@@ -4,7 +4,7 @@ export quark_distribution, antiquark_distribution,
         antiquark_distribution_antiderivative, antiquark_distribution_integral
         
 """PNJL模型中夸克有效分布函数"""
-function quark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
+@fastmath function quark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
     # 计算温度的倒数
     β_fm = 1 / T_inv_fm
 
@@ -24,7 +24,7 @@ function quark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Flo
 end
 
 """PNJL模型中反夸克有效分布函数"""
-function antiquark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
+@fastmath function antiquark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
     # 计算温度的倒数
     β_fm = 1 / T_inv_fm
 

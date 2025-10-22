@@ -40,9 +40,8 @@ include("src/relaxtime/relaxtime.jl")
 
 - `Project.toml`, `Manifest.toml`：Julia 项目环境与依赖清单，用于激活和重现环境。
 - `src/`：主要源代码目录。
-	- `RelaxTime.jl`：顶层入口文件，可能包含模块导出与初始化。
 	- `integration/`：数值积分相关实现，如 `CauchyPV.jl`, `GaussLegendre.jl`。
-	- `relaxtime/`：包含 `RelaxTime.jl` 实际实现代码（模块内部实现）。
+	- `relaxtime/`：包含弛豫时间计算实际实现代码（模块内部实现）。
 - `api/`：接口与公式的说明文档（Markdown），例如 `CauchyPV.md`, `GaussLegendre.md`。
 - `doc/`：项目文档（草稿与模板），如 `formula/` 目录下的公式说明。
 - `prompt/`：编码规范和变量命名指南（Markdown 与 YAML），用于团队协作时保证风格一致。
