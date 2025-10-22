@@ -1,0 +1,33 @@
+# 高性能计算代码风格指南
+# 此文件定义了 Julia 语言高性能计算的代码规范和性能要求
+
+high_performance_coding_guide:
+  # 语言要求
+  language_requirement: "Julia"
+  
+  # 性能验证要求
+  performance_verification:
+    benchmark_testing:
+      requirement: "所有性能关键函数必须包含基准测试、API文档与单元测试"
+    performance_regression:
+      requirements:
+        core_algorithm: "< 1ms 每百万元素"
+        memory_allocation: "零动态分配在热路径中"
+        cache_hit_rate: "> 90% 在典型工作负载"
+  
+  # 代码审查清单
+  code_review_checklist:
+    performance_review:
+      - "热路径中无动态内存分配"
+      - "分支预测友好"
+      - "内存访问模式连续"
+      - "无冗余计算"
+      - "编译器优化提示适当"
+      - "输入验证在调试模式外最小化"
+    readability:
+      - "复杂优化有注释说明"
+      - "性能关键部分有基准测试"
+      - "算法选择理由文档化"
+  
+  # 重要说明
+  note: "本指南强调性能优化，但所有优化必须基于性能分析数据。避免过早优化，确保优化确实解决性能瓶颈。"

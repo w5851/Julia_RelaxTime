@@ -1,0 +1,37 @@
+# 变量命名规范
+# 此文件定义了物理计算中变量命名的标准化规则
+
+variable_naming_convention:
+  # 单位命名约定
+  unit_naming_rules:
+    basic_rule: "变量名由基本名称和单位部分构成，两者用下划线分隔。单位部分始终置于变量名末尾。无量纲则不需要单位部分"
+    unicode_usage: "在需要时，变量名可使用Unicode字符"
+    unicode_example: "μ"
+    exponent_notation:
+      positive: "直接使用数字后缀表示单位的高阶正指数"
+      positive_example: 
+        name: "σ_fm4"
+        meaning: "变量 σ 的单位为 fm⁴"
+      negative: "使用 _inv_ 前缀表示单位的负指数"
+      negative_example:
+        name: "coupling_inv_fm4"
+        meaning: "变量 coupling 的单位为 fm⁻⁴"
+
+  # 常见变量示例
+  common_variables:
+    - name: "T_inv_fm"
+      description: "温度"
+      unit: "fm⁻¹"
+    - name: "μ_inv_fm"
+      description: "化学势"
+      unit: "fm⁻¹"
+
+  # 领域特定约定
+  domain_specific_conventions:
+    unit_system: "自然单位制"
+    base_unit: "fm"
+    conversion:
+      relation: "1 MeV⁻¹ ≈ 197.327 fm"
+      constant: "hc = 197.327"
+      implication: "1 MeV = 1 / hc fm⁻¹"
+      explanation: "其中 h 为普朗克常数，c 为光速"
