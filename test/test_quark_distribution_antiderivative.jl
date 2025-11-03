@@ -1,5 +1,6 @@
 
 using Test
+using Logging
 include("../src/QuarkDistribution.jl")
 
 using .PNJLQuarkDistributions
@@ -16,9 +17,10 @@ end
     Φbar = 0.5
 
     # 选取几个能量点测试
-    for E in (0.2, 0.5, 1.0, 2.0)
+    for E in (0.2, 0.5, 1.0, 2.0, 0.01, -0.01, -0.2, -0.5, -2.0, 0.0 ,-5.0)
         h = 1e-6
         anti = E -> quark_distribution_antiderivative(E, μ, T, Φ, Φbar)
+        @info "quark_distribution_antiderivative" E=E value=anti(E)
         numeric = numerical_derivative(anti, E, h)
         analytic = quark_distribution(E, μ, T, Φ, Φbar)
         @test isapprox(numeric, analytic; atol=1e-6, rtol=1e-6)
