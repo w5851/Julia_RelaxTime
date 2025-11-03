@@ -199,6 +199,7 @@ end
 """
     B0(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0, rtol=DEFAULT_RTOL, atol=DEFAULT_ATOL)
 根据文档公式组合四个 ̃B0 项得到完整的 B₀ 积分。
+λ = k0 + μ1 - μ2, 其中k0是传播子能量
 """
 function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T::Float64;
     Φ::Float64=0.0, Φbar::Float64=0.0, rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
