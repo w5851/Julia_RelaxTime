@@ -22,7 +22,7 @@ export B0
 # 基础工具函数
 const EPS_K = 1.0e-9 # 三动量k大小为零的判定阈值
 const EPS_SEGMENT = 1.0e-12 # 分母的最小值判定阈值
-const DEFAULT_RTOL = 1.0e-3 # 积分相对误差默认值
+const DEFAULT_RTOL = 1.0e-2 # 积分相对误差默认值
 const DEFAULT_ATOL = 0.0 # 积分绝对误差默认值
 """计算给定质量下的能量截断值"""
 @inline @fastmath function energy_cutoff(m::Float64)
@@ -202,12 +202,15 @@ end
 """
 function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T::Float64;
     Φ::Float64=0.0, Φbar::Float64=0.0, rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
-    kwargs = (; Φ=Φ, Φbar=Φbar, rtol=rtol, atol=atol)
-    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T; kwargs...)
-    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T; kwargs...)
-    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T; kwargs...)
-    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T; kwargs...)
-    return term1 - term2 + term3 - term4
+    tol_kwargs = (; rtol=rtol, atol=atol)
+    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T, Φ, Φbar; tol_kwargs...)
+    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T, Φ, Φbar; tol_kwargs...)
+    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
+    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
+
+    real = term1[1] - term2[1] + term3[1] - term4[1]
+    imag = term1[2] - term2[2] + term3[2] - term4[2]
+    return real, imag
 end
 
 end # module OneLoopIntegrals
