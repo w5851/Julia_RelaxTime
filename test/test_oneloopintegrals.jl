@@ -14,9 +14,19 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
 using Test
 using Base: time_ns
+using QuadGK: quadgk
 
 include("../src/relaxtime/OneLoopIntegrals.jl")
-using .OneLoopIntegrals: B0
+using .OneLoopIntegrals: B0, A
+
+const Λ_INV_FM = OneLoopIntegrals.Λ_inv_fm
+
+const DEFAULT_P_MAX = 20.0
+const DEFAULT_GAUSS_POINTS = 128
+
+function build_gauss_legendre_nodes()
+    return OneLoopIntegrals.gauleg(0.0, DEFAULT_P_MAX, DEFAULT_GAUSS_POINTS)
+end
 
 const TEST_PARAMS = (
     λ = 0.45,
@@ -105,6 +115,42 @@ end
         @test isfinite(sum_acc)
         @test avg_ms < 200.0
     end
+end
+
+@testset "OneLoopIntegrals.const_integral_term_A" begin
+    m = TEST_PARAMS.m1
+    integrand(p) = p^2 / sqrt(p^2 + m^2)
+    numeric, _ = quadgk(integrand, 0.0, Λ_INV_FM; rtol=1e-10, atol=1e-12)
+    analytic = OneLoopIntegrals.const_integral_term_A(m)
+    @test isapprox(analytic, numeric; rtol=1e-9, atol=1e-11)
+end
+
+@testset "OneLoopIntegrals.A" begin
+    nodes, weights = build_gauss_legendre_nodes()
+
+    m = TEST_PARAMS.m1
+    μ = TEST_PARAMS.μ1
+    T = TEST_PARAMS.T
+    Φ = TEST_PARAMS.Φ
+    Φbar = TEST_PARAMS.Φbar
+
+    result = A(m, μ, T, Φ, Φbar, nodes, weights)
+
+    integrand(p) = begin
+        E = sqrt(p^2 + m^2)
+        dist = OneLoopIntegrals.quark_distribution(E, μ, T, Φ, Φbar) +
+            OneLoopIntegrals.antiquark_distribution(E, μ, T, Φ, Φbar)
+        return p^2 / E * dist
+    end
+
+    dist_integral, _ = quadgk(integrand, 0.0, DEFAULT_P_MAX; rtol=1e-8, atol=1e-10)
+    expected = 4.0 * (-OneLoopIntegrals.const_integral_term_A(m) + dist_integral)
+
+    @test isapprox(result, expected; rtol=5e-5, atol=1e-6)
+
+    nodes_fine, weights_fine = OneLoopIntegrals.gauleg(0.0, DEFAULT_P_MAX, DEFAULT_GAUSS_POINTS * 2)
+    result_fine = A(m, μ, T, Φ, Φbar, nodes_fine, weights_fine)
+    @test isapprox(result, result_fine; rtol=5e-5, atol=1e-6)
 end
 
 println("\n" * "="^70)

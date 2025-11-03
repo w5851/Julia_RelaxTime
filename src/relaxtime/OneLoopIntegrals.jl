@@ -16,7 +16,7 @@ using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
 using .Constants_PNJL: Λ_inv_fm
 using QuadGK: quadgk
 
-export B0
+export B0, A
 
 # ----------------------------------------------------------------------------
 # 基础工具函数
@@ -212,6 +212,35 @@ function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2
     real = term1[1] - term2[1] + term3[1] - term4[1]
     imag = term1[2] - term2[2] + term3[2] - term4[2]
     return real, imag
+end
+
+# ---------------------------------------------------------------------------
+"""计算A的辅助函数,处理对常数项的积分"""
+function const_integral_term_A(m::Float64)
+    term1 = Λ_inv_fm * sqrt(Λ_inv_fm^2 + m^2)
+    term2 = m^2 * log((Λ_inv_fm + sqrt(Λ_inv_fm^2 + m^2)) / m)
+    return (term1 - term2) / 2.0
+end
+
+"""
+    A(m, μ, T, Φ, Φbar, nodes_p, weights_p)
+计算单线积分函数A,需要传入预生成的动量的积分节点与权重
+计算中的常数1需要截断,而分布函数的部分不需要截断
+常数项的积分可以直接计算，见 const_integral_term_A 函数
+因此只需计算分布函数的积分，传入的节点不需要截断(取0-足够大,如20)
+"""
+function A(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
+    nodes_p::Vector{Float64}, weights_p::Vector{Float64})
+    integral = -const_integral_term_A(m) # 计算常数项积分部分
+    @inbounds for i in eachindex(nodes_p)
+        node_p = nodes_p[i]
+        weight_p = weights_p[i]
+        E = sqrt(node_p^2 + m^2)
+        dist_quark = distribution_value(:pnjl, :plus, E, μ, T, Φ, Φbar)
+        dist_antiquark = distribution_value(:pnjl, :minus, E, μ, T, Φ, Φbar)
+        integral += weight_p * node_p^2 / E * (dist_quark + dist_antiquark)
+    end
+    return 4.0 * integral
 end
 
 end # module OneLoopIntegrals
