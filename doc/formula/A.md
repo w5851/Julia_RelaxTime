@@ -90,3 +90,6 @@ I = \int \frac{(x^2 + m^2) - m^2}{\sqrt{x^2 + m^2}}  dx = \int \sqrt{x^2 + m^2} 
 \int_{0}^{x_{\text{max}}} \frac{x^2}{\sqrt{x^2 + m^2}}  dx = \frac{x_{\text{max}}}{2} \sqrt{x_{\text{max}}^2 + m^2} - \frac{m^2}{2} \ln \left( \frac{x_{\text{max}} + \sqrt{x_{\text{max}}^2 + m^2}}{m} \right)
 \]
 
+### 4. A的单位和量纲
+- 由于积分变量 \(x\) 的单位为动量（fm⁻¹），被积函数的分母包含能量项（√(x² + m²)），因此整个积分的结果 \(A\) 的单位为 fm⁻²。
+- 量纲为[能量]²,即对应单位 fm⁻²。

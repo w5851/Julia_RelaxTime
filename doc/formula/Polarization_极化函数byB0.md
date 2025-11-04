@@ -1,0 +1,92 @@
+# 极化函数 Π<sub>ff'</sub><sup>P,S</sup> - 实现文档
+
+## 1. 公式标识
+- **程序实现**: `polarization`
+- **对应文件**: `../../src/relaxtime/Polarization.jl`
+
+## 2. 物理意义
+- **物理背景**: 该公式描述了在PNJL模型中赝标量(P)和标量(S)介子的极化函数，反映了夸克-反夸克对在介质中的响应特性，是计算介子传播子和质量的核心量。
+- **在计算链中的作用**: 作为介子传播子计算的关键输入，直接影响散射截面的计算，进而影响驰豫时间和输运系数。
+- **相关物理量**: 与手征相变、Mott相变密切相关，反映了QCD介质的非微扰特性。
+
+## 3. 数学表达式
+### 3.1 原始公式
+```math
+\Pi_{ff'}^{P,S}(k_0,\vec{k}) = -\frac{N_c}{8\pi^2} \left\{ A(m_f,\mu_f,T) + A(m_f',\mu_f',T) + [(m_f \mp m_f')^2 - (k_0 + \mu_f - \mu_f')^2 + k^2] \times B_0(|\vec{k}|, m_f,\mu_f,m_f',\mu_f',k_0,T) \right\}
+```
+
+### 3.2 程序实现形式
+```julia
+function polarization_function_P_S(channel::Symbol, k0::Float64, k_norm::Float64, m1::Float64, m2::Float64, 
+                                  μ1::Float64, μ2::Float64, T::Float64; Nc::Int=3)
+    # 计算A函数项
+    A1 = A_function(m1, μ1, T)
+    A2 = A_function(m2, μ2, T)
+    
+    # 计算B0函数
+    B0_val = B0_function(k_norm, m1, μ1, m2, μ2, k0, T)
+    
+    # 根据通道选择符号
+    sign = (channel == :pseudoscalar) ? -1 : 1
+    
+    # 计算平方项
+    mass_term = (m1 - sign * m2)^2
+    energy_term = (k0 + μ1 - μ2)^2
+    momentum_term = k_norm^2
+    
+    # 组合各项
+    prefactor = -Nc / (8π^2)
+    main_term = A1 + A2 + (mass_term - energy_term + momentum_term) * B0_val
+    
+    return prefactor * main_term
+end
+```
+
+## 4. 参数说明表
+
+| 参数 | 符号 | 类型 | 单位 | 物理意义 | 取值范围 |
+|------|------|------|------|----------|----------|
+| k0 | k₀ | 输入 | fm⁻¹ | 介子能量 | 0 - 10 fm⁻¹ |
+| k_norm | \|\vec{k}\| | 输入 | fm⁻¹ | 介子动量模 | 0 - 10 fm⁻¹ |
+| m1 | m_f | 输入 | fm⁻¹ | 第一个夸克质量 | 0 - 5 fm⁻¹ |
+| m2 | m_f' | 输入 | fm⁻¹ | 第二个夸克质量 | 0 - 5 fm⁻¹ |
+| μ1 | μ_f | 输入 | fm⁻¹ | 第一个夸克化学势 | 0 - 5 fm⁻¹ |
+| μ2 | μ_f' | 输入 | fm⁻¹ | 第二个夸克化学势 | 0 - 5 fm⁻¹ |
+| T | T | 输入 | fm⁻¹ | 温度 | 0 - 2 fm⁻¹ |
+| channel | P/S | 输入 | - | 通道类型 | :pseudoscalar 或 :scalar |
+| Π | Π<sub>f</sub><sup>P,S</sup> | 输出 | fm⁻² | 极化函数值 | 复数 |
+
+
+## 5. 输入参数详细说明
+### 5.1 必需参数
+- **k0**: 介子在介质中的能量，决定了极化的能谱特性，在静止系中对应介子质量
+- **k_norm**: 介子三维动量模，影响极化的动量依赖性
+- **m1, m2**: 构成介子的两个夸克的质量，与手征对称性破缺程度相关
+- **μ1, μ2**: 夸克化学势，反映有限密度效应
+- **T**: 系统温度，影响热分布和相变行为
+- **channel**: 区分赝标量(:pseudoscalar)和标量(:scalar)通道
+
+### 5.2 可选参数
+- **Nc**: 颜色数，默认值为3，对应QCD的SU(3)规范群
+
+## 6. 输出结果说明
+### 6.1 主输出
+- **polarization_function**: 复数类型的极化函数值，包含实部和虚部，虚部与介子衰变宽度相关
+
+## 7. 依赖关系
+### 7.1 输入依赖
+- **A_function**: 处理圈图积分中的紫外发散部分，采用动量截断正规化
+- **B0_function**: 计算有限部分的圈图积分，包含热力学分布效应
+- **quark_distribution**: 费米-狄拉克分布函数，考虑Polyakov loop修正
+
+### 7.2 输出用途
+- **meson_propagator**: 计算介子传播子，用于散射矩阵元
+- **meson_mass_equation**: 求解介子质量方程
+- **transport_coefficients**: 最终计算输运系数（η/s等）
+
+---
+
+**单位转换说明**:
+- 1 MeV = 5.068 fm⁻¹ (使用自然单位制 ħc = 197.3 MeV·fm)
+- 1 MeV² = 25.68 fm⁻²
+- 典型物理尺度：质子质量 ≈ 938 MeV ≈ 4.75 fm⁻¹，π介子质量 ≈ 140 MeV ≈ 0.71 fm⁻¹

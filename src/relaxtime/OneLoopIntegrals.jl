@@ -99,16 +99,16 @@ end
     integrand_fun(E) = real_integrand_k_zero(sign_flag, λ, m, denominator_term,
         μ, T, Φ, Φbar, E) # 闭包被积函数
 
-    imag = 0.0
+    imag_part = 0.0
     if isempty(singularity) # 无奇点
-        real, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
+        real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
     else # 有奇点
-        real, _ = quadgk(integrand_fun, Emin, singularity..., Emax; rtol=rtol, atol=atol)
+        real_part, _ = quadgk(integrand_fun, Emin, singularity..., Emax; rtol=rtol, atol=atol)
         p0 = internal_momentum(singularity[1], m)
-        imag = 2.0 * π * p0 * distribution_value(:pnjl, sign_flag, singularity[1], μ, T, Φ, Φbar)
+        imag_part = 2.0 * π * p0 * distribution_value(:pnjl, sign_flag, singularity[1], μ, T, Φ, Φbar)
     end
 
-    return real*2.0, imag/λ
+    return real_part * 2.0, imag_part / λ
 end
 # ----------------------------------------------------------------------------
 # k>0 时的积分计算相关函数
@@ -173,17 +173,17 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Floa
     Emax = energy_cutoff(m)
     integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar, E) # 闭包被积函数
     singularities = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
-    imag = 0.0
+    imag_part = 0.0
     if isempty(singularities) # 无奇点
-        real, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
+        real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
     else # 有奇点
-        real, _ = quadgk(integrand_fun, Emin, singularities..., Emax; rtol=rtol, atol=atol)
+        real_part, _ = quadgk(integrand_fun, Emin, singularities..., Emax; rtol=rtol, atol=atol)
         if length(singularities) == 2 # 有两个奇点
-            imag = π * sign(λ) * distribution_integral(:pnjl, sign_flag, singularities[1], singularities[2],
+            imag_part = π * sign(λ) * distribution_integral(:pnjl, sign_flag, singularities[1], singularities[2],
                 μ, T, Φ, Φbar)
         end
     end
-    return real/k,imag/k
+    return real_part / k, imag_part / k
 end
 
 """计算单个 ̃B0 分量的函数"""
@@ -209,9 +209,9 @@ function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2
     term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
     term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
 
-    real = term1[1] - term2[1] + term3[1] - term4[1]
-    imag = term1[2] - term2[2] + term3[2] - term4[2]
-    return real, imag
+    real_part = term1[1] - term2[1] + term3[1] - term4[1]
+    imag_part = term1[2] - term2[2] + term3[2] - term4[2]
+    return real_part, imag_part
 end
 
 # ---------------------------------------------------------------------------
