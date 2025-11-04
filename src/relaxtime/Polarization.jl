@@ -7,24 +7,32 @@
 """
 module Polarization
 
+include("../Constants_PNJL.jl")
 include("../relaxtime/OneLoopIntegrals.jl")
 using .Constants_PNJL: N_color
 using .OneLoopIntegrals: B0
 
 """
-    polarization(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, A1_value, A2_value)
+    polarization(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, A1_value, A2_value, num_s_quark)
 计算PNJL模型中两粒子碰撞下的赝标量(P)或标量(S)介子(通过channel标记区分)的极化函数
 返回 polarization_real, polarization_imag
 """
 function polarization(channel::Symbol, k0::Float64, k_norm::Float64, m1::Float64, m2::Float64, 
                                   μ1::Float64, μ2::Float64, T::Float64, Φ::Float64, 
-                                  Φbar::Float64, A1_value::Float64, A2_value::Float64)
+                                  Φbar::Float64, A1_value::Float64, A2_value::Float64, num_s_quark::Int)
     # 计算总系数
     factor = -N_color / (8π^2)
     # 计算能量-化学势组合参数
     λ = k0 + μ1 - μ2
-    # 计算B0函数项
+
+    # 计算B0函数项,当num_s_quark为1时,要恢复B0对k0的对称性
     B0_real, B0_imag = B0(λ, k_norm, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
+    if num_s_quark == 1
+        λ_extra = -k0 + μ1 - μ2
+        B0_real_extra, B0_imag_extra = B0(λ_extra, k_norm, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
+        B0_real = 0.5 * (B0_real + B0_real_extra)
+        B0_imag = 0.5 * (B0_imag + B0_imag_extra) 
+    end
 
     real_part = A1_value + A2_value
     imag_part = 0.0
