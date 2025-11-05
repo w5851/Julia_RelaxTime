@@ -13,6 +13,8 @@
 """
 module GaussLegendre
 
+include("../../src/Constants_PNJL.jl")
+using .Constants_PNJL: Λ_inv_fm
 using FastGaussQuadrature
 
 export gauleg
@@ -90,4 +92,15 @@ function gauleg(a::Float64, b::Float64, n::Int)
     return nodes, weights
 end
 
+const DEFAULT_momentum_POINTS = 64
+const DEFAULT_theta_POINTS = 32
+function build_default_nodes_weights()
+    cosθ_NODES, cosθ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)
+    momentum_NODES_toINF, momentum_WEIGHTS_toINF = gauleg(0.0, 20.0, DEFAULT_momentum_POINTS)
+    momentum_NODES_toPNJLΛ, momentum_WEIGHTS_toPNJLΛ = gauleg(0.0, Λ_inv_fm, DEFAULT_momentum_POINTS)
+    return cosθ_NODES, cosθ_WEIGHTS,
+        momentum_NODES_toINF, momentum_WEIGHTS_toINF,
+        momentum_NODES_toPNJLΛ, momentum_WEIGHTS_toPNJLΛ
+end
+export build_default_nodes_weights
 end # module GaussLegendre

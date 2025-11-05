@@ -2,7 +2,8 @@ module PNJLQuarkDistributions
 export quark_distribution, antiquark_distribution, 
         quark_distribution_antiderivative, quark_distribution_integral,
         antiquark_distribution_antiderivative, antiquark_distribution_integral
-        
+export distribution
+      
 """PNJL模型中夸克有效分布函数"""
 @fastmath function quark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
     # 计算温度的倒数
@@ -91,6 +92,16 @@ end
            antiquark_distribution_antiderivative(E_min_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
 end
 
+"""根据符号选择计算夸克或反夸克有效分布函数"""
+function distribution(sign_::Symbol, E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
+    if sign_ === :quark
+        return quark_distribution(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
+    elseif sign_ === :antiquark
+        return antiquark_distribution(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
+    else
+        throw(ArgumentError("sign_ must be :quark or :antiquark"))
+    end
+end
 end # module PNJLQuarkDistributions
 
 
