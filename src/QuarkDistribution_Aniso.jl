@@ -66,10 +66,9 @@ end
 """计算PNJL模型中夸克有效分布函数的各向异性一阶修正项"""
 function quark_distribution_aniso_correction(p_inv_fm::Float64, m_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, cosθ::Float64)
     E_inv_fm = sqrt(p_inv_fm^2 + m_inv_fm^2)
-    β = 1 / T_inv_fm
     df_dE = quark_df_dE(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
 
-    return 0.5*ξ*β*(p_inv_fm*cosθ)^2 / E_inv_fm * df_dE
+    return 0.5*ξ*(p_inv_fm*cosθ)^2 / E_inv_fm * df_dE
 end
 
 """计算PNJL模型中夸克有效分布函数的动量各向异性下完整Romatschke-Strickland形式"""
@@ -85,11 +84,9 @@ end
 """计算PNJL模型中反夸克有效分布函数的各向异性一阶修正项"""
 function antiquark_distribution_aniso_correction(p_inv_fm::Float64, m_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, cosθ::Float64)
     E_inv_fm = sqrt(p_inv_fm^2 + m_inv_fm^2)
-    β = 1 / T_inv_fm
-
     df_dE = antiquark_df_dE(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
 
-    return 0.5*ξ*β*(p_inv_fm*cosθ)^2 / E_inv_fm * df_dE
+    return 0.5*ξ*(p_inv_fm*cosθ)^2 / E_inv_fm * df_dE
 end
 
 """计算PNJL模型中反夸克有效分布函数的动量各向异性下完整Romatschke-Strickland形式"""
