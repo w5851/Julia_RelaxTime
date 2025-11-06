@@ -6,7 +6,7 @@
 """
 module PNJLQuarkDistributions_Aniso
 
-export distribution_aniso_correction, distribution_aniso
+export distribution_aniso_correction, distribution_aniso, correction_cos_theta_coefficient
 
 include("QuarkDistribution.jl")
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
@@ -60,6 +60,26 @@ function antiquark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float6
     df_dE = -β_fm * df_dx
 
     return df_dE    
+end
+
+# -------------------------------------
+"""
+    correction_cos_theta_coefficient(sign_, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ)
+计算PNJL模型中分布函数一阶修正项中cosθ的系数
+"""
+function correction_cos_theta_coefficient(sign_::Symbol, p_inv_fm::Float64, m_inv_fm::Float64, 
+    μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64)
+    E_inv_fm = sqrt(p_inv_fm^2 + m_inv_fm^2)
+    coeff = 0.5 * ξ * (p_inv_fm^2) / E_inv_fm
+    if sign_ === :quark
+        df_dE = quark_df_dE(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar) 
+    elseif sign_ === :antiquark
+        df_dE = antiquark_df_dE(E_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar)
+    else
+        throw(ArgumentError("sign_ must be :quark or :antiquark"))
+    end
+
+    return coeff*df_dE
 end
 
 # ------------------------------------

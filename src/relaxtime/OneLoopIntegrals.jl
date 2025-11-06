@@ -153,16 +153,16 @@ end
     if E1 > E2
         E1, E2 = E2, E1
     end
-    tol = EPS_SEGMENT
-    # 仅收集严格位于积分区间内部的点，避免端点奇异
-    if isfinite(E1) && (E1 > Emin + tol) && (E1 < Emax - tol)
+    
+    if E2-E1 < EPS_SEGMENT || E1 >= Emax || E2 <= Emin
+        # 两根过于接近或均在区间外，视为无奇点
+        return singularities
+    else
+        E1 = max(E1, Emin)
+        E2 = min(E2, Emax)
         push!(singularities, E1)
-    end
-    # 判别式为 0 时两根重合，仅添加一次
-    if (disc > 0.0) && isfinite(E2) && (E2 > Emin + tol) && (E2 < Emax - tol)
         push!(singularities, E2)
     end
-    #sort!(singularities)
     return singularities
 end
 
@@ -174,14 +174,10 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Floa
     integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar, E) # 闭包被积函数
     singularities = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
     imag_part = 0.0
-    if isempty(singularities) # 无奇点
-        real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
-    else # 有奇点
-        real_part, _ = quadgk(integrand_fun, Emin, singularities..., Emax; rtol=rtol, atol=atol)
-        if length(singularities) == 2 # 有两个奇点
-            imag_part = π * sign(λ) * distribution_integral(:pnjl, sign_flag, singularities[1], singularities[2],
+    real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
+    if length(singularities) == 2 # 有奇点
+        imag_part = π * sign(λ) * distribution_integral(:pnjl, sign_flag, singularities[1], singularities[2],
                 μ, T, Φ, Φbar)
-        end
     end
     return real_part / k, imag_part / k
 end
