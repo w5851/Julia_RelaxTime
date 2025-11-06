@@ -141,7 +141,7 @@ end
         return singularities
     end
     A = λ ^ 2 - k ^ 2 + m ^ 2 - m_prime ^ 2
-    disc = A ^ 2 - 4.0 * m ^ 2 * d0    # 判别式
+    disc = A ^ 2 + 4.0 * m ^ 2 * d0    # 判别式
     # 判别式为负无实根
     if disc < 0.0
         return singularities

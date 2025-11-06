@@ -97,7 +97,7 @@ x = -\frac{\lambda^{2} + 2\lambda E - k^{2} + m^{2} - m^{\prime 2}}{2pk}
    \]
    代入 \(C = \lambda^{2} - k^{2} + m^{2} - m^{\prime 2}\)，得到最终解（公式4.20）：
    \[
-   E_{1/2} = \frac{ \lambda (\lambda^{2} - k^{2} + m^{2} - m^{\prime 2}) }{ 2(k^{2} - \lambda^{2}) } \pm k \frac{ \sqrt{ (\lambda^{2} - k^{2} + m^{2} - m^{\prime 2})^{2} - 4m^{2}(k^{2} - \lambda^{2}) } }{ 2(k^{2} - \lambda^{2}) }
+   E_{1/2} = \frac{ \lambda (\lambda^{2} - k^{2} + m^{2} - m^{\prime 2}) }{ 2(k^{2} - \lambda^{2}) } \pm k \frac{ \sqrt{ (\lambda^{2} - k^{2} + m^{2} - m^{\prime 2})^{2} + 4m^{2}(k^{2} - \lambda^{2}) } }{ 2(k^{2} - \lambda^{2}) }
    \]
    这里 \(E_1\) 和 \(E_2\) 是方程的两个解，且假设 \(E_1 < E_2\)。
 
