@@ -77,9 +77,9 @@ function real_integrand_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Fl
 end
 
 """k=0时的积分虚部函数"""
-function imag_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, E::Float64,
+function imag_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64,
     ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
-    coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, E)
+    coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, 0.0)
     E_pole = -denominator_const / coeff_E
     Θ = heaviside_step(coeff_E, denominator_const, m, energy_cutoff(m))
     if Θ == 0.0
@@ -116,7 +116,7 @@ function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_pr
         ξ, T, μ, Φ, Φbar) # 闭包被积函数-实部
     real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
     # 计算虚部
-    imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime, E,
+    imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
         ξ, T, μ, Φ, Φbar)
 
     return real_part , imag_part
@@ -137,12 +137,12 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
 
     real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
     if length(singularities) <= 1
-        imag_part, _ = 0.0
+        imag_part = 0.0
     else
         imag_part, _ = quadgk(integrand_imag, singularities[1], singularities[2]; rtol=rtol, atol=atol)
     end
 
-    return real_part , imag_part
+    return real_part , imag_part*sign(λ)
 end
 
 """含各向异性修正项的 B0分量 积分计算"""
