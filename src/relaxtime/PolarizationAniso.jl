@@ -12,7 +12,7 @@ include("../relaxtime/OneLoopIntegrals.jl")
 include("../relaxtime/OneLoopIntegralsAniso.jl")
 using .Constants_PNJL: N_color
 using .OneLoopIntegrals: B0, EPS_SEGMENT
-using .OneLoopIntegralsAniso: B0_correction
+using .OneLoopIntegralsCorrection: B0_correction
 
 """
     polarization(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
@@ -39,10 +39,10 @@ function polarization_aniso(channel::Symbol, k0::Float64, k_norm::Float64, m1::F
 
     # 计算B0函数项的修正
     if ξ>EPS_SEGMENT
-        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, μ1, m2, μ2, T, ξ; Φ=Φ, Φbar=Φbar)
+        B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
         # 当num_s_quark为1时,要恢复B0对k0的对称性
         if num_s_quark == 1
-            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, μ1, m2, μ2, T, ξ; Φ=Φ, Φbar=Φbar)
+            B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
             B0_corr_real = 0.5 * (B0_corr_real + B0_corr_real_extra)
             B0_corr_imag = 0.5 * (B0_corr_imag + B0_corr_imag_extra)
         end
