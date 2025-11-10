@@ -125,45 +125,103 @@ end
     return dist * log_term
 end
 
-"""k>0 时的奇点计算函数
-返回位于 (Emin, Emax) 内的 E 奇点值列表；若无奇点则返回空列表"""
+"""
+k>0 时的奇点计算函数
+根据二次项系数 a = λ² - k² 的符号，返回虚部积分区间的元组 (intervals, sign_type)
+- intervals: Vector{Tuple{Float64, Float64}} 虚部积分区间列表
+- sign_type: Symbol, 表示区间的类型 (:between, :outside, :none)
+
+根据 B0_extra.md 文档:
+- a > 0 (λ² > k²): 虚部积分区间为 [E1, E2]
+- a < 0 (λ² < k²): 虚部积分区间为 [Emin, E1] ∪ [E2, Emax]
+- a ≈ 0 (λ² ≈ k²): 退化为线性情况，特殊处理
+"""
 @inline function singularity_k_positive(λ::Float64, k::Float64, m::Float64, m_prime::Float64,
-    Emin::Float64, Emax::Float64)::Vector{Float64}
+    Emin::Float64, Emax::Float64)::Tuple{Vector{Tuple{Float64, Float64}}, Symbol}
     # 解析解：
     # E_{1,2} = [λ(λ^2 - k^2 + m^2 - m'^2) ± k * sqrt((λ^2 - k^2 + m^2 - m'^2)^2 - 4 m^2 (k^2 - λ^2))] / [2 (k^2 - λ^2)]
-    # 仅当判别式非负且分母不为 0 时有实根；并只返回落在 (Emin, Emax) 内的点。
-    singularities = Float64[]
-
-    d0 = k ^ 2 - λ ^ 2               # 分母的一半系数 (未乘 2)
-    denom = 2.0 * d0                   # 实际分母 2(k^2 - λ^2)
-    # 分母过小或为 0，解析式不稳定，直接返回空
-    if abs(denom) < EPS_SEGMENT
-        return singularities
+    
+    intervals = Tuple{Float64, Float64}[]
+    
+    a = λ ^ 2 - k ^ 2                # 二次项系数
+    d0 = k ^ 2 - λ ^ 2               # 分母的一半系数 (未乘 2) = -a
+    denom = 2.0 * d0                 # 实际分母 2(k^2 - λ^2) = -2a
+    
+    # 情况3: a ≈ 0 (λ² ≈ k²)，退化为线性情况
+    if abs(a) < EPS_SEGMENT
+        # 原方程退化为线性: |2λE + m² - m'²| < 2k√(E² - m²)
+        # 根据 B0_extra.md 文档:
+        # 有解条件: λ > 0 且 m' > m
+        # 解的范围: E > (m'² - m²)/(4λ) + λm²/(m'² - m²)
+        
+        if λ > 0.0 && m_prime > m
+            # 计算临界能量
+            m2_diff = m_prime ^ 2 - m ^ 2
+            E_crit = m2_diff / (4.0 * λ) + λ * m ^ 2 / m2_diff
+            
+            # 虚部积分区间为 [max(E_crit, Emin), Emax]
+            if E_crit < Emax
+                E_start = max(E_crit, Emin)
+                push!(intervals, (E_start, Emax))
+            end
+        end
+        # 如果 λ ≤ 0 或 m' ≤ m，则无解，返回空区间
+        return (intervals, :none)
     end
+    
     A = λ ^ 2 - k ^ 2 + m ^ 2 - m_prime ^ 2
     disc = A ^ 2 + 4.0 * m ^ 2 * d0    # 判别式
+    
     # 判别式为负无实根
     if disc < 0.0
-        return singularities
+        return (intervals, :none)
     end
+    
     sqrt_disc = sqrt(disc)
     E1 = (λ * A - k * sqrt_disc) / denom
     E2 = (λ * A + k * sqrt_disc) / denom
+    
     # 保证 E1 <= E2
     if E1 > E2
         E1, E2 = E2, E1
     end
     
-    if E2-E1 < EPS_SEGMENT || E1 >= Emax || E2 <= Emin
-        # 两根过于接近或均在区间外，视为无奇点
-        return singularities
-    else
-        E1 = max(E1, Emin)
-        E2 = min(E2, Emax)
-        push!(singularities, E1)
-        push!(singularities, E2)
+    # 两根过于接近，视为无奇点
+    if E2 - E1 < EPS_SEGMENT
+        return (intervals, :none)
     end
-    return singularities
+    
+    # 情况1: a > 0 (λ² > k², 即 d0 < 0)
+    # 虚部积分区间为 [E1, E2]
+    if a > 0.0
+        # 检查 [E1, E2] 与 [Emin, Emax] 的交集
+        if E2 > Emin && E1 < Emax
+            E1_clipped = max(E1, Emin)
+            E2_clipped = min(E2, Emax)
+            if E2_clipped > E1_clipped
+                push!(intervals, (E1_clipped, E2_clipped))
+            end
+        end
+        return (intervals, :between)
+    else
+        # 情况2: a < 0 (λ² < k², 即 d0 > 0)
+        # 虚部积分区间为 [Emin, E1] ∪ [E2, Emax]
+        # 区间1: [Emin, E1]
+        if E1 > Emin
+            E1_clipped = min(E1, Emax)
+            if E1_clipped > Emin
+                push!(intervals, (Emin, E1_clipped))
+            end
+        end
+        # 区间2: [E2, Emax]
+        if E2 < Emax
+            E2_clipped = max(E2, Emin)
+            if Emax > E2_clipped
+                push!(intervals, (E2_clipped, Emax))
+            end
+        end
+        return (intervals, :outside)
+    end
 end
 
 """k>0 时的 B0分量 积分计算"""
@@ -172,13 +230,19 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Floa
     Emin = m
     Emax = energy_cutoff(m)
     integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar, E) # 闭包被积函数
-    singularities = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
+    intervals, sign_type = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
+    
     imag_part = 0.0
     real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
-    if length(singularities) == 2 # 有奇点
-        imag_part = π * sign(λ) * distribution_integral(:pnjl, sign_flag, singularities[1], singularities[2],
-                μ, T, Φ, Φbar)
+    
+    # 根据区间类型计算虚部
+    if !isempty(intervals)
+        for (E1, E2) in intervals
+            imag_part += distribution_integral(:pnjl, sign_flag, E1, E2, μ, T, Φ, Φbar)
+        end
+        imag_part *= π * sign(λ)
     end
+    
     return real_part / k, imag_part / k
 end
 

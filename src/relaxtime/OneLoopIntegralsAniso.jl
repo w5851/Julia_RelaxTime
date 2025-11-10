@@ -128,7 +128,7 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
     Emin = m
     Emax = energy_cutoff(m)
 
-    singularities = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
+    intervals, sign_type = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
 
     integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E,
         ξ, T, μ, Φ, Φbar) # 闭包被积函数-实部
@@ -136,13 +136,18 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
         ξ, T, μ, Φ, Φbar) # 闭包被积函数-虚部
 
     real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
-    if length(singularities) <= 1
-        imag_part = 0.0
-    else
-        imag_part, _ = quadgk(integrand_imag, singularities[1], singularities[2]; rtol=rtol, atol=atol)
+    
+    # 根据区间类型计算虚部
+    imag_part = 0.0
+    if !isempty(intervals)
+        for (E1, E2) in intervals
+            imag_part_segment, _ = quadgk(integrand_imag, E1, E2; rtol=rtol, atol=atol)
+            imag_part += imag_part_segment
+        end
+        imag_part *= sign(λ)
     end
 
-    return real_part , imag_part*sign(λ)
+    return real_part , imag_part
 end
 
 """含各向异性修正项的 B0分量 积分计算"""

@@ -129,6 +129,22 @@ x = -\frac{\lambda^{2} + 2\lambda E - k^{2} + m^{2} - m^{\prime 2}}{2pk}
      |2\lambda E + C| < 2k\sqrt{E^2 - m^2}
      \]
      其中 \(C = m^2 - m^{\prime 2}\)。这种情况较为特殊，在实际物理问题中较少出现。
+**a=0时:**
+在 \(k = \lambda\) 时，不等式 \(|\lambda^2 + 2\lambda E - k^2 + m^2 - m'^2| < 2p k\) 简化为 \( |2\lambda E + m^2 - m'^2| < 2p \lambda \)。其中 \(E\) 是能量，满足 \(E^2 = m^2 + p^2\)，\(p\) 是动量。
+不等式有解当且仅当 \(\lambda > 0\) 且 \(m' > m\)（即 \(m'^2 > m^2\)）。此时，\(E\) 必须满足：
+\[
+E > \frac{m'^2 - m^2}{4\lambda} + \frac{\lambda m^2}{m'^2 - m^2}
+\]
+
+如果 \(\lambda \leq 0\) 或 \(m' \leq m\)，则不等式无解。
+
+因此，解的条件为：
+- \(\lambda > 0\)(总是满足，不需要额外约束) 且 \(m' > m\)
+- \(E > \frac{m'^2 - m^2}{4\lambda} + \frac{\lambda m^2}{m'^2 - m^2}\)
+
+$$
+\boxed{\lambda > 0} \quad \boxed{m' > m} \quad \boxed{E > \dfrac{m'^{2} - m^{2}}{4\lambda} + \dfrac{\lambda m^{2}}{m'^{2} - m^{2}}}
+$$
 
    在实际计算中，\(E\) 还必须满足积分区间 \([m, \Lambda_E]\)，其中 \(\Lambda_E = \sqrt{\Lambda^2 + m^2}\)。因此，实际有效的范围为上述解与 \([m, \Lambda_E]\) 的交集。
 
