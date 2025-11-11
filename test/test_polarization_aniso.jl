@@ -59,8 +59,14 @@ function prepare_A_values(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φba
     return A(m, μ, T, Φ, Φbar, nodes, weights)
 end
 
-function benchmark_polarization_aniso_call(channel::Symbol, ξ::Float64, A1::Float64, A2::Float64; iterations::Int=4)
+function benchmark_polarization_aniso_call(channel::Symbol, ξ::Float64, A1::Float64, A2::Float64; iterations::Int=4, warmup::Int=100)
     params = POL_ANISO_TEST_PARAMS
+
+    # 预热阶段
+    for _ in 1:warmup
+        polarization_aniso(channel, params.k0, params.k_norm, params.m1, params.m2,
+            params.μ1, params.μ2, params.T, params.Φ, params.Φbar, ξ, A1, A2, NUM_S_QUARK_DEFAULT)
+    end
 
     GC.gc()
     real_acc = 0.0
@@ -281,10 +287,11 @@ end
         A1_perf = A(params.m1, params.μ1, params.T, params.Φ, params.Φbar, nodes, weights)
         A2_perf = A(params.m2, params.μ2, params.T, params.Φ, params.Φbar, nodes, weights)
         
-        avg_ms_P_iso, acc_P_iso = benchmark_polarization_aniso_call(:P, 0.0, A1_perf, A2_perf; iterations=1000)
-        avg_ms_S_iso, acc_S_iso = benchmark_polarization_aniso_call(:S, 0.0, A1_perf, A2_perf; iterations=1000)
-        avg_ms_P_aniso, acc_P_aniso = benchmark_polarization_aniso_call(:P, 0.5, A1_perf, A2_perf; iterations=1000)
-        avg_ms_S_aniso, acc_S_aniso = benchmark_polarization_aniso_call(:S, 0.5, A1_perf, A2_perf; iterations=1000)
+        # 使用更多迭代次数以获得更准确的性能数据
+        avg_ms_P_iso, acc_P_iso = benchmark_polarization_aniso_call(:P, 0.0, A1_perf, A2_perf; iterations=10000, warmup=500)
+        avg_ms_S_iso, acc_S_iso = benchmark_polarization_aniso_call(:S, 0.0, A1_perf, A2_perf; iterations=10000, warmup=500)
+        avg_ms_P_aniso, acc_P_aniso = benchmark_polarization_aniso_call(:P, 0.5, A1_perf, A2_perf; iterations=10000, warmup=500)
+        avg_ms_S_aniso, acc_S_aniso = benchmark_polarization_aniso_call(:S, 0.5, A1_perf, A2_perf; iterations=10000, warmup=500)
         
         @info "PolarizationAniso(:P, ξ=0) 单次调用平均耗时 (毫秒)" avg_ms_P_iso
         @info "PolarizationAniso(:S, ξ=0) 单次调用平均耗时 (毫秒)" avg_ms_S_iso
@@ -300,9 +307,11 @@ end
         @test avg_ms_P_aniso >= avg_ms_P_iso
         @test avg_ms_S_aniso >= avg_ms_S_iso
         
-        # 但不应该慢太多（合理范围内）
-        @test avg_ms_P_aniso < 2.0
-        @test avg_ms_S_aniso < 2.0
+        # 合理的性能范围（基于详细分析）
+        @test avg_ms_P_iso < 0.05  # ξ=0 应该约 0.026ms
+        @test avg_ms_S_iso < 0.05
+        @test avg_ms_P_aniso < 0.15  # ξ=0.5 应该约 0.077ms
+        @test avg_ms_S_aniso < 0.15
     end
 
     @testset "使用 B0_correction 测试参数验证一致性" begin

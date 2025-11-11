@@ -15,7 +15,7 @@ using .OneLoopIntegrals: B0, EPS_SEGMENT
 using .OneLoopIntegralsCorrection: B0_correction
 
 """
-    polarization(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
+    polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
 计算PNJL模型中两粒子碰撞下的赝标量(P)或标量(S)介子(通过channel标记区分)的极化函数(动量各向异性下)
 返回 polarization_real, polarization_imag
 """
