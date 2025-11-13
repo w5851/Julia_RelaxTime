@@ -94,6 +94,7 @@ end
 
 const DEFAULT_momentum_POINTS = 64
 const DEFAULT_theta_POINTS = 32
+"""构建默认的积分节点和权重"""
 function build_default_nodes_weights()
     cosθ_NODES, cosθ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)
     momentum_NODES_toINF, momentum_WEIGHTS_toINF = gauleg(0.0, 20.0, DEFAULT_momentum_POINTS)

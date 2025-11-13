@@ -66,6 +66,7 @@ end
 """
     correction_cos_theta_coefficient(sign_, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ)
 计算PNJL模型中分布函数一阶修正项中cosθ的系数
+# ps:x=cosθ,x^2对立体角积分相比于没有x^2的结果多了个1/3因子,如果原积分函数不含x,在调用此函数时需乘以1/3
 """
 function correction_cos_theta_coefficient(sign_::Symbol, p_inv_fm::Float64, m_inv_fm::Float64, 
     μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64)

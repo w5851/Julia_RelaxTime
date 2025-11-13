@@ -1,14 +1,16 @@
 """
-单圈积分在各向异性一阶修正下的修正项B0_correction的计算函数
+单圈积分在各向异性一阶修正下的修正项B0_correction和A_correction的计算函数
 """
 module OneLoopIntegralsCorrection
 
-export B0_correction
+export B0_correction, A_correction,
+    A_aniso
 
 include("../QuarkDistribution_Aniso.jl")
 include("OneLoopIntegrals.jl")
 using QuadGK: quadgk
-using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient
+using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso,
+    const_integral_term_A
 using .OneLoopIntegrals: internal_momentum, EPS_K, DEFAULT_RTOL, DEFAULT_ATOL,
     energy_cutoff, singularity_k_positive
 
@@ -181,4 +183,42 @@ function B0_correction(λ::Float64, k::Float64, m1::Float64, m2::Float64, μ1::F
     return real_part, imag_part
 end
 
+# -------------------------------------
+"""
+    A_correction(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p)
+计算单线积分函数A对ξ的一阶修正项(需要加上各向同性项才能进行后续计算，即零阶项),需要传入预生成的动量的积分节点与权重
+可以通过build_default_nodes_weights()函数生成默认的节点和权重
+"""
+function A_correction(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
+    ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64})
+    integral = 0.0
+    @inbounds for i in eachindex(nodes_p)
+        node_p = nodes_p[i]
+        weight_p = weights_p[i]
+        E = sqrt(node_p^2 + m^2)
+        quark_correction = correction_cos_theta_coefficient(:quark, node_p, m, μ, T, Φ, Φbar, ξ)
+        antiquark_correction = correction_cos_theta_coefficient(:antiquark, node_p, m, μ, T, Φ, Φbar, ξ)
+        integral += weight_p * node_p^2 / E * (quark_correction + antiquark_correction)
+    end
+    return 4.0 * integral / 3.0
+end
+
+"""
+    A_aniso(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p)
+计算单线积分函数A在动量各向异性下的完整形式,需要传入预生成的动量的积分节点与权重
+可以通过build_default_nodes_weights()函数生成默认的节点和权重
+"""
+function A_aniso(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
+    ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64})
+    integral = -const_integral_term_A(m) # 计算常数项积分部分
+    @inbounds for i in eachindex(nodes_p)
+        node_p = nodes_p[i]
+        weight_p = weights_p[i]
+        E = sqrt(node_p^2 + m^2)
+        dist_quark = distribution_aniso(:pnjl, :plus, E, μ, T, Φ, Φbar, ξ)
+        dist_antiquark = distribution_aniso(:pnjl, :minus, E, μ, T, Φ, Φbar, ξ)
+        integral += weight_p * node_p^2 / E * (dist_quark + dist_antiquark)
+    end
+    return 4.0 * integral
+end
 end # module OneLoopIntegralsCorrection
