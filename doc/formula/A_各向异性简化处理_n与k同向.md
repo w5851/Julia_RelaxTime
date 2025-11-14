@@ -80,6 +80,11 @@ A^{\text{aniso}} = \frac{4\xi \beta}{3} \int_0^{\Lambda} p^4 dp \frac{1}{E^2} \l
 A(m, \mu, T, \Lambda, \xi, \Phi, \bar{\Phi}) = 4\int_0^{\Lambda} p^2 dp \frac{1}{E} \left[f_q^+(u) + f_q^-(y) - 1\right] + \frac{4\xi \beta}{3} \int_0^{\Lambda} p^4 dp \frac{1}{E^2} \left[G(u) + H(y)\right]
 \]
 
+**重要说明**：
+- 积分中的分母统一使用各向同性能量 $E = \sqrt{p^2 + m^2}$
+- 各向异性效应**仅**通过修改分布函数 $f^{\text{aniso}}$ 体现
+- 这保证了常数项 $-1$ 的积分在各向同性和各向异性情况下保持一致
+
 ## 4. 常数项的处理
 
 对于常数项"-1"的积分，使用解析结果：

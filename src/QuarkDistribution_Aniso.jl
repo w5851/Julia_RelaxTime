@@ -30,8 +30,8 @@ function quark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, �
     df_dx = d_numerator * denominator - numerator * d_denominator
     df_dx /= denominator ^ 2
 
-    # 计算导数
-    df_dE = -β_fm * df_dx
+    # 计算导数 (链式法则: df/dE = df/dx * dx/dE = df/dx * β)
+    df_dE = β_fm * df_dx
 
     return df_dE
 end
@@ -56,8 +56,8 @@ function antiquark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float6
     df_dx = d_numerator * denominator - numerator * d_denominator
     df_dx /= denominator ^ 2
 
-    # 计算导数
-    df_dE = -β_fm * df_dx
+    # 计算导数 (链式法则: df/dE = df/dx * dx/dE = df/dx * β)
+    df_dE = β_fm * df_dx
 
     return df_dE    
 end

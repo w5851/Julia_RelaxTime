@@ -9,10 +9,9 @@ export B0_correction, A_correction,
 include("../QuarkDistribution_Aniso.jl")
 include("OneLoopIntegrals.jl")
 using QuadGK: quadgk
-using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso,
-    const_integral_term_A
+using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
 using .OneLoopIntegrals: internal_momentum, EPS_K, DEFAULT_RTOL, DEFAULT_ATOL,
-    energy_cutoff, singularity_k_positive
+    energy_cutoff, singularity_k_positive, const_integral_term_A
 
 """ k>0时
 对x积分所得结果的Sokhotski–Plemelj formula实部部分(柯西主值积分)
@@ -204,21 +203,34 @@ function A_correction(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::F
 end
 
 """
-    A_aniso(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p)
-计算单线积分函数A在动量各向异性下的完整形式,需要传入预生成的动量的积分节点与权重
+    A_aniso(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p, nodes_cosθ, weights_cosθ)
+计算单线积分函数A在动量各向异性下的完整形式,需要传入预生成的动量和角度的积分节点与权重
 可以通过build_default_nodes_weights()函数生成默认的节点和权重
 """
 function A_aniso(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
-    ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64})
-    integral = -const_integral_term_A(m) # 计算常数项积分部分
-    @inbounds for i in eachindex(nodes_p)
+    ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64},
+    nodes_cosθ::Vector{Float64}, weights_cosθ::Vector{Float64})
+    # 只计算分布函数的积分部分，常数项单独处理
+    integral = 0.0
+    @inbounds @simd for i in eachindex(nodes_p)
         node_p = nodes_p[i]
         weight_p = weights_p[i]
-        E = sqrt(node_p^2 + m^2)
-        dist_quark = distribution_aniso(:pnjl, :plus, E, μ, T, Φ, Φbar, ξ)
-        dist_antiquark = distribution_aniso(:pnjl, :minus, E, μ, T, Φ, Φbar, ξ)
-        integral += weight_p * node_p^2 / E * (dist_quark + dist_antiquark)
+        # 对角度进行积分
+        angle_integral_quark = 0.0
+        angle_integral_antiquark = 0.0
+        E = sqrt(node_p^2 + m^2)  # 使用各向同性能量作为分母
+        @inbounds @simd for j in eachindex(nodes_cosθ)
+            cosθ = nodes_cosθ[j]
+            weight_cosθ = weights_cosθ[j]
+            dist_quark = distribution_aniso(:quark, node_p, m, μ, T, Φ, Φbar, ξ, cosθ)
+            dist_antiquark = distribution_aniso(:antiquark, node_p, m, μ, T, Φ, Φbar, ξ, cosθ)
+            angle_integral_quark += weight_cosθ * node_p^2 / E * dist_quark
+            angle_integral_antiquark += weight_cosθ * node_p^2 / E * dist_antiquark
+        end
+        integral += weight_p * (angle_integral_quark + angle_integral_antiquark)
     end
-    return 4.0 * integral
+    # 分布函数项：angle integration给出因子2（cosθ权重和），φ积分贡献2π→归一化为2，总共4
+    # 常数项：无角度依赖，需要完整4π因子
+    return 2.0 * integral - 4.0 * const_integral_term_A(m)
 end
 end # module OneLoopIntegralsCorrection

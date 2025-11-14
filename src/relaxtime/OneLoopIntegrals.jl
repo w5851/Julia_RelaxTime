@@ -292,7 +292,7 @@ end
 function A(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
     nodes_p::Vector{Float64}, weights_p::Vector{Float64})
     integral = -const_integral_term_A(m) # 计算常数项积分部分
-    @inbounds for i in eachindex(nodes_p)
+    @inbounds @simd for i in eachindex(nodes_p)
         node_p = nodes_p[i]
         weight_p = weights_p[i]
         E = sqrt(node_p^2 + m^2)
