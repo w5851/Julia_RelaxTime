@@ -6,27 +6,44 @@
 
 ## 开发步骤
 
-### 步骤 1: 完善OneLoopIntegralsAniso模块的文档与测试
+### ✅ 步骤 1: 完善OneLoopIntegralsAniso模块的文档与测试 【已完成 2025-11-14】
 
 **目标**: 为新添加的A_correction和A_aniso函数补充完整的API文档和单元测试
 
-**任务清单**:
-- 在`api/`下创建`OneLoopIntegralsAniso.md`，参考`api/OneLoopIntegrals.md`的结构，重点说明：
-  - `A_correction`: 返回ξ的一阶修正项，需与各向同性项`A`相加使用（`A_total = A + A_correction`）
-  - `A_aniso`: 完整各向异性形式，直接返回包含各向异性的完整结果
-  - 两者的区别、适用场景和性能对比
+**完成情况**:
+- ✅ **API文档** (`api/OneLoopIntegralsAniso.md`, 555行)
+  - 详细说明了`A_correction`返回一阶修正项，需与`A`相加使用
+  - 详细说明了`A_aniso`直接返回完整各向异性结果
+  - 明确了两者的区别、适用场景（ξ<0.3 vs ξ≥0.3）和性能对比（1.5-2倍耗时差异）
   
-- 在`test/`下创建`test_oneloopintegrals_aniso.jl`，包含以下测试：
-  - ξ=0边界测试：验证`A_correction(ξ=0) ≈ 0`和`A_aniso(ξ=0) ≈ A`
-  - 数值对比测试：在小ξ范围（0.01~0.5）扫描，对比`A + A_correction`与`A_aniso`的相对误差
-  - 线性近似验证：检验A_correction是否满足线性关系（ratio = A_correction(2ξ) / A_correction(ξ) ≈ 2）
-  - 不同参数下的系统性测试：扫描温度T、化学势μ、夸克质量m
-  - 性能基准测试：对比两种方法的计算时间
+- ✅ **单元测试** (`test/test_oneloopintegrals_aniso.jl`, 455行，74/74测试通过)
+  - ξ=0边界测试：验证`A_correction(ξ=0) ≈ 0`和`A_aniso(ξ=0) ≈ A` ✓
+  - 数值对比测试：扫描ξ=0.01~0.5，相对误差从0.01%到1.09% ✓
+  - 线性近似验证：ratio检验通过，偏差<0.3% ✓
+  - 系统性测试：完成T、μ、m参数扫描 ✓
+  - 收敛性测试：确定最优节点配置（64×32） ✓
+  - 性能基准测试：详细对比两种方法 ✓
   
-- 创建`test/test_oneloopintegrals_aniso_summary.md`测试总结文档：
-  - 记录相对误差分析（一阶近似的有效范围）
-  - 收敛性测试结果（积分节点数的影响）
-  - 性能对比结论
+- ✅ **测试总结文档** (`test/test_oneloopintegrals_aniso_summary.md`, 490行)
+  - 相对误差分析：ξ≤0.2时误差<0.3%，ξ=0.5时误差1.09%
+  - 适用范围建议：一阶近似在ξ<0.3时可靠
+  - 收敛性结果：64动量节点和64×32双重积分配置
+  - 性能对比：包含批量计算优化建议
+  - 物理合理性检验：所有物理约束验证通过
+
+**关键修复**:
+- 🔧 修复了`QuarkDistribution_Aniso.jl`中df/dE符号错误（line 35, 63）
+  - 问题：`df_dE = -β_fm * df_dx`（多余负号）
+  - 修复：`df_dE = β_fm * df_dx`（正确链式法则）
+  - 影响：修复后delta_f与correction符号一致，相对误差从~100%降至<0.3%
+
+**测试结果摘要**:
+| ξ值 | 相对误差 | 适用性 |
+|-----|---------|--------|
+| 0.10 | 0.06% | ⭐⭐⭐⭐⭐ 优秀 |
+| 0.20 | 0.21% | ⭐⭐⭐⭐⭐ 优秀 |
+| 0.30 | 0.43% | ⭐⭐⭐⭐ 良好 |
+| 0.50 | 1.09% | ⭐⭐ 勉强可用 |
 
 **依赖关系**:
 - 输入依赖：`OneLoopIntegrals.jl`中的A函数、`QuarkDistribution_Aniso.jl`中的分布函数
@@ -34,44 +51,62 @@
 
 ---
 
-### 步骤 2: 构建有效耦合常数模块EffectiveCouplings.jl
+### ✅ 步骤 2: 构建有效耦合常数模块EffectiveCouplings.jl 【已完成 2025-11-14】
 
 **目标**: 实现从单圈积分A到有效耦合常数K的计算
 
-**任务清单**:
-- 在`src/relaxtime/`下创建`EffectiveCouplings.jl`模块
-  
-- 实现主函数`calculate_effective_couplings(G, K, A_u, A_d, A_s)`：
-  - 输入：原始耦合常数G、K（来自`Constants_PNJL.jl`），夸克凝聚函数A_u、A_d、A_s
-  - 输出：10个有效耦合系数的命名元组 `(K0_plus, K0_minus, K123_plus, K123_minus, K4567_plus, K4567_minus, K8_plus, K8_minus, K08_plus, K08_minus)`
-  - 注意转换关系：`G_f = -N_c/(4π²) * A_f(T, μ)`
-  
-- 从`doc/formula/K_有效耦合常数byA.md`提取公式实现：
-  - K₀± = G ∓ (1/3)K(2G^μ + G^s)
-  - K₁₂₃± = G ± (1/2)KG^s（π介子通道）
-  - K₄₅₆₇± = G ± (1/2)KG^μ（K介子通道）
-  - K₈± = G ± (1/6)K(4G^μ - G^s)
-  - K₀₈± = ±(1/6)√2 K(G^μ - G^s)（混合通道）
-  
-- 实现辅助函数：
-  - `coupling_matrix_determinant(K0_plus, K8_plus, K08_plus)`: 计算det K = K₀⁺K₈⁺ - (K₀₈⁺)²，用于混合介子传播子
-  
-- 在`api/EffectiveCouplings.md`中记录API文档：
-  - 完整参数说明表（包含G、K的典型值）
-  - 单位：所有K系数单位为fm²
-  - 物理意义：标量(+)/赝标量(-)通道的区分
-  - 使用示例：从温度T、化学势μ计算K系数的完整流程
-  
-- 在`test/test_effective_couplings.jl`中编写测试：
-  - 对称性测试：在某些条件下（如G^μ = G^s）检验对称关系
-  - 物理约束：验证det K > 0（确保传播子有物理意义）
-  - 极限情况：K=0时所有K_α应退化为G
-  - 数值稳定性：扫描A_f的合理范围，检查K系数的符号和量级
+**完成情况**:
+- ✅ **源代码模块** (`src/relaxtime/EffectiveCouplings.jl`, 220行)
+  - 实现了`calculate_G_from_A`转换函数
+  - 实现了`calculate_effective_couplings`主函数
+  - 实现了`coupling_matrix_determinant`辅助函数
+  - 完整的文档字符串和使用示例
 
-**依赖关系**:
-- 输入依赖：`OneLoopIntegrals.A`或`OneLoopIntegralsAniso.A_aniso`、`Constants_PNJL.jl`
-- 输出用途：提供给`MesonPropagator.jl`使用
-- 公式来源：`doc/formula/K_有效耦合常数byA.md`
+- ✅ **API文档** (`api/EffectiveCouplings.md`, 详细记录)
+  - 详细的参数说明表（包含典型值和取值范围）
+  - 物理意义解释（味道通道、手征极限、SU(3)对称性）
+  - 温度和化学势依赖性分析
+  - 完整的使用示例和注意事项
+
+- ✅ **单元测试** (`test/test_effective_couplings.jl`, 387行，96/96测试通过)
+  - 基本功能测试：验证三个函数的返回值和数值正确性 ✓
+  - 手征极限测试：K=0和G^f=0时K_α退化为G ✓
+  - SU(3)对称性测试：G^u=G^s时味道简并和K₀₈=0 ✓
+  - 物理约束测试：det K > 0（标量和赝标量通道） ✓
+  - K系数量级检验：所有系数在合理范围内 ✓
+  - 温度扫描测试：T=50-250 MeV，检验手征相变效应 ✓
+  - 化学势扫描测试：μ=0-300 MeV，检验η-η'混合增强 ✓
+  - 完整计算流程演示：从A函数到K系数的端到端计算 ✓
+
+**测试结果摘要**:
+
+| 测试类型 | 测试数量 | 通过率 | 关键结果 |
+|---------|---------|-------|---------|
+| 基本功能 | 31 | 100% | 所有函数正确返回预期值 |
+| 手征极限 | 18 | 100% | K=0和G^f=0时严格退化为G |
+| SU(3)对称性 | 6 | 100% | 味道简并关系验证通过 |
+| 物理约束 | 12 | 100% | det K > 0，量级合理 |
+| 数值稳定性 | 27 | 100% | 温度和化学势扫描无异常 |
+| 完整流程 | 2 | 100% | 端到端计算成功 |
+
+**典型物理结果**（T=150 MeV, μ=0）:
+
+| 系数 | 数值 (fm²) | 物理意义 |
+|------|-----------|---------|
+| K₁₂₃⁻ | 1.776×10⁻¹ | π介子通道 |
+| K₄₅₆₇⁻ | 1.731×10⁻¹ | K介子通道 |
+| K₀₈⁻ | -2.125×10⁻³ | η-η'混合 |
+| det K^P | 4.147×10⁻² fm⁴ | 赝标量行列式 |
+
+**依赖关系验证**:
+- 输入依赖：`OneLoopIntegrals.A`函数正常工作 ✓
+- 输出接口：返回NamedTuple供下游模块使用 ✓
+- 公式一致性：与`doc/formula/K_有效耦合常数byA.md`完全一致 ✓
+
+**任务清单**（原计划）:
+- ~~在`src/relaxtime/`下创建`EffectiveCouplings.jl`模块~~ ✓
+  
+
 
 ---
 
@@ -435,4 +470,7 @@
 
 **计划创建日期**: 2025年11月14日  
 **目标完成日期**: 2025年12月底至2026年1月初  
-**项目状态**: 第一阶段（A_correction和A_aniso）已完成，准备进入第二阶段（有效耦合常数）
+**项目状态**: 
+- ✅ **第一阶段（步骤1）已完成** (2025-11-14): OneLoopIntegralsAniso模块文档与测试完备，df/dE符号错误已修复
+- ✅ **第二阶段（步骤2）已完成** (2025-11-14): EffectiveCouplings模块实现、文档与测试完备，96个测试全部通过
+- 📋 **准备开始第三阶段（步骤3）**: 构建介子传播子模块MesonPropagator.jl
