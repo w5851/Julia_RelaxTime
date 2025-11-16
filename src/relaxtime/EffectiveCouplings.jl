@@ -94,12 +94,12 @@ K_{08}^± = ±(1/6)√2 K(G^μ - G^s)
  K8_plus, K8_minus, K08_plus, K08_minus)
 
 其中：
-- `*_plus`: 标量通道（S通道）
-- `*_minus`: 赝标量通道（P通道）
+- `*_plus`: 赝标量通道（P通道）
+- `*_minus`: 标量通道（S通道）
 
 # 物理意义
-- 标量通道（+）：对应自旋0、正宇称的介子（σ、f_0、a_0等）
-- 赝标量通道（-）：对应自旋0、负宇称的介子（π、K、η、η'等）
+- 赝标量通道（+）：对应自旋0、负宇称的介子（π、K、η、η'等）
+- 标量通道（-）：对应自旋0、正宇称的介子（σ_π、σ_K、σ, σ'等）
 
 # 使用示例
 ```julia
@@ -180,21 +180,26 @@ end
 # ----------------------------------------------------------------------------
 
 """
-    coupling_matrix_determinant(K0_plus::Float64, K8_plus::Float64, K08_plus::Float64) -> Float64
+    coupling_matrix_determinant(K0::Float64, K8::Float64, K08::Float64) -> Float64
 
-计算混合介子传播子所需的耦合矩阵行列式。
+计算混合介子传播子所需的耦合矩阵行列式（也称为det_K）。
 
 # 物理背景
-在η-η'介子系统中，存在SU(3)单态和八重态的混合。混合介子的传播子需要对2×2矩阵求逆，
-其行列式det K直接影响传播子的极点位置和介子质量。
+在η-η'介子系统（赝标量通道）或σ-σ'介子系统（标量通道）中，存在SU(3)单态和八重态的混合。
+混合介子的传播子需要对2×2矩阵求逆，其行列式det K直接影响传播子的极点位置和介子质量。
 
 # 公式
-det(K) = K_0^+ K_8^+ - (K_{08}^+)^2
+det(K^±) = K_0^± K_8^± - (K_{08}^±)^2
+
+其中±表示通道类型：
+- +：赝标量通道（P通道），用于η/η'混合介子
+- -：标量通道（S通道），用于σ/σ'混合介子
 
 # 参数
-- `K0_plus`: 单态通道标量耦合系数（单位：fm²）
-- `K8_plus`: 八重态通道标量耦合系数（单位：fm²）
-- `K08_plus`: 混合通道标量耦合系数（单位：fm²）
+参数名使用通用命名，适用于两种通道：
+- `K0`: 单态通道耦合系数（K0_plus用于P通道，K0_minus用于S通道）（单位：fm²）
+- `K8`: 八重态通道耦合系数（K8_plus用于P通道，K8_minus用于S通道）（单位：fm²）
+- `K08`: 混合通道耦合系数（K08_plus用于P通道，K08_minus用于S通道）（单位：fm²）
 
 # 返回值
 - `det_K`: 耦合矩阵行列式（单位：fm⁴）
@@ -203,17 +208,23 @@ det(K) = K_0^+ K_8^+ - (K_{08}^+)^2
 对于物理上有意义的传播子，要求det K > 0，否则传播子会出现非物理的极点。
 
 # 使用示例
-使用calculate_effective_couplings计算K系数后，调用此函数计算行列式。
-结果应为正值才表示物理合理。
+```julia
+# 计算赝标量通道（η/η'）的行列式
+K_coeffs = calculate_effective_couplings(G, K, G_u, G_s)
+det_K_P = coupling_matrix_determinant(K_coeffs.K0_plus, K_coeffs.K8_plus, K_coeffs.K08_plus)
+
+# 计算标量通道（σ/σ'）的行列式
+det_K_S = coupling_matrix_determinant(K_coeffs.K0_minus, K_coeffs.K8_minus, K_coeffs.K08_minus)
+```
 
 # 注意事项
-1. 仅用于标量通道（+），赝标量通道有独立的行列式
+1. 此函数适用于赝标量和标量两种通道，计算公式相同，只需传入相应的K系数即可
 2. det K的符号直接关系到介子传播子的因果性
 3. 在某些极端参数下（如非常高的温度或密度），det K可能变负，表示模型失效
 """
-@inline @fastmath function coupling_matrix_determinant(K0_plus::Float64, K8_plus::Float64, 
-                                                       K08_plus::Float64)
-    return K0_plus * K8_plus - K08_plus^2
+@inline @fastmath function coupling_matrix_determinant(K0::Float64, K8::Float64, 
+                                                       K08::Float64)
+    return K0 * K8 - K08^2
 end
 
 end # module EffectiveCouplings

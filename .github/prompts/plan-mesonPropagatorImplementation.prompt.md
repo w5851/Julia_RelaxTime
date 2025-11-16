@@ -14,16 +14,19 @@
    - **K系数自动选择**：函数内部根据`meson_type`和`channel`自动选择正确的K系数，降低调用者使用难度
    - **关键映射**：赝标量P（π、K）使用K⁺系数，标量S（σ_π、σ_K）使用K⁻系数
    - **K介子极化函数**：使用Π_{us}而非Π_{uu}
-   - 实现`meson_propagator_mixed`函数：计算混合介子传播子（η/η'、σ/σ'），接受散射过程参数(q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol)表示散射过程q1+q2→q3+q4，以及散射道channel::Symbol(:t/:s/:u)，使用矩阵乘法形式`2det(K)/det(M) × J^T M J'`，返回ComplexF64
+   - 实现`meson_propagator_mixed`函数：计算混合介子传播子（η/η'、σ/σ'），函数签名为`meson_propagator_mixed(det_K::Float64, M_matrix::Matrix{ComplexF64}, q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol, channel::Symbol) -> ComplexF64`，接受预计算的det_K和M矩阵、散射过程参数(q1, q2, q3, q4)表示散射过程q1+q2→q3+q4，以及散射道channel::Symbol(:t/:s/:u)，使用矩阵乘法形式`2det(K)/det(M) × J^T M J'`，返回ComplexF64
+   - **参数说明**：
+     - `det_K`: 预计算的耦合矩阵行列式(通过`EffectiveCouplings.coupling_matrix_determinant`获取，也称为det_K)
+     - `M_matrix`: 预计算的2×2复数耦合矩阵(通过`calculate_coupling_matrix`辅助函数获取)
    - **散射过程约束**：只有q2和q4可能是反夸克(:ubar/:dbar/:sbar)，且若有反夸克则q2和q4同时为反夸克
    - **场算符映射**：函数内部根据channel自动将q1,q2,q3,q4映射到ψ,ψ̄,ψ',ψ̄'场算符，调用者无需处理复杂的场算符对应关系
    - **关键映射**：赝标量P（η/η'）使用K⁺系数，标量S（σ/σ'）使用K⁻系数
    - 实现`extract_flavor`辅助函数：从Symbol中提取味类型(去除bar标记)，如:ubar→:u
    - 实现`get_quark_wavefunction`辅助函数：根据味类型(:u/:d/:s)和是否为bar返回对应的列向量或行向量波函数
-   - 在Constants_PNJL.jl中添加常量定义(使用ASCII bar命名，如ψbar_u而非ψ̄_u)：
+   - 实现`calculate_current_vector`辅助函数：根据入射/出射粒子的波函数和Gell-Mann矩阵计算流算符向量J=[ψ̄·λ₀·ψ, ψ̄·λ₈·ψ]，返回2×1列向量
+   - **Constants_PNJL.jl中的常量**：以下常量已在`Constants_PNJL.jl`中定义并export(使用ASCII bar命名，如ψbar_u而非ψ̄_u)：
      - Gell-Mann矩阵：`λ₀`和`λ₈`（3×3矩阵）
      - 夸克味波函数：`ψ_u`、`ψ_d`、`ψ_s`（列向量）和`ψbar_u`、`ψbar_d`、`ψbar_s`（行向量/1×3矩阵）
-     - **所有新常量必须在Constants_PNJL.jl中export**
    - 实现`calculate_coupling_matrix`辅助函数:根据极化函数(Π_uu::ComplexF64, Π_ss::ComplexF64)、预计算的K系数(K_coeffs::NamedTuple)和通道类型channel::Symbol(:P或:S)计算复数耦合矩阵M(2×2 ComplexF64矩阵)
    - **采用方案A**:K系数通过EffectiveCouplings.calculate_effective_couplings预先计算并作为参数传入,函数内部根据channel自动选择对应的K系数(:P通道用K⁺系数,:S通道用K⁻系数),符合批量计算时复用K系数的性能优化原则
    - **M矩阵对称性**：利用M₀₈ = M₈₀减少计算
@@ -34,6 +37,7 @@
 2. **编写API文档** [api/MesonPropagator.md]
    - 遵循`api/EffectiveCouplings.md`格式：模块概述、依赖关系、单位约定、API参考（含参数表和物理意义）
    - **K系数预计算说明**：所有函数都假设K系数已通过`EffectiveCouplings.calculate_effective_couplings`预先计算,批量计算时可复用同一组K系数以提升性能
+   - **det_K函数说明**：明确`EffectiveCouplings.coupling_matrix_determinant`函数用于预计算det_K（耦合矩阵行列式），文档中det_K和coupling_matrix_determinant指代同一概念
    - **K系数自动选择逻辑**：详细说明`meson_propagator_simple`函数如何根据`meson_type`和`channel`自动选择正确的K系数，减轻调用者负担
    - **明确介子类型映射表**（关键修正）：
      | 介子 | 通道 | 夸克组合 | 极化函数 | K系数 |
@@ -48,15 +52,15 @@
    - 明确所有传播子函数返回ComplexF64类型
    - 提供完整使用示例：从预计算极化函数（ComplexF64）到调用传播子函数的端到端代码
    - 补充性能优化说明：批量计算时一次性预计算Π和M以减少重复开销
+   - **各向异性修正说明**：传播子模块通过预计算的极化函数值间接支持各向异性，使用时先用不同的ξ参数计算极化函数Π(ξ)，再将结果传入传播子函数
 
 3. **开发单元测试** [test/test_meson_propagator.jl]
    - 基本功能测试：验证`meson_propagator_simple`和`meson_propagator_mixed`返回ComplexF64、单位正确（fm²）
    - **通道-K系数映射测试**：验证π和K使用K⁺，σ_π和σ_K使用K⁻，η/η'使用K⁺，σ/σ'使用K⁻
-   - **K介子极化函数测试**：验证K介子使用Π_{us}而非Π_{uu}，对比两者差异
+   - **K介子极化函数测试**：对比K介子使用Π_{us}与Π_{uu}的差异，直接输出数值差异无需判断合理性
    - 物理约束测试：检查k→0极限下传播子实部发散（质量壳条件）、虚部为零（无衰变）
    - 混合介子测试：验证η/η'混合时矩阵乘法计算的正确性，与手动展开结果对比（相对误差<1e-10）
-   - **M₀₈系数测试**：验证使用4√2/3而非4/(3√2)，对比两者数值差异
-   - 各向异性修正测试：对比ξ=0和ξ=0.3时传播子的变化（预期修正量级~10-30%，此为经验值，无理论依据，通过测试确定实际修正量级即可）
+   - 各向异性修正测试：分别用ξ=0和ξ=0.3计算极化函数Π，再传入传播子函数对比结果变化
    - 夸克味配置测试：测试u̅u、u̅s、s̅s不同夸克组合的传播子计算（涵盖所有波函数常量）
    - 参考`test/test_effective_couplings.jl`结构：使用@testset组织测试、预生成积分节点、输出测试总结
 
