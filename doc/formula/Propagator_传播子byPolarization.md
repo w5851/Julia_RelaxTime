@@ -379,8 +379,25 @@ J = \begin{pmatrix}
 - 单位：fm²
 
 ### 8.2 一般介子传播子实现
-- **函数签名**：`meson_propagator_simple(K_coeff::Float64, Π::ComplexF64) -> ComplexF64`
-- **性能优化**：将极化函数的复数值 `Π = Π_real + im*Π_imag` 作为参数传入，避免重复计算
+- **函数签名**：`meson_propagator_simple(meson_type::Symbol, channel::Symbol, K_coeffs::NamedTuple, Π::ComplexF64) -> ComplexF64`
+- **参数说明**：
+  - `meson_type`: 介子类型(`:pi`, `:K`, `:sigma_pi`, `:sigma_K`)
+  - `channel`: 通道类型(`:P`赝标量或`:S`标量)
+  - `K_coeffs`: 通过`EffectiveCouplings.calculate_effective_couplings`预先计算的K系数
+  - `Π`: 预计算的极化函数(ComplexF64)
+- **K系数自动选择**：函数内部根据`meson_type`和`channel`自动选择正确的K系数，实现逻辑如下：
+  ```julia
+  if meson_type == :pi
+      K_coeff = (channel == :P) ? K_coeffs.K123_minus : K_coeffs.K123_plus
+  elseif meson_type == :K
+      K_coeff = (channel == :P) ? K_coeffs.K4567_minus : K_coeffs.K4567_plus
+  elseif meson_type == :sigma_pi
+      K_coeff = (channel == :S) ? K_coeffs.K123_plus : K_coeffs.K123_minus
+  elseif meson_type == :sigma_K
+      K_coeff = (channel == :S) ? K_coeffs.K4567_plus : K_coeffs.K4567_minus
+  end
+  ```
+- **性能优化**：将极化函数的复数值 `Π = Π_real + im*Π_imag` 作为参数传入，避免重复计算；K系数选择的条件判断开销可忽略不计
 - **介子类型与K系数映射**（**关键修正**）：
   | 介子 | 通道 | 夸克组合 | 使用的Π | K系数 |
   |------|------|----------|---------|-------|
@@ -390,28 +407,40 @@ J = \begin{pmatrix}
   | σ_K | S | us̄/ds̄ | Π_{us}^S | K₄⁻ |
 
 ### 8.3 混合介子传播子实现
-- **函数签名**：`meson_propagator_mixed(det_K::ComplexF64, M_matrix::Matrix{ComplexF64}, quark_in::Symbol, antiquark_in::Symbol, quark_out::Symbol, antiquark_out::Symbol) -> ComplexF64`
+- **函数签名**：`meson_propagator_mixed(det_K::Float64, M_matrix::Matrix{ComplexF64}, q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol, channel::Symbol) -> ComplexF64`
+- **参数说明**：
+  - `q1, q2, q3, q4`: 散射过程q1+q2→q3+q4中的粒子类型(`:u`, `:d`, `:s`, `:ubar`, `:dbar`, `:sbar`)
+  - `channel`: 散射道类型(`:t`, `:s`, `:u`)
+- **散射过程约束**：只有q2和q4可能是反夸克，且若有反夸克则q2和q4同时为反夸克
+- **场算符映射**：函数内部根据channel自动将q1,q2,q3,q4映射到ψ,ψ̄,ψ',ψ̄'场算符，调用者无需处理复杂的场算符对应关系
 - **矩阵运算**：使用Julia内置的复数矩阵运算 `J' * M * J'`
 - **耦合矩阵M**：2×2复数矩阵，作为参数传入（在批量调用前预计算）
-- **味波函数常量**：在 `Constants_PNJL.jl` 中预定义：
+- **味波函数常量**：在 `Constants_PNJL.jl` 中预定义（使用ASCII bar命名）：
   ```julia
   const ψ_u = [1.0, 0.0, 0.0]  # 列向量
   const ψ_d = [0.0, 1.0, 0.0]
   const ψ_s = [0.0, 0.0, 1.0]
-  const ψ̄_u = [1.0 0.0 0.0]  # 行向量（1×3矩阵）
-  const ψ̄_d = [0.0 1.0 0.0]
-  const ψ̄_s = [0.0 0.0 1.0]
+  const ψbar_u = [1.0 0.0 0.0]  # 行向量（1×3矩阵）
+  const ψbar_d = [0.0 1.0 0.0]
+  const ψbar_s = [0.0 0.0 1.0]
   ```
 - **Gell-Mann矩阵常量**：在 `Constants_PNJL.jl` 中定义：
   ```julia
   const λ₀ = sqrt(2/3) * [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
   const λ₈ = (1/sqrt(3)) * [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 -2.0]
   ```
+- **辅助函数**：
+  - `extract_flavor(q::Symbol)`: 从Symbol中提取味类型(去除bar标记)，如`:ubar→:u`
+  - `get_quark_wavefunction(flavor::Symbol, is_bar::Bool)`: 根据味类型和是否为bar返回对应的列向量或行向量波函数
 
 ### 8.4 辅助函数
-- **`calculate_coupling_matrix`**：根据 `(Π_uu::ComplexF64, Π_ss::ComplexF64)` 和K系数计算复数矩阵M（2×2）
-- **通道选择**：通过参数 `channel::Symbol` (`:P` 或 `:S`) 选择使用K⁺或K⁻系数
+- **`calculate_coupling_matrix`**:根据 `(Π_uu::ComplexF64, Π_ss::ComplexF64)`、预计算的K系数 `K_coeffs::NamedTuple` 和通道类型 `channel::Symbol` 计算复数矩阵M(2×2)
+- **函数签名**:`calculate_coupling_matrix(Π_uu::ComplexF64, Π_ss::ComplexF64, K_coeffs::NamedTuple, channel::Symbol) -> Matrix{ComplexF64}`
+- **采用方案A**:K系数通过`EffectiveCouplings.calculate_effective_couplings(G, K, G_u, G_s)`预先计算并作为参数传入,函数内部根据channel自动选择对应的K系数(`:P`通道用K⁺系数,`:S`通道用K⁻系数)
+- **性能优化**:批量计算多个传播子时,可以只计算一次K系数并复用,避免重复调用`calculate_effective_couplings`
 - **M矩阵对称性**：利用 `M₀₈ = M₈₀` 减少计算量
+- **det_K计算**：`det_K`为Float64类型的实数，已在EffectiveCouplings.jl中定义
+- **det_M计算**：直接使用Julia标准库的`det()`函数计算M矩阵行列式，无需额外定义函数
 
 ### 8.5 关键公式修正总结
 1. **K介子极化函数**：使用 `Π_{us}` 而非 `Π_{uu}` ✓
@@ -419,5 +448,8 @@ J = \begin{pmatrix}
    - 赝标量通道P（π、K、η/η'）→ 使用 K⁺ 系数
    - 标量通道S（σ_π、σ_K、σ/σ'）→ 使用 K⁻ 系数
 3. **M₀₈系数**：$\frac{4\sqrt{2}}{3}$（即 $\frac{4}{3}\sqrt{2}$）✓
-4. **复数运算**：所有传播子和M矩阵使用 `ComplexF64` 类型 ✓
+4. **数据类型**：
+   - 所有传播子和M矩阵使用 `ComplexF64` 类型 ✓
+   - 极化函数Π作为 `ComplexF64` 传入 ✓
+   - K系数和det_K是 `Float64` 类型的实数 ✓
 5. **M矩阵对称性**：$M_{08} = M_{80}$ ✓

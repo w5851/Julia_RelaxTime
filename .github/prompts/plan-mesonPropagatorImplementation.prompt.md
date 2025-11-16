@@ -5,7 +5,13 @@
 ### Steps
 
 1. **创建MesonPropagator.jl核心模块** [src/relaxtime/MesonPropagator.jl]
-   - 实现`meson_propagator_simple`函数：计算一般介子传播子（π、K、σ_π、σ_K），接受预计算的极化函数Π::ComplexF64作为参数，返回ComplexF64
+   - 实现`meson_propagator_simple`函数：计算一般介子传播子（π、K、σ_π、σ_K），函数签名为`meson_propagator_simple(meson_type::Symbol, channel::Symbol, K_coeffs::NamedTuple, Π::ComplexF64) -> ComplexF64`
+   - **参数说明**：
+     - `meson_type`: 介子类型(`:pi`, `:K`, `:sigma_pi`, `:sigma_K`)
+     - `channel`: 通道类型(`:P`赝标量或`:S`标量)
+     - `K_coeffs`: 预计算的K系数NamedTuple(通过`EffectiveCouplings.calculate_effective_couplings`获取)
+     - `Π`: 预计算的极化函数(ComplexF64)
+   - **K系数自动选择**：函数内部根据`meson_type`和`channel`自动选择正确的K系数，降低调用者使用难度
    - **关键映射**：赝标量P（π、K）使用K⁺系数，标量S（σ_π、σ_K）使用K⁻系数
    - **K介子极化函数**：使用Π_{us}而非Π_{uu}
    - 实现`meson_propagator_mixed`函数：计算混合介子传播子（η/η'、σ/σ'），接受散射过程参数(q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol)表示散射过程q1+q2→q3+q4，以及散射道channel::Symbol(:t/:s/:u)，使用矩阵乘法形式`2det(K)/det(M) × J^T M J'`，返回ComplexF64
@@ -18,8 +24,8 @@
      - Gell-Mann矩阵：`λ₀`和`λ₈`（3×3矩阵）
      - 夸克味波函数：`ψ_u`、`ψ_d`、`ψ_s`（列向量）和`ψbar_u`、`ψbar_d`、`ψbar_s`（行向量/1×3矩阵）
      - **所有新常量必须在Constants_PNJL.jl中export**
-   - 实现`calculate_coupling_matrix`辅助函数：根据极化函数(Π_uu::ComplexF64, Π_ss::ComplexF64)和通道类型channel::Symbol(:P或:S)计算复数耦合矩阵M（2×2 ComplexF64矩阵）
-   - **采用方案A**：函数内部根据channel自动从EffectiveCouplings获取对应的K系数(:P通道用K⁺系数，:S通道用K⁻系数)，降低调用复杂度
+   - 实现`calculate_coupling_matrix`辅助函数:根据极化函数(Π_uu::ComplexF64, Π_ss::ComplexF64)、预计算的K系数(K_coeffs::NamedTuple)和通道类型channel::Symbol(:P或:S)计算复数耦合矩阵M(2×2 ComplexF64矩阵)
+   - **采用方案A**:K系数通过EffectiveCouplings.calculate_effective_couplings预先计算并作为参数传入,函数内部根据channel自动选择对应的K系数(:P通道用K⁺系数,:S通道用K⁻系数),符合批量计算时复用K系数的性能优化原则
    - **M矩阵对称性**：利用M₀₈ = M₈₀减少计算
    - **M₀₈系数修正**：使用4√2/3（即4/3·√2），不是4/(3√2)
    - **det_M计算**：直接使用Julia标准库的det()函数计算M矩阵行列式，无需额外定义det_M函数(det_K已在EffectiveCouplings.jl中定义)
@@ -27,6 +33,8 @@
 
 2. **编写API文档** [api/MesonPropagator.md]
    - 遵循`api/EffectiveCouplings.md`格式：模块概述、依赖关系、单位约定、API参考（含参数表和物理意义）
+   - **K系数预计算说明**：所有函数都假设K系数已通过`EffectiveCouplings.calculate_effective_couplings`预先计算,批量计算时可复用同一组K系数以提升性能
+   - **K系数自动选择逻辑**：详细说明`meson_propagator_simple`函数如何根据`meson_type`和`channel`自动选择正确的K系数，减轻调用者负担
    - **明确介子类型映射表**（关键修正）：
      | 介子 | 通道 | 夸克组合 | 极化函数 | K系数 |
      |------|------|----------|---------|-------|
