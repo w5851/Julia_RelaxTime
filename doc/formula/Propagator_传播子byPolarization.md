@@ -11,33 +11,90 @@
 
 ## 3. 数学表达式
 
-### 3.1 一般介子传播子(π, K, σ_K, σ_π)(σ_K和σ_π是标量介子S，而π和K是赝标量介子P)
+### 3.1 一般介子传播子(π, K, σ_π, σ_K)
+
+**介子类型与通道说明**：
+- **赝标量介子P**（使用K⁺系数）：π介子（uū/d̄d组合）、K介子（us̄/ds̄组合）
+- **标量介子S**（使用K⁻系数）：σ_π介子（uū/d̄d组合）、σ_K介子（us̄/ds̄组合）
+
+**传播子公式**（使用复数除法）：
+
+**π介子传播子**（赝标量P通道）：
 ```math
-\mathcal{D}_{\pi} = \frac{2K_3^{\pm}}{1 - 4K_3^{\pm} \prod_{u\bar u}^{P(S)}(k_0, k)}
+\mathcal{D}_{\pi} = \frac{2K_3^{+}}{1 - 4K_3^{+} \Pi_{u\bar u}^{P}(k_0, k)}
 ```
+其中 $\Pi_{u\bar u}^{P} = \Pi_{u\bar u}^{P,\text{real}} + i\Pi_{u\bar u}^{P,\text{imag}}$ 是复数。
+
+**K介子传播子**（赝标量P通道）：
 ```math
-\mathcal{D}_K = \frac{2K_4^{\pm}}{1 - 4K_4^{\pm} \prod_{u\bar u}^{P(S)}(k_0, k)}
+\mathcal{D}_{K} = \frac{2K_4^{+}}{1 - 4K_4^{+} \Pi_{u\bar s}^{P}(k_0, k)}
+```
+注意：K介子使用 $\Pi_{u\bar s}^{P}$ 而非 $\Pi_{u\bar u}^{P}$。
+
+**σ_π标量介子传播子**（标量S通道）：
+```math
+\mathcal{D}_{\sigma_\pi} = \frac{2K_3^{-}}{1 - 4K_3^{-} \Pi_{u\bar u}^{S}(k_0, k)}
 ```
 
-### 3.2 混合介子传播子（η/η', σ/σ'）(η/η'是赝标量介子P，σ/σ'是标量介子S)
+**σ_K标量介子传播子**（标量S通道）：
 ```math
-\mathcal{D} = 2\frac{\det K}{M_{00}M_{88}-M_{08}^2}(M_{00}\bar\psi\lambda_0\psi\cdot\bar\psi'\lambda_0\psi' + M_{08}\bar\psi\lambda_0\psi\cdot\bar\psi'\lambda_8\psi' + M_{80}\bar\psi\lambda_8\psi\cdot\bar\psi'\lambda_0\psi' + M_{88}\bar\psi\lambda_8\psi\cdot\bar\psi'\lambda_8\psi')
+\mathcal{D}_{\sigma_K} = \frac{2K_4^{-}}{1 - 4K_4^{-} \Pi_{u\bar s}^{S}(k_0, k)}
 ```
-- 其中**λ是盖尔曼矩阵**,**ψ与其变体是夸克味空间波函数**,详情见**3.3小节**
+
+**返回值格式**：
+- 传播子 $\mathcal{D}$ 是复数类型 `ComplexF64`
+- 可通过 `real(D)` 和 `imag(D)` 提取实部和虚部
+- 单位：fm²
+
+### 3.2 混合介子传播子（η/η', σ/σ'）
+
+**介子类型与通道说明**：
+- **赝标量混合介子P**（使用K⁺系数）：η/η'混合（uū、s̄s通过λ₀、λ₈耦合）
+- **标量混合介子S**（使用K⁻系数）：σ/σ'混合
+
+**传播子公式**（使用复数矩阵运算）：
+```math
+\mathcal{D} = 2\frac{\det K}{\det M} J^T M J'
+```
+
+展开形式：
+```math
+\mathcal{D} = 2\frac{\det K}{M_{00}M_{88}-M_{08}^2}(M_{00}\bar\psi\lambda_0\psi\cdot\bar\psi'\lambda_0\psi' + M_{08}\bar\psi\lambda_0\psi\cdot\bar\psi'\lambda_8\psi' + M_{08}\bar\psi\lambda_8\psi\cdot\bar\psi'\lambda_0\psi' + M_{88}\bar\psi\lambda_8\psi\cdot\bar\psi'\lambda_8\psi')
+```
+- 其中**λ是盖尔曼矩阵**，**ψ与其变体是夸克味空间波函数**，详情见**3.3小节**
+- **M矩阵是对称的**：$M_{08} = M_{80}$
+- **所有量均为复数**：$M_{ij}$、$\det K$、$\det M$、$\mathcal{D}$ 都是 `ComplexF64` 类型
+
+**耦合矩阵M的定义**（对赝标量P使用K⁺，标量S使用K⁻）：
+
+对于**赝标量通道P**（η/η'）：
+```math
+M_{00}^P = K_0^{+} - \frac{4}{3} \det K^{+} (\Pi_{u\bar u}^{P} + 2 \Pi_{s\bar s}^{P})
+```
+```math
+M_{08}^P = M_{80}^P = K_{08}^{+} - \frac{4\sqrt{2}}{3} \det K^{+} (\Pi_{u\bar u}^{P} - \Pi_{s\bar s}^{P})
+```
+```math
+M_{88}^P = K_8^{+} - \frac{4}{3} \det K^{+} (2 \Pi_{u\bar u}^{P} + \Pi_{s\bar s}^{P})
+```
+
+对于**标量通道S**（σ/σ'）：
+```math
+M_{00}^S = K_0^{-} - \frac{4}{3} \det K^{-} (\Pi_{u\bar u}^{S} + 2 \Pi_{s\bar s}^{S})
+```
+```math
+M_{08}^S = M_{80}^S = K_{08}^{-} - \frac{4\sqrt{2}}{3} \det K^{-} (\Pi_{u\bar u}^{S} - \Pi_{s\bar s}^{S})
+```
+```math
+M_{88}^S = K_8^{-} - \frac{4}{3} \det K^{-} (2 \Pi_{u\bar u}^{S} + \Pi_{s\bar s}^{S})
+```
 
 其中：
 ```math
-M_{00} = K_0^+ - \frac{4}{3} \det K (\Pi_{u\bar u}^{P(S)} + 2 \Pi_{s\bar s}^{P(S)})
+\det K^{\pm} = K_0^{\pm} K_8^{\pm} - (K_{08}^{\pm})^2
 ```
-```math
-M_{08} = K_0^+ - \frac{4}{3} \sqrt{2} \det K (\Pi_{u\bar u}^{P(S)} - \Pi_{s\bar s}^{P(S)})
-```
-```math
-M_{88} = K_0^+ - \frac{4}{3} \det K (2 \Pi_{u\bar u}^{P(S)} + \Pi_{s\bar s}^{P(S)})
-```
-```math
-\det K = K_0^+ K_8^+ - K_{08}^2
-```
+
+**注意**：$M_{08}$ 公式中的系数是 $\frac{4\sqrt{2}}{3}$（即 $\frac{4}{3}\sqrt{2}$），不是 $\frac{4}{3\sqrt{2}}$。
 - 这个传播子可以写成**矩阵乘法**的形式,推导如下:
 
 **定义以下矩阵和向量**：
@@ -127,21 +184,29 @@ $$
 \text{Tr}(\lambda_a \lambda_b) = 2\delta_{ab}
 \]
 
-常用的 λₐ 包括：
+**本模块使用的Gell-Mann矩阵**（需在Constants_PNJL.jl中定义为常量）：
 
 - **λ₀（味单态，归一化）**：
 \[
 \lambda_0 = \sqrt{\frac{2}{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}
 \]
 
+- **λ₈（超荷）**：
+\[
+\lambda_8 = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -2 \end{pmatrix}
+\]
+
+**其他Gell-Mann矩阵**（供参考，本模块暂不需要）：
+
 - **λ₃（同位旋第三分量）**：
 \[
 \lambda_3 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & -1 & 0 \\ 0 & 0 & 0 \end{pmatrix}
 \]
 
-- **λ₈（超荷）**：
+- **λ₄ 和 λ₅（K⁺ 介子相关）**：
 \[
-\lambda_8 = \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -2 \end{pmatrix}
+\lambda_4 = \begin{pmatrix} 0 & 0 & 1 \\ 0 & 0 & 0 \\ 1 & 0 & 0 \end{pmatrix}, \quad
+\lambda_5 = \begin{pmatrix} 0 & 0 & -i \\ 0 & 0 & 0 \\ i & 0 & 0 \end{pmatrix}
 \]
 
 - **λ₄ 和 λ₅（K⁺ 介子相关）**：
@@ -205,6 +270,26 @@ $$
 - **ψ′**：出射夸克的味波函数（列向量）
 - **ψ̄′**：出射反夸克的味波函数（行向量）
 
+##### 流算符 J 的计算示例
+
+对于 u 夸克和 s̄ 反夸克的混合介子传播子：
+\[
+J = \begin{pmatrix}
+\bar{\psi}_s \lambda_0 \psi_u \\
+\bar{\psi}_s \lambda_8 \psi_u
+\end{pmatrix}
+\]
+
+具体计算（以 u 夸克为例）：
+- $\bar{\psi}_u \lambda_0 \psi_u = [1\;0\;0] \cdot \sqrt{\frac{2}{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix} = \sqrt{\frac{2}{3}}$
+- $\bar{\psi}_u \lambda_8 \psi_u = [1\;0\;0] \cdot \frac{1}{\sqrt{3}} \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & -2 \end{pmatrix} \cdot \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix} = \frac{1}{\sqrt{3}}$
+
+对于 s 夸克：
+- $\bar{\psi}_s \lambda_0 \psi_s = \sqrt{\frac{2}{3}}$
+- $\bar{\psi}_s \lambda_8 \psi_s = \frac{1}{\sqrt{3}} \times (-2) = -\frac{2}{\sqrt{3}}$
+
+**性能注记**：这些矩阵乘法可以预计算为常量，但由于计算开销相对极化函数和传播子可忽略，也可直接在函数内部计算。
+
 ##### 示例：\( u\bar{s} \to u\bar{s} \) 过程
 
 - **入射**：u 夸克 + s̄ 反夸克
@@ -224,6 +309,7 @@ $$
 - **λₐ** 是 3×3 的 Gell-Mann 矩阵，描述夸克在味空间的变换。
 - **ψ** 是夸克的味波函数（列向量），**ψ̄** 是反夸克的味波函数（行向量）。
 - **ψ′** 和 **ψ̄′** 是出射态的味波函数。
+- **流算符 J** 是通过矩阵乘法 $\bar{\psi}\lambda\psi$ 计算得到的2×1列向量。
 
 ### 3.4 极化函数
 ```math
@@ -285,7 +371,53 @@ $$
 - 能量单位转换：1 MeV = 1/197.327 fm⁻¹
 - 耦合常数单位转换：1 MeV⁻² = (197.327)² fm²
 
-## 8. 程序实现细节计划
-- 计算一般介子传播子时，将极化函数的值作为参数传入而非在函数内计算，以避免重复计算极化函数
-- 计算混合介子传播子时，直接使用矩阵乘法计算，避免手动展开；另外，由于耦合矩阵M只与极化函数有关，因此将耦合矩阵M也作为参数传入，在批量调用函数前预计算耦合矩阵即可
-- 混合介子传播子的矩阵乘法计算与散射过程中的夸克类型有关，计划将u,d,s三种夸克的味波函数预定义为常量，直接在散射过程中调用，避免每次计算时重复创建向量；另外，这样需要将散射过程涉及到的夸克类型作为参数传入函数，以选择正确的味波函数进行计算
+## 8. 程序实现细节说明
+
+### 8.1 返回值格式与数据类型
+- **所有传播子函数返回 `ComplexF64` 类型**
+- 可通过 `real(D)` 和 `imag(D)` 提取实部和虚部
+- 单位：fm²
+
+### 8.2 一般介子传播子实现
+- **函数签名**：`meson_propagator_simple(K_coeff::Float64, Π::ComplexF64) -> ComplexF64`
+- **性能优化**：将极化函数的复数值 `Π = Π_real + im*Π_imag` 作为参数传入，避免重复计算
+- **介子类型与K系数映射**（**关键修正**）：
+  | 介子 | 通道 | 夸克组合 | 使用的Π | K系数 |
+  |------|------|----------|---------|-------|
+  | π | P | uū/d̄d | Π_{uu}^P | K₃⁺ |
+  | K | P | us̄/ds̄ | Π_{us}^P | K₄⁺ |
+  | σ_π | S | uū/d̄d | Π_{uu}^S | K₃⁻ |
+  | σ_K | S | us̄/ds̄ | Π_{us}^S | K₄⁻ |
+
+### 8.3 混合介子传播子实现
+- **函数签名**：`meson_propagator_mixed(det_K::ComplexF64, M_matrix::Matrix{ComplexF64}, quark_in::Symbol, antiquark_in::Symbol, quark_out::Symbol, antiquark_out::Symbol) -> ComplexF64`
+- **矩阵运算**：使用Julia内置的复数矩阵运算 `J' * M * J'`
+- **耦合矩阵M**：2×2复数矩阵，作为参数传入（在批量调用前预计算）
+- **味波函数常量**：在 `Constants_PNJL.jl` 中预定义：
+  ```julia
+  const ψ_u = [1.0, 0.0, 0.0]  # 列向量
+  const ψ_d = [0.0, 1.0, 0.0]
+  const ψ_s = [0.0, 0.0, 1.0]
+  const ψ̄_u = [1.0 0.0 0.0]  # 行向量（1×3矩阵）
+  const ψ̄_d = [0.0 1.0 0.0]
+  const ψ̄_s = [0.0 0.0 1.0]
+  ```
+- **Gell-Mann矩阵常量**：在 `Constants_PNJL.jl` 中定义：
+  ```julia
+  const λ₀ = sqrt(2/3) * [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 1.0]
+  const λ₈ = (1/sqrt(3)) * [1.0 0.0 0.0; 0.0 1.0 0.0; 0.0 0.0 -2.0]
+  ```
+
+### 8.4 辅助函数
+- **`calculate_coupling_matrix`**：根据 `(Π_uu::ComplexF64, Π_ss::ComplexF64)` 和K系数计算复数矩阵M（2×2）
+- **通道选择**：通过参数 `channel::Symbol` (`:P` 或 `:S`) 选择使用K⁺或K⁻系数
+- **M矩阵对称性**：利用 `M₀₈ = M₈₀` 减少计算量
+
+### 8.5 关键公式修正总结
+1. **K介子极化函数**：使用 `Π_{us}` 而非 `Π_{uu}` ✓
+2. **通道与K系数映射**（**已修正**）：
+   - 赝标量通道P（π、K、η/η'）→ 使用 K⁺ 系数
+   - 标量通道S（σ_π、σ_K、σ/σ'）→ 使用 K⁻ 系数
+3. **M₀₈系数**：$\frac{4\sqrt{2}}{3}$（即 $\frac{4}{3}\sqrt{2}$）✓
+4. **复数运算**：所有传播子和M矩阵使用 `ComplexF64` 类型 ✓
+5. **M矩阵对称性**：$M_{08} = M_{80}$ ✓
