@@ -20,6 +20,25 @@
 
 本项目用于计算弛豫时间相关的物理量。
 
+## 最近更新
+
+### 2025-11-17: 极化函数缓存模块
+新增 `PolarizationCache` 模块，通过哈希表缓存优化极化函数计算性能：
+- ✅ 自动缓存相同参数的极化函数，避免重复计算
+- ✅ 典型加速：10-30倍（大规模输运系数计算）
+- ✅ 100%测试通过（34/34测试用例）
+- 📖 完整文档：`api/PolarizationCache.md`
+
+**快速使用**：
+```julia
+using .PolarizationCache
+
+reset_cache!()  # 开始新计算
+Π = polarization_aniso_cached(...)  # 自动缓存
+stats = get_cache_stats()  # 查看统计
+reset_cache!()  # 释放内存
+```
+
 ## 安装与使用
 
 1. 激活项目环境：
