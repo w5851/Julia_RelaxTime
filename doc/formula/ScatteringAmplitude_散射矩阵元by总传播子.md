@@ -130,4 +130,69 @@ end
 3. **符号约定**: 注意夸克-夸克散射和夸克-反夸克散射的振幅符号差异
 4. **味因子处理**: 不同过程的顶点味因子不同，需要根据表5.3正确处理
 
-这样的设计确保了每个散射过程的计算逻辑清晰，便于调试和验证，同时也符合物理上的独立性原则。
+## 9.数学表达式(公式)
+
+
+### 夸克-夸克散射矩阵元平方
+
+对于夸克-夸克散射，散射矩阵元平方为：
+
+\[
+\frac{1}{4N_c^2} \sum_{\text{sc}} |\mathcal{M}|^2 = \frac{1}{4N_c^2} \sum_{\text{sc}} \left( |\mathcal{M}_u|^2 + |\mathcal{M}_t|^2 - 2 \mathcal{M}_u \mathcal{M}_t^* \right)
+\]
+
+其中：
+
+- **u 道矩阵元平方**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} |\mathcal{M}_u|^2 = |\mathcal{D}_u^S|^2 u_{14}^+ u_{23}^+ + |\mathcal{D}_u^P|^2 u_{14}^- u_{23}^-
+  \]
+
+- **t 道矩阵元平方**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} |\mathcal{M}_t|^2 = |\mathcal{D}_t^S|^2 t_{13}^+ t_{24}^+ + |\mathcal{D}_t^P|^2 t_{13}^- t_{24}^-
+  \]
+
+- **交叉项**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} \mathcal{M}_u \mathcal{M}_t^* =  \frac{1}{4N_c}\left[ \mathcal{D}_t^S \mathcal{D}_u^{S*} (t_{13}^+ t_{24}^+ - s_{12}^+ s_{34}^+ + u_{14}^+ u_{23}^+) - \mathcal{D}_t^S \mathcal{D}_u^{P*} (t_{13}^+ t_{24}^+ - s_{12}^- s_{34}^- + u_{14}^- u_{23}^-) - \mathcal{D}_t^P \mathcal{D}_u^{S*} (t_{13}^- t_{24}^- - s_{12}^- s_{34}^- + u_{14}^+ u_{23}^+) + \mathcal{D}_t^P \mathcal{D}_u^{P*} (t_{13}^- t_{24}^- - s_{12}^+ s_{34}^+ + u_{14}^- u_{23}^-) \right]
+  \]
+
+---
+
+### 夸克-反夸克散射矩阵元平方
+
+对于夸克-反夸克散射，散射矩阵元平方为：
+
+- **s 道矩阵元平方**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} |\mathcal{M}_s|^2 = |\mathcal{D}_s^S|^2 s_{12}^+ s_{34}^+ + |\mathcal{D}_s^P|^2 s_{12}^- s_{34}^-
+  \]
+
+- **t 道矩阵元平方**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} |\mathcal{M}_t|^2 = |\mathcal{D}_t^S|^2 t_{13}^+ t_{24}^+ + |\mathcal{D}_t^P|^2 t_{13}^- t_{24}^-
+  \]
+
+- **交叉项**：
+  \[
+  \frac{1}{4N_c^2} \sum_{\text{sc}} \mathcal{M}_s \mathcal{M}_t^* = \frac{1}{4N_c} \left[ \mathcal{D}_s^S \mathcal{D}_t^{S*} (s_{12}^+ s_{34}^+ - u_{14}^+ u_{23}^+ + t_{13}^+ t_{24}^+) - \mathcal{D}_s^S \mathcal{D}_t^{P*} (s_{12}^+ s_{34}^+ - u_{14}^- u_{23}^- + t_{13}^- t_{24}^-) - \mathcal{D}_s^P \mathcal{D}_t^{S*} (s_{12}^- s_{34}^- - u_{14}^- u_{23}^- + t_{13}^+ t_{24}^+) + \mathcal{D}_s^P \mathcal{D}_t^{P*} (s_{12}^- s_{34}^- - u_{14}^+ u_{23}^+ + t_{13}^- t_{24}^-) \right]
+  \]
+
+---
+
+## 辅助变量定义
+
+其中：
+
+\[
+\begin{aligned}
+s_{ij}^\pm &= s - (m_i \pm m_j)^2 \\
+t_{ij}^\pm &= t - (m_i \pm m_j)^2 \\
+u_{ij}^\pm &= u - (m_i \pm m_j)^2
+\end{aligned}
+\]
+
+---
+
+这些公式完整地描述了在三味 PNJL 模型中，夸克-夸克和夸克-反夸克弹性散射过程的散射矩阵元平方的计算方法。

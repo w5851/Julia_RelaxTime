@@ -46,7 +46,7 @@ m_s = m_s_MeV / ħc_MeV_fm
 μ_s = 0.0
 Φ = 0.5
 Φbar = 0.5
-ξ = 0.0
+ξ = 0.2
 
 k0_MeV = 100.0
 k_norm_MeV = 50.0

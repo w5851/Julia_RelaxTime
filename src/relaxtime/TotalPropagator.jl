@@ -25,7 +25,8 @@ using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calcula
 using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
 export total_propagator_simple, total_propagator_mixed, get_flavor_factor
-export calculate_all_propagators, total_propagator_auto
+export calculate_all_propagators, calculate_all_propagators_by_channel, total_propagator_auto
+export calculate_cms_momentum, get_quark_masses_for_process
 export reset_cache!, get_cache_stats  # 导出缓存管理函数
 
 # ----------------------------------------------------------------------------
@@ -43,6 +44,188 @@ const FLAVOR_FACTOR_TABLE = Dict{Tuple{Symbol, Symbol}, Float64}(
     (:s, :d) => √2,
     (:s, :s) => 2.0
 )
+
+# ----------------------------------------------------------------------------
+# 辅助函数：质量提取
+# ----------------------------------------------------------------------------
+
+"""
+    get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple) -> NTuple{4, Float64}
+
+根据散射过程提取四个粒子的质量。
+
+# 参数
+- `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_ssbar）
+- `quark_params`: 夸克参数NamedTuple，结构：
+  ```julia
+  (m = (u=m_u, d=m_d, s=m_s), ...)
+  ```
+
+# 返回值
+返回元组 (m1, m2, m3, m4)，对应散射过程 q1+q2→q3+q4 的四个粒子质量（单位：fm⁻¹）
+
+# 质量映射规则
+- 夸克和反夸克使用相同的质量（如u和ū都用m_u）
+- 从process符号解析粒子类型：如 :uubar_to_ssbar → (u, ū, s, š)
+- 映射到quark_params.m中的对应质量
+
+# 示例
+```julia
+quark_params = (m = (u=0.3, d=0.3, s=0.5), ...)
+m1, m2, m3, m4 = get_quark_masses_for_process(:uubar_to_ssbar, quark_params)
+# 返回: (0.3, 0.3, 0.5, 0.5)  # (m_u, m_u, m_s, m_s)
+```
+"""
+function get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple)
+    # 解析散射过程
+    q1, q2, q3, q4 = parse_scattering_process(process)
+    
+    # 提取味类型（忽略反粒子标记）
+    flavor1 = extract_quark_flavor(q1)
+    flavor2 = extract_quark_flavor(q2)
+    flavor3 = extract_quark_flavor(q3)
+    flavor4 = extract_quark_flavor(q4)
+    
+    # 获取对应质量
+    m1 = quark_params.m[flavor1]
+    m2 = quark_params.m[flavor2]
+    m3 = quark_params.m[flavor3]
+    m4 = quark_params.m[flavor4]
+    
+    return (m1, m2, m3, m4)
+end
+
+# ----------------------------------------------------------------------------
+# 辅助函数：质心系动量计算
+# ----------------------------------------------------------------------------
+
+"""
+    calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel::Symbol,
+                          quark_params::NamedTuple; u::Union{Float64, Nothing}=nothing) 
+                          -> NamedTuple
+
+计算质心系下介子的四动量，用于传播子计算。
+
+# 物理背景
+在散射过程 q₁+q₂→q₃+q₄ 中，介子交换发生在不同的散射道（s道、t道、u道）。
+介子的四动量(k0, k)由质心系运动学和Mandelstam变量唯一确定。
+
+# 质心系计算流程
+1. 计算四个粒子在质心系的能量：
+   - E1 = (s + m1² - m2²) / (2√s)
+   - E2 = (s - m1² + m2²) / (2√s)
+   - E3 = (s + m3² - m4²) / (2√s)
+   - E4 = (s - m3² + m4²) / (2√s)
+
+2. 根据散射道类型计算介子动量：
+   - **s道**（q₁+q₂→介子→q₃+q₄）: k0 = |E1+E2|, k = 0
+   - **t道**（q₁→q₃+介子）: k0 = |E1-E3|, k = √(k0²-t)
+   - **u道**（q₁→q₄+介子）: k0 = |E1-E4|, k = √(k0²-u)
+
+# 参数
+- `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_uubar）
+- `s`: Mandelstam变量s（单位：fm⁻²）
+- `t`: Mandelstam变量t（单位：fm⁻²）
+- `channel`: 散射道类型（:s, :t, :u）
+- `quark_params`: 夸克参数NamedTuple，用于提取质量
+- `u`: 可选的Mandelstam变量u（单位：fm⁻²）。如果为`nothing`，则自动计算 u = Σm² - s - t
+
+# 返回值
+返回NamedTuple: `(k0 = k0, k = k)`
+- `k0`: 介子能量分量（单位：fm⁻¹）
+- `k`: 介子三动量大小（单位：fm⁻¹）
+
+# 边界条件处理
+- 当 k0²-t ≥ 0 或 k0²-u ≥ 0：正常计算 k = √(k0²-t/u)
+- 当 -1e-12 < k0²-t/u < 0：数值误差，设 k = 0（发出警告）
+- 当 k0²-t/u < -1e-12：数值误差，设 k = 0（发出警告）
+
+# Mandelstam约束
+s + t + u = m1² + m2² + m3² + m4²
+
+如果不提供u，函数将自动计算以保证该约束严格满足。
+
+# 示例
+```julia
+quark_params = (m = (u=0.3, d=0.3, s=0.5), ...)
+s = 4.0  # fm⁻²
+t = -0.5  # fm⁻²
+
+# 自动计算u
+result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params)
+println("k0 = ", result.k0, " fm⁻¹")
+println("k = ", result.k, " fm⁻¹")
+
+# 使用预计算的u
+u = sum_masses_squared - s - t
+result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params; u=u)
+```
+"""
+function calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel::Symbol,
+                               quark_params::NamedTuple; u::Union{Float64, Nothing}=nothing)
+    # 1. 提取四个粒子质量
+    m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
+    
+    # 2. 计算u（如果未提供）
+    if u === nothing
+        u = m1^2 + m2^2 + m3^2 + m4^2 - s - t
+    end
+    
+    # 3. 计算质心系能量
+    sqrt_s = sqrt(s)
+    E1 = (s + m1^2 - m2^2) / (2.0 * sqrt_s)
+    E2 = (s - m1^2 + m2^2) / (2.0 * sqrt_s)
+    E3 = (s + m3^2 - m4^2) / (2.0 * sqrt_s)
+    E4 = (s - m3^2 + m4^2) / (2.0 * sqrt_s)
+    
+    # 4. 根据散射道计算介子四动量
+    local k0::Float64, k::Float64
+    
+    if channel == :s
+        # s道：k0 = |E1 + E2|, k = 0
+        k0 = abs(E1 + E2)
+        k = 0.0
+        
+    elseif channel == :t
+        # t道：k0 = |E1 - E3|, k = √(k0² - t)
+        k0 = abs(E1 - E3)
+        delta = k0^2 - t
+        
+        if delta >= 0.0
+            k = sqrt(delta)
+        elseif delta > -1e-12
+            # 数值误差范围内，设为0
+            k = 0.0
+            @warn "calculate_cms_momentum: k0²-t = $delta ∈ (-1e-12, 0), setting k=0" maxlog=10
+        else
+            # 明显的数值问题，设为0并警告
+            k = 0.0
+            @warn "calculate_cms_momentum: k0²-t = $delta < -1e-12, setting k=0. Check Mandelstam variables." maxlog=10
+        end
+        
+    elseif channel == :u
+        # u道：k0 = |E1 - E4|, k = √(k0² - u)
+        k0 = abs(E1 - E4)
+        delta = k0^2 - u
+        
+        if delta >= 0.0
+            k = sqrt(delta)
+        elseif delta > -1e-12
+            # 数值误差范围内，设为0
+            k = 0.0
+            @warn "calculate_cms_momentum: k0²-u = $delta ∈ (-1e-12, 0), setting k=0" maxlog=10
+        else
+            # 明显的数值问题，设为0并警告
+            k = 0.0
+            @warn "calculate_cms_momentum: k0²-u = $delta < -1e-12, setting k=0. Check Mandelstam variables." maxlog=10
+        end
+        
+    else
+        error("Unknown channel: $channel. Use :s, :t, or :u")
+    end
+    
+    return (k0 = k0, k = k)
+end
 
 # ----------------------------------------------------------------------------
 # 辅助函数
@@ -557,6 +740,191 @@ function calculate_all_propagators(process::Symbol,
         D_s = total_propagator_auto(process, :s, k0, k_norm, quark_params, thermo_params, K_coeffs)
         return (t = D_t, s = D_s)
     end
+end
+
+"""
+    calculate_all_propagators_by_channel(process, k0, k_norm, 
+                                        quark_params, thermo_params, K_coeffs) -> NamedTuple
+
+自动计算指定散射过程所有相关散射道的总传播子，并按标量(S)和赝标量(P)通道分离。
+
+# 功能说明
+根据散射类型自动判断需要计算的散射道，并将每个散射道的传播子按通道分离：
+- **qq散射**（夸克-夸克）：计算t道和u道，各分离为S和P通道
+- **qqbar散射**（夸克-反夸克）：计算t道和s道，各分离为S和P通道
+
+# 通道分离逻辑
+- **P通道（赝标量）**：累加π + K + η/η'混合介子的贡献
+- **S通道（标量）**：累加σ_π + σ_K + σ/σ'混合介子的贡献
+
+每个介子仅在其物理对应的通道中计算，无跨通道计算。
+
+# 参数
+- `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_uubar）
+- `k0`: 四动量能量分量（单位：fm⁻¹）
+- `k_norm`: 三动量大小（单位：fm⁻¹）
+- `quark_params`: 夸克参数NamedTuple
+- `thermo_params`: 热力学参数NamedTuple
+- `K_coeffs`: K系数NamedTuple
+
+# 返回值
+返回NamedTuple，按散射类型不同：
+- **qq散射**：`(t_S = D_t^S, t_P = D_t^P, u_S = D_u^S, u_P = D_u^P)`
+- **qqbar散射**：`(t_S = D_t^S, t_P = D_t^P, s_S = D_s^S, s_P = D_s^P)`
+
+所有值为ComplexF64类型，单位：fm²
+
+# 示例
+```julia
+# 夸克-夸克散射（返回t和u道的S/P分量）
+result = calculate_all_propagators_by_channel(:uu_to_uu, 
+                                              k0, k_norm, quark_params, thermo_params, K_coeffs)
+println("D_t^S = ", result.t_S)  # t道标量通道
+println("D_t^P = ", result.t_P)  # t道赝标量通道
+println("D_u^S = ", result.u_S)  # u道标量通道
+println("D_u^P = ", result.u_P)  # u道赝标量通道
+
+# 夸克-反夸克散射（返回t和s道的S/P分量）
+result = calculate_all_propagators_by_channel(:uubar_to_uubar,
+                                              k0, k_norm, quark_params, thermo_params, K_coeffs)
+println("D_t^S = ", result.t_S)  # t道标量通道
+println("D_t^P = ", result.t_P)  # t道赝标量通道
+println("D_s^S = ", result.s_S)  # s道标量通道
+println("D_s^P = ", result.s_P)  # s道赝标量通道
+```
+
+# 性能优化
+该函数会自动利用极化函数缓存。相同参数的极化函数只计算一次。
+
+# 错误处理
+如果散射过程不存在，抛出错误并列出所有支持的散射过程。
+"""
+function calculate_all_propagators_by_channel(process::Symbol,
+                                              k0::Float64, k_norm::Float64,
+                                              quark_params::NamedTuple, thermo_params::NamedTuple,
+                                              K_coeffs::NamedTuple)
+    # 验证散射过程是否存在
+    if !haskey(SCATTERING_MESON_MAP, process)
+        supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")
+        error("Unknown scattering process: $process. Supported processes: $supported")
+    end
+    
+    process_info = SCATTERING_MESON_MAP[process]
+    scattering_type = process_info[:type]
+    
+    if scattering_type == :qq
+        # 夸克-夸克散射：计算t道和u道的S/P分量
+        D_t_S, D_t_P = calculate_propagator_by_channel(process, :t, k0, k_norm, quark_params, thermo_params, K_coeffs)
+        D_u_S, D_u_P = calculate_propagator_by_channel(process, :u, k0, k_norm, quark_params, thermo_params, K_coeffs)
+        return (t_S = D_t_S, t_P = D_t_P, u_S = D_u_S, u_P = D_u_P)
+    else  # :qqbar
+        # 夸克-反夸克散射：计算t道和s道的S/P分量
+        D_t_S, D_t_P = calculate_propagator_by_channel(process, :t, k0, k_norm, quark_params, thermo_params, K_coeffs)
+        D_s_S, D_s_P = calculate_propagator_by_channel(process, :s, k0, k_norm, quark_params, thermo_params, K_coeffs)
+        return (t_S = D_t_S, t_P = D_t_P, s_S = D_s_S, s_P = D_s_P)
+    end
+end
+
+"""
+    calculate_propagator_by_channel(process, channel, k0, k_norm,
+                                    quark_params, thermo_params, K_coeffs) -> (ComplexF64, ComplexF64)
+
+计算指定散射道的标量(S)和赝标量(P)通道传播子。
+
+# 功能说明
+根据散射过程和散射道，分别累加标量和赝标量通道的介子贡献：
+- **P通道（赝标量）**：累加π、K介子 + η/η'混合介子
+- **S通道（标量）**：累加σ_π、σ_K介子 + σ/σ'混合介子
+
+# 参数
+- `process`: 散射过程符号（如 :uu_to_uu）
+- `channel`: 散射道类型（:t, :u, :s）
+- `k0`: 四动量能量分量（单位：fm⁻¹）
+- `k_norm`: 三动量大小（单位：fm⁻¹）
+- `quark_params`: 夸克参数NamedTuple
+- `thermo_params`: 热力学参数NamedTuple
+- `K_coeffs`: K系数NamedTuple
+
+# 返回值
+返回元组 (D_S, D_P)，分别为标量和赝标量通道的传播子（ComplexF64，单位：fm²）
+
+# 实现逻辑
+1. 从SCATTERING_MESON_MAP获取该散射道的介子列表和混合介子标记
+2. 根据介子类型分类：
+   - 赝标量介子（:pi, :K）→ 累加到P通道
+   - 标量介子（:sigma_pi, :sigma_K）→ 累加到S通道
+3. 如果存在混合介子：
+   - mixed_P=true → 计算η/η'贡献并累加到P通道
+   - mixed_S=true → 计算σ/σ'贡献并累加到S通道
+4. 返回两个通道的累加结果
+"""
+function calculate_propagator_by_channel(process::Symbol, channel::Symbol,
+                                        k0::Float64, k_norm::Float64,
+                                        quark_params::NamedTuple, thermo_params::NamedTuple,
+                                        K_coeffs::NamedTuple)
+    # 获取散射道信息
+    process_info = SCATTERING_MESON_MAP[process]
+    channel_info = process_info[:channels][channel]
+    
+    # 初始化S和P通道的传播子
+    D_S = ComplexF64(0.0, 0.0)
+    D_P = ComplexF64(0.0, 0.0)
+    
+    # 获取味因子
+    T1, T2 = get_flavor_factors_for_channel(process, channel)
+    
+    # 1. 处理一般介子
+    simple_mesons = channel_info[:simple]
+    for meson in simple_mesons
+        # 获取该介子的极化函数参数
+        pol_params = get_polarization_params(meson, quark_params)
+        
+        # 调用带缓存的极化函数
+        Π_real, Π_imag = polarization_aniso_cached(
+            pol_params.channel, k0, k_norm,
+            pol_params.m1, pol_params.m2,
+            pol_params.μ1, pol_params.μ2,
+            thermo_params.T, thermo_params.Φ, thermo_params.Φbar, thermo_params.ξ,
+            pol_params.A1, pol_params.A2,
+            pol_params.num_s_quark
+        )
+        
+        Π = ComplexF64(Π_real, Π_imag)
+        
+        # 计算介子传播子
+        D_meson = meson_propagator_simple(meson, K_coeffs, Π)
+        
+        # 根据介子类型累加到对应通道
+        if meson in [:pi, :K]
+            # 赝标量介子 → P通道
+            D_P += T1 * D_meson * T2
+        elseif meson in [:sigma_pi, :sigma_K]
+            # 标量介子 → S通道
+            D_S += T1 * D_meson * T2
+        else
+            error("Unknown meson type in channel separation: $meson")
+        end
+    end
+    
+    # 2. 处理赝标量混合介子（η/η'）
+    if channel_info[:mixed_P]
+        D_mixed_P = total_propagator_mixed(
+            process, channel, :P,
+            k0, k_norm, quark_params, thermo_params, K_coeffs
+        )
+        D_P += D_mixed_P
+    end
+    
+    # 3. 处理标量混合介子（σ/σ'）
+    if channel_info[:mixed_S]
+        D_mixed_S = total_propagator_mixed(
+            process, channel, :S,
+            k0, k_norm, quark_params, thermo_params, K_coeffs
+        )
+        D_S += D_mixed_S
+    end
+    
+    return (D_S, D_P)
 end
 
 end # module TotalPropagator
