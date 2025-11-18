@@ -22,10 +22,11 @@ include("PolarizationCache.jl")
 
 using .Constants_PNJL: SCATTERING_MESON_MAP
 using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix
-using .PolarizationCache: polarization_aniso_cached
+using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
 export total_propagator_simple, total_propagator_mixed, get_flavor_factor
 export calculate_all_propagators, total_propagator_auto
+export reset_cache!, get_cache_stats  # 导出缓存管理函数
 
 # ----------------------------------------------------------------------------
 # 味因子查询表（表5.3）
