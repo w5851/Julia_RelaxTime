@@ -134,6 +134,7 @@ n_rounds = 100
 times_with_cache = Float64[]
 
 for round in 1:n_rounds
+    reset_cache!()  # 可选：每轮开始时清空缓存以观察效果
     round_start = time_ns()
     for process in all_processes
         calculate_all_propagators(process, k0, k_norm, quark_params, thermo_params, K_coeffs)
