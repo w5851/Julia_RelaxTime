@@ -65,4 +65,137 @@ const ψbar_d = [0.0 1.0 0.0]
 # ψbar_s: s夸克共轭波函数
 const ψbar_s = [0.0 0.0 1.0]
 
+# 散射过程到介子种类的映射表-------------------------------------
+"""
+散射过程介子映射表
+
+映射关系：散射过程 → 散射类型 + 各散射道的介子列表
+
+# 数据结构
+```julia
+Dict(
+    :process_name => Dict(
+        :type => :qq 或 :qqbar,  # 散射类型（qq有t/u道，qqbar有t/s道）
+        :channels => Dict(
+            :t => Dict(:simple => [...], :mixed_P => true/false, :mixed_S => true/false),
+            :u => Dict(...),  # 仅qq散射有u道
+            :s => Dict(...)   # 仅qqbar散射有s道
+        )
+    )
+)
+```
+
+# 介子类型说明
+- `:simple` 列表：一般介子（:pi, :K, :sigma_pi, :sigma_K）
+- `:mixed_P => true`：存在赝标量混合介子（η/η'整体）
+- `:mixed_S => true`：存在标量混合介子（σ/σ'整体）
+
+# 参考文献
+doc/formula/散射过程所有可能.md 表1和表2
+"""
+const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
+    # ========== 表1：夸克-夸克散射过程（4个，有t道和u道）==========
+    
+    # u u → u u
+    :uu_to_uu => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # s s → s s
+    :ss_to_ss => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # u d → u d
+    :ud_to_ud => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
+    # u s → u s
+    :us_to_us => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
+    # ========== 表2：夸克-反夸克散射过程（7个，有t道和s道）==========
+    
+    # u đ → u đ
+    :udbar_to_udbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
+    # u s̄ → u s̄  (修正：原表格误写为s s̄)
+    :usbar_to_usbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
+    # u ū → u ū
+    :uubar_to_uubar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # u ū → d đ
+    :uubar_to_ddbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false),
+            :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # u ū → s s̄
+    :uubar_to_ssbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false),
+            :s => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # s s̄ → u ū
+    :ssbar_to_uubar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false),
+            :s => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+    
+    # s s̄ → s s̄
+    :ssbar_to_ssbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    )
+)
+
 end # module Constants_PNJL
