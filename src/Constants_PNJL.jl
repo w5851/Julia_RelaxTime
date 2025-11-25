@@ -152,6 +152,24 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
         )
     ),
     
+    # d ū → d ū (电荷共轭过程，与u đ等价)
+    :dubar_to_dubar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
+    # s ū → s ū (电荷共轭过程，与u s̄等价)
+    :subar_to_subar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+    
     # u ū → u ū
     :uubar_to_uubar => Dict(
         :type => :qqbar,

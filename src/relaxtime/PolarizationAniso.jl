@@ -38,7 +38,7 @@ function polarization_aniso(channel::Symbol, k0::Float64, k_norm::Float64, m1::F
     end
 
     # 计算B0函数项的修正
-    if ξ>EPS_SEGMENT
+    if abs(ξ) > EPS_SEGMENT
         B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
         # 当num_s_quark为1时,要恢复B0对k0的对称性
         if num_s_quark == 1
