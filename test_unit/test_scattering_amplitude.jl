@@ -228,6 +228,98 @@ using .GaussLegendre: gauleg
             :unknown_process, s, t, quark_params, thermo_params, K_coeffs
         )
     end
+    
+    # 测试8：性能测试 - 计算所有散射过程的平均用时
+    @testset "性能测试：散射过程平均用时" begin
+        println("\n" * "="^70)
+        println("性能测试：计算所有散射过程的平均用时")
+        println("="^70)
+        
+        # 测试参数
+        s_qq = 31.0
+        t_qq = -0.2
+        s_qqbar = 8.0
+        t_qqbar = -0.3
+        n_iterations = 10  # 每个过程重复次数
+        
+        # 4种qq散射
+        qq_processes = [:uu_to_uu, :ss_to_ss, :ud_to_ud, :us_to_us]
+        
+        # 7种qqbar散射
+        qqbar_processes = [:udbar_to_udbar, :usbar_to_usbar, :uubar_to_uubar,
+                          :uubar_to_ddbar, :uubar_to_ssbar, :ssbar_to_uubar, :ssbar_to_ssbar]
+        
+        all_processes = vcat(qq_processes, qqbar_processes)
+        
+        # 预热：运行一次所有过程
+        println("\n预热运行...")
+        for process in qq_processes
+            scattering_amplitude_squared(process, s_qq, t_qq, quark_params, thermo_params, K_coeffs)
+        end
+        for process in qqbar_processes
+            scattering_amplitude_squared(process, s_qqbar, t_qqbar, quark_params, thermo_params, K_coeffs)
+        end
+        
+        # 性能测试
+        println("\n开始性能测试 (每个过程重复 $n_iterations 次)...")
+        println("-"^70)
+        
+        timing_results = Dict{Symbol, Float64}()
+        
+        # 测试qq散射
+        for process in qq_processes
+            times = Float64[]
+            for _ in 1:n_iterations
+                t_start = time()
+                scattering_amplitude_squared(process, s_qq, t_qq, quark_params, thermo_params, K_coeffs)
+                t_end = time()
+                push!(times, (t_end - t_start) * 1000)  # 转换为毫秒
+            end
+            avg_time = sum(times) / n_iterations
+            timing_results[process] = avg_time
+            println("  $process: $(round(avg_time, digits=3)) ms")
+        end
+        
+        # 测试qqbar散射
+        for process in qqbar_processes
+            times = Float64[]
+            for _ in 1:n_iterations
+                t_start = time()
+                scattering_amplitude_squared(process, s_qqbar, t_qqbar, quark_params, thermo_params, K_coeffs)
+                t_end = time()
+                push!(times, (t_end - t_start) * 1000)
+            end
+            avg_time = sum(times) / n_iterations
+            timing_results[process] = avg_time
+            println("  $process: $(round(avg_time, digits=3)) ms")
+        end
+        
+        # 统计汇总
+        println("-"^70)
+        all_times = collect(values(timing_results))
+        avg_all = sum(all_times) / length(all_times)
+        min_time = minimum(all_times)
+        max_time = maximum(all_times)
+        
+        println("\n统计汇总:")
+        println("  总进程数: $(length(all_processes))")
+        println("  平均用时: $(round(avg_all, digits=3)) ms")
+        println("  最快过程: $(round(min_time, digits=3)) ms")
+        println("  最慢过程: $(round(max_time, digits=3)) ms")
+        
+        # 分类统计
+        qq_times = [timing_results[p] for p in qq_processes]
+        qqbar_times = [timing_results[p] for p in qqbar_processes]
+        
+        println("\n分类统计:")
+        println("  qq散射平均: $(round(sum(qq_times)/length(qq_times), digits=3)) ms")
+        println("  qqbar散射平均: $(round(sum(qqbar_times)/length(qqbar_times), digits=3)) ms")
+        
+        println("="^70)
+        
+        # 性能断言：确保单次计算不超过合理时间（例如100ms）
+        @test all(t -> t < 100.0, all_times)
+    end
 end
 
 println("\n" * "="^70)
