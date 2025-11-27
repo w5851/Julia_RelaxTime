@@ -4,7 +4,9 @@ export quark_distribution, antiquark_distribution,
         antiquark_distribution_antiderivative, antiquark_distribution_integral
 export distribution
       
-"""PNJL模型中夸克有效分布函数"""
+"""PNJL模型中夸克有效分布函数
+注：也许将硬截断clamp改为分子分母同时除以可能出现的最大项exp_term3会更好(确保计算过程中不出现很大的数，但是可能会出现很小的数)，
+但目前这样足够稳定且高效"""
 @fastmath function quark_distribution(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
     # 计算温度的倒数
     β_fm = 1 / T_inv_fm

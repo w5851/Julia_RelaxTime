@@ -186,7 +186,7 @@ end
 """
     A_correction(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p)
 计算单线积分函数A对ξ的一阶修正项(需要加上各向同性项才能进行后续计算，即零阶项),需要传入预生成的动量的积分节点与权重
-可以通过build_default_nodes_weights()函数生成默认的节点和权重
+可以使用 GaussLegendre 模块中的 DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS (积分上限 10.0 fm⁻¹)
 """
 function A_correction(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
     ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64})
@@ -205,7 +205,9 @@ end
 """
     A_aniso(m, μ, T, Φ, Φbar, ξ, nodes_p, weights_p, nodes_cosθ, weights_cosθ)
 计算单线积分函数A在动量各向异性下的完整形式,需要传入预生成的动量和角度的积分节点与权重
-可以通过build_default_nodes_weights()函数生成默认的节点和权重
+可以使用 GaussLegendre 模块中的常量：
+- DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS (p ∈ [0, 10] fm⁻¹)
+- DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS (cosθ ∈ [-1, 1])
 """
 function A_aniso(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
     ξ::Float64, nodes_p::Vector{Float64}, weights_p::Vector{Float64},

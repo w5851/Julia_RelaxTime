@@ -94,14 +94,28 @@ end
 
 const DEFAULT_momentum_POINTS = 64
 const DEFAULT_theta_POINTS = 32
-"""构建默认的积分节点和权重"""
-function build_default_nodes_weights()
-    cosθ_NODES, cosθ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)
-    momentum_NODES_toINF, momentum_WEIGHTS_toINF = gauleg(0.0, 20.0, DEFAULT_momentum_POINTS)
-    momentum_NODES_toPNJLΛ, momentum_WEIGHTS_toPNJLΛ = gauleg(0.0, Λ_inv_fm, DEFAULT_momentum_POINTS)
-    return cosθ_NODES, cosθ_WEIGHTS,
-        momentum_NODES_toINF, momentum_WEIGHTS_toINF,
-        momentum_NODES_toPNJLΛ, momentum_WEIGHTS_toPNJLΛ
-end
-export build_default_nodes_weights
+
+"""默认的角度积分节点和权重 (cosθ ∈ [-1, 1]，用于一般角度积分)"""
+const DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)
+
+"""默认的半区间角度积分节点和权重 (cosθ ∈ [0, 1]，用于对称被积函数的高精度积分)
+
+当被积函数关于 cosθ = 0 对称时（即 f(cosθ) = f(-cosθ)），可以利用对称性：
+∫₋₁¹ f(cosθ) d(cosθ) = 2 ∫₀¹ f(cosθ) d(cosθ)
+
+使用相同节点数时，半区间积分的精度更高，因为节点更密集地分布在 [0, 1] 区间。
+"""
+const DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS = gauleg(0.0, 1.0, DEFAULT_theta_POINTS)
+
+"""默认的动量积分节点和权重 (p ∈ [0, 10] fm⁻¹，用于热力学积分)"""
+const DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS = gauleg(0.0, 10.0, DEFAULT_momentum_POINTS)
+
+"""默认的动量积分节点和权重 (p ∈ [0, Λ] fm⁻¹，用于真空截断积分)"""
+const DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ = gauleg(0.0, Λ_inv_fm, DEFAULT_momentum_POINTS)
+
+export DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
+export DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS
+export DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+export DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ
+
 end # module GaussLegendre

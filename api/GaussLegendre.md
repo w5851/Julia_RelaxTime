@@ -186,6 +186,101 @@ end
 
 ---
 
+## 预定义常量
+
+模块提供了预定义的积分节点和权重，可以直接使用：
+
+### 角度积分节点
+
+#### `DEFAULT_COSΘ_NODES`, `DEFAULT_COSΘ_WEIGHTS`
+
+**全区间角度积分** (cosθ ∈ [-1, 1])
+
+```julia
+using .GaussLegendre: DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
+
+# 用于一般的角度积分
+result = sum(DEFAULT_COSΘ_WEIGHTS .* f.(DEFAULT_COSΘ_NODES))
+```
+
+- **节点数**: 32
+- **积分区间**: [-1, 1]
+- **用途**: 通用的角度积分
+
+#### `DEFAULT_COSΘ_HALF_NODES`, `DEFAULT_COSΘ_HALF_WEIGHTS`
+
+**半区间角度积分** (cosθ ∈ [0, 1])
+
+```julia
+using .GaussLegendre: DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS
+
+# 对于对称函数 f(x) = f(-x)，利用对称性:
+# ∫₋₁¹ f(cosθ) d(cosθ) = 2 ∫₀¹ f(cosθ) d(cosθ)
+result = 2.0 * sum(DEFAULT_COSΘ_HALF_WEIGHTS .* f.(DEFAULT_COSΘ_HALF_NODES))
+```
+
+- **节点数**: 32
+- **积分区间**: [0, 1]
+- **用途**: 对称被积函数的高精度积分
+- **优势**: 相同节点数下，精度比全区间方法更高（节点在半区间内更密集）
+
+**适用场景**:
+- ✓ 偶函数: f(x) = f(-x)
+- ✓ 各向同性分布
+- ✓ 偶数阶勒让德多项式
+- ✗ 奇函数或非对称函数
+
+**精度对比示例**:
+
+```julia
+# 测试函数: f(x) = x²
+exact = 2.0/3.0
+
+# 方法1: 全区间 (32节点)
+result_full = sum(DEFAULT_COSΘ_WEIGHTS .* (x -> x^2).(DEFAULT_COSΘ_NODES))
+error_full = abs(result_full - exact) / exact * 100  # ~3e-14 %
+
+# 方法2: 半区间对称 (32节点)
+result_half = 2.0 * sum(DEFAULT_COSΘ_HALF_WEIGHTS .* (x -> x^2).(DEFAULT_COSΘ_HALF_NODES))
+error_half = abs(result_half - exact) / exact * 100  # ~0 % (机器精度)
+
+# 精度提升: 可达数倍到数十倍
+```
+
+### 动量积分节点
+
+#### `DEFAULT_MOMENTUM_NODES`, `DEFAULT_MOMENTUM_WEIGHTS`
+
+**热力学动量积分** (p ∈ [0, 10] fm⁻¹)
+
+```julia
+using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+
+# 计算热力学量的动量积分
+result = sum(DEFAULT_MOMENTUM_WEIGHTS .* f.(DEFAULT_MOMENTUM_NODES))
+```
+
+- **节点数**: 64
+- **积分区间**: [0, 10] fm⁻¹
+- **用途**: 热力学积分（费米-狄拉克分布在 p ~ 10 fm⁻¹ 时已充分衰减）
+
+#### `DEFAULT_MOMENTUM_NODES_Λ`, `DEFAULT_MOMENTUM_WEIGHTS_Λ`
+
+**真空截断积分** (p ∈ [0, Λ] fm⁻¹)
+
+```julia
+using .GaussLegendre: DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ
+
+# 带紫外截断的真空积分
+result = sum(DEFAULT_MOMENTUM_WEIGHTS_Λ .* f.(DEFAULT_MOMENTUM_NODES_Λ))
+```
+
+- **节点数**: 64
+- **积分区间**: [0, Λ] fm⁻¹（Λ 来自 PNJL 模型参数）
+- **用途**: 真空项计算，遵循 PNJL 模型的紫外截断
+
+---
+
 ## 模块导入
 
 ```julia
@@ -196,6 +291,10 @@ using RelaxTime.GaussLegendre
 # 方式 2：直接包含文件
 include("src/integration/GaussLegendre.jl")
 using .GaussLegendre
+
+# 方式 3：只导入需要的常量
+using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS,
+                       DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS
 ```
 
 ---

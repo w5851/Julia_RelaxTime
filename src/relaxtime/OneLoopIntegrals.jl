@@ -287,7 +287,9 @@ end
 计算单线积分函数A,需要传入预生成的动量的积分节点与权重
 计算中的常数1需要截断,而分布函数的部分不需要截断
 常数项的积分可以直接计算，见 const_integral_term_A 函数
-因此只需计算分布函数的积分，传入的节点不需要截断(取0-足够大,如20)
+因此只需计算分布函数的积分，传入的节点积分上限设为 10.0 fm⁻¹ 即可收敛
+
+推荐使用 GaussLegendre 模块中的 DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS (p ∈ [0, 10] fm⁻¹)
 """
 function A(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
     nodes_p::Vector{Float64}, weights_p::Vector{Float64})

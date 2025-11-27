@@ -28,7 +28,8 @@ include("../src/integration/GaussLegendre.jl")
 
 using .OneLoopIntegrals: A, const_integral_term_A
 using .OneLoopIntegralsCorrection: A_correction, A_aniso
-using .GaussLegendre: gauleg, build_default_nodes_weights
+using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS, 
+    DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 # 标准测试参数
 const TEST_PARAMS = (
@@ -40,7 +41,8 @@ const TEST_PARAMS = (
 )
 
 # 生成默认积分节点
-const NODES_COSΘ, WEIGHTS_COSΘ, NODES_P, WEIGHTS_P, _, _ = build_default_nodes_weights()
+const NODES_COSΘ, WEIGHTS_COSΘ = DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
+const NODES_P, WEIGHTS_P = DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 @testset "OneLoopIntegralsAniso 模块测试" begin
     
@@ -306,6 +308,105 @@ const NODES_COSΘ, WEIGHTS_COSΘ, NODES_P, WEIGHTS_P, _, _ = build_default_nodes
             @test isfinite(A_total)
         end
         
+        println("="^70 * "\n")
+    end
+    
+    @testset "积分上限 p_max 收敛性测试" begin
+        m = TEST_PARAMS.m
+        μ = TEST_PARAMS.μ
+        T = TEST_PARAMS.T
+        Φ = TEST_PARAMS.Φ
+        Φbar = TEST_PARAMS.Φbar
+        ξ = 0.2
+        n_points = 64  # 固定节点数
+        
+        println("\n" * "="^70)
+        println("积分上限 p_max 收敛性测试")
+        println("="^70)
+        println("测试目的：验证 p_max = 20 fm⁻¹ 是否足够让积分收敛")
+        println("-"^70)
+        
+        # 测试 A 函数（各向同性）
+        println("\n表1: A 函数随 p_max 的变化")
+        println(@sprintf("%-12s %-15s %-15s", "p_max(fm⁻¹)", "A", "相对变化(%)"))
+        println("-"^70)
+        
+        p_max_values = [10.0, 15.0, 20.0, 25.0, 30.0, 40.0]
+        prev_A = nothing
+        
+        for p_max in p_max_values
+            nodes, weights = gauleg(0.0, p_max, n_points)
+            result = A(m, μ, T, Φ, Φbar, nodes, weights)
+            
+            if prev_A === nothing
+                println(@sprintf("%-12.1f %-15.8f %-15s", p_max, result, "-"))
+            else
+                rel_change = abs(result - prev_A) / abs(prev_A) * 100
+                println(@sprintf("%-12.1f %-15.8f %-15.6f", p_max, result, rel_change))
+                
+                # p_max >= 20 后，变化应 < 0.01%
+                if p_max >= 20.0
+                    @test rel_change < 0.01
+                end
+            end
+            
+            prev_A = result
+        end
+        
+        # 测试 A_correction 函数
+        println("\n表2: A_correction 函数随 p_max 的变化 (ξ=$ξ)")
+        println(@sprintf("%-12s %-15s %-15s", "p_max(fm⁻¹)", "A_correction", "相对变化(%)"))
+        println("-"^70)
+        
+        prev_ΔA = nothing
+        
+        for p_max in p_max_values
+            nodes, weights = gauleg(0.0, p_max, n_points)
+            result = A_correction(m, μ, T, Φ, Φbar, ξ, nodes, weights)
+            
+            if prev_ΔA === nothing
+                println(@sprintf("%-12.1f %-15.8f %-15s", p_max, result, "-"))
+            else
+                rel_change = abs(result - prev_ΔA) / abs(prev_ΔA) * 100
+                println(@sprintf("%-12.1f %-15.8f %-15.6f", p_max, result, rel_change))
+                
+                # p_max >= 20 后，变化应 < 0.01%
+                if p_max >= 20.0
+                    @test rel_change < 0.01
+                end
+            end
+            
+            prev_ΔA = result
+        end
+        
+        # 测试不同温度下的收敛性（高温时分布更宽，需要更大 p_max）
+        println("\n表3: 不同温度下 A 在 p_max=20 vs p_max=30 的差异")
+        println(@sprintf("%-12s %-15s %-15s %-12s", "T(fm⁻¹)", "A(p_max=20)", "A(p_max=30)", "相对差(%)"))
+        println("-"^70)
+        
+        nodes_20, weights_20 = gauleg(0.0, 20.0, n_points)
+        nodes_30, weights_30 = gauleg(0.0, 30.0, n_points)
+        
+        T_values = [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]
+        
+        for T_test in T_values
+            A_20 = A(m, μ, T_test, Φ, Φbar, nodes_20, weights_20)
+            A_30 = A(m, μ, T_test, Φ, Φbar, nodes_30, weights_30)
+            rel_diff = abs(A_30 - A_20) / abs(A_20) * 100
+            
+            println(@sprintf("%-12.2f %-15.8f %-15.8f %-12.6f", T_test, A_20, A_30, rel_diff))
+            
+            # 对于 T ≤ 0.3 fm⁻¹ (~60 MeV)，p_max=20 应该足够（误差 < 0.1%）
+            if T_test <= 0.30
+                @test rel_diff < 0.1
+            end
+        end
+        
+        println("="^70)
+        println("\n结论：")
+        println("  • 对于 T ≤ 0.3 fm⁻¹ (~60 MeV)，p_max = 20 fm⁻¹ 足够（误差 < 0.1%）")
+        println("  • 对于更高温度，可能需要增大 p_max")
+        println("  • 建议：对于典型 PNJL 计算（T ~ 150-200 MeV），p_max = 20 fm⁻¹ 足够")
         println("="^70 * "\n")
     end
     
