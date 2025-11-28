@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2→2散射动量可视化</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧控制面板 -->
+        <aside class="control-panel">
+            <h1>2→2散射计算</h1>
+            
+            <!-- 服务器状态 -->
+            <div class="status-box">
+                <span class="status-indicator" id="server-status"></span>
+                <span id="status-text">检查服务器...</span>
+            </div>
+            
+            <!-- 输入表单 -->
+            <form id="input-form">
+                <fieldset>
+                    <legend>入射粒子1动量 (fm⁻¹)</legend>
+                    <div class="input-group">
+                        <label>p₁ₓ: <input type="number" id="p1x" step="any" value="0.5"></label>
+                        <label>p₁ᵧ: <input type="number" id="p1y" step="any" value="0.0"></label>
+                        <label>p₁z: <input type="number" id="p1z" step="any" value="1.8"></label>
+                    </div>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>入射粒子2动量 (fm⁻¹)</legend>
+                    <div class="input-group">
+                        <label>p₂ₓ: <input type="number" id="p2x" step="any" value="-0.5"></label>
+                        <label>p₂ᵧ: <input type="number" id="p2y" step="any" value="0.0"></label>
+                        <label>p₂z: <input type="number" id="p2z" step="any" value="-1.8"></label>
+                    </div>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>粒子质量 (fm⁻¹)</legend>
+                    <div class="input-group">
+                        <label>m₁: <input type="number" id="m1" step="any" value="1.52"></label>
+                        <label>m₂: <input type="number" id="m2" step="any" value="1.52"></label>
+                        <label>m₃: <input type="number" id="m3" step="any" value="1.52"></label>
+                        <label>m₄: <input type="number" id="m4" step="any" value="1.52"></label>
+                    </div>
+                </fieldset>
+                
+                <fieldset>
+                    <legend>质心系方向参数</legend>
+                    <div class="input-group">
+                        <label>
+                            θ* (rad): 
+                            <input type="number" id="theta_star" step="any" min="0" max="3.15" value="0.785">
+                            <span class="hint">= π/4</span>
+                        </label>
+                        <label>
+                            φ* (rad): 
+                            <input type="number" id="phi_star" step="any" min="0" max="6.29" value="0.524">
+                            <span class="hint">= π/6</span>
+                        </label>
+                    </div>
+                </fieldset>
+                
+                <button type="submit" id="compute-btn">🚀 计算散射</button>
+            </form>
+            
+            <!-- 物理量显示 -->
+            <div id="results-panel" class="results-panel" style="display: none;">
+                <h2>计算结果</h2>
+                
+                <div class="result-section">
+                    <h3>📊 不变量</h3>
+                    <div class="result-item">
+                        <span class="label">√s:</span>
+                        <span class="value" id="sqrt-s">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">质心系动量:</span>
+                        <span class="value" id="p-star">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>🚀 Lorentz参数</h3>
+                    <div class="result-item">
+                        <span class="label">β:</span>
+                        <span class="value" id="beta">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">γ:</span>
+                        <span class="value" id="gamma">-</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>📍 出射动量 (实验室系)</h3>
+                    <div class="result-item">
+                        <span class="label">p₃:</span>
+                        <span class="value vector" id="p3-lab">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">p₄:</span>
+                        <span class="value vector" id="p4-lab">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>🟢 椭球参数</h3>
+                    <div class="result-item">
+                        <span class="label">中心:</span>
+                        <span class="value vector" id="ellipsoid-center">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">半轴长:</span>
+                        <span class="value vector" id="ellipsoid-lengths">-</span>
+                        <span class="unit">fm⁻¹</span>
+                    </div>
+                </div>
+                
+                <div class="result-section validation">
+                    <h3>✅ 物理验证</h3>
+                    <div class="result-item">
+                        <span class="label">能量守恒:</span>
+                        <span class="value" id="energy-check">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="label">动量守恒:</span>
+                        <span class="value" id="momentum-check">-</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 右侧3D视图 -->
+        <main class="visualization-area">
+            <div id="canvas-container">
+                <!-- Three.js 画布将在这里创建 -->
+            </div>
+            
+            <div class="controls-hint">
+                <p>🖱️ 左键旋转 | 滚轮缩放 | 右键平移</p>
+            </div>
+            
+            <div class="legend">
+                <h3>图例</h3>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #ff4444;"></span>
+                    <span>入射粒子1 (p₁)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #4444ff;"></span>
+                    <span>入射粒子2 (p₂)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #44ff44;"></span>
+                    <span>出射粒子3 (p₃)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #ffaa00;"></span>
+                    <span>出射粒子4 (p₄)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: rgba(0, 200, 255, 0.3); border: 1px solid #00c8ff;"></span>
+                    <span>可达椭球</span>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 加载JavaScript模块 -->
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/visualization.js"></script>
+    <script type="module" src="js/ui.js"></script>
+    
+    <script type="module">
+        import { UI } from './js/ui.js';
+        
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            const ui = new UI();
+            ui.initialize();
+        });
+    </script>
+</body>
+</html>

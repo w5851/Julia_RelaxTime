@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简化测试</title>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .online { background: #d4edda; color: #155724; }
+        .offline { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 10px 0; font-size: 16px; cursor: pointer; }
+        input { padding: 5px; margin: 5px; width: 100px; }
+        .result { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>简化测试页面</h1>
+    
+    <div id="status" class="status">检查中...</div>
+    
+    <h2>快速测试</h2>
+    <button onclick="testHealth()">测试健康检查</button>
+    <button onclick="quickCompute()">快速计算（默认参数）</button>
+    
+    <h2>自定义参数</h2>
+    <div>
+        <label>p1x: <input type="number" id="p1x" value="0.5"></label>
+        <label>p1y: <input type="number" id="p1y" value="0.0"></label>
+        <label>p1z: <input type="number" id="p1z" value="1.8"></label>
+    </div>
+    <div>
+        <label>p2x: <input type="number" id="p2x" value="-0.5"></label>
+        <label>p2y: <input type="number" id="p2y" value="0.0"></label>
+        <label>p2z: <input type="number" id="p2z" value="-1.8"></label>
+    </div>
+    <div>
+        <label>m: <input type="number" id="m" value="1.52"></label>
+        <label>θ*: <input type="number" id="theta" value="0.785"></label>
+        <label>φ*: <input type="number" id="phi" value="0.524"></label>
+    </div>
+    <button onclick="customCompute()">使用自定义参数计算</button>
+    
+    <div id="result" class="result" style="display:none;"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        
+        // 页面加载时检查服务器
+        window.addEventListener('load', checkServer);
+        
+        async function checkServer() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = '检查服务器...';
+            statusDiv.className = 'status';
+            
+            try {
+                console.log('Checking server at', API_URL + '/health');
+                const response = await fetch(API_URL + '/health');
+                console.log('Response:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    statusDiv.textContent = '✓ 服务器在线 (http://localhost:8080)';
+                    statusDiv.className = 'status online';
+                } else {
+                    statusDiv.textContent = '✗ 服务器响应异常: ' + response.status;
+                    statusDiv.className = 'status offline';
+                }
+            } catch (error) {
+                console.error('Server check error:', error);
+                statusDiv.textContent = '✗ 无法连接服务器: ' + error.message;
+                statusDiv.className = 'status offline';
+            }
+        }
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '测试中...';
+            
+            try {
+                const response = await fetch(API_URL + '/health');
+                const text = await response.text();
+                resultDiv.textContent = `✓ 健康检查成功\n状态码: ${response.status}\n响应: ${text}`;
+            } catch (error) {
+                resultDiv.textContent = `✗ 健康检查失败\n错误: ${error.message}`;
+            }
+        }
+        
+        async function quickCompute() {
+            await compute({
+                p1x: 0.5, p1y: 0.0, p1z: 1.8,
+                p2x: -0.5, p2y: 0.0, p2z: -1.8,
+                m1: 1.52, m2: 1.52, m3: 1.52, m4: 1.52,
+                theta_star: 0.785,
+                phi_star: 0.524
+            });
+        }
+        
+        async function customCompute() {
+            const m = parseFloat(document.getElementById('m').value);
+            await compute({
+                p1x: parseFloat(document.getElementById('p1x').value),
+                p1y: parseFloat(document.getElementById('p1y').value),
+                p1z: parseFloat(document.getElementById('p1z').value),
+                p2x: parseFloat(document.getElementById('p2x').value),
+                p2y: parseFloat(document.getElementById('p2y').value),
+                p2z: parseFloat(document.getElementById('p2z').value),
+                m1: m, m2: m, m3: m, m4: m,
+                theta_star: parseFloat(document.getElementById('theta').value),
+                phi_star: parseFloat(document.getElementById('phi').value)
+            });
+        }
+        
+        async function compute(params) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = '计算中...\n参数: ' + JSON.stringify(params, null, 2);
+            
+            try {
+                console.log('Sending compute request with params:', params);
+                const response = await fetch(API_URL + '/compute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                
+                console.log('Compute response status:', response.status);
+                const result = await response.json();
+                console.log('Compute result:', result);
+                
+                if (result.success) {
+                    const p = result.data.physics;
+                    const e = result.data.ellipsoid;
+                    resultDiv.textContent = `✓ 计算成功！
+
+物理量:
+  √s = ${p.sqrt_s.toFixed(4)} fm⁻¹
+  p* = ${p.p_star.toFixed(4)} fm⁻¹
+  β = ${p.beta.toFixed(6)}
+  γ = ${p.gamma.toFixed(6)}
+  
+椭球参数:
+  中心: [${e.center.map(v => v.toFixed(3)).join(', ')}]
+  半轴长: [${e.half_lengths.map(v => v.toFixed(3)).join(', ')}]
+  
+验证:
+  能量守恒: ${result.data.validation.is_valid ? '✓' : '✗'}
+  ΔE = ${result.data.validation.energy_conservation.toExponential(2)}`;
+                } else {
+                    resultDiv.textContent = `✗ 计算失败\n\n错误: ${result.error}`;
+                }
+            } catch (error) {
+                console.error('Compute error:', error);
+                resultDiv.textContent = `✗ 请求失败\n\n错误: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

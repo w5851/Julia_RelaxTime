@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>散射计算API测试</h1>
+    
+    <div>
+        <button onclick="testHealth()">测试健康检查 (/health)</button>
+        <button onclick="testCompute()">测试计算端点 (/compute)</button>
+    </div>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试健康检查...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`, {
+                    method: 'GET'
+                });
+                
+                const text = await response.text();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ 健康检查成功！\n\n状态码: ${response.status}\n响应: ${text}`;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 健康检查失败！\n\n错误: ${error.message}\n\n请确保Julia服务器正在运行：\njulia server.jl`;
+            }
+        }
+        
+        async function testCompute() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试计算端点...';
+            
+            const testData = {
+                p1x: 0.5, p1y: 0.0, p1z: 1.8,
+                p2x: -0.5, p2y: 0.0, p2z: -1.8,
+                m1: 1.52, m2: 1.52, m3: 1.52, m4: 1.52,
+                theta_star: 0.785,
+                phi_star: 0.524
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/compute`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `✅ 计算成功！\n\n√s = ${result.data.physics.sqrt_s.toFixed(4)} fm⁻¹\np* = ${result.data.physics.p_star.toFixed(4)} fm⁻¹\nβ = ${result.data.physics.beta.toFixed(6)}\nγ = ${result.data.physics.gamma.toFixed(6)}\n\n椭球中心: [${result.data.ellipsoid.center.map(v => v.toFixed(4)).join(', ')}]\n椭球半轴长: [${result.data.ellipsoid.half_lengths.map(v => v.toFixed(4)).join(', ')}]`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ 计算失败！\n\n错误: ${result.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ 请求失败！\n\n错误: ${error.message}\n\n请确保Julia服务器正在运行：\njulia server.jl`;
+            }
+        }
+    </script>
+</body>
+</html>
