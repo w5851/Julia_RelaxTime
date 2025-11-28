@@ -55,15 +55,35 @@ include("src/relaxtime/relaxtime.jl")
 
 ## 项目结构
 
-下面列出了仓库中主要文件和文件夹及其用途，帮助快速定位代码和文档：
+当前顶层目录及作用：
 
-- `Project.toml`, `Manifest.toml`：Julia 项目环境与依赖清单，用于激活和重现环境。
-- `src/`：主要源代码目录。
-	- `integration/`：数值积分相关实现，如 `CauchyPV.jl`, `GaussLegendre.jl`。
-	- `relaxtime/`：包含弛豫时间计算实际实现代码（模块内部实现）。
-- `api/`：接口与公式的说明文档（Markdown），例如 `CauchyPV.md`, `GaussLegendre.md`。
-- `doc/`：项目文档（草稿与模板），如 `formula/` 目录下的公式说明。
-- `prompt/`：编码规范和变量命名指南（Markdown 与 YAML），用于团队协作时保证风格一致。
-- `results/`：运行或测试生成的结果文件（数据、图表等）。
-- `test/`：单元测试文件，用来验证 `integration` 与 `relaxtime` 的正确性，如 `test_cauchypv.jl`, `test_gausslegendre.jl`。
-- `README.md`：本文件，项目介绍与快速上手说明。
+- `src/`：核心 Julia 源码，按 `integration/`、`relaxtime/`、`simulation/`、`utils/` 等子模块拆分。
+- `web/`：前端页面与静态资源，`web/js/` 含 `api.js`、`ui.js`、`visualization.js`。
+- `scripts/server/`：所有启动脚本与 HTTP 服务端代码（`server.jl`、`server_full.jl`、`test_server.jl`、`test_minimal_server.jl`、`start.bat`）。
+- `tests/`：测试资产；`tests/unit/` 存放原 `test_unit`，`tests/analysis/` 存放原 `test_other` 中的调试脚本与诊断报告。
+- `docs/`：文档中心。
+	- `docs/guides/`：用户/开发手册（`README` 补充材料、`QUICKSTART.md`、`USER_GUIDE.md`、`FRONTEND_DEBUG.md`、`FIXES.md` 等）。
+	- `docs/reference/`：公式、Mathematica、domain-knowledge 等原 `doc/` 内容。
+	- `docs/process/prompt`, `docs/process/plans`：原 `prompt/` 与 `plans/`，用于流程记录与规范。
+	- `docs/guides/examples/`：原 `examples/` 下的示例说明。
+- `api/`：面向外部的 API/公式描述（保持不变）。
+- `data/outputs/`：运行结果与缓存输出（原 `results/` 位于 `data/outputs/results/`）。
+- `scripts/`、`tests/`、`docs/` 之外的根文件：`Project.toml`、`Manifest.toml`、`README.md` 等项目元数据。
+
+## 目录迁移指南
+
+| 旧位置 | 新位置 | 说明 |
+| --- | --- | --- |
+| `server*.jl`, `start.bat` | `scripts/server/` | 所有后端/启动脚本集中到单一目录，`start.bat` 会自动回到仓库根目录再拉起 `server_full.jl`。 |
+| `test_unit/` | `tests/unit/` | 原全部单元测试未改名，只调整路径；引用 `../../src/...` 即可。 |
+| `test_other/` | `tests/analysis/` | 各类性能分析、调试脚本、诊断报告集中。 |
+| `results/` | `data/outputs/results/` | 将运行产物与原始数据分离，方便清理或忽略。 |
+| `doc/`（公式、domain-knowledge 等） | `docs/reference/` | 文档分类更明确。 |
+| `prompt/` | `docs/process/prompt/` | 规范类文档整合到流程档案。 |
+| `plans/` | `docs/process/plans/` | 规划和想法集中管理。 |
+| `examples/` | `docs/guides/examples/` | 所有示例写在 Guides 下便于索引。 |
+| `FIXES.md`, `FRONTEND_DEBUG.md`, `QUICKSTART.md`, `STATUS.md`, `USER_GUIDE.md` | `docs/guides/` | 一致收纳在指南目录，README 仅保留入口链接。 |
+
+> **启动方式更新**：
+> - Windows：执行 `scripts/server/start.bat`（会先 `Pkg.instantiate`，随后运行 `scripts/server/server_full.jl` 并自动打开浏览器）。
+> - CLI：`julia scripts/server/server_full.jl [port]` 或 `julia scripts/server/server.jl`（仅 API）。
