@@ -21,7 +21,7 @@ struct SeedPoint
     source::String
 end
 
-const DEFAULT_SEED_PATH = normpath(joinpath(@__DIR__, "..", "..", "data", "pnjl", "seeds", "aniso_coarse.csv"))
+const DEFAULT_SEED_PATH = normpath(joinpath(@__DIR__, "..", "..", "data", "raw", "pnjl", "seeds", "aniso_coarse.csv"))
 const DEFAULT_WEIGHTS = (T = 1.0, mu = 1.0, rho = 0.6, xi = 0.4)
 
 const _seed_cache = Ref{Vector{SeedPoint}}(nothing)
