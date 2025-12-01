@@ -1,0 +1,21 @@
+[physical]
+hbarc = 197.327
+alpha_em = 1.0 / 137.035999084
+
+[model]
+N_color = 3
+N_flavor = 3
+rho0_fm3 = 0.16
+Lambda_MeV = 602.3
+G_over_Lambda2 = 1.835
+K_over_Lambda5 = 12.36
+m_ud0_MeV = 5.5
+m_s0_MeV = 140.7
+
+[polyakov]
+T0_MeV = 210.0
+a0 = 3.51
+a1 = -2.47
+a2 = 15.2
+b3 = -1.75
+b4 = 7.555

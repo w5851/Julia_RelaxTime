@@ -4,31 +4,102 @@
 集中维护 RelaxTime 项目中使用的共用常量。
 """
 module Constants_PNJL
+
+using TOML
+
 export ħc_MeV_fm, α
 export N_color, N_flavor, ρ0_inv_fm3, m_ud0_inv_fm, m_s0_inv_fm, Λ_inv_fm, G_fm2, K_fm5
 export T0_inv_fm, a0, a1, a2, b3, b4
 export λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
+export PNJL_PROFILE, PNJL_CONFIG_PATH, load_pnjl_config
+
+const CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "config", "pnjl"))
+const DEFAULT_PROFILE = "default"
+
+const DEFAULT_CONFIG = Dict{String, Any}(
+    "physical" => Dict(
+        "hbarc" => 197.327,
+        "alpha_em" => 1.0 / 137.035999084,
+    ),
+    "model" => Dict(
+        "N_color" => 3,
+        "N_flavor" => 3,
+        "rho0_fm3" => 0.16,
+        "Lambda_MeV" => 602.3,
+        "G_over_Lambda2" => 1.835,
+        "K_over_Lambda5" => 12.36,
+        "m_ud0_MeV" => 5.5,
+        "m_s0_MeV" => 140.7,
+    ),
+    "polyakov" => Dict(
+        "T0_MeV" => 210.0,
+        "a0" => 3.51,
+        "a1" => -2.47,
+        "a2" => 15.2,
+        "b3" => -1.75,
+        "b4" => 7.555,
+    ),
+)
+
+function deep_merge(base::Dict{String, Any}, override::Dict{String, Any})
+    result = deepcopy(base)
+    for (k, v) in override
+        if v isa Dict{String, Any} && haskey(result, k) && result[k] isa Dict{String, Any}
+            result[k] = deep_merge(result[k]::Dict{String, Any}, v)
+        else
+            result[k] = v
+        end
+    end
+    return result
+end
+
+function load_pnjl_config(; profile::String=get(ENV, "PNJL_PARAM_PROFILE", DEFAULT_PROFILE))
+    path = joinpath(CONFIG_DIR, string(profile, ".toml"))
+    cfg = deepcopy(DEFAULT_CONFIG)
+    if isfile(path)
+        try
+            parsed = TOML.parsefile(path)
+            cfg = deep_merge(cfg, parsed)
+        catch err
+            @warn "解析 PNJL 配置失败，使用内置默认值" profile path exception = (err, catch_backtrace())
+        end
+    else
+        if profile != DEFAULT_PROFILE
+            @warn "未找到指定 PNJL 配置文件，退回默认参数" profile path
+        end
+    end
+    return (config=cfg, profile=profile, path=isfile(path) ? path : nothing)
+end
+
+const PNJL_CONFIG_DATA = load_pnjl_config()
+const PNJL_PROFILE = PNJL_CONFIG_DATA.profile
+const PNJL_CONFIG_PATH = PNJL_CONFIG_DATA.path
+const PNJL_CONFIG = PNJL_CONFIG_DATA.config
+
 # 基本物理常量-------------------------------------
-const ħc_MeV_fm = 197.327  # 197.327 MeV·fm
-const α::Float64 = 1.0 / 137.035999084  # 精细结构常数
+const physical_cfg = PNJL_CONFIG["physical"]
+const ħc_MeV_fm = Float64(physical_cfg["hbarc"])  # MeV·fm
+const α::Float64 = Float64(physical_cfg["alpha_em"])  # 精细结构常数
 
 # PNJL模型参数-------------------------------------
-const N_color = 3  # 夸克颜色数(红、绿、蓝)
-const N_flavor = 3  # 夸克味道数(u, d, s)
-const ρ0_inv_fm3 = 0.16  # 核子数密度, 单位fm⁻³ (ρ0 ≈ 0.16 fm⁻³)
-const m_ud0_inv_fm = 5.5 / ħc_MeV_fm  # u, d 夸克裸质量，单位 fm⁻¹ (m_ud0 ≈ 5.5 MeV)
-const m_s0_inv_fm = 140.7 / ħc_MeV_fm  # s 夸克裸质量，单位 fm⁻¹ (m_s0 ≈ 140.7 MeV)
-const Λ_inv_fm = 602.3 / ħc_MeV_fm  # 截断参数，单位 fm⁻¹ (Λ ≈ 602.3 MeV)
-const G_fm2 = 1.835 / Λ_inv_fm^2  # NJL 四夸克相互作用耦合常数，单位 fm² (G ≈ 1.835Λ²)
-const K_fm5 = 12.36 / Λ_inv_fm^5  # NJL 六夸克相互作用耦合常数(Kobayashi-Maskawa-'t Hooft)，单位 fm⁵ (K ≈ 12.36Λ⁵)
+const model_cfg = PNJL_CONFIG["model"]
+const N_color = Int(model_cfg["N_color"])  # 夸克颜色数
+const N_flavor = Int(model_cfg["N_flavor"])  # 夸克味道数
+const ρ0_inv_fm3 = Float64(model_cfg["rho0_fm3"])  # 核子数密度, 单位fm⁻³
+const Λ_inv_fm = Float64(model_cfg["Lambda_MeV"]) / ħc_MeV_fm  # 截断参数
+const m_ud0_inv_fm = Float64(model_cfg["m_ud0_MeV"]) / ħc_MeV_fm  # u,d夸克裸质量
+const m_s0_inv_fm = Float64(model_cfg["m_s0_MeV"]) / ħc_MeV_fm  # s夸克裸质量
+const G_fm2 = Float64(model_cfg["G_over_Lambda2"]) / Λ_inv_fm^2  # NJL四夸克耦合
+const K_fm5 = Float64(model_cfg["K_over_Lambda5"]) / Λ_inv_fm^5  # NJL六夸克耦合
 
 # Polyakov环有效势参数-------------------------------------
-const T0_inv_fm = 210.0 / ħc_MeV_fm  # Polyakov有效势参数 ，单位 fm⁻¹ (T0 ≈ 210 MeV)
-const a0 = 3.51
-const a1 = -2.47
-const a2 = 15.2
-const b3 = -1.75
-const b4 = 7.555
+const polyakov_cfg = PNJL_CONFIG["polyakov"]
+const T0_inv_fm = Float64(polyakov_cfg["T0_MeV"]) / ħc_MeV_fm  # Polyakov有效势参数
+const a0 = Float64(polyakov_cfg["a0"])
+const a1 = Float64(polyakov_cfg["a1"])
+const a2 = Float64(polyakov_cfg["a2"])
+const b3 = Float64(polyakov_cfg["b3"])
+const b4 = Float64(polyakov_cfg["b4"])
 
 # Gell-Mann矩阵(SU(3)味对称性)-------------------------------------
 # λ₀: 味单位矩阵(归一化)

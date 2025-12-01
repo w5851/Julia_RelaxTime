@@ -26,17 +26,17 @@
 API 约定（示例）：
 - 列出可用模块：GET `/api/modules` -> `[{id, name, description, params_schema}]`
 - 触发计算：POST `/api/modules/{id}/run`
-	- 请求体示例：
-		```json
-		{
-			"params": { "T": 0.15, "mu": 0.1 },
-			"target_sheet": "PNJL_result_1",
-			"save_as_new_sheet": true
-		}
-		```
-	- 返回示例：`{ "status":"queued", "job_id":"abc123", "sheet_id":"PNJL_result_1" }`
+    - 请求体示例：
+        ```json
+        {
+            "params": { "T": 0.15, "mu": 0.1 },
+            "target_sheet": "PNJL_result_1",
+            "save_as_new_sheet": true
+        }
+        ```
+    - 返回示例：`{ "status":"queued", "job_id":"abc123", "sheet_id":"PNJL_result_1" }`
 - 查询结果：GET `/api/results/{sheet_id}` -> `{ "columns": [...], "rows": [...], "meta": {...} }`
-	- 可选：使用 WebSocket `/ws/results` 推送进度与流式数据。
+    - 可选：使用 WebSocket `/ws/results` 推送进度与流式数据。
 
 前端实现建议（技术/库）：
 - 表格：考虑 `ag-Grid`, `Handsontable`, `Tabulator` 等支持虚拟化与导出的库。
@@ -60,31 +60,31 @@ API 约定（示例）：
 
 优缺点对比：
 - 子模块（推荐在外部仓库有独立生命周期时）：
-	- 优点：保留独立提交历史、便于同步上游、源码可被 agent 直接读取与 diff、便于单独更新。
-	- 缺点：需要维护 submodule 更新流程（`git submodule update --init --recursive`）。
-	- 示例命令（PowerShell）：
-		```powershell
-		git submodule add <git-url> src/pnjl
-		git submodule update --init --recursive
-		```
+    - 优点：保留独立提交历史、便于同步上游、源码可被 agent 直接读取与 diff、便于单独更新。
+    - 缺点：需要维护 submodule 更新流程（`git submodule update --init --recursive`）。
+    - 示例命令（PowerShell）：
+        ```powershell
+        git submodule add <git-url> src/pnjl
+        git submodule update --init --recursive
+        ```
 - 本地 path 依赖 / dev 模式（推荐并行开发）：
-	- 优点：外部项目作为工作区的一部分，agent 可跨项目引用并进行分析；在 Julia 中可使用 `pkg> dev /path/to/pnjl`。
-	- 缺点：需要管理路径与 workspace 配置。
-	- Julia 示例：
-		```julia
-		pkg> dev /absolute/path/to/pnjl
-		```
-	- 或在 `Project.toml` 中使用 `path` 依赖：
-		```toml
-		[deps]
-		PNJL = { path = "../pnjl" }
-		```
+    - 优点：外部项目作为工作区的一部分，agent 可跨项目引用并进行分析；在 Julia 中可使用 `pkg> dev /path/to/pnjl`。
+    - 缺点：需要管理路径与 workspace 配置。
+    - Julia 示例：
+        ```julia
+        pkg> dev /absolute/path/to/pnjl
+        ```
+    - 或在 `Project.toml` 中使用 `path` 依赖：
+        ```toml
+        [deps]
+        PNJL = { path = "../pnjl" }
+        ```
 - 内联移植（把外部代码拷贝进 `src/pnjl/`）：
-	- 优点：集成最直接、agent 访问无障碍。
-	- 缺点：造成代码重复，需要自行维护与 upstream 的同步策略。
+    - 优点：集成最直接、agent 访问无障碍。
+    - 缺点：造成代码重复，需要自行维护与 upstream 的同步策略。
 - 仅通过包管理器安装（Option C）：
-	- 优点：依赖管理清晰、易于版本化。
-	- 缺点：若源码不在工作区，agent 无法直接读取实现细节（除非将包以 `dev` 或源代码形式放入 `.julia/dev` 等可见路径）。
+    - 优点：依赖管理清晰、易于版本化。
+    - 缺点：若源码不在工作区，agent 无法直接读取实现细节（除非将包以 `dev` 或源代码形式放入 `.julia/dev` 等可见路径）。
 
 私有仓库注意事项：若外部仓库为私有，子模块或 path 方式仍可行，但需提前准备凭证（SSH key 或 Personal Access Token）；计划中应注明仓库可见性以便配置 CI/开发环境。
 
