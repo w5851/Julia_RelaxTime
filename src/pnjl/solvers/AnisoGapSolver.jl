@@ -50,7 +50,10 @@ const THERMAL_DEFAULT_WEIGHTS = DEFAULT_MOMENTUM_WEIGHTS
 const ρ0 = ρ0_inv_fm3
 const DEFAULT_RHO_GUESS = [-0.07441, -0.07441, -1.86717, 0.02032, 0.02372, 2.15664, 2.15664, 2.15664]
 const DEFAULT_MU_GUESS = [-1.8, -1.8, -2.1, 0.8, 0.8]
-const NODE_CACHE = Dict{Tuple{Int, Int}, Tuple{NTuple{3, Matrix{Float64}}, NTuple{3, Matrix{Float64}}}}()
+const NODE_CACHE = Dict{
+    Tuple{Int, Int},
+    Tuple{Tuple{Vector{Float64}, Vector{Float64}}, NTuple{3, Matrix{Float64}}},
+}()
 
 export SolverResult, solve_fixed_rho, solve_fixed_mu, DEFAULT_RHO_GUESS, DEFAULT_MU_GUESS
 
@@ -100,16 +103,14 @@ function build_nodes(p_num::Int, t_num::Int)
     p_nodes2, p_weights2 = thermal_nodes(p_num)
     t_nodes, t_weights = theta_nodes(t_num)
 
-    p1_mesh = repeat(p_nodes1, 1, t_num)
-    t_mesh = repeat(t_nodes', p_num, 1)
-    w1_mesh = p_weights1 * t_weights'
-    coefficient1 = w1_mesh .* p1_mesh.^2 ./ π^2
+    coef1 = (p_weights1 .* (p_nodes1 .^ 2) .* 2.0) ./ π^2
 
     p2_mesh = repeat(p_nodes2, 1, t_num)
+    t_mesh = repeat(t_nodes', p_num, 1)
     w2_mesh = p_weights2 * t_weights'
     coefficient2 = w2_mesh .* p2_mesh.^2 ./ π^2
 
-    nodes_1 = (p1_mesh, t_mesh, coefficient1)
+    nodes_1 = (p_nodes1, coef1)
     nodes_2 = (p2_mesh, t_mesh, coefficient2)
     return nodes_1, nodes_2
 end
@@ -142,7 +143,11 @@ end
     )
 end
 
-@inline function calculate_energy(mass_i, p, xi, t)
+@inline function calculate_energy_isotropic(mass_i, p)
+    return sqrt(p^2 + mass_i^2)
+end
+
+@inline function calculate_energy_anisotropic(mass_i, p, xi, t)
     return sqrt(p^2 + mass_i^2 + xi * (p * t)^2)
 end
 
@@ -164,25 +169,27 @@ end
     return safe_log(f1_val) + safe_log(f2_val)
 end
 
-function calculate_energy_sum(masses::SVector{3, TF}, p_nodes, t_nodes, coefficient, xi) where {TF}
+"""计算RS动量各向异性分布下巨热力学势真空项(能量和)"""
+function calculate_energy_sum(masses::SVector{3, TF}, p_nodes, coefficient) where {TF}
     total = zero(TF)
     @inbounds for i in 1:3
         mass_i = masses[i]
         for idx in eachindex(p_nodes)
-            E = calculate_energy(mass_i, p_nodes[idx], xi, t_nodes[idx])
+            E = calculate_energy_isotropic(mass_i, p_nodes[idx])
             total += E * coefficient[idx]
         end
     end
     return -N_color * total
 end
 
+"""计算RS动量各向异性分布下巨热力学势热项(对数和)"""
 function calculate_log_sum(masses::SVector{3, TF}, p_nodes, t_nodes, coefficient, Phi1, Phi2, mu_vec, T_fm, xi) where {TF}
     total = zero(TF)
     @inbounds for i in 1:3
         mass_i = masses[i]
         mu_i = mu_vec[i]
         for idx in eachindex(p_nodes)
-            E_i = calculate_energy(mass_i, p_nodes[idx], xi, t_nodes[idx])
+            E_i = calculate_energy_anisotropic(mass_i, p_nodes[idx], xi, t_nodes[idx])
             total += calculate_log_term(E_i, mu_i, T_fm, Phi1, Phi2) * coefficient[idx]
         end
     end
@@ -197,40 +204,40 @@ function calculate_pressure(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_f
     U = calculate_U(T_fm, Phi1, Phi2)
     masses = calculate_mass_vec(phi)
 
-    p_nodes1, t_nodes1, coef1 = nodes_1
+    p_nodes1, coef1 = nodes_1
     p_nodes2, t_nodes2, coef2 = nodes_2
 
-    energy_sum = calculate_energy_sum(masses, p_nodes1, t_nodes1, coef1, xi)
+    energy_sum = calculate_energy_sum(masses, p_nodes1, coef1)
     log_sum = calculate_log_sum(masses, p_nodes2, t_nodes2, coef2, Phi1, Phi2, mu_vec, T_fm, xi)
     return -(chi + U + energy_sum + log_sum)
 end
 
-@inline function pressure_wrapper(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
-    calculate_pressure(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
-end
-
+"""残差方程组的核心，计算偏导数向量，解方程意味着这些偏导数为零"""
 function calculate_core(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
-    f = y -> pressure_wrapper(y, mu_vec, T_fm, nodes_1, nodes_2, xi)
-    grad = ForwardDiff.gradient(f, x_state)
+    pressure_fn = y -> calculate_pressure(y, mu_vec, T_fm, nodes_1, nodes_2, xi)
+    grad = ForwardDiff.gradient(pressure_fn, x_state)
     return SVector{5, TF}(Tuple(grad))
 end
 
+"""计算粒子数密度ρ"""
 function calculate_rho(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
-    f_mu = μ -> pressure_wrapper(x_state, μ, T_fm, nodes_1, nodes_2, xi)
-    grad = ForwardDiff.gradient(f_mu, mu_vec)
+    pressure_mu = μ -> calculate_pressure(x_state, μ, T_fm, nodes_1, nodes_2, xi)
+    grad = ForwardDiff.gradient(pressure_mu, mu_vec)
     return SVector{3, TF}(Tuple(grad))
 end
 
+"""计算所有热力学量，返回压力、归一化密度、熵、能量"""
 function calculate_thermo(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
     rho_vec = calculate_rho(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
     rho_norm = sum(rho_vec) / (3.0 * ρ0)
-    f_T = τ -> pressure_wrapper(x_state, mu_vec, τ, nodes_1, nodes_2, xi)
-    entropy = ForwardDiff.derivative(f_T, T_fm)
-    pressure = pressure_wrapper(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
+    pressure_T = τ -> calculate_pressure(x_state, mu_vec, τ, nodes_1, nodes_2, xi)
+    entropy = ForwardDiff.derivative(pressure_T, T_fm)
+    pressure = calculate_pressure(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
     energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
     return pressure, rho_norm, entropy, energy
 end
 
+"""T-rho确定时的残差方程组"""
 function residual_rho!(fvec, x, T_fm, rho_target, nodes_1, nodes_2, xi)
     x_state = SVector{5}(Tuple(x[1:5]))
     mu_state = SVector{3}(x[6], x[7], x[8])
@@ -242,10 +249,11 @@ function residual_rho!(fvec, x, T_fm, rho_target, nodes_1, nodes_2, xi)
     return nothing
 end
 
+"""T-mu确定时的残差方程组"""
 function residual_mu!(fvec, x, mu_vec, T_fm, nodes_1, nodes_2, xi)
     x_state = SVector{5}(Tuple(x))
-    f = calculate_core(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
-    fvec .= f
+    core_grad = calculate_core(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
+    fvec .= core_grad
     return nothing
 end
 

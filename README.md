@@ -29,7 +29,7 @@
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
 - **文档与流程**：`docs/guides/QUICKSTART.md`、`USER_GUIDE.md`、`STATUS.md` 说明部署/排错，`docs/process/*` 保留 prompt 与计划，`docs/reference` 存放公式与 Mathematica 推导。
 - **数据与结果**：`data/outputs/results/` 用于收集服务器或批处理输出，便于与 PNJL 结果对比；尚未与 PNJL 求解器联通（见“下一步”）。
-- **PNJL 单点求解（实验性）**：`src/pnjl/` 提供 TOML 参数加载、粗网格种子缓存与各向异性 PNJL 单点求解器，HTTP 端可通过 `POST /api/modules/pnjl-gap/run` 触发（当前仅支持单点 /rho 或 /mu 模式，长任务扫描仍待实现）。
+- **PNJL 单点求解（实验性）**：`src/pnjl/` 提供 TOML 参数加载、粗网格种子缓存与各向异性 PNJL 单点求解器，HTTP 端可通过 `POST /api/modules/pnjl-gap/run` 触发（请求体以 `T_mev` 传入温度；当前仅支持单点 /rho 或 /mu 模式，长任务扫描仍待实现）。实现遵循 `docs/reference/formula/pnjl/Omega_RS各向异性.md`：各向异性只作用于热项能量，真空截断积分仍保持各向同性以避免误改基态。 
 
 > ⚠️ **未决功能**：PNJL 能隙方程与 Excel-like UI 尚未合入；新增 API/前端模式切换在 plan 中但无实现代码，集成前请确认挂钩方案。
 
