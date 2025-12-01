@@ -1,3 +1,9 @@
+# 保证 GaussLegendre 模块已加载，供积分节点生成复用
+const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSSLEGENDRE_PATH)
+end
+
 module AnisoGapSolver
 
 using LinearAlgebra
@@ -6,7 +12,12 @@ using StaticArrays
 using ForwardDiff
 using NLsolve
 using SpecialFunctions: log
-using FastGaussQuadrature: gausslegendre
+using Main.GaussLegendre:
+    gauleg,
+    DEFAULT_COSΘ_HALF_NODES,
+    DEFAULT_COSΘ_HALF_WEIGHTS,
+    DEFAULT_MOMENTUM_NODES,
+    DEFAULT_MOMENTUM_WEIGHTS
 
 using ..Constants_PNJL:
     ħc_MeV_fm,
@@ -25,6 +36,16 @@ using ..Constants_PNJL:
     a2,
     b3,
     b4
+
+const Λ_NODE_COUNT = 64
+const Λ_NODES, Λ_WEIGHTS = gauleg(0.0, Λ_inv_fm, Λ_NODE_COUNT)
+
+const DEFAULT_THETA_COUNT = length(DEFAULT_COSΘ_HALF_NODES)
+const DEFAULT_MOMENTUM_COUNT = length(DEFAULT_MOMENTUM_NODES)
+const THETA_DEFAULT_NODES = DEFAULT_COSΘ_HALF_NODES
+const THETA_DEFAULT_WEIGHTS = DEFAULT_COSΘ_HALF_WEIGHTS .* 2.0
+const THERMAL_DEFAULT_NODES = DEFAULT_MOMENTUM_NODES
+const THERMAL_DEFAULT_WEIGHTS = DEFAULT_MOMENTUM_WEIGHTS
 
 const ρ0 = ρ0_inv_fm3
 const DEFAULT_RHO_GUESS = [-0.07441, -0.07441, -1.86717, 0.02032, 0.02372, 2.15664, 2.15664, 2.15664]
@@ -52,19 +73,32 @@ end
     return x < min_val ? log(min_val) : log(x)
 end
 
-function gauleg(a::Float64, b::Float64, n::Int)
-    nodes, weights = gausslegendre(n)
-    scale = (b - a) / 2
-    shift = (a + b) / 2
-    nodes = @. scale * nodes + shift
-    weights = @. scale * weights
-    return nodes, weights
+@inline function lambda_nodes(p_num::Int)
+    if p_num == Λ_NODE_COUNT
+        return Λ_NODES, Λ_WEIGHTS
+    end
+    return gauleg(0.0, Λ_inv_fm, p_num)
+end
+
+@inline function theta_nodes(t_num::Int)
+    if t_num == DEFAULT_THETA_COUNT
+        return THETA_DEFAULT_NODES, THETA_DEFAULT_WEIGHTS
+    end
+    nodes, weights = gauleg(0.0, 1.0, t_num)
+    return nodes, weights .* 2.0
+end
+
+@inline function thermal_nodes(p_num::Int)
+    if p_num == DEFAULT_MOMENTUM_COUNT
+        return THERMAL_DEFAULT_NODES, THERMAL_DEFAULT_WEIGHTS
+    end
+    return gauleg(0.0, 10.0, p_num)
 end
 
 function build_nodes(p_num::Int, t_num::Int)
-    p_nodes1, p_weights1 = gauleg(0.0, Λ_inv_fm, p_num)
-    p_nodes2, p_weights2 = gauleg(0.0, 20.0, p_num)
-    t_nodes, t_weights = gauleg(0.0, 1.0, t_num)
+    p_nodes1, p_weights1 = lambda_nodes(p_num)
+    p_nodes2, p_weights2 = thermal_nodes(p_num)
+    t_nodes, t_weights = theta_nodes(t_num)
 
     p1_mesh = repeat(p_nodes1, 1, t_num)
     t_mesh = repeat(t_nodes', p_num, 1)
@@ -87,21 +121,21 @@ function cached_nodes(p_num::Int, t_num::Int)
     end
 end
 
-@inline function calculate_chiral(phi::SVector{3, T}) where {T}
+@inline function calculate_chiral(phi::SVector{3, TF}) where {TF}
     2 * G_fm2 * sum(phi .^ 2) - 4 * K_fm5 * prod(phi)
 end
 
-@inline function calculate_U(T::Real, Phi1::Real, Phi2::Real)
-    T_ratio = T0_inv_fm / T
+@inline function calculate_U(T_fm::Real, Phi1::Real, Phi2::Real)
+    T_ratio = T0_inv_fm / T_fm
     Ta = a0 + a1 * T_ratio + a2 * T_ratio^2
     Tb = b3 * T_ratio^3
     value = 1 - 6 * Phi2 * Phi1 + 4 * (Phi2^3 + Phi1^3) - 3 * (Phi2 * Phi1)^2
-    return T^4 * (-0.5 * Ta * Phi2 * Phi1 + Tb * safe_log(value))
+    return T_fm^4 * (-0.5 * Ta * Phi2 * Phi1 + Tb * safe_log(value))
 end
 
-@inline function calculate_mass_vec(phi::SVector{3, T}) where {T}
+@inline function calculate_mass_vec(phi::SVector{3, TF}) where {TF}
     phiu, phid, phis = phi
-    return SVector{3, T}(
+    return SVector{3, TF}(
         m_ud0_inv_fm - 4 * G_fm2 * phiu + 2 * K_fm5 * phid * phis,
         m_ud0_inv_fm - 4 * G_fm2 * phid + 2 * K_fm5 * phiu * phis,
         m_s0_inv_fm - 4 * G_fm2 * phis + 2 * K_fm5 * phiu * phid,
@@ -112,8 +146,8 @@ end
     return sqrt(p^2 + mass_i^2 + xi * (p * t)^2)
 end
 
-@inline function calculate_log_term(E_i, mu_i, T, Phi1, Phi2)
-    invT = 1.0 / T
+@inline function calculate_log_term(E_i, mu_i, T_fm, Phi1, Phi2)
+    invT = 1.0 / T_fm
     x_i = (E_i - mu_i) * invT
     x_i_anti = (E_i + mu_i) * invT
 
@@ -130,8 +164,8 @@ end
     return safe_log(f1_val) + safe_log(f2_val)
 end
 
-function calculate_energy_sum(masses::SVector{3, T}, p_nodes, t_nodes, coefficient, xi) where {T}
-    total = zero(T)
+function calculate_energy_sum(masses::SVector{3, TF}, p_nodes, t_nodes, coefficient, xi) where {TF}
+    total = zero(TF)
     @inbounds for i in 1:3
         mass_i = masses[i]
         for idx in eachindex(p_nodes)
@@ -142,80 +176,81 @@ function calculate_energy_sum(masses::SVector{3, T}, p_nodes, t_nodes, coefficie
     return -N_color * total
 end
 
-function calculate_log_sum(masses::SVector{3, T}, p_nodes, t_nodes, coefficient, Phi1, Phi2, mu_vec, T, xi) where {T}
-    total = zero(T)
+function calculate_log_sum(masses::SVector{3, TF}, p_nodes, t_nodes, coefficient, Phi1, Phi2, mu_vec, T_fm, xi) where {TF}
+    total = zero(TF)
     @inbounds for i in 1:3
         mass_i = masses[i]
         mu_i = mu_vec[i]
         for idx in eachindex(p_nodes)
             E_i = calculate_energy(mass_i, p_nodes[idx], xi, t_nodes[idx])
-            total += calculate_log_term(E_i, mu_i, T, Phi1, Phi2) * coefficient[idx]
+            total += calculate_log_term(E_i, mu_i, T_fm, Phi1, Phi2) * coefficient[idx]
         end
     end
-    return -T * total
+    return -T_fm * total
 end
 
-function calculate_pressure(x_state::SVector{5, T}, mu_vec::SVector{3, T}, T_val::T, nodes_1, nodes_2, xi) where {T}
-    phi = SVector{3, T}(x_state[1], x_state[2], x_state[3])
+function calculate_pressure(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
+    phi = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
     Phi1, Phi2 = x_state[4], x_state[5]
 
     chi = calculate_chiral(phi)
-    U = calculate_U(T_val, Phi1, Phi2)
+    U = calculate_U(T_fm, Phi1, Phi2)
     masses = calculate_mass_vec(phi)
 
     p_nodes1, t_nodes1, coef1 = nodes_1
     p_nodes2, t_nodes2, coef2 = nodes_2
 
     energy_sum = calculate_energy_sum(masses, p_nodes1, t_nodes1, coef1, xi)
-    log_sum = calculate_log_sum(masses, p_nodes2, t_nodes2, coef2, Phi1, Phi2, mu_vec, T_val, xi)
+    log_sum = calculate_log_sum(masses, p_nodes2, t_nodes2, coef2, Phi1, Phi2, mu_vec, T_fm, xi)
     return -(chi + U + energy_sum + log_sum)
 end
 
-@inline function pressure_wrapper(x_state::SVector{5, T}, mu_vec::SVector{3, T}, T_val::T, nodes_1, nodes_2, xi) where {T}
-    calculate_pressure(x_state, mu_vec, T_val, nodes_1, nodes_2, xi)
+@inline function pressure_wrapper(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
+    calculate_pressure(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
 end
 
-function calculate_core(x_state::SVector{5, T}, mu_vec::SVector{3, T}, T_val::T, nodes_1, nodes_2, xi) where {T}
-    f = y -> pressure_wrapper(y, mu_vec, T_val, nodes_1, nodes_2, xi)
+function calculate_core(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
+    f = y -> pressure_wrapper(y, mu_vec, T_fm, nodes_1, nodes_2, xi)
     grad = ForwardDiff.gradient(f, x_state)
-    return SVector{5, T}(Tuple(grad))
+    return SVector{5, TF}(Tuple(grad))
 end
 
-function calculate_rho(x_state::SVector{5, T}, mu_vec::SVector{3, T}, T_val::T, nodes_1, nodes_2, xi) where {T}
-    f_mu = μ -> pressure_wrapper(x_state, μ, T_val, nodes_1, nodes_2, xi)
+function calculate_rho(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
+    f_mu = μ -> pressure_wrapper(x_state, μ, T_fm, nodes_1, nodes_2, xi)
     grad = ForwardDiff.gradient(f_mu, mu_vec)
-    return SVector{3, T}(Tuple(grad))
+    return SVector{3, TF}(Tuple(grad))
 end
 
-function calculate_thermo(x_state::SVector{5, T}, mu_vec::SVector{3, T}, T_val::T, nodes_1, nodes_2, xi) where {T}
-    rho_vec = calculate_rho(x_state, mu_vec, T_val, nodes_1, nodes_2, xi)
+function calculate_thermo(x_state::SVector{5, TF}, mu_vec::SVector{3, TF}, T_fm::TF, nodes_1, nodes_2, xi) where {TF}
+    rho_vec = calculate_rho(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
     rho_norm = sum(rho_vec) / (3.0 * ρ0)
     f_T = τ -> pressure_wrapper(x_state, mu_vec, τ, nodes_1, nodes_2, xi)
-    entropy = ForwardDiff.derivative(f_T, T_val)
-    pressure = pressure_wrapper(x_state, mu_vec, T_val, nodes_1, nodes_2, xi)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_val * entropy
+    entropy = ForwardDiff.derivative(f_T, T_fm)
+    pressure = pressure_wrapper(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
+    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
     return pressure, rho_norm, entropy, energy
 end
 
-function residual_rho!(fvec, x, T_val, rho_target, nodes_1, nodes_2, xi)
+function residual_rho!(fvec, x, T_fm, rho_target, nodes_1, nodes_2, xi)
     x_state = SVector{5}(Tuple(x[1:5]))
     mu_state = SVector{3}(x[6], x[7], x[8])
-    fvec[1:5] = calculate_core(x_state, mu_state, T_val, nodes_1, nodes_2, xi)
+    fvec[1:5] = calculate_core(x_state, mu_state, T_fm, nodes_1, nodes_2, xi)
     fvec[6] = x[6] - x[7]
     fvec[7] = x[7] - x[8]
-    rho = calculate_rho(x_state, mu_state, T_val, nodes_1, nodes_2, xi)
+    rho = calculate_rho(x_state, mu_state, T_fm, nodes_1, nodes_2, xi)
     fvec[8] = sum(rho) / (3.0 * ρ0) - rho_target
     return nothing
 end
 
-function residual_mu!(fvec, x, mu_vec, T_val, nodes_1, nodes_2, xi)
+function residual_mu!(fvec, x, mu_vec, T_fm, nodes_1, nodes_2, xi)
     x_state = SVector{5}(Tuple(x))
-    f = calculate_core(x_state, mu_vec, T_val, nodes_1, nodes_2, xi)
+    f = calculate_core(x_state, mu_vec, T_fm, nodes_1, nodes_2, xi)
     fvec .= f
     return nothing
 end
 
-function solve_fixed_rho(T_fm::Float64, rho_target::Float64; xi::Float64=0.0, seed_state::AbstractVector=DEFAULT_RHO_GUESS, p_num::Int=256, t_num::Int=16, nlsolve_kwargs...)
+function solve_fixed_rho(T_mev::Float64, rho_target::Float64; xi::Float64=0.0, seed_state::AbstractVector=DEFAULT_RHO_GUESS, p_num::Int=Λ_NODE_COUNT, t_num::Int=DEFAULT_THETA_COUNT, nlsolve_kwargs...)
+    T_fm = T_mev / ħc_MeV_fm
     nodes_1, nodes_2 = cached_nodes(p_num, t_num)
     x0 = length(seed_state) == 8 ? Float64.(seed_state) : Float64.(DEFAULT_RHO_GUESS)
     f! = (F, x) -> residual_rho!(F, x, T_fm, rho_target, nodes_1, nodes_2, xi)
@@ -240,7 +275,8 @@ function solve_fixed_rho(T_fm::Float64, rho_target::Float64; xi::Float64=0.0, se
     )
 end
 
-function solve_fixed_mu(T_fm::Float64, mu_fm::Float64; xi::Float64=0.0, seed_state::AbstractVector=DEFAULT_MU_GUESS, p_num::Int=256, t_num::Int=16, nlsolve_kwargs...)
+function solve_fixed_mu(T_mev::Float64, mu_fm::Float64; xi::Float64=0.0, seed_state::AbstractVector=DEFAULT_MU_GUESS, p_num::Int=Λ_NODE_COUNT, t_num::Int=DEFAULT_THETA_COUNT, nlsolve_kwargs...)
+    T_fm = T_mev / ħc_MeV_fm
     nodes_1, nodes_2 = cached_nodes(p_num, t_num)
     x0 = length(seed_state) == 5 ? Float64.(seed_state) : Float64.(DEFAULT_MU_GUESS)
     mu_vec = SVector{3}(mu_fm, mu_fm, mu_fm)
@@ -265,4 +301,3 @@ function solve_fixed_mu(T_fm::Float64, mu_fm::Float64; xi::Float64=0.0, seed_sta
 end
 
 end # module
-*** End Patch

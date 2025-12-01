@@ -24,7 +24,6 @@ println("  DEFAULT_COSΘ_HALF_NODES:  ", length(DEFAULT_COSΘ_HALF_NODES), " 个
 
 println("\n动量积分节点:")
 println("  DEFAULT_MOMENTUM_NODES:   ", length(DEFAULT_MOMENTUM_NODES), " 个节点, 区间 [0, 10] fm⁻¹")
-println("  DEFAULT_MOMENTUM_NODES_Λ: ", length(DEFAULT_MOMENTUM_NODES_Λ), " 个节点, 区间 [0, Λ] fm⁻¹")
 
 println("\n" * "=" ^ 70)
 println("✓ 所有常量已成功导出并可用")

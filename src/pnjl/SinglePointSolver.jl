@@ -121,9 +121,9 @@ function run_single_point(params::Union{NamedTuple, AbstractDict, Dict}; seed_pa
     rho_seed, mu_seed = _extract_seed_vectors(nearest, request[:mode])
     xi = request[:xi]
     result = if request[:mode] == :rho
-        solve_fixed_rho(request[:T_fm], request[:rho]; xi = xi, seed_state = rho_seed, solver_kwargs...)
+        solve_fixed_rho(request[:T_mev], request[:rho]; xi = xi, seed_state = rho_seed, solver_kwargs...)
     else
-        solve_fixed_mu(request[:T_fm], request[:mu_fm]; xi = xi, seed_state = mu_seed, solver_kwargs...)
+        solve_fixed_mu(request[:T_mev], request[:mu_fm]; xi = xi, seed_state = mu_seed, solver_kwargs...)
     end
 
     status = result.converged ? "ok" : "warning"

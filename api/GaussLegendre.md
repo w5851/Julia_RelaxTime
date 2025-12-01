@@ -264,20 +264,20 @@ result = sum(DEFAULT_MOMENTUM_WEIGHTS .* f.(DEFAULT_MOMENTUM_NODES))
 - **积分区间**: [0, 10] fm⁻¹
 - **用途**: 热力学积分（费米-狄拉克分布在 p ~ 10 fm⁻¹ 时已充分衰减）
 
-#### `DEFAULT_MOMENTUM_NODES_Λ`, `DEFAULT_MOMENTUM_WEIGHTS_Λ`
+#### PNJL Λ-截断节点
 
-**真空截断积分** (p ∈ [0, Λ] fm⁻¹)
+Λ 取决于 PNJL 配置文件，目前默认的 `[0, Λ]` 节点仅在 `PNJL.AnisoGapSolver` 内部使用。若需要同样的节点分布，可通过下述方式自行构造：
 
 ```julia
-using .GaussLegendre: DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ
+include("src/integration/GaussLegendre.jl")
+include("src/Constants_PNJL.jl")
+using .GaussLegendre: gauleg
+using .Constants_PNJL: Λ_inv_fm
 
-# 带紫外截断的真空积分
-result = sum(DEFAULT_MOMENTUM_WEIGHTS_Λ .* f.(DEFAULT_MOMENTUM_NODES_Λ))
+nodes_Λ, weights_Λ = gauleg(0.0, Λ_inv_fm, 64)
 ```
 
-- **节点数**: 64
-- **积分区间**: [0, Λ] fm⁻¹（Λ 来自 PNJL 模型参数）
-- **用途**: 真空项计算，遵循 PNJL 模型的紫外截断
+这样可以完全自定义节点数，同时显式绑定当前使用的 PNJL 参数集。
 
 ---
 

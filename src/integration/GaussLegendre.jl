@@ -13,8 +13,6 @@
 """
 module GaussLegendre
 
-include("../../src/Constants_PNJL.jl")
-using .Constants_PNJL: Λ_inv_fm
 using FastGaussQuadrature
 
 export gauleg
@@ -110,12 +108,8 @@ const DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS = gauleg(0.0, 1.0, DE
 """默认的动量积分节点和权重 (p ∈ [0, 10] fm⁻¹，用于热力学积分)"""
 const DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS = gauleg(0.0, 10.0, DEFAULT_momentum_POINTS)
 
-"""默认的动量积分节点和权重 (p ∈ [0, Λ] fm⁻¹，用于真空截断积分)"""
-const DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ = gauleg(0.0, Λ_inv_fm, DEFAULT_momentum_POINTS)
-
 export DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
 export DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS
 export DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
-export DEFAULT_MOMENTUM_NODES_Λ, DEFAULT_MOMENTUM_WEIGHTS_Λ
 
 end # module GaussLegendre
