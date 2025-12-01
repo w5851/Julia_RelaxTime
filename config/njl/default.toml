@@ -1,0 +1,22 @@
+[physical]
+hbarc = 197.3269804
+alpha_em = 1.0 / 137.035999084
+
+[model]
+label = "toy-njl"
+version = "0.0.1-demo"
+N_color = 3
+N_flavor = 2
+rho0_fm3 = 0.16
+Lambda_MeV = 650.0
+G_over_Lambda2 = 2.0
+K_over_Lambda5 = 0.0
+m_ud0_MeV = 5.0
+m_s0_MeV = 120.0
+
+[meanfield]
+coupling_sigma = 10.0
+coupling_omega = 12.0
+coupling_rho = 4.0
+b_nonlinear = 0.002
+c_nonlinear = -0.0005

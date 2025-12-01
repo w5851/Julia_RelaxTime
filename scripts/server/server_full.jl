@@ -26,6 +26,14 @@ include(joinpath(REPO_ROOT, "src", "simulation", "MomentumMapping.jl"))
 using .MomentumMapping
 using LinearAlgebra
 
+# PNJL 模块（实验特性）
+include(joinpath(REPO_ROOT, "src", "pnjl", "PNJL.jl"))
+using .PNJL
+
+const MODULE_REGISTRY = [
+    PNJL.SinglePointSolver.describe_solver(),
+]
+
 # ==================== API处理函数 ====================
 
 """
@@ -197,11 +205,58 @@ function route_request(req::HTTP.Request)
         return HTTP.Response(200, ["Content-Type" => "text/plain"], "OK")
     elseif path == "/compute"
         return handle_compute(req)
+    elseif path == "/api/modules" && req.method == "GET"
+        return handle_modules_list()
+    elseif path == "/api/modules/pnjl-gap/run"
+        return handle_pnjl_single_point(req)
     # 静态文件
     else
         # 移除查询参数并确保是String
         path = String(split(path, '?')[1])
         return serve_static_file(path)
+    end
+end
+
+function handle_modules_list()
+    headers = [
+        "Content-Type" => "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin" => "*",
+    ]
+    return HTTP.Response(200, headers, JSON3.write(MODULE_REGISTRY))
+end
+
+function _to_symbol_dict(obj)
+    data = Dict{Symbol, Any}()
+    for (k, v) in pairs(obj)
+        key = k isa Symbol ? k : Symbol(string(k))
+        data[key] = v
+    end
+    return data
+end
+
+function handle_pnjl_single_point(req::HTTP.Request)
+    if req.method != "POST"
+        return HTTP.Response(405, ["Content-Type" => "text/plain"], "Method Not Allowed")
+    end
+    body = isempty(req.body) ? Dict{Symbol, Any}() : JSON3.read(String(req.body))
+    params_obj = haskey(body, :params) ? body[:params] : body
+    params_dict = params_obj isa Dict ? params_obj : _to_symbol_dict(params_obj)
+
+    try
+        result = PNJL.SinglePointSolver.run_single_point(params_dict)
+        headers = [
+            "Content-Type" => "application/json; charset=utf-8",
+            "Access-Control-Allow-Origin" => "*",
+        ]
+        return HTTP.Response(200, headers, JSON3.write(result))
+    catch e
+        error_msg = sprint(showerror, e, catch_backtrace())
+        headers = [
+            "Content-Type" => "application/json; charset=utf-8",
+            "Access-Control-Allow-Origin" => "*",
+        ]
+        payload = Dict("status" => "error", "error" => error_msg)
+        return HTTP.Response(500, headers, JSON3.write(payload))
     end
 end
 
