@@ -1,0 +1,44 @@
+name: pnlj-benchmarks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - "tests/perf/**"
+      - ".github/workflows/pnjl-benchmarks.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/perf/**"
+      - ".github/workflows/pnjl-benchmarks.yml"
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.10"
+
+      - name: Cache artifacts
+        uses: julia-actions/cache@v2
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Run PNJL benchmark
+        run: julia --project tests/perf/pnjl/single_point_solver_perf.jl
+
+      - name: Upload benchmark reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnlj-benchmark
+          path: |
+            output/perf/pnjl_single_point.json
+            output/perf/pnjl_single_point.md

@@ -24,6 +24,53 @@
 E_i = \sqrt{p^2 + M_i^2}
 ```
 
+### 1.1 真空项的解析积分
+
+真空部分可在球坐标下化为一维积分：
+
+```math
+I_i(\Lambda, M_i)
+= \int_{|\mathbf p|<\Lambda} \frac{d^3p}{(2\pi)^3} E_i
+= \frac{1}{2\pi^2} \int_0^\Lambda p^2 \sqrt{p^2 + M_i^2}\, dp.
+```
+
+利用不定积分公式
+
+```math
+\int p^2\sqrt{p^2 + M^2}\,dp
+= \frac{1}{8}\Big[p\sqrt{p^2+M^2}(2p^2+M^2) - M^4 \ln\big(p+\sqrt{p^2+M^2}\big)\Big],
+```
+
+可得封闭表达：
+
+```math
+I_i(\Lambda, M_i)
+= \frac{1}{16\pi^2}\Bigg[
+\Lambda\sqrt{\Lambda^2 + M_i^2}\,(2\Lambda^2 + M_i^2)
+- M_i^4 \ln\frac{\Lambda + \sqrt{\Lambda^2 + M_i^2}}{M_i}
+\Bigg].
+```
+
+因此真空项写成
+
+```math
+- 2N_c \int_0^\Lambda \frac{d^3p}{(2\pi)^3} \sum_i E_i
+= -\frac{N_c}{\pi^2}\sum_i F(\Lambda, M_i),
+```
+
+其中
+
+```math
+F(\Lambda, M_i)
+= \frac{1}{2} I_i(\Lambda, M_i)
+= \frac{1}{16}\Big[
+\Lambda\sqrt{\Lambda^2 + M_i^2}\,(2\Lambda^2 + M_i^2)
+- M_i^4 \ln\frac{\Lambda + \sqrt{\Lambda^2 + M_i^2}}{M_i}
+\Big].
+```
+
+数值实现时，可直接复用该解析公式以避免在能隙迭代中重复求一维积分。
+
 NJL 有效质量能隙方程（式 2.17）：
 
 

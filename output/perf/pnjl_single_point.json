@@ -1,0 +1,55 @@
+{
+    "generated_at": "2025-12-02T17:41:40.552",
+    "samples": 20,
+    "config": {
+        "T_mev": 50,
+        "rho_target": 0.05,
+        "xi": 0,
+        "p_num": 24,
+        "t_num": 12
+    },
+    "benchmarks": [
+        {
+            "label": "Newton (default line search)",
+            "params": "(method = :newton,)",
+            "stats": {
+                "samples": 20,
+                "min": 10.0885,
+                "median": 17.985999999999997,
+                "max": 23.2217,
+                "mean": 17.98462,
+                "allocs": 233,
+                "memory_bytes": 26800,
+                "gctime_ms": 0
+            }
+        },
+        {
+            "label": "Newton + BackTracking line search",
+            "params": "(method = :newton, linesearch = LineSearches.BackTracking{Float64, Int64}(0.0001, 0.5, 0.1, 1000, 3, Inf, nothing))",
+            "stats": {
+                "samples": 20,
+                "min": 18.6443,
+                "median": 22.1944,
+                "max": 31.2349,
+                "mean": 23.061745,
+                "allocs": 1164,
+                "memory_bytes": 76496,
+                "gctime_ms": 0
+            }
+        },
+        {
+            "label": "Trust-region",
+            "params": "(method = :trust_region,)",
+            "stats": {
+                "samples": 20,
+                "min": 16.0339,
+                "median": 28.2727,
+                "max": 33.3711,
+                "mean": 25.613984999999996,
+                "allocs": 982,
+                "memory_bytes": 75952,
+                "gctime_ms": 0
+            }
+        }
+    ]
+}

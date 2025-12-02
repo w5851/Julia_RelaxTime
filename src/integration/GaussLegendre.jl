@@ -91,7 +91,7 @@ function gauleg(a::Float64, b::Float64, n::Int)
 end
 
 const DEFAULT_momentum_POINTS = 64
-const DEFAULT_theta_POINTS = 32
+const DEFAULT_theta_POINTS = 8
 
 """默认的角度积分节点和权重 (cosθ ∈ [-1, 1]，用于一般角度积分)"""
 const DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)

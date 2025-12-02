@@ -1,6 +1,6 @@
 [physical]
 hbarc = 197.327
-alpha_em = 1.0 / 137.035999084
+alpha_em = 0.0072973525693
 
 [model]
 N_color = 3
