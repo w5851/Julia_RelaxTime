@@ -1,6 +1,7 @@
 module SeedCache
 
 using DelimitedFiles
+using NearestNeighbors
 using ..Constants_PNJL: ħc_MeV_fm
 
 export SeedPoint, load_seed_table, find_initial_seed, seed_state, DEFAULT_SEED_PATH
@@ -21,11 +22,30 @@ struct SeedPoint
     source::String
 end
 
-const DEFAULT_SEED_PATH = normpath(joinpath(@__DIR__, "..", "..", "data", "raw", "pnjl", "seeds", "aniso_coarse.csv"))
+const _SEED_DIR = normpath(joinpath(@__DIR__, "..", "..", "data", "raw", "pnjl", "seeds"))
+const GENERATED_SEED_FILE = "sobol_seed_table.csv"
+const DEFAULT_SEED_PATH = normpath(joinpath(_SEED_DIR, GENERATED_SEED_FILE))
+const FALLBACK_SEED_PATH = normpath(joinpath(_SEED_DIR, "aniso_coarse.csv"))
 const DEFAULT_WEIGHTS = (T = 1.0, mu = 1.0, rho = 0.6, xi = 0.4)
 
-const _seed_cache = Ref{Vector{SeedPoint}}(nothing)
+const _seed_cache = Ref(Vector{SeedPoint}())
 const _seed_cache_path = Ref{String}("")
+const _mu_tree_cache = Ref{Union{Nothing, Tuple{KDTree, String, NTuple{3, Float64}}}}(nothing)
+const _rho_tree_cache = Ref{Union{Nothing, Tuple{KDTree, String, NTuple{3, Float64}}}}(nothing)
+
+_weights_key_mu(w) = (w.T, w.mu, w.xi)
+_weights_key_rho(w) = (w.T, w.rho, w.xi)
+
+function _resolve_seed_path(path::AbstractString)
+    if isfile(path)
+        return path
+    elseif path == DEFAULT_SEED_PATH && isfile(FALLBACK_SEED_PATH)
+        @warn "Seed table $path not found, falling back to $FALLBACK_SEED_PATH"
+        return FALLBACK_SEED_PATH
+    else
+        error("Seed table not found: $path")
+    end
+end
 
 # ---------------- helper functions ----------------
 
@@ -72,14 +92,117 @@ function _distance(seed::SeedPoint, target, weights)
     return used == 0 ? Inf : sqrt(total)
 end
 
+function _collect_neighbors(seeds, indices, distances)
+    count = length(indices)
+    neighbors = Vector{NamedTuple}(undef, count)
+    for j in 1:count
+        seed = seeds[indices[j]]
+        state = seed_state(seed)
+        neighbors[j] = (seed = seed, distance = distances[j], state = state)
+    end
+    return sort(neighbors, by = n -> n.distance)
+end
+
+function _linear_neighbors(seeds, target, weights, k)
+    scored = NamedTuple[]
+    for seed in seeds
+        dist = _distance(seed, target, weights)
+        push!(scored, (seed = seed, distance = dist, state = seed_state(seed)))
+    end
+    sort!(scored, by = n -> n.distance)
+    return scored[1:clamp(k, 1, length(scored))]
+end
+
+function _blend_neighbors(neighbors)
+    isempty(neighbors) && return nothing
+    weights = similar(neighbors, Float64)
+    for (i, neighbor) in enumerate(neighbors)
+        weights[i] = neighbor.distance == 0.0 ? Inf : 1.0 / neighbor.distance
+    end
+    if any(isinf, weights)
+        idx = findfirst(isinf, weights)
+        rho_seed = copy(neighbors[idx].state.x)
+        mu_seed = rho_seed[1:5]
+        return (rho_seed = rho_seed, mu_seed = mu_seed)
+    end
+    norm = sum(weights)
+    rho_seed = zeros(Float64, length(neighbors[1].state.x))
+    mu_seed = zeros(Float64, 5)
+    for (neighbor, w) in zip(neighbors, weights)
+        rho_seed .+= w .* neighbor.state.x
+        mu_seed .+= w .* neighbor.state.x[1:5]
+    end
+    rho_seed ./= norm
+    mu_seed ./= norm
+    return (rho_seed = rho_seed, mu_seed = mu_seed)
+end
+
+function _query_mu_neighbors(seeds, target, weights, path, k)
+    tree = _ensure_mu_tree(weights, path)
+    xi_val = target.xi === nothing ? 0.0 : target.xi
+    point = [weights.T * target.T, weights.mu * target.mu, weights.xi * xi_val]
+    idxs, dists = knn(tree, point, clamp(k, 1, length(seeds)))
+    return _collect_neighbors(seeds, idxs, dists)
+end
+
+function _query_rho_neighbors(seeds, target, weights, path, k)
+    tree = _ensure_rho_tree(weights, path)
+    xi_val = target.xi === nothing ? 0.0 : target.xi
+    point = [weights.T * target.T, weights.rho * target.rho, weights.xi * xi_val]
+    idxs, dists = knn(tree, point, clamp(k, 1, length(seeds)))
+    return _collect_neighbors(seeds, idxs, dists)
+end
+
+function _build_mu_tree(seeds, weights, path)
+    coords = zeros(3, length(seeds))
+    for (i, seed) in enumerate(seeds)
+        coords[1, i] = weights.T * seed.T
+        coords[2, i] = weights.mu * seed.mu
+        coords[3, i] = weights.xi * seed.xi
+    end
+    tree = KDTree(coords)
+    _mu_tree_cache[] = (tree, path, _weights_key_mu(weights))
+    return tree
+end
+
+function _build_rho_tree(seeds, weights, path)
+    coords = zeros(3, length(seeds))
+    for (i, seed) in enumerate(seeds)
+        coords[1, i] = weights.T * seed.T
+        coords[2, i] = weights.rho * seed.rho
+        coords[3, i] = weights.xi * seed.xi
+    end
+    tree = KDTree(coords)
+    _rho_tree_cache[] = (tree, path, _weights_key_rho(weights))
+    return tree
+end
+
+function _ensure_mu_tree(weights, path)
+    resolved = _resolve_seed_path(path)
+    cache = _mu_tree_cache[]
+    if cache !== nothing && cache[2] == resolved && cache[3] == _weights_key_mu(weights)
+        return cache[1]
+    end
+    seeds = load_seed_table(path = resolved)
+    return _build_mu_tree(seeds, weights, resolved)
+end
+
+function _ensure_rho_tree(weights, path)
+    resolved = _resolve_seed_path(path)
+    cache = _rho_tree_cache[]
+    if cache !== nothing && cache[2] == resolved && cache[3] == _weights_key_rho(weights)
+        return cache[1]
+    end
+    seeds = load_seed_table(path = resolved)
+    return _build_rho_tree(seeds, weights, resolved)
+end
+
 # ---------------- public API ----------------
 
 function load_seed_table(; path::AbstractString = DEFAULT_SEED_PATH, force::Bool = false)
-    if force || _seed_cache[] === nothing || _seed_cache_path[] != path
-        if !isfile(path)
-            error("Seed table not found: $path")
-        end
-        data, header = readdlm(path, ',', header = true)
+    resolved = _resolve_seed_path(path)
+    if force || _seed_cache[] === nothing || _seed_cache_path[] != resolved
+        data, header = readdlm(resolved, ',', header = true)
         header_syms = Symbol.(vec(header))
         col_index = Dict(header_syms[i] => i for i in eachindex(header_syms))
         function col(row, name)
@@ -101,11 +224,13 @@ function load_seed_table(; path::AbstractString = DEFAULT_SEED_PATH, force::Bool
                 col(row, :mu_u_MeV) / ħc_MeV_fm,
                 col(row, :mu_d_MeV) / ħc_MeV_fm,
                 col(row, :mu_s_MeV) / ħc_MeV_fm,
-                path,
+                resolved,
             ))
         end
         _seed_cache[] = seeds
-        _seed_cache_path[] = path
+        _seed_cache_path[] = resolved
+        _mu_tree_cache[] = nothing
+        _rho_tree_cache[] = nothing
     end
     return _seed_cache[]
 end
@@ -128,26 +253,30 @@ function seed_state(seed::SeedPoint)
     )
 end
 
-function find_initial_seed(params; weights = DEFAULT_WEIGHTS, path::AbstractString = DEFAULT_SEED_PATH)
+function find_initial_seed(params; weights = DEFAULT_WEIGHTS, path::AbstractString = DEFAULT_SEED_PATH, k_neighbors::Int = 3)
     target = _normalize_request(params)
+    target.T === nothing && error("seed lookup needs temperature T")
     seeds = load_seed_table(path = path)
-    best_seed = nothing
-    best_dist = Inf
-    for seed in seeds
-        dist = _distance(seed, target, weights)
-        if dist < best_dist
-            best_seed = seed
-            best_dist = dist
-        end
+    isempty(seeds) && error("seed table is empty")
+
+    neighbors = if target.mu !== nothing
+        _query_mu_neighbors(seeds, target, weights, path, k_neighbors)
+    elseif target.rho !== nothing
+        _query_rho_neighbors(seeds, target, weights, path, k_neighbors)
+    else
+        _linear_neighbors(seeds, target, weights, k_neighbors)
     end
-    if best_seed === nothing
-        error("没有可用的种子点，请先提供至少一个种子参数")
-    end
+
+    neighbors = isempty(neighbors) ? _linear_neighbors(seeds, target, weights, k_neighbors) : neighbors
+    best = first(neighbors)
+    blended = _blend_neighbors(neighbors)
     return (
-        seed = best_seed,
-        distance = best_dist,
+        seed = best.seed,
+        distance = best.distance,
         used_axes = count(x -> x !== nothing, (target.T, target.mu, target.rho, target.xi)),
-        state = seed_state(best_seed),
+        state = best.state,
+        neighbors = neighbors,
+        blended_state = blended,
     )
 end
 

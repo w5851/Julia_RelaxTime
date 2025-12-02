@@ -100,14 +100,16 @@ function _extract_seed_vectors(nearest, mode)
     if nearest === nothing
         return Float64.(DEFAULT_RHO_GUESS), Float64.(DEFAULT_MU_GUESS)
     end
+    blended = nearest.blended_state
+    if blended !== nothing
+        rho_seed = Float64.(blended.rho_seed)
+        mu_seed = Float64.(blended.mu_seed)
+        return rho_seed, mu_seed
+    end
     x_vec = nearest.state.x
     rho_seed = length(x_vec) == 8 ? Float64.(x_vec) : Float64.(DEFAULT_RHO_GUESS)
     mu_seed = length(x_vec) >= 5 ? Float64.(x_vec[1:5]) : Float64.(DEFAULT_MU_GUESS)
-    if mode == :rho
-        return rho_seed, mu_seed
-    else
-        return rho_seed, mu_seed
-    end
+    return rho_seed, mu_seed
 end
 
 function run_single_point(params::Union{NamedTuple, AbstractDict, Dict}; seed_path::AbstractString = DEFAULT_SEED_PATH, solver_kwargs...)
