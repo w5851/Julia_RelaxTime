@@ -92,7 +92,7 @@ function build_nodes(p_num::Int, t_num::Int)
     thermal_p_mesh = repeat(momentum_nodes, 1, t_num)
     cosθ_mesh = repeat(cosθ_nodes', p_num, 1)
     weight_mesh = momentum_weights * cosθ_weights'
-    thermal_coefficients = weight_mesh .* thermal_p_mesh.^2 ./ π^2
+    thermal_coefficients = weight_mesh .* thermal_p_mesh.^2 ./ (2 * π)^2
 
     return (thermal_p_mesh, cosθ_mesh, thermal_coefficients)
 end
@@ -182,7 +182,7 @@ function calculate_log_sum(masses::SVector{3, TF}, p_nodes, cosθ_nodes, coeffic
             total += calculate_log_term(E_i, mu_i, T_fm, Φ, Φ̄) * coefficients[idx]
         end
     end
-    return -T_fm * total
+    return -2 * T_fm * total
 end
 
 function calculate_pressure(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
