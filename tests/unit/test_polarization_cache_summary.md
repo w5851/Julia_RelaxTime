@@ -234,7 +234,7 @@ channels = [:P, :S]                              # 2个通道
 - ✅ 详细的断言说明
 
 ### 文档完整性
-- ✅ API文档：`api/PolarizationCache.md`
+- ✅ API文档：`docs/api/PolarizationCache.md`
 - ✅ 使用文档：`doc/formula/PolarizationCache_缓存使用文档.md`
 - ✅ 测试文件：`test/test_polarization_cache.jl`
 - ✅ 测试总结：本文档

@@ -37,9 +37,9 @@ const HEADER = [
 
 const DEFAULT_CONFIG = (
     samples = 160,
-    T_range = (40.0, 220.0),
-    mu_range = (-50.0, 500.0),
-    xi_range = (0.0, 1.2),
+    T_range = (1.0, 400.0),
+    mu_range = (0.0, 500.0),
+    xi_range = (-0.8, 0.8),
     rng_seed = 42,
     p_num = 24,
     t_num = 8,

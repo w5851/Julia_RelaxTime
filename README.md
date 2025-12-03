@@ -23,7 +23,7 @@
 ## 当前功能概览
 
 - **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/test_momentum_mapping.jl`、`test_frame_transformations.jl` 已覆盖核心校验。
-- **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `api/ScatteringAmplitude.md` 与 `docs/reference/formula`。
+- **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `docs/api/ScatteringAmplitude.md` 与 `docs/reference/formula`。
 - **截面/弛豫时间链路（修复中）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 等仍包含已知缺陷（阈值处理、归一因子、输运系数整合尚未校对），目前默认不在服务器或前端中暴露，仅供研究性参考。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
@@ -40,7 +40,7 @@
 - ✅ 自动缓存相同参数的极化函数，避免重复计算
 - ✅ 典型加速：10-30倍（大规模输运系数计算）
 - ✅ 100%测试通过（34/34测试用例）
-- 📖 完整文档：`api/PolarizationCache.md`
+- 📖 完整文档：`docs/api/PolarizationCache.md`
 
 **快速使用**：
 ```julia
@@ -79,7 +79,7 @@ include("src/relaxtime/relaxtime.jl")
 	- `docs/reference/`：公式、Mathematica、domain-knowledge 等原 `doc/` 内容。
 	- `docs/process/prompt`, `docs/process/plans`：原 `prompt/` 与 `plans/`，用于流程记录与规范。
 	- `docs/guides/examples/`：原 `examples/` 下的示例说明。
-- `api/`：面向外部的 API/公式描述（保持不变）。
+- `docs/api/`：面向外部的 API/公式描述。
 - `data/outputs/`：运行结果与缓存输出（原 `results/` 位于 `data/outputs/results/`）。
 - `scripts/`、`tests/`、`docs/` 之外的根文件：`Project.toml`、`Manifest.toml`、`README.md` 等项目元数据。
 

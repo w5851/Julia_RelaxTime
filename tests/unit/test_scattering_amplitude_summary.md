@@ -302,7 +302,7 @@ t = -0.1 * s
 ✅ **模块已可用于下游应用(散射截面、弛豫时间计算)**
 
 **后续工作**:
-1. 创建API文档(`api/ScatteringAmplitude.md`)
+1. 创建API文档(`docs/api/ScatteringAmplitude.md`)
 2. 参数域边界处理优化
 3. 与理论文献数值结果对比验证
 
