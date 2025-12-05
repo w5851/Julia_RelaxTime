@@ -1,0 +1,12 @@
+T_MeV,xi,status,mu_coex_MeV,rho_gas,rho_liquid,area_residual,iterations,reason
+130.0,0.4,failure,,,,,0,no_s_shape
+130.2,0.4,failure,,,,,0,no_s_shape
+130.4,0.4,failure,,,,,0,no_s_shape
+130.6,0.4,failure,,,,,0,no_s_shape
+130.8,0.4,failure,,,,,0,no_s_shape
+131.0,0.4,failure,,,,,0,no_s_shape
+131.2,0.4,failure,,,,,0,no_s_shape
+131.4,0.4,failure,,,,,0,no_s_shape
+131.6,0.4,failure,,,,,0,no_s_shape
+131.8,0.4,failure,,,,,0,no_s_shape
+132.0,0.4,failure,,,,,0,no_s_shape

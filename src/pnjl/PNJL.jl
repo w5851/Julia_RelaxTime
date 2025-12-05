@@ -8,6 +8,13 @@ using ..Constants_PNJL
 
 include("SeedCache.jl")
 include(joinpath("solvers", "AnisoGapSolver.jl"))
+include(joinpath("seeds", "TrhoSeedChain.jl"))
 include("SinglePointSolver.jl")
+include(joinpath("scans", "TmuScan.jl"))
+include(joinpath("scans", "TrhoScan.jl"))
+include(joinpath("scans", "AdaptiveRhoRefinement.jl"))
+include(joinpath("analysis", "PhaseTransition.jl"))
+include(joinpath("analysis", "CEPFinder.jl"))
+include(joinpath("analysis", "MaxwellRhoMu.jl"))
 
 end # module

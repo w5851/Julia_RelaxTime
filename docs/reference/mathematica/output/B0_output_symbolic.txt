@@ -1,0 +1,109 @@
+==============================================
+B0 Angular Integration - COMPACT SYMBOLIC FORM
+Factorized Approach with Residue Contributions
+==============================================
+
+=== Generic Integral (After substitution x = cos Î¸) ===
+â«_{-1}^{+1} (a0 + a2*xÂ²)/(d0 + d1*x) dx
+
+=== Pole Analysis ===
+Pole location: x_pole = -d0/d1
+Residue at pole: Res = (a0 + a2Â·x_poleÂ²)/d1 = (a0Â·d1Â² + a2Â·d0Â²)/d1Â³
+
+=== Principal Value (Real Part) ===
+I_PV(p) = -[2*d0*d1*a2 + (d1Â²*a0 + d0Â²*a2)*L(p)] / d1Â³
+
+where:
+  L(p) = Log|d0 - d1| - Log|d0 + d1|
+
+Mathematica form (real part):
+ConditionalExpression[(2*a0*ArcTanh[d1/d0])/d1 + (2*a2*d0*(-d1 + d0*ArcTanh[d1/d0]))/d1^3, (d1 <= 0 && d0 + d1 > 0) || (d1 > 0 && d0 > d1)]
+
+=== Imaginary Part (from Residue Theorem) ===
+When pole inside [-1, 1], i.e., |d0/d1| < 1:
+  Im[I(p)] = -ÏÂ·(a0Â·d1Â² + a2Â·d0Â²)/d1Â³
+
+Mathematica form (imaginary part):
+((-I)*(a2*d0^2 + a0*d1^2)*Pi)/d1^3
+
+=== Complete Result ===
+I(p) = I_PV(p) + iÂ·Im[I(p)]Â·Î(1 - |d0/d1|)
+
+Full Mathematica form:
+ConditionalExpression[(2*a0*ArcTanh[d1/d0])/d1 + (2*a2*d0*(-d1 + d0*ArcTanh[d1/d0]))/d1^3 + Piecewise[{{((-I)*(a2*d0^2 + a0*d1^2)*Pi)/d1^3, Abs[d0/d1] < 1}}, 0], (d1 <= 0 && d0 + d1 > 0) || (d1 > 0 && d0 > d1)]
+
+Pole condition: |d0/d1| < 1  <==>  |Î»Â² - 2Î»E1 - kÂ² + m1Â² - m2Â²| < |2kp|
+
+=== Symbolic Parameter Definitions ===
+All are functions of momentum p:
+
+a0 = A0(p)/E1(p) = fÎ¦âº(E1, Î¼1) / E1
+   - Isotropic PNJL quark distribution
+   - Temperature and chemical potential dependent
+
+a2 = A2(p)/E1(p) = [Î¾pÂ²/(2E1Â²)] Â· âfÎ¦âº/âE1
+   - Anisotropic correction to distribution
+   - Proportional to anisotropy parameter Î¾
+
+d0 = D0(p) = Î»Â² - 2Î»E1 - kÂ² + m1Â² - m2Â²
+   - Propagator constant term
+   - Î» = k0 + Î¼1 - Î¼2
+
+d1 = D1(p) = 2kp
+   - Propagator angular coefficient
+   - k is gluon momentum magnitude
+
+where E1 = â(m1Â² + pÂ²) is quark quasi-particle energy
+
+=== Complete B0 Expression ===
+B0 = 8ÏÂ² â«â^Î Prefactor(p) Â· I(p) dp
+   = 8ÏÂ² â«â^Î [2pÂ²/E1] Â· [I_PV(p) + iÂ·Im[I(p)]Â·Î(1-|d0/d1|)] dp
+
+=== Physical Interpretation ===
+â¢ Logarithmic term L(p) encodes:
+  - Propagator pole structure at x = Â±d0/d1
+  - Quasiparticle energy spectrum modifications
+  - Medium response in anisotropic QGP
+
+â¢ Imaginary part from residue theorem:
+  - Appears when propagator has on-shell poles
+  - Encodes decay width / damping rate
+  - Related to Landau damping in thermal medium
+  - Non-zero only when |d0| < |d1|, i.e., |Î»Â² - 2Î»E1 - kÂ² + ÎmÂ²| < |2kp|
+
+â¢ Factorization benefits:
+  - Compact symbolic formula (NOT expanded with exponentials)
+  - Clear separation of distribution (a0, a2) and propagator (d0, d1)
+  - Efficient numerical evaluation in Julia
+
+=== Julia Implementation Guide ===
+function B0_aniso(k, k0; params...)
+    function integrand(p)
+        E1 = sqrt(m1^2 + p^2)
+        # Compute PNJL distribution
+        a0 = compute_a0(p, E1, mu1, T)  # fÎ¦âº/E1
+        a2 = compute_a2(p, E1, mu1, T, xi)  # anisotropic term
+        # Compute propagator coefficients
+        lambda = k0 + mu1 - mu2
+        d0 = lambda^2 - 2*lambda*E1 - k^2 + m1^2 - m2^2
+        d1 = 2*k*p
+        # Angular integral - Real part (principal value)
+        Lpole = log(abs(d0 - d1)) - log(abs(d0 + d1))
+        Ipv = -(2*d0*d1*a2 + (d1^2*a0 + d0^2*a2)*Lpole) / d1^3
+        # Imaginary part (residue contribution)
+        if abs(d0/d1) < 1.0  # pole inside [-1, 1]
+            Iim = -Ï * (a0*d1^2 + a2*d0^2) / d1^3
+        else
+            Iim = 0.0
+        end
+        Ip = complex(Ipv, Iim)
+        # Prefactor
+        return (2*p^2/E1) * Ip
+    end
+    return 8*Ï^2 * quadgk(integrand, 0, Lambda)[1]
+end
+
+==============================================
+â Output includes RESIDUE contributions!
+â Formula is COMPACT - No PNJL expansion!
+==============================================
