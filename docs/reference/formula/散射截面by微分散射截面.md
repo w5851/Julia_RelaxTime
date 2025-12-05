@@ -13,6 +13,10 @@
 \tag{5.13}
 ```
 
+对应的微分截面公式采用 \(s_{ij}^\pm = s - (m_i \pm m_j)^2\)，其分母组合满足 \(s_{ij}^+ s_{ij}^- = \lambda(s,m_i^2,m_j^2)\)，后续可直接以 Kall\'en 函数形式代入。
+
+当分布函数各向异性时，需要显式注明 \(f\) 可能依赖末态的出射角，例如 \(f = f(E, T, \mu, \theta^*)\)，其中 \(\theta^*\) 是质心系下的散射角。
+
 **注意**：本项目只考虑夸克-夸克散射（费米子），因此统一使用 Pauli blocking 因子 $(1-f)$，不涉及玻色子的 Bose enhancement $(1+f)$。
 
 其中上下限 $t_\pm$（Mandelstam 变量 $t$ 的取值范围）为：
@@ -26,6 +30,29 @@ t_\pm &= m_i^2 + m_c^2
 \end{aligned}
 \tag{5.14}
 ```
+
+引入 Kall\'en 函数 \(\lambda(x,y,z)=x^2+y^2+z^2-2xy-2xz-2yz\) 可将上式改写为更紧凑的形式：
+
+```math
+t_\pm = m_i^2 + m_c^2 - \frac{1}{2s}\Big[(s+m_i^2-m_j^2)(s+m_c^2-m_d^2)
+\mp \sqrt{\lambda(s,m_i^2,m_j^2)}\,\sqrt{\lambda(s,m_c^2,m_d^2)}\Big].
+```
+
+质心系下的散射角 \(\theta^*\) 与 \(t\) 的对应关系为
+
+```math
+t(\theta^*) = m_i^2 + m_c^2 - \frac{1}{2s}\Big[(s+m_i^2-m_j^2)(s+m_c^2-m_d^2)
+- \sqrt{\lambda(s,m_i^2,m_j^2)}\,\sqrt{\lambda(s,m_c^2,m_d^2)}\cos\theta^*\Big],
+```
+
+其中 \(\theta^*\in[0,\pi]\)，当 \(\cos\theta^*=\pm1\) 时分别给出 \(t_\mp\)。反解可得到
+
+```math
+\cos\theta^* = \frac{(s+m_i^2-m_j^2)(s+m_c^2-m_d^2) - 2s\,(m_i^2+m_c^2-t)}
+{\sqrt{\lambda(s,m_i^2,m_j^2)}\,\sqrt{\lambda(s,m_c^2,m_d^2)}}.
+```
+
+因此在数值积分中可任选 \(t\) 或 \(\theta^*\) 作为积分变量；若相空间或分布函数对角度敏感（如各向异性分布），需在被积函数中保留对 \(\theta^*\) 的依赖。
 
 ---
 

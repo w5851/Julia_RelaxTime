@@ -6,6 +6,19 @@
 \frac{d\sigma}{dt} = \frac{1}{16\pi s_{ij}^+ s_{ij}^-} \cdot \frac{1}{4N_C^2} \sum_{\text{spin, color}} |\mathcal{M}|^2
 \]
 
+这里引入 Kall\'en 函数（記作 \(\lambda\)）以便简化质量与能量的组合：
+
+\[
+\lambda(x,y,z) = x^2 + y^2 + z^2 - 2xy - 2xz - 2yz.
+\]
+
+对于初态质量为 \(m_i, m_j\) 的入射粒子，有
+
+\[
+s_{ij}^+ s_{ij}^- = \bigl(s - (m_i+m_j)^2\bigr)\bigl(s - (m_i-m_j)^2\bigr) = \lambda\bigl(s, m_i^2, m_j^2\bigr),
+\]
+因此分母可以直接写成 \(16\pi\,\lambda(s,m_i^2,m_j^2)\)。
+
 ## 符号说明
 
 - \(\displaystyle \frac{d\sigma}{dt}\)：微分散射截面，表示在 Mandelstam 变量 \(t\) 方向上的散射概率密度。
