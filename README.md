@@ -30,8 +30,21 @@
 - **文档与流程**：`docs/guides/QUICKSTART.md`、`USER_GUIDE.md`、`STATUS.md` 说明部署/排错，`docs/process/*` 保留 prompt 与计划，`docs/reference` 存放公式与 Mathematica 推导。
 - **数据与结果**：`data/outputs/results/` 用于收集服务器或批处理输出，便于与 PNJL 结果对比；尚未与 PNJL 求解器联通（见“下一步”）。
 - **PNJL 单点求解（实验性）**：`src/pnjl/` 提供 TOML 参数加载、粗网格种子缓存与各向异性 PNJL 单点求解器，HTTP 端可通过 `POST /api/modules/pnjl-gap/run` 触发（请求体以 `T_mev` 传入温度；当前仅支持单点 /rho 或 /mu 模式，长任务扫描仍待实现）。实现遵循 `docs/reference/formula/pnjl/Omega_RS各向异性.md`：各向异性只作用于热项能量，真空截断积分仍保持各向同性以避免误改基态。 
+- **平均散射率（实验性）**：`src/relaxtime/AverageScatteringRate.jl` 基于 Gauss-Legendre (p=32, 角度=4) 计算各向异性平均散射率，散射截面支持预计算+插值缓存。
 
 > ⚠️ **未决功能**：PNJL 能隙方程与 Excel-like UI 尚未合入；新增 API/前端模式切换在 plan 中但无实现代码，集成前请确认挂钩方案。
+
+## 计算链路概览（各向异性输运）
+
+1. **能隙求解 → 序参量/有效质量**：在各向异性 PNJL 下先解能隙方程，得到序参量与三味夸克有效质量、粒子数密度（`src/pnjl/`）。
+2. **弛豫时间近似 (RTA)**：输运系数采用 RTA，需要弛豫时间 \(\tau\)。
+3. **弛豫时间依赖平均散射率**：\(\tau\) 由各散射过程的平均散射率 \(\Gamma\) 决定，\(\Gamma\) 需要在入射动量可行域上对散射截面加权积分。
+4. **总截面需要微分截面积分**：`TotalCrossSection.jl` 对 \(\mathrm{d}\sigma/\mathrm{d}t\) 在 \(t\) 或 \(\theta^*\) 空间积分，包含各向异性分布的阻塞因子（`quark_distribution_aniso(...,\cos\theta^*)`）。
+5. **微分截面依赖散射矩阵元**：`DifferentialCrossSection.jl` 使用 \(|\mathcal{M}|^2\) 与 Källén 函数的动量因子；\(|\mathcal{M}|^2\) 由 `ScatteringAmplitude.jl` 计算。
+6. **矩阵元依赖介子传播子**：各散射道调用 `MesonPropagator`/`TotalPropagator` 获取传播子，按道合成振幅。
+7. **传播子依赖极化函数**：`Polarization*` 使用单圈积分 `OneLoopIntegrals*`（含各向异性积分）与夸克分布函数求取极化张量。
+
+> 当前位置：截面/弛豫时间链路仍标记为“修复中”，上述流程为实际调用路径，便于排查或扩展时定位入口。
 
 ## 最近更新
 

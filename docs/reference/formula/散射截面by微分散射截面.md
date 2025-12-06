@@ -17,6 +17,14 @@
 
 当分布函数各向异性时，需要显式注明 \(f\) 可能依赖末态的出射角，例如 \(f = f(E, T, \mu, \theta^*)\)，其中 \(\theta^*\) 是质心系下的散射角。
 
+在 PNJL 各向异性模型中，末态分布函数可直接写为
+
+```math
+f = f(E, T, \mu, \xi, \cos\theta^*) \equiv \texttt{quark\_distribution\_aniso}\bigl(p, m, \mu, T, \Phi, \bar\Phi, \xi, \cos\theta^*\bigr),
+```
+
+其中 \(p = \sqrt{E^2 - m^2}\)。对反粒子需使用相应的反夸克分布；末态粒子 d 的动量方向与 c 相反，因此可用 \(-\cos\theta^*\)。
+
 **注意**：本项目只考虑夸克-夸克散射（费米子），因此统一使用 Pauli blocking 因子 $(1-f)$，不涉及玻色子的 Bose enhancement $(1+f)$。
 
 其中上下限 $t_\pm$（Mandelstam 变量 $t$ 的取值范围）为：

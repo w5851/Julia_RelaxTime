@@ -368,6 +368,8 @@ mi = mj = mc = md = 1.52  # fm⁻¹
 T = 0.15
 Φ = 0.5
 Φbar = 0.5
+ξ = thermo_params.ξ
+cosθ_star = 0.25
 
 println("\n性能基准测试:")
 println("-" * "70")
@@ -387,16 +389,16 @@ println("   用时: $(round(bench_energies.times[1] / 1e3, digits=3)) μs")
 
 # 测试3: final_state_blocking_factor
 E = 3.0
-bench_blocking = @benchmark final_state_blocking_factor($E, $μ_c, $T, $Φ, $Φbar) samples=1 evals=1
+bench_blocking = @benchmark final_state_blocking_factor(:u, $E, $mi, $μ_c, $T, $Φ, $Φbar, $ξ, $cosθ_star) samples=1 evals=1
 
-println("\n3. final_state_blocking_factor:")
+println("\n3. final_state_blocking_factor (各向异性接口):")
 println("   用时: $(round(bench_blocking.times[1] / 1e3, digits=3)) μs")
 
 # 测试4: combined_final_state_factor
 E_c = E_d = 3.0
-bench_combined = @benchmark combined_final_state_factor($E_c, $E_d, $μ_c, $μ_d, $T, $Φ, $Φbar) samples=1 evals=1
+bench_combined = @benchmark combined_final_state_factor(:u, :u, $E_c, $E_d, $mc, $md, $μ_c, $μ_d, $T, $Φ, $Φbar, $ξ, $cosθ_star) samples=1 evals=1
 
-println("\n4. combined_final_state_factor:")
+println("\n4. combined_final_state_factor (含 cosθ*):")
 println("   用时: $(round(bench_combined.times[1] / 1e3, digits=3)) μs")
 
 println("\n" * "-"^70)

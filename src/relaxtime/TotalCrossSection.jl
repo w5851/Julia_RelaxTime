@@ -68,12 +68,14 @@ all_σ = calculate_all_total_cross_sections(
 # 导入依赖模块
 include(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
+include(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl"))
 include(joinpath(@__DIR__, "ScatteringAmplitude.jl"))
 include(joinpath(@__DIR__, "DifferentialCrossSection.jl"))
 include(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
 
 using .Constants_PNJL: SCATTERING_MESON_MAP
 using .GaussLegendre: gauleg
+using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 using .ScatteringAmplitude: scattering_amplitude_squared
 using .DifferentialCrossSection: differential_cross_section
 using .OneLoopIntegrals: distribution_value
@@ -92,6 +94,26 @@ export scan_s_dependence
 
 # 数值容差
 const EPS_KINEMATIC = 1e-14  # 运动学阈值容差
+
+# 基本工具
+@inline function kallen(x::Float64, y::Float64, z::Float64)
+    return x * x + y * y + z * z - 2.0 * (x * y + x * z + y * z)
+end
+
+@inline function momentum_from_energy(E::Float64, m::Float64)
+    return sqrt(max(E * E - m * m, 0.0))
+end
+
+@inline function cos_theta_star(s::Float64, t::Float64, mi::Float64, mj::Float64, mc::Float64, md::Float64)
+    λ_in = kallen(s, mi^2, mj^2)
+    λ_out = kallen(s, mc^2, md^2)
+    denom = sqrt(abs(λ_in)) * sqrt(abs(λ_out))
+    if denom < EPS_KINEMATIC
+        return 1.0  # 近阈值时退化为正向散射近似
+    end
+    numerator = (s + mi^2 - mj^2) * (s + mc^2 - md^2) - 2.0 * s * (mi^2 + mc^2 - t)
+    return clamp(numerator / denom, -1.0, 1.0)
+end
 
 # ----------------------------------------------------------------------------
 # 1. t 积分边界计算（修正版，公式 5.14）
@@ -256,110 +278,85 @@ end
 # ----------------------------------------------------------------------------
 
 """
-    final_state_blocking_factor(E, μ, T, Φ, Φbar) -> Float64
+    final_state_blocking_factor(flavor, E, m, μ, T, Φ, Φbar, ξ, cosθ) -> Float64
 
-计算末态费米子统计因子 (1 - f)。
-
-# 公式
-
-费米子: 1 - f(E, μ, T, Φ, Φbar) (Pauli blocking)
-
-其中 f 是 Fermi-Dirac 分布函数。
+计算末态费米子统计因子 (1 - f)，支持各向异性 PNJL：
+- 当 ξ = 0 使用各向同性分布；
+- 当 ξ ≠ 0 调用 `quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)`，其中 cosθ 由 t 反解得到的质心系散射角。
 
 # 参数
 
+- `flavor::Symbol`: 粒子味道（用于区分夸克/反夸克）
 - `E::Float64`: 粒子能量 [fm⁻¹]
+- `m::Float64`: 粒子质量 [fm⁻¹]
 - `μ::Float64`: 化学势 [fm⁻¹]
 - `T::Float64`: 温度 [fm⁻¹]
-- `Φ::Float64`: Polyakov loop
-- `Φbar::Float64`: Conjugate Polyakov loop
+- `Φ, Φbar::Float64`: Polyakov loop 及其共轭
+- `ξ::Float64`: 各向异性参数（ξ=0 退化为各向同性）
+- `cosθ::Float64`: 质心系散射角的余弦（由 t 反解得到的 θ*）
 
-# 返回
-
-`(1 - f)`: 末态统计因子（无量纲，范围 [0, 1]）
-
-# 物理意义
-
-Pauli blocking: 费米子不能占据已被占据的态，抑制散射到已被占据的末态。
-
-# 说明
-
-本项目只考虑夸克-夸克散射（费米子），不涉及玻色子（介子）散射。
-
-# 示例
-
-```julia
-E = 3.0  # fm⁻¹
-μ = 0.3  # fm⁻¹
-T = 0.15  # fm⁻¹
-Φ = 0.5
-Φbar = 0.5
-
-factor = final_state_blocking_factor(E, μ, T, Φ, Φbar)
-# 对于费米子: 0 ≤ factor ≤ 1
-```
 """
 function final_state_blocking_factor(
+    flavor::Symbol,
     E::Float64,
+    m::Float64,
     μ::Float64,
     T::Float64,
     Φ::Float64,
-    Φbar::Float64
+    Φbar::Float64,
+    ξ::Float64,
+    cosθ::Float64
 )::Float64
-    # 计算 Fermi-Dirac 分布函数 f(E, μ, T, Φ, Φbar)
-    # 使用 :pnjl 模式，:plus 符号（正能粒子）
-    f = distribution_value(:pnjl, :plus, E, μ, T, Φ, Φbar)
-    
-    # Pauli blocking (费米子)
+    f::Float64
+    if ξ == 0.0
+        sign_flag = is_antiquark(flavor) ? :minus : :plus
+        f = distribution_value(:pnjl, sign_flag, E, μ, T, Φ, Φbar)
+    else
+        p = momentum_from_energy(E, m)
+        if is_antiquark(flavor)
+            f = antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        else
+            f = quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        end
+    end
+
     return 1.0 - f
 end
 
 """
-    combined_final_state_factor(E_c, E_d, μ_c, μ_d, T, Φ, Φbar) -> Float64
+    combined_final_state_factor(flavor_c, flavor_d, E_c, E_d, mc, md, μ_c, μ_d, T, Φ, Φbar, ξ, cosθ_star)
 
-计算组合末态费米子统计因子 (1 - f_c)(1 - f_d)。
-
-# 参数
-
-- `E_c, E_d::Float64`: 末态粒子能量 [fm⁻¹]
-- `μ_c, μ_d::Float64`: 化学势 [fm⁻¹]
-- `T::Float64`: 温度 [fm⁻¹]
-- `Φ, Φbar::Float64`: Polyakov loop
-
-# 返回
-
-`(1 - f_c)(1 - f_d)`: 组合统计因子（费米子）
-
-# 说明
-
-本项目只考虑夸克-夸克散射（费米子），因此统一使用 Pauli blocking 因子。
-
-# 示例
-
-```julia
-factor = combined_final_state_factor(
-    3.0, 3.0, 0.3, 0.3, 0.15, 0.5, 0.5
-)
-```
+计算组合末态费米子统计因子 (1 - f_c)(1 - f_d)，在各向异性情形下使用 θ*→t 关系得到的角度：
+- 出射粒子 c 使用 cosθ*；
+- 出射粒子 d 反向，使用 -cosθ*。
 """
 function combined_final_state_factor(
+    flavor_c::Symbol,
+    flavor_d::Symbol,
     E_c::Float64,
     E_d::Float64,
+    mc::Float64,
+    md::Float64,
     μ_c::Float64,
     μ_d::Float64,
     T::Float64,
     Φ::Float64,
-    Φbar::Float64
+    Φbar::Float64,
+    ξ::Float64,
+    cosθ_star::Float64
 )::Float64
-    factor_c = final_state_blocking_factor(E_c, μ_c, T, Φ, Φbar)
-    factor_d = final_state_blocking_factor(E_d, μ_d, T, Φ, Φbar)
-    
+    factor_c = final_state_blocking_factor(flavor_c, E_c, mc, μ_c, T, Φ, Φbar, ξ, cosθ_star)
+    factor_d = final_state_blocking_factor(flavor_d, E_d, md, μ_d, T, Φ, Φbar, ξ, -cosθ_star)
     return factor_c * factor_d
 end
 
 # ----------------------------------------------------------------------------
 # 5. 辅助函数：粒子、质量和化学势
 # ----------------------------------------------------------------------------
+
+@inline function is_antiquark(flavor::Symbol)::Bool
+    return flavor === :ubar || flavor === :dbar || flavor === :sbar
+end
 
 """
     parse_particles_from_process(process) -> Tuple{Symbol, Symbol, Symbol, Symbol}
@@ -612,6 +609,7 @@ function total_cross_section(
     T = thermo_params.T
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
+    ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
     
     # 步骤7: 对 t 积分（高斯求积）
     σ = 0.0
@@ -629,12 +627,18 @@ function total_cross_section(
             s_12_plus, s_12_minus, M_squared
         )
         
-        # 7.3 计算末态能量
+        # 7.3 计算末态能量与角度
         E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
+        cosθ_star = cos_theta_star(s, t, mi, mj, mc, md)
         
-        # 7.4 计算末态统计因子（费米子）
+        # 7.4 计算末态统计因子（费米子，含各向异性）
         blocking_factor = combined_final_state_factor(
-            E_c, E_d, μ_c, μ_d, T, Φ, Φbar
+            particle_c, particle_d,
+            E_c, E_d,
+            mc, md,
+            μ_c, μ_d,
+            T, Φ, Φbar,
+            ξ, cosθ_star
         )
         
         # 7.5 累加
