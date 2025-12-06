@@ -307,7 +307,7 @@ function final_state_blocking_factor(
     ξ::Float64,
     cosθ::Float64
 )::Float64
-    f::Float64
+    f::Float64 = 0.0  # default to avoid uninitialized path
     if ξ == 0.0
         sign_flag = is_antiquark(flavor) ? :minus : :plus
         f = distribution_value(:pnjl, sign_flag, E, μ, T, Φ, Φbar)
@@ -592,6 +592,14 @@ function total_cross_section(
     
     μ_c = get_chemical_potential(particle_c, quark_params)
     μ_d = get_chemical_potential(particle_d, quark_params)
+
+    # 步骤2.5: 运动学阈值检查；s 低于阈值时截面为 0（避免抛错导致 NaN）
+    s_threshold_initial = (mi + mj)^2
+    s_threshold_final = (mc + md)^2
+    s_threshold = max(s_threshold_initial, s_threshold_final)
+    if s < s_threshold - EPS_KINEMATIC
+        return 0.0
+    end
     
     # 步骤3: 计算 t 积分边界
     t_bounds = calculate_t_bounds(s, mi, mj, mc, md)

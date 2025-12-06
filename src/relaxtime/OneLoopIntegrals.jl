@@ -81,8 +81,10 @@ end
     if !isfinite(E0)
         return Float64[]
     end
-    # 仅在严格位于积分区间内部且不靠近端点时视为奇点
-    if (E0 > Emin) && (E0 < Emax)
+
+    # 允许 E0 贴近端点（数值误差内）也被识别出来
+    tol = 1e-8 * max(1.0, abs(E0))
+    if (E0 > Emin - tol) && (E0 < Emax + tol)
         return [E0]
     else
         return Float64[]
@@ -102,10 +104,23 @@ end
     imag_part = 0.0
     if isempty(singularity) # 无奇点
         real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
-    else # 有奇点
-        real_part, _ = quadgk(integrand_fun, Emin, singularity..., Emax; rtol=rtol, atol=atol)
-        p0 = internal_momentum(singularity[1], m)
-        imag_part = 2.0 * π * p0 * distribution_value(:pnjl, sign_flag, singularity[1], μ, T, Φ, Φbar)
+    else # 有奇点：在 E0 附近留出对称的微小间隙，避免直接采样到 1/0
+        E0 = singularity[1]
+        eps = max(1e-6, 1e-6 * abs(E0))
+        lo = max(Emin, E0 - eps)
+        hi = min(Emax, E0 + eps)
+
+        if hi <= lo
+            # 极端情况下间隙退化，回退到直接积分（可能再次触发奇点，但覆盖面更小）
+            real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
+        else
+            left, _ = quadgk(integrand_fun, Emin, lo; rtol=rtol, atol=atol)
+            right, _ = quadgk(integrand_fun, hi, Emax; rtol=rtol, atol=atol)
+            real_part = left + right
+        end
+
+        p0 = internal_momentum(E0, m)
+        imag_part = 2.0 * π * p0 * distribution_value(:pnjl, sign_flag, E0, μ, T, Φ, Φbar)
     end
 
     return real_part * 2.0, imag_part / λ
