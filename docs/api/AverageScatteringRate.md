@@ -27,9 +27,18 @@ $$
 
 ## 主要 API
 
-- `CrossSectionCache(process::Symbol)`: 创建截面缓存；内部存储 `(s_vals, sigma_vals)`，线性插值。
+- `CrossSectionCache(process::Symbol)`: 创建截面缓存；内部存储 `(s_vals, sigma_vals)`，同时持有基于拟合的 σ(s) 近似（见下）。
 - `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=32)`: 预计算并填充截面表。
 - `average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=32, angle_nodes=4, phi_nodes=4, cs_cache=CrossSectionCache(process), n_sigma_points=32)`: 计算给定过程的平均散射率。
+
+### σ(s) 拟合与调用流程
+
+- 首次调用 `get_sigma` 会估算积分所需的 s 范围：阈值 `max((m_i+m_j)^2, (m_c+m_d)^2)` 到 `p_max=Λ_inv_fm` 推出的上界并乘以 1.05 余量。
+- 在该范围内取约 24 个左端偏置节点（指数偏置，λ=4），逐点调用一次 `total_cross_section` 真实计算并拟合：
+  - 初态更重（m_i+m_j≥m_c+m_d）：用 `sqrt` 型基函数 `A/√(s-s0)+B(s-s0)+C(s-s0)^2+D` 最小二乘拟合。
+  - 初态更轻：用分段线性插值（外推到边界）。
+- 随后所有落在拟合范围内的 σ 查询都直接用拟合值，积分时不再触发真实计算；仅当 s 超出拟合范围时才回退单点精确计算并缓存。
+- 拟合成本：每个 process 首次约 24 次 `total_cross_section` 调用；之后常数时间查表。
 
 ## 使用示例
 

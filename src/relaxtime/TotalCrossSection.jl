@@ -605,6 +605,11 @@ function total_cross_section(
     t_bounds = calculate_t_bounds(s, mi, mj, mc, md)
     t_min = t_bounds.t_min
     t_max = t_bounds.t_max
+
+    # 极近阈值时 t 区间可能退化为零宽度；此时贡献为 0，避免高斯节点报错
+    if t_max - t_min <= EPS_KINEMATIC
+        return 0.0
+    end
     
     # 步骤4: 生成高斯-勒让德积分节点和权重
     t_nodes, t_weights = gauleg(t_min, t_max, n_points)

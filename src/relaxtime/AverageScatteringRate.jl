@@ -13,6 +13,8 @@ include("TotalCrossSection.jl")
 include("../QuarkDistribution.jl")
 include("../QuarkDistribution_Aniso.jl")
 
+using LinearAlgebra
+
 using .Constants_PNJL: Λ_inv_fm
 using .GaussLegendre: gauleg
 using .TotalCrossSection: total_cross_section
@@ -99,10 +101,20 @@ mutable struct CrossSectionCache
     process::Symbol
     s_vals::Vector{Float64}
     sigma_vals::Vector{Float64}
+    fit_model::Symbol
+    fit_coeff::Any
+    fit_s_sample::Vector{Float64}
+    fit_sigma_sample::Vector{Float64}
+    s_min::Float64
+    s_max::Float64
+    s0::Float64
+    lambda::Float64
+    n_fit::Int
+    fit_ready::Bool
 end
 
 function CrossSectionCache(process::Symbol)
-    return CrossSectionCache(process, Float64[], Float64[])
+    return CrossSectionCache(process, Float64[], Float64[], :none, nothing, Float64[], Float64[], 0.0, 0.0, 0.0, 0.0, 0, false)
 end
 
 function insert_sigma!(cache::CrossSectionCache, s::Float64, σ::Float64)
@@ -143,13 +155,127 @@ end
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
-    σ_interp = interpolate_sigma(cache, s)
-    if σ_interp !== nothing
-        return σ_interp
+    if !cache.fit_ready
+        prepare_sigma_fit!(cache, quark_params, thermo_params, K_coeffs; n_points=n_points)
+    end
+
+    if cache.fit_ready && s >= cache.s_min && s <= cache.s_max
+        return predict_sigma(cache, s)
+    end
+
+    # fallback: exact compute (and cache raw)
+    idx = searchsortedfirst(cache.s_vals, s)
+    if idx <= length(cache.s_vals) && cache.s_vals[idx] == s
+        return cache.sigma_vals[idx]
+    end
+
+    σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+    insert_sigma!(cache, s, σ)
+    return σ
+end
+
+# -------------------- 拟合工具 --------------------
+
+@inline function is_heavy_initial(mi::Float64, mj::Float64, mc::Float64, md::Float64)
+    return (mi + mj) >= (mc + md)
+end
+
+function s_bounds(process::Symbol, quark_params::NamedTuple; margin::Float64=1.05)
+    pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
+    mi = get_mass(pi_sym, quark_params); mj = get_mass(pj_sym, quark_params)
+    mc = get_mass(pc_sym, quark_params); md = get_mass(pd_sym, quark_params)
+    s0 = (mi + mj)^2
+    sf = (mc + md)^2
+    s_min = max(s0, sf) + 1e-4
+
+    p_max = Λ_inv_fm
+    Ei = sqrt(p_max^2 + mi^2)
+    Ej = sqrt(p_max^2 + mj^2)
+    p_dot_max = Ei * Ej + p_max * p_max
+    s_max = (mi^2 + mj^2 + 2.0 * p_dot_max) * margin
+    return (s_min=s_min, s_max=s_max, s0=s0, mi=mi, mj=mj, mc=mc, md=md)
+end
+
+"""左端聚焦节点，lambda 越大越偏向左端。"""
+function left_biased_nodes(n::Int, a::Float64, b::Float64; lambda::Float64=4.0)
+    t = range(0.0, 1.0; length=n)
+    w = (exp.(lambda .* t) .- 1.0) ./ (exp(lambda) - 1.0)
+    return a .+ (b - a) .* w
+end
+
+function fit_sqrt2(s::Vector{Float64}, y::Vector{Float64}, s0::Float64)
+    shift = s .- s0
+    X = hcat(1.0 ./ sqrt.(shift), shift, shift.^2, ones(length(s)))
+    return X \ y
+end
+
+function predict_sqrt2(coeff::Vector{Float64}, s::Float64, s0::Float64)
+    A, B, C, D = coeff
+    x = s - s0
+    return A / sqrt(x) + B * x + C * x^2 + D
+end
+
+function predict_sqrt2(coeff::Vector{Float64}, svals::Vector{Float64}, s0::Float64)
+    A, B, C, D = coeff
+    x = svals .- s0
+    return A .* (1.0 ./ sqrt.(x)) .+ B .* x .+ C .* x.^2 .+ D
+end
+
+function predict_spline_linear(s_sample::Vector{Float64}, y_sample::Vector{Float64}, s::Float64)
+    if s <= s_sample[1]
+        return y_sample[1]
+    elseif s >= s_sample[end]
+        return y_sample[end]
     else
-        σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
-        insert_sigma!(cache, s, σ)
-        return σ
+        idx = searchsortedfirst(s_sample, s)
+        s1 = s_sample[idx-1]; s2 = s_sample[idx]
+        y1 = y_sample[idx-1]; y2 = y_sample[idx]
+        w = (s - s1) / (s2 - s1)
+        return y1 + w * (y2 - y1)
+    end
+end
+
+function predict_spline_linear(s_sample::Vector{Float64}, y_sample::Vector{Float64}, svals::Vector{Float64})
+    return [predict_spline_linear(s_sample, y_sample, s) for s in svals]
+end
+
+function prepare_sigma_fit!(cache::CrossSectionCache, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple; n_points::Int)
+    b = s_bounds(cache.process, quark_params)
+    heavy = is_heavy_initial(b.mi, b.mj, b.mc, b.md)
+    model = heavy ? :sqrt2 : :spline_lin
+    lambda = 4.0
+    n_fit = 24
+    s_sample = sort(left_biased_nodes(n_fit, b.s_min, b.s_max; lambda=lambda))
+    sigma_sample = Float64[]
+    for s in s_sample
+        push!(sigma_sample, total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points))
+    end
+
+    if model == :sqrt2
+        coeff = fit_sqrt2(s_sample, sigma_sample, b.s0)
+    else
+        coeff = nothing  # spline uses stored samples
+    end
+
+    cache.fit_model = model
+    cache.fit_coeff = coeff
+    cache.fit_s_sample = s_sample
+    cache.fit_sigma_sample = sigma_sample
+    cache.s_min = b.s_min
+    cache.s_max = b.s_max
+    cache.s0 = b.s0
+    cache.lambda = lambda
+    cache.n_fit = n_fit
+    cache.fit_ready = true
+end
+
+function predict_sigma(cache::CrossSectionCache, s::Float64)
+    if cache.fit_model == :sqrt2
+        return predict_sqrt2(cache.fit_coeff, s, cache.s0)
+    elseif cache.fit_model == :spline_lin
+        return predict_spline_linear(cache.fit_s_sample, cache.fit_sigma_sample, s)
+    else
+        error("Sigma fit not prepared for $(cache.process)")
     end
 end
 
