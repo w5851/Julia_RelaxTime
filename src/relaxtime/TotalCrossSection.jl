@@ -81,7 +81,7 @@ using .DifferentialCrossSection: differential_cross_section
 using .OneLoopIntegrals: distribution_value
 
 # 默认积分点数
-const DEFAULT_T_INTEGRAL_POINTS = 32
+const DEFAULT_T_INTEGRAL_POINTS = 6
 
 # 导出函数
 export calculate_t_bounds
