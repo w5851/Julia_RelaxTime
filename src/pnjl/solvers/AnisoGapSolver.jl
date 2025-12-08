@@ -12,6 +12,8 @@ using StaticArrays
 using ForwardDiff
 using NLsolve
 using SpecialFunctions: log
+include(joinpath(@__DIR__, "..", "..", "QuarkDistribution_Aniso.jl"))
+using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 using Main.GaussLegendre:
     gauleg,
     DEFAULT_COSΘ_HALF_NODES,
@@ -50,6 +52,7 @@ const DEFAULT_MU_GUESS = [-1.8, -1.8, -2.1, 0.8, 0.8]
 const NODE_CACHE = Dict{Tuple{Int, Int}, NTuple{3, Matrix{Float64}}}()
 
 export SolverResult, solve_fixed_rho, solve_fixed_mu, DEFAULT_RHO_GUESS, DEFAULT_MU_GUESS
+export calculate_number_densities
 
 struct SolverResult
     mode::Symbol
@@ -220,6 +223,35 @@ function calculate_rho(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm
     grad = ForwardDiff.gradient(pressure_mu, mu_vec)
     grad_type = typeof(grad[1])
     return SVector{3, grad_type}(Tuple(grad))
+end
+
+"""分别计算夸克与反夸克的数密度（各向异性分布）。返回 (quark, antiquark) 的三味道向量。"""
+function calculate_number_densities(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
+    φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
+    Φ, Φ̄ = x_state[4], x_state[5]
+    masses = calculate_mass_vec(φ)
+
+    thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
+    pref = 2 * N_color
+    acc_q = MVector{3, promote_type(TF, TM, eltype(thermal_p_mesh))}(0, 0, 0)
+    acc_aq = similar(acc_q)
+
+    @inbounds for i in 1:3
+        mass_i = masses[i]
+        mu_i = mu_vec[i]
+        total_q = zero(acc_q[i])
+        total_aq = zero(acc_aq[i])
+        for idx in eachindex(thermal_p_mesh)
+            p = thermal_p_mesh[idx]
+            cosθ = cosθ_mesh[idx]
+            w = thermal_coefficients[idx]
+            total_q += w * pref * quark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
+            total_aq += w * pref * antiquark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
+        end
+        acc_q[i] = total_q
+        acc_aq[i] = total_aq
+    end
+    return (quark = SVector{3}(acc_q), antiquark = SVector{3}(acc_aq))
 end
 
 """计算所有热力学量，返回压力、归一化密度、熵、能量"""

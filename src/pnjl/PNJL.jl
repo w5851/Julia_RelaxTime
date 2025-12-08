@@ -16,5 +16,6 @@ include(joinpath("scans", "AdaptiveRhoRefinement.jl"))
 include(joinpath("analysis", "PhaseTransition.jl"))
 include(joinpath("analysis", "CEPFinder.jl"))
 include(joinpath("analysis", "MaxwellRhoMu.jl"))
+include(joinpath("analysis", "ThermoDerivatives.jl"))
 
 end # module

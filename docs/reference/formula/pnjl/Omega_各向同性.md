@@ -167,6 +167,15 @@ P = -\Omega
 \rho_i = -\frac{\partial \Omega}{\partial \mu_i}
 ```
 
+等价的显式相空间积分（各向同性、准粒子质量为 \(M_i\)，费米分布 \(n_i^+, n_{\bar i}^-\)）：
+
+```math
+\rho_i = d_q \int \frac{d^3p}{(2\pi)^3}\, n_i^+(p),\qquad
+\rho_{\bar i} = d_q \int \frac{d^3p}{(2\pi)^3}\, n_{\bar i}^-(p),\qquad d_q = 2N_c.
+```
+
+其中 \(n_i^+(p) = [\exp((E_i-\mu_i)/T)+1]^{-1}\)，\(n_{\bar i}^-(p) = [\exp((E_i+\mu_i)/T)+1]^{-1}\)。
+
 若只需要重子数密度：
 
 ```math

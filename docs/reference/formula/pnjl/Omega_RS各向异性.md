@@ -128,6 +128,14 @@ n_+^{\rm aniso}(E_i^{\rm aniso}-\mu_i)
   ```math
   \rho_i = -\frac{\partial \Omega}{\partial \mu_i}
   ```
+  对应的显式积分（各向异性仅进入分布函数，简并度 \(d_q=2N_c\)）：
+
+  ```math
+  \rho_i = d_q \int \frac{d^3p}{(2\pi)^3}\, n_i^{+,\rm aniso}(p,\cos\theta),\qquad
+  \rho_{\bar i} = d_q \int \frac{d^3p}{(2\pi)^3}\, n_{\bar i}^{-,\rm aniso}(p,\cos\theta),
+  ```
+
+  其中分布函数指数中的能量替换为 \(E_i^{\rm aniso}(p,\cos\theta)=\sqrt{p^2+M_i^2+\xi p^2\cos^2\theta}\)。
 * 熵密度：
 
   ```math
