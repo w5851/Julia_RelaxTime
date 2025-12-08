@@ -2,9 +2,9 @@
 
 平均散射率计算模块（实验性，支持各向异性）。
 
-- 入口：`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=32, angle_nodes=4, phi_nodes=4, cs_cache=CrossSectionCache(process), n_sigma_points=32)`
-- 依赖：`TotalCrossSection.total_cross_section`（可通过 `CrossSectionCache` 预计算+插值），`quark_distribution(_aniso)`/`antiquark_distribution(_aniso)` 作为分布函数。
-- 默认节点：动量 32 点、角度 4 点；Gauss-Legendre 节点来自 `integration/GaussLegendre.jl`。
+- 入口：`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=6, angle_nodes=2, phi_nodes=4, p_grid=nothing, p_w=nothing, cos_grid=nothing, cos_w=nothing, phi_grid=nothing, phi_w=nothing, cs_cache=CrossSectionCache(process), n_sigma_points=32)`
+- 依赖：`TotalCrossSection.total_cross_section`（可通过 `CrossSectionCache` 预计算+拟合/插值），`quark_distribution(_aniso)`/`antiquark_distribution(_aniso)` 作为分布函数。
+- 默认节点：动量 6 点、角度 2 点、方位角 4 点；可按需调大节点数，或直接传入预计算的 Gauss-Legendre 节点/权重避免重复生成。
 - 各向异性：`ξ=0` 时退化为各向同性；`ξ≠0` 时分布调用 `quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)`，角度取自积分节点。
 - 预期用途：为弛豫时间近似提供过程级平均散射率 \(\omega_{ij}\)。
 
@@ -14,13 +14,15 @@
 
 $$
 \omega_{ij} = \frac{d_q^2}{4\pi^5\rho_i\rho_j} \int dp_i\,p_i^2 \int dp_j\,p_j^2 \int_0^1 d\cos\theta_i \int_0^1 d\cos\theta_j \int_0^\pi d\phi \, f_i f_j \, v_{\text{rel}} \, \sigma_{ij\to cd}(s, T, \mu_q)
-$$
-
+ω = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs;
+  cs_cache=cache, p_nodes=6, angle_nodes=2, phi_nodes=4)
 - 数密度（各向异性可选）：
+# 也可以复用外部预生成的节点/权重（示例）
 $$
 \rho_i = \frac{d_q}{2\pi^2} \int_0^\Lambda dp\,p^2 \int_0^1 d\cos\theta\; f_i(p,\cos\theta)
 $$
 
+  cs_cache=cache, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w, phi_grid=phi_grid, phi_w=phi_w)
 - 运动学：
   - \(s = m_i^2 + m_j^2 + 2(E_iE_j - p_i p_j \cos\Theta)\)，\(\cos\Theta = \cos\theta_i\cos\theta_j + \sin\theta_i\sin\theta_j \cos\phi\)
   - 相对速度 \(v_{\text{rel}} = \sqrt{(p_i\cdot p_j)^2 - m_i^2 m_j^2}/(E_iE_j)\)
@@ -29,7 +31,7 @@ $$
 
 - `CrossSectionCache(process::Symbol)`: 创建截面缓存；内部存储 `(s_vals, sigma_vals)`，同时持有基于拟合的 σ(s) 近似（见下）。
 - `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=32)`: 预计算并填充截面表。
-- `average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=32, angle_nodes=4, phi_nodes=4, cs_cache=CrossSectionCache(process), n_sigma_points=32)`: 计算给定过程的平均散射率。
+- `average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=6, angle_nodes=2, phi_nodes=4, p_grid=nothing, p_w=nothing, cos_grid=nothing, cos_w=nothing, phi_grid=nothing, phi_w=nothing, cs_cache=CrossSectionCache(process), n_sigma_points=32)`: 计算给定过程的平均散射率；可传入外部预计算的节点/权重（`p_grid/p_w, cos_grid/cos_w, phi_grid/phi_w`），未提供时按节点数自动生成。
 
 ### σ(s) 拟合与调用流程
 

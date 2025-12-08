@@ -23,8 +23,9 @@ using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distrib
 
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!
 
-const DEFAULT_P_NODES = 32
-const DEFAULT_ANGLE_NODES = 4
+const DEFAULT_P_NODES = 6
+const DEFAULT_ANGLE_NODES = 2
+const DEFAULT_PHI_NODES = 4
 const DQ = 6.0 # 简并度d_q=2*N_c=6
 const TWO_PI = 2.0 * π
 
@@ -281,9 +282,11 @@ end
 
 # -------------------- ρ 计算（各向异性） --------------------
 function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64;
-    p_nodes::Int=DEFAULT_P_NODES, angle_nodes::Int=DEFAULT_ANGLE_NODES)
-    p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes)
-    cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes)
+    p_nodes::Int=DEFAULT_P_NODES, angle_nodes::Int=DEFAULT_ANGLE_NODES,
+    p_grid::Union{Nothing,Vector{Float64}}=nothing, p_w::Union{Nothing,Vector{Float64}}=nothing,
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing)
+    p_grid === nothing && (p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes))
+    cos_grid === nothing && (cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes))
     integral = 0.0
     for (p, wp) in zip(p_grid, p_w)
         for (cθ, wθ) in zip(cos_grid, cos_w)
@@ -303,7 +306,10 @@ function average_scattering_rate(
     K_coeffs::NamedTuple;
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
-    phi_nodes::Int=DEFAULT_ANGLE_NODES,
+    phi_nodes::Int=DEFAULT_PHI_NODES,
+    p_grid::Union{Nothing,Vector{Float64}}=nothing, p_w::Union{Nothing,Vector{Float64}}=nothing,
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing,
+    phi_grid::Union{Nothing,Vector{Float64}}=nothing, phi_w::Union{Nothing,Vector{Float64}}=nothing,
     cs_cache::CrossSectionCache=CrossSectionCache(process),
     n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS
 )::Float64
@@ -317,14 +323,14 @@ function average_scattering_rate(
     T = thermo_params.T; Φ = thermo_params.Φ; Φbar = thermo_params.Φbar
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
-    # 预备节点
-    p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes)
-    cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes)
-    phi_grid, phi_w = gauleg(0.0, Float64(π), phi_nodes)
+    # 预备节点（可传入外部预计算节点/权重）
+    p_grid === nothing && (p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes))
+    cos_grid === nothing && (cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes))
+    phi_grid === nothing && (phi_grid, phi_w = gauleg(0.0, Float64(π), phi_nodes))
 
     # 数密度（用于归一化）
-    ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes)
-    ρ_j = number_density(pj_sym, mj, μj, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes)
+    ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w)
+    ρ_j = number_density(pj_sym, mj, μj, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w)
     if ρ_i == 0.0 || ρ_j == 0.0
         return 0.0
     end

@@ -240,6 +240,33 @@ function compare_methods()
 
     # crude comparison of evals
     @printf("Eval counts: tensor matched %d vs sparse %d (level=%d)\n", matched.evals, sparse.evals, level)
+
+    # ---------------- sweeps: which dimension needs more nodes? ----------------
+    p_anchor, angle_anchor, phi_anchor = 6, 4, 6
+    p_list = [3, 4, 5, 6, 8, 10]
+    angle_list = [2, 3, 4, 6, 8]
+    phi_list = [2, 3, 4, 6, 8]
+
+    @printf("\nSweep p-nodes (angle=%d, phi=%d):\n", angle_anchor, phi_anchor)
+    for p_n in p_list
+        res = tensor_average_rate(process; params=params, cache=cache, p_nodes=p_n, angle_nodes=angle_anchor, phi_nodes=phi_anchor, n_sigma_points=n_sigma_points)
+        rel_err = abs(res.value - ref.value) / abs(ref.value)
+        @printf("p=%2d angle=%2d phi=%2d | ω=%.6e rel_err=%.3e evals=%5d\n", p_n, angle_anchor, phi_anchor, res.value, rel_err, res.evals)
+    end
+
+    @printf("\nSweep angle-nodes (p=%d, phi=%d):\n", p_anchor, phi_anchor)
+    for a_n in angle_list
+        res = tensor_average_rate(process; params=params, cache=cache, p_nodes=p_anchor, angle_nodes=a_n, phi_nodes=phi_anchor, n_sigma_points=n_sigma_points)
+        rel_err = abs(res.value - ref.value) / abs(ref.value)
+        @printf("p=%2d angle=%2d phi=%2d | ω=%.6e rel_err=%.3e evals=%5d\n", p_anchor, a_n, phi_anchor, res.value, rel_err, res.evals)
+    end
+
+    @printf("\nSweep phi-nodes (p=%d, angle=%d):\n", p_anchor, angle_anchor)
+    for ph_n in phi_list
+        res = tensor_average_rate(process; params=params, cache=cache, p_nodes=p_anchor, angle_nodes=angle_anchor, phi_nodes=ph_n, n_sigma_points=n_sigma_points)
+        rel_err = abs(res.value - ref.value) / abs(ref.value)
+        @printf("p=%2d angle=%2d phi=%2d | ω=%.6e rel_err=%.3e evals=%5d\n", p_anchor, angle_anchor, ph_n, res.value, rel_err, res.evals)
+    end
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
