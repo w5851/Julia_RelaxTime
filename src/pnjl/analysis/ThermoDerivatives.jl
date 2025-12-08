@@ -19,9 +19,9 @@ using ..AnisoGapSolver:
 export solve_equilibrium_mu, thermo_derivatives, dP_dT, dP_dmu, dE_dT, dE_dmu, dEpsilon_dT, dEpsilon_dmu, dn_dT, dn_dmu, bulk_derivative_coeffs, quasiparticle_energy, mass_derivatives
 
 """将种子向量转换到当前参数的数值类型，便于在自动微分中复用"""
-function _convert_seed(seed_state, T_mev)
-    seed_type = promote_type(typeof(T_mev), Float64)
-    return seed_type.(seed_state)
+function _convert_seed(seed_state, T_mev, mu_mev)
+    seed_type = promote_type(typeof(T_mev), typeof(mu_mev), Float64)
+    return collect(seed_type.(seed_state))
 end
 
 """在指定 (T, μ, ξ) 下求解能隙方程，并返回热力学量。
@@ -33,7 +33,7 @@ function solve_equilibrium_mu(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_stat
     T_fm = T_mev / ħc_MeV_fm
     mu_fm = mu_mev / ħc_MeV_fm
     thermal_nodes = cached_nodes(p_num, t_num)
-    seed_vec = _convert_seed(seed_state, T_mev)
+    seed_vec = _convert_seed(seed_state, T_mev, mu_mev)
     mu_vec = SVector{3}(mu_fm, mu_fm, mu_fm)
 
     f! = (F, x) -> residual_mu!(F, x, mu_vec, T_fm, thermal_nodes, xi)
@@ -103,11 +103,11 @@ end
 function mass_derivatives(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
     mass_fn_T = t -> begin
         res = solve_equilibrium_mu(t, mu_mev; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
-        calculate_mass_vec(res.x_state)
+        calculate_mass_vec(SVector{3}(res.x_state[1:3]))
     end
     mass_fn_mu = μ -> begin
         res = solve_equilibrium_mu(T_mev, μ; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
-        calculate_mass_vec(res.x_state)
+        calculate_mass_vec(SVector{3}(res.x_state[1:3]))
     end
     masses = mass_fn_T(T_mev)
     dM_dT = SVector{3}(ForwardDiff.derivative(t -> mass_fn_T(t)[i], T_mev) for i in 1:3)
