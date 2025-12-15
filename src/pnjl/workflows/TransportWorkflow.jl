@@ -19,6 +19,7 @@ module TransportWorkflow
 
 # --- 依赖：常量/各向异性求解器/热力学导数/弛豫时间/输运系数/一圈积分(A) ---
 include("../../Constants_PNJL.jl")
+include("../../integration/GaussLegendre.jl")
 include("../solvers/AnisoGapSolver.jl")
 include("../analysis/ThermoDerivatives.jl")
 include("../../relaxtime/RelaxationTime.jl")
@@ -32,6 +33,7 @@ using .AnisoGapSolver: cached_nodes, calculate_mass_vec, calculate_number_densit
 using .RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients
 using .OneLoopIntegrals: A
+using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 export solve_gap_and_transport, build_equilibrium_params
 
@@ -68,8 +70,11 @@ end
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
 
-    A_u = A(Float64(T_fm), Float64(μu), Float64(mu), Φ, Φbar)
-    A_s = A(Float64(T_fm), Float64(μs), Float64(ms), Φ, Φbar)
+    nodes = DEFAULT_MOMENTUM_NODES
+    weights = DEFAULT_MOMENTUM_WEIGHTS
+
+    A_u = A(Float64(mu), Float64(μu), Float64(T_fm), Φ, Φbar, nodes, weights)
+    A_s = A(Float64(ms), Float64(μs), Float64(T_fm), Φ, Φbar, nodes, weights)
     return (u=A_u, d=A_u, s=A_s)
 end
 
@@ -100,6 +105,7 @@ function solve_gap_and_transport(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
+    equilibrium::Union{Nothing,NamedTuple}=nothing,
     compute_tau::Bool=false,
     K_coeffs::Union{Nothing,NamedTuple}=nothing,
     tau::Union{Nothing,NamedTuple}=nothing,
@@ -111,7 +117,7 @@ function solve_gap_and_transport(
     tau_kwargs::NamedTuple=(;),
     transport_kwargs::NamedTuple=(;)
 )
-    base = solve_equilibrium_mu(
+    base = equilibrium === nothing ? solve_equilibrium_mu(
         T_fm,
         mu_fm;
         xi=xi,
@@ -119,7 +125,7 @@ function solve_gap_and_transport(
         p_num=p_num,
         t_num=t_num,
         solver_kwargs...,
-    )
+    ) : equilibrium
 
     # 有效质量（直接由平衡解得到）
     φ = SVector{3}(base.x_state[1], base.x_state[2], base.x_state[3])
