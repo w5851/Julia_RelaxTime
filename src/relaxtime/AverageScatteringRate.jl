@@ -38,7 +38,8 @@ end
 @inline function distribution_with_anisotropy(flavor::Symbol, p::Float64, m::Float64, μ::Float64,
     T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, cosθ::Float64)
     if ξ == 0.0
-        return is_antiquark(flavor) ? antiquark_distribution(p, μ, T, Φ, Φbar) : quark_distribution(p, μ, T, Φ, Φbar)
+        E = energy_from_p(p, m)
+        return is_antiquark(flavor) ? antiquark_distribution(E, μ, T, Φ, Φbar) : quark_distribution(E, μ, T, Φ, Φbar)
     else
         return is_antiquark(flavor) ? antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ) : quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
     end
@@ -156,6 +157,13 @@ end
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    # 如果已有预计算/手动插入的样本点，则优先使用插值（或端点外推）。
+    # 这样可以支持“预计算并插值”的工作流，也能让单元测试用常数截面缓存避免触发完整截面计算。
+    if !cache.fit_ready && !isempty(cache.s_vals)
+        σ_interp = interpolate_sigma(cache, s)
+        σ_interp === nothing || return σ_interp
+    end
+
     if !cache.fit_ready
         prepare_sigma_fit!(cache, quark_params, thermo_params, K_coeffs; n_points=n_points)
     end
@@ -285,8 +293,8 @@ function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ:
     p_nodes::Int=DEFAULT_P_NODES, angle_nodes::Int=DEFAULT_ANGLE_NODES,
     p_grid::Union{Nothing,Vector{Float64}}=nothing, p_w::Union{Nothing,Vector{Float64}}=nothing,
     cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing)
-    p_grid === nothing && (p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes))
-    cos_grid === nothing && (cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes))
+    p_grid === nothing && ((p_grid, p_w) = gauleg(0.0, Λ_inv_fm, p_nodes))
+    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
     integral = 0.0
     for (p, wp) in zip(p_grid, p_w)
         for (cθ, wθ) in zip(cos_grid, cos_w)
@@ -324,9 +332,9 @@ function average_scattering_rate(
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
     # 预备节点（可传入外部预计算节点/权重）
-    p_grid === nothing && (p_grid, p_w = gauleg(0.0, Λ_inv_fm, p_nodes))
-    cos_grid === nothing && (cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes))
-    phi_grid === nothing && (phi_grid, phi_w = gauleg(0.0, Float64(π), phi_nodes))
+    p_grid === nothing && ((p_grid, p_w) = gauleg(0.0, Λ_inv_fm, p_nodes))
+    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
+    phi_grid === nothing && ((phi_grid, phi_w) = gauleg(0.0, Float64(π), phi_nodes))
 
     # 数密度（用于归一化）
     ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w)

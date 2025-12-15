@@ -4,5 +4,6 @@
         "/.*/": true,
 
         
-    }
+    },
+    "chat.agent.maxRequests": 30
 }

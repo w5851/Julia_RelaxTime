@@ -4,7 +4,6 @@ using ForwardDiff
 using StaticArrays
 using NLsolve
 
-using ..Constants_PNJL: ħc_MeV_fm
 using ..AnisoGapSolver:
     cached_nodes,
     calculate_thermo,
@@ -26,14 +25,15 @@ end
 
 """在指定 (T, μ, ξ) 下求解能隙方程，并返回热力学量。
 
+单位约定：
+- `T_fm` 与 `mu_fm` 均使用 fm⁻¹。
+
 自动微分调用时会把 T、μ 包装成 Dual，这里不强制转换为 Float64，
 以便导数能穿透求解过程。
 """
-function solve_equilibrium_mu(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, nlsolve_kwargs...)
-    T_fm = T_mev / ħc_MeV_fm
-    mu_fm = mu_mev / ħc_MeV_fm
+function solve_equilibrium_mu(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, nlsolve_kwargs...)
     thermal_nodes = cached_nodes(p_num, t_num)
-    seed_vec = _convert_seed(seed_state, T_mev, mu_mev)
+    seed_vec = _convert_seed(seed_state, T_fm, mu_fm)
     mu_vec = SVector{3}(mu_fm, mu_fm, mu_fm)
 
     f! = (F, x) -> residual_mu!(F, x, mu_vec, T_fm, thermal_nodes, xi)
@@ -43,12 +43,12 @@ function solve_equilibrium_mu(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_stat
     x_state = SVector{5}(Tuple(res.zero))
     pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
     rho_vec = calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    rho_total = sum(rho_vec) / 3
+    rho_baryon = sum(rho_vec) / 3
 
     return (
         pressure=pressure,
         energy=energy,
-        rho=rho_total,
+        rho=rho_baryon,
         rho_norm=rho_norm,
         entropy=entropy,
         x_state=x_state,
@@ -68,95 +68,95 @@ function _nth_derivative(f, x, n::Int)
 end
 
 """总压强对温度的 n 阶导数，内部会重新求解能隙以保持平衡"""
-function dP_dT(T_mev::Real, mu_mev::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = t -> solve_equilibrium_mu(t, mu_mev; xi=xi, seed_state=seed_state, kwargs...).pressure
-    return _nth_derivative(g, T_mev, order)
+function dP_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = t -> solve_equilibrium_mu(t, mu_fm; xi=xi, seed_state=seed_state, kwargs...).pressure
+    return _nth_derivative(g, T_fm, order)
 end
 
 """总压强对化学势的 n 阶导数"""
-function dP_dmu(T_mev::Real, mu_mev::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = μ -> solve_equilibrium_mu(T_mev, μ; xi=xi, seed_state=seed_state, kwargs...).pressure
-    return _nth_derivative(g, mu_mev, order)
+function dP_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = μ -> solve_equilibrium_mu(T_fm, μ; xi=xi, seed_state=seed_state, kwargs...).pressure
+    return _nth_derivative(g, mu_fm, order)
 end
 
 """能量密度 ε 对温度的 n 阶导数"""
-function dEpsilon_dT(T_mev::Real, mu_mev::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = t -> solve_equilibrium_mu(t, mu_mev; xi=xi, seed_state=seed_state, kwargs...).energy
-    return _nth_derivative(g, T_mev, order)
+function dEpsilon_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = t -> solve_equilibrium_mu(t, mu_fm; xi=xi, seed_state=seed_state, kwargs...).energy
+    return _nth_derivative(g, T_fm, order)
 end
 
 """能量密度 ε 对化学势的 n 阶导数"""
-function dEpsilon_dmu(T_mev::Real, mu_mev::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = μ -> solve_equilibrium_mu(T_mev, μ; xi=xi, seed_state=seed_state, kwargs...).energy
-    return _nth_derivative(g, mu_mev, order)
+function dEpsilon_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = μ -> solve_equilibrium_mu(T_fm, μ; xi=xi, seed_state=seed_state, kwargs...).energy
+    return _nth_derivative(g, mu_fm, order)
 end
 
 """给定动量 p_fm 和味道，返回各向同性色散关系 E = sqrt(p^2 + m^2)（m 来自平衡解）。"""
-function quasiparticle_energy(T_mev::Real, mu_mev::Real, p_fm::Real; flavor::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
+function quasiparticle_energy(T_fm::Real, mu_fm::Real, p_fm::Real; flavor::Int=1, xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
     1 <= flavor <= 3 || error("flavor must be 1,2,3")
-    base = solve_equilibrium_mu(T_mev, mu_mev; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    base = solve_equilibrium_mu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
     masses = calculate_mass_vec(base.x_state)
     return calculate_energy_isotropic(masses[flavor], p_fm)
 end
 
 """返回质量及其对 T/μ 的导数（三味）。"""
-function mass_derivatives(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
+function mass_derivatives(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
     mass_fn_T = t -> begin
-        res = solve_equilibrium_mu(t, mu_mev; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+        res = solve_equilibrium_mu(t, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
         calculate_mass_vec(SVector{3}(res.x_state[1:3]))
     end
     mass_fn_mu = μ -> begin
-        res = solve_equilibrium_mu(T_mev, μ; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+        res = solve_equilibrium_mu(T_fm, μ; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
         calculate_mass_vec(SVector{3}(res.x_state[1:3]))
     end
-    masses = mass_fn_T(T_mev)
-    dM_dT = SVector{3}(ForwardDiff.derivative(t -> mass_fn_T(t)[i], T_mev) for i in 1:3)
-    dM_dmu = SVector{3}(ForwardDiff.derivative(μ -> mass_fn_mu(μ)[i], mu_mev) for i in 1:3)
+    masses = mass_fn_T(T_fm)
+    dM_dT = SVector{3}(ForwardDiff.derivative(t -> mass_fn_T(t)[i], T_fm) for i in 1:3)
+    dM_dmu = SVector{3}(ForwardDiff.derivative(μ -> mass_fn_mu(μ)[i], mu_fm) for i in 1:3)
     return (masses=masses, dM_dT=dM_dT, dM_dmu=dM_dmu)
 end
 
 """单粒子能量对温度的导数（链式法则，传入已知 m 与 dM/dT）。"""
-function dE_dT(T_mev::Real, mu_mev::Real, p_fm::Real; m::Real, dM_dT::Real)
+function dE_dT(T_fm::Real, mu_fm::Real, p_fm::Real; m::Real, dM_dT::Real)
     E = calculate_energy_isotropic(m, p_fm)
     return (m / E) * dM_dT
 end
 
 """单粒子能量对化学势的导数（链式法则，传入已知 m 与 dM/dμ）。"""
-function dE_dmu(T_mev::Real, mu_mev::Real, p_fm::Real; m::Real, dM_dmu::Real)
+function dE_dmu(T_fm::Real, mu_fm::Real, p_fm::Real; m::Real, dM_dmu::Real)
     E = calculate_energy_isotropic(m, p_fm)
     return (m / E) * dM_dmu
 end
 
 """总粒子数密度 (未归一化) 对温度的一阶导数"""
-function dn_dT(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = t -> solve_equilibrium_mu(t, mu_mev; xi=xi, seed_state=seed_state, kwargs...).rho
-    return ForwardDiff.derivative(g, T_mev)
+function dn_dT(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = t -> solve_equilibrium_mu(t, mu_fm; xi=xi, seed_state=seed_state, kwargs...).rho
+    return ForwardDiff.derivative(g, T_fm)
 end
 
 """总粒子数密度 (未归一化) 对化学势的一阶导数"""
-function dn_dmu(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    g = μ -> solve_equilibrium_mu(T_mev, μ; xi=xi, seed_state=seed_state, kwargs...).rho
-    return ForwardDiff.derivative(g, mu_mev)
+function dn_dmu(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    g = μ -> solve_equilibrium_mu(T_fm, μ; xi=xi, seed_state=seed_state, kwargs...).rho
+    return ForwardDiff.derivative(g, mu_fm)
 end
 
 """同时返回基础热力学量及其一阶导数组合，便于体粘滞系数公式直接调用"""
-function thermo_derivatives(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
-    base = solve_equilibrium_mu(T_mev, mu_mev; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+function thermo_derivatives(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
+    base = solve_equilibrium_mu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
     seed_for_diff = base.x_state
 
-    P_T = dP_dT(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    P_mu = dP_dmu(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    E_T = dEpsilon_dT(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    E_mu = dEpsilon_dmu(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    n_T = dn_dT(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    n_mu = dn_dmu(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    P_T = dP_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    P_mu = dP_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    E_T = dEpsilon_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    E_mu = dEpsilon_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    n_T = dn_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    n_mu = dn_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
 
     denom_eps = E_T * n_mu - E_mu * n_T
     denom_n = n_T * E_mu - n_mu * E_T
     dP_depsilon_n = denom_eps == 0 ? NaN : (P_T * n_mu - P_mu * n_T) / denom_eps
     dP_dn_epsilon = denom_n == 0 ? NaN : (P_T * E_mu - P_mu * E_T) / denom_n
 
-    md = mass_derivatives(T_mev, mu_mev; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    md = mass_derivatives(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
 
     return (
         pressure=base.pressure,
@@ -182,8 +182,8 @@ function thermo_derivatives(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=
 end
 
 """返回体粘滞系数公式中常用的两个组合导数"""
-function bulk_derivative_coeffs(T_mev::Real, mu_mev::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
-    derivs = thermo_derivatives(T_mev, mu_mev; xi=xi, seed_state=seed_state, kwargs...)
+function bulk_derivative_coeffs(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, kwargs...)
+    derivs = thermo_derivatives(T_fm, mu_fm; xi=xi, seed_state=seed_state, kwargs...)
     return (
         dP_depsilon_n=derivs.dP_depsilon_n,
         dP_dn_epsilon=derivs.dP_dn_epsilon,
