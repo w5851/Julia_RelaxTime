@@ -65,14 +65,14 @@
 - **M矩阵是对称的**：$M_{08} = M_{80}$
 - **所有量均为复数**：$M_{ij}$、$\det K$、$\det M$、$\mathcal{D}$ 都是 `ComplexF64` 类型
 
-**耦合矩阵M的定义**（对赝标量P使用K⁺，标量S使用K⁻）：
+**耦合矩阵 $M$ 的定义**（对赝标量P使用K⁺，标量S使用K⁻）：
 
 对于**赝标量通道P**（η/η'）：
 ```math
 M_{00}^P = K_0^{+} - \frac{4}{3} \det K^{+} (\Pi_{u\bar u}^{P} + 2 \Pi_{s\bar s}^{P})
 ```
 ```math
-M_{08}^P = M_{80}^P = K_{08}^{+} - \frac{4\sqrt{2}}{3} \det K^{+} (\Pi_{u\bar u}^{P} - \Pi_{s\bar s}^{P})
+M_{08}^P = M_{80}^P = K_{08}^{+} + \frac{4\sqrt{2}}{3} \det K^{+} (\Pi_{u\bar u}^{P} - \Pi_{s\bar s}^{P})
 ```
 ```math
 M_{88}^P = K_8^{+} - \frac{4}{3} \det K^{+} (2 \Pi_{u\bar u}^{P} + \Pi_{s\bar s}^{P})
@@ -83,7 +83,7 @@ M_{88}^P = K_8^{+} - \frac{4}{3} \det K^{+} (2 \Pi_{u\bar u}^{P} + \Pi_{s\bar s}
 M_{00}^S = K_0^{-} - \frac{4}{3} \det K^{-} (\Pi_{u\bar u}^{S} + 2 \Pi_{s\bar s}^{S})
 ```
 ```math
-M_{08}^S = M_{80}^S = K_{08}^{-} - \frac{4\sqrt{2}}{3} \det K^{-} (\Pi_{u\bar u}^{S} - \Pi_{s\bar s}^{S})
+M_{08}^S = M_{80}^S = K_{08}^{-} + \frac{4\sqrt{2}}{3} \det K^{-} (\Pi_{u\bar u}^{S} - \Pi_{s\bar s}^{S})
 ```
 ```math
 M_{88}^S = K_8^{-} - \frac{4}{3} \det K^{-} (2 \Pi_{u\bar u}^{S} + \Pi_{s\bar s}^{S})

@@ -25,7 +25,7 @@ K_{08}^{\pm} &= \pm \frac{1}{6} \sqrt{2} K(G^\mu - G^s)
 其中：
 ```math
 \begin{aligned}
-G^f &= -\frac{N_c}{4\pi^2} A_f(T, \mu) \\
+G^f &= -\frac{N_c}{4\pi^2} \; m_f\; A_f(T, \mu) \\
 A_f(T, \mu) &= 16\pi^2 \int_0^\Lambda \frac{d^3 p}{(2\pi)^3} \left[ 1 - n_f^+ \frac{1}{2E} - n_f^- \frac{1}{2E} \right]
 \end{aligned}
 ```
@@ -91,7 +91,7 @@ end
 ## 7. 依赖关系
 
 ### 7.1 输入依赖
-- **夸克凝聚计算**: 需要先计算G^f = -N_c/(4π²) A_f(T,μ)
+- **夸克凝聚计算**: 需要先计算 $G^f = -N_c/(4\pi^2)\, m_f\, A_f(T,\mu)$，对应函数为 `calculate_G_from_A(A_f, m_f)`
 - **分布函数**: n_f±依赖于Polyakov环Φ、温度T和化学势μ_f
 - **能隙方程求解**: 夸克质量m_f需要通过能隙方程自洽求解
 

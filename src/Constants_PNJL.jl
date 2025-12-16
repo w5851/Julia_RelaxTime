@@ -209,6 +209,7 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
     :udbar_to_udbar => Dict(
         :type => :qqbar,
         :channels => Dict(
+            # t 道包含赝标量混合介子(η/η')与标量混合介子(σ/σ')：与 C++ debug 输出的 heavy(P/S) (k00/k88/k08, detK) 对齐
             :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
             :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
         )
@@ -227,6 +228,7 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
     :dubar_to_dubar => Dict(
         :type => :qqbar,
         :channels => Dict(
+            # 电荷共轭过程：与 udbar_to_udbar 采用相同的介子组合
             :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
             :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
         )

@@ -34,7 +34,7 @@ end
     return sqrt(E * E - m * m)
 end
 
-"""计算夸克有效分布函数的值"""
+"""计算夸克有效分布函数的值（供 A 积分使用：分别用夸克/反夸克分布）"""
 @inline function distribution_value(mode::Symbol, sign_flag::Symbol, E::Float64, μ::Float64,
     T::Float64, Φ::Float64, Φbar::Float64)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
@@ -46,6 +46,56 @@ end
         end
     else
         throw(ArgumentError("暂不支持的 distribution: $mode"))
+    end
+end
+
+"""B0 中使用的“±”分布（仅在正能量 E 上评估）。
+
+等价目标：与 C++ `fd(pm*E, mu, ...)` 一致，其中
+- `pm=+1` 对应 `f^+(E,mu)`
+- `pm=-1` 对应 `f^+(-E,mu) = 1 - f^-(E,mu)`
+
+同时保持 C++ 对 `mu<0` 的约定：`fd(E,mu<0)=f^-(E,|mu|)`。
+"""
+@inline function distribution_value_b0(sign_flag::Symbol, E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
+    @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
+
+    if sign_flag === :plus
+        # fd(+E, μ)
+        if μ >= 0.0
+            return quark_distribution(E, μ, T, Φ, Φbar)
+        else
+            return antiquark_distribution(E, -μ, T, Φ, Φbar)
+        end
+    else
+        # fd(-E, μ)
+        if μ >= 0.0
+            # f^+(-E,μ) = 1 - f^-(E,μ)
+            return 1.0 - antiquark_distribution(E, μ, T, Φ, Φbar)
+        else
+            # fd(-E,μ<0)=f^-( -E, |μ| ) = 1 - f^+(E,|μ|)
+            return 1.0 - quark_distribution(E, -μ, T, Φ, Φbar)
+        end
+    end
+end
+
+@inline function distribution_integral_b0(sign_flag::Symbol, E_min::Float64, E_max::Float64,
+    μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
+    @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
+
+    if sign_flag === :plus
+        if μ >= 0.0
+            return quark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
+        else
+            return antiquark_distribution_integral(E_min, E_max, -μ, T, Φ, Φbar)
+        end
+    else
+        interval_len = E_max - E_min
+        if μ >= 0.0
+            return interval_len - antiquark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
+        else
+            return interval_len - quark_distribution_integral(E_min, E_max, -μ, T, Φ, Φbar)
+        end
     end
 end
 
@@ -69,7 +119,7 @@ end
 @inline function real_integrand_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, denominator_term::Float64,
     μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, E::Float64)
     p = internal_momentum(E, m)
-    dist = distribution_value(:pnjl, sign_flag, E, μ, T, Φ, Φbar)
+    dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
     denominator = λ * E + denominator_term
     return p * dist / denominator
 end
@@ -120,7 +170,7 @@ end
         end
 
         p0 = internal_momentum(E0, m)
-        imag_part = 2.0 * π * p0 * distribution_value(:pnjl, sign_flag, E0, μ, T, Φ, Φbar)
+            imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
     end
 
     return real_part * 2.0, imag_part / λ
@@ -131,7 +181,7 @@ end
 @inline @fastmath function real_integrand_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64,
     μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, E::Float64)
     p = internal_momentum(E, m)
-    dist = distribution_value(:pnjl, sign_flag, E, μ, T, Φ, Φbar)
+    dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
     common_part = (λ + E)^2 - m_prime^2
     numerator = common_part - (p - k)^2
     denominator = common_part - (p + k)^2
@@ -253,7 +303,7 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Floa
     # 根据区间类型计算虚部
     if !isempty(intervals)
         for (E1, E2) in intervals
-            imag_part += distribution_integral(:pnjl, sign_flag, E1, E2, μ, T, Φ, Φbar)
+            imag_part += distribution_integral_b0(sign_flag, E1, E2, μ, T, Φ, Φbar)
         end
         imag_part *= π * sign(λ)
     end

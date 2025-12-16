@@ -22,21 +22,22 @@ export calculate_G_from_A
 # ----------------------------------------------------------------------------
 
 """
-    calculate_G_from_A(A_f::Float64; Nc::Int=3) -> Float64
+    calculate_G_from_A(A_f::Float64, m_f::Float64; Nc::Int=3) -> Float64
 
 从单圈积分A_f计算夸克凝聚相关函数G^f。
 
 # 公式
 ```math
-G^f = -\\frac{N_c}{4\\pi^2} A_f(T, \\mu)
+G^f = -\\frac{N_c}{4\\pi^2} m_f A_f(T, \\mu)
 ```
 
 # 参数
 - `A_f`: 单圈积分A函数的值（单位：fm）
+- `m_f`: 该味夸克的质量（单位：fm⁻¹）
 - `Nc`: 色数（默认3）
 
 # 返回值
-- `G_f`: 夸克凝聚相关函数（无量纲）
+- `G_f`: 夸克凝聚相关函数（单位：无量纲）
 
 # 示例
 ```julia
@@ -51,8 +52,14 @@ A_u = A(T_inv_fm, μ_inv_fm, m_inv_fm, Φ, Φbar)
 G_u = calculate_G_from_A(A_u)
 ```
 """
+@inline @fastmath function calculate_G_from_A(A_f::Float64, m_f::Float64; Nc::Int=3)
+    # 与 C++ set_pse() 中 G[i] 的构造一致（去掉了外层的 K_f 因子，
+    # 该因子会在 calculate_effective_couplings 的 K * G_f 中引入）
+    return -Nc / (4.0 * π^2) * (m_f * A_f)
+end
+
 @inline @fastmath function calculate_G_from_A(A_f::Float64; Nc::Int=3)
-    return -Nc / (4.0 * π^2) * A_f
+    throw(ArgumentError("calculate_G_from_A(A_f) is deprecated; call calculate_G_from_A(A_f, m_f)"))
 end
 
 # ----------------------------------------------------------------------------

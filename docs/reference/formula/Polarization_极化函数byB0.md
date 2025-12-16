@@ -42,6 +42,16 @@ function polarization_function_P_S(channel::Symbol, k0::Float64, k_norm::Float64
 end
 ```
 
+### 3.3 关于分布函数口径（NJL vs PNJL）
+
+在有限温度/密度下，B0 的 Matsubara 求和会产生既包含 `f` 也包含 `1-f` 的结构（泡利阻塞因子）。
+
+在 NJL 与 PNJL 两种模型下，都存在常用恒等式将 `1-f^{-}(E,\mu)` 等价改写为 `f^{+}(-E,\mu)`，从而在实现中统一使用 `f^{+}(pm\,E,\mu)`（`pm=±1`）的形式。
+
+详细说明与推导见：
+- [B0.md](B0.md) 的 “3.2.1 NJL vs PNJL：分布函数导致的等价改写”
+- [PNJL_夸克有效分布函数.md](PNJL_夸克有效分布函数.md)
+
 ## 4. 参数说明表
 
 | 参数 | 符号 | 类型 | 单位 | 物理意义 | 取值范围 |

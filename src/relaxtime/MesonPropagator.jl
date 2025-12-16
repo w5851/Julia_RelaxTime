@@ -176,10 +176,13 @@ end
 矩阵元素由有效耦合系数K和极化函数Π共同决定。
 
 # 公式
-M矩阵元素：
-- M₀₀ = 1 - K₀± Π_{uu}
-- M₀₈ = M₈₀ = -K₀₈± Π_{uu} × 4√2/3  （对称性）
-- M₈₈ = 1 - K₈± [Π_{uu} × 4/3 + Π_{ss} × 2/3]
+先从 `K_coeffs` 取出 (k00,k88,k08) 并计算
+detK = k00*k88 - k08^2
+
+再构造 2×2 复数矩阵 M（实现里用 m00/m08/m88 记号）：
+- m00 = k00 - (4/3) * detK * (Π_uu + 2Π_ss)
+- m08 = m80 = k08 + (4/3)*sqrt(2) * detK * (Π_uu - Π_ss)
+- m88 = k88 - (4/3) * detK * (2Π_uu + Π_ss)
 
 其中±表示通道类型：
 - +:赝标量通道（P通道），用于η/η'
@@ -224,22 +227,22 @@ M_S = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :S)
         K0 = K_coeffs.K0_plus
         K8 = K_coeffs.K8_plus
         K08 = K_coeffs.K08_plus
+        det_K = K_coeffs.det_K_plus
     elseif channel == :S
         # 标量通道（σ/σ'）使用K⁻系数
         K0 = K_coeffs.K0_minus
         K8 = K_coeffs.K8_minus
         K08 = K_coeffs.K08_minus
+        det_K = K_coeffs.det_K_minus
     else
         error("Unknown channel: $channel. Use :P (pseudoscalar) or :S (scalar)")
     end
-    
-    # 计算M矩阵元素
-    M00 = 1.0 - K0 * Π_uu
-    M08 = -K08 * Π_uu * 4.0 * sqrt(2.0) / 3.0  # 修正系数
-    M80 = M08  # 对称性
-    M88 = 1.0 - K8 * (Π_uu * 4.0 / 3.0 + Π_ss * 2.0 / 3.0)
-    
-    return ComplexF64[M00 M08; M80 M88]
+
+    M00 = K0 - (4.0 / 3.0) * (Π_uu + 2.0 * Π_ss) * det_K
+    M08 = K08 + (4.0 / 3.0) * sqrt(2.0) * (Π_uu - Π_ss) * det_K
+    M88 = K8 - (4.0 / 3.0) * (2.0 * Π_uu + Π_ss) * det_K
+
+    return ComplexF64[M00 M08; M08 M88]
 end
 
 # ----------------------------------------------------------------------------
@@ -251,18 +254,15 @@ end
 
 计算一般介子（π、K、σ_π、σ_K）的传播子。
 
-# 物理背景
-一般介子的传播子形式为：D = 1/(1 - KΠ)，其中K为有效耦合系数，Π为极化函数。
-
 # 公式
-D(q²) = 1 / (1 - K_α^± Π(q²))
+传播子采用：D(p0,p) = 2*K_α / (1 - 4*K_α*Π^±_process(p0,p))
 
 其中：
 - α：介子通道（π通道用123，K通道用4567）
 - ±：赝标量P用+，标量S用-
-
+- process：散射过程
 # 介子类型映射
-| 介子 | 通道 | 夸克组合 | K系数 | 极化函数 |
+| 介子 | 标量/赝标量 | 散射过程 | K系数 | 极化函数 |
 |------|------|----------|-------|---------|
 | π | P | ūu/d̄d | K123_plus | Π_{uu}^P |
 | K | P | ūs/d̄s | K4567_plus | Π_{us}^P |
@@ -316,8 +316,8 @@ D_sigma_pi = meson_propagator_simple(:sigma_pi, K_coeffs, Π_uu_S)
         error("Unknown meson type: $meson_type. Use :pi, :K, :sigma_pi, or :sigma_K")
     end
     
-    # 计算传播子 D = 1/(1 - KΠ)
-    return 1.0 / (1.0 - K * Π)
+    # D = 2K / (1 - 4KΠ)
+    return (2.0 * K) / (1.0 - 4.0 * K * Π)
 end
 
 # ----------------------------------------------------------------------------
