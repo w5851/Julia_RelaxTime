@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 # Scan total cross section σ(s) for a given scattering process.
 # Uses TotalCrossSection.total_cross_section (t integral included) and outputs CSV + line plot.
 
@@ -68,19 +66,19 @@ end
 
 function parse_args(args)::CLIOptions
     opts = Dict{Symbol, Any}(
-        :process => "uu_to_uu",
+        :process => "udbar_to_udbar",
         :s_min => 10.0,
         :s_max => 20.0,
         :s_steps => 40,
-        :sqrt_s_min_GeV => NaN,
-        :sqrt_s_max_GeV => NaN,
-        :sqrt_s_steps => 0,
+        :sqrt_s_min_GeV => 0.01,
+        :sqrt_s_max_GeV => 1.5,
+        :sqrt_s_steps => 20,
         :n_points => DEFAULT_T_INTEGRAL_POINTS,
         :T_MeV => 150.0,
-        :mu_B_MeV => NaN,
-        :mu_u_MeV => 0.0,
-        :mu_d_MeV => 0.0,
-        :mu_s_MeV => 0.0,
+        :mu_B_MeV => 800.0,
+        :mu_u_MeV => 800.0/3.0,
+        :mu_d_MeV => 800.0/3.0,
+        :mu_s_MeV => 800.0/3.0,
         :xi => 0.0,
         :output_csv => joinpath("data", "processed", "results", "relaxtime", "total_cross_section_scan.csv"),
         :output_fig => joinpath("data", "processed", "figures", "relaxtime", "total_cross_section_scan.png"),
@@ -179,9 +177,7 @@ function build_physical_parameters(opts::CLIOptions)
 
     # The PNJL gap solver currently supports a common chemical potential for u/d/s.
     # Enforce consistency here so downstream parameters are well-defined.
-    G_u = calculate_G_from_A(A_u, m_u)
-    G_s = calculate_G_from_A(A_s, m_s)
-    
+
 
     # Solve gap equation first to obtain constituent masses and Polyakov loop variables.
     # solve_fixed_mu takes T in MeV and μ in fm^-1.
@@ -204,8 +200,8 @@ function build_physical_parameters(opts::CLIOptions)
     A_d = A(m_d, μ_d, T, Φ, Φbar, nodes_p, weights_p)
     A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
 
-    G_u = calculate_G_from_A(A_u)
-    G_s = calculate_G_from_A(A_s)
+    G_u = calculate_G_from_A(A_u,m_u)
+    G_s = calculate_G_from_A(A_s,m_s)
 
     quark_params = (
         m = (u=m_u, d=m_d, s=m_s),
