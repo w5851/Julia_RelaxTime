@@ -308,6 +308,8 @@ function final_state_blocking_factor(
     cosθ::Float64
 )::Float64
     f::Float64 = 0.0  # default to avoid uninitialized path
+    # 约定：这里传入的 μ 永远是“夸克化学势” μ_q。
+    # 反夸克分布的 ± 号由 sign_flag 决定，而不是通过 μ 的正负来编码。
     if ξ == 0.0
         sign_flag = is_antiquark(flavor) ? :minus : :plus
         f = distribution_value(:pnjl, sign_flag, E, μ, T, Φ, Φbar)
@@ -485,22 +487,18 @@ end
 
 # 说明
 
-反粒子化学势为负：μ(q̄) = -μ(q)
+本模块内部约定：始终返回“夸克化学势” μ_q（不对反夸克取负）。
+反夸克的占据数由分布函数本身（通过 sign_flag 或 antiquark_distribution_*）来实现。
 """
 function get_chemical_potential(flavor::Symbol, quark_params::NamedTuple)::Float64
-    # 反粒子化学势为负
-    if flavor == :u
+    # 约定：这里返回的永远是“夸克化学势” μ_q（对应每个味 u/d/s），不对反夸克取负。
+    # 反夸克的占据数由分布函数的 sign_flag（或 antiquark_distribution_*）负责处理。
+    if flavor in [:u, :ubar]
         return quark_params.μ.u
-    elseif flavor == :ubar
-        return -quark_params.μ.u
-    elseif flavor == :d
+    elseif flavor in [:d, :dbar]
         return quark_params.μ.d
-    elseif flavor == :dbar
-        return -quark_params.μ.d
-    elseif flavor == :s
+    elseif flavor in [:s, :sbar]
         return quark_params.μ.s
-    elseif flavor == :sbar
-        return -quark_params.μ.s
     else
         error("Unknown flavor: $flavor")
     end
