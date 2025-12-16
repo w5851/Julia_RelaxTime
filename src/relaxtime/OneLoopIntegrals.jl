@@ -22,7 +22,7 @@ export B0, A
 # 基础工具函数
 const EPS_K = 1.0e-9 # 三动量k大小为零的判定阈值
 const EPS_SEGMENT = 1.0e-12 # 分母的最小值判定阈值
-const DEFAULT_RTOL = 1.0e-2 # 积分相对误差默认值
+const DEFAULT_RTOL = 1.0e-3 # 积分相对误差默认值
 const DEFAULT_ATOL = 0.0 # 积分绝对误差默认值
 """计算给定质量下的能量截断值"""
 @inline @fastmath function energy_cutoff(m::Float64)

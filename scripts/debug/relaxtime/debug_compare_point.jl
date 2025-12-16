@@ -2,7 +2,20 @@
 
 using StaticArrays
 
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+function find_project_root(start_dir::AbstractString)
+    dir = abspath(start_dir)
+    while true
+        if isfile(joinpath(dir, "Project.toml"))
+            return dir
+        end
+        parent = dirname(dir)
+        parent == dir && error("Could not find Project.toml from: $start_dir")
+        dir = parent
+    end
+end
+
+const PROJECT_ROOT = find_project_root(@__DIR__)
+
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src"))
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "relaxtime"))
 
@@ -57,11 +70,11 @@ function main()
     G_s = calculate_G_from_A(A_s, m_s)
     Kc = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
-        println("Kc: K123_plus=", Kc.K123_plus, " K123_minus=", Kc.K123_minus,
-            "  K0_plus=", Kc.K0_plus, " K0_minus=", Kc.K0_minus,
-            "  K8_plus=", Kc.K8_plus, " K8_minus=", Kc.K8_minus,
-            "  K08_plus=", Kc.K08_plus, " K08_minus=", Kc.K08_minus,
-            "  detK_plus=", Kc.det_K_plus, " detK_minus=", Kc.det_K_minus)
+    println("Kc: K123_plus=", Kc.K123_plus, " K123_minus=", Kc.K123_minus,
+        "  K0_plus=", Kc.K0_plus, " K0_minus=", Kc.K0_minus,
+        "  K8_plus=", Kc.K8_plus, " K8_minus=", Kc.K8_minus,
+        "  K08_plus=", Kc.K08_plus, " K08_minus=", Kc.K08_minus,
+        "  detK_plus=", Kc.det_K_plus, " detK_minus=", Kc.det_K_minus)
 
     quark_params = (m=(u=m_u, d=m_d, s=m_s), μ=(u=muq, d=muq, s=muq), A=(u=A_u, d=A_u, s=A_s))
     thermo_params = (T=T, Φ=Phi, Φbar=Phibar, ξ=0.0)

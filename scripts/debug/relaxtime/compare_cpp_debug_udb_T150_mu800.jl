@@ -3,7 +3,20 @@
 using Printf
 using StaticArrays
 
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+function find_project_root(start_dir::AbstractString)
+    dir = abspath(start_dir)
+    while true
+        if isfile(joinpath(dir, "Project.toml"))
+            return dir
+        end
+        parent = dirname(dir)
+        parent == dir && error("Could not find Project.toml from: $start_dir")
+        dir = parent
+    end
+end
+
+const PROJECT_ROOT = find_project_root(@__DIR__)
+
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src"))
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "relaxtime"))
 
@@ -26,6 +39,8 @@ using .DifferentialCrossSection: differential_cross_section
 using .TotalCrossSection: total_cross_section
 using .TotalPropagator: calculate_all_propagators_by_channel, calculate_cms_momentum
 using .PolarizationCache: polarization_aniso_cached
+using .Constants_PNJL: N_color
+using .OneLoopIntegrals: B0
 
 # -----------------------------
 # parsing helpers
@@ -103,13 +118,10 @@ function parse_cpp_amp_vs_t(path::AbstractString)
     in_table = false
     for ln in lines
         if occursin(" pick_sqrt_s", ln) && occursin(" s=", ln)
-            # contains s=...
             nums = _parse_numbers(ln)
-            # last number is s
             s = nums[end]
         elseif occursin("t_min=", ln) && occursin("t_max=", ln)
             nums = _parse_numbers(ln)
-            # expect t_min, t_max
             t_min = nums[end-1]
             t_max = nums[end]
         elseif occursin("block=", ln) && occursin("denom", ln)
@@ -119,7 +131,6 @@ function parse_cpp_amp_vs_t(path::AbstractString)
             denom = parse(Float64, m.captures[2])
         elseif occursin("# s-channel light", ln)
             nums = _parse_numbers(ln)
-            # expected tail: ... p_ij(P) p_ij(S) PiP_re PiP_im PiS_re PiS_im
             s_pij_P = nums[end-5]
             s_pij_S = nums[end-4]
             s_PiP = (re=nums[end-3], im=nums[end-2])
@@ -130,13 +141,11 @@ function parse_cpp_amp_vs_t(path::AbstractString)
             t_PiS = (re=nums[end-1], im=nums[end])
         elseif occursin("# t-channel heavy(P)", ln)
             nums = _parse_numbers(ln)
-            # expected: k00 k88 k08 detK Pi_uu_re Pi_uu_im Pi_ss_re Pi_ss_im
             t_k00_P, t_k88_P, t_k08_P, t_detK_P = nums[1], nums[2], nums[3], nums[4]
             t_Pi_uu_P = (re=nums[5], im=nums[6])
             t_Pi_ss_P = (re=nums[7], im=nums[8])
         elseif occursin("# t-channel heavy(S)", ln)
             nums = _parse_numbers(ln)
-            # expected: k00 k88 k08 detK Pi_uu_re Pi_uu_im Pi_ss_re Pi_ss_im
             t_k00_S, t_k88_S, t_k08_S, t_detK_S = nums[1], nums[2], nums[3], nums[4]
             t_Pi_uu_S = (re=nums[5], im=nums[6])
             t_Pi_ss_S = (re=nums[7], im=nums[8])
@@ -145,7 +154,6 @@ function parse_cpp_amp_vs_t(path::AbstractString)
             pick_t = nums[1]
         elseif occursin("# s-channel k0=", ln) && occursin("P(re,im)=", ln) && occursin("S(re,im)=", ln)
             nums = _parse_numbers(ln)
-            # ... k0 k fac P_re P_im S_re S_im
             prop_s_P = (re=nums[end-3], im=nums[end-2])
             prop_s_S = (re=nums[end-1], im=nums[end])
         elseif occursin("# t-channel k0=", ln) && occursin("P(re,im)=", ln) && occursin("S(re,im)=", ln)
@@ -185,6 +193,38 @@ function parse_cpp_amp_vs_t(path::AbstractString)
 end
 
 @inline relerr(a::Float64, b::Float64) = abs(a - b) / max(1e-12, abs(b))
+
+function polarization_with_rtol(channel::Symbol, k0::Float64, k_norm::Float64,
+    m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
+    T::Float64, Φ::Float64, Φbar::Float64,
+    A1_value::Float64, A2_value::Float64, num_s_quark::Int;
+    rtol::Float64=1e-2)
+
+    factor = -N_color / (8π^2)
+    λ = k0 + μ1 - μ2
+
+    B0_real, B0_imag = B0(λ, k_norm, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar, rtol=rtol)
+    if num_s_quark == 1
+        λ_extra = -k0 + μ1 - μ2
+        B0_real_extra, B0_imag_extra = B0(λ_extra, k_norm, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar, rtol=rtol)
+        B0_real = 0.5 * (B0_real + B0_real_extra)
+        B0_imag = 0.5 * (B0_imag + B0_imag_extra)
+    end
+
+    real_part = A1_value + A2_value
+    imag_part = 0.0
+    prefactor = k_norm^2 - λ^2
+    if channel == :P
+        prefactor += (m1 - m2)^2
+    elseif channel == :S
+        prefactor += (m1 + m2)^2
+    else
+        error("Unsupported channel: $channel")
+    end
+    real_part += prefactor * B0_real
+    imag_part += prefactor * B0_imag
+    return factor * real_part, factor * imag_part
+end
 
 function main()
     cpp_results_dir = normpath(joinpath(PROJECT_ROOT, "..", "20250413备份", "results"))
@@ -247,6 +287,15 @@ function main()
     PiP_t_ss_re, PiP_t_ss_im = polarization_aniso_cached(:P, cms_t.k0, cms_t.k, m_s, m_s, muq, muq, T, Phi, Phibar, 0.0, A_s, A_s, 0)
     PiS_t_ss_re, PiS_t_ss_im = polarization_aniso_cached(:S, cms_t.k0, cms_t.k, m_s, m_s, muq, muq, T, Phi, Phibar, 0.0, A_s, A_s, 0)
 
+    # rtol sensitivity check (Julia side only)
+    rtol_strict = 1e-8
+    PiP_s_re_strict, PiP_s_im_strict = polarization_with_rtol(:P, cms_s.k0, cms_s.k, m_u, m_d, muq, muq, T, Phi, Phibar, A_u, A_u, 0; rtol=rtol_strict)
+    PiS_s_re_strict, PiS_s_im_strict = polarization_with_rtol(:S, cms_s.k0, cms_s.k, m_u, m_d, muq, muq, T, Phi, Phibar, A_u, A_u, 0; rtol=rtol_strict)
+    PiP_t_uu_re_strict, PiP_t_uu_im_strict = polarization_with_rtol(:P, cms_t.k0, cms_t.k, m_u, m_u, muq, muq, T, Phi, Phibar, A_u, A_u, 0; rtol=rtol_strict)
+    PiS_t_uu_re_strict, PiS_t_uu_im_strict = polarization_with_rtol(:S, cms_t.k0, cms_t.k, m_u, m_u, muq, muq, T, Phi, Phibar, A_u, A_u, 0; rtol=rtol_strict)
+    PiP_t_ss_re_strict, PiP_t_ss_im_strict = polarization_with_rtol(:P, cms_t.k0, cms_t.k, m_s, m_s, muq, muq, T, Phi, Phibar, A_s, A_s, 0; rtol=rtol_strict)
+    PiS_t_ss_re_strict, PiS_t_ss_im_strict = polarization_with_rtol(:S, cms_t.k0, cms_t.k, m_s, m_s, muq, muq, T, Phi, Phibar, A_s, A_s, 0; rtol=rtol_strict)
+
     props_s = calculate_all_propagators_by_channel(process, cms_s.k0, cms_s.k, quark_params, thermo_params, Kc)
     props_t = calculate_all_propagators_by_channel(process, cms_t.k0, cms_t.k, quark_params, thermo_params, Kc)
 
@@ -261,6 +310,15 @@ function main()
     if amp.t_Pi_ss_S !== nothing
         @printf("t(ss) ΠS Julia %.6f,%.6f | C++ %.6f,%.6f\n", PiS_t_ss_re, PiS_t_ss_im, amp.t_Pi_ss_S.re, amp.t_Pi_ss_S.im)
     end
+
+    println("\n--- Π sensitivity to B0 rtol (Julia only) ---")
+    @printf("Using rtol_strict = %.0e\n", rtol_strict)
+    @printf("s ΠP strict %.6f,%.6f  (Δ=%.3e,%.3e vs default)\n", PiP_s_re_strict, PiP_s_im_strict, PiP_s_re_strict-PiP_s_re, PiP_s_im_strict-PiP_s_im)
+    @printf("s ΠS strict %.6f,%.6f  (Δ=%.3e,%.3e vs default)\n", PiS_s_re_strict, PiS_s_im_strict, PiS_s_re_strict-PiS_s_re, PiS_s_im_strict-PiS_s_im)
+    @printf("t(uu) ΠP strict %.6f,%.6f (Δ=%.3e,%.3e vs default)\n", PiP_t_uu_re_strict, PiP_t_uu_im_strict, PiP_t_uu_re_strict-PiP_t_uu_re, PiP_t_uu_im_strict-PiP_t_uu_im)
+    @printf("t(uu) ΠS strict %.6f,%.6f (Δ=%.3e,%.3e vs default)\n", PiS_t_uu_re_strict, PiS_t_uu_im_strict, PiS_t_uu_re_strict-PiS_t_uu_re, PiS_t_uu_im_strict-PiS_t_uu_im)
+    @printf("t(ss) ΠP strict %.6f,%.6f (Δ=%.3e,%.3e vs default)\n", PiP_t_ss_re_strict, PiP_t_ss_im_strict, PiP_t_ss_re_strict-PiP_t_ss_re, PiP_t_ss_im_strict-PiP_t_ss_im)
+    @printf("t(ss) ΠS strict %.6f,%.6f (Δ=%.3e,%.3e vs default)\n", PiS_t_ss_re_strict, PiS_t_ss_im_strict, PiS_t_ss_re_strict-PiS_t_ss_re, PiS_t_ss_im_strict-PiS_t_ss_im)
 
     println("\n--- Propagators D (at C++ pick_t) ---")
     @printf("s D_P Julia %.6f%+.6fim | C++ %.6f%+.6fim\n", real(props_s.s_P), imag(props_s.s_P), amp.prop_s_P.re, amp.prop_s_P.im)

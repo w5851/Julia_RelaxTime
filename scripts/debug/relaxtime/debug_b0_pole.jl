@@ -2,9 +2,23 @@
 
 # Temporary diagnostic for tilde_B0_k_zero pole handling.
 
-push!(LOAD_PATH, joinpath(@__DIR__, "..", "..", "src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "..", "..", "src", "integration"))
-push!(LOAD_PATH, joinpath(@__DIR__, "..", "..", "src", "relaxtime"))
+function find_project_root(start_dir::AbstractString)
+    dir = abspath(start_dir)
+    while true
+        if isfile(joinpath(dir, "Project.toml"))
+            return dir
+        end
+        parent = dirname(dir)
+        parent == dir && error("Could not find Project.toml from: $start_dir")
+        dir = parent
+    end
+end
+
+const PROJECT_ROOT = find_project_root(@__DIR__)
+
+push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src"))
+push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "integration"))
+push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "relaxtime"))
 
 using Constants_PNJL
 using OneLoopIntegrals
