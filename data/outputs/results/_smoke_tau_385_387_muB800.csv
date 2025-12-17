@@ -1,0 +1,21 @@
+# y_unit.tau_ubar: fm
+# y_unit.tau_u: fm
+# script: scripts/relaxtime/scan_relaxation_times_vs_T.jl
+# schema: scan_csv_v1
+# y_unit.tau_sbar: fm
+# y_unit.tauinv_s: 1/fm
+# y_unit.tauinv_ubar: 1/fm
+# x_unit: MeV
+# y_scale.tau_s: log
+# y_scale.tau_sbar: log
+# y_unit.tau_s: fm
+# y_unit.tauinv_sbar: 1/fm
+# title: relaxation_times_vs_T
+# y_unit.tauinv_u: 1/fm
+# y_scale.tau_u: log
+# y_scale.tau_ubar: log
+# x_label: T
+T_MeV,muB_MeV,muq_MeV,xi,T_fm,muq_fm,converged,iterations,residual_norm,Phi,Phibar,m_u,m_s,n_u,n_s,n_ubar,n_sbar,tau_u,tau_s,tau_ubar,tau_sbar,tauinv_u,tauinv_s,tauinv_ubar,tauinv_sbar,tau_p_nodes,tau_angle_nodes,tau_phi_nodes,tau_n_sigma_points,sigma_grid_n,p_cut_factor
+385.0,800.0,266.6666666666667,0.0,1.9510761325110098,1.3513947238171495,false,40,19.17614818918465,0.005989612178004811,-0.4033800068385849,4.051465208981329,3.0523078471306953,-0.17204533978892272,-0.3318179413593213,-0.3763696812908744,-0.5099689685222346,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,6,2,6,6,12,8.0
+386.0,800.0,266.6666666666667,0.0,1.956143862725324,1.3513947238171495,false,40,21.36544007141071,-0.10936332671458959,-0.3775173283182181,4.136269209971413,4.88222048931621,-0.5834956447246713,-0.4176902352091,-0.3501079697412836,-0.2717581030508338,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,6,2,6,6,12,8.0
+387.0,800.0,266.6666666666667,0.0,1.9612115929396383,1.3513947238171495,false,40,37.677305180844776,-0.8406724675037691,-0.9402915586615865,-5.855110051003357,5.6438105095015985,-2.017232397484976,-2.2220705596621917,-0.4954996881709144,-0.5371255001693412,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,6,2,6,6,12,8.0

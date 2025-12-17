@@ -14,6 +14,7 @@ Example:
 
 import argparse
 import csv
+import io
 import math
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -32,8 +33,11 @@ def read_rows(path: Path) -> List[Dict[str, str]]:
     if not path.exists():
         raise FileNotFoundError(f"CSV not found: {path}")
     with path.open("r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        return [row for row in reader]
+        lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
+    if not lines:
+        return []
+    reader = csv.DictReader(io.StringIO("".join(lines)))
+    return [row for row in reader]
 
 
 def filter_by_xi(rows: List[Dict[str, str]], xi: float, tol: float = 1e-9) -> List[Dict[str, str]]:
@@ -48,7 +52,8 @@ def filter_by_xi(rows: List[Dict[str, str]], xi: float, tol: float = 1e-9) -> Li
 
 def build_grid(rows: List[Dict[str, str]], field: str) -> Tuple[List[float], List[float], List[List[float]]]:
     t_vals = sorted({parse_float(r.get("T_MeV", "nan")) for r in rows if r})
-    mu_vals = sorted({parse_float(r.get("mu_MeV", "nan")) for r in rows if r})
+    mu_col = "muq_MeV" if any("muq_MeV" in r for r in rows) else "mu_MeV"
+    mu_vals = sorted({parse_float(r.get(mu_col, "nan")) for r in rows if r})
     t_vals = [v for v in t_vals if not math.isnan(v)]
     mu_vals = [v for v in mu_vals if not math.isnan(v)]
 
@@ -58,7 +63,7 @@ def build_grid(rows: List[Dict[str, str]], field: str) -> Tuple[List[float], Lis
     grid = [[math.nan for _ in mu_vals] for _ in t_vals]
     for r in rows:
         t = parse_float(r.get("T_MeV", "nan"))
-        m = parse_float(r.get("mu_MeV", "nan"))
+        m = parse_float(r.get(mu_col, "nan"))
         if math.isnan(t) or math.isnan(m):
             continue
         i = t_index.get(t)

@@ -26,12 +26,14 @@ const DEFAULT_RTOL = 1.0e-3 # 积分相对误差默认值
 const DEFAULT_ATOL = 0.0 # 积分绝对误差默认值
 """计算给定质量下的能量截断值"""
 @inline @fastmath function energy_cutoff(m::Float64)
-    return sqrt(m * m + Λ_inv_fm * Λ_inv_fm)
+    m_pos = max(m, 0.0)
+    return sqrt(m_pos * m_pos + Λ_inv_fm * Λ_inv_fm)
 end
 
 """计算给定能量和质量对应的动量"""
 @inline @fastmath function internal_momentum(E::Float64, m::Float64)
-    return sqrt(E * E - m * m)
+    m_pos = max(m, 0.0)
+    return sqrt(E * E - m_pos * m_pos)
 end
 
 """计算夸克有效分布函数的值（供 A 积分使用：分别用夸克/反夸克分布）"""
@@ -144,11 +146,13 @@ end
 """三动量大小k=0(小于EPS_K)时的 B0分量 积分计算"""
 @inline function tilde_B0_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
     Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
-    Emin = m
-    Emax = energy_cutoff(m)
-    denominator_term = (λ ^ 2 + m ^ 2 - m_prime ^ 2) / 2.0
+    m_pos = max(m, 0.0)
+    m_prime_pos = max(m_prime, 0.0)
+    Emin = m_pos
+    Emax = energy_cutoff(m_pos)
+    denominator_term = (λ ^ 2 + m_pos ^ 2 - m_prime_pos ^ 2) / 2.0
     singularity = singularity_k_zero(λ, Emin, Emax, denominator_term)
-    integrand_fun(E) = real_integrand_k_zero(sign_flag, λ, m, denominator_term,
+    integrand_fun(E) = real_integrand_k_zero(sign_flag, λ, m_pos, denominator_term,
         μ, T, Φ, Φbar, E) # 闭包被积函数
 
     imag_part = 0.0
@@ -169,8 +173,8 @@ end
             real_part = left + right
         end
 
-        p0 = internal_momentum(E0, m)
-            imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
+        p0 = internal_momentum(E0, m_pos)
+        imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
     end
 
     return real_part * 2.0, imag_part / λ
@@ -292,10 +296,12 @@ end
 """k>0 时的 B0分量 积分计算"""
 function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
     Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
-    Emin = m
-    Emax = energy_cutoff(m)
-    integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar, E) # 闭包被积函数
-    intervals, sign_type = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
+    m_pos = max(m, 0.0)
+    m_prime_pos = max(m_prime, 0.0)
+    Emin = m_pos
+    Emax = energy_cutoff(m_pos)
+    integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m_pos, m_prime_pos, μ, T, Φ, Φbar, E) # 闭包被积函数
+    intervals, sign_type = singularity_k_positive(λ, k, m_pos, m_prime_pos, Emin, Emax)
     
     imag_part = 0.0
     real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
@@ -342,8 +348,14 @@ end
 # ---------------------------------------------------------------------------
 """计算A的辅助函数,处理对常数项的积分"""
 function const_integral_term_A(m::Float64)
-    term1 = Λ_inv_fm * sqrt(Λ_inv_fm^2 + m^2)
-    term2 = m^2 * log((Λ_inv_fm + sqrt(Λ_inv_fm^2 + m^2)) / m)
+    m_pos = max(m, 0.0)
+    # m -> 0 极限：term2 -> 0，term1 = Λ^2
+    if m_pos < 1e-14
+        return (Λ_inv_fm^2) / 2.0
+    end
+
+    term1 = Λ_inv_fm * sqrt(Λ_inv_fm^2 + m_pos^2)
+    term2 = m_pos^2 * log((Λ_inv_fm + sqrt(Λ_inv_fm^2 + m_pos^2)) / m_pos)
     return (term1 - term2) / 2.0
 end
 

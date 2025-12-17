@@ -160,6 +160,15 @@ function relaxation_rates(
                  n_s * w_ssbar +
                  n_sbar * (w_ssbar + 2.0 * w_ssbar_uubar)
 
+    # 数值保护：平均速率应非负；若出现明显负值，提示但仍钳制到 0。
+    if omega_u < -1e-12 || omega_s < -1e-12 || omega_ubar < -1e-12 || omega_sbar < -1e-12
+        @warn "negative relaxation rate encountered; clamping to 0" omega_u=omega_u omega_s=omega_s omega_ubar=omega_ubar omega_sbar=omega_sbar
+    end
+    omega_u = max(omega_u, 0.0)
+    omega_s = max(omega_s, 0.0)
+    omega_ubar = max(omega_ubar, 0.0)
+    omega_sbar = max(omega_sbar, 0.0)
+
     return (
         u = omega_u,
         d = omega_u,     # isospin symmetry

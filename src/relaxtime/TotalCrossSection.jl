@@ -322,6 +322,8 @@ function final_state_blocking_factor(
         end
     end
 
+    # 数值误差下 f 可能略超出 [0,1]，这里钳制以避免 (1-f) 变负导致截面出现非物理解。
+    f = clamp(f, 0.0, 1.0)
     return 1.0 - f
 end
 
@@ -632,11 +634,25 @@ function total_cross_section(
         M_squared = scattering_amplitude_squared(
             process, s, t, quark_params, thermo_params, K_coeffs
         )
+
+        if !isfinite(M_squared)
+            continue
+        end
+        if M_squared < 0.0
+            M_squared = 0.0
+        end
         
         # 7.2 计算微分截面
         dsigma_dt = differential_cross_section(
             s_12_plus, s_12_minus, M_squared
         )
+
+        if !isfinite(dsigma_dt)
+            continue
+        end
+        if dsigma_dt < 0.0
+            dsigma_dt = 0.0
+        end
         
         # 7.3 计算末态能量与角度
         E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
@@ -651,9 +667,19 @@ function total_cross_section(
             T, Φ, Φbar,
             ξ, cosθ_star
         )
+
+        if !isfinite(blocking_factor)
+            continue
+        end
+        if blocking_factor < 0.0
+            blocking_factor = 0.0
+        end
         
         # 7.5 累加
-        σ += w * dsigma_dt * blocking_factor
+        term = w * dsigma_dt * blocking_factor
+        if isfinite(term)
+            σ += term
+        end
     end
     
     return σ

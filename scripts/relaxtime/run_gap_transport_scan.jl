@@ -16,6 +16,8 @@
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
+include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
+
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
@@ -27,6 +29,7 @@ using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .EffectiveCouplings.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using StaticArrays
+using .ScanCSV: ScanCSV
 
 struct ScanOptions
     output::String
@@ -196,28 +199,13 @@ function ensure_parent_dir(path::AbstractString)
 end
 
 function read_existing_keys(path::AbstractString)
-    keys = Set{Tuple{Float64,Float64,Float64}}()
-    isfile(path) || return keys
-    open(path, "r") do io
-        header = readline(io; keep=true)
-        isempty(header) && return keys
-        # assume columns contain T_MeV, mu_MeV, xi
-        for line in eachline(io)
-            isempty(strip(line)) && continue
-            parts = split(line, ',')
-            length(parts) < 3 && continue
-            T = tryparse(Float64, parts[1]); μ = tryparse(Float64, parts[2]); xi = tryparse(Float64, parts[3])
-            (T === nothing || μ === nothing || xi === nothing) && continue
-            push!(keys, (T, μ, xi))
-        end
-    end
-    return keys
+    return ScanCSV.read_existing_keys(path, ["T_MeV", "muq_MeV", "xi"])
 end
 
 function write_header_if_needed(io)
     header = join([
-        "T_MeV", "mu_MeV", "xi",
-        "T_fm", "mu_fm",
+        "T_MeV", "muq_MeV", "muB_MeV", "xi",
+        "T_fm", "muq_fm",
         "converged", "iterations", "residual_norm",
         "Phi", "Phibar",
         "m_u", "m_d", "m_s",
@@ -257,32 +245,38 @@ function run_scan(opts::ScanOptions)
     io = open(opts.output, "a")
     try
         if new_file
+            ScanCSV.write_metadata(io, Dict(
+                "schema" => "scan_csv_v1",
+                "title" => "gap_transport_scan",
+                "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
+            ))
             write_header_if_needed(io)
         end
 
         T_values = collect(range(opts.tmin_mev; stop=opts.tmax_mev, step=opts.tstep_mev))
-        mu_values = collect(range(opts.mumin_mev; stop=opts.mumax_mev, step=opts.mustep_mev))
+        muq_values = collect(range(opts.mumin_mev; stop=opts.mumax_mev, step=opts.mustep_mev))
 
-        total = length(opts.xi_values) * length(T_values) * length(mu_values)
+        total = length(opts.xi_values) * length(T_values) * length(muq_values)
         done = 0
 
         for xi in opts.xi_values
             for T_mev in T_values
                 seed_state = nothing
-                for mu_mev in mu_values
+                for muq_mev in muq_values
                     done += 1
-                    key = (T_mev, mu_mev, xi)
+                    key = (T_mev, muq_mev, xi)
                     if opts.resume && (key in existing)
                         continue
                     end
 
                     T_fm = T_mev / ħc_MeV_fm
-                    mu_fm = mu_mev / ħc_MeV_fm
+                    muq_fm = muq_mev / ħc_MeV_fm
+                    muB_mev = 3.0 * muq_mev
 
                     # 先求一次平衡解（用于 K_coeffs，并作为后续 workflow 的 equilibrium 复用）
                     base = TransportWorkflow.ThermoDerivatives.solve_equilibrium_mu(
                         T_fm,
-                        mu_fm;
+                        muq_fm;
                         xi=xi,
                         seed_state=(seed_state === nothing ? TransportWorkflow.AnisoGapSolver.DEFAULT_MU_GUESS : seed_state),
                         p_num=opts.p_num,
@@ -298,12 +292,12 @@ function run_scan(opts::ScanOptions)
                     mvec = TransportWorkflow.AnisoGapSolver.calculate_mass_vec(φ)
                     masses = (u=Float64(mvec[1]), d=Float64(mvec[2]), s=Float64(mvec[3]))
 
-                    K_coeffs = compute_K_coeffs(Float64(T_fm), Float64(mu_fm), masses, Φ, Φbar)
+                    K_coeffs = compute_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
 
                     # 正式计算：τ + 输运（η/σ）; ζ 默认关
                     res = solve_gap_and_transport(
                         T_fm,
-                        mu_fm;
+                        muq_fm;
                         xi=xi,
                         equilibrium=base,
                         compute_tau=true,
@@ -330,8 +324,8 @@ function run_scan(opts::ScanOptions)
                     tr = res.transport
 
                     row = join([
-                        string(T_mev), string(mu_mev), string(xi),
-                        string(T_fm), string(mu_fm),
+                        string(T_mev), string(muq_mev), string(muB_mev), string(xi),
+                        string(T_fm), string(muq_fm),
                         csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm),
                         string(Φ), string(Φbar),
                         string(masses.u), string(masses.d), string(masses.s),
@@ -349,7 +343,7 @@ function run_scan(opts::ScanOptions)
                     end
 
                     if done % 10 == 0
-                        println("progress: $(done)/$(total) (last T=$(T_mev) MeV, mu=$(mu_mev) MeV, xi=$(xi))")
+                        println("progress: $(done)/$(total) (last T=$(T_mev) MeV, muq=$(muq_mev) MeV, xi=$(xi))")
                     end
                 end
             end

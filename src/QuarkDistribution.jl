@@ -3,6 +3,10 @@ export quark_distribution, antiquark_distribution,
         quark_distribution_antiderivative, quark_distribution_integral,
         antiquark_distribution_antiderivative, antiquark_distribution_integral
 export distribution
+
+@inline function _safe_log_term(x::Float64; min_val::Float64=1e-300)
+    return log(x <= min_val ? min_val : x)
+end
       
 """PNJL模型中夸克有效分布函数
 注：也许将硬截断clamp改为分子分母同时除以可能出现的最大项exp_term3会更好(确保计算过程中不出现很大的数，但是可能会出现很小的数)，
@@ -61,7 +65,7 @@ function quark_distribution_antiderivative(E_inv_fm::Float64, μ_inv_fm::Float64
     log_term = 1 + 3 * Φ * exp_term + 3 * Φbar * exp_term2 + exp_term3
 
     # 返回原函数（针对能量 E 的不定积分）, 常数因子选择使得 d/dE antiderivative = quark_distribution
-    return -T_inv_fm * log(log_term) / 3
+    return -T_inv_fm * _safe_log_term(log_term) / 3
 end
 
 """计算夸克有效分布函数在给定能量区间的积分"""
@@ -85,7 +89,7 @@ function antiquark_distribution_antiderivative(E_inv_fm::Float64, μ_inv_fm::Flo
     log_term = 1 + 3 * Φbar * exp_term + 3 * Φ * exp_term2 + exp_term3
 
     # 返回原函数（针对能量 E 的不定积分）, 常数因子选择使得 d/dE antiderivative = antiquark_distribution
-    return -T_inv_fm * log(log_term) / 3
+    return -T_inv_fm * _safe_log_term(log_term) / 3
 end
 
 """计算反夸克有效分布函数在给定能量区间的积分"""

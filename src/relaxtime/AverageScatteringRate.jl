@@ -178,9 +178,18 @@ function sigma_at!(cache::CrossSectionCache, s::Float64,
         return cache.sigma_vals[idx]
     end
 
-    σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
-    insert_sigma!(cache, s, σ)
-    return σ
+    try
+        σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+        if !isfinite(σ) || σ < 0.0
+            @warn "sigma_at! produced non-finite/negative sigma; using 0" process=cache.process s=s sigma=σ
+            return 0.0
+        end
+        insert_sigma!(cache, s, σ)
+        return σ
+    catch err
+        @warn "sigma_at! failed; using 0" process=cache.process s=s error=err
+        return 0.0
+    end
 end
 
 function adaptive_interpolate_sigma!(cache::CrossSectionCache, s::Float64,

@@ -19,6 +19,14 @@ using .Constants_PNJL: λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
 using .EffectiveCouplings: coupling_matrix_determinant
 using LinearAlgebra: det
 
+# 传播子分母正则：避免在共振/极点附近出现 NaN/Inf。
+# 注意：这不是物理“宽度”建模，只是数值稳健性保护；值应尽量小。
+const PROPAGATOR_DENOM_EPS = 1e-12
+
+@inline function _isfinite_complex(z::ComplexF64)::Bool
+    return isfinite(real(z)) && isfinite(imag(z))
+end
+
 export meson_propagator_simple, meson_propagator_mixed
 export calculate_coupling_matrix, extract_flavor, get_quark_wavefunction, calculate_current_vector
 
@@ -317,7 +325,14 @@ D_sigma_pi = meson_propagator_simple(:sigma_pi, K_coeffs, Π_uu_S)
     end
     
     # D = 2K / (1 - 4KΠ)
-    return (2.0 * K) / (1.0 - 4.0 * K * Π)
+    denom = 1.0 - 4.0 * K * Π
+    if !_isfinite_complex(denom)
+        return 0.0 + 0.0im
+    end
+    if abs(denom) < PROPAGATOR_DENOM_EPS
+        denom += complex(0.0, PROPAGATOR_DENOM_EPS)
+    end
+    return (2.0 * K) / denom
 end
 
 # ----------------------------------------------------------------------------
@@ -420,10 +435,19 @@ D_sigma = meson_propagator_mixed(det_K_S, M_S, :u, :dbar, :u, :dbar, :s)
     
     # 计算M矩阵的行列式
     det_M = det(M_matrix)
+    if !_isfinite_complex(det_M)
+        return 0.0 + 0.0im
+    end
+    if abs(det_M) < PROPAGATOR_DENOM_EPS
+        det_M += complex(0.0, PROPAGATOR_DENOM_EPS)
+    end
     
     # 计算传播子 D = 2det(K)/det(M) × J^T M J'
     # 矩阵乘法：J^T (2×1 → 1×2) × M (2×2) × J' (2×1) = 标量
     result = (transpose(J) * M_matrix * J_prime)[1]  # 提取标量值
+    if !_isfinite_complex(result)
+        return 0.0 + 0.0im
+    end
     
     # 乘以前置因子
     D = 2.0 * det_K / det_M * result
