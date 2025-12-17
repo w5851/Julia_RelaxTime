@@ -70,6 +70,13 @@ struct Options
     # sigma precompute grid
     sigma_grid_n::Int
     p_cut_factor::Float64
+    # adaptive sigma cache controls (speed/accuracy)
+    sigma_cache_rtol::Float64
+    sigma_cache_max_refine::Int
+    # cache compute policy
+    sigma_compute_missing::Bool
+    # GC frequency
+    gc_every_n::Int
 end
 
 function print_usage()
@@ -88,8 +95,10 @@ function print_usage()
     println("  --tau-angle-nodes <int>      τ 平均散射率 cosθ 节点 (default 2)")
     println("  --tau-phi-nodes <int>        τ 平均散射率 φ 节点 (default 6)")
     println("  --tau-n-sigma <int>          σ(s) 的 t 积分点数 (default 6)")
-    println("  --sigma-grid-n <int>         每个过程预计算 σ(s) 的网格点数 (default 12)")
+    println("  --sigma-grid-n <int>         每个过程预计算 σ(s) 的网格点数 (default 18)")
     println("  --p-cut-factor <float>       σ(s) 预计算 s_max 使用的 p_cut = min(Λ, factor*T) (default 8.0)")
+    println("  --sigma-cache-rtol <float>   自适应插值相对误差阈值 (default 1e-2; 越大越快越粗)")
+    println("  --sigma-cache-max-refine <int>  自适应细分最大次数 (default 6; 越小越快)")
     println("  -h, --help                   显示帮助")
 end
 
@@ -110,8 +119,13 @@ function parse_args(args::Vector{String})
         :tau_angle_nodes => 2,
         :tau_phi_nodes => 6,
         :tau_n_sigma => 6,
-        :sigma_grid_n => 12,
+        # 默认更偏向“预网格”以减少积分中的按需补点次数
+        :sigma_grid_n => 18,
         :p_cut_factor => 8.0,
+        :sigma_cache_rtol => 5e-2,
+        :sigma_cache_max_refine => 6,
+        :sigma_compute_missing => false,
+        :gc_every_n => 5,
     )
 
     i = 1
@@ -161,6 +175,14 @@ function parse_args(args::Vector{String})
             opts[:sigma_grid_n] = parse(Int, require_value())
         elseif arg == "--p-cut-factor"
             opts[:p_cut_factor] = parse(Float64, require_value())
+        elseif arg == "--sigma-cache-rtol"
+            opts[:sigma_cache_rtol] = parse(Float64, require_value())
+        elseif arg == "--sigma-cache-max-refine"
+            opts[:sigma_cache_max_refine] = parse(Int, require_value())
+        elseif arg == "--sigma-compute-missing"
+            opts[:sigma_compute_missing] = true
+        elseif arg == "--gc-every-n"
+            opts[:gc_every_n] = parse(Int, require_value())
         elseif arg in ("-h", "--help")
             print_usage(); exit(0)
         else
@@ -189,6 +211,10 @@ function parse_args(args::Vector{String})
         Int(opts[:tau_n_sigma]),
         Int(opts[:sigma_grid_n]),
         Float64(opts[:p_cut_factor]),
+        Float64(opts[:sigma_cache_rtol]),
+        Int(opts[:sigma_cache_max_refine]),
+        Bool(opts[:sigma_compute_missing]),
+        Int(opts[:gc_every_n]),
     )
 end
 
@@ -209,6 +235,8 @@ function write_header(io)
         "tauinv_u", "tauinv_s", "tauinv_ubar", "tauinv_sbar",
         "tau_p_nodes", "tau_angle_nodes", "tau_phi_nodes", "tau_n_sigma_points",
         "sigma_grid_n", "p_cut_factor",
+        "sigma_cache_rtol", "sigma_cache_max_refine",
+        "sigma_compute_missing", "gc_every_n",
     ]
     println(io, join(cols, ','))
 end
@@ -278,7 +306,8 @@ function safe_total_cross_section(process::Symbol, s::Float64,
 end
 
 function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_sigma_points::Int, sigma_grid_n::Int, p_cut_factor::Float64)
+    n_sigma_points::Int, sigma_grid_n::Int, p_cut_factor::Float64,
+    sigma_cache_rtol::Float64, sigma_cache_max_refine::Int, compute_missing::Bool)
 
     p_cut = min(Λ_inv_fm, p_cut_factor * thermo_params.T)
     cs_caches = Dict{Symbol,RT_ASR.CrossSectionCache}()
@@ -293,7 +322,11 @@ function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_p
         sqrt_s_grid = range(sqrt(s_min), sqrt(s_max); length=sigma_grid_n)
         s_grid = Float64[(x * x) for x in sqrt_s_grid]
 
-        cache = RT_ASR.CrossSectionCache(process; compute_missing=true)
+        cache = RT_ASR.CrossSectionCache(process;
+            compute_missing=compute_missing,
+            rtol=sigma_cache_rtol,
+            max_refine=sigma_cache_max_refine,
+        )
         n_ok = 0
         n_bad = 0
         for s in s_grid
@@ -324,7 +357,7 @@ function run_scan(opts::Options)
         rm(opts.out)
     end
 
-    new_file = !isfile(opts.out)
+    new_file = !isfile(opts.out) || (isfile(opts.out) && filesize(opts.out) == 0)
     io = open(opts.out, "a")
     try
         if new_file
@@ -348,6 +381,13 @@ function run_scan(opts::Options)
                 "y_scale.tau_s" => "log",
                 "y_scale.tau_ubar" => "log",
                 "y_scale.tau_sbar" => "log",
+                # cache knobs for reproducibility
+                "sigma_grid_n" => string(opts.sigma_grid_n),
+                "p_cut_factor" => string(opts.p_cut_factor),
+                "sigma_cache_rtol" => string(opts.sigma_cache_rtol),
+                "sigma_cache_max_refine" => string(opts.sigma_cache_max_refine),
+                "sigma_compute_missing" => string(opts.sigma_compute_missing),
+                "gc_every_n" => string(opts.gc_every_n),
             ))
             write_header(io)
         end
@@ -358,6 +398,7 @@ function run_scan(opts::Options)
             muq_fm = muq_mev / ħc_MeV_fm
 
             seed_state = DEFAULT_MU_GUESS
+            local_iter = 0
             for T_mev in T_vals
                 if opts.resume && !opts.overwrite
                     if (T_mev, muB_mev, opts.xi) in existing
@@ -403,6 +444,9 @@ function run_scan(opts::Options)
                         n_sigma_points=opts.tau_n_sigma_points,
                         sigma_grid_n=opts.sigma_grid_n,
                         p_cut_factor=opts.p_cut_factor,
+                        sigma_cache_rtol=opts.sigma_cache_rtol,
+                        sigma_cache_max_refine=opts.sigma_cache_max_refine,
+                        compute_missing=opts.sigma_compute_missing,
                     )
 
                     tau_res = relaxation_times(
@@ -432,6 +476,7 @@ function run_scan(opts::Options)
                     tauinv.u, tauinv.s, tauinv.ubar, tauinv.sbar,
                     opts.tau_p_nodes, opts.tau_angle_nodes, opts.tau_phi_nodes, opts.tau_n_sigma_points,
                     opts.sigma_grid_n, opts.p_cut_factor,
+                    opts.sigma_cache_rtol, opts.sigma_cache_max_refine,
                 ]
                 println(io, join(row, ','))
                 flush(io)
@@ -441,6 +486,11 @@ function run_scan(opts::Options)
                         T_mev, muB_mev, tau.u, tau.s, tau.ubar, tau.sbar)
                 else
                     @printf("T=%6.1f MeV  muB=%6.1f MeV | equilibrium NOT converged; tau=NaN\n", T_mev, muB_mev)
+                end
+
+                local_iter += 1
+                if opts.gc_every_n > 0 && (local_iter % opts.gc_every_n == 0)
+                    GC.gc()
                 end
             end
         end

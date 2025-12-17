@@ -123,7 +123,15 @@ end
     p = internal_momentum(E, m)
     dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
     denominator = λ * E + denominator_term
-    return p * dist / denominator
+    if !isfinite(p) || !isfinite(dist) || !isfinite(denominator)
+        return 0.0
+    end
+    if abs(denominator) < EPS_SEGMENT
+        # PV 附近直接返回 0，避免 QuadGK 采样到 1/0 -> NaN
+        return 0.0
+    end
+    val = p * dist / denominator
+    return isfinite(val) ? val : 0.0
 end
 
 """k=0时的奇点计算函数
@@ -168,9 +176,16 @@ end
             # 极端情况下间隙退化，回退到直接积分（可能再次触发奇点，但覆盖面更小）
             real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
         else
-            left, _ = quadgk(integrand_fun, Emin, lo; rtol=rtol, atol=atol)
-            right, _ = quadgk(integrand_fun, hi, Emax; rtol=rtol, atol=atol)
-            real_part = left + right
+            real_part = 0.0
+            # 避免对退化区间 (a,a) 调用 quadgk（会在端点采样到 0/0 -> NaN）
+            if lo > Emin
+                left, _ = quadgk(integrand_fun, Emin, lo; rtol=rtol, atol=atol)
+                real_part += left
+            end
+            if Emax > hi
+                right, _ = quadgk(integrand_fun, hi, Emax; rtol=rtol, atol=atol)
+                real_part += right
+            end
         end
 
         p0 = internal_momentum(E0, m_pos)
@@ -189,9 +204,31 @@ end
     common_part = (λ + E)^2 - m_prime^2
     numerator = common_part - (p - k)^2
     denominator = common_part - (p + k)^2
+    if !isfinite(p) || !isfinite(dist) || !isfinite(numerator) || !isfinite(denominator)
+        return 0.0
+    end
+
+    # 避免 0/0 -> NaN（这是你看到 quadgk 报 NaN 的典型触发点）
+    if abs(numerator) < EPS_SEGMENT && abs(denominator) < EPS_SEGMENT
+        return 0.0
+    end
+
+    # 避免除以 0 造成 Inf/NaN
+    if abs(denominator) < EPS_SEGMENT
+        denominator = (denominator == 0.0) ? EPS_SEGMENT : sign(denominator) * EPS_SEGMENT
+    end
+
     ratio = abs(numerator / denominator)
+    if !isfinite(ratio)
+        return 0.0
+    end
+    ratio = max(ratio, 1e-300)
     log_term = log(ratio)
-    return dist * log_term
+    if !isfinite(log_term)
+        return 0.0
+    end
+    val = dist * log_term
+    return isfinite(val) ? val : 0.0
 end
 
 """
