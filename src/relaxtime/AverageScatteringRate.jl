@@ -5,6 +5,12 @@ module AverageScatteringRate
 - 积分采用 Gauss-Legendre：动量 32 节点，角度 4 节点（可覆盖 7 阶多项式）。
 - 支持各向异性分布 `quark_distribution_aniso(..., ξ, cosθ)`；`ξ=0` 时退化为各向同性。
 - 散射截面使用 `TotalCrossSection.total_cross_section`，可按需预计算并插值。
+
+Cross-section cache notes:
+- `CrossSectionCache(process; compute_missing=true, rtol=1e-2, max_refine=12)` 默认会在需要时调用
+    `TotalCrossSection.total_cross_section` 来补点（并在局部做自适应细分以提升插值可靠性）。
+- 若你只想用“手动插入/预计算的 σ(s) 点”做线性插值（例如单元测试、性能 smoke，或用常数 σ
+    进行回归测试），可用 `compute_missing=false`：此时 `get_sigma` **不会**触发任何真实截面计算。
 """
 
 include("../Constants_PNJL.jl")
@@ -89,12 +95,12 @@ end
 end
 
 @inline function get_mu(flavor::Symbol, quark_params::NamedTuple)
-    if flavor == :u; return quark_params.μ.u
-    elseif flavor == :ubar; return -quark_params.μ.u
-    elseif flavor == :d; return quark_params.μ.d
-    elseif flavor == :dbar; return -quark_params.μ.d
-    elseif flavor == :s; return quark_params.μ.s
-    elseif flavor == :sbar; return -quark_params.μ.s
+    # Convention: always return the quark chemical potential μ_q (positive sign).
+    # The particle/antiparticle distinction is handled by using
+    # `quark_distribution*` vs `antiquark_distribution*`.
+    if flavor in [:u, :ubar]; return quark_params.μ.u
+    elseif flavor in [:d, :dbar]; return quark_params.μ.d
+    elseif flavor in [:s, :sbar]; return quark_params.μ.s
     else; error("Unknown flavor $flavor") end
 end
 
@@ -103,20 +109,23 @@ mutable struct CrossSectionCache
     process::Symbol
     s_vals::Vector{Float64}
     sigma_vals::Vector{Float64}
-    fit_model::Symbol
-    fit_coeff::Any
-    fit_s_sample::Vector{Float64}
-    fit_sigma_sample::Vector{Float64}
-    s_min::Float64
-    s_max::Float64
-    s0::Float64
-    lambda::Float64
-    n_fit::Int
-    fit_ready::Bool
+
+    # If false, `get_sigma` will only interpolate/clamp from existing points
+    # and will not call the expensive exact cross-section calculation.
+    compute_missing::Bool
+
+    # Adaptive interpolation controls
+    rtol::Float64
+    max_refine::Int
 end
 
-function CrossSectionCache(process::Symbol)
-    return CrossSectionCache(process, Float64[], Float64[], :none, nothing, Float64[], Float64[], 0.0, 0.0, 0.0, 0.0, 0, false)
+function CrossSectionCache(
+    process::Symbol;
+    compute_missing::Bool=true,
+    rtol::Float64=1e-2,
+    max_refine::Int=12,
+)
+    return CrossSectionCache(process, Float64[], Float64[], compute_missing, rtol, max_refine)
 end
 
 function insert_sigma!(cache::CrossSectionCache, s::Float64, σ::Float64)
@@ -141,10 +150,12 @@ function interpolate_sigma(cache::CrossSectionCache, s::Float64)
         return nothing
     elseif n == 1
         return cache.sigma_vals[1]
-    elseif s <= cache.s_vals[1]
+    elseif s == cache.s_vals[1]
         return cache.sigma_vals[1]
-    elseif s >= cache.s_vals[end]
+    elseif s == cache.s_vals[end]
         return cache.sigma_vals[end]
+    elseif s < cache.s_vals[1] || s > cache.s_vals[end]
+        return nothing
     else
         idx = searchsortedfirst(cache.s_vals, s)
         s1, s2 = cache.s_vals[idx-1], cache.s_vals[idx]
@@ -154,25 +165,14 @@ function interpolate_sigma(cache::CrossSectionCache, s::Float64)
     end
 end
 
-function get_sigma(cache::CrossSectionCache, s::Float64,
+@inline function relerr(a::Float64, b::Float64)
+    return abs(a - b) / max(1e-12, abs(b))
+end
+
+function sigma_at!(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
-    # 如果已有预计算/手动插入的样本点，则优先使用插值（或端点外推）。
-    # 这样可以支持“预计算并插值”的工作流，也能让单元测试用常数截面缓存避免触发完整截面计算。
-    if !cache.fit_ready && !isempty(cache.s_vals)
-        σ_interp = interpolate_sigma(cache, s)
-        σ_interp === nothing || return σ_interp
-    end
+    n_points::Int)
 
-    if !cache.fit_ready
-        prepare_sigma_fit!(cache, quark_params, thermo_params, K_coeffs; n_points=n_points)
-    end
-
-    if cache.fit_ready && s >= cache.s_min && s <= cache.s_max
-        return predict_sigma(cache, s)
-    end
-
-    # fallback: exact compute (and cache raw)
     idx = searchsortedfirst(cache.s_vals, s)
     if idx <= length(cache.s_vals) && cache.s_vals[idx] == s
         return cache.sigma_vals[idx]
@@ -183,109 +183,78 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
     return σ
 end
 
-# -------------------- 拟合工具 --------------------
+function adaptive_interpolate_sigma!(cache::CrossSectionCache, s::Float64,
+    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    n_points::Int)
 
-@inline function is_heavy_initial(mi::Float64, mj::Float64, mc::Float64, md::Float64)
-    return (mi + mj) >= (mc + md)
-end
+    n = length(cache.s_vals)
+    n == 0 && return sigma_at!(cache, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
 
-function s_bounds(process::Symbol, quark_params::NamedTuple; margin::Float64=1.05)
-    pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
-    mi = get_mass(pi_sym, quark_params); mj = get_mass(pj_sym, quark_params)
-    mc = get_mass(pc_sym, quark_params); md = get_mass(pd_sym, quark_params)
-    s0 = (mi + mj)^2
-    sf = (mc + md)^2
-    s_min = max(s0, sf) + 1e-4
-
-    p_max = Λ_inv_fm
-    Ei = sqrt(p_max^2 + mi^2)
-    Ej = sqrt(p_max^2 + mj^2)
-    p_dot_max = Ei * Ej + p_max * p_max
-    s_max = (mi^2 + mj^2 + 2.0 * p_dot_max) * margin
-    return (s_min=s_min, s_max=s_max, s0=s0, mi=mi, mj=mj, mc=mc, md=md)
-end
-
-"""左端聚焦节点，lambda 越大越偏向左端。"""
-function left_biased_nodes(n::Int, a::Float64, b::Float64; lambda::Float64=4.0)
-    t = range(0.0, 1.0; length=n)
-    w = (exp.(lambda .* t) .- 1.0) ./ (exp(lambda) - 1.0)
-    return a .+ (b - a) .* w
-end
-
-function fit_sqrt2(s::Vector{Float64}, y::Vector{Float64}, s0::Float64)
-    shift = s .- s0
-    X = hcat(1.0 ./ sqrt.(shift), shift, shift.^2, ones(length(s)))
-    return X \ y
-end
-
-function predict_sqrt2(coeff::Vector{Float64}, s::Float64, s0::Float64)
-    A, B, C, D = coeff
-    x = s - s0
-    return A / sqrt(x) + B * x + C * x^2 + D
-end
-
-function predict_sqrt2(coeff::Vector{Float64}, svals::Vector{Float64}, s0::Float64)
-    A, B, C, D = coeff
-    x = svals .- s0
-    return A .* (1.0 ./ sqrt.(x)) .+ B .* x .+ C .* x.^2 .+ D
-end
-
-function predict_spline_linear(s_sample::Vector{Float64}, y_sample::Vector{Float64}, s::Float64)
-    if s <= s_sample[1]
-        return y_sample[1]
-    elseif s >= s_sample[end]
-        return y_sample[end]
-    else
-        idx = searchsortedfirst(s_sample, s)
-        s1 = s_sample[idx-1]; s2 = s_sample[idx]
-        y1 = y_sample[idx-1]; y2 = y_sample[idx]
-        w = (s - s1) / (s2 - s1)
-        return y1 + w * (y2 - y1)
-    end
-end
-
-function predict_spline_linear(s_sample::Vector{Float64}, y_sample::Vector{Float64}, svals::Vector{Float64})
-    return [predict_spline_linear(s_sample, y_sample, s) for s in svals]
-end
-
-function prepare_sigma_fit!(cache::CrossSectionCache, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple; n_points::Int)
-    b = s_bounds(cache.process, quark_params)
-    heavy = is_heavy_initial(b.mi, b.mj, b.mc, b.md)
-    model = heavy ? :sqrt2 : :spline_lin
-    lambda = 4.0
-    n_fit = 24
-    s_sample = sort(left_biased_nodes(n_fit, b.s_min, b.s_max; lambda=lambda))
-    sigma_sample = Float64[]
-    for s in s_sample
-        push!(sigma_sample, total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points))
+    # Always compute exact values outside the current cache window
+    if s <= cache.s_vals[1] || s >= cache.s_vals[end]
+        return sigma_at!(cache, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
     end
 
-    if model == :sqrt2
-        coeff = fit_sqrt2(s_sample, sigma_sample, b.s0)
-    else
-        coeff = nothing  # spline uses stored samples
+    idx = searchsortedfirst(cache.s_vals, s)
+    if idx <= length(cache.s_vals) && cache.s_vals[idx] == s
+        return cache.sigma_vals[idx]
     end
 
-    cache.fit_model = model
-    cache.fit_coeff = coeff
-    cache.fit_s_sample = s_sample
-    cache.fit_sigma_sample = sigma_sample
-    cache.s_min = b.s_min
-    cache.s_max = b.s_max
-    cache.s0 = b.s0
-    cache.lambda = lambda
-    cache.n_fit = n_fit
-    cache.fit_ready = true
+    # Bracket s by cached neighbors
+    sL = cache.s_vals[idx-1]
+    sR = cache.s_vals[idx]
+    σL = cache.sigma_vals[idx-1]
+    σR = cache.sigma_vals[idx]
+
+    # Refine only along the branch that contains the query s.
+    # Criterion: midpoint deviation from linear interpolation within rtol.
+    for _ in 1:cache.max_refine
+        sM = 0.5 * (sL + sR)
+        σM = sigma_at!(cache, sM, quark_params, thermo_params, K_coeffs; n_points=n_points)
+        σM_lin = 0.5 * (σL + σR)
+        if relerr(σM, σM_lin) <= cache.rtol
+            break
+        end
+        if s < sM
+            sR = sM
+            σR = σM
+        else
+            sL = sM
+            σL = σM
+        end
+    end
+
+    w = (s - sL) / (sR - sL)
+    return σL + w * (σR - σL)
 end
 
-function predict_sigma(cache::CrossSectionCache, s::Float64)
-    if cache.fit_model == :sqrt2
-        return predict_sqrt2(cache.fit_coeff, s, cache.s0)
-    elseif cache.fit_model == :spline_lin
-        return predict_spline_linear(cache.fit_s_sample, cache.fit_sigma_sample, s)
-    else
-        error("Sigma fit not prepared for $(cache.process)")
+function get_sigma(cache::CrossSectionCache, s::Float64,
+    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    if !cache.compute_missing
+        n = length(cache.s_vals)
+        n == 0 && error("CrossSectionCache has no points; cannot interpolate")
+        if n == 1
+            return cache.sigma_vals[1]
+        elseif s <= cache.s_vals[1]
+            return cache.sigma_vals[1]
+        elseif s >= cache.s_vals[end]
+            return cache.sigma_vals[end]
+        else
+            # Pure linear interpolation between cached neighbors
+            idx = searchsortedfirst(cache.s_vals, s)
+            s1, s2 = cache.s_vals[idx-1], cache.s_vals[idx]
+            σ1, σ2 = cache.sigma_vals[idx-1], cache.sigma_vals[idx]
+            w = (s - s1) / (s2 - s1)
+            return σ1 + w * (σ2 - σ1)
+        end
     end
+
+    # Strategy:
+    # - If cache already has points, use adaptive local refinement to improve
+    #   linear interpolation accuracy near sharp features (thresholds/resonances).
+    # - Otherwise compute exactly and insert.
+    return adaptive_interpolate_sigma!(cache, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
 end
 
 # -------------------- ρ 计算（各向异性） --------------------

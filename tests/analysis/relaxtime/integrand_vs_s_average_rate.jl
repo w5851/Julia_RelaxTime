@@ -44,8 +44,8 @@ function build_params(; T_MeV=150.0, mu_u_MeV=0.0, mu_d_MeV=0.0, mu_s_MeV=0.0,
     A_d = A(m_d, μ_d, T, phi, phibar, nodes_p, weights_p)
     A_s = A(m_s, μ_s, T, phi, phibar, nodes_p, weights_p)
 
-    G_u = calculate_G_from_A(A_u)
-    G_s = calculate_G_from_A(A_s)
+    G_u = calculate_G_from_A(A_u, m_u)
+    G_s = calculate_G_from_A(A_s, m_s)
 
     quark_params = (m=(u=m_u, d=m_d, s=m_s), μ=(u=μ_u, d=μ_d, s=μ_s), A=(u=A_u, d=A_d, s=A_s))
     thermo_params = (T=T, Φ=phi, Φbar=phibar, ξ=xi)
