@@ -223,8 +223,8 @@ function build_physical_parameters(opts::CLIOptions)
     A_d = A(m_d, μ_d, T, opts.phi, opts.phibar, nodes_p, weights_p)
     A_s = A(m_s, μ_s, T, opts.phi, opts.phibar, nodes_p, weights_p)
 
-    G_u = calculate_G_from_A(A_u)
-    G_s = calculate_G_from_A(A_s)
+    G_u = calculate_G_from_A(A_u, m_u)
+    G_s = calculate_G_from_A(A_s, m_s)
 
     quark_params = (
         m = (u=m_u, d=m_d, s=m_s),

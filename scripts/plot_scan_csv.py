@@ -136,6 +136,22 @@ def _apply_where(rows: List[Dict[str, str]], where: List[str]) -> List[Dict[str,
     return out
 
 
+def _sanitize_filename(s: str) -> str:
+    s2 = "".join(ch if ch.isalnum() or ch in {"-", "_", "."} else "_" for ch in str(s))
+    s2 = s2.strip("._")
+    return s2 if s2 else "value"
+
+
+def _split_rows(rows: List[Dict[str, str]], *, split: str | None) -> List[Tuple[str, List[Dict[str, str]]]]:
+    if not split:
+        return [("__all__", rows)]
+
+    groups: Dict[str, List[Dict[str, str]]] = {}
+    for r in rows:
+        groups.setdefault(str(r.get(split, "")), []).append(r)
+    return sorted(groups.items(), key=lambda kv: kv[0])
+
+
 def plot_lines(
     rows: List[Dict[str, str]],
     *,
@@ -281,6 +297,12 @@ def main() -> None:
     ap.add_argument("--mode", type=str, choices=["lines", "heatmap"], required=True)
     ap.add_argument("--title", type=str, default=None, help="Optional title prefix")
     ap.add_argument("--where", action="append", default=[], help="Filter clause col=value (repeatable)")
+    ap.add_argument(
+        "--split",
+        type=str,
+        default=None,
+        help="Optional split-by column (e.g. process). Produces one set of figures per distinct value.",
+    )
 
     # lines
     ap.add_argument("--x", type=str, default=None, help="x column")
@@ -303,16 +325,29 @@ def main() -> None:
         # If producer wrote a human-friendly title, prefer it.
         title = meta.get("title")
 
-    if args.mode == "lines":
-        if not args.x or not args.ys:
-            raise ValueError("lines mode requires --x and --ys")
-        ys = [s.strip() for s in args.ys.split(",") if s.strip()]
-        plot_lines(rows, x=args.x, ys=ys, group=args.group, out_dir=args.out_dir, title_prefix=title, meta=meta)
-    else:
-        if not args.x or not args.y or not args.fields:
-            raise ValueError("heatmap mode requires --x, --y and --fields")
-        fields = [s.strip() for s in args.fields.split(",") if s.strip()]
-        plot_heatmaps(rows, x=args.x, y=args.y, fields=fields, out_dir=args.out_dir, title_prefix=title, meta=meta)
+    splits = _split_rows(rows, split=args.split)
+
+    for split_value, subrows in splits:
+        if not subrows:
+            continue
+
+        out_dir = args.out_dir
+        title2 = title
+        if args.split:
+            safe = _sanitize_filename(split_value)
+            out_dir = out_dir / f"{args.split}={safe}"
+            title2 = f"{title} ({args.split}={split_value})" if title else f"{args.split}={split_value}"
+
+        if args.mode == "lines":
+            if not args.x or not args.ys:
+                raise ValueError("lines mode requires --x and --ys")
+            ys = [s.strip() for s in args.ys.split(",") if s.strip()]
+            plot_lines(subrows, x=args.x, ys=ys, group=args.group, out_dir=out_dir, title_prefix=title2, meta=meta)
+        else:
+            if not args.x or not args.y or not args.fields:
+                raise ValueError("heatmap mode requires --x, --y and --fields")
+            fields = [s.strip() for s in args.fields.split(",") if s.strip()]
+            plot_heatmaps(subrows, x=args.x, y=args.y, fields=fields, out_dir=out_dir, title_prefix=title2, meta=meta)
 
 
 if __name__ == "__main__":

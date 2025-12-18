@@ -117,6 +117,14 @@ mutable struct CrossSectionCache
     # Adaptive interpolation controls
     rtol::Float64
     max_refine::Int
+
+    # If true, disable interpolation entirely and always compute exact σ(s)
+    # at the queried s (while still memoizing exact points in the cache).
+    direct::Bool
+
+    # If false, never insert new σ(s) points (useful for direct mode where
+    # queries are effectively unique and caching just wastes memory).
+    memoize::Bool
 end
 
 function CrossSectionCache(
@@ -124,8 +132,10 @@ function CrossSectionCache(
     compute_missing::Bool=true,
     rtol::Float64=1e-2,
     max_refine::Int=12,
+    direct::Bool=false,
+    memoize::Bool=true,
 )
-    return CrossSectionCache(process, Float64[], Float64[], compute_missing, rtol, max_refine)
+    return CrossSectionCache(process, Float64[], Float64[], compute_missing, rtol, max_refine, direct, memoize)
 end
 
 function insert_sigma!(cache::CrossSectionCache, s::Float64, σ::Float64)
@@ -184,7 +194,9 @@ function sigma_at!(cache::CrossSectionCache, s::Float64,
             @warn "sigma_at! produced non-finite/negative sigma; using 0" process=cache.process s=s sigma=σ
             return 0.0
         end
-        insert_sigma!(cache, s, σ)
+        if cache.memoize
+            insert_sigma!(cache, s, σ)
+        end
         return σ
     catch err
         @warn "sigma_at! failed; using 0" process=cache.process s=s error=err
@@ -240,6 +252,23 @@ end
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    if cache.direct
+        if cache.memoize
+            return sigma_at!(cache, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+        end
+        # Direct exact evaluation without storing points.
+        try
+            σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+            if !isfinite(σ) || σ < 0.0
+                @warn "direct sigma produced non-finite/negative sigma; using 0" process=cache.process s=s sigma=σ
+                return 0.0
+            end
+            return σ
+        catch err
+            @warn "direct sigma failed; using 0" process=cache.process s=s error=err
+            return 0.0
+        end
+    end
     if !cache.compute_missing
         n = length(cache.s_vals)
         n == 0 && error("CrossSectionCache has no points; cannot interpolate")

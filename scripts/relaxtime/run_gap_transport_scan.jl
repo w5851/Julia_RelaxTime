@@ -227,8 +227,8 @@ function compute_K_coeffs(T_fm::Float64, mu_fm::Float64, masses::NamedTuple, Φ:
     weights = DEFAULT_MOMENTUM_WEIGHTS
     A_u = A(masses.u, mu_fm, T_fm, Φ, Φbar, nodes, weights)
     A_s = A(masses.s, mu_fm, T_fm, Φ, Φbar, nodes, weights)
-    G_u = calculate_G_from_A(A_u, m_u)
-    G_s = calculate_G_from_A(A_s, m_s)
+    G_u = calculate_G_from_A(A_u, masses.u)
+    G_s = calculate_G_from_A(A_s, masses.s)
     return calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 end
 

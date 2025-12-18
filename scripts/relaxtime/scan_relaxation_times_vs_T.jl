@@ -75,6 +75,8 @@ struct Options
     sigma_cache_max_refine::Int
     # cache compute policy
     sigma_compute_missing::Bool
+    # if true, disable interpolation and compute exact σ(s) at each query
+    sigma_direct::Bool
     # GC frequency
     gc_every_n::Int
 end
@@ -99,6 +101,9 @@ function print_usage()
     println("  --p-cut-factor <float>       σ(s) 预计算 s_max 使用的 p_cut = min(Λ, factor*T) (default 8.0)")
     println("  --sigma-cache-rtol <float>   自适应插值相对误差阈值 (default 1e-2; 越大越快越粗)")
     println("  --sigma-cache-max-refine <int>  自适应细分最大次数 (default 6; 越小越快)")
+    println("  --sigma-direct              关闭插值：每次精确计算 σ(s)（仍会缓存精确点；用于精度对比）")
+    println("  --sigma-compute-missing     允许在插值模式下按需补点/细分（可能更慢且占内存）")
+    println("  --gc-every-n <int>          每 N 个点触发一次 GC (default 5; 0 表示关闭)")
     println("  -h, --help                   显示帮助")
 end
 
@@ -125,6 +130,7 @@ function parse_args(args::Vector{String})
         :sigma_cache_rtol => 5e-2,
         :sigma_cache_max_refine => 6,
         :sigma_compute_missing => false,
+        :sigma_direct => false,
         :gc_every_n => 5,
     )
 
@@ -181,6 +187,8 @@ function parse_args(args::Vector{String})
             opts[:sigma_cache_max_refine] = parse(Int, require_value())
         elseif arg == "--sigma-compute-missing"
             opts[:sigma_compute_missing] = true
+        elseif arg == "--sigma-direct"
+            opts[:sigma_direct] = true
         elseif arg == "--gc-every-n"
             opts[:gc_every_n] = parse(Int, require_value())
         elseif arg in ("-h", "--help")
@@ -214,6 +222,7 @@ function parse_args(args::Vector{String})
         Float64(opts[:sigma_cache_rtol]),
         Int(opts[:sigma_cache_max_refine]),
         Bool(opts[:sigma_compute_missing]),
+        Bool(opts[:sigma_direct]),
         Int(opts[:gc_every_n]),
     )
 end
@@ -237,6 +246,7 @@ function write_header(io)
         "sigma_grid_n", "p_cut_factor",
         "sigma_cache_rtol", "sigma_cache_max_refine",
         "sigma_compute_missing", "gc_every_n",
+        "sigma_direct",
     ]
     println(io, join(cols, ','))
 end
@@ -307,12 +317,19 @@ end
 
 function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_sigma_points::Int, sigma_grid_n::Int, p_cut_factor::Float64,
-    sigma_cache_rtol::Float64, sigma_cache_max_refine::Int, compute_missing::Bool)
+    sigma_cache_rtol::Float64, sigma_cache_max_refine::Int, compute_missing::Bool, sigma_direct::Bool)
 
     p_cut = min(Λ_inv_fm, p_cut_factor * thermo_params.T)
     cs_caches = Dict{Symbol,RT_ASR.CrossSectionCache}()
 
     for process in processes
+        if sigma_direct
+            # Direct exact σ(s) at each query (no interpolation). We still memoize exact points.
+            cache = RT_ASR.CrossSectionCache(process; compute_missing=true, direct=true, memoize=false)
+            cs_caches[process] = cache
+            continue
+        end
+
         bounds = s_bounds_for_process(process, quark_params, thermo_params; p_cut=p_cut)
         s_min = bounds.s_min
         s_max = bounds.s_max
@@ -387,6 +404,7 @@ function run_scan(opts::Options)
                 "sigma_cache_rtol" => string(opts.sigma_cache_rtol),
                 "sigma_cache_max_refine" => string(opts.sigma_cache_max_refine),
                 "sigma_compute_missing" => string(opts.sigma_compute_missing),
+                "sigma_direct" => string(opts.sigma_direct),
                 "gc_every_n" => string(opts.gc_every_n),
             ))
             write_header(io)
@@ -447,6 +465,7 @@ function run_scan(opts::Options)
                         sigma_cache_rtol=opts.sigma_cache_rtol,
                         sigma_cache_max_refine=opts.sigma_cache_max_refine,
                         compute_missing=opts.sigma_compute_missing,
+                        sigma_direct=opts.sigma_direct,
                     )
 
                     tau_res = relaxation_times(
@@ -477,6 +496,8 @@ function run_scan(opts::Options)
                     opts.tau_p_nodes, opts.tau_angle_nodes, opts.tau_phi_nodes, opts.tau_n_sigma_points,
                     opts.sigma_grid_n, opts.p_cut_factor,
                     opts.sigma_cache_rtol, opts.sigma_cache_max_refine,
+                    opts.sigma_compute_missing, opts.gc_every_n,
+                    opts.sigma_direct,
                 ]
                 println(io, join(row, ','))
                 flush(io)
