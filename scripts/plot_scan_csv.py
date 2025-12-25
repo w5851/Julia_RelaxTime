@@ -34,11 +34,37 @@ import argparse
 import csv
 import io
 import math
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
 
 import matplotlib.pyplot as plt
+
+
+def _find_project_root() -> Path:
+    """Find project root by looking for Project.toml or .git."""
+    # Start from script location
+    script_dir = Path(__file__).resolve().parent
+    candidates = [script_dir, script_dir.parent]
+    # Also check cwd
+    candidates.append(Path.cwd())
+    
+    for start in candidates:
+        current = start
+        for _ in range(5):  # max 5 levels up
+            if (current / "Project.toml").exists() or (current / ".git").exists():
+                return current
+            parent = current.parent
+            if parent == current:
+                break
+            current = parent
+    # Fallback to cwd
+    return Path.cwd()
+
+
+PROJECT_ROOT = _find_project_root()
+DEFAULT_OUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures"
 
 
 def _parse_float(x: str) -> float:
@@ -290,10 +316,21 @@ def plot_heatmaps(
         print(f"Saved {out}")
 
 
+def _resolve_path(p: Path) -> Path:
+    """Resolve path relative to project root if not absolute."""
+    if p.is_absolute():
+        return p
+    return PROJECT_ROOT / p
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Plot scan CSV (lines/heatmap)")
-    ap.add_argument("--csv", type=Path, required=True, help="Input scan CSV")
-    ap.add_argument("--out-dir", type=Path, default=Path("data/outputs/figures"), help="Output directory")
+    ap = argparse.ArgumentParser(
+        description="Plot scan CSV (lines/heatmap)",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"Project root: {PROJECT_ROOT}\nDefault output: {DEFAULT_OUT_DIR}",
+    )
+    ap.add_argument("--csv", type=Path, required=True, help="Input scan CSV (relative to project root or absolute)")
+    ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR, help="Output directory")
     ap.add_argument("--mode", type=str, choices=["lines", "heatmap"], required=True)
     ap.add_argument("--title", type=str, default=None, help="Optional title prefix")
     ap.add_argument("--where", action="append", default=[], help="Filter clause col=value (repeatable)")
@@ -315,10 +352,14 @@ def main() -> None:
 
     args = ap.parse_args()
 
-    meta, rows = read_scan_csv(args.csv)
+    # Resolve paths relative to project root
+    csv_path = _resolve_path(args.csv)
+    out_dir = _resolve_path(args.out_dir)
+
+    meta, rows = read_scan_csv(csv_path)
     rows = _apply_where(rows, args.where)
     if not rows:
-        raise RuntimeError(f"No data rows after filtering: {args.csv}")
+        raise RuntimeError(f"No data rows after filtering: {csv_path}")
 
     title = args.title
     if title is None:
@@ -331,23 +372,23 @@ def main() -> None:
         if not subrows:
             continue
 
-        out_dir = args.out_dir
+        current_out_dir = out_dir
         title2 = title
         if args.split:
             safe = _sanitize_filename(split_value)
-            out_dir = out_dir / f"{args.split}={safe}"
+            current_out_dir = out_dir / f"{args.split}={safe}"
             title2 = f"{title} ({args.split}={split_value})" if title else f"{args.split}={split_value}"
 
         if args.mode == "lines":
             if not args.x or not args.ys:
                 raise ValueError("lines mode requires --x and --ys")
             ys = [s.strip() for s in args.ys.split(",") if s.strip()]
-            plot_lines(subrows, x=args.x, ys=ys, group=args.group, out_dir=out_dir, title_prefix=title2, meta=meta)
+            plot_lines(subrows, x=args.x, ys=ys, group=args.group, out_dir=current_out_dir, title_prefix=title2, meta=meta)
         else:
             if not args.x or not args.y or not args.fields:
                 raise ValueError("heatmap mode requires --x, --y and --fields")
             fields = [s.strip() for s in args.fields.split(",") if s.strip()]
-            plot_heatmaps(subrows, x=args.x, y=args.y, fields=fields, out_dir=out_dir, title_prefix=title2, meta=meta)
+            plot_heatmaps(subrows, x=args.x, y=args.y, fields=fields, out_dir=current_out_dir, title_prefix=title2, meta=meta)
 
 
 if __name__ == "__main__":
