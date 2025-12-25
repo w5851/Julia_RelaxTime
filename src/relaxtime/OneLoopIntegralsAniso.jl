@@ -3,11 +3,14 @@
 """
 module OneLoopIntegralsCorrection
 
-export B0_correction, A_correction,
-    A_aniso
+export B0_correction, A_correction, A_aniso,
+    IntegrationStrategy, STRATEGY_QUADGK, STRATEGY_INTERVAL_GL, STRATEGY_CLUSTER_GL, STRATEGY_HYBRID,
+    IntegrationDiagnostics, DEFAULT_STRATEGY, DEFAULT_CLUSTER_BETA, DEFAULT_CLUSTER_N
 
 include("../QuarkDistribution_Aniso.jl")
 include("OneLoopIntegrals.jl")
+include("../integration/GaussLegendre.jl")
+using .GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using QuadGK: quadgk
 using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
 using .OneLoopIntegrals: internal_momentum, EPS_K, DEFAULT_RTOL, DEFAULT_ATOL,
@@ -56,14 +59,33 @@ end
     end
 end
 
-"""k=0时的积分实部被积函数"""
+"""k=0 时被积函数的分子（不含分母）
+
+返回值 f(E) = (4/3) * p(E) * correction_cos_theta_coefficient(...)
+此函数仅计算分子部分，便于在外部进行奇点减法或在不同分母下复用。
+"""
+function real_integrand_k_zero_numer(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, E::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+    p = internal_momentum(E, m)
+    return (4.0/3.0) * p * correction_cos_theta_coefficient(sign_, p, m, μ, T, Φ, Φbar, ξ)
+end
+
+"""k=0 时被积函数的分母
+
+返回值 denom(E) = coeff_E * E + denominator_const
+此处复用 `compute_coefficients` 的 k=0 分支以确保与其它代码一致。
+"""
+@inline function real_integrand_k_zero_denom(λ::Float64, m::Float64, m_prime::Float64, E::Float64)
+    coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, E)
+    return coeff_E * E + denominator_const
+end
+
+"""k=0时的积分实部被积函数（保留原名，用分子/分母组合）"""
 function real_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, E::Float64,
     ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
-    coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, E)
-    p = internal_momentum(E,m)
-    # 含各向异性修正项
-    real_ = (4.0/3.0)*p/(coeff_E*E+denominator_const)*correction_cos_theta_coefficient(sign_, p, m, μ, T, Φ, Φbar, ξ)
-    return real_
+    num = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T, μ, Φ, Φbar)
+    den = real_integrand_k_zero_denom(λ, m, m_prime, E)
+    return isfinite(den) && isfinite(num) ? num / den : 0.0
 end
 
 """k>0时的积分实部被积函数"""
@@ -112,43 +134,468 @@ function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_pr
     Φ::Float64, Φbar::Float64, ξ::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
     Emin = m
     Emax = energy_cutoff(m)
+    # 采用奇点减法：f(E) = (4/3)*p(E)*correction(...) ，integrand = f(E) / (coeff_E*E + denominator_const)
+    coeff_E = 2.0 * λ
+    denominator_const = λ^2 + m^2 - m_prime^2
 
-    integrand_real(E) = real_integrand_k_zero(sign_, λ, m, m_prime, E,
-        ξ, T, μ, Φ, Φbar) # 闭包被积函数-实部
-    real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
-    # 计算虚部
-    imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
-        ξ, T, μ, Φ, Φbar)
+    # 寻找奇点 E0，当 coeff_E != 0 时
+    E0 = nothing
+    if coeff_E != 0.0
+        E0_val = -denominator_const / coeff_E
+        if isfinite(E0_val) && (E0_val >= Emin) && (E0_val <= Emax)
+            E0 = E0_val
+        end
+    end
 
-    return real_part , imag_part
+    # 使用已拆分的分子函数 `real_integrand_k_zero_numer` 来获取 f(E)
+    # 注意：不要在此重复实现分子，直接调用模块级 helper。 
+
+    # 使用模块内预计算的标准 32 节点并仿射映射到 [Emin, Emax]
+    # 提升默认节点数到 32 以提高在奇点附近的近似精度
+    nodes, weights = transform_standard32(Emin, Emax)
+
+    # 如果存在奇点，仍做奇点减法（计算 A），但不在节点处特殊替代极限值。
+    # 使用 GL 节点处直接评估剩余函数 (f(E)-A)/den，节点恰好命中奇点的概率极小。
+    if E0 !== nothing
+        # 直接调用分子函数计算 A = f(E0)
+        A = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E0, ξ, T, μ, Φ, Φbar)
+        vals = similar(nodes)
+        @inbounds for i in eachindex(nodes)
+            E = nodes[i]
+            den = coeff_E * E + denominator_const
+            v = (real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T, μ, Φ, Φbar) - A)
+            vals[i] = isfinite(den) && isfinite(v) ? v / den : 0.0
+        end
+        real_part = sum(weights .* vals)
+        # 将常数项 A 的主值积分解析部分加回：
+        # PV ∫_Emin^Emax A / (coeff_E * E + denominator_const) dE = A/coeff_E * ln|coeff_E*E + denominator_const| |_Emin^Emax
+        if coeff_E != 0.0
+            real_part += A/coeff_E * (log(abs(coeff_E * Emax + denominator_const)) - log(abs(coeff_E * Emin + denominator_const)))
+        end
+        imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
+            ξ, T, μ, Φ, Φbar)
+        return real_part, imag_part
+    else
+        # 无奇点或 coeff_E == 0：直接用 GL 对原始实部被积函数求积
+        vals = similar(nodes)
+        @inbounds for i in eachindex(nodes)
+            E = nodes[i]
+            vals[i] = real_integrand_k_zero(sign_, λ, m, m_prime, E,
+                ξ, T, μ, Φ, Φbar)
+        end
+        real_part = sum(weights .* vals)
+        imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
+            ξ, T, μ, Φ, Φbar)
+        return real_part , imag_part
+    end
 end
 
-"""k>0时的 B0分量 含各向异性修正项的积分计算"""
+# ============================================================================
+# 数值积分策略配置
+# ============================================================================
+"""积分策略枚举"""
+@enum IntegrationStrategy begin
+    STRATEGY_QUADGK       # 原始 QuadGK 自适应积分
+    STRATEGY_INTERVAL_GL  # 区间分割 + 标准 GL
+    STRATEGY_CLUSTER_GL   # 区间分割 + 聚簇 GL (tanh 对称)
+    STRATEGY_HYBRID       # 混合策略：根据奇点位置自适应选择变换 (最高精度)
+end
+
+"""默认积分策略"""
+const DEFAULT_STRATEGY = STRATEGY_HYBRID  # 混合策略在各种情况下都表现最优
+
+"""聚簇 GL 默认参数"""
+const DEFAULT_CLUSTER_BETA = 8.0   # tanh 映射参数，越大节点越聚集于端点
+const DEFAULT_CLUSTER_N = 32       # 每区间节点数（HYBRID 策略下 32 即可达到 1e-4 精度）
+const DEFAULT_POWER_ALPHA = 0.35   # 幂次变换参数（用于单侧聚簇）
+const DEFAULT_DE_H = 0.15          # DE 变换步长（用于双侧奇点）
+
+"""诊断输出结构"""
+struct IntegrationDiagnostics
+    strategy::IntegrationStrategy
+    n_roots::Int
+    roots::Vector{Float64}
+    n_intervals::Int
+    intervals::Vector{Tuple{Float64,Float64}}
+    real_part::Float64
+    imag_part::Float64
+    elapsed_ms::Float64
+end
+
+# ============================================================================
+# 辅助函数：根查找与区间构建
+# ============================================================================
+"""解析求解 A±B=0 的根
+
+方程推导：
+  A = 2*k*sqrt(E² - m²)
+  B = λ² + 2λE + m² - m'² - k²
+  
+  A ± B = 0 两边平方后化简为二次方程：
+  (k² - λ²)E² - λCE - (k²m² + C²/4) = 0
+  其中 C = λ² + m² - m'² - k²
+
+返回在 [Emin, Emax] 范围内的有效根。
+"""
+function find_roots_AB(λ::Float64, k::Float64, m::Float64, m_prime::Float64, Emin::Float64, Emax::Float64)
+    C = λ^2 + m^2 - m_prime^2 - k^2
+    
+    a = k^2 - λ^2
+    b = -λ * C
+    c = -(k^2 * m^2 + C^2 / 4)
+    
+    # 处理 a ≈ 0 的情况 (k ≈ |λ|)
+    if abs(a) < 1e-14
+        if abs(b) < 1e-14
+            return Float64[]  # 无解或恒等式
+        end
+        E = -c / b
+        # 检查是否在范围内且满足原方程
+        if E >= Emin && E <= Emax && E >= m
+            # 验证原方程
+            p = sqrt(max(0.0, E^2 - m^2))
+            A = 2*k*p
+            B = λ^2 + 2*λ*E + m^2 - m_prime^2 - k^2
+            if abs(A + B) < 1e-10 || abs(A - B) < 1e-10
+                return [E]
+            end
+        end
+        return Float64[]
+    end
+    
+    Δ = b^2 - 4*a*c
+    
+    if Δ < 0
+        return Float64[]  # 无实根
+    end
+    
+    sqrt_Δ = sqrt(Δ)
+    E1 = (-b - sqrt_Δ) / (2*a)
+    E2 = (-b + sqrt_Δ) / (2*a)
+    
+    # 筛选有效根：
+    # 1. E >= m (物理约束，确保 p = sqrt(E²-m²) 为实数)
+    # 2. E 在 [Emin, Emax] 范围内
+    # 3. 验证原方程（平方可能引入伪根）
+    valid_roots = Float64[]
+    
+    for E in [E1, E2]
+        if E >= m && E >= Emin && E <= Emax
+            # 验证原方程 A ± B = 0
+            p = sqrt(E^2 - m^2)
+            A = 2*k*p
+            B = λ^2 + 2*λ*E + m^2 - m_prime^2 - k^2
+            
+            # A + B = 0 或 A - B = 0
+            if abs(A + B) < 1e-10 || abs(A - B) < 1e-10
+                push!(valid_roots, E)
+            end
+        end
+    end
+    
+    return sort(unique(valid_roots))
+end
+
+"""根据根位置构建分割区间"""
+function build_intervals_from_roots(roots::Vector{Float64}, Emin::Float64, Emax::Float64)
+    δ = max(1e-10, 1e-8*(Emax-Emin))
+    endpoints = [Emin]
+    for r in roots
+        push!(endpoints, r-δ)
+        push!(endpoints, r+δ)
+    end
+    push!(endpoints, Emax)
+    
+    pairs = Tuple{Float64,Float64}[]
+    for i in 1:2:length(endpoints)-1
+        a, b = endpoints[i], endpoints[i+1]
+        if b > a + 1e-16
+            push!(pairs, (a, b))
+        end
+    end
+    return pairs
+end
+
+# ============================================================================
+# 聚簇 GL 节点生成（使用预计算的标准节点）
+# ============================================================================
+
+# 预计算标准 32 节点（用于所有变换）
+const _STD_32_NODES, _STD_32_WEIGHTS = GaussLegendre.gausslegendre(32)
+
+# 预计算标准 16 节点（用于自适应节点数）
+const _STD_16_NODES, _STD_16_WEIGHTS = GaussLegendre.gausslegendre(16)
+
+# 预计算 power_left 变换的中间量（alpha=0.35, n=32）
+const _POWER_LEFT_INV_ALPHA = 1.0 / DEFAULT_POWER_ALPHA
+const _POWER_LEFT_U_HALF_32 = (_STD_32_NODES .+ 1) ./ 2  # (u+1)/2
+const _POWER_LEFT_T_32 = _POWER_LEFT_U_HALF_32 .^ _POWER_LEFT_INV_ALPHA  # t = ((u+1)/2)^(1/α)
+const _POWER_LEFT_T_PRIME_32 = _POWER_LEFT_INV_ALPHA .* _POWER_LEFT_U_HALF_32 .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
+
+# 预计算 power_left 变换的中间量（alpha=0.35, n=16）
+const _POWER_LEFT_U_HALF_16 = (_STD_16_NODES .+ 1) ./ 2
+const _POWER_LEFT_T_16 = _POWER_LEFT_U_HALF_16 .^ _POWER_LEFT_INV_ALPHA
+const _POWER_LEFT_T_PRIME_16 = _POWER_LEFT_INV_ALPHA .* _POWER_LEFT_U_HALF_16 .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
+
+# 预计算 power_right 变换的中间量（n=32）
+const _POWER_RIGHT_T_32 = 1 .- (1 .- _POWER_LEFT_U_HALF_32) .^ _POWER_LEFT_INV_ALPHA
+const _POWER_RIGHT_T_PRIME_32 = _POWER_LEFT_INV_ALPHA .* (1 .- _POWER_LEFT_U_HALF_32) .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
+
+# 预计算 power_right 变换的中间量（n=16）
+const _POWER_RIGHT_T_16 = 1 .- (1 .- _POWER_LEFT_U_HALF_16) .^ _POWER_LEFT_INV_ALPHA
+const _POWER_RIGHT_T_PRIME_16 = _POWER_LEFT_INV_ALPHA .* (1 .- _POWER_LEFT_U_HALF_16) .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
+
+# 预计算 tanh 聚簇变换的中间量（beta=8.0）
+const _TANH_BETA = tanh(DEFAULT_CLUSTER_BETA)
+const _TANH_PHI = tanh.(DEFAULT_CLUSTER_BETA .* _STD_32_NODES) ./ _TANH_BETA
+const _TANH_PHI_PRIME = DEFAULT_CLUSTER_BETA .* (1 .- tanh.(DEFAULT_CLUSTER_BETA .* _STD_32_NODES).^2) ./ _TANH_BETA
+
+# 预计算 DE 变换的中间量（h=0.15, n=32）
+const _DE_KS = collect(-16:16)  # 33 个点
+const _DE_TS = _DE_KS .* DEFAULT_DE_H
+const _DE_PHI = tanh.(π/2 .* sinh.(_DE_TS))
+const _DE_PHI_PRIME = DEFAULT_DE_H .* (π/2) .* cosh.(_DE_TS) .* (sech.(π/2 .* sinh.(_DE_TS))).^2
+
+"""生成聚簇 GL 节点（tanh 映射，使用预计算节点）"""
+function clustered_gl_nodes(a::Float64, b::Float64, n::Int; beta::Float64=DEFAULT_CLUSTER_BETA)
+    if n == 32 && beta == DEFAULT_CLUSTER_BETA
+        # 使用预计算的变换
+        half = (b - a) / 2
+        center = (a + b) / 2
+        xs = center .+ half .* _TANH_PHI
+        wx = _STD_32_WEIGHTS .* half .* _TANH_PHI_PRIME
+        return xs, wx
+    else
+        # 回退到完整计算
+        us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
+        tanh_beta = tanh(beta)
+        phi = tanh.(beta .* us) ./ tanh_beta
+        phi_prime = beta .* (1 .- tanh.(beta .* us).^2) ./ tanh_beta
+        half = (b - a) / 2
+        center = (a + b) / 2
+        xs = center .+ half .* phi
+        wx = ws .* half .* phi_prime
+        return xs, wx
+    end
+end
+
+"""生成单侧幂次聚簇节点（聚簇于左端 a，使用预计算节点）"""
+function power_left_nodes(a::Float64, b::Float64, n::Int; alpha::Float64=DEFAULT_POWER_ALPHA)
+    len = b - a
+    if alpha == DEFAULT_POWER_ALPHA
+        if n == 32
+            xs = a .+ len .* _POWER_LEFT_T_32
+            wx = _STD_32_WEIGHTS .* len .* _POWER_LEFT_T_PRIME_32
+            return xs, wx
+        elseif n == 16
+            xs = a .+ len .* _POWER_LEFT_T_16
+            wx = _STD_16_WEIGHTS .* len .* _POWER_LEFT_T_PRIME_16
+            return xs, wx
+        end
+    end
+    # 回退到完整计算
+    us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
+    inv_alpha = 1.0 / alpha
+    u_half = (us .+ 1) ./ 2
+    t = u_half .^ inv_alpha
+    t_prime = inv_alpha .* u_half .^ (inv_alpha - 1) ./ 2
+    xs = a .+ len .* t
+    wx = ws .* len .* t_prime
+    return xs, wx
+end
+
+"""生成单侧幂次聚簇节点（聚簇于右端 b，使用预计算节点）"""
+function power_right_nodes(a::Float64, b::Float64, n::Int; alpha::Float64=DEFAULT_POWER_ALPHA)
+    len = b - a
+    if alpha == DEFAULT_POWER_ALPHA
+        if n == 32
+            xs = a .+ len .* _POWER_RIGHT_T_32
+            wx = _STD_32_WEIGHTS .* len .* _POWER_RIGHT_T_PRIME_32
+            return xs, wx
+        elseif n == 16
+            xs = a .+ len .* _POWER_RIGHT_T_16
+            wx = _STD_16_WEIGHTS .* len .* _POWER_RIGHT_T_PRIME_16
+            return xs, wx
+        end
+    end
+    # 回退到完整计算
+    us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
+    inv_alpha = 1.0 / alpha
+    u_half = (us .+ 1) ./ 2
+    t = 1 .- (1 .- u_half) .^ inv_alpha
+    t_prime = inv_alpha .* (1 .- u_half) .^ (inv_alpha - 1) ./ 2
+    xs = a .+ len .* t
+    wx = ws .* len .* t_prime
+    return xs, wx
+end
+
+"""生成 DE (tanh-sinh) 变换节点（使用预计算节点）"""
+function de_nodes(a::Float64, b::Float64, n::Int; h::Float64=DEFAULT_DE_H)
+    if n == 32 && h == DEFAULT_DE_H
+        # 使用预计算的变换（注意 DE 有 33 个点）
+        half = (b - a) / 2
+        center = (a + b) / 2
+        xs = center .+ half .* _DE_PHI
+        wx = half .* _DE_PHI_PRIME
+        return xs, wx
+    else
+        # 回退到完整计算
+        ks = collect(-n÷2:n÷2)
+        ts = ks .* h
+        half = (b - a) / 2
+        center = (a + b) / 2
+        xs = center .+ half .* tanh.(π/2 .* sinh.(ts))
+        wx = h .* half .* (π/2) .* cosh.(ts) .* (sech.(π/2 .* sinh.(ts))).^2
+        return xs, wx
+    end
+end
+
+"""奇点位置枚举"""
+@enum SingularityPosition SING_NONE SING_LEFT SING_RIGHT SING_BOTH
+
+"""根据奇点位置选择最优变换"""
+function hybrid_nodes(a::Float64, b::Float64, n::Int, sing_pos::SingularityPosition;
+    alpha::Float64=DEFAULT_POWER_ALPHA, beta::Float64=DEFAULT_CLUSTER_BETA, h::Float64=DEFAULT_DE_H)
+    if sing_pos == SING_LEFT
+        return power_left_nodes(a, b, n; alpha=alpha)
+    elseif sing_pos == SING_RIGHT
+        return power_right_nodes(a, b, n; alpha=alpha)
+    elseif sing_pos == SING_BOTH
+        return de_nodes(a, b, n; h=h)
+    else  # SING_NONE - 被积函数通常在左端（低能端）变化最剧烈
+        return power_left_nodes(a, b, n; alpha=alpha)
+    end
+end
+
+# ============================================================================
+# k>0 时的 B0 分量积分计算（增强版）
+# ============================================================================
+"""k>0时的 B0分量 含各向异性修正项的积分计算
+
+参数:
+- sign_: 符号类型 (:quark 或 :antiquark)
+- λ, k, m, m_prime: 物理参数
+- μ, T, Φ, Φbar, ξ: 热力学参数
+- strategy: 积分策略 (默认 STRATEGY_CLUSTER_GL)
+- cluster_beta: 聚簇参数 (默认 8.0)
+- cluster_n: 每区间节点数 (默认 64)
+- diagnostics: 是否返回诊断信息 (默认 false)
+- rtol, atol: QuadGK 容差 (仅 STRATEGY_QUADGK 使用)
+
+返回:
+- (real_part, imag_part) 或 (real_part, imag_part, diagnostics)
+"""
 function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64, ξ::Float64;
+    strategy::IntegrationStrategy=DEFAULT_STRATEGY,
+    cluster_beta::Float64=DEFAULT_CLUSTER_BETA,
+    cluster_n::Int=DEFAULT_CLUSTER_N,
+    diagnostics::Bool=false,
+    rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    
+    t_start = time()
     Emin = m
     Emax = energy_cutoff(m)
 
-    intervals, sign_type = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
+    # 被积函数闭包
+    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T, μ, Φ, Φbar)
+    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T, μ, Φ, Φbar)
 
-    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E,
-        ξ, T, μ, Φ, Φbar) # 闭包被积函数-实部
-    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E,
-        ξ, T, μ, Φ, Φbar) # 闭包被积函数-虚部
-
-    real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
+    # 获取虚部积分区间
+    intervals_imag, _ = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
     
-    # 根据区间类型计算虚部
+    # 根据策略计算实部
+    real_part = 0.0
+    roots = Float64[]
+    intervals_real = Tuple{Float64,Float64}[]
+    
+    if strategy == STRATEGY_QUADGK
+        # 原始 QuadGK 方法
+        real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
+        intervals_real = [(Emin, Emax)]
+        
+    elseif strategy == STRATEGY_INTERVAL_GL || strategy == STRATEGY_CLUSTER_GL || strategy == STRATEGY_HYBRID
+        # 查找 A±B=0 的根
+        roots = find_roots_AB(λ, k, m, m_prime, Emin, Emax)
+        intervals_real = build_intervals_from_roots(roots, Emin, Emax)
+        
+        if strategy == STRATEGY_INTERVAL_GL
+            # 标准 GL 积分
+            for (a, b) in intervals_real
+                nodes, weights = GaussLegendre.gauleg(a, b, cluster_n)
+                @inbounds for i in eachindex(nodes)
+                    real_part += weights[i] * integrand_real(nodes[i])
+                end
+            end
+        elseif strategy == STRATEGY_CLUSTER_GL
+            # 聚簇 GL 积分 (tanh 对称)
+            for (a, b) in intervals_real
+                xs, wx = clustered_gl_nodes(a, b, cluster_n; beta=cluster_beta)
+                @inbounds for i in eachindex(xs)
+                    real_part += wx[i] * integrand_real(xs[i])
+                end
+            end
+        else  # STRATEGY_HYBRID
+            # 混合策略：根据奇点位置选择最优变换和节点数
+            n_intervals = length(intervals_real)
+            for (idx, (a, b)) in enumerate(intervals_real)
+                # 确定奇点位置
+                sing_pos = if n_intervals == 1
+                    isempty(roots) ? SING_NONE : SING_BOTH
+                elseif idx == 1
+                    SING_RIGHT  # 第一个区间，奇点在右端
+                elseif idx == n_intervals
+                    SING_LEFT   # 最后一个区间，奇点在左端
+                else
+                    SING_BOTH   # 中间区间，两端都有奇点
+                end
+                
+                # 自适应节点数：
+                # - 无根情况：16 节点即可
+                # - 有根情况：
+                #   - 第一个区间（SING_RIGHT）：32 节点（左端 E=m 处有 p→0 奇异行为）
+                #   - 中间区间（SING_BOTH）：32 节点
+                #   - 最后一个区间（SING_LEFT）：16 节点
+                n_nodes = if isempty(roots)
+                    16  # 无根情况
+                elseif sing_pos == SING_LEFT
+                    16  # 最后一个区间
+                else
+                    32  # 第一个区间或中间区间
+                end
+                
+                xs, wx = hybrid_nodes(a, b, n_nodes, sing_pos)
+                @inbounds for i in eachindex(xs)
+                    real_part += wx[i] * integrand_real(xs[i])
+                end
+            end
+        end
+    end
+    
+    # 计算虚部（使用标准 16 节点 GL）
     imag_part = 0.0
-    if !isempty(intervals)
-        for (E1, E2) in intervals
-            imag_part_segment, _ = quadgk(integrand_imag, E1, E2; rtol=rtol, atol=atol)
-            imag_part += imag_part_segment
+    if !isempty(intervals_imag)
+        for (E1, E2) in intervals_imag
+            nodes_i, weights_i = transform_standard16(E1, E2)
+            @inbounds for i in eachindex(nodes_i)
+                imag_part += weights_i[i] * integrand_imag(nodes_i[i])
+            end
         end
         imag_part *= sign(λ)
     end
-
-    return real_part , imag_part
+    
+    t_elapsed = (time() - t_start) * 1000  # ms
+    
+    if diagnostics
+        diag = IntegrationDiagnostics(
+            strategy, length(roots), roots,
+            length(intervals_real), intervals_real,
+            real_part, imag_part, t_elapsed
+        )
+        return real_part, imag_part, diag
+    else
+        return real_part, imag_part
+    end
 end
 
 """含各向异性修正项的 B0分量 积分计算"""

@@ -15,7 +15,8 @@ module GaussLegendre
 
 using FastGaussQuadrature
 
-export gauleg
+export gauleg, gausslegendre
+export affine_transform, transform_standard8
 
 """
     gauleg(a::Float64, b::Float64, n::Int) -> (nodes, weights)
@@ -72,26 +73,59 @@ function gauleg(a::Float64, b::Float64, n::Int)
     if n <= 0
         throw(ArgumentError("节点数 n 必须大于 0，当前值: $n"))
     end
-    
+
     if a >= b
         throw(ArgumentError("区间端点必须满足 a < b，当前值: a=$a, b=$b"))
     end
-    
-    # 获取标准区间 [-1, 1] 上的节点和权重
+
+    # 获取标准区间 [-1,1] 上的节点和权重（直接调用 gausslegendre）
     nodes_std, weights_std = gausslegendre(n)
-    
+
     # 变换到区间 [a, b]
     # x = ((b-a)*t + (b+a))/2, t ∈ [-1, 1]
     nodes = @. ((b - a) * nodes_std + (b + a)) / 2.0
-    
+
     # 权重需要乘以雅可比行列式 (b-a)/2
     weights = @. weights_std * (b - a) / 2.0
-    
+
     return nodes, weights
 end
 
 const DEFAULT_momentum_POINTS = 64
 const DEFAULT_theta_POINTS = 8
+
+# 预计算一个用于标准区间 [-1,1] 的固定 8 节点（及权重），方便在需要固定节点数的场景中直接复用。
+# 这样上层代码可以 `include("GaussLegendre.jl")` 后直接使用 `DEFAULT_STANDARD_8_NODES/WEIGHTS`，
+# 对区间 [a,b] 只需做仿射变换，避免重复求解标准节点。
+const DEFAULT_STANDARD_8_NODES, DEFAULT_STANDARD_8_WEIGHTS = gausslegendre(8)
+# 预计算 16 节点与 32 节点版本，供需要更高精度的固定节点情形使用
+const DEFAULT_STANDARD_16_NODES, DEFAULT_STANDARD_16_WEIGHTS = gausslegendre(16)
+const DEFAULT_STANDARD_32_NODES, DEFAULT_STANDARD_32_WEIGHTS = gausslegendre(32)
+
+"""对标准区间节点/权重做仿射变换到区间 [a, b]
+
+返回 (nodes, weights)
+"""
+function affine_transform(nodes_std::Vector{Float64}, weights_std::Vector{Float64}, a::Float64, b::Float64)
+    nodes = @. ((b - a) * nodes_std + (b + a)) / 2.0
+    weights = @. weights_std * (b - a) / 2.0
+    return nodes, weights
+end
+
+"""把预计算的标准 8 节点映射到区间 [a,b] 并返回 (nodes, weights)"""
+function transform_standard8(a::Float64, b::Float64)
+    return affine_transform(DEFAULT_STANDARD_8_NODES, DEFAULT_STANDARD_8_WEIGHTS, a, b)
+end
+
+"""把预计算的标准 16 节点映射到区间 [a,b] 并返回 (nodes, weights)"""
+function transform_standard16(a::Float64, b::Float64)
+    return affine_transform(DEFAULT_STANDARD_16_NODES, DEFAULT_STANDARD_16_WEIGHTS, a, b)
+end
+
+"""把预计算的标准 32 节点映射到区间 [a,b] 并返回 (nodes, weights)"""
+function transform_standard32(a::Float64, b::Float64)
+    return affine_transform(DEFAULT_STANDARD_32_NODES, DEFAULT_STANDARD_32_WEIGHTS, a, b)
+end
 
 """默认的角度积分节点和权重 (cosθ ∈ [-1, 1]，用于一般角度积分)"""
 const DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS = gauleg(-1.0, 1.0, DEFAULT_theta_POINTS)
@@ -111,5 +145,9 @@ const DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS = gauleg(0.0, 10.0, DEFAU
 export DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
 export DEFAULT_COSΘ_HALF_NODES, DEFAULT_COSΘ_HALF_WEIGHTS
 export DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+export DEFAULT_STANDARD_8_NODES, DEFAULT_STANDARD_8_WEIGHTS
+export DEFAULT_STANDARD_16_NODES, DEFAULT_STANDARD_16_WEIGHTS
+export DEFAULT_STANDARD_32_NODES, DEFAULT_STANDARD_32_WEIGHTS
+export transform_standard16, transform_standard32
 
 end # module GaussLegendre
