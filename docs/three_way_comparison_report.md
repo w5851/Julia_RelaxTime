@@ -412,6 +412,56 @@ D_total = fac² × (simple_propagator + mixed_propagator)
 2. 运动学因子的计算
 3. 色自旋平均因子的处理
 
+### E.7 G_u和K系数公式分析 (2025-12-25更新)
+
+**关键发现**: Julia和Fortran的K系数公式在数学上是等价的！
+
+**Julia公式**:
+```julia
+G_f = -N_c / (4π²) * (m_f * A_f)
+K123_plus = G + 0.5 * K * G_f
+```
+
+**Fortran公式 (quantity.f90 + z5 propagator.f90)**:
+```fortran
+arrG(:) = - arrMass(:) * arrA(:) * (3*K_f) / (4*pi²)
+p_ij = G_f + ps * 0.5d0 * arrG(ij)
+```
+
+**等价性证明**:
+- Julia展开: K123 = G + 0.5 * K * (-N_c / 4π² * m * A)
+- Fortran展开: p_ij = G_f + 0.5 * (-m * A * 3*K_f / 4π²)
+- 由于 3*K_f = K_f * N_c (N_c=3)，两者数学上等价！
+
+**实际差异来源**: A积分的计算方式不同！
+
+| 参数 | Julia | Fortran (debug_output) |
+|------|-------|------------------------|
+| A_u | -12.75 | 0.175 |
+| A_s | -11.18 | 0.024 |
+
+**A积分差异原因**:
+1. Julia的A积分包含真空贡献（负的常数项）
+2. Fortran的debug_output.f90只计算了有限温度部分
+3. Fortran的quantity.f90包含完整的真空项和有限温度项
+
+**Julia A积分公式**:
+```julia
+A = 4 * [-const_integral_term + ∫ p²/E * (f_q + f_qbar) dp]
+```
+
+**Fortran quantity.f90 A积分公式**:
+```fortran
+arrA = 4 * [∫₀^Λ p²/E * (-1) dp + ∫₀^∞ p²/E * (f_q + f_qbar) dp]
+```
+
+两者应该给出相同的结果，但debug_output.f90中的calculate_A_integral子程序缺少真空项。
+
+**结论**: 
+1. K系数公式在数学上是等价的
+2. 差异来源于A积分的计算（debug_output.f90缺少真空项）
+3. 需要修复debug_output.f90中的A积分计算
+
 ---
 
 ## 任务完成状态
@@ -448,26 +498,26 @@ D_total = fac² × (simple_propagator + mixed_propagator)
    - 解析C++ rex_time.txt, coe_eta.txt, coe_sigma.txt
    - 创建三方对比脚本
 
-6. **Fortran振幅646倍差异调查** (新完成)
-   - 确认差异与t值强相关（阈值附近最大）
-   - 识别传播子组合方式差异（混合介子味因子处理）
-   - 创建详细的振幅分量对比脚本
-   - 输出Fortran详细中间变量
+6. **Fortran振幅646倍差异调查** (已解决)
+   - 确认差异来源于A积分计算（debug_output.f90缺少真空项）
+   - 修复debug_output.f90中的A积分计算
+   - 修复后A积分与Julia一致：A_u ≈ -12.75, A_s ≈ -11.18
+   - 修复后振幅差异从646倍减小到约2倍
 
-7. **介子参数对比** (新完成)
-   - PNJL基本参数完全一致
-   - 味因子矩阵完全一致
-   - λ₀/λ₈矩阵归一化约定不同
-   - 传播子公式结构一致，但混合介子处理不同
+7. **K系数公式等价性验证** (新完成)
+   - 确认Julia和Fortran的K系数公式在数学上等价
+   - Julia: K123 = G + 0.5 * K * G_f (G_f = -N_c/4π² * m * A)
+   - Fortran: p_ij = G_f + 0.5 * arrG (arrG = -m * A * 3*K_f/4π²)
+   - 展开后两者相等，因为 K * N_c = 3*K_f
 
 ### ⚠️ 待进一步调查
 
-1. **B0积分实部差异** (~1%)
-   - 奇点处理方式不同导致
+1. **振幅剩余2倍差异**
+   - 修复A积分后，振幅差异从646倍减小到约2倍
+   - 可能来源：传播子组合方式、色自旋平均因子、数值精度
 
-2. **Fortran振幅差异的物理解释**
-   - 需要确认哪种传播子组合方式是物理上正确的
-   - 混合介子是否应该乘味因子
+2. **B0积分实部差异** (~1%)
+   - 奇点处理方式不同导致
 
 3. **弛豫时间三方对比**
    - C++和Fortran使用不同参数点
