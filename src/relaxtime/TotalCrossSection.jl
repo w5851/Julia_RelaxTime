@@ -606,6 +606,12 @@ function total_cross_section(
     t_min = t_bounds.t_min
     t_max = t_bounds.t_max
 
+    # 相同粒子散射的对称因子：当出射粒子相同时，t积分范围减半
+    # 这是因为相同粒子的不可区分性（与Fortran一致）
+    if particle_c == particle_d
+        t_min = t_min / 2.0
+    end
+
     # 极近阈值时 t 区间可能退化为零宽度；此时贡献为 0，避免高斯节点报错
     if t_max - t_min <= EPS_KINEMATIC
         return 0.0
