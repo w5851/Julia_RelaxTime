@@ -31,6 +31,38 @@ t_\pm &= m_i^2 + m_c^2 - \frac{1}{2s}(s + m_i^2 - m_j^2)(s + m_c^2 - m_d^2)\\
 
 此公式基于质心系动量守恒和散射角的物理边界，相比简化近似更加精确。
 
+### 相同粒子散射的对称因子
+
+当末态粒子 $c$ 和 $d$ 为相同粒子时（如 $uu \to uu$ 或 $ss \to ss$），由于粒子的不可区分性，$t$ 积分的下限需要减半：
+
+$t_- \to \frac{t_-}{2} \quad \text{当 } c = d \text{ 时}$
+
+#### 物理原因与权威参考
+
+**权威来源**：Peskin & Schroeder, *An Introduction to Quantum Field Theory*
+
+📍 **位置**：第 4 章（Scattering），Section 4.5: Phase Space and Cross Sections
+
+📌 **关键原文**：
+> "If there are identical particles in the final state, the phase space must be divided by a symmetry factor $S$, where $S = n!$ for $n$ identical particles."
+
+**中文翻译**：若末态中存在相同粒子，则相空间必须除以一个对称因子 $S$；对于 $n$ 个相同粒子，该因子为 $n!$。
+
+**应用到本问题**：
+- 对于两个相同出射粒子（$n=2$），对称因子 $S = 2! = 2$
+- 由于 $t_{\max} = 0$ 且被积函数关于 $t \leftrightarrow u$ 交换具有对称性
+- 将 $t_{\min}$ 除以 2 等效于将积分结果除以对称因子 2
+
+**几何解释**：
+在 $t$ 积分中，$t$ 从 $t_-$ 到 $t_+ = 0$ 对应散射角 $\theta^*$ 从 $\pi$ 到 $0$。对于相同粒子，交换两个出射粒子等价于 $\theta^* \to \pi - \theta^*$，即 $t \leftrightarrow u$。由于被积函数在这种交换下对称，积分区间 $[t_-, 0]$ 实际上覆盖了每个物理构型两次。因此，将积分下限减半（$t_- \to t_-/2$）正好消除这种重复计数，等效于除以对称因子 2。
+
+**代码实现**：
+```julia
+if particle_c == particle_d
+    t_min = t_min / 2.0
+end
+```
+
 ### 末态粒子能量
 
 在质心系中：

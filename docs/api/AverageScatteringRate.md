@@ -19,8 +19,10 @@ $$
 - 数密度（各向异性可选）：
 # 也可以复用外部预生成的节点/权重（示例）
 $$
-\rho_i = \frac{d_q}{2\pi^2} \int_0^\Lambda dp\,p^2 \int_0^1 d\cos\theta\; f_i(p,\cos\theta)
-$$
+\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p,\cos\theta)
+$
+
+**重要说明**：数密度积分应使用半无穷积分范围 $[0, \infty)$，而非有限截断 $[0, \Lambda]$。$
 
   cs_cache=cache, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w, phi_grid=phi_grid, phi_w=phi_w)
 - 运动学：
