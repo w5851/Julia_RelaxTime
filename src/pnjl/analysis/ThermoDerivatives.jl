@@ -142,21 +142,22 @@ end
 """同时返回基础热力学量及其一阶导数组合，便于体粘滞系数公式直接调用"""
 function thermo_derivatives(T_fm::Real, mu_fm::Real; xi::Real=0.0, seed_state=DEFAULT_MU_GUESS, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, kwargs...)
     base = solve_equilibrium_mu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
-    seed_for_diff = base.x_state
+    # 注意：不要使用 base.x_state 作为后续微分的 seed，因为收敛解会导致 ForwardDiff 无法追踪导数
+    # 保持使用原始的 seed_state
 
-    P_T = dP_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    P_mu = dP_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    E_T = dEpsilon_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    E_mu = dEpsilon_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    n_T = dn_dT(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
-    n_mu = dn_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    P_T = dP_dT(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    P_mu = dP_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    E_T = dEpsilon_dT(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    E_mu = dEpsilon_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    n_T = dn_dT(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
+    n_mu = dn_dmu(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
 
     denom_eps = E_T * n_mu - E_mu * n_T
     denom_n = n_T * E_mu - n_mu * E_T
     dP_depsilon_n = denom_eps == 0 ? NaN : (P_T * n_mu - P_mu * n_T) / denom_eps
     dP_dn_epsilon = denom_n == 0 ? NaN : (P_T * E_mu - P_mu * E_T) / denom_n
 
-    md = mass_derivatives(T_fm, mu_fm; xi=xi, seed_state=seed_for_diff, p_num=p_num, t_num=t_num, kwargs...)
+    md = mass_derivatives(T_fm, mu_fm; xi=xi, seed_state=seed_state, p_num=p_num, t_num=t_num, kwargs...)
 
     return (
         pressure=base.pressure,
