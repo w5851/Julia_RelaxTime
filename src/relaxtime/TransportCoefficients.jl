@@ -12,8 +12,14 @@ module TransportCoefficients
 
 实现约定：
 - τ 与动量 p 无关（直接使用 `RelaxationTime.relaxation_times` 的输出）
-- ξ=0：各向同性，仅对动量 p 积分（乘以 4π）
-- ξ≠0：分布函数采用 RS 形式 `*_distribution_aniso(p,...,ξ,cosθ)`，对 cosθ 再做一层积分（φ 角已积掉，乘以 2π）
+- ξ=0：各向同性，仅对动量 p 积分
+  - 相空间测度：4π/(2π)³ ∫ p² dp = 1/(2π²) ∫ p² dp
+- ξ≠0：分布函数采用 RS 形式，需要完整的角度积分
+  - 相空间测度：2π/(2π)³ ∫ p² dp ∫ d(cosθ) = 1/(4π²) ∫ p² dp ∫ d(cosθ)
+
+积分核（含相空间测度 p²）：
+- η: p⁶/E² (来自 p² × p⁴/E²)
+- σ: p⁴q²/E² (来自 p² × p²q²/E²)
 """
 
 include("../Constants_PNJL.jl")
@@ -23,7 +29,7 @@ include("../QuarkDistribution_Aniso.jl")
 
 using Base.MathConstants: π
 
-using .Constants_PNJL: N_color
+using .Constants_PNJL: N_color, α
 using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
@@ -32,14 +38,28 @@ export shear_viscosity, bulk_viscosity, electric_conductivity, transport_coeffic
 
 const TWO_PI = 2.0 * π
 
+# 自然单位制中的元电荷: e = sqrt(4πα)
+const e_natural = sqrt(4.0 * π * α)
+
 @inline energy_from_p(p::Float64, m::Float64) = sqrt(p * p + m * m)
 
 @inline function degeneracy_default()::Float64
     return 2.0 * Float64(N_color)
 end
 
+"""
+    default_charges()
+
+返回夸克电荷（自然单位制）。
+
+在自然单位制中，元电荷 e = √(4πα)，其中 α ≈ 1/137 是精细结构常数。
+夸克电荷为：
+- u夸克: q_u = (2/3)e
+- d夸克: q_d = (-1/3)e  
+- s夸克: q_s = (-1/3)e
+"""
 @inline function default_charges()
-    return (u = 2.0 / 3.0, d = -1.0 / 3.0, s = -1.0 / 3.0)
+    return (u = (2.0 / 3.0) * e_natural, d = (-1.0 / 3.0) * e_natural, s = (-1.0 / 3.0) * e_natural)
 end
 
 @inline function fermi_factor(f::Float64)
@@ -88,8 +108,6 @@ end
 end
 
 @inline function mu_for_species(species::Symbol, quark_params::NamedTuple)::Float64
-    # 注意：这里的 μ 取“味道的夸克化学势”本身（正值或按调用方约定），
-    # 反粒子通过分布函数 `antiquark_distribution` 处理 E+μ 结构。
     if species in (:u, :ubar)
         return quark_params.μ.u
     elseif species in (:d, :dbar)
@@ -122,7 +140,15 @@ function _cos_nodes_weights(cos_nodes::Int, cos_grid, cos_w)
     return gauleg(-1.0, 1.0, cos_nodes)
 end
 
-"""剪切粘滞系数 η（RTA）。"""
+"""
+    shear_viscosity(quark_params, thermo_params; tau, ...)
+
+剪切粘滞系数 η（RTA）。
+
+积分公式：
+- 各向同性 (ξ=0): η = (1/15T) × (1/2π²) × ∫ dp p⁶/E² × g × τ × f(1-f)
+- 各向异性 (ξ≠0): η = (1/15T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁶/E² × g × τ × f(1-f)
+"""
 function shear_viscosity(
     quark_params::NamedTuple,
     thermo_params::NamedTuple;
@@ -143,8 +169,11 @@ function shear_viscosity(
 
     nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
 
-    pref_measure_iso = 4.0 * π / (2.0 * π)^3
-    pref_measure_aniso = 2.0 * π / (2.0 * π)^3
+    # 相空间测度系数
+    # 各向同性: 4π/(2π)³ = 1/(2π²)
+    # 各向异性: 2π/(2π)³ = 1/(4π²)
+    pref_measure_iso = 1.0 / (2.0 * π^2)
+    pref_measure_aniso = 1.0 / (4.0 * π^2)
 
     species_list = (:u, :d, :s, :ubar, :dbar, :sbar)
 
@@ -152,6 +181,7 @@ function shear_viscosity(
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
+            p6 = p2 * p2 * p2  # p⁶ = p² (相空间) × p⁴ (物理因子)
             for sp in species_list
                 m = mass_for_species(sp, quark_params)
                 μ = mu_for_species(sp, quark_params)
@@ -159,7 +189,7 @@ function shear_viscosity(
                 f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, 0.0, 0.0)
                 ff = fermi_factor(f)
                 τ = tau_for_species(sp, tau)
-                acc += wp * (p2 * p2) / (E * E) * (degeneracy * τ * ff)
+                acc += wp * p6 / (E * E) * (degeneracy * τ * ff)
             end
         end
         integral = pref_measure_iso * acc
@@ -169,6 +199,7 @@ function shear_viscosity(
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
+            p6 = p2 * p2 * p2
             for (c, wc) in zip(nodes_cos, weights_cos)
                 for sp in species_list
                     m = mass_for_species(sp, quark_params)
@@ -177,7 +208,7 @@ function shear_viscosity(
                     f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, ξ, c)
                     ff = fermi_factor(f)
                     τ = tau_for_species(sp, tau)
-                    acc += wp * wc * (p2 * p2) / (E * E) * (degeneracy * τ * ff)
+                    acc += wp * wc * p6 / (E * E) * (degeneracy * τ * ff)
                 end
             end
         end
@@ -186,7 +217,15 @@ function shear_viscosity(
     end
 end
 
-"""电导率 σ（RTA）。"""
+"""
+    electric_conductivity(quark_params, thermo_params; tau, charges, ...)
+
+电导率 σ（RTA）。
+
+积分公式：
+- 各向同性 (ξ=0): σ = (1/3T) × (1/2π²) × ∫ dp p⁴q²/E² × g × τ × f(1-f)
+- 各向异性 (ξ≠0): σ = (1/3T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁴q²/E² × g × τ × f(1-f)
+"""
 function electric_conductivity(
     quark_params::NamedTuple,
     thermo_params::NamedTuple;
@@ -208,8 +247,8 @@ function electric_conductivity(
 
     nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
 
-    pref_measure_iso = 4.0 * π / (2.0 * π)^3
-    pref_measure_aniso = 2.0 * π / (2.0 * π)^3
+    pref_measure_iso = 1.0 / (2.0 * π^2)
+    pref_measure_aniso = 1.0 / (4.0 * π^2)
 
     function q2_for_species(sp::Symbol)
         if sp in (:u, :ubar)
@@ -229,6 +268,7 @@ function electric_conductivity(
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
+            p4 = p2 * p2  # p⁴ = p² (相空间) × p² (物理因子)
             for sp in species_list
                 m = mass_for_species(sp, quark_params)
                 μ = mu_for_species(sp, quark_params)
@@ -236,16 +276,17 @@ function electric_conductivity(
                 f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, 0.0, 0.0)
                 ff = fermi_factor(f)
                 τ = tau_for_species(sp, tau)
-                acc += wp * p2 * (q2_for_species(sp) / (E * E)) * (degeneracy * τ * ff)
+                acc += wp * p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
             end
         end
         integral = pref_measure_iso * acc
-        return (2.0 / (3.0 * T)) * integral
+        return (1.0 / (3.0 * T)) * integral
     else
         nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
+            p4 = p2 * p2
             for (c, wc) in zip(nodes_cos, weights_cos)
                 for sp in species_list
                     m = mass_for_species(sp, quark_params)
@@ -254,16 +295,20 @@ function electric_conductivity(
                     f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, ξ, c)
                     ff = fermi_factor(f)
                     τ = tau_for_species(sp, tau)
-                    acc += wp * wc * p2 * (q2_for_species(sp) / (E * E)) * (degeneracy * τ * ff)
+                    acc += wp * wc * p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
                 end
             end
         end
         integral = pref_measure_aniso * acc
-        return (2.0 / (3.0 * T)) * integral
+        return (1.0 / (3.0 * T)) * integral
     end
 end
 
-"""体粘滞系数 ζ（RTA）。
+
+"""
+    bulk_viscosity(quark_params, thermo_params; tau, bulk_coeffs, ...)
+
+体粘滞系数 ζ（RTA）。
 
 注意：此实现按 docs/reference/formula/输运系数by弛豫时间.md 给出的表达式直译。
 输入 `bulk_coeffs` 建议使用 `PNJL.ThermoDerivatives.bulk_derivative_coeffs` 的返回值。
@@ -294,10 +339,9 @@ function bulk_viscosity(
 
     nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
 
-    pref_measure_iso = 4.0 * π / (2.0 * π)^3
-    pref_measure_aniso = 2.0 * π / (2.0 * π)^3
+    pref_measure_iso = 1.0 / (2.0 * π^2)
+    pref_measure_aniso = 1.0 / (4.0 * π^2)
 
-    # 这里按三味道质量与导数来使用（与 ThermoDerivatives.mass_derivatives 一致：SVector{3}）
     function flavor_index(sp::Symbol)
         if sp in (:u, :d, :ubar, :dbar)
             return 1
@@ -308,7 +352,6 @@ function bulk_viscosity(
         end
     end
 
-    # 只按文档里的求和 a=u,d,s；把反粒子项显式加入
     flavors = (:u, :d, :s)
 
     function one_flavor_pair_contrib(flavor::Symbol, p::Float64, cosθ::Float64)
@@ -340,7 +383,7 @@ function bulk_viscosity(
     if ξ == 0.0
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
-            p2 = p * p
+            p2 = p * p  # 相空间测度 p²
             for fl in flavors
                 acc += wp * p2 * one_flavor_pair_contrib(fl, p, 0.0)
             end
@@ -363,7 +406,11 @@ function bulk_viscosity(
     end
 end
 
-"""一次性计算 (η, ζ, σ)。"""
+"""
+    transport_coefficients(quark_params, thermo_params; tau, bulk_coeffs, charges, ...)
+
+一次性计算 (η, ζ, σ)。
+"""
 function transport_coefficients(
     quark_params::NamedTuple,
     thermo_params::NamedTuple;

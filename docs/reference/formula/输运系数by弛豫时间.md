@@ -1,107 +1,198 @@
 # 夸克物质的输运系数（弛豫时间近似）
 
-在弛豫时间近似下，基于相对论动力学，夸克物质的剪切粘滞系数、体粘滞系数和电导率表达式如下：
+在弛豫时间近似下，基于相对论动力学，夸克物质的剪切粘滞系数、体粘滞系数和电导率表达式如下。
 
-## 1. 剪切粘滞系数 (η)
+## 各向同性与各向异性情况
 
-\[
-\eta = \frac{1}{15T} \sum_a \int \frac{d^3p}{(2\pi)^3} \frac{p^4}{E_a^2} \left[ d_a \tau_a f_a^0 (1 - f_a^0) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
-\]
+### 各向同性 (ξ = 0)
 
-其中：
-- \( a \) 代表夸克味（u, d, s）。
-- \( \tau_i \) 为 i 粒子的弛豫时间（两次碰撞的平均间隔时间）。
-- \( d_a = 2 \times N_c \) 为简并因子（\( N_c \) 为色数）。
-- \( f_a^0 \) 为平衡态分布函数。
-- \( E_a = \sqrt{p^2 + m_a^2} \) 为能量。
+当系统各向同性时，分布函数 $f(\vec{p}) = f(|\vec{p}|) = f(p)$ 仅依赖于动量大小。此时角度积分可以简化：
 
-## 2. 体粘滞系数 (ζ)
+$$
+\int \frac{d^3p}{(2\pi)^3} = \frac{4\pi}{(2\pi)^3} \int_0^\infty p^2 dp = \frac{1}{2\pi^2} \int_0^\infty p^2 dp
+$$
 
-\[
-\begin{aligned}
-\zeta = & -\frac{1}{3T} \int \frac{d^3p}{(2\pi)^3} \Bigg\{ \frac{M^2}{E} \left[ g \tau f_a^0 (1 \pm f_a^0) + \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 \pm f_{\bar{a}}^0) \right] \\
-& \times \left[ \frac{\vec{p}^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu} \right] \\
-& - \frac{M^2}{E} \left[ g \tau f_a^0 (1 \pm f_a^0) - \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 \pm f_{\bar{a}}^0) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \Bigg\}
-\end{aligned}
-\]
+### 各向异性 (ξ ≠ 0, Romatschke-Strickland 形式)
 
-其中：
-- \( M \) 为等效质量，可能依赖于温度 \( T \) 和化学势 \( \mu \)。
-- \( g, \bar{g} \) 为粒子与反粒子的简并度。
-- \( (1 \pm f) \) 中 “+” 对应玻色子，“-” 对应费米子。
-- \( P, \varepsilon, n \) 分别为压强、能量密度和粒子数密度。
+当系统存在动量各向异性时，采用 Romatschke-Strickland (RS) 形式的分布函数：
 
-## 3. 电导率 (σ)
+$$
+f_{RS}(\vec{p}) = f_{iso}\left(\sqrt{p^2 + m^2 + \xi (p \cos\theta)^2}\right)
+$$
 
-\[
-\sigma = \frac{2}{3T} \sum_a \int \frac{d^3p}{(2\pi)^3} p^2 \left[ \frac{q_a^2}{E_a^2} d_a \tau_a f_a^0 (1 - f_a^0) + \frac{q_{\bar{a}}^2}{E_{\bar{a}}^2} d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
-\]
+其中 $\theta$ 是动量方向与各向异性方向（通常取为 z 轴）的夹角，$\xi$ 是各向异性参数。
 
-其中：
-- \( q_a \) 为夸克味 a 所带电荷。
+此时角度积分不能简化，需要完整计算：
+
+$$
+\int \frac{d^3p}{(2\pi)^3} = \frac{2\pi}{(2\pi)^3} \int_0^\infty p^2 dp \int_{-1}^{1} d(\cos\theta) = \frac{1}{4\pi^2} \int_0^\infty p^2 dp \int_{-1}^{1} d(\cos\theta)
+$$
+
+注意：φ 角积分已完成（乘以 2π），但 cosθ 积分必须显式进行。
 
 ---
 
-### 关键假设与说明
+## 1. 剪切粘滞系数 (η)
 
-1. **弛豫时间近似**：假设非平衡态分布函数 \( f_a \) 相对于平衡态 \( f_a^{(0)} \) 的偏离为一小量。
-2. **准粒子图像**：在有效模型中，强相互作用物质可用具有温度/化学势依赖质量的准粒子描述。
-3. **弛豫时间 \( \tau \)**：通常不是常数，而依赖于热力学参数（\( T, \mu \)）及相互作用的散射截面。将其视为常数（如 1 fm）可能偏离物理实际，因此需要计算与温度、化学势相关的弛豫时间。
-4. **剪切粘滞系数**：为各组分贡献之和，适用于稀薄相对论气体近似下的夸克胶子等离子体。
-5. **体粘滞中的 \(n\)**：这里的 \(n\) 指净重子数密度 \(n_B = (\rho_u+\rho_d+\rho_s)/3\)。代码中已将求解得到的 \(\rho\) 设为 \(\rho_B\)（`rho_total = sum(rho_vec)/3`）。
+### 各向同性情况 (ξ = 0)
 
-您提出的问题非常关键，这涉及公式符号的精确理解和物理对应。让我详细说明：
+$$
+\eta = \frac{1}{15T} \sum_a \int \frac{d^3p}{(2\pi)^3} \frac{p^4}{E_a^2} \left[ d_a \tau_a f_a^0 (1 - f_a^0) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
+$$
 
-## 澄清与修正
+展开为一维积分：
 
-**首先，我需要修正我之前的表述**：
-1. 在公式(5.5)中，**g和ḡ应该是简并度（degeneracy factor）**，但上下文中的d_a（在(5.4)和(5.6)中）也是简并度，这可能存在符号混淆。从公式结构看，g/ḡ与d_a应表示相同物理量，只是不同文献采用了不同符号。
-2. **q_a确实是夸克味a所带电荷**，这是正确的。
+$$
+\eta = \frac{1}{15T} \cdot \frac{1}{2\pi^2} \sum_a \int_0^\infty dp \, \frac{p^6}{E_a^2} \left[ d_a \tau_a f_a^0 (1 - f_a^0) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
+$$
 
-## 详细说明
+**注意**：积分核是 $p^6/E^2$，来自 $p^2 \cdot p^4/E^2$（相空间测度 × 物理因子）。
 
-### 1. 简并度 (g, ḡ, d_a)
+### 各向异性情况 (ξ ≠ 0)
 
-#### 为什么是简并度？
-- 在统计物理中，相空间积分通常包含简并度因子，代表相同能量状态的独立量子态数。
-- 从公式结构看：∫d³p/(2π)³ → 相空间体积元，前面的g/d是量子态的简并因子。
-- 公式(5.4)中d_a = 2×N_c明确给出了定义，这与夸克的内部自由度对应。
+$$
+\eta = \frac{1}{15T} \cdot \frac{1}{4\pi^2} \sum_a \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, \frac{p^6}{E_a^2} \left[ d_a \tau_a f_a (1 - f_a) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}} (1 - f_{\bar{a}}) \right]
+$$
 
-#### 具体数值：
-对于QCD的SU(3)色群：
-- **颜色自由度**：N_c = 3
-- **自旋自由度**：夸克是费米子，自旋1/2 → 2个自旋态
-- 因此，**每种夸克味的简并度**：
-  - **d_a = 2（自旋）× 3（颜色）= 6**
-  - 反夸克：d_ā = 6（同样）
-- 如果考虑味自由度（u,d,s），则总简并度需要乘以味数，但从公式看，求和∑_a已包含味求和。
+其中分布函数 $f_a = f_a(p, \cos\theta; \xi)$ 采用 RS 形式。
 
-**注意**：在不同上下文中：
-- 纯胶子：自旋×颜色 = 2×(N_c²-1) = 2×8 = 16
-- 夸克-胶子等离子体：夸克和胶子都有贡献，但此处公式只针对夸克部分
+---
 
-### 2. 电荷 (q_a)
+## 2. 电导率 (σ)
 
-#### 为什么是电荷？
-- 电导率公式(5.6)描述电流响应，自然与电荷相关。
-- 从量纲分析：[σ] = [电荷²]/[长度·时间]，公式中有q_a²。
-- 结构类比：η与动量流相关，σ与电流相关 → 电荷是自然的耦合系数。
+### 各向同性情况 (ξ = 0)
 
-#### 具体数值（以元电荷e为单位）：
-- **上夸克 (u)**：q_u = +2/3 e
-- **下夸克 (d)**：q_d = -1/3 e  
-- **奇异夸克 (s)**：q_s = -1/3 e
-- **反夸克**：电荷相反，但q_ā² = q_a²（平方后符号消失）
+$$
+\sigma = \frac{1}{3T} \sum_a \int \frac{d^3p}{(2\pi)^3} \frac{p^2 q_a^2}{E_a^2} \left[ d_a \tau_a f_a^0 (1 - f_a^0) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
+$$
 
+展开为一维积分：
 
-## 物理对应表
+$$
+\sigma = \frac{1}{3T} \cdot \frac{1}{2\pi^2} \sum_a \int_0^\infty dp \, \frac{p^4 q_a^2}{E_a^2} \left[ d_a \tau_a f_a^0 (1 - f_a^0) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right]
+$$
 
-| 符号 | 物理意义 | 具体值 (QCD, N_c=3) | 备注 |
-|------|----------|---------------------|------|
-| d_a, g_a | 夸克简并度 | 6（自旋2×颜色3） | 每种味单独计算 |
-| d_ā, g_ā | 反夸克简并度 | 6 | 同上 |
-| q_a | 夸克电荷 | u: +2/3e, d: -1/3e, s: -1/3e | 以元电荷e为单位 |
-| q_ā | 反夸克电荷 | ū: -2/3e, d̄: +1/3e, s̄: +1/3e | 但q²相同 |
-| τ_a, τ_ā | 弛豫时间 | 依赖T, μ, m_a | 从散射截面计算 |
-| M_a | 粒子有效质量 | 依赖T, μ（模型相关） | 可能来自Dyson方程 |
+**注意**：积分核是 $p^4 q^2/E^2$，来自 $p^2 \cdot p^2 q^2/E^2$。
 
+### 各向异性情况 (ξ ≠ 0)
+
+$$
+\sigma = \frac{1}{3T} \cdot \frac{1}{4\pi^2} \sum_a \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, \frac{p^4 q_a^2}{E_a^2} \left[ d_a \tau_a f_a (1 - f_a) + d_{\bar{a}} \tau_{\bar{a}} f_{\bar{a}} (1 - f_{\bar{a}}) \right]
+$$
+
+---
+
+## 3. 体粘滞系数 (ζ)
+
+### 各向同性情况 (ξ = 0)
+
+$$
+\begin{aligned}
+\zeta = & -\frac{1}{3T} \cdot \frac{1}{2\pi^2} \int_0^\infty dp \, p^2 \Bigg\{ \frac{M^2}{E} \left[ g \tau f_a^0 (1 - f_a^0) + \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right] \\
+& \times \left[ \frac{p^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu} \right] \\
+& - \frac{M^2}{E} \left[ g \tau f_a^0 (1 - f_a^0) - \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \Bigg\}
+\end{aligned}
+$$
+
+### 各向异性情况 (ξ ≠ 0)
+
+$$
+\begin{aligned}
+\zeta = & -\frac{1}{3T} \cdot \frac{1}{4\pi^2} \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, p^2 \Bigg\{ \frac{M^2}{E} \left[ g \tau f_a (1 - f_a) + \bar{g} \bar{\tau} f_{\bar{a}} (1 - f_{\bar{a}}) \right] \\
+& \times \left[ \frac{p^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu} \right] \\
+& - \frac{M^2}{E} \left[ g \tau f_a (1 - f_a) - \bar{g} \bar{\tau} f_{\bar{a}} (1 - f_{\bar{a}}) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \Bigg\}
+\end{aligned}
+$$
+
+---
+
+## 电导率公式说明
+
+### 与C++/Fortran的对比
+
+Julia和C++/Fortran使用相同的公式结构，在相同的电荷约定下应该给出一致的结果。
+
+**Julia公式**：
+$$\sigma = \frac{1}{3T} \cdot \frac{1}{2\pi^2} \cdot 2N_c \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f) = \frac{N_c}{3\pi^2 T} \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f)$$
+
+使用自然单位电荷 $q = q_{frac} \cdot e = q_{frac} \cdot \sqrt{4\pi\alpha}$：
+$$\sigma = \frac{4\alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)$$
+
+**C++/Fortran公式**：
+$$\sigma = \frac{4 \alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)$$
+
+**比值**：Julia / C++Fortran = 1（一致）
+
+### 电荷约定
+
+Julia使用自然单位制电荷：$q = q_{frac} \cdot e = q_{frac} \cdot \sqrt{4\pi\alpha}$
+
+其中 $q_{frac}$ 是分数电荷（u: 2/3, d: -1/3, s: -1/3）。
+
+---
+
+## 符号说明
+
+| 符号 | 物理意义 | 具体值 (QCD, N_c=3) |
+|------|----------|---------------------|
+| $a$ | 夸克味（u, d, s） | - |
+| $d_a, g$ | 夸克简并度 | 6（自旋2×颜色3） |
+| $d_{\bar{a}}, \bar{g}$ | 反夸克简并度 | 6 |
+| $e$ | 元电荷（自然单位） | $e = \sqrt{4\pi\alpha} \approx 0.303$ |
+| $q_a$ | 夸克电荷（自然单位） | $q_u = \frac{2}{3}e$, $q_d = q_s = -\frac{1}{3}e$ |
+| $\alpha$ | 精细结构常数 | $\alpha \approx 1/137$ |
+| $\tau_a, \tau_{\bar{a}}$ | 弛豫时间 | 依赖 T, μ, m |
+| $E_a$ | 能量 | $\sqrt{p^2 + m_a^2}$ |
+| $f_a^0$ | 各向同性平衡态分布函数 | PNJL 分布函数 |
+| $f_a$ | 各向异性分布函数 | RS 形式 |
+| $\xi$ | 各向异性参数 | $\xi > 0$ 表示沿 z 轴压缩 |
+| $M$ | 等效质量 | 依赖 T, μ |
+| $P, \varepsilon, n$ | 压强、能量密度、粒子数密度 | - |
+
+### 自然单位制中的电荷
+
+在自然单位制（$\hbar = c = 1$）中，精细结构常数定义为：
+$$\alpha = \frac{e^2}{4\pi} \approx \frac{1}{137}$$
+
+因此元电荷为：
+$$e = \sqrt{4\pi\alpha} \approx 0.303$$
+
+夸克电荷（自然单位）：
+- u夸克：$q_u = \frac{2}{3}e \approx 0.202$
+- d夸克：$q_d = -\frac{1}{3}e \approx -0.101$
+- s夸克：$q_s = -\frac{1}{3}e \approx -0.101$
+
+---
+
+## 数值实现要点
+
+### 1. 相空间积分测度
+
+- **各向同性**：$\frac{4\pi}{(2\pi)^3} \int p^2 dp = \frac{1}{2\pi^2} \int p^2 dp$
+- **各向异性**：$\frac{2\pi}{(2\pi)^3} \int p^2 dp \int d(\cos\theta) = \frac{1}{4\pi^2} \int p^2 dp \int d(\cos\theta)$
+
+### 2. 积分核（含相空间测度 p²）
+
+| 输运系数 | 各向同性积分核 | 各向异性积分核 |
+|---------|---------------|---------------|
+| η | $p^6/E^2$ | $p^6/E^2$ |
+| σ | $p^4 q^2/E^2$ | $p^4 q^2/E^2$ |
+| ζ | $p^2 \times (\text{复杂表达式})$ | $p^2 \times (\text{复杂表达式})$ |
+
+### 3. Gauss-Legendre 积分
+
+使用 Gauss-Legendre 求积时：
+- 动量积分：$\int_0^{p_{max}} f(p) dp \approx \sum_i w_i f(p_i)$
+- 角度积分：$\int_{-1}^{1} g(\cos\theta) d(\cos\theta) \approx \sum_j w_j g(c_j)$
+
+**重要**：积分核中的 $p^2$ 因子必须显式包含，因为 Gauss-Legendre 权重对应的是 $dp$ 而非 $p^2 dp$。
+
+---
+
+## 关键假设与说明
+
+1. **弛豫时间近似**：假设非平衡态分布函数相对于平衡态的偏离为一小量。
+2. **准粒子图像**：强相互作用物质用具有温度/化学势依赖质量的准粒子描述。
+3. **弛豫时间 τ**：依赖于热力学参数（T, μ）及散射截面，需要从微观计算获得。
+4. **各向异性参数 ξ**：描述系统偏离各向同性的程度，$\xi = 0$ 对应各向同性极限。
+5. **体粘滞中的 n**：指净重子数密度 $n_B = (\rho_u + \rho_d + \rho_s)/3$。
