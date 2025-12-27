@@ -296,17 +296,56 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
 end
 
 # -------------------- ρ 计算（各向异性） --------------------
+# 半无穷积分的默认参数
+const DEFAULT_SEMI_INF_SCALE = 10.0  # 半无穷积分的尺度参数
+const DEFAULT_SEMI_INF_NODES = 32    # 半无穷积分的节点数
+
+"""
+    number_density(flavor, m, μ, T, Φ, Φbar, ξ; kwargs...)
+
+计算夸克/反夸克数密度，使用半无穷积分 [0, ∞)。
+
+积分变换: p = scale * t / (1-t), dp = scale / (1-t)^2 dt
+其中 t ∈ [0, 1)
+
+# Arguments
+- `flavor::Symbol`: 夸克味道 (:u, :d, :s, :ubar, :dbar, :sbar)
+- `m::Float64`: 夸克质量 (fm⁻¹)
+- `μ::Float64`: 化学势 (fm⁻¹)
+- `T::Float64`: 温度 (fm⁻¹)
+- `Φ::Float64`: Polyakov loop
+- `Φbar::Float64`: Polyakov loop conjugate
+- `ξ::Float64`: 各向异性参数
+
+# Keyword Arguments
+- `p_nodes::Int`: 动量积分节点数 (默认32)
+- `angle_nodes::Int`: 角度积分节点数 (默认2)
+- `scale::Float64`: 半无穷积分尺度参数 (默认10.0)
+"""
 function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64;
-    p_nodes::Int=DEFAULT_P_NODES, angle_nodes::Int=DEFAULT_ANGLE_NODES,
+    p_nodes::Int=DEFAULT_SEMI_INF_NODES, angle_nodes::Int=DEFAULT_ANGLE_NODES,
     p_grid::Union{Nothing,Vector{Float64}}=nothing, p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing)
-    p_grid === nothing && ((p_grid, p_w) = gauleg(0.0, Λ_inv_fm, p_nodes))
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing,
+    scale::Float64=DEFAULT_SEMI_INF_SCALE)
+    
+    # 使用 [0, 1) 上的Gauss-Legendre节点，通过变换映射到 [0, ∞)
+    # 变换: p = scale * t / (1-t), dp/dt = scale / (1-t)^2
+    t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
     cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
+    
     integral = 0.0
-    for (p, wp) in zip(p_grid, p_w)
+    for (t, wt) in zip(t_grid, t_w)
+        # 避免 t=1 的奇点
+        if t >= 0.9999
+            continue
+        end
+        # 变换到半无穷区间
+        p = scale * t / (1.0 - t)
+        dp_dt = scale / (1.0 - t)^2
+        
         for (cθ, wθ) in zip(cos_grid, cos_w)
             f = distribution_with_anisotropy(flavor, p, m, μ, T, Φ, Φbar, ξ, cθ)
-            integral += wp * wθ * p^2 * f
+            integral += wt * wθ * p^2 * f * dp_dt
         end
     end
     # ρ = d_q / (2π^2) ∫ p^2 dp ∫_0^1 dcosθ f
@@ -314,6 +353,23 @@ function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ:
 end
 
 # -------------------- 平均散射率主函数 --------------------
+"""
+    average_scattering_rate(process, quark_params, thermo_params, K_coeffs; kwargs...)
+
+计算平均散射率，使用半无穷积分 [0, ∞)。
+
+# Arguments
+- `process::Symbol`: 散射过程 (如 :ud_to_ud)
+- `quark_params::NamedTuple`: 夸克参数 (m, μ, A)
+- `thermo_params::NamedTuple`: 热力学参数 (T, Φ, Φbar, ξ)
+- `K_coeffs::NamedTuple`: 有效耦合系数
+
+# Keyword Arguments
+- `p_nodes::Int`: 动量积分节点数 (默认6)
+- `angle_nodes::Int`: 角度积分节点数 (默认2)
+- `phi_nodes::Int`: 方位角积分节点数 (默认4)
+- `scale::Float64`: 半无穷积分尺度参数 (默认10.0)
+"""
 function average_scattering_rate(
     process::Symbol,
     quark_params::NamedTuple,
@@ -326,7 +382,8 @@ function average_scattering_rate(
     cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing, phi_w::Union{Nothing,Vector{Float64}}=nothing,
     cs_cache::CrossSectionCache=CrossSectionCache(process),
-    n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS
+    n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    scale::Float64=DEFAULT_SEMI_INF_SCALE
 )::Float64
     # 解析粒子、质量、化学势
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
@@ -338,14 +395,14 @@ function average_scattering_rate(
     T = thermo_params.T; Φ = thermo_params.Φ; Φbar = thermo_params.Φbar
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
-    # 预备节点（可传入外部预计算节点/权重）
-    p_grid === nothing && ((p_grid, p_w) = gauleg(0.0, Λ_inv_fm, p_nodes))
+    # 使用 [0, 1) 上的Gauss-Legendre节点，通过变换映射到 [0, ∞)
+    t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
     cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
     phi_grid === nothing && ((phi_grid, phi_w) = gauleg(0.0, Float64(π), phi_nodes))
 
-    # 数密度（用于归一化）
-    ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w)
-    ρ_j = number_density(pj_sym, mj, μj, T, Φ, Φbar, ξ; p_nodes=p_nodes, angle_nodes=angle_nodes, p_grid=p_grid, p_w=p_w, cos_grid=cos_grid, cos_w=cos_w)
+    # 数密度（用于归一化）- 使用半无穷积分
+    ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=DEFAULT_SEMI_INF_NODES, angle_nodes=angle_nodes, scale=scale)
+    ρ_j = number_density(pj_sym, mj, μj, T, Φ, Φbar, ξ; p_nodes=DEFAULT_SEMI_INF_NODES, angle_nodes=angle_nodes, scale=scale)
     if ρ_i == 0.0 || ρ_j == 0.0
         return 0.0
     end
@@ -353,10 +410,24 @@ function average_scattering_rate(
     prefactor = (DQ^2) / (4.0 * π^5 * ρ_i * ρ_j)
     ω = 0.0
 
-    for (p_i, w_pi) in zip(p_grid, p_w)
+    for (t_i, w_ti) in zip(t_grid, t_w)
+        # 避免 t=1 的奇点
+        if t_i >= 0.9999
+            continue
+        end
+        # 变换到半无穷区间
+        p_i = scale * t_i / (1.0 - t_i)
+        dp_i_dt = scale / (1.0 - t_i)^2
         Ei = energy_from_p(p_i, mi)
-        for (p_j, w_pj) in zip(p_grid, p_w)
+        
+        for (t_j, w_tj) in zip(t_grid, t_w)
+            if t_j >= 0.9999
+                continue
+            end
+            p_j = scale * t_j / (1.0 - t_j)
+            dp_j_dt = scale / (1.0 - t_j)^2
             Ej = energy_from_p(p_j, mj)
+            
             for (cθi, w_cθi) in zip(cos_grid, cos_w)
                 sθi = sqrt(max(1.0 - cθi*cθi, 0.0))
                 for (cθj, w_cθj) in zip(cos_grid, cos_w)
@@ -379,7 +450,8 @@ function average_scattering_rate(
                             continue
                         end
                         σ = get_sigma(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-                        ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ
+                        # 注意：需要乘以雅可比行列式 dp_i_dt * dp_j_dt
+                        ω += w_ti * w_tj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ * dp_i_dt * dp_j_dt
                     end
                 end
             end
