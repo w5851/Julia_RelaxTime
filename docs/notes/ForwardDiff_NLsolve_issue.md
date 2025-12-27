@@ -346,3 +346,8 @@ Julia 的首次调用慢是因为 JIT 编译。可以通过以下方式优化：
 - 2025-12-27: 添加高阶导数计算方法对比，推荐使用 ImplicitDifferentiation.jl
 - 2025-12-27: 完成 1-4 阶导数性能对比测试，发现数值微分在 3-4 阶精度严重下降
 - 2025-12-27: 修正测试方法（充分预热每个阶数），ImplicitDiff.jl 预热后性能优秀（4阶仅86ms）
+- 2025-12-27: **完成 ImplicitDifferentiation.jl 集成到 ThermoDerivatives.jl**
+  - 修复 Project.toml 中的 UUID（57b37032-215b-411a-8a7c-41a003a55207）
+  - 使用 DirectLinearSolver + MatrixRepresentation 支持高阶导数
+  - 验证通过：一阶导数误差 < 10⁻⁹，二阶导数误差 < 10⁻⁶
+  - 预热后性能：order=1 ~129ms, order=2 ~368ms, thermo_derivatives ~285ms
