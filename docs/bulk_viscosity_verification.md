@@ -89,14 +89,57 @@ $$
 2. 物理意义更清晰（与等熵过程直接相关）
 3. 与Fortran代码保持一致
 
-**待办**：修改 `TransportCoefficients.jl` 中的 `bulk_viscosity` 函数，采用等熵声速形式。
+**已完成**：在 `TransportCoefficients.jl` 中添加了 `bulk_viscosity_isentropic` 函数，采用等熵声速形式。
+
+## 等熵声速形式验证结果（2025-12-28）
+
+### 测试点
+
+T = 150 MeV, μ_B = 800 MeV
+
+### 热力学系数
+
+| 量 | 值 |
+|---|---|
+| v_n² | 0.098640 |
+| ∂μ_B/∂T\|_σ | 9.543024 |
+| M_u | 81.57 MeV |
+| M_s | 433.71 MeV |
+| Φ | 0.418108 |
+| Φbar | 0.437178 |
+| s | 5.053 fm⁻³ |
+| n_B | 0.515 fm⁻³ |
+
+### 输运系数结果
+
+使用 τ = 3.423 fm（与之前弛豫时间验证一致）：
+
+| 系数 | 值 | 无量纲比 |
+|------|-----|---------|
+| η | 3.084e+00 fm⁻³ | η/s = 0.610 |
+| ζ (等熵声速形式) | 1.300e+00 fm⁻³ | ζ/s = 0.257 |
+| σ | 4.011e-02 fm⁻¹ | σ/T = 0.053 |
+
+### 比值
+
+- ζ/η = 0.421
+- ζ (等熵声速形式) / ζ (热力学导数形式) ≈ 6.6
+
+### 验证状态
+
+✓ `bulk_viscosity_isentropic` 函数已添加到 `TransportCoefficients.jl`
+✓ 模块测试与独立测试脚本结果一致
+✓ 热力学导数系数计算正确
+
+**待验证**：与Fortran在相同测试点的结果对比（需要运行Fortran代码）
 
 ## 后续工作
 
 1. ~~**公式来源追溯**~~：已确认两种公式都正确，采用等熵声速形式
-2. **代码修改**：更新 `TransportCoefficients.jl` 中的体粘滞系数实现
-3. **验证测试**：修改后与Fortran结果对比验证
-4. **文献对比**：与已发表的体粘滞系数结果对比
+2. ~~**代码修改**~~：已添加 `bulk_viscosity_isentropic` 函数
+3. ~~**验证测试**~~：模块测试与独立脚本结果一致
+4. **Fortran对比**：在相同测试点运行Fortran代码进行数值对比
+5. **文献对比**：与已发表的体粘滞系数结果对比
 
 ## 相关文件
 
@@ -105,6 +148,8 @@ $$
 - `scripts/debug/bulk_viscosity_comparison.jl` - Julia vs Fortran公式对比脚本
 - `scripts/debug/bulk_viscosity_full_test.jl` - 完整测试脚本
 - `scripts/debug/test_implicit_thermo.jl` - 隐函数定理方法测试
+- `scripts/debug/test_bulk_viscosity_module.jl` - 模块测试脚本
+- `scripts/debug/test_bulk_viscosity_isentropic.jl` - 等熵声速形式测试脚本
 - `docs/reference/formula/输运系数by弛豫时间.md` - 公式文档
 
 ## 更新记录
@@ -113,3 +158,5 @@ $$
 - 2025-12-27: 完成Julia vs Fortran公式对比，发现约8倍差异
 - 2025-12-27: 分析差异原因：两种公式的数学形式不同（线性 vs 平方）
 - 2025-12-28: 确认采用等熵声速形式（公式 A26），更新公式文档
+- 2025-12-28: 添加 `bulk_viscosity_isentropic` 函数到 `TransportCoefficients.jl`
+- 2025-12-28: 修复系数错误（移除多余的相空间测度因子），验证通过

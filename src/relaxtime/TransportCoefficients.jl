@@ -34,7 +34,7 @@ using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, 
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
-export shear_viscosity, bulk_viscosity, electric_conductivity, transport_coefficients
+export shear_viscosity, bulk_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 
 const TWO_PI = 2.0 * π
 
@@ -403,6 +403,143 @@ function bulk_viscosity(
         end
         integral = pref_measure_aniso * acc
         return -(1.0 / (3.0 * T)) * integral
+    end
+end
+
+"""
+    bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...)
+
+体粘滞系数 ζ（RTA，等熵声速形式）。
+
+使用公式 A26（与 Fortran 代码一致）：
+    ζ = (N_c)/(9π²T) Σ_a ∫dp (p²/E²)·[τ_a·f_a·(1-f_a)·B_a² + τ_ā·f_ā·(1-f_ā)·B_ā²]
+
+其中 B = p² + 3·v_n²·T²·E·∂[(E∓μ)/T]/∂T|_σ
+
+输入 `bulk_coeffs_isentropic` 应使用 `PNJL.ThermoDerivatives.bulk_viscosity_coefficients` 的返回值。
+"""
+function bulk_viscosity_isentropic(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    tau::NamedTuple,
+    bulk_coeffs_isentropic::NamedTuple,
+    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
+    p_max::Float64=10.0,
+    p_grid::Union{Nothing,Vector{Float64}}=nothing,
+    p_w::Union{Nothing,Vector{Float64}}=nothing,
+    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
+    cos_w::Union{Nothing,Vector{Float64}}=nothing
+)::Float64
+    T = thermo_params.T
+    Φ = thermo_params.Φ
+    Φbar = thermo_params.Φbar
+    ξ = get(thermo_params, :ξ, 0.0)
+
+    # 从 bulk_coeffs_isentropic 提取系数
+    v_n_sq = bulk_coeffs_isentropic.v_n_sq
+    dμB_dT_sigma = bulk_coeffs_isentropic.dμB_dT_sigma
+    masses = bulk_coeffs_isentropic.masses
+    dM_dT = bulk_coeffs_isentropic.dM_dT
+    dM_dμB = bulk_coeffs_isentropic.dM_dμB
+
+    nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
+
+    # 系数：N_c / (9π²T)
+    # 注意：Fortran 公式中的积分是直接对 p 积分，没有额外的相空间测度因子
+    # 所以这里不需要乘 1/(2π²)
+    prefactor = Float64(N_color) / (9.0 * π^2 * T)
+
+    function flavor_index(sp::Symbol)
+        if sp in (:u, :ubar)
+            return 1
+        elseif sp in (:d, :dbar)
+            return 2
+        elseif sp in (:s, :sbar)
+            return 3
+        else
+            error("Unknown species: $sp")
+        end
+    end
+
+    flavors = (:u, :d, :s)
+
+    # 计算 B 项
+    function compute_B(p::Float64, m::Float64, μ::Float64, dM_dT_val::Float64, dM_dμB_val::Float64, is_antiquark::Bool)
+        E = sqrt(p * p + m * m)
+        
+        # 能量导数（对重子化学势）
+        dE_dT = (m / E) * dM_dT_val
+        dE_dμB = (m / E) * dM_dμB_val
+        
+        # 夸克重子数 b_q = 1/3
+        b_q = 1.0 / 3.0
+        
+        if is_antiquark
+            # 反夸克：x = E + μ_q
+            dx_dT_sigma = dE_dT + (dE_dμB + b_q) * dμB_dT_sigma
+            x = E + μ
+        else
+            # 夸克：x = E - μ_q
+            dx_dT_sigma = dE_dT + (dE_dμB - b_q) * dμB_dT_sigma
+            x = E - μ
+        end
+        
+        # ∂[x/T]/∂T|_σ
+        dxt_dT_sigma = dx_dT_sigma / T - x / T^2
+        
+        # B = p² + 3·v_n²·T²·E·∂[x/T]/∂T|_σ
+        return p * p + 3.0 * v_n_sq * T^2 * E * dxt_dT_sigma
+    end
+
+    function one_flavor_pair_contrib(flavor::Symbol, p::Float64, cosθ::Float64)
+        sp_q = flavor
+        sp_aq = Symbol(string(flavor, "bar"))
+
+        idx = flavor_index(sp_q)
+        m = masses[idx]
+        μ = mu_for_species(sp_q, quark_params)
+        E = sqrt(p * p + m * m)
+
+        f_q = distribution_for_species(sp_q, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_aq = distribution_for_species(sp_aq, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+
+        ff_q = fermi_factor(f_q)
+        ff_aq = fermi_factor(f_aq)
+
+        τ_q = tau_for_species(sp_q, tau)
+        τ_aq = tau_for_species(sp_aq, tau)
+
+        B_q = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], false)
+        B_aq = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], true)
+
+        # 积分核：(p²/E²) × τ × f(1-f) × B²
+        kernel_q = (p * p / (E * E)) * τ_q * ff_q * B_q^2
+        kernel_aq = (p * p / (E * E)) * τ_aq * ff_aq * B_aq^2
+
+        return kernel_q + kernel_aq
+    end
+
+    if ξ == 0.0
+        acc = 0.0
+        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+            for fl in flavors
+                acc += wp * one_flavor_pair_contrib(fl, p, 0.0)
+            end
+        end
+        return prefactor * acc
+    else
+        nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
+        acc = 0.0
+        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+            for (c, wc) in zip(nodes_cos, weights_cos)
+                for fl in flavors
+                    acc += wp * wc * one_flavor_pair_contrib(fl, p, c)
+                end
+            end
+        end
+        # 各向异性情况下需要除以角度积分的归一化因子 2
+        return prefactor * acc / 2.0
     end
 end
 
