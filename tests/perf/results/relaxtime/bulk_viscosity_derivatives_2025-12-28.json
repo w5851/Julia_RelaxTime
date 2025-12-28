@@ -7,38 +7,38 @@
       "μB_MeV": 800.0,
       "μq_fm": 1.3513947238171495
     },
-    "date": "2025-12-28 17:34:31"
+    "date": "2025-12-28 19:10:31"
   },
   "benchmarks": {
     "thermo_derivatives": {
-      "min_ms": 221.3697,
-      "median_ms": 285.7054,
+      "min_ms": 173.8046,
+      "median_ms": 175.3552,
       "memory_KB": 508.203125
     },
     "bulk_viscosity_coefficients": {
-      "min_ms": 156.9795,
-      "median_ms": 162.69445,
-      "memory_KB": 415.359375
+      "min_ms": 23.4018,
+      "median_ms": 24.08585,
+      "memory_KB": 70.09375
     },
     "v_n_squared": {
-      "min_ms": 65.3163,
-      "median_ms": 68.56015,
+      "min_ms": 59.7425,
+      "median_ms": 61.0576,
       "memory_KB": 174.0
     },
     "dmuB_dT_sigma": {
-      "min_ms": 65.3329,
-      "median_ms": 68.84795,
+      "min_ms": 59.7359,
+      "median_ms": 61.00765,
       "memory_KB": 174.125
     },
     "batch_B_brackets_600calls": {
-      "median_μs": 7.56,
+      "median_μs": 7.1,
       "min_μs": 6.44,
       "memory_KB": 1.8125,
-      "per_call_ns": 12.6
+      "per_call_ns": 11.833333333333334
     },
     "compute_B_bracket": {
-      "median_ns": 37.10819009100101,
-      "min_ns": 25.783619817997977,
+      "median_ns": 26.733668341708544,
+      "min_ns": 25.42713567839196,
       "memory_bytes": 0
     }
   }

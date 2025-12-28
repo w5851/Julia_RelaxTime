@@ -617,6 +617,10 @@ end
 
 使用重子化学势约定，与 Fortran 代码一致。
 
+## 优化说明
+此函数经过优化，只调用一次 IMPLICIT_SOLVER，然后通过 ForwardDiff.jacobian
+一次性计算所有需要的导数（s, n, M 对 T 和 μ 的导数）。
+
 # 参数
 - `T_fm`: 温度 (fm⁻¹)
 - `mu_fm`: 夸克化学势 (fm⁻¹)
@@ -638,53 +642,64 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
     thermal_nodes = get_thermal_nodes(p_num, t_num)
     
-    # 定义热力学量函数
-    function thermo_funcs(T, μ)
-        θ = [T, μ]
+    # 定义统一的计算函数：返回 [s, n, M_u, M_d, M_s]
+    # 这样只需要一次 jacobian 调用就能得到所有导数
+    function all_quantities(θ::AbstractVector)
         (x_out, _) = IMPLICIT_SOLVER(θ)
         x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(μ, μ, μ)
-        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
-        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        mu_vec = SVector{3}(θ[2], θ[2], θ[2])
+        
+        # 热力学量
+        _, _, s, _ = calculate_thermo(x_sv, mu_vec, θ[1], thermal_nodes, CURRENT_XI[])
+        rho_vec = calculate_rho(x_sv, mu_vec, θ[1], thermal_nodes, CURRENT_XI[])
         n = sum(rho_vec) / 3
-        return (s=s, n=n)
+        
+        # 质量
+        masses = compute_masses_from_state(x_out)
+        
+        return [s, n, masses[1], masses[2], masses[3]]
     end
     
-    # 基础量
-    base = thermo_funcs(T_fm, mu_fm)
-    s, n_B = base.s, base.n
+    θ = [Float64(T_fm), Float64(mu_fm)]
     
-    # 一阶导数（对夸克化学势）
-    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
-    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
-    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
-    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
+    # 计算基础量
+    base_vals = all_quantities(θ)
+    s = base_vals[1]
+    n_B = base_vals[2]
+    masses = SVector{3}(base_vals[3], base_vals[4], base_vals[5])
     
-    # 转换到重子化学势
+    # 一次性计算 Jacobian: ∂[s, n, M_u, M_d, M_s]/∂[T, μ]
+    # J[i,j] = ∂(quantity_i)/∂(θ_j)
+    J = ForwardDiff.jacobian(all_quantities, θ)
+    
+    # 提取导数（对夸克化学势）
+    ds_dT = J[1, 1]
+    ds_dμq = J[1, 2]
+    dn_dT = J[2, 1]
+    dn_dμq = J[2, 2]
+    dM_dT = SVector{3}(J[3, 1], J[4, 1], J[5, 1])
+    dM_dμq = SVector{3}(J[3, 2], J[4, 2], J[5, 2])
+    
+    # 转换到重子化学势：∂/∂μ_B = (1/3)·∂/∂μ_q
     ds_dμB = ds_dμq / 3.0
     dn_dμB = dn_dμq / 3.0
+    dM_dμB = dM_dμq ./ 3.0
     
-    # v_n²
+    # v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
     numerator_vn = s * dn_dμB - n_B * dn_dT
     denominator_vn = T_fm * (ds_dT * dn_dμB - ds_dμB * dn_dT)
     v_n_sq = numerator_vn / denominator_vn
     
-    # ∂μ_B/∂T|_σ
+    # ∂μ_B/∂T|_σ = -∂σ/∂T / ∂σ/∂μ_B
     dσ_dT = ds_dT / n_B - s * dn_dT / n_B^2
     dσ_dμB = ds_dμB / n_B - s * dn_dμB / n_B^2
     dμB_dT_sig = -dσ_dT / dσ_dμB
     
-    # 质量导数（对夸克化学势）
-    md = mass_derivatives(T_fm, mu_fm; order=1, xi=xi, p_num=p_num, t_num=t_num)
-    
-    # 转换到重子化学势：∂M/∂μ_B = (1/3)·∂M/∂μ_q
-    dM_dμB = md.dM_dmu ./ 3.0
-    
     return (
         v_n_sq = v_n_sq,
         dμB_dT_sigma = dμB_dT_sig,
-        masses = md.masses,
-        dM_dT = md.dM_dT,
+        masses = masses,
+        dM_dT = dM_dT,
         dM_dμB = dM_dμB,
         s = s,
         n_B = n_B,
