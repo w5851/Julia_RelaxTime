@@ -34,7 +34,7 @@ using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, 
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
-export shear_viscosity, bulk_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
+export shear_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 
 const TWO_PI = 2.0 * π
 
@@ -305,10 +305,23 @@ function electric_conductivity(
 end
 
 
+#= ============================================================================
+   已弃用：旧的体粘滞系数实现（热力学导数形式）
+   
+   此实现使用 (∂P/∂ε)_n 和 (∂P/∂n)_ε 形式的热力学导数。
+   已被 bulk_viscosity_isentropic（等熵声速形式）替代。
+   
+   保留此代码仅供参考，不建议在生产中使用。
+   ============================================================================
+
 """
     bulk_viscosity(quark_params, thermo_params; tau, bulk_coeffs, ...)
 
-体粘滞系数 ζ（RTA）。
+体粘滞系数 ζ（RTA，热力学导数形式）。
+
+!!! warning "已弃用"
+    此函数使用旧的热力学导数形式公式，已被 `bulk_viscosity_isentropic` 替代。
+    新公式使用等熵声速形式，与 Fortran 代码一致。
 
 注意：此实现按 docs/reference/formula/输运系数by弛豫时间.md 给出的表达式直译。
 输入 `bulk_coeffs` 建议使用 `PNJL.ThermoDerivatives.bulk_derivative_coeffs` 的返回值。
@@ -405,6 +418,8 @@ function bulk_viscosity(
         return -(1.0 / (3.0 * T)) * integral
     end
 end
+
+=# # 结束注释块
 
 """
     bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...)

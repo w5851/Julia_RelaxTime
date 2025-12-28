@@ -2,10 +2,8 @@
 性能测试：体粘滞系数热力学导数计算
 
 测试 ThermoDerivatives 模块中体粘滞相关函数的性能：
-- v_n_squared
-- dmuB_dT_sigma
-- bulk_viscosity_coefficients
-- compute_B_bracket
+- bulk_viscosity_coefficients: 一次性计算所有体粘滞系数所需的导数
+- compute_B_bracket: 体粘滞公式中的 B 项
 
 结果保存到 tests/perf/results/relaxtime/ 目录
 """
@@ -50,33 +48,19 @@ println()
 # 基准测试
 # ============================================================================
 
-println("1. v_n_squared 性能测试")
-b1 = @benchmark ThermoDerivatives.v_n_squared($T_fm, $μq_fm)
+println("1. bulk_viscosity_coefficients 性能测试")
+b1 = @benchmark ThermoDerivatives.bulk_viscosity_coefficients($T_fm, $μq_fm)
 println("   中位时间: $(@sprintf("%.2f", median(b1).time / 1e6)) ms")
 println("   最小时间: $(@sprintf("%.2f", minimum(b1).time / 1e6)) ms")
 println("   内存分配: $(@sprintf("%.2f", b1.memory / 1024)) KB")
-println()
-
-println("2. dmuB_dT_sigma 性能测试")
-b2 = @benchmark ThermoDerivatives.dmuB_dT_sigma($T_fm, $μq_fm)
-println("   中位时间: $(@sprintf("%.2f", median(b2).time / 1e6)) ms")
-println("   最小时间: $(@sprintf("%.2f", minimum(b2).time / 1e6)) ms")
-println("   内存分配: $(@sprintf("%.2f", b2.memory / 1024)) KB")
-println()
-
-println("3. bulk_viscosity_coefficients 性能测试")
-b3 = @benchmark ThermoDerivatives.bulk_viscosity_coefficients($T_fm, $μq_fm)
-println("   中位时间: $(@sprintf("%.2f", median(b3).time / 1e6)) ms")
-println("   最小时间: $(@sprintf("%.2f", minimum(b3).time / 1e6)) ms")
-println("   内存分配: $(@sprintf("%.2f", b3.memory / 1024)) KB")
 println()
 
 # 获取系数用于 B 项测试
 coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
 p_test = 1.0
 
-println("4. compute_B_bracket 性能测试 (单次调用)")
-b4 = @benchmark ThermoDerivatives.compute_B_bracket(
+println("2. compute_B_bracket 性能测试 (单次调用)")
+b2 = @benchmark ThermoDerivatives.compute_B_bracket(
     $p_test,
     $(coeffs.masses[1]),
     $μq_fm,
@@ -87,16 +71,16 @@ b4 = @benchmark ThermoDerivatives.compute_B_bracket(
     $(coeffs.dM_dμB[1]);
     is_antiquark=false
 )
-println("   中位时间: $(@sprintf("%.2f", median(b4).time)) ns")
-println("   最小时间: $(@sprintf("%.2f", minimum(b4).time)) ns")
-println("   内存分配: $(b4.memory) bytes")
+println("   中位时间: $(@sprintf("%.2f", median(b2).time)) ns")
+println("   最小时间: $(@sprintf("%.2f", minimum(b2).time)) ns")
+println("   内存分配: $(b2.memory) bytes")
 println()
 
 # ============================================================================
 # 批量计算性能测试
 # ============================================================================
 
-println("5. 批量 B 项计算性能测试 (100 个动量点)")
+println("3. 批量 B 项计算性能测试 (100 个动量点)")
 
 # 模拟实际使用场景：对多个动量点计算 B 项
 p_values = range(0.1, 5.0, length=100)
@@ -134,22 +118,22 @@ function compute_all_B_brackets(p_values, masses, dM_dT, dM_dμB, v_n_sq, dμB_d
     return B_q, B_qbar
 end
 
-b5 = @benchmark compute_all_B_brackets($p_values, $masses_val, $dM_dT_val, $dM_dμB_val, 
+b3 = @benchmark compute_all_B_brackets($p_values, $masses_val, $dM_dT_val, $dM_dμB_val, 
                                         $v_n_sq_val, $dμB_dT_sigma_val, $μq_fm, $T_fm)
-println("   中位时间: $(@sprintf("%.2f", median(b5).time / 1e3)) μs")
-println("   最小时间: $(@sprintf("%.2f", minimum(b5).time / 1e3)) μs")
-println("   内存分配: $(@sprintf("%.2f", b5.memory / 1024)) KB")
+println("   中位时间: $(@sprintf("%.2f", median(b3).time / 1e3)) μs")
+println("   最小时间: $(@sprintf("%.2f", minimum(b3).time / 1e3)) μs")
+println("   内存分配: $(@sprintf("%.2f", b3.memory / 1024)) KB")
 println()
 
 # ============================================================================
 # 与 thermo_derivatives 对比
 # ============================================================================
 
-println("6. 与 thermo_derivatives 性能对比")
-b6 = @benchmark ThermoDerivatives.thermo_derivatives($T_fm, $μq_fm)
-println("   thermo_derivatives 中位时间: $(@sprintf("%.2f", median(b6).time / 1e6)) ms")
-println("   bulk_viscosity_coefficients 中位时间: $(@sprintf("%.2f", median(b3).time / 1e6)) ms")
-println("   比值: $(@sprintf("%.2f", median(b3).time / median(b6).time))x")
+println("4. 与 thermo_derivatives 性能对比")
+b4 = @benchmark ThermoDerivatives.thermo_derivatives($T_fm, $μq_fm)
+println("   thermo_derivatives 中位时间: $(@sprintf("%.2f", median(b4).time / 1e6)) ms")
+println("   bulk_viscosity_coefficients 中位时间: $(@sprintf("%.2f", median(b1).time / 1e6)) ms")
+println("   比值: $(@sprintf("%.2f", median(b1).time / median(b4).time))x")
 println()
 
 # ============================================================================
@@ -168,36 +152,26 @@ results = Dict(
         )
     ),
     "benchmarks" => Dict(
-        "v_n_squared" => Dict(
+        "bulk_viscosity_coefficients" => Dict(
             "median_ms" => median(b1).time / 1e6,
             "min_ms" => minimum(b1).time / 1e6,
             "memory_KB" => b1.memory / 1024
         ),
-        "dmuB_dT_sigma" => Dict(
-            "median_ms" => median(b2).time / 1e6,
-            "min_ms" => minimum(b2).time / 1e6,
-            "memory_KB" => b2.memory / 1024
-        ),
-        "bulk_viscosity_coefficients" => Dict(
-            "median_ms" => median(b3).time / 1e6,
-            "min_ms" => minimum(b3).time / 1e6,
-            "memory_KB" => b3.memory / 1024
-        ),
         "compute_B_bracket" => Dict(
-            "median_ns" => median(b4).time,
-            "min_ns" => minimum(b4).time,
-            "memory_bytes" => b4.memory
+            "median_ns" => median(b2).time,
+            "min_ns" => minimum(b2).time,
+            "memory_bytes" => b2.memory
         ),
         "batch_B_brackets_600calls" => Dict(
-            "median_μs" => median(b5).time / 1e3,
-            "min_μs" => minimum(b5).time / 1e3,
-            "memory_KB" => b5.memory / 1024,
-            "per_call_ns" => median(b5).time / 600
+            "median_μs" => median(b3).time / 1e3,
+            "min_μs" => minimum(b3).time / 1e3,
+            "memory_KB" => b3.memory / 1024,
+            "per_call_ns" => median(b3).time / 600
         ),
         "thermo_derivatives" => Dict(
-            "median_ms" => median(b6).time / 1e6,
-            "min_ms" => minimum(b6).time / 1e6,
-            "memory_KB" => b6.memory / 1024
+            "median_ms" => median(b4).time / 1e6,
+            "min_ms" => minimum(b4).time / 1e6,
+            "memory_KB" => b4.memory / 1024
         )
     )
 )
@@ -220,14 +194,12 @@ println("性能总结")
 println("=" ^ 60)
 println()
 println("单次调用时间:")
-println("   v_n_squared:              $(@sprintf("%6.2f", median(b1).time / 1e6)) ms")
-println("   dmuB_dT_sigma:            $(@sprintf("%6.2f", median(b2).time / 1e6)) ms")
-println("   bulk_viscosity_coefficients: $(@sprintf("%6.2f", median(b3).time / 1e6)) ms")
-println("   compute_B_bracket:        $(@sprintf("%6.2f", median(b4).time)) ns")
+println("   bulk_viscosity_coefficients: $(@sprintf("%6.2f", median(b1).time / 1e6)) ms")
+println("   compute_B_bracket:           $(@sprintf("%6.2f", median(b2).time)) ns")
 println()
 println("批量计算 (100 点 × 3 味 × 2 粒子/反粒子):")
-println("   总时间: $(@sprintf("%.2f", median(b5).time / 1e3)) μs")
-println("   每点平均: $(@sprintf("%.2f", median(b5).time / 600)) ns")
+println("   总时间: $(@sprintf("%.2f", median(b3).time / 1e3)) μs")
+println("   每点平均: $(@sprintf("%.2f", median(b3).time / 600)) ns")
 println()
 println("建议：")
 println("   - bulk_viscosity_coefficients 应该在每个 (T, μ) 点只调用一次")

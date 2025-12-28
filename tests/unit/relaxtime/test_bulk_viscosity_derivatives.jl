@@ -2,9 +2,7 @@
 单元测试：体粘滞系数热力学导数计算
 
 测试 ThermoDerivatives 模块中的以下函数：
-- v_n_squared: 热力学速度 v_n²
-- dmuB_dT_sigma: 固定 σ 时的导数 ∂μ_B/∂T|_σ
-- bulk_viscosity_coefficients: 体粘滞系数所需的所有导数
+- bulk_viscosity_coefficients: 体粘滞系数所需的所有导数（包含 v_n_sq 和 dμB_dT_sigma）
 - compute_B_bracket: 体粘滞公式中的 B 项
 """
 
@@ -38,28 +36,7 @@ end
 
 @testset "体粘滞系数热力学导数" begin
     
-    @testset "v_n_squared 计算" begin
-        v_n_sq = ThermoDerivatives.v_n_squared(T_fm, μq_fm)
-        
-        # v_n² 应该是正数且在合理范围内
-        @test v_n_sq > 0
-        @test v_n_sq < 1  # 声速平方应该小于光速
-        
-        # 预期值（从测试脚本得到）
-        @test isapprox(v_n_sq, 0.098640, rtol=1e-4)
-    end
-
-    @testset "dmuB_dT_sigma 计算" begin
-        dμB_dT_sig = ThermoDerivatives.dmuB_dT_sigma(T_fm, μq_fm)
-        
-        # ∂μ_B/∂T|_σ 应该是正数（温度升高时化学势也升高以保持 σ 不变）
-        @test dμB_dT_sig > 0
-        
-        # 预期值（从测试脚本得到）
-        @test isapprox(dμB_dT_sig, 9.543024, rtol=1e-4)
-    end
-    
-    @testset "bulk_viscosity_coefficients 计算" begin
+    @testset "bulk_viscosity_coefficients 基本计算" begin
         coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # 检查返回的 NamedTuple 包含所有必要的字段
@@ -70,10 +47,31 @@ end
         @test haskey(coeffs, :dM_dμB)
         @test haskey(coeffs, :s)
         @test haskey(coeffs, :n_B)
+    end
+    
+    @testset "v_n_sq 数值验证" begin
+        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
         
-        # 检查数值
+        # v_n² 应该是正数且在合理范围内
+        @test coeffs.v_n_sq > 0
+        @test coeffs.v_n_sq < 1  # 声速平方应该小于光速
+        
+        # 预期值（从测试脚本得到）
         @test isapprox(coeffs.v_n_sq, 0.098640, rtol=1e-4)
+    end
+
+    @testset "dμB_dT_sigma 数值验证" begin
+        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        
+        # ∂μ_B/∂T|_σ 应该是正数（温度升高时化学势也升高以保持 σ 不变）
+        @test coeffs.dμB_dT_sigma > 0
+        
+        # 预期值（从测试脚本得到）
         @test isapprox(coeffs.dμB_dT_sigma, 9.543024, rtol=1e-4)
+    end
+    
+    @testset "质量和导数验证" begin
+        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # 质量应该是正数
         @test all(coeffs.masses .> 0)

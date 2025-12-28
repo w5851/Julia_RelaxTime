@@ -50,7 +50,7 @@ using ..Constants_PNJL: G_fm2, K_fm5
 
 export solve_equilibrium_mu, thermo_derivatives, mass_derivatives, bulk_derivative_coeffs
 export quasiparticle_energy, dE_dT, dE_dmu
-export bulk_viscosity_coefficients, compute_B_bracket, v_n_squared, dmuB_dT_sigma
+export bulk_viscosity_coefficients, compute_B_bracket
 
 # ============================================================================
 # 全局缓存的积分节点
@@ -493,122 +493,6 @@ export dP_dT, dP_dmu
 # ============================================================================
 # 体粘滞系数热力学导数（等熵声速形式）
 # ============================================================================
-
-"""
-    v_n_squared(T_fm, mu_fm; xi=0.0, p_num, t_num)
-
-计算热力学速度 v_n²，用于体粘滞系数公式。
-
-公式：
-    v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
-
-其中所有导数都是对重子化学势 μ_B 的导数。
-
-# 参数
-- `T_fm`: 温度 (fm⁻¹)
-- `mu_fm`: 夸克化学势 (fm⁻¹)
-
-# 返回
-- v_n²: 热力学速度平方（无量纲）
-"""
-function v_n_squared(T_fm::Real, mu_fm::Real;
-                     xi::Real=0.0,
-                     p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                     t_num::Int=DEFAULT_THETA_COUNT)
-    set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
-    
-    # 定义热力学量函数
-    function thermo_funcs(T, μ)
-        θ = [T, μ]
-        (x_out, _) = IMPLICIT_SOLVER(θ)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(μ, μ, μ)
-        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
-        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
-        n = sum(rho_vec) / 3
-        return (s=s, n=n)
-    end
-    
-    # 基础量
-    base = thermo_funcs(T_fm, mu_fm)
-    s, n_B = base.s, base.n
-    
-    # 一阶导数（对夸克化学势）
-    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
-    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
-    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
-    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
-    
-    # 转换到重子化学势：∂/∂μ_B = (1/3)·∂/∂μ_q
-    ds_dμB = ds_dμq / 3.0
-    dn_dμB = dn_dμq / 3.0
-    
-    # v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
-    numerator = s * dn_dμB - n_B * dn_dT
-    denominator = T_fm * (ds_dT * dn_dμB - ds_dμB * dn_dT)
-    
-    return numerator / denominator
-end
-
-"""
-    dmuB_dT_sigma(T_fm, mu_fm; xi=0.0, p_num, t_num)
-
-计算固定 σ=s/n_B 时重子化学势对温度的导数 ∂μ_B/∂T|_σ。
-
-公式：
-    ∂μ_B/∂T|_σ = -∂σ/∂T / ∂σ/∂μ_B
-
-其中：
-    ∂σ/∂T = ∂s/∂T/n_B - s·∂n_B/∂T/n_B²
-    ∂σ/∂μ_B = ∂s/∂μ_B/n_B - s·∂n_B/∂μ_B/n_B²
-
-# 参数
-- `T_fm`: 温度 (fm⁻¹)
-- `mu_fm`: 夸克化学势 (fm⁻¹)
-
-# 返回
-- ∂μ_B/∂T|_σ (fm⁻¹/fm⁻¹ = 无量纲)
-"""
-function dmuB_dT_sigma(T_fm::Real, mu_fm::Real;
-                       xi::Real=0.0,
-                       p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                       t_num::Int=DEFAULT_THETA_COUNT)
-    set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
-    
-    # 定义热力学量函数
-    function thermo_funcs(T, μ)
-        θ = [T, μ]
-        (x_out, _) = IMPLICIT_SOLVER(θ)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(μ, μ, μ)
-        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
-        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
-        n = sum(rho_vec) / 3
-        return (s=s, n=n)
-    end
-    
-    # 基础量
-    base = thermo_funcs(T_fm, mu_fm)
-    s, n_B = base.s, base.n
-    
-    # 一阶导数（对夸克化学势）
-    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
-    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
-    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
-    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
-    
-    # 转换到重子化学势
-    ds_dμB = ds_dμq / 3.0
-    dn_dμB = dn_dμq / 3.0
-    
-    # ∂σ/∂T 和 ∂σ/∂μ_B
-    dσ_dT = ds_dT / n_B - s * dn_dT / n_B^2
-    dσ_dμB = ds_dμB / n_B - s * dn_dμB / n_B^2
-    
-    return -dσ_dT / dσ_dμB
-end
 
 """
     bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num)
