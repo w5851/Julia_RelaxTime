@@ -50,6 +50,7 @@ using ..Constants_PNJL: G_fm2, K_fm5
 
 export solve_equilibrium_mu, thermo_derivatives, mass_derivatives, bulk_derivative_coeffs
 export quasiparticle_energy, dE_dT, dE_dmu
+export bulk_viscosity_coefficients, compute_B_bracket, v_n_squared, dmuB_dT_sigma
 
 # ============================================================================
 # 全局缓存的积分节点
@@ -488,5 +489,265 @@ end
 
 # 导出高阶导数函数
 export dP_dT, dP_dmu
+
+# ============================================================================
+# 体粘滞系数热力学导数（等熵声速形式）
+# ============================================================================
+
+"""
+    v_n_squared(T_fm, mu_fm; xi=0.0, p_num, t_num)
+
+计算热力学速度 v_n²，用于体粘滞系数公式。
+
+公式：
+    v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
+
+其中所有导数都是对重子化学势 μ_B 的导数。
+
+# 参数
+- `T_fm`: 温度 (fm⁻¹)
+- `mu_fm`: 夸克化学势 (fm⁻¹)
+
+# 返回
+- v_n²: 热力学速度平方（无量纲）
+"""
+function v_n_squared(T_fm::Real, mu_fm::Real;
+                     xi::Real=0.0,
+                     p_num::Int=DEFAULT_MOMENTUM_COUNT,
+                     t_num::Int=DEFAULT_THETA_COUNT)
+    set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
+    thermal_nodes = get_thermal_nodes(p_num, t_num)
+    
+    # 定义热力学量函数
+    function thermo_funcs(T, μ)
+        θ = [T, μ]
+        (x_out, _) = IMPLICIT_SOLVER(θ)
+        x_sv = SVector{5}(Tuple(x_out))
+        mu_vec = SVector{3}(μ, μ, μ)
+        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        n = sum(rho_vec) / 3
+        return (s=s, n=n)
+    end
+    
+    # 基础量
+    base = thermo_funcs(T_fm, mu_fm)
+    s, n_B = base.s, base.n
+    
+    # 一阶导数（对夸克化学势）
+    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
+    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
+    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
+    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
+    
+    # 转换到重子化学势：∂/∂μ_B = (1/3)·∂/∂μ_q
+    ds_dμB = ds_dμq / 3.0
+    dn_dμB = dn_dμq / 3.0
+    
+    # v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
+    numerator = s * dn_dμB - n_B * dn_dT
+    denominator = T_fm * (ds_dT * dn_dμB - ds_dμB * dn_dT)
+    
+    return numerator / denominator
+end
+
+"""
+    dmuB_dT_sigma(T_fm, mu_fm; xi=0.0, p_num, t_num)
+
+计算固定 σ=s/n_B 时重子化学势对温度的导数 ∂μ_B/∂T|_σ。
+
+公式：
+    ∂μ_B/∂T|_σ = -∂σ/∂T / ∂σ/∂μ_B
+
+其中：
+    ∂σ/∂T = ∂s/∂T/n_B - s·∂n_B/∂T/n_B²
+    ∂σ/∂μ_B = ∂s/∂μ_B/n_B - s·∂n_B/∂μ_B/n_B²
+
+# 参数
+- `T_fm`: 温度 (fm⁻¹)
+- `mu_fm`: 夸克化学势 (fm⁻¹)
+
+# 返回
+- ∂μ_B/∂T|_σ (fm⁻¹/fm⁻¹ = 无量纲)
+"""
+function dmuB_dT_sigma(T_fm::Real, mu_fm::Real;
+                       xi::Real=0.0,
+                       p_num::Int=DEFAULT_MOMENTUM_COUNT,
+                       t_num::Int=DEFAULT_THETA_COUNT)
+    set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
+    thermal_nodes = get_thermal_nodes(p_num, t_num)
+    
+    # 定义热力学量函数
+    function thermo_funcs(T, μ)
+        θ = [T, μ]
+        (x_out, _) = IMPLICIT_SOLVER(θ)
+        x_sv = SVector{5}(Tuple(x_out))
+        mu_vec = SVector{3}(μ, μ, μ)
+        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        n = sum(rho_vec) / 3
+        return (s=s, n=n)
+    end
+    
+    # 基础量
+    base = thermo_funcs(T_fm, mu_fm)
+    s, n_B = base.s, base.n
+    
+    # 一阶导数（对夸克化学势）
+    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
+    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
+    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
+    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
+    
+    # 转换到重子化学势
+    ds_dμB = ds_dμq / 3.0
+    dn_dμB = dn_dμq / 3.0
+    
+    # ∂σ/∂T 和 ∂σ/∂μ_B
+    dσ_dT = ds_dT / n_B - s * dn_dT / n_B^2
+    dσ_dμB = ds_dμB / n_B - s * dn_dμB / n_B^2
+    
+    return -dσ_dT / dσ_dμB
+end
+
+"""
+    bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num)
+
+计算体粘滞系数公式（等熵声速形式）所需的所有热力学导数系数。
+
+使用重子化学势约定，与 Fortran 代码一致。
+
+# 参数
+- `T_fm`: 温度 (fm⁻¹)
+- `mu_fm`: 夸克化学势 (fm⁻¹)
+
+# 返回
+NamedTuple 包含：
+- `v_n_sq`: 热力学速度 v_n²
+- `dμB_dT_sigma`: ∂μ_B/∂T|_σ
+- `masses`: 夸克有效质量 (u, d, s)
+- `dM_dT`: 质量对温度的导数
+- `dM_dμB`: 质量对重子化学势的导数
+- `s`: 熵密度
+- `n_B`: 重子数密度
+"""
+function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
+                                     xi::Real=0.0,
+                                     p_num::Int=DEFAULT_MOMENTUM_COUNT,
+                                     t_num::Int=DEFAULT_THETA_COUNT)
+    set_solver_config(; xi=xi, p_num=p_num, t_num=t_num)
+    thermal_nodes = get_thermal_nodes(p_num, t_num)
+    
+    # 定义热力学量函数
+    function thermo_funcs(T, μ)
+        θ = [T, μ]
+        (x_out, _) = IMPLICIT_SOLVER(θ)
+        x_sv = SVector{5}(Tuple(x_out))
+        mu_vec = SVector{3}(μ, μ, μ)
+        _, _, s, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        rho_vec = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        n = sum(rho_vec) / 3
+        return (s=s, n=n)
+    end
+    
+    # 基础量
+    base = thermo_funcs(T_fm, mu_fm)
+    s, n_B = base.s, base.n
+    
+    # 一阶导数（对夸克化学势）
+    ds_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).s, Float64(T_fm))
+    ds_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).s, Float64(mu_fm))
+    dn_dT = ForwardDiff.derivative(T -> thermo_funcs(T, mu_fm).n, Float64(T_fm))
+    dn_dμq = ForwardDiff.derivative(μ -> thermo_funcs(T_fm, μ).n, Float64(mu_fm))
+    
+    # 转换到重子化学势
+    ds_dμB = ds_dμq / 3.0
+    dn_dμB = dn_dμq / 3.0
+    
+    # v_n²
+    numerator_vn = s * dn_dμB - n_B * dn_dT
+    denominator_vn = T_fm * (ds_dT * dn_dμB - ds_dμB * dn_dT)
+    v_n_sq = numerator_vn / denominator_vn
+    
+    # ∂μ_B/∂T|_σ
+    dσ_dT = ds_dT / n_B - s * dn_dT / n_B^2
+    dσ_dμB = ds_dμB / n_B - s * dn_dμB / n_B^2
+    dμB_dT_sig = -dσ_dT / dσ_dμB
+    
+    # 质量导数（对夸克化学势）
+    md = mass_derivatives(T_fm, mu_fm; order=1, xi=xi, p_num=p_num, t_num=t_num)
+    
+    # 转换到重子化学势：∂M/∂μ_B = (1/3)·∂M/∂μ_q
+    dM_dμB = md.dM_dmu ./ 3.0
+    
+    return (
+        v_n_sq = v_n_sq,
+        dμB_dT_sigma = dμB_dT_sig,
+        masses = md.masses,
+        dM_dT = md.dM_dT,
+        dM_dμB = dM_dμB,
+        s = s,
+        n_B = n_B,
+    )
+end
+
+"""
+    compute_B_bracket(p, M, μq, T, v_n_sq, dμB_dT_sigma, dM_dT, dM_dμB; is_antiquark=false)
+
+计算体粘滞公式中的 B 项（括号项）。
+
+公式：
+    B = p² + 3·v_n²·T²·E·∂[(E∓μ_q)/T]/∂T|_σ
+
+对于夸克：使用 E - μ_q
+对于反夸克：使用 E + μ_q
+
+# 参数
+- `p`: 动量 (fm⁻¹)
+- `M`: 夸克有效质量 (fm⁻¹)
+- `μq`: 夸克化学势 (fm⁻¹)
+- `T`: 温度 (fm⁻¹)
+- `v_n_sq`: 热力学速度 v_n²
+- `dμB_dT_sigma`: ∂μ_B/∂T|_σ
+- `dM_dT`: ∂M/∂T
+- `dM_dμB`: ∂M/∂μ_B（对重子化学势的导数）
+- `is_antiquark`: 是否为反夸克
+
+# 返回
+- B: 括号项 (fm⁻²)
+"""
+function compute_B_bracket(p::Real, M::Real, μq::Real, T::Real,
+                           v_n_sq::Real, dμB_dT_sigma::Real,
+                           dM_dT::Real, dM_dμB::Real;
+                           is_antiquark::Bool=false)
+    E = sqrt(p^2 + M^2)
+    
+    # 能量导数（对重子化学势）
+    dE_dT_val = (M / E) * dM_dT
+    dE_dμB = (M / E) * dM_dμB
+    
+    # 夸克重子数 b_q = 1/3
+    b_q = 1.0 / 3.0
+    
+    if is_antiquark
+        # 反夸克：x = E + μ_q
+        # ∂x/∂T|_σ = ∂E/∂T + (∂E/∂μ_B + 1/3)·∂μ_B/∂T|_σ
+        dx_dT_sigma = dE_dT_val + (dE_dμB + b_q) * dμB_dT_sigma
+        x = E + μq
+    else
+        # 夸克：x = E - μ_q
+        # ∂x/∂T|_σ = ∂E/∂T + (∂E/∂μ_B - 1/3)·∂μ_B/∂T|_σ
+        dx_dT_sigma = dE_dT_val + (dE_dμB - b_q) * dμB_dT_sigma
+        x = E - μq
+    end
+    
+    # ∂[x/T]/∂T|_σ = (1/T)·∂x/∂T|_σ - x/T²
+    dxt_dT_sigma = dx_dT_sigma / T - x / T^2
+    
+    # B = p² + 3·v_n²·T²·E·∂[x/T]/∂T|_σ
+    B = p^2 + 3 * v_n_sq * T^2 * E * dxt_dT_sigma
+    
+    return B
+end
 
 end # module

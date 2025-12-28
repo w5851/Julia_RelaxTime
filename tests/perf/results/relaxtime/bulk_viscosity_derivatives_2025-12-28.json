@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "julia_version": "1.11.5",
+    "test_point": {
+      "T_MeV": 150.0,
+      "T_fm": 0.7601595321471466,
+      "μB_MeV": 800.0,
+      "μq_fm": 1.3513947238171495
+    },
+    "date": "2025-12-28 17:34:31"
+  },
+  "benchmarks": {
+    "thermo_derivatives": {
+      "min_ms": 221.3697,
+      "median_ms": 285.7054,
+      "memory_KB": 508.203125
+    },
+    "bulk_viscosity_coefficients": {
+      "min_ms": 156.9795,
+      "median_ms": 162.69445,
+      "memory_KB": 415.359375
+    },
+    "v_n_squared": {
+      "min_ms": 65.3163,
+      "median_ms": 68.56015,
+      "memory_KB": 174.0
+    },
+    "dmuB_dT_sigma": {
+      "min_ms": 65.3329,
+      "median_ms": 68.84795,
+      "memory_KB": 174.125
+    },
+    "batch_B_brackets_600calls": {
+      "median_μs": 7.56,
+      "min_μs": 6.44,
+      "memory_KB": 1.8125,
+      "per_call_ns": 12.6
+    },
+    "compute_B_bracket": {
+      "median_ns": 37.10819009100101,
+      "min_ns": 25.783619817997977,
+      "memory_bytes": 0
+    }
+  }
+}
