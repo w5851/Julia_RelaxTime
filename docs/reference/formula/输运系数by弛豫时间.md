@@ -84,42 +84,177 @@ $$
 
 ## 3. 体粘滞系数 (ζ)
 
-### 各向同性情况 (ξ = 0)
+体粘滞系数采用等熵声速形式（公式 A26）：
+
+### 主公式
 
 $$
-\begin{aligned}
-\zeta = & -\frac{1}{3T} \cdot \frac{1}{2\pi^2} \int_0^\infty dp \, p^2 \Bigg\{ \frac{M^2}{E} \left[ g \tau f_a^0 (1 - f_a^0) + \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right] \\
-& \times \left[ \frac{p^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu} \right] \\
-& - \frac{M^2}{E} \left[ g \tau f_a^0 (1 - f_a^0) - \bar{g} \bar{\tau} f_{\bar{a}}^0 (1 - f_{\bar{a}}^0) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \Bigg\}
-\end{aligned}
+\zeta = \frac{1}{9T} \sum_a \int d\Gamma_a \frac{\tau_a(E_a)}{E_a^2} \left[ p_a^2 + 3 v_n^2 T^2 E_a \frac{\partial}{\partial T} \left( \frac{E_a - \mu_a}{T} \right)_\sigma \right]^2 f_a^{eq} (1 + d_a f_a^{eq})
 $$
+
+其中：
+- $d\Gamma_a = (2s_a + 1) \frac{d^3p_a}{(2\pi)^3}$ 是相空间积分测度（包含自旋简并）
+- $d_a = (-1)^{2s_a}$ 是统计因子：
+  - **费米子**（$s_a = 1/2$，半整数自旋）：$d_a = (-1)^1 = -1$，因子为 $(1 - f_a^{eq})$，代表**泡利阻塞**
+  - **玻色子**（$s_a = 0, 1, ...$，整数自旋）：$d_a = (-1)^0 = +1$，因子为 $(1 + f_a^{eq})$，代表**玻色增强**
+- $\sigma = s/n_B$ 是熵密度与重子数密度之比
+
+### 各向同性情况 (ξ = 0)
+
+对于夸克体系，简并度 $g_a = 2 N_c = 6$，统计因子 $d_a = -1$（费米子）：
+
+$$
+\zeta = \frac{N_c}{9\pi^2 T} \sum_{a=u,d,s} \int_0^\infty dp \, \frac{p^2}{E_a^2} \left[ \tau_a f_a(1-f_a) \cdot B_a^2 + \tau_{\bar{a}} f_{\bar{a}}(1-f_{\bar{a}}) \cdot B_{\bar{a}}^2 \right]
+$$
+
+其中括号项 $B$ 定义为：
+
+$$
+B_a = p^2 + 3 v_n^2 T^2 E_a \cdot \frac{\partial}{\partial T}\left(\frac{E_a - \mu_a}{T}\right)_\sigma
+$$
+
+$$
+B_{\bar{a}} = p^2 + 3 v_n^2 T^2 E_a \cdot \frac{\partial}{\partial T}\left(\frac{E_a + \mu_a}{T}\right)_\sigma
+$$
+
+**注意**：
+- 对于费米子，$d_a = -1$，所以 $f(1 + d_a f) = f(1 - f)$，代表泡利阻塞效应
+- 积分核是 $p^2/E^2 \times f(1-f) \times B^2$，注意 $B$ 是**平方**的
 
 ### 各向异性情况 (ξ ≠ 0)
 
+在 Romatschke-Strickland 各向异性下，分布函数替换为各向异性形式，角度积分不能简化：
+
 $$
-\begin{aligned}
-\zeta = & -\frac{1}{3T} \cdot \frac{1}{4\pi^2} \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, p^2 \Bigg\{ \frac{M^2}{E} \left[ g \tau f_a (1 - f_a) + \bar{g} \bar{\tau} f_{\bar{a}} (1 - f_{\bar{a}}) \right] \\
-& \times \left[ \frac{p^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu} \right] \\
-& - \frac{M^2}{E} \left[ g \tau f_a (1 - f_a) - \bar{g} \bar{\tau} f_{\bar{a}} (1 - f_{\bar{a}}) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \Bigg\}
-\end{aligned}
+\zeta = \frac{N_c}{9 \cdot 2\pi^2 T} \sum_{a=u,d,s} \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, \frac{p^2}{E_a^2} \left[ \tau_a f_a(1-f_a) \cdot B_a^2 + \tau_{\bar{a}} f_{\bar{a}}(1-f_{\bar{a}}) \cdot B_{\bar{a}}^2 \right]
+$$
+
+**系数说明**：各向异性情况下分母为 $9 \cdot 2\pi^2$，因为：
+- 方位角积分 $\int_0^{2\pi} d\phi = 2\pi$ 消去一个因子 2
+- 简并度 $2N_c$ 中的因子 2 与方位角积分的 $2\pi$ 中的 2 相消
+
+---
+
+### 备用公式：热力学导数形式（已弃用）
+
+> **注意**：以下公式在物理上也是正确的，但在不同的近似条件下推导得到。我们决定采用上述等熵声速形式，以下公式仅供参考。
+
+$$
+\zeta = -\frac{1}{3T} \cdot \frac{1}{2\pi^2} \int_0^\infty dp \, p^2 \left\{ \frac{M^2}{E} \left[ g \tau f (1 - f) + \bar{g} \bar{\tau} \bar{f} (1 - \bar{f}) \right] \times \text{bracket} - \frac{M^2}{E} \left[ g \tau f (1 - f) - \bar{g} \bar{\tau} \bar{f} (1 - \bar{f}) \right] \times \left( \frac{\partial P}{\partial n} \right)_\varepsilon \right\}
+$$
+
+其中 bracket 定义为：
+$$
+\text{bracket} = \frac{p^2}{3E} - \left( \frac{\partial P}{\partial \varepsilon} \right)_n \left( E - T \frac{\partial E}{\partial T} - \mu \frac{\partial E}{\partial \mu} \right) + \left( \frac{\partial P}{\partial n} \right)_\varepsilon \frac{\partial E}{\partial \mu}
+$$
+
+该公式使用热力学导数 $(∂P/∂ε)_n$ 和 $(∂P/∂n)_ε$，积分核是**线性**的（不是平方），与等熵声速形式在数值上会有差异。
+
+---
+
+## 4. 热力学速度 $v_n^2$
+
+### 定义
+
+$$
+v_n^2 = \frac{s \cdot \chi_{\mu\mu} - n_B \cdot \chi_{\mu T}}{T \left( \chi_{TT} \cdot \chi_{\mu\mu} - \chi_{\mu T}^2 \right)}
+$$
+
+其中 $\chi_{xy} = \frac{\partial^2 P}{\partial x \partial y}$ 是压力的二阶偏导数：
+- $\chi_{TT} = \frac{\partial^2 P}{\partial T^2}$
+- $\chi_{\mu\mu} = \frac{\partial^2 P}{\partial \mu_B^2}$
+- $\chi_{\mu T} = \frac{\partial^2 P}{\partial \mu_B \partial T}$
+
+### 物理意义
+
+$v_n^2$ 是一个热力学响应系数，出现在熵每重子数 $\sigma = s/n_B$ 固定的条件下的导数中。它在体粘滞系数公式中起到关键作用，反映了系统在压缩或膨胀过程中熵与重子数耦合的热力学行为。
+
+### 相关速度
+
+**固定熵密度下的声速平方**：
+$$
+v_s^2 = -\frac{n_B \cdot \chi_{TT} - s \cdot \chi_{\mu T}}{\mu_B \left( \chi_{TT} \cdot \chi_{\mu\mu} - \chi_{\mu T}^2 \right)}
+$$
+
+**固定熵每重子数下的声速平方**：
+$$
+v_\sigma^2 = \frac{v_n^2 \cdot T \cdot s + v_s^2 \cdot \mu_B \cdot n_B}{w}
+$$
+
+其中 $w = \varepsilon + P$ 是焓密度。
+
+---
+
+## 5. 体粘滞系数的辅助量
+
+### 固定 $\sigma = s/n_B$ 时的导数
+
+**化学势对温度的导数**：
+$$
+\frac{\partial \mu}{\partial T}\bigg|_\sigma = -\frac{\partial \sigma / \partial T}{\partial \sigma / \partial \mu}
+$$
+
+其中：
+$$
+\frac{\partial \sigma}{\partial T} = \frac{1}{n_B}\frac{\partial s}{\partial T} - \frac{s}{n_B^2}\frac{\partial n_B}{\partial T}
+$$
+$$
+\frac{\partial \sigma}{\partial \mu} = \frac{1}{n_B}\frac{\partial s}{\partial \mu} - \frac{s}{n_B^2}\frac{\partial n_B}{\partial \mu}
+$$
+
+### 括号项中的导数
+
+对于夸克（$x = (E-\mu)/T$）：
+$$
+\frac{\partial x}{\partial T}\bigg|_\sigma = \frac{\partial E}{\partial T} + \left(\frac{\partial E}{\partial \mu} - b_a\right) \cdot \frac{\partial \mu}{\partial T}\bigg|_\sigma
+$$
+
+$$
+\frac{\partial}{\partial T}\left(\frac{E-\mu}{T}\right)_\sigma = \frac{1}{T}\frac{\partial x}{\partial T}\bigg|_\sigma - \frac{E-\mu}{T^2}
+$$
+
+对于反夸克（$x = (E+\mu)/T$）：
+$$
+\frac{\partial x}{\partial T}\bigg|_\sigma = \frac{\partial E}{\partial T} + \left(\frac{\partial E}{\partial \mu} + b_a\right) \cdot \frac{\partial \mu}{\partial T}\bigg|_\sigma
+$$
+
+$$
+\frac{\partial}{\partial T}\left(\frac{E+\mu}{T}\right)_\sigma = \frac{1}{T}\frac{\partial x}{\partial T}\bigg|_\sigma - \frac{E+\mu}{T^2}
+$$
+
+其中 $b_a = 1/3$ 是夸克的重子数（$\mu_q = \mu_B/3$）。
+
+### 能量导数
+
+$$
+\frac{\partial E}{\partial T} = \frac{M}{E} \cdot \frac{\partial M}{\partial T}
+$$
+$$
+\frac{\partial E}{\partial \mu} = \frac{M}{E} \cdot \frac{\partial M}{\partial \mu}
 $$
 
 ---
 
-## 电导率公式说明
+## 6. 电导率公式说明
 
 ### 与C++/Fortran的对比
 
 Julia和C++/Fortran使用相同的公式结构，在相同的电荷约定下应该给出一致的结果。
 
 **Julia公式**：
-$$\sigma = \frac{1}{3T} \cdot \frac{1}{2\pi^2} \cdot 2N_c \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f) = \frac{N_c}{3\pi^2 T} \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f)$$
+$$
+\sigma = \frac{1}{3T} \cdot \frac{1}{2\pi^2} \cdot 2N_c \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f) = \frac{N_c}{3\pi^2 T} \cdot \int dp \, \frac{p^4 q^2}{E^2} \tau f(1-f)
+$$
 
 使用自然单位电荷 $q = q_{frac} \cdot e = q_{frac} \cdot \sqrt{4\pi\alpha}$：
-$$\sigma = \frac{4\alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)$$
+$$
+\sigma = \frac{4\alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)
+$$
 
 **C++/Fortran公式**：
-$$\sigma = \frac{4 \alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)$$
+$$
+\sigma = \frac{4 \alpha N_c}{3\pi T} \cdot \int dp \, \frac{p^4 q_{frac}^2}{E^2} \tau f(1-f)
+$$
 
 **比值**：Julia / C++Fortran = 1（一致）
 
@@ -131,13 +266,15 @@ Julia使用自然单位制电荷：$q = q_{frac} \cdot e = q_{frac} \cdot \sqrt{
 
 ---
 
-## 量纲分析与单位转换
+## 7. 量纲分析与单位转换
 
 ### 自然单位制 ($\hbar = c = k_B = 1$)
 
 在自然单位制中，所有物理量都可以用能量的幂次表示。基本量纲关系：
 
-$$[E] = [p] = [m] = [T] = [\mu] = \text{MeV} = \text{fm}^{-1}$$
+$$
+[E] = [p] = [m] = [T] = [\mu] = \text{MeV} = \text{fm}^{-1}
+$$
 
 其中 $\hbar c \approx 197.327$ MeV·fm 用于 MeV 和 fm⁻¹ 之间的转换。
 
@@ -152,21 +289,29 @@ $$[E] = [p] = [m] = [T] = [\mu] = \text{MeV} = \text{fm}^{-1}$$
 ### 量纲验证
 
 **剪切粘滞系数 η**：
-$$[\eta] = \frac{1}{[T]} \cdot \frac{[p]^6}{[E]^2} \cdot [\tau] = \frac{1}{[E]} \cdot \frac{[E]^6}{[E]^2} \cdot [E]^{-1} = [E]^3 = \text{fm}^{-3}$$
+$$
+[\eta] = \frac{1}{[T]} \cdot \frac{[p]^6}{[E]^2} \cdot [\tau] = \frac{1}{[E]} \cdot \frac{[E]^6}{[E]^2} \cdot [E]^{-1} = [E]^3 = \text{fm}^{-3}
+$$
 
 **电导率 σ**：
-$$[\sigma] = \frac{1}{[T]} \cdot \frac{[p]^4 [q]^2}{[E]^2} \cdot [\tau] = \frac{1}{[E]} \cdot \frac{[E]^4 \cdot 1}{[E]^2} \cdot [E]^{-1} = [E]^1 = \text{fm}^{-1}$$
+$$
+[\sigma] = \frac{1}{[T]} \cdot \frac{[p]^4 [q]^2}{[E]^2} \cdot [\tau] = \frac{1}{[E]} \cdot \frac{[E]^4 \cdot 1}{[E]^2} \cdot [E]^{-1} = [E]^1 = \text{fm}^{-1}
+$$
 
 注意：在自然单位制中，电荷 $q$ 是无量纲的（$[q] = 1$）。
 
 **体粘滞系数 ζ**：
-$$[\zeta] = \frac{1}{[T]} \cdot [p]^2 \cdot \frac{[M]^2}{[E]} \cdot [\tau] \cdot [E] = \frac{1}{[E]} \cdot [E]^2 \cdot \frac{[E]^2}{[E]} \cdot [E]^{-1} \cdot [E] = [E]^3 = \text{fm}^{-3}$$
+$$
+[\zeta] = \frac{1}{[T]} \cdot \frac{[p]^2}{[E]^2} \cdot [\tau] \cdot [E]^4 = \frac{1}{[E]} \cdot \frac{[E]^2}{[E]^2} \cdot [E]^{-1} \cdot [E]^4 = [E]^3 = \text{fm}^{-3}
+$$
 
 ### 单位转换
 
 从 MeV 单位转换到 fm 单位：
 
-$$1 \text{ MeV} = \frac{1}{\hbar c} \text{ fm}^{-1} \approx \frac{1}{197.327} \text{ fm}^{-1}$$
+$$
+1 \text{ MeV} = \frac{1}{\hbar c} \text{ fm}^{-1} \approx \frac{1}{197.327} \text{ fm}^{-1}
+$$
 
 因此：
 - $\eta [\text{MeV}^3] = \eta [\text{fm}^{-3}] \times (\hbar c)^3$
@@ -185,13 +330,13 @@ $$1 \text{ MeV} = \frac{1}{\hbar c} \text{ fm}^{-1} \approx \frac{1}{197.327} \t
 
 ---
 
-## 符号说明
+## 8. 符号说明
 
 | 符号 | 物理意义 | 具体值 (QCD, N_c=3) |
 |------|----------|---------------------|
 | $a$ | 夸克味（u, d, s） | - |
-| $d_a, g$ | 夸克简并度 | 6（自旋2×颜色3） |
-| $d_{\bar{a}}, \bar{g}$ | 反夸克简并度 | 6 |
+| $g_a$ | 夸克简并度 | 6（自旋2×颜色3） |
+| $d_a$ | 统计因子 | -1（费米子） |
 | $e$ | 元电荷（自然单位） | $e = \sqrt{4\pi\alpha} \approx 0.303$ |
 | $q_a$ | 夸克电荷（自然单位） | $q_u = \frac{2}{3}e$, $q_d = q_s = -\frac{1}{3}e$ |
 | $\alpha$ | 精细结构常数 | $\alpha \approx 1/137$ |
@@ -201,15 +346,23 @@ $$1 \text{ MeV} = \frac{1}{\hbar c} \text{ fm}^{-1} \approx \frac{1}{197.327} \t
 | $f_a$ | 各向异性分布函数 | RS 形式 |
 | $\xi$ | 各向异性参数 | $\xi > 0$ 表示沿 z 轴压缩 |
 | $M$ | 等效质量 | 依赖 T, μ |
-| $P, \varepsilon, n$ | 压强、能量密度、粒子数密度 | - |
+| $P, \varepsilon, n_B$ | 压强、能量密度、重子数密度 | - |
+| $s$ | 熵密度 | - |
+| $v_n^2$ | 热力学速度（与体粘滞相关） | - |
+| $\sigma$ | 熵每重子数 $s/n_B$ | - |
+| $b_a$ | 夸克重子数 | $1/3$ |
 
 ### 自然单位制中的电荷
 
 在自然单位制（$\hbar = c = 1$）中，精细结构常数定义为：
-$$\alpha = \frac{e^2}{4\pi} \approx \frac{1}{137}$$
+$$
+\alpha = \frac{e^2}{4\pi} \approx \frac{1}{137}
+$$
 
 因此元电荷为：
-$$e = \sqrt{4\pi\alpha} \approx 0.303$$
+$$
+e = \sqrt{4\pi\alpha} \approx 0.303
+$$
 
 夸克电荷（自然单位）：
 - u夸克：$q_u = \frac{2}{3}e \approx 0.202$
@@ -218,7 +371,7 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 
 ---
 
-## 数值实现要点
+## 9. 数值实现要点
 
 ### 1. 相空间积分测度
 
@@ -231,7 +384,7 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 |---------|---------------|---------------|
 | η | $p^6/E^2$ | $p^6/E^2$ |
 | σ | $p^4 q^2/E^2$ | $p^4 q^2/E^2$ |
-| ζ | $p^2 \times (\text{复杂表达式})$ | $p^2 \times (\text{复杂表达式})$ |
+| ζ | $p^2/E^2 \times B^2$ | $p^2/E^2 \times B^2$ |
 
 ### 3. Gauss-Legendre 积分
 
@@ -241,12 +394,20 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 
 **重要**：积分核中的 $p^2$ 因子必须显式包含，因为 Gauss-Legendre 权重对应的是 $dp$ 而非 $p^2 dp$。
 
+### 4. 体粘滞系数的二阶导数
+
+计算 $v_n^2$ 需要压力的二阶偏导数 $\chi_{TT}$, $\chi_{\mu\mu}$, $\chi_{\mu T}$。可以使用：
+- 数值微分（对一阶导数再微分）
+- 自动微分（ImplicitDifferentiation.jl 支持高阶导数）
+
 ---
 
-## 关键假设与说明
+## 10. 关键假设与说明
 
 1. **弛豫时间近似**：假设非平衡态分布函数相对于平衡态的偏离为一小量。
 2. **准粒子图像**：强相互作用物质用具有温度/化学势依赖质量的准粒子描述。
 3. **弛豫时间 τ**：依赖于热力学参数（T, μ）及散射截面，需要从微观计算获得。
 4. **各向异性参数 ξ**：描述系统偏离各向同性的程度，$\xi = 0$ 对应各向同性极限。
 5. **体粘滞中的 n**：指净重子数密度 $n_B = (\rho_u + \rho_d + \rho_s)/3$。
+6. **等熵声速形式**：体粘滞系数公式采用固定熵每重子数 $\sigma = s/n_B$ 的形式，需要计算相关的热力学导数。
+7. **统计因子**：费米子 $d_a = -1$（泡利阻塞），玻色子 $d_a = +1$（玻色增强）。
