@@ -16,12 +16,14 @@ module Conditions
 using StaticArrays
 using ForwardDiff
 
-# 导入 ConstraintModes
-include("ConstraintModes.jl")
-using .ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim
+# 从父模块导入
+using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim
 
 # 导入 core 模块
-include(joinpath(@__DIR__, "..", "core", "Thermodynamics.jl"))
+const _THERMO_PATH = normpath(joinpath(@__DIR__, "..", "core", "Thermodynamics.jl"))
+if !isdefined(@__MODULE__, :Thermodynamics)
+    include(_THERMO_PATH)
+end
 using .Thermodynamics: calculate_pressure, calculate_rho, calculate_thermo, ρ0
 using .Thermodynamics.Integrals: cached_nodes
 
@@ -38,14 +40,14 @@ export GapParams
 能隙方程求解所需的参数集合。
 
 # 字段
-- `T_fm::Float64`: 温度 (fm⁻¹)
+- `T_fm`: 温度 (fm⁻¹)
 - `thermal_nodes`: 积分节点
-- `xi::Float64`: 各向异性参数
+- `xi`: 各向异性参数
 """
-struct GapParams{TN}
-    T_fm::Float64
+struct GapParams{TT, TN, TX}
+    T_fm::TT
     thermal_nodes::TN
-    xi::Float64
+    xi::TX
 end
 
 # ============================================================================

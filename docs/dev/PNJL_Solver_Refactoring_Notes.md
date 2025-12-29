@@ -246,7 +246,8 @@ src/pnjl/
 ├── solver/
 │   ├── ConstraintModes.jl     # FixedMu, FixedRho, FixedEntropy 等类型定义
 │   ├── Conditions.jl          # 条件定义（gap_conditions + 各模式约束）
-│   └── ImplicitSolver.jl      # ImplicitFunction 封装 + 初值策略
+│   ├── SeedStrategies.jl      # 初值策略（多种策略的统一接口）
+│   └── ImplicitSolver.jl      # ImplicitFunction 封装
 ├── derivatives/
 │   └── ThermoDerivatives.jl   # 热力学导数（使用 ImplicitDifferentiation）
 ├── analysis/
@@ -255,14 +256,13 @@ src/pnjl/
 │   └── MaxwellRhoMu.jl        # Maxwell 构造
 ├── scans/
 │   └── ...
-├── SeedCache.jl               # 种子缓存（保留现有功能）
 └── PNJL.jl                    # 主模块入口
 ```
 
 **关键设计决策**：
 - `ThermoDerivatives.jl` 从 `analysis/` 移到独立的 `derivatives/` 目录
 - 质量计算合并到 `Thermodynamics.jl`，不单独成模块
-- 初值策略暂时放在 `ImplicitSolver.jl` 中，复杂化后再抽取
+- `SeedStrategies.jl` 作为独立模块，整合现有 `SeedCache.jl` 功能
 
 ### 5.2 多求解模式的条件设计
 
@@ -345,6 +345,95 @@ function make_implicit_conditions(mode::ConstraintMode)
 end
 ```
 
+### 5.4 SeedStrategies.jl 初值策略模块设计
+
+**目标**：统一管理"如何为求解器选择初值"的问题，支持多种策略及其组合。
+
+#### 关于 SeedCache.jl 的决策
+
+经分析，现有的 `SeedCache.jl` 存在以下问题：
+- 依赖外部预计算数据文件，增加维护成本
+- 200+ 行代码实现相对简单的功能（过度工程）
+- 实际使用场景有限：扫描用连续性跟踪更有效，单点用多初值尝试更可靠
+
+**决策**：移除 `SeedCache.jl`，用更简单的策略替代。
+
+#### 简化后的策略设计
+
+```julia
+# 初值策略的抽象类型
+abstract type SeedStrategy end
+
+# 统一接口
+function get_seed(strategy::SeedStrategy, θ::AbstractVector, mode::ConstraintMode)::Vector{Float64}
+```
+
+#### 具体策略实现
+
+```julia
+# 策略1：固定默认值（基于物理直觉）
+struct DefaultSeed <: SeedStrategy
+    hadron_seed::Vector{Float64}  # 强子相典型值
+    quark_seed::Vector{Float64}   # 夸克相典型值
+    phase_hint::Symbol            # :hadron, :quark, 或 :auto
+end
+
+# 内置默认值
+const HADRON_SEED_5 = [-0.07, -0.07, -1.87, 0.02, 0.02]
+const QUARK_SEED_5 = [-1.8, -1.8, -2.1, 0.8, 0.8]
+
+# :auto 模式的启发式规则
+function auto_phase_hint(T_fm, μ_fm)
+    T_mev = T_fm * 197.327
+    μ_mev = μ_fm * 197.327
+    return (T_mev > 150 || μ_mev > 300) ? :quark : :hadron
+end
+
+# 策略2：多初值尝试（用于处理多值解）
+struct MultiSeed <: SeedStrategy
+    candidates::Vector{SeedStrategy}
+    selector::Function  # (results) -> best_result
+end
+
+# 默认选择器：选 Ω 最小的收敛解
+default_omega_selector(results) = argmin(r -> r.converged ? r.omega : Inf, results)
+
+# 策略3：连续性跟踪（用于参数扫描）
+mutable struct ContinuitySeed <: SeedStrategy
+    previous_solution::Union{Nothing, Vector{Float64}}
+    fallback::SeedStrategy
+end
+
+# 策略4：基于相图的智能选择（用于一阶相变区域）
+struct PhaseAwareSeed <: SeedStrategy
+    phase_boundary::Function  # (T) -> μ_c
+    hadron_strategy::SeedStrategy
+    quark_strategy::SeedStrategy
+end
+```
+
+#### 辅助函数
+
+```julia
+# 根据求解模式扩展基础种子
+function extend_seed(base_seed::Vector{Float64}, mode::FixedMu)
+    return base_seed  # 5 维
+end
+
+function extend_seed(base_seed::Vector{Float64}, mode::FixedRho)
+    # 扩展为 8 维，μ 初值基于 ρ 估计
+    μ_guess = estimate_mu_from_rho(mode.rho_target)
+    return [base_seed..., μ_guess, μ_guess, μ_guess]
+end
+
+# 基于 ρ 估计 μ 的简单公式（自由费米气体近似）
+function estimate_mu_from_rho(rho_norm)
+    # ρ/ρ₀ ≈ (μ/μ₀)³ 的粗略近似
+    μ₀ = 1.5  # fm⁻¹，约 300 MeV
+    return μ₀ * cbrt(max(rho_norm, 0.1))
+end
+```
+
 ---
 
 ## 六、参考资料
@@ -358,5 +447,90 @@ end
 ---
 
 *创建日期：2025-12-28*
-*最后更新：2025-12-28*
-*状态：设计讨论中*
+*最后更新：2025-12-29*
+*状态：Phase 1 完成*
+
+## 七、重构完成记录
+
+### 已完成（2025-12-29）
+
+1. ✅ 创建目录结构
+   - `src/pnjl/core/` - 核心计算
+   - `src/pnjl/solver/` - 求解器
+   - `src/pnjl/derivatives/` - 导数计算
+
+2. ✅ Core 模块
+   - `Integrals.jl` - 积分节点缓存、真空项、热项计算
+   - `Thermodynamics.jl` - 质量、势能、压强、热力学量计算
+
+3. ✅ Solver 模块
+   - `ConstraintModes.jl` - FixedMu, FixedRho, FixedEntropy, FixedSigma 类型
+   - `SeedStrategies.jl` - DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed
+   - `Conditions.jl` - gap_conditions, build_conditions, build_residual!
+   - `ImplicitSolver.jl` - solve(), create_implicit_solver()
+
+4. ✅ Derivatives 模块
+   - `ThermoDerivatives.jl` - mass_derivatives, thermo_derivatives, bulk_viscosity_coefficients
+   - 修复了 bulk_viscosity_coefficients 的 Dual 类型泄漏问题（使用有限差分替代 ForwardDiff.jacobian）
+
+5. ✅ PNJL.jl 主模块更新
+   - 新接口导出
+   - 旧接口兼容（AnisoGapSolver）
+   - SeedCache.jl 已弃用
+
+6. ✅ 初值常量更新（基于 trho_seed_table.csv 数据分析）
+   - 数据来源：`data/raw/pnjl/seeds/trho_seed_table.csv`
+   - 分析脚本：`scripts/analyze_seeds.jl`
+
+### 待完成
+
+- 旧模块迁移（TmuScan, TrhoScan 等）
+- 一阶相变处理实现
+- 完整测试套件
+
+---
+
+## 八、初值常量说明
+
+### 数据来源
+
+初值常量基于 `data/raw/pnjl/seeds/trho_seed_table.csv` 中的收敛解数据分析得出。
+该数据集包含 303 个点，覆盖：
+- T: 50 - 200 MeV
+- μ: 0 - 376 MeV
+- ρ/ρ₀: 0 - 3.0
+- ξ = 0.0（各向同性）
+
+### 初值常量定义
+
+```julia
+# 强子相（T=50 MeV, μ≈0, ρ=0）
+# 特征：手征凝聚完整，Polyakov loop 接近零（禁闭相）
+const HADRON_SEED_5 = [-1.84329, -1.84329, -2.22701, 1.0e-5, 4.0e-5]
+
+# 中等密度（T=100 MeV, ρ=1.0）
+# 特征：部分手征恢复，Polyakov loop 中等
+const MEDIUM_SEED_5 = [-1.3647, -1.3647, -2.14502, 0.10594, 0.15569]
+
+# 高密度（T=100 MeV, ρ=3.0）
+# 特征：手征对称性大部分恢复，Polyakov loop 较高
+const HIGH_DENSITY_SEED_5 = [-0.21695, -0.21695, -2.01372, 0.18601, 0.22333]
+
+# 高温（T=200 MeV, ρ=0）
+# 特征：高温解禁闭相，Polyakov loop 接近 0.6
+const HIGH_TEMP_SEED_5 = [-0.73192, -0.73192, -1.79539, 0.60532, 0.60532]
+
+# 8 维版本（含化学势，单位 fm⁻¹）
+const HADRON_SEED_8 = [HADRON_SEED_5..., 0.22367, 0.22367, 0.22367]
+const MEDIUM_SEED_8 = [MEDIUM_SEED_5..., 1.70267, 1.70267, 1.70267]
+const HIGH_DENSITY_SEED_8 = [HIGH_DENSITY_SEED_5..., 1.7516, 1.7516, 1.7516]
+```
+
+### 使用建议
+
+1. **低温低密度区域**：使用 `HADRON_SEED_5`
+2. **中等密度区域**：使用 `MEDIUM_SEED_5`
+3. **高密度区域**：使用 `HIGH_DENSITY_SEED_5`
+4. **高温区域**：使用 `HIGH_TEMP_SEED_5`（或 `QUARK_SEED_5`）
+
+对于未知区域，建议使用 `MultiSeed` 策略尝试多个初值。
