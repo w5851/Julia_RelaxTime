@@ -484,7 +484,6 @@ end
 
 ### 待完成
 
-- 一阶相变处理实现
 - 完整测试套件
 
 ### 已完成（2025-12-29 续）
@@ -498,6 +497,31 @@ end
      - 断点续扫支持
      - 输出增加有效质量列 (M_u, M_d, M_s)
    - 测试脚本：`scripts/test_scan_migration.jl`
+
+8. ✅ 双分支扫描与一阶相变处理
+   - `DualBranchScan.jl` - 双分支扫描模块
+   - 功能：
+     - 强子分支：从低 μ 向高 μ 扫描
+     - 夸克分支：从高 μ 向低 μ 扫描
+     - 自动选择物理分支（Ω 最小）
+     - 输出三个关键化学势：
+       - μ_c: 相变点（Ω 交叉点）
+       - μ_hadron_spinodal: 强子相亚稳态边界
+       - μ_quark_spinodal: 夸克相亚稳态边界
+     - 解跳跃检测（防止追踪到非物理解）
+     - 同解检测（区分真正的共存区）
+   - 导出函数：
+     - `run_dual_branch_scan()` - 单温度双分支扫描
+     - `find_phase_transition()` - 查找相变点和 spinodal 边界
+     - `merge_branches()` - 合并输出物理解
+     - `scan_phase_diagram()` - 多温度相变线扫描
+   - 测试结果（xi=0.0）：
+     - T = 50 MeV: μ_c ≈ 356 MeV, spinodal: [350, 365] MeV
+     - T = 80 MeV: μ_c ≈ 345 MeV, spinodal: [340, 350] MeV
+     - T = 100 MeV: μ_c ≈ 331 MeV, spinodal: [330, 335] MeV
+     - T = 120 MeV: 接近 CEP，共存区极窄
+   - 文档：`docs/notes/pnjl/一阶相变双分支扫描策略.md`
+   - 测试脚本：`scripts/test_dual_branch_scan.jl`
 
 ---
 

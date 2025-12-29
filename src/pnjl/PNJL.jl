@@ -88,13 +88,18 @@ export dP_dT, dP_dmu
 
 include(joinpath("scans", "TmuScan.jl"))
 include(joinpath("scans", "TrhoScan.jl"))
+include(joinpath("scans", "DualBranchScan.jl"))
 
 using .TmuScan
 using .TrhoScan
+using .DualBranchScan
 
 # 导出扫描功能
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
+# 双分支扫描
+export run_dual_branch_scan, find_phase_transition, merge_branches, scan_phase_diagram
+export DualBranchResult, BranchPoint, PhaseTransitionInfo
 
 # ============================================================================
 # 兼容性模块（旧接口）
