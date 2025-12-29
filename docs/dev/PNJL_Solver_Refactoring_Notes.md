@@ -668,28 +668,39 @@ Step 4: 热力学导数计算
     - 位置：`src/pnjl/solver/SeedStrategies.jl`
     - 新增类型：
       - `PhaseBoundaryData` - 相变线数据结构
+      - `PhaseAwareSeed` - 单点相变感知策略
+      - `PhaseAwareContinuitySeed` - 连续性 + 相变感知策略
     - 新增函数：
       - `load_phase_boundary(xi)` - 从 CSV 加载相变线数据
       - `interpolate_mu_c(data, T)` - 线性插值获取 μ_c(T)
       - `get_phase_hint(strategy, T, μ)` - 获取相位提示
     - 功能：
       - 自动加载 `data/reference/pnjl/boundary.csv` 和 `cep.csv`
-      - 根据 (T, μ) 与相变线的关系选择初值
+      - 连续性跟踪 + 跨越相变线时自动切换初值
       - μ < μ_c(T) → hadron 初值
       - μ > μ_c(T) → quark 初值
-      - T > T_CEP → crossover 策略（自动判断）
+      - T > T_CEP → crossover 策略
     - 测试脚本：`scripts/test_phase_aware_seed.jl`
-    - 测试结果：所有测试通过
+
+12. ✅ TmuScan 集成 PhaseAwareContinuitySeed
+    - 更新 `src/pnjl/scans/TmuScan.jl`
+    - 新增参数：`use_phase_aware=true`（默认启用）
+    - 功能：
+      - 为每个 xi 值创建独立的 PhaseAwareContinuitySeed 跟踪器
+      - 每个新温度重置跟踪器
+      - 跨越相变线时自动切换初值
+      - 保留普通连续性种子作为回退
+    - 测试脚本：`scripts/test_tmu_scan_phase_aware.jl`
+    - 测试结果：
+      - T=100 MeV, μ_c≈331 MeV
+      - μ < 331 MeV: 6/6 点正确识别为 hadron 相
+      - μ ≥ 331 MeV: 5/5 点正确识别为 quark 相
 
 ### 9.7 下一步任务
 
-1. **TmuScan 集成 PhaseAwareSeed**
-   - 更新 `TmuScan.jl`，支持传入 `PhaseAwareSeed` 策略
-   - 在一阶相变区域自动切换初解
-
-2. **相结构计算脚本**
+1. **相结构计算脚本**
    - 创建 `scripts/calculate_phase_structure.jl`
    - 整合 CEP 搜索、Maxwell 构造
 
-3. **GitHub Actions Pipeline**
+2. **GitHub Actions Pipeline**
    - 创建 `.github/workflows/pnjl-pipeline.yml`

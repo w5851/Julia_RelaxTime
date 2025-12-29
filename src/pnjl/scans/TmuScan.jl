@@ -6,7 +6,7 @@ T-μ 参数空间扫描模块（使用新求解器架构）。
 ## 功能
 - 在 (T, μ, ξ) 参数空间进行网格扫描
 - 支持断点续扫（resume）
-- 连续性跟踪初值策略
+- 相变感知的连续性跟踪初值策略
 - 多初值尝试处理收敛困难点
 
 ## 使用示例
@@ -23,6 +23,14 @@ result = run_tmu_scan(
     xi_values = [0.0],
     output_path = "my_scan.csv"
 )
+
+# 使用相变感知策略（推荐用于一阶相变区域）
+result = run_tmu_scan(
+    T_values = 50.0:10.0:130.0,
+    mu_values = 200.0:5.0:400.0,
+    xi_values = [0.0],
+    use_phase_aware = true
+)
 ```
 """
 module TmuScan
@@ -34,7 +42,9 @@ using StaticArrays
 using ..Constants_PNJL: ħc_MeV_fm
 using ..ConstraintModes: FixedMu, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, MultiSeed
+using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
+using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
 using ..ImplicitSolver: solve, SolverResult
 
 export run_tmu_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_OUTPUT_PATH
@@ -87,6 +97,7 @@ const HEADER = join((
 - `output_path`: 输出文件路径
 - `overwrite`: 是否覆盖已有文件，默认 false
 - `resume`: 是否断点续扫，默认 true
+- `use_phase_aware`: 是否使用相变感知策略，默认 true
 - `p_num`, `t_num`: 积分节点数
 - `progress_cb`: 进度回调函数 `(point, result) -> nothing`
 
@@ -97,6 +108,14 @@ NamedTuple 包含：
 - `failure`: 失败点数
 - `skipped`: 跳过点数
 - `output`: 输出文件路径
+
+# 相变感知策略
+当 `use_phase_aware=true` 时，扫描会：
+1. 加载相变线数据 (data/reference/pnjl/boundary.csv)
+2. 在跨越相变线时自动切换初值
+3. 其他情况使用连续性跟踪
+
+这对于一阶相变区域（T < T_CEP）特别重要，可以确保求解器收敛到正确的相。
 """
 function run_tmu_scan(;
     T_values=DEFAULT_T_VALUES,
@@ -105,6 +124,7 @@ function run_tmu_scan(;
     output_path::AbstractString=DEFAULT_OUTPUT_PATH,
     overwrite::Bool=false,
     resume::Bool=true,
+    use_phase_aware::Bool=true,
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
@@ -116,7 +136,20 @@ function run_tmu_scan(;
 
     stats = Dict(:total => 0, :success => 0, :failure => 0, :skipped => 0)
     
-    # 连续性跟踪器（按 T, xi 分组）
+    # 为每个 xi 值创建相变感知跟踪器
+    phase_trackers = Dict{Float64, PhaseAwareContinuitySeed}()
+    if use_phase_aware
+        for xi in xi_values
+            try
+                phase_trackers[xi] = PhaseAwareContinuitySeed(xi)
+            catch e
+                @warn "无法为 xi=$(xi) 加载相变线数据: $(e)，将使用普通连续性跟踪"
+                phase_trackers[xi] = PhaseAwareContinuitySeed()  # 无数据版本
+            end
+        end
+    end
+    
+    # 普通连续性跟踪器（按 T, xi 分组）- 作为回退
     continuation_seeds = Dict{Tuple{Float64, Float64}, Vector{Float64}}()
 
     open(output_path, io_mode) do io
@@ -124,50 +157,68 @@ function run_tmu_scan(;
             println(io, HEADER)
         end
 
-        for xi in xi_values, T in T_values, mu in mu_values
-            stats[:total] += 1
-            key = _key(T, mu, xi)
+        for xi in xi_values
+            # 获取该 xi 的相变感知跟踪器
+            tracker = get(phase_trackers, xi, nothing)
             
-            if key in completed
-                stats[:skipped] += 1
-                continue
-            end
+            for T in T_values
+                # 每个新温度重置跟踪器
+                if tracker !== nothing
+                    reset!(tracker)
+                end
+                
+                for mu in mu_values
+                    stats[:total] += 1
+                    key = _key(T, mu, xi)
+                    
+                    if key in completed
+                        stats[:skipped] += 1
+                        continue
+                    end
 
-            # 构建初值候选
-            seed_key = _seed_continuation_key(T, xi)
-            candidates = _build_seed_candidates(continuation_seeds, seed_key, T, mu)
+                    # 转换单位：MeV -> fm⁻¹
+                    T_fm = T / ħc_MeV_fm
+                    μ_fm = mu / ħc_MeV_fm
 
-            # 转换单位：MeV -> fm⁻¹
-            T_fm = T / ħc_MeV_fm
-            μ_fm = mu / ħc_MeV_fm
+                    # 构建初值候选
+                    candidates = _build_seed_candidates_v2(
+                        tracker, continuation_seeds, T, mu, xi, T_fm, μ_fm
+                    )
 
-            # 尝试求解
-            result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-                p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+                    # 尝试求解
+                    result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
+                        p_num=p_num, t_num=t_num, nlsolve_kwargs...)
 
-            # 更新连续性种子
-            if result !== nothing && _is_success(result)
-                continuation_seeds[seed_key] = copy(result.solution)
-            end
+                    # 更新跟踪器
+                    if result !== nothing && _is_success(result)
+                        if tracker !== nothing
+                            update!(tracker, result.solution, T, mu)
+                        end
+                        # 同时更新普通连续性种子（作为回退）
+                        seed_key = _seed_continuation_key(T, xi)
+                        continuation_seeds[seed_key] = copy(result.solution)
+                    end
 
-            # 写入结果
-            _write_row(io, T, mu, xi, result, message)
-            flush(io)
-            push!(completed, key)
+                    # 写入结果
+                    _write_row(io, T, mu, xi, result, message)
+                    flush(io)
+                    push!(completed, key)
 
-            # 更新统计
-            if _is_success(result)
-                stats[:success] += 1
-            else
-                stats[:failure] += 1
-            end
+                    # 更新统计
+                    if _is_success(result)
+                        stats[:success] += 1
+                    else
+                        stats[:failure] += 1
+                    end
 
-            # 进度回调
-            if progress_cb !== nothing
-                try
-                    progress_cb((T=T, mu=mu, xi=xi), result)
-                catch
-                    # ignore callback errors
+                    # 进度回调
+                    if progress_cb !== nothing
+                        try
+                            progress_cb((T=T, mu=mu, xi=xi), result)
+                        catch
+                            # ignore callback errors
+                        end
+                    end
                 end
             end
         end
@@ -214,7 +265,43 @@ function _load_completed(path::AbstractString)
     return completed
 end
 
-"""构建初值候选列表"""
+"""构建初值候选列表（新版本，支持相变感知）"""
+function _build_seed_candidates_v2(tracker, cache::Dict, T, mu, xi, T_fm, μ_fm)
+    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
+    
+    # 1. 相变感知连续性种子（最优先）
+    if tracker !== nothing
+        seed = get_seed(tracker, [T_fm, μ_fm], FixedMu())
+        # 判断种子来源
+        label = if tracker.previous_solution === nothing
+            "phase_aware_default"
+        else
+            "phase_aware_continuity"
+        end
+        push!(candidates, (label=label, state=seed))
+    end
+    
+    # 2. 普通连续性种子（回退）
+    seed_key = _seed_continuation_key(T, xi)
+    if haskey(cache, seed_key)
+        push!(candidates, (label="continuation", state=copy(cache[seed_key])))
+    end
+    
+    # 3. 基于相位的默认种子
+    T_mev = T
+    μ_mev = mu
+    if T_mev > 150 || μ_mev > 300
+        push!(candidates, (label="quark", state=copy(QUARK_SEED_5)))
+        push!(candidates, (label="hadron", state=copy(HADRON_SEED_5)))
+    else
+        push!(candidates, (label="hadron", state=copy(HADRON_SEED_5)))
+        push!(candidates, (label="quark", state=copy(QUARK_SEED_5)))
+    end
+    
+    return candidates
+end
+
+"""构建初值候选列表（旧版本，保留兼容性）"""
 function _build_seed_candidates(cache::Dict, seed_key, T, mu)
     candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
     
