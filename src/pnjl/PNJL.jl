@@ -83,6 +83,20 @@ export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 
 # ============================================================================
+# 扫描模块（使用新架构）
+# ============================================================================
+
+include(joinpath("scans", "TmuScan.jl"))
+include(joinpath("scans", "TrhoScan.jl"))
+
+using .TmuScan
+using .TrhoScan
+
+# 导出扫描功能
+export run_tmu_scan, run_trho_scan
+export build_default_rho_grid
+
+# ============================================================================
 # 兼容性模块（旧接口）
 # ============================================================================
 
@@ -95,7 +109,7 @@ export AnisoGapSolver
 # - SeedCache.jl（已弃用）
 # - TrhoSeedChain.jl（依赖 LineSearches）
 # - SinglePointSolver.jl
-# - TmuScan.jl, TrhoScan.jl, AdaptiveRhoRefinement.jl
+# - AdaptiveRhoRefinement.jl
 # - PhaseTransition.jl, CEPFinder.jl, MaxwellRhoMu.jl
 # - analysis/ThermoDerivatives.jl（旧版，新版在 derivatives/）
 
