@@ -586,3 +586,70 @@ const HIGH_DENSITY_SEED_8 = [HIGH_DENSITY_SEED_5..., 1.7516, 1.7516, 1.7516]
 4. **高温区域**：使用 `HIGH_TEMP_SEED_5`（或 `QUARK_SEED_5`）
 
 对于未知区域，建议使用 `MultiSeed` 策略尝试多个初值。
+
+
+---
+
+## 九、计算工作流规划（2025-12-29）
+
+### 9.1 方法选择决策
+
+经过对比分析，确定以下技术路线：
+
+| 任务 | 选择的方法 | 理由 |
+|------|-----------|------|
+| 一阶相变线计算 | T-ρ 扫描 + Maxwell 构造 | 直接输出密度边界，与相图绘制一致 |
+| T-μ 扫描初解选择 | 基于预生成的 boundary.csv | 效率高，单次扫描，逻辑简单 |
+| 双分支扫描 | 保留作为备用 | 用于验证或无预生成数据时 |
+
+### 9.2 数据生成工作流
+
+```
+Step 1: 相结构计算
+├── CEP 搜索
+├── 一阶相变线 (T-ρ + Maxwell)
+├── Crossover 线
+└── 输出: cep.csv, boundary.csv, crossover.csv
+        ↓
+Step 2: 相图绘制
+└── 输出: phase_diagram_*.png
+        ↓
+Step 3: 参数空间扫描
+├── T-μ 扫描 (依赖 boundary.csv)
+├── T-ρ 扫描
+└── 输出: tmu_scan.csv, trho_scan.csv
+        ↓
+Step 4: 热力学导数计算
+└── 输出: derivatives.csv, bulk_viscosity.csv
+```
+
+**关键依赖**：T-μ 扫描必须在相结构计算之后，因为需要 boundary.csv 来选择正确的初解。
+
+### 9.3 GitHub Actions 自动化计划
+
+**目标**：
+- 用户可在 GitHub 网站手动触发计算（workflow_dispatch）
+- 通过 UI 输入扫描参数（ξ, T 范围, μ/ρ 范围等）
+- 使用 GitHub 托管的运行器执行计算
+- 结果作为 Artifacts 上传，可下载
+
+**优势**：
+- 无需本地 Julia 环境
+- 随时随地可运行
+- 计算资源由 GitHub 提供
+- 结果自动保存和版本化
+
+**配置文件**：`.github/workflows/pnjl-pipeline.yml`（待创建）
+
+### 9.4 待实现任务
+
+1. **PhaseAwareSeed 策略**：在 `SeedStrategies.jl` 中实现基于 boundary.csv 的初解选择
+2. **TmuScan 更新**：集成 PhaseAwareSeed，支持加载相变线数据
+3. **相结构计算脚本**：`scripts/calculate_phase_structure.jl`
+4. **GitHub Actions 配置**：完整的 pipeline workflow
+
+### 9.5 相关文档
+
+- 详细工作流说明：`docs/notes/pnjl/PNJL计算工作流.md`
+- 一阶相变方法对比：`docs/notes/pnjl/一阶相变方法对比.md`
+- 双分支策略（备用）：`docs/notes/pnjl/一阶相变双分支扫描策略.md`
