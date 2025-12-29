@@ -70,9 +70,10 @@ export ρ0
 # 导出 Solver 功能
 export ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma
 export state_dim, param_dim, constraint_description
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed
-export get_seed, update!, reset!, get_all_seeds
+export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
+export PhaseBoundaryData, load_phase_boundary, interpolate_mu_c, get_phase_hint
 export gap_conditions, build_conditions, build_residual!, GapParams
 export solve, solve_multi, SolverResult
 export create_implicit_solver, solve_with_derivatives

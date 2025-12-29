@@ -653,3 +653,43 @@ Step 4: 热力学导数计算
 - 详细工作流说明：`docs/notes/pnjl/PNJL计算工作流.md`
 - 一阶相变方法对比：`docs/notes/pnjl/一阶相变方法对比.md`
 - 双分支策略（备用）：`docs/notes/pnjl/一阶相变双分支扫描策略.md`
+
+
+### 9.6 已完成（2025-12-29）
+
+10. ✅ 数据目录重组
+    - 创建 `data/reference/pnjl/` 目录存放代码依赖的预计算数据
+    - 合并不同 ξ 值的数据到单个文件（通过 xi 列区分）
+    - 新文件：
+      - `data/reference/pnjl/boundary.csv` - 相变线数据（xi=0.0, 0.2, 0.4）
+      - `data/reference/pnjl/cep.csv` - CEP 数据（xi=0.0, 0.2, 0.4）
+
+11. ✅ PhaseAwareSeed 策略实现
+    - 位置：`src/pnjl/solver/SeedStrategies.jl`
+    - 新增类型：
+      - `PhaseBoundaryData` - 相变线数据结构
+    - 新增函数：
+      - `load_phase_boundary(xi)` - 从 CSV 加载相变线数据
+      - `interpolate_mu_c(data, T)` - 线性插值获取 μ_c(T)
+      - `get_phase_hint(strategy, T, μ)` - 获取相位提示
+    - 功能：
+      - 自动加载 `data/reference/pnjl/boundary.csv` 和 `cep.csv`
+      - 根据 (T, μ) 与相变线的关系选择初值
+      - μ < μ_c(T) → hadron 初值
+      - μ > μ_c(T) → quark 初值
+      - T > T_CEP → crossover 策略（自动判断）
+    - 测试脚本：`scripts/test_phase_aware_seed.jl`
+    - 测试结果：所有测试通过
+
+### 9.7 下一步任务
+
+1. **TmuScan 集成 PhaseAwareSeed**
+   - 更新 `TmuScan.jl`，支持传入 `PhaseAwareSeed` 策略
+   - 在一阶相变区域自动切换初解
+
+2. **相结构计算脚本**
+   - 创建 `scripts/calculate_phase_structure.jl`
+   - 整合 CEP 搜索、Maxwell 构造
+
+3. **GitHub Actions Pipeline**
+   - 创建 `.github/workflows/pnjl-pipeline.yml`
