@@ -13,22 +13,39 @@
 
 **背景**：在 T > T_CEP 区域，手征相变变为平滑的 crossover，需要定义和计算 crossover 线。
 
-**常用定义方法**：
-1. **手征凝聚拐点**：∂²⟨ψ̄ψ⟩/∂T² = 0 的位置
-2. **手征磁化率峰值**：χ_σ = -∂⟨ψ̄ψ⟩/∂m_0 的峰值位置
-3. **Polyakov loop 拐点**：∂²Φ/∂T² = 0 的位置
-4. **比热峰值**：C_V = T∂s/∂T 的峰值位置
+**定义方法**：
+
+| 类型 | 方法 A（峰值法） | 方法 B（拐点法） |
+|------|-----------------|-----------------|
+| 手征 crossover | \|∂φ_u/∂T\| 峰值位置 | ∂²φ_u/∂T² = 0 的位置 |
+| 退禁闭 crossover | \|∂Φ/∂T\| 峰值位置 | ∂²Φ/∂T² = 0 的位置 |
+
+**技术基础**：
+- 已有 `solve_with_derivatives()` 支持一阶和二阶导数计算
+- `result.dx_dT[1]` = ∂φ_u/∂T，`result.dx_dT[4]` = ∂Φ/∂T
+- `result.d2x_dT2[1]` = ∂²φ_u/∂T²，`result.d2x_dT2[4]` = ∂²Φ/∂T²
+
+**算法流程**（固定 μ，扫描 T）：
+1. 在 T ∈ [T_CEP, T_max] 范围内计算导数
+2. 峰值法：找 |∂φ_u/∂T| 或 |∂Φ/∂T| 最大的 T
+3. 拐点法：找 ∂²φ_u/∂T² 或 ∂²Φ/∂T² 符号变化的 T（二分法细化）
 
 **实现计划**：
 - [ ] 在 `PhaseTransition.jl` 中添加 `detect_crossover()` 函数
-- [ ] 支持多种定义方法
+- [ ] 支持 `:chiral`（手征）和 `:deconfinement`（退禁闭）两种类型
+- [ ] 支持 `:peak`（峰值法）和 `:inflection`（拐点法）两种方法
 - [ ] 更新 `calculate_phase_structure.jl` 脚本
 - [ ] 输出 `crossover.csv`
 
 **输出格式**：
 ```
-xi, T_MeV, mu_crossover_MeV, method
+xi, mu_MeV, T_crossover_chiral_MeV, T_crossover_deconf_MeV
 ```
+
+**注意事项**：
+- 二阶导数计算成本较高（嵌套 AD）
+- 二阶导数对数值噪声敏感，可能需要平滑处理
+- 仅在 T > T_CEP 区域有效（crossover 区域）
 
 ### 1.2 T-μ 扫描脚本
 
