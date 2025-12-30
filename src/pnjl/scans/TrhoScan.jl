@@ -122,6 +122,8 @@ const HEADER = join((
 - `output_path`: 输出文件路径
 - `overwrite`: 是否覆盖已有文件，默认 false
 - `resume`: 是否断点续扫，默认 true
+- `reverse_rho`: 是否反向扫描 ρ（从大到小），默认 true
+  - 反向扫描可避免 ρ=0 奇异点导致的连续性跟踪失败
 - `p_num`, `t_num`: 积分节点数
 - `progress_cb`: 进度回调函数 `(point, result) -> nothing`
 
@@ -140,6 +142,7 @@ function run_trho_scan(;
     output_path::AbstractString=DEFAULT_OUTPUT_PATH,
     overwrite::Bool=false,
     resume::Bool=true,
+    reverse_rho::Bool=true,
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
@@ -153,13 +156,21 @@ function run_trho_scan(;
     
     # 连续性跟踪器（按 T, xi 分组）
     continuation_seeds = Dict{Tuple{Float64, Float64}, Vector{Float64}}()
+    
+    # 根据 reverse_rho 决定扫描顺序
+    rho_scan_order = reverse_rho ? reverse(collect(rho_values)) : collect(rho_values)
 
     open(output_path, io_mode) do io
         if io_mode == "w"
             println(io, HEADER)
         end
 
-        for xi in xi_values, T in T_values, rho in rho_values
+        for xi in xi_values, T in T_values
+            # 每个新温度重置连续性种子
+            seed_key = _seed_continuation_key(T, xi)
+            delete!(continuation_seeds, seed_key)
+            
+            for rho in rho_scan_order
             stats[:total] += 1
             key = _key(T, rho, xi)
             
@@ -204,8 +215,9 @@ function run_trho_scan(;
                     # ignore callback errors
                 end
             end
-        end
-    end
+            end  # for rho
+        end  # for T, xi
+    end  # open
 
     return (;
         total=stats[:total],

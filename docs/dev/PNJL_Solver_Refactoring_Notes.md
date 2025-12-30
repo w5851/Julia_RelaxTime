@@ -698,9 +698,94 @@ Step 4: 热力学导数计算
 
 ### 9.7 下一步任务
 
-1. **相结构计算脚本**
-   - 创建 `scripts/calculate_phase_structure.jl`
-   - 整合 CEP 搜索、Maxwell 构造
+1. **改进相结构计算脚本**
+   - 改进 S 形检测算法
+   - 改进 Maxwell 构造算法
+   - 或者集成现有的 analysis 模块
 
 2. **GitHub Actions Pipeline**
    - 创建 `.github/workflows/pnjl-pipeline.yml`
+
+### 9.8 已完成（2025-12-29 续）
+
+13. ✅ 相结构计算脚本框架
+    - 位置：`scripts/calculate_phase_structure.jl`
+    - 功能：
+      - Step 1: T-ρ 扫描
+      - Step 2: CEP 搜索（简化版）
+      - Step 3: Maxwell 构造（简化版）
+      - Step 4: 保存结果到 data/reference/pnjl/
+    - 命令行参数：
+      - `--xi`: 各向异性参数
+      - `--T_min/T_max/T_step`: 温度范围
+      - `--rho_max/rho_step`: 密度范围
+      - `--skip_trho`: 跳过扫描使用已有数据
+      - `--verbose`: 详细输出
+    - 状态：基本框架完成，S 形检测和 Maxwell 构造算法需要改进
+
+14. ✅ S 形检测和 Maxwell 构造算法改进
+    - 更新 `scripts/calculate_phase_structure.jl`
+    - 改进内容：
+      - S 形检测：基于 `src/pnjl/analysis/PhaseTransition.jl` 的完善实现
+        - 精确的 spinodal 点定位（斜率变号位置）
+        - 符号变化计数
+        - 更准确的 +1 → -1 → +1 模式检测
+      - Maxwell 构造：基于 `src/pnjl/analysis/MaxwellRhoMu.jl` 的完善实现
+        - 从 spinodal 点估计 μ 搜索区间
+        - 区间收缩避免边界问题
+        - 符号变化点搜索
+        - 二分法精确求解等面积点
+        - 详细的失败原因报告
+    - 测试结果（xi=0.0, T=50-140 MeV）：
+      - 7/10 温度点成功（T=50-80, 110-130 MeV）
+      - 3/10 失败（T=90-100, 140 MeV）
+        - T=90-100 MeV：求解器在低密度区域失败（NaN），导致曲线不完整
+        - T=140 MeV：已超过 CEP，无 S 形（正常）
+    - 输出示例：
+      ```
+      T=50.0 MeV: μ_c=356.46 MeV, ρ_gas=0.085, ρ_liquid=2.591
+      T=80.0 MeV: μ_c=345.24 MeV, ρ_gas=0.242, ρ_liquid=2.505
+      T=130.0 MeV: μ_c=292.94 MeV, ρ_gas=1.652, ρ_liquid=2.198
+      ```
+
+### 9.9 已知问题
+
+1. ~~**T=90-105 MeV 区域求解失败**~~ ✅ 已解决
+   - 原因：ρ=0 是奇异点（μ=0 的真空解），从这里开始连续性跟踪会失败
+   - 解决方案：使用反向扫描（ρ_max → 0），在 `TrhoScan.jl` 中添加 `reverse_rho=true` 参数
+   - 测试结果：T=90 MeV 从 8/16 成功提升到 16/16 成功
+
+2. ~~**CEP 估计精度**~~ ✅ 已解决
+   - 实现：二分法细化 CEP 位置
+   - 通过线性插值获取中间温度的曲线
+   - 测试结果：
+     - 初始区间 [130.0, 135.0] MeV
+     - 3 次二分后 [130.62, 131.25] MeV
+     - T_CEP ≈ 130.94 MeV, μ_CEP ≈ 291.79 MeV
+     - 与文献值（T_CEP ≈ 131 MeV, μ_CEP ≈ 291 MeV）吻合
+
+### 9.10 下一步任务
+
+1. **GitHub Actions Pipeline**
+   - 创建 `.github/workflows/pnjl-pipeline.yml`
+   - 支持手动触发计算
+   - 参数化输入（ξ, T 范围等）
+
+### 9.11 已完成（2025-12-29 续）
+
+15. ✅ TrhoScan 反向扫描
+    - 添加 `reverse_rho=true` 参数（默认启用）
+    - 解决了 ρ=0 奇异点导致的连续性跟踪失败问题
+    - 扫描成功率从 95% 提升到 100%
+
+16. ✅ CEP 二分法细化
+    - 默认精度 0.01 MeV
+    - 通过线性插值获取中间温度的曲线
+    - 结果：T_CEP ≈ 131.04 MeV, μ_CEP ≈ 291.14 MeV (xi=0.0)
+
+17. ✅ 脚本重组和绘图功能
+    - 移动 `calculate_phase_structure.jl` 到 `scripts/pnjl/`
+    - 创建 `scripts/pnjl/plot_phase_diagram.py`（Python 绘图）
+    - 支持 T-μ、T-ρ、组合相图
+    - 支持多 ξ 值叠加显示
+    - 输出格式：png/pdf/svg
