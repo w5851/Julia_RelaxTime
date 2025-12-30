@@ -124,12 +124,12 @@ include(joinpath("solvers", "AnisoGapSolver.jl"))
 using .AnisoGapSolver
 export AnisoGapSolver
 
-# 注意：以下旧模块暂时禁用，需要时可手动加载
+# 注意：以下旧模块已删除，功能已整合到 PhaseTransition.jl
 # - SeedCache.jl（已弃用）
 # - TrhoSeedChain.jl（依赖 LineSearches）
 # - SinglePointSolver.jl
 # - AdaptiveRhoRefinement.jl
-# - PhaseTransition.jl, CEPFinder.jl, MaxwellRhoMu.jl
+# - CEPFinder.jl, MaxwellRhoMu.jl（已整合到 PhaseTransition.jl）
 # - analysis/ThermoDerivatives.jl（旧版，新版在 derivatives/）
 
 end # module PNJL
