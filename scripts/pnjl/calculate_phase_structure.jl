@@ -5,7 +5,7 @@ PNJL 相结构计算脚本
 计算并输出：
 1. CEP (临界终点)
 2. 一阶相变线 (T-ρ 扫描 + Maxwell 构造)
-3. 相图数据
+3. Spinodal 数据（亚稳态边界）
 
 输出文件保存到 data/reference/pnjl/
 
@@ -36,6 +36,7 @@ include(joinpath(@__DIR__, "..", "..", "src", "pnjl", "PNJL.jl"))
 
 using .PNJL
 using .PNJL.TrhoScan
+using .PNJL.PhaseTransition  # 使用模块化的相变分析功能
 
 # ============================================================================
 # 配置

@@ -103,6 +103,19 @@ export run_dual_branch_scan, find_phase_transition, merge_branches, scan_phase_d
 export DualBranchResult, BranchPoint, PhaseTransitionInfo
 
 # ============================================================================
+# 分析模块
+# ============================================================================
+
+include(joinpath("analysis", "PhaseTransition.jl"))
+
+using .PhaseTransition
+
+# 导出分析功能
+export SShapeResult, detect_s_shape
+export MaxwellResult, maxwell_construction
+export group_curves_by_temperature
+
+# ============================================================================
 # 兼容性模块（旧接口）
 # ============================================================================
 

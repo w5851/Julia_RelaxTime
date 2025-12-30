@@ -1,4 +1,4 @@
-name: pnlj-benchmarks
+name: pnjl-benchmarks
 
 on:
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v4
         with:
-          name: pnlj-benchmark
+          name: pnjl-benchmark
           path: |
             output/perf/pnjl_single_point.json
             output/perf/pnjl_single_point.md
