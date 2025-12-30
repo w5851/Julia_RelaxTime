@@ -447,8 +447,10 @@ end
 ---
 
 *创建日期：2025-12-28*
-*最后更新：2025-12-29*
-*状态：Phase 1 完成*
+*最后更新：2025-12-30*
+*状态：✅ 重构完成*
+
+> **注意**：后续开发任务已迁移到 [`PNJL_Phase_Diagram_TODO.md`](./PNJL_Phase_Diagram_TODO.md)
 
 ## 七、重构完成记录
 
@@ -484,7 +486,7 @@ end
 
 ### 待完成
 
-- 完整测试套件
+> 已迁移到 [`PNJL_Phase_Diagram_TODO.md`](./PNJL_Phase_Diagram_TODO.md)
 
 ### 已完成（2025-12-29 续）
 
@@ -764,12 +766,17 @@ Step 4: 热力学导数计算
      - T_CEP ≈ 130.94 MeV, μ_CEP ≈ 291.79 MeV
      - 与文献值（T_CEP ≈ 131 MeV, μ_CEP ≈ 291 MeV）吻合
 
-### 9.10 下一步任务
+### 9.10 后续任务
 
-1. **GitHub Actions Pipeline**
-   - 创建 `.github/workflows/pnjl-pipeline.yml`
-   - 支持手动触发计算
-   - 参数化输入（ξ, T 范围等）
+> 已迁移到 [`PNJL_Phase_Diagram_TODO.md`](./PNJL_Phase_Diagram_TODO.md)，包括：
+> - Crossover 线计算
+> - T-μ 扫描脚本
+> - 热力学导数计算脚本
+> - GitHub Actions Pipeline
+> - 完整测试套件
+> - 数值稳定性改进（Log-Sum-Exp）
+> - 自适应动量截断
+> - 诊断工具（Ω 组件分解）
 
 ### 9.11 已完成（2025-12-29 续）
 
