@@ -274,23 +274,17 @@ function run_scan(opts::ScanOptions)
                     muB_mev = 3.0 * muq_mev
 
                     # 先求一次平衡解（用于 K_coeffs，并作为后续 workflow 的 equilibrium 复用）
-                    base = TransportWorkflow.ThermoDerivatives.solve_equilibrium_mu(
-                        T_fm,
-                        muq_fm;
+                    base = TransportWorkflow.PNJL.solve(TransportWorkflow.PNJL.FixedMu(), T_fm, muq_fm;
                         xi=xi,
-                        seed_state=(seed_state === nothing ? TransportWorkflow.AnisoGapSolver.DEFAULT_MU_GUESS : seed_state),
                         p_num=opts.p_num,
                         t_num=opts.t_num,
-                        iterations=opts.max_iter,
                     )
 
-                    seed_state = base.x_state
+                    seed_state = Vector(base.solution)
 
                     Φ = Float64(base.x_state[4])
                     Φbar = Float64(base.x_state[5])
-                    φ = SVector{3}(base.x_state[1], base.x_state[2], base.x_state[3])
-                    mvec = TransportWorkflow.AnisoGapSolver.calculate_mass_vec(φ)
-                    masses = (u=Float64(mvec[1]), d=Float64(mvec[2]), s=Float64(mvec[3]))
+                    masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
 
                     K_coeffs = compute_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
 

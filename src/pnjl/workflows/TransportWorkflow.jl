@@ -1,10 +1,10 @@
 module TransportWorkflow
 
 """
-将“各向异性 PNJL 能隙方程求解”与“RTA 输运系数计算”串联起来，并可选在内部计算弛豫时间 τ。
+将"各向异性 PNJL 能隙方程求解"与"RTA 输运系数计算"串联起来，并可选在内部计算弛豫时间 τ。
 
 工作流：
-1) 调用 `ThermoDerivatives.solve_equilibrium_mu` 在给定 `(T, μ, ξ)` 下求平衡（能隙/Polyakov 环）。
+1) 调用 `PNJL.solve(FixedMu(), T_fm, μ_fm)` 在给定 `(T, μ, ξ)` 下求平衡（能隙/Polyakov 环）。
 2) 从平衡解构造 `quark_params` 与 `thermo_params`。
 3) （可选）计算数密度与平均散射率，从而得到 `tau`（见 `RelaxationTime.relaxation_times`）。
 4) （可选）通过 `ThermoDerivatives.bulk_derivative_coeffs` 生成体粘滞需要的导数组合。
@@ -17,28 +17,27 @@ module TransportWorkflow
 注意：仓库目前采用 include 组织方式，本模块会 include 相关依赖文件。
 """
 
-# --- 依赖：常量/各向异性求解器/热力学导数/弛豫时间/输运系数/一圈积分(A) ---
+# --- 依赖：常量/PNJL模块/弛豫时间/输运系数/一圈积分(A) ---
 include("../../Constants_PNJL.jl")
-include("../../integration/GaussLegendre.jl")
-include("../solvers/AnisoGapSolver.jl")
-include("../analysis/ThermoDerivatives.jl")
+include("../PNJL.jl")
 include("../../relaxtime/RelaxationTime.jl")
 include("../../relaxtime/TransportCoefficients.jl")
 include("../../relaxtime/OneLoopIntegrals.jl")
 
 using StaticArrays
 
-using .ThermoDerivatives: solve_equilibrium_mu, bulk_derivative_coeffs
-using .AnisoGapSolver: cached_nodes, calculate_mass_vec, calculate_number_densities
+using .PNJL: solve, FixedMu, cached_nodes, calculate_mass_vec, calculate_number_densities
+using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using .PNJL.ThermoDerivatives: bulk_derivative_coeffs
+using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients
 using .OneLoopIntegrals: A
-using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 export solve_gap_and_transport, build_equilibrium_params
 
 """将平衡求解结果转换成 (quark_params, thermo_params)。"""
-function build_equilibrium_params(base::NamedTuple, T_fm::Real, mu_fm::Real; xi::Real=0.0)
+function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     Φ = Float64(base.x_state[4])
     Φbar = Float64(base.x_state[5])
     return (
@@ -97,7 +96,7 @@ end
 - `tau`: 若提供则直接用于输运计算，并仍会被原样回传（适合你自己在外部算 τ 或做对照）
 - `compute_bulk`: 是否计算 ζ 需要的导数（会额外触发多次自动微分+求解，较慢）
 - `p_num`, `t_num`: 热积分节点数（传给能隙求解/密度计算）
-- `solver_kwargs`: 透传到 `solve_equilibrium_mu`（例如 `iterations` 等）
+- `solver_kwargs`: 透传到 `solve`（例如 `iterations` 等）
 - `tau_kwargs`: 透传到 `RelaxationTime.relaxation_times`（例如 `p_nodes/angle_nodes/phi_nodes/n_sigma_points/cs_caches/existing_rates` 等）
 - `transport_kwargs`: 透传到 `transport_coefficients`（例如 `p_nodes`, `p_max` 等）
 """
@@ -105,31 +104,27 @@ function solve_gap_and_transport(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    equilibrium::Union{Nothing,NamedTuple}=nothing,
+    equilibrium::Union{Nothing,Any}=nothing,
     compute_tau::Bool=false,
     K_coeffs::Union{Nothing,NamedTuple}=nothing,
     tau::Union{Nothing,NamedTuple}=nothing,
     compute_bulk::Bool=true,
-    p_num::Int=AnisoGapSolver.DEFAULT_MOMENTUM_COUNT,
-    t_num::Int=AnisoGapSolver.DEFAULT_THETA_COUNT,
-    seed_state=AnisoGapSolver.DEFAULT_MU_GUESS,
+    p_num::Int=DEFAULT_MOMENTUM_COUNT,
+    t_num::Int=DEFAULT_THETA_COUNT,
+    seed_state=HADRON_SEED_5,
     solver_kwargs::NamedTuple=(;),
     tau_kwargs::NamedTuple=(;),
     transport_kwargs::NamedTuple=(;)
 )
-    base = equilibrium === nothing ? solve_equilibrium_mu(
-        T_fm,
-        mu_fm;
+    base = equilibrium === nothing ? solve(FixedMu(), T_fm, mu_fm;
         xi=xi,
-        seed_state=seed_state,
         p_num=p_num,
         t_num=t_num,
         solver_kwargs...,
     ) : equilibrium
 
     # 有效质量（直接由平衡解得到）
-    φ = SVector{3}(base.x_state[1], base.x_state[2], base.x_state[3])
-    masses = calculate_mass_vec(φ)
+    masses = base.masses
 
     params0 = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
     quark_params_basic = (
@@ -173,7 +168,7 @@ function solve_gap_and_transport(
             T_fm,
             mu_fm;
             xi=xi,
-            seed_state=base.x_state,
+            seed_state=Vector(base.solution),
             p_num=p_num,
             t_num=t_num,
             solver_kwargs...,

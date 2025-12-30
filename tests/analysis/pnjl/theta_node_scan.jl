@@ -1,22 +1,16 @@
-# Quantify sensitivity of angle quadrature nodes on PNJL single-point observables under multiple regimes
+# Quantify sensitivity of angle quadrature nodes on PNJL single-point observables under multiple regimes (using new architecture)
 using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-module PNJLLocal
-    using ..Constants_PNJL
-    include(joinpath(Main.PROJECT_ROOT, "src", "pnjl", "solvers", "AnisoGapSolver.jl"))
-    export AnisoGapSolver
-end
-
-using .PNJLLocal: AnisoGapSolver
-using Main.GaussLegendre: DEFAULT_theta_POINTS
+using .Constants_PNJL: ħc_MeV_fm
+using .PNJL: solve, FixedMu, DEFAULT_THETA_COUNT
 
 const THETA_SWEEP = [4, 8, 12, 16, 24, 32, 40, 48, 64]
-const DEFAULT_T_NUM = DEFAULT_theta_POINTS
+const DEFAULT_T_NUM = DEFAULT_THETA_COUNT
 
 const PRESSURE_TOL = 1e-8
 const RHO_TOL = 1e-9
@@ -29,8 +23,9 @@ const CASES = [
 ]
 
 function solve_with_theta(case_cfg, t_num)
-    mu_fm = case_cfg.mu_mev / Constants_PNJL.ħc_MeV_fm
-    return AnisoGapSolver.solve_fixed_mu(case_cfg.T_mev, mu_fm;
+    T_fm = case_cfg.T_mev / ħc_MeV_fm
+    mu_fm = case_cfg.mu_mev / ħc_MeV_fm
+    return solve(FixedMu(), T_fm, mu_fm;
         xi = case_cfg.xi,
         p_num = case_cfg.p_num,
         t_num = t_num,
@@ -61,7 +56,7 @@ function analyze_case(case_cfg)
     for t_num in THETA_SWEEP
         res = solve_with_theta(case_cfg, t_num)
         dp = abs(res.pressure - reference.pressure)
-        dr = abs(res.rho - reference.rho)
+        dr = abs(res.rho_norm - reference.rho_norm)
         de = abs(res.energy - reference.energy)
         errors_by_theta[t_num] = (dp = dp, dr = dr, de = de)
         @printf("%8d %10d %14.6e %14.6e %14.6e\n", t_num, res.iterations, dp, dr, de)

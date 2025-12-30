@@ -7,22 +7,14 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-module PNJLLocal
-    using ..Constants_PNJL
-    include(joinpath(Main.PROJECT_ROOT, "src", "pnjl", "solvers", "AnisoGapSolver.jl"))
-    include(joinpath(Main.PROJECT_ROOT, "src", "pnjl", "seeds", "TrhoSeedChain.jl"))
-    export AnisoGapSolver, TrhoSeedChain
-end
+using .Constants_PNJL: ħc_MeV_fm
+using .PNJL: solve, FixedMu, HADRON_SEED_5
 
-using .PNJLLocal: AnisoGapSolver, TrhoSeedChain
-const DEFAULT_MU_GUESS = AnisoGapSolver.DEFAULT_MU_GUESS
-const ħc_MeV_fm = Main.Constants_PNJL.ħc_MeV_fm
 const SEED_T_DIGITS = 1
 const SEED_XI_DIGITS = 2
 const ACCEPTABLE_RESIDUAL = 1e-4
-const DEFAULT_CHAIN_DIR = TrhoSeedChain.DEFAULT_CHAIN_DIR
 
 const OUTPUT_DIR = joinpath(PROJECT_ROOT, "data", "raw", "pnjl", "seeds")
 const DEFAULT_OUTPUT = joinpath(OUTPUT_DIR, "sobol_seed_table.csv")
@@ -61,10 +53,6 @@ function parse_args()
         :T_range => DEFAULT_CONFIG.T_range,
         :mu_range => DEFAULT_CONFIG.mu_range,
         :xi_range => DEFAULT_CONFIG.xi_range,
-        :chain_dir => DEFAULT_CHAIN_DIR,
-        :use_chain => true,
-        :chain_t_tol => 3.0,
-        :chain_xi_tol => 1e-3,
     )
     for arg in ARGS
         if startswith(arg, "--")
@@ -96,14 +84,6 @@ function parse_args()
                 cfg[:xi_range] = (cfg[:xi_range][1], parse(Float64, value))
             elseif sym == :xi_min
                 cfg[:xi_range] = (parse(Float64, value), cfg[:xi_range][2])
-            elseif sym == :chain_dir
-                cfg[:chain_dir] = value
-            elseif sym == :disable_chain
-                cfg[:use_chain] = false
-            elseif sym == :chain_t_tol
-                cfg[:chain_t_tol] = parse(Float64, value)
-            elseif sym == :chain_xi_tol
-                cfg[:chain_xi_tol] = parse(Float64, value)
             else
                 @warn "Unknown argument" arg
             end
@@ -149,7 +129,7 @@ function build_row(T_mev, mu_mev, xi, result)
     return (
         T_mev,
         mu_mev,
-        result.rho,
+        result.rho_norm,
         xi,
         phi_u,
         phi_d,
@@ -176,16 +156,16 @@ function main()
     io = open(cfg[:output], "w")
     println(io, join(HEADER, ","))
     for (idx, p) in enumerate(params)
+        T_fm = p.T_mev / ħc_MeV_fm
         mu_fm = p.mu_mev / ħc_MeV_fm
         seed, _ = _select_seed(p, continuation, cfg)
         try
-            res = AnisoGapSolver.solve_fixed_mu(p.T_mev, mu_fm;
+            res = solve(FixedMu(), T_fm, mu_fm;
                 xi = p.xi,
                 p_num = cfg[:p_num],
                 t_num = cfg[:t_num],
-                seed_state = seed,
             )
-            res, refined = _refine_if_needed(p.T_mev, mu_fm, p.xi, res; p_num=cfg[:p_num], t_num=cfg[:t_num])
+            res, _ = _refine_if_needed(T_fm, mu_fm, p.xi, res; p_num=cfg[:p_num], t_num=cfg[:t_num])
             if res !== nothing && res.converged
                 row = format_row(build_row(p.T_mev, p.mu_mev, p.xi, res))
                 println(io, row)
@@ -206,21 +186,14 @@ end
 _seed_key(T, xi) = (round(Float64(T); digits=SEED_T_DIGITS), round(Float64(xi); digits=SEED_XI_DIGITS))
 
 function _select_seed(params, continuation, cfg)
-    if cfg[:use_chain]
-        seed = TrhoSeedChain.find_chain_seed(params.T_mev, params.xi, params.mu_mev;
-            chain_dir=cfg[:chain_dir], T_tol=cfg[:chain_t_tol], xi_tol=cfg[:chain_xi_tol])
-        if seed !== nothing
-            return seed, "trho-chain"
-        end
-    end
     key = _seed_key(params.T_mev, params.xi)
     if haskey(continuation, key)
         return copy(continuation[key]), "continuation"
     end
-    return copy(DEFAULT_MU_GUESS), "default"
+    return copy(HADRON_SEED_5), "default"
 end
 
-function _refine_if_needed(T_mev, mu_fm, xi, result; p_num, t_num)
+function _refine_if_needed(T_fm, mu_fm, xi, result; p_num, t_num)
     result === nothing && return nothing, false
     if result.converged
         return result, false
@@ -230,11 +203,10 @@ function _refine_if_needed(T_mev, mu_fm, xi, result; p_num, t_num)
         return result, false
     end
     try
-        refined = AnisoGapSolver.solve_fixed_mu(T_mev, mu_fm;
+        refined = solve(FixedMu(), T_fm, mu_fm;
             xi = xi,
             p_num = p_num,
             t_num = t_num,
-            seed_state = result.solution,
         )
         return refined, true
     catch

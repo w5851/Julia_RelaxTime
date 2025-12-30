@@ -28,9 +28,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "solvers", "AnisoGapSolver.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "analysis", "ThermoDerivatives.jl"))
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
@@ -39,9 +37,9 @@ using Printf
 using StaticArrays
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
-using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
-using .ThermoDerivatives: solve_equilibrium_mu
-using .AnisoGapSolver: cached_nodes, calculate_mass_vec, calculate_number_densities, DEFAULT_MU_GUESS
+using .PNJL: solve, FixedMu, cached_nodes, calculate_mass_vec, calculate_number_densities
+using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .RelaxationTime: relaxation_times, REQUIRED_PROCESSES
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
@@ -415,7 +413,7 @@ function run_scan(opts::Options)
             muq_mev = muB_mev / 3.0
             muq_fm = muq_mev / ħc_MeV_fm
 
-            seed_state = DEFAULT_MU_GUESS
+            seed_state = HADRON_SEED_5
             local_iter = 0
             for T_mev in T_vals
                 if opts.resume && !opts.overwrite
@@ -425,21 +423,16 @@ function run_scan(opts::Options)
                 end
                 T_fm = T_mev / ħc_MeV_fm
 
-                base = solve_equilibrium_mu(
-                    T_fm,
-                    muq_fm;
+                base = solve(FixedMu(), T_fm, muq_fm;
                     xi=opts.xi,
-                    seed_state=seed_state,
                     p_num=opts.p_num,
                     t_num=opts.t_num,
-                    iterations=opts.max_iter,
                 )
-                seed_state = base.x_state
+                seed_state = Vector(base.solution)
 
                 Φ = Float64(base.x_state[4])
                 Φbar = Float64(base.x_state[5])
-                masses_vec = calculate_mass_vec(SVector{3}(base.x_state[1], base.x_state[2], base.x_state[3]))
-                masses = (u=Float64(masses_vec[1]), d=Float64(masses_vec[2]), s=Float64(masses_vec[3]))
+                masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
 
                 thermo_params = (T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(opts.xi))
                 quark_params_basic = (m=masses, μ=(u=Float64(muq_fm), d=Float64(muq_fm), s=Float64(muq_fm)))

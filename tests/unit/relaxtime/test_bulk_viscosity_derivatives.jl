@@ -11,7 +11,7 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "../../.."))
 
 include("../../../src/pnjl/PNJL.jl")
-using .PNJL: ThermoDerivatives, AnisoGapSolver
+using .PNJL: ThermoDerivatives
 
 using StaticArrays
 using ForwardDiff

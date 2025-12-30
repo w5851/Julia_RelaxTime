@@ -48,7 +48,7 @@ function main()
     T = T_MeV / ħc_MeV_fm
     muq = muq_MeV / ħc_MeV_fm
 
-    res = PNJL.AnisoGapSolver.solve_fixed_mu(T_MeV, muq; xi=0.0)
+    res = PNJL.solve(PNJL.FixedMu(), T, muq; xi=0.0)
     res.converged || error("gap solver did not converge")
 
     x = res.solution
@@ -56,8 +56,7 @@ function main()
     Phi = Float64(x[4])
     Phibar = Float64(x[5])
 
-    mvec = PNJL.AnisoGapSolver.calculate_mass_vec(phi)
-    m_u, m_d, m_s = mvec
+    m_u, m_d, m_s = res.masses
 
     println("gap: m_u(MeV)=", m_u * ħc_MeV_fm, " m_d(MeV)=", m_d * ħc_MeV_fm, " Phi=", Phi, " Phibar=", Phibar)
 

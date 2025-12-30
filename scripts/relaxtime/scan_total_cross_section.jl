@@ -180,15 +180,15 @@ function build_physical_parameters(opts::CLIOptions)
 
 
     # Solve gap equation first to obtain constituent masses and Polyakov loop variables.
-    # solve_fixed_mu takes T in MeV and μ in fm^-1.
-    gap_res = PNJL.AnisoGapSolver.solve_fixed_mu(Float64(opts.T_MeV), Float64(μ_u); xi=Float64(opts.xi))
+    T_fm = opts.T_MeV / ħc_MeV_fm
+    gap_res = PNJL.solve(PNJL.FixedMu(), T_fm, Float64(μ_u); xi=Float64(opts.xi))
     gap_res.converged || error("Gap solver did not converge (T=$(opts.T_MeV) MeV, μ=$(opts.mu_u_MeV) MeV, xi=$(opts.xi))")
 
     x = gap_res.solution
     ϕ = SVector{3, Float64}(x[1], x[2], x[3])
     Φ = Float64(x[4])
     Φbar = Float64(x[5])
-    m_vec = PNJL.AnisoGapSolver.calculate_mass_vec(ϕ)
+    m_vec = gap_res.masses
     m_u, m_d, m_s = m_vec[1], m_vec[2], m_vec[3]
 
     @info "Solved gap equation" T_MeV=opts.T_MeV mu_MeV=opts.mu_u_MeV xi=opts.xi m_u=m_u m_d=m_d m_s=m_s Phi=Φ Phibar=Φbar

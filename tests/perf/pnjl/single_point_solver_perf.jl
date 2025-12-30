@@ -1,4 +1,4 @@
-# Benchmark a single PNJL gap solve under varying NLsolve configurations
+# Benchmark a single PNJL gap solve under varying NLsolve configurations (using new architecture)
 using Printf
 using Statistics
 using BenchmarkTools
@@ -12,15 +12,10 @@ const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "pnjl_single_point.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "pnjl_single_point.md")
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-module PNJLLocal
-    using ..Constants_PNJL
-    include(joinpath(Main.PROJECT_ROOT, "src", "pnjl", "solvers", "AnisoGapSolver.jl"))
-    export AnisoGapSolver
-end
-
-using .PNJLLocal: AnisoGapSolver
+using .Constants_PNJL: ħc_MeV_fm
+using .PNJL: solve, FixedRho
 
 const BENCH_CONFIG = (
     T_mev = 50.0,
@@ -54,9 +49,8 @@ const BENCHMARKS = [
 ]
 
 function run_single_point(; kwargs...)
-    return AnisoGapSolver.solve_fixed_rho(
-        BENCH_CONFIG.T_mev,
-        BENCH_CONFIG.rho_target;
+    T_fm = BENCH_CONFIG.T_mev / ħc_MeV_fm
+    return solve(FixedRho(BENCH_CONFIG.rho_target), T_fm;
         xi = BENCH_CONFIG.xi,
         p_num = BENCH_CONFIG.p_num,
         t_num = BENCH_CONFIG.t_num,

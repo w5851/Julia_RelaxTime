@@ -25,9 +25,7 @@ using StaticArrays
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "solvers", "AnisoGapSolver.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "analysis", "ThermoDerivatives.jl"))
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "ScatteringAmplitude.jl"))
@@ -35,9 +33,9 @@ include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TotalCrossSection.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "AverageScatteringRate.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
-using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
-using .AnisoGapSolver: calculate_mass_vec, DEFAULT_MU_GUESS
-using .ThermoDerivatives: solve_equilibrium_mu
+using .PNJL: solve, FixedMu, calculate_mass_vec, HADRON_SEED_5
+using .PNJL: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScatteringAmplitude: scattering_amplitude_squared
@@ -177,21 +175,16 @@ function build_equilibrium_params(opts::Options)
     muq_mev = opts.muB_MeV / 3.0
     muq_fm = muq_mev / ħc_MeV_fm
 
-    base = solve_equilibrium_mu(
-        T_fm,
-        muq_fm;
+    base = solve(FixedMu(), T_fm, muq_fm;
         xi=opts.xi,
-        seed_state=DEFAULT_MU_GUESS,
         p_num=opts.p_num,
         t_num=opts.t_num,
-        iterations=opts.max_iter,
     )
     Bool(base.converged) || error("equilibrium not converged: iters=$(base.iterations) residual=$(base.residual_norm)")
 
     Φ = Float64(base.x_state[4])
     Φbar = Float64(base.x_state[5])
-    masses_vec = calculate_mass_vec(SVector{3}(base.x_state[1], base.x_state[2], base.x_state[3]))
-    masses = (u=Float64(masses_vec[1]), d=Float64(masses_vec[2]), s=Float64(masses_vec[3]))
+    masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
 
     A_u = A(masses.u, muq_fm, T_fm, Φ, Φbar, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS)
     A_s = A(masses.s, muq_fm, T_fm, Φ, Φbar, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS)

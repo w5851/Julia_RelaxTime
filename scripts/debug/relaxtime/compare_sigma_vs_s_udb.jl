@@ -59,15 +59,14 @@ function build_params(; T_MeV::Float64, muB_MeV::Float64, xi::Float64)
     T = T_MeV / ħc_MeV_fm
     μ = muq_MeV / ħc_MeV_fm
 
-    gap_res = PNJL.AnisoGapSolver.solve_fixed_mu(Float64(T_MeV), Float64(μ); xi=Float64(xi))
+    gap_res = PNJL.solve(PNJL.FixedMu(), T, Float64(μ); xi=Float64(xi))
     gap_res.converged || error("Gap solver did not converge (T=$T_MeV MeV, μq=$muq_MeV MeV, xi=$xi)")
 
     x = gap_res.solution
     ϕ = SVector{3, Float64}(x[1], x[2], x[3])
     Φ = Float64(x[4])
     Φbar = Float64(x[5])
-    m_vec = PNJL.AnisoGapSolver.calculate_mass_vec(ϕ)
-    m_u, m_d, m_s = m_vec[1], m_vec[2], m_vec[3]
+    m_u, m_d, m_s = gap_res.masses[1], gap_res.masses[2], gap_res.masses[3]
 
     nodes_p = DEFAULT_MOMENTUM_NODES
     weights_p = DEFAULT_MOMENTUM_WEIGHTS
