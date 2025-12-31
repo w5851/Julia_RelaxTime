@@ -68,6 +68,17 @@
 
 **测试脚本**：`scripts/pnjl/test_crossover_methods.jl`
 
+**计算脚本集成**：`scripts/pnjl/calculate_phase_structure.jl`
+- 添加 `--skip_crossover` 选项
+- Step 5: 自动扫描 μ = 0 到 μ_CEP 的 crossover 线
+- 输出文件：`crossover.csv`（格式：xi, mu_MeV, T_crossover_chiral_MeV, T_crossover_deconf_MeV）
+
+**绘图脚本集成**：`scripts/pnjl/plot_phase_diagram.py`
+- 添加 `--crossover` 和 `--no-crossover` 选项
+- 手征 crossover：虚线（:）
+- 退禁闭 crossover：点划线（-.）
+- 与一阶相变线绘制在同一张图中
+
 ### 1.2 T-μ 扫描脚本
 
 **背景**：使用 `PhaseAwareContinuitySeed` 进行 T-μ 参数空间扫描。
@@ -244,4 +255,4 @@ GitHub Actions 自动化
 
 ---
 
-*更新日期：2025-12-30*
+*更新日期：2025-12-31*

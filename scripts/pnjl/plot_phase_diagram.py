@@ -53,6 +53,7 @@ PROJECT_ROOT = _find_project_root()
 DEFAULT_BOUNDARY_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
 DEFAULT_CEP_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "cep.csv"
 DEFAULT_SPINODAL_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "spinodals.csv"
+DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl"
 
 
@@ -83,6 +84,15 @@ class SpinodalPoint:
     mu_spinodal_high_MeV: float
     rho_spinodal_hadron: float  # 强子相侧 spinodal
     rho_spinodal_quark: float   # 夸克相侧 spinodal
+
+
+@dataclass
+class CrossoverPoint:
+    """Crossover 点"""
+    xi: float
+    mu_MeV: float
+    T_chiral_MeV: Optional[float]  # 手征 crossover 温度
+    T_deconf_MeV: Optional[float]  # 退禁闭 crossover 温度
 
 
 def load_boundary_data(path: Path) -> List[BoundaryPoint]:
@@ -159,6 +169,29 @@ def load_spinodal_data(path: Path) -> List[SpinodalPoint]:
     return points
 
 
+def load_crossover_data(path: Path) -> List[CrossoverPoint]:
+    """加载 crossover 数据"""
+    if not path.exists():
+        return []
+    
+    points = []
+    with open(path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            try:
+                T_chiral = row.get("T_crossover_chiral_MeV", "")
+                T_deconf = row.get("T_crossover_deconf_MeV", "")
+                points.append(CrossoverPoint(
+                    xi=float(row["xi"]),
+                    mu_MeV=float(row["mu_MeV"]),
+                    T_chiral_MeV=float(T_chiral) if T_chiral else None,
+                    T_deconf_MeV=float(T_deconf) if T_deconf else None,
+                ))
+            except (KeyError, ValueError):
+                continue
+    return points
+
+
 def group_by_xi(points: List[BoundaryPoint]) -> Dict[float, List[BoundaryPoint]]:
     """按 ξ 值分组"""
     groups: Dict[float, List[BoundaryPoint]] = {}
@@ -194,6 +227,22 @@ def get_spinodals_for_xi(spinodals: List[SpinodalPoint], xi: float, tol: float =
     return [s for s in spinodals if abs(s.xi - xi) < tol]
 
 
+def group_crossover_by_xi(points: List[CrossoverPoint]) -> Dict[float, List[CrossoverPoint]]:
+    """按 ξ 值分组 crossover 数据"""
+    groups: Dict[float, List[CrossoverPoint]] = {}
+    for p in points:
+        groups.setdefault(p.xi, []).append(p)
+    # 按 μ 排序
+    for xi in groups:
+        groups[xi].sort(key=lambda p: p.mu_MeV)
+    return groups
+
+
+def get_crossover_for_xi(crossovers: List[CrossoverPoint], xi: float, tol: float = 1e-6) -> List[CrossoverPoint]:
+    """获取指定 ξ 的 crossover 数据"""
+    return sorted([c for c in crossovers if abs(c.xi - xi) < tol], key=lambda c: c.mu_MeV)
+
+
 # 颜色方案
 XI_COLORS = {
     0.0: "#E41A1C",   # 红色
@@ -219,6 +268,7 @@ def plot_T_mu_phase_diagram(
     boundary_groups: Dict[float, List[BoundaryPoint]],
     ceps: List[CEPPoint],
     spinodals: Optional[List[SpinodalPoint]] = None,
+    crossovers: Optional[List[CrossoverPoint]] = None,
     xi_filter: Optional[List[float]] = None,
     output_path: Optional[Path] = None,
     show: bool = True,
@@ -232,6 +282,7 @@ def plot_T_mu_phase_diagram(
         xi_values = [xi for xi in xi_values if xi in xi_filter]
     
     spinodal_groups = group_spinodals_by_xi(spinodals) if spinodals else {}
+    crossover_groups = group_crossover_by_xi(crossovers) if crossovers else {}
     
     for xi in xi_values:
         points = boundary_groups.get(xi, [])
@@ -260,6 +311,23 @@ def plot_T_mu_phase_diagram(
                       s=150, c=color, marker='*', edgecolors='black', 
                       linewidths=0.5, zorder=10,
                       label=f"CEP (ξ={xi:.1f})" if len(xi_values) > 1 else "CEP")
+        
+        # 绘制 crossover 线
+        xi_crossovers = crossover_groups.get(xi, [])
+        if xi_crossovers:
+            # 手征 crossover（虚线）
+            chiral_mu = [c.mu_MeV for c in xi_crossovers if c.T_chiral_MeV is not None]
+            chiral_T = [c.T_chiral_MeV for c in xi_crossovers if c.T_chiral_MeV is not None]
+            if chiral_mu:
+                ax.plot(chiral_mu, chiral_T, ':', color=color, linewidth=2, alpha=0.8,
+                       label="Chiral crossover" if xi == xi_values[0] else None)
+            
+            # 退禁闭 crossover（点划线）
+            deconf_mu = [c.mu_MeV for c in xi_crossovers if c.T_deconf_MeV is not None]
+            deconf_T = [c.T_deconf_MeV for c in xi_crossovers if c.T_deconf_MeV is not None]
+            if deconf_mu:
+                ax.plot(deconf_mu, deconf_T, '-.', color=color, linewidth=1.5, alpha=0.7,
+                       label="Deconf. crossover" if xi == xi_values[0] else None)
     
     ax.set_xlabel(r"$\mu$ (MeV)", fontsize=12)
     ax.set_ylabel(r"$T$ (MeV)", fontsize=12)
@@ -366,6 +434,7 @@ def plot_combined_phase_diagram(
     boundary_groups: Dict[float, List[BoundaryPoint]],
     ceps: List[CEPPoint],
     spinodals: Optional[List[SpinodalPoint]] = None,
+    crossovers: Optional[List[CrossoverPoint]] = None,
     xi_filter: Optional[List[float]] = None,
     output_path: Optional[Path] = None,
     show: bool = True,
@@ -379,6 +448,7 @@ def plot_combined_phase_diagram(
         xi_values = [xi for xi in xi_values if xi in xi_filter]
     
     spinodal_groups = group_spinodals_by_xi(spinodals) if spinodals else {}
+    crossover_groups = group_crossover_by_xi(crossovers) if crossovers else {}
     
     for xi in xi_values:
         points = boundary_groups.get(xi, [])
@@ -425,6 +495,23 @@ def plot_combined_phase_diagram(
             ax2.scatter([rho_cep], [cep.T_CEP_MeV], 
                        s=150, c=color, marker='*', edgecolors='black',
                        linewidths=0.5, zorder=10)
+        
+        # T-μ 图: crossover 线
+        xi_crossovers = crossover_groups.get(xi, [])
+        if xi_crossovers:
+            # 手征 crossover
+            chiral_mu = [c.mu_MeV for c in xi_crossovers if c.T_chiral_MeV is not None]
+            chiral_T = [c.T_chiral_MeV for c in xi_crossovers if c.T_chiral_MeV is not None]
+            if chiral_mu:
+                ax1.plot(chiral_mu, chiral_T, ':', color=color, linewidth=2, alpha=0.8,
+                        label="Chiral" if xi == xi_values[0] else None)
+            
+            # 退禁闭 crossover
+            deconf_mu = [c.mu_MeV for c in xi_crossovers if c.T_deconf_MeV is not None]
+            deconf_T = [c.T_deconf_MeV for c in xi_crossovers if c.T_deconf_MeV is not None]
+            if deconf_mu:
+                ax1.plot(deconf_mu, deconf_T, '-.', color=color, linewidth=1.5, alpha=0.7,
+                        label="Deconf." if xi == xi_values[0] else None)
     
     # 设置 T-μ 图
     ax1.set_xlabel(r"$\mu$ (MeV)", fontsize=12)
@@ -468,6 +555,8 @@ def main() -> None:
                        help="CEP data file")
     parser.add_argument("--spinodal", type=Path, default=DEFAULT_SPINODAL_PATH,
                        help="Spinodal data file")
+    parser.add_argument("--crossover", type=Path, default=DEFAULT_CROSSOVER_PATH,
+                       help="Crossover data file")
     parser.add_argument("--xi", type=float, action="append", default=None,
                        help="ξ values to plot (can specify multiple times)")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
@@ -481,6 +570,8 @@ def main() -> None:
                        help="Type of phase diagram to plot")
     parser.add_argument("--no-spinodal", action="store_true", 
                        help="Don't plot spinodal lines")
+    parser.add_argument("--no-crossover", action="store_true",
+                       help="Don't plot crossover lines")
     
     args = parser.parse_args()
     
@@ -488,6 +579,7 @@ def main() -> None:
     boundary_points = load_boundary_data(args.boundary)
     cep_points = load_cep_data(args.cep)
     spinodal_points = [] if args.no_spinodal else load_spinodal_data(args.spinodal)
+    crossover_points = [] if args.no_crossover else load_crossover_data(args.crossover)
     
     if not boundary_points:
         print(f"No boundary data found in {args.boundary}")
@@ -500,6 +592,7 @@ def main() -> None:
     print(f"Available ξ values: {sorted(boundary_groups.keys())}")
     print(f"CEP points: {len(cep_points)}")
     print(f"Spinodal points: {len(spinodal_points)}")
+    print(f"Crossover points: {len(crossover_points)}")
     
     show = not args.no_show
     output_dir = args.output_dir
@@ -515,7 +608,7 @@ def main() -> None:
     # 绘制相图
     if args.type in ["T-mu", "all"]:
         plot_T_mu_phase_diagram(
-            boundary_groups, cep_points, spinodal_points, xi_filter,
+            boundary_groups, cep_points, spinodal_points, crossover_points, xi_filter,
             output_path=output_dir / f"phase_diagram_T_mu{suffix}.{fmt}",
             show=show, dpi=dpi,
         )
@@ -529,7 +622,7 @@ def main() -> None:
     
     if args.type in ["combined", "all"]:
         plot_combined_phase_diagram(
-            boundary_groups, cep_points, spinodal_points, xi_filter,
+            boundary_groups, cep_points, spinodal_points, crossover_points, xi_filter,
             output_path=output_dir / f"phase_diagram_combined{suffix}.{fmt}",
             show=show, dpi=dpi,
         )

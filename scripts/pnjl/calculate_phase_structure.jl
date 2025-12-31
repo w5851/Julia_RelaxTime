@@ -6,6 +6,7 @@ PNJL 相结构计算脚本
 1. CEP (临界终点)
 2. 一阶相变线 (T-ρ 扫描 + Maxwell 构造)
 3. Spinodal 数据（亚稳态边界）
+4. Crossover 线（手征和退禁闭）
 
 输出文件保存到 data/reference/pnjl/
 
@@ -21,6 +22,7 @@ PNJL 相结构计算脚本
     --rho_step=0.05   密度步长
     --output_dir=...  输出目录
     --skip_trho       跳过 T-ρ 扫描（使用已有数据）
+    --skip_crossover  跳过 crossover 计算
     --verbose         详细输出
 """
 
@@ -37,6 +39,10 @@ include(joinpath(@__DIR__, "..", "..", "src", "pnjl", "PNJL.jl"))
 using .PNJL
 using .PNJL.TrhoScan
 using .PNJL.PhaseTransition: SShapeResult, detect_s_shape, MaxwellResult, maxwell_construction
+using .PNJL.PhaseTransition: detect_crossover, CrossoverResult, scan_crossover_line
+
+# 单位转换
+const hbarc = 197.327  # MeV·fm
 
 # ============================================================================
 # 配置
@@ -53,6 +59,7 @@ struct PhaseStructureConfig
     rho_step::Float64
     output_dir::String
     skip_trho::Bool
+    skip_crossover::Bool
     verbose::Bool
 end
 
@@ -65,6 +72,7 @@ function parse_args(args)
     rho_step = 0.05
     output_dir = DEFAULT_OUTPUT_DIR
     skip_trho = false
+    skip_crossover = false
     verbose = false
     
     for arg in args
@@ -84,6 +92,8 @@ function parse_args(args)
             output_dir = arg[14:end]
         elseif arg == "--skip_trho"
             skip_trho = true
+        elseif arg == "--skip_crossover"
+            skip_crossover = true
         elseif arg == "--verbose"
             verbose = true
         elseif arg == "--help" || arg == "-h"
@@ -97,13 +107,14 @@ function parse_args(args)
             println("  --rho_step=0.05   密度步长")
             println("  --output_dir=...  输出目录")
             println("  --skip_trho       跳过 T-ρ 扫描")
+            println("  --skip_crossover  跳过 crossover 计算")
             println("  --verbose         详细输出")
             exit(0)
         end
     end
     
     return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_max, rho_step, 
-                                 output_dir, skip_trho, verbose)
+                                 output_dir, skip_trho, skip_crossover, verbose)
 end
 
 # ============================================================================
@@ -138,6 +149,13 @@ function main(args=ARGS)
     
     # Step 4: 保存结果（包括 spinodal）
     step4_save_results(config, cep_result, boundary_results, curves)
+    
+    # Step 5: Crossover 计算
+    if !config.skip_crossover
+        step5_crossover_calculation(config, cep_result)
+    else
+        println("\n[Step 5] 跳过 Crossover 计算")
+    end
     
     println("\n" * "=" ^ 60)
     println("计算完成!")
@@ -574,6 +592,114 @@ function save_spinodals(path::String, xi::Float64, curves)
             xi_val, T = key
             mu_low, mu_high, rho_hadron, rho_quark = existing[key]
             println(io, "$xi_val,$T,$mu_low,$mu_high,$rho_hadron,$rho_quark")
+        end
+    end
+end
+
+# ============================================================================
+# Step 5: Crossover 计算
+# ============================================================================
+
+"""
+Crossover 计算：扫描 μ = 0 到 μ_CEP 的 crossover 线
+
+计算手征 crossover (φ_u) 和退禁闭 crossover (Φ)
+"""
+function step5_crossover_calculation(config::PhaseStructureConfig, cep_result)
+    println("\n[Step 5] Crossover 计算")
+    println("-" ^ 40)
+    
+    # 确定 μ 扫描范围
+    if cep_result.has_cep
+        μ_max_MeV = cep_result.mu_cep
+        println("μ 范围: 0 - $(round(μ_max_MeV, digits=1)) MeV (CEP)")
+    else
+        # 如果没有 CEP，使用默认范围
+        μ_max_MeV = 300.0
+        println("μ 范围: 0 - $(μ_max_MeV) MeV (默认)")
+    end
+    
+    # 转换为 fm⁻¹
+    μ_max_fm = μ_max_MeV / hbarc
+    
+    # 温度搜索范围 (fm⁻¹)
+    T_min_fm = config.T_min / hbarc
+    T_max_fm = config.T_max / hbarc
+    
+    # μ 采样点数
+    n_mu = max(10, Int(ceil(μ_max_MeV / 20)))  # 约每 20 MeV 一个点
+    
+    println("温度搜索范围: $(config.T_min) - $(config.T_max) MeV")
+    println("μ 采样点数: $n_mu")
+    println()
+    
+    # 扫描手征 crossover
+    println("计算手征 crossover (φ_u)...")
+    t_start = time()
+    chiral_results = scan_crossover_line(
+        (0.0, μ_max_fm, n_mu), (T_min_fm, T_max_fm);
+        method=:inflection, variable=:phi_u, xi=config.xi
+    )
+    t_chiral = time() - t_start
+    chiral_success = count(r -> r.converged, chiral_results)
+    println("  完成: $(chiral_success)/$n_mu 成功, 耗时 $(round(t_chiral, digits=1)) 秒")
+    
+    # 扫描退禁闭 crossover
+    println("计算退禁闭 crossover (Φ)...")
+    t_start = time()
+    deconf_results = scan_crossover_line(
+        (0.0, μ_max_fm, n_mu), (T_min_fm, T_max_fm);
+        method=:inflection, variable=:Phi, xi=config.xi
+    )
+    t_deconf = time() - t_start
+    deconf_success = count(r -> r.converged, deconf_results)
+    println("  完成: $(deconf_success)/$n_mu 成功, 耗时 $(round(t_deconf, digits=1)) 秒")
+    
+    # 保存结果
+    crossover_path = joinpath(config.output_dir, "crossover.csv")
+    save_crossover(crossover_path, config.xi, chiral_results, deconf_results)
+    println("\nCrossover 数据: $crossover_path")
+end
+
+"""保存 crossover 数据"""
+function save_crossover(path::String, xi::Float64, 
+                        chiral_results::Vector, deconf_results::Vector)
+    # 读取现有数据（如果存在）
+    existing = Dict{Tuple{Float64, Float64}, Tuple{Float64, Float64}}()
+    if isfile(path)
+        for line in eachline(path)
+            startswith(line, "xi") && continue
+            cols = split(line, ',')
+            length(cols) >= 4 || continue
+            xi_val = tryparse(Float64, cols[1])
+            mu = tryparse(Float64, cols[2])
+            T_chiral = tryparse(Float64, cols[3])
+            T_deconf = tryparse(Float64, cols[4])
+            xi_val === nothing && continue
+            existing[(xi_val, mu)] = (something(T_chiral, NaN), something(T_deconf, NaN))
+        end
+    end
+    
+    # 更新当前 xi 的数据
+    n = min(length(chiral_results), length(deconf_results))
+    for i in 1:n
+        μ_MeV = chiral_results[i].mu_fm * hbarc
+        T_chiral_MeV = chiral_results[i].converged ? 
+                       chiral_results[i].T_crossover_fm * hbarc : NaN
+        T_deconf_MeV = deconf_results[i].converged ? 
+                       deconf_results[i].T_crossover_fm * hbarc : NaN
+        existing[(xi, μ_MeV)] = (T_chiral_MeV, T_deconf_MeV)
+    end
+    
+    # 写入文件
+    open(path, "w") do io
+        println(io, "xi,mu_MeV,T_crossover_chiral_MeV,T_crossover_deconf_MeV")
+        for key in sort(collect(keys(existing)))
+            xi_val, mu = key
+            T_chiral, T_deconf = existing[key]
+            T_chiral_str = isnan(T_chiral) ? "" : string(T_chiral)
+            T_deconf_str = isnan(T_deconf) ? "" : string(T_deconf)
+            println(io, "$xi_val,$mu,$T_chiral_str,$T_deconf_str")
         end
     end
 end
