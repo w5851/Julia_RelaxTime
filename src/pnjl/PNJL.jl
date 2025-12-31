@@ -115,6 +115,7 @@ using .PhaseTransition
 export SShapeResult, detect_s_shape
 export MaxwellResult, maxwell_construction
 export group_curves_by_temperature
+export CrossoverResult, detect_crossover, scan_crossover_line
 
 # ============================================================================
 # 兼容性模块（旧接口）- 已弃用
