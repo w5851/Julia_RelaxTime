@@ -39,6 +39,7 @@ def _find_project_root() -> Path:
 PROJECT_ROOT = _find_project_root()
 DEFAULT_BOUNDARY_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
 DEFAULT_SPINODAL_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "spinodals.csv"
+DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
 
 
 @dataclass
@@ -276,6 +277,159 @@ def validate_spinodal_data(path: Path) -> List[ValidationIssue]:
     return issues
 
 
+def group_crossover_by_xi(rows: List[Dict[str, float]]) -> Dict[float, List[Dict[str, float]]]:
+    """按 xi 分组并按化学势排序"""
+    groups: Dict[float, List[Dict[str, float]]] = {}
+    for row in rows:
+        xi = row.get("xi", 0.0)
+        groups.setdefault(xi, []).append(row)
+    for xi in groups:
+        groups[xi].sort(key=lambda r: r.get("mu_MeV", 0))
+    return groups
+
+
+def validate_crossover_data(path: Path) -> List[ValidationIssue]:
+    """验证 crossover.csv 数据
+    
+    检查规则：
+    1. T_crossover 应随 μ 增加而单调递减
+    2. T_deconf <= T_chiral（退禁闭温度应低于手征温度）
+    3. 数据应光滑，无大跳变
+    4. T_crossover 应在合理范围内（50-300 MeV）
+    """
+    issues = []
+    headers, rows = load_csv_data(path)
+    
+    if not rows:
+        issues.append(ValidationIssue(
+            severity="warning", file=str(path), column="",
+            xi=0, T_MeV=0, message="No crossover data found"
+        ))
+        return issues
+    
+    groups = group_crossover_by_xi(rows)
+    
+    for xi, data in groups.items():
+        mu_vals = [r["mu_MeV"] for r in data]
+        
+        # 获取 chiral 和 deconf 温度
+        T_chiral = []
+        T_deconf = []
+        for r in data:
+            tc = r.get("T_crossover_chiral_MeV", float('nan'))
+            td = r.get("T_crossover_deconf_MeV", float('nan'))
+            T_chiral.append(tc)
+            T_deconf.append(td)
+        
+        # 检查 1: T_chiral 单调递减
+        valid_chiral = [(i, mu_vals[i], T_chiral[i]) for i in range(len(T_chiral)) 
+                        if not np.isnan(T_chiral[i])]
+        for i in range(1, len(valid_chiral)):
+            idx_prev, mu_prev, T_prev = valid_chiral[i-1]
+            idx_curr, mu_curr, T_curr = valid_chiral[i]
+            if T_curr > T_prev + 0.1:  # 允许小误差
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    file="crossover.csv",
+                    column="T_crossover_chiral_MeV",
+                    xi=xi,
+                    T_MeV=T_curr,
+                    message=f"Non-monotonic: T increased from {T_prev:.2f} to {T_curr:.2f} MeV "
+                            f"(μ: {mu_prev:.1f} → {mu_curr:.1f} MeV)",
+                    value=T_curr
+                ))
+        
+        # 检查 2: T_deconf 单调递减
+        valid_deconf = [(i, mu_vals[i], T_deconf[i]) for i in range(len(T_deconf)) 
+                        if not np.isnan(T_deconf[i])]
+        for i in range(1, len(valid_deconf)):
+            idx_prev, mu_prev, T_prev = valid_deconf[i-1]
+            idx_curr, mu_curr, T_curr = valid_deconf[i]
+            if T_curr > T_prev + 0.1:  # 允许小误差
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    file="crossover.csv",
+                    column="T_crossover_deconf_MeV",
+                    xi=xi,
+                    T_MeV=T_curr,
+                    message=f"Non-monotonic: T increased from {T_prev:.2f} to {T_curr:.2f} MeV "
+                            f"(μ: {mu_prev:.1f} → {mu_curr:.1f} MeV)",
+                    value=T_curr
+                ))
+        
+        # 检查 3: T_deconf <= T_chiral
+        for i in range(len(data)):
+            tc, td = T_chiral[i], T_deconf[i]
+            if not np.isnan(tc) and not np.isnan(td):
+                if td > tc + 1.0:  # 允许 1 MeV 误差
+                    issues.append(ValidationIssue(
+                        severity="error",
+                        file="crossover.csv",
+                        column="T_crossover_deconf_MeV",
+                        xi=xi,
+                        T_MeV=td,
+                        message=f"T_deconf ({td:.2f} MeV) > T_chiral ({tc:.2f} MeV) "
+                                f"at μ={mu_vals[i]:.1f} MeV",
+                        value=td,
+                        expected_range=(0, tc)
+                    ))
+        
+        # 检查 4: T_crossover 在合理范围内
+        T_MIN, T_MAX = 50.0, 300.0
+        for i in range(len(data)):
+            mu = mu_vals[i]
+            for col, T_val in [("T_crossover_chiral_MeV", T_chiral[i]), 
+                               ("T_crossover_deconf_MeV", T_deconf[i])]:
+                if np.isnan(T_val):
+                    continue
+                if T_val < T_MIN or T_val > T_MAX:
+                    issues.append(ValidationIssue(
+                        severity="error",
+                        file="crossover.csv",
+                        column=col,
+                        xi=xi,
+                        T_MeV=T_val,
+                        message=f"T_crossover out of range [{T_MIN}, {T_MAX}] MeV "
+                                f"at μ={mu:.1f} MeV",
+                        value=T_val,
+                        expected_range=(T_MIN, T_MAX)
+                    ))
+        
+        # 检查 5: 光滑性（chiral）
+        valid_T_chiral = [T_chiral[i] for i in range(len(T_chiral)) if not np.isnan(T_chiral[i])]
+        valid_mu_chiral = [mu_vals[i] for i in range(len(T_chiral)) if not np.isnan(T_chiral[i])]
+        if len(valid_T_chiral) >= 3:
+            jumps = check_smoothness(valid_T_chiral, valid_mu_chiral, threshold_ratio=0.3)
+            for idx, mu, val, ratio in jumps:
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    file="crossover.csv",
+                    column="T_crossover_chiral_MeV",
+                    xi=xi,
+                    T_MeV=val,
+                    message=f"Large jump detected at μ={mu:.1f} MeV (ratio={ratio:.2f})",
+                    value=val
+                ))
+        
+        # 检查 6: 光滑性（deconf）
+        valid_T_deconf = [T_deconf[i] for i in range(len(T_deconf)) if not np.isnan(T_deconf[i])]
+        valid_mu_deconf = [mu_vals[i] for i in range(len(T_deconf)) if not np.isnan(T_deconf[i])]
+        if len(valid_T_deconf) >= 3:
+            jumps = check_smoothness(valid_T_deconf, valid_mu_deconf, threshold_ratio=0.3)
+            for idx, mu, val, ratio in jumps:
+                issues.append(ValidationIssue(
+                    severity="warning",
+                    file="crossover.csv",
+                    column="T_crossover_deconf_MeV",
+                    xi=xi,
+                    T_MeV=val,
+                    message=f"Large jump detected at μ={mu:.1f} MeV (ratio={ratio:.2f})",
+                    value=val
+                ))
+    
+    return issues
+
+
 def print_statistics(path: Path, name: str) -> None:
     """打印数据统计信息"""
     headers, rows = load_csv_data(path)
@@ -309,6 +463,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Validate PNJL phase data")
     parser.add_argument("--boundary", type=Path, default=DEFAULT_BOUNDARY_PATH)
     parser.add_argument("--spinodal", type=Path, default=DEFAULT_SPINODAL_PATH)
+    parser.add_argument("--crossover", type=Path, default=DEFAULT_CROSSOVER_PATH)
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
     
@@ -319,6 +474,7 @@ def main() -> None:
     # 统计信息
     print_statistics(args.boundary, "boundary.csv")
     print_statistics(args.spinodal, "spinodals.csv")
+    print_crossover_statistics(args.crossover, "crossover.csv")
     
     # 验证
     print("\n" + "-" * 60)
@@ -328,6 +484,7 @@ def main() -> None:
     all_issues = []
     all_issues.extend(validate_boundary_data(args.boundary))
     all_issues.extend(validate_spinodal_data(args.spinodal))
+    all_issues.extend(validate_crossover_data(args.crossover))
     
     if not all_issues:
         print("\n✓ All data passed validation!")
@@ -344,6 +501,39 @@ def main() -> None:
                   f"{issue.column}: {issue.message}{val_str}")
     
     print("\n" + "=" * 60)
+
+
+def print_crossover_statistics(path: Path, name: str) -> None:
+    """打印 crossover 数据统计信息"""
+    headers, rows = load_csv_data(path)
+    if not rows:
+        print(f"\n{name}: No data")
+        return
+    
+    groups = group_crossover_by_xi(rows)
+    
+    print(f"\n{name}:")
+    print(f"  Total rows: {len(rows)}")
+    print(f"  ξ values: {sorted(groups.keys())}")
+    
+    for xi in sorted(groups.keys()):
+        data = groups[xi]
+        mu_min = min(r["mu_MeV"] for r in data)
+        mu_max = max(r["mu_MeV"] for r in data)
+        print(f"  ξ={xi}: {len(data)} points, μ=[{mu_min:.1f}, {mu_max:.1f}] MeV")
+        
+        # 打印 chiral 和 deconf 的范围
+        T_chiral = [r.get("T_crossover_chiral_MeV", float('nan')) for r in data]
+        T_chiral_valid = [t for t in T_chiral if not np.isnan(t)]
+        if T_chiral_valid:
+            print(f"    T_chiral: [{min(T_chiral_valid):.2f}, {max(T_chiral_valid):.2f}] MeV "
+                  f"({len(T_chiral_valid)}/{len(data)} valid)")
+        
+        T_deconf = [r.get("T_crossover_deconf_MeV", float('nan')) for r in data]
+        T_deconf_valid = [t for t in T_deconf if not np.isnan(t)]
+        if T_deconf_valid:
+            print(f"    T_deconf: [{min(T_deconf_valid):.2f}, {max(T_deconf_valid):.2f}] MeV "
+                  f"({len(T_deconf_valid)}/{len(data)} valid)")
 
 
 if __name__ == "__main__":

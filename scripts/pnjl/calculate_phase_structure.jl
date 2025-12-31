@@ -623,13 +623,16 @@ function step5_crossover_calculation(config::PhaseStructureConfig, cep_result)
     μ_max_fm = μ_max_MeV / hbarc
     
     # 温度搜索范围 (fm⁻¹)
+    # 使用 220 MeV 作为上限，确保能捕获 μ=0 的 chiral crossover（约 200 MeV）
+    # 同时避免高温区域的虚假拐点
     T_min_fm = config.T_min / hbarc
-    T_max_fm = config.T_max / hbarc
+    T_max_crossover = min(config.T_max, 220.0)  # 限制在 220 MeV 以下
+    T_max_fm = T_max_crossover / hbarc
     
     # μ 采样点数
     n_mu = max(10, Int(ceil(μ_max_MeV / 20)))  # 约每 20 MeV 一个点
     
-    println("温度搜索范围: $(config.T_min) - $(config.T_max) MeV")
+    println("温度搜索范围: $(config.T_min) - $(T_max_crossover) MeV")
     println("μ 采样点数: $n_mu")
     println()
     
@@ -661,11 +664,11 @@ function step5_crossover_calculation(config::PhaseStructureConfig, cep_result)
     println("\nCrossover 数据: $crossover_path")
 end
 
-"""保存 crossover 数据"""
+"""保存 crossover 数据（包含 ρ 值）"""
 function save_crossover(path::String, xi::Float64, 
                         chiral_results::Vector, deconf_results::Vector)
-    # 读取现有数据（如果存在）
-    existing = Dict{Tuple{Float64, Float64}, Tuple{Float64, Float64}}()
+    # 读取现有数据（如果存在）- 新格式包含 rho
+    existing = Dict{Tuple{Float64, Float64}, NTuple{4, Float64}}()
     if isfile(path)
         for line in eachline(path)
             startswith(line, "xi") && continue
@@ -674,9 +677,16 @@ function save_crossover(path::String, xi::Float64,
             xi_val = tryparse(Float64, cols[1])
             mu = tryparse(Float64, cols[2])
             T_chiral = tryparse(Float64, cols[3])
-            T_deconf = tryparse(Float64, cols[4])
+            T_deconf = length(cols) >= 4 ? tryparse(Float64, cols[4]) : nothing
+            rho_chiral = length(cols) >= 5 ? tryparse(Float64, cols[5]) : nothing
+            rho_deconf = length(cols) >= 6 ? tryparse(Float64, cols[6]) : nothing
             xi_val === nothing && continue
-            existing[(xi_val, mu)] = (something(T_chiral, NaN), something(T_deconf, NaN))
+            existing[(xi_val, mu)] = (
+                something(T_chiral, NaN), 
+                something(T_deconf, NaN),
+                something(rho_chiral, NaN),
+                something(rho_deconf, NaN)
+            )
         end
     end
     
@@ -688,18 +698,24 @@ function save_crossover(path::String, xi::Float64,
                        chiral_results[i].T_crossover_fm * hbarc : NaN
         T_deconf_MeV = deconf_results[i].converged ? 
                        deconf_results[i].T_crossover_fm * hbarc : NaN
-        existing[(xi, μ_MeV)] = (T_chiral_MeV, T_deconf_MeV)
+        rho_chiral = chiral_results[i].converged ? 
+                     something(chiral_results[i].rho, NaN) : NaN
+        rho_deconf = deconf_results[i].converged ? 
+                     something(deconf_results[i].rho, NaN) : NaN
+        existing[(xi, μ_MeV)] = (T_chiral_MeV, T_deconf_MeV, rho_chiral, rho_deconf)
     end
     
-    # 写入文件
+    # 写入文件（新格式包含 rho）
     open(path, "w") do io
-        println(io, "xi,mu_MeV,T_crossover_chiral_MeV,T_crossover_deconf_MeV")
+        println(io, "xi,mu_MeV,T_crossover_chiral_MeV,T_crossover_deconf_MeV,rho_chiral,rho_deconf")
         for key in sort(collect(keys(existing)))
             xi_val, mu = key
-            T_chiral, T_deconf = existing[key]
+            T_chiral, T_deconf, rho_chiral, rho_deconf = existing[key]
             T_chiral_str = isnan(T_chiral) ? "" : string(T_chiral)
             T_deconf_str = isnan(T_deconf) ? "" : string(T_deconf)
-            println(io, "$xi_val,$mu,$T_chiral_str,$T_deconf_str")
+            rho_chiral_str = isnan(rho_chiral) ? "" : string(rho_chiral)
+            rho_deconf_str = isnan(rho_deconf) ? "" : string(rho_deconf)
+            println(io, "$xi_val,$mu,$T_chiral_str,$T_deconf_str,$rho_chiral_str,$rho_deconf_str")
         end
     end
 end

@@ -93,6 +93,8 @@ class CrossoverPoint:
     mu_MeV: float
     T_chiral_MeV: Optional[float]  # 手征 crossover 温度
     T_deconf_MeV: Optional[float]  # 退禁闭 crossover 温度
+    rho_chiral: Optional[float]    # 手征 crossover 密度
+    rho_deconf: Optional[float]    # 退禁闭 crossover 密度
 
 
 def load_boundary_data(path: Path) -> List[BoundaryPoint]:
@@ -181,11 +183,15 @@ def load_crossover_data(path: Path) -> List[CrossoverPoint]:
             try:
                 T_chiral = row.get("T_crossover_chiral_MeV", "")
                 T_deconf = row.get("T_crossover_deconf_MeV", "")
+                rho_chiral = row.get("rho_chiral", "")
+                rho_deconf = row.get("rho_deconf", "")
                 points.append(CrossoverPoint(
                     xi=float(row["xi"]),
                     mu_MeV=float(row["mu_MeV"]),
                     T_chiral_MeV=float(T_chiral) if T_chiral else None,
                     T_deconf_MeV=float(T_deconf) if T_deconf else None,
+                    rho_chiral=float(rho_chiral) if rho_chiral else None,
+                    rho_deconf=float(rho_deconf) if rho_deconf else None,
                 ))
             except (KeyError, ValueError):
                 continue
@@ -356,12 +362,13 @@ def plot_T_rho_phase_diagram(
     boundary_groups: Dict[float, List[BoundaryPoint]],
     ceps: List[CEPPoint],
     spinodals: Optional[List[SpinodalPoint]] = None,
+    crossovers: Optional[List[CrossoverPoint]] = None,
     xi_filter: Optional[List[float]] = None,
     output_path: Optional[Path] = None,
     show: bool = True,
     dpi: int = 200,
 ) -> None:
-    """绘制 T-ρ 相图（共存区）"""
+    """绘制 T-ρ 相图（共存区和 crossover 线）"""
     fig, ax = plt.subplots(figsize=(8, 6))
     
     xi_values = sorted(boundary_groups.keys())
@@ -369,6 +376,7 @@ def plot_T_rho_phase_diagram(
         xi_values = [xi for xi in xi_values if xi in xi_filter]
     
     spinodal_groups = group_spinodals_by_xi(spinodals) if spinodals else {}
+    crossover_groups = group_crossover_by_xi(crossovers) if crossovers else {}
     
     for xi in xi_values:
         points = boundary_groups.get(xi, [])
@@ -397,6 +405,27 @@ def plot_T_rho_phase_diagram(
         ax.fill_betweenx(T_vals, rho_hadron, rho_quark, 
                          color=color, alpha=0.2,
                          label=f"ξ = {xi:.1f}" if len(xi_values) > 1 else "Coexistence region")
+        
+        # 绘制 crossover 线（按 T 排序，因为 ρ 不是单调的）
+        xi_crossovers = crossover_groups.get(xi, [])
+        if xi_crossovers:
+            # 手征 crossover (T-ρ)，按 T 降序排列（高温到低温）
+            chiral_data = [(c.rho_chiral, c.T_chiral_MeV) for c in xi_crossovers 
+                          if c.T_chiral_MeV is not None and c.rho_chiral is not None]
+            if chiral_data:
+                chiral_sorted = sorted(chiral_data, key=lambda x: x[1], reverse=True)
+                rho_chiral, T_chiral = zip(*chiral_sorted)
+                ax.plot(rho_chiral, T_chiral, '-.', color=color, linewidth=2, 
+                       label=f"Chiral crossover (ξ={xi:.1f})" if len(xi_values) > 1 else "Chiral crossover")
+            
+            # 退禁闭 crossover (T-ρ)，按 T 降序排列
+            deconf_data = [(c.rho_deconf, c.T_deconf_MeV) for c in xi_crossovers 
+                          if c.T_deconf_MeV is not None and c.rho_deconf is not None]
+            if deconf_data:
+                deconf_sorted = sorted(deconf_data, key=lambda x: x[1], reverse=True)
+                rho_deconf, T_deconf = zip(*deconf_sorted)
+                ax.plot(rho_deconf, T_deconf, ':', color=color, linewidth=2,
+                       label=f"Deconf crossover (ξ={xi:.1f})" if len(xi_values) > 1 else "Deconf crossover")
         
         # 绘制 CEP（在 ρ 图上用 (ρ_hadron + ρ_quark)/2 作为 x 坐标）
         cep = get_cep_for_xi(ceps, xi)
@@ -615,7 +644,7 @@ def main() -> None:
     
     if args.type in ["T-rho", "all"]:
         plot_T_rho_phase_diagram(
-            boundary_groups, cep_points, spinodal_points, xi_filter,
+            boundary_groups, cep_points, spinodal_points, crossover_points, xi_filter,
             output_path=output_dir / f"phase_diagram_T_rho{suffix}.{fmt}",
             show=show, dpi=dpi,
         )

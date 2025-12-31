@@ -394,6 +394,7 @@ Crossover 检测结果
 字段：
 - `found`: 是否找到 crossover
 - `T_crossover`: crossover 温度 (fm⁻¹)
+- `rho`: crossover 点的密度 (ρ/ρ₀)
 - `method`: 使用的方法 (:peak 或 :inflection)
 - `derivative_value`: 在 crossover 点的导数值
 - `iterations`: 迭代次数
@@ -402,13 +403,14 @@ Crossover 检测结果
 struct CrossoverResult
     found::Bool
     T_crossover::Union{Nothing, Float64}
+    rho::Union{Nothing, Float64}
     method::Symbol
     derivative_value::Union{Nothing, Float64}
     iterations::Int
     details::Dict{Symbol, Any}
 end
 
-CrossoverResult(; method::Symbol=:peak) = CrossoverResult(false, nothing, method, nothing, 0, Dict{Symbol, Any}())
+CrossoverResult(; method::Symbol=:peak) = CrossoverResult(false, nothing, nothing, method, nothing, 0, Dict{Symbol, Any}())
 
 # 导入求解器模块
 const _SOLVER_PATH = normpath(joinpath(@__DIR__, "..", "solver", "Solver.jl"))
@@ -449,13 +451,36 @@ function detect_crossover(μ_fm::Real, T_range::Tuple{Real, Real};
         return result.dx_dT[var_idx], result.d2x_dT2[var_idx]
     end
     
+    # 检测 crossover
     if method == :peak
-        return _detect_crossover_peak(T_min, T_max, compute_derivatives, n_scan, tol, max_iter, var_idx)
+        result = _detect_crossover_peak(T_min, T_max, compute_derivatives, n_scan, tol, max_iter, var_idx)
     elseif method == :inflection
-        return _detect_crossover_inflection(T_min, T_max, compute_derivatives, n_scan, tol, max_iter, var_idx)
+        result = _detect_crossover_inflection(T_min, T_max, compute_derivatives, n_scan, tol, max_iter, var_idx)
     else
         error("Unknown method: $method. Use :peak or :inflection")
     end
+    
+    # 如果找到 crossover，计算对应的 ρ 值
+    if result.found && result.T_crossover !== nothing
+        rho = _compute_rho_at_crossover(result.T_crossover, Float64(μ_fm), xi, p_num, t_num)
+        return CrossoverResult(result.found, result.T_crossover, rho, result.method, 
+                               result.derivative_value, result.iterations, result.details)
+    end
+    
+    return result
+end
+
+"""计算 crossover 点的密度"""
+function _compute_rho_at_crossover(T_fm::Float64, μ_fm::Float64, xi::Real, p_num::Int, t_num::Int)
+    try
+        sol = Solver.solve(Solver.FixedMu(), T_fm, μ_fm; xi=xi, p_num=p_num, t_num=t_num)
+        if sol.converged
+            return sol.rho_norm
+        end
+    catch e
+        # 忽略错误，返回 nothing
+    end
+    return nothing
 end
 
 """峰值法检测 crossover - 找最大峰（手征 crossover）
@@ -549,13 +574,15 @@ function _detect_crossover_peak(T_min::Float64, T_max::Float64,
                                 :all_peaks => all_peaks,
                                 :scan_data => collect(zip(T_vals, derivs)))
     
-    return CrossoverResult(true, T_crossover, :peak, final_deriv, iterations, details)
+    return CrossoverResult(true, T_crossover, nothing, :peak, final_deriv, iterations, details)
 end
 
-"""拐点法检测 crossover - 找第一个 + → - 拐点（手征 crossover）
+"""拐点法检测 crossover - 找手征/退禁闭 crossover 的拐点
 
-从高温向低温扫描，找到第一个 ∂²φ/∂T² 从正变负的位置。
+从高温向低温扫描，找到 ∂²φ/∂T² 从负变正的位置（峰值右侧的拐点）。
 使用二分法细化拐点位置。
+
+注意：会过滤掉 |dφ/dT| 过小的虚假拐点（高温饱和区域）。
 """
 function _detect_crossover_inflection(T_min::Float64, T_max::Float64,
                                       compute_derivatives::Function,
@@ -575,23 +602,40 @@ function _detect_crossover_inflection(T_min::Float64, T_max::Float64,
         end
     end
     
-    # 从高温向低温找第一个 - → + 的符号变化（因为扫描方向反了，所以是 - → +）
-    # 这对应原来的 + → -（从凸变凹，峰值的拐点）
-    sign_change_idx = nothing
+    # 计算 |dφ/dT| 的最大值，用于过滤虚假拐点
+    valid_d1 = filter(!isnan, d1_vals)
+    max_abs_d1 = isempty(valid_d1) ? 1.0 : maximum(abs, valid_d1)
+    # 阈值：|dφ/dT| 至少要达到最大值的 15%（提高阈值以过滤更多虚假拐点）
+    d1_threshold = max_abs_d1 * 0.15
+    
+    # 收集所有有效的拐点
+    valid_inflections = Tuple{Int, Float64}[]  # (index, d1_at_inflection)
     for i in 1:(length(d2_vals) - 1)
         if !isnan(d2_vals[i]) && !isnan(d2_vals[i+1])
             if d2_vals[i] < 0 && d2_vals[i+1] > 0  # - → +（高温到低温方向）
-                sign_change_idx = i
-                break
+                # 检查拐点附近的 |dφ/dT| 是否足够大
+                d1_at_inflection = (abs(d1_vals[i]) + abs(d1_vals[i+1])) / 2
+                if d1_at_inflection >= d1_threshold
+                    push!(valid_inflections, (i, d1_at_inflection))
+                end
             end
         end
     end
     
+    # 如果有多个有效拐点，选择 |dφ/dT| 最大的那个（对应真正的 crossover）
+    sign_change_idx = nothing
+    if !isempty(valid_inflections)
+        # 选择 |dφ/dT| 最大的拐点
+        _, best_pos = findmax(x -> x[2], valid_inflections)
+        sign_change_idx = valid_inflections[best_pos][1]
+    end
+    
     if sign_change_idx === nothing
         details = Dict{Symbol, Any}(:T_range => (T_min, T_max), :n_scan => n_scan,
-                                    :variable_index => var_idx, :reason => "no_sign_change",
+                                    :variable_index => var_idx, :reason => "no_valid_sign_change",
+                                    :d1_threshold => d1_threshold,
                                     :scan_data => collect(zip(T_vals, d1_vals, d2_vals)))
-        return CrossoverResult(false, nothing, :inflection, nothing, 0, details)
+        return CrossoverResult(false, nothing, nothing, :inflection, nothing, 0, details)
     end
     
     # 二分法细化
@@ -622,23 +666,26 @@ function _detect_crossover_inflection(T_min::Float64, T_max::Float64,
     T_crossover = (a + b) / 2
     final_d1, final_d2 = try compute_derivatives(T_crossover) catch; (NaN, NaN) end
     
-    # 记录所有拐点信息
-    all_inflections = Tuple{Float64, Float64}[]
+    # 记录所有拐点信息（包括被过滤的）
+    all_inflections = Tuple{Float64, Float64, Bool}[]  # (T1, T2, is_valid)
     for i in 1:(length(d2_vals) - 1)
         if !isnan(d2_vals[i]) && !isnan(d2_vals[i+1])
-            if d2_vals[i] < 0 && d2_vals[i+1] > 0
-                push!(all_inflections, (T_vals[i], T_vals[i+1]))
+            if d2_vals[i] < 0 && d2_vals[i+1] > 0  # - → +
+                d1_at_inflection = (abs(d1_vals[i]) + abs(d1_vals[i+1])) / 2
+                is_valid = d1_at_inflection >= d1_threshold
+                push!(all_inflections, (T_vals[i], T_vals[i+1], is_valid))
             end
         end
     end
     
     details = Dict{Symbol, Any}(:T_range => (T_min, T_max), :n_scan => n_scan,
                                 :variable_index => var_idx, :final_d2 => final_d2,
+                                :d1_threshold => d1_threshold,
                                 :n_inflections_found => length(all_inflections),
                                 :all_inflections => all_inflections,
                                 :scan_data => collect(zip(T_vals, d1_vals, d2_vals)))
     
-    return CrossoverResult(true, T_crossover, :inflection, final_d1, iterations, details)
+    return CrossoverResult(true, T_crossover, nothing, :inflection, final_d1, iterations, details)
 end
 
 """
@@ -654,7 +701,7 @@ end
 - `xi`: 各向异性参数
 
 # 返回
-Vector{NamedTuple} 包含 (mu_fm, T_crossover_fm, converged, derivative)
+Vector{NamedTuple} 包含 (mu_fm, T_crossover_fm, rho, converged, derivative)
 """
 function scan_crossover_line(mu_range::Tuple{Real, Real, Int}, T_range::Tuple{Real, Real};
                              method::Symbol=:peak, variable::Symbol=:phi_u,
@@ -662,12 +709,12 @@ function scan_crossover_line(mu_range::Tuple{Real, Real, Int}, T_range::Tuple{Re
     μ_min, μ_max, n_mu = mu_range
     μ_vals = range(Float64(μ_min), Float64(μ_max); length=n_mu)
     
-    results = NamedTuple{(:mu_fm, :T_crossover_fm, :converged, :derivative), 
-                         Tuple{Float64, Union{Nothing, Float64}, Bool, Union{Nothing, Float64}}}[]
+    results = NamedTuple{(:mu_fm, :T_crossover_fm, :rho, :converged, :derivative), 
+                         Tuple{Float64, Union{Nothing, Float64}, Union{Nothing, Float64}, Bool, Union{Nothing, Float64}}}[]
     
     for μ in μ_vals
         result = detect_crossover(μ, T_range; method=method, variable=variable, xi=xi, kwargs...)
-        push!(results, (mu_fm=μ, T_crossover_fm=result.T_crossover, 
+        push!(results, (mu_fm=μ, T_crossover_fm=result.T_crossover, rho=result.rho,
                        converged=result.found, derivative=result.derivative_value))
     end
     
