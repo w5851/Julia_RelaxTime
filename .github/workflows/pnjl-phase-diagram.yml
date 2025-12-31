@@ -1,0 +1,127 @@
+name: PNJL Phase Diagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      xi_values:
+        description: 'ξ values (comma-separated, e.g., "0.0,0.2,0.4")'
+        required: false
+        default: '0.0'
+        type: string
+      T_min:
+        description: 'Minimum temperature (MeV)'
+        required: false
+        default: '50'
+        type: string
+      T_max:
+        description: 'Maximum temperature (MeV)'
+        required: false
+        default: '220'
+        type: string
+      T_step:
+        description: 'Temperature step (MeV)'
+        required: false
+        default: '5'
+        type: string
+      rho_max:
+        description: 'Maximum density (ρ/ρ₀)'
+        required: false
+        default: '4.0'
+        type: string
+      skip_trho:
+        description: 'Skip T-ρ scan (use existing data)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        xi: ${{ fromJson(format('[{0}]', inputs.xi_values || '0.0')) }}
+      fail-fast: false
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.10"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Install Python dependencies
+        run: pip install numpy matplotlib
+
+      - name: Run phase structure calculation
+        run: |
+          julia --project=. scripts/pnjl/calculate_phase_structure.jl \
+            --xi=${{ matrix.xi }} \
+            --T_min=${{ inputs.T_min || '50' }} \
+            --T_max=${{ inputs.T_max || '220' }} \
+            --T_step=${{ inputs.T_step || '5' }} \
+            --rho_max=${{ inputs.rho_max || '4.0' }} \
+            ${{ inputs.skip_trho == true && '--skip_trho' || '' }} \
+            --verbose
+
+      - name: Validate phase data
+        run: python scripts/pnjl/validate_phase_data.py
+
+      - name: Generate phase diagrams
+        run: |
+          python scripts/pnjl/plot_phase_diagram.py \
+            --type all \
+            --xi ${{ matrix.xi }} \
+            --output-dir data/outputs/figures/pnjl/phase_diagrams \
+            --no-show
+
+      - name: Upload data artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-phase-data-xi${{ matrix.xi }}
+          path: |
+            data/reference/pnjl/*.csv
+          retention-days: 90
+
+      - name: Upload figure artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-phase-figures-xi${{ matrix.xi }}
+          path: |
+            data/outputs/figures/pnjl/phase_diagrams/*.png
+          retention-days: 90
+
+  summary:
+    needs: calculate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create summary
+        run: |
+          echo "## PNJL Phase Diagram Calculation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Parameters" >> $GITHUB_STEP_SUMMARY
+          echo "- ξ values: ${{ inputs.xi_values || '0.0' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- T range: ${{ inputs.T_min || '50' }} - ${{ inputs.T_max || '220' }} MeV (step: ${{ inputs.T_step || '5' }})" >> $GITHUB_STEP_SUMMARY
+          echo "- ρ_max: ${{ inputs.rho_max || '4.0' }} ρ₀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
+          find artifacts -type f -name "*.csv" -o -name "*.png" | sort | while read f; do
+            echo "- \`$f\`" >> $GITHUB_STEP_SUMMARY
+          done
