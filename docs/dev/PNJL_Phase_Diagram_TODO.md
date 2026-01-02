@@ -81,23 +81,94 @@
 
 ### 1.2 T-μ 扫描脚本
 
+**状态**：✅ 已实现
+
 **背景**：使用 `PhaseAwareContinuitySeed` 进行 T-μ 参数空间扫描。
 
-**实现计划**：
-- [ ] 创建 `scripts/pnjl/run_tmu_scan.jl`
-- [ ] 支持命令行参数（ξ, T 范围, μ 范围）
-- [ ] 自动加载 `boundary.csv` 用于相变感知
-- [ ] 输出热力学量（P, s, ε, ρ, M_u, M_d, M_s）
+**实现位置**：`scripts/pnjl/run_tmu_scan.jl`
+
+**功能**：
+- [x] 支持命令行参数（ξ, T 范围, μ 范围）
+- [x] 自动加载 `boundary.csv` 用于相变感知
+- [x] 输出热力学量（P, s, ε, ρ, M_u, M_d, M_s）
+- [x] 断点续扫支持
+- [x] 进度显示
+
+**命令行参数**：
+```
+--xi=0.0          各向异性参数
+--T_min=50        最低温度 (MeV)
+--T_max=200       最高温度 (MeV)
+--T_step=10       温度步长 (MeV)
+--mu_min=0        最低化学势 (MeV)
+--mu_max=400      最高化学势 (MeV)
+--mu_step=10      化学势步长 (MeV)
+--output=...      输出文件路径
+--resume          断点续扫（默认启用）
+--overwrite       覆盖已有文件
+--no_phase_aware  禁用相变感知策略
+--verbose         详细输出
+```
+
+**使用示例**：
+```bash
+# 基本扫描
+julia scripts/pnjl/run_tmu_scan.jl
+
+# 自定义参数范围
+julia scripts/pnjl/run_tmu_scan.jl --xi=0.2 --T_min=50 --T_max=150 --mu_max=350
+
+# 高分辨率扫描
+julia scripts/pnjl/run_tmu_scan.jl --T_step=5 --mu_step=5 --verbose
+```
+
+**输出格式**：CSV 文件，包含列：
+- T_MeV, mu_MeV, xi
+- pressure_fm4, rho, entropy_fm3, energy_fm4
+- phi_u, phi_d, phi_s, Phi1, Phi2
+- M_u_MeV, M_d_MeV, M_s_MeV
+- iterations, residual_norm, converged, message
 
 ### 1.3 热力学导数计算脚本
 
+**状态**：✅ 已实现
+
 **背景**：计算质量导数和体粘滞系数。
 
-**实现计划**：
-- [ ] 创建 `scripts/pnjl/calculate_derivatives.jl`
-- [ ] 计算 ∂M/∂T, ∂M/∂μ
-- [ ] 计算体粘滞系数 ζ/s
-- [ ] 输出 `derivatives.csv`, `bulk_viscosity.csv`
+**实现位置**：`scripts/pnjl/calculate_derivatives.jl`
+
+**功能**：
+- [x] 创建 `scripts/pnjl/calculate_derivatives.jl`
+- [x] 计算 ∂M/∂T, ∂M/∂μ
+- [x] 计算体粘滞系数 ζ/s 相关量（v_n², ∂μ_B/∂T|_σ）
+- [x] 输出 `derivatives.csv`, `bulk_viscosity.csv`
+
+**命令行参数**：
+```
+--xi=0.0          各向异性参数
+--T_min=100       最低温度 (MeV)
+--T_max=200       最高温度 (MeV)
+--T_step=10       温度步长 (MeV)
+--mu_min=0        最低化学势 (MeV)
+--mu_max=300      最高化学势 (MeV)
+--mu_step=50      化学势步长 (MeV)
+--output_dir=...  输出目录
+--verbose         详细输出
+```
+
+**输出文件**：
+1. `derivatives_xi{xi}.csv`：质量导数和热力学导数
+   - T_MeV, mu_MeV, xi
+   - M_u/d/s_MeV, dM_u/d/s_dT, dM_u/d/s_dmu
+   - dP_dT, dP_dmu, dEpsilon_dT, dEpsilon_dmu, dn_dT, dn_dmu
+   - pressure, energy, entropy, rho_norm
+
+2. `bulk_viscosity_xi{xi}.csv`：体粘滞系数相关量
+   - T_MeV, mu_MeV, xi
+   - v_n_sq (等熵声速平方)
+   - dmuB_dT_sigma (等比熵线斜率)
+   - M_u/d/s_MeV, dM_u/d/s_dT, dM_u/d/s_dmuB
+   - entropy, n_B
 
 ---
 
@@ -124,21 +195,30 @@
 
 ### 2.2 完整测试套件
 
+**状态**：✅ 已实现
+
 **背景**：新架构需要完整的测试覆盖。
 
-**实现计划**：
-- [ ] Core 模块单元测试
-  - `Integrals.jl` 测试
-  - `Thermodynamics.jl` 测试
-- [ ] Solver 模块单元测试
-  - `ConstraintModes.jl` 测试
-  - `SeedStrategies.jl` 测试
-  - `Conditions.jl` 测试
-  - `ImplicitSolver.jl` 测试
-- [ ] Derivatives 模块测试
-- [ ] 集成测试
-  - 扫描模块测试
-  - 相变分析测试
+**实现位置**：`tests/unit/pnjl/`
+
+**测试文件**：
+- [x] `test_core_integrals.jl` - Core Integrals 模块测试（34 tests）
+- [x] `test_core_thermodynamics.jl` - Core Thermodynamics 模块测试（37 tests）
+- [x] `test_solver_constraint_modes.jl` - ConstraintModes 测试（27 tests）
+- [x] `test_solver_seed_strategies.jl` - SeedStrategies 测试（66 tests）
+- [x] `test_solver_conditions.jl` - Conditions 测试（28 tests）
+- [x] `test_solver_implicit.jl` - ImplicitSolver 测试（64 tests）
+
+**已有测试**（之前实现）：
+- `test_phase_transition.jl` - 相变分析测试
+- `test_scans.jl` - 扫描模块测试
+- `test_thermo_derivatives.jl` - 热力学导数测试
+- `test_bulk_viscosity.jl` - 体粘滞系数测试
+
+**测试覆盖**：
+- Core 模块：积分节点、真空项、热项、能量色散、热力学势、热力学量
+- Solver 模块：约束模式、初值策略、条件函数、隐函数求解器
+- 物理一致性：熵非负、质量正定、同位旋对称、P=-Ω
 
 ---
 
@@ -255,4 +335,7 @@ GitHub Actions 自动化
 
 ---
 
-*更新日期：2025-12-31*
+*更新日期：2026-01-02*
+*1.2 实现日期：2025-12-31*
+*1.3 实现日期：2025-12-31*
+*2.2 实现日期：2026-01-02*
