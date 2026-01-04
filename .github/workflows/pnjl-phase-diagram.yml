@@ -68,6 +68,8 @@ jobs:
 
       - name: Cache Julia artifacts
         uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-phase-diagram
 
       - name: Install Julia dependencies
         run: |

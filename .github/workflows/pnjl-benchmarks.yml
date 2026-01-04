@@ -24,13 +24,15 @@ jobs:
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
         with:
-          version: "1.10"
+          version: "1.11"
 
-      - name: Cache artifacts
+      - name: Cache Julia artifacts
         uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-benchmark
 
       - name: Install dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
       - name: Run PNJL single-point benchmark
         run: julia --project tests/perf/pnjl/single_point_solver_perf.jl
