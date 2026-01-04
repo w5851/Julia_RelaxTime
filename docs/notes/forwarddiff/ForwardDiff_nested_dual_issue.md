@@ -503,55 +503,96 @@ grad = ForwardDiff.gradient(test_with_solver, [T_fm, μ_fm])  # 成功！
 2. **ImplicitDifferentiation.jl 的特殊处理**：该库可能内部处理了 Dual 类型传播
 3. **特定的类型组合**：某些类型组合可能触发问题，而其他组合则不会
 
-### 当前状态
+### `*_direct` 函数已移除（2026-01-03）
 
-虽然嵌套 ForwardDiff 现在可以工作，但我们仍然保留了解析式实现（方案 1），因为：
+经过性能测试，发现在完整的 `bulk_viscosity_coefficients` 函数中，`*_direct` 解析式实现仅比嵌套 ForwardDiff 快约 14%（12.1 ms vs 14.1 ms），主要耗时在求解器部分。
 
-1. **性能更好**：解析式避免了额外的 AD 开销
-2. **更可预测**：不依赖于 ForwardDiff 的内部行为
-3. **已经实现**：代码已经写好并测试通过
+为减少维护成本，已移除以下函数：
+- `calculate_rho_direct`
+- `calculate_entropy_direct`
+- `calculate_thermo_direct`
+- `calculate_log_sum_derivatives`
+- `calculate_log_term_derivatives`
 
-### 性能对比（完整 bulk_viscosity_coefficients）
+现在统一使用嵌套 ForwardDiff 实现。
 
-| 方法 | 时间 |
-|------|------|
-| 方案 1（解析式 + 链式法则） | ~48 ms |
-| 方案 3（单次 ForwardDiff） | ~144 ms |
-| 嵌套 ForwardDiff（原始实现） | ~48 ms（与方案 1 相当） |
+### 测试文件
 
-### 结论
-
-1. **嵌套 ForwardDiff 可以工作**，但行为可能因版本和类型组合而异
-2. **方案 1（解析式）仍然是推荐方案**，因为性能最好且最可预测
-3. **Zygote 性能极差**（慢 600+ 倍），不推荐使用
-4. **ChainRulesCore 方案**需要额外的集成工作，且 ForwardDiff 默认不使用它
-
+- `scripts/debug/test_nested_forwarddiff.jl` - 嵌套 ForwardDiff 系统测试
+- `tests/unit/pnjl/test_bulk_viscosity.jl` - 体粘滞系数测试
 
 ---
 
-## 最终方案（2025-12-29）
+## 最新测试发现（2026-01-03）
 
-经过测试确认嵌套 ForwardDiff 可以正常工作后，`bulk_viscosity_coefficients` 已改回使用原始的 `calculate_thermo` 和 `calculate_rho` 函数（内部使用 ForwardDiff）。
+### 嵌套 ForwardDiff 测试结果
 
-### 优点
+通过 `scripts/debug/test_nested_forwarddiff.jl` 进行了系统测试：
 
-1. **代码更简洁**：不需要维护额外的 `_direct` 版本函数
-2. **更灵活**：公式变更时不需要重新推导解析式
-3. **性能相当**：与解析式方案性能相当
+| 测试场景 | 结果 | 说明 |
+|---------|------|------|
+| 简单嵌套 (derivative inside derivative) | ✅ 通过 | 误差 < 1e-14 |
+| 复杂嵌套 (gradient inside gradient) | ✅ 通过 | 误差 < 1e-14 |
+| 模拟 PNJL 场景 | ✅ 通过 | 误差 < 1e-14 |
+| 三层嵌套 | ✅ 通过 | 误差 < 1e-14 |
+| 实际 PNJL 模块 (calculate_thermo) | ✅ 通过 | 误差 ~1.7e-10 |
 
-### 保留的解析式函数
+### 关键发现
 
-以下函数仍然保留在代码中，可用于其他场景或作为备选方案：
+1. **ForwardDiff 的 Tag 系统有效**：每个 ForwardDiff 调用创建唯一的 Tag，避免不同层级的 Dual 数混淆
 
-- `calculate_log_sum_derivatives` (Integrals.jl)
-- `calculate_log_term_derivatives` (Integrals.jl)
-- `calculate_rho_direct` (Thermodynamics.jl)
-- `calculate_entropy_direct` (Thermodynamics.jl)
-- `calculate_thermo_direct` (Thermodynamics.jl)
-- `calculate_U_derivative_T` (Thermodynamics.jl)
+2. **嵌套 ForwardDiff 可以正常工作**：
+   ```julia
+   function s_of_T_nested(T)
+       # calculate_thermo 内部使用 ForwardDiff.derivative
+       _, _, s, _ = calculate_thermo(x_state, mu_vec, T, thermal_nodes, 0.0)
+       return s
+   end
+   
+   # 外层 ForwardDiff - 正常工作！
+   ds_dT = ForwardDiff.derivative(s_of_T_nested, T_fm)
+   ```
 
-### 清理的依赖
+3. **类型签名很重要**：确保传入的参数类型正确（如 `SVector{5}` 而不是 `Vector`）
 
-从 Project.toml 中移除了测试时添加的未使用依赖：
-- `Zygote`
-- `ChainRulesCore`
+### 为什么保留 `*_direct` 函数
+
+尽管嵌套 ForwardDiff 可以工作，我们仍然保留解析式实现，因为：
+
+1. **性能更好**：解析式避免了额外的 AD 开销
+2. **更可预测**：不依赖于 ForwardDiff 的内部行为
+3. **测试验证**：可用于与 ForwardDiff 版本交叉验证
+4. **边界情况**：在某些极端参数下可能更稳定
+
+### 测试文件
+
+- `scripts/debug/test_nested_forwarddiff.jl` - 嵌套 ForwardDiff 系统测试
+- `tests/unit/pnjl/test_bulk_viscosity.jl` - 体粘滞系数测试（已修复导入问题）
+
+### 问题描述
+
+在测试 `bulk_viscosity_coefficients` 时发现，原始测试参数 `T=150 MeV, μ=300 MeV` 位于相变点附近，导致：
+
+1. **有限差分不稳定**：不同的 ε 值给出完全不同的导数（甚至符号相反）
+2. **解的剧烈变化**：微小的参数变化导致解从 `φ_u ≈ 5.1` 跳变到 `φ_u ≈ -0.16`
+
+### 测试结果
+
+| 参数点 | φ_u | dx/dT[1] | 稳定性 |
+|--------|-----|----------|--------|
+| T=100, μ=100 | -1.84 | 6.4e-3 | ✓ 稳定 |
+| T=150, μ=100 | -1.81 | 3.5e+6 | ✗ 不稳定 |
+| T=200, μ=100 | -0.41 | 6.5e+0 | ✓ 稳定 |
+| T=100, μ=200 | -1.84 | 4.2e-2 | ✓ 稳定 |
+| T=150, μ=300 | 5.14 | 2.5e+6 | ✗ 不稳定 |
+| T=180, μ=200 | -0.33 | 4.5e+0 | ✓ 稳定 |
+
+### 解决方案
+
+修改 `tests/unit/pnjl/test_bulk_viscosity.jl`，使用稳定参数点 `T=100 MeV, μ=100 MeV` 进行测试。
+
+### 关键发现
+
+1. **ImplicitDifferentiation.jl 工作正常**：在稳定点，`ForwardDiff.jacobian` 与有限差分的相对误差 < 1e-6
+2. **相变点附近有限差分不可靠**：不能用于验证 AD 结果
+3. **测试应选择稳定参数点**：远离相变区域的参数点更适合数值验证

@@ -32,13 +32,18 @@ jobs:
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Run PNJL benchmark
+      - name: Run PNJL single-point benchmark
         run: julia --project tests/perf/pnjl/single_point_solver_perf.jl
+
+      - name: Run PNJL scan benchmark
+        run: julia --project tests/perf/pnjl/scan_perf.jl
 
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v4
         with:
           name: pnjl-benchmark
           path: |
-            output/perf/pnjl_single_point.json
-            output/perf/pnjl_single_point.md
+            tests/perf/results/pnjl/single_point_benchmark.json
+            tests/perf/results/pnjl/single_point_benchmark.md
+            tests/perf/results/pnjl/scan_benchmark.json
+            tests/perf/results/pnjl/scan_benchmark.md

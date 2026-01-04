@@ -43,7 +43,6 @@ end
 using Main.Constants_PNJL: Λ_inv_fm, N_color
 
 export cached_nodes, vacuum_integral, calculate_energy_sum, calculate_log_sum
-export calculate_log_sum_derivatives
 export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT
 export calculate_energy_isotropic, calculate_energy_anisotropic
 
@@ -149,12 +148,15 @@ end
 # 热项积分
 # ============================================================================
 
+# Log-Sum-Exp 常量
+const POLYAKOV_EPS = 1e-16
+
 """
     safe_log(x; min_val=1e-16) -> Float64
 
 安全的对数函数，避免 log(0) 或 log(负数)。
 """
-@inline function safe_log(x; min_val=1e-16)
+@inline function safe_log(x; min_val=POLYAKOV_EPS)
     x <= 0 && return log(min_val)
     return x < min_val ? log(min_val) : log(x)
 end
@@ -181,23 +183,58 @@ end
     calculate_log_term(E, mu, T, Φ, Φ̄) -> Float64
 
 计算 Polyakov loop 修正的对数项：ln(f₊) + ln(f₋)
+
+使用 Log-Sum-Exp 技巧避免数值溢出，特别是在：
+- E < μ 且 T 很小时（x < 0，exp(-x) 可能溢出）
+- 极低温时（x >> 1，exp(-x) 下溢但结果仍正确）
+
+优化版本：内联 LSE 计算，减少函数调用开销。
 """
 @inline function calculate_log_term(E_i, mu_i, T_fm, Φ, Φ̄)
     invT = 1.0 / T_fm
-    x_i = (E_i - mu_i) * invT
-    x_i_anti = (E_i + mu_i) * invT
-
-    exp1 = exp(-x_i)
-    exp2 = exp1 * exp1
-    exp3 = exp1 * exp2
-    exp1_anti = exp(-x_i_anti)
-    exp2_anti = exp1_anti * exp1_anti
-    exp3_anti = exp1_anti * exp2_anti
-
-    f1_val = 1.0 + 3.0 * Φ * exp1 + 3.0 * Φ̄ * exp2 + exp3
-    f2_val = 1.0 + 3.0 * Φ̄ * exp1_anti + 3.0 * Φ * exp2_anti + exp3_anti
-
-    return safe_log(f1_val) + safe_log(f2_val)
+    
+    # 夸克项：a = -(E - μ)/T，反夸克项：b = -(E + μ)/T
+    # 注意：b = a - 2μ/T，总是 b < a
+    a = -(E_i - mu_i) * invT
+    b = -(E_i + mu_i) * invT
+    
+    # LSE for quark term: ln(1 + 3Φ·e^a + 3Φ̄·e^{2a} + e^{3a})
+    # 当 a > 0 时需要归一化避免溢出，否则直接计算
+    if a > 0
+        # 归一化：除以 e^{3a}，即所有指数减去 3a
+        m_a = 3.0 * a
+        exp_a_m = exp(-2.0 * a)  # exp(a - 3a) = exp(-2a)
+        exp_2a_m = exp(-a)       # exp(2a - 3a) = exp(-a)
+        exp_neg_m = exp(-m_a)    # exp(0 - 3a) = exp(-3a)
+        term_a = exp_neg_m + 3.0 * Φ * exp_a_m + 3.0 * Φ̄ * exp_2a_m + 1.0
+        log_f_plus = m_a + log(max(term_a, POLYAKOV_EPS))
+    else
+        # a <= 0: 直接计算，不会溢出
+        exp_a = exp(a)
+        exp_2a = exp_a * exp_a
+        exp_3a = exp_a * exp_2a
+        f_plus = 1.0 + 3.0 * Φ * exp_a + 3.0 * Φ̄ * exp_2a + exp_3a
+        log_f_plus = log(max(f_plus, POLYAKOV_EPS))
+    end
+    
+    # LSE for antiquark term: ln(1 + 3Φ̄·e^b + 3Φ·e^{2b} + e^{3b})
+    # 由于 b < a，当 a <= 0 时 b 也 <= 0，可以跳过 LSE 分支
+    if b > 0
+        m_b = 3.0 * b
+        exp_b_m = exp(-2.0 * b)
+        exp_2b_m = exp(-b)
+        exp_neg_m = exp(-m_b)
+        term_b = exp_neg_m + 3.0 * Φ̄ * exp_b_m + 3.0 * Φ * exp_2b_m + 1.0
+        log_f_minus = m_b + log(max(term_b, POLYAKOV_EPS))
+    else
+        exp_b = exp(b)
+        exp_2b = exp_b * exp_b
+        exp_3b = exp_b * exp_2b
+        f_minus = 1.0 + 3.0 * Φ̄ * exp_b + 3.0 * Φ * exp_2b + exp_3b
+        log_f_minus = log(max(f_minus, POLYAKOV_EPS))
+    end
+    
+    return log_f_plus + log_f_minus
 end
 
 """
@@ -219,127 +256,6 @@ function calculate_log_sum(masses::SVector{3, TF}, p_nodes, cosθ_nodes, coeffic
         end
     end
     return -2 * T_fm * total
-end
-
-# ============================================================================
-# 热项导数的解析计算（避免嵌套 ForwardDiff）
-# ============================================================================
-
-"""
-    calculate_log_term_derivatives(E, mu, T, Φ, Φ̄) -> (log_term, d_log_dmu, d_log_dT)
-
-计算 Polyakov loop 修正的对数项及其对 μ 和 T 的导数。
-
-返回：
-- `log_term`: ln(f₊) + ln(f₋)
-- `d_log_dmu`: ∂[ln(f₊) + ln(f₋)]/∂μ
-- `d_log_dT`: ∂[ln(f₊) + ln(f₋)]/∂T
-"""
-@inline function calculate_log_term_derivatives(E_i, mu_i, T_fm, Φ, Φ̄)
-    invT = 1.0 / T_fm
-    x = (E_i - mu_i) * invT  # 夸克
-    y = (E_i + mu_i) * invT  # 反夸克
-
-    # 指数项
-    exp1_x = exp(-x)
-    exp2_x = exp1_x * exp1_x
-    exp3_x = exp1_x * exp2_x
-    exp1_y = exp(-y)
-    exp2_y = exp1_y * exp1_y
-    exp3_y = exp1_y * exp2_y
-
-    # f₊ 和 f₋
-    f_plus = 1.0 + 3.0 * Φ * exp1_x + 3.0 * Φ̄ * exp2_x + exp3_x
-    f_minus = 1.0 + 3.0 * Φ̄ * exp1_y + 3.0 * Φ * exp2_y + exp3_y
-
-    # 对数项
-    log_term = safe_log(f_plus) + safe_log(f_minus)
-
-    # ∂f₊/∂μ = (1/T) * (3Φ·e^{-x} + 6Φ̄·e^{-2x} + 3e^{-3x})
-    # ∂f₋/∂μ = (-1/T) * (3Φ̄·e^{-y} + 6Φ·e^{-2y} + 3e^{-3y})
-    df_plus_dmu = invT * (3.0 * Φ * exp1_x + 6.0 * Φ̄ * exp2_x + 3.0 * exp3_x)
-    df_minus_dmu = -invT * (3.0 * Φ̄ * exp1_y + 6.0 * Φ * exp2_y + 3.0 * exp3_y)
-
-    # ∂ln(f)/∂μ = (1/f) * ∂f/∂μ
-    d_log_dmu = df_plus_dmu / f_plus + df_minus_dmu / f_minus
-
-    # ∂f₊/∂T = (x/T) * (3Φ·e^{-x} + 6Φ̄·e^{-2x} + 3e^{-3x})
-    # ∂f₋/∂T = (y/T) * (3Φ̄·e^{-y} + 6Φ·e^{-2y} + 3e^{-3y})
-    df_plus_dT = (x * invT) * (3.0 * Φ * exp1_x + 6.0 * Φ̄ * exp2_x + 3.0 * exp3_x)
-    df_minus_dT = (y * invT) * (3.0 * Φ̄ * exp1_y + 6.0 * Φ * exp2_y + 3.0 * exp3_y)
-
-    # ∂ln(f)/∂T = (1/f) * ∂f/∂T
-    d_log_dT = df_plus_dT / f_plus + df_minus_dT / f_minus
-
-    return (log_term, d_log_dmu, d_log_dT)
-end
-
-"""
-    calculate_log_sum_derivatives(masses, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu_vec, T, xi)
-        -> (log_sum, d_log_sum_dmu::SVector{3}, d_log_sum_dT)
-
-计算热项对数和及其对 μ_i 和 T 的导数（不使用 ForwardDiff）。
-
-log_sum = -2T ∑_i ∫ [ln(f₊) + ln(f₋)] d³p/(2π)³
-
-返回：
-- `log_sum`: 热项对数和
-- `d_log_sum_dmu`: ∂log_sum/∂μ_i (i=1,2,3)
-- `d_log_sum_dT`: ∂log_sum/∂T
-"""
-function calculate_log_sum_derivatives(masses::SVector{3, TF}, p_nodes, cosθ_nodes, coefficients, 
-                                       Φ, Φ̄, mu_vec, T_fm, xi) where {TF}
-    # 确定输出类型（支持 Dual 类型）
-    RT = promote_type(TF, typeof(T_fm), eltype(mu_vec))
-    
-    # 累加器
-    total_log = zero(RT)
-    total_dmu_1 = zero(RT)
-    total_dmu_2 = zero(RT)
-    total_dmu_3 = zero(RT)
-    total_dT = zero(RT)
-
-    @inbounds for i in 1:3
-        mass_i = masses[i]
-        mu_i = mu_vec[i]
-        flavor_log = zero(RT)
-        flavor_dmu = zero(RT)
-        flavor_dT = zero(RT)
-
-        for idx in eachindex(p_nodes)
-            p = p_nodes[idx]
-            cosθ = cosθ_nodes[idx]
-            w = coefficients[idx]
-            E_i = calculate_energy_anisotropic(mass_i, p, xi, cosθ)
-            
-            log_term, d_log_dmu, d_log_dT = calculate_log_term_derivatives(E_i, mu_i, T_fm, Φ, Φ̄)
-            
-            flavor_log += w * log_term
-            flavor_dmu += w * d_log_dmu
-            flavor_dT += w * d_log_dT
-        end
-
-        total_log += flavor_log
-        if i == 1
-            total_dmu_1 = flavor_dmu
-        elseif i == 2
-            total_dmu_2 = flavor_dmu
-        else
-            total_dmu_3 = flavor_dmu
-        end
-        total_dT += flavor_dT
-    end
-
-    # log_sum = -2T * total_log
-    # ∂log_sum/∂μ_i = -2T * ∂total_log/∂μ_i
-    # ∂log_sum/∂T = -2 * total_log - 2T * ∂total_log/∂T
-    log_sum = -2 * T_fm * total_log
-    d_log_sum_dmu = SVector{3, RT}(-2 * T_fm * total_dmu_1, 
-                                   -2 * T_fm * total_dmu_2, 
-                                   -2 * T_fm * total_dmu_3)
-    d_log_sum_dT = -2 * total_log - 2 * T_fm * total_dT
-
-    return (log_sum, d_log_sum_dmu, d_log_sum_dT)
 end
 
 end # module Integrals

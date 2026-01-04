@@ -44,14 +44,12 @@ using .Integrals:
     safe_log,
     calculate_energy_sum,
     calculate_log_sum,
-    calculate_log_sum_derivatives,
     calculate_energy_isotropic,
     calculate_energy_anisotropic
 
 export calculate_mass_vec, calculate_chiral, calculate_U, calculate_U_derivative_T
 export calculate_pressure, calculate_omega
 export calculate_rho, calculate_thermo, calculate_number_densities
-export calculate_rho_direct, calculate_entropy_direct, calculate_thermo_direct
 export ρ0
 
 # 导出常用常量
@@ -235,103 +233,6 @@ function calculate_thermo(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T
     entropy = ForwardDiff.derivative(pressure_T, T_fm)
     
     pressure = calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-    
-    return pressure, rho_norm, entropy, energy
-end
-
-"""
-    calculate_rho_direct(x_state, mu_vec, T, thermal_nodes, xi) -> SVector{3}
-
-直接计算粒子数密度（不使用 ForwardDiff）。
-
-ρ_i = -∂Ω/∂μ_i = ∂P/∂μ_i
-
-由于 P = -(χ + U + energy_sum + log_sum)，且只有 log_sum 依赖于 μ：
-ρ_i = -∂log_sum/∂μ_i
-"""
-function calculate_rho_direct(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
-    φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
-    Φ, Φ̄ = x_state[4], x_state[5]
-    masses = calculate_mass_vec(φ)
-    
-    thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
-    _, d_log_sum_dmu, _ = calculate_log_sum_derivatives(masses, thermal_p_mesh, cosθ_mesh, 
-                                                         thermal_coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
-    
-    # ρ = ∂P/∂μ = -∂Ω/∂μ = -∂log_sum/∂μ
-    return -d_log_sum_dmu
-end
-
-"""
-    calculate_entropy_direct(x_state, mu_vec, T, thermal_nodes, xi) -> Float64
-
-直接计算熵密度（不使用 ForwardDiff）。
-
-s = ∂P/∂T = -∂Ω/∂T
-
-由于 Ω = χ + U + energy_sum + log_sum：
-- χ 不依赖于 T
-- energy_sum 不依赖于 T
-- U 和 log_sum 依赖于 T
-
-s = -∂U/∂T - ∂log_sum/∂T
-"""
-function calculate_entropy_direct(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
-    φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
-    Φ, Φ̄ = x_state[4], x_state[5]
-    masses = calculate_mass_vec(φ)
-    
-    thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
-    _, _, d_log_sum_dT = calculate_log_sum_derivatives(masses, thermal_p_mesh, cosθ_mesh, 
-                                                        thermal_coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
-    
-    dU_dT = calculate_U_derivative_T(T_fm, Φ, Φ̄)
-    
-    # s = ∂P/∂T = -∂Ω/∂T = -∂U/∂T - ∂log_sum/∂T
-    return -dU_dT - d_log_sum_dT
-end
-
-"""
-    calculate_thermo_direct(x_state, mu_vec, T, thermal_nodes, xi) -> (P, ρ_norm, s, ε)
-
-直接计算所有热力学量（不使用 ForwardDiff）。
-
-# 返回
-- `P`: 压强 (fm⁻⁴)
-- `ρ_norm`: 归一化重子数密度 ρ_B/ρ₀
-- `s`: 熵密度 (fm⁻³)
-- `ε`: 能量密度 (fm⁻⁴)
-"""
-function calculate_thermo_direct(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
-    φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
-    Φ, Φ̄ = x_state[4], x_state[5]
-    masses = calculate_mass_vec(φ)
-    
-    thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
-    
-    # 计算 log_sum 及其导数
-    log_sum, d_log_sum_dmu, d_log_sum_dT = calculate_log_sum_derivatives(
-        masses, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
-    
-    # 计算其他项
-    chi = calculate_chiral(φ)
-    U = calculate_U(T_fm, Φ, Φ̄)
-    energy_sum = calculate_energy_sum(masses)
-    dU_dT = calculate_U_derivative_T(T_fm, Φ, Φ̄)
-    
-    # Ω = χ + U + energy_sum + log_sum
-    omega = chi + U + energy_sum + log_sum
-    pressure = -omega
-    
-    # ρ = -∂log_sum/∂μ
-    rho_vec = -d_log_sum_dmu
-    rho_norm = sum(rho_vec) / (3.0 * ρ0)
-    
-    # s = -∂U/∂T - ∂log_sum/∂T
-    entropy = -dU_dT - d_log_sum_dT
-    
-    # ε = -P + μ·ρ + T·s
     energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
     
     return pressure, rho_norm, entropy, energy

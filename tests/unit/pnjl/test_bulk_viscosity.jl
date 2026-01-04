@@ -10,8 +10,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 using .PNJL: bulk_viscosity_coefficients, solve, FixedMu
-using .PNJL.ThermoDerivatives: calculate_entropy_direct, calculate_rho_direct, 
-    get_thermal_nodes, set_config, IMPLICIT_SOLVER
+using .PNJL.ThermoDerivatives: get_thermal_nodes, set_config, IMPLICIT_SOLVER
+using .PNJL.Thermodynamics: calculate_thermo, calculate_rho
 
 using StaticArrays
 using ForwardDiff
@@ -41,9 +41,11 @@ using LinearAlgebra: dot, norm
 end
 
 @testset "bulk_viscosity_coefficients intermediate verification" begin
-    T_fm = 150.0 / 197.327
-    μ_fm = 300.0 / 197.327
-    ε = 1e-6
+    # 使用稳定参数点（远离相变区域）
+    # T=150 MeV, μ=300 MeV 在相变附近，有限差分不稳定
+    T_fm = 100.0 / 197.327
+    μ_fm = 100.0 / 197.327
+    ε = 1e-7  # 使用更小的 ε 提高精度
 
     set_config(xi=0.0, p_num=64, t_num=16)
     thermal_nodes = get_thermal_nodes(64, 16)
@@ -76,12 +78,14 @@ end
     # 计算 ∂s/∂x 和链式法则
     function s_of_x(x_vec)
         x_s = SVector{5}(Tuple(x_vec))
-        return calculate_entropy_direct(x_s, mu_vec, T_fm, thermal_nodes, 0.0)
+        _, _, s_val, _ = calculate_thermo(x_s, mu_vec, T_fm, thermal_nodes, 0.0)
+        return s_val
     end
     ds_dx = ForwardDiff.gradient(s_of_x, x_base)
 
     function s_of_T(T)
-        return calculate_entropy_direct(x_sv, mu_vec, T, thermal_nodes, 0.0)
+        _, _, s_val, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, 0.0)
+        return s_val
     end
     s_T_partial = ForwardDiff.derivative(s_of_T, T_fm)
 
@@ -90,8 +94,8 @@ end
     # 使用有限差分验证总导数
     x_sv_T_plus = SVector{5}(Tuple(x_T_plus))
     x_sv_T_minus = SVector{5}(Tuple(x_T_minus))
-    s_T_plus_total = calculate_entropy_direct(x_sv_T_plus, mu_vec, T_fm + ε, thermal_nodes, 0.0)
-    s_T_minus_total = calculate_entropy_direct(x_sv_T_minus, mu_vec, T_fm - ε, thermal_nodes, 0.0)
+    _, _, s_T_plus_total, _ = calculate_thermo(x_sv_T_plus, mu_vec, T_fm + ε, thermal_nodes, 0.0)
+    _, _, s_T_minus_total, _ = calculate_thermo(x_sv_T_minus, mu_vec, T_fm - ε, thermal_nodes, 0.0)
     ds_dT_total_fd = (s_T_plus_total - s_T_minus_total) / (2ε)
     
     @test abs(ds_dT_total - ds_dT_total_fd) / abs(ds_dT_total_fd) < 0.01

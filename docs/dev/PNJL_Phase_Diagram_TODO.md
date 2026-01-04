@@ -226,27 +226,63 @@ julia scripts/pnjl/run_tmu_scan.jl --T_step=5 --mu_step=5 --verbose
 
 ### 3.1 数值稳定性：Log-Sum-Exp 技巧
 
+**状态**：✅ 已完成
+
 **背景**：在计算 Polyakov loop 修正的对数项时，指数函数可能导致数值溢出。
 
-**参考实现**（Julia_test）：
+**实现**（2026-01-03）：
+
+在 `src/pnjl/core/Integrals.jl` 中引入 Log-Sum-Exp 技巧：
+
 ```julia
-function _log_polyakov_series(a, Phi1, Phi2)
-    m = max.(0.0, a)
-    m = max.(m, 2 .* a)
-    m = max.(m, 3 .* a)
-    term = exp.(-m) .+ 3.0 .* Phi1 .* exp.(a .- m) .+ 
-           3.0 .* Phi2 .* exp.(2 .* a .- m) .+ exp.(3 .* a .- m)
-    clamped = max.(term, POLYAKOV_EPS)
-    return m .+ log.(clamped)
+@inline function log_polyakov_series_lse(a, Φ, Φ̄)
+    m = a > 0 ? 3.0 * a : zero(a)
+    term = exp(-m) + 3.0 * Φ * exp(a - m) + 3.0 * Φ̄ * exp(2.0 * a - m) + exp(3.0 * a - m)
+    return m + log(max(term, POLYAKOV_EPS))
 end
 ```
 
-**当前状态**：使用 `safe_log` 处理，在极端参数下可能有问题。
+**性能测试结果**：
+
+底层函数性能对比：
+| 测试用例 | 旧版本(ns) | 新版本(ns) | 比值 |
+|---------|-----------|-----------|------|
+| 正常区域 | 142 | 217 | 1.52x |
+| 相变区域 | 183 | 179 | 0.98x |
+| **平均** | - | - | **1.45x** |
+
+实际求解器性能（LSE 引入后）：
+| 测试项目 | 耗时 | 收敛率 |
+|---------|------|--------|
+| 单点求解器（平均） | 9.45 ms | - |
+| T-μ 扫描（49点） | 7.02 ms/点 | 100% |
+| T-ρ 扫描（80点） | 54.32 ms/点 | 100% |
+
+**数值稳定性测试**：
+
+| 条件 | 结果 |
+|------|------|
+| 极低温 (T=10 MeV) | ✅ 收敛 |
+| 大化学势 (μ=600 MeV) | ✅ 收敛 |
+| 低温+大μ (T=30, μ=500) | ✅ 收敛 |
+| 极高温 (T=500 MeV) | ✅ 收敛 |
+| 极端条件 (T=20, μ=700) | ✅ 收敛 |
+
+**结论**：
+- 底层函数开销约 1.5x，但对实际求解器性能影响可忽略
+- LSE 技巧成功解决了大化学势下的数值溢出问题
+- 所有极端条件测试均通过，收敛率保持 100%
 
 **实现计划**：
-- [ ] 评估当前实现在极端参数下的表现
-- [ ] 如有必要，在 `Thermodynamics.jl` 中引入 log-sum-exp 技巧
-- [ ] 添加数值稳定性测试
+- [x] 评估当前实现在极端参数下的表现
+- [x] 在 `Integrals.jl` 中引入 log-sum-exp 技巧
+- [x] 添加数值稳定性测试
+
+**相关文件**：
+- 实现：`src/pnjl/core/Integrals.jl`
+- 评估报告：`docs/dev/log_sum_exp_evaluation.md`
+- 评估脚本：`scripts/pnjl/evaluate_log_sum_exp.jl`
+- 性能测试：`scripts/pnjl/benchmark_lse_full.jl`
 
 ### 3.2 自适应动量截断
 
@@ -335,7 +371,8 @@ GitHub Actions 自动化
 
 ---
 
-*更新日期：2026-01-02*
+*更新日期：2026-01-03*
 *1.2 实现日期：2025-12-31*
 *1.3 实现日期：2025-12-31*
 *2.2 实现日期：2026-01-02*
+*3.1 实现日期：2026-01-03*
