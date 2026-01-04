@@ -55,6 +55,7 @@ struct PhaseStructureConfig
     T_min::Float64
     T_max::Float64
     T_step::Float64
+    rho_min::Float64
     rho_max::Float64
     rho_step::Float64
     output_dir::String
@@ -65,9 +66,10 @@ end
 
 function parse_args(args)
     xi = 0.0
-    T_min = 50.0
-    T_max = 200.0
+    T_min = 30.0
+    T_max = 350.0
     T_step = 10.0
+    rho_min = 0.0
     rho_max = 4.0
     rho_step = 0.05
     output_dir = DEFAULT_OUTPUT_DIR
@@ -84,6 +86,8 @@ function parse_args(args)
             T_max = parse(Float64, arg[9:end])
         elseif startswith(arg, "--T_step=")
             T_step = parse(Float64, arg[10:end])
+        elseif startswith(arg, "--rho_min=")
+            rho_min = parse(Float64, arg[11:end])
         elseif startswith(arg, "--rho_max=")
             rho_max = parse(Float64, arg[11:end])
         elseif startswith(arg, "--rho_step=")
@@ -100,9 +104,10 @@ function parse_args(args)
             println("用法: julia calculate_phase_structure.jl [options]")
             println("选项:")
             println("  --xi=0.0          各向异性参数")
-            println("  --T_min=50        最低温度 (MeV)")
-            println("  --T_max=200       最高温度 (MeV)")
+            println("  --T_min=30        最低温度 (MeV)")
+            println("  --T_max=350       最高温度 (MeV)")
             println("  --T_step=10       温度步长 (MeV)")
+            println("  --rho_min=0.0     最低密度 (ρ/ρ₀)")
             println("  --rho_max=4.0     最大密度 (ρ/ρ₀)")
             println("  --rho_step=0.05   密度步长")
             println("  --output_dir=...  输出目录")
@@ -113,7 +118,7 @@ function parse_args(args)
         end
     end
     
-    return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_max, rho_step, 
+    return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_min, rho_max, rho_step, 
                                  output_dir, skip_trho, skip_crossover, verbose)
 end
 
@@ -131,8 +136,8 @@ function main(args=ARGS)
     println("参数:")
     println("  xi = $(config.xi)")
     println("  T 范围: $(config.T_min) - $(config.T_max) MeV (步长 $(config.T_step))")
-    println("  ρ 范围: 0 - $(config.rho_max) ρ₀ (步长 $(config.rho_step))")
-    println("  输出目录: $(config.output_dir)")
+    println("  ρ 范围: $(config.rho_min) - $(config.rho_max) ρ₀ (步长 $(config.rho_step))")
+    println("  输出目录: $(abspath(config.output_dir))")
     println()
     
     mkpath(config.output_dir)
@@ -176,7 +181,7 @@ function step1_trho_scan(config::PhaseStructureConfig, output_path::String)
     end
     
     T_values = collect(config.T_min:config.T_step:config.T_max)
-    rho_values = collect(0.0:config.rho_step:config.rho_max)
+    rho_values = collect(config.rho_min:config.rho_step:config.rho_max)
     
     println("温度点数: $(length(T_values))")
     println("密度点数: $(length(rho_values))")
@@ -279,6 +284,8 @@ CEP 搜索：使用二分法细化 CEP 位置
 1. 找到初始区间 [T_low, T_high]，其中 T_low 有 S 形，T_high 无 S 形
 2. 二分法细化：计算 T_mid 的曲线，判断是否有 S 形
 3. 重复直到区间宽度 < tol
+
+注意：使用 Maxwell 构造验证 S 形的有效性，避免边界情况的误判
 """
 function step2_find_cep(config::PhaseStructureConfig, curves;
                         tol::Float64=0.01,  # 温度精度 (MeV)
@@ -296,7 +303,8 @@ function step2_find_cep(config::PhaseStructureConfig, curves;
     # 按温度排序
     temperatures = sort(collect(keys(curves)))
     
-    # 找到初始区间：最后一个有 S 形的温度和第一个没有 S 形的温度
+    # 找到初始区间：最后一个有有效 S 形的温度和第一个没有 S 形的温度
+    # 使用 Maxwell 构造验证 S 形的有效性
     last_with_s = nothing
     first_without_s = nothing
     s_shape_cache = Dict{Float64, SShapeResult}()
@@ -307,14 +315,32 @@ function step2_find_cep(config::PhaseStructureConfig, curves;
         s_shape_cache[T] = result
         
         if result.has_s_shape
-            last_with_s = (T, result)
+            # 使用 Maxwell 构造验证 S 形的有效性
+            maxwell_result = maxwell_construction(mu_vals, rho_vals;
+                min_samples=8, detect_min_points=5, detect_eps=1e-6,
+                candidate_steps=64, max_iter=60, tol_area=1e-4,
+                spinodal_hint=result)
+            
+            if maxwell_result.converged
+                last_with_s = (T, result)
+                first_without_s = nothing  # 重置，因为找到了新的有效 S 形
+            else
+                # S 形检测通过但 Maxwell 构造失败，视为无效 S 形
+                if last_with_s !== nothing && first_without_s === nothing
+                    first_without_s = T
+                end
+                if config.verbose
+                    reason = get(maxwell_result.details, :reason, "unknown")
+                    println("  T=$T MeV: S 形检测通过但 Maxwell 失败 ($reason)，视为无效")
+                end
+            end
         elseif last_with_s !== nothing && first_without_s === nothing
             first_without_s = T
         end
     end
     
     if last_with_s === nothing
-        println("未找到 S 形曲线 (可能全为 crossover)")
+        println("未找到有效 S 形曲线 (可能全为 crossover)")
         return (has_cep=false, T_cep=NaN, mu_cep=NaN)
     end
     
@@ -345,16 +371,26 @@ function step2_find_cep(config::PhaseStructureConfig, curves;
         result = detect_s_shape(mu_vals, rho_vals)
         s_shape_cache[T_mid] = result
         
+        # 使用 Maxwell 构造验证 S 形的有效性
+        is_valid_s_shape = false
         if result.has_s_shape
+            maxwell_result = maxwell_construction(mu_vals, rho_vals;
+                min_samples=8, detect_min_points=5, detect_eps=1e-6,
+                candidate_steps=64, max_iter=60, tol_area=1e-4,
+                spinodal_hint=result)
+            is_valid_s_shape = maxwell_result.converged
+        end
+        
+        if is_valid_s_shape
             T_low = T_mid
             res_low = result
             if config.verbose
-                println("  T=$T_mid MeV: 有 S 形 → 更新下界")
+                println("  T=$T_mid MeV: 有效 S 形 → 更新下界")
             end
         else
             T_high = T_mid
             if config.verbose
-                println("  T=$T_mid MeV: 无 S 形 → 更新上界")
+                println("  T=$T_mid MeV: 无有效 S 形 → 更新上界")
             end
         end
         

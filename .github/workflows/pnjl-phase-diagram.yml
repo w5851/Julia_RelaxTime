@@ -4,32 +4,42 @@ on:
   workflow_dispatch:
     inputs:
       xi_values:
-        description: 'ξ values (comma-separated, e.g., "0.0,0.2,0.4")'
+        description: 'ξ 值（逗号分隔，如 "0.0,0.2,0.4"）'
         required: false
         default: '0.0'
         type: string
       T_min:
-        description: 'Minimum temperature (MeV)'
+        description: '最低温度 T_min (MeV)'
         required: false
-        default: '50'
+        default: '30'
         type: string
       T_max:
-        description: 'Maximum temperature (MeV)'
+        description: '最高温度 T_max (MeV)'
         required: false
-        default: '220'
+        default: '350'
         type: string
       T_step:
-        description: 'Temperature step (MeV)'
+        description: '温度步长 ΔT (MeV)'
         required: false
         default: '5'
         type: string
+      rho_min:
+        description: '最低密度 ρ_min (ρ/ρ₀)'
+        required: false
+        default: '0.0'
+        type: string
       rho_max:
-        description: 'Maximum density (ρ/ρ₀)'
+        description: '最高密度 ρ_max (ρ/ρ₀)'
         required: false
         default: '4.0'
         type: string
+      rho_step:
+        description: '密度步长 Δρ (ρ/ρ₀)'
+        required: false
+        default: '0.05'
+        type: string
       skip_trho:
-        description: 'Skip T-ρ scan (use existing data)'
+        description: '跳过 T-ρ 扫描（使用已有数据）'
         required: false
         default: false
         type: boolean
@@ -60,19 +70,27 @@ jobs:
         uses: julia-actions/cache@v2
 
       - name: Install Julia dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+        run: |
+          julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
       - name: Install Python dependencies
         run: pip install numpy matplotlib
+
+      - name: Clean output directory
+        run: |
+          rm -rf data/outputs/figures/pnjl/phase_diagrams/*.png 2>/dev/null || true
+          mkdir -p data/outputs/figures/pnjl/phase_diagrams
 
       - name: Run phase structure calculation
         run: |
           julia --project=. scripts/pnjl/calculate_phase_structure.jl \
             --xi=${{ matrix.xi }} \
-            --T_min=${{ inputs.T_min || '50' }} \
-            --T_max=${{ inputs.T_max || '220' }} \
+            --T_min=${{ inputs.T_min || '30' }} \
+            --T_max=${{ inputs.T_max || '350' }} \
             --T_step=${{ inputs.T_step || '5' }} \
+            --rho_min=${{ inputs.rho_min || '0.0' }} \
             --rho_max=${{ inputs.rho_max || '4.0' }} \
+            --rho_step=${{ inputs.rho_step || '0.05' }} \
             ${{ inputs.skip_trho == true && '--skip_trho' || '' }} \
             --verbose
 
@@ -118,8 +136,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Parameters" >> $GITHUB_STEP_SUMMARY
           echo "- ξ values: ${{ inputs.xi_values || '0.0' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- T range: ${{ inputs.T_min || '50' }} - ${{ inputs.T_max || '220' }} MeV (step: ${{ inputs.T_step || '5' }})" >> $GITHUB_STEP_SUMMARY
-          echo "- ρ_max: ${{ inputs.rho_max || '4.0' }} ρ₀" >> $GITHUB_STEP_SUMMARY
+          echo "- T range: ${{ inputs.T_min || '30' }} - ${{ inputs.T_max || '350' }} MeV (step: ${{ inputs.T_step || '5' }})" >> $GITHUB_STEP_SUMMARY
+          echo "- ρ range: ${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }} ρ₀ (step: ${{ inputs.rho_step || '0.05' }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Generated Files" >> $GITHUB_STEP_SUMMARY
           find artifacts -type f -name "*.csv" -o -name "*.png" | sort | while read f; do
