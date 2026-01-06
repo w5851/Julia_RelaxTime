@@ -12,6 +12,7 @@ export N_color, N_flavor, ρ0_inv_fm3, m_ud0_inv_fm, m_s0_inv_fm, Λ_inv_fm, G_f
 export T0_inv_fm, a0, a1, a2, b3, b4
 export λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
 export PNJL_PROFILE, PNJL_CONFIG_PATH, load_pnjl_config
+export SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 
 const CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "config", "pnjl"))
 const DEFAULT_PROFILE = "default"
@@ -162,35 +163,26 @@ Dict(
 - `:mixed_S => true`：存在标量混合介子（σ/σ'整体）
 
 # 参考文献
-doc/formula/散射过程所有可能.md 表1和表2
+doc/formula/散射过程所有可能.md
 """
 const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
     # ========== 表1：夸克-夸克散射过程（4个，有t道和u道）==========
-    
-    # u u → u u
-    :uu_to_uu => Dict(
-        :type => :qq,
-        :channels => Dict(
-            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
-            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
-        )
-    ),
-    
-    # s s → s s
-    :ss_to_ss => Dict(
-        :type => :qq,
-        :channels => Dict(
-            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
-            :u => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
-        )
-    ),
-    
+
     # u d → u d
     :ud_to_ud => Dict(
         :type => :qq,
         :channels => Dict(
             :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
             :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+
+    # u u → u u
+    :uu_to_uu => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
         )
     ),
     
@@ -202,8 +194,55 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
             :u => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
         )
     ),
+
+    # s s → s s
+    :ss_to_ss => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+
+    # ========== 夸克-夸克的电荷共轭：反夸克-反夸克散射（用于弛豫时间）==========
+
+    # ū đ → ū đ （与 u d → u d 等价）
+    :ubardbar_to_ubardbar => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+
+    # ū ū → ū ū （与 u u → u u 等价）
+    :ubarubar_to_ubarubar => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+
+    # ū s̄ → ū s̄ （与 u s → u s 等价）
+    :ubarsbar_to_ubarsbar => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+
+    # s̄ s̄ → s̄ s̄ （与 s s → s s 等价）
+    :sbarsbar_to_sbarsbar => Dict(
+        :type => :qq,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :u => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true)
+        )
+    ),
     
-    # ========== 表2：夸克-反夸克散射过程（7个，有t道和s道）==========
+    # ========== 表2：夸克-反夸克散射过程（7个 + 电荷共轭2个，有t道和s道）==========
     
     # u đ → u đ
     :udbar_to_udbar => Dict(
@@ -215,15 +254,6 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
         )
     ),
     
-    # u s̄ → u s̄  (修正：原表格误写为s s̄)
-    :usbar_to_usbar => Dict(
-        :type => :qqbar,
-        :channels => Dict(
-            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
-            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
-        )
-    ),
-    
     # d ū → d ū (电荷共轭过程，与u đ等价)
     :dubar_to_dubar => Dict(
         :type => :qqbar,
@@ -231,15 +261,6 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
             # 电荷共轭过程：与 udbar_to_udbar 采用相同的介子组合
             :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true),
             :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false)
-        )
-    ),
-    
-    # s ū → s ū (电荷共轭过程，与u s̄等价)
-    :subar_to_subar => Dict(
-        :type => :qqbar,
-        :channels => Dict(
-            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
-            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
         )
     ),
     
@@ -258,6 +279,24 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
         :channels => Dict(
             :t => Dict(:simple => [:pi, :sigma_pi], :mixed_P => false, :mixed_S => false),
             :s => Dict(:simple => [:pi, :sigma_pi], :mixed_P => true, :mixed_S => true)
+        )
+    ),
+
+    # u s̄ → u s̄  (修正：原表格误写为s s̄)
+    :usbar_to_usbar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
+        )
+    ),
+
+    # s ū → s ū (电荷共轭过程，与u s̄等价)
+    :subar_to_subar => Dict(
+        :type => :qqbar,
+        :channels => Dict(
+            :t => Dict(:simple => Symbol[], :mixed_P => true, :mixed_S => true),
+            :s => Dict(:simple => [:K, :sigma_K], :mixed_P => false, :mixed_S => false)
         )
     ),
     
@@ -288,5 +327,12 @@ const SCATTERING_MESON_MAP = Dict{Symbol, Dict}(
         )
     )
 )
+
+"""散射过程 key 的固定列表。
+
+用于避免在其它模块里重复维护 process 列表（例如弛豫时间的 REQUIRED_PROCESSES）。
+顺序与 `SCATTERING_MESON_MAP` 的插入顺序一致。
+"""
+const SCATTERING_PROCESS_KEYS = Tuple(keys(SCATTERING_MESON_MAP))
 
 end # module Constants_PNJL

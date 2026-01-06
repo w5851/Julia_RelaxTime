@@ -12,27 +12,18 @@ module RelaxationTime
 
 include("AverageScatteringRate.jl")
 include("TotalCrossSection.jl")
+include("../Constants_PNJL.jl")
 
 using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES
 using .TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
+using .Constants_PNJL: SCATTERING_PROCESS_KEYS
 
 export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCESSES
 
-# Processes needed by the documented tau expressions
-const REQUIRED_PROCESSES = (
-    :uu_to_uu,
-    :ud_to_ud,
-    :us_to_us,
-    :usbar_to_usbar,
-    :uubar_to_uubar,
-    :uubar_to_ddbar,
-    :uubar_to_ssbar,
-    :udbar_to_udbar,
-    :ss_to_ss,
-    :ssbar_to_ssbar,
-    :ssbar_to_uubar,
-)
+# Single source of truth for supported scattering processes.
+# This list is derived from `Constants_PNJL.SCATTERING_MESON_MAP` keys.
+const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
 
 @inline function density_lookup(densities, key::Symbol)
     if densities isa NamedTuple
@@ -127,14 +118,22 @@ function relaxation_rates(
     w_uu = rate_lookup(rates, :uu_to_uu)
     w_ud = rate_lookup(rates, :ud_to_ud)
     w_us = rate_lookup(rates, :us_to_us)
-    w_usbar = rate_lookup(rates, :usbar_to_usbar)
+    w_udbar = rate_lookup(rates, :udbar_to_udbar)
+    w_dubar = rate_lookup(rates, :dubar_to_dubar)
     w_uubar = rate_lookup(rates, :uubar_to_uubar)
     w_uubar_ddbar = rate_lookup(rates, :uubar_to_ddbar)
+    w_usbar = rate_lookup(rates, :usbar_to_usbar)
+    w_subar = rate_lookup(rates, :subar_to_subar)
     w_uubar_ssbar = rate_lookup(rates, :uubar_to_ssbar)
-    w_udbar = rate_lookup(rates, :udbar_to_udbar)
     w_ss = rate_lookup(rates, :ss_to_ss)
-    w_ssbar = rate_lookup(rates, :ssbar_to_ssbar)
     w_ssbar_uubar = rate_lookup(rates, :ssbar_to_uubar)
+    w_ssbar = rate_lookup(rates, :ssbar_to_ssbar)
+
+    # Additional rates for antiquark relaxation times
+    w_ubardbar = rate_lookup(rates, :ubardbar_to_ubardbar)
+    w_ubarubar = rate_lookup(rates, :ubarubar_to_ubarubar)
+    w_ubarsbar = rate_lookup(rates, :ubarsbar_to_ubarsbar)
+    w_sbarsbar = rate_lookup(rates, :sbarsbar_to_sbarsbar)
 
     # u quark (shared with d by isospin symmetry)
     omega_u = n_u * (w_uu + w_ud) +
@@ -149,16 +148,20 @@ function relaxation_rates(
               n_sbar * (w_ssbar + 2.0 * w_ssbar_uubar)
 
     # anti-u (shared with anti-d)
-    omega_ubar = n_u * (w_uubar + w_udbar + w_usbar + w_uubar_ddbar) +
-                 n_ubar * (w_uubar + w_udbar) +
-                 n_s * w_usbar +
-                 n_sbar * w_usbar
+    # Matches Fortran: tau_lb = 1 / (
+    #   n_u*(w6+w7+w9+wa5) + n_ub*(wa1+wa2) + n_s*wa6 + n_sb*wa3 )
+    omega_ubar = n_u * (w_uubar + w_uubar_ddbar + w_uubar_ssbar + w_dubar) +
+                 n_ubar * (w_ubardbar + w_ubarubar) +
+                 n_s * w_subar +
+                 n_sbar * w_ubarsbar
 
     # anti-s
+    # Matches Fortran: tau_sb = 1 / (
+    #   2*n_u*w8 + 2*n_ub*wa3 + n_sb*wa4 + n_s*(w11+2*w10) )
     omega_sbar = 2.0 * n_u * w_usbar +
-                 2.0 * n_ubar * w_usbar +
-                 n_s * w_ssbar +
-                 n_sbar * (w_ssbar + 2.0 * w_ssbar_uubar)
+                 2.0 * n_ubar * w_ubarsbar +
+                 n_sbar * w_sbarsbar +
+                 n_s * (w_ssbar + 2.0 * w_ssbar_uubar)
 
     # 数值保护：平均速率应非负；若出现明显负值，提示但仍钳制到 0。
     if omega_u < -1e-12 || omega_s < -1e-12 || omega_ubar < -1e-12 || omega_sbar < -1e-12

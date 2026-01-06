@@ -252,50 +252,86 @@ function get_flavor_factor(quark1::Symbol, quark2::Symbol)
     end
 end
 
+"""
+    parse_particle_pair_str(pair_str::AbstractString) -> Tuple{Symbol, Symbol}
+
+将过程符号里形如 `"ud"`, `"uubar"`, `"ubarsbar"` 的二粒子字符串解析为两个粒子 `Symbol`。
+
+支持的 token：
+- 夸克：`u`, `d`, `s`
+- 反夸克：`ubar`, `dbar`, `sbar`
+
+约束：
+- 解析结果必须恰好是 2 个粒子，否则抛错。
+
+示例：
+```julia
+parse_particle_pair_str("ud")       # (:u, :d)
+parse_particle_pair_str("uubar")    # (:u, :ubar)
+parse_particle_pair_str("ubarubar") # (:ubar, :ubar)
+parse_particle_pair_str("ubardbar") # (:ubar, :dbar)
+```
+"""
+function parse_particle_pair_str(pair_str::AbstractString)::Tuple{Symbol, Symbol}
+    # Token-based parser that supports both quarks and antiquarks, e.g.
+    # "ud" -> (:u,:d)
+    # "uubar" -> (:u,:ubar)
+    # "ubarubar" -> (:ubar,:ubar)
+    # "ubardbar" -> (:ubar,:dbar)
+    s = String(pair_str)
+    particles = Symbol[]
+    i = firstindex(s)
+    while i <= lastindex(s)
+        rest = SubString(s, i)
+        if startswith(rest, "ubar")
+            push!(particles, :ubar)
+            i = nextind(s, i, 4)
+        elseif startswith(rest, "dbar")
+            push!(particles, :dbar)
+            i = nextind(s, i, 4)
+        elseif startswith(rest, "sbar")
+            push!(particles, :sbar)
+            i = nextind(s, i, 4)
+        else
+            c = s[i]
+            if c == 'u'
+                push!(particles, :u)
+            elseif c == 'd'
+                push!(particles, :d)
+            elseif c == 's'
+                push!(particles, :s)
+            else
+                error("Invalid particle token at position $i in '$s'")
+            end
+            i = nextind(s, i)
+        end
+    end
+    length(particles) == 2 || error("Invalid particle pair '$s' (expected 2 particles)")
+    return (particles[1], particles[2])
+end
+
+"""
+    parse_scattering_process(process::Symbol) -> Tuple{Symbol, Symbol, Symbol, Symbol}
+
+将散射过程 key（例如 `:uu_to_uu`, `:uubar_to_ssbar`, `:ubardbar_to_ubardbar`）解析为
+四个粒子符号 `(q1, q2, q3, q4)`，对应反应 `q1 + q2 → q3 + q4`。
+
+说明：
+- 输入格式要求为 `q1q2_to_q3q4`（以 `"_to_"` 分隔）。
+- 粒子对字符串的解析由 `parse_particle_pair_str` 完成，因此同时支持夸克与反夸克 token。
+
+该解析结果会被用于：
+- `get_quark_masses_for_process`：提取四个粒子的质量（忽略 bar 标记取味）
+- `get_flavor_factors_for_channel`：为 s/t/u 道计算味因子组合
+- 混合介子传播子的味结构选择
+"""
 function parse_scattering_process(process::Symbol)
     s = string(process)
     parts = split(s, "_to_")
-    if length(parts) != 2
-        error("Invalid process format: $process. Expected: q1q2_to_q3q4")
-    end
-    
-    initial = parts[1]
-    final = parts[2]
-    
-    # 解析初态
-    if occursin("bar", initial)
-        initial_clean = replace(initial, "bar" => "")
-        if length(initial_clean) == 2 && endswith(initial, "bar")
-            q1 = Symbol(initial_clean[1:1])
-            q2 = Symbol(initial_clean[2:2] * "bar")
-        else
-            error("Invalid initial state: $initial")
-        end
-    else
-        if length(initial) != 2
-            error("Invalid initial state: $initial")
-        end
-        q1 = Symbol(initial[1:1])
-        q2 = Symbol(initial[2:2])
-    end
-    
-    # 解析末态
-    if occursin("bar", final)
-        final_clean = replace(final, "bar" => "")
-        if length(final_clean) == 2 && endswith(final, "bar")
-            q3 = Symbol(final_clean[1:1])
-            q4 = Symbol(final_clean[2:2] * "bar")
-        else
-            error("Invalid final state: $final")
-        end
-    else
-        if length(final) != 2
-            error("Invalid final state: $final")
-        end
-        q3 = Symbol(final[1:1])
-        q4 = Symbol(final[2:2])
-    end
-    
+    length(parts) == 2 || error("Invalid process format: $process. Expected: q1q2_to_q3q4")
+
+    q1, q2 = parse_particle_pair_str(parts[1])
+    q3, q4 = parse_particle_pair_str(parts[2])
     return (q1, q2, q3, q4)
 end
 

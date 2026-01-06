@@ -10,6 +10,7 @@ export B0_correction, A_correction, A_aniso,
 include("../QuarkDistribution_Aniso.jl")
 include("OneLoopIntegrals.jl")
 include("../integration/GaussLegendre.jl")
+include("../integration/IntervalQuadratureStrategies.jl")
 using .GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using QuadGK: quadgk
 using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
@@ -191,38 +192,6 @@ function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_pr
 end
 
 # ============================================================================
-# 数值积分策略配置
-# ============================================================================
-"""积分策略枚举"""
-@enum IntegrationStrategy begin
-    STRATEGY_QUADGK       # 原始 QuadGK 自适应积分
-    STRATEGY_INTERVAL_GL  # 区间分割 + 标准 GL
-    STRATEGY_CLUSTER_GL   # 区间分割 + 聚簇 GL (tanh 对称)
-    STRATEGY_HYBRID       # 混合策略：根据奇点位置自适应选择变换 (最高精度)
-end
-
-"""默认积分策略"""
-const DEFAULT_STRATEGY = STRATEGY_HYBRID  # 混合策略在各种情况下都表现最优
-
-"""聚簇 GL 默认参数"""
-const DEFAULT_CLUSTER_BETA = 8.0   # tanh 映射参数，越大节点越聚集于端点
-const DEFAULT_CLUSTER_N = 32       # 每区间节点数（HYBRID 策略下 32 即可达到 1e-4 精度）
-const DEFAULT_POWER_ALPHA = 0.35   # 幂次变换参数（用于单侧聚簇）
-const DEFAULT_DE_H = 0.15          # DE 变换步长（用于双侧奇点）
-
-"""诊断输出结构"""
-struct IntegrationDiagnostics
-    strategy::IntegrationStrategy
-    n_roots::Int
-    roots::Vector{Float64}
-    n_intervals::Int
-    intervals::Vector{Tuple{Float64,Float64}}
-    real_part::Float64
-    imag_part::Float64
-    elapsed_ms::Float64
-end
-
-# ============================================================================
 # 辅助函数：根查找与区间构建
 # ============================================================================
 """解析求解 A±B=0 的根
@@ -314,157 +283,6 @@ function build_intervals_from_roots(roots::Vector{Float64}, Emin::Float64, Emax:
         end
     end
     return pairs
-end
-
-# ============================================================================
-# 聚簇 GL 节点生成（使用预计算的标准节点）
-# ============================================================================
-
-# 预计算标准 32 节点（用于所有变换）
-const _STD_32_NODES, _STD_32_WEIGHTS = GaussLegendre.gausslegendre(32)
-
-# 预计算标准 16 节点（用于自适应节点数）
-const _STD_16_NODES, _STD_16_WEIGHTS = GaussLegendre.gausslegendre(16)
-
-# 预计算 power_left 变换的中间量（alpha=0.35, n=32）
-const _POWER_LEFT_INV_ALPHA = 1.0 / DEFAULT_POWER_ALPHA
-const _POWER_LEFT_U_HALF_32 = (_STD_32_NODES .+ 1) ./ 2  # (u+1)/2
-const _POWER_LEFT_T_32 = _POWER_LEFT_U_HALF_32 .^ _POWER_LEFT_INV_ALPHA  # t = ((u+1)/2)^(1/α)
-const _POWER_LEFT_T_PRIME_32 = _POWER_LEFT_INV_ALPHA .* _POWER_LEFT_U_HALF_32 .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
-
-# 预计算 power_left 变换的中间量（alpha=0.35, n=16）
-const _POWER_LEFT_U_HALF_16 = (_STD_16_NODES .+ 1) ./ 2
-const _POWER_LEFT_T_16 = _POWER_LEFT_U_HALF_16 .^ _POWER_LEFT_INV_ALPHA
-const _POWER_LEFT_T_PRIME_16 = _POWER_LEFT_INV_ALPHA .* _POWER_LEFT_U_HALF_16 .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
-
-# 预计算 power_right 变换的中间量（n=32）
-const _POWER_RIGHT_T_32 = 1 .- (1 .- _POWER_LEFT_U_HALF_32) .^ _POWER_LEFT_INV_ALPHA
-const _POWER_RIGHT_T_PRIME_32 = _POWER_LEFT_INV_ALPHA .* (1 .- _POWER_LEFT_U_HALF_32) .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
-
-# 预计算 power_right 变换的中间量（n=16）
-const _POWER_RIGHT_T_16 = 1 .- (1 .- _POWER_LEFT_U_HALF_16) .^ _POWER_LEFT_INV_ALPHA
-const _POWER_RIGHT_T_PRIME_16 = _POWER_LEFT_INV_ALPHA .* (1 .- _POWER_LEFT_U_HALF_16) .^ (_POWER_LEFT_INV_ALPHA - 1) ./ 2
-
-# 预计算 tanh 聚簇变换的中间量（beta=8.0）
-const _TANH_BETA = tanh(DEFAULT_CLUSTER_BETA)
-const _TANH_PHI = tanh.(DEFAULT_CLUSTER_BETA .* _STD_32_NODES) ./ _TANH_BETA
-const _TANH_PHI_PRIME = DEFAULT_CLUSTER_BETA .* (1 .- tanh.(DEFAULT_CLUSTER_BETA .* _STD_32_NODES).^2) ./ _TANH_BETA
-
-# 预计算 DE 变换的中间量（h=0.15, n=32）
-const _DE_KS = collect(-16:16)  # 33 个点
-const _DE_TS = _DE_KS .* DEFAULT_DE_H
-const _DE_PHI = tanh.(π/2 .* sinh.(_DE_TS))
-const _DE_PHI_PRIME = DEFAULT_DE_H .* (π/2) .* cosh.(_DE_TS) .* (sech.(π/2 .* sinh.(_DE_TS))).^2
-
-"""生成聚簇 GL 节点（tanh 映射，使用预计算节点）"""
-function clustered_gl_nodes(a::Float64, b::Float64, n::Int; beta::Float64=DEFAULT_CLUSTER_BETA)
-    if n == 32 && beta == DEFAULT_CLUSTER_BETA
-        # 使用预计算的变换
-        half = (b - a) / 2
-        center = (a + b) / 2
-        xs = center .+ half .* _TANH_PHI
-        wx = _STD_32_WEIGHTS .* half .* _TANH_PHI_PRIME
-        return xs, wx
-    else
-        # 回退到完整计算
-        us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
-        tanh_beta = tanh(beta)
-        phi = tanh.(beta .* us) ./ tanh_beta
-        phi_prime = beta .* (1 .- tanh.(beta .* us).^2) ./ tanh_beta
-        half = (b - a) / 2
-        center = (a + b) / 2
-        xs = center .+ half .* phi
-        wx = ws .* half .* phi_prime
-        return xs, wx
-    end
-end
-
-"""生成单侧幂次聚簇节点（聚簇于左端 a，使用预计算节点）"""
-function power_left_nodes(a::Float64, b::Float64, n::Int; alpha::Float64=DEFAULT_POWER_ALPHA)
-    len = b - a
-    if alpha == DEFAULT_POWER_ALPHA
-        if n == 32
-            xs = a .+ len .* _POWER_LEFT_T_32
-            wx = _STD_32_WEIGHTS .* len .* _POWER_LEFT_T_PRIME_32
-            return xs, wx
-        elseif n == 16
-            xs = a .+ len .* _POWER_LEFT_T_16
-            wx = _STD_16_WEIGHTS .* len .* _POWER_LEFT_T_PRIME_16
-            return xs, wx
-        end
-    end
-    # 回退到完整计算
-    us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
-    inv_alpha = 1.0 / alpha
-    u_half = (us .+ 1) ./ 2
-    t = u_half .^ inv_alpha
-    t_prime = inv_alpha .* u_half .^ (inv_alpha - 1) ./ 2
-    xs = a .+ len .* t
-    wx = ws .* len .* t_prime
-    return xs, wx
-end
-
-"""生成单侧幂次聚簇节点（聚簇于右端 b，使用预计算节点）"""
-function power_right_nodes(a::Float64, b::Float64, n::Int; alpha::Float64=DEFAULT_POWER_ALPHA)
-    len = b - a
-    if alpha == DEFAULT_POWER_ALPHA
-        if n == 32
-            xs = a .+ len .* _POWER_RIGHT_T_32
-            wx = _STD_32_WEIGHTS .* len .* _POWER_RIGHT_T_PRIME_32
-            return xs, wx
-        elseif n == 16
-            xs = a .+ len .* _POWER_RIGHT_T_16
-            wx = _STD_16_WEIGHTS .* len .* _POWER_RIGHT_T_PRIME_16
-            return xs, wx
-        end
-    end
-    # 回退到完整计算
-    us, ws = GaussLegendre.gauleg(-1.0, 1.0, n)
-    inv_alpha = 1.0 / alpha
-    u_half = (us .+ 1) ./ 2
-    t = 1 .- (1 .- u_half) .^ inv_alpha
-    t_prime = inv_alpha .* (1 .- u_half) .^ (inv_alpha - 1) ./ 2
-    xs = a .+ len .* t
-    wx = ws .* len .* t_prime
-    return xs, wx
-end
-
-"""生成 DE (tanh-sinh) 变换节点（使用预计算节点）"""
-function de_nodes(a::Float64, b::Float64, n::Int; h::Float64=DEFAULT_DE_H)
-    if n == 32 && h == DEFAULT_DE_H
-        # 使用预计算的变换（注意 DE 有 33 个点）
-        half = (b - a) / 2
-        center = (a + b) / 2
-        xs = center .+ half .* _DE_PHI
-        wx = half .* _DE_PHI_PRIME
-        return xs, wx
-    else
-        # 回退到完整计算
-        ks = collect(-n÷2:n÷2)
-        ts = ks .* h
-        half = (b - a) / 2
-        center = (a + b) / 2
-        xs = center .+ half .* tanh.(π/2 .* sinh.(ts))
-        wx = h .* half .* (π/2) .* cosh.(ts) .* (sech.(π/2 .* sinh.(ts))).^2
-        return xs, wx
-    end
-end
-
-"""奇点位置枚举"""
-@enum SingularityPosition SING_NONE SING_LEFT SING_RIGHT SING_BOTH
-
-"""根据奇点位置选择最优变换"""
-function hybrid_nodes(a::Float64, b::Float64, n::Int, sing_pos::SingularityPosition;
-    alpha::Float64=DEFAULT_POWER_ALPHA, beta::Float64=DEFAULT_CLUSTER_BETA, h::Float64=DEFAULT_DE_H)
-    if sing_pos == SING_LEFT
-        return power_left_nodes(a, b, n; alpha=alpha)
-    elseif sing_pos == SING_RIGHT
-        return power_right_nodes(a, b, n; alpha=alpha)
-    elseif sing_pos == SING_BOTH
-        return de_nodes(a, b, n; h=h)
-    else  # SING_NONE - 被积函数通常在左端（低能端）变化最剧烈
-        return power_left_nodes(a, b, n; alpha=alpha)
-    end
 end
 
 # ============================================================================

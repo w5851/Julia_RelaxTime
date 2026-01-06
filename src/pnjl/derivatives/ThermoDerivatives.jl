@@ -446,10 +446,13 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     denominator_vn = T_val * (ds_dT * dn_dμB - ds_dμB * dn_dT)
     v_n_sq = numerator_vn / denominator_vn
     
-    # ∂μ_B/∂T|_σ = -∂σ/∂T / ∂σ/∂μ_B
-    dσ_dT = ds_dT / n_B - s * dn_dT / n_B^2
-    dσ_dμB = ds_dμB / n_B - s * dn_dμB / n_B^2
-    dμB_dT_sig = -dσ_dT / dσ_dμB
+    # ∂μ_B/∂T|_σ = - (∂σ/∂T) / (∂σ/∂μ_B), 其中 σ = s/n_B。
+    # 为避免 n_B=0 时的除零问题，将分子分母同乘 n_B^2，得到等价形式：
+    #   ∂μ_B/∂T|_σ = - (n_B·ds/dT - s·dn_B/dT) / (n_B·ds/dμ_B - s·dn_B/dμ_B)
+    # 该形式在 n_B→0 的极限下通常是良定义的（例如 μ=0 线）。
+    num_muB_T = n_B * ds_dT - s * dn_dT
+    den_muB_T = n_B * ds_dμB - s * dn_dμB
+    dμB_dT_sig = -num_muB_T / den_muB_T
     
     return (
         v_n_sq = v_n_sq,

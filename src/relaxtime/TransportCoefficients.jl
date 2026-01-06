@@ -304,123 +304,6 @@ function electric_conductivity(
     end
 end
 
-
-#= ============================================================================
-   已弃用：旧的体粘滞系数实现（热力学导数形式）
-   
-   此实现使用 (∂P/∂ε)_n 和 (∂P/∂n)_ε 形式的热力学导数。
-   已被 bulk_viscosity_isentropic（等熵声速形式）替代。
-   
-   保留此代码仅供参考，不建议在生产中使用。
-   ============================================================================
-
-"""
-    bulk_viscosity(quark_params, thermo_params; tau, bulk_coeffs, ...)
-
-体粘滞系数 ζ（RTA，热力学导数形式）。
-
-!!! warning "已弃用"
-    此函数使用旧的热力学导数形式公式，已被 `bulk_viscosity_isentropic` 替代。
-    新公式使用等熵声速形式，与 Fortran 代码一致。
-
-注意：此实现按 docs/reference/formula/输运系数by弛豫时间.md 给出的表达式直译。
-输入 `bulk_coeffs` 建议使用 `PNJL.ThermoDerivatives.bulk_derivative_coeffs` 的返回值。
-"""
-function bulk_viscosity(
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple;
-    tau::NamedTuple,
-    bulk_coeffs::NamedTuple,
-    degeneracy::Float64=degeneracy_default(),
-    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
-    p_max::Float64=10.0,
-    p_grid::Union{Nothing,Vector{Float64}}=nothing,
-    p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
-    cos_w::Union{Nothing,Vector{Float64}}=nothing
-)::Float64
-    T = thermo_params.T
-    Φ = thermo_params.Φ
-    Φbar = thermo_params.Φbar
-    ξ = get(thermo_params, :ξ, 0.0)
-
-    dP_depsilon_n = bulk_coeffs.dP_depsilon_n
-    dP_dn_epsilon = bulk_coeffs.dP_dn_epsilon
-    dM_dT = bulk_coeffs.dM_dT
-    dM_dmu = bulk_coeffs.dM_dmu
-
-    nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
-
-    pref_measure_iso = 1.0 / (2.0 * π^2)
-    pref_measure_aniso = 1.0 / (4.0 * π^2)
-
-    function flavor_index(sp::Symbol)
-        if sp in (:u, :d, :ubar, :dbar)
-            return 1
-        elseif sp in (:s, :sbar)
-            return 3
-        else
-            error("Unknown species: $sp")
-        end
-    end
-
-    flavors = (:u, :d, :s)
-
-    function one_flavor_pair_contrib(flavor::Symbol, p::Float64, cosθ::Float64)
-        sp_q = flavor
-        sp_aq = Symbol(string(flavor, "bar"))
-
-        m = mass_for_species(sp_q, quark_params)
-        μ = mu_for_species(sp_q, quark_params)
-        E = energy_from_p(p, m)
-
-        idx = flavor_index(sp_q)
-        dE_dT_val = (m / E) * dM_dT[idx]
-        dE_dmu_val = (m / E) * dM_dmu[idx]
-
-        f_q = distribution_for_species(sp_q, p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        f_aq = distribution_for_species(sp_aq, p, m, μ, T, Φ, Φbar, ξ, cosθ)
-
-        w_q = degeneracy * tau_for_species(sp_q, tau) * fermi_factor(f_q)
-        w_aq = degeneracy * tau_for_species(sp_aq, tau) * fermi_factor(f_aq)
-
-        bracket = (p * p) / (3.0 * E) - dP_depsilon_n * (E - T * dE_dT_val - μ * dE_dmu_val) + dP_dn_epsilon * dE_dmu_val
-
-        term_sum = (m * m / E) * (w_q + w_aq) * bracket
-        term_diff = (m * m / E) * (w_q - w_aq) * dP_dn_epsilon
-
-        return term_sum - term_diff
-    end
-
-    if ξ == 0.0
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
-            p2 = p * p  # 相空间测度 p²
-            for fl in flavors
-                acc += wp * p2 * one_flavor_pair_contrib(fl, p, 0.0)
-            end
-        end
-        integral = pref_measure_iso * acc
-        return -(1.0 / (3.0 * T)) * integral
-    else
-        nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
-            p2 = p * p
-            for (c, wc) in zip(nodes_cos, weights_cos)
-                for fl in flavors
-                    acc += wp * wc * p2 * one_flavor_pair_contrib(fl, p, c)
-                end
-            end
-        end
-        integral = pref_measure_aniso * acc
-        return -(1.0 / (3.0 * T)) * integral
-    end
-end
-
-=# # 结束注释块
-
 """
     bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...)
 
@@ -607,12 +490,11 @@ function transport_coefficients(
         cos_w=cos_w,
     )
 
-    zeta = bulk_coeffs === nothing ? NaN : bulk_viscosity(
+    zeta = bulk_coeffs === nothing ? NaN : bulk_viscosity_isentropic(
         quark_params,
         thermo_params;
         tau=tau,
-        bulk_coeffs=bulk_coeffs,
-        degeneracy=degeneracy,
+        bulk_coeffs_isentropic=bulk_coeffs,
         p_nodes=p_nodes,
         p_max=p_max,
         p_grid=p_grid,
