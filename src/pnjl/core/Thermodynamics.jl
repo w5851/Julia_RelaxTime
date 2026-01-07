@@ -47,6 +47,11 @@ using .Integrals:
     calculate_energy_isotropic,
     calculate_energy_anisotropic
 
+# 导入各向异性分布函数（避免在函数内 include 触发 world-age 问题）
+const _QUARK_DIST_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "..", "QuarkDistribution_Aniso.jl"))
+include(_QUARK_DIST_ANISO_PATH)
+using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
+
 export calculate_mass_vec, calculate_chiral, calculate_U, calculate_U_derivative_T
 export calculate_pressure, calculate_omega
 export calculate_rho, calculate_thermo, calculate_number_densities
@@ -248,12 +253,6 @@ end
 - `antiquark`: 反夸克数密度 [n_ū, n_d̄, n_s̄]
 """
 function calculate_number_densities(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
-    # 需要导入分布函数
-    include_path = joinpath(@__DIR__, "..", "..", "QuarkDistribution_Aniso.jl")
-    if !isdefined(@__MODULE__, :PNJLQuarkDistributions_Aniso)
-        include(include_path)
-    end
-    
     φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
     Φ, Φ̄ = x_state[4], x_state[5]
     masses = calculate_mass_vec(φ)
@@ -272,8 +271,8 @@ function calculate_number_densities(x_state::SVector{5, TF}, mu_vec::AbstractVec
             p = thermal_p_mesh[idx]
             cosθ = cosθ_mesh[idx]
             w = thermal_coefficients[idx]
-            total_q += w * pref * Main.PNJLQuarkDistributions_Aniso.quark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
-            total_aq += w * pref * Main.PNJLQuarkDistributions_Aniso.antiquark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
+            total_q += w * pref * quark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
+            total_aq += w * pref * antiquark_distribution_aniso(p, mass_i, mu_i, T_fm, Φ, Φ̄, xi, cosθ)
         end
         acc_q[i] = total_q
         acc_aq[i] = total_aq

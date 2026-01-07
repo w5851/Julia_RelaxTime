@@ -33,7 +33,7 @@ include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 using StaticArrays
 using Dates
 using .ScanCSV: ScanCSV
-using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
+using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, ρ0_inv_fm3
 using .TransportWorkflow: solve_gap_and_transport
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .EffectiveCouplings.OneLoopIntegrals: A
@@ -352,13 +352,17 @@ function run_scan(opts::Options)
             tauinv = res.tau_inv
             tr = res.transport
 
+            # 由密度重建净密度（与旧版 eq.rho/eq.rho_norm 含义保持一致：sum(net quark)/3/ρ0）
+            rho = (dens.u - dens.ubar) + (dens.d - dens.dbar) + (dens.s - dens.sbar)
+            rho_norm = rho / (3.0 * ρ0_inv_fm3)
+
             row = join([
                 string(T_mev), string(muq_mev), string(muB_mev), string(xi),
                 string(T_fm), string(muq_fm),
                 csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm),
                 string(Φ), string(Φbar),
                 string(masses.u), string(masses.d), string(masses.s),
-                string(eq.rho), string(eq.rho_norm),
+                string(rho), string(rho_norm),
                 string(dens.u), string(dens.d), string(dens.s), string(dens.ubar), string(dens.dbar), string(dens.sbar),
                 string(tau.u), string(tau.d), string(tau.s), string(tau.ubar), string(tau.dbar), string(tau.sbar),
                 string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
