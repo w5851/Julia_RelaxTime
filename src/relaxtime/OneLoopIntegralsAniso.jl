@@ -4,15 +4,13 @@
 module OneLoopIntegralsCorrection
 
 export B0_correction, A_correction, A_aniso,
-    IntegrationStrategy, STRATEGY_QUADGK, STRATEGY_INTERVAL_GL, STRATEGY_CLUSTER_GL, STRATEGY_HYBRID,
-    IntegrationDiagnostics, DEFAULT_STRATEGY, DEFAULT_CLUSTER_BETA, DEFAULT_CLUSTER_N
+    IntegrationDiagnostics
 
 include("../QuarkDistribution_Aniso.jl")
 include("OneLoopIntegrals.jl")
 include("../integration/GaussLegendre.jl")
 include("../integration/IntervalQuadratureStrategies.jl")
 using .GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
-using QuadGK: quadgk
 using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
 using .OneLoopIntegrals: internal_momentum, EPS_K, DEFAULT_RTOL, DEFAULT_ATOL,
     energy_cutoff, singularity_k_positive, const_integral_term_A
@@ -294,20 +292,13 @@ end
 - sign_: 符号类型 (:quark 或 :antiquark)
 - λ, k, m, m_prime: 物理参数
 - μ, T, Φ, Φbar, ξ: 热力学参数
-- strategy: 积分策略 (默认 STRATEGY_CLUSTER_GL)
-- cluster_beta: 聚簇参数 (默认 8.0)
-- cluster_n: 每区间节点数 (默认 64)
 - diagnostics: 是否返回诊断信息 (默认 false)
-- rtol, atol: QuadGK 容差 (仅 STRATEGY_QUADGK 使用)
 
 返回:
 - (real_part, imag_part) 或 (real_part, imag_part, diagnostics)
 """
 function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
     Φ::Float64, Φbar::Float64, ξ::Float64;
-    strategy::IntegrationStrategy=DEFAULT_STRATEGY,
-    cluster_beta::Float64=DEFAULT_CLUSTER_BETA,
-    cluster_n::Int=DEFAULT_CLUSTER_N,
     diagnostics::Bool=false,
     rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
     
@@ -322,81 +313,52 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
     # 获取虚部积分区间
     intervals_imag, _ = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
     
-    # 根据策略计算实部
+    # 固定 hybrid：根据 A±B=0 的根分段，并按奇点位置选择映射
     real_part = 0.0
     roots = Float64[]
     intervals_real = Tuple{Float64,Float64}[]
-    
-    if strategy == STRATEGY_QUADGK
-        # 原始 QuadGK 方法
-        real_part, _ = quadgk(integrand_real, Emin, Emax; rtol=rtol, atol=atol)
-        intervals_real = [(Emin, Emax)]
-        
-    elseif strategy == STRATEGY_INTERVAL_GL || strategy == STRATEGY_CLUSTER_GL || strategy == STRATEGY_HYBRID
-        # 查找 A±B=0 的根
-        roots = find_roots_AB(λ, k, m, m_prime, Emin, Emax)
-        intervals_real = build_intervals_from_roots(roots, Emin, Emax)
-        
-        if strategy == STRATEGY_INTERVAL_GL
-            # 标准 GL 积分
-            for (a, b) in intervals_real
-                nodes, weights = GaussLegendre.gauleg(a, b, cluster_n)
-                @inbounds for i in eachindex(nodes)
-                    real_part += weights[i] * integrand_real(nodes[i])
-                end
-            end
-        elseif strategy == STRATEGY_CLUSTER_GL
-            # 聚簇 GL 积分 (tanh 对称)
-            for (a, b) in intervals_real
-                xs, wx = clustered_gl_nodes(a, b, cluster_n; beta=cluster_beta)
-                @inbounds for i in eachindex(xs)
-                    real_part += wx[i] * integrand_real(xs[i])
-                end
-            end
-        else  # STRATEGY_HYBRID
-            # 混合策略：根据奇点位置选择最优变换和节点数
-            n_intervals = length(intervals_real)
-            for (idx, (a, b)) in enumerate(intervals_real)
-                # 确定奇点位置
-                sing_pos = if n_intervals == 1
-                    isempty(roots) ? SING_NONE : SING_BOTH
-                elseif idx == 1
-                    SING_RIGHT  # 第一个区间，奇点在右端
-                elseif idx == n_intervals
-                    SING_LEFT   # 最后一个区间，奇点在左端
-                else
-                    SING_BOTH   # 中间区间，两端都有奇点
-                end
-                
-                # 自适应节点数：
-                # - 无根情况：16 节点即可
-                # - 有根情况：
-                #   - 第一个区间（SING_RIGHT）：32 节点（左端 E=m 处有 p→0 奇异行为）
-                #   - 中间区间（SING_BOTH）：32 节点
-                #   - 最后一个区间（SING_LEFT）：16 节点
-                n_nodes = if isempty(roots)
-                    16  # 无根情况
-                elseif sing_pos == SING_LEFT
-                    16  # 最后一个区间
-                else
-                    32  # 第一个区间或中间区间
-                end
-                
-                xs, wx = hybrid_nodes(a, b, n_nodes, sing_pos)
-                @inbounds for i in eachindex(xs)
-                    real_part += wx[i] * integrand_real(xs[i])
-                end
-            end
+
+    # 查找 A±B=0 的根并构造分段
+    roots = find_roots_AB(λ, k, m, m_prime, Emin, Emax)
+    intervals_real = build_intervals_from_roots(roots, Emin, Emax)
+
+    # 混合策略：根据奇点位置选择映射与节点数
+    n_intervals = length(intervals_real)
+    for (idx, (a, b)) in enumerate(intervals_real)
+        sing_pos = if n_intervals == 1
+            isempty(roots) ? SING_NONE : SING_BOTH
+        elseif idx == 1
+            SING_RIGHT
+        elseif idx == n_intervals
+            SING_LEFT
+        else
+            SING_BOTH
         end
+
+        n_nodes = if isempty(roots)
+            16
+        elseif sing_pos == SING_LEFT
+            16
+        else
+            32
+        end
+
+        real_part += integrate_hybrid_interval(integrand_real, a, b, sing_pos; n=n_nodes)
     end
     
-    # 计算虚部（使用标准 16 节点 GL）
+    # 计算虚部（使用标准 16 节点 GL，无分配）
     imag_part = 0.0
     if !isempty(intervals_imag)
         for (E1, E2) in intervals_imag
-            nodes_i, weights_i = transform_standard16(E1, E2)
-            @inbounds for i in eachindex(nodes_i)
-                imag_part += weights_i[i] * integrand_imag(nodes_i[i])
+            half = (E2 - E1) / 2
+            center = (E1 + E2) / 2
+            @inbounds @simd for i in eachindex(_STD_16_NODES)
+                x = center + half * _STD_16_NODES[i]
+                w = _STD_16_WEIGHTS[i] * half
+                v = integrand_imag(x)
+                if isfinite(v)
+                    imag_part += w * v
+                end
             end
         end
         imag_part *= sign(λ)
@@ -406,7 +368,7 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
     
     if diagnostics
         diag = IntegrationDiagnostics(
-            strategy, length(roots), roots,
+            STRATEGY_HYBRID, length(roots), roots,
             length(intervals_real), intervals_real,
             real_part, imag_part, t_elapsed
         )
@@ -442,8 +404,14 @@ function B0_correction(λ::Float64, k::Float64, m1::Float64, m2::Float64, μ1::F
     term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T, Φ, Φbar, ξ; tol_kwargs...)
     term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T, Φ, Φbar, ξ; tol_kwargs...)
 
-    real_part = term1[1] - term2[1] + term3[1] - term4[1]
-    imag_part = term1[2] - term2[2] + term3[2] - term4[2]
+    # 注意：B0 的 pm=-1(antiquark) 分支语义是 NJL 中的f(-E-μ)=1-f(E+μ)
+    # 这里f(E+μ)是NJL中反粒子的分布函数，为避免 PNJL 分布在负能量下的数值溢出，
+    # 实现上采将严格恒等式变换后的NJL形式转换到PNJL的分布函数f^-(E,μ)上计算：
+    # 一阶各向异性修正只取 δf（对 ξ 的线性项），常数 1 无修正：
+    #   δ f(−E-μ) = δ(1 − f^−(E, μ)) = − δ f^−(E, μ)
+    # 因此在最终组合 B0 = B0^+(...) − B0^−(...) + ... 中，对应 term2/term4 出现“负负得正”。
+    real_part = term1[1] + term2[1] + term3[1] + term4[1]
+    imag_part = term1[2] + term2[2] + term3[2] + term4[2]
     return real_part, imag_part
 end
 

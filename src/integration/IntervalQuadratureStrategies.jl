@@ -190,3 +190,121 @@ function hybrid_nodes(a::Float64, b::Float64, n::Int, sing_pos::SingularityPosit
         return power_left_nodes(a, b, n; alpha=alpha)
     end
 end
+
+# ============================================================================
+# 高性能：无分配的 hybrid 区间求积
+#
+# 设计：直接复用本文件里预计算的映射数组（_POWER_* / _DE_*），
+# 在循环内计算节点与权重，避免为每个区间分配 xs/wx 向量。
+#
+# 说明：
+# - SING_LEFT  -> power_left
+# - SING_RIGHT -> power_right
+# - SING_BOTH  -> DE (tanh-sinh)
+# - SING_NONE  -> power_left（经验上对端点更稳）
+#
+# 若传入非默认参数或非常用 n，会自动回退到生成节点的实现。
+# ============================================================================
+
+@inline function _integrate_power_left_32(f::F, a::Float64, b::Float64) where {F}
+    len = b - a
+    total = 0.0
+    @inbounds @simd for i in eachindex(_STD_32_WEIGHTS)
+        x = a + len * _POWER_LEFT_T_32[i]
+        w = _STD_32_WEIGHTS[i] * len * _POWER_LEFT_T_PRIME_32[i]
+        v = f(x)
+        if isfinite(v)
+            total += w * v
+        end
+    end
+    return total
+end
+
+@inline function _integrate_power_left_16(f::F, a::Float64, b::Float64) where {F}
+    len = b - a
+    total = 0.0
+    @inbounds @simd for i in eachindex(_STD_16_WEIGHTS)
+        x = a + len * _POWER_LEFT_T_16[i]
+        w = _STD_16_WEIGHTS[i] * len * _POWER_LEFT_T_PRIME_16[i]
+        v = f(x)
+        if isfinite(v)
+            total += w * v
+        end
+    end
+    return total
+end
+
+@inline function _integrate_power_right_32(f::F, a::Float64, b::Float64) where {F}
+    len = b - a
+    total = 0.0
+    @inbounds @simd for i in eachindex(_STD_32_WEIGHTS)
+        x = a + len * _POWER_RIGHT_T_32[i]
+        w = _STD_32_WEIGHTS[i] * len * _POWER_RIGHT_T_PRIME_32[i]
+        v = f(x)
+        if isfinite(v)
+            total += w * v
+        end
+    end
+    return total
+end
+
+@inline function _integrate_power_right_16(f::F, a::Float64, b::Float64) where {F}
+    len = b - a
+    total = 0.0
+    @inbounds @simd for i in eachindex(_STD_16_WEIGHTS)
+        x = a + len * _POWER_RIGHT_T_16[i]
+        w = _STD_16_WEIGHTS[i] * len * _POWER_RIGHT_T_PRIME_16[i]
+        v = f(x)
+        if isfinite(v)
+            total += w * v
+        end
+    end
+    return total
+end
+
+@inline function _integrate_de_default(f::F, a::Float64, b::Float64) where {F}
+    half = (b - a) / 2
+    center = (a + b) / 2
+    total = 0.0
+    @inbounds @simd for i in eachindex(_DE_PHI)
+        x = center + half * _DE_PHI[i]
+        w = half * _DE_PHI_PRIME[i]
+        v = f(x)
+        if isfinite(v)
+            total += w * v
+        end
+    end
+    return total
+end
+
+"""在区间 [a,b] 上用 hybrid 规则积分（高性能路径，尽量无分配）。"""
+@inline function integrate_hybrid_interval(f::F, a::Float64, b::Float64, sing_pos::SingularityPosition;
+    n::Int=32, alpha::Float64=DEFAULT_POWER_ALPHA, h::Float64=DEFAULT_DE_H) where {F}
+
+    if !(isfinite(a) && isfinite(b)) || b <= a
+        return 0.0
+    end
+
+    # 常用默认参数走无分配快路径
+    if alpha == DEFAULT_POWER_ALPHA && h == DEFAULT_DE_H
+        if sing_pos == SING_BOTH
+            return _integrate_de_default(f, a, b)
+        elseif sing_pos == SING_RIGHT
+            return (n == 16) ? _integrate_power_right_16(f, a, b) : _integrate_power_right_32(f, a, b)
+        else
+            # SING_LEFT / SING_NONE
+            return (n == 16) ? _integrate_power_left_16(f, a, b) : _integrate_power_left_32(f, a, b)
+        end
+    end
+
+    # 回退：生成节点再积分（仍然正确，但会分配）
+    xs, wx = hybrid_nodes(a, b, n, sing_pos; alpha=alpha, h=h)
+    total = 0.0
+    @inbounds for i in eachindex(xs)
+        v = f(xs[i])
+        if isfinite(v)
+            total += wx[i] * v
+        end
+    end
+    return total
+end

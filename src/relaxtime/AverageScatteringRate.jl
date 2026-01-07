@@ -30,8 +30,8 @@ using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distrib
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!
 
 const DEFAULT_P_NODES = 6
-const DEFAULT_ANGLE_NODES = 2
-const DEFAULT_PHI_NODES = 4
+const DEFAULT_ANGLE_NODES = 4  # cosθ节点数
+const DEFAULT_PHI_NODES = 8    # φ节点数
 const DQ = 6.0 # 简并度d_q=2*N_c=6
 const TWO_PI = 2.0 * π
 
@@ -356,7 +356,7 @@ end
 """
     average_scattering_rate(process, quark_params, thermo_params, K_coeffs; kwargs...)
 
-计算平均散射率，使用半无穷积分 [0, ∞)。
+计算平均散射率（采用半无穷积分 [0, ∞) 的实现）。
 
 # Arguments
 - `process::Symbol`: 散射过程 (如 :ud_to_ud)
@@ -368,7 +368,7 @@ end
 - `p_nodes::Int`: 动量积分节点数 (默认6)
 - `angle_nodes::Int`: 角度积分节点数 (默认2)
 - `phi_nodes::Int`: 方位角积分节点数 (默认4)
-- `scale::Float64`: 半无穷积分尺度参数 (默认10.0)
+- `scale::Float64`: 半无穷积分尺度参数
 """
 function average_scattering_rate(
     process::Symbol,
@@ -395,10 +395,29 @@ function average_scattering_rate(
     T = thermo_params.T; Φ = thermo_params.Φ; Φbar = thermo_params.Φbar
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
+    # 使用半无穷积分 [0, ∞)
+    return _average_scattering_rate_semi_infinite(
+        process, pi_sym, pj_sym, mi, mj, μi, μj, T, Φ, Φbar, ξ,
+        quark_params, thermo_params, K_coeffs,
+        p_nodes, angle_nodes, phi_nodes, scale,
+        p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
+        cs_cache, n_sigma_points
+    )
+end
+
+# 半无穷积分版本（保留原有实现）
+function _average_scattering_rate_semi_infinite(
+    process, pi_sym, pj_sym, mi, mj, μi, μj, T, Φ, Φbar, ξ,
+    quark_params, thermo_params, K_coeffs,
+    p_nodes, angle_nodes, phi_nodes, scale,
+    p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
+    cs_cache, n_sigma_points
+)
     # 使用 [0, 1) 上的Gauss-Legendre节点，通过变换映射到 [0, ∞)
     t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
-    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
-    phi_grid === nothing && ((phi_grid, phi_w) = gauleg(0.0, Float64(π), phi_nodes))
+    # 使用完整积分区间 [-1,1] 和 [0,2π]
+    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(-1.0, 1.0, angle_nodes))
+    phi_grid === nothing && ((phi_grid, phi_w) = gauleg(0.0, TWO_PI, phi_nodes))
 
     # 数密度（用于归一化）- 使用半无穷积分
     ρ_i = number_density(pi_sym, mi, μi, T, Φ, Φbar, ξ; p_nodes=DEFAULT_SEMI_INF_NODES, angle_nodes=angle_nodes, scale=scale)
@@ -407,7 +426,8 @@ function average_scattering_rate(
         return 0.0
     end
 
-    prefactor = (DQ^2) / (4.0 * π^5 * ρ_i * ρ_j)
+    # 原始公式的前因子: DQ²/(2π)⁵ = DQ²/(32π⁵)
+    prefactor = (DQ^2) / (32.0 * π^5 * ρ_i * ρ_j)
     ω = 0.0
 
     for (t_i, w_ti) in zip(t_grid, t_w)
@@ -439,14 +459,19 @@ function average_scattering_rate(
                     end
                     for (φ, wφ) in zip(phi_grid, phi_w)
                         cosΘ = cθi * cθj + sθi * sθj * cos(φ)
-                        p_dot = Ei * Ej - p_i * p_j * cosΘ
-                        s = mi^2 + mj^2 + 2.0 * p_dot
+                        s = mi^2 + mj^2 + 2.0 * (Ei * Ej - p_i * p_j * cosΘ)
                         if s <= (mi + mj)^2
                             continue
                         end
-                        v_rel_num = p_dot^2 - mi^2 * mj^2
-                        v_rel = v_rel_num > 0 ? sqrt(v_rel_num) / (Ei * Ej) : 0.0
-                        if v_rel == 0.0
+                        # 使用质心系能量计算v_rel (参考公式文档)
+                        s_rt = sqrt(s)
+                        Ei_cm = (s + mi^2 - mj^2) / (2.0 * s_rt)
+                        Ej_cm = (s - mi^2 + mj^2) / (2.0 * s_rt)
+                        pi_cm = sqrt(max(0.0, (s - (mi + mj)^2) * (s - (mi - mj)^2))) / (2.0 * s_rt)
+                        pj_cm = pi_cm  # 质心系中动量大小相等
+                        v_rel_num = (Ei_cm * Ej_cm + pi_cm * pj_cm)^2 - (mi * mj)^2
+                        v_rel = v_rel_num > 0.0 ? sqrt(v_rel_num) / (Ei_cm * Ej_cm) : 0.0
+                        if v_rel == 0.0 || v_rel > 2.0
                             continue
                         end
                         σ = get_sigma(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)

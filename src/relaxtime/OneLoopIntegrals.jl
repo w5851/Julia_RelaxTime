@@ -10,11 +10,11 @@ module OneLoopIntegrals
 include("../integration/GaussLegendre.jl")
 include("../Constants_PNJL.jl")
 include("../QuarkDistribution.jl")
+include("../integration/IntervalQuadratureStrategies.jl")
 using .GaussLegendre: gauleg
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using .Constants_PNJL: Λ_inv_fm
-using QuadGK: quadgk
 
 export B0, A
 
@@ -24,6 +24,17 @@ const EPS_K = 1.0e-9 # 三动量k大小为零的判定阈值
 const EPS_SEGMENT = 1.0e-12 # 分母的最小值判定阈值
 const DEFAULT_RTOL = 1.0e-3 # 积分相对误差默认值
 const DEFAULT_ATOL = 0.0 # 积分绝对误差默认值
+
+# hybrid 求积默认节点数（热点路径：优先性能）
+const HYBRID_N_SMOOTH = 16
+const HYBRID_N_SING = 32
+
+"""k=0 主值积分在端点贴近极点时挖掉的对称 gap（相对区间长度的比例）。
+
+默认 PV 实部使用“奇点减法 + 解析对数项”，不依赖 quadgk。
+仅当极点数值上贴近积分端点，导致对数项不稳定时，回退到“挖掉小 gap + 分段策略积分”。
+"""
+const PV_GAP_REL = 1e-6
 """计算给定质量下的能量截断值"""
 @inline @fastmath function energy_cutoff(m::Float64)
     m_pos = max(m, 0.0)
@@ -51,33 +62,25 @@ end
     end
 end
 
-"""B0 中使用的“±”分布（仅在正能量 E 上评估）。
+"""B0 中使用的“±”分布（只在正能量 E 上评估，避免负能量导致溢出）。
 
-等价目标：与 C++ `fd(pm*E, mu, ...)` 一致，其中
-- `pm=+1` 对应 `f^+(E,mu)`
-- `pm=-1` 对应 `f^+(-E,mu) = 1 - f^-(E,mu)`
+等价目标：与参考实现的 `fd(pm*E, mu)` 一致。
 
-同时保持 C++ 对 `mu<0` 的约定：`fd(E,mu<0)=f^-(E,|mu|)`。
+注意：当前 PNJL 分布的实现形式在 E<0 时会出现 exp_term^2 溢出，
+因此这里必须使用稳定恒等式把 `fd(-E,mu)` 映射回正能量表达。
 """
 @inline function distribution_value_b0(sign_flag::Symbol, E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
 
+    # 重要：这里的 μ 具有“真实物理含义”，允许为负；不能用 μ 的正负来暗示粒子/反粒子。
+    # B0 文档约定：
+    # - :plus  => f^+(+E, μ)
+    # - :minus => f^+(-E, μ) = 1 - f^-(+E, μ)
+    # 且只在正能量 E 上评估以避免 E<0 时的指数溢出。
     if sign_flag === :plus
-        # fd(+E, μ)
-        if μ >= 0.0
-            return quark_distribution(E, μ, T, Φ, Φbar)
-        else
-            return antiquark_distribution(E, -μ, T, Φ, Φbar)
-        end
+        return quark_distribution(E, μ, T, Φ, Φbar)
     else
-        # fd(-E, μ)
-        if μ >= 0.0
-            # f^+(-E,μ) = 1 - f^-(E,μ)
-            return 1.0 - antiquark_distribution(E, μ, T, Φ, Φbar)
-        else
-            # fd(-E,μ<0)=f^-( -E, |μ| ) = 1 - f^+(E,|μ|)
-            return 1.0 - quark_distribution(E, -μ, T, Φ, Φbar)
-        end
+        return 1.0 - antiquark_distribution(E, μ, T, Φ, Φbar)
     end
 end
 
@@ -85,19 +88,14 @@ end
     μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
 
+    # 与 distribution_value_b0 保持一致：
+    # :plus  -> ∫ f^+(E, μ) dE
+    # :minus -> ∫ f^+(-E, μ) dE = ∫ (1 - f^-(E, μ)) dE = (E_max-E_min) - ∫ f^-(E, μ) dE
     if sign_flag === :plus
-        if μ >= 0.0
-            return quark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
-        else
-            return antiquark_distribution_integral(E_min, E_max, -μ, T, Φ, Φbar)
-        end
+        return quark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
     else
         interval_len = E_max - E_min
-        if μ >= 0.0
-            return interval_len - antiquark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
-        else
-            return interval_len - quark_distribution_integral(E_min, E_max, -μ, T, Φ, Φbar)
-        end
+        return interval_len - antiquark_distribution_integral(E_min, E_max, μ, T, Φ, Φbar)
     end
 end
 
@@ -127,7 +125,7 @@ end
         return 0.0
     end
     if abs(denominator) < EPS_SEGMENT
-        # PV 附近直接返回 0，避免 QuadGK 采样到 1/0 -> NaN
+        # PV 附近直接返回 0，避免 1/0 -> Inf/NaN
         return 0.0
     end
     val = p * dist / denominator
@@ -153,7 +151,8 @@ end
 
 """三动量大小k=0(小于EPS_K)时的 B0分量 积分计算"""
 @inline function tilde_B0_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL,
+    )
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -165,34 +164,66 @@ end
 
     imag_part = 0.0
     if isempty(singularity) # 无奇点
-        real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
-    else # 有奇点：在 E0 附近留出对称的微小间隙，避免直接采样到 1/0
-        E0 = singularity[1]
-        eps = max(1e-6, 1e-6 * abs(E0))
-        lo = max(Emin, E0 - eps)
-        hi = min(Emax, E0 + eps)
-
-        if hi <= lo
-            # 极端情况下间隙退化，回退到直接积分（可能再次触发奇点，但覆盖面更小）
-            real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
-        else
-            real_part = 0.0
-            # 避免对退化区间 (a,a) 调用 quadgk（会在端点采样到 0/0 -> NaN）
-            if lo > Emin
-                left, _ = quadgk(integrand_fun, Emin, lo; rtol=rtol, atol=atol)
-                real_part += left
-            end
-            if Emax > hi
-                right, _ = quadgk(integrand_fun, hi, Emax; rtol=rtol, atol=atol)
-                real_part += right
-            end
-        end
-
-        p0 = internal_momentum(E0, m_pos)
-        imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
+        real_part = integrate_hybrid_interval(integrand_fun, Emin, Emax, SING_NONE; n=HYBRID_N_SMOOTH)
+        return real_part * 2.0, imag_part / λ
     end
 
-    return real_part * 2.0, imag_part / λ
+    # 有奇点：主值积分（PV）。
+    # 默认使用“奇点减法 + 解析对数项”，避免在 JIT 路径中引入 quadgk。
+    E0 = singularity[1]
+
+    @inline function numer(E::Float64)
+        p = internal_momentum(E, m_pos)
+        dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
+        if !isfinite(p) || !isfinite(dist)
+            return 0.0
+        end
+        val = p * dist
+        return isfinite(val) ? val : 0.0
+    end
+
+    f0 = numer(E0)
+
+    # 若极点贴近端点，解析对数项会引入 log(0) 的不稳定；此时回退到挖 gap 的分段策略积分。
+    endpoint_tol = 1e-10 * max(1.0, Emax - Emin)
+    if abs(E0 - Emin) <= endpoint_tol || abs(Emax - E0) <= endpoint_tol
+        gap = max(PV_GAP_REL * (Emax - Emin), 64 * eps(E0))
+        left_end = max(Emin, E0 - gap)
+        right_start = min(Emax, E0 + gap)
+        pv_integral = 0.0
+        if left_end > Emin
+            pv_integral += integrate_hybrid_interval(integrand_fun, Emin, left_end, SING_NONE; n=HYBRID_N_SMOOTH)
+        end
+        if right_start < Emax
+            pv_integral += integrate_hybrid_interval(integrand_fun, right_start, Emax, SING_NONE; n=HYBRID_N_SMOOTH)
+        end
+    else
+        @inline function regular_integrand(E::Float64)
+            d = E - E0
+            if abs(d) < 64 * eps(E0)
+                δ = max(1e-7 * (Emax - Emin), 64 * eps(E0))
+                El = max(Emin, E0 - δ)
+                Er = min(Emax, E0 + δ)
+                if Er > El
+                    return (numer(Er) - numer(El)) / (Er - El)
+                else
+                    return 0.0
+                end
+            end
+            return (numer(E) - f0) / d
+        end
+
+        regular = integrate_hybrid_interval(regular_integrand, Emin, Emax, SING_NONE; n=HYBRID_N_SING)
+        logterm = f0 * (log(abs(Emax - E0)) - log(abs(Emin - E0)))
+        pv_integral = (regular + logterm) / λ
+    end
+
+    # 解析虚部（残数项）
+    p0 = internal_momentum(E0, m_pos)
+    imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
+
+    # 与无奇点分支保持相同归一化：返回 2×(PV 积分结果)
+    return pv_integral * 2.0, imag_part / λ
 end
 # ----------------------------------------------------------------------------
 # k>0 时的积分计算相关函数
@@ -331,8 +362,102 @@ k>0 时的奇点计算函数
 end
 
 """k>0 时的 B0分量 积分计算"""
+
+# ---------------------------------------------------------------------------
+
+# 固定 hybrid：按奇点分割区间并选择映射（无分配快路径）
+@inline function integrate_piecewise_hybrid(integrand_fun::F, Emin::Float64, Emax::Float64,
+    intervals::Vector{Tuple{Float64, Float64}}) where {F}
+
+    if isempty(intervals)
+        return integrate_hybrid_interval(integrand_fun, Emin, Emax, SING_NONE; n=HYBRID_N_SMOOTH)
+    end
+
+    # 热点优化：singularity_k_positive 只会返回 1 或 2 个区间（:between / :outside）。
+    # 直接按结构分段，避免构造 pts / sort / unique 的分配。
+    if length(intervals) == 1
+        E1, E2 = intervals[1]
+        total = 0.0
+        if E1 > Emin
+            total += integrate_hybrid_interval(integrand_fun, Emin, E1, SING_RIGHT; n=HYBRID_N_SING)
+        end
+        if E2 > E1
+            total += integrate_hybrid_interval(integrand_fun, E1, E2, SING_BOTH; n=HYBRID_N_SING)
+        end
+        if Emax > E2
+            total += integrate_hybrid_interval(integrand_fun, E2, Emax, SING_LEFT; n=HYBRID_N_SMOOTH)
+        end
+        return total
+    elseif length(intervals) == 2
+        # 期望形态： (Emin, E1) 与 (E2, Emax)
+        a1, b1 = intervals[1]
+        a2, b2 = intervals[2]
+        tol = 1e-12 * max(1.0, Emax - Emin)
+
+        E1 = NaN
+        E2 = NaN
+        if abs(a1 - Emin) <= tol
+            E1 = b1
+        elseif abs(a2 - Emin) <= tol
+            E1 = b2
+        end
+
+        if abs(b1 - Emax) <= tol
+            E2 = a1
+        elseif abs(b2 - Emax) <= tol
+            E2 = a2
+        end
+
+        if !(isfinite(E1) && isfinite(E2))
+            # 非预期形态，回退到通用逻辑
+        else
+            total = 0.0
+            if E1 > Emin
+                total += integrate_hybrid_interval(integrand_fun, Emin, E1, SING_RIGHT; n=HYBRID_N_SING)
+            end
+            if E2 > E1
+                total += integrate_hybrid_interval(integrand_fun, E1, E2, SING_BOTH; n=HYBRID_N_SING)
+            end
+            if Emax > E2
+                total += integrate_hybrid_interval(integrand_fun, E2, Emax, SING_LEFT; n=HYBRID_N_SMOOTH)
+            end
+            return total
+        end
+    end
+
+    pts = Float64[Emin]
+    for (a, b) in intervals
+        push!(pts, a)
+        push!(pts, b)
+    end
+    push!(pts, Emax)
+    pts = sort(unique(pts))
+
+    nseg = length(pts) - 1
+    if nseg <= 0
+        return 0.0
+    elseif nseg == 1
+        return integrate_hybrid_interval(integrand_fun, pts[1], pts[2], SING_NONE; n=HYBRID_N_SMOOTH)
+    end
+
+    total = 0.0
+    for i in 1:nseg
+        a = pts[i]
+        b = pts[i + 1]
+        if !(isfinite(a) && isfinite(b)) || b <= a
+            continue
+        end
+
+        sing_pos = (i == 1) ? SING_RIGHT : (i == nseg ? SING_LEFT : SING_BOTH)
+        n_nodes = (i == nseg) ? HYBRID_N_SMOOTH : HYBRID_N_SING
+        total += integrate_hybrid_interval(integrand_fun, a, b, sing_pos; n=n_nodes)
+    end
+    return total
+end
+
 function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL,
+    )
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -341,7 +466,7 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Floa
     intervals, sign_type = singularity_k_positive(λ, k, m_pos, m_prime_pos, Emin, Emax)
     
     imag_part = 0.0
-    real_part, _ = quadgk(integrand_fun, Emin, Emax; rtol=rtol, atol=atol)
+    real_part = integrate_piecewise_hybrid(integrand_fun, Emin, Emax, intervals)
     
     # 根据区间类型计算虚部
     if !isempty(intervals)
