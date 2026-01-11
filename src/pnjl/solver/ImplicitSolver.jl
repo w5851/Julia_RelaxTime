@@ -44,6 +44,113 @@ export solve, SolverResult
 export create_implicit_solver, solve_with_derivatives
 
 # ============================================================================
+# 物理性判据与兜底求解（Newton → Trust-Region）
+# ============================================================================
+
+@inline function _default_is_physical_solution(x_state::SVector{5, Float64}, masses::SVector{3, Float64}; phi_tol::Float64=1e-8)
+    Φ = x_state[4]
+    Φbar = x_state[5]
+    if !(isfinite(Φ) && isfinite(Φbar) && (-phi_tol <= Φ <= 1 + phi_tol) && (-phi_tol <= Φbar <= 1 + phi_tol))
+        return false
+    end
+    if any(!isfinite, masses) || any(m -> m <= 0.0, masses)
+        return false
+    end
+    return true
+end
+
+@inline function _all_finite_thermo(omega::Float64, pressure::Float64, rho_norm::Float64, entropy::Float64, energy::Float64)
+    return isfinite(omega) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
+end
+
+function _postprocess_candidate(postprocess_fn::Function, physicality_check::Function, x_sol)
+    pp = postprocess_fn(x_sol)
+    phys = physicality_check(pp.x_state, pp.masses) && _all_finite_thermo(pp.omega, pp.pressure, pp.rho_norm, pp.entropy, pp.energy)
+    return (phys=phys, x_sol=Vector{Float64}(x_sol), pp...)
+end
+
+function _choose_candidate(primary_res, primary_cand, fallback_res, fallback_cand; residual_norm_max::Float64)
+    primary_good = primary_res.f_converged && isfinite(primary_res.residual_norm) && primary_res.residual_norm <= residual_norm_max && primary_cand.phys
+    fallback_good = fallback_res.f_converged && isfinite(fallback_res.residual_norm) && fallback_res.residual_norm <= residual_norm_max && fallback_cand.phys
+
+    if fallback_good && !primary_good
+        return fallback_res, fallback_cand
+    elseif primary_good && !fallback_good
+        return primary_res, primary_cand
+    elseif fallback_good && primary_good
+        # 同样“好”的情况下：优先 omega 更小（P 更大）；再比 residual_norm
+        if fallback_cand.omega < primary_cand.omega
+            return fallback_res, fallback_cand
+        elseif fallback_cand.omega > primary_cand.omega
+            return primary_res, primary_cand
+        else
+            return (fallback_res.residual_norm < primary_res.residual_norm) ? (fallback_res, fallback_cand) : (primary_res, primary_cand)
+        end
+    end
+
+    # 都不够好：优先收敛；否则 residual 更小
+    if fallback_res.f_converged && !primary_res.f_converged
+        return fallback_res, fallback_cand
+    elseif primary_res.f_converged && !fallback_res.f_converged
+        return primary_res, primary_cand
+    end
+    if isfinite(fallback_res.residual_norm) && isfinite(primary_res.residual_norm)
+        return (fallback_res.residual_norm < primary_res.residual_norm) ? (fallback_res, fallback_cand) : (primary_res, primary_cand)
+    end
+    return primary_res, primary_cand
+end
+
+function _nlsolve_with_tr_fallback(residual_fn!, x0;
+    primary_method::Symbol,
+    fallback_method::Symbol=:trust_region,
+    use_fallback::Bool=true,
+    physicality_check::Function=_default_is_physical_solution,
+    residual_norm_max::Float64=1e-6,
+    postprocess_fn::Function,
+    nlsolve_kwargs...)
+
+    primary_res = nlsolve(residual_fn!, x0; autodiff=:forward, method=primary_method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
+
+    local primary_cand
+    try
+        primary_cand = _postprocess_candidate(postprocess_fn, physicality_check, primary_res.zero)
+    catch
+        primary_cand = (phys=false,
+                        x_sol=Vector{Float64}(primary_res.zero),
+                        x_state=SVector{5, Float64}(fill(NaN, 5)),
+                        mu_vec=SVector{3, Float64}(fill(NaN, 3)),
+                        omega=NaN,
+                        pressure=NaN,
+                        rho_norm=NaN,
+                        entropy=NaN,
+                        energy=NaN,
+                        masses=SVector{3, Float64}(fill(NaN, 3)))
+    end
+
+    need_fallback = use_fallback && (
+        !primary_res.f_converged ||
+        !isfinite(primary_res.residual_norm) ||
+        primary_res.residual_norm > residual_norm_max ||
+        !primary_cand.phys
+    )
+
+    if !need_fallback
+        return primary_res, primary_cand
+    end
+
+    local fallback_res
+    local fallback_cand
+    try
+        fallback_res = nlsolve(residual_fn!, x0; autodiff=:forward, method=fallback_method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
+        fallback_cand = _postprocess_candidate(postprocess_fn, physicality_check, fallback_res.zero)
+    catch
+        return primary_res, primary_cand
+    end
+
+    return _choose_candidate(primary_res, primary_cand, fallback_res, fallback_cand; residual_norm_max=residual_norm_max)
+end
+
+# ============================================================================
 # 求解结果结构
 # ============================================================================
 
@@ -106,6 +213,11 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               nlsolve_method::Symbol=:newton,
+               trust_region_fallback::Bool=true,
+               fallback_method::Symbol=:trust_region,
+               physicality_check::Function=_default_is_physical_solution,
+               residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
     mode = FixedMu()
@@ -120,26 +232,34 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
     
     # 构建残差函数并求解
     residual_fn! = build_residual!(mode, mu_vec, params)
-    res = nlsolve(residual_fn!, x0; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-    
-    # 提取结果
-    x_state = SVector{5}(Tuple(res.zero))
-    pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    omega = -pressure
-    masses = calculate_mass_vec(x_state)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol))
+        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        omega = -pressure
+        masses = calculate_mass_vec(x_state)
+        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+    end
+    res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        physicality_check=physicality_check,
+        residual_norm_max=Float64(residual_norm_max),
+        postprocess_fn=postprocess_fn,
+        nlsolve_kwargs...)
     
     return SolverResult(
         mode,
         res.f_converged,
-        Vector{Float64}(res.zero),
-        x_state,
+        cand.x_sol,
+        cand.x_state,
         mu_vec,
-        omega,
-        pressure,
-        rho_norm,
-        entropy,
-        energy,
-        masses,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
         res.iterations,
         res.residual_norm,
         Float64(xi),
@@ -161,6 +281,11 @@ function solve(mode::FixedRho, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               nlsolve_method::Symbol=:newton,
+               trust_region_fallback::Bool=true,
+               fallback_method::Symbol=:trust_region,
+               physicality_check::Function=_default_is_physical_solution,
+               residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
     thermal_nodes = cached_nodes(p_num, t_num)
@@ -173,28 +298,35 @@ function solve(mode::FixedRho, T_fm::Real;
     
     # 构建残差函数并求解
     residual_fn! = build_residual!(mode, params)
-    res = nlsolve(residual_fn!, x0; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-    
-    # 提取结果
-    x_sol = res.zero
-    x_state = SVector{5}(Tuple(x_sol[1:5]))
-    mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-    pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    omega = -pressure
-    masses = calculate_mass_vec(x_state)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol[1:5]))
+        mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
+        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        omega = -pressure
+        masses = calculate_mass_vec(x_state)
+        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+    end
+    res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        physicality_check=physicality_check,
+        residual_norm_max=Float64(residual_norm_max),
+        postprocess_fn=postprocess_fn,
+        nlsolve_kwargs...)
     
     return SolverResult(
         mode,
         res.f_converged,
-        Vector{Float64}(x_sol),
-        x_state,
-        mu_vec,
-        omega,
-        pressure,
-        rho_norm,
-        entropy,
-        energy,
-        masses,
+        cand.x_sol,
+        cand.x_state,
+        cand.mu_vec,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
         res.iterations,
         res.residual_norm,
         Float64(xi),
@@ -211,6 +343,11 @@ function solve(mode::FixedEntropy, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               nlsolve_method::Symbol=:newton,
+               trust_region_fallback::Bool=true,
+               fallback_method::Symbol=:trust_region,
+               physicality_check::Function=_default_is_physical_solution,
+               residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
     thermal_nodes = cached_nodes(p_num, t_num)
@@ -221,27 +358,35 @@ function solve(mode::FixedEntropy, T_fm::Real;
     x0 = Float64.(seed)
     
     residual_fn! = build_residual!(mode, params)
-    res = nlsolve(residual_fn!, x0; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-    
-    x_sol = res.zero
-    x_state = SVector{5}(Tuple(x_sol[1:5]))
-    mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-    pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    omega = -pressure
-    masses = calculate_mass_vec(x_state)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol[1:5]))
+        mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
+        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        omega = -pressure
+        masses = calculate_mass_vec(x_state)
+        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+    end
+    res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        physicality_check=physicality_check,
+        residual_norm_max=Float64(residual_norm_max),
+        postprocess_fn=postprocess_fn,
+        nlsolve_kwargs...)
     
     return SolverResult(
         mode,
         res.f_converged,
-        Vector{Float64}(x_sol),
-        x_state,
-        mu_vec,
-        omega,
-        pressure,
-        rho_norm,
-        entropy,
-        energy,
-        masses,
+        cand.x_sol,
+        cand.x_state,
+        cand.mu_vec,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
         res.iterations,
         res.residual_norm,
         Float64(xi),
@@ -258,6 +403,11 @@ function solve(mode::FixedSigma, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               nlsolve_method::Symbol=:newton,
+               trust_region_fallback::Bool=true,
+               fallback_method::Symbol=:trust_region,
+               physicality_check::Function=_default_is_physical_solution,
+               residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
     thermal_nodes = cached_nodes(p_num, t_num)
@@ -268,27 +418,35 @@ function solve(mode::FixedSigma, T_fm::Real;
     x0 = Float64.(seed)
     
     residual_fn! = build_residual!(mode, params)
-    res = nlsolve(residual_fn!, x0; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-    
-    x_sol = res.zero
-    x_state = SVector{5}(Tuple(x_sol[1:5]))
-    mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-    pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    omega = -pressure
-    masses = calculate_mass_vec(x_state)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol[1:5]))
+        mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
+        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        omega = -pressure
+        masses = calculate_mass_vec(x_state)
+        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+    end
+    res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        physicality_check=physicality_check,
+        residual_norm_max=Float64(residual_norm_max),
+        postprocess_fn=postprocess_fn,
+        nlsolve_kwargs...)
     
     return SolverResult(
         mode,
         res.f_converged,
-        Vector{Float64}(x_sol),
-        x_state,
-        mu_vec,
-        omega,
-        pressure,
-        rho_norm,
-        entropy,
-        energy,
-        masses,
+        cand.x_sol,
+        cand.x_state,
+        cand.mu_vec,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
         res.iterations,
         res.residual_norm,
         Float64(xi),
@@ -306,6 +464,7 @@ end
 """
 function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
                      seed_strategy::MultiSeed=MultiSeed(),
+                     nlsolve_method::Symbol=:newton,
                      kwargs...)
     θ = [T_fm, μ_fm]
     seeds = get_all_seeds(seed_strategy, θ, mode)
@@ -315,6 +474,7 @@ function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
         try
             result = solve(mode, T_fm, μ_fm; 
                           seed_strategy=DefaultSeed(seed, seed, :hadron),
+                          nlsolve_method=nlsolve_method,
                           kwargs...)
             push!(results, result)
         catch e

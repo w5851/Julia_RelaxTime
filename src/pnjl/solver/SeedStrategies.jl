@@ -34,7 +34,7 @@ using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedS
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed
 export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
-export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5
+export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
 export MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
 export default_omega_selector
 
@@ -69,6 +69,13 @@ const HIGH_DENSITY_SEED_5 = [-0.21695, -0.21695, -2.01372, 0.18601, 0.22333]
 特征：高温解禁闭相，Polyakov loop 接近 0.6
 """
 const HIGH_TEMP_SEED_5 = [-0.73192, -0.73192, -1.79539, 0.60532, 0.60532]
+
+"""
+更高温初值（5维）
+用途：T≈300–400 MeV 区间的数值求解更稳健的起点（更接近手征恢复 + 去禁闭）。
+注：这是经验种子（并非唯一），用于提升收敛到物理解（Φ/Φ̄∈[0,1]、有效质量为正）概率。
+"""
+const VERY_HIGH_TEMP_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
 
 # 兼容旧接口的别名
 """夸克相典型初值（高温或高密度）"""
@@ -189,7 +196,18 @@ function get_seed(s::DefaultSeed, θ::AbstractVector, mode::ConstraintMode)
         hint = :hadron  # 默认强子相
     end
     
-    base = hint == :quark ? s.quark_seed : s.hadron_seed
+    base = if hint == :quark
+        # 高温（或高化学势）时，T=200MeV 的 quark 种子有时会收敛到非物理解；对更高温区间使用更“去禁闭/手征恢复”的种子。
+        if length(θ) >= 1
+            T_fm = θ[1]
+            T_mev = T_fm * 197.327
+            (T_mev >= 300.0) ? VERY_HIGH_TEMP_SEED_5 : s.quark_seed
+        else
+            s.quark_seed
+        end
+    else
+        s.hadron_seed
+    end
     return extend_seed(base, mode)
 end
 
