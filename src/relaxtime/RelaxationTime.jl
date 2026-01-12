@@ -17,7 +17,7 @@ include("../Constants_PNJL.jl")
 using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES
 using .TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
-using .Constants_PNJL: SCATTERING_PROCESS_KEYS
+using .Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 
 export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCESSES
 
@@ -72,6 +72,18 @@ function compute_average_rates(
         for (k, v) in pairs(existing_rates)
             rates[Symbol(k)] = v
         end
+    end
+
+    # Unified standard (default):
+    # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
+    # - number densities remain semi-infinite inside AverageScatteringRate
+    if (p_grid === nothing) != (p_w === nothing)
+        error("compute_average_rates: p_grid and p_w must be provided together")
+    end
+    if p_grid === nothing
+        Λ_fm = 1.0 / Λ_inv_fm
+        # Use the requested p_nodes as the cutoff-grid resolution.
+        p_grid, p_w = AverageScatteringRate.gauleg(0.0, Λ_fm, p_nodes)
     end
 
     for process in REQUIRED_PROCESSES
@@ -234,6 +246,85 @@ function relaxation_times(
     )
 
     return (tau=tau, tau_inv=tau_inv, rates=rates)
+end
+
+function _read_sigma_table_csv(path::AbstractString)
+    s_vals = Float64[]
+    sigma_vals = Float64[]
+    for raw in eachline(path)
+        line = strip(raw)
+        isempty(line) && continue
+        startswith(line, "#") && continue
+        # Support either comma-separated or whitespace-separated formats.
+        line = replace(line, ',' => ' ')
+        parts = split(line)
+        length(parts) < 2 && continue
+        s_try = tryparse(Float64, parts[1])
+        σ_try = tryparse(Float64, parts[2])
+        (s_try === nothing || σ_try === nothing) && continue
+        s = s_try
+        σ = σ_try
+        push!(s_vals, s)
+        push!(sigma_vals, σ)
+    end
+
+    isempty(s_vals) && error("sigma table file has no data rows: $(path)")
+
+    p = sortperm(s_vals)
+    s_sorted = s_vals[p]
+    σ_sorted = sigma_vals[p]
+
+    # De-duplicate identical s values by keeping the last occurrence.
+    s_out = Float64[]
+    σ_out = Float64[]
+    for (s, σ) in zip(s_sorted, σ_sorted)
+        if !isempty(s_out) && s == s_out[end]
+            σ_out[end] = σ
+        else
+            push!(s_out, s)
+            push!(σ_out, σ)
+        end
+    end
+    return (s_out, σ_out)
+end
+
+"""
+    load_cross_section_caches_from_dir(dir; compute_missing=false, interp_mode=:linear, log_eps=1e-12) -> Dict{Symbol,CrossSectionCache}
+
+从目录加载每个散射过程的 σ(s) 表（CSV），并构造 `cs_caches` 以注入到 `relaxation_times`。
+
+默认 `compute_missing=false`：运行时只插值/端点钳制，确保不会触发任何新的 σ(s) 计算。
+
+目录内每个过程支持以下文件名之一：
+- `sigma_<process>.csv`（推荐）
+- `<process>.csv`
+
+每个 CSV 的数据行格式为：
+- `s,sigma` 或 `s sigma`（允许 # 开头注释行）
+"""
+function load_cross_section_caches_from_dir(
+    dir::AbstractString;
+    compute_missing::Bool=false,
+    interp_mode::Symbol=:linear,
+    log_eps::Float64=1e-12,
+)::Dict{Symbol,CrossSectionCache}
+    isdir(dir) || error("sigma cache directory not found: $(dir)")
+
+    cs_caches = Dict{Symbol,CrossSectionCache}()
+    for process in REQUIRED_PROCESSES
+        path1 = joinpath(dir, "sigma_$(process).csv")
+        path2 = joinpath(dir, "$(process).csv")
+        path = isfile(path1) ? path1 : (isfile(path2) ? path2 : "")
+        isempty(path) && error("missing sigma table for $(process) under $(dir) (expected $(path1) or $(path2))")
+
+        s_vals, σ_vals = _read_sigma_table_csv(path)
+        cache = CrossSectionCache(process; compute_missing=compute_missing, interp_mode=interp_mode, log_eps=log_eps)
+        cache.s_vals = s_vals
+        cache.sigma_vals = σ_vals
+        cache.pchip_dirty = true
+        cs_caches[process] = cache
+    end
+    return cs_caches
 end
 
 end # module

@@ -48,6 +48,9 @@ struct Options
     resume::Bool
     ignore_lock::Bool
 
+    dump_debug::Bool
+    debug_output::String
+
     # equilibrium solver
     p_num::Int
     t_num::Int
@@ -58,6 +61,9 @@ struct Options
     tau_angle_nodes::Int
     tau_phi_nodes::Int
     tau_n_sigma_points::Int
+
+    # optional: load precomputed σ(s) tables and only interpolate
+    sigma_cache_dir::String
 
     # transport settings
     tr_p_nodes::Int
@@ -77,9 +83,12 @@ function print_usage()
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --xi-min/--xi-max/--xi-step 扫描 ξ 的区间与步长（默认 0..1 step 0.1）")
+    println("  --xi0-only                  只计算 ξ=0.0 单点（覆盖其它 ξ 选项）")
     println("  --overwrite                 覆盖输出文件")
     println("  --no-resume                 禁用跳过逻辑，强制重算")
     println("  --ignore-lock               忽略输出锁文件（不建议；用于确认没有重复进程时手动解锁）")
+    println("  --dump-debug                输出 ξ 单点的 densities/rates/tau 分解到文本文件")
+    println("  --debug-out <path>          指定 debug 输出路径（默认 <output>.debug.txt）")
     println("  --p-num <int>               能隙/密度的动量节点数 (default 12)")
     println("  --t-num <int>               能隙/密度的角度节点数 (default 6)")
     println("  --max-iter <int>            NLsolve iterations 上限 (default 40)")
@@ -87,6 +96,7 @@ function print_usage()
     println("  --tau-angle-nodes <int>     τ 平均散射率 cosθ 节点 (default 2)")
     println("  --tau-phi-nodes <int>       τ 平均散射率 φ 节点 (default 4)")
     println("  --tau-n-sigma <int>         截面 t 积分点数 (default 8)")
+    println("  --sigma-cache-dir <path>    从目录加载预计算 σ(s) 表（每过程一个 CSV），运行时只插值/钳制；支持 {xi} 占位符")
     println("  --tr-p-nodes <int>          输运积分动量节点 (default 24)")
     println("  --tr-p-max <fm^-1>          输运积分 p 上限 (default 8.0)")
     println("  --compute-bulk              计算体粘滞 ζ（很慢；默认关闭）")
@@ -102,18 +112,24 @@ function parse_args(args::Vector{String})::Options
         :xi_min => 0.0,
         :xi_max => 1.0,
         :xi_step => 0.1,
+        :xi0_only => false,
         :overwrite => false,
         :resume => true,
         :ignore_lock => false,
-        :p_num => 12,
-        :t_num => 6,
+
+        :dump_debug => false,
+        :debug_out => "",
+        # reduced defaults to lower memory/CPU for quick single-point runs
+        :p_num => 8,
+        :t_num => 4,
         :max_iter => 40,
-        :tau_p_nodes => 6,
-        :tau_angle_nodes => 2,
-        :tau_phi_nodes => 4,
-        :tau_n_sigma => 8,
-        :tr_p_nodes => 24,
-        :tr_p_max => 8.0,
+        :tau_p_nodes => 4,
+        :tau_angle_nodes => 1,
+        :tau_phi_nodes => 2,
+        :tau_n_sigma => 4,
+        :sigma_cache_dir => "",
+        :tr_p_nodes => 12,
+        :tr_p_max => 6.0,
         :compute_bulk => false,
     )
 
@@ -145,12 +161,18 @@ function parse_args(args::Vector{String})::Options
             opts[:xi_max] = parse(Float64, require_value())
         elseif arg == "--xi-step"
             opts[:xi_step] = parse(Float64, require_value())
+        elseif arg == "--xi0-only"
+            opts[:xi0_only] = true
         elseif arg == "--overwrite"
             opts[:overwrite] = true
         elseif arg == "--no-resume"
             opts[:resume] = false
         elseif arg == "--ignore-lock"
             opts[:ignore_lock] = true
+        elseif arg == "--dump-debug"
+            opts[:dump_debug] = true
+        elseif arg == "--debug-out"
+            opts[:debug_out] = require_value()
         elseif arg == "--p-num"
             opts[:p_num] = parse(Int, require_value())
         elseif arg == "--t-num"
@@ -165,6 +187,8 @@ function parse_args(args::Vector{String})::Options
             opts[:tau_phi_nodes] = parse(Int, require_value())
         elseif arg == "--tau-n-sigma"
             opts[:tau_n_sigma] = parse(Int, require_value())
+        elseif arg == "--sigma-cache-dir"
+            opts[:sigma_cache_dir] = require_value()
         elseif arg == "--tr-p-nodes"
             opts[:tr_p_nodes] = parse(Int, require_value())
         elseif arg == "--tr-p-max"
@@ -181,7 +205,9 @@ function parse_args(args::Vector{String})::Options
     end
 
     xi_vals = Float64.(opts[:xi_values])
-    if isempty(xi_vals)
+    if Bool(opts[:xi0_only])
+        xi_vals = [0.0]
+    elseif isempty(xi_vals)
         xmin = Float64(opts[:xi_min])
         xmax = Float64(opts[:xi_max])
         xstep = Float64(opts[:xi_step])
@@ -191,6 +217,11 @@ function parse_args(args::Vector{String})::Options
     end
     xi_vals = unique(sort(xi_vals))
 
+    debug_out = String(opts[:debug_out])
+    if Bool(opts[:dump_debug]) && isempty(debug_out)
+        debug_out = String(opts[:output]) * ".debug.txt"
+    end
+
     return Options(
         String(opts[:output]),
         Float64(opts[:T_mev]),
@@ -199,6 +230,9 @@ function parse_args(args::Vector{String})::Options
         Bool(opts[:overwrite]),
         Bool(opts[:resume]),
         Bool(opts[:ignore_lock]),
+
+        Bool(opts[:dump_debug]),
+        debug_out,
         Int(opts[:p_num]),
         Int(opts[:t_num]),
         Int(opts[:max_iter]),
@@ -206,10 +240,102 @@ function parse_args(args::Vector{String})::Options
         Int(opts[:tau_angle_nodes]),
         Int(opts[:tau_phi_nodes]),
         Int(opts[:tau_n_sigma]),
+        String(opts[:sigma_cache_dir]),
         Int(opts[:tr_p_nodes]),
         Float64(opts[:tr_p_max]),
         Bool(opts[:compute_bulk]),
     )
+end
+
+function write_debug_snapshot(path::AbstractString, opts::Options, xi::Float64, res, rates, K_coeffs)
+    ensure_parent_dir(path)
+    open(path, "a") do io
+        println(io, "# Julia debug snapshot")
+        println(io, "# time: ", Dates.now())
+        println(io, "# T_MeV=", opts.T_mev, " muB_MeV=", opts.muB_mev, " xi=", xi)
+        println(io, "# p_num=", opts.p_num, " t_num=", opts.t_num)
+        println(io, "# tau_p_nodes=", opts.tau_p_nodes, " tau_angle_nodes=", opts.tau_angle_nodes, " tau_phi_nodes=", opts.tau_phi_nodes, " tau_n_sigma_points=", opts.tau_n_sigma_points)
+        println(io, "# compute_bulk=", opts.compute_bulk)
+        println(io)
+
+        dens = res.densities
+        tau = res.tau
+        tauinv = res.tau_inv
+
+        println(io, "# Number densities (fm^-3)")
+        println(io, "n_u     = ", dens.u)
+        println(io, "n_d     = ", dens.d)
+        println(io, "n_s     = ", dens.s)
+        println(io, "n_ubar  = ", dens.ubar)
+        println(io, "n_dbar  = ", dens.dbar)
+        println(io, "n_sbar  = ", dens.sbar)
+        println(io)
+
+        println(io, "# Effective couplings (fm units)")
+        for (k, v) in pairs(K_coeffs)
+            println(io, string(k), " = ", v)
+        end
+        println(io)
+
+        println(io, "# Average scattering rates (fm^-1)")
+        for (k, v) in pairs(rates)
+            println(io, string(k), " = ", v)
+        end
+        println(io)
+
+        println(io, "# Relaxation times")
+        println(io, "tau_u_inv (fm^-1) = ", tauinv.u)
+        println(io, "tau_u (fm)        = ", tau.u)
+        println(io, "tau_d_inv (fm^-1) = ", tauinv.d)
+        println(io, "tau_d (fm)        = ", tau.d)
+        println(io, "tau_s_inv (fm^-1) = ", tauinv.s)
+        println(io, "tau_s (fm)        = ", tau.s)
+        println(io, "tau_ubar_inv (fm^-1) = ", tauinv.ubar)
+        println(io, "tau_ubar (fm)        = ", tau.ubar)
+        println(io, "tau_dbar_inv (fm^-1) = ", tauinv.dbar)
+        println(io, "tau_dbar (fm)        = ", tau.dbar)
+        println(io, "tau_sbar_inv (fm^-1) = ", tauinv.sbar)
+        println(io, "tau_sbar (fm)        = ", tau.sbar)
+        println(io)
+
+        println(io, "# tau_inv breakdown (omega_i = sum_j n_j * w_ij)")
+        # Match formulas in src/relaxtime/RelaxationTime.jl (relaxation_rates)
+        n_u, n_d, n_s = dens.u, dens.d, dens.s
+        n_ubar, n_dbar, n_sbar = dens.ubar, dens.dbar, dens.sbar
+
+        w = Dict{Symbol,Float64}()
+        for (k, v) in pairs(rates)
+            w[Symbol(k)] = Float64(v)
+        end
+
+        omega_u = n_u * (w[:uu_to_uu] + w[:ud_to_ud]) +
+                  n_ubar * (w[:uubar_to_uubar] + w[:uubar_to_ddbar] + w[:uubar_to_ssbar] + w[:udbar_to_udbar]) +
+                  n_s * w[:us_to_us] +
+                  n_sbar * w[:usbar_to_usbar]
+
+        omega_s = 2.0 * n_u * w[:us_to_us] +
+                  2.0 * n_ubar * w[:usbar_to_usbar] +
+                  n_s * w[:ss_to_ss] +
+                  n_sbar * (w[:ssbar_to_ssbar] + 2.0 * w[:ssbar_to_uubar])
+
+        omega_ubar = n_u * (w[:uubar_to_uubar] + w[:uubar_to_ddbar] + w[:uubar_to_ssbar] + w[:dubar_to_dubar]) +
+                     n_ubar * (w[:ubardbar_to_ubardbar] + w[:ubarubar_to_ubarubar]) +
+                     n_s * w[:subar_to_subar] +
+                     n_sbar * w[:ubarsbar_to_ubarsbar]
+
+        omega_sbar = 2.0 * n_u * w[:usbar_to_usbar] +
+                     2.0 * n_ubar * w[:ubarsbar_to_ubarsbar] +
+                     n_sbar * w[:sbarsbar_to_sbarsbar] +
+                     n_s * (w[:ssbar_to_ssbar] + 2.0 * w[:ssbar_to_uubar])
+
+        println(io, "omega_u    = ", omega_u, " (tau_u_inv reported: ", tauinv.u, ")")
+        println(io, "omega_s    = ", omega_s, " (tau_s_inv reported: ", tauinv.s, ")")
+        println(io, "omega_ubar = ", omega_ubar, " (tau_ubar_inv reported: ", tauinv.ubar, ")")
+        println(io, "omega_sbar = ", omega_sbar, " (tau_sbar_inv reported: ", tauinv.sbar, ")")
+        println(io)
+        println(io, "# ----")
+        println(io)
+    end
 end
 
 function ensure_parent_dir(path::AbstractString)
@@ -324,6 +450,22 @@ function run_scan(opts::Options)
 
             K_coeffs = compute_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
 
+            cs_caches = nothing
+            if !isempty(opts.sigma_cache_dir)
+                cache_dir = replace(opts.sigma_cache_dir, "{xi}" => string(xi))
+                cs_caches = TransportWorkflow.RelaxationTime.load_cross_section_caches_from_dir(cache_dir; compute_missing=false)
+            end
+
+            tau_kwargs = (
+                p_nodes=opts.tau_p_nodes,
+                angle_nodes=opts.tau_angle_nodes,
+                phi_nodes=opts.tau_phi_nodes,
+                n_sigma_points=opts.tau_n_sigma_points,
+            )
+            if cs_caches !== nothing
+                tau_kwargs = merge(tau_kwargs, (cs_caches=cs_caches,))
+            end
+
             res = solve_gap_and_transport(
                 T_fm,
                 muq_fm;
@@ -337,12 +479,7 @@ function run_scan(opts::Options)
                 t_num=opts.t_num,
                 seed_state=seed_state,
                 solver_kwargs=(iterations=opts.max_iter,),
-                tau_kwargs=(
-                    p_nodes=opts.tau_p_nodes,
-                    angle_nodes=opts.tau_angle_nodes,
-                    phi_nodes=opts.tau_phi_nodes,
-                    n_sigma_points=opts.tau_n_sigma_points,
-                ),
+                tau_kwargs=tau_kwargs,
                 transport_kwargs=(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm,),
             )
 
@@ -351,6 +488,10 @@ function run_scan(opts::Options)
             tau = res.tau
             tauinv = res.tau_inv
             tr = res.transport
+
+            if opts.dump_debug
+                write_debug_snapshot(opts.debug_output, opts, Float64(xi), res, res.rates, K_coeffs)
+            end
 
             # 由密度重建净密度（与旧版 eq.rho/eq.rho_norm 含义保持一致：sum(net quark)/3/ρ0）
             rho = (dens.u - dens.ubar) + (dens.d - dens.dbar) + (dens.s - dens.sbar)
