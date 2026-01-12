@@ -9,7 +9,7 @@ module AverageScatteringRate
 Cross-section cache notes:
 - 本仓库已将生产默认策略固定为 **w0cdf 取点 + PCHIP 插值**。
 - `CrossSectionCache` 仅用于承载预计算的 σ(s) 表，并用 PCHIP 做插值/端点钳制；运行时不会触发任何新的 σ(s) 计算。
-- 因此构造时必须使用 `compute_missing=false` 且 `interp_mode=:pchip`。
+- `CrossSectionCache(process)` 创建空缓存；通过 `precompute_cross_section!` 填充后即可用于 `average_scattering_rate`。
 """
 
 include("../Constants_PNJL.jl")
@@ -26,7 +26,7 @@ using .TotalCrossSection: total_cross_section
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
-export average_scattering_rate, CrossSectionCache, precompute_cross_section!
+export average_scattering_rate, CrossSectionCache, precompute_cross_section!, build_w0cdf_pchip_cache
 
 const DEFAULT_P_NODES = 20
 const DEFAULT_ANGLE_NODES = 4  # cosθ节点数
@@ -113,57 +113,18 @@ mutable struct CrossSectionCache
     s_vals::Vector{Float64}
     sigma_vals::Vector{Float64}
 
-    # Legacy knob (disabled in production): must be false.
-    # The cache is expected to be fully precomputed on a w0cdf grid.
-    compute_missing::Bool
-
-    # Legacy knobs (adaptive refinement is removed/disabled).
-    rtol::Float64
-    max_refine::Int
-
-    # Legacy knob (disabled): direct exact σ(s) per query.
-    direct::Bool
-
-    # Legacy knob (kept for compatibility; has no effect in the fixed method).
-    memoize::Bool
-
-    # Fixed in production: :pchip only.
-    interp_mode::Symbol
-    log_eps::Float64
-
     # Cached slopes for :pchip (same length as s_vals).
     pchip_slopes::Vector{Float64}
     pchip_dirty::Bool
 end
 
-function CrossSectionCache(
-    process::Symbol;
-    compute_missing::Bool=false,
-    rtol::Float64=1e-2,
-    max_refine::Int=12,
-    direct::Bool=false,
-    memoize::Bool=true,
-    interp_mode::Symbol=:pchip,
-    log_eps::Float64=1e-12,
-)
-    # Keep only the finalized production method.
-    compute_missing && error("Only w0cdf+PCHIP is supported: set compute_missing=false and precompute σ(s) on a w0cdf grid")
-    direct && error("Only w0cdf+PCHIP is supported: direct σ(s) evaluation is disabled")
-    interp_mode === :pchip || error("Only w0cdf+PCHIP is supported: interp_mode must be :pchip")
-    return CrossSectionCache(
-        process,
-        Float64[],
-        Float64[],
-        compute_missing,
-        rtol,
-        max_refine,
-        direct,
-        memoize,
-        interp_mode,
-        log_eps,
-        Float64[],
-        true,
-    )
+CrossSectionCache(process::Symbol) = CrossSectionCache(process, Float64[], Float64[], Float64[], true)
+
+function CrossSectionCache(process::Symbol, s_vals::Vector{Float64}, sigma_vals::Vector{Float64})
+    length(s_vals) == length(sigma_vals) || error("CrossSectionCache: s_vals and sigma_vals length mismatch")
+    cache = CrossSectionCache(process, s_vals, sigma_vals, Float64[], true)
+    _ensure_pchip_slopes!(cache)
+    return cache
 end
 
 function insert_sigma!(cache::CrossSectionCache, s::Float64, σ::Float64)
@@ -426,7 +387,7 @@ function build_w0cdf_pchip_cache(
         phi_nodes=design_phi_nodes,
         scale=scale,
     )
-    cache = CrossSectionCache(process; compute_missing=false, interp_mode=:pchip)
+    cache = CrossSectionCache(process)
     precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
     _ensure_pchip_slopes!(cache)
     return cache

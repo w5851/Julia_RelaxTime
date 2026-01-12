@@ -289,11 +289,12 @@ function _read_sigma_table_csv(path::AbstractString)
 end
 
 """
-    load_cross_section_caches_from_dir(dir; compute_missing=false, interp_mode=:linear, log_eps=1e-12) -> Dict{Symbol,CrossSectionCache}
+    load_cross_section_caches_from_dir(dir) -> Dict{Symbol,CrossSectionCache}
 
 从目录加载每个散射过程的 σ(s) 表（CSV），并构造 `cs_caches` 以注入到 `relaxation_times`。
 
-默认 `compute_missing=false`：运行时只插值/端点钳制，确保不会触发任何新的 σ(s) 计算。
+本仓库的生产默认策略固定为 w0cdf+PCHIP，因此这里加载出的缓存会用 PCHIP 插值并做端点钳制；
+运行时不会触发任何新的 σ(s) 计算。
 
 目录内每个过程支持以下文件名之一：
 - `sigma_<process>.csv`（推荐）
@@ -302,12 +303,7 @@ end
 每个 CSV 的数据行格式为：
 - `s,sigma` 或 `s sigma`（允许 # 开头注释行）
 """
-function load_cross_section_caches_from_dir(
-    dir::AbstractString;
-    compute_missing::Bool=false,
-    interp_mode::Symbol=:linear,
-    log_eps::Float64=1e-12,
-)::Dict{Symbol,CrossSectionCache}
+function load_cross_section_caches_from_dir(dir::AbstractString)::Dict{Symbol,CrossSectionCache}
     isdir(dir) || error("sigma cache directory not found: $(dir)")
 
     cs_caches = Dict{Symbol,CrossSectionCache}()
@@ -318,7 +314,7 @@ function load_cross_section_caches_from_dir(
         isempty(path) && error("missing sigma table for $(process) under $(dir) (expected $(path1) or $(path2))")
 
         s_vals, σ_vals = _read_sigma_table_csv(path)
-        cache = CrossSectionCache(process; compute_missing=compute_missing, interp_mode=interp_mode, log_eps=log_eps)
+        cache = CrossSectionCache(process)
         cache.s_vals = s_vals
         cache.sigma_vals = σ_vals
         cache.pchip_dirty = true

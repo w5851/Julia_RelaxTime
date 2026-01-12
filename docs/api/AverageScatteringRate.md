@@ -2,9 +2,9 @@
 
 平均散射率计算模块（实验性，支持各向异性）。
 
-- 入口：`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=6, angle_nodes=2, phi_nodes=4, p_grid=nothing, p_w=nothing, cos_grid=nothing, cos_w=nothing, phi_grid=nothing, phi_w=nothing, cs_cache=CrossSectionCache(process), n_sigma_points=32)`
-- 依赖：`TotalCrossSection.total_cross_section`（可通过 `CrossSectionCache` 预计算+拟合/插值），`quark_distribution(_aniso)`/`antiquark_distribution(_aniso)` 作为分布函数。
-- 默认节点：动量 6 点、角度 2 点、方位角 4 点；可按需调大节点数，或直接传入预计算的 Gauss-Legendre 节点/权重避免重复生成。
+- 入口：`average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=20, angle_nodes=4, phi_nodes=8, cs_cache=nothing, n_sigma_points=32, ...)`
+- 依赖：`TotalCrossSection.total_cross_section`（通过 **w0cdf 取点 + PCHIP 插值**预计算成 σ(s) 表），`quark_distribution(_aniso)`/`antiquark_distribution(_aniso)` 作为分布函数。
+- 默认节点：动量 20 点、角度 4 点、方位角 8 点；可按需调大节点数，或直接传入预计算的 Gauss-Legendre 节点/权重避免重复生成。
 - 各向异性：`ξ=0` 时退化为各向同性；`ξ≠0` 时分布调用 `quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)`，角度取自积分节点。
 - 预期用途：为弛豫时间近似提供过程级平均散射率 \(\omega_{ij}\)。
 
@@ -31,18 +31,16 @@ $
 
 ## 主要 API
 
-- `CrossSectionCache(process::Symbol)`: 创建截面缓存；内部存储 `(s_vals, sigma_vals)`，同时持有基于拟合的 σ(s) 近似（见下）。
-- `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=32)`: 预计算并填充截面表。
-- `average_scattering_rate(process, quark_params, thermo_params, K_coeffs; p_nodes=6, angle_nodes=2, phi_nodes=4, p_grid=nothing, p_w=nothing, cos_grid=nothing, cos_w=nothing, phi_grid=nothing, phi_w=nothing, cs_cache=CrossSectionCache(process), n_sigma_points=32)`: 计算给定过程的平均散射率；可传入外部预计算的节点/权重（`p_grid/p_w, cos_grid/cos_w, phi_grid/phi_w`），未提供时按节点数自动生成。
+- `CrossSectionCache(process::Symbol)`: 创建空截面缓存；内部存储 `(s_vals, sigma_vals)`。
+- `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=32)`: 在给定 `s_grid` 上预计算并填充截面表。
+- `build_w0cdf_pchip_cache(process, quark_params, thermo_params, K_coeffs; N=60, design_p_nodes=14, design_angle_nodes=4, design_phi_nodes=8, ...)`: 生成生产默认的 σ(s) 缓存（w0cdf + PCHIP）。
+- `average_scattering_rate(process, quark_params, thermo_params, K_coeffs; cs_cache=nothing, ...)`: 计算给定过程的平均散射率；若 `cs_cache === nothing`，会自动构建 w0cdf+PCHIP 的 σ(s) 缓存。
 
-### σ(s) 拟合与调用流程
+### σ(s) 缓存策略（固定）
 
-- 首次调用 `get_sigma` 会估算积分所需的 s 范围：阈值 `max((m_i+m_j)^2, (m_c+m_d)^2)` 到 `p_max=Λ_inv_fm` 推出的上界并乘以 1.05 余量。
-- 在该范围内取约 24 个左端偏置节点（指数偏置，λ=4），逐点调用一次 `total_cross_section` 真实计算并拟合：
-  - 初态更重（m_i+m_j≥m_c+m_d）：用 `sqrt` 型基函数 `A/√(s-s0)+B(s-s0)+C(s-s0)^2+D` 最小二乘拟合。
-  - 初态更轻：用分段线性插值（外推到边界）。
-- 随后所有落在拟合范围内的 σ 查询都直接用拟合值，积分时不再触发真实计算；仅当 s 超出拟合范围时才回退单点精确计算并缓存。
-- 拟合成本：每个 process 首次约 24 次 `total_cross_section` 调用；之后常数时间查表。
+- 生产默认：在“ω 的权重 $w_0$”下对 $\sqrt{s}$ 构造加权 CDF，并用分位点选取 $N$ 个采样点（默认 $N=60$）。
+- 对这些点逐点预计算 `total_cross_section(process, s, ...)` 得到 σ(s) 表。
+- 查询时只做 PCHIP 插值（并对端点做钳制），避免积分过程中触发昂贵的 σ(s) 精确计算。
 
 ## 使用示例
 
@@ -61,11 +59,14 @@ precompute_cross_section!(cache, range(10.0, 40.0, length=5), quark_params, ther
 
 ω = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs;
     cs_cache=cache, p_nodes=32, angle_nodes=4, phi_nodes=4)
+
+# 或者使用生产默认（自动构建 w0cdf+PCHIP cache）：
+ω2 = average_scattering_rate(:uu_to_uu, quark_params, thermo_params, K_coeffs)
 ```
 
 ## 注意事项
 
 - 截面计算仍依赖 `TotalCrossSection` 链路（标记“修复中”），用于研究或诊断；生产前需校验。
-- 若算力不足，可降低 `p_nodes`、`angle_nodes`、`phi_nodes` 或减少 `n_sigma_points`；或预先将截面插值表存盘再加载。
+- 若算力不足，可降低 `p_nodes`、`angle_nodes`、`phi_nodes` 或减少 `n_sigma_points`；或预先将 σ(s) 表存盘再加载。
 - 近阈值处若 \(\rho_i\) 或 \(\rho_j\) 为 0，将返回 0 以避免数值不稳定。
 - 截断 \(\Lambda\) 取自 `Constants_PNJL.Λ_inv_fm`。

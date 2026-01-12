@@ -453,7 +453,7 @@ function run_scan(opts::Options)
             cs_caches = nothing
             if !isempty(opts.sigma_cache_dir)
                 cache_dir = replace(opts.sigma_cache_dir, "{xi}" => string(xi))
-                cs_caches = TransportWorkflow.RelaxationTime.load_cross_section_caches_from_dir(cache_dir; compute_missing=false)
+                cs_caches = TransportWorkflow.RelaxationTime.load_cross_section_caches_from_dir(cache_dir)
             end
 
             tau_kwargs = (

@@ -130,32 +130,23 @@ function omega_tensor_direct_sigma(process::Symbol; params, p_nodes::Int, angle_
 end
 
 function omega_tensor_cached(process::Symbol; params, p_nodes::Int, angle_nodes::Int, phi_nodes::Int, n_sigma_points::Int,
-    cache_mode::Symbol, n_coarse::Int, rtol::Float64, max_refine::Int)
+    N_sigma_grid::Int, design_p_nodes::Int, design_angle_nodes::Int, design_phi_nodes::Int)
 
     quark_params = params.quark_params
     thermo_params = params.thermo_params
     K_coeffs = params.K_coeffs
 
-    if cache_mode == :interp
-        cache = ASR.CrossSectionCache(process; compute_missing=false)
-        # coarse grid in s: use a conservative √s window (in MeV) that covers typical thermal support
-        sqrt_s_min = parse(Float64, get(ENV, "SQRT_S_MIN_MEV", "250.0"))
-        sqrt_s_max = parse(Float64, get(ENV, "SQRT_S_MAX_MEV", "1100.0"))
-        s_min = (sqrt_s_min / ħc_MeV_fm)^2
-        s_max = (sqrt_s_max / ħc_MeV_fm)^2
-        s_grid = collect(range(s_min, s_max; length=n_coarse))
-        ASR.precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-    elseif cache_mode == :adapt
-        cache = ASR.CrossSectionCache(process; compute_missing=true, rtol=rtol, max_refine=max_refine)
-        sqrt_s_min = parse(Float64, get(ENV, "SQRT_S_MIN_MEV", "250.0"))
-        sqrt_s_max = parse(Float64, get(ENV, "SQRT_S_MAX_MEV", "1100.0"))
-        s_min = (sqrt_s_min / ħc_MeV_fm)^2
-        s_max = (sqrt_s_max / ħc_MeV_fm)^2
-        s_grid = collect(range(s_min, s_max; length=n_coarse))
-        ASR.precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-    else
-        error("unknown cache_mode=$cache_mode")
-    end
+    cache = ASR.build_w0cdf_pchip_cache(
+        process,
+        quark_params,
+        thermo_params,
+        K_coeffs;
+        N=N_sigma_grid,
+        design_p_nodes=design_p_nodes,
+        design_angle_nodes=design_angle_nodes,
+        design_phi_nodes=design_phi_nodes,
+        n_sigma_points=n_sigma_points,
+    )
 
     ω = ASR.average_scattering_rate(process, quark_params, thermo_params, K_coeffs;
         p_nodes=p_nodes,
@@ -241,17 +232,14 @@ function main()
     t_dir = @elapsed ω_dir = omega_tensor_direct_sigma(process; params=params, p_nodes=test_p, angle_nodes=test_a, phi_nodes=test_phi, n_sigma_points=test_nσ)
     @printf("direct: ω=%.6e  time=%.3fs\n", ω_dir, t_dir)
 
-    n_coarse = parse(Int, get(ENV, "N_COARSE", "12"))
-    rtol = parse(Float64, get(ENV, "RTOL", "1e-2"))
-    max_refine = parse(Int, get(ENV, "MAX_REFINE", "12"))
+    N_sigma_grid = parse(Int, get(ENV, "N_COARSE", "60"))
+    design_p_nodes = parse(Int, get(ENV, "DESIGN_P", "14"))
+    design_angle_nodes = parse(Int, get(ENV, "DESIGN_ANGLE", "4"))
+    design_phi_nodes = parse(Int, get(ENV, "DESIGN_PHI", "8"))
 
     t = @elapsed r_interp = omega_tensor_cached(process; params=params, p_nodes=test_p, angle_nodes=test_a, phi_nodes=test_phi, n_sigma_points=test_nσ,
-        cache_mode=:interp, n_coarse=n_coarse, rtol=rtol, max_refine=max_refine)
-    @printf("interp: ω=%.6e relerr_vs_direct=%.3e time=%.3fs cache_points=%d\n", r_interp.value, relerr(r_interp.value, ω_dir), t, r_interp.cache_points)
-
-    t = @elapsed r_adapt = omega_tensor_cached(process; params=params, p_nodes=test_p, angle_nodes=test_a, phi_nodes=test_phi, n_sigma_points=test_nσ,
-        cache_mode=:adapt, n_coarse=n_coarse, rtol=rtol, max_refine=max_refine)
-    @printf("adapt:  ω=%.6e relerr_vs_direct=%.3e time=%.3fs cache_points=%d\n", r_adapt.value, relerr(r_adapt.value, ω_dir), t, r_adapt.cache_points)
+        N_sigma_grid=N_sigma_grid, design_p_nodes=design_p_nodes, design_angle_nodes=design_angle_nodes, design_phi_nodes=design_phi_nodes)
+    @printf("w0cdf+pchip: ω=%.6e relerr_vs_direct=%.3e time=%.3fs cache_points=%d\n", r_interp.value, relerr(r_interp.value, ω_dir), t, r_interp.cache_points)
 
     println("\nDone.")
     return nothing

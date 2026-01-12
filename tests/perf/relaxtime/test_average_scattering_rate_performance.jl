@@ -13,7 +13,7 @@ const THERMO = (T = 0.15, Φ = 0.5, Φbar = 0.5, ξ = 0.0)
 const K_COEFFS = (K_σπ=2.0, K_σK=2.0, K_σ=3.0, K_δπ=1.5, K_δK=1.5)
 
 function constant_sigma_cache(process::Symbol; sigma::Float64=1.0)
-    cache = CrossSectionCache(process; compute_missing=false)
+    cache = CrossSectionCache(process)
     AverageScatteringRate.insert_sigma!(cache, 0.0, sigma)
     AverageScatteringRate.insert_sigma!(cache, 500.0, sigma)
     return cache
