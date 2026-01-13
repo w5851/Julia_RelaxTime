@@ -13,7 +13,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-using .PNJL.ConstraintModes
+# 避免跨测试文件导出冲突：通过模块前缀访问。
+P = PNJL
 
 # ============================================================================
 # 模式构造测试
@@ -21,29 +22,29 @@ using .PNJL.ConstraintModes
 
 @testset "ConstraintModes construction" begin
     @testset "FixedMu" begin
-        mode = FixedMu()
-        @test mode isa ConstraintMode
-        @test mode isa FixedMu
+        mode = P.FixedMu()
+        @test mode isa P.ConstraintMode
+        @test mode isa P.FixedMu
     end
     
     @testset "FixedRho" begin
-        mode = FixedRho(1.0)
-        @test mode isa ConstraintMode
-        @test mode isa FixedRho
+        mode = P.FixedRho(1.0)
+        @test mode isa P.ConstraintMode
+        @test mode isa P.FixedRho
         @test mode.rho_target == 1.0
     end
     
     @testset "FixedEntropy" begin
-        mode = FixedEntropy(0.5)
-        @test mode isa ConstraintMode
-        @test mode isa FixedEntropy
+        mode = P.FixedEntropy(0.5)
+        @test mode isa P.ConstraintMode
+        @test mode isa P.FixedEntropy
         @test mode.s_target == 0.5
     end
     
     @testset "FixedSigma" begin
-        mode = FixedSigma(10.0)
-        @test mode isa ConstraintMode
-        @test mode isa FixedSigma
+        mode = P.FixedSigma(10.0)
+        @test mode isa P.ConstraintMode
+        @test mode isa P.FixedSigma
         @test mode.sigma_target == 10.0
     end
 end
@@ -53,17 +54,17 @@ end
 # ============================================================================
 
 @testset "state_dim" begin
-    @test state_dim(FixedMu()) == 5
-    @test state_dim(FixedRho(1.0)) == 8
-    @test state_dim(FixedEntropy(0.5)) == 8
-    @test state_dim(FixedSigma(10.0)) == 8
+    @test P.state_dim(P.FixedMu()) == 5
+    @test P.state_dim(P.FixedRho(1.0)) == 8
+    @test P.state_dim(P.FixedEntropy(0.5)) == 8
+    @test P.state_dim(P.FixedSigma(10.0)) == 8
 end
 
 @testset "param_dim" begin
-    @test param_dim(FixedMu()) == 2  # [T, μ]
-    @test param_dim(FixedRho(1.0)) == 1  # [T]
-    @test param_dim(FixedEntropy(0.5)) == 1  # [T]
-    @test param_dim(FixedSigma(10.0)) == 1  # [T]
+    @test P.param_dim(P.FixedMu()) == 2  # [T, μ]
+    @test P.param_dim(P.FixedRho(1.0)) == 1  # [T]
+    @test P.param_dim(P.FixedEntropy(0.5)) == 1  # [T]
+    @test P.param_dim(P.FixedSigma(10.0)) == 1  # [T]
 end
 
 # ============================================================================
@@ -71,10 +72,10 @@ end
 # ============================================================================
 
 @testset "constraint_description" begin
-    @test constraint_description(FixedMu()) == "Fixed chemical potential μ"
-    @test constraint_description(FixedRho(1.5)) == "Fixed baryon density ρ/ρ₀ = 1.5"
-    @test constraint_description(FixedEntropy(0.3)) == "Fixed entropy density s = 0.3 fm⁻³"
-    @test constraint_description(FixedSigma(8.0)) == "Fixed specific entropy σ = s/n_B = 8.0"
+    @test P.constraint_description(P.FixedMu()) == "Fixed chemical potential μ"
+    @test P.constraint_description(P.FixedRho(1.5)) == "Fixed baryon density ρ/ρ₀ = 1.5"
+    @test P.constraint_description(P.FixedEntropy(0.3)) == "Fixed entropy density s = 0.3 fm⁻³"
+    @test P.constraint_description(P.FixedSigma(8.0)) == "Fixed specific entropy σ = s/n_B = 8.0"
 end
 
 # ============================================================================
@@ -82,8 +83,8 @@ end
 # ============================================================================
 
 @testset "show methods" begin
-    @test sprint(show, FixedMu()) == "FixedMu()"
-    @test sprint(show, FixedRho(1.0)) == "FixedRho(ρ/ρ₀=1.0)"
-    @test sprint(show, FixedEntropy(0.5)) == "FixedEntropy(s=0.5)"
-    @test sprint(show, FixedSigma(10.0)) == "FixedSigma(σ=10.0)"
+    @test sprint(show, P.FixedMu()) == "FixedMu()"
+    @test sprint(show, P.FixedRho(1.0)) == "FixedRho(ρ/ρ₀=1.0)"
+    @test sprint(show, P.FixedEntropy(0.5)) == "FixedEntropy(s=0.5)"
+    @test sprint(show, P.FixedSigma(10.0)) == "FixedSigma(σ=10.0)"
 end

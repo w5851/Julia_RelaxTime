@@ -39,17 +39,17 @@ using ..Constants_PNJL
 # ============================================================================
 
 # Core 模块
-include(joinpath("core", "Integrals.jl"))
-include(joinpath("core", "Thermodynamics.jl"))
+include(joinpath(@__DIR__, "core", "Integrals.jl"))
+include(joinpath(@__DIR__, "core", "Thermodynamics.jl"))
 
 # Solver 模块
-include(joinpath("solver", "ConstraintModes.jl"))
-include(joinpath("solver", "SeedStrategies.jl"))
-include(joinpath("solver", "Conditions.jl"))
-include(joinpath("solver", "ImplicitSolver.jl"))
+include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
+include(joinpath(@__DIR__, "solver", "Conditions.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitSolver.jl"))
 
 # Derivatives 模块
-include(joinpath("derivatives", "ThermoDerivatives.jl"))
+include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
 
 # 使用新模块
 using .Integrals
@@ -88,9 +88,9 @@ export dP_dT, dP_dmu
 # 扫描模块（使用新架构）
 # ============================================================================
 
-include(joinpath("scans", "TmuScan.jl"))
-include(joinpath("scans", "TrhoScan.jl"))
-include(joinpath("scans", "DualBranchScan.jl"))
+include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
+include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
+include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
 
 using .TmuScan
 using .TrhoScan
@@ -107,7 +107,7 @@ export DualBranchResult, BranchPoint, PhaseTransitionInfo
 # 分析模块
 # ============================================================================
 
-include(joinpath("analysis", "PhaseTransition.jl"))
+include(joinpath(@__DIR__, "analysis", "PhaseTransition.jl"))
 
 using .PhaseTransition
 

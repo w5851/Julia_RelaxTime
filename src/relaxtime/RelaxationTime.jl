@@ -12,10 +12,13 @@ module RelaxationTime
 
 include("AverageScatteringRate.jl")
 include("TotalCrossSection.jl")
+include("OneLoopIntegrals.jl")
 include("../Constants_PNJL.jl")
 
 using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
-    DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES
+    DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
+    build_w0cdf_pchip_cache
+using .OneLoopIntegrals: A
 using .TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
 using .Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 
@@ -24,6 +27,27 @@ export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCE
 # Single source of truth for supported scattering processes.
 # This list is derived from `Constants_PNJL.SCATTERING_MESON_MAP` keys.
 const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
+
+@inline function ensure_quark_params_has_A(quark_params::NamedTuple, thermo_params::NamedTuple)::NamedTuple
+    # Many low-level scattering routines require `quark_params.A` for polarization functions.
+    # Older callers/tests may only provide (m, μ). In that case we compute A on-demand here.
+    if hasproperty(quark_params, :A)
+        return quark_params
+    end
+    hasproperty(quark_params, :m) || error("quark_params is missing :m")
+    hasproperty(quark_params, :μ) || error("quark_params is missing :μ")
+    hasproperty(thermo_params, :T) || error("thermo_params is missing :T")
+    hasproperty(thermo_params, :Φ) || error("thermo_params is missing :Φ")
+    hasproperty(thermo_params, :Φbar) || error("thermo_params is missing :Φbar")
+
+    # A 的分布函数积分部分在 p ∈ [0, 10] fm⁻¹ 已可收敛（OneLoopIntegrals.jl 的约定）。
+    nodes_p, weights_p = AverageScatteringRate.gauleg(0.0, 10.0, 32)
+    A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+    A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+    A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+
+    return merge(quark_params, (A=(u=A_u, d=A_d, s=A_s),))
+end
 
 @inline function density_lookup(densities, key::Symbol)
     if densities isa NamedTuple
@@ -39,9 +63,37 @@ end
 
 @inline function rate_lookup(rates, key::Symbol)
     if rates isa NamedTuple
+        # Backward/ergonomic aliases (isospin / charge conjugation).
+        # These help older callers/tests that only provide a reduced rate set.
+        if key === :dubar_to_dubar && !hasproperty(rates, :dubar_to_dubar) && hasproperty(rates, :udbar_to_udbar)
+            key = :udbar_to_udbar
+        elseif key === :subar_to_subar && !hasproperty(rates, :subar_to_subar) && hasproperty(rates, :usbar_to_usbar)
+            key = :usbar_to_usbar
+        elseif key === :ubardbar_to_ubardbar && !hasproperty(rates, :ubardbar_to_ubardbar) && hasproperty(rates, :ud_to_ud)
+            key = :ud_to_ud
+        elseif key === :ubarubar_to_ubarubar && !hasproperty(rates, :ubarubar_to_ubarubar) && hasproperty(rates, :uu_to_uu)
+            key = :uu_to_uu
+        elseif key === :ubarsbar_to_ubarsbar && !hasproperty(rates, :ubarsbar_to_ubarsbar) && hasproperty(rates, :us_to_us)
+            key = :us_to_us
+        elseif key === :sbarsbar_to_sbarsbar && !hasproperty(rates, :sbarsbar_to_sbarsbar) && hasproperty(rates, :ss_to_ss)
+            key = :ss_to_ss
+        end
         hasproperty(rates, key) || error("average rate for $(key) not found")
         return getproperty(rates, key)
     elseif rates isa AbstractDict
+        if key === :dubar_to_dubar && !haskey(rates, :dubar_to_dubar) && haskey(rates, :udbar_to_udbar)
+            key = :udbar_to_udbar
+        elseif key === :subar_to_subar && !haskey(rates, :subar_to_subar) && haskey(rates, :usbar_to_usbar)
+            key = :usbar_to_usbar
+        elseif key === :ubardbar_to_ubardbar && !haskey(rates, :ubardbar_to_ubardbar) && haskey(rates, :ud_to_ud)
+            key = :ud_to_ud
+        elseif key === :ubarubar_to_ubarubar && !haskey(rates, :ubarubar_to_ubarubar) && haskey(rates, :uu_to_uu)
+            key = :uu_to_uu
+        elseif key === :ubarsbar_to_ubarsbar && !haskey(rates, :ubarsbar_to_ubarsbar) && haskey(rates, :us_to_us)
+            key = :us_to_us
+        elseif key === :sbarsbar_to_sbarsbar && !haskey(rates, :sbarsbar_to_sbarsbar) && haskey(rates, :ss_to_ss)
+            key = :ss_to_ss
+        end
         haskey(rates, key) || error("average rate for $(key) not found")
         return rates[key]
     else
@@ -74,6 +126,8 @@ function compute_average_rates(
         end
     end
 
+    quark_params = ensure_quark_params_has_A(quark_params, thermo_params)
+
     # Unified standard (default):
     # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
     # - number densities remain semi-infinite inside AverageScatteringRate
@@ -93,6 +147,20 @@ function compute_average_rates(
         cache = get!(cs_caches, process) do
             CrossSectionCache(process)
         end
+
+        # If the cache is still empty, build the default designed σ-grid + PCHIP cache.
+        # `average_scattering_rate` assumes any provided cache is already populated.
+        if isempty(cache.s_vals)
+            cache = build_w0cdf_pchip_cache(
+                process,
+                quark_params,
+                thermo_params,
+                K_coeffs;
+                n_sigma_points=n_sigma_points,
+            )
+            cs_caches[process] = cache
+        end
+
         rates[process] = average_scattering_rate(
             process,
             quark_params,
@@ -198,6 +266,37 @@ end
     return x == 0.0 ? Inf : 1.0 / x
 end
 
+const REQUIRED_RATE_KEYS_FOR_TAU = (
+    :uu_to_uu,
+    :ud_to_ud,
+    :us_to_us,
+    :udbar_to_udbar,
+    :dubar_to_dubar,
+    :uubar_to_uubar,
+    :uubar_to_ddbar,
+    :usbar_to_usbar,
+    :subar_to_subar,
+    :uubar_to_ssbar,
+    :ss_to_ss,
+    :ssbar_to_uubar,
+    :ssbar_to_ssbar,
+    :ubardbar_to_ubardbar,
+    :ubarubar_to_ubarubar,
+    :ubarsbar_to_ubarsbar,
+    :sbarsbar_to_sbarsbar,
+)
+
+@inline function can_compute_tau_from_existing_rates(rates)::Bool
+    try
+        for k in REQUIRED_RATE_KEYS_FOR_TAU
+            rate_lookup(rates, k)
+        end
+        return true
+    catch
+        return false
+    end
+end
+
 # Main entry: returns tau, tau_inv, and the averaged rates for reuse.
 function relaxation_times(
     quark_params::NamedTuple,
@@ -217,23 +316,27 @@ function relaxation_times(
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::NamedTuple
-    rates = compute_average_rates(
-        quark_params,
-        thermo_params,
-        K_coeffs;
-        existing_rates=existing_rates,
-        cs_caches=cs_caches,
-        p_nodes=p_nodes,
-        angle_nodes=angle_nodes,
-        phi_nodes=phi_nodes,
-        p_grid=p_grid,
-        p_w=p_w,
-        cos_grid=cos_grid,
-        cos_w=cos_w,
-        phi_grid=phi_grid,
-        phi_w=phi_w,
-        n_sigma_points=n_sigma_points,
-    )
+    rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
+        existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)
+    else
+        compute_average_rates(
+            quark_params,
+            thermo_params,
+            K_coeffs;
+            existing_rates=existing_rates,
+            cs_caches=cs_caches,
+            p_nodes=p_nodes,
+            angle_nodes=angle_nodes,
+            phi_nodes=phi_nodes,
+            p_grid=p_grid,
+            p_w=p_w,
+            cos_grid=cos_grid,
+            cos_w=cos_w,
+            phi_grid=phi_grid,
+            phi_w=phi_w,
+            n_sigma_points=n_sigma_points,
+        )
+    end
 
     tau_inv = relaxation_rates(densities, rates)
     tau = (

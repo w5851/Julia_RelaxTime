@@ -77,6 +77,13 @@ const HIGH_TEMP_SEED_5 = [-0.73192, -0.73192, -1.79539, 0.60532, 0.60532]
 """
 const VERY_HIGH_TEMP_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
 
+# 额外候选：用于提高极端参数（高温/强各向异性）下的收敛鲁棒性。
+# 与 scripts/pnjl/diagnose_gap_point.jl 里的人工候选保持一致。
+const HT_GUESS_0p8_SEED_5 = [-0.50, -0.50, -1.20, 0.80, 0.80]
+const HT_GUESS_0p9_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
+const HT_GUESS_0p95_SEED_5 = [-0.20, -0.20, -0.70, 0.95, 0.95]
+const WEAK_CHIRAL_CONF_SEED_5 = [-0.50, -0.50, -1.20, 1e-3, 1e-3]
+
 # 兼容旧接口的别名
 """夸克相典型初值（高温或高密度）"""
 const QUARK_SEED_5 = HIGH_TEMP_SEED_5
@@ -245,6 +252,12 @@ function MultiSeed(; selector::Function=default_omega_selector)
     candidates = [
         DefaultSeed(phase_hint=:hadron),
         DefaultSeed(phase_hint=:quark),
+        # 更偏禁闭：Φ 很小，但凝聚较弱（用于避免卡到坏分支）
+        DefaultSeed(copy(WEAK_CHIRAL_CONF_SEED_5), copy(WEAK_CHIRAL_CONF_SEED_5), :hadron),
+        # 人工高温候选：凝聚幅度更小、Polyakov loop 更高
+        DefaultSeed(copy(HT_GUESS_0p8_SEED_5), copy(HT_GUESS_0p8_SEED_5), :hadron),
+        DefaultSeed(copy(HT_GUESS_0p9_SEED_5), copy(HT_GUESS_0p9_SEED_5), :hadron),
+        DefaultSeed(copy(HT_GUESS_0p95_SEED_5), copy(HT_GUESS_0p95_SEED_5), :hadron),
     ]
     return MultiSeed(candidates, selector)
 end

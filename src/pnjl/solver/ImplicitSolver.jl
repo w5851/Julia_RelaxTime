@@ -215,12 +215,29 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                t_num::Int=DEFAULT_THETA_COUNT,
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
+               auto_multiseed_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
                physicality_check::Function=_default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
     mode = FixedMu()
+
+    # 如果用户显式给了 MultiSeed，则直接走 solve_multi（符合文档示例），并避免在内部递归 fallback。
+    if seed_strategy isa MultiSeed
+        return solve_multi(mode, T_fm, μ_fm;
+            seed_strategy=seed_strategy,
+            nlsolve_method=nlsolve_method,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            trust_region_fallback=trust_region_fallback,
+            auto_multiseed_fallback=false,
+            fallback_method=fallback_method,
+            physicality_check=physicality_check,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+    end
     thermal_nodes = cached_nodes(p_num, t_num)
     params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi))
     mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
@@ -247,10 +264,12 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
         residual_norm_max=Float64(residual_norm_max),
         postprocess_fn=postprocess_fn,
         nlsolve_kwargs...)
-    
-    return SolverResult(
+
+    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
+
+    single = SolverResult(
         mode,
-        res.f_converged,
+        converged,
         cand.x_sol,
         cand.x_state,
         mu_vec,
@@ -264,6 +283,29 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
         res.residual_norm,
         Float64(xi),
     )
+
+    if converged || !auto_multiseed_fallback
+        return single
+    end
+
+    # 单初值没能得到“可用物理解”时，自动回退到多初值策略。
+    try
+        multi = solve_multi(mode, T_fm, μ_fm;
+            seed_strategy=MultiSeed(),
+            nlsolve_method=nlsolve_method,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            trust_region_fallback=trust_region_fallback,
+            auto_multiseed_fallback=false,
+            fallback_method=fallback_method,
+            physicality_check=physicality_check,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+        return multi
+    catch
+        return single
+    end
 end
 
 """
@@ -314,10 +356,12 @@ function solve(mode::FixedRho, T_fm::Real;
         residual_norm_max=Float64(residual_norm_max),
         postprocess_fn=postprocess_fn,
         nlsolve_kwargs...)
+
+    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
     
     return SolverResult(
         mode,
-        res.f_converged,
+        converged,
         cand.x_sol,
         cand.x_state,
         cand.mu_vec,
@@ -374,10 +418,12 @@ function solve(mode::FixedEntropy, T_fm::Real;
         residual_norm_max=Float64(residual_norm_max),
         postprocess_fn=postprocess_fn,
         nlsolve_kwargs...)
+
+    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
     
     return SolverResult(
         mode,
-        res.f_converged,
+        converged,
         cand.x_sol,
         cand.x_state,
         cand.mu_vec,
@@ -434,10 +480,12 @@ function solve(mode::FixedSigma, T_fm::Real;
         residual_norm_max=Float64(residual_norm_max),
         postprocess_fn=postprocess_fn,
         nlsolve_kwargs...)
+
+    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
     
     return SolverResult(
         mode,
-        res.f_converged,
+        converged,
         cand.x_sol,
         cand.x_state,
         cand.mu_vec,
@@ -475,15 +523,20 @@ function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
             result = solve(mode, T_fm, μ_fm; 
                           seed_strategy=DefaultSeed(seed, seed, :hadron),
                           nlsolve_method=nlsolve_method,
+                          auto_multiseed_fallback=false,
                           kwargs...)
             push!(results, result)
         catch e
             @warn "Solve failed with seed" seed exception=e
         end
     end
-    
-    isempty(results) && error("All seeds failed to converge")
-    return seed_strategy.selector(results)
+
+    isempty(results) && error("All seeds failed (exceptions) in solve_multi")
+
+    converged = filter(r -> r.converged, results)
+    isempty(converged) && error("All seeds failed to converge to a physical solution")
+
+    return seed_strategy.selector(converged)
 end
 
 export solve_multi

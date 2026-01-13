@@ -15,9 +15,8 @@ include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-using .PNJL.ConstraintModes
-using .PNJL.Conditions
-using .PNJL.Conditions.Thermodynamics.Integrals: cached_nodes
+# 避免跨测试文件导出冲突：不把符号 `using` 进 Main。
+P = PNJL
 
 # ============================================================================
 # GapParams 测试
@@ -25,10 +24,10 @@ using .PNJL.Conditions.Thermodynamics.Integrals: cached_nodes
 
 @testset "GapParams" begin
     T_fm = 0.5
-    thermal_nodes = cached_nodes(24, 6)
+    thermal_nodes = P.cached_nodes(24, 6)
     xi = 0.0
     
-    params = GapParams(T_fm, thermal_nodes, xi)
+    params = P.GapParams(T_fm, thermal_nodes, xi)
     
     @test params.T_fm == T_fm
     @test params.thermal_nodes === thermal_nodes
@@ -41,15 +40,15 @@ end
 
 @testset "gap_conditions" begin
     T_fm = 0.5
-    thermal_nodes = cached_nodes(24, 6)
+    thermal_nodes = P.cached_nodes(24, 6)
     xi = 0.0
-    params = GapParams(T_fm, thermal_nodes, xi)
+    params = P.GapParams(T_fm, thermal_nodes, xi)
     
     @testset "返回值维度" begin
         x_state = SVector{5}(-1.5, -1.5, -2.1, 0.2, 0.2)
         mu_vec = SVector{3}(1.0, 1.0, 1.0)
         
-        residual = gap_conditions(x_state, mu_vec, params)
+        residual = P.gap_conditions(x_state, mu_vec, params)
         
         @test length(residual) == 5
         @test all(isfinite.(residual))
@@ -60,9 +59,9 @@ end
         x_state = SVector{5}(-1.84329, -1.84329, -2.22701, 1.0e-5, 4.0e-5)
         mu_vec = SVector{3}(0.05, 0.05, 0.05)  # 低化学势
         T_fm_low = 0.25  # ~50 MeV
-        params_low = GapParams(T_fm_low, thermal_nodes, xi)
+        params_low = P.GapParams(T_fm_low, thermal_nodes, xi)
         
-        residual = gap_conditions(x_state, mu_vec, params_low)
+        residual = P.gap_conditions(x_state, mu_vec, params_low)
         
         # 残差应该相对较小（但不一定为零，因为这不是精确解）
         @test all(isfinite.(residual))
@@ -74,11 +73,11 @@ end
 # ============================================================================
 
 @testset "build_conditions" begin
-    thermal_nodes = cached_nodes(24, 6)
-    params = GapParams(0.5, thermal_nodes, 0.0)
+    thermal_nodes = P.cached_nodes(24, 6)
+    params = P.GapParams(0.5, thermal_nodes, 0.0)
     
     @testset "FixedMu" begin
-        cond_fn = build_conditions(FixedMu(), params)
+        cond_fn = P.build_conditions(P.FixedMu(), params)
         
         θ = [0.5, 1.0]  # T, μ
         x = [-1.5, -1.5, -2.1, 0.2, 0.2]
@@ -90,7 +89,7 @@ end
     end
     
     @testset "FixedRho" begin
-        cond_fn = build_conditions(FixedRho(1.0), params)
+        cond_fn = P.build_conditions(P.FixedRho(1.0), params)
         
         θ = [0.5]  # T
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]  # 5 + 3 维
@@ -102,7 +101,7 @@ end
     end
     
     @testset "FixedEntropy" begin
-        cond_fn = build_conditions(FixedEntropy(0.5), params)
+        cond_fn = P.build_conditions(P.FixedEntropy(0.5), params)
         
         θ = [0.5]
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
@@ -114,7 +113,7 @@ end
     end
     
     @testset "FixedSigma" begin
-        cond_fn = build_conditions(FixedSigma(10.0), params)
+        cond_fn = P.build_conditions(P.FixedSigma(10.0), params)
         
         θ = [0.5]
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
@@ -131,13 +130,13 @@ end
 # ============================================================================
 
 @testset "build_residual!" begin
-    thermal_nodes = cached_nodes(24, 6)
+    thermal_nodes = P.cached_nodes(24, 6)
     T_fm = 0.5
-    params = GapParams(T_fm, thermal_nodes, 0.0)
+    params = P.GapParams(T_fm, thermal_nodes, 0.0)
     
     @testset "FixedMu" begin
         mu_vec = SVector{3}(1.0, 1.0, 1.0)
-        residual_fn! = build_residual!(FixedMu(), mu_vec, params)
+        residual_fn! = P.build_residual!(P.FixedMu(), mu_vec, params)
         
         x = [-1.5, -1.5, -2.1, 0.2, 0.2]
         F = zeros(5)
@@ -149,7 +148,7 @@ end
     end
     
     @testset "FixedRho" begin
-        residual_fn! = build_residual!(FixedRho(1.0), params)
+        residual_fn! = P.build_residual!(P.FixedRho(1.0), params)
         
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
         F = zeros(8)
@@ -165,7 +164,7 @@ end
     end
     
     @testset "FixedEntropy" begin
-        residual_fn! = build_residual!(FixedEntropy(0.5), params)
+        residual_fn! = P.build_residual!(P.FixedEntropy(0.5), params)
         
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
         F = zeros(8)
@@ -177,7 +176,7 @@ end
     end
     
     @testset "FixedSigma" begin
-        residual_fn! = build_residual!(FixedSigma(10.0), params)
+        residual_fn! = P.build_residual!(P.FixedSigma(10.0), params)
         
         x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
         F = zeros(8)
@@ -194,12 +193,12 @@ end
 # ============================================================================
 
 @testset "constraint consistency" begin
-    thermal_nodes = cached_nodes(24, 6)
+    thermal_nodes = P.cached_nodes(24, 6)
     T_fm = 0.5
-    params = GapParams(T_fm, thermal_nodes, 0.0)
+    params = P.GapParams(T_fm, thermal_nodes, 0.0)
     
     @testset "FixedRho 化学势相等" begin
-        residual_fn! = build_residual!(FixedRho(1.0), params)
+        residual_fn! = P.build_residual!(P.FixedRho(1.0), params)
         
         # 化学势相等的情况
         x_equal = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]

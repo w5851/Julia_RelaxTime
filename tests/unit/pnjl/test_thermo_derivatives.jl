@@ -1,8 +1,8 @@
 # PNJL ThermoDerivatives 单元测试
 #
 # 测试内容：
-# 1. 旧接口（MeV 单位）基本功能
-# 2. 新接口（fm⁻¹ 单位）基本功能
+# 1. thermo_derivatives/mass_derivatives 基本功能（fm⁻¹）
+# 2. dP/dT 与中心差分的一致性（近似）
 # 3. 返回类型检查（无 Dual 泄漏）
 
 using Test
@@ -11,20 +11,22 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+using .Constants_PNJL: ħc_MeV_fm
 
-module PNJL
-    using ..Constants_PNJL
-    include(joinpath(Main.PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-end
+# 直接 include，让被测模块在 Main 下定义为 `PNJL`
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
 # ============================================================================
-# 旧接口测试（MeV 单位）
+# 基本功能（fm⁻¹）
 # ============================================================================
 
-@testset "thermo_derivatives basic finite (legacy)" begin
+@testset "thermo_derivatives basic finite" begin
     T_mev = 130.0
     mu_mev = 320.0
-    derivs = PNJL.ThermoDerivatives.thermo_derivatives(T_mev, mu_mev; xi=0.0, p_num=48, t_num=12)
+    T_fm = T_mev / ħc_MeV_fm
+    mu_fm = mu_mev / ħc_MeV_fm
+
+    derivs = PNJL.thermo_derivatives(T_fm, mu_fm; xi=0.0, p_num=48, t_num=12)
     @test derivs.converged
     @test isfinite(derivs.pressure)
     @test isfinite(derivs.energy)
@@ -38,27 +40,21 @@ end
     @test !isnan(derivs.dP_dn_epsilon)
 end
 
-@testset "dP/dT matches central diff approximately (legacy)" begin
+@testset "dP/dT matches central diff approximately" begin
     T_mev = 130.0
     mu_mev = 320.0
-    seed = PNJL.ThermoDerivatives.solve_equilibrium_mu(T_mev, mu_mev; xi=0.0, p_num=48, t_num=12)
-    δT = 0.25
-    f_plus = PNJL.ThermoDerivatives.solve_equilibrium_mu(T_mev + δT, mu_mev; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12).pressure
-    f_minus = PNJL.ThermoDerivatives.solve_equilibrium_mu(T_mev - δT, mu_mev; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12).pressure
-    fd_est = (f_plus - f_minus) / (2δT)
-    autodiff_val = PNJL.ThermoDerivatives.dP_dT(T_mev, mu_mev; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12)
-    @test isapprox(autodiff_val, fd_est; atol=5e-3, rtol=1e-2)
-end
+    T_fm = T_mev / ħc_MeV_fm
+    mu_fm = mu_mev / ħc_MeV_fm
 
-@testset "quasiparticle energy derivatives finite (legacy)" begin
-    T_mev = 130.0
-    mu_mev = 320.0
-    p_fm = 0.5
-    seed = PNJL.ThermoDerivatives.solve_equilibrium_mu(T_mev, mu_mev; xi=0.0, p_num=48, t_num=12)
-    E = PNJL.ThermoDerivatives.quasiparticle_energy(T_mev, mu_mev, p_fm; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12)
-    @test isfinite(E)
-    @test isfinite(PNJL.ThermoDerivatives.dE_dT(T_mev, mu_mev, p_fm; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12))
-    @test isfinite(PNJL.ThermoDerivatives.dE_dmu(T_mev, mu_mev, p_fm; xi=0.0, seed_state=seed.x_state, p_num=48, t_num=12))
+    δT_mev = 0.25
+    δT_fm = δT_mev / ħc_MeV_fm
+
+    P_plus = PNJL.thermo_derivatives(T_fm + δT_fm, mu_fm; xi=0.0, p_num=48, t_num=12).pressure
+    P_minus = PNJL.thermo_derivatives(T_fm - δT_fm, mu_fm; xi=0.0, p_num=48, t_num=12).pressure
+    fd_est = (P_plus - P_minus) / (2δT_fm)
+
+    autodiff_val = PNJL.dP_dT(T_fm, mu_fm; xi=0.0, p_num=48, t_num=12)
+    @test isapprox(autodiff_val, fd_est; atol=5e-3, rtol=1e-2)
 end
 
 # ============================================================================
@@ -69,7 +65,7 @@ end
     T_fm = 0.5  # ~100 MeV
     μ_fm = 1.5  # ~300 MeV
 
-    md = PNJL.ThermoDerivatives.mass_derivatives(T_fm, μ_fm)
+    md = PNJL.mass_derivatives(T_fm, μ_fm)
     
     @test all(isa.(md.masses, Float64))
     @test all(isa.(md.dM_dT, Float64))
@@ -83,7 +79,7 @@ end
     T_fm = 0.5
     μ_fm = 1.5
 
-    td = PNJL.ThermoDerivatives.thermo_derivatives(T_fm, μ_fm)
+    td = PNJL.thermo_derivatives(T_fm, μ_fm)
     
     @test isa(td.pressure, Float64)
     @test isa(td.dP_dT, Float64)
@@ -98,7 +94,7 @@ end
     T_fm = 0.5
     μ_fm = 1.5
 
-    bv = PNJL.ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μ_fm)
+    bv = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm)
     
     # 类型检查
     @test typeof(bv.v_n_sq) == Float64
