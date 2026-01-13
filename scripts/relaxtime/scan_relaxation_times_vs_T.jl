@@ -15,11 +15,7 @@
 - 输出 τ 单位为 fm
 
 示例：
-  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl \
-    --tmin 80 --tmax 220 --tstep 10 \
-    --mub-list 0,800 \
-    --tau-phi-nodes 6 \
-    --out data/outputs/results/relaxtime/relaxation_times_vs_T.csv
+  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --tmin 80 --tmax 220 --tstep 10 --mub-list 0,800 --tau-phi-nodes 6 --out data/outputs/results/relaxtime/relaxation_times_vs_T.csv
 """
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))

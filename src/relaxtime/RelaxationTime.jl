@@ -135,9 +135,12 @@ function compute_average_rates(
         error("compute_average_rates: p_grid and p_w must be provided together")
     end
     if p_grid === nothing
-        Λ_fm = 1.0 / Λ_inv_fm
+        # NOTE: `Λ_inv_fm` is the PNJL momentum cutoff Λ in units of fm⁻¹.
+        # Do NOT invert it; otherwise the integration upper bound becomes ~0.3 fm⁻¹
+        # instead of ~3 fm⁻¹, suppressing phase space and inflating τ.
+        Λ = Λ_inv_fm
         # Use the requested p_nodes as the cutoff-grid resolution.
-        p_grid, p_w = AverageScatteringRate.gauleg(0.0, Λ_fm, p_nodes)
+        p_grid, p_w = AverageScatteringRate.gauleg(0.0, Λ, p_nodes)
     end
 
     for process in REQUIRED_PROCESSES
