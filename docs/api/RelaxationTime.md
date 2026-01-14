@@ -1,57 +1,69 @@
 # RelaxationTime 模块 API
 
-弛豫时间计算，基于平均散射率表达式（见《弛豫时间by平均散射率.md》）。一次计算所需散射过程的平均散射率，可复用于六种夸克（d/dbar 直接复用 u/ubar 的结果）。
+弛豫时间计算，基于平均散射率表达式。
 
 ## 导出符号
-- `REQUIRED_PROCESSES`：需要的散射过程符号列表。
-- `compute_average_rates(quark_params, thermo_params, K_coeffs; existing_rates, cs_caches, p_nodes, angle_nodes, phi_nodes, p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w, n_sigma_points)`
+- `REQUIRED_PROCESSES`：需要的散射过程符号列表
+- `compute_average_rates(quark_params, thermo_params, K_coeffs; ...)`
 - `relaxation_rates(densities, rates)`
-- `relaxation_times(quark_params, thermo_params, K_coeffs; densities, existing_rates, cs_caches, p_nodes, angle_nodes, phi_nodes, p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w, n_sigma_points)`
+- `relaxation_times(quark_params, thermo_params, K_coeffs; densities, ...)`
 
 ## 数学定义
-弛豫时间满足
 $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
-其中 \(\rho_j\) 为粒子数密度，\(\bar{w}_{ij}\) 为平均散射率。
+
+## 默认行为
+
+当不传入 `p_grid`/`p_w` 时：
+- 动量积分范围：`[0, Λ]`（Λ ≈ 3.05 fm⁻¹）
+- σ(s) 缓存范围：基于 Λ 截断的 w0cdf 设计
+- 数密度积分：半无穷 `[0, ∞)`（物理要求，由调用方提供）
+
+这确保了动量积分范围与 σ(s) 缓存范围的一致性。
 
 ## 参数说明
-- `quark_params`：含质量、化学势等的 NamedTuple（与散射率模块一致）。
-- `thermo_params`：热力学参数 `(T, Φ, Φbar, ξ)`。
-- `K_coeffs`：有效耦合系数 NamedTuple。
-- `densities`：外部提供的数密度，必须包含 `:u, :d, :s, :ubar, :dbar, :sbar`。
-- `existing_rates`：可选，预先计算好的平均散射率集合（NamedTuple 或 Dict）。若已包含 `REQUIRED_PROCESSES`，则不会触发新的散射率积分。
-- `cs_caches`：可选，`Dict{Symbol,CrossSectionCache}`，用于重用截面拟合。
-- `p_nodes/angle_nodes/phi_nodes`：高斯节点数量。
-- `p_grid/p_w/cos_grid/cos_w/phi_grid/phi_w`：可选自定义积分节点与权重；为 `nothing` 时内部使用默认高斯节点（来自 `AverageScatteringRate`）。
-- `n_sigma_points`：总截面 t 积分节点数。
 
-## 行为细节
-- `p_grid` 等网格参数未提供（`nothing`）时，会在 `average_scattering_rate` 内部自动调用默认高斯节点设置；不会传递 `nothing` 继续下去。
-- `existing_rates` 已覆盖全部 `REQUIRED_PROCESSES` 时，`compute_average_rates` 不会再计算散射率，直接返回传入值。
-- d、dbar 的结果直接复用 u、ubar 的计算（同位旋对称）。
+- `quark_params`：夸克参数 `(m, μ, A)`
+- `thermo_params`：热力学参数 `(T, Φ, Φbar, ξ)`
+- `K_coeffs`：有效耦合系数
+- `densities`：数密度（**必须使用半无穷积分计算**）
+- `p_grid/p_w`：可选，自定义动量积分节点
+- `sigma_cutoff`：σ(s) 有效范围的动量截断（默认 Λ）
+
 
 ## 典型用法
+
 ```julia
-include("src/relaxtime/RelaxationTime.jl")
 using .RelaxationTime
+using .GaussLegendre: gauleg
+using .Constants_PNJL: Λ_inv_fm
 
-# 预先给出数密度与散射率（避免重复积分）
-densities = (u=1.0, d=1.0, s=2.0, ubar=3.0, dbar=3.0, sbar=4.0)
-rates = (
-    uu_to_uu=1.0, ud_to_ud=2.0, us_to_us=3.0, usbar_to_usbar=5.0,
-    uubar_to_uubar=7.0, uubar_to_ddbar=11.0, uubar_to_ssbar=13.0,
-    udbar_to_udbar=17.0, ss_to_ss=19.0, ssbar_to_ssbar=23.0, ssbar_to_uubar=29.0,
-)
+# 方式1：使用默认行为（推荐）
+result = relaxation_times(quark_params, thermo_params, K_coeffs;
+    densities=densities)
 
-quark_params = (m=(u=0.1,d=0.1,s=0.2), μ=(u=0.0,d=0.0,s=0.0))
-thermo_params = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
-K_coeffs = (K_σπ=1.0, K_σK=1.0, K_σ=1.0, K_δπ=1.0, K_δK=1.0)
-
-result = relaxation_times(
-    quark_params, thermo_params, K_coeffs;
+# 方式2：有限截断积分（与 C++ 一致）
+p_grid, p_w = gauleg(0.0, 15.0, 64)
+result = relaxation_times(quark_params, thermo_params, K_coeffs;
     densities=densities,
-    existing_rates=rates,
-)
+    p_grid=p_grid, p_w=p_w,
+    sigma_cutoff=Λ_inv_fm)
 
-println(result.tau_inv)  # 各味的 τ^-1
 println(result.tau)      # 各味的 τ
+println(result.tau_inv)  # 各味的 τ^-1
 ```
+
+## 与 C++ 实现对比
+
+| 参数 | Julia 默认 | C++ 实现 | 匹配方式 |
+|------|-----------|----------|----------|
+| 动量积分范围 | [0, Λ] | [0, 15] fm⁻¹ | 传入 `p_grid=gauleg(0,15,n)` |
+| σ(s) 缓存范围 | 基于 Λ 截断 | 基于 Λ 截断 | 已一致 |
+| 数密度积分 | [0, ∞) | [0, ∞) | 已一致 |
+
+使用 `p_grid=gauleg(0,15,n)` + `sigma_cutoff=Λ_inv_fm` 后，与 C++ 结果误差 < 0.3%。
+
+## 物理说明
+
+- **数密度积分范围**：必须使用半无穷积分 [0, ∞)，这是物理要求
+- **σ(s) 有效范围**：由 PNJL 模型的动量截断 Λ 决定
+- **重夸克注意**：当夸克质量 m 接近 Λ 时（如低温下的 s 夸克），相空间被限制

@@ -117,7 +117,8 @@ function compute_average_rates(
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
-    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_cutoff::Union{Nothing,Float64}=nothing  # σ(s)有效范围的动量截断，默认使用 Λ
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -130,10 +131,15 @@ function compute_average_rates(
 
     # Unified standard (default):
     # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
+    # - σ(s) cache also uses Λ cutoff for consistency
     # - number densities remain semi-infinite inside AverageScatteringRate
     if (p_grid === nothing) != (p_w === nothing)
         error("compute_average_rates: p_grid and p_w must be provided together")
     end
+    
+    # 默认使用 Λ 截断
+    effective_sigma_cutoff = sigma_cutoff === nothing ? Λ_inv_fm : sigma_cutoff
+    
     if p_grid === nothing
         # NOTE: `Λ_inv_fm` is the PNJL momentum cutoff Λ in units of fm⁻¹.
         # Do NOT invert it; otherwise the integration upper bound becomes ~0.3 fm⁻¹
@@ -153,12 +159,14 @@ function compute_average_rates(
 
         # If the cache is still empty, build the default designed σ-grid + PCHIP cache.
         # `average_scattering_rate` assumes any provided cache is already populated.
+        # 使用 effective_sigma_cutoff 确保 σ(s) 缓存范围与动量积分范围一致
         if isempty(cache.s_vals)
             cache = build_w0cdf_pchip_cache(
                 process,
                 quark_params,
                 thermo_params,
                 K_coeffs;
+                p_cutoff=effective_sigma_cutoff,
                 n_sigma_points=n_sigma_points,
             )
             cs_caches[process] = cache
@@ -180,6 +188,7 @@ function compute_average_rates(
             phi_w=phi_w,
             cs_cache=cache,
             n_sigma_points=n_sigma_points,
+            sigma_cutoff=sigma_cutoff,
         )
     end
 
@@ -317,7 +326,8 @@ function relaxation_times(
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
-    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::NamedTuple
     rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
         existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)
@@ -338,6 +348,7 @@ function relaxation_times(
             phi_grid=phi_grid,
             phi_w=phi_w,
             n_sigma_points=n_sigma_points,
+            sigma_cutoff=sigma_cutoff,
         )
     end
 

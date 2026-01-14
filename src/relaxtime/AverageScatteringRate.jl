@@ -274,6 +274,30 @@ function _build_semi_infinite_p_grid(p_nodes::Int, scale::Float64)
     return p_vals, p_wts, dp_jac
 end
 
+function _build_finite_cutoff_p_grid(p_nodes::Int, p_max::Float64)
+    p_vals, p_wts = gauleg(0.0, p_max, p_nodes)
+    dp_jac = ones(Float64, length(p_vals))
+    return p_vals, p_wts, dp_jac
+end
+
+"""
+    design_w0cdf_s_grid(process, quark_params, thermo_params; kwargs...)
+
+基于 ω 积分权重的 CDF 设计 σ(s) 采样网格。
+
+# Keyword Arguments
+- `N::Int`: 采样点数（默认 60）
+- `p_nodes::Int`: 动量积分节点数（默认 14）
+- `angle_nodes::Int`: 角度积分节点数（默认 4）
+- `phi_nodes::Int`: 方位角积分节点数（默认 8）
+- `p_cutoff::Union{Nothing,Float64}`: 动量截断（fm⁻¹）。
+  - `nothing`（默认）：使用半无穷积分 [0, ∞)
+  - 指定值（如 `Λ_inv_fm`）：使用有限截断 [0, p_cutoff]
+- `scale::Float64`: 半无穷积分的尺度参数（默认 10.0，仅当 p_cutoff=nothing 时使用）
+
+# Returns
+- `s_grid::Vector{Float64}`: σ(s) 采样点的 s 值数组
+"""
 function design_w0cdf_s_grid(
     process::Symbol,
     quark_params::NamedTuple,
@@ -282,6 +306,7 @@ function design_w0cdf_s_grid(
     p_nodes::Int=DEFAULT_W0CDF_P_NODES,
     angle_nodes::Int=DEFAULT_W0CDF_ANGLE_NODES,
     phi_nodes::Int=DEFAULT_W0CDF_PHI_NODES,
+    p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
 )
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
@@ -297,7 +322,13 @@ function design_w0cdf_s_grid(
     Φbar = thermo_params.Φbar
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
-    p_vals, p_wts, dp_jac = _build_semi_infinite_p_grid(p_nodes, scale)
+    # 根据 p_cutoff 选择动量网格构建方式
+    p_vals, p_wts, dp_jac = if p_cutoff !== nothing
+        _build_finite_cutoff_p_grid(p_nodes, p_cutoff)
+    else
+        _build_semi_infinite_p_grid(p_nodes, scale)
+    end
+    
     cos_grid, cos_w = gauleg(-1.0, 1.0, angle_nodes)
     phi_grid, phi_w = gauleg(0.0, TWO_PI, phi_nodes)
 
@@ -305,6 +336,13 @@ function design_w0cdf_s_grid(
     weights = Float64[]
 
     s_bo = max((mi + mj)^2, (mc + md)^2)
+    # 如果指定了 p_cutoff，则限制 s 的上限
+    s_up = if p_cutoff !== nothing
+        min((sqrt(mi^2 + p_cutoff^2) + sqrt(mj^2 + p_cutoff^2))^2,
+            (sqrt(mc^2 + p_cutoff^2) + sqrt(md^2 + p_cutoff^2))^2)
+    else
+        Inf
+    end
 
     for (p_i, w_pi, dp_i) in zip(p_vals, p_wts, dp_jac)
         Ei = energy_from_p(p_i, mi)
@@ -322,6 +360,8 @@ function design_w0cdf_s_grid(
                         cosΘ = cθi * cθj + sθi * sθj * cos(φ)
                         s = mi^2 + mj^2 + 2.0 * (Ei * Ej - p_i * p_j * cosΘ)
                         s <= s_bo && continue
+                        # 如果指定了 p_cutoff，跳过超出 s_up 的点
+                        s >= s_up && continue
 
                         s_rt = sqrt(s)
                         Ei_cm = (s + mi^2 - mj^2) / (2.0 * s_rt)
@@ -341,7 +381,7 @@ function design_w0cdf_s_grid(
         end
     end
 
-    isempty(weights) && error("w0cdf design produced empty weights")
+    isempty(weights) && error("w0cdf design produced empty weights for process $process")
 
     order = sortperm(sqrt_s_samples)
     xs = sqrt_s_samples[order]
@@ -365,6 +405,22 @@ function design_w0cdf_s_grid(
     return s_grid
 end
 
+"""
+    build_w0cdf_pchip_cache(process, quark_params, thermo_params, K_coeffs; kwargs...)
+
+构建基于 w0cdf 设计的 σ(s) 缓存。
+
+# Keyword Arguments
+- `N::Int`: 采样点数（默认 60）
+- `design_p_nodes::Int`: w0cdf 设计时的动量节点数（默认 14）
+- `design_angle_nodes::Int`: w0cdf 设计时的角度节点数（默认 4）
+- `design_phi_nodes::Int`: w0cdf 设计时的方位角节点数（默认 8）
+- `p_cutoff::Union{Nothing,Float64}`: 动量截断（fm⁻¹）。
+  - `nothing`：使用半无穷积分 [0, ∞)
+  - 指定值（如 `Λ_inv_fm`）：使用有限截断 [0, p_cutoff]，**推荐用于生产**
+- `scale::Float64`: 半无穷积分的尺度参数（默认 10.0，仅当 p_cutoff=nothing 时使用）
+- `n_sigma_points::Int`: σ(s) 计算时的 t 积分点数
+"""
 function build_w0cdf_pchip_cache(
     process::Symbol,
     quark_params::NamedTuple,
@@ -374,6 +430,7 @@ function build_w0cdf_pchip_cache(
     design_p_nodes::Int=DEFAULT_W0CDF_P_NODES,
     design_angle_nodes::Int=DEFAULT_W0CDF_ANGLE_NODES,
     design_phi_nodes::Int=DEFAULT_W0CDF_PHI_NODES,
+    p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
     n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
 )
@@ -385,6 +442,7 @@ function build_w0cdf_pchip_cache(
         p_nodes=design_p_nodes,
         angle_nodes=design_angle_nodes,
         phi_nodes=design_phi_nodes,
+        p_cutoff=p_cutoff,
         scale=scale,
     )
     cache = CrossSectionCache(process)
@@ -503,7 +561,8 @@ function average_scattering_rate(
     density_p_w::Union{Nothing,Vector{Float64}}=nothing,
     density_p_nodes::Int=DEFAULT_SEMI_INF_NODES,
     density_scale::Float64=DEFAULT_SEMI_INF_SCALE,
-    apply_s_domain_cut::Bool=true
+    apply_s_domain_cut::Bool=true,
+    sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::Float64
     # 解析粒子、质量、化学势
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
@@ -516,6 +575,7 @@ function average_scattering_rate(
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
     # Build the finalized σ-cache strategy by default.
+    # 如果指定了 sigma_cutoff，则使用有限截断的 w0cdf 设计
     cs_cache === nothing && (cs_cache = build_w0cdf_pchip_cache(
         process,
         quark_params,
@@ -525,6 +585,7 @@ function average_scattering_rate(
         design_p_nodes=DEFAULT_W0CDF_P_NODES,
         design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
         design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
+        p_cutoff=sigma_cutoff,  # 传递 sigma_cutoff 作为 p_cutoff
         scale=scale,
         n_sigma_points=n_sigma_points,
     ))
@@ -537,7 +598,7 @@ function average_scattering_rate(
         p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
         cs_cache, n_sigma_points,
         density_p_grid, density_p_w, density_p_nodes, density_scale,
-        mc, md, apply_s_domain_cut
+        mc, md, apply_s_domain_cut, sigma_cutoff
     )
 end
 
@@ -549,7 +610,7 @@ function _average_scattering_rate_semi_infinite(
     p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
     cs_cache, n_sigma_points,
     density_p_grid, density_p_w, density_p_nodes, density_scale,
-    mc, md, apply_s_domain_cut
+    mc, md, apply_s_domain_cut, sigma_cutoff
 )
     # Momentum integration:
     # - Default: semi-infinite [0, ∞) via t∈[0,1) mapping.
@@ -580,9 +641,16 @@ function _average_scattering_rate_semi_infinite(
     #   s_bo = max((mi+mj)^2, (mc+md)^2) * (1+1e-3)
     #   s_up = min((Ei_max+Ej_max)^2, (Ec_max+Ed_max)^2) with Ei_max = sqrt(mi^2+Λ^2)
     has_finite_p_cut = (p_grid !== nothing && p_w !== nothing)
-    Λ = has_finite_p_cut ? maximum(p_vals) : NaN
+    # 使用 sigma_cutoff 参数（如果提供）来确定 s 范围，否则从动量网格推断
+    Λ = if sigma_cutoff !== nothing
+        sigma_cutoff
+    elseif has_finite_p_cut
+        maximum(p_vals)
+    else
+        NaN
+    end
     s_bo = max((mi + mj)^2, (mc + md)^2)
-    s_up = if has_finite_p_cut
+    s_up = if !isnan(Λ)
         min((sqrt(mi^2 + Λ^2) + sqrt(mj^2 + Λ^2))^2,
             (sqrt(mc^2 + Λ^2) + sqrt(md^2 + Λ^2))^2)
     else
@@ -609,6 +677,8 @@ function _average_scattering_rate_semi_infinite(
 
     # 原始公式的前因子: DQ²/(2π)⁵ = DQ²/(32π⁵)
     prefactor = (DQ^2) / (32.0 * π^5 * ρ_i * ρ_j)
+    # 当提供了 sigma_cutoff 或有限动量网格时，应用 s 范围截断
+    apply_s_cut = apply_s_domain_cut && (!isnan(Λ))
     ω = _omega_integral_5d(
         process, pi_sym, pj_sym,
         mi, mj, μi, μj, T, Φ, Φbar, ξ,
@@ -617,7 +687,7 @@ function _average_scattering_rate_semi_infinite(
         cos_grid, cos_w,
         phi_grid, phi_w,
         cs_cache, n_sigma_points,
-        has_finite_p_cut, s_bo, s_up, apply_s_domain_cut,
+        apply_s_cut, s_bo, s_up,
     )
 
     return prefactor * ω
@@ -647,10 +717,9 @@ function _omega_integral_5d(
     phi_w::Vector{Float64},
     cs_cache::CrossSectionCache,
     n_sigma_points::Int,
-    has_finite_p_cut::Bool,
+    apply_s_cut::Bool,
     s_bo::Float64,
     s_up::Float64,
-    apply_s_domain_cut::Bool,
 )::Float64
     ω = 0.0
 
@@ -672,7 +741,7 @@ function _omega_integral_5d(
                     for (φ, wφ) in zip(phi_grid, phi_w)
                         cosΘ = cθi * cθj + sθi * sθj * cos(φ)
                         s = mi^2 + mj^2 + 2.0 * (Ei * Ej - p_i * p_j * cosΘ)
-                        if apply_s_domain_cut && has_finite_p_cut
+                        if apply_s_cut
                             if (s <= s_bo) || (s >= s_up)
                                 continue
                             end
