@@ -7,7 +7,7 @@ module TransportWorkflow
 1) 调用 `PNJL.solve(FixedMu(), T_fm, μ_fm)` 在给定 `(T, μ, ξ)` 下求平衡（能隙/Polyakov 环）。
 2) 从平衡解构造 `quark_params` 与 `thermo_params`。
 3) （可选）计算数密度与平均散射率，从而得到 `tau`（见 `RelaxationTime.relaxation_times`）。
-4) （可选）通过 `ThermoDerivatives.bulk_derivative_coeffs` 生成体粘滞需要的导数组合。
+4) （可选）通过 `ThermoDerivatives.bulk_viscosity_coefficients` 生成体粘滞需要的等熵系数。
 5) 调用 `TransportCoefficients.transport_coefficients` 返回 (η, ζ, σ)。
 
 单位约定：
@@ -28,7 +28,7 @@ using StaticArrays
 
 using .PNJL: solve, FixedMu, cached_nodes, calculate_mass_vec, calculate_number_densities
 using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
-using .PNJL.ThermoDerivatives: bulk_derivative_coeffs
+using .PNJL.ThermoDerivatives: bulk_viscosity_coefficients
 using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients
@@ -116,12 +116,24 @@ function solve_gap_and_transport(
     tau_kwargs::NamedTuple=(;),
     transport_kwargs::NamedTuple=(;)
 )
-    base = equilibrium === nothing ? solve(FixedMu(), T_fm, mu_fm;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        solver_kwargs...,
-    ) : equilibrium
+    base = equilibrium === nothing ? begin
+        # 兼容旧接口：允许直接传入一个状态向量作为初值。
+        # 若调用方想使用更复杂的初值逻辑（MultiSeed/PhaseAwareContinuitySeed 等），应直接在外部调用 PNJL.solve。
+        seed_strategy = if seed_state isa AbstractVector
+            s5 = Float64.(seed_state[1:5])
+            PNJL.DefaultSeed(s5, s5, :hadron)
+        else
+            PNJL.DefaultSeed(phase_hint=:auto)
+        end
+
+        solve(FixedMu(), T_fm, mu_fm;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            seed_strategy=seed_strategy,
+            solver_kwargs...,
+        )
+    end : equilibrium
 
     # 有效质量（直接由平衡解得到）
     masses = base.masses
@@ -164,14 +176,14 @@ function solve_gap_and_transport(
 
     bulk_coeffs = nothing
     if compute_bulk
-        bulk_coeffs = bulk_derivative_coeffs(
+        # ζ 需要 ThermoDerivatives.bulk_viscosity_coefficients 的整套等熵系数（v_n_sq, dμB/dT|σ, dM/dT, dM/dμB, ...）
+        # 该函数不依赖 seed_state，也不接受求解器的 iterations 等参数。
+        bulk_coeffs = bulk_viscosity_coefficients(
             T_fm,
             mu_fm;
             xi=xi,
-            seed_state=Vector(base.solution),
             p_num=p_num,
             t_num=t_num,
-            solver_kwargs...,
         )
     end
 

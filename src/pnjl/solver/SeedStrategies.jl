@@ -7,7 +7,8 @@ PNJL 求解器初值策略模块。
 - `DefaultSeed`: 基于物理直觉的固定默认值
 - `MultiSeed`: 多初值尝试（处理多值解）
 - `ContinuitySeed`: 连续性跟踪（参数扫描）
-- `PhaseAwareSeed`: 基于相图的智能选择（一阶相变区域）
+- `PhaseAwareSeed`: 基于相图的智能选择（一阶相变区域，单点/无状态）
+- `PhaseAwareContinuitySeed`: 相变感知的连续性跟踪（推荐用于扫描；跨相变线时自动切换相的默认种子）
 
 ## 使用示例
 ```julia
@@ -15,12 +16,17 @@ PNJL 求解器初值策略模块。
 strategy = DefaultSeed()
 seed = get_seed(strategy, [T, μ], FixedMu())
 
-# 连续性跟踪
-tracker = ContinuitySeed()
-for μ in μ_range
-    seed = get_seed(tracker, [T, μ], FixedMu())
-    result = solve(...)
-    update!(tracker, result.solution)
+# 推荐：首点 MultiSeed 选最小 Ω，后续用相变感知连续跟踪
+tracker = PhaseAwareContinuitySeed(xi)
+
+# 首点：MultiSeed（避免落在亚稳态/坏分支）
+result0 = solve(FixedMu(), T0, μ0; xi=xi, seed_strategy=MultiSeed())
+update!(tracker, result0.solution, T0*197.327, μ0*197.327)  # update! 需要 MeV
+
+# 后续点：连续跟踪 + 跨相变线自动切换默认相种子
+for (T, μ) in scan_points
+    result = solve(FixedMu(), T, μ; xi=xi, seed_strategy=tracker)
+    result.converged && update!(tracker, result.solution, T*197.327, μ*197.327)
 end
 ```
 """
@@ -31,7 +37,7 @@ using StaticArrays
 # 从父模块导入 ConstraintModes
 using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim
 
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed
+export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
@@ -676,6 +682,8 @@ mutable struct PhaseAwareContinuitySeed <: SeedStrategy
     previous_phase::Symbol
     hadron_seed::Vector{Float64}
     quark_seed::Vector{Float64}
+    bootstrap_multiseed::Bool
+    bootstrap_strategy::MultiSeed
     fallback::SeedStrategy
 end
 
@@ -688,6 +696,8 @@ export PhaseAwareContinuitySeed
 
 # 参数
 - `xi`: 各向异性参数
+- `bootstrap_multiseed`: 是否在“第一个点”用多初值（MultiSeed）自举，以更稳定地选到 Ω 最小的物理解（默认 false）
+- `bootstrap_strategy`: 自举时使用的 MultiSeed 候选集合（默认 MultiSeed()）
 - `boundary_path`: boundary.csv 路径（可选）
 - `cep_path`: cep.csv 路径（可选）
 
@@ -695,6 +705,9 @@ export PhaseAwareContinuitySeed
 ```julia
 # 创建策略
 tracker = PhaseAwareContinuitySeed(0.0)
+
+# 推荐：首点用 MultiSeed 自举（需要求解器支持；FixedMu 下可用）
+tracker = PhaseAwareContinuitySeed(0.0; bootstrap_multiseed=true)
 
 # 扫描循环
 for μ in μ_range
@@ -707,7 +720,7 @@ end
 reset!(tracker)
 ```
 """
-function PhaseAwareContinuitySeed(xi::Real; kwargs...)
+function PhaseAwareContinuitySeed(xi::Real; bootstrap_multiseed::Bool=false, bootstrap_strategy::MultiSeed=MultiSeed(), kwargs...)
     boundary_data = try
         load_phase_boundary(xi; kwargs...)
     catch e
@@ -721,18 +734,22 @@ function PhaseAwareContinuitySeed(xi::Real; kwargs...)
         :unknown,          # previous_phase
         copy(HADRON_SEED_5),
         copy(QUARK_SEED_5),
+        Bool(bootstrap_multiseed),
+        bootstrap_strategy,
         DefaultSeed(phase_hint=:auto),
     )
 end
 
 """无参数构造函数（无相变线数据）"""
-function PhaseAwareContinuitySeed()
+function PhaseAwareContinuitySeed(; bootstrap_multiseed::Bool=false, bootstrap_strategy::MultiSeed=MultiSeed())
     return PhaseAwareContinuitySeed(
         nothing,
         nothing,
         :unknown,
         copy(HADRON_SEED_5),
         copy(QUARK_SEED_5),
+        Bool(bootstrap_multiseed),
+        bootstrap_strategy,
         DefaultSeed(phase_hint=:auto),
     )
 end
@@ -892,7 +909,7 @@ Base.show(io::IO, s::_PhaseAwareSeedWithFunction) = print(io, "PhaseAwareSeed(cu
 function Base.show(io::IO, s::PhaseAwareContinuitySeed)
     has_data = s.boundary_data !== nothing
     has_prev = s.previous_solution !== nothing
-    print(io, "PhaseAwareContinuitySeed(data=$has_data, prev=$has_prev, phase=$(s.previous_phase))")
+    print(io, "PhaseAwareContinuitySeed(data=$has_data, prev=$has_prev, phase=$(s.previous_phase), bootstrap_multiseed=$(s.bootstrap_multiseed))")
 end
 
 end # module SeedStrategies

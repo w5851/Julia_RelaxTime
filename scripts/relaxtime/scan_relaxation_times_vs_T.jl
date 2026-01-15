@@ -20,13 +20,13 @@
 
 示例：
   # 半无穷积分（默认）
-  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode semi_infinite --tmin 80 --tmax 220 --tstep 10 --mub-list 0,800
+  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode semi_infinite --tmin 100 --tmax 400 --tstep 10 --mub-list 0,800
 
   # 有限截断到15 fm⁻¹（与C++一致）
-  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode finite_15 --tmin 80 --tmax 220 --tstep 10 --mub-list 0,800
+  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode finite_15 --tmin 100 --tmax 400 --tstep 10 --mub-list 0,800
 
   # 有限截断到Λ
-  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode finite_lambda --tmin 80 --tmax 220 --tstep 10 --mub-list 0,800
+  julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl --mode finite_lambda --tmin 100 --tmax 400 --tstep 10 --mub-list 0,800
 """
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))

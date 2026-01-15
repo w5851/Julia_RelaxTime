@@ -18,7 +18,12 @@
 
 ## 项目说明
 
-本项目用于计算弛豫时间相关的物理量。
+本项目用于计算弛豫时间相关的物理量，并包含：散射运动学/矩阵元计算、PNJL 平衡求解与扫描、以及若干用于对比与可视化的脚本与网页前端。
+
+协作与规范文件位于 `.github/`：
+- 贡献指南：[`CONTRIBUTING.md`](.github/CONTRIBUTING.md)
+- 行为准则：[`CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md)
+- 安全策略：[`SECURITY.md`](.github/SECURITY.md)
 
 ## 当前功能概览
 
@@ -27,12 +32,15 @@
 - **截面/弛豫时间链路（修复中）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 等仍包含已知缺陷（阈值处理、归一因子、输运系数整合尚未校对），目前默认不在服务器或前端中暴露，仅供研究性参考。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
-- **文档与流程**：`docs/guides/QUICKSTART.md`、`USER_GUIDE.md`、`STATUS.md` 说明部署/排错，`docs/process/*` 保留 prompt 与计划，`docs/reference` 存放公式与 Mathematica 推导。
-- **数据与结果**：`data/outputs/results/` 用于收集服务器或批处理输出，便于与 PNJL 结果对比；尚未与 PNJL 求解器联通（见“下一步”）。
-- **PNJL 单点求解（实验性）**：`src/pnjl/` 提供 TOML 参数加载、粗网格种子缓存与各向异性 PNJL 单点求解器，HTTP 端可通过 `POST /api/modules/pnjl-gap/run` 触发（请求体以 `T_mev` 传入温度；当前仅支持单点 /rho 或 /mu 模式，长任务扫描仍待实现）。实现遵循 `docs/reference/formula/pnjl/Omega_RS各向异性.md`：各向异性只作用于热项能量，真空截断积分仍保持各向同性以避免误改基态。 
+- **文档与流程**：`docs/guides/QUICKSTART.md`、`docs/guides/USER_GUIDE.md`、`docs/guides/STATUS.md` 说明部署/排错；`docs/process/` 保留 prompt 与计划；`docs/reference/` 存放公式与推导。
+- **数据与结果**：`data/outputs/` 用于收集服务器或批处理输出（例如 `data/outputs/results/relaxtime/` 下的扫描 CSV），便于跨语言/跨实现对比。
+- **PNJL（求解器 + 扫描）**：`src/pnjl/` 提供 PNJL 平衡求解与扫描能力。
+	- 推荐入口：`PNJL.solve(...)` + seed 策略（`MultiSeed/PhaseAwareContinuitySeed` 等），见 `docs/api/pnjl/PNJL.md` 与 `docs/api/pnjl/SeedStrategies.md`。
+	- 扫描脚本：`scripts/relaxtime/run_gap_transport_scan.jl` 可批量输出平衡量与输运相关派生量到 CSV。
+	- HTTP 端（实验性）：`scripts/server/server_full.jl` 提供 `POST /api/modules/pnjl-gap/run` 单点调用（请求体仍使用 `T_mev`/`mu_mev` 这类 MeV 输入字段；内部会换算到自然单位）。
 - **平均散射率（实验性）**：`src/relaxtime/AverageScatteringRate.jl` 基于 Gauss-Legendre (p=32, 角度=4) 计算各向异性平均散射率，散射截面支持预计算+插值缓存。
 
-> ⚠️ **未决功能**：PNJL 能隙方程与 Excel-like UI 尚未合入；新增 API/前端模式切换在 plan 中但无实现代码，集成前请确认挂钩方案。
+> ⚠️ **状态说明**：截面/弛豫时间链路仍标记为“修复中”（阈值处理、归一因子与输运系数整合仍需校对）。PNJL 求解与扫描链路已可用，但物理与数值精度仍建议通过 `docs/` 下的对比报告持续验证。
 
 ## 计算链路概览（各向异性输运）
 
@@ -79,7 +87,23 @@ Pkg.instantiate()
 include("src/relaxtime/relaxtime.jl")
 ```
 
+3. 常用入口：
+
+- 启动本地服务器（API + 前端）：
+
+```powershell
+julia --project=. scripts/server/server_full.jl
+```
+
+- 运行 PNJL + 输运相关扫描（示例命令见脚本 Usage）：
+
+```powershell
+julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
+```
+
 ## 项目结构
+
+更完整的目录职责与文档/源码对齐规则见：[docs/dev/项目结构约定.md](docs/dev/%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E7%BA%A6%E5%AE%9A.md)。
 
 当前顶层目录及作用：
 

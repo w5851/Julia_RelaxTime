@@ -1,0 +1,51 @@
+name: Bug 报告
+description: 报告可复现的问题（请提供最小复现与日志）
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你提交 Bug。为了更快定位问题，请尽量提供最小复现与环境信息。
+  - type: input
+    id: julia_version
+    attributes:
+      label: Julia 版本
+      placeholder: "例如 1.11.x"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      placeholder: "例如 Windows 11 / Ubuntu 22.04"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请输入可以复现问题的最小步骤（命令/脚本/输入参数）
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志/报错栈（可选）
+      render: text

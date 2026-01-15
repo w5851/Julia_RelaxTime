@@ -29,7 +29,7 @@ using ImplicitDifferentiation
 
 # 使用相对路径导入，避免重复定义
 using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim, param_dim
-using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, get_seed, get_all_seeds, default_omega_selector
+using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
 # 导入 core 模块的 Thermodynamics
@@ -222,6 +222,25 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                nlsolve_kwargs...)
     
     mode = FixedMu()
+
+    # PhaseAwareContinuitySeed 可选：第一个点用 MultiSeed 自举（选 Ω 最小的物理解），随后由调用方 update! 进入连续跟踪。
+    if seed_strategy isa PhaseAwareContinuitySeed
+        s = seed_strategy::PhaseAwareContinuitySeed
+        if s.bootstrap_multiseed && s.previous_solution === nothing
+            return solve_multi(mode, T_fm, μ_fm;
+                seed_strategy=s.bootstrap_strategy,
+                nlsolve_method=nlsolve_method,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+                trust_region_fallback=trust_region_fallback,
+                auto_multiseed_fallback=false,
+                fallback_method=fallback_method,
+                physicality_check=physicality_check,
+                residual_norm_max=residual_norm_max,
+                nlsolve_kwargs...)
+        end
+    end
 
     # 如果用户显式给了 MultiSeed，则直接走 solve_multi（符合文档示例），并避免在内部递归 fallback。
     if seed_strategy isa MultiSeed

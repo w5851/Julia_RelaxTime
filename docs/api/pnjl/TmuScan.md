@@ -1,3 +1,57 @@
+# Tμ 扫描（TmuScan）
+
+该模块提供在 $(T,\mu)$ 参数空间的网格扫描工具，用于生成热力学量表格、相变/交叉相关信息，以及作为后续输运计算的平衡输入。
+本仓库的“连续性跟踪（continuity）”是**路径依赖**的：它只知道“上一个点”的解，因此你按什么顺序遍历网格，就沿那条路径连续。
+
+## 推荐用法（避免跳到错误分支）
+### 1) 逐条扫描线（强烈推荐）
+
+在二维网格里，建议把扫描拆成多条 1D 扫描线：
+- 固定 $\mu$，沿 $T$ 扫描（每条 $\mu$ 一条线）
+- 或固定 $T$，沿 $\mu$ 扫描（每条 $T$ 一条线）
+
+对每条线维护一个独立的 tracker（例如 `PhaseAwareContinuitySeed`），换线时 `reset!`。
+
+### 2) 首点使用 MultiSeed，自举稳定分支
+一阶相变附近，单一初值很容易“收敛到错误分支”（局部解、亚稳态解）。推荐首点用 `MultiSeed()` 选 $\Omega$ 最小分支，再用连续性推进：
+
+```julia
+using PNJL
+
+tracker = PNJL.PhaseAwareContinuitySeed(xi; bootstrap_multiseed=true)
+for (iT, T_MeV) in enumerate(T_list)
+    T_fm = T_MeV / PNJL.ħc_MeV_fm
+    μ_fm = μ_MeV / PNJL.ħc_MeV_fm
+    res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=xi, seed_strategy=tracker)
+    res.converged || error("failed")
+
+    # update! 使用 MeV（与相变线数据一致）
+    PNJL.update!(tracker, res.solution, T_MeV, μ_MeV)
+end
+
+```
+相关策略细节见：
+- `docs/api/pnjl/SeedStrategies.md`
+- `docs/api/pnjl/ImplicitSolver.md`
+
+## “连续性跟踪”在二维网格沿哪条路？
+- 若你使用 `ContinuitySeed` / `PhaseAwareContinuitySeed`，连续性严格沿“外层循环定义的上一个点”。
+- 典型做法：
+    - `for μ in μ_list; reset!(tracker); for T in T_list; ... end; end`（每条 μ 线一条路径）
+    - 或 `for T in T_list; reset!(tracker); for μ in μ_list; ... end; end`（每条 T 线一条路径）
+- 不建议直接用双重循环把 2D 网格当作“蛇形/任意走法”而不清楚路径，因为这会改变分支跟踪结果。
+
+## 输出与产物
+具体输出文件名取决于调用方脚本/参数，一般包括：
+
+- 网格扫描结果 CSV（每点的解、热力学量、$\Omega$ 等）
+- 若启用相变分析，可能生成 phase boundary/CEP 相关 CSV（供 `PhaseAwareSeed`/`PhaseAwareContinuitySeed` 使用）
+## 何时用 DualBranchScan
+
+如果目标是**一阶相变区的物理解选择**（两分支都要、并比较 $\Omega$），请用 `DualBranchScan`：
+
+- `docs/api/pnjl/DualBranchScan.md`
+它比“单分支连续性”更适合做相变线、潜热、Maxwell 构造相关工作。
 # T-μ 扫描模块 `PNJL.TmuScan`
 
 `src/pnjl/scans/TmuScan.jl` 实现了在固定温度/化学势网格上批量调用 `AnisoGapSolver.solve_fixed_mu` 的工具。该模块负责：
