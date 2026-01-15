@@ -1,2 +1,6 @@
 # Windows系统文件
 Desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
