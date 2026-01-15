@@ -4,3 +4,6 @@ Desktop.ini
 # Python
 __pycache__/
 *.py[cod]
+
+# VScode
+.vscode/*
