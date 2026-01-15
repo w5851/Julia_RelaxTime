@@ -1,4 +1,21 @@
-# 分析 HYBRID 策略的时间开销分布
+"""
+分析 HYBRID 策略的时间开销分布（阶段拆分）
+
+对应系统流程步骤：
+- 单圈积分修正（HYBRID）：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+
+测试内容（拆分阶段计时）：
+- 根查找：`find_roots_AB`
+- 区间构建：`build_intervals_from_roots`
+- 节点生成：`hybrid_nodes`
+- 被积函数求值：`real_integrand_k_positive`
+
+运行方式：
+- `julia --project=. tests/perf/relaxtime/profile_hybrid_overhead.jl`
+
+备注：
+- 用于判断 HYBRID 的主要耗时来自“根/区间/节点/求值”哪一段。
+"""
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))

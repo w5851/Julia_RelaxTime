@@ -1,10 +1,19 @@
 """
 测试 calculate_all_propagators 的性能
 
+对应系统流程步骤：
+- 散射流程中的“总传播子/极化函数”等中间量计算：`src/relaxtime/TotalPropagator.jl` 等
+
 目标：
 1. 测量单次散射过程总传播子计算的平均时间
 2. 与极化函数计算时间对比
 3. 分析性能瓶颈
+
+输出：
+- 会在同目录生成 `test_total_propagator_performance_summary.md`（脚本内写出）
+
+运行方式：
+- `julia --project=. tests/perf/relaxtime/test_total_propagator_performance.jl`
 """
 
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))

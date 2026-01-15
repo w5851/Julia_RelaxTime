@@ -1,3 +1,23 @@
+"""
+total_cross_section 性能测试（完整链路，可选重测试）
+
+对应系统流程步骤：
+- 散射总截面：`src/relaxtime/TotalCrossSection.jl`
+- 依赖散射振幅：`src/relaxtime/ScatteringAmplitude.jl`
+
+测试内容：
+- 以固定参数集运行若干子测试，并用 `BenchmarkTools` 输出关键调用的耗时
+- 部分“完整计算”步骤可能较耗时，脚本内提供开关控制
+
+输出：
+- 会在同目录生成 `test_total_cross_section_performance.md`（脚本内写出）
+
+运行方式：
+- `julia --project=. tests/perf/relaxtime/test_total_cross_section_performance.jl`
+
+备注：
+- 该文件是性能/流程回归脚本（非单元测试的严格断言集合）。
+"""
 using Test
 using BenchmarkTools
 using Dates

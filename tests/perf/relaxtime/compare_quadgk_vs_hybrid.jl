@@ -1,4 +1,18 @@
-# 对比原始 QuadGK（不限节点）和 HYBRID 策略的性能
+"""
+QuadGK（高精度参考）vs HYBRID（固定节点）性能对比
+
+对应系统流程步骤：
+- 单圈积分修正：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+
+测试内容：
+- 对一组“有根/无根”参数：
+    - 计算 QuadGK 参考值（较宽松 rtol，仅作对比基线）
+    - 计算 HYBRID(n=32)
+    - 比较用时与相对误差
+
+运行方式：
+- `julia --project=. tests/perf/relaxtime/compare_quadgk_vs_hybrid.jl`
+"""
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))

@@ -1,4 +1,22 @@
-# 详细用时分析
+"""
+详细用时分析（拆分计时）
+
+对应系统流程步骤：
+- `src/relaxtime/OneLoopIntegralsAniso.jl` / `src/relaxtime/OneLoopIntegrals.jl`
+- 核心入口：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+    （单圈积分修正的数值积分策略：QUADGK / CLUSTER_GL / HYBRID）
+
+测试内容：
+1) 预热后单次调用平均耗时（多次循环取均值/方差）
+2) HYBRID 在不同 `cluster_n` 下的耗时变化
+3) 节点生成/节点变换的独立开销（用于判断热点在“节点”还是“被积函数”）
+
+运行方式：
+- 在仓库根目录：`julia --project=. tests/perf/relaxtime/timing_analysis.jl`
+
+备注：
+- 该脚本用于交互式定位热点，不建议纳入 CI。
+"""
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
