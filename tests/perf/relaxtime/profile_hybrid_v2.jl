@@ -1,15 +1,13 @@
-"""
-分析 HYBRID 策略的时间开销分布（v2，更稳定的统计）
-
-对应系统流程步骤：
-- 单圈积分修正（HYBRID）：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
-
-测试内容：
-- 将 HYBRID 分解为多个子阶段并分别计时，使用更大的 `n_runs` 获取稳定均值。
-
-运行方式：
-- `julia --project=. tests/perf/relaxtime/profile_hybrid_v2.jl`
-"""
+# 分析 HYBRID 策略的时间开销分布（v2，更稳定的统计）
+#
+# 对应系统流程步骤：
+# - `OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+#
+# 测试内容：
+# - 将 HYBRID 分解为多个子阶段并分别计时，使用更大的 `n_runs` 获取稳定均值
+#
+# 运行方式：
+# - `julia --project=. tests/perf/relaxtime/profile_hybrid_v2.jl`
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))

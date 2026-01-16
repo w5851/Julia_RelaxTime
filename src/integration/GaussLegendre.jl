@@ -14,9 +14,32 @@
 module GaussLegendre
 
 using FastGaussQuadrature
+using Base.Threads: ReentrantLock
 
 export gauleg, gausslegendre
+export standard_nodes_weights
 export affine_transform, transform_standard8
+
+const _STANDARD_NODES_WEIGHTS_CACHE = Dict{Int,Tuple{Vector{Float64},Vector{Float64}}}()
+const _STANDARD_NODES_WEIGHTS_LOCK = ReentrantLock()
+
+"""
+    standard_nodes_weights(n::Int) -> (nodes_std, weights_std)
+
+返回标准区间 [-1, 1] 上的 n 个高斯-勒让德节点与权重，并在模块内缓存。
+
+注意：返回的向量应视为只读。
+"""
+function standard_nodes_weights(n::Int)
+    lock(_STANDARD_NODES_WEIGHTS_LOCK)
+    try
+        return get!(_STANDARD_NODES_WEIGHTS_CACHE, n) do
+            FastGaussQuadrature.gausslegendre(n)
+        end
+    finally
+        unlock(_STANDARD_NODES_WEIGHTS_LOCK)
+    end
+end
 
 """
     gauleg(a::Float64, b::Float64, n::Int) -> (nodes, weights)
@@ -78,15 +101,19 @@ function gauleg(a::Float64, b::Float64, n::Int)
         throw(ArgumentError("区间端点必须满足 a < b，当前值: a=$a, b=$b"))
     end
 
-    # 获取标准区间 [-1,1] 上的节点和权重（直接调用 gausslegendre）
-    nodes_std, weights_std = gausslegendre(n)
+    # 获取标准区间 [-1,1] 上的节点和权重（带缓存）
+    nodes_std, weights_std = standard_nodes_weights(n)
 
     # 变换到区间 [a, b]
     # x = ((b-a)*t + (b+a))/2, t ∈ [-1, 1]
-    nodes = @. ((b - a) * nodes_std + (b + a)) / 2.0
-
-    # 权重需要乘以雅可比行列式 (b-a)/2
-    weights = @. weights_std * (b - a) / 2.0
+    scale = (b - a) / 2.0
+    shift = (b + a) / 2.0
+    nodes = similar(nodes_std)
+    weights = similar(weights_std)
+    @inbounds @simd for i in 1:n
+        nodes[i] = scale * nodes_std[i] + shift
+        weights[i] = scale * weights_std[i]
+    end
 
     return nodes, weights
 end

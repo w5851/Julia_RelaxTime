@@ -1,19 +1,14 @@
-"""
-average_scattering_rate 性能烟囱测试（smoke）
-
-对应系统流程步骤：
-- 弛豫时间流程中的“平均散射率”计算：`src/relaxtime/AverageScatteringRate.jl`
-
-测试内容：
-- 构造一个常量截面 cache（避免把“截面计算”混入该基准）
-- 使用 `BenchmarkTools.@benchmark` 对 `average_scattering_rate` 进行单样本计时
-
-运行方式：
-- `julia --project=. tests/perf/relaxtime/test_average_scattering_rate_performance.jl`
-
-备注：
-- 该文件位于 `tests/perf`，目标是快速发现“明显变慢/无法跑通”，并非精细 benchmark。
-"""
+# average_scattering_rate 性能烟囱测试（smoke）
+#
+# 对应系统流程步骤：
+# - `src/relaxtime/AverageScatteringRate.jl`
+#
+# 测试内容：
+# - 构造常量截面 cache（避免把“截面计算”混入该基准）
+# - `BenchmarkTools.@benchmark` 单样本计时
+#
+# 运行方式：
+# - `julia --project=. tests/perf/relaxtime/test_average_scattering_rate_performance.jl`
 using Test
 using BenchmarkTools
 

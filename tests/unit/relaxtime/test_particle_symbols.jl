@@ -175,8 +175,8 @@ using .ParticleSymbols
         println("  get_chemical_potential(:u) = $μ_u fm⁻¹ ✓")
         
         μ_ubar = get_chemical_potential(:ubar, quark_params)
-        @test μ_ubar ≈ -0.3  # 反粒子化学势取负
-        println("  get_chemical_potential(:ubar) = $μ_ubar fm⁻¹ (反粒子取负) ✓")
+        @test μ_ubar ≈ 0.3  # 约定：始终返回“夸克化学势” μ_q（同号）
+        println("  get_chemical_potential(:ubar) = $μ_ubar fm⁻¹ (同号) ✓")
         
         μ_s = get_chemical_potential(:s, quark_params)
         @test μ_s ≈ 0.0

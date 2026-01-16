@@ -1,21 +1,14 @@
-"""
-详细性能对比：策略 × 节点数（误差与用时）
-
-对应系统流程步骤：
-- 单圈积分修正：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
-- 参考值：QuadGK (`quadgk`)
-
-测试内容：
-- 固定一组典型参数（有根/无根等），对比不同策略在不同 `cluster_n` 下：
-    - 相对误差（相对 QuadGK）
-    - 平均耗时（少量重复取均值）
-
-运行方式：
-- `julia --project=. tests/perf/relaxtime/performance_comparison.jl`
-
-备注：
-- 输出表格更适合“选节点数/选策略”时快速扫一眼。
-"""
+# 详细性能对比：策略 × 节点数（误差与用时）
+#
+# 对应系统流程步骤：
+# - `OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+# - QuadGK (`quadgk`) 作为参考值
+#
+# 测试内容：
+# - 固定一组典型参数，对比不同策略在不同 `cluster_n` 下的误差与耗时
+#
+# 运行方式：
+# - `julia --project=. tests/perf/relaxtime/performance_comparison.jl`
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))

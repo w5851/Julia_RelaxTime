@@ -20,10 +20,12 @@ module ScatteringAmplitude
 """
 
 include("../Constants_PNJL.jl")
+include("../utils/ParticleSymbols.jl")
 include("TotalPropagator.jl")
 
 using .Constants_PNJL: N_color, SCATTERING_MESON_MAP
-using .TotalPropagator: calculate_all_propagators_by_channel, calculate_cms_momentum, get_quark_masses_for_process
+using .TotalPropagator: calculate_cms_momentum
+using .ParticleSymbols: get_quark_masses_for_process
 
 export scattering_amplitude_squared
 export calculate_mandelstam_variables
@@ -286,19 +288,15 @@ function calculate_qq_amplitude_squared(process::Symbol, s::Float64, t::Float64,
     cms_t = calculate_cms_momentum(process, s, t, :t, quark_params; u=u)
     cms_u = calculate_cms_momentum(process, s, t, :u, quark_params; u=u)
     
-    # 2. 获取t道传播子
-    prop_t = calculate_all_propagators_by_channel(
-        process, cms_t.k0, cms_t.k, quark_params, thermo_params, K_coeffs
+    # 2. 获取t道传播子（按需只算 t 道，避免同时计算 u 道的浪费）
+    D_t_S, D_t_P = TotalPropagator.calculate_propagator_by_channel(
+        process, :t, cms_t.k0, cms_t.k, quark_params, thermo_params, K_coeffs
     )
-    D_t_S = prop_t.t_S
-    D_t_P = prop_t.t_P
     
-    # 3. 获取u道传播子
-    prop_u = calculate_all_propagators_by_channel(
-        process, cms_u.k0, cms_u.k, quark_params, thermo_params, K_coeffs
+    # 3. 获取u道传播子（按需只算 u 道）
+    D_u_S, D_u_P = TotalPropagator.calculate_propagator_by_channel(
+        process, :u, cms_u.k0, cms_u.k, quark_params, thermo_params, K_coeffs
     )
-    D_u_S = prop_u.u_S
-    D_u_P = prop_u.u_P
     
     # 4. 计算Mandelstam辅助变量
     vars = calculate_mandelstam_variables(s, t, u, m1, m2, m3, m4)
@@ -377,19 +375,15 @@ function calculate_qqbar_amplitude_squared(process::Symbol, s::Float64, t::Float
     cms_s = calculate_cms_momentum(process, s, t, :s, quark_params; u=u)
     cms_t = calculate_cms_momentum(process, s, t, :t, quark_params; u=u)
     
-    # 2. 获取s道传播子
-    prop_s = calculate_all_propagators_by_channel(
-        process, cms_s.k0, cms_s.k, quark_params, thermo_params, K_coeffs
+    # 2. 获取s道传播子（按需只算 s 道）
+    D_s_S, D_s_P = TotalPropagator.calculate_propagator_by_channel(
+        process, :s, cms_s.k0, cms_s.k, quark_params, thermo_params, K_coeffs
     )
-    D_s_S = prop_s.s_S
-    D_s_P = prop_s.s_P
     
-    # 3. 获取t道传播子
-    prop_t = calculate_all_propagators_by_channel(
-        process, cms_t.k0, cms_t.k, quark_params, thermo_params, K_coeffs
+    # 3. 获取t道传播子（按需只算 t 道）
+    D_t_S, D_t_P = TotalPropagator.calculate_propagator_by_channel(
+        process, :t, cms_t.k0, cms_t.k, quark_params, thermo_params, K_coeffs
     )
-    D_t_S = prop_t.t_S
-    D_t_P = prop_t.t_P
     
     # 4. 计算Mandelstam辅助变量
     vars = calculate_mandelstam_variables(s, t, u, m1, m2, m3, m4)

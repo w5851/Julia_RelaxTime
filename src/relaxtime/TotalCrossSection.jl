@@ -74,9 +74,10 @@ include(joinpath(@__DIR__, "DifferentialCrossSection.jl"))
 include(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
 
 using .Constants_PNJL: SCATTERING_MESON_MAP
-using .GaussLegendre: gauleg
+using .GaussLegendre: gauleg, standard_nodes_weights
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 using .ScatteringAmplitude: scattering_amplitude_squared
+using .ScatteringAmplitude.ParticleSymbols: parse_scattering_process, parse_particle_pair_str, is_antiquark
 using .DifferentialCrossSection: differential_cross_section
 using .OneLoopIntegrals: distribution_value
 
@@ -358,10 +359,6 @@ end
 # 5. 辅助函数：粒子、质量和化学势
 # ----------------------------------------------------------------------------
 
-@inline function is_antiquark(flavor::Symbol)::Bool
-    return flavor === :ubar || flavor === :dbar || flavor === :sbar
-end
-
 """
     parse_particles_from_process(process) -> Tuple{Symbol, Symbol, Symbol, Symbol}
 
@@ -386,25 +383,9 @@ i, j, c, d = parse_particles_from_process(:ud_to_dū)
 ```
 """
 function parse_particles_from_process(process::Symbol)::Tuple{Symbol, Symbol, Symbol, Symbol}
-    # 将过程名称转换为字符串
-    process_str = string(process)
-    
-    # 分割 "_to_"
-    parts = split(process_str, "_to_")
-    if length(parts) != 2
-        error("Invalid process format: $process (expected format: 'ab_to_cd')")
-    end
-    
-    initial_str = String(parts[1])
-    final_str = String(parts[2])
-    
-    # 解析初态粒子
-    particle_i, particle_j = parse_particle_pair(initial_str)
-    
-    # 解析末态粒子
-    particle_c, particle_d = parse_particle_pair(final_str)
-    
-    return (particle_i, particle_j, particle_c, particle_d)
+    # 统一使用 TotalPropagator 的解析逻辑（包含已知过程的缓存，且支持 "ū/đ/s̄" 形式）。
+    q1, q2, q3, q4 = parse_scattering_process(process)
+    return (q1, q2, q3, q4)
 end
 
 """
@@ -413,38 +394,8 @@ end
 从字符串解析粒子对（如 "uu" → (:u, :u), "dū" → (:d, :ubar)）。
 """
 function parse_particle_pair(pair_str::String)::Tuple{Symbol, Symbol}
-    # 处理反粒子标记 ū, đ, s̄
-    pair_str = replace(pair_str, "ū" => "ubar")
-    pair_str = replace(pair_str, "đ" => "dbar")  
-    pair_str = replace(pair_str, "s̄" => "sbar")
-    
-    # 匹配模式：两个字母或 letterbar
-    particles = Symbol[]
-    
-    i = 1
-    while i <= length(pair_str)
-        if i + 3 <= length(pair_str) && pair_str[i:i+3] == "ubar"
-            push!(particles, :ubar)
-            i += 4
-        elseif i + 3 <= length(pair_str) && pair_str[i:i+3] == "dbar"
-            push!(particles, :dbar)
-            i += 4
-        elseif i + 3 <= length(pair_str) && pair_str[i:i+3] == "sbar"
-            push!(particles, :sbar)
-            i += 4
-        elseif pair_str[i] in ['u', 'd', 's']
-            push!(particles, Symbol(pair_str[i]))
-            i += 1
-        else
-            error("Unknown particle symbol at position $i in '$pair_str'")
-        end
-    end
-    
-    if length(particles) != 2
-        error("Expected 2 particles in '$pair_str', found $(length(particles))")
-    end
-    
-    return (particles[1], particles[2])
+    # 兼容旧 API：委托给 TotalPropagator 的 token parser（已支持 "ū/đ/s̄" 形式）。
+    return parse_particle_pair_str(pair_str)
 end
 
 """
@@ -462,11 +413,11 @@ end
 质量 [fm⁻¹]
 """
 function get_mass_for_flavor(flavor::Symbol, quark_params::NamedTuple)::Float64
-    if flavor in [:u, :ubar]
+    if flavor === :u || flavor === :ubar
         return quark_params.m.u
-    elseif flavor in [:d, :dbar]
+    elseif flavor === :d || flavor === :dbar
         return quark_params.m.d
-    elseif flavor in [:s, :sbar]
+    elseif flavor === :s || flavor === :sbar
         return quark_params.m.s
     else
         error("Unknown flavor: $flavor")
@@ -495,11 +446,11 @@ end
 function get_chemical_potential(flavor::Symbol, quark_params::NamedTuple)::Float64
     # 约定：这里返回的永远是“夸克化学势” μ_q（对应每个味 u/d/s），不对反夸克取负。
     # 反夸克的占据数由分布函数的 sign_flag（或 antiquark_distribution_*）负责处理。
-    if flavor in [:u, :ubar]
+    if flavor === :u || flavor === :ubar
         return quark_params.μ.u
-    elseif flavor in [:d, :dbar]
+    elseif flavor === :d || flavor === :dbar
         return quark_params.μ.d
-    elseif flavor in [:s, :sbar]
+    elseif flavor === :s || flavor === :sbar
         return quark_params.μ.s
     else
         error("Unknown flavor: $flavor")
@@ -617,8 +568,10 @@ function total_cross_section(
         return 0.0
     end
     
-    # 步骤4: 生成高斯-勒让德积分节点和权重
-    t_nodes, t_weights = gauleg(t_min, t_max, n_points)
+    # 步骤4: 使用标准区间节点/权重并做仿射变换（避免分配 t_nodes/t_weights）
+    nodes_std, weights_std = standard_nodes_weights(n_points)
+    scale_t = (t_max - t_min) / 2.0
+    shift_t = (t_max + t_min) / 2.0
     
     # 步骤5: 预计算 s 依赖的 Mandelstam 变量
     s_12_plus = s - (mi + mj)^2
@@ -632,9 +585,9 @@ function total_cross_section(
     
     # 步骤7: 对 t 积分（高斯求积）
     σ = 0.0
-    for i in 1:n_points
-        t = t_nodes[i]
-        w = t_weights[i]
+    @inbounds for i in 1:n_points
+        t = scale_t * nodes_std[i] + shift_t
+        w = scale_t * weights_std[i]
         
         # 7.1 计算散射矩阵元
         M_squared = scattering_amplitude_squared(

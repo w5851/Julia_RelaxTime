@@ -29,6 +29,32 @@ using .PolarizationAniso: polarization_aniso
 # 导出函数
 export polarization_aniso_cached, reset_cache!, get_cache_stats
 
+@inline function _channel_code(channel::Symbol)::UInt8
+    channel === :P && return UInt8(0x01)
+    channel === :S && return UInt8(0x02)
+    throw(ArgumentError("Unknown polarization channel: $channel (expected :P or :S)"))
+end
+
+# 缓存量化精度：通过截断 Float64 的 mantissa（有效位）把“浮点容差”落到离散桶。
+# 好处：
+# 1) Dict 的 hash/== 一致性由“离散桶”保证
+# 2) 避免 round(sigdigits=...) 带来的 log10/^ 等昂贵开销（profile 热点）
+# 3) 量化后的相对误差上界约为 2^(-CACHE_MANTISSA_BITS)
+const CACHE_MANTISSA_BITS = 40  # 2^-40 ≈ 9.09e-13，接近原先 1e-12 的容差目标
+
+const _SIGN_EXP_MASK = UInt64(0xFFF0000000000000)
+const _MANTISSA_MASK = UInt64(0x000FFFFFFFFFFFFF)
+const _MANTISSA_KEEP_MASK = _MANTISSA_MASK & ~((UInt64(1) << (52 - CACHE_MANTISSA_BITS)) - 1)
+
+@inline function _round_cache(x::Float64)
+    # 这些特殊值保持不变
+    (x == 0.0 || isnan(x) || isinf(x)) && return x
+    bits = reinterpret(UInt64, x)
+    sign_exp = bits & _SIGN_EXP_MASK
+    mantissa = bits & _MANTISSA_MASK
+    return reinterpret(Float64, sign_exp | (mantissa & _MANTISSA_KEEP_MASK))
+end
+
 # ----------------------------------------------------------------------------
 # 缓存键结构
 # ----------------------------------------------------------------------------
@@ -54,7 +80,7 @@ export polarization_aniso_cached, reset_cache!, get_cache_stats
 使用hash和==运算符时会考虑浮点数容差（EPS_CACHE）
 """
 struct PolarizationKey
-    channel::Symbol
+    channel_code::UInt8
     k0::Float64
     k_norm::Float64
     m1::Float64
@@ -67,80 +93,64 @@ struct PolarizationKey
     ξ::Float64
     A1::Float64
     A2::Float64
-    num_s_quark::Int
-end
+    num_s_quark::UInt8
 
-# 浮点数比较容差（相对误差）
-const EPS_CACHE = 1e-12
-
-"""
-    Base.hash(key::PolarizationKey, h::UInt)
-
-为PolarizationKey生成哈希值，用于哈希表查找。
-
-# 实现细节
-- 对浮点数参数进行舍入以提高缓存命中率
-- 保留12位有效数字（对应EPS_CACHE = 1e-12）
-- Symbol和Int类型直接参与哈希计算
-"""
-function Base.hash(key::PolarizationKey, h::UInt)
-    # 对浮点数参数进行舍入以提高缓存命中率
-    # 保留12位有效数字
-    round_val(x) = round(x, sigdigits=12)
-    
-    h = hash(key.channel, h)
-    h = hash(round_val(key.k0), h)
-    h = hash(round_val(key.k_norm), h)
-    h = hash(round_val(key.m1), h)
-    h = hash(round_val(key.m2), h)
-    h = hash(round_val(key.μ1), h)
-    h = hash(round_val(key.μ2), h)
-    h = hash(round_val(key.T), h)
-    h = hash(round_val(key.Φ), h)
-    h = hash(round_val(key.Φbar), h)
-    h = hash(round_val(key.ξ), h)
-    h = hash(round_val(key.A1), h)
-    h = hash(round_val(key.A2), h)
-    h = hash(key.num_s_quark, h)
-    return h
-end
-
-"""
-    Base.:(==)(k1::PolarizationKey, k2::PolarizationKey)
-
-比较两个PolarizationKey是否相等，考虑浮点数容差。
-
-# 实现细节
-- Symbol和Int类型必须完全相等
-- Float64类型使用相对容差EPS_CACHE比较
-- 相对误差：|a - b| / max(|a|, |b|) < EPS_CACHE
-"""
-function Base.:(==)(k1::PolarizationKey, k2::PolarizationKey)
-    # Symbol和Int必须完全相等
-    k1.channel != k2.channel && return false
-    k1.num_s_quark != k2.num_s_quark && return false
-    
-    # 浮点数使用相对容差比较
-    function approx_equal(a::Float64, b::Float64)
-        abs_max = max(abs(a), abs(b))
-        abs_max < 1e-15 && return true  # 都接近零
-        return abs(a - b) / abs_max < EPS_CACHE
+    function PolarizationKey(channel::Symbol, k0::Float64, k_norm::Float64,
+                             m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
+                             T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64,
+                             A1::Float64, A2::Float64, num_s_quark::Int)
+        return new(
+            _channel_code(channel),
+            _round_cache(k0),
+            _round_cache(k_norm),
+            _round_cache(m1),
+            _round_cache(m2),
+            _round_cache(μ1),
+            _round_cache(μ2),
+            _round_cache(T),
+            _round_cache(Φ),
+            _round_cache(Φbar),
+            _round_cache(ξ),
+            _round_cache(A1),
+            _round_cache(A2),
+            UInt8(num_s_quark),
+        )
     end
-    
-    approx_equal(k1.k0, k2.k0) || return false
-    approx_equal(k1.k_norm, k2.k_norm) || return false
-    approx_equal(k1.m1, k2.m1) || return false
-    approx_equal(k1.m2, k2.m2) || return false
-    approx_equal(k1.μ1, k2.μ1) || return false
-    approx_equal(k1.μ2, k2.μ2) || return false
-    approx_equal(k1.T, k2.T) || return false
-    approx_equal(k1.Φ, k2.Φ) || return false
-    approx_equal(k1.Φbar, k2.Φbar) || return false
-    approx_equal(k1.ξ, k2.ξ) || return false
-    approx_equal(k1.A1, k2.A1) || return false
-    approx_equal(k1.A2, k2.A2) || return false
-    
-    return true
+end
+
+@inline function Base.isequal(a::PolarizationKey, b::PolarizationKey)
+    return a.channel_code == b.channel_code &&
+           isequal(a.k0, b.k0) &&
+           isequal(a.k_norm, b.k_norm) &&
+           isequal(a.m1, b.m1) &&
+           isequal(a.m2, b.m2) &&
+           isequal(a.μ1, b.μ1) &&
+           isequal(a.μ2, b.μ2) &&
+           isequal(a.T, b.T) &&
+           isequal(a.Φ, b.Φ) &&
+           isequal(a.Φbar, b.Φbar) &&
+           isequal(a.ξ, b.ξ) &&
+           isequal(a.A1, b.A1) &&
+           isequal(a.A2, b.A2) &&
+           a.num_s_quark == b.num_s_quark
+end
+
+@inline function Base.hash(k::PolarizationKey, h::UInt)
+    h = hash(k.channel_code, h)
+    h = hash(k.k0, h)
+    h = hash(k.k_norm, h)
+    h = hash(k.m1, h)
+    h = hash(k.m2, h)
+    h = hash(k.μ1, h)
+    h = hash(k.μ2, h)
+    h = hash(k.T, h)
+    h = hash(k.Φ, h)
+    h = hash(k.Φbar, h)
+    h = hash(k.ξ, h)
+    h = hash(k.A1, h)
+    h = hash(k.A2, h)
+    h = hash(k.num_s_quark, h)
+    return h
 end
 
 # ----------------------------------------------------------------------------
@@ -200,16 +210,16 @@ function polarization_aniso_cached(channel::Symbol, k0::Float64, k_norm::Float64
     # 构造缓存键
     key = PolarizationKey(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
     
-    # 查询缓存
-    if haskey(POLARIZATION_CACHE, key)
+    # 单次查找：命中则直接返回，避免 haskey + getindex 的双查找
+    cached = get(POLARIZATION_CACHE, key, nothing)
+    if cached !== nothing
         CACHE_HIT_CALLS[] += 1
-        return POLARIZATION_CACHE[key]
+        return cached
     end
-    
+
     # 缓存未命中，计算并缓存
     result = polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
     POLARIZATION_CACHE[key] = result
-    
     return result
 end
 

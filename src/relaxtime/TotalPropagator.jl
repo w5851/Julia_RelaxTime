@@ -21,79 +21,44 @@ include("MesonPropagator.jl")
 include("PolarizationCache.jl")
 
 using .Constants_PNJL: SCATTERING_MESON_MAP
-using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix
+using ..ParticleSymbols: parse_scattering_process, parse_particle_pair_str, extract_quark_flavor, parse_scattering_process_flavor_codes, get_quark_masses_for_process
+using ..ParticleSymbols: FLAVOR_U, FLAVOR_D, FLAVOR_S
+using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
 using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
 export total_propagator_simple, total_propagator_mixed, get_flavor_factor
 export calculate_all_propagators, calculate_all_propagators_by_channel, total_propagator_auto
-export calculate_cms_momentum, get_quark_masses_for_process
+export calculate_cms_momentum
 export reset_cache!, get_cache_stats  # 导出缓存管理函数
 
 # ----------------------------------------------------------------------------
 # 味因子查询表（表5.3）
 # ----------------------------------------------------------------------------
 
-const FLAVOR_FACTOR_TABLE = Dict{Tuple{Symbol, Symbol}, Float64}(
-    (:u, :u) => 1.0,
-    (:u, :d) => √2,
-    (:u, :s) => √2,
-    (:d, :u) => √2,
-    (:d, :d) => -1.0,
-    (:d, :s) => √2,
-    (:s, :u) => √2,
-    (:s, :d) => √2,
-    (:s, :s) => 2.0
-)
+const _SQRT2 = sqrt(2.0)
+
+@inline function _flavor_factor_from_codes(c1::UInt8, c2::UInt8)::Float64
+    if c1 == c2
+        if c1 == FLAVOR_U
+            return 1.0
+        elseif c1 == FLAVOR_D
+            return -1.0
+        elseif c1 == FLAVOR_S
+            return 2.0
+        else
+            error("Unknown flavor code: $c1 (expected FLAVOR_U/FLAVOR_D/FLAVOR_S)")
+        end
+    end
+    return _SQRT2
+end
 
 # ----------------------------------------------------------------------------
 # 辅助函数：质量提取
 # ----------------------------------------------------------------------------
 
-"""
-    get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple) -> NTuple{4, Float64}
-
-根据散射过程提取四个粒子的质量。
-
-# 参数
-- `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_ssbar）
-- `quark_params`: 夸克参数NamedTuple，结构：
-  ```julia
-  (m = (u=m_u, d=m_d, s=m_s), ...)
-  ```
-
-# 返回值
-返回元组 (m1, m2, m3, m4)，对应散射过程 q1+q2→q3+q4 的四个粒子质量（单位：fm⁻¹）
-
-# 质量映射规则
-- 夸克和反夸克使用相同的质量（如u和ū都用m_u）
-- 从process符号解析粒子类型：如 :uubar_to_ssbar → (u, ū, s, š)
-- 映射到quark_params.m中的对应质量
-
-# 示例
-```julia
-quark_params = (m = (u=0.3, d=0.3, s=0.5), ...)
-m1, m2, m3, m4 = get_quark_masses_for_process(:uubar_to_ssbar, quark_params)
-# 返回: (0.3, 0.3, 0.5, 0.5)  # (m_u, m_u, m_s, m_s)
-```
-"""
-function get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple)
-    # 解析散射过程
-    q1, q2, q3, q4 = parse_scattering_process(process)
-    
-    # 提取味类型（忽略反粒子标记）
-    flavor1 = extract_quark_flavor(q1)
-    flavor2 = extract_quark_flavor(q2)
-    flavor3 = extract_quark_flavor(q3)
-    flavor4 = extract_quark_flavor(q4)
-    
-    # 获取对应质量
-    m1 = quark_params.m[flavor1]
-    m2 = quark_params.m[flavor2]
-    m3 = quark_params.m[flavor3]
-    m4 = quark_params.m[flavor4]
-    
-    return (m1, m2, m3, m4)
-end
+# 质量提取工具函数统一由 ParticleSymbols 提供：
+# `ParticleSymbols.get_quark_masses_for_process(process, quark_params)`。
+# 本模块内部直接 `using ..ParticleSymbols: get_quark_masses_for_process` 调用即可。
 
 # ----------------------------------------------------------------------------
 # 辅助函数：质心系动量计算
@@ -231,122 +196,39 @@ end
 # 辅助函数
 # ----------------------------------------------------------------------------
 
-function extract_quark_flavor(quark::Symbol)
-    s = string(quark)
-    if endswith(s, "bar")
-        return Symbol(s[1:end-3])
-    else
-        return quark
-    end
-end
-
 function get_flavor_factor(quark1::Symbol, quark2::Symbol)
     flavor1 = extract_quark_flavor(quark1)
     flavor2 = extract_quark_flavor(quark2)
-    
-    key = (flavor1, flavor2)
-    if haskey(FLAVOR_FACTOR_TABLE, key)
-        return FLAVOR_FACTOR_TABLE[key]
-    else
-        error("Unknown flavor combination: ($flavor1, $flavor2)")
-    end
-end
 
-"""
-    parse_particle_pair_str(pair_str::AbstractString) -> Tuple{Symbol, Symbol}
-
-将过程符号里形如 `"ud"`, `"uubar"`, `"ubarsbar"` 的二粒子字符串解析为两个粒子 `Symbol`。
-
-支持的 token：
-- 夸克：`u`, `d`, `s`
-- 反夸克：`ubar`, `dbar`, `sbar`
-
-约束：
-- 解析结果必须恰好是 2 个粒子，否则抛错。
-
-示例：
-```julia
-parse_particle_pair_str("ud")       # (:u, :d)
-parse_particle_pair_str("uubar")    # (:u, :ubar)
-parse_particle_pair_str("ubarubar") # (:ubar, :ubar)
-parse_particle_pair_str("ubardbar") # (:ubar, :dbar)
-```
-"""
-function parse_particle_pair_str(pair_str::AbstractString)::Tuple{Symbol, Symbol}
-    # Token-based parser that supports both quarks and antiquarks, e.g.
-    # "ud" -> (:u,:d)
-    # "uubar" -> (:u,:ubar)
-    # "ubarubar" -> (:ubar,:ubar)
-    # "ubardbar" -> (:ubar,:dbar)
-    s = String(pair_str)
-    particles = Symbol[]
-    i = firstindex(s)
-    while i <= lastindex(s)
-        rest = SubString(s, i)
-        if startswith(rest, "ubar")
-            push!(particles, :ubar)
-            i = nextind(s, i, 4)
-        elseif startswith(rest, "dbar")
-            push!(particles, :dbar)
-            i = nextind(s, i, 4)
-        elseif startswith(rest, "sbar")
-            push!(particles, :sbar)
-            i = nextind(s, i, 4)
+    # Flavor-factor rule for {u,d,s} (Table 5.3):
+    # - off-diagonal: √2
+    # - diagonal: uu→1, dd→-1, ss→2
+    if flavor1 === flavor2
+        if flavor1 === :u
+            return 1.0
+        elseif flavor1 === :d
+            return -1.0
+        elseif flavor1 === :s
+            return 2.0
         else
-            c = s[i]
-            if c == 'u'
-                push!(particles, :u)
-            elseif c == 'd'
-                push!(particles, :d)
-            elseif c == 's'
-                push!(particles, :s)
-            else
-                error("Invalid particle token at position $i in '$s'")
-            end
-            i = nextind(s, i)
+            error("Unknown flavor: $flavor1")
         end
     end
-    length(particles) == 2 || error("Invalid particle pair '$s' (expected 2 particles)")
-    return (particles[1], particles[2])
-end
-
-"""
-    parse_scattering_process(process::Symbol) -> Tuple{Symbol, Symbol, Symbol, Symbol}
-
-将散射过程 key（例如 `:uu_to_uu`, `:uubar_to_ssbar`, `:ubardbar_to_ubardbar`）解析为
-四个粒子符号 `(q1, q2, q3, q4)`，对应反应 `q1 + q2 → q3 + q4`。
-
-说明：
-- 输入格式要求为 `q1q2_to_q3q4`（以 `"_to_"` 分隔）。
-- 粒子对字符串的解析由 `parse_particle_pair_str` 完成，因此同时支持夸克与反夸克 token。
-
-该解析结果会被用于：
-- `get_quark_masses_for_process`：提取四个粒子的质量（忽略 bar 标记取味）
-- `get_flavor_factors_for_channel`：为 s/t/u 道计算味因子组合
-- 混合介子传播子的味结构选择
-"""
-function parse_scattering_process(process::Symbol)
-    s = string(process)
-    parts = split(s, "_to_")
-    length(parts) == 2 || error("Invalid process format: $process. Expected: q1q2_to_q3q4")
-
-    q1, q2 = parse_particle_pair_str(parts[1])
-    q3, q4 = parse_particle_pair_str(parts[2])
-    return (q1, q2, q3, q4)
+    return _SQRT2
 end
 
 function get_flavor_factors_for_channel(process::Symbol, channel::Symbol)
-    q1, q2, q3, q4 = parse_scattering_process(process)
-    
-    if channel == :t
-        T1 = get_flavor_factor(q1, q3)
-        T2 = get_flavor_factor(q2, q4)
-    elseif channel == :u
-        T1 = get_flavor_factor(q1, q4)
-        T2 = get_flavor_factor(q2, q3)
-    elseif channel == :s
-        T1 = get_flavor_factor(q1, q2)
-        T2 = get_flavor_factor(q3, q4)
+    c1, c2, c3, c4 = parse_scattering_process_flavor_codes(process)
+
+    if channel === :t
+        T1 = _flavor_factor_from_codes(c1, c3)
+        T2 = _flavor_factor_from_codes(c2, c4)
+    elseif channel === :u
+        T1 = _flavor_factor_from_codes(c1, c4)
+        T2 = _flavor_factor_from_codes(c2, c3)
+    elseif channel === :s
+        T1 = _flavor_factor_from_codes(c1, c2)
+        T2 = _flavor_factor_from_codes(c3, c4)
     else
         error("Unknown channel: $channel. Use :t, :u, or :s")
     end
@@ -590,15 +472,15 @@ function total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel:
     )
     Π_ss = ComplexF64(Π_ss_real, Π_ss_imag)
     
-    # 计算M矩阵
-    M_matrix = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, meson_channel)
+    # 计算 M 矩阵元素（避免分配 2×2 Matrix）
+    M00, M08, M88 = calculate_coupling_elements(Π_uu, Π_ss, K_coeffs, meson_channel)
     
     # 从K_coeffs中获取det_K
     det_K = (meson_channel == :P) ? K_coeffs.det_K_plus : K_coeffs.det_K_minus
     
     # 计算混合介子传播子
     q1, q2, q3, q4 = parse_scattering_process(process)
-    D_mixed = meson_propagator_mixed(det_K, M_matrix, q1, q2, q3, q4, channel)
+    D_mixed = meson_propagator_mixed(det_K, M00, M08, M88, q1, q2, q3, q4, channel)
     
     return D_mixed
 end
@@ -930,11 +812,11 @@ function calculate_propagator_by_channel(process::Symbol, channel::Symbol,
         # 计算介子传播子
         D_meson = meson_propagator_simple(meson, K_coeffs, Π)
         
-        # 根据介子类型累加到对应通道
-        if meson in [:pi, :K]
+        # 根据介子类型累加到对应通道（避免 `meson in [:a, :b]` 造成的小数组分配）
+        if meson === :pi || meson === :K
             # 赝标量介子 → P通道
             D_P += T1 * D_meson * T2
-        elseif meson in [:sigma_pi, :sigma_K]
+        elseif meson === :sigma_pi || meson === :sigma_K
             # 标量介子 → S通道
             D_S += T1 * D_meson * T2
         else

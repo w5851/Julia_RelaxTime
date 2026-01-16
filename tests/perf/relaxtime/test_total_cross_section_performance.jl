@@ -1,23 +1,18 @@
-"""
-total_cross_section 性能测试（完整链路，可选重测试）
-
-对应系统流程步骤：
-- 散射总截面：`src/relaxtime/TotalCrossSection.jl`
-- 依赖散射振幅：`src/relaxtime/ScatteringAmplitude.jl`
-
-测试内容：
-- 以固定参数集运行若干子测试，并用 `BenchmarkTools` 输出关键调用的耗时
-- 部分“完整计算”步骤可能较耗时，脚本内提供开关控制
-
-输出：
-- 会在同目录生成 `test_total_cross_section_performance.md`（脚本内写出）
-
-运行方式：
-- `julia --project=. tests/perf/relaxtime/test_total_cross_section_performance.jl`
-
-备注：
-- 该文件是性能/流程回归脚本（非单元测试的严格断言集合）。
-"""
+# total_cross_section 性能测试（完整链路，可选重测试）
+#
+# 对应系统流程步骤：
+# - `src/relaxtime/TotalCrossSection.jl`
+# - `src/relaxtime/ScatteringAmplitude.jl`
+#
+# 测试内容：
+# - 固定参数集 + BenchmarkTools 输出关键调用耗时
+# - “完整计算”步骤可能较耗时，脚本内提供开关控制
+#
+# 输出：
+# - 同目录生成 `test_total_cross_section_performance.md`（脚本内写出）
+#
+# 运行方式：
+# - `julia --project=. tests/perf/relaxtime/test_total_cross_section_performance.jl`
 using Test
 using BenchmarkTools
 using Dates
@@ -463,9 +458,9 @@ if RUN_FULL_TOTAL_CROSS_SECTION_TEST
     println("   计算 A_s...")
     A_s = A(m_s_fm, 0.0, T_fm, Φ, Φbar, nodes_p, weights_p)
     
-    # 从 A 函数计算 G 函数
-    G_u = calculate_G_from_A(A_u)
-    G_s = calculate_G_from_A(A_s)
+    # 从 A 函数计算 G 函数（新签名需要质量）
+    G_u = calculate_G_from_A(A_u, m_u_fm)
+    G_s = calculate_G_from_A(A_s, m_s_fm)
     
     # 设置 PNJL 耦合常数（从 Constants_PNJL.jl）
     # G_MeV = 1.835, K_MeV = 12.36, ħc = 197.327 MeV·fm

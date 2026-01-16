@@ -161,6 +161,36 @@ end
 2. **重复使用节点**：
    - 如果多次在同一区间积分，预先计算并存储节点和权重
 
+4. **高频热路径建议**：
+   - 若在热循环中频繁对不同区间做积分，建议改用 `standard_nodes_weights(n)` 取标准区间 [-1,1] 节点/权重，再用仿射变换在循环内计算实际节点/权重，避免为每个区间分配 `nodes::Vector`/`weights::Vector`
+
+---
+
+### `standard_nodes_weights(n)`
+
+返回标准区间 [-1, 1] 上的 n 个高斯-勒让德节点与权重（模块内缓存，返回值应视为只读）。
+
+#### 函数签名
+
+```julia
+standard_nodes_weights(n::Int) -> (nodes_std::Vector{Float64}, weights_std::Vector{Float64})
+```
+
+#### 典型用法（避免分配区间节点）
+
+```julia
+nodes_std, weights_std = standard_nodes_weights(n)
+scale = (b - a) / 2
+shift = (b + a) / 2
+
+acc = 0.0
+@inbounds for i in 1:n
+    x = scale * nodes_std[i] + shift
+    w = scale * weights_std[i]
+    acc += w * f(x)
+end
+```
+
 3. **向量化计算**：
    - 利用 Julia 的广播语法 `.` 进行向量化操作
    - 示例：`result = sum(weights .* f.(nodes))`

@@ -1,21 +1,14 @@
-"""
-综合基准测试：精度 + 实际用时（多参数组合）
-
-对应系统流程步骤：
-- 单圈积分修正：`OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
-- 参考值：QuadGK (`quadgk`) 作为高精度对照
-
-测试内容：
-- 对一组“有根/无根”参数，比较不同策略（QUADGK/CLUSTER_GL/HYBRID）的：
-    - 平均耗时（多次循环取均值）
-    - 相对误差（相对 QuadGK 参考值）
-
-运行方式：
-- `julia --project=. tests/perf/relaxtime/comprehensive_benchmark.jl`
-
-备注：
-- 该脚本兼顾精度与性能，用于选择默认策略/节点数的经验依据。
-"""
+# 综合基准测试：精度 + 实际用时（多参数组合）
+#
+# 对应系统流程步骤：
+# - `OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
+# - QuadGK (`quadgk`) 作为参考值
+#
+# 测试内容：
+# - 多组“有根/无根”参数下，比较不同策略的平均耗时与相对误差
+#
+# 运行方式：
+# - `julia --project=. tests/perf/relaxtime/comprehensive_benchmark.jl`
 using Printf
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))

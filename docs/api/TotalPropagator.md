@@ -340,6 +340,11 @@ total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel::Symbol,
 
 **对称性：** T(q1, q2) = T(q2, q1)
 
+**实现说明（性能相关）：**
+
+- `get_flavor_factors_for_channel(process, channel)` 内部使用 `ParticleSymbols.parse_scattering_process_flavor_codes(process)::NTuple{4,UInt8}` 获取四个粒子的味编码（isbits），并按上表规则分支计算味因子。
+- 这样可以避免在热路径中构造/散列 `Tuple{Symbol,Symbol}` 并进行 Dict 查找（减少 hash 开销与潜在分配）。
+
 ---
 
 ## 缓存管理

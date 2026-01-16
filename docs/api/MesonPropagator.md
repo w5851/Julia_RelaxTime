@@ -162,6 +162,18 @@ meson_propagator_mixed(det_K::Float64, M_matrix::Matrix{ComplexF64},
                       channel::Symbol) -> ComplexF64
 ```
 
+##### 推荐（低分配）签名
+
+从性能角度，mixed 传播子只需要 2×2 对称矩阵 $M$ 的三个独立元素 $(M_{00}, M_{08}, M_{88})$。
+代码里提供了对应的重载以避免构造 2×2 矩阵与 `det`/矩阵乘法：
+
+```julia
+meson_propagator_mixed(det_K::Float64,
+                      M00::ComplexF64, M08::ComplexF64, M88::ComplexF64,
+                      q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol,
+                      channel::Symbol) -> ComplexF64
+```
+
 ##### 物理公式
 
 ```
@@ -172,6 +184,33 @@ D(q²) = [2det(K) / det(M)] × J^T M J'
 - det(K)：耦合矩阵行列式（预计算）
 - M：2×2耦合矩阵（包含极化函数修正）
 - J, J'：流算符向量（由散射过程的味量子数决定）
+
+##### 实现细节（性能优化同步）
+
+本仓库在 mixed 传播子路径上做了几项关键的低分配优化，用于减少 `total_cross_section → scattering_amplitude_squared → total_propagator_mixed` 链路中的热点开销：
+
+1) **显式展开 2×2 行列式与双线性型**
+
+mixed 通道的耦合矩阵 $M$ 是在 $(0,8)$ 基底下的 2×2（数值上按构造为对称矩阵）。
+因此：
+
+$$
+\det(M) = M_{00} M_{88} - M_{08}^2
+$$
+
+同时 $J^T M J'$ 可以用标量显式展开（避免构造矩阵、避免 `det(M)`、避免 `J'`/`J` 的矩阵乘法），这在 Julia 下能显著降低 allocations。
+
+2) **one-hot 味波函数下的流向量计算**
+
+mixed 传播子需要的流向量分量形如 $J_a = \bar\psi\,\lambda_a\,\psi$（$a\in\{0,8\}$）。
+在本项目中，味波函数 $\psi_u,\psi_d,\psi_s$（以及反粒子对应）是 one-hot 形式（标准基向量）。
+因此 $\bar\psi\,\lambda\,\psi$ 等价于直接取 Gell-Mann 矩阵的某个元素 $\lambda[row,col]$，无需执行 3×3 矩阵乘法。
+
+3) **过程/味解析去字符串化**
+
+为减少热点路径的字符串分配：
+- `extract_flavor`/反粒子识别优先走 `Symbol` 分支匹配（`:u/:d/:s/:ubar/:dbar/:sbar`），减少 `string(...)`/`endswith(...)` 触发的分配。
+- 相关调用链路中，散射过程解析会优先使用缓存的解析结果（对常见过程键）。
 
 ##### 散射道映射表
 

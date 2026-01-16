@@ -23,6 +23,8 @@ using LinearAlgebra
 using .Constants_PNJL: Λ_inv_fm
 using .GaussLegendre: gauleg
 using .TotalCrossSection: total_cross_section
+using .TotalCrossSection: parse_particles_from_process
+using .TotalCrossSection.ScatteringAmplitude.ParticleSymbols: is_antiquark
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
@@ -40,10 +42,6 @@ const TWO_PI = 2.0 * π
 
 # --------------------------- 工具函数 ---------------------------
 
-@inline function is_antiquark(flavor::Symbol)::Bool
-    return flavor === :ubar || flavor === :dbar || flavor === :sbar
-end
-
 @inline function distribution_with_anisotropy(flavor::Symbol, p::Float64, m::Float64, μ::Float64,
     T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, cosθ::Float64)
     if ξ == 0.0
@@ -58,42 +56,12 @@ end
     return sqrt(p * p + m * m)
 end
 
-# 解析 process: 复用 TotalCrossSection 里约定的字符串方案
-@inline function parse_particle_pair(pair_str::String)::Tuple{Symbol, Symbol}
-    pair_str = replace(pair_str, "ū" => "ubar")
-    pair_str = replace(pair_str, "đ" => "dbar")
-    pair_str = replace(pair_str, "s̄" => "sbar")
-    particles = Symbol[]
-    i = 1
-    while i <= length(pair_str)
-        if i + 3 <= length(pair_str) && pair_str[i:i+3] == "ubar"
-            push!(particles, :ubar); i += 4
-        elseif i + 3 <= length(pair_str) && pair_str[i:i+3] == "dbar"
-            push!(particles, :dbar); i += 4
-        elseif i + 3 <= length(pair_str) && pair_str[i:i+3] == "sbar"
-            push!(particles, :sbar); i += 4
-        elseif pair_str[i] in ['u','d','s']
-            push!(particles, Symbol(pair_str[i])); i += 1
-        else
-            error("Unknown particle symbol at position $i in '$pair_str'")
-        end
-    end
-    length(particles) == 2 || error("Expected 2 particles in '$pair_str'")
-    return (particles[1], particles[2])
-end
 
-@inline function parse_particles_from_process(process::Symbol)::Tuple{Symbol,Symbol,Symbol,Symbol}
-    parts = split(string(process), "_to_")
-    length(parts) == 2 || error("Invalid process format: $process")
-    i,j = parse_particle_pair(String(parts[1]))
-    c,d = parse_particle_pair(String(parts[2]))
-    return (i,j,c,d)
-end
 
 @inline function get_mass(flavor::Symbol, quark_params::NamedTuple)
-    if flavor in [:u,:ubar]; return quark_params.m.u
-    elseif flavor in [:d,:dbar]; return quark_params.m.d
-    elseif flavor in [:s,:sbar]; return quark_params.m.s
+    if flavor === :u || flavor === :ubar; return quark_params.m.u
+    elseif flavor === :d || flavor === :dbar; return quark_params.m.d
+    elseif flavor === :s || flavor === :sbar; return quark_params.m.s
     else; error("Unknown flavor $flavor") end
 end
 
@@ -101,9 +69,9 @@ end
     # Convention: always return the quark chemical potential μ_q (positive sign).
     # The particle/antiparticle distinction is handled by using
     # `quark_distribution*` vs `antiquark_distribution*`.
-    if flavor in [:u, :ubar]; return quark_params.μ.u
-    elseif flavor in [:d, :dbar]; return quark_params.μ.d
-    elseif flavor in [:s, :sbar]; return quark_params.μ.s
+    if flavor === :u || flavor === :ubar; return quark_params.μ.u
+    elseif flavor === :d || flavor === :dbar; return quark_params.μ.d
+    elseif flavor === :s || flavor === :sbar; return quark_params.μ.s
     else; error("Unknown flavor $flavor") end
 end
 

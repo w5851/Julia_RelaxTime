@@ -28,7 +28,8 @@ const PROPAGATOR_DENOM_EPS = 1e-12
 end
 
 export meson_propagator_simple, meson_propagator_mixed
-export calculate_coupling_matrix, extract_flavor, get_quark_wavefunction, calculate_current_vector
+export calculate_coupling_matrix, calculate_coupling_elements
+export extract_flavor, get_quark_wavefunction, calculate_current_vector
 
 # ----------------------------------------------------------------------------
 # 辅助函数：味提取和波函数选择
@@ -54,13 +55,29 @@ extract_flavor(:ubar) # 返回 (:u, true)
 ```
 """
 @inline function extract_flavor(q::Symbol)
-    s = string(q)
-    if endswith(s, "bar")
-        flavor = Symbol(s[1:end-3])  # 去除"bar"后缀
-        return (flavor, true)
+    # 走分支匹配，避免 string/endswith/slicing 的分配与开销（profile 热点）
+    if q === :ubar
+        return (:u, true)
+    elseif q === :dbar
+        return (:d, true)
+    elseif q === :sbar
+        return (:s, true)
+    elseif q === :u
+        return (:u, false)
+    elseif q === :d
+        return (:d, false)
+    elseif q === :s
+        return (:s, false)
     else
-        return (q, false)
+        error("Unknown quark symbol: $q")
     end
+end
+
+@inline function _flavor_index(flavor::Symbol)::Int
+    flavor === :u && return 1
+    flavor === :d && return 2
+    flavor === :s && return 3
+    error("Unknown flavor: $flavor")
 end
 
 """
@@ -158,14 +175,12 @@ function calculate_current_vector(q1::Symbol, q2::Symbol, channel::Symbol)
     # - 第二个粒子(q2)对应ψ̄（行向量）
     # 无论是夸克还是反夸克，都使用相同味道的波函数
     
-    # 获取波函数（总是用相同的味）
-    ψ1 = get_quark_wavefunction(flavor1, false)  # 列向量
-    ψbar2 = get_quark_wavefunction(flavor2, true)  # 行向量
-    
-    # 矩阵乘法顺序：ψbar2 (1×3) * λ (3×3) * ψ1 (3×1) = 标量
-    J0 = (ψbar2 * λ₀ * ψ1)[1]  # 提取标量值
-    J8 = (ψbar2 * λ₈ * ψ1)[1]
-    
+    # ψbar 和 ψ 都是 one-hot 基矢，因此 ψbar2*λ*ψ1 等价于取 λ 的 (row,col) 元素。
+    row = _flavor_index(flavor2)
+    col = _flavor_index(flavor1)
+    J0 = λ₀[row, col]
+    J8 = λ₈[row, col]
+
     return [J0, J8]
 end
 
@@ -227,8 +242,8 @@ M_P = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :P)
 M_S = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :S)
 ```
 """
-@fastmath function calculate_coupling_matrix(Π_uu::ComplexF64, Π_ss::ComplexF64, 
-                                             K_coeffs::NamedTuple, channel::Symbol)
+@inline @fastmath function calculate_coupling_elements(Π_uu::ComplexF64, Π_ss::ComplexF64,
+                                                       K_coeffs::NamedTuple, channel::Symbol)
     # 根据通道选择对应的K系数
     if channel == :P
         # 赝标量通道（η/η'）使用K⁺系数
@@ -250,6 +265,12 @@ M_S = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :S)
     M08 = K08 + (4.0 / 3.0) * sqrt(2.0) * (Π_uu - Π_ss) * det_K
     M88 = K8 - (4.0 / 3.0) * (2.0 * Π_uu + Π_ss) * det_K
 
+    return (M00, M08, M88)
+end
+
+@inline @fastmath function calculate_coupling_matrix(Π_uu::ComplexF64, Π_ss::ComplexF64,
+                                                     K_coeffs::NamedTuple, channel::Symbol)
+    M00, M08, M88 = calculate_coupling_elements(Π_uu, Π_ss, K_coeffs, channel)
     return ComplexF64[M00 M08; M08 M88]
 end
 
@@ -410,41 +431,61 @@ M_S = calculate_coupling_matrix(Π_uu_P, Π_ss_P, K_coeffs, :S)
 D_sigma = meson_propagator_mixed(det_K_S, M_S, :u, :dbar, :u, :dbar, :s)
 ```
 """
+@inline @fastmath function _current_components(q1::Symbol, q2::Symbol)::NTuple{2, Float64}
+    flavor1, _ = extract_flavor(q1)
+    flavor2, _ = extract_flavor(q2)
+    row = _flavor_index(flavor2)
+    col = _flavor_index(flavor1)
+    return (λ₀[row, col], λ₈[row, col])
+end
+
+@inline @fastmath function _mixed_scalar(M00::ComplexF64, M08::ComplexF64, M88::ComplexF64,
+                                        J0::Float64, J8::Float64, Jp0::Float64, Jp8::Float64)
+    # J^T * M * J'，显式展开避免临时向量/矩阵
+    return J0 * (M00 * Jp0 + M08 * Jp8) + J8 * (M08 * Jp0 + M88 * Jp8)
+end
+
 @fastmath function meson_propagator_mixed(det_K::Float64, M_matrix::Matrix{ComplexF64},
+                                          q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol,
+                                          channel::Symbol)
+    M00 = M_matrix[1, 1]
+    M08 = M_matrix[1, 2]
+    M88 = M_matrix[2, 2]
+    return meson_propagator_mixed(det_K, M00, M08, M88, q1, q2, q3, q4, channel)
+end
+
+@fastmath function meson_propagator_mixed(det_K::Float64,
+                                          M00::ComplexF64, M08::ComplexF64, M88::ComplexF64,
                                           q1::Symbol, q2::Symbol, q3::Symbol, q4::Symbol,
                                           channel::Symbol)
     # 根据散射道映射表选择场算符
     if channel == :t
-        # t道：q₁+q₂→q₃+q₄（直接传递）
         # ψ=q1, ψ̄=q3, ψ'=q2, ψ̄'=q4
-        J = calculate_current_vector(q1, q3, channel)
-        J_prime = calculate_current_vector(q2, q4, channel)
+        J0, J8 = _current_components(q1, q3)
+        Jp0, Jp8 = _current_components(q2, q4)
     elseif channel == :s
-        # s道：q₁+q̄₂→q₃+q̄₄（湮灭-产生）
         # ψ=q1, ψ̄=q2, ψ'=q3, ψ̄'=q4
-        J = calculate_current_vector(q1, q2, channel)
-        J_prime = calculate_current_vector(q3, q4, channel)
+        J0, J8 = _current_components(q1, q2)
+        Jp0, Jp8 = _current_components(q3, q4)
     elseif channel == :u
-        # u道：q₁+q₂→q₃+q₄（交叉传递）
         # ψ=q1, ψ̄=q4, ψ'=q2, ψ̄'=q3
-        J = calculate_current_vector(q1, q4, channel)
-        J_prime = calculate_current_vector(q2, q3, channel)
+        J0, J8 = _current_components(q1, q4)
+        Jp0, Jp8 = _current_components(q2, q3)
     else
         error("Unknown channel: $channel. Use :t, :s, or :u")
     end
-    
-    # 计算M矩阵的行列式
-    det_M = det(M_matrix)
+
+    # 2×2 行列式：det([M00 M08; M08 M88])
+    det_M = M00 * M88 - M08 * M08
     if !_isfinite_complex(det_M)
         return 0.0 + 0.0im
     end
     if abs(det_M) < PROPAGATOR_DENOM_EPS
         det_M += complex(0.0, PROPAGATOR_DENOM_EPS)
     end
-    
+
     # 计算传播子 D = 2det(K)/det(M) × J^T M J'
-    # 矩阵乘法：J^T (2×1 → 1×2) × M (2×2) × J' (2×1) = 标量
-    result = (transpose(J) * M_matrix * J_prime)[1]  # 提取标量值
+    result = _mixed_scalar(M00, M08, M88, J0, J8, Jp0, Jp8)
     if !_isfinite_complex(result)
         return 0.0 + 0.0im
     end

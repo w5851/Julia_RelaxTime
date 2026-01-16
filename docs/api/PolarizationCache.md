@@ -135,7 +135,7 @@ A_u = -50.0     # 预计算的A函数值
 
 ##### 注意事项
 
-1. **浮点数容差**：参数比较使用相对容差`EPS_CACHE = 1e-12`，微小差异会命中缓存
+1. **浮点数容差/量化**：缓存键会对所有 Float64 参数做“mantissa 截断量化”（目标精度约 $2^{-40}\approx 9\times 10^{-13}$），从而把浮点容差落到离散桶上，避免 `round(sigdigits=...)` 的额外开销
 2. **A函数复用**：A函数仅依赖(m, μ, T, Φ)，应在外层预计算并传入
 3. **线程安全**：当前实现不是线程安全，并行计算需要每个线程独立缓存
 4. **内存占用**：每个缓存条目约200字节，10,000条目约2MB
@@ -233,11 +233,13 @@ println("  估算节省时间: $(stats.cache_hits * 0.5)ms")
 
 #### `PolarizationKey`（内部使用）
 
-缓存键结构体，包含所有14个影响计算结果的参数。
+缓存键结构体，包含所有影响计算结果的参数。
+
+为避免 `Symbol` 参与 Dict 哈希时走 `objectid` 造成额外开销，内部会把通道 `:P/:S` 编码成 `UInt8`（`channel_code`）。
 
 ```julia
 struct PolarizationKey
-    channel::Symbol
+    channel_code::UInt8
     k0::Float64
     k_norm::Float64
     m1::Float64
@@ -250,24 +252,20 @@ struct PolarizationKey
     ξ::Float64
     A1::Float64
     A2::Float64
-    num_s_quark::Int
+    num_s_quark::UInt8
 end
 ```
 
 ### 哈希和相等性
 
 #### 哈希算法
-- 对所有Float64参数舍入到12位有效数字
-- 使用Julia标准`hash`函数链式计算
-- 确保相似参数产生相同哈希值
+- 对所有 Float64 参数做 mantissa 截断量化（约等价于 $\sim 10^{-12}$ 的容差目标）
+- 使用 Julia 标准 `hash` 对量化后的字段计算
+- `channel_code` / `num_s_quark` 使用紧凑整数编码，减少哈希开销
 
 #### 相等性判断
-- Symbol和Int：完全相等
-- Float64：相对容差比较
-  ```julia
-  |a - b| / max(|a|, |b|) < 1e-12
-  ```
-- 特殊处理：两个值都接近零时（<1e-15）视为相等
+- `channel_code` / `num_s_quark`：完全相等
+- Float64：比较量化后的值（等价于在量化桶上做完全相等）
 
 ### 全局缓存存储
 

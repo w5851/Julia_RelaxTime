@@ -8,7 +8,7 @@
 - 输出同时包含 MeV 与 fm⁻¹ 的关键量。
 
 示例：
-  julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi 0.0 --mode finite_15 --compute-bulk --overwrite
+  julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi-list -0.6,-0.4,-0.2,0.0,0.2,0.4,0.6 --mode finite_15 --compute-bulk --overwrite --output data/outputs/results/relaxtime/gap_transport_scan_xi-0p6to0p6.csv
 
 注意：
 - compute_bulk 默认关闭（体粘滞需要多次自动微分+求解，扫描会很慢）。
