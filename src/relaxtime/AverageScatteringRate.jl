@@ -215,9 +215,11 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
     n == 0 && error("CrossSectionCache has no points; precompute σ(s) first")
     if n == 1
         return cache.sigma_vals[1]
-    elseif s <= cache.s_vals[1]
+    elseif s < cache.s_vals[1] || s > cache.s_vals[end]
+        return 0.0
+    elseif s == cache.s_vals[1]
         return cache.sigma_vals[1]
-    elseif s >= cache.s_vals[end]
+    elseif s == cache.s_vals[end]
         return cache.sigma_vals[end]
     end
     val = interpolate_sigma(cache, s)
