@@ -17,7 +17,7 @@ $$\sigma(s, T, \mu_q) = \int_{t_-}^{t_+} dt \cdot \frac{d\sigma}{dt} \cdot (1 - 
 其中：
 - $\frac{d\sigma}{dt}$: 微分散射截面（来自 `DifferentialCrossSection` 模块）
 - $(1 - f)$: 末态费米子统计因子（Pauli blocking）
-- $E_c, E_d$: 末态粒子能量，从 $(s, t)$ 计算
+- $E_c, E_d$: 末态粒子能量，从 $s$ 与末态质量计算
 - $t_\pm$: t 积分边界（公式 5.14）
 
 **注意**: 本模块只考虑夸克-夸克散射（费米子），不涉及玻色子散射。
@@ -146,16 +146,15 @@ println("t ∈ [$(t_bounds.t_min), $(t_bounds.t_max)] fm⁻²")
 ### `calculate_final_state_energies`
 
 ```julia
-calculate_final_state_energies(s, t, mi, mj, mc, md) -> (E_c, E_d)
+calculate_final_state_energies(s, mc, md) -> (E_c, E_d)
 ```
 
-从 Mandelstam 变量计算质心系中末态粒子的能量。
+从 Mandelstam 变量 $s$ 与末态粒子质量计算质心系中末态粒子的能量。
 
 #### 参数
 
 - `s::Float64`: Mandelstam 变量 s [fm⁻²]
-- `t::Float64`: Mandelstam 变量 t [fm⁻²]
-- `mi, mj, mc, md::Float64`: 粒子质量 [fm⁻¹]
+- `mc, md::Float64`: 末态粒子质量 [fm⁻¹]
 
 #### 返回值
 
@@ -171,10 +170,9 @@ calculate_final_state_energies(s, t, mi, mj, mc, md) -> (E_c, E_d)
 
 ```julia
 s = 31.0
-t = -2.0
-mi = mj = mc = md = 1.52
+mc = md = 1.52
 
-E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
+E_c, E_d = calculate_final_state_energies(s, mc, md)
 println("E_c = $E_c fm⁻¹, E_d = $E_d fm⁻¹")
 println("E_c + E_d = $(E_c + E_d) ≈ √s = $(sqrt(s))")
 # 能量守恒验证
@@ -186,18 +184,22 @@ println("E_c + E_d = $(E_c + E_d) ≈ √s = $(sqrt(s))")
 ### `final_state_blocking_factor`
 
 ```julia
-final_state_blocking_factor(E, μ, T, Φ, Φbar) -> Float64
+final_state_blocking_factor(flavor, E, m, μ, T, Φ, Φbar, ξ, cosθ) -> Float64
 ```
 
 计算单个末态费米子的统计因子 $(1 - f)$（Pauli blocking）。
 
 #### 参数
 
+- `flavor::Symbol`: 粒子味道（区分夸克/反夸克）
 - `E::Float64`: 粒子能量 [fm⁻¹]
+- `m::Float64`: 粒子质量 [fm⁻¹]
 - `μ::Float64`: 化学势 [fm⁻¹]
 - `T::Float64`: 温度 [fm⁻¹]
 - `Φ::Float64`: Polyakov loop
 - `Φbar::Float64`: Conjugate Polyakov loop
+- `ξ::Float64`: 各向异性参数（ξ=0 表示各向同性）
+- `cosθ::Float64`: 质心系散射角余弦（各向异性分布需要）
 
 #### 返回值
 
@@ -217,8 +219,10 @@ E = 3.0  # fm⁻¹
 T = 0.15  # fm⁻¹
 Φ = 0.5
 Φbar = 0.5
+ξ = 0.0
+cosθ = 0.0
 
-factor = final_state_blocking_factor(E, μ, T, Φ, Φbar)
+factor = final_state_blocking_factor(:u, E, 1.52, μ, T, Φ, Φbar, ξ, cosθ)
 println("(1 - f) = $factor")
 # 对于费米子: 0 ≤ factor ≤ 1
 @assert 0.0 ≤ factor ≤ 1.0
@@ -229,17 +233,21 @@ println("(1 - f) = $factor")
 ### `combined_final_state_factor`
 
 ```julia
-combined_final_state_factor(E_c, E_d, μ_c, μ_d, T, Φ, Φbar) -> Float64
+combined_final_state_factor(flavor_c, flavor_d, E_c, E_d, mc, md, μ_c, μ_d, T, Φ, Φbar, ξ, cosθ_star) -> Float64
 ```
 
 计算组合末态费米子统计因子 $(1 - f_c)(1 - f_d)$。
 
 #### 参数
 
+- `flavor_c, flavor_d::Symbol`: 末态粒子味道
 - `E_c, E_d::Float64`: 末态粒子能量 [fm⁻¹]
+- `mc, md::Float64`: 末态粒子质量 [fm⁻¹]
 - `μ_c, μ_d::Float64`: 化学势 [fm⁻¹]
 - `T::Float64`: 温度 [fm⁻¹]
 - `Φ, Φbar::Float64`: Polyakov loop
+- `ξ::Float64`: 各向异性参数
+- `cosθ_star::Float64`: 质心系散射角余弦
 
 #### 返回值
 
@@ -253,7 +261,12 @@ combined_final_state_factor(E_c, E_d, μ_c, μ_d, T, Φ, Φbar) -> Float64
 
 ```julia
 factor = combined_final_state_factor(
-    3.0, 3.0, 0.3, 0.3, 0.15, 0.5, 0.5
+    :u, :u,
+    3.0, 3.0,
+    1.52, 1.52,
+    0.3, 0.3,
+    0.15, 0.5, 0.5,
+    0.0, 0.0
 )
 println("(1-f_c)(1-f_d) = $factor")
 ```
@@ -282,7 +295,7 @@ total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points)
   - `Φbar`: Conjugate Polyakov loop
   - `ξ`: 各向异性参数
 - `K_coeffs::NamedTuple`: 有效耦合常数
-- `n_points::Int=32`: 高斯-勒让德积分点数
+- `n_points::Int=6`: 高斯-勒让德积分点数（默认 6）
 
 #### 返回值
 
@@ -295,10 +308,9 @@ total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points)
 3. 计算 t 积分边界
 4. 生成高斯-勒让德积分节点和权重
 5. 对每个 t 点计算：
-   - 计算散射矩阵元 $|\mathcal{M}|^2$
-   - 计算微分截面 $d\sigma/dt$
-   - 计算末态能量 $E_c, E_d$
-   - 计算费米子统计因子 $(1-f_c)(1-f_d)$
+    - 计算散射矩阵元 $|\mathcal{M}|^2$
+    - 计算微分截面 $d\sigma/dt$
+    - 计算费米子统计因子 $(1-f_c)(1-f_d)$（各向同性时可预计算）
 6. 加权求和得到积分结果
 
 #### 积分方法
@@ -310,16 +322,17 @@ total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points)
 
 | n_points | 预估耗时 | 推荐场景 |
 |----------|---------|---------|
-| 8 | ~0.4 s | 快速估算、参数扫描 |
+| 6 | ~0.3 s | 默认设置、快速扫描 |
+| 8 | ~0.4 s | 更稳健的快速估算 |
 | 16 | ~0.8 s | 中等精度计算 |
-| 32 | ~1.6 s | 高精度计算（默认）|
+| 32 | ~1.6 s | 高精度计算 |
 | 64 | ~3.2 s | 验证收敛性 |
 
 #### 性能考虑
 
 - 每个 t 点需要计算 $|\mathcal{M}|^2$（约 50 ms）
 - 总耗时 = n_points × 50 ms（线性可预测）
-- 默认 n_points=32 时约 1.6 秒
+- 默认 n_points=6 时约 0.3 秒
 
 #### 示例
 
@@ -343,12 +356,12 @@ thermo_params = (
 # 计算 K 系数（需要 EffectiveCouplings 模块）
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
-# 计算总散射截面（使用默认 32 个积分点）
+# 计算总散射截面（使用默认 6 个积分点）
 s = 31.0  # fm⁻²
 σ = total_cross_section(
     :uu_to_uu, s,
     quark_params, thermo_params, K_coeffs,
-    n_points=32
+    n_points=6
 )
 
 println("σ(s=$s fm⁻²) = $σ fm²")
@@ -635,14 +648,14 @@ end
 ### 验证2：能量守恒
 
 ```julia
-E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
+E_c, E_d = calculate_final_state_energies(s, mc, md)
 @test abs(E_c + E_d - sqrt(s)) < 1e-12
 ```
 
 ### 验证3：统计因子范围
 
 ```julia
-factor = combined_final_state_factor(E_c, E_d, μ_c, μ_d, T, Φ, Φbar)
+factor = combined_final_state_factor(:u, :u, E_c, E_d, mc, md, μ_c, μ_d, T, Φ, Φbar, 0.0, 0.0)
 @test 0.0 ≤ factor ≤ 1.0
 ```
 
@@ -705,7 +718,7 @@ global_logger(ConsoleLogger(stderr, Logging.Debug))
 t_bounds = calculate_t_bounds(s, mi, mj, mc, md)
 println("t_bounds: ", t_bounds)
 
-E_c, E_d = calculate_final_state_energies(s, t_bounds.t_min, mi, mj, mc, md)
+E_c, E_d = calculate_final_state_energies(s, mc, md)
 println("Energies at t_min: E_c=$E_c, E_d=$E_d")
 
 # 验证被积函数
@@ -714,8 +727,8 @@ function integrand_test(t)
         :uu_to_uu, s, t, quark_params, thermo_params, K_coeffs
     )
     dsigma_dt = differential_cross_section(s_12_plus, s_12_minus, M_squared)
-    E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
-    blocking = combined_final_state_factor(E_c, E_d, μ_c, μ_d, T, Φ, Φbar)
+    E_c, E_d = calculate_final_state_energies(s, mc, md)
+    blocking = combined_final_state_factor(:u, :u, E_c, E_d, mc, md, μ_c, μ_d, T, Φ, Φbar, 0.0, 0.0)
     return dsigma_dt * blocking
 end
 

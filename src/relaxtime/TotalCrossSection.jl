@@ -14,7 +14,7 @@ module TotalCrossSection
 其中：
 - dσ/dt: 微分散射截面（来自 DifferentialCrossSection 模块）
 - (1 - f): 末态费米子统计因子（Pauli blocking）
-- E_c, E_d: 末态粒子能量，从 (s, t) 计算
+- E_c, E_d: 末态粒子能量，从 s 与末态质量计算
 - t_±: t 积分边界（公式 5.14）
 
 注：本模块只考虑夸克-夸克散射（费米子），不涉及玻色子散射。
@@ -43,7 +43,7 @@ using .TotalCrossSection
 σ = total_cross_section(
     :uu_to_uu, 31.0,
     quark_params, thermo_params, K_coeffs,
-    n_points=32  # 高斯积分点数
+    n_points=6  # 高斯积分点数（默认）
 )
 
 # 扫描 s 依赖性
@@ -74,10 +74,10 @@ include(joinpath(@__DIR__, "DifferentialCrossSection.jl"))
 include(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
 
 using .Constants_PNJL: SCATTERING_MESON_MAP
-using .GaussLegendre: gauleg, standard_nodes_weights
+using .GaussLegendre: standard_nodes_weights
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 using .ScatteringAmplitude: scattering_amplitude_squared
-using .ScatteringAmplitude.ParticleSymbols: parse_scattering_process, parse_particle_pair_str, is_antiquark
+using .ScatteringAmplitude.ParticleSymbols: parse_scattering_process, is_antiquark
 using .DifferentialCrossSection: differential_cross_section
 using .OneLoopIntegrals: distribution_value
 
@@ -219,7 +219,7 @@ end
 # ----------------------------------------------------------------------------
 
 """
-    calculate_final_state_energies(s, t, mi, mj, mc, md) -> (E_c, E_d)
+    calculate_final_state_energies(s, mc, md) -> (E_c, E_d)
 
 从 Mandelstam 变量计算质心系中末态粒子的能量。
 
@@ -232,8 +232,7 @@ end
 # 参数
 
 - `s::Float64`: Mandelstam 变量 s [fm⁻²]
-- `t::Float64`: Mandelstam 变量 t [fm⁻²]
-- `mi, mj, mc, md::Float64`: 粒子质量 [fm⁻¹]
+- `mc, md::Float64`: 末态粒子质量 [fm⁻¹]
 
 # 返回
 
@@ -249,18 +248,14 @@ end
 
 ```julia
 s = 31.0
-t = -2.0
-mi = mj = mc = md = 1.52
+mc = md = 1.52
 
-E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
+E_c, E_d = calculate_final_state_energies(s, mc, md)
 @assert E_c + E_d ≈ sqrt(s)  # 能量守恒
 ```
 """
 function calculate_final_state_energies(
     s::Float64,
-    t::Float64,
-    mi::Float64,
-    mj::Float64,
     mc::Float64,
     md::Float64
 )::Tuple{Float64, Float64}
@@ -356,7 +351,7 @@ function combined_final_state_factor(
 end
 
 # ----------------------------------------------------------------------------
-# 5. 辅助函数：粒子、质量和化学势
+# 4. 辅助函数：粒子、质量和化学势
 # ----------------------------------------------------------------------------
 
 """
@@ -386,16 +381,6 @@ function parse_particles_from_process(process::Symbol)::Tuple{Symbol, Symbol, Sy
     # 统一使用 TotalPropagator 的解析逻辑（包含已知过程的缓存，且支持 "ū/đ/s̄" 形式）。
     q1, q2, q3, q4 = parse_scattering_process(process)
     return (q1, q2, q3, q4)
-end
-
-"""
-    parse_particle_pair(pair_str) -> Tuple{Symbol, Symbol}
-
-从字符串解析粒子对（如 "uu" → (:u, :u), "dū" → (:d, :ubar)）。
-"""
-function parse_particle_pair(pair_str::String)::Tuple{Symbol, Symbol}
-    # 兼容旧 API：委托给 TotalPropagator 的 token parser（已支持 "ū/đ/s̄" 形式）。
-    return parse_particle_pair_str(pair_str)
 end
 
 """
@@ -458,7 +443,7 @@ function get_chemical_potential(flavor::Symbol, quark_params::NamedTuple)::Float
 end
 
 # ----------------------------------------------------------------------------
-# 6. 核心函数：总散射截面计算
+# 5. 核心函数：总散射截面计算
 # ----------------------------------------------------------------------------
 
 """
@@ -482,7 +467,7 @@ end
 - `quark_params::NamedTuple`: 夸克参数（质量、化学势）
 - `thermo_params::NamedTuple`: 热力学参数（T, Φ, Φbar）
 - `K_coeffs::NamedTuple`: 有效耦合常数
-- `n_points::Int=32`: 高斯-勒让德积分点数（默认 32 点）
+- `n_points::Int=6`: 高斯-勒让德积分点数（默认 6 点）
 
 # 返回
 
@@ -495,10 +480,9 @@ end
 3. 计算 t 积分边界
 4. 生成高斯-勒让德积分节点和权重
 5. 对每个 t 点计算被积函数：
-   - 计算散射矩阵元 |M|²
-   - 计算微分截面 dσ/dt
-   - 计算末态能量 E_c, E_d
-   - 计算费米子统计因子 (1-f_c)(1-f_d)
+    - 计算散射矩阵元 |M|²
+    - 计算微分截面 dσ/dt
+    - 计算费米子统计因子 (1-f_c)(1-f_d)
 6. 加权求和得到积分结果
 
 # 说明
@@ -511,7 +495,7 @@ end
 
 - 每个 t 点需要计算 |M|²（~50 ms）
 - 总耗时 ≈ n_points × 50 ms
-- n_points=32 时，约 1.6 秒；n_points=16 时，约 0.8 秒
+- n_points=6 时约 0.3 秒；n_points=16 时约 0.8 秒
 
 # 示例
 
@@ -519,7 +503,7 @@ end
 σ = total_cross_section(
     :uu_to_uu, 31.0,
     quark_params, thermo_params, K_coeffs,
-    n_points=32
+    n_points=6
 )
 println("σ(s=31) = \$σ fm²")
 ```
@@ -582,6 +566,19 @@ function total_cross_section(
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
+
+    # 步骤6.5: 末态能量（与 t 无关）
+    E_c, E_d = calculate_final_state_energies(s, mc, md)
+
+    # 步骤6.6: 各向同性时末态统计因子与 t 无关，可预计算
+    blocking_factor_const = ξ == 0.0 ? combined_final_state_factor(
+        particle_c, particle_d,
+        E_c, E_d,
+        mc, md,
+        μ_c, μ_d,
+        T, Φ, Φbar,
+        ξ, 0.0
+    ) : 0.0
     
     # 步骤7: 对 t 积分（高斯求积）
     σ = 0.0
@@ -614,18 +611,20 @@ function total_cross_section(
         end
         
         # 7.3 计算末态能量与角度
-        E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
-        cosθ_star = cos_theta_star(s, t, mi, mj, mc, md)
-        
         # 7.4 计算末态统计因子（费米子，含各向异性）
-        blocking_factor = combined_final_state_factor(
-            particle_c, particle_d,
-            E_c, E_d,
-            mc, md,
-            μ_c, μ_d,
-            T, Φ, Φbar,
-            ξ, cosθ_star
-        )
+        if ξ == 0.0
+            blocking_factor = blocking_factor_const
+        else
+            cosθ_star = cos_theta_star(s, t, mi, mj, mc, md)
+            blocking_factor = combined_final_state_factor(
+                particle_c, particle_d,
+                E_c, E_d,
+                mc, md,
+                μ_c, μ_d,
+                T, Φ, Φbar,
+                ξ, cosθ_star
+            )
+        end
 
         if !isfinite(blocking_factor)
             continue
@@ -645,7 +644,7 @@ function total_cross_section(
 end
 
 # ----------------------------------------------------------------------------
-# 7. 批量计算与 s 扫描
+# 6. 批量计算与 s 扫描
 # ----------------------------------------------------------------------------
 
 """
@@ -666,7 +665,7 @@ end
 ```julia
 all_σ = calculate_all_total_cross_sections(
     31.0, quark_params, thermo_params, K_coeffs,
-    n_points=32
+    n_points=6
 )
 println("uu→uu: \$(all_σ.uu_to_uu) fm²")
 println("dd→dd: \$(all_σ.dd_to_dd) fm²")
@@ -718,7 +717,7 @@ s_values = collect(range(10.0, 50.0, length=20))
 σ_values = scan_s_dependence(
     s_values, :uu_to_uu,
     quark_params, thermo_params, K_coeffs,
-    n_points=32
+    n_points=6
 )
 
 using Plots

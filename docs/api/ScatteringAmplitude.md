@@ -2,7 +2,7 @@
 
 ## 模块概述
 
-`ScatteringAmplitude`模块实现了三味PNJL模型中夸克-夸克和夸克-反夸克弹性散射的散射矩阵元平方计算。该模块基于介子交换机制(π, K, η, η', σ等),支持11种独立散射过程。
+`ScatteringAmplitude`模块实现了三味PNJL模型中夸克-夸克和夸克-反夸克弹性散射的散射矩阵元平方计算。该模块基于介子交换机制(π, K, η, η', σ等)，支持 `Constants_PNJL.SCATTERING_PROCESS_KEYS` 中定义的全部散射过程（含电荷共轭过程）。
 
 **文件位置**: `src/relaxtime/ScatteringAmplitude.jl`  
 **依赖模块**: 
@@ -82,24 +82,17 @@ K_coeffs = (
 
 #### 支持的散射过程
 
-**4种qq散射**:
-| 符号 | 物理过程 | t道介子 | u道介子 |
-|------|---------|---------|---------|
-| `:uu_to_uu` | u + u → u + u | η, η', σ, σ' | η, η', σ, σ' |
-| `:ss_to_ss` | s + s → s + s | η, η', σ, σ' | η, η', σ, σ' |
-| `:ud_to_ud` | u + d → u + d | π, σ_π | π, σ_π |
-| `:us_to_us` | u + s → u + s | K, σ_K | K, σ_K |
+散射过程以 `Constants_PNJL.SCATTERING_PROCESS_KEYS` 为准（与 `SCATTERING_MESON_MAP` 同步）。
 
-**7种qqbar散射**:
-| 符号 | 物理过程 | s道介子 | t道介子 |
-|------|---------|---------|---------|
-| `:udbar_to_udbar` | u + đ → u + đ | - | π, σ_π |
-| `:usbar_to_usbar` | u + š → u + š | - | K, σ_K |
-| `:uubar_to_uubar` | u + ū → u + ū | η, η', σ, σ' | η, η', σ, σ' |
-| `:uubar_to_ddbar` | u + ū → d + đ | π, σ_π | π, σ_π |
-| `:uubar_to_ssbar` | u + ū → s + š | K, σ_K | K, σ_K |
-| `:ssbar_to_uubar` | s + š → u + ū | K, σ_K | K, σ_K |
-| `:ssbar_to_ssbar` | s + š → s + š | η, η', σ, σ' | η, η', σ, σ' |
+**qq散射（4种）**:
+- `:uu_to_uu`, `:ss_to_ss`, `:ud_to_ud`, `:us_to_us`
+
+**qq散射的电荷共轭（4种）**:
+- `:ubardbar_to_ubardbar`, `:ubarubar_to_ubarubar`, `:ubarsbar_to_ubarsbar`, `:sbarsbar_to_sbarsbar`
+
+**qqbar散射（9种）**:
+- `:udbar_to_udbar`, `:dubar_to_dubar`, `:uubar_to_uubar`, `:uubar_to_ddbar`,
+  `:usbar_to_usbar`, `:subar_to_subar`, `:uubar_to_ssbar`, `:ssbar_to_uubar`, `:ssbar_to_ssbar`
 
 #### 返回值
 
@@ -169,13 +162,7 @@ println("uu→uu: |M|² = $M_squared fm⁻⁴")
 
 **示例2: 遍历所有过程**
 ```julia
-# 所有11种散射过程
-all_processes = [
-    :uu_to_uu, :ss_to_ss, :ud_to_ud, :us_to_us,          # qq
-    :udbar_to_udbar, :usbar_to_usbar, :uubar_to_uubar,   # qqbar (1-3)
-    :uubar_to_ddbar, :uubar_to_ssbar,                    # qqbar (4-5)
-    :ssbar_to_uubar, :ssbar_to_ssbar                     # qqbar (6-7)
-]
+using .Constants_PNJL: SCATTERING_PROCESS_KEYS
 
 s_qq = 10.0
 s_qqbar = 6.0
@@ -183,7 +170,7 @@ t = -0.2
 
 results = Dict{Symbol, Float64}()
 
-for process in all_processes
+for process in SCATTERING_PROCESS_KEYS
     # 根据过程类型选择s值
     s_val = contains(string(process), "bar") ? s_qqbar : s_qq
     
@@ -624,7 +611,7 @@ t = -0.1 ~ -0.5 fm⁻²  # 小角散射
 ## 版本历史
 
 ### v1.0 (当前版本)
-- ✅ 实现11种独立散射过程
+- ✅ 实现 `SCATTERING_PROCESS_KEYS` 中全部散射过程
 - ✅ 修正色自旋平均因子处理
 - ✅ 通过完整单元测试(39/40通过,1个已知数值问题)
 - ✅ 支持完整PNJL模型参数

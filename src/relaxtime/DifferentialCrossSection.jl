@@ -200,55 +200,5 @@ function check_kinematic_threshold(
     return true
 end
 
-"""
-    calculate_t_bounds(s, m1, m2, m3, m4) -> NamedTuple
-
-计算给定 s 下 Mandelstam 变量 t 的物理边界。
-
-# 物理背景
-在质心系中，散射角 θ 的范围是 [0, π]，对应的 t 范围为 [t_min, t_max]。
-这些边界由能量-动量守恒和质量壳条件唯一确定。
-
-# 公式
-t_min = -[s - (m₁+m₂)²][s - (m₃+m₄)²] / (4s)
-t_max = 0
-
-其中：
-- t_min: 对应后向散射（θ = π）
-- t_max = 0: 对应正向散射（θ = 0）
-
-# 参数
-- `s::Float64`: Mandelstam 变量 s [fm⁻²]
-- `m1, m2::Float64`: 入射粒子质量 [fm⁻¹]
-- `m3, m4::Float64`: 出射粒子质量 [fm⁻¹]
-
-# 返回值
-NamedTuple 包含：
-- `t_min::Float64`: t 的最小值（后向散射）[fm⁻²]
-- `t_max::Float64`: t 的最大值（正向散射，= 0）[fm⁻²]
-
-# 运动学约束
-要求 s ≥ (m1+m2)² 且 s ≥ (m3+m4)²，否则边界无物理意义。
-
-# 示例
-```julia
-s = 31.0  # fm⁻²
-m_u = 0.3  # fm⁻¹
-
-t_bounds = calculate_t_bounds(s, m_u, m_u, m_u, m_u)
-println("t 积分范围: [", t_bounds.t_min, ", ", t_bounds.t_max, "] fm⁻²")
-
-# 用于总截面积分
-using QuadGK
-σ_total, err = quadgk(
-    t -> differential_cross_section(...),
-    t_bounds.t_min, t_bounds.t_max
-)
-```
-
-# 参考
-- Mandelstam 变量约束: s + t + u = Σmᵢ²
-- 散射角关系: t = -(s - Σmᵢ²)(1 - cos θ)/2 (质心系近似)
-"""
 
 end  # module DifferentialCrossSection

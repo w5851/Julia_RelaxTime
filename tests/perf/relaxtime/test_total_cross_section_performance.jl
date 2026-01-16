@@ -162,13 +162,13 @@ end
     t = -2.0
     mi = mj = mc = md = 1.52
     
-    E_c, E_d = calculate_final_state_energies(s, t, mi, mj, mc, md)
+    E_c, E_d = calculate_final_state_energies(s, mc, md)
     
     sqrt_s = sqrt(s)
     
     println("\n计算结果:")
     println("  s = $s fm⁻²,  √s = $sqrt_s fm⁻¹")
-    println("  t = $t fm⁻²")
+    println("  t = $t fm⁻² (该函数与 t 无关，仅用于对比说明)")
     println("  E_c = $E_c fm⁻¹")
     println("  E_d = $E_d fm⁻¹")
     println("  E_c + E_d = $(E_c + E_d) fm⁻¹")
@@ -187,28 +187,28 @@ end
     end
     
     # 测试 2.3: 不同 t 值
-    @testset "不同 t 值" begin
+    @testset "t 无关性" begin
         t_bounds = calculate_t_bounds(s, mi, mj, mc, md)
         
         # 在 t_min
         E_c_min, E_d_min = calculate_final_state_energies(
-            s, t_bounds.t_min, mi, mj, mc, md
+            s, mc, md
         )
         
         # 在 t_max
         E_c_max, E_d_max = calculate_final_state_energies(
-            s, t_bounds.t_max, mi, mj, mc, md
+            s, mc, md
         )
         
-        println("\n  不同 t 值的能量:")
-        println("    t = t_min: E_c = $E_c_min, E_d = $E_d_min")
-        println("    t = t_max: E_c = $E_c_max, E_d = $E_d_max")
+        println("\n  t 无关性检查:")
+        println("    (t_min) E_c = $E_c_min, E_d = $E_d_min")
+        println("    (t_max) E_c = $E_c_max, E_d = $E_d_max")
         
         # 都应该满足能量守恒
         @test E_c_min + E_d_min ≈ sqrt_s rtol=1e-12
         @test E_c_max + E_d_max ≈ sqrt_s rtol=1e-12
         
-        println("\n✓ 不同 t 值能量守恒均满足")
+        println("\n✓ t 无关性下能量守恒均满足")
     end
 end
 
@@ -397,7 +397,7 @@ println("   用时: $(round(bench_t_bounds.times[1] / 1e3, digits=3)) μs")
 
 # 测试2: calculate_final_state_energies
 t = -2.0
-bench_energies = @benchmark calculate_final_state_energies($s, $t, $mi, $mj, $mc, $md) samples=1 evals=1
+bench_energies = @benchmark calculate_final_state_energies($s, $mc, $md) samples=1 evals=1
 
 println("\n2. calculate_final_state_energies:")
 println("   用时: $(round(bench_energies.times[1] / 1e3, digits=3)) μs")

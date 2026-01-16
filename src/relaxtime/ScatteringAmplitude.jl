@@ -12,7 +12,7 @@ module ScatteringAmplitude
 公式参考 doc/formula/ScatteringAmplitude_散射矩阵元by总传播子.md
 
 ## 核心设计原则
-- 支持所有11个散射过程（4个qq散射 + 7个qqbar散射）
+- 支持 `Constants_PNJL.SCATTERING_PROCESS_KEYS` 中定义的全部散射过程（含电荷共轭过程）
 - 直接计算|M|²而无需单独构建振幅M
 - 按标量(S)和赝标量(P)通道分离传播子
 - 自动计算质心系介子四动量
@@ -23,7 +23,7 @@ include("../Constants_PNJL.jl")
 include("../utils/ParticleSymbols.jl")
 include("TotalPropagator.jl")
 
-using .Constants_PNJL: N_color, SCATTERING_MESON_MAP
+using .Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 using .TotalPropagator: calculate_cms_momentum
 using .ParticleSymbols: get_quark_masses_for_process
 
@@ -33,6 +33,8 @@ export calculate_all_scattering_amplitudes_squared
 
 # 使用N_color作为N_c
 const N_c = N_color
+const CROSS_TERM_FACTOR = 1.0 / (4.0 * N_c)
+
 
 # ----------------------------------------------------------------------------
 # 辅助函数：Mandelstam辅助变量计算
@@ -314,21 +316,24 @@ function calculate_qq_amplitude_squared(process::Symbol, s::Float64, t::Float64,
     # 7. 计算色自旋平均后的交叉项
     # 公式：1/(4N_c²) ∑(M_u M_t*) = 1/(4N_c) × [4个D组合项]
     # 左右两边相等，即右边已经是完整的 1/(4N_c²) ∑(M_u M_t*)
-    cross_term_factor = 1.0 / (4.0 * N_c)
+    cross_term_factor = CROSS_TERM_FACTOR
+
+    D_u_S_conj = conj(D_u_S)
+    D_u_P_conj = conj(D_u_P)
     
-    term1 = D_t_S * conj(D_u_S) * (vars.t_13_plus * vars.t_24_plus - 
+    term1 = D_t_S * D_u_S_conj * (vars.t_13_plus * vars.t_24_plus - 
                                     vars.s_12_plus * vars.s_34_plus + 
                                     vars.u_14_plus * vars.u_23_plus)
     
-    term2 = D_t_S * conj(D_u_P) * (vars.t_13_plus * vars.t_24_plus - 
+    term2 = D_t_S * D_u_P_conj * (vars.t_13_plus * vars.t_24_plus - 
                                     vars.s_12_minus * vars.s_34_minus + 
                                     vars.u_14_minus * vars.u_23_minus)
     
-    term3 = D_t_P * conj(D_u_S) * (vars.t_13_minus * vars.t_24_minus - 
+    term3 = D_t_P * D_u_S_conj * (vars.t_13_minus * vars.t_24_minus - 
                                     vars.s_12_minus * vars.s_34_minus + 
                                     vars.u_14_plus * vars.u_23_plus)
     
-    term4 = D_t_P * conj(D_u_P) * (vars.t_13_minus * vars.t_24_minus - 
+    term4 = D_t_P * D_u_P_conj * (vars.t_13_minus * vars.t_24_minus - 
                                     vars.s_12_plus * vars.s_34_plus + 
                                     vars.u_14_minus * vars.u_23_minus)
     
@@ -401,21 +406,24 @@ function calculate_qqbar_amplitude_squared(process::Symbol, s::Float64, t::Float
     # 7. 计算色自旋平均后的交叉项
     # 公式：1/(4N_c²) ∑(M_s M_t*) = 1/(4N_c) × [4个D组合项]
     # 左右两边相等，即右边已经是完整的 1/(4N_c²) ∑(M_s M_t*)
-    cross_term_factor = 1.0 / (4.0 * N_c)
+    cross_term_factor = CROSS_TERM_FACTOR
+
+    D_t_S_conj = conj(D_t_S)
+    D_t_P_conj = conj(D_t_P)
     
-    term1 = D_s_S * conj(D_t_S) * (vars.s_12_plus * vars.s_34_plus - 
+    term1 = D_s_S * D_t_S_conj * (vars.s_12_plus * vars.s_34_plus - 
                                     vars.u_14_plus * vars.u_23_plus + 
                                     vars.t_13_plus * vars.t_24_plus)
     
-    term2 = D_s_S * conj(D_t_P) * (vars.s_12_plus * vars.s_34_plus - 
+    term2 = D_s_S * D_t_P_conj * (vars.s_12_plus * vars.s_34_plus - 
                                     vars.u_14_minus * vars.u_23_minus + 
                                     vars.t_13_minus * vars.t_24_minus)
     
-    term3 = D_s_P * conj(D_t_S) * (vars.s_12_minus * vars.s_34_minus - 
+    term3 = D_s_P * D_t_S_conj * (vars.s_12_minus * vars.s_34_minus - 
                                     vars.u_14_minus * vars.u_23_minus + 
                                     vars.t_13_plus * vars.t_24_plus)
     
-    term4 = D_s_P * conj(D_t_P) * (vars.s_12_minus * vars.s_34_minus - 
+    term4 = D_s_P * D_t_P_conj * (vars.s_12_minus * vars.s_34_minus - 
                                     vars.u_14_plus * vars.u_23_plus + 
                                     vars.t_13_minus * vars.t_24_minus)
     
@@ -436,7 +444,7 @@ end
 """
     calculate_all_scattering_amplitudes_squared(s, t, quark_params, thermo_params, K_coeffs) -> NamedTuple
 
-批量计算所有13种散射过程的散射矩阵元平方 |M|²。
+批量计算 `SCATTERING_PROCESS_KEYS` 中全部散射过程的散射矩阵元平方 |M|²。
 
 这是一个便利函数，一次性计算所有支持的散射过程，返回包含每个过程结果的NamedTuple。
 适用于需要同时分析多个散射过程的场景，如计算总散射率或弛豫时间。
@@ -449,7 +457,7 @@ end
 - `K_coeffs::NamedTuple`: 有效耦合常数，由`calculate_effective_couplings`计算
 
 # 返回值
-NamedTuple，包含所有13种散射过程的|M|²值（单位：fm⁻⁴）：
+NamedTuple，包含 `SCATTERING_PROCESS_KEYS` 中全部散射过程的|M|²值（单位：fm⁻⁴）：
 
 **夸克-夸克散射（4种）：**
 - `uu_to_uu`: u+u→u+u
@@ -476,7 +484,7 @@ NamedTuple，包含所有13种散射过程的|M|²值（单位：fm⁻⁴）：
 # 性能说明
 - 每个过程独立计算，无相互依赖
 - 利用极化函数缓存机制加速重复计算
-- 典型耗时：~0.5-1ms（13个过程总计，取决于缓存命中率）
+- 典型耗时取决于 `SCATTERING_PROCESS_KEYS` 数量与缓存命中率
 
 # 示例
 ```julia
@@ -514,35 +522,12 @@ function calculate_all_scattering_amplitudes_squared(
     K_coeffs::NamedTuple
 )::NamedTuple
     
-    # 获取所有散射过程（按固定顺序）
-    all_processes = [
-        # qq散射（4种）
-        :uu_to_uu,
-        :ss_to_ss,
-        :ud_to_ud,
-        :us_to_us,
-        # qqbar散射（9种）
-        :udbar_to_udbar,
-        :usbar_to_usbar,
-        :dubar_to_dubar,
-        :subar_to_subar,
-        :uubar_to_uubar,
-        :uubar_to_ddbar,
-        :uubar_to_ssbar,
-        :ssbar_to_uubar,
-        :ssbar_to_ssbar
-    ]
-    
-    # 计算每个过程的矩阵元平方
-    results = Dict{Symbol, Float64}()
-    for process in all_processes
-        results[process] = scattering_amplitude_squared(
-            process, s, t, quark_params, thermo_params, K_coeffs
-        )
-    end
-    
-    # 转换为NamedTuple（保持固定顺序）
-    return NamedTuple(results)
+    # 计算每个过程的矩阵元平方（避免Dict分配，保持固定顺序）
+    values = ntuple(i -> scattering_amplitude_squared(
+        SCATTERING_PROCESS_KEYS[i], s, t, quark_params, thermo_params, K_coeffs
+    ), length(SCATTERING_PROCESS_KEYS))
+
+    return NamedTuple{SCATTERING_PROCESS_KEYS}(values)
 end
 
 end # module ScatteringAmplitude
