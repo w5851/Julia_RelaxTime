@@ -25,6 +25,33 @@
 - 行为准则：[`CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md)
 - 安全策略：[`SECURITY.md`](.github/SECURITY.md)
 
+## 快速开始（Quickstart）
+
+完整环境复现说明见 [INSTALL.md](INSTALL.md)。这里提供最短可跑路径：
+
+1. 初始化 Julia 环境：
+
+```julia
+using Pkg
+Pkg.activate(".")
+Pkg.instantiate()
+```
+
+2. 启动服务端（API + 前端）：
+
+```powershell
+julia --project=. scripts/server/server_full.jl
+```
+
+3. （可选）生成依赖图与 SVG：
+
+```powershell
+npm install
+julia --project=. scripts/dev/gen_deps.jl
+```
+
+> Python 脚本环境与前端开发工具的可复现安装步骤请见 [INSTALL.md](INSTALL.md)。
+
 ## 当前功能概览
 
 - **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/test_momentum_mapping.jl`、`test_frame_transformations.jl` 已覆盖核心校验。

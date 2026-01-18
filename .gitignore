@@ -7,3 +7,7 @@ __pycache__/
 
 # VScode
 .vscode/*
+
+# 依赖目录
+# JavaScript/Node.js
+node_modules/

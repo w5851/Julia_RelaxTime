@@ -1,0 +1,12 @@
+{
+  "name": "julia-relaxtime-tools",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Dev tools for dependency graph rendering",
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.8.1"
+  },
+  "scripts": {
+    "deps:render": "mmdc -i docs/architecture/dependencies.mmd -o docs/architecture/dependencies.svg -w 1600 -H 1200"
+  }
+}
