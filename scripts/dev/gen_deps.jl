@@ -13,6 +13,7 @@ mkpath(outdir)
 outfile = joinpath(outdir, "dependencies.md")
 mmdfile = joinpath(outdir, "dependencies.mmd")
 svgfile = joinpath(outdir, "dependencies.svg")
+manualfile = joinpath(outdir, "dependencies.manual.md")
 
 function find_mmdc()
     if Sys.which("mmdc") !== nothing
@@ -161,7 +162,11 @@ for n in keys(adj)
 end
 
 graphbuf = IOBuffer()
-println(graphbuf, "graph TD")
+direction = get(ENV, "MERMAID_DIRECTION", "LR")
+node_spacing = get(ENV, "MERMAID_NODE_SPACING", "40")
+rank_spacing = get(ENV, "MERMAID_RANK_SPACING", "60")
+println(graphbuf, "%%{init: { 'flowchart': { 'nodeSpacing': ", node_spacing, ", 'rankSpacing': ", rank_spacing, ", 'useMaxWidth': false } }}%%")
+println(graphbuf, "flowchart ", direction)
 
 # print groups as subgraphs
 for (g, nodes) in sort(collect(groups); by=x->x[1])
@@ -185,9 +190,13 @@ end
 
 graph_text = String(take!(graphbuf))
 
+manual_content = isfile(manualfile) ? read(manualfile, String) : "## L1/L3 (manual)\n\n请在 docs/architecture/dependencies.manual.md 中补充 L1/L3 内容。\n"
+
 mermaid = IOBuffer()
 println(mermaid, "# Dependency graph generated: ", Dates.now())
 println(mermaid, "\nRun: julia --project=. scripts/dev/gen_deps.jl\n")
+print(mermaid, manual_content)
+println(mermaid, "\n---\n")
 println(mermaid, "![Dependency graph](dependencies.svg)")
 println(mermaid, "\n---\n")
 println(mermaid, "```mermaid")
@@ -216,10 +225,13 @@ end
 println("Wrote dependency graph to: ", outfile)
 println("Wrote Mermaid source to: ", mmdfile)
 
+svg_width = get(ENV, "MERMAID_WIDTH", "2200")
+svg_height = get(ENV, "MERMAID_HEIGHT", "1400")
+svg_scale = get(ENV, "MERMAID_SCALE", "1.5")
 mmdc_path = find_mmdc()
 if mmdc_path !== nothing
     try
-        cmd = Cmd([mmdc_path, "-i", mmdfile, "-o", svgfile, "-w", "1600", "-H", "1200"])
+        cmd = Cmd([mmdc_path, "-i", mmdfile, "-o", svgfile, "-w", svg_width, "-H", svg_height, "-s", svg_scale])
         run(cmd)
         println("Wrote SVG to: ", svgfile)
     catch err

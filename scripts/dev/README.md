@@ -9,6 +9,12 @@
 julia --project=. scripts/dev/gen_deps.jl
 ```
 
+生成依赖审计报告：
+
+```powershell
+julia --project=. scripts/dev/analyze_deps.jl
+```
+
 可复现安装（推荐）：
 
 ```powershell
@@ -32,3 +38,4 @@ npm run deps:render
 后续增强建议：
 - 将 `web/js` 的 ES module import 解析加入图
 - 在 CI 中加入自动检查并阻止新增循环依赖
+- 使用 `docs/architecture/dependency_rules.md` 维护目录级依赖矩阵

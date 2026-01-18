@@ -1,0 +1,33 @@
+name: Dependency Audit
+
+on:
+  pull_request:
+  push:
+    paths:
+      - "src/**"
+      - "scripts/dev/**"
+      - "docs/architecture/**"
+      - "Project.toml"
+      - "Manifest.toml"
+      - "package.json"
+      - "package-lock.json"
+
+jobs:
+  deps-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: "1.10"
+
+      - name: Generate dependency graph
+        run: julia --project=. scripts/dev/gen_deps.jl
+
+      - name: Run dependency audit (strict)
+        env:
+          DEPS_STRICT: "1"
+        run: julia --project=. scripts/dev/analyze_deps.jl
