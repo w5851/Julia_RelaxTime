@@ -1,3 +1,25 @@
+---
+title: Dependency Analysis & Recommendations
+archived: true
+original: docs/dev/任务2.md
+archived_date: 2026-01-19
+---
+
+概要：
+
+- 本文档总结了为本项目引入模块依赖可视化与审计的价值、实践建议与分层方案（L1/L2/L3），并给出基于仓库现状的落地建议与最小可行方案（MVP）。
+- 已在仓库中实现：`scripts/dev/gen_deps.jl`（生成 Mermaid）、`scripts/dev/analyze_deps.jl`（审计/违规检测）、`docs/architecture/dependencies.manual.md`（L1/L3 手工内容）、CI 工作流 `.github/workflows/dependency-audit.yml`（严格审计）。
+
+建议后续行动（优先级）：
+
+- 确认并固定 `docs/architecture/dependency_rules.md` 中的允许依赖矩阵（若需调整，更新规则文档）。
+- 在 CI 中根据团队共识决定是否开启严格模式（`DEPS_STRICT=1`）。
+- 对审计报告中的违规点优先做小范围重构或将共享逻辑上移到 `src/utils/` 或 `src/core/`。
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+***
+
 根据以下分析内容，结合项目本身分析适合本项目的依赖分析工具：
 **是的，这是一个非常好的实践，但具体实现方式需要根据项目情况灵活选择。** 记录模块依赖关系对于项目的可维护性、新人上手和架构理解至关重要，关键在于如何高效、可持续地维护这份文档。
 
@@ -88,7 +110,7 @@
   - 建议放置：`docs/architecture/dependencies.md`
   - 目的：新人快速理解“主链路 + 辅助资产”的关系。
 
-- **L2 模块依赖图（自动生成，Julia 为主）**
+- **L2 模块依赖圖（自动生成，Julia 为主）**
   - 重点：`src/` 内模块（`pnjl/`、`relaxtime/`、`integration/`、`simulation/`、`utils/`）
   - 依赖来源：
     - `include("...")` 链路（文件级）
