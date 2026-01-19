@@ -1,3 +1,14 @@
+---
+title: 重构顺序建议
+archived: true
+original: docs/dev/重构顺序.md
+archived_date: 2026-01-19
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+***
+
 重构顺序建议：
 
 先创建目录结构和基础模块（core/、solver/、derivatives/）

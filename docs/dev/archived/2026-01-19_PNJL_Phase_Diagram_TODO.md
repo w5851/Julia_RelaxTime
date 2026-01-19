@@ -1,3 +1,14 @@
+---
+title: PNJL 相图计算待办事项
+archived: true
+original: docs/dev/PNJL_Phase_Diagram_TODO.md
+archived_date: 2026-01-19
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+***
+
 # PNJL 相图计算待办事项
 
 > 创建日期：2025-12-30
@@ -76,7 +87,7 @@
 **绘图脚本集成**：`scripts/pnjl/plot_phase_diagram.py`
 - 添加 `--crossover` 和 `--no-crossover` 选项
 - 手征 crossover：虚线（:）
-- 退禁闭 crossover：点划线（-.）
+- 退禁闭 crossover：点划线（-.)
 - 与一阶相变线绘制在同一张图中
 
 ### 1.2 T-μ 扫描脚本

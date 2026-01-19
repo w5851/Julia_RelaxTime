@@ -1,3 +1,14 @@
+---
+title: PNJL 求解器重构笔记
+archived: true
+original: docs/dev/PNJL_Solver_Refactoring_Notes.md
+archived_date: 2026-01-19
+---
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+***
+
 # PNJL 求解器重构笔记
 
 > 临时文档：记录 Julia_test 实验代码的可借鉴之处及待解决问题
