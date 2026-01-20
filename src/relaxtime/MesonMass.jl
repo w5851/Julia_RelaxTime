@@ -10,12 +10,14 @@ module MesonMass
 include("../integration/GaussLegendre.jl")
 include("../Constants_PNJL.jl")
 include("OneLoopIntegrals.jl")
+include("OneLoopIntegralsAniso.jl")
 include("EffectiveCouplings.jl")
 include("PolarizationAniso.jl")
 
-using .GaussLegendre: gauleg
+using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
 using .Constants_PNJL: G_fm2, K_fm5
 using .OneLoopIntegrals: A
+using .OneLoopIntegralsCorrection: A_aniso
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .PolarizationAniso: polarization_with_width
 using NLsolve
@@ -25,7 +27,9 @@ export default_meson_mass_guess
 export meson_mass_equation, solve_meson_mass
 
 @inline function ensure_quark_params_has_A(quark_params::NamedTuple, thermo_params::NamedTuple;
-                                           p_nodes::Int=32)
+                                           p_nodes::Int=32,
+                                           cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
+                                           use_aniso::Bool=true)
     if hasproperty(quark_params, :A)
         return quark_params
     end
@@ -36,9 +40,20 @@ export meson_mass_equation, solve_meson_mass
     hasproperty(thermo_params, :Φbar) || error("thermo_params is missing :Φbar")
 
     nodes_p, weights_p = gauleg(0.0, 10.0, p_nodes)
-    A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-    A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-    A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+    ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
+    if use_aniso && abs(ξ) > 0.0
+        nodes_cos, weights_cos = gauleg(-1.0, 1.0, cos_nodes)
+        A_u = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
+                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
+        A_d = A_aniso(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
+                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
+        A_s = A_aniso(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
+                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
+    else
+        A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+        A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+        A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
+    end
 
     return merge(quark_params, (A=(u=A_u, d=A_d, s=A_s),))
 end
@@ -171,7 +186,14 @@ function solve_meson_mass(meson::Symbol, quark_params::NamedTuple, thermo_params
     gamma = result.zero[2]
     residual_norm = result.residual_norm
 
-    return (mass=mass, gamma=gamma, converged=result.converged,
+    converged = if hasproperty(result, :converged)
+        result.converged
+    else
+        (hasproperty(result, :f_converged) ? result.f_converged : false) ||
+            (hasproperty(result, :x_converged) ? result.x_converged : false)
+    end
+
+    return (mass=mass, gamma=gamma, converged=converged,
             residual_norm=residual_norm, solution=result)
 end
 

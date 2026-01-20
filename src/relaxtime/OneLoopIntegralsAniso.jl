@@ -12,7 +12,7 @@ include("../integration/GaussLegendre.jl")
 include("../integration/IntervalQuadratureStrategies.jl")
 using .GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using .PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
-using .OneLoopIntegrals: internal_momentum, EPS_K, DEFAULT_RTOL, DEFAULT_ATOL,
+using .OneLoopIntegrals: internal_momentum, EPS_K,
     energy_cutoff, singularity_k_positive, const_integral_term_A
 
 """ k>0时
@@ -130,7 +130,7 @@ end
 
 """k=0时的 B0分量 含各向异性修正项的积分计算"""
 function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64, ξ::Float64)
     Emin = m
     Emax = energy_cutoff(m)
     # 采用奇点减法：f(E) = (4/3)*p(E)*correction(...) ，integrand = f(E) / (coeff_E*E + denominator_const)
@@ -299,8 +299,7 @@ end
 """
 function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
     Φ::Float64, Φbar::Float64, ξ::Float64;
-    diagnostics::Bool=false,
-    rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    diagnostics::Bool=false)
     
     t_start = time()
     Emin = m
@@ -380,29 +379,27 @@ end
 
 """含各向异性修正项的 B0分量 积分计算"""
 function tilde_B0_correction(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64, ξ::Float64)
     if k > EPS_K
         return tilde_B0_correction_k_positive(sign_, λ, k, m, m_prime, μ, T,
-            Φ, Φbar, ξ; rtol=rtol, atol=atol)
+            Φ, Φbar, ξ)
     else
         return tilde_B0_correction_k_zero(sign_, λ, m, m_prime, μ, T,
-            Φ, Φbar, ξ; rtol=rtol, atol=atol)
+            Φ, Φbar, ξ)
     end
 end
 
 """
-    B0_correction(λ, k, m1, m2, μ1, μ2, T, Φ, Φbar, ξ; rtol=DEFAULT_RTOL, atol=DEFAULT_ATOL)
+    B0_correction(λ, k, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
 动量各向异性下B0的一阶修正
 """
 function B0_correction(λ::Float64, k::Float64, m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64, ξ::Float64)
 
-    tol_kwargs = (; rtol=rtol, atol=atol)
-
-    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T, Φ, Φbar, ξ; tol_kwargs...)
-    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T, Φ, Φbar, ξ; tol_kwargs...)
-    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T, Φ, Φbar, ξ; tol_kwargs...)
-    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T, Φ, Φbar, ξ; tol_kwargs...)
+    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T, Φ, Φbar, ξ)
+    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T, Φ, Φbar, ξ)
+    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T, Φ, Φbar, ξ)
+    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T, Φ, Φbar, ξ)
 
     # 注意：B0 的 pm=-1(antiquark) 分支语义是 NJL 中的f(-E-μ)=1-f(E+μ)
     # 这里f(E+μ)是NJL中反粒子的分布函数，为避免 PNJL 分布在负能量下的数值溢出，

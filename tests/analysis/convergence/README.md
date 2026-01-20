@@ -2,6 +2,9 @@
 
 本目录包含针对 RelaxationTime 输运计算的收敛性回归测试脚本，主要用于评估数值积分参数（动量、角度、σ 网格等）对关键物理量（`τ`、`η`、`σ`、`η/s`）的影响，并给出推荐的默认参数。
 
+新增了 A 函数（单线积分）在 `p ∈ [0, 10]`、`p_nodes=32` 下的收敛性验证脚本，用于确认默认积分上限与节点数的可靠性。
+新增了 B0 函数收敛性脚本，用更严格积分参数作为参考值，验证默认参数的稳定性。
+
 ## 覆盖范围
 
 脚本 [tests/analysis/convergence/run_convergence.jl](tests/analysis/convergence/run_convergence.jl) 对以下参数做系统扫描：
@@ -23,10 +26,24 @@
 julia --project=. tests/analysis/convergence/run_convergence.jl
 ```
 
+```bash
+julia --project=. tests/analysis/convergence/test_A_convergence.jl
+```
+
+```bash
+julia --project=. tests/analysis/convergence/test_B0_convergence.jl
+```
+
 可通过环境变量调节容忍度：
 - `CONV_TOL`（默认 0.08）
 - `CONV_TOL_ANGLEPHI`（默认 0.12）
 - `CONV_TOL_SIGMA_GRID`（默认 0.20）
+
+对 A 函数收敛性脚本可使用：
+- `A_CONV_TOL`（默认 5e-3）
+
+对 B0 函数收敛性脚本可使用：
+- `B0_CONV_TOL`（默认 5e-4）
 
 ## 最新结论（摘要）
 

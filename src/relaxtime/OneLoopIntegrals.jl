@@ -22,8 +22,6 @@ export B0, A
 # 基础工具函数
 const EPS_K = 1.0e-9 # 三动量k大小为零的判定阈值
 const EPS_SEGMENT = 1.0e-12 # 分母的最小值判定阈值
-const DEFAULT_RTOL = 1.0e-3 # 积分相对误差默认值
-const DEFAULT_ATOL = 0.0 # 积分绝对误差默认值
 
 # hybrid 求积默认节点数（热点路径：优先性能）
 const HYBRID_N_SMOOTH = 16
@@ -151,8 +149,7 @@ end
 
 """三动量大小k=0(小于EPS_K)时的 B0分量 积分计算"""
 @inline function tilde_B0_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL,
-    )
+    Φ::Float64, Φbar::Float64)
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -456,8 +453,7 @@ end
 end
 
 function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL,
-    )
+    Φ::Float64, Φbar::Float64)
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -481,26 +477,25 @@ end
 
 """计算单个 ̃B0 分量的函数"""
 @inline function tilde_B0(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64; rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
+    Φ::Float64, Φbar::Float64)
     if abs(k) < EPS_K
-        return tilde_B0_k_zero(sign_flag, λ, m, m_prime, μ, T, Φ, Φbar; rtol=rtol, atol=atol)
+        return tilde_B0_k_zero(sign_flag, λ, m, m_prime, μ, T, Φ, Φbar)
     else
-        return tilde_B0_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar; rtol=rtol, atol=atol)
+        return tilde_B0_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar)
     end
 end
 
 """
-    B0(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0, rtol=DEFAULT_RTOL, atol=DEFAULT_ATOL)
+    B0(λ, k, m1, μ1, m2, μ2, T; Φ=0.0, Φbar=0.0)
 根据文档公式组合四个 ̃B0 项得到完整的 B₀ 积分。
 λ = k0 + μ1 - μ2, 其中k0是传播子能量
 """
 function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T::Float64;
-    Φ::Float64=0.0, Φbar::Float64=0.0, rtol::Float64=DEFAULT_RTOL, atol::Float64=DEFAULT_ATOL)
-    tol_kwargs = (; rtol=rtol, atol=atol)
-    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T, Φ, Φbar; tol_kwargs...)
-    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T, Φ, Φbar; tol_kwargs...)
-    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
-    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T, Φ, Φbar; tol_kwargs...)
+    Φ::Float64=0.0, Φbar::Float64=0.0)
+    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T, Φ, Φbar)
+    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T, Φ, Φbar)
+    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T, Φ, Φbar)
+    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T, Φ, Φbar)
 
     real_part = term1[1] - term2[1] + term3[1] - term4[1]
     imag_part = term1[2] - term2[2] + term3[2] - term4[2]
