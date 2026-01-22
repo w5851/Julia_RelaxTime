@@ -28,20 +28,20 @@ A函数(T,μ,m) → G^f → K系数 → 介子传播子D → 散射振幅M → �
 
 ## API 参考
 
-### `calculate_G_from_A(A_f; Nc=3)`
+### `calculate_G_from_A(A_f, m_f; Nc=3)`
 
 从单圈积分A函数计算夸克凝聚相关函数G^f。
 
 #### 函数签名
 
 ```julia
-calculate_G_from_A(A_f::Float64; Nc::Int=3) -> Float64
+calculate_G_from_A(A_f::Float64, m_f::Float64; Nc::Int=3) -> Float64
 ```
 
 #### 物理公式
 
 ```
-G^f = -N_c / (4π²) × A_f(T, μ)
+G^f = -N_c / (4π²) × m_f × A_f(T, μ)
 ```
 
 其中 A_f 由 `OneLoopIntegrals.A` 或 `OneLoopIntegralsAniso.A_aniso` 计算。
@@ -51,6 +51,7 @@ G^f = -N_c / (4π²) × A_f(T, μ)
 | 参数 | 类型 | 说明 | 单位 | 默认值 |
 |------|------|------|------|--------|
 | `A_f` | `Float64` | 单圈积分A函数的值 | fm | — |
+| `m_f` | `Float64` | 该味夸克质量 | fm⁻¹ | — |
 | `Nc` | `Int` | 色数（QCD中固定为3） | 无量纲 | 3 |
 
 #### 返回值
@@ -99,7 +100,7 @@ A_u = A(m_u_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, nodes_p, weights_p)
 println("A_u = ", A_u, " fm")
 
 # 计算G^u
-G_u = calculate_G_from_A(A_u)
+G_u = calculate_G_from_A(A_u, m_u_inv_fm)
 println("G^u = ", G_u, " (无量纲)")
 ```
 
@@ -153,16 +154,16 @@ K₀₈±   = ±(1/6)√2 K(G^μ - G^s)         # 混合通道
 
 ```julia
 (
-    K0_plus::Float64,      # 单态标量
-    K0_minus::Float64,     # 单态赝标量
-    K123_plus::Float64,    # π通道标量（a0介子）
-    K123_minus::Float64,   # π通道赝标量（π介子）
-    K4567_plus::Float64,   # K通道标量（K0*介子）
-    K4567_minus::Float64,  # K通道赝标量（K介子）
-    K8_plus::Float64,      # 八重态标量
-    K8_minus::Float64,     # 八重态赝标量（η8）
-    K08_plus::Float64,     # 混合标量（σ-f0混合）
-    K08_minus::Float64     # 混合赝标量（η-η'混合）
+    K0_plus::Float64,      # 单态赝标量（P通道）
+    K0_minus::Float64,     # 单态标量（S通道）
+    K123_plus::Float64,    # π通道赝标量（π介子）
+    K123_minus::Float64,   # π通道标量（a0介子）
+    K4567_plus::Float64,   # K通道赝标量（K介子）
+    K4567_minus::Float64,  # K通道标量（K0*介子）
+    K8_plus::Float64,      # 八重态赝标量（η8）
+    K8_minus::Float64,     # 八重态标量
+    K08_plus::Float64,     # 混合赝标量（η-η'混合）
+    K08_minus::Float64     # 混合标量（σ-f0混合）
 )
 ```
 
@@ -230,8 +231,8 @@ A_u = A(m_u_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, nodes_p, weights_p)
 A_s = A(m_s_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, nodes_p, weights_p)
 
 # 计算G^f
-G_u = calculate_G_from_A(A_u)
-G_s = calculate_G_from_A(A_s)
+G_u = calculate_G_from_A(A_u, m_u_inv_fm)
+G_s = calculate_G_from_A(A_s, m_s_inv_fm)
 
 # 计算有效耦合系数
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
@@ -296,37 +297,37 @@ A_u = A_aniso(m_u_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ;
               nodes_p=nodes_p, weights_p=weights_p,
               nodes_x=nodes_x, weights_x=weights_x)
 
-G_u = calculate_G_from_A(A_u)
+G_u = calculate_G_from_A(A_u, m_u_inv_fm)
 # 继续计算有效耦合系数...
 ```
 
 ---
 
-### `coupling_matrix_determinant(K0_plus, K8_plus, K08_plus)`
+### `coupling_matrix_determinant(K0, K8, K08)`
 
 计算混合介子传播子所需的耦合矩阵行列式。
 
 #### 函数签名
 
 ```julia
-coupling_matrix_determinant(K0_plus::Float64, 
-                            K8_plus::Float64, 
-                            K08_plus::Float64) -> Float64
+coupling_matrix_determinant(K0::Float64, 
+                            K8::Float64, 
+                            K08::Float64) -> Float64
 ```
 
 #### 物理公式
 
 ```
-det K = K₀⁺ × K₈⁺ - (K₀₈⁺)²
+det K = K0 × K8 - K08²
 ```
 
 #### 参数
 
 | 参数 | 类型 | 说明 | 单位 |
 |------|------|------|------|
-| `K0_plus` | `Float64` | 单态通道标量耦合系数 | fm² |
-| `K8_plus` | `Float64` | 八重态通道标量耦合系数 | fm² |
-| `K08_plus` | `Float64` | 混合通道标量耦合系数 | fm² |
+| `K0` | `Float64` | 单态通道耦合系数 | fm² |
+| `K8` | `Float64` | 八重态通道耦合系数 | fm² |
+| `K08` | `Float64` | 混合通道耦合系数 | fm² |
 
 #### 返回值
 
@@ -364,15 +365,15 @@ using .EffectiveCouplings: calculate_effective_couplings, coupling_matrix_determ
 # 假设已计算得到K系数
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
-# 计算标量通道行列式
-det_K_scalar = coupling_matrix_determinant(K_coeffs.K0_plus, 
-                                           K_coeffs.K8_plus, 
-                                           K_coeffs.K08_plus)
+# 计算赝标量通道（P，η/η'）行列式
+det_K_pseudoscalar = coupling_matrix_determinant(K_coeffs.K0_plus, 
+                                                 K_coeffs.K8_plus, 
+                                                 K_coeffs.K08_plus)
 
-# 计算赝标量通道行列式
-det_K_pseudoscalar = coupling_matrix_determinant(K_coeffs.K0_minus, 
-                                                 K_coeffs.K8_minus, 
-                                                 K_coeffs.K08_minus)
+# 计算标量通道（S，σ/σ'）行列式
+det_K_scalar = coupling_matrix_determinant(K_coeffs.K0_minus, 
+                                           K_coeffs.K8_minus, 
+                                           K_coeffs.K08_minus)
 
 println("标量通道行列式: det K^S = ", det_K_scalar, " fm⁴")
 println("赝标量通道行列式: det K^P = ", det_K_pseudoscalar, " fm⁴")
@@ -401,6 +402,36 @@ end
 3. **不合理的模型参数**：G 或 K 取值超出物理范围
 
 此时需要检查输入参数的合理性，或考虑模型的适用范围限制。
+
+---
+
+### `mixing_matrix_elements(Π_uu, Π_ss, K_coeffs, channel)`
+
+构造混合介子（η/η′ 或 σ/σ′）传播子/极点方程所需的 2×2 对称矩阵元素 (M00, M08, M88)。
+
+#### 函数签名
+
+```julia
+mixing_matrix_elements(Π_uu::ComplexF64, Π_ss::ComplexF64,
+                       K_coeffs::NamedTuple, channel::Symbol) -> NamedTuple
+```
+
+#### 约定
+
+- `channel = :P`：赝标量通道（使用 `K*_plus` 与 `det_K_plus`）
+- `channel = :S`：标量通道（使用 `K*_minus` 与 `det_K_minus`）
+
+#### 公式
+
+```
+M00 = K0 - (4/3) * detK * (Π_uu + 2Π_ss)
+M08 = K08 + (4/3) * sqrt(2) * detK * (Π_uu - Π_ss)
+M88 = K8 - (4/3) * detK * (2Π_uu + Π_ss)
+```
+
+#### 返回值
+
+返回 `NamedTuple`：`(M00, M08, M88, det_K)`。
 
 ---
 

@@ -7,13 +7,15 @@
 
 ## 主要函数
 
-### `ensure_quark_params_has_A(quark_params, thermo_params; p_nodes=32)`
+### `ensure_quark_params_has_A(quark_params, thermo_params; p_nodes=16, p_max=20.0, cos_nodes=..., use_aniso=true)`
 为 `quark_params` 补齐 `A` 字段（若缺失）。
 
 **参数**
 - `quark_params::NamedTuple`：包含 `m`、`μ` 字段
 - `thermo_params::NamedTuple`：包含 `T`、`Φ`、`Φbar`
-- `p_nodes::Int`：A 积分节点数（默认 32）
+- `p_nodes::Int`：A 积分节点数（默认 16）
+- `p_max::Float64`：A 积分上限（默认 20.0）
+- `use_aniso::Bool`：若 `thermo_params` 含 `ξ` 且 `use_aniso=true`，则使用各向异性 A 积分
 
 **返回**
 - 新的 `quark_params`（包含 `A` 字段）
@@ -22,7 +24,7 @@
 返回复数残差 $f=1-4K\Pi$。
 
 **参数**
-- `meson::Symbol`：`:pi`, `:K`, `:sigma_pi`, `:sigma_K`
+- `meson::Symbol`：`:pi`, `:K`, `:sigma_pi`, `:sigma_K`, `:eta`, `:eta_prime`, `:sigma`, `:sigma_prime`
 - `k0::Float64`：能量实部
 - `gamma::Float64`：宽度
 - `k_norm::Float64`：三动量模长
@@ -48,4 +50,9 @@ thermo_params = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 
 res = solve_meson_mass(:pi, quark_params, thermo_params)
 @show res.mass res.gamma res.converged
+
+# 混合介子（η/η' 或 σ/σ'）
+res_eta = solve_meson_mass(:eta, quark_params, thermo_params)
+res_etap = solve_meson_mass(:eta_prime, quark_params, thermo_params)
+@show res_eta.mass res_etap.mass
 ```

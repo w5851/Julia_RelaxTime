@@ -40,8 +40,8 @@ const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
     hasproperty(thermo_params, :Φ) || error("thermo_params is missing :Φ")
     hasproperty(thermo_params, :Φbar) || error("thermo_params is missing :Φbar")
 
-    # A 的分布函数积分部分在 p ∈ [0, 10] fm⁻¹ 已可收敛（OneLoopIntegrals.jl 的约定）。
-    nodes_p, weights_p = AverageScatteringRate.gauleg(0.0, 10.0, 32)
+    # A 的热部分对高温/轻质量参数更敏感：这里使用更稳健的上限/节点配置。
+    nodes_p, weights_p = AverageScatteringRate.gauleg(0.0, 20.0, 16)
     A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
     A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
     A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)

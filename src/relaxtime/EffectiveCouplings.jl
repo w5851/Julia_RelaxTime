@@ -16,6 +16,7 @@ using .OneLoopIntegralsCorrection: A_aniso
 
 export calculate_effective_couplings, coupling_matrix_determinant
 export calculate_G_from_A
+export mixing_matrix_elements
 
 # ----------------------------------------------------------------------------
 # 转换函数：从A函数计算G^f
@@ -112,6 +113,42 @@ det_K_S = coupling_matrix_determinant(K_coeffs.K0_minus, K_coeffs.K8_minus, K_co
 @inline @fastmath function coupling_matrix_determinant(K0::Float64, K8::Float64, 
                                                        K08::Float64)
     return K0 * K8 - K08^2
+end
+
+"""mixing_matrix_elements(Π_uu, Π_ss, K_coeffs, channel) -> NamedTuple
+
+构造混合介子（η/η′ 或 σ/σ′）传播子/极点方程所需的 2×2 对称矩阵 M 的三个独立元素。
+
+约定：
+- `channel = :P`：赝标量通道（使用 `K*_plus` 与 `det_K_plus`）
+- `channel = :S`：标量通道（使用 `K*_minus` 与 `det_K_minus`）
+
+矩阵元与 docs/reference/formula/Propagator_传播子byPolarization.md 对齐：
+
+- M00 = K0 - (4/3) * detK * (Π_uu + 2Π_ss)
+- M08 = K08 + (4/3) * sqrt(2) * detK * (Π_uu - Π_ss)
+- M88 = K8 - (4/3) * detK * (2Π_uu + Π_ss)
+"""
+@inline @fastmath function mixing_matrix_elements(Π_uu::ComplexF64, Π_ss::ComplexF64,
+                                                  K_coeffs::NamedTuple, channel::Symbol)
+    if channel == :P
+        K0 = K_coeffs.K0_plus
+        K8 = K_coeffs.K8_plus
+        K08 = K_coeffs.K08_plus
+        det_K = K_coeffs.det_K_plus
+    elseif channel == :S
+        K0 = K_coeffs.K0_minus
+        K8 = K_coeffs.K8_minus
+        K08 = K_coeffs.K08_minus
+        det_K = K_coeffs.det_K_minus
+    else
+        error("Unknown channel: $channel. Use :P (pseudoscalar) or :S (scalar)")
+    end
+
+    M00 = K0 - (4.0 / 3.0) * det_K * (Π_uu + 2.0 * Π_ss)
+    M08 = K08 + (4.0 / 3.0) * sqrt(2.0) * det_K * (Π_uu - Π_ss)
+    M88 = K8 - (4.0 / 3.0) * det_K * (2.0 * Π_uu + Π_ss)
+    return (M00=M00, M08=M08, M88=M88, det_K=det_K)
 end
 
 # ----------------------------------------------------------------------------

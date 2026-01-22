@@ -33,7 +33,7 @@ $$
 $$
 \begin{aligned}
 M_{00} &= K_0^+ -\frac{4}{3}\det K(\Pi_{u\bar{u}} + 2\Pi_{s\bar{s}}) \\
-M_{08} &= K_{08}^+ -\frac{4}{3}\sqrt{2}\det K(\Pi_{u\bar{u}} - \Pi_{s\bar{s}}) \\
+M_{08} &= K_{08}^+ +\frac{4}{3}\sqrt{2}\det K(\Pi_{u\bar{u}} - \Pi_{s\bar{s}}) \\
 M_{88} &= K_8^+ -\frac{4}{3}\det K(2\Pi_{u\bar{u}} + \Pi_{s\bar{s}}) \\
 \det K &= K_0^+ K_8^+ -K_{08}^{+2}
 \end{aligned}

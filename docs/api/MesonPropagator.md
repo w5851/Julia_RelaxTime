@@ -298,12 +298,14 @@ calculate_coupling_matrix(Π_uu::ComplexF64, Π_ss::ComplexF64,
 
 M矩阵元素：
 ```
-M₀₀ = 1 - K₀± Π_{uu}
-M₀₈ = M₈₀ = -K₀₈± Π_{uu} × 4√2/3
-M₈₈ = 1 - K₈± [Π_{uu} × 4/3 + Π_{ss} × 2/3]
+M00 = K0 - (4/3) * detK * (Π_uu + 2Π_ss)
+M08 = K08 + (4/3) * sqrt(2) * detK * (Π_uu - Π_ss)
+M88 = K8 - (4/3) * detK * (2Π_uu + Π_ss)
 ```
 
 其中±表示通道类型（+为赝标量P，-为标量S）。
+
+实现说明：代码侧的 `calculate_coupling_elements/calculate_coupling_matrix` 会委托给 `EffectiveCouplings.mixing_matrix_elements`，保证 `MesonMass` 与 `MesonPropagator` 共用同一套 (M00,M08,M88) 约定。
 
 ##### 参数
 

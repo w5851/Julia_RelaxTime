@@ -13,10 +13,12 @@
 module MesonPropagator
 
 include("../Constants_PNJL.jl")
+include("../utils/ParticleSymbols.jl")
 include("EffectiveCouplings.jl")
 
 using .Constants_PNJL: λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
-using .EffectiveCouplings: coupling_matrix_determinant
+using .ParticleSymbols
+using .EffectiveCouplings: coupling_matrix_determinant, mixing_matrix_elements
 using LinearAlgebra: det
 
 # 传播子分母正则：避免在共振/极点附近出现 NaN/Inf。
@@ -35,43 +37,7 @@ export extract_flavor, get_quark_wavefunction, calculate_current_vector
 # 辅助函数：味提取和波函数选择
 # ----------------------------------------------------------------------------
 
-"""
-    extract_flavor(q::Symbol) -> (Symbol, Bool)
-
-从夸克/反夸克符号中提取味类型和反粒子标志。
-
-# 参数
-- `q`: 夸克/反夸克类型（`:u`, `:d`, `:s`, `:ubar`, `:dbar`, `:sbar`）
-
-# 返回值
-返回元组 `(flavor, is_bar)`：
-- `flavor`: 味类型（`:u`, `:d`, `:s`）
-- `is_bar`: 是否为反夸克（`true`表示反夸克）
-
-# 示例
-```julia
-extract_flavor(:u) # 返回 (:u, false)
-extract_flavor(:ubar) # 返回 (:u, true)
-```
-"""
-@inline function extract_flavor(q::Symbol)
-    # 走分支匹配，避免 string/endswith/slicing 的分配与开销（profile 热点）
-    if q === :ubar
-        return (:u, true)
-    elseif q === :dbar
-        return (:d, true)
-    elseif q === :sbar
-        return (:s, true)
-    elseif q === :u
-        return (:u, false)
-    elseif q === :d
-        return (:d, false)
-    elseif q === :s
-        return (:s, false)
-    else
-        error("Unknown quark symbol: $q")
-    end
-end
+@inline extract_flavor(q::Symbol) = ParticleSymbols.extract_flavor(q)
 
 @inline function _flavor_index(flavor::Symbol)::Int
     flavor === :u && return 1
@@ -80,50 +46,27 @@ end
     error("Unknown flavor: $flavor")
 end
 
-"""
-    get_quark_wavefunction(flavor::Symbol, is_bar::Bool) -> Union{Vector{Float64}, Matrix{Float64}}
-
-根据味类型和反粒子标志返回对应的夸克波函数。
-
-# 参数
-- `flavor`: 味类型（`:u`, `:d`, `:s`）
-- `is_bar`: 是否为反夸克（`false`为夸克，`true`为反夸克）
-
-# 返回值
-- `is_bar=false`: 返回列向量ψ（3×1向量）
-- `is_bar=true`: 返回行向量ψ̄（1×3矩阵）
-
-# 物理意义
-- ψ_u = [1, 0, 0]：u夸克在味空间的表示
-- ψbar_u = [1 0 0]：u反夸克在味空间的表示（1×3矩阵）
-
-# 示例
-```julia
-ψu = get_quark_wavefunction(:u, false)  # 返回列向量 [1.0, 0.0, 0.0]
-ψbar_u = get_quark_wavefunction(:u, true)  # 返回行向量 [1.0 0.0 0.0]
-```
-"""
 @inline function get_quark_wavefunction(flavor::Symbol, is_bar::Bool)
+    # 保持历史签名（flavor + is_bar），内部走 ParticleSymbols 的 flavor 约定。
     if is_bar
-        if flavor == :u
+        if flavor === :u
             return ψbar_u
-        elseif flavor == :d
+        elseif flavor === :d
             return ψbar_d
-        elseif flavor == :s
+        elseif flavor === :s
             return ψbar_s
         else
             error("Unknown flavor: $flavor")
         end
+    end
+    if flavor === :u
+        return ψ_u
+    elseif flavor === :d
+        return ψ_d
+    elseif flavor === :s
+        return ψ_s
     else
-        if flavor == :u
-            return ψ_u
-        elseif flavor == :d
-            return ψ_d
-        elseif flavor == :s
-            return ψ_s
-        else
-            error("Unknown flavor: $flavor")
-        end
+        error("Unknown flavor: $flavor")
     end
 end
 
@@ -244,28 +187,8 @@ M_S = calculate_coupling_matrix(Π_uu, Π_ss, K_coeffs, :S)
 """
 @inline @fastmath function calculate_coupling_elements(Π_uu::ComplexF64, Π_ss::ComplexF64,
                                                        K_coeffs::NamedTuple, channel::Symbol)
-    # 根据通道选择对应的K系数
-    if channel == :P
-        # 赝标量通道（η/η'）使用K⁺系数
-        K0 = K_coeffs.K0_plus
-        K8 = K_coeffs.K8_plus
-        K08 = K_coeffs.K08_plus
-        det_K = K_coeffs.det_K_plus
-    elseif channel == :S
-        # 标量通道（σ/σ'）使用K⁻系数
-        K0 = K_coeffs.K0_minus
-        K8 = K_coeffs.K8_minus
-        K08 = K_coeffs.K08_minus
-        det_K = K_coeffs.det_K_minus
-    else
-        error("Unknown channel: $channel. Use :P (pseudoscalar) or :S (scalar)")
-    end
-
-    M00 = K0 - (4.0 / 3.0) * (Π_uu + 2.0 * Π_ss) * det_K
-    M08 = K08 + (4.0 / 3.0) * sqrt(2.0) * (Π_uu - Π_ss) * det_K
-    M88 = K8 - (4.0 / 3.0) * (2.0 * Π_uu + Π_ss) * det_K
-
-    return (M00, M08, M88)
+    elems = mixing_matrix_elements(Π_uu, Π_ss, K_coeffs, channel)
+    return (elems.M00, elems.M08, elems.M88)
 end
 
 @inline @fastmath function calculate_coupling_matrix(Π_uu::ComplexF64, Π_ss::ComplexF64,

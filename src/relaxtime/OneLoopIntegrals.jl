@@ -519,11 +519,14 @@ end
 """
     A(m, μ, T, Φ, Φbar, nodes_p, weights_p)
 计算单线积分函数A,需要传入预生成的动量的积分节点与权重
-计算中的常数1需要截断,而分布函数的部分不需要截断
+计算中的常数1需要截断,而分布函数的部分理论上可积分到无穷；实践中通常采用有限上限近似。
 常数项的积分可以直接计算，见 const_integral_term_A 函数
-因此只需计算分布函数的积分，传入的节点积分上限设为 10.0 fm⁻¹ 即可收敛
+因此只需计算分布函数的积分。
 
-推荐使用 GaussLegendre 模块中的 DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS (p ∈ [0, 10] fm⁻¹)
+注意：在高温/轻质量/Φ 接近 1 的参数区，分布函数尾部贡献更显著，
+积分上限 10.0 fm⁻¹ 可能不足；经验上 p ∈ [0, 20] fm⁻¹ 会更稳健。
+
+推荐：根据精度/性能需求自行生成节点；一个常用折中是 gauleg(0.0, 20.0, 16)。
 """
 function A(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
     nodes_p::Vector{Float64}, weights_p::Vector{Float64})
