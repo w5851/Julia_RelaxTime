@@ -6,7 +6,7 @@
 1. **一阶修正函数**：`A_correction` 和 `B0_correction`，计算各向异性参数 ξ 的一阶修正项
 2. **完整各向异性函数**：`A_aniso`，直接计算包含 Romatschke-Strickland (RS) 分布的完整积分
 
-本模块实现依据 `doc/formula/A_各向异性简化处理_n与k同向.md`、`doc/formula/B0_各向异性一般情况.md` 等公式文档，适用于重离子碰撞等非平衡系统的早期动力学研究。
+本模块实现依据 `docs/reference/formula/relaxtime/integrals/A_各向异性简化处理_n与k同向.md`、`docs/reference/formula/relaxtime/integrals/B0_各向异性一般情况.md` 等公式文档，适用于重离子碰撞等非平衡系统的早期动力学研究。
 
 ## 依赖
 
@@ -541,9 +541,9 @@ end
 
 ## 相关文档
 
-- **公式推导**：`doc/formula/A_各向异性简化处理_n与k同向.md`
-- **各向同性基础**：`api/OneLoopIntegrals.md`
-- **分布函数**：`doc/formula/PNJL_夸克有效分布函数_动量各向异性.md`
+- **公式推导**：`docs/reference/formula/relaxtime/integrals/A_各向异性简化处理_n与k同向.md`
+- **各向同性基础**：`docs/api/integrals/OneLoopIntegrals.md`
+- **分布函数**：`docs/reference/formula/pnjl/distribution/PNJL_夸克有效分布函数_动量各向异性.md`
 - **测试总结**：`test/test_oneloopintegrals_aniso_summary.md`
 - **B0修正详细分析**：`test/test_b0_correction_summary.md`
 

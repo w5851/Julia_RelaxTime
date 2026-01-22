@@ -232,5 +232,5 @@
 - 测试脚本: `test/test_b0_correction.jl`
 - 实现文件: `src/relaxtime/OneLoopIntegralsAniso.jl`
 - 零阶项实现: `src/relaxtime/OneLoopIntegrals.jl`
-- 理论文档: `doc/formula/B0_extra.md`
-- 修复说明: `doc/formula/singularity_fix_summary.md`
+- 理论文档: `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0_extra.md`
+- 修复验证: `tests/analysis/unit_summaries/test_singularity_inequality_summary.md`

@@ -102,5 +102,5 @@
 3. **混合介子特殊处理**：η/η'和σ/σ'不能简单与一般介子求和
 4. **性能优化策略**：
    - K系数可在批量计算中复用
-   - **极化函数缓存**：使用`PolarizationCache`模块避免重复计算相同参数的极化函数（详见`doc/formula/PolarizationCache_缓存使用文档.md`）
+   - **极化函数缓存**：使用`PolarizationCache`模块避免重复计算相同参数的极化函数（详见`docs/reference/formula/relaxtime/polarization/PolarizationCache_缓存使用文档.md`）
    - 典型收益：缓存命中率30%-70%，可节省约50%计算时间

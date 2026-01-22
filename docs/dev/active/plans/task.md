@@ -11,7 +11,7 @@
 **目标**: 为新添加的A_correction和A_aniso函数补充完整的API文档和单元测试
 
 **完成情况**:
-- ✅ **API文档** (`docs/api/OneLoopIntegralsAniso.md`, 555行)
+- ✅ **API文档** (`docs/api/integrals/OneLoopIntegralsAniso.md`, 555行)
   - 详细说明了`A_correction`返回一阶修正项，需与`A`相加使用
   - 详细说明了`A_aniso`直接返回完整各向异性结果
   - 明确了两者的区别、适用场景（ξ<0.3 vs ξ≥0.3）和性能对比（1.5-2倍耗时差异）
@@ -47,7 +47,7 @@
 
 **依赖关系**:
 - 输入依赖：`OneLoopIntegrals.jl`中的A函数、`QuarkDistribution_Aniso.jl`中的分布函数
-- 文档参考：`docs/api/OneLoopIntegrals.md`的格式、`test_b0_correction.jl`的测试结构
+- 文档参考：`docs/api/integrals/OneLoopIntegrals.md`的格式、`test_b0_correction.jl`的测试结构
 
 ---
 
@@ -62,7 +62,7 @@
   - 实现了`coupling_matrix_determinant`辅助函数
   - 完整的文档字符串和使用示例
 
-- ✅ **API文档** (`docs/api/EffectiveCouplings.md`, 详细记录)
+- ✅ **API文档** (`docs/api/relaxtime/propagator/EffectiveCouplings.md`, 详细记录)
   - 详细的参数说明表（包含典型值和取值范围）
   - 物理意义解释（味道通道、手征极限、SU(3)对称性）
   - 温度和化学势依赖性分析
@@ -142,7 +142,7 @@
   - `extract_meson_mass(meson_type, ...)`: 通过求解`Re[D⁻¹(m, 0)] = 0`提取物理质量
   - `check_mott_transition(m_meson, m_q1, m_q2)`: 检测Mott相变（m_meson ≈ m_q1 + m_q2）
   
-- 在`docs/api/MesonPropagator.md`中记录：
+- 在`docs/api/relaxtime/propagator/MesonPropagator.md`中记录：
   - 各介子类型对应的夸克味道组合
   - 复数返回值的物理意义（实部对应质量壳，虚部对应衰变宽度）
   - Mott相变的物理解释和数值处理
@@ -233,7 +233,7 @@
   - t通道和u通道的关系
   - 全同粒子的Bose/Fermi统计因子
   
-- 在`docs/api/ScatteringAmplitude.md`中记录：
+- 在`docs/api/relaxtime/scattering/ScatteringAmplitude.md`中记录：
   - 所有支持的散射过程列表
   - 单位约定（自然单位制，能量和动量单位为fm⁻¹）
   - 振幅的物理意义和典型量级
@@ -270,7 +270,7 @@
   - `total_cross_section(process, s, ...)`: 对t积分得到σ_total
   - 使用自适应积分（QuadGK）处理可能的奇点
   
-- 在`docs/api/CrossSection.md`中记录：
+- 在`docs/api/relaxtime/scattering/TotalCrossSection.md`中记录：
   - 截面的物理意义（单位面积的散射概率）
   - 单位换算：fm² ↔ mb（毫靶恩）
   - 典型截面值和温度依赖性
@@ -295,7 +295,7 @@
   - 实现多重积分（对靶粒子动量p₂和出射粒子动量p₃、p₄积分）
   - 考虑各向异性分布函数的角度依赖
   
-- 在`docs/api/RelaxationTime.md`中记录：
+- 在`docs/api/relaxtime/transport/RelaxationTime.md`中记录：
   - 驰豫时间的物理意义（系统趋于平衡的特征时间）
   - 温度依赖性：高温下τ↓（散射更频繁）
   - 各向异性修正的效应：ξ如何影响τ

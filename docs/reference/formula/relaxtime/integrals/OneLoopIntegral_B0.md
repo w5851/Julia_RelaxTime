@@ -108,7 +108,7 @@ f_{\rm NJL}^{+}(E,\mu)+f_{\rm NJL}^{-}(-E,\mu)=1
 
 #### (2) PNJL（含 Polyakov loop 的有效分布）
 
-PNJL 下的有效分布（记作 \(f_{\Phi}^{\pm}\)）见 [PNJL_夸克有效分布函数.md](PNJL_夸克有效分布函数.md)。同样满足
+PNJL 下的有效分布（记作 \(f_{\Phi}^{\pm}\)）见 [PNJL_夸克有效分布函数.md](../../pnjl/distribution/PNJL_夸克有效分布函数.md)。同样满足
 ```math
 f_{\Phi}^{+}(E,\mu)+f_{\Phi}^{-}(-E,\mu)=1
 \quad\Rightarrow\quad

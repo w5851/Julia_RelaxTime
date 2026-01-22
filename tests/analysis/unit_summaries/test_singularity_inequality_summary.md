@@ -107,7 +107,7 @@ $$
 - 测试脚本: `test/test_singularity_inequality.jl`
 - 测试数: 14 项
 - 通过率: 100%
-- 理论依据: `doc/formula/B0_extra.md`
+- 理论依据: `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0_extra.md`
 
 ---
 *测试日期: 2025年11月10日*

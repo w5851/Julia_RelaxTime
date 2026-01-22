@@ -55,7 +55,7 @@ julia --project=. scripts/dev/gen_deps.jl
 ## 当前功能概览
 
 - **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/test_momentum_mapping.jl`、`test_frame_transformations.jl` 已覆盖核心校验。
-- **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `docs/api/ScatteringAmplitude.md` 与 `docs/reference/formula`。
+- **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `docs/api/relaxtime/scattering/ScatteringAmplitude.md` 与 `docs/reference/formula`。
 - **截面/弛豫时间链路（修复中）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 等仍包含已知缺陷（阈值处理、归一因子、输运系数整合尚未校对），目前默认不在服务器或前端中暴露，仅供研究性参考。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
@@ -88,7 +88,7 @@ julia --project=. scripts/dev/gen_deps.jl
 - ✅ 自动缓存相同参数的极化函数，避免重复计算
 - ✅ 典型加速：10-30倍（大规模输运系数计算）
 - ✅ 100%测试通过（34/34测试用例）
-- 📖 完整文档：`docs/api/PolarizationCache.md`
+- 📖 完整文档：`docs/api/relaxtime/polarization/PolarizationCache.md`
 
 **快速使用**：
 ```julia

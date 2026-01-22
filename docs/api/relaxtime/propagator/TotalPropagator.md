@@ -12,7 +12,7 @@
 - 内部调用带缓存的极化函数，自动复用相同参数的计算结果
 - 提供质心系动量计算功能
 
-**公式参考：** `doc/formula/总传播子byPropagator.md`
+**公式参考：** `docs/reference/formula/relaxtime/propagator/总传播子byPropagator.md`
 
 ---
 
@@ -557,7 +557,7 @@ println("t道赝标量传播子: ", result_t_prop.t_P)
 
 ## 参考文献
 
-1. 公式文档：`doc/formula/总传播子byPropagator.md`
-2. 散射矩阵元：`doc/formula/ScatteringAmplitude_散射矩阵元by总传播子.md`
-3. 介子传播子：`api/MesonPropagator.md`
-4. 极化函数：`api/PolarizationAniso.md`
+1. 公式文档：`docs/reference/formula/relaxtime/propagator/总传播子byPropagator.md`
+2. 散射矩阵元：`docs/reference/formula/relaxtime/scattering/ScatteringAmplitude_散射矩阵元by总传播子.md`
+3. 介子传播子：`docs/api/relaxtime/propagator/MesonPropagator.md`
+4. 极化函数：`docs/api/relaxtime/polarization/PolarizationAniso.md`

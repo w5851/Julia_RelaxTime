@@ -4,8 +4,9 @@
 
 ## 组织方式
 
-- `docs/api/*.md`：跨模块或 relaxtime 主链路相关的 API 文档（保持历史链接兼容）。
+- `docs/api/relaxtime/*`：relaxtime 主链路相关的 API 文档（按功能拆分到 polarization/propagator/scattering/transport/workflow）。
 - `docs/api/pnjl/*.md`：PNJL 求解/扫描/工作流相关 API 文档。
+- `docs/api/integrals/*.md`：跨模块通用的数值积分/数学工具类 API 文档（与具体物理链路解耦）。
 - `docs/api/relaxtime/`：预留子目录（见该目录下 README）。
 
 ## 命名约定

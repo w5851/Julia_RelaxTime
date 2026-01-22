@@ -740,8 +740,8 @@ println("Integrand at t_max: ", integrand_test(t_bounds.t_max))
 
 ## 参考文献
 
-- **公式推导**: `doc/formula/散射截面by微分散射截面.md`
-- **微分截面**: `api/DifferentialCrossSection.md`
-- **散射矩阵元**: `api/ScatteringAmplitude.md`
+- **公式推导**: `docs/reference/formula/relaxtime/scattering/散射截面by微分散射截面.md`
+- **微分截面**: `docs/api/relaxtime/scattering/DifferentialCrossSection.md`
+- **散射矩阵元**: `docs/api/relaxtime/scattering/ScatteringAmplitude.md`
 - **测试用例**: `test_unit/test_total_cross_section.jl`
 - **性能测试**: `test_unit/test_total_cross_section_performance.md`

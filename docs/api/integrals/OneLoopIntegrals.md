@@ -2,7 +2,7 @@
 
 ## 模块概述
 
-`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含双传播子积分 `B0` 与单传播子积分 `A` 的数值计算。实现依据 `doc/formula/B0.md` 与 `doc/formula/A.md` 中的推导，支持 PNJL 模型中的有效分布函数，并自动处理三动量为零和非零的两种积分形态。
+`OneLoopIntegrals` 模块提供有限温度/密度下的单圈极化积分实现，当前包含双传播子积分 `B0` 与单传播子积分 `A` 的数值计算。实现依据 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_B0.md` 与 `docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A.md` 中的推导，支持 PNJL 模型中的有效分布函数，并自动处理三动量为零和非零的两种积分形态。
 
 ## 依赖
 

@@ -542,9 +542,9 @@ julia test/test_polarization_cache.jl
 
 ## 参考文档
 
-- [PolarizationCache_缓存使用文档.md](../doc/formula/PolarizationCache_缓存使用文档.md) - 详细使用指南
+- [PolarizationCache_缓存使用文档.md](../../../reference/formula/relaxtime/polarization/PolarizationCache_缓存使用文档.md) - 详细使用指南
 - [PolarizationAniso API](PolarizationAniso.md) - 底层计算函数文档
-- [总传播子计算文档](../doc/formula/总传播子byPropagator.md) - 在总传播子计算中的应用
+- [总传播子计算文档](../../../reference/formula/relaxtime/propagator/总传播子byPropagator.md) - 在总传播子计算中的应用
 
 ## 作者与维护
 

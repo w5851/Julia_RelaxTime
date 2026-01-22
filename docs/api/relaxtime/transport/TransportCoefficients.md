@@ -20,7 +20,7 @@
 
 ## 物理公式
 
-详见 `docs/reference/formula/输运系数by弛豫时间.md`。
+详见 `docs/reference/formula/relaxtime/transport/输运系数by弛豫时间.md`。
 
 ### 剪切粘滞系数 η
 
