@@ -8,7 +8,7 @@ module AverageScatteringRate
 
 Cross-section cache notes:
 - 本仓库已将生产默认策略固定为 **w0cdf 取点 + PCHIP 插值**。
-- `CrossSectionCache` 仅用于承载预计算的 σ(s) 表，并用 PCHIP 做插值/端点钳制；运行时不会触发任何新的 σ(s) 计算。
+- `CrossSectionCache` 仅用于承载预计算的 σ(s) 表，并用 PCHIP 做插值；当质心能量 s 超出缓存覆盖区间时，直接返回 0（而不是钳制到边界），以避免不可达的 s 区域产生伪贡献。
 - `CrossSectionCache(process)` 创建空缓存；通过 `precompute_cross_section!` 填充后即可用于 `average_scattering_rate`。
 """
 
