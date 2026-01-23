@@ -2,6 +2,11 @@
 
 在弛豫时间近似下，基于相对论动力学，夸克物质的剪切粘滞系数、体粘滞系数和电导率表达式如下。
 
+## 相关文档
+
+- 弛豫时间的求和与过程键值对应： [RelaxationTime_FromAverageScatteringRate.md](RelaxationTime_FromAverageScatteringRate.md)
+- 流算符向量在夸克味空间的对应关系： [FlowOperatorVector_QuarkFlavorSpaceWavefunctionMapping.md](FlowOperatorVector_QuarkFlavorSpaceWavefunctionMapping.md)
+
 ## 各向同性与各向异性情况
 
 ### 各向同性 (ξ = 0)

@@ -18,7 +18,7 @@ $$
 ## 3. 计算步骤
 1. 设定温度 $T$ 与重子化学势 $\mu_B$（或夸克化学势 $\mu_q$）扫描范围。
 2. 解平均场方程得到 $M_u, M_d, M_s$。
-3. 求解介子质量 $M_\pi(T,\mu)$、$M_K(T,\mu)$（见 [MesonMass.md](MesonMass.md)）。
+3. 求解介子质量 $M_\pi(T,\mu)$、$M_K(T,\mu)$（见 [MesonMass_RPA_Pole.md](MesonMass_RPA_Pole.md)）。
 4. 计算差值：
    - $\Delta_\pi = M_\pi - (M_u + M_d)$
    - $\Delta_K = M_K - (M_u + M_s)$

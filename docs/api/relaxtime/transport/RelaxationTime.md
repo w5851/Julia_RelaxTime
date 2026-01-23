@@ -11,6 +11,10 @@
 ## 数学定义
 $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 
+## 物理公式
+
+详见 `docs/reference/formula/relaxtime/transport/RelaxationTime_FromAverageScatteringRate.md`。
+
 ## 默认行为
 
 当不传入 `p_grid`/`p_w` 时：

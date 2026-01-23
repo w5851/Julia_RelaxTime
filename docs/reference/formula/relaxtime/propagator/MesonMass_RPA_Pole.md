@@ -1,6 +1,6 @@
 # 介子质量计算（RPA 传播子极点）
 
-本文汇总 PNJL/RPA 框架下介子（π、K、η、η′等）质量的计算公式与步骤，并与项目中既有极化函数/传播子实现保持一致。极化函数记号与 [../Polarization_极化函数byB0.md](../Polarization_极化函数byB0.md) 和 [../Propagator_传播子byPolarization.md](../Propagator_传播子byPolarization.md) 对齐。
+本文汇总 PNJL/RPA 框架下介子（π、K、η、η′等）质量的计算公式与步骤，并与项目中既有极化函数/传播子实现保持一致。极化函数记号与 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md) 和 [Propagator_传播子byPolarization.md](propagator/Propagator_传播子byPolarization.md) 对齐。
 
 ## 1. 介子传播子公式
 
@@ -14,8 +14,8 @@ $$
 $$
 
 其中：
-- $K_{3}^{\pm}, K_{4}^{\pm}$ 为有效耦合常数（参见 [../K_有效耦合常数byA.md](../K_有效耦合常数byA.md)）。
-- $\Pi_{ff'}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [../Polarization_极化函数byB0.md](../Polarization_极化函数byB0.md)）。
+- $K_{3}^{\pm}, K_{4}^{\pm}$ 为有效耦合常数（参见 [EffectiveCoupling_K_FromA.md](couplings/EffectiveCoupling_K_FromA.md)）。
+- $\Pi_{ff'}^{P(S)}(p_{0},\mathbf{k})$ 为夸克-反夸克极化函数（参见 [Polarization_极化函数byB0.md](polarization/Polarization_极化函数byB0.md)）。
 
 ### 1.2 η 与 η′ 介子传播子（含混合）
 赝标量介子 η、η′（以及标量 σ、σ′）存在单态/八重态混合，其传播子结构为：

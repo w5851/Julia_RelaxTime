@@ -9,7 +9,7 @@ archived_date: 2026-01-19
 
 ***
 
-1.添加按 docs\reference\formula\relaxtime\MesonMass.md 中记录的完整流程计算介子质量和 Mott 相变位置的扫描脚本。
+1.添加按 docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md 中记录的完整流程计算介子质量和 Mott 相变位置的扫描脚本。
 
 已实现（2026-01-21）：
 

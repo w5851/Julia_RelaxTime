@@ -32,7 +32,7 @@
 
 ### Julia公式
 
-Julia使用热力学导数形式（见 `docs/reference/formula/relaxtime/transport/输运系数by弛豫时间.md`）：
+Julia使用热力学导数形式（见 `docs/reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md`）：
 
 $$
 \zeta = -\frac{1}{3T} \cdot \frac{1}{2\pi^2} \int dp \, p^2 \cdot \frac{M^2}{E} \cdot [g\tau f(1-f) + \bar{g}\bar{\tau}\bar{f}(1-\bar{f})] \times \text{bracket}
@@ -150,7 +150,7 @@ T = 150 MeV, μ_B = 800 MeV
 - `scripts/debug/test_implicit_thermo.jl` - 隐函数定理方法测试
 - `scripts/debug/test_bulk_viscosity_module.jl` - 模块测试脚本
 - `scripts/debug/test_bulk_viscosity_isentropic.jl` - 等熵声速形式测试脚本
-- `docs/reference/formula/relaxtime/transport/输运系数by弛豫时间.md` - 公式文档
+- `docs/reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md` - 公式文档
 
 ## 更新记录
 

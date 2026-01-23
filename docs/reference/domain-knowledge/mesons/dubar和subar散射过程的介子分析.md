@@ -6,7 +6,7 @@
 - **dub_code**: $d\bar{u} \to d\bar{u}$ 散射
 - **sub_code**: $s\bar{u} \to s\bar{u}$ 散射
 
-根据 Julia 文档（`散射过程所有可能.md` 表2），独立的夸克-反夸克散射过程只列出了：
+根据 Julia 文档（`ScatteringProcesses_AllPossible.md` 表2），独立的夸克-反夸克散射过程只列出了：
 - $u\bar{d} \to u\bar{d}$
 - $u\bar{s} \to u\bar{s}$
 - $u\bar{u} \to u\bar{u}$, $u\bar{u} \to d\bar{d}$, $u\bar{u} \to s\bar{s}$
@@ -89,7 +89,7 @@ $$
 
 ### 4.1 dub 过程：$d\bar{u} \to d\bar{u}$
 
-根据 Julia 文档的 `额外散射过程推理.md` 和 `散射过程所有可能.md` 表2，$d\bar{u}$ 过程与 $u\bar{d}$ 过程的介子种类完全相同：
+根据 Julia 文档的 `额外散射过程推理.md` 和 `ScatteringProcesses_AllPossible.md` 表2，$d\bar{u}$ 过程与 $u\bar{d}$ 过程的介子种类完全相同：
 
 #### t 道（交换）：
 夸克对 $d\bar{d}$ 和 $u\bar{u}$ 都可以形成以下介子：

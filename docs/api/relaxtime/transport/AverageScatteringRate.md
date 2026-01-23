@@ -30,6 +30,8 @@ p_grid, p_w = gauleg(0.0, 15.0, 64)
 
 ## 核心公式
 
+详见 `docs/reference/formula/relaxtime/scattering/AverageScatteringRate_FromCrossSection.md`。
+
 平均散射率：
 $$\omega_{ij} = \frac{d_q^2}{32\pi^5\rho_i\rho_j} \int d^3p_i\,d^3p_j\, f_i f_j \, v_{\text{rel}} \, \sigma_{ij}(s)$$
 

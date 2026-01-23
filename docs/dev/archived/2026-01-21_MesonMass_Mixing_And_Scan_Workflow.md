@@ -37,7 +37,7 @@ archived_date: 2026-01-21
 	- 目前一次调用对应某一对夸克味道（由 `(m1, m2, μ1, μ2, A1, A2)` 指定）。
 - 混合通道所需的有效耦合系数已经具备：
 	- [src/relaxtime/EffectiveCouplings.jl](src/relaxtime/EffectiveCouplings.jl) 已提供 `K0_±, K8_±, K08_±` 与 `det_K_±`。
-- 混合介子的公式在 [docs/reference/formula/relaxtime/MesonMass.md](docs/reference/formula/relaxtime/MesonMass.md) 已给出（η/η′ 与 σ/σ′）。
+- 混合介子的公式在 [docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md](docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md) 已给出（η/η′ 与 σ/σ′）。
 
 ## 目标范围（建议的“混合介子”最小可用集）
 
@@ -60,7 +60,7 @@ archived_date: 2026-01-21
 - `Π_uu`：`polarization_with_width(channel, k0, gamma, k_norm, m_u, m_u, μ_u, μ_u, ...)`
 - `Π_ss`：`polarization_with_width(channel, k0, gamma, k_norm, m_s, m_s, μ_s, μ_s, ...)`
 
-2) 用 EffectiveCouplings 里已有的 `K0/K8/K08/det_K` 按 [docs/reference/formula/relaxtime/MesonMass.md](docs/reference/formula/relaxtime/MesonMass.md) 组装 `M00/M08/M88`。
+2) 用 EffectiveCouplings 里已有的 `K0/K8/K08/det_K` 按 [docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md](docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md) 组装 `M00/M08/M88`。
 
 3) 由 `(M00, M08, M88)` 构造两个“本征逆传播子”（η 与 η′，或 σ 与 σ′）：
 - `Minv_light = M00 + M88 - sqrt((M00 - M88)^2 + 4*M08^2)`
@@ -125,6 +125,6 @@ archived_date: 2026-01-21
 
 1. 退化极限检查：设置 `G_u == G_s`（或构造一个近似 SU(3) 对称点），验证 `K08≈0` 时混合消失。
 2. 连续性检查：沿 T 扫描，η/η′ 质量曲线不应出现明显的非物理跳变（除非确有 Mott/共振转换）。
-3. 与公式文档逐项对齐：对比 [docs/reference/formula/relaxtime/MesonMass.md](docs/reference/formula/relaxtime/MesonMass.md) 中的 `M00/M08/M88` 构造，确保变量含义与工程 `Π` 的定义一致。
+3. 与公式文档逐项对齐：对比 [docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md](docs/reference/formula/relaxtime/propagator/MesonMass_RPA_Pole.md) 中的 `M00/M08/M88` 构造，确保变量含义与工程 `Π` 的定义一致。
 
 ***

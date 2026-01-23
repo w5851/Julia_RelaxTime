@@ -558,6 +558,6 @@ println("t道赝标量传播子: ", result_t_prop.t_P)
 ## 参考文献
 
 1. 公式文档：`docs/reference/formula/relaxtime/propagator/总传播子byPropagator.md`
-2. 散射矩阵元：`docs/reference/formula/relaxtime/scattering/ScatteringAmplitude_散射矩阵元by总传播子.md`
+2. 散射矩阵元：`docs/reference/formula/relaxtime/scattering/ScatteringAmplitude_FromTotalPropagator.md`
 3. 介子传播子：`docs/api/relaxtime/propagator/MesonPropagator.md`
 4. 极化函数：`docs/api/relaxtime/polarization/PolarizationAniso.md`

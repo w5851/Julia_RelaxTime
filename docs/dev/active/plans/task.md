@@ -101,7 +101,7 @@
 **依赖关系验证**:
 - 输入依赖：`OneLoopIntegrals.A`函数正常工作 ✓
 - 输出接口：返回NamedTuple供下游模块使用 ✓
-- 公式一致性：与`doc/formula/K_有效耦合常数byA.md`完全一致 ✓
+- 公式一致性：与`docs/reference/formula/relaxtime/couplings/EffectiveCoupling_K_FromA.md`完全一致 ✓
 
 **任务清单**（原计划）:
 - ~~在`src/relaxtime/`下创建`EffectiveCouplings.jl`模块~~ ✓
@@ -158,7 +158,7 @@
 **依赖关系**:
 - 输入依赖：`EffectiveCouplings.jl`、`PolarizationAniso.jl`
 - 输出用途：提供给`ScatteringAmplitude.jl`使用
-- 公式来源：`doc/formula/Propagator_传播子byPolarization.md`
+- 公式来源：`docs/reference/formula/relaxtime/propagator/Propagator_传播子byPolarization.md`
 
 ---
 
@@ -169,7 +169,7 @@
 **任务清单**:
 - 手动从外部PDF论文中读取散射矩阵元公式（涉及介子交换的t通道贡献）
   
-- 在`doc/formula/`下创建`ScatteringAmplitude_散射矩阵元.md`，按照`公式文档模板.md`格式：
+- 在`docs/reference/formula/relaxtime/scattering/`下创建/维护 `ScatteringAmplitude_FromTotalPropagator.md`，按照`公式文档模板.md`格式：
   
   1. **公式标识**：
      - 程序实现：`scattering_amplitude`
@@ -249,7 +249,7 @@
 **依赖关系**:
 - 输入依赖：`MesonPropagator.jl`、`EffectiveCouplings.jl`
 - 输出用途：提供给`CrossSection.jl`使用
-- 公式来源：`doc/formula/ScatteringAmplitude_散射矩阵元.md`
+- 公式来源：`docs/reference/formula/relaxtime/scattering/ScatteringAmplitude_FromTotalPropagator.md`
 
 ---
 
@@ -260,7 +260,9 @@
 #### 6.1 散射截面模块
 
 **任务清单**:
-- 从PDF论文提取公式，创建`doc/formula/CrossSection_散射截面.md`：
+- 从PDF论文提取公式，创建/维护：
+  - `docs/reference/formula/relaxtime/scattering/DifferentialCrossSection_FromScatteringAmplitude.md`
+  - `docs/reference/formula/relaxtime/scattering/TotalCrossSection_FromDifferentialCrossSection.md`
   - 微分截面：`dσ/dt = (1/16πs) |M(s,t)|²`
   - 总截面：`σ_total = ∫ dσ/dt dt`（积分范围：t_min到t_max）
   - Mandelstam变量的运动学边界
@@ -284,7 +286,7 @@
 #### 6.2 驰豫时间模块
 
 **任务清单**:
-- 从PDF论文提取公式，创建`doc/formula/RelaxationTime_驰豫时间.md`：
+- 从PDF论文提取公式，创建/维护 `docs/reference/formula/relaxtime/transport/RelaxationTime_FromAverageScatteringRate.md`：
   - 平均散射率：`ω = ∫ dΓ σ(s) v_rel f₂(1±f₃)(1±f₄)`
   - 驰豫时间：`τ = 1/ω`
   - 相空间积分的处理（考虑Pauli阻塞/Bose增强）
@@ -311,7 +313,9 @@
 **依赖关系**:
 - 输入依赖：`CrossSection.jl`、`QuarkDistribution_Aniso.jl`
 - 输出用途：计算输运系数（剪切粘滞系数η/s、体粘滞系数ζ/s）
-- 公式来源：`doc/formula/平均散射率_动量各向异性.md`（已存在）和新创建的文档
+- 公式来源：
+  - `docs/reference/formula/relaxtime/scattering/AverageScatteringRate_FromCrossSection.md`
+  - `docs/reference/domain-knowledge/anisotropy/平均散射率_动量各向异性.md`
 
 ---
 
@@ -320,7 +324,7 @@
 ### 1. 公式来源的规范化
 
 **建议**:
-- 在`doc/formula/`下创建`References.md`，统一记录所有公式的来源：
+- 在`docs/reference/formula/`下创建`References.md`，统一记录所有公式的来源：
   - 论文标题、作者、期刊、年份、DOI
   - 每个公式文档对应的章节号和页码
   - 如有修改或简化，注明理由
@@ -445,9 +449,9 @@
 - `CauchyPV.jl` - 柯西主值积分工具
 
 **现有公式文档**（15个）:
-- 基础积分：A.md、B0.md、B0_extra.md、B0_各向异性一般情况.md等
+- 基础积分：OneLoopIntegral_A.md、OneLoopIntegral_B0.md、OneLoopIntegral_B0_extra.md、OneLoopIntegral_B0_Aniso_General.md 等
 - 分布函数：PNJL_夸克有效分布函数.md、PNJL_夸克有效分布函数_动量各向异性.md
-- 高层计算：K_有效耦合常数byA.md、Polarization_极化函数byB0.md、Propagator_传播子byPolarization.md
+- 高层计算：EffectiveCoupling_K_FromA.md、Polarization_极化函数byB0.md、Propagator_传播子byPolarization.md
 - 散射率：平均散射率_动量各向异性.md
 
 **现有测试**（8个）:

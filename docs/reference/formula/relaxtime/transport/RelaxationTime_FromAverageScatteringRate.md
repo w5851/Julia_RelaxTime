@@ -1,7 +1,7 @@
 ## 📘 计算弛豫时间时对平均散射率的求和说明
 
 **散射过程来源说明**  
-本文档中涉及的散射过程列表见《散射过程所有可能.md》中的表1（夸克-夸克散射）、表2（夸克-反夸克散射）与表3（反夸克-反夸克散射，表1 的电荷共轭）。以下弛豫时间表达式利用同位旋对称性（\(u\) 和 \(d\) 夸克质量相同）进行简化，并与代码实现保持一致。
+本文档中涉及的散射过程列表见 [ScatteringProcesses_AllPossible.md](../scattering/ScatteringProcesses_AllPossible.md) 中的表1（夸克-夸克散射）、表2（夸克-反夸克散射）与表3（反夸克-反夸克散射，表1 的电荷共轭）。平均散射率的积分定义见 [AverageScatteringRate_FromCrossSection.md](../scattering/AverageScatteringRate_FromCrossSection.md)。以下弛豫时间表达式利用同位旋对称性（\(u\) 和 \(d\) 夸克质量相同）进行简化，并与代码实现保持一致。
 
 在驰豫时间近似（RTA）下，第 \( i \) 类夸克的弛豫时间 \( \tau_i \) 由下式给出：
 

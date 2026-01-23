@@ -517,7 +517,7 @@ det_K = coupling_matrix_determinant(K_coeffs.K0_plus, K_coeffs.K8_plus, K_coeffs
 ## 参考文档
 
 ### 公式推导
-- `docs/reference/formula/relaxtime/couplings/K_有效耦合常数byA.md` - 有效耦合系数的详细推导
+- `docs/reference/formula/relaxtime/couplings/EffectiveCoupling_K_FromA.md` - 有效耦合系数的详细推导
 
 ### 依赖模块
 - `docs/api/integrals/OneLoopIntegrals.md` - A函数的各向同性计算
