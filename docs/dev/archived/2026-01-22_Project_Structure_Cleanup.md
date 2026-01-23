@@ -1,3 +1,10 @@
+---
+title: Project Structure Cleanup (整理项目结构)
+archived: true
+original: docs/dev/active/2026-1-22整理项目结构.md
+archived_date: 2026-01-23
+---
+
 # 2026-01-22 整理项目结构
 
 目标：检查并整理项目结构，尤其是根目录（repo root）中“需要长期保留/应该移动/应当忽略或删除”的内容，确保结构清晰、可复现、不引入隐性依赖。
