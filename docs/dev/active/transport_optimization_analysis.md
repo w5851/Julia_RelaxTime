@@ -2,6 +2,65 @@
 
 ## 日期：2025-12-28
 
+## 2026-01-23 状态复核（完成度评估）
+
+- ✅ 已实现（与文档描述一致）："ThermoDerivatives.jl 中重复求解能隙方程" 的高优先级优化。
+   - 现状：`bulk_viscosity_coefficients` 通过一次 `IMPLICIT_SOLVER` 求解拿到基态 `x_base`，再用 `ForwardDiff.jacobian(solve_state, θ)` 统一得到 $dx/dθ$，后续用链式法则拼出所需导数。
+   - 代码位置：[src/pnjl/derivatives/ThermoDerivatives.jl](src/pnjl/derivatives/ThermoDerivatives.jl)
+
+- ❌ 仍未实现（因此“整份任务”不算完成，不建议归档到 archived）：
+   - `TransportCoefficients.jl` 的通用积分框架抽取与去重复
+   - ✅ 采用配置结构体简化参数传递（已在 `TransportCoefficients` 引入 `TransportIntegrationConfig`，并在 `TransportWorkflow` 支持 `transport_config=...` 作为调用侧入口）
+   - 输入参数验证（如 `T>0` 等）与极端参数数值保护
+   - `Symbol` → 整数索引、分派表等低优先级性能微优化
+   - 更完整的 API 文档与集成测试补齐
+   - 体粘滞函数命名/接口统一方案（仍待讨论）
+
+## 方案记录：配置结构体简化参数（Phase 1：TransportCoefficients）
+
+目标：在不破坏现有关键字参数调用方式的前提下，引入一个“积分配置结构体”，统一承载动量/角度积分的常用参数，减少函数签名中的重复参数，并让上层 workflow 更容易透传配置。
+
+### 设计原则
+
+1. **完全向后兼容**：原有调用 `...; p_nodes=..., p_max=..., cos_nodes=...` 必须保持可用且行为不变。
+2. **新增更高层入口**：新增 `config=...` 作为统一入口；调用方可以只传一个结构体。
+3. **优先级规则**：若同时提供 `config` 与显式关键字（如 `p_nodes=...`），则 **显式关键字覆盖 config**（便于逐步迁移与调参）。
+4. **最小侵入落地**：Phase 1 只覆盖 `src/relaxtime/TransportCoefficients.jl`；后续再评估是否将 `RelaxationTime/AverageScatteringRate` 的积分参数也统一到同一套配置系统。
+
+### 结构体草案
+
+建议命名：`TransportIntegrationConfig`（避免与其它模块的更通用 `IntegrationConfig` 撞名）。
+
+字段（与现有 API 一一对应）：
+- `p_nodes::Int`
+- `p_max::Float64`
+- `p_grid::Union{Nothing,Vector{Float64}}`
+- `p_w::Union{Nothing,Vector{Float64}}`
+- `cos_nodes::Int`
+- `cos_grid::Union{Nothing,Vector{Float64}}`
+- `cos_w::Union{Nothing,Vector{Float64}}`
+
+默认值：沿用模块当前默认（`DEFAULT_*_NODES/WEIGHTS` 与 `p_max=10.0`）。
+
+### 校验规则（先从结构体层做起）
+
+- `p_grid` 与 `p_w` 必须成对出现，且长度一致。
+- `cos_grid` 与 `cos_w` 必须成对出现，且长度一致。
+
+### API 改造方式
+
+- `shear_viscosity/electric_conductivity/bulk_viscosity_isentropic/transport_coefficients` 新增 keyword：
+   - `config::TransportIntegrationConfig=DEFAULT_TRANSPORT_CONFIG`
+- 原有关键字参数仍保留，但其默认值改为从 `config` 读取，从而自动实现“显式关键字覆盖 config”。
+
+### 文档与测试同步
+
+- API 文档 `docs/api/relaxtime/transport/TransportCoefficients.md` 增加 `config` 参数说明与示例。
+- 单元测试增加：
+   - `config` 用法与旧关键字用法等价性测试。
+   - “显式关键字覆盖 config”的优先级测试。
+   - 结构体参数校验（例如只给 `p_grid` 不给 `p_w` 应报错）。
+
 ## 当前计算流程
 
 ```

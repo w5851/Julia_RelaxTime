@@ -15,6 +15,13 @@ include("TotalCrossSection.jl")
 include("OneLoopIntegrals.jl")
 include("../Constants_PNJL.jl")
 
+# Ensure shared parameter types are loaded for cross-module reuse
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
+
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
 using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
     build_w0cdf_pchip_cache
@@ -24,11 +31,16 @@ using .Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 
 export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCESSES
 
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
+
 # Single source of truth for supported scattering processes.
 # This list is derived from `Constants_PNJL.SCATTERING_MESON_MAP` keys.
 const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
 
-@inline function ensure_quark_params_has_A(quark_params::NamedTuple, thermo_params::NamedTuple)::NamedTuple
+@inline function ensure_quark_params_has_A(quark_params, thermo_params)::NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     # Many low-level scattering routines require `quark_params.A` for polarization functions.
     # Older callers/tests may only provide (m, μ). In that case we compute A on-demand here.
     if hasproperty(quark_params, :A)
@@ -103,8 +115,8 @@ end
 
 # Compute missing averaged scattering rates while reusing any existing results or cross-section caches.
 function compute_average_rates(
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params,
+    thermo_params,
     K_coeffs::NamedTuple;
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
     cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
@@ -127,7 +139,8 @@ function compute_average_rates(
         end
     end
 
-    quark_params = ensure_quark_params_has_A(quark_params, thermo_params)
+    quark_params = ensure_quark_params_has_A(_nt_quark(quark_params), _nt_thermo(thermo_params))
+    thermo_params = _nt_thermo(thermo_params)
 
     # Unified standard (default):
     # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
@@ -311,8 +324,8 @@ end
 
 # Main entry: returns tau, tau_inv, and the averaged rates for reuse.
 function relaxation_times(
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params,
+    thermo_params,
     K_coeffs::NamedTuple;
     densities::Union{NamedTuple,AbstractDict},
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,

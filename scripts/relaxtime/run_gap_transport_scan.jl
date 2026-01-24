@@ -485,7 +485,7 @@ function run_scan(opts::ScanOptions)
                             phi_w=phi_w,
                             sigma_cutoff=sigma_cutoff,
                         ),
-                        transport_kwargs=(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm,),
+                        transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
                     )
 
                     eq = res.equilibrium

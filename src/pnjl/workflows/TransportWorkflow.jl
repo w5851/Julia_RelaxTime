@@ -21,8 +21,21 @@ module TransportWorkflow
 include("../../Constants_PNJL.jl")
 include("../PNJL.jl")
 include("../../relaxtime/RelaxationTime.jl")
-include("../../relaxtime/TransportCoefficients.jl")
 include("../../relaxtime/OneLoopIntegrals.jl")
+
+# Shared parameter structs (QuarkParams/ThermoParams)
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+end
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
+# Avoid duplicate TransportCoefficients modules when this workflow is loaded after
+# standalone TransportCoefficients tests; reuse Main.TransportCoefficients if it
+# already exists, otherwise load it into Main once.
+if !isdefined(Main, :TransportCoefficients)
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "relaxtime", "TransportCoefficients.jl"))
+end
+const TransportCoefficients = Main.TransportCoefficients
 
 using StaticArrays
 
@@ -31,21 +44,39 @@ using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
 using .PNJL.ThermoDerivatives: bulk_viscosity_coefficients
 using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .RelaxationTime: relaxation_times
-using .TransportCoefficients: transport_coefficients
+using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
 using .OneLoopIntegrals: A
 
 export solve_gap_and_transport, build_equilibrium_params
+export TransportIntegrationConfig
+
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
+
+const TRANSPORT_INTEGRATION_KEYS = (
+    :p_nodes, :p_max,
+    :p_grid, :p_w,
+    :cos_nodes, :cos_grid, :cos_w,
+)
+
+@inline function _drop_transport_integration_keys(kwargs::NamedTuple)::NamedTuple
+    return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_INTEGRATION_KEYS))...)
+end
+
+@inline function _extract_transport_integration_kwargs(kwargs::NamedTuple)::NamedTuple
+    return (; (k => v for (k, v) in pairs(kwargs) if (k in TRANSPORT_INTEGRATION_KEYS))...)
+end
 
 """将平衡求解结果转换成 (quark_params, thermo_params)。"""
 function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     Φ = Float64(base.x_state[4])
     Φbar = Float64(base.x_state[5])
     return (
-        quark_params=(
+        quark_params=QuarkParams((
             m=(u=NaN, d=NaN, s=NaN),
             μ=(u=Float64(mu_fm), d=Float64(mu_fm), s=Float64(mu_fm)),
-        ),
-        thermo_params=(T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi)),
+        )),
+        thermo_params=ThermoParams((T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi))),
     )
 end
 
@@ -61,13 +92,16 @@ end
     )
 end
 
-@inline function _A_from_equilibrium(T_fm::Real, quark_params::NamedTuple, thermo_params::NamedTuple)
-    μu = quark_params.μ.u
-    μs = quark_params.μ.s
-    mu = quark_params.m.u
-    ms = quark_params.m.s
-    Φ = thermo_params.Φ
-    Φbar = thermo_params.Φbar
+@inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params)
+    qp = _nt_quark(quark_params)
+    tp = _nt_thermo(thermo_params)
+
+    μu = qp.μ.u
+    μs = qp.μ.s
+    mu = qp.m.u
+    ms = qp.m.s
+    Φ = tp.Φ
+    Φbar = tp.Φbar
 
     nodes = DEFAULT_MOMENTUM_NODES
     weights = DEFAULT_MOMENTUM_WEIGHTS
@@ -98,7 +132,9 @@ end
 - `p_num`, `t_num`: 热积分节点数（传给能隙求解/密度计算）
 - `solver_kwargs`: 透传到 `solve`（例如 `iterations` 等）
 - `tau_kwargs`: 透传到 `RelaxationTime.relaxation_times`（例如 `p_nodes/angle_nodes/phi_nodes/n_sigma_points/cs_caches/existing_rates` 等）
-- `transport_kwargs`: 透传到 `transport_coefficients`（例如 `p_nodes`, `p_max` 等）
+- `transport_config`: 输运系数积分配置（推荐），例如 `TransportIntegrationConfig(p_nodes=64, p_max=15.0, cos_nodes=32)`。
+    - 若同时在 `transport_kwargs` 里提供了 `p_nodes/p_max/...`，会被自动提取并用于构造 config（便于平滑迁移）。
+- `transport_kwargs`: 透传到 `transport_coefficients` 的其它参数（建议只放 `degeneracy/charges` 等非积分配置项）。
 """
 function solve_gap_and_transport(
     T_fm::Real,
@@ -114,6 +150,7 @@ function solve_gap_and_transport(
     seed_state=HADRON_SEED_5,
     solver_kwargs::NamedTuple=(;),
     tau_kwargs::NamedTuple=(;),
+    transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
     transport_kwargs::NamedTuple=(;)
 )
     base = equilibrium === nothing ? begin
@@ -139,10 +176,10 @@ function solve_gap_and_transport(
     masses = base.masses
 
     params0 = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
-    quark_params_basic = (
+    quark_params_basic = QuarkParams((
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
         μ=params0.quark_params.μ,
-    )
+    ))
     thermo_params = params0.thermo_params
 
     # 密度：用于 τ 的 ω_i = Σ ρ_j \bar{w}_{ij}
@@ -187,13 +224,37 @@ function solve_gap_and_transport(
         )
     end
 
-    tr = transport_coefficients(
-        quark_params_basic,
-        thermo_params;
-        tau=tau,
-        bulk_coeffs=bulk_coeffs,
-        transport_kwargs...,
-    )
+    # Backward/ergonomic compatibility:
+    # - If caller passes legacy integration knobs in transport_kwargs, auto-upgrade them into a config.
+    # - Keep transport_kwargs clean (non-integration keywords only) to avoid duplicated keyword errors.
+    integration_kwargs = _extract_transport_integration_kwargs(transport_kwargs)
+    transport_kwargs_clean = _drop_transport_integration_keys(transport_kwargs)
+    effective_transport_config = if transport_config !== nothing
+        transport_config
+    elseif length(keys(integration_kwargs)) > 0
+        TransportIntegrationConfig(; integration_kwargs...)
+    else
+        nothing
+    end
+
+    tr = if effective_transport_config === nothing
+        transport_coefficients(
+            as_namedtuple(quark_params_basic),
+            as_namedtuple(thermo_params);
+            tau=tau,
+            bulk_coeffs=bulk_coeffs,
+            transport_kwargs_clean...,
+        )
+    else
+        transport_coefficients(
+            as_namedtuple(quark_params_basic),
+            as_namedtuple(thermo_params);
+            tau=tau,
+            bulk_coeffs=bulk_coeffs,
+            config=effective_transport_config,
+            transport_kwargs_clean...,
+        )
+    end
 
     return (
         equilibrium=base,

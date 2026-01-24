@@ -20,7 +20,7 @@ using .TransportWorkflow
         p_num=8,
         t_num=4,
         solver_kwargs=(iterations=30,),
-        transport_kwargs=(p_nodes=12, p_max=4.0,),
+        transport_config=TransportIntegrationConfig(p_nodes=12, p_max=4.0),
     )
 
     @test haskey(res, :equilibrium)

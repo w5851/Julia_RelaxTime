@@ -172,7 +172,7 @@ function solve_point(T_mev::Float64, muB_mev::Float64, xi::Float64, c::ConvCase)
             phi_w=phi_w,
             sigma_cutoff=sigma_cutoff,
         ),
-        transport_kwargs=(p_nodes=c.tr_p_nodes, p_max=c.tr_p_max_fm,),
+        transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=c.tr_p_nodes, p_max=c.tr_p_max_fm),
     )
 
     eq = res.equilibrium

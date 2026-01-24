@@ -16,6 +16,12 @@ include("../PNJL.jl")
 include("../../relaxtime/MesonMass.jl")
 include("../../relaxtime/MottTransition.jl")
 
+# Shared parameter structs (QuarkParams/ThermoParams)
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+end
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
 using .Constants_PNJL: ħc_MeV_fm
 using .PNJL: solve, FixedMu
 using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
@@ -25,6 +31,9 @@ using .MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses, mot
 export DEFAULT_MESONS
 export solve_gap_and_meson_point
 export build_equilibrium_params
+
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 const DEFAULT_MESONS = (
     :pi,
@@ -50,19 +59,22 @@ end
 
 function _solve_meson_mass_with_retries(
     meson::Symbol,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple;
+    quark_params,
+    thermo_params;
     k_norm::Float64,
     mass_kwargs::NamedTuple,
 )
+    qp = _nt_quark(quark_params)
+    tp = _nt_thermo(thermo_params)
+
     # 基础阈值：用于构造更稳健的初值候选。
     thr = if _is_mixed_meson(meson)
-        mott_threshold_masses(meson, quark_params).min
+        mott_threshold_masses(meson, qp).min
     else
-        mott_threshold_mass(meson, quark_params)
+        mott_threshold_mass(meson, qp)
     end
 
-    guess = default_meson_mass_guess(meson, quark_params)
+    guess = default_meson_mass_guess(meson, qp)
     mass_candidates = _unique_positive_candidates(Float64[
         guess,
         0.7 * guess,
@@ -84,7 +96,7 @@ function _solve_meson_mass_with_retries(
     for m0 in mass_candidates
         for g0 in gamma_candidates
             res = try
-                solve_meson_mass(meson, quark_params, thermo_params;
+                solve_meson_mass(meson, qp, tp;
                     k_norm=k_norm,
                     initial_mass=m0,
                     initial_gamma=g0,
@@ -119,11 +131,11 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     Φbar = Float64(base.x_state[5])
 
     masses = base.masses
-    quark_params = (
+    quark_params = QuarkParams((
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
         μ=(u=Float64(mu_fm), d=Float64(mu_fm), s=Float64(mu_fm)),
-    )
-    thermo_params = (T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi))
+    ))
+    thermo_params = ThermoParams((T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi)))
     return (quark_params=quark_params, thermo_params=thermo_params)
 end
 
@@ -186,13 +198,15 @@ function solve_gap_and_meson_point(
         residual = res === nothing ? Inf : Float64(res.residual_norm)
 
         if _is_mixed_meson(meson)
-            thr = mott_threshold_masses(meson, quark_params)
-            gaps = isfinite(mass) ? mott_gaps(meson, mass, quark_params) : (uu=NaN, ss=NaN, min=NaN)
+            qp = _nt_quark(quark_params)
+            thr = mott_threshold_masses(meson, qp)
+            gaps = isfinite(mass) ? mott_gaps(meson, mass, qp) : (uu=NaN, ss=NaN, min=NaN)
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     threshold=thr, gaps=gaps)
         else
-            thr = mott_threshold_mass(meson, quark_params)
-            gapv = isfinite(mass) ? mott_gap(meson, mass, quark_params) : NaN
+            qp = _nt_quark(quark_params)
+            thr = mott_threshold_mass(meson, qp)
+            gapv = isfinite(mass) ? mott_gap(meson, mass, qp) : NaN
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     threshold=thr, gap=gapv)
         end

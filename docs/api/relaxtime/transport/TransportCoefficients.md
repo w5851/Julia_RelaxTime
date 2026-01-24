@@ -73,6 +73,13 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 ## 模块位置
 - 源码：`src/relaxtime/TransportCoefficients.jl`
 
+## 参数结构体（可复用）
+
+`QuarkParams` 与 `ThermoParams` 属于项目级通用参数结构体，定义在 `src/ParameterTypes.jl` 的 `ParameterTypes` 模块中。
+
+- 推荐：`using ParameterTypes` 后直接使用这些类型。
+- 兼容：本模块仍 re-export 了 `QuarkParams/ThermoParams`，旧调用无需修改。
+
 ---
 
 ## API 参考
@@ -87,12 +94,11 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 - `tau::NamedTuple`：至少包含 `u,d,s,ubar,dbar,sbar`（fm）。
 
 **可选参数**
-- `degeneracy::Float64`：默认 $2N_c = 6$。
-- `p_nodes::Int`：动量积分节点数。
-- `p_max::Float64`：动量积分上限（fm⁻¹）。
-- `p_grid, p_w`：自定义动量积分节点和权重。
-- `cos_nodes::Int`：角度积分节点数（仅 ξ≠0 时使用）。
-- `cos_grid, cos_w`：自定义角度积分节点和权重。
+- `config`：积分配置结构体 `TransportIntegrationConfig(...)`，用于统一传递积分相关参数。
+  - 默认：`DEFAULT_TRANSPORT_CONFIG`
+  - 优先级：调用时提供的同名关键字（例如 `p_nodes=...`）会覆盖 `config` 中对应字段。
+  - 允许覆盖的字段：`p_nodes/p_max/p_grid/p_w/cos_nodes/cos_grid/cos_w`
+- `degeneracy::Float64`：默认 $2N_c = 6$（物理简并度，不属于积分配置）。
 
 ---
 
@@ -172,7 +178,8 @@ tau = (
     ubar = 1.0, dbar = 1.0, sbar = 2.0
 )
 
-# 计算剪切粘滞系数
+
+# 计算剪切粘滞系数（直接用关键字覆盖默认积分配置）
 η = shear_viscosity(quark_params, thermo_params; tau=tau, p_max=15.0, p_nodes=64)
 
 # 计算电导率
@@ -181,6 +188,29 @@ tau = (
 # 各向异性情况
 thermo_params_aniso = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.1)
 η_aniso = shear_viscosity(quark_params, thermo_params_aniso; tau=tau, p_max=15.0, p_nodes=64, cos_nodes=32)
+
+# 使用配置结构体统一传参（推荐：把积分配置集中在一个结构体里）
+cfg = TransportIntegrationConfig(p_nodes=64, p_max=15.0, cos_nodes=32)
+η_cfg = shear_viscosity(quark_params, thermo_params_aniso; tau=tau, config=cfg)
+
+
+# 也支持把 config 作为位置参数（更简洁），并可用关键字覆盖其中字段
+η_cfg2 = shear_viscosity(quark_params, thermo_params_aniso, cfg; tau=tau)
+η_cfg3 = shear_viscosity(quark_params, thermo_params_aniso, cfg; tau=tau, p_nodes=96)
+
+# 推荐入口：使用更高层的请求结构体统一封装所有参数
+req = TransportRequest(
+  quark_params,
+  thermo_params_aniso;
+  tau=tau,
+  integration=cfg,
+  # 可选：charges / degeneracy 也可以在这里统一指定
+)
+
+η_req = shear_viscosity(req)                 # 使用 req.integration
+η_req2 = shear_viscosity(req; p_nodes=96)    # 覆盖 integration 字段
+σ_req = electric_conductivity(req)
+all = transport_coefficients(req; bulk_coeffs=nothing)
 ```
 
 ## 注意事项

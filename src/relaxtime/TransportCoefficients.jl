@@ -34,12 +34,90 @@ using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, 
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
+# Ensure shared parameter types are loaded at Main-level
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
+
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
 export shear_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
+
+export TransportIntegrationConfig, QuarkParams, ThermoParams, TransportPhysicsConfig, TransportRequest
 
 const TWO_PI = 2.0 * π
 
 # 自然单位制中的元电荷: e = sqrt(4πα)
 const e_natural = sqrt(4.0 * π * α)
+
+const _TRANSPORT_INTEGRATION_KEYS = (
+    :p_nodes,
+    :p_max,
+    :p_grid,
+    :p_w,
+    :cos_nodes,
+    :cos_grid,
+    :cos_w,
+)
+
+struct TransportIntegrationConfig
+    p_nodes::Int
+    p_max::Float64
+    p_grid::Union{Nothing,Vector{Float64}}
+    p_w::Union{Nothing,Vector{Float64}}
+    cos_nodes::Int
+    cos_grid::Union{Nothing,Vector{Float64}}
+    cos_w::Union{Nothing,Vector{Float64}}
+end
+
+function TransportIntegrationConfig(;
+    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
+    p_max::Float64=10.0,
+    p_grid::Union{Nothing,Vector{Float64}}=nothing,
+    p_w::Union{Nothing,Vector{Float64}}=nothing,
+    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
+    cos_w::Union{Nothing,Vector{Float64}}=nothing,
+)
+    if (p_grid === nothing) != (p_w === nothing)
+        error("TransportIntegrationConfig: p_grid and p_w must be provided together")
+    end
+    if p_grid !== nothing && length(p_grid) != length(p_w)
+        error("TransportIntegrationConfig: p_grid and p_w length mismatch")
+    end
+    if (cos_grid === nothing) != (cos_w === nothing)
+        error("TransportIntegrationConfig: cos_grid and cos_w must be provided together")
+    end
+    if cos_grid !== nothing && length(cos_grid) != length(cos_w)
+        error("TransportIntegrationConfig: cos_grid and cos_w length mismatch")
+    end
+    return TransportIntegrationConfig(p_nodes, p_max, p_grid, p_w, cos_nodes, cos_grid, cos_w)
+end
+
+const DEFAULT_TRANSPORT_CONFIG = TransportIntegrationConfig()
+
+@inline function _merge_transport_integration_config(
+    base::TransportIntegrationConfig,
+    overrides::Base.Pairs,
+)::TransportIntegrationConfig
+    unknown = Symbol[]
+    for k in keys(overrides)
+        k in _TRANSPORT_INTEGRATION_KEYS || push!(unknown, k)
+    end
+    isempty(unknown) || error(
+        "Unknown integration keyword(s): $(unknown). Allowed keys: $(_TRANSPORT_INTEGRATION_KEYS)"
+    )
+
+    return TransportIntegrationConfig(
+        p_nodes=get(overrides, :p_nodes, base.p_nodes),
+        p_max=get(overrides, :p_max, base.p_max),
+        p_grid=get(overrides, :p_grid, base.p_grid),
+        p_w=get(overrides, :p_w, base.p_w),
+        cos_nodes=get(overrides, :cos_nodes, base.cos_nodes),
+        cos_grid=get(overrides, :cos_grid, base.cos_grid),
+        cos_w=get(overrides, :cos_w, base.cos_w),
+    )
+end
 
 @inline energy_from_p(p::Float64, m::Float64) = sqrt(p * p + m * m)
 
@@ -60,6 +138,131 @@ end
 """
 @inline function default_charges()
     return (u = (2.0 / 3.0) * e_natural, d = (-1.0 / 3.0) * e_natural, s = (-1.0 / 3.0) * e_natural)
+end
+
+struct TransportPhysicsConfig
+    charges::NamedTuple
+    degeneracy::Float64
+end
+
+function TransportPhysicsConfig(;
+    charges::NamedTuple=default_charges(),
+    degeneracy::Float64=degeneracy_default(),
+)
+    return TransportPhysicsConfig(charges, degeneracy)
+end
+
+struct TransportRequest
+    quark::QuarkParams
+    thermo::ThermoParams
+    tau::NamedTuple
+    physics::TransportPhysicsConfig
+    integration::TransportIntegrationConfig
+end
+
+function TransportRequest(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    tau::NamedTuple,
+    charges::NamedTuple=default_charges(),
+    degeneracy::Float64=degeneracy_default(),
+    integration::TransportIntegrationConfig=DEFAULT_TRANSPORT_CONFIG,
+)
+    return TransportRequest(
+        QuarkParams(quark_params),
+        ThermoParams(thermo_params),
+        tau,
+        TransportPhysicsConfig(charges=charges, degeneracy=degeneracy),
+        integration,
+    )
+end
+
+function TransportRequest(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    tau::NamedTuple,
+    physics::TransportPhysicsConfig=TransportPhysicsConfig(),
+    integration::TransportIntegrationConfig=DEFAULT_TRANSPORT_CONFIG,
+)
+    return TransportRequest(quark, thermo, tau, physics, integration)
+end
+
+"""Recommended entry: pass a `TransportRequest` and optionally override integration fields by keywords."""
+function shear_viscosity(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    degeneracy::Float64=req.physics.degeneracy,
+    integration::TransportIntegrationConfig=req.integration,
+    kwargs...
+)::Float64
+    return shear_viscosity(
+        as_namedtuple(req.quark),
+        as_namedtuple(req.thermo);
+        tau=tau,
+        degeneracy=degeneracy,
+        config=integration,
+        kwargs...
+    )
+end
+
+"""Recommended entry: pass a `TransportRequest` and optionally override integration fields by keywords."""
+function electric_conductivity(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    charges::NamedTuple=req.physics.charges,
+    degeneracy::Float64=req.physics.degeneracy,
+    integration::TransportIntegrationConfig=req.integration,
+    kwargs...
+)::Float64
+    return electric_conductivity(
+        as_namedtuple(req.quark),
+        as_namedtuple(req.thermo);
+        tau=tau,
+        charges=charges,
+        degeneracy=degeneracy,
+        config=integration,
+        kwargs...
+    )
+end
+
+"""Recommended entry: pass a `TransportRequest` and optionally override integration fields by keywords."""
+function bulk_viscosity_isentropic(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    bulk_coeffs_isentropic::NamedTuple,
+    integration::TransportIntegrationConfig=req.integration,
+    kwargs...
+)::Float64
+    return bulk_viscosity_isentropic(
+        as_namedtuple(req.quark),
+        as_namedtuple(req.thermo);
+        tau=tau,
+        bulk_coeffs_isentropic=bulk_coeffs_isentropic,
+        config=integration,
+        kwargs...
+    )
+end
+
+"""Recommended entry: pass a `TransportRequest` and optionally override integration fields by keywords."""
+function transport_coefficients(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    charges::NamedTuple=req.physics.charges,
+    degeneracy::Float64=req.physics.degeneracy,
+    integration::TransportIntegrationConfig=req.integration,
+    kwargs...
+)::NamedTuple
+    return transport_coefficients(
+        as_namedtuple(req.quark),
+        as_namedtuple(req.thermo);
+        tau=tau,
+        bulk_coeffs=bulk_coeffs,
+        charges=charges,
+        degeneracy=degeneracy,
+        config=integration,
+        kwargs...
+    )
 end
 
 @inline function fermi_factor(f::Float64)
@@ -154,20 +357,23 @@ function shear_viscosity(
     thermo_params::NamedTuple;
     tau::NamedTuple,
     degeneracy::Float64=degeneracy_default(),
-    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
-    p_max::Float64=10.0,
-    p_grid::Union{Nothing,Vector{Float64}}=nothing,
-    p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
-    cos_w::Union{Nothing,Vector{Float64}}=nothing
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    kwargs...
 )::Float64
     T = thermo_params.T
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
     ξ = get(thermo_params, :ξ, 0.0)
 
-    nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
+    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
+    effective_config = _merge_transport_integration_config(base_config, kwargs)
+
+    nodes_p, weights_p = _p_nodes_weights(
+        effective_config.p_nodes,
+        effective_config.p_max,
+        effective_config.p_grid,
+        effective_config.p_w,
+    )
 
     # 相空间测度系数
     # 各向同性: 4π/(2π)³ = 1/(2π²)
@@ -195,7 +401,11 @@ function shear_viscosity(
         integral = pref_measure_iso * acc
         return (1.0 / (15.0 * T)) * integral
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
+        nodes_cos, weights_cos = _cos_nodes_weights(
+            effective_config.cos_nodes,
+            effective_config.cos_grid,
+            effective_config.cos_w,
+        )
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
@@ -217,6 +427,25 @@ function shear_viscosity(
     end
 end
 
+"""Convenience overload: pass `config` as a positional argument."""
+function shear_viscosity(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    degeneracy::Float64=degeneracy_default(),
+    kwargs...
+)::Float64
+    return shear_viscosity(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        config=config,
+        degeneracy=degeneracy,
+        kwargs...
+    )
+end
+
 """
     electric_conductivity(quark_params, thermo_params; tau, charges, ...)
 
@@ -232,20 +461,23 @@ function electric_conductivity(
     tau::NamedTuple,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
-    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
-    p_max::Float64=10.0,
-    p_grid::Union{Nothing,Vector{Float64}}=nothing,
-    p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
-    cos_w::Union{Nothing,Vector{Float64}}=nothing
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    kwargs...
 )::Float64
     T = thermo_params.T
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
     ξ = get(thermo_params, :ξ, 0.0)
 
-    nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
+    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
+    effective_config = _merge_transport_integration_config(base_config, kwargs)
+
+    nodes_p, weights_p = _p_nodes_weights(
+        effective_config.p_nodes,
+        effective_config.p_max,
+        effective_config.p_grid,
+        effective_config.p_w,
+    )
 
     pref_measure_iso = 1.0 / (2.0 * π^2)
     pref_measure_aniso = 1.0 / (4.0 * π^2)
@@ -282,7 +514,11 @@ function electric_conductivity(
         integral = pref_measure_iso * acc
         return (1.0 / (3.0 * T)) * integral
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
+        nodes_cos, weights_cos = _cos_nodes_weights(
+            effective_config.cos_nodes,
+            effective_config.cos_grid,
+            effective_config.cos_w,
+        )
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             p2 = p * p
@@ -304,6 +540,27 @@ function electric_conductivity(
     end
 end
 
+"""Convenience overload: pass `config` as a positional argument."""
+function electric_conductivity(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    charges::NamedTuple=default_charges(),
+    degeneracy::Float64=degeneracy_default(),
+    kwargs...
+)::Float64
+    return electric_conductivity(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        config=config,
+        charges=charges,
+        degeneracy=degeneracy,
+        kwargs...
+    )
+end
+
 """
     bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...)
 
@@ -321,13 +578,8 @@ function bulk_viscosity_isentropic(
     thermo_params::NamedTuple;
     tau::NamedTuple,
     bulk_coeffs_isentropic::NamedTuple,
-    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
-    p_max::Float64=10.0,
-    p_grid::Union{Nothing,Vector{Float64}}=nothing,
-    p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
-    cos_w::Union{Nothing,Vector{Float64}}=nothing
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    kwargs...
 )::Float64
     T = thermo_params.T
     Φ = thermo_params.Φ
@@ -341,7 +593,15 @@ function bulk_viscosity_isentropic(
     dM_dT = bulk_coeffs_isentropic.dM_dT
     dM_dμB = bulk_coeffs_isentropic.dM_dμB
 
-    nodes_p, weights_p = _p_nodes_weights(p_nodes, p_max, p_grid, p_w)
+    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
+    effective_config = _merge_transport_integration_config(base_config, kwargs)
+
+    nodes_p, weights_p = _p_nodes_weights(
+        effective_config.p_nodes,
+        effective_config.p_max,
+        effective_config.p_grid,
+        effective_config.p_w,
+    )
 
     # 系数：N_c / (9π²T)
     # 注意：Fortran 公式中的积分是直接对 p 积分，没有额外的相空间测度因子
@@ -427,7 +687,11 @@ function bulk_viscosity_isentropic(
         end
         return prefactor * acc
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(cos_nodes, cos_grid, cos_w)
+        nodes_cos, weights_cos = _cos_nodes_weights(
+            effective_config.cos_nodes,
+            effective_config.cos_grid,
+            effective_config.cos_w,
+        )
         acc = 0.0
         @inbounds for (p, wp) in zip(nodes_p, weights_p)
             for (c, wc) in zip(nodes_cos, weights_cos)
@@ -441,6 +705,25 @@ function bulk_viscosity_isentropic(
     end
 end
 
+"""Convenience overload: pass `config` as a positional argument."""
+function bulk_viscosity_isentropic(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    bulk_coeffs_isentropic::NamedTuple,
+    kwargs...
+)::Float64
+    return bulk_viscosity_isentropic(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        bulk_coeffs_isentropic=bulk_coeffs_isentropic,
+        config=config,
+        kwargs...
+    )
+end
+
 """
     transport_coefficients(quark_params, thermo_params; tau, bulk_coeffs, charges, ...)
 
@@ -451,60 +734,63 @@ function transport_coefficients(
     thermo_params::NamedTuple;
     tau::NamedTuple,
     bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
-    p_nodes::Int=length(DEFAULT_MOMENTUM_NODES),
-    p_max::Float64=10.0,
-    p_grid::Union{Nothing,Vector{Float64}}=nothing,
-    p_w::Union{Nothing,Vector{Float64}}=nothing,
-    cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
-    cos_w::Union{Nothing,Vector{Float64}}=nothing
+    kwargs...
 )::NamedTuple
+    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
+    effective_config = _merge_transport_integration_config(base_config, kwargs)
+
     eta = shear_viscosity(
         quark_params,
-        thermo_params;
+        thermo_params,
+        effective_config;
         tau=tau,
         degeneracy=degeneracy,
-        p_nodes=p_nodes,
-        p_max=p_max,
-        p_grid=p_grid,
-        p_w=p_w,
-        cos_nodes=cos_nodes,
-        cos_grid=cos_grid,
-        cos_w=cos_w,
     )
 
     sigma = electric_conductivity(
         quark_params,
-        thermo_params;
+        thermo_params,
+        effective_config;
         tau=tau,
         charges=charges,
         degeneracy=degeneracy,
-        p_nodes=p_nodes,
-        p_max=p_max,
-        p_grid=p_grid,
-        p_w=p_w,
-        cos_nodes=cos_nodes,
-        cos_grid=cos_grid,
-        cos_w=cos_w,
     )
 
     zeta = bulk_coeffs === nothing ? NaN : bulk_viscosity_isentropic(
         quark_params,
-        thermo_params;
+        thermo_params,
+        effective_config;
         tau=tau,
         bulk_coeffs_isentropic=bulk_coeffs,
-        p_nodes=p_nodes,
-        p_max=p_max,
-        p_grid=p_grid,
-        p_w=p_w,
-        cos_nodes=cos_nodes,
-        cos_grid=cos_grid,
-        cos_w=cos_w,
     )
 
     return (eta=eta, zeta=zeta, sigma=sigma)
+end
+
+"""Convenience overload: pass `config` as a positional argument, with optional explicit overrides."""
+function transport_coefficients(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    charges::NamedTuple=default_charges(),
+    degeneracy::Float64=degeneracy_default(),
+    kwargs...
+)::NamedTuple
+    return transport_coefficients(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        bulk_coeffs=bulk_coeffs,
+        config=config,
+        charges=charges,
+        degeneracy=degeneracy,
+        kwargs...
+    )
 end
 
 end # module

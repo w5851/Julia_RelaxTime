@@ -480,7 +480,7 @@ function run_scan(opts::Options)
                 seed_state=seed_state,
                 solver_kwargs=(iterations=opts.max_iter,),
                 tau_kwargs=tau_kwargs,
-                transport_kwargs=(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm,),
+                transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
             )
 
             eq = res.equilibrium
