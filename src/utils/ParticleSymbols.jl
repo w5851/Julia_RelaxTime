@@ -1,5 +1,5 @@
 """
-# ParticleSymbols.jl
+# ParticleSymbols Module
 
 统一的粒子符号处理工具模块，提供符号解析、参数查询等通用功能。
 
@@ -16,6 +16,26 @@
 - 提供清晰的错误信息
 - 避免代码重复
 
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters** for parameter lookup functions:
+
+```julia
+# Using structs (recommended)
+using Main.ParameterTypes: QuarkParams
+
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+m = get_mass(:u, q)  # 1.52 fm⁻¹
+μ = get_chemical_potential(:ubar, q)  # +0.3 fm⁻¹
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+m = get_mass(:u, q_nt)  # 1.52 fm⁻¹
+μ = get_chemical_potential(:ubar, q_nt)  # +0.3 fm⁻¹
+```
+
+Both produce identical results. Internal normalization ensures type stability.
+
 ## 使用示例
 
 ```julia
@@ -27,7 +47,7 @@ flavor, is_antiparticle = extract_flavor(:ubar)  # (:u, true)
 # 过程解析
 i, j, c, d = parse_scattering_process(:uu_to_uu)  # (:u, :u, :u, :u)
 
-# 参数查询
+# 参数查询（支持结构体和NamedTuple）
 m = get_mass(:u, quark_params)  # 1.52 fm⁻¹
 μ = get_chemical_potential(:ubar, quark_params)  # +0.3 fm⁻¹ (同号)
 ψ = get_wavefunction(:u, false)  # [1.0, 0.0, 0.0] (列向量)
@@ -54,6 +74,26 @@ export get_wavefunction
 # 导入必要的常量
 include(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
 using .Constants_PNJL: ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s, SCATTERING_MESON_MAP
+
+# 导入参数类型
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
+using Main.ParameterTypes: QuarkParams, as_namedtuple
+
+# ----------------------------------------------------------------------------
+# 0. Normalization Helper
+# ----------------------------------------------------------------------------
+
+"""
+    _nt_quark(q) -> NamedTuple
+
+Internal normalization helper that converts QuarkParams struct to NamedTuple.
+If input is already a NamedTuple, returns it unchanged.
+
+This ensures consistent internal representation regardless of input type.
+"""
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
 
 # ----------------------------------------------------------------------------
 # 1. 味标识解析
@@ -448,12 +488,14 @@ end
 # ----------------------------------------------------------------------------
 
 """
-    get_mass(particle::Symbol, quark_params::NamedTuple) -> Float64
+    get_mass(particle::Symbol, quark_params) -> Float64
 
 获取指定粒子的质量。
 
 # 参数
 
+- `particle::Symbol`: 粒子符号 (:u, :d, :s, :ubar, :dbar, :sbar)
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或包含 `m` 字段的 `NamedTuple`
 
 # 返回
 
@@ -466,11 +508,18 @@ end
 # 示例
 
 ```julia
-m_u = get_mass(:u, quark_params)      # 1.52 fm⁻¹
-m_ubar = get_mass(:ubar, quark_params)  # 1.52 fm⁻¹ (相同)
+# Using QuarkParams struct (recommended)
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+m_u = get_mass(:u, q)      # 1.52 fm⁻¹
+m_ubar = get_mass(:ubar, q)  # 1.52 fm⁻¹ (相同)
+
+# Using NamedTuple (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+m_u = get_mass(:u, q_nt)      # 1.52 fm⁻¹
 ```
 """
-function get_mass(particle::Symbol, quark_params::NamedTuple)
+function get_mass(particle::Symbol, quark_params::Union{NamedTuple, QuarkParams})
+    quark_params = _nt_quark(quark_params)
     flavor, _ = extract_flavor(particle)
     
     if flavor == :u
@@ -484,7 +533,8 @@ function get_mass(particle::Symbol, quark_params::NamedTuple)
     end
 end
 
-@inline function _mass_for_quark_flavor(flavor::Symbol, quark_params::NamedTuple)::Float64
+@inline function _mass_for_quark_flavor(flavor::Symbol, quark_params)::Float64
+    quark_params = _nt_quark(quark_params)
     if flavor === :u
         return quark_params.m.u
     elseif flavor === :d
@@ -496,7 +546,8 @@ end
     end
 end
 
-@inline function _mass_for_flavor_code(code::UInt8, quark_params::NamedTuple)::Float64
+@inline function _mass_for_flavor_code(code::UInt8, quark_params)::Float64
+    quark_params = _nt_quark(quark_params)
     if code == FLAVOR_U
         return quark_params.m.u
     elseif code == FLAVOR_D
@@ -509,7 +560,7 @@ end
 end
 
 """
-    get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple) -> NTuple{4, Float64}
+    get_quark_masses_for_process(process::Symbol, quark_params) -> NTuple{4, Float64}
 
 根据散射过程符号返回四个外腿粒子的质量 `(m1, m2, m3, m4)`（单位：fm⁻¹）。
 
@@ -519,7 +570,8 @@ end
 
 该函数刻意只做“符号→质量索引”的工具工作，不涉及任何动力学或散射道（s/t/u）逻辑。
 """
-function get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple)::NTuple{4, Float64}
+function get_quark_masses_for_process(process::Symbol, quark_params::Union{NamedTuple, QuarkParams})::NTuple{4, Float64}
+    quark_params = _nt_quark(quark_params)
     c1, c2, c3, c4 = _parse_scattering_process_flavor_codes(process)
     return (
         _mass_for_flavor_code(c1, quark_params),
@@ -530,14 +582,14 @@ function get_quark_masses_for_process(process::Symbol, quark_params::NamedTuple)
 end
 
 """
-    get_chemical_potential(particle::Symbol, quark_params::NamedTuple) -> Float64
+    get_chemical_potential(particle::Symbol, quark_params) -> Float64
 
 获取指定粒子的化学势。
 
 # 参数
 
 - `particle::Symbol`: 粒子符号 (:u, :d, :s, :ubar, :dbar, :sbar)
-- `quark_params::NamedTuple`: 夸克参数 (需包含 `μ` 字段)
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或包含 `μ` 字段的 `NamedTuple`
 
 # 返回
 
@@ -551,11 +603,19 @@ end
 # 示例
 
 ```julia
-μ_u = get_chemical_potential(:u, quark_params)      # +0.3 fm⁻¹
-μ_ubar = get_chemical_potential(:ubar, quark_params)  # +0.3 fm⁻¹
+# Using QuarkParams struct (recommended)
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+μ_u = get_chemical_potential(:u, q)      # +0.3 fm⁻¹
+μ_ubar = get_chemical_potential(:ubar, q)  # +0.3 fm⁻¹
+
+# Using NamedTuple (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+μ_u = get_chemical_potential(:u, q_nt)      # +0.3 fm⁻¹
+μ_ubar = get_chemical_potential(:ubar, q_nt)  # +0.3 fm⁻¹
 ```
 """
-function get_chemical_potential(particle::Symbol, quark_params::NamedTuple)
+function get_chemical_potential(particle::Symbol, quark_params::Union{NamedTuple, QuarkParams})
+    quark_params = _nt_quark(quark_params)
     flavor, is_antiparticle = extract_flavor(particle)
     
     # 获取正粒子化学势

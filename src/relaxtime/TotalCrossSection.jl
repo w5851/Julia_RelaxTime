@@ -1,7 +1,7 @@
 module TotalCrossSection
 
 """
-# TotalCrossSection.jl
+# TotalCrossSection Module
 
 总散射截面计算模块，对微分散射截面进行 t 积分，包含末态统计因子。
 
@@ -34,6 +34,26 @@ t_± = m_i² + m_c² - (1/2s)·(s + m_i² - m_j²)(s + m_c² - m_d²)
 4. **总散射截面 σ(s)**: 高斯-勒让德数值积分（固定点数，可预测耗时）
 5. **批量计算与扫描**: 支持多过程、s 依赖性分析
 
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters**:
+
+```julia
+# Using structs (recommended)
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+σ = total_cross_section(:uu_to_uu, 2.0, q, t, K_coeffs)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+σ = total_cross_section(:uu_to_uu, 2.0, q_nt, t_nt, K_coeffs)
+```
+
+Both produce identical results. Internal normalization ensures type stability.
+
 ## 使用示例
 
 ```julia
@@ -64,6 +84,17 @@ all_σ = calculate_all_total_cross_sections(
 - doc/formula/散射截面by微分散射截面.md: 公式推导
 - api/TotalCrossSection.md: API 详细文档
 """
+
+# Import parameter types from Main
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
+
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
+# Normalization helpers for dual interface support
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 # 导入依赖模块
 include(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
@@ -464,8 +495,8 @@ end
 
 - `process::Symbol`: 散射过程标识（如 :uu_to_uu）
 - `s::Float64`: Mandelstam 变量 s [fm⁻²]
-- `quark_params::NamedTuple`: 夸克参数（质量、化学势）
-- `thermo_params::NamedTuple`: 热力学参数（T, Φ, Φbar）
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple（质量、化学势）
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple（T, Φ, Φbar）
 - `K_coeffs::NamedTuple`: 有效耦合常数
 - `n_points::Int=6`: 高斯-勒让德积分点数（默认 6 点）
 
@@ -500,22 +531,28 @@ end
 # 示例
 
 ```julia
-σ = total_cross_section(
-    :uu_to_uu, 31.0,
-    quark_params, thermo_params, K_coeffs,
-    n_points=6
-)
-println("σ(s=31) = \$σ fm²")
+# 使用结构体（推荐）
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+σ = total_cross_section(:uu_to_uu, 31.0, q, t, K_coeffs, n_points=6)
+
+# 使用 NamedTuple（向后兼容）
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+σ = total_cross_section(:uu_to_uu, 31.0, q_nt, t_nt, K_coeffs, n_points=6)
 ```
 """
 function total_cross_section(
     process::Symbol,
     s::Float64,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::Float64
+    # Normalize parameters at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     # 步骤1: 解析过程中的粒子
     particle_i, particle_j, particle_c, particle_d = parse_particles_from_process(process)
     
@@ -655,6 +692,8 @@ end
 # 参数
 
 与 `total_cross_section` 相同，但不需要指定 `process`
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple
 
 # 返回
 
@@ -663,21 +702,30 @@ end
 # 示例
 
 ```julia
-all_σ = calculate_all_total_cross_sections(
-    31.0, quark_params, thermo_params, K_coeffs,
-    n_points=6
-)
+# 使用结构体（推荐）
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+all_σ = calculate_all_total_cross_sections(31.0, q, t, K_coeffs, n_points=6)
+
+# 使用 NamedTuple（向后兼容）
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+all_σ = calculate_all_total_cross_sections(31.0, q_nt, t_nt, K_coeffs, n_points=6)
+
 println("uu→uu: \$(all_σ.uu_to_uu) fm²")
 println("dd→dd: \$(all_σ.dd_to_dd) fm²")
 ```
 """
 function calculate_all_total_cross_sections(
     s::Float64,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::NamedTuple
+    # Normalize parameters at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     results = Dict{Symbol, Float64}()
     
     for process in keys(SCATTERING_MESON_MAP)
@@ -705,6 +753,8 @@ end
 
 - `s_values::Vector{Float64}`: s 值数组 [fm⁻²]
 - 其他参数与 `total_cross_section` 相同
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple
 
 # 返回
 
@@ -713,12 +763,16 @@ end
 # 示例
 
 ```julia
+# 使用结构体（推荐）
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
 s_values = collect(range(10.0, 50.0, length=20))
-σ_values = scan_s_dependence(
-    s_values, :uu_to_uu,
-    quark_params, thermo_params, K_coeffs,
-    n_points=6
-)
+σ_values = scan_s_dependence(s_values, :uu_to_uu, q, t, K_coeffs, n_points=6)
+
+# 使用 NamedTuple（向后兼容）
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+σ_values = scan_s_dependence(s_values, :uu_to_uu, q_nt, t_nt, K_coeffs, n_points=6)
 
 using Plots
 plot(s_values, σ_values, xlabel="s [fm⁻²]", ylabel="σ [fm²]")
@@ -727,11 +781,14 @@ plot(s_values, σ_values, xlabel="s [fm⁻²]", ylabel="σ [fm²]")
 function scan_s_dependence(
     s_values::Vector{Float64},
     process::Symbol,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::Vector{Float64}
+    # Normalize parameters at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     σ_values = Float64[]
     
     for s in s_values

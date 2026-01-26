@@ -1,5 +1,5 @@
 """
-# TotalPropagator.jl
+# TotalPropagator Module
 
 总传播子计算模块，支持任意散射道组合及介子组合的总传播子计算。
 
@@ -9,10 +9,32 @@
 公式参考 doc/formula/总传播子byPropagator.md
 
 ## 核心设计原则
+
 - 支持任意散射过程（如 :uu_to_uu, :us_to_us, :ud_to_ud 等）
 - 自动识别散射道（t/u/s）对应的味因子
 - 灵活处理一般介子（π, K, σ_π, σ_K）和混合介子（η/η', σ/σ'）
 - 性能优化：内部调用带缓存的极化函数，自动复用相同参数的计算结果
+
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters**:
+
+```julia
+# Using structs (recommended)
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+D = total_propagator_simple(:uu_to_uu, :t, [:pi], 0.5, 1.0, q, t, K_coeffs)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+D = total_propagator_simple(:uu_to_uu, :t, [:pi], 0.5, 1.0, q_nt, t_nt, K_coeffs)
+```
+
+Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo`) ensures
+type stability and zero overhead.
 """
 module TotalPropagator
 
@@ -26,10 +48,20 @@ using ..ParticleSymbols: FLAVOR_U, FLAVOR_D, FLAVOR_S
 using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
 using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
+# Import parameter types for struct support
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
 export total_propagator_simple, total_propagator_mixed, get_flavor_factor
 export calculate_all_propagators, calculate_all_propagators_by_channel, total_propagator_auto
 export calculate_cms_momentum
 export reset_cache!, get_cache_stats  # 导出缓存管理函数
+
+# ----------------------------------------------------------------------------
+# Normalization helpers for dual interface support
+# ----------------------------------------------------------------------------
+
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 # ----------------------------------------------------------------------------
 # 味因子查询表（表5.3）
@@ -66,7 +98,7 @@ end
 
 """
     calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel::Symbol,
-                          quark_params::NamedTuple; u::Union{Float64, Nothing}=nothing) 
+                          quark_params::Union{NamedTuple, QuarkParams}; u::Union{Float64, Nothing}=nothing) 
                           -> NamedTuple
 
 计算质心系下介子的四动量，用于传播子计算。
@@ -92,7 +124,7 @@ end
 - `s`: Mandelstam变量s（单位：fm⁻²）
 - `t`: Mandelstam变量t（单位：fm⁻²）
 - `channel`: 散射道类型（:s, :t, :u）
-- `quark_params`: 夸克参数NamedTuple，用于提取质量
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple，用于提取质量
 - `u`: 可选的Mandelstam变量u（单位：fm⁻²）。如果为`nothing`，则自动计算 u = Σm² - s - t
 
 # 返回值
@@ -112,7 +144,8 @@ s + t + u = m1² + m2² + m3² + m4²
 
 # 示例
 ```julia
-quark_params = (m = (u=0.3, d=0.3, s=0.5), ...)
+# 使用结构体（推荐）
+quark_params = QuarkParams(m=(u=0.3, d=0.3, s=0.5), μ=(u=0.0, d=0.0, s=0.0))
 s = 4.0  # fm⁻²
 t = -0.5  # fm⁻²
 
@@ -121,13 +154,20 @@ result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params)
 println("k0 = ", result.k0, " fm⁻¹")
 println("k = ", result.k, " fm⁻¹")
 
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (m = (u=0.3, d=0.3, s=0.5), μ = (u=0.0, d=0.0, s=0.0))
+result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params_nt)
+
 # 使用预计算的u
 u = sum_masses_squared - s - t
 result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params; u=u)
 ```
 """
 function calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel::Symbol,
-                               quark_params::NamedTuple; u::Union{Float64, Nothing}=nothing)
+                               quark_params::Union{NamedTuple, QuarkParams}; u::Union{Float64, Nothing}=nothing)
+    # Normalize input to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    
     # 1. 提取四个粒子质量
     m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
     
@@ -316,13 +356,13 @@ D_total = T1 * sum(D_meson) * T2
 - `meson_list`: 介子列表（如 [:pi, :K]）
 - `k0`: 四动量能量分量（单位：fm⁻¹）
 - `k_norm`: 三动量大小（单位：fm⁻¹）
-- `quark_params`: 夸克参数NamedTuple，结构：
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple，结构：
   ```julia
   (m = (u=m_u, d=m_d, s=m_s),   # 夸克质量（fm⁻¹）
    μ = (u=μ_u, d=μ_d, s=μ_s),   # 夸克化学势（fm⁻¹）
    A = (u=A_u, d=A_d, s=A_s))   # A函数值（fm）
   ```
-- `thermo_params`: 热力学参数NamedTuple，结构：
+- `thermo_params`: 热力学参数，可以是ThermoParams结构体或NamedTuple，结构：
   ```julia
   (T=T, Φ=Φ, Φbar=Φbar, ξ=ξ)    # 温度（fm⁻¹）、Polyakov环、各向异性参数
   ```
@@ -341,7 +381,7 @@ T = 150.0 / 197.327  # 150 MeV → fm⁻¹
 k0 = 100.0 / 197.327
 k_norm = 50.0 / 197.327
 
-# 计算夸克参数
+# 计算夸克参数（使用结构体，推荐）
 m_u = 300.0 / 197.327
 m_s = 500.0 / 197.327
 μ_u = 0.0
@@ -352,13 +392,13 @@ m_s = 500.0 / 197.327
 A_u = A(T, μ_u, m_u, Φ, Φbar)
 A_s = A(T, μ_s, m_s, Φ, Φbar)
 
-quark_params = (
-    m = (u=m_u, d=m_u, s=m_s),
-    μ = (u=μ_u, d=μ_u, s=μ_s),
-    A = (u=A_u, d=A_u, s=A_s)
+quark_params = QuarkParams(
+    m=(u=m_u, d=m_u, s=m_s),
+    μ=(u=μ_u, d=μ_u, s=μ_s)
 )
+# Note: A field will be added by ensure_quark_params_has_A if needed
 
-thermo_params = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+thermo_params = ThermoParams(T, Φ, Φbar, 0.0)
 
 # 计算K系数
 G_u = calculate_G_from_A(A_u)
@@ -368,12 +408,27 @@ K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 # 计算总传播子
 D = total_propagator_simple(:uu_to_uu, :t, [:pi, :K], 
                            k0, k_norm, quark_params, thermo_params, K_coeffs)
+
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (
+    m = (u=m_u, d=m_u, s=m_s),
+    μ = (u=μ_u, d=μ_u, s=μ_s),
+    A = (u=A_u, d=A_u, s=A_s)
+)
+thermo_params_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+D = total_propagator_simple(:uu_to_uu, :t, [:pi, :K], 
+                           k0, k_norm, quark_params_nt, thermo_params_nt, K_coeffs)
 ```
 """
 function total_propagator_simple(process::Symbol, channel::Symbol, meson_list::Vector{Symbol},
                                 k0::Float64, k_norm::Float64,
-                                quark_params::NamedTuple, thermo_params::NamedTuple,
+                                quark_params::Union{NamedTuple, QuarkParams}, 
+                                thermo_params::Union{NamedTuple, ThermoParams},
                                 K_coeffs::NamedTuple)
+    # Normalize inputs to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     T1, T2 = get_flavor_factors_for_channel(process, channel)
     
     D_sum = ComplexF64(0.0, 0.0)
@@ -416,13 +471,13 @@ end
 - `meson_channel`: 介子通道类型（:P为赝标量η/η'，:S为标量σ/σ'）
 - `k0`: 四动量能量分量（单位：fm⁻¹）
 - `k_norm`: 三动量大小（单位：fm⁻¹）
-- `quark_params`: 夸克参数NamedTuple，结构：
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple，结构：
   ```julia
   (m = (u=m_u, d=m_d, s=m_s),   # 夸克质量（fm⁻¹）
    μ = (u=μ_u, d=μ_d, s=μ_s),   # 夸克化学势（fm⁻¹）
    A = (u=A_u, d=A_d, s=A_s))   # A函数值（fm）
   ```
-- `thermo_params`: 热力学参数NamedTuple，结构：
+- `thermo_params`: 热力学参数，可以是ThermoParams结构体或NamedTuple，结构：
   ```julia
   (T=T, Φ=Φ, Φbar=Φbar, ξ=ξ)    # 温度（fm⁻¹）、Polyakov环、各向异性参数
   ```
@@ -437,6 +492,10 @@ end
 
 # 示例
 ```julia
+# 使用结构体（推荐）
+quark_params = QuarkParams(m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s))
+thermo_params = ThermoParams(T, Φ, Φbar, 0.0)
+
 # 计算η/η'传播子（赝标量通道）
 D_eta = total_propagator_mixed(:uu_to_uu, :t, :P, 
                                k0, k_norm, quark_params, thermo_params, K_coeffs)
@@ -444,12 +503,23 @@ D_eta = total_propagator_mixed(:uu_to_uu, :t, :P,
 # 计算σ/σ'传播子（标量通道）
 D_sigma = total_propagator_mixed(:uu_to_uu, :t, :S,
                                  k0, k_norm, quark_params, thermo_params, K_coeffs)
+
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s), A=(u=A_u, d=A_u, s=A_s))
+thermo_params_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+D_eta = total_propagator_mixed(:uu_to_uu, :t, :P, 
+                               k0, k_norm, quark_params_nt, thermo_params_nt, K_coeffs)
 ```
 """
 function total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel::Symbol,
                                k0::Float64, k_norm::Float64,
-                               quark_params::NamedTuple, thermo_params::NamedTuple,
+                               quark_params::Union{NamedTuple, QuarkParams}, 
+                               thermo_params::Union{NamedTuple, ThermoParams},
                                K_coeffs::NamedTuple)
+    # Normalize inputs to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     # 计算Π_uu（u夸克极化函数）
     Π_uu_real, Π_uu_imag = polarization_aniso_cached(
         meson_channel, k0, k_norm,
@@ -510,8 +580,8 @@ end
 - `channel`: 散射道类型（:t, :u, :s）
 - `k0`: 四动量能量分量（单位：fm⁻¹）
 - `k_norm`: 三动量大小（单位：fm⁻¹）
-- `quark_params`: 夸克参数NamedTuple
-- `thermo_params`: 热力学参数NamedTuple
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple
+- `thermo_params`: 热力学参数，可以是ThermoParams结构体或NamedTuple
 - `K_coeffs`: K系数NamedTuple
 
 # 返回值
@@ -519,9 +589,19 @@ end
 
 # 示例
 ```julia
+# 使用结构体（推荐）
+quark_params = QuarkParams(m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s))
+thermo_params = ThermoParams(T, Φ, Φbar, 0.0)
+
 # 计算 u+u→u+u 散射的t道总传播子
 D_t = total_propagator_auto(:uu_to_uu, :t, 
                             k0, k_norm, quark_params, thermo_params, K_coeffs)
+
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s), A=(u=A_u, d=A_u, s=A_s))
+thermo_params_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+D_t = total_propagator_auto(:uu_to_uu, :t, 
+                            k0, k_norm, quark_params_nt, thermo_params_nt, K_coeffs)
 ```
 
 # 错误处理
@@ -530,8 +610,13 @@ D_t = total_propagator_auto(:uu_to_uu, :t,
 """
 function total_propagator_auto(process::Symbol, channel::Symbol,
                                k0::Float64, k_norm::Float64,
-                               quark_params::NamedTuple, thermo_params::NamedTuple,
+                               quark_params::Union{NamedTuple, QuarkParams}, 
+                               thermo_params::Union{NamedTuple, ThermoParams},
                                K_coeffs::NamedTuple)
+    # Normalize inputs to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)
         supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")
@@ -601,8 +686,8 @@ end
 - `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_uubar）
 - `k0`: 四动量能量分量（单位：fm⁻¹）
 - `k_norm`: 三动量大小（单位：fm⁻¹）
-- `quark_params`: 夸克参数NamedTuple
-- `thermo_params`: 热力学参数NamedTuple
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple
+- `thermo_params`: 热力学参数，可以是ThermoParams结构体或NamedTuple
 - `K_coeffs`: K系数NamedTuple
 
 # 返回值
@@ -614,6 +699,10 @@ end
 
 # 示例
 ```julia
+# 使用结构体（推荐）
+quark_params = QuarkParams(m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s))
+thermo_params = ThermoParams(T, Φ, Φbar, 0.0)
+
 # 夸克-夸克散射（返回t和u道）
 result = calculate_all_propagators(:uu_to_uu, 
                                    k0, k_norm, quark_params, thermo_params, K_coeffs)
@@ -625,6 +714,12 @@ result = calculate_all_propagators(:uubar_to_uubar,
                                    k0, k_norm, quark_params, thermo_params, K_coeffs)
 println("D_t = ", result.t)
 println("D_s = ", result.s)
+
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s), A=(u=A_u, d=A_u, s=A_s))
+thermo_params_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+result = calculate_all_propagators(:uu_to_uu, 
+                                   k0, k_norm, quark_params_nt, thermo_params_nt, K_coeffs)
 ```
 
 # 性能优化
@@ -636,8 +731,13 @@ println("D_s = ", result.s)
 """
 function calculate_all_propagators(process::Symbol,
                                   k0::Float64, k_norm::Float64,
-                                  quark_params::NamedTuple, thermo_params::NamedTuple,
+                                  quark_params::Union{NamedTuple, QuarkParams}, 
+                                  thermo_params::Union{NamedTuple, ThermoParams},
                                   K_coeffs::NamedTuple)
+    # Normalize inputs to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)
         supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")
@@ -681,8 +781,8 @@ end
 - `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_uubar）
 - `k0`: 四动量能量分量（单位：fm⁻¹）
 - `k_norm`: 三动量大小（单位：fm⁻¹）
-- `quark_params`: 夸克参数NamedTuple
-- `thermo_params`: 热力学参数NamedTuple
+- `quark_params`: 夸克参数，可以是QuarkParams结构体或NamedTuple
+- `thermo_params`: 热力学参数，可以是ThermoParams结构体或NamedTuple
 - `K_coeffs`: K系数NamedTuple
 
 # 返回值
@@ -694,6 +794,10 @@ end
 
 # 示例
 ```julia
+# 使用结构体（推荐）
+quark_params = QuarkParams(m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s))
+thermo_params = ThermoParams(T, Φ, Φbar, 0.0)
+
 # 夸克-夸克散射（返回t和u道的S/P分量）
 result = calculate_all_propagators_by_channel(:uu_to_uu, 
                                               k0, k_norm, quark_params, thermo_params, K_coeffs)
@@ -709,6 +813,12 @@ println("D_t^S = ", result.t_S)  # t道标量通道
 println("D_t^P = ", result.t_P)  # t道赝标量通道
 println("D_s^S = ", result.s_S)  # s道标量通道
 println("D_s^P = ", result.s_P)  # s道赝标量通道
+
+# 使用NamedTuple（向后兼容）
+quark_params_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s), A=(u=A_u, d=A_u, s=A_s))
+thermo_params_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
+result = calculate_all_propagators_by_channel(:uu_to_uu,
+                                              k0, k_norm, quark_params_nt, thermo_params_nt, K_coeffs)
 ```
 
 # 性能优化
@@ -719,8 +829,13 @@ println("D_s^P = ", result.s_P)  # s道赝标量通道
 """
 function calculate_all_propagators_by_channel(process::Symbol,
                                               k0::Float64, k_norm::Float64,
-                                              quark_params::NamedTuple, thermo_params::NamedTuple,
+                                              quark_params::Union{NamedTuple, QuarkParams}, 
+                                              thermo_params::Union{NamedTuple, ThermoParams},
                                               K_coeffs::NamedTuple)
+    # Normalize inputs to NamedTuple
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)
         supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")

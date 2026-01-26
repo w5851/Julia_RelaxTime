@@ -14,3 +14,10 @@ __pycache__/
 # 依赖目录
 # JavaScript/Node.js
 node_modules/
+
+# Kiro编辑器相关spec
+.kiro/*
+!/.kiro/specs/
+
+# Supposition.jl 测试数据库（自动生成的测试用例缓存）
+test/SuppositionDB/

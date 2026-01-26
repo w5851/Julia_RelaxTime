@@ -1,15 +1,41 @@
 module AverageScatteringRate
 
 """
+# AverageScatteringRate Module
+
 平均散射率计算模块（各向异性可选）。
+
+## Features
+
 - 积分采用 Gauss-Legendre：动量 32 节点，角度 4 节点（可覆盖 7 阶多项式）。
 - 支持各向异性分布 `quark_distribution_aniso(..., ξ, cosθ)`；`ξ=0` 时退化为各向同性。
 - 散射截面使用 `TotalCrossSection.total_cross_section`，可按需预计算并插值。
 
-Cross-section cache notes:
+## Cross-section Cache
+
 - 本仓库已将生产默认策略固定为 **w0cdf 取点 + PCHIP 插值**。
 - `CrossSectionCache` 仅用于承载预计算的 σ(s) 表，并用 PCHIP 做插值；当质心能量 s 超出缓存覆盖区间时，直接返回 0（而不是钳制到边界），以避免不可达的 s 区域产生伪贡献。
 - `CrossSectionCache(process)` 创建空缓存；通过 `precompute_cross_section!` 填充后即可用于 `average_scattering_rate`。
+
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters**:
+
+```julia
+# Using structs (recommended)
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+rate = average_scattering_rate(:uu_to_uu, q, t, K_coeffs)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+rate = average_scattering_rate(:uu_to_uu, q_nt, t_nt, K_coeffs)
+```
+
+Both produce identical results. Internal normalization ensures type stability and zero overhead.
 """
 
 include("../Constants_PNJL.jl")
@@ -28,7 +54,17 @@ using .TotalCrossSection.ScatteringAmplitude.ParticleSymbols: is_antiquark
 using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
+# Import parameter types from Main
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!, build_w0cdf_pchip_cache
+
+# Normalization helpers for dual interface support
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 const DEFAULT_P_NODES = 20
 const DEFAULT_ANGLE_NODES = 4  # cosθ节点数
@@ -58,14 +94,16 @@ end
 
 
 
-@inline function get_mass(flavor::Symbol, quark_params::NamedTuple)
+@inline function get_mass(flavor::Symbol, quark_params::Union{NamedTuple, QuarkParams})
+    quark_params = _nt_quark(quark_params)
     if flavor === :u || flavor === :ubar; return quark_params.m.u
     elseif flavor === :d || flavor === :dbar; return quark_params.m.d
     elseif flavor === :s || flavor === :sbar; return quark_params.m.s
     else; error("Unknown flavor $flavor") end
 end
 
-@inline function get_mu(flavor::Symbol, quark_params::NamedTuple)
+@inline function get_mu(flavor::Symbol, quark_params::Union{NamedTuple, QuarkParams})
+    quark_params = _nt_quark(quark_params)
     # Convention: always return the quark chemical potential μ_q (positive sign).
     # The particle/antiparticle distinction is handled by using
     # `quark_distribution*` vs `antiquark_distribution*`.
@@ -172,8 +210,10 @@ end
 end
 
 function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Float64},
-    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     for s in s_grid
         σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
         insert_sigma!(cache, s, σ)
@@ -208,8 +248,10 @@ function interpolate_sigma(cache::CrossSectionCache, s::Float64)
 end
 
 function get_sigma(cache::CrossSectionCache, s::Float64,
-    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     # Only cached PCHIP interpolation is supported.
     n = length(cache.s_vals)
     n == 0 && error("CrossSectionCache has no points; precompute σ(s) first")
@@ -255,6 +297,11 @@ end
 
 基于 ω 积分权重的 CDF 设计 σ(s) 采样网格。
 
+# Arguments
+- `process::Symbol`: 散射过程
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple (m, μ)
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple (T, Φ, Φbar, ξ)
+
 # Keyword Arguments
 - `N::Int`: 采样点数（默认 60）
 - `p_nodes::Int`: 动量积分节点数（默认 14）
@@ -270,8 +317,8 @@ end
 """
 function design_w0cdf_s_grid(
     process::Symbol,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple;
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams};
     N::Int=DEFAULT_SIGMA_GRID_N,
     p_nodes::Int=DEFAULT_W0CDF_P_NODES,
     angle_nodes::Int=DEFAULT_W0CDF_ANGLE_NODES,
@@ -279,6 +326,8 @@ function design_w0cdf_s_grid(
     p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
 )
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_params)
     mj = get_mass(pj_sym, quark_params)
@@ -380,6 +429,12 @@ end
 
 构建基于 w0cdf 设计的 σ(s) 缓存。
 
+# Arguments
+- `process::Symbol`: 散射过程
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple (m, μ)
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple (T, Φ, Φbar, ξ)
+- `K_coeffs::NamedTuple`: 有效耦合系数
+
 # Keyword Arguments
 - `N::Int`: 采样点数（默认 60）
 - `design_p_nodes::Int`: w0cdf 设计时的动量节点数（默认 14）
@@ -393,8 +448,8 @@ end
 """
 function build_w0cdf_pchip_cache(
     process::Symbol,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     N::Int=DEFAULT_SIGMA_GRID_N,
     design_p_nodes::Int=DEFAULT_W0CDF_P_NODES,
@@ -404,6 +459,8 @@ function build_w0cdf_pchip_cache(
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
     n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
 )
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     s_grid = design_w0cdf_s_grid(
         process,
         quark_params,
@@ -503,8 +560,8 @@ end
 
 # Arguments
 - `process::Symbol`: 散射过程 (如 :ud_to_ud)
-- `quark_params::NamedTuple`: 夸克参数 (m, μ, A)
-- `thermo_params::NamedTuple`: 热力学参数 (T, Φ, Φbar, ξ)
+- `quark_params`: 夸克参数，可以是 `QuarkParams` 结构体或 NamedTuple (m, μ, A)
+- `thermo_params`: 热力学参数，可以是 `ThermoParams` 结构体或 NamedTuple (T, Φ, Φbar, ξ)
 - `K_coeffs::NamedTuple`: 有效耦合系数
 
 # Keyword Arguments
@@ -515,8 +572,8 @@ end
 """
 function average_scattering_rate(
     process::Symbol,
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
@@ -534,6 +591,8 @@ function average_scattering_rate(
     apply_s_domain_cut::Bool=true,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::Float64
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     # 解析粒子、质量、化学势
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_params); mj = get_mass(pj_sym, quark_params)

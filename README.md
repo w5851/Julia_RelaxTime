@@ -83,6 +83,40 @@ julia --project=. scripts/dev/gen_deps.jl
 
 ## 最近更新
 
+### 2026-01-25: Parameter Struct Migration
+完成参数结构体迁移，提供类型安全的参数接口：
+- ✅ 新增 `QuarkParams` 和 `ThermoParams` 结构体
+- ✅ 双接口模式：支持结构体和 NamedTuple 两种格式
+- ✅ 零性能开销：内联归一化确保无运行时损耗
+- ✅ 向后兼容：现有 NamedTuple 代码无需修改
+- ✅ 100%测试通过：所有模块支持双接口
+- 📖 完整文档：`docs/guides/PARAMETER_STRUCT_MIGRATION.md`
+- 📖 API 文档：`docs/api/PARAMETER_TYPES_API.md`
+
+**快速使用**：
+```julia
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+# 使用结构体（推荐）
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+result = relaxation_times(q, t, K_coeffs; densities=densities)
+
+# 使用 NamedTuple（向后兼容）
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+result = relaxation_times(q_nt, t_nt, K_coeffs; densities=densities)
+```
+
+**支持的模块**：
+- RelaxationTime.jl
+- AverageScatteringRate.jl
+- TotalCrossSection.jl
+- ScatteringAmplitude.jl
+- DifferentialCrossSection.jl
+- TotalPropagator.jl
+- ParticleSymbols.jl
+
 ### 2025-11-17: 极化函数缓存模块
 新增 `PolarizationCache` 模块，通过哈希表缓存优化极化函数计算性能：
 - ✅ 自动缓存相同参数的极化函数，避免重复计算

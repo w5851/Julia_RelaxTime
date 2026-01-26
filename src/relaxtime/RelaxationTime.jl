@@ -1,13 +1,57 @@
 module RelaxationTime
 
 """
+# RelaxationTime Module
+
 基于平均散射率公式的弛豫时间计算。
+
+## Features
+
 - 仅需计算一次所需的平均散射率，即可复用至六种夸克种类（u、d、s、ubar、dbar、sbar）。
 - 基于同位旋对称性，d和dbar共享u与ubar的计算结果，因此仅需显式评估四种夸克味。
 - 粒子数密度 `densities` 由调用方提供（可预先计算或通过其他方式插值）。
 - 若部分平均速率已存在，则通过 `existing_rates` 提供；缺失过程将自动补全。
+- 同时返回 tau 和 tau_inv 以及可复用的平均速率。
 
-同时返回 tau 和 tau_inv 以及可复用的平均速率。
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters** through a dual interface:
+
+- **Structs (Recommended)**: Use `QuarkParams` and `ThermoParams` for type safety and better IDE support
+- **NamedTuples (Backward Compatible)**: Existing NamedTuple-based code continues to work without modification
+
+### Example with Structs
+
+```julia
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+quark_params = QuarkParams(
+    m=(u=1.52, d=1.52, s=3.04),
+    μ=(u=0.3, d=0.3, s=0.3)
+)
+thermo_params = ThermoParams(0.15, 0.5, 0.5, 0.0)
+
+result = relaxation_times(quark_params, thermo_params, K_coeffs; densities=densities)
+```
+
+### Example with NamedTuples
+
+```julia
+quark_params = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+thermo_params = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+
+result = relaxation_times(quark_params, thermo_params, K_coeffs; densities=densities)
+```
+
+Both approaches produce identical results. See `docs/guides/PARAMETER_STRUCT_MIGRATION.md` for details.
+
+## Internal Normalization
+
+The module uses internal normalization helpers `_nt_quark` and `_nt_thermo` to convert
+struct inputs to NamedTuples at function boundaries. This ensures:
+- Type stability in internal implementation
+- Zero runtime overhead (helpers are inlined)
+- Backward compatibility with existing code
 """
 
 include("AverageScatteringRate.jl")
@@ -113,10 +157,42 @@ end
     end
 end
 
-# Compute missing averaged scattering rates while reusing any existing results or cross-section caches.
+"""
+    compute_average_rates(quark_params, thermo_params, K_coeffs; kwargs...)
+
+Compute missing averaged scattering rates while reusing any existing results or cross-section caches.
+
+# Arguments
+- `quark_params`: Quark parameters, either a `QuarkParams` struct or a NamedTuple with fields `m` and `μ`
+- `thermo_params`: Thermodynamic parameters, either a `ThermoParams` struct or a NamedTuple with fields `T`, `Φ`, `Φbar`, `ξ`
+- `K_coeffs`: Coupling coefficients as a NamedTuple
+- `existing_rates`: Optional pre-computed rates to reuse
+- `cs_caches`: Dictionary of cross-section caches for performance
+- `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
+- `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
+- `n_sigma_points`: Number of points for cross-section interpolation
+- `sigma_cutoff`: Momentum cutoff for σ(s) effective range (defaults to Λ)
+
+# Returns
+A NamedTuple containing average scattering rates for all required processes.
+
+# Examples
+```julia
+# Using structs (recommended)
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+K = (K_pi=1.0, K_K=1.0, K_eta=1.0)
+rates = compute_average_rates(q, t, K)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+rates = compute_average_rates(q_nt, t_nt, K)
+```
+"""
 function compute_average_rates(
-    quark_params,
-    thermo_params,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
     cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
@@ -132,6 +208,10 @@ function compute_average_rates(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # σ(s)有效范围的动量截断，默认使用 Λ
 )::NamedTuple
+    # Normalize inputs at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
         for (k, v) in pairs(existing_rates)
@@ -139,8 +219,7 @@ function compute_average_rates(
         end
     end
 
-    quark_params = ensure_quark_params_has_A(_nt_quark(quark_params), _nt_thermo(thermo_params))
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = ensure_quark_params_has_A(quark_params, thermo_params)
 
     # Unified standard (default):
     # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
@@ -322,10 +401,50 @@ const REQUIRED_RATE_KEYS_FOR_TAU = (
     end
 end
 
-# Main entry: returns tau, tau_inv, and the averaged rates for reuse.
+"""
+    relaxation_times(quark_params, thermo_params, K_coeffs; kwargs...)
+
+Calculate quark relaxation times based on average scattering rates.
+
+This is the main entry point for computing relaxation times. It returns tau, tau_inv, 
+and the averaged rates for reuse.
+
+# Arguments
+- `quark_params`: Quark parameters, either a `QuarkParams` struct or a NamedTuple with fields `m` and `μ`
+- `thermo_params`: Thermodynamic parameters, either a `ThermoParams` struct or a NamedTuple with fields `T`, `Φ`, `Φbar`, `ξ`
+- `K_coeffs`: Coupling coefficients as a NamedTuple
+- `densities`: Particle number densities (required keyword argument)
+- `existing_rates`: Optional pre-computed rates to reuse
+- `cs_caches`: Dictionary of cross-section caches for performance
+- `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
+- `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
+- `n_sigma_points`: Number of points for cross-section interpolation
+- `sigma_cutoff`: Momentum cutoff for σ(s) effective range
+
+# Returns
+A NamedTuple with fields:
+- `tau`: Relaxation times for each quark flavor (u, d, s, ubar, dbar, sbar)
+- `tau_inv`: Inverse relaxation times (scattering rates)
+- `rates`: Average scattering rates for all processes
+
+# Examples
+```julia
+# Using structs (recommended)
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+K = (K_pi=1.0, K_K=1.0, K_eta=1.0)
+densities = (u=0.1, d=0.1, s=0.05, ubar=0.1, dbar=0.1, sbar=0.05)
+result = relaxation_times(q, t, K; densities=densities)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+result = relaxation_times(q_nt, t_nt, K; densities=densities)
+```
+"""
 function relaxation_times(
-    quark_params,
-    thermo_params,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     densities::Union{NamedTuple,AbstractDict},
     existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
@@ -342,6 +461,13 @@ function relaxation_times(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::NamedTuple
+    # Normalize inputs at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    # Normalize inputs at function entry
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
         existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)
     else

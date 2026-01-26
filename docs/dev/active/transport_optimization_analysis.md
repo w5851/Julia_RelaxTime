@@ -2,19 +2,30 @@
 
 ## 日期：2025-12-28
 
-## 2026-01-23 状态复核（完成度评估）
+## 2026-01-24 状态复核（完成度评估）
 
 - ✅ 已实现（与文档描述一致）："ThermoDerivatives.jl 中重复求解能隙方程" 的高优先级优化。
    - 现状：`bulk_viscosity_coefficients` 通过一次 `IMPLICIT_SOLVER` 求解拿到基态 `x_base`，再用 `ForwardDiff.jacobian(solve_state, θ)` 统一得到 $dx/dθ$，后续用链式法则拼出所需导数。
    - 代码位置：[src/pnjl/derivatives/ThermoDerivatives.jl](src/pnjl/derivatives/ThermoDerivatives.jl)
 
+- ✅ 已实现：采用配置结构体简化参数传递（Phase 1：TransportCoefficients）。
+   - `TransportIntegrationConfig` 已在 [src/relaxtime/TransportCoefficients.jl](src/relaxtime/TransportCoefficients.jl) 引入，并提供参数校验（`p_grid/p_w`、`cos_grid/cos_w` 成对出现且长度一致）。
+   - `transport_coefficients/shear_viscosity/electric_conductivity/bulk_viscosity_isentropic` 已支持 `config=TransportIntegrationConfig(...)`；若同时给出 `p_nodes/p_max/...` 等显式关键字，显式关键字会覆盖 `config`（保持向后兼容、便于调参）。
+   - 上层工作流 [src/pnjl/workflows/TransportWorkflow.jl](src/pnjl/workflows/TransportWorkflow.jl) 已支持 `transport_config=...` 作为调用侧入口，并兼容旧的 `transport_kwargs` 传参方式。
+   - 单测覆盖：
+     - [tests/unit/relaxtime/test_transport_coefficients.jl](tests/unit/relaxtime/test_transport_coefficients.jl)
+     - [tests/unit/relaxtime/test_transport_workflow.jl](tests/unit/relaxtime/test_transport_workflow.jl)
+   - 注：为避免 include 顺序导致“同名结构体来自不同模块实例”的类型不一致，`TransportWorkflow` 复用了 `Main.TransportCoefficients`（细节见该文件头部）。
+
 - ❌ 仍未实现（因此“整份任务”不算完成，不建议归档到 archived）：
    - `TransportCoefficients.jl` 的通用积分框架抽取与去重复
-   - ✅ 采用配置结构体简化参数传递（已在 `TransportCoefficients` 引入 `TransportIntegrationConfig`，并在 `TransportWorkflow` 支持 `transport_config=...` 作为调用侧入口）
    - 输入参数验证（如 `T>0` 等）与极端参数数值保护
    - `Symbol` → 整数索引、分派表等低优先级性能微优化
    - 更完整的 API 文档与集成测试补齐
    - 体粘滞函数命名/接口统一方案（仍待讨论）
+
+> 备注：项目层面的“参数结构体化”（例如 `QuarkParams/ThermoParams` 的跨模块复用）已单独抽出进度文档，以避免本文件堆积：
+> - [docs/dev/active/parameter_structs_migration.md](docs/dev/active/parameter_structs_migration.md)
 
 ## 方案记录：配置结构体简化参数（Phase 1：TransportCoefficients）
 

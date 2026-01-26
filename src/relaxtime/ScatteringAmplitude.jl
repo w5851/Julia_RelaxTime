@@ -1,7 +1,7 @@
 module ScatteringAmplitude
 
 """
-# ScatteringAmplitude.jl
+# ScatteringAmplitude Module
 
 散射矩阵元计算模块，支持PNJL模型中的夸克弹性散射过程。
 
@@ -12,17 +12,45 @@ module ScatteringAmplitude
 公式参考 doc/formula/ScatteringAmplitude_散射矩阵元by总传播子.md
 
 ## 核心设计原则
+
 - 支持 `Constants_PNJL.SCATTERING_PROCESS_KEYS` 中定义的全部散射过程（含电荷共轭过程）
 - 直接计算|M|²而无需单独构建振幅M
 - 按标量(S)和赝标量(P)通道分离传播子
 - 自动计算质心系介子四动量
 - 正确处理不同过程的Mandelstam变量组合
+
+## Dual Interface Pattern
+
+This module supports **both struct and NamedTuple parameters**:
+
+```julia
+# Using structs (recommended)
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t = ThermoParams(0.15, 0.5, 0.5, 0.0)
+M² = scattering_amplitude_squared(:uu_to_uu, 2.0, -0.5, q, t, K_coeffs)
+
+# Using NamedTuples (backward compatible)
+q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
+t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+M² = scattering_amplitude_squared(:uu_to_uu, 2.0, -0.5, q_nt, t_nt, K_coeffs)
+```
+
+Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo`) ensures
+type stability and zero overhead.
 """
+
+# Load ParameterTypes at Main level if not already loaded
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+end
 
 include("../Constants_PNJL.jl")
 include("../utils/ParticleSymbols.jl")
 include("TotalPropagator.jl")
 
+using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 using .Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 using .TotalPropagator: calculate_cms_momentum
 using .ParticleSymbols: get_quark_masses_for_process
@@ -34,6 +62,42 @@ export calculate_all_scattering_amplitudes_squared
 # 使用N_color作为N_c
 const N_c = N_color
 const CROSS_TERM_FACTOR = 1.0 / (4.0 * N_c)
+
+# ----------------------------------------------------------------------------
+# 参数归一化辅助函数
+# ----------------------------------------------------------------------------
+
+"""
+    _nt_quark(q)
+
+将 QuarkParams 结构体或 NamedTuple 归一化为 NamedTuple 格式。
+
+这是一个内部辅助函数，用于在函数入口处统一参数格式，确保内部实现的类型稳定性。
+使用 @inline 标记以避免运行时开销。
+
+# 参数
+- `q`: QuarkParams 结构体或 NamedTuple
+
+# 返回值
+NamedTuple 格式的夸克参数 (m=..., μ=...)
+"""
+@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+
+"""
+    _nt_thermo(t)
+
+将 ThermoParams 结构体或 NamedTuple 归一化为 NamedTuple 格式。
+
+这是一个内部辅助函数，用于在函数入口处统一参数格式，确保内部实现的类型稳定性。
+使用 @inline 标记以避免运行时开销。
+
+# 参数
+- `t`: ThermoParams 结构体或 NamedTuple
+
+# 返回值
+NamedTuple 格式的热力学参数 (T=..., Φ=..., Φbar=..., ξ=...)
+"""
+@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 
 # ----------------------------------------------------------------------------
@@ -148,16 +212,20 @@ end
 - `process`: 散射过程符号（如 :uu_to_uu, :uubar_to_ssbar）
 - `s`: Mandelstam变量 s（单位：fm⁻²）
 - `t`: Mandelstam变量 t（单位：fm⁻²）
-- `quark_params`: 夸克参数NamedTuple，结构：
-  ```julia
-  (m = (u=m_u, d=m_d, s=m_s),   # 夸克质量（fm⁻¹）
-   μ = (u=μ_u, d=μ_d, s=μ_s),   # 夸克化学势（fm⁻¹）
-   A = (u=A_u, d=A_u, s=A_s))   # A函数值（fm）
-  ```
-- `thermo_params`: 热力学参数NamedTuple，结构：
-  ```julia
-  (T=T, Φ=Φ, Φbar=Φbar, ξ=ξ)    # 温度（fm⁻¹）、Polyakov环、各向异性参数
-  ```
+- `quark_params`: 夸克参数，可以是：
+  - `QuarkParams` 结构体（推荐）
+  - NamedTuple，结构：
+    ```julia
+    (m = (u=m_u, d=m_d, s=m_s),   # 夸克质量（fm⁻¹）
+     μ = (u=μ_u, d=μ_d, s=μ_s),   # 夸克化学势（fm⁻¹）
+     A = (u=A_u, d=A_u, s=A_s))   # A函数值（fm）
+    ```
+- `thermo_params`: 热力学参数，可以是：
+  - `ThermoParams` 结构体（推荐）
+  - NamedTuple，结构：
+    ```julia
+    (T=T, Φ=Φ, Φbar=Φbar, ξ=ξ)    # 温度（fm⁻¹）、Polyakov环、各向异性参数
+    ```
 - `K_coeffs`: K系数NamedTuple（通过`EffectiveCouplings.calculate_effective_couplings`获取）
 
 # 返回值
@@ -178,6 +246,7 @@ end
 
 # 示例
 ```julia
+using Main.ParameterTypes: QuarkParams, ThermoParams
 using .EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
 using .OneLoopIntegrals: A
 using .Constants_PNJL
@@ -198,6 +267,11 @@ A_s = A(T, μ_s, m_s, Φ, Φbar)
 G_u = calculate_G_from_A(A_u)
 G_s = calculate_G_from_A(A_s)
 
+# 使用结构体（推荐）
+q = QuarkParams((m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s)))
+t_params = ThermoParams(T, Φ, Φbar, ξ)
+
+# 或使用 NamedTuple（向后兼容）
 quark_params = (
     m = (u=m_u, d=m_u, s=m_s),
     μ = (u=μ_u, d=μ_u, s=μ_s),
@@ -214,7 +288,7 @@ K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 s = 4.0  # fm⁻²
 t = -0.5  # fm⁻²
 M_squared = scattering_amplitude_squared(
-    :uu_to_uu, s, t, quark_params, thermo_params, K_coeffs
+    :uu_to_uu, s, t, q, t_params, K_coeffs
 )
 println("|M|² = ", M_squared, " fm⁻⁴")
 ```
@@ -226,8 +300,13 @@ println("|M|² = ", M_squared, " fm⁻⁴")
 4. 各向异性参数ξ影响极化函数，进而影响传播子和散射矩阵元
 """
 function scattering_amplitude_squared(process::Symbol, s::Float64, t::Float64,
-                                     quark_params::NamedTuple, thermo_params::NamedTuple,
+                                     quark_params::Union{NamedTuple, QuarkParams}, 
+                                     thermo_params::Union{NamedTuple, ThermoParams},
                                      K_coeffs::NamedTuple)
+    # 归一化参数为 NamedTuple 格式
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    
     # 1. 提取四个粒子质量
     m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
     
@@ -452,8 +531,12 @@ end
 # 参数
 - `s::Float64`: Mandelstam变量s（质心系能量平方，单位：fm⁻²）
 - `t::Float64`: Mandelstam变量t（动量转移平方，单位：fm⁻²）
-- `quark_params::NamedTuple`: 夸克参数，包含m(质量), μ(化学势), A(单圈积分值)
-- `thermo_params::NamedTuple`: 热力学参数，包含T(温度), Φ(Polyakov环), Φbar(共轭Polyakov环), ξ(各向异性参数)
+- `quark_params`: 夸克参数，可以是：
+  - `QuarkParams` 结构体（推荐）
+  - NamedTuple，包含m(质量), μ(化学势), A(单圈积分值)
+- `thermo_params`: 热力学参数，可以是：
+  - `ThermoParams` 结构体（推荐）
+  - NamedTuple，包含T(温度), Φ(Polyakov环), Φbar(共轭Polyakov环), ξ(各向异性参数)
 - `K_coeffs::NamedTuple`: 有效耦合常数，由`calculate_effective_couplings`计算
 
 # 返回值
@@ -488,19 +571,17 @@ NamedTuple，包含 `SCATTERING_PROCESS_KEYS` 中全部散射过程的|M|²值�
 
 # 示例
 ```julia
-# 准备参数
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+# 准备参数（使用结构体）
 s = 8.0  # fm⁻²
 t = -0.3  # fm⁻²
-quark_params = (
-    m = (u=0.3, d=0.3, s=0.5),
-    μ = (u=0.0, d=0.0, s=0.0),
-    A = (u=0.05, d=0.05, s=0.08)
-)
-thermo_params = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+q = QuarkParams((m=(u=0.3, d=0.3, s=0.5), μ=(u=0.0, d=0.0, s=0.0)))
+t_params = ThermoParams(0.15, 0.5, 0.5, 0.0)
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 
 # 批量计算
-results = calculate_all_scattering_amplitudes_squared(s, t, quark_params, thermo_params, K_coeffs)
+results = calculate_all_scattering_amplitudes_squared(s, t, q, t_params, K_coeffs)
 
 # 访问结果
 println("uu→uu: |M|² = ", results.uu_to_uu, " fm⁻⁴")
@@ -517,10 +598,13 @@ total_rate = sum(values(results))
 function calculate_all_scattering_amplitudes_squared(
     s::Float64, 
     t::Float64,
-    quark_params::NamedTuple, 
-    thermo_params::NamedTuple,
+    quark_params::Union{NamedTuple, QuarkParams}, 
+    thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple
 )::NamedTuple
+    # 归一化参数为 NamedTuple 格式
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
     
     # 计算每个过程的矩阵元平方（避免Dict分配，保持固定顺序）
     values = ntuple(i -> scattering_amplitude_squared(
