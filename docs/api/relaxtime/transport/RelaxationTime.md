@@ -33,6 +33,18 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - `p_grid/p_w`：可选，自定义动量积分节点
 - `sigma_cutoff`：σ(s) 有效范围的动量截断（默认 Λ）
 
+## 本次提交的变更（e9cb5fbd...，2026-01-29）
+
+- `compute_average_rates(...)` 中对 `cs_cache` 的处理逻辑有调整：
+    - 若调用方已在 `cs_caches[process]` 中放置了已填充的 `CrossSectionCache`，`compute_average_rates` 将复用该缓存；否则将把 `cs_cache` 参数以 `nothing` 传递给 `average_scattering_rate`，让后者按需在内部构建缓存并应用阈值减法策略（若请求）。
+    - 这通过内部变量 `cs_cache_arg` 实现（若缓存缺失或为空则传入 `nothing`）。
+
+- 推荐调用模式：
+    1. 如果需在多个参数点复用截面，调用者应先用 `build_w0cdf_pchip_cache(...)` 构建并缓存 `CrossSectionCache`，放入 `cs_caches[process]`，以避免重复构建开销。
+    2. 对于一次性评估，可传 `cs_cache=nothing` 或不传该参数，让内部按需构建（会使用 `threshold_subtraction` 等参数）。
+
+- 关键影响：性能（避免重复构建）和语义（当启用阈值减法时，缓存保存的是 `raw - asym`，返回值会把解析项加回）。
+
 
 ## 典型用法
 

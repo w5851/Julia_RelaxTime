@@ -50,6 +50,21 @@ $$\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p
 - `average_scattering_rate(process, ...; sigma_cutoff=nothing)`: 计算平均散射率
 - `number_density(flavor, ...)`: 计算数密度（始终使用半无穷积分）
 
+## 阈值渐近正则化（threshold_subtraction）
+
+- 新增字段与参数（2026-01-29 提交引入）：
+    - `CrossSectionCache` 新增字段：`asym_enabled::Bool`, `asym_s0::Float64`, `asym_A::Float64`, `asym_requested::Bool`。
+    - `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points, threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10)`：新增关键字参数以启用阈值附近的额外采样与拟合，用于检测并减去形如 $A/\sqrt{s-s_0}$ 的渐近项，再把已正则化的值缓存起来。
+    - `build_w0cdf_pchip_cache(...; threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10)`：构建缓存时会记录 `asym_requested` 并传给 `precompute_cross_section!`。
+
+- 查询与返回语义：
+    - 当查询点 `s` 在缓存外且 `asym_enabled` 时，`get_sigma(cache,s)` 会返回仅由解析渐近项给出的近似值 $A/\sqrt{s-s_0}$（若适用）。
+    - 当查询点在缓存内且缓存为已正则化的 `sigma_vals = raw - asym`，`get_sigma` 会把插值结果与解析渐近项相加后返回最终的 σ(s)。
+
+- 其他行为：
+    - 若在构建缓存时为阈值附近额外采样（`asym_extra_points`），这些点会加入缓存以改善插值质量；默认不开启以保证向后兼容性。
+
+
 ## 使用示例
 
 ```julia
