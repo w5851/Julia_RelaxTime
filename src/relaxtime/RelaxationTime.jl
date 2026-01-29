@@ -221,48 +221,29 @@ function compute_average_rates(
 
     quark_params = ensure_quark_params_has_A(quark_params, thermo_params)
 
-    # Unified standard (default):
-    # - numerator momentum integrals p_i,p_j use the PNJL cutoff p∈[0,Λ]
-    # - σ(s) cache also uses Λ cutoff for consistency
+    # New strategy (2026-01-26):
+    # - numerator momentum integrals p_i,p_j use semi-infinite [0,∞) integration
+    # - σ(s) cache uses Λ cutoff: σ(s) = 0 when s exceeds Λ-based threshold
     # - number densities remain semi-infinite inside AverageScatteringRate
     if (p_grid === nothing) != (p_w === nothing)
         error("compute_average_rates: p_grid and p_w must be provided together")
     end
     
-    # 默认使用 Λ 截断
+    # σ(s)缓存默认使用 Λ 截断
     effective_sigma_cutoff = sigma_cutoff === nothing ? Λ_inv_fm : sigma_cutoff
     
-    if p_grid === nothing
-        # NOTE: `Λ_inv_fm` is the PNJL momentum cutoff Λ in units of fm⁻¹.
-        # Do NOT invert it; otherwise the integration upper bound becomes ~0.3 fm⁻¹
-        # instead of ~3 fm⁻¹, suppressing phase space and inflating τ.
-        Λ = Λ_inv_fm
-        # Use the requested p_nodes as the cutoff-grid resolution.
-        p_grid, p_w = AverageScatteringRate.gauleg(0.0, Λ, p_nodes)
-    end
+    # 动量积分不再使用截断，p_grid保持为nothing以触发半无穷积分
+    # if p_grid === nothing: 将在 average_scattering_rate 中使用半无穷积分
 
     for process in REQUIRED_PROCESSES
         if haskey(rates, process)
             continue
         end
-        cache = get!(cs_caches, process) do
-            CrossSectionCache(process)
-        end
-
-        # If the cache is still empty, build the default designed σ-grid + PCHIP cache.
-        # `average_scattering_rate` assumes any provided cache is already populated.
-        # 使用 effective_sigma_cutoff 确保 σ(s) 缓存范围与动量积分范围一致
-        if isempty(cache.s_vals)
-            cache = build_w0cdf_pchip_cache(
-                process,
-                quark_params,
-                thermo_params,
-                K_coeffs;
-                p_cutoff=effective_sigma_cutoff,
-                n_sigma_points=n_sigma_points,
-            )
-            cs_caches[process] = cache
-        end
+        # Reuse an existing populated cache if available; otherwise do NOT build it here.
+        # Passing `nothing` as `cs_cache` allows `average_scattering_rate` to auto-build
+        # the cache with the appropriate threshold-subtraction logic when needed.
+        cache = haskey(cs_caches, process) ? cs_caches[process] : nothing
+        cs_cache_arg = (cache === nothing || isempty(cache.s_vals)) ? nothing : cache
 
         rates[process] = average_scattering_rate(
             process,
@@ -278,7 +259,7 @@ function compute_average_rates(
             cos_w=cos_w,
             phi_grid=phi_grid,
             phi_w=phi_w,
-            cs_cache=cache,
+            cs_cache=cs_cache_arg,
             n_sigma_points=n_sigma_points,
             sigma_cutoff=sigma_cutoff,
         )

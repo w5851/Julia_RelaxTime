@@ -452,11 +452,12 @@ function run_scan(opts::ScanOptions)
                     quark_params = (m=masses, μ=(u=Float64(muq_fm), d=Float64(muq_fm), s=Float64(muq_fm)), A=ktmp.A_vals)
 
                     cs_caches = nothing
+                    """
                     if Bool(base.converged)
                         cs_caches = build_sigma_caches(REQUIRED_PROCESSES, quark_params, thermo_params, ktmp.K_coeffs;
                             n_sigma_points=opts.tau_n_sigma_points, sigma_grid_n=opts.sigma_grid_n)
                     end
-
+                    """
                     # 正式计算：τ + 输运（η/σ）; ζ 默认关
                     res = solve_gap_and_transport(
                         T_fm,
@@ -476,7 +477,7 @@ function run_scan(opts::ScanOptions)
                             angle_nodes=opts.tau_angle_nodes,
                             phi_nodes=opts.tau_phi_nodes,
                             n_sigma_points=opts.tau_n_sigma_points,
-                            cs_caches=cs_caches,
+                            #cs_caches=cs_caches,
                             p_grid=p_grid,
                             p_w=p_w,
                             cos_grid=cos_grid,

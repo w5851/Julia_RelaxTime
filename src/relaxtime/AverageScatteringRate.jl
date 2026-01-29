@@ -45,6 +45,7 @@ include("../QuarkDistribution.jl")
 include("../QuarkDistribution_Aniso.jl")
 
 using LinearAlgebra
+using Statistics
 
 using .Constants_PNJL: Λ_inv_fm
 using .GaussLegendre: gauleg
@@ -122,13 +123,20 @@ mutable struct CrossSectionCache
     # Cached slopes for :pchip (same length as s_vals).
     pchip_slopes::Vector{Float64}
     pchip_dirty::Bool
+
+    # Optional analytic threshold subtraction parameters
+    asym_enabled::Bool
+    asym_s0::Float64
+    asym_A::Float64
+    # Whether build requested asymptotic subtraction (auto or explicit)
+    asym_requested::Bool
 end
 
-CrossSectionCache(process::Symbol) = CrossSectionCache(process, Float64[], Float64[], Float64[], true)
+CrossSectionCache(process::Symbol) = CrossSectionCache(process, Float64[], Float64[], Float64[], true, false, 0.0, 0.0, false)
 
 function CrossSectionCache(process::Symbol, s_vals::Vector{Float64}, sigma_vals::Vector{Float64})
     length(s_vals) == length(sigma_vals) || error("CrossSectionCache: s_vals and sigma_vals length mismatch")
-    cache = CrossSectionCache(process, s_vals, sigma_vals, Float64[], true)
+    cache = CrossSectionCache(process, s_vals, sigma_vals, Float64[], true, false, 0.0, 0.0, false)
     _ensure_pchip_slopes!(cache)
     return cache
 end
@@ -211,13 +219,107 @@ end
 
 function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Float64},
     quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
-    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10)
     quark_params = _nt_quark(quark_params)
     thermo_params = _nt_thermo(thermo_params)
+    # compute raw σ(s) for grid
+    raw = Float64[]
+    # prepare containers for potential extra samples (defined regardless of threshold_subtraction)
+    extra_s = Float64[]
+    extra_raw = Float64[]
     for s in s_grid
         σ = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
-        insert_sigma!(cache, s, σ)
+        push!(raw, σ)
     end
+
+    # optional threshold asymptotic subtraction
+    cache.asym_enabled = false
+    if threshold_subtraction
+        # compute s_th from process masses
+        pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(cache.process)
+        mi = get_mass(pi_sym, quark_params)
+        mj = get_mass(pj_sym, quark_params)
+        mc = get_mass(pc_sym, quark_params)
+        md = get_mass(pd_sym, quark_params)
+        s_th = max((mi + mj)^2, (mc + md)^2)
+
+        # select points near threshold for fitting
+        idxs = findall(i -> isfinite(raw[i]) && raw[i] > 0.0 && (s_grid[i] - s_th) > 1e-12 && (s_grid[i] - s_th) <= asym_window, 1:length(s_grid))
+
+        # Prepare containers for possible extra samples
+        extra_s = Float64[]
+        extra_raw = Float64[]
+
+        # If insufficient points, compute extra high-resolution samples near threshold
+        if length(idxs) < asym_fit_min_points
+            extra_s = collect(range(s_th + 1e-12, stop = s_th + asym_window, length = asym_extra_points))
+            for s_ex in extra_s
+                σ_ex = total_cross_section(cache.process, s_ex, quark_params, thermo_params, K_coeffs; n_points=n_points)
+                push!(extra_raw, σ_ex)
+            end
+        end
+
+        # combine original grid and extra samples for fitting and (later) for caching
+        s_all = vcat(s_grid, extra_s)
+        raw_all = vcat(raw, extra_raw)
+        idxs_all = findall(i -> isfinite(raw_all[i]) && raw_all[i] > 0.0 && (s_all[i] - s_th) > 1e-12 && (s_all[i] - s_th) <= asym_window, 1:length(s_all))
+        if length(idxs_all) >= asym_fit_min_points
+            vals = [raw_all[i] * sqrt(s_all[i] - s_th) for i in idxs_all]
+            A_est = median(vals)
+            if isfinite(A_est) && A_est > 0.0
+                cache.asym_enabled = true
+                cache.asym_s0 = s_th
+                cache.asym_A = A_est
+            end
+        end
+    end
+
+    # store sigma_vals as regularized (raw - asym) if asym enabled
+    # If extra samples were taken, include them in the cached grid so interpolation benefits
+    if !isempty(extra_s)
+        # Build mapping from s -> raw (prefer original grid values if duplicated)
+        raw_map = Dict{Float64, Float64}()
+        for (s, σ) in zip(s_grid, raw)
+            raw_map[s] = σ
+        end
+        for (s, σ) in zip(extra_s, extra_raw)
+            # only set if not already present (avoid overwriting original grid values)
+            if !haskey(raw_map, s)
+                raw_map[s] = σ
+            end
+        end
+        s_used = sort(collect(keys(raw_map)))
+        cache.s_vals = copy(s_used)
+        sigma_list = Float64[]
+        for s in s_used
+            σ = raw_map[s]
+            if cache.asym_enabled
+                σ_asym = (s > cache.asym_s0) ? cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0)) : 0.0
+                push!(sigma_list, max(0.0, σ - σ_asym))
+            else
+                push!(sigma_list, σ)
+            end
+        end
+        cache.sigma_vals = sigma_list
+    else
+        cache.s_vals = copy(s_grid)
+        if cache.asym_enabled
+            reg = Float64[]
+            for (s, σ) in zip(s_grid, raw)
+                σ_asym = (s > cache.asym_s0) ? cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0)) : 0.0
+                push!(reg, max(0.0, σ - σ_asym))
+            end
+            cache.sigma_vals = reg
+        else
+            cache.sigma_vals = copy(raw)
+        end
+    end
+    cache.pchip_dirty = true
+    _ensure_pchip_slopes!(cache)
     return cache
 end
 
@@ -258,6 +360,10 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
     if n == 1
         return cache.sigma_vals[1]
     elseif s < cache.s_vals[1] || s > cache.s_vals[end]
+        # outside cached window: return only asymptotic part if available
+        if cache.asym_enabled && s > cache.asym_s0
+            return cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0))
+        end
         return 0.0
     elseif s == cache.s_vals[1]
         return cache.sigma_vals[1]
@@ -266,6 +372,10 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
     end
     val = interpolate_sigma(cache, s)
     val === nothing && error("interpolation failed inside cache window")
+    # add back analytic asymptotic if enabled
+    if cache.asym_enabled && s > cache.asym_s0
+        return val + cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0))
+    end
     return val
 end
 
@@ -458,6 +568,10 @@ function build_w0cdf_pchip_cache(
     p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
     n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10,
 )
     quark_params = _nt_quark(quark_params)
     thermo_params = _nt_thermo(thermo_params)
@@ -473,7 +587,14 @@ function build_w0cdf_pchip_cache(
         scale=scale,
     )
     cache = CrossSectionCache(process)
-    precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
+    # record whether asymptotic subtraction was requested (explicitly or auto-enabled)
+    cache.asym_requested = threshold_subtraction
+    precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs;
+        n_points=n_sigma_points,
+        threshold_subtraction=threshold_subtraction,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points)
     _ensure_pchip_slopes!(cache)
     return cache
 end
@@ -589,7 +710,12 @@ function average_scattering_rate(
     density_p_nodes::Int=DEFAULT_SEMI_INF_NODES,
     density_scale::Float64=DEFAULT_SEMI_INF_SCALE,
     apply_s_domain_cut::Bool=true,
-    sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
+    sigma_cutoff::Union{Nothing,Float64}=nothing,  # 新增：σ(s)有效范围的动量截断
+    # 允许在未传入 cs_cache 时自动构建并配置阈值减法
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10
 )::Float64
     quark_params = _nt_quark(quark_params)
     thermo_params = _nt_thermo(thermo_params)
@@ -605,19 +731,31 @@ function average_scattering_rate(
 
     # Build the finalized σ-cache strategy by default.
     # 如果指定了 sigma_cutoff，则使用有限截断的 w0cdf 设计
-    cs_cache === nothing && (cs_cache = build_w0cdf_pchip_cache(
-        process,
-        quark_params,
-        thermo_params,
-        K_coeffs;
-        N=DEFAULT_SIGMA_GRID_N,
-        design_p_nodes=DEFAULT_W0CDF_P_NODES,
-        design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
-        design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
-        p_cutoff=sigma_cutoff,  # 传递 sigma_cutoff 作为 p_cutoff
-        scale=scale,
-        n_sigma_points=n_sigma_points,
-    ))
+    if cs_cache === nothing
+        # force-enable threshold subtraction for processes where initial total mass
+        # (mi^2 + mj^2) is greater than final total mass (mc^2 + md^2).
+        thr_for_build = threshold_subtraction
+        if (mi^2 + mj^2) > (mc^2 + md^2)
+            thr_for_build = true
+        end
+        cs_cache = build_w0cdf_pchip_cache(
+            process,
+            quark_params,
+            thermo_params,
+            K_coeffs;
+            N=DEFAULT_SIGMA_GRID_N,
+            design_p_nodes=DEFAULT_W0CDF_P_NODES,
+            design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
+            design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
+            p_cutoff=sigma_cutoff,  # 传递 sigma_cutoff 作为 p_cutoff
+            scale=scale,
+            n_sigma_points=n_sigma_points,
+            threshold_subtraction=thr_for_build,
+            asym_window=asym_window,
+            asym_fit_min_points=asym_fit_min_points,
+            asym_extra_points=asym_extra_points,
+        )
+    end
 
     # 使用半无穷积分 [0, ∞)
     return _average_scattering_rate_semi_infinite(
