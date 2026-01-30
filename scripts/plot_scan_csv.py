@@ -57,6 +57,8 @@ from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+import matplotlib
+from matplotlib.ticker import AutoLocator, LogLocator, MaxNLocator
 
 
 def _find_project_root() -> Path:
@@ -236,6 +238,10 @@ def plot_lines(
     linewidth: float,
     grid_alpha: float,
     legend_loc: str | None,
+    line_style: str = "-",
+    formats: List[str] = None,
+    dpi: int = 600,
+    check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -247,7 +253,7 @@ def plot_lines(
         groups.setdefault(group_key(r), []).append(r)
 
     for y in ys:
-        plt.figure(figsize=(6.8, 4.6))
+        fig, ax = plt.subplots(figsize=(6.8, 4.6))
         any_plotted = False
 
         # 轴缩放：优先使用命令行覆盖，其次使用元数据。
@@ -265,7 +271,7 @@ def plot_lines(
                 continue
             xs3, ys3 = zip(*pairs)
             label = gk if group else y
-            plt.plot(xs3, ys3, marker=(marker or ""), lw=linewidth, label=label)
+            ax.plot(xs3, ys3, marker=(marker or ""), lw=linewidth, linestyle=line_style, label=label)
             any_plotted = True
 
         if not any_plotted:
@@ -273,35 +279,56 @@ def plot_lines(
             continue
 
         if meta:
-            plt.xlabel(_axis_label(meta, axis="x", col=x))
-            plt.ylabel(_axis_label(meta, axis="y", col=y))
+            ax.set_xlabel(_axis_label(meta, axis="x", col=x))
+            ax.set_ylabel(_axis_label(meta, axis="y", col=y))
         else:
-            plt.xlabel(x)
-            plt.ylabel(y)
+            ax.set_xlabel(x)
+            ax.set_ylabel(y)
 
         if xscale:
-            plt.xscale(xscale)
+            ax.set_xscale(xscale)
         if yscale:
-            plt.yscale(yscale)
+            ax.set_yscale(yscale)
 
-        if xlim:
-            plt.xlim(xlim)
-        if ylim:
-            plt.ylim(ylim)
+        # Apply strict axis-limit rules: user-specified limits win; otherwise compute from data and align to major ticks
+        # Collect all plotted data on axes for limit calculation
+        # For x: use all xs across groups; for y: compute from plotted y-values
+        x_values = []
+        y_values = []
+        for line in ax.get_lines():
+            xd = line.get_xdata()
+            yd = line.get_ydata()
+            x_values.extend([float(v) for v in xd if not math.isnan(v)])
+            y_values.extend([float(v) for v in yd if not math.isnan(v)])
+
+        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=tuple(xlim) if xlim else None, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
 
         title = f"{title_prefix} - {y}" if title_prefix else y
-        plt.title(title)
-        plt.grid(True, alpha=grid_alpha)
+        ax.set_title(title)
+        if grid_alpha > 0:
+            ax.grid(True, alpha=grid_alpha)
         if group:
             if legend_loc:
                 plt.legend(loc=legend_loc)
             else:
                 plt.legend()
-        plt.tight_layout()
-        out = out_dir / f"{y}_vs_{x}.png"
-        plt.savefig(out, dpi=200)
-        plt.close()
-        print(f"Saved {out}")
+        fig.tight_layout()
+        # 保存为指定格式（优先支持矢量 PDF）
+        fmts = formats or ["pdf", "png"]
+        saved = []
+        for fmt in fmts:
+            out = out_dir / f"{y}_vs_{x}.{fmt}"
+            fmt_lower = fmt.lower()
+            if fmt_lower in {"pdf", "eps"}:
+                fig.savefig(out, format=fmt_lower, dpi=dpi)
+            else:
+                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            saved.append(out)
+        plt.close(fig)
+        print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if check:
+            _post_save_checks(saved, expected_dpi=dpi)
 
 
 def _build_grid(rows: List[Dict[str, str]], *, x: str, y: str, z: str) -> Tuple[List[float], List[float], List[List[float]]]:
@@ -328,6 +355,56 @@ def _build_grid(rows: List[Dict[str, str]], *, x: str, y: str, z: str) -> Tuple[
     return xs, ys, grid
 
 
+def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tuple[float, float] | None, scale: str | None):
+    """Set axis limits according to rule:
+    - If user_lim provided, use it.
+    - Else compute major ticks from data range and set axis limits to first/last major tick.
+    - For log scale use LogLocator; for linear use AutoLocator/MaxNLocator.
+    """
+    if user_lim:
+        if axis == "x":
+            ax.set_xlim(user_lim)
+        else:
+            ax.set_ylim(user_lim)
+        return
+
+    vals = [v for v in values if not math.isnan(v)]
+    if not vals:
+        return
+    vmin = min(vals)
+    vmax = max(vals)
+    if vmin == vmax:
+        # tiny fallback
+        vmin -= 0.5
+        vmax += 0.5
+
+    try:
+        if scale == "log":
+            locator = LogLocator()
+            ticks = locator.tick_values(max(vmin, 1e-300), max(vmax, 1e-300))
+        else:
+            # prefer MaxNLocator for nice round ticks
+            locator = MaxNLocator(nbins=6)
+            ticks = locator.tick_values(vmin, vmax)
+        if len(ticks) >= 2:
+            low, high = float(ticks[0]), float(ticks[-1])
+        else:
+            low, high = vmin, vmax
+    except Exception:
+        low, high = vmin, vmax
+
+    # Ensure the chosen limits still cover data
+    if low > vmin:
+        low = vmin
+    if high < vmax:
+        high = vmax
+
+    if axis == "x":
+        ax.set_xlim(low, high)
+    else:
+        ax.set_ylim(low, high)
+
+
 def plot_heatmaps(
     rows: List[Dict[str, str]],
     *,
@@ -344,6 +421,9 @@ def plot_heatmaps(
     zscale: str | None,
     clim: Tuple[float, float] | None,
     cmap: str | None,
+    formats: List[str] = None,
+    dpi: int = 600,
+    check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -372,7 +452,7 @@ def plot_heatmaps(
         if not xs2 or not ys2:
             continue
 
-        plt.figure(figsize=(7.6, 5.2))
+        fig, ax = plt.subplots(figsize=(7.6, 5.2))
 
         # 轴缩放：优先使用命令行覆盖，其次使用元数据。
         xscale = xscale_override or (_axis_scale(meta, axis="x", col=x) if meta else None)
@@ -402,7 +482,7 @@ def plot_heatmaps(
             if vmin is not None and vmax is not None and vmin > 0 and vmax > 0:
                 norm = LogNorm(vmin=vmin, vmax=vmax)
 
-        im = plt.imshow(
+        im = ax.imshow(
             grid2,
             origin="lower",
             aspect="auto",
@@ -417,31 +497,40 @@ def plot_heatmaps(
             im.set_clim(clim[0], clim[1])
 
         if meta:
-            plt.colorbar(im, label=_axis_label(meta, axis="y", col=field))
-            plt.xlabel(_axis_label(meta, axis="x", col=x))
-            plt.ylabel(_axis_label(meta, axis="y", col=y))
+            fig.colorbar(im, ax=ax, label=_axis_label(meta, axis="y", col=field))
+            ax.set_xlabel(_axis_label(meta, axis="x", col=x))
+            ax.set_ylabel(_axis_label(meta, axis="y", col=y))
         else:
-            plt.colorbar(im, label=field)
-            plt.xlabel(x)
-            plt.ylabel(y)
+            fig.colorbar(im, ax=ax, label=field)
+            ax.set_xlabel(x)
+            ax.set_ylabel(y)
 
         if xscale:
-            plt.xscale(xscale)
+            ax.set_xscale(xscale)
         if yscale:
-            plt.yscale(yscale)
+            ax.set_yscale(yscale)
 
-        if xlim:
-            plt.xlim(xlim)
-        if ylim:
-            plt.ylim(ylim)
+        # Apply strict axis limits based on grid coordinates xs2/ys2 unless user provided limits
+        _set_axis_limits_strict(ax, axis="x", values=xs2, user_lim=tuple(xlim) if xlim else None, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=ys2, user_lim=tuple(ylim) if ylim else None, scale=yscale)
         title = f"{title_prefix} - {field}" if title_prefix else field
-        plt.title(title)
-        plt.tight_layout()
+        ax.set_title(title)
+        fig.tight_layout()
 
-        out = out_dir / f"heatmap_{field}_({y}_vs_{x}).png"
-        plt.savefig(out, dpi=200)
-        plt.close()
-        print(f"Saved {out}")
+        fmts = formats or ["pdf", "png"]
+        saved = []
+        for fmt in fmts:
+            out = out_dir / f"heatmap_{field}_({y}_vs_{x}).{fmt}"
+            fmt_lower = fmt.lower()
+            if fmt_lower in {"pdf", "eps"}:
+                fig.savefig(out, format=fmt_lower, dpi=dpi)
+            else:
+                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            saved.append(out)
+        plt.close(fig)
+        print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if check:
+            _post_save_checks(saved, expected_dpi=dpi)
 
 
 def _resolve_path(p: Path) -> Path:
@@ -449,6 +538,73 @@ def _resolve_path(p: Path) -> Path:
     if p.is_absolute():
         return p
     return PROJECT_ROOT / p
+
+
+def configure_publication_style(*, font: str = "Times New Roman", font_size: int = 10, line_width: float = 1.0, dpi: int = 600) -> None:
+    """Configure matplotlib rcParams for publication-quality figures."""
+    matplotlib.rcParams.update({
+        "font.family": "serif",
+        "font.serif": [font, "Times"],
+        "font.size": font_size,
+        "axes.titlesize": font_size,
+        "axes.labelsize": font_size,
+        "legend.fontsize": max(8, font_size - 2),
+        "xtick.labelsize": max(8, font_size - 2),
+        "ytick.labelsize": max(8, font_size - 2),
+        "lines.linewidth": line_width,
+        "lines.markersize": 4,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "axes.grid": False,
+        "savefig.dpi": dpi,
+        "savefig.format": "pdf",
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.05,
+    })
+
+
+def _post_save_checks(paths: List[Path], *, expected_dpi: int = 600) -> None:
+    """Run simple post-save checks on saved image files.
+
+    - For PNG: check `info['dpi']` if available and warn if below expected_dpi.
+    - For PDF/EPS: print a reminder to verify vectorness and font embedding.
+    """
+    try:
+        from PIL import Image
+    except Exception:
+        Image = None
+
+    for p in paths:
+        try:
+            p = Path(p)
+            if not p.exists():
+                print(f"[check] Missing file: {p}")
+                continue
+            suffix = p.suffix.lower()
+            if suffix in {".png", ".tiff", ".tif"}:
+                if Image is None:
+                    print(f"[check] PIL not available — cannot inspect {p.name}")
+                    continue
+                with Image.open(p) as im:
+                    dpi = im.info.get("dpi")
+                    if dpi:
+                        # dpi may be tuple
+                        if isinstance(dpi, tuple):
+                            dpi_val = int(min(dpi))
+                        else:
+                            dpi_val = int(dpi)
+                        if dpi_val < expected_dpi:
+                            print(f"[check] WARNING: {p.name} DPI={dpi_val} < expected {expected_dpi}")
+                        else:
+                            print(f"[check] OK: {p.name} DPI={dpi_val}")
+                    else:
+                        print(f"[check] NOTE: {p.name} has no DPI metadata; visually verify size/resolution")
+            elif suffix in {".pdf", ".eps"}:
+                print(f"[check] {p.name} created (PDF/EPS) — please verify vector content and font embedding if required.")
+            else:
+                print(f"[check] {p.name} created (unknown ext).")
+        except Exception as e:
+            print(f"[check] Error inspecting {p}: {e}")
 
 
 def main() -> None:
@@ -479,10 +635,12 @@ def main() -> None:
     ap.add_argument("--ylim", type=float, nargs=2, default=None, metavar=("YMIN", "YMAX"), help="y axis limits")
     ap.add_argument("--xscale", type=str, default=None, choices=["linear", "log"], help="Override x axis scale")
     ap.add_argument("--yscale", type=str, default=None, choices=["linear", "log"], help="Override y axis scale")
-    ap.add_argument("--marker", type=str, default="o", help="Marker style for lines (use empty string to disable)")
-    ap.add_argument("--linewidth", type=float, default=2.0, help="Line width")
-    ap.add_argument("--grid-alpha", type=float, default=0.3, help="Grid alpha")
+    ap.add_argument("--marker", type=str, default="", help="Marker style for lines (use empty string to disable)")
+    ap.add_argument("--linewidth", type=float, default=1.5, help="Line width")
+    ap.add_argument("--grid-alpha", type=float, default=0.0, help="Grid alpha")
     ap.add_argument("--legend-loc", type=str, default=None, help="Legend location (matplotlib loc string)")
+    ap.add_argument("--line-style", type=str, default="-", help="Line style for lines (e.g. '-', '--', '-.', ':')")
+    ap.add_argument("--check", action="store_true", help="Run simple post-save checks (PNG DPI, basic validity)")
 
     # heatmap
     ap.add_argument("--y", type=str, default=None, help="y column (heatmap mode)")
@@ -490,6 +648,10 @@ def main() -> None:
     ap.add_argument("--zscale", type=str, default=None, choices=["linear", "log"], help="Heatmap color scale")
     ap.add_argument("--clim", type=float, nargs=2, default=None, metavar=("VMIN", "VMAX"), help="Heatmap color limits")
     ap.add_argument("--cmap", type=str, default=None, help="Heatmap colormap name")
+
+    # output formats and quality
+    ap.add_argument("--formats", type=str, default="pdf,png", help="Comma-separated output formats (e.g. pdf,png,eps)")
+    ap.add_argument("--dpi", type=int, default=600, help="Output DPI for saved figures (default 600)")
 
     args = ap.parse_args()
 
@@ -508,6 +670,9 @@ def main() -> None:
         title = meta.get("title")
 
     splits = _split_rows(rows, split=args.split)
+
+    # Configure publication style before plotting
+    configure_publication_style(dpi=args.dpi)
 
     for split_value, subrows in splits:
         if not subrows:
@@ -540,6 +705,10 @@ def main() -> None:
                 linewidth=float(args.linewidth),
                 grid_alpha=float(args.grid_alpha),
                 legend_loc=args.legend_loc,
+                line_style=args.line_style,
+                formats=[s.strip() for s in args.formats.split(",") if s.strip()],
+                dpi=int(args.dpi),
+                check=bool(args.check),
             )
         else:
             if not args.x or not args.y or not args.fields:
@@ -560,6 +729,9 @@ def main() -> None:
                 zscale=_parse_scale_arg(args.zscale),
                 clim=tuple(args.clim) if args.clim else None,
                 cmap=args.cmap,
+                formats=[s.strip() for s in args.formats.split(",") if s.strip()],
+                dpi=int(args.dpi),
+                check=bool(args.check),
             )
 
 
