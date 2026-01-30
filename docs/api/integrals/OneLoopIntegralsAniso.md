@@ -543,7 +543,7 @@ end
 
 - **公式推导**：`docs/reference/formula/relaxtime/integrals/OneLoopIntegral_A_Aniso_Collinear.md`
 - **各向同性基础**：`docs/api/integrals/OneLoopIntegrals.md`
-- **分布函数**：`docs/reference/formula/pnjl/distribution/PNJL_夸克有效分布函数_动量各向异性.md`
+- **分布函数**：`docs/reference/formula/models/pnjl/distribution/PNJL_夸克有效分布函数_动量各向异性.md`
 - **测试总结**：`test/test_oneloopintegrals_aniso_summary.md`
 - **B0修正详细分析**：`test/test_b0_correction_summary.md`
 

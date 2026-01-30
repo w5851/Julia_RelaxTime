@@ -2,7 +2,7 @@
 各向异性下对夸克有效分布函数对ξ的一阶展开修正项:
 在ξ很小的情况下, 使用线性近似.
 
-具体公式见文档doc/formula/PNJL_夸克有效分布函数_动量各向异性.md
+具体公式见文档docs/reference/formula/models/pnjl/distribution/PNJL_夸克有效分布函数_动量各向异性.md
 """
 module PNJLQuarkDistributions_Aniso
 

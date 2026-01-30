@@ -449,9 +449,9 @@ end
 
 ## 六、参考资料
 
-- `docs/reference/formula/pnjl/Omega_各向同性.md` - 各向同性 PNJL 公式
-- `docs/reference/formula/pnjl/Omega_RS各向异性.md` - 各向异性 PNJL 公式
-- `docs/reference/formula/pnjl/PNJL模型一阶相变处理策略.md` - 一阶相变策略
+- `docs/reference/formula/models/pnjl/Omega_各向同性.md` - 各向同性 PNJL 公式
+- `docs/reference/formula/models/pnjl/Omega_RS各向异性.md` - 各向异性 PNJL 公式
+- `docs/reference/formula/models/pnjl/PNJL模型一阶相变处理策略.md` - 一阶相变策略
 - `Julia_test/integral_test/Pnjl_minimal.jl` - 实验性实现参考
 - ImplicitDifferentiation.jl 文档：https://gdalle.github.io/ImplicitDifferentiation.jl/
 

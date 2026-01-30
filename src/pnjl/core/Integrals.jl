@@ -4,8 +4,8 @@
 PNJL 模型积分计算模块，包含真空项和热项的积分实现。
 
 ## 公式来源
-- 各向同性公式：docs/reference/formula/pnjl/Omega_各向同性.md
-- 各向异性公式：docs/reference/formula/pnjl/Omega_RS各向异性.md
+- 各向同性公式：docs/reference/formula/models/pnjl/Omega_各向同性.md
+- 各向异性公式：docs/reference/formula/models/pnjl/Omega_RS各向异性.md
 
 ## 主要功能
 - 积分节点缓存管理
