@@ -39,3 +39,46 @@ npm run deps:render
 - 将 `web/js` 的 ES module import 解析加入图
 - 在 CI 中加入自动检查并阻止新增循环依赖
 - 使用 `docs/architecture/dependency_rules.md` 维护目录级依赖矩阵
+
+---
+
+## 归档开发文档
+
+自动归档 `docs/dev/active` 中的文档到 `docs/dev/archived`，并添加元信息头部。
+
+### 交互式归档
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl -i
+```
+
+### 批量归档指定文件
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl file1.md file2.md
+```
+
+### 使用自定义日期归档
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl -d 2026-01-15 file1.md
+```
+
+### 验证已归档文件格式
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl -c
+```
+
+### 预览归档操作（不实际执行）
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl --dry-run file1.md
+```
+
+**功能说明**：
+- 自动添加 YAML 元信息头部（title、archived、original、archived_date）
+- 自动提取文档标题（从第一个 # 标题）
+- 自动添加日期前缀到文件名（如果尚未存在）
+- 从 active 目录移动到 archived 目录
+- 支持批量操作和交互式选择
