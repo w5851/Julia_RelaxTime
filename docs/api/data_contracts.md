@@ -8,6 +8,107 @@
 
 ---
 
+## 0. Models 子系统（阶段 0）契约
+
+本节描述当前仓库 `src/models` 下 **models 子系统** 的“最小稳定入口”，用于支撑 legacy → models 的渐进迁移。
+
+### 0.1 统一入口
+
+- `Models.solve_gap(model, T, mu_vec; kwargs...) -> x_state`
+- `Models.omega(model, x_state, T, mu_vec; kwargs...) -> Real`
+- `Models.omega_components(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
+- （可选扩展）`Models.number_densities(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
+
+### 0.2 `x_state`（平均场状态）
+
+推荐的规范表示是：
+
+```julia
+Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
+```
+
+字段约定：
+
+- `phi = (φu, φd, φs)`：三味凝聚参数
+- `Phi` / `PhiBar`：Polyakov loop 变量（NJL 类通常可取 1 并被忽略）
+
+兼容输入（会被规范化为 `MeanFieldState`）：
+
+- `MeanFieldState` 本身
+- `AbstractVector`：长度为 3（只含 φ）或长度 ≥ 5（φ + Φ + Φbar）
+- `NamedTuple`：必须包含 `:φ` 或 `:phi`；`Φ/Φbar` 缺省时默认 1
+
+配套工具函数：
+
+- `Models.meanfield_state(x_state)`：规范化为 `MeanFieldState`
+- `Models.state_vector(x_state)`：转为 5 维向量 `(φu, φd, φs, Φ, Φbar)`
+
+### 0.3 `mu_vec`（化学势向量）
+
+内部约定为三味化学势向量 `(μu, μd, μs)`。
+
+兼容输入：
+
+- `Real`：按对称情形扩展为 `(μ, μ, μ)`
+- `AbstractVector`：必须长度为 3
+
+配套工具函数：
+
+- `Models.normalize_mu_vec(mu_vec)`：统一转换为 `SVector{3}`
+
+### 0.4 rPNJL 最小契约（阶段 6 MVP）
+
+本节定义“先可运行、后增强”的 rPNJL 最小交付口径，目标是以最小改动打通 models 主链，不在 MVP 阶段承诺完整物理细节。
+
+最小入口：
+
+- `Models.create_model(:RPNJL; profile="default", physics_profile="default")`
+- `Models.solve_gap(model::AbstractPNJLModel, T, mu_vec; kwargs...)`
+- `Models.omega(model::AbstractQCDModel, x_state, T, mu_vec; kwargs...)`
+- `Models.omega_components(model::AbstractQCDModel, x_state, T, mu_vec; kwargs...)`
+
+状态与输入语义（与 PNJL 家族保持一致）：
+
+- `x_state`：兼容 `MeanFieldState` / 长度 3 或 ≥5 向量 / 含 `phi` 的 `NamedTuple`。
+- `mu_vec`：兼容 `Real`（扩展为三味同值）或长度为 3 的向量。
+- `gap_state_dim`：rPNJL 在 MVP 阶段按 PNJL 家族约束为 5。
+
+参数契约（MVP）：
+
+- 继承 PNJL 参数集（`G, K, Λ, m_u0, m_d0, m_s0, T0, a0..`）。
+- 预留 rPNJL 扩展参数位：`g1`, `g2`, `kappa`。
+- 在“八夸克项/Vandermonde”未启用前，允许 `g1/g2/kappa` 仅保留为配置字段，不改变现有数值路径。
+
+兼容边界：
+
+- MVP 不改变 NJL/PNJL 既有行为与默认结果。
+- 容差策略仅允许存在于测试断言层，不作为被测函数 keyword 暴露。
+- 若后续启用 `g1/g2/kappa` 进入主计算路径，需在 active 文档记录“公式来源 + 参数来源 + 新旧对比 smoke”。
+
+### 0.5 rPNJL 公式映射契约（阶段 7）
+
+来源文档：`docs/reference/formula/models/rpnjl/rPNJL_core.md`
+
+阶段 7 约定把公式映射到以下实现入口：
+
+- 式(3.31)（能隙方程，含 `g1/g2`）→ `calculate_mass_vec(::RPNJLModel, φ)`
+- 式(3.30)（巨热力学势中的凝聚/八夸克势项）→ `calculate_chiral(::RPNJLModel, φ)`
+- 式(3.27)–(3.29)（Polyakov 势 + Vandermonde）→ `polyakov_potential(::RPNJLModel, Φ, Φbar, T)`
+
+参数与单位契约：
+
+- `g1/g2`：配置文件使用 `MeV^-8`，在模型加载时统一换算为 `fm^8`（乘以 `hbarc^8`）。
+- `kappa`：无量纲，默认来源于 `config/models/rpnjl/<profile>.toml` 的 `[rpnjl].kappa`。
+- `T0,a0,a1,a2,b3,b4`：rPNJL profile 可覆盖 PNJL 同名参数；覆盖行为只作用于 `RPNJLModel`。
+
+退化与兼容约束：
+
+- `use_rpnjl_extensions=false` 时，`RPNJLModel` 应退化到 PNJL 参数面（用于 bridge sanity）。
+- `use_rpnjl_extensions=true` 时，允许与 PNJL 基线出现受控偏离，但需通过固定点 smoke 追踪。
+- 阶段 7 期间禁止修改测试外部容差 API；所有容差仅在测试断言层设置。
+
+---
+
 ## 1. 参数类型系统
 
 ### 1.1 核心参数类型

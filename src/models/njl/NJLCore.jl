@@ -23,8 +23,14 @@
 """
 module NJLCore
 
-using TOML
 using StaticArrays
+
+# Shared config loader (reusable across models)
+const _CONFIG_LOADER_PATH = normpath(joinpath(@__DIR__, "..", "..", "config", "ConfigLoader.jl"))
+if !isdefined(@__MODULE__, :ConfigLoader)
+    include(_CONFIG_LOADER_PATH)
+end
+using .ConfigLoader: deep_merge, load_config
 
 export NJLParams
 export load_njl_config, njl_params
@@ -50,7 +56,7 @@ Base.@kwdef struct NJLParams
     N_flavor::Int = 3
 
     # scales
-    hbarc_MeV_fm::Float64 = 197.3269804
+    hbarc_MeV_fm::Float64 = 197.327
     rho0_fm3::Float64 = 0.16
 
     # model params (internal fm units)
@@ -61,12 +67,61 @@ Base.@kwdef struct NJLParams
     m_s0_inv_fm::Float64
 end
 
-"""读取 `config/njl/<profile>.toml` 并返回解析后的 Dict。"""
-function load_njl_config(; profile::String=get(ENV, "NJL_PARAM_PROFILE", "default"))
-    config_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "njl"))
-    path = joinpath(config_dir, string(profile, ".toml"))
-    isfile(path) || error("NJL config not found: ", path)
-    return TOML.parsefile(path)
+const DEFAULT_PROFILE = "default"
+
+const PHYSICS_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
+const NJL_CONFIG_DIR_NEW = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "njl"))
+const NJL_CONFIG_DIR_OLD = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "njl"))
+
+const DEFAULT_PHYSICS_CONFIG = Dict{String, Any}(
+    "physical" => Dict(
+        "hbarc" => 197.327,
+        "alpha_em" => 1.0 / 137.035999084,
+    ),
+)
+
+const DEFAULT_NJL_MODEL_CONFIG = Dict{String, Any}(
+    "model" => Dict(
+        "label" => "njl-standard",
+        "version" => "1.0",
+        "N_color" => 3,
+        "N_flavor" => 3,
+        "rho0_fm3" => 0.16,
+        "Lambda_MeV" => 602.3,
+        "G_over_Lambda2" => 1.835,
+        "K_over_Lambda5" => 12.36,
+        "m_ud0_MeV" => 5.5,
+        "m_s0_MeV" => 140.7,
+    ),
+)
+
+function _select_config_dir(profile::String, new_dir::String, old_dir::String)
+    if isfile(joinpath(new_dir, string(profile, ".toml")))
+        return new_dir
+    end
+    if isfile(joinpath(old_dir, string(profile, ".toml")))
+        return old_dir
+    end
+    return new_dir
+end
+
+"""读取配置并返回解析后的 Dict。
+
+优先使用方案B：
+- physics: `config/physics/<profile>.toml`
+- model: `config/models/njl/<profile>.toml`
+
+兼容回退：若不存在则尝试旧路径 `config/njl/<profile>.toml`（其中可能包含 [physical]）。
+"""
+function load_njl_config(; profile::String=get(ENV, "NJL_PARAM_PROFILE", DEFAULT_PROFILE))
+    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", DEFAULT_PROFILE)
+
+    physics_data = load_config(PHYSICS_CONFIG_DIR, DEFAULT_PHYSICS_CONFIG; profile=physics_profile)
+
+    model_dir = _select_config_dir(profile, NJL_CONFIG_DIR_NEW, NJL_CONFIG_DIR_OLD)
+    model_data = load_config(model_dir, DEFAULT_NJL_MODEL_CONFIG; profile=profile)
+
+    return deep_merge(physics_data.config, model_data.config)
 end
 
 """从配置文件构造 `NJLParams`（默认 profile=default）。"""
@@ -76,7 +131,7 @@ function njl_params(; profile::String=get(ENV, "NJL_PARAM_PROFILE", "default"))
     physical = get(cfg, "physical", Dict{String, Any}())
     model = get(cfg, "model", Dict{String, Any}())
 
-    hbarc = Float64(get(physical, "hbarc", 197.3269804))
+    hbarc = Float64(get(physical, "hbarc", 197.327))
     label = String(get(model, "label", "njl"))
 
     N_color = Int(get(model, "N_color", 3))

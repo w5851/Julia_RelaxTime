@@ -99,6 +99,18 @@ end
         @test length(residual) == 8
         @test all(isfinite.(residual))
     end
+
+    @testset "FixedAsymmetricRho" begin
+        cond_fn = P.build_conditions(P.FixedAsymmetricRho(1.0, 0.876, 0.0), params)
+
+        θ = [0.5]
+        x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.4, 0.9]
+
+        residual = cond_fn(θ, x)
+
+        @test length(residual) == 8
+        @test all(isfinite.(residual))
+    end
     
     @testset "FixedEntropy" begin
         cond_fn = P.build_conditions(P.FixedEntropy(0.5), params)
@@ -161,6 +173,24 @@ end
         # 检查化学势相等约束
         @test F[6] ≈ x[6] - x[7]  # μ_u = μ_d
         @test F[7] ≈ x[7] - x[8]  # μ_d = μ_s
+    end
+
+    @testset "FixedAsymmetricRho" begin
+        mode = P.FixedAsymmetricRho(1.0, 0.876, 0.0)
+        residual_fn! = P.build_residual!(mode, params)
+
+        x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.4, 0.9]
+        F = zeros(8)
+
+        residual_fn!(F, x)
+
+        @test length(F) == 8
+        @test all(isfinite.(F))
+
+        # 数值保护场景：μ_d 极小导致 rho_d 可能接近 0，要求约束仍有限
+        x_guard = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, -50.0, 0.9]
+        residual_fn!(F, x_guard)
+        @test isfinite(F[7])
     end
     
     @testset "FixedEntropy" begin

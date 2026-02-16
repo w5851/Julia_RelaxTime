@@ -29,6 +29,7 @@ struct AdaptiveCLIOptions
     p_num::Int
     t_num::Int
     seed_path::String
+    seed_policy::Symbol
 end
 
 function parse_args(args::Vector{String})
@@ -47,6 +48,7 @@ function parse_args(args::Vector{String})
         :p_num => 24,
         :t_num => 8,
         :seed_path => DEFAULT_SEED_PATH,
+        :seed_policy => :hybrid_continuity,
     )
     i = 1
     while i <= length(args)
@@ -85,6 +87,8 @@ function parse_args(args::Vector{String})
             opts[:t_num] = parse(Int, require_value())
         elseif arg == "--seed-path"
             opts[:seed_path] = require_value()
+        elseif arg == "--seed-policy"
+            opts[:seed_policy] = Symbol(lowercase(require_value()))
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -108,6 +112,7 @@ function parse_args(args::Vector{String})
         Int(opts[:p_num]),
         Int(opts[:t_num]),
         String(opts[:seed_path]),
+        Symbol(opts[:seed_policy]),
     )
 end
 
@@ -126,6 +131,7 @@ function print_usage()
     println("  --no-resume               禁用 skip 逻辑，强制重算")
     println("  --p-num / --t-num <int>   透传给 TrhoScan 的积分节点")
     println("  --seed-path <path>        自定义连续种子文件")
+    println("  --seed-policy <symbol>    Trho seed policy (default hybrid_continuity)")
 end
 
 function _maybe_float(row, key::Symbol)
@@ -210,6 +216,7 @@ function run_adaptive_scan(opts::AdaptiveCLIOptions)
                   xi_values=[opts.xi],
                   output_path=opts.output,
                   seed_path=opts.seed_path,
+                  seed_policy=opts.seed_policy,
                   overwrite=false,
                   resume=opts.resume,
                   p_num=opts.p_num,

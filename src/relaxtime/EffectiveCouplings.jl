@@ -7,12 +7,25 @@
 """
 module EffectiveCouplings
 
-include("../Constants_PNJL.jl")
-include("OneLoopIntegrals.jl")
-include("OneLoopIntegralsAniso.jl")
-using .Constants_PNJL: N_color, ħc_MeV_fm
-using .OneLoopIntegrals: A
-using .OneLoopIntegralsCorrection: A_aniso
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+
+# Prefer reuse Main.OneLoopIntegrals / Main.OneLoopIntegralsCorrection to avoid duplication
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegralsAniso.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegralsCorrection, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
+using Main.Constants_PNJL: N_color, ħc_MeV_fm
+using Main.OneLoopIntegrals: A
+using Main.OneLoopIntegralsCorrection: A_aniso
 
 export calculate_effective_couplings, coupling_matrix_determinant
 export calculate_G_from_A
@@ -42,7 +55,7 @@ G^f = -\\frac{N_c}{4\\pi^2} m_f A_f(T, \\mu)
 
 # 示例
 ```julia
-using .OneLoopIntegrals: A
+using Main.OneLoopIntegrals: A
 T_inv_fm = 150.0 / 197.327  # 150 MeV
 μ_inv_fm = 0.0
 m_inv_fm = 300.0 / 197.327  # 300 MeV
@@ -199,8 +212,8 @@ K_{08}^± = ±(1/6)√2 K(G^μ - G^s)
 
 # 使用示例
 ```julia
-using .Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm
-using .OneLoopIntegrals: A
+using Main.Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm
+using Main.OneLoopIntegrals: A
 
 # 设置物理参数
 T_MeV = 150.0

@@ -22,28 +22,43 @@ module TransportCoefficients
 - σ: p⁴q²/E² (来自 p² × p²q²/E²)
 """
 
-include("../Constants_PNJL.jl")
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
 include("../integration/GaussLegendre.jl")
-include("../QuarkDistribution.jl")
-include("../QuarkDistribution_Aniso.jl")
+include("../integration/PhaseSpaceSampling.jl")
+
+# Prefer reuse Main-level distribution modules to avoid duplication
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "QuarkDistribution.jl"))
+IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
+const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl"))
+IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
 
 using Base.MathConstants: π
 
-using .Constants_PNJL: N_color, α
+using Main.Constants_PNJL: N_color, α
 using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
-using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
-using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
+using .PhaseSpaceSampling: p_nodes_weights, cos_nodes_weights, integrate_p, integrate_p_cos
+using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
+using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
 # Ensure shared parameter types are loaded at Main-level
-if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
-end
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 export shear_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 
 export TransportIntegrationConfig, QuarkParams, ThermoParams, TransportPhysicsConfig, TransportRequest
+export default_transport_provider
 
 const TWO_PI = 2.0 * π
 
@@ -121,6 +136,22 @@ end
 
 @inline energy_from_p(p::Float64, m::Float64) = sqrt(p * p + m * m)
 
+@inline function energy_from_p_aniso(p::Float64, m::Float64, ξ::Float64, cosθ::Float64)
+    return sqrt(p * p + m * m + ξ * (p * cosθ)^2)
+end
+
+const DEFAULT_TRANSPORT_PROVIDER = (
+    energy_from_p=energy_from_p,
+    energy_from_p_aniso=energy_from_p_aniso,
+    quark_distribution=quark_distribution,
+    antiquark_distribution=antiquark_distribution,
+    quark_distribution_aniso=quark_distribution_aniso,
+    antiquark_distribution_aniso=antiquark_distribution_aniso,
+    prefer_energy_aniso=true,
+)
+
+@inline default_transport_provider() = DEFAULT_TRANSPORT_PROVIDER
+
 @inline function degeneracy_default()::Float64
     return 2.0 * Float64(N_color)
 end
@@ -193,6 +224,7 @@ function shear_viscosity(
     tau::NamedTuple=req.tau,
     degeneracy::Float64=req.physics.degeneracy,
     integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return shear_viscosity(
@@ -201,6 +233,7 @@ function shear_viscosity(
         tau=tau,
         degeneracy=degeneracy,
         config=integration,
+        provider=provider,
         kwargs...
     )
 end
@@ -212,6 +245,7 @@ function electric_conductivity(
     charges::NamedTuple=req.physics.charges,
     degeneracy::Float64=req.physics.degeneracy,
     integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return electric_conductivity(
@@ -221,6 +255,7 @@ function electric_conductivity(
         charges=charges,
         degeneracy=degeneracy,
         config=integration,
+        provider=provider,
         kwargs...
     )
 end
@@ -231,6 +266,7 @@ function bulk_viscosity_isentropic(
     tau::NamedTuple=req.tau,
     bulk_coeffs_isentropic::NamedTuple,
     integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return bulk_viscosity_isentropic(
@@ -239,6 +275,7 @@ function bulk_viscosity_isentropic(
         tau=tau,
         bulk_coeffs_isentropic=bulk_coeffs_isentropic,
         config=integration,
+        provider=provider,
         kwargs...
     )
 end
@@ -251,6 +288,7 @@ function transport_coefficients(
     charges::NamedTuple=req.physics.charges,
     degeneracy::Float64=req.physics.degeneracy,
     integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::NamedTuple
     return transport_coefficients(
@@ -261,6 +299,7 @@ function transport_coefficients(
         charges=charges,
         degeneracy=degeneracy,
         config=integration,
+        provider=provider,
         kwargs...
     )
 end
@@ -269,8 +308,10 @@ end
     return f * (1.0 - f)
 end
 
-@inline function distribution_for_species(
+@inline function distribution_for_species_from_E(
+    provider,
     species::Symbol,
+    E::Float64,
     p::Float64,
     m::Float64,
     μ::Float64,
@@ -281,19 +322,60 @@ end
     cosθ::Float64
 )
     if ξ == 0.0
-        E = energy_from_p(p, m)
         if species in (:u, :d, :s)
-            return quark_distribution(E, μ, T, Φ, Φbar)
+            return provider.quark_distribution(E, μ, T, Φ, Φbar)
         else
-            return antiquark_distribution(E, μ, T, Φ, Φbar)
+            return provider.antiquark_distribution(E, μ, T, Φ, Φbar)
         end
     else
-        if species in (:u, :d, :s)
-            return quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        else
-            return antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        is_quark = species in (:u, :d, :s)
+
+        has_energy_passthrough = (
+            hasproperty(provider, :energy_from_p_aniso) &&
+            hasproperty(provider, :quark_distribution) &&
+            hasproperty(provider, :antiquark_distribution)
+        )
+
+        has_aniso_distribution = is_quark ? hasproperty(provider, :quark_distribution_aniso) : hasproperty(provider, :antiquark_distribution_aniso)
+
+        prefer_energy = hasproperty(provider, :prefer_energy_aniso) && provider.prefer_energy_aniso === true
+
+        if has_energy_passthrough && (prefer_energy || !has_aniso_distribution)
+            return is_quark ? provider.quark_distribution(E, μ, T, Φ, Φbar) : provider.antiquark_distribution(E, μ, T, Φ, Φbar)
         end
+
+        # Compatibility: provider may implement a nontrivial aniso distribution.
+        if has_aniso_distribution
+            return is_quark ? provider.quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ) : provider.antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        end
+
+        error(
+            "provider does not support anisotropic distribution: missing $(is_quark ? :quark_distribution_aniso : :antiquark_distribution_aniso) and no energy passthrough available (need :energy_from_p_aniso + :quark_distribution/:antiquark_distribution)"
+        )
     end
+end
+
+@inline function distribution_for_species(
+    provider,
+    species::Symbol,
+    p::Float64,
+    m::Float64,
+    μ::Float64,
+    T::Float64,
+    Φ::Float64,
+    Φbar::Float64,
+    ξ::Float64,
+    cosθ::Float64
+)
+    E = _energy_for_kernel(provider, p, m, ξ, cosθ)
+    return distribution_for_species_from_E(provider, species, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+end
+
+@inline function _energy_for_kernel(provider, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
+    if ξ == 0.0 || !hasproperty(provider, :energy_from_p_aniso)
+        return provider.energy_from_p(p, m)
+    end
+    return provider.energy_from_p_aniso(p, m, ξ, cosθ)
 end
 
 @inline function mass_for_species(species::Symbol, quark_params::NamedTuple)::Float64
@@ -322,25 +404,74 @@ end
     end
 end
 
+@inline function _mass_for_species(provider, species::Symbol, quark_params::NamedTuple, thermo_params::NamedTuple)::Float64
+    if hasproperty(provider, :mass_for_species)
+        return provider.mass_for_species(species, quark_params, thermo_params)
+    end
+    return mass_for_species(species, quark_params)
+end
+
+@inline function _mu_for_species(provider, species::Symbol, quark_params::NamedTuple, thermo_params::NamedTuple)::Float64
+    if hasproperty(provider, :mu_for_species)
+        return provider.mu_for_species(species, quark_params, thermo_params)
+    end
+    return mu_for_species(species, quark_params)
+end
+
 @inline function tau_for_species(species::Symbol, tau::NamedTuple)::Float64
     hasproperty(tau, species) || error("tau is missing :$species")
     return getproperty(tau, species)
 end
 
-function _p_nodes_weights(p_nodes::Int, p_max::Float64, p_grid, p_w)
-    if p_grid !== nothing
-        p_w !== nothing || error("p_w must be provided when p_grid is provided")
-        return p_grid, p_w
-    end
-    return gauleg(0.0, p_max, p_nodes)
+@inline function _species_transport_state(
+    provider,
+    sp::Symbol,
+    p::Float64,
+    c::Float64,
+    ξ::Float64,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple,
+)::NTuple{3,Float64}
+    T = thermo_params.T
+    Φ = thermo_params.Φ
+    Φbar = thermo_params.Φbar
+
+    m = _mass_for_species(provider, sp, quark_params, thermo_params)
+    μ = _mu_for_species(provider, sp, quark_params, thermo_params)
+    E = _energy_for_kernel(provider, p, m, ξ, c)
+    f = distribution_for_species_from_E(provider, sp, E, p, m, μ, T, Φ, Φbar, ξ, c)
+    ff = fermi_factor(f)
+    τ = tau_for_species(sp, tau)
+    return (E, ff, τ)
 end
 
-function _cos_nodes_weights(cos_nodes::Int, cos_grid, cos_w)
-    if cos_grid !== nothing
-        cos_w !== nothing || error("cos_w must be provided when cos_grid is provided")
-        return cos_grid, cos_w
-    end
-    return gauleg(-1.0, 1.0, cos_nodes)
+@inline _p_nodes_weights(p_nodes::Int, p_max::Float64, p_grid, p_w) = p_nodes_weights(p_nodes, p_max, p_grid, p_w)
+@inline _cos_nodes_weights(cos_nodes::Int, cos_grid, cos_w) = cos_nodes_weights(cos_nodes, cos_grid, cos_w)
+
+@inline function _effective_transport_config(
+    config::Union{Nothing,TransportIntegrationConfig},
+    kwargs::Base.Pairs,
+)::TransportIntegrationConfig
+    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
+    return _merge_transport_integration_config(base_config, kwargs)
+end
+
+@inline function _p_quadrature(effective_config::TransportIntegrationConfig)
+    return _p_nodes_weights(
+        effective_config.p_nodes,
+        effective_config.p_max,
+        effective_config.p_grid,
+        effective_config.p_w,
+    )
+end
+
+@inline function _cos_quadrature(effective_config::TransportIntegrationConfig)
+    return _cos_nodes_weights(
+        effective_config.cos_nodes,
+        effective_config.cos_grid,
+        effective_config.cos_w,
+    )
 end
 
 """
@@ -357,23 +488,15 @@ function shear_viscosity(
     thermo_params::NamedTuple;
     tau::NamedTuple,
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     config::Union{Nothing,TransportIntegrationConfig}=nothing,
     kwargs...
 )::Float64
     T = thermo_params.T
-    Φ = thermo_params.Φ
-    Φbar = thermo_params.Φbar
     ξ = get(thermo_params, :ξ, 0.0)
 
-    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
-    effective_config = _merge_transport_integration_config(base_config, kwargs)
-
-    nodes_p, weights_p = _p_nodes_weights(
-        effective_config.p_nodes,
-        effective_config.p_max,
-        effective_config.p_grid,
-        effective_config.p_w,
-    )
+    effective_config = _effective_transport_config(config, kwargs)
+    nodes_p, weights_p = _p_quadrature(effective_config)
 
     # 相空间测度系数
     # 各向同性: 4π/(2π)³ = 1/(2π²)
@@ -384,43 +507,29 @@ function shear_viscosity(
     species_list = (:u, :d, :s, :ubar, :dbar, :sbar)
 
     if ξ == 0.0
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+        acc = integrate_p(nodes_p, weights_p) do p
             p2 = p * p
             p6 = p2 * p2 * p2  # p⁶ = p² (相空间) × p⁴ (物理因子)
+            inner = 0.0
             for sp in species_list
-                m = mass_for_species(sp, quark_params)
-                μ = mu_for_species(sp, quark_params)
-                E = energy_from_p(p, m)
-                f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, 0.0, 0.0)
-                ff = fermi_factor(f)
-                τ = tau_for_species(sp, tau)
-                acc += wp * p6 / (E * E) * (degeneracy * τ * ff)
+                E, ff, τ = _species_transport_state(provider, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
+                inner += p6 / (E * E) * (degeneracy * τ * ff)
             end
+            return inner
         end
         integral = pref_measure_iso * acc
         return (1.0 / (15.0 * T)) * integral
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(
-            effective_config.cos_nodes,
-            effective_config.cos_grid,
-            effective_config.cos_w,
-        )
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+        nodes_cos, weights_cos = _cos_quadrature(effective_config)
+        acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
             p2 = p * p
             p6 = p2 * p2 * p2
-            for (c, wc) in zip(nodes_cos, weights_cos)
-                for sp in species_list
-                    m = mass_for_species(sp, quark_params)
-                    μ = mu_for_species(sp, quark_params)
-                    E = energy_from_p(p, m)
-                    f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, ξ, c)
-                    ff = fermi_factor(f)
-                    τ = tau_for_species(sp, tau)
-                    acc += wp * wc * p6 / (E * E) * (degeneracy * τ * ff)
-                end
+            inner = 0.0
+            for sp in species_list
+                E, ff, τ = _species_transport_state(provider, sp, p, c, ξ, quark_params, thermo_params, tau)
+                inner += p6 / (E * E) * (degeneracy * τ * ff)
             end
+            return inner
         end
         integral = pref_measure_aniso * acc
         return (1.0 / (15.0 * T)) * integral
@@ -434,6 +543,7 @@ function shear_viscosity(
     config::TransportIntegrationConfig;
     tau::NamedTuple,
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return shear_viscosity(
@@ -442,6 +552,7 @@ function shear_viscosity(
         tau=tau,
         config=config,
         degeneracy=degeneracy,
+        provider=provider,
         kwargs...
     )
 end
@@ -461,23 +572,15 @@ function electric_conductivity(
     tau::NamedTuple,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     config::Union{Nothing,TransportIntegrationConfig}=nothing,
     kwargs...
 )::Float64
     T = thermo_params.T
-    Φ = thermo_params.Φ
-    Φbar = thermo_params.Φbar
     ξ = get(thermo_params, :ξ, 0.0)
 
-    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
-    effective_config = _merge_transport_integration_config(base_config, kwargs)
-
-    nodes_p, weights_p = _p_nodes_weights(
-        effective_config.p_nodes,
-        effective_config.p_max,
-        effective_config.p_grid,
-        effective_config.p_w,
-    )
+    effective_config = _effective_transport_config(config, kwargs)
+    nodes_p, weights_p = _p_quadrature(effective_config)
 
     pref_measure_iso = 1.0 / (2.0 * π^2)
     pref_measure_aniso = 1.0 / (4.0 * π^2)
@@ -497,43 +600,29 @@ function electric_conductivity(
     species_list = (:u, :d, :s, :ubar, :dbar, :sbar)
 
     if ξ == 0.0
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+        acc = integrate_p(nodes_p, weights_p) do p
             p2 = p * p
             p4 = p2 * p2  # p⁴ = p² (相空间) × p² (物理因子)
+            inner = 0.0
             for sp in species_list
-                m = mass_for_species(sp, quark_params)
-                μ = mu_for_species(sp, quark_params)
-                E = energy_from_p(p, m)
-                f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, 0.0, 0.0)
-                ff = fermi_factor(f)
-                τ = tau_for_species(sp, tau)
-                acc += wp * p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
+                E, ff, τ = _species_transport_state(provider, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
+                inner += p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
             end
+            return inner
         end
         integral = pref_measure_iso * acc
         return (1.0 / (3.0 * T)) * integral
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(
-            effective_config.cos_nodes,
-            effective_config.cos_grid,
-            effective_config.cos_w,
-        )
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+        nodes_cos, weights_cos = _cos_quadrature(effective_config)
+        acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
             p2 = p * p
             p4 = p2 * p2
-            for (c, wc) in zip(nodes_cos, weights_cos)
-                for sp in species_list
-                    m = mass_for_species(sp, quark_params)
-                    μ = mu_for_species(sp, quark_params)
-                    E = energy_from_p(p, m)
-                    f = distribution_for_species(sp, p, m, μ, T, Φ, Φbar, ξ, c)
-                    ff = fermi_factor(f)
-                    τ = tau_for_species(sp, tau)
-                    acc += wp * wc * p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
-                end
+            inner = 0.0
+            for sp in species_list
+                E, ff, τ = _species_transport_state(provider, sp, p, c, ξ, quark_params, thermo_params, tau)
+                inner += p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
             end
+            return inner
         end
         integral = pref_measure_aniso * acc
         return (1.0 / (3.0 * T)) * integral
@@ -548,6 +637,7 @@ function electric_conductivity(
     tau::NamedTuple,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return electric_conductivity(
@@ -557,6 +647,7 @@ function electric_conductivity(
         config=config,
         charges=charges,
         degeneracy=degeneracy,
+        provider=provider,
         kwargs...
     )
 end
@@ -578,6 +669,7 @@ function bulk_viscosity_isentropic(
     thermo_params::NamedTuple;
     tau::NamedTuple,
     bulk_coeffs_isentropic::NamedTuple,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     config::Union{Nothing,TransportIntegrationConfig}=nothing,
     kwargs...
 )::Float64
@@ -593,15 +685,8 @@ function bulk_viscosity_isentropic(
     dM_dT = bulk_coeffs_isentropic.dM_dT
     dM_dμB = bulk_coeffs_isentropic.dM_dμB
 
-    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
-    effective_config = _merge_transport_integration_config(base_config, kwargs)
-
-    nodes_p, weights_p = _p_nodes_weights(
-        effective_config.p_nodes,
-        effective_config.p_max,
-        effective_config.p_grid,
-        effective_config.p_w,
-    )
+    effective_config = _effective_transport_config(config, kwargs)
+    nodes_p, weights_p = _p_quadrature(effective_config)
 
     # 系数：N_c / (9π²T)
     # 注意：Fortran 公式中的积分是直接对 p 积分，没有额外的相空间测度因子
@@ -623,8 +708,8 @@ function bulk_viscosity_isentropic(
     flavors = (:u, :d, :s)
 
     # 计算 B 项
-    function compute_B(p::Float64, m::Float64, μ::Float64, dM_dT_val::Float64, dM_dμB_val::Float64, is_antiquark::Bool)
-        E = sqrt(p * p + m * m)
+    function compute_B(p::Float64, m::Float64, μ::Float64, dM_dT_val::Float64, dM_dμB_val::Float64, is_antiquark::Bool, ξ::Float64, cosθ::Float64)
+        E = _energy_for_kernel(provider, p, m, ξ, cosθ)
         
         # 能量导数（对重子化学势）
         dE_dT = (m / E) * dM_dT_val
@@ -656,11 +741,11 @@ function bulk_viscosity_isentropic(
 
         idx = flavor_index(sp_q)
         m = masses[idx]
-        μ = mu_for_species(sp_q, quark_params)
-        E = sqrt(p * p + m * m)
+        μ = _mu_for_species(provider, sp_q, quark_params, thermo_params)
+        E = _energy_for_kernel(provider, p, m, ξ, cosθ)
 
-        f_q = distribution_for_species(sp_q, p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        f_aq = distribution_for_species(sp_aq, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_q = distribution_for_species_from_E(provider, sp_q, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_aq = distribution_for_species_from_E(provider, sp_aq, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 
         ff_q = fermi_factor(f_q)
         ff_aq = fermi_factor(f_aq)
@@ -668,8 +753,8 @@ function bulk_viscosity_isentropic(
         τ_q = tau_for_species(sp_q, tau)
         τ_aq = tau_for_species(sp_aq, tau)
 
-        B_q = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], false)
-        B_aq = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], true)
+        B_q = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], false, ξ, cosθ)
+        B_aq = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], true, ξ, cosθ)
 
         # 积分核：(p²/E²) × τ × f(1-f) × B²
         kernel_q = (p * p / (E * E)) * τ_q * ff_q * B_q^2
@@ -679,26 +764,22 @@ function bulk_viscosity_isentropic(
     end
 
     if ξ == 0.0
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
+        acc = integrate_p(nodes_p, weights_p) do p
+            inner = 0.0
             for fl in flavors
-                acc += wp * one_flavor_pair_contrib(fl, p, 0.0)
+                inner += one_flavor_pair_contrib(fl, p, 0.0)
             end
+            return inner
         end
         return prefactor * acc
     else
-        nodes_cos, weights_cos = _cos_nodes_weights(
-            effective_config.cos_nodes,
-            effective_config.cos_grid,
-            effective_config.cos_w,
-        )
-        acc = 0.0
-        @inbounds for (p, wp) in zip(nodes_p, weights_p)
-            for (c, wc) in zip(nodes_cos, weights_cos)
-                for fl in flavors
-                    acc += wp * wc * one_flavor_pair_contrib(fl, p, c)
-                end
+        nodes_cos, weights_cos = _cos_quadrature(effective_config)
+        acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
+            inner = 0.0
+            for fl in flavors
+                inner += one_flavor_pair_contrib(fl, p, c)
             end
+            return inner
         end
         # 各向异性情况下需要除以角度积分的归一化因子 2
         return prefactor * acc / 2.0
@@ -712,6 +793,7 @@ function bulk_viscosity_isentropic(
     config::TransportIntegrationConfig;
     tau::NamedTuple,
     bulk_coeffs_isentropic::NamedTuple,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
     return bulk_viscosity_isentropic(
@@ -720,6 +802,7 @@ function bulk_viscosity_isentropic(
         tau=tau,
         bulk_coeffs_isentropic=bulk_coeffs_isentropic,
         config=config,
+        provider=provider,
         kwargs...
     )
 end
@@ -737,10 +820,10 @@ function transport_coefficients(
     config::Union{Nothing,TransportIntegrationConfig}=nothing,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::NamedTuple
-    base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
-    effective_config = _merge_transport_integration_config(base_config, kwargs)
+    effective_config = _effective_transport_config(config, kwargs)
 
     eta = shear_viscosity(
         quark_params,
@@ -748,6 +831,7 @@ function transport_coefficients(
         effective_config;
         tau=tau,
         degeneracy=degeneracy,
+        provider=provider,
     )
 
     sigma = electric_conductivity(
@@ -757,6 +841,7 @@ function transport_coefficients(
         tau=tau,
         charges=charges,
         degeneracy=degeneracy,
+        provider=provider,
     )
 
     zeta = bulk_coeffs === nothing ? NaN : bulk_viscosity_isentropic(
@@ -765,6 +850,7 @@ function transport_coefficients(
         effective_config;
         tau=tau,
         bulk_coeffs_isentropic=bulk_coeffs,
+        provider=provider,
     )
 
     return (eta=eta, zeta=zeta, sigma=sigma)
@@ -779,6 +865,7 @@ function transport_coefficients(
     bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::NamedTuple
     return transport_coefficients(
@@ -789,6 +876,7 @@ function transport_coefficients(
         config=config,
         charges=charges,
         degeneracy=degeneracy,
+        provider=provider,
         kwargs...
     )
 end

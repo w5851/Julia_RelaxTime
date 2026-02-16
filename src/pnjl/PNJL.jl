@@ -1,38 +1,43 @@
-"""
-    PNJL
+if !isdefined(Main, :PNJL)
+    @eval begin
+        """
+            PNJL
 
-PNJL 模型主模块，提供统一的接口访问所有子模块功能。
+        PNJL 模型主模块，提供统一的接口访问所有子模块功能。
 
-## 子模块
-- `Core`: 核心计算（积分、热力学量）
-- `Solver`: 求解器（约束模式、条件函数、初值策略）
-- `Derivatives`: 热力学导数计算
-- `Scans`: T-μ/T-ρ 扫描
-- `Analysis`: 相变分析（Maxwell 构造、S 形检测）
+        ## 子模块
+        - `Core`: 核心计算（积分、热力学量）
+        - `Solver`: 求解器（约束模式、条件函数、初值策略）
+        - `Derivatives`: 热力学导数计算
+        - `Scans`: T-μ/T-ρ 扫描
+        - `Analysis`: 相变分析（Maxwell 构造、S 形检测）
 
-## 使用示例
-```julia
-using PNJL
+        ## 使用示例
+        ```julia
+        using PNJL
 
-# 固定化学势求解
-result = solve(FixedMu(), T_fm, μ_fm)
+        # 固定化学势求解
+        result = solve(FixedMu(), T_fm, μ_fm)
 
-# 固定密度求解
-result = solve(FixedRho(1.0), T_fm)
+        # 固定密度求解
+        result = solve(FixedRho(1.0), T_fm)
 
-# 热力学导数
-md = mass_derivatives(T_fm, μ_fm)
-```
-"""
+        # 热力学导数
+        md = mass_derivatives(T_fm, μ_fm)
+        ```
+        """
+        module PNJL
 
-# 确保常量模块已加载
-if !isdefined(Main, :Constants_PNJL)
-    include(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
-end
+        const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+        if !isdefined(Main, :IncludeOnce)
+            Base.include(Main, _INCLUDE_ONCE_PATH)
+        end
+        const IncludeOnce = Main.IncludeOnce
 
-module PNJL
-
-using ..Constants_PNJL
+        # 确保常量模块已加载
+        const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+        IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+        using Main.Constants_PNJL
 
 # ============================================================================
 # 新架构模块
@@ -69,9 +74,9 @@ export calculate_number_densities
 export ρ0
 
 # 导出 Solver 功能
-export ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma
+export ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
 export state_dim, param_dim, constraint_description
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export PhaseBoundaryData, load_phase_boundary, interpolate_mu_c, get_phase_hint
@@ -88,20 +93,37 @@ export dP_dT, dP_dmu
 # 扫描模块（使用新架构）
 # ============================================================================
 
+include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
+include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
-include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
+include(joinpath(@__DIR__, "scans", "AdaptiveRhoRefinement.jl"))
 
 using .TmuScan
 using .TrhoScan
-using .DualBranchScan
+using .AdaptiveRhoRefinement
+
+"""load_dual_branch_scan!() -> Module
+
+按需加载一阶相变分析用的双分支扫描模块 `PNJL.DualBranchScan`。
+
+说明：该模块不进入主线默认导出/默认加载；需要时显式调用本函数。
+"""
+function load_dual_branch_scan!()
+    if !isdefined(@__MODULE__, :DualBranchScan)
+        include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
+    end
+    return DualBranchScan
+end
+
+export load_dual_branch_scan!
 
 # 导出扫描功能
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
-# 双分支扫描
-export run_dual_branch_scan, find_phase_transition, merge_branches, scan_phase_diagram
-export DualBranchResult, BranchPoint, PhaseTransitionInfo
+
+# 自适应 ρ 网格加密
+export AdaptiveRhoConfig, suggest_refinement_points, merge_rho_values
 
 # ============================================================================
 # 分析模块
@@ -130,4 +152,6 @@ export CrossoverResult, detect_crossover, scan_crossover_line
 # - CEPFinder.jl, MaxwellRhoMu.jl（已整合到 PhaseTransition.jl）
 # - analysis/ThermoDerivatives.jl（旧版，新版在 derivatives/）
 
-end # module PNJL
+        end # module PNJL
+    end
+end

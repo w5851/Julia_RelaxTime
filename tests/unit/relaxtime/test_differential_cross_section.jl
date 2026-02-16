@@ -19,24 +19,45 @@ using Statistics
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 
-include("../../../src/Constants_PNJL.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/ScatteringAmplitude.jl")
-include("../../../src/relaxtime/DifferentialCrossSection.jl")
-include("../../../src/relaxtime/TotalCrossSection.jl")
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
+const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
+if !isdefined(Main, :EffectiveCouplings)
+    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
+end
+const _SCATTERING_AMPLITUDE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "ScatteringAmplitude.jl"))
+if !isdefined(Main, :ScatteringAmplitude)
+    Base.include(Main, _SCATTERING_AMPLITUDE_PATH)
+end
+const _DIFFERENTIAL_CROSS_SECTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "DifferentialCrossSection.jl"))
+if !isdefined(Main, :DifferentialCrossSection)
+    Base.include(Main, _DIFFERENTIAL_CROSS_SECTION_PATH)
+end
+const _TOTAL_CROSS_SECTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "TotalCrossSection.jl"))
+if !isdefined(Main, :TotalCrossSection)
+    Base.include(Main, _TOTAL_CROSS_SECTION_PATH)
+end
 
-using .Constants_PNJL
-using .OneLoopIntegrals: A
-using .GaussLegendre: gauleg
-using .EffectiveCouplings: calculate_K_from_G, calculate_G_from_A,
-                           calculate_effective_couplings
-using .ScatteringAmplitude: scattering_amplitude_squared, 
+using Main.Constants_PNJL
+const Constants_PNJL = Main.Constants_PNJL
+using Main.OneLoopIntegrals: A
+using Main.GaussLegendre: gauleg
+using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using Main.ScatteringAmplitude: scattering_amplitude_squared, 
                             get_quark_masses_for_process,
                             calculate_mandelstam_variables
-using .DifferentialCrossSection
-using .TotalCrossSection: calculate_t_bounds
+using Main.DifferentialCrossSection
+using Main.TotalCrossSection: calculate_t_bounds
 
 @testset "微分散射截面计算测试" begin
     
@@ -71,9 +92,9 @@ using .TotalCrossSection: calculate_t_bounds
     G_u = calculate_G_from_A(A_u, m_u)
     G_s = calculate_G_from_A(A_s, m_s)
     
-    G_fm2 = Constants_PNJL.G_fm2
-    K_fm5 = Constants_PNJL.K_fm5
-    K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+    G_fm2_val = Constants_PNJL.G_fm2
+    K_fm5_val = Constants_PNJL.K_fm5
+    K_coeffs = calculate_effective_couplings(G_fm2_val, K_fm5_val, G_u, G_s)
     
     # 组装参数结构
     quark_params = (
@@ -388,9 +409,9 @@ A_s = A(m_s, 0.0, T, Φ, Φbar, nodes_p, weights_p)
 G_u = calculate_G_from_A(A_u, m_u)
 G_s = calculate_G_from_A(A_s, m_s)
 
-G_fm2 = Constants_PNJL.G_fm2
-K_fm5 = Constants_PNJL.K_fm5
-K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+G_fm2_val = Constants_PNJL.G_fm2
+K_fm5_val = Constants_PNJL.K_fm5
+K_coeffs = calculate_effective_couplings(G_fm2_val, K_fm5_val, G_u, G_s)
 
 # 组装参数结构
 quark_params = (

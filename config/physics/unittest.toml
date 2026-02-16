@@ -1,0 +1,6 @@
+[physical]
+hbarc = 199.0
+alpha_em = 0.0072973525664
+
+[transport_workflow]
+prefer_energy_aniso = false

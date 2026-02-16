@@ -1,0 +1,12 @@
+[model]
+# Keep Lambda_MeV default; only change couplings.
+G_over_Lambda2 = 2.500
+K_over_Lambda5 = 0.250
+
+[polyakov]
+T0_MeV = 260.0
+a0 = 1.23
+a1 = -4.56
+a2 = 7.89
+b3 = -0.42
+b4 = 123.456

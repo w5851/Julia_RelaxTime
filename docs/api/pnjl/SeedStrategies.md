@@ -58,4 +58,4 @@ end
 ## 相关模块
 
 - `PNJL.ImplicitSolver`：真正消费这些策略并执行求解
-- `PNJL.DualBranchScan`：一阶相变区域的双分支扫描（显式追踪两分支并比较 Ω）
+- （按需）`PNJL.DualBranchScan`：一阶相变区域的双分支扫描（显式追踪两分支并比较 Ω；使用前先 `PNJL.load_dual_branch_scan!()`）

@@ -31,6 +31,7 @@ struct DenseScanOptions
     resume::Bool
     p_num::Int
     t_num::Int
+    seed_policy::Symbol
 end
 
 function parse_args(args::Vector{String})
@@ -52,6 +53,7 @@ function parse_args(args::Vector{String})
         :resume => true,
         :p_num => 24,
         :t_num => 8,
+        :seed_policy => :hybrid_continuity,
     )
     i = 1
     while i <= length(args)
@@ -106,6 +108,8 @@ function parse_args(args::Vector{String})
             opts[:p_num] = parse(Int, require_value())
         elseif arg == "--t-num"
             opts[:t_num] = parse(Int, require_value())
+        elseif arg == "--seed-policy"
+            opts[:seed_policy] = Symbol(lowercase(require_value()))
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -143,6 +147,7 @@ function parse_args(args::Vector{String})
         Bool(opts[:resume]),
         Int(opts[:p_num]),
         Int(opts[:t_num]),
+        Symbol(opts[:seed_policy]),
     )
 end
 
@@ -166,6 +171,7 @@ function print_usage()
     println("  --no-resume                 Disable resume/skip logic")
     println("  --p-num <int>               Momentum grid size (pass-through)")
     println("  --t-num <int>               Theta grid size (pass-through)")
+    println("  --seed-policy <symbol>      Trho seed policy (default hybrid_continuity)")
     println("  -h, --help                  Show this help text")
 end
 
@@ -195,6 +201,7 @@ function run_dense_scan(opts::DenseScanOptions)
           output_path=opts.output,
           overwrite=opts.overwrite,
           resume=opts.resume,
+            seed_policy=opts.seed_policy,
           p_num=opts.p_num,
           t_num=opts.t_num,
     )

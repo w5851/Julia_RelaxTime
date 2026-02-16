@@ -58,6 +58,7 @@ struct PhaseStructureConfig
     rho_min::Float64
     rho_max::Float64
     rho_step::Float64
+    seed_policy::Symbol
     output_dir::String
     skip_trho::Bool
     skip_crossover::Bool
@@ -72,6 +73,7 @@ function parse_args(args)
     rho_min = 0.0
     rho_max = 4.0
     rho_step = 0.05
+    seed_policy = :hybrid_continuity
     output_dir = DEFAULT_OUTPUT_DIR
     skip_trho = false
     skip_crossover = false
@@ -92,6 +94,8 @@ function parse_args(args)
             rho_max = parse(Float64, arg[11:end])
         elseif startswith(arg, "--rho_step=")
             rho_step = parse(Float64, arg[12:end])
+        elseif startswith(arg, "--seed_policy=")
+            seed_policy = Symbol(lowercase(arg[15:end]))
         elseif startswith(arg, "--output_dir=")
             output_dir = arg[14:end]
         elseif arg == "--skip_trho"
@@ -110,6 +114,7 @@ function parse_args(args)
             println("  --rho_min=0.0     最低密度 (ρ/ρ₀)")
             println("  --rho_max=4.0     最大密度 (ρ/ρ₀)")
             println("  --rho_step=0.05   密度步长")
+            println("  --seed_policy=... 初值策略（default hybrid_continuity）")
             println("  --output_dir=...  输出目录")
             println("  --skip_trho       跳过 T-ρ 扫描")
             println("  --skip_crossover  跳过 crossover 计算")
@@ -118,7 +123,8 @@ function parse_args(args)
         end
     end
     
-    return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_min, rho_max, rho_step, 
+    return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_min, rho_max, rho_step,
+                                 seed_policy,
                                  output_dir, skip_trho, skip_crossover, verbose)
 end
 
@@ -137,6 +143,7 @@ function main(args=ARGS)
     println("  xi = $(config.xi)")
     println("  T 范围: $(config.T_min) - $(config.T_max) MeV (步长 $(config.T_step))")
     println("  ρ 范围: $(config.rho_min) - $(config.rho_max) ρ₀ (步长 $(config.rho_step))")
+    println("  seed_policy = $(config.seed_policy)")
     println("  输出目录: $(abspath(config.output_dir))")
     println()
     
@@ -209,6 +216,7 @@ function step1_trho_scan(config::PhaseStructureConfig, output_path::String)
         output_path = output_path,
         overwrite = true,
         reverse_rho = true,  # 反向扫描避免 ρ=0 奇异点问题
+        seed_policy = config.seed_policy,
         progress_cb = progress_cb
     )
     

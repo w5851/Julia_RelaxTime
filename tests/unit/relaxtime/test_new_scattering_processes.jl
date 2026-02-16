@@ -13,17 +13,33 @@ using Printf
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 
-include("../../../src/Constants_PNJL.jl")
-include("../../../src/relaxtime/ScatteringAmplitude.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _SCATTERING_AMPLITUDE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "ScatteringAmplitude.jl"))
+if !isdefined(Main, :ScatteringAmplitude)
+    Base.include(Main, _SCATTERING_AMPLITUDE_PATH)
+end
+const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
+if !isdefined(Main, :EffectiveCouplings)
+    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
+end
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
 
-using .ScatteringAmplitude
-using .Constants_PNJL
-using .EffectiveCouplings
-using .OneLoopIntegrals: A
-using .GaussLegendre: gauleg
+using Main.ScatteringAmplitude
+using Main.Constants_PNJL
+const Constants_PNJL = Main.Constants_PNJL
+using Main.EffectiveCouplings
+using Main.OneLoopIntegrals: A
+using Main.GaussLegendre: gauleg
 
 @testset "新增散射过程验证" begin
     

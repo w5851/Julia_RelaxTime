@@ -38,11 +38,20 @@ type stability and zero overhead.
 """
 module TotalPropagator
 
-include("../Constants_PNJL.jl")
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
 include("MesonPropagator.jl")
 include("PolarizationCache.jl")
 
-using .Constants_PNJL: SCATTERING_MESON_MAP
+using Main.Constants_PNJL: SCATTERING_MESON_MAP
 using ..ParticleSymbols: parse_scattering_process, parse_particle_pair_str, extract_quark_flavor, parse_scattering_process_flavor_codes, get_quark_masses_for_process
 using ..ParticleSymbols: FLAVOR_U, FLAVOR_D, FLAVOR_S
 using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
@@ -373,8 +382,8 @@ D_total = T1 * sum(D_meson) * T2
 
 # 示例
 ```julia
-using .EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
-using .OneLoopIntegrals: A
+using Main.EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
+using Main.OneLoopIntegrals: A
 
 # 设置参数
 T = 150.0 / 197.327  # 150 MeV → fm⁻¹

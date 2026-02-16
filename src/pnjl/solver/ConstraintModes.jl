@@ -6,6 +6,7 @@ PNJL 求解器约束模式定义。
 ## 支持的模式
 - `FixedMu`: 固定化学势 μ
 - `FixedRho`: 固定重子数密度 ρ
+- `FixedAsymmetricRho`: 固定非对称约束（nB、ρu/ρd、ρs）
 - `FixedEntropy`: 固定熵密度 s
 - `FixedSigma`: 固定比熵 σ = s/ρ
 
@@ -20,6 +21,7 @@ mode = FixedSigma(10.0)
 module ConstraintModes
 
 export ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma
+export FixedAsymmetricRho
 export state_dim, param_dim, constraint_description
 
 # ============================================================================
@@ -63,6 +65,25 @@ struct FixedRho <: ConstraintMode
 end
 
 """
+    FixedAsymmetricRho <: ConstraintMode
+
+固定非对称约束模式。
+
+参数 θ = [T]，状态变量 x = [φ_u, φ_d, φ_s, Φ, Φ̄, μ_u, μ_d, μ_s]（8维）。
+方程：5 个能隙方程 + 3 个非对称约束。
+
+# 字段
+- `rho_target::Float64`: 目标重子数密度（归一化，ρ/ρ₀）
+- `ud_ratio_target::Float64`: 目标 u/d 数密度比（ρ_u/ρ_d）
+- `s_target::Float64`: 目标奇异数密度 ρ_s（默认建议 0）
+"""
+struct FixedAsymmetricRho <: ConstraintMode
+    rho_target::Float64
+    ud_ratio_target::Float64
+    s_target::Float64
+end
+
+"""
     FixedEntropy <: ConstraintMode
 
 固定熵密度模式。
@@ -103,6 +124,7 @@ end
 """
 state_dim(::FixedMu) = 5
 state_dim(::FixedRho) = 8
+state_dim(::FixedAsymmetricRho) = 8
 state_dim(::FixedEntropy) = 8
 state_dim(::FixedSigma) = 8
 
@@ -113,6 +135,7 @@ state_dim(::FixedSigma) = 8
 """
 param_dim(::FixedMu) = 2  # [T, μ]
 param_dim(::FixedRho) = 1  # [T]
+param_dim(::FixedAsymmetricRho) = 1  # [T]
 param_dim(::FixedEntropy) = 1  # [T]
 param_dim(::FixedSigma) = 1  # [T]
 
@@ -123,6 +146,7 @@ param_dim(::FixedSigma) = 1  # [T]
 """
 constraint_description(::FixedMu) = "Fixed chemical potential μ"
 constraint_description(m::FixedRho) = "Fixed baryon density ρ/ρ₀ = $(m.rho_target)"
+constraint_description(m::FixedAsymmetricRho) = "Fixed asymmetric density constraints (ρ/ρ₀=$(m.rho_target), ρu/ρd=$(m.ud_ratio_target), ρs=$(m.s_target))"
 constraint_description(m::FixedEntropy) = "Fixed entropy density s = $(m.s_target) fm⁻³"
 constraint_description(m::FixedSigma) = "Fixed specific entropy σ = s/n_B = $(m.sigma_target)"
 
@@ -132,6 +156,7 @@ constraint_description(m::FixedSigma) = "Fixed specific entropy σ = s/n_B = $(m
 
 Base.show(io::IO, ::FixedMu) = print(io, "FixedMu()")
 Base.show(io::IO, m::FixedRho) = print(io, "FixedRho(ρ/ρ₀=$(m.rho_target))")
+Base.show(io::IO, m::FixedAsymmetricRho) = print(io, "FixedAsymmetricRho(ρ/ρ₀=$(m.rho_target), ρu/ρd=$(m.ud_ratio_target), ρs=$(m.s_target))")
 Base.show(io::IO, m::FixedEntropy) = print(io, "FixedEntropy(s=$(m.s_target))")
 Base.show(io::IO, m::FixedSigma) = print(io, "FixedSigma(σ=$(m.sigma_target))")
 

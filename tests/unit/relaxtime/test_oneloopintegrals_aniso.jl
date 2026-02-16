@@ -22,13 +22,22 @@ Pkg.activate(joinpath(@__DIR__, "..", ".."))
 using Test
 using Printf
 
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/relaxtime/OneLoopIntegralsAniso.jl")
-include("../../../src/integration/GaussLegendre.jl")
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegralsAniso.jl"))
+if !isdefined(Main, :OneLoopIntegralsCorrection)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
+end
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
 
-using .OneLoopIntegrals: A, const_integral_term_A
-using .OneLoopIntegralsCorrection: A_correction, A_aniso
-using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS, 
+using Main.OneLoopIntegrals: A, const_integral_term_A
+using Main.OneLoopIntegralsCorrection: A_correction, A_aniso
+using Main.GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS, 
     DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 # 标准测试参数

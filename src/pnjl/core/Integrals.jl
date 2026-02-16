@@ -22,11 +22,16 @@ module Integrals
 using Base.MathConstants: π
 using StaticArrays
 
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
 # 加载 GaussLegendre 模块
 const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "integration", "GaussLegendre.jl"))
-if !isdefined(Main, :GaussLegendre)
-    Base.include(Main, _GAUSSLEGENDRE_PATH)
-end
+IncludeOnce.include_once!(Main, :GaussLegendre, _GAUSSLEGENDRE_PATH)
 
 using Main.GaussLegendre:
     gauleg,
@@ -37,9 +42,7 @@ using Main.GaussLegendre:
 
 # 常量导入 - 使用绝对路径加载
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
-if !isdefined(Main, :Constants_PNJL)
-    Base.include(Main, _CONSTANTS_PATH)
-end
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: Λ_inv_fm, N_color
 
 export cached_nodes, vacuum_integral, calculate_energy_sum, calculate_log_sum

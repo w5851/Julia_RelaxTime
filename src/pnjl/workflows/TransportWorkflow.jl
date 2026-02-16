@@ -15,40 +15,86 @@ module TransportWorkflow
 - `tau` 为 fm
 
 注意：仓库目前采用 include 组织方式，本模块会 include 相关依赖文件。
+- `prefer_energy_aniso`: ξ≠0 时是否优先走“能量直通”分布路径。
+    - `true`：复用已计算的 `E_aniso`，直接调用 `quark_distribution(E,...) / antiquark_distribution(E,...)`（更省一次 `sqrt`）。
+    - `false`：优先使用 provider 的 `*_distribution_aniso(p,m,...)`（适合你实现了非平凡 aniso 分布接口的情况）。
+    - 可通过 `transport_kwargs.prefer_energy_aniso` 覆写；若两者都提供，以显式 keyword 为准。
 """
 
-# --- 依赖：常量/PNJL模块/弛豫时间/输运系数/一圈积分(A) ---
-include("../../Constants_PNJL.jl")
-include("../PNJL.jl")
-include("../../relaxtime/RelaxationTime.jl")
-include("../../relaxtime/OneLoopIntegrals.jl")
+# --- 依赖：优先复用 Main.*，避免重复模块与 world-age 噪声 ---
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "PNJL.jl"))
+const PNJL = IncludeOnce.include_once!(Main, :PNJL, _PNJL_PATH)
+
+const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxationTime.jl"))
+const RelaxationTime = IncludeOnce.include_once!(Main, :RelaxationTime, _RELAXATION_TIME_PATH)
+
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "OneLoopIntegrals.jl"))
+const OneLoopIntegrals = IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+
+# Shared config loader (TOML)
+const _CONFIG_LOADER_PATH = normpath(joinpath(@__DIR__, "..", "..", "config", "ConfigLoader.jl"))
+if !isdefined(@__MODULE__, :ConfigLoader)
+    include(_CONFIG_LOADER_PATH)
+end
+using .ConfigLoader: load_config
+
+const _PREFER_ENERGY_ANISO_CACHE_LOCK = ReentrantLock()
+const _PREFER_ENERGY_ANISO_CACHE = Dict{String, Bool}()
+
+"""reset_transport_workflow_config_cache!()
+
+仅供测试/调试：清空 workflow 内部对 toml 默认值的轻量缓存。
+
+用途：
+- 在同一 Julia session 内切换 `PHYSICS_PARAM_PROFILE` 后，强制让 workflow 重新读取 `config/physics/<profile>.toml`。
+"""
+function reset_transport_workflow_config_cache!()
+    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    try
+        empty!(_PREFER_ENERGY_ANISO_CACHE)
+    finally
+        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    end
+    return nothing
+end
+
+# Unified thermo facade (legacy vs models): reuse Main.* to avoid module duplication.
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
+# Unified equilibrium facade (solve_gap + state_vector + masses): reuse Main.* to avoid module duplication.
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
+const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
-if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
-end
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 # Avoid duplicate TransportCoefficients modules when this workflow is loaded after
 # standalone TransportCoefficients tests; reuse Main.TransportCoefficients if it
 # already exists, otherwise load it into Main once.
-if !isdefined(Main, :TransportCoefficients)
-    Base.include(Main, joinpath(@__DIR__, "..", "..", "relaxtime", "TransportCoefficients.jl"))
-end
-const TransportCoefficients = Main.TransportCoefficients
+const _TRANSPORT_COEFFS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "TransportCoefficients.jl"))
+const TransportCoefficients = IncludeOnce.include_once!(Main, :TransportCoefficients, _TRANSPORT_COEFFS_PATH)
 
 using StaticArrays
 
-using .PNJL: solve, FixedMu, cached_nodes, calculate_mass_vec, calculate_number_densities
-using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
-using .PNJL.ThermoDerivatives: bulk_viscosity_coefficients
-using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
-using .RelaxationTime: relaxation_times
+using Main.PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using Main.PNJL.ThermoDerivatives: bulk_viscosity_coefficients
+using Main.PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
-using .OneLoopIntegrals: A
+using Main.OneLoopIntegrals: A
 
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig
+export solve_transport_from_equilibrium
 
 @inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
 @inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
@@ -59,12 +105,107 @@ const TRANSPORT_INTEGRATION_KEYS = (
     :cos_nodes, :cos_grid, :cos_w,
 )
 
+const TRANSPORT_PROVIDER_KEYS = (
+    :prefer_energy_aniso,
+)
+
 @inline function _drop_transport_integration_keys(kwargs::NamedTuple)::NamedTuple
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_INTEGRATION_KEYS))...)
 end
 
 @inline function _extract_transport_integration_kwargs(kwargs::NamedTuple)::NamedTuple
     return (; (k => v for (k, v) in pairs(kwargs) if (k in TRANSPORT_INTEGRATION_KEYS))...)
+end
+
+@inline function _provider_prefer_energy_aniso_from_kwargs(kwargs::NamedTuple)
+    return hasproperty(kwargs, :prefer_energy_aniso) ? kwargs.prefer_energy_aniso : nothing
+end
+
+@inline function _default_prefer_energy_aniso_from_toml()::Bool
+    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
+
+    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    try
+        if haskey(_PREFER_ENERGY_ANISO_CACHE, physics_profile)
+            return _PREFER_ENERGY_ANISO_CACHE[physics_profile]
+        end
+    finally
+        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    end
+
+    physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
+
+    default_physics = Dict{String, Any}(
+        "physical" => Dict(
+            "hbarc" => 197.327,
+            "alpha_em" => 1.0 / 137.035999084,
+        ),
+        "transport_workflow" => Dict(
+            "prefer_energy_aniso" => true,
+        ),
+    )
+
+    data = load_config(physics_dir, default_physics; profile=physics_profile)
+    cfg = data.config
+    tw = get(cfg, "transport_workflow", Dict{String, Any}())
+    val = Bool(get(tw, "prefer_energy_aniso", true))
+
+    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    try
+        _PREFER_ENERGY_ANISO_CACHE[physics_profile] = val
+    finally
+        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    end
+
+    return val
+end
+
+@inline function _drop_transport_provider_keys(kwargs::NamedTuple)::NamedTuple
+    return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_PROVIDER_KEYS))...)
+end
+
+@inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
+    prefer_energy_aniso === nothing && return provider
+
+    if isdefined(Main, :Models) && isdefined(Main.Models, :TransportProvider) && provider isa Main.Models.TransportProvider
+        return Main.Models.TransportProvider(
+            provider.energy_from_p,
+            provider.energy_from_p_aniso,
+            provider.quark_distribution,
+            provider.antiquark_distribution,
+            provider.quark_distribution_aniso,
+            provider.antiquark_distribution_aniso,
+            prefer_energy_aniso,
+            provider.mass_for_species,
+            provider.mu_for_species,
+            provider.ctx,
+        )
+    end
+
+    # NamedTuple provider (or other mergeable tuples)
+    if provider isa NamedTuple
+        return merge(provider, (prefer_energy_aniso=prefer_energy_aniso,))
+    end
+
+    return provider
+end
+
+@inline function _default_transport_provider_for_backend(thermo_backend::Symbol)
+    if thermo_backend === :models
+        if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
+            # Prefer model-based provider to keep workflow independent from backend dispatch.
+            kind = EquilibriumFacade.pnjl_model_kind(thermo_backend)
+            m = ThermoFacade.get_models_model(kind)
+            try
+                return Main.Models.transport_provider(m)
+            catch
+                # Compatibility: do not fall back to backend-based provider here.
+                # Keep `Models.transport_provider(:models)` available for explicit use.
+                return nothing
+            end
+        end
+    end
+    return nothing
 end
 
 """将平衡求解结果转换成 (quark_params, thermo_params)。"""
@@ -80,8 +221,18 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     )
 end
 
-@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    nd = calculate_number_densities(x_state, mu_vec, T_fm, thermal_nodes, xi)
+@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi, thermo_backend::Symbol; p_num::Int, t_num::Int)
+    nd = ThermoFacade.calculate_number_densities_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        thermo_backend=thermo_backend,
+        model_kind=EquilibriumFacade.pnjl_model_kind(thermo_backend),
+        p_num=p_num,
+        t_num=t_num,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
     return (
         u=Float64(nd.quark[1]),
         d=Float64(nd.quark[2]),
@@ -90,6 +241,34 @@ end
         dbar=Float64(nd.antiquark[2]),
         sbar=Float64(nd.antiquark[3]),
     )
+end
+
+@inline _solve_equilibrium(args...; kwargs...) = EquilibriumFacade.solve_equilibrium_backend(args...; kwargs...)
+
+@inline function _transport_inputs_from_equilibrium(
+    base,
+    T_fm::Real,
+    mu_fm::Real;
+    xi::Real,
+    thermo_backend::Symbol,
+    p_num::Int,
+    t_num::Int,
+)
+    masses = base.masses
+
+    params0 = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
+    quark_params_basic = QuarkParams((
+        m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
+        μ=params0.quark_params.μ,
+    ))
+    thermo_params = params0.thermo_params
+
+    densities = _densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, nothing, Float64(xi), thermo_backend;
+        p_num=p_num,
+        t_num=t_num,
+    )
+
+    return (masses=masses, quark_params=quark_params_basic, thermo_params=thermo_params, densities=densities)
 end
 
 @inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params)
@@ -140,6 +319,8 @@ function solve_gap_and_transport(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
     equilibrium::Union{Nothing,Any}=nothing,
     compute_tau::Bool=false,
     K_coeffs::Union{Nothing,NamedTuple}=nothing,
@@ -149,42 +330,82 @@ function solve_gap_and_transport(
     t_num::Int=DEFAULT_THETA_COUNT,
     seed_state=HADRON_SEED_5,
     solver_kwargs::NamedTuple=(;),
+    models_solver=nothing,
+    models_residual_norm_max::Real=1e-4,
     tau_kwargs::NamedTuple=(;),
     transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
-    transport_kwargs::NamedTuple=(;)
+    transport_kwargs::NamedTuple=(;),
+    provider=nothing,
+    prefer_energy_aniso=nothing
 )
-    base = equilibrium === nothing ? begin
-        # 兼容旧接口：允许直接传入一个状态向量作为初值。
-        # 若调用方想使用更复杂的初值逻辑（MultiSeed/PhaseAwareContinuitySeed 等），应直接在外部调用 PNJL.solve。
-        seed_strategy = if seed_state isa AbstractVector
-            s5 = Float64.(seed_state[1:5])
-            PNJL.DefaultSeed(s5, s5, :hadron)
-        else
-            PNJL.DefaultSeed(phase_hint=:auto)
-        end
+    base = equilibrium === nothing ? _solve_equilibrium(
+        T_fm,
+        mu_fm;
+        xi=xi,
+        thermo_backend=thermo_backend,
+        solver_backend=solver_backend,
+        p_num=p_num,
+        t_num=t_num,
+        seed_state=seed_state,
+        solver_kwargs=solver_kwargs,
+        models_solver=models_solver,
+        models_residual_norm_max=models_residual_norm_max,
+    ) : equilibrium
 
-        solve(FixedMu(), T_fm, mu_fm;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            seed_strategy=seed_strategy,
-            solver_kwargs...,
-        )
-    end : equilibrium
+    return solve_transport_from_equilibrium(
+        base,
+        T_fm,
+        mu_fm;
+        xi=xi,
+        thermo_backend=thermo_backend,
+        compute_tau=compute_tau,
+        K_coeffs=K_coeffs,
+        tau=tau,
+        compute_bulk=compute_bulk,
+        p_num=p_num,
+        t_num=t_num,
+        tau_kwargs=tau_kwargs,
+        transport_config=transport_config,
+        transport_kwargs=transport_kwargs,
+        provider=provider,
+        prefer_energy_aniso=prefer_energy_aniso,
+    )
+end
 
-    # 有效质量（直接由平衡解得到）
-    masses = base.masses
+"""solve_transport_from_equilibrium(equilibrium, T_fm, mu_fm; ...) -> NamedTuple
 
-    params0 = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
-    quark_params_basic = QuarkParams((
-        m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
-        μ=params0.quark_params.μ,
-    ))
-    thermo_params = params0.thermo_params
+纯后处理层：在已给定平衡态解的前提下，完成密度/τ/ζ 导数与输运系数计算。
+用于阶段 4 的 workflow 解耦：允许外部独立求平衡态，然后复用同一输运计算链。
+"""
+function solve_transport_from_equilibrium(
+    base,
+    T_fm::Real,
+    mu_fm::Real;
+    xi::Real=0.0,
+    thermo_backend::Symbol=:legacy,
+    compute_tau::Bool=false,
+    K_coeffs::Union{Nothing,NamedTuple}=nothing,
+    tau::Union{Nothing,NamedTuple}=nothing,
+    compute_bulk::Bool=true,
+    p_num::Int=DEFAULT_MOMENTUM_COUNT,
+    t_num::Int=DEFAULT_THETA_COUNT,
+    tau_kwargs::NamedTuple=(;),
+    transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    transport_kwargs::NamedTuple=(;),
+    provider=nothing,
+    prefer_energy_aniso=nothing
+)
+    inputs = _transport_inputs_from_equilibrium(base, T_fm, mu_fm;
+        xi=xi,
+        thermo_backend=thermo_backend,
+        p_num=p_num,
+        t_num=t_num,
+    )
 
-    # 密度：用于 τ 的 ω_i = Σ ρ_j \bar{w}_{ij}
-    thermal_nodes = cached_nodes(p_num, t_num)
-    densities = _densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, thermal_nodes, Float64(xi))
+    masses = inputs.masses
+    quark_params_basic = inputs.quark_params
+    thermo_params = inputs.thermo_params
+    densities = inputs.densities
 
     tau_inv = nothing
     rates = nothing
@@ -213,22 +434,53 @@ function solve_gap_and_transport(
 
     bulk_coeffs = nothing
     if compute_bulk
-        # ζ 需要 ThermoDerivatives.bulk_viscosity_coefficients 的整套等熵系数（v_n_sq, dμB/dT|σ, dM/dT, dM/dμB, ...）
-        # 该函数不依赖 seed_state，也不接受求解器的 iterations 等参数。
         bulk_coeffs = bulk_viscosity_coefficients(
             T_fm,
             mu_fm;
             xi=xi,
+            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
         )
     end
 
     # Backward/ergonomic compatibility:
-    # - If caller passes legacy integration knobs in transport_kwargs, auto-upgrade them into a config.
-    # - Keep transport_kwargs clean (non-integration keywords only) to avoid duplicated keyword errors.
+    prefer_from_kwargs = _provider_prefer_energy_aniso_from_kwargs(transport_kwargs)
+    prefer_effective = if prefer_energy_aniso !== nothing
+        prefer_energy_aniso
+    elseif prefer_from_kwargs !== nothing
+        prefer_from_kwargs
+    else
+        _default_prefer_energy_aniso_from_toml()
+    end
+
+    effective_provider = provider === nothing ? _default_transport_provider_for_backend(thermo_backend) : provider
+    if effective_provider === nothing
+        # No backend default provider: only materialize a provider if the desired
+        # behavior differs from TransportCoefficients default.
+        if prefer_effective != true
+            effective_provider = merge(TransportCoefficients.default_transport_provider(), (prefer_energy_aniso=prefer_effective,))
+        end
+    else
+        effective_provider = _apply_prefer_energy_aniso(effective_provider, prefer_effective)
+    end
+    if effective_provider !== nothing && isdefined(Main, :Models) && isdefined(Main.Models, :TransportProvider)
+        if effective_provider isa Main.Models.TransportProvider && isdefined(Main.Models, :prepare_transport_provider)
+            effective_provider = Main.Models.prepare_transport_provider(
+                effective_provider,
+                base;
+                quark_params=as_namedtuple(quark_params_basic),
+                thermo_params=as_namedtuple(thermo_params),
+                masses=masses,
+            )
+        end
+    end
     integration_kwargs = _extract_transport_integration_kwargs(transport_kwargs)
     transport_kwargs_clean = _drop_transport_integration_keys(transport_kwargs)
+    transport_kwargs_clean = _drop_transport_provider_keys(transport_kwargs_clean)
+    if effective_provider !== nothing
+        transport_kwargs_clean = (; (k => v for (k, v) in pairs(transport_kwargs_clean) if k != :provider)...)
+    end
     effective_transport_config = if transport_config !== nothing
         transport_config
     elseif length(keys(integration_kwargs)) > 0
@@ -237,12 +489,15 @@ function solve_gap_and_transport(
         nothing
     end
 
+    pass_provider = effective_provider === nothing ? (; ) : (; provider=effective_provider)
+
     tr = if effective_transport_config === nothing
         transport_coefficients(
             as_namedtuple(quark_params_basic),
             as_namedtuple(thermo_params);
             tau=tau,
             bulk_coeffs=bulk_coeffs,
+            pass_provider...,
             transport_kwargs_clean...,
         )
     else
@@ -252,6 +507,7 @@ function solve_gap_and_transport(
             tau=tau,
             bulk_coeffs=bulk_coeffs,
             config=effective_transport_config,
+            pass_provider...,
             transport_kwargs_clean...,
         )
     end

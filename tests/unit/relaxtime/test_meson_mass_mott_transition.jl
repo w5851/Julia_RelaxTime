@@ -6,15 +6,27 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
 using Test
 
-include("../../../src/Constants_PNJL.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/MesonMass.jl")
-include("../../../src/relaxtime/MottTransition.jl")
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
+if !isdefined(Main, :EffectiveCouplings)
+    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
+end
+const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "MesonMass.jl"))
+if !isdefined(Main, :MesonMass)
+    Base.include(Main, _MESON_MASS_PATH)
+end
+const _MOTT_TRANSITION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "MottTransition.jl"))
+if !isdefined(Main, :MottTransition)
+    Base.include(Main, _MOTT_TRANSITION_PATH)
+end
 
-using .Constants_PNJL: G_fm2, K_fm5
-using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .MesonMass: ensure_quark_params_has_A, default_meson_mass_guess, meson_mass_equation
-using .MottTransition: mott_threshold_mass, mott_gap, is_mott_point, mott_threshold_masses, mott_gaps
+using Main.Constants_PNJL: G_fm2, K_fm5
+using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using Main.MesonMass: ensure_quark_params_has_A, default_meson_mass_guess, meson_mass_equation
+using Main.MottTransition: mott_threshold_mass, mott_gap, is_mott_point, mott_threshold_masses, mott_gaps
 
 @testset "MesonMass/MottTransition 基础测试" begin
     quark_params = (m=(u=0.3, d=0.31, s=0.5), μ=(u=0.0, d=0.0, s=0.0))

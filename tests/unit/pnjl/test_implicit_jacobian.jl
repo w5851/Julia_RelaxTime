@@ -19,22 +19,17 @@ using StaticArrays
 using LinearAlgebra
 
 @testset "ImplicitFunction basic behavior" begin
-    # 简单多维隐函数问题：
-    # x[1]^2 + x[2]^2 - θ[1] = 0
-    # x[1] * x[2] - θ[2] = 0
+    # 简单多维隐函数问题（解析 forward solve，避免数值求解引入的不稳定/奇异）：
+    # x[1]^3 - θ[1] = 0  => x[1] = cbrt(θ[1])
+    # x[2]^2 - θ[2] = 0  => x[2] = sqrt(θ[2])
     function forward_solve_multi(θ::AbstractVector)
-        T_val = Float64(θ[1])
-        μ_val = Float64(θ[2])
-        f! = (F, x) -> begin
-            F[1] = x[1]^2 + x[2]^2 - T_val
-            F[2] = x[1] * x[2] - μ_val
-        end
-        res = nlsolve(f!, [1.0, 1.0]; autodiff=:forward)
-        return (res.zero, nothing)
+        x1 = cbrt(θ[1])
+        x2 = sqrt(θ[2])
+        return ([x1, x2], nothing)
     end
 
     function conditions_multi(θ::AbstractVector, x::AbstractVector, _)
-        return [x[1]^2 + x[2]^2 - θ[1], x[1] * x[2] - θ[2]]
+        return [x[1]^3 - θ[1], x[2]^2 - θ[2]]
     end
 
     implicit_multi = ImplicitFunction(
@@ -43,12 +38,12 @@ using LinearAlgebra
         representation=MatrixRepresentation()
     )
 
-    θ = [2.0, 1.0]
+    θ = [8.0, 4.0]
     (x, _) = implicit_multi(θ)
     
     @test length(x) == 2
-    @test x[1]^2 + x[2]^2 ≈ θ[1] atol=1e-8
-    @test x[1] * x[2] ≈ θ[2] atol=1e-8
+    @test x[1]^3 ≈ θ[1] atol=1e-8
+    @test x[2]^2 ≈ θ[2] atol=1e-8
 
     # 测试 Jacobian 计算
     function my_func_multi(θ_in)

@@ -28,8 +28,8 @@ using ForwardDiff
 using ImplicitDifferentiation
 
 # 使用相对路径导入，避免重复定义
-using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim, param_dim
-using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector
+using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim, param_dim
+using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector, update!
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
 # 导入 core 模块的 Thermodynamics
@@ -40,8 +40,19 @@ end
 using .Thermodynamics: calculate_pressure, calculate_omega, calculate_rho, calculate_thermo, calculate_mass_vec, ρ0
 using .Thermodynamics.Integrals: cached_nodes, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
 
+# Unified thermo facade (legacy vs models)
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
 export solve, SolverResult
 export create_implicit_solver, solve_with_derivatives
+export solve_weighted_block_fallback
 
 # ============================================================================
 # 物理性判据与兜底求解（Newton → Trust-Region）
@@ -213,6 +224,7 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                auto_multiseed_fallback::Bool=true,
@@ -258,7 +270,7 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
             nlsolve_kwargs...)
     end
     thermal_nodes = cached_nodes(p_num, t_num)
-    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi))
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi), thermo_backend, p_num, t_num, :PNJL)
     mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
     
     # 获取初值
@@ -270,9 +282,18 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
     residual_fn! = build_residual!(mode, mu_vec, params)
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol))
-        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T_fm;
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         omega = -pressure
-        masses = calculate_mass_vec(x_state)
+        masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
         return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
@@ -342,15 +363,31 @@ function solve(mode::FixedRho, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
                physicality_check::Function=_default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
+
+    if seed_strategy isa MultiSeed
+        return solve_multi(mode, T_fm;
+            seed_strategy=seed_strategy,
+            nlsolve_method=nlsolve_method,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            thermo_backend=thermo_backend,
+            trust_region_fallback=trust_region_fallback,
+            fallback_method=fallback_method,
+            physicality_check=physicality_check,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+    end
     
     thermal_nodes = cached_nodes(p_num, t_num)
-    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi))
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi), thermo_backend, p_num, t_num, :PNJL)
     
     # 获取初值
     θ = [T_fm]
@@ -362,9 +399,18 @@ function solve(mode::FixedRho, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T_fm;
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         omega = -pressure
-        masses = calculate_mass_vec(x_state)
+        masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
         return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
@@ -397,6 +443,161 @@ function solve(mode::FixedRho, T_fm::Real;
 end
 
 """
+    solve(mode::FixedAsymmetricRho, T_fm; kwargs...) -> SolverResult
+
+固定非对称约束模式求解。
+
+# 约束
+- `sum(rho)/(3ρ0) = mode.rho_target`
+- `rho_u/rho_d = mode.ud_ratio_target`
+- `rho_s = mode.s_target`
+"""
+function solve(mode::FixedAsymmetricRho, T_fm::Real;
+               xi::Real=0.0,
+               seed_strategy::SeedStrategy=DefaultSeed(),
+               p_num::Int=DEFAULT_MOMENTUM_COUNT,
+               t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
+               model_kind::Symbol=:PNJL,
+               nlsolve_method::Symbol=:newton,
+               trust_region_fallback::Bool=true,
+               fallback_method::Symbol=:trust_region,
+               enforce_physicality::Bool=false,
+               physicality_check::Function=_default_is_physical_solution,
+               residual_norm_max::Real=1e-6,
+               nlsolve_kwargs...)
+
+    if seed_strategy isa HybridContinuitySeed
+        s = seed_strategy::HybridContinuitySeed
+
+        continuity_result = try
+            solve(mode, T_fm;
+                xi=xi,
+                seed_strategy=s.continuity,
+                p_num=p_num,
+                t_num=t_num,
+                thermo_backend=thermo_backend,
+                model_kind=model_kind,
+                nlsolve_method=nlsolve_method,
+                trust_region_fallback=trust_region_fallback,
+                fallback_method=fallback_method,
+                enforce_physicality=enforce_physicality,
+                physicality_check=physicality_check,
+                residual_norm_max=residual_norm_max,
+                nlsolve_kwargs...)
+        catch
+            nothing
+        end
+
+        if continuity_result !== nothing && continuity_result.converged
+            update!(s, continuity_result.solution)
+            return continuity_result
+        end
+
+        fallback_result = solve(mode, T_fm;
+            xi=xi,
+            seed_strategy=s.fallback,
+            p_num=p_num,
+            t_num=t_num,
+            thermo_backend=thermo_backend,
+            model_kind=model_kind,
+            nlsolve_method=nlsolve_method,
+            trust_region_fallback=trust_region_fallback,
+            fallback_method=fallback_method,
+            enforce_physicality=enforce_physicality,
+            physicality_check=physicality_check,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+
+        if fallback_result.converged
+            update!(s, fallback_result.solution)
+        end
+        return fallback_result
+    end
+
+    if seed_strategy isa MultiSeed
+        return solve_multi(mode, T_fm;
+            seed_strategy=seed_strategy,
+            nlsolve_method=nlsolve_method,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            thermo_backend=thermo_backend,
+            model_kind=model_kind,
+            trust_region_fallback=trust_region_fallback,
+            fallback_method=fallback_method,
+            physicality_check=physicality_check,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+    end
+
+    thermal_nodes = cached_nodes(p_num, t_num)
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi),
+        thermo_backend, p_num, t_num, model_kind)
+
+    θ = [T_fm]
+    seed = get_seed(seed_strategy, θ, mode)
+    x0 = Float64.(seed)
+
+    residual_fn! = build_residual!(mode, params)
+    effective_physicality_check = enforce_physicality ? physicality_check : ((_, _) -> true)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol[1:5]))
+        mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
+        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T_fm;
+            thermo_backend=thermo_backend,
+            model_kind=model_kind,
+            p_num=p_num,
+            t_num=t_num,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
+        omega = -pressure
+        masses = ThermoFacade.calculate_mass_vec_backend(
+            x_state;
+            thermo_backend=thermo_backend,
+            model_kind=model_kind,
+        )
+        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+    end
+
+    res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        physicality_check=effective_physicality_check,
+        residual_norm_max=Float64(residual_norm_max),
+        postprocess_fn=postprocess_fn,
+        nlsolve_kwargs...)
+
+    converged = if enforce_physicality
+        res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
+    else
+        isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
+    end
+
+    return SolverResult(
+        mode,
+        converged,
+        cand.x_sol,
+        cand.x_state,
+        cand.mu_vec,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
+        res.iterations,
+        res.residual_norm,
+        Float64(xi),
+    )
+end
+
+"""
     solve(mode::FixedEntropy, T_fm; kwargs...) -> SolverResult
 
 固定熵密度模式求解。
@@ -406,6 +607,7 @@ function solve(mode::FixedEntropy, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
@@ -414,7 +616,7 @@ function solve(mode::FixedEntropy, T_fm::Real;
                nlsolve_kwargs...)
     
     thermal_nodes = cached_nodes(p_num, t_num)
-    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi))
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi), thermo_backend, p_num, t_num, :PNJL)
     
     θ = [T_fm]
     seed = get_seed(seed_strategy, θ, mode)
@@ -424,9 +626,18 @@ function solve(mode::FixedEntropy, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T_fm;
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         omega = -pressure
-        masses = calculate_mass_vec(x_state)
+        masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
         return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
@@ -468,6 +679,7 @@ function solve(mode::FixedSigma, T_fm::Real;
                seed_strategy::SeedStrategy=DefaultSeed(),
                p_num::Int=DEFAULT_MOMENTUM_COUNT,
                t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
@@ -476,7 +688,7 @@ function solve(mode::FixedSigma, T_fm::Real;
                nlsolve_kwargs...)
     
     thermal_nodes = cached_nodes(p_num, t_num)
-    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi))
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi), thermo_backend, p_num, t_num, :PNJL)
     
     θ = [T_fm]
     seed = get_seed(seed_strategy, θ, mode)
@@ -486,9 +698,18 @@ function solve(mode::FixedSigma, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T_fm;
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         omega = -pressure
-        masses = calculate_mass_vec(x_state)
+        masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
         return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
@@ -529,22 +750,18 @@ end
 
 使用多初值策略求解，返回最优解。
 """
-function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
-                     seed_strategy::MultiSeed=MultiSeed(),
-                     nlsolve_method::Symbol=:newton,
-                     kwargs...)
-    θ = [T_fm, μ_fm]
+@inline function _solve_multi_collect(
+    mode::ConstraintMode,
+    θ::AbstractVector,
+    seed_strategy::MultiSeed,
+    run_with_seed::Function,
+)
     seeds = get_all_seeds(seed_strategy, θ, mode)
-    
+
     results = SolverResult[]
     for seed in seeds
         try
-            result = solve(mode, T_fm, μ_fm; 
-                          seed_strategy=DefaultSeed(seed, seed, :hadron),
-                          nlsolve_method=nlsolve_method,
-                          auto_multiseed_fallback=false,
-                          kwargs...)
-            push!(results, result)
+            push!(results, run_with_seed(seed))
         catch e
             @warn "Solve failed with seed" seed exception=e
         end
@@ -558,7 +775,234 @@ function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
     return seed_strategy.selector(converged)
 end
 
+@inline function _is_physically_preferred_result(r::SolverResult)
+    return _default_is_physical_solution(r.x_state, r.masses) &&
+           _all_finite_thermo(r.omega, r.pressure, r.rho_norm, r.entropy, r.energy)
+end
+
+function _physical_first_omega_selector(results::AbstractVector{SolverResult})
+    converged = filter(r -> r.converged, results)
+    isempty(converged) && return first(results)
+
+    physical = filter(_is_physically_preferred_result, converged)
+    pool = isempty(physical) ? converged : physical
+
+    return argmin(r -> (r.omega, r.residual_norm), pool)
+end
+
+function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real;
+                     seed_strategy::MultiSeed=MultiSeed(),
+                     nlsolve_method::Symbol=:newton,
+                     kwargs...)
+    θ = [T_fm, μ_fm]
+    return _solve_multi_collect(mode, θ, seed_strategy, seed -> begin
+        solve(mode, T_fm, μ_fm;
+            seed_strategy=DefaultSeed(seed, seed, :hadron),
+            nlsolve_method=nlsolve_method,
+            auto_multiseed_fallback=false,
+            kwargs...)
+    end)
+end
+
+function solve_multi(mode::FixedRho, T_fm::Real;
+                     seed_strategy::MultiSeed=MultiSeed(),
+                     nlsolve_method::Symbol=:newton,
+                     kwargs...)
+    θ = [T_fm]
+    return _solve_multi_collect(mode, θ, seed_strategy, seed -> begin
+        solve(mode, T_fm;
+            seed_strategy=DefaultSeed(seed, seed, :hadron),
+            nlsolve_method=nlsolve_method,
+            kwargs...)
+    end)
+end
+
+function solve_multi(mode::FixedAsymmetricRho, T_fm::Real;
+                     seed_strategy::MultiSeed=MultiSeed(),
+                     nlsolve_method::Symbol=:newton,
+                     kwargs...)
+    effective_seed_strategy = seed_strategy
+    if seed_strategy.selector === default_omega_selector
+        effective_seed_strategy = MultiSeed(seed_strategy.candidates, _physical_first_omega_selector)
+    end
+
+    θ = [T_fm]
+    return _solve_multi_collect(mode, θ, effective_seed_strategy, seed -> begin
+        solve(mode, T_fm;
+            seed_strategy=DefaultSeed(seed, seed, :hadron),
+            nlsolve_method=nlsolve_method,
+            kwargs...)
+    end)
+end
+
 export solve_multi
+
+# ============================================================================
+# Weighted-Block fallback（用于 FixedAsymmetricRho 失败点救援）
+# ============================================================================
+
+@inline function _weighted_stage_schedule()
+    return (
+        (w6=0.10, w7=0.10, w8=1.0, method=:trust_region, iterations=600),
+        (w6=0.50, w7=0.50, w8=1.0, method=:trust_region, iterations=1000),
+        (w6=1.00, w7=1.00, w8=1.0, method=:trust_region, iterations=1400),
+        (w6=1.00, w7=1.00, w8=1.0, method=:newton,       iterations=1000),
+    )
+end
+
+function _run_weighted_stage(raw_residual!::Function, x0::Vector{Float64};
+    w6::Float64,
+    w7::Float64,
+    w8::Float64,
+    method::Symbol,
+    iterations::Int,
+)
+    weights = Float64[1.0, 1.0, 1.0, 1.0, 1.0, w6, w7, w8]
+
+    weighted_residual! = (F, x) -> begin
+        rawF = similar(F)
+        raw_residual!(rawF, x)
+        @inbounds for i in 1:8
+            F[i] = weights[i] * rawF[i]
+        end
+        return nothing
+    end
+
+    res = nlsolve(weighted_residual!, x0;
+        autodiff=:forward,
+        method=method,
+        xtol=1e-9,
+        ftol=1e-9,
+        iterations=iterations,
+    )
+
+    x = Vector{Float64}(res.zero)
+    rawF = zeros(8)
+    raw_residual!(rawF, x)
+    raw_norm = sqrt(sum(abs2, rawF))
+
+    return (x=x, raw_norm=raw_norm)
+end
+
+"""
+    solve_weighted_block_fallback(mode::FixedAsymmetricRho, T_fm; initial_seed, kwargs...) -> Union{SolverResult, Nothing}
+
+仅用于 Hybrid 失败点的兜底：
+1) 对约束分量做分阶段加权求解（w6/w7 由小到大）；
+2) 用阶段最优点作为 seed，再走标准 `solve` 做严格判定。
+"""
+function solve_weighted_block_fallback(mode::FixedAsymmetricRho, T_fm::Real;
+    initial_seed::AbstractVector{<:Real},
+    max_seed_candidates::Int=3,
+    xi::Real=0.0,
+    p_num::Int=DEFAULT_MOMENTUM_COUNT,
+    t_num::Int=DEFAULT_THETA_COUNT,
+    thermo_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
+    residual_norm_max::Real=1e-6,
+    nlsolve_kwargs...)
+
+    base_seed = if length(initial_seed) >= 8
+        Float64.(initial_seed[1:8])
+    else
+        extend_seed(Float64.(initial_seed), mode)
+    end
+
+    seed_candidates = Vector{Vector{Float64}}()
+    push!(seed_candidates, copy(base_seed))
+    extra = max(max_seed_candidates - 1, 0)
+    for seed in Iterators.take(get_all_seeds(MultiSeed(), [T_fm], mode), extra)
+        s8 = length(seed) >= 8 ? Float64.(seed[1:8]) : extend_seed(Float64.(seed), mode)
+        push!(seed_candidates, s8)
+    end
+
+    uniq = Dict{String, Vector{Float64}}()
+    for s in seed_candidates
+        key = join(round.(s; digits=6), ",")
+        if !haskey(uniq, key)
+            uniq[key] = s
+        end
+    end
+    seed_candidates = collect(values(uniq))
+
+    thermal_nodes = cached_nodes(p_num, t_num)
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi),
+        thermo_backend, p_num, t_num, model_kind)
+    raw_residual! = build_residual!(mode, params)
+
+    best_x = copy(base_seed)
+    best_raw = Inf
+
+    for seed in seed_candidates
+        x = copy(seed)
+        for cfg in _weighted_stage_schedule()
+            stage = try
+                _run_weighted_stage(raw_residual!, x;
+                    w6=cfg.w6,
+                    w7=cfg.w7,
+                    w8=cfg.w8,
+                    method=cfg.method,
+                    iterations=cfg.iterations,
+                )
+            catch
+                nothing
+            end
+            stage === nothing && continue
+
+            x = stage.x
+            if isfinite(stage.raw_norm) && stage.raw_norm < best_raw
+                best_raw = stage.raw_norm
+                best_x = copy(stage.x)
+            end
+            if isfinite(best_raw) && best_raw <= 1e-8
+                early_seed = DefaultSeed(best_x, best_x, :hadron)
+                early_result = try
+                    solve(mode, T_fm;
+                        xi=xi,
+                        seed_strategy=early_seed,
+                        p_num=p_num,
+                        t_num=t_num,
+                        thermo_backend=thermo_backend,
+                        model_kind=model_kind,
+                        nlsolve_method=:trust_region,
+                        trust_region_fallback=true,
+                        residual_norm_max=residual_norm_max,
+                        nlsolve_kwargs...)
+                catch
+                    nothing
+                end
+                if early_result !== nothing && early_result.converged
+                    return early_result
+                end
+            end
+            if best_raw <= 1e-8
+                break
+            end
+        end
+        if best_raw <= 1e-8
+            break
+        end
+    end
+
+    final_seed = DefaultSeed(best_x, best_x, :hadron)
+    result = try
+        solve(mode, T_fm;
+            xi=xi,
+            seed_strategy=final_seed,
+            p_num=p_num,
+            t_num=t_num,
+            thermo_backend=thermo_backend,
+            model_kind=model_kind,
+            nlsolve_method=:trust_region,
+            trust_region_fallback=true,
+            residual_norm_max=residual_norm_max,
+            nlsolve_kwargs...)
+    catch
+        nothing
+    end
+
+    return result
+end
 
 # ============================================================================
 # ImplicitDifferentiation.jl 集成
@@ -589,7 +1033,7 @@ function forward_solve_mu(θ::AbstractVector)
     config = IMPLICIT_CONFIG[]
     
     mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-    params = GapParams(T_fm, config.thermal_nodes, config.xi)
+    params = GapParams(T_fm, config.thermal_nodes, config.xi, :legacy, config.p_num, config.t_num, :PNJL)
     
     seed = get_seed(DefaultSeed(), θ, FixedMu())
     residual_fn! = build_residual!(FixedMu(), mu_vec, params)
@@ -607,7 +1051,7 @@ function conditions_mu(θ::AbstractVector, x::AbstractVector, z)
     config = IMPLICIT_CONFIG[]
     
     mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-    params = GapParams(T_fm, config.thermal_nodes, config.xi)
+    params = GapParams(T_fm, config.thermal_nodes, config.xi, :legacy, config.p_num, config.t_num, :PNJL)
     x_state = SVector{5}(Tuple(x))
     
     return Vector(gap_conditions(x_state, mu_vec, params))

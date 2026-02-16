@@ -41,17 +41,26 @@ Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo
 type stability and zero overhead.
 """
 
-# Load ParameterTypes at Main level if not already loaded
-if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
 end
+const IncludeOnce = Main.IncludeOnce
 
-include("../Constants_PNJL.jl")
+# Load ParameterTypes at Main level if not already loaded
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+const Constants_PNJL = Main.Constants_PNJL
 include("../utils/ParticleSymbols.jl")
 include("TotalPropagator.jl")
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
-using .Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
+using Main.Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 using .TotalPropagator: calculate_cms_momentum
 using .ParticleSymbols: get_quark_masses_for_process
 
@@ -247,9 +256,9 @@ end
 # 示例
 ```julia
 using Main.ParameterTypes: QuarkParams, ThermoParams
-using .EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
-using .OneLoopIntegrals: A
-using .Constants_PNJL
+using Main.EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
+using Main.OneLoopIntegrals: A
+using Main.Constants_PNJL
 
 # 设置参数
 T = 150.0 / 197.327  # 150 MeV → fm⁻¹

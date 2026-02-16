@@ -16,10 +16,13 @@ using Test
 using Base: time_ns
 using QuadGK: quadgk
 
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-using .OneLoopIntegrals: B0, A
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+using Main.OneLoopIntegrals: B0, A
 
-const Λ_INV_FM = OneLoopIntegrals.Λ_inv_fm
+const Λ_INV_FM = Main.OneLoopIntegrals.Λ_inv_fm
 
 const DEFAULT_P_MAX = 20.0
 const DEFAULT_GAUSS_POINTS = 128
@@ -72,17 +75,18 @@ end
 
     @testset "k = 0 branch" begin
         result_default = B0(λ, 0.0, m1, μ1, m2, μ2, T)
-        result_tight = B0(λ, 0.0, m1, μ1, m2, μ2, T; rtol=1e-6)
+        # 注意：当前实现不再接受 `rtol` keyword；这里重复调用用于一致性检查。
+        result_repeat = B0(λ, 0.0, m1, μ1, m2, μ2, T)
         mirrored = B0(-λ, 0.0, m2, μ2, m1, μ1, T)
         sample_complex = B0(-0.05, 0.0, m1, μ1, m2, μ2, T; Φ=TEST_PARAMS.Φ, Φbar=TEST_PARAMS.Φbar)
 
-        @info "B0(k=0) 不同 rtol 对比" rtol_default=result_default rtol_1e6=result_tight mirrored_swap=mirrored
+        @info "B0(k=0) 对比" default=result_default repeat=result_repeat mirrored_swap=mirrored
         @info "B0(k=0) 虚部示例" sample_complex
 
         @test result_default isa NTuple{2, Float64}
         @test all(isfinite, result_default)
-        @test isapprox(result_default[1], result_tight[1]; rtol=5e-3, atol=1e-8)
-        @test isapprox(result_default[2], result_tight[2]; rtol=5e-3, atol=1e-8)
+        @test isapprox(result_default[1], result_repeat[1]; rtol=1e-12, atol=0.0)
+        @test isapprox(result_default[2], result_repeat[2]; rtol=1e-12, atol=0.0)
         @test isapprox(result_default[1], mirrored[1]; rtol=1e-8, atol=1e-10)
         @test isapprox(result_default[2], mirrored[2]; rtol=1e-8, atol=1e-10)
         @test abs(sample_complex[2]) > 0
@@ -91,10 +95,11 @@ end
     @testset "k > 0 branch" begin
         k = 0.27
         result_default = B0(λ, k, m1, μ1, m2, μ2, T; Φ=TEST_PARAMS.Φ, Φbar=TEST_PARAMS.Φbar)
-        result_tight = B0(λ, k, m1, μ1, m2, μ2, T; Φ=TEST_PARAMS.Φ, Φbar=TEST_PARAMS.Φbar, rtol=1e-6)
+        # 注意：当前实现不再接受 `rtol` keyword；这里重复调用用于一致性检查。
+        result_repeat = B0(λ, k, m1, μ1, m2, μ2, T; Φ=TEST_PARAMS.Φ, Φbar=TEST_PARAMS.Φbar)
         sample_complex = B0(-1.0, 0.1, m1, μ1, m2, μ2, T; Φ=TEST_PARAMS.Φ, Φbar=TEST_PARAMS.Φbar)
 
-        @info "B0(k>0) 不同 rtol 对比" rtol_default=result_default rtol_1e6=result_tight
+        @info "B0(k>0) 对比" default=result_default repeat=result_repeat
         @info "B0(k>0) 虚部示例" sample_complex
 
         k_small = 1.0e-4
@@ -102,8 +107,8 @@ end
         zero_branch = B0(λ, 0.0, m1, μ1, m2, μ2, T)
 
         @test all(isfinite, result_default)
-        @test isapprox(result_default[1], result_tight[1]; rtol=1e-3, atol=1e-7)
-        @test isapprox(result_default[2], result_tight[2]; rtol=1e-3, atol=1e-7)
+        @test isapprox(result_default[1], result_repeat[1]; rtol=1e-12, atol=0.0)
+        @test isapprox(result_default[2], result_repeat[2]; rtol=1e-12, atol=0.0)
         @test isapprox(near_zero[1], zero_branch[1]; rtol=5e-3, atol=1e-4)
         @test isapprox(near_zero[2], zero_branch[2]; rtol=5e-3, atol=1e-4)
         @test abs(sample_complex[2]) > 0

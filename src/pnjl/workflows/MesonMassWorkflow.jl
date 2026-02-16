@@ -11,22 +11,40 @@ src/relaxtime/MottTransition.jl，无需本工作流。
 - 输入与输出均使用 fm⁻¹（T_fm, mu_fm, 质量/动量）
 """
 
-include("../../Constants_PNJL.jl")
-include("../PNJL.jl")
-include("../../relaxtime/MesonMass.jl")
-include("../../relaxtime/MottTransition.jl")
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Ensure shared constants are loaded at Main-level (avoid module replacement warnings)
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+
+# Prefer reusing Main.* modules to avoid duplicates/world-age noise.
+const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "PNJL.jl"))
+IncludeOnce.include_once!(Main, :PNJL, _PNJL_PATH)
+
+const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MesonMass.jl"))
+IncludeOnce.include_once!(Main, :MesonMass, _MESON_MASS_PATH)
+
+const _MOTT_TRANSITION_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MottTransition.jl"))
+IncludeOnce.include_once!(Main, :MottTransition, _MOTT_TRANSITION_PATH)
+
+# Unified equilibrium facade (solve_gap + state_vector + masses)
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
+IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
-if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
-end
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
-using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu
-using .PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
-using .MesonMass: solve_meson_mass, default_meson_mass_guess
-using .MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses, mott_gaps
+using Main.Constants_PNJL: ħc_MeV_fm
+using Main.PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using Main.MesonMass: solve_meson_mass, default_meson_mass_guess
+using Main.MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses, mott_gaps
 
 export DEFAULT_MESONS
 export solve_gap_and_meson_point
@@ -157,27 +175,37 @@ function solve_gap_and_meson_point(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
     mesons::Tuple{Vararg{Symbol}}=DEFAULT_MESONS,
     k_norm::Real=0.0,
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     seed_state=HADRON_SEED_5,
     solver_kwargs::NamedTuple=(;),
+    models_solver=nothing,
+    models_residual_norm_max::Real=1e-4,
     mass_kwargs::NamedTuple=(;),
 )
-    seed_strategy = if seed_state isa AbstractVector
-        s5 = Float64.(seed_state[1:5])
-        PNJL.DefaultSeed(s5, s5, :hadron)
+    seed_guess = if seed_state isa AbstractVector
+        length(seed_state) >= 5 || throw(ArgumentError("seed_state must have length >= 5 (got $(length(seed_state)))"))
+        Float64.(seed_state[1:5])
     else
-        PNJL.DefaultSeed(phase_hint=:auto)
+        seed_state
     end
 
-    base = solve(FixedMu(), T_fm, mu_fm;
+    base = Main.EquilibriumFacade.solve_equilibrium_backend(
+        T_fm,
+        mu_fm;
         xi=xi,
+        thermo_backend=thermo_backend,
+        solver_backend=solver_backend,
         p_num=p_num,
         t_num=t_num,
-        seed_strategy=seed_strategy,
-        solver_kwargs...,
+        seed_state=seed_guess,
+        solver_kwargs=solver_kwargs,
+        models_solver=models_solver,
+        models_residual_norm_max=models_residual_norm_max,
     )
 
     params = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)

@@ -8,16 +8,30 @@
 module MesonMass
 
 include("../integration/GaussLegendre.jl")
-include("../Constants_PNJL.jl")
-include("OneLoopIntegrals.jl")
-include("OneLoopIntegralsAniso.jl")
+
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+
+# Prefer reuse Main.OneLoopIntegrals / Main.OneLoopIntegralsCorrection to avoid duplication
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegralsAniso.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegralsCorrection, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
 include("EffectiveCouplings.jl")
 include("PolarizationAniso.jl")
 
 using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
-using .Constants_PNJL: G_fm2, K_fm5
-using .OneLoopIntegrals: A
-using .OneLoopIntegralsCorrection: A_aniso
+using Main.Constants_PNJL: G_fm2, K_fm5
+using Main.OneLoopIntegrals: A
+using Main.OneLoopIntegralsCorrection: A_aniso
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, mixing_matrix_elements
 using .PolarizationAniso: polarization_with_width
 using NLsolve

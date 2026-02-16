@@ -33,6 +33,15 @@ P = PNJL
         @test mode isa P.FixedRho
         @test mode.rho_target == 1.0
     end
+
+    @testset "FixedAsymmetricRho" begin
+        mode = P.FixedAsymmetricRho(1.0, 0.876, 0.0)
+        @test mode isa P.ConstraintMode
+        @test mode isa P.FixedAsymmetricRho
+        @test mode.rho_target == 1.0
+        @test mode.ud_ratio_target == 0.876
+        @test mode.s_target == 0.0
+    end
     
     @testset "FixedEntropy" begin
         mode = P.FixedEntropy(0.5)
@@ -56,6 +65,7 @@ end
 @testset "state_dim" begin
     @test P.state_dim(P.FixedMu()) == 5
     @test P.state_dim(P.FixedRho(1.0)) == 8
+    @test P.state_dim(P.FixedAsymmetricRho(1.0, 0.876, 0.0)) == 8
     @test P.state_dim(P.FixedEntropy(0.5)) == 8
     @test P.state_dim(P.FixedSigma(10.0)) == 8
 end
@@ -63,6 +73,7 @@ end
 @testset "param_dim" begin
     @test P.param_dim(P.FixedMu()) == 2  # [T, μ]
     @test P.param_dim(P.FixedRho(1.0)) == 1  # [T]
+    @test P.param_dim(P.FixedAsymmetricRho(1.0, 0.876, 0.0)) == 1  # [T]
     @test P.param_dim(P.FixedEntropy(0.5)) == 1  # [T]
     @test P.param_dim(P.FixedSigma(10.0)) == 1  # [T]
 end
@@ -74,6 +85,7 @@ end
 @testset "constraint_description" begin
     @test P.constraint_description(P.FixedMu()) == "Fixed chemical potential μ"
     @test P.constraint_description(P.FixedRho(1.5)) == "Fixed baryon density ρ/ρ₀ = 1.5"
+    @test P.constraint_description(P.FixedAsymmetricRho(1.5, 0.876, 0.0)) == "Fixed asymmetric density constraints (ρ/ρ₀=1.5, ρu/ρd=0.876, ρs=0.0)"
     @test P.constraint_description(P.FixedEntropy(0.3)) == "Fixed entropy density s = 0.3 fm⁻³"
     @test P.constraint_description(P.FixedSigma(8.0)) == "Fixed specific entropy σ = s/n_B = 8.0"
 end
@@ -85,6 +97,7 @@ end
 @testset "show methods" begin
     @test sprint(show, P.FixedMu()) == "FixedMu()"
     @test sprint(show, P.FixedRho(1.0)) == "FixedRho(ρ/ρ₀=1.0)"
+    @test sprint(show, P.FixedAsymmetricRho(1.0, 0.876, 0.0)) == "FixedAsymmetricRho(ρ/ρ₀=1.0, ρu/ρd=0.876, ρs=0.0)"
     @test sprint(show, P.FixedEntropy(0.5)) == "FixedEntropy(s=0.5)"
     @test sprint(show, P.FixedSigma(10.0)) == "FixedSigma(σ=10.0)"
 end
