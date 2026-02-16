@@ -265,6 +265,9 @@ function ensure_output_header_compatible(path::AbstractString)
         "eps_minus_3P_over_T4",
         "eta_over_s",
         "zeta_over_s",
+        "sigma_over_T",
+        "sigma_over_T_over_eta_over_s",
+        "zeta_over_s_over_eta_over_s",
     )
     for c in required
         occursin(c, header) || error("existing output CSV header is incompatible with current script (missing column: $c). Please rerun with --overwrite or choose a new --output path.")
@@ -286,6 +289,7 @@ function write_header_if_needed(io)
         "tau_u", "tau_d", "tau_s", "tau_ubar", "tau_dbar", "tau_sbar",
         "tauinv_u", "tauinv_d", "tauinv_s", "tauinv_ubar", "tauinv_dbar", "tauinv_sbar",
         "eta", "sigma", "zeta", "eta_over_s", "zeta_over_s",
+        "sigma_over_T", "sigma_over_T_over_eta_over_s", "zeta_over_s_over_eta_over_s",
     ], ',')
     println(io, header)
 end
@@ -393,6 +397,11 @@ function run_scan(opts::ScanOptions)
                 "tau_n_sigma_points" => string(opts.tau_n_sigma_points),
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
+
+                # labels for plotting convenience
+                "y_label.sigma_over_T" => "σ/T",
+                "y_label.sigma_over_T_over_eta_over_s" => "(σ/T)/(η/s)",
+                "y_label.zeta_over_s_over_eta_over_s" => "(ζ/s)/(η/s)",
             ))
             write_header_if_needed(io)
         end
@@ -511,6 +520,10 @@ function run_scan(opts::ScanOptions)
                     eta_over_s = (isfinite(tr.eta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.eta / s_fm3inv) : NaN
                     zeta_over_s = (isfinite(tr.zeta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.zeta / s_fm3inv) : NaN
 
+                    sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
+                    sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
+                    zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+
                     row = join([
                         string(T_mev), string(muq_mev), string(muB_mev), string(xi),
                         string(T_fm), string(muq_fm),
@@ -525,6 +538,7 @@ function run_scan(opts::ScanOptions)
                         string(tau.u), string(tau.d), string(tau.s), string(tau.ubar), string(tau.dbar), string(tau.sbar),
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
+                        string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
                     ], ',')
                     println(io, row)
                     flush(io)

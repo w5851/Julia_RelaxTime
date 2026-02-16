@@ -227,6 +227,7 @@ def plot_lines(
     x: str,
     ys: List[str],
     group: str | None,
+    multi_y: bool = False,
     out_dir: Path,
     title_prefix: str | None,
     meta: Dict[str, str] | None,
@@ -244,6 +245,91 @@ def plot_lines(
     check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    if multi_y and group:
+        raise ValueError("--multi-y cannot be combined with --group")
+
+    if multi_y:
+        fig, ax = plt.subplots(figsize=(6.8, 4.6))
+
+        xscale = xscale_override or (_axis_scale(meta, axis="x", col=x) if meta else None)
+        yscale = yscale_override or (_axis_scale(meta, axis="y", col=ys[0]) if meta and ys else None)
+
+        sub2 = sorted(rows, key=lambda r: _parse_float(r.get(x, "nan")))
+        xs_all = [_parse_float(r.get(x, "nan")) for r in sub2]
+
+        any_plotted = False
+        for y in ys:
+            ys_all = [_parse_float(r.get(y, "nan")) for r in sub2]
+            pairs = [(xx, yy) for xx, yy in zip(xs_all, ys_all) if not (math.isnan(xx) or math.isnan(yy))]
+            pairs = _apply_xrange_filter(pairs, xlim)
+            pairs = _apply_positive_filter_for_log(pairs, yscale=yscale)
+            if not pairs:
+                continue
+            xs3, ys3 = zip(*pairs)
+            ax.plot(xs3, ys3, marker=(marker or ""), lw=linewidth, linestyle=line_style, label=y)
+            any_plotted = True
+
+        if not any_plotted:
+            plt.close(fig)
+            return
+
+        if meta:
+            ax.set_xlabel(_axis_label(meta, axis="x", col=x))
+        else:
+            ax.set_xlabel(x)
+
+        if all(str(y).startswith("tau_") for y in ys):
+            ax.set_ylabel("τ")
+        else:
+            ax.set_ylabel(_axis_label(meta, axis="y", col=ys[0]) if meta and ys else "Value")
+
+        if xscale:
+            ax.set_xscale(xscale)
+        if yscale:
+            ax.set_yscale(yscale)
+
+        x_values = []
+        y_values = []
+        for line in ax.get_lines():
+            xd = line.get_xdata()
+            yd = line.get_ydata()
+            x_values.extend([float(v) for v in xd if not math.isnan(v)])
+            y_values.extend([float(v) for v in yd if not math.isnan(v)])
+
+        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=tuple(xlim) if xlim else None, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
+        _apply_axis_alignment(ax)
+
+        ax.set_title(title_prefix or "multi-y")
+        if grid_alpha > 0:
+            ax.grid(True, alpha=grid_alpha)
+        if legend_loc:
+            plt.legend(loc=legend_loc)
+        else:
+            plt.legend()
+
+        fig.tight_layout()
+        fmts = formats or ["pdf", "png"]
+        y_tag = "_".join([str(s) for s in ys])
+        # keep filename reasonably short but stable
+        if len(y_tag) > 80:
+            y_tag = f"{ys[0]}_to_{ys[-1]}_{len(ys)}ys"
+        y_tag = _sanitize_filename(y_tag)
+        saved = []
+        for fmt in fmts:
+            out = out_dir / f"multi_y_{y_tag}_vs_{x}.{fmt}"
+            fmt_lower = fmt.lower()
+            if fmt_lower in {"pdf", "eps"}:
+                fig.savefig(out, format=fmt_lower, dpi=dpi)
+            else:
+                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            saved.append(out)
+        plt.close(fig)
+        print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if check:
+            _post_save_checks(saved, expected_dpi=dpi)
+        return
 
     def group_key(r: Dict[str, str]) -> str:
         return "__all__" if not group else str(r.get(group, ""))
@@ -304,6 +390,8 @@ def plot_lines(
         _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=tuple(xlim) if xlim else None, scale=xscale)
         _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
 
+        _apply_axis_alignment(ax)
+
         title = f"{title_prefix} - {y}" if title_prefix else y
         ax.set_title(title)
         if grid_alpha > 0:
@@ -355,6 +443,18 @@ def _build_grid(rows: List[Dict[str, str]], *, x: str, y: str, z: str) -> Tuple[
     return xs, ys, grid
 
 
+def _pick_bounds_from_ticks(ticks: List[float], lo: float, hi: float) -> Tuple[float, float]:
+    t = [float(x) for x in ticks if not math.isnan(float(x))]
+    if len(t) < 2:
+        return lo, hi
+    t = sorted(set(t))
+    low = next((x for x in t if x <= lo), t[0])
+    high = next((x for x in reversed(t) if x >= hi), t[-1])
+    if low == high:
+        return lo, hi
+    return low, high
+
+
 def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tuple[float, float] | None, scale: str | None):
     """Set axis limits according to rule:
     - If user_lim provided, use it.
@@ -380,29 +480,53 @@ def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tup
 
     try:
         if scale == "log":
+            vmin2 = max(vmin, 1e-300)
+            vmax2 = max(vmax, 1e-300)
             locator = LogLocator()
-            ticks = locator.tick_values(max(vmin, 1e-300), max(vmax, 1e-300))
+            ticks = locator.tick_values(vmin2, vmax2)
+            low, high = _pick_bounds_from_ticks(list(ticks), vmin2, vmax2)
         else:
             # prefer MaxNLocator for nice round ticks
             locator = MaxNLocator(nbins=6)
             ticks = locator.tick_values(vmin, vmax)
-        if len(ticks) >= 2:
-            low, high = float(ticks[0]), float(ticks[-1])
-        else:
-            low, high = vmin, vmax
+            low, high = _pick_bounds_from_ticks(list(ticks), vmin, vmax)
     except Exception:
         low, high = vmin, vmax
-
-    # Ensure the chosen limits still cover data
-    if low > vmin:
-        low = vmin
-    if high < vmax:
-        high = vmax
 
     if axis == "x":
         ax.set_xlim(low, high)
     else:
         ax.set_ylim(low, high)
+
+
+def _apply_axis_alignment(ax) -> None:
+    """Align axis spines to the first/last major tick.
+
+    Requirement:
+    - Axis line visual endpoints must align exactly to the first and last major ticks.
+    - No extra spine extension beyond the outer major ticks.
+    """
+    try:
+        ax.margins(x=0.0, y=0.0)
+    except Exception:
+        pass
+
+    # Ensure tick locations are computed for the final limits/scale.
+    try:
+        ax.figure.canvas.draw()
+    except Exception:
+        pass
+
+    for which, spine_name in (("x", "bottom"), ("y", "left")):
+        try:
+            ticks = ax.xaxis.get_majorticklocs() if which == "x" else ax.yaxis.get_majorticklocs()
+            if ticks is None or len(ticks) < 2:
+                continue
+            a, b = float(ticks[0]), float(ticks[-1])
+            if spine_name in ax.spines:
+                ax.spines[spine_name].set_bounds(a, b)
+        except Exception:
+            continue
 
 
 def plot_heatmaps(
@@ -513,6 +637,8 @@ def plot_heatmaps(
         # Apply strict axis limits based on grid coordinates xs2/ys2 unless user provided limits
         _set_axis_limits_strict(ax, axis="x", values=xs2, user_lim=tuple(xlim) if xlim else None, scale=xscale)
         _set_axis_limits_strict(ax, axis="y", values=ys2, user_lim=tuple(ylim) if ylim else None, scale=yscale)
+
+        _apply_axis_alignment(ax)
         title = f"{title_prefix} - {field}" if title_prefix else field
         ax.set_title(title)
         fig.tight_layout()
@@ -629,6 +755,7 @@ def main() -> None:
     ap.add_argument("--x", type=str, default=None, help="x column")
     ap.add_argument("--ys", type=str, default=None, help="Comma-separated y columns (lines mode)")
     ap.add_argument("--group", type=str, default=None, help="Group-by column (lines mode)")
+    ap.add_argument("--multi-y", action="store_true", help="Plot all --ys on a single figure (lines mode; cannot use --group)")
 
     # axis / style
     ap.add_argument("--xlim", type=float, nargs=2, default=None, metavar=("XMIN", "XMAX"), help="x axis limits")
@@ -694,6 +821,7 @@ def main() -> None:
                 x=args.x,
                 ys=ys,
                 group=args.group,
+                multi_y=bool(args.multi_y),
                 out_dir=current_out_dir,
                 title_prefix=title2,
                 meta=meta,

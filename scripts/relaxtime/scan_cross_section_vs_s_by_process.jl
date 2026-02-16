@@ -20,7 +20,7 @@ raw"""
     --processes ssbar_to_uubar,uubar_to_ssbar \
     --delta-sqrt-mev-min 1e-3 --delta-sqrt-mev-max 60 --n-threshold 240 \
     --n-points 64 \
-    --out data/processed/results/relaxtime/xs_vs_s_threshold_T150_muB800.csv
+    --out data/outputs/results/relaxtime/cross_section/xs_vs_s_threshold_T150_muB800.csv
 """
 
 using Printf
@@ -105,7 +105,7 @@ function parse_args(args::Vector{String})::Options
         :n_threshold => 240,
         :sqrt_tail_max_mev => 0.0,
         :n_tail => 0,
-        :out => joinpath("data", "processed", "results", "relaxtime", "xs_vs_s_by_process.csv"),
+        :out => joinpath("data", "outputs", "results", "relaxtime", "cross_section", "xs_vs_s_by_process.csv"),
         :overwrite => false,
     )
 

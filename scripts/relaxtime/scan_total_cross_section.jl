@@ -59,8 +59,8 @@ function print_usage()
     println("  --mu-d <float>       Mu_d in MeV (default 0)")
     println("  --mu-s <float>       Mu_s in MeV (default 0)")
     println("  --xi <float>        Momentum anisotropy xi (default 0.0)")
-    println("  --output-csv <path> CSV output (default data/processed/results/relaxtime/total_cross_section_scan.csv)")
-    println("  --output-fig <path> Figure output (default data/processed/figures/relaxtime/total_cross_section_scan.png)")
+    println("  --output-csv <path> CSV output (default data/outputs/results/relaxtime/total_cross_section_scan.csv)")
+    println("  --output-fig <path> Figure output (default data/outputs/figures/relaxtime/total_cross_section_scan.png)")
     println("  -h, --help          Show this help message")
 end
 
@@ -80,8 +80,8 @@ function parse_args(args)::CLIOptions
         :mu_d_MeV => 800.0/3.0,
         :mu_s_MeV => 800.0/3.0,
         :xi => 0.0,
-        :output_csv => joinpath("data", "processed", "results", "relaxtime", "total_cross_section_scan.csv"),
-        :output_fig => joinpath("data", "processed", "figures", "relaxtime", "total_cross_section_scan.png"),
+        :output_csv => joinpath("data", "outputs", "results", "relaxtime", "total_cross_section_scan.csv"),
+        :output_fig => joinpath("data", "outputs", "figures", "relaxtime", "total_cross_section_scan.png"),
     )
 
     i = 1

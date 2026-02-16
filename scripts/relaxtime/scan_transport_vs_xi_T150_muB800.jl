@@ -17,8 +17,8 @@ raw"""
 
 建议绘图：
   python scripts/plot_scan_csv.py --mode lines \
-    --csv data/processed/results/relaxtime/transport_vs_xi_T150_muB800.csv \
-    --x xi --ys eta,sigma,zeta,tau_u,tau_s --out-dir data/processed/figures/relaxtime/transport_vs_xi
+        --csv data/outputs/results/relaxtime/transport_vs_xi_T150_muB800.csv \
+        --x xi --ys eta,sigma,zeta,tau_u,tau_s --out-dir data/outputs/figures/relaxtime/transport_vs_xi
 """
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
@@ -76,7 +76,7 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/scan_transport_vs_xi_T150_muB800.jl [options]\n")
     println("Options:")
-    println("  --output <path>             输出 CSV (default data/processed/results/relaxtime/transport_vs_xi_T150_muB800.csv)")
+    println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/transport_vs_xi_T150_muB800.csv)")
     println("  --out <path>                同 --output")
     println("  --T-MeV <value>             Temperature in MeV (default 150)")
     println("  --muB-MeV <value>           Baryon chemical potential μ_B in MeV (default 800)")
@@ -105,7 +105,7 @@ end
 
 function parse_args(args::Vector{String})::Options
     opts = Dict{Symbol,Any}(
-        :output => joinpath("data", "processed", "results", "relaxtime", "transport_vs_xi_T150_muB800.csv"),
+        :output => joinpath("data", "outputs", "results", "relaxtime", "transport_vs_xi_T150_muB800.csv"),
         :T_mev => 150.0,
         :muB_mev => 800.0,
         :xi_values => Float64[],
