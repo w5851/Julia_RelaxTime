@@ -12,7 +12,6 @@ using .PNJL
 using .PNJL.TmuScan
 using .PNJL.TrhoScan
 using .PNJL.AdaptiveRhoRefinement
-using .PNJL.SeedCache: DEFAULT_SEED_PATH
 
 @testset "TrhoScan defaults" begin
     @test first(DEFAULT_RHO_VALUES) == 0.0
@@ -52,7 +51,6 @@ end
         mu_values = [10.0],
         xi_values = [0.0],
         output_path = output,
-        seed_path = DEFAULT_SEED_PATH,
         overwrite = true,
         resume = false,
         p_num = 12,
@@ -68,6 +66,29 @@ end
     @test parse(Float64, data[2]) ≈ 10.0
 end
 
+@testset "TmuScan single point (thermo_backend=models)" begin
+    tmp_dir = mktempdir()
+    output = joinpath(tmp_dir, "tmu_scan_models.csv")
+    stats = run_tmu_scan(
+        T_values = [90.0],
+        mu_values = [10.0],
+        xi_values = [0.0],
+        output_path = output,
+        overwrite = true,
+        resume = false,
+        thermo_backend = :models,
+        p_num = 12,
+        t_num = 6,
+    )
+    @test isfile(output)
+    @test stats.total == 1
+    header, data = _read_data(output)
+    @test header[1:3] == ["T_MeV", "mu_MeV", "xi"]
+    @test length(header) == length(data)
+    # 关键列可解析（避免 NaN/空串导致下游崩溃）
+    @test isfinite(parse(Float64, data[4]))  # pressure_fm4
+end
+
 @testset "TrhoScan single point" begin
     tmp_dir = mktempdir()
     output = joinpath(tmp_dir, "trho_scan.csv")
@@ -76,7 +97,6 @@ end
         rho_values = [0.2],
         xi_values = [0.0],
         output_path = output,
-        seed_path = DEFAULT_SEED_PATH,
         overwrite = true,
         resume = false,
         p_num = 12,
@@ -89,7 +109,9 @@ end
     @test length(header) == length(data)
     @test parse(Float64, data[1]) ≈ 90.0
     @test parse(Float64, data[2]) ≈ 0.2
-    @test data[18] == "true"
+    idx_conv = findfirst(==("converged"), header)
+    @test idx_conv !== nothing
+    @test data[idx_conv] == "true"
     mu_u = parse(Float64, data[4])
     @test isfinite(mu_u)
 end

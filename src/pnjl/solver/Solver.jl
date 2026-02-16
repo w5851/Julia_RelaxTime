@@ -24,7 +24,7 @@ using .Conditions
 using .ImplicitSolver
 
 # 重新导出 ConstraintModes
-export ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma
+export ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
 export state_dim, param_dim, constraint_description
 
 # 重新导出 SeedStrategies

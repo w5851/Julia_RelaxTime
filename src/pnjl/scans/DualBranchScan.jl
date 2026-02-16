@@ -105,6 +105,7 @@ function run_dual_branch_scan(;
     T_mev::Real,
     mu_range,
     xi::Real=0.0,
+    thermo_backend::Symbol=:legacy,
     p_num::Int=24,
     t_num::Int=8,
     verbose::Bool=false,
@@ -127,7 +128,7 @@ function run_dual_branch_scan(;
     
     for (i, mu_mev) in enumerate(mu_values)
         μ_fm = mu_mev / ħc_MeV_fm
-        result = _solve_point(T_fm, μ_fm, xi, hadron_tracker; p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+        result = _solve_point(T_fm, μ_fm, xi, hadron_tracker; thermo_backend=thermo_backend, p_num=p_num, t_num=t_num, nlsolve_kwargs...)
         
         if result !== nothing && result.converged
             # 检查是否发生了解跳跃（序参量突变）
@@ -155,7 +156,7 @@ function run_dual_branch_scan(;
     for i in n_points:-1:1
         mu_mev = mu_values[i]
         μ_fm = mu_mev / ħc_MeV_fm
-        result = _solve_point(T_fm, μ_fm, xi, quark_tracker; p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+        result = _solve_point(T_fm, μ_fm, xi, quark_tracker; thermo_backend=thermo_backend, p_num=p_num, t_num=t_num, nlsolve_kwargs...)
         
         if result !== nothing && result.converged
             # 检查是否发生了解跳跃
@@ -339,13 +340,14 @@ function get_seed(s::_FixedSeedStrategy, ::AbstractVector, ::ConstraintMode)
 end
 
 """单点求解"""
-function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed; p_num, t_num, nlsolve_kwargs...)
+function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed; thermo_backend::Symbol=:legacy, p_num, t_num, nlsolve_kwargs...)
     seed = get_seed(tracker, [T_fm, μ_fm], FixedMu())
     strategy = _FixedSeedStrategy(seed)
     
     try
         result = solve(FixedMu(), T_fm, μ_fm;
             xi=xi,
+            thermo_backend=thermo_backend,
             seed_strategy=strategy,
             p_num=p_num,
             t_num=t_num,
@@ -540,6 +542,7 @@ function scan_phase_diagram(;
     T_range,
     mu_range,
     xi::Real=0.0,
+    thermo_backend::Symbol=:legacy,
     output_dir::Union{Nothing, String}=nothing,
     verbose::Bool=true,
     kwargs...
@@ -549,7 +552,7 @@ function scan_phase_diagram(;
     for T_mev in T_range
         verbose && println("\n处理 T = $T_mev MeV...")
         
-        result = run_dual_branch_scan(T_mev=T_mev, mu_range=mu_range, xi=xi, verbose=verbose; kwargs...)
+        result = run_dual_branch_scan(T_mev=T_mev, mu_range=mu_range, xi=xi, thermo_backend=thermo_backend, verbose=verbose; kwargs...)
         transition = find_phase_transition(result)
         push!(transitions, transition)
         

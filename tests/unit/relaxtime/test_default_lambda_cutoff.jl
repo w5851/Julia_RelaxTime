@@ -9,21 +9,43 @@
 
 using Test
 
-include("../../../src/Constants_PNJL.jl")
-include("../../../src/pnjl/PNJL.jl")
-include("../../../src/relaxtime/RelaxationTime.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/integration/GaussLegendre.jl")
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "PNJL.jl"))
+if !isdefined(Main, :PNJL)
+    Base.include(Main, _PNJL_PATH)
+end
+const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxationTime.jl"))
+if !isdefined(Main, :RelaxationTime)
+    Base.include(Main, _RELAXATION_TIME_PATH)
+end
 
-using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
-using .PNJL: solve, FixedMu, cached_nodes, calculate_number_densities
-using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
-using .RelaxationTime: relaxation_times, REQUIRED_PROCESSES
-using .OneLoopIntegrals: A
-using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .GaussLegendre: gauleg
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
 
+const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
+if !isdefined(Main, :EffectiveCouplings)
+    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
+end
+
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
+
+using Main.Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
+using Main.PNJL: solve, FixedMu, cached_nodes, calculate_number_densities
+using Main.PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+using Main.RelaxationTime: relaxation_times, REQUIRED_PROCESSES
+using Main.OneLoopIntegrals: A
+using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using Main.GaussLegendre: gauleg
+
+const RelaxationTime = Main.RelaxationTime
 const RT_ASR = RelaxationTime.AverageScatteringRate
 
 # 测试条件：T=100 MeV, μB=800 MeV（重夸克条件，m_s 接近 Λ）
@@ -93,13 +115,13 @@ end
     end
 end
 
-@testset "relaxation_times default behavior equals explicit Λ cutoff" begin
+@testset "relaxation_times default behavior equals explicit Λ sigma_cutoff" begin
     params = setup_test_params()
     
     cos_grid, cos_w = gauleg(-1.0, 1.0, 4)
     phi_grid, phi_w = gauleg(0.0, 2π, 8)
     
-    # 默认行为（不传 p_grid）
+    # 默认行为（不传 p_grid）：动量积分走半无穷区间；σ(s) 默认使用 Λ 截断
     tau_default = relaxation_times(params.quark_params, params.thermo_params, params.K_coeffs;
         densities=params.densities,
         p_nodes=20, angle_nodes=4, phi_nodes=8,
@@ -107,12 +129,10 @@ end
         n_sigma_points=6,
     )
     
-    # 显式传入 [0, Λ] 网格 + sigma_cutoff=Λ
-    p_grid_lambda, p_w_lambda = gauleg(0.0, Λ_inv_fm, 20)
+    # 显式指定 sigma_cutoff=Λ（保持动量积分仍为半无穷区间，与默认一致）
     tau_explicit = relaxation_times(params.quark_params, params.thermo_params, params.K_coeffs;
         densities=params.densities,
         p_nodes=20, angle_nodes=4, phi_nodes=8,
-        p_grid=p_grid_lambda, p_w=p_w_lambda,
         cos_grid=cos_grid, cos_w=cos_w, phi_grid=phi_grid, phi_w=phi_w,
         n_sigma_points=6,
         sigma_cutoff=Λ_inv_fm,

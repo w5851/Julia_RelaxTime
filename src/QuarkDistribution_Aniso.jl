@@ -8,8 +8,17 @@ module PNJLQuarkDistributions_Aniso
 
 export distribution_aniso_correction, distribution_aniso, correction_cos_theta_coefficient
 
-include("QuarkDistribution.jl")
-using .PNJLQuarkDistributions: quark_distribution, antiquark_distribution
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution.jl"))
+IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
+
+using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 """计算PNJL模型中夸克有效分布函数对能量的导数"""
 function quark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
     # 计算温度的倒数

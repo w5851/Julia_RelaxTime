@@ -7,7 +7,7 @@
 ### `solve_gap_and_transport`
 
 ```julia
-solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing, tau=nothing, compute_bulk=true, p_num=..., t_num=..., seed_state=..., solver_kwargs=(;), tau_kwargs=(;), transport_kwargs=(;))
+solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing, tau=nothing, compute_bulk=true, p_num=..., t_num=..., seed_state=..., solver_kwargs=(;), tau_kwargs=(;), transport_kwargs=(;), prefer_energy_aniso=nothing)
 ```
 
 - **输入单位**
@@ -22,6 +22,15 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   4. 若 `compute_bulk=true`，用 `ThermoDerivatives.bulk_derivative_coeffs` 生成体粘滞 ζ 所需的导数组合。
   5. 调用 `TransportCoefficients.transport_coefficients(quark_params, thermo_params; tau=..., bulk_coeffs=...)` 返回 `(eta, zeta, sigma)`。
 
+- **关于 `prefer_energy_aniso`（ξ≠0 时的分布计算路径选择）**
+  - 背景：当 `xi != 0` 时，输运 integrand 需要各向异性色散能量 $E_\xi(p,\cos\theta)$。
+  - 默认行为：如果 provider 支持 `energy_from_p_aniso(p,m,xi,cosθ)`，并且 `prefer_energy_aniso=true`，则在 ξ≠0 时会复用已计算的 $E_\xi$，直接调用 `quark_distribution(E,...) / antiquark_distribution(E,...)`（避免 `*_distribution_aniso` 内部重复 `sqrt`）。
+  - 覆写方式（二选一）：
+    - 直接传 keyword：`prefer_energy_aniso=false`
+    - 或者放在 `transport_kwargs`：`transport_kwargs=(; prefer_energy_aniso=false, ...)`
+  - toml 默认值（方案 A）：当两种覆写都未提供时，workflow 会从 `PHYSICS_PARAM_PROFILE` 对应的 `config/physics/<profile>.toml` 的 `[transport_workflow]` 段读取 `prefer_energy_aniso` 作为默认值。
+  - 典型用法：当你注入的 provider 实现了“非平凡”的 `*_distribution_aniso(p,m,...)`（不只是 RS 形式）时，可显式设置 `prefer_energy_aniso=false` 以确保走该实现。
+
 - **返回**（NamedTuple）
   - `equilibrium`：平衡求解输出（pressure/energy/rho/.../x_state 等）
   - `quark_params`：`(m=(u,d,s), μ=(u,d,s))`
@@ -32,6 +41,32 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   - `rates`：平均散射率（若内部计算 τ 则给出，便于复用/诊断）
   - `bulk_coeffs`：`compute_bulk=true` 时给出
   - `transport`：`(eta, zeta, sigma)`
+
+## Day 1 输入契约冻结（v2026-02-12）
+
+以下约定作为阶段 4 解耦期间的稳定输入合同：
+
+### 输入分层
+
+| 层级 | 关键输入 | 说明 |
+|---|---|---|
+| 平衡层 | `T_fm`, `mu_fm`, `xi`, `seed_state`, `solver_kwargs` | 只负责求平衡态与热力学状态 |
+| τ 计算层（可选） | `compute_tau`, `K_coeffs`, `tau_kwargs` | `compute_tau=true` 时由 workflow 内部计算 `tau/tau_inv/rates` |
+| 输运层 | `tau`（显式或内部计算）, `transport_kwargs`, `prefer_energy_aniso` | 委托给 `TransportCoefficients.transport_coefficients` |
+
+### 参数优先级
+
+1. 显式 keyword `prefer_energy_aniso=...`
+2. `transport_kwargs.prefer_energy_aniso`
+3. `config/physics/<PHYSICS_PARAM_PROFILE>.toml` 中 `[transport_workflow].prefer_energy_aniso`
+4. provider 默认值（通常为 `true`）
+
+### 输入契约细则
+
+- `model/x_state(or equilibrium)`：当前入口对外暴露为 `solve_gap_and_transport(T_fm, mu_fm; ...)`，内部产出 `equilibrium.x_state` 后再进入输运层。
+- `quark_params` 来源：由 `equilibrium` 与质量计算组装，统一传给 `TransportCoefficients`，避免 workflow 内部重复散落的 species 分支。
+- `thermo_params` 来源：统一为 `(T, Φ, Φbar, ξ)`，作为输运层唯一热态输入。
+- `transport_kwargs`：只承载输运积分/provider 行为相关键；不应承载平衡求解器参数。
 
 ## 示例
 
@@ -57,6 +92,20 @@ res = solve_gap_and_transport(
     t_num=6,
     solver_kwargs=(iterations=40,),
     transport_kwargs=(p_nodes=24, p_max=8.0,),
+)
+
+# 例：显式关闭能量直通（强制优先用 provider 的 *_distribution_aniso）
+res2 = solve_gap_and_transport(
+  T,
+  mu;
+  xi=xi,
+  tau=tau0,
+  compute_tau=false,
+  compute_bulk=false,
+  p_num=12,
+  t_num=6,
+  solver_kwargs=(iterations=40,),
+  transport_kwargs=(p_nodes=24, p_max=8.0, prefer_energy_aniso=false),
 )
 
 @show res.thermo_params

@@ -7,12 +7,25 @@
 """
 module PolarizationAniso
 
-include("../Constants_PNJL.jl")
-include("../relaxtime/OneLoopIntegrals.jl")
-include("../relaxtime/OneLoopIntegralsAniso.jl")
-using .Constants_PNJL: N_color
-using .OneLoopIntegrals: B0, EPS_SEGMENT
-using .OneLoopIntegralsCorrection: B0_correction
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+
+# Prefer reuse Main.OneLoopIntegrals / Main.OneLoopIntegralsCorrection to avoid duplication
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegralsAniso.jl"))
+IncludeOnce.include_once!(Main, :OneLoopIntegralsCorrection, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
+using Main.Constants_PNJL: N_color
+using Main.OneLoopIntegrals: B0, EPS_SEGMENT
+using Main.OneLoopIntegralsCorrection: B0_correction
 
 """
     polarization_aniso(channel, k0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)

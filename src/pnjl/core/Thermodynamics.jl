@@ -19,11 +19,16 @@ using Base.MathConstants: π
 using StaticArrays
 using ForwardDiff
 
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
 # 常量导入 - 使用绝对路径加载
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
-if !isdefined(Main, :Constants_PNJL)
-    Base.include(Main, _CONSTANTS_PATH)
-end
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL:
     ħc_MeV_fm,
     N_color,
@@ -54,6 +59,7 @@ using .PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distrib
 
 export calculate_mass_vec, calculate_chiral, calculate_U, calculate_U_derivative_T
 export calculate_pressure, calculate_omega
+export calculate_omega_components
 export calculate_rho, calculate_thermo, calculate_number_densities
 export ρ0
 
@@ -192,6 +198,34 @@ function calculate_omega(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_
     log_sum = calculate_log_sum(masses, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
     
     return chi + U + energy_sum + log_sum
+end
+
+"""calculate_omega_components(x_state, mu_vec, T, thermal_nodes, xi) -> NamedTuple
+
+返回 Ω 的组成分解（legacy 路径）：
+- `chi`: 手征凝聚项
+- `poly`: Polyakov 势 U
+- `vac`: 真空贡献（与 `Integrals.calculate_energy_sum` 对应）
+- `therm`: 热激发贡献（与 `Integrals.calculate_log_sum` 对应）
+- `masses`: 有效质量向量
+- `omega`: 总 Ω
+
+键名对齐新架构 `Models.omega_components`，便于对比与 bridge 测试。
+"""
+function calculate_omega_components(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, T_fm::TR, thermal_nodes, xi) where {TF, TM, TR}
+    φ = SVector{3, TF}(x_state[1], x_state[2], x_state[3])
+    Φ, Φ̄ = x_state[4], x_state[5]
+
+    chi = calculate_chiral(φ)
+    poly = calculate_U(T_fm, Φ, Φ̄)
+    masses = calculate_mass_vec(φ)
+
+    thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
+    vac = calculate_energy_sum(masses)
+    therm = calculate_log_sum(masses, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
+
+    ω = chi + poly + vac + therm
+    return (chi=chi, poly=poly, vac=vac, therm=therm, masses=masses, omega=ω)
 end
 
 """

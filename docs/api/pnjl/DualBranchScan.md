@@ -7,8 +7,13 @@
 ## 入口
 
 ```julia
-res = PNJL.run_dual_branch_scan(; T_mev=100.0, mu_range=0.0:10.0:400.0, xi=0.0)
-info = PNJL.find_phase_transition(res)
+using PNJL
+
+# DualBranchScan 不进入主线默认加载/导出，需要时显式启用
+PNJL.load_dual_branch_scan!()
+
+res = PNJL.DualBranchScan.run_dual_branch_scan(; T_mev=100.0, mu_range=0.0:10.0:400.0, xi=0.0)
+info = PNJL.DualBranchScan.find_phase_transition(res)
 ```
 
 ## 适用场景

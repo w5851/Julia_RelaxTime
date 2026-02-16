@@ -7,6 +7,7 @@ PNJL 求解器初值策略模块。
 - `DefaultSeed`: 基于物理直觉的固定默认值
 - `MultiSeed`: 多初值尝试（处理多值解）
 - `ContinuitySeed`: 连续性跟踪（参数扫描）
+- `HybridContinuitySeed`: 连续性优先 + 多初值回退
 - `PhaseAwareSeed`: 基于相图的智能选择（一阶相变区域，单点/无状态）
 - `PhaseAwareContinuitySeed`: 相变感知的连续性跟踪（推荐用于扫描；跨相变线时自动切换相的默认种子）
 
@@ -35,9 +36,9 @@ module SeedStrategies
 using StaticArrays
 
 # 从父模块导入 ConstraintModes
-using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedEntropy, FixedSigma, state_dim
+using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
@@ -160,6 +161,15 @@ function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedRho)
     seed_5 = base_seed[1:5]
     μ_guess = estimate_mu_from_rho(mode.rho_target)
     return Float64[seed_5..., μ_guess, μ_guess, μ_guess]
+end
+
+function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedAsymmetricRho)
+    seed_5 = base_seed[1:5]
+    μ_d = estimate_mu_from_rho(mode.rho_target)
+    ratio = max(mode.ud_ratio_target, 1e-6)
+    μ_u = μ_d * cbrt(ratio)
+    μ_s = abs(mode.s_target) <= 1e-12 ? 0.05 : μ_d
+    return Float64[seed_5..., μ_u, μ_d, μ_s]
 end
 
 function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedEntropy)
@@ -303,6 +313,43 @@ export get_all_seeds
 mutable struct ContinuitySeed <: SeedStrategy
     previous_solution::Union{Nothing, Vector{Float64}}
     fallback::SeedStrategy
+end
+
+# ============================================================================
+# 策略3b：连续性优先 + 多初值回退
+# ============================================================================
+
+"""
+    HybridContinuitySeed <: SeedStrategy
+
+连续性优先的混合策略：
+- 优先使用 `ContinuitySeed`（上一点解）
+- 若当前点失败，则由求解器侧回退到 `fallback`（通常是 `MultiSeed`）
+
+说明：真正的“失败回退”需要在求解器层面触发，本类型仅承载策略状态与参数。
+"""
+mutable struct HybridContinuitySeed <: SeedStrategy
+    continuity::ContinuitySeed
+    fallback::MultiSeed
+end
+
+"""创建混合连续性策略（默认回退为 MultiSeed()）"""
+function HybridContinuitySeed(; fallback::MultiSeed=MultiSeed(), continuity_fallback::SeedStrategy=DefaultSeed())
+    return HybridContinuitySeed(ContinuitySeed(fallback=continuity_fallback), fallback)
+end
+
+function get_seed(s::HybridContinuitySeed, θ::AbstractVector, mode::ConstraintMode)
+    return get_seed(s.continuity, θ, mode)
+end
+
+function update!(s::HybridContinuitySeed, solution::AbstractVector{<:Real})
+    update!(s.continuity, solution)
+    return s
+end
+
+function reset!(s::HybridContinuitySeed)
+    reset!(s.continuity)
+    return s
 end
 
 """创建连续性跟踪策略"""
@@ -896,6 +943,7 @@ export set_phase!
 Base.show(io::IO, s::DefaultSeed) = print(io, "DefaultSeed(phase_hint=$(s.phase_hint))")
 Base.show(io::IO, s::MultiSeed) = print(io, "MultiSeed($(length(s.candidates)) candidates)")
 Base.show(io::IO, s::ContinuitySeed) = print(io, "ContinuitySeed(has_previous=$(s.previous_solution !== nothing))")
+Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.continuity.previous_solution !== nothing), fallback=$(length(s.fallback.candidates)) seeds)")
 function Base.show(io::IO, s::PhaseAwareSeed)
     if s.boundary_data !== nothing
         n = length(s.boundary_data.T_values)

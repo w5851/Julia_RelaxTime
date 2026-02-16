@@ -52,6 +52,8 @@ end
 
 - `docs/api/pnjl/DualBranchScan.md`
 它比“单分支连续性”更适合做相变线、潜热、Maxwell 构造相关工作。
+
+注意：`DualBranchScan` 不进入主线默认加载/导出；使用前先调用 `PNJL.load_dual_branch_scan!()`。
 # T-μ 扫描模块 `PNJL.TmuScan`
 
 `src/pnjl/scans/TmuScan.jl` 实现了在固定温度/化学势网格上批量调用 `AnisoGapSolver.solve_fixed_mu` 的工具。该模块负责：

@@ -219,8 +219,43 @@ all = transport_coefficients(req; bulk_coeffs=nothing)
 
 2. **各向异性**：当 ξ≠0 时，使用 Romatschke-Strickland 形式的分布函数，需要完整的角度积分。
 
-3. **电荷单位**：默认使用自然单位制电荷（$e = \sqrt{4\pi\alpha}$）。
+3. **provider 约定（与各向异性路径相关）**：
+   - `energy_from_p_aniso(p,m,ξ,cosθ)`：可选 provider 接口；当 `ξ≠0` 时若提供则优先用于能量 $E_\xi$，否则回退到各向同性 `energy_from_p(p,m)`。
+     - 默认实现：$E_\xi = \sqrt{p^2 + m^2 + \xi (p\cos\theta)^2}$。
+   - provider 可选字段 `prefer_energy_aniso::Bool`（默认 provider 为 `true`）。
+   - 当 `ξ≠0` 且 provider 具备 `energy_from_p_aniso(p,m,ξ,cosθ)` 时：
+     - `prefer_energy_aniso=true`：优先复用已计算的 $E_\xi$，直接调用 `quark_distribution(E,...) / antiquark_distribution(E,...)`，避免 `*_distribution_aniso` 内部重复 `sqrt`。
+     - `prefer_energy_aniso=false`：优先调用 provider 的 `quark_distribution_aniso(p,m,...) / antiquark_distribution_aniso(p,m,...)`（适合你实现了非平凡的 aniso 分布接口）。
 
-4. **与C++/Fortran的一致性**：
+   - `default_transport_provider()` 字段列表（NamedTuple）：
+     - 必备：`energy_from_p`, `quark_distribution`, `antiquark_distribution`
+     - 各向异性相关（默认提供）：`energy_from_p_aniso`, `quark_distribution_aniso`, `antiquark_distribution_aniso`, `prefer_energy_aniso`
+     - 可选扩展（若提供会被使用）：`mass_for_species(species, quark_params, thermo_params)`, `mu_for_species(species, quark_params, thermo_params)`
+
+### Day 1 契约冻结（v2026-02-12）
+
+以下为阶段 4 的 provider 接口冻结版本（用于后续解耦改造的兼容边界）。
+
+| 字段 | 必选 | 说明 | 优先级/回退 |
+|---|---|---|---|
+| `energy_from_p(p, m)` | 是 | 各向同性色散关系 | 基础入口 |
+| `quark_distribution(E_or_p, m, T, μ, Φ, Φbar)` | 是 | 夸克分布函数 | 与 `antiquark_distribution` 成对出现 |
+| `antiquark_distribution(E_or_p, m, T, μ, Φ, Φbar)` | 是 | 反夸克分布函数 | 与 `quark_distribution` 成对出现 |
+| `energy_from_p_aniso(p, m, ξ, cosθ)` | 否 | 各向异性能量 | `ξ≠0` 时若提供则优先使用；否则回退 `energy_from_p` |
+| `quark_distribution_aniso(...)` / `antiquark_distribution_aniso(...)` | 否 | 各向异性分布接口 | 当 `prefer_energy_aniso=false` 时优先尝试 |
+| `prefer_energy_aniso::Bool` | 否 | ξ≠0 路径开关 | 默认 provider 为 `true`；可被 workflow keyword/`transport_kwargs` 覆盖 |
+| `mass_for_species(species, quark_params, thermo_params)` | 否 | species 质量覆写 | 若缺失则回退 `quark_params.m` |
+| `mu_for_species(species, quark_params, thermo_params)` | 否 | species 化学势覆写 | 若缺失则回退 `quark_params.μ` |
+
+`ξ≠0` 时的分布计算优先级：
+
+1. 若有 `energy_from_p_aniso` 且 `prefer_energy_aniso=true`：优先复用 $E_\xi$ 并调用 `quark_distribution/antiquark_distribution`。
+2. 否则，若有 `*_distribution_aniso`：走各向异性分布接口。
+3. 否则：回退到“能量直通”路径（若可构造 $E_\xi$）。
+4. 仍不可用时：回退到各向同性 `energy_from_p` 路径。
+
+4. **电荷单位**：默认使用自然单位制电荷（$e = \sqrt{4\pi\alpha}$）。
+
+5. **与C++/Fortran的一致性**：
    - **剪切粘滞系数 η**：Julia与C++/Fortran一致
    - **电导率 σ**：Julia与C++/Fortran一致（使用相同的公式和电荷约定）

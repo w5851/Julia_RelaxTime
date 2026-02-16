@@ -14,19 +14,37 @@ Pkg.activate(joinpath(@__DIR__, "..", ".."))
 using Test
 using Printf
 
-include("../../../src/Constants_PNJL.jl")
-include("../../../src/integration/GaussLegendre.jl")
-include("../../../src/QuarkDistribution.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/MesonPropagator.jl")
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, _QUARK_DISTRIBUTION_PATH)
+end
+const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
+if !isdefined(Main, :OneLoopIntegrals)
+    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
+end
+const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
+if !isdefined(Main, :EffectiveCouplings)
+    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
+end
+const _MESON_PROPAGATOR_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "MesonPropagator.jl"))
+if !isdefined(Main, :MesonPropagator)
+    Base.include(Main, _MESON_PROPAGATOR_PATH)
+end
 
-using .Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm, λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
-using .GaussLegendre: gauleg
-using .OneLoopIntegrals: A
-using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, coupling_matrix_determinant
-using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed
-using .MesonPropagator: calculate_coupling_matrix, extract_flavor, get_quark_wavefunction, calculate_current_vector
+using Main.Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm, λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
+using Main.GaussLegendre: gauleg
+using Main.OneLoopIntegrals: A
+using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, coupling_matrix_determinant
+using Main.MesonPropagator: meson_propagator_simple, meson_propagator_mixed
+using Main.MesonPropagator: calculate_coupling_matrix, extract_flavor, get_quark_wavefunction, calculate_current_vector
 
 # 标准测试参数
 const T_TEST_MeV = 150.0

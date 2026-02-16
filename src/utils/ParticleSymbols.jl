@@ -55,6 +55,13 @@ m = get_mass(:u, quark_params)  # 1.52 fm⁻¹
 """
 module ParticleSymbols
 
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
 # 导出函数
 export extract_flavor
 export extract_quark_flavor
@@ -71,14 +78,14 @@ export get_mass
 export get_chemical_potential
 export get_wavefunction
 
-# 导入必要的常量
-include(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
-using .Constants_PNJL: ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s, SCATTERING_MESON_MAP
+# 导入必要的常量（优先复用 Main.Constants_PNJL，避免重复模块）
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+using Main.Constants_PNJL: ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s, SCATTERING_MESON_MAP
 
 # 导入参数类型
-if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "ParameterTypes.jl"))
-end
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, as_namedtuple
 
 # ----------------------------------------------------------------------------

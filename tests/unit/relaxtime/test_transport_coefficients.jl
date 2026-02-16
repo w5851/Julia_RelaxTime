@@ -1,7 +1,10 @@
 using Test
 
-include("../../../src/relaxtime/TransportCoefficients.jl")
-using .TransportCoefficients
+const _TRANSPORT_COEFFICIENTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "TransportCoefficients.jl"))
+if !isdefined(Main, :TransportCoefficients)
+    Base.include(Main, _TRANSPORT_COEFFICIENTS_PATH)
+end
+using Main.TransportCoefficients
 
 const QUARK_PARAMS = (m=(u=0.3,d=0.3,s=0.5), μ=(u=0.2,d=0.2,s=0.2))
 const THERMO_PARAMS = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
@@ -72,5 +75,132 @@ end
 
     sigma_req = electric_conductivity(req)
     @test isapprox(sigma_req, sigma_kw; rtol=1e-12, atol=0.0)
+end
+
+@testset "TransportCoefficients: provider injection smoke" begin
+    prov = default_transport_provider()
+
+    eta_default = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    eta_injected = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0, provider=prov)
+    @test isapprox(eta_injected, eta_default; rtol=1e-12, atol=0.0)
+
+    sigma_default = electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    sigma_injected = electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0, provider=prov)
+    @test isapprox(sigma_injected, sigma_default; rtol=1e-12, atol=0.0)
+
+    req = TransportRequest(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, integration=TransportIntegrationConfig(p_nodes=16, p_max=10.0))
+    eta_req_default = shear_viscosity(req)
+    eta_req_injected = shear_viscosity(req; provider=prov)
+    @test isapprox(eta_req_injected, eta_req_default; rtol=1e-12, atol=0.0)
+
+    toy_provider = (
+        energy_from_p=(p::Float64, m::Float64) -> sqrt(p * p + m * m),
+        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.1,
+        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.1,
+        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.1,
+        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.1,
+    )
+
+    eta_toy = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0, provider=toy_provider)
+    @test isfinite(eta_toy)
+    @test eta_toy > 0.0
+    @test !isapprox(eta_toy, eta_default; rtol=1e-6, atol=0.0)
+end
+
+@testset "TransportCoefficients: provider mass/mu override smoke" begin
+    # Make sure transport integrand can be decoupled from hard-coded quark_params fields.
+    qp_bad = (m=(u=NaN, d=NaN, s=NaN), μ=(u=999.0, d=999.0, s=999.0))
+
+    eta_bad_default = shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    @test !isfinite(eta_bad_default)
+
+    cached_m = (u=0.3, d=0.3, s=0.5)
+    cached_mu = (u=0.2, d=0.2, s=0.2)
+
+    prov_base = default_transport_provider()
+    prov = merge(prov_base, (
+        mass_for_species=(sp::Symbol, qp, tp) -> begin
+            sp in (:u, :ubar) && return cached_m.u
+            sp in (:d, :dbar) && return cached_m.d
+            sp in (:s, :sbar) && return cached_m.s
+            error("unknown species=$sp")
+        end,
+        mu_for_species=(sp::Symbol, qp, tp) -> begin
+            sp in (:u, :ubar) && return cached_mu.u
+            sp in (:d, :dbar) && return cached_mu.d
+            sp in (:s, :sbar) && return cached_mu.s
+            error("unknown species=$sp")
+        end,
+    ))
+
+    eta_bad = shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0, provider=prov)
+    @test isfinite(eta_bad)
+    @test eta_bad > 0.0
+
+    @testset "TransportCoefficients anisotropic energy hook" begin
+        # Minimal anisotropic smoke: ensure ξ≠0 path is finite and that overriding
+        # `energy_from_p_aniso` affects the result when `prefer_energy_aniso=true`.
+        thermo_params_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
+
+        η0 = shear_viscosity(
+            QUARK_PARAMS,
+            thermo_params_aniso;
+            tau=TAU_ONE,
+            p_nodes=6,
+            cos_nodes=6,
+            p_max=6.0,
+        )
+        @test isfinite(η0)
+        @test η0 > 0
+
+        provider = default_transport_provider()
+        provider2 = merge(
+            provider,
+            (
+                prefer_energy_aniso=true,
+                energy_from_p_aniso=(p, m, ξ, cosθ) -> sqrt(p * p + m * m + 10.0 * ξ * (p * cosθ)^2),
+            ),
+        )
+
+        η2 = shear_viscosity(
+            QUARK_PARAMS,
+            thermo_params_aniso;
+            tau=TAU_ONE,
+            provider=provider2,
+            p_nodes=6,
+            cos_nodes=6,
+            p_max=6.0,
+        )
+        @test isfinite(η2)
+        @test η2 > 0
+        @test !isapprox(η2, η0; rtol=1e-10, atol=0.0)
+    end
+
+    @testset "TransportCoefficients aniso distribution fallback" begin
+        # Provider without *_distribution_aniso should still work for ξ≠0 if
+        # energy passthrough is available.
+        thermo_params_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
+
+        prov_full = default_transport_provider()
+        prov_no_aniso = (
+            energy_from_p=prov_full.energy_from_p,
+            energy_from_p_aniso=prov_full.energy_from_p_aniso,
+            quark_distribution=prov_full.quark_distribution,
+            antiquark_distribution=prov_full.antiquark_distribution,
+            prefer_energy_aniso=false,
+        )
+
+        η = shear_viscosity(
+            QUARK_PARAMS,
+            thermo_params_aniso;
+            tau=TAU_ONE,
+            provider=prov_no_aniso,
+            p_nodes=6,
+            cos_nodes=6,
+            p_max=6.0,
+        )
+        @test isfinite(η)
+        @test η > 0
+    end
 end
 

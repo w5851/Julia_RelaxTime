@@ -1,0 +1,23 @@
+[rpnjl]
+# rPNJL-specific NJL base parameters (table 3.1 in docs/reference/formula/models/rpnjl/rPNJL_core.md).
+# These override the generic PNJL/NJL defaults only when model_kind=:RPNJL is used.
+Lambda_MeV = 637.72
+G_over_Lambda2 = 2.9147
+K_over_Lambda5 = 75.968
+m_ud0_MeV = 5.5
+m_s0_MeV = 183.468
+
+# Eight-quark couplings in MeV^-8 (will be converted to fm^8 using hbarc^8).
+g1_MeV_inv8 = 2.193e-21
+g2_MeV_inv8 = -5.890e-22
+
+# Vandermonde term strength in the rPNJL Polyakov potential.
+kappa = 0.0
+
+# rPNJL Polyakov parameters (table 3.2).
+T0_MeV = 175.0
+a0 = 6.75
+a1 = -9.8
+a2 = 0.26
+b3 = 0.805
+b4 = 7.55

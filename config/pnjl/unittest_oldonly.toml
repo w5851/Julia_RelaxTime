@@ -1,0 +1,5 @@
+[model]
+N_color = 9
+
+[polyakov]
+T0_MeV = 111.0

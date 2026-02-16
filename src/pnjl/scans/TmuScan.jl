@@ -1,13 +1,7 @@
 """
     TmuScan
 
-T-μ 参数空间扫描模块（使用新求解器架构）。
-
-## 功能
-- 在 (T, μ, ξ) 参数空间进行网格扫描
-- 支持断点续扫（resume）
-- 相变感知的连续性跟踪初值策略
-- 多初值尝试处理收敛困难点
+    masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
 
 ## 使用示例
 ```julia
@@ -38,14 +32,28 @@ module TmuScan
 using Printf
 using StaticArrays
 
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Unified thermo facade (legacy vs models)
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
 # 导入新架构模块
 using ..Constants_PNJL: ħc_MeV_fm
 using ..ConstraintModes: FixedMu, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, MultiSeed
 using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
+using ..SeedStrategies: auto_phase_hint
 using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
 using ..ImplicitSolver: solve, SolverResult
+using ..ScanCommon
+using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
 
 export run_tmu_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_OUTPUT_PATH
 
@@ -125,13 +133,16 @@ function run_tmu_scan(;
     overwrite::Bool=false,
     resume::Bool=true,
     use_phase_aware::Bool=true,
+    bootstrap_multiseed::Bool=true,
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
     mkpath(dirname(output_path))
-    completed = (resume && !overwrite && isfile(output_path)) ? _load_completed(output_path) : Set{NTuple{3, Float64}}()
+    completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
 
     stats = Dict(:total => 0, :success => 0, :failure => 0, :skipped => 0)
@@ -141,10 +152,10 @@ function run_tmu_scan(;
     if use_phase_aware
         for xi in xi_values
             try
-                phase_trackers[xi] = PhaseAwareContinuitySeed(xi)
+                phase_trackers[xi] = PhaseAwareContinuitySeed(xi; bootstrap_multiseed=bootstrap_multiseed)
             catch e
                 @warn "无法为 xi=$(xi) 加载相变线数据: $(e)，将使用普通连续性跟踪"
-                phase_trackers[xi] = PhaseAwareContinuitySeed()  # 无数据版本
+                phase_trackers[xi] = PhaseAwareContinuitySeed(; bootstrap_multiseed=bootstrap_multiseed)  # 无数据版本
             end
         end
     end
@@ -169,7 +180,7 @@ function run_tmu_scan(;
                 
                 for mu in mu_values
                     stats[:total] += 1
-                    key = _key(T, mu, xi)
+                    key = ScanCommon.key3(T, mu, xi; digits=6)
                     
                     if key in completed
                         stats[:skipped] += 1
@@ -181,13 +192,30 @@ function run_tmu_scan(;
                     μ_fm = mu / ħc_MeV_fm
 
                     # 构建初值候选
-                    candidates = _build_seed_candidates_v2(
-                        tracker, continuation_seeds, T, mu, xi, T_fm, μ_fm
-                    )
+                    local result
+                    local message
 
-                    # 尝试求解
-                    result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-                        p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+                    # Phase-aware 首点可选：MultiSeed 自举（选 Ω 最小的物理解），减少对启发式默认种子顺序的依赖。
+                    if tracker !== nothing && bootstrap_multiseed && tracker.previous_solution === nothing
+                        result, message = _solve_point_with_seed_strategy(T_fm, μ_fm, xi, tracker;
+                            thermo_backend=thermo_backend,
+                            solver_backend=solver_backend,
+                            p_num=p_num,
+                            t_num=t_num,
+                            nlsolve_kwargs...)
+                    else
+                        # 常规：构建候选并尝试
+                        candidates = _build_seed_candidates_v2(
+                            tracker, continuation_seeds, T, mu, xi, T_fm, μ_fm
+                        )
+
+                        result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
+                            thermo_backend=thermo_backend,
+                            solver_backend=solver_backend,
+                            p_num=p_num,
+                            t_num=t_num,
+                            nlsolve_kwargs...)
+                    end
 
                     # 更新跟踪器
                     if result !== nothing && _is_success(result)
@@ -237,33 +265,7 @@ end
 # 内部辅助函数
 # ============================================================================
 
-_key(T, mu, xi) = (round(Float64(T); digits=6), round(Float64(mu); digits=6), round(Float64(xi); digits=6))
-_seed_continuation_key(T, xi) = (round(Float64(T); digits=SEED_KEY_DIGITS), round(Float64(xi); digits=SEED_KEY_DIGITS))
-
-function _load_completed(path::AbstractString)
-    completed = Set{NTuple{3, Float64}}()
-    open(path, "r") do io
-        first_line = true
-        for line in eachline(io)
-            if first_line
-                first_line = false
-                continue
-            end
-            isempty(strip(line)) && continue
-            cols = split(line, ',')
-            length(cols) < 3 && continue
-            try
-                T = parse(Float64, strip(cols[1]))
-                mu = parse(Float64, strip(cols[2]))
-                xi = parse(Float64, strip(cols[3]))
-                push!(completed, _key(T, mu, xi))
-            catch
-                # ignore malformed lines
-            end
-        end
-    end
-    return completed
-end
+_seed_continuation_key(T, xi) = ScanCommon.key2(T, xi; digits=SEED_KEY_DIGITS)
 
 """构建初值候选列表（新版本，支持相变感知）"""
 function _build_seed_candidates_v2(tracker, cache::Dict, T, mu, xi, T_fm, μ_fm)
@@ -287,33 +289,9 @@ function _build_seed_candidates_v2(tracker, cache::Dict, T, mu, xi, T_fm, μ_fm)
         push!(candidates, (label="continuation", state=copy(cache[seed_key])))
     end
     
-    # 3. 基于相位的默认种子
-    T_mev = T
-    μ_mev = mu
-    if T_mev > 150 || μ_mev > 300
-        push!(candidates, (label="quark", state=copy(QUARK_SEED_5)))
-        push!(candidates, (label="hadron", state=copy(HADRON_SEED_5)))
-    else
-        push!(candidates, (label="hadron", state=copy(HADRON_SEED_5)))
-        push!(candidates, (label="quark", state=copy(QUARK_SEED_5)))
-    end
-    
-    return candidates
-end
-
-"""构建初值候选列表（旧版本，保留兼容性）"""
-function _build_seed_candidates(cache::Dict, seed_key, T, mu)
-    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
-    
-    # 1. 连续性种子（优先）
-    if haskey(cache, seed_key)
-        push!(candidates, (label="continuation", state=copy(cache[seed_key])))
-    end
-    
-    # 2. 基于相位的默认种子
-    T_mev = T
-    μ_mev = mu
-    if T_mev > 150 || μ_mev > 300
+    # 3. 基于相位的默认种子（把启发式集中在 SeedStrategies）
+    hint = auto_phase_hint(T_fm, μ_fm)
+    if hint === :quark
         push!(candidates, (label="quark", state=copy(QUARK_SEED_5)))
         push!(candidates, (label="hadron", state=copy(HADRON_SEED_5)))
     else
@@ -325,52 +303,64 @@ function _build_seed_candidates(cache::Dict, seed_key, T, mu)
 end
 
 """尝试多个初值候选"""
-function _attempt_with_candidates(T_fm, μ_fm, xi, candidates; p_num, t_num, nlsolve_kwargs...)
-    messages = String[]
-    
-    for candidate in candidates
-        result, msg = _solve_point(T_fm, μ_fm, xi, candidate.state; p_num=p_num, t_num=t_num, nlsolve_kwargs...)
-        
-        if _is_success(result)
-            # 尝试精炼
-            refined, refine_msg = _refine_result(T_fm, μ_fm, xi, result; p_num=p_num, t_num=t_num, nlsolve_kwargs...)
-            result = refined
-            
-            # 处理近似收敛
-            result, promote_msg = _promote_success(result)
-            
-            if !isempty(msg)
-                push!(messages, msg)
-            end
-            if !isempty(promote_msg)
-                push!(messages, promote_msg)
-            end
-            if !isempty(refine_msg)
-                push!(messages, refine_msg)
-            end
-            
-            return result, _join_messages(messages)
-        end
-        
-        push!(messages, _format_candidate_failure(candidate.label, msg, result))
-    end
-    
-    return nothing, _join_messages(messages)
+function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
+    p_num,
+    t_num,
+    nlsolve_kwargs...)
+    return ScanCommon.attempt_with_candidates(candidates;
+        solve_point=seed_state -> _solve_point(T_fm, μ_fm, xi, seed_state;
+            thermo_backend=thermo_backend,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        ),
+        refine=result -> _refine_result(T_fm, μ_fm, xi, result;
+            thermo_backend=thermo_backend,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        ),
+        promote=_promote_success,
+        is_success=_is_success,
+    )
 end
 
 """单点求解"""
-function _solve_point(T_fm, μ_fm, xi, seed_state; p_num, t_num, nlsolve_kwargs...)
+function _solve_point(T_fm, μ_fm, xi, seed_state;
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
+    p_num,
+    t_num,
+    nlsolve_kwargs...)
     try
+        (solver_backend === :legacy || solver_backend === :models) || error("unknown solver_backend=$solver_backend (expected :legacy or :models)")
+        if solver_backend === :models && thermo_backend !== :models
+            error("solver_backend=:models requires thermo_backend=:models")
+        end
+
         # 创建固定种子策略
         seed_5 = Float64.(seed_state[1:min(5, length(seed_state))])
-        strategy = _FixedSeedStrategy(seed_5)
+        strategy = ScanCommon.FixedSeedStrategy(seed_5)
         
         result = solve(FixedMu(), T_fm, μ_fm;
             xi=xi,
+            thermo_backend=solver_backend,
             seed_strategy=strategy,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...
+        )
+
+        result = finalize_solver_result(result, T_fm, xi;
+            solver_backend=solver_backend,
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=:PNJL,
         )
         return result, ""
     catch err
@@ -381,81 +371,69 @@ function _solve_point(T_fm, μ_fm, xi, seed_state; p_num, t_num, nlsolve_kwargs.
     end
 end
 
-"""固定种子策略（内部使用）"""
-struct _FixedSeedStrategy <: SeedStrategy
-    seed::Vector{Float64}
-end
+"""单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
+function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
+    p_num,
+    t_num,
+    nlsolve_kwargs...)
+    try
+        (solver_backend === :legacy || solver_backend === :models) || error("unknown solver_backend=$solver_backend (expected :legacy or :models)")
+        if solver_backend === :models && thermo_backend !== :models
+            error("solver_backend=:models requires thermo_backend=:models")
+        end
 
-# 导入 get_seed 以便扩展
-import ..SeedStrategies: get_seed
+        result = solve(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            thermo_backend=solver_backend,
+            seed_strategy=seed_strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...
+        )
 
-function get_seed(s::_FixedSeedStrategy, θ::AbstractVector, mode::ConstraintMode)
-    return copy(s.seed)
+        result = finalize_solver_result(result, T_fm, xi;
+            solver_backend=solver_backend,
+            thermo_backend=thermo_backend,
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=:PNJL,
+        )
+        return result, "bootstrap_multiseed"
+    catch err
+        msg = sprint() do io
+            showerror(io, err)
+        end
+        return nothing, _clean_message(msg)
+    end
 end
 
 """精炼近似收敛的结果"""
-function _refine_result(T_fm, μ_fm, xi, result; p_num, t_num, nlsolve_kwargs...)
-    result === nothing && return nothing, ""
-    if result.converged
-        return result, ""
-    end
-    
-    residual = result.residual_norm
-    if !isfinite(residual) || residual > ACCEPTABLE_RESIDUAL
-        return result, ""
-    end
-    
-    # 用当前解作为初值重新求解
-    refined, msg = _solve_point(T_fm, μ_fm, xi, result.solution; p_num=p_num, t_num=t_num, nlsolve_kwargs...)
-    if refined !== nothing && refined.converged
-        return refined, "refined from near-converged seed"
-    end
-    return result, msg
+function _refine_result(T_fm, μ_fm, xi, result;
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
+    p_num,
+    t_num,
+    nlsolve_kwargs...)
+
+    return refine_near_converged(result;
+        acceptable_residual=ACCEPTABLE_RESIDUAL,
+        solve_again=seed -> _solve_point(T_fm, μ_fm, xi, seed;
+            thermo_backend=thermo_backend,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        ),
+    )
 end
 
 """判断是否成功"""
-_is_success(::Nothing) = false
-function _is_success(result)
-    result === nothing && return false
-    if result.converged
-        return true
-    end
-    residual = result.residual_norm
-    return isfinite(residual) && residual <= ACCEPTABLE_RESIDUAL
-end
+_is_success(result) = is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
 
 """提升近似收敛为成功"""
-function _promote_success(result)
-    result === nothing && return nothing, ""
-    if result.converged
-        return result, ""
-    end
-    
-    residual = result.residual_norm
-    if !isfinite(residual) || residual > ACCEPTABLE_RESIDUAL
-        return result, ""
-    end
-    
-    # 创建标记为收敛的新结果
-    promoted = SolverResult(
-        result.mode,
-        true,  # converged = true
-        copy(result.solution),
-        result.x_state,
-        result.mu_vec,
-        result.omega,
-        result.pressure,
-        result.rho_norm,
-        result.entropy,
-        result.energy,
-        result.masses,
-        result.iterations,
-        residual,
-        result.xi,
-    )
-    msg = string("force-marked converged (residual ", _fmt(residual), ")")
-    return promoted, msg
-end
+_promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
 
 """写入一行结果"""
 function _write_row(io, T, mu, xi, result, message)
@@ -503,37 +481,13 @@ function _write_row(io, T, mu, xi, result, message)
 end
 
 # ============================================================================
-# 格式化辅助
+# 格式化辅助（复用 ScanCommon）
 # ============================================================================
 
-_fmt(x::Float64) = @sprintf("%.6f", x)
-_fmt(x::Real) = _fmt(Float64(x))
-_fmt(x) = string(x)
-
-function _clean_message(msg::AbstractString)
-    stripped = replace(strip(msg), '\n' => ' ')
-    return replace(stripped, '"' => '\'')
-end
-
-_quote(msg::AbstractString) = isempty(msg) ? "" : string('"', msg, '"')
-_quote(::Nothing) = ""
-
-function _join_messages(messages)
-    filtered = filter(!isempty, messages)
-    return isempty(filtered) ? "" : join(filtered, " | ")
-end
-
-function _format_candidate_failure(label, message, result)
-    base = "seed[$label] failed"
-    if result !== nothing
-        base = string(base, " (iterations=", result.iterations, 
-                      ", residual=", _fmt(result.residual_norm), 
-                      ", converged=", string(result.converged), ")")
-    end
-    if isempty(message)
-        return base
-    end
-    return string(base, ": ", message)
-end
+const _fmt = ScanCommon.fmt
+const _clean_message = ScanCommon.clean_message
+const _quote = ScanCommon.quote_csv
+const _join_messages = ScanCommon.join_messages
+const _format_candidate_failure = ScanCommon.format_candidate_failure
 
 end # module TmuScan

@@ -12,11 +12,20 @@
 """
 module MesonPropagator
 
-include("../Constants_PNJL.jl")
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
 include("../utils/ParticleSymbols.jl")
 include("EffectiveCouplings.jl")
 
-using .Constants_PNJL: λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
+using Main.Constants_PNJL: λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
 using .ParticleSymbols
 using .EffectiveCouplings: coupling_matrix_determinant, mixing_matrix_elements
 using LinearAlgebra: det

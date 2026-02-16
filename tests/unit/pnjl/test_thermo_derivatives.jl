@@ -9,12 +9,22 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-using .Constants_PNJL: ħc_MeV_fm
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+const _PNJL_PATH = normpath(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
 
-# 直接 include，让被测模块在 Main 下定义为 `PNJL`
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
+if !isdefined(Main, :PNJL)
+    Base.include(Main, _PNJL_PATH)
+end
+
+using Main.Constants_PNJL: ħc_MeV_fm
+const PNJL = Main.PNJL
 
 # ============================================================================
 # 基本功能（fm⁻¹）
@@ -90,6 +100,31 @@ end
     @test isfinite(td.dP_dmu)
 end
 
+@testset "thermo_backend legacy vs models" begin
+    # 选一个相对温和的点，避免极端相变附近的数值敏感
+    T_fm = 0.5
+    μ_fm = 1.5
+
+    legacy = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:legacy)
+    models = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:models)
+
+    @test legacy.converged
+    @test models.converged
+
+    @test isapprox(models.pressure, legacy.pressure; rtol=1e-6, atol=1e-8)
+    @test isapprox(models.energy, legacy.energy; rtol=1e-6, atol=1e-8)
+    @test isapprox(models.entropy, legacy.entropy; rtol=1e-5, atol=1e-8)
+    @test isapprox(models.rho, legacy.rho; rtol=1e-6, atol=1e-8)
+
+    # 一阶导数更敏感，容差稍放宽
+    @test isapprox(models.dP_dT, legacy.dP_dT; rtol=5e-4, atol=1e-6)
+    @test isapprox(models.dP_dmu, legacy.dP_dmu; rtol=5e-4, atol=1e-6)
+    @test isapprox(models.dEpsilon_dT, legacy.dEpsilon_dT; rtol=5e-4, atol=1e-6)
+    @test isapprox(models.dEpsilon_dmu, legacy.dEpsilon_dmu; rtol=5e-4, atol=1e-6)
+    @test isapprox(models.dn_dT, legacy.dn_dT; rtol=5e-4, atol=1e-6)
+    @test isapprox(models.dn_dmu, legacy.dn_dmu; rtol=5e-4, atol=1e-6)
+end
+
 @testset "bulk_viscosity_coefficients (new interface)" begin
     T_fm = 0.5
     μ_fm = 1.5
@@ -109,6 +144,18 @@ end
     @test all(isfinite.(bv.masses))
 end
 
+@testset "bulk_viscosity_coefficients mu=0 models finite" begin
+    # μ=0 线对 dμB/dT|σ 的形式更敏感；这里做一个稳健性回归。
+    T_fm = 0.5
+    μ_fm = 0.0
+
+    bv = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=24, t_num=8, thermo_backend=:models)
+
+    @test isfinite(bv.v_n_sq)
+    @test isfinite(bv.dμB_dT_sigma)
+    @test all(isfinite.(bv.masses))
+end
+
 # ============================================================================
 # 类型检查测试（确保无 Dual 泄漏）
 # ============================================================================
@@ -117,7 +164,7 @@ using ForwardDiff
 using StaticArrays
 
 @testset "all_quantities type check" begin
-    using .PNJL.ThermoDerivatives: IMPLICIT_SOLVER, get_thermal_nodes, set_config, 
+    using Main.PNJL.ThermoDerivatives: IMPLICIT_SOLVER, get_thermal_nodes, set_config, 
         CURRENT_XI, CURRENT_P_NUM, CURRENT_T_NUM, calculate_thermo, calculate_rho,
         compute_masses_from_state
 

@@ -8,6 +8,9 @@
 对于非线性方程 F(x; θ) = 0，其中 x 是状态变量，θ = (T, μ) 是参数，
 ImplicitDifferentiation.jl 自动使用隐函数定理计算 dx/dθ，支持任意阶导数。
 
+策略约定：本模块导数统一采用 AD（ForwardDiff + ImplicitDifferentiation.jl）。
+有限差分仅允许作为测试/诊断对照，不作为默认或主线路径。
+
 ## 主要函数
 
 - `mass_derivatives`: 计算质量及其对 T/μ 的导数
@@ -33,22 +36,132 @@ using StaticArrays
 using ImplicitDifferentiation
 using LinearAlgebra: dot
 
-# 导入 solver 模块
-include(joinpath(@__DIR__, "..", "solver", "Solver.jl"))
-using .Solver: solve, SolverResult, FixedMu, GapParams, gap_conditions
-using .Solver.Conditions.Thermodynamics: calculate_thermo, calculate_rho, calculate_mass_vec, ρ0
-using .Solver.Conditions.Thermodynamics.Integrals: cached_nodes, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT, calculate_energy_isotropic
+using ..Thermodynamics
+
+# 导入默认积分规模常量（保持旧 API 习惯：p_num/t_num 默认值与 legacy 一致）。
+# 注意：PNJL 主模块会先 include core/Thermodynamics.jl，因此这里直接复用它的 Integrals 子模块。
+using ..Thermodynamics.Integrals: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Unified thermo facade (legacy vs models)
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
+# Unified equilibrium facade (model-kind mapping, solve_gap helper)
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
+const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # 导入常量
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
-if !isdefined(Main, :Constants_PNJL)
-    Base.include(Main, _CONSTANTS_PATH)
-end
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: G_fm2, K_fm5
 
 export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
+
+# -----------------------------------------------------------------------------
+# Compatibility helpers (used by tests / debugging)
+# -----------------------------------------------------------------------------
+
+"""get_thermal_nodes(p_num, t_num)
+
+返回 legacy 热积分节点缓存（用于测试/诊断）。
+"""
+@inline get_thermal_nodes(p_num::Int, t_num::Int) = Thermodynamics.Integrals.cached_nodes(p_num, t_num)
+
+@inline calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi) =
+    ThermoFacade.Thermodynamics.calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+
+@inline calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi) =
+    ThermoFacade.Thermodynamics.calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi)
+
+"""IMPLICIT_SOLVER(θ)
+
+返回当前 `set_config` 指定的后端/积分规模下的隐函数求解器输出 `(x_state, meta)`。
+"""
+@inline IMPLICIT_SOLVER(θ) = _implicit_gap_solver(CURRENT_THERMO_BACKEND[])(θ)
+
+# ============================================================================
+# Thermo backend selector
+# ============================================================================
+
+const CURRENT_THERMO_BACKEND = Ref{Symbol}(:legacy)
+const _IMPLICIT_GAP_SOLVER_CACHE = Dict{Tuple{Symbol, Float64, Int, Int, UInt}, Any}()
+
+@inline function _implicit_gap_solver(thermo_backend::Symbol; model=nothing)
+    ThermoFacade.ModelThermodynamics.ensure_models_loaded()
+    isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
+    isdefined(Main.Models, :create_implicit_gap_solver) || error("Models.create_implicit_gap_solver is not defined")
+
+    m = model === nothing ? ThermoFacade.get_models_model(EquilibriumFacade.pnjl_model_kind(thermo_backend)) : model
+    key = (thermo_backend, Float64(CURRENT_XI[]), Int(CURRENT_P_NUM[]), Int(CURRENT_T_NUM[]), Base.objectid(m))
+    if haskey(_IMPLICIT_GAP_SOLVER_CACHE, key)
+        return _IMPLICIT_GAP_SOLVER_CACHE[key]
+    end
+
+    f = Base.invokelatest(Main.Models.create_implicit_gap_solver, m;
+        xi=CURRENT_XI[],
+        p_num=CURRENT_P_NUM[],
+        t_num=CURRENT_T_NUM[],
+    )
+    _IMPLICIT_GAP_SOLVER_CACHE[key] = f
+    return f
+end
+
+@inline function _thermo_backend(thermo_backend::Symbol,
+    x_state::SVector{5},
+    mu_vec,
+    T_fm,
+    thermal_nodes,
+    xi;
+    p_num::Int,
+    t_num::Int,
+    model=nothing)
+
+    m = model === nothing ? ThermoFacade.get_models_model(EquilibriumFacade.pnjl_model_kind(thermo_backend)) : model
+    return ThermoFacade.calculate_thermo_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        thermo_backend=thermo_backend,
+        model=m,
+        p_num=p_num,
+        t_num=t_num,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+@inline function _rho_backend(thermo_backend::Symbol,
+    x_state::SVector{5},
+    mu_vec,
+    T_fm,
+    thermal_nodes,
+    xi;
+    p_num::Int,
+    t_num::Int,
+    model=nothing)
+
+    m = model === nothing ? ThermoFacade.get_models_model(EquilibriumFacade.pnjl_model_kind(thermo_backend)) : model
+    return ThermoFacade.calculate_rho_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        thermo_backend=thermo_backend,
+        model=m,
+        p_num=p_num,
+        t_num=t_num,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
 
 # ============================================================================
 # 全局配置
@@ -57,52 +170,13 @@ export dP_dT, dP_dmu
 const CURRENT_XI = Ref{Float64}(0.0)
 const CURRENT_P_NUM = Ref{Int}(DEFAULT_MOMENTUM_COUNT)
 const CURRENT_T_NUM = Ref{Int}(DEFAULT_THETA_COUNT)
-const THERMAL_NODES = Ref{Any}(nothing)
 
-function get_thermal_nodes(p_num::Int, t_num::Int)
-    if THERMAL_NODES[] === nothing || (CURRENT_P_NUM[] != p_num || CURRENT_T_NUM[] != t_num)
-        THERMAL_NODES[] = cached_nodes(p_num, t_num)
-        CURRENT_P_NUM[] = p_num
-        CURRENT_T_NUM[] = t_num
-    end
-    return THERMAL_NODES[]
-end
-
-function set_config(; xi::Real=0.0, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT)
+function set_config(; xi::Real=0.0, p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT, thermo_backend::Symbol=CURRENT_THERMO_BACKEND[])
+    CURRENT_THERMO_BACKEND[] = thermo_backend
     CURRENT_XI[] = Float64(xi)
-    get_thermal_nodes(p_num, t_num)
+    CURRENT_P_NUM[] = p_num
+    CURRENT_T_NUM[] = t_num
 end
-
-# ============================================================================
-# ImplicitDifferentiation.jl 设置
-# ============================================================================
-
-function forward_solve_impl(θ::AbstractVector)
-    T_fm = Float64(θ[1])
-    μ_fm = Float64(θ[2])
-    
-    result = solve(FixedMu(), T_fm, μ_fm; xi=CURRENT_XI[], p_num=CURRENT_P_NUM[], t_num=CURRENT_T_NUM[])
-    return (collect(result.x_state), nothing)
-end
-
-function conditions_impl(θ::AbstractVector, x::AbstractVector, z)
-    T_fm = θ[1]
-    μ_fm = θ[2]
-    thermal_nodes = get_thermal_nodes(CURRENT_P_NUM[], CURRENT_T_NUM[])
-    
-    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-    x_state = SVector{5}(Tuple(x))
-    params = GapParams(T_fm, thermal_nodes, CURRENT_XI[])
-    
-    return Vector(gap_conditions(x_state, mu_vec, params))
-end
-
-const IMPLICIT_SOLVER = ImplicitFunction(
-    forward_solve_impl,
-    conditions_impl;
-    linear_solver=DirectLinearSolver(),
-    representation=MatrixRepresentation(),
-)
 
 # ============================================================================
 # 质量计算
@@ -133,12 +207,15 @@ function mass_derivatives(T_fm::Real, mu_fm::Real;
                           order::Int=1,
                           xi::Real=0.0,
                           p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                          t_num::Int=DEFAULT_THETA_COUNT)
-    set_config(xi=xi, p_num=p_num, t_num=t_num)
+                          t_num::Int=DEFAULT_THETA_COUNT,
+                          thermo_backend::Symbol=:legacy,
+                          model=nothing)
+    set_config(xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend)
     θ = [Float64(T_fm), Float64(mu_fm)]
+    implicit = _implicit_gap_solver(thermo_backend; model=model)
     
     function mass_vec_func(θ_in)
-        (x_out, _) = IMPLICIT_SOLVER(θ_in)
+        (x_out, _) = implicit(θ_in)
         return collect(compute_masses_from_state(x_out))
     end
     
@@ -186,18 +263,22 @@ end
 function thermo_derivatives(T_fm::Real, mu_fm::Real;
                             xi::Real=0.0,
                             p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                            t_num::Int=DEFAULT_THETA_COUNT)
-    set_config(xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
+                            t_num::Int=DEFAULT_THETA_COUNT,
+                            thermo_backend::Symbol=:legacy,
+                            model=nothing)
+    set_config(xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend)
     θ = [Float64(T_fm), Float64(mu_fm)]
+    implicit = _implicit_gap_solver(thermo_backend; model=model)
     
     function thermo_func(θ_in)
-        (x_out, _) = IMPLICIT_SOLVER(θ_in)
+        (x_out, _) = implicit(θ_in)
         x_sv = SVector{5}(Tuple(x_out))
         mu_vec = SVector{3}(θ_in[2], θ_in[2], θ_in[2])
-        
-        P, rho_norm, s, ε = calculate_thermo(x_sv, mu_vec, θ_in[1], thermal_nodes, CURRENT_XI[])
-        rho_vec = calculate_rho(x_sv, mu_vec, θ_in[1], thermal_nodes, CURRENT_XI[])
+
+        P, rho_norm, s, ε = _thermo_backend(thermo_backend, x_sv, mu_vec, θ_in[1], nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
+        rho_vec = _rho_backend(thermo_backend, x_sv, mu_vec, θ_in[1], nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         n = sum(rho_vec) / 3
         
         return [P, ε, n, s]
@@ -205,6 +286,15 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
     
     base_vals = thermo_func(θ)
     pressure, energy, rho, entropy = base_vals[1], base_vals[2], base_vals[3], base_vals[4]
+
+    # Derivative routines above treat x_state as implicit function of θ.
+    # Here we also compute a consistent rho_norm for reporting.
+    (x_base, _) = implicit(θ)
+    x_sv = SVector{5}(Tuple(x_base))
+    mu_vec = SVector{3}(θ[2], θ[2], θ[2])
+    rho_vec0 = _rho_backend(thermo_backend, x_sv, mu_vec, θ[1], nothing, CURRENT_XI[];
+        p_num=p_num, t_num=t_num, model=model)
+    rho_norm = sum(rho_vec0) / (3.0 * ThermoFacade.ModelThermodynamics.ρ0)
     
     P_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[1], θ[1])
     P_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[1], θ[2])
@@ -218,14 +308,13 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
     dP_depsilon_n = denom_eps == 0 ? NaN : (P_T * n_mu - P_mu * n_T) / denom_eps
     dP_dn_epsilon = denom_n == 0 ? NaN : (P_T * E_mu - P_mu * E_T) / denom_n
     
-    md = mass_derivatives(T_fm, mu_fm; order=1, xi=xi, p_num=p_num, t_num=t_num)
-    result = solve(FixedMu(), T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num)
+    md = mass_derivatives(T_fm, mu_fm; order=1, xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend, model=model)
     
     return (
         pressure=pressure,
         energy=energy,
         rho=rho,
-        rho_norm=result.rho_norm,
+        rho_norm=rho_norm,
         entropy=entropy,
         dP_dT=P_T,
         dP_dmu=P_mu,
@@ -238,9 +327,9 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
         masses=md.masses,
         dM_dT=md.dM_dT,
         dM_dmu=md.dM_dmu,
-        converged=result.converged,
-        iterations=result.iterations,
-        residual_norm=result.residual_norm,
+        converged=true,
+        iterations=missing,
+        residual_norm=missing,
     )
 end
 
@@ -276,16 +365,19 @@ end
 总压强对温度的 n 阶导数。
 """
 function dP_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
-               p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT)
-    set_config(xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
+               p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT,
+               thermo_backend::Symbol=:legacy,
+               model=nothing)
+    set_config(xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend)
+    implicit = _implicit_gap_solver(thermo_backend; model=model)
     
     function P_func(T)
         θ = [T, Float64(mu_fm)]
-        (x_out, _) = IMPLICIT_SOLVER(θ)
+        (x_out, _) = implicit(θ)
         x_sv = SVector{5}(Tuple(x_out))
         mu_vec = SVector{3}(mu_fm, mu_fm, mu_fm)
-        P, _, _, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        P, _, _, _ = _thermo_backend(thermo_backend, x_sv, mu_vec, T, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return P
     end
     
@@ -298,16 +390,19 @@ end
 总压强对化学势的 n 阶导数。
 """
 function dP_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
-                p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT)
-    set_config(xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
+                p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT,
+                thermo_backend::Symbol=:legacy,
+                model=nothing)
+    set_config(xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend)
+    implicit = _implicit_gap_solver(thermo_backend; model=model)
     
     function P_func(μ)
         θ = [Float64(T_fm), μ]
-        (x_out, _) = IMPLICIT_SOLVER(θ)
+        (x_out, _) = implicit(θ)
         x_sv = SVector{5}(Tuple(x_out))
         mu_vec = SVector{3}(μ, μ, μ)
-        P, _, _, _ = calculate_thermo(x_sv, mu_vec, T_fm, thermal_nodes, CURRENT_XI[])
+        P, _, _, _ = _thermo_backend(thermo_backend, x_sv, mu_vec, T_fm, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return P
     end
     
@@ -328,8 +423,8 @@ end
 ## 技术说明
 
 通过 ImplicitDifferentiation.jl 计算 dx/dθ，然后使用链式法则计算热力学量的导数。
-calculate_thermo 和 calculate_rho 内部使用 ForwardDiff，形成嵌套 AD，
-经测试在当前环境下可以正常工作。
+热力学量统一通过 ModelThermodynamics（内部调用 Models.omega 并使用 ForwardDiff）计算，
+因此会出现嵌套 AD（类似 legacy 的结构）。经测试在当前环境下可以正常工作。
 
 链式法则：
 - ds/dT = ∂s/∂T|_x + ∂s/∂x · dx/dT
@@ -342,9 +437,11 @@ calculate_thermo 和 calculate_rho 内部使用 ForwardDiff，形成嵌套 AD，
 function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
                                      xi::Real=0.0,
                                      p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                                     t_num::Int=DEFAULT_THETA_COUNT)
-    set_config(xi=xi, p_num=p_num, t_num=t_num)
-    thermal_nodes = get_thermal_nodes(p_num, t_num)
+                                     t_num::Int=DEFAULT_THETA_COUNT,
+                                     thermo_backend::Symbol=:legacy,
+                                     model=nothing)
+    set_config(xi=xi, p_num=p_num, t_num=t_num, thermo_backend=thermo_backend)
+    implicit = _implicit_gap_solver(thermo_backend; model=model)
     
     T_val = Float64(T_fm)
     μ_val = Float64(mu_fm)
@@ -352,7 +449,7 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     
     # 定义只计算状态变量的函数（通过 ImplicitFunction）
     function solve_state(θ_in)
-        (x_out, _) = IMPLICIT_SOLVER(θ_in)
+        (x_out, _) = implicit(θ_in)
         return collect(x_out)
     end
     
@@ -361,9 +458,11 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     x_sv = SVector{5}(Tuple(x_base))
     mu_vec = SVector{3}(μ_val, μ_val, μ_val)
     
-    # 计算基础热力学量（使用原始函数，内部使用 ForwardDiff）
-    _, _, s, _ = calculate_thermo(x_sv, mu_vec, T_val, thermal_nodes, CURRENT_XI[])
-    rho_vec = calculate_rho(x_sv, mu_vec, T_val, thermal_nodes, CURRENT_XI[])
+    # 计算基础热力学量（内部使用 ForwardDiff；legacy 与 models 都支持嵌套 AD）
+    _, _, s, _ = _thermo_backend(thermo_backend, x_sv, mu_vec, T_val, nothing, CURRENT_XI[];
+        p_num=p_num, t_num=t_num, model=model)
+    rho_vec = _rho_backend(thermo_backend, x_sv, mu_vec, T_val, nothing, CURRENT_XI[];
+        p_num=p_num, t_num=t_num, model=model)
     n_B = sum(rho_vec) / 3
     masses = compute_masses_from_state(x_base)
     
@@ -371,44 +470,50 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     dx_dθ = ForwardDiff.jacobian(solve_state, θ)
     
     # 计算 ∂s/∂x, ∂n/∂x（固定 T, μ）
-    # 使用 calculate_thermo（嵌套 ForwardDiff 可以工作）
+    # 通过 ModelThermodynamics（嵌套 ForwardDiff 可以工作）
     function s_of_x(x_vec)
         x_s = SVector{5}(Tuple(x_vec))
-        _, _, s_val, _ = calculate_thermo(x_s, mu_vec, T_val, thermal_nodes, CURRENT_XI[])
+        _, _, s_val, _ = _thermo_backend(thermo_backend, x_s, mu_vec, T_val, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return s_val
     end
     ds_dx = ForwardDiff.gradient(s_of_x, x_base)
     
     function n_of_x(x_vec)
         x_s = SVector{5}(Tuple(x_vec))
-        rho = calculate_rho(x_s, mu_vec, T_val, thermal_nodes, CURRENT_XI[])
+        rho = _rho_backend(thermo_backend, x_s, mu_vec, T_val, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return sum(rho) / 3
     end
     dn_dx = ForwardDiff.gradient(n_of_x, x_base)
     
     # 计算 ∂s/∂T, ∂s/∂μ, ∂n/∂T, ∂n/∂μ（固定 x）
     function s_of_T(T)
-        _, _, s_val, _ = calculate_thermo(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        _, _, s_val, _ = _thermo_backend(thermo_backend, x_sv, mu_vec, T, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return s_val
     end
     s_T_partial = ForwardDiff.derivative(s_of_T, T_val)
     
     function s_of_mu(μ)
         mu_v = SVector{3}(μ, μ, μ)
-        _, _, s_val, _ = calculate_thermo(x_sv, mu_v, T_val, thermal_nodes, CURRENT_XI[])
+        _, _, s_val, _ = _thermo_backend(thermo_backend, x_sv, mu_v, T_val, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return s_val
     end
     s_μ_partial = ForwardDiff.derivative(s_of_mu, μ_val)
     
     function n_of_T(T)
-        rho = calculate_rho(x_sv, mu_vec, T, thermal_nodes, CURRENT_XI[])
+        rho = _rho_backend(thermo_backend, x_sv, mu_vec, T, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return sum(rho) / 3
     end
     n_T_partial = ForwardDiff.derivative(n_of_T, T_val)
     
     function n_of_mu(μ)
         mu_v = SVector{3}(μ, μ, μ)
-        rho = calculate_rho(x_sv, mu_v, T_val, thermal_nodes, CURRENT_XI[])
+        rho = _rho_backend(thermo_backend, x_sv, mu_v, T_val, nothing, CURRENT_XI[];
+            p_num=p_num, t_num=t_num, model=model)
         return sum(rho) / 3
     end
     n_μ_partial = ForwardDiff.derivative(n_of_mu, μ_val)

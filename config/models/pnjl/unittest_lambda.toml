@@ -1,0 +1,3 @@
+[model]
+# Override only the cutoff scale to validate Λ injection.
+Lambda_MeV = 800.0

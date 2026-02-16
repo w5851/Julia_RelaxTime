@@ -1,0 +1,156 @@
+using Test
+
+include(abspath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "workflows", "TransportWorkflow.jl")))
+const TW = Main.TransportWorkflow
+
+@testset "TransportWorkflow config smoke: prefer_energy_aniso via PHYSICS_PARAM_PROFILE" begin
+    # This test validates toml-based defaults in the workflow layer.
+    # It must NOT rely on module-load-time const caching, so it sets ENV at call time.
+
+    withenv("PHYSICS_PARAM_PROFILE" => "unittest") do
+        T = 0.15
+        mu = 0.0
+        xi = 0.2
+
+        tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+
+        toy_provider_aniso = (
+            energy_from_p=(p::Float64, m::Float64) -> sqrt(p * p + m * m),
+            energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> sqrt(p * p + m * m + ξ * (p * c)^2),
+            quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.20,
+            antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.20,
+            quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.90,
+            antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.90,
+        )
+
+        res_default = TW.solve_gap_and_transport(
+            T,
+            mu;
+            xi=xi,
+            thermo_backend=:models,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=30,),
+            transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+            provider=toy_provider_aniso,
+        )
+
+        res_true = TW.solve_gap_and_transport(
+            T,
+            mu;
+            xi=xi,
+            thermo_backend=:models,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=30,),
+            transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+            provider=toy_provider_aniso,
+            prefer_energy_aniso=true,
+        )
+
+        res_false = TW.solve_gap_and_transport(
+            T,
+            mu;
+            xi=xi,
+            thermo_backend=:models,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=30,),
+            transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+            provider=toy_provider_aniso,
+            prefer_energy_aniso=false,
+        )
+
+        @test isfinite(res_default.transport.eta)
+        @test isfinite(res_true.transport.eta)
+        @test isfinite(res_false.transport.eta)
+
+        # unittest profile sets prefer_energy_aniso=false in config/physics/unittest.toml
+        @test isapprox(res_default.transport.eta, res_false.transport.eta; rtol=1e-12, atol=0.0)
+        @test !isapprox(res_default.transport.eta, res_true.transport.eta; rtol=1e-10, atol=0.0)
+
+        # Cache reset helper smoke:
+        # - same Julia session
+        # - switch PHYSICS_PARAM_PROFILE
+        # - modify the toml on disk and verify reset forces re-read
+        repo_root = abspath(joinpath(@__DIR__, "..", "..", ".."))
+        unittest_toml = joinpath(repo_root, "config", "physics", "unittest.toml")
+
+        @test get(ENV, "PHYSICS_PARAM_PROFILE", "<none>") == "unittest"
+
+        original = read(unittest_toml, String)
+        modified = replace(original, r"(?m)^prefer_energy_aniso\s*=\s*(true|false)\s*$" => "prefer_energy_aniso = true")
+        @test modified != original
+
+        try
+            write(unittest_toml, modified)
+
+            # Without resetting cache, default behavior should remain unchanged (still from cache).
+            res_stale = TW.solve_gap_and_transport(
+                T,
+                mu;
+                xi=xi,
+                thermo_backend=:models,
+                tau=tau,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(iterations=30,),
+                transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+                provider=toy_provider_aniso,
+            )
+            @test isapprox(res_stale.transport.eta, res_default.transport.eta; rtol=1e-12, atol=0.0)
+
+            # After reset, it must re-read the file and reflect the new value.
+            TW.reset_transport_workflow_config_cache!()
+            res_refreshed = TW.solve_gap_and_transport(
+                T,
+                mu;
+                xi=xi,
+                thermo_backend=:models,
+                tau=tau,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(iterations=30,),
+                transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+                provider=toy_provider_aniso,
+            )
+            @test isapprox(res_refreshed.transport.eta, res_true.transport.eta; rtol=1e-12, atol=0.0)
+        finally
+            write(unittest_toml, original)
+            TW.reset_transport_workflow_config_cache!()
+        end
+
+        # Profile switch smoke (same Julia session): default profile sets prefer_energy_aniso=true.
+        withenv("PHYSICS_PARAM_PROFILE" => "default") do
+            TW.reset_transport_workflow_config_cache!()
+            res_default_profile_default = TW.solve_gap_and_transport(
+                T,
+                mu;
+                xi=xi,
+                thermo_backend=:models,
+                tau=tau,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(iterations=30,),
+                transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+                provider=toy_provider_aniso,
+            )
+            @test isapprox(res_default_profile_default.transport.eta, res_true.transport.eta; rtol=1e-12, atol=0.0)
+        end
+    end
+end
