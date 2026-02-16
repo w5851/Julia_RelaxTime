@@ -72,6 +72,7 @@ const SMOKE_FILES = [
     # [RelaxTime Numerics] 保留理由：输运底层数值稳定性哨兵。
     # RelaxTime core numerics
     joinpath(UNIT_DIR, "relaxtime", "test_b0_correction.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_aniso_A_switch_smoke.jl"),
 
     # [Transport Workflow & Backend Bridge] 保留理由：阶段4/5主交付回归面。
     # Transport workflow (gap -> densities -> transport) wiring

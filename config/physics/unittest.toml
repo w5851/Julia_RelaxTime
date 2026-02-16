@@ -4,3 +4,9 @@ alpha_em = 0.0072973525664
 
 [transport_workflow]
 prefer_energy_aniso = false
+
+[transport_workflow.a_builder]
+p_nodes = 10
+p_max = 8.0
+cos_nodes = 6
+use_aniso = true

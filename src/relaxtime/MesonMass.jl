@@ -25,13 +25,14 @@ const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.j
 IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
 const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegralsAniso.jl"))
 IncludeOnce.include_once!(Main, :OneLoopIntegralsCorrection, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
+const _A_FIELD_BUILDER_PATH = normpath(joinpath(@__DIR__, "AFieldBuilder.jl"))
+IncludeOnce.include_once!(Main, :AFieldBuilder, _A_FIELD_BUILDER_PATH)
 include("EffectiveCouplings.jl")
 include("PolarizationAniso.jl")
 
 using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
 using Main.Constants_PNJL: G_fm2, K_fm5
-using Main.OneLoopIntegrals: A
-using Main.OneLoopIntegralsCorrection: A_aniso
+using Main.AFieldBuilder: ensure_quark_params_has_A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, mixing_matrix_elements
 using .PolarizationAniso: polarization_with_width
 using NLsolve
@@ -97,39 +98,6 @@ end
     else
         error("Unknown mixed eigenmode: $which")
     end
-end
-
-@inline function ensure_quark_params_has_A(quark_params::NamedTuple, thermo_params::NamedTuple;
-                                           p_nodes::Int=16,
-                                           p_max::Float64=20.0,
-                                           cos_nodes::Int=length(DEFAULT_COSΘ_NODES),
-                                           use_aniso::Bool=true)
-    if hasproperty(quark_params, :A)
-        return quark_params
-    end
-    hasproperty(quark_params, :m) || error("quark_params is missing :m")
-    hasproperty(quark_params, :μ) || error("quark_params is missing :μ")
-    hasproperty(thermo_params, :T) || error("thermo_params is missing :T")
-    hasproperty(thermo_params, :Φ) || error("thermo_params is missing :Φ")
-    hasproperty(thermo_params, :Φbar) || error("thermo_params is missing :Φbar")
-
-    nodes_p, weights_p = gauleg(0.0, p_max, p_nodes)
-    ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
-    if use_aniso && abs(ξ) > 0.0
-        nodes_cos, weights_cos = gauleg(-1.0, 1.0, cos_nodes)
-        A_u = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
-                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
-        A_d = A_aniso(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
-                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
-        A_s = A_aniso(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar,
-                      ξ, nodes_p, weights_p, nodes_cos, weights_cos)
-    else
-        A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-        A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-        A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-    end
-
-    return merge(quark_params, (A=(u=A_u, d=A_d, s=A_s),))
 end
 
 @inline function _ensure_K_coeffs(quark_params::NamedTuple, K_coeffs::Union{Nothing,NamedTuple})

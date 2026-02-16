@@ -65,9 +65,9 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-# Prefer reuse Main.OneLoopIntegrals to avoid duplicating the module
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
-IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+# Prefer reuse Main.AFieldBuilder to centralize A/A_aniso construction logic
+const _A_FIELD_BUILDER_PATH = normpath(joinpath(@__DIR__, "AFieldBuilder.jl"))
+IncludeOnce.include_once!(Main, :AFieldBuilder, _A_FIELD_BUILDER_PATH)
 
 # Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
 const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
@@ -82,7 +82,6 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
     build_w0cdf_pchip_cache
-using Main.OneLoopIntegrals: A
 using .TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
 using Main.Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 
@@ -95,27 +94,25 @@ export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCE
 # This list is derived from `Constants_PNJL.SCATTERING_MESON_MAP` keys.
 const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
 
-@inline function ensure_quark_params_has_A(quark_params, thermo_params)::NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
-    # Many low-level scattering routines require `quark_params.A` for polarization functions.
-    # Older callers/tests may only provide (m, μ). In that case we compute A on-demand here.
-    if hasproperty(quark_params, :A)
-        return quark_params
-    end
-    hasproperty(quark_params, :m) || error("quark_params is missing :m")
-    hasproperty(quark_params, :μ) || error("quark_params is missing :μ")
-    hasproperty(thermo_params, :T) || error("thermo_params is missing :T")
-    hasproperty(thermo_params, :Φ) || error("thermo_params is missing :Φ")
-    hasproperty(thermo_params, :Φbar) || error("thermo_params is missing :Φbar")
-
-    # A 的热部分对高温/轻质量参数更敏感：这里使用更稳健的上限/节点配置。
-    nodes_p, weights_p = AverageScatteringRate.gauleg(0.0, 20.0, 16)
-    A_u = A(quark_params.m.u, quark_params.μ.u, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-    A_d = A(quark_params.m.d, quark_params.μ.d, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-    A_s = A(quark_params.m.s, quark_params.μ.s, thermo_params.T, thermo_params.Φ, thermo_params.Φbar, nodes_p, weights_p)
-
-    return merge(quark_params, (A=(u=A_u, d=A_d, s=A_s),))
+@inline function ensure_quark_params_has_A(
+    quark_params,
+    thermo_params;
+    p_nodes::Int=16,
+    p_max::Float64=20.0,
+    cos_nodes::Int=DEFAULT_ANGLE_NODES,
+    use_aniso::Bool=true,
+)::NamedTuple
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    return Main.AFieldBuilder.ensure_quark_params_has_A(
+        quark_nt,
+        thermo_nt;
+        p_nodes=p_nodes,
+        p_max=p_max,
+        cos_nodes=cos_nodes,
+        use_aniso=use_aniso,
+        warn_on_auto=true,
+    )
 end
 
 @inline function density_lookup(densities, key::Symbol)

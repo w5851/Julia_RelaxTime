@@ -78,6 +78,41 @@ const TW = Main.TransportWorkflow
         @test isapprox(res_default.transport.eta, res_false.transport.eta; rtol=1e-12, atol=0.0)
         @test !isapprox(res_default.transport.eta, res_true.transport.eta; rtol=1e-10, atol=0.0)
 
+        @testset "a_builder config from profile and explicit override" begin
+            q = (m=(u=1.2, d=1.2, s=1.8), μ=(u=0.1, d=0.1, s=0.2))
+            tp = (T=0.15, Φ=0.45, Φbar=0.45, ξ=0.3)
+
+            A_default = TW._A_from_equilibrium(tp.T, q, tp)
+            A_expected_profile = Main.AFieldBuilder.build_A_triplet(
+                q,
+                tp;
+                p_nodes=10,
+                p_max=8.0,
+                cos_nodes=6,
+                use_aniso=true,
+            )
+            @test isapprox(A_default.u, A_expected_profile.u; rtol=1e-12, atol=0.0)
+            @test isapprox(A_default.s, A_expected_profile.s; rtol=1e-12, atol=0.0)
+
+            A_override = TW._A_from_equilibrium(
+                tp.T,
+                q,
+                tp;
+                a_builder_config=(p_nodes=12, p_max=7.0, cos_nodes=5, use_aniso=false),
+            )
+            A_expected_override = Main.AFieldBuilder.build_A_triplet(
+                q,
+                tp;
+                p_nodes=12,
+                p_max=7.0,
+                cos_nodes=5,
+                use_aniso=false,
+            )
+            @test isapprox(A_override.u, A_expected_override.u; rtol=1e-12, atol=0.0)
+            @test isapprox(A_override.s, A_expected_override.s; rtol=1e-12, atol=0.0)
+            @test !isapprox(A_override.u, A_default.u; rtol=1e-8, atol=0.0)
+        end
+
         # Cache reset helper smoke:
         # - same Julia session
         # - switch PHYSICS_PARAM_PROFILE

@@ -34,8 +34,8 @@ const PNJL = IncludeOnce.include_once!(Main, :PNJL, _PNJL_PATH)
 const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxationTime.jl"))
 const RelaxationTime = IncludeOnce.include_once!(Main, :RelaxationTime, _RELAXATION_TIME_PATH)
 
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "OneLoopIntegrals.jl"))
-const OneLoopIntegrals = IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
+const _A_FIELD_BUILDER_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "AFieldBuilder.jl"))
+const AFieldBuilder = IncludeOnce.include_once!(Main, :AFieldBuilder, _A_FIELD_BUILDER_PATH)
 
 # Shared config loader (TOML)
 const _CONFIG_LOADER_PATH = normpath(joinpath(@__DIR__, "..", "..", "config", "ConfigLoader.jl"))
@@ -46,6 +46,8 @@ using .ConfigLoader: load_config
 
 const _PREFER_ENERGY_ANISO_CACHE_LOCK = ReentrantLock()
 const _PREFER_ENERGY_ANISO_CACHE = Dict{String, Bool}()
+const _A_BUILDER_CONFIG_CACHE_LOCK = ReentrantLock()
+const _A_BUILDER_CONFIG_CACHE = Dict{String, NamedTuple}()
 
 """reset_transport_workflow_config_cache!()
 
@@ -60,6 +62,13 @@ function reset_transport_workflow_config_cache!()
         empty!(_PREFER_ENERGY_ANISO_CACHE)
     finally
         unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    end
+
+    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    try
+        empty!(_A_BUILDER_CONFIG_CACHE)
+    finally
+        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
     end
     return nothing
 end
@@ -90,7 +99,6 @@ using Main.PNJL.ThermoDerivatives: bulk_viscosity_coefficients
 using Main.PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
-using Main.OneLoopIntegrals: A
 
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig
@@ -107,6 +115,13 @@ const TRANSPORT_INTEGRATION_KEYS = (
 
 const TRANSPORT_PROVIDER_KEYS = (
     :prefer_energy_aniso,
+)
+
+const A_BUILDER_KEYS = (
+    :p_nodes,
+    :p_max,
+    :cos_nodes,
+    :use_aniso,
 )
 
 @inline function _drop_transport_integration_keys(kwargs::NamedTuple)::NamedTuple
@@ -158,6 +173,78 @@ end
     end
 
     return val
+end
+
+@inline function _default_a_builder_config_from_toml()::NamedTuple
+    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
+
+    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    try
+        if haskey(_A_BUILDER_CONFIG_CACHE, physics_profile)
+            return _A_BUILDER_CONFIG_CACHE[physics_profile]
+        end
+    finally
+        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    end
+
+    physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
+
+    default_physics = Dict{String, Any}(
+        "physical" => Dict(
+            "hbarc" => 197.327,
+            "alpha_em" => 1.0 / 137.035999084,
+        ),
+        "transport_workflow" => Dict(
+            "prefer_energy_aniso" => true,
+            "a_builder" => Dict(
+                "p_nodes" => 16,
+                "p_max" => 20.0,
+                "cos_nodes" => 4,
+                "use_aniso" => true,
+            ),
+        ),
+    )
+
+    data = load_config(physics_dir, default_physics; profile=physics_profile)
+    cfg = data.config
+    tw = get(cfg, "transport_workflow", Dict{String, Any}())
+    a_builder = get(tw, "a_builder", Dict{String, Any}())
+
+    val = (
+        p_nodes=Int(get(a_builder, "p_nodes", 16)),
+        p_max=Float64(get(a_builder, "p_max", 20.0)),
+        cos_nodes=Int(get(a_builder, "cos_nodes", 4)),
+        use_aniso=Bool(get(a_builder, "use_aniso", true)),
+    )
+
+    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    try
+        _A_BUILDER_CONFIG_CACHE[physics_profile] = val
+    finally
+        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    end
+
+    return val
+end
+
+@inline function _merge_a_builder_config(base::NamedTuple, override::NamedTuple)::NamedTuple
+    unknown = Symbol[]
+    for k in keys(override)
+        k in A_BUILDER_KEYS || push!(unknown, k)
+    end
+    isempty(unknown) || error("Unknown a_builder_config key(s): $(unknown). Allowed keys: $(A_BUILDER_KEYS)")
+
+    return (
+        p_nodes=get(override, :p_nodes, base.p_nodes),
+        p_max=get(override, :p_max, base.p_max),
+        cos_nodes=get(override, :cos_nodes, base.cos_nodes),
+        use_aniso=get(override, :use_aniso, base.use_aniso),
+    )
+end
+
+@inline function _effective_a_builder_config(a_builder_config::Union{Nothing,NamedTuple})::NamedTuple
+    base = _default_a_builder_config_from_toml()
+    return a_builder_config === nothing ? base : _merge_a_builder_config(base, a_builder_config)
 end
 
 @inline function _drop_transport_provider_keys(kwargs::NamedTuple)::NamedTuple
@@ -271,23 +358,20 @@ end
     return (masses=masses, quark_params=quark_params_basic, thermo_params=thermo_params, densities=densities)
 end
 
-@inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params)
+@inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params;
+                                     a_builder_config::Union{Nothing,NamedTuple}=nothing)
     qp = _nt_quark(quark_params)
     tp = _nt_thermo(thermo_params)
 
-    μu = qp.μ.u
-    μs = qp.μ.s
-    mu = qp.m.u
-    ms = qp.m.s
-    Φ = tp.Φ
-    Φbar = tp.Φbar
-
-    nodes = DEFAULT_MOMENTUM_NODES
-    weights = DEFAULT_MOMENTUM_WEIGHTS
-
-    A_u = A(Float64(mu), Float64(μu), Float64(T_fm), Φ, Φbar, nodes, weights)
-    A_s = A(Float64(ms), Float64(μs), Float64(T_fm), Φ, Φbar, nodes, weights)
-    return (u=A_u, d=A_u, s=A_s)
+    cfg = _effective_a_builder_config(a_builder_config)
+    return AFieldBuilder.build_A_triplet(
+        qp,
+        tp;
+        p_nodes=cfg.p_nodes,
+        p_max=cfg.p_max,
+        cos_nodes=cfg.cos_nodes,
+        use_aniso=cfg.use_aniso,
+    )
 end
 
 """一次性完成：平衡求解 →（可选）τ 计算 →（可选）ζ 导数 → 输运系数。
@@ -311,6 +395,7 @@ end
 - `p_num`, `t_num`: 热积分节点数（传给能隙求解/密度计算）
 - `solver_kwargs`: 透传到 `solve`（例如 `iterations` 等）
 - `tau_kwargs`: 透传到 `RelaxationTime.relaxation_times`（例如 `p_nodes/angle_nodes/phi_nodes/n_sigma_points/cs_caches/existing_rates` 等）
+- `a_builder_config`: A 构造配置（`p_nodes/p_max/cos_nodes/use_aniso`），用于 `compute_tau=true` 时构建 `quark_params.A`。
 - `transport_config`: 输运系数积分配置（推荐），例如 `TransportIntegrationConfig(p_nodes=64, p_max=15.0, cos_nodes=32)`。
     - 若同时在 `transport_kwargs` 里提供了 `p_nodes/p_max/...`，会被自动提取并用于构造 config（便于平滑迁移）。
 - `transport_kwargs`: 透传到 `transport_coefficients` 的其它参数（建议只放 `degeneracy/charges` 等非积分配置项）。
@@ -333,6 +418,7 @@ function solve_gap_and_transport(
     models_solver=nothing,
     models_residual_norm_max::Real=1e-4,
     tau_kwargs::NamedTuple=(;),
+    a_builder_config::Union{Nothing,NamedTuple}=nothing,
     transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
@@ -365,6 +451,7 @@ function solve_gap_and_transport(
         p_num=p_num,
         t_num=t_num,
         tau_kwargs=tau_kwargs,
+        a_builder_config=a_builder_config,
         transport_config=transport_config,
         transport_kwargs=transport_kwargs,
         provider=provider,
@@ -390,6 +477,7 @@ function solve_transport_from_equilibrium(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     tau_kwargs::NamedTuple=(;),
+    a_builder_config::Union{Nothing,NamedTuple}=nothing,
     transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
@@ -414,7 +502,7 @@ function solve_transport_from_equilibrium(
         K_coeffs === nothing && error("compute_tau=true requires K_coeffs")
 
         # 为截面/传播子准备 A 字段（TotalPropagator 会用到）
-        A_vals = _A_from_equilibrium(T_fm, quark_params_basic, thermo_params)
+        A_vals = _A_from_equilibrium(T_fm, quark_params_basic, thermo_params; a_builder_config=a_builder_config)
         quark_params_full = (m=quark_params_basic.m, μ=quark_params_basic.μ, A=A_vals)
 
         tau_res = relaxation_times(
