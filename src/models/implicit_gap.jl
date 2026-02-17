@@ -33,6 +33,47 @@ export create_implicit_gap_solver
 - 其它 kwargs：也会透传给 solve_gap 与 gap_residual（如 residual_norm_max 等）
 """
 function create_implicit_gap_solver(
+    model::NJL2Model;
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    solver::AbstractGapSolver=NLsolveGapSolver(),
+    kwargs...
+)
+    gap_state_dim(model) == 2 || throw(ArgumentError("create_implicit_gap_solver(::NJL2Model) expects dim=2"))
+
+    forward_solve_impl = function (θ::AbstractVector)
+        T_fm = Float64(θ[1])
+        μ_fm = Float64(θ[2])
+        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+
+        st = solve_gap(model, T_fm, mu_vec; solver=solver, xi=xi, p_num=p_num, t_num=t_num, kwargs...)
+        return ([st.phi[1], st.phi[2]], nothing)
+    end
+
+    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
+        _ = z
+        T_fm = θ[1]
+        μ_fm = θ[2]
+        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+
+        r = gap_residual(model, x, T_fm, mu_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            kwargs...)
+        return Vector(r)
+    end
+
+    return ImplicitFunction(
+        forward_solve_impl,
+        conditions_impl;
+        linear_solver=DirectLinearSolver(),
+        representation=MatrixRepresentation(),
+    )
+end
+
+function create_implicit_gap_solver(
     model::AbstractNJLModel;
     xi::Real=0.0,
     p_num::Int=64,

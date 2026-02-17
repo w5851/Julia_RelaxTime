@@ -20,6 +20,7 @@ export calculate_mass_vec, calculate_chiral
 export vacuum_contribution, thermal_contribution, polyakov_potential
 export number_densities
 export NJLModel
+export NJL2Model
 export PNJLModel
 export RPNJLModel
 export LegacyPNJLModel
@@ -43,6 +44,7 @@ include(joinpath(@__DIR__, "state.jl"))
 
 # Concrete models
 include(joinpath(@__DIR__, "njl", "NJLModel.jl"))
+include(joinpath(@__DIR__, "njl", "NJL2Model.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLDistributions.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))

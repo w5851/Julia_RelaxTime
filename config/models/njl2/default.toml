@@ -1,0 +1,9 @@
+[model]
+label = "njl-2f"
+version = "1.0"
+N_color = 3
+N_flavor = 2
+rho0_fm3 = 0.16
+Lambda_MeV = 631.0
+G_over_Lambda2 = 2.14
+m_ud0_MeV = 5.5

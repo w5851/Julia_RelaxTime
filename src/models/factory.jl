@@ -32,6 +32,8 @@ end
 function create_model(kind::Symbol; kwargs...)
     if kind === :NJL
         return NJLModel(; kwargs...)
+    elseif kind === :NJL2
+        return NJL2Model(; kwargs...)
     elseif kind === :PNJL
         return PNJLModel(; kwargs...)
     elseif kind === :RPNJL

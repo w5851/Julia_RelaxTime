@@ -56,6 +56,8 @@ end
 """
 @inline gap_state_dim(::AbstractNJLModel) = 3
 
+@inline gap_state_dim(::NJL2Model) = 2
+
 @inline gap_state_dim(::AbstractPNJLModel) = 5
 
 """gap_initial_guess(model, T, mu_vec) -> AbstractVector
@@ -67,6 +69,11 @@ end
 @inline function gap_initial_guess(::AbstractNJLModel, T, mu_vec)
     _ = (T, mu_vec)
     return [-1.84329, -1.84329, -2.22701]
+end
+
+@inline function gap_initial_guess(::NJL2Model, T, mu_vec)
+    _ = (T, mu_vec)
+    return [-1.84329, -1.84329]
 end
 
 @inline function gap_initial_guess(::AbstractPNJLModel, T, mu_vec)
@@ -153,6 +160,37 @@ function gap_residual(
     return SVector{N, eltype(g)}(Tuple(g))
 end
 
+function gap_residual(
+    model::NJL2Model,
+    x,
+    T,
+    mu_vec;
+    p_num::Int=64,
+    t_num::Int=8,
+    xi=0.0,
+    kwargs...
+)
+    μ = normalize_mu_vec(mu_vec)
+
+    x_state = if x isa MeanFieldState
+        v = state_vector(x)
+        SVector{2, eltype(v)}(v[1], v[2])
+    else
+        length(x) >= 2 || throw(ArgumentError("x must have length >= 2, got $(length(x))"))
+        Tx = typeof(x[1])
+        SVector{2, Tx}(x[1], x[2])
+    end
+
+    omega_fn = y -> begin
+        Ty = eltype(y)
+        st = MeanFieldState(SVector{3, Ty}(y[1], y[2], zero(Ty)); Phi=one(Ty), PhiBar=one(Ty))
+        return omega(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
+    end
+
+    g = ForwardDiff.gradient(omega_fn, x_state)
+    return SVector{2, eltype(g)}(Tuple(g))
+end
+
 # -----------------------------------------------------------------------------
 # Generic solve_gap for models that implement gap_residual
 # -----------------------------------------------------------------------------
@@ -168,6 +206,21 @@ end
     if seed isa NamedTuple
         st = MeanFieldState(seed)
         return Vector{Float64}(st.phi)
+    end
+    throw(ArgumentError("unsupported initial_guess type: $(typeof(seed))"))
+end
+
+@inline function _as_seed_vec2(seed)
+    if seed isa MeanFieldState
+        return [Float64(seed.phi[1]), Float64(seed.phi[2])]
+    end
+    if seed isa AbstractVector
+        length(seed) >= 2 || throw(ArgumentError("initial_guess must have length >= 2"))
+        return [Float64(seed[1]), Float64(seed[2])]
+    end
+    if seed isa NamedTuple
+        st = MeanFieldState(seed)
+        return [Float64(st.phi[1]), Float64(st.phi[2])]
     end
     throw(ArgumentError("unsupported initial_guess type: $(typeof(seed))"))
 end
@@ -195,6 +248,39 @@ end
 
 注意：PNJL 目前有更具体的 `solve_gap(::PNJLModel, ...)`（legacy 适配器），会优先走那个。
 """
+function solve_gap(
+    model::NJL2Model,
+    T,
+    mu_vec;
+    solver::AbstractGapSolver=NLsolveGapSolver(),
+    initial_guess=nothing,
+    residual_norm_max::Real=1e-6,
+    kwargs...
+)
+    x0 = initial_guess === nothing ? gap_initial_guess(model, T, mu_vec) : _as_seed_vec2(initial_guess)
+
+    function residual!(F, x)
+        r = gap_residual(model, x, T, mu_vec; kwargs...)
+        @inbounds for i in 1:2
+            F[i] = convert(eltype(F), r[i])
+        end
+        return nothing
+    end
+
+    s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
+    autodiff_mode = s.jacobian === :forward ? :forward : :finite
+    result = nlsolve(residual!, x0; autodiff=autodiff_mode, method=s.method, xtol=s.xtol, ftol=s.ftol)
+
+    resid = Float64(result.residual_norm)
+    if !(result.f_converged && isfinite(resid) && resid <= Float64(residual_norm_max))
+        error("solve_gap did not converge (residual_norm=$resid, f_converged=$(result.f_converged))")
+    end
+
+    x_sol = result.zero
+    phi = SVector{3, Float64}(x_sol[1], x_sol[2], 0.0)
+    return MeanFieldState(phi; Phi=1.0, PhiBar=1.0)
+end
+
 function solve_gap(
     model::AbstractNJLModel,
     T,
