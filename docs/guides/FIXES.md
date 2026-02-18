@@ -17,7 +17,7 @@ pause >nul       # 静默暂停
 exit             # 明确退出
 ```
 
-**文件**: `start.bat`
+**文件**: `scripts/server/start.bat`
 
 ### 2. HTML表单字段拼写错误
 
@@ -140,13 +140,13 @@ Invoke-WebRequest -Uri http://localhost:8080/compute -Method POST -Body $body -C
 
 ### 方法1: 使用bat脚本（推荐）
 ```powershell
-.\start.bat
+.\scripts\server\start.bat
 ```
 
 ### 方法2: 手动启动
 ```powershell
 # 终端1: 启动服务器
-julia server.jl
+julia --project=. scripts/server/server_full.jl
 
 # 终端2或浏览器: 打开前端
 start web\index.html
@@ -154,7 +154,7 @@ start web\index.html
 
 ### 方法3: PowerShell一键启动
 ```powershell
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; julia server.jl"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD'; julia --project=. scripts/server/server_full.jl"
 Start-Sleep -Seconds 8
 start web\index.html
 ```
@@ -170,7 +170,7 @@ Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue
 Get-Process julia -ErrorAction SilentlyContinue | Stop-Process -Force
 
 # 重新启动
-julia server.jl
+julia --project=. scripts/server/server_full.jl
 ```
 
 ### 前端显示"服务器离线"
@@ -190,7 +190,7 @@ julia server.jl
 
 ## ✨ 系统状态
 
-**当前版本**: 完全可用 ✅
+**当前版本**: Web/API 演示链路可用 ✅
 
 **测试结果**:
 - ✅ Julia服务器启动正常
@@ -199,7 +199,7 @@ julia server.jl
 - ✅ CORS配置正确
 - ✅ 所有模块导出完整
 
-**已知问题**: 无
+**已知问题**: 以 `README.md` 的状态说明为准（截面/弛豫时间链路仍在修复与校对中）
 
 ## 📞 获取帮助
 
@@ -212,4 +212,4 @@ julia server.jl
 
 ---
 
-**所有问题已修复，系统可以正常使用！** 🎉
+**本页仅记录历史修复项，当前总体状态请以 `README.md` 与 `docs/guides/STATUS.md` 为准。**

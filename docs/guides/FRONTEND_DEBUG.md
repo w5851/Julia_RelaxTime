@@ -137,7 +137,7 @@ document.getElementById('theta_star').validity.valid
 Get-Process julia -ErrorAction SilentlyContinue | Stop-Process -Force
 
 # 重启服务器
-Start-Process cmd -ArgumentList "/k", "cd /d D:\Desktop\Julia_RelaxTime && julia server.jl"
+Start-Process cmd -ArgumentList "/k", "cd /d D:\Desktop\Julia_RelaxTime && julia --project=. scripts/server/server_full.jl"
 
 # 等待10秒
 Start-Sleep -Seconds 10

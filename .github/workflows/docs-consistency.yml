@@ -1,0 +1,40 @@
+name: docs-consistency
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "docs/**"
+      - "scripts/dev/check_docs_consistency.jl"
+      - ".github/workflows/docs-consistency.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "README.md"
+      - "docs/**"
+      - "scripts/dev/check_docs_consistency.jl"
+      - ".github/workflows/docs-consistency.yml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-docs-consistency
+
+      - name: Instantiate dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Run docs consistency check
+        run: julia --project=. scripts/dev/check_docs_consistency.jl

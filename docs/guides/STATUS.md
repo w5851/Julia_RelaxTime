@@ -1,156 +1,38 @@
 # 系统状态总结
 
-## ✅ 部署完成
+本页用于给出“当前可用能力 + 已知风险”，状态口径与 `README.md` 保持一致。
 
-### Julia后端
-- **状态**: ✅ 运行中
-- **地址**: http://localhost:8080
-- **端点**: 
-  - `GET /health` - 健康检查
-  - `POST /compute` - 散射计算
+## 1. 总体状态
 
-### 依赖安装
-- ✅ `HTTP.jl` v1.10.19
-- ✅ `JSON3.jl` v1.14.3
-- ✅ `LinearAlgebra` (标准库)
+- **Web/API 演示链路**：可用（`/health`、`/compute`）
+- **PNJL 求解与扫描链路**：可用（建议结合对比报告验证数值一致性）
+- **截面/弛豫时间链路**：仍在修复与校对中（阈值处理、归一因子、输运系数整合）
 
-### JavaScript前端
-- **状态**: ✅ 就绪
-- **文件**: `web/index.html`
-- **依赖**: Three.js (CDN加载，无需本地安装)
+## 2. 关键入口
 
-## 🎯 使用方法
+- 服务端：`scripts/server/server_full.jl`
+- 一键启动：`scripts/server/start.bat`
+- 前端页面：`web/index.html`
+- 单元测试入口：`tests/unit/runtests.jl`
 
-### 方式1: 直接使用（最简单）
-1. Julia服务器已在后台运行
-2. 双击打开 `web\index.html`
-3. 输入参数并点击"计算散射"
+## 3. 推荐验证命令
 
-### 方式2: 命令行启动
 ```powershell
-# 如服务器未运行，执行：
+# 启动服务
 julia --project=. scripts/server/server_full.jl
 
-# 然后打开浏览器访问
-start web\index.html
+# 运行单元 smoke
+$env:UNIT_PROFILE='smoke'
+julia --project=. tests/unit/runtests.jl
 ```
 
-### 方式3: 一键启动脚本
-```powershell
-.\scripts\server\start.bat
-```
+## 4. 已知注意事项
 
-## 📝 关键文件说明
+- 不建议将“前端可用”解读为“全部物理链路已完成验收”
+- 对研究结论请优先参考 `docs/reference/` 与 `docs/dev/archived/` 的比对记录
+- 发生路径疑问时，统一以仓库根目录当前结构为准（`scripts/server/`、`tests/unit/`、`docs/reference/`）
 
-### 运行文件
-- `scripts/server/server_full.jl` - API + 前端静态资源一体化服务入口
-- `scripts/server/start.bat` - Windows一键启动脚本
+## 5. 输出目录口径
 
-### 配置文件
-- `Project.toml` - Julia项目配置
-- `Manifest.toml` - Julia依赖锁定
-
-### 源代码
-- `src/simulation/*.jl` - 后端计算模块（4个文件）
-- `web/js/*.js` - 前端JavaScript模块（3个文件）
-- `web/css/style.css` - 界面样式
-- `web/index.html` - 主页面
-
-### 文档
-- `QUICKSTART.md` - **快速开始指南** ⭐
-- `docs/guides/examples/web_demo.md` - 完整使用文档
-- `src/simulation/README.md` - 模块说明
-
-## 🐛 已修复的问题
-
-### 问题1: Julia包未找到
-**错误**: `Package HTTP not found in current path`
-**解决**: ✅ 
-- 安装了HTTP.jl和JSON3.jl
-- 在server.jl中添加 `Pkg.activate(@__DIR__)`
-
-### 问题2: 模块路径错误
-**错误**: 相对路径include失败
-**解决**: ✅
-- 所有include改用 `joinpath(@__DIR__, ...)`
-- 确保模块间正确引用
-
-### 问题3: 变量作用域警告
-**警告**: Assignment to `port` in soft scope is ambiguous
-**解决**: ✅
-- 使用 `const DEFAULT_PORT`
-- 使用 `global port`
-
-### 问题4: JavaScript依赖
-**问题**: Three.js如何管理？
-**解决**: ✅
-- 使用CDN加载（无需本地安装）
-- 创建了离线使用指南（`web/THREEJS_LOCAL.md`）
-
-## 📊 系统测试
-
-### 后端测试
-```julia
-julia --project=. tests/unit/runtests.jl       # ✅ 推荐 smoke 入口
-julia --project=. tests/unit/relaxtime/test_frame_transformations.jl
-julia --project=. tests/unit/integration/test_momentum_mapping.jl
-```
-
-### API测试
-```julia
-# 在Julia REPL中
-include("src/simulation/HTTPServer.jl")
-using .HTTPServer
-test_api_endpoint()  # 测试/compute端点
-```
-
-### 前端测试
-1. 打开 `web/index.html`
-2. 检查左上角状态指示器（应显示"服务器在线"🟢）
-3. 点击"计算散射"
-4. 验证3D视图显示椭球和动量箭头
-
-## 💡 使用技巧
-
-### 修改默认参数
-编辑 `web/index.html` 中的 `value` 属性：
-```html
-<input type="number" id="p1z" step="0.01" value="1.8">
-```
-
-### 更换端口
-```powershell
-julia --project=. scripts/server/server_full.jl 8081
-```
-同时修改 `web/js/api.js`:
-```javascript
-const API_BASE_URL = 'http://localhost:8081';
-```
-
-### 查看服务器日志
-Julia终端会显示所有请求日志和错误信息。
-
-## 🚀 下一步
-
-系统已完全就绪！建议：
-
-1. **先测试默认参数**: 打开web/index.html，直接点击"计算散射"
-2. **调整参数探索**: 修改动量或角度，观察椭球变化
-3. **阅读完整文档**: 查看 `docs/guides/examples/web_demo.md` 了解更多功能
-4. **运行单元测试**: 验证计算模块的正确性
-
-## 📦 输出目录口径
-
-- 默认运行产物目录为 `data/outputs/`（结果、图像、缓存）。
-- 根目录 `outputs/` 不作为默认落盘目录，保留仅用于兼容历史脚本。
-
-## 📞 问题反馈
-
-如遇到问题：
-1. 检查Julia终端的错误输出
-2. 查看浏览器控制台（F12）
-3. 参考 `QUICKSTART.md` 的故障排除章节
-
----
-
-**状态**: 🎉 **系统完全就绪，可以开始使用！**
+- 默认运行产物目录：`data/outputs/`
+- 根目录 `outputs/`：仅历史兼容，不作为默认结果落盘目录

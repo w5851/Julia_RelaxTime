@@ -14,7 +14,7 @@
 在项目根目录下运行：
 
 ```powershell
-julia server.jl
+julia --project=. scripts/server/server_full.jl
 ```
 
 成功启动后会看到：
@@ -170,10 +170,10 @@ web/index.html
 
 ```powershell
 # 测试坐标变换模块
-julia test_unit/test_frame_transformations.jl
+julia --project=. tests/unit/relaxtime/test_frame_transformations.jl
 
 # 测试动量映射模块
-julia test_unit/test_momentum_mapping.jl
+julia --project=. tests/unit/integration/test_momentum_mapping.jl
 ```
 
 ## 技术栈
@@ -226,7 +226,7 @@ eigenvalues, eigenvectors = eig(S)
 
 **解决**: 使用其他端口
 ```powershell
-julia server.jl 8081
+julia --project=. scripts/server/server_full.jl 8081
 ```
 并在 `web/js/api.js` 中修改 `API_BASE_URL`。
 
