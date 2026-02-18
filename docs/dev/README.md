@@ -66,6 +66,25 @@ archived_date: 2026-01-19
 - 可选追加版本号（如 `v1.2`）或状态（如 `deprecated`）
 - 保留原扩展名
 
+## active 命名与归档触发规则（新增）
+
+- `docs/dev/active` 下任务文档命名统一为：`YYYY-MM-DD_描述.md`
+- 归档触发条件（满足任一）：
+	- 任务单 DoD 全部勾选完成；
+	- 文档创建后超过 60 天仍停留在 active；
+	- 任务被新任务单替代，旧文档仅保留历史价值。
+- 建议校验命令：
+
+```powershell
+julia --project=. scripts/dev/check_active_docs_governance.jl
+```
+
+- 归档命令：
+
+```powershell
+julia --project=. scripts/dev/archive_docs.jl <filename.md>
+```
+
 ## 开发任务完成后的文档与测试补充
 
 完成开发任务后，需同步补充以下内容：

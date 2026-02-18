@@ -1,0 +1,33 @@
+name: active-docs-governance
+
+on:
+  pull_request:
+    paths:
+      - "docs/dev/active/**"
+      - "scripts/dev/check_active_docs_governance.jl"
+      - ".github/workflows/active-docs-governance.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/dev/active/**"
+      - "scripts/dev/check_active_docs_governance.jl"
+      - ".github/workflows/active-docs-governance.yml"
+  workflow_dispatch:
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Check active docs governance
+        run: julia --project=. scripts/dev/check_active_docs_governance.jl

@@ -3,7 +3,7 @@ MesonMass 与 MottTransition 基础测试（轻量验证）。
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 
 const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))

@@ -18,7 +18,7 @@ include("test/test_oneloopintegrals_aniso.jl")
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Printf
 

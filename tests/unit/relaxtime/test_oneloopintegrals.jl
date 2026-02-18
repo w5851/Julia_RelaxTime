@@ -11,7 +11,7 @@ include("test/test_oneloopintegrals.jl")
 
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Base: time_ns
 using QuadGK: quadgk

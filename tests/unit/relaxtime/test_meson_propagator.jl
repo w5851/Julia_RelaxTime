@@ -10,7 +10,7 @@ include("test/test_meson_propagator.jl")
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Printf
 

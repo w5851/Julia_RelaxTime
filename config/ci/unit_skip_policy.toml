@@ -1,0 +1,13 @@
+max_skip = 4
+
+[phase]
+name = "phase-1"
+description = "先清理 deprecated/失效接口测试，再缩减 DEFAULT_SKIP"
+
+[targets]
+required_entries = [
+  "test_core_integrals.jl",
+  "test_implicit_jacobian.jl",
+  "test_scans.jl",
+  "test_differential_cross_section.jl",
+]

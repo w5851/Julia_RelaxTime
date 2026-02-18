@@ -33,6 +33,18 @@ Benchmark 阈值检查：
 julia --project=. scripts/dev/check_benchmark_thresholds.jl
 ```
 
+unit skip/deprecated 门禁检查：
+
+```powershell
+julia --project=. scripts/dev/check_unit_skip_policy.jl
+```
+
+active 文档治理检查（命名 + 归档触发）：
+
+```powershell
+julia --project=. scripts/dev/check_active_docs_governance.jl
+```
+
 检查项包含：
 - `docs/guides/**/*.md` 中历史路径（如 `test_unit/`、`julia server.jl`、`.\\start.bat`、`doc/domain-knowledge/`）
 - 当 `README.md` 标注“修复中”时，guides 中是否出现“系统完全就绪/已知问题: 无”等绝对化状态词
