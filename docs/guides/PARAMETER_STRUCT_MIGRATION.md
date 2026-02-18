@@ -10,6 +10,80 @@ This guide explains:
 - How to migrate existing code to use structs
 - The internal normalization strategy
 
+## Phase B Status (PNJL workflows/scans)
+
+Phase B extends the migration from RelaxationTime chain to PNJL workflows/scans.
+
+### Completed
+
+1. **Workflow normalization adapter extracted**
+     - Added: `src/pnjl/workflows/WorkflowParamAdapters.jl`
+     - Shared helpers:
+         - `normalize_quark_params`
+         - `normalize_thermo_params`
+         - `as_legacy_inputs`
+
+2. **Workflow modules switched to shared adapter**
+     - `src/pnjl/workflows/TransportWorkflow.jl`
+     - `src/pnjl/workflows/MesonMassWorkflow.jl`
+
+3. **Structured scan config objects added (non-breaking)**
+     - Added: `src/pnjl/scans/ScanConfig.jl`
+     - Types:
+         - `TmuScanConfig`
+         - `TrhoScanConfig`
+     - New overloads:
+         - `run_tmu_scan(config::TmuScanConfig; kwargs...)`
+         - `run_trho_scan(config::TrhoScanConfig; kwargs...)`
+
+### Compatibility guarantees
+
+- Existing kwargs-based scan APIs remain unchanged.
+- Existing NamedTuple inputs remain fully supported.
+- Config-object style is additive; kwargs still have highest precedence.
+
+## Phase C Status (contract tightening & soft deprecation)
+
+Phase C focuses on making input contracts explicit and testable, while preserving runtime compatibility.
+
+### Completed in current batch
+
+1. **Workflow contract validation hardened**
+    - `WorkflowParamAdapters.normalize_quark_params` validates `m/μ` flavor triplets (`u/d/s`) are finite reals.
+    - `WorkflowParamAdapters.normalize_thermo_params` validates `T/Φ/Φbar/ξ` are finite reals.
+    - Validation errors are unified as `ArgumentError` with field-level messages.
+
+2. **Scan entry input validation added**
+    - `run_tmu_scan` / `run_trho_scan` now validate key vector inputs and option symbols at entry.
+    - Early contract failures now fail fast with readable `ArgumentError`.
+
+3. **Soft deprecation enabled for workflow NamedTuple path**
+    - NamedTuple input for workflow adapter normalization still works.
+    - Compatibility path now emits `Base.depwarn` and points to `QuarkParams`/`ThermoParams`.
+
+### Recommended usage in Phase C
+
+- Workflows: prefer `QuarkParams` + `ThermoParams`.
+- Scans: prefer config-object entry (`TmuScanConfig` / `TrhoScanConfig`) and use kwargs only for local override.
+
+### Minimal replacement examples
+
+Before:
+
+```julia
+q = (m=(u=1.5,d=1.5,s=3.0), μ=(u=0.1,d=0.1,s=0.1))
+t = (T=0.15, Φ=0.2, Φbar=0.2, ξ=0.0)
+```
+
+After:
+
+```julia
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+q = QuarkParams((m=(u=1.5,d=1.5,s=3.0), μ=(u=0.1,d=0.1,s=0.1)))
+t = ThermoParams((T=0.15, Φ=0.2, Φbar=0.2, ξ=0.0))
+```
+
 ## The Dual Interface Pattern
 
 All public functions in the RelaxationTime module chain now accept **both** struct and NamedTuple parameters through Julia's Union types:

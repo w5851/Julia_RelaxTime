@@ -1,3 +1,15 @@
+---
+title: 参数结构体化迁移进度（ParameterTypes）
+archived: true
+original: docs/dev/active/2026_01_24_parameter_structs_migration.md
+archived_date: 2026-02-17
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 参数结构体化迁移进度（ParameterTypes）
 
 ## 日期：2026-01-24

@@ -71,12 +71,17 @@ function archive_file(filepath::String; date::String=Dates.format(today(), "yyyy
     # Generate metadata
     metadata = generate_metadata(title, rel_path, date)
     
-    # Generate archived filename with date prefix if not already present
-    if !occursin(r"^\d{4}[-_]\d{2}[-_]\d{2}", filename)
-        date_prefix = replace(date, "-" => "_")
-        archived_filename = "$(date_prefix)_$filename"
+    # Generate archived filename and normalize to YYYY-MM-DD_...
+    if !occursin(r"^\d{4}[-_]\d{2}[-_]\d{2}[-_]", filename)
+        archived_filename = "$(date)_$filename"
     else
-        archived_filename = filename
+        m = match(r"^(\d{4})[-_](\d{2})[-_](\d{2})[-_](.+)$", filename)
+        if m === nothing
+            archived_filename = filename
+        else
+            yyyy, mm, dd, rest = m.captures
+            archived_filename = "$(yyyy)-$(mm)-$(dd)_$(rest)"
+        end
     end
     
     archived_path = joinpath(ARCHIVED_DIR, archived_filename)

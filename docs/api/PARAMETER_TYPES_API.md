@@ -8,6 +8,8 @@ This document provides comprehensive API documentation for the `QuarkParams` and
 - [ThermoParams](#thermoparams)
 - [Helper Functions](#helper-functions)
 - [Normalization Helpers](#normalization-helpers)
+- [Phase B Additions](#phase-b-additions)
+- [Phase C Additions](#phase-c-additions)
 - [Usage Examples](#usage-examples)
 
 ---
@@ -279,6 +281,48 @@ end
 
 ---
 
+## Phase C Additions
+
+Phase C starts tightening input contracts for PNJL workflows/scans while keeping backward compatibility.
+
+### Recommended entry signatures
+
+- Scans (recommended):
+    - `run_tmu_scan(config::TmuScanConfig; kwargs...)`
+    - `run_trho_scan(config::TrhoScanConfig; kwargs...)`
+- Workflows:
+    - `solve_gap_and_transport(T_fm::Real, mu_fm::Real; ...)`
+    - `solve_transport_from_equilibrium(base, T_fm::Real, mu_fm::Real; ...)`
+    - `solve_gap_and_meson_point(T_fm::Real, mu_fm::Real; ...)`
+
+### Contract validation behavior
+
+- Workflow adapter layer (`WorkflowParamAdapters`) now validates:
+    - `quark_params.m.(u,d,s)` and `quark_params.μ.(u,d,s)` are finite real values.
+    - `thermo_params.(T,Φ,Φbar,ξ)` are finite real values.
+- Scan entry layer validates:
+    - `T_values/mu_values/rho_values/xi_values` are non-empty `AbstractVector{<:Real}`.
+    - Enum-like options (`seed_policy`, `constraint_mode`, `thermo_backend`, `solver_backend`) are within allowed symbols.
+- Invalid contract inputs throw `ArgumentError` with field-level messages.
+
+### Deprecation path (soft migration)
+
+- Passing raw `NamedTuple` to workflow adapter normalization remains supported but now emits `Base.depwarn`.
+- Preferred replacement:
+    - `NamedTuple -> QuarkParams`
+    - `NamedTuple -> ThermoParams`
+
+Minimal migration snippet:
+
+```julia
+using Main.ParameterTypes: QuarkParams, ThermoParams
+
+qp = QuarkParams((m=(u=1.5, d=1.5, s=3.0), μ=(u=0.1, d=0.1, s=0.1)))
+tp = ThermoParams((T=0.15, Φ=0.2, Φbar=0.2, ξ=0.0))
+```
+
+---
+
 ## Usage Examples
 
 ### Basic Usage
@@ -409,6 +453,59 @@ q_nt = as_namedtuple(q_struct)
 ```
 
 Results show no measurable performance difference between struct and NamedTuple usage.
+
+---
+
+## Phase B Additions
+
+### WorkflowParamAdapters
+
+Phase B introduces a shared workflow adapter module:
+
+- `src/pnjl/workflows/WorkflowParamAdapters.jl`
+
+Provided helpers:
+
+```julia
+normalize_quark_params(q)
+normalize_thermo_params(t)
+as_legacy_inputs(q, t)
+```
+
+Contract:
+- struct input (`QuarkParams` / `ThermoParams`) is converted to legacy-compatible NamedTuple;
+- NamedTuple input is passed through unchanged;
+- `as_legacy_inputs(q, t)` returns a pair for old interfaces:
+    - `quark_params`
+    - `thermo_params`
+
+Used by:
+- `src/pnjl/workflows/TransportWorkflow.jl`
+- `src/pnjl/workflows/MesonMassWorkflow.jl`
+
+### ScanConfig (structured scan configuration)
+
+Phase B adds scan configuration objects:
+
+- `src/pnjl/scans/ScanConfig.jl`
+- `TmuScanConfig`
+- `TrhoScanConfig`
+- `scan_kwargs(cfg)`
+
+Compatibility pattern:
+
+```julia
+run_tmu_scan(; kwargs...)                        # existing API
+run_tmu_scan(config::TmuScanConfig; kwargs...)   # new API
+
+run_trho_scan(; kwargs...)                       # existing API
+run_trho_scan(config::TrhoScanConfig; kwargs...) # new API
+```
+
+Behavior:
+- existing kwargs workflows continue to work unchanged;
+- config-object style is now supported;
+- explicit kwargs override config fields.
 
 ---
 

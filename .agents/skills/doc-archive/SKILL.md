@@ -36,8 +36,12 @@ description: Archive docs/dev/active markdown tasks into docs/dev/archived with 
 
 ## Inputs
 
-- 一个或多个 active 文档文件名（如 `2026_02_16_两味NJL模型实现.md`）
+- 一个或多个 active 文档文件名（如 `2026-02-16_两味NJL模型实现.md`）
 - 可选归档日期（`YYYY-MM-DD`）
+
+归档文件命名约定：
+- 推荐格式：`YYYY-MM-DD_描述.md`
+- 日期部分使用连字符（ISO 8601），日期与描述之间使用下划线。
 
 ## Outputs
 
@@ -85,7 +89,7 @@ description: Archive docs/dev/active markdown tasks into docs/dev/archived with 
 
 ## Example
 
-- 归档：`docs/dev/active/2026_02_16_两味NJL模型实现.md`
-	1) `julia --project=. scripts/dev/archive_docs.jl 2026_02_16_两味NJL模型实现.md`
-	2) 检查输出文件：`docs/dev/archived/2026_02_16_两味NJL模型实现.md`
+- 归档：`docs/dev/active/2026-02-16_两味NJL模型实现.md`
+	1) `julia --project=. scripts/dev/archive_docs.jl 2026-02-16_两味NJL模型实现.md`
+	2) 检查输出文件：`docs/dev/archived/2026-02-16_两味NJL模型实现.md`
 	3) 确认头部字段完整且 active 中文件已移除
