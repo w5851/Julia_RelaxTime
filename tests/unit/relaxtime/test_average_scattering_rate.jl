@@ -4,6 +4,7 @@ using BenchmarkTools
 include("../../../src/relaxtime/AverageScatteringRate.jl")
 
 using .AverageScatteringRate
+using Main.ParameterTypes: QuarkParams, ThermoParams
 
 # 构造简化参数，降低节点以加快单测
 const QUARK_PARAMS = (
@@ -53,6 +54,40 @@ end
     )
     @test isfinite(ω)
     @test ω > 0
+end
+
+@testset "average_scattering_rate struct/NamedTuple equivalence with cache" begin
+    cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
+    q_struct = QuarkParams(QUARK_PARAMS)
+    t_struct = ThermoParams(THERMO_ISO)
+
+    ω_nt = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+    )
+
+    ω_struct = average_scattering_rate(
+        :uu_to_uu,
+        q_struct,
+        t_struct,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+    )
+
+    @test isfinite(ω_nt)
+    @test isfinite(ω_struct)
+    @test isapprox(ω_struct, ω_nt; rtol=1e-12, atol=0.0)
 end
 
 @testset "CrossSectionCache interpolation" begin

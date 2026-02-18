@@ -86,6 +86,10 @@ const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "Parameter
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
+const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "WorkflowParamAdapters.jl"))
+const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)
+using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
+
 # Avoid duplicate TransportCoefficients modules when this workflow is loaded after
 # standalone TransportCoefficients tests; reuse Main.TransportCoefficients if it
 # already exists, otherwise load it into Main once.
@@ -103,9 +107,6 @@ using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig
 export solve_transport_from_equilibrium
-
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 const TRANSPORT_INTEGRATION_KEYS = (
     :p_nodes, :p_max,
@@ -360,8 +361,8 @@ end
 
 @inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params;
                                      a_builder_config::Union{Nothing,NamedTuple}=nothing)
-    qp = _nt_quark(quark_params)
-    tp = _nt_thermo(thermo_params)
+    qp = normalize_quark_params(quark_params)
+    tp = normalize_thermo_params(thermo_params)
 
     cfg = _effective_a_builder_config(a_builder_config)
     return AFieldBuilder.build_A_triplet(
@@ -543,6 +544,7 @@ function solve_transport_from_equilibrium(
     end
 
     effective_provider = provider === nothing ? _default_transport_provider_for_backend(thermo_backend) : provider
+    legacy_inputs = as_legacy_inputs(quark_params_basic, thermo_params)
     if effective_provider === nothing
         # No backend default provider: only materialize a provider if the desired
         # behavior differs from TransportCoefficients default.
@@ -557,8 +559,8 @@ function solve_transport_from_equilibrium(
             effective_provider = Main.Models.prepare_transport_provider(
                 effective_provider,
                 base;
-                quark_params=as_namedtuple(quark_params_basic),
-                thermo_params=as_namedtuple(thermo_params),
+                quark_params=legacy_inputs.quark_params,
+                thermo_params=legacy_inputs.thermo_params,
                 masses=masses,
             )
         end
@@ -581,8 +583,8 @@ function solve_transport_from_equilibrium(
 
     tr = if effective_transport_config === nothing
         transport_coefficients(
-            as_namedtuple(quark_params_basic),
-            as_namedtuple(thermo_params);
+            legacy_inputs.quark_params,
+            legacy_inputs.thermo_params;
             tau=tau,
             bulk_coeffs=bulk_coeffs,
             pass_provider...,
@@ -590,8 +592,8 @@ function solve_transport_from_equilibrium(
         )
     else
         transport_coefficients(
-            as_namedtuple(quark_params_basic),
-            as_namedtuple(thermo_params);
+            legacy_inputs.quark_params,
+            legacy_inputs.thermo_params;
             tau=tau,
             bulk_coeffs=bulk_coeffs,
             config=effective_transport_config,

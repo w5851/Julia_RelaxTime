@@ -53,6 +53,7 @@ using ..SeedStrategies: auto_phase_hint
 using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
 using ..ImplicitSolver: solve, SolverResult
 using ..ScanCommon
+using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
 
 export run_tmu_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_OUTPUT_PATH
@@ -88,6 +89,27 @@ const HEADER = join((
     "converged",
     "message",
 ), ",")
+
+@inline function _validate_real_vector(name::Symbol, values)
+    values isa AbstractVector{<:Real} || throw(ArgumentError("$(name) must be AbstractVector{<:Real}, got $(typeof(values))"))
+    isempty(values) && throw(ArgumentError("$(name) must not be empty"))
+    for (i, v) in pairs(values)
+        isfinite(Float64(v)) || throw(ArgumentError("$(name)[$(i)] must be finite Real, got $(v)"))
+    end
+    return nothing
+end
+
+@inline function _validate_tmu_scan_inputs(T_values, mu_values, xi_values, thermo_backend::Symbol, solver_backend::Symbol)
+    _validate_real_vector(:T_values, T_values)
+    _validate_real_vector(:mu_values, mu_values)
+    _validate_real_vector(:xi_values, xi_values)
+
+    (thermo_backend === :legacy || thermo_backend === :models) ||
+        throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
+    (solver_backend === :legacy || solver_backend === :models) ||
+        throw(ArgumentError("solver_backend must be :legacy or :models, got $(solver_backend)"))
+    return nothing
+end
 
 # ============================================================================
 # 主扫描函数
@@ -141,6 +163,8 @@ function run_tmu_scan(;
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
+    _validate_tmu_scan_inputs(T_values, mu_values, xi_values, thermo_backend, solver_backend)
+
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
@@ -259,6 +283,15 @@ function run_tmu_scan(;
         skipped=stats[:skipped],
         output=output_path
     )
+end
+
+"""run_tmu_scan(config::TmuScanConfig; kwargs...) -> NamedTuple
+
+结构化配置入口。`kwargs` 会覆盖 config 中同名项，保持与原 kwargs 接口兼容。
+"""
+function run_tmu_scan(config::TmuScanConfig; kwargs...)
+    cfg = scan_kwargs(config)
+    return run_tmu_scan(; cfg..., config.nlsolve_kwargs..., kwargs...)
 end
 
 # ============================================================================

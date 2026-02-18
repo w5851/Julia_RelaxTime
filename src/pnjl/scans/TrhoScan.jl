@@ -50,6 +50,7 @@ using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
 using ..ImplicitSolver: solve, SolverResult, solve_weighted_block_fallback
 using ..ScanCommon
+using ..ScanConfig: TrhoScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
 
 export run_trho_scan, DEFAULT_T_VALUES, DEFAULT_RHO_VALUES, DEFAULT_OUTPUT_PATH
@@ -125,6 +126,33 @@ const HEADER = join((
     "message",
 ), ",")
 
+@inline function _validate_real_vector(name::Symbol, values)
+    values isa AbstractVector{<:Real} || throw(ArgumentError("$(name) must be AbstractVector{<:Real}, got $(typeof(values))"))
+    isempty(values) && throw(ArgumentError("$(name) must not be empty"))
+    for (i, v) in pairs(values)
+        isfinite(Float64(v)) || throw(ArgumentError("$(name)[$(i)] must be finite Real, got $(v)"))
+    end
+    return nothing
+end
+
+@inline function _validate_trho_scan_inputs(T_values, rho_values, xi_values,
+                                            seed_policy::Symbol, constraint_mode::Symbol,
+                                            thermo_backend::Symbol, solver_backend::Symbol)
+    _validate_real_vector(:T_values, T_values)
+    _validate_real_vector(:rho_values, rho_values)
+    _validate_real_vector(:xi_values, xi_values)
+
+    (seed_policy === :hybrid_continuity || seed_policy === :candidates) ||
+        throw(ArgumentError("seed_policy must be :hybrid_continuity or :candidates, got $(seed_policy)"))
+    (constraint_mode === :fixed_rho || constraint_mode === :fixed_asymmetric_rho) ||
+        throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
+    (thermo_backend === :legacy || thermo_backend === :models) ||
+        throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
+    (solver_backend === :legacy || solver_backend === :models) ||
+        throw(ArgumentError("solver_backend must be :legacy or :models, got $(solver_backend)"))
+    return nothing
+end
+
 # ============================================================================
 # 主扫描函数
 # ============================================================================
@@ -181,6 +209,8 @@ function run_trho_scan(;
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
+    _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, thermo_backend, solver_backend)
+
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
@@ -287,6 +317,15 @@ function run_trho_scan(;
         skipped=stats[:skipped],
         output=output_path
     )
+end
+
+"""run_trho_scan(config::TrhoScanConfig; kwargs...) -> NamedTuple
+
+结构化配置入口。`kwargs` 会覆盖 config 中同名项，保持与原 kwargs 接口兼容。
+"""
+function run_trho_scan(config::TrhoScanConfig; kwargs...)
+    cfg = scan_kwargs(config)
+    return run_trho_scan(; cfg..., config.nlsolve_kwargs..., kwargs...)
 end
 
 # ============================================================================

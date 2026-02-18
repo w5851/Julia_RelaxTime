@@ -10,6 +10,10 @@ This document provides comprehensive API documentation for the `QuarkParams` and
 - [Normalization Helpers](#normalization-helpers)
 - [Phase B Additions](#phase-b-additions)
 - [Phase C Additions](#phase-c-additions)
+- [Phase D Additions](#phase-d-additions)
+- [Phase E Additions](#phase-e-additions)
+- [Phase F Additions](#phase-f-additions)
+- [Phase G Additions](#phase-g-additions)
 - [Usage Examples](#usage-examples)
 
 ---
@@ -320,6 +324,116 @@ using Main.ParameterTypes: QuarkParams, ThermoParams
 qp = QuarkParams((m=(u=1.5, d=1.5, s=3.0), μ=(u=0.1, d=0.1, s=0.1)))
 tp = ThermoParams((T=0.15, Φ=0.2, Φbar=0.2, ξ=0.0))
 ```
+
+---
+
+## Phase D Additions
+
+Phase D introduces hotspot-driven optimization on top of Phase C contracts.
+
+### Implemented optimization target
+
+- Module: `src/relaxtime/TransportCoefficients.jl`
+- Target path: `TransportRequest` entry to
+    - `shear_viscosity(req)`
+    - `electric_conductivity(req)`
+    - `bulk_viscosity_isentropic(req)`
+    - `transport_coefficients(req)`
+
+### What changed
+
+- Removed request-entry reliance on `as_namedtuple(req.quark/req.thermo)`.
+- Added explicit request fast path using direct field views at call boundary.
+- Preserved public compatibility:
+    - NamedTuple public APIs remain unchanged.
+    - Direct `QuarkParams` + `ThermoParams` overloads remain available.
+
+### Validation summary
+
+- Existing `TransportCoefficients` unit tests pass.
+- Added/extended struct-vs-legacy equivalence assertions in tests.
+- Phase D profiling script reports request-path improvement in latest run:
+    - `transport_coeff(req struct) / transport_coeff(explicit nt) ≈ 0.9178`
+    - Interpreted as ~8% faster in this local baseline.
+
+---
+
+## Phase E Additions
+
+Phase E continues hotspot-driven optimization in the RelaxationTime chain.
+
+### Implemented target
+
+- Module: `src/relaxtime/RelaxationTime.jl`
+- Target path: `relaxation_times(...)` calling `compute_average_rates(...)`
+
+### What changed
+
+- Added internal NamedTuple kernel: `_compute_average_rates_nt(...)`.
+- `compute_average_rates(...)` now normalizes once at boundary and delegates to internal kernel.
+- `relaxation_times(...)` now normalizes once and directly reuses the internal kernel, removing repeated normalization calls.
+
+### Validation summary
+
+- New equivalence test added in `test_relaxation_time.jl` for struct vs NamedTuple on existing-rates path.
+- Existing relaxation and transport coefficient tests pass.
+- Profiling script now includes lightweight `relaxation_times(...; existing_rates=...)` comparison:
+    - latest local run ratio `relaxation(struct)/relaxation(nt) ≈ 1.0642`
+    - indicates functional parity and that remaining overhead is small, guiding next hotspot selection.
+
+---
+
+## Phase F Additions
+
+Phase F coalesces avoidable normalization in `AverageScatteringRate` and `TotalCrossSection`.
+
+### Implemented changes
+
+- `AverageScatteringRate.jl`
+    - Added internal NamedTuple kernels:
+        - `_precompute_cross_section_nt!`
+        - `_design_w0cdf_s_grid_nt`
+        - `_get_sigma_nt`
+    - Public wrappers still accept both struct and NamedTuple, but now normalize once at boundary.
+    - Deep-loop path (`_omega_integral_5d`) now calls `_get_sigma_nt` directly to avoid repeated normalization calls.
+
+- `TotalCrossSection.jl`
+    - Added internal kernel `_total_cross_section_nt`.
+    - Added explicit NamedTuple overload for `total_cross_section` to bypass wrapper normalization overhead in internal/batch calls.
+    - `calculate_all_total_cross_sections` and `scan_s_dependence` now normalize once and reuse normalized parameters.
+
+### Validation summary
+
+- `test_average_scattering_rate.jl` passed, including new struct-vs-NamedTuple equivalence case with cached sigma path.
+- `test_relaxation_time.jl` and `test_transport_coefficients.jl` remained green after refactor.
+- Hotspot script remains executable and reproducible after updates.
+
+---
+
+## Phase G Additions
+
+Phase G introduces a dedicated model-ready benchmark lane for `TotalCrossSection` to avoid fragile generic fixtures.
+
+### Implemented changes
+
+- Added dedicated profiling script:
+    - `scripts/dev/profile_total_cross_section_model_ready.jl`
+- Script now builds model-ready inputs explicitly:
+    - auto-populates `A` via `ensure_quark_params_has_A`
+    - computes full effective `K_coeffs` via `calculate_G_from_A` + `calculate_effective_couplings`
+- Benchmarks three TCS API surfaces:
+    - `total_cross_section`
+    - `scan_s_dependence`
+    - `calculate_all_total_cross_sections`
+
+### Validation summary
+
+- Added smoke test: `tests/unit/relaxtime/test_total_cross_section_model_ready_fixture_smoke.jl`
+- Local baseline (ms/call):
+    - `total_cross_section(:uu_to_uu, s0)` = `0.0168`
+    - `scan_s_dependence(4 points)` = `0.0529`
+    - `calculate_all_total_cross_sections` = `1.0785`
+- New smoke test passed (`6/6`).
 
 ---
 

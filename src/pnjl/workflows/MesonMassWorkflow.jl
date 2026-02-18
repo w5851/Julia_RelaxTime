@@ -41,6 +41,10 @@ const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "Parameter
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
+const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "WorkflowParamAdapters.jl"))
+const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)
+using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
+
 using Main.Constants_PNJL: ħc_MeV_fm
 using Main.PNJL: HADRON_SEED_5, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
 using Main.MesonMass: solve_meson_mass, default_meson_mass_guess
@@ -49,9 +53,6 @@ using Main.MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses,
 export DEFAULT_MESONS
 export solve_gap_and_meson_point
 export build_equilibrium_params
-
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 const DEFAULT_MESONS = (
     :pi,
@@ -82,8 +83,8 @@ function _solve_meson_mass_with_retries(
     k_norm::Float64,
     mass_kwargs::NamedTuple,
 )
-    qp = _nt_quark(quark_params)
-    tp = _nt_thermo(thermo_params)
+    qp = normalize_quark_params(quark_params)
+    tp = normalize_thermo_params(thermo_params)
 
     # 基础阈值：用于构造更稳健的初值候选。
     thr = if _is_mixed_meson(meson)
@@ -226,13 +227,13 @@ function solve_gap_and_meson_point(
         residual = res === nothing ? Inf : Float64(res.residual_norm)
 
         if _is_mixed_meson(meson)
-            qp = _nt_quark(quark_params)
+            qp = normalize_quark_params(quark_params)
             thr = mott_threshold_masses(meson, qp)
             gaps = isfinite(mass) ? mott_gaps(meson, mass, qp) : (uu=NaN, ss=NaN, min=NaN)
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     threshold=thr, gaps=gaps)
         else
-            qp = _nt_quark(quark_params)
+            qp = normalize_quark_params(quark_params)
             thr = mott_threshold_mass(meson, qp)
             gapv = isfinite(mass) ? mott_gap(meson, mass, qp) : NaN
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,

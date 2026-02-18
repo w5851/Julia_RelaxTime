@@ -84,6 +84,119 @@ q = QuarkParams((m=(u=1.5,d=1.5,s=3.0), μ=(u=0.1,d=0.1,s=0.1)))
 t = ThermoParams((T=0.15, Φ=0.2, Φbar=0.2, ξ=0.0))
 ```
 
+## Phase D Status (hotspot-driven optimization)
+
+Phase D shifts from broad migration to targeted optimization.
+
+### Completed in current batch
+
+1. **Profiling baseline script added**
+    - `scripts/dev/profile_paramtypes_hotspots.jl`
+    - Covers normalization overhead, representative workflow cost, and request-path transport cost.
+
+2. **First optimization target landed**
+    - Module: `src/relaxtime/TransportCoefficients.jl`
+    - Path: `TransportRequest` -> transport coefficient entry methods
+    - Change: removed `as_namedtuple`-based adapter path in request entry, replaced with direct field-view fast path.
+
+3. **Validation and regression completed**
+    - `tests/unit/relaxtime/test_transport_coefficients.jl` fully passed after optimization.
+    - Related workflow/scan/contract smoke tests passed in combined regression run.
+
+### Quantitative result (latest local run)
+
+- `transport_coeff(req struct)` / `transport_coeff(explicit nt)` ≈ `0.9178`
+- Interpreted as request path being about 8% faster in the measured local baseline.
+
+### Migration recommendation after Phase D
+
+- Continue using **struct-first at public entry**, with compatibility NamedTuple only at explicit boundaries.
+- Prefer **hotspot-specific optimization** over full-chain rewrite.
+
+## Phase E Status (RelaxationTime normalization coalescing)
+
+Phase E targets duplicate normalization in the RelaxationTime main path.
+
+### Completed in current batch
+
+1. **Single-boundary normalization in RelaxationTime**
+    - Added internal kernel `_compute_average_rates_nt(...)`.
+    - `compute_average_rates(...)` and `relaxation_times(...)` now normalize at boundary once, then reuse NamedTuple internal path.
+    - Removed duplicate normalization statements in `relaxation_times(...)`.
+
+2. **Compatibility and equivalence checks**
+    - Added struct-vs-NamedTuple equivalence test for existing-rates path in `tests/unit/relaxtime/test_relaxation_time.jl`.
+    - Existing transport and relaxation test suites remain green.
+
+3. **Profiling extension**
+    - Updated `scripts/dev/profile_paramtypes_hotspots.jl` to include lightweight RelaxationTime path comparison.
+    - Latest local ratio: `relaxation(struct)/relaxation(nt) ≈ 1.0642`.
+
+### Recommendation after Phase E
+
+- Keep current strategy: one normalization at module boundary + NamedTuple internal kernels.
+- Next optimization should focus on nested-chain repeated normalization in `AverageScatteringRate`/`TotalCrossSection` internals, not API-level rewrites.
+
+## Phase F Status (ASR/TCS normalization coalescing)
+
+Phase F lands the next hotspot-driven step in `AverageScatteringRate` (ASR) and `TotalCrossSection` (TCS).
+
+### Completed in current batch
+
+1. **ASR internal kernel split and deep-path cleanup**
+    - Added `_precompute_cross_section_nt!`, `_design_w0cdf_s_grid_nt`, `_get_sigma_nt`.
+    - Public methods keep dual-interface compatibility, but normalize once at boundary.
+    - `_omega_integral_5d` now calls `_get_sigma_nt` directly, reducing repeated boundary normalization in hot loops.
+
+2. **TCS single-boundary normalization path**
+    - Added `_total_cross_section_nt` as internal kernel.
+    - Added explicit NamedTuple overload for `total_cross_section`.
+    - Batch/scan helpers now normalize once and reuse normalized parameters.
+
+3. **Validation**
+    - `test_average_scattering_rate.jl` passed with new struct-vs-NamedTuple cache-path equivalence check.
+    - `test_relaxation_time.jl` and `test_transport_coefficients.jl` remained green.
+    - Profiling script remains runnable after Phase F updates.
+
+### Recommendation after Phase F
+
+- Continue using **single-boundary normalization + internal NamedTuple kernels**.
+- For TotalCrossSection profiling, use model-ready fixtures (`A` fields + full K coefficient sets) in dedicated benchmark scripts before judging struct/NamedTuple runtime ratio.
+
+## Phase G Status (TCS model-ready benchmark lane)
+
+Phase G formalizes a dedicated, model-ready profiling path for `TotalCrossSection` (TCS).
+
+### Completed in current batch
+
+1. **Dedicated model-ready profiling script added**
+    - Added: `scripts/dev/profile_total_cross_section_model_ready.jl`
+    - Script builds fixture with:
+        - `A` ensured by `ensure_quark_params_has_A`
+        - full effective couplings from `calculate_G_from_A` + `calculate_effective_couplings`
+
+2. **TCS benchmark scope stabilized**
+    - Baselines now cover:
+        - `total_cross_section`
+        - `scan_s_dependence`
+        - `calculate_all_total_cross_sections`
+    - This avoids false failures caused by incomplete generic fixtures.
+
+3. **Smoke-test guardrail added**
+    - Added: `tests/unit/relaxtime/test_total_cross_section_model_ready_fixture_smoke.jl`
+    - Verifies single-point, scan, and batch-all TCS APIs on model-ready inputs.
+
+### Quantitative result (latest local run)
+
+- `total_cross_section(:uu_to_uu, s0)` ≈ `0.0168 ms/call`
+- `scan_s_dependence(4 points)` ≈ `0.0529 ms/call`
+- `calculate_all_total_cross_sections` ≈ `1.0785 ms/call`
+
+### Recommendation after Phase G
+
+- Keep TCS performance tracking in dedicated model-ready scripts.
+- Keep generic hotspot script focused on stable, low-dependency comparisons.
+
 ## The Dual Interface Pattern
 
 All public functions in the RelaxationTime module chain now accept **both** struct and NamedTuple parameters through Julia's Union types:

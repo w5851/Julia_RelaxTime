@@ -53,7 +53,7 @@ using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_dis
 const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
 
 export shear_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 
@@ -218,6 +218,77 @@ function TransportRequest(
     return TransportRequest(quark, thermo, tau, physics, integration)
 end
 
+@inline _qp_view(q::QuarkParams) = (m=q.m, μ=q.μ)
+@inline _tp_view(t::ThermoParams) = (T=t.T, Φ=t.Φ, Φbar=t.Φbar, ξ=t.ξ)
+
+function shear_viscosity(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::Float64
+    return shear_viscosity(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function shear_viscosity(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::Float64
+    return shear_viscosity(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
+function electric_conductivity(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::Float64
+    return electric_conductivity(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function electric_conductivity(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::Float64
+    return electric_conductivity(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
+function bulk_viscosity_isentropic(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::Float64
+    return bulk_viscosity_isentropic(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function bulk_viscosity_isentropic(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::Float64
+    return bulk_viscosity_isentropic(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
+function transport_coefficients(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::NamedTuple
+    return transport_coefficients(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function transport_coefficients(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::NamedTuple
+    return transport_coefficients(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
 """Recommended entry: pass a `TransportRequest` and optionally override integration fields by keywords."""
 function shear_viscosity(
     req::TransportRequest;
@@ -227,9 +298,11 @@ function shear_viscosity(
     provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
     return shear_viscosity(
-        as_namedtuple(req.quark),
-        as_namedtuple(req.thermo);
+        quark_params,
+        thermo_params;
         tau=tau,
         degeneracy=degeneracy,
         config=integration,
@@ -248,9 +321,11 @@ function electric_conductivity(
     provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
     return electric_conductivity(
-        as_namedtuple(req.quark),
-        as_namedtuple(req.thermo);
+        quark_params,
+        thermo_params;
         tau=tau,
         charges=charges,
         degeneracy=degeneracy,
@@ -269,9 +344,11 @@ function bulk_viscosity_isentropic(
     provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::Float64
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
     return bulk_viscosity_isentropic(
-        as_namedtuple(req.quark),
-        as_namedtuple(req.thermo);
+        quark_params,
+        thermo_params;
         tau=tau,
         bulk_coeffs_isentropic=bulk_coeffs_isentropic,
         config=integration,
@@ -291,9 +368,11 @@ function transport_coefficients(
     provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::NamedTuple
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
     return transport_coefficients(
-        as_namedtuple(req.quark),
-        as_namedtuple(req.thermo);
+        quark_params,
+        thermo_params;
         tau=tau,
         bulk_coeffs=bulk_coeffs,
         charges=charges,
@@ -378,7 +457,7 @@ end
     return provider.energy_from_p_aniso(p, m, ξ, cosθ)
 end
 
-@inline function mass_for_species(species::Symbol, quark_params::NamedTuple)::Float64
+@inline function mass_for_species(species::Symbol, quark_params::Union{NamedTuple,QuarkParams})::Float64
     if species in (:u, :d)
         return species === :u ? quark_params.m.u : quark_params.m.d
     elseif species === :s
@@ -392,7 +471,7 @@ end
     end
 end
 
-@inline function mu_for_species(species::Symbol, quark_params::NamedTuple)::Float64
+@inline function mu_for_species(species::Symbol, quark_params::Union{NamedTuple,QuarkParams})::Float64
     if species in (:u, :ubar)
         return quark_params.μ.u
     elseif species in (:d, :dbar)
@@ -404,14 +483,14 @@ end
     end
 end
 
-@inline function _mass_for_species(provider, species::Symbol, quark_params::NamedTuple, thermo_params::NamedTuple)::Float64
+@inline function _mass_for_species(provider, species::Symbol, quark_params, thermo_params)::Float64
     if hasproperty(provider, :mass_for_species)
         return provider.mass_for_species(species, quark_params, thermo_params)
     end
     return mass_for_species(species, quark_params)
 end
 
-@inline function _mu_for_species(provider, species::Symbol, quark_params::NamedTuple, thermo_params::NamedTuple)::Float64
+@inline function _mu_for_species(provider, species::Symbol, quark_params, thermo_params)::Float64
     if hasproperty(provider, :mu_for_species)
         return provider.mu_for_species(species, quark_params, thermo_params)
     end

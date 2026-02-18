@@ -8,6 +8,8 @@ using Main.TransportCoefficients
 
 const QUARK_PARAMS = (m=(u=0.3,d=0.3,s=0.5), μ=(u=0.2,d=0.2,s=0.2))
 const THERMO_PARAMS = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+const QUARK_PARAMS_STRUCT = QuarkParams(QUARK_PARAMS)
+const THERMO_PARAMS_STRUCT = ThermoParams(THERMO_PARAMS)
 
 const TAU_ZERO = (u=0.0,d=0.0,s=0.0,ubar=0.0,dbar=0.0,sbar=0.0)
 const TAU_ONE = (u=1.0,d=1.0,s=1.0,ubar=1.0,dbar=1.0,sbar=1.0)
@@ -30,6 +32,11 @@ const TAU_ONE = (u=1.0,d=1.0,s=1.0,ubar=1.0,dbar=1.0,sbar=1.0)
     sigma1_cfg = electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg)
     @test isapprox(eta1_cfg, eta1; rtol=1e-12, atol=0.0)
     @test isapprox(sigma1_cfg, sigma1; rtol=1e-12, atol=0.0)
+
+    eta1_struct = shear_viscosity(QUARK_PARAMS_STRUCT, THERMO_PARAMS_STRUCT; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    sigma1_struct = electric_conductivity(QUARK_PARAMS_STRUCT, THERMO_PARAMS_STRUCT; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    @test isapprox(eta1_struct, eta1; rtol=1e-12, atol=0.0)
+    @test isapprox(sigma1_struct, sigma1; rtol=1e-12, atol=0.0)
 end
 
 @testset "TransportCoefficients: sigma scales with q^2" begin
@@ -75,6 +82,17 @@ end
 
     sigma_req = electric_conductivity(req)
     @test isapprox(sigma_req, sigma_kw; rtol=1e-12, atol=0.0)
+
+    req_struct = TransportRequest(
+        QUARK_PARAMS_STRUCT,
+        THERMO_PARAMS_STRUCT;
+        tau=TAU_ONE,
+        integration=cfg_p8,
+    )
+    eta_req_struct = shear_viscosity(req_struct; p_nodes=16)
+    sigma_req_struct = electric_conductivity(req_struct)
+    @test isapprox(eta_req_struct, eta_kw; rtol=1e-12, atol=0.0)
+    @test isapprox(sigma_req_struct, sigma_kw; rtol=1e-12, atol=0.0)
 end
 
 @testset "TransportCoefficients: provider injection smoke" begin

@@ -559,14 +559,35 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 function total_cross_section(
     process::Symbol,
     s::Float64,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+)::Float64
+    return _total_cross_section_nt(process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+end
+
+function total_cross_section(
+    process::Symbol,
+    s::Float64,
     quark_params::Union{NamedTuple, QuarkParams},
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::Float64
-    # Normalize parameters at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    return _total_cross_section_nt(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
+end
+
+function _total_cross_section_nt(
+    process::Symbol,
+    s::Float64,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+)::Float64
     # 步骤1: 解析过程中的粒子
     particle_i, particle_j, particle_c, particle_d = parse_particles_from_process(process)
     
@@ -737,15 +758,14 @@ function calculate_all_total_cross_sections(
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::NamedTuple
-    # Normalize parameters at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
     results = Dict{Symbol, Float64}()
     
     for process in keys(SCATTERING_MESON_MAP)
         try
             σ = total_cross_section(
-                process, s, quark_params, thermo_params, K_coeffs,
+                process, s, quark_nt, thermo_nt, K_coeffs,
                 n_points=n_points
             )
             results[process] = σ
@@ -800,15 +820,14 @@ function scan_s_dependence(
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS
 )::Vector{Float64}
-    # Normalize parameters at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
     σ_values = Float64[]
     
     for s in s_values
         try
             σ = total_cross_section(
-                process, s, quark_params, thermo_params, K_coeffs,
+                process, s, quark_nt, thermo_nt, K_coeffs,
                 n_points=n_points
             )
             push!(σ_values, σ)

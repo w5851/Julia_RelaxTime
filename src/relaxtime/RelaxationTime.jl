@@ -218,10 +218,47 @@ function compute_average_rates(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # σ(s)有效范围的动量截断，默认使用 Λ
 )::NamedTuple
-    # Normalize inputs at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
-    
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+
+    return _compute_average_rates_nt(
+        quark_nt,
+        thermo_nt,
+        K_coeffs;
+        existing_rates=existing_rates,
+        cs_caches=cs_caches,
+        p_nodes=p_nodes,
+        angle_nodes=angle_nodes,
+        phi_nodes=phi_nodes,
+        p_grid=p_grid,
+        p_w=p_w,
+        cos_grid=cos_grid,
+        cos_w=cos_w,
+        phi_grid=phi_grid,
+        phi_w=phi_w,
+        n_sigma_points=n_sigma_points,
+        sigma_cutoff=sigma_cutoff,
+    )
+end
+
+function _compute_average_rates_nt(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
+    cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
+    p_nodes::Int=DEFAULT_P_NODES,
+    angle_nodes::Int=DEFAULT_ANGLE_NODES,
+    phi_nodes::Int=DEFAULT_PHI_NODES,
+    p_grid::Union{Nothing,Vector{Float64}}=nothing,
+    p_w::Union{Nothing,Vector{Float64}}=nothing,
+    cos_grid::Union{Nothing,Vector{Float64}}=nothing,
+    cos_w::Union{Nothing,Vector{Float64}}=nothing,
+    phi_grid::Union{Nothing,Vector{Float64}}=nothing,
+    phi_w::Union{Nothing,Vector{Float64}}=nothing,
+    n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_cutoff::Union{Nothing,Float64}=nothing
+)::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
         for (k, v) in pairs(existing_rates)
@@ -452,19 +489,15 @@ function relaxation_times(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::NamedTuple
-    # Normalize inputs at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
-    # Normalize inputs at function entry
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
     
     rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
         existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)
     else
-        compute_average_rates(
-            quark_params,
-            thermo_params,
+        _compute_average_rates_nt(
+            quark_nt,
+            thermo_nt,
             K_coeffs;
             existing_rates=existing_rates,
             cs_caches=cs_caches,

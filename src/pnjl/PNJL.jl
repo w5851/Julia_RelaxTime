@@ -94,11 +94,13 @@ export dP_dT, dP_dmu
 # ============================================================================
 
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
+include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
 include(joinpath(@__DIR__, "scans", "AdaptiveRhoRefinement.jl"))
 
+using .ScanConfig
 using .TmuScan
 using .TrhoScan
 using .AdaptiveRhoRefinement
@@ -121,6 +123,7 @@ export load_dual_branch_scan!
 # 导出扫描功能
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
+export TmuScanConfig, TrhoScanConfig
 
 # 自适应 ρ 网格加密
 export AdaptiveRhoConfig, suggest_refinement_points, merge_rho_values

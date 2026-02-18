@@ -2,6 +2,7 @@ using Test
 
 include("../../../src/relaxtime/RelaxationTime.jl")
 using .RelaxationTime
+using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const DENSITIES_SAMPLE = (u=1.0, d=1.0, s=2.0, ubar=3.0, dbar=3.0, sbar=4.0)
 const RATES_SAMPLE = (
@@ -73,5 +74,30 @@ end
     @test result.tau.ubar ≈ EXPECTED_TAU.ubar
     @test result.tau.dbar ≈ EXPECTED_TAU.dbar
     @test result.tau.sbar ≈ EXPECTED_TAU.sbar
+end
+
+@testset "relaxation_times struct/NamedTuple equivalence on existing rates" begin
+    q_struct = QuarkParams(QUARK_PARAMS)
+    t_struct = ThermoParams(THERMO_PARAMS)
+
+    res_nt = relaxation_times(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        densities=DENSITIES_SAMPLE,
+        existing_rates=RATES_SAMPLE,
+    )
+
+    res_struct = relaxation_times(
+        q_struct,
+        t_struct,
+        K_COEFFS;
+        densities=DENSITIES_SAMPLE,
+        existing_rates=RATES_SAMPLE,
+    )
+
+    @test res_struct.tau_inv == res_nt.tau_inv
+    @test res_struct.tau == res_nt.tau
+    @test res_struct.rates == res_nt.rates
 end
 

@@ -107,16 +107,16 @@ end
 
 
 
-@inline function get_mass(flavor::Symbol, quark_params::Union{NamedTuple, QuarkParams})
-    quark_params = _nt_quark(quark_params)
+@inline function get_mass(flavor::Symbol, quark_params::NamedTuple)
     if flavor === :u || flavor === :ubar; return quark_params.m.u
     elseif flavor === :d || flavor === :dbar; return quark_params.m.d
     elseif flavor === :s || flavor === :sbar; return quark_params.m.s
     else; error("Unknown flavor $flavor") end
 end
 
-@inline function get_mu(flavor::Symbol, quark_params::Union{NamedTuple, QuarkParams})
-    quark_params = _nt_quark(quark_params)
+@inline get_mass(flavor::Symbol, quark_params::QuarkParams) = get_mass(flavor, as_namedtuple(quark_params))
+
+@inline function get_mu(flavor::Symbol, quark_params::NamedTuple)
     # Convention: always return the quark chemical potential μ_q (positive sign).
     # The particle/antiparticle distinction is handled by using
     # `quark_distribution*` vs `antiquark_distribution*`.
@@ -125,6 +125,8 @@ end
     elseif flavor === :s || flavor === :sbar; return quark_params.μ.s
     else; error("Unknown flavor $flavor") end
 end
+
+@inline get_mu(flavor::Symbol, quark_params::QuarkParams) = get_mu(flavor, as_namedtuple(quark_params))
 
 # -------------------- 截面缓存与插值 --------------------
 mutable struct CrossSectionCache
@@ -236,8 +238,23 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10)
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    return _precompute_cross_section_nt!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
+        n_points=n_points,
+        threshold_subtraction=threshold_subtraction,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points)
+end
+
+function _precompute_cross_section_nt!(cache::CrossSectionCache, s_grid::Vector{Float64},
+    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10)
     # compute raw σ(s) for grid
     raw = Float64[]
     # prepare containers for potential extra samples (defined regardless of threshold_subtraction)
@@ -364,8 +381,14 @@ end
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    return _get_sigma_nt(cache, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
+end
+
+function _get_sigma_nt(cache::CrossSectionCache, s::Float64,
+    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
+    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
     # Only cached PCHIP interpolation is supported.
     n = length(cache.s_vals)
     n == 0 && error("CrossSectionCache has no points; precompute σ(s) first")
@@ -448,8 +471,28 @@ function design_w0cdf_s_grid(
     p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
 )
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    return _design_w0cdf_s_grid_nt(process, quark_nt, thermo_nt;
+        N=N,
+        p_nodes=p_nodes,
+        angle_nodes=angle_nodes,
+        phi_nodes=phi_nodes,
+        p_cutoff=p_cutoff,
+        scale=scale)
+end
+
+function _design_w0cdf_s_grid_nt(
+    process::Symbol,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    N::Int=DEFAULT_SIGMA_GRID_N,
+    p_nodes::Int=DEFAULT_W0CDF_P_NODES,
+    angle_nodes::Int=DEFAULT_W0CDF_ANGLE_NODES,
+    phi_nodes::Int=DEFAULT_W0CDF_PHI_NODES,
+    p_cutoff::Union{Nothing,Float64}=nothing,
+    scale::Float64=DEFAULT_SEMI_INF_SCALE,
+)
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_params)
     mj = get_mass(pj_sym, quark_params)
@@ -585,12 +628,12 @@ function build_w0cdf_pchip_cache(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
 )
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
-    s_grid = design_w0cdf_s_grid(
+    quark_nt = _nt_quark(quark_params)
+    thermo_nt = _nt_thermo(thermo_params)
+    s_grid = _design_w0cdf_s_grid_nt(
         process,
-        quark_params,
-        thermo_params;
+        quark_nt,
+        thermo_nt;
         N=N,
         p_nodes=design_p_nodes,
         angle_nodes=design_angle_nodes,
@@ -601,7 +644,7 @@ function build_w0cdf_pchip_cache(
     cache = CrossSectionCache(process)
     # record whether asymptotic subtraction was requested (explicitly or auto-enabled)
     cache.asym_requested = threshold_subtraction
-    precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs;
+    _precompute_cross_section_nt!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_sigma_points,
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
@@ -941,7 +984,7 @@ function _omega_integral_5d(
                             continue
                         end
 
-                        σ = get_sigma(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
+                        σ = _get_sigma_nt(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
                         ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ * dp_i * dp_j
                     end
                 end
