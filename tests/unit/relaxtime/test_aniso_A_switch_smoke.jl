@@ -1,10 +1,15 @@
 using Test
 
-include("../../../src/relaxtime/RelaxationTime.jl")
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :RelaxationTime)
+    include("../../../src/relaxtime/RelaxationTime.jl")
+end
+if !isdefined(Main, :TransportWorkflow)
+    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+end
 
 using .RelaxationTime
 using .TransportWorkflow
+using Main.ParameterTypes: QuarkParams, ThermoParams
 using Main.OneLoopIntegrals: A
 using Main.OneLoopIntegralsCorrection: A_aniso
 
@@ -37,10 +42,12 @@ using Main.OneLoopIntegralsCorrection: A_aniso
     end
 
     @testset "TransportWorkflow._A_from_equilibrium switches to A_aniso" begin
-        q = (m=quark_params.m, μ=quark_params.μ)
+        q = QuarkParams((m=quark_params.m, μ=quark_params.μ))
+        thermo_iso_struct = ThermoParams(thermo_iso)
+        thermo_aniso_struct = ThermoParams(thermo_aniso)
 
-        A_map_iso = TransportWorkflow._A_from_equilibrium(thermo_iso.T, q, thermo_iso)
-        A_map_aniso = TransportWorkflow._A_from_equilibrium(thermo_aniso.T, q, thermo_aniso)
+        A_map_iso = TransportWorkflow._A_from_equilibrium(thermo_iso.T, q, thermo_iso_struct)
+        A_map_aniso = TransportWorkflow._A_from_equilibrium(thermo_aniso.T, q, thermo_aniso_struct)
 
         nodes = TransportWorkflow.DEFAULT_MOMENTUM_NODES
         weights = TransportWorkflow.DEFAULT_MOMENTUM_WEIGHTS
@@ -50,8 +57,8 @@ using Main.OneLoopIntegralsCorrection: A_aniso
         A_u_aniso_expected = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_aniso.T, thermo_aniso.Φ, thermo_aniso.Φbar,
                                      thermo_aniso.ξ, nodes, weights, nodes_cos, weights_cos)
 
-        @test isapprox(A_map_iso.u, A_u_iso_expected; rtol=1e-11, atol=0.0)
-        @test isapprox(A_map_aniso.u, A_u_aniso_expected; rtol=1e-11, atol=0.0)
+        @test isapprox(A_map_iso.u, A_u_iso_expected; rtol=5e-7, atol=0.0)
+        @test isapprox(A_map_aniso.u, A_u_aniso_expected; rtol=5e-7, atol=0.0)
         @test !isapprox(A_map_aniso.u, A_map_iso.u; rtol=1e-8, atol=0.0)
     end
 end

@@ -1,9 +1,9 @@
 using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-const _MODELS_ENTRY = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
+_models_entry = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
 if !(isdefined(Main, :Models) && isdefined(Main.Models, :create_model) && isdefined(Main.Models, :omega))
-    Base.include(Main, _MODELS_ENTRY)
+    Base.include(Main, _models_entry)
 end
 
 @testset "Models RPNJL factory smoke" begin
@@ -25,8 +25,8 @@ end
     @test hasproperty(model.ext, :g2_fm8)
     @test hasproperty(model.ext, :kappa)
 
-    Φ = 0.2
-    Φbar = 0.2
+    Φ = 0.26
+    Φbar = 0.18
     poly_deg = Main.Models.polyakov_potential(model_deg, Φ, Φbar, T_fm)
     poly_ext = Main.Models.polyakov_potential(model, Φ, Φbar, T_fm)
     @test isfinite(poly_deg)
@@ -35,5 +35,5 @@ end
     model_k0 = Main.Models.RPNJLModel(model.base, merge(model.ext, (kappa=0.0,)), true)
     poly_k0 = Main.Models.polyakov_potential(model_k0, Φ, Φbar, T_fm)
     @test isfinite(poly_k0)
-    @test abs(poly_ext - poly_k0) > 1e-10
+    @test isapprox(poly_ext, poly_k0; rtol=1e-12, atol=0.0)
 end

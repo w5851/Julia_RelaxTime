@@ -9,9 +9,15 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+end
+if !isdefined(Main, :GaussLegendre)
+    include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+end
+if !isdefined(Main, :PNJL)
+    include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+end
 
 P = PNJL
 

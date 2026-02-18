@@ -1,6 +1,8 @@
 using Test
 
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :TransportWorkflow)
+    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solve_gap_and_transport (no tau/bulk)" begin
@@ -11,7 +13,7 @@ using .TransportWorkflow
     # Provide tau so workflow doesn't spend time computing it.
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
-    res = solve_gap_and_transport(
+    res = TransportWorkflow.solve_gap_and_transport(
         T,
         mu;
         xi=xi,
@@ -46,7 +48,7 @@ using .TransportWorkflow
         qp_wrong = (m=(u=999.0, d=999.0, s=999.0), μ=qp_nt.μ)
         @test prov_prepared.mass_for_species(:u, qp_wrong, tp_nt) == prov_prepared.ctx.masses.u
 
-        res_prov = solve_gap_and_transport(
+        res_prov = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             xi=xi,
@@ -61,7 +63,7 @@ using .TransportWorkflow
             provider=prov,
         )
 
-        res_model = solve_gap_and_transport(
+        res_model = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             xi=xi,
@@ -76,7 +78,7 @@ using .TransportWorkflow
             provider=prov_model,
         )
 
-        res_prepared = solve_gap_and_transport(
+        res_prepared = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             xi=xi,
@@ -101,7 +103,7 @@ using .TransportWorkflow
         @test isapprox(res_prepared.transport.sigma, res.transport.sigma; rtol=1e-12, atol=0.0)
 
         prov_tuple = TransportWorkflow.TransportCoefficients.default_transport_provider()
-        res_tuple = solve_gap_and_transport(
+        res_tuple = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             xi=xi,
@@ -127,7 +129,7 @@ using .TransportWorkflow
             antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.1,
         )
 
-        res_toy = solve_gap_and_transport(
+        res_toy = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             xi=xi,
@@ -158,7 +160,7 @@ using .TransportWorkflow
                 antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.90,
             )
 
-            res_pref_true = solve_gap_and_transport(
+            res_pref_true = TransportWorkflow.solve_gap_and_transport(
                 T,
                 mu;
                 xi=xi2,
@@ -174,7 +176,7 @@ using .TransportWorkflow
                 transport_kwargs=(; prefer_energy_aniso=true),
             )
 
-            res_pref_false = solve_gap_and_transport(
+            res_pref_false = TransportWorkflow.solve_gap_and_transport(
                 T,
                 mu;
                 xi=xi2,
@@ -219,7 +221,7 @@ using .TransportWorkflow
             solver_kwargs=(iterations=30,),
         )
 
-        res2 = solve_transport_from_equilibrium(
+        res2 = TransportWorkflow.solve_transport_from_equilibrium(
             eq,
             T,
             mu;
@@ -234,7 +236,7 @@ using .TransportWorkflow
         )
 
         prov = Main.Models.transport_provider(:models)
-        res2_prov = solve_transport_from_equilibrium(
+        res2_prov = TransportWorkflow.solve_transport_from_equilibrium(
             eq,
             T,
             mu;

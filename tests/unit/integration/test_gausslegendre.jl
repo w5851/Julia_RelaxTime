@@ -17,7 +17,9 @@ include("test/test_gausslegendre.jl")
 using Test
 
 # 加载模块
-include("../../../src/integration/GaussLegendre.jl")
+if !isdefined(Main, :GaussLegendre)
+    include("../../../src/integration/GaussLegendre.jl")
+end
 using .GaussLegendre
 
 @testset "GaussLegendre 模块测试" begin

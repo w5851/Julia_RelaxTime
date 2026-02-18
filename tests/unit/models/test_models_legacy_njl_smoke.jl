@@ -8,9 +8,9 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-const _MODELS_ENTRY = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
+_models_entry = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
 if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Main.Models, :solve_gap))
-    Base.include(Main, _MODELS_ENTRY)
+    Base.include(Main, _models_entry)
 end
 
 @testset "Models legacy adapter (NJL)" begin

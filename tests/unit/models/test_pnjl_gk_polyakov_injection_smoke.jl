@@ -3,9 +3,9 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-const _MODELS_ENTRY = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
+_models_entry = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
 if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Main.Models, :solve_gap))
-    Base.include(Main, _MODELS_ENTRY)
+    Base.include(Main, _models_entry)
 end
 
 @inline function _polyakov_U_manual(consts, Φ, Φbar, T_fm)

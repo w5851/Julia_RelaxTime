@@ -29,7 +29,7 @@
 ### 方式2: 命令行启动
 ```powershell
 # 如服务器未运行，执行：
-julia server.jl
+julia --project=. scripts/server/server_full.jl
 
 # 然后打开浏览器访问
 start web\index.html
@@ -37,14 +37,14 @@ start web\index.html
 
 ### 方式3: 一键启动脚本
 ```powershell
-.\start.bat
+.\scripts\server\start.bat
 ```
 
 ## 📝 关键文件说明
 
 ### 运行文件
-- `server.jl` - 服务器启动脚本（已修复所有依赖问题）
-- `start.bat` - Windows一键启动脚本
+- `scripts/server/server_full.jl` - API + 前端静态资源一体化服务入口
+- `scripts/server/start.bat` - Windows一键启动脚本
 
 ### 配置文件
 - `Project.toml` - Julia项目配置
@@ -58,7 +58,7 @@ start web\index.html
 
 ### 文档
 - `QUICKSTART.md` - **快速开始指南** ⭐
-- `examples/web_demo.md` - 完整使用文档
+- `docs/guides/examples/web_demo.md` - 完整使用文档
 - `src/simulation/README.md` - 模块说明
 
 ## 🐛 已修复的问题
@@ -91,8 +91,9 @@ start web\index.html
 
 ### 后端测试
 ```julia
-julia test_unit/test_frame_transformations.jl  # ✅ 通过
-julia test_unit/test_momentum_mapping.jl       # ✅ 通过
+julia --project=. tests/unit/runtests.jl       # ✅ 推荐 smoke 入口
+julia --project=. tests/unit/relaxtime/test_frame_transformations.jl
+julia --project=. tests/unit/integration/test_momentum_mapping.jl
 ```
 
 ### API测试
@@ -119,7 +120,7 @@ test_api_endpoint()  # 测试/compute端点
 
 ### 更换端口
 ```powershell
-julia server.jl 8081
+julia --project=. scripts/server/server_full.jl 8081
 ```
 同时修改 `web/js/api.js`:
 ```javascript
@@ -135,8 +136,13 @@ Julia终端会显示所有请求日志和错误信息。
 
 1. **先测试默认参数**: 打开web/index.html，直接点击"计算散射"
 2. **调整参数探索**: 修改动量或角度，观察椭球变化
-3. **阅读完整文档**: 查看 `examples/web_demo.md` 了解更多功能
+3. **阅读完整文档**: 查看 `docs/guides/examples/web_demo.md` 了解更多功能
 4. **运行单元测试**: 验证计算模块的正确性
+
+## 📦 输出目录口径
+
+- 默认运行产物目录为 `data/outputs/`（结果、图像、缓存）。
+- 根目录 `outputs/` 不作为默认落盘目录，保留仅用于兼容历史脚本。
 
 ## 📞 问题反馈
 

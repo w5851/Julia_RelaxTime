@@ -10,9 +10,9 @@ using ForwardDiff
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-const _MODELS_ENTRY = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
+_models_entry = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
 if !(isdefined(Main, :Models) && isdefined(Main.Models, :create_implicit_gap_solver))
-    Base.include(Main, _MODELS_ENTRY)
+    Base.include(Main, _models_entry)
 end
 
 @testset "Models implicit differentiation (NJL)" begin

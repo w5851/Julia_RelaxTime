@@ -1,6 +1,8 @@
 using Test
 
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :TransportWorkflow)
+    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: legacy/models transport bridge (4 fixed points)" begin
@@ -28,7 +30,7 @@ using .TransportWorkflow
             transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
         )
 
-        res_legacy = solve_gap_and_transport(
+        res_legacy = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             common_kwargs...,
@@ -36,7 +38,7 @@ using .TransportWorkflow
             solver_kwargs=(iterations=30,),
         )
 
-        res_models = solve_gap_and_transport(
+        res_models = TransportWorkflow.solve_gap_and_transport(
             T,
             mu;
             common_kwargs...,

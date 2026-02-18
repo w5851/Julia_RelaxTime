@@ -6,7 +6,7 @@
 
 ```powershell
 # 1. 启动Julia HTTP服务器
-julia server.jl
+julia --project=. scripts/server/server_full.jl
 
 # 2. 打开浏览器访问
 web/index.html
@@ -15,12 +15,14 @@ web/index.html
 ## 项目结构
 
 ```
-├── server.jl                          # HTTP服务器启动脚本
 ├── src/simulation/                    # Julia计算模块
 │   ├── FrameTransformations.jl       # Lorentz变换
 │   ├── EllipsoidCalculation.jl       # 椭球参数计算
 │   ├── MomentumMapping.jl            # 动量映射主模块
 │   └── HTTPServer.jl                  # REST API服务器
+├── scripts/server/                    # 服务器启动脚本
+│   ├── server_full.jl                 # API+静态资源服务
+│   └── start.bat                      # Windows 一键启动
 ├── web/                               # 前端文件
 │   ├── index.html                     # 主页面
 │   ├── css/style.css                  # 样式
@@ -28,11 +30,11 @@ web/index.html
 │       ├── api.js                     # API通信
 │       ├── visualization.js           # Three.js可视化
 │       └── ui.js                      # UI控制器
-├── test_unit/                         # 单元测试
-│   ├── test_frame_transformations.jl
-│   └── test_momentum_mapping.jl
-└── examples/
-    └── web_demo.md                    # 完整使用文档
+├── tests/unit/                        # 单元测试
+│   ├── relaxtime/test_frame_transformations.jl
+│   └── integration/test_momentum_mapping.jl
+└── docs/guides/examples/
+  └── web_demo.md                    # 完整使用文档
 ```
 
 ## 功能特性
@@ -81,7 +83,7 @@ print_kinematics_info(result)
 
 ### Web界面使用
 
-1. 启动服务器: `julia server.jl`
+1. 启动服务器: `julia --project=. scripts/server/server_full.jl`
 2. 打开 `web/index.html`
 3. 输入参数（默认值已填充）
 4. 点击"计算散射"
@@ -115,14 +117,14 @@ print_kinematics_info(result)
 }
 ```
 
-详见 `examples/web_demo.md` 完整文档。
+详见 `docs/guides/examples/web_demo.md` 完整文档。
 
 ## 测试
 
 ```powershell
 # 运行单元测试
-julia test_unit/test_frame_transformations.jl
-julia test_unit/test_momentum_mapping.jl
+julia --project=. tests/unit/relaxtime/test_frame_transformations.jl
+julia --project=. tests/unit/integration/test_momentum_mapping.jl
 ```
 
 ## 技术栈
@@ -142,7 +144,7 @@ p_lab = A · p_cms + b
 
 通过特征分解 `S = A·Aᵀ` 得到椭球的主轴方向和半轴长。
 
-详细推导见 `doc/domain-knowledge/从质心系到实验室系动量转换.md`。
+详细推导见 `docs/reference/domain-knowledge/从质心系到实验室系动量转换.md`。
 
 ## 注意事项
 
@@ -152,9 +154,9 @@ p_lab = A · p_cms + b
 
 ## 相关文档
 
-- 完整使用指南: `examples/web_demo.md`
+- 完整使用指南: `docs/guides/examples/web_demo.md`
 - 实现计划: `.github/prompts/plan-twoToTwoScatteringMomentumVisualization.prompt.md`
-- 物理推导: `doc/domain-knowledge/从质心系到实验室系动量转换.md`
+- 物理推导: `docs/reference/domain-knowledge/从质心系到实验室系动量转换.md`
 
 ---
 

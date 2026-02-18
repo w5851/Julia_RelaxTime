@@ -1,6 +1,8 @@
 using Test
 
-include(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    include(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+end
 
 @testset "PNJL config dynamic constants (no load-time cache dependency)" begin
     # New scheme preferred over old scheme when both exist.

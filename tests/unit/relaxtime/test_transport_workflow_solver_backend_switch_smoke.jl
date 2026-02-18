@@ -1,6 +1,8 @@
 using Test
 
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :TransportWorkflow)
+    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solver_backend switch (legacy vs models)" begin
@@ -21,10 +23,10 @@ using .TransportWorkflow
         transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
     )
 
-    res_legacy = solve_gap_and_transport(T, mu; common_kwargs..., solver_backend=:legacy, solver_kwargs=(iterations=30,))
+    res_legacy = TransportWorkflow.solve_gap_and_transport(T, mu; common_kwargs..., solver_backend=:legacy, solver_kwargs=(iterations=30,))
 
     models_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite, xtol=1e-10, ftol=1e-10)
-    res_models = solve_gap_and_transport(T, mu;
+    res_models = TransportWorkflow.solve_gap_and_transport(T, mu;
         common_kwargs...,
         solver_backend=:models,
         models_solver=models_solver,

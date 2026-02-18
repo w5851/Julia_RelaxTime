@@ -1,9 +1,9 @@
 using Test
 
 # New models entry
-const _MODELS_ENTRY = joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl")
+_models_entry = joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl")
 if !isdefined(Main, :Models)
-    include(_MODELS_ENTRY)
+    include(_models_entry)
 end
 using .Models
 

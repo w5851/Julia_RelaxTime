@@ -59,8 +59,9 @@ julia --project=. scripts/dev/gen_deps.jl
 - **截面/弛豫时间链路（修复中）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 等仍包含已知缺陷（阈值处理、归一因子、输运系数整合尚未校对），目前默认不在服务器或前端中暴露，仅供研究性参考。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
-- **文档与流程**：`docs/guides/QUICKSTART.md`、`docs/guides/USER_GUIDE.md`、`docs/guides/STATUS.md` 说明部署/排错；`docs/process/` 保留 prompt 与计划；`docs/reference/` 存放公式与推导。
+- **文档与流程**：`docs/guides/QUICKSTART.md`、`docs/guides/USER_GUIDE.md`、`docs/guides/STATUS.md` 说明部署/排错；`docs/dev/active/` 与 `docs/dev/archived/` 管理开发计划与归档；`docs/reference/` 存放公式与推导。
 - **数据与结果**：`data/outputs/` 用于收集服务器或批处理输出（例如 `data/outputs/results/relaxtime/` 下的扫描 CSV），便于跨语言/跨实现对比。
+	- 目录口径：默认只使用 `data/outputs/` 落盘；根目录 `outputs/` 仅保留历史兼容，不作为新流程默认路径。
 - **PNJL（求解器 + 扫描）**：`src/pnjl/` 提供 PNJL 平衡求解与扫描能力。
 	- 推荐入口：`PNJL.solve(...)` + seed 策略（`MultiSeed/PhaseAwareContinuitySeed` 等），见 `docs/api/pnjl/PNJL.md` 与 `docs/api/pnjl/SeedStrategies.md`。
 	- 扫描脚本：`scripts/relaxtime/run_gap_transport_scan.jl` 可批量输出平衡量与输运相关派生量到 CSV。
@@ -175,7 +176,7 @@ julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
 - `docs/`：文档中心。
 	- `docs/guides/`：用户/开发手册（`README` 补充材料、`QUICKSTART.md`、`USER_GUIDE.md`、`FRONTEND_DEBUG.md`、`FIXES.md` 等）。
 	- `docs/reference/`：公式、Mathematica、domain-knowledge 等原 `doc/` 内容。
-	- `docs/process/prompt`, `docs/process/plans`：原 `prompt/` 与 `plans/`，用于流程记录与规范。
+	- `docs/dev/active/`、`docs/dev/active/plans/`、`docs/dev/archived/`：开发过程中的计划、任务与归档记录。
 	- `docs/guides/examples/`：原 `examples/` 下的示例说明。
 - `docs/api/`：面向外部的 API/公式描述。
 - `data/outputs/`：运行结果与缓存输出（原 `results/` 位于 `data/outputs/results/`）。
@@ -190,8 +191,8 @@ julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
 | `test_other/` | `tests/analysis/` | 各类性能分析、调试脚本、诊断报告集中。 |
 | `results/` | `data/outputs/results/` | 将运行产物与原始数据分离，方便清理或忽略。 |
 | `doc/`（公式、domain-knowledge 等） | `docs/reference/` | 文档分类更明确。 |
-| `prompt/` | `docs/process/prompt/` | 规范类文档整合到流程档案。 |
-| `plans/` | `docs/process/plans/` | 规划和想法集中管理。 |
+| `prompt/` | `docs/dev/active/plans/` | 规范类草案与计划统一纳入开发任务区（按 active/archived 生命周期管理）。 |
+| `plans/` | `docs/dev/active/plans/` | 规划和想法集中管理，并在完成后归档到 `docs/dev/archived/`。 |
 | `examples/` | `docs/guides/examples/` | 所有示例写在 Guides 下便于索引。 |
 | `FIXES.md`, `FRONTEND_DEBUG.md`, `QUICKSTART.md`, `STATUS.md`, `USER_GUIDE.md` | `docs/guides/` | 一致收纳在指南目录，README 仅保留入口链接。 |
 

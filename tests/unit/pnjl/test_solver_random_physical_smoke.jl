@@ -13,8 +13,12 @@ using Random
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+end
+if !isdefined(Main, :PNJL)
+    include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+end
 
 using .Constants_PNJL: ħc_MeV_fm
 using .PNJL: solve

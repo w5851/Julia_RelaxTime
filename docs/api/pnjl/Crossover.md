@@ -176,4 +176,4 @@ end
 ## 相关文档
 
 - [PhaseTransition.md](./PhaseTransition.md) - 一阶相变分析
-- [PNJL_Phase_Diagram_TODO.md](../../dev/PNJL_Phase_Diagram_TODO.md) - 开发计划
+- [2026-01-19_PNJL_Phase_Diagram_TODO.md](../../dev/archived/2026-01-19_PNJL_Phase_Diagram_TODO.md) - 开发计划（已归档）
