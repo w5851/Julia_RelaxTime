@@ -1,4 +1,16 @@
 ---
+title: 从归档文档复制 compare_meson_masses_with_fortran.jl 到本地临时文件后运行
+archived: true
+original: docs/dev/active/MesonMass_MottTransition_Fortran_Validation.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: MesonMass/MottTransition Fortran 对比验证
 archived: true
 original: docs/dev/active/2026_1_19新增功能测试.md

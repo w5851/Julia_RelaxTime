@@ -40,6 +40,9 @@ jobs:
       - name: Run PNJL scan benchmark
         run: julia --project tests/perf/pnjl/scan_perf.jl
 
+      - name: Check benchmark thresholds
+        run: julia --project=. scripts/dev/check_benchmark_thresholds.jl
+
       - name: Upload benchmark reports
         uses: actions/upload-artifact@v4
         with:

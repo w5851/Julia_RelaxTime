@@ -60,7 +60,7 @@ julia --project=. tests/unit/runtests.jl
 
 - Web/API 演示链路可用
 - PNJL 求解与扫描链路可用
-- 截面/弛豫时间部分链路仍在修复与校对中（以 `README.md` 为准）
+- 截面/弛豫时间链路已验证可用（建议结合对比报告持续回归，以 `README.md` 为准）
 
 ## 7. 输出目录
 

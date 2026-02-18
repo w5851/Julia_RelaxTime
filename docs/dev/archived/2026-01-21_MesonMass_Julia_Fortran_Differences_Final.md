@@ -1,4 +1,16 @@
 ---
+title: MesonMass Julia Fortran Differences Final
+archived: true
+original: docs/dev/active/MesonMass_Julia_Fortran_Differences_Final.md
+archived_date: 2026-01-21
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: MesonMass Julia vs Fortran Differences (Final Archive)
 archived: true
 original: docs/dev/active/2026_1_20介子质量计算结果不同原因分析.md

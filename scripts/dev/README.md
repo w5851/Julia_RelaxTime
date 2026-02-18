@@ -21,9 +21,22 @@ julia --project=. scripts/dev/analyze_deps.jl
 julia --project=. scripts/dev/check_docs_consistency.jl
 ```
 
+归档元信息补齐（历史文档一次性修复）：
+
+```powershell
+julia --project=. scripts/dev/backfill_archived_frontmatter.jl
+```
+
+Benchmark 阈值检查：
+
+```powershell
+julia --project=. scripts/dev/check_benchmark_thresholds.jl
+```
+
 检查项包含：
 - `docs/guides/**/*.md` 中历史路径（如 `test_unit/`、`julia server.jl`、`.\\start.bat`、`doc/domain-knowledge/`）
 - 当 `README.md` 标注“修复中”时，guides 中是否出现“系统完全就绪/已知问题: 无”等绝对化状态词
+- 当 `README.md` 标注“已验证可用”时，guides 中是否残留“修复中”表述
 
 可复现安装（推荐）：
 

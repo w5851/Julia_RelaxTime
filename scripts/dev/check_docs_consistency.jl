@@ -6,6 +6,7 @@
 检查目标：
 1) docs/guides/**/*.md 与 README.md 中是否含历史路径模式。
 2) 当 README 标注“修复中”时，guides 不应出现绝对化状态词。
+3) 当 README 标注“已验证可用”时，guides 不应残留“修复中”表述。
 
 用法：
   julia --project=. scripts/dev/check_docs_consistency.jl
@@ -66,6 +67,8 @@ function main()
 
     readme_content = isfile(readme) ? read(readme, String) : ""
     readme_marks_wip = occursin("修复中", readme_content)
+    readme_marks_validated = occursin("截面/弛豫时间链路（已验证可用）", readme_content) ||
+                             occursin("截面/弛豫时间链路已验证可用", readme_content)
 
     if readme_marks_wip
         absolute_state = r"系统完全就绪|已知问题\s*[:：]\s*无"
@@ -74,6 +77,17 @@ function main()
             if occursin(absolute_state, content)
                 display = relpath_display(file, root)
                 push!(violations, "$(display): README 标注部分链路“修复中”，此文件却出现绝对化状态词")
+            end
+        end
+    end
+
+    if readme_marks_validated
+        stale_wip = r"截面/弛豫时间.*修复中|截面/弛豫时间.*仍在修复"
+        for file in guide_files
+            content = read(file, String)
+            if occursin(stale_wip, content)
+                display = relpath_display(file, root)
+                push!(violations, "$(display): README 已标注“已验证可用”，此文件仍保留“修复中”表述")
             end
         end
     end

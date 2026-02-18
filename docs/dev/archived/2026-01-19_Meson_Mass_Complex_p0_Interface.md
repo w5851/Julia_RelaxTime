@@ -1,4 +1,16 @@
 ---
+title: 介子质量复数 $p_0$ 接口草案（函数签名 + 伪代码 + 参数说明）
+archived: true
+original: docs/dev/active/Meson_Mass_Complex_p0_Interface.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: 介子质量复数 p0 接口实现
 archived: true
 original: docs/dev/active/介子质量复数p0接口草案.md

@@ -1,6 +1,18 @@
 ---
 title: 阶段3与IncludeOnce收敛归档
 archived: true
+original: docs/dev/active/阶段3与IncludeOnce收敛归档.md
+archived_date: 2026-02-12
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
+title: 阶段3与IncludeOnce收敛归档
+archived: true
 original: docs/dev/active/2026_02_02_新代码框架.md
 archived_date: 2026-02-12
 ---

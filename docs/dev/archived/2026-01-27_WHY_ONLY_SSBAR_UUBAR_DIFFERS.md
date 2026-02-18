@@ -1,3 +1,15 @@
+---
+title: 为什么只有 ssbar→uubar 有3.238倍差异？
+archived: true
+original: docs/dev/active/WHY_ONLY_SSBAR_UUBAR_DIFFERS.md
+archived_date: 2026-01-27
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 为什么只有 ssbar→uubar 有3.238倍差异？
 
 **问题**: 为什么17个散射过程中，只有 ssbar→uubar 有3.238倍差异，而其他16个都接近1.0？

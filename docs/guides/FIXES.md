@@ -199,7 +199,7 @@ julia --project=. scripts/server/server_full.jl
 - ✅ CORS配置正确
 - ✅ 所有模块导出完整
 
-**已知问题**: 以 `README.md` 的状态说明为准（截面/弛豫时间链路仍在修复与校对中）
+**状态说明**: 以 `README.md` 的状态说明为准（截面/弛豫时间链路已验证可用，建议持续回归）
 
 ## 📞 获取帮助
 

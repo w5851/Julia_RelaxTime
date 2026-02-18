@@ -56,7 +56,7 @@ julia --project=. scripts/dev/gen_deps.jl
 
 - **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/test_momentum_mapping.jl`、`test_frame_transformations.jl` 已覆盖核心校验。
 - **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `docs/api/relaxtime/scattering/ScatteringAmplitude.md` 与 `docs/reference/formula`。
-- **截面/弛豫时间链路（修复中）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 等仍包含已知缺陷（阈值处理、归一因子、输运系数整合尚未校对），目前默认不在服务器或前端中暴露，仅供研究性参考。
+- **截面/弛豫时间链路（已验证可用）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 已完成当前验证集下的可用性校验；默认仍不在服务器或前端中直接暴露，研究性调用建议通过脚本与模块入口执行并保留对比记录。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
 - **HTTP + 前端**：`scripts/server/server_full.jl` 同时提供 API 与静态资源，`web/index.html` + `web/js` 展示 3D 椭球、输入面板与健康检查指示灯；`web/simple_test.html` 适合最小交互验证。
 - **文档与流程**：`docs/guides/QUICKSTART.md`、`docs/guides/USER_GUIDE.md`、`docs/guides/STATUS.md` 说明部署/排错；`docs/dev/active/` 与 `docs/dev/archived/` 管理开发计划与归档；`docs/reference/` 存放公式与推导。
@@ -68,7 +68,7 @@ julia --project=. scripts/dev/gen_deps.jl
 	- HTTP 端（实验性）：`scripts/server/server_full.jl` 提供 `POST /api/modules/pnjl-gap/run` 单点调用（请求体仍使用 `T_mev`/`mu_mev` 这类 MeV 输入字段；内部会换算到自然单位）。
 - **平均散射率（实验性）**：`src/relaxtime/AverageScatteringRate.jl` 基于 Gauss-Legendre (p=32, 角度=4) 计算各向异性平均散射率，散射截面支持预计算+插值缓存。
 
-> ⚠️ **状态说明**：截面/弛豫时间链路仍标记为“修复中”（阈值处理、归一因子与输运系数整合仍需校对）。PNJL 求解与扫描链路已可用，但物理与数值精度仍建议通过 `docs/` 下的对比报告持续验证。
+> ✅ **状态说明**：截面/弛豫时间链路已验证可用。PNJL 求解与扫描链路同样可用；物理与数值精度仍建议通过 `docs/` 下的对比报告持续验证。
 
 ## 计算链路概览（各向异性输运）
 
@@ -80,7 +80,7 @@ julia --project=. scripts/dev/gen_deps.jl
 6. **矩阵元依赖介子传播子**：各散射道调用 `MesonPropagator`/`TotalPropagator` 获取传播子，按道合成振幅。
 7. **传播子依赖极化函数**：`Polarization*` 使用单圈积分 `OneLoopIntegrals*`（含各向异性积分）与夸克分布函数求取极化张量。
 
-> 当前位置：截面/弛豫时间链路仍标记为“修复中”，上述流程为实际调用路径，便于排查或扩展时定位入口。
+> 当前位置：截面/弛豫时间链路已验证可用，上述流程为实际调用路径，便于排查或扩展时定位入口。
 
 ## 最近更新
 

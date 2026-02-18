@@ -1,6 +1,18 @@
 ---
 title: PNJL 相图计算待办事项
 archived: true
+original: docs/dev/active/PNJL_Phase_Diagram_TODO.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
+title: PNJL 相图计算待办事项
+archived: true
 original: docs/dev/PNJL_Phase_Diagram_TODO.md
 archived_date: 2026-01-19
 ---

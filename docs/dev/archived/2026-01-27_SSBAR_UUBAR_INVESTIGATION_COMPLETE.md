@@ -1,3 +1,15 @@
+---
+title: ssbar→uubar 差异的最终结论
+archived: true
+original: docs/dev/active/SSBAR_UUBAR_INVESTIGATION_COMPLETE.md
+archived_date: 2026-01-27
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # ssbar→uubar 差异的最终结论
 
 **日期**: 2026-01-27

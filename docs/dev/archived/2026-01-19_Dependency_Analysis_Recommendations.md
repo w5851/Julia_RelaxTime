@@ -1,4 +1,16 @@
 ---
+title: Dependency Analysis Recommendations
+archived: true
+original: docs/dev/active/Dependency_Analysis_Recommendations.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: Dependency Analysis & Recommendations
 archived: true
 original: docs/dev/任务2.md

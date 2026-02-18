@@ -1,6 +1,18 @@
 ---
 title: Log-Sum-Exp 数值稳定性评估报告
 archived: true
+original: docs/dev/active/Log_Sum_Exp_Evaluation.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
+title: Log-Sum-Exp 数值稳定性评估报告
+archived: true
 original: docs/dev/log_sum_exp_evaluation.md
 archived_date: 2026-01-19
 ---

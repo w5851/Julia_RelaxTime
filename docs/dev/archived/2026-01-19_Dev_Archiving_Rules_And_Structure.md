@@ -1,4 +1,16 @@
 ---
+title: Dev Archiving Rules And Structure
+archived: true
+original: docs/dev/active/Dev_Archiving_Rules_And_Structure.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: 开发文档归档规范与结构约定合并
 archived: true
 original: docs/dev/active/2026-1-19.md

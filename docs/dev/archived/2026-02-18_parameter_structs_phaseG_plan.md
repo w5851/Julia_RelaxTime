@@ -1,6 +1,18 @@
 ---
 title: Parameter Structs Phase G 任务单（可勾选）
 archived: true
+original: docs/dev/active/parameter_structs_phaseG_plan.md
+archived_date: 2026-02-18
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
+title: Parameter Structs Phase G 任务单（可勾选）
+archived: true
 original: docs/dev/active/2026_02_18_parameter_structs_phaseG_plan.md
 archived_date: 2026-02-18
 ---

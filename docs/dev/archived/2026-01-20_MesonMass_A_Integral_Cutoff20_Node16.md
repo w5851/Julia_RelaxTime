@@ -1,4 +1,16 @@
 ---
+title: MesonMass A Integral Cutoff20 Node16
+archived: true
+original: docs/dev/active/MesonMass_A_Integral_Cutoff20_Node16.md
+archived_date: 2026-01-20
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: MesonMass A Integral Cutoff=20 & Nodes=16
 archived: true
 original: docs/dev/active/2026_1_20介子质量计算结果不同原因分析.md

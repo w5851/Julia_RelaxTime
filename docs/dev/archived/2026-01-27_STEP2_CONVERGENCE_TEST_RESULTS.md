@@ -1,3 +1,15 @@
+---
+title: 步骤 2 结果总结: 收敛性测试
+archived: true
+original: docs/dev/active/STEP2_CONVERGENCE_TEST_RESULTS.md
+archived_date: 2026-01-27
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 步骤 2 结果总结: 收敛性测试
 
 **日期**: 2026-01-27

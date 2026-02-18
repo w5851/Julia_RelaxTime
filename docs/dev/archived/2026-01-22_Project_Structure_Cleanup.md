@@ -1,4 +1,16 @@
 ---
+title: 2026-01-22 整理项目结构
+archived: true
+original: docs/dev/active/Project_Structure_Cleanup.md
+archived_date: 2026-01-22
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: Project Structure Cleanup (整理项目结构)
 archived: true
 original: docs/dev/active/2026-1-22整理项目结构.md

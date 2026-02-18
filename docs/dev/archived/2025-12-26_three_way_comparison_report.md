@@ -1,3 +1,15 @@
+---
+title: 三方跨语言对比报告: Julia vs C++ vs Fortran
+archived: true
+original: docs/dev/active/three_way_comparison_report.md
+archived_date: 2025-12-26
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 三方跨语言对比报告: Julia vs C++ vs Fortran
 
 测试点: T=150MeV, μB=800MeV

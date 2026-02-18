@@ -1,3 +1,15 @@
+---
+title: usbar->usbar 振幅18.5倍差异分析报告
+archived: true
+original: docs/dev/active/usbar_amplitude_difference_analysis.md
+archived_date: 2025-12-24
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # usbar->usbar 振幅18.5倍差异分析报告
 
 ## 问题描述

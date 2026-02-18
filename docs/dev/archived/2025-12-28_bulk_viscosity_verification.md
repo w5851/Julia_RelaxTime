@@ -1,3 +1,15 @@
+---
+title: 体粘滞系数验证状态
+archived: true
+original: docs/dev/active/bulk_viscosity_verification.md
+archived_date: 2025-12-28
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 体粘滞系数验证状态
 
 ## 概述

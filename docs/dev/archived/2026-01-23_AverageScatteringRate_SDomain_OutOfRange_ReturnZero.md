@@ -1,4 +1,16 @@
 ---
+title: AverageScatteringRate SDomain OutOfRange ReturnZero
+archived: true
+original: docs/dev/active/AverageScatteringRate_SDomain_OutOfRange_ReturnZero.md
+archived_date: 2026-01-23
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: AverageScatteringRate s-domain out-of-range returns zero
 archived: true
 original: docs/dev/active/任务6.md

@@ -1,4 +1,16 @@
 ---
+title: Compare Julia meson masses vs Fortran reference output.
+archived: true
+original: docs/dev/active/RelaxTime_Fortran_Comparison_Scripts.md
+archived_date: 2026-01-22
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 title: RelaxTime Fortran 对照/诊断脚本归档
 archived: true
 original: scripts/relaxtime/* (临时对照/实验脚本)

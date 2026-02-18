@@ -1,6 +1,18 @@
 ---
 title: PNJL 求解器重构笔记
 archived: true
+original: docs/dev/active/PNJL_Solver_Refactoring_Notes.md
+archived_date: 2026-01-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
+title: PNJL 求解器重构笔记
+archived: true
 original: docs/dev/PNJL_Solver_Refactoring_Notes.md
 archived_date: 2026-01-19
 ---
