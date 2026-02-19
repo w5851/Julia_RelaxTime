@@ -46,12 +46,11 @@ end
         T_fm = pt.T
         mu = pt.mu
 
-        x_pnjl = invoke(
-            Main.Models.solve_gap,
-            Tuple{Main.Models.AbstractPNJLModel, Any, Any},
+        x_pnjl = Main.Models.solve_gap(
             pnjl,
             T_fm,
             mu;
+            solver_backend=:models,
             solver=solver,
             p_num=8,
             t_num=4,

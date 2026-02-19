@@ -45,7 +45,7 @@ end
 
 function approx_equal(x::Tuple, y::Tuple; rtol=1e-12, atol=1e-14)
     length(x) == length(y) || return false
-    return all(approx_equal(x[i], y[i]; rtol=rtol, atol=atol) for i in 1:length(x))
+    return all(approx_equal(x[i], y[i]; rtol=rtol, atol=atol) for i in eachindex(x))
 end
 
 # ============================================================================

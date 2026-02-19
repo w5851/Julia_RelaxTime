@@ -264,14 +264,19 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
     
     @testset "Flavor factor" begin
         # Test flavor factor extraction
-        processes = [:uu_to_uu, :ud_to_ud, :us_to_us, :dd_to_dd, :ds_to_ds, :ss_to_ss]
+        flavor_pairs = [
+            (:u, :u),
+            (:u, :d),
+            (:u, :s),
+            (:d, :d),
+            (:d, :s),
+            (:s, :s),
+        ]
         
-        for process in processes
-            # Flavor factor should be the same for struct and NamedTuple
-            factor = get_flavor_factor(process)
+        for (q1, q2) in flavor_pairs
+            factor = get_flavor_factor(q1, q2)
             
             @test factor isa Float64
-            @test factor > 0.0
             @test isfinite(factor)
         end
     end

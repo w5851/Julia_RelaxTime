@@ -14,20 +14,20 @@
 # 运行方式：
 # - `julia --project=. tests/perf/relaxtime/test_total_propagator_performance.jl`
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
 using Printf
 using Statistics
 using Dates
 
 # 加载模块
-include("../../src/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/EffectiveCouplings.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/TotalPropagator.jl")
-include("../../src/relaxtime/PolarizationAniso.jl")  # 用于独立测试极化函数
+include("../../../src/Constants_PNJL.jl")
+include("../../../src/integration/GaussLegendre.jl")
+include("../../../src/relaxtime/EffectiveCouplings.jl")
+include("../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../src/relaxtime/TotalPropagator.jl")
+include("../../../src/relaxtime/PolarizationAniso.jl")  # 用于独立测试极化函数
 
 using .Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm, SCATTERING_MESON_MAP
 using .GaussLegendre: gauleg

@@ -13,6 +13,7 @@
 # 运行方式：
 # - `julia --project=. tests/perf/relaxtime/timing_analysis.jl`
 using Printf
+using Statistics
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
 
@@ -32,7 +33,7 @@ for _ in 1:3
 end
 
 println("\n1. 单次调用用时 (预热后, 1000次平均):")
-n_runs = 1000
+const N_RUNS = 1000
 
 for (strat, sname) in [
     (OneLoopIntegralsCorrection.STRATEGY_QUADGK, "QUADGK"),
@@ -40,7 +41,7 @@ for (strat, sname) in [
     (OneLoopIntegralsCorrection.STRATEGY_HYBRID, "HYBRID"),
 ]
     times = Float64[]
-    for _ in 1:n_runs
+    for _ in 1:N_RUNS
         t0 = time_ns()
         OneLoopIntegralsCorrection.tilde_B0_correction_k_positive(
             :quark, λ, k, m, m_prime, μ, T, Φ, Φbar, ξ;
@@ -49,12 +50,12 @@ for (strat, sname) in [
         push!(times, (time_ns() - t0) / 1e6)
     end
     avg = sum(times) / length(times)
-    std = sqrt(sum((t - avg)^2 for t in times) / length(times))
+    std = Statistics.std(times; corrected=false)
     println(@sprintf("  %-12s: %.3f ± %.3f ms", sname, avg, std))
 end
 
 println("\n2. 不同节点数的用时 (HYBRID):")
-for n in [16, 24, 32, 48, 64]
+for n in (16, 24, 32, 48, 64)
     times = Float64[]
     for _ in 1:500
         t0 = time_ns()

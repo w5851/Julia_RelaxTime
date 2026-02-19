@@ -7,7 +7,7 @@
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 # Include necessary modules (adjust paths as needed)
-include("../../src/relaxtime/RelaxationTime.jl")
+include(joinpath(@__DIR__, "../../../src/relaxtime/RelaxationTime.jl"))
 using .RelaxationTime
 
 # =============================================================================

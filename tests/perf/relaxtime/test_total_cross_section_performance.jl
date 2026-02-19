@@ -222,7 +222,8 @@ println("="^70)
 println("说明：此测试需要计算完整的有效耦合常数 K_coeffs")
 println("包括 K0_plus, K123_plus 等，需要依赖 EffectiveCouplings 模块")
 
-if false  # 暂时跳过
+run_full_cross_section_tests = get(ENV, "RUN_FULL_CROSS_SECTION_TESTS", "false") == "true"
+if run_full_cross_section_tests
 @testset "总散射截面计算" begin
     println("\n" * "="^70)
     println("测试集 3: 总散射截面计算")
@@ -244,7 +245,7 @@ if false  # 暂时跳过
     @testset "基本计算" begin
         σ = total_cross_section(
             process, s, quark_params, thermo_params, K_coeffs,
-            rtol=1e-4, atol=1e-8
+            n_points=6
         )
         
         println("\n结果:")
@@ -270,7 +271,7 @@ if false  # 暂时跳过
             try
                 σ = total_cross_section(
                     proc, s, quark_params, thermo_params, K_coeffs,
-                    rtol=1e-4
+                    n_points=6
                 )
                 println("    $proc: σ = $(round(σ, digits=6)) fm²")
                 @test σ > 0.0
@@ -292,7 +293,7 @@ println("\n" * "="^70)
 println("测试集 4: s 依赖性扫描（跳过 - 需要完整物理参数）")
 println("="^70)
 
-if false  # 暂时跳过
+if run_full_cross_section_tests
 @testset "s 依赖性扫描" begin
     println("\n" * "="^70)
     println("测试集 4: s 依赖性扫描")
@@ -318,7 +319,7 @@ if false  # 暂时跳过
         σ_values = scan_s_dependence(
             s_values, :uu_to_uu,
             quark_params, thermo_params, K_coeffs,
-            rtol=1e-4
+            n_points=6
         )
         
         println("\ns 依赖性结果:")

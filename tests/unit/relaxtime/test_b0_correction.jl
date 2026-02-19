@@ -108,7 +108,7 @@ TEST_PARAMS = (
         println("="^70 * "\n")
         
         # 验证 ξ 增加时，修正项的绝对值也应该增加（一般情况）
-        for i in 2:length(results)
+        for i in (firstindex(results) + 1):lastindex(results)
             if results[i].ξ > 0
                 @test abs(results[i].real) > abs(results[1].real) || abs(results[i].real) < 1e-8
             end

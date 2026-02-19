@@ -25,12 +25,11 @@ using StaticArrays
     # Force calling the generic AbstractPNJLModel method even if PNJLModel has a more specific solver.
     solver = Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite, xtol=1e-10, ftol=1e-10)
 
-    st = invoke(
-        Models.solve_gap,
-        Tuple{Models.AbstractPNJLModel, Any, Any},
+    st = Models.solve_gap(
         m,
         T,
         mu_vec;
+        solver_backend=:models,
         solver=solver,
         initial_guess=x0,
         residual_norm_max=1e-4,

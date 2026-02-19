@@ -246,7 +246,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         @test length(cache.sigma_vals) == length(s_grid)
         
         # Verify s_vals match input grid
-        for i in 1:length(s_grid)
+        for i in eachindex(s_grid)
             @test cache.s_vals[i] == s_grid[i]
         end
         

@@ -392,7 +392,7 @@ end
         Π0_P = results_P[1].real
         Π0_S = results_S[1].real
         
-        for i in 2:length(results_P)
+        for i in (firstindex(results_P) + 1):lastindex(results_P)
             change_P = abs((results_P[i].real - Π0_P) / Π0_P) * 100
             change_S = abs((results_S[i].real - Π0_S) / Π0_S) * 100
             println(@sprintf("%-10.2f %-20.6f %-20.6f", results_P[i].ξ, change_P, change_S))

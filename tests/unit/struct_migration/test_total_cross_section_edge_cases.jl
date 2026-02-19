@@ -130,7 +130,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         # Test smoothness: check that cross-section increases monotonically
         # or at least doesn't have large jumps
         # (Physical expectation: σ generally increases with s above threshold)
-        for i in 2:length(σ_values)
+        for i in (firstindex(σ_values) + 1):lastindex(σ_values)
             # Check for large discontinuous jumps (more than 50% change)
             if σ_values[i-1] > 0.0
                 relative_change = abs(σ_values[i] - σ_values[i-1]) / σ_values[i-1]
@@ -329,7 +329,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         
         # Verify equivalence for scan
         @test length(σ_struct_scan) == length(σ_nt_scan)
-        for i in 1:length(σ_struct_scan)
+        for i in eachindex(σ_struct_scan)
             if isfinite(σ_struct_scan[i]) && isfinite(σ_nt_scan[i])
                 @test isapprox(σ_struct_scan[i], σ_nt_scan[i], rtol=1e-12)
             end
