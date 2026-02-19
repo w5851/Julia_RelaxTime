@@ -8,9 +8,9 @@ using .PNJL.TrhoScan
 using DelimitedFiles
 using Printf
 
-const DEFAULT_RAW = joinpath(PROJECT_ROOT, "outputs", "results", "julia_baseline_raw.csv")
-const DEFAULT_UNIFIED = joinpath(PROJECT_ROOT, "outputs", "results", "julia_baseline_unified.csv")
-const DEFAULT_FORTRAN = joinpath(PROJECT_ROOT, "outputs", "results", "fortran_baseline_unified.csv")
+const DEFAULT_RAW = joinpath(PROJECT_ROOT, "data", "outputs", "results", "julia_baseline_raw.csv")
+const DEFAULT_UNIFIED = joinpath(PROJECT_ROOT, "data", "outputs", "results", "julia_baseline_unified.csv")
+const DEFAULT_FORTRAN = joinpath(PROJECT_ROOT, "data", "outputs", "results", "fortran_baseline_unified.csv")
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol, Any}(

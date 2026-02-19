@@ -2,11 +2,15 @@ using Test
 using Logging
 using Printf
 
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, _QUARK_DISTRIBUTION_PATH)
+end
+
 include("../../../src/QuarkDistribution_Aniso.jl")
 
-using .PNJLQuarkDistributions_Aniso
-using .PNJLQuarkDistributions_Aniso: PNJLQuarkDistributions_Aniso as Aniso
-using .PNJLQuarkDistributions_Aniso.PNJLQuarkDistributions: PNJLQuarkDistributions as Dist
+const Aniso = Main.PNJLQuarkDistributions_Aniso
+const Dist = Main.PNJLQuarkDistributions
 
 @testset "各向异性分布函数测试" begin
     # 测试参数设置
@@ -185,21 +189,21 @@ using .PNJLQuarkDistributions_Aniso.PNJLQuarkDistributions: PNJLQuarkDistributio
     cosθ = 0.5
     
     println("\n测试:quark符号:")
-    f_quark = distribution_aniso(:quark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
+    f_quark = Aniso.distribution_aniso(:quark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     f_quark_direct = Aniso.quark_distribution_aniso(p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     @test f_quark == f_quark_direct
     println(@sprintf("distribution_aniso(:quark, ...) = %.10e", f_quark))
     println(@sprintf("quark_distribution_aniso(...)  = %.10e", f_quark_direct))
     
     println("\n测试:antiquark符号:")
-    f_antiquark = distribution_aniso(:antiquark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
+    f_antiquark = Aniso.distribution_aniso(:antiquark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     f_antiquark_direct = Aniso.antiquark_distribution_aniso(p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     @test f_antiquark == f_antiquark_direct
     println(@sprintf("distribution_aniso(:antiquark, ...) = %.10e", f_antiquark))
     println(@sprintf("antiquark_distribution_aniso(...)  = %.10e", f_antiquark_direct))
     
     println("\n测试:correction统一接口:")
-    corr_quark = distribution_aniso_correction(:quark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
+    corr_quark = Aniso.distribution_aniso_correction(:quark, p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     corr_quark_direct = Aniso.quark_distribution_aniso_correction(p_inv_fm, m_inv_fm, μ_inv_fm, T_inv_fm, Φ, Φbar, ξ, cosθ)
     @test corr_quark == corr_quark_direct
     println(@sprintf("distribution_aniso_correction(:quark, ...) = %.10e", corr_quark))

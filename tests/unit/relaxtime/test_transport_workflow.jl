@@ -1,7 +1,10 @@
 using Test
 
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
-using .TransportWorkflow
+const _TRANSPORT_WORKFLOW_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+if !isdefined(Main, :TransportWorkflow)
+    Base.include(Main, _TRANSPORT_WORKFLOW_PATH)
+end
+using Main.TransportWorkflow
 
 @testset "TransportWorkflow: gap -> transport (single point)" begin
     T = 0.15
@@ -10,7 +13,7 @@ using .TransportWorkflow
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
-    res = solve_gap_and_transport(
+    res = TransportWorkflow.solve_gap_and_transport(
         T,
         mu;
         xi=xi,
@@ -59,7 +62,7 @@ end
         iterations=30,
     )
 
-    res_legacy = solve_gap_and_transport(
+    res_legacy = TransportWorkflow.solve_gap_and_transport(
         T,
         mu;
         xi=xi,
@@ -73,7 +76,7 @@ end
         transport_config=TransportIntegrationConfig(p_nodes=12, p_max=4.0),
     )
 
-    res_models = solve_gap_and_transport(
+    res_models = TransportWorkflow.solve_gap_and_transport(
         T,
         mu;
         xi=xi,
@@ -107,7 +110,7 @@ end
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
-    res = solve_gap_and_transport(
+    res = TransportWorkflow.solve_gap_and_transport(
         T,
         mu;
         xi=xi,

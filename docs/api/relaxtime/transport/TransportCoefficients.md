@@ -115,18 +115,29 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 
 ---
 
-### `bulk_viscosity(quark_params, thermo_params; tau, bulk_coeffs, ...) -> Float64`
+### `bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...) -> Float64`
 
 计算体粘滞系数 $\zeta$。
 
 **额外参数**
-- `bulk_coeffs::NamedTuple`：热力学导数系数，需包含：
+- `bulk_coeffs_isentropic::NamedTuple`：等熵体粘滞导数系数，需包含：
   - `dP_depsilon_n`：$(\partial P/\partial\varepsilon)_n$
   - `dP_dn_epsilon`：$(\partial P/\partial n)_\varepsilon$
   - `dM_dT`：质量对温度的导数（3元素数组）
   - `dM_dmu`：质量对化学势的导数（3元素数组）
 
-建议使用 `PNJL.ThermoDerivatives.bulk_derivative_coeffs(T, mu; ...)` 的返回值。
+建议使用 `PNJL.ThermoDerivatives.bulk_viscosity_coefficients(T, mu; ...)` 的返回值。
+
+### `bulk_viscosity(quark_params, thermo_params; formula=:isentropic, ...) -> Float64`
+
+统一体粘滞入口，当前支持：
+
+- `formula=:isentropic`：转发到 `bulk_viscosity_isentropic(...)`
+
+兼容参数：
+
+- `bulk_coeffs_isentropic=...`（推荐）
+- `bulk_coeffs=...`（兼容旧参数名）
 
 ---
 
@@ -156,7 +167,7 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 ## 示例
 
 ```julia
-include("src/relaxtime/TransportCoefficients.jl")
+include("../../../../src/relaxtime/TransportCoefficients.jl")
 using .TransportCoefficients
 
 # 物理参数
@@ -212,6 +223,16 @@ req = TransportRequest(
 σ_req = electric_conductivity(req)
 all = transport_coefficients(req; bulk_coeffs=nothing)
 ```
+
+## 输入校验与数值保护
+
+- `thermo_params.T` 必须为有限正数；`m_u,m_d,m_s` 必须为有限非负数。
+- `tau` 必须包含 `u,d,s,ubar,dbar,sbar` 且每个值有限且非负。
+- `TransportIntegrationConfig` 约束：`p_nodes>0`、`cos_nodes>0`、`p_max>0`，自定义网格/权重必须成对、长度一致且有限。
+- `electric_conductivity` 的 `charges.u/d/s` 必须为有限数。
+- 数值保护：
+  - 能量采用下限保护：`E = max(E_raw, sqrt(eps(Float64)))`
+  - 费米因子采用物理区间截断：`f(1-f) -> clamp(f(1-f), 0.0, 0.25)`
 
 ## 注意事项
 

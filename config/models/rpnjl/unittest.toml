@@ -1,0 +1,2 @@
+# rPNJL unittest profile intentionally keeps no overrides.
+# Semantics: merged config == config/models/rpnjl/default.toml

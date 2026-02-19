@@ -26,13 +26,7 @@ const UNIT_DIR = @__DIR__
 # - analysis/perf/script-style checks should move to tests/analysis, tests/perf, or scripts.
 # Default `include("tests/unit/runtests.jl")` should be green and reasonably fast.
 const DEFAULT_SKIP = Set([
-    # PNJL: missing symbol / AD singularities / references removed APIs
-    "test_core_integrals.jl",
-    "test_implicit_jacobian.jl",
-    "test_scans.jl",
-
-    # RelaxTime: uses deprecated API signature (should be updated before re-enabling)
-    "test_differential_cross_section.jl",
+    # phase-2: DEFAULT_SKIP 已清零；若需临时豁免，请同步更新 config/ci/unit_skip_policy.toml
 ])
 
 const SMOKE_FILES = [
@@ -138,9 +132,20 @@ end
 
 function _include_dir(dir::String)
     files = sort(readdir(dir; join=true))
+    verbose_include = get(ENV, "UNIT_VERBOSE_INCLUDE", "0") in ("1", "true", "TRUE", "yes", "YES")
     for f in files
         _should_include_unit_file(f) || continue
-        include(f)
+        rel = relpath(f, UNIT_DIR)
+        if verbose_include
+            println("[unit-full] including: " * rel)
+        end
+        try
+            include(f)
+        catch err
+            println(stderr, "[unit-full] include failed: " * rel)
+            println(stderr, "[unit-full] reproduce: UNIT_PROFILE=full UNIT_FILES='" * replace(rel, '\\' => '/') * "' julia --project=. tests/unit/runtests.jl")
+            rethrow(err)
+        end
     end
 end
 

@@ -39,6 +39,108 @@ const TAU_ONE = (u=1.0,d=1.0,s=1.0,ubar=1.0,dbar=1.0,sbar=1.0)
     @test isapprox(sigma1_struct, sigma1; rtol=1e-12, atol=0.0)
 end
 
+@testset "TransportCoefficients: input validation guards" begin
+    cfg = TransportIntegrationConfig(p_nodes=8, p_max=4.0)
+
+    bad_T = merge(THERMO_PARAMS, (T=0.0,))
+    @test_throws ErrorException shear_viscosity(QUARK_PARAMS, bad_T; tau=TAU_ONE, config=cfg)
+
+    bad_mass = (m=(u=-0.1, d=0.3, s=0.5), μ=QUARK_PARAMS.μ)
+    @test_throws ErrorException shear_viscosity(bad_mass, THERMO_PARAMS; tau=TAU_ONE, config=cfg)
+
+    tau_missing = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0)
+    @test_throws ErrorException shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=tau_missing, config=cfg)
+
+    bad_charges = (u=NaN, d=-1 / 3, s=-1 / 3)
+    @test_throws ErrorException electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg, charges=bad_charges)
+
+    bad_cfg = TransportIntegrationConfig(p_nodes=8, p_max=4.0)
+    bad_bulk = (
+        v_n_sq=0.3,
+        dμB_dT_sigma=0.1,
+        masses=[0.3, 0.3],
+        dM_dT=[0.0, 0.0, 0.0],
+        dM_dμB=[0.0, 0.0, 0.0],
+    )
+    @test_throws ErrorException bulk_viscosity_isentropic(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        config=bad_cfg,
+        bulk_coeffs_isentropic=bad_bulk,
+    )
+end
+
+@testset "TransportCoefficients: numerical safeguards" begin
+    thermo_params_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
+
+    # f>1 会导致原始 f(1-f) 为负；开启截断后系数应保持非负且有限。
+    provider_bad_f = (
+        energy_from_p=(p::Float64, m::Float64) -> 1e-30,
+        energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> 1e-30,
+        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.1,
+        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.1,
+        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.1,
+        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.1,
+        prefer_energy_aniso=true,
+    )
+
+    η = shear_viscosity(
+        QUARK_PARAMS,
+        thermo_params_aniso;
+        tau=TAU_ONE,
+        provider=provider_bad_f,
+        p_nodes=6,
+        cos_nodes=6,
+        p_max=4.0,
+    )
+    @test isfinite(η)
+    @test η >= 0.0
+end
+
+@testset "TransportCoefficients: bulk_viscosity unified entry" begin
+    coeffs = (
+        v_n_sq=0.3,
+        dμB_dT_sigma=0.1,
+        masses=[0.3, 0.3, 0.5],
+        dM_dT=[0.0, 0.0, 0.0],
+        dM_dμB=[0.0, 0.0, 0.0],
+    )
+
+    zeta_iso = bulk_viscosity_isentropic(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        p_nodes=8,
+        p_max=4.0,
+        bulk_coeffs_isentropic=coeffs,
+    )
+
+    zeta_unified = bulk_viscosity(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        formula=:isentropic,
+        tau=TAU_ONE,
+        p_nodes=8,
+        p_max=4.0,
+        bulk_coeffs_isentropic=coeffs,
+    )
+
+    zeta_legacy_alias = bulk_viscosity(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        formula=:isentropic,
+        tau=TAU_ONE,
+        p_nodes=8,
+        p_max=4.0,
+        bulk_coeffs=coeffs,
+    )
+
+    @test isapprox(zeta_unified, zeta_iso; rtol=1e-12, atol=0.0)
+    @test isapprox(zeta_legacy_alias, zeta_iso; rtol=1e-12, atol=0.0)
+    @test_throws ErrorException bulk_viscosity(QUARK_PARAMS, THERMO_PARAMS; formula=:unknown, tau=TAU_ONE, bulk_coeffs_isentropic=coeffs)
+end
+
 @testset "TransportCoefficients: sigma scales with q^2" begin
     charges1 = (u=2/3, d=-1/3, s=-1/3)
     charges2 = (u=4/3, d=-2/3, s=-2/3)
@@ -129,8 +231,7 @@ end
     # Make sure transport integrand can be decoupled from hard-coded quark_params fields.
     qp_bad = (m=(u=NaN, d=NaN, s=NaN), μ=(u=999.0, d=999.0, s=999.0))
 
-    eta_bad_default = shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
-    @test !isfinite(eta_bad_default)
+    @test_throws ErrorException shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
 
     cached_m = (u=0.3, d=0.3, s=0.5)
     cached_mu = (u=0.2, d=0.2, s=0.2)

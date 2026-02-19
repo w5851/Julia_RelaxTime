@@ -1,13 +1,8 @@
-max_skip = 4
+max_skip = 0
 
 [phase]
-name = "phase-1"
-description = "先清理 deprecated/失效接口测试，再缩减 DEFAULT_SKIP"
+name = "phase-2"
+description = "DEFAULT_SKIP 清零，新增临时豁免需显式准入"
 
 [targets]
-required_entries = [
-  "test_core_integrals.jl",
-  "test_implicit_jacobian.jl",
-  "test_scans.jl",
-  "test_differential_cross_section.jl",
-]
+required_entries = []

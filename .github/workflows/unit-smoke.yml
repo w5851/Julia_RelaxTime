@@ -5,6 +5,8 @@ on:
     paths:
       - "src/**"
       - "tests/unit/**"
+      - "config/**"
+      - "scripts/dev/check_model_profile_matrix.jl"
       - "Project.toml"
       - "Manifest.toml"
       - ".github/workflows/unit-smoke.yml"
@@ -13,6 +15,8 @@ on:
     paths:
       - "src/**"
       - "tests/unit/**"
+      - "config/**"
+      - "scripts/dev/check_model_profile_matrix.jl"
       - "Project.toml"
       - "Manifest.toml"
       - ".github/workflows/unit-smoke.yml"
@@ -40,6 +44,9 @@ jobs:
 
       - name: Check unit skip policy
         run: julia --project=. scripts/dev/check_unit_skip_policy.jl
+
+      - name: Check model profile matrix
+        run: julia --project=. scripts/dev/check_model_profile_matrix.jl
 
       - name: Run unit smoke profile
         env:

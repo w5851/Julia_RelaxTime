@@ -44,6 +44,7 @@ function main(args::Vector{String})
         (T=0.90, mu=0.00, xi=0.0),
         (T=1.05, mu=0.00, xi=0.0),
         (T=0.90, mu=0.15, xi=0.0),
+        (T=0.90, mu=0.00, xi=0.2),
     )
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)

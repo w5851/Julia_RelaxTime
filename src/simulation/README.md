@@ -19,9 +19,17 @@ web/index.html
 │   ├── FrameTransformations.jl       # Lorentz变换
 │   ├── EllipsoidCalculation.jl       # 椭球参数计算
 │   ├── MomentumMapping.jl            # 动量映射主模块
-│   └── HTTPServer.jl                  # REST API服务器
+│   ├── HTTPServer.jl                 # 轻量REST API服务器（/compute, /health）
+│   ├── FullServerApp.jl              # full server 应用装配（路由/处理器/静态资源）
+│   ├── ServerLauncher.jl             # full server 启动与端口/启动日志编排
+│   └── fullserver/                   # full server 子模块
+│       ├── routing.jl                # 路由分发
+│       ├── compute_handlers.jl       # /compute 处理
+│       ├── pnjl_handlers.jl          # /api/modules/* 处理
+│       ├── http_utils.jl             # CORS + 静态资源处理
+│       └── shared.jl                 # 共享常量与参数解析辅助
 ├── scripts/server/                    # 服务器启动脚本
-│   ├── server_full.jl                 # API+静态资源服务
+│   ├── server_full.jl                 # 仅保留启动编排（核心逻辑在 src/simulation）
 │   └── start.bat                      # Windows 一键启动
 ├── web/                               # 前端文件
 │   ├── index.html                     # 主页面

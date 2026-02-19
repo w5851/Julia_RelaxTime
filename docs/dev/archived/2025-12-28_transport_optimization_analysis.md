@@ -1,43 +1,108 @@
+---
+title: 输运系数计算流程优化任务单（执行版，可勾选）
+archived: true
+original: docs/dev/active/2025-12-28_transport_optimization_analysis.md
+archived_date: 2026-02-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 输运系数计算流程优化任务单（执行版，可勾选）
 
 ## 目标
 
-将历史优化分析转为可执行任务，补齐未完成项并形成可归档证据。
+将历史优化分析转为“与当前仓库状态一致”的可执行任务：补齐 P0 缺口、补强已落地能力，并形成可归档证据。
 
 ## 当前状态（2026-02-19）
 
 - [x] 高优先级项“ThermoDerivatives 中重复求解能隙方程”已落地。
 - [x] Phase 1（TransportIntegrationConfig）已落地并有单测覆盖。
-- [ ] 通用积分框架抽取仍未完成。
-- [ ] 输入参数验证与极端参数数值保护未完成。
-- [ ] 低优先级性能微优化（Symbol→索引、分派表）未完成。
-- [ ] API 文档与集成测试补齐未完成。
+- [x] 已有固定点基线文件与对应 smoke 回归（transport bridge）。
+- [x] 通用积分框架抽取已落地：η/σ 共享主积分循环，ζ 复用共享组件并保留特例物理公式。
+- [x] 输入参数验证与极端参数数值保护已落地（T>0、质量非负、E 下限、ff 截断等）并有单测。
+- [x] Transport API 文档口径已修正（`bulk_viscosity_isentropic` 等）。
+- [x] 低优先级性能微优化首轮已落地（Symbol→索引映射 + provider 能力缓存，减少热循环分支判定）。
+- [x] 与技术债总单的映射与去重已建立（避免 active 任务单漂移）。
 
 ## 待办（可勾选）
 
 ### P0
 
-- [ ] 在 TransportCoefficients 中抽取通用积分框架，减少重复循环实现。
-- [ ] 完成输入参数校验（T>0、质量非负、网格一致性等）并新增单测。
-- [ ] 增加极端参数数值保护（E 下限、ff 截断等）并验证不改变正常区间结果。
+- [x] 在 TransportCoefficients 中抽取“共享积分主循环”：已统一 η/σ 的主积分路径；ζ 保留特例公式并复用共享组件。
+- [x] 完成输入参数校验（T>0、质量非负、网格一致性、tau/charges 字段完整性）并新增单测。
+- [x] 增加极端参数数值保护（E 下限、ff 截断等），并验证正常物理区间结果不漂移。
+- [x] 修正 Transport API 文档口径（函数命名、参数名、默认值、边界行为）并与当前实现一致。
 
 ### P1
 
-- [ ] 评估并落地 Symbol→整数索引替换（仅在热点路径）。
-- [ ] 评估并落地分派表/函数指针缓存，减少热循环条件分支。
-- [ ] 统一 bulk_viscosity 命名或提供单入口公式切换方案。
+- [x] 评估并落地 Symbol→整数索引替换（仅在热点路径，先完成 species/flavor 映射路径）。
+- [x] 评估并落地分派表/函数指针缓存，减少热循环条件分支。
+- [x] 统一体粘滞接口命名策略（新增单入口 `bulk_viscosity(...; formula=:isentropic)`，并保留 `bulk_viscosity_isentropic` 兼容）。
+- [x] 输出热点路径“优化前后”对比（固定点 + 小网格），形成可复现实验记录。
 
 ### P2
 
-- [ ] 完善 API 文档（参数、默认值、边界行为）。
-- [ ] 补齐端到端集成测试并记录性能对比。
+- [x] 补强固定点基线覆盖（在现有 `baseline_transport_fixedpoints_v1.csv` 基础上扩展 ξ≠0 点位）。
+- [x] 将基线治理流程补齐到文档（容差来源、更新准入、变更说明模板）。
+- [x] 与 `2026-02-19_技术债优先级清单与验收任务单` 建立映射，去重并保持状态同步。
 
 ## DoD
 
-- [ ] P0 全部完成并有单测证据。
-- [ ] 性能热点路径有“优化前后对比”记录。
-- [ ] README/STATUS/API 文档口径一致。
-- [ ] 可归档执行记录完整。
+- [x] P0 全部完成并有单测证据。
+- [x] 保留并通过现有基线 smoke 回归；新增/更新基线时有版本号、原因和容差说明。
+- [x] 性能热点路径有“优化前后对比”记录（命令、点位、容差可复现）。
+- [x] README/STATUS/API/测试口径一致（含体粘滞接口命名）。
+- [x] 与技术债总单状态一致，无重复或冲突项。
+- [x] 可归档执行记录完整。
+
+## 2026-02-19 执行记录（本轮）
+
+### 已落地代码与测试
+
+- `src/relaxtime/TransportCoefficients.jl`
+   - 抽取 η/σ 共享积分主循环 `_integrate_species_sum`。
+   - 增加统一输入校验 `_validate_transport_inputs`。
+   - 增加数值保护：`E = max(E_raw, sqrt(eps(Float64)))`，`ff = clamp(f*(1-f), 0.0, 0.25)`。
+   - species/flavor 路径改为索引映射辅助函数（减少热点 Symbol 分支判断）。
+   - provider 能力缓存 `_provider_caps`：在热循环复用分支能力判断。
+   - 新增统一体粘滞入口 `bulk_viscosity(...; formula=:isentropic)`（兼容 `bulk_coeffs` 旧参数名）。
+- `tests/unit/relaxtime/test_transport_coefficients.jl`
+   - 新增输入校验与数值保护测试。
+   - 与现有 provider mass/mu override smoke 语义对齐。
+- `tests/unit/relaxtime/test_transport_legacy_models_bridge_smoke.jl`
+   - 默认纳入 `ξ=0.2` 固定点回归。
+- `tests/baselines/relaxtime/baseline_transport_fixedpoints_v1.csv`
+   - 新增 `T=0.9, mu=0.0, xi=0.2` 基线行。
+
+### 定向验证命令与结果
+
+- `Set-Item Env:UNIT_FILES 'relaxtime/test_transport_workflow_smoke.jl'; julia --project=. tests/unit/runtests.jl`
+   - 结果：`35 passed, 0 failed, 0 errored`
+- `Set-Item Env:UNIT_FILES 'relaxtime/test_transport_legacy_models_bridge_smoke.jl'; julia --project=. tests/unit/runtests.jl`
+   - 结果：`100 passed, 0 failed, 0 errored`
+
+- `Set-Item Env:UNIT_FILES 'relaxtime/test_transport_coefficients.jl'; julia --project=. tests/unit/runtests.jl`
+   - 结果：`48 passed, 0 failed, 0 errored`
+
+### 热点路径性能记录（小网格）
+
+- 脚本：`scripts/dev/benchmark_transport_hotpath.jl`
+- 命令：`julia --project=. scripts/dev/benchmark_transport_hotpath.jl`
+- 输出（当前实现）：
+   - `eta_median_s=2.935e-5`
+   - `sigma_median_s=3.165e-5`
+   - `eta_min_s=1.88e-5`
+   - `sigma_min_s=2.01e-5`
+
+### 基线治理口径（本任务单内约定）
+
+- 基线文件：`tests/baselines/relaxtime/baseline_transport_fixedpoints_v1.csv`
+- smoke 校验：`tests/unit/relaxtime/test_transport_legacy_models_bridge_smoke.jl`
+- 容差口径：当前 smoke 使用 `rtol=8e-2, atol=1e-6`。
+- 基线更新准入：必须同时提交“变更原因 + 影响范围 + 新旧差异摘要 + 验证命令/结果 + 文档更新”。
 
 ---
 

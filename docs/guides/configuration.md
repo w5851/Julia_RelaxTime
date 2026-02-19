@@ -6,6 +6,37 @@
 
 **目标**：提供灵活、可维护的配置系统，支持多种使用场景和环境。
 
+## 当前项目 Profile 口径（2026-02）
+
+当前模型参数文件以 `config/models/` 为主：
+
+- `config/models/njl/default.toml` + `config/models/njl/unittest.toml`
+- `config/models/pnjl/default.toml` + `config/models/pnjl/unittest.toml`
+- `config/models/rpnjl/default.toml` + `config/models/rpnjl/unittest.toml`
+
+覆盖关系统一为：
+
+1. 先加载 `default.toml`（完整基线）
+2. 再把 `unittest.toml` 作为覆盖层 deep-merge 到 default
+3. `unittest` 中未出现的字段，继承 `default`（即“只写差异”）
+
+对应环境变量：
+
+- `NJL_PARAM_PROFILE` / `PNJL_PARAM_PROFILE` / `RPNJL_PARAM_PROFILE`
+- `PHYSICS_PARAM_PROFILE`（物理常量层）
+
+推荐漂移检查命令：
+
+```powershell
+julia --project=. scripts/dev/check_model_profile_matrix.jl
+```
+
+该检查会验证：
+
+- default+unittest 合并后关键字段完整；
+- unittest 覆盖键必须是 default 已存在键（防止误拼写/静默新增漂移）；
+- 输出各模型覆盖键列表，便于审阅 profile 差异。
+
 ---
 
 ## 1. 配置层次
@@ -657,6 +688,14 @@ num_workers = 4
 file = "data/outputs/tmu_scan_results.csv"
 save_convergence_info = true
 ```
+
+### 9.3 输出目录迁移说明（root `outputs/` -> `data/outputs/`）
+
+- 当前默认口径：所有新脚本输出应写入 `data/outputs/`（按 `results/`、`figures/` 分层）。
+- 历史兼容口径：根目录 `outputs/` 仅用于读取历史产物，不再作为默认落盘路径。
+- 迁移建议：
+    - 旧命令若显式写 `--output outputs/...`，请改为 `--output data/outputs/...`。
+    - 若历史脚本需复现实验，可保留旧入参路径，但新产物应回写到 `data/outputs/`。
 
 ---
 

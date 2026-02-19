@@ -151,9 +151,6 @@ using .TransportWorkflow
 
     _check_bridge_points(points, 0.0, tau, models_solver, rtol_transport, atol_transport)
 
-    include_xi_case = get(ENV, "UNIT_BRIDGE_XI_CASE", "0") in ("1", "true", "TRUE", "yes", "YES")
-    if include_xi_case
-        xi_points = ((T=0.90, mu=0.00),)
-        _check_bridge_points(xi_points, 0.2, tau, models_solver, rtol_transport, atol_transport)
-    end
+    xi_points = ((T=0.90, mu=0.00),)
+    _check_bridge_points(xi_points, 0.2, tau, models_solver, rtol_transport, atol_transport)
 end

@@ -55,12 +55,16 @@ IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
-export shear_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
+export shear_viscosity, bulk_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 
 export TransportIntegrationConfig, QuarkParams, ThermoParams, TransportPhysicsConfig, TransportRequest
 export default_transport_provider
 
 const TWO_PI = 2.0 * π
+const ENERGY_FLOOR = sqrt(eps(Float64))
+
+const _SPECIES_ALL = (:u, :d, :s, :ubar, :dbar, :sbar)
+const _FLAVORS = (:u, :d, :s)
 
 # 自然单位制中的元电荷: e = sqrt(4πα)
 const e_natural = sqrt(4.0 * π * α)
@@ -94,17 +98,31 @@ function TransportIntegrationConfig(;
     cos_grid::Union{Nothing,Vector{Float64}}=nothing,
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
 )
+    p_nodes > 0 || error("TransportIntegrationConfig: p_nodes must be > 0")
+    cos_nodes > 0 || error("TransportIntegrationConfig: cos_nodes must be > 0")
+    isfinite(p_max) && p_max > 0.0 || error("TransportIntegrationConfig: p_max must be finite and > 0")
+
     if (p_grid === nothing) != (p_w === nothing)
         error("TransportIntegrationConfig: p_grid and p_w must be provided together")
     end
     if p_grid !== nothing && length(p_grid) != length(p_w)
         error("TransportIntegrationConfig: p_grid and p_w length mismatch")
     end
+    if p_grid !== nothing
+        isempty(p_grid) && error("TransportIntegrationConfig: p_grid must not be empty")
+        all(isfinite, p_grid) || error("TransportIntegrationConfig: p_grid must be finite")
+        all(isfinite, p_w) || error("TransportIntegrationConfig: p_w must be finite")
+    end
     if (cos_grid === nothing) != (cos_w === nothing)
         error("TransportIntegrationConfig: cos_grid and cos_w must be provided together")
     end
     if cos_grid !== nothing && length(cos_grid) != length(cos_w)
         error("TransportIntegrationConfig: cos_grid and cos_w length mismatch")
+    end
+    if cos_grid !== nothing
+        isempty(cos_grid) && error("TransportIntegrationConfig: cos_grid must not be empty")
+        all(isfinite, cos_grid) || error("TransportIntegrationConfig: cos_grid must be finite")
+        all(isfinite, cos_w) || error("TransportIntegrationConfig: cos_w must be finite")
     end
     return TransportIntegrationConfig(p_nodes, p_max, p_grid, p_w, cos_nodes, cos_grid, cos_w)
 end
@@ -272,6 +290,39 @@ function bulk_viscosity_isentropic(
     return bulk_viscosity_isentropic(_qp_view(quark), _tp_view(thermo), config; kwargs...)
 end
 
+"""Unified bulk viscosity entry. Currently supports `formula=:isentropic`."""
+function bulk_viscosity(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    formula::Symbol=:isentropic,
+    bulk_coeffs_isentropic::Union{Nothing,NamedTuple}=nothing,
+    bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    kwargs...
+)::Float64
+    formula === :isentropic || error("Unsupported bulk viscosity formula: $formula. Supported formulas: (:isentropic,)")
+    coeffs = something(bulk_coeffs_isentropic, bulk_coeffs)
+    coeffs === nothing && error("bulk_viscosity requires bulk_coeffs_isentropic (or legacy alias bulk_coeffs) when formula=:isentropic")
+    return bulk_viscosity_isentropic(quark_params, thermo_params; bulk_coeffs_isentropic=coeffs, kwargs...)
+end
+
+function bulk_viscosity(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::Float64
+    return bulk_viscosity(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function bulk_viscosity(
+    req::TransportRequest;
+    formula::Symbol=:isentropic,
+    kwargs...
+)::Float64
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
+    return bulk_viscosity(quark_params, thermo_params; formula=formula, tau=req.tau, kwargs...)
+end
+
 function transport_coefficients(
     quark::QuarkParams,
     thermo::ThermoParams;
@@ -384,7 +435,103 @@ function transport_coefficients(
 end
 
 @inline function fermi_factor(f::Float64)
-    return f * (1.0 - f)
+    return clamp(f * (1.0 - f), 0.0, 0.25)
+end
+
+@inline function _is_quark_species(species::Symbol)::Bool
+    return species === :u || species === :d || species === :s
+end
+
+@inline function _flavor_index(species::Symbol)::Int
+    if species === :u || species === :ubar
+        return 1
+    elseif species === :d || species === :dbar
+        return 2
+    elseif species === :s || species === :sbar
+        return 3
+    end
+    error("Unknown species: $species")
+end
+
+@inline function _anti_species(flavor::Symbol)::Symbol
+    if flavor === :u
+        return :ubar
+    elseif flavor === :d
+        return :dbar
+    elseif flavor === :s
+        return :sbar
+    end
+    error("Unknown flavor: $flavor")
+end
+
+@inline function _q2_for_species(species::Symbol, charges::NamedTuple)::Float64
+    idx = _flavor_index(species)
+    if idx == 1
+        return charges.u^2
+    elseif idx == 2
+        return charges.d^2
+    end
+    return charges.s^2
+end
+
+@inline function _provider_caps(provider)
+    return (
+        has_energy_from_p_aniso=hasproperty(provider, :energy_from_p_aniso),
+        has_quark_distribution_aniso=hasproperty(provider, :quark_distribution_aniso),
+        has_antiquark_distribution_aniso=hasproperty(provider, :antiquark_distribution_aniso),
+        has_mass_for_species=hasproperty(provider, :mass_for_species),
+        has_mu_for_species=hasproperty(provider, :mu_for_species),
+        prefer_energy_aniso=(hasproperty(provider, :prefer_energy_aniso) && provider.prefer_energy_aniso === true),
+    )
+end
+
+@inline function _energy_for_kernel(provider, caps::NamedTuple, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
+    raw_E = if ξ == 0.0 || !caps.has_energy_from_p_aniso
+        provider.energy_from_p(p, m)
+    else
+        provider.energy_from_p_aniso(p, m, ξ, cosθ)
+    end
+    return max(raw_E, ENERGY_FLOOR)
+end
+
+@inline function distribution_for_species_from_E(
+    provider,
+    caps::NamedTuple,
+    species::Symbol,
+    E::Float64,
+    p::Float64,
+    m::Float64,
+    μ::Float64,
+    T::Float64,
+    Φ::Float64,
+    Φbar::Float64,
+    ξ::Float64,
+    cosθ::Float64
+)
+    if ξ == 0.0
+        if _is_quark_species(species)
+            return provider.quark_distribution(E, μ, T, Φ, Φbar)
+        else
+            return provider.antiquark_distribution(E, μ, T, Φ, Φbar)
+        end
+    else
+        is_quark = _is_quark_species(species)
+
+        has_energy_passthrough = caps.has_energy_from_p_aniso
+        has_aniso_distribution = is_quark ? caps.has_quark_distribution_aniso : caps.has_antiquark_distribution_aniso
+
+        if has_energy_passthrough && (caps.prefer_energy_aniso || !has_aniso_distribution)
+            return is_quark ? provider.quark_distribution(E, μ, T, Φ, Φbar) : provider.antiquark_distribution(E, μ, T, Φ, Φbar)
+        end
+
+        if has_aniso_distribution
+            return is_quark ? provider.quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ) : provider.antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        end
+
+        error(
+            "provider does not support anisotropic distribution: missing $(is_quark ? :quark_distribution_aniso : :antiquark_distribution_aniso) and no energy passthrough available (need :energy_from_p_aniso + :quark_distribution/:antiquark_distribution)"
+        )
+    end
 end
 
 @inline function distribution_for_species_from_E(
@@ -400,38 +547,8 @@ end
     ξ::Float64,
     cosθ::Float64
 )
-    if ξ == 0.0
-        if species in (:u, :d, :s)
-            return provider.quark_distribution(E, μ, T, Φ, Φbar)
-        else
-            return provider.antiquark_distribution(E, μ, T, Φ, Φbar)
-        end
-    else
-        is_quark = species in (:u, :d, :s)
-
-        has_energy_passthrough = (
-            hasproperty(provider, :energy_from_p_aniso) &&
-            hasproperty(provider, :quark_distribution) &&
-            hasproperty(provider, :antiquark_distribution)
-        )
-
-        has_aniso_distribution = is_quark ? hasproperty(provider, :quark_distribution_aniso) : hasproperty(provider, :antiquark_distribution_aniso)
-
-        prefer_energy = hasproperty(provider, :prefer_energy_aniso) && provider.prefer_energy_aniso === true
-
-        if has_energy_passthrough && (prefer_energy || !has_aniso_distribution)
-            return is_quark ? provider.quark_distribution(E, μ, T, Φ, Φbar) : provider.antiquark_distribution(E, μ, T, Φ, Φbar)
-        end
-
-        # Compatibility: provider may implement a nontrivial aniso distribution.
-        if has_aniso_distribution
-            return is_quark ? provider.quark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ) : provider.antiquark_distribution_aniso(p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        end
-
-        error(
-            "provider does not support anisotropic distribution: missing $(is_quark ? :quark_distribution_aniso : :antiquark_distribution_aniso) and no energy passthrough available (need :energy_from_p_aniso + :quark_distribution/:antiquark_distribution)"
-        )
-    end
+    caps = _provider_caps(provider)
+    return distribution_for_species_from_E(provider, caps, species, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 end
 
 @inline function distribution_for_species(
@@ -446,45 +563,48 @@ end
     ξ::Float64,
     cosθ::Float64
 )
-    E = _energy_for_kernel(provider, p, m, ξ, cosθ)
+    caps = _provider_caps(provider)
+    E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
     return distribution_for_species_from_E(provider, species, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 end
 
 @inline function _energy_for_kernel(provider, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
-    if ξ == 0.0 || !hasproperty(provider, :energy_from_p_aniso)
-        return provider.energy_from_p(p, m)
-    end
-    return provider.energy_from_p_aniso(p, m, ξ, cosθ)
+    caps = _provider_caps(provider)
+    return _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
 end
 
 @inline function mass_for_species(species::Symbol, quark_params::Union{NamedTuple,QuarkParams})::Float64
-    if species in (:u, :d)
-        return species === :u ? quark_params.m.u : quark_params.m.d
-    elseif species === :s
-        return quark_params.m.s
-    elseif species in (:ubar, :dbar)
-        return species === :ubar ? quark_params.m.u : quark_params.m.d
-    elseif species === :sbar
-        return quark_params.m.s
+    idx = _flavor_index(species)
+    if idx == 1
+        return quark_params.m.u
+    elseif idx == 2
+        return quark_params.m.d
     else
-        error("Unknown species: $species")
+        return quark_params.m.s
     end
 end
 
 @inline function mu_for_species(species::Symbol, quark_params::Union{NamedTuple,QuarkParams})::Float64
-    if species in (:u, :ubar)
+    idx = _flavor_index(species)
+    if idx == 1
         return quark_params.μ.u
-    elseif species in (:d, :dbar)
+    elseif idx == 2
         return quark_params.μ.d
-    elseif species in (:s, :sbar)
+    elseif idx == 3
         return quark_params.μ.s
-    else
-        error("Unknown species: $species")
     end
+    error("Unknown species: $species")
 end
 
 @inline function _mass_for_species(provider, species::Symbol, quark_params, thermo_params)::Float64
     if hasproperty(provider, :mass_for_species)
+        return provider.mass_for_species(species, quark_params, thermo_params)
+    end
+    return mass_for_species(species, quark_params)
+end
+
+@inline function _mass_for_species(provider, caps::NamedTuple, species::Symbol, quark_params, thermo_params)::Float64
+    if caps.has_mass_for_species
         return provider.mass_for_species(species, quark_params, thermo_params)
     end
     return mass_for_species(species, quark_params)
@@ -497,6 +617,13 @@ end
     return mu_for_species(species, quark_params)
 end
 
+@inline function _mu_for_species(provider, caps::NamedTuple, species::Symbol, quark_params, thermo_params)::Float64
+    if caps.has_mu_for_species
+        return provider.mu_for_species(species, quark_params, thermo_params)
+    end
+    return mu_for_species(species, quark_params)
+end
+
 @inline function tau_for_species(species::Symbol, tau::NamedTuple)::Float64
     hasproperty(tau, species) || error("tau is missing :$species")
     return getproperty(tau, species)
@@ -504,6 +631,7 @@ end
 
 @inline function _species_transport_state(
     provider,
+    caps::NamedTuple,
     sp::Symbol,
     p::Float64,
     c::Float64,
@@ -516,10 +644,10 @@ end
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
 
-    m = _mass_for_species(provider, sp, quark_params, thermo_params)
-    μ = _mu_for_species(provider, sp, quark_params, thermo_params)
-    E = _energy_for_kernel(provider, p, m, ξ, c)
-    f = distribution_for_species_from_E(provider, sp, E, p, m, μ, T, Φ, Φbar, ξ, c)
+    m = _mass_for_species(provider, caps, sp, quark_params, thermo_params)
+    μ = _mu_for_species(provider, caps, sp, quark_params, thermo_params)
+    E = _energy_for_kernel(provider, caps, p, m, ξ, c)
+    f = distribution_for_species_from_E(provider, caps, sp, E, p, m, μ, T, Φ, Φbar, ξ, c)
     ff = fermi_factor(f)
     τ = tau_for_species(sp, tau)
     return (E, ff, τ)
@@ -534,6 +662,118 @@ end
 )::TransportIntegrationConfig
     base_config = something(config, DEFAULT_TRANSPORT_CONFIG)
     return _merge_transport_integration_config(base_config, kwargs)
+end
+
+@inline function _validate_transport_inputs(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple,
+    config::TransportIntegrationConfig;
+    provider=nothing,
+    charges::Union{Nothing,NamedTuple}=nothing,
+    bulk_coeffs_isentropic::Union{Nothing,NamedTuple}=nothing,
+)
+    T = thermo_params.T
+    isfinite(T) && T > 0.0 || error("thermo_params.T must be finite and > 0")
+    isfinite(thermo_params.Φ) || error("thermo_params.Φ must be finite")
+    isfinite(thermo_params.Φbar) || error("thermo_params.Φbar must be finite")
+
+    for sp in _SPECIES_ALL
+        τ = tau_for_species(sp, tau)
+        isfinite(τ) || error("tau.:$sp must be finite")
+        τ >= 0.0 || error("tau.:$sp must be >= 0")
+    end
+
+    check_mass = provider === nothing || !hasproperty(provider, :mass_for_species)
+    check_mu = provider === nothing || !hasproperty(provider, :mu_for_species)
+
+    for fl in _FLAVORS
+        m = getproperty(quark_params.m, fl)
+        μ = getproperty(quark_params.μ, fl)
+        if check_mass
+            isfinite(m) || error("quark_params.m.$fl must be finite")
+            m >= 0.0 || error("quark_params.m.$fl must be >= 0")
+        end
+        if check_mu
+            isfinite(μ) || error("quark_params.μ.$fl must be finite")
+        end
+    end
+
+    config.p_nodes > 0 || error("integration p_nodes must be > 0")
+    config.cos_nodes > 0 || error("integration cos_nodes must be > 0")
+    isfinite(config.p_max) && config.p_max > 0.0 || error("integration p_max must be finite and > 0")
+
+    if charges !== nothing
+        isfinite(charges.u) || error("charges.u must be finite")
+        isfinite(charges.d) || error("charges.d must be finite")
+        isfinite(charges.s) || error("charges.s must be finite")
+    end
+
+    if bulk_coeffs_isentropic !== nothing
+        isfinite(bulk_coeffs_isentropic.v_n_sq) || error("bulk_coeffs_isentropic.v_n_sq must be finite")
+        isfinite(bulk_coeffs_isentropic.dμB_dT_sigma) || error("bulk_coeffs_isentropic.dμB_dT_sigma must be finite")
+
+        length(bulk_coeffs_isentropic.masses) == 3 || error("bulk_coeffs_isentropic.masses must have length 3")
+        length(bulk_coeffs_isentropic.dM_dT) == 3 || error("bulk_coeffs_isentropic.dM_dT must have length 3")
+        length(bulk_coeffs_isentropic.dM_dμB) == 3 || error("bulk_coeffs_isentropic.dM_dμB must have length 3")
+
+        all(isfinite, bulk_coeffs_isentropic.masses) || error("bulk_coeffs_isentropic.masses must be finite")
+        all(m -> m >= 0.0, bulk_coeffs_isentropic.masses) || error("bulk_coeffs_isentropic.masses must be >= 0")
+        all(isfinite, bulk_coeffs_isentropic.dM_dT) || error("bulk_coeffs_isentropic.dM_dT must be finite")
+        all(isfinite, bulk_coeffs_isentropic.dM_dμB) || error("bulk_coeffs_isentropic.dM_dμB must be finite")
+    end
+
+    return nothing
+end
+
+@inline function _integrate_species_sum(
+    term_for_species,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple,
+    provider,
+    config::TransportIntegrationConfig,
+)::Float64
+    ξ = get(thermo_params, :ξ, 0.0)
+    caps = _provider_caps(provider)
+
+    nodes_p, weights_p = _p_quadrature(config)
+    pref_measure_iso = 1.0 / (2.0 * π^2)
+    pref_measure_aniso = 1.0 / (4.0 * π^2)
+
+    if ξ == 0.0
+        acc = integrate_p(nodes_p, weights_p) do p
+            inner = 0.0
+            for sp in _SPECIES_ALL
+                E, ff, τ = _species_transport_state(provider, caps, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
+                inner += term_for_species(p, sp, E, ff, τ)
+            end
+            return inner
+        end
+        return pref_measure_iso * acc
+    end
+
+    nodes_cos, weights_cos = _cos_quadrature(config)
+    acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
+        inner = 0.0
+        for sp in _SPECIES_ALL
+            E, ff, τ = _species_transport_state(provider, caps, sp, p, c, ξ, quark_params, thermo_params, tau)
+            inner += term_for_species(p, sp, E, ff, τ)
+        end
+        return inner
+    end
+    return pref_measure_aniso * acc
+end
+
+@inline function _integrate_species_sum(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple,
+    provider,
+    config::TransportIntegrationConfig,
+    term_for_species,
+)::Float64
+    return _integrate_species_sum(term_for_species, quark_params, thermo_params, tau, provider, config)
 end
 
 @inline function _p_quadrature(effective_config::TransportIntegrationConfig)
@@ -572,47 +812,17 @@ function shear_viscosity(
     kwargs...
 )::Float64
     T = thermo_params.T
-    ξ = get(thermo_params, :ξ, 0.0)
 
     effective_config = _effective_transport_config(config, kwargs)
-    nodes_p, weights_p = _p_quadrature(effective_config)
+    _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider)
 
-    # 相空间测度系数
-    # 各向同性: 4π/(2π)³ = 1/(2π²)
-    # 各向异性: 2π/(2π)³ = 1/(4π²)
-    pref_measure_iso = 1.0 / (2.0 * π^2)
-    pref_measure_aniso = 1.0 / (4.0 * π^2)
-
-    species_list = (:u, :d, :s, :ubar, :dbar, :sbar)
-
-    if ξ == 0.0
-        acc = integrate_p(nodes_p, weights_p) do p
-            p2 = p * p
-            p6 = p2 * p2 * p2  # p⁶ = p² (相空间) × p⁴ (物理因子)
-            inner = 0.0
-            for sp in species_list
-                E, ff, τ = _species_transport_state(provider, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
-                inner += p6 / (E * E) * (degeneracy * τ * ff)
-            end
-            return inner
-        end
-        integral = pref_measure_iso * acc
-        return (1.0 / (15.0 * T)) * integral
-    else
-        nodes_cos, weights_cos = _cos_quadrature(effective_config)
-        acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
-            p2 = p * p
-            p6 = p2 * p2 * p2
-            inner = 0.0
-            for sp in species_list
-                E, ff, τ = _species_transport_state(provider, sp, p, c, ξ, quark_params, thermo_params, tau)
-                inner += p6 / (E * E) * (degeneracy * τ * ff)
-            end
-            return inner
-        end
-        integral = pref_measure_aniso * acc
-        return (1.0 / (15.0 * T)) * integral
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, ff, τ
+        p2 = p * p
+        p6 = p2 * p2 * p2
+        return p6 / (E * E) * (degeneracy * τ * ff)
     end
+
+    return (1.0 / (15.0 * T)) * integral
 end
 
 """Convenience overload: pass `config` as a positional argument."""
@@ -656,56 +866,17 @@ function electric_conductivity(
     kwargs...
 )::Float64
     T = thermo_params.T
-    ξ = get(thermo_params, :ξ, 0.0)
 
     effective_config = _effective_transport_config(config, kwargs)
-    nodes_p, weights_p = _p_quadrature(effective_config)
+    _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider, charges=charges)
 
-    pref_measure_iso = 1.0 / (2.0 * π^2)
-    pref_measure_aniso = 1.0 / (4.0 * π^2)
-
-    function q2_for_species(sp::Symbol)
-        if sp in (:u, :ubar)
-            return charges.u^2
-        elseif sp in (:d, :dbar)
-            return charges.d^2
-        elseif sp in (:s, :sbar)
-            return charges.s^2
-        else
-            error("Unknown species: $sp")
-        end
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, ff, τ
+        p2 = p * p
+        p4 = p2 * p2
+        return p4 * _q2_for_species(sp, charges) / (E * E) * (degeneracy * τ * ff)
     end
 
-    species_list = (:u, :d, :s, :ubar, :dbar, :sbar)
-
-    if ξ == 0.0
-        acc = integrate_p(nodes_p, weights_p) do p
-            p2 = p * p
-            p4 = p2 * p2  # p⁴ = p² (相空间) × p² (物理因子)
-            inner = 0.0
-            for sp in species_list
-                E, ff, τ = _species_transport_state(provider, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
-                inner += p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
-            end
-            return inner
-        end
-        integral = pref_measure_iso * acc
-        return (1.0 / (3.0 * T)) * integral
-    else
-        nodes_cos, weights_cos = _cos_quadrature(effective_config)
-        acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
-            p2 = p * p
-            p4 = p2 * p2
-            inner = 0.0
-            for sp in species_list
-                E, ff, τ = _species_transport_state(provider, sp, p, c, ξ, quark_params, thermo_params, tau)
-                inner += p4 * q2_for_species(sp) / (E * E) * (degeneracy * τ * ff)
-            end
-            return inner
-        end
-        integral = pref_measure_aniso * acc
-        return (1.0 / (3.0 * T)) * integral
-    end
+    return (1.0 / (3.0 * T)) * integral
 end
 
 """Convenience overload: pass `config` as a positional argument."""
@@ -765,6 +936,15 @@ function bulk_viscosity_isentropic(
     dM_dμB = bulk_coeffs_isentropic.dM_dμB
 
     effective_config = _effective_transport_config(config, kwargs)
+    caps = _provider_caps(provider)
+    _validate_transport_inputs(
+        quark_params,
+        thermo_params,
+        tau,
+        effective_config;
+        provider=provider,
+        bulk_coeffs_isentropic=bulk_coeffs_isentropic,
+    )
     nodes_p, weights_p = _p_quadrature(effective_config)
 
     # 系数：N_c / (9π²T)
@@ -772,23 +952,11 @@ function bulk_viscosity_isentropic(
     # 所以这里不需要乘 1/(2π²)
     prefactor = Float64(N_color) / (9.0 * π^2 * T)
 
-    function flavor_index(sp::Symbol)
-        if sp in (:u, :ubar)
-            return 1
-        elseif sp in (:d, :dbar)
-            return 2
-        elseif sp in (:s, :sbar)
-            return 3
-        else
-            error("Unknown species: $sp")
-        end
-    end
-
-    flavors = (:u, :d, :s)
+    flavors = _FLAVORS
 
     # 计算 B 项
     function compute_B(p::Float64, m::Float64, μ::Float64, dM_dT_val::Float64, dM_dμB_val::Float64, is_antiquark::Bool, ξ::Float64, cosθ::Float64)
-        E = _energy_for_kernel(provider, p, m, ξ, cosθ)
+        E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
         
         # 能量导数（对重子化学势）
         dE_dT = (m / E) * dM_dT_val
@@ -816,15 +984,15 @@ function bulk_viscosity_isentropic(
 
     function one_flavor_pair_contrib(flavor::Symbol, p::Float64, cosθ::Float64)
         sp_q = flavor
-        sp_aq = Symbol(string(flavor, "bar"))
+        sp_aq = _anti_species(flavor)
 
-        idx = flavor_index(sp_q)
+        idx = _flavor_index(sp_q)
         m = masses[idx]
-        μ = _mu_for_species(provider, sp_q, quark_params, thermo_params)
-        E = _energy_for_kernel(provider, p, m, ξ, cosθ)
+        μ = _mu_for_species(provider, caps, sp_q, quark_params, thermo_params)
+        E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
 
-        f_q = distribution_for_species_from_E(provider, sp_q, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        f_aq = distribution_for_species_from_E(provider, sp_aq, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_q = distribution_for_species_from_E(provider, caps, sp_q, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_aq = distribution_for_species_from_E(provider, caps, sp_aq, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 
         ff_q = fermi_factor(f_q)
         ff_aq = fermi_factor(f_aq)
