@@ -1,3 +1,15 @@
+---
+title: PNJL 常量与参数管理草案
+archived: true
+original: docs/dev/active/plans/pnjl-constants-config.md
+archived_date: 2026-02-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL 常量与参数管理草案
 
 ## 目标

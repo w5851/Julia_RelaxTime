@@ -1,3 +1,15 @@
+---
+title: plan-pnjlGapIntegrationBackEnd.prompt
+archived: true
+original: docs/dev/active/plans/plan-pnjlGapIntegrationBackEnd.prompt.md
+archived_date: 2026-02-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 ## 计划：集成 PNJL 能隙方程 UI
 
 将外部 PNJL 能隙方程后端引入 `src/`，与现有的松弛时间模块并置，通过当前的 HTTP 服务器进行暴露，并扩展 `web/` 前端，使用户可以在传统界面和新的 PNJL 视图之间切换，同时共享底层 API。

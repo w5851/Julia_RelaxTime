@@ -146,7 +146,7 @@ function check_archived_format(filepath::String)
     content = read(filepath, String)
     
     # Check for YAML frontmatter
-    if !startswith(content, "---\n")
+    if match(r"^---\r?\n", content) === nothing
         return false
     end
     

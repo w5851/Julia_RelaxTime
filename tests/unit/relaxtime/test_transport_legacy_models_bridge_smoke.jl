@@ -1,4 +1,5 @@
 using Test
+using Printf
 
 if !isdefined(Main, :TransportWorkflow)
     include("../../../src/pnjl/workflows/TransportWorkflow.jl")
@@ -6,12 +7,43 @@ end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: legacy/models transport bridge (4 fixed points)" begin
+    BASELINE_PATH = joinpath(@__DIR__, "..", "..", "baselines", "relaxtime", "baseline_transport_fixedpoints_v1.csv")
+
+    function _point_key(T::Float64, mu::Float64, xi::Float64)
+        return @sprintf("%.6f|%.6f|%.6f", T, mu, xi)
+    end
+
+    function _load_baseline(path::String)
+        isfile(path) || error("baseline CSV not found: $path")
+        table = Dict{String,NamedTuple{(:eta,:sigma,:zeta),NTuple{3,Float64}}}()
+        lines = readlines(path)
+        isempty(lines) && error("baseline CSV is empty: $path")
+
+        for line in lines[2:end]
+            s = strip(line)
+            isempty(s) && continue
+            startswith(s, "#") && continue
+            cols = split(s, ',')
+            length(cols) == 6 || error("invalid baseline row: $line")
+            T = parse(Float64, strip(cols[1]))
+            mu = parse(Float64, strip(cols[2]))
+            xi = parse(Float64, strip(cols[3]))
+            eta = parse(Float64, strip(cols[4]))
+            sigma = parse(Float64, strip(cols[5]))
+            zeta = parse(Float64, strip(cols[6]))
+            table[_point_key(T, mu, xi)] = (eta=eta, sigma=sigma, zeta=zeta)
+        end
+        return table
+    end
+
     points = (
         (T=0.75, mu=0.00),
         (T=0.90, mu=0.00),
         (T=1.05, mu=0.00),
         (T=0.90, mu=0.15),
     )
+
+    baseline = _load_baseline(BASELINE_PATH)
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
@@ -96,6 +128,22 @@ using .TransportWorkflow
 
                 @testset "approx zeta $(point_label)" begin
                     @test isapprox(res_models.transport.zeta, res_legacy.transport.zeta; rtol=rtol_transport, atol=atol_transport)
+                end
+
+                baseline_key = _point_key(Float64(T), Float64(mu), Float64(xi))
+                @test haskey(baseline, baseline_key)
+                expected = baseline[baseline_key]
+
+                @testset "legacy vs baseline $(point_label)" begin
+                    @test isapprox(res_legacy.transport.eta, expected.eta; rtol=rtol_transport, atol=atol_transport)
+                    @test isapprox(res_legacy.transport.sigma, expected.sigma; rtol=rtol_transport, atol=atol_transport)
+                    @test isapprox(res_legacy.transport.zeta, expected.zeta; rtol=rtol_transport, atol=atol_transport)
+                end
+
+                @testset "models vs baseline $(point_label)" begin
+                    @test isapprox(res_models.transport.eta, expected.eta; rtol=rtol_transport, atol=atol_transport)
+                    @test isapprox(res_models.transport.sigma, expected.sigma; rtol=rtol_transport, atol=atol_transport)
+                    @test isapprox(res_models.transport.zeta, expected.zeta; rtol=rtol_transport, atol=atol_transport)
                 end
             end
         end
