@@ -16,7 +16,7 @@ end
     @test cfg.alpha_em > 0
     @test cfg.N_color >= 1
     @test cfg.N_flavor >= 1
-    @test cfg.ρ0_fm3 > 0
+    @test cfg.rho0_fm3 > 0
     @test cfg.Λ_inv_fm > 0
     @test cfg.G_fm2 > 0
     @test cfg.K_fm5 > 0
