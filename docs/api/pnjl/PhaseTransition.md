@@ -108,7 +108,7 @@ end
 
 ```julia
 using CSV
-rows = CSV.File("data/outputs/results/pnjl/trho_scan.csv")
+rows = CSV.File("data/outputs/results/pnjl/scan/trho/trho_scan.csv")
 grouped = group_curves_by_temperature(rows; xi=0.0)
 for (T, samples) in grouped
     println("T=$T MeV: $(length(samples)) 个样本")
@@ -121,7 +121,7 @@ end
 using PNJL.PhaseTransition
 
 # 1. 加载数据
-rows = CSV.File("trho_scan.csv")
+rows = CSV.File("data/outputs/results/pnjl/scan/trho/trho_scan.csv")
 grouped = group_curves_by_temperature(rows; xi=0.0)
 
 # 2. 对每个温度进行分析

@@ -91,7 +91,7 @@ function build_default_rho_grid(;
 end
 
 const DEFAULT_RHO_VALUES = build_default_rho_grid()
-const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "outputs", "results", "pnjl", "trho_scan.csv"))
+const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "outputs", "results", "pnjl", "scan", "trho", "trho_scan.csv"))
 const SEED_KEY_DIGITS = 6
 const ACCEPTABLE_RESIDUAL = 1e-4
 

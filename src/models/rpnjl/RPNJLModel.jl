@@ -8,7 +8,6 @@
 - 预留 `g1/g2/kappa` 参数位，为后续物理特化提供挂载点。
 """
 
-using TOML
 using StaticArrays
 using Base.MathConstants: π
 
@@ -16,7 +15,7 @@ const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH)
 end
-using Main.Constants_PNJL: pnjl_constants
+using Main.Constants_PNJL: pnjl_constants, load_config
 
 export RPNJLModel
 
@@ -35,21 +34,57 @@ const _RPNJL_DEFAULT_EXTENSION = (
     return get(ENV, "RPNJL_PARAM_PROFILE", get(ENV, "PNJL_PARAM_PROFILE", "default"))
 end
 
-@inline function _rpnjl_select_config_path(profile::String)
-    new_path = joinpath(_RPNJL_CONFIG_DIR_NEW, string(profile, ".toml"))
-    if isfile(new_path)
-        return new_path
-    end
-    old_path = joinpath(_RPNJL_CONFIG_DIR_OLD, string(profile, ".toml"))
-    return isfile(old_path) ? old_path : nothing
+@inline function _rpnjl_env_flag(name::String, default::Bool=false)
+    s = lowercase(strip(get(ENV, name, default ? "1" : "0")))
+    return s in ("1", "true", "yes", "y", "on")
 end
 
-function _load_rpnjl_extension(; profile::String, hbarc_MeV_fm::Float64)
-    path = _rpnjl_select_config_path(profile)
+@inline function _rpnjl_select_config_dir(profile::String)
+    if isfile(joinpath(_RPNJL_CONFIG_DIR_NEW, string(profile, ".toml")))
+        return _RPNJL_CONFIG_DIR_NEW
+    end
+    if isfile(joinpath(_RPNJL_CONFIG_DIR_OLD, string(profile, ".toml")))
+        return _RPNJL_CONFIG_DIR_OLD
+    end
+    return _RPNJL_CONFIG_DIR_NEW
+end
+
+const _RPNJL_DEFAULT_CONFIG = Dict{String, Any}(
+    "rpnjl" => Dict{String, Any}(
+        "g1_MeV_inv8" => 0.0,
+        "g2_MeV_inv8" => 0.0,
+        "kappa" => 0.0,
+    ),
+)
+
+function _load_rpnjl_config(; profile::String, log_config::Bool=_rpnjl_env_flag("RPNJL_CONFIG_LOG", false))
+    cfg_dir = _rpnjl_select_config_dir(profile)
+    cfg = load_config(cfg_dir, _RPNJL_DEFAULT_CONFIG; profile=profile)
+    if log_config
+        @info "RPNJL config resolved" profile=profile path=cfg.path
+    end
+    return cfg
+end
+
+function _validate_rpnjl_extension(sec::Dict{String, Any}, path)
+    g1 = Float64(get(sec, "g1_MeV_inv8", 0.0))
+    g2 = Float64(get(sec, "g2_MeV_inv8", 0.0))
+    kappa = Float64(get(sec, "kappa", 0.0))
+
+    isfinite(g1) || error("invalid rpnjl config$(path === nothing ? "" : " at $(path)"): rpnjl.g1_MeV_inv8 must be finite")
+    isfinite(g2) || error("invalid rpnjl config$(path === nothing ? "" : " at $(path)"): rpnjl.g2_MeV_inv8 must be finite")
+    isfinite(kappa) || error("invalid rpnjl config$(path === nothing ? "" : " at $(path)"): rpnjl.kappa must be finite")
+    kappa >= 0 || error("invalid rpnjl config$(path === nothing ? "" : " at $(path)"): rpnjl.kappa must be >= 0")
+    return nothing
+end
+
+function _load_rpnjl_extension(; profile::String, hbarc_MeV_fm::Float64, log_config::Bool=_rpnjl_env_flag("RPNJL_CONFIG_LOG", false))
+    cfg = _load_rpnjl_config(profile=profile, log_config=log_config)
+    path = cfg.path
     path === nothing && return _RPNJL_DEFAULT_EXTENSION
 
-    data = TOML.parsefile(path)
-    sec = get(data, "rpnjl", Dict{String, Any}())
+    sec = get(cfg.config, "rpnjl", Dict{String, Any}())
+    _validate_rpnjl_extension(sec, path)
 
     g1_MeV_inv8 = Float64(get(sec, "g1_MeV_inv8", 0.0))
     g2_MeV_inv8 = Float64(get(sec, "g2_MeV_inv8", 0.0))
@@ -133,11 +168,14 @@ function RPNJLModel(
     profile::String=_rpnjl_profile_default(),
     physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"),
     use_rpnjl_extensions::Bool=true,
+    log_config::Bool=_rpnjl_env_flag("RPNJL_CONFIG_LOG", false),
 )
-    base_consts = pnjl_constants(profile=profile, physics_profile=physics_profile)
+    base_consts = pnjl_constants(profile=profile, physics_profile=physics_profile, log_config=log_config)
 
-    path = use_rpnjl_extensions ? _rpnjl_select_config_path(profile) : nothing
-    ext_cfg = path === nothing ? Dict{String, Any}() : get(TOML.parsefile(path), "rpnjl", Dict{String, Any}())
+    cfg_data = use_rpnjl_extensions ? _load_rpnjl_config(profile=profile, log_config=log_config) : nothing
+    path = (cfg_data === nothing) ? nothing : cfg_data.path
+    ext_cfg = (cfg_data === nothing || path === nothing) ? Dict{String, Any}() : get(cfg_data.config, "rpnjl", Dict{String, Any}())
+    use_rpnjl_extensions && _validate_rpnjl_extension(ext_cfg, path)
     merged_consts = if use_rpnjl_extensions
         model_overridden = _apply_rpnjl_model_overrides(base_consts, ext_cfg)
         _apply_rpnjl_polyakov_overrides(model_overridden, ext_cfg)
@@ -146,7 +184,7 @@ function RPNJLModel(
     end
 
     extension = use_rpnjl_extensions ?
-        _load_rpnjl_extension(profile=profile, hbarc_MeV_fm=Float64(base_consts.hbarc_MeV_fm)) :
+        _load_rpnjl_extension(profile=profile, hbarc_MeV_fm=Float64(base_consts.hbarc_MeV_fm), log_config=log_config) :
         merge(_RPNJL_DEFAULT_EXTENSION, (profile=profile, path=nothing))
     return RPNJLModel(PNJLModel(merged_consts), extension, use_rpnjl_extensions)
 end

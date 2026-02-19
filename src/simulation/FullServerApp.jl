@@ -19,6 +19,7 @@ using Main.Constants_PNJL: ħc_MeV_fm
 include(joinpath(@__DIR__, "fullserver", "shared.jl"))
 include(joinpath(@__DIR__, "fullserver", "compute_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "pnjl_handlers.jl"))
+include(joinpath(@__DIR__, "fullserver", "pnjl_scan_jobs.jl"))
 include(joinpath(@__DIR__, "fullserver", "http_utils.jl"))
 include(joinpath(@__DIR__, "fullserver", "routing.jl"))
 

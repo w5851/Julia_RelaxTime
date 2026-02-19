@@ -12,6 +12,19 @@ const MODULE_REGISTRY = [
             "t_num" => "Int (optional)",
         ),
     ),
+    Dict(
+        "id" => "pnjl-scan",
+        "name" => "PNJL Scan Job",
+        "description" => "Run PNJL T-mu / T-rho scans as background jobs with status/result endpoints",
+        "params_schema" => Dict(
+            "kind" => "String (required): tmu | trho",
+            "params" => "Dict (optional): scan kwargs, e.g. T_values/mu_values/rho_values/output_path",
+            "params.xi" => "Float64 (optional): single xi",
+            "params.xi_values" => "Vector{Float64} (optional): explicit xi list",
+            "params.xi_grid" => "Dict(start, stop, step) (optional): generate xi list",
+            "params.max_retries" => "Int (optional, default 0, max 3)",
+        ),
+    ),
 ]
 
 @inline function _to_float64(x)

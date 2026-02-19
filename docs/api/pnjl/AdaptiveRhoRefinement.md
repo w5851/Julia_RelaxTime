@@ -47,7 +47,7 @@ TrhoScan.run_trho_scan(
     xi_values = [0.0],
     resume = true,
     overwrite = false,
-    output_path = "data/outputs/results/pnjl/trho_scan.csv",
+    output_path = "data/outputs/results/pnjl/scan/trho/trho_scan.csv",
 )
 ```
 

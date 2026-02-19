@@ -685,17 +685,25 @@ parallel = true
 num_workers = 4
 
 [scan.output]
-file = "data/outputs/tmu_scan_results.csv"
+file = "data/outputs/results/pnjl/scan/tmu/tmu_scan_results.csv"
 save_convergence_info = true
 ```
 
 ### 9.3 输出目录迁移说明（root `outputs/` -> `data/outputs/`）
 
 - 当前默认口径：所有新脚本输出应写入 `data/outputs/`（按 `results/`、`figures/` 分层）。
+- 推荐细分：
+    - 性能基准产物写入 `data/outputs/perf/<module>/`；
+    - 参数扫描产物写入 `data/outputs/results/<module>/scan/<feature>/`；
+    - 导数量化产物写入 `data/outputs/results/<module>/derivatives/`；
+    - 回归校验产物写入 `data/outputs/results/<module>/regression/`；
+    - 调试比对产物写入 `data/outputs/results/debug/<topic>/`；
+    - 图像产物写入 `data/outputs/figures/<module>/`。
 - 历史兼容口径：根目录 `outputs/` 仅用于读取历史产物，不再作为默认落盘路径。
 - 迁移建议：
     - 旧命令若显式写 `--output outputs/...`，请改为 `--output data/outputs/...`。
     - 若历史脚本需复现实验，可保留旧入参路径，但新产物应回写到 `data/outputs/`。
+- 空目录说明：`data/outputs/results/debug/baseline_compare/` 作为对比产物标准目录，若当前没有执行过 Fortran/Julia 对齐导出任务则可为空，不视为迁移遗漏。
 
 ---
 

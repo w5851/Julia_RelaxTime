@@ -26,6 +26,7 @@ web/index.html
 │       ├── routing.jl                # 路由分发
 │       ├── compute_handlers.jl       # /compute 处理
 │       ├── pnjl_handlers.jl          # /api/modules/* 处理
+│       ├── pnjl_scan_jobs.jl         # PNJL 扫描长任务（创建/状态/结果）
 │       ├── http_utils.jl             # CORS + 静态资源处理
 │       └── shared.jl                 # 共享常量与参数解析辅助
 ├── scripts/server/                    # 服务器启动脚本
@@ -64,6 +65,11 @@ web/index.html
 - JSON序列化
 - CORS跨域支持
 - 健康检查端点
+- PNJL 单点接口：`POST /api/modules/pnjl-gap/run`
+- PNJL 扫描长任务接口：
+  - `POST /api/modules/pnjl-scan/jobs`
+  - `GET /api/modules/pnjl-scan/jobs/{job_id}`
+  - `GET /api/modules/pnjl-scan/jobs/{job_id}/result`
 
 ## 使用示例
 

@@ -62,9 +62,11 @@ include("TotalPropagator.jl")
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 using Main.Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 using .TotalPropagator: calculate_cms_momentum
-using .ParticleSymbols: get_quark_masses_for_process
+using .ParticleSymbols: get_quark_masses_for_process, parse_scattering_process
 
 export scattering_amplitude_squared
+export prepare_scattering_context
+export scattering_amplitude_squared_prepared
 export calculate_mandelstam_variables
 export calculate_all_scattering_amplitudes_squared
 
@@ -197,6 +199,94 @@ function calculate_mandelstam_variables(s::Float64, t::Float64, u::Float64,
 end
 
 # ----------------------------------------------------------------------------
+# 预解析上下文（用于热点路径减少重复工作）
+# ----------------------------------------------------------------------------
+
+"""
+    prepare_scattering_context(process, quark_params) -> NamedTuple
+
+预解析单个散射过程的静态上下文（过程类型、粒子标签、质量）。
+该上下文可在固定 process/quark_params 的循环中复用，以减少重复开销。
+"""
+function prepare_scattering_context(
+    process::Symbol,
+    quark_params::NamedTuple
+)
+    if !haskey(SCATTERING_MESON_MAP, process)
+        supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")
+        error("Unknown scattering process: $process. Supported processes: $supported")
+    end
+
+    process_info = SCATTERING_MESON_MAP[process]
+    scattering_type = Symbol(process_info[:type])
+    particle_i, particle_j, particle_c, particle_d = parse_scattering_process(process)
+    m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
+
+    return (
+        process=process,
+        scattering_type=scattering_type,
+        particle_i=particle_i,
+        particle_j=particle_j,
+        particle_c=particle_c,
+        particle_d=particle_d,
+        m1=m1,
+        m2=m2,
+        m3=m3,
+        m4=m4,
+    )
+end
+
+function prepare_scattering_context(
+    process::Symbol,
+    quark_params::Union{NamedTuple, QuarkParams}
+)
+    quark_params = _nt_quark(quark_params)
+    return prepare_scattering_context(process, quark_params)
+end
+
+"""
+    scattering_amplitude_squared_prepared(ctx, s, t, quark_params, thermo_params, K_coeffs)
+
+使用 `prepare_scattering_context` 生成的上下文计算 |M|²。
+适用于 t 积分等热点循环，避免重复解析 process 与质量提取。
+"""
+function scattering_amplitude_squared_prepared(
+    ctx::NamedTuple,
+    s::Float64,
+    t::Float64,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple,
+)
+    u = ctx.m1^2 + ctx.m2^2 + ctx.m3^2 + ctx.m4^2 - s - t
+
+    if ctx.scattering_type == :qq
+        return calculate_qq_amplitude_squared(
+            ctx.process, s, t, u, ctx.m1, ctx.m2, ctx.m3, ctx.m4,
+            quark_params, thermo_params, K_coeffs,
+        )
+    end
+
+    return calculate_qqbar_amplitude_squared(
+        ctx.process, s, t, u, ctx.m1, ctx.m2, ctx.m3, ctx.m4,
+        quark_params, thermo_params, K_coeffs,
+    )
+end
+
+function scattering_amplitude_squared_prepared(
+    ctx::NamedTuple,
+    s::Float64,
+    t::Float64,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
+    K_coeffs::NamedTuple,
+)
+    quark_params = _nt_quark(quark_params)
+    thermo_params = _nt_thermo(thermo_params)
+    return scattering_amplitude_squared_prepared(ctx, s, t, quark_params, thermo_params, K_coeffs)
+end
+
+# ----------------------------------------------------------------------------
 # 主函数：散射矩阵元平方
 # ----------------------------------------------------------------------------
 
@@ -315,34 +405,9 @@ function scattering_amplitude_squared(process::Symbol, s::Float64, t::Float64,
     # 归一化参数为 NamedTuple 格式
     quark_params = _nt_quark(quark_params)
     thermo_params = _nt_thermo(thermo_params)
-    
-    # 1. 提取四个粒子质量
-    m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
-    
-    # 2. 计算 u（Mandelstam约束）
-    u = m1^2 + m2^2 + m3^2 + m4^2 - s - t
-    
-    # 3. 获取散射过程信息
-    if !haskey(SCATTERING_MESON_MAP, process)
-        supported = join(sort(collect(keys(SCATTERING_MESON_MAP))), ", ")
-        error("Unknown scattering process: $process. Supported processes: $supported")
-    end
-    
-    process_info = SCATTERING_MESON_MAP[process]
-    scattering_type = process_info[:type]
-    
-    # 4. 根据散射类型计算|M|²
-    if scattering_type == :qq
-        return calculate_qq_amplitude_squared(
-            process, s, t, u, m1, m2, m3, m4,
-            quark_params, thermo_params, K_coeffs
-        )
-    else  # :qqbar
-        return calculate_qqbar_amplitude_squared(
-            process, s, t, u, m1, m2, m3, m4,
-            quark_params, thermo_params, K_coeffs
-        )
-    end
+
+    ctx = prepare_scattering_context(process, quark_params)
+    return scattering_amplitude_squared_prepared(ctx, s, t, quark_params, thermo_params, K_coeffs)
 end
 
 # ----------------------------------------------------------------------------

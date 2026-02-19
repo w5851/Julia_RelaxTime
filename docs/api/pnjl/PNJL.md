@@ -37,11 +37,14 @@ res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=0.0, seed_strategy=PNJL.MultiSe
 更多求解器细节见：
 - `docs/api/pnjl/ImplicitSolver.md`
 - `docs/api/pnjl/SeedStrategies.md`
+- 涨落 AD 接入路径（含隐式求导边界）：`docs/api/pnjl/FluctuationADPath.md`
+- 扫描采样模板与禁用区间：`docs/api/pnjl/ScanSamplingGuidelines.md`
 
 ### 扫描
 
 - `PNJL.run_tmu_scan`：T-μ 网格扫描（见 `docs/api/pnjl/TmuScan.md`）
 - `PNJL.run_trho_scan`：T-ρ 网格扫描（见 `docs/api/pnjl/TrhoScan.md`）
+- 统一输出契约：`docs/api/pnjl/ScanOutputContract.md`
 - （按需）一阶相变区域双分支扫描：先调用 `PNJL.load_dual_branch_scan!()`，再使用 `PNJL.DualBranchScan.*`（见 `docs/api/pnjl/DualBranchScan.md`）
 
 ---

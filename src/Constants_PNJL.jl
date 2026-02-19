@@ -62,6 +62,51 @@ const DEFAULT_PNJL_MODEL_CONFIG = Dict{String, Any}(
     ),
 )
 
+@inline function _env_flag(name::String, default::Bool=false)
+    s = lowercase(strip(get(ENV, name, default ? "1" : "0")))
+    return s in ("1", "true", "yes", "y", "on")
+end
+
+@inline function _require_finite_positive(value::Float64, label::String)
+    isfinite(value) || error("invalid config: $(label) must be finite, got $(value)")
+    value > 0 || error("invalid config: $(label) must be > 0, got $(value)")
+    return value
+end
+
+@inline function _require_finite_nonnegative(value::Float64, label::String)
+    isfinite(value) || error("invalid config: $(label) must be finite, got $(value)")
+    value >= 0 || error("invalid config: $(label) must be >= 0, got $(value)")
+    return value
+end
+
+function _validate_pnjl_critical_params(
+    ;
+    hbarc_MeV_fm::Float64,
+    alpha_em::Float64,
+    N_color::Int,
+    N_flavor::Int,
+    rho0_fm3::Float64,
+    Lambda_MeV::Float64,
+    m_ud0_MeV::Float64,
+    m_s0_MeV::Float64,
+    G_over_Lambda2::Float64,
+    K_over_Lambda5::Float64,
+    T0_MeV::Float64,
+)
+    _require_finite_positive(hbarc_MeV_fm, "physical.hbarc")
+    _require_finite_positive(alpha_em, "physical.alpha_em")
+    N_color >= 1 || error("invalid config: model.N_color must be >= 1, got $(N_color)")
+    N_flavor >= 1 || error("invalid config: model.N_flavor must be >= 1, got $(N_flavor)")
+    _require_finite_positive(rho0_fm3, "model.rho0_fm3")
+    _require_finite_positive(Lambda_MeV, "model.Lambda_MeV")
+    _require_finite_nonnegative(m_ud0_MeV, "model.m_ud0_MeV")
+    _require_finite_nonnegative(m_s0_MeV, "model.m_s0_MeV")
+    _require_finite_positive(G_over_Lambda2, "model.G_over_Lambda2")
+    _require_finite_positive(K_over_Lambda5, "model.K_over_Lambda5")
+    _require_finite_positive(T0_MeV, "polyakov.T0_MeV")
+    return nothing
+end
+
 function _select_config_dir(profile::String, new_dir::String, old_dir::String)
     if isfile(joinpath(new_dir, string(profile, ".toml")))
         return new_dir
@@ -76,6 +121,7 @@ function load_pnjl_config(
     ;
     profile::String=get(ENV, "PNJL_PARAM_PROFILE", DEFAULT_PROFILE),
     physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", DEFAULT_PROFILE),
+    log_config::Bool=_env_flag("PNJL_CONFIG_LOG", false),
 )
 
     physics_data = load_config(PHYSICS_CONFIG_DIR, DEFAULT_PHYSICS_CONFIG; profile=physics_profile)
@@ -84,6 +130,11 @@ function load_pnjl_config(
     model_data = load_config(model_dir, DEFAULT_PNJL_MODEL_CONFIG; profile=profile)
 
     merged = deep_merge(physics_data.config, model_data.config)
+
+    if log_config
+        @info "PNJL config resolved" profile=profile physics_profile=physics_profile model_path=model_data.path physics_path=physics_data.path
+    end
+
     return (config=merged, profile=profile, path=model_data.path)
 end
 
@@ -99,8 +150,10 @@ function pnjl_constants(
     ;
     profile::String=get(ENV, "PNJL_PARAM_PROFILE", DEFAULT_PROFILE),
     physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", DEFAULT_PROFILE),
+    validate::Bool=true,
+    log_config::Bool=_env_flag("PNJL_CONFIG_LOG", false),
 )
-    data = load_pnjl_config(profile=profile, physics_profile=physics_profile)
+    data = load_pnjl_config(profile=profile, physics_profile=physics_profile, log_config=log_config)
     cfg = data.config
 
     physical_cfg = get(cfg, "physical", Dict{String, Any}())
@@ -135,6 +188,22 @@ function pnjl_constants(
     a2 = Float64(get(polyakov_cfg, "a2", 15.2))
     b3 = Float64(get(polyakov_cfg, "b3", -1.75))
     b4 = Float64(get(polyakov_cfg, "b4", 7.555))
+
+    if validate
+        _validate_pnjl_critical_params(
+            hbarc_MeV_fm=hbarc_MeV_fm,
+            alpha_em=alpha_em,
+            N_color=N_color,
+            N_flavor=N_flavor,
+            rho0_fm3=rho0_fm3,
+            Lambda_MeV=Lambda_MeV,
+            m_ud0_MeV=m_ud0_MeV,
+            m_s0_MeV=m_s0_MeV,
+            G_over_Lambda2=G_over_Lambda2,
+            K_over_Lambda5=K_over_Lambda5,
+            T0_MeV=T0_MeV,
+        )
+    end
 
     return (
         profile=profile,

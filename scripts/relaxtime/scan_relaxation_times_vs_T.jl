@@ -85,7 +85,7 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl [options]\n")
     println("Options:")
-    println("  --out <path>                 输出 CSV (default data/outputs/results/relaxtime/relaxation_times_vs_T.csv)")
+    println("  --out <path>                 输出 CSV (default data/outputs/results/relaxtime/scan/relaxation_times_vs_T.csv)")
     println("  --overwrite                  覆盖输出文件")
     println("  --no-resume                  禁用跳过逻辑，强制重算")
     println("  --xi <value>                 各向异性参数 ξ (default 0.0)")
@@ -110,7 +110,7 @@ end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
-        :out => joinpath("data", "outputs", "results", "relaxtime", "relaxation_times_vs_T.csv"),
+        :out => joinpath("data", "outputs", "results", "relaxtime", "scan", "relaxation_times_vs_T.csv"),
         :overwrite => false,
         :resume => true,
         :xi => 0.0,

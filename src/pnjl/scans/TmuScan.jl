@@ -64,7 +64,7 @@ export run_tmu_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_OUTPUT_PATH
 
 const DEFAULT_T_VALUES = collect(50.0:10.0:200.0)
 const DEFAULT_MU_VALUES = collect(0.0:10.0:400.0)
-const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "outputs", "results", "pnjl", "tmu_scan.csv"))
+const DEFAULT_OUTPUT_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu", "tmu_scan.csv"))
 const SEED_KEY_DIGITS = 6
 const ACCEPTABLE_RESIDUAL = 1e-4
 

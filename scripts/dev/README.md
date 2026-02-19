@@ -33,6 +33,24 @@ Benchmark 阈值检查：
 julia --project=. scripts/dev/check_benchmark_thresholds.jl
 ```
 
+散射截面热点基准（legacy vs fast_path）：
+
+```powershell
+julia --project=. scripts/dev/benchmark_total_cross_section_hotpath.jl
+```
+
+总截面固定点 baseline 导出：
+
+```powershell
+julia --project=. scripts/dev/export_total_cross_section_fixedpoint_baseline.jl
+```
+
+PNJL 扫描固定点 baseline 导出：
+
+```powershell
+julia --project=. scripts/dev/export_pnjl_scan_fixedpoint_baseline.jl
+```
+
 unit skip/deprecated 门禁检查：
 
 ```powershell

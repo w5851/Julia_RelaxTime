@@ -9,7 +9,7 @@
 | `run_trho_scan` | 函数 | 主入口，执行 T-ρ 扫描并输出 CSV |
 | `DEFAULT_T_VALUES` | `Vector{Float64}` | 默认温度集合（50–200 MeV，步长 10） |
 | `DEFAULT_RHO_VALUES` | `Vector{Float64}` | 默认密度集合（0 至 3.0，以 0.05 递增） |
-| `DEFAULT_OUTPUT_PATH` | `String` | 默认输出 `data/outputs/results/pnjl/trho_scan.csv` |
+| `DEFAULT_OUTPUT_PATH` | `String` | 默认输出 `data/outputs/results/pnjl/scan/trho/trho_scan.csv` |
 | `默认 NLsolve 设置` | `NamedTuple` | `linesearch = LineSearches.BackTracking()`，可用关键字覆盖 |
 
 ## `run_trho_scan` 接口
@@ -42,16 +42,16 @@ run_trho_scan(; T_values=DEFAULT_T_VALUES,
 
 ## CSV 字段
 
-输出表头：
+统一契约见 `docs/api/pnjl/ScanOutputContract.md`。`run_trho_scan` 的完整表头为：
 
 ```
-T_MeV, rho, xi, mu_u_MeV, mu_d_MeV, mu_s_MeV, mu_avg_MeV,
-pressure_fm4, entropy_fm3, energy_fm4,
-phi_u, phi_d, phi_s, Phi1, Phi2,
-iterations, residual_norm, converged, message
+T_MeV,rho,xi,mu_u_MeV,mu_d_MeV,mu_s_MeV,mu_avg_MeV,mu_B_MeV,mu_Q_MeV,mu_S_MeV,pressure_fm4,entropy_fm3,energy_fm4,rho_u_fm3,rho_d_fm3,rho_s_fm3,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message
 ```
 
 - `mu_*` 来自 `SolverResult.mu_vec`（已换算为 MeV），`mu_avg_MeV` 为三味平均；
+- `mu_B_MeV/mu_Q_MeV/mu_S_MeV` 为重子数、电荷、奇异化学势分解；
+- `rho_u_fm3/rho_d_fm3/rho_s_fm3` 为分味粒子数密度；
+- `M_u_MeV/M_d_MeV/M_s_MeV` 为三味有效质量（MeV）；
 - 其他字段与 T-μ 扫描一致；
 - 失败或未收敛的记录会以 `NaN`/`false` 标识，并携带 `message` 描述。
 
@@ -66,7 +66,7 @@ stats = run_trho_scan(
     T_values = 70:20:110,
     rho_values = 0.2:0.2:1.0,
     xi_values = [0.0],
-    output_path = "data/outputs/results/pnjl/trho_scan_demo.csv",
+    output_path = "data/outputs/results/pnjl/scan/trho/trho_scan_demo.csv",
     p_num = 16,
     t_num = 6;
     method = :trust_region,

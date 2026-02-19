@@ -33,3 +33,6 @@ jobs:
 
       - name: Run transport fixedpoint regression gate
         run: julia --project=. scripts/relaxtime/run_transport_fixedpoint_regression.jl
+
+      - name: Run total-cross-section fixedpoint regression gate
+        run: julia --project=. scripts/relaxtime/run_total_cross_section_fixedpoint_regression.jl

@@ -1,14 +1,14 @@
 """
 批量扫描 (T, μ) 网格，串联：各向异性 PNJL 平衡求解 → τ → RTA 输运系数。
 
-输出：CSV（默认 data/outputs/results/relaxtime/gap_transport_scan.csv）
+输出：CSV（默认 data/outputs/results/relaxtime/scan/gap_transport_scan.csv）
 
 单位约定：
 - CLI 的温度/化学势默认使用 MeV（更符合扫描习惯）；脚本内部会换算到 fm⁻¹。
 - 输出同时包含 MeV 与 fm⁻¹ 的关键量。
 
 示例：
-  julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi-list -0.6,-0.4,-0.2,0.0,0.2,0.4,0.6 --mode finite_15 --compute-bulk --overwrite --output data/outputs/results/relaxtime/gap_transport_scan_xi-0p6to0p6.csv
+    julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --tmin 120 --tmax 400 --tstep 10 --mubmin 0 --mubmax 800 --mubstep 800 --xi-list -0.6,-0.4,-0.2,0.0,0.2,0.4,0.6 --mode finite_15 --compute-bulk --overwrite --output data/outputs/results/relaxtime/scan/gap_transport_scan_xi-0p6to0p6.csv
 
 注意：
 - compute_bulk 默认关闭（体粘滞需要多次自动微分+求解，扫描会很慢）。
@@ -70,7 +70,7 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_gap_transport_scan.jl [options]\n")
     println("Options:")
-    println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/gap_transport_scan.csv)")
+    println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_transport_scan.csv)")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -96,7 +96,7 @@ end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
-        :output => joinpath("data", "outputs", "results", "relaxtime", "gap_transport_scan.csv"),
+        :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_transport_scan.csv"),
         :xi_values => Float64[0.0],
         :tmin => 50.0,
         :tmax => 200.0,

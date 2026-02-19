@@ -1,7 +1,7 @@
 """
 批量扫描 (T, μ_B, ξ) 网格，串联：PNJL 平衡求解 → 介子质量/宽度（MesonMass）→ Mott 阈值与 gap。
 
-输出：CSV（默认 data/outputs/results/relaxtime/gap_meson_mass_scan.csv）
+输出：CSV（默认 data/outputs/results/relaxtime/scan/gap_meson_mass_scan.csv）
 
 单位约定：
 - CLI 参数的温度/化学势使用 MeV（更符合扫描习惯）；脚本内部换算到 fm⁻¹。
@@ -43,7 +43,7 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_gap_meson_mass_scan.jl [options]\n")
     println("Options:")
-    println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/gap_meson_mass_scan.csv)")
+    println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_meson_mass_scan.csv)")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -58,7 +58,7 @@ end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
-        :output => joinpath("data", "outputs", "results", "relaxtime", "gap_meson_mass_scan.csv"),
+        :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_meson_mass_scan.csv"),
         :xi_values => Float64[0.0],
         :tmin => 120.0,
         :tmax => 220.0,

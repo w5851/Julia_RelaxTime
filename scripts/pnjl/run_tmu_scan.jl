@@ -18,7 +18,7 @@ PNJL T-μ 参数空间扫描脚本
     --mu_min=0        最低化学势 (MeV)
     --mu_max=400      最高化学势 (MeV)
     --mu_step=10      化学势步长 (MeV)
-    --output=...      输出文件路径（默认 data/outputs/results/pnjl/tmu_scan.csv）
+    --output=...      输出文件路径（默认 data/outputs/results/pnjl/scan/tmu/tmu_scan_xi{xi}.csv）
     --resume          断点续扫（默认启用）
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
@@ -51,7 +51,7 @@ PNJL T-μ 参数空间扫描脚本
     --mu_min=0        最低化学势 (MeV)
     --mu_max=400      最高化学势 (MeV)
     --mu_step=10      化学势步长 (MeV)
-    --output=...      输出文件路径
+    --output=...      输出文件路径（默认 data/outputs/results/pnjl/scan/tmu/tmu_scan_xi{xi}.csv）
     --resume          断点续扫（默认启用）
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
@@ -78,7 +78,7 @@ using .PNJL.TmuScan
 # 配置
 # ============================================================================
 
-const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl")
+const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu")
 
 struct TmuScanConfig
     xi::Float64

@@ -72,7 +72,7 @@ const hbarc = 197.327  # MeV·fm
 # 配置
 # ============================================================================
 
-const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl")
+const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "derivatives")
 
 struct DerivativesConfig
     xi::Float64

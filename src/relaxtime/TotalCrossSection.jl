@@ -121,7 +121,7 @@ IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
 using Main.Constants_PNJL: SCATTERING_MESON_MAP
 using .GaussLegendre: standard_nodes_weights
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
-using .ScatteringAmplitude: scattering_amplitude_squared
+using .ScatteringAmplitude: scattering_amplitude_squared, prepare_scattering_context, scattering_amplitude_squared_prepared
 using .ScatteringAmplitude.ParticleSymbols: parse_scattering_process, is_antiquark
 using .DifferentialCrossSection: differential_cross_section
 using Main.OneLoopIntegrals: distribution_value
@@ -562,9 +562,10 @@ function total_cross_section(
     quark_params::NamedTuple,
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple;
-    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
 )::Float64
-    return _total_cross_section_nt(process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+    return _total_cross_section_nt(process, s, quark_params, thermo_params, K_coeffs; n_points=n_points, fast_path=fast_path)
 end
 
 function total_cross_section(
@@ -573,11 +574,12 @@ function total_cross_section(
     quark_params::Union{NamedTuple, QuarkParams},
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
-    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
 )::Float64
     quark_nt = _nt_quark(quark_params)
     thermo_nt = _nt_thermo(thermo_params)
-    return _total_cross_section_nt(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
+    return _total_cross_section_nt(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points, fast_path=fast_path)
 end
 
 function _total_cross_section_nt(
@@ -586,16 +588,21 @@ function _total_cross_section_nt(
     quark_params::NamedTuple,
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple;
-    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
 )::Float64
-    # 步骤1: 解析过程中的粒子
-    particle_i, particle_j, particle_c, particle_d = parse_particles_from_process(process)
-    
+    # 步骤1: 预解析过程上下文（热点路径复用）
+    ctx = prepare_scattering_context(process, quark_params)
+    particle_i = ctx.particle_i
+    particle_j = ctx.particle_j
+    particle_c = ctx.particle_c
+    particle_d = ctx.particle_d
+
     # 步骤2: 获取质量和化学势
-    mi = get_mass_for_flavor(particle_i, quark_params)
-    mj = get_mass_for_flavor(particle_j, quark_params)
-    mc = get_mass_for_flavor(particle_c, quark_params)
-    md = get_mass_for_flavor(particle_d, quark_params)
+    mi = ctx.m1
+    mj = ctx.m2
+    mc = ctx.m3
+    md = ctx.m4
     
     μ_c = get_chemical_potential(particle_c, quark_params)
     μ_d = get_chemical_potential(particle_d, quark_params)
@@ -659,9 +666,15 @@ function _total_cross_section_nt(
         w = scale_t * weights_std[i]
         
         # 7.1 计算散射矩阵元
-        M_squared = scattering_amplitude_squared(
-            process, s, t, quark_params, thermo_params, K_coeffs
-        )
+        M_squared = if fast_path
+            scattering_amplitude_squared_prepared(
+                ctx, s, t, quark_params, thermo_params, K_coeffs
+            )
+        else
+            scattering_amplitude_squared(
+                process, s, t, quark_params, thermo_params, K_coeffs
+            )
+        end
 
         if !isfinite(M_squared)
             continue
@@ -756,7 +769,8 @@ function calculate_all_total_cross_sections(
     quark_params::Union{NamedTuple, QuarkParams},
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
-    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
 )::NamedTuple
     quark_nt = _nt_quark(quark_params)
     thermo_nt = _nt_thermo(thermo_params)
@@ -766,7 +780,8 @@ function calculate_all_total_cross_sections(
         try
             σ = total_cross_section(
                 process, s, quark_nt, thermo_nt, K_coeffs,
-                n_points=n_points
+                n_points=n_points,
+                fast_path=fast_path,
             )
             results[process] = σ
         catch e
@@ -818,7 +833,8 @@ function scan_s_dependence(
     quark_params::Union{NamedTuple, QuarkParams},
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple;
-    n_points::Int=DEFAULT_T_INTEGRAL_POINTS
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
 )::Vector{Float64}
     quark_nt = _nt_quark(quark_params)
     thermo_nt = _nt_thermo(thermo_params)
@@ -828,7 +844,8 @@ function scan_s_dependence(
         try
             σ = total_cross_section(
                 process, s, quark_nt, thermo_nt, K_coeffs,
-                n_points=n_points
+                n_points=n_points,
+                fast_path=fast_path,
             )
             push!(σ_values, σ)
         catch e

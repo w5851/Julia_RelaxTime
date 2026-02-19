@@ -70,7 +70,7 @@ end
 | `run_tmu_scan` | 函数 | 主入口，执行扫描并写入 CSV |
 | `DEFAULT_T_VALUES` | `Vector{Float64}` | 默认温度集合（50–200 MeV，步长 10） |
 | `DEFAULT_MU_VALUES` | `Vector{Float64}` | 默认化学势集合（0–400 MeV，步长 10） |
-| `DEFAULT_OUTPUT_PATH` | `String` | 默认输出 `data/outputs/results/pnjl/tmu_scan.csv` |
+| `DEFAULT_OUTPUT_PATH` | `String` | 默认输出 `data/outputs/results/pnjl/scan/tmu/tmu_scan.csv` |
 
 ## `run_tmu_scan` 接口
 
@@ -101,16 +101,15 @@ run_tmu_scan(; T_values=DEFAULT_T_VALUES,
 
 ## CSV 字段
 
-`run_tmu_scan` 会写入表头：
+统一契约见 `docs/api/pnjl/ScanOutputContract.md`。`run_tmu_scan` 的完整表头为：
 
 ```
-T_MeV, mu_MeV, xi, pressure_fm4, rho, entropy_fm3, energy_fm4,
-phi_u, phi_d, phi_s, Phi1, Phi2, iterations, residual_norm,
-converged, message
+T_MeV,mu_MeV,xi,pressure_fm4,rho,entropy_fm3,energy_fm4,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message
 ```
 
 - 热力学量均以 `fm` 自然单位表示；
 - `phi_*` 与 `Phi1/Phi2` 对应求解向量；
+- `M_u_MeV/M_d_MeV/M_s_MeV` 为三味有效质量（MeV）；
 - `converged` 指示 NLsolve 是否达到公差；
 - `message` 记录种子失败或求解异常（为空表示正常）。
 
@@ -124,7 +123,7 @@ stats = run_tmu_scan(
     T_values = 80:20:120,
     mu_values = 0:50:200,
     xi_values = [0.0, 0.5],
-    output_path = "data/outputs/results/pnjl/tmu_scan_demo.csv",
+    output_path = "data/outputs/results/pnjl/scan/tmu/tmu_scan_demo.csv",
     p_num = 16,
     t_num = 6,
     solver_kwargs = (; maxiters = 80),

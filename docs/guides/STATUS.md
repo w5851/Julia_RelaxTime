@@ -32,6 +32,13 @@ julia --project=. tests/unit/runtests.jl
 - 对研究结论请优先参考 `docs/reference/` 与 `docs/dev/archived/` 的比对记录
 - 发生路径疑问时，统一以仓库根目录当前结构为准（`scripts/server/`、`tests/unit/`、`docs/reference/`）
 
+## 4.1 近期变更（2026-02-19）
+
+- PNJL/rPNJL 配置链路已补“关键参数校验 + 可控日志开关”，用于异常回溯：
+	- `PNJL_CONFIG_LOG=1`：输出 PNJL 配置解析来源
+	- `RPNJL_CONFIG_LOG=1`：输出 rPNJL 配置解析来源
+- `docs/dev/active/2026-02-19_PNJL集成方向提炼待办.md` 已完成并归档到 `docs/dev/archived/`。
+
 ## 5. 输出目录口径
 
 - 默认运行产物目录：`data/outputs/`

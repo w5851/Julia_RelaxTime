@@ -1,0 +1,2 @@
+T_MeV,mu_MeV,xi,pressure_fm4,rho,entropy_fm3,energy_fm4,phi_u,phi_d,phi_s,Phi1,Phi2,M_u_MeV,M_d_MeV,M_s_MeV,iterations,residual_norm,converged,message
+150.000000,0.000000,0.000000,21.617909,0.000000,0.166787,-21.491124,-1.825498,-1.825498,-2.219783,0.053037,0.053037,363.908987,363.908987,547.153645,7,0.000000,true,"bootstrap_multiseed"

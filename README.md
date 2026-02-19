@@ -66,6 +66,13 @@ julia --project=. scripts/dev/gen_deps.jl
 	- 推荐入口：`PNJL.solve(...)` + seed 策略（`MultiSeed/PhaseAwareContinuitySeed` 等），见 `docs/api/pnjl/PNJL.md` 与 `docs/api/pnjl/SeedStrategies.md`。
 	- 扫描脚本：`scripts/relaxtime/run_gap_transport_scan.jl` 可批量输出平衡量与输运相关派生量到 CSV。
 	- HTTP 端（实验性）：`scripts/server/server_full.jl` 提供 `POST /api/modules/pnjl-gap/run` 单点调用（请求体仍使用 `T_mev`/`mu_mev` 这类 MeV 输入字段；内部会换算到自然单位）。
+	- HTTP 扫描长任务（实验性）：
+		- `POST /api/modules/pnjl-scan/jobs` 创建后台扫描任务（`kind=tmu|trho`）
+			- ξ 参数策略：`params.xi` / `params.xi_values` / `params.xi_grid={start,stop,step}` 三选一（默认 `xi=0.0`）
+			- 队列策略：`max_running=2`，`max_pending=32`，可选 `params.max_retries<=3`
+		- `GET /api/modules/pnjl-scan/jobs/{job_id}` 查询任务状态与进度
+		- `GET /api/modules/pnjl-scan/jobs/{job_id}/result` 获取结果索引（输出路径与统计）
+	- 配置治理：PNJL/rPNJL 关键参数已加启动时校验；可通过 `PNJL_CONFIG_LOG=1` / `RPNJL_CONFIG_LOG=1` 打开配置来源日志，便于排障。
 - **平均散射率（实验性）**：`src/relaxtime/AverageScatteringRate.jl` 基于 Gauss-Legendre (p=32, 角度=4) 计算各向异性平均散射率，散射截面支持预计算+插值缓存。
 
 > ✅ **状态说明**：截面/弛豫时间链路已验证可用。PNJL 求解与扫描链路同样可用；物理与数值精度仍建议通过 `docs/` 下的对比报告持续验证。

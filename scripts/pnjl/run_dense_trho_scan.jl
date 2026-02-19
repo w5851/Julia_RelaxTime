@@ -36,7 +36,7 @@ end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol, Any}(
-        :output => joinpath("data", "outputs", "results", "pnjl", "trho_scan.csv"),
+        :output => joinpath("data", "outputs", "results", "pnjl", "scan", "trho", "trho_scan.csv"),
         :xi_values => Float64[0.0],
         :tmin => 130.0,
         :tmax => 132.0,
@@ -154,7 +154,7 @@ end
 function print_usage()
     println("Usage: julia scripts/pnjl/run_dense_trho_scan.jl [options]\n")
     println("Options:")
-    println("  --output <path>             Destination CSV (default data/outputs/results/pnjl/trho_scan.csv)")
+    println("  --output <path>             Destination CSV (default data/outputs/results/pnjl/scan/trho/trho_scan.csv)")
     println("  --xi <value>                Append an additional ξ value (default 0.0)")
     println("  --xi-list v1,v2,...         Replace ξ list with comma-separated values")
     println("  --tmin/--tmax <MeV>         Temperature window (default 130–132 MeV)")

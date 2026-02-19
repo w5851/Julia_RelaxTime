@@ -4,7 +4,7 @@
 
 ## 1. 准备输入
 
-1. 已完成 `run_trho_scan`，并在 `data/outputs/results/pnjl/trho_scan.csv` 中存有扫描结果；
+1. 已完成 `run_trho_scan`，并在 `data/outputs/results/pnjl/scan/trho/trho_scan.csv` 中存有扫描结果；
 2. `TrhoScan` 需要覆盖目标温度区间，并提供足够密的 `ρ` 采样，以便步骤 6（Maxwell）收敛；
 3. （可选）提前执行 `scripts/pnjl/plot_curves.py` 以快速检查回环质量。
 
@@ -14,7 +14,7 @@
 
 ```powershell
 julia --project scripts/pnjl/plot_phase_diagram.jl \
-    --trho-csv data/outputs/results/pnjl/trho_scan.csv \
+    --trho-csv data/outputs/results/pnjl/scan/trho/trho_scan.csv \
     --xi 0.0 \
     --output data/outputs/figures/pnjl/pnjl_phase_diagram.png \
     --dump-boundary data/outputs/results/pnjl/phase_boundary.csv \
@@ -25,7 +25,7 @@ julia --project scripts/pnjl/plot_phase_diagram.jl \
 
 | 选项 | 默认值 | 说明 |
 |------|--------|------|
-| `--trho-csv` | `data/outputs/results/pnjl/trho_scan.csv` | `TrhoScan` 输出路径 |
+| `--trho-csv` | `data/outputs/results/pnjl/scan/trho/trho_scan.csv` | `TrhoScan` 输出路径 |
 | `--xi` / `--xi-tol` | `0.0 / 1e-6` | 只保留匹配的各向异性参数 |
 | `--output` | `data/outputs/figures/pnjl/pnjl_phase_diagram.png` | 图像输出位置（自动创建目录） |
 | `--min-samples` | `12` | 每条曲线最少样本数，低于该值的温度被跳过 |

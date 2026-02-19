@@ -29,13 +29,14 @@ PNJL 模型的完整计算流程需要按特定顺序执行，因为后续步骤
 │  Step 3: 参数空间扫描                                            │
 │  ├── T-μ 扫描 (使用 PhaseAwareContinuitySeed)                   │
 │  ├── T-ρ 扫描                                                   │
-│  └── 输出: tmu_scan.csv, trho_scan.csv                          │
+│  └── 输出: scan/tmu/tmu_scan_xi*.csv, scan/trho/trho_scan.csv  │
 │           ↓                                                     │
 │  Step 4: 热力学导数计算                                          │
 │  ├── 质量导数 (∂M/∂T, ∂M/∂μ)                                    │
 │  ├── 热力学响应函数                                              │
 │  ├── 体粘滞系数                                                  │
-│  └── 输出: derivatives.csv, bulk_viscosity.csv                  │
+│  └── 输出: derivatives/derivatives_xi*.csv,                     │
+│           derivatives/bulk_viscosity_xi*.csv                    │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```

@@ -34,8 +34,8 @@ end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol, Any}(
-        :source => joinpath("data", "outputs", "results", "pnjl", "trho_scan.csv"),
-        :output => joinpath("data", "outputs", "results", "pnjl", "trho_scan.csv"),
+        :source => joinpath("data", "outputs", "results", "pnjl", "scan", "trho", "trho_scan.csv"),
+        :output => joinpath("data", "outputs", "results", "pnjl", "scan", "trho", "trho_scan.csv"),
         :xi => 0.0,
         :xi_tol => 1e-6,
         :slope_tol => 5.0,
@@ -119,7 +119,7 @@ end
 function print_usage()
     println("Usage: julia scripts/pnjl/run_adaptive_trho_scan.jl [options]\n")
     println("Options:")
-    println("  --source <path>           Existing TrhoScan CSV (default data/.../trho_scan.csv)")
+    println("  --source <path>           Existing TrhoScan CSV (default data/outputs/results/pnjl/scan/trho/trho_scan.csv)")
     println("  --output <path>           Output CSV (default同 source)")
     println("  --xi <value>              目标 ξ (default 0.0)")
     println("  --xi-tol <value>          ξ 过滤容差 (default 1e-6)")

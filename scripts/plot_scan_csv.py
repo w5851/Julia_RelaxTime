@@ -19,7 +19,7 @@ CSV 规范（scan_csv_v1）
 1) 弛豫时间 vs T（按 muB 分组）
     python scripts/plot_scan_csv.py \
         --mode lines \
-        --csv data/outputs/results/relaxtime/relaxation_times_vs_T.csv \
+        --csv data/outputs/results/relaxtime/scan/relaxation_times_vs_T.csv \
         --x T_MeV --ys tau_u,tau_s,tau_ubar,tau_sbar \
         --group muB_MeV \
         --out-dir data/outputs/figures/relaxtime
@@ -27,7 +27,7 @@ CSV 规范（scan_csv_v1）
 2) 固定 xi 的 gap/transport 热力图
     python scripts/plot_scan_csv.py \
         --mode heatmap \
-        --csv data/outputs/results/relaxtime/gap_transport_scan.csv \
+        --csv data/outputs/results/relaxtime/scan/gap_transport_scan.csv \
         --x muq_MeV --y T_MeV --fields eta,sigma,tau_u \
         --where xi=0.0 \
         --out-dir data/outputs/figures/relaxtime
@@ -37,7 +37,7 @@ CSV 规范（scan_csv_v1）
      并限制横坐标 100..400、纵坐标对数轴且范围 1e-3..1e2。
     python scripts/plot_scan_csv.py \
         --mode lines \
-        --csv data/outputs/results/relaxtime/gap_transport_scan_xi-0p6to0p6.csv \
+        --csv data/outputs/results/relaxtime/scan/gap_transport_scan_xi-0p6to0p6.csv \
         --where muB_MeV=800.0 \
         --x T_MeV --ys eta_over_s,zeta_over_s \
         --group xi \

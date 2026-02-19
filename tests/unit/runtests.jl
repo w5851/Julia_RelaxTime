@@ -81,12 +81,14 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_tmu_scan_solver_backend_models_smoke.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_trho_scan_smoke.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_trho_scan_solver_backend_models_smoke.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_scan_fixedpoint_baseline_smoke.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraints_models_backend_smoke.jl"),
 
     # [Config Injection] 保留理由：配置体系稳定性与可复现性保障。
     # Config profile selection/override rules
     joinpath(UNIT_DIR, "config", "test_config_profile_smoke.jl"),
     joinpath(UNIT_DIR, "config", "test_pnjl_profile_dynamic_constants_smoke.jl"),
+    joinpath(UNIT_DIR, "config", "test_pnjl_rpnjl_critical_params_smoke.jl"),
 ]
 
 function _selected_unit_files()

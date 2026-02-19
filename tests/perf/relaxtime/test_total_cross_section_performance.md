@@ -1,5 +1,32 @@
 # 总散射截面模块性能测试报告
 
+## 2026-02-19 热点优化回归（fast_path）
+
+本轮针对 `total_cross_section` 的热点路径增加了“预解析上下文复用”优化（`fast_path=true`）。
+
+### 基准命令
+
+```powershell
+julia --project=. scripts/dev/benchmark_total_cross_section_hotpath.jl --repeats 8 --n-points 6 --process uu_to_uu --s 31.0
+```
+
+### 基准结果（中位耗时）
+
+- legacy：`9.130000e-05 s`
+- fast：`7.585000e-05 s`
+- speedup：`1.204x`
+
+原始数据见：
+
+- `data/outputs/perf/relaxtime/total_cross_section_hotpath_benchmark_latest.csv`
+
+### 数值一致性
+
+- 已通过固定点回归：
+   - `scripts/relaxtime/run_total_cross_section_fixedpoint_regression.jl`
+   - 输出：`data/outputs/results/relaxtime/regression/total_cross_section_fixedpoint_regression_latest.csv`
+- 本轮固定点中 `fast_path=true/false` 与 baseline 全部通过（`pass=true`）。
+
 **测试日期**: 2026-01-15 17:40:04
 
 **测试环境**:

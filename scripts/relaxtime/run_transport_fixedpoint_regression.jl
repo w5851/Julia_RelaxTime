@@ -4,7 +4,7 @@
 固定点回归：读取 transport baseline，计算 legacy/models 两套实现并逐点比对。
 
 输出：
-- 默认写入 `data/outputs/results/relaxtime/transport_fixedpoint_regression_latest.csv`
+- 默认写入 `data/outputs/results/relaxtime/regression/transport_fixedpoint_regression_latest.csv`
 - 若任一点超出阈值，脚本以非零退出并打印可定位信息
 
 示例：
@@ -16,7 +16,7 @@ using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const DEFAULT_BASELINE = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxtime", "baseline_transport_fixedpoints_v1.csv")
-const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "transport_fixedpoint_regression_latest.csv")
+const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "regression", "transport_fixedpoint_regression_latest.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
 using .TransportWorkflow

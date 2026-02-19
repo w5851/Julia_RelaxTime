@@ -276,7 +276,7 @@ println("(1-f_c)(1-f_d) = $factor")
 ### `total_cross_section`
 
 ```julia
-total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points) -> Float64
+total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points, fast_path) -> Float64
 ```
 
 计算给定 s 下的总散射截面 σ(s)。**这是模块的核心函数**。
@@ -296,6 +296,13 @@ total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points)
   - `ξ`: 各向异性参数
 - `K_coeffs::NamedTuple`: 有效耦合常数
 - `n_points::Int=6`: 高斯-勒让德积分点数（默认 6）
+- `fast_path::Bool=true`: 是否启用预解析热点路径（推荐开启）
+
+#### `fast_path` 说明
+
+- `fast_path=true`（默认）：在 `t` 积分前预解析散射上下文（过程类型、粒子标签、质量），循环内复用，减少重复解析开销。
+- `fast_path=false`：使用历史逐点路径，便于回归对照与诊断。
+- 数值一致性：项目回归脚本同时比较 `fast_path=true/false`，要求在容差内一致。
 
 #### 返回值
 

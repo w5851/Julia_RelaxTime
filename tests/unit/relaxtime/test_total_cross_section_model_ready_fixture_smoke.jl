@@ -41,15 +41,21 @@ end
     process = :uu_to_uu
     s0 = 31.0
 
-    σ = total_cross_section(process, s0, fx.q, fx.t, fx.K; n_points=2)
+    σ_legacy = total_cross_section(process, s0, fx.q, fx.t, fx.K; n_points=2, fast_path=false)
+    σ = total_cross_section(process, s0, fx.q, fx.t, fx.K; n_points=2, fast_path=true)
     @test isfinite(σ)
     @test σ ≥ 0.0
+    @test isapprox(σ, σ_legacy; rtol=1e-12, atol=0.0)
 
-    scan = scan_s_dependence([25.0, 31.0, 38.0], process, fx.q, fx.t, fx.K; n_points=2)
+    scan_legacy = scan_s_dependence([25.0, 31.0, 38.0], process, fx.q, fx.t, fx.K; n_points=2, fast_path=false)
+    scan = scan_s_dependence([25.0, 31.0, 38.0], process, fx.q, fx.t, fx.K; n_points=2, fast_path=true)
     @test length(scan) == 3
     @test all(isfinite, scan)
+    @test all(isapprox.(scan, scan_legacy; rtol=1e-12, atol=0.0))
 
-    allσ = calculate_all_total_cross_sections(s0, fx.q, fx.t, fx.K; n_points=2)
+    allσ = calculate_all_total_cross_sections(s0, fx.q, fx.t, fx.K; n_points=2, fast_path=true)
+    allσ_legacy = calculate_all_total_cross_sections(s0, fx.q, fx.t, fx.K; n_points=2, fast_path=false)
     @test length(keys(allσ)) > 0
     @test all(v -> isfinite(v) || isnan(v), values(allσ))
+    @test all(k -> isapprox(getfield(allσ, k), getfield(allσ_legacy, k); rtol=1e-12, atol=0.0), keys(allσ))
 end
