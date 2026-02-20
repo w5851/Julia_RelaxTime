@@ -12,6 +12,7 @@
 
 - `config/models/njl/default.toml` + `config/models/njl/unittest.toml`
 - `config/models/pnjl/default.toml` + `config/models/pnjl/unittest.toml`
+- `config/models/pnjl/magnetic_default.toml`（外磁场 PNJL 配置模板）
 - `config/models/rpnjl/default.toml` + `config/models/rpnjl/unittest.toml`
 
 覆盖关系统一为：

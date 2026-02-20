@@ -1,0 +1,19 @@
+[magnetic]
+# eB (fm^-2), where electric charge e is included.
+eB_fm2 = 0.10
+
+# Landau truncation; set to -1 to enable auto estimation.
+n_max = -1
+
+# pz integration settings
+p_num = 96
+pz_max = 25.0
+cutoff_N = 10
+
+[magnetic.imc]
+# G(B)=G0*(1+aζ^2+bζ^3)/(1+cζ^2+dζ^4), ζ=eB/Λ_QCD^2
+a = 0.108805
+b = -1.0133e-4
+c = 0.02228
+d = 1.84558e-4
+Lambda_QCD_MeV = 300.0

@@ -36,3 +36,6 @@ jobs:
 
       - name: Run total-cross-section fixedpoint regression gate
         run: julia --project=. scripts/relaxtime/run_total_cross_section_fixedpoint_regression.jl
+
+      - name: Run PNJL magnetic fixedpoint regression gate
+        run: julia --project=. scripts/pnjl/run_magnetic_fixedpoint_regression.jl

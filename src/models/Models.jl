@@ -22,6 +22,7 @@ export number_densities
 export NJLModel
 export NJL2Model
 export PNJLModel
+export PNJLMagneticModel
 export RPNJLModel
 export LegacyPNJLModel
 export LegacyNJLModel
@@ -47,6 +48,7 @@ include(joinpath(@__DIR__, "njl", "NJLModel.jl"))
 include(joinpath(@__DIR__, "njl", "NJL2Model.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLDistributions.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLModel.jl"))
+include(joinpath(@__DIR__, "pnjl", "PNJLMagneticModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))
 
 # Factory

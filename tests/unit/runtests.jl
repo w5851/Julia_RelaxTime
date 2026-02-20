@@ -82,6 +82,8 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_trho_scan_smoke.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_trho_scan_solver_backend_models_smoke.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_scan_fixedpoint_baseline_smoke.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_magnetic_fixedpoint_baseline_smoke.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_magnetic_nmax_convergence.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraints_models_backend_smoke.jl"),
 
     # [Config Injection] 保留理由：配置体系稳定性与可复现性保障。

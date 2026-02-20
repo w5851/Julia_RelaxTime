@@ -20,6 +20,7 @@
   - `PNJL.ConstraintModes` / `PNJL.SeedStrategies` / `PNJL.ImplicitSolver`：求解器主链路
   - `PNJL.ThermoDerivatives`：热力学导数/体粘滞相关导数
   - `PNJL.TmuScan` / `PNJL.TrhoScan`：扫描与相变分析辅助
+  - `PNJL.MagneticIntegrals` / `PNJL.MagneticThermodynamics`：外磁场 PNJL（Landau 能级）
   - `PNJL.PhaseTransition`：S 形检测、Maxwell 构造、crossover 扫描等
   - （按需）`PNJL.DualBranchScan`：一阶相变区域双分支扫描（不进入主线默认加载/导出）
 
@@ -46,6 +47,11 @@ res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=0.0, seed_strategy=PNJL.MultiSe
 - `PNJL.run_trho_scan`：T-ρ 网格扫描（见 `docs/api/pnjl/TrhoScan.md`）
 - 统一输出契约：`docs/api/pnjl/ScanOutputContract.md`
 - （按需）一阶相变区域双分支扫描：先调用 `PNJL.load_dual_branch_scan!()`，再使用 `PNJL.DualBranchScan.*`（见 `docs/api/pnjl/DualBranchScan.md`）
+
+### 外磁场 PNJL
+
+- API 说明：`docs/api/pnjl/MagneticPNJL.md`
+- 参数说明：`docs/api/pnjl/MagneticPNJLParameters.md`
 
 ---
 
