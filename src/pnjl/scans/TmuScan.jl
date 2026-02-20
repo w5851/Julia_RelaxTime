@@ -106,9 +106,13 @@ end
 
     (thermo_backend === :legacy || thermo_backend === :models) ||
         throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
-    (solver_backend === :legacy || solver_backend === :models) ||
-        throw(ArgumentError("solver_backend must be :legacy or :models, got $(solver_backend)"))
+    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
     return nothing
+end
+
+@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
+    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
 end
 
 # ============================================================================
@@ -370,8 +374,10 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
     t_num,
     nlsolve_kwargs...)
     try
-        (solver_backend === :legacy || solver_backend === :models) || error("unknown solver_backend=$solver_backend (expected :legacy or :models)")
-        if solver_backend === :models && thermo_backend !== :models
+        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
+            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        if effective_solver_backend === :models && thermo_backend !== :models
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
@@ -381,7 +387,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         
         result = solve(FixedMu(), T_fm, μ_fm;
             xi=xi,
-            thermo_backend=solver_backend,
+            thermo_backend=effective_solver_backend,
             seed_strategy=strategy,
             p_num=p_num,
             t_num=t_num,
@@ -389,7 +395,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         )
 
         result = finalize_solver_result(result, T_fm, xi;
-            solver_backend=solver_backend,
+            solver_backend=effective_solver_backend,
             thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
@@ -412,14 +418,16 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
     t_num,
     nlsolve_kwargs...)
     try
-        (solver_backend === :legacy || solver_backend === :models) || error("unknown solver_backend=$solver_backend (expected :legacy or :models)")
-        if solver_backend === :models && thermo_backend !== :models
+        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
+            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        if effective_solver_backend === :models && thermo_backend !== :models
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
         result = solve(FixedMu(), T_fm, μ_fm;
             xi=xi,
-            thermo_backend=solver_backend,
+            thermo_backend=effective_solver_backend,
             seed_strategy=seed_strategy,
             p_num=p_num,
             t_num=t_num,
@@ -427,7 +435,7 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
         )
 
         result = finalize_solver_result(result, T_fm, xi;
-            solver_backend=solver_backend,
+            solver_backend=effective_solver_backend,
             thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,

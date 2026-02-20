@@ -35,3 +35,27 @@ using .PNJL: run_tmu_scan
     @test length(cols) >= 4
     @test isfinite(parse(Float64, cols[4]))  # pressure_fm4
 end
+
+@testset "TmuScan smoke: single point (solver_backend=:auto, thermo_backend=:models)" begin
+    tmp_dir = mktempdir()
+
+    output = joinpath(tmp_dir, "tmu_scan_solver_backend_auto.csv")
+    stats = run_tmu_scan(
+        T_values=[150.0],
+        mu_values=[0.0],
+        xi_values=[0.0],
+        output_path=output,
+        overwrite=true,
+        resume=false,
+        use_phase_aware=false,
+        thermo_backend=:models,
+        solver_backend=:auto,
+        p_num=12,
+        t_num=4,
+        iterations=80,
+    )
+
+    @test isfile(output)
+    @test stats.total == 1
+    @test stats.success == 1
+end

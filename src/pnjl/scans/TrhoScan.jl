@@ -148,9 +148,13 @@ end
         throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
     (thermo_backend === :legacy || thermo_backend === :models) ||
         throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
-    (solver_backend === :legacy || solver_backend === :models) ||
-        throw(ArgumentError("solver_backend must be :legacy or :models, got $(solver_backend)"))
+    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
     return nothing
+end
+
+@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
+    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
 end
 
 # ============================================================================
@@ -430,6 +434,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     t_num,
     nlsolve_kwargs...)
 
+    effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
     elseif constraint_mode === :fixed_asymmetric_rho
@@ -443,7 +449,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
         if mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=solver_backend,
+                thermo_backend=effective_solver_backend,
                 model_kind=model_kind,
                 seed_strategy=strategy,
                 p_num=p_num,
@@ -453,7 +459,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
         else
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=solver_backend,
+                thermo_backend=effective_solver_backend,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -469,7 +475,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
 
     if result !== nothing
         result = finalize_solver_result(result, T_fm, xi;
-            solver_backend=solver_backend,
+            solver_backend=effective_solver_backend,
             thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
@@ -512,12 +518,12 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
-            thermo_backend=solver_backend,
+            thermo_backend=effective_solver_backend,
             model_kind=model_kind)
 
         if wb_result !== nothing
             wb_final = finalize_solver_result(wb_result, T_fm, xi;
-                solver_backend=solver_backend,
+                solver_backend=effective_solver_backend,
                 thermo_backend=thermo_backend,
                 p_num=p_num,
                 t_num=t_num,
@@ -548,8 +554,10 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     t_num,
     nlsolve_kwargs...)
     try
-        (solver_backend === :legacy || solver_backend === :models) || error("unknown solver_backend=$solver_backend (expected :legacy or :models)")
-        if solver_backend === :models && thermo_backend !== :models
+        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
+            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        if effective_solver_backend === :models && thermo_backend !== :models
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
@@ -576,7 +584,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         result = if mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=solver_backend,
+                thermo_backend=effective_solver_backend,
                 model_kind=model_kind,
                 seed_strategy=strategy,
                 p_num=p_num,
@@ -586,7 +594,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         else
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=solver_backend,
+                thermo_backend=effective_solver_backend,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -595,7 +603,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         end
 
         result = finalize_solver_result(result, T_fm, xi;
-            solver_backend=solver_backend,
+            solver_backend=effective_solver_backend,
             thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,

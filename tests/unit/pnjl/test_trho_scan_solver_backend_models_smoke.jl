@@ -73,3 +73,27 @@ end
         @test stats.success == 1
     end
 end
+
+@testset "TrhoScan smoke: single point (solver_backend=:auto, thermo_backend=:models)" begin
+    tmp_dir = mktempdir()
+
+    output = joinpath(tmp_dir, "trho_scan_solver_backend_auto.csv")
+    stats = run_trho_scan(
+        T_values=[150.0],
+        rho_values=[0.2],
+        xi_values=[0.0],
+        output_path=output,
+        overwrite=true,
+        resume=false,
+        reverse_rho=false,
+        thermo_backend=:models,
+        solver_backend=:auto,
+        p_num=12,
+        t_num=4,
+        iterations=80,
+    )
+
+    @test isfile(output)
+    @test stats.total == 1
+    @test stats.success == 1
+end

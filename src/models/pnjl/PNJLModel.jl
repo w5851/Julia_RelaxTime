@@ -205,13 +205,20 @@ function solve_gap(
     T_fm,
     mu_vec;
     solver_backend::Symbol=:legacy,
+    fallback_legacy_on_failure::Bool=true,
     xi::Real=0.0,
     p_num::Int=PNJLIntegrals.DEFAULT_MOMENTUM_COUNT,
     t_num::Int=PNJLIntegrals.DEFAULT_THETA_COUNT,
     thermo_backend::Symbol=:models,
     kwargs...
 )
-    if solver_backend === :legacy
+    effective_backend = if solver_backend === :auto
+        :models
+    else
+        solver_backend
+    end
+
+    if effective_backend === :legacy
         _ensure_pnjl_solver_loaded()
 
         μ = normalize_mu_vec(mu_vec)
@@ -231,21 +238,44 @@ function solve_gap(
 
         res.converged || error("PNJLModel.solve_gap did not converge (residual_norm=$(res.residual_norm))")
         return MeanFieldState(res.x_state)
-    elseif solver_backend === :models
-        # Use the generic 5D solver (gap_residual = ∇Ω). Do NOT pass legacy-only
-        # kwargs (e.g. thermo_backend) down to gap_residual/omega.
-        return invoke(
-            solve_gap,
-            Tuple{AbstractPNJLModel, Any, Any},
-            model,
-            T_fm,
-            mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...,
-        )
+    elseif effective_backend === :models
+        # Prefer models-native 5D solver (gap_residual = ∇Ω).
+        # Do NOT pass legacy-only kwargs (e.g. thermo_backend) down to gap_residual/omega.
+        try
+            return invoke(
+                solve_gap,
+                Tuple{AbstractPNJLModel, Any, Any},
+                model,
+                T_fm,
+                mu_vec;
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+                kwargs...,
+            )
+        catch err
+            if !fallback_legacy_on_failure
+                rethrow(err)
+            end
+
+            μ = normalize_mu_vec(mu_vec)
+            if !(μ[1] == μ[2] == μ[3])
+                rethrow(err)
+            end
+
+            return solve_gap(
+                model,
+                T_fm,
+                μ;
+                solver_backend=:legacy,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+                thermo_backend=thermo_backend,
+                kwargs...,
+            )
+        end
     else
-        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :legacy or :models)"))
+        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)"))
     end
 end

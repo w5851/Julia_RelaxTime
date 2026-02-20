@@ -35,15 +35,21 @@ export calculate_omega_components_backend
 export calculate_mass_vec_backend
 export calculate_number_densities_backend
 export get_models_model
+export ensure_models_loaded
+export rho0
 
 const _CACHED_MODELS = Dict{Symbol, Any}()
+
+@inline ensure_models_loaded() = ModelThermodynamics.ensure_models_loaded()
+
+@inline rho0() = ModelThermodynamics.ρ0
 
 """get_models_model(kind::Symbol=:PNJL) -> model
 
 返回一个缓存的 models 模型对象（默认 `:PNJL`）。
 """
 @inline function get_models_model(kind::Symbol=:PNJL)
-    ModelThermodynamics.ensure_models_loaded()
+    ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
     isdefined(Main.Models, :create_model) || error("Models.create_model is not defined")
 

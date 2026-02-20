@@ -33,24 +33,71 @@ using StaticArrays
         p_num=p_num,
         t_num=t_num,
     )
+    st_auto = Models.solve_gap(m, T, mu_vec;
+        solver_backend=:auto,
+        solver=solver_models,
+        initial_guess=x0,
+        residual_norm_max=1e-4,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
 
     vL = Models.state_vector(st_legacy)
     vM = Models.state_vector(st_models)
+    vA = Models.state_vector(st_auto)
     @test all(isfinite, vL)
     @test all(isfinite, vM)
+    @test all(isfinite, vA)
 
     rL = Models.gap_residual(m, st_legacy, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
     rM = Models.gap_residual(m, st_models, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
+    rA = Models.gap_residual(m, st_auto, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
     @test maximum(abs.(rL)) <= 1e-2
     @test maximum(abs.(rM)) <= 1e-2
+    @test maximum(abs.(rA)) <= 1e-2
 
     ωL = Models.omega(m, st_legacy, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
     ωM = Models.omega(m, st_models, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
+    ωA = Models.omega(m, st_auto, T, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
 
     @test isfinite(ωL)
     @test isfinite(ωM)
+    @test isfinite(ωA)
 
     # Loose comparability check (smoke): energies should be close.
     scale = max(1.0, abs(ωL))
     @test abs(ωM - ωL) / scale <= 1e-2
+    @test abs(ωA - ωL) / scale <= 1e-2
+
+    # Asymmetric chemical potential is models-only for now; :auto should route to models path.
+    mu_asym = @SVector [0.04, 0.00, -0.02]
+    st_auto_asym = Models.solve_gap(m, T, mu_asym;
+        solver_backend=:auto,
+        solver=solver_models,
+        initial_guess=x0,
+        residual_norm_max=1e-4,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
+    st_models_asym = Models.solve_gap(m, T, mu_asym;
+        solver_backend=:models,
+        solver=solver_models,
+        initial_guess=x0,
+        residual_norm_max=1e-4,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
+
+    vAA = Models.state_vector(st_auto_asym)
+    vMA = Models.state_vector(st_models_asym)
+    @test all(isfinite, vAA)
+    @test all(isfinite, vMA)
+
+    rAA = Models.gap_residual(m, st_auto_asym, T, mu_asym; xi=xi, p_num=p_num, t_num=t_num)
+    rMA = Models.gap_residual(m, st_models_asym, T, mu_asym; xi=xi, p_num=p_num, t_num=t_num)
+    @test maximum(abs.(rAA)) <= 1e-2
+    @test maximum(abs.(rMA)) <= 1e-2
 end

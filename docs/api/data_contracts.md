@@ -19,6 +19,12 @@
 - `Models.omega_components(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
 - （可选扩展）`Models.number_densities(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
 
+后端约定（迁移期）：
+
+- `solver_backend` 继续支持 `:legacy | :models`；默认保持兼容（不强制切换）。
+- `src/pnjl/core/EquilibriumFacade.jl` 支持 `solver_backend=:auto`（按 `thermo_backend` 推导），但默认仍为 `:legacy` 以避免行为突变。
+- `PNJLModel.solve_gap` 在 `solver_backend=:models` 下支持失败时回退 legacy 的受控策略（对称化学势场景）。
+
 ### 0.2 `x_state`（平均场状态）
 
 推荐的规范表示是：

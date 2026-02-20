@@ -72,7 +72,7 @@ function solve_equilibrium_backend(
 )
     kind = pnjl_model_kind(thermo_backend)
 
-    ThermoFacade.ModelThermodynamics.ensure_models_loaded()
+    ThermoFacade.ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
     isdefined(Main.Models, :solve_gap) || error("Models.solve_gap is not defined")
     isdefined(Main.Models, :state_vector) || error("Models.state_vector is not defined")
@@ -80,7 +80,13 @@ function solve_equilibrium_backend(
 
     m = model === nothing ? ThermoFacade.get_models_model(kind) : model
 
-    st = if solver_backend === :legacy
+    effective_solver_backend = if solver_backend === :auto
+        thermo_backend === :models ? :models : :legacy
+    else
+        solver_backend
+    end
+
+    st = if effective_solver_backend === :legacy
         # For LegacyPNJLModel / PNJLModel(solver_backend=:legacy), allow legacy solver kwargs.
         Main.Models.solve_gap(m, T_fm, mu_fm;
             xi=xi,
@@ -89,7 +95,7 @@ function solve_equilibrium_backend(
             thermo_backend=thermo_backend,
             solver_kwargs...,
         )
-    elseif solver_backend === :models
+    elseif effective_solver_backend === :models
         thermo_backend === :models || error("solver_backend=:models requires thermo_backend=:models")
         m isa Main.Models.PNJLModel || error("solver_backend=:models requires a PNJLModel (got $(typeof(m)))")
 
@@ -104,7 +110,7 @@ function solve_equilibrium_backend(
             t_num=t_num,
         )
     else
-        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :legacy or :models)"))
+        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :auto, :legacy or :models)"))
     end
 
     x_state = Main.Models.state_vector(st)

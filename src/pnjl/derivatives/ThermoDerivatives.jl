@@ -96,7 +96,7 @@ const CURRENT_THERMO_BACKEND = Ref{Symbol}(:legacy)
 const _IMPLICIT_GAP_SOLVER_CACHE = Dict{Tuple{Symbol, Float64, Int, Int, UInt}, Any}()
 
 @inline function _implicit_gap_solver(thermo_backend::Symbol; model=nothing)
-    ThermoFacade.ModelThermodynamics.ensure_models_loaded()
+    ThermoFacade.ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
     isdefined(Main.Models, :create_implicit_gap_solver) || error("Models.create_implicit_gap_solver is not defined")
 
@@ -294,7 +294,7 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
     mu_vec = SVector{3}(θ[2], θ[2], θ[2])
     rho_vec0 = _rho_backend(thermo_backend, x_sv, mu_vec, θ[1], nothing, CURRENT_XI[];
         p_num=p_num, t_num=t_num, model=model)
-    rho_norm = sum(rho_vec0) / (3.0 * ThermoFacade.ModelThermodynamics.ρ0)
+    rho_norm = sum(rho_vec0) / (3.0 * ThermoFacade.rho0())
     
     P_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[1], θ[1])
     P_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[1], θ[2])
