@@ -27,10 +27,12 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL
+const PNJL = Models.legacy_pnjl_module()
+const Models = Main.Models
 
 @inline function env_int(key::String, default::Int)
     return parse(Int, get(ENV, key, string(default)))
@@ -112,6 +114,7 @@ function main()
     out_csv = get(ENV, "OUT_CSV", "")
 
     rng = MersenneTwister(seed)
+    model = Models.create_model(:PNJL)
 
     @printf("random_sample_gap_points: N=%d seed=%d\n", n_samples, seed)
     @printf("ranges: T=[%.1f, %.1f] MeV  muB=[%.1f, %.1f] MeV  xi=[%.3f, %.3f]\n", T_min, T_max, muB_min, muB_max, xi_min, xi_max)
@@ -144,7 +147,17 @@ function main()
 
             local res
             try
-                res = PNJL.solve(PNJL.FixedMu(), T_fm, muq_fm; xi=xi, p_num=p_num, t_num=t_num)
+                seed = PNJL.get_seed(PNJL.DefaultSeed(), [T_fm, muq_fm], PNJL.FixedMu())
+                seed_guess = Float64.(seed[1:5])
+                res = Models.solve_fixedmu_constraint(
+                    model,
+                    T_fm,
+                    muq_fm;
+                    seed_guess=seed_guess,
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                )
             catch err
                 n_failed += 1
                 @printf("[%d] ERROR: solve threw exception at T=%.3f muB=%.3f xi=%.3f : %s\n", i, T_MeV, muB_MeV, xi, string(err))

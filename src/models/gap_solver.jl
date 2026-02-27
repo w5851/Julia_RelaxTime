@@ -109,6 +109,18 @@ end
     throw(ArgumentError("unsupported state dim N=$N"))
 end
 
+@inline function _is_legacy_adapter_model(model)
+    return (isdefined(@__MODULE__, :LegacyPNJLModel) && model isa LegacyPNJLModel) ||
+           (isdefined(@__MODULE__, :LegacyNJLModel) && model isa LegacyNJLModel)
+end
+
+@inline function _omega_worldsafe(model, st, T, μ; p_num::Int, t_num::Int, xi, kwargs...)
+    if _is_legacy_adapter_model(model)
+        return Base.invokelatest(omega, model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
+    end
+    return omega(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
+end
+
 function gap_residual(
     model::AbstractQCDModel,
     x,
@@ -135,24 +147,14 @@ function gap_residual(
         _as_svec(x, Val(N))
     end
 
-    @inline function _omega_worldsafe(st)
-        # Legacy adapters are loaded lazily; use invokelatest to avoid world-age
-        # dispatch falling back to generic omega/omega_components during nested AD.
-        if (isdefined(@__MODULE__, :LegacyPNJLModel) && model isa LegacyPNJLModel) ||
-           (isdefined(@__MODULE__, :LegacyNJLModel) && model isa LegacyNJLModel)
-            return Base.invokelatest(omega, model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-        end
-        return omega(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-    end
-
     omega_fn = y -> begin
         Ty = eltype(y)
         if N == 3
             st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=one(Ty), PhiBar=one(Ty))
-            return _omega_worldsafe(st)
+            return _omega_worldsafe(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
         else
             st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=y[4], PhiBar=y[5])
-            return _omega_worldsafe(st)
+            return _omega_worldsafe(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
         end
     end
 

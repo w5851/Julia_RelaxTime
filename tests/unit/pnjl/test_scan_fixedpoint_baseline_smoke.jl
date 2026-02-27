@@ -3,8 +3,11 @@ using Test
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_scan_fixedpoints_v1.csv")
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL: run_tmu_scan, run_trho_scan
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+const PNJL = Models.legacy_pnjl_module()
+const run_tmu_scan = getproperty(PNJL, :run_tmu_scan)
+const run_trho_scan = getproperty(PNJL, :run_trho_scan)
 
 function _load_baseline(path::String)
     isfile(path) || error("baseline CSV not found: $path")

@@ -12,10 +12,13 @@ const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.md")
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedRho
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedRho = getproperty(PNJL, :FixedRho)
 
 const BENCH_CONFIG = (
     T_mev = 50.0,

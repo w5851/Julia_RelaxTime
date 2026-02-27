@@ -34,12 +34,18 @@ using Dates
 
 # 加载模块
 include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "..", "..", "src", "pnjl", "PNJL.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL
-using .PNJL.TrhoScan
-using .PNJL.PhaseTransition: SShapeResult, detect_s_shape, MaxwellResult, maxwell_construction
-using .PNJL.PhaseTransition: detect_crossover, CrossoverResult, scan_crossover_line
+const PNJL = Models.legacy_pnjl_module()
+const PhaseTransition = getproperty(PNJL, :PhaseTransition)
+const SShapeResult = getproperty(PhaseTransition, :SShapeResult)
+const detect_s_shape = getproperty(PhaseTransition, :detect_s_shape)
+const MaxwellResult = getproperty(PhaseTransition, :MaxwellResult)
+const maxwell_construction = getproperty(PhaseTransition, :maxwell_construction)
+const detect_crossover = getproperty(PhaseTransition, :detect_crossover)
+const CrossoverResult = getproperty(PhaseTransition, :CrossoverResult)
+const scan_crossover_line = getproperty(PhaseTransition, :scan_crossover_line)
 
 # 单位转换
 const hbarc = 197.327  # MeV·fm

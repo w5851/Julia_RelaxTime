@@ -2,9 +2,9 @@
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
-using .PNJL.TrhoScan
+using .Models: run_trho_scan
 using DelimitedFiles
 using Printf
 
@@ -256,7 +256,7 @@ function run_export(opts)
 
     for (idx, (T, rho)) in enumerate(points)
         println(@sprintf("[%d/%d] T=%.3f MeV rho=%.6f", idx, length(points), T, rho))
-        stats = TrhoScan.run_trho_scan(
+        stats = run_trho_scan(
             ;
             T_values=[Float64(T)],
             rho_values=[Float64(rho)],

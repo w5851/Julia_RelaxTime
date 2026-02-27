@@ -2,8 +2,9 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+const PNJL = Models.legacy_pnjl_module()
 
 function _read_single_data_line(path)
     lines = readlines(path)

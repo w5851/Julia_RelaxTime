@@ -7,10 +7,16 @@ using Base.MathConstants: π
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL: vacuum_integral, calculate_energy_sum, calculate_mass_vec
-using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+const PNJL = Models.legacy_pnjl_module()
+const vacuum_integral = getproperty(PNJL, :vacuum_integral)
+const calculate_energy_sum = getproperty(PNJL, :calculate_energy_sum)
+const calculate_mass_vec = getproperty(PNJL, :calculate_mass_vec)
+const Integrals = getproperty(PNJL, :Integrals)
+const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
+const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
 
 const Λ = Constants_PNJL.Λ_inv_fm
 const GAUSS_NODES = 256

@@ -33,7 +33,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
@@ -43,9 +44,15 @@ using Printf
 using StaticArrays
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
-using .PNJL: solve, FixedMu, cached_nodes, calculate_number_densities
-using .PNJL: HADRON_SEED_5
-using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const cached_nodes = getproperty(PNJL, :cached_nodes)
+const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
+const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
+const Integrals = getproperty(PNJL, :Integrals)
+const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
+const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
 using .RelaxationTime: relaxation_times, REQUIRED_PROCESSES
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings

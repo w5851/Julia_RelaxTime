@@ -1,6 +1,6 @@
 using Test
 
-const _TRANSPORT_WORKFLOW_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+const _TRANSPORT_WORKFLOW_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "workflows", "TransportWorkflow.jl"))
 if !isdefined(Main, :TransportWorkflow)
     Base.include(Main, _TRANSPORT_WORKFLOW_PATH)
 end
@@ -50,16 +50,16 @@ end
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
     # Solve equilibrium once; reuse it for both backends.
-    base = TransportWorkflow.PNJL.solve(
-        TransportWorkflow.PNJL.FixedMu(),
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
         T,
         mu;
         xi=xi,
-        thermo_backend=:legacy,
+        thermo_backend=:models,
+        solver_backend=:models,
         p_num=8,
         t_num=4,
-        seed_strategy=TransportWorkflow.PNJL.DefaultSeed(phase_hint=:auto),
-        iterations=30,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
     )
 
     res_legacy = TransportWorkflow.solve_gap_and_transport(

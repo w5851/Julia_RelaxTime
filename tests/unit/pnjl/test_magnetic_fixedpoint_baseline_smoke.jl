@@ -5,9 +5,10 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_magnetic_fixedpoints_smoke_v1.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL
+const PNJL = Models.legacy_pnjl_module()
 
 function _load_rows(path::String)
     isfile(path) || error("baseline CSV not found: $path")

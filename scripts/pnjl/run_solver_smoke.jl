@@ -5,10 +5,14 @@ using NLsolve: LineSearches
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu, FixedRho
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const FixedRho = getproperty(PNJL, :FixedRho)
 
 function run_case_mu(T_mev, mu_mev; xi=0.0, p_num=32, t_num=16)
     @printf("\nCase solve(FixedMu()): T=%.2f MeV, mu=%.2f MeV, xi=%.3f\n", T_mev, mu_mev, xi)

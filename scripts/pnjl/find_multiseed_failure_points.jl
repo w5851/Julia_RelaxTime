@@ -1,5 +1,5 @@
 #!/usr/bin/env julia
-# Find parameter points where PNJL.solve_multi(FixedMu) fails to find *any* physical solution.
+# Find parameter points where models-backend equilibrium solve fails to find a physical solution.
 #
 # This script is intentionally separate from unit tests:
 # - It explores parameter space.
@@ -30,11 +30,15 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "EquilibriumFacade.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL
-using .PNJL.ConstraintModes: FixedMu
+using .EquilibriumFacade
+const PNJL = Models.legacy_pnjl_module()
+const ConstraintModes = getproperty(PNJL, :ConstraintModes)
+const FixedMu = getproperty(ConstraintModes, :FixedMu)
 
 @inline function env_int(key::String, default::Int)
     return parse(Int, get(ENV, key, string(default)))
@@ -134,7 +138,15 @@ function main()
 
             local res
             try
-                res = PNJL.solve_multi(FixedMu(), T_fm, muq_fm; xi=xi, p_num=p_num, t_num=t_num)
+                res = EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                    xi=xi,
+                    thermo_backend=:models,
+                    solver_backend=:models,
+                    p_num=p_num,
+                    t_num=t_num,
+                    seed_state=PNJL.HADRON_SEED_5,
+                    models_residual_norm_max=1e-4,
+                )
                 ok = true
                 n_ok += 1
 

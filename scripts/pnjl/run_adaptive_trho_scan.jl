@@ -8,11 +8,13 @@ using CSV
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL.TrhoScan
-using .PNJL.AdaptiveRhoRefinement
-using .PNJL.SeedCache: DEFAULT_SEED_PATH
+const PNJL = Models.legacy_pnjl_module()
+const run_trho_scan = getproperty(PNJL, :run_trho_scan)
+const AdaptiveRhoRefinement = getproperty(PNJL, :AdaptiveRhoRefinement)
+const DEFAULT_SEED_PATH = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "scan", "trho", "adaptive_seed_chain.csv")
 
 struct AdaptiveCLIOptions
     source::String
@@ -210,7 +212,7 @@ function run_adaptive_scan(opts::AdaptiveCLIOptions)
         for T in sort(collect(keys(plan)))
             rho_values = plan[T]
             println("  T=$(T) -> $(length(rho_values)) new ρ samples")
-            stats = TrhoScan.run_trho_scan(
+            stats = run_trho_scan(
                 ; T_values=[T],
                   rho_values=rho_values,
                   xi_values=[opts.xi],

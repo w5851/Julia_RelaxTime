@@ -1,8 +1,9 @@
 using Test
 
-if !isdefined(Main, :TransportWorkflow)
-    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
 end
+Main.Models.transport_workflow_module()
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solver_backend switch (legacy vs models)" begin

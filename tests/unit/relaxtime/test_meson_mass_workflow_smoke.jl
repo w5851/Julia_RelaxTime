@@ -1,6 +1,9 @@
 using Test
 
-include("../../../src/pnjl/workflows/MesonMassWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
+end
+Main.Models.meson_workflow_module()
 using .MesonMassWorkflow
 
 @testset "MesonMassWorkflow smoke: solve_gap_and_meson_point (single meson)" begin
@@ -8,7 +11,7 @@ using .MesonMassWorkflow
     mu = 0.0
     xi = 0.0
 
-    res = solve_gap_and_meson_point(
+    res = MesonMassWorkflow.solve_gap_and_meson_point(
         T,
         mu;
         xi=xi,
@@ -38,7 +41,7 @@ using .MesonMassWorkflow
     @test isfinite(rpi.gap) || !isfinite(rpi.mass)
 
     # Also validate backend keywords cheaply (no meson solve).
-    res_models = solve_gap_and_meson_point(
+    res_models = MesonMassWorkflow.solve_gap_and_meson_point(
         T,
         mu;
         xi=xi,

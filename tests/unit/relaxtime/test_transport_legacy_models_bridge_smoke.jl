@@ -1,9 +1,10 @@
 using Test
 using Printf
 
-if !isdefined(Main, :TransportWorkflow)
-    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
 end
+Main.Models.transport_workflow_module()
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: legacy/models transport bridge (4 fixed points)" begin

@@ -1,0 +1,24 @@
+# src/models 下允许存在的 Base.invokelatest 边界（迁移期）
+# 说明：
+# - 键为仓库相对路径
+# - 值为该文件允许出现的正则模式（逐行匹配）
+# - 任何新增 Base.invokelatest 若不命中本清单，将被迁移门禁拦截
+
+[models_invokelatest_allowlist]
+"src/models/pnjl/PNJLModel.jl" = [
+  "Base\\.invokelatest\\(pnjl\\.FixedMu\\)",
+  "Base\\.invokelatest\\(pnjl\\.solve,\\s*mode,",
+]
+"src/models/legacy/LegacyPNJLModel.jl" = [
+  "Base\\.invokelatest\\(pnjl\\.FixedMu\\)",
+  "Base\\.invokelatest\\(pnjl\\.solve,\\s*mode,",
+]
+"src/models/gap_solver.jl" = [
+  "Base\\.invokelatest\\(omega,\\s*model,\\s*st,\\s*T,\\s*μ;",
+]
+"src/models/factory.jl" = [
+  "Base\\.invokelatest\\(ctor;\\s*kwargs\\.\\.\\.\\)",
+]
+"src/models/entrypoints.jl" = [
+  "Base\\.invokelatest\\(fn,\\s*args\\.\\.\\.;\\s*kwargs\\.\\.\\.\\)",
+]

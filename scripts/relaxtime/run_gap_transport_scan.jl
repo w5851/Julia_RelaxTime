@@ -20,13 +20,13 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm, ρ0_inv_fm3
 using .TransportWorkflow: solve_gap_and_transport
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .EffectiveCouplings.OneLoopIntegrals: A
+using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
 using .ScanCSV: ScanCSV
@@ -435,22 +435,24 @@ function run_scan(opts::ScanOptions)
                     muq_fm = muq_mev / ħc_MeV_fm
 
                     # 先求一次平衡解（用于 K_coeffs，并作为后续 workflow 的 equilibrium 复用）
-                    # 首点：MultiSeed；后续：相变感知的连续性跟踪（phase_tracker 会用上一次解作为种子，并在跨相变线时切换默认相的种子）。
-                    seed_strategy = (phase_tracker.previous_solution === nothing) ? TransportWorkflow.PNJL.MultiSeed() : phase_tracker
-                    base = TransportWorkflow.PNJL.solve(TransportWorkflow.PNJL.FixedMu(), T_fm, muq_fm;
+                    # 初值连续性：首点用 hadron seed；后续点沿用上一点解向量。
+                    base_seed = phase_tracker.previous_solution === nothing ? TransportWorkflow.PNJL.HADRON_SEED_5 : phase_tracker.previous_solution
+                    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
                         xi=xi,
+                        thermo_backend=:models,
+                        solver_backend=:models,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
-                        seed_strategy=seed_strategy,
-                        solver_kwargs...,
+                        seed_state=base_seed,
+                        models_residual_norm_max=1e-4,
                     )
 
                     if base.converged
                         # PhaseAwareContinuitySeed 的 update! 需要 MeV 单位（与其内部 boundary.csv 数据一致）
-                        TransportWorkflow.PNJL.update!(phase_tracker, base.solution, T_mev, muq_mev)
+                        TransportWorkflow.PNJL.update!(phase_tracker, base.x_state, T_mev, muq_mev)
                     end
 
-                    seed_state = Vector(base.solution)
+                    seed_state = Vector(base.x_state)
 
                     Φ = Float64(base.x_state[4])
                     Φbar = Float64(base.x_state[5])
@@ -504,15 +506,30 @@ function run_scan(opts::ScanOptions)
                     tauinv = res.tau_inv
                     tr = res.transport
 
+                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = TransportWorkflow.ThermoFacade.calculate_thermo_backend(
+                        eq.x_state,
+                        eq.mu_vec,
+                        T_fm;
+                        thermo_backend=:models,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        xi=xi,
+                    )
+
                     # 重建重子数密度（旧版 eq.rho/eq.rho_norm 已移除）
                     rho_quark_net = (dens.u - dens.ubar) + (dens.d - dens.dbar) + (dens.s - dens.sbar)
                     rho_baryon = rho_quark_net / 3.0
                     rho_norm = rho_baryon / ρ0_inv_fm3
 
-                    omega_fm4inv = eq.omega
-                    P_fm4inv = eq.pressure
-                    epsilon_fm4inv = eq.energy
-                    s_fm3inv = eq.entropy
+                    omega_fm4inv = TransportWorkflow.ThermoFacade.calculate_omega_backend(
+                        eq.x_state,
+                        eq.mu_vec,
+                        T_fm;
+                        thermo_backend=:models,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        xi=xi,
+                    )
                     omega_MeV_fm3 = omega_fm4inv * ħc_MeV_fm
                     P_MeV_fm3 = P_fm4inv * ħc_MeV_fm
                     epsilon_MeV_fm3 = epsilon_fm4inv * ħc_MeV_fm

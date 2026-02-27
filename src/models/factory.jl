@@ -7,21 +7,31 @@
 
 export create_model
 
-const _LEGACY_PNJL_MODEL_PATH = joinpath(@__DIR__, "legacy", "LegacyPNJLModel.jl")
-const _LEGACY_NJL_MODEL_PATH = joinpath(@__DIR__, "legacy", "LegacyNJLModel.jl")
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
 
-@inline function _ensure_legacy_pnjl_loaded()
+const _LEGACY_PNJL_MODEL_PATH = normpath(joinpath(@__DIR__, "legacy", "LegacyPNJLModel.jl"))
+const _LEGACY_NJL_MODEL_PATH = normpath(joinpath(@__DIR__, "legacy", "LegacyNJLModel.jl"))
+
+@inline function _legacy_pnjl_ctor()
     if !isdefined(@__MODULE__, :LegacyPNJLModel)
-        include(_LEGACY_PNJL_MODEL_PATH)
+        Base.include(@__MODULE__, _LEGACY_PNJL_MODEL_PATH)
     end
-    return nothing
+    return getfield(@__MODULE__, :LegacyPNJLModel)
 end
 
-@inline function _ensure_legacy_njl_loaded()
+@inline function _legacy_njl_ctor()
     if !isdefined(@__MODULE__, :LegacyNJLModel)
-        include(_LEGACY_NJL_MODEL_PATH)
+        Base.include(@__MODULE__, _LEGACY_NJL_MODEL_PATH)
     end
-    return nothing
+    return getfield(@__MODULE__, :LegacyNJLModel)
+end
+
+@inline function _construct_worldsafe(ctor; kwargs...)
+    return Base.invokelatest(ctor; kwargs...)
 end
 
 """create_model(kind; kwargs...) -> model
@@ -41,11 +51,11 @@ function create_model(kind::Symbol; kwargs...)
     elseif kind === :RPNJL
         return RPNJLModel(; kwargs...)
     elseif kind === :LegacyNJL
-        _ensure_legacy_njl_loaded()
-        return Base.invokelatest(LegacyNJLModel; kwargs...)
+        ctor = _legacy_njl_ctor()
+        return _construct_worldsafe(ctor; kwargs...)
     elseif kind === :LegacyPNJL
-        _ensure_legacy_pnjl_loaded()
-        return Base.invokelatest(LegacyPNJLModel)
+        ctor = _legacy_pnjl_ctor()
+        return _construct_worldsafe(ctor)
     end
     error("Unknown model kind: ", kind)
 end

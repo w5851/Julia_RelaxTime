@@ -8,10 +8,19 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL: bulk_viscosity_coefficients, solve, FixedMu
-using .PNJL.ThermoDerivatives: get_thermal_nodes, set_config, IMPLICIT_SOLVER
-using .PNJL.Thermodynamics: calculate_thermo, calculate_rho
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+const PNJL = Models.legacy_pnjl_module()
+const bulk_viscosity_coefficients = getproperty(PNJL, :bulk_viscosity_coefficients)
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
+const get_thermal_nodes = getproperty(ThermoDerivatives, :get_thermal_nodes)
+const set_config = getproperty(ThermoDerivatives, :set_config)
+const IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
+const Thermodynamics = getproperty(PNJL, :Thermodynamics)
+const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
+const calculate_rho = getproperty(Thermodynamics, :calculate_rho)
 
 using StaticArrays
 using ForwardDiff

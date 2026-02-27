@@ -77,6 +77,7 @@ archived_date: 2026-01-19
 
 ```powershell
 julia --project=. scripts/dev/check_active_docs_governance.jl
+julia --project=. scripts/dev/check_pnjl_migration_guard.jl
 ```
 
 - 归档命令：
@@ -153,3 +154,19 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 ### 变更流程建议
 
 - 改代码 → 补测试（或说明为何不易测）→ 更新文档（docs/api 或 docs/dev）→ 在 PR 中写清验证方式。
+
+## world-age 边界治理（迁移期）
+
+- `src/models` 中 `Base.invokelatest(...)` 仅允许出现在已登记边界点，禁止新增散点调用。
+- 当前登记基线为 7 处，详见 `docs/architecture/dependency_rules.md` 的 “world-age 动态调用边界” 小节。
+- 边界登记的机读单一来源为 `config/ci/models_invokelatest_allowlist.toml`。
+- 若确需新增，必须同时完成：
+	- 更新 `scripts/dev/check_pnjl_migration_guard.jl` 白名单；
+	- 在迁移任务单补充必要性与回归证据；
+	- 提供 `models-invokelatest-audit` 输出（observed/baseline/allowlisted）。
+
+## 运行时入口迁移现状（2026-02-24）
+
+- `src/simulation/fullserver` 的扫描与单点求解主路径已切到 `Models` 统一入口。
+- `src/pnjl/PNJL.jl` 当前定位为兼容层，保留对外导出以支持迁移过渡。
+- 新增调用方默认应优先使用 `src/models/entrypoints.jl` 暴露的入口；仅在兼容需求下使用 `PNJL` 导出。

@@ -18,7 +18,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const DEFAULT_BASELINE = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxtime", "baseline_transport_fixedpoints_v1.csv")
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "regression", "transport_fixedpoint_regression_latest.csv")
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 using .TransportWorkflow
 
 struct RegressionOptions

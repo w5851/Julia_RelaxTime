@@ -2,9 +2,11 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL.PhaseTransition
+const PNJL = Models.legacy_pnjl_module()
+const PhaseTransition = getproperty(PNJL, :PhaseTransition)
 
 # ============================================================================
 # 测试数据

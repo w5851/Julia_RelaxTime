@@ -38,8 +38,14 @@ if !isdefined(Main, :GaussLegendre)
 end
 
 using Main.Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
-using Main.PNJL: solve, FixedMu, cached_nodes, calculate_number_densities
-using Main.PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+const PNJL = Main.PNJL
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const cached_nodes = getproperty(PNJL, :cached_nodes)
+const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
+const Integrals = getproperty(PNJL, :Integrals)
+const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
+const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
 using Main.RelaxationTime: relaxation_times, REQUIRED_PROCESSES
 using Main.OneLoopIntegrals: A
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings

@@ -4,10 +4,13 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
 
 const T_CASES = [50.0, 100.0, 150.0]
 const MU_CASES = [-50.0, 0.0, 50.0, 100.0]

@@ -3,9 +3,10 @@ using Test
 if !isdefined(Main, :RelaxationTime)
     include("../../../src/relaxtime/RelaxationTime.jl")
 end
-if !isdefined(Main, :TransportWorkflow)
-    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
 end
+Main.Models.transport_workflow_module()
 
 using .RelaxationTime
 using .TransportWorkflow

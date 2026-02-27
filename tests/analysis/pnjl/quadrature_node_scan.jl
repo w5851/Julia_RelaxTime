@@ -4,10 +4,15 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const DEFAULT_MOMENTUM_COUNT = getproperty(PNJL, :DEFAULT_MOMENTUM_COUNT)
+const DEFAULT_THETA_COUNT = getproperty(PNJL, :DEFAULT_THETA_COUNT)
 
 const PRESSURE_TOL = 5e-7
 const RHO_TOL = 5e-8

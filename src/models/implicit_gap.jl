@@ -20,6 +20,8 @@ using ForwardDiff
 using ImplicitDifferentiation
 
 export create_implicit_gap_solver
+export create_pnjl_implicit_solver
+export solve_pnjl_with_derivatives
 
 """create_implicit_gap_solver(model; kwargs...) -> ImplicitFunction
 
@@ -71,6 +73,101 @@ function create_implicit_gap_solver(
         linear_solver=DirectLinearSolver(),
         representation=MatrixRepresentation(),
     )
+end
+
+@inline function _pnjl_model_kind(thermo_backend::Symbol)
+    if thermo_backend === :legacy
+        return :LegacyPNJL
+    elseif thermo_backend === :models
+        return :PNJL
+    end
+    throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :legacy or :models)"))
+end
+
+"""create_pnjl_implicit_solver(; kwargs...) -> ImplicitFunction
+
+基于 models 入口创建 PNJL 5 维隐函数求解器：
+- 参数 θ = [T, μ]
+- 解向量 x = [φu, φd, φs, Φ, Φbar]
+
+默认使用 models backend；可通过 `thermo_backend/solver_backend` 切换。
+"""
+function create_pnjl_implicit_solver(;
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    thermo_backend::Symbol=:models,
+    solver_backend::Symbol=:models,
+    kwargs...
+)
+    kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
+    model = create_model(kind)
+    return create_implicit_gap_solver(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        solver_backend=solver_backend,
+        kwargs...,
+    )
+end
+
+"""solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...) -> NamedTuple
+
+通过 models 隐函数求解器计算 PNJL 解及其导数：
+- `order=1`：返回 `x, dx_dT, dx_dμ`
+- `order=2`：额外返回 `d2x_dT2, d2x_dμ2, d2x_dTdμ`
+"""
+function solve_pnjl_with_derivatives(
+    T_fm::Real,
+    μ_fm::Real;
+    order::Int=1,
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    thermo_backend::Symbol=:models,
+    solver_backend::Symbol=:models,
+    kwargs...
+)
+    solver = create_pnjl_implicit_solver(
+        ;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        thermo_backend=thermo_backend,
+        solver_backend=solver_backend,
+        kwargs...,
+    )
+
+    θ = [Float64(T_fm), Float64(μ_fm)]
+    x, _ = solver(θ)
+
+    if order == 1
+        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
+        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
+        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ)
+    elseif order == 2
+        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
+        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
+
+        d2x_dT2 = ForwardDiff.derivative(
+            T -> ForwardDiff.derivative(t -> solver([t, θ[2]])[1], T),
+            θ[1],
+        )
+        d2x_dμ2 = ForwardDiff.derivative(
+            μ -> ForwardDiff.derivative(m -> solver([θ[1], m])[1], μ),
+            θ[2],
+        )
+        d2x_dTdμ = ForwardDiff.derivative(
+            T -> ForwardDiff.derivative(μ -> solver([T, μ])[1], θ[2]),
+            θ[1],
+        )
+
+        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ,
+                d2x_dT2=d2x_dT2, d2x_dμ2=d2x_dμ2, d2x_dTdμ=d2x_dTdμ)
+    else
+        throw(ArgumentError("order must be 1 or 2, got $order"))
+    end
 end
 
 function create_implicit_gap_solver(

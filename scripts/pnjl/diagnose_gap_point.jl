@@ -17,9 +17,10 @@ Pkg.activate(joinpath(@__DIR__, "..", ".."))
 using Printf
 
 include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "..", "..", "src", "pnjl", "PNJL.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL
+const PNJL = Models.legacy_pnjl_module()
 using StaticArrays
 using NLsolve
 

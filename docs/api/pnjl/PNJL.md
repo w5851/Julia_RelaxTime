@@ -8,6 +8,11 @@
 
 **注意**：仓库已迁移到新架构（位于 `src/pnjl`）。旧版 `SeedCache/AnisoGapSolver/SinglePointSolver` 已移除或废弃；以本文件与 `docs/api/pnjl/*` 为准。
 
+**迁移期定位（2026-02-24）**：
+- `PNJL` 模块当前定位为兼容层与历史入口聚合层。
+- 新增业务调用（尤其 `simulation/fullserver` 运行时链路）应优先通过 `Models` 统一入口（`src/models/entrypoints.jl`）。
+- 既有 `PNJL.run_*` 与求解相关接口可用于存量调用回放与灰度迁移，但不作为新功能默认入口。
+
 ---
 
 ## 模块概览

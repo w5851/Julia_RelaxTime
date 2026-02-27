@@ -54,6 +54,8 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_pnjl_integrals_forwarddiff_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_gap_residual_generic_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_pnjl_solve_gap_generic_smoke.jl"),
+    joinpath(UNIT_DIR, "models", "test_models_dispatch_interface_smoke.jl"),
+    joinpath(UNIT_DIR, "models", "test_models_unified_entrypoints_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_pnjl_solve_gap_backend_switch_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_pnjl_thermo_bridge_multipoint_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_rpnjl_model_factory_smoke.jl"),

@@ -4,10 +4,14 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu, DEFAULT_THETA_COUNT
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const DEFAULT_THETA_COUNT = getproperty(PNJL, :DEFAULT_THETA_COUNT)
 
 const THETA_SWEEP = [4, 8, 12, 16, 24, 32, 40, 48, 64]
 const DEFAULT_T_NUM = DEFAULT_THETA_COUNT

@@ -8,9 +8,10 @@ const DEFAULT_SMOKE_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl"
 const DEFAULT_NIGHTLY_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_magnetic_fixedpoints_nightly_v1.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL
+const PNJL = Models.legacy_pnjl_module()
 
 function parse_args(args::Vector{String})
     scope = :smoke

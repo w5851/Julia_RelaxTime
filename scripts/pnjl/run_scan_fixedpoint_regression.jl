@@ -14,8 +14,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const DEFAULT_BASELINE = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_scan_fixedpoints_v1.csv")
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "regression", "scan_fixedpoint_regression_latest.csv")
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL: run_tmu_scan, run_trho_scan
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+using .Models: run_tmu_scan, run_trho_scan
 
 struct RegressionOptions
     baseline::String

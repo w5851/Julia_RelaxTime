@@ -16,7 +16,8 @@ if !isdefined(Main, :GaussLegendre)
     include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 end
 if !isdefined(Main, :PNJL)
-    include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+    Models.legacy_pnjl_module()
 end
 
 P = PNJL
@@ -25,10 +26,49 @@ const ħc = 197.327  # MeV·fm
 
 @testset "constraints with models thermo backend (smoke)" begin
     T_fm = 100.0 / ħc
+    μ_fm = 20.0 / ħc
 
     # keep these small-ish for smoke runtime
     p_num = 16
     t_num = 6
+
+    @testset "FixedMu" begin
+        result = P.solve(P.FixedMu(), T_fm, μ_fm; thermo_backend=:models, p_num=p_num, t_num=t_num)
+        @test result.converged
+        @test isfinite(result.pressure)
+        @test isfinite(result.rho_norm)
+        @test all(isfinite.(result.masses))
+        @test result.residual_norm <= 1e-2
+    end
+
+    @testset "FixedMu MultiSeed (models backend)" begin
+        result = P.solve(P.FixedMu(), T_fm, μ_fm;
+            thermo_backend=:models,
+            seed_strategy=P.MultiSeed(),
+            p_num=p_num,
+            t_num=t_num,
+        )
+        @test result.converged
+        @test isfinite(result.pressure)
+        @test isfinite(result.rho_norm)
+        @test all(isfinite.(result.masses))
+        @test result.residual_norm <= 1e-2
+    end
+
+    @testset "FixedMu PhaseAware bootstrap MultiSeed (models backend)" begin
+        tracker = P.PhaseAwareContinuitySeed(0.0; bootstrap_multiseed=true)
+        result = P.solve(P.FixedMu(), T_fm, μ_fm;
+            thermo_backend=:models,
+            seed_strategy=tracker,
+            p_num=p_num,
+            t_num=t_num,
+        )
+        @test result.converged
+        @test isfinite(result.pressure)
+        @test isfinite(result.rho_norm)
+        @test all(isfinite.(result.masses))
+        @test result.residual_norm <= 1e-2
+    end
 
     @testset "FixedRho" begin
         target_rho = 1.0
@@ -92,5 +132,25 @@ const ħc = 197.327  # MeV·fm
         @test isfinite(result.pressure)
         @test isfinite(result.rho_norm)
         @test all(isfinite.(result.masses))
+    end
+
+    @testset "Implicit solver (models backend)" begin
+        solver = P.create_implicit_solver(thermo_backend=:models, p_num=p_num, t_num=t_num)
+        θ = [T_fm, μ_fm]
+        x, _ = solver(θ)
+        @test length(x) == 5
+        @test all(isfinite.(x))
+
+        d = P.solve_with_derivatives(T_fm, μ_fm;
+            order=1,
+            thermo_backend=:models,
+            model_kind=:PNJL,
+            p_num=p_num,
+            t_num=t_num,
+        )
+        @test length(d.dx_dT) == 5
+        @test length(d.dx_dμ) == 5
+        @test all(isfinite.(d.dx_dT))
+        @test all(isfinite.(d.dx_dμ))
     end
 end

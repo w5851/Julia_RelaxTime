@@ -3,11 +3,13 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "MagneticIntegrals.jl"))
-
-using .MagneticIntegrals
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+const PNJL = Models.legacy_pnjl_module()
+const alpha_n = getproperty(PNJL, :alpha_n)
+const energy_landau = getproperty(PNJL, :energy_landau)
+const resolve_nmax_from_cutoff = getproperty(PNJL, :resolve_nmax_from_cutoff)
+const smooth_cutoff = getproperty(PNJL, :smooth_cutoff)
 
 @testset "magnetic energy levels" begin
     @test alpha_n(0) == 1.0

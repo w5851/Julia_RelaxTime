@@ -250,7 +250,7 @@ function _run_tmu_scan_job!(job_id::String, params::Dict{Symbol, Any})
         nothing
     end
 
-    stats = PNJL.run_tmu_scan(; kwargs..., progress_cb=progress_cb)
+    stats = Models.run_tmu_scan(; kwargs..., progress_cb=progress_cb)
     return Dict{String, Any}(
         "output_path" => stats.output,
         "stats" => Dict(
@@ -286,7 +286,7 @@ function _run_trho_scan_job!(job_id::String, params::Dict{Symbol, Any})
         nothing
     end
 
-    stats = PNJL.run_trho_scan(; kwargs..., progress_cb=progress_cb)
+    stats = Models.run_trho_scan(; kwargs..., progress_cb=progress_cb)
     return Dict{String, Any}(
         "output_path" => stats.output,
         "stats" => Dict(

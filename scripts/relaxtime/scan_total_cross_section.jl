@@ -12,10 +12,13 @@ push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "relaxtime"))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TotalCrossSection.jl"))
+
+const Models = Main.Models
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
@@ -181,14 +184,14 @@ function build_physical_parameters(opts::CLIOptions)
 
     # Solve gap equation first to obtain constituent masses and Polyakov loop variables.
     T_fm = opts.T_MeV / ħc_MeV_fm
-    gap_res = PNJL.solve(PNJL.FixedMu(), T_fm, Float64(μ_u); xi=Float64(opts.xi))
-    gap_res.converged || error("Gap solver did not converge (T=$(opts.T_MeV) MeV, μ=$(opts.mu_u_MeV) MeV, xi=$(opts.xi))")
+    model = Models.create_model(:PNJL)
+    st = Models.solve_gap(model, T_fm, Float64(μ_u); solver_backend=:models, xi=Float64(opts.xi))
 
-    x = gap_res.solution
+    x = Vector{Float64}(Models.state_vector(st))
     ϕ = SVector{3, Float64}(x[1], x[2], x[3])
     Φ = Float64(x[4])
     Φbar = Float64(x[5])
-    m_vec = gap_res.masses
+    m_vec = Models.calculate_mass_vec(model, SVector{3, Float64}(x[1], x[2], x[3]))
     m_u, m_d, m_s = m_vec[1], m_vec[2], m_vec[3]
 
     @info "Solved gap equation" T_MeV=opts.T_MeV mu_MeV=opts.mu_u_MeV xi=opts.xi m_u=m_u m_d=m_d m_s=m_s Phi=Φ Phibar=Φbar

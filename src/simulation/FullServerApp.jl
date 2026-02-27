@@ -7,8 +7,8 @@ using LinearAlgebra
 include(joinpath(@__DIR__, "MomentumMapping.jl"))
 using .MomentumMapping
 
-include(joinpath(@__DIR__, "..", "pnjl", "PNJL.jl"))
-using .PNJL
+include(joinpath(@__DIR__, "..", "models", "Models.jl"))
+using .Models
 
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
 if !isdefined(Main, :Constants_PNJL)

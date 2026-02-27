@@ -2,7 +2,7 @@ const MODULE_REGISTRY = [
     Dict(
         "id" => "pnjl-gap",
         "name" => "PNJL Gap Single Point",
-        "description" => "Run PNJL single-point solve via exported PNJL.solve interface",
+        "description" => "Run PNJL-compatible single-point solve via Models unified interfaces",
         "params_schema" => Dict(
             "T_mev" => "Float64 (required)",
             "mu_mev" => "Float64 (required for FixedMu)",

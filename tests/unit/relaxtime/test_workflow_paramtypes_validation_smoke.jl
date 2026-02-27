@@ -1,7 +1,10 @@
 using Test
 
-include("../../../src/pnjl/workflows/TransportWorkflow.jl")
-include("../../../src/pnjl/workflows/MesonMassWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
+end
+Main.Models.transport_workflow_module()
+Main.Models.meson_workflow_module()
 
 using .TransportWorkflow
 using .MesonMassWorkflow
@@ -11,16 +14,16 @@ using .MesonMassWorkflow
     mu = 0.0
     xi = 0.0
 
-    base = TransportWorkflow.PNJL.solve(
-        TransportWorkflow.PNJL.FixedMu(),
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
         T,
         mu;
         xi=xi,
-        thermo_backend=:legacy,
+        thermo_backend=:models,
+        solver_backend=:models,
         p_num=8,
         t_num=4,
-        seed_strategy=TransportWorkflow.PNJL.DefaultSeed(phase_hint=:auto),
-        iterations=30,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
     )
 
     params = MesonMassWorkflow.build_equilibrium_params(base, T, mu; xi=xi)

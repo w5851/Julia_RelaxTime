@@ -1,8 +1,8 @@
-# 求解器聚合模块 `PNJL.Solver`
+# 求解器入口 `PNJL.*`
 
-代码位置：`src/pnjl/solver/Solver.jl`
+代码位置：`src/pnjl/PNJL.jl` + `src/pnjl/solver/{ConstraintModes,SeedStrategies,Conditions,ImplicitSolver}.jl`
 
-`PNJL.Solver` 是一个“聚合/重导出”模块：按依赖顺序 include 子模块，并把常用类型与函数统一导出，方便外部通过 `PNJL.*` 调用。
+当前 `PNJL` 顶层按依赖顺序加载 solver 子模块，并直接重导出常用类型与函数，外部统一通过 `PNJL.*` 调用。
 
 ## 子模块
 

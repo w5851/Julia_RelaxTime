@@ -2,9 +2,9 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-# Load PNJL module tree (includes scans)
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL: run_tmu_scan
+# Load Models unified scan entrypoint
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+using .Models: run_tmu_scan
 
 @testset "TmuScan smoke: single point (solver_backend=:models)" begin
     tmp_dir = mktempdir()

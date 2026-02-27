@@ -1,6 +1,6 @@
 using Test
 
-include(abspath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "workflows", "TransportWorkflow.jl")))
+include(abspath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "workflows", "TransportWorkflow.jl")))
 const TW = Main.TransportWorkflow
 
 @testset "TransportWorkflow config smoke: prefer_energy_aniso via PHYSICS_PARAM_PROFILE" begin

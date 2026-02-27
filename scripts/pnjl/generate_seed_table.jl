@@ -7,10 +7,14 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu, HADRON_SEED_5
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
 
 const SEED_T_DIGITS = 1
 const SEED_XI_DIGITS = 2

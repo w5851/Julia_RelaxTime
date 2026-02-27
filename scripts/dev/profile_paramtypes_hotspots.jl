@@ -11,8 +11,8 @@ Parameter Types 热点 profiling（Phase D）
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "MesonMassWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "MesonMassWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TransportCoefficients.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
 
@@ -35,16 +35,16 @@ function main()
     xi = 0.0
 
     println("[Phase F] preparing equilibrium baseline...")
-    base = TransportWorkflow.PNJL.solve(
-        TransportWorkflow.PNJL.FixedMu(),
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
         T,
         mu;
         xi=xi,
-        thermo_backend=:legacy,
+        thermo_backend=:models,
+        solver_backend=:models,
         p_num=8,
         t_num=4,
-        seed_strategy=TransportWorkflow.PNJL.DefaultSeed(phase_hint=:auto),
-        iterations=30,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
     )
 
     inputs = TransportWorkflow._transport_inputs_from_equilibrium(base, T, mu;
@@ -152,18 +152,18 @@ function main()
 
     solve_acc = Ref(0.0)
     solve_us = avg_elapsed_us(() -> begin
-        s = TransportWorkflow.PNJL.solve(
-            TransportWorkflow.PNJL.FixedMu(),
+        s = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
             T,
             mu;
             xi=xi,
-            thermo_backend=:legacy,
+            thermo_backend=:models,
+            solver_backend=:models,
             p_num=8,
             t_num=4,
-            seed_strategy=TransportWorkflow.PNJL.DefaultSeed(phase_hint=:auto),
-            iterations=30,
+            seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+            models_residual_norm_max=1e-4,
         )
-        solve_acc[] += s.pressure
+        solve_acc[] += s.x_state[1]
         nothing
     end, n_solve)
 
@@ -222,7 +222,7 @@ function main()
     println("normalize(nt inputs):     ", round(norm_nt_us; digits=4))
     println("A_from_equilibrium(struct): ", round(A_struct_us; digits=4))
     println("A_from_equilibrium(nt):     ", round(A_nt_us; digits=4))
-    println("PNJL.solve baseline:        ", round(solve_us; digits=4))
+    println("equilibrium solve baseline: ", round(solve_us; digits=4))
     println("transport_coeff(req struct): ", round(tc_req_us; digits=4))
     println("transport_coeff(explicit nt): ", round(tc_manual_nt_us; digits=4))
     println("relaxation_times(struct, existing): ", round(rt_struct_us; digits=4))

@@ -29,16 +29,24 @@ using StaticArrays
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TotalCrossSection.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "AverageScatteringRate.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
-using .PNJL: solve, FixedMu, calculate_mass_vec, HADRON_SEED_5
-using .PNJL: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
-using .PNJL.Integrals: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const calculate_mass_vec = getproperty(PNJL, :calculate_mass_vec)
+const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
+const DEFAULT_MOMENTUM_COUNT = getproperty(PNJL, :DEFAULT_MOMENTUM_COUNT)
+const DEFAULT_THETA_COUNT = getproperty(PNJL, :DEFAULT_THETA_COUNT)
+const Integrals = getproperty(PNJL, :Integrals)
+const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
+const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .TotalCrossSection: total_cross_section

@@ -1,4 +1,4 @@
-# Dependency graph generated: 2026-02-19T17:33:25.999
+# Dependency graph generated: 2026-02-22T09:53:44.642
 
 Run: julia --project=. scripts/dev/gen_deps.jl
 
@@ -115,20 +115,19 @@ flowchart LR
   end
   subgraph pnjl
     src_pnjl_PNJL_jl[pnjl/PNJL.jl]
-    src_pnjl_core_Core_jl[pnjl/core/Core.jl]
+    src_pnjl_analysis_PhaseTransition_jl[pnjl/analysis/PhaseTransition.jl]
     src_pnjl_core_Integrals_jl[pnjl/core/Integrals.jl]
+    src_pnjl_core_MagneticIntegrals_jl[pnjl/core/MagneticIntegrals.jl]
+    src_pnjl_core_MagneticThermodynamics_jl[pnjl/core/MagneticThermodynamics.jl]
     src_pnjl_core_Thermodynamics_jl[pnjl/core/Thermodynamics.jl]
-    src_pnjl_derivatives_ThermoDerivatives_jl[pnjl/derivatives/ThermoDerivatives.jl]
     src_pnjl_scans_DualBranchScan_jl[pnjl/scans/DualBranchScan.jl]
     src_pnjl_scans_ScanCommon_jl[pnjl/scans/ScanCommon.jl]
     src_pnjl_scans_ScanResultFinalize_jl[pnjl/scans/ScanResultFinalize.jl]
     src_pnjl_scans_TmuScan_jl[pnjl/scans/TmuScan.jl]
     src_pnjl_scans_TrhoScan_jl[pnjl/scans/TrhoScan.jl]
     src_pnjl_solver_Conditions_jl[pnjl/solver/Conditions.jl]
-    src_pnjl_solver_ConstraintModes_jl[pnjl/solver/ConstraintModes.jl]
     src_pnjl_solver_ImplicitSolver_jl[pnjl/solver/ImplicitSolver.jl]
     src_pnjl_solver_SeedStrategies_jl[pnjl/solver/SeedStrategies.jl]
-    src_pnjl_solver_Solver_jl[pnjl/solver/Solver.jl]
     src_pnjl_workflows_MesonMassWorkflow_jl[pnjl/workflows/MesonMassWorkflow.jl]
     src_pnjl_workflows_TransportWorkflow_jl[pnjl/workflows/TransportWorkflow.jl]
   end
@@ -163,6 +162,8 @@ flowchart LR
     GaussLegendre[GaussLegendre]
     ImplicitSolver[ImplicitSolver]
     Integrals[Integrals]
+    MagneticIntegrals[MagneticIntegrals]
+    MagneticThermodynamics[MagneticThermodynamics]
     MesonPropagator[MesonPropagator]
     Models[Models]
     MomentumMapping[MomentumMapping]
@@ -213,6 +214,8 @@ flowchart LR
   src_pnjl_PNJL_jl --> ConstraintModes
   src_pnjl_PNJL_jl --> ImplicitSolver
   src_pnjl_PNJL_jl --> Integrals
+  src_pnjl_PNJL_jl --> MagneticIntegrals
+  src_pnjl_PNJL_jl --> MagneticThermodynamics
   src_pnjl_PNJL_jl --> PhaseTransition
   src_pnjl_PNJL_jl --> ScanConfig
   src_pnjl_PNJL_jl --> SeedStrategies
@@ -220,14 +223,16 @@ flowchart LR
   src_pnjl_PNJL_jl --> Thermodynamics
   src_pnjl_PNJL_jl --> TmuScan
   src_pnjl_PNJL_jl --> TrhoScan
-  src_pnjl_core_Core_jl --> Integrals
-  src_pnjl_core_Core_jl --> Thermodynamics
-  src_pnjl_core_Core_jl --> src_pnjl_core_Integrals_jl
-  src_pnjl_core_Core_jl --> src_pnjl_core_Thermodynamics_jl
+  src_pnjl_analysis_PhaseTransition_jl --> ConstraintModes
+  src_pnjl_core_MagneticThermodynamics_jl --> Integrals
+  src_pnjl_core_MagneticThermodynamics_jl --> MagneticIntegrals
+  src_pnjl_core_MagneticThermodynamics_jl --> Thermodynamics
+  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_Integrals_jl
+  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_MagneticIntegrals_jl
+  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_Thermodynamics_jl
   src_pnjl_core_Thermodynamics_jl --> Integrals
   src_pnjl_core_Thermodynamics_jl --> PNJLQuarkDistributions_Aniso
   src_pnjl_core_Thermodynamics_jl --> src_pnjl_core_Integrals_jl
-  src_pnjl_derivatives_ThermoDerivatives_jl --> Thermodynamics
   src_pnjl_scans_DualBranchScan_jl --> Constants_PNJL
   src_pnjl_scans_DualBranchScan_jl --> ConstraintModes
   src_pnjl_scans_DualBranchScan_jl --> ImplicitSolver
@@ -245,26 +250,15 @@ flowchart LR
   src_pnjl_scans_TmuScan_jl --> SeedStrategies
   src_pnjl_scans_TrhoScan_jl --> Constants_PNJL
   src_pnjl_scans_TrhoScan_jl --> ConstraintModes
-  src_pnjl_scans_TrhoScan_jl --> ImplicitSolver
   src_pnjl_scans_TrhoScan_jl --> ScanCommon
   src_pnjl_scans_TrhoScan_jl --> ScanConfig
   src_pnjl_scans_TrhoScan_jl --> ScanResultFinalize
   src_pnjl_scans_TrhoScan_jl --> SeedStrategies
   src_pnjl_solver_Conditions_jl --> ConstraintModes
-  src_pnjl_solver_Conditions_jl --> Thermodynamics
   src_pnjl_solver_ImplicitSolver_jl --> Conditions
   src_pnjl_solver_ImplicitSolver_jl --> ConstraintModes
   src_pnjl_solver_ImplicitSolver_jl --> SeedStrategies
-  src_pnjl_solver_ImplicitSolver_jl --> Thermodynamics
   src_pnjl_solver_SeedStrategies_jl --> ConstraintModes
-  src_pnjl_solver_Solver_jl --> Conditions
-  src_pnjl_solver_Solver_jl --> ConstraintModes
-  src_pnjl_solver_Solver_jl --> ImplicitSolver
-  src_pnjl_solver_Solver_jl --> SeedStrategies
-  src_pnjl_solver_Solver_jl --> src_pnjl_solver_Conditions_jl
-  src_pnjl_solver_Solver_jl --> src_pnjl_solver_ConstraintModes_jl
-  src_pnjl_solver_Solver_jl --> src_pnjl_solver_ImplicitSolver_jl
-  src_pnjl_solver_Solver_jl --> src_pnjl_solver_SeedStrategies_jl
   src_pnjl_workflows_MesonMassWorkflow_jl --> WorkflowParamAdapters
   src_pnjl_workflows_TransportWorkflow_jl --> ConfigLoader
   src_pnjl_workflows_TransportWorkflow_jl --> TransportCoefficients

@@ -10,8 +10,8 @@ using Test
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../../.."))
 
-include("../../../src/pnjl/PNJL.jl")
-using .PNJL: ThermoDerivatives
+include("../../../src/models/Models.jl")
+using .Models
 
 using StaticArrays
 using ForwardDiff
@@ -37,7 +37,7 @@ end
 @testset "体粘滞系数热力学导数" begin
     
     @testset "bulk_viscosity_coefficients 基本计算" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # 检查返回的 NamedTuple 包含所有必要的字段
         @test haskey(coeffs, :v_n_sq)
@@ -50,7 +50,7 @@ end
     end
     
     @testset "v_n_sq 数值验证" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # v_n² 应该是正数且在合理范围内
         @test coeffs.v_n_sq > 0
@@ -61,7 +61,7 @@ end
     end
 
     @testset "dμB_dT_sigma 数值验证" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # ∂μ_B/∂T|_σ 应该是正数（温度升高时化学势也升高以保持 σ 不变）
         @test coeffs.dμB_dT_sigma > 0
@@ -71,7 +71,7 @@ end
     end
     
     @testset "质量和导数验证" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # 质量应该是正数
         @test all(coeffs.masses .> 0)
@@ -92,13 +92,13 @@ end
     end
 
     @testset "compute_B_bracket 计算" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         p_test = 1.0  # fm⁻¹
         flavor = 1    # u 夸克
         
         # 夸克的 B 项
-        B_q = ThermoDerivatives.compute_B_bracket(
+        B_q = Models.compute_B_bracket(
             p_test,
             coeffs.masses[flavor],
             μq_fm,
@@ -111,7 +111,7 @@ end
         )
         
         # 反夸克的 B 项
-        B_qbar = ThermoDerivatives.compute_B_bracket(
+        B_qbar = Models.compute_B_bracket(
             p_test,
             coeffs.masses[flavor],
             μq_fm,
@@ -132,7 +132,7 @@ end
     end
     
     @testset "不同动量下的 B 项" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         flavor = 1
         
         # 提取纯数值（避免 Dual 类型问题）
@@ -147,7 +147,7 @@ end
         B_values = Float64[]
         
         for p in p_values
-            B = ThermoDerivatives.compute_B_bracket(
+            B = Models.compute_B_bracket(
                 p, M_val, μq_fm, T_fm,
                 v_n_sq_val, dμB_dT_sigma_val,
                 dM_dT_val, dM_dμB_val;
@@ -162,7 +162,7 @@ end
 
     @testset "热力学恒等式验证" begin
         # 验证 s = ∂P/∂T 和 n_B = (1/3)·∂P/∂μ_q
-        td = ThermoDerivatives.thermo_derivatives(T_fm, μq_fm)
+        td = Models.thermo_derivatives(T_fm, μq_fm)
         
         # s = ∂P/∂T
         @test isapprox(td.entropy, td.dP_dT, rtol=1e-6)
@@ -172,7 +172,7 @@ end
     end
     
     @testset "链式法则一致性" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         p_test = 1.0
         M = coeffs.masses[1]
@@ -194,7 +194,7 @@ end
     end
     
     @testset "不同味道的导数" begin
-        coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+        coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
         
         # u 和 d 夸克的导数应该相同（同位旋对称）
         @test isapprox(coeffs.dM_dT[1], coeffs.dM_dT[2], rtol=1e-6)

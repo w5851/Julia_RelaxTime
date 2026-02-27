@@ -11,12 +11,20 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "Thermodynamics.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .Thermodynamics
-using .Thermodynamics.Integrals: cached_nodes
+const PNJL = Models.legacy_pnjl_module()
+const cached_nodes = getproperty(PNJL, :cached_nodes)
+const Thermodynamics = getproperty(PNJL, :Thermodynamics)
+const calculate_mass_vec = getproperty(PNJL, :calculate_mass_vec)
+const calculate_chiral = getproperty(PNJL, :calculate_chiral)
+const calculate_U = getproperty(PNJL, :calculate_U)
+const calculate_U_derivative_T = getproperty(PNJL, :calculate_U_derivative_T)
+const calculate_omega = getproperty(Thermodynamics, :calculate_omega)
+const calculate_pressure = getproperty(Thermodynamics, :calculate_pressure)
+const calculate_rho = getproperty(Thermodynamics, :calculate_rho)
+const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
 
 # ============================================================================
 # 有效质量计算测试

@@ -13,24 +13,27 @@ using StaticArrays
 
 export LegacyPNJLModel
 
-# Load legacy thermodynamics once at module load (avoid runtime include world-age issues)
-const _LEGACY_THERMO_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "Thermodynamics.jl"))
-if !isdefined(@__MODULE__, :LegacyThermodynamics)
-    include(_LEGACY_THERMO_PATH)
-    const LegacyThermodynamics = Thermodynamics
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
 end
+const IncludeOnce = Main.IncludeOnce
 
-const _pnjl_cached_nodes = LegacyThermodynamics.Integrals.cached_nodes
-const DEFAULT_MOMENTUM_COUNT = LegacyThermodynamics.Integrals.DEFAULT_MOMENTUM_COUNT
-const DEFAULT_THETA_COUNT = LegacyThermodynamics.Integrals.DEFAULT_THETA_COUNT
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
-const _PNJL_SOLVER_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "solver", "Solver.jl"))
+const DEFAULT_MOMENTUM_COUNT = ThermoFacade.default_momentum_count()
+const DEFAULT_THETA_COUNT = ThermoFacade.default_theta_count()
 
-@inline function _ensure_pnjl_solver_loaded()
-    if !(isdefined(Main, :Solver) && isdefined(Main.Solver, :solve) && isdefined(Main.Solver, :FixedMu))
-        Base.include(Main, _PNJL_SOLVER_PATH)
+const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
+
+@inline function _pnjl_solver_module()
+    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
+    if !(isdefined(pnjl, :solve) && isdefined(pnjl, :FixedMu))
+        error("PNJL module loaded but required API (solve/FixedMu) is missing")
     end
-    return nothing
+    return pnjl
 end
 
 """legacy PNJL 模型适配器（参数仍来自 legacy 常量/配置）。"""
@@ -44,7 +47,7 @@ Legacy 适配器的有效质量向量；直接复用 legacy thermo 的质量公�
 """
 @inline function calculate_mass_vec(::LegacyPNJLModel, φ::SVector{3, T}; kwargs...) where {T}
     _ = kwargs
-    return LegacyThermodynamics.calculate_mass_vec(φ)
+    return ThermoFacade.calculate_mass_vec_backend(φ; thermo_backend=:legacy)
 end
 
 # -----------------------------------------------------------------------------
@@ -69,31 +72,16 @@ function omega_components(
     st = meanfield_state(x_state)
     x5 = state_vector(st)
 
-    nodes = isnothing(thermal_nodes) ? _pnjl_cached_nodes(p_num, t_num) : thermal_nodes
-    thermal_p_mesh, cosθ_mesh, thermal_coefficients = nodes
-
-    φ = SVector{3, eltype(x5)}(x5[1], x5[2], x5[3])
-    Φ, Φbar = x5[4], x5[5]
-
-    chi = LegacyThermodynamics.calculate_chiral(φ)
-    poly = LegacyThermodynamics.calculate_U(T_fm, Φ, Φbar)
-
-    masses = LegacyThermodynamics.calculate_mass_vec(φ)
-    vac = LegacyThermodynamics.Integrals.calculate_energy_sum(masses)
-    therm = LegacyThermodynamics.Integrals.calculate_log_sum(
-        masses,
-        thermal_p_mesh,
-        cosθ_mesh,
-        thermal_coefficients,
-        Φ,
-        Φbar,
+    return ThermoFacade.calculate_omega_components_backend(
+        x5,
         μ,
-        T_fm,
-        xi,
+        T_fm;
+        thermo_backend=:legacy,
+        p_num=p_num,
+        t_num=t_num,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
     )
-
-    ω = chi + poly + vac + therm
-    return (chi=chi, poly=poly, vac=vac, therm=therm, masses=masses, omega=ω)
 end
 
 """Ω 标量值（legacy 公式）。"""
@@ -134,8 +122,16 @@ function number_densities(
     st = meanfield_state(x_state)
     x5 = state_vector(st)
 
-    nodes = isnothing(thermal_nodes) ? _pnjl_cached_nodes(p_num, t_num) : thermal_nodes
-    return LegacyThermodynamics.calculate_number_densities(x5, μ, T_fm, nodes, xi)
+    return ThermoFacade.calculate_number_densities_backend(
+        x5,
+        μ,
+        T_fm;
+        thermo_backend=:legacy,
+        p_num=p_num,
+        t_num=t_num,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
 end
 
 """solve_gap(::LegacyPNJLModel, T, mu_vec) -> MeanFieldState
@@ -152,15 +148,15 @@ function solve_gap(
     thermo_backend::Symbol=:legacy,
     kwargs...
 )
-    _ensure_pnjl_solver_loaded()
+    pnjl = _pnjl_solver_module()
 
     μ = normalize_mu_vec(mu_vec)
     if !(μ[1] == μ[2] == μ[3])
         throw(ArgumentError("LegacyPNJLModel.solve_gap currently requires mu_u == mu_d == mu_s (FixedMu mode). Got mu_vec=$μ"))
     end
 
-    mode = Base.invokelatest(Main.Solver.FixedMu)
-    res = Base.invokelatest(Main.Solver.solve, mode, T_fm, μ[1];
+    mode = Base.invokelatest(pnjl.FixedMu)
+    res = Base.invokelatest(pnjl.solve, mode, T_fm, μ[1];
         xi=xi,
         p_num=p_num,
         t_num=t_num,

@@ -1,8 +1,9 @@
 using Test
 
-if !isdefined(Main, :TransportWorkflow)
-    include("../../../src/pnjl/workflows/TransportWorkflow.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
 end
+Main.Models.transport_workflow_module()
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solve_gap_and_transport (no tau/bulk)" begin

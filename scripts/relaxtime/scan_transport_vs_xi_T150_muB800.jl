@@ -27,7 +27,7 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using StaticArrays
@@ -36,7 +36,7 @@ using .ScanCSV: ScanCSV
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, ρ0_inv_fm3
 using .TransportWorkflow: solve_gap_and_transport
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .EffectiveCouplings.OneLoopIntegrals: A
+using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 
 struct Options
@@ -437,12 +437,16 @@ function run_scan(opts::Options)
                 continue
             end
 
-            base = TransportWorkflow.PNJL.solve(TransportWorkflow.PNJL.FixedMu(), T_fm, muq_fm;
+            base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
                 xi=xi,
+                thermo_backend=:models,
+                solver_backend=:models,
                 p_num=opts.p_num,
                 t_num=opts.t_num,
+                seed_state=seed_state,
+                models_residual_norm_max=1e-4,
             )
-            seed_state = Vector(base.solution)
+            seed_state = Vector(base.x_state)
 
             Φ = Float64(base.x_state[4])
             Φbar = Float64(base.x_state[5])

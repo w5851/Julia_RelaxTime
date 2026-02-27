@@ -17,12 +17,15 @@ if !isdefined(Main, :Constants_PNJL)
     include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 end
 if !isdefined(Main, :PNJL)
-    include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+    Models.legacy_pnjl_module()
 end
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve
-using .PNJL.ConstraintModes: FixedMu
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const ConstraintModes = getproperty(PNJL, :ConstraintModes)
+const FixedMu = getproperty(ConstraintModes, :FixedMu)
 
 @inline function _phys_ok(res; phi_tol::Float64=1e-8)
     Φ = res.x_state[4]

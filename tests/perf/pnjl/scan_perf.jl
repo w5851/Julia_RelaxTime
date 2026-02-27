@@ -23,11 +23,17 @@ const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.md")
 
 # 加载 PNJL 模块
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-using .PNJL: solve, FixedMu, FixedRho, ContinuitySeed, update!
-using .PNJL.TrhoScan: run_trho_scan
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const FixedRho = getproperty(PNJL, :FixedRho)
+const ContinuitySeed = getproperty(PNJL, :ContinuitySeed)
+const update! = getproperty(PNJL, :update!)
+const run_trho_scan = getproperty(PNJL, :run_trho_scan)
 
 # ============================================================================
 # 测试配置

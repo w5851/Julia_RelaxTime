@@ -8,9 +8,17 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
-using .PNJL: solve, FixedMu, gap_conditions, GapParams, cached_nodes
-using .PNJL.ThermoDerivatives: IMPLICIT_SOLVER, set_config
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
+const PNJL = Models.legacy_pnjl_module()
+const solve = getproperty(PNJL, :solve)
+const FixedMu = getproperty(PNJL, :FixedMu)
+const gap_conditions = getproperty(PNJL, :gap_conditions)
+const GapParams = getproperty(PNJL, :GapParams)
+const cached_nodes = getproperty(PNJL, :cached_nodes)
+const ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
+const IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
+const set_config = getproperty(ThermoDerivatives, :set_config)
 
 using ForwardDiff
 using NLsolve

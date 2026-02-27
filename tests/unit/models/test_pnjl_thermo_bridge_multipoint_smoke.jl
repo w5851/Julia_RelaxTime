@@ -7,13 +7,9 @@ if !isdefined(Main, :Models)
 end
 using .Models
 
-# Legacy PNJL thermodynamics
-include(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "core", "Thermodynamics.jl"))
-using .Thermodynamics
-
-# Model-based thermo bridge
-include(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "core", "ModelThermodynamics.jl"))
-using .ModelThermodynamics
+# Model-based thermo facade
+include(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "core", "ThermoFacade.jl"))
+using .ThermoFacade
 
 using StaticArrays
 
@@ -26,7 +22,7 @@ using StaticArrays
 
     p_num = 24
     t_num = 6
-    thermal_nodes = Thermodynamics.Integrals.cached_nodes(p_num, t_num)
+    thermal_nodes = ThermoFacade.cached_nodes_legacy(p_num, t_num)
 
     points = [
         (T=0.15, μ=0.0),
@@ -38,10 +34,24 @@ using StaticArrays
         T = pt.T
         mu_vec = @SVector [pt.μ, pt.μ, pt.μ]
 
-        ω_legacy = Thermodynamics.calculate_omega(x_state, mu_vec, T, thermal_nodes, xi)
+        ω_legacy = ThermoFacade.calculate_omega_backend(
+            x_state,
+            mu_vec,
+            T;
+            thermo_backend=:legacy,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         ω_models = Models.omega(model, x_state, T, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
 
-        comp_legacy = Thermodynamics.calculate_omega_components(x_state, mu_vec, T, thermal_nodes, xi)
+        comp_legacy = ThermoFacade.calculate_omega_components_backend(
+            x_state,
+            mu_vec,
+            T;
+            thermo_backend=:legacy,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
         comp_models = Models.omega_components(model, x_state, T, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
 
         @test isfinite(ω_legacy)
@@ -59,8 +69,24 @@ using StaticArrays
             @test isapprox(getfield(comp_models, k), getfield(comp_legacy, k); rtol=1e-9, atol=1e-11)
         end
 
-        P_legacy, rho_norm_legacy, s_legacy, e_legacy = Thermodynamics.calculate_thermo(x_state, mu_vec, T, thermal_nodes, xi)
-        P_m, rho_norm_m, s_m, e_m = ModelThermodynamics.thermo_model(model, x_state, mu_vec, T; p_num=p_num, t_num=t_num, xi=xi)
+        P_legacy, rho_norm_legacy, s_legacy, e_legacy = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T;
+            thermo_backend=:legacy,
+            thermal_nodes=thermal_nodes,
+            xi=xi,
+        )
+        P_m, rho_norm_m, s_m, e_m = ThermoFacade.calculate_thermo_backend(
+            x_state,
+            mu_vec,
+            T;
+            thermo_backend=:models,
+            model=model,
+            p_num=p_num,
+            t_num=t_num,
+            xi=xi,
+        )
 
         @test isfinite(P_legacy)
         @test isfinite(P_m)

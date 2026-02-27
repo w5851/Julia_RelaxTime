@@ -9,9 +9,9 @@ results to the main CSV for CEP/Maxwell analysis.
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
-using .PNJL.TrhoScan
+using .Models: run_trho_scan, build_default_rho_grid
 
 struct DenseScanOptions
     output::String
@@ -176,7 +176,7 @@ function print_usage()
 end
 
 function build_dense_rho_values(opts::DenseScanOptions)
-    return TrhoScan.build_default_rho_grid(
+    return build_default_rho_grid(
         rho_max=opts.rho_max,
         coarse_step=opts.coarse_step,
         medium_switch=opts.medium_switch,
@@ -194,7 +194,7 @@ function run_dense_scan(opts::DenseScanOptions)
     rho_values = build_dense_rho_values(opts)
     println("Running dense scan for T in [$(opts.tmin), $(opts.tmax)] with $(length(T_values)) slices")
     println("ρ grid points: $(length(rho_values)) (Δρ adjusted for low-density region)")
-    stats = TrhoScan.run_trho_scan(
+    stats = run_trho_scan(
         ; T_values=T_values,
           rho_values=rho_values,
           xi_values=opts.xi_values,

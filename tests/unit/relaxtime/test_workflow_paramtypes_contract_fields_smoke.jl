@@ -1,6 +1,9 @@
 using Test
 
-include("../../../src/pnjl/workflows/WorkflowParamAdapters.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
+end
+Main.Models.workflow_param_adapters_module()
 using .WorkflowParamAdapters
 
 @testset "Workflow ParamTypes contract fields smoke" begin

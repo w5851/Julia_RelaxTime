@@ -16,8 +16,8 @@ using Printf
 using JSON
 using Dates
 
-include("../../../src/pnjl/PNJL.jl")
-using .PNJL: ThermoDerivatives
+include("../../../src/models/Models.jl")
+using .Models
 
 # 结果输出目录
 const RESULTS_DIR = joinpath(@__DIR__, "..", "results", "relaxtime")
@@ -40,7 +40,7 @@ println()
 
 # 预热
 println("预热中...")
-ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+Models.bulk_viscosity_coefficients(T_fm, μq_fm)
 println("预热完成")
 println()
 
@@ -49,18 +49,18 @@ println()
 # ============================================================================
 
 println("1. bulk_viscosity_coefficients 性能测试")
-b1 = @benchmark ThermoDerivatives.bulk_viscosity_coefficients($T_fm, $μq_fm)
+b1 = @benchmark Models.bulk_viscosity_coefficients($T_fm, $μq_fm)
 println("   中位时间: $(@sprintf("%.2f", median(b1).time / 1e6)) ms")
 println("   最小时间: $(@sprintf("%.2f", minimum(b1).time / 1e6)) ms")
 println("   内存分配: $(@sprintf("%.2f", b1.memory / 1024)) KB")
 println()
 
 # 获取系数用于 B 项测试
-coeffs = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μq_fm)
+coeffs = Models.bulk_viscosity_coefficients(T_fm, μq_fm)
 p_test = 1.0
 
 println("2. compute_B_bracket 性能测试 (单次调用)")
-b2 = @benchmark ThermoDerivatives.compute_B_bracket(
+b2 = @benchmark Models.compute_B_bracket(
     $p_test,
     $(coeffs.masses[1]),
     $μq_fm,
@@ -101,13 +101,13 @@ function compute_all_B_brackets(p_values, masses, dM_dT, dM_dμB, v_n_sq, dμB_d
     
     for (i, p) in enumerate(p_values)
         for flavor in 1:3
-            B_q[i] += ThermoDerivatives.compute_B_bracket(
+            B_q[i] += Models.compute_B_bracket(
                 p, masses[flavor], μq, T,
                 v_n_sq, dμB_dT_sigma,
                 dM_dT[flavor], dM_dμB[flavor];
                 is_antiquark=false
             )
-            B_qbar[i] += ThermoDerivatives.compute_B_bracket(
+            B_qbar[i] += Models.compute_B_bracket(
                 p, masses[flavor], μq, T,
                 v_n_sq, dμB_dT_sigma,
                 dM_dT[flavor], dM_dμB[flavor];
@@ -130,7 +130,7 @@ println()
 # ============================================================================
 
 println("4. 与 thermo_derivatives 性能对比")
-b4 = @benchmark ThermoDerivatives.thermo_derivatives($T_fm, $μq_fm)
+b4 = @benchmark Models.thermo_derivatives($T_fm, $μq_fm)
 println("   thermo_derivatives 中位时间: $(@sprintf("%.2f", median(b4).time / 1e6)) ms")
 println("   bulk_viscosity_coefficients 中位时间: $(@sprintf("%.2f", median(b1).time / 1e6)) ms")
 println("   比值: $(@sprintf("%.2f", median(b1).time / median(b4).time))x")

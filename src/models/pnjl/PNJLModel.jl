@@ -29,13 +29,14 @@ const _pnjl_model_cached_nodes = PNJLIntegrals.cached_nodes
 const _pnjl_model_log_sum = PNJLIntegrals.calculate_log_sum
 const _PNJL_POLYAKOV_EPS = 1e-16
 
-const _PNJL_SOLVER_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "solver", "Solver.jl"))
+const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
 
-@inline function _ensure_pnjl_solver_loaded()
-    if !(isdefined(Main, :Solver) && isdefined(Main.Solver, :solve) && isdefined(Main.Solver, :FixedMu))
-        Base.include(Main, _PNJL_SOLVER_PATH)
+@inline function _pnjl_solver_module()
+    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
+    if !(isdefined(pnjl, :solve) && isdefined(pnjl, :FixedMu))
+        error("PNJL module loaded but required API (solve/FixedMu) is missing")
     end
-    return nothing
+    return pnjl
 end
 
 export PNJLModel
@@ -196,7 +197,7 @@ end
 
 """solve_gap(::PNJLModel, T, mu_vec; kwargs...) -> MeanFieldState
 
-阶段 0：先复用 legacy 求解器（src/pnjl/solver/Solver.jl），将其结果适配到 models 的 `MeanFieldState`。
+阶段 0：先复用 legacy 求解入口（src/pnjl/PNJL.jl 导出的 solver API），将其结果适配到 models 的 `MeanFieldState`。
 
 当前限制：仅支持对称化学势 `mu_u == mu_d == mu_s`（因为 legacy FixedMu 模式以标量 μ 为入口）。
 """
@@ -212,6 +213,11 @@ function solve_gap(
     thermo_backend::Symbol=:models,
     kwargs...
 )
+    legacy_kwargs = Dict{Symbol,Any}(pairs(kwargs))
+    for key in (:solver, :initial_guess, :residual_norm_max)
+        pop!(legacy_kwargs, key, nothing)
+    end
+
     effective_backend = if solver_backend === :auto
         :models
     else
@@ -219,22 +225,21 @@ function solve_gap(
     end
 
     if effective_backend === :legacy
-        _ensure_pnjl_solver_loaded()
+        pnjl = _pnjl_solver_module()
 
         μ = normalize_mu_vec(mu_vec)
         if !(μ[1] == μ[2] == μ[3])
             throw(ArgumentError("PNJLModel.solve_gap(::legacy) requires mu_u == mu_d == mu_s (FixedMu mode). Got mu_vec=$μ"))
         end
 
-        # NOTE: We may have just `include`d the legacy solver module; use `invokelatest`
-        # to avoid world-age issues when running inside tests or AD contexts.
-        mode = Base.invokelatest(Main.Solver.FixedMu)
-        res = Base.invokelatest(Main.Solver.solve, mode, T_fm, μ[1];
+        # NOTE: legacy solver module may be loaded lazily; keep world-age safety.
+        mode = Base.invokelatest(pnjl.FixedMu)
+        res = Base.invokelatest(pnjl.solve, mode, T_fm, μ[1];
             xi=xi,
             p_num=p_num,
             t_num=t_num,
-            thermo_backend=thermo_backend,
-            kwargs...)
+            thermo_backend=:legacy,
+            legacy_kwargs...)
 
         res.converged || error("PNJLModel.solve_gap did not converge (residual_norm=$(res.residual_norm))")
         return MeanFieldState(res.x_state)
@@ -271,8 +276,8 @@ function solve_gap(
                 xi=xi,
                 p_num=p_num,
                 t_num=t_num,
-                thermo_backend=thermo_backend,
-                kwargs...,
+                thermo_backend=:legacy,
+                legacy_kwargs...,
             )
         end
     else

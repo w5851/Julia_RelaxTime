@@ -1,0 +1,40 @@
+name: data-output-path-guard
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/data-output-path-guard.yml"
+      - "Project.toml"
+      - "Manifest.toml"
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/data-output-path-guard.yml"
+      - "Project.toml"
+      - "Manifest.toml"
+  workflow_dispatch:
+
+jobs:
+  data-output-path-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-data-output-path-guard
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Check data output path guard
+        run: julia --project=. scripts/dev/check_data_output_path_guard.jl

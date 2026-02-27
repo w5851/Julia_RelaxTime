@@ -3,16 +3,15 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "Integrals.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "Thermodynamics.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "MagneticIntegrals.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "core", "MagneticThermodynamics.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .Integrals
-using .Thermodynamics
-using .MagneticThermodynamics
+const PNJL = Models.legacy_pnjl_module()
+const cached_nodes = getproperty(PNJL, :cached_nodes)
+const calculate_omega = getproperty(PNJL, :calculate_omega)
+const MagneticConfig = getproperty(PNJL, :MagneticConfig)
+const calculate_magnetic_omega_components = getproperty(PNJL, :calculate_magnetic_omega_components)
+const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
 
 @testset "magnetic omega components" begin
     x_state = SVector{5, Float64}(-0.03, -0.03, -0.04, 0.2, 0.2)

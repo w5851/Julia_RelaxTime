@@ -6,11 +6,12 @@ using StaticArrays
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.legacy_pnjl_module()
 
-using .PNJL
+const PNJL = Models.legacy_pnjl_module()
 
-function main(; T_MeV::Float64=150.0, mu_MeV::Float64=60.0, eB_min_MeV2::Float64=5.0e3, eB_max_MeV2::Float64=4.0e4, points::Int=8, output::String=joinpath(PROJECT_ROOT, "outputs", "results", "pnjl_magnetic_eb_scan.csv"))
+function main(; T_MeV::Float64=150.0, mu_MeV::Float64=60.0, eB_min_MeV2::Float64=5.0e3, eB_max_MeV2::Float64=4.0e4, points::Int=8, output::String=joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl_magnetic", "scan", "pnjl_magnetic_eb_scan.csv"))
     points >= 2 || error("points must be >= 2")
     mkpath(dirname(output))
 

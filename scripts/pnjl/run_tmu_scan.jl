@@ -69,10 +69,9 @@ using Dates
 
 # 加载模块
 include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "..", "..", "src", "pnjl", "PNJL.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 
-using .PNJL
-using .PNJL.TmuScan
+using .Models: run_tmu_scan
 
 # ============================================================================
 # 配置

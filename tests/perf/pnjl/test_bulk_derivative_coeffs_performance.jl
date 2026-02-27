@@ -2,8 +2,8 @@ using Test
 using BenchmarkTools
 using Statistics: mean
 
-include(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "PNJL.jl"))
-using .PNJL: ThermoDerivatives
+include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+using .Models
 
 const BENCH_CONFIG = (
     T_mev = 150.0,
@@ -14,7 +14,7 @@ const BENCH_CONFIG = (
 )
 
 @testset "bulk_derivative_coeffs performance (average runtime)" begin
-    ThermoDerivatives.bulk_derivative_coeffs(
+    Models.bulk_derivative_coeffs(
         BENCH_CONFIG.T_mev,
         BENCH_CONFIG.mu_mev;
         xi = BENCH_CONFIG.xi,
@@ -22,7 +22,7 @@ const BENCH_CONFIG = (
         t_num = BENCH_CONFIG.t_num,
     )
 
-    bench = @benchmark ThermoDerivatives.bulk_derivative_coeffs(
+    bench = @benchmark Models.bulk_derivative_coeffs(
         $(BENCH_CONFIG.T_mev),
         $(BENCH_CONFIG.mu_mev);
         xi = $(BENCH_CONFIG.xi),

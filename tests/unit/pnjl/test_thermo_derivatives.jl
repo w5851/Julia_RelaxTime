@@ -164,9 +164,16 @@ using ForwardDiff
 using StaticArrays
 
 @testset "all_quantities type check" begin
-    using Main.PNJL.ThermoDerivatives: IMPLICIT_SOLVER, get_thermal_nodes, set_config, 
-        CURRENT_XI, CURRENT_P_NUM, CURRENT_T_NUM, calculate_thermo, calculate_rho,
-        compute_masses_from_state
+    local ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
+    local IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
+    local get_thermal_nodes = getproperty(ThermoDerivatives, :get_thermal_nodes)
+    local set_config = getproperty(ThermoDerivatives, :set_config)
+    local CURRENT_XI = getproperty(ThermoDerivatives, :CURRENT_XI)
+    local CURRENT_P_NUM = getproperty(ThermoDerivatives, :CURRENT_P_NUM)
+    local CURRENT_T_NUM = getproperty(ThermoDerivatives, :CURRENT_T_NUM)
+    local calculate_thermo = getproperty(ThermoDerivatives, :calculate_thermo)
+    local calculate_rho = getproperty(ThermoDerivatives, :calculate_rho)
+    local compute_masses_from_state = getproperty(ThermoDerivatives, :compute_masses_from_state)
 
     set_config(xi=0.0)
     

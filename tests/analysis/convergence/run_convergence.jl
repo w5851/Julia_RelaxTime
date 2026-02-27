@@ -21,13 +21,13 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
 using .TransportWorkflow: solve_gap_and_transport
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .EffectiveCouplings.OneLoopIntegrals: A
+using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 
 const RT_ASR = TransportWorkflow.RelaxationTime.AverageScatteringRate
@@ -120,12 +120,14 @@ function solve_point(T_mev::Float64, muB_mev::Float64, xi::Float64, c::ConvCase)
     muq_mev = muB_mev / 3.0
     muq_fm = muq_mev / ħc_MeV_fm
 
-    base = TransportWorkflow.PNJL.solve(TransportWorkflow.PNJL.FixedMu(), T_fm, muq_fm;
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
         xi=xi,
+        thermo_backend=:models,
+        solver_backend=:models,
         p_num=DEFAULT_P_NUM,
         t_num=DEFAULT_T_NUM,
-        seed_strategy=TransportWorkflow.PNJL.MultiSeed(),
-        iterations=DEFAULT_MAX_ITER,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
     )
 
     base.converged || error("PNJL equilibrium did not converge at T=$(T_mev), muB=$(muB_mev), xi=$(xi)")
@@ -156,7 +158,7 @@ function solve_point(T_mev::Float64, muB_mev::Float64, xi::Float64, c::ConvCase)
         compute_bulk=false,
         p_num=DEFAULT_P_NUM,
         t_num=DEFAULT_T_NUM,
-        seed_state=Vector(base.solution),
+        seed_state=Vector(base.x_state),
         solver_kwargs=(iterations=DEFAULT_MAX_ITER,),
         tau_kwargs=(
             p_nodes=c.tau_p_nodes,
@@ -178,7 +180,15 @@ function solve_point(T_mev::Float64, muB_mev::Float64, xi::Float64, c::ConvCase)
     eq = res.equilibrium
     tr = res.transport
     tau = res.tau
-    s_fm3inv = eq.entropy
+    _, _, s_fm3inv, _ = TransportWorkflow.ThermoFacade.calculate_thermo_backend(
+        eq.x_state,
+        eq.mu_vec,
+        T_fm;
+        thermo_backend=:models,
+        p_num=DEFAULT_P_NUM,
+        t_num=DEFAULT_T_NUM,
+        xi=xi,
+    )
 
     eta_over_s = (isfinite(tr.eta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.eta / s_fm3inv) : NaN
 
