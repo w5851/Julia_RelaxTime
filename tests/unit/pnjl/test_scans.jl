@@ -6,15 +6,19 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
 
 using .Models
 
 if !isdefined(Main, :PNJL)
+    if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-    Models.legacy_pnjl_module()
 end
-const PNJL = Main.PNJL
+    Models.pnjl_module()
+end
+const PNJL = Models.pnjl_module()
 PNJL.load_tmu_scan!()
 PNJL.load_trho_scan!()
 PNJL.load_adaptive_rho_refinement!()

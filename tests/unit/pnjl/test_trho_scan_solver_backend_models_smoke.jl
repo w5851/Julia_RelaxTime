@@ -3,7 +3,11 @@ using Test
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 # Load Models unified scan entrypoint
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+end
 using .Models: run_trho_scan
 
 @testset "TrhoScan smoke: single point (solver_backend=:models)" begin

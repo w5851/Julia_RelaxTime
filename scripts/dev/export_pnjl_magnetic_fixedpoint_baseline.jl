@@ -9,9 +9,9 @@ const DEFAULT_NIGHTLY_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "pnj
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 
 function parse_args(args::Vector{String})
     scope = :smoke

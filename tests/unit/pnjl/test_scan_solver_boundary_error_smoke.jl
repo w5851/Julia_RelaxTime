@@ -2,9 +2,11 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
-const PNJL = Models.legacy_pnjl_module()
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+Models.pnjl_module()
+const PNJL = Models.pnjl_module()
 
 @testset "Scan solver boundary error smoke" begin
     tmp_dir = mktempdir()

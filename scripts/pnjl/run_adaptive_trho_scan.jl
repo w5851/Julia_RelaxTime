@@ -9,9 +9,9 @@ using CSV
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const run_trho_scan = getproperty(PNJL, :run_trho_scan)
 const AdaptiveRhoRefinement = getproperty(PNJL, :AdaptiveRhoRefinement)
 const DEFAULT_SEED_PATH = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "scan", "trho", "adaptive_seed_chain.csv")

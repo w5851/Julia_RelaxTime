@@ -3,11 +3,15 @@ using Test
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_scan_fixedpoints_v1.csv")
 
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
-const PNJL = Models.legacy_pnjl_module()
-const run_tmu_scan = getproperty(PNJL, :run_tmu_scan)
-const run_trho_scan = getproperty(PNJL, :run_trho_scan)
+if !isdefined(Main, :Models)
+    if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+end
+Models.pnjl_module()
+const PNJL = Models.pnjl_module()
+const pnjl_run_tmu_scan = getproperty(PNJL, :run_tmu_scan)
+const pnjl_run_trho_scan = getproperty(PNJL, :run_trho_scan)
 
 function _load_baseline(path::String)
     isfile(path) || error("baseline CSV not found: $path")
@@ -60,7 +64,7 @@ end
         out = joinpath(tmp_dir, "single.csv")
 
         if row.kind == "tmu"
-            stats = run_tmu_scan(
+            stats = pnjl_run_tmu_scan(
                 T_values=[row.T],
                 mu_values=[row.mu],
                 xi_values=[row.xi],
@@ -82,7 +86,7 @@ end
             @test isapprox(_f(r, "energy_fm4"), row.energy; rtol=rtol, atol=atol)
             @test isapprox(_f(r, "rho"), row.rho_out; rtol=rtol, atol=atol)
         elseif row.kind == "trho"
-            stats = run_trho_scan(
+            stats = pnjl_run_trho_scan(
                 T_values=[row.T],
                 rho_values=[row.rho],
                 xi_values=[row.xi],

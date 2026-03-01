@@ -11,7 +11,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 const _CONSTANTS_PNJL_PATH = normpath(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 const _GAUSS_LEGENDRE_PATH = normpath(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-const _PNJL_PATH = normpath(joinpath(PROJECT_ROOT, "src", "pnjl", "PNJL.jl"))
+const _MODELS_PATH = normpath(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH)
@@ -19,12 +19,13 @@ end
 if !isdefined(Main, :GaussLegendre)
     Base.include(Main, _GAUSS_LEGENDRE_PATH)
 end
-if !isdefined(Main, :PNJL)
-    Base.include(Main, _PNJL_PATH)
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODELS_PATH)
 end
 
+using .Models
 using Main.Constants_PNJL: ħc_MeV_fm
-const PNJL = Main.PNJL
+const PNJL = Models.pnjl_module()
 
 # ============================================================================
 # 基本功能（fm⁻¹）

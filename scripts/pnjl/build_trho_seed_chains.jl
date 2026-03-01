@@ -5,9 +5,9 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const TrhoSeedChain = getproperty(PNJL, :TrhoSeedChain)
 
 struct Options

@@ -1,7 +1,9 @@
 using Test
 
 if !isdefined(Main, :Models)
+    if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
+end
 end
 Main.Models.workflow_param_adapters_module()
 using .WorkflowParamAdapters

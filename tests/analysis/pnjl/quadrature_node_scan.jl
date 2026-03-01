@@ -5,10 +5,10 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const DEFAULT_MOMENTUM_COUNT = getproperty(PNJL, :DEFAULT_MOMENTUM_COUNT)

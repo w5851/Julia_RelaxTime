@@ -3,7 +3,9 @@ using Test
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 # Load Models unified scan entrypoint
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
 using .Models: run_tmu_scan
 
 @testset "TmuScan smoke: single point (legacy/models)" begin

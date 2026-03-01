@@ -3,9 +3,11 @@ using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
-const PNJL = Models.legacy_pnjl_module()
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+Models.pnjl_module()
+const PNJL = Models.pnjl_module()
 const MagneticConfig = getproperty(PNJL, :MagneticConfig)
 const calculate_magnetic_rho = getproperty(PNJL, :calculate_magnetic_rho)
 const calculate_magnetic_number_densities = getproperty(PNJL, :calculate_magnetic_number_densities)

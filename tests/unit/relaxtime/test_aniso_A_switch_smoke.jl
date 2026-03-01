@@ -4,7 +4,9 @@ if !isdefined(Main, :RelaxationTime)
     include("../../../src/relaxtime/RelaxationTime.jl")
 end
 if !isdefined(Main, :Models)
+    if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
+end
 end
 Main.Models.transport_workflow_module()
 

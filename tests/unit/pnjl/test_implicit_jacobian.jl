@@ -8,9 +8,11 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
-const PNJL = Models.legacy_pnjl_module()
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+Models.pnjl_module()
+const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const gap_conditions = getproperty(PNJL, :gap_conditions)

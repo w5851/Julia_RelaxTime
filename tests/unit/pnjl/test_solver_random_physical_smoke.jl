@@ -17,12 +17,14 @@ if !isdefined(Main, :Constants_PNJL)
     include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 end
 if !isdefined(Main, :PNJL)
+    if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-    Models.legacy_pnjl_module()
+end
+    Models.pnjl_module()
 end
 
 using .Constants_PNJL: ħc_MeV_fm
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const ConstraintModes = getproperty(PNJL, :ConstraintModes)
 const FixedMu = getproperty(ConstraintModes, :FixedMu)

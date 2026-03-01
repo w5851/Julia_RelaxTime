@@ -16,8 +16,10 @@ if !isdefined(Main, :GaussLegendre)
     include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 end
 if !isdefined(Main, :PNJL)
+    if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-    Models.legacy_pnjl_module()
+end
+    Models.pnjl_module()
 end
 
 P = PNJL

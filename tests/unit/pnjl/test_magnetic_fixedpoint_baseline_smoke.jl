@@ -5,10 +5,12 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_magnetic_fixedpoints_smoke_v1.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 
 function _load_rows(path::String)
     isfile(path) || error("baseline CSV not found: $path")
@@ -56,11 +58,11 @@ end
         eB_fm2 = row.eB / (Constants_PNJL.ħc_MeV_fm^2)
         mu_vec = SVector{3, Float64}(mu_fm, mu_fm, mu_fm)
 
-        conf = Main.PNJL.default_magnetic_config(eB_fm2=eB_fm2)
-        comp = Main.PNJL.calculate_magnetic_omega_components(x_state, mu_vec, T_fm, conf)
-        rho = Main.PNJL.calculate_magnetic_rho(x_state, mu_vec, T_fm, conf)
-        nd = Main.PNJL.calculate_magnetic_number_densities(x_state, mu_vec, T_fm, conf)
-        conv = Main.PNJL.magnetic_nmax_convergence_report(x_state, mu_vec, T_fm, conf; delta_n=6, rtol=3e-2)
+        conf = PNJL.default_magnetic_config(eB_fm2=eB_fm2)
+        comp = PNJL.calculate_magnetic_omega_components(x_state, mu_vec, T_fm, conf)
+        rho = PNJL.calculate_magnetic_rho(x_state, mu_vec, T_fm, conf)
+        nd = PNJL.calculate_magnetic_number_densities(x_state, mu_vec, T_fm, conf)
+        conv = PNJL.magnetic_nmax_convergence_report(x_state, mu_vec, T_fm, conf; delta_n=6, rtol=3e-2)
 
         @test isapprox(comp.omega, row.omega; rtol=rtol, atol=atol)
         @test isapprox(-comp.omega, row.pressure; rtol=rtol, atol=atol)

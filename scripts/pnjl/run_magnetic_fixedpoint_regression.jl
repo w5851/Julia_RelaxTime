@@ -8,9 +8,9 @@ const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "base
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 
 function load_rows(path::String)
     isfile(path) || error("baseline CSV not found: $path")

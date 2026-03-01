@@ -18,9 +18,9 @@ using Printf
 
 include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 using StaticArrays
 using NLsolve
 

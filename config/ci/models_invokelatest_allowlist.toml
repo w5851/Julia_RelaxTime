@@ -20,5 +20,19 @@
   "Base\\.invokelatest\\(ctor;\\s*kwargs\\.\\.\\.\\)",
 ]
 "src/models/entrypoints.jl" = [
+  "Base\\.invokelatest\\(scan\\.pnjl_module_ref\\)",
+  "Base\\.invokelatest\\(bridge\\.module_ref\\)",
   "Base\\.invokelatest\\(fn,\\s*args\\.\\.\\.;\\s*kwargs\\.\\.\\.\\)",
+]
+"src/models/derivative_entrypoints.jl" = [
+  "Base\\.invokelatest\\(td\\.derivatives_module_ref\\)",
+]
+"src/models/workflows/TransportWorkflow.jl" = [
+  "Base\\.invokelatest\\(ModelsScanEntrypoints\\.pnjl_module_ref\\)",
+]
+"src/models/workflows/MesonMassWorkflow.jl" = [
+  "Base\\.invokelatest\\(ModelsScanEntrypoints\\.pnjl_module_ref\\)",
+]
+"src/models/pnjl/derivatives/ThermoDerivatives.jl" = [
+  "Base\\.invokelatest\\(Main\\.Models\\.create_implicit_gap_solver,\\s*m;",
 ]

@@ -4,9 +4,9 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 
 function run_magnetic_point(; T_MeV::Float64=150.0, mu_MeV::Float64=0.0, eB_MeV2::Float64=2.0e4)
     T_fm = T_MeV / Constants_PNJL.ħc_MeV_fm

@@ -10,7 +10,9 @@ using Test
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "../../.."))
 
-include("../../../src/models/Models.jl")
+if !isdefined(Main, :Models)
+    include("../../../src/models/Models.jl")
+end
 using .Models
 
 using StaticArrays

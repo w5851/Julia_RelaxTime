@@ -13,9 +13,9 @@ const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src"
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH)
 end
-const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "pnjl", "PNJL.jl"))
-if !isdefined(Main, :PNJL)
-    Base.include(Main, _PNJL_PATH)
+const _MODELS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODELS_PATH)
 end
 const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxationTime.jl"))
 if !isdefined(Main, :RelaxationTime)
@@ -37,8 +37,9 @@ if !isdefined(Main, :GaussLegendre)
     Base.include(Main, _GAUSS_LEGENDRE_PATH)
 end
 
+using .Models
 using Main.Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
-const PNJL = Main.PNJL
+const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const cached_nodes = getproperty(PNJL, :cached_nodes)

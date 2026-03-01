@@ -35,9 +35,9 @@ using Dates
 # 加载模块
 include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const PhaseTransition = getproperty(PNJL, :PhaseTransition)
 const SShapeResult = getproperty(PhaseTransition, :SShapeResult)
 const detect_s_shape = getproperty(PhaseTransition, :detect_s_shape)

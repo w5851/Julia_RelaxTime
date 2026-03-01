@@ -24,10 +24,10 @@ const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.md")
 # 加载 PNJL 模块
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+Models.pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const FixedRho = getproperty(PNJL, :FixedRho)

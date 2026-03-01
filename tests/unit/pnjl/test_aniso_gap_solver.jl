@@ -7,10 +7,12 @@ using Base.MathConstants: π
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.legacy_pnjl_module()
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+Models.pnjl_module()
 
-const PNJL = Models.legacy_pnjl_module()
+const PNJL = Models.pnjl_module()
 const vacuum_integral = getproperty(PNJL, :vacuum_integral)
 const calculate_energy_sum = getproperty(PNJL, :calculate_energy_sum)
 const calculate_mass_vec = getproperty(PNJL, :calculate_mass_vec)
