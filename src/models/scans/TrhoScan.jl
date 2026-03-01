@@ -446,7 +446,15 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
 
     primary_err_msg = ""
     result = try
-        if mode isa FixedAsymmetricRho
+        if effective_solver_backend === :models
+            _solve_with_models(mode, T_fm;
+                xi=xi,
+                model_kind=model_kind,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...)
+        elseif mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
                 thermo_backend=effective_solver_backend,
@@ -581,7 +589,15 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         # 创建自定义策略，直接返回指定种子
         strategy = ScanCommon.FixedSeedStrategy(seed_8)
 
-        result = if mode isa FixedAsymmetricRho
+        result = if effective_solver_backend === :models
+            _solve_with_models(mode, T_fm;
+                xi=xi,
+                model_kind=model_kind,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...)
+        elseif mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
                 thermo_backend=effective_solver_backend,
@@ -651,6 +667,57 @@ _is_success(result) = is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL
 
 """提升近似收敛为成功"""
 _promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
+
+@inline function _models_mode(mode::FixedRho)
+    return Main.Models.FixedRho(mode.rho_target)
+end
+
+@inline function _models_mode(mode::FixedAsymmetricRho)
+    return Main.Models.FixedAsymmetricRho(mode.rho_target, mode.ud_ratio_target, mode.s_target)
+end
+
+function _to_solver_result(mode::ConstraintMode, result, xi::Real)
+    return SolverResult(
+        mode,
+        Bool(result.converged),
+        Float64.(result.solution),
+        SVector{5, Float64}(Tuple(Float64.(result.x_state))),
+        SVector{3, Float64}(Tuple(Float64.(result.mu_vec))),
+        Float64(result.omega),
+        Float64(result.pressure),
+        Float64(result.rho_norm),
+        Float64(result.entropy),
+        Float64(result.energy),
+        SVector{3, Float64}(Tuple(Float64.(result.masses))),
+        Int(result.iterations),
+        Float64(result.residual_norm),
+        Float64(xi),
+    )
+end
+
+function _solve_with_models(mode::ConstraintMode, T_fm;
+    xi::Real,
+    model_kind::Symbol,
+    seed_strategy::SeedStrategy,
+    p_num::Int,
+    t_num::Int,
+    nlsolve_kwargs...)
+    ThermoFacade.ensure_models_loaded()
+    model = Main.Models.create_model(model_kind)
+    mapped_mode = _models_mode(mode)
+    seed_guess = get_seed(seed_strategy, [T_fm], mode)
+    raw = Main.Models.solve_constraint(
+        model,
+        mapped_mode,
+        T_fm;
+        seed_guess=seed_guess,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        nlsolve_kwargs...,
+    )
+    return _to_solver_result(mode, raw, xi)
+end
 
 """写入一行结果"""
 function _write_row(io, T, rho, xi, result, message;

@@ -385,14 +385,24 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         seed_5 = Float64.(seed_state[1:min(5, length(seed_state))])
         strategy = ScanCommon.FixedSeedStrategy(seed_5)
         
-        result = solve(FixedMu(), T_fm, μ_fm;
-            xi=xi,
-            thermo_backend=effective_solver_backend,
-            seed_strategy=strategy,
-            p_num=p_num,
-            t_num=t_num,
-            nlsolve_kwargs...
-        )
+        result = if effective_solver_backend === :models
+            _solve_with_models(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                model_kind=:PNJL,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...)
+        else
+            solve(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                thermo_backend=effective_solver_backend,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...
+            )
+        end
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -425,14 +435,24 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
-        result = solve(FixedMu(), T_fm, μ_fm;
-            xi=xi,
-            thermo_backend=effective_solver_backend,
-            seed_strategy=seed_strategy,
-            p_num=p_num,
-            t_num=t_num,
-            nlsolve_kwargs...
-        )
+        result = if effective_solver_backend === :models
+            _solve_with_models(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                model_kind=:PNJL,
+                seed_strategy=seed_strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...)
+        else
+            solve(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                thermo_backend=effective_solver_backend,
+                seed_strategy=seed_strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...
+            )
+        end
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -475,6 +495,55 @@ _is_success(result) = is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL
 
 """提升近似收敛为成功"""
 _promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
+
+@inline function _models_mode(mode::FixedMu)
+    return Main.Models.FixedMu()
+end
+
+function _to_solver_result(mode::ConstraintMode, result, xi::Real)
+    return SolverResult(
+        mode,
+        Bool(result.converged),
+        Float64.(result.solution),
+        SVector{5, Float64}(Tuple(Float64.(result.x_state))),
+        SVector{3, Float64}(Tuple(Float64.(result.mu_vec))),
+        Float64(result.omega),
+        Float64(result.pressure),
+        Float64(result.rho_norm),
+        Float64(result.entropy),
+        Float64(result.energy),
+        SVector{3, Float64}(Tuple(Float64.(result.masses))),
+        Int(result.iterations),
+        Float64(result.residual_norm),
+        Float64(xi),
+    )
+end
+
+function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
+    xi::Real,
+    model_kind::Symbol,
+    seed_strategy::SeedStrategy,
+    p_num::Int,
+    t_num::Int,
+    nlsolve_kwargs...)
+    ThermoFacade.ensure_models_loaded()
+    model = Main.Models.create_model(model_kind)
+    mapped_mode = _models_mode(mode)
+    seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
+    raw = Main.Models.solve_constraint(
+        model,
+        mapped_mode,
+        T_fm;
+        μ_fm=μ_fm,
+        seed_guess=seed_guess,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        models_kwargs...,
+    )
+    return _to_solver_result(mode, raw, xi)
+end
 
 """写入一行结果"""
 function _write_row(io, T, mu, xi, result, message)

@@ -32,6 +32,17 @@ module DualBranchScan
 using Printf
 using StaticArrays
 
+# Include-once helper
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
+end
+const IncludeOnce = Main.IncludeOnce
+
+# Unified thermo facade (legacy vs models)
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
 # 导入新架构模块
 using ..Constants_PNJL: ħc_MeV_fm
 using ..ConstraintModes: FixedMu, ConstraintMode
@@ -42,6 +53,10 @@ using ..ImplicitSolver: solve, SolverResult
 
 export run_dual_branch_scan, find_phase_transition, merge_branches
 export DualBranchResult, BranchPoint, PhaseTransitionInfo
+
+@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
+    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
+end
 
 # ============================================================================
 # 数据结构
@@ -106,6 +121,7 @@ function run_dual_branch_scan(;
     mu_range,
     xi::Real=0.0,
     thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
     p_num::Int=24,
     t_num::Int=8,
     verbose::Bool=false,
@@ -128,7 +144,12 @@ function run_dual_branch_scan(;
     
     for (i, mu_mev) in enumerate(mu_values)
         μ_fm = mu_mev / ħc_MeV_fm
-        result = _solve_point(T_fm, μ_fm, xi, hadron_tracker; thermo_backend=thermo_backend, p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+        result = _solve_point(T_fm, μ_fm, xi, hadron_tracker;
+            thermo_backend=thermo_backend,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
         
         if result !== nothing && result.converged
             # 检查是否发生了解跳跃（序参量突变）
@@ -156,7 +177,12 @@ function run_dual_branch_scan(;
     for i in n_points:-1:1
         mu_mev = mu_values[i]
         μ_fm = mu_mev / ħc_MeV_fm
-        result = _solve_point(T_fm, μ_fm, xi, quark_tracker; thermo_backend=thermo_backend, p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+        result = _solve_point(T_fm, μ_fm, xi, quark_tracker;
+            thermo_backend=thermo_backend,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
         
         if result !== nothing && result.converged
             # 检查是否发生了解跳跃
@@ -340,23 +366,94 @@ function get_seed(s::_FixedSeedStrategy, ::AbstractVector, ::ConstraintMode)
 end
 
 """单点求解"""
-function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed; thermo_backend::Symbol=:legacy, p_num, t_num, nlsolve_kwargs...)
+function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
+    thermo_backend::Symbol=:legacy,
+    solver_backend::Symbol=:legacy,
+    p_num,
+    t_num,
+    nlsolve_kwargs...)
     seed = get_seed(tracker, [T_fm, μ_fm], FixedMu())
     strategy = _FixedSeedStrategy(seed)
     
     try
-        result = solve(FixedMu(), T_fm, μ_fm;
-            xi=xi,
-            thermo_backend=thermo_backend,
-            seed_strategy=strategy,
-            p_num=p_num,
-            t_num=t_num,
-            nlsolve_kwargs...
-        )
+        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
+            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        if effective_solver_backend === :models && thermo_backend !== :models
+            error("solver_backend=:models requires thermo_backend=:models")
+        end
+
+        result = if effective_solver_backend === :models
+            _solve_with_models(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                model_kind=:PNJL,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...)
+        else
+            solve(FixedMu(), T_fm, μ_fm;
+                xi=xi,
+                thermo_backend=effective_solver_backend,
+                seed_strategy=strategy,
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_kwargs...
+            )
+        end
         return result
     catch
         return nothing
     end
+end
+
+@inline function _models_mode(mode::FixedMu)
+    return Main.Models.FixedMu()
+end
+
+function _to_solver_result(mode::ConstraintMode, result, xi::Real)
+    return SolverResult(
+        mode,
+        Bool(result.converged),
+        Float64.(result.solution),
+        SVector{5, Float64}(Tuple(Float64.(result.x_state))),
+        SVector{3, Float64}(Tuple(Float64.(result.mu_vec))),
+        Float64(result.omega),
+        Float64(result.pressure),
+        Float64(result.rho_norm),
+        Float64(result.entropy),
+        Float64(result.energy),
+        SVector{3, Float64}(Tuple(Float64.(result.masses))),
+        Int(result.iterations),
+        Float64(result.residual_norm),
+        Float64(xi),
+    )
+end
+
+function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
+    xi::Real,
+    model_kind::Symbol,
+    seed_strategy::SeedStrategy,
+    p_num::Int,
+    t_num::Int,
+    nlsolve_kwargs...)
+    ThermoFacade.ensure_models_loaded()
+    model = Main.Models.create_model(model_kind)
+    mapped_mode = _models_mode(mode)
+    seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
+    raw = Main.Models.solve_constraint(
+        model,
+        mapped_mode,
+        T_fm;
+        μ_fm=μ_fm,
+        seed_guess=seed_guess,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        models_kwargs...,
+    )
+    return _to_solver_result(mode, raw, xi)
 end
 
 """转换为 BranchPoint"""
