@@ -7,7 +7,7 @@
 用法：
 
 ```julia
-include("src/pnjl/DualBranchScanEntry.jl")
+include("src/models/pnjl/DualBranchScanEntry.jl")
 
 # 之后 DualBranchScan 位于 PNJL 子模块内
 using PNJL
