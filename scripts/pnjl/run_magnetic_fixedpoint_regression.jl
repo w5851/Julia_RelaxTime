@@ -58,11 +58,11 @@ function main()
         eB_fm2 = row.eB / (Constants_PNJL.ħc_MeV_fm^2)
         mu_vec = SVector{3, Float64}(mu_fm, mu_fm, mu_fm)
 
-        conf = default_magnetic_config(eB_fm2=eB_fm2)
-        comp = calculate_magnetic_omega_components(x_state, mu_vec, T_fm, conf)
-        rho = calculate_magnetic_rho(x_state, mu_vec, T_fm, conf)
-        nd = calculate_magnetic_number_densities(x_state, mu_vec, T_fm, conf)
-        conv = magnetic_nmax_convergence_report(x_state, mu_vec, T_fm, conf; delta_n=6, rtol=3e-2)
+        conf = PNJL.default_magnetic_config(eB_fm2=eB_fm2)
+        comp = PNJL.calculate_magnetic_omega_components(x_state, mu_vec, T_fm, conf)
+        rho = PNJL.calculate_magnetic_rho(x_state, mu_vec, T_fm, conf)
+        nd = PNJL.calculate_magnetic_number_densities(x_state, mu_vec, T_fm, conf)
+        conv = PNJL.magnetic_nmax_convergence_report(x_state, mu_vec, T_fm, conf; delta_n=6, rtol=3e-2)
 
         checks = [
             isapprox(comp.omega, row.omega; rtol=rtol, atol=atol),

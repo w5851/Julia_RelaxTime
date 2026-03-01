@@ -28,6 +28,7 @@ export LegacyPNJLModel
 export LegacyNJLModel
 export create_model
 export omega, omega_components, grand_potential
+export model_pressure, model_rho, model_thermo
 export MeanFieldState
 export meanfield_state, state_vector
 export normalize_mu_vec
@@ -63,15 +64,21 @@ include(joinpath(@__DIR__, "state.jl"))
 include(joinpath(@__DIR__, "njl", "NJLModel.jl"))
 include(joinpath(@__DIR__, "njl", "NJL2Model.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLDistributions.jl"))
+include(joinpath(@__DIR__, "pnjl", "PNJLCore.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLModel.jl"))
 include(joinpath(@__DIR__, "pnjl", "PNJLMagneticModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))
+
+# Backward-compatible access path used by some tests/callers:
+# Main.Models.PNJLIntegrals.*
+const PNJLIntegrals = PNJLCore.PNJLIntegrals
 
 # Factory
 include(joinpath(@__DIR__, "factory.jl"))
 
 # Ω assembly
 include(joinpath(@__DIR__, "omega.jl"))
+include(joinpath(@__DIR__, "thermo_kernel.jl"))
 include(joinpath(@__DIR__, "gap_solver.jl"))
 include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
