@@ -29,7 +29,7 @@ const _pnjl_model_cached_nodes = PNJLIntegrals.cached_nodes
 const _pnjl_model_log_sum = PNJLIntegrals.calculate_log_sum
 const _PNJL_POLYAKOV_EPS = 1e-16
 
-const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
+const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "PNJL.jl"))
 
 @inline function _pnjl_solver_module()
     pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)

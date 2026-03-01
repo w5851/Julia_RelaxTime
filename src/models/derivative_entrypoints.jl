@@ -4,20 +4,16 @@ Models 统一导数入口（Option B 过渡层）：
 - 将历史 `PNJL.ThermoDerivatives` 能力通过 Models 暴露，避免调用方直接 include `src/pnjl/PNJL.jl`。
 """
 
-@inline function _pnjl_module_for_derivatives()
-    include_once_path = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-    if !isdefined(Main, :IncludeOnce)
-        Base.include(Main, include_once_path)
-    end
-    include_once = Main.IncludeOnce
-    pnjl_entry_path = normpath(joinpath(@__DIR__, "..", "pnjl", "PNJL.jl"))
-    return include_once.include_once!(Main, :PNJL, pnjl_entry_path)
+const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
+if !isdefined(Main, :IncludeOnce)
+    Base.include(Main, _INCLUDE_ONCE_PATH)
 end
+const IncludeOnce = Main.IncludeOnce
 
 @inline function _pnjl_thermo_derivatives_module()
-    pnjl = _pnjl_module_for_derivatives()
-    isdefined(pnjl, :ThermoDerivatives) || error("PNJL.ThermoDerivatives is not available")
-    return getproperty(pnjl, :ThermoDerivatives)
+    module_path = normpath(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
+    td = IncludeOnce.include_once!(Main, :ModelsThermoDerivatives, module_path)
+    return Base.invokelatest(td.derivatives_module_ref)
 end
 
 @inline function _invoke_td_worldsafe(symbol::Symbol, args...; kwargs...)

@@ -44,12 +44,13 @@ export solve_fixedrho_constraint
 export solve_fixedentropy_constraint
 export solve_fixedsigma_constraint
 export solve_fixedasymrho_constraint
+export solve_constraint
 export transport_provider
 export TransportProvider
 export prepare_transport_provider
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
-export legacy_pnjl_module
+export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
 
@@ -74,6 +75,8 @@ include(joinpath(@__DIR__, "omega.jl"))
 include(joinpath(@__DIR__, "gap_solver.jl"))
 include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
+include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "Solver.jl"))
 include(joinpath(@__DIR__, "derivative_entrypoints.jl"))
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling

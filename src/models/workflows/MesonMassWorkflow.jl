@@ -23,8 +23,9 @@ const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 
 # Prefer reusing Main.* modules to avoid duplicates/world-age noise.
-const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
-const PNJL = IncludeOnce.include_once!(Main, :PNJL, _PNJL_PATH)
+const _PNJL_BRIDGE_PATH = normpath(joinpath(@__DIR__, "..", "scans", "ScanEntrypoints.jl"))
+const ModelsScanEntrypoints = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _PNJL_BRIDGE_PATH)
+const PNJL = Base.invokelatest(ModelsScanEntrypoints.pnjl_module_ref)
 
 const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MesonMass.jl"))
 IncludeOnce.include_once!(Main, :MesonMass, _MESON_MASS_PATH)
@@ -33,7 +34,7 @@ const _MOTT_TRANSITION_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime
 IncludeOnce.include_once!(Main, :MottTransition, _MOTT_TRANSITION_PATH)
 
 # Unified equilibrium facade (solve_gap + state_vector + masses)
-const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "EquilibriumFacade.jl"))
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
 IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)

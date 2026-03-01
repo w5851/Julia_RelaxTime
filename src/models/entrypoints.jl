@@ -14,7 +14,7 @@ export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
 export transport_workflow_module, meson_workflow_module
 export workflow_param_adapters_module
-export legacy_pnjl_module
+export pnjl_module
 
 # Include-once helper
 const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
@@ -23,13 +23,14 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "PNJL.jl"))
+const _SCAN_ENTRY_MODULE_PATH = normpath(joinpath(@__DIR__, "scans", "ScanEntrypoints.jl"))
 const _TRANSPORT_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "TransportWorkflowBridge.jl"))
 const _MESON_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "MesonMassWorkflowBridge.jl"))
 const _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "WorkflowParamAdaptersBridge.jl"))
 
 @inline function _pnjl_module()
-    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
+    scan = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _SCAN_ENTRY_MODULE_PATH)
+    pnjl = Base.invokelatest(scan.pnjl_module_ref)
     if !(isdefined(pnjl, :run_tmu_scan) && isdefined(pnjl, :run_trho_scan))
         error("PNJL module loaded but required API (run_tmu_scan/run_trho_scan) is missing")
     end
@@ -38,7 +39,7 @@ end
 
 @inline function _transport_workflow_module()
     bridge = IncludeOnce.include_once!(Main, :ModelsTransportWorkflowBridge, _TRANSPORT_WORKFLOW_BRIDGE_PATH)
-    workflow = bridge.module_ref()
+    workflow = Base.invokelatest(bridge.module_ref)
     if !(isdefined(workflow, :solve_gap_and_transport) && isdefined(workflow, :solve_transport_from_equilibrium))
         error("TransportWorkflow module loaded but required API is missing")
     end
@@ -47,7 +48,7 @@ end
 
 @inline function _meson_workflow_module()
     bridge = IncludeOnce.include_once!(Main, :ModelsMesonMassWorkflowBridge, _MESON_WORKFLOW_BRIDGE_PATH)
-    workflow = bridge.module_ref()
+    workflow = Base.invokelatest(bridge.module_ref)
     if !isdefined(workflow, :solve_gap_and_meson_point)
         error("MesonMassWorkflow module loaded but required API (solve_gap_and_meson_point) is missing")
     end
@@ -85,11 +86,11 @@ end
 
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
-@inline legacy_pnjl_module() = _pnjl_module()
+@inline pnjl_module() = _pnjl_module()
 
 @inline function workflow_param_adapters_module()
     bridge = IncludeOnce.include_once!(Main, :ModelsWorkflowParamAdaptersBridge, _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH)
-    adapters = bridge.module_ref()
+    adapters = Base.invokelatest(bridge.module_ref)
     if !isdefined(adapters, :normalize_quark_params)
         error("WorkflowParamAdapters module loaded but required API (normalize_quark_params) is missing")
     end

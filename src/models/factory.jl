@@ -13,12 +13,12 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _LEGACY_PNJL_MODEL_PATH = normpath(joinpath(@__DIR__, "legacy", "LegacyPNJLModel.jl"))
+const _COMPAT_PNJL_MODEL_PATH = normpath(joinpath(@__DIR__, "legacy", "LegacyPNJLModel.jl"))
 const _LEGACY_NJL_MODEL_PATH = normpath(joinpath(@__DIR__, "legacy", "LegacyNJLModel.jl"))
 
-@inline function _legacy_pnjl_ctor()
+@inline function _compat_pnjl_ctor()
     if !isdefined(@__MODULE__, :LegacyPNJLModel)
-        Base.include(@__MODULE__, _LEGACY_PNJL_MODEL_PATH)
+        Base.include(@__MODULE__, _COMPAT_PNJL_MODEL_PATH)
     end
     return getfield(@__MODULE__, :LegacyPNJLModel)
 end
@@ -54,7 +54,7 @@ function create_model(kind::Symbol; kwargs...)
         ctor = _legacy_njl_ctor()
         return _construct_worldsafe(ctor; kwargs...)
     elseif kind === :LegacyPNJL
-        ctor = _legacy_pnjl_ctor()
+        ctor = _compat_pnjl_ctor()
         return _construct_worldsafe(ctor)
     end
     error("Unknown model kind: ", kind)

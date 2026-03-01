@@ -28,8 +28,9 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
-const PNJL = IncludeOnce.include_once!(Main, :PNJL, _PNJL_PATH)
+const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "models", "scans", "ScanEntrypoints.jl"))
+const ModelsScanEntrypoints = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _PNJL_PATH)
+const PNJL = Base.invokelatest(ModelsScanEntrypoints.pnjl_module_ref)
 
 const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxationTime.jl"))
 const RelaxationTime = IncludeOnce.include_once!(Main, :RelaxationTime, _RELAXATION_TIME_PATH)
@@ -74,11 +75,11 @@ function reset_transport_workflow_config_cache!()
 end
 
 # Unified thermo facade (legacy vs models): reuse Main.* to avoid module duplication.
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 # Unified equilibrium facade (solve_gap + state_vector + masses): reuse Main.* to avoid module duplication.
-const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "EquilibriumFacade.jl"))
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
 const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)

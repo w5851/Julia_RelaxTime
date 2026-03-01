@@ -7,7 +7,7 @@ using StaticArrays
 
 export PNJLMagneticModel
 
-const _PNJL_MAG_CORE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "MagneticThermodynamics.jl"))
+const _PNJL_MAG_CORE_PATH = normpath(joinpath(@__DIR__, "core", "MagneticThermodynamics.jl"))
 if !isdefined(Main, :MagneticThermodynamics)
     Base.include(Main, _PNJL_MAG_CORE_PATH)
 end

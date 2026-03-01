@@ -20,13 +20,13 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 const DEFAULT_MOMENTUM_COUNT = ThermoFacade.default_momentum_count()
 const DEFAULT_THETA_COUNT = ThermoFacade.default_theta_count()
 
-const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "..", "pnjl", "PNJL.jl"))
+const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "PNJL.jl"))
 
 @inline function _pnjl_solver_module()
     pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
