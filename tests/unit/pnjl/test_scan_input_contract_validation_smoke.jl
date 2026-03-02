@@ -9,7 +9,7 @@ Models.pnjl_module()
 const PNJL = Models.pnjl_module()
 
 @testset "Scan input contract validation smoke" begin
-    @test_throws ArgumentError run_tmu_scan(
+    @test_throws ArgumentError Models.run_tmu_scan(
         T_values=1.0,
         mu_values=[10.0],
         xi_values=[0.0],
@@ -18,7 +18,7 @@ const PNJL = Models.pnjl_module()
         resume=false,
     )
 
-    @test_throws ArgumentError run_tmu_scan(
+    @test_throws ArgumentError Models.run_tmu_scan(
         T_values=[90.0],
         mu_values=[10.0],
         xi_values=Float64[],
@@ -27,7 +27,7 @@ const PNJL = Models.pnjl_module()
         resume=false,
     )
 
-    @test_throws ArgumentError run_trho_scan(
+    @test_throws ArgumentError Models.run_trho_scan(
         T_values=[90.0],
         rho_values=[0.2],
         xi_values=[0.0],
@@ -37,7 +37,7 @@ const PNJL = Models.pnjl_module()
         resume=false,
     )
 
-    @test_throws ArgumentError run_trho_scan(
+    @test_throws ArgumentError Models.run_trho_scan(
         T_values=[90.0],
         rho_values=[0.2],
         xi_values=[NaN],

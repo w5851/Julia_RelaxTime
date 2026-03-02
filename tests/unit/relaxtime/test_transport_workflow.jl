@@ -49,12 +49,21 @@ end
     # Provide tau so workflow doesn't spend time computing it.
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
 
-    # Solve equilibrium once; reuse it for both backends.
-    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+    base_legacy = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
         T,
         mu;
         xi=xi,
-        thermo_backend=:models,
+        solver_backend=:legacy,
+        p_num=8,
+        t_num=4,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
+    )
+
+    base_models = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+        T,
+        mu;
+        xi=xi,
         solver_backend=:models,
         p_num=8,
         t_num=4,
@@ -66,8 +75,7 @@ end
         T,
         mu;
         xi=xi,
-        equilibrium=base,
-        thermo_backend=:legacy,
+        equilibrium=base_legacy,
         tau=tau,
         compute_tau=false,
         compute_bulk=false,
@@ -80,8 +88,7 @@ end
         T,
         mu;
         xi=xi,
-        equilibrium=base,
-        thermo_backend=:models,
+        equilibrium=base_models,
         tau=tau,
         compute_tau=false,
         compute_bulk=false,
@@ -96,7 +103,7 @@ end
         @test isapprox(
             getproperty(res_models.densities, k),
             getproperty(res_legacy.densities, k);
-            rtol=1e-8,
+            rtol=2e-3,
             atol=1e-10,
         )
     end
@@ -114,7 +121,6 @@ end
         T,
         mu;
         xi=xi,
-        thermo_backend=:models,
         tau=tau,
         compute_tau=false,
         compute_bulk=true,

@@ -19,9 +19,6 @@ end
     Models.pnjl_module()
 end
 const PNJL = Models.pnjl_module()
-PNJL.load_tmu_scan!()
-PNJL.load_trho_scan!()
-PNJL.load_adaptive_rho_refinement!()
 
 @testset "TrhoScan defaults" begin
     rho_defaults = PNJL.build_default_rho_grid()

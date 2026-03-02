@@ -21,6 +21,7 @@ module Integrals
 
 using Base.MathConstants: π
 using StaticArrays
+using ForwardDiff
 
 # Include-once helper
 const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
@@ -46,6 +47,7 @@ IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: Λ_inv_fm, N_color
 
 export cached_nodes, vacuum_integral, calculate_energy_sum, calculate_log_sum
+export calculate_log_sum_derivatives
 export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT
 export calculate_energy_isotropic, calculate_energy_anisotropic
 
@@ -259,6 +261,34 @@ function calculate_log_sum(masses::SVector{3, TF}, p_nodes, cosθ_nodes, coeffic
         end
     end
     return -2 * T_fm * total
+end
+
+"""
+    calculate_log_sum_derivatives(masses, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu_vec, T_fm, xi)
+
+返回：
+- `log_sum`: 热项积分值
+- `d_log_sum_dmu`: 对 `(μ_u, μ_d, μ_s)` 的偏导（长度 3）
+- `d_log_sum_dT`: 对温度 `T` 的偏导
+"""
+function calculate_log_sum_derivatives(masses::SVector{3, TF}, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu_vec, T_fm, xi) where {TF}
+    mu0 = SVector{3, Float64}(Tuple(mu_vec))
+    T0 = Float64(T_fm)
+
+    log_sum = calculate_log_sum(masses, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu0, T0, xi)
+
+    function _f_mu(mu_arr)
+        mu_sv = SVector{3}(Tuple(mu_arr))
+        return calculate_log_sum(masses, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu_sv, T0, xi)
+    end
+    d_log_sum_dmu = ForwardDiff.gradient(_f_mu, collect(mu0))
+
+    function _f_T(T)
+        return calculate_log_sum(masses, p_nodes, cosθ_nodes, coefficients, Φ, Φ̄, mu0, T, xi)
+    end
+    d_log_sum_dT = ForwardDiff.derivative(_f_T, T0)
+
+    return log_sum, SVector{3, Float64}(Tuple(d_log_sum_dmu)), Float64(d_log_sum_dT)
 end
 
 end # module Integrals

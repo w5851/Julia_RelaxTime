@@ -30,9 +30,9 @@ end
         iterations=60,
     )
 
-    stats_kw = run_tmu_scan(; kw..., output_path=out_kw)
+    stats_kw = Models.run_tmu_scan(; kw..., output_path=out_kw)
 
-    cfg = TmuScanConfig(
+    cfg = PNJL.TmuScanConfig(
         T_values=[90.0],
         mu_values=[10.0],
         xi_values=[0.0],
@@ -43,7 +43,7 @@ end
         t_num=4,
         nlsolve_kwargs=(iterations=60,),
     )
-    stats_cfg = run_tmu_scan(cfg)
+    stats_cfg = Models.run_tmu_scan(cfg)
 
     @test stats_kw.total == stats_cfg.total == 1
     @test stats_kw.success == stats_cfg.success
@@ -70,9 +70,9 @@ end
         iterations=60,
     )
 
-    stats_kw = run_trho_scan(; kw..., output_path=out_kw)
+    stats_kw = Models.run_trho_scan(; kw..., output_path=out_kw)
 
-    cfg = TrhoScanConfig(
+    cfg = PNJL.TrhoScanConfig(
         T_values=[90.0],
         rho_values=[0.2],
         xi_values=[0.0],
@@ -84,7 +84,7 @@ end
         t_num=4,
         nlsolve_kwargs=(iterations=60,),
     )
-    stats_cfg = run_trho_scan(cfg)
+    stats_cfg = Models.run_trho_scan(cfg)
 
     @test stats_kw.total == stats_cfg.total == 1
     @test stats_kw.success == stats_cfg.success

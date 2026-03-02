@@ -115,7 +115,6 @@ end
 function run_one(T::Float64, mu::Float64, xi::Float64, tau, models_solver)
     common_kwargs = (
         xi=xi,
-        thermo_backend=:models,
         tau=tau,
         compute_tau=false,
         compute_bulk=true,

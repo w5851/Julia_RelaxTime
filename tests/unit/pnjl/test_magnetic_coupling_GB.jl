@@ -8,8 +8,8 @@ end
 Models.pnjl_module()
 const PNJL = Models.pnjl_module()
 const coupling_GB = getproperty(PNJL, :coupling_GB)
-const Constants_PNJL = getproperty(PNJL, :Constants_PNJL)
-const G_fm2 = getproperty(Constants_PNJL, :G_fm2)
+const PNJLConstants = getproperty(PNJL, :Constants_PNJL)
+const G_fm2 = getproperty(PNJLConstants, :G_fm2)
 
 @testset "magnetic coupling G(B)" begin
     g0 = coupling_GB(0.0)

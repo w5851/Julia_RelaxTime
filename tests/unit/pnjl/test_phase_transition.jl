@@ -44,7 +44,7 @@ end
 @testset "detect_s_shape" begin
     @testset "检测 S 形曲线" begin
         mu, rho = s_shape_curve()
-        result = detect_s_shape(mu, rho)
+        result = PhaseTransition.detect_s_shape(mu, rho)
         
         @test result.has_s_shape
         @test result.mu_spinodal_hadron !== nothing
@@ -58,7 +58,7 @@ end
     
     @testset "单调曲线无 S 形" begin
         mu, rho = monotonic_curve()
-        result = detect_s_shape(mu, rho)
+        result = PhaseTransition.detect_s_shape(mu, rho)
         
         @test !result.has_s_shape
         @test result.mu_spinodal_hadron === nothing
@@ -68,7 +68,7 @@ end
     @testset "数据点不足" begin
         mu = Float64[250.0, 260.0]
         rho = Float64[0.0, 1.0]
-        result = detect_s_shape(mu, rho; min_points=5)
+        result = PhaseTransition.detect_s_shape(mu, rho; min_points=5)
         
         @test !result.has_s_shape
     end
@@ -81,7 +81,7 @@ end
 @testset "maxwell_construction" begin
     @testset "基本 Maxwell 构造" begin
         mu, rho = synthetic_maxwell_curve()
-        result = maxwell_construction(mu, rho; min_samples=8)
+        result = PhaseTransition.maxwell_construction(mu, rho; min_samples=8)
         
         @test result.converged
         @test result.mu_transition !== nothing
@@ -94,15 +94,15 @@ end
     
     @testset "使用 spinodal_hint" begin
         mu, rho = synthetic_maxwell_curve()
-        hint = detect_s_shape(mu, rho)
-        result = maxwell_construction(mu, rho; spinodal_hint=hint, min_samples=8)
+        hint = PhaseTransition.detect_s_shape(mu, rho)
+        result = PhaseTransition.maxwell_construction(mu, rho; spinodal_hint=hint, min_samples=8)
         
         @test result.converged
     end
     
     @testset "单调曲线无法构造" begin
         mu, rho = monotonic_curve()
-        result = maxwell_construction(mu, rho; min_samples=3)
+        result = PhaseTransition.maxwell_construction(mu, rho; min_samples=3)
         
         @test !result.converged
         @test get(result.details, :reason, "") == "no_s_shape"
@@ -111,7 +111,7 @@ end
     @testset "数据点不足" begin
         mu = Float64[250.0, 260.0, 270.0]
         rho = Float64[0.0, 0.5, 1.0]
-        result = maxwell_construction(mu, rho; min_samples=12)
+        result = PhaseTransition.maxwell_construction(mu, rho; min_samples=12)
         
         @test !result.converged
         @test get(result.details, :reason, "") == "insufficient_points"
@@ -130,7 +130,7 @@ end
         Dict("T_MeV" => "70", "xi" => "0.5", "rho" => "0.1", "mu_avg_MeV" => "245.0"),  # 不同 xi
     ]
     
-    grouped = group_curves_by_temperature(rows; xi=0.0)
+    grouped = PhaseTransition.group_curves_by_temperature(rows; xi=0.0)
     
     @test haskey(grouped, 70.0)
     @test haskey(grouped, 80.0)

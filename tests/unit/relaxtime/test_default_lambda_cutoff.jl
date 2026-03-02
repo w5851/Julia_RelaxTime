@@ -44,16 +44,16 @@ const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const cached_nodes = getproperty(PNJL, :cached_nodes)
 const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
-const Integrals = getproperty(PNJL, :Integrals)
-const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
-const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
+const PNJLIntegrals = getproperty(PNJL, :Integrals)
+const DEFAULT_MOMENTUM_NODES = getproperty(PNJLIntegrals, :DEFAULT_MOMENTUM_NODES)
+const DEFAULT_MOMENTUM_WEIGHTS = getproperty(PNJLIntegrals, :DEFAULT_MOMENTUM_WEIGHTS)
 using Main.RelaxationTime: relaxation_times, REQUIRED_PROCESSES
 using Main.OneLoopIntegrals: A
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.GaussLegendre: gauleg
 
-const RelaxationTime = Main.RelaxationTime
-const RT_ASR = RelaxationTime.AverageScatteringRate
+const RTModule = Main.RelaxationTime
+const RT_ASR = RTModule.AverageScatteringRate
 
 # 测试条件：T=100 MeV, μB=800 MeV（重夸克条件，m_s 接近 Λ）
 const T_MEV = 100.0

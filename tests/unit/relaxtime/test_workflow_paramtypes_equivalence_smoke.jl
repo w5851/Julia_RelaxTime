@@ -21,7 +21,6 @@ using Main.ParameterTypes: as_namedtuple
         T,
         mu;
         xi=xi,
-        thermo_backend=:models,
         solver_backend=:models,
         p_num=8,
         t_num=4,
@@ -31,7 +30,6 @@ using Main.ParameterTypes: as_namedtuple
 
     inputs = TransportWorkflow._transport_inputs_from_equilibrium(base, T, mu;
         xi=xi,
-        thermo_backend=:legacy,
         p_num=8,
         t_num=4,
     )

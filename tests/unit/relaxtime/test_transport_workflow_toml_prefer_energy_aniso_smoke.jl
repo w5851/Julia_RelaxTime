@@ -27,7 +27,6 @@ const TW = Main.TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -42,7 +41,6 @@ const TW = Main.TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -58,7 +56,6 @@ const TW = Main.TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -134,7 +131,6 @@ const TW = Main.TransportWorkflow
                 T,
                 mu;
                 xi=xi,
-                thermo_backend=:models,
                 tau=tau,
                 compute_tau=false,
                 compute_bulk=false,
@@ -152,7 +148,6 @@ const TW = Main.TransportWorkflow
                 T,
                 mu;
                 xi=xi,
-                thermo_backend=:models,
                 tau=tau,
                 compute_tau=false,
                 compute_bulk=false,
@@ -175,7 +170,6 @@ const TW = Main.TransportWorkflow
                 T,
                 mu;
                 xi=xi,
-                thermo_backend=:models,
                 tau=tau,
                 compute_tau=false,
                 compute_bulk=false,

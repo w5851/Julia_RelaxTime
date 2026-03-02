@@ -122,8 +122,11 @@ end
     T_fm = 0.5
     μ_fm = 1.5
 
-    legacy = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:legacy)
-    models = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:models)
+    legacy_model = Main.Models.create_model(:LegacyPNJL)
+    models_model = Main.Models.create_model(:PNJL)
+
+    legacy = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, model=legacy_model)
+    models = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, model=models_model)
 
     # 基础有限性
     @test isfinite(legacy.v_n_sq)
