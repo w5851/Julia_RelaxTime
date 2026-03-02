@@ -22,7 +22,6 @@ using .Models: run_trho_scan
         overwrite=true,
         resume=false,
         reverse_rho=false,
-        thermo_backend=:models,
         solver_backend=:models,
         p_num=12,
         t_num=4,
@@ -64,7 +63,6 @@ end
             constraint_mode=:fixed_asymmetric_rho,
             asym_ud_ratio_target=0.876,
             asym_s_target=0.0,
-            thermo_backend=:models,
             solver_backend=:models,
             model_kind=kind,
             p_num=12,
@@ -78,7 +76,7 @@ end
     end
 end
 
-@testset "TrhoScan smoke: single point (solver_backend=:auto, thermo_backend=:models)" begin
+@testset "TrhoScan smoke: single point (solver_backend=:auto)" begin
     tmp_dir = mktempdir()
 
     output = joinpath(tmp_dir, "trho_scan_solver_backend_auto.csv")
@@ -90,7 +88,6 @@ end
         overwrite=true,
         resume=false,
         reverse_rho=false,
-        thermo_backend=:models,
         solver_backend=:auto,
         p_num=12,
         t_num=4,

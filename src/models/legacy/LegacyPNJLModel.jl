@@ -47,7 +47,7 @@ Legacy 适配器的有效质量向量；直接复用 legacy thermo 的质量公�
 """
 @inline function calculate_mass_vec(::LegacyPNJLModel, φ::SVector{3, T}; kwargs...) where {T}
     _ = kwargs
-    return ThermoFacade.calculate_mass_vec_backend(φ; thermo_backend=:legacy)
+    return ThermoFacade.calculate_mass_vec_backend(φ; model_kind=:PNJL)
 end
 
 # -----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ function omega_components(
         x5,
         μ,
         T_fm;
-        thermo_backend=:legacy,
+        model_kind=:PNJL,
         p_num=p_num,
         t_num=t_num,
         thermal_nodes=thermal_nodes,
@@ -126,7 +126,7 @@ function number_densities(
         x5,
         μ,
         T_fm;
-        thermo_backend=:legacy,
+        model_kind=:PNJL,
         p_num=p_num,
         t_num=t_num,
         thermal_nodes=thermal_nodes,
@@ -145,7 +145,6 @@ function solve_gap(
     xi::Real=0.0,
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
-    thermo_backend::Symbol=:legacy,
     kwargs...
 )
     pnjl = _pnjl_solver_module()
@@ -155,13 +154,15 @@ function solve_gap(
         throw(ArgumentError("LegacyPNJLModel.solve_gap currently requires mu_u == mu_d == mu_s (FixedMu mode). Got mu_vec=$μ"))
     end
 
+    legacy_kwargs = Dict{Symbol,Any}(pairs(kwargs))
+    pop!(legacy_kwargs, :thermo_backend, nothing)
+
     mode = Base.invokelatest(pnjl.FixedMu)
     res = Base.invokelatest(pnjl.solve, mode, T_fm, μ[1];
         xi=xi,
         p_num=p_num,
         t_num=t_num,
-        thermo_backend=thermo_backend,
-        kwargs...)
+        legacy_kwargs...)
 
     res.converged || error("LegacyPNJLModel.solve_gap did not converge (residual_norm=$(res.residual_norm))")
     return MeanFieldState(res.x_state)

@@ -17,7 +17,6 @@ using .TransportWorkflow
 
     common_kwargs = (
         xi=xi,
-        thermo_backend=:models,
         tau=tau,
         compute_tau=false,
         compute_bulk=false,

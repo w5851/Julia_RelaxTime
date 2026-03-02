@@ -56,7 +56,6 @@ using .TransportWorkflow
     function _run_bridge_case(T, mu, xi, tau, models_solver, rtol_transport, atol_transport)
         common_kwargs = (
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=true,
