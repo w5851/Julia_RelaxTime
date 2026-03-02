@@ -31,12 +31,7 @@ export pnjl_model_kind
 export solve_equilibrium_backend
 
 @inline function pnjl_model_kind(thermo_backend::Symbol)::Symbol
-    if thermo_backend === :legacy
-        return :LegacyPNJL
-    elseif thermo_backend === :models
-        return :PNJL
-    end
-    throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :legacy or :models)"))
+    return :PNJL
 end
 
 """solve_equilibrium_backend(T_fm, mu_fm; ...) -> NamedTuple
@@ -49,19 +44,17 @@ end
 - `iterations`, `residual_norm`: 预留字段（目前为 missing）
 
 关键词参数：
-- `thermo_backend`: :legacy|:models
 - `solver_backend`: :legacy|:models
 - `seed_state`: solver_backend=:models 时的 5D 初值
 - `solver_kwargs`: 透传给 legacy 求解器（例如 iterations 等）
 - `models_solver`, `models_residual_norm_max`: models solver 配置
-- `model`: 可选注入 models model（默认按 thermo_backend 自动取缓存模型）
+- `model`: 可选注入 models model（默认取 PNJL 缓存模型）
 """
 function solve_equilibrium_backend(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     p_num::Int=24,
     t_num::Int=8,
     seed_state=nothing,
@@ -70,7 +63,7 @@ function solve_equilibrium_backend(
     models_residual_norm_max::Real=1e-4,
     model=nothing,
 )
-    kind = pnjl_model_kind(thermo_backend)
+    kind = :PNJL
 
     ThermoFacade.ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
@@ -81,7 +74,7 @@ function solve_equilibrium_backend(
     m = model === nothing ? ThermoFacade.get_models_model(kind) : model
 
     effective_solver_backend = if solver_backend === :auto
-        thermo_backend === :models ? :models : :legacy
+        :models
     else
         solver_backend
     end
@@ -92,11 +85,9 @@ function solve_equilibrium_backend(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
-            thermo_backend=thermo_backend,
             solver_kwargs...,
         )
     elseif effective_solver_backend === :models
-        thermo_backend === :models || error("solver_backend=:models requires thermo_backend=:models")
         m isa Main.Models.PNJLModel || error("solver_backend=:models requires a PNJLModel (got $(typeof(m)))")
 
         solver = models_solver === nothing ? Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite) : models_solver
@@ -118,7 +109,6 @@ function solve_equilibrium_backend(
 
     masses = ThermoFacade.calculate_mass_vec_backend(
         x_state;
-        thermo_backend=thermo_backend,
         model=m,
         model_kind=kind,
     )

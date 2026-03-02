@@ -120,7 +120,7 @@ function run_dual_branch_scan(;
     T_mev::Real,
     mu_range,
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
+    thermo_backend::Symbol=:models,
     solver_backend::Symbol=:legacy,
     p_num::Int=24,
     t_num::Int=8,
@@ -367,7 +367,7 @@ end
 
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
-    thermo_backend::Symbol=:legacy,
+    thermo_backend::Symbol=:models,
     solver_backend::Symbol=:legacy,
     p_num,
     t_num,
@@ -639,7 +639,7 @@ function scan_phase_diagram(;
     T_range,
     mu_range,
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
+    thermo_backend::Symbol=:models,
     output_dir::Union{Nothing, String}=nothing,
     verbose::Bool=true,
     kwargs...

@@ -1,7 +1,7 @@
-# PNJL constraints under thermo_backend=:models (smoke)
+# PNJL constraints under unified models path (smoke)
 #
 # Goal:
-# - Ensure FixedRho / FixedEntropy / FixedSigma run end-to-end with the models thermo backend.
+# - Ensure FixedRho / FixedEntropy / FixedSigma run end-to-end with unified models thermo path.
 # - Catch accidental legacy fallbacks inside Conditions/constraints.
 
 using Test
@@ -26,7 +26,7 @@ P = PNJL
 
 const ħc = 197.327  # MeV·fm
 
-@testset "constraints with models thermo backend (smoke)" begin
+@testset "constraints with unified thermo path (smoke)" begin
     T_fm = 100.0 / ħc
     μ_fm = 20.0 / ħc
 
@@ -35,7 +35,7 @@ const ħc = 197.327  # MeV·fm
     t_num = 6
 
     @testset "FixedMu" begin
-        result = P.solve(P.FixedMu(), T_fm, μ_fm; thermo_backend=:models, p_num=p_num, t_num=t_num)
+        result = P.solve(P.FixedMu(), T_fm, μ_fm; p_num=p_num, t_num=t_num)
         @test result.converged
         @test isfinite(result.pressure)
         @test isfinite(result.rho_norm)
@@ -45,7 +45,6 @@ const ħc = 197.327  # MeV·fm
 
     @testset "FixedMu MultiSeed (models backend)" begin
         result = P.solve(P.FixedMu(), T_fm, μ_fm;
-            thermo_backend=:models,
             seed_strategy=P.MultiSeed(),
             p_num=p_num,
             t_num=t_num,
@@ -60,7 +59,6 @@ const ħc = 197.327  # MeV·fm
     @testset "FixedMu PhaseAware bootstrap MultiSeed (models backend)" begin
         tracker = P.PhaseAwareContinuitySeed(0.0; bootstrap_multiseed=true)
         result = P.solve(P.FixedMu(), T_fm, μ_fm;
-            thermo_backend=:models,
             seed_strategy=tracker,
             p_num=p_num,
             t_num=t_num,
@@ -74,7 +72,7 @@ const ħc = 197.327  # MeV·fm
 
     @testset "FixedRho" begin
         target_rho = 1.0
-        result = P.solve(P.FixedRho(target_rho), T_fm; thermo_backend=:models, p_num=p_num, t_num=t_num)
+        result = P.solve(P.FixedRho(target_rho), T_fm; p_num=p_num, t_num=t_num)
         @test result.converged
         @test isfinite(result.pressure)
         @test isfinite(result.rho_norm)
@@ -84,7 +82,7 @@ const ħc = 197.327  # MeV·fm
 
     @testset "FixedEntropy" begin
         target_s = 0.5
-        result = P.solve(P.FixedEntropy(target_s), T_fm; thermo_backend=:models, p_num=p_num, t_num=t_num)
+        result = P.solve(P.FixedEntropy(target_s), T_fm; p_num=p_num, t_num=t_num)
         @test result.converged
         @test isfinite(result.entropy)
         @test all(isfinite.(result.masses))
@@ -93,7 +91,7 @@ const ħc = 197.327  # MeV·fm
 
     @testset "FixedSigma" begin
         target_sigma = 10.0
-        result = P.solve(P.FixedSigma(target_sigma), T_fm; thermo_backend=:models, p_num=p_num, t_num=t_num)
+        result = P.solve(P.FixedSigma(target_sigma), T_fm; p_num=p_num, t_num=t_num)
         @test result.converged
         @test isfinite(result.entropy)
         @test isfinite(result.rho_norm)
@@ -107,7 +105,6 @@ const ħc = 197.327  # MeV·fm
     @testset "FixedAsymmetricRho (PNJL)" begin
         mode = P.FixedAsymmetricRho(0.05, 1.0, 0.0)
         result = P.solve(mode, T_fm;
-            thermo_backend=:models,
             model_kind=:PNJL,
             p_num=p_num,
             t_num=t_num,
@@ -123,7 +120,6 @@ const ħc = 197.327  # MeV·fm
     @testset "FixedAsymmetricRho (RPNJL)" begin
         mode = P.FixedAsymmetricRho(0.05, 1.0, 0.0)
         result = P.solve(mode, T_fm;
-            thermo_backend=:models,
             model_kind=:RPNJL,
             p_num=p_num,
             t_num=t_num,
@@ -137,7 +133,7 @@ const ħc = 197.327  # MeV·fm
     end
 
     @testset "Implicit solver (models backend)" begin
-        solver = P.create_implicit_solver(thermo_backend=:models, p_num=p_num, t_num=t_num)
+        solver = P.create_implicit_solver(p_num=p_num, t_num=t_num)
         θ = [T_fm, μ_fm]
         x, _ = solver(θ)
         @test length(x) == 5
@@ -145,7 +141,6 @@ const ħc = 197.327  # MeV·fm
 
         d = P.solve_with_derivatives(T_fm, μ_fm;
             order=1,
-            thermo_backend=:models,
             model_kind=:PNJL,
             p_num=p_num,
             t_num=t_num,

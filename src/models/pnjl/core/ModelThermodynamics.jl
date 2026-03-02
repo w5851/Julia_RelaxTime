@@ -15,7 +15,6 @@
 module ModelThermodynamics
 
 using StaticArrays
-using ForwardDiff
 
 # Include-once helper
 const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
@@ -53,7 +52,7 @@ end
     t_num::Int,
     xi)
     ensure_models_loaded()
-    return -Main.Models.omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    return Main.Models.model_pressure(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算数密度向量：ρ_i = ∂P/∂μ_i。"""
@@ -61,11 +60,8 @@ function rho_model(model, x_state, mu_vec, T_fm;
     p_num::Int,
     t_num::Int,
     xi)
-
-    pressure_mu = μ -> pressure_model(model, x_state, μ, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-    grad = ForwardDiff.gradient(pressure_mu, mu_vec)
-    grad_type = typeof(grad[1])
-    return SVector{3, grad_type}(Tuple(grad))
+    ensure_models_loaded()
+    return Main.Models.model_rho(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算 (pressure, rho_norm, entropy, energy)。"""
@@ -73,17 +69,8 @@ function thermo_model(model, x_state, mu_vec, T_fm;
     p_num::Int,
     t_num::Int,
     xi)
-
-    rho_vec = rho_model(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-    rho_norm = sum(rho_vec) / (3.0 * ρ0)
-
-    pressure_T = τ -> pressure_model(model, x_state, mu_vec, τ; p_num=p_num, t_num=t_num, xi=xi)
-    entropy = ForwardDiff.derivative(pressure_T, T_fm)
-
-    pressure = pressure_model(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-
-    return pressure, rho_norm, entropy, energy
+    ensure_models_loaded()
+    return Main.Models.model_thermo(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算 (quark, antiquark) 数密度。

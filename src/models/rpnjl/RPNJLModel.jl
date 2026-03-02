@@ -277,7 +277,7 @@ function vacuum_contribution(model::RPNJLModel, masses::SVector{3, T}; kwargs...
 
     total = zero(T)
     @inbounds for i in 1:3
-        total += _vacuum_integral_with_cutoff(masses[i], Λ)
+        total += PNJLCore.vacuum_integral_with_cutoff(masses[i], Λ)
     end
     return -2 * Nc * total
 end
@@ -289,8 +289,8 @@ function thermal_contribution(
     Φbar,
     mu_vec,
     T_fm;
-    p_num::Int=PNJLIntegrals.DEFAULT_MOMENTUM_COUNT,
-    t_num::Int=PNJLIntegrals.DEFAULT_THETA_COUNT,
+    p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
+    t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
     xi=0.0,
     kwargs...
 ) where {T}

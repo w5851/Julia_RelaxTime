@@ -38,14 +38,118 @@ if !isdefined(Main, :PNJL)
         const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
         IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
         using Main.Constants_PNJL
+        using StaticArrays
 
 # ============================================================================
 # 新架构模块
 # ============================================================================
 
+# PNJLCore 命名空间（参数与核心公式 + 节点缓存统一入口）
+include(joinpath(@__DIR__, "PNJLCore.jl"))
+
+# Unified thermo facade（legacy vs models）
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "core", "ThermoFacade.jl"))
+const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
+
+const _PNJL_PARAMS_REF = Ref{Any}(nothing)
+
+@inline function _pnjl_params()
+    p = _PNJL_PARAMS_REF[]
+    if p === nothing
+        p = PNJLCore.pnjl_params()
+        _PNJL_PARAMS_REF[] = p
+    end
+    return p
+end
+
+@inline calculate_mass_vec(φ) = PNJLCore.calculate_mass_vec(_pnjl_params(), φ)
+@inline calculate_mass_vec(x_state::AbstractVector) =
+    PNJLCore.calculate_mass_vec(_pnjl_params(), SVector{3}(x_state[1], x_state[2], x_state[3]))
+
+@inline calculate_chiral(φ) = PNJLCore.chiral_potential(_pnjl_params(), φ)
+@inline calculate_U(T_fm::Real, Φ::Real, Φbar::Real) = PNJLCore.polyakov_potential(_pnjl_params(), Φ, Φbar, T_fm)
+
+@inline function _safe_log(x)
+    min_x = one(x) * 1e-16
+    x <= zero(x) && return log(min_x)
+    return x < min_x ? log(min_x) : log(x)
+end
+
+@inline function calculate_U_derivative_T(T_fm::Real, Φ::Real, Φbar::Real)
+    p = _pnjl_params()
+    T_ratio = p.T0_inv_fm / T_fm
+    Ta = p.a0 + p.a1 * T_ratio + p.a2 * T_ratio^2
+    Tb = p.b3 * T_ratio^3
+    value = 1 - 6 * Φbar * Φ + 4 * (Φbar^3 + Φ^3) - 3 * (Φbar * Φ)^2
+    log_value = _safe_log(value)
+
+    U_over_T4 = -0.5 * Ta * Φbar * Φ + Tb * log_value
+    dTa_dT = -p.a1 * p.T0_inv_fm / T_fm^2 - 2 * p.a2 * p.T0_inv_fm^2 / T_fm^3
+    dTb_dT = -3 * p.b3 * p.T0_inv_fm^3 / T_fm^4
+
+    return 4 * T_fm^3 * U_over_T4 + T_fm^4 * (dTa_dT * (-0.5 * Φbar * Φ) + dTb_dT * log_value)
+end
+
+@inline function calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    return ThermoFacade.calculate_pressure_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        model_kind=:PNJL,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+@inline function calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    return ThermoFacade.calculate_omega_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        model_kind=:PNJL,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+@inline function calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    return ThermoFacade.calculate_rho_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        model_kind=:PNJL,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+@inline function calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    return ThermoFacade.calculate_thermo_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        model_kind=:PNJL,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+@inline function calculate_number_densities(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    return ThermoFacade.calculate_number_densities_backend(
+        x_state,
+        mu_vec,
+        T_fm;
+        model_kind=:PNJL,
+        thermal_nodes=thermal_nodes,
+        xi=xi,
+    )
+end
+
+const Thermodynamics = @__MODULE__
+const ρ0 = ThermoFacade.rho0()
+
 # Core 模块
 include(joinpath(@__DIR__, "core", "Integrals.jl"))
-include(joinpath(@__DIR__, "core", "Thermodynamics.jl"))
 include(joinpath(@__DIR__, "core", "MagneticIntegrals.jl"))
 include(joinpath(@__DIR__, "core", "MagneticThermodynamics.jl"))
 
@@ -60,9 +164,9 @@ include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
 
 # 使用新模块
 using .Integrals
-using .Thermodynamics
 using .MagneticIntegrals
 using .MagneticThermodynamics
+import .PNJLCore
 using .ConstraintModes
 using .SeedStrategies
 using .Conditions
@@ -70,6 +174,7 @@ using .ImplicitSolver
 using .ThermoDerivatives
 
 # 导出 Core 功能
+export PNJLCore
 export cached_nodes, vacuum_integral, calculate_energy_sum, calculate_log_sum
 export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT
 export calculate_mass_vec, calculate_chiral, calculate_U

@@ -137,7 +137,7 @@ end
 
 @inline function _validate_trho_scan_inputs(T_values, rho_values, xi_values,
                                             seed_policy::Symbol, constraint_mode::Symbol,
-                                            thermo_backend::Symbol, solver_backend::Symbol)
+                                            solver_backend::Symbol)
     _validate_real_vector(:T_values, T_values)
     _validate_real_vector(:rho_values, rho_values)
     _validate_real_vector(:xi_values, xi_values)
@@ -146,15 +146,13 @@ end
         throw(ArgumentError("seed_policy must be :hybrid_continuity or :candidates, got $(seed_policy)"))
     (constraint_mode === :fixed_rho || constraint_mode === :fixed_asymmetric_rho) ||
         throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
-    (thermo_backend === :legacy || thermo_backend === :models) ||
-        throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
     return nothing
 end
 
-@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
-    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
+@inline function _effective_solver_backend(solver_backend::Symbol)::Symbol
+    return solver_backend === :auto ? :models : solver_backend
 end
 
 # ============================================================================
@@ -205,7 +203,6 @@ function run_trho_scan(;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
@@ -213,7 +210,7 @@ function run_trho_scan(;
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
-    _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, thermo_backend, solver_backend)
+    _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -264,7 +261,6 @@ function run_trho_scan(;
                     hybrid_weighted_max_seed_candidates=hybrid_weighted_max_seed_candidates,
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
-                    thermo_backend=thermo_backend,
                     solver_backend=solver_backend,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
@@ -275,7 +271,6 @@ function run_trho_scan(;
                     constraint_mode=constraint_mode,
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
-                    thermo_backend=thermo_backend,
                     solver_backend=solver_backend,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
@@ -287,7 +282,6 @@ function run_trho_scan(;
 
             # 写入结果
             _write_row(io, T, rho, xi, result, message;
-                thermo_backend=thermo_backend,
                 model_kind=model_kind,
                 p_num=p_num,
                 t_num=t_num,
@@ -386,7 +380,6 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num,
@@ -397,7 +390,6 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             constraint_mode=constraint_mode,
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             model_kind=model_kind,
             p_num=p_num,
@@ -408,7 +400,6 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             constraint_mode=constraint_mode,
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             model_kind=model_kind,
             p_num=p_num,
@@ -427,14 +418,13 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     hybrid_weighted_max_seed_candidates::Int=3,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
 
-    effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+    effective_solver_backend = _effective_solver_backend(solver_backend)
 
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
@@ -457,7 +447,6 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
         elseif mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 model_kind=model_kind,
                 seed_strategy=strategy,
                 p_num=p_num,
@@ -467,7 +456,6 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
         else
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -484,7 +472,6 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     if result !== nothing
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
-            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
             model_kind=model_kind,
@@ -496,7 +483,6 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             constraint_mode=constraint_mode,
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             model_kind=model_kind,
             p_num=p_num,
@@ -526,13 +512,11 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
-            thermo_backend=effective_solver_backend,
             model_kind=model_kind)
 
         if wb_result !== nothing
             wb_final = finalize_solver_result(wb_result, T_fm, xi;
                 solver_backend=effective_solver_backend,
-                thermo_backend=thermo_backend,
                 p_num=p_num,
                 t_num=t_num,
                 model_kind=model_kind,
@@ -555,19 +539,15 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        effective_solver_backend = _effective_solver_backend(solver_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
-        if effective_solver_backend === :models && thermo_backend !== :models
-            error("solver_backend=:models requires thermo_backend=:models")
-        end
 
         mode = if constraint_mode === :fixed_rho
             FixedRho(rho_target)
@@ -600,7 +580,6 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         elseif mode isa FixedAsymmetricRho
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 model_kind=model_kind,
                 seed_strategy=strategy,
                 p_num=p_num,
@@ -610,7 +589,6 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         else
             solve(mode, T_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -620,7 +598,6 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
-            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
             model_kind=model_kind,
@@ -639,7 +616,6 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num,
@@ -652,7 +628,6 @@ function _refine_result(T_fm, ρ_fm, xi, result;
             constraint_mode=constraint_mode,
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             model_kind=model_kind,
             p_num=p_num,
@@ -721,7 +696,6 @@ end
 
 """写入一行结果"""
 function _write_row(io, T, rho, xi, result, message;
-    thermo_backend::Symbol=:legacy,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -754,7 +728,6 @@ function _write_row(io, T, rho, xi, result, message;
         result.x_state,
         result.mu_vec,
         T_fm;
-        thermo_backend=thermo_backend,
         model_kind=model_kind,
         p_num=p_num,
         t_num=t_num,

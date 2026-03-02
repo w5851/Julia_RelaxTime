@@ -20,56 +20,17 @@ export promote_near_converged
 export is_success
 export refine_near_converged
 
-"""finalize_solver_result(result, T_fm, xi; solver_backend, thermo_backend, p_num, t_num, model_kind=:PNJL)
+"""finalize_solver_result(result, T_fm, xi; solver_backend, p_num, t_num, model_kind=:PNJL)
 
-统一处理 scan 单点求解后的输出：
-- 若 `thermo_backend == solver_backend`，直接返回原结果。
-- 否则按 `thermo_backend` 重算派生量 (P, ρ, s, ε, Ω, masses)，保持 x_state/mu_vec/迭代信息不变。
-
-约定：scan 内部求解时传入 `solve(...; thermo_backend=solver_backend)`。
+统一处理 scan 单点求解后的输出（单路径 models 实现）。
 """
 function finalize_solver_result(result::SolverResult, T_fm, xi;
     solver_backend::Symbol,
-    thermo_backend::Symbol,
     p_num::Int,
     t_num::Int,
     model_kind::Symbol=:PNJL,
 )
-    if thermo_backend === solver_backend
-        return result
-    end
-
-    x_state = result.x_state
-    mu_vec = result.mu_vec
-
-    pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-        x_state,
-        mu_vec,
-        T_fm;
-        thermo_backend=thermo_backend,
-        p_num=p_num,
-        t_num=t_num,
-        xi=xi,
-    )
-    omega = -pressure
-    masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=model_kind)
-
-    return SolverResult(
-        result.mode,
-        result.converged,
-        copy(result.solution),
-        x_state,
-        mu_vec,
-        omega,
-        pressure,
-        rho_norm,
-        entropy,
-        energy,
-        masses,
-        result.iterations,
-        result.residual_norm,
-        Float64(xi),
-    )
+    return result
 end
 
 """promote_near_converged(result; acceptable_residual) -> (result, message)

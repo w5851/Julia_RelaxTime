@@ -284,19 +284,13 @@ end
     return provider
 end
 
-@inline function _default_transport_provider_for_backend(thermo_backend::Symbol)
-    if thermo_backend === :models
-        if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
-            # Prefer model-based provider to keep workflow independent from backend dispatch.
-            kind = EquilibriumFacade.pnjl_model_kind(thermo_backend)
-            m = ThermoFacade.get_models_model(kind)
-            try
-                return Main.Models.transport_provider(m)
-            catch
-                # Compatibility: do not fall back to backend-based provider here.
-                # Keep `Models.transport_provider(:models)` available for explicit use.
-                return nothing
-            end
+@inline function _default_transport_provider_for_backend()
+    if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
+        m = ThermoFacade.get_models_model(:PNJL)
+        try
+            return Main.Models.transport_provider(m)
+        catch
+            return nothing
         end
     end
     return nothing
@@ -315,13 +309,12 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     )
 end
 
-@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi, thermo_backend::Symbol; p_num::Int, t_num::Int)
+@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
     nd = ThermoFacade.calculate_number_densities_backend(
         x_state,
         mu_vec,
         T_fm;
-        thermo_backend=thermo_backend,
-        model_kind=EquilibriumFacade.pnjl_model_kind(thermo_backend),
+        model_kind=:PNJL,
         p_num=p_num,
         t_num=t_num,
         thermal_nodes=thermal_nodes,
@@ -344,7 +337,6 @@ end
     T_fm::Real,
     mu_fm::Real;
     xi::Real,
-    thermo_backend::Symbol,
     p_num::Int,
     t_num::Int,
 )
@@ -357,7 +349,7 @@ end
     ))
     thermo_params = params0.thermo_params
 
-    densities = _densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, nothing, Float64(xi), thermo_backend;
+    densities = _densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, nothing, Float64(xi);
         p_num=p_num,
         t_num=t_num,
     )
@@ -411,7 +403,6 @@ function solve_gap_and_transport(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     equilibrium::Union{Nothing,Any}=nothing,
     compute_tau::Bool=false,
@@ -435,7 +426,6 @@ function solve_gap_and_transport(
         T_fm,
         mu_fm;
         xi=xi,
-        thermo_backend=thermo_backend,
         solver_backend=solver_backend,
         p_num=p_num,
         t_num=t_num,
@@ -450,7 +440,6 @@ function solve_gap_and_transport(
         T_fm,
         mu_fm;
         xi=xi,
-        thermo_backend=thermo_backend,
         compute_tau=compute_tau,
         K_coeffs=K_coeffs,
         tau=tau,
@@ -476,7 +465,6 @@ function solve_transport_from_equilibrium(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
     compute_tau::Bool=false,
     K_coeffs::Union{Nothing,NamedTuple}=nothing,
     tau::Union{Nothing,NamedTuple}=nothing,
@@ -492,7 +480,6 @@ function solve_transport_from_equilibrium(
 )
     inputs = _transport_inputs_from_equilibrium(base, T_fm, mu_fm;
         xi=xi,
-        thermo_backend=thermo_backend,
         p_num=p_num,
         t_num=t_num,
     )
@@ -533,7 +520,6 @@ function solve_transport_from_equilibrium(
             T_fm,
             mu_fm;
             xi=xi,
-            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
         )
@@ -549,7 +535,7 @@ function solve_transport_from_equilibrium(
         _default_prefer_energy_aniso_from_toml()
     end
 
-    effective_provider = provider === nothing ? _default_transport_provider_for_backend(thermo_backend) : provider
+    effective_provider = provider === nothing ? _default_transport_provider_for_backend() : provider
     legacy_inputs = as_legacy_inputs(quark_params_basic, thermo_params)
     if effective_provider === nothing
         # No backend default provider: only materialize a provider if the desired

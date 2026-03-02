@@ -47,7 +47,6 @@ using .MesonMassWorkflow
         T,
         mu;
         xi=xi,
-        thermo_backend=:models,
         solver_backend=:legacy,
         mesons=(),
         p_num=8,

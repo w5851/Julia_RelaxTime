@@ -19,13 +19,11 @@ using ForwardDiff
 # 从父模块导入
 using ..ConstraintModes: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
-# 导入 core 模块
-const _THERMO_PATH = normpath(joinpath(@__DIR__, "..", "core", "Thermodynamics.jl"))
-if !isdefined(@__MODULE__, :Thermodynamics)
-    include(_THERMO_PATH)
+const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "PNJLCore.jl"))
+if !isdefined(@__MODULE__, :PNJLCore)
+    include(_PNJL_CORE_PATH)
 end
-using .Thermodynamics: calculate_rho, calculate_thermo, ρ0
-using .Thermodynamics.Integrals: cached_nodes
+using .PNJLCore: cached_nodes
 
 # Unified thermo facade (legacy vs models)
 const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
@@ -33,6 +31,11 @@ if !isdefined(Main, :IncludeOnce)
     Base.include(Main, _INCLUDE_ONCE_PATH)
 end
 const IncludeOnce = Main.IncludeOnce
+
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "Constants_PNJL.jl"))
+IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+using Main.Constants_PNJL: ρ0_inv_fm3
+const ρ0 = ρ0_inv_fm3
 
 const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
@@ -59,7 +62,6 @@ struct GapParams{TT, TN, TX}
     thermal_nodes::TN
     xi::TX
 
-    thermo_backend::Symbol
     p_num::Int
     t_num::Int
     model_kind::Symbol
@@ -69,12 +71,11 @@ end
     T_fm::TT,
     thermal_nodes::TN,
     xi::TX;
-    thermo_backend::Symbol=:legacy,
     p_num::Int=size(thermal_nodes[1], 1),
     t_num::Int=size(thermal_nodes[1], 2),
-    model_kind::Symbol=(thermo_backend === :legacy ? :LegacyPNJL : :PNJL),
+    model_kind::Symbol=:PNJL,
 ) where {TT, TN, TX}
-    return GapParams(T_fm, thermal_nodes, xi, thermo_backend, p_num, t_num, model_kind)
+    return GapParams(T_fm, thermal_nodes, xi, p_num, t_num, model_kind)
 end
 
 @inline function _rho_vec(x_state, mu_vec, T_fm, params::GapParams)
@@ -82,7 +83,6 @@ end
         x_state,
         mu_vec,
         T_fm;
-        thermo_backend=params.thermo_backend,
         model_kind=params.model_kind,
         p_num=params.p_num,
         t_num=params.t_num,
@@ -96,7 +96,6 @@ end
         x_state,
         mu_vec,
         T_fm;
-        thermo_backend=params.thermo_backend,
         model_kind=params.model_kind,
         p_num=params.p_num,
         t_num=params.t_num,
@@ -138,7 +137,6 @@ function gap_conditions(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, par
             y_s,
             mu_vec,
             params.T_fm;
-            thermo_backend=params.thermo_backend,
             model_kind=params.model_kind,
             p_num=params.p_num,
             t_num=params.t_num,
@@ -171,7 +169,7 @@ function build_conditions(::FixedMu, params::GapParams)
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
         x_state = SVector{5}(Tuple(x))
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            params.thermo_backend, params.p_num, params.t_num, params.model_kind)
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
         return Vector(gap_conditions(x_state, mu_vec, local_params))
     end
 end
@@ -191,7 +189,7 @@ function build_conditions(mode::FixedRho, params::GapParams)
         x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
         mu_vec = SVector{3}(x[6], x[7], x[8])
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            params.thermo_backend, params.p_num, params.t_num, params.model_kind)
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
         
         # 5 个能隙方程
         gap = gap_conditions(x_state, mu_vec, local_params)
@@ -223,7 +221,7 @@ function build_conditions(mode::FixedAsymmetricRho, params::GapParams)
         x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
         mu_vec = SVector{3}(x[6], x[7], x[8])
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            params.thermo_backend, params.p_num, params.t_num, params.model_kind)
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
 
         gap = gap_conditions(x_state, mu_vec, local_params)
 
@@ -249,7 +247,7 @@ function build_conditions(mode::FixedEntropy, params::GapParams)
         x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
         mu_vec = SVector{3}(x[6], x[7], x[8])
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            params.thermo_backend, params.p_num, params.t_num, params.model_kind)
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
         
         # 5 个能隙方程
         gap = gap_conditions(x_state, mu_vec, local_params)
@@ -277,7 +275,7 @@ function build_conditions(mode::FixedSigma, params::GapParams)
         x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
         mu_vec = SVector{3}(x[6], x[7], x[8])
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            params.thermo_backend, params.p_num, params.t_num, params.model_kind)
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
         
         # 5 个能隙方程
         gap = gap_conditions(x_state, mu_vec, local_params)

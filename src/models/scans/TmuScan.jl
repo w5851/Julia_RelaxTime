@@ -1,8 +1,6 @@
 """
     TmuScan
 
-    masses = ThermoFacade.calculate_mass_vec_backend(x_state; thermo_backend=thermo_backend, model_kind=:PNJL)
-
 ## 使用示例
 ```julia
 using PNJL.TmuScan
@@ -99,20 +97,18 @@ const HEADER = join((
     return nothing
 end
 
-@inline function _validate_tmu_scan_inputs(T_values, mu_values, xi_values, thermo_backend::Symbol, solver_backend::Symbol)
+@inline function _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend::Symbol)
     _validate_real_vector(:T_values, T_values)
     _validate_real_vector(:mu_values, mu_values)
     _validate_real_vector(:xi_values, xi_values)
 
-    (thermo_backend === :legacy || thermo_backend === :models) ||
-        throw(ArgumentError("thermo_backend must be :legacy or :models, got $(thermo_backend)"))
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
     return nothing
 end
 
-@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
-    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
+@inline function _effective_solver_backend(solver_backend::Symbol)::Symbol
+    return solver_backend === :auto ? :models : solver_backend
 end
 
 # ============================================================================
@@ -160,14 +156,13 @@ function run_tmu_scan(;
     resume::Bool=true,
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
-    _validate_tmu_scan_inputs(T_values, mu_values, xi_values, thermo_backend, solver_backend)
+    _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -226,7 +221,6 @@ function run_tmu_scan(;
                     # Phase-aware 首点可选：MultiSeed 自举（选 Ω 最小的物理解），减少对启发式默认种子顺序的依赖。
                     if tracker !== nothing && bootstrap_multiseed && tracker.previous_solution === nothing
                         result, message = _solve_point_with_seed_strategy(T_fm, μ_fm, xi, tracker;
-                            thermo_backend=thermo_backend,
                             solver_backend=solver_backend,
                             p_num=p_num,
                             t_num=t_num,
@@ -238,7 +232,6 @@ function run_tmu_scan(;
                         )
 
                         result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-                            thermo_backend=thermo_backend,
                             solver_backend=solver_backend,
                             p_num=p_num,
                             t_num=t_num,
@@ -341,21 +334,18 @@ end
 
 """尝试多个初值候选"""
 function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     p_num,
     t_num,
     nlsolve_kwargs...)
     return ScanCommon.attempt_with_candidates(candidates;
         solve_point=seed_state -> _solve_point(T_fm, μ_fm, xi, seed_state;
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
         ),
         refine=result -> _refine_result(T_fm, μ_fm, xi, result;
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
@@ -368,18 +358,14 @@ end
 
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, seed_state;
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        effective_solver_backend = _effective_solver_backend(solver_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
-        if effective_solver_backend === :models && thermo_backend !== :models
-            error("solver_backend=:models requires thermo_backend=:models")
-        end
 
         # 创建固定种子策略
         seed_5 = Float64.(seed_state[1:min(5, length(seed_state))])
@@ -396,7 +382,6 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         else
             solve(FixedMu(), T_fm, μ_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -406,7 +391,6 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
-            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
             model_kind=:PNJL,
@@ -422,18 +406,14 @@ end
 
 """单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
 function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
+        effective_solver_backend = _effective_solver_backend(solver_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
-        if effective_solver_backend === :models && thermo_backend !== :models
-            error("solver_backend=:models requires thermo_backend=:models")
-        end
 
         result = if effective_solver_backend === :models
             _solve_with_models(FixedMu(), T_fm, μ_fm;
@@ -446,7 +426,6 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
         else
             solve(FixedMu(), T_fm, μ_fm;
                 xi=xi,
-                thermo_backend=effective_solver_backend,
                 seed_strategy=seed_strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -456,7 +435,6 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
-            thermo_backend=thermo_backend,
             p_num=p_num,
             t_num=t_num,
             model_kind=:PNJL,
@@ -472,7 +450,6 @@ end
 
 """精炼近似收敛的结果"""
 function _refine_result(T_fm, μ_fm, xi, result;
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     p_num,
     t_num,
@@ -481,7 +458,6 @@ function _refine_result(T_fm, μ_fm, xi, result;
     return refine_near_converged(result;
         acceptable_residual=ACCEPTABLE_RESIDUAL,
         solve_again=seed -> _solve_point(T_fm, μ_fm, xi, seed;
-            thermo_backend=thermo_backend,
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,

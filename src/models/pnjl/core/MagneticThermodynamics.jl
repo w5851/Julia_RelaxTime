@@ -30,10 +30,13 @@ using Main.Constants_PNJL:
     ħc_MeV_fm,
     ρ0_inv_fm3
 
-include("Thermodynamics.jl")
-using .Thermodynamics: calculate_U, calculate_chiral, calculate_mass_vec, calculate_omega
+const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "PNJLCore.jl"))
+if !isdefined(@__MODULE__, :PNJLCore)
+    include(_PNJL_CORE_PATH)
+end
+
 include("Integrals.jl")
-using .Integrals: cached_nodes
+using .Integrals: cached_nodes, calculate_energy_sum, calculate_log_sum
 
 include("MagneticIntegrals.jl")
 using .MagneticIntegrals:
@@ -51,6 +54,16 @@ export calculate_magnetic_number_densities
 export magnetic_nmax_convergence_report
 
 const ρ0 = ρ0_inv_fm3
+const _PNJL_PARAMS_REF = Ref{Any}(nothing)
+
+@inline function _pnjl_params()
+    p = _PNJL_PARAMS_REF[]
+    if p === nothing
+        p = PNJLCore.pnjl_params()
+        _PNJL_PARAMS_REF[] = p
+    end
+    return p
+end
 
 Base.@kwdef struct MagneticIMCParams
     a::Float64 = 0.108805
@@ -120,10 +133,18 @@ function calculate_magnetic_omega_components(
     xi::Real=0.0,
 ) where {T, M}
     if abs(magnetic.eB_fm2) <= 1e-14
+        params = _pnjl_params()
+        φ0 = SVector{3, T}(x_state[1], x_state[2], x_state[3])
+        Φ0, Φbar0 = x_state[4], x_state[5]
         thermal_nodes = cached_nodes(24, 8)
-        ω0 = calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
-        masses0 = calculate_mass_vec(x_state)
-        return (chi=calculate_chiral(SVector{3, T}(x_state[1], x_state[2], x_state[3])), poly=calculate_U(T_fm, x_state[4], x_state[5]), vac=0.0, therm=0.0, masses=masses0, omega=ω0, n_max=0, G_B=G_fm2)
+        masses0 = PNJLCore.calculate_mass_vec(params, φ0)
+        χ0 = PNJLCore.chiral_potential(params, φ0)
+        U0 = PNJLCore.polyakov_potential(params, Φ0, Φbar0, T_fm)
+        thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
+        ω0 = χ0 + U0 +
+             calculate_energy_sum(masses0) +
+             calculate_log_sum(masses0, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ0, Φbar0, mu_vec, T_fm, xi)
+        return (chi=χ0, poly=U0, vac=0.0, therm=0.0, masses=masses0, omega=ω0, n_max=0, G_B=G_fm2)
     end
 
     φ = SVector{3, T}(x_state[1], x_state[2], x_state[3])
@@ -162,7 +183,7 @@ function calculate_magnetic_omega_components(
     end
 
     chi = _chiral_with_GB(φ, G_B)
-    poly = calculate_U(T_fm, Φ, Φbar)
+    poly = PNJLCore.polyakov_potential(_pnjl_params(), Φ, Φbar, T_fm)
     ω = chi + poly + vac + therm
     return (chi=chi, poly=poly, vac=vac, therm=therm, masses=masses, omega=ω, n_max=n_max, G_B=G_B)
 end

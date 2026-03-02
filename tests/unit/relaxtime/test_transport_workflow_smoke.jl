@@ -20,7 +20,6 @@ using .TransportWorkflow
         T,
         mu;
         xi=xi,
-        thermo_backend=:models,
         tau=tau,
         compute_tau=false,
         compute_bulk=false,
@@ -31,10 +30,8 @@ using .TransportWorkflow
     )
 
     @testset "provider injection smoke" begin
-        prov = Main.Models.transport_provider(:models)
-
-        kind = TransportWorkflow.EquilibriumFacade.pnjl_model_kind(:models)
-        m = TransportWorkflow.ThermoFacade.get_models_model(kind)
+        m = TransportWorkflow.ThermoFacade.get_models_model(:PNJL)
+        prov = Main.Models.transport_provider(m)
         prov_model = Main.Models.transport_provider(m)
 
         qp_nt = Main.ParameterTypes.as_namedtuple(res.quark_params)
@@ -55,7 +52,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -70,7 +66,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -85,7 +80,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -110,7 +104,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -136,7 +129,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -167,7 +159,6 @@ using .TransportWorkflow
                 T,
                 mu;
                 xi=xi2,
-                thermo_backend=:models,
                 tau=tau,
                 compute_tau=false,
                 compute_bulk=false,
@@ -183,7 +174,6 @@ using .TransportWorkflow
                 T,
                 mu;
                 xi=xi2,
-                thermo_backend=:models,
                 tau=tau,
                 compute_tau=false,
                 compute_bulk=false,
@@ -217,7 +207,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             solver_backend=:legacy,
             p_num=8,
             t_num=4,
@@ -229,7 +218,6 @@ using .TransportWorkflow
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,
@@ -238,13 +226,12 @@ using .TransportWorkflow
             transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
         )
 
-        prov = Main.Models.transport_provider(:models)
+        prov = Main.Models.transport_provider(TransportWorkflow.ThermoFacade.get_models_model(:PNJL))
         res2_prov = TransportWorkflow.solve_transport_from_equilibrium(
             eq,
             T,
             mu;
             xi=xi,
-            thermo_backend=:models,
             tau=tau,
             compute_tau=false,
             compute_bulk=false,

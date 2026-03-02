@@ -101,29 +101,28 @@ end
     @test isfinite(td.dP_dmu)
 end
 
-@testset "thermo_backend legacy vs models" begin
-    # 选一个相对温和的点，避免极端相变附近的数值敏感
+@testset "thermo_derivatives unified path consistency" begin
+    # 选一个相对温和的点，做重复调用一致性检查
     T_fm = 0.5
     μ_fm = 1.5
 
-    legacy = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:legacy)
-    models = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, thermo_backend=:models)
+    a = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10)
+    b = PNJL.thermo_derivatives(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10)
 
-    @test legacy.converged
-    @test models.converged
+    @test a.converged
+    @test b.converged
 
-    @test isapprox(models.pressure, legacy.pressure; rtol=1e-6, atol=1e-8)
-    @test isapprox(models.energy, legacy.energy; rtol=1e-6, atol=1e-8)
-    @test isapprox(models.entropy, legacy.entropy; rtol=1e-5, atol=1e-8)
-    @test isapprox(models.rho, legacy.rho; rtol=1e-6, atol=1e-8)
+    @test isapprox(a.pressure, b.pressure; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.energy, b.energy; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.entropy, b.entropy; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.rho, b.rho; rtol=1e-10, atol=1e-12)
 
-    # 一阶导数更敏感，容差稍放宽
-    @test isapprox(models.dP_dT, legacy.dP_dT; rtol=5e-4, atol=1e-6)
-    @test isapprox(models.dP_dmu, legacy.dP_dmu; rtol=5e-4, atol=1e-6)
-    @test isapprox(models.dEpsilon_dT, legacy.dEpsilon_dT; rtol=5e-4, atol=1e-6)
-    @test isapprox(models.dEpsilon_dmu, legacy.dEpsilon_dmu; rtol=5e-4, atol=1e-6)
-    @test isapprox(models.dn_dT, legacy.dn_dT; rtol=5e-4, atol=1e-6)
-    @test isapprox(models.dn_dmu, legacy.dn_dmu; rtol=5e-4, atol=1e-6)
+    @test isapprox(a.dP_dT, b.dP_dT; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.dP_dmu, b.dP_dmu; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.dEpsilon_dT, b.dEpsilon_dT; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.dEpsilon_dmu, b.dEpsilon_dmu; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.dn_dT, b.dn_dT; rtol=1e-10, atol=1e-12)
+    @test isapprox(a.dn_dmu, b.dn_dmu; rtol=1e-10, atol=1e-12)
 end
 
 @testset "bulk_viscosity_coefficients (new interface)" begin
@@ -150,7 +149,7 @@ end
     T_fm = 0.5
     μ_fm = 0.0
 
-    bv = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=24, t_num=8, thermo_backend=:models)
+    bv = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=24, t_num=8)
 
     @test isfinite(bv.v_n_sq)
     @test isfinite(bv.dμB_dT_sigma)

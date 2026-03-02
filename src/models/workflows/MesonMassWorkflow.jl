@@ -179,7 +179,6 @@ function solve_gap_and_meson_point(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    thermo_backend::Symbol=:legacy,
     solver_backend::Symbol=:legacy,
     mesons::Tuple{Vararg{Symbol}}=DEFAULT_MESONS,
     k_norm::Real=0.0,
@@ -202,7 +201,6 @@ function solve_gap_and_meson_point(
         T_fm,
         mu_fm;
         xi=xi,
-        thermo_backend=thermo_backend,
         solver_backend=solver_backend,
         p_num=p_num,
         t_num=t_num,
