@@ -54,6 +54,9 @@ export build_default_rho_grid
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export run_phase_pipeline, find_cep, build_phase_artifacts
+export resolve_phase_output_target, promote_phase_artifacts
+export CEPResult, PromotionResult, PhasePipelineResult
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
 
@@ -90,6 +93,14 @@ include(joinpath(@__DIR__, "derivative_entrypoints.jl"))
 include(joinpath(@__DIR__, "transport_provider.jl"))
 
 # Unified scan/workflow entrypoints (Stage C compatibility layer)
+include(joinpath(@__DIR__, "phase", "PhaseTypes.jl"))
+include(joinpath(@__DIR__, "phase", "AdaptiveRhoRefinement.jl"))
+include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
+include(joinpath(@__DIR__, "phase", "PhaseIO.jl"))
+include(joinpath(@__DIR__, "phase", "CEPDetector.jl"))
+include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
+include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
+include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
 include(joinpath(@__DIR__, "entrypoints.jl"))
 
 end # module Models

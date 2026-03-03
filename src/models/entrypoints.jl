@@ -12,6 +12,8 @@ Models 统一流程入口（阶段 C）：
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export run_phase_pipeline, find_cep, build_phase_artifacts
+export resolve_phase_output_target, promote_phase_artifacts
 export transport_workflow_module, meson_workflow_module
 export workflow_param_adapters_module
 export pnjl_module

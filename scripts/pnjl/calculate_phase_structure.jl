@@ -1,778 +1,270 @@
 #!/usr/bin/env julia
 """
-PNJL 相结构计算脚本
+PNJL 相结构计算脚本（薄 CLI）
 
-计算并输出：
-1. CEP (临界终点)
-2. 一阶相变线 (T-ρ 扫描 + Maxwell 构造)
-3. Spinodal 数据（亚稳态边界）
-4. Crossover 线（手征和退禁闭）
+职责：
+- 仅做参数解析、调用 Models.run_phase_pipeline
+- 可选触发晋升到 data/reference
 
-输出文件保存到 data/reference/pnjl/
-
-用法：
-    julia scripts/pnjl/calculate_phase_structure.jl [options]
-
-选项：
-    --xi=0.0          各向异性参数
-    --T_min=50        最低温度 (MeV)
-    --T_max=200       最高温度 (MeV)
-    --T_step=10       温度步长 (MeV)
-    --rho_max=4.0     最大密度 (ρ/ρ₀)
-    --rho_step=0.05   密度步长
-    --output_dir=...  输出目录
-    --skip_trho       跳过 T-ρ 扫描（使用已有数据）
-    --skip_crossover  跳过 crossover 计算
-    --verbose         详细输出
+示例：
+    julia scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --verbose
+    julia scripts/pnjl/calculate_phase_structure.jl --T_min=120 --T_max=180 --T_step=20 --rho_max=0.8 --rho_step=0.2
+    julia scripts/pnjl/calculate_phase_structure.jl --promote_reference
 """
 
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
 
-using Printf
 using Dates
 
-# 加载模块
-include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
-Models.pnjl_module()
+using .Models
 
-const PNJL = Models.pnjl_module()
-const PhaseTransition = getproperty(PNJL, :PhaseTransition)
-const SShapeResult = getproperty(PhaseTransition, :SShapeResult)
-const detect_s_shape = getproperty(PhaseTransition, :detect_s_shape)
-const MaxwellResult = getproperty(PhaseTransition, :MaxwellResult)
-const maxwell_construction = getproperty(PhaseTransition, :maxwell_construction)
-const detect_crossover = getproperty(PhaseTransition, :detect_crossover)
-const CrossoverResult = getproperty(PhaseTransition, :CrossoverResult)
-const scan_crossover_line = getproperty(PhaseTransition, :scan_crossover_line)
+Base.@kwdef mutable struct PhaseCliConfig
+    model_kind::Symbol = :PNJL
+    xi::Float64 = 0.0
+    T_min::Float64 = 30.0
+    T_max::Float64 = 350.0
+    T_step::Float64 = 10.0
+    rho_min::Float64 = 0.0
+    rho_max::Float64 = 4.0
+    rho_step::Float64 = 0.05
+    profile::Symbol = :default
+    run_id::Union{Nothing, String} = nothing
+    output_dir::Union{Nothing, String} = nothing
+    solver_backend::Symbol = :models
+    seed_policy::Symbol = :hybrid_continuity
+    reverse_rho::Bool = true
+    p_num::Int = 12
+    t_num::Int = 4
+    iterations::Int = 80
+    compute_crossover::Bool = false
+    crossover_method::Symbol = :inflection
+    crossover_variable::Symbol = :phi_u
+    crossover_n_mu::Int = 12
+    cep_strategy::Symbol = :interpolate
+    cep_tol::Float64 = 0.01
+    cep_max_bisect_iter::Int = 20
+    cep_area_tol_good::Float64 = 1e-4
+    cep_area_tol_bad::Float64 = 5e-4
+    cep_max_refine_level::Int = 2
+    cep_adaptive_rho::Bool = true
+    cep_adaptive_slope_tol::Float64 = 5.0
+    cep_adaptive_min_gap::Float64 = 0.002
+    cep_adaptive_max_points::Int = 32
+    cep_adaptive_digits::Int = 6
+    cep_direct_bracket_mode::Symbol = :directional
+    cep_direct_start::Symbol = :low
+    cep_direct_initial_step::Float64 = NaN
+    cep_direct_expand_factor::Float64 = 2.0
+    cep_direct_max_expand_steps::Int = 8
+    cep_direct_fallback_scan::Bool = true
+    promote_reference::Bool = false
+    verbose::Bool = false
+end
 
-# 单位转换
-const hbarc = 197.327  # MeV·fm
-
-# ============================================================================
-# 配置
-# ============================================================================
-
-const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "reference", "pnjl")
-
-struct PhaseStructureConfig
-    xi::Float64
-    T_min::Float64
-    T_max::Float64
-    T_step::Float64
-    rho_min::Float64
-    rho_max::Float64
-    rho_step::Float64
-    seed_policy::Symbol
-    output_dir::String
-    skip_trho::Bool
-    skip_crossover::Bool
-    verbose::Bool
+function _usage()
+    println("用法: julia scripts/pnjl/calculate_phase_structure.jl [options]")
+    println("选项:")
+    println("  --model_kind=PNJL      模型类型（如 PNJL/RPNJL）")
+    println("  --xi=0.0               各向异性参数")
+    println("  --T_min=30             最低温度 (MeV)")
+    println("  --T_max=350            最高温度 (MeV)")
+    println("  --T_step=10            温度步长 (MeV)")
+    println("  --rho_min=0.0          最低密度 (ρ/ρ₀)")
+    println("  --rho_max=4.0          最高密度 (ρ/ρ₀)")
+    println("  --rho_step=0.05        密度步长")
+    println("  --profile=default      运行 profile")
+    println("  --run_id=...           指定 run_id")
+    println("  --output_dir=...       指定输出目录（覆盖默认 processed 路径）")
+    println("  --solver_backend=models|legacy|auto")
+    println("  --seed_policy=...      扫描初值策略")
+    println("  --reverse_rho=true|false")
+    println("  --p_num=12             动量积分点数")
+    println("  --t_num=4              角度积分点数")
+    println("  --iterations=80        求解迭代上限")
+    println("  --compute_crossover    计算并输出 crossover_line.csv")
+    println("  --crossover_method=... crossover方法（inflection|peak）")
+    println("  --crossover_variable=... crossover变量（phi_u|Phi）")
+    println("  --crossover_n_mu=12    crossover扫描的mu点数")
+    println("  --cep_strategy=...     CEP定位策略（interpolate|direct）")
+    println("  --cep_tol=0.01         CEP二分温度容差 (MeV)")
+    println("  --cep_max_bisect_iter=20 CEP二分迭代上限")
+    println("  --cep_area_tol_good=1e-4 CEP判定valid阈值")
+    println("  --cep_area_tol_bad=5e-4  CEP判定invalid阈值")
+    println("  --cep_max_refine_level=2 CEP直接二分每点加密上限")
+    println("  --cep_adaptive_rho=true  direct评估时启用rho自适应补点")
+    println("  --cep_adaptive_slope_tol=5.0 自适应补点斜率阈值")
+    println("  --cep_adaptive_min_gap=0.002 自适应最小区间")
+    println("  --cep_adaptive_max_points=32 自适应单轮最多补点")
+    println("  --cep_adaptive_digits=6 自适应去重精度")
+    println("  --cep_direct_bracket_mode=... direct bracket模式（directional|scan）")
+    println("  --cep_direct_start=...   directional起点（low|mid|high）")
+    println("  --cep_direct_initial_step=... directional初始步长(MeV, NaN=自动)")
+    println("  --cep_direct_expand_factor=2.0 directional步长扩张倍数")
+    println("  --cep_direct_max_expand_steps=8 directional最大扩张步数")
+    println("  --cep_direct_fallback_scan=true directional失败后是否回退扫描")
+    println("  --promote_reference    运行后尝试晋升到 data/reference")
+    println("  --verbose              输出详细信息")
+    println("  -h, --help             显示帮助")
 end
 
 function parse_args(args)
-    xi = 0.0
-    T_min = 30.0
-    T_max = 350.0
-    T_step = 10.0
-    rho_min = 0.0
-    rho_max = 4.0
-    rho_step = 0.05
-    seed_policy = :hybrid_continuity
-    output_dir = DEFAULT_OUTPUT_DIR
-    skip_trho = false
-    skip_crossover = false
-    verbose = false
-    
+    cfg = PhaseCliConfig()
     for arg in args
-        if startswith(arg, "--xi=")
-            xi = parse(Float64, arg[6:end])
-        elseif startswith(arg, "--T_min=")
-            T_min = parse(Float64, arg[9:end])
-        elseif startswith(arg, "--T_max=")
-            T_max = parse(Float64, arg[9:end])
-        elseif startswith(arg, "--T_step=")
-            T_step = parse(Float64, arg[10:end])
-        elseif startswith(arg, "--rho_min=")
-            rho_min = parse(Float64, arg[11:end])
-        elseif startswith(arg, "--rho_max=")
-            rho_max = parse(Float64, arg[11:end])
-        elseif startswith(arg, "--rho_step=")
-            rho_step = parse(Float64, arg[12:end])
-        elseif startswith(arg, "--seed_policy=")
-            seed_policy = Symbol(lowercase(arg[15:end]))
-        elseif startswith(arg, "--output_dir=")
-            output_dir = arg[14:end]
-        elseif arg == "--skip_trho"
-            skip_trho = true
-        elseif arg == "--skip_crossover"
-            skip_crossover = true
-        elseif arg == "--verbose"
-            verbose = true
-        elseif arg == "--help" || arg == "-h"
-            println("用法: julia calculate_phase_structure.jl [options]")
-            println("选项:")
-            println("  --xi=0.0          各向异性参数")
-            println("  --T_min=30        最低温度 (MeV)")
-            println("  --T_max=350       最高温度 (MeV)")
-            println("  --T_step=10       温度步长 (MeV)")
-            println("  --rho_min=0.0     最低密度 (ρ/ρ₀)")
-            println("  --rho_max=4.0     最大密度 (ρ/ρ₀)")
-            println("  --rho_step=0.05   密度步长")
-            println("  --seed_policy=... 初值策略（default hybrid_continuity）")
-            println("  --output_dir=...  输出目录")
-            println("  --skip_trho       跳过 T-ρ 扫描")
-            println("  --skip_crossover  跳过 crossover 计算")
-            println("  --verbose         详细输出")
+        if arg in ("-h", "--help")
+            _usage()
             exit(0)
+        elseif startswith(arg, "--model_kind=")
+            cfg.model_kind = Symbol(uppercase(arg[14:end]))
+        elseif startswith(arg, "--xi=")
+            cfg.xi = parse(Float64, arg[6:end])
+        elseif startswith(arg, "--T_min=")
+            cfg.T_min = parse(Float64, arg[9:end])
+        elseif startswith(arg, "--T_max=")
+            cfg.T_max = parse(Float64, arg[9:end])
+        elseif startswith(arg, "--T_step=")
+            cfg.T_step = parse(Float64, arg[10:end])
+        elseif startswith(arg, "--rho_min=")
+            cfg.rho_min = parse(Float64, arg[11:end])
+        elseif startswith(arg, "--rho_max=")
+            cfg.rho_max = parse(Float64, arg[11:end])
+        elseif startswith(arg, "--rho_step=")
+            cfg.rho_step = parse(Float64, arg[12:end])
+        elseif startswith(arg, "--profile=")
+            cfg.profile = Symbol(lowercase(arg[11:end]))
+        elseif startswith(arg, "--run_id=")
+            cfg.run_id = arg[10:end]
+        elseif startswith(arg, "--output_dir=")
+            cfg.output_dir = arg[14:end]
+        elseif startswith(arg, "--solver_backend=")
+            cfg.solver_backend = Symbol(lowercase(arg[18:end]))
+        elseif startswith(arg, "--seed_policy=")
+            cfg.seed_policy = Symbol(lowercase(arg[15:end]))
+        elseif startswith(arg, "--reverse_rho=")
+            cfg.reverse_rho = lowercase(arg[15:end]) in ("1", "true", "yes")
+        elseif startswith(arg, "--p_num=")
+            cfg.p_num = parse(Int, arg[9:end])
+        elseif startswith(arg, "--t_num=")
+            cfg.t_num = parse(Int, arg[9:end])
+        elseif startswith(arg, "--iterations=")
+            cfg.iterations = parse(Int, arg[14:end])
+        elseif arg == "--compute_crossover"
+            cfg.compute_crossover = true
+        elseif startswith(arg, "--crossover_method=")
+            cfg.crossover_method = Symbol(lowercase(arg[20:end]))
+        elseif startswith(arg, "--crossover_variable=")
+            cfg.crossover_variable = Symbol(arg[22:end])
+        elseif startswith(arg, "--crossover_n_mu=")
+            cfg.crossover_n_mu = parse(Int, arg[18:end])
+        elseif startswith(arg, "--cep_strategy=")
+            cfg.cep_strategy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--cep_tol=")
+            cfg.cep_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_max_bisect_iter=")
+            cfg.cep_max_bisect_iter = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_area_tol_good=")
+            cfg.cep_area_tol_good = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_area_tol_bad=")
+            cfg.cep_area_tol_bad = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_max_refine_level=")
+            cfg.cep_max_refine_level = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_adaptive_rho=")
+            cfg.cep_adaptive_rho = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
+        elseif startswith(arg, "--cep_adaptive_slope_tol=")
+            cfg.cep_adaptive_slope_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_adaptive_min_gap=")
+            cfg.cep_adaptive_min_gap = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_adaptive_max_points=")
+            cfg.cep_adaptive_max_points = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_adaptive_digits=")
+            cfg.cep_adaptive_digits = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_direct_bracket_mode=")
+            cfg.cep_direct_bracket_mode = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--cep_direct_start=")
+            cfg.cep_direct_start = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--cep_direct_initial_step=")
+            cfg.cep_direct_initial_step = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_direct_expand_factor=")
+            cfg.cep_direct_expand_factor = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_direct_max_expand_steps=")
+            cfg.cep_direct_max_expand_steps = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--cep_direct_fallback_scan=")
+            cfg.cep_direct_fallback_scan = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
+        elseif arg == "--promote_reference"
+            cfg.promote_reference = true
+        elseif arg == "--verbose"
+            cfg.verbose = true
+        else
+            error("Unknown option: $arg")
         end
     end
-    
-    return PhaseStructureConfig(xi, T_min, T_max, T_step, rho_min, rho_max, rho_step,
-                                 seed_policy,
-                                 output_dir, skip_trho, skip_crossover, verbose)
+    return cfg
 end
-
-# ============================================================================
-# 主函数
-# ============================================================================
 
 function main(args=ARGS)
-    config = parse_args(args)
-    
-    println("=" ^ 60)
-    println("PNJL 相结构计算")
-    println("=" ^ 60)
-    println("时间: $(now())")
-    println("参数:")
-    println("  xi = $(config.xi)")
-    println("  T 范围: $(config.T_min) - $(config.T_max) MeV (步长 $(config.T_step))")
-    println("  ρ 范围: $(config.rho_min) - $(config.rho_max) ρ₀ (步长 $(config.rho_step))")
-    println("  seed_policy = $(config.seed_policy)")
-    println("  输出目录: $(abspath(config.output_dir))")
-    println()
-    
-    mkpath(config.output_dir)
-    
-    # Step 1: T-ρ 扫描
-    trho_path = joinpath(config.output_dir, "trho_scan_xi$(config.xi).csv")
-    curves = step1_trho_scan(config, trho_path)
-    
-    # Step 2: CEP 搜索
-    cep_result = step2_find_cep(config, curves)
-    
-    # Step 3: Maxwell 构造
-    boundary_results = step3_maxwell_construction(config, curves)
-    
-    # Step 4: 保存结果（包括 spinodal）
-    step4_save_results(config, cep_result, boundary_results, curves)
-    
-    # Step 5: Crossover 计算
-    if !config.skip_crossover
-        step5_crossover_calculation(config, cep_result)
-    else
-        println("\n[Step 5] 跳过 Crossover 计算")
-    end
-    
-    println("\n" * "=" ^ 60)
-    println("计算完成!")
-    println("=" ^ 60)
-end
+    cfg = parse_args(args)
 
-# ============================================================================
-# Step 1: T-ρ 扫描
-# ============================================================================
+    T_grid = collect(cfg.T_min:cfg.T_step:cfg.T_max)
+    rho_grid = collect(cfg.rho_min:cfg.rho_step:cfg.rho_max)
 
-function step1_trho_scan(config::PhaseStructureConfig, output_path::String)
-    println("\n[Step 1] T-ρ 扫描")
-    println("-" ^ 40)
-    
-    if config.skip_trho && isfile(output_path)
-        println("跳过扫描，加载已有数据: $output_path")
-        return load_curves_from_csv(output_path, config.xi)
-    end
-    
-    T_values = collect(config.T_min:config.T_step:config.T_max)
-    rho_values = collect(config.rho_min:config.rho_step:config.rho_max)
-    
-    println("温度点数: $(length(T_values))")
-    println("密度点数: $(length(rho_values))")
-    println("总点数: $(length(T_values) * length(rho_values))")
-    
-    # 进度回调
-    progress_cb = nothing
-    if config.verbose
-        progress_cb = (point, result) -> begin
-            if result !== nothing && result.converged
-                print(".")
-            else
-                print("x")
-            end
-        end
-    end
-    
-    println("\n开始扫描...")
-    t_start = time()
-    
-    result = run_trho_scan(
-        T_values = T_values,
-        rho_values = rho_values,
-        xi_values = [config.xi],
-        output_path = output_path,
-        overwrite = true,
-        reverse_rho = true,  # 反向扫描避免 ρ=0 奇异点问题
-        seed_policy = config.seed_policy,
-        progress_cb = progress_cb
+    println("="^60)
+    println("Phase pipeline CLI")
+    println("="^60)
+    println("time=$(now()) model_kind=$(cfg.model_kind) profile=$(cfg.profile)")
+    println("T-grid: $(first(T_grid)) -> $(last(T_grid)) (n=$(length(T_grid)))")
+    println("rho-grid: $(first(rho_grid)) -> $(last(rho_grid)) (n=$(length(rho_grid)))")
+
+    result = Models.run_phase_pipeline(
+        cfg.model_kind;
+        T_grid=T_grid,
+        rho_grid=rho_grid,
+        xi=cfg.xi,
+        output_dir=cfg.output_dir,
+        profile=cfg.profile,
+        run_id=cfg.run_id,
+        solver_backend=cfg.solver_backend,
+        seed_policy=cfg.seed_policy,
+        reverse_rho=cfg.reverse_rho,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+        iterations=cfg.iterations,
+        compute_crossover=cfg.compute_crossover,
+        crossover_method=cfg.crossover_method,
+        crossover_variable=cfg.crossover_variable,
+        crossover_n_mu=cfg.crossover_n_mu,
+        cep_strategy=cfg.cep_strategy,
+        cep_tol=cfg.cep_tol,
+        cep_max_bisect_iter=cfg.cep_max_bisect_iter,
+        cep_area_tol_good=cfg.cep_area_tol_good,
+        cep_area_tol_bad=cfg.cep_area_tol_bad,
+        cep_max_refine_level=cfg.cep_max_refine_level,
+        cep_adaptive_rho=cfg.cep_adaptive_rho,
+        cep_adaptive_slope_tol=cfg.cep_adaptive_slope_tol,
+        cep_adaptive_min_gap=cfg.cep_adaptive_min_gap,
+        cep_adaptive_max_points=cfg.cep_adaptive_max_points,
+        cep_adaptive_digits=cfg.cep_adaptive_digits,
+        cep_direct_bracket_mode=cfg.cep_direct_bracket_mode,
+        cep_direct_start=cfg.cep_direct_start,
+        cep_direct_initial_step=cfg.cep_direct_initial_step,
+        cep_direct_expand_factor=cfg.cep_direct_expand_factor,
+        cep_direct_max_expand_steps=cfg.cep_direct_max_expand_steps,
+        cep_direct_fallback_scan=cfg.cep_direct_fallback_scan,
+        promote_reference=cfg.promote_reference,
     )
-    
-    t_elapsed = time() - t_start
-    
-    println("\n扫描完成:")
-    println("  成功: $(result.success) / $(result.total)")
-    println("  失败: $(result.failure)")
-    println("  耗时: $(round(t_elapsed, digits=1)) 秒")
-    
-    # 加载曲线数据
-    return load_curves_from_csv(output_path, config.xi)
-end
 
-function load_curves_from_csv(path::String, xi::Float64)
-    curves = Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}()
-    
-    isfile(path) || return curves
-    
-    # 按温度分组
-    grouped = Dict{Float64, Vector{Tuple{Float64, Float64}}}()
-    
-    for line in eachline(path)
-        startswith(line, "T_MeV") && continue
-        isempty(strip(line)) && continue
-        
-        cols = split(line, ',')
-        length(cols) < 21 && continue
-        
-        # TrhoScan 输出格式:
-        # T_MeV(1), rho(2), xi(3), mu_u(4), mu_d(5), mu_s(6), mu_avg(7), ...
-        # converged(21)
-        T = tryparse(Float64, cols[1])
-        rho = tryparse(Float64, cols[2])
-        xi_val = tryparse(Float64, cols[3])
-        mu = tryparse(Float64, cols[7])  # mu_avg_MeV
-        converged = lowercase(strip(cols[21])) in ("true", "1")
-        
-        T === nothing && continue
-        rho === nothing && continue
-        mu === nothing && continue
-        !converged && continue
-        xi_val === nothing && continue
-        abs(xi_val - xi) > 1e-6 && continue
-        
-        if !haskey(grouped, T)
-            grouped[T] = Tuple{Float64, Float64}[]
-        end
-        push!(grouped[T], (mu, rho))
-    end
-    
-    # 转换为 curves 格式
-    for (T, samples) in grouped
-        length(samples) < 3 && continue
-        mu_vals = Float64[s[1] for s in samples]
-        rho_vals = Float64[s[2] for s in samples]
-        curves[T] = (mu_vals, rho_vals)
-    end
-    
-    println("  加载了 $(length(curves)) 个温度点的曲线数据")
-    
-    return curves
-end
-
-# ============================================================================
-# Step 2: CEP 搜索
-# ============================================================================
-
-"""
-CEP 搜索：使用二分法细化 CEP 位置
-
-算法：
-1. 找到初始区间 [T_low, T_high]，其中 T_low 有 S 形，T_high 无 S 形
-2. 二分法细化：计算 T_mid 的曲线，判断是否有 S 形
-3. 重复直到区间宽度 < tol
-
-注意：使用 Maxwell 构造验证 S 形的有效性，避免边界情况的误判
-"""
-function step2_find_cep(config::PhaseStructureConfig, curves;
-                        tol::Float64=0.01,  # 温度精度 (MeV)
-                        max_bisect_iter::Int=20)
-    println("\n[Step 2] CEP 搜索")
-    println("-" ^ 40)
-    
-    if isempty(curves)
-        println("警告: 无曲线数据，跳过 CEP 搜索")
-        return (has_cep=false, T_cep=NaN, mu_cep=NaN)
-    end
-    
-    println("可用温度点: $(length(curves))")
-    
-    # 按温度排序
-    temperatures = sort(collect(keys(curves)))
-    
-    # 找到初始区间：最后一个有有效 S 形的温度和第一个没有 S 形的温度
-    # 使用 Maxwell 构造验证 S 形的有效性
-    last_with_s = nothing
-    first_without_s = nothing
-    s_shape_cache = Dict{Float64, SShapeResult}()
-    
-    for T in temperatures
-        mu_vals, rho_vals = curves[T]
-        result = detect_s_shape(mu_vals, rho_vals)
-        s_shape_cache[T] = result
-        
-        if result.has_s_shape
-            # 使用 Maxwell 构造验证 S 形的有效性
-            maxwell_result = maxwell_construction(mu_vals, rho_vals;
-                min_samples=8, detect_min_points=5, detect_eps=1e-6,
-                candidate_steps=64, max_iter=60, tol_area=1e-4,
-                spinodal_hint=result)
-            
-            if maxwell_result.converged
-                last_with_s = (T, result)
-                first_without_s = nothing  # 重置，因为找到了新的有效 S 形
-            else
-                # S 形检测通过但 Maxwell 构造失败，视为无效 S 形
-                if last_with_s !== nothing && first_without_s === nothing
-                    first_without_s = T
-                end
-                if config.verbose
-                    reason = get(maxwell_result.details, :reason, "unknown")
-                    println("  T=$T MeV: S 形检测通过但 Maxwell 失败 ($reason)，视为无效")
-                end
-            end
-        elseif last_with_s !== nothing && first_without_s === nothing
-            first_without_s = T
-        end
-    end
-    
-    if last_with_s === nothing
-        println("未找到有效 S 形曲线 (可能全为 crossover)")
-        return (has_cep=false, T_cep=NaN, mu_cep=NaN)
-    end
-    
-    T_low, res_low = last_with_s
-    T_high = first_without_s !== nothing ? first_without_s : T_low + config.T_step
-    
-    println("初始区间: [$T_low, $T_high] MeV")
-    
-    # 二分法细化
-    bisect_count = 0
-    while (T_high - T_low) > tol && bisect_count < max_bisect_iter
-        T_mid = (T_low + T_high) / 2
-        
-        # 检查是否已有该温度的曲线
-        if haskey(curves, T_mid)
-            mu_vals, rho_vals = curves[T_mid]
-        else
-            # 需要计算新的曲线（通过线性插值估计，或者实际计算）
-            # 这里使用线性插值作为近似
-            mu_vals, rho_vals = _interpolate_curve(curves, T_mid)
-            if mu_vals === nothing
-                println("  无法插值 T=$T_mid MeV 的曲线，停止二分")
-                break
-            end
-            curves[T_mid] = (mu_vals, rho_vals)
-        end
-        
-        result = detect_s_shape(mu_vals, rho_vals)
-        s_shape_cache[T_mid] = result
-        
-        # 使用 Maxwell 构造验证 S 形的有效性
-        is_valid_s_shape = false
-        if result.has_s_shape
-            maxwell_result = maxwell_construction(mu_vals, rho_vals;
-                min_samples=8, detect_min_points=5, detect_eps=1e-6,
-                candidate_steps=64, max_iter=60, tol_area=1e-4,
-                spinodal_hint=result)
-            is_valid_s_shape = maxwell_result.converged
-        end
-        
-        if is_valid_s_shape
-            T_low = T_mid
-            res_low = result
-            if config.verbose
-                println("  T=$T_mid MeV: 有效 S 形 → 更新下界")
-            end
-        else
-            T_high = T_mid
-            if config.verbose
-                println("  T=$T_mid MeV: 无有效 S 形 → 更新上界")
-            end
-        end
-        
-        bisect_count += 1
-    end
-    
-    # CEP 估计为区间中点
-    T_cep = (T_low + T_high) / 2
-    
-    # μ_CEP 估计为 spinodal 中点
-    mu_hadron = something(res_low.mu_spinodal_hadron, NaN)
-    mu_quark = something(res_low.mu_spinodal_quark, NaN)
-    mu_cep = (mu_hadron + mu_quark) / 2
-    
-    println("找到 CEP ($(bisect_count) 次二分):")
-    println("  T_CEP ≈ $(round(T_cep, digits=2)) MeV (区间: $(round(T_low, digits=2)) - $(round(T_high, digits=2)))")
-    println("  μ_CEP ≈ $(round(mu_cep, digits=2)) MeV")
-    
-    return (has_cep=true, T_cep=T_cep, mu_cep=mu_cep)
-end
-
-"""线性插值获取中间温度的曲线"""
-function _interpolate_curve(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}, T_target::Float64)
-    temps = sort(collect(keys(curves)))
-    
-    # 找到相邻的温度点
-    T_below = nothing
-    T_above = nothing
-    for T in temps
-        if T < T_target
-            T_below = T
-        elseif T > T_target && T_above === nothing
-            T_above = T
-        end
-    end
-    
-    (T_below === nothing || T_above === nothing) && return nothing, nothing
-    
-    mu_below, rho_below = curves[T_below]
-    mu_above, rho_above = curves[T_above]
-    
-    # 需要相同的 ρ 采样点
-    length(rho_below) == length(rho_above) || return nothing, nothing
-    
-    # 线性插值 μ
-    α = (T_target - T_below) / (T_above - T_below)
-    mu_interp = mu_below .+ α .* (mu_above .- mu_below)
-    
-    return mu_interp, rho_below
-end
-
-# ============================================================================
-# Step 3: Maxwell 构造
-# ============================================================================
-
-function step3_maxwell_construction(config::PhaseStructureConfig, curves)
-    println("\n[Step 3] Maxwell 构造")
-    println("-" ^ 40)
-    
-    if isempty(curves)
-        println("警告: 无曲线数据，跳过 Maxwell 构造")
-        return Dict{Float64, MaxwellResult}()
-    end
-    
-    results = Dict{Float64, MaxwellResult}()
-    
-    for T in sort(collect(keys(curves)))
-        mu_vals, rho_vals = curves[T]
-        # 使用模块化的 maxwell_construction 算法
-        result = maxwell_construction(mu_vals, rho_vals;
-            min_samples=8,           # 降低最小样本要求
-            detect_min_points=5,     # S 形检测最小点数
-            detect_eps=1e-6,
-            candidate_steps=64,
-            max_iter=60,
-            tol_area=1e-4
-        )
-        results[T] = result
-    end
-    
-    success_count = count(r -> r.converged, values(results))
-    println("Maxwell 构造结果: $(success_count) / $(length(results)) 成功")
-    
-    if config.verbose
-        println("\n详细结果:")
-        for T in sort(collect(keys(results)))
-            r = results[T]
-            if r.converged
-                area_str = r.area_residual !== nothing ? @sprintf("%.2e", r.area_residual) : "N/A"
-                println("  T=$(T) MeV: μ_c=$(round(r.mu_transition, digits=2)) MeV, " *
-                       "ρ_hadron=$(round(r.rho_hadron, digits=3)), ρ_quark=$(round(r.rho_quark, digits=3)), " *
-                       "残差=$(area_str), 迭代=$(r.iterations)")
-            else
-                reason = get(r.details, :reason, "unknown")
-                println("  T=$(T) MeV: 失败 ($(reason))")
-            end
-        end
-    end
-    
-    return results
-end
-
-# ============================================================================
-# Step 4: 保存结果
-# ============================================================================
-
-function step4_save_results(config::PhaseStructureConfig, cep_result, boundary_results, curves)
-    println("\n[Step 4] 保存结果")
-    println("-" ^ 40)
-    
-    # 保存 CEP
-    cep_path = joinpath(config.output_dir, "cep.csv")
-    save_cep(cep_path, config.xi, cep_result)
-    println("CEP 数据: $cep_path")
-    
-    # 保存相变线
-    boundary_path = joinpath(config.output_dir, "boundary.csv")
-    save_boundary(boundary_path, config.xi, boundary_results)
-    println("相变线数据: $boundary_path")
-    
-    # 保存 spinodal（亚稳态边界）
-    spinodal_path = joinpath(config.output_dir, "spinodals.csv")
-    save_spinodals(spinodal_path, config.xi, curves)
-    println("Spinodal 数据: $spinodal_path")
-end
-
-function save_cep(path::String, xi::Float64, result)
-    # 读取现有数据（如果存在）
-    existing = Dict{Float64, Tuple{Float64, Float64}}()
-    if isfile(path)
-        for line in eachline(path)
-            startswith(line, "xi") && continue
-            cols = split(line, ',')
-            length(cols) >= 3 || continue
-            xi_val = tryparse(Float64, cols[1])
-            T_cep = tryparse(Float64, cols[2])
-            mu_cep = tryparse(Float64, cols[3])
-            xi_val === nothing && continue
-            existing[xi_val] = (T_cep, mu_cep)
-        end
-    end
-    
-    # 更新当前 xi 的数据
-    if result.has_cep
-        existing[xi] = (result.T_cep, result.mu_cep)
-    end
-    
-    # 写入文件
-    open(path, "w") do io
-        println(io, "xi,T_CEP_MeV,mu_CEP_MeV")
-        for xi_val in sort(collect(keys(existing)))
-            T_cep, mu_cep = existing[xi_val]
-            println(io, "$xi_val,$T_cep,$mu_cep")
+    println("\n完成:")
+    println("  run_id = $(result.run_id)")
+    println("  CEP found = $(result.cep.found)")
+    println("  boundary_count = $(length(result.first_order_boundary))")
+    println("  artifacts = $(result.artifact_paths)")
+    if cfg.promote_reference
+        println("  promotion = passed=$(result.promotion_status.passed), baseline_id=$(result.promotion_status.baseline_id)")
+        if !isempty(result.promotion_status.failed_checks)
+            println("  promotion_failed_checks = $(result.promotion_status.failed_checks)")
         end
     end
 end
-
-function save_boundary(path::String, xi::Float64, results::Dict{Float64, MaxwellResult})
-    # 读取现有数据（如果存在）
-    existing = Dict{Tuple{Float64, Float64}, Tuple{Float64, Float64, Float64}}()
-    if isfile(path)
-        for line in eachline(path)
-            startswith(line, "xi") && continue
-            cols = split(line, ',')
-            length(cols) >= 5 || continue
-            xi_val = tryparse(Float64, cols[1])
-            T = tryparse(Float64, cols[2])
-            mu = tryparse(Float64, cols[3])
-            rho_hadron = tryparse(Float64, cols[4])
-            rho_quark = tryparse(Float64, cols[5])
-            xi_val === nothing && continue
-            existing[(xi_val, T)] = (mu, rho_hadron, rho_quark)
-        end
-    end
-    
-    # 更新当前 xi 的数据
-    for (T, r) in results
-        if r.converged && r.mu_transition !== nothing && r.rho_hadron !== nothing && r.rho_quark !== nothing
-            existing[(xi, T)] = (r.mu_transition, r.rho_hadron, r.rho_quark)
-        end
-    end
-    
-    # 写入文件
-    open(path, "w") do io
-        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark")
-        for key in sort(collect(keys(existing)))
-            xi_val, T = key
-            mu, rho_hadron, rho_quark = existing[key]
-            println(io, "$xi_val,$T,$mu,$rho_hadron,$rho_quark")
-        end
-    end
-end
-
-"""保存 spinodal（亚稳态边界）数据"""
-function save_spinodals(path::String, xi::Float64, curves)
-    # 读取现有数据（如果存在）
-    existing = Dict{Tuple{Float64, Float64}, Tuple{Float64, Float64, Float64, Float64}}()
-    if isfile(path)
-        for line in eachline(path)
-            startswith(line, "xi") && continue
-            cols = split(line, ',')
-            length(cols) >= 6 || continue
-            xi_val = tryparse(Float64, cols[1])
-            T = tryparse(Float64, cols[2])
-            mu_low = tryparse(Float64, cols[3])
-            mu_high = tryparse(Float64, cols[4])
-            rho_low = tryparse(Float64, cols[5])
-            rho_high = tryparse(Float64, cols[6])
-            xi_val === nothing && continue
-            existing[(xi_val, T)] = (mu_low, mu_high, rho_low, rho_high)
-        end
-    end
-    
-    # 从曲线数据提取 spinodal
-    for (T, (mu_vals, rho_vals)) in curves
-        result = detect_s_shape(mu_vals, rho_vals)
-        if result.has_s_shape && 
-           result.mu_spinodal_hadron !== nothing && 
-           result.mu_spinodal_quark !== nothing &&
-           result.rho_spinodal_hadron !== nothing &&
-           result.rho_spinodal_quark !== nothing
-            existing[(xi, T)] = (
-                result.mu_spinodal_hadron,
-                result.mu_spinodal_quark,
-                result.rho_spinodal_hadron,
-                result.rho_spinodal_quark
-            )
-        end
-    end
-    
-    # 写入文件
-    open(path, "w") do io
-        println(io, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,rho_spinodal_hadron,rho_spinodal_quark")
-        for key in sort(collect(keys(existing)))
-            xi_val, T = key
-            mu_low, mu_high, rho_hadron, rho_quark = existing[key]
-            println(io, "$xi_val,$T,$mu_low,$mu_high,$rho_hadron,$rho_quark")
-        end
-    end
-end
-
-# ============================================================================
-# Step 5: Crossover 计算
-# ============================================================================
-
-"""
-Crossover 计算：扫描 μ = 0 到 μ_CEP 的 crossover 线
-
-计算手征 crossover (φ_u) 和退禁闭 crossover (Φ)
-"""
-function step5_crossover_calculation(config::PhaseStructureConfig, cep_result)
-    println("\n[Step 5] Crossover 计算")
-    println("-" ^ 40)
-    
-    # 确定 μ 扫描范围
-    if cep_result.has_cep
-        μ_max_MeV = cep_result.mu_cep
-        println("μ 范围: 0 - $(round(μ_max_MeV, digits=1)) MeV (CEP)")
-    else
-        # 如果没有 CEP，使用默认范围
-        μ_max_MeV = 300.0
-        println("μ 范围: 0 - $(μ_max_MeV) MeV (默认)")
-    end
-    
-    # 转换为 fm⁻¹
-    μ_max_fm = μ_max_MeV / hbarc
-    
-    # 温度搜索范围 (fm⁻¹)
-    # 使用 220 MeV 作为上限，确保能捕获 μ=0 的 chiral crossover（约 200 MeV）
-    # 同时避免高温区域的虚假拐点
-    T_min_fm = config.T_min / hbarc
-    T_max_crossover = min(config.T_max, 220.0)  # 限制在 220 MeV 以下
-    T_max_fm = T_max_crossover / hbarc
-    
-    # μ 采样点数
-    n_mu = max(10, Int(ceil(μ_max_MeV / 20)))  # 约每 20 MeV 一个点
-    
-    println("温度搜索范围: $(config.T_min) - $(T_max_crossover) MeV")
-    println("μ 采样点数: $n_mu")
-    println()
-    
-    # 扫描手征 crossover
-    println("计算手征 crossover (φ_u)...")
-    t_start = time()
-    chiral_results = scan_crossover_line(
-        (0.0, μ_max_fm, n_mu), (T_min_fm, T_max_fm);
-        method=:inflection, variable=:phi_u, xi=config.xi
-    )
-    t_chiral = time() - t_start
-    chiral_success = count(r -> r.converged, chiral_results)
-    println("  完成: $(chiral_success)/$n_mu 成功, 耗时 $(round(t_chiral, digits=1)) 秒")
-    
-    # 扫描退禁闭 crossover
-    println("计算退禁闭 crossover (Φ)...")
-    t_start = time()
-    deconf_results = scan_crossover_line(
-        (0.0, μ_max_fm, n_mu), (T_min_fm, T_max_fm);
-        method=:inflection, variable=:Phi, xi=config.xi
-    )
-    t_deconf = time() - t_start
-    deconf_success = count(r -> r.converged, deconf_results)
-    println("  完成: $(deconf_success)/$n_mu 成功, 耗时 $(round(t_deconf, digits=1)) 秒")
-    
-    # 保存结果
-    crossover_path = joinpath(config.output_dir, "crossover.csv")
-    save_crossover(crossover_path, config.xi, chiral_results, deconf_results)
-    println("\nCrossover 数据: $crossover_path")
-end
-
-"""保存 crossover 数据（包含 ρ 值）"""
-function save_crossover(path::String, xi::Float64, 
-                        chiral_results::Vector, deconf_results::Vector)
-    # 读取现有数据（如果存在）- 新格式包含 rho
-    existing = Dict{Tuple{Float64, Float64}, NTuple{4, Float64}}()
-    if isfile(path)
-        for line in eachline(path)
-            startswith(line, "xi") && continue
-            cols = split(line, ',')
-            length(cols) >= 4 || continue
-            xi_val = tryparse(Float64, cols[1])
-            mu = tryparse(Float64, cols[2])
-            T_chiral = tryparse(Float64, cols[3])
-            T_deconf = length(cols) >= 4 ? tryparse(Float64, cols[4]) : nothing
-            rho_chiral = length(cols) >= 5 ? tryparse(Float64, cols[5]) : nothing
-            rho_deconf = length(cols) >= 6 ? tryparse(Float64, cols[6]) : nothing
-            xi_val === nothing && continue
-            existing[(xi_val, mu)] = (
-                something(T_chiral, NaN), 
-                something(T_deconf, NaN),
-                something(rho_chiral, NaN),
-                something(rho_deconf, NaN)
-            )
-        end
-    end
-    
-    # 更新当前 xi 的数据
-    n = min(length(chiral_results), length(deconf_results))
-    for i in 1:n
-        μ_MeV = chiral_results[i].mu_fm * hbarc
-        T_chiral_MeV = chiral_results[i].converged ? 
-                       chiral_results[i].T_crossover_fm * hbarc : NaN
-        T_deconf_MeV = deconf_results[i].converged ? 
-                       deconf_results[i].T_crossover_fm * hbarc : NaN
-        rho_chiral = chiral_results[i].converged ? 
-                     something(chiral_results[i].rho, NaN) : NaN
-        rho_deconf = deconf_results[i].converged ? 
-                     something(deconf_results[i].rho, NaN) : NaN
-        existing[(xi, μ_MeV)] = (T_chiral_MeV, T_deconf_MeV, rho_chiral, rho_deconf)
-    end
-    
-    # 写入文件（新格式包含 rho）
-    open(path, "w") do io
-        println(io, "xi,mu_MeV,T_crossover_chiral_MeV,T_crossover_deconf_MeV,rho_chiral,rho_deconf")
-        for key in sort(collect(keys(existing)))
-            xi_val, mu = key
-            T_chiral, T_deconf, rho_chiral, rho_deconf = existing[key]
-            T_chiral_str = isnan(T_chiral) ? "" : string(T_chiral)
-            T_deconf_str = isnan(T_deconf) ? "" : string(T_deconf)
-            rho_chiral_str = isnan(rho_chiral) ? "" : string(rho_chiral)
-            rho_deconf_str = isnan(rho_deconf) ? "" : string(rho_deconf)
-            println(io, "$xi_val,$mu,$T_chiral_str,$T_deconf_str,$rho_chiral_str,$rho_deconf_str")
-        end
-    end
-end
-
-# ============================================================================
-# 入口
-# ============================================================================
 
 if abspath(PROGRAM_FILE) == @__FILE__
     main()

@@ -250,15 +250,14 @@ export AdaptiveRhoConfig, suggest_refinement_points, merge_rho_values
 # 分析模块
 # ============================================================================
 
-include(joinpath(@__DIR__, "analysis", "PhaseTransition.jl"))
-
-using .PhaseTransition
+# 直接复用 phase 主域算法实现（不再保留 PNJL.PhaseTransition 兼容层）
+include(normpath(joinpath(@__DIR__, "..", "phase", "PhaseCore.jl")))
+include(normpath(joinpath(@__DIR__, "..", "phase", "PhaseIO.jl")))
 
 # 导出分析功能
 export SShapeResult, detect_s_shape
 export MaxwellResult, maxwell_construction
 export group_curves_by_temperature
-export CrossoverResult, detect_crossover, scan_crossover_line
 
 # ============================================================================
 # 兼容性模块（旧接口）- 已弃用
@@ -270,7 +269,7 @@ export CrossoverResult, detect_crossover, scan_crossover_line
 # - TrhoSeedChain.jl（依赖 LineSearches）
 # - SinglePointSolver.jl
 # - AdaptiveRhoRefinement.jl
-# - CEPFinder.jl, MaxwellRhoMu.jl（已整合到 PhaseTransition.jl）
+# - CEPFinder.jl, MaxwellRhoMu.jl（已整合到 phase 主域实现）
 # - analysis/ThermoDerivatives.jl（旧版，新版在 derivatives/）
 
         end # module PNJL
