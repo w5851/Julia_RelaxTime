@@ -25,14 +25,13 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _SCAN_ENTRY_MODULE_PATH = normpath(joinpath(@__DIR__, "scans", "ScanEntrypoints.jl"))
+const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "pnjl", "PNJL.jl"))
 const _TRANSPORT_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "TransportWorkflowBridge.jl"))
 const _MESON_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "MesonMassWorkflowBridge.jl"))
 const _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "WorkflowParamAdaptersBridge.jl"))
 
 @inline function _pnjl_module()
-    scan = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _SCAN_ENTRY_MODULE_PATH)
-    pnjl = Base.invokelatest(scan.pnjl_module_ref)
+    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
     if !(isdefined(pnjl, :run_tmu_scan) && isdefined(pnjl, :run_trho_scan))
         error("PNJL module loaded but required API (run_tmu_scan/run_trho_scan) is missing")
     end
@@ -63,15 +62,15 @@ end
 end
 
 function run_tmu_scan(args...; kwargs...)
-    return _invoke_worldsafe(_pnjl_module(), :run_tmu_scan, args...; kwargs...)
+    return TmuScan.run_tmu_scan(args...; kwargs...)
 end
 
 function run_trho_scan(args...; kwargs...)
-    return _invoke_worldsafe(_pnjl_module(), :run_trho_scan, args...; kwargs...)
+    return TrhoScan.run_trho_scan(args...; kwargs...)
 end
 
 function build_default_rho_grid(args...; kwargs...)
-    return _invoke_worldsafe(_pnjl_module(), :build_default_rho_grid, args...; kwargs...)
+    return TrhoScan.build_default_rho_grid(args...; kwargs...)
 end
 
 function solve_gap_and_transport(args...; kwargs...)

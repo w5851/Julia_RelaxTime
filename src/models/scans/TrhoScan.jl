@@ -38,12 +38,12 @@ end
 const IncludeOnce = Main.IncludeOnce
 
 # Unified thermo facade (legacy vs models)
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 # 导入新架构模块
-using ..Constants_PNJL: ħc_MeV_fm
-using ..ConstraintModes: FixedRho, FixedAsymmetricRho, ConstraintMode
+using Main.Constants_PNJL: ħc_MeV_fm
+import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, HybridContinuitySeed
 using ..SeedStrategies: get_seed, update!, reset!, extend_seed
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5

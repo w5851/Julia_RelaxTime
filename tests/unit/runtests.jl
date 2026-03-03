@@ -57,6 +57,7 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_models_dispatch_interface_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_models_unified_entrypoints_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_models_native_solver_phase1_smoke.jl"),
+    joinpath(UNIT_DIR, "models", "test_models_derivatives_dual_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_phase_core_algorithms_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_phase_pipeline_smoke.jl"),
     joinpath(UNIT_DIR, "models", "test_phase_artifacts_promotion_smoke.jl"),

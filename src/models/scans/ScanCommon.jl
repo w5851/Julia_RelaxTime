@@ -2,7 +2,7 @@ module ScanCommon
 
 using Printf
 
-using ..ConstraintModes: ConstraintMode
+import Main.Models: ConstraintMode
 using ..SeedStrategies: SeedStrategy
 import ..SeedStrategies: get_seed
 using ..ImplicitSolver: SolverResult

@@ -208,20 +208,23 @@ export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 
 # ============================================================================
-# 扫描模块（使用新架构）
+# 扫描模块（代理到 Models 域）
 # ============================================================================
 
-include(normpath(joinpath(@__DIR__, "..", "scans", "ScanCommon.jl")))
-include(normpath(joinpath(@__DIR__, "..", "scans", "ScanConfig.jl")))
-include(normpath(joinpath(@__DIR__, "..", "scans", "ScanResultFinalize.jl")))
-include(normpath(joinpath(@__DIR__, "..", "scans", "TmuScan.jl")))
-include(normpath(joinpath(@__DIR__, "..", "scans", "TrhoScan.jl")))
-include(normpath(joinpath(@__DIR__, "..", "scans", "AdaptiveRhoRefinement.jl")))
+const _MODELS_PATH = normpath(joinpath(@__DIR__, "..", "Models.jl"))
+if !isdefined(Main, :Models)
+    IncludeOnce.include_once!(Main, :Models, _MODELS_PATH)
+end
 
-using .ScanConfig
-using .TmuScan
-using .TrhoScan
-using .AdaptiveRhoRefinement
+run_tmu_scan(args...; kwargs...) = Main.Models.run_tmu_scan(args...; kwargs...)
+run_trho_scan(args...; kwargs...) = Main.Models.run_trho_scan(args...; kwargs...)
+build_default_rho_grid(args...; kwargs...) = Main.Models.build_default_rho_grid(args...; kwargs...)
+
+const TmuScanConfig = Main.Models.ScanConfig.TmuScanConfig
+const TrhoScanConfig = Main.Models.ScanConfig.TrhoScanConfig
+const AdaptiveRhoConfig = Main.Models.AdaptiveRhoRefinement.AdaptiveRhoConfig
+suggest_refinement_points(args...; kwargs...) = Main.Models.AdaptiveRhoRefinement.suggest_refinement_points(args...; kwargs...)
+merge_rho_values(args...; kwargs...) = Main.Models.AdaptiveRhoRefinement.merge_rho_values(args...; kwargs...)
 
 """load_dual_branch_scan!() -> Module
 
@@ -230,10 +233,7 @@ using .AdaptiveRhoRefinement
 说明：该模块不进入主线默认导出/默认加载；需要时显式调用本函数。
 """
 function load_dual_branch_scan!()
-    if !isdefined(@__MODULE__, :DualBranchScan)
-        include(normpath(joinpath(@__DIR__, "..", "scans", "DualBranchScan.jl")))
-    end
-    return DualBranchScan
+    return Main.Models.load_dual_branch_scan!()
 end
 
 export load_dual_branch_scan!

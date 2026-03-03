@@ -52,11 +52,21 @@ export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, GapParams
 export create_implicit_solver, solve_with_derivatives
+export QUARK_CHARGE_ABS
+export alpha_n, energy_landau, smooth_cutoff, resolve_nmax_from_cutoff
+export omega0_flavor_landau, omegat_flavor_landau, density_flavor_landau
+export MagneticIMCParams, default_imc_params, coupling_GB
+export MagneticConfig, default_magnetic_config
+export calculate_magnetic_omega_components, calculate_magnetic_omega
+export calculate_magnetic_pressure, calculate_magnetic_rho
+export calculate_magnetic_number_densities
+export magnetic_nmax_convergence_report
 export transport_provider
 export TransportProvider
 export prepare_transport_provider
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
+export load_dual_branch_scan!
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
@@ -96,11 +106,26 @@ include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
 include(joinpath(@__DIR__, "solver", "Conditions.jl"))
 include(joinpath(@__DIR__, "solver", "ImplicitSolver.jl"))
 include(joinpath(@__DIR__, "solver", "Solver.jl"))
-include(joinpath(@__DIR__, "derivative_entrypoints.jl"))
+include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
+include(joinpath(@__DIR__, "pnjl", "core", "MagneticIntegrals.jl"))
+include(joinpath(@__DIR__, "pnjl", "core", "MagneticThermodynamics.jl"))
+include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
+include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
+include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
+include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
+include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
+include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
+include(joinpath(@__DIR__, "scans", "AdaptiveRhoRefinement.jl"))
+include(joinpath(@__DIR__, "scans", "DualBranchScanEntry.jl"))
 
 using .SeedStrategies
 using .Conditions
 import .ImplicitSolver
+using .ThermoDerivatives
+using .MagneticIntegrals
+using .MagneticThermodynamics
+using .TmuScan
+using .TrhoScan
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
 include(joinpath(@__DIR__, "transport_provider.jl"))
