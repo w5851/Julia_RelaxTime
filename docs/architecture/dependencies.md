@@ -2,6 +2,8 @@
 
 Run: julia --project=. scripts/dev/gen_deps.jl
 
+> 2026-03-03 PR3 更新：`src/models/pnjl/` 已删除，相关实现迁移至 `src/models/pnjl_physics/`；本文件中的旧 `src/pnjl/*` 参考节点属于历史快照，后续依赖图重生成为准。
+
 ## L1 高层架构图（手动）
 
 ```mermaid

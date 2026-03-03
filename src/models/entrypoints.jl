@@ -25,18 +25,9 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "pnjl", "PNJL.jl"))
 const _TRANSPORT_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "TransportWorkflowBridge.jl"))
 const _MESON_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "MesonMassWorkflowBridge.jl"))
 const _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "WorkflowParamAdaptersBridge.jl"))
-
-@inline function _pnjl_module()
-    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
-    if !(isdefined(pnjl, :run_tmu_scan) && isdefined(pnjl, :run_trho_scan))
-        error("PNJL module loaded but required API (run_tmu_scan/run_trho_scan) is missing")
-    end
-    return pnjl
-end
 
 @inline function _transport_workflow_module()
     bridge = IncludeOnce.include_once!(Main, :ModelsTransportWorkflowBridge, _TRANSPORT_WORKFLOW_BRIDGE_PATH)
@@ -87,7 +78,7 @@ end
 
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
-@inline pnjl_module() = _pnjl_module()
+@inline pnjl_module() = Main.Models
 
 @inline function workflow_param_adapters_module()
     bridge = IncludeOnce.include_once!(Main, :ModelsWorkflowParamAdaptersBridge, _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH)

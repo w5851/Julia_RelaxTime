@@ -45,12 +45,14 @@
 
 迁移期允许在 `src/models` 保留少量 `Base.invokelatest(...)` 作为 world-age 安全边界，但必须集中、可审计。
 
-当前必要边界（基线=7）：
-- `src/models/pnjl/PNJLModel.jl`：2 处（`FixedMu` 构造、`solve` 调用）
-- `src/models/legacy/LegacyPNJLModel.jl`：2 处（`FixedMu` 构造、`solve` 调用）
+当前必要边界（Phase5-8 后）：
 - `src/models/gap_solver.jl`：1 处（legacy adapter 的 `omega` 边界）
 - `src/models/factory.jl`：1 处（legacy 构造器边界）
-- `src/models/entrypoints.jl`：1 处（统一流程入口边界）
+- `src/models/entrypoints.jl`：workflow bridge 边界
+
+Phase5-8 结论（2026-03-03）：
+- `src/models/pnjl/` 已下线删除。
+- 物理实现迁移到 `src/models/pnjl_physics/`，不再保留 `module PNJL` 运行时入口。
 
 单一来源：
 - 机读清单位于 `config/ci/models_invokelatest_allowlist.toml`。

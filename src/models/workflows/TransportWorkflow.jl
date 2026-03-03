@@ -28,10 +28,6 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "models", "scans", "ScanEntrypoints.jl"))
-const ModelsScanEntrypoints = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _PNJL_PATH)
-const PNJL = Base.invokelatest(ModelsScanEntrypoints.pnjl_module_ref)
-
 const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxationTime.jl"))
 const RelaxationTime = IncludeOnce.include_once!(Main, :RelaxationTime, _RELAXATION_TIME_PATH)
 
@@ -99,16 +95,16 @@ const TransportCoefficients = IncludeOnce.include_once!(Main, :TransportCoeffici
 
 using StaticArrays
 
-const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
-const DEFAULT_MOMENTUM_COUNT = getproperty(PNJL, :DEFAULT_MOMENTUM_COUNT)
-const DEFAULT_THETA_COUNT = getproperty(PNJL, :DEFAULT_THETA_COUNT)
-const ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
-const bulk_viscosity_coefficients = getproperty(ThermoDerivatives, :bulk_viscosity_coefficients)
-const Integrals = getproperty(PNJL, :Integrals)
-const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
-const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
+const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
+const DEFAULT_MOMENTUM_COUNT = Main.Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
+const DEFAULT_THETA_COUNT = Main.Models.PNJLCore.DEFAULT_THETA_COUNT
+const bulk_viscosity_coefficients = Main.Models.bulk_viscosity_coefficients
+const DEFAULT_MOMENTUM_NODES = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_NODES
+const DEFAULT_MOMENTUM_WEIGHTS = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
 using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
+
+const PNJL = Main.Models
 
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig

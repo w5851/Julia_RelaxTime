@@ -20,16 +20,6 @@ const IncludeOnce = Main.IncludeOnce
 const _pnjl_model_cached_nodes = PNJLCore.cached_nodes
 const _pnjl_model_log_sum = PNJLCore.calculate_log_sum
 
-const _PNJL_ENTRY_PATH = normpath(joinpath(@__DIR__, "PNJL.jl"))
-
-@inline function _pnjl_solver_module()
-    pnjl = IncludeOnce.include_once!(Main, :PNJL, _PNJL_ENTRY_PATH)
-    if !(isdefined(pnjl, :solve) && isdefined(pnjl, :FixedMu))
-        error("PNJL module loaded but required API (solve/FixedMu) is missing")
-    end
-    return pnjl
-end
-
 export PNJLModel
 
 """各向异性色散 PNJL 模型（参数通过 `PNJLCore.PNJLParams` 注入）。
@@ -155,9 +145,7 @@ end
 
 """solve_gap(::PNJLModel, T, mu_vec; kwargs...) -> MeanFieldState
 
-阶段 0：先复用 legacy 求解入口（src/pnjl/PNJL.jl 导出的 solver API），将其结果适配到 models 的 `MeanFieldState`。
-
-当前限制：仅支持对称化学势 `mu_u == mu_d == mu_s`（因为 legacy FixedMu 模式以标量 μ 为入口）。
+统一通过 Models 求解链路完成平衡态求解。
 """
 function solve_gap(
     model::PNJLModel,
@@ -175,67 +163,37 @@ function solve_gap(
         pop!(legacy_kwargs, key, nothing)
     end
 
-    effective_backend = if solver_backend === :auto
-        :models
-    else
-        solver_backend
+    effective_backend = solver_backend === :auto ? :models : solver_backend
+    if effective_backend !== :models && effective_backend !== :legacy
+        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)"))
     end
 
-    if effective_backend === :legacy
-        pnjl = _pnjl_solver_module()
-
-        μ = normalize_mu_vec(mu_vec)
-        if !(μ[1] == μ[2] == μ[3])
-            throw(ArgumentError("PNJLModel.solve_gap(::legacy) requires mu_u == mu_d == mu_s (FixedMu mode). Got mu_vec=$μ"))
-        end
-
-        # NOTE: legacy solver module may be loaded lazily; keep world-age safety.
-        mode = Base.invokelatest(pnjl.FixedMu)
-        res = Base.invokelatest(pnjl.solve, mode, T_fm, μ[1];
+    try
+        return invoke(
+            solve_gap,
+            Tuple{AbstractPNJLModel, Any, Any},
+            model,
+            T_fm,
+            mu_vec;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
-            legacy_kwargs...)
-
-        res.converged || error("PNJLModel.solve_gap did not converge (residual_norm=$(res.residual_norm))")
-        return MeanFieldState(res.x_state)
-    elseif effective_backend === :models
-        # Prefer models-native 5D solver (gap_residual = ∇Ω).
-        # Do NOT pass legacy-only kwargs (e.g. thermo_backend) down to gap_residual/omega.
-        try
-            return invoke(
-                solve_gap,
-                Tuple{AbstractPNJLModel, Any, Any},
-                model,
-                T_fm,
-                mu_vec;
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-                kwargs...,
-            )
-        catch err
-            if !fallback_legacy_on_failure
-                rethrow(err)
-            end
-
-            μ = normalize_mu_vec(mu_vec)
-            if !(μ[1] == μ[2] == μ[3])
-                rethrow(err)
-            end
-
-            return solve_gap(
-                model,
-                T_fm,
-                μ;
-                solver_backend=:legacy,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-                legacy_kwargs...,
-            )
+            kwargs...,
+        )
+    catch err
+        if !fallback_legacy_on_failure
+            rethrow(err)
         end
-    else
-        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)"))
+        return invoke(
+            solve_gap,
+            Tuple{AbstractPNJLModel, Any, Any},
+            model,
+            T_fm,
+            mu_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            legacy_kwargs...,
+        )
     end
 end

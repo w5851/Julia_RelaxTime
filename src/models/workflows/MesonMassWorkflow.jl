@@ -22,11 +22,6 @@ const IncludeOnce = Main.IncludeOnce
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 
-# Prefer reusing Main.* modules to avoid duplicates/world-age noise.
-const _PNJL_BRIDGE_PATH = normpath(joinpath(@__DIR__, "..", "scans", "ScanEntrypoints.jl"))
-const ModelsScanEntrypoints = IncludeOnce.include_once!(Main, :ModelsScanEntrypoints, _PNJL_BRIDGE_PATH)
-const PNJL = Base.invokelatest(ModelsScanEntrypoints.pnjl_module_ref)
-
 const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MesonMass.jl"))
 IncludeOnce.include_once!(Main, :MesonMass, _MESON_MASS_PATH)
 
@@ -47,9 +42,9 @@ const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdap
 using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 
 using Main.Constants_PNJL: ħc_MeV_fm
-const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
-const DEFAULT_MOMENTUM_COUNT = getproperty(PNJL, :DEFAULT_MOMENTUM_COUNT)
-const DEFAULT_THETA_COUNT = getproperty(PNJL, :DEFAULT_THETA_COUNT)
+const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
+const DEFAULT_MOMENTUM_COUNT = Main.Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
+const DEFAULT_THETA_COUNT = Main.Models.PNJLCore.DEFAULT_THETA_COUNT
 using Main.MesonMass: solve_meson_mass, default_meson_mass_guess
 using Main.MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses, mott_gaps
 

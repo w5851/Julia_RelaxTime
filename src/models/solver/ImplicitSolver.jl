@@ -32,7 +32,7 @@ import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, Fixed
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector, update!
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
-const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "PNJLCore.jl"))
+const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "PNJLCore.jl"))
 if !isdefined(@__MODULE__, :PNJLCore)
     include(_PNJL_CORE_PATH)
 end
@@ -50,7 +50,7 @@ IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 export solve, SolverResult

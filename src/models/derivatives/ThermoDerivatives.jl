@@ -47,11 +47,11 @@ end
 const IncludeOnce = Main.IncludeOnce
 
 # Unified thermo facade (legacy vs models)
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 # Unified equilibrium facade (model-kind mapping, solve_gap helper)
-const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "core", "EquilibriumFacade.jl"))
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
 const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # 导入常量

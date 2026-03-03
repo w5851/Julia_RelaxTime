@@ -41,5 +41,25 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     return ImplicitSolver.solve_multi(mode, T_fm; kwargs...)
 end
 
+function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    model = create_model(:PNJL)
+    return solve(model, mode, T_fm, μ_fm; kwargs...)
+end
+
+function solve(mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
+    model = create_model(:PNJL)
+    return solve(model, mode, T_fm; kwargs...)
+end
+
+function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    model = create_model(:PNJL)
+    return solve_multi(model, mode, T_fm, μ_fm; kwargs...)
+end
+
+function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
+    model = create_model(:PNJL)
+    return solve_multi(model, mode, T_fm; kwargs...)
+end
+
 @inline create_implicit_solver(; kwargs...) = ImplicitSolver.create_implicit_solver(; kwargs...)
 @inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) = ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)

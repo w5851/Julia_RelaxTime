@@ -19,7 +19,7 @@ using ForwardDiff
 # 从 Models 域导入
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
-const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "PNJLCore.jl"))
+const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "PNJLCore.jl"))
 if !isdefined(@__MODULE__, :PNJLCore)
     include(_PNJL_CORE_PATH)
 end
@@ -37,7 +37,7 @@ IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel

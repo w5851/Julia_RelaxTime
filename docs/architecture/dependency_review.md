@@ -41,3 +41,9 @@
 - 已删除 `src/models/pnjl/analysis/PhaseTransition.jl`，`PNJL` 分析导出直接复用 `src/models/phase/PhaseCore.jl` 与 `src/models/phase/PhaseIO.jl`。
 - 已移除仅服务兼容层的单测（`tests/unit/pnjl/test_phase_transition.jl`、`tests/unit/models/test_phase_transition_forwarding_smoke.jl`），主流程 smoke 继续保留。
 
+## 2026-03-03 PR3 收尾（Phase 5-8）
+
+- 已删除 `src/models/pnjl/` 目录，原 `PNJLCore/PNJLModel/PNJLMagneticModel` 等实现迁移到 `src/models/pnjl_physics/`。
+- `TransportWorkflow` / `MesonMassWorkflow` / `LegacyPNJLModel` 均改为 `Main.Models` 直连，不再包含 `PNJL.jl` 运行时绑定。
+- `UNIT_PROFILE=smoke` 回归通过（178/178）。
+
