@@ -46,6 +46,12 @@ export solve_fixedentropy_constraint
 export solve_fixedsigma_constraint
 export solve_fixedasymrho_constraint
 export solve_constraint
+export solve, solve_multi, SolverResult
+export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export get_seed, update!, reset!, get_all_seeds, set_phase!
+export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
+export build_conditions, build_residual!, GapParams
+export create_implicit_solver, solve_with_derivatives
 export transport_provider
 export TransportProvider
 export prepare_transport_provider
@@ -86,8 +92,15 @@ include(joinpath(@__DIR__, "gap_solver.jl"))
 include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
+include(joinpath(@__DIR__, "solver", "Conditions.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitSolver.jl"))
 include(joinpath(@__DIR__, "solver", "Solver.jl"))
 include(joinpath(@__DIR__, "derivative_entrypoints.jl"))
+
+using .SeedStrategies
+using .Conditions
+import .ImplicitSolver
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
 include(joinpath(@__DIR__, "transport_provider.jl"))
