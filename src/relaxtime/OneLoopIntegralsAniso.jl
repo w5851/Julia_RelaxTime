@@ -15,7 +15,7 @@ const IncludeOnce = Main.IncludeOnce
 
 
 # Prefer reuse Main-level distribution module to avoid duplication
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl"))
+const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
 IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
 
 # Prefer reuse Main.OneLoopIntegrals to avoid duplicating the module

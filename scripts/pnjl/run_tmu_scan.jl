@@ -68,7 +68,7 @@ using Printf
 using Dates
 
 # 加载模块
-include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 
 using .Models: run_tmu_scan

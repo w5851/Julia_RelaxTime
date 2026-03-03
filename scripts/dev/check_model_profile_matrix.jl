@@ -4,6 +4,7 @@ using TOML
 
 const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const MODELS_CFG_ROOT = joinpath(ROOT, "config", "models")
+const PHYSICS_DEFAULT_PATH = joinpath(ROOT, "config", "physics", "default.toml")
 
 const DOMAINS = (
     :njl,
@@ -88,6 +89,15 @@ function parse_profile(path::String)
     return isfile(path) ? TOML.parsefile(path) : Dict{String, Any}()
 end
 
+function inherited_model_shared_cfg()
+    physics_cfg = parse_profile(PHYSICS_DEFAULT_PATH)
+    shared = get(physics_cfg, "model_shared", Dict{String, Any}())
+    if !(shared isa Dict{String, Any}) || isempty(shared)
+        return Dict{String, Any}()
+    end
+    return Dict{String, Any}("model" => shared)
+end
+
 function profile_path(domain::Symbol, profile::String)
     return joinpath(model_dir(domain), string(profile, ".toml"))
 end
@@ -111,6 +121,7 @@ end
 function main()
     violations = String[]
     infos = String[]
+    model_shared_cfg = inherited_model_shared_cfg()
 
     println("[config-profile-matrix] checking njl/pnjl/rpnjl")
 
@@ -125,9 +136,14 @@ function main()
 
         default_cfg = parse_profile(default_path)
         unittest_cfg = parse_profile(unittest_path)
-        merged_cfg = deep_merge(default_cfg, unittest_cfg)
+        base_cfg = if domain in (:njl, :pnjl)
+            deep_merge(model_shared_cfg, default_cfg)
+        else
+            default_cfg
+        end
+        merged_cfg = deep_merge(base_cfg, unittest_cfg)
 
-        stats = summarize_overrides(default_cfg, unittest_cfg)
+        stats = summarize_overrides(base_cfg, unittest_cfg)
 
         assert_required_keys!(violations, domain, merged_cfg)
 

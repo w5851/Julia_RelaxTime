@@ -16,7 +16,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 
 include("../../../src/relaxtime/ScatteringAmplitude.jl")
-include("../../../src/Constants_PNJL.jl")
+include("../../../src/constants/Constants_PNJL.jl")
 include("../../../src/relaxtime/EffectiveCouplings.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")
 include("../../../src/integration/GaussLegendre.jl")

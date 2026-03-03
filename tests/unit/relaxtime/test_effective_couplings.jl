@@ -14,7 +14,7 @@ Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Printf
 
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH)
 end
@@ -22,7 +22,7 @@ const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src"
 if !isdefined(Main, :GaussLegendre)
     Base.include(Main, _GAUSS_LEGENDRE_PATH)
 end
-const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution.jl"))
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "pnjl_physics", "QuarkDistribution.jl"))
 if !isdefined(Main, :PNJLQuarkDistributions)
     Base.include(Main, _QUARK_DISTRIBUTION_PATH)
 end

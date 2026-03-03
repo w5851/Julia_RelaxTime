@@ -1,6 +1,14 @@
 [physical]
-hbarc = 197.327
+hbarc = 197.3269804
 alpha_em = 0.0072973525664
+
+[model_shared]
+N_color = 3
+Lambda_MeV = 602.3
+G_over_Lambda2 = 1.835
+K_over_Lambda5 = 12.36
+m_ud0_MeV = 5.5
+m_s0_MeV = 140.7
 
 [transport_workflow]
 prefer_energy_aniso = true

@@ -6,7 +6,7 @@ using StaticArrays
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_magnetic_fixedpoints_nightly_v1.csv")
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 

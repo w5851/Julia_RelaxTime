@@ -20,7 +20,7 @@ if !isdefined(Main, :ParticleSymbols)
     Base.include(Main, joinpath(@__DIR__, "../../../src/utils/ParticleSymbols.jl"))
 end
 
-include("../../../src/Constants_PNJL.jl")
+include("../../../src/constants/Constants_PNJL.jl")
 include("../../../src/relaxtime/TotalPropagator.jl")
 include("../../../src/relaxtime/EffectiveCouplings.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")

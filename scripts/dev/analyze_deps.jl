@@ -135,7 +135,7 @@ open(outdoc, "w") do io
     else
         println(io, "- 若出现“底层依赖上层”，优先考虑下沉公共逻辑到 `utils/` 或 `integration/`。")
         println(io, "- 若属于流程编排层，可集中在 `workflows/` 并作为例外记录。")
-        println(io, "- 如果仅为常量/类型共享，考虑抽离到 `src/Constants_PNJL.jl` 或新增 `src/core/`。")
+        println(io, "- 如果仅为常量/类型共享，考虑抽离到 `src/constants/Constants_PNJL.jl` 或新增 `src/core/`。")
         println(io)
     end
 end

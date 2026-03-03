@@ -14,7 +14,7 @@ using BenchmarkTools
 using Statistics
 using Profile
 
-include(joinpath(@__DIR__, "../../../src/Constants_PNJL.jl"))
+include(joinpath(@__DIR__, "../../../src/constants/Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "../../../src/integration/GaussLegendre.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
 include(joinpath(@__DIR__, "../../../src/relaxtime/EffectiveCouplings.jl"))
@@ -54,7 +54,7 @@ A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
 G_u = calculate_G_from_A(A_u, m_u)
 G_s = calculate_G_from_A(A_s, m_s)
 
-# 注意：这里沿用项目内部的 fm 单位；耦合常数的具体换算以 src/Constants_PNJL.jl 为准
+# 注意：这里沿用项目内部的 fm 单位；耦合常数的具体换算以 src/constants/Constants_PNJL.jl 为准
 G_fm2 = Constants_PNJL.G_fm2
 K_fm5 = Constants_PNJL.K_fm5
 K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)

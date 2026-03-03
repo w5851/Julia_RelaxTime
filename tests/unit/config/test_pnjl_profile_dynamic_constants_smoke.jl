@@ -1,7 +1,7 @@
 using Test
 
 if !isdefined(Main, :Constants_PNJL)
-    include(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+    include(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
 end
 
 @testset "PNJL config dynamic constants (no load-time cache dependency)" begin

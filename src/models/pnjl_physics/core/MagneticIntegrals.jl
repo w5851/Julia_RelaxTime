@@ -22,7 +22,7 @@ const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "integ
 IncludeOnce.include_once!(Main, :GaussLegendre, _GAUSSLEGENDRE_PATH)
 using Main.GaussLegendre: gauleg
 
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: Λ_inv_fm
 

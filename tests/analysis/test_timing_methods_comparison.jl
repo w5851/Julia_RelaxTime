@@ -11,7 +11,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 using Statistics
 using Printf
 
-include("../../src/Constants_PNJL.jl")
+include("../../src/constants/Constants_PNJL.jl")
 include("../../src/integration/GaussLegendre.jl")
 include("../../src/relaxtime/OneLoopIntegrals.jl")
 include("../../src/relaxtime/PolarizationAniso.jl")

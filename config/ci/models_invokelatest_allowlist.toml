@@ -5,34 +5,9 @@
 # - 任何新增 Base.invokelatest 若不命中本清单，将被迁移门禁拦截
 
 [models_invokelatest_allowlist]
-"src/models/pnjl/PNJLModel.jl" = [
-  "Base\\.invokelatest\\(pnjl\\.FixedMu\\)",
-  "Base\\.invokelatest\\(pnjl\\.solve,\\s*mode,",
-]
-"src/models/legacy/LegacyPNJLModel.jl" = [
-  "Base\\.invokelatest\\(pnjl\\.FixedMu\\)",
-  "Base\\.invokelatest\\(pnjl\\.solve,\\s*mode,",
-]
 "src/models/gap_solver.jl" = [
   "Base\\.invokelatest\\(omega,\\s*model,\\s*st,\\s*T,\\s*μ;",
 ]
 "src/models/factory.jl" = [
   "Base\\.invokelatest\\(ctor;\\s*kwargs\\.\\.\\.\\)",
-]
-"src/models/entrypoints.jl" = [
-  "Base\\.invokelatest\\(scan\\.pnjl_module_ref\\)",
-  "Base\\.invokelatest\\(bridge\\.module_ref\\)",
-  "Base\\.invokelatest\\(fn,\\s*args\\.\\.\\.;\\s*kwargs\\.\\.\\.\\)",
-]
-"src/models/derivative_entrypoints.jl" = [
-  "Base\\.invokelatest\\(td\\.derivatives_module_ref\\)",
-]
-"src/models/workflows/TransportWorkflow.jl" = [
-  "Base\\.invokelatest\\(ModelsScanEntrypoints\\.pnjl_module_ref\\)",
-]
-"src/models/workflows/MesonMassWorkflow.jl" = [
-  "Base\\.invokelatest\\(ModelsScanEntrypoints\\.pnjl_module_ref\\)",
-]
-"src/models/pnjl/derivatives/ThermoDerivatives.jl" = [
-  "Base\\.invokelatest\\(Main\\.Models\\.create_implicit_gap_solver,\\s*m;",
 ]

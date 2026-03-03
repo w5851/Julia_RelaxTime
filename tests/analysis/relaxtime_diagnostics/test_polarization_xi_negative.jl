@@ -14,8 +14,8 @@ using Printf
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 
 include("../../../src/integration/GaussLegendre.jl")
-include("../../../src/QuarkDistribution.jl")
-include("../../../src/QuarkDistribution_Aniso.jl")
+include("../../../src/models/pnjl_physics/QuarkDistribution.jl")
+include("../../../src/relaxtime/QuarkDistribution_Aniso.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")
 include("../../../src/relaxtime/OneLoopIntegralsAniso.jl")
 include("../../../src/relaxtime/PolarizationAniso.jl")
@@ -191,7 +191,7 @@ using .OneLoopIntegrals: A
     
     # 手动检查代码中可能的问题点
     println("\n请人工检查以下代码位置:")
-    println("1. src/QuarkDistribution_Aniso.jl:74")
+    println("1. src/relaxtime/QuarkDistribution_Aniso.jl:74")
     println("   coeff = 0.5 * ξ * (p_inv_fm^2) / E_inv_fm")
     println("   → 检查: 是否误用 abs(ξ)?")
     println()

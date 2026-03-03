@@ -7,7 +7,7 @@
 using CSV
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 

@@ -15,7 +15,7 @@ using Test
 using Base: time_ns
 using Printf
 
-include("../../../src/Constants_PNJL.jl")
+include("../../../src/constants/Constants_PNJL.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")
 include("../../../src/relaxtime/OneLoopIntegralsAniso.jl")
 include("../../../src/relaxtime/PolarizationAniso.jl")

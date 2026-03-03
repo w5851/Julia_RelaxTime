@@ -1,6 +1,6 @@
 # 详细追踪ss→ss散射中的警告来源
 
-include("../../src/Constants_PNJL.jl")
+include("../../src/constants/Constants_PNJL.jl")
 include("../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .ScatteringAmplitude

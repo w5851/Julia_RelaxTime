@@ -18,7 +18,7 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 
 using Main.Constants_PNJL: pnjl_constants

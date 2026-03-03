@@ -11,15 +11,15 @@
 
 ## 2026-02-20 迁移状态补充（执行对齐）
 
-- 已明确边界：`src/models/*` 作为模型层，`src/pnjl/scans/*`、`src/pnjl/workflows/*`、`src/simulation/*` 作为流程层。
-- 本阶段不执行 `src/pnjl` 全量搬迁；采用“模型内核收敛 + 流程层稳定入口保留”的渐进策略。
+- 已明确边界：`src/models/*` 作为模型层，`src/models/scans/*`、`src/models/workflows/*`、`src/simulation/*` 作为流程层。
+- `src/models/pnjl/` 已删除，相关实现已迁移至 `src/models/pnjl_physics/` 与 `src/models/{solver,scans,workflows,derivatives}`。
 - 已保留双后端策略（`:legacy | :models`）作为回归与回退手段。
 - 后续删除 legacy 实体文件前，先完成“裁剪候选清单 + 定向回归 + smoke 全绿”的门槛校验。
 
 ## 2026-02-21 下一阶段计划（全量迁移）
 
 - 已新增执行任务单：`docs/dev/active/2026-02-21_新架构全量迁移实施任务单.md`。
-- 下一阶段目标：以 Julia 多重派发为核心，完成 models 主路径承载并分波次移出 `src/pnjl` 模块。
+- 下一阶段目标：以 Julia 多重派发为核心，完成 models 主路径承载并分波次移出 legacy 兼容入口。
 - 执行原则：先接口冻结与去耦，再流程薄层化，最后按门禁裁剪 legacy 实体。
 
 ---
@@ -35,7 +35,7 @@ src/core/
 └── exceptions.jl         # 自定义异常类型（新增）
 
 src/models/
-├── base/                 # 共享工具（重构自src/pnjl/core/）
+├── base/                 # 共享工具（历史上重构自旧core）
 │   ├── integrals.jl
 │   ├── polyakov.jl
 │   ├── safe_math.jl
@@ -59,23 +59,23 @@ src/compatibility/
 
 #### 重构模块
 ```
-src/pnjl/core/
+src/models/pnjl_physics/core/
 ├── Thermodynamics.jl     # 部分函数迁移到models/base/
 ├── Integrals.jl          # 迁移到models/base/integrals.jl
 └── Core.jl               # 保留，但调用新接口
 
-src/pnjl/solver/
+src/models/solver/
 ├── Solver.jl             # 更新为接受model参数
 ├── ImplicitSolver.jl     # 更新为接受model参数
 ├── Conditions.jl         # 更新为使用model接口
 └── SeedStrategies.jl     # 更新为使用model接口
 
-src/pnjl/scans/
+src/models/scans/
 ├── TmuScan.jl            # 更新为使用model实例
 ├── TrhoScan.jl           # 更新为使用model实例
 └── DualBranchScan.jl     # 更新为使用model实例
 
-src/pnjl/workflows/
+src/models/workflows/
 ├── MesonMassWorkflow.jl  # 更新为使用model实例
 └── TransportWorkflow.jl  # 更新为使用model实例
 ```
@@ -107,14 +107,14 @@ U = calculate_U(T, Φ, Φbar)
 ```
 
 **受影响文件**：
-- `src/pnjl/solver/Conditions.jl` - gap方程定义
-- `src/pnjl/solver/ImplicitSolver.jl` - 求解器
-- `src/pnjl/scans/TmuScan.jl` - T-μ扫描
-- `src/pnjl/scans/TrhoScan.jl` - T-ρ扫描
-- `src/pnjl/scans/DualBranchScan.jl` - 双分支扫描
-- `src/pnjl/derivatives/ThermoDerivatives.jl` - 热力学导数
-- `src/pnjl/workflows/MesonMassWorkflow.jl` - 介子质量工作流
-- `src/pnjl/workflows/TransportWorkflow.jl` - 输运工作流
+- `src/models/solver/Conditions.jl` - gap方程定义
+- `src/models/solver/ImplicitSolver.jl` - 求解器
+- `src/models/scans/TmuScan.jl` - T-μ扫描
+- `src/models/scans/TrhoScan.jl` - T-ρ扫描
+- `src/models/scans/DualBranchScan.jl` - 双分支扫描
+- `src/models/derivatives/ThermoDerivatives.jl` - 热力学导数
+- `src/models/workflows/MesonMassWorkflow.jl` - 介子质量工作流
+- `src/models/workflows/TransportWorkflow.jl` - 输运工作流
 
 **迁移策略**：
 1. 阶段1：添加兼容层，保持旧调用方式工作
@@ -132,8 +132,8 @@ log_term = calculate_log_sum(masses, nodes, Φ, Φbar, mu, T, xi)
 ```
 
 **受影响文件**：
-- `src/pnjl/core/Thermodynamics.jl` - 热力学计算
-- `src/pnjl/derivatives/ThermoDerivatives.jl` - 导数计算
+- `src/models/pnjl_physics/core/ThermoFacade.jl` - 热力学计算
+- `src/models/derivatives/ThermoDerivatives.jl` - 导数计算
 
 **迁移策略**：
 - 将函数移动到`src/models/base/integrals.jl`
@@ -148,8 +148,8 @@ using Main.Constants_PNJL: G_fm2, K_fm5, T0_inv_fm, a0, a1, a2, b3
 ```
 
 **受影响文件**：
-- `src/pnjl/core/Thermodynamics.jl`
-- `src/pnjl/solver/Conditions.jl`
+- `src/models/pnjl_physics/core/ThermoFacade.jl`
+- `src/models/solver/Conditions.jl`
 
 **迁移策略**：
 - 将常量封装到模型参数中
@@ -281,8 +281,8 @@ graph TD
 
 **并行开发规则**：
 - ✅ 可以并行：其他模块的bug修复
-- ❌ 禁止并行：修改`src/pnjl/core/`中的函数签名
-- ⚠️ 需协调：新增`src/pnjl/`下的功能
+- ❌ 禁止并行：修改`src/models/pnjl_physics/core/`中的函数签名
+- ⚠️ 需协调：新增`src/models/pnjl_physics/`下的功能
 
 **协调机制**：
 - 每日同步会议（15分钟）
@@ -293,14 +293,14 @@ graph TD
 **开发内容**：
 - `src/models/isotropic/pnjl.jl`
 - `src/compatibility/legacy_api.jl`
-- 更新`src/pnjl/solver/`模块
+- 更新`src/models/solver/`模块
 - 回归测试
 
 **并行开发规则**：
 - ✅ 可以并行：`src/relaxtime/`的开发
 - ✅ 可以并行：文档更新
-- ❌ 禁止并行：修改`src/pnjl/solver/`
-- ⚠️ 需协调：修改`src/pnjl/scans/`
+- ❌ 禁止并行：修改`src/models/solver/`
+- ⚠️ 需协调：修改`src/models/scans/`
 
 **协调机制**：
 - 兼容层完成后通知团队
@@ -326,8 +326,8 @@ graph TD
 
 #### 阶段4：扫描器和工作流更新（3-4天）
 **开发内容**：
-- 更新`src/pnjl/scans/`
-- 更新`src/pnjl/workflows/`
+- 更新`src/models/scans/`
+- 更新`src/models/workflows/`
 - 更新脚本文件
 - 集成测试
 

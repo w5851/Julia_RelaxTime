@@ -1,7 +1,7 @@
 
 using Test
 using Logging
-include("../../../src/QuarkDistribution.jl")
+include("../../../src/models/pnjl_physics/QuarkDistribution.jl")
 
 # 避免跨文件导出冲突：不把符号 `using` 进 Main。
 QD = PNJLQuarkDistributions

@@ -71,7 +71,7 @@ function reset_transport_workflow_config_cache!()
 end
 
 # Unified thermo facade (legacy vs models): reuse Main.* to avoid module duplication.
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "ThermoFacade.jl"))
+const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
 const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 # Unified equilibrium facade (solve_gap + state_vector + masses): reuse Main.* to avoid module duplication.
@@ -79,7 +79,7 @@ const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "Equi
 const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 

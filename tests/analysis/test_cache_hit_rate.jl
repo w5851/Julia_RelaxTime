@@ -14,7 +14,7 @@ using Printf
 using Statistics
 
 # 加载模块
-include("../../src/Constants_PNJL.jl")
+include("../../src/constants/Constants_PNJL.jl")
 include("../../src/integration/GaussLegendre.jl")
 include("../../src/relaxtime/EffectiveCouplings.jl")
 include("../../src/relaxtime/OneLoopIntegrals.jl")

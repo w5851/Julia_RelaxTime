@@ -16,7 +16,7 @@ Pkg.activate(joinpath(@__DIR__, "..", ".."))
 
 using Printf
 
-include(joinpath(@__DIR__, "..", "..", "src", "Constants_PNJL.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 Models.pnjl_module()
 

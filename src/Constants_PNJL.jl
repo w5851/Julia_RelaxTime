@@ -125,9 +125,16 @@ function load_pnjl_config(
 )
 
     physics_data = load_config(PHYSICS_CONFIG_DIR, DEFAULT_PHYSICS_CONFIG; profile=physics_profile)
+    shared_model = get(physics_data.config, "model_shared", Dict{String, Any}())
+    inherited_model_cfg = isempty(shared_model) ? Dict{String, Any}[] : [Dict("model" => shared_model)]
 
     model_dir = _select_config_dir(profile, PNJL_CONFIG_DIR_NEW, PNJL_CONFIG_DIR_OLD)
-    model_data = load_config(model_dir, DEFAULT_PNJL_MODEL_CONFIG; profile=profile)
+    model_data = load_config(
+        model_dir,
+        DEFAULT_PNJL_MODEL_CONFIG;
+        profile=profile,
+        inherited_configs=inherited_model_cfg,
+    )
 
     merged = deep_merge(physics_data.config, model_data.config)
 

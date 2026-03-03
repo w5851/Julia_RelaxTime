@@ -13,7 +13,7 @@ using Printf
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "Constants_PNJL.jl"))
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH)
 end

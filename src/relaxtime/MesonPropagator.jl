@@ -20,7 +20,7 @@ end
 const IncludeOnce = Main.IncludeOnce
 
 # Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
 include("../utils/ParticleSymbols.jl")
 include("EffectiveCouplings.jl")

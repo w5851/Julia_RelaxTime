@@ -117,7 +117,6 @@ include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
 include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
-include(joinpath(@__DIR__, "scans", "AdaptiveRhoRefinement.jl"))
 include(joinpath(@__DIR__, "scans", "DualBranchScanEntry.jl"))
 
 using .SeedStrategies
@@ -144,6 +143,20 @@ include(joinpath(@__DIR__, "phase", "CEPDetector.jl"))
 include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
+include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
+include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
+include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
+
+if !isdefined(Main, :WorkflowParamAdapters)
+	@eval Main const WorkflowParamAdapters = $WorkflowParamAdapters
+end
+if !isdefined(Main, :TransportWorkflow)
+	@eval Main const TransportWorkflow = $TransportWorkflow
+end
+if !isdefined(Main, :MesonMassWorkflow)
+	@eval Main const MesonMassWorkflow = $MesonMassWorkflow
+end
+
 include(joinpath(@__DIR__, "entrypoints.jl"))
 
 end # module Models

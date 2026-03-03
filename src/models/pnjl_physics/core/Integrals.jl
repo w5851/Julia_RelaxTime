@@ -42,7 +42,7 @@ using Main.GaussLegendre:
     DEFAULT_MOMENTUM_WEIGHTS
 
 # 常量导入 - 使用绝对路径加载
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: Λ_inv_fm, N_color
 

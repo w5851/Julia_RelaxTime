@@ -8,7 +8,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
 using Printf
 
 # 加载模块
-include("../../src/Constants_PNJL.jl")
+include("../../src/constants/Constants_PNJL.jl")
 include("../../src/integration/GaussLegendre.jl")
 include("../../src/relaxtime/EffectiveCouplings.jl")
 include("../../src/relaxtime/OneLoopIntegrals.jl")

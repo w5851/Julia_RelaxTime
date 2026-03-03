@@ -51,9 +51,11 @@ function create_model(kind::Symbol; kwargs...)
     elseif kind === :RPNJL
         return RPNJLModel(; kwargs...)
     elseif kind === :LegacyNJL
+        Base.depwarn("create_model(:LegacyNJL) is deprecated and will be removed in a future release; use create_model(:NJL) instead.", :create_model)
         ctor = _legacy_njl_ctor()
         return _construct_worldsafe(ctor; kwargs...)
     elseif kind === :LegacyPNJL
+        Base.depwarn("create_model(:LegacyPNJL) is deprecated and will be removed in a future release; use create_model(:PNJL) instead.", :create_model)
         ctor = _compat_pnjl_ctor()
         return _construct_worldsafe(ctor)
     end

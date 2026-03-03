@@ -93,7 +93,7 @@ end
 const IncludeOnce = Main.IncludeOnce
 
 # Import parameter types from Main
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl"))
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
@@ -104,12 +104,12 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 # 导入依赖模块
 # Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
 include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
 
 # Prefer reuse Main-level distribution module to avoid duplication
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl"))
+const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
 IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
 include(joinpath(@__DIR__, "ScatteringAmplitude.jl"))
 include(joinpath(@__DIR__, "DifferentialCrossSection.jl"))
@@ -822,9 +822,6 @@ s_values = collect(range(10.0, 50.0, length=20))
 q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
 t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 σ_values = scan_s_dependence(s_values, :uu_to_uu, q_nt, t_nt, K_coeffs, n_points=6)
-
-using Plots
-plot(s_values, σ_values, xlabel="s [fm⁻²]", ylabel="σ [fm²]")
 ```
 """
 function scan_s_dependence(

@@ -31,16 +31,29 @@ function deep_merge(base::Dict{String, Any}, override::Dict{String, Any})
     return result
 end
 
-"""load_config(dir, default_config; profile="default")
+"""load_config(dir, default_config; profile="default", inherited_configs=Dict[])
 
 从 `dir/<profile>.toml` 读取配置，并与 `default_config` deep-merge。
 
+可通过 `inherited_configs` 传入一组“父配置”Dict，按顺序先合并父配置再合并 profile 文件，
+用于实现跨目录/跨层级的参数继承（例如 physics 层共享参数注入模型层）。
+
 返回 `(config, profile, path)`，其中 `path` 若文件不存在则为 `nothing`。
 """
-function load_config(dir::AbstractString, default_config::Dict{String, Any}; profile::String="default")
+function load_config(
+    dir::AbstractString,
+    default_config::Dict{String, Any};
+    profile::String="default",
+    inherited_configs::AbstractVector=Any[],
+)
     path = joinpath(dir, string(profile, ".toml"))
 
     cfg = deepcopy(default_config)
+    for inherited in inherited_configs
+        inherited_dict = inherited isa Dict{String, Any} ? inherited : Dict{String, Any}(inherited)
+        cfg = deep_merge(cfg, inherited_dict)
+    end
+
     if isfile(path)
         try
             parsed = TOML.parsefile(path)

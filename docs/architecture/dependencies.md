@@ -1,8 +1,6 @@
-# Dependency graph generated: 2026-02-22T09:53:44.642
+# Dependency graph generated: 2026-03-03T17:58:43.963
 
 Run: julia --project=. scripts/dev/gen_deps.jl
-
-> 2026-03-03 PR3 更新：`src/models/pnjl/` 已删除，相关实现迁移至 `src/models/pnjl_physics/`；本文件中的旧 `src/pnjl/*` 参考节点属于历史快照，后续依赖图重生成为准。
 
 ## L1 高层架构图（手动）
 
@@ -25,7 +23,7 @@ flowchart LR
     src_utils[src/utils]
     src_integration[src/integration]
     src_simulation[src/simulation]
-    src_pnjl[src/pnjl]
+    src_models[src/models]
     src_relaxtime[src/relaxtime]
   end
 
@@ -44,25 +42,25 @@ flowchart LR
 
   src_utils --> src_integration
   src_integration --> src_relaxtime
-  src_relaxtime --> src_pnjl
+  src_relaxtime --> src_models
   src_simulation --> src_utils
 
   scripts_server --> src_simulation
-  scripts_server --> src_pnjl
+  scripts_server --> src_models
   scripts_server --> web_static
 
-  scripts_other --> src_pnjl
+  scripts_other --> src_models
   scripts_other --> src_relaxtime
 
-  docs_api --> src_pnjl
+  docs_api --> src_models
   docs_api --> src_relaxtime
   docs_guides --> scripts_server
 
-  src_pnjl --> data_outputs
+  src_models --> data_outputs
   scripts_other --> data_outputs
 
   config --> scripts_other
-  tests --> src_pnjl
+  tests --> src_models
   tests --> src_relaxtime
 ```
 
@@ -110,28 +108,23 @@ flowchart LR
   end
   subgraph models
     src_models_Models_jl[models/Models.jl]
+    src_models_derivatives_ThermoDerivatives_jl[models/derivatives/ThermoDerivatives.jl]
     src_models_njl_NJL2Core_jl[models/njl/NJL2Core.jl]
     src_models_njl_NJL2Model_jl[models/njl/NJL2Model.jl]
     src_models_njl_NJLCore_jl[models/njl/NJLCore.jl]
     src_models_njl_NJLModel_jl[models/njl/NJLModel.jl]
-  end
-  subgraph pnjl
-    src_pnjl_PNJL_jl[pnjl/PNJL.jl]
-    src_pnjl_analysis_PhaseTransition_jl[pnjl/analysis/PhaseTransition.jl]
-    src_pnjl_core_Integrals_jl[pnjl/core/Integrals.jl]
-    src_pnjl_core_MagneticIntegrals_jl[pnjl/core/MagneticIntegrals.jl]
-    src_pnjl_core_MagneticThermodynamics_jl[pnjl/core/MagneticThermodynamics.jl]
-    src_pnjl_core_Thermodynamics_jl[pnjl/core/Thermodynamics.jl]
-    src_pnjl_scans_DualBranchScan_jl[pnjl/scans/DualBranchScan.jl]
-    src_pnjl_scans_ScanCommon_jl[pnjl/scans/ScanCommon.jl]
-    src_pnjl_scans_ScanResultFinalize_jl[pnjl/scans/ScanResultFinalize.jl]
-    src_pnjl_scans_TmuScan_jl[pnjl/scans/TmuScan.jl]
-    src_pnjl_scans_TrhoScan_jl[pnjl/scans/TrhoScan.jl]
-    src_pnjl_solver_Conditions_jl[pnjl/solver/Conditions.jl]
-    src_pnjl_solver_ImplicitSolver_jl[pnjl/solver/ImplicitSolver.jl]
-    src_pnjl_solver_SeedStrategies_jl[pnjl/solver/SeedStrategies.jl]
-    src_pnjl_workflows_MesonMassWorkflow_jl[pnjl/workflows/MesonMassWorkflow.jl]
-    src_pnjl_workflows_TransportWorkflow_jl[pnjl/workflows/TransportWorkflow.jl]
+    src_models_pnjl_physics_core_Integrals_jl[models/pnjl_physics/core/Integrals.jl]
+    src_models_pnjl_physics_core_MagneticIntegrals_jl[models/pnjl_physics/core/MagneticIntegrals.jl]
+    src_models_pnjl_physics_core_MagneticThermodynamics_jl[models/pnjl_physics/core/MagneticThermodynamics.jl]
+    src_models_scans_DualBranchScan_jl[models/scans/DualBranchScan.jl]
+    src_models_scans_ScanCommon_jl[models/scans/ScanCommon.jl]
+    src_models_scans_ScanResultFinalize_jl[models/scans/ScanResultFinalize.jl]
+    src_models_scans_TmuScan_jl[models/scans/TmuScan.jl]
+    src_models_scans_TrhoScan_jl[models/scans/TrhoScan.jl]
+    src_models_solver_Conditions_jl[models/solver/Conditions.jl]
+    src_models_solver_ImplicitSolver_jl[models/solver/ImplicitSolver.jl]
+    src_models_workflows_MesonMassWorkflow_jl[models/workflows/MesonMassWorkflow.jl]
+    src_models_workflows_TransportWorkflow_jl[models/workflows/TransportWorkflow.jl]
   end
   subgraph relaxtime
     src_relaxtime_AFieldBuilder_jl[relaxtime/AFieldBuilder.jl]
@@ -150,12 +143,9 @@ flowchart LR
     src_relaxtime_TransportCoefficients_jl[relaxtime/TransportCoefficients.jl]
   end
   subgraph root
-    AdaptiveRhoRefinement[AdaptiveRhoRefinement]
     AverageScatteringRate[AverageScatteringRate]
     Conditions[Conditions]
     ConfigLoader[ConfigLoader]
-    Constants_PNJL[Constants_PNJL]
-    ConstraintModes[ConstraintModes]
     DifferentialCrossSection[DifferentialCrossSection]
     EffectiveCouplings[EffectiveCouplings]
     EllipsoidCalculation[EllipsoidCalculation]
@@ -169,12 +159,10 @@ flowchart LR
     MesonPropagator[MesonPropagator]
     Models[Models]
     MomentumMapping[MomentumMapping]
-    PNJL[PNJL]
-    PNJLQuarkDistributions_Aniso[PNJLQuarkDistributions_Aniso]
+    PNJLCore[PNJLCore]
     ParameterTypes[ParameterTypes]
     ParticleSymbols[ParticleSymbols]
     PhaseSpaceSampling[PhaseSpaceSampling]
-    PhaseTransition[PhaseTransition]
     PolarizationAniso[PolarizationAniso]
     PolarizationCache[PolarizationCache]
     ScanCommon[ScanCommon]
@@ -183,7 +171,6 @@ flowchart LR
     ScatteringAmplitude[ScatteringAmplitude]
     SeedStrategies[SeedStrategies]
     ThermoDerivatives[ThermoDerivatives]
-    Thermodynamics[Thermodynamics]
     TmuScan[TmuScan]
     TotalCrossSection[TotalCrossSection]
     TotalPropagator[TotalPropagator]
@@ -206,65 +193,47 @@ flowchart LR
   src_ParameterTypes_jl --> ParameterTypes
   src_integration_IntervalQuadratureStrategies_jl --> src_integration_GaussLegendre_jl
   src_integration_PhaseSpaceSampling_jl --> GaussLegendre
+  src_models_Models_jl --> Conditions
+  src_models_Models_jl --> ImplicitSolver
+  src_models_Models_jl --> MagneticIntegrals
+  src_models_Models_jl --> MagneticThermodynamics
   src_models_Models_jl --> Models
+  src_models_Models_jl --> SeedStrategies
+  src_models_Models_jl --> ThermoDerivatives
+  src_models_Models_jl --> TmuScan
+  src_models_Models_jl --> TrhoScan
+  src_models_derivatives_ThermoDerivatives_jl --> PNJLCore
   src_models_njl_NJL2Core_jl --> ConfigLoader
   src_models_njl_NJL2Model_jl --> GaussLegendre
   src_models_njl_NJLCore_jl --> ConfigLoader
   src_models_njl_NJLModel_jl --> GaussLegendre
-  src_pnjl_PNJL_jl --> AdaptiveRhoRefinement
-  src_pnjl_PNJL_jl --> Conditions
-  src_pnjl_PNJL_jl --> ConstraintModes
-  src_pnjl_PNJL_jl --> ImplicitSolver
-  src_pnjl_PNJL_jl --> Integrals
-  src_pnjl_PNJL_jl --> MagneticIntegrals
-  src_pnjl_PNJL_jl --> MagneticThermodynamics
-  src_pnjl_PNJL_jl --> PhaseTransition
-  src_pnjl_PNJL_jl --> ScanConfig
-  src_pnjl_PNJL_jl --> SeedStrategies
-  src_pnjl_PNJL_jl --> ThermoDerivatives
-  src_pnjl_PNJL_jl --> Thermodynamics
-  src_pnjl_PNJL_jl --> TmuScan
-  src_pnjl_PNJL_jl --> TrhoScan
-  src_pnjl_analysis_PhaseTransition_jl --> ConstraintModes
-  src_pnjl_core_MagneticThermodynamics_jl --> Integrals
-  src_pnjl_core_MagneticThermodynamics_jl --> MagneticIntegrals
-  src_pnjl_core_MagneticThermodynamics_jl --> Thermodynamics
-  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_Integrals_jl
-  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_MagneticIntegrals_jl
-  src_pnjl_core_MagneticThermodynamics_jl --> src_pnjl_core_Thermodynamics_jl
-  src_pnjl_core_Thermodynamics_jl --> Integrals
-  src_pnjl_core_Thermodynamics_jl --> PNJLQuarkDistributions_Aniso
-  src_pnjl_core_Thermodynamics_jl --> src_pnjl_core_Integrals_jl
-  src_pnjl_scans_DualBranchScan_jl --> Constants_PNJL
-  src_pnjl_scans_DualBranchScan_jl --> ConstraintModes
-  src_pnjl_scans_DualBranchScan_jl --> ImplicitSolver
-  src_pnjl_scans_DualBranchScan_jl --> SeedStrategies
-  src_pnjl_scans_ScanCommon_jl --> ConstraintModes
-  src_pnjl_scans_ScanCommon_jl --> ImplicitSolver
-  src_pnjl_scans_ScanCommon_jl --> SeedStrategies
-  src_pnjl_scans_ScanResultFinalize_jl --> ImplicitSolver
-  src_pnjl_scans_TmuScan_jl --> Constants_PNJL
-  src_pnjl_scans_TmuScan_jl --> ConstraintModes
-  src_pnjl_scans_TmuScan_jl --> ImplicitSolver
-  src_pnjl_scans_TmuScan_jl --> ScanCommon
-  src_pnjl_scans_TmuScan_jl --> ScanConfig
-  src_pnjl_scans_TmuScan_jl --> ScanResultFinalize
-  src_pnjl_scans_TmuScan_jl --> SeedStrategies
-  src_pnjl_scans_TrhoScan_jl --> Constants_PNJL
-  src_pnjl_scans_TrhoScan_jl --> ConstraintModes
-  src_pnjl_scans_TrhoScan_jl --> ScanCommon
-  src_pnjl_scans_TrhoScan_jl --> ScanConfig
-  src_pnjl_scans_TrhoScan_jl --> ScanResultFinalize
-  src_pnjl_scans_TrhoScan_jl --> SeedStrategies
-  src_pnjl_solver_Conditions_jl --> ConstraintModes
-  src_pnjl_solver_ImplicitSolver_jl --> Conditions
-  src_pnjl_solver_ImplicitSolver_jl --> ConstraintModes
-  src_pnjl_solver_ImplicitSolver_jl --> SeedStrategies
-  src_pnjl_solver_SeedStrategies_jl --> ConstraintModes
-  src_pnjl_workflows_MesonMassWorkflow_jl --> WorkflowParamAdapters
-  src_pnjl_workflows_TransportWorkflow_jl --> ConfigLoader
-  src_pnjl_workflows_TransportWorkflow_jl --> TransportCoefficients
-  src_pnjl_workflows_TransportWorkflow_jl --> WorkflowParamAdapters
+  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> Integrals
+  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> MagneticIntegrals
+  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> src_models_pnjl_physics_core_Integrals_jl
+  src_models_pnjl_physics_core_MagneticThermodynamics_jl --> src_models_pnjl_physics_core_MagneticIntegrals_jl
+  src_models_scans_DualBranchScan_jl --> ImplicitSolver
+  src_models_scans_DualBranchScan_jl --> SeedStrategies
+  src_models_scans_ScanCommon_jl --> ImplicitSolver
+  src_models_scans_ScanCommon_jl --> SeedStrategies
+  src_models_scans_ScanResultFinalize_jl --> ImplicitSolver
+  src_models_scans_TmuScan_jl --> ImplicitSolver
+  src_models_scans_TmuScan_jl --> ScanCommon
+  src_models_scans_TmuScan_jl --> ScanConfig
+  src_models_scans_TmuScan_jl --> ScanResultFinalize
+  src_models_scans_TmuScan_jl --> SeedStrategies
+  src_models_scans_TrhoScan_jl --> ImplicitSolver
+  src_models_scans_TrhoScan_jl --> ScanCommon
+  src_models_scans_TrhoScan_jl --> ScanConfig
+  src_models_scans_TrhoScan_jl --> ScanResultFinalize
+  src_models_scans_TrhoScan_jl --> SeedStrategies
+  src_models_solver_Conditions_jl --> PNJLCore
+  src_models_solver_ImplicitSolver_jl --> Conditions
+  src_models_solver_ImplicitSolver_jl --> PNJLCore
+  src_models_solver_ImplicitSolver_jl --> SeedStrategies
+  src_models_workflows_MesonMassWorkflow_jl --> WorkflowParamAdapters
+  src_models_workflows_TransportWorkflow_jl --> ConfigLoader
+  src_models_workflows_TransportWorkflow_jl --> TransportCoefficients
+  src_models_workflows_TransportWorkflow_jl --> WorkflowParamAdapters
   src_relaxtime_AFieldBuilder_jl --> GaussLegendre
   src_relaxtime_AFieldBuilder_jl --> src_integration_GaussLegendre_jl
   src_relaxtime_AverageScatteringRate_jl --> GaussLegendre
@@ -308,8 +277,8 @@ flowchart LR
   src_relaxtime_TransportCoefficients_jl --> PhaseSpaceSampling
   src_relaxtime_TransportCoefficients_jl --> src_integration_GaussLegendre_jl
   src_relaxtime_TransportCoefficients_jl --> src_integration_PhaseSpaceSampling_jl
+  src_simulation_FullServerApp_jl --> Models
   src_simulation_FullServerApp_jl --> MomentumMapping
-  src_simulation_FullServerApp_jl --> PNJL
   src_simulation_HTTPServer_jl --> MomentumMapping
   src_simulation_MomentumMapping_jl --> EllipsoidCalculation
   src_simulation_MomentumMapping_jl --> FrameTransformations

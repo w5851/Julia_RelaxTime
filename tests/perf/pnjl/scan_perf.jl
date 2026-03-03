@@ -22,7 +22,7 @@ const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "scan_benchmark.md")
 
 # 加载 PNJL 模块
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 

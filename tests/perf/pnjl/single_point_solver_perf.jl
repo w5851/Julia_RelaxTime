@@ -11,7 +11,7 @@ const PERF_OUTPUT_DIR = joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl
 const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.md")
 
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 

@@ -6,7 +6,7 @@ if !(isdefined(Main, :Models) && isdefined(Main.Models, :create_model))
     Base.include(Main, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 if !isdefined(Main, :Constants_PNJL)
-    Base.include(Main, joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+    Base.include(Main, joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 end
 
 @testset "PNJL/RPNJL critical params validation smoke" begin

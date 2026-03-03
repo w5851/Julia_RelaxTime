@@ -117,9 +117,16 @@ function load_njl_config(; profile::String=get(ENV, "NJL_PARAM_PROFILE", DEFAULT
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", DEFAULT_PROFILE)
 
     physics_data = load_config(PHYSICS_CONFIG_DIR, DEFAULT_PHYSICS_CONFIG; profile=physics_profile)
+    shared_model = get(physics_data.config, "model_shared", Dict{String, Any}())
+    inherited_model_cfg = isempty(shared_model) ? Dict{String, Any}[] : [Dict("model" => shared_model)]
 
     model_dir = _select_config_dir(profile, NJL_CONFIG_DIR_NEW, NJL_CONFIG_DIR_OLD)
-    model_data = load_config(model_dir, DEFAULT_NJL_MODEL_CONFIG; profile=profile)
+    model_data = load_config(
+        model_dir,
+        DEFAULT_NJL_MODEL_CONFIG;
+        profile=profile,
+        inherited_configs=inherited_model_cfg,
+    )
 
     return deep_merge(physics_data.config, model_data.config)
 end

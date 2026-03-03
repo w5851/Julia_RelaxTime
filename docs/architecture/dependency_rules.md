@@ -15,26 +15,26 @@
 - `utils`：通用工具与常量
 - `integration`：数值积分相关
 - `simulation`：运动学与服务接口
-- `pnjl`：PNJL 求解与扫描
+- `models`：QCD 模型实现与求解/扫描/工作流入口（含 `pnjl_physics`）
 - `relaxtime`：弛豫时间与散射链路
 
 允许依赖（✅ 允许 / ❌ 不允许）：
 
-| From \ To | root | utils | integration | simulation | pnjl | relaxtime |
+| From \ To | root | utils | integration | simulation | models | relaxtime |
 |---|---|---|---|---|---|---|
 | root | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | utils | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | integration | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
 | simulation | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
-| pnjl | ✅ | ✅ | ✅ | ❌ | ✅ | ⚠️ 仅 workflows |
+| models | ✅ | ✅ | ✅ | ❌ | ✅ | ⚠️ 仅 workflows |
 | relaxtime | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
 
 **例外约定**：
-- `src/pnjl/workflows/` 允许依赖 `src/relaxtime/`（用于输运流程编排）。
+- `src/models/workflows/` 允许依赖 `src/relaxtime/`（用于输运流程编排）。
 
 迁移期补充约束（2026-02-24）：
 - `src/simulation/fullserver` 新增调用应优先经 `src/models/entrypoints.jl` 进入扫描/工作流，不再新增对 `PNJL.run_*` 的运行时依赖。
-- `src/pnjl/PNJL.jl` 视为兼容层入口，允许存量调用逐步迁移，但不作为新功能默认入口。
+- `src/models/pnjl_module()` 仅作兼容别名入口，允许存量调用逐步迁移，但不作为新功能默认入口。
 
 ## 变更流程
 

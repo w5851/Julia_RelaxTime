@@ -16,7 +16,7 @@ using Test
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
-include("../../../src/Constants_PNJL.jl")
+include("../../../src/constants/Constants_PNJL.jl")
 include("../../../src/relaxtime/ScatteringAmplitude.jl")
 include("../../../src/relaxtime/EffectiveCouplings.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")
@@ -30,7 +30,7 @@ using .GaussLegendre: gauleg
 
 # Load ParameterTypes directly (don't use test_utils to avoid Supposition dependency)
 if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "../../../src/ParameterTypes.jl"))
+    Base.include(Main, joinpath(@__DIR__, "../../../src/types/ParameterTypes.jl"))
 end
 using .Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 

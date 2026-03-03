@@ -35,7 +35,7 @@ end
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src", "relaxtime"))
 
 println("Including Constants_PNJL.jl ..."); flush(stdout)
-include(joinpath(PROJECT_ROOT, "src", "Constants_PNJL.jl"))
+include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 println("Including GaussLegendre.jl ..."); flush(stdout)
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 println("Including OneLoopIntegrals.jl ..."); flush(stdout)

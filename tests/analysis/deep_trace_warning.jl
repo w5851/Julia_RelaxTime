@@ -1,6 +1,6 @@
 # 详细追踪警告来源 - 添加更多调试信息
 
-include("../../src/Constants_PNJL.jl")
+include("../../src/constants/Constants_PNJL.jl")
 include("../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .ScatteringAmplitude

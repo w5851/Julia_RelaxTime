@@ -8,7 +8,7 @@ end
 using .Models
 
 # Model-based thermo facade
-include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "core", "ThermoFacade.jl"))
+include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "pnjl_physics", "core", "ThermoFacade.jl"))
 using .ThermoFacade
 
 using StaticArrays

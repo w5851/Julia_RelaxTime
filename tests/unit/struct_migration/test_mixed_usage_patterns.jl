@@ -8,7 +8,7 @@ include("test_utils.jl")
 
 # Load modules
 if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "..", "..", "..", "src", "ParameterTypes.jl"))
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "..", "src", "types", "ParameterTypes.jl"))
 end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple

@@ -3,7 +3,7 @@
 """
 
 using Test
-include("../../../src/QuarkDistribution.jl")
+include("../../../src/models/pnjl_physics/QuarkDistribution.jl")
 
 using .PNJLQuarkDistributions
 

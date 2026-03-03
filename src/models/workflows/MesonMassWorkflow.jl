@@ -19,7 +19,7 @@ end
 const IncludeOnce = Main.IncludeOnce
 
 # Ensure shared constants are loaded at Main-level (avoid module replacement warnings)
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "constants", "Constants_PNJL.jl"))
 IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 
 const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MesonMass.jl"))
@@ -33,7 +33,7 @@ const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "Equi
 IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "ParameterTypes.jl"))
+const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 

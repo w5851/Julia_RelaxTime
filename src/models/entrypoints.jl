@@ -18,20 +18,8 @@ export transport_workflow_module, meson_workflow_module
 export workflow_param_adapters_module
 export pnjl_module
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-const _TRANSPORT_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "TransportWorkflowBridge.jl"))
-const _MESON_WORKFLOW_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "MesonMassWorkflowBridge.jl"))
-const _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workflows", "WorkflowParamAdaptersBridge.jl"))
-
 @inline function _transport_workflow_module()
-    bridge = IncludeOnce.include_once!(Main, :ModelsTransportWorkflowBridge, _TRANSPORT_WORKFLOW_BRIDGE_PATH)
-    workflow = Base.invokelatest(bridge.module_ref)
+    workflow = TransportWorkflow
     if !(isdefined(workflow, :solve_gap_and_transport) && isdefined(workflow, :solve_transport_from_equilibrium))
         error("TransportWorkflow module loaded but required API is missing")
     end
@@ -39,17 +27,11 @@ const _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH = normpath(joinpath(@__DIR__, "workfl
 end
 
 @inline function _meson_workflow_module()
-    bridge = IncludeOnce.include_once!(Main, :ModelsMesonMassWorkflowBridge, _MESON_WORKFLOW_BRIDGE_PATH)
-    workflow = Base.invokelatest(bridge.module_ref)
+    workflow = MesonMassWorkflow
     if !isdefined(workflow, :solve_gap_and_meson_point)
         error("MesonMassWorkflow module loaded but required API (solve_gap_and_meson_point) is missing")
     end
     return workflow
-end
-
-@inline function _invoke_worldsafe(mod, symbol::Symbol, args...; kwargs...)
-    fn = getproperty(mod, symbol)
-    return Base.invokelatest(fn, args...; kwargs...)
 end
 
 function run_tmu_scan(args...; kwargs...)
@@ -65,15 +47,15 @@ function build_default_rho_grid(args...; kwargs...)
 end
 
 function solve_gap_and_transport(args...; kwargs...)
-    return _invoke_worldsafe(_transport_workflow_module(), :solve_gap_and_transport, args...; kwargs...)
+    return _transport_workflow_module().solve_gap_and_transport(args...; kwargs...)
 end
 
 function solve_transport_from_equilibrium(args...; kwargs...)
-    return _invoke_worldsafe(_transport_workflow_module(), :solve_transport_from_equilibrium, args...; kwargs...)
+    return _transport_workflow_module().solve_transport_from_equilibrium(args...; kwargs...)
 end
 
 function solve_gap_and_meson_point(args...; kwargs...)
-    return _invoke_worldsafe(_meson_workflow_module(), :solve_gap_and_meson_point, args...; kwargs...)
+    return _meson_workflow_module().solve_gap_and_meson_point(args...; kwargs...)
 end
 
 @inline transport_workflow_module() = _transport_workflow_module()
@@ -81,8 +63,7 @@ end
 @inline pnjl_module() = Main.Models
 
 @inline function workflow_param_adapters_module()
-    bridge = IncludeOnce.include_once!(Main, :ModelsWorkflowParamAdaptersBridge, _WORKFLOW_PARAM_ADAPTERS_BRIDGE_PATH)
-    adapters = Base.invokelatest(bridge.module_ref)
+    adapters = WorkflowParamAdapters
     if !isdefined(adapters, :normalize_quark_params)
         error("WorkflowParamAdapters module loaded but required API (normalize_quark_params) is missing")
     end

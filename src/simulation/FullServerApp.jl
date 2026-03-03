@@ -10,7 +10,7 @@ using .MomentumMapping
 include(joinpath(@__DIR__, "..", "models", "Models.jl"))
 using .Models
 
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl"))
+const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PATH)
 end

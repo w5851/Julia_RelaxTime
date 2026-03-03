@@ -2,12 +2,12 @@ using Test
 using Logging
 using Printf
 
-const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution.jl"))
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "pnjl_physics", "QuarkDistribution.jl"))
 if !isdefined(Main, :PNJLQuarkDistributions)
     Base.include(Main, _QUARK_DISTRIBUTION_PATH)
 end
 
-include("../../../src/QuarkDistribution_Aniso.jl")
+include("../../../src/relaxtime/QuarkDistribution_Aniso.jl")
 
 const Aniso = Main.PNJLQuarkDistributions_Aniso
 const Dist = Main.PNJLQuarkDistributions
