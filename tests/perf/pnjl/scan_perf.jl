@@ -32,7 +32,8 @@ const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const FixedRho = getproperty(PNJL, :FixedRho)
 const ContinuitySeed = getproperty(PNJL, :ContinuitySeed)
-const update! = getproperty(PNJL, :update!)
+const SeedStrategies = getproperty(PNJL, :SeedStrategies)
+const update_seed! = getproperty(SeedStrategies, :update!)
 const run_trho_scan = getproperty(PNJL, :run_trho_scan)
 
 # ============================================================================
@@ -74,7 +75,7 @@ function run_tmu_scan_benchmark()
             result = solve(mode, T_fm, μ_fm; xi=xi, seed_strategy=seed)
             if result.converged
                 n_success += 1
-                update!(seed, result.solution)
+                update_seed!(seed, result.solution)
             end
         end
     end

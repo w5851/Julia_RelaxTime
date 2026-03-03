@@ -26,8 +26,5 @@ jobs:
         with:
           version: "1.11"
 
-      - name: Install dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
-
       - name: Check active docs governance
-        run: julia --project=. scripts/dev/check_active_docs_governance.jl
+        run: julia scripts/dev/check_active_docs_governance.jl

@@ -32,6 +32,7 @@ export calculate_rho_backend
 export calculate_pressure_backend
 export calculate_omega_backend
 export calculate_omega_components_backend
+export calculate_thermo, calculate_rho, calculate_pressure, calculate_omega, calculate_omega_components
 export calculate_mass_vec_backend
 export calculate_number_densities_backend
 export get_models_model
@@ -219,6 +220,26 @@ function calculate_number_densities_backend(
 
     m = _effective_model(model, model_kind)
     return ModelThermodynamics.number_densities_model(m, x_state, mu_vec, T_fm; thermal_nodes=nodes, xi=xi)
+end
+
+@inline function calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi::Real=0.0; kwargs...)
+    return calculate_thermo_backend(x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, kwargs...)
+end
+
+@inline function calculate_rho(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi::Real=0.0; kwargs...)
+    return calculate_rho_backend(x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, kwargs...)
+end
+
+@inline function calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi::Real=0.0; kwargs...)
+    return calculate_pressure_backend(x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, kwargs...)
+end
+
+@inline function calculate_omega(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi::Real=0.0; kwargs...)
+    return calculate_omega_backend(x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, kwargs...)
+end
+
+@inline function calculate_omega_components(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi::Real=0.0; kwargs...)
+    return calculate_omega_components_backend(x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, kwargs...)
 end
 
 end # module ThermoFacade

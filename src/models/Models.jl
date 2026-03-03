@@ -75,6 +75,12 @@ export solve_gap_and_meson_point
 export run_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, PromotionResult, PhasePipelineResult
+export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
+export Thermodynamics
+export calculate_U, calculate_U_derivative_T
+export Constants_PNJL
+export calculate_omega, calculate_pressure, calculate_rho, calculate_thermo
+export TmuScanConfig, TrhoScanConfig
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
 
@@ -158,5 +164,89 @@ if !isdefined(Main, :MesonMassWorkflow)
 end
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
+
+const Integrals = PNJLCore.PNJLIntegrals
+const Thermodynamics = Main.ThermoFacade
+const Constants_PNJL = Main.Constants_PNJL
+const TmuScanConfig = ScanConfig.TmuScanConfig
+const TrhoScanConfig = ScanConfig.TrhoScanConfig
+const update! = SeedStrategies.update!
+const reset! = SeedStrategies.reset!
+
+@inline function cached_nodes(
+	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
+	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+)
+	return PNJLCore.cached_nodes(p_num, t_num)
+end
+
+@inline function vacuum_integral(mass)
+	TT = typeof(mass)
+	Λ = convert(TT, Main.Constants_PNJL.Λ_inv_fm)
+	return PNJLCore.vacuum_integral_with_cutoff(convert(TT, mass), Λ)
+end
+
+@inline function calculate_energy_sum(masses)
+	total = zero(eltype(masses))
+	@inbounds for i in 1:length(masses)
+		total += vacuum_integral(masses[i])
+	end
+	return -2 * Main.Constants_PNJL.N_color * total
+end
+
+@inline function calculate_mass_vec(x_state::AbstractVector{<:Real}; kwargs...)
+	model = create_model(:PNJL)
+	φ = SVector{3, Float64}(Float64(x_state[1]), Float64(x_state[2]), Float64(x_state[3]))
+	return calculate_mass_vec(model, φ; kwargs...)
+end
+
+@inline function calculate_chiral(φ::AbstractVector{<:Real}; kwargs...)
+	model = create_model(:PNJL)
+	ϕ = SVector{3, Float64}(Float64(φ[1]), Float64(φ[2]), Float64(φ[3]))
+	return calculate_chiral(model, ϕ; kwargs...)
+end
+
+@inline function calculate_number_densities(
+	x_state,
+	mu_vec,
+	T_fm,
+	thermal_nodes=nothing,
+	xi=0.0;
+	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
+	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+	kwargs...
+)
+	model = create_model(:PNJL)
+	return number_densities(
+		model,
+		x_state,
+		T_fm,
+		mu_vec;
+		thermal_nodes=thermal_nodes,
+		p_num=p_num,
+		t_num=t_num,
+		xi=xi,
+		kwargs...,
+	)
+end
+
+@inline function calculate_U(T_fm, Φ, Φbar)
+	model = create_model(:PNJL)
+	return polyakov_potential(model, Φ, Φbar, T_fm)
+end
+
+@inline function calculate_U_derivative_T(T_fm, Φ, Φbar)
+	δT = 1e-6
+	return (calculate_U(T_fm + δT, Φ, Φbar) - calculate_U(T_fm - δT, Φ, Φbar)) / (2δT)
+end
+
+const calculate_omega = Thermodynamics.calculate_omega
+const calculate_pressure = Thermodynamics.calculate_pressure
+const calculate_rho = Thermodynamics.calculate_rho
+const calculate_thermo = Thermodynamics.calculate_thermo
+
+if !isdefined(Main, :PNJL)
+	@eval Main const PNJL = $(@__MODULE__)
+end
 
 end # module Models
