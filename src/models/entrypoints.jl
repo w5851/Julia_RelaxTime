@@ -5,8 +5,8 @@ Models 统一流程入口（阶段 C）：
 - 工作流：solve_gap_and_transport / solve_gap_and_meson_point
 
 当前采用兼容转发策略：
-- 业务流程模块仍位于 `src/pnjl/*`，但统一经 `Models` 暴露调用入口；
-- 后续可以在不改调用方的前提下，把实现逐步迁入 `src/models`。
+- 业务流程模块统一位于 `src/models/*` 域并由 `Models` 暴露入口；
+- 对外保留稳定函数签名，便于调用方无感升级。
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid

@@ -2,7 +2,7 @@
 
 PNJL 模型在 models 路径下使用的最小热项积分与节点缓存实现。
 
-目标：让 `src/models/pnjl_physics/PNJLModel.jl` 的热项计算不再依赖 legacy 的
+目标：让 `models/pnjl_physics/PNJLModel.jl` 的热项计算不再依赖 legacy 的
 `src/pnjl/core/Integrals.jl`（以及其上层 Thermodynamics include）。
 
 说明：此处实现保持与 legacy 积分节点与 log-sum 形式一致，但刻意只提供

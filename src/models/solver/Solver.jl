@@ -53,6 +53,15 @@ end
 
 function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     model = create_model(:PNJL)
+    if haskey(kwargs, :seeds)
+        seeds = kwargs[:seeds]
+        candidates = [DefaultSeed(Float64.(seed), Float64.(seed), :hadron) for seed in seeds]
+        selector = haskey(kwargs, :selector) ? kwargs[:selector] : SeedStrategies.default_omega_selector
+        forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :seeds && k != :selector)...)
+        return solve_multi(model, mode, T_fm, μ_fm;
+            seed_strategy=MultiSeed(candidates, selector),
+            forward_kwargs...)
+    end
     return solve_multi(model, mode, T_fm, μ_fm; kwargs...)
 end
 
@@ -63,3 +72,8 @@ end
 
 @inline create_implicit_solver(; kwargs...) = ImplicitSolver.create_implicit_solver(; kwargs...)
 @inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) = ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)
+
+@inline function solve_with_derivatives(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    _ = model, mode
+    return ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)
+end
