@@ -107,13 +107,14 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
             q_nt = as_namedtuple(q_original)
             q_reconstructed = QuarkParams(q_nt)
             
-            # Verify all fields are preserved (using Supposition's assertion mechanism)
-            q_reconstructed.m.u ≈ q_original.m.u || error("m.u not preserved")
-            q_reconstructed.m.d ≈ q_original.m.d || error("m.d not preserved")
-            q_reconstructed.m.s ≈ q_original.m.s || error("m.s not preserved")
-            q_reconstructed.μ.u ≈ q_original.μ.u || error("μ.u not preserved")
-            q_reconstructed.μ.d ≈ q_original.μ.d || error("μ.d not preserved")
-            q_reconstructed.μ.s ≈ q_original.μ.s || error("μ.s not preserved")
+            # Verify all fields are preserved — use === for bitwise identity
+            # (no arithmetic is involved, and ≈ fails for NaN which Floats may generate)
+            q_reconstructed.m.u === q_original.m.u || error("m.u not preserved")
+            q_reconstructed.m.d === q_original.m.d || error("m.d not preserved")
+            q_reconstructed.m.s === q_original.m.s || error("m.s not preserved")
+            q_reconstructed.μ.u === q_original.μ.u || error("μ.u not preserved")
+            q_reconstructed.μ.d === q_original.μ.d || error("μ.d not preserved")
+            q_reconstructed.μ.s === q_original.μ.s || error("μ.s not preserved")
         end
         
         @check max_examples=100 function property_thermo_params_roundtrip(
@@ -128,11 +129,11 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
             t_nt = as_namedtuple(t_original)
             t_reconstructed = ThermoParams(t_nt)
             
-            # Verify all fields are preserved (using Supposition's assertion mechanism)
-            t_reconstructed.T ≈ t_original.T || error("T not preserved")
-            t_reconstructed.Φ ≈ t_original.Φ || error("Φ not preserved")
-            t_reconstructed.Φbar ≈ t_original.Φbar || error("Φbar not preserved")
-            t_reconstructed.ξ ≈ t_original.ξ || error("ξ not preserved")
+            # Verify all fields are preserved — use === for bitwise identity
+            t_reconstructed.T === t_original.T || error("T not preserved")
+            t_reconstructed.Φ === t_original.Φ || error("Φ not preserved")
+            t_reconstructed.Φbar === t_original.Φbar || error("Φbar not preserved")
+            t_reconstructed.ξ === t_original.ξ || error("ξ not preserved")
         end
     end
     

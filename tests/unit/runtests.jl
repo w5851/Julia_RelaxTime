@@ -152,6 +152,10 @@ end
             _include_dir(joinpath(UNIT_DIR, "types"))
         end
 
+        @testset "Constants" begin
+            _include_dir(joinpath(UNIT_DIR, "constants"))
+        end
+
         @testset "Config" begin
             _include_dir(joinpath(UNIT_DIR, "config"))
         end
