@@ -1,16 +1,20 @@
-# 诊断脚本：比较 STRATEGY_HYBRID 与其他策略
-#
-# 说明：该文件用于数值策略对比与诊断（包含打印与耗时统计），不属于单元测试。
-# 建议手动运行：
+using Test
+
+# 注意：该文件历史上是诊断/对比脚本（包含 println 与耗时统计），不属于单元测试。
+# 为保持 UNIT_PROFILE=full 可用，这里默认只做一个轻量占位。
+# 如需运行诊断脚本，请手动执行：
 #   julia --project=. tests/analysis/relaxtime_diagnostics/test_hybrid_strategy.jl
 
-using Printf
-using QuadGK: quadgk
-
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegralsAniso.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
+if get(ENV, "RUN_HYBRID_DIAGNOSTIC", "0") != "1"
+    @testset "Hybrid strategy diagnostic (skipped in unit)" begin
+        @test true
+    end
+else
+    # 原诊断脚本（保留，仅在显式开启时执行）
+    using Printf
+    include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegralsAniso.jl"))
+    include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegrals.jl"))
+    using QuadGK: quadgk
 
 println("=" ^ 70)
 println("Testing STRATEGY_HYBRID vs other strategies")
@@ -116,3 +120,5 @@ end
 println("\n" * "=" ^ 70)
 println("Test completed!")
 println("=" ^ 70)
+
+end

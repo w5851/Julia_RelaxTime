@@ -19,7 +19,7 @@ Models.pnjl_module()
 const PNJL = Models.pnjl_module()
 const cached_nodes = getproperty(PNJL, :cached_nodes)
 const Thermodynamics = getproperty(PNJL, :Thermodynamics)
-const calculate_mass_vec = getproperty(PNJL, :calculate_mass_vec)
+const mass_vec_fn = getproperty(PNJL, :calculate_mass_vec)
 const calculate_chiral = getproperty(PNJL, :calculate_chiral)
 const calculate_U = getproperty(PNJL, :calculate_U)
 const calculate_U_derivative_T = getproperty(PNJL, :calculate_U_derivative_T)
@@ -35,7 +35,7 @@ const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
 @testset "calculate_mass_vec" begin
     @testset "从 φ 计算质量" begin
         φ = SVector{3}(-1.8, -1.8, -2.2)  # 典型强子相值
-        masses = calculate_mass_vec(φ)
+        masses = mass_vec_fn(φ)
         
         @test length(masses) == 3
         @test all(isfinite.(masses))
@@ -45,7 +45,7 @@ const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
     
     @testset "从 x_state 计算质量" begin
         x_state = SVector{5}(-1.8, -1.8, -2.2, 0.1, 0.1)
-        masses = calculate_mass_vec(x_state)
+        masses = mass_vec_fn(x_state)
         
         @test length(masses) == 3
         @test all(isfinite.(masses))
@@ -54,12 +54,12 @@ const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
     @testset "质量正定性" begin
         # 强子相：大质量
         φ_hadron = SVector{3}(-1.8, -1.8, -2.2)
-        masses_hadron = calculate_mass_vec(φ_hadron)
+        masses_hadron = mass_vec_fn(φ_hadron)
         @test all(masses_hadron .> 0)
         
         # 夸克相：小质量
         φ_quark = SVector{3}(-0.2, -0.2, -1.8)
-        masses_quark = calculate_mass_vec(φ_quark)
+        masses_quark = mass_vec_fn(φ_quark)
         @test all(masses_quark .> 0)
     end
 end

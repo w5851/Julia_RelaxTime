@@ -8,10 +8,18 @@
 """
 
 # ── 加载共享外部依赖到 Main 作用域 ──
-Base.include(Main, normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl")))
-Base.include(Main, normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl")))
-Base.include(Main, normpath(joinpath(@__DIR__, "..", "QuarkDistribution.jl")))
-Base.include(Main, normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl")))
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "ParameterTypes.jl")))
+end
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "Constants_PNJL.jl")))
+end
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "QuarkDistribution.jl")))
+end
+if !isdefined(Main, :PNJLQuarkDistributions_Aniso)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl")))
+end
 
 module RelaxTime
 
