@@ -6,7 +6,7 @@ using JSON3
 using Dates
 using NLsolve: LineSearches
 
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PERF_OUTPUT_DIR = joinpath(PROJECT_ROOT, "tests", "perf", "results", "pnjl")
 const JSON_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.json")
 const MARKDOWN_OUTPUT = joinpath(PERF_OUTPUT_DIR, "single_point_benchmark.md")

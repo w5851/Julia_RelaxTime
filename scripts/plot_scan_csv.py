@@ -240,17 +240,19 @@ def plot_lines(
     grid_alpha: float,
     legend_loc: str | None,
     line_style: str = "-",
+    figsize: Tuple[float, float] | None = None,
     formats: List[str] = None,
     dpi: int = 600,
     check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    _figsize = figsize or APS_FIGSIZE["default"]
 
     if multi_y and group:
         raise ValueError("--multi-y cannot be combined with --group")
 
     if multi_y:
-        fig, ax = plt.subplots(figsize=(6.8, 4.6))
+        fig, ax = plt.subplots(figsize=_figsize)
 
         xscale = xscale_override or (_axis_scale(meta, axis="x", col=x) if meta else None)
         yscale = yscale_override or (_axis_scale(meta, axis="y", col=ys[0]) if meta and ys else None)
@@ -339,7 +341,7 @@ def plot_lines(
         groups.setdefault(group_key(r), []).append(r)
 
     for y in ys:
-        fig, ax = plt.subplots(figsize=(6.8, 4.6))
+        fig, ax = plt.subplots(figsize=_figsize)
         any_plotted = False
 
         # 轴缩放：优先使用命令行覆盖，其次使用元数据。
@@ -545,11 +547,13 @@ def plot_heatmaps(
     zscale: str | None,
     clim: Tuple[float, float] | None,
     cmap: str | None,
+    figsize: Tuple[float, float] | None = None,
     formats: List[str] = None,
     dpi: int = 600,
     check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
+    _figsize_hm = figsize or (7.6, 5.2)
 
     for field in fields:
         xs, ys, grid = _build_grid(rows, x=x, y=y, z=field)
@@ -576,7 +580,7 @@ def plot_heatmaps(
         if not xs2 or not ys2:
             continue
 
-        fig, ax = plt.subplots(figsize=(7.6, 5.2))
+        fig, ax = plt.subplots(figsize=_figsize_hm)
 
         # 轴缩放：优先使用命令行覆盖，其次使用元数据。
         xscale = xscale_override or (_axis_scale(meta, axis="x", col=x) if meta else None)
@@ -666,22 +670,47 @@ def _resolve_path(p: Path) -> Path:
     return PROJECT_ROOT / p
 
 
+# APS standard figure widths (inches)
+APS_FIGSIZE = {
+    "single-column": (3.375, 2.5),
+    "double-column": (6.75, 4.6),
+    "default": (6.8, 4.6),
+}
+
+
 def configure_publication_style(*, font: str = "Times New Roman", font_size: int = 10, line_width: float = 1.0, dpi: int = 600) -> None:
-    """Configure matplotlib rcParams for publication-quality figures."""
+    """Configure matplotlib rcParams for publication-quality figures.
+
+    Key APS (Physical Review) compliance points:
+    - pdf.fonttype = 42 → TrueType font embedding (required by APS)
+    - ps.fonttype = 42  → same for EPS output
+    - axes.linewidth ≥ 0.5 pt
+    - tick direction inward
+    - font size 7–10 pt
+    """
     matplotlib.rcParams.update({
         "font.family": "serif",
         "font.serif": [font, "Times"],
         "font.size": font_size,
         "axes.titlesize": font_size,
         "axes.labelsize": font_size,
+        "axes.linewidth": 0.8,
         "legend.fontsize": max(8, font_size - 2),
         "xtick.labelsize": max(8, font_size - 2),
         "ytick.labelsize": max(8, font_size - 2),
+        "xtick.major.width": 0.6,
+        "ytick.major.width": 0.6,
+        "xtick.minor.width": 0.4,
+        "ytick.minor.width": 0.4,
         "lines.linewidth": line_width,
         "lines.markersize": 4,
         "xtick.direction": "in",
         "ytick.direction": "in",
+        "xtick.top": True,
+        "ytick.right": True,
         "axes.grid": False,
+        "pdf.fonttype": 42,
+        "ps.fonttype": 42,
         "savefig.dpi": dpi,
         "savefig.format": "pdf",
         "savefig.bbox": "tight",
@@ -776,6 +805,18 @@ def main() -> None:
     ap.add_argument("--clim", type=float, nargs=2, default=None, metavar=("VMIN", "VMAX"), help="Heatmap color limits")
     ap.add_argument("--cmap", type=str, default=None, help="Heatmap colormap name")
 
+    # figure size presets (APS journal compliance)
+    ap.add_argument(
+        "--figsize",
+        type=str,
+        default=None,
+        help=(
+            "Figure size preset or WxH in inches. "
+            "Presets: 'single-column' (3.375x2.5), 'double-column' (6.75x4.6). "
+            "Custom example: '5.0x3.5'"
+        ),
+    )
+
     # output formats and quality
     ap.add_argument("--formats", type=str, default="pdf,png", help="Comma-separated output formats (e.g. pdf,png,eps)")
     ap.add_argument("--dpi", type=int, default=600, help="Output DPI for saved figures (default 600)")
@@ -797,6 +838,18 @@ def main() -> None:
         title = meta.get("title")
 
     splits = _split_rows(rows, split=args.split)
+
+    # Parse figsize
+    figsize: Tuple[float, float] | None = None
+    if args.figsize:
+        fs = args.figsize.strip().lower()
+        if fs in APS_FIGSIZE:
+            figsize = APS_FIGSIZE[fs]
+        elif "x" in fs:
+            parts = fs.split("x", 1)
+            figsize = (float(parts[0]), float(parts[1]))
+        else:
+            raise ValueError(f"Invalid --figsize: {args.figsize}. Use preset name or WxH (e.g. '5.0x3.5')")
 
     # Configure publication style before plotting
     configure_publication_style(dpi=args.dpi)
@@ -834,6 +887,7 @@ def main() -> None:
                 grid_alpha=float(args.grid_alpha),
                 legend_loc=args.legend_loc,
                 line_style=args.line_style,
+                figsize=figsize,
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),
@@ -857,6 +911,7 @@ def main() -> None:
                 zscale=_parse_scale_arg(args.zscale),
                 clim=tuple(args.clim) if args.clim else None,
                 cmap=args.cmap,
+                figsize=figsize,
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),

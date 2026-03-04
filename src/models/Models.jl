@@ -240,10 +240,15 @@ end
 	return (calculate_U(T_fm + δT, Φ, Φbar) - calculate_U(T_fm - δT, Φ, Φbar)) / (2δT)
 end
 
-const calculate_omega = Thermodynamics.calculate_omega
-const calculate_pressure = Thermodynamics.calculate_pressure
-const calculate_rho = Thermodynamics.calculate_rho
-const calculate_thermo = Thermodynamics.calculate_thermo
+# NOTE: use forwarding functions instead of const aliases to break the circular
+# load-time dependency  ThermoFacade → ModelThermodynamics → Models.jl.
+# At the point Models.jl is evaluated, ThermoFacade has not finished defining
+# its functions yet, so `Thermodynamics.calculate_omega` would be UndefVarError.
+# Forwarding functions defer the lookup to call time, which is always safe.
+@inline calculate_omega(args...; kwargs...)   = Thermodynamics.calculate_omega(args...; kwargs...)
+@inline calculate_pressure(args...; kwargs...) = Thermodynamics.calculate_pressure(args...; kwargs...)
+@inline calculate_rho(args...; kwargs...)      = Thermodynamics.calculate_rho(args...; kwargs...)
+@inline calculate_thermo(args...; kwargs...)   = Thermodynamics.calculate_thermo(args...; kwargs...)
 
 if !isdefined(Main, :PNJL)
 	@eval Main const PNJL = $(@__MODULE__)

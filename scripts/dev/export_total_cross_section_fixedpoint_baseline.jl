@@ -4,15 +4,13 @@ using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "AFieldBuilder.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TotalCrossSection.jl"))
+# Load RelaxTime module (provides GaussLegendre, AFieldBuilder, etc. in correct nesting)
+include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxTime.jl"))
 
 using .Constants_PNJL: G_fm2, K_fm5
-using .AFieldBuilder: ensure_quark_params_has_A
-using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
-using .TotalCrossSection: total_cross_section
+using .RelaxTime.AFieldBuilder: ensure_quark_params_has_A
+using .RelaxTime.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using .RelaxTime.TotalCrossSection: total_cross_section
 
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxtime", "baseline_total_cross_section_fixedpoints_v1.csv")
 

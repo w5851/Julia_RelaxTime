@@ -23,10 +23,12 @@ const mass_vec_fn = getproperty(PNJL, :calculate_mass_vec)
 const calculate_chiral = getproperty(PNJL, :calculate_chiral)
 const calculate_U = getproperty(PNJL, :calculate_U)
 const calculate_U_derivative_T = getproperty(PNJL, :calculate_U_derivative_T)
-const calculate_omega = getproperty(Thermodynamics, :calculate_omega)
-const calculate_pressure = getproperty(Thermodynamics, :calculate_pressure)
-const calculate_rho = getproperty(Thermodynamics, :calculate_rho)
-const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
+# Use local aliases (not const) to avoid redefinition conflict when running
+# in the full test suite where `using .Models` may have already imported these.
+const _tf_calculate_omega = getproperty(Thermodynamics, :calculate_omega)
+const _tf_calculate_pressure = getproperty(Thermodynamics, :calculate_pressure)
+const _tf_calculate_rho = getproperty(Thermodynamics, :calculate_rho)
+const _tf_calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
 
 # ============================================================================
 # 有效质量计算测试
@@ -129,7 +131,7 @@ end
     thermal_nodes = cached_nodes(24, 6)
     xi = 0.0
     
-    omega = calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    omega = _tf_calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
     @test isfinite(omega)
 end
 
@@ -140,8 +142,8 @@ end
     thermal_nodes = cached_nodes(24, 6)
     xi = 0.0
     
-    P = calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    omega = calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    P = _tf_calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    omega = _tf_calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, xi)
     
     @test isfinite(P)
     @test isapprox(P, -omega; rtol=1e-10)
@@ -158,7 +160,7 @@ end
     thermal_nodes = cached_nodes(24, 6)
     xi = 0.0
     
-    rho_vec = calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    rho_vec = _tf_calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi)
     
     @test length(rho_vec) == 3
     @test all(isfinite.(rho_vec))
@@ -171,7 +173,7 @@ end
     thermal_nodes = cached_nodes(24, 6)
     xi = 0.0
     
-    P, rho_norm, s, ε = calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    P, rho_norm, s, ε = _tf_calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
     
     @test isfinite(P)
     @test isfinite(rho_norm)
