@@ -41,28 +41,14 @@ Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo
 type stability and zero overhead.
 """
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Load ParameterTypes at Main level if not already loaded
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
+# Dependencies loaded by RelaxTime.jl entry point
 const Constants_PNJL = Main.Constants_PNJL
-include("../utils/ParticleSymbols.jl")
-include("TotalPropagator.jl")
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 using Main.Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
-using .TotalPropagator: calculate_cms_momentum
-using .ParticleSymbols: get_quark_masses_for_process, parse_scattering_process
+import ..TotalPropagator
+using ..TotalPropagator: calculate_cms_momentum
+using ..ParticleSymbols: get_quark_masses_for_process, parse_scattering_process
 
 export scattering_amplitude_squared
 export prepare_scattering_context

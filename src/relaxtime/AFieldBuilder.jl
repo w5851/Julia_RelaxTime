@@ -1,23 +1,8 @@
 module AFieldBuilder
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-include("../integration/GaussLegendre.jl")
-
-# Prefer reuse Main.OneLoopIntegrals / Main.OneLoopIntegralsCorrection to avoid duplication
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
-IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
-const _ONE_LOOP_INTEGRALS_CORRECTION_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegralsAniso.jl"))
-IncludeOnce.include_once!(Main, :OneLoopIntegralsCorrection, _ONE_LOOP_INTEGRALS_CORRECTION_PATH)
-
-using .GaussLegendre: gauleg, DEFAULT_COSΘ_NODES
-using Main.OneLoopIntegrals: A
-using Main.OneLoopIntegralsCorrection: A_aniso
+using ..GaussLegendre: gauleg, DEFAULT_COSΘ_NODES
+using ..OneLoopIntegrals: A
+using ..OneLoopIntegralsCorrection: A_aniso
 
 export build_A_triplet, ensure_quark_params_has_A
 

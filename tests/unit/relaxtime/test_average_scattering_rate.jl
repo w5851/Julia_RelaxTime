@@ -1,9 +1,13 @@
 using Test
 using BenchmarkTools
 
-include("../../../src/relaxtime/AverageScatteringRate.jl")
+# Load all relaxtime modules via RelaxTime.jl entry point
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
+end
 
-using .AverageScatteringRate
+using Main.AverageScatteringRate
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 # 构造简化参数，降低节点以加快单测

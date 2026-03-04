@@ -39,38 +39,20 @@ Both produce identical results. Internal normalization ensures type stability an
 """
 
 # Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-include("../integration/GaussLegendre.jl")
-include("TotalCrossSection.jl")
-
-# Prefer reuse Main-level distribution modules to avoid duplication
-const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "models", "pnjl_physics", "QuarkDistribution.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
+# Dependencies loaded by RelaxTime.jl entry point
 
 using LinearAlgebra
 using Statistics
 
 using Main.Constants_PNJL: Λ_inv_fm
-using .GaussLegendre: gauleg
-using .TotalCrossSection: total_cross_section
-using .TotalCrossSection: parse_particles_from_process
-using .TotalCrossSection.ScatteringAmplitude.ParticleSymbols: is_antiquark
+using ..GaussLegendre: gauleg
+import ..TotalCrossSection
+using ..TotalCrossSection: total_cross_section
+using ..TotalCrossSection: parse_particles_from_process
+using ..ParticleSymbols: is_antiquark
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
-# Import parameter types from Main
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!, build_w0cdf_pchip_cache

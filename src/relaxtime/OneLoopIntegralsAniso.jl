@@ -6,26 +6,11 @@ module OneLoopIntegralsCorrection
 export B0_correction, A_correction, A_aniso,
     IntegrationDiagnostics
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-
-# Prefer reuse Main-level distribution module to avoid duplication
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
-
-# Prefer reuse Main.OneLoopIntegrals to avoid duplicating the module
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
-IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
-include("../integration/GaussLegendre.jl")
+import ..GaussLegendre  # needed by IntervalQuadratureStrategies
 include("../integration/IntervalQuadratureStrategies.jl")
-using .GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
+using ..GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using Main.PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
-using Main.OneLoopIntegrals: internal_momentum, EPS_K,
+using ..OneLoopIntegrals: internal_momentum, EPS_K,
     energy_cutoff, singularity_k_positive, const_integral_term_A
 
 """ k>0时

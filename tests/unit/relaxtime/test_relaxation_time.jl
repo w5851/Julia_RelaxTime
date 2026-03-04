@@ -1,7 +1,11 @@
 using Test
 
-include("../../../src/relaxtime/RelaxationTime.jl")
-using .RelaxationTime
+# Load all relaxtime modules via RelaxTime.jl entry point
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
+end
+using Main.RelaxationTime
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const DENSITIES_SAMPLE = (u=1.0, d=1.0, s=2.0, ubar=3.0, dbar=3.0, sbar=4.0)

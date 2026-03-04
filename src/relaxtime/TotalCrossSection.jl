@@ -85,16 +85,7 @@ all_σ = calculate_all_total_cross_sections(
 - api/TotalCrossSection.md: API 详细文档
 """
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Import parameter types from Main
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
+# Dependencies loaded by RelaxTime.jl entry point
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
@@ -102,29 +93,13 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 @inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
 @inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
-# 导入依赖模块
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
-
-# Prefer reuse Main-level distribution module to avoid duplication
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
-include(joinpath(@__DIR__, "ScatteringAmplitude.jl"))
-include(joinpath(@__DIR__, "DifferentialCrossSection.jl"))
-
-# Prefer reuse Main.OneLoopIntegrals to avoid duplicating the module
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "OneLoopIntegrals.jl"))
-IncludeOnce.include_once!(Main, :OneLoopIntegrals, _ONE_LOOP_INTEGRALS_PATH)
-
 using Main.Constants_PNJL: SCATTERING_MESON_MAP
-using .GaussLegendre: standard_nodes_weights
+using ..GaussLegendre: standard_nodes_weights
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
-using .ScatteringAmplitude: scattering_amplitude_squared, prepare_scattering_context, scattering_amplitude_squared_prepared
-using .ScatteringAmplitude.ParticleSymbols: parse_scattering_process, is_antiquark
-using .DifferentialCrossSection: differential_cross_section
-using Main.OneLoopIntegrals: distribution_value
+using ..ScatteringAmplitude: scattering_amplitude_squared, prepare_scattering_context, scattering_amplitude_squared_prepared
+using ..ParticleSymbols: parse_scattering_process, is_antiquark
+using ..DifferentialCrossSection: differential_cross_section
+using ..OneLoopIntegrals: distribution_value
 
 # 默认积分点数
 const DEFAULT_T_INTEGRAL_POINTS = 6

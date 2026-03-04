@@ -11,12 +11,12 @@
 
 using Test
 
-# 添加src路径
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
-
-include("../../../src/relaxtime/PolarizationCache.jl")
-using .PolarizationCache
+# Load all relaxtime modules via RelaxTime.jl entry point
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
+end
+using Main.PolarizationCache
 
 @testset "极化函数缓存测试" begin
     

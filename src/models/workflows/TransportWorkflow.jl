@@ -21,18 +21,19 @@ module TransportWorkflow
     - 可通过 `transport_kwargs.prefer_energy_aniso` 覆写；若两者都提供，以显式 keyword 为准。
 """
 
-# --- 依赖：优先复用 Main.*，避免重复模块与 world-age 噪声 ---
+# --- 依赖：通过 RelaxTime.jl 入口加载全部 relaxtime 子模块 ---
 const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
 if !isdefined(Main, :IncludeOnce)
     Base.include(Main, _INCLUDE_ONCE_PATH)
 end
 const IncludeOnce = Main.IncludeOnce
 
-const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxationTime.jl"))
-const RelaxationTime = IncludeOnce.include_once!(Main, :RelaxationTime, _RELAXATION_TIME_PATH)
-
-const _A_FIELD_BUILDER_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "AFieldBuilder.jl"))
-const AFieldBuilder = IncludeOnce.include_once!(Main, :AFieldBuilder, _A_FIELD_BUILDER_PATH)
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
+end
+const RelaxationTime = Main.RelaxationTime
+const AFieldBuilder = Main.AFieldBuilder
 
 # Shared config loader (TOML)
 const _CONFIG_LOADER_PATH = normpath(joinpath(@__DIR__, "..", "..", "config", "ConfigLoader.jl"))
@@ -87,11 +88,8 @@ const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "..", "..", "m
 const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)
 using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
 
-# Avoid duplicate TransportCoefficients modules when this workflow is loaded after
-# standalone TransportCoefficients tests; reuse Main.TransportCoefficients if it
-# already exists, otherwise load it into Main once.
-const _TRANSPORT_COEFFS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "TransportCoefficients.jl"))
-const TransportCoefficients = IncludeOnce.include_once!(Main, :TransportCoefficients, _TRANSPORT_COEFFS_PATH)
+# TransportCoefficients available via RelaxTime backward-compat promotion
+const TransportCoefficients = Main.TransportCoefficients
 
 using StaticArrays
 

@@ -15,7 +15,7 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
 
 include("../../../src/integration/GaussLegendre.jl")
 include("../../../src/models/pnjl_physics/QuarkDistribution.jl")
-include("../../../src/relaxtime/QuarkDistribution_Aniso.jl")
+include("../../../src/QuarkDistribution_Aniso.jl")
 include("../../../src/relaxtime/OneLoopIntegrals.jl")
 include("../../../src/relaxtime/OneLoopIntegralsAniso.jl")
 include("../../../src/relaxtime/PolarizationAniso.jl")

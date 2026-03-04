@@ -17,7 +17,7 @@ include("tests/unit/test_tilde_B0_enhanced.jl")
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Printf
 

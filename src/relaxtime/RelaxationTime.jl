@@ -1,5 +1,4 @@
-if !isdefined(Main, :RelaxationTime)
-    @eval module RelaxationTime
+module RelaxationTime
 
 """
 # RelaxationTime Module
@@ -55,35 +54,16 @@ struct inputs to NamedTuples at function boundaries. This ensures:
 - Backward compatibility with existing code
 """
 
-include(joinpath(@__DIR__, "AverageScatteringRate.jl"))
-include(joinpath(@__DIR__, "TotalCrossSection.jl"))
-
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Prefer reuse Main.AFieldBuilder to centralize A/A_aniso construction logic
-const _A_FIELD_BUILDER_PATH = normpath(joinpath(@__DIR__, "AFieldBuilder.jl"))
-IncludeOnce.include_once!(Main, :AFieldBuilder, _A_FIELD_BUILDER_PATH)
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-
-# Ensure shared parameter types are loaded for cross-module reuse
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
+# Dependencies loaded by RelaxTime.jl entry point
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
-using .AverageScatteringRate: average_scattering_rate, CrossSectionCache,
+using ..AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
     build_w0cdf_pchip_cache
-using .TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
+using ..TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
 using Main.Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
+using ..AFieldBuilder: ensure_quark_params_has_A as _ensure_A
 
 export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCESSES
 
@@ -104,7 +84,7 @@ const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
 )::NamedTuple
     quark_nt = _nt_quark(quark_params)
     thermo_nt = _nt_thermo(thermo_params)
-    return Main.AFieldBuilder.ensure_quark_params_has_A(
+    return _ensure_A(
         quark_nt,
         thermo_nt;
         p_nodes=p_nodes,
@@ -604,4 +584,3 @@ function load_cross_section_caches_from_dir(dir::AbstractString)::Dict{Symbol,Cr
 end
 
 end # module RelaxationTime
-end

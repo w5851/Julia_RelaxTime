@@ -38,24 +38,11 @@ type stability and zero overhead.
 """
 module TotalPropagator
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-include("MesonPropagator.jl")
-include("PolarizationCache.jl")
-
 using Main.Constants_PNJL: SCATTERING_MESON_MAP
 using ..ParticleSymbols: parse_scattering_process, parse_particle_pair_str, extract_quark_flavor, parse_scattering_process_flavor_codes, get_quark_masses_for_process
 using ..ParticleSymbols: FLAVOR_U, FLAVOR_D, FLAVOR_S
-using .MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
-using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
+using ..MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
+using ..PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
 # Import parameter types for struct support
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple

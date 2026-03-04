@@ -22,36 +22,15 @@ module TransportCoefficients
 - σ: p⁴q²/E² (来自 p² × p²q²/E²)
 """
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-include("../integration/GaussLegendre.jl")
-include("../integration/PhaseSpaceSampling.jl")
-
-# Prefer reuse Main-level distribution modules to avoid duplication
-const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "models", "pnjl_physics", "QuarkDistribution.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
-const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution_Aniso.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions_Aniso, _QUARK_DISTRIBUTION_ANISO_PATH)
+# Dependencies loaded by RelaxTime.jl entry point
 
 using Base.MathConstants: π
 
 using Main.Constants_PNJL: N_color, α
-using .GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
-using .PhaseSpaceSampling: p_nodes_weights, cos_nodes_weights, integrate_p, integrate_p_cos
+using ..GaussLegendre: gauleg, DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, DEFAULT_COSΘ_NODES, DEFAULT_COSΘ_WEIGHTS
+using ..PhaseSpaceSampling: p_nodes_weights, cos_nodes_weights, integrate_p, integrate_p_cos
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
-
-# Ensure shared parameter types are loaded at Main-level
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 
 using Main.ParameterTypes: QuarkParams, ThermoParams
 

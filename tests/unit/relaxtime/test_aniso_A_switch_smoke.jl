@@ -1,7 +1,7 @@
 using Test
 
-if !isdefined(Main, :RelaxationTime)
-    include("../../../src/relaxtime/RelaxationTime.jl")
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl")))
 end
 if !isdefined(Main, :Models)
     if !isdefined(Main, :Models)
@@ -32,8 +32,8 @@ using Main.OneLoopIntegralsCorrection: A_aniso
         @test hasproperty(q_iso, :A)
         @test hasproperty(q_aniso, :A)
 
-        nodes_p, weights_p = RelaxationTime.AverageScatteringRate.gauleg(0.0, 20.0, 16)
-        nodes_cos, weights_cos = RelaxationTime.AverageScatteringRate.gauleg(-1.0, 1.0, RelaxationTime.DEFAULT_ANGLE_NODES)
+        nodes_p, weights_p = Main.GaussLegendre.gauleg(0.0, 20.0, 16)
+        nodes_cos, weights_cos = Main.GaussLegendre.gauleg(-1.0, 1.0, Main.AverageScatteringRate.DEFAULT_ANGLE_NODES)
 
         A_u_iso_expected = A(quark_params.m.u, quark_params.μ.u, thermo_iso.T, thermo_iso.Φ, thermo_iso.Φbar, nodes_p, weights_p)
         A_u_aniso_expected = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_aniso.T, thermo_aniso.Φ, thermo_aniso.Φbar,
@@ -54,7 +54,7 @@ using Main.OneLoopIntegralsCorrection: A_aniso
 
         nodes = TransportWorkflow.DEFAULT_MOMENTUM_NODES
         weights = TransportWorkflow.DEFAULT_MOMENTUM_WEIGHTS
-        nodes_cos, weights_cos = RelaxationTime.AverageScatteringRate.gauleg(-1.0, 1.0, 4)
+        nodes_cos, weights_cos = Main.GaussLegendre.gauleg(-1.0, 1.0, 4)
 
         A_u_iso_expected = A(quark_params.m.u, quark_params.μ.u, thermo_iso.T, thermo_iso.Φ, thermo_iso.Φbar, nodes, weights)
         A_u_aniso_expected = A_aniso(quark_params.m.u, quark_params.μ.u, thermo_aniso.T, thermo_aniso.Φ, thermo_aniso.Φbar,

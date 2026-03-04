@@ -76,16 +76,9 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 ```
 """
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
+# Include-once helper — REMOVED (loaded via RelaxTime.jl entry point)
 
 # 导入参数类型
-const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 # ----------------------------------------------------------------------------

@@ -23,8 +23,7 @@
 """
 module PolarizationCache
 
-include("PolarizationAniso.jl")
-using .PolarizationAniso: polarization_aniso
+using ..PolarizationAniso: polarization_aniso
 
 # 导出函数
 export polarization_aniso_cached, reset_cache!, get_cache_stats

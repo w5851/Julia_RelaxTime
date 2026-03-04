@@ -7,7 +7,10 @@ if !isdefined(Main, :PNJLQuarkDistributions)
     Base.include(Main, _QUARK_DISTRIBUTION_PATH)
 end
 
-include("../../../src/relaxtime/QuarkDistribution_Aniso.jl")
+const _QUARK_DISTRIBUTION_ANISO_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "QuarkDistribution_Aniso.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions_Aniso)
+    Base.include(Main, _QUARK_DISTRIBUTION_ANISO_PATH)
+end
 
 const Aniso = Main.PNJLQuarkDistributions_Aniso
 const Dist = Main.PNJLQuarkDistributions

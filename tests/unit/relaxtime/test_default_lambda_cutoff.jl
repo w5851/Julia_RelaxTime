@@ -17,24 +17,10 @@ const _MODELS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "model
 if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_PATH)
 end
-const _RELAXATION_TIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxationTime.jl"))
-if !isdefined(Main, :RelaxationTime)
-    Base.include(Main, _RELAXATION_TIME_PATH)
-end
-
-const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
-if !isdefined(Main, :OneLoopIntegrals)
-    Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
-end
-
-const _EFFECTIVE_COUPLINGS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
-if !isdefined(Main, :EffectiveCouplings)
-    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH)
-end
-
-const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
-if !isdefined(Main, :GaussLegendre)
-    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+# Load all relaxtime modules via RelaxTime.jl entry point
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
 end
 
 using .Models
@@ -53,7 +39,7 @@ using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.GaussLegendre: gauleg
 
 const RTModule = Main.RelaxationTime
-const RT_ASR = RTModule.AverageScatteringRate
+const RT_ASR = Main.AverageScatteringRate
 
 # 测试条件：T=100 MeV, μB=800 MeV（重夸克条件，m_s 接近 Λ）
 const T_MEV = 100.0

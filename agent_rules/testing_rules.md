@@ -1,89 +1,139 @@
 # 测试组织与入口规范（Julia_RelaxTime）
 
-更新时间：2026-01-13
+更新时间：2026-03-04
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
-- 默认测试入口“稳定、确定、快速”（CI/本地都不折腾）。
-- 允许逐步清理历史测试/脚本/性能探针，而不影响主分支开发体验。
+- 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
+- 四层分类清晰：Unit / Integration / Validation / Benchmark。
+- 非测试制品（分析脚本、性能探针）与测试严格分离。
+
+---
 
 ## 目录分层（必须遵守）
 
-- `tests/unit/`：单元测试（确定性、快速、无外部依赖）
-- `tests/analysis/`：分析/验证类测试（可能慢、可能依赖数据文件、允许更宽松）
-- `tests/perf/`：性能/基准（允许很慢、可打印 timing、可调节点数）
-- `scripts/`：交互诊断/一次性检查/扫描脚本（不算测试入口的一部分）
+| 层级 | 目录 | 用途 | CI 层 |
+|------|------|------|-------|
+| Unit | `tests/unit/` | 确定性、快速、无外部依赖的单元测试 | smoke / full |
+| Numerics | `tests/unit/numerics/` | 核心数值算法测试（Gauss-Legendre、Cauchy PV 等） | smoke |
+| Integration | `tests/integration/`（待建） | 跨模块端到端正确性（待 P1.3 完成后迁入） | nightly |
+| Validation | `tests/validation/`（待建） | Fortran/Mathematica 基线对照 | nightly |
+| Benchmark | `benchmark/` | PkgBenchmark 性能基准，独立 `Project.toml` | on-demand |
+| 分析脚本 | `scripts/analysis/` | 一次性分析/诊断/扫描脚本（非测试入口） | — |
+| 性能脚本 | `scripts/perf/` | Profile/timing 探针脚本（非测试入口） | — |
+| 交互脚本 | `scripts/` | 调试/可视化/开发辅助脚本 | — |
 
-## Unit 测试准入规则（硬规则）
+### 已废弃目录
 
-unit 只允许放满足以下全部条件的测试：
+- ~~`tests/analysis/`~~ → 已迁移至 `scripts/analysis/`（2026-03-04）
+- ~~`tests/perf/`~~ → benchmark 文件迁至 `benchmark/`，profile 脚本迁至 `scripts/perf/`（2026-03-04）
+- ~~`tests/unit/integration/`~~ → 已重命名为 `tests/unit/numerics/`（2026-03-04）
+
+## 四层分类标准
+
+### Unit（单元测试）
+准入条件——必须全部满足：
 1. **确定性**：固定随机种子；结果不依赖运行时机/线程调度/浮点噪声放大。
-2. **快速**：默认配置下可接受的时间内结束（建议单文件 < 1–2s，整套 smoke < 1min）。
+2. **快速**：默认配置下单文件 < 1–2s，整套 smoke < 1min。
 3. **无外部依赖**：不依赖网络、不依赖大数据文件、不依赖用户本地环境（除 `--project=.` 之外）。
 4. **不混杂**：不把脚本、性能探针、交互诊断代码放进 `tests/unit`。
 
-不满足上述条件的内容：
-- 放 `tests/analysis` / `tests/perf` / `scripts`。
+### Integration（集成测试）
+- 跨模块端到端正确性验证：gap → densities → transport 链路。
+- 可以较慢（单文件 < 30s），但仍须确定性。
+- 在 P1.3（relaxtime 模块化）完成后从 `tests/unit/` 中分离。
 
-## 子系统分目录（推荐做法，逐步迁移）
+### Validation（验证测试）
+- Fortran / Mathematica 参考值对照。
+- 使用固定参考数据文件，容差在 `isapprox` 层显式标注。
+- 允许更宽松的运行时间。
 
-按子系统分目录管理：
-- `tests/unit/pnjl/`：PNJL 求解器、热力学、积分缓存等的单元测试
-- `tests/unit/relaxtime/`：RelaxTime/散射率/截面等单元测试
-- `tests/unit/integration/`：跨模块但仍应快速、确定的“小集成”测试（可选）
+### Benchmark（性能基准）
+- 使用 `BenchmarkTools.jl` / `PkgBenchmark.jl`。
+- 独立 `benchmark/Project.toml`，不污染主项目依赖。
+- 入口：`benchmark/benchmarks.jl`（PkgBenchmark 标准布局）。
+
+## 子系统分目录
+
+按子系统管理 unit 测试：
+- `tests/unit/pnjl/`：PNJL 求解器、热力学、积分缓存等
+- `tests/unit/relaxtime/`：RelaxTime/散射率/截面等
+- `tests/unit/numerics/`：核心数值算法（Gauss-Legendre、Cauchy PV、动量映射）
+- `tests/unit/models/`：模型工厂、适配器、后端桥接
+- `tests/unit/config/`：配置加载与校验
 
 根目录 `tests/unit/*.jl` 只保留：
 - `tests/unit/runtests.jl`（入口）
-- 少量“通用数值算法”测试（如果无法明确归属）
+- 少量无法归属子系统的通用测试
 
 ## 单测命名
 
-- 单测文件统一：`test_*.jl`
-- 非单测脚本严禁命名为 `test_*.jl`（否则容易被入口误 include）
+- 测试文件统一：`test_*.jl`
+- Benchmark 文件：`bench_*.jl`（`benchmark/` 下）或 `benchmark_*.jl`
+- 非测试脚本严禁命名为 `test_*.jl`
 
-## 单测入口策略（现行）
+## 单测入口策略
 
 入口文件：`tests/unit/runtests.jl`
 
-提供两种运行档：
-- `UNIT_PROFILE=smoke`（默认）：精选、稳定、确定性的测试集合，要求长期保持绿色。
-- `UNIT_PROFILE=full`：更大范围的 include，用于逐步修复/迁移历史测试；允许短期不全绿，但要以“逐步变绿”为目标。
+运行档：
+- `UNIT_PROFILE=smoke`（默认）：精选、稳定、确定性的测试集合，长期保持绿色。
+- `UNIT_PROFILE=full`：更大范围 include，逐步修复；允许短期不全绿。
 
-可用环境变量（以入口实现为准）：
+环境变量（以入口实现为准）：
 - `UNIT_PROFILE=smoke|full`
-- `UNIT_INCLUDE_PERF=1`：仅在 full 下有意义，用于允许 include 名称包含 performance 的文件（默认关闭）。
+- `UNIT_INCLUDE_PERF=1`：full 下允许 include performance 相关测试（默认关闭）。
+- `UNIT_INCLUDE_SLOW=1`：允许 include 标记为 slow 的测试。
+- `UNIT_INCLUDE_WIP=1`：允许 include 标记为 WIP 的测试。
+- `UNIT_FILES=path1,path2,...`：仅运行指定文件。
 
 ## PNJL 求解器相关约定
 
-- 在 unit 中涉及随机采样的测试必须是**确定性的**（固定 RNG seed），并且默认样本数要保守；可通过 ENV 提升样本数做压力回归。
-- “在参数空间内找失败点/分支问题”的扫描应作为脚本放在 `scripts/pnjl/`，而不是 unit。
+- 随机采样测试必须**确定性**（固定 RNG seed），默认样本数保守。
+- 参数空间扫描放 `scripts/pnjl/`，不放 unit。
 
-## 后端对比测试约定（legacy/models）
+## 后端对比测试约定
 
-- 后端对比基线应使用固定点集（固定 `T/μ/xi`、固定积分节点与配置），避免把随机性引入断言。
-- 容差一律放在测试断言层（`isapprox(...; rtol=..., atol=...)`），不要通过被测函数 keyword 注入“测试专用容差”。
-- 对于 transport smoke（阶段 5 当前口径）：
+> 注：`solver_backend` 参数已弃用（P3.5, 2026-03-04），现统一走 models 路径。
+
+- 基线使用固定点集（固定 `T/μ/xi`、固定积分节点与配置）。
+- 容差在测试断言层（`isapprox(...; rtol=..., atol=...)`），不通过被测函数 keyword 注入。
+- Transport smoke 口径：
 	- 固定点：`(T,μ)=(0.75,0.00),(0.90,0.00),(1.05,0.00),(0.90,0.15)`
 	- 比较量：`η/σ/ζ`
 	- 容差：`rtol=8e-2`, `atol=1e-6`
-- 若后续因算法升级需要调整容差：必须在 `docs/dev/active` 记录“变更原因 + 新旧口径对比 + 对应 smoke 结果”。
+- 容差调整须在 `docs/dev/active` 记录变更原因与对比。
 
-## smoke → full/perf 迁移触发条件
+## smoke → full 迁移触发条件
 
-当某测试不再满足 smoke 的“高价值、低成本、稳定”原则时，应迁移出 `UNIT_PROFILE=smoke`：
+当测试不再满足 smoke 的"高价值、低成本、稳定"原则时应迁出：
 
 - 移入 `full`：
-	- 单文件运行时长长期高于日常迭代可接受范围（经验阈值：稳定超过 ~10s，且与主链价值相比收益有限）；
-	- 依赖较重初始化或更大输入规模，但仍属于功能正确性验证。
-- 移入 `perf`：
-	- 主要目标是比较性能/缩放趋势（节点数、采样数、时间开销），而非功能正确性；
-	- 需要放宽时长约束、打印 timing 或进行参数扫。
+	- 单文件运行时长稳定超过 ~10s；
+	- 依赖较重初始化或更大输入规模。
+- 移入 `benchmark/`：
+	- 主要目标是性能/缩放趋势比较，非功能正确性。
 - 触发后动作：
-	- 在 `tests/unit/runtests.jl` 的分组注释中说明迁移原因；
-	- 在 `docs/dev/active` 记录迁移前后的回归影响（耗时/覆盖变化）；
-	- 至少补一条替代 smoke（同子系统、低成本）以维持代表性覆盖。
+	- 在 `runtests.jl` 分组注释中说明迁移原因；
+	- 在 `docs/dev/active` 记录回归影响；
+	- 补一条替代 smoke 维持覆盖。
 
-## 迁移/清理建议（路线）
+## Benchmark 基础设施
 
-1. 把 `tests/unit/` 根目录下明显属于子系统的文件迁入对应子目录。
-2. 修复过时 API、移除非单测脚本、将 perf 探针迁到 `tests/perf/`。
-3. 逐步扩大 smoke 覆盖面，让 full 越来越绿。
+```
+benchmark/
+├── Project.toml       # 独立依赖（BenchmarkTools）
+├── benchmarks.jl      # PkgBenchmark 入口
+├── README.md          # 说明与运行方法
+├── relaxtime/         # 输运相关 benchmark
+│   ├── bench_*.jl
+│   └── benchmark_*.jl
+└── pnjl/              # PNJL 相关 benchmark
+    └── *.jl
+```
+
+运行方式：
+```julia
+using PkgBenchmark
+benchmarkpkg(".")              # 运行全部
+judge(benchmarkpkg("."), "main")  # 对比分支
+```

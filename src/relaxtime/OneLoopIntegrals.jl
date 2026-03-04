@@ -7,24 +7,9 @@
 """
 module OneLoopIntegrals
 
-include("../integration/GaussLegendre.jl")
-
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-# Prefer reuse Main.Constants_PNJL to avoid duplicating the constants module
-const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PNJL_PATH)
-
-# Prefer reuse Main-level distribution module to avoid duplication
-const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "models", "pnjl_physics", "QuarkDistribution.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
+import ..GaussLegendre  # needed by IntervalQuadratureStrategies (bare `GaussLegendre.gauleg`)
 include("../integration/IntervalQuadratureStrategies.jl")
-using .GaussLegendre: gauleg
+using ..GaussLegendre: gauleg
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using Main.Constants_PNJL: Λ_inv_fm

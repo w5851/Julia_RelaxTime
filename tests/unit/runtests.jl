@@ -68,8 +68,8 @@ const SMOKE_FILES = [
 
     # [Core Numerics] 保留理由：基础数值模块，变动少但影响范围大。
     # Core numerics / integration utils
-    joinpath(UNIT_DIR, "integration", "test_gausslegendre.jl"),
-    joinpath(UNIT_DIR, "integration", "test_cauchypv.jl"),
+    joinpath(UNIT_DIR, "numerics", "test_gausslegendre.jl"),
+    joinpath(UNIT_DIR, "numerics", "test_cauchypv.jl"),
 
     # [RelaxTime Numerics] 保留理由：输运底层数值稳定性哨兵。
     # RelaxTime core numerics
@@ -190,8 +190,8 @@ end
             end
         end
     elseif profile == "full"
-        @testset "Integration" begin
-            _include_dir(joinpath(UNIT_DIR, "integration"))
+        @testset "Numerics" begin
+            _include_dir(joinpath(UNIT_DIR, "numerics"))
         end
 
         @testset "PNJL" begin

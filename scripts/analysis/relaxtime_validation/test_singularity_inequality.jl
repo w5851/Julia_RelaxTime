@@ -13,7 +13,7 @@ include("test/test_singularity_inequality.jl")
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Printf
 

@@ -18,15 +18,11 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-# Ensure shared constants are loaded at Main-level (avoid module replacement warnings)
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
-
-const _MESON_MASS_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MesonMass.jl"))
-IncludeOnce.include_once!(Main, :MesonMass, _MESON_MASS_PATH)
-
-const _MOTT_TRANSITION_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "MottTransition.jl"))
-IncludeOnce.include_once!(Main, :MottTransition, _MOTT_TRANSITION_PATH)
+# Load all relaxtime submodules via RelaxTime.jl (ensures Constants_PNJL, MesonMass, MottTransition etc.)
+const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAX_TIME_MODULE_PATH)
+end
 
 # Unified equilibrium facade (solve_gap + state_vector + masses)
 const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))

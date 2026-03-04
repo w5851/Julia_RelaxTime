@@ -10,7 +10,7 @@ include("test/test_polarization_aniso.jl")
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "..", ".."))
+Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Base: time_ns
 using Printf
