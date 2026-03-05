@@ -1,3 +1,15 @@
+---
+title: Thermodynamics 收口未完成项任务单
+archived: true
+original: docs/dev/active/2026-03-02_Thermodynamics收口未完成项任务单.md
+archived_date: 2026-03-05
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Thermodynamics 收口未完成项任务单
 
 更新日期：2026-03-02

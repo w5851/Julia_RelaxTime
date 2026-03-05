@@ -468,7 +468,15 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     
     # 使用 ForwardDiff.jacobian 计算 dx/dθ
     dx_dθ = ForwardDiff.jacobian(solve_state, θ)
-    
+    """
+    # 中心差分替代方案（仅用于测试/诊断，默认不使用）
+    _fd_step = sqrt(eps(Float64))
+    ΔT = max(1e-5, _fd_step * abs(T_val))       # fm⁻¹，约 1e-5
+    Δμ = max(1e-5, _fd_step * (abs(μ_val) + 1e-6))
+    x_T_p = solve_state([T_val + ΔT, μ_val]);  x_T_m = solve_state([T_val - ΔT, μ_val])
+    x_μ_p = solve_state([T_val, μ_val + Δμ]);  x_μ_m = solve_state([T_val, μ_val - Δμ])
+    dx_dθ = hcat((x_T_p .- x_T_m) ./ (2ΔT), (x_μ_p .- x_μ_m) ./ (2Δμ))
+    """
     # 计算 ∂s/∂x, ∂n/∂x（固定 T, μ）
     # 通过 ModelThermodynamics（嵌套 ForwardDiff 可以工作）
     function s_of_x(x_vec)

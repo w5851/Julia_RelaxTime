@@ -31,8 +31,8 @@ using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
 using .ScanCSV: ScanCSV
 
-const RT_ASR = TransportWorkflow.RelaxationTime.AverageScatteringRate
-const RT_TCS = TransportWorkflow.RelaxationTime.TotalCrossSection
+const RT_ASR = Main.AverageScatteringRate
+const RT_TCS = Main.TotalCrossSection
 const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
 
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
@@ -430,6 +430,8 @@ function run_scan(opts::ScanOptions)
                         continue
                     end
 
+                    try  # 单点容错：失败不中断后续扫描
+
                     T_fm = T_mev / ħc_MeV_fm
                     muq_mev = muB_mev / 3.0
                     muq_fm = muq_mev / ħc_MeV_fm
@@ -437,15 +439,26 @@ function run_scan(opts::ScanOptions)
                     # 先求一次平衡解（用于 K_coeffs，并作为后续 workflow 的 equilibrium 复用）
                     # 初值连续性：首点用 hadron seed；后续点沿用上一点解向量。
                     base_seed = phase_tracker.previous_solution === nothing ? TransportWorkflow.PNJL.HADRON_SEED_5 : phase_tracker.previous_solution
-                    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                        xi=xi,
-                        thermo_backend=:models,
-                        solver_backend=:models,
-                        p_num=opts.p_num,
-                        t_num=opts.t_num,
-                        seed_state=base_seed,
-                        models_residual_norm_max=1e-4,
-                    )
+                    base = try
+                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                            xi=xi,
+                            solver_backend=:models,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=base_seed,
+                            models_residual_norm_max=1e-4,
+                        )
+                    catch err
+                        @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=err
+                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                            xi=xi,
+                            solver_backend=:legacy,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=nothing,
+                            solver_kwargs=(iterations=opts.max_iter,),
+                        )
+                    end
 
                     if base.converged
                         # PhaseAwareContinuitySeed 的 update! 需要 MeV 单位（与其内部 boundary.csv 数据一致）
@@ -470,35 +483,74 @@ function run_scan(opts::ScanOptions)
                     end
                     """
                     # 正式计算：τ + 输运（η/σ）; ζ 默认关
-                    res = solve_gap_and_transport(
-                        T_fm,
-                        muq_fm;
-                        xi=xi,
-                        equilibrium=base,
-                        compute_tau=true,
-                        K_coeffs=ktmp.K_coeffs,
-                        tau=nothing,
-                        compute_bulk=opts.compute_bulk,
-                        p_num=opts.p_num,
-                        t_num=opts.t_num,
-                        seed_state=seed_state,
-                        solver_kwargs=solver_kwargs,
-                        tau_kwargs=(
-                            p_nodes=opts.tau_p_nodes,
-                            angle_nodes=opts.tau_angle_nodes,
-                            phi_nodes=opts.tau_phi_nodes,
-                            n_sigma_points=opts.tau_n_sigma_points,
-                            #cs_caches=cs_caches,
-                            p_grid=p_grid,
-                            p_w=p_w,
-                            cos_grid=cos_grid,
-                            cos_w=cos_w,
-                            phi_grid=phi_grid,
-                            phi_w=phi_w,
-                            sigma_cutoff=sigma_cutoff,
-                        ),
-                        transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
-                    )
+                    # 容错策略：先尝试含 bulk，若 bulk 计算抛错则回退到只算 η/σ
+                    _compute_bulk_this_point = opts.compute_bulk
+                    res = try
+                        solve_gap_and_transport(
+                            T_fm,
+                            muq_fm;
+                            xi=xi,
+                            equilibrium=base,
+                            compute_tau=true,
+                            K_coeffs=ktmp.K_coeffs,
+                            tau=nothing,
+                            compute_bulk=_compute_bulk_this_point,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=seed_state,
+                            solver_kwargs=solver_kwargs,
+                            tau_kwargs=(
+                                p_nodes=opts.tau_p_nodes,
+                                angle_nodes=opts.tau_angle_nodes,
+                                phi_nodes=opts.tau_phi_nodes,
+                                n_sigma_points=opts.tau_n_sigma_points,
+                                #cs_caches=cs_caches,
+                                p_grid=p_grid,
+                                p_w=p_w,
+                                cos_grid=cos_grid,
+                                cos_w=cos_w,
+                                phi_grid=phi_grid,
+                                phi_w=phi_w,
+                                sigma_cutoff=sigma_cutoff,
+                            ),
+                            transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                        )
+                    catch bulk_err
+                        if _compute_bulk_this_point
+                            @warn "transport with bulk failed, retrying without bulk" T_mev=T_mev muB_mev=muB_mev xi=xi err=bulk_err
+                            _compute_bulk_this_point = false
+                            solve_gap_and_transport(
+                                T_fm,
+                                muq_fm;
+                                xi=xi,
+                                equilibrium=base,
+                                compute_tau=true,
+                                K_coeffs=ktmp.K_coeffs,
+                                tau=nothing,
+                                compute_bulk=false,
+                                p_num=opts.p_num,
+                                t_num=opts.t_num,
+                                seed_state=seed_state,
+                                solver_kwargs=solver_kwargs,
+                                tau_kwargs=(
+                                    p_nodes=opts.tau_p_nodes,
+                                    angle_nodes=opts.tau_angle_nodes,
+                                    phi_nodes=opts.tau_phi_nodes,
+                                    n_sigma_points=opts.tau_n_sigma_points,
+                                    p_grid=p_grid,
+                                    p_w=p_w,
+                                    cos_grid=cos_grid,
+                                    cos_w=cos_w,
+                                    phi_grid=phi_grid,
+                                    phi_w=phi_w,
+                                    sigma_cutoff=sigma_cutoff,
+                                ),
+                                transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                            )
+                        else
+                            rethrow(bulk_err)
+                        end
+                    end
 
                     eq = res.equilibrium
                     dens = res.densities
@@ -510,7 +562,6 @@ function run_scan(opts::ScanOptions)
                         eq.x_state,
                         eq.mu_vec,
                         T_fm;
-                        thermo_backend=:models,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
                         xi=xi,
@@ -525,7 +576,6 @@ function run_scan(opts::ScanOptions)
                         eq.x_state,
                         eq.mu_vec,
                         T_fm;
-                        thermo_backend=:models,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
                         xi=xi,
@@ -563,6 +613,10 @@ function run_scan(opts::ScanOptions)
                     if eq.converged
                         seed_state = eq.x_state
                     end
+
+                    catch point_err
+                        @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+                    end  # try 单点容错
 
                     if opts.gc_every_n > 0 && done % opts.gc_every_n == 0
                         GC.gc()

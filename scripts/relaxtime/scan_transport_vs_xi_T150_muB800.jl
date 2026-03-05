@@ -365,10 +365,14 @@ function write_header(io)
         "Phi", "Phibar",
         "m_u", "m_d", "m_s",
         "rho_baryon", "rho_norm",
+        "omega_fm4inv", "P_fm4inv", "epsilon_fm4inv", "s_fm3inv",
+        "omega_MeV_fm3", "P_MeV_fm3", "epsilon_MeV_fm3",
+        "eps_minus_3P_over_T4",
         "n_u", "n_d", "n_s", "n_ubar", "n_dbar", "n_sbar",
         "tau_u", "tau_d", "tau_s", "tau_ubar", "tau_dbar", "tau_sbar",
         "tauinv_u", "tauinv_d", "tauinv_s", "tauinv_ubar", "tauinv_dbar", "tauinv_sbar",
-        "eta", "sigma", "zeta",
+        "eta", "sigma", "zeta", "eta_over_s", "zeta_over_s",
+        "sigma_over_T", "sigma_over_T_over_eta_over_s", "zeta_over_s_over_eta_over_s",
     ])
 end
 
@@ -410,6 +414,11 @@ function run_scan(opts::Options)
                 "y_label.eta" => "η",
                 "y_label.sigma" => "σ",
                 "y_label.zeta" => "ζ",
+                "y_label.eta_over_s" => "η/s",
+                "y_label.zeta_over_s" => "ζ/s",
+                "y_label.sigma_over_T" => "σ/T",
+                "y_label.sigma_over_T_over_eta_over_s" => "(σ/T)/(η/s)",
+                "y_label.zeta_over_s_over_eta_over_s" => "(ζ/s)/(η/s)",
                 "y_label.tau_u" => "τ_u",
                 "y_label.tau_s" => "τ_s",
                 "y_scale.tau_u" => "log",
@@ -437,15 +446,28 @@ function run_scan(opts::Options)
                 continue
             end
 
-            base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                xi=xi,
-                thermo_backend=:models,
-                solver_backend=:models,
-                p_num=opts.p_num,
-                t_num=opts.t_num,
-                seed_state=seed_state,
-                models_residual_norm_max=1e-4,
-            )
+            try  # 单点容错：失败不中断后续扫描
+
+            base = try
+                TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                    xi=xi,
+                    solver_backend=:models,
+                    p_num=opts.p_num,
+                    t_num=opts.t_num,
+                    seed_state=seed_state,
+                    models_residual_norm_max=1e-4,
+                )
+            catch err
+                @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=err
+                TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                    xi=xi,
+                    solver_backend=:legacy,
+                    p_num=opts.p_num,
+                    t_num=opts.t_num,
+                    seed_state=nothing,
+                    solver_kwargs=(iterations=opts.max_iter,),
+                )
+            end
             seed_state = Vector(base.x_state)
 
             Φ = Float64(base.x_state[4])
@@ -470,22 +492,48 @@ function run_scan(opts::Options)
                 tau_kwargs = merge(tau_kwargs, (cs_caches=cs_caches,))
             end
 
-            res = solve_gap_and_transport(
-                T_fm,
-                muq_fm;
-                xi=xi,
-                equilibrium=base,
-                compute_tau=true,
-                K_coeffs=K_coeffs,
-                tau=nothing,
-                compute_bulk=opts.compute_bulk,
-                p_num=opts.p_num,
-                t_num=opts.t_num,
-                seed_state=seed_state,
-                solver_kwargs=(iterations=opts.max_iter,),
-                tau_kwargs=tau_kwargs,
-                transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
-            )
+            _compute_bulk_this_point = opts.compute_bulk
+            res = try
+                solve_gap_and_transport(
+                    T_fm,
+                    muq_fm;
+                    xi=xi,
+                    equilibrium=base,
+                    compute_tau=true,
+                    K_coeffs=K_coeffs,
+                    tau=nothing,
+                    compute_bulk=_compute_bulk_this_point,
+                    p_num=opts.p_num,
+                    t_num=opts.t_num,
+                    seed_state=seed_state,
+                    solver_kwargs=(iterations=opts.max_iter,),
+                    tau_kwargs=tau_kwargs,
+                    transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                )
+            catch bulk_err
+                if _compute_bulk_this_point
+                    @warn "transport with bulk failed, retrying without bulk" T_mev=T_mev muB_mev=muB_mev xi=xi err=bulk_err
+                    _compute_bulk_this_point = false
+                    solve_gap_and_transport(
+                        T_fm,
+                        muq_fm;
+                        xi=xi,
+                        equilibrium=base,
+                        compute_tau=true,
+                        K_coeffs=K_coeffs,
+                        tau=nothing,
+                        compute_bulk=false,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        seed_state=seed_state,
+                        solver_kwargs=(iterations=opts.max_iter,),
+                        tau_kwargs=tau_kwargs,
+                        transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                    )
+                else
+                    rethrow(bulk_err)
+                end
+            end
 
             eq = res.equilibrium
             dens = res.densities
@@ -501,6 +549,36 @@ function run_scan(opts::Options)
             rho = (dens.u - dens.ubar) + (dens.d - dens.dbar) + (dens.s - dens.sbar)
             rho_norm = rho / (3.0 * ρ0_inv_fm3)
 
+            # 计算热力学量
+            P_fm4inv, _, s_fm3inv, epsilon_fm4inv = TransportWorkflow.ThermoFacade.calculate_thermo_backend(
+                eq.x_state,
+                eq.mu_vec,
+                T_fm;
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                xi=xi,
+            )
+
+            omega_fm4inv = TransportWorkflow.ThermoFacade.calculate_omega_backend(
+                eq.x_state,
+                eq.mu_vec,
+                T_fm;
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                xi=xi,
+            )
+            omega_MeV_fm3 = omega_fm4inv * ħc_MeV_fm
+            P_MeV_fm3 = P_fm4inv * ħc_MeV_fm
+            epsilon_MeV_fm3 = epsilon_fm4inv * ħc_MeV_fm
+            eps_minus_3P_over_T4 = (isfinite(epsilon_fm4inv) && isfinite(P_fm4inv) && isfinite(T_fm) && T_fm != 0.0) ? ((epsilon_fm4inv - 3.0 * P_fm4inv) / T_fm^4) : NaN
+
+            # 计算无量纲比值
+            eta_over_s = (isfinite(tr.eta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.eta / s_fm3inv) : NaN
+            zeta_over_s = (isfinite(tr.zeta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.zeta / s_fm3inv) : NaN
+            sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
+            sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
+            zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+
             row = join([
                 string(T_mev), string(muq_mev), string(muB_mev), string(xi),
                 string(T_fm), string(muq_fm),
@@ -508,10 +586,14 @@ function run_scan(opts::Options)
                 string(Φ), string(Φbar),
                 string(masses.u), string(masses.d), string(masses.s),
                 string(rho), string(rho_norm),
+                string(omega_fm4inv), string(P_fm4inv), string(epsilon_fm4inv), string(s_fm3inv),
+                string(omega_MeV_fm3), string(P_MeV_fm3), string(epsilon_MeV_fm3),
+                string(eps_minus_3P_over_T4),
                 string(dens.u), string(dens.d), string(dens.s), string(dens.ubar), string(dens.dbar), string(dens.sbar),
                 string(tau.u), string(tau.d), string(tau.s), string(tau.ubar), string(tau.dbar), string(tau.sbar),
                 string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
-                string(tr.eta), string(tr.sigma), string(tr.zeta),
+                string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
+                string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
             ], ',')
             println(io, row)
             flush(io)
@@ -519,6 +601,10 @@ function run_scan(opts::Options)
             if eq.converged
                 seed_state = eq.x_state
             end
+
+            catch point_err
+                @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+            end  # try 单点容错
 
             if done % 5 == 0
                 println("progress: $(done)/$(total) (xi=$(xi))")

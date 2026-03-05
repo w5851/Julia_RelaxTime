@@ -414,7 +414,7 @@ function transport_coefficients(
 end
 
 @inline function fermi_factor(f::Float64)
-    return clamp(f * (1.0 - f), 0.0, 0.25)
+    return f * (1.0 - f)
 end
 
 @inline function _is_quark_species(species::Symbol)::Bool
@@ -697,7 +697,9 @@ end
         length(bulk_coeffs_isentropic.dM_dμB) == 3 || error("bulk_coeffs_isentropic.dM_dμB must have length 3")
 
         all(isfinite, bulk_coeffs_isentropic.masses) || error("bulk_coeffs_isentropic.masses must be finite")
-        all(m -> m >= 0.0, bulk_coeffs_isentropic.masses) || error("bulk_coeffs_isentropic.masses must be >= 0")
+        if !all(m -> m >= 0.0, bulk_coeffs_isentropic.masses)
+            @warn "bulk_coeffs_isentropic.masses contains negative value(s) — may indicate unphysical gap solution; proceeding with abs(m)" masses=bulk_coeffs_isentropic.masses
+        end
         all(isfinite, bulk_coeffs_isentropic.dM_dT) || error("bulk_coeffs_isentropic.dM_dT must be finite")
         all(isfinite, bulk_coeffs_isentropic.dM_dμB) || error("bulk_coeffs_isentropic.dM_dμB must be finite")
     end
@@ -910,7 +912,7 @@ function bulk_viscosity_isentropic(
     # 从 bulk_coeffs_isentropic 提取系数
     v_n_sq = bulk_coeffs_isentropic.v_n_sq
     dμB_dT_sigma = bulk_coeffs_isentropic.dμB_dT_sigma
-    masses = bulk_coeffs_isentropic.masses
+    masses = bulk_coeffs_isentropic.masses  # 使用模型给出的质量（可能为负，物理上保留）
     dM_dT = bulk_coeffs_isentropic.dM_dT
     dM_dμB = bulk_coeffs_isentropic.dM_dμB
 

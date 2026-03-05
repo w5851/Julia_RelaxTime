@@ -1,0 +1,44 @@
+name: ci-validation
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/validation/**"
+      - "tests/baselines/**"
+      - "Project.toml"
+      - "Manifest.toml"
+      - ".github/workflows/ci-validation.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - "tests/validation/**"
+      - "tests/baselines/**"
+      - "Project.toml"
+      - "Manifest.toml"
+      - ".github/workflows/ci-validation.yml"
+  workflow_dispatch:
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-validation
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run validation (baseline regression)
+        run: julia --project=. tests/validation/runtests.jl

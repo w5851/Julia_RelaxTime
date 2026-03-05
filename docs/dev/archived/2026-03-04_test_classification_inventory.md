@@ -1,3 +1,15 @@
+---
+title: 测试文件分类清单
+archived: true
+original: docs/dev/active/2026-03-04_test_classification_inventory.md
+archived_date: 2026-03-05
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 测试文件分类清单
 
 生成日期：2026-03-04

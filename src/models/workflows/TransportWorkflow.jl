@@ -510,13 +510,18 @@ function solve_transport_from_equilibrium(
 
     bulk_coeffs = nothing
     if compute_bulk
-        bulk_coeffs = bulk_viscosity_coefficients(
-            T_fm,
-            mu_fm;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-        )
+        bulk_coeffs = try
+            bulk_viscosity_coefficients(
+                T_fm,
+                mu_fm;
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+        catch bc_err
+            @warn "bulk_viscosity_coefficients failed — ζ will be NaN for this point" T_fm=T_fm mu_fm=mu_fm xi=xi err=bc_err
+            nothing
+        end
     end
 
     # Backward/ergonomic compatibility:
