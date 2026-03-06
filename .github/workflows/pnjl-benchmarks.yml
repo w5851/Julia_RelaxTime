@@ -1,4 +1,4 @@
-name: pnjl-benchmarks
+name: benchmarks
 
 on:
   workflow_dispatch:
@@ -7,17 +7,29 @@ on:
     paths:
       - "src/**"
       - "benchmark/**"
+      - "scripts/analysis/**"
       - "scripts/perf/**"
+      - "scripts/pnjl/**"
+      - "scripts/relaxtime/**"
+      - "scripts/plot_scan_csv.py"
+      - "scripts/dev/check_script_entrypoints.jl"
+      - "scripts/dev/check_python_script_syntax.py"
       - ".github/workflows/pnjl-benchmarks.yml"
   pull_request:
     paths:
       - "src/**"
       - "benchmark/**"
+      - "scripts/analysis/**"
       - "scripts/perf/**"
+      - "scripts/pnjl/**"
+      - "scripts/relaxtime/**"
+      - "scripts/plot_scan_csv.py"
+      - "scripts/dev/check_script_entrypoints.jl"
+      - "scripts/dev/check_python_script_syntax.py"
       - ".github/workflows/pnjl-benchmarks.yml"
 
 jobs:
-  benchmark:
+  pnjl-benchmark:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -54,3 +66,39 @@ jobs:
             tests/perf/results/pnjl/single_point_benchmark.md
             tests/perf/results/pnjl/scan_benchmark.json
             tests/perf/results/pnjl/scan_benchmark.md
+
+  julia-script-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-script-smoke
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Check PNJL and relaxtime Julia script entrypoints
+        run: julia --project=. scripts/dev/check_script_entrypoints.jl
+
+  python-script-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check plotting and helper Python scripts
+        run: python scripts/dev/check_python_script_syntax.py

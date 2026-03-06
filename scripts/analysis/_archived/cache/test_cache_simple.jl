@@ -2,13 +2,13 @@
 简单测试：验证 polarization_aniso_cached 的缓存统计是否工作
 """
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src/relaxtime"))
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/PolarizationCache.jl")
+include("../../../../src/constants/Constants_PNJL.jl")
+include("../../../../src/integration/GaussLegendre.jl")
+include("../../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../../src/relaxtime/PolarizationCache.jl")
 
 using .PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 using .GaussLegendre: gauleg

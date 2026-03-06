@@ -2,17 +2,17 @@
 缓存开销详细分析：区分JIT编译、哈希表构造和哈希查询的开销
 """
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src/relaxtime"))
 
 using Statistics
 using Printf
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/PolarizationAniso.jl")
-include("../../src/relaxtime/TotalPropagator.jl")
+include("../../../../src/constants/Constants_PNJL.jl")
+include("../../../../src/integration/GaussLegendre.jl")
+include("../../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../../src/relaxtime/PolarizationAniso.jl")
+include("../../../../src/relaxtime/TotalPropagator.jl")
 
 using .GaussLegendre: gauleg
 using .OneLoopIntegrals: A

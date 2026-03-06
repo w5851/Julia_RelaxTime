@@ -14,8 +14,8 @@
 
 using Test
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
 include("../../../src/relaxtime/TotalPropagator.jl")
 include("../../../src/constants/Constants_PNJL.jl")

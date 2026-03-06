@@ -2,7 +2,7 @@ using Test
 using BenchmarkTools
 using Statistics: mean
 
-include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 using .Models
 
 const BENCH_CONFIG = (

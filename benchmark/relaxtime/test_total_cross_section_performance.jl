@@ -19,9 +19,9 @@ using Dates
 using Statistics
 
 # 导入相关模块
-include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/TotalCrossSection.jl")
-include("../../../src/relaxtime/ScatteringAmplitude.jl")
+include("../../src/constants/Constants_PNJL.jl")
+include("../../src/relaxtime/TotalCrossSection.jl")
+include("../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .Constants_PNJL
 using .TotalCrossSection
@@ -433,8 +433,8 @@ if RUN_FULL_TOTAL_CROSS_SECTION_TEST
     println("   计算 K_coeffs（需要约30秒）...")
     
     # 导入 EffectiveCouplings 和 OneLoopIntegrals 模块
-    include("../../../src/relaxtime/EffectiveCouplings.jl")
-    include("../../../src/relaxtime/OneLoopIntegrals.jl")
+    include("../../src/relaxtime/EffectiveCouplings.jl")
+    include("../../src/relaxtime/OneLoopIntegrals.jl")
     using .EffectiveCouplings: calculate_effective_couplings, calculate_G_from_A
     using .OneLoopIntegrals: A
     
@@ -445,7 +445,7 @@ if RUN_FULL_TOTAL_CROSS_SECTION_TEST
     μ_u_fm = μ_c  # 0.3 fm⁻¹
     
     # 准备高斯求积节点和权重
-    include("../../../src/integration/GaussLegendre.jl")
+    include("../../src/integration/GaussLegendre.jl")
     using .GaussLegendre: gausslegendre
     nodes_p, weights_p = gausslegendre(64)  # 64点高斯求积
     # 将节点从 [-1,1] 映射到 [0, 20] (动量范围)

@@ -5,38 +5,40 @@ using Random
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "pnjl", "SeedCache.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.pnjl_module()
 
-const WEIGHTS = SeedCache.DEFAULT_WEIGHTS
-const PATH = SeedCache.DEFAULT_SEED_PATH
-const SEEDS = SeedCache.load_seed_table(path = PATH)
+using .Constants_PNJL: ħc_MeV_fm
+const PNJL = Models.pnjl_module()
+
+const DEFAULT_STRATEGY = PNJL.DefaultSeed()
+const MULTI_STRATEGY = PNJL.MultiSeed()
 
 function random_request()
-    return Dict(
-        :T_mev => 40.0 + rand() * 180.0,
-        :mu_mev => -50.0 + rand() * 550.0,
-        :xi => rand(),
+    return (
+        T_mev = 40.0 + rand() * 180.0,
+        mu_mev = -50.0 + rand() * 550.0,
+        xi = rand(),
     )
 end
 
 function benchmark_once()
     request = random_request()
-    target = SeedCache._normalize_request(request)
-    neighbors = SeedCache._query_mu_neighbors(SEEDS, target, WEIGHTS, PATH, 3)
-    println("Benchmark target: T=$(target.T*Constants_PNJL.ħc_MeV_fm) MeV, mu=$(target.mu*Constants_PNJL.ħc_MeV_fm) MeV, xi=$(target.xi)")
-    println("Near neighbor distances: ", [n.distance for n in neighbors])
+    T_fm = request.T_mev / ħc_MeV_fm
+    mu_fm = request.mu_mev / ħc_MeV_fm
+    theta = [T_fm, mu_fm]
+    mode = PNJL.FixedMu()
 
-    println("\n@btime find_initial_seed (k=3)")
-    @btime SeedCache.find_initial_seed($request; weights = WEIGHTS, path = PATH, k_neighbors = 3)
+    println("Benchmark target: T=$(request.T_mev) MeV, mu=$(request.mu_mev) MeV, xi=$(request.xi)")
 
-    println("\n@btime neighbor query only")
-    @btime SeedCache._query_mu_neighbors($SEEDS, $target, WEIGHTS, PATH, 3)
+    println("\n@btime DefaultSeed get_seed")
+    @btime PNJL.get_seed($DEFAULT_STRATEGY, $theta, $mode)
 
-    println("\n@btime blend neighbors")
-    @btime SeedCache._blend_neighbors($neighbors)
+    println("\n@btime MultiSeed get_seed (first candidate)")
+    @btime PNJL.get_seed($MULTI_STRATEGY, $theta, $mode)
 
-    println("\n@btime find_initial_seed (k=1 no blend)")
-    @btime SeedCache.find_initial_seed($request; weights = WEIGHTS, path = PATH, k_neighbors = 1)
+    println("\n@btime MultiSeed get_all_seeds")
+    @btime PNJL.get_all_seeds($MULTI_STRATEGY, $theta, $mode)
 end
 
 benchmark_once()

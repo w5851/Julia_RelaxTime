@@ -12,8 +12,8 @@ if get(ENV, "RUN_HYBRID_DIAGNOSTIC", "0") != "1"
 else
     # 原诊断脚本（保留，仅在显式开启时执行）
     using Printf
-    include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegralsAniso.jl"))
-    include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegrals.jl"))
+    include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
+    include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
     using QuadGK: quadgk
 
 println("=" ^ 70)
