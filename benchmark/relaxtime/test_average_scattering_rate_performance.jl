@@ -12,7 +12,7 @@
 using Test
 using BenchmarkTools
 
-include("../../../src/relaxtime/AverageScatteringRate.jl")
+include("../../src/relaxtime/AverageScatteringRate.jl")
 
 using .AverageScatteringRate
 

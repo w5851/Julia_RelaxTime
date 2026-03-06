@@ -172,7 +172,7 @@ end
 
 @inline function calculate_energy_sum(masses)
 	total = zero(eltype(masses))
-	@inbounds for i in 1:length(masses)
+	@inbounds for i in eachindex(masses)
 		total += vacuum_integral(masses[i])
 	end
 	return -2 * Main.Constants_PNJL.N_color * total

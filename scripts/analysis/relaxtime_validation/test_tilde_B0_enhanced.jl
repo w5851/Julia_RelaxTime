@@ -12,7 +12,7 @@
 ```julia
 using Pkg
 Pkg.activate(".")
-include("tests/unit/test_tilde_B0_enhanced.jl")
+julia --project=. scripts/analysis/relaxtime_validation/test_tilde_B0_enhanced.jl
 ```
 """
 

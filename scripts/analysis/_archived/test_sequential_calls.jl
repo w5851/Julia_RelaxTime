@@ -1,7 +1,7 @@
 # 模拟测试中的连续调用
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/relaxtime/ScatteringAmplitude.jl")
+include("../../../src/constants/Constants_PNJL.jl")
+include("../../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .ScatteringAmplitude
 

@@ -1,7 +1,7 @@
 # 验证ss→ss散射的推荐参数
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/relaxtime/ScatteringAmplitude.jl")
+include("../../../src/constants/Constants_PNJL.jl")
+include("../../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .ScatteringAmplitude
 

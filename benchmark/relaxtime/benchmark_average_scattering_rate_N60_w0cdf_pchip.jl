@@ -5,7 +5,7 @@
 # - ω integral: AverageScatteringRate defaults (p=20, angle=4, phi=8)
 #
 # Run:
-#   julia --project=. --eval 'include("tests/perf/relaxtime/benchmark_average_scattering_rate_N60_w0cdf_pchip.jl")'
+#   julia --project=. benchmark/relaxtime/benchmark_average_scattering_rate_N60_w0cdf_pchip.jl
 #
 # Optional env knobs (defaults match production):
 #   PROCESS=udbar_to_udbar
@@ -17,7 +17,7 @@
 
 using Printf
 
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 push!(LOAD_PATH, joinpath(PROJECT_ROOT, "src"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))

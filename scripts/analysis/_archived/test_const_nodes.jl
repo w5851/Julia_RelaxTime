@@ -2,7 +2,7 @@
 测试新的 const 常量节点使用方式
 """
 
-include("../../src/integration/GaussLegendre.jl")
+include("../../../src/integration/GaussLegendre.jl")
 using .GaussLegendre
 
 println("=" ^ 70)

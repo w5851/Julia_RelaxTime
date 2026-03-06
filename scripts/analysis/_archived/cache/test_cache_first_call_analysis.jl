@@ -5,17 +5,17 @@
       以及这个额外开销的具体来源
 """
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src/relaxtime"))
 
 using Statistics
 using Printf
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/PolarizationAniso.jl")
-include("../../src/relaxtime/PolarizationCache.jl")
+include("../../../../src/constants/Constants_PNJL.jl")
+include("../../../../src/integration/GaussLegendre.jl")
+include("../../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../../src/relaxtime/PolarizationAniso.jl")
+include("../../../../src/relaxtime/PolarizationCache.jl")
 
 using .GaussLegendre: gauleg
 using .OneLoopIntegrals: A

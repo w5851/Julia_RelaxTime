@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
 
-const TransportWorkflow = Main.Models.transport_workflow_module()
+TransportWorkflow = Main.Models.transport_workflow_module()
 
 using .RelaxationTime
 using .TransportWorkflow
