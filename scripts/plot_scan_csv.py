@@ -58,7 +58,8 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import matplotlib
-from matplotlib.ticker import AutoLocator, LogLocator, MaxNLocator
+from matplotlib.ticker import LogLocator, MaxNLocator
+from cycler import cycler
 
 
 def _find_project_root() -> Path:
@@ -197,7 +198,14 @@ def _apply_where(rows: List[Dict[str, str]], where: List[str]) -> List[Dict[str,
     for r in rows:
         ok = True
         for k, v in clauses:
-            if str(r.get(k, "")) != v:
+            actual = str(r.get(k, ""))
+            actual_num = _parse_float(actual)
+            expected_num = _parse_float(v)
+            if not math.isnan(actual_num) and not math.isnan(expected_num):
+                if not math.isclose(actual_num, expected_num, rel_tol=1e-9, abs_tol=1e-12):
+                    ok = False
+                    break
+            elif actual != v:
                 ok = False
                 break
         if ok:
@@ -241,6 +249,7 @@ def plot_lines(
     legend_loc: str | None,
     line_style: str = "-",
     figsize: Tuple[float, float] | None = None,
+    show_title: bool = False,
     formats: List[str] = None,
     dpi: int = 600,
     check: bool = False,
@@ -269,7 +278,10 @@ def plot_lines(
             if not pairs:
                 continue
             xs3, ys3 = zip(*pairs)
-            ax.plot(xs3, ys3, marker=(marker or ""), lw=linewidth, linestyle=line_style, label=y)
+            plot_kwargs = {"lw": linewidth, "linestyle": line_style, "label": y}
+            if marker:
+                plot_kwargs["marker"] = marker
+            ax.plot(xs3, ys3, **plot_kwargs)
             any_plotted = True
 
         if not any_plotted:
@@ -303,15 +315,14 @@ def plot_lines(
         _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
         _apply_axis_alignment(ax)
 
-        ax.set_title(title_prefix or "multi-y")
+        if show_title and title_prefix:
+            ax.set_title(title_prefix)
         if grid_alpha > 0:
             ax.grid(True, alpha=grid_alpha)
         if legend_loc:
-            plt.legend(loc=legend_loc)
+            plt.legend(loc=legend_loc, frameon=False)
         else:
-            plt.legend()
-
-        fig.tight_layout()
+            plt.legend(frameon=False)
         fmts = formats or ["pdf", "png"]
         y_tag = "_".join([str(s) for s in ys])
         # keep filename reasonably short but stable
@@ -322,10 +333,7 @@ def plot_lines(
         for fmt in fmts:
             out = out_dir / f"multi_y_{y_tag}_vs_{x}.{fmt}"
             fmt_lower = fmt.lower()
-            if fmt_lower in {"pdf", "eps"}:
-                fig.savefig(out, format=fmt_lower, dpi=dpi)
-            else:
-                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -359,7 +367,10 @@ def plot_lines(
                 continue
             xs3, ys3 = zip(*pairs)
             label = gk if group else y
-            ax.plot(xs3, ys3, marker=(marker or ""), lw=linewidth, linestyle=line_style, label=label)
+            plot_kwargs = {"lw": linewidth, "linestyle": line_style, "label": label}
+            if marker:
+                plot_kwargs["marker"] = marker
+            ax.plot(xs3, ys3, **plot_kwargs)
             any_plotted = True
 
         if not any_plotted:
@@ -394,26 +405,23 @@ def plot_lines(
 
         _apply_axis_alignment(ax)
 
-        title = f"{title_prefix} - {y}" if title_prefix else y
-        ax.set_title(title)
+        if show_title:
+            title = f"{title_prefix} - {y}" if title_prefix else y
+            ax.set_title(title)
         if grid_alpha > 0:
             ax.grid(True, alpha=grid_alpha)
         if group:
             if legend_loc:
-                plt.legend(loc=legend_loc)
+                plt.legend(loc=legend_loc, frameon=False)
             else:
-                plt.legend()
-        fig.tight_layout()
+                plt.legend(frameon=False)
         # 保存为指定格式（优先支持矢量 PDF）
         fmts = formats or ["pdf", "png"]
         saved = []
         for fmt in fmts:
             out = out_dir / f"{y}_vs_{x}.{fmt}"
             fmt_lower = fmt.lower()
-            if fmt_lower in {"pdf", "eps"}:
-                fig.savefig(out, format=fmt_lower, dpi=dpi)
-            else:
-                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -473,26 +481,39 @@ def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tup
     vals = [v for v in values if not math.isnan(v)]
     if not vals:
         return
-    vmin = min(vals)
-    vmax = max(vals)
-    if vmin == vmax:
-        # tiny fallback
-        vmin -= 0.5
-        vmax += 0.5
 
     try:
         if scale == "log":
-            vmin2 = max(vmin, 1e-300)
-            vmax2 = max(vmax, 1e-300)
-            locator = LogLocator()
-            ticks = locator.tick_values(vmin2, vmax2)
-            low, high = _pick_bounds_from_ticks(list(ticks), vmin2, vmax2)
+            pos_vals = [v for v in vals if v > 0]
+            if not pos_vals:
+                return
+            vmin = min(pos_vals)
+            vmax = max(pos_vals)
+            if math.isclose(vmin, vmax):
+                low = 10 ** math.floor(math.log10(vmin))
+                high = 10 ** math.ceil(math.log10(vmax * 1.01))
+            else:
+                locator = LogLocator(base=10.0)
+                ticks = locator.tick_values(vmin, vmax)
+                ticks = [tick for tick in ticks if math.isfinite(tick) and tick > 0]
+                if ticks:
+                    low, high = _pick_bounds_from_ticks(list(ticks), vmin, vmax)
+                else:
+                    low = 10 ** math.floor(math.log10(vmin))
+                    high = 10 ** math.ceil(math.log10(vmax))
         else:
+            vmin = min(vals)
+            vmax = max(vals)
+            if vmin == vmax:
+                vmin -= 0.5
+                vmax += 0.5
             # prefer MaxNLocator for nice round ticks
             locator = MaxNLocator(nbins=6)
             ticks = locator.tick_values(vmin, vmax)
             low, high = _pick_bounds_from_ticks(list(ticks), vmin, vmax)
     except Exception:
+        vmin = min(vals)
+        vmax = max(vals)
         low, high = vmin, vmax
 
     if axis == "x":
@@ -513,16 +534,14 @@ def _apply_axis_alignment(ax) -> None:
     except Exception:
         pass
 
-    # Ensure tick locations are computed for the final limits/scale.
-    try:
-        ax.figure.canvas.draw()
-    except Exception:
-        pass
-
     for which, spine_name in (("x", "bottom"), ("y", "left")):
         try:
-            ticks = ax.xaxis.get_majorticklocs() if which == "x" else ax.yaxis.get_majorticklocs()
-            if ticks is None or len(ticks) < 2:
+            lo, hi = ax.get_xlim() if which == "x" else ax.get_ylim()
+            axis_obj = ax.xaxis if which == "x" else ax.yaxis
+            locator = axis_obj.get_major_locator()
+            ticks = locator.tick_values(lo, hi)
+            ticks = [tick for tick in ticks if math.isfinite(tick) and min(lo, hi) <= tick <= max(lo, hi)]
+            if len(ticks) < 2:
                 continue
             a, b = float(ticks[0]), float(ticks[-1])
             if spine_name in ax.spines:
@@ -548,12 +567,13 @@ def plot_heatmaps(
     clim: Tuple[float, float] | None,
     cmap: str | None,
     figsize: Tuple[float, float] | None = None,
+    show_title: bool = False,
     formats: List[str] = None,
     dpi: int = 600,
     check: bool = False,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
-    _figsize_hm = figsize or (7.6, 5.2)
+    _figsize_hm = figsize or APS_FIGSIZE["double-column"]
 
     for field in fields:
         xs, ys, grid = _build_grid(rows, x=x, y=y, z=field)
@@ -643,19 +663,16 @@ def plot_heatmaps(
         _set_axis_limits_strict(ax, axis="y", values=ys2, user_lim=tuple(ylim) if ylim else None, scale=yscale)
 
         _apply_axis_alignment(ax)
-        title = f"{title_prefix} - {field}" if title_prefix else field
-        ax.set_title(title)
-        fig.tight_layout()
+        if show_title:
+            title = f"{title_prefix} - {field}" if title_prefix else field
+            ax.set_title(title)
 
         fmts = formats or ["pdf", "png"]
         saved = []
         for fmt in fmts:
             out = out_dir / f"heatmap_{field}_({y}_vs_{x}).{fmt}"
             fmt_lower = fmt.lower()
-            if fmt_lower in {"pdf", "eps"}:
-                fig.savefig(out, format=fmt_lower, dpi=dpi)
-            else:
-                fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -677,6 +694,16 @@ APS_FIGSIZE = {
     "default": (6.8, 4.6),
 }
 
+APS_COLOR_CYCLE = [
+    "#4477AA",
+    "#EE6677",
+    "#228833",
+    "#CCBB44",
+    "#66CCEE",
+    "#AA3377",
+    "#BBBBBB",
+]
+
 
 def configure_publication_style(*, font: str = "Times New Roman", font_size: int = 10, line_width: float = 1.0, dpi: int = 600) -> None:
     """Configure matplotlib rcParams for publication-quality figures.
@@ -692,14 +719,17 @@ def configure_publication_style(*, font: str = "Times New Roman", font_size: int
         "font.family": "serif",
         "font.serif": [font, "Times"],
         "font.size": font_size,
+        "mathtext.fontset": "stix",
+        "axes.prop_cycle": cycler(color=APS_COLOR_CYCLE),
         "axes.titlesize": font_size,
         "axes.labelsize": font_size,
-        "axes.linewidth": 0.8,
+        "axes.linewidth": 0.6,
         "legend.fontsize": max(8, font_size - 2),
+        "legend.frameon": False,
         "xtick.labelsize": max(8, font_size - 2),
         "ytick.labelsize": max(8, font_size - 2),
-        "xtick.major.width": 0.6,
-        "ytick.major.width": 0.6,
+        "xtick.major.width": 0.5,
+        "ytick.major.width": 0.5,
         "xtick.minor.width": 0.4,
         "ytick.minor.width": 0.4,
         "lines.linewidth": line_width,
@@ -771,7 +801,8 @@ def main() -> None:
     ap.add_argument("--csv", type=Path, required=True, help="Input scan CSV (relative to project root or absolute)")
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR, help="Output directory")
     ap.add_argument("--mode", type=str, choices=["lines", "heatmap"], required=True)
-    ap.add_argument("--title", type=str, default=None, help="Optional title prefix")
+    ap.add_argument("--title", type=str, default=None, help="Optional title prefix (hidden by default; use --show-title to render)")
+    ap.add_argument("--show-title", action="store_true", help="Render in-figure titles; disabled by default for publication-style output")
     ap.add_argument("--where", action="append", default=[], help="Filter clause col=value (repeatable)")
     ap.add_argument(
         "--split",
@@ -791,7 +822,7 @@ def main() -> None:
     ap.add_argument("--ylim", type=float, nargs=2, default=None, metavar=("YMIN", "YMAX"), help="y axis limits")
     ap.add_argument("--xscale", type=str, default=None, choices=["linear", "log"], help="Override x axis scale")
     ap.add_argument("--yscale", type=str, default=None, choices=["linear", "log"], help="Override y axis scale")
-    ap.add_argument("--marker", type=str, default="", help="Marker style for lines (use empty string to disable)")
+    ap.add_argument("--marker", type=str, default=None, help="Marker style for lines (omit to disable)")
     ap.add_argument("--linewidth", type=float, default=1.5, help="Line width")
     ap.add_argument("--grid-alpha", type=float, default=0.0, help="Grid alpha")
     ap.add_argument("--legend-loc", type=str, default=None, help="Legend location (matplotlib loc string)")
@@ -888,6 +919,7 @@ def main() -> None:
                 legend_loc=args.legend_loc,
                 line_style=args.line_style,
                 figsize=figsize,
+                show_title=bool(args.show_title),
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),
@@ -912,6 +944,7 @@ def main() -> None:
                 clim=tuple(args.clim) if args.clim else None,
                 cmap=args.cmap,
                 figsize=figsize,
+                show_title=bool(args.show_title),
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),
