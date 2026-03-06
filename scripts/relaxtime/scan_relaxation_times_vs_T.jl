@@ -34,9 +34,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using Printf
@@ -54,6 +52,7 @@ using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScanCSV: ScanCSV
 using .GaussLegendre: gauleg
 
+const TransportWorkflow = Models.transport_workflow_module()
 const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 
@@ -323,7 +322,7 @@ function run_scan(opts::Options)
 
                 try
                     base = try
-                        Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
                             T_fm,
                             muq_fm;
                             xi=opts.xi,
@@ -335,7 +334,7 @@ function run_scan(opts::Options)
                         )
                     catch err
                         @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=err
-                        Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
                             T_fm,
                             muq_fm;
                             xi=opts.xi,

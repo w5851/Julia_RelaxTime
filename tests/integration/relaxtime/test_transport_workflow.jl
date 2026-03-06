@@ -1,10 +1,12 @@
 using Test
 
-const _TRANSPORT_WORKFLOW_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "workflows", "TransportWorkflow.jl"))
-if !isdefined(Main, :TransportWorkflow)
-    Base.include(Main, _TRANSPORT_WORKFLOW_PATH)
+const _MODELS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODELS_PATH)
 end
-using Main.TransportWorkflow
+
+const TransportWorkflow = Main.Models.transport_workflow_module()
+using .TransportWorkflow
 
 @testset "TransportWorkflow: gap -> transport (single point)" begin
     T = 0.15

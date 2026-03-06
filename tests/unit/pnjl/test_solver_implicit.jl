@@ -16,10 +16,9 @@ include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Models.pnjl_module()
+const P = Models.pnjl_module()
 
 # 避免跨测试文件导出冲突：不把符号 `using` 进 Main。
-P = PNJL
 
 const ħc = 197.327  # MeV·fm
 

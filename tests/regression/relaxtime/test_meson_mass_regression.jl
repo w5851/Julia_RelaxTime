@@ -6,7 +6,8 @@ const MESON_BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxt
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Main.Models.meson_workflow_module()
+
+const MesonMassWorkflow = Main.Models.meson_workflow_module()
 using .MesonMassWorkflow
 
 function _load_rows(path::String)

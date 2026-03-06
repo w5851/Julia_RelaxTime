@@ -4,7 +4,8 @@ using Printf
 if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
-Main.Models.transport_workflow_module()
+
+const TransportWorkflow = Main.Models.transport_workflow_module()
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solver backend bridge (4 fixed points)" begin

@@ -10,8 +10,8 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Models.pnjl_module()
 
+const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 const vacuum_integral = getproperty(PNJL, :vacuum_integral)
 const calculate_energy_sum = getproperty(PNJL, :calculate_energy_sum)
@@ -42,7 +42,7 @@ end
 
 @testset "calculate_energy_sum aggregates vacuum_integral" begin
     phi = @SVector [-0.02, -0.02, -0.25]
-    masses = calculate_mass_vec(phi)
+    masses = Models.calculate_mass_vec(PNJL_MODEL, phi)
     direct = calculate_energy_sum(masses)
     manual = -2 * Constants_PNJL.N_color * sum(vacuum_integral(masses[i]) for i in 1:3)
     @test isapprox(direct, manual; atol=1e-10, rtol=1e-10)

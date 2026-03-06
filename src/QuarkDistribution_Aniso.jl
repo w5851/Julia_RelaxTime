@@ -8,15 +8,10 @@ module PNJLQuarkDistributions_Aniso
 
 export distribution_aniso_correction, distribution_aniso, correction_cos_theta_coefficient
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution.jl"))
-IncludeOnce.include_once!(Main, :PNJLQuarkDistributions, _QUARK_DISTRIBUTION_PATH)
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, _QUARK_DISTRIBUTION_PATH)
+end
 
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 """计算PNJL模型中夸克有效分布函数对能量的导数"""

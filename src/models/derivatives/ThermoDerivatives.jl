@@ -39,20 +39,18 @@ using LinearAlgebra: dot
 # 导入默认积分规模常量（保持旧 API 习惯：p_num/t_num 默认值与 legacy 一致）。
 using ..PNJLCore: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT, cached_nodes
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 # Unified equilibrium facade (model-kind mapping, solve_gap helper)
 const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
-const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
+if !isdefined(Main, :EquilibriumFacade)
+    Base.include(Main, _EQUILIBRIUM_FACADE_PATH)
+end
+const EquilibriumFacade = Main.EquilibriumFacade
 
 # 导入常量
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PATH)
+end
 using Main.Constants_PNJL: G_fm2, K_fm5
 
 export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs

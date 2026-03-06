@@ -11,13 +11,6 @@ src/relaxtime/MottTransition.jl，无需本工作流。
 - 输入与输出均使用 fm⁻¹（T_fm, mu_fm, 质量/动量）
 """
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 # Load all relaxtime submodules via RelaxTime.jl (ensures Constants_PNJL, MesonMass, MottTransition etc.)
 const _RELAX_TIME_MODULE_PATH = normpath(joinpath(@__DIR__, "..", "..", "relaxtime", "RelaxTime.jl"))
 if !isdefined(Main, :RelaxTime)
@@ -26,15 +19,22 @@ end
 
 # Unified equilibrium facade (solve_gap + state_vector + masses)
 const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
-IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
+if !isdefined(Main, :EquilibriumFacade)
+    Base.include(Main, _EQUILIBRIUM_FACADE_PATH)
+end
 
 # Shared parameter structs (QuarkParams/ThermoParams)
 const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, _PARAMETER_TYPES_PATH)
+end
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "WorkflowParamAdapters.jl"))
-const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)
+if !isdefined(Main, :WorkflowParamAdapters)
+    Base.include(Main, _WORKFLOW_PARAM_ADAPTERS_PATH)
+end
+const WorkflowParamAdapters = Main.WorkflowParamAdapters
 using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 
 using Main.Constants_PNJL: ħc_MeV_fm

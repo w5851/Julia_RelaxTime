@@ -4,16 +4,15 @@ const RELAXTIME_VALIDATION_PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."
 const RELAXTIME_VALIDATION_DATA_PATH = joinpath(RELAXTIME_VALIDATION_PROJECT_ROOT, "tests", "validation", "data", "relaxtime_tau_literature_targets_v1.csv")
 
 const RELAXTIME_VALIDATION_MODELS_PATH = joinpath(RELAXTIME_VALIDATION_PROJECT_ROOT, "src", "models", "Models.jl")
-const RELAXTIME_VALIDATION_TRANSPORT_WORKFLOW_PATH = joinpath(RELAXTIME_VALIDATION_PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl")
 
 if !isdefined(Main, :Models)
     Base.include(Main, RELAXTIME_VALIDATION_MODELS_PATH)
 end
-if !isdefined(Main, :TransportWorkflow)
-    Base.include(Main, RELAXTIME_VALIDATION_TRANSPORT_WORKFLOW_PATH)
-end
 
-const PNJL = Main.Models.pnjl_module()
+using .Models
+
+const TransportWorkflow = Models.transport_workflow_module()
+const PNJL = Models.pnjl_module()
 const DEFAULT_MOMENTUM_NODES = getproperty(getproperty(PNJL, :Integrals), :DEFAULT_MOMENTUM_NODES)
 const DEFAULT_MOMENTUM_WEIGHTS = getproperty(getproperty(PNJL, :Integrals), :DEFAULT_MOMENTUM_WEIGHTS)
 const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
@@ -94,7 +93,7 @@ end
 
 function _solve_validation_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64)
     try
-        return Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+        return TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
             T_fm,
             muq_fm;
             xi=xi,
@@ -105,7 +104,7 @@ function _solve_validation_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float
             models_residual_norm_max=1e-4,
         )
     catch
-        return Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+        return TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
             T_fm,
             muq_fm;
             xi=xi,
@@ -135,7 +134,7 @@ function _compute_tau_point(T_MeV::Float64, muB_MeV::Float64)
 
     ktmp = _build_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Phi, Phibar)
 
-    tau_res = Main.TransportWorkflow.solve_gap_and_transport(
+    tau_res = TransportWorkflow.solve_gap_and_transport(
         T_fm,
         muq_fm;
         xi=xi,

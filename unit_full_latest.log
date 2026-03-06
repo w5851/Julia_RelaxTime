@@ -1,0 +1,31 @@
+Selected: Error During Test at D:\Desktop\Julia_RelaxTime\tests\unit\runtests.jl:134
+  Got exception outside of a @test
+  LoadError: UndefVarError: `Constants_PNJL` not defined in `Main`
+  Stacktrace:
+    [1] include(mod::Module, _path::String)
+      @ Base .\Base.jl:557
+    [2] top-level scope
+      @ D:\Desktop\Julia_RelaxTime\tests\unit\relaxtime\test_transport_coefficients.jl:5
+    [3] include
+      @ .\sysimg.jl:38 [inlined]
+    [4] macro expansion
+      @ D:\Desktop\Julia_RelaxTime\tests\unit\runtests.jl:136 [inlined]
+    [5] macro expansion
+      @ D:\Julia-1.11.5\share\julia\stdlib\v1.11\Test\src\Test.jl:1704 [inlined]
+    [6] macro expansion
+      @ D:\Desktop\Julia_RelaxTime\tests\unit\runtests.jl:135 [inlined]
+    [7] macro expansion
+      @ D:\Julia-1.11.5\share\julia\stdlib\v1.11\Test\src\Test.jl:1704 [inlined]
+    [8] top-level scope
+      @ D:\Desktop\Julia_RelaxTime\tests\unit\runtests.jl:131
+    [9] include(mod::Module, _path::String)
+      @ Base .\Base.jl:557
+   [10] exec_options(opts::Base.JLOptions)
+      @ Base .\client.jl:323
+   [11] _start()
+      @ Base .\client.jl:531
+  in expression starting at D:\Desktop\Julia_RelaxTime\src\relaxtime\TransportCoefficients.jl:1
+  in expression starting at D:\Desktop\Julia_RelaxTime\tests\unit\relaxtime\test_transport_coefficients.jl:4
+Test Summary: | Error  Total  Time
+Unit          |     1      1  1.5s
+  Selected    |     1      1  1.5s

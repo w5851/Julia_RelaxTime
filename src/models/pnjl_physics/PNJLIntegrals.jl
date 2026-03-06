@@ -13,16 +13,11 @@ module PNJLIntegrals
 using Base.MathConstants: π
 using StaticArrays
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 # Gauss-Legendre nodes/weights
 const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "integration", "GaussLegendre.jl"))
-IncludeOnce.include_once!(Main, :GaussLegendre, _GAUSSLEGENDRE_PATH)
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSSLEGENDRE_PATH)
+end
 
 using Main.GaussLegendre:
     gauleg,

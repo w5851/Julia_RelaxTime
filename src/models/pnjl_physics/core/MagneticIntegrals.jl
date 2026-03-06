@@ -12,18 +12,16 @@ module MagneticIntegrals
 using Base.MathConstants: π
 using StaticArrays
 
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 const _GAUSSLEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "integration", "GaussLegendre.jl"))
-IncludeOnce.include_once!(Main, :GaussLegendre, _GAUSSLEGENDRE_PATH)
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSSLEGENDRE_PATH)
+end
 using Main.GaussLegendre: gauleg
 
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PATH)
+end
 using Main.Constants_PNJL: Λ_inv_fm
 
 export QUARK_CHARGE_ABS

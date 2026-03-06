@@ -1,0 +1,5 @@
+target_id,series,muB_MeV,T_MeV,expected_eta_over_s,rtol,source
+eta_muB0_1,muB0,0.0,190.32398528918,0.322006688373496,0.35,he_thesis_fig_5_8_wpd
+eta_muB0_2,muB0,0.0,250.611101526072,0.0997553735769878,0.5,he_thesis_fig_5_8_wpd
+eta_muB800_1,muB800,800.0,130.053978136499,4.00685901215986,0.5,he_thesis_fig_5_8_wpd
+eta_muB800_2,muB800,800.0,317.627276312129,0.300461497362152,0.5,he_thesis_fig_5_8_wpd

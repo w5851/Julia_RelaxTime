@@ -30,13 +30,6 @@ module TrhoScan
 using Printf
 using StaticArrays
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
