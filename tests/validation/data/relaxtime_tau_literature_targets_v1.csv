@@ -1,0 +1,17 @@
+target_id,series,muB_MeV,flavor,antiparticle,T_MeV,expected_tau_fm,rtol,source
+tau_s_muB0_1,tau_s_muB0,0.0,s,false,317.715799046803,0.60912057099031,0.4,he_thesis_fig_5_7_wpd
+tau_s_muB0_2,tau_s_muB0,0.0,s,false,388.859753833507,0.791584893683345,0.4,he_thesis_fig_5_7_wpd
+tau_s_muB800_1,tau_s_muB800,800.0,s,false,140.528009274726,8.15505380900508,0.35,he_thesis_fig_5_7_wpd
+tau_s_muB800_2,tau_s_muB800,800.0,s,false,199.155384158202,2.04143763321443,0.35,he_thesis_fig_5_7_wpd
+tau_s_muB800_3,tau_s_muB800,800.0,s,false,298.750828061994,1.34928056095442,0.35,he_thesis_fig_5_7_wpd
+tau_sbar_muB800_1,tau_sbar_muB800,800.0,s,true,200.869139543028,0.50509457277494,0.45,he_thesis_fig_5_7_wpd
+tau_sbar_muB800_2,tau_sbar_muB800,800.0,s,true,279.338948687044,0.397250692442671,0.45,he_thesis_fig_5_7_wpd
+tau_u_muB0_1,tau_u_muB0,0.0,u,false,196.998167404606,1.70583033342835,0.35,he_thesis_fig_5_7_wpd
+tau_u_muB0_2,tau_u_muB0,0.0,u,false,250.453922067242,0.576136099900868,0.35,he_thesis_fig_5_7_wpd
+tau_u_muB0_3,tau_u_muB0,0.0,u,false,369.456858659667,0.737141732490256,0.35,he_thesis_fig_5_7_wpd
+tau_u_muB800_1,tau_u_muB800,800.0,u,false,140.242262534573,10.1343108164848,0.35,he_thesis_fig_5_7_wpd
+tau_u_muB800_2,tau_u_muB800,800.0,u,false,198.762501655852,1.81528772015875,0.35,he_thesis_fig_5_7_wpd
+tau_u_muB800_3,tau_u_muB800,800.0,u,false,279.779820112787,1.37867959836382,0.35,he_thesis_fig_5_7_wpd
+tau_ubar_muB800_1,tau_ubar_muB800,800.0,u,true,139.659957188356,3.91474857550922,0.45,he_thesis_fig_5_7_wpd
+tau_ubar_muB800_2,tau_ubar_muB800,800.0,u,true,199.141325533743,0.336810329385159,0.45,he_thesis_fig_5_7_wpd
+tau_ubar_muB800_3,tau_ubar_muB800,800.0,u,true,278.799830827399,0.388988070274397,0.45,he_thesis_fig_5_7_wpd

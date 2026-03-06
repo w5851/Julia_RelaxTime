@@ -32,7 +32,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
             mu_seed_mev = _to_float64(get(params_dict, :mu_mev, get(params_dict, :mu, 0.0)))
             mu_seed_fm = mu_seed_mev / ħc_MeV_fm
             seed_state = try
-                st_seed = Models.solve_gap(model, t_fm, mu_seed_fm; solver_backend=:models, xi=xi, p_num=p_num, t_num=t_num)
+                st_seed = Models.solve_gap(model, t_fm, mu_seed_fm; xi=xi, p_num=p_num, t_num=t_num)
                 Models.state_vector(st_seed)
             catch
                 [0.02, 0.02, 0.03, 0.5, 0.5]
@@ -71,7 +71,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
             mu_mev_raw = get(params_dict, :mu_mev, get(params_dict, :mu, nothing))
             mu_mev_raw === nothing && error("Missing required parameter: mu_mev (for FixedMu mode)")
             mu_fm = _to_float64(mu_mev_raw) / ħc_MeV_fm
-            st = Models.solve_gap(model, t_fm, mu_fm; solver_backend=:models, xi=xi, p_num=p_num, t_num=t_num)
+            st = Models.solve_gap(model, t_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num)
             x_state = Models.state_vector(st)
             mu_vec = Models.normalize_mu_vec(mu_fm)
             omega_val = Models.omega(model, x_state, t_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)

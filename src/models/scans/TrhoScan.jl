@@ -37,10 +37,6 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-# Unified thermo facade (legacy vs models)
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
@@ -677,7 +673,6 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     p_num::Int,
     t_num::Int,
     nlsolve_kwargs...)
-    ThermoFacade.ensure_models_loaded()
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
@@ -724,11 +719,11 @@ function _write_row(io, T, rho, xi, result, message;
     mu_S = mu_vec_mev[2] - mu_vec_mev[3]
 
     T_fm = T / ħc_MeV_fm
-    rho_vec = ThermoFacade.calculate_rho_backend(
+    rho_vec = Main.Models.model_rho(
+        Main.Models.create_model(model_kind),
         result.x_state,
         result.mu_vec,
         T_fm;
-        model_kind=model_kind,
         p_num=p_num,
         t_num=t_num,
         xi=xi,

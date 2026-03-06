@@ -29,6 +29,7 @@ using ImplicitDifferentiation
 
 # 从 Models 域导入，避免重复定义
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim, param_dim
+import Main.Models: AbstractQCDModel, create_model, model_thermo, calculate_mass_vec
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector, update!
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
@@ -50,12 +51,43 @@ IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 export solve, SolverResult
 export create_implicit_solver, solve_with_derivatives
 export solve_weighted_block_fallback
+
+const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
+
+@inline function _get_model(model_kind::Symbol)
+    return get!(_MODEL_CACHE, model_kind) do
+        if model_kind === :PNJL
+            return create_model(:PNJL)
+        elseif model_kind === :RPNJL
+            return create_model(:RPNJL)
+        else
+            error("Unsupported model kind in ImplicitSolver: $(model_kind)")
+        end
+    end
+end
+
+@inline function _postprocess_payload(model_kind::Symbol, x_state, mu_vec, T_fm;
+    p_num::Int,
+    t_num::Int,
+    xi,
+)
+    model = _get_model(model_kind)
+    pressure, rho_norm, entropy, energy = model_thermo(
+        model,
+        x_state,
+        mu_vec,
+        T_fm;
+        p_num=p_num,
+        t_num=t_num,
+        xi=xi,
+    )
+    omega = -pressure
+    masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+    return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
+end
 
 # ============================================================================
 # 物理性判据与兜底求解（Newton → Trust-Region）
@@ -284,18 +316,11 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
     residual_fn! = build_residual!(mode, mu_vec, params)
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol))
-        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-            x_state,
-            mu_vec,
-            T_fm;
+        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
             p_num=p_num,
             t_num=t_num,
-            thermal_nodes=thermal_nodes,
             xi=xi,
         )
-        omega = -pressure
-        masses = ThermoFacade.calculate_mass_vec_backend(x_state; model_kind=:PNJL)
-        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
         primary_method=nlsolve_method,
@@ -398,18 +423,11 @@ function solve(mode::FixedRho, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-            x_state,
-            mu_vec,
-            T_fm;
+        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
             p_num=p_num,
             t_num=t_num,
-            thermal_nodes=thermal_nodes,
             xi=xi,
         )
-        omega = -pressure
-        masses = ThermoFacade.calculate_mass_vec_backend(x_state; model_kind=:PNJL)
-        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
         primary_method=nlsolve_method,
@@ -538,22 +556,11 @@ function solve(mode::FixedAsymmetricRho, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-            x_state,
-            mu_vec,
-            T_fm;
-            model_kind=model_kind,
+        return _postprocess_payload(model_kind, x_state, mu_vec, T_fm;
             p_num=p_num,
             t_num=t_num,
-            thermal_nodes=thermal_nodes,
             xi=xi,
         )
-        omega = -pressure
-        masses = ThermoFacade.calculate_mass_vec_backend(
-            x_state;
-            model_kind=model_kind,
-        )
-        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
 
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
@@ -617,18 +624,11 @@ function solve(mode::FixedEntropy, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-            x_state,
-            mu_vec,
-            T_fm;
+        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
             p_num=p_num,
             t_num=t_num,
-            thermal_nodes=thermal_nodes,
             xi=xi,
         )
-        omega = -pressure
-        masses = ThermoFacade.calculate_mass_vec_backend(x_state; model_kind=:PNJL)
-        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
         primary_method=nlsolve_method,
@@ -687,18 +687,11 @@ function solve(mode::FixedSigma, T_fm::Real;
     postprocess_fn = x_sol -> begin
         x_state = SVector{5}(Tuple(x_sol[1:5]))
         mu_vec = SVector{3}(x_sol[6], x_sol[7], x_sol[8])
-        pressure, rho_norm, entropy, energy = ThermoFacade.calculate_thermo_backend(
-            x_state,
-            mu_vec,
-            T_fm;
+        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
             p_num=p_num,
             t_num=t_num,
-            thermal_nodes=thermal_nodes,
             xi=xi,
         )
-        omega = -pressure
-        masses = ThermoFacade.calculate_mass_vec_backend(x_state; model_kind=:PNJL)
-        return (x_state=x_state, mu_vec=mu_vec, omega=omega, pressure=pressure, rho_norm=rho_norm, entropy=entropy, energy=energy, masses=masses)
     end
     res, cand = _nlsolve_with_tr_fallback(residual_fn!, x0;
         primary_method=nlsolve_method,

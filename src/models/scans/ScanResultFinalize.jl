@@ -7,11 +7,6 @@ const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "Inc
 if !isdefined(Main, :IncludeOnce)
     Base.include(Main, _INCLUDE_ONCE_PATH)
 end
-const IncludeOnce = Main.IncludeOnce
-
-# Unified thermo facade (legacy vs models)
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
 
 using ..ImplicitSolver: SolverResult
 

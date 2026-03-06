@@ -35,32 +35,27 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
-include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using Printf
 using StaticArrays
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
 const PNJL = Models.pnjl_module()
-const solve = getproperty(PNJL, :solve)
-const FixedMu = getproperty(PNJL, :FixedMu)
-const cached_nodes = getproperty(PNJL, :cached_nodes)
-const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
 const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
 const Integrals = getproperty(PNJL, :Integrals)
 const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
 const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
-using .RelaxationTime: relaxation_times, REQUIRED_PROCESSES
+using .TransportWorkflow: solve_gap_and_transport
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScanCSV: ScanCSV
 using .GaussLegendre: gauleg
 
-const RT_ASR = RelaxationTime.AverageScatteringRate
-const RT_TCS = RelaxationTime.TotalCrossSection
+const RT_ASR = Main.AverageScatteringRate
+const RT_TCS = Main.TotalCrossSection
 
 # 从模块获取默认参数
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
@@ -213,6 +208,14 @@ function ensure_parent_dir(path::AbstractString)
     isdir(dir) || mkpath(dir)
 end
 
+function current_git_commit()
+    try
+        return readchomp(`git -C $(PROJECT_ROOT) rev-parse HEAD`)
+    catch
+        return "unknown"
+    end
+end
+
 function write_header(io, opts::Options)
     cols = [
         "T_MeV", "muB_MeV", "muq_MeV", "xi",
@@ -240,61 +243,6 @@ function build_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::NamedTuple, Φ::
     return (K_coeffs=calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s), A_vals=(u=A_u, d=A_u, s=A_s))
 end
 
-function densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    nd = calculate_number_densities(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    return (
-        u=Float64(nd.quark[1]), d=Float64(nd.quark[2]), s=Float64(nd.quark[3]),
-        ubar=Float64(nd.antiquark[1]), dbar=Float64(nd.antiquark[2]), sbar=Float64(nd.antiquark[3]),
-    )
-end
-
-function safe_total_cross_section(process::Symbol, s::Float64,
-    quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_points::Int, max_tries::Int=4)
-    s_try = s
-    last_err = nothing
-    for _ in 1:max_tries
-        try
-            σ = RT_TCS.total_cross_section(process, s_try, quark_params, thermo_params, K_coeffs; n_points=n_points)
-            isfinite(σ) && return σ
-        catch err
-            last_err = err
-        end
-        s_try = s_try * (1.0 + 1e-6) + 1e-10
-    end
-    @warn "failed to compute sigma; returning NaN" process=process s=s last_error=last_err
-    return NaN
-end
-
-function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_sigma_points::Int, sigma_grid_n::Int, integration_mode::Symbol)
-    cs_caches = Dict{Symbol,RT_ASR.CrossSectionCache}()
-    
-    # 所有模式都使用基于 Λ 截断的 σ(s) 范围（确保一致性）
-    # 这是物理上正确的行为：PNJL 模型的动量截断 Λ 决定了 σ(s) 的有效范围
-    for process in processes
-        # 使用 w0cdf 设计，但限制在 Λ 截断范围内
-        s_grid = RT_ASR.design_w0cdf_s_grid(process, quark_params, thermo_params; 
-            N=sigma_grid_n, p_cutoff=Λ_inv_fm)
-        
-        cache = RT_ASR.CrossSectionCache(process)
-        n_ok, n_bad = 0, 0
-        for s in s_grid
-            σ = safe_total_cross_section(process, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-            if !isfinite(σ)
-                n_bad += 1
-                continue
-            end
-            RT_ASR.insert_sigma!(cache, s, σ)
-            n_ok += 1
-        end
-        n_bad > 0 && @warn "sigma grid had non-finite points" process=process n_ok=n_ok n_bad=n_bad
-        n_ok >= 2 || error("sigma cache has too few valid points for $process (n_ok=$n_ok)")
-        cs_caches[process] = cache
-    end
-    return cs_caches
-end
-
 function run_scan(opts::Options)
     ensure_parent_dir(opts.out)
     existing = opts.resume && isfile(opts.out) && !opts.overwrite ? 
@@ -309,6 +257,11 @@ function run_scan(opts::Options)
                 "schema" => "scan_csv_v1",
                 "title" => "relaxation_times_vs_T",
                 "script" => "scripts/relaxtime/scan_relaxation_times_vs_T.jl",
+                "git_commit" => current_git_commit(),
+                "provenance.entrypoint" => "workflow",
+                "provenance.equilibrium_backend" => "TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(:models)",
+                "provenance.tau_path" => "TransportWorkflow.solve_gap_and_transport",
+                "provenance.integration_mode" => string(opts.integration_mode),
                 "x_label" => "T", "x_unit" => "MeV",
                 "y_unit.tau_u" => "fm", "y_unit.tau_s" => "fm",
                 "y_unit.tau_ubar" => "fm", "y_unit.tau_sbar" => "fm",
@@ -352,44 +305,93 @@ function run_scan(opts::Options)
             muq_mev = muB_mev / 3.0
             muq_fm = muq_mev / ħc_MeV_fm
             local_iter = 0
+            seed_state = nothing
 
             for T_mev in T_vals
                 opts.resume && !opts.overwrite && (T_mev, muB_mev, opts.xi) in existing && continue
                 T_fm = T_mev / ħc_MeV_fm
 
-                base = solve(FixedMu(), T_fm, muq_fm; xi=opts.xi, p_num=opts.p_num, t_num=opts.t_num)
-                Φ, Φbar = Float64(base.x_state[4]), Float64(base.x_state[5])
-                masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
-
-                thermo_params = (T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(opts.xi))
-                ktmp = build_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
-                quark_params = (m=masses, μ=(u=Float64(muq_fm), d=Float64(muq_fm), s=Float64(muq_fm)), A=ktmp.A_vals)
-                K_coeffs = ktmp.K_coeffs
-
-                thermal_nodes = cached_nodes(opts.p_num, opts.t_num)
-                densities = densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, thermal_nodes, Float64(opts.xi))
-
                 tau = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
                 tauinv = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
-                if Bool(base.converged)
-                    cs_caches = build_sigma_caches(REQUIRED_PROCESSES, quark_params, thermo_params, K_coeffs;
-                        n_sigma_points=opts.tau_n_sigma_points, sigma_grid_n=opts.sigma_grid_n,
-                        integration_mode=opts.integration_mode)
+                densities = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
+                Φ = NaN
+                Φbar = NaN
+                masses = (u=NaN, d=NaN, s=NaN)
+                converged = false
+                iterations = missing
+                residual_norm = missing
 
-                    tau_res = relaxation_times(quark_params, thermo_params, K_coeffs;
-                        densities=densities, cs_caches=cs_caches,
-                        p_nodes=opts.tau_p_nodes, angle_nodes=opts.tau_angle_nodes, phi_nodes=opts.tau_phi_nodes,
-                        p_grid=p_grid, p_w=p_w,
-                        cos_grid=cos_grid, cos_w=cos_w, phi_grid=phi_grid, phi_w=phi_w,
-                        n_sigma_points=opts.tau_n_sigma_points,
-                        sigma_cutoff=sigma_cutoff,
+                try
+                    base = try
+                        Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+                            T_fm,
+                            muq_fm;
+                            xi=opts.xi,
+                            solver_backend=:models,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=seed_state === nothing ? HADRON_SEED_5 : seed_state,
+                            models_residual_norm_max=1e-4,
+                        )
+                    catch err
+                        @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=err
+                        Main.TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+                            T_fm,
+                            muq_fm;
+                            xi=opts.xi,
+                            solver_backend=:legacy,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=nothing,
+                            solver_kwargs=(iterations=opts.max_iter,),
+                        )
+                    end
+
+                    Φ, Φbar = Float64(base.x_state[4]), Float64(base.x_state[5])
+                    masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
+                    ktmp = build_K_coeffs(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
+
+                    res = solve_gap_and_transport(
+                        T_fm,
+                        muq_fm;
+                        xi=opts.xi,
+                        equilibrium=base,
+                        compute_tau=true,
+                        K_coeffs=ktmp.K_coeffs,
+                        tau=nothing,
+                        compute_bulk=false,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        seed_state=Vector(base.x_state),
+                        solver_kwargs=(iterations=opts.max_iter,),
+                        tau_kwargs=(
+                            p_nodes=opts.tau_p_nodes,
+                            angle_nodes=opts.tau_angle_nodes,
+                            phi_nodes=opts.tau_phi_nodes,
+                            n_sigma_points=opts.tau_n_sigma_points,
+                            p_grid=p_grid,
+                            p_w=p_w,
+                            cos_grid=cos_grid,
+                            cos_w=cos_w,
+                            phi_grid=phi_grid,
+                            phi_w=phi_w,
+                            sigma_cutoff=sigma_cutoff,
+                        ),
                     )
-                    tau, tauinv = tau_res.tau, tau_res.tau_inv
+
+                    converged = Bool(res.equilibrium.converged)
+                    iterations = res.equilibrium.iterations
+                    residual_norm = res.equilibrium.residual_norm
+                    densities = (u=res.densities.u, s=res.densities.s, ubar=res.densities.ubar, sbar=res.densities.sbar)
+                    tau, tauinv = res.tau, res.tau_inv
+                    seed_state = res.equilibrium.x_state
+                catch point_err
+                    @warn "tau scan point failed; writing NaN row" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=point_err
                 end
 
                 row = Any[
                     T_mev, muB_mev, muq_mev, opts.xi, T_fm, muq_fm,
-                    csv_bool(Bool(base.converged)), Int(base.iterations), Float64(base.residual_norm),
+                    csv_bool(converged), string(iterations), string(residual_norm),
                     Φ, Φbar, masses.u, masses.s,
                     densities.u, densities.s, densities.ubar, densities.sbar,
                     tau.u, tau.s, tau.ubar, tau.sbar,
@@ -400,7 +402,7 @@ function run_scan(opts::Options)
                 ]
                 println(io, join(row, ',')); flush(io)
 
-                if Bool(base.converged)
+                if converged
                     @printf("T=%6.1f MeV  muB=%6.1f MeV | tau_u=%.3e tau_s=%.3e tau_ubar=%.3e tau_sbar=%.3e\n",
                         T_mev, muB_mev, tau.u, tau.s, tau.ubar, tau.sbar)
                 else

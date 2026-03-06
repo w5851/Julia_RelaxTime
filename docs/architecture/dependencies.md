@@ -1,4 +1,4 @@
-# Dependency graph generated: 2026-03-03T17:58:43.963
+# Dependency graph generated: 2026-03-06T13:20:58.247
 
 Run: julia --project=. scripts/dev/gen_deps.jl
 
@@ -23,7 +23,7 @@ flowchart LR
     src_utils[src/utils]
     src_integration[src/integration]
     src_simulation[src/simulation]
-    src_models[src/models]
+    src_pnjl[src/pnjl]
     src_relaxtime[src/relaxtime]
   end
 
@@ -42,25 +42,25 @@ flowchart LR
 
   src_utils --> src_integration
   src_integration --> src_relaxtime
-  src_relaxtime --> src_models
+  src_relaxtime --> src_pnjl
   src_simulation --> src_utils
 
   scripts_server --> src_simulation
-  scripts_server --> src_models
+  scripts_server --> src_pnjl
   scripts_server --> web_static
 
-  scripts_other --> src_models
+  scripts_other --> src_pnjl
   scripts_other --> src_relaxtime
 
-  docs_api --> src_models
+  docs_api --> src_pnjl
   docs_api --> src_relaxtime
   docs_guides --> scripts_server
 
-  src_models --> data_outputs
+  src_pnjl --> data_outputs
   scripts_other --> data_outputs
 
   config --> scripts_other
-  tests --> src_models
+  tests --> src_pnjl
   tests --> src_relaxtime
 ```
 
@@ -129,13 +129,16 @@ flowchart LR
   subgraph relaxtime
     src_relaxtime_AFieldBuilder_jl[relaxtime/AFieldBuilder.jl]
     src_relaxtime_AverageScatteringRate_jl[relaxtime/AverageScatteringRate.jl]
+    src_relaxtime_DifferentialCrossSection_jl[relaxtime/DifferentialCrossSection.jl]
     src_relaxtime_EffectiveCouplings_jl[relaxtime/EffectiveCouplings.jl]
     src_relaxtime_MesonMass_jl[relaxtime/MesonMass.jl]
     src_relaxtime_MesonPropagator_jl[relaxtime/MesonPropagator.jl]
+    src_relaxtime_MottTransition_jl[relaxtime/MottTransition.jl]
     src_relaxtime_OneLoopIntegrals_jl[relaxtime/OneLoopIntegrals.jl]
     src_relaxtime_OneLoopIntegralsAniso_jl[relaxtime/OneLoopIntegralsAniso.jl]
     src_relaxtime_PolarizationAniso_jl[relaxtime/PolarizationAniso.jl]
     src_relaxtime_PolarizationCache_jl[relaxtime/PolarizationCache.jl]
+    src_relaxtime_RelaxTime_jl[relaxtime/RelaxTime.jl]
     src_relaxtime_RelaxationTime_jl[relaxtime/RelaxationTime.jl]
     src_relaxtime_ScatteringAmplitude_jl[relaxtime/ScatteringAmplitude.jl]
     src_relaxtime_TotalCrossSection_jl[relaxtime/TotalCrossSection.jl]
@@ -143,6 +146,7 @@ flowchart LR
     src_relaxtime_TransportCoefficients_jl[relaxtime/TransportCoefficients.jl]
   end
   subgraph root
+    AFieldBuilder[AFieldBuilder]
     AverageScatteringRate[AverageScatteringRate]
     Conditions[Conditions]
     ConfigLoader[ConfigLoader]
@@ -156,15 +160,20 @@ flowchart LR
     Integrals[Integrals]
     MagneticIntegrals[MagneticIntegrals]
     MagneticThermodynamics[MagneticThermodynamics]
+    MesonMass[MesonMass]
     MesonPropagator[MesonPropagator]
     Models[Models]
     MomentumMapping[MomentumMapping]
+    MottTransition[MottTransition]
+    OneLoopIntegrals[OneLoopIntegrals]
+    OneLoopIntegralsCorrection[OneLoopIntegralsCorrection]
     PNJLCore[PNJLCore]
     ParameterTypes[ParameterTypes]
     ParticleSymbols[ParticleSymbols]
     PhaseSpaceSampling[PhaseSpaceSampling]
     PolarizationAniso[PolarizationAniso]
     PolarizationCache[PolarizationCache]
+    RelaxationTime[RelaxationTime]
     ScanCommon[ScanCommon]
     ScanConfig[ScanConfig]
     ScanResultFinalize[ScanResultFinalize]
@@ -235,48 +244,75 @@ flowchart LR
   src_models_workflows_TransportWorkflow_jl --> TransportCoefficients
   src_models_workflows_TransportWorkflow_jl --> WorkflowParamAdapters
   src_relaxtime_AFieldBuilder_jl --> GaussLegendre
-  src_relaxtime_AFieldBuilder_jl --> src_integration_GaussLegendre_jl
+  src_relaxtime_AFieldBuilder_jl --> OneLoopIntegrals
+  src_relaxtime_AFieldBuilder_jl --> OneLoopIntegralsCorrection
   src_relaxtime_AverageScatteringRate_jl --> GaussLegendre
+  src_relaxtime_AverageScatteringRate_jl --> ParticleSymbols
   src_relaxtime_AverageScatteringRate_jl --> TotalCrossSection
-  src_relaxtime_AverageScatteringRate_jl --> src_integration_GaussLegendre_jl
-  src_relaxtime_AverageScatteringRate_jl --> src_relaxtime_TotalCrossSection_jl
+  src_relaxtime_EffectiveCouplings_jl --> OneLoopIntegrals
+  src_relaxtime_EffectiveCouplings_jl --> OneLoopIntegralsCorrection
+  src_relaxtime_MesonMass_jl --> AFieldBuilder
   src_relaxtime_MesonMass_jl --> EffectiveCouplings
   src_relaxtime_MesonMass_jl --> GaussLegendre
   src_relaxtime_MesonMass_jl --> PolarizationAniso
-  src_relaxtime_MesonMass_jl --> src_integration_GaussLegendre_jl
-  src_relaxtime_MesonMass_jl --> src_relaxtime_EffectiveCouplings_jl
-  src_relaxtime_MesonMass_jl --> src_relaxtime_PolarizationAniso_jl
   src_relaxtime_MesonPropagator_jl --> EffectiveCouplings
   src_relaxtime_MesonPropagator_jl --> ParticleSymbols
-  src_relaxtime_MesonPropagator_jl --> src_relaxtime_EffectiveCouplings_jl
-  src_relaxtime_MesonPropagator_jl --> src_utils_ParticleSymbols_jl
   src_relaxtime_OneLoopIntegrals_jl --> GaussLegendre
-  src_relaxtime_OneLoopIntegrals_jl --> src_integration_GaussLegendre_jl
   src_relaxtime_OneLoopIntegrals_jl --> src_integration_IntervalQuadratureStrategies_jl
   src_relaxtime_OneLoopIntegralsAniso_jl --> GaussLegendre
-  src_relaxtime_OneLoopIntegralsAniso_jl --> src_integration_GaussLegendre_jl
+  src_relaxtime_OneLoopIntegralsAniso_jl --> OneLoopIntegrals
   src_relaxtime_OneLoopIntegralsAniso_jl --> src_integration_IntervalQuadratureStrategies_jl
+  src_relaxtime_PolarizationAniso_jl --> OneLoopIntegrals
+  src_relaxtime_PolarizationAniso_jl --> OneLoopIntegralsCorrection
   src_relaxtime_PolarizationCache_jl --> PolarizationAniso
-  src_relaxtime_PolarizationCache_jl --> src_relaxtime_PolarizationAniso_jl
+  src_relaxtime_RelaxTime_jl --> AFieldBuilder
+  src_relaxtime_RelaxTime_jl --> AverageScatteringRate
+  src_relaxtime_RelaxTime_jl --> DifferentialCrossSection
+  src_relaxtime_RelaxTime_jl --> EffectiveCouplings
+  src_relaxtime_RelaxTime_jl --> MesonMass
+  src_relaxtime_RelaxTime_jl --> MesonPropagator
+  src_relaxtime_RelaxTime_jl --> MottTransition
+  src_relaxtime_RelaxTime_jl --> OneLoopIntegrals
+  src_relaxtime_RelaxTime_jl --> OneLoopIntegralsCorrection
+  src_relaxtime_RelaxTime_jl --> PolarizationAniso
+  src_relaxtime_RelaxTime_jl --> PolarizationCache
+  src_relaxtime_RelaxTime_jl --> RelaxationTime
+  src_relaxtime_RelaxTime_jl --> ScatteringAmplitude
+  src_relaxtime_RelaxTime_jl --> TotalCrossSection
+  src_relaxtime_RelaxTime_jl --> TotalPropagator
+  src_relaxtime_RelaxTime_jl --> TransportCoefficients
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_AFieldBuilder_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_AverageScatteringRate_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_DifferentialCrossSection_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_EffectiveCouplings_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonMass_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonPropagator_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_MottTransition_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_OneLoopIntegrals_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_OneLoopIntegralsAniso_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_PolarizationAniso_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_PolarizationCache_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_RelaxationTime_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_ScatteringAmplitude_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_TotalCrossSection_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_TotalPropagator_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_TransportCoefficients_jl
+  src_relaxtime_RelaxationTime_jl --> AFieldBuilder
   src_relaxtime_RelaxationTime_jl --> AverageScatteringRate
   src_relaxtime_RelaxationTime_jl --> TotalCrossSection
   src_relaxtime_ScatteringAmplitude_jl --> ParticleSymbols
   src_relaxtime_ScatteringAmplitude_jl --> TotalPropagator
-  src_relaxtime_ScatteringAmplitude_jl --> src_relaxtime_TotalPropagator_jl
-  src_relaxtime_ScatteringAmplitude_jl --> src_utils_ParticleSymbols_jl
   src_relaxtime_TotalCrossSection_jl --> DifferentialCrossSection
   src_relaxtime_TotalCrossSection_jl --> GaussLegendre
+  src_relaxtime_TotalCrossSection_jl --> OneLoopIntegrals
+  src_relaxtime_TotalCrossSection_jl --> ParticleSymbols
   src_relaxtime_TotalCrossSection_jl --> ScatteringAmplitude
   src_relaxtime_TotalCrossSection_jl --> TotalCrossSection
   src_relaxtime_TotalPropagator_jl --> MesonPropagator
   src_relaxtime_TotalPropagator_jl --> ParticleSymbols
   src_relaxtime_TotalPropagator_jl --> PolarizationCache
-  src_relaxtime_TotalPropagator_jl --> src_relaxtime_MesonPropagator_jl
-  src_relaxtime_TotalPropagator_jl --> src_relaxtime_PolarizationCache_jl
   src_relaxtime_TransportCoefficients_jl --> GaussLegendre
   src_relaxtime_TransportCoefficients_jl --> PhaseSpaceSampling
-  src_relaxtime_TransportCoefficients_jl --> src_integration_GaussLegendre_jl
-  src_relaxtime_TransportCoefficients_jl --> src_integration_PhaseSpaceSampling_jl
   src_simulation_FullServerApp_jl --> Models
   src_simulation_FullServerApp_jl --> MomentumMapping
   src_simulation_HTTPServer_jl --> MomentumMapping
