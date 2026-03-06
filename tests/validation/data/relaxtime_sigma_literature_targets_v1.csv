@@ -12,5 +12,7 @@ sigma_us_muB800_t100_1,us_to_us_T100_muB800,us_to_us,100.0,800.0,0.9211168724867
 sigma_us_muB800_t180_1,us_to_us_T180_muB800,us_to_us,180.0,800.0,0.924622004737427,1.01083762092334,0.15,he_thesis_fig_muB800_sigma_wpd
 sigma_udbar_muB800_t150_1,udbar_to_udbar_T150_muB800,udbar_to_udbar,150.0,800.0,0.510874791113476,5.32659780978249,0.15,he_thesis_fig_muB800_sigma_wpd
 sigma_udbar_muB800_t180_1,udbar_to_udbar_T180_muB800,udbar_to_udbar,180.0,800.0,0.604435766926695,4.83863525790903,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_udbar_muB800_t100_1,udbar_to_udbar_T100_muB800,udbar_to_udbar,100.0,800.0,0.9118849931997868,2.512791371115266,0.5,he_thesis_fig_muB800_sigma_wpd
+sigma_usbar_muB800_t100_1,usbar_to_usbar_T100_muB800,usbar_to_usbar,100.0,800.0,1.0707766062008215,2.3581242385267935,0.5,he_thesis_fig_muB800_sigma_wpd
 sigma_usbar_muB800_t150_1,usbar_to_usbar_T150_muB800,usbar_to_usbar,150.0,800.0,0.853111076370071,2.62590301615904,0.15,he_thesis_fig_muB800_sigma_wpd
 sigma_usbar_muB800_t180_1,usbar_to_usbar_T180_muB800,usbar_to_usbar,180.0,800.0,0.464204126837159,0.68100667372254,0.15,he_thesis_fig_muB800_sigma_wpd
