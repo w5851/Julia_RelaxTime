@@ -132,7 +132,8 @@ using .GaussLegendre
         
         # 验证误差递减（前几次明显递减）
         @test errors[2] < errors[1]
-        @test errors[3] < errors[2]
+        # 误差进入机器精度附近后，可能出现平台而不再严格递减。
+        @test errors[3] <= errors[2] || max(errors[2], errors[3]) < 1e-10
         # 当误差达到机器精度附近时，可能不再严格递减
         @test errors[4] < 1e-10  # 50个节点应该达到很高精度
     end

@@ -2,17 +2,17 @@
 调试缓存为什么不工作
 """
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../../src/relaxtime"))
 
 using Printf
 
 # 加载模块
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/EffectiveCouplings.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/TotalPropagator.jl")
+include("../../../../src/constants/Constants_PNJL.jl")
+include("../../../../src/integration/GaussLegendre.jl")
+include("../../../../src/relaxtime/EffectiveCouplings.jl")
+include("../../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../../src/relaxtime/TotalPropagator.jl")
 
 using .Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm
 using .GaussLegendre: gauleg

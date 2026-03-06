@@ -8,7 +8,7 @@
 ```julia
 using Pkg
 Pkg.activate(".")
-include("test/test_singularity_inequality.jl")
+julia --project=. scripts/analysis/relaxtime_validation/test_singularity_inequality.jl
 ```
 """
 

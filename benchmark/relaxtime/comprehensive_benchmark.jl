@@ -10,8 +10,8 @@
 # 运行方式：
 # - `julia --project=. tests/perf/relaxtime/comprehensive_benchmark.jl`
 using Printf
-include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegralsAniso.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegrals.jl"))
 using QuadGK: quadgk
 
 println("=" ^ 70)

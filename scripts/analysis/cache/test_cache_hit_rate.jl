@@ -7,19 +7,19 @@
 3. 验证 ud_to_ud 的 t 道是否命中 uu_to_uu 的缓存
 """
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
 using Printf
 using Statistics
 
 # 加载模块
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/integration/GaussLegendre.jl")
-include("../../src/relaxtime/EffectiveCouplings.jl")
-include("../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../src/relaxtime/TotalPropagator.jl")
-include("../../src/relaxtime/PolarizationCache.jl")
+include("../../../src/constants/Constants_PNJL.jl")
+include("../../../src/integration/GaussLegendre.jl")
+include("../../../src/relaxtime/EffectiveCouplings.jl")
+include("../../../src/relaxtime/OneLoopIntegrals.jl")
+include("../../../src/relaxtime/TotalPropagator.jl")
+include("../../../src/relaxtime/PolarizationCache.jl")
 
 using .Constants_PNJL: G_fm2, K_fm5, ħc_MeV_fm, SCATTERING_MESON_MAP
 using .GaussLegendre: gauleg

@@ -26,16 +26,16 @@ using Dates
 
 # Load ParameterTypes module
 if !isdefined(Main, :ParameterTypes)
-    Base.include(Main, joinpath(@__DIR__, "../../../src/types/ParameterTypes.jl"))
+    Base.include(Main, joinpath(@__DIR__, "../../src/types/ParameterTypes.jl"))
 end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 # Load modules under test
-include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/RelaxationTime.jl")
-include("../../../src/relaxtime/AverageScatteringRate.jl")
+include("../../src/constants/Constants_PNJL.jl")
+include("../../src/relaxtime/EffectiveCouplings.jl")
+include("../../src/relaxtime/RelaxationTime.jl")
+include("../../src/relaxtime/AverageScatteringRate.jl")
 
 using .Constants_PNJL
 using .EffectiveCouplings

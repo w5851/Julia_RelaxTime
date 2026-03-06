@@ -5,7 +5,7 @@
 ```julia
 using Pkg
 Pkg.activate(".")
-include("test/test_polarization_aniso.jl")
+julia --project=. scripts/analysis/relaxtime_validation/test_polarization_aniso.jl
 ```
 """
 

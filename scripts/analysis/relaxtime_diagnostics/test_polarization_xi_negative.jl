@@ -11,7 +11,7 @@
 using Test
 using Printf
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
 
 include("../../../src/integration/GaussLegendre.jl")
 include("../../../src/models/pnjl_physics/QuarkDistribution.jl")

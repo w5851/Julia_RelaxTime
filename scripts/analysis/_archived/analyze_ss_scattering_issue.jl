@@ -1,7 +1,7 @@
 # 分析ss_to_ss散射过程中k0²-u<0的问题
 
-include("../../src/constants/Constants_PNJL.jl")
-include("../../src/relaxtime/ScatteringAmplitude.jl")
+include("../../../src/constants/Constants_PNJL.jl")
+include("../../../src/relaxtime/ScatteringAmplitude.jl")
 
 using .Constants_PNJL
 using .ScatteringAmplitude

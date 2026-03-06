@@ -12,8 +12,8 @@
 using Test
 using Printf  # 用于格式化输出
 
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../src/relaxtime"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
+push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
 include("../../../src/relaxtime/ScatteringAmplitude.jl")
 include("../../../src/constants/Constants_PNJL.jl")

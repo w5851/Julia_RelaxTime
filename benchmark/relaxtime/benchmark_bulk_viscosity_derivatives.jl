@@ -9,14 +9,14 @@
 """
 
 using Pkg
-Pkg.activate(joinpath(@__DIR__, "../../.."))
+Pkg.activate(joinpath(@__DIR__, "../.."))
 
 using BenchmarkTools
 using Printf
 using JSON
 using Dates
 
-include("../../../src/models/Models.jl")
+include("../../src/models/Models.jl")
 using .Models
 
 # 结果输出目录

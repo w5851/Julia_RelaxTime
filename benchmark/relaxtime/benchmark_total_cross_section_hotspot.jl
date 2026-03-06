@@ -14,12 +14,12 @@ using BenchmarkTools
 using Statistics
 using Profile
 
-include(joinpath(@__DIR__, "../../../src/constants/Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "../../../src/integration/GaussLegendre.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/EffectiveCouplings.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/ScatteringAmplitude.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/TotalCrossSection.jl"))
+include(joinpath(@__DIR__, "../../src/constants/Constants_PNJL.jl"))
+include(joinpath(@__DIR__, "../../src/integration/GaussLegendre.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/OneLoopIntegrals.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/EffectiveCouplings.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/ScatteringAmplitude.jl"))
+include(joinpath(@__DIR__, "../../src/relaxtime/TotalCrossSection.jl"))
 
 using .Constants_PNJL
 using .GaussLegendre: gausslegendre

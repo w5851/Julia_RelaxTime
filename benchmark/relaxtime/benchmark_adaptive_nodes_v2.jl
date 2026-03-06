@@ -8,7 +8,7 @@ using Printf
 using BenchmarkTools
 
 # 加载模块
-include("../../../src/relaxtime/OneLoopIntegralsAniso.jl")
+include("../../src/relaxtime/OneLoopIntegralsAniso.jl")
 using .OneLoopIntegralsCorrection: tilde_B0_correction_k_positive, 
     STRATEGY_HYBRID, STRATEGY_QUADGK
 
