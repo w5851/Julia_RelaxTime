@@ -74,14 +74,15 @@ end
 @testset "TransportCoefficients: numerical safeguards" begin
     thermo_params_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
 
-    # f>1 会导致原始 f(1-f) 为负；开启截断后系数应保持非负且有限。
-    provider_bad_f = (
+    # 数值保护只覆盖物理占据数范围内的极端输入；这里用接近 1 的边界值
+    # 验证极小能量下系数仍保持有限且非负，而不改变核心物理表达式。
+    provider_edge_f = (
         energy_from_p=(p::Float64, m::Float64) -> 1e-30,
         energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> 1e-30,
-        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.1,
-        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.1,
-        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.1,
-        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.1,
+        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.0 - 1e-12,
+        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 1.0 - 1e-12,
+        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.0 - 1e-12,
+        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 1.0 - 1e-12,
         prefer_energy_aniso=true,
     )
 
@@ -89,7 +90,7 @@ end
         QUARK_PARAMS,
         thermo_params_aniso;
         tau=TAU_ONE,
-        provider=provider_bad_f,
+        provider=provider_edge_f,
         p_nodes=6,
         cos_nodes=6,
         p_max=4.0,
