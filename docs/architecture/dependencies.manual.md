@@ -15,18 +15,25 @@ flowchart LR
   end
 
   subgraph Source[核心源码]
-    src_root[src/ (root)]
+    src_models[src/models]
     src_utils[src/utils]
     src_integration[src/integration]
     src_simulation[src/simulation]
-    src_pnjl[src/pnjl]
     src_relaxtime[src/relaxtime]
   end
 
   subgraph Scripts[脚本与服务]
     scripts_server[scripts/server]
     scripts_dev[scripts/dev]
-    scripts_other[scripts/...]
+    scripts_relaxtime[scripts/relaxtime]
+  end
+
+  subgraph Tests[测试套件]
+    tests_unit[tests/unit]
+    tests_integration[tests/integration]
+    tests_regression[tests/regression]
+    tests_validation[tests/validation]
+    tests_baselines[tests/baselines]
   end
 
   subgraph Web[前端]
@@ -34,30 +41,84 @@ flowchart LR
   end
 
   config[config/*]
-  tests[tests/*]
 
   src_utils --> src_integration
+  src_models --> src_integration
   src_integration --> src_relaxtime
-  src_relaxtime --> src_pnjl
   src_simulation --> src_utils
 
   scripts_server --> src_simulation
-  scripts_server --> src_pnjl
+  scripts_server --> src_models
   scripts_server --> web_static
+  scripts_relaxtime --> src_models
+  scripts_relaxtime --> src_relaxtime
+  scripts_dev --> src_models
 
-  scripts_other --> src_pnjl
-  scripts_other --> src_relaxtime
-
-  docs_api --> src_pnjl
+  docs_api --> src_models
   docs_api --> src_relaxtime
   docs_guides --> scripts_server
 
-  src_pnjl --> data_outputs
-  scripts_other --> data_outputs
+  src_models --> data_outputs
+  scripts_relaxtime --> data_outputs
 
-  config --> scripts_other
-  tests --> src_pnjl
-  tests --> src_relaxtime
+  tests_unit --> src_models
+  tests_unit --> src_relaxtime
+  tests_integration --> src_models
+  tests_regression --> src_models
+  tests_regression --> tests_baselines
+  tests_validation --> src_models
+
+  config --> scripts_relaxtime
+```
+
+## L2 Models 模块架构（基于多重派发）
+
+```mermaid
+flowchart TB
+  subgraph Models[src/models/]
+    Models.jl[Models.jl<br/>统一入口]
+    abstract[abstract_model.jl<br/>类型层次]
+    factory[factory.jl<br/>模型工厂]
+
+    subgraph NJL[njl/]
+      NJLModel[NJLModel.jl]
+      NJL2Model[NJL2Model.jl]
+    end
+
+    subgraph PNJL[pnjl_physics/]
+      PNJLModel[PNJLModel.jl]
+      RPNJLModel[RPNJLModel.jl]
+      PNJLMagnetic[PNJLMagneticModel.jl]
+      PNJLCore[PNJLCore.jl]
+      PNJLIntegrals[PNJLIntegrals.jl]
+    end
+
+    subgraph Solver[solver/]
+      SolverMain[Solver.jl]
+      ImplicitSolver[ImplicitSolver.jl]
+      ConstraintModes[ConstraintModes.jl]
+      SeedStrategies[SeedStrategies.jl]
+      Conditions[Conditions.jl]
+    end
+  end
+
+  Models.jl --> abstract
+  Models.jl --> factory
+  factory --> NJLModel
+  factory --> NJL2Model
+  factory --> PNJLModel
+  factory --> RPNJLModel
+  factory --> PNJLMagnetic
+
+  PNJLModel --> PNJLCore
+  PNJLModel --> PNJLIntegrals
+  RPNJLModel --> PNJLModel
+  PNJLMagnetic --> PNJLModel
+
+  SolverMain --> ImplicitSolver
+  SolverMain --> ConstraintModes
+  SolverMain --> SeedStrategies
+  SolverMain --> Conditions
 ```
 
 ## L3 关键链路补充（手动）
@@ -73,11 +134,25 @@ flowchart LR
     --> RelaxationTime[RelaxationTime]
 ```
 
-**PNJL 求解链路**
+**PNJL 求解链路（新架构）**
 
 ```mermaid
 flowchart LR
-  SeedStrategies[SeedStrategies]
+  Models[Models.jl]
+    --> Factory[factory.jl]
+    --> PNJLModel[PNJLModel]
     --> Solver[Solver]
-    --> Scan[Scan (Tmu/Trho/DualBranch)]
+    --> Result[MeanFieldState]
+```
+
+**回归测试链路**
+
+```mermaid
+flowchart LR
+  Baselines[tests/baselines/*.csv]
+    --> RegressionTests[tests/regression/**/*.jl]
+    --> Models[src/models/]
+    --> Results[计算结果]
+    --> Comparison[数值对比<br/>rtol/atol]
+    --> Report[测试报告]
 ```

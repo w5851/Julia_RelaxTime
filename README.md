@@ -174,20 +174,68 @@ julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help
 
 更完整的目录职责与文档/源码对齐规则见：[docs/dev/项目结构约定.md](docs/dev/%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E7%BA%A6%E5%AE%9A.md)。
 
-当前顶层目录及作用：
+### 核心架构（基于多重派发的模型系统）
 
-- `src/`：核心 Julia 源码，按 `integration/`、`relaxtime/`、`simulation/`、`utils/` 等子模块拆分。
-- `web/`：前端页面与静态资源，`web/js/` 含 `api.js`、`ui.js`、`visualization.js`。
-- `scripts/server/`：所有启动脚本与 HTTP 服务端代码（`server.jl`、`server_full.jl`、`test_server.jl`、`test_minimal_server.jl`、`start.bat`）。
-- `tests/`：测试资产；`tests/unit/` 存放原 `test_unit`，`tests/analysis/` 存放原 `test_other` 中的调试脚本与诊断报告。
-- `docs/`：文档中心。
-	- `docs/guides/`：用户/开发手册（`README` 补充材料、`QUICKSTART.md`、`USER_GUIDE.md`、`FRONTEND_DEBUG.md`、`FIXES.md` 等）。
-	- `docs/reference/`：公式、Mathematica、domain-knowledge 等原 `doc/` 内容。
-	- `docs/dev/active/`、`docs/dev/active/plans/`、`docs/dev/archived/`：开发过程中的计划、任务与归档记录。
-	- `docs/guides/examples/`：原 `examples/` 下的示例说明。
-- `docs/api/`：面向外部的 API/公式描述。
-- `data/outputs/`：运行结果与缓存输出（原 `results/` 位于 `data/outputs/results/`）。
-- `scripts/`、`tests/`、`docs/` 之外的根文件：`Project.toml`、`Manifest.toml`、`README.md` 等项目元数据。
+项目已完成从旧架构到基于多重派发的新架构迁移，核心模型统一位于 `src/models/` 目录：
+
+- **`src/models/Models.jl`**：统一模型入口，提供显式的 `Models` 模块接口
+- **`src/models/abstract_model.jl`**：抽象类型层次定义（`AbstractQuarkModel`, `AbstractNJLModel`, `AbstractPNJLModel`）
+- **`src/models/njl/`**：NJL 与 NJL2 模型实现（3 flavor / 2 flavor）
+- **`src/models/pnjl_physics/`**：PNJL 相关模型物理实现
+  - `PNJLModel.jl`：标准 PNJL 模型
+  - `RPNJLModel.jl`：repulsive PNJL 模型（MVP 版本）
+  - `PNJLMagneticModel.jl`：含磁场的 PNJL 模型（MVP 版本）
+- **`src/models/solver/`**：统一求解器框架
+  - `Solver.jl`：主求解入口
+  - `ImplicitSolver.jl`：隐式微分求解器
+  - `ConstraintModes.jl`：约束模式（FixedMu/FixedRho/FixedEntropy 等）
+  - `SeedStrategies.jl`：初值策略（MultiSeed/PhaseAwareContinuitySeed）
+- **`src/models/factory.jl`**：模型工厂，支持 `:NJL`, `:NJL2`, `:PNJL`, `:rPNJL`, `:PNJLMagnetic` 注册
+
+**使用示例**：
+```julia
+# 显式使用 Models 模块
+include("src/models/Models.jl")
+const PNJL = Models.pnjl_module()
+
+# 创建模型
+model = Models.create_model(:PNJL)
+
+# 求解 gap 方程
+result = Models.solve_gap(model, T, mu)
+
+# 计算热力学量
+pressure = Models.calculate_pressure(model, result)
+```
+
+### 顶层目录及作用
+
+- **`src/`**：核心 Julia 源码
+  - `src/models/`：模型系统（已完成架构迁移）
+  - `src/integration/`：数值积分工具
+  - `src/relaxtime/`：弛豫时间与输运系数计算
+  - `src/simulation/`：散射运动学模拟
+  - `src/utils/`：通用工具函数
+- **`tests/`**：完整测试套件
+  - `tests/unit/`：单元测试
+  - `tests/integration/`：集成测试
+  - `tests/regression/`：回归测试（数值基线验证）
+  - `tests/validation/`：物理验证测试（与外部参考对照）
+  - `tests/baselines/`：回归测试基线 CSV 文件
+- **`scripts/`**：
+  - `scripts/server/`：HTTP 服务端与启动脚本
+  - `scripts/dev/`：开发工具（基线导出、依赖图生成等）
+  - `scripts/relaxtime/`：输运系数计算脚本
+- **`docs/`**：文档中心
+  - `docs/guides/`：用户/开发手册
+  - `docs/reference/`：公式推导与理论参考
+  - `docs/architecture/`：架构文档与依赖图
+  - `docs/dev/active/`：活跃的开发计划
+  - `docs/dev/archived/`：已归档的开发记录
+  - `docs/api/`：API 文档
+- **`web/`**：前端页面与静态资源
+- **`data/outputs/`**：运行结果与缓存输出
+- **`config/`**：配置文件（TOML 格式）
 
 ## 目录迁移指南
 
