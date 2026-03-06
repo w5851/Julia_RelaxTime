@@ -1,12 +1,11 @@
 using Test
 
 if !isdefined(Main, :Models)
-    if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
-end
-Main.Models.transport_workflow_module()
-Main.Models.meson_workflow_module()
+
+const TransportWorkflow = Main.Models.transport_workflow_module()
+const MesonMassWorkflow = Main.Models.meson_workflow_module()
 
 using .TransportWorkflow
 using .MesonMassWorkflow

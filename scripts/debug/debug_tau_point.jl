@@ -16,7 +16,6 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
@@ -25,11 +24,11 @@ using Printf
 using StaticArrays
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
+const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const cached_nodes = getproperty(PNJL, :cached_nodes)
-const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
 const Integrals = getproperty(PNJL, :Integrals)
 const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
 const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
@@ -116,7 +115,7 @@ function build_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::NamedTuple, Φ::
 end
 
 function densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi)
-    nd = calculate_number_densities(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    nd = Models.number_densities(PNJL_MODEL, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=xi)
     return (
         u=Float64(nd.quark[1]),
         d=Float64(nd.quark[2]),

@@ -16,16 +16,11 @@ module ModelThermodynamics
 
 using StaticArrays
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 # constants
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PATH)
+end
 using Main.Constants_PNJL: ρ0_inv_fm3
 
 """ρ0（单位 fm⁻³）。"""

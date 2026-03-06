@@ -1,0 +1,9 @@
+WARNING: replacing module OneLoopIntegrals.
+process=ud_to_ud  sqrt_s_th=32.241 MeV  points=420
+WARNING: replacing module EffectiveCouplings.
+WARNING: replacing module TotalCrossSection.
+process=us_to_us  sqrt_s_th=328.350 MeV  points=420
+WARNING: replacing module AverageScatteringRate.
+process=udbar_to_udbar  sqrt_s_th=32.241 MeV  points=420
+process=usbar_to_usbar  sqrt_s_th=328.350 MeV  points=420
+Done. Wrote data/outputs/results/relaxtime/cross_section/literature_compare/xs_T250_muB0_xi0p0.csv

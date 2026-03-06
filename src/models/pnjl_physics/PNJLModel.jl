@@ -10,13 +10,6 @@
 
 using StaticArrays
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 const _pnjl_model_cached_nodes = PNJLCore.cached_nodes
 const _pnjl_model_log_sum = PNJLCore.calculate_log_sum
 

@@ -8,7 +8,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-Main.Models.transport_workflow_module()
+const TransportWorkflow = Main.Models.transport_workflow_module()
 using .TransportWorkflow
 
 function _point_key(T::Float64, mu::Float64, xi::Float64)

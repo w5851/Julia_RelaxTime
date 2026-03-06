@@ -2,12 +2,6 @@ module ScanResultFinalize
 
 using StaticArrays
 
-# Include-once helper
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-
 using ..ImplicitSolver: SolverResult
 
 export finalize_solver_result

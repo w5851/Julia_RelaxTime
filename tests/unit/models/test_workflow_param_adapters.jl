@@ -5,16 +5,17 @@ using Test
 const PROJECT_ROOT_WPA = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
 const _PT_PATH_WPA = normpath(joinpath(PROJECT_ROOT_WPA, "src", "ParameterTypes.jl"))
+const _MODELS_PATH_WPA = normpath(joinpath(PROJECT_ROOT_WPA, "src", "models", "Models.jl"))
 if !isdefined(Main, :ParameterTypes)
     Base.include(Main, _PT_PATH_WPA)
 end
-
-const _WPA_PATH = normpath(joinpath(PROJECT_ROOT_WPA, "src", "models", "workflows", "WorkflowParamAdapters.jl"))
-if !isdefined(Main, :WorkflowParamAdapters)
-    Base.include(Main, _WPA_PATH)
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODELS_PATH_WPA)
 end
 
-using Main.WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
+const WorkflowParamAdaptersModule = Main.Models.workflow_param_adapters_module()
+
+using .WorkflowParamAdaptersModule: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 @testset "WorkflowParamAdapters" begin

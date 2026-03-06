@@ -1,13 +1,9 @@
 module WorkflowParamAdapters
 
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
 const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
-IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
+if !isdefined(Main, :ParameterTypes)
+    Base.include(Main, _PARAMETER_TYPES_PATH)
+end
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 export normalize_quark_params, normalize_thermo_params, as_legacy_inputs

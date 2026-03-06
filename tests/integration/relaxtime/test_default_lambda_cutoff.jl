@@ -25,11 +25,11 @@ end
 
 using .Models
 using Main.Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm
+const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const cached_nodes = getproperty(PNJL, :cached_nodes)
-const calculate_number_densities = getproperty(PNJL, :calculate_number_densities)
 const PNJLIntegrals = getproperty(PNJL, :Integrals)
 const DEFAULT_MOMENTUM_NODES = getproperty(PNJLIntegrals, :DEFAULT_MOMENTUM_NODES)
 const DEFAULT_MOMENTUM_WEIGHTS = getproperty(PNJLIntegrals, :DEFAULT_MOMENTUM_WEIGHTS)
@@ -66,7 +66,7 @@ function setup_test_params()
     thermo_params = (T=Float64(T_FM), Φ=Φ, Φbar=Φbar, ξ=0.0)
     
     thermal_nodes = cached_nodes(12, 6)
-    nd = calculate_number_densities(base.x_state, base.mu_vec, T_FM, thermal_nodes, 0.0)
+    nd = Models.number_densities(PNJL_MODEL, base.x_state, T_FM, base.mu_vec; thermal_nodes=thermal_nodes, xi=0.0)
     densities = (
         u=Float64(nd.quark[1]), d=Float64(nd.quark[2]), s=Float64(nd.quark[3]),
         ubar=Float64(nd.antiquark[1]), dbar=Float64(nd.antiquark[2]), sbar=Float64(nd.antiquark[3]),

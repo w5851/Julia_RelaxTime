@@ -1,17 +1,17 @@
 """Models
 
-新架构 models 子系统入口。
+新架构 models 子系统统一入口。
 
-用法（建议）：
+推荐用法：
 
 ```julia
 include("src/models/Models.jl")
 using .Models
 
-m = Models.create_model(:NJL)
+model = Models.create_model(:NJL)
 ```
 
-说明：当前处于重构早期阶段，因此此入口以“最小可用接口”为目标。
+该模块暴露面向模型对象的多重派发接口，以及少量显式模块访问器。
 """
 module Models
 
@@ -74,9 +74,7 @@ export run_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, PromotionResult, PhasePipelineResult
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
-export calculate_U, calculate_U_derivative_T
 export Constants_PNJL
-export calculate_omega, calculate_pressure, calculate_rho, calculate_thermo
 export TmuScanConfig, TrhoScanConfig
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
@@ -150,16 +148,6 @@ include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
 
-if !isdefined(Main, :WorkflowParamAdapters)
-	@eval Main const WorkflowParamAdapters = $WorkflowParamAdapters
-end
-if !isdefined(Main, :TransportWorkflow)
-	@eval Main const TransportWorkflow = $TransportWorkflow
-end
-if !isdefined(Main, :MesonMassWorkflow)
-	@eval Main const MesonMassWorkflow = $MesonMassWorkflow
-end
-
 include(joinpath(@__DIR__, "entrypoints.jl"))
 
 const Integrals = PNJLCore.PNJLIntegrals
@@ -188,76 +176,6 @@ end
 		total += vacuum_integral(masses[i])
 	end
 	return -2 * Main.Constants_PNJL.N_color * total
-end
-
-@inline function calculate_mass_vec(x_state::AbstractVector{<:Real}; kwargs...)
-	model = create_model(:PNJL)
-	φ = SVector{3, Float64}(Float64(x_state[1]), Float64(x_state[2]), Float64(x_state[3]))
-	return calculate_mass_vec(model, φ; kwargs...)
-end
-
-@inline function calculate_chiral(φ::AbstractVector{<:Real}; kwargs...)
-	model = create_model(:PNJL)
-	ϕ = SVector{3, Float64}(Float64(φ[1]), Float64(φ[2]), Float64(φ[3]))
-	return calculate_chiral(model, ϕ; kwargs...)
-end
-
-@inline function calculate_number_densities(
-	x_state,
-	mu_vec,
-	T_fm,
-	thermal_nodes=nothing,
-	xi=0.0;
-	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
-	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
-	kwargs...
-)
-	model = create_model(:PNJL)
-	return number_densities(
-		model,
-		x_state,
-		T_fm,
-		mu_vec;
-		thermal_nodes=thermal_nodes,
-		p_num=p_num,
-		t_num=t_num,
-		xi=xi,
-		kwargs...,
-	)
-end
-
-@inline function calculate_U(T_fm, Φ, Φbar)
-	model = create_model(:PNJL)
-	return polyakov_potential(model, Φ, Φbar, T_fm)
-end
-
-@inline function calculate_U_derivative_T(T_fm, Φ, Φbar)
-	δT = 1e-6
-	return (calculate_U(T_fm + δT, Φ, Φbar) - calculate_U(T_fm - δT, Φ, Φbar)) / (2δT)
-end
-
-@inline function calculate_omega(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
-	model = create_model(:PNJL)
-	return omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-end
-
-@inline function calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
-	model = create_model(:PNJL)
-	return model_pressure(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-end
-
-@inline function calculate_rho(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
-	model = create_model(:PNJL)
-	return model_rho(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-end
-
-@inline function calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
-	model = create_model(:PNJL)
-	return model_thermo(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
-end
-
-if !isdefined(Main, :PNJL)
-	@eval Main const PNJL = $(@__MODULE__)
 end
 
 end # module Models

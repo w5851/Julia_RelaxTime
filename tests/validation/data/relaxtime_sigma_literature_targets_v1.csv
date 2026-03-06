@@ -1,0 +1,16 @@
+target_id,series,process,T_MeV,muB_MeV,sqrt_s_GeV,expected_sigma_mb,rtol,source
+sigma_ud_t200_1,ud_to_ud_T200,ud_to_ud,200.0,0.0,0.993053450593812,1.39471572753408,0.6,he_thesis_fig_5_5_wpd
+sigma_ud_t160_1,ud_to_ud_T160,ud_to_ud,160.0,0.0,1.01055445544554,1.17762409045965,0.6,he_thesis_fig_5_5_wpd
+sigma_ud_t250_1,ud_to_ud_T250,ud_to_ud,250.0,0.0,1.16828042924053,0.542271976794275,0.6,he_thesis_fig_5_5_wpd
+sigma_us_t160_1,us_to_us_T160,us_to_us,160.0,0.0,0.903989661665081,3.10704672382423,0.6,he_thesis_fig_5_5_wpd
+sigma_us_t250_1,us_to_us_T250,us_to_us,250.0,0.0,1.04236473587478,1.05716477279244,0.6,he_thesis_fig_5_5_wpd
+sigma_udbar_t210_1,udbar_to_udbar_T210,udbar_to_udbar,210.0,0.0,0.465637339183019,2.04377353087662,0.7,he_thesis_fig_5_5_wpd
+sigma_usbar_t250_1,usbar_to_usbar_T250,usbar_to_usbar,250.0,0.0,0.639268453192623,4.28696763980773,0.7,he_thesis_fig_5_5_wpd
+sigma_ud_muB800_t100_1,ud_to_ud_T100_muB800,ud_to_ud,100.0,800.0,0.934975250908551,1.55213688790511,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_ud_muB800_t180_1,ud_to_ud_T180_muB800,ud_to_ud,180.0,800.0,0.994686870190779,1.05770420196179,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_us_muB800_t100_1,us_to_us_T100_muB800,us_to_us,100.0,800.0,0.921116872486758,3.83729279240062,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_us_muB800_t180_1,us_to_us_T180_muB800,us_to_us,180.0,800.0,0.924622004737427,1.01083762092334,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_udbar_muB800_t150_1,udbar_to_udbar_T150_muB800,udbar_to_udbar,150.0,800.0,0.510874791113476,5.32659780978249,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_udbar_muB800_t180_1,udbar_to_udbar_T180_muB800,udbar_to_udbar,180.0,800.0,0.604435766926695,4.83863525790903,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_usbar_muB800_t150_1,usbar_to_usbar_T150_muB800,usbar_to_usbar,150.0,800.0,0.853111076370071,2.62590301615904,0.15,he_thesis_fig_muB800_sigma_wpd
+sigma_usbar_muB800_t180_1,usbar_to_usbar_T180_muB800,usbar_to_usbar,180.0,800.0,0.464204126837159,0.68100667372254,0.15,he_thesis_fig_muB800_sigma_wpd

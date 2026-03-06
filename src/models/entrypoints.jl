@@ -4,9 +4,9 @@ Models 统一流程入口（阶段 C）：
 - 扫描：run_tmu_scan / run_trho_scan
 - 工作流：solve_gap_and_transport / solve_gap_and_meson_point
 
-当前采用兼容转发策略：
+当前采用统一入口策略：
 - 业务流程模块统一位于 `src/models/*` 域并由 `Models` 暴露入口；
-- 对外保留稳定函数签名，便于调用方无感升级。
+- 调用方应通过 `Models` 模块显式访问工作流能力。
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
@@ -60,7 +60,7 @@ end
 
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
-@inline pnjl_module() = Main.Models
+@inline pnjl_module() = @__MODULE__
 
 @inline function workflow_param_adapters_module()
     adapters = WorkflowParamAdapters

@@ -14,10 +14,9 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Models.pnjl_module()
+const P = Models.pnjl_module()
 
 # 避免跨测试文件导出冲突：通过模块前缀访问。
-P = PNJL
 
 # ============================================================================
 # 模式构造测试

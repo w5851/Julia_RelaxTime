@@ -21,8 +21,6 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.pnjl_module()
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm, ρ0_inv_fm3
@@ -33,6 +31,8 @@ using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
 using .ScanCSV: ScanCSV
 
+const PNJL_MODEL = Models.create_model(:PNJL)
+const TransportWorkflow = Models.transport_workflow_module()
 const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
@@ -573,14 +573,14 @@ function run_scan(opts::ScanOptions)
                     tauinv = res.tau_inv
                     tr = res.transport
 
-                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Main.Models.calculate_thermo(
+                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Models.model_thermo(
+                        PNJL_MODEL,
                         eq.x_state,
                         eq.mu_vec,
                         T_fm,
-                        nothing,
-                        xi;
                         p_num=opts.p_num,
                         t_num=opts.t_num,
+                        xi=xi,
                     )
 
                     # 重建重子数密度（旧版 eq.rho/eq.rho_norm 已移除）
@@ -588,14 +588,14 @@ function run_scan(opts::ScanOptions)
                     rho_baryon = rho_quark_net / 3.0
                     rho_norm = rho_baryon / ρ0_inv_fm3
 
-                    omega_fm4inv = Main.Models.calculate_omega(
+                    omega_fm4inv = Models.omega(
+                        PNJL_MODEL,
                         eq.x_state,
-                        eq.mu_vec,
                         T_fm,
-                        nothing,
-                        xi;
+                        eq.mu_vec;
                         p_num=opts.p_num,
                         t_num=opts.t_num,
+                        xi=xi,
                     )
                     omega_MeV_fm3 = omega_fm4inv * ħc_MeV_fm
                     P_MeV_fm3 = P_fm4inv * ħc_MeV_fm

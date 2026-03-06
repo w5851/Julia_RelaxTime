@@ -11,8 +11,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Models.pnjl_module()
 
+const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 const MagneticConfig = getproperty(PNJL, :MagneticConfig)
 const coupling_GB = getproperty(PNJL, :coupling_GB)
@@ -21,7 +21,6 @@ const G_fm2 = getproperty(PNJLConstants, :G_fm2)
 const calculate_magnetic_rho = getproperty(PNJL, :calculate_magnetic_rho)
 const calculate_magnetic_number_densities = getproperty(PNJL, :calculate_magnetic_number_densities)
 const cached_nodes = getproperty(PNJL, :cached_nodes)
-const calculate_omega = getproperty(PNJL, :calculate_omega)
 const calculate_magnetic_omega_components = getproperty(PNJL, :calculate_magnetic_omega_components)
 const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
 
@@ -67,7 +66,7 @@ const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
         @test comp.G_B > 0
 
         thermal_nodes = cached_nodes(24, 8)
-        omega_legacy = calculate_omega(x_state, mu_vec, T_fm, thermal_nodes, 0.0)
+        omega_legacy = Models.omega(PNJL_MODEL, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=0.0)
         omega_b0 = calculate_magnetic_omega(x_state, mu_vec, T_fm, MagneticConfig(eB_fm2=0.0, p_num=24, pz_max=10.0))
         @test isapprox(omega_b0, omega_legacy; rtol=1e-7, atol=1e-8)
     end

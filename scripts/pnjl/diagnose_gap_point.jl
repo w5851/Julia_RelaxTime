@@ -18,8 +18,8 @@ using Printf
 
 include(joinpath(@__DIR__, "..", "..", "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
-Models.pnjl_module()
 
+const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 using StaticArrays
 using NLsolve
@@ -119,9 +119,9 @@ function solve_once(T_fm::Float64, mu_fm::Float64, xi::Float64, p_num::Int, t_nu
     elapsed = time() - t0
 
     x_state = SVector{5}(Tuple(res.zero))
-    pressure, rho_norm, entropy, energy = PNJL.calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi)
+    pressure, rho_norm, entropy, energy = Models.model_thermo(PNJL_MODEL, x_state, mu_vec, T_fm; thermal_nodes=thermal_nodes, xi=xi, p_num=p_num, t_num=t_num)
     omega = -pressure
-    masses = PNJL.calculate_mass_vec(x_state)
+    masses = Models.calculate_mass_vec(PNJL_MODEL, SVector{3}(x_state[1], x_state[2], x_state[3]))
 
     if verbose
         @printf("    converged=%s iter=%d |res|=%.3e  omega=%.6e  time=%.3fs\n", string(res.f_converged), res.iterations, res.residual_norm, omega, elapsed)

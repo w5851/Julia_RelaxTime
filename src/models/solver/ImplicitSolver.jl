@@ -38,16 +38,6 @@ if !isdefined(@__MODULE__, :PNJLCore)
     include(_PNJL_CORE_PATH)
 end
 using .PNJLCore: cached_nodes, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
-
-# Unified thermo facade (legacy vs models)
-const _INCLUDE_ONCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "utils", "IncludeOnce.jl"))
-if !isdefined(Main, :IncludeOnce)
-    Base.include(Main, _INCLUDE_ONCE_PATH)
-end
-const IncludeOnce = Main.IncludeOnce
-
-const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
-IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 

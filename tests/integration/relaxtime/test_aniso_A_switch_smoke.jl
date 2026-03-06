@@ -4,11 +4,10 @@ if !isdefined(Main, :RelaxTime)
     Base.include(Main, normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl")))
 end
 if !isdefined(Main, :Models)
-    if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
-end
-Main.Models.transport_workflow_module()
+
+const TransportWorkflow = Main.Models.transport_workflow_module()
 
 using .RelaxationTime
 using .TransportWorkflow
