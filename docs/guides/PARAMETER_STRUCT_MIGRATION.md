@@ -1,5 +1,9 @@
 # Parameter Struct Migration Guide
 
+> **✅ 迁移状态：已完成（2026-01-25）**
+> 参数结构体迁移已全面完成，所有模块支持 `QuarkParams` 和 `ThermoParams` 结构体，同时保持向后兼容。
+> 本文档作为参考保留，用于理解迁移过程和双接口模式设计。
+
 ## Overview
 
 The PNJL model codebase has been migrated to use `QuarkParams` and `ThermoParams` structs as the standard parameter representation, while maintaining full backward compatibility with existing NamedTuple-based code.
