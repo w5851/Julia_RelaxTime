@@ -1,4 +1,3 @@
-```skill
 ---
 name: openalex-database
 description: OpenAlex-focused scholarly retrieval skill for work/author/institution queries, citation trend snapshots, and topic-level evidence discovery. Use when you need structured literature discovery and bibliometric signals from OpenAlex.
@@ -32,4 +31,3 @@ metadata:
 ## Boundary
 - 该技能偏“检索与计量”，不替代深度方法评估。
 - 方案落地与技术路线选择交给 `research-engineer`。
-```

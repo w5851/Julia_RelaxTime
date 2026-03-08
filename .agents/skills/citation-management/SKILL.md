@@ -1,4 +1,3 @@
-```skill
 ---
 name: citation-management
 description: Citation operations skill for DOI/arXiv metadata normalization, BibTeX curation, duplicate cleanup, and reference consistency checks. Use when managing reference quality and bibliography integrity for papers and reports.
@@ -32,4 +31,3 @@ metadata:
 ## Boundary
 - 大规模文献检索与主题综合请配合 `literature-review`。
 - 仅做写作润色时优先用 `writing-skills`。
-```

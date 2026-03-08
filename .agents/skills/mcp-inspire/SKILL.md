@@ -1,4 +1,3 @@
-```skill
 ---
 name: mcp-inspire
 description: Workflows for using the local mcp-inspire MCP server in VS Code (INSPIRE search, sorting, arXiv PDF download, and handoff to PDF utilities).
@@ -40,4 +39,3 @@ metadata:
 ## Boundary
 - 不做出版社付费墙自动化登录/爬取。
 - `download_open_file` 仅允许下载白名单开放域名（INSPIRE files、arXiv）。
-```

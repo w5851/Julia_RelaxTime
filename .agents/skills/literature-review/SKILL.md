@@ -1,4 +1,3 @@
-```skill
 ---
 name: literature-review
 description: Structured multi-database literature review workflow for academic synthesis with reproducible search logs and thematic evidence mapping. Use when you need rigorous review methodology (scope, screening, synthesis), not general brainstorming.
@@ -33,4 +32,3 @@ metadata:
 ## Boundary
 - 通用跨域背景搜集优先用 `deep-research`。
 - 方法选型并落地到工程决策优先用 `research-engineer`。
-```
