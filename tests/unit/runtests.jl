@@ -35,7 +35,9 @@ const SMOKE_FILES = [
 
     # [Types & Config] 基础类型与配置
     joinpath(UNIT_DIR, "types", "test_parameter_types.jl"),
+    joinpath(UNIT_DIR, "types", "test_parameter_adapters.jl"),
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
+    joinpath(UNIT_DIR, "config", "test_config_inheritance.jl"),
 
     # [NJL Core] NJL 模型核心
     joinpath(UNIT_DIR, "njl", "test_njl_core.jl"),
@@ -53,6 +55,7 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraint_modes.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_pnjl_core.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_core_integrals.jl"),
+    joinpath(UNIT_DIR, "pnjl", "test_thermo_derivatives.jl"),
 
     # [RelaxTime Core] 输运核心模块
     joinpath(UNIT_DIR, "relaxtime", "test_oneloopintegrals.jl"),

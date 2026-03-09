@@ -47,7 +47,7 @@ Both approaches produce identical results. See `docs/guides/PARAMETER_STRUCT_MIG
 
 ## Internal Normalization
 
-The module uses internal normalization helpers `_nt_quark` and `_nt_thermo` to convert
+The module uses shared normalization helpers from ParameterAdapters to convert
 struct inputs to NamedTuples at function boundaries. This ensures:
 - Type stability in internal implementation
 - Zero runtime overhead (helpers are inlined)
@@ -56,7 +56,8 @@ struct inputs to NamedTuples at function boundaries. This ensures:
 
 # Dependencies loaded by RelaxTime.jl entry point
 
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 
 using ..AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
@@ -67,12 +68,18 @@ using ..AFieldBuilder: ensure_quark_params_has_A as _ensure_A
 
 export relaxation_rates, relaxation_times, compute_average_rates, REQUIRED_PROCESSES
 
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
-
 # Single source of truth for supported scattering processes.
 # This list is derived from `Constants_PNJL.SCATTERING_MESON_MAP` keys.
 const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
+
+const RATE_ALIASES = (
+    dubar_to_dubar=(:dubar_to_dubar, :udbar_to_udbar),
+    subar_to_subar=(:subar_to_subar, :usbar_to_usbar),
+    ubardbar_to_ubardbar=(:ubardbar_to_ubardbar, :ud_to_ud),
+    ubarubar_to_ubarubar=(:ubarubar_to_ubarubar, :uu_to_uu),
+    ubarsbar_to_ubarsbar=(:ubarsbar_to_ubarsbar, :us_to_us),
+    sbarsbar_to_sbarsbar=(:sbarsbar_to_sbarsbar, :ss_to_ss),
+)
 
 @inline function ensure_quark_params_has_A(
     quark_params,
@@ -82,8 +89,8 @@ const REQUIRED_PROCESSES = SCATTERING_PROCESS_KEYS
     cos_nodes::Int=DEFAULT_ANGLE_NODES,
     use_aniso::Bool=true,
 )::NamedTuple
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     return _ensure_A(
         quark_nt,
         thermo_nt;
@@ -107,41 +114,25 @@ end
     end
 end
 
+@inline _has_rate(rates::NamedTuple, key::Symbol) = hasproperty(rates, key)
+@inline _has_rate(rates::AbstractDict, key::Symbol) = haskey(rates, key)
+
+@inline _get_rate(rates::NamedTuple, key::Symbol) = getproperty(rates, key)
+@inline _get_rate(rates::AbstractDict, key::Symbol) = rates[key]
+
+@inline function _resolve_rate_key(rates, key::Symbol)::Symbol
+    aliases = get(RATE_ALIASES, key, (key,))
+    for candidate in aliases
+        _has_rate(rates, candidate) && return candidate
+    end
+    return key
+end
+
 @inline function rate_lookup(rates, key::Symbol)
-    if rates isa NamedTuple
-        # Backward/ergonomic aliases (isospin / charge conjugation).
-        # These help older callers/tests that only provide a reduced rate set.
-        if key === :dubar_to_dubar && !hasproperty(rates, :dubar_to_dubar) && hasproperty(rates, :udbar_to_udbar)
-            key = :udbar_to_udbar
-        elseif key === :subar_to_subar && !hasproperty(rates, :subar_to_subar) && hasproperty(rates, :usbar_to_usbar)
-            key = :usbar_to_usbar
-        elseif key === :ubardbar_to_ubardbar && !hasproperty(rates, :ubardbar_to_ubardbar) && hasproperty(rates, :ud_to_ud)
-            key = :ud_to_ud
-        elseif key === :ubarubar_to_ubarubar && !hasproperty(rates, :ubarubar_to_ubarubar) && hasproperty(rates, :uu_to_uu)
-            key = :uu_to_uu
-        elseif key === :ubarsbar_to_ubarsbar && !hasproperty(rates, :ubarsbar_to_ubarsbar) && hasproperty(rates, :us_to_us)
-            key = :us_to_us
-        elseif key === :sbarsbar_to_sbarsbar && !hasproperty(rates, :sbarsbar_to_sbarsbar) && hasproperty(rates, :ss_to_ss)
-            key = :ss_to_ss
-        end
-        hasproperty(rates, key) || error("average rate for $(key) not found")
-        return getproperty(rates, key)
-    elseif rates isa AbstractDict
-        if key === :dubar_to_dubar && !haskey(rates, :dubar_to_dubar) && haskey(rates, :udbar_to_udbar)
-            key = :udbar_to_udbar
-        elseif key === :subar_to_subar && !haskey(rates, :subar_to_subar) && haskey(rates, :usbar_to_usbar)
-            key = :usbar_to_usbar
-        elseif key === :ubardbar_to_ubardbar && !haskey(rates, :ubardbar_to_ubardbar) && haskey(rates, :ud_to_ud)
-            key = :ud_to_ud
-        elseif key === :ubarubar_to_ubarubar && !haskey(rates, :ubarubar_to_ubarubar) && haskey(rates, :uu_to_uu)
-            key = :uu_to_uu
-        elseif key === :ubarsbar_to_ubarsbar && !haskey(rates, :ubarsbar_to_ubarsbar) && haskey(rates, :us_to_us)
-            key = :us_to_us
-        elseif key === :sbarsbar_to_sbarsbar && !haskey(rates, :sbarsbar_to_sbarsbar) && haskey(rates, :ss_to_ss)
-            key = :ss_to_ss
-        end
-        haskey(rates, key) || error("average rate for $(key) not found")
-        return rates[key]
+    if rates isa NamedTuple || rates isa AbstractDict
+        resolved_key = _resolve_rate_key(rates, key)
+        _has_rate(rates, resolved_key) || error("average rate for $(key) not found")
+        return _get_rate(rates, resolved_key)
     else
         error("rates must be a NamedTuple or Dict")
     end
@@ -198,8 +189,8 @@ function compute_average_rates(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # σ(s)有效范围的动量截断，默认使用 Λ
 )::NamedTuple
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
 
     return _compute_average_rates_nt(
         quark_nt,
@@ -404,7 +395,8 @@ const REQUIRED_RATE_KEYS_FOR_TAU = (
             rate_lookup(rates, k)
         end
         return true
-    catch
+    catch err
+        err isa InterruptException && rethrow()
         return false
     end
 end
@@ -469,8 +461,8 @@ function relaxation_times(
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
 )::NamedTuple
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     
     rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
         existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)

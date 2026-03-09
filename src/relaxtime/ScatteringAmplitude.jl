@@ -37,14 +37,15 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 M² = scattering_amplitude_squared(:uu_to_uu, 2.0, -0.5, q_nt, t_nt, K_coeffs)
 ```
 
-Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo`) ensures
+Both produce identical results. Internal normalization via ParameterAdapters ensures
 type stability and zero overhead.
 """
 
 # Dependencies loaded by RelaxTime.jl entry point
 const Constants_PNJL = Main.Constants_PNJL
 
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 using Main.Constants_PNJL: N_color, SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 import ..TotalPropagator
 using ..TotalPropagator: calculate_cms_momentum
@@ -59,43 +60,6 @@ export calculate_all_scattering_amplitudes_squared
 # 使用N_color作为N_c
 const N_c = N_color
 const CROSS_TERM_FACTOR = 1.0 / (4.0 * N_c)
-
-# ----------------------------------------------------------------------------
-# 参数归一化辅助函数
-# ----------------------------------------------------------------------------
-
-"""
-    _nt_quark(q)
-
-将 QuarkParams 结构体或 NamedTuple 归一化为 NamedTuple 格式。
-
-这是一个内部辅助函数，用于在函数入口处统一参数格式，确保内部实现的类型稳定性。
-使用 @inline 标记以避免运行时开销。
-
-# 参数
-- `q`: QuarkParams 结构体或 NamedTuple
-
-# 返回值
-NamedTuple 格式的夸克参数 (m=..., μ=...)
-"""
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-
-"""
-    _nt_thermo(t)
-
-将 ThermoParams 结构体或 NamedTuple 归一化为 NamedTuple 格式。
-
-这是一个内部辅助函数，用于在函数入口处统一参数格式，确保内部实现的类型稳定性。
-使用 @inline 标记以避免运行时开销。
-
-# 参数
-- `t`: ThermoParams 结构体或 NamedTuple
-
-# 返回值
-NamedTuple 格式的热力学参数 (T=..., Φ=..., Φbar=..., ξ=...)
-"""
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
-
 
 # ----------------------------------------------------------------------------
 # 辅助函数：Mandelstam辅助变量计算
@@ -226,7 +190,7 @@ function prepare_scattering_context(
     process::Symbol,
     quark_params::Union{NamedTuple, QuarkParams}
 )
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     return prepare_scattering_context(process, quark_params)
 end
 
@@ -267,8 +231,8 @@ function scattering_amplitude_squared_prepared(
     thermo_params::Union{NamedTuple, ThermoParams},
     K_coeffs::NamedTuple,
 )
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     return scattering_amplitude_squared_prepared(ctx, s, t, quark_params, thermo_params, K_coeffs)
 end
 
@@ -389,8 +353,8 @@ function scattering_amplitude_squared(process::Symbol, s::Float64, t::Float64,
                                      thermo_params::Union{NamedTuple, ThermoParams},
                                      K_coeffs::NamedTuple)
     # 归一化参数为 NamedTuple 格式
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
 
     ctx = prepare_scattering_context(process, quark_params)
     return scattering_amplitude_squared_prepared(ctx, s, t, quark_params, thermo_params, K_coeffs)
@@ -663,8 +627,8 @@ function calculate_all_scattering_amplitudes_squared(
     K_coeffs::NamedTuple
 )::NamedTuple
     # 归一化参数为 NamedTuple 格式
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     # 计算每个过程的矩阵元平方（避免Dict分配，保持固定顺序）
     values = ntuple(i -> scattering_amplitude_squared(

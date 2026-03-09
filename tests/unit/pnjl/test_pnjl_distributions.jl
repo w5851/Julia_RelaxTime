@@ -96,6 +96,23 @@ const _PD = Models
         @test isfinite(f_qbar)
     end
 
+    @testset "极端低温高化学势稳定性" begin
+        E = 0.2
+        μ = 2.0
+        T = 0.005
+        Φ = 0.2
+        Φbar = 0.25
+
+        f_q = _PD.pnjl_quark_distribution(E, μ, T, Φ, Φbar)
+        f_qbar = _PD.pnjl_antiquark_distribution(E, μ, T, Φ, Φbar)
+
+        @test isfinite(f_q)
+        @test isfinite(f_qbar)
+        @test 0.0 <= f_q <= 1.0
+        @test 0.0 <= f_qbar <= 1.0
+        @test f_q > 0.999999
+    end
+
     @testset "各向异性分布 aniso" begin
         p = 2.0
         m = 1.0

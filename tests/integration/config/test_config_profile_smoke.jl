@@ -4,12 +4,11 @@ include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "njl", "NJLCore.jl
 
 @testset "Config profile selection (NJL)" begin
     withenv("PHYSICS_PARAM_PROFILE" => "default") do
-        # New scheme preferred over old scheme when both exist:
-        # - config/models/njl/<profile>.toml has priority over config/njl/<profile>.toml
+        # Model profiles are loaded only from config/models/njl/<profile>.toml.
         p_new = NJLCore.njl_params(profile="unittest")
         @test p_new.label == "njl-unittest-new"
 
-        # Fallback to legacy path when only old config exists.
+        # Legacy-only profile has been migrated into config/models/njl/.
         p_old = NJLCore.njl_params(profile="unittest_oldonly")
         @test p_old.label == "njl-unittest-oldonly"
     end

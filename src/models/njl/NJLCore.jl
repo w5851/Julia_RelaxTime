@@ -56,7 +56,7 @@ Base.@kwdef struct NJLParams
     N_flavor::Int = 3
 
     # scales
-    hbarc_MeV_fm::Float64 = 197.327
+    hbarc_MeV_fm::Float64 = 197.3269804
     rho0_fm3::Float64 = 0.16
 
     # model params (internal fm units)
@@ -70,13 +70,12 @@ end
 const DEFAULT_PROFILE = "default"
 
 const PHYSICS_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
-const NJL_CONFIG_DIR_NEW = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "njl"))
-const NJL_CONFIG_DIR_OLD = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "njl"))
+const NJL_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "njl"))
 
 const DEFAULT_PHYSICS_CONFIG = Dict{String, Any}(
     "physical" => Dict(
-        "hbarc" => 197.327,
-        "alpha_em" => 1.0 / 137.035999084,
+        "hbarc" => 197.3269804,
+        "alpha_em" => 0.0072973525664,
     ),
 )
 
@@ -95,23 +94,11 @@ const DEFAULT_NJL_MODEL_CONFIG = Dict{String, Any}(
     ),
 )
 
-function _select_config_dir(profile::String, new_dir::String, old_dir::String)
-    if isfile(joinpath(new_dir, string(profile, ".toml")))
-        return new_dir
-    end
-    if isfile(joinpath(old_dir, string(profile, ".toml")))
-        return old_dir
-    end
-    return new_dir
-end
-
 """读取配置并返回解析后的 Dict。
 
-优先使用方案B：
+使用方案B：
 - physics: `config/physics/<profile>.toml`
 - model: `config/models/njl/<profile>.toml`
-
-兼容回退：若不存在则尝试旧路径 `config/njl/<profile>.toml`（其中可能包含 [physical]）。
 """
 function load_njl_config(; profile::String=get(ENV, "NJL_PARAM_PROFILE", DEFAULT_PROFILE))
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", DEFAULT_PROFILE)
@@ -120,9 +107,8 @@ function load_njl_config(; profile::String=get(ENV, "NJL_PARAM_PROFILE", DEFAULT
     shared_model = get(physics_data.config, "model_shared", Dict{String, Any}())
     inherited_model_cfg = isempty(shared_model) ? Dict{String, Any}[] : [Dict("model" => shared_model)]
 
-    model_dir = _select_config_dir(profile, NJL_CONFIG_DIR_NEW, NJL_CONFIG_DIR_OLD)
     model_data = load_config(
-        model_dir,
+        NJL_CONFIG_DIR,
         DEFAULT_NJL_MODEL_CONFIG;
         profile=profile,
         inherited_configs=inherited_model_cfg,
@@ -138,7 +124,7 @@ function njl_params(; profile::String=get(ENV, "NJL_PARAM_PROFILE", "default"))
     physical = get(cfg, "physical", Dict{String, Any}())
     model = get(cfg, "model", Dict{String, Any}())
 
-    hbarc = Float64(get(physical, "hbarc", 197.327))
+    hbarc = Float64(get(physical, "hbarc", 197.3269804))
     label = String(get(model, "label", "njl"))
 
     N_color = Int(get(model, "N_color", 3))

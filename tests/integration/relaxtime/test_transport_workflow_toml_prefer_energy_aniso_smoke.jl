@@ -78,14 +78,50 @@ const TW = Main.Models.transport_workflow_module()
         @test isapprox(res_default.transport.eta, res_false.transport.eta; rtol=1e-12, atol=0.0)
         @test !isapprox(res_default.transport.eta, res_true.transport.eta; rtol=1e-10, atol=0.0)
 
+        @testset "explicit workflow_cache injection" begin
+            cache = TW.WorkflowCache()
+            res_custom_cache = TW.solve_gap_and_transport(
+                T,
+                mu;
+                xi=xi,
+                tau=tau,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(iterations=30,),
+                transport_config=TW.TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6),
+                provider=toy_provider_aniso,
+                workflow_cache=cache,
+            )
+
+            @test isfinite(res_custom_cache.transport.eta)
+            @test haskey(cache.model_cache, :PNJL)
+            @test haskey(cache.prefer_energy_aniso_cache, "unittest")
+
+            _ = TW._A_from_equilibrium(
+                res_custom_cache.thermo_params.T,
+                res_custom_cache.quark_params,
+                res_custom_cache.thermo_params;
+                workflow_cache=cache,
+            )
+            @test haskey(cache.a_builder_config_cache, "unittest")
+
+            TW.reset_transport_workflow_config_cache!(cache)
+            @test haskey(cache.model_cache, :PNJL)
+            @test isempty(cache.prefer_energy_aniso_cache)
+            @test isempty(cache.a_builder_config_cache)
+        end
+
         @testset "a_builder config from profile and explicit override" begin
-            q = (m=(u=1.2, d=1.2, s=1.8), μ=(u=0.1, d=0.1, s=0.2))
-            tp = (T=0.15, Φ=0.45, Φbar=0.45, ξ=0.3)
+            q = Main.ParameterTypes.QuarkParams((m=(u=1.2, d=1.2, s=1.8), μ=(u=0.1, d=0.1, s=0.2)))
+            tp = Main.ParameterTypes.ThermoParams((T=0.15, Φ=0.45, Φbar=0.45, ξ=0.3))
+            legacy = TW.as_legacy_inputs(q, tp)
 
             A_default = TW._A_from_equilibrium(tp.T, q, tp)
             A_expected_profile = Main.AFieldBuilder.build_A_triplet(
-                q,
-                tp;
+                legacy.quark_params,
+                legacy.thermo_params;
                 p_nodes=10,
                 p_max=8.0,
                 cos_nodes=6,
@@ -101,8 +137,8 @@ const TW = Main.Models.transport_workflow_module()
                 a_builder_config=(p_nodes=12, p_max=7.0, cos_nodes=5, use_aniso=false),
             )
             A_expected_override = Main.AFieldBuilder.build_A_triplet(
-                q,
-                tp;
+                legacy.quark_params,
+                legacy.thermo_params;
                 p_nodes=12,
                 p_max=7.0,
                 cos_nodes=5,

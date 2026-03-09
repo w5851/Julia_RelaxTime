@@ -36,10 +36,14 @@ if !isdefined(@__MODULE__, :ConfigLoader)
 end
 using .ConfigLoader: load_config
 
-const _PREFER_ENERGY_ANISO_CACHE_LOCK = ReentrantLock()
-const _PREFER_ENERGY_ANISO_CACHE = Dict{String, Bool}()
-const _A_BUILDER_CONFIG_CACHE_LOCK = ReentrantLock()
-const _A_BUILDER_CONFIG_CACHE = Dict{String, NamedTuple}()
+Base.@kwdef mutable struct WorkflowCache
+    model_cache::Dict{Symbol, Any} = Dict{Symbol, Any}()
+    prefer_energy_aniso_cache::Dict{String, Bool} = Dict{String, Bool}()
+    a_builder_config_cache::Dict{String, NamedTuple} = Dict{String, NamedTuple}()
+    lock::ReentrantLock = ReentrantLock()
+end
+
+const _DEFAULT_WORKFLOW_CACHE = WorkflowCache()
 
 """reset_transport_workflow_config_cache!()
 
@@ -48,19 +52,13 @@ const _A_BUILDER_CONFIG_CACHE = Dict{String, NamedTuple}()
 用途：
 - 在同一 Julia session 内切换 `PHYSICS_PARAM_PROFILE` 后，强制让 workflow 重新读取 `config/physics/<profile>.toml`。
 """
-function reset_transport_workflow_config_cache!()
-    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+function reset_transport_workflow_config_cache!(cache::WorkflowCache=_DEFAULT_WORKFLOW_CACHE)
+    lock(cache.lock)
     try
-        empty!(_PREFER_ENERGY_ANISO_CACHE)
+        empty!(cache.prefer_energy_aniso_cache)
+        empty!(cache.a_builder_config_cache)
     finally
-        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
-    end
-
-    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
-    try
-        empty!(_A_BUILDER_CONFIG_CACHE)
-    finally
-        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
+        unlock(cache.lock)
     end
     return nothing
 end
@@ -103,17 +101,23 @@ using .TransportCoefficients: rho_mass_from_densities
 
 const PNJL = Main.Models
 
-const _MODEL_CACHE = Dict{Symbol, Any}()
-
-@inline function _get_model(model_kind::Symbol)
-    return get!(_MODEL_CACHE, model_kind) do
-        Main.Models.create_model(model_kind)
+@inline function _get_model(cache::WorkflowCache, model_kind::Symbol)
+    lock(cache.lock)
+    try
+        return get!(cache.model_cache, model_kind) do
+            Main.Models.create_model(model_kind)
+        end
+    finally
+        unlock(cache.lock)
     end
 end
+
+@inline _get_model(model_kind::Symbol) = _get_model(_DEFAULT_WORKFLOW_CACHE, model_kind)
 
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig
 export solve_transport_from_equilibrium
+export WorkflowCache, reset_transport_workflow_config_cache!
 
 const TRANSPORT_INTEGRATION_KEYS = (
     :p_nodes, :p_max,
@@ -144,24 +148,24 @@ end
     return hasproperty(kwargs, :prefer_energy_aniso) ? kwargs.prefer_energy_aniso : nothing
 end
 
-@inline function _default_prefer_energy_aniso_from_toml()::Bool
+@inline function _default_prefer_energy_aniso_from_toml(cache::WorkflowCache)::Bool
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
 
-    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    lock(cache.lock)
     try
-        if haskey(_PREFER_ENERGY_ANISO_CACHE, physics_profile)
-            return _PREFER_ENERGY_ANISO_CACHE[physics_profile]
+        if haskey(cache.prefer_energy_aniso_cache, physics_profile)
+            return cache.prefer_energy_aniso_cache[physics_profile]
         end
     finally
-        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+        unlock(cache.lock)
     end
 
     physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
 
     default_physics = Dict{String, Any}(
         "physical" => Dict(
-            "hbarc" => 197.327,
-            "alpha_em" => 1.0 / 137.035999084,
+            "hbarc" => 197.3269804,
+            "alpha_em" => 0.0072973525664,
         ),
         "transport_workflow" => Dict(
             "prefer_energy_aniso" => true,
@@ -173,34 +177,36 @@ end
     tw = get(cfg, "transport_workflow", Dict{String, Any}())
     val = Bool(get(tw, "prefer_energy_aniso", true))
 
-    lock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+    lock(cache.lock)
     try
-        _PREFER_ENERGY_ANISO_CACHE[physics_profile] = val
+        cache.prefer_energy_aniso_cache[physics_profile] = val
     finally
-        unlock(_PREFER_ENERGY_ANISO_CACHE_LOCK)
+        unlock(cache.lock)
     end
 
     return val
 end
 
-@inline function _default_a_builder_config_from_toml()::NamedTuple
+@inline _default_prefer_energy_aniso_from_toml() = _default_prefer_energy_aniso_from_toml(_DEFAULT_WORKFLOW_CACHE)
+
+@inline function _default_a_builder_config_from_toml(cache::WorkflowCache)::NamedTuple
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
 
-    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    lock(cache.lock)
     try
-        if haskey(_A_BUILDER_CONFIG_CACHE, physics_profile)
-            return _A_BUILDER_CONFIG_CACHE[physics_profile]
+        if haskey(cache.a_builder_config_cache, physics_profile)
+            return cache.a_builder_config_cache[physics_profile]
         end
     finally
-        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
+        unlock(cache.lock)
     end
 
     physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
 
     default_physics = Dict{String, Any}(
         "physical" => Dict(
-            "hbarc" => 197.327,
-            "alpha_em" => 1.0 / 137.035999084,
+            "hbarc" => 197.3269804,
+            "alpha_em" => 0.0072973525664,
         ),
         "transport_workflow" => Dict(
             "prefer_energy_aniso" => true,
@@ -225,15 +231,17 @@ end
         use_aniso=Bool(get(a_builder, "use_aniso", true)),
     )
 
-    lock(_A_BUILDER_CONFIG_CACHE_LOCK)
+    lock(cache.lock)
     try
-        _A_BUILDER_CONFIG_CACHE[physics_profile] = val
+        cache.a_builder_config_cache[physics_profile] = val
     finally
-        unlock(_A_BUILDER_CONFIG_CACHE_LOCK)
+        unlock(cache.lock)
     end
 
     return val
 end
+
+@inline _default_a_builder_config_from_toml() = _default_a_builder_config_from_toml(_DEFAULT_WORKFLOW_CACHE)
 
 @inline function _merge_a_builder_config(base::NamedTuple, override::NamedTuple)::NamedTuple
     unknown = Symbol[]
@@ -250,10 +258,12 @@ end
     )
 end
 
-@inline function _effective_a_builder_config(a_builder_config::Union{Nothing,NamedTuple})::NamedTuple
-    base = _default_a_builder_config_from_toml()
+@inline function _effective_a_builder_config(cache::WorkflowCache, a_builder_config::Union{Nothing,NamedTuple})::NamedTuple
+    base = _default_a_builder_config_from_toml(cache)
     return a_builder_config === nothing ? base : _merge_a_builder_config(base, a_builder_config)
 end
+
+@inline _effective_a_builder_config(a_builder_config::Union{Nothing,NamedTuple}) = _effective_a_builder_config(_DEFAULT_WORKFLOW_CACHE, a_builder_config)
 
 @inline function _drop_transport_provider_keys(kwargs::NamedTuple)::NamedTuple
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_PROVIDER_KEYS))...)
@@ -285,9 +295,9 @@ end
     return provider
 end
 
-@inline function _default_transport_provider_for_backend()
+@inline function _default_transport_provider_for_backend(cache::WorkflowCache)
     if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
-        m = _get_model(:PNJL)
+        m = _get_model(cache, :PNJL)
         try
             return Main.Models.transport_provider(m)
         catch
@@ -296,6 +306,8 @@ end
     end
     return nothing
 end
+
+@inline _default_transport_provider_for_backend() = _default_transport_provider_for_backend(_DEFAULT_WORKFLOW_CACHE)
 
 """将平衡求解结果转换成 (quark_params, thermo_params)。"""
 function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
@@ -310,9 +322,9 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
     )
 end
 
-@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
+@inline function _densities_from_equilibrium(cache::WorkflowCache, x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
     nd = Main.Models.number_densities(
-        _get_model(:PNJL),
+        _get_model(cache, :PNJL),
         x_state,
         T_fm,
         mu_vec,
@@ -330,13 +342,17 @@ end
     )
 end
 
-@inline function _thermo_background_from_equilibrium(base, T_fm::Real; xi::Real, p_num::Int, t_num::Int)
+@inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
+    return _densities_from_equilibrium(_DEFAULT_WORKFLOW_CACHE, x_state, mu_vec, T_fm, thermal_nodes, xi; p_num=p_num, t_num=t_num)
+end
+
+@inline function _thermo_background_from_equilibrium(cache::WorkflowCache, base, T_fm::Real; xi::Real, p_num::Int, t_num::Int)
     if hasproperty(base, :pressure) && hasproperty(base, :energy) && hasproperty(base, :entropy)
         return (pressure=Float64(base.pressure), entropy=Float64(base.entropy), energy=Float64(base.energy))
     end
 
     pressure, _, entropy, energy = Main.Models.model_thermo(
-        _get_model(:PNJL),
+        _get_model(cache, :PNJL),
         base.x_state,
         base.mu_vec,
         T_fm;
@@ -347,9 +363,14 @@ end
     return (pressure=Float64(pressure), entropy=Float64(entropy), energy=Float64(energy))
 end
 
+@inline function _thermo_background_from_equilibrium(base, T_fm::Real; xi::Real, p_num::Int, t_num::Int)
+    return _thermo_background_from_equilibrium(_DEFAULT_WORKFLOW_CACHE, base, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+end
+
 @inline _solve_equilibrium(args...; kwargs...) = EquilibriumFacade.solve_equilibrium_backend(args...; kwargs...)
 
 @inline function _transport_inputs_from_equilibrium(
+    cache::WorkflowCache,
     base,
     T_fm::Real,
     mu_fm::Real;
@@ -366,7 +387,7 @@ end
     ))
     thermo_params = params0.thermo_params
 
-    densities = _densities_from_equilibrium(base.x_state, base.mu_vec, T_fm, nothing, Float64(xi);
+    densities = _densities_from_equilibrium(cache, base.x_state, base.mu_vec, T_fm, nothing, Float64(xi);
         p_num=p_num,
         t_num=t_num,
     )
@@ -374,12 +395,24 @@ end
     return (masses=masses, quark_params=quark_params_basic, thermo_params=thermo_params, densities=densities)
 end
 
+@inline function _transport_inputs_from_equilibrium(
+    base,
+    T_fm::Real,
+    mu_fm::Real;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    return _transport_inputs_from_equilibrium(_DEFAULT_WORKFLOW_CACHE, base, T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num)
+end
+
 @inline function _A_from_equilibrium(T_fm::Real, quark_params, thermo_params;
-                                     a_builder_config::Union{Nothing,NamedTuple}=nothing)
+                                     a_builder_config::Union{Nothing,NamedTuple}=nothing,
+                                     workflow_cache::WorkflowCache=_DEFAULT_WORKFLOW_CACHE)
     qp = normalize_quark_params(quark_params)
     tp = normalize_thermo_params(thermo_params)
 
-    cfg = _effective_a_builder_config(a_builder_config)
+    cfg = _effective_a_builder_config(workflow_cache, a_builder_config)
     return AFieldBuilder.build_A_triplet(
         qp,
         tp;
@@ -440,8 +473,11 @@ function solve_gap_and_transport(
     rho_mass::Union{Nothing,Real}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
-    prefer_energy_aniso=nothing
+    prefer_energy_aniso=nothing,
+    workflow_cache::Union{Nothing,WorkflowCache}=nothing,
 )
+    cache = workflow_cache === nothing ? _DEFAULT_WORKFLOW_CACHE : workflow_cache
+
     base = equilibrium === nothing ? _solve_equilibrium(
         T_fm,
         mu_fm;
@@ -474,6 +510,7 @@ function solve_gap_and_transport(
         transport_kwargs=transport_kwargs,
         provider=provider,
         prefer_energy_aniso=prefer_energy_aniso,
+        workflow_cache=cache,
     )
 end
 
@@ -500,9 +537,12 @@ function solve_transport_from_equilibrium(
     rho_mass::Union{Nothing,Real}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
-    prefer_energy_aniso=nothing
+    prefer_energy_aniso=nothing,
+    workflow_cache::Union{Nothing,WorkflowCache}=nothing,
 )
-    inputs = _transport_inputs_from_equilibrium(base, T_fm, mu_fm;
+    cache = workflow_cache === nothing ? _DEFAULT_WORKFLOW_CACHE : workflow_cache
+
+    inputs = _transport_inputs_from_equilibrium(cache, base, T_fm, mu_fm;
         xi=xi,
         p_num=p_num,
         t_num=t_num,
@@ -512,7 +552,7 @@ function solve_transport_from_equilibrium(
     quark_params_basic = inputs.quark_params
     thermo_params = inputs.thermo_params
     densities = inputs.densities
-    thermo_background = _thermo_background_from_equilibrium(base, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+    thermo_background = _thermo_background_from_equilibrium(cache, base, T_fm; xi=xi, p_num=p_num, t_num=t_num)
     rho_mass_background = rho_mass_from_densities(quark_params_basic.m, densities)
 
     tau_inv = nothing
@@ -522,7 +562,13 @@ function solve_transport_from_equilibrium(
         K_coeffs === nothing && error("compute_tau=true requires K_coeffs")
 
         # 为截面/传播子准备 A 字段（TotalPropagator 会用到）
-        A_vals = _A_from_equilibrium(T_fm, quark_params_basic, thermo_params; a_builder_config=a_builder_config)
+        A_vals = _A_from_equilibrium(
+            T_fm,
+            quark_params_basic,
+            thermo_params;
+            a_builder_config=a_builder_config,
+            workflow_cache=cache,
+        )
         quark_params_full = (m=quark_params_basic.m, μ=quark_params_basic.μ, A=A_vals)
 
         tau_res = relaxation_times(
@@ -573,10 +619,10 @@ function solve_transport_from_equilibrium(
     elseif prefer_from_kwargs !== nothing
         prefer_from_kwargs
     else
-        _default_prefer_energy_aniso_from_toml()
+        _default_prefer_energy_aniso_from_toml(cache)
     end
 
-    effective_provider = provider === nothing ? _default_transport_provider_for_backend() : provider
+    effective_provider = provider === nothing ? _default_transport_provider_for_backend(cache) : provider
     legacy_inputs = as_legacy_inputs(quark_params_basic, thermo_params)
     if effective_provider === nothing
         # No backend default provider: only materialize a provider if the desired

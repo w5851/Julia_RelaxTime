@@ -20,13 +20,18 @@ end
 if !isdefined(Main, :PNJLQuarkDistributions_Aniso)
     Base.include(Main, normpath(joinpath(@__DIR__, "..", "QuarkDistribution_Aniso.jl")))
 end
+if !isdefined(Main, :ParameterAdapters)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl")))
+end
 
 module RelaxTime
 
 # ── Integration & utility submodules ──
+include(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl"))
 include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
 include(joinpath(@__DIR__, "..", "utils", "ParticleSymbols.jl"))
 include(joinpath(@__DIR__, "..", "integration", "PhaseSpaceSampling.jl"))
+include("KinematicChecks.jl")
 
 # ── Relaxtime submodules (dependency order) ──
 include("OneLoopIntegrals.jl")
@@ -63,6 +68,7 @@ using .TotalCrossSection
 using .AverageScatteringRate
 using .RelaxationTime
 using .TransportCoefficients
+using .KinematicChecks
 
 end # module RelaxTime
 
@@ -73,7 +79,7 @@ for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso
               :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
               :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
-              :GaussLegendre, :ParticleSymbols)
+              :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :KinematicChecks)
     if !isdefined(@__MODULE__, _name)
         Core.eval(@__MODULE__, :(const $_name = RelaxTime.$_name))
     end

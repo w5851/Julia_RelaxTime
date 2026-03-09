@@ -34,7 +34,7 @@ m = get_mass(:u, q_nt)  # 1.52 fm⁻¹
 μ = get_chemical_potential(:ubar, q_nt)  # +0.3 fm⁻¹
 ```
 
-Both produce identical results. Internal normalization ensures type stability.
+Both produce identical results. Internal normalization is delegated to ParameterAdapters.
 
 ## 使用示例
 
@@ -83,21 +83,13 @@ const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "types", "Parame
 if !isdefined(Main, :ParameterTypes)
     Base.include(Main, _PARAMETER_TYPES_PATH)
 end
-using Main.ParameterTypes: QuarkParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams
 
-# ----------------------------------------------------------------------------
-# 0. Normalization Helper
-# ----------------------------------------------------------------------------
-
-"""
-    _nt_quark(q) -> NamedTuple
-
-Internal normalization helper that converts QuarkParams struct to NamedTuple.
-If input is already a NamedTuple, returns it unchanged.
-
-This ensures consistent internal representation regardless of input type.
-"""
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
+const _PARAMETER_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "ParameterAdapters.jl"))
+if !isdefined(Main, :ParameterAdapters)
+    Base.include(Main, _PARAMETER_ADAPTERS_PATH)
+end
+using Main.ParameterAdapters: normalize_quark_input
 
 # ----------------------------------------------------------------------------
 # 1. 味标识解析
@@ -523,7 +515,7 @@ m_u = get_mass(:u, q_nt)      # 1.52 fm⁻¹
 ```
 """
 function get_mass(particle::Symbol, quark_params::Union{NamedTuple, QuarkParams})
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     flavor, _ = extract_flavor(particle)
     
     if flavor == :u
@@ -538,7 +530,7 @@ function get_mass(particle::Symbol, quark_params::Union{NamedTuple, QuarkParams}
 end
 
 @inline function _mass_for_quark_flavor(flavor::Symbol, quark_params)::Float64
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     if flavor === :u
         return quark_params.m.u
     elseif flavor === :d
@@ -551,7 +543,7 @@ end
 end
 
 @inline function _mass_for_flavor_code(code::UInt8, quark_params)::Float64
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     if code == FLAVOR_U
         return quark_params.m.u
     elseif code == FLAVOR_D
@@ -575,7 +567,7 @@ end
 该函数刻意只做“符号→质量索引”的工具工作，不涉及任何动力学或散射道（s/t/u）逻辑。
 """
 function get_quark_masses_for_process(process::Symbol, quark_params::Union{NamedTuple, QuarkParams})::NTuple{4, Float64}
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     c1, c2, c3, c4 = _parse_scattering_process_flavor_codes(process)
     return (
         _mass_for_flavor_code(c1, quark_params),
@@ -619,7 +611,7 @@ q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
 ```
 """
 function get_chemical_potential(particle::Symbol, quark_params::Union{NamedTuple, QuarkParams})
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     flavor, is_antiparticle = extract_flavor(particle)
     
     # 获取正粒子化学势

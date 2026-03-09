@@ -28,6 +28,6 @@
 
 ## Checklist
 
-- [ ] 代码风格与命名符合 `agent_rules/代码风格指南.md` 与 `agent_rules/变量命名规范.md`
+- [ ] 代码风格与命名符合 `.github/copilot-instructions.md`
 - [ ] 对外行为改变已更新文档
 - [ ] 新增/修改逻辑有对应测试或说明

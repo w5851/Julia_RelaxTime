@@ -78,38 +78,20 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 
 # Include-once helper — REMOVED (loaded via RelaxTime.jl entry point)
 
+const _KINEMATIC_CHECKS_PATH = normpath(joinpath(@__DIR__, "KinematicChecks.jl"))
+if !isdefined(Main, :KinematicChecks)
+    Base.include(Main, _KINEMATIC_CHECKS_PATH)
+end
+using ..KinematicChecks: check_kinematic_threshold, emit_regularization_notice
+
 # 导入参数类型
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
-
-# ----------------------------------------------------------------------------
-# 0. Normalization Helpers
-# ----------------------------------------------------------------------------
-
-"""
-    _nt_quark(q) -> NamedTuple
-
-Internal normalization helper that converts QuarkParams struct to NamedTuple.
-If input is already a NamedTuple, returns it unchanged.
-
-This ensures consistent internal representation regardless of input type.
-"""
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-
-"""
-    _nt_thermo(t) -> NamedTuple
-
-Internal normalization helper that converts ThermoParams struct to NamedTuple.
-If input is already a NamedTuple, returns it unchanged.
-
-This ensures consistent internal representation regardless of input type.
-"""
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 
 # 预计算常数因子：1/(16π)
 const KINEMATIC_PREFACTOR = 1.0 / (16π)
 
 # 数值容差
-const EPS_THRESHOLD = 1e-12  # 阈值检查容差
 const EPS_REGULARIZATION = 1e-14  # s_12_minus 正则化容差
 
 export differential_cross_section
@@ -193,8 +175,11 @@ function differential_cross_section(
     # 处理 m1 ≈ m2 的退化情况（s_12_minus ≈ 0）
     s_12_minus_reg = s_12_minus
     if abs(s_12_minus) < EPS_REGULARIZATION
-        @warn "s_12_minus is very small (|s_12_minus| = $(abs(s_12_minus)) < $EPS_REGULARIZATION), " *
-              "applying regularization. This typically occurs when m1 ≈ m2."
+        emit_regularization_notice(
+            "s_12_minus is very small; this typically occurs when m1 ≈ m2",
+            s_12_minus,
+            EPS_REGULARIZATION,
+        )
         s_12_minus_reg = sign(s_12_minus) * EPS_REGULARIZATION
         if s_12_minus == 0.0  # 完全相等
             s_12_minus_reg = EPS_REGULARIZATION
@@ -213,87 +198,5 @@ end
 # ----------------------------------------------------------------------------
 # 辅助函数：运动学约束检查
 # ----------------------------------------------------------------------------
-
-"""
-    check_kinematic_threshold(s, m1, m2; warn_close=true) -> Bool
-
-检查 Mandelstam 变量 s 是否满足运动学阈值条件。
-
-# 阈值条件
-对于散射过程 q₁ + q₂ → q₃ + q₄，要求：
-s ≥ (m₁ + m₂)²
-
-这确保了质心系中入射粒子的相对动量为实数。
-
-# 参数
-- `s::Float64`: Mandelstam 变量 s [fm⁻²]
-- `m1::Float64`: 第一个入射粒子质量 [fm⁻¹]
-- `m2::Float64`: 第二个入射粒子质量 [fm⁻¹]
-- `warn_close::Bool=true`: 是否在接近阈值时发出警告
-
-# 返回值
-- `true`: 满足阈值条件
-- `false`: 违反阈值条件（s < (m1+m2)²）
-
-# 警告
-当 `s` 非常接近阈值时（`s_12_plus < 1e-12`），会发出警告，
-因为此时微分截面可能发散。
-
-# 参数类型支持
-本函数接受质量值作为 `Float64` 参数。质量值可以从 `QuarkParams` 结构体或
-`NamedTuple` 中提取，使用 `get_mass` 或 `get_quark_masses_for_process` 函数。
-
-# 示例
-```julia
-# 使用 QuarkParams 结构体
-using Main.ParameterTypes: QuarkParams
-
-q = QuarkParams(m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-m1, m2, _, _ = get_quark_masses_for_process(:uu_to_uu, q)
-
-s = 4.0  # fm⁻²
-if check_kinematic_threshold(s, m1, m2)
-    println("运动学条件满足，可以计算散射截面")
-else
-    println("警告：s 低于阈值！")
-end
-
-# 使用 NamedTuple（向后兼容）
-q_nt = (m=(u=1.52, d=1.52, s=3.04), μ=(u=0.3, d=0.3, s=0.3))
-m_u = q_nt.m.u
-if check_kinematic_threshold(s, m_u, m_u)
-    println("运动学条件满足")
-end
-```
-
-# 参考
-- 阈值物理: s_threshold = (m1 + m2)² 对应质心系零动量
-- 接近阈值时的发散行为与粒子产生阈值相关
-- 参数提取: ParticleSymbols.get_mass, ParticleSymbols.get_quark_masses_for_process
-"""
-function check_kinematic_threshold(
-    s::Float64,
-    m1::Float64,
-    m2::Float64;
-    warn_close::Bool=true
-)::Bool
-    s_threshold = (m1 + m2)^2
-    
-    # 检查是否低于阈值
-    if s < s_threshold
-        @warn "Kinematic threshold violation" s=s threshold=s_threshold deficit=(s_threshold - s)
-        return false
-    end
-    
-    # 检查是否非常接近阈值
-    s_plus = s - s_threshold
-    if warn_close && s_plus < EPS_THRESHOLD
-        @warn "s is very close to threshold (s_12_plus = $s_plus < $EPS_THRESHOLD). " *
-              "Differential cross section may diverge near threshold."
-    end
-    
-    return true
-end
-
 
 end  # module DifferentialCrossSection

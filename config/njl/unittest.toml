@@ -1,6 +1,0 @@
-[physical]
-hbarc = 111.0
-alpha_em = 0.123
-
-[model]
-label = "njl-unittest-old"

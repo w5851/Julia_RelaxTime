@@ -30,14 +30,13 @@ export pnjl_constants
 export SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 
 const PHYSICS_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "config", "physics"))
-const PNJL_CONFIG_DIR_NEW = normpath(joinpath(@__DIR__, "..", "config", "models", "pnjl"))
-const PNJL_CONFIG_DIR_OLD = normpath(joinpath(@__DIR__, "..", "config", "pnjl"))
+const PNJL_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "config", "models", "pnjl"))
 const DEFAULT_PROFILE = "default"
 
 const DEFAULT_PHYSICS_CONFIG = Dict{String, Any}(
     "physical" => Dict(
-        "hbarc" => 197.327,
-        "alpha_em" => 1.0 / 137.035999084,
+        "hbarc" => 197.3269804,
+        "alpha_em" => 0.0072973525664,
     ),
 )
 
@@ -107,16 +106,6 @@ function _validate_pnjl_critical_params(
     return nothing
 end
 
-function _select_config_dir(profile::String, new_dir::String, old_dir::String)
-    if isfile(joinpath(new_dir, string(profile, ".toml")))
-        return new_dir
-    end
-    if isfile(joinpath(old_dir, string(profile, ".toml")))
-        return old_dir
-    end
-    return new_dir
-end
-
 function load_pnjl_config(
     ;
     profile::String=get(ENV, "PNJL_PARAM_PROFILE", DEFAULT_PROFILE),
@@ -128,9 +117,8 @@ function load_pnjl_config(
     shared_model = get(physics_data.config, "model_shared", Dict{String, Any}())
     inherited_model_cfg = isempty(shared_model) ? Dict{String, Any}[] : [Dict("model" => shared_model)]
 
-    model_dir = _select_config_dir(profile, PNJL_CONFIG_DIR_NEW, PNJL_CONFIG_DIR_OLD)
     model_data = load_config(
-        model_dir,
+        PNJL_CONFIG_DIR,
         DEFAULT_PNJL_MODEL_CONFIG;
         profile=profile,
         inherited_configs=inherited_model_cfg,
@@ -167,8 +155,8 @@ function pnjl_constants(
     model_cfg = get(cfg, "model", Dict{String, Any}())
     polyakov_cfg = get(cfg, "polyakov", Dict{String, Any}())
 
-    hbarc_MeV_fm = Float64(get(physical_cfg, "hbarc", 197.327))
-    alpha_em = Float64(get(physical_cfg, "alpha_em", 1.0 / 137.035999084))
+    hbarc_MeV_fm = Float64(get(physical_cfg, "hbarc", 197.3269804))
+    alpha_em = Float64(get(physical_cfg, "alpha_em", 0.0072973525664))
 
     N_color = Int(get(model_cfg, "N_color", 3))
     N_flavor = Int(get(model_cfg, "N_flavor", 3))

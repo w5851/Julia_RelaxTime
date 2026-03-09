@@ -115,7 +115,8 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 	- data/outputs/：运行产物、结果与缓存输出。
 - web/：前端静态资源与交互页面。
 - config/：参数文件、扫描配置、模型参数集等。
-- agent_rules/：代码风格、命名等规范（视作约束性文档）。
+- `.github/copilot-instructions.md`：工作区级 Copilot 指令与项目级编码约束。
+- `docs/dev/testing_governance.md`：测试组织、入口与 smoke/full 治理规范。
 
 ### 源码组织原则（src/）
 

@@ -87,13 +87,11 @@ all_σ = calculate_all_total_cross_sections(
 
 # Dependencies loaded by RelaxTime.jl entry point
 
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
-
-# Normalization helpers for dual interface support
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 
 using Main.Constants_PNJL: SCATTERING_MESON_MAP
+using ..KinematicChecks: check_kinematic_threshold, kinematic_error_mode, emit_runtime_failure_notice
 using ..GaussLegendre: standard_nodes_weights
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 using ..ScatteringAmplitude: scattering_amplitude_squared, prepare_scattering_context, scattering_amplitude_squared_prepared
@@ -212,12 +210,10 @@ function calculate_t_bounds(
     
     # 检查运动学可行性
     if sqrt_arg1 < -EPS_KINEMATIC
-        s_threshold_ij = (mi + mj)^2
-        error("Initial state kinematic violation: s = $s < threshold = $s_threshold_ij")
+        check_kinematic_threshold(s, mi, mj; warn_close=false, mode=:strict, context="Initial state kinematic violation")
     end
     if sqrt_arg2 < -EPS_KINEMATIC
-        s_threshold_cd = (mc + md)^2
-        error("Final state kinematic violation: s = $s < threshold = $s_threshold_cd")
+        check_kinematic_threshold(s, mc, md; warn_close=false, mode=:strict, context="Final state kinematic violation")
     end
     
     # 处理接近阈值的情况（避免负数开方）
@@ -552,8 +548,8 @@ function total_cross_section(
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     fast_path::Bool=true,
 )::Float64
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     return _total_cross_section_nt(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points, fast_path=fast_path)
 end
 
@@ -583,10 +579,19 @@ function _total_cross_section_nt(
     μ_d = get_chemical_potential(particle_d, quark_params)
 
     # 步骤2.5: 运动学阈值检查；s 低于阈值时截面为 0（避免抛错导致 NaN）
-    s_threshold_initial = (mi + mj)^2
-    s_threshold_final = (mc + md)^2
-    s_threshold = max(s_threshold_initial, s_threshold_final)
-    if s < s_threshold - EPS_KINEMATIC
+    valid_initial = check_kinematic_threshold(
+        s, mi, mj;
+        warn_close=false,
+        mode=kinematic_error_mode(),
+        context="Initial state kinematic violation",
+    )
+    valid_final = check_kinematic_threshold(
+        s, mc, md;
+        warn_close=false,
+        mode=kinematic_error_mode(),
+        context="Final state kinematic violation",
+    )
+    if !(valid_initial && valid_final)
         return 0.0
     end
     
@@ -747,8 +752,8 @@ function calculate_all_total_cross_sections(
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     fast_path::Bool=true,
 )::NamedTuple
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     results = Dict{Symbol, Float64}()
     
     for process in keys(SCATTERING_MESON_MAP)
@@ -760,7 +765,7 @@ function calculate_all_total_cross_sections(
             )
             results[process] = σ
         catch e
-            @warn "Failed to calculate $process" exception=e
+            emit_runtime_failure_notice("Failed to calculate $(process)", e)
             results[process] = NaN
         end
     end
@@ -808,8 +813,8 @@ function scan_s_dependence(
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     fast_path::Bool=true,
 )::Vector{Float64}
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     σ_values = Float64[]
     
     for s in s_values
@@ -821,7 +826,7 @@ function scan_s_dependence(
             )
             push!(σ_values, σ)
         catch e
-            @warn "Failed to calculate σ at s=$s" exception=e
+            emit_runtime_failure_notice("Failed to calculate σ at s=$(s)", e)
             push!(σ_values, NaN)
         end
     end

@@ -33,31 +33,26 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 D = total_propagator_simple(:uu_to_uu, :t, [:pi], 0.5, 1.0, q_nt, t_nt, K_coeffs)
 ```
 
-Both produce identical results. Internal normalization (`_nt_quark`, `_nt_thermo`) ensures
+Both produce identical results. Internal normalization via ParameterAdapters ensures
 type stability and zero overhead.
 """
 module TotalPropagator
 
 using Main.Constants_PNJL: SCATTERING_MESON_MAP
+using ..KinematicChecks: emit_negative_radicand_notice
 using ..ParticleSymbols: parse_scattering_process, parse_particle_pair_str, extract_quark_flavor, parse_scattering_process_flavor_codes, get_quark_masses_for_process
 using ..ParticleSymbols: FLAVOR_U, FLAVOR_D, FLAVOR_S
 using ..MesonPropagator: meson_propagator_simple, meson_propagator_mixed, calculate_coupling_matrix, calculate_coupling_elements
 using ..PolarizationCache: polarization_aniso_cached, reset_cache!, get_cache_stats
 
 # Import parameter types for struct support
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 
 export total_propagator_simple, total_propagator_mixed, get_flavor_factor
 export calculate_all_propagators, calculate_all_propagators_by_channel, total_propagator_auto
 export calculate_cms_momentum
 export reset_cache!, get_cache_stats  # 导出缓存管理函数
-
-# ----------------------------------------------------------------------------
-# Normalization helpers for dual interface support
-# ----------------------------------------------------------------------------
-
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 # ----------------------------------------------------------------------------
 # 味因子查询表（表5.3）
@@ -162,7 +157,7 @@ result = calculate_cms_momentum(:uu_to_uu, s, t, :t, quark_params; u=u)
 function calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel::Symbol,
                                quark_params::Union{NamedTuple, QuarkParams}; u::Union{Float64, Nothing}=nothing)
     # Normalize input to NamedTuple
-    quark_params = _nt_quark(quark_params)
+    quark_params = normalize_quark_input(quark_params)
     
     # 1. 提取四个粒子质量
     m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
@@ -194,14 +189,9 @@ function calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel
         
         if delta >= 0.0
             k = sqrt(delta)
-        elseif delta > -1e-12
-            # 数值误差范围内，设为0
-            k = 0.0
-            @warn "calculate_cms_momentum: k0²-t = $delta ∈ (-1e-12, 0), setting k=0" maxlog=10
         else
-            # 明显的数值问题，设为0并警告
             k = 0.0
-            @warn "calculate_cms_momentum: k0²-t = $delta < -1e-12, setting k=0. Check Mandelstam variables." maxlog=10
+            emit_negative_radicand_notice("calculate_cms_momentum (t channel)", delta, 1e-12)
         end
         
     elseif channel == :u
@@ -211,14 +201,9 @@ function calculate_cms_momentum(process::Symbol, s::Float64, t::Float64, channel
         
         if delta >= 0.0
             k = sqrt(delta)
-        elseif delta > -1e-12
-            # 数值误差范围内，设为0
-            k = 0.0
-            @warn "calculate_cms_momentum: k0²-u = $delta ∈ (-1e-12, 0), setting k=0" maxlog=10
         else
-            # 明显的数值问题，设为0并警告
             k = 0.0
-            @warn "calculate_cms_momentum: k0²-u = $delta < -1e-12, setting k=0. Check Mandelstam variables." maxlog=10
+            emit_negative_radicand_notice("calculate_cms_momentum (u channel)", delta, 1e-12)
         end
         
     else
@@ -422,8 +407,8 @@ function total_propagator_simple(process::Symbol, channel::Symbol, meson_list::V
                                 thermo_params::Union{NamedTuple, ThermoParams},
                                 K_coeffs::NamedTuple)
     # Normalize inputs to NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     T1, T2 = get_flavor_factors_for_channel(process, channel)
     
@@ -513,8 +498,8 @@ function total_propagator_mixed(process::Symbol, channel::Symbol, meson_channel:
                                thermo_params::Union{NamedTuple, ThermoParams},
                                K_coeffs::NamedTuple)
     # Normalize inputs to NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     # 计算Π_uu（u夸克极化函数）
     Π_uu_real, Π_uu_imag = polarization_aniso_cached(
@@ -610,8 +595,8 @@ function total_propagator_auto(process::Symbol, channel::Symbol,
                                thermo_params::Union{NamedTuple, ThermoParams},
                                K_coeffs::NamedTuple)
     # Normalize inputs to NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)
@@ -731,8 +716,8 @@ function calculate_all_propagators(process::Symbol,
                                   thermo_params::Union{NamedTuple, ThermoParams},
                                   K_coeffs::NamedTuple)
     # Normalize inputs to NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)
@@ -829,8 +814,8 @@ function calculate_all_propagators_by_channel(process::Symbol,
                                               thermo_params::Union{NamedTuple, ThermoParams},
                                               K_coeffs::NamedTuple)
     # Normalize inputs to NamedTuple
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     
     # 验证散射过程是否存在
     if !haskey(SCATTERING_MESON_MAP, process)

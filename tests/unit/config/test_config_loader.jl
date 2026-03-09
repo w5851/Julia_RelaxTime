@@ -28,12 +28,11 @@ using Main.ConfigLoader: deep_merge, load_config
         @test merged["x"]["b"] == 3
     end
 
-    @testset "load_config 加载默认配置" begin
-        config_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "pnjl"))
-        if isdir(config_dir)
-            config, profile, path = load_config(config_dir, Dict{String,Any}())
-            @test config isa Dict
-            @test profile isa String
-        end
+    @testset "load_config 加载 models 目录默认配置" begin
+        config_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "pnjl"))
+        config, profile, path = load_config(config_dir, Dict{String,Any}())
+        @test config isa Dict
+        @test profile isa String
+        @test path !== nothing
     end
 end

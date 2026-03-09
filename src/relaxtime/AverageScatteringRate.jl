@@ -53,13 +53,10 @@ using ..ParticleSymbols: is_antiquark
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
 
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!, build_w0cdf_pchip_cache
-
-# Normalization helpers for dual interface support
-@inline _nt_quark(q) = q isa QuarkParams ? as_namedtuple(q) : q
-@inline _nt_thermo(t) = t isa ThermoParams ? as_namedtuple(t) : t
 
 const DEFAULT_P_NODES = 20
 const DEFAULT_ANGLE_NODES = 4  # cosθ节点数
@@ -96,7 +93,7 @@ end
     else; error("Unknown flavor $flavor") end
 end
 
-@inline get_mass(flavor::Symbol, quark_params::QuarkParams) = get_mass(flavor, as_namedtuple(quark_params))
+@inline get_mass(flavor::Symbol, quark_params::QuarkParams) = get_mass(flavor, normalize_quark_input(quark_params))
 
 @inline function get_mu(flavor::Symbol, quark_params::NamedTuple)
     # Convention: always return the quark chemical potential μ_q (positive sign).
@@ -108,31 +105,73 @@ end
     else; error("Unknown flavor $flavor") end
 end
 
-@inline get_mu(flavor::Symbol, quark_params::QuarkParams) = get_mu(flavor, as_namedtuple(quark_params))
+@inline get_mu(flavor::Symbol, quark_params::QuarkParams) = get_mu(flavor, normalize_quark_input(quark_params))
 
 # -------------------- 截面缓存与插值 --------------------
-mutable struct CrossSectionCache
-    process::Symbol
+mutable struct CrossSectionData
     s_vals::Vector{Float64}
     sigma_vals::Vector{Float64}
+end
 
-    # Cached slopes for :pchip (same length as s_vals).
+mutable struct CachedInterpolation
     pchip_slopes::Vector{Float64}
     pchip_dirty::Bool
+end
 
-    # Optional analytic threshold subtraction parameters
+mutable struct AsymptoticConfig
     asym_enabled::Bool
     asym_s0::Float64
     asym_A::Float64
-    # Whether build requested asymptotic subtraction (auto or explicit)
     asym_requested::Bool
 end
 
-CrossSectionCache(process::Symbol) = CrossSectionCache(process, Float64[], Float64[], Float64[], true, false, 0.0, 0.0, false)
+mutable struct CrossSectionCache
+    process::Symbol
+    data::CrossSectionData
+    interpolation::CachedInterpolation
+    asymptotic::AsymptoticConfig
+end
+
+CrossSectionData() = CrossSectionData(Float64[], Float64[])
+CachedInterpolation() = CachedInterpolation(Float64[], true)
+AsymptoticConfig() = AsymptoticConfig(false, 0.0, 0.0, false)
+
+function Base.propertynames(::CrossSectionCache, private::Bool=false)
+    names = (:process, :data, :interpolation, :asymptotic,
+        :s_vals, :sigma_vals, :pchip_slopes, :pchip_dirty,
+        :asym_enabled, :asym_s0, :asym_A, :asym_requested)
+    return private ? names : names
+end
+
+function Base.getproperty(cache::CrossSectionCache, name::Symbol)
+    if name === :process || name === :data || name === :interpolation || name === :asymptotic
+        return getfield(cache, name)
+    elseif name === :s_vals || name === :sigma_vals
+        return getfield(getfield(cache, :data), name)
+    elseif name === :pchip_slopes || name === :pchip_dirty
+        return getfield(getfield(cache, :interpolation), name)
+    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
+        return getfield(getfield(cache, :asymptotic), name)
+    end
+    return getfield(cache, name)
+end
+
+function Base.setproperty!(cache::CrossSectionCache, name::Symbol, value)
+    if name === :s_vals || name === :sigma_vals
+        return setfield!(getfield(cache, :data), name, value)
+    elseif name === :pchip_slopes || name === :pchip_dirty
+        return setfield!(getfield(cache, :interpolation), name, value)
+    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
+        return setfield!(getfield(cache, :asymptotic), name, value)
+    end
+    return setfield!(cache, name, value)
+end
+
+CrossSectionCache(process::Symbol) = CrossSectionCache(process, CrossSectionData(), CachedInterpolation(), AsymptoticConfig())
 
 function CrossSectionCache(process::Symbol, s_vals::Vector{Float64}, sigma_vals::Vector{Float64})
     length(s_vals) == length(sigma_vals) || error("CrossSectionCache: s_vals and sigma_vals length mismatch")
-    cache = CrossSectionCache(process, s_vals, sigma_vals, Float64[], true, false, 0.0, 0.0, false)
+    cache = CrossSectionCache(process, CrossSectionData(s_vals, sigma_vals), CachedInterpolation(), AsymptoticConfig())
     _ensure_pchip_slopes!(cache)
     return cache
 end
@@ -220,8 +259,8 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10)
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     return _precompute_cross_section_nt!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_points,
         threshold_subtraction=threshold_subtraction,
@@ -363,8 +402,8 @@ end
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     return _get_sigma_nt(cache, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
 end
 
@@ -453,8 +492,8 @@ function design_w0cdf_s_grid(
     p_cutoff::Union{Nothing,Float64}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
 )
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     return _design_w0cdf_s_grid_nt(process, quark_nt, thermo_nt;
         N=N,
         p_nodes=p_nodes,
@@ -610,8 +649,8 @@ function build_w0cdf_pchip_cache(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
 )
-    quark_nt = _nt_quark(quark_params)
-    thermo_nt = _nt_thermo(thermo_params)
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
     s_grid = _design_w0cdf_s_grid_nt(
         process,
         quark_nt,
@@ -754,8 +793,8 @@ function average_scattering_rate(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10
 )::Float64
-    quark_params = _nt_quark(quark_params)
-    thermo_params = _nt_thermo(thermo_params)
+    quark_params = normalize_quark_input(quark_params)
+    thermo_params = normalize_thermo_input(thermo_params)
     # 解析粒子、质量、化学势
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_params); mj = get_mass(pj_sym, quark_params)

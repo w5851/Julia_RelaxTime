@@ -19,8 +19,7 @@ using Main.Constants_PNJL: pnjl_constants, load_config
 
 export RPNJLModel
 
-const _RPNJL_CONFIG_DIR_NEW = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "rpnjl"))
-const _RPNJL_CONFIG_DIR_OLD = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "rpnjl"))
+const _RPNJL_CONFIG_DIR = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "models", "rpnjl"))
 
 const _RPNJL_DEFAULT_EXTENSION = (
     g1_fm8=0.0,
@@ -39,16 +38,6 @@ end
     return s in ("1", "true", "yes", "y", "on")
 end
 
-@inline function _rpnjl_select_config_dir(profile::String)
-    if isfile(joinpath(_RPNJL_CONFIG_DIR_NEW, string(profile, ".toml")))
-        return _RPNJL_CONFIG_DIR_NEW
-    end
-    if isfile(joinpath(_RPNJL_CONFIG_DIR_OLD, string(profile, ".toml")))
-        return _RPNJL_CONFIG_DIR_OLD
-    end
-    return _RPNJL_CONFIG_DIR_NEW
-end
-
 const _RPNJL_DEFAULT_CONFIG = Dict{String, Any}(
     "rpnjl" => Dict{String, Any}(
         "g1_MeV_inv8" => 0.0,
@@ -58,8 +47,7 @@ const _RPNJL_DEFAULT_CONFIG = Dict{String, Any}(
 )
 
 function _load_rpnjl_config(; profile::String, log_config::Bool=_rpnjl_env_flag("RPNJL_CONFIG_LOG", false))
-    cfg_dir = _rpnjl_select_config_dir(profile)
-    cfg = load_config(cfg_dir, _RPNJL_DEFAULT_CONFIG; profile=profile)
+    cfg = load_config(_RPNJL_CONFIG_DIR, _RPNJL_DEFAULT_CONFIG; profile=profile)
     if log_config
         @info "RPNJL config resolved" profile=profile path=cfg.path
     end

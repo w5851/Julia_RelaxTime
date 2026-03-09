@@ -1,9 +1,0 @@
-[physical]
-hbarc = 197.3269804
-alpha_em = 0.0072973525693
-
-[model]
-label = "njl-standard"
-version = "1.0"
-N_flavor = 3
-rho0_fm3 = 0.16

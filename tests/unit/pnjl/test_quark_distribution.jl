@@ -46,4 +46,21 @@ end
             @test isapprox(numeric, analytic; atol=1e-5, rtol=1e-5)
         end
     end
+
+    @testset "extreme low-temperature stability" begin
+        E = 0.2
+        μ = 2.0
+        T = 0.005
+        Φ = 0.2
+        Φbar = 0.25
+
+        fq = quark_distribution(E, μ, T, Φ, Φbar)
+        faq = antiquark_distribution(E, μ, T, Φ, Φbar)
+
+        @test isfinite(fq)
+        @test isfinite(faq)
+        @test 0.0 <= fq <= 1.0
+        @test 0.0 <= faq <= 1.0
+        @test fq > 0.999999
+    end
 end
