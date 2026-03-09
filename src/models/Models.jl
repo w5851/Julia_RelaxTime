@@ -33,11 +33,20 @@ export normalize_mu_vec
 export solve_gap
 export gap_state_dim, gap_residual
 export create_implicit_gap_solver
+export create_flavor_mu_implicit_gap_solver
 export create_pnjl_implicit_solver
 export solve_pnjl_with_derivatives
-export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
+export solve_pnjl_with_flavor_mu_derivatives
+export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs, legacy_transport_c_p
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
+export flavor_pressure_derivatives, conserved_charge_susceptibility
+export chi_BQS, cumulant_BQS
+export chi_B, chi1_B, chi2_B, chi3_B, chi4_B
+export chi_Q, chi1_Q, chi2_Q, chi3_Q, chi4_Q
+export chi_S, chi1_S, chi2_S, chi3_S, chi4_S
+export chi11_BQ, chi11_BS, chi11_QS
+export cumulant_B, baryon_Ssigma, baryon_kappa_sigma2
 export solve_fixedmu_constraint
 export solve_fixedrho_constraint
 export solve_fixedentropy_constraint
@@ -110,6 +119,7 @@ include(joinpath(@__DIR__, "solver", "Conditions.jl"))
 include(joinpath(@__DIR__, "solver", "ImplicitSolver.jl"))
 include(joinpath(@__DIR__, "solver", "Solver.jl"))
 include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
+include(joinpath(@__DIR__, "derivatives", "ConservedChargeSusceptibilities.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
@@ -125,6 +135,7 @@ using .Conditions
 import .ImplicitSolver
 const ConstraintModes = @__MODULE__
 using .ThermoDerivatives
+using .ConservedChargeSusceptibilities
 using .MagneticIntegrals
 using .MagneticThermodynamics
 using .TmuScan

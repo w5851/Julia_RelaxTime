@@ -1,8 +1,8 @@
 using Test
 
-const _TRANSPORT_COEFFICIENTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "TransportCoefficients.jl"))
-if !isdefined(Main, :TransportCoefficients)
-    Base.include(Main, _TRANSPORT_COEFFICIENTS_PATH)
+const _RELAXTIME_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAXTIME_PATH)
 end
 using Main.TransportCoefficients
 
@@ -13,6 +13,9 @@ const THERMO_PARAMS_STRUCT = ThermoParams(THERMO_PARAMS)
 
 const TAU_ZERO = (u=0.0,d=0.0,s=0.0,ubar=0.0,dbar=0.0,sbar=0.0)
 const TAU_ONE = (u=1.0,d=1.0,s=1.0,ubar=1.0,dbar=1.0,sbar=1.0)
+const DENSITIES_ONE = (u=0.12,d=0.09,s=0.03,ubar=0.02,dbar=0.01,sbar=0.005)
+const PRESSURE_ONE = 0.08
+const ENERGY_ONE = 0.60
 
 @testset "TransportCoefficients: eta/sigma basic" begin
     eta0 = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, p_nodes=16, p_max=10.0)
@@ -37,6 +40,93 @@ const TAU_ONE = (u=1.0,d=1.0,s=1.0,ubar=1.0,dbar=1.0,sbar=1.0)
     sigma1_struct = electric_conductivity(QUARK_PARAMS_STRUCT, THERMO_PARAMS_STRUCT; tau=TAU_ONE, p_nodes=16, p_max=10.0)
     @test isapprox(eta1_struct, eta1; rtol=1e-12, atol=0.0)
     @test isapprox(sigma1_struct, sigma1; rtol=1e-12, atol=0.0)
+end
+
+@testset "TransportCoefficients: conserved-charge helpers" begin
+    @test conserved_charge_value(:u, :B) == 1 / 3
+    @test conserved_charge_value(:ubar, :B) == -1 / 3
+    @test conserved_charge_value(:u, :Q) == 2 / 3
+    @test conserved_charge_value(:dbar, :Q) == 1 / 3
+    @test conserved_charge_value(:s, :S) == -1
+    @test conserved_charge_value(:sbar, :S) == 1
+
+    ch = conserved_charge_densities(DENSITIES_ONE)
+    @test isapprox(ch.B, (0.10 + 0.08 + 0.025) / 3; rtol=1e-12, atol=0.0)
+    @test isapprox(ch.Q, (2 * 0.10 - 0.08 - 0.025) / 3; rtol=1e-12, atol=0.0)
+    @test isapprox(ch.S, -0.025; rtol=1e-12, atol=0.0)
+    @test enthalpy_density(PRESSURE_ONE, ENERGY_ONE) == PRESSURE_ONE + ENERGY_ONE
+    @test isapprox(rho_mass_from_densities(QUARK_PARAMS.m, DENSITIES_ONE), (0.12 + 0.02) * 0.3 + (0.09 + 0.01) * 0.3 + (0.03 + 0.005) * 0.5; rtol=1e-12, atol=0.0)
+end
+
+@testset "TransportCoefficients: kappa/lambda basic" begin
+    cfg = TransportIntegrationConfig(p_nodes=16, p_max=10.0)
+
+    κBB0 = kappa_BB(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κBQ0 = kappa_BQ(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κBS0 = kappa_BS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κQQ0 = kappa_QQ(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κQS0 = kappa_QS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κSS0 = kappa_SS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ZERO, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    @test κBB0 == 0.0
+    @test κBQ0 == 0.0
+    @test κBS0 == 0.0
+    @test κQQ0 == 0.0
+    @test κQS0 == 0.0
+    @test κSS0 == 0.0
+
+    κBB = kappa_BB(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κBQ = kappa_BQ(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κBS = kappa_BS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κQQ = kappa_QQ(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κQS = kappa_QS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κSS = kappa_SS(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    κmat = diffusion_matrix(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+    λ = lambda_from_kappa_BB(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, densities=DENSITIES_ONE, pressure=PRESSURE_ONE, energy=ENERGY_ONE, config=cfg)
+
+    @test isfinite(κBB)
+    @test isfinite(κBQ)
+    @test isfinite(κBS)
+    @test isfinite(κQQ)
+    @test isfinite(κQS)
+    @test isfinite(κSS)
+    @test κBB > 0.0
+    @test κQQ > 0.0
+    @test κSS > 0.0
+    @test κmat.BQ == κmat.QB
+    @test κmat.BS == κmat.SB
+    @test κmat.QS == κmat.SQ
+    @test isapprox(κmat.BB, κBB; rtol=1e-12, atol=0.0)
+    @test isapprox(κmat.BQ, κBQ; rtol=1e-12, atol=0.0)
+    @test isapprox(κmat.BS, κBS; rtol=1e-12, atol=0.0)
+    @test isapprox(κmat.QQ, κQQ; rtol=1e-12, atol=0.0)
+    @test isapprox(κmat.QS, κQS; rtol=1e-12, atol=0.0)
+    @test isapprox(κmat.SS, κSS; rtol=1e-12, atol=0.0)
+    @test size(κmat.matrix) == (3, 3)
+    @test isfinite(λ)
+    @test λ > 0.0
+end
+
+@testset "TransportCoefficients: derived ratio helpers" begin
+    λ = 2.4
+    σ = 1.5
+    T = 0.2
+    η = 0.9
+    s = 3.0
+    ζ = 0.18
+    c_p = 4.0
+    rho_mass = 2.0
+
+    @test isapprox(lorenz_number(λ, σ, T), λ / (σ * T); rtol=1e-12, atol=0.0)
+    @test isapprox(lorentz_legacy(λ, σ, T), λ / (σ / T); rtol=1e-12, atol=0.0)
+    @test isapprox(viscous_conductive_coupling_ratio(η, s, σ, T), (η / s) / (σ / T); rtol=1e-12, atol=0.0)
+    @test isapprox(prandtl_number(η, c_p, λ, rho_mass), η * c_p / (λ * rho_mass); rtol=1e-12, atol=0.0)
+    @test isapprox(bulk_to_shear_viscosity_ratio(ζ, η), ζ / η; rtol=1e-12, atol=0.0)
+
+    @test isnan(lorenz_number(λ, 0.0, T))
+    @test isnan(lorentz_legacy(λ, 0.0, T))
+    @test isnan(viscous_conductive_coupling_ratio(η, 0.0, σ, T))
+    @test isnan(prandtl_number(η, c_p, 0.0, rho_mass))
+    @test isnan(bulk_to_shear_viscosity_ratio(ζ, 0.0))
 end
 
 @testset "TransportCoefficients: input validation guards" begin
@@ -322,5 +412,57 @@ end
         @test isfinite(η)
         @test η > 0
     end
+end
+
+@testset "TransportCoefficients: transport_coefficients diffusion extension" begin
+    cfg = TransportIntegrationConfig(p_nodes=10, p_max=6.0)
+
+    tr_basic = transport_coefficients(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg)
+    @test isnan(tr_basic.kappa_BB)
+    @test isnan(tr_basic.kappa_BQ)
+    @test isnan(tr_basic.kappa_BS)
+    @test isnan(tr_basic.kappa_QQ)
+    @test isnan(tr_basic.kappa_QS)
+    @test isnan(tr_basic.kappa_SS)
+    @test tr_basic.diffusion_matrix === nothing
+    @test isnan(tr_basic.lambda)
+    @test isnan(tr_basic.lorenz_number)
+    @test isnan(tr_basic.lorentz_legacy)
+    @test isnan(tr_basic.viscous_conductive_coupling_ratio)
+    @test isnan(tr_basic.prandtl_number)
+    @test isnan(tr_basic.bulk_to_shear_viscosity_ratio)
+
+    tr_full = transport_coefficients(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        config=cfg,
+        densities=DENSITIES_ONE,
+        pressure=PRESSURE_ONE,
+        energy=ENERGY_ONE,
+        entropy=0.42,
+        c_p=1.8,
+        rho_mass=0.75,
+    )
+    @test isfinite(tr_full.kappa_BB)
+    @test isfinite(tr_full.kappa_BQ)
+    @test isfinite(tr_full.kappa_BS)
+    @test isfinite(tr_full.kappa_QQ)
+    @test isfinite(tr_full.kappa_QS)
+    @test isfinite(tr_full.kappa_SS)
+    @test tr_full.diffusion_matrix !== nothing
+    @test isapprox(tr_full.diffusion_matrix.BQ, tr_full.kappa_BQ; rtol=1e-12, atol=0.0)
+    @test isfinite(tr_full.lambda)
+    @test isfinite(tr_full.lorenz_number)
+    @test isfinite(tr_full.lorentz_legacy)
+    @test isfinite(tr_full.viscous_conductive_coupling_ratio)
+    @test isfinite(tr_full.prandtl_number)
+    @test isnan(tr_full.bulk_to_shear_viscosity_ratio)
+    @test tr_full.kappa_BB > 0.0
+    @test isapprox(tr_full.lorenz_number, tr_full.lambda / (tr_full.sigma * THERMO_PARAMS.T); rtol=1e-12, atol=0.0)
+    @test isapprox(tr_full.lorentz_legacy, tr_full.lambda / (tr_full.sigma / THERMO_PARAMS.T); rtol=1e-12, atol=0.0)
+    @test isapprox(tr_full.viscous_conductive_coupling_ratio, (tr_full.eta / 0.42) / (tr_full.sigma / THERMO_PARAMS.T); rtol=1e-12, atol=0.0)
+    @test isapprox(tr_full.prandtl_number, tr_full.eta * 1.8 / (tr_full.lambda * 0.75); rtol=1e-12, atol=0.0)
+    @test isnan(tr_full.bulk_to_shear_viscosity_ratio)
 end
 

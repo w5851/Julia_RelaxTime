@@ -2,7 +2,7 @@
 
 在弛豫时间近似下，基于相对论动力学，夸克物质的剪切粘滞系数、体粘滞系数和电导率表达式如下。
 
-本文档聚焦 `eta`、`zeta`、`sigma`。`kappa_BB / kappa_QQ / kappa_SS / lambda` 已单独整理到关联文档中，避免与静态涨落中的 `\kappa\sigma^2` 记号混淆；其中 `kappa` 家族现在已用 Das 2022 的扩散矩阵框架重新锚定。
+本文档聚焦 `eta`、`zeta`、`sigma`。`kappa_BB / kappa_QQ / kappa_SS / lambda` 已单独整理到关联文档中，避免与静态涨落中的 `\kappa\sigma^2` 记号混淆；其中 `kappa` 家族现在已用 Das 2022 的扩散矩阵框架重新锚定。需要特别注意的是，关联文档现已区分标准 `lorenz_number = lambda / (sigma * T)` 与 legacy `lorentz_legacy = lambda / (sigma / T)`，不要把两者混写成同一个量。
 
 ## 相关文档
 

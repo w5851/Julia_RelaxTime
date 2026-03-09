@@ -35,6 +35,10 @@ using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_dis
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 export shear_viscosity, bulk_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
+export diffusion_coefficient, diffusion_matrix
+export kappa_BB, kappa_BQ, kappa_BS, kappa_QQ, kappa_QS, kappa_SS, lambda_from_kappa_BB
+export conserved_charge_value, conserved_charge_densities, enthalpy_density, rho_mass_from_densities
+export lorenz_number, lorentz_legacy, viscous_conductive_coupling_ratio, prandtl_number, bulk_to_shear_viscosity_ratio
 
 export TransportIntegrationConfig, QuarkParams, ThermoParams, TransportPhysicsConfig, TransportRequest
 export default_transport_provider
@@ -44,6 +48,7 @@ const ENERGY_FLOOR = sqrt(eps(Float64))
 
 const _SPECIES_ALL = (:u, :d, :s, :ubar, :dbar, :sbar)
 const _FLAVORS = (:u, :d, :s)
+const _CONSERVED_CHARGES = (:B, :Q, :S)
 
 # 自然单位制中的元电荷: e = sqrt(4πα)
 const e_natural = sqrt(4.0 * π * α)
@@ -392,6 +397,12 @@ function transport_coefficients(
     req::TransportRequest;
     tau::NamedTuple=req.tau,
     bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    densities::Union{Nothing,NamedTuple}=nothing,
+    pressure::Union{Nothing,Real}=nothing,
+    energy::Union{Nothing,Real}=nothing,
+    entropy::Union{Nothing,Real}=nothing,
+    c_p::Union{Nothing,Real}=nothing,
+    rho_mass::Union{Nothing,Real}=nothing,
     charges::NamedTuple=req.physics.charges,
     degeneracy::Float64=req.physics.degeneracy,
     integration::TransportIntegrationConfig=req.integration,
@@ -405,6 +416,12 @@ function transport_coefficients(
         thermo_params;
         tau=tau,
         bulk_coeffs=bulk_coeffs,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        entropy=entropy,
+        c_p=c_p,
+        rho_mass=rho_mass,
         charges=charges,
         degeneracy=degeneracy,
         config=integration,
@@ -415,6 +432,113 @@ end
 
 @inline function fermi_factor(f::Float64)
     return f * (1.0 - f)
+end
+
+@inline function conserved_charge_value(species::Symbol, charge::Symbol)::Float64
+    if charge === :B
+        return _is_quark_species(species) ? (1.0 / 3.0) : (-1.0 / 3.0)
+    elseif charge === :Q
+        if species === :u
+            return 2.0 / 3.0
+        elseif species === :d || species === :s
+            return -1.0 / 3.0
+        elseif species === :ubar
+            return -2.0 / 3.0
+        elseif species === :dbar || species === :sbar
+            return 1.0 / 3.0
+        end
+    elseif charge === :S
+        if species === :s
+            return -1.0
+        elseif species === :sbar
+            return 1.0
+        elseif species === :u || species === :d || species === :ubar || species === :dbar
+            return 0.0
+        end
+    end
+    error("Unknown conserved charge or species: charge=$charge species=$species")
+end
+
+function conserved_charge_densities(densities::NamedTuple)::NamedTuple
+    for sp in _SPECIES_ALL
+        hasproperty(densities, sp) || error("densities is missing :$sp")
+        val = getproperty(densities, sp)
+        isfinite(val) || error("densities.:$sp must be finite")
+    end
+
+    Δu = Float64(densities.u - densities.ubar)
+    Δd = Float64(densities.d - densities.dbar)
+    Δs = Float64(densities.s - densities.sbar)
+
+    return (
+        B=(Δu + Δd + Δs) / 3.0,
+        Q=(2.0 * Δu - Δd - Δs) / 3.0,
+        S=-Δs,
+    )
+end
+
+@inline function enthalpy_density(pressure::Real, energy::Real)::Float64
+    p = Float64(pressure)
+    e = Float64(energy)
+    isfinite(p) || error("pressure must be finite")
+    isfinite(e) || error("energy must be finite")
+    return p + e
+end
+
+function rho_mass_from_densities(masses::NamedTuple, densities::NamedTuple)::Float64
+    for flavor in _FLAVORS
+        hasproperty(masses, flavor) || error("masses is missing :$flavor")
+        mass = Float64(getproperty(masses, flavor))
+        isfinite(mass) || error("masses.:$flavor must be finite")
+        mass >= 0.0 || error("masses.:$flavor must be >= 0")
+    end
+    for sp in _SPECIES_ALL
+        hasproperty(densities, sp) || error("densities is missing :$sp")
+        val = Float64(getproperty(densities, sp))
+        isfinite(val) || error("densities.:$sp must be finite")
+    end
+
+    return (Float64(densities.u) + Float64(densities.ubar)) * Float64(masses.u) +
+           (Float64(densities.d) + Float64(densities.dbar)) * Float64(masses.d) +
+           (Float64(densities.s) + Float64(densities.sbar)) * Float64(masses.s)
+end
+
+@inline function _safe_ratio(numerator::Real, denominator::Real)::Float64
+    num = Float64(numerator)
+    den = Float64(denominator)
+    isfinite(num) || return NaN
+    isfinite(den) || return NaN
+    abs(den) <= sqrt(eps(Float64)) && return NaN
+    return num / den
+end
+
+@inline function _sigma_over_temperature(sigma::Real, T::Real)::Float64
+    temp = Float64(T)
+    isfinite(temp) && temp > 0.0 || error("T must be finite and > 0")
+    return _safe_ratio(sigma, temp)
+end
+
+@inline function lorenz_number(lambda_value::Real, sigma::Real, T::Real)::Float64
+    temp = Float64(T)
+    isfinite(temp) && temp > 0.0 || error("T must be finite and > 0")
+    return _safe_ratio(lambda_value, Float64(sigma) * temp)
+end
+
+@inline function lorentz_legacy(lambda_value::Real, sigma::Real, T::Real)::Float64
+    return _safe_ratio(lambda_value, _sigma_over_temperature(sigma, T))
+end
+
+@inline function viscous_conductive_coupling_ratio(eta::Real, entropy_density::Real, sigma::Real, T::Real)::Float64
+    eta_over_s = _safe_ratio(eta, entropy_density)
+    return _safe_ratio(eta_over_s, _sigma_over_temperature(sigma, T))
+end
+
+@inline function prandtl_number(eta::Real, c_p::Real, lambda_value::Real, rho_mass::Real)::Float64
+    return _safe_ratio(Float64(eta) * Float64(c_p), Float64(lambda_value) * Float64(rho_mass))
+end
+
+@inline function bulk_to_shear_viscosity_ratio(zeta::Real, eta::Real)::Float64
+    return _safe_ratio(zeta, eta)
 end
 
 @inline function _is_quark_species(species::Symbol)::Bool
@@ -618,7 +742,7 @@ end
     quark_params::NamedTuple,
     thermo_params::NamedTuple,
     tau::NamedTuple,
-)::NTuple{3,Float64}
+)::NTuple{4,Float64}
     T = thermo_params.T
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
@@ -629,7 +753,7 @@ end
     f = distribution_for_species_from_E(provider, caps, sp, E, p, m, μ, T, Φ, Φbar, ξ, c)
     ff = fermi_factor(f)
     τ = tau_for_species(sp, tau)
-    return (E, ff, τ)
+    return (E, f, ff, τ)
 end
 
 @inline _p_nodes_weights(p_nodes::Int, p_max::Float64, p_grid, p_w) = p_nodes_weights(p_nodes, p_max, p_grid, p_w)
@@ -726,8 +850,8 @@ end
         acc = integrate_p(nodes_p, weights_p) do p
             inner = 0.0
             for sp in _SPECIES_ALL
-                E, ff, τ = _species_transport_state(provider, caps, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
-                inner += term_for_species(p, sp, E, ff, τ)
+                E, f, ff, τ = _species_transport_state(provider, caps, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
+                inner += term_for_species(p, sp, E, f, ff, τ)
             end
             return inner
         end
@@ -738,8 +862,8 @@ end
     acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
         inner = 0.0
         for sp in _SPECIES_ALL
-            E, ff, τ = _species_transport_state(provider, caps, sp, p, c, ξ, quark_params, thermo_params, tau)
-            inner += term_for_species(p, sp, E, ff, τ)
+            E, f, ff, τ = _species_transport_state(provider, caps, sp, p, c, ξ, quark_params, thermo_params, tau)
+            inner += term_for_species(p, sp, E, f, ff, τ)
         end
         return inner
     end
@@ -797,7 +921,7 @@ function shear_viscosity(
     effective_config = _effective_transport_config(config, kwargs)
     _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider)
 
-    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, ff, τ
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
         p2 = p * p
         p6 = p2 * p2 * p2
         return p6 / (E * E) * (degeneracy * τ * ff)
@@ -851,7 +975,7 @@ function electric_conductivity(
     effective_config = _effective_transport_config(config, kwargs)
     _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider, charges=charges)
 
-    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, ff, τ
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
         p2 = p * p
         p4 = p2 * p2
         return p4 * _q2_for_species(sp, charges) / (E * E) * (degeneracy * τ * ff)
@@ -1035,16 +1159,445 @@ function bulk_viscosity_isentropic(
     )
 end
 
+@inline function _validate_conserved_charge_symbol(charge::Symbol)::Symbol
+    charge in _CONSERVED_CHARGES || error("Unknown conserved charge: $charge. Allowed charges: $(_CONSERVED_CHARGES)")
+    return charge
+end
+
+function _validate_diffusion_background(densities::NamedTuple, pressure::Real, energy::Real)
+    charge_densities = conserved_charge_densities(densities)
+    h = enthalpy_density(pressure, energy)
+    h > 0.0 || error("enthalpy density must be > 0")
+    return charge_densities, h
+end
+
+@inline function _kappa_projection(species::Symbol, charge::Symbol, charge_densities::NamedTuple, enthalpy::Float64, E::Float64)::Float64
+    q = conserved_charge_value(species, charge)
+    n = getproperty(charge_densities, charge)
+    return q - (n / enthalpy) * E
+end
+
+@inline function _kappa_integrand_weight(
+    species::Symbol,
+    charge_left::Symbol,
+    charge_right::Symbol,
+    charge_densities::NamedTuple,
+    enthalpy::Float64,
+    E::Float64,
+)::Float64
+    left = _kappa_projection(species, charge_left, charge_densities, enthalpy, E)
+    right = _kappa_projection(species, charge_right, charge_densities, enthalpy, E)
+    return left * right
+end
+
+function diffusion_coefficient(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    tau::NamedTuple,
+    charge_left::Symbol,
+    charge_right::Symbol,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    kwargs...
+)::Float64
+    T = thermo_params.T
+    charge_left = _validate_conserved_charge_symbol(charge_left)
+    charge_right = _validate_conserved_charge_symbol(charge_right)
+
+    effective_config = _effective_transport_config(config, kwargs)
+    _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider)
+    charge_densities, h = _validate_diffusion_background(densities, pressure, energy)
+
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
+        p2 = p * p
+        p4 = p2 * p2
+        weight = _kappa_integrand_weight(sp, charge_left, charge_right, charge_densities, h, E)
+        return p4 / (E * E) * (degeneracy * τ * f * weight)
+    end
+
+    return integral / (3.0 * T * T)
+end
+
+function diffusion_coefficient(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    charge_left::Symbol,
+    charge_right::Symbol,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    kwargs...
+)::Float64
+    return diffusion_coefficient(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        charge_left=charge_left,
+        charge_right=charge_right,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+end
+
+function diffusion_coefficient(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::Float64
+    return diffusion_coefficient(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function diffusion_coefficient(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::Float64
+    return diffusion_coefficient(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
+function diffusion_coefficient(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    charge_left::Symbol,
+    charge_right::Symbol,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=req.physics.degeneracy,
+    integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    kwargs...
+)::Float64
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
+    return diffusion_coefficient(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        charge_left=charge_left,
+        charge_right=charge_right,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        config=integration,
+        provider=provider,
+        kwargs...
+    )
+end
+
+@inline function kappa_BB(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:B, charge_right=:B, kwargs...)
+end
+
+@inline function kappa_BB(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_BB(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+@inline function kappa_BQ(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:B, charge_right=:Q, kwargs...)
+end
+
+@inline function kappa_BQ(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_BQ(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+@inline function kappa_BS(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:B, charge_right=:S, kwargs...)
+end
+
+@inline function kappa_BS(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_BS(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+@inline function kappa_QQ(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:Q, charge_right=:Q, kwargs...)
+end
+
+@inline function kappa_QQ(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_QQ(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+@inline function kappa_QS(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:Q, charge_right=:S, kwargs...)
+end
+
+@inline function kappa_QS(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_QS(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+@inline function kappa_SS(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    return diffusion_coefficient(quark_params, thermo_params; charge_left=:S, charge_right=:S, kwargs...)
+end
+
+@inline function kappa_SS(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return kappa_SS(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function diffusion_matrix(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    tau::NamedTuple,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    kwargs...
+)::NamedTuple
+    κBB = kappa_BB(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+    κBQ = kappa_BQ(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+    κBS = kappa_BS(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+    κQQ = kappa_QQ(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+    κQS = kappa_QS(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+    κSS = kappa_SS(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+
+    return (
+        charges=_CONSERVED_CHARGES,
+        matrix=[κBB κBQ κBS; κBQ κQQ κQS; κBS κQS κSS],
+        BB=κBB,
+        BQ=κBQ,
+        BS=κBS,
+        QB=κBQ,
+        QQ=κQQ,
+        QS=κQS,
+        SB=κBS,
+        SQ=κQS,
+        SS=κSS,
+    )
+end
+
+function diffusion_matrix(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    config::TransportIntegrationConfig;
+    tau::NamedTuple,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=degeneracy_default(),
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    kwargs...
+)::NamedTuple
+    return diffusion_matrix(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+        config=config,
+        kwargs...
+    )
+end
+
+function diffusion_matrix(
+    quark::QuarkParams,
+    thermo::ThermoParams;
+    kwargs...
+)::NamedTuple
+    return diffusion_matrix(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function diffusion_matrix(
+    quark::QuarkParams,
+    thermo::ThermoParams,
+    config::TransportIntegrationConfig;
+    kwargs...
+)::NamedTuple
+    return diffusion_matrix(_qp_view(quark), _tp_view(thermo), config; kwargs...)
+end
+
+function diffusion_matrix(
+    req::TransportRequest;
+    tau::NamedTuple=req.tau,
+    densities::NamedTuple,
+    pressure::Real,
+    energy::Real,
+    degeneracy::Float64=req.physics.degeneracy,
+    integration::TransportIntegrationConfig=req.integration,
+    provider=DEFAULT_TRANSPORT_PROVIDER,
+    kwargs...
+)::NamedTuple
+    quark_params = (m=req.quark.m, μ=req.quark.μ)
+    thermo_params = (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ)
+    return diffusion_matrix(
+        quark_params,
+        thermo_params;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        config=integration,
+        provider=provider,
+        kwargs...
+    )
+end
+
+@inline function kappa_BB(req::TransportRequest; kwargs...)::Float64
+    return kappa_BB((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+@inline function kappa_BQ(req::TransportRequest; kwargs...)::Float64
+    return kappa_BQ((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+@inline function kappa_BS(req::TransportRequest; kwargs...)::Float64
+    return kappa_BS((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+@inline function kappa_QQ(req::TransportRequest; kwargs...)::Float64
+    return kappa_QQ((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+@inline function kappa_QS(req::TransportRequest; kwargs...)::Float64
+    return kappa_QS((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+@inline function kappa_SS(req::TransportRequest; kwargs...)::Float64
+    return kappa_SS((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
+function lambda_from_kappa_BB(kappa_BB::Real, pressure::Real, energy::Real, n_B::Real, T::Real)::Float64
+    κ = Float64(kappa_BB)
+    h = enthalpy_density(pressure, energy)
+    nB = Float64(n_B)
+    temp = Float64(T)
+    isfinite(κ) || return NaN
+    isfinite(nB) || error("n_B must be finite")
+    isfinite(temp) && temp > 0.0 || error("T must be finite and > 0")
+    if abs(nB) <= sqrt(eps(Float64))
+        return NaN
+    end
+    return κ * (h / (nB * temp))^2
+end
+
+function lambda_from_kappa_BB(quark_params::NamedTuple, thermo_params::NamedTuple; kwargs...)::Float64
+    haskey(kwargs, :densities) || error("lambda_from_kappa_BB requires densities")
+    haskey(kwargs, :pressure) || error("lambda_from_kappa_BB requires pressure")
+    haskey(kwargs, :energy) || error("lambda_from_kappa_BB requires energy")
+    densities = kwargs[:densities]
+    pressure = kwargs[:pressure]
+    energy = kwargs[:energy]
+    κBB = kappa_BB(quark_params, thermo_params; kwargs...)
+    nB = conserved_charge_densities(densities).B
+    return lambda_from_kappa_BB(κBB, pressure, energy, nB, thermo_params.T)
+end
+
+function lambda_from_kappa_BB(quark::QuarkParams, thermo::ThermoParams; kwargs...)::Float64
+    return lambda_from_kappa_BB(_qp_view(quark), _tp_view(thermo); kwargs...)
+end
+
+function lambda_from_kappa_BB(req::TransportRequest; kwargs...)::Float64
+    return lambda_from_kappa_BB((m=req.quark.m, μ=req.quark.μ), (T=req.thermo.T, Φ=req.thermo.Φ, Φbar=req.thermo.Φbar, ξ=req.thermo.ξ); tau=req.tau, kwargs...)
+end
+
 """
     transport_coefficients(quark_params, thermo_params; tau, bulk_coeffs, charges, ...)
 
-一次性计算 (η, ζ, σ)。
+一次性计算 (η, ζ, σ, κ 对角元/非对角元, λ) 及其派生诊断比值。
+
+- `lorenz_number = lambda / (sigma * T)` 是标准 Lorenz 数。
+- `lorentz_legacy = lambda / (sigma / T)` 保留 legacy Fortran 诊断口径。
+- `viscous_conductive_coupling_ratio` 当前沿用 legacy 归一化 `(eta / s) / (sigma / T)`。
+- `prandtl_number` 需要额外提供 `c_p` 与 `rho_mass`。
+- `bulk_to_shear_viscosity_ratio = zeta / eta`。
 """
 function transport_coefficients(
     quark_params::NamedTuple,
     thermo_params::NamedTuple;
     tau::NamedTuple,
     bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    densities::Union{Nothing,NamedTuple}=nothing,
+    pressure::Union{Nothing,Real}=nothing,
+    energy::Union{Nothing,Real}=nothing,
+    entropy::Union{Nothing,Real}=nothing,
+    c_p::Union{Nothing,Real}=nothing,
+    rho_mass::Union{Nothing,Real}=nothing,
     config::Union{Nothing,TransportIntegrationConfig}=nothing,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
@@ -1081,7 +1634,57 @@ function transport_coefficients(
         provider=provider,
     )
 
-    return (eta=eta, zeta=zeta, sigma=sigma)
+    has_diffusion_background = densities !== nothing || pressure !== nothing || energy !== nothing
+    if has_diffusion_background
+        densities !== nothing || error("transport_coefficients requires densities when pressure/energy is provided")
+        pressure !== nothing || error("transport_coefficients requires pressure when densities/energy is provided")
+        energy !== nothing || error("transport_coefficients requires energy when densities/pressure is provided")
+    end
+
+    κmat = has_diffusion_background ? diffusion_matrix(
+        quark_params,
+        thermo_params,
+        effective_config;
+        tau=tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=degeneracy,
+        provider=provider,
+    ) : nothing
+
+    κBB = κmat === nothing ? NaN : κmat.BB
+    κBQ = κmat === nothing ? NaN : κmat.BQ
+    κBS = κmat === nothing ? NaN : κmat.BS
+    κQQ = κmat === nothing ? NaN : κmat.QQ
+    κQS = κmat === nothing ? NaN : κmat.QS
+    κSS = κmat === nothing ? NaN : κmat.SS
+
+    λ = has_diffusion_background ? lambda_from_kappa_BB(κBB, pressure, energy, conserved_charge_densities(densities).B, thermo_params.T) : NaN
+    L = lorenz_number(λ, sigma, thermo_params.T)
+    L_legacy = lorentz_legacy(λ, sigma, thermo_params.T)
+    ratio_eta_sigma = entropy === nothing ? NaN : viscous_conductive_coupling_ratio(eta, entropy, sigma, thermo_params.T)
+    Pr = (c_p === nothing || rho_mass === nothing) ? NaN : prandtl_number(eta, c_p, λ, rho_mass)
+    zeta_over_eta = bulk_to_shear_viscosity_ratio(zeta, eta)
+
+    return (
+        eta=eta,
+        zeta=zeta,
+        sigma=sigma,
+        kappa_BB=κBB,
+        kappa_BQ=κBQ,
+        kappa_BS=κBS,
+        kappa_QQ=κQQ,
+        kappa_QS=κQS,
+        kappa_SS=κSS,
+        diffusion_matrix=κmat,
+        lambda=λ,
+        lorenz_number=L,
+        lorentz_legacy=L_legacy,
+        viscous_conductive_coupling_ratio=ratio_eta_sigma,
+        prandtl_number=Pr,
+        bulk_to_shear_viscosity_ratio=zeta_over_eta,
+    )
 end
 
 """Convenience overload: pass `config` as a positional argument, with optional explicit overrides."""
@@ -1091,6 +1694,12 @@ function transport_coefficients(
     config::TransportIntegrationConfig;
     tau::NamedTuple,
     bulk_coeffs::Union{Nothing,NamedTuple}=nothing,
+    densities::Union{Nothing,NamedTuple}=nothing,
+    pressure::Union{Nothing,Real}=nothing,
+    energy::Union{Nothing,Real}=nothing,
+    entropy::Union{Nothing,Real}=nothing,
+    c_p::Union{Nothing,Real}=nothing,
+    rho_mass::Union{Nothing,Real}=nothing,
     charges::NamedTuple=default_charges(),
     degeneracy::Float64=degeneracy_default(),
     provider=DEFAULT_TRANSPORT_PROVIDER,
@@ -1101,6 +1710,12 @@ function transport_coefficients(
         thermo_params;
         tau=tau,
         bulk_coeffs=bulk_coeffs,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        entropy=entropy,
+        c_p=c_p,
+        rho_mass=rho_mass,
         config=config,
         charges=charges,
         degeneracy=degeneracy,

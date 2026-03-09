@@ -1,0 +1,7 @@
+record_id,artifact,source_system,path_or_symbol,status,notes
+rates_julia_public_api,rates,Julia_RelaxTime,src/models/workflows/TransportWorkflow.jl|src/relaxtime/RelaxationTime.jl,available,"workflow returns rates when tau is computed internally; public semantics are average scattering rates per required process"
+rates_cpp_scan_output,sca_rate,20250413备份,results/sca_rate.txt,empty_export,"checked-in C++ result file exists but is empty, so it cannot anchor acceptance targets yet"
+sigma_decomposition_cpp_output,qk_sigmat,20250413备份,results/qk_sigmat.txt,empty_export,"checked-in C++ decomposition file exists but is empty, so it currently supports schema-only audit, not acceptance"
+eta_decomposition_cpp_output,qk_etat3,20250413备份,results/qk_etat3.txt,empty_export,"checked-in C++ decomposition file exists but is empty, so it currently supports schema-only audit, not acceptance"
+rates_cpp_output_schema,sca_rate,20250413备份,codes/PNJL_loop.cpp|codes/PNJL_loop_small_sn.cpp,output_schema_only,"legacy C++ code writes channel-resolved averaged rates, but current repository snapshot lacks populated exports"
+decomposition_cpp_output_schema,qk_sigmat|qk_etat3,20250413备份,codes/PNJL_loop.cpp|codes/PNJL_loop_small_sn.cpp,output_schema_only,"legacy C++ code writes flavor-resolved sigma/eta decomposition arrays, but current repository snapshot lacks populated exports"

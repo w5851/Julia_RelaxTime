@@ -12,7 +12,7 @@ g1_MeV_inv8 = 2.193e-21
 g2_MeV_inv8 = -5.890e-22
 
 # Vandermonde term strength in the rPNJL Polyakov potential.
-kappa = 0.0
+kappa = 0.1
 
 # rPNJL Polyakov parameters (table 3.2).
 T0_MeV = 175.0

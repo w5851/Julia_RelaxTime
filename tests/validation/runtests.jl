@@ -10,16 +10,23 @@ using Test
 
 const VALIDATION_DIR = @__DIR__
 
+include(joinpath(VALIDATION_DIR, "common", "data_paths.jl"))
+
 function _include_validation_dir(dir::String)
     isdir(dir) || return
-    files = sort(readdir(dir; join=true))
-    for f in files
-        file = lowercase(basename(f))
+    entries = sort(readdir(dir; join=true))
+    for entry in entries
+        if isdir(entry)
+            _include_validation_dir(entry)
+            continue
+        end
+
+        file = lowercase(basename(entry))
         endswith(file, ".jl") || continue
         startswith(file, "test_") || continue
-        rel = relpath(f, VALIDATION_DIR)
+        rel = relpath(entry, VALIDATION_DIR)
         try
-            include(f)
+            include(entry)
         catch err
             println(stderr, "[validation] include failed: " * rel)
             rethrow(err)

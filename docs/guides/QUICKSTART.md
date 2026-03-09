@@ -57,4 +57,6 @@ julia --project=. tests/unit/runtests.jl
 - 安装与复现：`INSTALL.md`
 - 使用说明：`docs/guides/USER_GUIDE.md`
 - 状态说明：`docs/guides/STATUS.md`
+- 脚本入口清单：`docs/guides/scripts/README.md`
+- 守恒荷广义磁化率脚本：`docs/guides/scripts/pnjl_conserved_charge_susceptibilities.md`
 - 参考资料：`docs/reference/`

@@ -20,8 +20,20 @@ using ForwardDiff
 using ImplicitDifferentiation
 
 export create_implicit_gap_solver
+export create_flavor_mu_implicit_gap_solver
 export create_pnjl_implicit_solver
 export solve_pnjl_with_derivatives
+export solve_pnjl_with_flavor_mu_derivatives
+
+@inline function symmetric_mu_direction_derivative(dx_dmu_vec::AbstractMatrix)
+    size(dx_dmu_vec, 2) == 3 || throw(ArgumentError("dx_dmu_vec must have 3 columns for (μ_u, μ_d, μ_s), got size=$(size(dx_dmu_vec))"))
+    return vec(sum(dx_dmu_vec; dims=2))
+end
+
+@inline function _normalize_flavor_mu_vec(mu_vec)
+    μ = normalize_mu_vec(mu_vec)
+    return [Float64(μ[1]), Float64(μ[2]), Float64(μ[3])]
+end
 
 """create_implicit_gap_solver(model; kwargs...) -> ImplicitFunction
 
@@ -168,6 +180,101 @@ function solve_pnjl_with_derivatives(
     else
         throw(ArgumentError("order must be 1 or 2, got $order"))
     end
+end
+
+"""create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
+
+创建一个 flavor 化学势版本的隐函数求解器：
+- 参数 `θ = [T, μ_u, μ_d, μ_s]`
+- 解向量 `x = [φu, φd, φs, Φ, Φbar]`
+
+实现约定：
+- `forward_solve_impl` 仅负责 primal solve，可安全使用 `Float64` 转换。
+- `conditions_impl` 必须对 Dual 友好，不能把 `θ` 中的化学势分量压回 `Float64`。
+"""
+function create_flavor_mu_implicit_gap_solver(
+    model::AbstractPNJLModel;
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    kwargs...
+)
+    gap_state_dim(model) == 5 || throw(ArgumentError("create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
+
+    forward_solve_impl = function (θ::AbstractVector)
+        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
+        T_fm = Float64(θ[1])
+        mu_vec = SVector{3, Float64}(Float64(θ[2]), Float64(θ[3]), Float64(θ[4]))
+
+        st = solve_gap(model, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num, kwargs...)
+        return (collect(state_vector(st)), nothing)
+    end
+
+    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
+        _ = z
+        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
+        T_fm = θ[1]
+        mu_vec = SVector{3}(θ[2], θ[3], θ[4])
+
+        r = gap_residual(model, x, T_fm, mu_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            kwargs...)
+        return Vector(r)
+    end
+
+    return ImplicitFunction(
+        forward_solve_impl,
+        conditions_impl;
+        linear_solver=DirectLinearSolver(),
+        representation=MatrixRepresentation(),
+    )
+end
+
+"""solve_pnjl_with_flavor_mu_derivatives(T_fm, mu_vec; order=1, kwargs...) -> NamedTuple
+
+通过 flavor 化学势版本的隐函数求解器计算 PNJL 解及其导数：
+- `x`: 5 维平衡态向量
+- `dx_dT`: 对温度的一阶导数
+- `dx_dmu_vec`: 对 `(μ_u, μ_d, μ_s)` 的 5×3 Jacobian
+
+当前仅支持 `order=1`。更高阶张量留待 susceptibility 层真正需要时再接入，
+避免在底层接口过早固化不稳定的张量布局。
+"""
+function solve_pnjl_with_flavor_mu_derivatives(
+    T_fm::Real,
+    mu_vec;
+    order::Int=1,
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    thermo_backend::Symbol=:models,
+    solver_backend::Symbol=:models,
+    kwargs...
+)
+    order == 1 || throw(ArgumentError("solve_pnjl_with_flavor_mu_derivatives currently supports order=1 only"))
+
+    kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
+    model = create_model(kind)
+
+    solver = create_flavor_mu_implicit_gap_solver(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        solver_backend=solver_backend,
+        kwargs...,
+    )
+
+    μ0 = _normalize_flavor_mu_vec(mu_vec)
+    θ = [Float64(T_fm), μ0[1], μ0[2], μ0[3]]
+    x, _ = solver(θ)
+
+    dx_dT = ForwardDiff.derivative(T -> solver([T, μ0[1], μ0[2], μ0[3]])[1], θ[1])
+    dx_dmu_vec = ForwardDiff.jacobian(μ -> solver([θ[1], μ[1], μ[2], μ[3]])[1], μ0)
+
+    return (x=x, mu_vec=SVector{3}(μ0[1], μ0[2], μ0[3]), dx_dT=dx_dT, dx_dmu_vec=dx_dmu_vec)
 end
 
 function create_implicit_gap_solver(

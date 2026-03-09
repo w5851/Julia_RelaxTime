@@ -1,7 +1,15 @@
 using Test
 
-const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-const DATA_PATH = joinpath(PROJECT_ROOT, "tests", "validation", "data", "pnjl_literature_textual_targets_v1.csv")
+if !isdefined(Main, :validation_targets_path)
+    Base.include(Main, joinpath(@__DIR__, "..", "common", "data_paths.jl"))
+end
+
+const PROJECT_ROOT = VALIDATION_PROJECT_ROOT
+const DATA_PATH = validation_targets_path(
+    "pnjl",
+    "literature",
+    "pnjl_literature_textual_targets_v1.csv",
+)
 const HBARC_MEV_FM = 197.327
 
 if !isdefined(Main, :Models)

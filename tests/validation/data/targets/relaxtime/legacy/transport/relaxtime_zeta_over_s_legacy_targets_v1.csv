@@ -1,0 +1,4 @@
+record_id,T_MeV,muB_MeV,field,expected_value,rtol,source
+zeta_over_s_mu5_t50,50.0,5.0,zeta_over_s,1.212443987e7,0.5,legacy_transport_zeta_fortran_v1
+zeta_over_s_mu5_t55,55.0,5.0,zeta_over_s,2.400687423e6,0.5,legacy_transport_zeta_fortran_v1
+zeta_over_s_mu5_t60,60.0,5.0,zeta_over_s,6.033574884e5,0.5,legacy_transport_zeta_fortran_v1

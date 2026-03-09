@@ -99,6 +99,7 @@ const DEFAULT_MOMENTUM_NODES = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_NODES
 const DEFAULT_MOMENTUM_WEIGHTS = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
 using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
+using .TransportCoefficients: rho_mass_from_densities
 
 const PNJL = Main.Models
 
@@ -329,6 +330,23 @@ end
     )
 end
 
+@inline function _thermo_background_from_equilibrium(base, T_fm::Real; xi::Real, p_num::Int, t_num::Int)
+    if hasproperty(base, :pressure) && hasproperty(base, :energy) && hasproperty(base, :entropy)
+        return (pressure=Float64(base.pressure), entropy=Float64(base.entropy), energy=Float64(base.energy))
+    end
+
+    pressure, _, entropy, energy = Main.Models.model_thermo(
+        _get_model(:PNJL),
+        base.x_state,
+        base.mu_vec,
+        T_fm;
+        p_num=p_num,
+        t_num=t_num,
+        xi=xi,
+    )
+    return (pressure=Float64(pressure), entropy=Float64(entropy), energy=Float64(energy))
+end
+
 @inline _solve_equilibrium(args...; kwargs...) = EquilibriumFacade.solve_equilibrium_backend(args...; kwargs...)
 
 @inline function _transport_inputs_from_equilibrium(
@@ -396,6 +414,7 @@ end
 - `a_builder_config`: A 构造配置（`p_nodes/p_max/cos_nodes/use_aniso`），用于 `compute_tau=true` 时构建 `quark_params.A`。
 - `transport_config`: 输运系数积分配置（推荐），例如 `TransportIntegrationConfig(p_nodes=64, p_max=15.0, cos_nodes=32)`。
     - 若同时在 `transport_kwargs` 里提供了 `p_nodes/p_max/...`，会被自动提取并用于构造 config（便于平滑迁移）。
+- `c_p`, `rho_mass`: 可选热背景量；若提供则 `transport.prandtl_number` 可直接给出有限值。
 - `transport_kwargs`: 透传到 `transport_coefficients` 的其它参数（建议只放 `degeneracy/charges` 等非积分配置项）。
 """
 function solve_gap_and_transport(
@@ -417,6 +436,8 @@ function solve_gap_and_transport(
     tau_kwargs::NamedTuple=(;),
     a_builder_config::Union{Nothing,NamedTuple}=nothing,
     transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    c_p::Union{Nothing,Real}=nothing,
+    rho_mass::Union{Nothing,Real}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
     prefer_energy_aniso=nothing
@@ -448,6 +469,8 @@ function solve_gap_and_transport(
         tau_kwargs=tau_kwargs,
         a_builder_config=a_builder_config,
         transport_config=transport_config,
+        c_p=c_p,
+        rho_mass=rho_mass,
         transport_kwargs=transport_kwargs,
         provider=provider,
         prefer_energy_aniso=prefer_energy_aniso,
@@ -473,6 +496,8 @@ function solve_transport_from_equilibrium(
     tau_kwargs::NamedTuple=(;),
     a_builder_config::Union{Nothing,NamedTuple}=nothing,
     transport_config::Union{Nothing,TransportIntegrationConfig}=nothing,
+    c_p::Union{Nothing,Real}=nothing,
+    rho_mass::Union{Nothing,Real}=nothing,
     transport_kwargs::NamedTuple=(;),
     provider=nothing,
     prefer_energy_aniso=nothing
@@ -487,6 +512,8 @@ function solve_transport_from_equilibrium(
     quark_params_basic = inputs.quark_params
     thermo_params = inputs.thermo_params
     densities = inputs.densities
+    thermo_background = _thermo_background_from_equilibrium(base, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+    rho_mass_background = rho_mass_from_densities(quark_params_basic.m, densities)
 
     tau_inv = nothing
     rates = nothing
@@ -528,6 +555,16 @@ function solve_transport_from_equilibrium(
             nothing
         end
     end
+
+    c_p_background = if c_p !== nothing
+        Float64(c_p)
+    elseif bulk_coeffs !== nothing && hasproperty(bulk_coeffs, :c_p)
+        Float64(bulk_coeffs.c_p)
+    else
+        NaN
+    end
+    rho_mass_effective = rho_mass === nothing ? rho_mass_background : Float64(rho_mass)
+    thermo_background = merge(thermo_background, (rho_mass=rho_mass_effective, c_p=c_p_background))
 
     # Backward/ergonomic compatibility:
     prefer_from_kwargs = _provider_prefer_energy_aniso_from_kwargs(transport_kwargs)
@@ -583,6 +620,12 @@ function solve_transport_from_equilibrium(
             legacy_inputs.thermo_params;
             tau=tau,
             bulk_coeffs=bulk_coeffs,
+            densities=densities,
+            pressure=thermo_background.pressure,
+            entropy=thermo_background.entropy,
+            energy=thermo_background.energy,
+            c_p=thermo_background.c_p,
+            rho_mass=thermo_background.rho_mass,
             pass_provider...,
             transport_kwargs_clean...,
         )
@@ -592,6 +635,12 @@ function solve_transport_from_equilibrium(
             legacy_inputs.thermo_params;
             tau=tau,
             bulk_coeffs=bulk_coeffs,
+            densities=densities,
+            pressure=thermo_background.pressure,
+            entropy=thermo_background.entropy,
+            energy=thermo_background.energy,
+            c_p=thermo_background.c_p,
+            rho_mass=thermo_background.rho_mass,
             config=effective_transport_config,
             pass_provider...,
             transport_kwargs_clean...,
@@ -602,6 +651,7 @@ function solve_transport_from_equilibrium(
         equilibrium=base,
         quark_params=quark_params_basic,
         thermo_params=thermo_params,
+        thermo_background=thermo_background,
         masses=masses,
         densities=densities,
         tau=tau,

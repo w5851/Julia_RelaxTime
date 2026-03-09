@@ -1,0 +1,13 @@
+record_id,T_MeV,muB_MeV,flavor,antiparticle,expected_tau_fm,rtol
+tau_u_mu5_t50,50.0,5.0,u,false,7.015570615e8,0.5
+tau_ubar_mu5_t50,50.0,5.0,u,true,7.012635006e8,0.5
+tau_s_mu5_t50,50.0,5.0,s,false,8.025116944e8,0.5
+tau_sbar_mu5_t50,50.0,5.0,s,true,8.025128318e8,0.5
+tau_u_mu5_t55,55.0,5.0,u,false,1.214603351e8,0.5
+tau_ubar_mu5_t55,55.0,5.0,u,true,1.213853517e8,0.5
+tau_s_mu5_t55,55.0,5.0,s,false,1.389943262e8,0.5
+tau_sbar_mu5_t55,55.0,5.0,s,true,1.389931746e8,0.5
+tau_u_mu5_t60,60.0,5.0,u,false,2.705761135e7,0.5
+tau_ubar_mu5_t60,60.0,5.0,u,true,2.703505043e7,0.5
+tau_s_mu5_t60,60.0,5.0,s,false,3.095762049e7,0.5
+tau_sbar_mu5_t60,60.0,5.0,s,true,3.095693100e7,0.5

@@ -1,4 +1,8 @@
-const RELAXTIME_LITERATURE_VALIDATION_PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+if !isdefined(Main, :validation_targets_path)
+    Base.include(Main, joinpath(@__DIR__, "..", "common", "data_paths.jl"))
+end
+
+const RELAXTIME_LITERATURE_VALIDATION_PROJECT_ROOT = VALIDATION_PROJECT_ROOT
 
 const RELAXTIME_LITERATURE_VALIDATION_MODELS_PATH = joinpath(
     RELAXTIME_LITERATURE_VALIDATION_PROJECT_ROOT,
@@ -45,7 +49,7 @@ const RELAXTIME_LITERATURE_VALIDATION_VALIDATION_T_NUM = 6
 const RELAXTIME_LITERATURE_VALIDATION_VALIDATION_MAX_ITER = 40
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_N_POINTS = 64
 
-const RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE = Dict{Tuple{Float64, Float64}, NamedTuple}()
+const RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE = Dict{Tuple{Float64, Float64, Bool}, NamedTuple}()
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_PARAM_CACHE = Dict{Tuple{Float64, Float64}, NamedTuple}()
 const RELAXTIME_LITERATURE_VALIDATION_SIGMA_VALUE_CACHE = Dict{Tuple{Float64, Float64, Symbol, Float64}, Float64}()
 
@@ -113,8 +117,12 @@ function _build_relaxtime_literature_validation_K_coeffs(
     )
 end
 
-function _compute_relaxtime_literature_transport_point(T_MeV::Float64, muB_MeV::Float64)
-    key = (T_MeV, muB_MeV)
+function _compute_relaxtime_literature_transport_point_cached(
+    T_MeV::Float64,
+    muB_MeV::Float64;
+    compute_bulk::Bool=false,
+)
+    key = (T_MeV, muB_MeV, compute_bulk)
     haskey(RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE, key) &&
         return RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE[key]
 
@@ -142,7 +150,7 @@ function _compute_relaxtime_literature_transport_point(T_MeV::Float64, muB_MeV::
         equilibrium=equilibrium,
         compute_tau=true,
         K_coeffs=ktmp.K_coeffs,
-        compute_bulk=false,
+        compute_bulk=compute_bulk,
         p_num=RELAXTIME_LITERATURE_VALIDATION_VALIDATION_P_NUM,
         t_num=RELAXTIME_LITERATURE_VALIDATION_VALIDATION_T_NUM,
         seed_state=Vector(equilibrium.x_state),
@@ -162,12 +170,22 @@ function _compute_relaxtime_literature_transport_point(T_MeV::Float64, muB_MeV::
 
     RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE[key] = (
         eta_over_s=eta_over_s,
+        s_fm3inv=s_fm3inv,
+        compute_bulk=compute_bulk,
         transport=result.transport,
         equilibrium=equilibrium,
         masses=masses,
         K_coeffs=ktmp.K_coeffs,
     )
     return RELAXTIME_LITERATURE_VALIDATION_TRANSPORT_CACHE[key]
+end
+
+function _compute_relaxtime_literature_transport_point(T_MeV::Float64, muB_MeV::Float64)
+    return _compute_relaxtime_literature_transport_point_cached(T_MeV, muB_MeV; compute_bulk=false)
+end
+
+function _compute_relaxtime_literature_transport_point_bulk(T_MeV::Float64, muB_MeV::Float64)
+    return _compute_relaxtime_literature_transport_point_cached(T_MeV, muB_MeV; compute_bulk=true)
 end
 
 function _build_relaxtime_literature_sigma_params(T_MeV::Float64, muB_MeV::Float64)

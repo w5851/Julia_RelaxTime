@@ -21,3 +21,13 @@ node_modules/
 
 # Supposition.jl 测试数据库（自动生成的测试用例缓存）
 test/SuppositionDB/
+
+# 临时日志与一次性排查输出
+/.tmp_*.log
+/.tmp_*.txt
+/test_full.log
+/test_out2.txt
+/test_output.txt
+/test_smoke.txt
+/unit_full_latest.log
+/tmp_*.csv

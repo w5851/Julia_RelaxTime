@@ -24,6 +24,7 @@ end
     @test hasproperty(model.ext, :g1_fm8)
     @test hasproperty(model.ext, :g2_fm8)
     @test hasproperty(model.ext, :kappa)
+    @test isapprox(model.ext.kappa, 0.1; rtol=0.0, atol=1e-12)
 
     Φ = 0.26
     Φbar = 0.18
@@ -35,5 +36,5 @@ end
     model_k0 = Main.Models.RPNJLModel(model.base, merge(model.ext, (kappa=0.0,)), true)
     poly_k0 = Main.Models.polyakov_potential(model_k0, Φ, Φbar, T_fm)
     @test isfinite(poly_k0)
-    @test isapprox(poly_ext, poly_k0; rtol=1e-12, atol=0.0)
+    @test !isapprox(poly_ext, poly_k0; rtol=1e-8, atol=1e-12)
 end

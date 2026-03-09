@@ -53,7 +53,7 @@ if !isdefined(Main, :Constants_PNJL)
 end
 using Main.Constants_PNJL: G_fm2, K_fm5
 
-export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
+export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs, legacy_transport_c_p
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 
@@ -567,6 +567,8 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     num_muB_T = n_B * ds_dT - s * dn_dT
     den_muB_T = n_B * ds_dμB - s * dn_dμB
     dμB_dT_sig = -num_muB_T / den_muB_T
+
+    c_p = abs(n_B) <= sqrt(eps(Float64)) ? NaN : T_val * (ds_dT - ds_dμB * s / n_B)
     
     return (
         v_n_sq = v_n_sq,
@@ -574,9 +576,27 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
         masses = SVector{3}(masses...),
         dM_dT = dM_dT,
         dM_dμB = dM_dμB,
+        ds_dT = ds_dT,
+        ds_dμB = ds_dμB,
+        dn_dT = dn_dT,
+        dn_dμB = dn_dμB,
+        c_p = c_p,
         s = s,
         n_B = n_B,
     )
+end
+
+function legacy_transport_c_p(T_fm::Real, mu_fm::Real;
+                              xi::Real=0.0,
+                              p_num::Int=DEFAULT_MOMENTUM_COUNT,
+                              t_num::Int=DEFAULT_THETA_COUNT,
+                              model=nothing)
+    return bulk_viscosity_coefficients(T_fm, mu_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=model,
+    ).c_p
 end
 
 """

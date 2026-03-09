@@ -1,0 +1,4 @@
+record_id,T_MeV,muB_MeV,field,expected_value,rtol,source
+eta_over_s_mu5_t50,50.0,5.0,eta_over_s,1.668142504e7,0.5,legacy_fortran_eta_sigma_dat_v1
+eta_over_s_mu5_t55,55.0,5.0,eta_over_s,3.371806982e6,0.5,legacy_fortran_eta_sigma_dat_v1
+eta_over_s_mu5_t60,60.0,5.0,eta_over_s,8.627218571e5,0.5,legacy_fortran_eta_sigma_dat_v1

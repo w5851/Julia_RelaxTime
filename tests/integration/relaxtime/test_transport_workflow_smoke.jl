@@ -195,11 +195,20 @@ using .TransportWorkflow
 
     @test length(res.masses) == 3
     @test all(isfinite, res.masses)
+    @test isfinite(res.thermo_background.pressure)
+    @test isfinite(res.thermo_background.entropy)
+    @test isfinite(res.thermo_background.energy)
+    @test isfinite(res.thermo_background.rho_mass)
+    @test isnan(res.thermo_background.c_p)
 
     @test isfinite(res.transport.eta)
     @test isfinite(res.transport.sigma)
     @test res.transport.eta >= 0
     @test res.transport.sigma >= 0
+    @test res.transport.lorenz_number isa Float64
+    @test res.transport.lorentz_legacy isa Float64
+    @test res.transport.viscous_conductive_coupling_ratio isa Float64
+    @test isnan(res.transport.prandtl_number)
 
     @testset "post-equilibrium API: solve_transport_from_equilibrium" begin
         eq = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
@@ -242,12 +251,39 @@ using .TransportWorkflow
 
         @test res2.equilibrium.converged isa Bool
         @test all(isfinite, res2.masses)
+        @test isfinite(res2.thermo_background.pressure)
+        @test isfinite(res2.thermo_background.entropy)
+        @test isfinite(res2.thermo_background.energy)
+        @test isfinite(res2.thermo_background.rho_mass)
+        @test isnan(res2.thermo_background.c_p)
         @test isfinite(res2.transport.eta)
         @test isfinite(res2.transport.sigma)
         @test res2.transport.eta >= 0
         @test res2.transport.sigma >= 0
+        @test res2.transport.viscous_conductive_coupling_ratio isa Float64
+        @test isnan(res2.transport.prandtl_number)
 
         @test isapprox(res2_prov.transport.eta, res2.transport.eta; rtol=1e-12, atol=0.0)
         @test isapprox(res2_prov.transport.sigma, res2.transport.sigma; rtol=1e-12, atol=0.0)
+    end
+
+    @testset "optional Pr background passthrough" begin
+        res_pr = TransportWorkflow.solve_gap_and_transport(
+            T,
+            mu;
+            xi=xi,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=30,),
+            transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
+            c_p=1.8,
+        )
+
+        @test isfinite(res_pr.thermo_background.rho_mass)
+        @test isapprox(res_pr.thermo_background.c_p, 1.8; rtol=1e-12, atol=0.0)
+        @test res_pr.transport.prandtl_number isa Float64
     end
 end

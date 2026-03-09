@@ -135,6 +135,9 @@ end
     @test res.bulk_coeffs !== nothing
     @test isfinite(res.bulk_coeffs.v_n_sq)
     @test isfinite(res.bulk_coeffs.dμB_dT_sigma)
+    @test isfinite(res.bulk_coeffs.c_p) || isnan(res.bulk_coeffs.c_p)
     @test all(isfinite, res.bulk_coeffs.masses)
+    @test isfinite(res.thermo_background.rho_mass)
+    @test isfinite(res.thermo_background.c_p) || isnan(res.thermo_background.c_p)
 end
 

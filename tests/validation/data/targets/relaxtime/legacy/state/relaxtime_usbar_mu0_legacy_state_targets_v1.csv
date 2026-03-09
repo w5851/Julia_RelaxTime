@@ -1,0 +1,13 @@
+record_id,T_MeV,muB_MeV,field,fortran_value,cpp_value,consensus_value,rtol,source
+state_usbar_mu0_t210_phi_u,210,0.0,phi_u,-0.333131535168321,-0.333131548907773,-0.333131542038047,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t210_phi_s,210,0.0,phi_s,-1.652693250947937,-1.652693249224903,-1.652693250086420,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t210_Phi,210,0.0,Phi,0.652839794734540,0.652839794929923,0.652839794832231,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t210_Phibar,210,0.0,Phibar,0.652839794734540,0.652839794930264,0.652839794832402,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t210_m_u_MeV,210,0.0,m_u_MeV,67.430293754956139,67.430296296104586,67.430295025530370,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t210_m_s_MeV,210,0.0,m_s_MeV,399.689542119966575,399.689542020143278,399.689542070054927,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_phi_u,250,0.0,phi_u,-0.059535453233912,-0.059535453160091,-0.059535453197002,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_phi_s,250,0.0,phi_s,-1.094733546663268,-1.094733545865126,-1.094733546264197,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_Phi,250,0.0,Phi,0.763445871397977,0.763445871394551,0.763445871396264,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_Phibar,250,0.0,Phibar,0.763445871397977,0.763445871394551,0.763445871396264,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_m_u_MeV,250,0.0,m_u_MeV,15.956168869130746,15.956168855290731,15.956168862210738,0.02,legacy_fortran_cpp_state_consensus_v1
+state_usbar_mu0_t250_m_s_MeV,250,0.0,m_s_MeV,310.964699668315745,310.964699544065809,310.964699606190777,0.02,legacy_fortran_cpp_state_consensus_v1

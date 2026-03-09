@@ -1,0 +1,5 @@
+record_id,muB_MeV,mu_q_MeV,fortran_T_MeV,cpp_T_MeV,max_abs_delta_T_MeV,source
+pnjl_crossover_legacy_muB2_consistency,2.0,0.6666666666666666,200.0,200.1,0.5,legacy_fortran_cpp_crossover_consistency_v1
+pnjl_crossover_legacy_muB105_consistency,105.0,35.0,199.0,199.1,0.5,legacy_fortran_cpp_crossover_consistency_v1
+pnjl_crossover_legacy_muB209_consistency,209.0,69.66666666666667,196.0,196.4,0.5,legacy_fortran_cpp_crossover_consistency_v1
+pnjl_crossover_legacy_muB291_consistency,291.0,97.0,193.0,192.9,0.5,legacy_fortran_cpp_crossover_consistency_v1

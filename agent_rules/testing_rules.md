@@ -51,6 +51,7 @@
 ### Validation（验证测试）
 - Fortran / Mathematica 参考值对照。
 - 使用固定参考数据文件，容差在 `isapprox` 层显式标注。
+- 若某个 digitized literature target 经多份 legacy 实现交叉验证后被判定为 disputed，则保留原始数据文件不改写，在 acceptance target 中禁用该点，并以单独记录 provenance 的 legacy consensus target 替补。
 - 允许更宽松的运行时间。
 
 ### Benchmark（性能基准）

@@ -4,6 +4,7 @@ const REGRESSION_DIR = @__DIR__
 
 const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "njl", "test_njl_gap_fixedpoint_regression.jl"),
+    joinpath(REGRESSION_DIR, "rpnjl", "test_rpnjl_gap_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_scan_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_constraint_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_magnetic_fixedpoint_regression.jl"),
@@ -67,6 +68,10 @@ end
 
         @testset "PNJL" begin
             _include_regression_dir(joinpath(REGRESSION_DIR, "pnjl"))
+        end
+
+        @testset "RPNJL" begin
+            _include_regression_dir(joinpath(REGRESSION_DIR, "rpnjl"))
         end
 
         @testset "RelaxTime" begin

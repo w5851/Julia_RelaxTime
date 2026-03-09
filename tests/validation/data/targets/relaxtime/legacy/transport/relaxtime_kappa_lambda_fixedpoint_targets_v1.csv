@@ -1,0 +1,15 @@
+record_id,T_MeV,muB_MeV,field,expected_value,rtol,source
+kappa_mu0_t210_bb,210.0,0.0,kappa_BB,0.05481230044517893,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu0_t210_qq,210.0,0.0,kappa_QQ,0.11609896464317461,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu0_t210_ss,210.0,0.0,kappa_SS,0.1255907188186366,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu0_t250_bb,250.0,0.0,kappa_BB,0.06610748104594781,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu0_t250_qq,250.0,0.0,kappa_QQ,0.13810311882899515,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu0_t250_ss,250.0,0.0,kappa_SS,0.16299350271524632,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t210_bb,210.0,100.0,kappa_BB,0.044867193922703066,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t210_qq,210.0,100.0,kappa_QQ,0.09479330703129135,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t210_ss,210.0,100.0,kappa_SS,0.12767600686431618,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+lambda_mu100_t210,210.0,100.0,lambda,689.5335524671184,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t250_bb,250.0,100.0,kappa_BB,0.06648106973699648,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t250_qq,250.0,100.0,kappa_QQ,0.1421352398354099,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+kappa_mu100_t250_ss,250.0,100.0,kappa_SS,0.16686615972236324,0.05,julia_transport_kappa_lambda_fixedpoints_v1
+lambda_mu100_t250,250.0,100.0,lambda,1472.5819630990718,0.05,julia_transport_kappa_lambda_fixedpoints_v1

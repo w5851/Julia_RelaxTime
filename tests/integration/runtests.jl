@@ -47,10 +47,12 @@ const INTEGRATION_SMOKE_FILES = [
     # Models contracts
     joinpath(INTEGRATION_DIR, "models", "test_models_phase0_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_models_dispatch_interface_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_models_implicitdiff_flavor_mu_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_rpnjl_model_factory_smoke.jl"),
 
     # PNJL scans
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "pnjl", "test_conserved_charge_susceptibilities_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_solver_random_physical_smoke.jl"),
 
     # Config

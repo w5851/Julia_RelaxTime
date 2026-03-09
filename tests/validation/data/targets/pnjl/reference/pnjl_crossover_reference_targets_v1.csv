@@ -1,0 +1,9 @@
+target_id,observable,xi,mu_MeV,expected_T_MeV,lower_T_MeV,upper_T_MeV,method,variable,source
+pnjl_crossover_chiral_mu0,chiral_crossover,0.0,0.0,200.15676398026315,190.0,210.0,inflection,phi_u,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_deconf_mu0,deconf_crossover,0.0,0.0,175.76120476973682,166.0,186.0,inflection,Phi,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_chiral_mu104,chiral_crossover,0.0,104.00523009859634,191.92588404605263,182.0,202.0,inflection,phi_u,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_deconf_mu104,deconf_crossover,0.0,104.00523009859634,166.70898437499997,157.0,177.0,inflection,Phi,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_chiral_mu208,chiral_crossover,0.0,208.01046019719269,166.02744654605263,156.0,176.0,inflection,phi_u,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_deconf_mu208,deconf_crossover,0.0,208.01046019719269,155.1403166118421,145.0,165.0,inflection,Phi,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_chiral_mu291,chiral_crossover,0.0,291.21464427606975,130.98941200657893,123.0,139.0,inflection,phi_u,data_reference_pnjl_crossover_csv_v1
+pnjl_crossover_deconf_mu291,deconf_crossover,0.0,291.21464427606975,130.98941200657893,123.0,139.0,inflection,Phi,data_reference_pnjl_crossover_csv_v1

@@ -252,11 +252,26 @@ Das 2022 本身聚焦扩散矩阵，没有直接把 $\lambda$ 作为主结果展
 
 ## 8. 派生量
 
-### 8.1 Lorentz 数
+### 8.1 标准 Lorenz 数与 legacy `Lorentz`
+
+当前需要明确区分两种不同口径：
+
+- 标准热电输运文献里的 Lorenz 数通常写作
 
 $$
-\mathrm{Lorentz} = \frac{\lambda}{\sigma/T}
+L = \frac{\lambda}{\sigma T}
 $$
+
+- legacy Fortran `coefficients_tmu.f90` 实际输出的 `Lorentz` 则是
+
+$$
+\mathrm{Lorentz}_{\mathrm{legacy}} = \frac{\lambda}{\sigma/T} = \frac{\lambda T}{\sigma}
+$$
+
+因此，Julia 主线实现应将二者视为两个不同的派生诊断量：
+
+- `lorenz_number = lambda / (sigma * T)`：标准 Lorenz 数
+- `lorentz_legacy = lambda / (sigma / T)`：保留 legacy compare 口径
 
 ### 8.2 剪切粘滞与电导比
 
@@ -264,11 +279,55 @@ $$
 R_{\eta\sigma} = \frac{\eta/s}{\sigma/T}
 $$
 
+这里并不是常见教科书中的标准命名量，而更接近一个“粘滞-导电耦合诊断比值”。Julia 侧当前将其视为 legacy-compatible derived diagnostic。
+
 ### 8.3 Prandtl 数
 
 $$
 \mathrm{Pr} = \frac{\eta\,c_p}{\lambda\,\rho_{\text{mass}}}
 $$
+
+legacy 代码中这两个背景量的口径可以进一步明确为：
+
+$$
+\rho_{\text{mass}} = \sum_{f \in \{u,d,s\}} \left(n_f + n_{\bar f}\right) M_f
+$$
+
+即把夸克与反夸克的数密度分别乘对应有效质量后求和。Fortran `quantity.f90` 中对应的是：
+
+$$
+\rho_{\text{mass}} = \sum_f N_q(f) M_f + \sum_f N_{\bar q}(f) M_f
+$$
+
+对于 `c_p`，legacy `coefficients_tmu.f90` 直接使用的代码级定义是：
+
+$$
+c_p^{\mathrm{legacy}} = T \left( \frac{d s}{d T} - \frac{s}{n_B} \frac{d s}{d \mu_B} \right)
+$$
+
+这里保留 legacy 记号 `c_p`，因为其确实被用于 Prandtl 数的背景量；但当前更稳妥的表述是“legacy transport background coefficient”，而不是在没有进一步文献锚点时直接把它强断言为某个标准教材口径。
+
+Julia 当前已实现：
+
+- `rho_mass_from_densities(...)`：按 legacy 质量密度公式计算 `\rho_{\text{mass}}`
+- `legacy_transport_c_p(...)`：按 legacy 导数组合计算 `c_p`
+
+workflow 侧现已自动给出 `rho_mass`，而 `c_p` 在 `compute_bulk=true` 时可随导数计算一并获得；也允许外部显式传入两者作为背景量。
+
+### 8.3a Julia 公共 API 边界
+
+当前公共 API 边界建议明确如下：
+
+- 稳定公开的 advanced transport API 位于 `Main.TransportCoefficients` / `Main.RelaxTime`：
+	- `kappa_BB`, `kappa_QQ`, `kappa_SS`
+	- `kappa_BQ`, `kappa_BS`, `kappa_QS`
+	- `diffusion_matrix`
+	- `lambda_from_kappa_BB`
+	- `lorenz_number`, `lorentz_legacy`, `viscous_conductive_coupling_ratio`, `prandtl_number`, `bulk_to_shear_viscosity_ratio`
+	- `rho_mass_from_densities`
+- 面向上层统一入口的公开边界位于 workflow：`solve_gap_and_transport(...).transport` 与 `solve_transport_from_equilibrium(...).transport`。
+- 当前不再把 `diffusion_matrix` 与非对角元视为“内部预留但未公开”；它们属于稳定的 advanced public API。
+- 但也不额外升格为一个新的 `Models` 顶层 facade 契约；主推荐入口仍是 workflow 结果或 `Main.TransportCoefficients` 模块本身。
 
 ### 8.4 粘滞比值
 

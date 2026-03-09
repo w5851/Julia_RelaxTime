@@ -4,11 +4,10 @@ if !isdefined(Main, :_compute_relaxtime_literature_transport_point)
     include(joinpath(@__DIR__, "literature_validation_helpers.jl"))
 end
 
-const RELAXTIME_ETA_VALIDATION_DATA_PATH = joinpath(
-    RELAXTIME_LITERATURE_VALIDATION_PROJECT_ROOT,
-    "tests",
-    "validation",
-    "data",
+const RELAXTIME_ETA_VALIDATION_DATA_PATH = validation_targets_path(
+    "relaxtime",
+    "literature",
+    "eta_over_s",
     "relaxtime_eta_over_s_literature_targets_v1.csv",
 )
 

@@ -1,0 +1,3 @@
+record_id,series,process,T_MeV,muB_MeV,sqrt_s_GeV,fortran_sigma_mb,cpp_sigma_mb,consensus_sigma_mb,relative_delta,source,evidence_doc
+sigma_usbar_t210_legacy_consensus_1,usbar_to_usbar_T210_legacy_consensus,usbar_to_usbar,210.0,0.0,0.9507441157289369,2.100096319742,2.098513947264,2.099305133503,-7.537062e-4,legacy_fortran_cpp_consensus_interp_v1,docs/dev/archived/2026-03-08_cpp_usbar_mu0_validation_check.md
+sigma_usbar_t250_legacy_consensus_1,usbar_to_usbar_T250_legacy_consensus,usbar_to_usbar,250.0,0.0,0.6392684531926230,7.737695283376,7.737100411569,7.737397847473,-7.688729e-5,legacy_fortran_cpp_consensus_interp_v1,docs/dev/archived/2026-03-08_cpp_usbar_mu0_validation_check.md

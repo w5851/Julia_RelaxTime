@@ -1,0 +1,7 @@
+record_id,T_MeV,muB_MeV,field,expected_value,rtol,source
+R_etasig_mu5_t50,50.0,5.0,viscous_conductive_coupling_ratio,7.435217096e7,0.5,legacy_transport_related_ratios_fortran_v1
+zeta_eta_mu5_t50,50.0,5.0,bulk_to_shear_viscosity_ratio,7.268227888e-1,0.5,legacy_transport_zeta_fortran_v1
+R_etasig_mu5_t55,55.0,5.0,viscous_conductive_coupling_ratio,1.788830542e7,0.5,legacy_transport_related_ratios_fortran_v1
+zeta_eta_mu5_t55,55.0,5.0,bulk_to_shear_viscosity_ratio,7.119883895e-1,0.5,legacy_transport_zeta_fortran_v1
+R_etasig_mu5_t60,60.0,5.0,viscous_conductive_coupling_ratio,5.368002240e6,0.5,legacy_transport_related_ratios_fortran_v1
+zeta_eta_mu5_t60,60.0,5.0,bulk_to_shear_viscosity_ratio,6.993650195e-1,0.5,legacy_transport_zeta_fortran_v1

@@ -1,0 +1,9 @@
+target_id,observable,xi,mu_MeV,expected_T_MeV,lower_T_MeV,upper_T_MeV,method,variable,source
+pnjl_crossover_legacy_muB2_chiral,chiral_crossover_legacy_cpp,0.0,0.6666666666666666,200.1,198.5,201.5,inflection,phi_u,legacy_cpp_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB105_chiral,chiral_crossover_legacy_cpp,0.0,35.0,199.1,197.5,200.5,inflection,phi_u,legacy_cpp_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB209_chiral,chiral_crossover_legacy_cpp,0.0,69.66666666666667,196.4,194.5,198.0,inflection,phi_u,legacy_cpp_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB291_chiral,chiral_crossover_legacy_cpp,0.0,97.0,192.9,191.0,194.5,inflection,phi_u,legacy_cpp_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB2_chiral_fortran,chiral_crossover_legacy_fortran,0.0,0.6666666666666666,200.0,198.5,201.5,inflection,phi_u,legacy_fortran_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB105_chiral_fortran,chiral_crossover_legacy_fortran,0.0,35.0,199.0,197.5,200.5,inflection,phi_u,legacy_fortran_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB209_chiral_fortran,chiral_crossover_legacy_fortran,0.0,69.66666666666667,196.0,194.5,197.5,inflection,phi_u,legacy_fortran_crossover_tmu_export_muB_to_muq_v1
+pnjl_crossover_legacy_muB291_chiral_fortran,chiral_crossover_legacy_fortran,0.0,97.0,193.0,191.0,194.5,inflection,phi_u,legacy_fortran_crossover_tmu_export_muB_to_muq_v1
