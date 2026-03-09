@@ -134,15 +134,7 @@ end
     throw(ArgumentError("unsupported state dim N=$N"))
 end
 
-@inline function _is_legacy_adapter_model(model)
-    return (isdefined(@__MODULE__, :LegacyPNJLModel) && model isa LegacyPNJLModel) ||
-           (isdefined(@__MODULE__, :LegacyNJLModel) && model isa LegacyNJLModel)
-end
-
 @inline function _omega_worldsafe(model, st, T, μ; p_num::Int, t_num::Int, xi, kwargs...)
-    if _is_legacy_adapter_model(model)
-        return Base.invokelatest(omega, model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-    end
     return omega(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
 end
 

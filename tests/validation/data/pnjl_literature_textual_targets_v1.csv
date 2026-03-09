@@ -1,0 +1,3 @@
+target_id,observable,variable,mu_MeV,expected_MeV,lower_bound_MeV,upper_bound_MeV,source
+gao_thesis_mu0_chiral,crossover_temperature,phi_u,0.0,200.0,185.0,215.0,高雪艳博士论文_零化学势手征特征温度正文值
+gao_thesis_mu0_deconf,crossover_temperature,Phi,0.0,171.0,155.0,190.0,高雪艳博士论文_零化学势退禁闭特征温度正文值

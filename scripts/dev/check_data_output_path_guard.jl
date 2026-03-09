@@ -80,8 +80,8 @@ function target_patch_scripts(root::String, cfg::GuardConfig)
     end
 end
 
-function is_forbidden_output_line(line::String)
-    s = strip(line)
+function is_forbidden_output_line(line::AbstractString)
+    s = String(strip(line))
 
     joinpath_outputs_results = occursin(r"joinpath\([^\n]*\"outputs\"\s*,\s*\"results\"", s)
     if joinpath_outputs_results && !occursin("\"data\"", s)

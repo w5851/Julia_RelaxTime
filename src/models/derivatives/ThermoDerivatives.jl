@@ -46,10 +46,6 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-# Unified thermo facade (legacy vs models)
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 # Unified equilibrium facade (model-kind mapping, solve_gap helper)
 const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
 const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
@@ -73,23 +69,33 @@ export dP_dT, dP_dmu
 """
 @inline get_thermal_nodes(p_num::Int, t_num::Int) = cached_nodes(p_num, t_num)
 
+const _MODEL_CACHE = Dict{Symbol, Any}()
+
+@inline function _get_model(model_kind::Symbol)
+    return get!(_MODEL_CACHE, model_kind) do
+        Main.Models.create_model(model_kind)
+    end
+end
+
 @inline calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi) =
-    ThermoFacade.calculate_thermo_backend(
+    Main.Models.model_thermo(
+        _get_model(:PNJL),
         x_state,
         mu_vec,
         T_fm;
-        model_kind=:PNJL,
-        thermal_nodes=thermal_nodes,
+        p_num=CURRENT_P_NUM[],
+        t_num=CURRENT_T_NUM[],
         xi=xi,
     )
 
 @inline calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi) =
-    ThermoFacade.calculate_rho_backend(
+    Main.Models.model_rho(
+        _get_model(:PNJL),
         x_state,
         mu_vec,
         T_fm;
-        model_kind=:PNJL,
-        thermal_nodes=thermal_nodes,
+        p_num=CURRENT_P_NUM[],
+        t_num=CURRENT_T_NUM[],
         xi=xi,
     )
 
@@ -106,11 +112,10 @@ export dP_dT, dP_dmu
 const _IMPLICIT_GAP_SOLVER_CACHE = Dict{Tuple{Float64, Int, Int, UInt}, Any}()
 
 @inline function _implicit_gap_solver(; model=nothing)
-    ThermoFacade.ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
     isdefined(Main.Models, :create_implicit_gap_solver) || error("Models.create_implicit_gap_solver is not defined")
 
-    m = model === nothing ? ThermoFacade.get_models_model(:PNJL) : model
+    m = model === nothing ? _get_model(:PNJL) : model
     key = (Float64(CURRENT_XI[]), Int(CURRENT_P_NUM[]), Int(CURRENT_T_NUM[]), Base.objectid(m))
     if haskey(_IMPLICIT_GAP_SOLVER_CACHE, key)
         return _IMPLICIT_GAP_SOLVER_CACHE[key]
@@ -134,15 +139,14 @@ end
     t_num::Int,
     model=nothing)
 
-    m = model === nothing ? ThermoFacade.get_models_model(:PNJL) : model
-    return ThermoFacade.calculate_thermo_backend(
+    m = model === nothing ? _get_model(:PNJL) : model
+    return Main.Models.model_thermo(
+        m,
         x_state,
         mu_vec,
         T_fm;
-        model=m,
         p_num=p_num,
         t_num=t_num,
-        thermal_nodes=thermal_nodes,
         xi=xi,
     )
 end
@@ -156,15 +160,14 @@ end
     t_num::Int,
     model=nothing)
 
-    m = model === nothing ? ThermoFacade.get_models_model(:PNJL) : model
-    return ThermoFacade.calculate_rho_backend(
+    m = model === nothing ? _get_model(:PNJL) : model
+    return Main.Models.model_rho(
+        m,
         x_state,
         mu_vec,
         T_fm;
-        model=m,
         p_num=p_num,
         t_num=t_num,
-        thermal_nodes=thermal_nodes,
         xi=xi,
     )
 end
@@ -297,7 +300,7 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
     mu_vec = SVector{3}(θ[2], θ[2], θ[2])
     rho_vec0 = _rho_backend(x_sv, mu_vec, θ[1], nothing, CURRENT_XI[];
         p_num=p_num, t_num=t_num, model=model)
-    rho_norm = sum(rho_vec0) / (3.0 * ThermoFacade.rho0())
+    rho_norm = sum(rho_vec0) / (3.0 * Main.Models.ρ0)
     
     P_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[1], θ[1])
     P_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[1], θ[2])

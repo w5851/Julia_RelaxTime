@@ -185,7 +185,7 @@ function build_physical_parameters(opts::CLIOptions)
     # Solve gap equation first to obtain constituent masses and Polyakov loop variables.
     T_fm = opts.T_MeV / ħc_MeV_fm
     model = Models.create_model(:PNJL)
-    st = Models.solve_gap(model, T_fm, Float64(μ_u); solver_backend=:models, xi=Float64(opts.xi))
+    st = Models.solve_gap(model, T_fm, Float64(μ_u); xi=Float64(opts.xi))
 
     x = Vector{Float64}(Models.state_vector(st))
     ϕ = SVector{3, Float64}(x[1], x[2], x[3])

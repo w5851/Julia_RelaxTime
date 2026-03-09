@@ -20,9 +20,8 @@ const ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
 const get_thermal_nodes = getproperty(ThermoDerivatives, :get_thermal_nodes)
 const set_config = getproperty(ThermoDerivatives, :set_config)
 const IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
-const Thermodynamics = getproperty(PNJL, :Thermodynamics)
-const calculate_thermo = getproperty(Thermodynamics, :calculate_thermo)
-const calculate_rho = getproperty(Thermodynamics, :calculate_rho)
+const calculate_thermo = getproperty(ThermoDerivatives, :calculate_thermo)
+const calculate_rho = getproperty(ThermoDerivatives, :calculate_rho)
 
 using StaticArrays
 using ForwardDiff
@@ -117,32 +116,30 @@ end
     @test isfinite(result.dμB_dT_sigma)
 end
 
-@testset "bulk_viscosity_coefficients legacy vs models" begin
+@testset "bulk_viscosity_coefficients default vs explicit model" begin
     # 选较温和点，避免相变附近对高阶/嵌套 AD 过敏
     T_fm = 0.5
     μ_fm = 1.5
 
-    legacy_model = Main.Models.create_model(:LegacyPNJL)
     models_model = Main.Models.create_model(:PNJL)
 
-    legacy = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, model=legacy_model)
+    default_result = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10)
     models = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, model=models_model)
 
     # 基础有限性
-    @test isfinite(legacy.v_n_sq)
+    @test isfinite(default_result.v_n_sq)
     @test isfinite(models.v_n_sq)
-    @test isfinite(legacy.dμB_dT_sigma)
+    @test isfinite(default_result.dμB_dT_sigma)
     @test isfinite(models.dμB_dT_sigma)
-    @test all(isfinite.(legacy.masses))
+    @test all(isfinite.(default_result.masses))
     @test all(isfinite.(models.masses))
-    @test all(isfinite.(legacy.dM_dT))
+    @test all(isfinite.(default_result.dM_dT))
     @test all(isfinite.(models.dM_dT))
-    @test all(isfinite.(legacy.dM_dμB))
+    @test all(isfinite.(default_result.dM_dμB))
     @test all(isfinite.(models.dM_dμB))
 
-    # 一致性（这些量对数值/AD 嵌套相对敏感，容差放宽）
-    @test isapprox(models.v_n_sq, legacy.v_n_sq; rtol=5e-3, atol=5e-3)
-    @test isapprox(models.dμB_dT_sigma, legacy.dμB_dT_sigma; rtol=5e-3, atol=5e-3)
-    @test isapprox(models.s, legacy.s; rtol=5e-3, atol=1e-6)
-    @test isapprox(models.n_B, legacy.n_B; rtol=5e-3, atol=1e-6)
+    @test isapprox(models.v_n_sq, default_result.v_n_sq; rtol=5e-3, atol=5e-3)
+    @test isapprox(models.dμB_dT_sigma, default_result.dμB_dT_sigma; rtol=5e-3, atol=5e-3)
+    @test isapprox(models.s, default_result.s; rtol=5e-3, atol=1e-6)
+    @test isapprox(models.n_B, default_result.n_B; rtol=5e-3, atol=1e-6)
 end

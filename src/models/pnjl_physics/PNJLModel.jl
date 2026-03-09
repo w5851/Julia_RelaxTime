@@ -147,38 +147,16 @@ end
     solve_gap(::PNJLModel, T, mu_vec; kwargs...) -> MeanFieldState
 
 统一通过 Models 求解链路完成平衡态求解。
-
-!!! compat "v0.next"
-    `solver_backend` 和 `fallback_legacy_on_failure` 关键字参数已弃用，
-    将在下一个主版本中移除。现在始终使用 models 路径。
 """
 function solve_gap(
     model::PNJLModel,
     T_fm,
     mu_vec;
-    solver_backend::Symbol=:models,
-    fallback_legacy_on_failure::Bool=false,
     xi::Real=0.0,
     p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
     t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
     kwargs...
 )
-    if solver_backend !== :models
-        Base.depwarn(
-            "`solver_backend=:$solver_backend` is deprecated; " *
-            "the :models backend is now the only path. " *
-            "This parameter will be removed in a future release.",
-            :solve_gap,
-        )
-    end
-    if fallback_legacy_on_failure
-        Base.depwarn(
-            "`fallback_legacy_on_failure=true` is deprecated and ignored. " *
-            "This parameter will be removed in a future release.",
-            :solve_gap,
-        )
-    end
-
     return invoke(
         solve_gap,
         Tuple{AbstractPNJLModel, Any, Any},

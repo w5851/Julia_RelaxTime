@@ -23,12 +23,16 @@ if !isdefined(Main, :IncludeOnce)
 end
 const IncludeOnce = Main.IncludeOnce
 
-# Unified thermo facade (legacy vs models): reuse Main.* to avoid module duplication.
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 export pnjl_model_kind
 export solve_equilibrium_backend
+
+const _MODEL_CACHE = Dict{Symbol, Any}()
+
+@inline function _get_model(model_kind::Symbol)
+    return get!(_MODEL_CACHE, model_kind) do
+        Main.Models.create_model(model_kind)
+    end
+end
 
 @inline function pnjl_model_kind(thermo_backend::Symbol)::Symbol
     return :PNJL
@@ -65,13 +69,12 @@ function solve_equilibrium_backend(
 )
     kind = :PNJL
 
-    ThermoFacade.ensure_models_loaded()
     isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
     isdefined(Main.Models, :solve_gap) || error("Models.solve_gap is not defined")
     isdefined(Main.Models, :state_vector) || error("Models.state_vector is not defined")
     isdefined(Main.Models, :normalize_mu_vec) || error("Models.normalize_mu_vec is not defined")
 
-    m = model === nothing ? ThermoFacade.get_models_model(kind) : model
+    m = model === nothing ? _get_model(kind) : model
 
     effective_solver_backend = if solver_backend === :auto
         :models
@@ -80,7 +83,7 @@ function solve_equilibrium_backend(
     end
 
     st = if effective_solver_backend === :legacy
-        # For LegacyPNJLModel / PNJLModel(solver_backend=:legacy), allow legacy solver kwargs.
+        # Legacy solver backend still accepts legacy-style solver kwargs.
         Main.Models.solve_gap(m, T_fm, mu_fm;
             xi=xi,
             p_num=p_num,
@@ -107,11 +110,7 @@ function solve_equilibrium_backend(
     x_state = Main.Models.state_vector(st)
     mu_vec = Main.Models.normalize_mu_vec(mu_fm)
 
-    masses = ThermoFacade.calculate_mass_vec_backend(
-        x_state;
-        model=m,
-        model_kind=kind,
-    )
+    masses = Main.Models.calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
 
     return (
         converged=true,

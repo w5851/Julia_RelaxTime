@@ -30,7 +30,7 @@ using .TransportWorkflow
     )
 
     @testset "provider injection smoke" begin
-        m = TransportWorkflow.ThermoFacade.get_models_model(:PNJL)
+        m = Main.Models.create_model(:PNJL)
         prov = Main.Models.transport_provider(m)
         prov_model = Main.Models.transport_provider(m)
 
@@ -226,7 +226,7 @@ using .TransportWorkflow
             transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
         )
 
-        prov = Main.Models.transport_provider(TransportWorkflow.ThermoFacade.get_models_model(:PNJL))
+        prov = Main.Models.transport_provider(Main.Models.create_model(:PNJL))
         res2_prov = TransportWorkflow.solve_transport_from_equilibrium(
             eq,
             T,

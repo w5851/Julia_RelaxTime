@@ -25,13 +25,13 @@ if !isdefined(Main, :RelaxTime)
 end
 
 # Unified equilibrium facade (solve_gap + state_vector + masses)
-const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
 IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
 const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "WorkflowParamAdapters.jl"))
 const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)

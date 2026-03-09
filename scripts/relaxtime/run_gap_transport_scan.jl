@@ -20,6 +20,8 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Models.pnjl_module()
 include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
@@ -241,6 +243,14 @@ function ensure_parent_dir(path::AbstractString)
     isdir(dir) || mkpath(dir)
 end
 
+function current_git_commit()
+    try
+        return readchomp(`git -C $(PROJECT_ROOT) rev-parse HEAD`)
+    catch
+        return "unknown"
+    end
+end
+
 function read_existing_keys(path::AbstractString)
     return ScanCSV.read_existing_keys(path, ["T_MeV", "muB_MeV", "xi"])
 end
@@ -388,6 +398,11 @@ function run_scan(opts::ScanOptions)
                 "schema" => "scan_csv_v1",
                 "title" => "gap_transport_scan",
                 "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
+                "git_commit" => current_git_commit(),
+                "provenance.entrypoint" => "workflow",
+                "provenance.equilibrium_backend" => "TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(:models)",
+                "provenance.tau_path" => "TransportWorkflow.solve_gap_and_transport",
+                "provenance.integration_mode" => string(opts.integration_mode),
                 "sigma_grid_n" => string(opts.sigma_grid_n),
                 "integration_mode" => string(opts.integration_mode),
                 "gc_every_n" => string(opts.gc_every_n),
@@ -558,13 +573,14 @@ function run_scan(opts::ScanOptions)
                     tauinv = res.tau_inv
                     tr = res.transport
 
-                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = TransportWorkflow.ThermoFacade.calculate_thermo_backend(
+                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Main.Models.calculate_thermo(
                         eq.x_state,
                         eq.mu_vec,
-                        T_fm;
+                        T_fm,
+                        nothing,
+                        xi;
                         p_num=opts.p_num,
                         t_num=opts.t_num,
-                        xi=xi,
                     )
 
                     # 重建重子数密度（旧版 eq.rho/eq.rho_norm 已移除）
@@ -572,13 +588,14 @@ function run_scan(opts::ScanOptions)
                     rho_baryon = rho_quark_net / 3.0
                     rho_norm = rho_baryon / ρ0_inv_fm3
 
-                    omega_fm4inv = TransportWorkflow.ThermoFacade.calculate_omega_backend(
+                    omega_fm4inv = Main.Models.calculate_omega(
                         eq.x_state,
                         eq.mu_vec,
-                        T_fm;
+                        T_fm,
+                        nothing,
+                        xi;
                         p_num=opts.p_num,
                         t_num=opts.t_num,
-                        xi=xi,
                     )
                     omega_MeV_fm3 = omega_fm4inv * ħc_MeV_fm
                     P_MeV_fm3 = P_fm4inv * ħc_MeV_fm

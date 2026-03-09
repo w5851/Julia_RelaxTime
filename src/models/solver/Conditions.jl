@@ -37,10 +37,8 @@ IncludeOnce.include_once!(Main, :Constants_PNJL, _CONSTANTS_PATH)
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
+import Main.Models: create_model, model_pressure, model_rho, model_thermo, calculate_mass_vec
 
 export gap_conditions, build_conditions, build_residual!
 export GapParams
@@ -50,6 +48,20 @@ export GapParams
 @inline _model_kind_symbol(::PNJLMagneticModel) = :PNJL
 @inline _model_kind_symbol(::RPNJLModel) = :RPNJL
 @inline _model_kind_symbol(::AbstractQCDModel) = :PNJL
+
+const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
+
+@inline function _get_model(model_kind::Symbol)
+    return get!(_MODEL_CACHE, model_kind) do
+        if model_kind === :PNJL
+            return create_model(:PNJL)
+        elseif model_kind === :RPNJL
+            return create_model(:RPNJL)
+        else
+            error("Unsupported model kind in Conditions: $(model_kind)")
+        end
+    end
+end
 
 # ============================================================================
 # 参数结构
@@ -87,29 +99,32 @@ end
 end
 
 @inline function _rho_vec(x_state, mu_vec, T_fm, params::GapParams)
-    return ThermoFacade.calculate_rho_backend(
+    return model_rho(
+        _get_model(params.model_kind),
         x_state,
         mu_vec,
         T_fm;
-        model_kind=params.model_kind,
         p_num=params.p_num,
         t_num=params.t_num,
-        thermal_nodes=params.thermal_nodes,
         xi=params.xi,
     )
 end
 
 @inline function _thermo_tuple(x_state, mu_vec, T_fm, params::GapParams)
-    return ThermoFacade.calculate_thermo_backend(
+    return model_thermo(
+        _get_model(params.model_kind),
         x_state,
         mu_vec,
         T_fm;
-        model_kind=params.model_kind,
         p_num=params.p_num,
         t_num=params.t_num,
-        thermal_nodes=params.thermal_nodes,
         xi=params.xi,
     )
+end
+
+@inline function _mass_vec(x_state, params::GapParams)
+    phi = SVector{3}(x_state[1], x_state[2], x_state[3])
+    return calculate_mass_vec(_get_model(params.model_kind), phi)
 end
 
 @inline function _safe_density_ratio(num, den; eps::Float64=1e-12)
@@ -138,17 +153,17 @@ end
 - SVector{5}: 能隙方程残差（平衡态时为零）
 """
 function gap_conditions(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, params::GapParams) where {TF, TM}
+    model = _get_model(params.model_kind)
     pressure_fn = y -> begin
         eltp = typeof(y[1])
         y_s = SVector{5, eltp}(Tuple(y))
-        ThermoFacade.calculate_pressure_backend(
+        model_pressure(
+            model,
             y_s,
             mu_vec,
             params.T_fm;
-            model_kind=params.model_kind,
             p_num=params.p_num,
             t_num=params.t_num,
-            thermal_nodes=params.thermal_nodes,
             xi=params.xi,
         )
     end

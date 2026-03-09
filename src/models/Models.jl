@@ -24,8 +24,6 @@ export NJL2Model
 export PNJLModel
 export PNJLMagneticModel
 export RPNJLModel
-export LegacyPNJLModel
-export LegacyNJLModel
 export create_model
 export omega, omega_components, grand_potential
 export model_pressure, model_rho, model_thermo
@@ -76,7 +74,6 @@ export run_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, PromotionResult, PhasePipelineResult
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
-export Thermodynamics
 export calculate_U, calculate_U_derivative_T
 export Constants_PNJL
 export calculate_omega, calculate_pressure, calculate_rho, calculate_thermo
@@ -166,7 +163,6 @@ end
 include(joinpath(@__DIR__, "entrypoints.jl"))
 
 const Integrals = PNJLCore.PNJLIntegrals
-const Thermodynamics = Main.ThermoFacade
 const Constants_PNJL = Main.Constants_PNJL
 const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
@@ -240,15 +236,25 @@ end
 	return (calculate_U(T_fm + δT, Φ, Φbar) - calculate_U(T_fm - δT, Φ, Φbar)) / (2δT)
 end
 
-# NOTE: use forwarding functions instead of const aliases to break the circular
-# load-time dependency  ThermoFacade → ModelThermodynamics → Models.jl.
-# At the point Models.jl is evaluated, ThermoFacade has not finished defining
-# its functions yet, so `Thermodynamics.calculate_omega` would be UndefVarError.
-# Forwarding functions defer the lookup to call time, which is always safe.
-@inline calculate_omega(args...; kwargs...)   = Thermodynamics.calculate_omega(args...; kwargs...)
-@inline calculate_pressure(args...; kwargs...) = Thermodynamics.calculate_pressure(args...; kwargs...)
-@inline calculate_rho(args...; kwargs...)      = Thermodynamics.calculate_rho(args...; kwargs...)
-@inline calculate_thermo(args...; kwargs...)   = Thermodynamics.calculate_thermo(args...; kwargs...)
+@inline function calculate_omega(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
+	model = create_model(:PNJL)
+	return omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+end
+
+@inline function calculate_pressure(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
+	model = create_model(:PNJL)
+	return model_pressure(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+end
+
+@inline function calculate_rho(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
+	model = create_model(:PNJL)
+	return model_rho(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+end
+
+@inline function calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes=nothing, xi=0.0; p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT, t_num::Int=PNJLCore.DEFAULT_THETA_COUNT)
+	model = create_model(:PNJL)
+	return model_thermo(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+end
 
 if !isdefined(Main, :PNJL)
 	@eval Main const PNJL = $(@__MODULE__)

@@ -5,7 +5,7 @@
 约定：单位均为 fm⁻¹。
 
 注意：这是“最小 API 抽取”切片；实现目前与仓库既有公式保持一致，
-用于让 `Models.transport_provider(:models)` 不再依赖根目录的 legacy 分布模块命名。
+用于让 `Models.transport_provider(model)` 不再依赖根目录的 legacy 分布模块命名。
 """
 
 @inline function _clamp_exp(x)

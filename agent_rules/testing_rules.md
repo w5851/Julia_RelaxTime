@@ -4,7 +4,7 @@
 
 本文件用于统一项目内测试的放置规则、命名规则与入口策略，目标是：
 - 默认测试入口"稳定、确定、快速"（CI/本地都不折腾）。
-- 四层分类清晰：Unit / Integration / Validation / Benchmark。
+- 五层分类清晰：Unit / Integration / Regression / Validation / Benchmark。
 - 非测试制品（分析脚本、性能探针）与测试严格分离。
 
 ---
@@ -15,8 +15,9 @@
 |------|------|------|-------|
 | Unit | `tests/unit/` | 确定性、快速、无外部依赖的单元测试 | smoke / full |
 | Numerics | `tests/unit/numerics/` | 核心数值算法测试（Gauss-Legendre、Cauchy PV 等） | smoke |
-| Integration | `tests/integration/`（待建） | 跨模块端到端正确性（待 P1.3 完成后迁入） | nightly |
-| Validation | `tests/validation/`（待建） | Fortran/Mathematica 基线对照 | nightly |
+| Integration | `tests/integration/` | 跨模块端到端正确性 | smoke / nightly |
+| Regression | `tests/regression/` | 内部 baseline 数值回归，对比仓库内 CSV 基线 | smoke / full |
+| Validation | `tests/validation/` | 外部参考值验证（Fortran / Mathematica / 文献） | nightly / milestone |
 | Benchmark | `benchmark/` | PkgBenchmark 性能基准，独立 `Project.toml` | on-demand |
 | 分析脚本 | `scripts/analysis/` | 一次性分析/诊断/扫描脚本（非测试入口） | — |
 | 性能脚本 | `scripts/perf/` | Profile/timing 探针脚本（非测试入口） | — |
@@ -28,7 +29,7 @@
 - ~~`tests/perf/`~~ → benchmark 文件迁至 `benchmark/`，profile 脚本迁至 `scripts/perf/`（2026-03-04）
 - ~~`tests/unit/integration/`~~ → 已重命名为 `tests/unit/numerics/`（2026-03-04）
 
-## 四层分类标准
+## 五层分类标准
 
 ### Unit（单元测试）
 准入条件——必须全部满足：
@@ -40,7 +41,12 @@
 ### Integration（集成测试）
 - 跨模块端到端正确性验证：gap → densities → transport 链路。
 - 可以较慢（单文件 < 30s），但仍须确定性。
-- 在 P1.3（relaxtime 模块化）完成后从 `tests/unit/` 中分离。
+
+### Regression（回归测试）
+- 使用仓库内固定 baseline CSV，验证代码变更不会引入静默数值漂移。
+- 入口统一为 `tests/regression/runtests.jl`。
+- smoke 运行小规模固定点；full 运行更大覆盖面或 nightly 基线。
+- 导出脚本保留在 `scripts/dev/`，但门禁逻辑必须落到 `@testset`。
 
 ### Validation（验证测试）
 - Fortran / Mathematica 参考值对照。
@@ -86,6 +92,15 @@
 - `UNIT_INCLUDE_WIP=1`：允许 include 标记为 WIP 的测试。
 - `UNIT_FILES=path1,path2,...`：仅运行指定文件。
 
+## 回归测试入口策略
+
+入口文件：`tests/regression/runtests.jl`
+
+环境变量（以入口实现为准）：
+- `REGRESSION_PROFILE=smoke|full`
+- `REGRESSION_FILES=path1,path2,...`：仅运行指定回归文件
+- `REGRESSION_MAGNETIC_SCOPE=smoke|nightly`：切换 PNJL magnetic baseline 口径
+
 ## PNJL 求解器相关约定
 
 - 随机采样测试必须**确定性**（固定 RNG seed），默认样本数保守。
@@ -95,13 +110,19 @@
 
 > 注：`solver_backend` 参数已弃用（P3.5, 2026-03-04），现统一走 models 路径。
 
-- 基线使用固定点集（固定 `T/μ/xi`、固定积分节点与配置）。
+- 基线使用固定点集（固定 `T/μ/xi`、固定积分节点与配置），统一存放于 `tests/baselines/<domain>/`。
 - 容差在测试断言层（`isapprox(...; rtol=..., atol=...)`），不通过被测函数 keyword 注入。
 - Transport smoke 口径：
 	- 固定点：`(T,μ)=(0.75,0.00),(0.90,0.00),(1.05,0.00),(0.90,0.15)`
 	- 比较量：`η/σ/ζ`
 	- 容差：`rtol=8e-2`, `atol=1e-6`
 - 容差调整须在 `docs/dev/active` 记录变更原因与对比。
+
+## Regression 与 Validation 的边界
+
+- `tests/regression/`：当前代码 vs 仓库内部 baseline。
+- `tests/validation/`：当前代码 vs 外部参考实现或文献数据。
+- 不再将内部 baseline 回归继续堆入 `tests/validation/`。
 
 ## smoke → full 迁移触发条件
 

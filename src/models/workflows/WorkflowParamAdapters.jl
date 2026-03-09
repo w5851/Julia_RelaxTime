@@ -12,9 +12,6 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
 export normalize_quark_params, normalize_thermo_params, as_legacy_inputs
 
-const _QUARK_NAMEDTUPLE_DEPWARN_EMITTED = Ref(false)
-const _THERMO_NAMEDTUPLE_DEPWARN_EMITTED = Ref(false)
-
 @inline function _ensure_real_field(scope::AbstractString, name::Symbol, value)
     value isa Real || throw(ArgumentError("$(scope).$(name) must be Real, got $(typeof(value))"))
     isfinite(Float64(value)) || throw(ArgumentError("$(scope).$(name) must be finite, got $(value)"))
@@ -64,30 +61,20 @@ end
     )
 end
 
+@inline function normalize_quark_params(q::QuarkParams)
+    return _normalize_quark_namedtuple(as_namedtuple(q))
+end
+
 @inline function normalize_quark_params(q)
-    if q isa QuarkParams
-        return _normalize_quark_namedtuple(as_namedtuple(q))
-    elseif q isa NamedTuple
-        if !_QUARK_NAMEDTUPLE_DEPWARN_EMITTED[]
-            Base.depwarn("Passing NamedTuple to quark_params is deprecated; use QuarkParams", :normalize_quark_params; force=true)
-            _QUARK_NAMEDTUPLE_DEPWARN_EMITTED[] = true
-        end
-        return _normalize_quark_namedtuple(q)
-    end
-    throw(ArgumentError("quark_params must be QuarkParams or NamedTuple, got $(typeof(q))"))
+    throw(ArgumentError("quark_params must be QuarkParams, got $(typeof(q))"))
+end
+
+@inline function normalize_thermo_params(t::ThermoParams)
+    return _normalize_thermo_namedtuple(as_namedtuple(t))
 end
 
 @inline function normalize_thermo_params(t)
-    if t isa ThermoParams
-        return _normalize_thermo_namedtuple(as_namedtuple(t))
-    elseif t isa NamedTuple
-        if !_THERMO_NAMEDTUPLE_DEPWARN_EMITTED[]
-            Base.depwarn("Passing NamedTuple to thermo_params is deprecated; use ThermoParams", :normalize_thermo_params; force=true)
-            _THERMO_NAMEDTUPLE_DEPWARN_EMITTED[] = true
-        end
-        return _normalize_thermo_namedtuple(t)
-    end
-    throw(ArgumentError("thermo_params must be ThermoParams or NamedTuple, got $(typeof(t))"))
+    throw(ArgumentError("thermo_params must be ThermoParams, got $(typeof(t))"))
 end
 
 @inline as_legacy_inputs(q, t) = (quark_params=normalize_quark_params(q), thermo_params=normalize_thermo_params(t))

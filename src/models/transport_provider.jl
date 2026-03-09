@@ -93,21 +93,6 @@ end
     return _mu_from_quark_params(species, quark_params)
 end
 
-const _DEFAULT_TRANSPORT_PROVIDER = (
-    energy_from_p=energy_from_p,
-    energy_from_p_aniso=energy_from_p_aniso,
-    quark_distribution=pnjl_quark_distribution,
-    antiquark_distribution=pnjl_antiquark_distribution,
-    quark_distribution_aniso=pnjl_quark_distribution_aniso,
-    antiquark_distribution_aniso=pnjl_antiquark_distribution_aniso,
-    prefer_energy_aniso=true,
-)
-
-"""transport_provider(thermo_backend) -> provider
-
-当前最小实现：legacy/models 都返回同一套 PNJL 分布/色散实现（仅作为解耦占位）。
-后续可按 backend/model_kind 分流到真正的 models 侧实现。
-"""
 @inline function transport_provider(model::AbstractQCDModel)
     if model isa PNJLModel
         ctx0 = (backend=:models, impl=:models_pnjl_distributions, model=model)
@@ -128,28 +113,6 @@ const _DEFAULT_TRANSPORT_PROVIDER = (
         )
     end
     throw(ArgumentError("transport_provider(model) is not implemented for model type $(typeof(model))"))
-end
-
-@inline function transport_provider(thermo_backend::Symbol)
-    if thermo_backend === :legacy || thermo_backend === :models
-        ctx0 = (backend=thermo_backend, impl=:models_pnjl_distributions)
-        mass_for_species = (species, quark_params, thermo_params) -> _mass_from_ctx_or_params(ctx0, species, quark_params, thermo_params)
-        mu_for_species = (species, quark_params, thermo_params) -> _mu_from_ctx_or_params(ctx0, species, quark_params, thermo_params)
-
-        return TransportProvider(
-            _DEFAULT_TRANSPORT_PROVIDER.energy_from_p,
-            _DEFAULT_TRANSPORT_PROVIDER.energy_from_p_aniso,
-            _DEFAULT_TRANSPORT_PROVIDER.quark_distribution,
-            _DEFAULT_TRANSPORT_PROVIDER.antiquark_distribution,
-            _DEFAULT_TRANSPORT_PROVIDER.quark_distribution_aniso,
-            _DEFAULT_TRANSPORT_PROVIDER.antiquark_distribution_aniso,
-            _DEFAULT_TRANSPORT_PROVIDER.prefer_energy_aniso,
-            mass_for_species,
-            mu_for_species,
-            ctx0,
-        )
-    end
-    throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :legacy or :models)"))
 end
 
 """prepare_transport_provider(provider, equilibrium; quark_params, thermo_params, masses=nothing)

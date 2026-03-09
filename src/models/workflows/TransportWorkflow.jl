@@ -71,18 +71,14 @@ function reset_transport_workflow_config_cache!()
     return nothing
 end
 
-# Unified thermo facade (legacy vs models): reuse Main.* to avoid module duplication.
-const _THERMO_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "ThermoFacade.jl"))
-const ThermoFacade = IncludeOnce.include_once!(Main, :ThermoFacade, _THERMO_FACADE_PATH)
-
 # Unified equilibrium facade (solve_gap + state_vector + masses): reuse Main.* to avoid module duplication.
-const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "core", "EquilibriumFacade.jl"))
+const _EQUILIBRIUM_FACADE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "core", "EquilibriumFacade.jl"))
 const EquilibriumFacade = IncludeOnce.include_once!(Main, :EquilibriumFacade, _EQUILIBRIUM_FACADE_PATH)
 
 # Shared parameter structs (QuarkParams/ThermoParams)
 const _PARAMETER_TYPES_PATH = normpath(joinpath(@__DIR__, "..", "..", "types", "ParameterTypes.jl"))
 IncludeOnce.include_once!(Main, :ParameterTypes, _PARAMETER_TYPES_PATH)
-using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
+using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "..", "..", "models", "workflows", "WorkflowParamAdapters.jl"))
 const WorkflowParamAdapters = IncludeOnce.include_once!(Main, :WorkflowParamAdapters, _WORKFLOW_PARAM_ADAPTERS_PATH)
@@ -103,6 +99,14 @@ using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
 
 const PNJL = Main.Models
+
+const _MODEL_CACHE = Dict{Symbol, Any}()
+
+@inline function _get_model(model_kind::Symbol)
+    return get!(_MODEL_CACHE, model_kind) do
+        Main.Models.create_model(model_kind)
+    end
+end
 
 export solve_gap_and_transport, build_equilibrium_params
 export TransportIntegrationConfig
@@ -280,7 +284,7 @@ end
 
 @inline function _default_transport_provider_for_backend()
     if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
-        m = ThermoFacade.get_models_model(:PNJL)
+        m = _get_model(:PNJL)
         try
             return Main.Models.transport_provider(m)
         catch
@@ -304,13 +308,12 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
 end
 
 @inline function _densities_from_equilibrium(x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
-    nd = ThermoFacade.calculate_number_densities_backend(
+    nd = Main.Models.number_densities(
+        _get_model(:PNJL),
         x_state,
+        T_fm,
         mu_vec,
-        T_fm;
-        model_kind=:PNJL,
-        p_num=p_num,
-        t_num=t_num,
+        ;
         thermal_nodes=thermal_nodes,
         xi=xi,
     )
