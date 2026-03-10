@@ -1,0 +1,72 @@
+# Magnetic 热力学接口
+
+本页说明 magnetic 主题中真正面向业务计算的热力学主接口。实现位于 [src/models/pnjl_physics/core/MagneticThermodynamics.jl](../../../../src/models/pnjl_physics/core/MagneticThermodynamics.jl#L1)。
+
+## 主要导出
+
+- `coupling_GB`
+- `calculate_magnetic_omega_components`
+- `calculate_magnetic_omega`
+- `calculate_magnetic_pressure`
+- `calculate_magnetic_rho`
+- `calculate_magnetic_number_densities`
+- `magnetic_nmax_convergence_report`
+
+## `coupling_GB`
+
+计算 IMC 耦合 `G(B)`。它主要服务于热力学组件计算，而不是独立业务工作流。
+
+## `calculate_magnetic_omega_components`
+
+返回 magnetic 主题里最完整的热力学拆分结果，包括：
+
+- `chi`
+- `poly`
+- `vac`
+- `therm`
+- `masses`
+- `omega`
+- `n_max`
+- `G_B`
+
+这是理解磁场下 `omega` 组装边界的核心入口。
+
+## `calculate_magnetic_omega` / `calculate_magnetic_pressure`
+
+这两个是最常见的业务层接口：
+
+- `calculate_magnetic_omega`
+- `calculate_magnetic_pressure`
+
+若你只需要最终热力学量，优先使用它们，而不是直接调用 Landau 低层函数。
+
+## `calculate_magnetic_rho`
+
+通过数值导数路径计算 flavor 相关密度。它更偏进阶入口，使用时应注意步长与数值敏感区的影响。
+
+## `calculate_magnetic_number_densities`
+
+返回：
+
+- `quark`
+- `baryon`
+
+适合固定点、扫描脚本或回归基线中直接消费。
+
+## `magnetic_nmax_convergence_report`
+
+这是 magnetic 主题必须显式强调的收敛治理入口。它比较 `n_base` 与 `n_base + delta_n` 下的 `omega` 差异，并给出：
+
+- `converged`
+- `rtol`
+- `rel_diff`
+- `n_base`
+- `n_probe`
+- `omega_base`
+- `omega_probe`
+
+建议在以下场景优先调用：
+
+- 新参数区首次跑点
+- 调整 `eB_fm2`、`p_num` 或 `pz_max` 后
+- 更新实现后做 baseline 或 regression 检查前

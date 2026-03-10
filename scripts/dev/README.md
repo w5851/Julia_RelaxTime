@@ -21,6 +21,221 @@ julia --project=. scripts/dev/analyze_deps.jl
 julia --project=. scripts/dev/check_docs_consistency.jl
 ```
 
+导出 API 全集索引生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--output docs/api/generated/models/ModelsExportIndex.md \
+	--title "Models Export API Index"
+```
+
+相图主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--module-file src/models/entrypoints.jl \
+	--include-symbol run_phase_pipeline \
+	--include-symbol find_cep \
+	--include-symbol build_phase_artifacts \
+	--include-symbol resolve_phase_output_target \
+	--include-symbol promote_phase_artifacts \
+	--include-symbol PhasePipelineResult \
+	--include-symbol CEPResult \
+	--include-symbol PromotionResult \
+	--output docs/api/models/phase/generated/Exports.md \
+	--title "Phase Export API Index"
+```
+
+工作流主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--module-file src/models/entrypoints.jl \
+	--include-symbol solve_gap_and_transport \
+	--include-symbol solve_transport_from_equilibrium \
+	--include-symbol solve_gap_and_meson_point \
+	--include-symbol transport_workflow_module \
+	--include-symbol meson_workflow_module \
+	--include-symbol workflow_param_adapters_module \
+	--include-symbol pnjl_module \
+	--output docs/api/models/workflows/generated/Exports.md \
+	--title "Workflow Export API Index"
+```
+
+扫描主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/entrypoints.jl \
+	--include-symbol run_tmu_scan \
+	--include-symbol run_trho_scan \
+	--include-symbol build_default_rho_grid \
+	--output docs/api/models/scans/generated/Exports.md \
+	--title "Scan Export API Index"
+```
+
+模型变体 magnetic 主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--include-symbol PNJLMagneticModel \
+	--include-symbol alpha_n \
+	--include-symbol energy_landau \
+	--include-symbol smooth_cutoff \
+	--include-symbol resolve_nmax_from_cutoff \
+	--include-symbol omega0_flavor_landau \
+	--include-symbol omegat_flavor_landau \
+	--include-symbol density_flavor_landau \
+	--include-symbol MagneticIMCParams \
+	--include-symbol default_imc_params \
+	--include-symbol coupling_GB \
+	--include-symbol MagneticConfig \
+	--include-symbol default_magnetic_config \
+	--include-symbol calculate_magnetic_omega_components \
+	--include-symbol calculate_magnetic_omega \
+	--include-symbol calculate_magnetic_pressure \
+	--include-symbol calculate_magnetic_rho \
+	--include-symbol calculate_magnetic_number_densities \
+	--include-symbol magnetic_nmax_convergence_report \
+	--output docs/api/models/variants/magnetic/generated/Exports.md \
+	--title "Models Magnetic Variant Export API Index"
+```
+
+衍生量 susceptibility 主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--include-symbol conserved_charge_susceptibility \
+	--include-symbol chi_BQS \
+	--include-symbol chi_B \
+	--include-symbol chi1_B \
+	--include-symbol chi2_B \
+	--include-symbol chi3_B \
+	--include-symbol chi4_B \
+	--include-symbol chi_Q \
+	--include-symbol chi1_Q \
+	--include-symbol chi2_Q \
+	--include-symbol chi3_Q \
+	--include-symbol chi4_Q \
+	--include-symbol chi_S \
+	--include-symbol chi1_S \
+	--include-symbol chi2_S \
+	--include-symbol chi3_S \
+	--include-symbol chi4_S \
+	--include-symbol chi11_BQ \
+	--include-symbol chi11_BS \
+	--include-symbol chi11_QS \
+	--include-symbol cumulant_B \
+	--include-symbol cumulant_BQS \
+	--include-symbol baryon_Ssigma \
+	--include-symbol baryon_kappa_sigma2 \
+	--output docs/api/models/derived/susceptibility/generated/Exports.md \
+	--title "Models Susceptibility Export API Index"
+```
+
+衍生量 derivatives 主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--include-symbol mass_derivatives \
+	--include-symbol thermo_derivatives \
+	--include-symbol bulk_derivative_coeffs \
+	--include-symbol dP_dT \
+	--include-symbol dP_dmu \
+	--include-symbol bulk_viscosity_coefficients \
+	--include-symbol compute_B_bracket \
+	--include-symbol legacy_transport_c_p \
+	--output docs/api/models/derived/derivatives/generated/Exports.md \
+	--title "Models Derivatives Export API Index"
+```
+
+relaxtime transport 主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--module-file src/relaxtime/TransportCoefficients.jl \
+	--module-file src/relaxtime/RelaxationTime.jl \
+	--module-file src/relaxtime/AverageScatteringRate.jl \
+	--include-symbol transport_provider \
+	--include-symbol TransportProvider \
+	--include-symbol prepare_transport_provider \
+	--include-symbol default_transport_provider \
+	--include-symbol TransportIntegrationConfig \
+	--include-symbol TransportRequest \
+	--include-symbol shear_viscosity \
+	--include-symbol electric_conductivity \
+	--include-symbol bulk_viscosity \
+	--include-symbol bulk_viscosity_isentropic \
+	--include-symbol transport_coefficients \
+	--include-symbol relaxation_times \
+	--include-symbol compute_average_rates \
+	--include-symbol REQUIRED_PROCESSES \
+	--include-symbol average_scattering_rate \
+	--include-symbol CrossSectionCache \
+	--include-symbol build_w0cdf_pchip_cache \
+	--output docs/api/relaxtime/transport/generated/Exports.md \
+	--title "relaxtime Transport Export API Index"
+```
+
+核心求解与约束主题导出全集生成：
+
+```powershell
+julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/Models.jl \
+	--include-symbol create_model \
+	--include-symbol MeanFieldState \
+	--include-symbol meanfield_state \
+	--include-symbol state_vector \
+	--include-symbol normalize_mu_vec \
+	--include-symbol solve_gap \
+	--include-symbol solve \
+	--include-symbol solve_multi \
+	--include-symbol ConstraintModes \
+	--include-symbol GapParams \
+	--include-symbol build_conditions \
+	--include-symbol build_residual! \
+	--include-symbol gap_state_dim \
+	--include-symbol gap_residual \
+	--include-symbol SeedStrategy \
+	--include-symbol DefaultSeed \
+	--include-symbol MultiSeed \
+	--include-symbol ContinuitySeed \
+	--include-symbol HybridContinuitySeed \
+	--include-symbol PhaseAwareSeed \
+	--include-symbol PhaseAwareContinuitySeed \
+	--include-symbol get_seed \
+	--include-symbol get_all_seeds \
+	--include-symbol update! \
+	--include-symbol reset! \
+	--include-symbol set_phase! \
+	--include-symbol create_implicit_gap_solver \
+	--include-symbol create_flavor_mu_implicit_gap_solver \
+	--include-symbol create_pnjl_implicit_solver \
+	--include-symbol create_implicit_solver \
+	--include-symbol solve_with_derivatives \
+	--include-symbol solve_fixedmu_constraint \
+	--include-symbol solve_fixedrho_constraint \
+	--include-symbol solve_fixedentropy_constraint \
+	--include-symbol solve_fixedsigma_constraint \
+	--include-symbol solve_fixedasymrho_constraint \
+	--include-symbol solve_constraint \
+	--output docs/api/models/solver/generated/Exports.md \
+	--title "Solver Export API Index"
+```
+
+说明：
+- 该脚本用于生成“导出 API 全集”这一层视图；
+- 现已支持多次传入 `--module-file` 与 `--include-symbol`，可为主题页生成聚合后的公开导出子集；
+- 会扫描目标文件中的 `export` 列表，并统计这些符号是否已在 `docs/api/` 的非 generated 页面中被提及；
+- 适合与人工维护的“面向用户入口”“算法核心”页面配套使用。
+
 归档元信息补齐（历史文档一次性修复）：
 
 ```powershell

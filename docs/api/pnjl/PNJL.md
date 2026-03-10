@@ -6,7 +6,7 @@
 - 求解器 `PNJL.solve(...)` 使用自然单位 `fm⁻¹`（`T_fm`, `μ_fm`）。
 - 扫描脚本/扫描模块通常使用 MeV（`T_MeV`, `μ_MeV`, `μB_MeV`），再通过 `ħc_MeV_fm` 换算到 `fm⁻¹`。
 
-**注意**：仓库已迁移到新架构（位于 `src/pnjl`）。旧版 `SeedCache/AnisoGapSolver/SinglePointSolver` 已移除或废弃；以本文件与 `docs/api/pnjl/*` 为准。
+**注意**：仓库已迁移到新架构（位于 `src/pnjl`）。旧版 `SeedCache/AnisoGapSolver/SinglePointSolver` 已移除或废弃；现行 API 说明以本文件及 `docs/api/models/*`、`docs/api/relaxtime/*` 主题页为准。
 
 **迁移期定位（2026-02-24）**：
 - `PNJL` 模块当前定位为兼容层与历史入口聚合层。
@@ -41,22 +41,22 @@ res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=0.0, seed_strategy=PNJL.MultiSe
 ```
 
 更多求解器细节见：
-- `docs/api/pnjl/ImplicitSolver.md`
-- `docs/api/pnjl/SeedStrategies.md`
-- 涨落 AD 接入路径（含隐式求导边界）：`docs/api/pnjl/FluctuationADPath.md`
-- 扫描采样模板与禁用区间：`docs/api/pnjl/ScanSamplingGuidelines.md`
+- `docs/api/models/solver/ImplicitSolvers.md`
+- `docs/api/models/solver/SeedStrategies.md`
+- 涨落 AD 接入路径（含隐式求导边界）：`docs/api/models/solver/CoreConcepts.md`
+- 扫描采样模板与禁用区间：`docs/api/models/scans/SamplingGrid.md`
 
 ### 扫描
 
-- `PNJL.run_tmu_scan`：T-μ 网格扫描（见 `docs/api/pnjl/TmuScan.md`）
-- `PNJL.run_trho_scan`：T-ρ 网格扫描（见 `docs/api/pnjl/TrhoScan.md`）
-- 统一输出契约：`docs/api/pnjl/ScanOutputContract.md`
+- `PNJL.run_tmu_scan`：T-μ 网格扫描（见 `docs/api/models/scans/TmuScan.md`）
+- `PNJL.run_trho_scan`：T-ρ 网格扫描（见 `docs/api/models/scans/TrhoScan.md`）
+- 统一输出契约：`docs/api/models/scans/Overview.md`
 - （按需）一阶相变区域双分支扫描：先调用 `PNJL.load_dual_branch_scan!()`，再使用 `PNJL.DualBranchScan.*`（见 `docs/api/pnjl/DualBranchScan.md`）
 
 ### 外磁场 PNJL
 
-- API 说明：`docs/api/pnjl/MagneticPNJL.md`
-- 参数说明：`docs/api/pnjl/MagneticPNJLParameters.md`
+- 主题入口：`docs/api/models/variants/magnetic/README.md`
+- 参数与配置：`docs/api/models/variants/magnetic/ModelAndConfig.md`
 
 ---
 

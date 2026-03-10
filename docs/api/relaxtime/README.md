@@ -1,10 +1,44 @@
-# docs/api/relaxtime
+# relaxtime API 主题总览
 
-该目录目前作为**预留的子命名空间**存在。
+本目录承接 `relaxtime` 领域链路的 API 文档，重点覆盖：
 
-当前项目的 relaxtime API 文档文件（例如 `RelaxationTime.md`、`TotalCrossSection.md` 等）为了保持既有链接与目录结构兼容，暂时放在 `docs/api/` 根目录。
+- transport：输运系数、弛豫时间、平均散射率与 workflow 细节
+- scattering：散射幅、微分截面、总截面
+- propagator：介子传播子、Mott 阈值与有效耦合
+- polarization：极化函数与缓存
 
-本目录当前新增的文档：
-- `ParticleSymbols.md`：relaxtime 链路使用的统一粒子/过程解析工具（含缓存与输入格式约定）。
+## 推荐阅读入口
 
-后续如果需要把 relaxtime 文档整体迁移到 `docs/api/relaxtime/`，建议采用“新旧路径并存 + 旧路径仅保留跳转说明”的方式，避免破坏已有引用。
+如果你的目标是“直接算输运系数”或“理解 transport provider 契约”，优先从以下页面开始：
+
+- `transport/README.md`
+- `transport/Overview.md`
+- `transport/CoreConcepts.md`
+- `transport/generated/Exports.md`
+- `workflow/TransportWorkflow.md`
+
+如果你是从 `Models.solve_gap_and_transport` 之类的统一入口进入，建议按以下顺序阅读：
+
+1. `docs/api/models/workflows/TransportWorkflow.md`
+2. `workflow/TransportWorkflow.md`
+3. `transport/Overview.md`
+4. `transport/CoreConcepts.md`
+
+## 当前已落地的 relaxtime 子主题
+
+- `ParticleSymbols.md`
+- `transport/TransportCoefficients.md`
+- `transport/RelaxationTime.md`
+- `transport/AverageScatteringRate.md`
+- `workflow/TransportWorkflow.md`
+- `scattering/*`
+- `propagator/*`
+- `polarization/*`
+
+## 目录迁移原则
+
+本目录现在不再只是预留命名空间。后续若继续把旧 `docs/api/*.md` 中的 relaxtime 相关页面迁入本目录，仍遵循：
+
+- 新路径先建立稳定主题入口；
+- 旧路径保留兼容跳转说明；
+- 不为维持旧结构而阻止新主题成形。

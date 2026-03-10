@@ -2,6 +2,10 @@
 
 将各向异性 PNJL 平衡求解（能隙方程 + Polyakov 环）与 RTA 输运系数计算串联。
 
+本文档是 transport workflow 的领域细节页，重点解释内部流程、输入合同与参数优先级。
+
+如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 `../../models/workflows/TransportWorkflow.md`；本页不重复承担入口选择与使用场景导航。
+
 ## 入口
 
 ### `solve_gap_and_transport`
@@ -41,6 +45,8 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   - `rates`：平均散射率（若内部计算 τ 则给出，便于复用/诊断）
   - `bulk_coeffs`：`compute_bulk=true` 时给出
   - `transport`：`(eta, zeta, sigma)`
+
+本页把 `solve_gap_and_transport` 视为 workflow 细节入口；“它适合哪些用户场景”与“何时改用 `solve_transport_from_equilibrium`”的高层说明留给 `Models` 侧入口页。
 
 ## Day 1 输入契约冻结（v2026-02-12）
 
@@ -118,3 +124,9 @@ res2 = solve_gap_and_transport(
 
 - `compute_bulk=true` 会触发多次自动微分与求解（用于导数），通常明显慢于只算 η/σ。
 - 扫描任务建议外层脚本自行管理 seed（用上一次点的 `equilibrium.x_state` 作为 `seed_state`）以提高收敛与速度。
+
+## 与 Models 入口页的分工
+
+- `docs/api/models/workflows/TransportWorkflow.md`：负责“选入口”和“理解业务闭环”
+- 本页：负责“看内部流程、输入优先级与 workflow 细节”
+- `../transport/CoreConcepts.md`：负责 provider 契约与 bridge 语义

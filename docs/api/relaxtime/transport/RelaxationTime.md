@@ -24,6 +24,8 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 
 这确保了动量积分范围与 σ(s) 缓存范围的一致性。
 
+`AverageScatteringRate.md` 中的默认截断与缓存口径应与本节保持一致；后者更偏向单过程积分与缓存细节，本页负责 τ 聚合层的默认行为说明。
+
 ## 参数说明
 
 - `quark_params`：夸克参数 `(m, μ, A)`
@@ -77,6 +79,8 @@ println(result.tau_inv)  # 各味的 τ^-1
 | 数密度积分 | [0, ∞) | [0, ∞) | 已一致 |
 
 使用 `p_grid=gauleg(0,15,n)` + `sigma_cutoff=Λ_inv_fm` 后，与 C++ 结果误差 < 0.3%。
+
+若你正在排查单个过程的 σ(s) 缓存、阈值渐近项与平均散射率积分细节，请继续阅读 `AverageScatteringRate.md`，本页不重复展开单过程缓存实现。
 
 ## 物理说明
 

@@ -2,6 +2,8 @@
 
 本模块实现弛豫时间近似（RTA）下的夸克物质输运系数计算：剪切粘滞系数 $\eta$、体粘滞系数 $\zeta$、电导率 $\sigma$。
 
+如果你当前更关心 transport provider 的字段契约、`Models.TransportProvider` 与 `prepare_transport_provider` 的桥接语义，建议先阅读 `CoreConcepts.md`，本页聚焦系数公式、积分配置与直接调用方式。
+
 ## 单位约定
 - 自然单位：$\hbar=c=k_B=1$
 - 温度/化学势/质量/动量：fm⁻¹
@@ -234,46 +236,21 @@ all = transport_coefficients(req; bulk_coeffs=nothing)
   - 能量采用下限保护：`E = max(E_raw, sqrt(eps(Float64)))`
   - 费米因子采用物理区间截断：`f(1-f) -> clamp(f(1-f), 0.0, 0.25)`
 
+## provider 摘要
+
+本页只保留 transport 计算直接相关的 provider 摘要；完整字段契约、`Models.TransportProvider`、`prepare_transport_provider` 与 `ctx` 语义见 `CoreConcepts.md`。
+
+- transport 计算至少依赖：`energy_from_p`、`quark_distribution`、`antiquark_distribution`
+- 当 `xi != 0` 时，若 provider 提供 `energy_from_p_aniso` 且 `prefer_energy_aniso=true`，实现会优先复用各向异性能量
+- 若你需要自定义 species 质量/化学势解析，或理解 `prepare_transport_provider(...)` 如何把平衡态结果注入 provider，应转到 `CoreConcepts.md`
+
 ## 注意事项
 
 1. **积分核**：积分核中包含相空间测度 $p^2$，因此 η 的积分核是 $p^6/E^2$，σ 的积分核是 $p^4 q^2/E^2$。
 
 2. **各向异性**：当 ξ≠0 时，使用 Romatschke-Strickland 形式的分布函数，需要完整的角度积分。
 
-3. **provider 约定（与各向异性路径相关）**：
-   - `energy_from_p_aniso(p,m,ξ,cosθ)`：可选 provider 接口；当 `ξ≠0` 时若提供则优先用于能量 $E_\xi$，否则回退到各向同性 `energy_from_p(p,m)`。
-     - 默认实现：$E_\xi = \sqrt{p^2 + m^2 + \xi (p\cos\theta)^2}$。
-   - provider 可选字段 `prefer_energy_aniso::Bool`（默认 provider 为 `true`）。
-   - 当 `ξ≠0` 且 provider 具备 `energy_from_p_aniso(p,m,ξ,cosθ)` 时：
-     - `prefer_energy_aniso=true`：优先复用已计算的 $E_\xi$，直接调用 `quark_distribution(E,...) / antiquark_distribution(E,...)`，避免 `*_distribution_aniso` 内部重复 `sqrt`。
-     - `prefer_energy_aniso=false`：优先调用 provider 的 `quark_distribution_aniso(p,m,...) / antiquark_distribution_aniso(p,m,...)`（适合你实现了非平凡的 aniso 分布接口）。
-
-   - `default_transport_provider()` 字段列表（NamedTuple）：
-     - 必备：`energy_from_p`, `quark_distribution`, `antiquark_distribution`
-     - 各向异性相关（默认提供）：`energy_from_p_aniso`, `quark_distribution_aniso`, `antiquark_distribution_aniso`, `prefer_energy_aniso`
-     - 可选扩展（若提供会被使用）：`mass_for_species(species, quark_params, thermo_params)`, `mu_for_species(species, quark_params, thermo_params)`
-
-### Day 1 契约冻结（v2026-02-12）
-
-以下为阶段 4 的 provider 接口冻结版本（用于后续解耦改造的兼容边界）。
-
-| 字段 | 必选 | 说明 | 优先级/回退 |
-|---|---|---|---|
-| `energy_from_p(p, m)` | 是 | 各向同性色散关系 | 基础入口 |
-| `quark_distribution(E_or_p, m, T, μ, Φ, Φbar)` | 是 | 夸克分布函数 | 与 `antiquark_distribution` 成对出现 |
-| `antiquark_distribution(E_or_p, m, T, μ, Φ, Φbar)` | 是 | 反夸克分布函数 | 与 `quark_distribution` 成对出现 |
-| `energy_from_p_aniso(p, m, ξ, cosθ)` | 否 | 各向异性能量 | `ξ≠0` 时若提供则优先使用；否则回退 `energy_from_p` |
-| `quark_distribution_aniso(...)` / `antiquark_distribution_aniso(...)` | 否 | 各向异性分布接口 | 当 `prefer_energy_aniso=false` 时优先尝试 |
-| `prefer_energy_aniso::Bool` | 否 | ξ≠0 路径开关 | 默认 provider 为 `true`；可被 workflow keyword/`transport_kwargs` 覆盖 |
-| `mass_for_species(species, quark_params, thermo_params)` | 否 | species 质量覆写 | 若缺失则回退 `quark_params.m` |
-| `mu_for_species(species, quark_params, thermo_params)` | 否 | species 化学势覆写 | 若缺失则回退 `quark_params.μ` |
-
-`ξ≠0` 时的分布计算优先级：
-
-1. 若有 `energy_from_p_aniso` 且 `prefer_energy_aniso=true`：优先复用 $E_\xi$ 并调用 `quark_distribution/antiquark_distribution`。
-2. 否则，若有 `*_distribution_aniso`：走各向异性分布接口。
-3. 否则：回退到“能量直通”路径（若可构造 $E_\xi$）。
-4. 仍不可用时：回退到各向同性 `energy_from_p` 路径。
+3. **provider 路径**：当 `ξ≠0` 时，默认实现会优先复用 `energy_from_p_aniso` 与 `prefer_energy_aniso` 控制的能量直通路径；如果你需要完整字段表、回退顺序或 `prepare_transport_provider(...)` 的桥接细节，请阅读 `CoreConcepts.md`。
 
 4. **电荷单位**：默认使用自然单位制电荷（$e = \sqrt{4\pi\alpha}$）。
 
