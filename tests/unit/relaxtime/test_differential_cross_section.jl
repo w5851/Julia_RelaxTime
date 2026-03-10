@@ -374,7 +374,7 @@ using Main.TotalCrossSection: calculate_t_bounds
         println("\n测试 t_bounds 阈值检查:")
         m_u = quark_params.m.u
         s_below = 0.1  # < (2m_u)²
-        @test_throws ErrorException calculate_t_bounds(s_below, m_u, m_u, m_u, m_u)
+        @test_throws DomainError calculate_t_bounds(s_below, m_u, m_u, m_u, m_u)
         println("  ✓ 正确检测阈值违反")
         
         println("✓ 错误处理测试通过")
