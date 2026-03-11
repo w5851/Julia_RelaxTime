@@ -109,7 +109,63 @@ export final_state_blocking_factor
 export combined_final_state_factor
 export total_cross_section
 export calculate_all_total_cross_sections
+export calculate_all_total_cross_sections_detailed
 export scan_s_dependence
+export scan_s_dependence_detailed
+export CrossSectionEvaluationResult
+
+Base.@kwdef struct CrossSectionEvaluationResult
+    success::Bool
+    value::Union{Nothing, Float64}=nothing
+    error_code::Union{Nothing, Symbol}=nothing
+    error_message::Union{Nothing, String}=nothing
+    exception::Any=nothing
+end
+
+@inline CrossSectionEvaluationResult(value::Float64) = CrossSectionEvaluationResult(success=true, value=value)
+
+@inline function _cross_section_error_code(err)::Symbol
+    if err isa ArgumentError
+        return :argument_error
+    elseif err isa DomainError
+        return :domain_error
+    elseif err isa MethodError
+        return :method_error
+    elseif err isa BoundsError
+        return :bounds_error
+    end
+    return :runtime_error
+end
+
+function _capture_cross_section_evaluation(thunk::Function)::CrossSectionEvaluationResult
+    try
+        return CrossSectionEvaluationResult(thunk())
+    catch err
+        return CrossSectionEvaluationResult(
+            success=false,
+            error_code=_cross_section_error_code(err),
+            error_message=sprint(showerror, err),
+            exception=err,
+        )
+    end
+end
+
+function _materialize_cross_section_value(
+    result::CrossSectionEvaluationResult,
+    context::AbstractString;
+    on_error::Symbol,
+)::Float64
+    result.success && return something(result.value)
+
+    if on_error === :nan
+        emit_runtime_failure_notice(context, result.exception)
+        return NaN
+    elseif on_error === :throw
+        throw(ErrorException("$(context): $(result.error_code): $(result.error_message)"))
+    end
+
+    throw(ArgumentError("Unknown on_error=$(on_error). Allowed values: :throw, :nan"))
+end
 
 # 数值容差
 const EPS_KINEMATIC = 1e-14  # 运动学阈值容差
@@ -536,7 +592,7 @@ function total_cross_section(
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     fast_path::Bool=true,
 )::Float64
-    return _total_cross_section_nt(process, s, quark_params, thermo_params, K_coeffs; n_points=n_points, fast_path=fast_path)
+    return _total_cross_section_core(process, s, quark_params, thermo_params, K_coeffs; n_points=n_points, fast_path=fast_path)
 end
 
 function total_cross_section(
@@ -550,10 +606,10 @@ function total_cross_section(
 )::Float64
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    return _total_cross_section_nt(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points, fast_path=fast_path)
+    return _total_cross_section_core(process, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points, fast_path=fast_path)
 end
 
-function _total_cross_section_nt(
+function _total_cross_section_core(
     process::Symbol,
     s::Float64,
     quark_params::NamedTuple,
@@ -744,7 +800,7 @@ println("uu→uu: \$(all_σ.uu_to_uu) fm²")
 println("dd→dd: \$(all_σ.dd_to_dd) fm²")
 ```
 """
-function calculate_all_total_cross_sections(
+function calculate_all_total_cross_sections_detailed(
     s::Float64,
     quark_params::Union{NamedTuple, QuarkParams},
     thermo_params::Union{NamedTuple, ThermoParams},
@@ -754,23 +810,48 @@ function calculate_all_total_cross_sections(
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    results = Dict{Symbol, Float64}()
-    
+    results = Dict{Symbol, CrossSectionEvaluationResult}()
+
     for process in keys(SCATTERING_MESON_MAP)
-        try
-            σ = total_cross_section(
+        results[process] = _capture_cross_section_evaluation() do
+            total_cross_section(
                 process, s, quark_nt, thermo_nt, K_coeffs,
                 n_points=n_points,
                 fast_path=fast_path,
             )
-            results[process] = σ
-        catch e
-            emit_runtime_failure_notice("Failed to calculate $(process)", e)
-            results[process] = NaN
         end
     end
-    
+
     return NamedTuple(results)
+end
+
+function calculate_all_total_cross_sections(
+    s::Float64,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
+    K_coeffs::NamedTuple;
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
+    on_error::Symbol=:throw,
+)::NamedTuple
+    detailed = calculate_all_total_cross_sections_detailed(
+        s,
+        quark_params,
+        thermo_params,
+        K_coeffs;
+        n_points=n_points,
+        fast_path=fast_path,
+    )
+
+    values = Dict{Symbol, Float64}()
+    for (process, result) in pairs(detailed)
+        values[process] = _materialize_cross_section_value(
+            result,
+            "Failed to calculate $(process)";
+            on_error=on_error,
+        )
+    end
+    return NamedTuple(values)
 end
 
 """
@@ -804,6 +885,32 @@ t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 σ_values = scan_s_dependence(s_values, :uu_to_uu, q_nt, t_nt, K_coeffs, n_points=6)
 ```
 """
+function scan_s_dependence_detailed(
+    s_values::Vector{Float64},
+    process::Symbol,
+    quark_params::Union{NamedTuple, QuarkParams},
+    thermo_params::Union{NamedTuple, ThermoParams},
+    K_coeffs::NamedTuple;
+    n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    fast_path::Bool=true,
+)::Vector{CrossSectionEvaluationResult}
+    quark_nt = normalize_quark_input(quark_params)
+    thermo_nt = normalize_thermo_input(thermo_params)
+    σ_values = CrossSectionEvaluationResult[]
+
+    for s in s_values
+        push!(σ_values, _capture_cross_section_evaluation() do
+            total_cross_section(
+                process, s, quark_nt, thermo_nt, K_coeffs,
+                n_points=n_points,
+                fast_path=fast_path,
+            )
+        end)
+    end
+
+    return σ_values
+end
+
 function scan_s_dependence(
     s_values::Vector{Float64},
     process::Symbol,
@@ -812,25 +919,29 @@ function scan_s_dependence(
     K_coeffs::NamedTuple;
     n_points::Int=DEFAULT_T_INTEGRAL_POINTS,
     fast_path::Bool=true,
+    on_error::Symbol=:throw,
 )::Vector{Float64}
-    quark_nt = normalize_quark_input(quark_params)
-    thermo_nt = normalize_thermo_input(thermo_params)
+    detailed = scan_s_dependence_detailed(
+        s_values,
+        process,
+        quark_params,
+        thermo_params,
+        K_coeffs;
+        n_points=n_points,
+        fast_path=fast_path,
+    )
+
     σ_values = Float64[]
-    
-    for s in s_values
-        try
-            σ = total_cross_section(
-                process, s, quark_nt, thermo_nt, K_coeffs,
-                n_points=n_points,
-                fast_path=fast_path,
-            )
-            push!(σ_values, σ)
-        catch e
-            emit_runtime_failure_notice("Failed to calculate σ at s=$(s)", e)
-            push!(σ_values, NaN)
-        end
+    for (idx, result) in enumerate(detailed)
+        push!(
+            σ_values,
+            _materialize_cross_section_value(
+                result,
+                "Failed to calculate σ at index=$(idx), s=$(s_values[idx])";
+                on_error=on_error,
+            ),
+        )
     end
-    
     return σ_values
 end
 

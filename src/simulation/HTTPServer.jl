@@ -27,10 +27,20 @@ struct APIResponse
     success::Bool
     data::Union{Dict, Nothing}
     error::Union{String, Nothing}
+    error_code::Union{String, Nothing}
 end
 
 # 定义JSON3序列化规则
 JSON3.StructType(::Type{APIResponse}) = JSON3.Struct()
+
+@inline function _json_response(status::Int, resp::APIResponse)
+    headers = ["Content-Type" => "application/json; charset=utf-8"]
+    return HTTP.Response(status, headers, JSON3.write(resp))
+end
+
+@inline function _error_response(status::Int, code::String, message::String)
+    return _json_response(status, APIResponse(false, nothing, message, code))
+end
 
 """
     handle_compute(req::HTTP.Request)
@@ -90,15 +100,11 @@ function handle_compute(req::HTTP.Request)
         
         # 输入验证
         if any(isnan.([p1; p2; m1; m2; m3; m4; theta_star; phi_star]))
-            return HTTP.Response(400, JSON3.write(
-                APIResponse(false, nothing, "Invalid input: NaN detected")
-            ))
+            return _error_response(400, "INVALID_INPUT", "Invalid input: NaN detected")
         end
         
         if any([m1, m2, m3, m4] .<= 0)
-            return HTTP.Response(400, JSON3.write(
-                APIResponse(false, nothing, "Invalid input: masses must be positive")
-            ))
+            return _error_response(400, "INVALID_INPUT", "Invalid input: masses must be positive")
         end
         
         # 计算散射运动学
@@ -147,20 +153,15 @@ function handle_compute(req::HTTP.Request)
             )
         )
         
-        resp = APIResponse(true, response_data, nothing)
-        
-        # 返回JSON响应
-        headers = ["Content-Type" => "application/json; charset=utf-8"]
-        return HTTP.Response(200, headers, JSON3.write(resp))
+        return _json_response(200, APIResponse(true, response_data, nothing, nothing))
         
     catch e
-        # 错误处理
-        error_msg = sprint(showerror, e, catch_backtrace())
         @error "Computation error" exception=(e, catch_backtrace())
-        
-        resp = APIResponse(false, nothing, error_msg)
-        headers = ["Content-Type" => "application/json; charset=utf-8"]
-        return HTTP.Response(400, headers, JSON3.write(resp))
+
+        if e isa ArgumentError || e isa DomainError
+            return _error_response(400, "INVALID_INPUT", "Invalid request parameters")
+        end
+        return _error_response(500, "COMPUTATION_ERROR", "Computation failed")
     end
 end
 

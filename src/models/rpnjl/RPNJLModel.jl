@@ -90,27 +90,22 @@ function _load_rpnjl_extension(; profile::String, hbarc_MeV_fm::Float64, log_con
     )
 end
 
-function _apply_rpnjl_polyakov_overrides(base_consts::NamedTuple, extension_dict::Dict{String, Any})
-    haskey(extension_dict, "T0_MeV") || return base_consts
+function _apply_rpnjl_polyakov_overrides(base_params::PNJLCore.PNJLParams, extension_dict::Dict{String, Any})
+    haskey(extension_dict, "T0_MeV") || return base_params
 
-    T0_inv_fm = Float64(extension_dict["T0_MeV"]) / Float64(base_consts.hbarc_MeV_fm)
-    a0 = Float64(get(extension_dict, "a0", base_consts.a0))
-    a1 = Float64(get(extension_dict, "a1", base_consts.a1))
-    a2 = Float64(get(extension_dict, "a2", base_consts.a2))
-    b3 = Float64(get(extension_dict, "b3", base_consts.b3))
-    b4 = Float64(get(extension_dict, "b4", base_consts.b4))
-
-    return merge(base_consts, (
-        T0_inv_fm=T0_inv_fm,
-        a0=a0,
-        a1=a1,
-        a2=a2,
-        b3=b3,
-        b4=b4,
-    ))
+    return PNJLCore.PNJLParams(
+        ;
+        PNJLCore.as_namedtuple(base_params)...,
+        T0_inv_fm=Float64(extension_dict["T0_MeV"]) / Float64(base_params.hbarc_MeV_fm),
+        a0=Float64(get(extension_dict, "a0", base_params.a0)),
+        a1=Float64(get(extension_dict, "a1", base_params.a1)),
+        a2=Float64(get(extension_dict, "a2", base_params.a2)),
+        b3=Float64(get(extension_dict, "b3", base_params.b3)),
+        b4=Float64(get(extension_dict, "b4", base_params.b4)),
+    )
 end
 
-function _apply_rpnjl_model_overrides(base_consts::NamedTuple, extension_dict::Dict{String, Any})
+function _apply_rpnjl_model_overrides(base_params::PNJLCore.PNJLParams, extension_dict::Dict{String, Any})
     has_model_override = any(k -> haskey(extension_dict, k), (
         "Lambda_MeV",
         "m_ud0_MeV",
@@ -118,31 +113,33 @@ function _apply_rpnjl_model_overrides(base_consts::NamedTuple, extension_dict::D
         "G_over_Lambda2",
         "K_over_Lambda5",
     ))
-    has_model_override || return base_consts
+    has_model_override || return base_params
 
-    hbarc = Float64(base_consts.hbarc_MeV_fm)
+    hbarc = Float64(base_params.hbarc_MeV_fm)
 
-    Lambda_MeV = Float64(get(extension_dict, "Lambda_MeV", Float64(base_consts.Λ_inv_fm) * hbarc))
-    m_ud0_MeV = Float64(get(extension_dict, "m_ud0_MeV", Float64(base_consts.m_ud0_inv_fm) * hbarc))
-    m_s0_MeV = Float64(get(extension_dict, "m_s0_MeV", Float64(base_consts.m_s0_inv_fm) * hbarc))
+    Lambda_MeV = Float64(get(extension_dict, "Lambda_MeV", Float64(base_params.Λ_inv_fm) * hbarc))
+    m_ud0_MeV = Float64(get(extension_dict, "m_ud0_MeV", Float64(base_params.m_ud0_inv_fm) * hbarc))
+    m_s0_MeV = Float64(get(extension_dict, "m_s0_MeV", Float64(base_params.m_s0_inv_fm) * hbarc))
 
     Λ_inv_fm = Lambda_MeV / hbarc
     m_ud0_inv_fm = m_ud0_MeV / hbarc
     m_s0_inv_fm = m_s0_MeV / hbarc
 
-    G_over_Lambda2 = Float64(get(extension_dict, "G_over_Lambda2", Float64(base_consts.G_fm2) * Float64(base_consts.Λ_inv_fm)^2))
-    K_over_Lambda5 = Float64(get(extension_dict, "K_over_Lambda5", Float64(base_consts.K_fm5) * Float64(base_consts.Λ_inv_fm)^5))
+    G_over_Lambda2 = Float64(get(extension_dict, "G_over_Lambda2", Float64(base_params.G_fm2) * Float64(base_params.Λ_inv_fm)^2))
+    K_over_Lambda5 = Float64(get(extension_dict, "K_over_Lambda5", Float64(base_params.K_fm5) * Float64(base_params.Λ_inv_fm)^5))
 
     G_fm2 = G_over_Lambda2 / (Λ_inv_fm^2)
     K_fm5 = K_over_Lambda5 / (Λ_inv_fm^5)
 
-    return merge(base_consts, (
+    return PNJLCore.PNJLParams(
+        ;
+        PNJLCore.as_namedtuple(base_params)...,
         Λ_inv_fm=Λ_inv_fm,
         m_ud0_inv_fm=m_ud0_inv_fm,
         m_s0_inv_fm=m_s0_inv_fm,
         G_fm2=G_fm2,
         K_fm5=K_fm5,
-    ))
+    )
 end
 
 struct RPNJLModel <: AbstractPNJLModel
@@ -158,33 +155,35 @@ function RPNJLModel(
     use_rpnjl_extensions::Bool=true,
     log_config::Bool=_rpnjl_env_flag("RPNJL_CONFIG_LOG", false),
 )
-    base_consts = pnjl_constants(profile=profile, physics_profile=physics_profile, log_config=log_config)
+    base_params = PNJLCore.pnjl_params(; profile=profile, physics_profile=physics_profile, log_config=log_config)
 
     cfg_data = use_rpnjl_extensions ? _load_rpnjl_config(profile=profile, log_config=log_config) : nothing
     path = (cfg_data === nothing) ? nothing : cfg_data.path
     ext_cfg = (cfg_data === nothing || path === nothing) ? Dict{String, Any}() : get(cfg_data.config, "rpnjl", Dict{String, Any}())
     use_rpnjl_extensions && _validate_rpnjl_extension(ext_cfg, path)
-    merged_consts = if use_rpnjl_extensions
-        model_overridden = _apply_rpnjl_model_overrides(base_consts, ext_cfg)
+    merged_params = if use_rpnjl_extensions
+        model_overridden = _apply_rpnjl_model_overrides(base_params, ext_cfg)
         _apply_rpnjl_polyakov_overrides(model_overridden, ext_cfg)
     else
-        base_consts
+        base_params
     end
 
     extension = use_rpnjl_extensions ?
-        _load_rpnjl_extension(profile=profile, hbarc_MeV_fm=Float64(base_consts.hbarc_MeV_fm), log_config=log_config) :
+        _load_rpnjl_extension(profile=profile, hbarc_MeV_fm=Float64(base_params.hbarc_MeV_fm), log_config=log_config) :
         merge(_RPNJL_DEFAULT_EXTENSION, (profile=profile, path=nothing))
-    return RPNJLModel(PNJLModel(merged_consts), extension, use_rpnjl_extensions)
+    return RPNJLModel(PNJLModel(merged_params), extension, use_rpnjl_extensions)
 end
 
 RPNJLModel() = RPNJLModel(; profile=_rpnjl_profile_default(), physics_profile=get(ENV, "PHYSICS_PARAM_PROFILE", "default"))
 
+@inline _base_params(model::RPNJLModel) = model.base.params
+
 function calculate_mass_vec(model::RPNJLModel, φ::SVector{3, T}; kwargs...) where {T}
-    consts = model.base.consts
-    m_ud0 = convert(T, Float64(consts.m_ud0_inv_fm))
-    m_s0 = convert(T, Float64(consts.m_s0_inv_fm))
-    G = convert(T, Float64(consts.G_fm2))
-    K = convert(T, Float64(consts.K_fm5))
+    params = _base_params(model)
+    m_ud0 = convert(T, Float64(params.m_ud0_inv_fm))
+    m_s0 = convert(T, Float64(params.m_s0_inv_fm))
+    G = convert(T, Float64(params.G_fm2))
+    K = convert(T, Float64(params.K_fm5))
 
     g1 = convert(T, Float64(model.ext.g1_fm8))
     g2 = convert(T, Float64(model.ext.g2_fm8))
@@ -207,9 +206,9 @@ function calculate_mass_vec(model::RPNJLModel, φ::SVector{3, T}; kwargs...) whe
 end
 
 function calculate_chiral(model::RPNJLModel, φ::SVector{3, T}; kwargs...) where {T}
-    consts = model.base.consts
-    G = convert(T, Float64(consts.G_fm2))
-    K = convert(T, Float64(consts.K_fm5))
+    params = _base_params(model)
+    G = convert(T, Float64(params.G_fm2))
+    K = convert(T, Float64(params.K_fm5))
 
     g1 = convert(T, Float64(model.ext.g1_fm8))
     g2 = convert(T, Float64(model.ext.g2_fm8))
@@ -234,13 +233,13 @@ function polyakov_potential(model::RPNJLModel, Φ, Φbar, T_fm; kwargs...)
     ΦbarT = convert(TT, Φbar)
     TT_fm = convert(TT, T_fm)
 
-    consts = model.base.consts
-    T0 = convert(TT, Float64(consts.T0_inv_fm))
-    a0 = convert(TT, Float64(consts.a0))
-    a1 = convert(TT, Float64(consts.a1))
-    a2 = convert(TT, Float64(consts.a2))
-    b3 = convert(TT, Float64(consts.b3))
-    b4 = convert(TT, Float64(consts.b4))
+    params = _base_params(model)
+    T0 = convert(TT, Float64(params.T0_inv_fm))
+    a0 = convert(TT, Float64(params.a0))
+    a1 = convert(TT, Float64(params.a1))
+    a2 = convert(TT, Float64(params.a2))
+    b3 = convert(TT, Float64(params.b3))
+    b4 = convert(TT, Float64(params.b4))
     kappa = convert(TT, Float64(model.ext.kappa))
 
     t_ratio = T0 / TT_fm
@@ -260,8 +259,9 @@ function polyakov_potential(model::RPNJLModel, Φ, Φbar, T_fm; kwargs...)
 end
 
 function vacuum_contribution(model::RPNJLModel, masses::SVector{3, T}; kwargs...) where {T}
-    Λ = convert(T, Float64(model.base.consts.Λ_inv_fm))
-    Nc = convert(T, Int(model.base.consts.N_color))
+    params = _base_params(model)
+    Λ = convert(T, Float64(params.Λ_inv_fm))
+    Nc = convert(T, Int(params.N_color))
 
     total = zero(T)
     @inbounds for i in 1:3

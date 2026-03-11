@@ -105,29 +105,32 @@ function number_densities(
     T_val = Float64(T_fm)
     xi_val = Float64(xi)
 
-    φ = SVector{3, Float64}(Float64(st.phi[1]), Float64(st.phi[2]), Float64(st.phi[3]))
-    masses = calculate_mass_vec(model, φ)
+    φ = SVector{3, Float64}(st.phi)
+    masses = SVector{3, Float64}(calculate_mass_vec(model, φ))
+    μ_values = SVector{3, Float64}(normalize_mu_vec(mu_vec))
 
     nodes = isnothing(thermal_nodes) ? _pnjl_model_cached_nodes(p_num, t_num) : thermal_nodes
     thermal_p_mesh, cosθ_mesh, thermal_coefficients = nodes
-    pref = 2 * model.params.N_color
+    pref = Float64(2 * model.params.N_color)
+    invT = inv(T_val)
 
     acc_q = MVector{3, Float64}(0.0, 0.0, 0.0)
     acc_aq = MVector{3, Float64}(0.0, 0.0, 0.0)
 
-    mu_vec = normalize_mu_vec(mu_vec)
-
     @inbounds for i in 1:3
-        mass_i = Float64(masses[i])
-        mu_i = Float64(mu_vec[i])
+        mass_i = masses[i]
+        mass_sq = mass_i * mass_i
+        mu_i = μ_values[i]
         total_q = 0.0
         total_aq = 0.0
-        for idx in eachindex(thermal_p_mesh)
-            p = Float64(thermal_p_mesh[idx])
-            cosθ = Float64(cosθ_mesh[idx])
-            w = Float64(thermal_coefficients[idx])
-            total_q += w * pref * pnjl_quark_distribution_aniso(p, mass_i, mu_i, T_val, Φ, Φbar, xi_val, cosθ)
-            total_aq += w * pref * pnjl_antiquark_distribution_aniso(p, mass_i, mu_i, T_val, Φ, Φbar, xi_val, cosθ)
+        for idx in eachindex(thermal_p_mesh, cosθ_mesh, thermal_coefficients)
+            p = thermal_p_mesh[idx]
+            cosθ = cosθ_mesh[idx]
+            coeff = pref * thermal_coefficients[idx]
+            pcos = p * cosθ
+            energy = sqrt(p * p + mass_sq + xi_val * pcos * pcos)
+            total_q += coeff * _pnjl_quark_distribution_core((energy - mu_i) * invT, Φ, Φbar)
+            total_aq += coeff * _pnjl_antiquark_distribution_core((energy + mu_i) * invT, Φ, Φbar)
         end
         acc_q[i] = total_q
         acc_aq[i] = total_aq

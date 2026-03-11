@@ -86,7 +86,7 @@ function solve_equilibrium_backend(
     elseif effective_solver_backend === :models
         m isa Main.Models.PNJLModel || error("solver_backend=:models requires a PNJLModel (got $(typeof(m)))")
 
-        solver = models_solver === nothing ? Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite) : models_solver
+        solver = models_solver === nothing ? Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward) : models_solver
         Main.Models.solve_gap(m, T_fm, mu_fm;
             solver_backend=:models,
             solver=solver,

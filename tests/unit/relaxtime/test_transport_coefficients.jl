@@ -133,16 +133,16 @@ end
     cfg = TransportIntegrationConfig(p_nodes=8, p_max=4.0)
 
     bad_T = merge(THERMO_PARAMS, (T=0.0,))
-    @test_throws ErrorException shear_viscosity(QUARK_PARAMS, bad_T; tau=TAU_ONE, config=cfg)
+    @test_throws ArgumentError shear_viscosity(QUARK_PARAMS, bad_T; tau=TAU_ONE, config=cfg)
 
     bad_mass = (m=(u=-0.1, d=0.3, s=0.5), μ=QUARK_PARAMS.μ)
-    @test_throws ErrorException shear_viscosity(bad_mass, THERMO_PARAMS; tau=TAU_ONE, config=cfg)
+    @test_throws ArgumentError shear_viscosity(bad_mass, THERMO_PARAMS; tau=TAU_ONE, config=cfg)
 
     tau_missing = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0)
     @test_throws ErrorException shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=tau_missing, config=cfg)
 
     bad_charges = (u=NaN, d=-1 / 3, s=-1 / 3)
-    @test_throws ErrorException electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg, charges=bad_charges)
+    @test_throws ArgumentError electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg, charges=bad_charges)
 
     bad_cfg = TransportIntegrationConfig(p_nodes=8, p_max=4.0)
     bad_bulk = (
@@ -152,7 +152,7 @@ end
         dM_dT=[0.0, 0.0, 0.0],
         dM_dμB=[0.0, 0.0, 0.0],
     )
-    @test_throws ErrorException bulk_viscosity_isentropic(
+    @test_throws ArgumentError bulk_viscosity_isentropic(
         QUARK_PARAMS,
         THERMO_PARAMS;
         tau=TAU_ONE,
@@ -249,10 +249,11 @@ end
     eta_override = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg_p8, p_nodes=16)
     @test isapprox(eta_override, eta_p16; rtol=1e-12, atol=0.0)
 
-    @test_throws ErrorException TransportIntegrationConfig(p_grid=[0.0, 1.0])
-    @test_throws ErrorException TransportIntegrationConfig(cos_grid=[-1.0, 1.0])
-    @test_throws ErrorException TransportIntegrationConfig(p_grid=[0.0, 1.0], p_w=[1.0])
-    @test_throws ErrorException TransportIntegrationConfig(cos_grid=[-1.0, 1.0], cos_w=[1.0])
+    @test_throws ArgumentError TransportIntegrationConfig(p_grid=[0.0, 1.0])
+    @test_throws ArgumentError TransportIntegrationConfig(cos_grid=[-1.0, 1.0])
+    @test_throws ArgumentError TransportIntegrationConfig(p_grid=[0.0, 1.0], p_w=[1.0])
+    @test_throws ArgumentError TransportIntegrationConfig(cos_grid=[-1.0, 1.0], cos_w=[1.0])
+    @test_throws ArgumentError TransportIntegrationConfig(p_max=0.0)
 
     # positional-config overloads
     eta_pos = shear_viscosity(QUARK_PARAMS, THERMO_PARAMS, cfg_p8; tau=TAU_ONE, p_nodes=16)
@@ -322,7 +323,7 @@ end
     # Make sure transport integrand can be decoupled from hard-coded quark_params fields.
     qp_bad = (m=(u=NaN, d=NaN, s=NaN), μ=(u=999.0, d=999.0, s=999.0))
 
-    @test_throws ErrorException shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
+    @test_throws ArgumentError shear_viscosity(qp_bad, THERMO_PARAMS; tau=TAU_ONE, p_nodes=16, p_max=10.0)
 
     cached_m = (u=0.3, d=0.3, s=0.5)
     cached_mu = (u=0.2, d=0.2, s=0.2)

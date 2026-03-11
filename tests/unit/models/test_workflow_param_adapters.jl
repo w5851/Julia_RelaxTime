@@ -15,7 +15,7 @@ end
 
 const WorkflowParamAdaptersModule = Main.Models.workflow_param_adapters_module()
 
-using .WorkflowParamAdaptersModule: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
+using .WorkflowParamAdaptersModule: normalize_quark_params, normalize_thermo_params, as_relaxtime_inputs
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 @testset "WorkflowParamAdapters" begin
@@ -33,12 +33,12 @@ using Main.ParameterTypes: QuarkParams, ThermoParams
         @test result.ξ ≈ 0.0
     end
 
-    @testset "as_legacy_inputs 返回正确结构" begin
+    @testset "as_relaxtime_inputs 返回正确结构" begin
         qp = QuarkParams((m=(u=0.3, d=0.31, s=0.5), μ=(u=0.0, d=0.0, s=0.0)))
         tp = ThermoParams((T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0))
-        legacy = as_legacy_inputs(qp, tp)
-        @test haskey(legacy, :quark_params)
-        @test haskey(legacy, :thermo_params)
+        relaxtime_inputs = as_relaxtime_inputs(qp, tp)
+        @test haskey(relaxtime_inputs, :quark_params)
+        @test haskey(relaxtime_inputs, :thermo_params)
     end
 
     @testset "NamedTuple 输入已拒绝" begin

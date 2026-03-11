@@ -586,10 +586,15 @@ normalize_thermo_params(t)
 as_legacy_inputs(q, t)
 ```
 
+Compatibility note:
+- `as_legacy_inputs(q, t)` is deprecated and kept only for compatibility.
+- Prefer `as_relaxtime_inputs(q, t)` in new code.
+- The deprecated helper is no longer part of the default recommended surface and should only be used by explicit compatibility paths.
+
 Contract:
 - struct input (`QuarkParams` / `ThermoParams`) is converted to legacy-compatible NamedTuple;
 - NamedTuple input is passed through unchanged;
-- `as_legacy_inputs(q, t)` returns a pair for old interfaces:
+- `as_legacy_inputs(q, t)` returns a pair for old interfaces only:
     - `quark_params`
     - `thermo_params`
 

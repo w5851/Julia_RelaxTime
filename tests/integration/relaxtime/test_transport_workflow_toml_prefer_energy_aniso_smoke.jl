@@ -116,12 +116,12 @@ const TW = Main.Models.transport_workflow_module()
         @testset "a_builder config from profile and explicit override" begin
             q = Main.ParameterTypes.QuarkParams((m=(u=1.2, d=1.2, s=1.8), μ=(u=0.1, d=0.1, s=0.2)))
             tp = Main.ParameterTypes.ThermoParams((T=0.15, Φ=0.45, Φbar=0.45, ξ=0.3))
-            legacy = TW.as_legacy_inputs(q, tp)
+            relaxtime_inputs = TW.as_relaxtime_inputs(q, tp)
 
             A_default = TW._A_from_equilibrium(tp.T, q, tp)
             A_expected_profile = Main.AFieldBuilder.build_A_triplet(
-                legacy.quark_params,
-                legacy.thermo_params;
+                relaxtime_inputs.quark_params,
+                relaxtime_inputs.thermo_params;
                 p_nodes=10,
                 p_max=8.0,
                 cos_nodes=6,
@@ -137,8 +137,8 @@ const TW = Main.Models.transport_workflow_module()
                 a_builder_config=(p_nodes=12, p_max=7.0, cos_nodes=5, use_aniso=false),
             )
             A_expected_override = Main.AFieldBuilder.build_A_triplet(
-                legacy.quark_params,
-                legacy.thermo_params;
+                relaxtime_inputs.quark_params,
+                relaxtime_inputs.thermo_params;
                 p_nodes=12,
                 p_max=7.0,
                 cos_nodes=5,

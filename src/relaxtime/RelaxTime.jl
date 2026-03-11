@@ -23,11 +23,15 @@ end
 if !isdefined(Main, :ParameterAdapters)
     Base.include(Main, normpath(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl")))
 end
+if !isdefined(Main, :ValidationUtils)
+    Base.include(Main, normpath(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl")))
+end
 
 module RelaxTime
 
 # ── Integration & utility submodules ──
 include(joinpath(@__DIR__, "..", "utils", "ParameterAdapters.jl"))
+include(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl"))
 include(joinpath(@__DIR__, "..", "integration", "GaussLegendre.jl"))
 include(joinpath(@__DIR__, "..", "utils", "ParticleSymbols.jl"))
 include(joinpath(@__DIR__, "..", "integration", "PhaseSpaceSampling.jl"))
@@ -79,7 +83,7 @@ for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso
               :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
               :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
-              :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :KinematicChecks)
+              :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)
     if !isdefined(@__MODULE__, _name)
         Core.eval(@__MODULE__, :(const $_name = RelaxTime.$_name))
     end

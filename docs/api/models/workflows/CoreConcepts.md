@@ -46,7 +46,13 @@
 
 - 校验 `QuarkParams` 与 `ThermoParams`
 - 转换成 workflow 内部稳定使用的 NamedTuple 结构
-- 提供 `as_legacy_inputs` 这类兼容桥接能力
+- 提供 `as_legacy_inputs` 这类已弃用的兼容桥接能力
+
+兼容说明：
+
+- `as_legacy_inputs` 仅为历史调用方保留，已进入弃用窗口。
+- workflow 主路径与常规测试已切换到 `as_relaxtime_inputs`。
+- 该旧入口不再属于推荐使用的公开表面，只应在显式兼容场景下访问。
 
 它的意义不在于“再提供一个业务入口”，而在于把参数归一化从 workflow 主逻辑里抽离出来。
 

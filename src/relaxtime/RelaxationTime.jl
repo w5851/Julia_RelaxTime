@@ -56,8 +56,15 @@ struct inputs to NamedTuples at function boundaries. This ensures:
 
 # Dependencies loaded by RelaxTime.jl entry point
 
+const _VALIDATION_UTILS_PATH = normpath(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl"))
+if !isdefined(Main, :ValidationUtils)
+    Base.include(Main, _VALIDATION_UTILS_PATH)
+end
+
 using Main.ParameterTypes: QuarkParams, ThermoParams
-using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input,
+    normalize_symbol_mapping_input, lookup_symbol_value
+using Main.ValidationUtils: validate_grid_weight_pair
 
 using ..AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
@@ -102,25 +109,12 @@ const RATE_ALIASES = (
     )
 end
 
-@inline function density_lookup(densities, key::Symbol)
-    if densities isa NamedTuple
-        hasproperty(densities, key) || error("densities is missing $(key)")
-        return getproperty(densities, key)
-    elseif densities isa AbstractDict
-        haskey(densities, key) || error("densities is missing $(key)")
-        return densities[key]
-    else
-        error("densities must be a NamedTuple or Dict with keys :u, :d, :s, :ubar, :dbar, :sbar")
-    end
-end
+@inline density_value(densities::NamedTuple, key::Symbol) = lookup_symbol_value(densities, key, "densities")
 
 @inline _has_rate(rates::NamedTuple, key::Symbol) = hasproperty(rates, key)
-@inline _has_rate(rates::AbstractDict, key::Symbol) = haskey(rates, key)
-
 @inline _get_rate(rates::NamedTuple, key::Symbol) = getproperty(rates, key)
-@inline _get_rate(rates::AbstractDict, key::Symbol) = rates[key]
 
-@inline function _resolve_rate_key(rates, key::Symbol)::Symbol
+@inline function _resolve_rate_key(rates::NamedTuple, key::Symbol)::Symbol
     aliases = get(RATE_ALIASES, key, (key,))
     for candidate in aliases
         _has_rate(rates, candidate) && return candidate
@@ -128,14 +122,19 @@ end
     return key
 end
 
-@inline function rate_lookup(rates, key::Symbol)
-    if rates isa NamedTuple || rates isa AbstractDict
-        resolved_key = _resolve_rate_key(rates, key)
-        _has_rate(rates, resolved_key) || error("average rate for $(key) not found")
-        return _get_rate(rates, resolved_key)
-    else
-        error("rates must be a NamedTuple or Dict")
-    end
+@inline function _rate_value_core(rates::NamedTuple, key::Symbol)
+    resolved_key = _resolve_rate_key(rates, key)
+    _has_rate(rates, resolved_key) || throw(ArgumentError("average rate for $(key) not found"))
+    return _get_rate(rates, resolved_key)
+end
+
+@inline function rate_value(rates, key::Symbol)
+    return _rate_value_core(normalize_symbol_mapping_input(rates, "rates"), key)
+end
+
+function rate_lookup(args...)
+    Base.depwarn("rate_lookup is deprecated; use rate_value instead.", :rate_lookup)
+    return rate_value(args...)
 end
 
 """
@@ -191,12 +190,13 @@ function compute_average_rates(
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
+    existing_rates_nt = existing_rates === nothing ? nothing : normalize_symbol_mapping_input(existing_rates, "existing_rates")
 
-    return _compute_average_rates_nt(
+    return _compute_average_rates_core(
         quark_nt,
         thermo_nt,
         K_coeffs;
-        existing_rates=existing_rates,
+        existing_rates=existing_rates_nt,
         cs_caches=cs_caches,
         p_nodes=p_nodes,
         angle_nodes=angle_nodes,
@@ -212,11 +212,11 @@ function compute_average_rates(
     )
 end
 
-function _compute_average_rates_nt(
+function _compute_average_rates_core(
     quark_params::NamedTuple,
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple;
-    existing_rates::Union{Nothing,NamedTuple,AbstractDict}=nothing,
+    existing_rates::Union{Nothing,NamedTuple}=nothing,
     cs_caches::Dict{Symbol,CrossSectionCache}=Dict{Symbol,CrossSectionCache}(),
     p_nodes::Int=DEFAULT_P_NODES,
     angle_nodes::Int=DEFAULT_ANGLE_NODES,
@@ -243,9 +243,9 @@ function _compute_average_rates_nt(
     # - numerator momentum integrals p_i,p_j use semi-infinite [0,∞) integration
     # - σ(s) cache uses Λ cutoff: σ(s) = 0 when s exceeds Λ-based threshold
     # - number densities remain semi-infinite inside AverageScatteringRate
-    if (p_grid === nothing) != (p_w === nothing)
-        error("compute_average_rates: p_grid and p_w must be provided together")
-    end
+    validate_grid_weight_pair("compute_average_rates", "p_grid", p_grid, "p_w", p_w)
+    validate_grid_weight_pair("compute_average_rates", "cos_grid", cos_grid, "cos_w", cos_w)
+    validate_grid_weight_pair("compute_average_rates", "phi_grid", phi_grid, "phi_w", phi_w)
     
     # σ(s)缓存默认使用 Λ 截断
     effective_sigma_cutoff = sigma_cutoff === nothing ? Λ_inv_fm : sigma_cutoff
@@ -286,37 +286,49 @@ function _compute_average_rates_nt(
     return NamedTuple(rates)
 end
 
+@inline _compute_average_rates_compat(args...; kwargs...) = _compute_average_rates_core(args...; kwargs...)
+@inline _compute_average_rates_nt(args...; kwargs...) = _compute_average_rates_compat(args...; kwargs...)
+
 # tau_i^-1 = sum_j rho_j * \bar{w}_{ij}
 function relaxation_rates(
     densities::Union{NamedTuple,AbstractDict},
     rates::Union{NamedTuple,AbstractDict}
 )::NamedTuple
-    n_u = density_lookup(densities, :u)
-    n_d = density_lookup(densities, :d)
-    n_s = density_lookup(densities, :s)
-    n_ubar = density_lookup(densities, :ubar)
-    n_dbar = density_lookup(densities, :dbar)
-    n_sbar = density_lookup(densities, :sbar)
+    densities_nt = normalize_symbol_mapping_input(densities, "densities")
+    rates_nt = normalize_symbol_mapping_input(rates, "rates")
+    return _relaxation_rates_core(densities_nt, rates_nt)
+end
 
-    w_uu = rate_lookup(rates, :uu_to_uu)
-    w_ud = rate_lookup(rates, :ud_to_ud)
-    w_us = rate_lookup(rates, :us_to_us)
-    w_udbar = rate_lookup(rates, :udbar_to_udbar)
-    w_dubar = rate_lookup(rates, :dubar_to_dubar)
-    w_uubar = rate_lookup(rates, :uubar_to_uubar)
-    w_uubar_ddbar = rate_lookup(rates, :uubar_to_ddbar)
-    w_usbar = rate_lookup(rates, :usbar_to_usbar)
-    w_subar = rate_lookup(rates, :subar_to_subar)
-    w_uubar_ssbar = rate_lookup(rates, :uubar_to_ssbar)
-    w_ss = rate_lookup(rates, :ss_to_ss)
-    w_ssbar_uubar = rate_lookup(rates, :ssbar_to_uubar)
-    w_ssbar = rate_lookup(rates, :ssbar_to_ssbar)
+function _relaxation_rates_core(
+    densities::NamedTuple,
+    rates::NamedTuple,
+)::NamedTuple
+    n_u = density_value(densities, :u)
+    n_d = density_value(densities, :d)
+    n_s = density_value(densities, :s)
+    n_ubar = density_value(densities, :ubar)
+    n_dbar = density_value(densities, :dbar)
+    n_sbar = density_value(densities, :sbar)
+
+    w_uu = rate_value(rates, :uu_to_uu)
+    w_ud = rate_value(rates, :ud_to_ud)
+    w_us = rate_value(rates, :us_to_us)
+    w_udbar = rate_value(rates, :udbar_to_udbar)
+    w_dubar = rate_value(rates, :dubar_to_dubar)
+    w_uubar = rate_value(rates, :uubar_to_uubar)
+    w_uubar_ddbar = rate_value(rates, :uubar_to_ddbar)
+    w_usbar = rate_value(rates, :usbar_to_usbar)
+    w_subar = rate_value(rates, :subar_to_subar)
+    w_uubar_ssbar = rate_value(rates, :uubar_to_ssbar)
+    w_ss = rate_value(rates, :ss_to_ss)
+    w_ssbar_uubar = rate_value(rates, :ssbar_to_uubar)
+    w_ssbar = rate_value(rates, :ssbar_to_ssbar)
 
     # Additional rates for antiquark relaxation times
-    w_ubardbar = rate_lookup(rates, :ubardbar_to_ubardbar)
-    w_ubarubar = rate_lookup(rates, :ubarubar_to_ubarubar)
-    w_ubarsbar = rate_lookup(rates, :ubarsbar_to_ubarsbar)
-    w_sbarsbar = rate_lookup(rates, :sbarsbar_to_sbarsbar)
+    w_ubardbar = rate_value(rates, :ubardbar_to_ubardbar)
+    w_ubarubar = rate_value(rates, :ubarubar_to_ubarubar)
+    w_ubarsbar = rate_value(rates, :ubarsbar_to_ubarsbar)
+    w_sbarsbar = rate_value(rates, :sbarsbar_to_sbarsbar)
 
     # u quark (shared with d by isospin symmetry)
     omega_u = n_u * (w_uu + w_ud) +
@@ -392,7 +404,7 @@ const REQUIRED_RATE_KEYS_FOR_TAU = (
 @inline function can_compute_tau_from_existing_rates(rates)::Bool
     try
         for k in REQUIRED_RATE_KEYS_FOR_TAU
-            rate_lookup(rates, k)
+            rate_value(rates, k)
         end
         return true
     catch err
@@ -463,15 +475,17 @@ function relaxation_times(
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
+    densities_nt = normalize_symbol_mapping_input(densities, "densities")
+    existing_rates_nt = existing_rates === nothing ? nothing : normalize_symbol_mapping_input(existing_rates, "existing_rates")
     
-    rates = if existing_rates !== nothing && can_compute_tau_from_existing_rates(existing_rates)
-        existing_rates isa NamedTuple ? existing_rates : (; (Symbol(k) => v for (k, v) in pairs(existing_rates))...)
+    rates = if existing_rates_nt !== nothing && can_compute_tau_from_existing_rates(existing_rates_nt)
+        existing_rates_nt
     else
-        _compute_average_rates_nt(
+        _compute_average_rates_core(
             quark_nt,
             thermo_nt,
             K_coeffs;
-            existing_rates=existing_rates,
+            existing_rates=existing_rates_nt,
             cs_caches=cs_caches,
             p_nodes=p_nodes,
             angle_nodes=angle_nodes,
@@ -487,7 +501,7 @@ function relaxation_times(
         )
     end
 
-    tau_inv = relaxation_rates(densities, rates)
+    tau_inv = _relaxation_rates_core(densities_nt, rates)
     tau = (
         u = safe_inv(tau_inv.u),
         d = safe_inv(tau_inv.d),

@@ -56,15 +56,33 @@ const K_COEFFS = (K_σπ=1.0, K_σK=1.0, K_σ=1.0, K_δπ=1.0, K_δK=1.0)
     @test tau_inv.sbar ≈ EXPECTED_TAU_INV.sbar
 end
 
-@testset "rate_lookup alias table" begin
-    @test RelaxationTime.rate_lookup(RATES_SAMPLE, :dubar_to_dubar) == RATES_SAMPLE.udbar_to_udbar
-    @test RelaxationTime.rate_lookup(RATES_SAMPLE, :subar_to_subar) == RATES_SAMPLE.usbar_to_usbar
-    @test RelaxationTime.rate_lookup(RATES_SAMPLE, :ubardbar_to_ubardbar) == RATES_SAMPLE.ud_to_ud
+@testset "rate_value alias table" begin
+    @test RelaxationTime.rate_value(RATES_SAMPLE, :dubar_to_dubar) == RATES_SAMPLE.udbar_to_udbar
+    @test RelaxationTime.rate_value(RATES_SAMPLE, :subar_to_subar) == RATES_SAMPLE.usbar_to_usbar
+    @test RelaxationTime.rate_value(RATES_SAMPLE, :ubardbar_to_ubardbar) == RATES_SAMPLE.ud_to_ud
 
     rates_dict = Dict{Symbol, Float64}(pairs(RATES_SAMPLE))
-    @test RelaxationTime.rate_lookup(rates_dict, :ubarubar_to_ubarubar) == RATES_SAMPLE.uu_to_uu
-    @test RelaxationTime.rate_lookup(rates_dict, :ubarsbar_to_ubarsbar) == RATES_SAMPLE.us_to_us
-    @test RelaxationTime.rate_lookup(rates_dict, :sbarsbar_to_sbarsbar) == RATES_SAMPLE.ss_to_ss
+    @test RelaxationTime.rate_value(rates_dict, :ubarubar_to_ubarubar) == RATES_SAMPLE.uu_to_uu
+    @test RelaxationTime.rate_value(rates_dict, :ubarsbar_to_ubarsbar) == RATES_SAMPLE.us_to_us
+    @test RelaxationTime.rate_value(rates_dict, :sbarsbar_to_sbarsbar) == RATES_SAMPLE.ss_to_ss
+end
+
+@testset "relaxation adapters normalize Dict inputs" begin
+    densities_dict = Dict{Symbol, Float64}(pairs(DENSITIES_SAMPLE))
+    rates_dict = Dict{Symbol, Float64}(pairs(RATES_SAMPLE))
+
+    tau_inv = relaxation_rates(densities_dict, rates_dict)
+    @test tau_inv == EXPECTED_TAU_INV
+
+    result = relaxation_times(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        densities=densities_dict,
+        existing_rates=rates_dict,
+    )
+    @test result.tau_inv == EXPECTED_TAU_INV
+    @test result.tau == EXPECTED_TAU
 end
 
 @testset "relaxation_times uses provided rates" begin

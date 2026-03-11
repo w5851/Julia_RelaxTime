@@ -33,6 +33,9 @@ using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
 using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_distribution_aniso
 
 using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
+using Main.ValidationUtils: require_finite, require_positive_finite,
+    require_nonnegative_finite, require_positive_integer, validate_grid_weight_pair
 
 export shear_viscosity, bulk_viscosity, bulk_viscosity_isentropic, electric_conductivity, transport_coefficients
 export diffusion_coefficient, diffusion_matrix
@@ -82,32 +85,11 @@ function TransportIntegrationConfig(;
     cos_grid::Union{Nothing,Vector{Float64}}=nothing,
     cos_w::Union{Nothing,Vector{Float64}}=nothing,
 )
-    p_nodes > 0 || error("TransportIntegrationConfig: p_nodes must be > 0")
-    cos_nodes > 0 || error("TransportIntegrationConfig: cos_nodes must be > 0")
-    isfinite(p_max) && p_max > 0.0 || error("TransportIntegrationConfig: p_max must be finite and > 0")
-
-    if (p_grid === nothing) != (p_w === nothing)
-        error("TransportIntegrationConfig: p_grid and p_w must be provided together")
-    end
-    if p_grid !== nothing && length(p_grid) != length(p_w)
-        error("TransportIntegrationConfig: p_grid and p_w length mismatch")
-    end
-    if p_grid !== nothing
-        isempty(p_grid) && error("TransportIntegrationConfig: p_grid must not be empty")
-        all(isfinite, p_grid) || error("TransportIntegrationConfig: p_grid must be finite")
-        all(isfinite, p_w) || error("TransportIntegrationConfig: p_w must be finite")
-    end
-    if (cos_grid === nothing) != (cos_w === nothing)
-        error("TransportIntegrationConfig: cos_grid and cos_w must be provided together")
-    end
-    if cos_grid !== nothing && length(cos_grid) != length(cos_w)
-        error("TransportIntegrationConfig: cos_grid and cos_w length mismatch")
-    end
-    if cos_grid !== nothing
-        isempty(cos_grid) && error("TransportIntegrationConfig: cos_grid must not be empty")
-        all(isfinite, cos_grid) || error("TransportIntegrationConfig: cos_grid must be finite")
-        all(isfinite, cos_w) || error("TransportIntegrationConfig: cos_w must be finite")
-    end
+    require_positive_integer("TransportIntegrationConfig.p_nodes", p_nodes)
+    require_positive_integer("TransportIntegrationConfig.cos_nodes", cos_nodes)
+    require_positive_finite("TransportIntegrationConfig.p_max", p_max)
+    validate_grid_weight_pair("TransportIntegrationConfig", "p_grid", p_grid, "p_w", p_w)
+    validate_grid_weight_pair("TransportIntegrationConfig", "cos_grid", cos_grid, "cos_w", cos_w)
     return TransportIntegrationConfig(p_nodes, p_max, p_grid, p_w, cos_nodes, cos_grid, cos_w)
 end
 
@@ -220,8 +202,8 @@ function TransportRequest(
     return TransportRequest(quark, thermo, tau, physics, integration)
 end
 
-@inline _qp_view(q::QuarkParams) = (m=q.m, μ=q.μ)
-@inline _tp_view(t::ThermoParams) = (T=t.T, Φ=t.Φ, Φbar=t.Φbar, ξ=t.ξ)
+@inline _qp_view(q::QuarkParams) = normalize_quark_input(q)
+@inline _tp_view(t::ThermoParams) = normalize_thermo_input(t)
 
 function shear_viscosity(
     quark::QuarkParams,
@@ -777,14 +759,13 @@ end
     bulk_coeffs_isentropic::Union{Nothing,NamedTuple}=nothing,
 )
     T = thermo_params.T
-    isfinite(T) && T > 0.0 || error("thermo_params.T must be finite and > 0")
-    isfinite(thermo_params.Φ) || error("thermo_params.Φ must be finite")
-    isfinite(thermo_params.Φbar) || error("thermo_params.Φbar must be finite")
+    require_positive_finite("thermo_params.T", T)
+    require_finite("thermo_params.Φ", thermo_params.Φ)
+    require_finite("thermo_params.Φbar", thermo_params.Φbar)
 
     for sp in _SPECIES_ALL
         τ = tau_for_species(sp, tau)
-        isfinite(τ) || error("tau.:$sp must be finite")
-        τ >= 0.0 || error("tau.:$sp must be >= 0")
+        require_nonnegative_finite("tau.:$sp", τ)
     end
 
     check_mass = provider === nothing || !hasproperty(provider, :mass_for_species)
@@ -794,38 +775,37 @@ end
         m = getproperty(quark_params.m, fl)
         μ = getproperty(quark_params.μ, fl)
         if check_mass
-            isfinite(m) || error("quark_params.m.$fl must be finite")
-            m >= 0.0 || error("quark_params.m.$fl must be >= 0")
+            require_nonnegative_finite("quark_params.m.$fl", m)
         end
         if check_mu
-            isfinite(μ) || error("quark_params.μ.$fl must be finite")
+            require_finite("quark_params.μ.$fl", μ)
         end
     end
 
-    config.p_nodes > 0 || error("integration p_nodes must be > 0")
-    config.cos_nodes > 0 || error("integration cos_nodes must be > 0")
-    isfinite(config.p_max) && config.p_max > 0.0 || error("integration p_max must be finite and > 0")
+    require_positive_integer("integration p_nodes", config.p_nodes)
+    require_positive_integer("integration cos_nodes", config.cos_nodes)
+    require_positive_finite("integration p_max", config.p_max)
 
     if charges !== nothing
-        isfinite(charges.u) || error("charges.u must be finite")
-        isfinite(charges.d) || error("charges.d must be finite")
-        isfinite(charges.s) || error("charges.s must be finite")
+        require_finite("charges.u", charges.u)
+        require_finite("charges.d", charges.d)
+        require_finite("charges.s", charges.s)
     end
 
     if bulk_coeffs_isentropic !== nothing
-        isfinite(bulk_coeffs_isentropic.v_n_sq) || error("bulk_coeffs_isentropic.v_n_sq must be finite")
-        isfinite(bulk_coeffs_isentropic.dμB_dT_sigma) || error("bulk_coeffs_isentropic.dμB_dT_sigma must be finite")
+        require_finite("bulk_coeffs_isentropic.v_n_sq", bulk_coeffs_isentropic.v_n_sq)
+        require_finite("bulk_coeffs_isentropic.dμB_dT_sigma", bulk_coeffs_isentropic.dμB_dT_sigma)
 
-        length(bulk_coeffs_isentropic.masses) == 3 || error("bulk_coeffs_isentropic.masses must have length 3")
-        length(bulk_coeffs_isentropic.dM_dT) == 3 || error("bulk_coeffs_isentropic.dM_dT must have length 3")
-        length(bulk_coeffs_isentropic.dM_dμB) == 3 || error("bulk_coeffs_isentropic.dM_dμB must have length 3")
+        length(bulk_coeffs_isentropic.masses) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.masses must have length 3"))
+        length(bulk_coeffs_isentropic.dM_dT) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must have length 3"))
+        length(bulk_coeffs_isentropic.dM_dμB) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must have length 3"))
 
-        all(isfinite, bulk_coeffs_isentropic.masses) || error("bulk_coeffs_isentropic.masses must be finite")
+        all(isfinite, bulk_coeffs_isentropic.masses) || throw(ArgumentError("bulk_coeffs_isentropic.masses must be finite"))
         if !all(m -> m >= 0.0, bulk_coeffs_isentropic.masses)
             @warn "bulk_coeffs_isentropic.masses contains negative value(s) — may indicate unphysical gap solution; proceeding with abs(m)" masses=bulk_coeffs_isentropic.masses
         end
-        all(isfinite, bulk_coeffs_isentropic.dM_dT) || error("bulk_coeffs_isentropic.dM_dT must be finite")
-        all(isfinite, bulk_coeffs_isentropic.dM_dμB) || error("bulk_coeffs_isentropic.dM_dμB must be finite")
+        all(isfinite, bulk_coeffs_isentropic.dM_dT) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must be finite"))
+        all(isfinite, bulk_coeffs_isentropic.dM_dμB) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must be finite"))
     end
 
     return nothing

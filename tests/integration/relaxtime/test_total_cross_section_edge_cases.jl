@@ -17,11 +17,9 @@ using Test
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
-include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/TotalCrossSection.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
+if !isdefined(Main, :RelaxTime)
+    include("../../../src/relaxtime/RelaxTime.jl")
+end
 
 using .TotalCrossSection
 using .Constants_PNJL
@@ -99,6 +97,34 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         
         println("✓ calculate_all_total_cross_sections works with struct parameters")
         println("  Finite results: $finite_count / $(length(all_σ))")
+    end
+
+    @testset "Structured failure contract" begin
+        bad_K_coeffs = (bad = 1.0,)
+        s = 31.0
+
+        detailed = calculate_all_total_cross_sections_detailed(
+            s, q_struct_with_A, t_struct, bad_K_coeffs, n_points=6
+        )
+        @test detailed.uu_to_uu.success == false
+        @test detailed.uu_to_uu.error_code !== nothing
+        @test !isnothing(detailed.uu_to_uu.error_message)
+
+        @test_throws ErrorException calculate_all_total_cross_sections(
+            s, q_struct_with_A, t_struct, bad_K_coeffs, n_points=6
+        )
+
+        legacy = calculate_all_total_cross_sections(
+            s, q_struct_with_A, t_struct, bad_K_coeffs, n_points=6, on_error=:nan
+        )
+        @test isnan(legacy.uu_to_uu)
+
+        s_values = [s, s * 1.1]
+        scan_detailed = scan_s_dependence_detailed(
+            s_values, :uu_to_uu, q_struct_with_A, t_struct, bad_K_coeffs, n_points=6
+        )
+        @test length(scan_detailed) == length(s_values)
+        @test all(!result.success for result in scan_detailed)
     end
     
     # ========================================================================

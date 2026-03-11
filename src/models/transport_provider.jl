@@ -135,16 +135,16 @@ function prepare_transport_provider(
         end
     end
 
-    masses_nt = if masses_val === nothing
+    mass_triplet = if masses_val === nothing
         (u=Float64(quark_params.m.u), d=Float64(quark_params.m.d), s=Float64(quark_params.m.s))
     elseif masses_val isa NamedTuple
         (u=Float64(masses_val.u), d=Float64(masses_val.d), s=Float64(masses_val.s))
     else
         (u=Float64(masses_val[1]), d=Float64(masses_val[2]), s=Float64(masses_val[3]))
     end
-    mu_nt = (u=Float64(quark_params.μ.u), d=Float64(quark_params.μ.d), s=Float64(quark_params.μ.s))
+    mu_triplet = (u=Float64(quark_params.μ.u), d=Float64(quark_params.μ.d), s=Float64(quark_params.μ.s))
 
-    ctx1 = merge(provider.ctx, (masses=masses_nt, mu=mu_nt))
+    ctx1 = merge(provider.ctx, (masses=mass_triplet, mu=mu_triplet))
     mass_for_species = (species, qp, tp) -> _mass_from_ctx_or_params(ctx1, species, qp, tp)
     mu_for_species = (species, qp, tp) -> _mu_from_ctx_or_params(ctx1, species, qp, tp)
 
@@ -176,15 +176,15 @@ function prepare_transport_provider(
         end
     end
 
-    masses_nt = if masses_val === nothing
+    mass_triplet = if masses_val === nothing
         (u=Float64(quark_params.m.u), d=Float64(quark_params.m.d), s=Float64(quark_params.m.s))
     elseif masses_val isa NamedTuple
         (u=Float64(masses_val.u), d=Float64(masses_val.d), s=Float64(masses_val.s))
     else
         (u=Float64(masses_val[1]), d=Float64(masses_val[2]), s=Float64(masses_val[3]))
     end
-    mu_nt = (u=Float64(quark_params.μ.u), d=Float64(quark_params.μ.d), s=Float64(quark_params.μ.s))
-    ctx1 = (masses=masses_nt, mu=mu_nt)
+    mu_triplet = (u=Float64(quark_params.μ.u), d=Float64(quark_params.μ.d), s=Float64(quark_params.μ.s))
+    ctx1 = (masses=mass_triplet, mu=mu_triplet)
 
     out = merge(provider, (ctx=ctx1,))
     if !hasproperty(out, :energy_from_p_aniso)

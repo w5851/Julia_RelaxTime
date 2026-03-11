@@ -25,7 +25,7 @@ Phase B extends the migration from RelaxationTime chain to PNJL workflows/scans.
      - Shared helpers:
          - `normalize_quark_params`
          - `normalize_thermo_params`
-         - `as_legacy_inputs`
+         - `as_legacy_inputs`（已弃用，仅兼容用途）
 
 2. **Workflow modules switched to shared adapter**
      - `src/pnjl/workflows/TransportWorkflow.jl`

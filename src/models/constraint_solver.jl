@@ -26,12 +26,78 @@ end
     return [μ0, μ0, μ0]
 end
 
+@inline function _constraint_failure!(F)
+    @inbounds for i in eachindex(F)
+        F[i] = convert(eltype(F), 1e6)
+    end
+    return nothing
+end
+
+@inline function _refresh_constraint_state!(residual_fn!::Function, root)
+    tmpF = zeros(length(root))
+    residual_fn!(tmpF, root)
+    return nothing
+end
+
+function _solve_gap_with_outer_fallback(
+    model::AbstractQCDModel,
+    T_fm,
+    μ_input;
+    st_prev,
+    seed_guess,
+    solver_primary::AbstractGapSolver,
+    solver_secondary::Union{Nothing, AbstractGapSolver},
+    residual_norm_max::Real,
+    xi,
+    p_num::Int,
+    t_num::Int,
+)
+    initial_guess = if st_prev === nothing
+        Float64.(seed_guess)
+    else
+        Vector{Float64}(state_vector(st_prev))
+    end
+
+    try
+        return solve_gap(
+            model,
+            T_fm,
+            μ_input;
+            solver_backend=:models,
+            solver=solver_primary,
+            initial_guess=initial_guess,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
+    catch
+        solver_secondary === nothing && return nothing
+        try
+            return solve_gap(
+                model,
+                T_fm,
+                μ_input;
+                solver_backend=:models,
+                solver=solver_secondary,
+                initial_guess=initial_guess,
+                residual_norm_max=residual_norm_max,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+        catch
+            return nothing
+        end
+    end
+end
+
 function solve_fixedmu_constraint(
     model::AbstractQCDModel,
     T_fm::Real,
     μ_fm::Real;
     seed_guess::AbstractVector,
-    solver::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9),
+    solver::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9),
     xi::Real=0.0,
     p_num::Int=24,
     t_num::Int=8,
@@ -92,7 +158,7 @@ function solve_fixedrho_constraint(
     rho_target::Real;
     seed_guess::AbstractVector,
     mu0::Real=0.2,
-    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9),
+    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9),
     solver_secondary::Union{Nothing, AbstractGapSolver}=nothing,
     xi::Real=0.0,
     p_num::Int=24,
@@ -103,62 +169,34 @@ function solve_fixedrho_constraint(
     nlsolve_kwargs...,
 )
     st_ref = Ref{Any}(nothing)
-    x_state_ref = Ref(SVector{5, Float64}(fill(NaN, 5)))
-    mu_vec_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
-    pressure_ref = Ref(NaN)
-    rho_norm_ref = Ref(NaN)
-    entropy_ref = Ref(NaN)
-    energy_ref = Ref(NaN)
-    masses_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
+    x_state_ref = Ref{Any}(nothing)
+    mu_vec_ref = Ref{Any}(nothing)
+    pressure_ref = Ref{Any}(nothing)
+    rho_norm_ref = Ref{Any}(nothing)
+    entropy_ref = Ref{Any}(nothing)
+    energy_ref = Ref{Any}(nothing)
+    masses_ref = Ref{Any}(nothing)
 
     residual_fn! = (F, x) -> begin
-        μ = Float64(x[1])
+        μ = x[1]
         μ_vec = normalize_mu_vec(μ)
 
-        initial_guess = if st_ref[] === nothing
-            Float64.(seed_guess)
-        else
-            Vector{Float64}(state_vector(st_ref[]))
-        end
-
-        st = try
-            solve_gap(
-                model,
-                T_fm,
-                μ;
-                solver_backend=:models,
-                solver=solver_primary,
-                initial_guess=initial_guess,
-                residual_norm_max=residual_norm_max,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-            )
-        catch
-            if solver_secondary === nothing
-                nothing
-            else
-                try
-                    solve_gap(
-                        model,
-                        T_fm,
-                        μ;
-                        solver_backend=:models,
-                        solver=solver_secondary,
-                        initial_guess=initial_guess,
-                        residual_norm_max=residual_norm_max,
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-                catch
-                    nothing
-                end
-            end
-        end
+        st = _solve_gap_with_outer_fallback(
+            model,
+            T_fm,
+            μ;
+            st_prev=st_ref[],
+            seed_guess=seed_guess,
+            solver_primary=solver_primary,
+            solver_secondary=solver_secondary,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
         if st === nothing
-            F[1] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
@@ -184,7 +222,7 @@ function solve_fixedrho_constraint(
         energy_ref[] = energy
         masses_ref[] = masses
 
-        F[1] = rho_norm - rho_target
+        F[1] = convert(eltype(F), rho_norm - rho_target)
         return nothing
     end
 
@@ -192,7 +230,7 @@ function solve_fixedrho_constraint(
         nlsolve(
             residual_fn!,
             [Float64(mu0)];
-            autodiff=:finite,
+            autodiff=:forward,
             method=nlsolve_method,
             xtol=1e-9,
             ftol=1e-9,
@@ -205,7 +243,7 @@ function solve_fixedrho_constraint(
         nlsolve(
             residual_fn!,
             [Float64(mu0)];
-            autodiff=:finite,
+            autodiff=:forward,
             method=:trust_region,
             xtol=1e-9,
             ftol=1e-9,
@@ -213,10 +251,7 @@ function solve_fixedrho_constraint(
         )
     end
 
-    if st_ref[] === nothing
-        tmpF = zeros(1)
-        residual_fn!(tmpF, res.zero)
-    end
+    _refresh_constraint_state!(residual_fn!, res.zero)
 
     gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
     gap_norm = sqrt(sum(abs2, gap_vec))
@@ -253,7 +288,7 @@ function solve_fixedentropy_constraint(
     s_target::Real;
     seed_guess::AbstractVector,
     mu0::Real=0.2,
-    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9),
+    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9),
     solver_secondary::Union{Nothing, AbstractGapSolver}=nothing,
     xi::Real=0.0,
     p_num::Int=24,
@@ -265,62 +300,34 @@ function solve_fixedentropy_constraint(
     nlsolve_kwargs...,
 )
     st_ref = Ref{Any}(nothing)
-    x_state_ref = Ref(SVector{5, Float64}(fill(NaN, 5)))
-    mu_vec_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
-    pressure_ref = Ref(NaN)
-    rho_norm_ref = Ref(NaN)
-    entropy_ref = Ref(NaN)
-    energy_ref = Ref(NaN)
-    masses_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
+    x_state_ref = Ref{Any}(nothing)
+    mu_vec_ref = Ref{Any}(nothing)
+    pressure_ref = Ref{Any}(nothing)
+    rho_norm_ref = Ref{Any}(nothing)
+    entropy_ref = Ref{Any}(nothing)
+    energy_ref = Ref{Any}(nothing)
+    masses_ref = Ref{Any}(nothing)
 
     residual_fn! = (F, x) -> begin
-        μ = Float64(x[1])
+        μ = x[1]
         μ_vec = normalize_mu_vec(μ)
 
-        initial_guess = if st_ref[] === nothing
-            Float64.(seed_guess)
-        else
-            Vector{Float64}(state_vector(st_ref[]))
-        end
-
-        st = try
-            solve_gap(
-                model,
-                T_fm,
-                μ;
-                solver_backend=:models,
-                solver=solver_primary,
-                initial_guess=initial_guess,
-                residual_norm_max=residual_norm_max,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-            )
-        catch
-            if solver_secondary === nothing
-                nothing
-            else
-                try
-                    solve_gap(
-                        model,
-                        T_fm,
-                        μ;
-                        solver_backend=:models,
-                        solver=solver_secondary,
-                        initial_guess=initial_guess,
-                        residual_norm_max=residual_norm_max,
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-                catch
-                    nothing
-                end
-            end
-        end
+        st = _solve_gap_with_outer_fallback(
+            model,
+            T_fm,
+            μ;
+            st_prev=st_ref[],
+            seed_guess=seed_guess,
+            solver_primary=solver_primary,
+            solver_secondary=solver_secondary,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
         if st === nothing
-            F[1] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
@@ -338,7 +345,7 @@ function solve_fixedentropy_constraint(
         masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
 
         if mass_positive_constraint && any(m -> !isfinite(m) || m <= 0.0, masses)
-            F[1] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
@@ -351,24 +358,21 @@ function solve_fixedentropy_constraint(
         energy_ref[] = energy
         masses_ref[] = masses
 
-        F[1] = entropy - s_target
+        F[1] = convert(eltype(F), entropy - s_target)
         return nothing
     end
 
     res = nlsolve(
         residual_fn!,
         [Float64(mu0)];
-        autodiff=:finite,
+        autodiff=:forward,
         method=:trust_region,
         xtol=1e-9,
         ftol=1e-9,
         nlsolve_kwargs...,
     )
 
-    if st_ref[] === nothing
-        tmpF = zeros(1)
-        residual_fn!(tmpF, res.zero)
-    end
+    _refresh_constraint_state!(residual_fn!, res.zero)
 
     gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
     gap_norm = sqrt(sum(abs2, gap_vec))
@@ -418,7 +422,7 @@ function solve_fixedsigma_constraint(
     sigma_target::Real;
     seed_guess::AbstractVector,
     mu0::Real=0.2,
-    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9),
+    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9),
     solver_secondary::Union{Nothing, AbstractGapSolver}=nothing,
     xi::Real=0.0,
     p_num::Int=24,
@@ -429,62 +433,34 @@ function solve_fixedsigma_constraint(
     nlsolve_kwargs...,
 )
     st_ref = Ref{Any}(nothing)
-    x_state_ref = Ref(SVector{5, Float64}(fill(NaN, 5)))
-    mu_vec_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
-    pressure_ref = Ref(NaN)
-    rho_norm_ref = Ref(NaN)
-    entropy_ref = Ref(NaN)
-    energy_ref = Ref(NaN)
-    masses_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
+    x_state_ref = Ref{Any}(nothing)
+    mu_vec_ref = Ref{Any}(nothing)
+    pressure_ref = Ref{Any}(nothing)
+    rho_norm_ref = Ref{Any}(nothing)
+    entropy_ref = Ref{Any}(nothing)
+    energy_ref = Ref{Any}(nothing)
+    masses_ref = Ref{Any}(nothing)
 
     residual_fn! = (F, x) -> begin
-        μ = Float64(x[1])
+        μ = x[1]
         μ_vec = normalize_mu_vec(μ)
 
-        initial_guess = if st_ref[] === nothing
-            Float64.(seed_guess)
-        else
-            Vector{Float64}(state_vector(st_ref[]))
-        end
-
-        st = try
-            solve_gap(
-                model,
-                T_fm,
-                μ;
-                solver_backend=:models,
-                solver=solver_primary,
-                initial_guess=initial_guess,
-                residual_norm_max=residual_norm_max,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-            )
-        catch
-            if solver_secondary === nothing
-                nothing
-            else
-                try
-                    solve_gap(
-                        model,
-                        T_fm,
-                        μ;
-                        solver_backend=:models,
-                        solver=solver_secondary,
-                        initial_guess=initial_guess,
-                        residual_norm_max=residual_norm_max,
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-                catch
-                    nothing
-                end
-            end
-        end
+        st = _solve_gap_with_outer_fallback(
+            model,
+            T_fm,
+            μ;
+            st_prev=st_ref[],
+            seed_guess=seed_guess,
+            solver_primary=solver_primary,
+            solver_secondary=solver_secondary,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
         if st === nothing
-            F[1] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
@@ -512,28 +488,25 @@ function solve_fixedsigma_constraint(
 
         n_B = rho_norm * rho0
         if !isfinite(n_B) || abs(n_B) <= 1e-12
-            F[1] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
-        F[1] = entropy / n_B - sigma_target
+        F[1] = convert(eltype(F), entropy / n_B - sigma_target)
         return nothing
     end
 
     res = nlsolve(
         residual_fn!,
         [Float64(mu0)];
-        autodiff=:finite,
+        autodiff=:forward,
         method=:trust_region,
         xtol=1e-9,
         ftol=1e-9,
         nlsolve_kwargs...,
     )
 
-    if st_ref[] === nothing
-        tmpF = zeros(1)
-        residual_fn!(tmpF, res.zero)
-    end
+    _refresh_constraint_state!(residual_fn!, res.zero)
 
     gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
     gap_norm = sqrt(sum(abs2, gap_vec))
@@ -577,7 +550,7 @@ function solve_fixedasymrho_constraint(
     s_target::Real;
     seed_guess::AbstractVector,
     mu0::AbstractVector=Float64[0.2, 0.2, 0.2],
-    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9),
+    solver_primary::AbstractGapSolver=NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9),
     solver_secondary::Union{Nothing, AbstractGapSolver}=nothing,
     xi::Real=0.0,
     p_num::Int=24,
@@ -589,64 +562,34 @@ function solve_fixedasymrho_constraint(
     nlsolve_kwargs...,
 )
     st_ref = Ref{Any}(nothing)
-    x_state_ref = Ref(SVector{5, Float64}(fill(NaN, 5)))
-    mu_vec_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
-    pressure_ref = Ref(NaN)
-    rho_norm_ref = Ref(NaN)
-    entropy_ref = Ref(NaN)
-    energy_ref = Ref(NaN)
-    masses_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
-    rho_vec_ref = Ref(SVector{3, Float64}(fill(NaN, 3)))
+    x_state_ref = Ref{Any}(nothing)
+    mu_vec_ref = Ref{Any}(nothing)
+    pressure_ref = Ref{Any}(nothing)
+    rho_norm_ref = Ref{Any}(nothing)
+    entropy_ref = Ref{Any}(nothing)
+    energy_ref = Ref{Any}(nothing)
+    masses_ref = Ref{Any}(nothing)
+    rho_vec_ref = Ref{Any}(nothing)
 
     residual_fn! = (F, x) -> begin
-        μ_vec = SVector{3}(Float64(x[1]), Float64(x[2]), Float64(x[3]))
+        μ_vec = SVector{3}(x[1], x[2], x[3])
 
-        initial_guess = if st_ref[] === nothing
-            Float64.(seed_guess)
-        else
-            Vector{Float64}(state_vector(st_ref[]))
-        end
-
-        st = try
-            solve_gap(
-                model,
-                T_fm,
-                μ_vec;
-                solver_backend=:models,
-                solver=solver_primary,
-                initial_guess=initial_guess,
-                residual_norm_max=residual_norm_max,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-            )
-        catch
-            if solver_secondary === nothing
-                nothing
-            else
-                try
-                    solve_gap(
-                        model,
-                        T_fm,
-                        μ_vec;
-                        solver_backend=:models,
-                        solver=solver_secondary,
-                        initial_guess=initial_guess,
-                        residual_norm_max=residual_norm_max,
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-                catch
-                    nothing
-                end
-            end
-        end
+        st = _solve_gap_with_outer_fallback(
+            model,
+            T_fm,
+            μ_vec;
+            st_prev=st_ref[],
+            seed_guess=seed_guess,
+            solver_primary=solver_primary,
+            solver_secondary=solver_secondary,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
         if st === nothing
-            F[1] = 1e6
-            F[2] = 1e6
-            F[3] = 1e6
+            _constraint_failure!(F)
             return nothing
         end
 
@@ -681,26 +624,23 @@ function solve_fixedasymrho_constraint(
         masses_ref[] = masses
         rho_vec_ref[] = SVector{3}(Tuple(rho_vec))
 
-        F[1] = nB - rho_target
-        F[2] = ud_ratio - ud_ratio_target
-        F[3] = rho_s - s_target
+        F[1] = convert(eltype(F), nB - rho_target)
+        F[2] = convert(eltype(F), ud_ratio - ud_ratio_target)
+        F[3] = convert(eltype(F), rho_s - s_target)
         return nothing
     end
 
     res = nlsolve(
         residual_fn!,
         Float64.(mu0);
-        autodiff=:finite,
+        autodiff=:forward,
         method=:trust_region,
         xtol=1e-9,
         ftol=1e-9,
         nlsolve_kwargs...,
     )
 
-    if st_ref[] === nothing
-        tmpF = zeros(3)
-        residual_fn!(tmpF, res.zero)
-    end
+    _refresh_constraint_state!(residual_fn!, res.zero)
 
     gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
     gap_norm = sqrt(sum(abs2, gap_vec))

@@ -32,9 +32,9 @@ using .MesonMassWorkflow
         t_num=4,
     )
 
-    legacy_inputs = TransportWorkflow.as_legacy_inputs(inputs.quark_params, inputs.thermo_params)
-    @test haskey(legacy_inputs, :quark_params)
-    @test haskey(legacy_inputs, :thermo_params)
+    relaxtime_inputs = TransportWorkflow.as_relaxtime_inputs(inputs.quark_params, inputs.thermo_params)
+    @test haskey(relaxtime_inputs, :quark_params)
+    @test haskey(relaxtime_inputs, :thermo_params)
 
     A_struct = TransportWorkflow._A_from_equilibrium(
         T,

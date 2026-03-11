@@ -6,7 +6,7 @@ if !isdefined(Main, :ParameterTypes)
 end
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
-export normalize_quark_params, normalize_thermo_params, as_legacy_inputs
+export normalize_quark_params, normalize_thermo_params, as_relaxtime_inputs
 
 @inline function _ensure_real_field(scope::AbstractString, name::Symbol, value)
     value isa Real || throw(ArgumentError("$(scope).$(name) must be Real, got $(typeof(value))"))
@@ -73,6 +73,10 @@ end
     throw(ArgumentError("thermo_params must be ThermoParams, got $(typeof(t))"))
 end
 
-@inline as_legacy_inputs(q, t) = (quark_params=normalize_quark_params(q), thermo_params=normalize_thermo_params(t))
+@inline as_relaxtime_inputs(q, t) = (quark_params=normalize_quark_params(q), thermo_params=normalize_thermo_params(t))
+function as_legacy_inputs(args...)
+    Base.depwarn("as_legacy_inputs is deprecated; use as_relaxtime_inputs instead.", :as_legacy_inputs)
+    return as_relaxtime_inputs(args...)
+end
 
 end # module

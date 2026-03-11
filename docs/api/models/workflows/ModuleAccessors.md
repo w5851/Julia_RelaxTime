@@ -39,9 +39,14 @@
 
 - `normalize_quark_params`
 - `normalize_thermo_params`
-- `as_legacy_inputs`
+- `as_legacy_inputs`（已弃用，仅兼容用途）
 
 它的职责是把 `QuarkParams` 与 `ThermoParams` 校验并归一化为 workflow 内部稳定使用的 NamedTuple 结构。
+
+兼容说明：
+
+- 新代码应使用 `as_relaxtime_inputs` 作为主名。
+- `as_legacy_inputs` 已不再默认导出，只保留给显式兼容路径与兼容测试。
 
 ## 为什么这些接口仍然应该写进主题文档
 

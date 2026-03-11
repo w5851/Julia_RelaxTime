@@ -36,6 +36,23 @@ end
     return x isa Integer ? Int(x) : parse(Int, String(x))
 end
 
+@inline function _to_bool(x, default::Bool)
+    x === nothing && return default
+    if x isa Bool
+        return x
+    end
+    if x isa Number
+        return Int(x) != 0
+    end
+    s = lowercase(String(x))
+    if s in ("1", "true", "yes", "y", "on")
+        return true
+    elseif s in ("0", "false", "no", "n", "off")
+        return false
+    end
+    error("Invalid boolean value: $(x)")
+end
+
 function _to_symbol_dict(obj)
     data = Dict{Symbol,Any}()
     for (k, v) in pairs(obj)

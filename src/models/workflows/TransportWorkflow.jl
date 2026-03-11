@@ -82,7 +82,7 @@ if !isdefined(Main, :WorkflowParamAdapters)
     Base.include(Main, _WORKFLOW_PARAM_ADAPTERS_PATH)
 end
 const WorkflowParamAdapters = Main.WorkflowParamAdapters
-using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, as_legacy_inputs
+using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, as_relaxtime_inputs
 
 # TransportCoefficients available via RelaxTime backward-compat promotion
 const TransportCoefficients = Main.TransportCoefficients
@@ -623,7 +623,7 @@ function solve_transport_from_equilibrium(
     end
 
     effective_provider = provider === nothing ? _default_transport_provider_for_backend(cache) : provider
-    legacy_inputs = as_legacy_inputs(quark_params_basic, thermo_params)
+    legacy_inputs = as_relaxtime_inputs(quark_params_basic, thermo_params)
     if effective_provider === nothing
         # No backend default provider: only materialize a provider if the desired
         # behavior differs from TransportCoefficients default.

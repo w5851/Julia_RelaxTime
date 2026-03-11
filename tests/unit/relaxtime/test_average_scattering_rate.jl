@@ -9,6 +9,7 @@ end
 
 using Main.AverageScatteringRate
 using Main.ParameterTypes: QuarkParams, ThermoParams
+using Main.GaussLegendre: gauleg
 
 # 构造简化参数，降低节点以加快单测
 const QUARK_PARAMS = (
@@ -101,5 +102,107 @@ end
     @test AverageScatteringRate.interpolate_sigma(cache, 10.0) == 1.0
     @test AverageScatteringRate.interpolate_sigma(cache, 20.0) == 3.0
     @test AverageScatteringRate.interpolate_sigma(cache, 15.0) ≈ 2.0 atol=1e-12
+end
+
+@testset "number_density default grid matches explicit grids" begin
+    p_nodes = 6
+    angle_nodes = 4
+    scale = 10.0
+
+    t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
+    p_grid = Float64[]
+    p_w = Float64[]
+    for (t, wt) in zip(t_grid, t_w)
+        if t >= 0.9999
+            continue
+        end
+        inv_gap = 1.0 / (1.0 - t)
+        push!(p_grid, scale * t * inv_gap)
+        push!(p_w, wt * scale * inv_gap^2)
+    end
+    cos_grid, cos_w = gauleg(0.0, 1.0, angle_nodes)
+
+    ρ_default = AverageScatteringRate.number_density(
+        :u,
+        QUARK_PARAMS.m.u,
+        QUARK_PARAMS.μ.u,
+        THERMO_ISO.T,
+        THERMO_ISO.Φ,
+        THERMO_ISO.Φbar,
+        THERMO_ISO.ξ;
+        p_nodes=p_nodes,
+        angle_nodes=angle_nodes,
+        scale=scale,
+    )
+
+    ρ_explicit = AverageScatteringRate.number_density(
+        :u,
+        QUARK_PARAMS.m.u,
+        QUARK_PARAMS.μ.u,
+        THERMO_ISO.T,
+        THERMO_ISO.Φ,
+        THERMO_ISO.Φbar,
+        THERMO_ISO.ξ;
+        p_grid=p_grid,
+        p_w=p_w,
+        cos_grid=cos_grid,
+        cos_w=cos_w,
+    )
+
+    @test isfinite(ρ_default)
+    @test isapprox(ρ_default, ρ_explicit; rtol=1e-12, atol=0.0)
+end
+
+@testset "average_scattering_rate default grids match explicit grids" begin
+    cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
+    p_nodes = 4
+    angle_nodes = 2
+    phi_nodes = 2
+    scale = 10.0
+
+    t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
+    p_grid = Float64[]
+    p_w = Float64[]
+    for (t, wt) in zip(t_grid, t_w)
+        if t >= 0.9999
+            continue
+        end
+        inv_gap = 1.0 / (1.0 - t)
+        push!(p_grid, scale * t * inv_gap)
+        push!(p_w, wt * scale * inv_gap^2)
+    end
+    cos_grid, cos_w = gauleg(-1.0, 1.0, angle_nodes)
+    phi_grid, phi_w = gauleg(0.0, 2π, phi_nodes)
+
+    ω_default = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=p_nodes,
+        angle_nodes=angle_nodes,
+        phi_nodes=phi_nodes,
+        scale=scale,
+        cs_cache=cache,
+        n_sigma_points=4,
+    )
+
+    ω_explicit = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_grid=p_grid,
+        p_w=p_w,
+        cos_grid=cos_grid,
+        cos_w=cos_w,
+        phi_grid=phi_grid,
+        phi_w=phi_w,
+        cs_cache=cache,
+        n_sigma_points=4,
+    )
+
+    @test isfinite(ω_default)
+    @test isapprox(ω_default, ω_explicit; rtol=1e-12, atol=0.0)
 end
 

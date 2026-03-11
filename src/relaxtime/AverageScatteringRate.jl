@@ -41,11 +41,18 @@ Both produce identical results. Internal normalization ensures type stability an
 # Include-once helper
 # Dependencies loaded by RelaxTime.jl entry point
 
+const _VALIDATION_UTILS_PATH = normpath(joinpath(@__DIR__, "..", "utils", "ValidationUtils.jl"))
+if !isdefined(Main, :ValidationUtils)
+    Base.include(Main, _VALIDATION_UTILS_PATH)
+end
+
 using LinearAlgebra
 using Statistics
+using Base.Threads: ReentrantLock
 
 using Main.Constants_PNJL: Λ_inv_fm
 using ..GaussLegendre: gauleg
+using ..GaussLegendre: standard_nodes_weights
 import ..TotalCrossSection
 using ..TotalCrossSection: total_cross_section
 using ..TotalCrossSection: parse_particles_from_process
@@ -55,6 +62,7 @@ using Main.PNJLQuarkDistributions_Aniso: quark_distribution_aniso, antiquark_dis
 
 using Main.ParameterTypes: QuarkParams, ThermoParams
 using Main.ParameterAdapters: normalize_quark_input, normalize_thermo_input
+using Main.ValidationUtils: validate_grid_weight_pair
 
 export average_scattering_rate, CrossSectionCache, precompute_cross_section!, build_w0cdf_pchip_cache
 
@@ -261,7 +269,7 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
     asym_extra_points::Int=10)
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    return _precompute_cross_section_nt!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
+    return _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_points,
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
@@ -269,7 +277,7 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
         asym_extra_points=asym_extra_points)
 end
 
-function _precompute_cross_section_nt!(cache::CrossSectionCache, s_grid::Vector{Float64},
+function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vector{Float64},
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
     threshold_subtraction::Bool=false,
@@ -404,10 +412,10 @@ function get_sigma(cache::CrossSectionCache, s::Float64,
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    return _get_sigma_nt(cache, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
+    return _get_sigma_core(cache, s, quark_nt, thermo_nt, K_coeffs; n_points=n_points)
 end
 
-function _get_sigma_nt(cache::CrossSectionCache, s::Float64,
+function _get_sigma_core(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
     # Only cached PCHIP interpolation is supported.
@@ -494,7 +502,7 @@ function design_w0cdf_s_grid(
 )
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    return _design_w0cdf_s_grid_nt(process, quark_nt, thermo_nt;
+    return _design_w0cdf_s_grid_core(process, quark_nt, thermo_nt;
         N=N,
         p_nodes=p_nodes,
         angle_nodes=angle_nodes,
@@ -503,7 +511,7 @@ function design_w0cdf_s_grid(
         scale=scale)
 end
 
-function _design_w0cdf_s_grid_nt(
+function _design_w0cdf_s_grid_core(
     process::Symbol,
     quark_params::NamedTuple,
     thermo_params::NamedTuple;
@@ -651,7 +659,7 @@ function build_w0cdf_pchip_cache(
 )
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
-    s_grid = _design_w0cdf_s_grid_nt(
+    s_grid = _design_w0cdf_s_grid_core(
         process,
         quark_nt,
         thermo_nt;
@@ -665,7 +673,7 @@ function build_w0cdf_pchip_cache(
     cache = CrossSectionCache(process)
     # record whether asymptotic subtraction was requested (explicitly or auto-enabled)
     cache.asym_requested = threshold_subtraction
-    _precompute_cross_section_nt!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
+    _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_sigma_points,
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
@@ -679,6 +687,87 @@ end
 # 半无穷积分的默认参数
 const DEFAULT_SEMI_INF_SCALE = 10.0  # 半无穷积分的尺度参数
 const DEFAULT_SEMI_INF_NODES = 32    # 半无穷积分的节点数
+
+const _INTERVAL_GRID_CACHE = Dict{Tuple{Float64,Float64,Int},NTuple{2,Vector{Float64}}}()
+const _INTERVAL_GRID_LOCK = ReentrantLock()
+const _SEMI_INF_GRID_CACHE = Dict{Tuple{Int,Float64},NTuple{2,Vector{Float64}}}()
+const _SEMI_INF_GRID_LOCK = ReentrantLock()
+
+@inline function _build_interval_grid(a::Float64, b::Float64, n::Int)
+    nodes_std, weights_std = standard_nodes_weights(n)
+    nodes = similar(nodes_std)
+    weights = similar(weights_std)
+    scale = 0.5 * (b - a)
+    shift = 0.5 * (b + a)
+    @inbounds @simd for i in eachindex(nodes_std)
+        nodes[i] = scale * nodes_std[i] + shift
+        weights[i] = scale * weights_std[i]
+    end
+    return nodes, weights
+end
+
+function _cached_interval_grid(a::Float64, b::Float64, n::Int)
+    if a == 0.0 && b == 1.0 && n == DEFAULT_ANGLE_NODES
+        return _DEFAULT_HALF_COS_GRID
+    elseif a == -1.0 && b == 1.0 && n == DEFAULT_ANGLE_NODES
+        return _DEFAULT_FULL_COS_GRID
+    elseif a == 0.0 && b == TWO_PI && n == DEFAULT_PHI_NODES
+        return _DEFAULT_PHI_GRID
+    end
+
+    key = (a, b, n)
+    lock(_INTERVAL_GRID_LOCK)
+    try
+        return get!(_INTERVAL_GRID_CACHE, key) do
+            _build_interval_grid(a, b, n)
+        end
+    finally
+        unlock(_INTERVAL_GRID_LOCK)
+    end
+end
+
+function _build_semi_infinite_momentum_grid(p_nodes::Int, scale::Float64)
+    t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
+    p_vals = Float64[]
+    quadrature_wts = Float64[]
+    sizehint!(p_vals, length(t_grid))
+    sizehint!(quadrature_wts, length(t_w))
+
+    for (t, wt) in zip(t_grid, t_w)
+        if t >= 0.9999
+            continue
+        end
+        inv_gap = 1.0 / (1.0 - t)
+        p = scale * t * inv_gap
+        push!(p_vals, p)
+        push!(quadrature_wts, wt * scale * inv_gap^2)
+    end
+    return p_vals, quadrature_wts
+end
+
+function _cached_semi_infinite_momentum_grid(p_nodes::Int, scale::Float64)
+    if p_nodes == DEFAULT_SEMI_INF_NODES && scale == DEFAULT_SEMI_INF_SCALE
+        return _DEFAULT_DENSITY_SEMI_INF_GRID
+    elseif p_nodes == DEFAULT_P_NODES && scale == DEFAULT_SEMI_INF_SCALE
+        return _DEFAULT_ASR_SEMI_INF_GRID
+    end
+
+    key = (p_nodes, scale)
+    lock(_SEMI_INF_GRID_LOCK)
+    try
+        return get!(_SEMI_INF_GRID_CACHE, key) do
+            _build_semi_infinite_momentum_grid(p_nodes, scale)
+        end
+    finally
+        unlock(_SEMI_INF_GRID_LOCK)
+    end
+end
+
+const _DEFAULT_HALF_COS_GRID = _build_interval_grid(0.0, 1.0, DEFAULT_ANGLE_NODES)
+const _DEFAULT_FULL_COS_GRID = _build_interval_grid(-1.0, 1.0, DEFAULT_ANGLE_NODES)
+const _DEFAULT_PHI_GRID = _build_interval_grid(0.0, TWO_PI, DEFAULT_PHI_NODES)
+const _DEFAULT_DENSITY_SEMI_INF_GRID = _build_semi_infinite_momentum_grid(DEFAULT_SEMI_INF_NODES, DEFAULT_SEMI_INF_SCALE)
+const _DEFAULT_ASR_SEMI_INF_GRID = _build_semi_infinite_momentum_grid(DEFAULT_P_NODES, DEFAULT_SEMI_INF_SCALE)
 
 """
     number_density(flavor, m, μ, T, Φ, Φbar, ξ; kwargs...)
@@ -707,42 +796,33 @@ function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ:
     p_grid::Union{Nothing,Vector{Float64}}=nothing, p_w::Union{Nothing,Vector{Float64}}=nothing,
     cos_grid::Union{Nothing,Vector{Float64}}=nothing, cos_w::Union{Nothing,Vector{Float64}}=nothing,
     scale::Float64=DEFAULT_SEMI_INF_SCALE)
-    
-    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(0.0, 1.0, angle_nodes))
+    validate_grid_weight_pair("number_density", "p_grid", p_grid, "p_w", p_w)
+    validate_grid_weight_pair("number_density", "cos_grid", cos_grid, "cos_w", cos_w)
+
+    cos_grid === nothing && ((cos_grid, cos_w) = _cached_interval_grid(0.0, 1.0, angle_nodes))
 
     # Momentum integration:
     # - Default: semi-infinite [0, ∞) via t∈[0,1) mapping.
     # - If p_grid/p_w are provided: integrate directly on that finite grid.
-    p_vals = Float64[]
-    p_wts = Float64[]
-    dp_jac = Float64[]
     if p_grid !== nothing && p_w !== nothing
-        length(p_grid) == length(p_w) || error("number_density: p_grid and p_w length mismatch")
         p_vals = p_grid
-        p_wts = p_w
-        dp_jac = ones(Float64, length(p_grid))
-    else
-        # 使用 [0, 1) 上的Gauss-Legendre节点，通过变换映射到 [0, ∞)
-        # 变换: p = scale * t / (1-t), dp/dt = scale / (1-t)^2
-        t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
-        for (t, wt) in zip(t_grid, t_w)
-            # 避免 t=1 的奇点
-            if t >= 0.9999
-                continue
+        integral = 0.0
+        for (p, wp) in zip(p_vals, p_w)
+            for (cθ, wθ) in zip(cos_grid, cos_w)
+                f = distribution_with_anisotropy(flavor, p, m, μ, T, Φ, Φbar, ξ, cθ)
+                integral += wp * wθ * p^2 * f
             end
-            p = scale * t / (1.0 - t)
-            dp_dt = scale / (1.0 - t)^2
-            push!(p_vals, p)
-            push!(p_wts, wt)
-            push!(dp_jac, dp_dt)
         end
+        return DQ * integral / (2.0 * π^2)
+    else
+        p_vals, quadrature_wts = _cached_semi_infinite_momentum_grid(p_nodes, scale)
     end
 
     integral = 0.0
-    for (p, wp, dp) in zip(p_vals, p_wts, dp_jac)
+    for (p, wp) in zip(p_vals, quadrature_wts)
         for (cθ, wθ) in zip(cos_grid, cos_w)
             f = distribution_with_anisotropy(flavor, p, m, μ, T, Φ, Φbar, ξ, cθ)
-            integral += wp * wθ * p^2 * f * dp
+            integral += wp * wθ * p^2 * f
         end
     end
     # ρ = d_q / (2π^2) ∫ p^2 dp ∫_0^1 dcosθ f
@@ -855,29 +935,18 @@ function _average_scattering_rate_semi_infinite(
     density_p_grid, density_p_w, density_p_nodes, density_scale,
     mc, md, apply_s_domain_cut, sigma_cutoff
 )
+    validate_grid_weight_pair("average_scattering_rate", "p_grid", p_grid, "p_w", p_w)
+    validate_grid_weight_pair("average_scattering_rate", "cos_grid", cos_grid, "cos_w", cos_w)
+    validate_grid_weight_pair("average_scattering_rate", "phi_grid", phi_grid, "phi_w", phi_w)
+
     # Momentum integration:
     # - Default: semi-infinite [0, ∞) via t∈[0,1) mapping.
     # - If p_grid/p_w are provided: integrate directly on that finite grid.
-    p_vals = Float64[]
-    p_wts = Float64[]
-    dp_jac = Float64[]
     if p_grid !== nothing && p_w !== nothing
-        length(p_grid) == length(p_w) || error("average_scattering_rate: p_grid and p_w length mismatch")
         p_vals = p_grid
-        p_wts = p_w
-        dp_jac = ones(Float64, length(p_grid))
+        quadrature_wts = p_w
     else
-        t_grid, t_w = gauleg(0.0, 1.0, p_nodes)
-        for (t, wt) in zip(t_grid, t_w)
-            if t >= 0.9999
-                continue
-            end
-            p = scale * t / (1.0 - t)
-            dp_dt = scale / (1.0 - t)^2
-            push!(p_vals, p)
-            push!(p_wts, wt)
-            push!(dp_jac, dp_dt)
-        end
+        p_vals, quadrature_wts = _cached_semi_infinite_momentum_grid(p_nodes, scale)
     end
 
     # If numerator uses a finite cutoff grid, optionally apply the same s-domain cuts as Fortran:
@@ -900,8 +969,8 @@ function _average_scattering_rate_semi_infinite(
         Inf
     end
     # 使用完整积分区间 [-1,1] 和 [0,2π]
-    cos_grid === nothing && ((cos_grid, cos_w) = gauleg(-1.0, 1.0, angle_nodes))
-    phi_grid === nothing && ((phi_grid, phi_w) = gauleg(0.0, TWO_PI, phi_nodes))
+    cos_grid === nothing && ((cos_grid, cos_w) = _cached_interval_grid(-1.0, 1.0, angle_nodes))
+    phi_grid === nothing && ((phi_grid, phi_w) = _cached_interval_grid(0.0, TWO_PI, phi_nodes))
 
     # 数密度（用于归一化）
     # - 默认：半无穷积分 [0,∞)
@@ -926,7 +995,7 @@ function _average_scattering_rate_semi_infinite(
         process, pi_sym, pj_sym,
         mi, mj, μi, μj, T, Φ, Φbar, ξ,
         quark_params, thermo_params, K_coeffs,
-        p_vals, p_wts, dp_jac,
+        p_vals, quadrature_wts,
         cos_grid, cos_w,
         phi_grid, phi_w,
         cs_cache, n_sigma_points,
@@ -952,8 +1021,7 @@ function _omega_integral_5d(
     thermo_params::NamedTuple,
     K_coeffs::NamedTuple,
     p_vals::Vector{Float64},
-    p_wts::Vector{Float64},
-    dp_jac::Vector{Float64},
+    quadrature_wts::Vector{Float64},
     cos_grid::Vector{Float64},
     cos_w::Vector{Float64},
     phi_grid::Vector{Float64},
@@ -966,10 +1034,10 @@ function _omega_integral_5d(
 )::Float64
     ω = 0.0
 
-    for (p_i, w_pi, dp_i) in zip(p_vals, p_wts, dp_jac)
+    for (p_i, w_pi) in zip(p_vals, quadrature_wts)
         Ei = energy_from_p(p_i, mi)
 
-        for (p_j, w_pj, dp_j) in zip(p_vals, p_wts, dp_jac)
+        for (p_j, w_pj) in zip(p_vals, quadrature_wts)
             Ej = energy_from_p(p_j, mj)
 
             for (cθi, w_cθi) in zip(cos_grid, cos_w)
@@ -1005,8 +1073,8 @@ function _omega_integral_5d(
                             continue
                         end
 
-                        σ = _get_sigma_nt(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
-                        ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ * dp_i * dp_j
+                        σ = _get_sigma_core(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
+                        ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ
                     end
                 end
             end

@@ -6,6 +6,18 @@ function handle_modules_list()
     return HTTP.Response(200, headers, JSON3.write(MODULE_REGISTRY))
 end
 
+@inline function _pnjl_json_response(status::Int, payload::AbstractDict)
+    headers = [
+        "Content-Type" => "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin" => "*",
+    ]
+    return HTTP.Response(status, headers, JSON3.write(payload))
+end
+
+@inline function _pnjl_error_response(status::Int, code::String, message::String)
+    return _pnjl_json_response(status, Dict("status" => "error", "error_code" => code, "error" => message))
+end
+
 function handle_pnjl_single_point(req::HTTP.Request)
     if req.method != "POST"
         return HTTP.Response(405, ["Content-Type" => "text/plain"], "Method Not Allowed")
@@ -22,6 +34,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
         t_mev = _to_float64(t_mev_raw)
         p_num = _to_int(get(params_dict, :p_num, nothing), 24)
         t_num = _to_int(get(params_dict, :t_num, nothing), 12)
+        allow_seed_fallback = _to_bool(get(params_dict, :allow_seed_fallback, true), true)
 
         t_fm = t_mev / ħc_MeV_fm
 
@@ -31,15 +44,21 @@ function handle_pnjl_single_point(req::HTTP.Request)
             rho_target = _to_float64(params_dict[:rho_target])
             mu_seed_mev = _to_float64(get(params_dict, :mu_mev, get(params_dict, :mu, 0.0)))
             mu_seed_fm = mu_seed_mev / ħc_MeV_fm
+            seed_fallback_used = false
             seed_state = try
                 st_seed = Models.solve_gap(model, t_fm, mu_seed_fm; xi=xi, p_num=p_num, t_num=t_num)
                 Models.state_vector(st_seed)
-            catch
+            catch err
+                if !allow_seed_fallback
+                    rethrow(err)
+                end
+                seed_fallback_used = true
+                @warn "PNJL fixed-rho seed solve failed; falling back to default seed" T_mev=t_mev mu_seed_mev=mu_seed_mev rho_target=rho_target xi=xi exception=(err, catch_backtrace())
                 [0.02, 0.02, 0.03, 0.5, 0.5]
             end
 
-            solver_primary = Models.NLsolveGapSolver(method=:newton, jacobian=:finite, xtol=1e-9, ftol=1e-9)
-            solver_secondary = Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite, xtol=1e-9, ftol=1e-9)
+            solver_primary = Models.NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9)
+            solver_secondary = Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward, xtol=1e-9, ftol=1e-9)
             r = Models.solve_fixedrho_constraint(
                 model,
                 t_fm,
@@ -63,6 +82,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
                 iterations=r.iterations,
                 residual_norm=r.residual_norm,
                 xi=xi,
+                seed_fallback_used=seed_fallback_used,
                 x_state=r.x_state,
                 mu_vec=r.mu_vec,
                 masses=r.masses,
@@ -89,6 +109,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
                 iterations=0,
                 residual_norm=NaN,
                 xi=xi,
+                seed_fallback_used=false,
                 x_state=x_state,
                 mu_vec=mu_vec,
                 masses=masses,
@@ -105,23 +126,18 @@ function handle_pnjl_single_point(req::HTTP.Request)
             "iterations" => solver_result.iterations,
             "residual_norm" => solver_result.residual_norm,
             "xi" => solver_result.xi,
+            "seed_fallback_used" => solver_result.seed_fallback_used,
             "x_state" => collect(solver_result.x_state),
             "mu_vec" => collect(solver_result.mu_vec),
             "masses" => collect(solver_result.masses),
         )
 
-        headers = [
-            "Content-Type" => "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin" => "*",
-        ]
-        return HTTP.Response(200, headers, JSON3.write(Dict("status" => "ok", "result" => result)))
+        return _pnjl_json_response(200, Dict("status" => "ok", "result" => result))
     catch e
-        error_msg = sprint(showerror, e, catch_backtrace())
-        headers = [
-            "Content-Type" => "application/json; charset=utf-8",
-            "Access-Control-Allow-Origin" => "*",
-        ]
-        payload = Dict("status" => "error", "error" => error_msg)
-        return HTTP.Response(500, headers, JSON3.write(payload))
+        @error "PNJL single-point request failed" exception=(e, catch_backtrace())
+        if e isa ArgumentError || e isa DomainError
+            return _pnjl_error_response(400, "INVALID_REQUEST", "Invalid PNJL request parameters")
+        end
+        return _pnjl_error_response(500, "PNJL_SINGLE_POINT_FAILED", "PNJL single-point solve failed")
     end
 end
