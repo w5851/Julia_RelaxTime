@@ -7,6 +7,8 @@
 - 五层分类清晰：Unit / Integration / Regression / Validation / Benchmark。
 - 非测试制品（分析脚本、性能探针）与测试严格分离。
 
+当前 CI Julia 固定版本：`1.12.5`。调整该版本时，必须同步更新 workflow 与 `Manifest.toml`，避免出现跨版本解析导致的安装或预编译漂移。
+
 ---
 
 ## 目录分层（必须遵守）

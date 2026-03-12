@@ -24,7 +24,7 @@ jobs:
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
         with:
-          version: "1.11"
+          version: "1.12.5"
 
       - name: Check active docs governance
         run: julia scripts/dev/check_active_docs_governance.jl
