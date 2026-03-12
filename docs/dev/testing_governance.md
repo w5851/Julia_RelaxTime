@@ -47,6 +47,7 @@
 - 入口统一为 `tests/regression/runtests.jl`。
 - smoke 运行小规模固定点；full 运行更大覆盖面或 nightly 基线。
 - 导出脚本保留在 `scripts/dev/`，但门禁逻辑必须落到 `@testset`。
+- 若默认 solver 策略、AD 路径或核心数值内核发生变更，必须通过对应 `scripts/dev/export_*_baseline.jl` 重生受影响基线，并在提交说明中交代原因与验证命令。
 
 ### Validation（验证测试）
 - Fortran / Mathematica 参考值对照。
