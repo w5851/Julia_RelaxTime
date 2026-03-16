@@ -68,10 +68,10 @@ result = Models.run_phase_pipeline(
   - `first_order_boundary.csv`
   - `spinodal.csv`
   - `crossover_line.csv`
-- `phase_summary.json`
-- `pm_branch_scan.csv`
-- `pm_phase_summary.json`
-- `pm_vs_maxwell.csv`
+  - `phase_summary.json`
+  - `pm_branch_scan.csv`
+  - `pm_phase_summary.json`
+  - `pm_vs_maxwell.csv`
   - `phase_report.md`
 
 ## 常见使用模式

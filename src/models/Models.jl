@@ -84,13 +84,7 @@ export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, PromotionResult, PhasePipelineResult
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
-export _pm_interpolate_transition_mu, _pm_extract_endpoints, _pm_has_bistable_window
-export _pm_compare_with_maxwell, _pm_pressure_crosscheck
-export _pm_accept_branch_point, _pm_check_branch_continuity
 export derive_pm_seed_pair, analyze_pm_branch_competition
-export _pm_branch_scan_fieldnames, _pm_branch_scan_record
-export _pm_maxwell_reference_from_rows
-export _pm_refine_transition_bracket
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
 export Constants_PNJL
 export TmuScanConfig, TrhoScanConfig

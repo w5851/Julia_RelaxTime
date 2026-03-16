@@ -29,6 +29,16 @@ end
     @test seed_pair.continuity_mode == :branch_local
     @test seed_pair.fallback_mode == :none
 
+    struct_seed_pair = Models.PMSeedPair(
+        hadron_seed0=[7.0, 8.0],
+        quark_seed0=[9.0, 10.0],
+        continuity_mode=:branch_local,
+        fallback_mode=:none,
+    )
+    normalized_struct = Models.normalize_pm_seed_pair(struct_seed_pair)
+    @test normalized_struct.hadron_seed0 == [7.0, 8.0]
+    @test normalized_struct.quark_seed0 == [9.0, 10.0]
+
     @test isdefined(Models, :pm_next_seed_source)
     @test Models.pm_next_seed_source(true, :hadron) == :previous_same_branch
     @test Models.pm_next_seed_source(false, :hadron) == :seed0
@@ -228,4 +238,34 @@ end
     @test refined[1].mu_MeV == 291.10
     @test refined[end].mu_MeV == 291.20
     @test refined[2].mu_MeV == 291.11
+end
+
+@testset "PM phase diagnostic input contract" begin
+    @test_throws ArgumentError Models.derive_pm_seed_pair(130.9, [291.2, 291.0, 291.1])
+    @test_throws ArgumentError Models.analyze_pm_branch_competition(
+        T_values=130.9,
+        mu_grid=[290.9, 291.0],
+        xi=0.0,
+        solver_backend=:legacy,
+        p_num=24,
+        t_num=8,
+        output_dir=tempname(),
+    )
+
+    @test_throws ArgumentError Models.analyze_pm_branch_competition(
+        T_values=[130.9],
+        mu_grid=[290.9, NaN],
+        xi=0.0,
+        solver_backend=:legacy,
+        p_num=24,
+        t_num=8,
+        output_dir=tempname(),
+    )
+end
+
+@testset "PM helper exports stay internal" begin
+    @test !Base.isexported(Models, :_pm_interpolate_transition_mu)
+    @test !Base.isexported(Models, :_pm_branch_scan_fieldnames)
+    @test !Base.isexported(Models, :_pm_maxwell_reference_from_rows)
+    @test !Base.isexported(Models, :_pm_refine_transition_bracket)
 end

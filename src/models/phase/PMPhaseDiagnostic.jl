@@ -1,3 +1,11 @@
+function _pm_normalize_mev_grid(values, name::String)
+    values isa AbstractVector || throw(ArgumentError("$name must be an AbstractVector"))
+    normalized = collect(Float64, values)
+    isempty(normalized) && throw(ArgumentError("$name must not be empty"))
+    all(isfinite, normalized) || throw(ArgumentError("$name must contain only finite values"))
+    return normalized
+end
+
 function _pm_interpolate_transition_mu(rows)
     length(rows) >= 2 || return nothing
     left = rows[1]
@@ -394,19 +402,23 @@ function analyze_pm_branch_competition(;
         residual_accept_tol::Float64=1e-6,
         continuity_x_tol::Float64=0.25,
         continuity_rho_tol::Float64=0.15)
+    T_values_vec = _pm_normalize_mev_grid(T_values, "T_values")
+    mu_grid_vec = _pm_normalize_mev_grid(mu_grid, "mu_grid")
+    issorted(mu_grid_vec) || throw(ArgumentError("mu_grid must be sorted in ascending order"))
+
     branch_rows = NamedTuple[]
     temperature_summaries = NamedTuple[]
     comparison_rows = NamedTuple[]
 
-    for T_MeV in T_values
-        local_seed_pair = isnothing(seed_pair) ? derive_pm_seed_pair(T_MeV, mu_grid;
+    for T_MeV in T_values_vec
+        local_seed_pair = isnothing(seed_pair) ? derive_pm_seed_pair(T_MeV, mu_grid_vec;
             xi=xi,
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
             residual_accept_tol=residual_accept_tol) : normalize_pm_seed_pair(seed_pair)
 
-        rows = _pm_branch_rows_for_temperature(T_MeV, mu_grid, local_seed_pair;
+        rows = _pm_branch_rows_for_temperature(T_MeV, mu_grid_vec, local_seed_pair;
             xi=xi,
             solver_backend=solver_backend,
             p_num=p_num,
