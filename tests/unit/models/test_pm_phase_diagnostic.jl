@@ -249,8 +249,9 @@ end
         solver_backend=:legacy,
         p_num=24,
         t_num=8,
-        output_dir=mktempdir(),
+        output_dir=tempname(),
     )
+
     @test_throws ArgumentError Models.analyze_pm_branch_competition(
         T_values=[130.9],
         mu_grid=[290.9, NaN],
@@ -258,7 +259,7 @@ end
         solver_backend=:legacy,
         p_num=24,
         t_num=8,
-        output_dir=mktempdir(),
+        output_dir=tempname(),
     )
 end
 
