@@ -15,12 +15,6 @@ export solve_gap_and_meson_point
 export run_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
-export _pm_branch_scan_fieldnames, _pm_branch_scan_record
-export _pm_maxwell_reference_from_rows
-export _pm_refine_transition_bracket
-export _pm_interpolate_transition_mu, _pm_extract_endpoints, _pm_has_bistable_window
-export _pm_compare_with_maxwell, _pm_pressure_crosscheck
-export _pm_accept_branch_point, _pm_check_branch_continuity
 export transport_workflow_module, meson_workflow_module
 export workflow_param_adapters_module
 export pnjl_module

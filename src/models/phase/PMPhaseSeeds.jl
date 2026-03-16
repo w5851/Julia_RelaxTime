@@ -1,8 +1,12 @@
+@inline function _pm_getfield_or_default(x, name::Symbol, default)
+    return hasproperty(x, name) ? getproperty(x, name) : default
+end
+
 function normalize_pm_seed_pair(seed_pair)
     hadron_seed0 = Float64.(collect(seed_pair.hadron_seed0))
     quark_seed0 = Float64.(collect(seed_pair.quark_seed0))
-    continuity_mode = get(seed_pair, :continuity_mode, :branch_local)
-    fallback_mode = get(seed_pair, :fallback_mode, :none)
+    continuity_mode = _pm_getfield_or_default(seed_pair, :continuity_mode, :branch_local)
+    fallback_mode = _pm_getfield_or_default(seed_pair, :fallback_mode, :none)
     return PMSeedPair(
         hadron_seed0=hadron_seed0,
         quark_seed0=quark_seed0,
@@ -64,6 +68,8 @@ function derive_pm_seed_pair(T_MeV::Real, mu_grid;
         residual_accept_tol::Float64=1e-6)
     mu_values = collect(Float64, mu_grid)
     isempty(mu_values) && throw(ArgumentError("mu_grid must not be empty"))
+    all(isfinite, mu_values) || throw(ArgumentError("mu_grid must contain only finite values"))
+    issorted(mu_values) || throw(ArgumentError("mu_grid must be sorted in ascending order"))
 
     hadron_seed = copy(HADRON_SEED_5)
     quark_seed = copy(QUARK_SEED_5)
