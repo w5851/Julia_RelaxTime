@@ -82,6 +82,15 @@ export solve_gap_and_meson_point
 export run_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, PromotionResult, PhasePipelineResult
+export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
+export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
+export _pm_interpolate_transition_mu, _pm_extract_endpoints, _pm_has_bistable_window
+export _pm_compare_with_maxwell, _pm_pressure_crosscheck
+export _pm_accept_branch_point, _pm_check_branch_continuity
+export derive_pm_seed_pair, analyze_pm_branch_competition
+export _pm_branch_scan_fieldnames, _pm_branch_scan_record
+export _pm_maxwell_reference_from_rows
+export _pm_refine_transition_bracket
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
 export Constants_PNJL
 export TmuScanConfig, TrhoScanConfig
@@ -148,6 +157,10 @@ const ρ0 = Main.Constants_PNJL.ρ0_inv_fm3
 
 # Unified scan/workflow entrypoints (Stage C compatibility layer)
 include(joinpath(@__DIR__, "phase", "PhaseTypes.jl"))
+include(joinpath(@__DIR__, "phase", "PMPhaseTypes.jl"))
+include(joinpath(@__DIR__, "phase", "PMPhaseSeeds.jl"))
+include(joinpath(@__DIR__, "phase", "PMPhaseDiagnostic.jl"))
+include(joinpath(@__DIR__, "phase", "PMPhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "AdaptiveRhoRefinement.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseIO.jl"))

@@ -15,6 +15,7 @@
 - `Models.run_phase_pipeline` 的主工作流调用
 - `Models.find_cep` 的独立 CEP 诊断
 - `Models.build_phase_artifacts`、`Models.resolve_phase_output_target`、`Models.promote_phase_artifacts` 的工件治理
+- `Models.analyze_pm_branch_competition` 的 compare-only `P-mu` 诊断入口
 - `src/models/phase/` 下的关键算法关系，例如 S-shape、Maxwell、crossover 与自适应 `rho` 加密
 
 ## 目录职责
@@ -24,6 +25,7 @@
 - [PhaseTransition.md](docs/api/models/phase/PhaseTransition.md)：S-shape、Maxwell 与温度切片整理
 - [Crossover.md](docs/api/models/phase/Crossover.md)：crossover 检测与扫描
 - [AdaptiveRhoRefinement.md](docs/api/models/phase/AdaptiveRhoRefinement.md)：自适应 `rho` 加密辅助层
+- [PMPhaseDiagnostic.md](docs/api/models/phase/PMPhaseDiagnostic.md)：compare-only `P-mu / Omega-mu` 双分支竞争诊断
 - [generated/Exports.md](docs/api/models/phase/generated/Exports.md)：自动生成的公开导出索引，作为完整性基线
 
 ## 入口约束
