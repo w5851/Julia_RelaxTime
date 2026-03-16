@@ -8,6 +8,7 @@
 
 - 从 `T-ρ` 扫描构建一阶相变边界与 spinodal
 - 估计 CEP 并获取诊断信息
+- 在 CEP 邻域做 compare-only `P-mu / Omega-mu` 双分支竞争诊断
 - 可选生成 crossover line
 - 将结果写出为 CSV、JSON、Markdown 报告
 - 将已验证的结果晋升到 reference 目录
@@ -23,6 +24,7 @@
 - `Models.build_phase_artifacts`
 - `Models.resolve_phase_output_target`
 - `Models.promote_phase_artifacts`
+- `Models.analyze_pm_branch_competition`
 
 结果类型：
 
@@ -66,7 +68,10 @@ result = Models.run_phase_pipeline(
   - `first_order_boundary.csv`
   - `spinodal.csv`
   - `crossover_line.csv`
-  - `phase_summary.json`
+- `phase_summary.json`
+- `pm_branch_scan.csv`
+- `pm_phase_summary.json`
+- `pm_vs_maxwell.csv`
   - `phase_report.md`
 
 ## 常见使用模式
@@ -90,6 +95,21 @@ result = Models.run_phase_pipeline(
 
 如果你需要把产物写入受控目录，再决定是否晋升参考数据，先调用 `Models.resolve_phase_output_target`，完成主流程后再调用 `Models.promote_phase_artifacts`。对应的最小验证路径可参考 [tests/integration/models/test_phase_artifacts_promotion_smoke.jl](tests/integration/models/test_phase_artifacts_promotion_smoke.jl)。
 
+### 4. 在 CEP 邻域做 `P-mu` 诊断对照
+
+当你不想替换当前 Maxwell 主线，只想在固定温度下比较 hadron-like / quark-like 双分支竞争与 Maxwell 判据是否一致时，优先调用 `Models.analyze_pm_branch_competition`。
+
+该入口当前定位为 compare-only 诊断：
+
+- 输入 `T_values` 与固定 `mu_grid`
+- 对每个 `(T, mu)` 同时追踪 hadron / quark 两支
+- 输出：
+  - `pm_branch_scan.csv`
+  - `pm_phase_summary.json`
+  - `pm_vs_maxwell.csv`
+
+最小示例见 [PMPhaseDiagnostic.md](docs/api/models/phase/PMPhaseDiagnostic.md)。
+
 ## 非首选入口
 
 以下接口虽然重要，但不应作为多数用户的第一站：
@@ -101,6 +121,7 @@ result = Models.run_phase_pipeline(
 - `AdaptiveRhoConfig`
 - `suggest_refinement_points`
 - `merge_rho_values`
+- `analyze_pm_branch_competition` 的内部 branch helper 与 artifact helper
 
 这些能力属于算法核心层，关系说明见 [Algorithms.md](docs/api/models/phase/Algorithms.md)。
 
