@@ -14,6 +14,8 @@
 - 将结果写出为 CSV、JSON、Markdown 报告
 - 将已验证的结果晋升到 reference 目录
 
+研究口径下，`run_phase_pipeline` 默认使用 `cep_strategy=:interpolate`，且 crossover 默认方法为 `crossover_method=:peak`。若要仅在 CEP 临界二分点对中间温度重新直算曲线，可额外传 `cep_interpolate_use_direct_eval=true`，用于比较插值曲线与 direct 重算曲线对 CEP 口径的影响，而不必把整个 research 主路径切到 `:direct`。
+
 ## 首选公开入口
 
 相图主题当前推荐的统一入口位于 [src/models/Models.jl](src/models/Models.jl#L82) 与 [src/models/entrypoints.jl](src/models/entrypoints.jl#L15)。
