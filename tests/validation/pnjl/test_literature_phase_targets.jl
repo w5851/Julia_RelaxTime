@@ -17,6 +17,7 @@ function _compute_reference_cep()
     tmp = mktempdir()
     result = Models.run_phase_pipeline(
         :PNJL;
+        mode=:research,
         T_grid=[120.0, 125.0, 130.0, 135.0, 140.0, 145.0, 150.0],
         rho_grid=collect(0.1:0.1:3.0),
         xi=0.0,

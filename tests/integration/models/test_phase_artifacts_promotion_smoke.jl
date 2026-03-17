@@ -22,6 +22,7 @@ using .Models
 
     result = Models.run_phase_pipeline(
         :PNJL;
+        mode=:research,
         T_grid=[150.0],
         rho_grid=[0.1, 0.2, 0.3],
         xi=0.0,

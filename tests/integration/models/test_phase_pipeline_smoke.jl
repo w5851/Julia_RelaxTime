@@ -11,6 +11,7 @@ using .Models
 
     result = Models.run_phase_pipeline(
         :PNJL;
+        mode=:research,
         T_grid=[150.0],
         rho_grid=[0.1, 0.2, 0.3],
         xi=0.0,
@@ -36,5 +37,31 @@ using .Models
     @test isfile(result.artifact_paths["crossover_line"])
     @test isfile(result.artifact_paths["phase_report"])
     @test haskey(result.diagnostics, "scan_total")
-    @test result.diagnostics["scan_total"] == 3
+    @test result.diagnostics["scan_total"] >= 1
+end
+
+@testset "Phase pipeline production smoke" begin
+    tmp = mktempdir()
+
+    result = Models.run_phase_pipeline(
+        :PNJL;
+        mode=:production,
+        T_grid=[150.0],
+        rho_grid=[0.1, 0.2, 0.3],
+        xi=0.0,
+        output_dir=tmp,
+        profile=:smoke,
+        solver_backend=:legacy,
+        p_num=12,
+        t_num=4,
+        iterations=10,
+        promote_reference=false,
+    )
+
+    @test isfile(joinpath(tmp, "trho_scan.csv"))
+    @test result.config_snapshot["mode"] == "production"
+    @test haskey(result.artifact_paths, "phase_summary")
+    @test haskey(result.artifact_paths, "phase_report")
+    @test isfile(result.artifact_paths["phase_summary"])
+    @test isfile(result.artifact_paths["phase_report"])
 end

@@ -14,7 +14,11 @@
 - 将结果写出为 CSV、JSON、Markdown 报告
 - 将已验证的结果晋升到 reference 目录
 
-研究口径下，`run_phase_pipeline` 默认使用 `cep_strategy=:interpolate`，且 crossover 默认方法为 `crossover_method=:peak`。若要仅在 CEP 临界二分点对中间温度重新直算曲线，可额外传 `cep_interpolate_use_direct_eval=true`，用于比较插值曲线与 direct 重算曲线对 CEP 口径的影响，而不必把整个 research 主路径切到 `:direct`。
+研究口径下，`run_phase_pipeline` 默认使用 `cep_strategy=:interpolate`，且 crossover 默认方法为 `crossover_method=:peak`。更细的 research 调参应按具体实验目标单独显式传参，而不是把它当作总览页的默认使用方式。
+
+`Models.run_phase_pipeline` 当前同时支持 `mode=:research` 与 `mode=:production` 两条口径。
+
+脚本入口 `scripts/pnjl/calculate_phase_structure.jl` 在未显式传参时默认走 `--mode=production`；当你需要研究口径时，必须显式传 `mode=:research` 或 `--mode=research`。
 
 ## 首选公开入口
 
@@ -51,6 +55,7 @@ tmp = mktempdir()
 
 result = Models.run_phase_pipeline(
     :PNJL;
+    mode=:research,
     T_grid=[150.0],
     rho_grid=[0.1, 0.2, 0.3],
     xi=0.0,

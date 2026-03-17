@@ -23,11 +23,17 @@ function _load_rows(path::String)
     return rows
 end
 
+_baseline_boundary_key(row) = (row.T_MeV, row.mu_MeV)
+_actual_boundary_key(row) = (row.T_MeV, row.mu_transition_MeV)
+_baseline_crossover_key(row) = (row.mu_MeV, row.T_MeV)
+_actual_crossover_key(row) = (row.mu_MeV, row.T_crossover_MeV)
+
 @testset "Phase pipeline regression" begin
     rows = _load_rows(PHASE_BASELINE_PATH)
     tmp = mktempdir()
     result = Models.run_phase_pipeline(
         :PNJL;
+        mode=:research,
         T_grid=[120.0, 125.0, 130.0, 135.0, 140.0, 145.0, 150.0],
         rho_grid=collect(0.1:0.1:3.0),
         xi=0.0,
@@ -52,9 +58,10 @@ end
     @test isapprox(result.cep.T_cep_MeV, cep_row.T_MeV; rtol=1e-6, atol=1e-10)
     @test isapprox(result.cep.mu_cep_MeV, cep_row.mu_MeV; rtol=1e-6, atol=1e-10)
 
-    boundary_rows = filter(r -> r.kind == "boundary", rows)
-    @test length(result.first_order_boundary) == length(boundary_rows)
-    for (row, actual) in zip(boundary_rows, result.first_order_boundary)
+    boundary_rows = sort(filter(r -> r.kind == "boundary", rows); by=_baseline_boundary_key)
+    actual_boundary = sort!(collect(result.first_order_boundary); by=_actual_boundary_key)
+    @test length(actual_boundary) == length(boundary_rows)
+    for (row, actual) in zip(boundary_rows, actual_boundary)
         @test actual.converged == row.flag
         @test isapprox(actual.T_MeV, row.T_MeV; rtol=1e-6, atol=1e-10)
         @test isapprox(actual.mu_transition_MeV, row.mu_MeV; rtol=1e-6, atol=1e-10)
@@ -63,9 +70,10 @@ end
         @test isapprox(actual.area_residual, row.aux; rtol=1e-6, atol=1e-10)
     end
 
-    crossover_rows = filter(r -> r.kind == "crossover", rows)
-    @test length(result.crossover_line) == length(crossover_rows)
-    for (row, actual) in zip(crossover_rows, result.crossover_line)
+    crossover_rows = sort(filter(r -> r.kind == "crossover", rows); by=_baseline_crossover_key)
+    actual_crossover = sort!(collect(result.crossover_line); by=_actual_crossover_key)
+    @test length(actual_crossover) == length(crossover_rows)
+    for (row, actual) in zip(crossover_rows, actual_crossover)
         @test actual.converged == row.flag
         @test isapprox(actual.T_crossover_MeV, row.T_MeV; rtol=1e-6, atol=1e-10, nans=true)
         @test isapprox(actual.mu_MeV, row.mu_MeV; rtol=1e-6, atol=1e-10)
