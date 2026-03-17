@@ -39,10 +39,11 @@ Base.@kwdef mutable struct PhaseCliConfig
     t_num::Int = 4
     iterations::Int = 80
     compute_crossover::Bool = false
-    crossover_method::Symbol = :inflection
+    crossover_method::Symbol = :peak
     crossover_variable::Symbol = :phi_u
     crossover_n_mu::Int = 12
     cep_strategy::Symbol = :interpolate
+    cep_interpolate_use_direct_eval::Bool = false
     cep_tol::Float64 = 0.01
     cep_max_bisect_iter::Int = 20
     cep_area_tol_good::Float64 = 1e-4
@@ -88,6 +89,7 @@ function _usage()
     println("  --crossover_variable=... crossover变量（phi_u|Phi）")
     println("  --crossover_n_mu=12    crossover扫描的mu点数")
     println("  --cep_strategy=...     CEP定位策略（interpolate|direct）")
+    println("  --cep_interpolate_use_direct_eval=true|false interpolate策略下对临界二分点做direct重算")
     println("  --cep_tol=0.01         CEP二分温度容差 (MeV)")
     println("  --cep_max_bisect_iter=20 CEP二分迭代上限")
     println("  --cep_area_tol_good=1e-4 CEP判定valid阈值")
@@ -159,6 +161,8 @@ function parse_args(args)
             cfg.crossover_n_mu = parse(Int, arg[18:end])
         elseif startswith(arg, "--cep_strategy=")
             cfg.cep_strategy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--cep_interpolate_use_direct_eval=")
+            cfg.cep_interpolate_use_direct_eval = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
         elseif startswith(arg, "--cep_tol=")
             cfg.cep_tol = parse(Float64, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_max_bisect_iter=")
@@ -234,6 +238,7 @@ function main(args=ARGS)
         crossover_variable=cfg.crossover_variable,
         crossover_n_mu=cfg.crossover_n_mu,
         cep_strategy=cfg.cep_strategy,
+        cep_interpolate_use_direct_eval=cfg.cep_interpolate_use_direct_eval,
         cep_tol=cfg.cep_tol,
         cep_max_bisect_iter=cfg.cep_max_bisect_iter,
         cep_area_tol_good=cfg.cep_area_tol_good,

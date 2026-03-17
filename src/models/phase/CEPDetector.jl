@@ -8,6 +8,16 @@ function _is_valid_s_curve(mu_vals, rho_vals; maxwell_options::NamedTuple=(;))
     return (false, nothing, sres)
 end
 
+function _classify_interpolate_curve(mu_vals, rho_vals; maxwell_options::NamedTuple=(;))
+    cres = _classify_s_curve(mu_vals, rho_vals; maxwell_options=maxwell_options)
+    if cres.status == :valid
+        return (true, :valid, cres.mu_transition, cres.sres)
+    elseif cres.status == :weak_s_shape
+        return (true, :weak_s_shape, cres.mu_transition, cres.sres)
+    end
+    return (false, cres.status, nothing, cres.sres)
+end
+
 function _classify_s_curve(mu_vals, rho_vals;
         maxwell_options::NamedTuple=(;),
         area_tol_good::Float64=1e-4,
@@ -24,6 +34,23 @@ function _classify_s_curve(mu_vals, rho_vals;
     mres = maxwell_construction(mu_vals, rho_vals; spinodal_hint=sres, maxwell_options...)
     if !(mres.converged && mres.mu_transition !== nothing)
         reason = get(mres.details, :reason, "maxwell_failed")
+        if reason == "no_sign_change"
+            weak = _weak_s_shape_metrics(mu_vals, rho_vals, sres)
+            if _is_weak_s_shape(weak)
+                weak_mu = if sres.mu_spinodal_hadron !== nothing && sres.mu_spinodal_quark !== nothing
+                    0.5 * (Float64(sres.mu_spinodal_hadron) + Float64(sres.mu_spinodal_quark))
+                else
+                    nothing
+                end
+                return (
+                    status=:weak_s_shape,
+                    mu_transition=weak_mu,
+                    sres=sres,
+                    area_residual=nothing,
+                    reason="weak_s_shape_no_sign_change",
+                )
+            end
+        end
         return (
             status=:invalid,
             mu_transition=nothing,
@@ -61,6 +88,58 @@ function _classify_s_curve(mu_vals, rho_vals;
     )
 end
 
+function _weak_s_shape_metrics(mu_vals, rho_vals, sres)
+    mu_sorted, rho_sorted = _sort_curve_by_rho(mu_vals, rho_vals)
+    min_negative_slope = Inf
+    negative_segment_width = 0.0
+    negative_segment_count = 0
+
+    for i in 1:(length(rho_sorted) - 1)
+        drho = rho_sorted[i + 1] - rho_sorted[i]
+        drho == 0 && continue
+        slope = (mu_sorted[i + 1] - mu_sorted[i]) / drho
+        if slope < 0
+            min_negative_slope = min(min_negative_slope, slope)
+            negative_segment_width += abs(drho)
+            negative_segment_count += 1
+        end
+    end
+
+    spinodal_mu_gap = if sres.mu_spinodal_hadron !== nothing && sres.mu_spinodal_quark !== nothing
+        abs(Float64(sres.mu_spinodal_hadron) - Float64(sres.mu_spinodal_quark))
+    else
+        Inf
+    end
+    spinodal_rho_gap = if sres.rho_spinodal_hadron !== nothing && sres.rho_spinodal_quark !== nothing
+        abs(Float64(sres.rho_spinodal_hadron) - Float64(sres.rho_spinodal_quark))
+    else
+        Inf
+    end
+
+    return (
+        min_negative_slope=min_negative_slope,
+        negative_segment_width=negative_segment_width,
+        negative_segment_count=negative_segment_count,
+        spinodal_mu_gap=spinodal_mu_gap,
+        spinodal_rho_gap=spinodal_rho_gap,
+    )
+end
+
+function _is_weak_s_shape(metrics;
+        min_negative_slope_tol::Float64=0.01,
+        negative_segment_width_tol::Float64=0.051,
+        negative_segment_count_max::Int=1,
+        spinodal_mu_gap_tol::Float64=0.01,
+        spinodal_rho_gap_tol::Float64=0.1)
+    return metrics.negative_segment_count <= negative_segment_count_max ||
+           metrics.negative_segment_width <= negative_segment_width_tol ||
+           abs(metrics.min_negative_slope) <= min_negative_slope_tol ||
+           metrics.spinodal_mu_gap <= spinodal_mu_gap_tol ||
+           metrics.spinodal_rho_gap <= spinodal_rho_gap_tol
+end
+
+@inline _is_cep_low_side_status(status::Symbol) = status in (:valid, :weak_s_shape)
+
 function _interpolate_curve(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}, T_target::Float64)
     temps = sort(collect(keys(curves)))
     T_below = nothing
@@ -82,6 +161,20 @@ function _interpolate_curve(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{
     α = (T_target - T_below) / (T_above - T_below)
     mu_interp = mu_below .+ α .* (mu_above .- mu_below)
     return mu_interp, rho_below
+end
+
+function _interpolate_or_reevaluate_curve(
+        curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}},
+        T_target::Float64;
+        evaluate_at_T::Union{Nothing, Function}=nothing)
+    if haskey(curves, T_target)
+        return curves[T_target]
+    end
+    if evaluate_at_T !== nothing
+        curve = evaluate_at_T(T_target, 0)
+        curve !== nothing && return curve
+    end
+    return _interpolate_curve(curves, T_target)
 end
 
 function _uniform_rho_grid(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}; atol::Float64=1e-10)
@@ -178,7 +271,7 @@ function _scan_bracket(temperatures::Vector{Float64}, eval_fn::Function)
     first_invalid = nothing
     for T in temperatures
         er = eval_fn(T)
-        if er.status == :valid
+        if _is_cep_low_side_status(er.status)
             last_valid = (Float64(T), er.mu_transition)
             first_invalid = nothing
         elseif er.status == :invalid
@@ -211,7 +304,7 @@ function _directional_bracket(temperatures::Vector{Float64}, eval_fn::Function;
     start_res = eval_fn(T_start)
     start_res.status == :unknown && return nothing
 
-    direction = start_res.status == :valid ? 1.0 : -1.0
+    direction = _is_cep_low_side_status(start_res.status) ? 1.0 : -1.0
     step0 = isfinite(direct_initial_step) && direct_initial_step > 0 ? direct_initial_step : _auto_initial_step(temperatures, tol)
     expand_factor = direct_expand_factor > 1.0 ? direct_expand_factor : 2.0
 
@@ -223,7 +316,7 @@ function _directional_bracket(temperatures::Vector{Float64}, eval_fn::Function;
             T_candidate = min(T_max, T_start + step)
             T_candidate <= current_valid_T && break
             er = eval_fn(T_candidate)
-            if er.status == :valid
+            if _is_cep_low_side_status(er.status)
                 current_valid_T = Float64(T_candidate)
                 current_valid_mu = er.mu_transition
                 continue
@@ -245,7 +338,7 @@ function _directional_bracket(temperatures::Vector{Float64}, eval_fn::Function;
             if er.status == :invalid
                 current_invalid_T = Float64(T_candidate)
                 continue
-            elseif er.status == :valid
+            elseif _is_cep_low_side_status(er.status)
                 return (
                     T_low=Float64(T_candidate),
                     mu_low=er.mu_transition,
@@ -356,7 +449,7 @@ function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Fl
         T_mid = 0.5 * (T_low + T_high)
         eval_mid = eval_fn(T_mid)
 
-        if eval_mid.status == :valid
+        if _is_cep_low_side_status(eval_mid.status)
             T_low = T_mid
             eval_mid.mu_transition !== nothing && (last_mu = Float64(eval_mid.mu_transition))
         elseif eval_mid.status == :invalid
@@ -427,12 +520,14 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
     temperatures = sort(collect(keys(curves)))
     last_with_s = nothing
     first_without_s = nothing
+    last_status = :invalid
 
     for T in temperatures
         mu_vals, rho_vals = curves[T]
-        valid, mu_transition, _ = _is_valid_s_curve(mu_vals, rho_vals; maxwell_options=maxwell_options)
+        valid, status, mu_transition, _ = _classify_interpolate_curve(mu_vals, rho_vals; maxwell_options=maxwell_options)
         if valid
-            last_with_s = (Float64(T), Float64(mu_transition))
+            last_with_s = (Float64(T), status, Float64(something(mu_transition, NaN)))
+            last_status = status
             first_without_s = nothing
         elseif last_with_s !== nothing && first_without_s === nothing
             first_without_s = Float64(T)
@@ -441,7 +536,7 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
 
     last_with_s === nothing && return CEPResult(method=:no_valid_s_shape)
 
-    T_low, mu_low = last_with_s
+    T_low, low_status, mu_low = last_with_s
     T_high = first_without_s === nothing ? T_low + max(0.1, tol) : first_without_s
     last_mu = mu_low
     bisect_count = 0
@@ -452,22 +547,19 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
 
     while (T_high - T_low) > tol && bisect_count < max_bisect_iter
         T_mid = 0.5 * (T_low + T_high)
-        mu_vals, rho_vals = if haskey(curves, T_mid)
-            curves[T_mid]
-        else
-            _interpolate_curve(curves, T_mid)
-        end
+        mu_vals, rho_vals = _interpolate_or_reevaluate_curve(curves, T_mid; evaluate_at_T=evaluate_at_T)
 
         if mu_vals === nothing || rho_vals === nothing
             return CEPResult(found=true, T_cep_MeV=T_low, mu_cep_MeV=last_mu, method=:fallback_last_valid_interpolation_failed)
         end
 
-        valid, mu_transition, _ = _is_valid_s_curve(mu_vals, rho_vals; maxwell_options=maxwell_options)
+        valid, status, mu_transition, _ = _classify_interpolate_curve(mu_vals, rho_vals; maxwell_options=maxwell_options)
         curves[T_mid] = (mu_vals, rho_vals)
 
         if valid
             T_low = T_mid
-            last_mu = Float64(mu_transition)
+            low_status = status
+            mu_transition !== nothing && (last_mu = Float64(mu_transition))
         else
             T_high = T_mid
         end
@@ -475,5 +567,6 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
     end
 
     T_cep = 0.5 * (T_low + T_high)
-    return CEPResult(found=true, T_cep_MeV=T_cep, mu_cep_MeV=last_mu, method=:bisect_last_valid_maxwell)
+    method = low_status == :weak_s_shape ? :bisect_weak_s_shape_disappearance : :bisect_last_valid_maxwell
+    return CEPResult(found=true, T_cep_MeV=T_cep, mu_cep_MeV=last_mu, method=method)
 end
