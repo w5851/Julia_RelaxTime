@@ -83,6 +83,43 @@ end
         @test cres.mu_transition !== nothing
     end
 
+    @testset "_classify_s_curve 不将明显非弱 no_sign_change 误判为 weak_s_shape" begin
+        rho_vals = collect(0.0:0.05:1.2)
+        mu_vals = [
+            -0.0003281682876595267,
+            0.04841824949440648,
+            0.0936102611465675,
+            0.1283662431809479,
+            0.13861566900656133,
+            0.10548202553599884,
+            0.07231301412417683,
+            0.1626490466370995,
+            -0.125093482719776,
+            -0.3379666334524407,
+            -0.2773641542899543,
+            -0.06974533828680642,
+            0.22780715960196624,
+            0.55209268408524,
+            0.8480427451509811,
+            1.0674944271492053,
+            1.1759809660249494,
+            1.1777855883649444,
+            1.1218862556900857,
+            1.0682844150768769,
+            1.0498688154790619,
+            1.066650699418709,
+            1.1044049618930905,
+            1.1509234887062252,
+            1.2001534364461435,
+        ]
+
+        cres = Models._classify_s_curve(mu_vals, rho_vals)
+
+        @test cres.status == :invalid
+        @test cres.reason == "no_sign_change"
+        @test cres.mu_transition === nothing
+    end
+
     @testset "interpolate CEP 可报告 weak_s_shape disappearance 口径" begin
         curves = _load_reference_curves()
         mu_strong, rho_strong = _interpolate_curve(curves, 130.625)
