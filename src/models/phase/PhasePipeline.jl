@@ -196,7 +196,7 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
             promotion_gate_options=promotion_gate_options,
         )
     elseif mode != :research
-        error("Unknown phase pipeline mode: $mode. Use :production or :research")
+        throw(ArgumentError("Unknown phase pipeline mode: $mode. Use :production or :research"))
     end
 
     # Research mode: original pipeline logic
@@ -350,6 +350,7 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
     config_snapshot = Dict(
         "model_kind" => String(model_kind),
         "profile" => String(profile),
+        "mode" => "research",
         "xi" => Float64(xi),
         "T_grid" => collect(Float64.(T_grid)),
         "rho_grid" => collect(Float64.(rho_grid)),
@@ -364,7 +365,7 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
         "cep_direct_start" => String(cep_direct_start),
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
-        profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend)
+        mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend)
 
     diagnostics = Dict{String, Any}(
         "scan_total" => getproperty(stats, :total),

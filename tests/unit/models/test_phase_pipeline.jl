@@ -88,4 +88,59 @@ end
         @test haskey(result.config_snapshot, "cep_tol_MeV")
         @test result.config_snapshot["cep_tol_MeV"] == 0.01
     end
+
+    @testset "run_phase_pipeline 暴露 research 与 production 模式" begin
+        tmp_research = mktempdir()
+        result_research = Models.run_phase_pipeline(
+            :PNJL;
+            mode=:research,
+            T_grid=[150.0],
+            rho_grid=[0.1, 0.2, 0.3],
+            xi=0.0,
+            output_dir=tmp_research,
+            profile=:smoke,
+            solver_backend=:legacy,
+            p_num=12,
+            t_num=4,
+            iterations=10,
+            promote_reference=false,
+        )
+
+        tmp_production = mktempdir()
+        result_production = Models.run_phase_pipeline(
+            :PNJL;
+            mode=:production,
+            T_grid=[150.0],
+            rho_grid=[0.1, 0.2, 0.3],
+            xi=0.0,
+            output_dir=tmp_production,
+            profile=:smoke,
+            solver_backend=:legacy,
+            p_num=12,
+            t_num=4,
+            iterations=10,
+            promote_reference=false,
+        )
+
+        @test result_research.config_snapshot["mode"] == "research"
+        @test result_production.config_snapshot["mode"] == "production"
+    end
+
+    @testset "run_phase_pipeline 非法 mode 抛出 ArgumentError" begin
+        tmp = mktempdir()
+        @test_throws ArgumentError Models.run_phase_pipeline(
+            :PNJL;
+            mode=:invalid,
+            T_grid=[150.0],
+            rho_grid=[0.1, 0.2, 0.3],
+            xi=0.0,
+            output_dir=tmp,
+            profile=:smoke,
+            solver_backend=:legacy,
+            p_num=12,
+            t_num=4,
+            iterations=10,
+            promote_reference=false,
+        )
+    end
 end

@@ -22,6 +22,7 @@ using .Models
 
 Base.@kwdef mutable struct PhaseCliConfig
     model_kind::Symbol = :PNJL
+    mode::Symbol = :production
     xi::Float64 = 0.0
     T_min::Float64 = 30.0
     T_max::Float64 = 350.0
@@ -68,6 +69,7 @@ function _usage()
     println("用法: julia scripts/pnjl/calculate_phase_structure.jl [options]")
     println("选项:")
     println("  --model_kind=PNJL      模型类型（如 PNJL/RPNJL）")
+    println("  --mode=production|research  运行模式")
     println("  --xi=0.0               各向异性参数")
     println("  --T_min=30             最低温度 (MeV)")
     println("  --T_max=350            最高温度 (MeV)")
@@ -119,6 +121,8 @@ function parse_args(args)
             exit(0)
         elseif startswith(arg, "--model_kind=")
             cfg.model_kind = Symbol(uppercase(arg[14:end]))
+        elseif startswith(arg, "--mode=")
+            cfg.mode = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         elseif startswith(arg, "--xi=")
             cfg.xi = parse(Float64, arg[6:end])
         elseif startswith(arg, "--T_min=")
@@ -203,6 +207,7 @@ function parse_args(args)
             error("Unknown option: $arg")
         end
     end
+    cfg.mode in (:production, :research) || throw(ArgumentError("invalid --mode=$(cfg.mode); accepted values: production, research"))
     return cfg
 end
 
@@ -215,12 +220,13 @@ function main(args=ARGS)
     println("="^60)
     println("Phase pipeline CLI")
     println("="^60)
-    println("time=$(now()) model_kind=$(cfg.model_kind) profile=$(cfg.profile)")
+    println("time=$(now()) model_kind=$(cfg.model_kind) mode=$(cfg.mode) profile=$(cfg.profile)")
     println("T-grid: $(first(T_grid)) -> $(last(T_grid)) (n=$(length(T_grid)))")
     println("rho-grid: $(first(rho_grid)) -> $(last(rho_grid)) (n=$(length(rho_grid)))")
 
     result = Models.run_phase_pipeline(
         cfg.model_kind;
+        mode=cfg.mode,
         T_grid=T_grid,
         rho_grid=rho_grid,
         xi=cfg.xi,
