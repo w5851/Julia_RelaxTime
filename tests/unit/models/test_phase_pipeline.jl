@@ -33,4 +33,59 @@ end
         @test :crossover_line in fnames
         @test :diagnostics in fnames
     end
+
+    @testset "Production 类型存在" begin
+        @test isdefined(Models, :FirstOrderSweepResult)
+        @test isdefined(Models, :ProductionPipelineConfig)
+        sweep_fields = fieldnames(Models.FirstOrderSweepResult)
+        cfg_fields = fieldnames(Models.ProductionPipelineConfig)
+        @test :first_point_fallback in sweep_fields
+        @test :unknown_budget in cfg_fields
+        @test :dT_initial in cfg_fields
+    end
+
+    @testset "run_phase_pipeline 接受临界区 direct re-evaluate 开关" begin
+        tmp = mktempdir()
+        result = Models.run_phase_pipeline(
+            :PNJL;
+            mode=:research,
+            T_grid=[150.0],
+            rho_grid=[0.1, 0.2, 0.3],
+            xi=0.0,
+            output_dir=tmp,
+            profile=:smoke,
+            solver_backend=:legacy,
+            p_num=12,
+            t_num=4,
+            iterations=10,
+            cep_strategy=:interpolate,
+            cep_interpolate_use_direct_eval=true,
+            promote_reference=false,
+        )
+
+        @test haskey(result.config_snapshot, "cep_interpolate_use_direct_eval")
+        @test result.config_snapshot["cep_interpolate_use_direct_eval"] == true
+    end
+
+    @testset "production run_phase_pipeline 保留高精度 CEP 容差" begin
+        tmp = mktempdir()
+        result = Models.run_phase_pipeline(
+            :PNJL;
+            mode=:production,
+            T_grid=[130.0, 131.0, 132.0],
+            rho_grid=[0.0, 0.1, 0.2],
+            xi=0.0,
+            output_dir=tmp,
+            profile=:smoke,
+            solver_backend=:legacy,
+            p_num=12,
+            t_num=4,
+            iterations=10,
+            cep_tol=0.01,
+            promote_reference=false,
+        )
+
+        @test haskey(result.config_snapshot, "cep_tol_MeV")
+        @test result.config_snapshot["cep_tol_MeV"] == 0.01
+    end
 end
