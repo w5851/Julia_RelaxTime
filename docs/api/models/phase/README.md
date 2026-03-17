@@ -12,7 +12,8 @@
 
 本主题覆盖以下能力：
 
-- `Models.run_phase_pipeline` 的主工作流调用
+- `Models.run_phase_pipeline` 的通用 / research 主工作流调用
+- `Models.run_production_phase_pipeline` 的 production / baseline 主工作流调用
 - `Models.find_cep` 的独立 CEP 诊断
 - `Models.build_phase_artifacts`、`Models.resolve_phase_output_target`、`Models.promote_phase_artifacts` 的工件治理
 - `Models.analyze_pm_branch_competition` 的 compare-only `P-mu` 诊断入口
@@ -27,6 +28,17 @@
 - [AdaptiveRhoRefinement.md](docs/api/models/phase/AdaptiveRhoRefinement.md)：自适应 `rho` 加密辅助层
 - [PMPhaseDiagnostic.md](docs/api/models/phase/PMPhaseDiagnostic.md)：compare-only `P-mu / Omega-mu` 双分支竞争诊断
 - [generated/Exports.md](docs/api/models/phase/generated/Exports.md)：自动生成的公开导出索引，作为完整性基线
+
+## 双入口口径
+
+- `Models.run_phase_pipeline`
+  - 面向通用相图工作流
+  - 默认适合研究态比较、策略试验和 `find_cep` / crossover 组合分析
+- `Models.run_production_phase_pipeline`
+  - 面向 production/baseline 同步
+  - 显式承载温度扫掠、unknown budget、fallback 与高精度 CEP 收口逻辑
+
+两者都返回 `PhasePipelineResult`，但 production 入口会额外依赖 `FirstOrderSweepResult` 与 `ProductionPipelineConfig` 这两个稳定类型来表达扫掠合同。
 
 ## 入口约束
 

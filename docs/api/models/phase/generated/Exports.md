@@ -4,22 +4,25 @@
 
 - Source module files: `src/models/Models.jl`, `src/models/entrypoints.jl`
 - Generated page: `docs/api/models/phase/generated/Exports.md`
-- Exported symbol count: 8
-- Mentioned in non-generated docs/api pages: 8
-- Topic filter: `run_phase_pipeline`, `find_cep`, `build_phase_artifacts`, `resolve_phase_output_target`, `promote_phase_artifacts`, `PhasePipelineResult`, `CEPResult`, `PromotionResult`
+- Exported symbol count: 11
+- Mentioned in non-generated docs/api pages: 11
+- Topic filter: `run_phase_pipeline`, `run_production_phase_pipeline`, `find_cep`, `build_phase_artifacts`, `resolve_phase_output_target`, `promote_phase_artifacts`, `PhasePipelineResult`, `CEPResult`, `FirstOrderSweepResult`, `ProductionPipelineConfig`, `PromotionResult`
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
 | `CEPResult` | src/models/Models.jl | 84 | 2 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md |
-| `PhasePipelineResult` | src/models/Models.jl | 84 | 2 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md |
+| `FirstOrderSweepResult` | src/models/Models.jl | 84 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `PhasePipelineResult` | src/models/Models.jl | 84 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `ProductionPipelineConfig` | src/models/Models.jl | 84 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `PromotionResult` | src/models/Models.jl | 84 | 1 | docs/api/models/phase/Overview.md |
 | `build_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 82, 15 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `find_cep` | src/models/Models.jl<br>src/models/entrypoints.jl | 82, 15 | 4 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
 | `promote_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 83, 16 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `resolve_phase_output_target` | src/models/Models.jl<br>src/models/entrypoints.jl | 83, 16 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `run_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 82, 15 | 4 | docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
+| `run_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 82, 15 | 6 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
+| `run_production_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 82, 15 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 
 ## Undocumented Or Not Yet Mentioned
 

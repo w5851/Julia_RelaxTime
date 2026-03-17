@@ -32,6 +32,16 @@ function _cep_eval_filename(T::Float64, level::Int)
     return "cep_eval_T$(t_token)_L$(level).csv"
 end
 
+function _infer_temperature_step(T_grid)
+    temps = sort(unique(Float64.(T_grid)))
+    if length(temps) < 2
+        return 5.0
+    end
+    diffs = diff(temps)
+    positive = filter(>(0.0), diffs)
+    return isempty(positive) ? 5.0 : minimum(positive)
+end
+
 function _run_single_temperature_scan(
         out_csv::String,
         T_mid::Float64,
@@ -110,6 +120,7 @@ function _collect_spinodal(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{F
 end
 
 function run_phase_pipeline(model_kind::Symbol=:PNJL;
+        mode::Symbol=:production,
         T_grid::AbstractVector=[150.0],
         rho_grid::AbstractVector=[0.2],
         xi::Real=0.0,
@@ -128,6 +139,7 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
         crossover_variable::Symbol=:phi_u,
         crossover_n_mu::Int=12,
         cep_strategy::Symbol=:interpolate,
+        cep_interpolate_use_direct_eval::Bool=false,
         cep_tol::Float64=0.01,
         cep_max_bisect_iter::Int=20,
         cep_area_tol_good::Float64=1e-4,
@@ -145,8 +157,49 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
         cep_direct_max_expand_steps::Int=8,
         cep_direct_fallback_scan::Bool=true,
         promote_reference::Bool=false,
-        promotion_gate_options::NamedTuple=(;))
+        promotion_gate_options::NamedTuple=(;),
+        T_start::Float64=NaN,
+        T_end::Float64=NaN,
+        dT::Float64=NaN,
+        unknown_budget::Int=5)
 
+    if mode == :production
+        T_start_eff = isfinite(T_start) ? T_start : Float64(minimum(T_grid))
+        T_end_eff = isfinite(T_end) ? T_end : Float64(maximum(T_grid))
+        dT_eff = isfinite(dT) ? dT : _infer_temperature_step(T_grid)
+        return run_production_phase_pipeline(model_kind;
+            T_start=T_start_eff,
+            T_end=T_end_eff,
+            dT=dT_eff,
+            rho_grid=rho_grid,
+            xi=xi,
+            output_dir=output_dir,
+            profile=profile,
+            run_id=run_id,
+            policy=policy,
+            solver_backend=solver_backend,
+            reverse_rho=reverse_rho,
+            seed_policy=seed_policy,
+            p_num=p_num,
+            t_num=t_num,
+            iterations=iterations,
+            compute_crossover=compute_crossover,
+            crossover_method=crossover_method,
+            crossover_variable=crossover_variable,
+            crossover_n_mu=crossover_n_mu,
+            cep_tol=isfinite(cep_tol) && cep_tol > 0 ? cep_tol : 0.5,
+            cep_max_bisect_iter=cep_max_bisect_iter,
+            area_tol_good=cep_area_tol_good,
+            area_tol_bad=cep_area_tol_bad,
+            unknown_budget=unknown_budget,
+            promote_reference=promote_reference,
+            promotion_gate_options=promotion_gate_options,
+        )
+    elseif mode != :research
+        error("Unknown phase pipeline mode: $mode. Use :production or :research")
+    end
+
+    # Research mode: original pipeline logic
     target = resolve_phase_output_target(model_kind; profile=profile, run_id=run_id, policy=policy)
     run_dir = isnothing(output_dir) ? target.run_dir : output_dir
     effective_run_id = isnothing(run_id) ? target.run_id : run_id
@@ -229,6 +282,27 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
 
             return curve
         end
+    elseif cep_strategy == :interpolate && cep_interpolate_use_direct_eval
+        base_rho_grid = collect(Float64.(rho_grid))
+        eval_dir = joinpath(run_dir, "cep_interpolate_direct")
+        mkpath(eval_dir)
+        function (T_mid::Float64, level::Int)
+            rho_eval = level <= 0 ? base_rho_grid : _refine_rho_grid(base_rho_grid, level)
+            out_csv = joinpath(eval_dir, _cep_eval_filename(T_mid, level))
+            return _run_single_temperature_scan(
+                out_csv,
+                T_mid,
+                rho_eval,
+                Float64(xi),
+                reverse_rho,
+                seed_policy,
+                solver_backend,
+                model_kind,
+                p_num,
+                t_num,
+                iterations,
+            )
+        end
     else
         nothing
     end
@@ -281,6 +355,7 @@ function run_phase_pipeline(model_kind::Symbol=:PNJL;
         "rho_grid" => collect(Float64.(rho_grid)),
         "solver_backend" => String(solver_backend),
         "cep_strategy" => String(cep_strategy),
+        "cep_interpolate_use_direct_eval" => cep_interpolate_use_direct_eval,
         "cep_adaptive_rho" => cep_adaptive_rho,
         "cep_adaptive_slope_tol" => cep_adaptive_slope_tol,
         "cep_adaptive_min_gap" => cep_adaptive_min_gap,

@@ -14,7 +14,20 @@
 6. 将结果封装为 `PhasePipelineResult`
 7. 通过 `build_phase_artifacts` 写出工件，并可选调用 `promote_phase_artifacts` 晋升
 
-上层编排主要位于 [src/models/phase/PhasePipeline.jl](src/models/phase/PhasePipeline.jl)，结果类型定义位于 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl)。
+上层编排主要位于 [src/models/phase/PhasePipeline.jl](src/models/phase/PhasePipeline.jl) 与 [src/models/phase/ProductionPhasePipeline.jl](src/models/phase/ProductionPhasePipeline.jl)，结果类型定义位于 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl)。
+
+## 双入口分工
+
+当前相图主题有两条公开主流程：
+
+- `run_phase_pipeline`
+  - 通用 / research 入口
+  - 保留插值 CEP、direct CEP、crossover 和策略比较等较灵活的研究向路径
+- `run_production_phase_pipeline`
+  - production / baseline 入口
+  - 使用显式温度区间 `T_start:T_end`、固定 `dT_initial`、unknown budget 和非插值 Maxwell 收口逻辑
+
+两条入口共享底层 `run_trho_scan`、S-shape、Maxwell 与 artifact 治理能力，但在温度扫掠编排和 CEP 收口策略上职责不同。
 
 ## 一阶相变判据
 
@@ -68,6 +81,18 @@
 
 这些字段主要服务于回归治理、失败解释与策略比较，而不只是展示一个 `T_cep_MeV` 数值。
 
+### production 收口路径
+
+`run_production_phase_pipeline` 不把 CEP 搜索抽象成单次“对已有曲线集合调用 `find_cep`”，而是显式执行温度扫掠与 bracket 收缩：
+
+1. 根据 `ProductionPipelineConfig` 生成温度网格
+2. 对每个温度切片执行 Maxwell 有效性分类，状态为 `valid`、`unknown` 或 `invalid`
+3. 将扫掠结果收集到 `FirstOrderSweepResult`
+4. 从最后一个 `valid` 与随后的 `invalid` 温度切片构造 production bracket
+5. 在 bracket 内继续二分，得到 production CEP
+
+这条路径的重点不是更“通用”，而是更适合 production/baseline 口径的可解释性与稳定收口。
+
 ## Crossover 支路
 
 当温度高于 CEP 或未形成一阶相变时，pipeline 可转而计算 crossover line。
@@ -111,6 +136,16 @@
 - `promote_phase_artifacts` 负责 gate 校验与 reference 晋升
 
 因此，相图 pipeline 的真正闭环是“算法结果 + 结构化产物 + 晋升治理”，而不是只停留在相变点数值本身。
+
+production 入口同样复用这套工件治理，但会在 `diagnostics` 和 `config_snapshot` 中附加 production 特有字段，例如：
+
+- `mode`
+- `dT_initial`
+- `unknown_budget`
+- `first_point_fallback`
+- `forced_invalid_count`
+- `sweep_temperatures_MeV`
+- `sweep_statuses`
 
 ## 当前边界
 

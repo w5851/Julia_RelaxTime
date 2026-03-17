@@ -79,9 +79,9 @@ export load_dual_branch_scan!
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
-export run_phase_pipeline, find_cep, build_phase_artifacts
+export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
-export CEPResult, PromotionResult, PhasePipelineResult
+export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
 export derive_pm_seed_pair, analyze_pm_branch_competition
@@ -162,6 +162,7 @@ include(joinpath(@__DIR__, "phase", "CEPDetector.jl"))
 include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
+include(joinpath(@__DIR__, "phase", "ProductionPhasePipeline.jl"))
 include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
