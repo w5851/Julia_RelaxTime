@@ -830,6 +830,61 @@ function number_density(flavor::Symbol, m::Float64, μ::Float64, T::Float64, Φ:
 end
 
 # -------------------- 平均散射率主函数 --------------------
+
+@inline function _resolve_auto_threshold_subtraction(
+    threshold_subtraction::Bool,
+    mi::Float64,
+    mj::Float64,
+    mc::Float64,
+    md::Float64,
+)::Bool
+    if (mi^2 + mj^2) > (mc^2 + md^2)
+        return true
+    end
+    return threshold_subtraction
+end
+
+@inline function _resolve_sigma_support_bounds(
+    mi::Float64,
+    mj::Float64,
+    mc::Float64,
+    md::Float64,
+    sigma_cutoff::Union{Nothing,Float64},
+    p_grid::Union{Nothing,Vector{Float64}},
+    p_w::Union{Nothing,Vector{Float64}},
+)::Tuple{Float64,Float64,Float64}
+    has_finite_p_cut = (p_grid !== nothing && p_w !== nothing)
+    Λ = if sigma_cutoff !== nothing
+        sigma_cutoff
+    elseif has_finite_p_cut
+        maximum(p_grid)
+    else
+        NaN
+    end
+
+    s_bo = max((mi + mj)^2, (mc + md)^2)
+    s_up = if !isnan(Λ)
+        min((sqrt(mi^2 + Λ^2) + sqrt(mj^2 + Λ^2))^2,
+            (sqrt(mc^2 + Λ^2) + sqrt(md^2 + Λ^2))^2)
+    else
+        Inf
+    end
+    return Λ, s_bo, s_up
+end
+
+@inline function _ensure_default_angle_grids(
+    cos_grid::Union{Nothing,Vector{Float64}},
+    cos_w::Union{Nothing,Vector{Float64}},
+    phi_grid::Union{Nothing,Vector{Float64}},
+    phi_w::Union{Nothing,Vector{Float64}},
+    angle_nodes::Int,
+    phi_nodes::Int,
+)
+    cos_grid === nothing && ((cos_grid, cos_w) = _cached_interval_grid(-1.0, 1.0, angle_nodes))
+    phi_grid === nothing && ((phi_grid, phi_w) = _cached_interval_grid(0.0, TWO_PI, phi_nodes))
+    return cos_grid, cos_w, phi_grid, phi_w
+end
+
 """
     average_scattering_rate(process, quark_params, thermo_params, K_coeffs; kwargs...)
 
@@ -888,12 +943,7 @@ function average_scattering_rate(
     # Build the finalized σ-cache strategy by default.
     # 如果指定了 sigma_cutoff，则使用有限截断的 w0cdf 设计
     if cs_cache === nothing
-        # force-enable threshold subtraction for processes where initial total mass
-        # (mi^2 + mj^2) is greater than final total mass (mc^2 + md^2).
-        thr_for_build = threshold_subtraction
-        if (mi^2 + mj^2) > (mc^2 + md^2)
-            thr_for_build = true
-        end
+        thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
         cs_cache = build_w0cdf_pchip_cache(
             process,
             quark_params,
@@ -949,28 +999,9 @@ function _average_scattering_rate_semi_infinite(
         p_vals, quadrature_wts = _cached_semi_infinite_momentum_grid(p_nodes, scale)
     end
 
-    # If numerator uses a finite cutoff grid, optionally apply the same s-domain cuts as Fortran:
-    #   s_bo = max((mi+mj)^2, (mc+md)^2) * (1+1e-3)
-    #   s_up = min((Ei_max+Ej_max)^2, (Ec_max+Ed_max)^2) with Ei_max = sqrt(mi^2+Λ^2)
-    has_finite_p_cut = (p_grid !== nothing && p_w !== nothing)
-    # 使用 sigma_cutoff 参数（如果提供）来确定 s 范围，否则从动量网格推断
-    Λ = if sigma_cutoff !== nothing
-        sigma_cutoff
-    elseif has_finite_p_cut
-        maximum(p_vals)
-    else
-        NaN
-    end
-    s_bo = max((mi + mj)^2, (mc + md)^2)
-    s_up = if !isnan(Λ)
-        min((sqrt(mi^2 + Λ^2) + sqrt(mj^2 + Λ^2))^2,
-            (sqrt(mc^2 + Λ^2) + sqrt(md^2 + Λ^2))^2)
-    else
-        Inf
-    end
-    # 使用完整积分区间 [-1,1] 和 [0,2π]
-    cos_grid === nothing && ((cos_grid, cos_w) = _cached_interval_grid(-1.0, 1.0, angle_nodes))
-    phi_grid === nothing && ((phi_grid, phi_w) = _cached_interval_grid(0.0, TWO_PI, phi_nodes))
+    # 使用 sigma_cutoff 参数（如果提供）来确定 s 范围，否则从动量网格推断。
+    Λ, s_bo, s_up = _resolve_sigma_support_bounds(mi, mj, mc, md, sigma_cutoff, p_grid, p_w)
+    cos_grid, cos_w, phi_grid, phi_w = _ensure_default_angle_grids(cos_grid, cos_w, phi_grid, phi_w, angle_nodes, phi_nodes)
 
     # 数密度（用于归一化）
     # - 默认：半无穷积分 [0,∞)

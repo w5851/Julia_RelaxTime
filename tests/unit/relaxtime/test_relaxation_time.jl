@@ -67,6 +67,19 @@ end
     @test RelaxationTime.rate_value(rates_dict, :sbarsbar_to_sbarsbar) == RATES_SAMPLE.ss_to_ss
 end
 
+@testset "relaxation_rates warns and clamps negative totals" begin
+    densities = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+    rates_negative = (; (k => -abs(v) for (k, v) in pairs(RATES_SAMPLE))...)
+
+    @test_logs (:warn, r"negative relaxation rate encountered; clamping to 0") begin
+        tau_inv = relaxation_rates(densities, rates_negative)
+        @test tau_inv.u >= 0.0
+        @test tau_inv.s >= 0.0
+        @test tau_inv.ubar >= 0.0
+        @test tau_inv.sbar >= 0.0
+    end
+end
+
 @testset "relaxation adapters normalize Dict inputs" begin
     densities_dict = Dict{Symbol, Float64}(pairs(DENSITIES_SAMPLE))
     rates_dict = Dict{Symbol, Float64}(pairs(RATES_SAMPLE))
@@ -83,6 +96,17 @@ end
     )
     @test result.tau_inv == EXPECTED_TAU_INV
     @test result.tau == EXPECTED_TAU
+end
+
+@testset "relaxation_rates accepts integer-compatible inputs" begin
+    densities_int = Dict{Symbol, Int}(k => Int(round(v)) for (k, v) in pairs(DENSITIES_SAMPLE))
+    rates_int = Dict{Symbol, Int}(k => Int(round(v)) for (k, v) in pairs(RATES_SAMPLE))
+
+    tau_inv = relaxation_rates(densities_int, rates_int)
+    @test tau_inv.u == EXPECTED_TAU_INV.u
+    @test tau_inv.s == EXPECTED_TAU_INV.s
+    @test tau_inv.ubar == EXPECTED_TAU_INV.ubar
+    @test tau_inv.sbar == EXPECTED_TAU_INV.sbar
 end
 
 @testset "relaxation_times uses provided rates" begin
@@ -133,4 +157,3 @@ end
     @test res_struct.tau == res_nt.tau
     @test res_struct.rates == res_nt.rates
 end
-

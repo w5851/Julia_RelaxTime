@@ -128,6 +128,74 @@ end
     return _get_rate(rates, resolved_key)
 end
 
+@inline function _density_map(densities::NamedTuple)
+    return (
+        u=density_value(densities, :u),
+        d=density_value(densities, :d),
+        s=density_value(densities, :s),
+        ubar=density_value(densities, :ubar),
+        dbar=density_value(densities, :dbar),
+        sbar=density_value(densities, :sbar),
+    )
+end
+
+@inline function _rate_map(rates::NamedTuple)
+    return (
+        uu=rate_value(rates, :uu_to_uu),
+        ud=rate_value(rates, :ud_to_ud),
+        us=rate_value(rates, :us_to_us),
+        udbar=rate_value(rates, :udbar_to_udbar),
+        dubar=rate_value(rates, :dubar_to_dubar),
+        uubar=rate_value(rates, :uubar_to_uubar),
+        uubar_ddbar=rate_value(rates, :uubar_to_ddbar),
+        usbar=rate_value(rates, :usbar_to_usbar),
+        subar=rate_value(rates, :subar_to_subar),
+        uubar_ssbar=rate_value(rates, :uubar_to_ssbar),
+        ss=rate_value(rates, :ss_to_ss),
+        ssbar_uubar=rate_value(rates, :ssbar_to_uubar),
+        ssbar=rate_value(rates, :ssbar_to_ssbar),
+        ubardbar=rate_value(rates, :ubardbar_to_ubardbar),
+        ubarubar=rate_value(rates, :ubarubar_to_ubarubar),
+        ubarsbar=rate_value(rates, :ubarsbar_to_ubarsbar),
+        sbarsbar=rate_value(rates, :sbarsbar_to_sbarsbar),
+    )
+end
+
+@inline function _species_omega_u(n, w)
+    return n.u * (w.uu + w.ud) +
+           n.ubar * (w.uubar + w.uubar_ddbar + w.uubar_ssbar + w.udbar) +
+           n.s * w.us +
+           n.sbar * w.usbar
+end
+
+@inline function _species_omega_s(n, w)
+    return 2.0 * n.u * w.us +
+           2.0 * n.ubar * w.usbar +
+           n.s * w.ss +
+           n.sbar * (w.ssbar + 2.0 * w.ssbar_uubar)
+end
+
+@inline function _species_omega_ubar(n, w)
+    return n.u * (w.uubar + w.uubar_ddbar + w.uubar_ssbar + w.dubar) +
+           n.ubar * (w.ubardbar + w.ubarubar) +
+           n.s * w.subar +
+           n.sbar * w.ubarsbar
+end
+
+@inline function _species_omega_sbar(n, w)
+    return 2.0 * n.u * w.usbar +
+           2.0 * n.ubar * w.ubarsbar +
+           n.sbar * w.sbarsbar +
+           n.s * (w.ssbar + 2.0 * w.ssbar_uubar)
+end
+
+@inline function _warn_and_clamp_nonnegative(omega_u::Real, omega_s::Real, omega_ubar::Real, omega_sbar::Real)
+    if omega_u < -1e-12 || omega_s < -1e-12 || omega_ubar < -1e-12 || omega_sbar < -1e-12
+        @warn "negative relaxation rate encountered; clamping to 0" omega_u=omega_u omega_s=omega_s omega_ubar=omega_ubar omega_sbar=omega_sbar
+    end
+    return max(omega_u, 0.0), max(omega_s, 0.0), max(omega_ubar, 0.0), max(omega_sbar, 0.0)
+end
+
 @inline function rate_value(rates, key::Symbol)
     return _rate_value_core(normalize_symbol_mapping_input(rates, "rates"), key)
 end
@@ -303,69 +371,21 @@ function _relaxation_rates_core(
     densities::NamedTuple,
     rates::NamedTuple,
 )::NamedTuple
-    n_u = density_value(densities, :u)
-    n_d = density_value(densities, :d)
-    n_s = density_value(densities, :s)
-    n_ubar = density_value(densities, :ubar)
-    n_dbar = density_value(densities, :dbar)
-    n_sbar = density_value(densities, :sbar)
+    n = _density_map(densities)
+    w = _rate_map(rates)
 
-    w_uu = rate_value(rates, :uu_to_uu)
-    w_ud = rate_value(rates, :ud_to_ud)
-    w_us = rate_value(rates, :us_to_us)
-    w_udbar = rate_value(rates, :udbar_to_udbar)
-    w_dubar = rate_value(rates, :dubar_to_dubar)
-    w_uubar = rate_value(rates, :uubar_to_uubar)
-    w_uubar_ddbar = rate_value(rates, :uubar_to_ddbar)
-    w_usbar = rate_value(rates, :usbar_to_usbar)
-    w_subar = rate_value(rates, :subar_to_subar)
-    w_uubar_ssbar = rate_value(rates, :uubar_to_ssbar)
-    w_ss = rate_value(rates, :ss_to_ss)
-    w_ssbar_uubar = rate_value(rates, :ssbar_to_uubar)
-    w_ssbar = rate_value(rates, :ssbar_to_ssbar)
-
-    # Additional rates for antiquark relaxation times
-    w_ubardbar = rate_value(rates, :ubardbar_to_ubardbar)
-    w_ubarubar = rate_value(rates, :ubarubar_to_ubarubar)
-    w_ubarsbar = rate_value(rates, :ubarsbar_to_ubarsbar)
-    w_sbarsbar = rate_value(rates, :sbarsbar_to_sbarsbar)
-
-    # u quark (shared with d by isospin symmetry)
-    omega_u = n_u * (w_uu + w_ud) +
-              n_ubar * (w_uubar + w_uubar_ddbar + w_uubar_ssbar + w_udbar) +
-              n_s * w_us +
-              n_sbar * w_usbar
-
-    # s quark
-    omega_s = 2.0 * n_u * w_us +
-              2.0 * n_ubar * w_usbar +
-              n_s * w_ss +
-              n_sbar * (w_ssbar + 2.0 * w_ssbar_uubar)
-
+    omega_u = _species_omega_u(n, w)
+    omega_s = _species_omega_s(n, w)
     # anti-u (shared with anti-d)
     # Matches Fortran: tau_lb = 1 / (
     #   n_u*(w6+w7+w9+wa5) + n_ub*(wa1+wa2) + n_s*wa6 + n_sb*wa3 )
-    omega_ubar = n_u * (w_uubar + w_uubar_ddbar + w_uubar_ssbar + w_dubar) +
-                 n_ubar * (w_ubardbar + w_ubarubar) +
-                 n_s * w_subar +
-                 n_sbar * w_ubarsbar
-
+    omega_ubar = _species_omega_ubar(n, w)
     # anti-s
     # Matches Fortran: tau_sb = 1 / (
     #   2*n_u*w8 + 2*n_ub*wa3 + n_sb*wa4 + n_s*(w11+2*w10) )
-    omega_sbar = 2.0 * n_u * w_usbar +
-                 2.0 * n_ubar * w_ubarsbar +
-                 n_sbar * w_sbarsbar +
-                 n_s * (w_ssbar + 2.0 * w_ssbar_uubar)
+    omega_sbar = _species_omega_sbar(n, w)
 
-    # 数值保护：平均速率应非负；若出现明显负值，提示但仍钳制到 0。
-    if omega_u < -1e-12 || omega_s < -1e-12 || omega_ubar < -1e-12 || omega_sbar < -1e-12
-        @warn "negative relaxation rate encountered; clamping to 0" omega_u=omega_u omega_s=omega_s omega_ubar=omega_ubar omega_sbar=omega_sbar
-    end
-    omega_u = max(omega_u, 0.0)
-    omega_s = max(omega_s, 0.0)
-    omega_ubar = max(omega_ubar, 0.0)
-    omega_sbar = max(omega_sbar, 0.0)
+    omega_u, omega_s, omega_ubar, omega_sbar = _warn_and_clamp_nonnegative(omega_u, omega_s, omega_ubar, omega_sbar)
 
     return (
         u = omega_u,
