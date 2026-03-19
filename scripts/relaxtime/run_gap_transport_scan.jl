@@ -1413,4 +1413,6 @@ function main()
     run_scan(opts)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end
