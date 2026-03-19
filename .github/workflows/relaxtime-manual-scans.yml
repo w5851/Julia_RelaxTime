@@ -1,0 +1,127 @@
+name: Relaxtime Manual Scans
+
+on:
+  workflow_dispatch:
+    inputs:
+      sections:
+        description: "Outputs to generate: all, cross_section, plan_a, or plan_b"
+        required: false
+        default: "all"
+        type: string
+      integration_mode:
+        description: "Tau integration mode"
+        required: false
+        default: "finite_15"
+        type: choice
+        options:
+          - semi_infinite
+          - finite_15
+          - finite_lambda
+      tau_p_nodes:
+        description: "Tau momentum nodes"
+        required: false
+        default: "20"
+        type: string
+      tau_angle_nodes:
+        description: "Tau cos(theta) nodes"
+        required: false
+        default: "4"
+        type: string
+      tau_phi_nodes:
+        description: "Tau phi nodes"
+        required: false
+        default: "8"
+        type: string
+      tau_n_sigma:
+        description: "Tau sigma integral points"
+        required: false
+        default: "6"
+        type: string
+      sigma_grid_n:
+        description: "Tau sigma cache grid size"
+        required: false
+        default: "60"
+        type: string
+      compute_bulk:
+        description: "Compute zeta-related outputs"
+        required: false
+        default: true
+        type: boolean
+      overwrite:
+        description: "Overwrite existing outputs"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-manual-scans
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Install Python plotting dependencies
+        run: python -m pip install numpy pandas matplotlib
+
+      - name: Run manual relaxtime workflow
+        run: |
+          julia --project=. scripts/relaxtime/run_manual_relaxation_scan_workflow.jl \
+            --sections "${{ inputs.sections || 'all' }}" \
+            --mode "${{ inputs.integration_mode || 'finite_15' }}" \
+            --tau-p-nodes "${{ inputs.tau_p_nodes || '20' }}" \
+            --tau-angle-nodes "${{ inputs.tau_angle_nodes || '4' }}" \
+            --tau-phi-nodes "${{ inputs.tau_phi_nodes || '8' }}" \
+            --tau-n-sigma "${{ inputs.tau_n_sigma || '6' }}" \
+            --sigma-grid-n "${{ inputs.sigma_grid_n || '60' }}" \
+            ${{ inputs.compute_bulk == true && '' || '--no-bulk' }} \
+            ${{ inputs.overwrite == true && '--overwrite' || '' }}
+
+      - name: Upload result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: relaxtime-manual-scan-results
+          path: |
+            data/outputs/results/relaxtime/cross_section/**
+            data/outputs/results/relaxtime/plan_a/**
+            data/outputs/results/relaxtime/plan_b/**
+          retention-days: 30
+
+      - name: Upload figure artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: relaxtime-manual-scan-figures
+          path: |
+            data/outputs/figures/relaxtime/cross_section/**
+            data/outputs/figures/relaxtime/plan_a/**
+            data/outputs/figures/relaxtime/plan_b/**
+          retention-days: 30
+
+      - name: Write summary
+        run: |
+          echo "## Relaxtime Manual Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- sections: ${{ inputs.sections || 'all' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- integration mode: ${{ inputs.integration_mode || 'finite_15' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- tau nodes: p=${{ inputs.tau_p_nodes || '20' }}, angle=${{ inputs.tau_angle_nodes || '4' }}, phi=${{ inputs.tau_phi_nodes || '8' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- tau sigma settings: n_sigma=${{ inputs.tau_n_sigma || '6' }}, sigma_grid=${{ inputs.sigma_grid_n || '60' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- compute bulk: ${{ inputs.compute_bulk }}" >> $GITHUB_STEP_SUMMARY
+          echo "- overwrite: ${{ inputs.overwrite }}" >> $GITHUB_STEP_SUMMARY
