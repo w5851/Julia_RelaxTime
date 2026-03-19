@@ -1,0 +1,10 @@
+process,mode,rate
+uubar_to_uubar,pchip,0.6723215455610828
+uubar_to_uubar,linear,0.7893392119955577
+uubar_to_uubar,direct,0.4966869080876662
+uubar_to_ddbar,pchip,0.4363430472936139
+uubar_to_ddbar,linear,0.5427014541898382
+uubar_to_ddbar,direct,0.2767310067609895
+udbar_to_udbar,pchip,0.3144113407386027
+udbar_to_udbar,linear,0.31434240960614684
+udbar_to_udbar,direct,0.3153190707414325
