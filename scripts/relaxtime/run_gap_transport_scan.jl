@@ -17,6 +17,7 @@
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "scan_quality.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
@@ -24,12 +25,12 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm, ρ0_inv_fm3
-using .TransportWorkflow: solve_gap_and_transport
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
 using .ScanCSV: ScanCSV
+using .ScanQuality: assess_point_quality
 
 const PNJL_MODEL = Models.create_model(:PNJL)
 const TransportWorkflow = Models.transport_workflow_module()
@@ -37,12 +38,24 @@ const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
 
+function preferred_phase_reference_path(dense_name::String, legacy_name::String)
+    dense_path = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", dense_name)
+    return isfile(dense_path) ? dense_path : joinpath(PROJECT_ROOT, "data", "reference", "pnjl", legacy_name)
+end
+
+const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_dense.csv", "boundary.csv")
+const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
+const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
+
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
 const MODULE_DEFAULT_ANGLE_NODES = RT_ASR.DEFAULT_ANGLE_NODES   # 4
 const MODULE_DEFAULT_PHI_NODES = RT_ASR.DEFAULT_PHI_NODES       # 8
 const MODULE_DEFAULT_SIGMA_GRID_N = RT_ASR.DEFAULT_SIGMA_GRID_N # 60
+const PHASE_BOUNDARY_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
+const PHASE_CROSSOVER_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 struct ScanOptions
     output::String
+    channel_diagnostics_output::Union{Nothing, String}
     xi_values::Vector{Float64}
     tmin_mev::Float64
     tmax_mev::Float64
@@ -61,6 +74,11 @@ struct ScanOptions
     tau_angle_nodes::Int
     tau_phi_nodes::Int
     tau_n_sigma_points::Int
+    tau_threshold_subtraction::Bool
+    tau_asym_window::Float64
+    tau_asym_fit_min_points::Int
+    tau_asym_extra_points::Int
+    tau_interpolation_mode::Symbol
     sigma_grid_n::Int
     integration_mode::Symbol
     gc_every_n::Int
@@ -73,6 +91,7 @@ function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_gap_transport_scan.jl [options]\n")
     println("Options:")
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_transport_scan.csv)")
+    println("  --channel-diagnostics-output <path>  可选：输出每点每通道的 τ^-1 贡献明细 CSV")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -88,6 +107,11 @@ function print_usage()
     println("  --tau-angle-nodes <int>     τ 平均散射率 cosθ 节点 (default $(MODULE_DEFAULT_ANGLE_NODES))")
     println("  --tau-phi-nodes <int>       τ 平均散射率 φ 节点 (default $(MODULE_DEFAULT_PHI_NODES))")
     println("  --tau-n-sigma <int>         σ(s) 的 t 积分点数 (default $(RT_TCS.DEFAULT_T_INTEGRAL_POINTS))")
+    println("  --tau-threshold-subtraction / --tau-no-threshold-subtraction  是否启用阈值减法缓存 (default true)")
+    println("  --tau-asym-window <float>   阈值减法拟合窗口 Δs (default 0.6)")
+    println("  --tau-asym-fit-min-points <int> 阈值减法最小拟合点数 (default 8)")
+    println("  --tau-asym-extra-points <int> 阈值减法补点数量 (default 10)")
+    println("  --tau-interpolation-mode <pchip|linear|direct|hybrid_threshold>  τ 中 σ(s) 取值模式 (default linear)")
     println("  --sigma-grid-n <int>        σ(s) 预计算网格点数 (default $(MODULE_DEFAULT_SIGMA_GRID_N))")
     println("  --mode <mode>               τ 积分模式: semi_infinite | finite_15 | finite_lambda (default semi_infinite)")
     println("  --gc-every-n <int>          每 N 个点触发一次 GC (default 5; 0 表示关闭)")
@@ -99,6 +123,7 @@ end
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_transport_scan.csv"),
+        :channel_diagnostics_output => nothing,
         :xi_values => Float64[0.0],
         :tmin => 50.0,
         :tmax => 200.0,
@@ -116,6 +141,11 @@ function parse_args(args::Vector{String})
         :tau_angle_nodes => MODULE_DEFAULT_ANGLE_NODES,
         :tau_phi_nodes => MODULE_DEFAULT_PHI_NODES,
         :tau_n_sigma => RT_TCS.DEFAULT_T_INTEGRAL_POINTS,
+        :tau_threshold_subtraction => true,
+        :tau_asym_window => 0.6,
+        :tau_asym_fit_min_points => 8,
+        :tau_asym_extra_points => 10,
+        :tau_interpolation_mode => :linear,
         :sigma_grid_n => MODULE_DEFAULT_SIGMA_GRID_N,
         :integration_mode => :semi_infinite,
         :gc_every_n => 5,
@@ -134,6 +164,8 @@ function parse_args(args::Vector{String})
         end
         if arg == "--output"
             opts[:output] = require_value()
+        elseif arg == "--channel-diagnostics-output"
+            opts[:channel_diagnostics_output] = require_value()
         elseif arg == "--xi"
             val = parse(Float64, require_value())
             if opts[:xi_values] == Float64[0.0]
@@ -183,6 +215,20 @@ function parse_args(args::Vector{String})
             opts[:tau_phi_nodes] = parse(Int, require_value())
         elseif arg == "--tau-n-sigma"
             opts[:tau_n_sigma] = parse(Int, require_value())
+        elseif arg == "--tau-threshold-subtraction"
+            opts[:tau_threshold_subtraction] = true
+        elseif arg == "--tau-no-threshold-subtraction"
+            opts[:tau_threshold_subtraction] = false
+        elseif arg == "--tau-asym-window"
+            opts[:tau_asym_window] = parse(Float64, require_value())
+        elseif arg == "--tau-asym-fit-min-points"
+            opts[:tau_asym_fit_min_points] = parse(Int, require_value())
+        elseif arg == "--tau-asym-extra-points"
+            opts[:tau_asym_extra_points] = parse(Int, require_value())
+        elseif arg == "--tau-interpolation-mode"
+            mode = Symbol(require_value())
+            mode in (:pchip, :linear, :direct, :hybrid_threshold) || error("unknown tau interpolation mode: $(mode) (expected: pchip|linear|direct|hybrid_threshold)")
+            opts[:tau_interpolation_mode] = mode
         elseif arg == "--sigma-grid-n"
             opts[:sigma_grid_n] = parse(Int, require_value())
         elseif arg == "--mode"
@@ -213,6 +259,7 @@ function parse_args(args::Vector{String})
 
     return ScanOptions(
         String(opts[:output]),
+        isnothing(opts[:channel_diagnostics_output]) ? nothing : String(opts[:channel_diagnostics_output]),
         xi_vals,
         Float64(opts[:tmin]),
         Float64(opts[:tmax]),
@@ -230,12 +277,160 @@ function parse_args(args::Vector{String})
         Int(opts[:tau_angle_nodes]),
         Int(opts[:tau_phi_nodes]),
         Int(opts[:tau_n_sigma]),
+        Bool(opts[:tau_threshold_subtraction]),
+        Float64(opts[:tau_asym_window]),
+        Int(opts[:tau_asym_fit_min_points]),
+        Int(opts[:tau_asym_extra_points]),
+        Symbol(opts[:tau_interpolation_mode]),
         Int(opts[:sigma_grid_n]),
         Symbol(opts[:integration_mode]),
         Int(opts[:gc_every_n]),
         Int(opts[:tr_p_nodes]),
         Float64(opts[:tr_p_max]),
     )
+end
+
+function write_channel_diagnostics_header_if_needed(io)
+    header = join([
+        "T_MeV", "muq_MeV", "muB_MeV", "xi",
+        "species", "channel", "density_key", "multiplicity",
+        "density", "rate", "contribution", "total", "tau_inv_species",
+        "equilibrium_backend", "phase_curr", "phase_structure",
+    ], ',')
+    println(io, header)
+end
+
+@inline function _rate_with_alias(rates, key::Symbol)
+    if hasproperty(rates, key)
+        return getproperty(rates, key)
+    end
+    if key == :dubar_to_dubar && hasproperty(rates, :udbar_to_udbar)
+        return getproperty(rates, :udbar_to_udbar)
+    elseif key == :subar_to_subar && hasproperty(rates, :usbar_to_usbar)
+        return getproperty(rates, :usbar_to_usbar)
+    elseif key == :ubardbar_to_ubardbar && hasproperty(rates, :ud_to_ud)
+        return getproperty(rates, :ud_to_ud)
+    elseif key == :ubarubar_to_ubarubar && hasproperty(rates, :uu_to_uu)
+        return getproperty(rates, :uu_to_uu)
+    elseif key == :ubarsbar_to_ubarsbar && hasproperty(rates, :us_to_us)
+        return getproperty(rates, :us_to_us)
+    elseif key == :sbarsbar_to_sbarsbar && hasproperty(rates, :ss_to_ss)
+        return getproperty(rates, :ss_to_ss)
+    end
+    return 0.0
+end
+
+function _fallback_relaxation_rate_contribution_rows(dens, rates)
+    rows = NamedTuple[]
+
+    function add_row(species::Symbol, channel::Symbol, density_key::Symbol, multiplicity::Float64)
+        density = getproperty(dens, density_key)
+        rate = Float64(_rate_with_alias(rates, channel))
+        contribution = multiplicity * density * rate
+        push!(rows, (
+            species=species,
+            channel=channel,
+            density_key=density_key,
+            multiplicity=multiplicity,
+            density=density,
+            rate=rate,
+            contribution=contribution,
+            total=0.0,
+        ))
+    end
+
+    # u / d (isospin)
+    add_row(:u, :uu_to_uu, :u, 1.0)
+    add_row(:u, :ud_to_ud, :u, 1.0)
+    add_row(:u, :uubar_to_uubar, :ubar, 1.0)
+    add_row(:u, :uubar_to_ddbar, :ubar, 1.0)
+    add_row(:u, :uubar_to_ssbar, :ubar, 1.0)
+    add_row(:u, :udbar_to_udbar, :ubar, 1.0)
+    add_row(:u, :us_to_us, :s, 1.0)
+    add_row(:u, :usbar_to_usbar, :sbar, 1.0)
+
+    add_row(:d, :uu_to_uu, :d, 1.0)
+    add_row(:d, :ud_to_ud, :d, 1.0)
+    add_row(:d, :uubar_to_uubar, :dbar, 1.0)
+    add_row(:d, :uubar_to_ddbar, :dbar, 1.0)
+    add_row(:d, :uubar_to_ssbar, :dbar, 1.0)
+    add_row(:d, :udbar_to_udbar, :dbar, 1.0)
+    add_row(:d, :us_to_us, :s, 1.0)
+    add_row(:d, :usbar_to_usbar, :sbar, 1.0)
+
+    # s
+    add_row(:s, :us_to_us, :u, 2.0)
+    add_row(:s, :usbar_to_usbar, :ubar, 2.0)
+    add_row(:s, :ss_to_ss, :s, 1.0)
+    add_row(:s, :ssbar_to_ssbar, :sbar, 1.0)
+    add_row(:s, :ssbar_to_uubar, :sbar, 2.0)
+
+    # anti-u / anti-d (isospin)
+    add_row(:ubar, :uubar_to_uubar, :u, 1.0)
+    add_row(:ubar, :uubar_to_ddbar, :u, 1.0)
+    add_row(:ubar, :uubar_to_ssbar, :u, 1.0)
+    add_row(:ubar, :dubar_to_dubar, :u, 1.0)
+    add_row(:ubar, :ubardbar_to_ubardbar, :ubar, 1.0)
+    add_row(:ubar, :ubarubar_to_ubarubar, :ubar, 1.0)
+    add_row(:ubar, :subar_to_subar, :s, 1.0)
+    add_row(:ubar, :ubarsbar_to_ubarsbar, :sbar, 1.0)
+
+    add_row(:dbar, :uubar_to_uubar, :d, 1.0)
+    add_row(:dbar, :uubar_to_ddbar, :d, 1.0)
+    add_row(:dbar, :uubar_to_ssbar, :d, 1.0)
+    add_row(:dbar, :dubar_to_dubar, :d, 1.0)
+    add_row(:dbar, :ubardbar_to_ubardbar, :dbar, 1.0)
+    add_row(:dbar, :ubarubar_to_ubarubar, :dbar, 1.0)
+    add_row(:dbar, :subar_to_subar, :s, 1.0)
+    add_row(:dbar, :ubarsbar_to_ubarsbar, :sbar, 1.0)
+
+    # anti-s
+    add_row(:sbar, :usbar_to_usbar, :u, 2.0)
+    add_row(:sbar, :ubarsbar_to_ubarsbar, :ubar, 2.0)
+    add_row(:sbar, :sbarsbar_to_sbarsbar, :sbar, 1.0)
+    add_row(:sbar, :ssbar_to_ssbar, :s, 1.0)
+    add_row(:sbar, :ssbar_to_uubar, :s, 2.0)
+
+    totals = Dict{Symbol, Float64}()
+    for row in rows
+        totals[row.species] = get(totals, row.species, 0.0) + row.contribution
+    end
+
+    out = NamedTuple[]
+    for row in rows
+        push!(out, (
+            species=row.species,
+            channel=row.channel,
+            density_key=row.density_key,
+            multiplicity=row.multiplicity,
+            density=row.density,
+            rate=row.rate,
+            contribution=row.contribution,
+            total=get(totals, row.species, 0.0),
+        ))
+    end
+    return out
+end
+
+function write_channel_diagnostics_rows!(io, T_mev::Float64, muq_mev::Float64, muB_mev::Float64, xi::Float64,
+    dens, rates, tauinv, eq_backend, diag)
+    rows = if isdefined(TransportWorkflow.RelaxationTime, :relaxation_rate_contribution_rows)
+        TransportWorkflow.RelaxationTime.relaxation_rate_contribution_rows(dens, rates)
+    else
+        _fallback_relaxation_rate_contribution_rows(dens, rates)
+    end
+    for row in rows
+        species = row.species
+        tauinv_species = getproperty(tauinv, species)
+        line = join([
+            string(T_mev), string(muq_mev), string(muB_mev), string(xi),
+            string(species), string(row.channel), string(row.density_key), string(row.multiplicity),
+            string(row.density), string(row.rate), string(row.contribution), string(row.total), string(tauinv_species),
+            string(eq_backend), string(diag.phase_curr), string(diag.phase_structure),
+        ], ',')
+        println(io, line)
+    end
+    flush(io)
 end
 
 function ensure_parent_dir(path::AbstractString)
@@ -278,6 +473,15 @@ function ensure_output_header_compatible(path::AbstractString)
         "sigma_over_T",
         "sigma_over_T_over_eta_over_s",
         "zeta_over_s_over_eta_over_s",
+        "quality_flag",
+        "quality_reason",
+        "quality_metric",
+        "equilibrium_backend",
+        "seed_source",
+        "phase_prev",
+        "phase_curr",
+        "phase_structure",
+        "phase_boundary_xi_used",
     )
     for c in required
         occursin(c, header) || error("existing output CSV header is incompatible with current script (missing column: $c). Please rerun with --overwrite or choose a new --output path.")
@@ -288,7 +492,7 @@ function write_header_if_needed(io)
     header = join([
         "T_MeV", "muq_MeV", "muB_MeV", "xi",
         "T_fm", "muq_fm",
-        "converged", "iterations", "residual_norm",
+        "converged", "iterations", "residual_norm", "equilibrium_backend", "seed_source", "phase_prev", "phase_curr", "phase_structure", "phase_boundary_xi_used",
         "Phi", "Phibar",
         "m_u", "m_d", "m_s",
         "rho_baryon", "rho_norm",
@@ -300,6 +504,7 @@ function write_header_if_needed(io)
         "tauinv_u", "tauinv_d", "tauinv_s", "tauinv_ubar", "tauinv_dbar", "tauinv_sbar",
         "eta", "sigma", "zeta", "eta_over_s", "zeta_over_s",
         "sigma_over_T", "sigma_over_T_over_eta_over_s", "zeta_over_s_over_eta_over_s",
+        "quality_flag", "quality_reason", "quality_metric",
     ], ',')
     println(io, header)
 end
@@ -328,6 +533,351 @@ function integration_grids(opts::ScanOptions)
     else
         return (nothing, nothing, nothing)
     end
+end
+
+function compute_equilibrium_residual_norm(T_fm::Float64, muq_fm::Float64, x_state, xi::Float64, opts::ScanOptions)
+    mu_vec = Main.Models.normalize_mu_vec(muq_fm)
+    residual_vec = Main.Models.gap_residual(
+        PNJL_MODEL,
+        x_state,
+        T_fm,
+        mu_vec;
+        xi=xi,
+        p_num=opts.p_num,
+        t_num=opts.t_num,
+    )
+    return sqrt(sum(abs2, residual_vec))
+end
+
+function build_phase_tracker(xi::Float64, previous_solution, previous_phase::Symbol)
+    boundary_xi_used = xi
+    tracker = try
+        TransportWorkflow.PNJL.PhaseAwareContinuitySeed(xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
+    catch
+        TransportWorkflow.PNJL.PhaseAwareContinuitySeed()
+    end
+    if tracker.boundary_data !== nothing && isempty(tracker.boundary_data.T_values)
+        nearest_xi = nearest_phase_boundary_xi(xi)
+        if nearest_xi !== nothing
+            tracker = try
+                TransportWorkflow.PNJL.PhaseAwareContinuitySeed(nearest_xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
+            catch
+                tracker
+            end
+            boundary_xi_used = nearest_xi
+        end
+    end
+    if previous_solution !== nothing
+        tracker.previous_solution = collect(Float64, previous_solution)
+        tracker.previous_phase = previous_phase
+    end
+    return tracker, boundary_xi_used
+end
+
+function available_phase_boundary_xis()
+    if PHASE_BOUNDARY_XI_CACHE[] !== nothing
+        return PHASE_BOUNDARY_XI_CACHE[]
+    end
+    xis = Float64[]
+    if isfile(DEFAULT_PHASE_BOUNDARY_PATH)
+        for line in eachline(DEFAULT_PHASE_BOUNDARY_PATH)
+            startswith(line, "xi") && continue
+            parts = split(line, ',')
+            length(parts) >= 1 || continue
+            xi_val = tryparse(Float64, parts[1])
+            xi_val === nothing && continue
+            push!(xis, xi_val)
+        end
+    end
+    PHASE_BOUNDARY_XI_CACHE[] = unique(sort(xis))
+    return PHASE_BOUNDARY_XI_CACHE[]
+end
+
+function nearest_phase_boundary_xi(xi::Float64)
+    xis = available_phase_boundary_xis()
+    isempty(xis) && return nothing
+    distances = abs.(xis .- xi)
+    return xis[argmin(distances)]
+end
+
+function available_phase_crossover_xis()
+    if PHASE_CROSSOVER_XI_CACHE[] !== nothing
+        return PHASE_CROSSOVER_XI_CACHE[]
+    end
+    xis = Float64[]
+    if isfile(DEFAULT_PHASE_CROSSOVER_PATH)
+        for line in eachline(DEFAULT_PHASE_CROSSOVER_PATH)
+            startswith(line, "xi") && continue
+            parts = split(line, ',')
+            length(parts) >= 1 || continue
+            xi_val = tryparse(Float64, parts[1])
+            xi_val === nothing && continue
+            push!(xis, xi_val)
+        end
+    end
+    PHASE_CROSSOVER_XI_CACHE[] = unique(sort(xis))
+    return PHASE_CROSSOVER_XI_CACHE[]
+end
+
+function nearest_phase_crossover_xi(xi::Float64)
+    xis = available_phase_crossover_xis()
+    isempty(xis) && return nothing
+    distances = abs.(xis .- xi)
+    return xis[argmin(distances)]
+end
+
+function load_crossover_reference(xi::Float64)
+    isfile(DEFAULT_PHASE_CROSSOVER_PATH) || return nothing, nothing
+
+    header = nothing
+    rows = NamedTuple{(:mu_MeV, :T_crossover_MeV), Tuple{Float64, Float64}}[]
+    xi_used = xi
+    exact_match_found = false
+    nearest_xi = nearest_phase_crossover_xi(xi)
+
+    open(DEFAULT_PHASE_CROSSOVER_PATH, "r") do io
+        for raw_line in eachline(io)
+            line = strip(raw_line)
+            isempty(line) && continue
+            if header === nothing
+                header = split(line, ',')
+                continue
+            end
+
+            parts = split(line, ',')
+            length(parts) == length(header) || continue
+            idx_xi = findfirst(==("xi"), header)
+            idx_mu = findfirst(==("mu_MeV"), header)
+            idx_T = findfirst(==("T_crossover_MeV"), header)
+            if idx_T === nothing
+                idx_T = findfirst(==("T_crossover_chiral_MeV"), header)
+            end
+            (idx_xi === nothing || idx_mu === nothing || idx_T === nothing) && return nothing, nothing
+
+            row_xi = tryparse(Float64, parts[idx_xi])
+            row_mu = tryparse(Float64, parts[idx_mu])
+            row_T = tryparse(Float64, parts[idx_T])
+            (row_xi === nothing || row_mu === nothing || row_T === nothing) && continue
+
+            if abs(row_xi - xi) <= 1e-6
+                exact_match_found = true
+                push!(rows, (mu_MeV=Float64(row_mu), T_crossover_MeV=Float64(row_T)))
+                xi_used = Float64(row_xi)
+            elseif !exact_match_found && nearest_xi !== nothing && abs(row_xi - nearest_xi) <= 1e-6
+                push!(rows, (mu_MeV=Float64(row_mu), T_crossover_MeV=Float64(row_T)))
+                xi_used = Float64(row_xi)
+            end
+        end
+    end
+
+    filtered = filter(row -> isfinite(row.mu_MeV) && isfinite(row.T_crossover_MeV), rows)
+    isempty(filtered) && return nothing, nothing
+    sort!(filtered, by=row -> row.mu_MeV)
+    return filtered, xi_used
+end
+
+function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64)
+    data, xi_used = load_crossover_reference(xi)
+    data === nothing && return NaN, xi_used
+    length(data) == 1 && return data[1].T_crossover_MeV, xi_used
+
+    if muq_mev <= data[1].mu_MeV
+        return data[1].T_crossover_MeV, xi_used
+    elseif muq_mev >= data[end].mu_MeV
+        return data[end].T_crossover_MeV, xi_used
+    end
+
+    for i in 1:(length(data) - 1)
+        left = data[i]
+        right = data[i + 1]
+        if left.mu_MeV <= muq_mev <= right.mu_MeV
+            weight = (muq_mev - left.mu_MeV) / (right.mu_MeV - left.mu_MeV)
+            return left.T_crossover_MeV + weight * (right.T_crossover_MeV - left.T_crossover_MeV), xi_used
+        end
+    end
+
+    return NaN, xi_used
+end
+
+function tracker_phase(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
+    boundary_phase = try
+        Main.Models.SeedStrategies._get_current_phase(tracker, T_mev, muq_mev)
+    catch
+        :unknown
+    end
+
+    if boundary_phase in (:hadron, :quark)
+        return boundary_phase
+    end
+
+    Tc_mev, _ = interpolate_crossover_temperature(xi, muq_mev)
+    if isfinite(Tc_mev)
+        if abs(T_mev - Tc_mev) <= 2.0
+            return :crossover
+        elseif T_mev < Tc_mev
+            return :hadron
+        else
+            return :quark
+        end
+    end
+
+    if boundary_phase == :crossover
+        return :quark
+    end
+
+    return boundary_phase
+end
+
+function is_phase_transition(prev_phase::Symbol, current_phase::Symbol)
+    try
+        return Main.Models.SeedStrategies._is_phase_transition(prev_phase, current_phase)
+    catch
+        return false
+    end
+end
+
+function describe_seed_source(tracker, current_phase::Symbol)
+    if tracker.previous_solution === nothing
+        return "phase_aware_default_$(String(current_phase))"
+    elseif is_phase_transition(tracker.previous_phase, current_phase)
+        return "phase_aware_phase_switch_$(String(tracker.previous_phase))_to_$(String(current_phase))"
+    else
+        return "phase_aware_continuity_$(String(current_phase))"
+    end
+end
+
+function phase_structure(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
+    data = tracker.boundary_data
+    if data !== nothing && !isempty(data.T_values) && !isnan(data.T_CEP) && T_mev <= data.T_CEP
+        return :first_order_possible
+    end
+
+    Tc_mev, _ = interpolate_crossover_temperature(xi, muq_mev)
+    if isfinite(Tc_mev)
+        return T_mev <= Tc_mev ? :crossover_possible : :no_transition
+    end
+
+    return :unknown
+end
+
+function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
+    raw = Main.Models.solve_constraint(
+        PNJL_MODEL,
+        Main.Models.FixedMu(),
+        T_fm;
+        μ_fm=muq_fm,
+        seed_guess=Float64.(seed_state[1:min(5, length(seed_state))]),
+        xi=xi,
+        p_num=opts.p_num,
+        t_num=opts.t_num,
+        residual_norm_max=1e-4,
+        physicality_check=Main.Models.ImplicitSolver._default_is_physical_solution,
+    )
+    Bool(raw.converged) || return nothing
+    masses = SVector{3}(Tuple(Float64.(raw.masses)))
+    (all(isfinite, masses) && all(>(0.0), masses)) || return nothing
+    return (
+        converged=true,
+        x_state=SVector{5}(Tuple(Float64.(raw.x_state))),
+        mu_vec=SVector{3}(Tuple(Float64.(raw.mu_vec))),
+        masses=masses,
+        iterations=Int(raw.iterations),
+        residual_norm=Float64(raw.residual_norm),
+        solver_backend=:models,
+        omega=Float64(raw.omega),
+    )
+end
+
+function solve_legacy_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+        T_fm,
+        muq_fm;
+        xi=xi,
+        solver_backend=:legacy,
+        p_num=opts.p_num,
+        t_num=opts.t_num,
+        seed_state=nothing,
+        solver_kwargs=(iterations=opts.max_iter,),
+    )
+    residual_norm = compute_equilibrium_residual_norm(T_fm, muq_fm, base.x_state, xi, opts)
+    return (
+        converged=base.converged,
+        x_state=base.x_state,
+        mu_vec=base.mu_vec,
+        masses=base.masses,
+        iterations=-1,
+        residual_norm=residual_norm,
+        solver_backend=:legacy,
+    )
+end
+
+function compete_phase_branches(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
+    candidates = NamedTuple[]
+    for (label, seed) in ((:hadron, TransportWorkflow.PNJL.HADRON_SEED_5), (:quark, TransportWorkflow.PNJL.QUARK_SEED_5))
+        eq = try
+            solve_models_equilibrium(T_fm, muq_fm, xi, seed, opts)
+        catch
+            nothing
+        end
+        eq === nothing && continue
+        push!(candidates, (label=label, eq=eq))
+    end
+    isempty(candidates) && return nothing
+    sort!(candidates, by=row -> row.eq.omega)
+    return first(candidates)
+end
+
+function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi::Float64, opts::ScanOptions;
+    previous_solution=nothing,
+    previous_phase::Symbol=:unknown,
+)
+    T_fm = T_mev / ħc_MeV_fm
+    muq_mev = muB_mev / 3.0
+    muq_fm = muq_mev / ħc_MeV_fm
+
+    tracker, boundary_xi_used = build_phase_tracker(xi, previous_solution, previous_phase)
+    phase_prev = tracker.previous_phase
+    phase_curr_hint = tracker_phase(tracker, T_mev, muq_mev, xi)
+    structure = phase_structure(tracker, T_mev, muq_mev, xi)
+    seed_source = describe_seed_source(tracker, phase_curr_hint)
+    seed_state = Main.Models.get_seed(tracker, [T_fm, muq_fm], Main.Models.FixedMu())
+
+    eq = nothing
+    phase_curr = phase_curr_hint
+    models_err = nothing
+
+    if tracker.previous_solution !== nothing && is_phase_transition(phase_prev, phase_curr_hint) && phase_curr_hint in (:hadron, :quark)
+        winner = compete_phase_branches(T_fm, muq_fm, xi, opts)
+        if winner !== nothing
+            eq = winner.eq
+            phase_curr = winner.label
+            seed_source = "phase_aware_branch_competition_$(String(winner.label))"
+        end
+    end
+
+    if eq === nothing
+        try
+            eq = solve_models_equilibrium(T_fm, muq_fm, xi, seed_state, opts)
+        catch err
+            models_err = err
+        end
+    end
+
+    if eq === nothing
+        models_err !== nothing && @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=models_err
+        eq = solve_legacy_equilibrium(T_fm, muq_fm, xi, opts)
+        seed_source = string(seed_source, "+legacy_fallback")
+    end
+
+    next_solution = collect(Float64, eq.x_state)
+    next_phase = phase_curr
+    return eq, next_solution, next_phase, (
+        seed_source=seed_source,
+        phase_prev=phase_prev,
+        phase_curr=next_phase,
+        phase_structure=structure,
+        phase_boundary_xi_used=boundary_xi_used,
+    )
 end
 
 function safe_total_cross_section(process::Symbol, s::Float64,
@@ -375,6 +925,9 @@ end
 
 function run_scan(opts::ScanOptions)
     ensure_parent_dir(opts.output)
+    if opts.channel_diagnostics_output !== nothing
+        ensure_parent_dir(opts.channel_diagnostics_output)
+    end
 
     if opts.resume && isfile(opts.output) && !opts.overwrite
         ensure_output_header_compatible(opts.output)
@@ -385,6 +938,9 @@ function run_scan(opts::ScanOptions)
     if opts.overwrite && isfile(opts.output)
         rm(opts.output)
     end
+    if opts.channel_diagnostics_output !== nothing && opts.overwrite && isfile(opts.channel_diagnostics_output)
+        rm(opts.channel_diagnostics_output)
+    end
 
     new_file = !isfile(opts.output) || filesize(opts.output) == 0
     p_grid, p_w, sigma_cutoff = integration_grids(opts)
@@ -392,6 +948,7 @@ function run_scan(opts::ScanOptions)
     phi_grid, phi_w = gauleg(0.0, 2 * pi, opts.tau_phi_nodes)
     solver_kwargs = (iterations=opts.max_iter,)
     io = open(opts.output, "a")
+    channel_io = opts.channel_diagnostics_output === nothing ? nothing : open(opts.channel_diagnostics_output, "a")
     try
         if new_file
             ScanCSV.write_metadata(io, Dict(
@@ -400,7 +957,7 @@ function run_scan(opts::ScanOptions)
                 "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
                 "git_commit" => current_git_commit(),
                 "provenance.entrypoint" => "workflow",
-                "provenance.equilibrium_backend" => "TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(:models)",
+                "provenance.equilibrium_backend" => "models.solve_constraint(FixedMu) with phase-aware xi/T continuity and legacy fallback",
                 "provenance.tau_path" => "TransportWorkflow.solve_gap_and_transport",
                 "provenance.integration_mode" => string(opts.integration_mode),
                 "sigma_grid_n" => string(opts.sigma_grid_n),
@@ -410,6 +967,12 @@ function run_scan(opts::ScanOptions)
                 "tau_angle_nodes" => string(opts.tau_angle_nodes),
                 "tau_phi_nodes" => string(opts.tau_phi_nodes),
                 "tau_n_sigma_points" => string(opts.tau_n_sigma_points),
+                "tau_threshold_subtraction" => string(opts.tau_threshold_subtraction),
+                "tau_asym_window" => string(opts.tau_asym_window),
+                "tau_asym_fit_min_points" => string(opts.tau_asym_fit_min_points),
+                "tau_asym_extra_points" => string(opts.tau_asym_extra_points),
+                "tau_interpolation_mode" => string(opts.tau_interpolation_mode),
+                "note.tau_threshold_hint" => "for near-threshold sharp channels, linear+threshold_subtraction often more robust than pchip",
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
 
@@ -420,25 +983,220 @@ function run_scan(opts::ScanOptions)
             ))
             write_header_if_needed(io)
         end
+        if channel_io !== nothing
+            channel_new_file = !isfile(opts.channel_diagnostics_output) || filesize(opts.channel_diagnostics_output) == 0
+            if channel_new_file
+                ScanCSV.write_metadata(channel_io, Dict(
+                    "schema" => "scan_csv_v1",
+                    "title" => "gap_transport_scan_channel_diagnostics",
+                    "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
+                    "git_commit" => current_git_commit(),
+                    "source_csv" => opts.output,
+                ))
+                write_channel_diagnostics_header_if_needed(channel_io)
+            end
+        end
 
         T_values = collect(range(opts.tmin_mev; stop=opts.tmax_mev, step=opts.tstep_mev))
         muB_values = collect(range(opts.mubmin_mev; stop=opts.mubmax_mev, step=opts.mubstep_mev))
         muB_values = unique(sort(Float64.(muB_values)))
+        xi_continuity_mode = length(T_values) == 1 && length(muB_values) == 1 && length(opts.xi_values) > 1
 
         total = length(opts.xi_values) * length(T_values) * length(muB_values)
         done = 0
 
-        for xi in opts.xi_values
-            for muB_mev in muB_values
-                # 固定同一个 μ_B：按温度递增扫描，输出自然按 T 排序
-                seed_state = nothing
-                # 初值策略：首点用 MultiSeed 选最低 Ω；后续点用相变感知的连续性跟踪，避免跨一阶相变线时跳到错误分支。
-                phase_tracker = try
-                    TransportWorkflow.PNJL.PhaseAwareContinuitySeed(xi)
-                catch
-                    TransportWorkflow.PNJL.PhaseAwareContinuitySeed()
+        if xi_continuity_mode
+            T_mev = T_values[1]
+            muB_mev = muB_values[1]
+            previous_solution = nothing
+            previous_phase = :unknown
+            for xi in opts.xi_values
+                done += 1
+                key = (T_mev, muB_mev, xi)
+                if opts.resume && (key in existing)
+                    continue
                 end
-                for T_mev in T_values
+
+                try
+                    eq, previous_solution, previous_phase, diag = solve_equilibrium_with_diagnostics(
+                        T_mev,
+                        muB_mev,
+                        xi,
+                        opts;
+                        previous_solution=previous_solution,
+                        previous_phase=previous_phase,
+                    )
+
+                    T_fm = T_mev / ħc_MeV_fm
+                    muq_mev = muB_mev / 3.0
+                    muq_fm = muq_mev / ħc_MeV_fm
+                    seed_state = Vector(eq.x_state)
+
+                    Φ = Float64(eq.x_state[4])
+                    Φbar = Float64(eq.x_state[5])
+                    masses = (u=Float64(eq.masses[1]), d=Float64(eq.masses[2]), s=Float64(eq.masses[3]))
+
+                    ktmp = build_K_data(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
+
+                    _compute_bulk_this_point = opts.compute_bulk
+                    res = try
+                        TransportWorkflow.solve_gap_and_transport(
+                            T_fm,
+                            muq_fm;
+                            xi=xi,
+                            equilibrium=eq,
+                            compute_tau=true,
+                            K_coeffs=ktmp.K_coeffs,
+                            tau=nothing,
+                            compute_bulk=_compute_bulk_this_point,
+                            p_num=opts.p_num,
+                            t_num=opts.t_num,
+                            seed_state=seed_state,
+                            solver_kwargs=solver_kwargs,
+                            tau_kwargs=(
+                                p_nodes=opts.tau_p_nodes,
+                                angle_nodes=opts.tau_angle_nodes,
+                                phi_nodes=opts.tau_phi_nodes,
+                                n_sigma_points=opts.tau_n_sigma_points,
+                                p_grid=p_grid,
+                                p_w=p_w,
+                                cos_grid=cos_grid,
+                                cos_w=cos_w,
+                                phi_grid=phi_grid,
+                                phi_w=phi_w,
+                                sigma_cutoff=sigma_cutoff,
+                                threshold_subtraction=opts.tau_threshold_subtraction,
+                                asym_window=opts.tau_asym_window,
+                                asym_fit_min_points=opts.tau_asym_fit_min_points,
+                                asym_extra_points=opts.tau_asym_extra_points,
+                                interpolation_mode=opts.tau_interpolation_mode,
+                            ),
+                            transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                        )
+                    catch bulk_err
+                        if _compute_bulk_this_point
+                            @warn "transport with bulk failed, retrying without bulk" T_mev=T_mev muB_mev=muB_mev xi=xi err=bulk_err
+                            _compute_bulk_this_point = false
+                            TransportWorkflow.solve_gap_and_transport(
+                                T_fm,
+                                muq_fm;
+                                xi=xi,
+                                equilibrium=eq,
+                                compute_tau=true,
+                                K_coeffs=ktmp.K_coeffs,
+                                tau=nothing,
+                                compute_bulk=false,
+                                p_num=opts.p_num,
+                                t_num=opts.t_num,
+                                seed_state=seed_state,
+                                solver_kwargs=solver_kwargs,
+                                tau_kwargs=(
+                                    p_nodes=opts.tau_p_nodes,
+                                    angle_nodes=opts.tau_angle_nodes,
+                                    phi_nodes=opts.tau_phi_nodes,
+                                    n_sigma_points=opts.tau_n_sigma_points,
+                                    p_grid=p_grid,
+                                    p_w=p_w,
+                                    cos_grid=cos_grid,
+                                    cos_w=cos_w,
+                                    phi_grid=phi_grid,
+                                    phi_w=phi_w,
+                                    sigma_cutoff=sigma_cutoff,
+                                    threshold_subtraction=opts.tau_threshold_subtraction,
+                                    asym_window=opts.tau_asym_window,
+                                    asym_fit_min_points=opts.tau_asym_fit_min_points,
+                                    asym_extra_points=opts.tau_asym_extra_points,
+                                    interpolation_mode=opts.tau_interpolation_mode,
+                                ),
+                                transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
+                            )
+                        else
+                            rethrow(bulk_err)
+                        end
+                    end
+
+                    dens = res.densities
+                    tau = res.tau
+                    tauinv = res.tau_inv
+                    tr = res.transport
+                    rates = res.rates
+
+                    P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Models.model_thermo(
+                        PNJL_MODEL,
+                        eq.x_state,
+                        eq.mu_vec,
+                        T_fm,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        xi=xi,
+                    )
+
+                    rho_quark_net = (dens.u - dens.ubar) + (dens.d - dens.dbar) + (dens.s - dens.sbar)
+                    rho_baryon = rho_quark_net / 3.0
+                    rho_norm = rho_baryon / ρ0_inv_fm3
+
+                    omega_fm4inv = Models.omega(
+                        PNJL_MODEL,
+                        eq.x_state,
+                        T_fm,
+                        eq.mu_vec;
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        xi=xi,
+                    )
+                    omega_MeV_fm3 = omega_fm4inv * ħc_MeV_fm
+                    P_MeV_fm3 = P_fm4inv * ħc_MeV_fm
+                    epsilon_MeV_fm3 = epsilon_fm4inv * ħc_MeV_fm
+                    eps_minus_3P_over_T4 = (isfinite(epsilon_fm4inv) && isfinite(P_fm4inv) && isfinite(T_fm) && T_fm != 0.0) ? ((epsilon_fm4inv - 3.0 * P_fm4inv) / T_fm^4) : NaN
+                    eta_over_s = (isfinite(tr.eta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.eta / s_fm3inv) : NaN
+                    zeta_over_s = (isfinite(tr.zeta) && isfinite(s_fm3inv) && s_fm3inv != 0.0) ? (tr.zeta / s_fm3inv) : NaN
+                    sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
+                    sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
+                    zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+                    quality_flag, quality_reason, quality_metric = assess_point_quality(tau, eta_over_s, sigma_over_T)
+
+                    row = join([
+                        string(T_mev), string(muq_mev), string(muB_mev), string(xi),
+                        string(T_fm), string(muq_fm),
+                        csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm), string(eq.solver_backend), diag.seed_source, string(diag.phase_prev), string(diag.phase_curr), string(diag.phase_structure), string(diag.phase_boundary_xi_used),
+                        string(Φ), string(Φbar),
+                        string(masses.u), string(masses.d), string(masses.s),
+                        string(rho_baryon), string(rho_norm),
+                        string(omega_fm4inv), string(P_fm4inv), string(epsilon_fm4inv), string(s_fm3inv),
+                        string(omega_MeV_fm3), string(P_MeV_fm3), string(epsilon_MeV_fm3),
+                        string(eps_minus_3P_over_T4),
+                        string(dens.u), string(dens.d), string(dens.s), string(dens.ubar), string(dens.dbar), string(dens.sbar),
+                        string(tau.u), string(tau.d), string(tau.s), string(tau.ubar), string(tau.dbar), string(tau.sbar),
+                        string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
+                        string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
+                        string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric),
+                    ], ',')
+                    println(io, row)
+                    flush(io)
+
+                    if channel_io !== nothing && rates !== nothing
+                        write_channel_diagnostics_rows!(channel_io, T_mev, muq_mev, muB_mev, xi,
+                            dens, rates, tauinv, eq.solver_backend, diag)
+                    end
+                catch point_err
+                    @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+                end
+
+                if opts.gc_every_n > 0 && done % opts.gc_every_n == 0
+                    GC.gc()
+                end
+
+                if done % 10 == 0
+                    println("progress: $(done)/$(total) (last muB=$(muB_mev) MeV, T=$(T_mev) MeV, xi=$(xi))")
+                end
+            end
+        else
+            for xi in opts.xi_values
+                for muB_mev in muB_values
+                    previous_solution = nothing
+                    previous_phase = :unknown
+                    for T_mev in T_values
                     done += 1
                     key = (T_mev, muB_mev, xi)
                     if opts.resume && (key in existing)
@@ -447,44 +1205,24 @@ function run_scan(opts::ScanOptions)
 
                     try  # 单点容错：失败不中断后续扫描
 
+                    eq, previous_solution, previous_phase, diag = solve_equilibrium_with_diagnostics(
+                        T_mev,
+                        muB_mev,
+                        xi,
+                        opts;
+                        previous_solution=previous_solution,
+                        previous_phase=previous_phase,
+                    )
+
                     T_fm = T_mev / ħc_MeV_fm
                     muq_mev = muB_mev / 3.0
                     muq_fm = muq_mev / ħc_MeV_fm
 
-                    # 先求一次平衡解（用于 K_coeffs，并作为后续 workflow 的 equilibrium 复用）
-                    # 初值连续性：首点用 hadron seed；后续点沿用上一点解向量。
-                    base_seed = phase_tracker.previous_solution === nothing ? TransportWorkflow.PNJL.HADRON_SEED_5 : phase_tracker.previous_solution
-                    base = try
-                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                            xi=xi,
-                            solver_backend=:models,
-                            p_num=opts.p_num,
-                            t_num=opts.t_num,
-                            seed_state=base_seed,
-                            models_residual_norm_max=1e-4,
-                        )
-                    catch err
-                        @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=err
-                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                            xi=xi,
-                            solver_backend=:legacy,
-                            p_num=opts.p_num,
-                            t_num=opts.t_num,
-                            seed_state=nothing,
-                            solver_kwargs=(iterations=opts.max_iter,),
-                        )
-                    end
+                    seed_state = Vector(eq.x_state)
 
-                    if base.converged
-                        # PhaseAwareContinuitySeed 的 update! 需要 MeV 单位（与其内部 boundary.csv 数据一致）
-                        TransportWorkflow.PNJL.update!(phase_tracker, base.x_state, T_mev, muq_mev)
-                    end
-
-                    seed_state = Vector(base.x_state)
-
-                    Φ = Float64(base.x_state[4])
-                    Φbar = Float64(base.x_state[5])
-                    masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))
+                    Φ = Float64(eq.x_state[4])
+                    Φbar = Float64(eq.x_state[5])
+                    masses = (u=Float64(eq.masses[1]), d=Float64(eq.masses[2]), s=Float64(eq.masses[3]))
 
                     ktmp = build_K_data(Float64(T_fm), Float64(muq_fm), masses, Φ, Φbar)
                     thermo_params = (T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi))
@@ -501,11 +1239,11 @@ function run_scan(opts::ScanOptions)
                     # 容错策略：先尝试含 bulk，若 bulk 计算抛错则回退到只算 η/σ
                     _compute_bulk_this_point = opts.compute_bulk
                     res = try
-                        solve_gap_and_transport(
+                        TransportWorkflow.solve_gap_and_transport(
                             T_fm,
                             muq_fm;
                             xi=xi,
-                            equilibrium=base,
+                            equilibrium=eq,
                             compute_tau=true,
                             K_coeffs=ktmp.K_coeffs,
                             tau=nothing,
@@ -527,6 +1265,11 @@ function run_scan(opts::ScanOptions)
                                 phi_grid=phi_grid,
                                 phi_w=phi_w,
                                 sigma_cutoff=sigma_cutoff,
+                                threshold_subtraction=opts.tau_threshold_subtraction,
+                                asym_window=opts.tau_asym_window,
+                                asym_fit_min_points=opts.tau_asym_fit_min_points,
+                                asym_extra_points=opts.tau_asym_extra_points,
+                                interpolation_mode=opts.tau_interpolation_mode,
                             ),
                             transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
                         )
@@ -534,11 +1277,11 @@ function run_scan(opts::ScanOptions)
                         if _compute_bulk_this_point
                             @warn "transport with bulk failed, retrying without bulk" T_mev=T_mev muB_mev=muB_mev xi=xi err=bulk_err
                             _compute_bulk_this_point = false
-                            solve_gap_and_transport(
+                            TransportWorkflow.solve_gap_and_transport(
                                 T_fm,
                                 muq_fm;
                                 xi=xi,
-                                equilibrium=base,
+                                equilibrium=eq,
                                 compute_tau=true,
                                 K_coeffs=ktmp.K_coeffs,
                                 tau=nothing,
@@ -559,6 +1302,11 @@ function run_scan(opts::ScanOptions)
                                     phi_grid=phi_grid,
                                     phi_w=phi_w,
                                     sigma_cutoff=sigma_cutoff,
+                                    threshold_subtraction=opts.tau_threshold_subtraction,
+                                    asym_window=opts.tau_asym_window,
+                                    asym_fit_min_points=opts.tau_asym_fit_min_points,
+                                    asym_extra_points=opts.tau_asym_extra_points,
+                                    interpolation_mode=opts.tau_interpolation_mode,
                                 ),
                                 transport_config=TransportWorkflow.TransportIntegrationConfig(p_nodes=opts.tr_p_nodes, p_max=opts.tr_p_max_fm),
                             )
@@ -572,6 +1320,7 @@ function run_scan(opts::ScanOptions)
                     tau = res.tau
                     tauinv = res.tau_inv
                     tr = res.transport
+                    rates = res.rates
 
                     P_fm4inv, _, s_fm3inv, epsilon_fm4inv = Models.model_thermo(
                         PNJL_MODEL,
@@ -607,11 +1356,12 @@ function run_scan(opts::ScanOptions)
                     sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
                     sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
                     zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+                    quality_flag, quality_reason, quality_metric = assess_point_quality(tau, eta_over_s, sigma_over_T)
 
                     row = join([
                         string(T_mev), string(muq_mev), string(muB_mev), string(xi),
                         string(T_fm), string(muq_fm),
-                        csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm),
+                        csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm), string(eq.solver_backend), diag.seed_source, string(diag.phase_prev), string(diag.phase_curr), string(diag.phase_structure), string(diag.phase_boundary_xi_used),
                         string(Φ), string(Φbar),
                         string(masses.u), string(masses.d), string(masses.s),
                         string(rho_baryon), string(rho_norm),
@@ -623,12 +1373,14 @@ function run_scan(opts::ScanOptions)
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
                         string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric),
                     ], ',')
                     println(io, row)
                     flush(io)
 
-                    if eq.converged
-                        seed_state = eq.x_state
+                    if channel_io !== nothing && rates !== nothing
+                        write_channel_diagnostics_rows!(channel_io, T_mev, muq_mev, muB_mev, xi,
+                            dens, rates, tauinv, eq.solver_backend, diag)
                     end
 
                     catch point_err
@@ -645,8 +1397,12 @@ function run_scan(opts::ScanOptions)
                 end
             end
         end
+        end
     finally
         close(io)
+        if channel_io !== nothing
+            close(channel_io)
+        end
     end
 
     println("Scan finished. Output: $(opts.output)")
@@ -657,4 +1413,6 @@ function main()
     run_scan(opts)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

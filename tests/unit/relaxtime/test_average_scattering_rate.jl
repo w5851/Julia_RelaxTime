@@ -461,3 +461,134 @@ end
     @test isfinite(ω_default_density)
     @test isapprox(ω_default_density, ω_explicit_density; rtol=1e-12, atol=0.0)
 end
+
+@testset "average_scattering_rate direct mode bypasses cache interpolation" begin
+    zero_cache = constant_sigma_cache(:uu_to_uu; sigma=0.0)
+
+    ω_cached = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=zero_cache,
+        n_sigma_points=4,
+        interpolation_mode=:pchip,
+    )
+
+    ω_direct = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=zero_cache,
+        n_sigma_points=4,
+        interpolation_mode=:direct,
+    )
+
+    @test isfinite(ω_cached)
+    @test isfinite(ω_direct)
+    @test ω_cached == 0.0
+    @test ω_direct > 0.0
+end
+
+@testset "average_scattering_rate hybrid_threshold mode stays finite" begin
+    zero_cache = CrossSectionCache(:uu_to_uu)
+    AverageScatteringRate.insert_sigma!(zero_cache, 0.0, 0.0)
+    AverageScatteringRate.insert_sigma!(zero_cache, 1.0e6, 0.0)
+
+    ω_hybrid = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=zero_cache,
+        n_sigma_points=4,
+        interpolation_mode=:hybrid_threshold,
+        apply_s_domain_cut=false,
+        sigma_cutoff=nothing,
+    )
+
+    @test isfinite(ω_hybrid)
+    @test ω_hybrid >= 0.0
+end
+
+@testset "hybrid_threshold gate triggers only for configured channels" begin
+    zero_cache = CrossSectionCache(:udbar_to_udbar)
+    AverageScatteringRate.insert_sigma!(zero_cache, 0.0, 0.0)
+    AverageScatteringRate.insert_sigma!(zero_cache, 1.0e6, 0.0)
+
+    ω_hybrid = average_scattering_rate(
+        :udbar_to_udbar,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=zero_cache,
+        n_sigma_points=4,
+        interpolation_mode=:hybrid_threshold,
+        apply_s_domain_cut=false,
+        sigma_cutoff=nothing,
+    )
+
+    @test isfinite(ω_hybrid)
+    @test ω_hybrid == 0.0
+end
+
+@testset "hybrid_threshold mode remains deterministic for repeated evaluation" begin
+    process = :uubar_to_uubar
+    sparse_grid = [10.8, 12.5, 14.0, 18.0]
+
+    cache = CrossSectionCache(process)
+    precompute_cross_section!(
+        cache,
+        sparse_grid,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        threshold_subtraction=true,
+        asym_window=0.8,
+        asym_fit_min_points=8,
+        asym_extra_points=16,
+    )
+
+    cache.peak_ratio = 100.0
+    cache.peak_s = cache.asym_s0 + 0.1
+    cache.peak_dirty = false
+
+    row_s = cache.asym_s0 + 0.2
+    v1 = AverageScatteringRate._get_sigma_core(
+        cache,
+        row_s,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        interpolation_mode=:hybrid_threshold,
+    )
+
+    v2 = AverageScatteringRate._get_sigma_core(
+        cache,
+        row_s,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        interpolation_mode=:hybrid_threshold,
+    )
+
+    @test isfinite(v1)
+    @test isfinite(v2)
+    @test isapprox(v2, v1; rtol=1e-12, atol=0.0)
+end
