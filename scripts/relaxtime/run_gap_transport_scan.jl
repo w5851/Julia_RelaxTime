@@ -17,6 +17,7 @@
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "scan_quality.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
@@ -29,6 +30,7 @@ using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
 using .ScanCSV: ScanCSV
+using .ScanQuality: assess_point_quality
 
 const PNJL_MODEL = Models.create_model(:PNJL)
 const TransportWorkflow = Models.transport_workflow_module()
@@ -471,6 +473,9 @@ function ensure_output_header_compatible(path::AbstractString)
         "sigma_over_T",
         "sigma_over_T_over_eta_over_s",
         "zeta_over_s_over_eta_over_s",
+        "quality_flag",
+        "quality_reason",
+        "quality_metric",
         "equilibrium_backend",
         "seed_source",
         "phase_prev",
@@ -499,6 +504,7 @@ function write_header_if_needed(io)
         "tauinv_u", "tauinv_d", "tauinv_s", "tauinv_ubar", "tauinv_dbar", "tauinv_sbar",
         "eta", "sigma", "zeta", "eta_over_s", "zeta_over_s",
         "sigma_over_T", "sigma_over_T_over_eta_over_s", "zeta_over_s_over_eta_over_s",
+        "quality_flag", "quality_reason", "quality_metric",
     ], ',')
     println(io, header)
 end
@@ -1147,6 +1153,7 @@ function run_scan(opts::ScanOptions)
                     sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
                     sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
                     zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+                    quality_flag, quality_reason, quality_metric = assess_point_quality(tau, eta_over_s, sigma_over_T)
 
                     row = join([
                         string(T_mev), string(muq_mev), string(muB_mev), string(xi),
@@ -1163,6 +1170,7 @@ function run_scan(opts::ScanOptions)
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
                         string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric),
                     ], ',')
                     println(io, row)
                     flush(io)
@@ -1348,6 +1356,7 @@ function run_scan(opts::ScanOptions)
                     sigma_over_T = (isfinite(tr.sigma) && isfinite(T_fm) && T_fm != 0.0) ? (tr.sigma / T_fm) : NaN
                     sigma_over_T_over_eta_over_s = (isfinite(sigma_over_T) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (sigma_over_T / eta_over_s) : NaN
                     zeta_over_s_over_eta_over_s = (isfinite(zeta_over_s) && isfinite(eta_over_s) && eta_over_s != 0.0) ? (zeta_over_s / eta_over_s) : NaN
+                    quality_flag, quality_reason, quality_metric = assess_point_quality(tau, eta_over_s, sigma_over_T)
 
                     row = join([
                         string(T_mev), string(muq_mev), string(muB_mev), string(xi),
@@ -1364,6 +1373,7 @@ function run_scan(opts::ScanOptions)
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
                         string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric),
                     ], ',')
                     println(io, row)
                     flush(io)
