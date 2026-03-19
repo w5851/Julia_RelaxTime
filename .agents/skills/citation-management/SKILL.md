@@ -31,7 +31,3 @@ metadata:
 ## Boundary
 - 大规模文献检索与主题综合请配合 `literature-review`。
 - 仅做写作润色时优先用 `writing-skills`。
-
-## Hand-off
-- 上游通常来自 `deep-research`、`literature-review` 或 `research-engineer` 产出的候选文献集。
-- 本 skill 负责把参考文献数据清理到可引用状态，不负责替代主题综述或方法决策。

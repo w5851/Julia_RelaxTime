@@ -99,12 +99,6 @@ When citing sources, note:
 - **Expert commentary** - Qualified opinions
 - **General websites** - verify independently
 
-## Boundary and Hand-off
-- Use `deep-research` for broad background gathering, perspective mapping, and multi-source orientation.
-- If the task requires reproducible screening criteria, inclusion/exclusion logs, and formal evidence synthesis, hand off to `literature-review`.
-- If the task must end in method choice, engineering recommendation, or validation plan, hand off to `research-engineer`.
-- If the task ends in bibliography cleanup or citation normalization, hand off to `citation-management`.
-
 ## Example
 
 **User Request:** "Research the benefits and risks of intermittent fasting"

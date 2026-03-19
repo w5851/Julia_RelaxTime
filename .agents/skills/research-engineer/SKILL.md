@@ -10,15 +10,9 @@ metadata:
 # Research Engineer
 
 ## When to apply
+- User requests a literature review or state-of-the-art summary.
 - Need to compare competing methods or models.
 - Need evidence-backed recommendations for implementation choices.
-- Need to turn literature or benchmark evidence into concrete engineering or computational next steps.
-
-## Boundary
-- Broad background gathering, perspective mapping, or open-ended topic familiarization goes to `deep-research`.
-- Reproducible screening-oriented review workflows go to `literature-review`.
-- Reference cleanup, DOI normalization, or BibTeX curation goes to `citation-management`.
-- Use this skill when the end product is a decision, plan, or implementation path rather than a survey alone.
 
 ## Research protocol
 1. Define scope: domain, assumptions, constraints, and success criteria.
@@ -51,8 +45,3 @@ metadata:
 
 ## Source Notes
 - Numbered source list with one-line credibility notes
-
-## Hand-off
-- Upstream inputs often come from `deep-research` or `literature-review`.
-- Downstream outputs should usually feed implementation work, experiments, or benchmark validation.
-- If the task ends at bibliography hygiene rather than method choice, hand off to `citation-management`.
