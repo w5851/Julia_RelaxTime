@@ -32,3 +32,8 @@ metadata:
 ## Boundary
 - 通用跨域背景搜集优先用 `deep-research`。
 - 方法选型并落地到工程决策优先用 `research-engineer`。
+- 引文清洗、BibTeX 规范化、去重收尾优先用 `citation-management`。
+
+## Hand-off
+- 上游可来自 `deep-research` 提供的初始背景和候选文献池。
+- 下游若需要把综述结论转成实现路线、方法选型或验证计划，应转 `research-engineer`。
