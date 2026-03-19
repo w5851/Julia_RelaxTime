@@ -221,3 +221,38 @@ julia --project=benchmark benchmark/relaxtime/bench_total_cross_section.jl
 - Only add `@inline` or `@inbounds` when justified by hot-path use.
 - Put performance comparisons in `benchmark/`, not in smoke tests.
 - Every new core module should include unit tests, and stable public entrypoints should also update `docs/api/`.
+
+## Commit Message Governance (Mandatory)
+
+When creating any git commit in this repository, the agent MUST follow historical commit style.
+
+1) Style sampling (required)
+- Run: git log -10 --oneline
+- Extract prefix patterns from recent history (e.g. docs:, fix:, refactor:, ci:, feat:, or type(scope):).
+
+2) Style matching (required)
+- The new commit message MUST use an existing prefix pattern already present in sampled history.
+- Prefer matching the nearest 3 commits in the same change category.
+- If multiple styles exist, choose the dominant recent style; do not invent a new format.
+
+3) Message quality (required)
+- Keep message concise and intent-driven (focus on why, not only what).
+- Subject line should be one line, clear scope, no filler words.
+- Avoid vague messages like “update files”, “fix issues”, “misc changes”.
+
+4) Pre-commit self-check (required)
+- Before commit, the agent must verify:
+  - Prefix matches historical style
+  - Scope/category is accurate
+  - Message is concise and meaningful
+
+5) Fallback rule
+- If style cannot be determined confidently from recent history, use:
+  - docs: ... for documentation-only changes
+  - fix: ... for bug fixes
+  - refactor: ... for non-functional code restructuring
+  - ci: ... for workflow/pipeline changes
+  and note that fallback was used.
+
+6) Non-compliance
+- If the message does not match repository style, the agent must revise it before committing.
