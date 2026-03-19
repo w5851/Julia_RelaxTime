@@ -124,6 +124,14 @@ end
 mutable struct CachedInterpolation
     pchip_slopes::Vector{Float64}
     pchip_dirty::Bool
+    peak_ratio::Float64
+    peak_s::Float64
+    peak_dirty::Bool
+    local_s_vals::Vector{Float64}
+    local_sigma_vals::Vector{Float64}
+    local_dirty::Bool
+    local_n_points::Int
+    local_upper_s::Float64
 end
 
 mutable struct AsymptoticConfig
@@ -141,12 +149,14 @@ mutable struct CrossSectionCache
 end
 
 CrossSectionData() = CrossSectionData(Float64[], Float64[])
-CachedInterpolation() = CachedInterpolation(Float64[], true)
+CachedInterpolation() = CachedInterpolation(Float64[], true, 0.0, 0.0, true, Float64[], Float64[], true, 0, 0.0)
 AsymptoticConfig() = AsymptoticConfig(false, 0.0, 0.0, false)
 
 function Base.propertynames(::CrossSectionCache, private::Bool=false)
     names = (:process, :data, :interpolation, :asymptotic,
         :s_vals, :sigma_vals, :pchip_slopes, :pchip_dirty,
+        :peak_ratio, :peak_s, :peak_dirty,
+        :local_s_vals, :local_sigma_vals, :local_dirty, :local_n_points, :local_upper_s,
         :asym_enabled, :asym_s0, :asym_A, :asym_requested)
     return private ? names : names
 end
@@ -158,6 +168,10 @@ function Base.getproperty(cache::CrossSectionCache, name::Symbol)
         return getfield(getfield(cache, :data), name)
     elseif name === :pchip_slopes || name === :pchip_dirty
         return getfield(getfield(cache, :interpolation), name)
+    elseif name === :peak_ratio || name === :peak_s || name === :peak_dirty
+        return getfield(getfield(cache, :interpolation), name)
+    elseif name === :local_s_vals || name === :local_sigma_vals || name === :local_dirty || name === :local_n_points || name === :local_upper_s
+        return getfield(getfield(cache, :interpolation), name)
     elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
         return getfield(getfield(cache, :asymptotic), name)
     end
@@ -168,6 +182,10 @@ function Base.setproperty!(cache::CrossSectionCache, name::Symbol, value)
     if name === :s_vals || name === :sigma_vals
         return setfield!(getfield(cache, :data), name, value)
     elseif name === :pchip_slopes || name === :pchip_dirty
+        return setfield!(getfield(cache, :interpolation), name, value)
+    elseif name === :peak_ratio || name === :peak_s || name === :peak_dirty
+        return setfield!(getfield(cache, :interpolation), name, value)
+    elseif name === :local_s_vals || name === :local_sigma_vals || name === :local_dirty || name === :local_n_points || name === :local_upper_s
         return setfield!(getfield(cache, :interpolation), name, value)
     elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
         return setfield!(getfield(cache, :asymptotic), name, value)
@@ -189,6 +207,26 @@ function insert_sigma!(cache::CrossSectionCache, s::Float64, σ::Float64)
     insert!(cache.s_vals, idx, s)
     insert!(cache.sigma_vals, idx, σ)
     cache.pchip_dirty = true
+    cache.peak_dirty = true
+    cache.local_dirty = true
+end
+
+function _ensure_peak_profile!(cache::CrossSectionCache)
+    if !cache.peak_dirty
+        return
+    end
+    n = length(cache.sigma_vals)
+    if n == 0
+        cache.peak_ratio = 0.0
+        cache.peak_s = 0.0
+        cache.peak_dirty = false
+        return
+    end
+    idx = argmax(cache.sigma_vals)
+    μ = mean(cache.sigma_vals)
+    cache.peak_ratio = (μ > 0.0 && isfinite(μ)) ? (cache.sigma_vals[idx] / μ) : 0.0
+    cache.peak_s = cache.s_vals[idx]
+    cache.peak_dirty = false
 end
 
 @inline function _signmatch(a::Float64, b::Float64)
@@ -377,6 +415,8 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
         end
     end
     cache.pchip_dirty = true
+    cache.peak_dirty = true
+    cache.local_dirty = true
     _ensure_pchip_slopes!(cache)
     return cache
 end
@@ -407,6 +447,28 @@ function interpolate_sigma(cache::CrossSectionCache, s::Float64)
     return isfinite(y) ? max(0.0, y) : 0.0
 end
 
+@inline function interpolate_sigma_linear(cache::CrossSectionCache, s::Float64)
+    n = length(cache.s_vals)
+    if n == 0
+        return nothing
+    elseif n == 1
+        return cache.sigma_vals[1]
+    elseif s == cache.s_vals[1]
+        return cache.sigma_vals[1]
+    elseif s == cache.s_vals[end]
+        return cache.sigma_vals[end]
+    elseif s < cache.s_vals[1] || s > cache.s_vals[end]
+        return nothing
+    end
+
+    idx = searchsortedfirst(cache.s_vals, s)
+    s1, s2 = cache.s_vals[idx-1], cache.s_vals[idx]
+    y1, y2 = cache.sigma_vals[idx-1], cache.sigma_vals[idx]
+    t = (s - s1) / (s2 - s1)
+    y = y1 + t * (y2 - y1)
+    return isfinite(y) ? max(0.0, y) : 0.0
+end
+
 function get_sigma(cache::CrossSectionCache, s::Float64,
     quark_params::Union{NamedTuple, QuarkParams}, thermo_params::Union{NamedTuple, ThermoParams}, K_coeffs::NamedTuple;
     n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
@@ -417,7 +479,12 @@ end
 
 function _get_sigma_core(cache::CrossSectionCache, s::Float64,
     quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple;
-    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS)
+    n_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    interpolation_mode::Symbol=:pchip)
+    if interpolation_mode == :direct
+        return total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_points)
+    end
+
     # Only cached PCHIP interpolation is supported.
     n = length(cache.s_vals)
     n == 0 && error("CrossSectionCache has no points; precompute σ(s) first")
@@ -434,7 +501,34 @@ function _get_sigma_core(cache::CrossSectionCache, s::Float64,
     elseif s == cache.s_vals[end]
         return cache.sigma_vals[end]
     end
-    val = interpolate_sigma(cache, s)
+
+    if interpolation_mode == :hybrid_threshold
+        _ensure_peak_profile!(cache)
+        if cache.process in (:uubar_to_uubar, :uubar_to_ddbar)
+            peak_offset = cache.peak_s - cache.asym_s0
+            if cache.asym_enabled && cache.peak_ratio >= 20.0 && peak_offset >= 0.0 && peak_offset <= 0.8 && s <= (cache.asym_s0 + 0.8)
+                # Lightweight error fuse: evaluate two nearby quadratures.
+                n_lo = max(n_points, 8)
+                n_hi = max(n_lo + 4, 12)
+                σ_lo = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_lo)
+                σ_hi = total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_hi)
+                rel = abs(σ_hi - σ_lo) / max(abs(σ_hi), 1e-12)
+                if rel > 0.05
+                    n_ref = max(n_hi + 4, 16)
+                    return total_cross_section(cache.process, s, quark_params, thermo_params, K_coeffs; n_points=n_ref)
+                end
+                return σ_hi
+            end
+        end
+    end
+
+    val = if interpolation_mode == :linear
+        interpolate_sigma_linear(cache, s)
+    elseif interpolation_mode == :hybrid_threshold
+        interpolate_sigma_linear(cache, s)
+    else
+        interpolate_sigma(cache, s)
+    end
     val === nothing && error("interpolation failed inside cache window")
     # add back analytic asymptotic if enabled
     if cache.asym_enabled && s > cache.asym_s0
@@ -926,7 +1020,8 @@ function average_scattering_rate(
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10
+    asym_extra_points::Int=10,
+    interpolation_mode::Symbol=:pchip,
 )::Float64
     quark_params = normalize_quark_input(quark_params)
     thermo_params = normalize_thermo_input(thermo_params)
@@ -971,7 +1066,7 @@ function average_scattering_rate(
         p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
         cs_cache, n_sigma_points,
         density_p_grid, density_p_w, density_p_nodes, density_scale,
-        mc, md, apply_s_domain_cut, sigma_cutoff
+        mc, md, apply_s_domain_cut, sigma_cutoff, interpolation_mode
     )
 end
 
@@ -983,7 +1078,8 @@ function _average_scattering_rate_semi_infinite(
     p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
     cs_cache, n_sigma_points,
     density_p_grid, density_p_w, density_p_nodes, density_scale,
-    mc, md, apply_s_domain_cut, sigma_cutoff
+    mc, md, apply_s_domain_cut, sigma_cutoff,
+    interpolation_mode::Symbol
 )
     validate_grid_weight_pair("average_scattering_rate", "p_grid", p_grid, "p_w", p_w)
     validate_grid_weight_pair("average_scattering_rate", "cos_grid", cos_grid, "cos_w", cos_w)
@@ -1031,6 +1127,7 @@ function _average_scattering_rate_semi_infinite(
         phi_grid, phi_w,
         cs_cache, n_sigma_points,
         apply_s_cut, s_bo, s_up,
+        interpolation_mode,
     )
 
     return prefactor * ω
@@ -1062,6 +1159,7 @@ function _omega_integral_5d(
     apply_s_cut::Bool,
     s_bo::Float64,
     s_up::Float64,
+    interpolation_mode::Symbol,
 )::Float64
     ω = 0.0
 
@@ -1104,7 +1202,8 @@ function _omega_integral_5d(
                             continue
                         end
 
-                        σ = _get_sigma_core(cs_cache, s, quark_params, thermo_params, K_coeffs; n_points=n_sigma_points)
+                        σ = _get_sigma_core(cs_cache, s, quark_params, thermo_params, K_coeffs;
+                            n_points=n_sigma_points, interpolation_mode=interpolation_mode)
                         ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ
                     end
                 end

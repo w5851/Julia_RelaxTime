@@ -157,3 +157,21 @@ end
     @test res_struct.tau == res_nt.tau
     @test res_struct.rates == res_nt.rates
 end
+
+@testset "relaxation_times forwards advanced ASR kwargs" begin
+    result = relaxation_times(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        densities=DENSITIES_SAMPLE,
+        existing_rates=RATES_SAMPLE,
+        threshold_subtraction=true,
+        asym_window=0.25,
+        asym_fit_min_points=6,
+        asym_extra_points=9,
+        interpolation_mode=:linear,
+    )
+
+    @test result.tau_inv == EXPECTED_TAU_INV
+    @test result.tau == EXPECTED_TAU
+end

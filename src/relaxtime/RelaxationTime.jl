@@ -296,7 +296,12 @@ function _compute_average_rates_core(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_cutoff::Union{Nothing,Float64}=nothing
+    sigma_cutoff::Union{Nothing,Float64}=nothing,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10,
+    interpolation_mode::Symbol=:pchip,
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -348,6 +353,11 @@ function _compute_average_rates_core(
             cs_cache=cs_cache_arg,
             n_sigma_points=n_sigma_points,
             sigma_cutoff=effective_sigma_cutoff,
+            threshold_subtraction=threshold_subtraction,
+            asym_window=asym_window,
+            asym_fit_min_points=asym_fit_min_points,
+            asym_extra_points=asym_extra_points,
+            interpolation_mode=interpolation_mode,
         )
     end
 
@@ -491,7 +501,12 @@ function relaxation_times(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_cutoff::Union{Nothing,Float64}=nothing  # 新增：σ(s)有效范围的动量截断
+    sigma_cutoff::Union{Nothing,Float64}=nothing,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10,
+    interpolation_mode::Symbol=:pchip,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -518,6 +533,11 @@ function relaxation_times(
             phi_w=phi_w,
             n_sigma_points=n_sigma_points,
             sigma_cutoff=sigma_cutoff,
+            threshold_subtraction=threshold_subtraction,
+            asym_window=asym_window,
+            asym_fit_min_points=asym_fit_min_points,
+            asym_extra_points=asym_extra_points,
+            interpolation_mode=interpolation_mode,
         )
     end
 
