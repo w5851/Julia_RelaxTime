@@ -46,13 +46,14 @@ const HADRON_SEED_5 = getproperty(PNJL, :HADRON_SEED_5)
 const Integrals = getproperty(PNJL, :Integrals)
 const DEFAULT_MOMENTUM_NODES = getproperty(Integrals, :DEFAULT_MOMENTUM_NODES)
 const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHTS)
-using .TransportWorkflow: solve_gap_and_transport
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScanCSV: ScanCSV
 using .GaussLegendre: gauleg
 
 const TransportWorkflow = Models.transport_workflow_module()
+const solve_gap_and_transport = getproperty(TransportWorkflow, :solve_gap_and_transport)
+const RelaxationTime = Main.RelaxationTime
 const RT_ASR = Main.AverageScatteringRate
 const RT_TCS = Main.TotalCrossSection
 
@@ -64,6 +65,7 @@ const MODULE_DEFAULT_SIGMA_GRID_N = RT_ASR.DEFAULT_SIGMA_GRID_N # 60
 
 struct Options
     out::String
+    diagnostics_out::Union{Nothing,String}
     overwrite::Bool
     resume::Bool
     xi::Float64
@@ -87,6 +89,7 @@ function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/scan_relaxation_times_vs_T.jl [options]\n")
     println("Options:")
     println("  --out <path>                 输出 CSV (default data/outputs/results/relaxtime/scan/relaxation_times_vs_T.csv)")
+    println("  --diagnostics-out <path>     过程级诊断 CSV（按 species/channel 导出贡献）")
     println("  --overwrite                  覆盖输出文件")
     println("  --no-resume                  禁用跳过逻辑，强制重算")
     println("  --xi <value>                 各向异性参数 ξ (default 0.0)")
@@ -112,6 +115,7 @@ end
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :out => joinpath("data", "outputs", "results", "relaxtime", "scan", "relaxation_times_vs_T.csv"),
+        :diagnostics_out => nothing,
         :overwrite => false,
         :resume => true,
         :xi => 0.0,
@@ -143,6 +147,8 @@ function parse_args(args::Vector{String})
 
         if arg == "--out"
             opts[:out] = require_value()
+        elseif arg == "--diagnostics-out"
+            opts[:diagnostics_out] = require_value()
         elseif arg == "--overwrite"
             opts[:overwrite] = true
         elseif arg == "--no-resume"
@@ -193,7 +199,7 @@ function parse_args(args::Vector{String})
 
     tstep = Float64(opts[:tstep]); tstep > 0 || error("tstep must be positive")
     return Options(
-        String(opts[:out]), Bool(opts[:overwrite]), Bool(opts[:resume]),
+        String(opts[:out]), opts[:diagnostics_out] === nothing ? nothing : String(opts[:diagnostics_out]), Bool(opts[:overwrite]), Bool(opts[:resume]),
         Float64(opts[:xi]), Float64(opts[:tmin]), Float64(opts[:tmax]), Float64(opts[:tstep]),
         Float64.(opts[:mub_list]), Int(opts[:p_num]), Int(opts[:t_num]), Int(opts[:max_iter]),
         Int(opts[:tau_p_nodes]), Int(opts[:tau_angle_nodes]), Int(opts[:tau_phi_nodes]),
@@ -232,6 +238,29 @@ function write_header(io, opts::Options)
     println(io, join(cols, ','))
 end
 
+function write_diagnostics_header(io)
+    cols = [
+        "T_MeV", "muB_MeV", "xi",
+        "species", "channel", "density_key",
+        "multiplicity", "density_value", "rate_value", "contribution",
+        "tau_inv_species", "tau_species",
+    ]
+    println(io, join(cols, ','))
+end
+
+function append_diagnostics_rows(io, T_mev::Float64, muB_mev::Float64, xi::Float64, tau, tauinv, densities, rates)
+    for row in RelaxationTime.relaxation_rate_contribution_rows(densities, rates)
+        out = Any[
+            T_mev, muB_mev, xi,
+            String(row.species), String(row.channel), String(row.density_key),
+            row.multiplicity, row.density, row.rate, row.contribution,
+            getproperty(tauinv, row.species), getproperty(tau, row.species),
+        ]
+        println(io, join(out, ','))
+    end
+    flush(io)
+end
+
 @inline csv_bool(x::Bool) = x ? "true" : "false"
 
 function build_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::NamedTuple, Φ::Float64, Φbar::Float64)
@@ -247,10 +276,30 @@ function run_scan(opts::Options)
     existing = opts.resume && isfile(opts.out) && !opts.overwrite ? 
         ScanCSV.read_existing_keys(opts.out, ["T_MeV", "muB_MeV", "xi"]) : Set{Tuple{Float64,Float64,Float64}}()
     opts.overwrite && isfile(opts.out) && rm(opts.out)
+    if opts.diagnostics_out !== nothing
+        ensure_parent_dir(opts.diagnostics_out)
+        opts.overwrite && isfile(opts.diagnostics_out) && rm(opts.diagnostics_out)
+    end
 
     new_file = !isfile(opts.out) || filesize(opts.out) == 0
     io = open(opts.out, "a")
+    diag_io = nothing
     try
+        if opts.diagnostics_out !== nothing
+            new_diag_file = !isfile(opts.diagnostics_out) || filesize(opts.diagnostics_out) == 0
+            diag_io = open(opts.diagnostics_out, "a")
+            if new_diag_file
+                ScanCSV.write_metadata(diag_io, Dict(
+                    "schema" => "tau_process_diagnostics_v1",
+                    "title" => "relaxation_time_process_contributions",
+                    "script" => "scripts/relaxtime/scan_relaxation_times_vs_T.jl",
+                    "integration_mode" => string(opts.integration_mode),
+                    "sigma_grid_n" => string(opts.sigma_grid_n),
+                ))
+                write_diagnostics_header(diag_io)
+            end
+        end
+
         if new_file
             ScanCSV.write_metadata(io, Dict(
                 "schema" => "scan_csv_v1",
@@ -313,6 +362,7 @@ function run_scan(opts::Options)
                 tau = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
                 tauinv = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
                 densities = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
+                rates = nothing
                 Φ = NaN
                 Φbar = NaN
                 masses = (u=NaN, d=NaN, s=NaN)
@@ -368,6 +418,7 @@ function run_scan(opts::Options)
                             angle_nodes=opts.tau_angle_nodes,
                             phi_nodes=opts.tau_phi_nodes,
                             n_sigma_points=opts.tau_n_sigma_points,
+                            sigma_grid_n=opts.sigma_grid_n,
                             p_grid=p_grid,
                             p_w=p_w,
                             cos_grid=cos_grid,
@@ -383,6 +434,7 @@ function run_scan(opts::Options)
                     residual_norm = res.equilibrium.residual_norm
                     densities = (u=res.densities.u, s=res.densities.s, ubar=res.densities.ubar, sbar=res.densities.sbar)
                     tau, tauinv = res.tau, res.tau_inv
+                    rates = res.rates
                     seed_state = res.equilibrium.x_state
                 catch point_err
                     @warn "tau scan point failed; writing NaN row" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=point_err
@@ -401,6 +453,18 @@ function run_scan(opts::Options)
                 ]
                 println(io, join(row, ',')); flush(io)
 
+                if diag_io !== nothing && converged && rates !== nothing
+                    densities_diag = (
+                        u=densities.u,
+                        d=densities.u,
+                        s=densities.s,
+                        ubar=densities.ubar,
+                        dbar=densities.ubar,
+                        sbar=densities.sbar,
+                    )
+                    append_diagnostics_rows(diag_io, T_mev, muB_mev, opts.xi, tau, tauinv, densities_diag, rates)
+                end
+
                 if converged
                     @printf("T=%6.1f MeV  muB=%6.1f MeV | tau_u=%.3e tau_s=%.3e tau_ubar=%.3e tau_sbar=%.3e\n",
                         T_mev, muB_mev, tau.u, tau.s, tau.ubar, tau.sbar)
@@ -414,6 +478,7 @@ function run_scan(opts::Options)
         end
     finally
         close(io)
+        diag_io === nothing || close(diag_io)
     end
     @printf("Done. Wrote %s\n", opts.out)
 end

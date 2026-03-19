@@ -333,7 +333,7 @@ def plot_lines(
         for fmt in fmts:
             out = out_dir / f"multi_y_{y_tag}_vs_{x}.{fmt}"
             fmt_lower = fmt.lower()
-            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.08)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -421,7 +421,7 @@ def plot_lines(
         for fmt in fmts:
             out = out_dir / f"{y}_vs_{x}.{fmt}"
             fmt_lower = fmt.lower()
-            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.08)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -523,31 +523,17 @@ def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tup
 
 
 def _apply_axis_alignment(ax) -> None:
-    """Align axis spines to the first/last major tick.
+    """Apply stable axis styling without truncating visible spines.
 
-    Requirement:
-    - Axis line visual endpoints must align exactly to the first and last major ticks.
-    - No extra spine extension beyond the outer major ticks.
+    Earlier versions shortened left/bottom spines to the first and last major
+    ticks. Combined with tight bounding-box export this could make the axis look
+    visually broken near the plot edges. Keep zero margins, but leave the spines
+    at their full extent so exported figures retain continuous axes.
     """
     try:
         ax.margins(x=0.0, y=0.0)
     except Exception:
         pass
-
-    for which, spine_name in (("x", "bottom"), ("y", "left")):
-        try:
-            lo, hi = ax.get_xlim() if which == "x" else ax.get_ylim()
-            axis_obj = ax.xaxis if which == "x" else ax.yaxis
-            locator = axis_obj.get_major_locator()
-            ticks = locator.tick_values(lo, hi)
-            ticks = [tick for tick in ticks if math.isfinite(tick) and min(lo, hi) <= tick <= max(lo, hi)]
-            if len(ticks) < 2:
-                continue
-            a, b = float(ticks[0]), float(ticks[-1])
-            if spine_name in ax.spines:
-                ax.spines[spine_name].set_bounds(a, b)
-        except Exception:
-            continue
 
 
 def plot_heatmaps(
@@ -672,7 +658,7 @@ def plot_heatmaps(
         for fmt in fmts:
             out = out_dir / f"heatmap_{field}_({y}_vs_{x}).{fmt}"
             fmt_lower = fmt.lower()
-            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.05)
+            fig.savefig(out, format=fmt_lower, dpi=dpi, bbox_inches="tight", pad_inches=0.08)
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
@@ -744,7 +730,7 @@ def configure_publication_style(*, font: str = "Times New Roman", font_size: int
         "savefig.dpi": dpi,
         "savefig.format": "pdf",
         "savefig.bbox": "tight",
-        "savefig.pad_inches": 0.05,
+        "savefig.pad_inches": 0.08,
     })
 
 
