@@ -1,0 +1,22 @@
+# tr_p_max_fm: 8.0
+# sigma_grid_n: 128
+# provenance.equilibrium_backend: models.solve_constraint(FixedMu) with phase-aware xi/T continuity and legacy fallback
+# provenance.tau_path: TransportWorkflow.solve_gap_and_transport
+# tau_p_nodes: 28
+# gc_every_n: 5
+# script: scripts/relaxtime/run_gap_transport_scan.jl
+# tau_phi_nodes: 8
+# schema: scan_csv_v1
+# provenance.entrypoint: workflow
+# git_commit: f196bce86483267108100538d0befbf4ca99803a
+# tau_n_sigma_points: 6
+# y_label.zeta_over_s_over_eta_over_s: (ζ/s)/(η/s)
+# provenance.integration_mode: finite_15
+# y_label.sigma_over_T_over_eta_over_s: (σ/T)/(η/s)
+# tr_p_nodes: 24
+# integration_mode: finite_15
+# title: gap_transport_scan
+# tau_angle_nodes: 8
+# y_label.sigma_over_T: σ/T
+T_MeV,muq_MeV,muB_MeV,xi,T_fm,muq_fm,converged,iterations,residual_norm,equilibrium_backend,seed_source,phase_prev,phase_curr,phase_structure,phase_boundary_xi_used,Phi,Phibar,m_u,m_d,m_s,rho_baryon,rho_norm,omega_fm4inv,P_fm4inv,epsilon_fm4inv,s_fm3inv,omega_MeV_fm3,P_MeV_fm3,epsilon_MeV_fm3,eps_minus_3P_over_T4,n_u,n_d,n_s,n_ubar,n_dbar,n_sbar,tau_u,tau_d,tau_s,tau_ubar,tau_dbar,tau_sbar,tauinv_u,tauinv_d,tauinv_s,tauinv_ubar,tauinv_dbar,tauinv_sbar,eta,sigma,zeta,eta_over_s,zeta_over_s,sigma_over_T,sigma_over_T_over_eta_over_s,zeta_over_s_over_eta_over_s
+190.0,0.0,0.0,-0.1,0.9628688363590852,0.0,true,0,8.60454523428157e-10,models,phase_aware_default_hadron,unknown,hadron,crossover_possible,0.0,0.5479411215938598,0.5479411215938598,1.0594613006482587,1.0594613006482587,2.326196746812959,0.0,0.0,-22.208336907270663,22.208336907270663,-14.012588569259833,8.511801429778924,-4382.304061617595,4382.304061617595,-2765.061789959599,-93.81430518218525,0.24932734901244896,0.24932734901244896,0.12559373224198267,0.24932734901244896,0.24932734901244896,0.12559373224198267,0.28838558233238026,0.28838558233238026,3.3538254130058855,0.2883855823323803,0.2883855823323803,3.3538254130058855,3.467579730970895,3.467579730970895,0.29816698153758225,3.4675797309708942,3.4675797309708942,0.29816698153758225,0.8444809482331693,0.003827590638380308,NaN,0.0992129521817455,NaN,0.003975194225678392,0.04006729099640481,NaN
