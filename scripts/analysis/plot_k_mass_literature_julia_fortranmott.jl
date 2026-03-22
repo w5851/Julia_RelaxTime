@@ -43,7 +43,7 @@ const DEFAULT_OUT_CSV = joinpath(
 
 const DEFAULT_OUT_FIG = joinpath(
     PROJECT_ROOT,
-    "data", "outputs", "figures", "relaxtime",
+    "data", "outputs", "figures", "relaxtime", "literature",
     "k_mass_literature_julia_fortranmott_comparison.png",
 )
 

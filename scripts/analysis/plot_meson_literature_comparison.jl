@@ -35,7 +35,7 @@ function parse_args(args::Vector{String})
     )
     output_fig = joinpath(
         PROJECT_ROOT,
-        "data", "outputs", "figures", "relaxtime",
+        "data", "outputs", "figures", "relaxtime", "literature",
         "meson_mass_julia_vs_literature_comparison.png",
     )
 

@@ -1,0 +1,11 @@
+# format: scan_csv_v1
+# muB_MeV: 0.0
+# script: scripts/analysis/scan_mott_meson_vs_xi_mu0.jl
+# smoke: true
+xi,meson,T_Mott_MeV,method,approx,status,points_used,T_min_MeV,T_max_MeV
+-0.1,pi,190.0,minabs_approx,true,success,3,150.0,190.0
+-0.1,K,190.0,minabs_approx,true,success,3,150.0,190.0
+0.0,pi,190.0,minabs_approx,true,success,3,150.0,190.0
+0.0,K,190.0,minabs_approx,true,success,3,150.0,190.0
+0.1,pi,190.0,minabs_approx,true,success,3,150.0,190.0
+0.1,K,190.0,minabs_approx,true,success,3,150.0,190.0
