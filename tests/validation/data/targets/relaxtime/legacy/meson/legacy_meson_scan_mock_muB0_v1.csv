@@ -1,0 +1,7 @@
+record_id,source_impl,T_MeV,muB_MeV,xi,meson,mass_MeV,threshold_MeV,gap_MeV,mott_flag,solver_status
+mock_fortran_pi_t150,fortran,150.0,0.0,0.0,pi,250.0,260.0,-10.0,0,success
+mock_fortran_pi_t160,fortran,160.0,0.0,0.0,pi,265.0,260.0,5.0,0,success
+mock_fortran_k_t150,fortran,150.0,0.0,0.0,K,500.0,505.0,-5.0,0,success
+mock_fortran_k_t160,fortran,160.0,0.0,0.0,K,504.0,505.0,-1.0,0,success
+mock_cpp_pi_t150,cpp,150.0,0.0,0.0,pi,251.0,260.0,-9.0,0,success
+mock_cpp_pi_t160,cpp,160.0,0.0,0.0,pi,264.0,260.0,4.0,0,success
