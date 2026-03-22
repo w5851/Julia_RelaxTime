@@ -1,0 +1,3 @@
+target_id,series,meson,muB_MeV,xi,expected_T_mott_MeV,rtol,source
+lit_mott_pi_muB0_xi0,digitized_wpd_20260321_corrected,pi,0.0,0.0,205.6,0.02,user_literature_note_20260321
+lit_mott_pi_muB600_xi0,digitized_wpd_20260321_corrected,pi,600.0,0.0,175.1,0.03,user_literature_note_20260321
