@@ -48,7 +48,7 @@ function main()
     rows = _read_csv_rows(in_csv)
     isempty(rows) && error("no rows in $in_csv")
 
-    out_dir = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime")
+    out_dir = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "validation")
     mkpath(out_dir)
 
     T_eta, jm_eta, fm_eta, jg_eta, fg_eta = _series(rows, :eta)
