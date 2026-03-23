@@ -38,6 +38,7 @@ const WorkflowParamAdapters = Main.WorkflowParamAdapters
 using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 
 using Main.Constants_PNJL: ħc_MeV_fm
+using Main.Models: RootPolicy, solve_root_with_policy
 const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
 const DEFAULT_MOMENTUM_COUNT = Main.Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
 const DEFAULT_THETA_COUNT = Main.Models.PNJLCore.DEFAULT_THETA_COUNT
@@ -355,9 +356,6 @@ function _solve_meson_mass_with_policy(
         end
     end
 
-    best = nothing
-    best_resid = Inf
-
     if initial_seed !== nothing
         if experiment_mode === :fortran_track
             m0 = initial_seed[1] * 1.001
@@ -371,67 +369,48 @@ function _solve_meson_mass_with_policy(
             end
             return seed_res, :bad, Float64[seed_res.mass, seed_res.gamma]
         end
-
-        seed_res = run_once(nothing; m0=initial_seed[1], g0=initial_seed[2])
-        if seed_res !== nothing
-            seed_resid = Float64(seed_res.residual_norm)
-            if isfinite(seed_resid) && seed_resid < best_resid
-                best = seed_res
-                best_resid = seed_resid
-            end
-            if _mass_result_good(seed_res, policy)
-                return seed_res, :good, Float64[seed_res.mass, seed_res.gamma]
-            end
-        end
     end
 
-    retry_res = _solve_meson_mass_with_retries(meson, quark_params, thermo_params;
-        k_norm=k_norm,
-        mass_kwargs=mass_kwargs,
+    solve_once_callback = function (method::Symbol, seed::Vector{Float64})
+        picked = run_once(method; m0=seed[1], g0=max(seed[2], 0.0))
+        return picked
+    end
+
+    guess = default_meson_mass_guess(meson, qp)
+    seed0 = initial_seed === nothing ? Float64[guess, 0.0] : Float64[initial_seed[1], initial_seed[2]]
+
+    root_policy = RootPolicy(
+        primary_method=:newton,
+        fallback_method=:trust_region,
+        use_fallback=Bool(policy.use_trust_region_fallback),
+        use_multiseed=true,
+        residual_norm_max=Float64(policy.residual_norm_max),
+        require_converged=Bool(policy.require_converged),
+        diagnostics_level=:basic,
     )
-    if retry_res !== nothing
-        retry_resid = Float64(retry_res.residual_norm)
-        if isfinite(retry_resid) && retry_resid < best_resid
-            best = retry_res
-            best_resid = retry_resid
+
+    solved = solve_root_with_policy(solve_once_callback, seed0; policy=root_policy)
+    root_quality = solved.quality_tag
+
+    selected_method = solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method
+    selected_seed = Float64[solved.x[1], solved.x[2]]
+    selected = run_once(selected_method; m0=selected_seed[1], g0=max(selected_seed[2], 0.0))
+
+    if selected === nothing
+        if !isfinite(solved.x[1]) || !isfinite(solved.x[2])
+            return nothing, root_quality, nothing
         end
-        if _mass_result_good(retry_res, policy)
-            return retry_res, :good, Float64[retry_res.mass, retry_res.gamma]
-        end
+        selected = (
+            mass=Float64(solved.x[1]),
+            gamma=Float64(solved.x[2]),
+            converged=Bool(solved.converged),
+            residual_norm=Float64(solved.residual_norm),
+            solution=nothing,
+        )
     end
 
-    if Bool(policy.use_trust_region_fallback)
-        fallback_seeds = Vector{Vector{Float64}}()
-        if initial_seed !== nothing
-            push!(fallback_seeds, initial_seed)
-        end
-        if retry_res !== nothing
-            push!(fallback_seeds, Float64[retry_res.mass, retry_res.gamma])
-        end
-        if isempty(fallback_seeds)
-            guess = default_meson_mass_guess(meson, qp)
-            push!(fallback_seeds, Float64[guess, 0.0])
-        end
-
-        for s in fallback_seeds
-            tr_res = run_once(:trust_region; m0=s[1], g0=s[2])
-            tr_res === nothing && continue
-
-            tr_resid = Float64(tr_res.residual_norm)
-            if isfinite(tr_resid) && tr_resid < best_resid
-                best = tr_res
-                best_resid = tr_resid
-            end
-            if _mass_result_good(tr_res, policy)
-                return tr_res, :fallback, Float64[tr_res.mass, tr_res.gamma]
-            end
-        end
-    end
-
-    if best === nothing
-        return nothing, :bad, nothing
-    end
-    return best, :bad, Float64[best.mass, best.gamma]
+    out_seed = (isfinite(selected.mass) && isfinite(selected.gamma)) ? Float64[selected.mass, selected.gamma] : nothing
+    return selected, root_quality, out_seed
 end
 
 const DEFAULT_MESONS = (

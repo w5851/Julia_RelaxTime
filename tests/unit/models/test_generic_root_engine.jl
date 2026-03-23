@@ -55,4 +55,18 @@ end
         @test result.converged
         @test result.quality_tag in (:degraded, :bad)
     end
+
+    @testset "callback solver path supports fallback" begin
+        solve_once = function (method::Symbol, seed::Vector{Float64})
+            if method === :newton
+                return (mass=seed[1], gamma=seed[2], converged=false, residual_norm=1.0)
+            end
+            return (mass=2.0, gamma=0.0, converged=true, residual_norm=1e-12)
+        end
+
+        result = Models.solve_root_with_policy(solve_once, [1.0, 0.0])
+        @test result.converged
+        @test result.quality_tag == :fallback
+        @test isapprox(result.x[1], 2.0; atol=1e-12)
+    end
 end

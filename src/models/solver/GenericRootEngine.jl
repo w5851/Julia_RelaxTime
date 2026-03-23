@@ -225,6 +225,109 @@ function solve_root_with_policy(
     return RootSolveResult(selected_x, selected_conv, selected_resn, selected_tag, diag)
 end
 
+@inline function _extract_x_from_callback_result(cb_res)
+    if hasproperty(cb_res, :x)
+        x = getproperty(cb_res, :x)
+        x isa AbstractVector || throw(ArgumentError("callback result.x must be an AbstractVector"))
+        return Float64.(x)
+    end
+    if hasproperty(cb_res, :mass) && hasproperty(cb_res, :gamma)
+        return Float64[Float64(getproperty(cb_res, :mass)), Float64(getproperty(cb_res, :gamma))]
+    end
+    throw(ArgumentError("callback result must provide :x or (:mass, :gamma)"))
+end
+
+@inline function _extract_conv_residual_from_callback_result(cb_res)
+    hasproperty(cb_res, :converged) || throw(ArgumentError("callback result must provide :converged"))
+    hasproperty(cb_res, :residual_norm) || throw(ArgumentError("callback result must provide :residual_norm"))
+    return Bool(getproperty(cb_res, :converged)), Float64(getproperty(cb_res, :residual_norm))
+end
+
+function solve_root_with_policy(
+    solve_once::Function,
+    x0::AbstractVector{<:Real};
+    policy::RootPolicy=RootPolicy(),
+    continuation_state::Union{Nothing,ContinuationState}=nothing,
+    domain_quality=nothing,
+    branch_key=nothing,
+)
+    seed = Float64.(x0)
+    branch = _normalize_branch_key(branch_key, seed, nothing)
+    seed_source = :default
+    if continuation_state !== nothing && haskey(continuation_state.seed_by_branch, branch)
+        cseed = continuation_state.seed_by_branch[branch]
+        if length(cseed) == length(seed)
+            seed = copy(cseed)
+            seed_source = :continuation
+        end
+    end
+
+    attempts = RootAttempt[]
+    notes = String[]
+    selected_idx = 0
+    selected_x = copy(seed)
+    selected_conv = false
+    selected_resn = Inf
+    selected_tag = :bad
+
+    function run_callback(method::Symbol, s::Vector{Float64})
+        out = solve_once(method, s)
+        out === nothing && return copy(s), false, Inf
+        x = _extract_x_from_callback_result(out)
+        conv, resn = _extract_conv_residual_from_callback_result(out)
+        return x, conv, resn
+    end
+
+    function register_attempt(method::Symbol, source::Symbol, x::Vector{Float64}, conv::Bool, resn::Float64; is_fallback::Bool=false)
+        domain_ok = _domain_quality_ok(domain_quality, x, nothing)
+        qtag = _quality_tag(conv, resn, domain_ok, policy; is_fallback=is_fallback)
+        push!(attempts, RootAttempt(method, source, conv, resn, qtag))
+        return qtag
+    end
+
+    x_primary, conv_primary, resn_primary = run_callback(policy.primary_method, seed)
+    tag_primary = register_attempt(policy.primary_method, seed_source, x_primary, conv_primary, resn_primary)
+    selected_idx = 1
+    selected_x = x_primary
+    selected_conv = conv_primary
+    selected_resn = resn_primary
+    selected_tag = tag_primary
+
+    if policy.use_fallback && tag_primary in (:degraded, :bad)
+        x_fb, conv_fb, resn_fb = run_callback(policy.fallback_method, seed)
+        tag_fb = register_attempt(policy.fallback_method, seed_source, x_fb, conv_fb, resn_fb; is_fallback=true)
+        if tag_fb in (:good, :fallback) || (tag_primary in (:degraded, :bad) && resn_fb < selected_resn)
+            selected_idx = length(attempts)
+            selected_x = x_fb
+            selected_conv = conv_fb
+            selected_resn = resn_fb
+            selected_tag = tag_fb
+        end
+    end
+
+    if policy.use_multiseed && selected_tag in (:degraded, :bad)
+        for s in _multiseed_candidates(seed)
+            x_ms, conv_ms, resn_ms = run_callback(policy.primary_method, s)
+            tag_ms = register_attempt(policy.primary_method, :multiseed, x_ms, conv_ms, resn_ms)
+            if tag_ms in (:good, :fallback) || resn_ms < selected_resn
+                selected_idx = length(attempts)
+                selected_x = x_ms
+                selected_conv = conv_ms
+                selected_resn = resn_ms
+                selected_tag = tag_ms
+            end
+        end
+        push!(notes, "multiseed attempted")
+    end
+
+    if continuation_state !== nothing
+        continuation_state.seed_by_branch[branch] = copy(selected_x)
+    end
+
+    diag = RootDiagnostics(selected_idx, attempts, branch, notes)
+    return RootSolveResult(selected_x, selected_conv, selected_resn, selected_tag, diag)
+end
+
 function solve_root_continuation(
     scan_points,
     spec_factory::Function;
