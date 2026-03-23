@@ -55,6 +55,9 @@ const INTEGRATION_SMOKE_FILES = [
     joinpath(INTEGRATION_DIR, "pnjl", "test_conserved_charge_susceptibilities_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_solver_random_physical_smoke.jl"),
 
+    # Rotation workflow
+    joinpath(INTEGRATION_DIR, "models", "test_rotation_workflow_smoke.jl"),
+
     # Config
     joinpath(INTEGRATION_DIR, "config", "test_config_profile_smoke.jl"),
 

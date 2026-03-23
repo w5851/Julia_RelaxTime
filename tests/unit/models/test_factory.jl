@@ -48,6 +48,11 @@ Models.pnjl_module()
         @test m isa Models.AbstractPNJLModel
     end
 
+    @testset ":Rotation" begin
+        m = Models.create_model(:Rotation)
+        @test m isa Models.AbstractQCDModel
+    end
+
     # ============================================================================
     # 未知模型
     # ============================================================================
