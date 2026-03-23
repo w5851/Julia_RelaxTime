@@ -373,6 +373,24 @@ function _solve_meson_mass_with_policy(
 
     solve_once_callback = function (method::Symbol, seed::Vector{Float64})
         picked = run_once(method; m0=seed[1], g0=max(seed[2], 0.0))
+        if picked !== nothing
+            qp_local = normalize_quark_params(quark_params)
+            tp_local = normalize_thermo_params(thermo_params)
+            local_score = try
+                splus, sminus = _mixed_branch_scores(
+                    meson,
+                    Float64(picked.mass),
+                    Float64(picked.gamma),
+                    qp_local,
+                    tp_local,
+                    Float64(k_norm),
+                )
+                min(splus, sminus)
+            catch
+                NaN
+            end
+            return merge(picked, (score=local_score,))
+        end
         return picked
     end
 
