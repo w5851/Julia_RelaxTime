@@ -88,11 +88,11 @@
 - Modify (future): `src/models/workflows/MesonMassWorkflow.jl`
 - Add (future): `src/models/solver/GenericRootEngine.jl`
 
-- [ ] 将 Meson 当前 `_solve_meson_mass_with_policy` 的通用部分迁入 `GenericRootEngine`。
-- [ ] 保留 Meson 专属部分在 workflow：
+- [x] 将 Meson 当前 `_solve_meson_mass_with_policy` 的通用部分迁入 `GenericRootEngine`。
+- [x] 保留 Meson 专属部分在 workflow：
   - 混合态分支语义（light/heavy）
   - threshold/gap 计算与输出格式
-- [ ] 验证迁移后行为等价（至少保持现有测试全绿）。
+- [x] 验证迁移后行为等价（至少保持现有测试全绿）。
 
 ### Task 3: Phase B 迁移（Gap 求解接入）
 
@@ -100,9 +100,9 @@
 - Modify (future): `src/models/solver/ImplicitSolver.jl`
 - Modify (future): `src/models/solver/SeedStrategies.jl`（若需轻量接口适配）
 
-- [ ] 把 `_nlsolve_with_tr_fallback` 的通用部分改为调用 `GenericRootEngine`。
-- [ ] 通过 adapter 注入 Gap 特有判据（omega/physicality/thermo finite）。
-- [ ] 确保 FixedMu / FixedRho / FixedAsymmetricRho 回归不退化。
+- [x] 把 `_nlsolve_with_tr_fallback` 的通用部分改为调用 `GenericRootEngine`。
+- [x] 通过 adapter 注入 Gap 特有判据（omega/physicality/thermo finite）。
+- [x] 确保 FixedMu / FixedRho / FixedAsymmetricRho 回归不退化。
 
 ### Task 4: Phase C 统一诊断输出
 
@@ -111,9 +111,9 @@
 - Modify (future): `src/models/solver/ImplicitSolver.jl`
 - Add (future): `docs/api/...`（如该输出成为稳定公共字段）
 
-- [ ] 统一质量标签枚举：`good/fallback/degraded/bad`。
-- [ ] 统一 attempt trace 结构（方法、初值来源、residual、收敛标志）。
-- [ ] 输出兼容层：避免破坏现有调用方。
+- [x] 统一质量标签枚举：`good/fallback/degraded/bad`。
+- [x] 统一 attempt trace 结构（方法、初值来源、residual、收敛标志）。
+- [x] 输出兼容层：避免破坏现有调用方。
 
 ---
 
@@ -143,7 +143,7 @@
 
 - [x] 新建 `GenericRootEngine.jl`（最小骨架 + 单元测试）
 - [ ] 先迁 Meson，再迁 Gap
-- [ ] 回归：
+- [x] 回归：
   - `tests/validation/relaxtime/test_mixed_meson_root_quality_continuation.jl`
   - 关键 legacy/literature 验证栈
 - [ ] 文档同步：
