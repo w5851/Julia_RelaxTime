@@ -30,6 +30,7 @@ using ImplicitDifferentiation
 # 从 Models 域导入，避免重复定义
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim, param_dim
 import Main.Models: AbstractQCDModel, create_model, model_thermo, calculate_mass_vec
+import Main.Models: RootPolicy, solve_root_with_policy
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector, update!
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
@@ -145,45 +146,56 @@ function _nlsolve_with_tr_fallback(residual_fn!, x0;
     postprocess_fn::Function,
     nlsolve_kwargs...)
 
-    primary_res = nlsolve(residual_fn!, x0; autodiff=:forward, method=primary_method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
+    cache = Dict{Symbol,Tuple{Any,Any}}()
 
-    local primary_cand
-    try
-        primary_cand = _postprocess_candidate(postprocess_fn, physicality_check, primary_res.zero)
-    catch
-        primary_cand = (phys=false,
-                        x_sol=Vector{Float64}(primary_res.zero),
-                        x_state=SVector{5, Float64}(fill(NaN, 5)),
-                        mu_vec=SVector{3, Float64}(fill(NaN, 3)),
-                        omega=NaN,
-                        pressure=NaN,
-                        rho_norm=NaN,
-                        entropy=NaN,
-                        energy=NaN,
-                        masses=SVector{3, Float64}(fill(NaN, 3)))
+    solve_once = function (method::Symbol, seed::Vector{Float64})
+        res = nlsolve(residual_fn!, seed; autodiff=:forward, method=method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
+
+        local cand
+        try
+            cand = _postprocess_candidate(postprocess_fn, physicality_check, res.zero)
+        catch
+            cand = (phys=false,
+                    x_sol=Vector{Float64}(res.zero),
+                    x_state=SVector{5, Float64}(fill(NaN, 5)),
+                    mu_vec=SVector{3, Float64}(fill(NaN, 3)),
+                    omega=NaN,
+                    pressure=NaN,
+                    rho_norm=NaN,
+                    entropy=NaN,
+                    energy=NaN,
+                    masses=SVector{3, Float64}(fill(NaN, 3)))
+        end
+
+        cache[method] = (res, cand)
+        return (
+            x=Vector{Float64}(res.zero),
+            converged=Bool(res.f_converged) && Bool(cand.phys),
+            residual_norm=Float64(res.residual_norm),
+        )
     end
 
-    need_fallback = use_fallback && (
-        !primary_res.f_converged ||
-        !isfinite(primary_res.residual_norm) ||
-        primary_res.residual_norm > residual_norm_max ||
-        !primary_cand.phys
+    policy = RootPolicy(
+        primary_method=primary_method,
+        fallback_method=fallback_method,
+        use_fallback=use_fallback,
+        use_multiseed=false,
+        residual_norm_max=residual_norm_max,
+        require_converged=true,
+        diagnostics_level=:basic,
     )
 
-    if !need_fallback
-        return primary_res, primary_cand
+    solved = solve_root_with_policy(solve_once, Vector{Float64}(x0); policy=policy)
+    selected_method = solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method
+
+    if haskey(cache, selected_method)
+        return cache[selected_method]
     end
 
-    local fallback_res
-    local fallback_cand
-    try
-        fallback_res = nlsolve(residual_fn!, x0; autodiff=:forward, method=fallback_method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-        fallback_cand = _postprocess_candidate(postprocess_fn, physicality_check, fallback_res.zero)
-    catch
-        return primary_res, primary_cand
-    end
-
-    return _choose_candidate(primary_res, primary_cand, fallback_res, fallback_cand; residual_norm_max=residual_norm_max)
+    picked = solve_once(selected_method, Vector{Float64}(x0))
+    res, cand = cache[selected_method]
+    _ = picked
+    return res, cand
 end
 
 # ============================================================================
@@ -1137,4 +1149,3 @@ function solve_with_derivatives(T_fm::Real, μ_fm::Real;
 end
 
 end # module ImplicitSolver
-
