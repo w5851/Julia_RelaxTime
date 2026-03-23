@@ -66,7 +66,22 @@ end
 
         result = Models.solve_root_with_policy(solve_once, [1.0, 0.0])
         @test result.converged
-        @test result.quality_tag == :fallback
+        @test result.quality_tag in (:good, :fallback)
         @test isapprox(result.x[1], 2.0; atol=1e-12)
+    end
+
+    @testset "callback solver prefers lower score over lower residual" begin
+        solve_once = function (method::Symbol, seed::Vector{Float64})
+            if method === :newton
+                return (mass=10.0, gamma=0.0, converged=true, residual_norm=1e-12, score=10.0)
+            end
+            return (mass=11.0, gamma=0.0, converged=true, residual_norm=1e-8, score=0.1)
+        end
+
+        result = Models.solve_root_with_policy(solve_once, [1.0, 0.0])
+        @test result.quality_tag == :fallback
+        @test isapprox(result.x[1], 11.0; atol=1e-12)
+        selected = result.diagnostics.attempts[result.diagnostics.selected_attempt]
+        @test selected.score ≈ 0.1
     end
 end

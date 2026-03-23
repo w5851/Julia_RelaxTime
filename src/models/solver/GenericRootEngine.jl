@@ -60,6 +60,7 @@ struct RootAttempt
     converged::Bool
     residual_norm::Float64
     quality_tag::Symbol
+    score::Float64
 end
 
 struct RootDiagnostics
@@ -113,6 +114,33 @@ end
         return :degraded
     end
     return :bad
+end
+
+@inline function _quality_rank(tag::Symbol)::Int
+    if tag === :good || tag === :fallback
+        return 1
+    elseif tag === :degraded
+        return 2
+    end
+    return 3
+end
+
+@inline function _should_replace_best(best_tag::Symbol, best_resn::Float64, best_score::Float64,
+                                      cand_tag::Symbol, cand_resn::Float64, cand_score::Float64)::Bool
+    rb = _quality_rank(best_tag)
+    rc = _quality_rank(cand_tag)
+    rc < rb && return true
+    rc > rb && return false
+
+    if isfinite(cand_score) && isfinite(best_score)
+        cand_score < best_score && return true
+        cand_score > best_score && return false
+    end
+
+    if isfinite(cand_resn) && isfinite(best_resn)
+        return cand_resn < best_resn
+    end
+    return false
 end
 
 function _solve_once(spec::RootProblemSpec, seed::Vector{Float64}, method::Symbol)
@@ -171,11 +199,13 @@ function solve_root_with_policy(
     selected_conv = false
     selected_resn = Inf
     selected_tag = :bad
+    selected_score = NaN
 
-    function register_attempt(method::Symbol, source::Symbol, x::Vector{Float64}, conv::Bool, resn::Float64; is_fallback::Bool=false)
+    function register_attempt(method::Symbol, source::Symbol, x::Vector{Float64}, conv::Bool, resn::Float64;
+                              is_fallback::Bool=false, score::Float64=NaN)
         domain_ok = _domain_quality_ok(domain_quality, x, spec.ctx)
         qtag = _quality_tag(conv, resn, domain_ok, policy; is_fallback=is_fallback)
-        push!(attempts, RootAttempt(method, source, conv, resn, qtag))
+        push!(attempts, RootAttempt(method, source, conv, resn, qtag, score))
         return qtag
     end
 
@@ -187,31 +217,36 @@ function solve_root_with_policy(
     selected_conv = conv_primary
     selected_resn = resn_primary
     selected_tag = tag_primary
+    selected_score = NaN
 
-    if policy.use_fallback && tag_primary in (:degraded, :bad)
+    should_try_fallback = policy.use_fallback && (tag_primary in (:degraded, :bad))
+    if should_try_fallback
         res_fb = _solve_once(spec, seed, policy.fallback_method)
         x_fb, conv_fb, resn_fb = _candidate_from_result(res_fb)
         tag_fb = register_attempt(policy.fallback_method, seed_source, x_fb, conv_fb, resn_fb; is_fallback=true)
-        if tag_fb in (:good, :fallback) || (tag_primary in (:degraded, :bad) && resn_fb < selected_resn)
+        if _should_replace_best(selected_tag, selected_resn, selected_score, tag_fb, resn_fb, NaN)
             selected_idx = length(attempts)
             selected_x = x_fb
             selected_conv = conv_fb
             selected_resn = resn_fb
             selected_tag = tag_fb
+            selected_score = NaN
         end
     end
 
-    if policy.use_multiseed && selected_tag in (:degraded, :bad)
+    should_try_multiseed = policy.use_multiseed && (selected_tag in (:degraded, :bad) || isfinite(selected_score))
+    if should_try_multiseed
         for s in _multiseed_candidates(seed)
             res_ms = _solve_once(spec, s, policy.primary_method)
             x_ms, conv_ms, resn_ms = _candidate_from_result(res_ms)
             tag_ms = register_attempt(policy.primary_method, :multiseed, x_ms, conv_ms, resn_ms)
-            if tag_ms in (:good, :fallback) || resn_ms < selected_resn
+            if _should_replace_best(selected_tag, selected_resn, selected_score, tag_ms, resn_ms, NaN)
                 selected_idx = length(attempts)
                 selected_x = x_ms
                 selected_conv = conv_ms
                 selected_resn = resn_ms
                 selected_tag = tag_ms
+                selected_score = NaN
             end
         end
         push!(notes, "multiseed attempted")
@@ -243,6 +278,13 @@ end
     return Bool(getproperty(cb_res, :converged)), Float64(getproperty(cb_res, :residual_norm))
 end
 
+@inline function _extract_score_from_callback_result(cb_res)::Float64
+    if hasproperty(cb_res, :score)
+        return Float64(getproperty(cb_res, :score))
+    end
+    return NaN
+end
+
 function solve_root_with_policy(
     solve_once::Function,
     x0::AbstractVector{<:Real};
@@ -269,52 +311,60 @@ function solve_root_with_policy(
     selected_conv = false
     selected_resn = Inf
     selected_tag = :bad
+    selected_score = NaN
 
     function run_callback(method::Symbol, s::Vector{Float64})
         out = solve_once(method, s)
-        out === nothing && return copy(s), false, Inf
+        out === nothing && return copy(s), false, Inf, NaN
         x = _extract_x_from_callback_result(out)
         conv, resn = _extract_conv_residual_from_callback_result(out)
-        return x, conv, resn
+        score = _extract_score_from_callback_result(out)
+        return x, conv, resn, score
     end
 
-    function register_attempt(method::Symbol, source::Symbol, x::Vector{Float64}, conv::Bool, resn::Float64; is_fallback::Bool=false)
+    function register_attempt(method::Symbol, source::Symbol, x::Vector{Float64}, conv::Bool, resn::Float64;
+                              is_fallback::Bool=false, score::Float64=NaN)
         domain_ok = _domain_quality_ok(domain_quality, x, nothing)
         qtag = _quality_tag(conv, resn, domain_ok, policy; is_fallback=is_fallback)
-        push!(attempts, RootAttempt(method, source, conv, resn, qtag))
+        push!(attempts, RootAttempt(method, source, conv, resn, qtag, score))
         return qtag
     end
 
-    x_primary, conv_primary, resn_primary = run_callback(policy.primary_method, seed)
-    tag_primary = register_attempt(policy.primary_method, seed_source, x_primary, conv_primary, resn_primary)
+    x_primary, conv_primary, resn_primary, score_primary = run_callback(policy.primary_method, seed)
+    tag_primary = register_attempt(policy.primary_method, seed_source, x_primary, conv_primary, resn_primary; score=score_primary)
     selected_idx = 1
     selected_x = x_primary
     selected_conv = conv_primary
     selected_resn = resn_primary
     selected_tag = tag_primary
+    selected_score = score_primary
 
-    if policy.use_fallback && tag_primary in (:degraded, :bad)
-        x_fb, conv_fb, resn_fb = run_callback(policy.fallback_method, seed)
-        tag_fb = register_attempt(policy.fallback_method, seed_source, x_fb, conv_fb, resn_fb; is_fallback=true)
-        if tag_fb in (:good, :fallback) || (tag_primary in (:degraded, :bad) && resn_fb < selected_resn)
+    should_try_fallback = policy.use_fallback && (tag_primary in (:degraded, :bad) || isfinite(score_primary))
+    if should_try_fallback
+        x_fb, conv_fb, resn_fb, score_fb = run_callback(policy.fallback_method, seed)
+        tag_fb = register_attempt(policy.fallback_method, seed_source, x_fb, conv_fb, resn_fb; is_fallback=true, score=score_fb)
+        if _should_replace_best(selected_tag, selected_resn, selected_score, tag_fb, resn_fb, score_fb)
             selected_idx = length(attempts)
             selected_x = x_fb
             selected_conv = conv_fb
             selected_resn = resn_fb
             selected_tag = tag_fb
+            selected_score = score_fb
         end
     end
 
-    if policy.use_multiseed && selected_tag in (:degraded, :bad)
+    should_try_multiseed = policy.use_multiseed && (selected_tag in (:degraded, :bad) || isfinite(selected_score))
+    if should_try_multiseed
         for s in _multiseed_candidates(seed)
-            x_ms, conv_ms, resn_ms = run_callback(policy.primary_method, s)
-            tag_ms = register_attempt(policy.primary_method, :multiseed, x_ms, conv_ms, resn_ms)
-            if tag_ms in (:good, :fallback) || resn_ms < selected_resn
+            x_ms, conv_ms, resn_ms, score_ms = run_callback(policy.primary_method, s)
+            tag_ms = register_attempt(policy.primary_method, :multiseed, x_ms, conv_ms, resn_ms; score=score_ms)
+            if _should_replace_best(selected_tag, selected_resn, selected_score, tag_ms, resn_ms, score_ms)
                 selected_idx = length(attempts)
                 selected_x = x_ms
                 selected_conv = conv_ms
                 selected_resn = resn_ms
                 selected_tag = tag_ms
+                selected_score = score_ms
             end
         end
         push!(notes, "multiseed attempted")
