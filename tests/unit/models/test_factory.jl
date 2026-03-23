@@ -48,6 +48,11 @@ Models.pnjl_module()
         @test m isa Models.AbstractPNJLModel
     end
 
+    @testset ":GasLiquid" begin
+        m = Models.create_model(:GasLiquid)
+        @test m isa Models.AbstractQCDModel
+    end
+
     # ============================================================================
     # 未知模型
     # ============================================================================
