@@ -362,12 +362,22 @@ function _solve_meson_mass_with_policy(
             g0 = max(initial_seed[2] * 1.001, 0.0)
             seed_res = run_once(nothing; m0=m0, g0=g0)
             if seed_res === nothing
-                return nothing, :bad, nothing
+                diag = (selected_method=:fortran_track, selected_attempt=0, attempts=NamedTuple[])
+                return nothing, :bad, nothing, diag
             end
+            attempt = (
+                method=:fortran_track,
+                seed_source=:seed,
+                converged=Bool(seed_res.converged),
+                residual_norm=Float64(seed_res.residual_norm),
+                quality_tag=_mass_result_good(seed_res, policy) ? :good : :bad,
+                score=NaN,
+            )
+            diag = (selected_method=:fortran_track, selected_attempt=1, attempts=[attempt])
             if _mass_result_good(seed_res, policy)
-                return seed_res, :good, Float64[seed_res.mass, seed_res.gamma]
+                return seed_res, :good, Float64[seed_res.mass, seed_res.gamma], diag
             end
-            return seed_res, :bad, Float64[seed_res.mass, seed_res.gamma]
+            return seed_res, :bad, Float64[seed_res.mass, seed_res.gamma], diag
         end
     end
 
@@ -409,6 +419,21 @@ function _solve_meson_mass_with_policy(
 
     solved = solve_root_with_policy(solve_once_callback, seed0; policy=root_policy)
     root_quality = solved.quality_tag
+    diag_attempts = map(solved.diagnostics.attempts) do a
+        (
+            method=a.method,
+            seed_source=a.seed_source,
+            converged=a.converged,
+            residual_norm=a.residual_norm,
+            quality_tag=a.quality_tag,
+            score=a.score,
+        )
+    end
+    root_diag = (
+        selected_method=solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method,
+        selected_attempt=solved.diagnostics.selected_attempt,
+        attempts=diag_attempts,
+    )
 
     selected_method = solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method
     selected_seed = Float64[solved.x[1], solved.x[2]]
@@ -416,7 +441,7 @@ function _solve_meson_mass_with_policy(
 
     if selected === nothing
         if !isfinite(solved.x[1]) || !isfinite(solved.x[2])
-            return nothing, root_quality, nothing
+            return nothing, root_quality, nothing, root_diag
         end
         selected = (
             mass=Float64(solved.x[1]),
@@ -428,7 +453,7 @@ function _solve_meson_mass_with_policy(
     end
 
     out_seed = (isfinite(selected.mass) && isfinite(selected.gamma)) ? Float64[selected.mass, selected.gamma] : nothing
-    return selected, root_quality, out_seed
+    return selected, root_quality, out_seed, root_diag
 end
 
 const DEFAULT_MESONS = (
@@ -622,7 +647,7 @@ function solve_gap_and_meson_point(
 
     for meson in mesons
         initial_seed = haskey(seed_in, meson) ? seed_in[meson] : nothing
-        res, root_quality, seed_vec = _solve_meson_mass_with_policy(
+        res, root_quality, seed_vec, root_diagnostics = _solve_meson_mass_with_policy(
             meson,
             quark_params,
             thermo_params;
@@ -644,6 +669,7 @@ function solve_gap_and_meson_point(
             gaps = isfinite(mass) ? mott_gaps(meson, mass, qp) : (uu=NaN, ss=NaN, min=NaN)
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     root_quality=root_quality,
+                                    root_diagnostics=root_diagnostics,
                                     threshold=thr, gaps=gaps)
         else
             qp = normalize_quark_params(quark_params)
@@ -651,6 +677,7 @@ function solve_gap_and_meson_point(
             gapv = isfinite(mass) ? mott_gap(meson, mass, qp) : NaN
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     root_quality=root_quality,
+                                    root_diagnostics=root_diagnostics,
                                     threshold=thr, gap=gapv)
         end
 

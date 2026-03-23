@@ -41,6 +41,11 @@ const _HBARC_MEV_FM = Main.Constants_PNJL.ħc_MeV_fm
         seed_state = res.meson_seed_state
         @test hasproperty(res.meson_results[:eta], :root_quality)
         @test hasproperty(res.meson_results[:eta_prime], :root_quality)
+        @test hasproperty(res.meson_results[:eta], :root_diagnostics)
+        @test hasproperty(res.meson_results[:eta_prime], :root_diagnostics)
+        @test hasproperty(res.meson_results[:eta].root_diagnostics, :selected_method)
+        @test hasproperty(res.meson_results[:eta].root_diagnostics, :attempts)
+        @test !isempty(res.meson_results[:eta].root_diagnostics.attempts)
 
         if res.meson_results[:eta].root_quality != :good
             @test !res.meson_results[:eta].converged || res.meson_results[:eta].residual > 1e-6
