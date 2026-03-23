@@ -12,10 +12,13 @@ Models 统一流程入口（阶段 C）：
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export solve_gas_liquid_point
+export solve_rotation_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
 export transport_workflow_module, meson_workflow_module
+export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
 export pnjl_module
@@ -64,9 +67,14 @@ function solve_gas_liquid_point(args...; kwargs...)
     return gas_liquid_workflow_module().solve_gas_liquid_point(args...; kwargs...)
 end
 
+function solve_rotation_point(args...; kwargs...)
+    return rotation_workflow_module().solve_rotation_point(args...; kwargs...)
+end
+
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
 @inline gas_liquid_workflow_module() = GasLiquidWorkflow
+@inline rotation_workflow_module() = RotationWorkflow
 @inline pnjl_module() = @__MODULE__
 
 @inline function workflow_param_adapters_module()

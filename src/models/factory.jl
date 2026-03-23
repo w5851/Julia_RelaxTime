@@ -23,6 +23,8 @@ function create_model(kind::Symbol; kwargs...)
         return PNJLMagneticModel(; kwargs...)
     elseif kind === :RPNJL
         return RPNJLModel(; kwargs...)
+    elseif kind === :Rotation
+        return RotationModel(; kwargs...)
     elseif kind === :GasLiquid
         return GasLiquidModel(; kwargs...)
     end
