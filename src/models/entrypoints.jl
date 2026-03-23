@@ -16,6 +16,7 @@ export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_
 export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
 export transport_workflow_module, meson_workflow_module
+export gas_liquid_workflow_module
 export workflow_param_adapters_module
 export pnjl_module
 
@@ -59,8 +60,13 @@ function solve_gap_and_meson_point(args...; kwargs...)
     return _meson_workflow_module().solve_gap_and_meson_point(args...; kwargs...)
 end
 
+function solve_gas_liquid_point(args...; kwargs...)
+    return gas_liquid_workflow_module().solve_gas_liquid_point(args...; kwargs...)
+end
+
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
+@inline gas_liquid_workflow_module() = GasLiquidWorkflow
 @inline pnjl_module() = @__MODULE__
 
 @inline function workflow_param_adapters_module()

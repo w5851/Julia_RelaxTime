@@ -24,6 +24,7 @@ export NJL2Model
 export PNJLModel
 export PNJLMagneticModel
 export RPNJLModel
+export GasLiquidModel
 export create_model
 export omega, omega_components, grand_potential
 export model_pressure, model_rho, model_thermo
@@ -82,6 +83,7 @@ export load_dual_branch_scan!
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export solve_gas_liquid_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
@@ -105,6 +107,8 @@ include(joinpath(@__DIR__, "pnjl_physics", "PNJLCore.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLModel.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLMagneticModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))
+include(joinpath(@__DIR__, "variants", "gas_liquid", "GasLiquidModel.jl"))
+include(joinpath(@__DIR__, "variants", "gas_liquid", "workflows", "GasLiquidWorkflow.jl"))
 
 # Backward-compatible access path used by some tests/callers:
 # Main.Models.PNJLIntegrals.*
