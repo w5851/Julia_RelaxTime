@@ -1343,4 +1343,24 @@ function solve_with_root_diagnostics(mode::FixedAsymmetricRho, T_fm::Real; kwarg
     return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
 end
 
+"""
+    solve_with_root_diagnostics(mode::FixedEntropy, T_fm; kwargs...) -> NamedTuple
+
+固定熵密度模式的兼容诊断入口。
+"""
+function solve_with_root_diagnostics(mode::FixedEntropy, T_fm::Real; kwargs...)
+    result = solve(mode, T_fm; kwargs...)
+    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
+end
+
+"""
+    solve_with_root_diagnostics(mode::FixedSigma, T_fm; kwargs...) -> NamedTuple
+
+固定比熵模式的兼容诊断入口。
+"""
+function solve_with_root_diagnostics(mode::FixedSigma, T_fm::Real; kwargs...)
+    result = solve(mode, T_fm; kwargs...)
+    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
+end
+
 end # module ImplicitSolver
