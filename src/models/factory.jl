@@ -25,6 +25,8 @@ function create_model(kind::Symbol; kwargs...)
         return RPNJLModel(; kwargs...)
     elseif kind === :Rotation
         return RotationModel(; kwargs...)
+    elseif kind === :GasLiquid
+        return GasLiquidModel(; kwargs...)
     end
     error("Unknown model kind: ", kind)
 end
