@@ -60,6 +60,7 @@ export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, GapParams
 export create_implicit_solver, solve_with_derivatives
+export solve_with_root_diagnostics
 export RootProblemSpec, RootPolicy, ContinuationState, RootAttempt, RootDiagnostics, RootSolveResult
 export solve_root_with_policy, solve_root_continuation
 export ρ0

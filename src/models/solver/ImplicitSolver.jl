@@ -45,6 +45,7 @@ const ρ0 = ρ0_inv_fm3
 export solve, SolverResult
 export create_implicit_solver, solve_with_derivatives
 export solve_weighted_block_fallback
+export solve_with_root_diagnostics
 
 const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
 
@@ -1147,6 +1148,160 @@ function solve_with_derivatives(T_fm::Real, μ_fm::Real;
     else
         error("order must be 1 or 2, got $order")
     end
+end
+
+"""
+    solve_with_root_diagnostics(mode::FixedMu, T_fm, μ_fm; kwargs...) -> NamedTuple
+
+与 `solve(mode, ...)` 行为一致，但额外返回 root diagnostics 结构，
+用于迁移期诊断兼容。
+"""
+function solve_with_root_diagnostics(::FixedMu, T_fm::Real, μ_fm::Real;
+                                     xi::Real=0.0,
+                                     seed_strategy::SeedStrategy=DefaultSeed(),
+                                     p_num::Int=DEFAULT_MOMENTUM_COUNT,
+                                     t_num::Int=DEFAULT_THETA_COUNT,
+                                     nlsolve_method::Symbol=:newton,
+                                     trust_region_fallback::Bool=true,
+                                     auto_multiseed_fallback::Bool=true,
+                                     fallback_method::Symbol=:trust_region,
+                                     physicality_check::Function=_default_is_physical_solution,
+                                     residual_norm_max::Real=1e-6,
+                                     nlsolve_kwargs...)
+
+    mode = FixedMu()
+    thermal_nodes = cached_nodes(p_num, t_num)
+    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi); p_num=p_num, t_num=t_num, model_kind=:PNJL)
+    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+
+    θ = [T_fm, μ_fm]
+    seed = get_seed(seed_strategy, θ, mode)
+    x0 = Float64.(seed)
+
+    residual_fn! = build_residual!(mode, mu_vec, params)
+    postprocess_fn = x_sol -> begin
+        x_state = SVector{5}(Tuple(x_sol))
+        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
+            p_num=p_num,
+            t_num=t_num,
+            xi=xi,
+        )
+    end
+
+    cache = Dict{Symbol,Tuple{Any,Any}}()
+    solve_once = function (method::Symbol, seedv::Vector{Float64})
+        res = nlsolve(residual_fn!, seedv; autodiff=:forward, method=method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
+        local cand
+        try
+            cand = _postprocess_candidate(postprocess_fn, physicality_check, res.zero)
+        catch
+            cand = (phys=false,
+                    x_sol=Vector{Float64}(res.zero),
+                    x_state=SVector{5, Float64}(fill(NaN, 5)),
+                    mu_vec=SVector{3, Float64}(fill(NaN, 3)),
+                    omega=NaN,
+                    pressure=NaN,
+                    rho_norm=NaN,
+                    entropy=NaN,
+                    energy=NaN,
+                    masses=SVector{3, Float64}(fill(NaN, 3)))
+        end
+
+        cache[method] = (res, cand)
+        return (
+            x=Vector{Float64}(res.zero),
+            converged=Bool(res.f_converged) && Bool(cand.phys),
+            residual_norm=Float64(res.residual_norm),
+            score=isfinite(cand.omega) ? Float64(cand.omega) : NaN,
+        )
+    end
+
+    policy = RootPolicy(
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        use_multiseed=false,
+        residual_norm_max=Float64(residual_norm_max),
+        require_converged=true,
+        diagnostics_level=:basic,
+    )
+
+    solved = solve_root_with_policy(solve_once, x0; policy=policy)
+    selected_method = solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method
+    if !haskey(cache, selected_method)
+        _ = solve_once(selected_method, x0)
+    end
+    res, cand = cache[selected_method]
+
+    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
+    single = SolverResult(
+        mode,
+        converged,
+        cand.x_sol,
+        cand.x_state,
+        mu_vec,
+        cand.omega,
+        cand.pressure,
+        cand.rho_norm,
+        cand.entropy,
+        cand.energy,
+        cand.masses,
+        res.iterations,
+        res.residual_norm,
+        Float64(xi),
+    )
+
+    if converged || !auto_multiseed_fallback
+        attempts = map(solved.diagnostics.attempts) do a
+            (
+                method=a.method,
+                seed_source=a.seed_source,
+                converged=a.converged,
+                residual_norm=a.residual_norm,
+                quality_tag=a.quality_tag,
+                score=a.score,
+            )
+        end
+        return (
+            result=single,
+            root_diagnostics=(
+                selected_method=selected_method,
+                selected_attempt=solved.diagnostics.selected_attempt,
+                attempts=attempts,
+            ),
+        )
+    end
+
+    multi = solve_multi(mode, T_fm, μ_fm;
+        seed_strategy=MultiSeed(),
+        nlsolve_method=nlsolve_method,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        trust_region_fallback=trust_region_fallback,
+        auto_multiseed_fallback=false,
+        fallback_method=fallback_method,
+        physicality_check=physicality_check,
+        residual_norm_max=residual_norm_max,
+        nlsolve_kwargs...)
+    attempts = map(solved.diagnostics.attempts) do a
+        (
+            method=a.method,
+            seed_source=a.seed_source,
+            converged=a.converged,
+            residual_norm=a.residual_norm,
+            quality_tag=a.quality_tag,
+            score=a.score,
+        )
+    end
+    return (
+        result=multi,
+        root_diagnostics=(
+            selected_method=:multiseed,
+            selected_attempt=solved.diagnostics.selected_attempt,
+            attempts=attempts,
+        ),
+    )
 end
 
 end # module ImplicitSolver
