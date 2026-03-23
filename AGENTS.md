@@ -11,7 +11,8 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Root `Project.toml` declares Julia `1.10` compatibility.
 - This repo is include-driven, not a standard packaged `src/PackageName.jl` layout.
 - Prefer unified entrypoints exposed through `Models` and `src/models/entrypoints.jl`.
-- Treat `src/pnjl/PNJL.jl` as a compatibility layer unless an existing caller already depends on it.
+- `src/pnjl/PNJL.jl` 已从主线移除；若历史文档仍提及该路径，应按“兼容层历史说明”理解，不作为当前实现入口。
+- 统一入口请使用 `Models` 与 `src/models/entrypoints.jl`。
 - Default user-facing communication language is Chinese.
 
 ## Repo Rules From Copilot / Cursor
