@@ -25,3 +25,10 @@
 - 若先做文档后做代码：优先使用 `shared/` 文档统一符号，再按模型主题实现。
 - 若做 API 文档：将稳定入口同步到 `docs/api/models/*`，本目录保留理论与公式层。
 - 若发现公式与代码不一致：以代码为准修正文档，并记录偏差原因与修订日期。
+
+## 文献对齐记录
+
+- `rotation/Rotation_PNJL_CoreEquations.md` 已按 arXiv:2307.14402v1 做了一轮公式口径对齐（含 `\epsilon_n`、Bessel 权重、Polyakov 势参数化与驻点方程）。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已按 `thesis.pdf` 第 2.2 节做逐式对照（Eq. 2.40-2.70）与符号映射；对提取不确定项已显式标注“待复核”。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已补“基于当前实现反推的不确定项”，用于指导后续参数配置收敛（区分占位实现与论文定式）。
+- `gas_liquid/GasLiquid_RMF_CoreEquations.md` 已吸收 `tmp/公式文档temp.md` 的可验证信息，并把耦合比口径统一为原文符号 `f_sigma/f_omega/f_rho`。

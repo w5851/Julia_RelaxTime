@@ -104,3 +104,29 @@ PNJL 情况下色迹会把普通费米对数改写为含 `Phi/PhiBar` 的多项�
 - 内部单位优先自然单位；对外 MeV 字段显式命名（`*_MeV`）。
 - 公式文档必须能映射到现有或计划中的 `src/models/*` 路径。
 - 以“可测试最小核”作为第一实现目标，而非一次完成全部变体。
+
+## 6. 旋转 PNJL 的专用补充（arXiv:2307.14402）
+
+对 rotation 变体，Step 4-6 在数学结构上有三点特化：
+
+1) **准粒子能量带角动量模位移**
+
+```math
+\epsilon_n=\sqrt{M^2+p_t^2+p_z^2}-(n+1/2)\omega,
+```
+
+2) **积分核带柱坐标模权重**
+
+```math
+\mathcal W_n(p_tr)=J_n^2(p_tr)+J_{n+1}^2(p_tr),
+```
+
+3) **巨势仍可整理为 PNJL 双对数核 + Polyakov 势**
+
+```math
+\Omega_{rot}=\Omega_{cond}+\Omega_{int}(\epsilon_n,\mathcal W_n)+\mathcal U(\Phi,\bar\Phi;T).
+```
+
+其中 `U(Φ,Φ̄;T)` 可先采用不显含 `omega` 的多项式势，旋转影响通过夸克热项反馈到 `Phi/PhiBar`。
+
+> 该补充用于统一“推导流程文档”与 `rotation/Rotation_PNJL_CoreEquations.md` 的符号和实现口径，避免同一仓库内出现两套不兼容写法。
