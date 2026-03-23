@@ -123,6 +123,26 @@ end
             @test isapprox(result.mu_vec[2], result.mu_vec[3]; rtol=1e-6)
         end
     end
+
+    @testset "root diagnostics 接口" begin
+        payload = P.solve_with_root_diagnostics(P.FixedRho(1.0), T_fm; p_num=24, t_num=6)
+        @test haskey(payload, :result)
+        @test haskey(payload, :root_diagnostics)
+        @test payload.result isa P.SolverResult
+        @test haskey(payload.root_diagnostics, :attempts)
+        @test !isempty(payload.root_diagnostics.attempts)
+    end
+end
+
+@testset "solve FixedAsymmetricRho root diagnostics" begin
+    T_MeV = 100.0
+    T_fm = T_MeV / ħc
+    payload = P.solve_with_root_diagnostics(P.FixedAsymmetricRho(1.0, 0.876, 0.0), T_fm; p_num=24, t_num=6)
+    @test haskey(payload, :result)
+    @test haskey(payload, :root_diagnostics)
+    @test payload.result isa P.SolverResult
+    @test haskey(payload.root_diagnostics, :attempts)
+    @test !isempty(payload.root_diagnostics.attempts)
 end
 
 # ============================================================================
