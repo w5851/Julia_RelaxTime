@@ -172,6 +172,7 @@ function _nlsolve_with_tr_fallback(residual_fn!, x0;
             x=Vector{Float64}(res.zero),
             converged=Bool(res.f_converged) && Bool(cand.phys),
             residual_norm=Float64(res.residual_norm),
+            score=isfinite(cand.omega) ? Float64(cand.omega) : NaN,
         )
     end
 
