@@ -60,6 +60,8 @@ export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, GapParams
 export create_implicit_solver, solve_with_derivatives
+export RootProblemSpec, RootPolicy, ContinuationState, RootAttempt, RootDiagnostics, RootSolveResult
+export solve_root_with_policy, solve_root_continuation
 export ρ0
 export QUARK_CHARGE_ABS
 export alpha_n, energy_landau, smooth_cutoff, resolve_nmax_from_cutoff
@@ -119,6 +121,7 @@ include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
 include(joinpath(@__DIR__, "solver", "Conditions.jl"))
+include(joinpath(@__DIR__, "solver", "GenericRootEngine.jl"))
 include(joinpath(@__DIR__, "solver", "ImplicitSolver.jl"))
 include(joinpath(@__DIR__, "solver", "Solver.jl"))
 include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))

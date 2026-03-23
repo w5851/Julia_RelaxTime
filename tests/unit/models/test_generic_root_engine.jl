@@ -1,0 +1,58 @@
+using Test
+
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
+
+@testset "GenericRootEngine" begin
+    @test isdefined(Models, :RootProblemSpec)
+    @test isdefined(Models, :RootPolicy)
+    @test isdefined(Models, :ContinuationState)
+    @test isdefined(Models, :solve_root_with_policy)
+    @test isdefined(Models, :solve_root_continuation)
+
+    @testset "solve_root_with_policy solves scalar root" begin
+        spec = Models.RootProblemSpec(
+            (F, x, _) -> (F[1] = x[1]^2 - 2.0),
+            nothing,
+            1,
+            :single,
+        )
+        result = Models.solve_root_with_policy(spec, [1.0])
+        @test result.converged
+        @test result.quality_tag in (:good, :fallback)
+        @test isapprox(result.x[1], sqrt(2.0); atol=1e-8)
+        @test length(result.diagnostics.attempts) >= 1
+    end
+
+    @testset "solve_root_continuation tracks across points" begin
+        spec_factory = p -> Models.RootProblemSpec(
+            (F, x, ctx) -> (F[1] = x[1] - ctx.target),
+            (target=Float64(p),),
+            1,
+            :single,
+        )
+        tracker = Models.ContinuationState()
+        results = Models.solve_root_continuation([1.0, 2.0, 3.0], spec_factory; tracker=tracker, x0=[0.0])
+
+        @test length(results) == 3
+        @test isapprox(results[end].x[1], 3.0; atol=1e-10)
+        @test haskey(tracker.seed_by_branch, :default)
+        @test isapprox(tracker.seed_by_branch[:default][1], 3.0; atol=1e-10)
+    end
+
+    @testset "domain_quality can veto quality gate" begin
+        spec = Models.RootProblemSpec(
+            (F, x, _) -> (F[1] = x[1] + 1.0),
+            nothing,
+            1,
+            :single,
+        )
+        dq = (x, _) -> (ok=x[1] > 0.0, score=abs(x[1]), reason=:positive_required)
+        result = Models.solve_root_with_policy(spec, [0.0]; domain_quality=dq)
+        @test result.converged
+        @test result.quality_tag in (:degraded, :bad)
+    end
+end

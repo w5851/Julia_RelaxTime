@@ -141,7 +141,7 @@
 
 ## 下一 PR 执行清单（预告）
 
-- [ ] 新建 `GenericRootEngine.jl`（最小骨架 + 单元测试）
+- [x] 新建 `GenericRootEngine.jl`（最小骨架 + 单元测试）
 - [ ] 先迁 Meson，再迁 Gap
 - [ ] 回归：
   - `tests/validation/relaxtime/test_mixed_meson_root_quality_continuation.jl`
