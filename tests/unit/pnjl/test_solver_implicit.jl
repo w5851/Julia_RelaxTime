@@ -76,6 +76,16 @@ const ħc = 197.327  # MeV·fm
                       p_num=24, t_num=6)
         @test result.converged
     end
+
+    @testset "root diagnostics 接口" begin
+        payload = P.solve_with_root_diagnostics(P.FixedMu(), T_fm, μ_fm; p_num=24, t_num=6)
+        @test haskey(payload, :result)
+        @test haskey(payload, :root_diagnostics)
+        @test payload.result isa P.SolverResult
+        @test haskey(payload.root_diagnostics, :selected_method)
+        @test haskey(payload.root_diagnostics, :attempts)
+        @test !isempty(payload.root_diagnostics.attempts)
+    end
 end
 
 # ============================================================================
