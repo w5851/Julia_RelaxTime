@@ -1304,4 +1304,43 @@ function solve_with_root_diagnostics(::FixedMu, T_fm::Real, μ_fm::Real;
     )
 end
 
+@inline function _diagnostics_payload_from_result(result::SolverResult; selected_method::Symbol=:unknown, seed_source::Symbol=:seed)
+    attempt = (
+        method=selected_method,
+        seed_source=seed_source,
+        converged=Bool(result.converged),
+        residual_norm=Float64(result.residual_norm),
+        quality_tag=Bool(result.converged) ? :good : :degraded,
+        score=isfinite(result.omega) ? Float64(result.omega) : NaN,
+    )
+    return (
+        result=result,
+        root_diagnostics=(
+            selected_method=selected_method,
+            selected_attempt=1,
+            attempts=[attempt],
+        ),
+    )
+end
+
+"""
+    solve_with_root_diagnostics(mode::FixedRho, T_fm; kwargs...) -> NamedTuple
+
+固定密度模式的兼容诊断入口。
+"""
+function solve_with_root_diagnostics(mode::FixedRho, T_fm::Real; kwargs...)
+    result = solve(mode, T_fm; kwargs...)
+    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
+end
+
+"""
+    solve_with_root_diagnostics(mode::FixedAsymmetricRho, T_fm; kwargs...) -> NamedTuple
+
+固定非对称密度模式的兼容诊断入口。
+"""
+function solve_with_root_diagnostics(mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
+    result = solve(mode, T_fm; kwargs...)
+    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
+end
+
 end # module ImplicitSolver
