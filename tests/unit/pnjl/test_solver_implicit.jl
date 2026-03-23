@@ -160,6 +160,15 @@ end
         @test result.mode isa P.FixedEntropy
         @test length(result.solution) == 8
     end
+
+    @testset "root diagnostics 接口" begin
+        payload = P.solve_with_root_diagnostics(P.FixedEntropy(0.5), T_fm; p_num=24, t_num=6)
+        @test haskey(payload, :result)
+        @test haskey(payload, :root_diagnostics)
+        @test payload.result isa P.SolverResult
+        @test haskey(payload.root_diagnostics, :attempts)
+        @test !isempty(payload.root_diagnostics.attempts)
+    end
 end
 
 # ============================================================================
@@ -176,6 +185,15 @@ end
         @test result isa P.SolverResult
         @test result.mode isa P.FixedSigma
         @test length(result.solution) == 8
+    end
+
+    @testset "root diagnostics 接口" begin
+        payload = P.solve_with_root_diagnostics(P.FixedSigma(10.0), T_fm; p_num=24, t_num=6)
+        @test haskey(payload, :result)
+        @test haskey(payload, :root_diagnostics)
+        @test payload.result isa P.SolverResult
+        @test haskey(payload.root_diagnostics, :attempts)
+        @test !isempty(payload.root_diagnostics.attempts)
     end
 end
 
