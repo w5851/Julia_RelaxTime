@@ -2,6 +2,14 @@ using Test
 
 const REGRESSION_DIR = @__DIR__
 
+const EXPECTED_OPTIONAL_FIXTURE_SKIPS = [
+    (
+        name = "tau xi probe regression fixtures",
+        file = "tests/regression/relaxtime/test_tau_xi_probe_regression.jl",
+        reason = "缺少 data/outputs/results/relaxtime/scan/_xi_probe_T190_summary.csv 或 _xi_probe_T200_summary.csv 时会触发 @test_skip",
+    ),
+]
+
 const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "njl", "test_njl_gap_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "rpnjl", "test_rpnjl_gap_fixedpoint_regression.jl"),
@@ -42,7 +50,19 @@ function _include_regression_dir(dir::String)
     end
 end
 
+function _print_expected_regression_skips()
+    isempty(EXPECTED_OPTIONAL_FIXTURE_SKIPS) && return
+    println("[regression] 预期可选跳过项（用于解释 summary 中的 Broken 计数）:")
+    for item in EXPECTED_OPTIONAL_FIXTURE_SKIPS
+        println("  - $(item.name)")
+        println("    file: $(item.file)")
+        println("    reason: $(item.reason)")
+    end
+end
+
 @testset "Regression" begin
+    _print_expected_regression_skips()
+
     selected = _selected_regression_files()
 
     if selected !== nothing
