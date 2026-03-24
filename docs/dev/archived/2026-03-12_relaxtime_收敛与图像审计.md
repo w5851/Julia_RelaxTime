@@ -1,3 +1,15 @@
+---
+title: RelaxTime 收敛与图像审计记录
+archived: true
+original: docs/dev/active/2026-03-12_relaxtime_收敛与图像审计.md
+archived_date: 2026-03-24
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # RelaxTime 收敛与图像审计记录
 
 ## 背景

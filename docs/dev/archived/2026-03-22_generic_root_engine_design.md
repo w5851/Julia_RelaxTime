@@ -1,3 +1,15 @@
+---
+title: 通用连续性求解引擎设计（零知识实施版）
+archived: true
+original: docs/dev/active/2026-03-22_generic_root_engine_design.md
+archived_date: 2026-03-24
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 通用连续性求解引擎设计（零知识实施版）
 
 ## 1. 背景与目标
