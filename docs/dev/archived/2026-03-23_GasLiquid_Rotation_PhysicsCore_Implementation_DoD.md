@@ -1,3 +1,15 @@
+---
+title: Gas-Liquid + Rotation 物理内核实现任务单（本 PR）
+archived: true
+original: docs/dev/active/2026-03-23_GasLiquid_Rotation_PhysicsCore_Implementation_DoD.md
+archived_date: 2026-03-24
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Gas-Liquid + Rotation 物理内核实现任务单（本 PR）
 
 更新日期：2026-03-23
