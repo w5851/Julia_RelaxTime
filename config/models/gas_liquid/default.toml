@@ -1,0 +1,21 @@
+[model]
+# Walecka/NLrho baseline (doc-aligned)
+m_nucleon_MeV = 939.0
+m_sigma_MeV = 500.0
+m_omega_MeV = 783.0
+m_rho_MeV = 770.0
+m_delta_MeV = 983.0
+
+# Original symbol convention in docs: f_i = g_i / m_i
+f_sigma = 10.329
+f_omega = 5.423
+f_rho = 3.15
+
+# Optional delta channel coupling (0.0 keeps NLrho baseline)
+g_delta = 0.0
+
+# Nonlinear scalar potential U(sigma)
+b = 0.00692
+c = -0.0048
+
+hbarc_MeV_fm = 197.3269804
