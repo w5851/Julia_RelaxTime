@@ -1,0 +1,20 @@
+[model]
+# Quarkyonic phase induced by Rotation (arXiv:2307.14402v1)
+m0_MeV = 5.0
+Lambda_MeV = 650.0
+G_MeV_inv2 = 4.93
+
+# Polyakov polynomial potential
+a0 = 6.75
+a1 = -1.95
+a2 = 2.625
+a3 = -7.44
+b3 = 0.75
+b4 = 7.5
+T0_MeV = 270.0
+
+# Rotation geometry / mode truncation
+r_fm = 0.1
+n_cut = 5
+
+hbarc_MeV_fm = 197.3269804

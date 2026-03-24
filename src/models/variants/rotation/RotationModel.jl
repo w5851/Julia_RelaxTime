@@ -11,7 +11,11 @@ if !isdefined(@__MODULE__, :RotationThermo)
     include(_ROTATION_THERMO_PATH)
 end
 
-using .RotationThermo: RotationParams, pressure_density_entropy_energy, omega_components as rotation_omega_components
+using .RotationThermo: RotationParams
+using .RotationThermo: pressure_density_entropy_energy as rotation_pressure_density_entropy_energy
+using .RotationThermo: omega_components as rotation_omega_components
+using .RotationThermo: gap_residuals as rotation_gap_residuals
+using .RotationThermo: polyakov_potential as rotation_polyakov_potential
 
 export RotationModel
 
@@ -24,14 +28,16 @@ RotationModel(; kwargs...) = RotationModel(RotationParams(; kwargs...))
 @inline gap_state_dim(::RotationModel) = 3
 
 function solve_gap(model::RotationModel, T_fm, mu_vec; omega::Real=0.0, initial_guess=nothing, kwargs...)
-    _ = (kwargs,)
+    p_num = Int(get(kwargs, :p_num, 48))
+    z_num = Int(get(kwargs, :z_num, 48))
     mu = mu_vec isa Real ? mu_vec : (mu_vec[1] + mu_vec[2] + mu_vec[3]) / 3
     x0 = initial_guess === nothing ? [0.1, 1.0, 1.0] : collect(float.(initial_guess))
 
     function residual!(F, x)
-        F[1] = x[1] - tanh((mu - T_fm) / (T_fm + 0.2))
-        F[2] = x[2] - 1.0
-        F[3] = x[3] - 1.0
+        r = rotation_gap_residuals(x[1], x[2], x[3], T_fm, mu, omega, model.params; p_num=p_num, z_num=z_num)
+        F[1] = r[1]
+        F[2] = r[2]
+        F[3] = r[3]
         return nothing
     end
 
@@ -50,34 +56,37 @@ end
 end
 
 function calculate_mass_vec(model::RotationModel, φ; kwargs...)
-    _ = (kwargs,)
-    m = model.params.m0_inv_fm - model.params.g_chiral * φ[1]
+    _ = kwargs
+    m = model.params.m0_inv_fm - 2 * model.params.G_fm2 * φ[1]
     return SVector{3, typeof(m)}(m, m, model.params.m0_inv_fm)
 end
 
 @inline calculate_chiral(::RotationModel, φ; kwargs...) = 0.05 * (φ[1]^2)
 
-@inline function polyakov_potential(::RotationModel, Φ, Φbar, T; kwargs...)
-    _ = (Φ, Φbar, T, kwargs)
-    return 0.0
+@inline function polyakov_potential(model::RotationModel, Φ, Φbar, T; kwargs...)
+    _ = kwargs
+    return rotation_polyakov_potential(Φ, Φbar, T, model.params)
 end
 
 @inline vacuum_contribution(::RotationModel, masses; kwargs...) = -0.04 * masses[1]
 
 function thermal_contribution(model::RotationModel, masses, Φ, Φbar, mu_vec, T; omega::Real=0.0, kwargs...)
-    _ = (masses, Φ, Φbar, kwargs)
+    p_num = Int(get(kwargs, :p_num, 48))
+    z_num = Int(get(kwargs, :z_num, 48))
+    _ = masses
     mu = _mu_scalar(mu_vec)
-    thermo = pressure_density_entropy_energy(0.0, T, mu, omega, model.params)
-    chi = 0.0
-    vac = -0.04 * model.params.m0_inv_fm
+    thermo = rotation_pressure_density_entropy_energy(0.0, T, mu, omega, model.params; Φ=Φ, Φbar=Φbar, p_num=p_num, z_num=z_num)
+    chi = model.params.G_fm2 * 0.0
+    vac = 0.0
     return -thermo.pressure - chi - vac
 end
 
 function number_densities(model::RotationModel, x_state, T, mu_vec; omega::Real=0.0, kwargs...)
-    _ = (kwargs,)
+    p_num = Int(get(kwargs, :p_num, 48))
+    z_num = Int(get(kwargs, :z_num, 48))
     st = x_state isa MeanFieldState ? x_state : MeanFieldState(x_state)
     mu = _mu_scalar(mu_vec)
-    thermo = pressure_density_entropy_energy(st.phi[1], T, mu, omega, model.params)
+    thermo = rotation_pressure_density_entropy_energy(st.phi[1], T, mu, omega, model.params; Φ=st.Phi, Φbar=st.PhiBar, p_num=p_num, z_num=z_num)
     Tm = typeof(thermo.rho)
     q = SVector{3, Tm}(thermo.rho, thermo.rho, thermo.rho)
     aq = SVector{3, Tm}(zero(Tm), zero(Tm), zero(Tm))
@@ -85,8 +94,9 @@ function number_densities(model::RotationModel, x_state, T, mu_vec; omega::Real=
 end
 
 function omega_components(model::RotationModel, x_state, T, mu_vec; omega::Real=0.0, kwargs...)
-    _ = (kwargs,)
+    p_num = Int(get(kwargs, :p_num, 48))
+    z_num = Int(get(kwargs, :z_num, 48))
     st = x_state isa MeanFieldState ? x_state : MeanFieldState(x_state)
     mu = _mu_scalar(mu_vec)
-    return rotation_omega_components(st.phi[1], T, mu, omega, model.params)
+    return rotation_omega_components(st.phi[1], st.Phi, st.PhiBar, T, mu, omega, model.params; p_num=p_num, z_num=z_num)
 end

@@ -18,7 +18,7 @@ if !isdefined(@__MODULE__, :GasLiquidThermodynamics)
     include(_GASLIQUID_THERMO_PATH)
 end
 
-using .GasLiquidEquationSet: GasLiquidCoreParams, GasLiquidState, solve_equilibrium
+using .GasLiquidEquationSet: GasLiquidCoreParams, GasLiquidState, solve_equilibrium, mu_baryon
 using .GasLiquidThermodynamics: pressure_density_entropy_energy, omega_components as gasliquid_omega_components
 
 export GasLiquidModel
@@ -41,7 +41,7 @@ end
 
 @inline function _to_gasliquid_state(x_state, mu_vec)
     st = x_state isa MeanFieldState ? x_state : MeanFieldState(x_state)
-    muB = mu_vec isa Real ? mu_vec : (mu_vec[1] + mu_vec[2] + mu_vec[3]) / 3
+    muB = mu_baryon(mu_vec)
     Tprom = promote_type(typeof(st.phi[1]), typeof(st.phi[2]), typeof(muB))
     return GasLiquidState(Tprom(st.phi[1]), Tprom(st.phi[2]), Tprom(muB), Tprom(muB))
 end
@@ -52,7 +52,8 @@ function calculate_mass_vec(model::GasLiquidModel, φ; kwargs...)
 end
 
 @inline function calculate_chiral(::GasLiquidModel, φ; kwargs...)
-    return 0.05 * (float(φ[1])^2 + float(φ[2])^2)
+    _ = kwargs
+    return 0.0
 end
 
 @inline function polyakov_potential(::GasLiquidModel, Φ, Φbar, T; kwargs...)
@@ -62,28 +63,28 @@ end
 
 @inline function vacuum_contribution(model::GasLiquidModel, masses; kwargs...)
     _ = (kwargs,)
-    return -0.03 * sum(float.(masses))
+    return 0.0
 end
 
 @inline function thermal_contribution(model::GasLiquidModel, masses, Φ, Φbar, mu_vec, T; kwargs...)
     _ = (model, masses, Φ, Φbar, kwargs)
-    muB = mu_vec isa Real ? float(mu_vec) : float((mu_vec[1] + mu_vec[2] + mu_vec[3]) / 3)
-    return -0.02 * float(T) * (1 + abs(muB))
+    gl = GasLiquidState(0.0, 0.0, mu_baryon(mu_vec), mu_baryon(mu_vec))
+    return -pressure_density_entropy_energy(gl, float(T), model.params).pressure
 end
 
 function number_densities(model::GasLiquidModel, x_state, T, mu_vec; kwargs...)
-    _ = (kwargs,)
+    p_num = Int(get(kwargs, :p_num, 96))
     gl = _to_gasliquid_state(x_state, mu_vec)
-    thermo = pressure_density_entropy_energy(gl, T, model.params)
+    thermo = pressure_density_entropy_energy(gl, T, model.params; p_num=p_num)
     # 映射为 quark-like 3 分量契约，保持与 TransportWorkflow 兼容。
     Tm = typeof(thermo.rho)
-    q = SVector{3, Tm}(thermo.rho, thermo.rho, thermo.rho)
+    q = SVector{3, Tm}(thermo.rho / 3, thermo.rho / 3, thermo.rho / 3)
     aq = SVector{3, Tm}(zero(Tm), zero(Tm), zero(Tm))
     return (quark=q, antiquark=aq)
 end
 
 function omega_components(model::GasLiquidModel, x_state, T, mu_vec; kwargs...)
-    _ = (kwargs,)
+    p_num = Int(get(kwargs, :p_num, 96))
     gl = _to_gasliquid_state(x_state, mu_vec)
-    return gasliquid_omega_components(gl, T, model.params)
+    return gasliquid_omega_components(gl, T, model.params; p_num=p_num)
 end
