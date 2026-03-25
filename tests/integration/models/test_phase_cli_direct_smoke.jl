@@ -111,6 +111,26 @@ end
     @test occursin(joinpath("config", "models", "pnjl", "phase_pipeline_default.toml"), String(manifest["config_path"]))
 end
 
+@testset "Phase CLI supports --preset=smoke" begin
+    cfg = parse_args(["--preset=smoke"])
+    @test cfg.mode == :research
+    @test cfg.profile == :smoke
+    @test cfg.solver_backend == :legacy
+    @test cfg.iterations == 10
+    @test cfg.p_num == 12
+    @test cfg.t_num == 4
+end
+
+@testset "Phase CLI keeps explicit args over --preset=smoke" begin
+    cfg = parse_args([
+        "--preset=smoke",
+        "--iterations=77",
+        "--mode=production",
+    ])
+    @test cfg.iterations == 77
+    @test cfg.mode == :production
+end
+
 @testset "Phase CLI loads config file and allows CLI override" begin
     tmpdir = mktempdir()
     cfg_path = joinpath(tmpdir, "phase_cli.toml")

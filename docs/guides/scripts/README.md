@@ -32,6 +32,7 @@ julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --
 
 - 默认会自动加载 `config/models/pnjl/phase_pipeline_default.toml`。
 - 可以使用 `--config=<path/to/phase_pipeline.toml>` 指定自定义模板。
+- 可以使用 `--preset=smoke` 快速切换到轻量可复现实验参数（随后仍可用 CLI 显式参数覆盖）。
 - CLI 显式参数优先级高于模板（同名键会覆盖）。
 
 最小产物结构（输出目录）：

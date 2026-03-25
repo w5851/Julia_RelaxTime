@@ -26,6 +26,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 Base.@kwdef mutable struct PhaseCliConfig
     config_path::Union{Nothing, String} = nothing
+    preset::Union{Nothing, Symbol} = nothing
     model_kind::Symbol = :PNJL
     mode::Symbol = :production
     xi::Float64 = 0.0
@@ -106,6 +107,25 @@ function _default_phase_config_path(model_kind::Symbol)::Union{Nothing, String}
     return isfile(path) ? path : nothing
 end
 
+function _apply_preset!(cfg::PhaseCliConfig, preset::Symbol)
+    if preset == :smoke
+        cfg.mode = :research
+        cfg.profile = :smoke
+        cfg.solver_backend = :legacy
+        cfg.T_min = 150.0
+        cfg.T_max = 150.0
+        cfg.T_step = 10.0
+        cfg.rho_min = 0.1
+        cfg.rho_max = 0.3
+        cfg.rho_step = 0.1
+        cfg.p_num = 12
+        cfg.t_num = 4
+        cfg.iterations = 10
+        return cfg
+    end
+    throw(ArgumentError("invalid --preset=$(preset); accepted values: smoke"))
+end
+
 function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "model_kind") && (cfg.model_kind = Symbol(uppercase(String(table["model_kind"]))))
     haskey(table, "mode") && (cfg.mode = Symbol(lowercase(String(table["mode"]))))
@@ -180,6 +200,7 @@ function _usage()
     println("用法: julia scripts/pnjl/calculate_phase_structure.jl [options]")
     println("选项:")
     println("  --config=...           指定 phase pipeline TOML 配置文件")
+    println("  --preset=smoke         使用内置快速复现参数模板（可被后续CLI参数覆盖）")
     println("  --model_kind=PNJL      模型类型（如 PNJL/RPNJL）")
     println("  --mode=production|research  运行模式")
     println("  --xi=0.0               各向异性参数")
@@ -229,10 +250,12 @@ function parse_args(args)
     cfg = PhaseCliConfig()
 
     explicit_config = nothing
+    preset = nothing
     for arg in args
         if startswith(arg, "--config=")
             explicit_config = arg[10:end]
-            break
+        elseif startswith(arg, "--preset=")
+            preset = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         end
     end
 
@@ -248,11 +271,18 @@ function parse_args(args)
         end
     end
 
+    if preset !== nothing
+        cfg.preset = preset
+        _apply_preset!(cfg, preset)
+    end
+
     for arg in args
         if arg in ("-h", "--help")
             _usage()
             exit(0)
         elseif startswith(arg, "--config=")
+            continue
+        elseif startswith(arg, "--preset=")
             continue
         elseif startswith(arg, "--model_kind=")
             cfg.model_kind = Symbol(uppercase(arg[14:end]))
