@@ -25,6 +25,7 @@ export calculate_mass_vec, chiral_potential, polyakov_potential
 export vacuum_integral_with_cutoff
 export cached_nodes, calculate_log_sum
 export DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+export LogPolyakovPotential, PolynomialPolyakovPotential, FukushimaPolyakovPotential
 
 const _PNJL_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "PNJLIntegrals.jl"))
 if !isdefined(@__MODULE__, :PNJLIntegrals)
@@ -54,11 +55,31 @@ Base.@kwdef struct PNJLParams
     K_fm5::Float64
 
     T0_inv_fm::Float64
+    polyakov_scheme::Symbol = :log
     a0::Float64
     a1::Float64
     a2::Float64
+    a3::Float64 = 0.0
     b3::Float64
     b4::Float64
+    fukushima_a_inv_fm::Float64 = 664.0 / 197.3269804
+    fukushima_b_inv_fm3::Float64 = (196.0 / 197.3269804)^3
+end
+
+abstract type AbstractPolyakovPotential end
+struct LogPolyakovPotential <: AbstractPolyakovPotential end
+struct PolynomialPolyakovPotential <: AbstractPolyakovPotential end
+struct FukushimaPolyakovPotential <: AbstractPolyakovPotential end
+
+@inline function _polyakov_tag(s::Symbol)::AbstractPolyakovPotential
+    if s === :log
+        return LogPolyakovPotential()
+    elseif s === :poly
+        return PolynomialPolyakovPotential()
+    elseif s === :fukushima
+        return FukushimaPolyakovPotential()
+    end
+    throw(ArgumentError("unknown Polyakov potential scheme: $(s); expected :log, :poly or :fukushima"))
 end
 
 function pnjl_params(constants::NamedTuple)
@@ -77,11 +98,15 @@ function pnjl_params(constants::NamedTuple)
         G_fm2=Float64(constants.G_fm2),
         K_fm5=Float64(constants.K_fm5),
         T0_inv_fm=Float64(constants.T0_inv_fm),
+        polyakov_scheme=Symbol(lowercase(String(get(constants, :polyakov_scheme, :log)))),
         a0=Float64(constants.a0),
         a1=Float64(constants.a1),
         a2=Float64(constants.a2),
+        a3=Float64(get(constants, :a3, 0.0)),
         b3=Float64(constants.b3),
         b4=Float64(constants.b4),
+        fukushima_a_inv_fm=Float64(get(constants, :fukushima_a_inv_fm, 664.0 / Float64(constants.hbarc_MeV_fm))),
+        fukushima_b_inv_fm3=Float64(get(constants, :fukushima_b_inv_fm3, (196.0 / Float64(constants.hbarc_MeV_fm))^3)),
     )
 end
 
@@ -105,11 +130,15 @@ end
         G_fm2=p.G_fm2,
         K_fm5=p.K_fm5,
         T0_inv_fm=p.T0_inv_fm,
+        polyakov_scheme=p.polyakov_scheme,
         a0=p.a0,
         a1=p.a1,
         a2=p.a2,
+        a3=p.a3,
         b3=p.b3,
         b4=p.b4,
+        fukushima_a_inv_fm=p.fukushima_a_inv_fm,
+        fukushima_b_inv_fm3=p.fukushima_b_inv_fm3,
     )
 end
 
@@ -139,12 +168,7 @@ end
     return x < min_x ? log(min_x) : log(x)
 end
 
-function polyakov_potential(p::PNJLParams, Φ, Φbar, T_fm)
-    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm))
-    ΦT = convert(TT, Φ)
-    ΦbarT = convert(TT, Φbar)
-    TT_fm = convert(TT, T_fm)
-
+@inline function _polyakov_potential(::LogPolyakovPotential, p::PNJLParams, ΦT, ΦbarT, TT_fm, ::Type{TT}) where {TT}
     T0 = convert(TT, p.T0_inv_fm)
     a0 = convert(TT, p.a0)
     a1 = convert(TT, p.a1)
@@ -156,6 +180,37 @@ function polyakov_potential(p::PNJLParams, Φ, Φbar, T_fm)
     Tb = b3 * T_ratio^3
     value = 1 - 6 * ΦbarT * ΦT + 4 * (ΦbarT^3 + ΦT^3) - 3 * (ΦbarT * ΦT)^2
     return TT_fm^4 * (-0.5 * Ta * ΦbarT * ΦT + Tb * _safe_log(value))
+end
+
+@inline function _polyakov_potential(::PolynomialPolyakovPotential, p::PNJLParams, ΦT, ΦbarT, TT_fm, ::Type{TT}) where {TT}
+    T0 = convert(TT, p.T0_inv_fm)
+    a0 = convert(TT, p.a0)
+    a1 = convert(TT, p.a1)
+    a2 = convert(TT, p.a2)
+    a3 = convert(TT, p.a3)
+    b3 = convert(TT, p.b3)
+    b4 = convert(TT, p.b4)
+
+    ratio = T0 / TT_fm
+    b2 = a0 + a1 * ratio + a2 * ratio^2 + a3 * ratio^3
+    φφ = ΦbarT * ΦT
+    return TT_fm^4 * (-0.5 * b2 * φφ - (b3 / 6) * (ΦT^3 + ΦbarT^3) + 0.25 * b4 * φφ^2)
+end
+
+@inline function _polyakov_potential(::FukushimaPolyakovPotential, p::PNJLParams, ΦT, ΦbarT, TT_fm, ::Type{TT}) where {TT}
+    a = convert(TT, p.fukushima_a_inv_fm)
+    b = convert(TT, p.fukushima_b_inv_fm3)
+    φφ = ΦbarT * ΦT
+    log_arg = 1 - 6 * φφ - 3 * φφ^2 + 4 * (ΦT^3 + ΦbarT^3)
+    return TT_fm^4 * (-b * TT_fm * (54 * exp(-a / TT_fm) * φφ + _safe_log(log_arg)))
+end
+
+function polyakov_potential(p::PNJLParams, Φ, Φbar, T_fm)
+    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm))
+    ΦT = convert(TT, Φ)
+    ΦbarT = convert(TT, Φbar)
+    TT_fm = convert(TT, T_fm)
+    return _polyakov_potential(_polyakov_tag(p.polyakov_scheme), p, ΦT, ΦbarT, TT_fm, TT)
 end
 
 @inline function vacuum_integral_with_cutoff(mass::T, Λ::T) where {T}

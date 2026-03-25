@@ -2,4 +2,8 @@
 N_color = 7
 
 [polyakov]
+scheme = "log"
 T0_MeV = 333.0
+a3 = 0.0
+fukushima_a_MeV = 664.0
+fukushima_b_MeV3 = 7529536.0

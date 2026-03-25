@@ -91,17 +91,38 @@ function _load_rpnjl_extension(; profile::String, hbarc_MeV_fm::Float64, log_con
 end
 
 function _apply_rpnjl_polyakov_overrides(base_params::PNJLCore.PNJLParams, extension_dict::Dict{String, Any})
-    haskey(extension_dict, "T0_MeV") || return base_params
+    has_poly_override = any(k -> haskey(extension_dict, k), (
+        "scheme",
+        "T0_MeV",
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "b3",
+        "b4",
+        "fukushima_a_MeV",
+        "fukushima_b_MeV3",
+    ))
+    has_poly_override || return base_params
+
+    hbarc = Float64(base_params.hbarc_MeV_fm)
+    scheme = Symbol(lowercase(String(get(extension_dict, "scheme", base_params.polyakov_scheme))))
+    fukushima_a_inv_fm = Float64(get(extension_dict, "fukushima_a_MeV", Float64(base_params.fukushima_a_inv_fm) * hbarc)) / hbarc
+    fukushima_b_inv_fm3 = Float64(get(extension_dict, "fukushima_b_MeV3", Float64(base_params.fukushima_b_inv_fm3) * hbarc^3)) / hbarc^3
 
     return PNJLCore.PNJLParams(
         ;
         PNJLCore.as_namedtuple(base_params)...,
-        T0_inv_fm=Float64(extension_dict["T0_MeV"]) / Float64(base_params.hbarc_MeV_fm),
+        T0_inv_fm=Float64(get(extension_dict, "T0_MeV", Float64(base_params.T0_inv_fm) * hbarc)) / hbarc,
+        polyakov_scheme=scheme,
         a0=Float64(get(extension_dict, "a0", base_params.a0)),
         a1=Float64(get(extension_dict, "a1", base_params.a1)),
         a2=Float64(get(extension_dict, "a2", base_params.a2)),
+        a3=Float64(get(extension_dict, "a3", base_params.a3)),
         b3=Float64(get(extension_dict, "b3", base_params.b3)),
         b4=Float64(get(extension_dict, "b4", base_params.b4)),
+        fukushima_a_inv_fm=fukushima_a_inv_fm,
+        fukushima_b_inv_fm3=fukushima_b_inv_fm3,
     )
 end
 

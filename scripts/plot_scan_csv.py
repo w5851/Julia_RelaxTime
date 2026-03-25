@@ -219,6 +219,17 @@ def _sanitize_filename(s: str) -> str:
     return s2 if s2 else "value"
 
 
+def _as_float_list(values) -> List[float]:
+    if values is None:
+        return []
+    if isinstance(values, (int, float)):
+        return [float(values)]
+    try:
+        return [float(v) for v in values]
+    except TypeError:
+        return []
+
+
 def _split_rows(rows: List[Dict[str, str]], *, split: str | None) -> List[Tuple[str, List[Dict[str, str]]]]:
     if not split:
         return [("__all__", rows)]
@@ -250,7 +261,7 @@ def plot_lines(
     line_style: str = "-",
     figsize: Tuple[float, float] | None = None,
     show_title: bool = False,
-    formats: List[str] = None,
+    formats: List[str] | None = None,
     dpi: int = 600,
     check: bool = False,
 ) -> None:
@@ -306,13 +317,13 @@ def plot_lines(
         x_values = []
         y_values = []
         for line in ax.get_lines():
-            xd = line.get_xdata()
-            yd = line.get_ydata()
-            x_values.extend([float(v) for v in xd if not math.isnan(v)])
-            y_values.extend([float(v) for v in yd if not math.isnan(v)])
+            xd = _as_float_list(line.get_xdata())
+            yd = _as_float_list(line.get_ydata())
+            x_values.extend([v for v in xd if not math.isnan(v)])
+            y_values.extend([v for v in yd if not math.isnan(v)])
 
-        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=tuple(xlim) if xlim else None, scale=xscale)
-        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
+        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=xlim, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=ylim, scale=yscale)
         _apply_axis_alignment(ax)
 
         if show_title and title_prefix:
@@ -323,7 +334,7 @@ def plot_lines(
             plt.legend(loc=legend_loc, frameon=False)
         else:
             plt.legend(frameon=False)
-        fmts = formats or ["pdf", "png"]
+        fmts = formats or ["png"]
         y_tag = "_".join([str(s) for s in ys])
         # keep filename reasonably short but stable
         if len(y_tag) > 80:
@@ -395,13 +406,13 @@ def plot_lines(
         x_values = []
         y_values = []
         for line in ax.get_lines():
-            xd = line.get_xdata()
-            yd = line.get_ydata()
-            x_values.extend([float(v) for v in xd if not math.isnan(v)])
-            y_values.extend([float(v) for v in yd if not math.isnan(v)])
+            xd = _as_float_list(line.get_xdata())
+            yd = _as_float_list(line.get_ydata())
+            x_values.extend([v for v in xd if not math.isnan(v)])
+            y_values.extend([v for v in yd if not math.isnan(v)])
 
-        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=tuple(xlim) if xlim else None, scale=xscale)
-        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=tuple(ylim) if ylim else None, scale=yscale)
+        _set_axis_limits_strict(ax, axis="x", values=x_values, user_lim=xlim, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=y_values, user_lim=ylim, scale=yscale)
 
         _apply_axis_alignment(ax)
 
@@ -415,8 +426,8 @@ def plot_lines(
                 plt.legend(loc=legend_loc, frameon=False)
             else:
                 plt.legend(frameon=False)
-        # 保存为指定格式（优先支持矢量 PDF）
-        fmts = formats or ["pdf", "png"]
+        # 保存为指定格式（默认仅输出 PNG）
+        fmts = formats or ["png"]
         saved = []
         for fmt in fmts:
             out = out_dir / f"{y}_vs_{x}.{fmt}"
@@ -465,7 +476,7 @@ def _pick_bounds_from_ticks(ticks: List[float], lo: float, hi: float) -> Tuple[f
     return low, high
 
 
-def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tuple[float, float] | None, scale: str | None):
+def _set_axis_limits_strict(ax, *, axis: str, values: List[float], user_lim: Tuple[float, ...] | None, scale: str | None):
     """Set axis limits according to rule:
     - If user_lim provided, use it.
     - Else compute major ticks from data range and set axis limits to first/last major tick.
@@ -554,7 +565,7 @@ def plot_heatmaps(
     cmap: str | None,
     figsize: Tuple[float, float] | None = None,
     show_title: bool = False,
-    formats: List[str] = None,
+    formats: List[str] | None = None,
     dpi: int = 600,
     check: bool = False,
 ) -> None:
@@ -620,7 +631,7 @@ def plot_heatmaps(
             grid2,
             origin="lower",
             aspect="auto",
-            extent=[x0, x1, y0, y1],
+            extent=(x0, x1, y0, y1),
             interpolation="nearest",
             cmap=cmap,
             norm=norm,
@@ -645,15 +656,15 @@ def plot_heatmaps(
             ax.set_yscale(yscale)
 
         # Apply strict axis limits based on grid coordinates xs2/ys2 unless user provided limits
-        _set_axis_limits_strict(ax, axis="x", values=xs2, user_lim=tuple(xlim) if xlim else None, scale=xscale)
-        _set_axis_limits_strict(ax, axis="y", values=ys2, user_lim=tuple(ylim) if ylim else None, scale=yscale)
+        _set_axis_limits_strict(ax, axis="x", values=xs2, user_lim=xlim, scale=xscale)
+        _set_axis_limits_strict(ax, axis="y", values=ys2, user_lim=ylim, scale=yscale)
 
         _apply_axis_alignment(ax)
         if show_title:
             title = f"{title_prefix} - {field}" if title_prefix else field
             ax.set_title(title)
 
-        fmts = formats or ["pdf", "png"]
+        fmts = formats or ["png"]
         saved = []
         for fmt in fmts:
             out = out_dir / f"heatmap_{field}_({y}_vs_{x}).{fmt}"
@@ -728,7 +739,7 @@ def configure_publication_style(*, font: str = "Times New Roman", font_size: int
         "pdf.fonttype": 42,
         "ps.fonttype": 42,
         "savefig.dpi": dpi,
-        "savefig.format": "pdf",
+        "savefig.format": "png",
         "savefig.bbox": "tight",
         "savefig.pad_inches": 0.08,
     })
@@ -835,7 +846,7 @@ def main() -> None:
     )
 
     # output formats and quality
-    ap.add_argument("--formats", type=str, default="pdf,png", help="Comma-separated output formats (e.g. pdf,png,eps)")
+    ap.add_argument("--formats", type=str, default="png", help="Comma-separated output formats (e.g. png,pdf,eps)")
     ap.add_argument("--dpi", type=int, default=600, help="Output DPI for saved figures (default 600)")
 
     args = ap.parse_args()
