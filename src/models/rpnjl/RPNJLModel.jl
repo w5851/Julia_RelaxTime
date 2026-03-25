@@ -249,18 +249,34 @@ end
 function polyakov_potential(model::RPNJLModel, Φ, Φbar, T_fm; kwargs...)
     model.use_extensions || return polyakov_potential(model.base, Φ, Φbar, T_fm; kwargs...)
 
-    base_value = PNJLCore.polyakov_potential(_base_params(model), Φ, Φbar, T_fm)
-    kappa = model.ext.kappa
-    kappa == 0 && return base_value
-
-    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm), typeof(kappa))
+    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm))
     ΦT = convert(TT, Φ)
     ΦbarT = convert(TT, Φbar)
+    TT_fm = convert(TT, T_fm)
+
+    params = _base_params(model)
+    T0 = convert(TT, Float64(params.T0_inv_fm))
+    a0 = convert(TT, Float64(params.a0))
+    a1 = convert(TT, Float64(params.a1))
+    a2 = convert(TT, Float64(params.a2))
+    b3 = convert(TT, Float64(params.b3))
+    b4 = convert(TT, Float64(params.b4))
+    kappa = convert(TT, Float64(model.ext.kappa))
+
+    t_ratio = T0 / TT_fm
+    b2 = a0 + a1 * t_ratio * exp(-a2 / t_ratio)
+
     φφ = ΦT * ΦbarT
     j_poly = 1 - 6 * φφ + 4 * (ΦT^3 + ΦbarT^3) - 3 * φφ^2
     j_pref = convert(TT, 27.0 / (24.0 * π^2))
     jac = j_pref * j_poly
-    return convert(TT, base_value) - convert(TT, kappa) * _rpnjl_safe_log(jac)
+
+    return TT_fm^4 * (
+        -0.5 * b2 * φφ
+        - (b3 / 6) * (ΦT^3 + ΦbarT^3)
+        + (b4 / 4) * φφ^2
+        - kappa * _rpnjl_safe_log(jac)
+    )
 end
 
 function vacuum_contribution(model::RPNJLModel, masses::SVector{3, T}; kwargs...) where {T}

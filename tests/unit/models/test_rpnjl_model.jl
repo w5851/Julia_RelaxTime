@@ -8,6 +8,7 @@
 
 using Test
 using StaticArrays
+using Base.MathConstants: π
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -73,6 +74,37 @@ Models.pnjl_module()
         μ = SVector{3}(0.0, 0.0, 0.0)
         ω = Models.omega(m, x, T, μ; p_num=24, t_num=6, xi=0.0)
         @test isfinite(ω)
+    end
+
+    @testset "polyakov_potential 默认兼容 rPNJL 旧公式" begin
+        m = Models.RPNJLModel()
+        Φ = 0.31
+        Φbar = 0.29
+        T = 0.72
+
+        p = m.base.params
+        T0 = Float64(p.T0_inv_fm)
+        a0 = Float64(p.a0)
+        a1 = Float64(p.a1)
+        a2 = Float64(p.a2)
+        b3 = Float64(p.b3)
+        b4 = Float64(p.b4)
+        kappa = Float64(m.ext.kappa)
+
+        t_ratio = T0 / T
+        b2 = a0 + a1 * t_ratio * exp(-a2 / t_ratio)
+        φφ = Φ * Φbar
+        j_poly = 1 - 6 * φφ + 4 * (Φ^3 + Φbar^3) - 3 * φφ^2
+        jac = (27.0 / (24.0 * π^2)) * j_poly
+        expected = T^4 * (
+            -0.5 * b2 * φφ
+            - (b3 / 6.0) * (Φ^3 + Φbar^3)
+            + (b4 / 4.0) * φφ^2
+            - kappa * log(max(jac, 1e-16))
+        )
+
+        actual = Models.polyakov_potential(m, Φ, Φbar, T)
+        @test isapprox(actual, expected; rtol=1e-12, atol=1e-12)
     end
 
     # --- gap_residual 可调用 ---
