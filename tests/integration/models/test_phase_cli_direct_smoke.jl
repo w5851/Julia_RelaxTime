@@ -85,6 +85,32 @@ end
     @test occursin("research", output)
 end
 
+@testset "Phase CLI auto-loads default template by model_kind" begin
+    cfg_pnjl = parse_args(String[])
+    @test cfg_pnjl.model_kind == :PNJL
+    @test cfg_pnjl.config_path !== nothing
+    @test occursin(joinpath("config", "models", "pnjl", "phase_pipeline_default.toml"), cfg_pnjl.config_path)
+    @test cfg_pnjl.compute_crossover == true
+
+    cfg_rpnjl = parse_args(["--model_kind=RPNJL"])
+    @test cfg_rpnjl.model_kind == :RPNJL
+    @test cfg_rpnjl.config_path !== nothing
+    @test occursin(joinpath("config", "models", "rpnjl", "phase_pipeline_default.toml"), cfg_rpnjl.config_path)
+    @test cfg_rpnjl.compute_crossover == true
+end
+
+@testset "Phase CLI run without --config uses default template" begin
+    output_dir = mktempdir()
+    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --output_dir=$(output_dir) --profile=smoke --solver_backend=legacy --iterations=10`
+    run(cmd)
+
+    manifest_path = joinpath(output_dir, "run_manifest.json")
+    @test isfile(manifest_path)
+    manifest = JSON3.read(read(manifest_path, String))
+    @test haskey(manifest, "config_path")
+    @test occursin(joinpath("config", "models", "pnjl", "phase_pipeline_default.toml"), String(manifest["config_path"]))
+end
+
 @testset "Phase CLI loads config file and allows CLI override" begin
     tmpdir = mktempdir()
     cfg_path = joinpath(tmpdir, "phase_cli.toml")

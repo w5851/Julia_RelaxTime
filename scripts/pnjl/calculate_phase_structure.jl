@@ -22,6 +22,8 @@ using JSON3
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 using .Models
 
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+
 Base.@kwdef mutable struct PhaseCliConfig
     config_path::Union{Nothing, String} = nothing
     model_kind::Symbol = :PNJL
@@ -88,6 +90,20 @@ function _phase_config_table(path::String)
     table = raw["phase_pipeline"]
     table isa AbstractDict || throw(ArgumentError("[phase_pipeline] must be a TOML table in config: $(path)"))
     return table
+end
+
+function _extract_model_kind_hint(args)::Symbol
+    for arg in args
+        startswith(arg, "--model_kind=") || continue
+        return Symbol(uppercase(arg[14:end]))
+    end
+    return :PNJL
+end
+
+function _default_phase_config_path(model_kind::Symbol)::Union{Nothing, String}
+    model_tag = lowercase(String(model_kind))
+    path = joinpath(PROJECT_ROOT, "config", "models", model_tag, "phase_pipeline_default.toml")
+    return isfile(path) ? path : nothing
 end
 
 function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
@@ -163,6 +179,7 @@ end
 function _usage()
     println("用法: julia scripts/pnjl/calculate_phase_structure.jl [options]")
     println("选项:")
+    println("  --config=...           指定 phase pipeline TOML 配置文件")
     println("  --model_kind=PNJL      模型类型（如 PNJL/RPNJL）")
     println("  --mode=production|research  运行模式")
     println("  --xi=0.0               各向异性参数")
@@ -211,11 +228,23 @@ end
 function parse_args(args)
     cfg = PhaseCliConfig()
 
+    explicit_config = nothing
     for arg in args
         if startswith(arg, "--config=")
-            cfg.config_path = arg[10:end]
-            _apply_phase_config!(cfg, _phase_config_table(cfg.config_path))
+            explicit_config = arg[10:end]
             break
+        end
+    end
+
+    if explicit_config !== nothing
+        cfg.config_path = explicit_config
+        _apply_phase_config!(cfg, _phase_config_table(cfg.config_path))
+    else
+        model_hint = _extract_model_kind_hint(args)
+        default_cfg = _default_phase_config_path(model_hint)
+        if default_cfg !== nothing
+            cfg.config_path = default_cfg
+            _apply_phase_config!(cfg, _phase_config_table(default_cfg))
         end
     end
 

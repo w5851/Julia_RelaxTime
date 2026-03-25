@@ -17,6 +17,32 @@
   - 守恒荷广义磁化率、累积量、`Ssigma`、`kappa_sigma2` 的统一单点/小范围扫描入口
 - [scripts/pnjl/run_tmu_scan.jl](scripts/pnjl/run_tmu_scan.jl)
   - T-μ 参数空间扫描入口
+- [scripts/pnjl/calculate_phase_structure.jl](scripts/pnjl/calculate_phase_structure.jl)
+  - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
+
+#### 相图最小单命令产线（PNJL）
+
+在仓库根目录执行：
+
+```powershell
+julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --solver_backend=legacy --output_dir=<your_output_dir>
+```
+
+说明：
+
+- 默认会自动加载 `config/models/pnjl/phase_pipeline_default.toml`。
+- 可以使用 `--config=<path/to/phase_pipeline.toml>` 指定自定义模板。
+- CLI 显式参数优先级高于模板（同名键会覆盖）。
+
+最小产物结构（输出目录）：
+
+- `trho_scan.csv`
+- `first_order_boundary.csv`
+- `spinodal.csv`
+- `crossover_line.csv`
+- `phase_summary.json`
+- `phase_report.md`
+- `run_manifest.json`（记录 argv、config_path、config_hash、git_commit、artifact_paths）
 
 ### Server
 
