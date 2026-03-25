@@ -91,17 +91,38 @@ function _load_rpnjl_extension(; profile::String, hbarc_MeV_fm::Float64, log_con
 end
 
 function _apply_rpnjl_polyakov_overrides(base_params::PNJLCore.PNJLParams, extension_dict::Dict{String, Any})
-    haskey(extension_dict, "T0_MeV") || return base_params
+    has_poly_override = any(k -> haskey(extension_dict, k), (
+        "scheme",
+        "T0_MeV",
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "b3",
+        "b4",
+        "fukushima_a_MeV",
+        "fukushima_b_MeV3",
+    ))
+    has_poly_override || return base_params
+
+    hbarc = Float64(base_params.hbarc_MeV_fm)
+    scheme = Symbol(lowercase(String(get(extension_dict, "scheme", base_params.polyakov_scheme))))
+    fukushima_a_inv_fm = Float64(get(extension_dict, "fukushima_a_MeV", Float64(base_params.fukushima_a_inv_fm) * hbarc)) / hbarc
+    fukushima_b_inv_fm3 = Float64(get(extension_dict, "fukushima_b_MeV3", Float64(base_params.fukushima_b_inv_fm3) * hbarc^3)) / hbarc^3
 
     return PNJLCore.PNJLParams(
         ;
         PNJLCore.as_namedtuple(base_params)...,
-        T0_inv_fm=Float64(extension_dict["T0_MeV"]) / Float64(base_params.hbarc_MeV_fm),
+        T0_inv_fm=Float64(get(extension_dict, "T0_MeV", Float64(base_params.T0_inv_fm) * hbarc)) / hbarc,
+        polyakov_scheme=scheme,
         a0=Float64(get(extension_dict, "a0", base_params.a0)),
         a1=Float64(get(extension_dict, "a1", base_params.a1)),
         a2=Float64(get(extension_dict, "a2", base_params.a2)),
+        a3=Float64(get(extension_dict, "a3", base_params.a3)),
         b3=Float64(get(extension_dict, "b3", base_params.b3)),
         b4=Float64(get(extension_dict, "b4", base_params.b4)),
+        fukushima_a_inv_fm=fukushima_a_inv_fm,
+        fukushima_b_inv_fm3=fukushima_b_inv_fm3,
     )
 end
 
@@ -228,34 +249,18 @@ end
 function polyakov_potential(model::RPNJLModel, Φ, Φbar, T_fm; kwargs...)
     model.use_extensions || return polyakov_potential(model.base, Φ, Φbar, T_fm; kwargs...)
 
-    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm))
+    base_value = PNJLCore.polyakov_potential(_base_params(model), Φ, Φbar, T_fm)
+    kappa = model.ext.kappa
+    kappa == 0 && return base_value
+
+    TT = promote_type(typeof(Φ), typeof(Φbar), typeof(T_fm), typeof(kappa))
     ΦT = convert(TT, Φ)
     ΦbarT = convert(TT, Φbar)
-    TT_fm = convert(TT, T_fm)
-
-    params = _base_params(model)
-    T0 = convert(TT, Float64(params.T0_inv_fm))
-    a0 = convert(TT, Float64(params.a0))
-    a1 = convert(TT, Float64(params.a1))
-    a2 = convert(TT, Float64(params.a2))
-    b3 = convert(TT, Float64(params.b3))
-    b4 = convert(TT, Float64(params.b4))
-    kappa = convert(TT, Float64(model.ext.kappa))
-
-    t_ratio = T0 / TT_fm
-    b2 = a0 + a1 * t_ratio * exp(-a2 / t_ratio)
-
     φφ = ΦT * ΦbarT
     j_poly = 1 - 6 * φφ + 4 * (ΦT^3 + ΦbarT^3) - 3 * φφ^2
     j_pref = convert(TT, 27.0 / (24.0 * π^2))
     jac = j_pref * j_poly
-
-    return TT_fm^4 * (
-        -0.5 * b2 * φφ
-        - (b3 / 6) * (ΦT^3 + ΦbarT^3)
-        + (b4 / 4) * φφ^2
-        - kappa * _rpnjl_safe_log(jac)
-    )
+    return convert(TT, base_value) - convert(TT, kappa) * _rpnjl_safe_log(jac)
 end
 
 function vacuum_contribution(model::RPNJLModel, masses::SVector{3, T}; kwargs...) where {T}

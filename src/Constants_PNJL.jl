@@ -23,7 +23,7 @@ using .TransportConstants: SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 
 export ħc_MeV_fm, α
 export N_color, N_flavor, ρ0_inv_fm3, m_ud0_inv_fm, m_s0_inv_fm, Λ_inv_fm, G_fm2, K_fm5
-export T0_inv_fm, a0, a1, a2, b3, b4
+export T0_inv_fm, polyakov_scheme, a0, a1, a2, a3, b3, b4, fukushima_a_inv_fm, fukushima_b_inv_fm3
 export λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
 export PNJL_PROFILE, PNJL_CONFIG_PATH, load_pnjl_config
 export pnjl_constants
@@ -52,12 +52,16 @@ const DEFAULT_PNJL_MODEL_CONFIG = Dict{String, Any}(
         "m_s0_MeV" => 140.7,
     ),
     "polyakov" => Dict(
+        "scheme" => "log",
         "T0_MeV" => 210.0,
         "a0" => 3.51,
         "a1" => -2.47,
         "a2" => 15.2,
+        "a3" => 0.0,
         "b3" => -1.75,
         "b4" => 7.555,
+        "fukushima_a_MeV" => 664.0,
+        "fukushima_b_MeV3" => 7529536.0,
     ),
 )
 
@@ -177,12 +181,18 @@ function pnjl_constants(
 
     T0_MeV = Float64(get(polyakov_cfg, "T0_MeV", 210.0))
     T0_inv_fm = T0_MeV / hbarc_MeV_fm
+    polyakov_scheme = Symbol(lowercase(String(get(polyakov_cfg, "scheme", "log"))))
 
     a0 = Float64(get(polyakov_cfg, "a0", 3.51))
     a1 = Float64(get(polyakov_cfg, "a1", -2.47))
     a2 = Float64(get(polyakov_cfg, "a2", 15.2))
+    a3 = Float64(get(polyakov_cfg, "a3", 0.0))
     b3 = Float64(get(polyakov_cfg, "b3", -1.75))
     b4 = Float64(get(polyakov_cfg, "b4", 7.555))
+    fukushima_a_MeV = Float64(get(polyakov_cfg, "fukushima_a_MeV", 664.0))
+    fukushima_b_MeV3 = Float64(get(polyakov_cfg, "fukushima_b_MeV3", 7529536.0))
+    fukushima_a_inv_fm = fukushima_a_MeV / hbarc_MeV_fm
+    fukushima_b_inv_fm3 = fukushima_b_MeV3 / (hbarc_MeV_fm^3)
 
     if validate
         _validate_pnjl_critical_params(
@@ -215,11 +225,15 @@ function pnjl_constants(
         G_fm2=G_fm2,
         K_fm5=K_fm5,
         T0_inv_fm=T0_inv_fm,
+        polyakov_scheme=polyakov_scheme,
         a0=a0,
         a1=a1,
         a2=a2,
+        a3=a3,
         b3=b3,
         b4=b4,
+        fukushima_a_inv_fm=fukushima_a_inv_fm,
+        fukushima_b_inv_fm3=fukushima_b_inv_fm3,
     )
 end
 
@@ -247,11 +261,15 @@ const K_fm5 = Float64(model_cfg["K_over_Lambda5"]) / Λ_inv_fm^5  # NJL六夸克
 # Polyakov环有效势参数-------------------------------------
 const polyakov_cfg = PNJL_CONFIG["polyakov"]
 const T0_inv_fm = Float64(polyakov_cfg["T0_MeV"]) / ħc_MeV_fm  # Polyakov有效势参数
+const polyakov_scheme = Symbol(lowercase(String(get(polyakov_cfg, "scheme", "log"))))
 const a0 = Float64(polyakov_cfg["a0"])
 const a1 = Float64(polyakov_cfg["a1"])
 const a2 = Float64(polyakov_cfg["a2"])
+const a3 = Float64(get(polyakov_cfg, "a3", 0.0))
 const b3 = Float64(polyakov_cfg["b3"])
 const b4 = Float64(polyakov_cfg["b4"])
+const fukushima_a_inv_fm = Float64(get(polyakov_cfg, "fukushima_a_MeV", 664.0)) / ħc_MeV_fm
+const fukushima_b_inv_fm3 = Float64(get(polyakov_cfg, "fukushima_b_MeV3", 7529536.0)) / (ħc_MeV_fm^3)
 
 # Gell-Mann矩阵(SU(3)味对称性)-------------------------------------
 # λ₀: 味单位矩阵(归一化)
