@@ -16,11 +16,14 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
 
 using Dates
+using TOML
+using JSON3
 
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 using .Models
 
 Base.@kwdef mutable struct PhaseCliConfig
+    config_path::Union{Nothing, String} = nothing
     model_kind::Symbol = :PNJL
     mode::Symbol = :production
     xi::Float64 = 0.0
@@ -63,6 +66,98 @@ Base.@kwdef mutable struct PhaseCliConfig
     cep_direct_fallback_scan::Bool = true
     promote_reference::Bool = false
     verbose::Bool = false
+end
+
+function _as_bool(x, name::AbstractString)
+    if x isa Bool
+        return x
+    elseif x isa Integer
+        return x != 0
+    elseif x isa AbstractString
+        token = lowercase(strip(x))
+        token in ("1", "true", "yes", "on") && return true
+        token in ("0", "false", "no", "off") && return false
+    end
+    throw(ArgumentError("invalid boolean value for $(name): $(repr(x))"))
+end
+
+function _phase_config_table(path::String)
+    isfile(path) || throw(ArgumentError("config file does not exist: $(path)"))
+    raw = TOML.parsefile(path)
+    haskey(raw, "phase_pipeline") || throw(ArgumentError("missing [phase_pipeline] section in config: $(path)"))
+    table = raw["phase_pipeline"]
+    table isa AbstractDict || throw(ArgumentError("[phase_pipeline] must be a TOML table in config: $(path)"))
+    return table
+end
+
+function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
+    haskey(table, "model_kind") && (cfg.model_kind = Symbol(uppercase(String(table["model_kind"]))))
+    haskey(table, "mode") && (cfg.mode = Symbol(lowercase(String(table["mode"]))))
+    haskey(table, "xi") && (cfg.xi = Float64(table["xi"]))
+    haskey(table, "T_min") && (cfg.T_min = Float64(table["T_min"]))
+    haskey(table, "T_max") && (cfg.T_max = Float64(table["T_max"]))
+    haskey(table, "T_step") && (cfg.T_step = Float64(table["T_step"]))
+    haskey(table, "rho_min") && (cfg.rho_min = Float64(table["rho_min"]))
+    haskey(table, "rho_max") && (cfg.rho_max = Float64(table["rho_max"]))
+    haskey(table, "rho_step") && (cfg.rho_step = Float64(table["rho_step"]))
+    haskey(table, "profile") && (cfg.profile = Symbol(lowercase(String(table["profile"]))))
+    haskey(table, "run_id") && (cfg.run_id = String(table["run_id"]))
+    haskey(table, "output_dir") && (cfg.output_dir = String(table["output_dir"]))
+    haskey(table, "solver_backend") && (cfg.solver_backend = Symbol(lowercase(String(table["solver_backend"]))))
+    haskey(table, "seed_policy") && (cfg.seed_policy = Symbol(lowercase(String(table["seed_policy"]))))
+    haskey(table, "reverse_rho") && (cfg.reverse_rho = _as_bool(table["reverse_rho"], "phase_pipeline.reverse_rho"))
+    haskey(table, "p_num") && (cfg.p_num = Int(table["p_num"]))
+    haskey(table, "t_num") && (cfg.t_num = Int(table["t_num"]))
+    haskey(table, "iterations") && (cfg.iterations = Int(table["iterations"]))
+    haskey(table, "compute_crossover") && (cfg.compute_crossover = _as_bool(table["compute_crossover"], "phase_pipeline.compute_crossover"))
+    haskey(table, "crossover_method") && (cfg.crossover_method = Symbol(lowercase(String(table["crossover_method"]))))
+    haskey(table, "crossover_variable") && (cfg.crossover_variable = Symbol(String(table["crossover_variable"])))
+    haskey(table, "crossover_n_mu") && (cfg.crossover_n_mu = Int(table["crossover_n_mu"]))
+    haskey(table, "cep_strategy") && (cfg.cep_strategy = Symbol(lowercase(String(table["cep_strategy"]))))
+    haskey(table, "cep_interpolate_use_direct_eval") && (cfg.cep_interpolate_use_direct_eval = _as_bool(table["cep_interpolate_use_direct_eval"], "phase_pipeline.cep_interpolate_use_direct_eval"))
+    haskey(table, "cep_tol") && (cfg.cep_tol = Float64(table["cep_tol"]))
+    haskey(table, "cep_max_bisect_iter") && (cfg.cep_max_bisect_iter = Int(table["cep_max_bisect_iter"]))
+    haskey(table, "cep_area_tol_good") && (cfg.cep_area_tol_good = Float64(table["cep_area_tol_good"]))
+    haskey(table, "cep_area_tol_bad") && (cfg.cep_area_tol_bad = Float64(table["cep_area_tol_bad"]))
+    haskey(table, "cep_max_refine_level") && (cfg.cep_max_refine_level = Int(table["cep_max_refine_level"]))
+    haskey(table, "cep_adaptive_rho") && (cfg.cep_adaptive_rho = _as_bool(table["cep_adaptive_rho"], "phase_pipeline.cep_adaptive_rho"))
+    haskey(table, "cep_adaptive_slope_tol") && (cfg.cep_adaptive_slope_tol = Float64(table["cep_adaptive_slope_tol"]))
+    haskey(table, "cep_adaptive_min_gap") && (cfg.cep_adaptive_min_gap = Float64(table["cep_adaptive_min_gap"]))
+    haskey(table, "cep_adaptive_max_points") && (cfg.cep_adaptive_max_points = Int(table["cep_adaptive_max_points"]))
+    haskey(table, "cep_adaptive_digits") && (cfg.cep_adaptive_digits = Int(table["cep_adaptive_digits"]))
+    haskey(table, "cep_direct_bracket_mode") && (cfg.cep_direct_bracket_mode = Symbol(lowercase(String(table["cep_direct_bracket_mode"]))))
+    haskey(table, "cep_direct_start") && (cfg.cep_direct_start = Symbol(lowercase(String(table["cep_direct_start"]))))
+    haskey(table, "cep_direct_initial_step") && (cfg.cep_direct_initial_step = Float64(table["cep_direct_initial_step"]))
+    haskey(table, "cep_direct_expand_factor") && (cfg.cep_direct_expand_factor = Float64(table["cep_direct_expand_factor"]))
+    haskey(table, "cep_direct_max_expand_steps") && (cfg.cep_direct_max_expand_steps = Int(table["cep_direct_max_expand_steps"]))
+    haskey(table, "cep_direct_fallback_scan") && (cfg.cep_direct_fallback_scan = _as_bool(table["cep_direct_fallback_scan"], "phase_pipeline.cep_direct_fallback_scan"))
+    haskey(table, "promote_reference") && (cfg.promote_reference = _as_bool(table["promote_reference"], "phase_pipeline.promote_reference"))
+    haskey(table, "verbose") && (cfg.verbose = _as_bool(table["verbose"], "phase_pipeline.verbose"))
+    return cfg
+end
+
+function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vector{String}, result)
+    manifest_path = joinpath(output_dir, "run_manifest.json")
+    git_commit = try
+        readchomp(`git -C $(joinpath(@__DIR__, "..", "..")) rev-parse HEAD`)
+    catch
+        nothing
+    end
+    payload = Dict(
+        "generated_at" => string(now()),
+        "git_commit" => git_commit,
+        "argv" => collect(String.(args)),
+        "config_path" => cfg.config_path,
+        "config_hash" => get(result.config_snapshot, "config_hash", nothing),
+        "run_id" => result.run_id,
+        "mode" => String(cfg.mode),
+        "model_kind" => String(cfg.model_kind),
+        "artifact_paths" => result.artifact_paths,
+    )
+    open(manifest_path, "w") do io
+        write(io, JSON3.write(payload))
+    end
+    return manifest_path
 end
 
 function _usage()
@@ -115,10 +210,21 @@ end
 
 function parse_args(args)
     cfg = PhaseCliConfig()
+
+    for arg in args
+        if startswith(arg, "--config=")
+            cfg.config_path = arg[10:end]
+            _apply_phase_config!(cfg, _phase_config_table(cfg.config_path))
+            break
+        end
+    end
+
     for arg in args
         if arg in ("-h", "--help")
             _usage()
             exit(0)
+        elseif startswith(arg, "--config=")
+            continue
         elseif startswith(arg, "--model_kind=")
             cfg.model_kind = Symbol(uppercase(arg[14:end]))
         elseif startswith(arg, "--mode=")
@@ -264,11 +370,15 @@ function main(args=ARGS)
         promote_reference=cfg.promote_reference,
     )
 
+    output_root = isnothing(cfg.output_dir) ? dirname(result.artifact_paths["phase_summary"]) : cfg.output_dir
+    manifest_path = _write_run_manifest(output_root, cfg, collect(String.(args)), result)
+
     println("\n完成:")
     println("  run_id = $(result.run_id)")
     println("  CEP found = $(result.cep.found)")
     println("  boundary_count = $(length(result.first_order_boundary))")
     println("  artifacts = $(result.artifact_paths)")
+    println("  manifest = $(manifest_path)")
     if cfg.promote_reference
         println("  promotion = passed=$(result.promotion_status.passed), baseline_id=$(result.promotion_status.baseline_id)")
         if !isempty(result.promotion_status.failed_checks)

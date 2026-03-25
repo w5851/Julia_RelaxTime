@@ -1,0 +1,49 @@
+[phase_pipeline]
+model_kind = "RPNJL"
+mode = "production"
+profile = "default"
+
+xi = 0.0
+
+T_min = 30.0
+T_max = 350.0
+T_step = 10.0
+
+rho_min = 0.0
+rho_max = 4.0
+rho_step = 0.05
+
+solver_backend = "models"
+seed_policy = "hybrid_continuity"
+reverse_rho = true
+
+p_num = 12
+t_num = 4
+iterations = 80
+
+compute_crossover = true
+crossover_method = "peak"
+crossover_variable = "phi_u"
+crossover_n_mu = 12
+
+cep_strategy = "interpolate"
+cep_interpolate_use_direct_eval = false
+cep_tol = 0.01
+cep_max_bisect_iter = 20
+cep_area_tol_good = 1.0e-4
+cep_area_tol_bad = 5.0e-4
+cep_max_refine_level = 2
+cep_adaptive_rho = true
+cep_adaptive_slope_tol = 5.0
+cep_adaptive_min_gap = 0.002
+cep_adaptive_max_points = 32
+cep_adaptive_digits = 6
+cep_direct_bracket_mode = "directional"
+cep_direct_start = "low"
+cep_direct_initial_step = nan
+cep_direct_expand_factor = 2.0
+cep_direct_max_expand_steps = 8
+cep_direct_fallback_scan = true
+
+promote_reference = false
+verbose = false
