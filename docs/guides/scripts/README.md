@@ -45,6 +45,11 @@ julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --
 - `phase_report.md`
 - `run_manifest.json`（记录 argv、config_path、config_hash、git_commit、artifact_paths）
 
+`run_manifest.json` 关键字段：
+
+- `preset`：若使用 `--preset=...`，记录最终采用的预设名。
+- `effective_config`：记录本次运行的最终有效参数快照（含被 CLI 覆盖后的值）。
+
 ### Server
 
 - [scripts/server/server_full.jl](scripts/server/server_full.jl)

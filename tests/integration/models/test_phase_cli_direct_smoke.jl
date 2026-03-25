@@ -188,4 +188,25 @@ end
     @test haskey(manifest, "config_hash")
     @test haskey(manifest, "run_id")
     @test haskey(manifest, "artifact_paths")
+    @test haskey(manifest, "effective_config")
+end
+
+@testset "Phase CLI manifest includes preset and effective config" begin
+    output_dir = mktempdir()
+    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --preset=smoke --iterations=77 --output_dir=$(output_dir)`
+    run(cmd)
+
+    manifest_path = joinpath(output_dir, "run_manifest.json")
+    @test isfile(manifest_path)
+    manifest = JSON3.read(read(manifest_path, String))
+
+    @test haskey(manifest, "preset")
+    @test String(manifest["preset"]) == "smoke"
+
+    @test haskey(manifest, "effective_config")
+    effective = manifest["effective_config"]
+    @test haskey(effective, "iterations")
+    @test Int(effective["iterations"]) == 77
+    @test haskey(effective, "profile")
+    @test String(effective["profile"]) == "smoke"
 end

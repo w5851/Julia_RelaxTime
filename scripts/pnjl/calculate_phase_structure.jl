@@ -179,16 +179,39 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
     catch
         nothing
     end
+    effective_config = Dict(
+        "model_kind" => String(cfg.model_kind),
+        "mode" => String(cfg.mode),
+        "profile" => String(cfg.profile),
+        "xi" => cfg.xi,
+        "T_min" => cfg.T_min,
+        "T_max" => cfg.T_max,
+        "T_step" => cfg.T_step,
+        "rho_min" => cfg.rho_min,
+        "rho_max" => cfg.rho_max,
+        "rho_step" => cfg.rho_step,
+        "solver_backend" => String(cfg.solver_backend),
+        "seed_policy" => String(cfg.seed_policy),
+        "reverse_rho" => cfg.reverse_rho,
+        "p_num" => cfg.p_num,
+        "t_num" => cfg.t_num,
+        "iterations" => cfg.iterations,
+        "compute_crossover" => cfg.compute_crossover,
+        "promote_reference" => cfg.promote_reference,
+    )
+
     payload = Dict(
         "generated_at" => string(now()),
         "git_commit" => git_commit,
         "argv" => collect(String.(args)),
         "config_path" => cfg.config_path,
+        "preset" => isnothing(cfg.preset) ? nothing : String(cfg.preset),
         "config_hash" => get(result.config_snapshot, "config_hash", nothing),
         "run_id" => result.run_id,
         "mode" => String(cfg.mode),
         "model_kind" => String(cfg.model_kind),
         "artifact_paths" => result.artifact_paths,
+        "effective_config" => effective_config,
     )
     open(manifest_path, "w") do io
         write(io, JSON3.write(payload))
