@@ -16,11 +16,17 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
 
 using Dates
+using TOML
+using JSON3
 
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 using .Models
 
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+
 Base.@kwdef mutable struct PhaseCliConfig
+    config_path::Union{Nothing, String} = nothing
+    preset::Union{Nothing, Symbol} = nothing
     model_kind::Symbol = :PNJL
     mode::Symbol = :production
     xi::Float64 = 0.0
@@ -65,9 +71,159 @@ Base.@kwdef mutable struct PhaseCliConfig
     verbose::Bool = false
 end
 
+function _as_bool(x, name::AbstractString)
+    if x isa Bool
+        return x
+    elseif x isa Integer
+        return x != 0
+    elseif x isa AbstractString
+        token = lowercase(strip(x))
+        token in ("1", "true", "yes", "on") && return true
+        token in ("0", "false", "no", "off") && return false
+    end
+    throw(ArgumentError("invalid boolean value for $(name): $(repr(x))"))
+end
+
+function _phase_config_table(path::String)
+    isfile(path) || throw(ArgumentError("config file does not exist: $(path)"))
+    raw = TOML.parsefile(path)
+    haskey(raw, "phase_pipeline") || throw(ArgumentError("missing [phase_pipeline] section in config: $(path)"))
+    table = raw["phase_pipeline"]
+    table isa AbstractDict || throw(ArgumentError("[phase_pipeline] must be a TOML table in config: $(path)"))
+    return table
+end
+
+function _extract_model_kind_hint(args)::Symbol
+    for arg in args
+        startswith(arg, "--model_kind=") || continue
+        return Symbol(uppercase(arg[14:end]))
+    end
+    return :PNJL
+end
+
+function _default_phase_config_path(model_kind::Symbol)::Union{Nothing, String}
+    model_tag = lowercase(String(model_kind))
+    path = joinpath(PROJECT_ROOT, "config", "models", model_tag, "phase_pipeline_default.toml")
+    return isfile(path) ? path : nothing
+end
+
+function _apply_preset!(cfg::PhaseCliConfig, preset::Symbol)
+    if preset == :smoke
+        cfg.mode = :research
+        cfg.profile = :smoke
+        cfg.solver_backend = :legacy
+        cfg.T_min = 150.0
+        cfg.T_max = 150.0
+        cfg.T_step = 10.0
+        cfg.rho_min = 0.1
+        cfg.rho_max = 0.3
+        cfg.rho_step = 0.1
+        cfg.p_num = 12
+        cfg.t_num = 4
+        cfg.iterations = 10
+        return cfg
+    end
+    throw(ArgumentError("invalid --preset=$(preset); accepted values: smoke"))
+end
+
+function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
+    haskey(table, "model_kind") && (cfg.model_kind = Symbol(uppercase(String(table["model_kind"]))))
+    haskey(table, "mode") && (cfg.mode = Symbol(lowercase(String(table["mode"]))))
+    haskey(table, "xi") && (cfg.xi = Float64(table["xi"]))
+    haskey(table, "T_min") && (cfg.T_min = Float64(table["T_min"]))
+    haskey(table, "T_max") && (cfg.T_max = Float64(table["T_max"]))
+    haskey(table, "T_step") && (cfg.T_step = Float64(table["T_step"]))
+    haskey(table, "rho_min") && (cfg.rho_min = Float64(table["rho_min"]))
+    haskey(table, "rho_max") && (cfg.rho_max = Float64(table["rho_max"]))
+    haskey(table, "rho_step") && (cfg.rho_step = Float64(table["rho_step"]))
+    haskey(table, "profile") && (cfg.profile = Symbol(lowercase(String(table["profile"]))))
+    haskey(table, "run_id") && (cfg.run_id = String(table["run_id"]))
+    haskey(table, "output_dir") && (cfg.output_dir = String(table["output_dir"]))
+    haskey(table, "solver_backend") && (cfg.solver_backend = Symbol(lowercase(String(table["solver_backend"]))))
+    haskey(table, "seed_policy") && (cfg.seed_policy = Symbol(lowercase(String(table["seed_policy"]))))
+    haskey(table, "reverse_rho") && (cfg.reverse_rho = _as_bool(table["reverse_rho"], "phase_pipeline.reverse_rho"))
+    haskey(table, "p_num") && (cfg.p_num = Int(table["p_num"]))
+    haskey(table, "t_num") && (cfg.t_num = Int(table["t_num"]))
+    haskey(table, "iterations") && (cfg.iterations = Int(table["iterations"]))
+    haskey(table, "compute_crossover") && (cfg.compute_crossover = _as_bool(table["compute_crossover"], "phase_pipeline.compute_crossover"))
+    haskey(table, "crossover_method") && (cfg.crossover_method = Symbol(lowercase(String(table["crossover_method"]))))
+    haskey(table, "crossover_variable") && (cfg.crossover_variable = Symbol(String(table["crossover_variable"])))
+    haskey(table, "crossover_n_mu") && (cfg.crossover_n_mu = Int(table["crossover_n_mu"]))
+    haskey(table, "cep_strategy") && (cfg.cep_strategy = Symbol(lowercase(String(table["cep_strategy"]))))
+    haskey(table, "cep_interpolate_use_direct_eval") && (cfg.cep_interpolate_use_direct_eval = _as_bool(table["cep_interpolate_use_direct_eval"], "phase_pipeline.cep_interpolate_use_direct_eval"))
+    haskey(table, "cep_tol") && (cfg.cep_tol = Float64(table["cep_tol"]))
+    haskey(table, "cep_max_bisect_iter") && (cfg.cep_max_bisect_iter = Int(table["cep_max_bisect_iter"]))
+    haskey(table, "cep_area_tol_good") && (cfg.cep_area_tol_good = Float64(table["cep_area_tol_good"]))
+    haskey(table, "cep_area_tol_bad") && (cfg.cep_area_tol_bad = Float64(table["cep_area_tol_bad"]))
+    haskey(table, "cep_max_refine_level") && (cfg.cep_max_refine_level = Int(table["cep_max_refine_level"]))
+    haskey(table, "cep_adaptive_rho") && (cfg.cep_adaptive_rho = _as_bool(table["cep_adaptive_rho"], "phase_pipeline.cep_adaptive_rho"))
+    haskey(table, "cep_adaptive_slope_tol") && (cfg.cep_adaptive_slope_tol = Float64(table["cep_adaptive_slope_tol"]))
+    haskey(table, "cep_adaptive_min_gap") && (cfg.cep_adaptive_min_gap = Float64(table["cep_adaptive_min_gap"]))
+    haskey(table, "cep_adaptive_max_points") && (cfg.cep_adaptive_max_points = Int(table["cep_adaptive_max_points"]))
+    haskey(table, "cep_adaptive_digits") && (cfg.cep_adaptive_digits = Int(table["cep_adaptive_digits"]))
+    haskey(table, "cep_direct_bracket_mode") && (cfg.cep_direct_bracket_mode = Symbol(lowercase(String(table["cep_direct_bracket_mode"]))))
+    haskey(table, "cep_direct_start") && (cfg.cep_direct_start = Symbol(lowercase(String(table["cep_direct_start"]))))
+    haskey(table, "cep_direct_initial_step") && (cfg.cep_direct_initial_step = Float64(table["cep_direct_initial_step"]))
+    haskey(table, "cep_direct_expand_factor") && (cfg.cep_direct_expand_factor = Float64(table["cep_direct_expand_factor"]))
+    haskey(table, "cep_direct_max_expand_steps") && (cfg.cep_direct_max_expand_steps = Int(table["cep_direct_max_expand_steps"]))
+    haskey(table, "cep_direct_fallback_scan") && (cfg.cep_direct_fallback_scan = _as_bool(table["cep_direct_fallback_scan"], "phase_pipeline.cep_direct_fallback_scan"))
+    haskey(table, "promote_reference") && (cfg.promote_reference = _as_bool(table["promote_reference"], "phase_pipeline.promote_reference"))
+    haskey(table, "verbose") && (cfg.verbose = _as_bool(table["verbose"], "phase_pipeline.verbose"))
+    return cfg
+end
+
+function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vector{String}, result)
+    manifest_path = joinpath(output_dir, "run_manifest.json")
+    git_commit = try
+        readchomp(`git -C $(joinpath(@__DIR__, "..", "..")) rev-parse HEAD`)
+    catch
+        nothing
+    end
+    effective_config = Dict(
+        "model_kind" => String(cfg.model_kind),
+        "mode" => String(cfg.mode),
+        "profile" => String(cfg.profile),
+        "xi" => cfg.xi,
+        "T_min" => cfg.T_min,
+        "T_max" => cfg.T_max,
+        "T_step" => cfg.T_step,
+        "rho_min" => cfg.rho_min,
+        "rho_max" => cfg.rho_max,
+        "rho_step" => cfg.rho_step,
+        "solver_backend" => String(cfg.solver_backend),
+        "seed_policy" => String(cfg.seed_policy),
+        "reverse_rho" => cfg.reverse_rho,
+        "p_num" => cfg.p_num,
+        "t_num" => cfg.t_num,
+        "iterations" => cfg.iterations,
+        "compute_crossover" => cfg.compute_crossover,
+        "promote_reference" => cfg.promote_reference,
+    )
+
+    payload = Dict(
+        "generated_at" => string(now()),
+        "git_commit" => git_commit,
+        "argv" => collect(String.(args)),
+        "config_path" => cfg.config_path,
+        "preset" => isnothing(cfg.preset) ? nothing : String(cfg.preset),
+        "config_hash" => get(result.config_snapshot, "config_hash", nothing),
+        "run_id" => result.run_id,
+        "mode" => String(cfg.mode),
+        "model_kind" => String(cfg.model_kind),
+        "artifact_paths" => result.artifact_paths,
+        "effective_config" => effective_config,
+    )
+    open(manifest_path, "w") do io
+        write(io, JSON3.write(payload))
+    end
+    return manifest_path
+end
+
 function _usage()
     println("用法: julia scripts/pnjl/calculate_phase_structure.jl [options]")
     println("选项:")
+    println("  --config=...           指定 phase pipeline TOML 配置文件")
+    println("  --preset=smoke         使用内置快速复现参数模板（可被后续CLI参数覆盖）")
     println("  --model_kind=PNJL      模型类型（如 PNJL/RPNJL）")
     println("  --mode=production|research  运行模式")
     println("  --xi=0.0               各向异性参数")
@@ -115,10 +271,42 @@ end
 
 function parse_args(args)
     cfg = PhaseCliConfig()
+
+    explicit_config = nothing
+    preset = nothing
+    for arg in args
+        if startswith(arg, "--config=")
+            explicit_config = arg[10:end]
+        elseif startswith(arg, "--preset=")
+            preset = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        end
+    end
+
+    if explicit_config !== nothing
+        cfg.config_path = explicit_config
+        _apply_phase_config!(cfg, _phase_config_table(cfg.config_path))
+    else
+        model_hint = _extract_model_kind_hint(args)
+        default_cfg = _default_phase_config_path(model_hint)
+        if default_cfg !== nothing
+            cfg.config_path = default_cfg
+            _apply_phase_config!(cfg, _phase_config_table(default_cfg))
+        end
+    end
+
+    if preset !== nothing
+        cfg.preset = preset
+        _apply_preset!(cfg, preset)
+    end
+
     for arg in args
         if arg in ("-h", "--help")
             _usage()
             exit(0)
+        elseif startswith(arg, "--config=")
+            continue
+        elseif startswith(arg, "--preset=")
+            continue
         elseif startswith(arg, "--model_kind=")
             cfg.model_kind = Symbol(uppercase(arg[14:end]))
         elseif startswith(arg, "--mode=")
@@ -264,11 +452,15 @@ function main(args=ARGS)
         promote_reference=cfg.promote_reference,
     )
 
+    output_root = isnothing(cfg.output_dir) ? dirname(result.artifact_paths["phase_summary"]) : cfg.output_dir
+    manifest_path = _write_run_manifest(output_root, cfg, collect(String.(args)), result)
+
     println("\n完成:")
     println("  run_id = $(result.run_id)")
     println("  CEP found = $(result.cep.found)")
     println("  boundary_count = $(length(result.first_order_boundary))")
     println("  artifacts = $(result.artifact_paths)")
+    println("  manifest = $(manifest_path)")
     if cfg.promote_reference
         println("  promotion = passed=$(result.promotion_status.passed), baseline_id=$(result.promotion_status.baseline_id)")
         if !isempty(result.promotion_status.failed_checks)
