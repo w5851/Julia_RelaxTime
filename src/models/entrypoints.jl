@@ -22,6 +22,7 @@ export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
 export pnjl_module
+export magnetic_thermodynamics_module
 
 @inline function _transport_workflow_module()
     workflow = TransportWorkflow
@@ -76,6 +77,7 @@ end
 @inline gas_liquid_workflow_module() = GasLiquidWorkflow
 @inline rotation_workflow_module() = RotationWorkflow
 @inline pnjl_module() = @__MODULE__
+@inline magnetic_thermodynamics_module() = MagneticThermodynamics
 
 @inline function workflow_param_adapters_module()
     adapters = WorkflowParamAdapters

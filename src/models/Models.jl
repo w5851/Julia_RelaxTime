@@ -80,12 +80,15 @@ export TransportProvider
 export prepare_transport_provider
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
+export default_momentum_count, default_theta_count
+export default_momentum_nodes, default_momentum_weights
 export load_dual_branch_scan!
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
 export solve_rotation_point
 export solve_gas_liquid_point
+export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
@@ -117,6 +120,12 @@ include(joinpath(@__DIR__, "variants", "rotation", "workflows", "RotationWorkflo
 # Backward-compatible access path used by some tests/callers:
 # Main.Models.PNJLIntegrals.*
 const PNJLIntegrals = PNJLCore.PNJLIntegrals
+
+# Stable accessor contract for workflow-side thermal grid defaults.
+@inline default_momentum_count() = PNJLCore.DEFAULT_MOMENTUM_COUNT
+@inline default_theta_count() = PNJLCore.DEFAULT_THETA_COUNT
+@inline default_momentum_nodes() = PNJLIntegrals.THERMAL_DEFAULT_NODES
+@inline default_momentum_weights() = PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
 
 # Factory
 include(joinpath(@__DIR__, "factory.jl"))
