@@ -1,4 +1,5 @@
 using Test
+using JSON3
 
 _models_entry = joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl")
 if !isdefined(Main, :Models)
@@ -64,4 +65,15 @@ end
     @test haskey(result.artifact_paths, "phase_report")
     @test isfile(result.artifact_paths["phase_summary"])
     @test isfile(result.artifact_paths["phase_report"])
+
+    report_text = read(result.artifact_paths["phase_report"], String)
+    @test occursin("## Conclusion", report_text)
+    @test occursin("- phase_structure:", report_text)
+    @test occursin("- cep_result:", report_text)
+
+    summary = JSON3.read(read(result.artifact_paths["phase_summary"], String))
+    @test haskey(summary, "conclusion")
+    conclusion = summary["conclusion"]
+    @test haskey(conclusion, "phase_structure")
+    @test haskey(conclusion, "cep_result")
 end

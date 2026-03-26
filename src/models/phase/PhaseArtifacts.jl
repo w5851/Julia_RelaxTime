@@ -70,7 +70,27 @@ function _write_crossover_line(path::String, rows::Vector{NamedTuple})
     end
 end
 
+function _build_conclusion(result::PhasePipelineResult)
+    boundary_count = length(result.first_order_boundary)
+    crossover_count = length(result.crossover_line)
+    phase_structure = if boundary_count > 0
+        "first_order_detected"
+    elseif crossover_count > 0
+        "crossover_only"
+    else
+        "no_transition_signal"
+    end
+    cep_result = result.cep.found ? "found" : "not_found"
+    return Dict(
+        "phase_structure" => phase_structure,
+        "cep_result" => cep_result,
+        "boundary_count" => boundary_count,
+        "crossover_count" => crossover_count,
+    )
+end
+
 function _write_phase_report(path::String, result::PhasePipelineResult)
+    conclusion = _build_conclusion(result)
     open(path, "w") do io
         println(io, "# Phase Pipeline Report")
         println(io)
@@ -96,10 +116,15 @@ function _write_phase_report(path::String, result::PhasePipelineResult)
         for (k, v) in sort(collect(result.diagnostics); by=first)
             println(io, "- diag.$k: $v")
         end
+        println(io)
+        println(io, "## Conclusion")
+        println(io, "- phase_structure: $(conclusion["phase_structure"])")
+        println(io, "- cep_result: $(conclusion["cep_result"])")
     end
 end
 
 function _build_summary(result::PhasePipelineResult)
+    conclusion = _build_conclusion(result)
     scan_total = get(result.diagnostics, "scan_total", 0)
     scan_success = get(result.diagnostics, "scan_success", 0)
     scan_failure = get(result.diagnostics, "scan_failure", 0)
@@ -155,6 +180,7 @@ function _build_summary(result::PhasePipelineResult)
         ),
         "stats" => result.diagnostics,
         "stats_compare" => stats_compare,
+        "conclusion" => conclusion,
     )
 end
 
