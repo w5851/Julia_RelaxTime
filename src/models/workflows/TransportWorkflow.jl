@@ -304,6 +304,15 @@ end
     )
 end
 
+@inline function _workflow_reproducibility_metadata()
+    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
+    physics_config_path = abspath(normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics", string(physics_profile, ".toml"))))
+    return (
+        physics_profile=physics_profile,
+        physics_config_path=physics_config_path,
+    )
+end
+
 @inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
     prefer_energy_aniso === nothing && return provider
 
@@ -750,6 +759,7 @@ function solve_transport_from_equilibrium(
         rates=rates,
         bulk_coeffs=bulk_coeffs,
         transport=tr,
+        reproducibility=_workflow_reproducibility_metadata(),
     )
 end
 

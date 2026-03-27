@@ -45,6 +45,9 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   - `rates`：平均散射率（若内部计算 τ 则给出，便于复用/诊断）
   - `bulk_coeffs`：`compute_bulk=true` 时给出
   - `transport`：`(eta, zeta, sigma)`
+  - `reproducibility`：复现元信息
+    - `physics_profile`：本次 workflow 使用的 `PHYSICS_PARAM_PROFILE`
+    - `physics_config_path`：解析得到的 `config/physics/<profile>.toml` 绝对路径（用于结果归档和复现记录）
 
 本页把 `solve_gap_and_transport` 视为 workflow 细节入口；“它适合哪些用户场景”与“何时改用 `solve_transport_from_equilibrium`”的高层说明留给 `Models` 侧入口页。
 
