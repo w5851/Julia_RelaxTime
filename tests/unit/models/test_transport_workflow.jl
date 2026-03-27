@@ -93,4 +93,19 @@ end
         d1["transport_workflow"]["prefer_energy_aniso"] = false
         @test d2["transport_workflow"]["prefer_energy_aniso"] == true
     end
+
+    @testset "workflow warning diagnostics payload shape" begin
+        @test isdefined(_TW, :_workflow_warning_diagnostics)
+        diag = _TW._workflow_warning_diagnostics(T_fm=0.15, mu_fm=0.02, xi=0.1, error_type="ArgumentError")
+        @test hasproperty(diag, :job_id)
+        @test hasproperty(diag, :profile)
+        @test hasproperty(diag, :T_fm)
+        @test hasproperty(diag, :mu_fm)
+        @test hasproperty(diag, :xi)
+        @test hasproperty(diag, :error_type)
+        @test diag.T_fm == 0.15
+        @test diag.mu_fm == 0.02
+        @test diag.xi == 0.1
+        @test diag.error_type == "ArgumentError"
+    end
 end

@@ -281,6 +281,17 @@ end
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_PROVIDER_KEYS))...)
 end
 
+@inline function _workflow_warning_diagnostics(; job_id=nothing, T_fm::Real, mu_fm::Real, xi::Real, error_type::Union{Nothing,String}=nothing)
+    return (
+        job_id=job_id,
+        profile=get(ENV, "PHYSICS_PARAM_PROFILE", "default"),
+        T_fm=Float64(T_fm),
+        mu_fm=Float64(mu_fm),
+        xi=Float64(xi),
+        error_type=error_type,
+    )
+end
+
 @inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
     prefer_energy_aniso === nothing && return provider
 
@@ -609,7 +620,13 @@ function solve_transport_from_equilibrium(
                 t_num=t_num,
             )
         catch bc_err
-            @warn "bulk_viscosity_coefficients failed — ζ will be NaN for this point" T_fm=T_fm mu_fm=mu_fm xi=xi err=bc_err
+            diag = _workflow_warning_diagnostics(
+                T_fm=T_fm,
+                mu_fm=mu_fm,
+                xi=xi,
+                error_type=string(typeof(bc_err)),
+            )
+            @warn "bulk_viscosity_coefficients failed — ζ will be NaN for this point" diagnostics=diag err=bc_err
             nothing
         end
     end
