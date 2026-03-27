@@ -47,18 +47,11 @@ export create_implicit_solver, solve_with_derivatives
 export solve_weighted_block_fallback
 export solve_with_root_diagnostics
 
-const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
-
 @inline function _get_model(model_kind::Symbol)
-    return get!(_MODEL_CACHE, model_kind) do
-        if model_kind === :PNJL
-            return create_model(:PNJL)
-        elseif model_kind === :RPNJL
-            return create_model(:RPNJL)
-        else
-            error("Unsupported model kind in ImplicitSolver: $(model_kind)")
-        end
+    if model_kind === :PNJL || model_kind === :RPNJL
+        return Main.Models.get_cached_model(model_kind)
     end
+    error("Unsupported model kind in ImplicitSolver: $(model_kind)")
 end
 
 @inline function _postprocess_payload(model_kind::Symbol, x_state, mu_vec, T_fm;

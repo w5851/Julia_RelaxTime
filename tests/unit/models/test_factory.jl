@@ -23,6 +23,20 @@ Models.pnjl_module()
 
 @testset "factory create_model" begin
 
+    @testset "cached model accessor" begin
+        @test isdefined(Models, :get_cached_model)
+        @test isdefined(Models, :clear_model_cache!)
+
+        Models.clear_model_cache!()
+        m1 = Models.get_cached_model(:PNJL)
+        m2 = Models.get_cached_model(:PNJL)
+        @test m1 === m2
+
+        Models.clear_model_cache!(kinds=(:PNJL,))
+        m3 = Models.get_cached_model(:PNJL)
+        @test m3 isa Models.PNJLModel
+    end
+
     @testset ":NJL" begin
         m = Models.create_model(:NJL)
         @test m isa Models.AbstractNJLModel

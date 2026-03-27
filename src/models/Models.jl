@@ -27,6 +27,7 @@ export RPNJLModel
 export RotationModel
 export GasLiquidModel
 export create_model
+export get_cached_model, clear_model_cache!
 export omega, omega_components, grand_potential
 export model_pressure, model_rho, model_thermo
 export MeanFieldState

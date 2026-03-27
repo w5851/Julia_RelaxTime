@@ -39,18 +39,11 @@ export GapParams
 @inline _model_kind_symbol(::RPNJLModel) = :RPNJL
 @inline _model_kind_symbol(::AbstractQCDModel) = :PNJL
 
-const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
-
 @inline function _get_model(model_kind::Symbol)
-    return get!(_MODEL_CACHE, model_kind) do
-        if model_kind === :PNJL
-            return create_model(:PNJL)
-        elseif model_kind === :RPNJL
-            return create_model(:RPNJL)
-        else
-            error("Unsupported model kind in Conditions: $(model_kind)")
-        end
+    if model_kind === :PNJL || model_kind === :RPNJL
+        return Main.Models.get_cached_model(model_kind)
     end
+    error("Unsupported model kind in Conditions: $(model_kind)")
 end
 
 # ============================================================================
@@ -462,4 +455,3 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
 end
 
 end # module Conditions
-
