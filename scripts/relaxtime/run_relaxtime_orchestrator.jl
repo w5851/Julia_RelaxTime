@@ -3,8 +3,10 @@
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfig.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfigAudit.jl"))
 
 using .WorkflowConfig: normalize_merge_validate
+using .WorkflowConfigAudit: build_consumption_report
 using TOML
 using Dates
 using SHA
@@ -164,11 +166,86 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
     merged = normalize_merge_validate(default_cfg, toml_cfg, cli_cfg, aliases)
     effective = merged.effective
 
+    consumed_keys = Set{String}()
+    # minimal consumption for current orchestrator stage
+    push!(consumed_keys, "schema_version")
+    push!(consumed_keys, "profile_name")
+    push!(consumed_keys, "scan.transport.muB_MeV")
+    push!(consumed_keys, "scan.transport.xi_list")
+    push!(consumed_keys, "scan.transport.tmin_MeV")
+    push!(consumed_keys, "scan.transport.tmax_MeV")
+    push!(consumed_keys, "scan.transport.tstep_MeV")
+    push!(consumed_keys, "scan.transport.resume")
+    push!(consumed_keys, "scan.transport.overwrite")
+    push!(consumed_keys, "scan.transport.solver.p_num")
+    push!(consumed_keys, "scan.transport.solver.t_num")
+    push!(consumed_keys, "scan.transport.solver.max_iter")
+    push!(consumed_keys, "scan.transport.tau.mode")
+    push!(consumed_keys, "scan.transport.tau.tau_p_nodes")
+    push!(consumed_keys, "scan.transport.tau.tau_angle_nodes")
+    push!(consumed_keys, "scan.transport.tau.tau_phi_nodes")
+    push!(consumed_keys, "scan.transport.tau.tau_n_sigma")
+    push!(consumed_keys, "scan.transport.tau.sigma_grid_n")
+    push!(consumed_keys, "scan.transport.transport.compute_bulk")
+    push!(consumed_keys, "scan.transport.transport.tr_p_nodes")
+    push!(consumed_keys, "scan.transport.transport.tr_p_max_fm")
+    push!(consumed_keys, "scan.cross_section.muB_MeV")
+    push!(consumed_keys, "scan.cross_section.T_list_MeV")
+    push!(consumed_keys, "scan.cross_section.xi_list")
+    push!(consumed_keys, "scan.cross_section.processes")
+    push!(consumed_keys, "scan.cross_section.n_points")
+    push!(consumed_keys, "scan.cross_section.energy.mode")
+    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_min_MeV")
+    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_max_MeV")
+    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_num")
+    push!(consumed_keys, "plot.transport.x")
+    push!(consumed_keys, "plot.transport.group")
+    push!(consumed_keys, "plot.transport.ys")
+    push!(consumed_keys, "plot.cross_section.x")
+    push!(consumed_keys, "plot.cross_section.group")
+    push!(consumed_keys, "plot.cross_section.split")
+
+    if haskey(effective, "strict")
+        push!(consumed_keys, "strict")
+    end
+    if haskey(effective, "scan") && effective["scan"] isa AbstractDict
+        scan = effective["scan"]
+        if haskey(scan, "cross_section") && scan["cross_section"] isa AbstractDict
+            xs = scan["cross_section"]
+            if haskey(xs, "energy") && xs["energy"] isa AbstractDict
+                energy = xs["energy"]
+                if haskey(energy, "sqrt_s_list_MeV")
+                    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_list_MeV")
+                end
+            end
+        end
+    end
+
+    strict_mode = Bool(get(effective, "strict", false))
+    overridden = Set{String}()
+    if opts["resume"] !== nothing
+        push!(overridden, "scan.transport.resume")
+    end
+    if opts["overwrite"] !== nothing
+        push!(overridden, "scan.transport.overwrite")
+    end
+    if cmd == "cross-section" && opts["processes"] !== nothing
+        push!(overridden, "scan.cross_section.processes")
+    end
+    report = build_consumption_report(
+        effective,
+        consumed_keys;
+        overridden=overridden,
+        fallback_used=false,
+        strict=strict_mode,
+    )
+
     outdir = String(opts["outdir"])
     mkpath(outdir)
 
     effective_json = joinpath(outdir, "effective_config.json")
     _write_json(effective_json, effective)
+    _write_json(joinpath(outdir, "consumption_report.json"), report)
 
     cfg_hash = bytes2hex(sha256(_to_json(effective)))
     run_id = string("relaxtime-orch-", Dates.format(now(UTC), "yyyymmddTHHMMSS"), "-", first(cfg_hash, 8))
@@ -181,6 +258,7 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
         "timestamp_utc" => Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SS") * "Z",
         "fail_on_fallback" => Bool(opts["fail_on_fallback"]),
         "fallback_events" => Any[],
+        "consumption_report" => joinpath(outdir, "consumption_report.json"),
         "trace" => String.(merged.trace),
     )
     _write_json(joinpath(outdir, "run_manifest.json"), manifest)
