@@ -237,7 +237,7 @@
   - Run: `julia --project=. --threads=1 scripts/perf/bench_configloader_cache.jl`
   - 预期：输出 before/after 三项指标。
 
-- [ ] **Step 3: 在 PR 描述附原始输出片段**
+- [x] **Step 3: 在 PR 描述附原始输出片段**
   - 不设置硬阈值，只报告真实性能变化。
 
 - [x] **Step 4: Commit**
@@ -290,14 +290,14 @@
 **Files:**
 - No repository file changes required
 
-- [ ] **Step 1: 准备 PR 摘要**
+- [x] **Step 1: 准备 PR 摘要**
   - 按 A/B/C 三段说明“为什么改、行为是否变、如何验证”。
 
-- [ ] **Step 2: 附验证证据**
+- [x] **Step 2: 附验证证据**
   - smoke 命令与结果；缓存行为测试；性能脚本原始输出片段。
 
-- [ ] **Step 3: 明确分支策略**
+- [x] **Step 3: 明确分支策略**
   - 标注实现分支来源与禁止直改 `main` 已遵守。
 
-- [ ] **Step 4: 请求代码审阅**
+- [x] **Step 4: 请求代码审阅**
   - 建议至少 1 名熟悉 `TransportWorkflow` 与 1 名熟悉 `ConfigLoader` 的 reviewer。
