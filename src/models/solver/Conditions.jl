@@ -18,17 +18,12 @@ using ForwardDiff
 
 # 从 Models 域导入
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
-
-const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "PNJLCore.jl"))
-if !isdefined(@__MODULE__, :PNJLCore)
-    include(_PNJL_CORE_PATH)
-end
-using .PNJLCore: cached_nodes
+const cached_nodes = Main.Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
-import Main.Models: create_model, model_pressure, model_rho, model_thermo, calculate_mass_vec
+import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
 
 export gap_conditions, build_conditions, build_residual!
 export GapParams
@@ -39,18 +34,11 @@ export GapParams
 @inline _model_kind_symbol(::RPNJLModel) = :RPNJL
 @inline _model_kind_symbol(::AbstractQCDModel) = :PNJL
 
-const _MODEL_CACHE = Dict{Symbol, AbstractQCDModel}()
-
 @inline function _get_model(model_kind::Symbol)
-    return get!(_MODEL_CACHE, model_kind) do
-        if model_kind === :PNJL
-            return create_model(:PNJL)
-        elseif model_kind === :RPNJL
-            return create_model(:RPNJL)
-        else
-            error("Unsupported model kind in Conditions: $(model_kind)")
-        end
+    if model_kind === :PNJL || model_kind === :RPNJL
+        return Main.Models.get_cached_model(model_kind)
     end
+    error("Unsupported model kind in Conditions: $(model_kind)")
 end
 
 # ============================================================================
@@ -462,4 +450,3 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
 end
 
 end # module Conditions
-

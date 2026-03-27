@@ -5,6 +5,8 @@
 当前已规划主题：
 
 - [magnetic/README.md](magnetic/README.md)：外磁场 PNJL / Landau 能级离散化相关能力。
+- [rotation/README.md](rotation/README.md)：旋转变体模型与单点 workflow 入口。
+- [gas_liquid/README.md](gas_liquid/README.md)：气液（RMF/Walecka）变体模型与单点 workflow 入口。
 
 设计原则：
 

@@ -32,6 +32,23 @@ Models.pnjl_module()
         @test mod === Models.MesonMassWorkflow
     end
 
+    @testset "magnetic_thermodynamics_module" begin
+        mod = Models.magnetic_thermodynamics_module()
+        @test mod === Models.MagneticThermodynamics
+    end
+
+    @testset "积分网格契约 accessor" begin
+        @test isdefined(Models, :default_momentum_count)
+        @test isdefined(Models, :default_theta_count)
+        @test isdefined(Models, :default_momentum_nodes)
+        @test isdefined(Models, :default_momentum_weights)
+
+        @test Models.default_momentum_count() == Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
+        @test Models.default_theta_count() == Models.PNJLCore.DEFAULT_THETA_COUNT
+        @test Models.default_momentum_nodes() === Models.PNJLIntegrals.THERMAL_DEFAULT_NODES
+        @test Models.default_momentum_weights() === Models.PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
+    end
+
     @testset "薄转发接口存在" begin
         @test isdefined(Models, :run_tmu_scan)
         @test isdefined(Models, :run_trho_scan)

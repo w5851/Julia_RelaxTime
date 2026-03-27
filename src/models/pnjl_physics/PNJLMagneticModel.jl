@@ -12,14 +12,21 @@ if !isdefined(Main, :MagneticThermodynamics)
     Base.include(Main, _PNJL_MAG_CORE_PATH)
 end
 
-struct PNJLMagneticModel <: AbstractPNJLModel
+@inline function _magnetic_thermodynamics_module()
+    if isdefined(Main, :Models) && isdefined(Main.Models, :magnetic_thermodynamics_module)
+        return Main.Models.magnetic_thermodynamics_module()
+    end
+    return Main.MagneticThermodynamics
+end
+
+struct PNJLMagneticModel{MT} <: AbstractPNJLModel
     base::PNJLModel
-    magnetic::Main.MagneticThermodynamics.MagneticConfig
+    magnetic::MT
 end
 
 function PNJLMagneticModel(; eB_fm2::Real=0.0, profile::String=get(ENV, "PNJL_PARAM_PROFILE", "default"), physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"), kwargs...)
     base = PNJLModel(; profile=profile, physics_profile=physics_profile)
-    conf = Main.MagneticThermodynamics.default_magnetic_config(eB_fm2=float(eB_fm2))
+    conf = _magnetic_thermodynamics_module().default_magnetic_config(eB_fm2=float(eB_fm2))
     return PNJLMagneticModel(base, conf)
 end
 
@@ -44,7 +51,7 @@ end
 end
 
 @inline function number_densities(model::PNJLMagneticModel, x_state, T, mu_vec; kwargs...)
-    return Main.MagneticThermodynamics.calculate_magnetic_number_densities(x_state, normalize_mu_vec(mu_vec), T, model.magnetic)
+    return _magnetic_thermodynamics_module().calculate_magnetic_number_densities(x_state, normalize_mu_vec(mu_vec), T, model.magnetic)
 end
 
 function solve_gap(model::PNJLMagneticModel, T_fm, mu_vec; kwargs...)
@@ -54,7 +61,7 @@ end
 function omega_components(model::PNJLMagneticModel, x_state, T, mu_vec; kwargs...)
     st = x_state isa MeanFieldState ? state_vector(x_state) : SVector{5, Float64}(Tuple(x_state))
     μ = normalize_mu_vec(mu_vec)
-    comp = Main.MagneticThermodynamics.calculate_magnetic_omega_components(st, μ, T, model.magnetic)
+    comp = _magnetic_thermodynamics_module().calculate_magnetic_omega_components(st, μ, T, model.magnetic)
     return (chi=comp.chi, poly=comp.poly, vac=comp.vac, therm=comp.therm, masses=comp.masses, omega=comp.omega)
 end
 

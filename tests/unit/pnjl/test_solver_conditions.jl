@@ -20,6 +20,10 @@ end
 # 避免跨测试文件导出冲突：不把符号 `using` 进 Main。
 const P = Models.pnjl_module()
 
+@testset "solver dependency boundary" begin
+    @test !isdefined(P.Conditions, :PNJLCore)
+end
+
 # ============================================================================
 # GapParams 测试
 # ============================================================================

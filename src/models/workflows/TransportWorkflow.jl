@@ -90,11 +90,11 @@ const TransportCoefficients = Main.TransportCoefficients
 using StaticArrays
 
 const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
-const DEFAULT_MOMENTUM_COUNT = Main.Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
-const DEFAULT_THETA_COUNT = Main.Models.PNJLCore.DEFAULT_THETA_COUNT
+const DEFAULT_MOMENTUM_COUNT = Main.Models.default_momentum_count()
+const DEFAULT_THETA_COUNT = Main.Models.default_theta_count()
 const bulk_viscosity_coefficients = Main.Models.bulk_viscosity_coefficients
-const DEFAULT_MOMENTUM_NODES = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_NODES
-const DEFAULT_MOMENTUM_WEIGHTS = Main.Models.PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
+const DEFAULT_MOMENTUM_NODES = Main.Models.default_momentum_nodes()
+const DEFAULT_MOMENTUM_WEIGHTS = Main.Models.default_momentum_weights()
 using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
 using .TransportCoefficients: rho_mass_from_densities

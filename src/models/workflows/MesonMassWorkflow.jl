@@ -40,8 +40,8 @@ using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 using Main.Constants_PNJL: ħc_MeV_fm
 using Main.Models: RootPolicy, solve_root_with_policy
 const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
-const DEFAULT_MOMENTUM_COUNT = Main.Models.PNJLCore.DEFAULT_MOMENTUM_COUNT
-const DEFAULT_THETA_COUNT = Main.Models.PNJLCore.DEFAULT_THETA_COUNT
+const DEFAULT_MOMENTUM_COUNT = Main.Models.default_momentum_count()
+const DEFAULT_THETA_COUNT = Main.Models.default_theta_count()
 using Main.MesonMass: solve_meson_mass, default_meson_mass_guess, ensure_quark_params_has_A
 using Main.PolarizationAniso: polarization_with_width
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings, mixing_matrix_elements

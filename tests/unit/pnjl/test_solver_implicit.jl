@@ -20,6 +20,10 @@ const P = Models.pnjl_module()
 
 # 避免跨测试文件导出冲突：不把符号 `using` 进 Main。
 
+@testset "solver dependency boundary" begin
+    @test !isdefined(P.ImplicitSolver, :PNJLCore)
+end
+
 const ħc = 197.327  # MeV·fm
 
 # ============================================================================
