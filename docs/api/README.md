@@ -30,6 +30,16 @@
 	- 用户入口：`docs/api/models/variants/magnetic/Overview.md`
 	- 职责核心：`docs/api/models/variants/magnetic/CoreConcepts.md`
 	- 导出 API 全集：`docs/api/models/variants/magnetic/generated/Exports.md`
+	- 当前主题：`docs/api/models/variants/rotation/`
+	- 主题入口：`docs/api/models/variants/rotation/README.md`
+	- 用户入口：`docs/api/models/variants/rotation/Overview.md`
+	- 职责核心：`docs/api/models/variants/rotation/CoreConcepts.md`
+	- 导出 API 全集：`docs/api/models/variants/rotation/generated/Exports.md`
+	- 当前主题：`docs/api/models/variants/gas_liquid/`
+	- 主题入口：`docs/api/models/variants/gas_liquid/README.md`
+	- 用户入口：`docs/api/models/variants/gas_liquid/Overview.md`
+	- 职责核心：`docs/api/models/variants/gas_liquid/CoreConcepts.md`
+	- 导出 API 全集：`docs/api/models/variants/gas_liquid/generated/Exports.md`
 - `docs/api/models/derived/`：`Models` 衍生量/响应量主题总层。
 	- 当前主题：`docs/api/models/derived/susceptibility/`
 	- 主题入口：`docs/api/models/derived/susceptibility/README.md`
