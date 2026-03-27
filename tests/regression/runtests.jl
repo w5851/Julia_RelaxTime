@@ -19,6 +19,7 @@ const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_total_cross_section_fixedpoint_regression.jl"),
+    joinpath(REGRESSION_DIR, "relaxtime", "test_workflow_vs_direct_consistency.jl"),
 ]
 
 function _selected_regression_files()
