@@ -28,6 +28,7 @@ export RotationModel
 export GasLiquidModel
 export create_model
 export get_cached_model, clear_model_cache!
+export register_model!, unregister_model!, registered_model_kinds
 export omega, omega_components, grand_potential
 export model_pressure, model_rho, model_thermo
 export MeanFieldState

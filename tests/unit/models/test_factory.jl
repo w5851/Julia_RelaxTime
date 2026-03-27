@@ -23,6 +23,28 @@ Models.pnjl_module()
 
 @testset "factory create_model" begin
 
+    @testset "model registry API" begin
+        @test isdefined(Models, :register_model!)
+        @test isdefined(Models, :unregister_model!)
+        @test isdefined(Models, :registered_model_kinds)
+
+        local marker = Ref(0)
+        Models.register_model!(:FakeModel, (; kwargs...) -> begin
+            _ = kwargs
+            marker[] += 1
+            return Models.NJLModel()
+        end)
+        @test :FakeModel in Models.registered_model_kinds()
+
+        fake = Models.create_model(:FakeModel)
+        @test fake isa Models.NJLModel
+        @test marker[] == 1
+
+        Models.unregister_model!(:FakeModel)
+        @test !(:FakeModel in Models.registered_model_kinds())
+        @test_throws ErrorException Models.create_model(:FakeModel)
+    end
+
     @testset "cached model accessor" begin
         @test isdefined(Models, :get_cached_model)
         @test isdefined(Models, :clear_model_cache!)
