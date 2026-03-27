@@ -1,0 +1,19 @@
+schema_version = "v1"
+
+[scripts]
+"scripts/relaxtime/run_relaxtime_orchestrator.jl" = "public-authoritative"
+"scripts/relaxtime/run_gap_transport_scan.jl" = "internal-authoritative"
+"scripts/relaxtime/scan_relaxation_times_vs_T.jl" = "internal-authoritative"
+"scripts/relaxtime/run_manual_relaxation_scan_workflow.jl" = "internal-authoritative"
+"scripts/relaxtime/run_outputs_2026_02_05.jl" = "internal-authoritative"
+"scripts/relaxtime/run_offline_transport_patch.jl" = "internal-authoritative"
+"scripts/relaxtime/run_transport_fixedpoint_regression.jl" = "regression-gate"
+"scripts/relaxtime/run_total_cross_section_fixedpoint_regression.jl" = "regression-gate"
+"scripts/relaxtime/scan_cross_section_vs_s_by_process.jl" = "analysis-experimental"
+"scripts/relaxtime/scan_total_cross_section.jl" = "analysis-experimental"
+"scripts/relaxtime/scan_scattering_amplitude.jl" = "analysis-experimental"
+"scripts/relaxtime/scan_scattering_amplitude_st_grid.jl" = "analysis-experimental"
+"scripts/relaxtime/scan_scattering_amplitude_vs_s_mid_t.jl" = "analysis-experimental"
+
+[allowlist]
+public_authoritative_direct_relaxtime_includes = []

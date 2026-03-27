@@ -1,0 +1,10 @@
+[process_aliases]
+
+[process_aliases.mappings]
+udtoud = "ud_to_ud"
+ustous = "us_to_us"
+udbartoudbar = "udbar_to_udbar"
+usbartousbar = "usbar_to_usbar"
+
+[deprecated_keys]
+mappings = {}
