@@ -18,17 +18,12 @@ using ForwardDiff
 
 # 从 Models 域导入
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
-
-const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "PNJLCore.jl"))
-if !isdefined(@__MODULE__, :PNJLCore)
-    include(_PNJL_CORE_PATH)
-end
-using .PNJLCore: cached_nodes
+const cached_nodes = Main.Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
-import Main.Models: create_model, model_pressure, model_rho, model_thermo, calculate_mass_vec
+import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
 
 export gap_conditions, build_conditions, build_residual!
 export GapParams

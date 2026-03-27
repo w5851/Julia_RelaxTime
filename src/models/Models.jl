@@ -128,6 +128,13 @@ const PNJLIntegrals = PNJLCore.PNJLIntegrals
 @inline default_momentum_nodes() = PNJLIntegrals.THERMAL_DEFAULT_NODES
 @inline default_momentum_weights() = PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
 
+@inline function cached_nodes(
+	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
+	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+)
+	return PNJLCore.cached_nodes(p_num, t_num)
+end
+
 # Factory
 include(joinpath(@__DIR__, "factory.jl"))
 
@@ -197,13 +204,6 @@ const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
 const update! = SeedStrategies.update!
 const reset! = SeedStrategies.reset!
-
-@inline function cached_nodes(
-	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
-	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
-)
-	return PNJLCore.cached_nodes(p_num, t_num)
-end
 
 @inline function vacuum_integral(mass)
 	TT = typeof(mass)

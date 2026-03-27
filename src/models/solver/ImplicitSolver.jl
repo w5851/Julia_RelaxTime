@@ -29,16 +29,14 @@ using ImplicitDifferentiation
 
 # 从 Models 域导入，避免重复定义
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim, param_dim
-import Main.Models: AbstractQCDModel, create_model, model_thermo, calculate_mass_vec
+import Main.Models: AbstractQCDModel, model_thermo, calculate_mass_vec
 import Main.Models: RootPolicy, solve_root_with_policy
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareContinuitySeed, get_seed, get_all_seeds, default_omega_selector, update!
 using ..Conditions: GapParams, gap_conditions, build_residual!
 
-const _PNJL_CORE_PATH = normpath(joinpath(@__DIR__, "..", "pnjl_physics", "PNJLCore.jl"))
-if !isdefined(@__MODULE__, :PNJLCore)
-    include(_PNJL_CORE_PATH)
-end
-using .PNJLCore: cached_nodes, DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+const cached_nodes = Main.Models.cached_nodes
+const DEFAULT_MOMENTUM_COUNT = Main.Models.default_momentum_count()
+const DEFAULT_THETA_COUNT = Main.Models.default_theta_count()
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
