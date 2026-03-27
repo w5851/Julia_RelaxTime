@@ -10,6 +10,7 @@ const _PNJL_SCAN_MAX_RUNNING = 2
 const _PNJL_SCAN_MAX_PENDING = 32
 const _PNJL_SCAN_MAX_XI_POINTS = 64
 const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
+const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -163,8 +164,35 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
     )
     lock(_PNJL_SCAN_JOBS_LOCK) do
         _PNJL_SCAN_JOBS[job_id] = job
+        _prune_finished_jobs_locked!(_PNJL_SCAN_FINISHED_KEEP_MAX)
     end
     return job_id
+end
+
+function _prune_finished_jobs_locked!(keep_max::Int=_PNJL_SCAN_FINISHED_KEEP_MAX)
+    keep_max >= 0 || throw(ArgumentError("keep_max must be >= 0"))
+
+    finished = Tuple{String, Int}[]
+    for (job_id, job) in _PNJL_SCAN_JOBS
+        st = get(job, "status", "")
+        if st == "succeeded" || st == "failed"
+            push!(finished, (job_id, Int(get(job, "seq", typemax(Int)))))
+        end
+    end
+
+    excess = length(finished) - keep_max
+    excess <= 0 && return 0
+
+    sort!(finished; by=last)
+    removed = 0
+    for i in 1:excess
+        job_id = finished[i][1]
+        if haskey(_PNJL_SCAN_JOBS, job_id)
+            delete!(_PNJL_SCAN_JOBS, job_id)
+            removed += 1
+        end
+    end
+    return removed
 end
 
 function _queue_snapshot()

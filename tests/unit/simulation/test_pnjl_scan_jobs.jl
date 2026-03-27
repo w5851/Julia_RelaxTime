@@ -138,5 +138,66 @@ end
         @test body.error == "queue is full"
     end
 
+    @testset "finished jobs pruning keeps active jobs" begin
+        _reset_jobs_state!()
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            PSJ._PNJL_SCAN_JOBS["queued"] = Dict{String, Any}(
+                "job_id" => "queued",
+                "seq" => 1,
+                "kind" => "tmu",
+                "status" => "queued",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => nothing,
+                "progress" => Dict{String, Any}("total" => nothing, "completed" => 0, "percent" => nothing),
+                "result" => nothing,
+                "error" => nothing,
+                "request" => Dict{String, Any}(),
+            )
+            PSJ._PNJL_SCAN_JOBS["running"] = Dict{String, Any}(
+                "job_id" => "running",
+                "seq" => 2,
+                "kind" => "tmu",
+                "status" => "running",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => nothing,
+                "progress" => Dict{String, Any}("total" => nothing, "completed" => 0, "percent" => nothing),
+                "result" => nothing,
+                "error" => nothing,
+                "request" => Dict{String, Any}(),
+            )
+
+            for i in 1:5
+                id = "done_$(i)"
+                PSJ._PNJL_SCAN_JOBS[id] = Dict{String, Any}(
+                    "job_id" => id,
+                    "seq" => 2 + i,
+                    "kind" => "tmu",
+                    "status" => "succeeded",
+                    "created_at" => "",
+                    "started_at" => nothing,
+                    "ended_at" => "",
+                    "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                    "result" => Dict{String, Any}(),
+                    "error" => nothing,
+                    "request" => Dict{String, Any}(),
+                )
+            end
+
+            PSJ._prune_finished_jobs_locked!(2)
+        end
+
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            @test haskey(PSJ._PNJL_SCAN_JOBS, "queued")
+            @test haskey(PSJ._PNJL_SCAN_JOBS, "running")
+            @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_1")
+            @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_2")
+            @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_3")
+            @test haskey(PSJ._PNJL_SCAN_JOBS, "done_4")
+            @test haskey(PSJ._PNJL_SCAN_JOBS, "done_5")
+        end
+    end
+
     _reset_jobs_state!()
 end
