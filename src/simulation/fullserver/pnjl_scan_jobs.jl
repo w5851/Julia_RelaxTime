@@ -4,6 +4,7 @@ using UUIDs: uuid4
 const _PNJL_SCAN_JOBS_LOCK = ReentrantLock()
 const _PNJL_SCAN_JOBS = Dict{String, Dict{String, Any}}()
 const _PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+const _SCAN_OUTPUT_ROOT = abspath(normpath(joinpath(_PROJECT_ROOT, "data", "outputs")))
 const _PNJL_SCAN_JOB_SEQ = Ref(0)
 const _PNJL_SCAN_MAX_RUNNING = 2
 const _PNJL_SCAN_MAX_PENDING = 32
@@ -56,6 +57,30 @@ function _to_nonneg_int(x, default::Int; name::String)
     v = _to_int(x, default)
     v >= 0 || error("$(name) must be >= 0")
     return v
+end
+
+@inline function _normalized_path_for_compare(path::AbstractString)
+    return replace(lowercase(abspath(normpath(path))), '/' => '\\')
+end
+
+function _ensure_safe_output_path(path_raw)
+    output_raw = _to_string(path_raw, "")
+    isempty(strip(output_raw)) && throw(ArgumentError("output_path cannot be empty"))
+
+    candidate = if isabspath(output_raw)
+        abspath(normpath(output_raw))
+    else
+        abspath(normpath(joinpath(_PROJECT_ROOT, output_raw)))
+    end
+
+    base_cmp = _normalized_path_for_compare(_SCAN_OUTPUT_ROOT)
+    candidate_cmp = _normalized_path_for_compare(candidate)
+    safe_prefix = string(base_cmp, "\\")
+    if !(candidate_cmp == base_cmp || startswith(candidate_cmp, safe_prefix))
+        throw(ArgumentError("output_path must be under data/outputs"))
+    end
+
+    return candidate
 end
 
 function _normalize_grid_dict(obj)
@@ -191,7 +216,7 @@ end
 
 function _safe_output_path(kind::String, params::Dict{Symbol, Any}, job_id::String)
     if haskey(params, :output_path)
-        return _to_string(params[:output_path], "")
+        return _ensure_safe_output_path(params[:output_path])
     end
 
     ts = Dates.format(Dates.now(), dateformat"yyyymmdd_HHMMSS")
