@@ -1,3 +1,15 @@
+---
+title: Models 架构优化设计任务单（最小风险版）
+archived: true
+original: docs/dev/active/2026-03-26_models_architecture_optimization_tasklist.md
+archived_date: 2026-03-27
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Models 架构优化设计任务单（最小风险版）
 
 ## 1. 背景与目标
@@ -39,63 +51,63 @@
 
 ### 3.2 待优化（结构性缺口）
 
-- [ ] workflow 与部分模型仍存在 `Main.*` 直接访问（如 `src/models/workflows/TransportWorkflow.jl`、`src/models/workflows/MesonMassWorkflow.jl`、`src/models/pnjl_physics/PNJLMagneticModel.jl`）。
-- [ ] `src/models/solver/Conditions.jl` 与 `src/models/solver/ImplicitSolver.jl` 存在重复 model cache 与 model 获取策略。
-- [ ] 上层模块仍直接依赖 `PNJLCore` 默认网格常量（耦合实现细节）。
-- [ ] `Models.jl` include/export 体量较大，聚合层次可进一步清晰化。
-- [ ] `create_model` 仍是 `if-elseif` 分支，可扩展性一般。
-- [ ] API 文档在 `variants` 层仅明确 magnetic，rotation/gas_liquid 主题不足。
+- [x] workflow 与部分模型仍存在 `Main.*` 直接访问（如 `src/models/workflows/TransportWorkflow.jl`、`src/models/workflows/MesonMassWorkflow.jl`、`src/models/pnjl_physics/PNJLMagneticModel.jl`）。
+- [x] `src/models/solver/Conditions.jl` 与 `src/models/solver/ImplicitSolver.jl` 存在重复 model cache 与 model 获取策略。
+- [x] 上层模块仍直接依赖 `PNJLCore` 默认网格常量（耦合实现细节）。
+- [x] `Models.jl` include/export 体量较大，聚合层次可进一步清晰化。
+- [x] `create_model` 仍是 `if-elseif` 分支，可扩展性一般。
+- [x] API 文档在 `variants` 层仅明确 magnetic，rotation/gas_liquid 主题不足。
 
 ## 4. 任务分解（可勾选）
 
 ## 阶段 A：依赖方向收敛（高优先级）
 
-- [ ] A1. 新增/补齐 `Models` 内部稳定 accessor（例如 workflow 需要的节点、常量、模块访问器），避免 workflow 直接依赖 `Main.*`。
+- [x] A1. 新增/补齐 `Models` 内部稳定 accessor（例如 workflow 需要的节点、常量、模块访问器），避免 workflow 直接依赖 `Main.*`。
   - 验收：`TransportWorkflow` 与 `MesonMassWorkflow` 中关键 `Main.Models.PNJLCore/PNJLIntegrals` 直接访问显著减少。
-- [ ] A2. 梳理 `PNJLMagneticModel` 对 `Main.MagneticThermodynamics` 的依赖边界，优先封装为 `Models` 内部门面函数。
+- [x] A2. 梳理 `PNJLMagneticModel` 对 `Main.MagneticThermodynamics` 的依赖边界，优先封装为 `Models` 内部门面函数。
   - 验收：模型侧调用点集中在有限门面函数，外部行为不变。
 
 ## 阶段 B：solver cache 统一（高优先级）
 
-- [ ] B1. 抽取统一 model cache/getter（可放在 `src/models/factory.jl` 或新增轻量 `model_registry.jl`）。
+- [x] B1. 抽取统一 model cache/getter（可放在 `src/models/factory.jl` 或新增轻量 `model_registry.jl`）。
   - 验收：`Conditions` 与 `ImplicitSolver` 不再各自维护重复 `_MODEL_CACHE`。
-- [ ] B2. 统一并发访问策略（必要时加入锁或明确线程模型说明）。
+- [x] B2. 统一并发访问策略（必要时加入锁或明确线程模型说明）。
   - 验收：接口行为一致，回归测试通过。
 
 ## 阶段 C：核心实现细节下沉（中优先级）
 
-- [ ] C1. 为积分网格与默认节点定义稳定契约（经 `entrypoints` 或专用 accessor 暴露）。
+- [x] C1. 为积分网格与默认节点定义稳定契约（经 `entrypoints` 或专用 accessor 暴露）。
   - 验收：workflow 不再直接取 `PNJLCore.DEFAULT_*`。
-- [ ] C2. 将 `PNJLCore` 作为“内部实现依赖”逐步限制在模型/求解核心，减少向上游扩散。
+- [x] C2. 将 `PNJLCore` 作为“内部实现依赖”逐步限制在模型/求解核心，减少向上游扩散。
   - 验收：新增调用方默认使用契约层接口。
 
 ## 阶段 D：聚合与工厂优化（中优先级）
 
-- [ ] D1. 拆分 `Models.jl` 导出聚合段（如 core/solver/workflows/variants 分块），保持 include 顺序安全。
+- [x] D1. 拆分 `Models.jl` 导出聚合段（如 core/solver/workflows/variants 分块），保持 include 顺序安全。
   - 验收：文件可读性提升，不引入 world-age/加载顺序回归。
-- [ ] D2. 将 `create_model` 升级为注册表机制（保留旧符号兼容）。
+- [x] D2. 将 `create_model` 升级为注册表机制（保留旧符号兼容）。
   - 验收：新增模型不再需要修改长 `if-elseif` 主分支。
 
 ## 阶段 E：文档对齐（中优先级）
 
-- [ ] E1. 在 `docs/api/models/variants/` 新增 `rotation` 与 `gas_liquid` 主题页（至少 README + Overview + generated exports）。
+- [x] E1. 在 `docs/api/models/variants/` 新增 `rotation` 与 `gas_liquid` 主题页（至少 README + Overview + generated exports）。
   - 验收：代码与 API 导航语义一致。
-- [ ] E2. 更新 `docs/api/models/variants/README.md` 的主题列表。
+- [x] E2. 更新 `docs/api/models/variants/README.md` 的主题列表。
   - 验收：`variants` 总览可直接发现全部主变体。
 
 ## 5. 测试与验收标准
 
 ### 5.1 最小回归集（每阶段至少执行）
 
-- [ ] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
 
 ### 5.2 治理脚本（文档/迁移门禁）
 
-- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
-- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
-- [ ] `julia --project=. scripts/dev/check_pnjl_migration_guard.jl`
+- [x] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [x] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [x] `julia --project=. scripts/dev/check_pnjl_migration_guard.jl`
 
 ### 5.3 分阶段验收口径
 
@@ -107,17 +119,17 @@
 
 ## 6. 里程碑
 
-- [ ] M1（短期，1-2 次 PR）：完成阶段 A + B。
-- [ ] M2（中期，1-2 次 PR）：完成阶段 C + D。
-- [ ] M3（收尾，1 次 PR）：完成阶段 E，并进行文档一致性检查。
+- [x] M1（短期，1-2 次 PR）：完成阶段 A + B。
+- [x] M2（中期，1-2 次 PR）：完成阶段 C + D。
+- [x] M3（收尾，1 次 PR）：完成阶段 E，并进行文档一致性检查。
 
 ## 7. DoD（Definition of Done）
 
-- [ ] 所有本期范围任务勾选完成，且非范围未被误改。
-- [ ] `Models` 入口兼容性保持（`create_model`、`entrypoints`、核心导出不破坏）。
-- [ ] smoke 单元/集成/回归测试通过。
-- [ ] 文档门禁脚本通过，`docs/api/models/variants` 导航可用。
-- [ ] 迁移与兼容说明完整，便于后续归档。
+- [x] 所有本期范围任务勾选完成，且非范围未被误改。
+- [x] `Models` 入口兼容性保持（`create_model`、`entrypoints`、核心导出不破坏）。
+- [x] smoke 单元/集成/回归测试通过。
+- [x] 文档门禁脚本通过，`docs/api/models/variants` 导航可用。
+- [x] 迁移与兼容说明完整，便于后续归档。
 
 ## 8. 风险与回退方案
 
@@ -137,3 +149,10 @@
 
 - 本文档是实施前设计任务单，不代表代码已改动。
 - 后续实施建议按阶段推进，并在每个阶段结束后更新本文件的勾选状态与验证记录。
+
+## 10. 实施完成记录（2026-03-27）
+
+- 已按阶段 A-E 全部完成并合并入 `main`（PR #26）。
+- 关键提交：`1bf9621`、`48982f7`、`7c66b35`、`2e762d2`、`6e2ad32`。
+- PR checks 全部通过：`unit-smoke`、`integration-smoke`、`validation`、`docs-consistency` 等。
+- active 文档状态更新完毕，可归档。
