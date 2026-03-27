@@ -106,6 +106,52 @@ end
     @test λ > 0.0
 end
 
+@testset "TransportCoefficients: diffusion follows legacy occupancy factor" begin
+    cfg = TransportIntegrationConfig(p_nodes=12, p_max=8.0)
+    base_provider = default_transport_provider()
+
+    provider_f02 = merge(base_provider, (
+        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.2,
+        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.2,
+        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.2,
+        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.2,
+    ))
+    provider_f08 = merge(base_provider, (
+        quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.8,
+        antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.8,
+        quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.8,
+        antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.8,
+    ))
+
+    κ02 = kappa_BB(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        densities=DENSITIES_ONE,
+        pressure=PRESSURE_ONE,
+        energy=ENERGY_ONE,
+        provider=provider_f02,
+        config=cfg,
+    )
+
+    κ08 = kappa_BB(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        densities=DENSITIES_ONE,
+        pressure=PRESSURE_ONE,
+        energy=ENERGY_ONE,
+        provider=provider_f08,
+        config=cfg,
+    )
+
+    @test isfinite(κ02)
+    @test isfinite(κ08)
+    # Legacy/doc formula uses occupancy kernel F=f; for fixed f=0.2 and f=0.8,
+    # diffusion scales approximately linearly with f.
+    @test isapprox(κ08 / κ02, 4.0; rtol=1e-2, atol=0.0)
+end
+
 @testset "TransportCoefficients: derived ratio helpers" begin
     λ = 2.4
     σ = 1.5
