@@ -101,11 +101,23 @@ using .TransportCoefficients: rho_mass_from_densities
 
 const PNJL = Main.Models
 
+@inline function _models_api()
+    return (
+        create_model=Main.Models.create_model,
+        number_densities=Main.Models.number_densities,
+        model_thermo=Main.Models.model_thermo,
+        transport_provider=isdefined(Main.Models, :transport_provider) ? Main.Models.transport_provider : nothing,
+        transport_provider_type=isdefined(Main.Models, :TransportProvider) ? Main.Models.TransportProvider : nothing,
+        prepare_transport_provider=isdefined(Main.Models, :prepare_transport_provider) ? Main.Models.prepare_transport_provider : nothing,
+    )
+end
+
 @inline function _get_model(cache::WorkflowCache, model_kind::Symbol)
+    models = _models_api()
     lock(cache.lock)
     try
         return get!(cache.model_cache, model_kind) do
-            Main.Models.create_model(model_kind)
+            models.create_model(model_kind)
         end
     finally
         unlock(cache.lock)
@@ -319,10 +331,11 @@ end
 end
 
 @inline function _default_transport_provider_for_backend(cache::WorkflowCache)
-    if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
+    models = _models_api()
+    if models.transport_provider !== nothing
         m = _get_model(cache, :PNJL)
         try
-            return Main.Models.transport_provider(m)
+            return models.transport_provider(m)
         catch
             return nothing
         end
@@ -346,7 +359,8 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
 end
 
 @inline function _densities_from_equilibrium(cache::WorkflowCache, x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
-    nd = Main.Models.number_densities(
+    models = _models_api()
+    nd = models.number_densities(
         _get_model(cache, :PNJL),
         x_state,
         T_fm,
@@ -374,7 +388,8 @@ end
         return (pressure=Float64(base.pressure), entropy=Float64(base.entropy), energy=Float64(base.energy))
     end
 
-    pressure, _, entropy, energy = Main.Models.model_thermo(
+    models = _models_api()
+    pressure, _, entropy, energy = models.model_thermo(
         _get_model(cache, :PNJL),
         base.x_state,
         base.mu_vec,
@@ -662,9 +677,10 @@ function solve_transport_from_equilibrium(
     else
         effective_provider = _apply_prefer_energy_aniso(effective_provider, prefer_effective)
     end
-    if effective_provider !== nothing && isdefined(Main, :Models) && isdefined(Main.Models, :TransportProvider)
-        if effective_provider isa Main.Models.TransportProvider && isdefined(Main.Models, :prepare_transport_provider)
-            effective_provider = Main.Models.prepare_transport_provider(
+    models = _models_api()
+    if effective_provider !== nothing && models.transport_provider_type !== nothing
+        if effective_provider isa models.transport_provider_type && models.prepare_transport_provider !== nothing
+            effective_provider = models.prepare_transport_provider(
                 effective_provider,
                 base;
                 quark_params=legacy_inputs.quark_params,

@@ -108,4 +108,15 @@ end
         @test diag.xi == 0.1
         @test diag.error_type == "ArgumentError"
     end
+
+    @testset "models API facade exists and wired" begin
+        @test isdefined(_TW, :_models_api)
+        api = _TW._models_api()
+        @test api.create_model !== nothing
+        @test api.number_densities !== nothing
+        @test api.model_thermo !== nothing
+        @test api.transport_provider !== nothing
+        @test api.transport_provider_type !== nothing
+        @test api.prepare_transport_provider !== nothing
+    end
 end
