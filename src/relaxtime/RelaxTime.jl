@@ -53,6 +53,7 @@ include("ScatteringAmplitude.jl")
 include("TotalCrossSection.jl")
 include("AverageScatteringRate.jl")
 include("RelaxationTime.jl")
+include("TransportCoefficientsValidation.jl")
 include("TransportCoefficients.jl")
 
 # ── Re-exports ──

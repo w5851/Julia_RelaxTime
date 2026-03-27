@@ -2,7 +2,7 @@
 
 串联：PNJL 平衡求解 → 介子质量/宽度（MesonMass）→ Mott 阈值与 gap（MottTransition）。
 
-实现位于 [src/pnjl/workflows/MesonMassWorkflow.jl](src/pnjl/workflows/MesonMassWorkflow.jl)。
+实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/models/workflows/MesonMassWorkflow.jl)。
 
 ## 入口
 
@@ -61,7 +61,7 @@ build_equilibrium_params(base, T_fm, mu_fm; xi=0.0)
 ## 示例
 
 ```julia
-include("src/pnjl/workflows/MesonMassWorkflow.jl")
+include("src/models/workflows/MesonMassWorkflow.jl")
 using .MesonMassWorkflow
 
 T = 0.15  # fm^-1

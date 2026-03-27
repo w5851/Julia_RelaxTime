@@ -4,11 +4,13 @@ using UUIDs: uuid4
 const _PNJL_SCAN_JOBS_LOCK = ReentrantLock()
 const _PNJL_SCAN_JOBS = Dict{String, Dict{String, Any}}()
 const _PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+const _SCAN_OUTPUT_ROOT = abspath(normpath(joinpath(_PROJECT_ROOT, "data", "outputs")))
 const _PNJL_SCAN_JOB_SEQ = Ref(0)
 const _PNJL_SCAN_MAX_RUNNING = 2
 const _PNJL_SCAN_MAX_PENDING = 32
 const _PNJL_SCAN_MAX_XI_POINTS = 64
 const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
+const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -56,6 +58,30 @@ function _to_nonneg_int(x, default::Int; name::String)
     v = _to_int(x, default)
     v >= 0 || error("$(name) must be >= 0")
     return v
+end
+
+@inline function _normalized_path_for_compare(path::AbstractString)
+    return replace(lowercase(abspath(normpath(path))), '/' => '\\')
+end
+
+function _ensure_safe_output_path(path_raw)
+    output_raw = _to_string(path_raw, "")
+    isempty(strip(output_raw)) && throw(ArgumentError("output_path cannot be empty"))
+
+    candidate = if isabspath(output_raw)
+        abspath(normpath(output_raw))
+    else
+        abspath(normpath(joinpath(_PROJECT_ROOT, output_raw)))
+    end
+
+    base_cmp = _normalized_path_for_compare(_SCAN_OUTPUT_ROOT)
+    candidate_cmp = _normalized_path_for_compare(candidate)
+    safe_prefix = string(base_cmp, "\\")
+    if !(candidate_cmp == base_cmp || startswith(candidate_cmp, safe_prefix))
+        throw(ArgumentError("output_path must be under data/outputs"))
+    end
+
+    return candidate
 end
 
 function _normalize_grid_dict(obj)
@@ -138,8 +164,35 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
     )
     lock(_PNJL_SCAN_JOBS_LOCK) do
         _PNJL_SCAN_JOBS[job_id] = job
+        _prune_finished_jobs_locked!(_PNJL_SCAN_FINISHED_KEEP_MAX)
     end
     return job_id
+end
+
+function _prune_finished_jobs_locked!(keep_max::Int=_PNJL_SCAN_FINISHED_KEEP_MAX)
+    keep_max >= 0 || throw(ArgumentError("keep_max must be >= 0"))
+
+    finished = Tuple{String, Int}[]
+    for (job_id, job) in _PNJL_SCAN_JOBS
+        st = get(job, "status", "")
+        if st == "succeeded" || st == "failed"
+            push!(finished, (job_id, Int(get(job, "seq", typemax(Int)))))
+        end
+    end
+
+    excess = length(finished) - keep_max
+    excess <= 0 && return 0
+
+    sort!(finished; by=last)
+    removed = 0
+    for i in 1:excess
+        job_id = finished[i][1]
+        if haskey(_PNJL_SCAN_JOBS, job_id)
+            delete!(_PNJL_SCAN_JOBS, job_id)
+            removed += 1
+        end
+    end
+    return removed
 end
 
 function _queue_snapshot()
@@ -191,7 +244,7 @@ end
 
 function _safe_output_path(kind::String, params::Dict{Symbol, Any}, job_id::String)
     if haskey(params, :output_path)
-        return _to_string(params[:output_path], "")
+        return _ensure_safe_output_path(params[:output_path])
     end
 
     ts = Dates.format(Dates.now(), dateformat"yyyymmdd_HHMMSS")
@@ -202,6 +255,18 @@ function _safe_output_path(kind::String, params::Dict{Symbol, Any}, job_id::Stri
     else
         error("Unsupported scan kind: $(kind)")
     end
+end
+
+@inline function _build_job_diagnostics(job_id, kind, job_status; err=nothing)
+    payload = Dict{String, Any}(
+        "job_id" => job_id,
+        "kind" => kind,
+        "job_status" => job_status,
+    )
+    if err !== nothing
+        payload["error_type"] = string(typeof(err))
+    end
+    return payload
 end
 
 function _estimate_total_points(kind::String, params::Dict{Symbol, Any})
@@ -413,11 +478,13 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
                 "max_running" => _PNJL_SCAN_MAX_RUNNING,
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
+            "diagnostics" => _build_job_diagnostics(job_id, kind, "queued"),
         ))
     catch e
         return _json_response(400, Dict(
             "status" => "error",
             "error" => sprint(showerror, e),
+            "diagnostics" => _build_job_diagnostics(nothing, nothing, "rejected"; err=e),
         ))
     end
 end
@@ -444,6 +511,7 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
             "policy" => get(job, "policy", Dict{String, Any}()),
+            "diagnostics" => _build_job_diagnostics(job["job_id"], job["kind"], job["status"]),
         )
     end
 
@@ -461,6 +529,7 @@ function handle_pnjl_scan_job_result(job_id::String)
                 "job_id" => job_id,
                 "error" => "job not succeeded",
                 "job_status" => status,
+                "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
             )
         end
         output_path = get(result, "output_path", nothing)
@@ -473,6 +542,7 @@ function handle_pnjl_scan_job_result(job_id::String)
                 "output_exists" => output_path isa AbstractString ? isfile(output_path) : false,
                 "output_mtime" => output_path isa AbstractString && isfile(output_path) ? string(Dates.unix2datetime(mtime(output_path))) : nothing,
             ),
+            "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
         )
     end
 

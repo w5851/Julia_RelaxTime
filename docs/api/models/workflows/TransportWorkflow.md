@@ -30,6 +30,7 @@
 - `tau`, `tau_inv`, `rates`
 - `bulk_coeffs`
 - `transport`
+- `reproducibility`（`physics_profile`, `physics_config_path`）
 
 ## `solve_transport_from_equilibrium`
 

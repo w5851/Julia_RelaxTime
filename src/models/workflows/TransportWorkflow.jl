@@ -101,11 +101,23 @@ using .TransportCoefficients: rho_mass_from_densities
 
 const PNJL = Main.Models
 
+@inline function _models_api()
+    return (
+        create_model=Main.Models.create_model,
+        number_densities=Main.Models.number_densities,
+        model_thermo=Main.Models.model_thermo,
+        transport_provider=isdefined(Main.Models, :transport_provider) ? Main.Models.transport_provider : nothing,
+        transport_provider_type=isdefined(Main.Models, :TransportProvider) ? Main.Models.TransportProvider : nothing,
+        prepare_transport_provider=isdefined(Main.Models, :prepare_transport_provider) ? Main.Models.prepare_transport_provider : nothing,
+    )
+end
+
 @inline function _get_model(cache::WorkflowCache, model_kind::Symbol)
+    models = _models_api()
     lock(cache.lock)
     try
         return get!(cache.model_cache, model_kind) do
-            Main.Models.create_model(model_kind)
+            models.create_model(model_kind)
         end
     finally
         unlock(cache.lock)
@@ -281,6 +293,40 @@ end
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_PROVIDER_KEYS))...)
 end
 
+@inline function _workflow_warning_diagnostics(; job_id=nothing, T_fm::Real, mu_fm::Real, xi::Real, error_type::Union{Nothing,String}=nothing)
+    return (
+        job_id=job_id,
+        profile=get(ENV, "PHYSICS_PARAM_PROFILE", "default"),
+        T_fm=Float64(T_fm),
+        mu_fm=Float64(mu_fm),
+        xi=Float64(xi),
+        error_type=error_type,
+    )
+end
+
+@inline function _workflow_reproducibility_metadata()
+    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
+    physics_config_path = abspath(normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics", string(physics_profile, ".toml"))))
+    return (
+        physics_profile=physics_profile,
+        physics_config_path=physics_config_path,
+    )
+end
+
+@inline function _validate_workflow_tau_for_transport(tau::NamedTuple)
+    for sp in (:u, :d, :s, :ubar, :dbar, :sbar)
+        hasproperty(tau, sp) || throw(ArgumentError("tau is missing :$(sp)"))
+        τ = Float64(getproperty(tau, sp))
+        if !isfinite(τ)
+            throw(ArgumentError("workflow received non-finite tau.:$(sp); likely from safe_inv(0)=Inf upstream. Please provide finite tau or avoid zero relaxation rates."))
+        end
+        if τ < 0.0
+            throw(ArgumentError("tau.:$(sp) must be >= 0"))
+        end
+    end
+    return nothing
+end
+
 @inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
     prefer_energy_aniso === nothing && return provider
 
@@ -308,10 +354,11 @@ end
 end
 
 @inline function _default_transport_provider_for_backend(cache::WorkflowCache)
-    if isdefined(Main, :Models) && isdefined(Main.Models, :transport_provider)
+    models = _models_api()
+    if models.transport_provider !== nothing
         m = _get_model(cache, :PNJL)
         try
-            return Main.Models.transport_provider(m)
+            return models.transport_provider(m)
         catch
             return nothing
         end
@@ -335,7 +382,8 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
 end
 
 @inline function _densities_from_equilibrium(cache::WorkflowCache, x_state, mu_vec, T_fm, thermal_nodes, xi; p_num::Int, t_num::Int)
-    nd = Main.Models.number_densities(
+    models = _models_api()
+    nd = models.number_densities(
         _get_model(cache, :PNJL),
         x_state,
         T_fm,
@@ -363,7 +411,8 @@ end
         return (pressure=Float64(base.pressure), entropy=Float64(base.entropy), energy=Float64(base.energy))
     end
 
-    pressure, _, entropy, energy = Main.Models.model_thermo(
+    models = _models_api()
+    pressure, _, entropy, energy = models.model_thermo(
         _get_model(cache, :PNJL),
         base.x_state,
         base.mu_vec,
@@ -598,6 +647,8 @@ function solve_transport_from_equilibrium(
         tau === nothing && error("either provide tau=... or set compute_tau=true")
     end
 
+    _validate_workflow_tau_for_transport(tau)
+
     bulk_coeffs = nothing
     if compute_bulk
         bulk_coeffs = try
@@ -609,7 +660,13 @@ function solve_transport_from_equilibrium(
                 t_num=t_num,
             )
         catch bc_err
-            @warn "bulk_viscosity_coefficients failed — ζ will be NaN for this point" T_fm=T_fm mu_fm=mu_fm xi=xi err=bc_err
+            diag = _workflow_warning_diagnostics(
+                T_fm=T_fm,
+                mu_fm=mu_fm,
+                xi=xi,
+                error_type=string(typeof(bc_err)),
+            )
+            @warn "bulk_viscosity_coefficients failed — ζ will be NaN for this point" diagnostics=diag err=bc_err
             nothing
         end
     end
@@ -645,9 +702,10 @@ function solve_transport_from_equilibrium(
     else
         effective_provider = _apply_prefer_energy_aniso(effective_provider, prefer_effective)
     end
-    if effective_provider !== nothing && isdefined(Main, :Models) && isdefined(Main.Models, :TransportProvider)
-        if effective_provider isa Main.Models.TransportProvider && isdefined(Main.Models, :prepare_transport_provider)
-            effective_provider = Main.Models.prepare_transport_provider(
+    models = _models_api()
+    if effective_provider !== nothing && models.transport_provider_type !== nothing
+        if effective_provider isa models.transport_provider_type && models.prepare_transport_provider !== nothing
+            effective_provider = models.prepare_transport_provider(
                 effective_provider,
                 base;
                 quark_params=legacy_inputs.quark_params,
@@ -717,6 +775,7 @@ function solve_transport_from_equilibrium(
         rates=rates,
         bulk_coeffs=bulk_coeffs,
         transport=tr,
+        reproducibility=_workflow_reproducibility_metadata(),
     )
 end
 

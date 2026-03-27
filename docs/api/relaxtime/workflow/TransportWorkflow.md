@@ -23,6 +23,7 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   1. 调用 `ThermoDerivatives.solve_equilibrium_mu(T_fm, mu_fm; xi=xi, ...)` 得到平衡解 `x_state=(φ_u,φ_d,φ_s,Φ,Φbar)` 与热力学量。
   2. 从 `x_state` 提取 `Φ, Φbar`，并计算三味有效质量 `masses`。
   3. 若 `compute_tau=true`，用 `RelaxationTime.relaxation_times` 计算平均散射率与 τ，并返回 `tau/tau_inv/rates`（需要 `K_coeffs`）。
+  3a. workflow 会在进入输运积分前验证 `tau` 为有限且非负；若出现非有限值（常见于上游 `safe_inv(0)=Inf` 语义传播），会立即抛出 `ArgumentError` 并提示处理方式。
   4. 若 `compute_bulk=true`，用 `ThermoDerivatives.bulk_derivative_coeffs` 生成体粘滞 ζ 所需的导数组合。
   5. 调用 `TransportCoefficients.transport_coefficients(quark_params, thermo_params; tau=..., bulk_coeffs=...)` 返回 `(eta, zeta, sigma)`。
 
@@ -45,6 +46,9 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   - `rates`：平均散射率（若内部计算 τ 则给出，便于复用/诊断）
   - `bulk_coeffs`：`compute_bulk=true` 时给出
   - `transport`：`(eta, zeta, sigma)`
+  - `reproducibility`：复现元信息
+    - `physics_profile`：本次 workflow 使用的 `PHYSICS_PARAM_PROFILE`
+    - `physics_config_path`：解析得到的 `config/physics/<profile>.toml` 绝对路径（用于结果归档和复现记录）
 
 本页把 `solve_gap_and_transport` 视为 workflow 细节入口；“它适合哪些用户场景”与“何时改用 `solve_transport_from_equilibrium`”的高层说明留给 `Models` 侧入口页。
 
@@ -77,7 +81,7 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
 ## 示例
 
 ```julia
-include("src/pnjl/workflows/TransportWorkflow.jl")
+include("src/models/workflows/TransportWorkflow.jl")
 using .TransportWorkflow
 
 T = 0.15

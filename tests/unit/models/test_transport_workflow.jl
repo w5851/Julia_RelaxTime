@@ -93,4 +93,84 @@ end
         d1["transport_workflow"]["prefer_energy_aniso"] = false
         @test d2["transport_workflow"]["prefer_energy_aniso"] == true
     end
+
+    @testset "workflow warning diagnostics payload shape" begin
+        @test isdefined(_TW, :_workflow_warning_diagnostics)
+        diag = _TW._workflow_warning_diagnostics(T_fm=0.15, mu_fm=0.02, xi=0.1, error_type="ArgumentError")
+        @test hasproperty(diag, :job_id)
+        @test hasproperty(diag, :profile)
+        @test hasproperty(diag, :T_fm)
+        @test hasproperty(diag, :mu_fm)
+        @test hasproperty(diag, :xi)
+        @test hasproperty(diag, :error_type)
+        @test diag.T_fm == 0.15
+        @test diag.mu_fm == 0.02
+        @test diag.xi == 0.1
+        @test diag.error_type == "ArgumentError"
+    end
+
+    @testset "models API facade exists and wired" begin
+        @test isdefined(_TW, :_models_api)
+        api = _TW._models_api()
+        @test api.create_model !== nothing
+        @test api.number_densities !== nothing
+        @test api.model_thermo !== nothing
+        @test api.transport_provider !== nothing
+        @test api.transport_provider_type !== nothing
+        @test api.prepare_transport_provider !== nothing
+    end
+
+    @testset "workflow reproducibility metadata helper" begin
+        @test isdefined(_TW, :_workflow_reproducibility_metadata)
+        meta = _TW._workflow_reproducibility_metadata()
+        profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
+        @test hasproperty(meta, :physics_profile)
+        @test hasproperty(meta, :physics_config_path)
+        @test meta.physics_profile == profile
+        @test meta.physics_config_path isa String
+        @test endswith(meta.physics_config_path, string(profile, ".toml"))
+    end
+
+    @testset "workflow result includes reproducibility metadata" begin
+        tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+        res = _TW.solve_gap_and_transport(
+            0.15,
+            0.0;
+            xi=0.0,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=6,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            transport_config=_TW.TransportCoefficients.TransportIntegrationConfig(p_nodes=6, p_max=3.0),
+        )
+        @test hasproperty(res, :reproducibility)
+        @test hasproperty(res.reproducibility, :physics_profile)
+        @test hasproperty(res.reproducibility, :physics_config_path)
+    end
+
+    @testset "workflow rejects non-finite tau from safe_inv semantics" begin
+        tau_bad = (u=Inf, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+        err = try
+            _TW.solve_gap_and_transport(
+                0.15,
+                0.0;
+                xi=0.0,
+                tau=tau_bad,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=6,
+                t_num=4,
+                solver_kwargs=(iterations=20,),
+                transport_config=_TW.TransportCoefficients.TransportIntegrationConfig(p_nodes=6, p_max=3.0),
+            )
+            nothing
+        catch e
+            e
+        end
+
+        @test err isa ArgumentError
+        @test occursin("safe_inv(0)=Inf", sprint(showerror, err))
+    end
 end
