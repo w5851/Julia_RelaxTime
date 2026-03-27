@@ -67,6 +67,8 @@ end
         @test resp.status == 400
         @test body.status == "error"
         @test occursin("max_retries", String(body.error))
+        @test haskey(body, :diagnostics)
+        @test body.diagnostics.error_type in ("ErrorException", "ArgumentError")
     end
 
     @testset "xi strategy exclusivity gate" begin
@@ -92,12 +94,18 @@ end
         status_body = _body_dict(status_payload)
         @test status_payload.status == 200
         @test status_body.job_status == "queued"
+        @test haskey(status_body, :diagnostics)
+        @test status_body.diagnostics.job_id == job_id
+        @test status_body.diagnostics.kind == "tmu"
+        @test status_body.diagnostics.job_status == "queued"
 
         result_payload = PSJ.handle_pnjl_scan_job_result(job_id)
         result_body = _body_dict(result_payload)
         @test result_payload.status == 409
         @test result_body.status == "error"
         @test result_body.job_status == "queued"
+        @test haskey(result_body, :diagnostics)
+        @test result_body.diagnostics.job_id == job_id
     end
 
     @testset "queue limit gate" begin

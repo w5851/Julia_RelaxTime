@@ -229,6 +229,18 @@ function _safe_output_path(kind::String, params::Dict{Symbol, Any}, job_id::Stri
     end
 end
 
+@inline function _build_job_diagnostics(job_id, kind, job_status; err=nothing)
+    payload = Dict{String, Any}(
+        "job_id" => job_id,
+        "kind" => kind,
+        "job_status" => job_status,
+    )
+    if err !== nothing
+        payload["error_type"] = string(typeof(err))
+    end
+    return payload
+end
+
 function _estimate_total_points(kind::String, params::Dict{Symbol, Any})
     xi_values = _resolve_xi_values(params)
     n_xi = length(xi_values)
@@ -438,11 +450,13 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
                 "max_running" => _PNJL_SCAN_MAX_RUNNING,
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
+            "diagnostics" => _build_job_diagnostics(job_id, kind, "queued"),
         ))
     catch e
         return _json_response(400, Dict(
             "status" => "error",
             "error" => sprint(showerror, e),
+            "diagnostics" => _build_job_diagnostics(nothing, nothing, "rejected"; err=e),
         ))
     end
 end
@@ -469,6 +483,7 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
             "policy" => get(job, "policy", Dict{String, Any}()),
+            "diagnostics" => _build_job_diagnostics(job["job_id"], job["kind"], job["status"]),
         )
     end
 
@@ -486,6 +501,7 @@ function handle_pnjl_scan_job_result(job_id::String)
                 "job_id" => job_id,
                 "error" => "job not succeeded",
                 "job_status" => status,
+                "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
             )
         end
         output_path = get(result, "output_path", nothing)
@@ -498,6 +514,7 @@ function handle_pnjl_scan_job_result(job_id::String)
                 "output_exists" => output_path isa AbstractString ? isfile(output_path) : false,
                 "output_mtime" => output_path isa AbstractString && isfile(output_path) ? string(Dates.unix2datetime(mtime(output_path))) : nothing,
             ),
+            "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
         )
     end
 
