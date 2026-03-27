@@ -618,3 +618,25 @@ The parameter struct migration provides:
 ✅ **Better documentation** through explicit types  
 
 **Recommendation**: Use structs for new code, but don't worry about updating existing code unless you want the benefits of type safety.
+
+## Deprecation Timeline (P1-R4)
+
+This section tracks compatibility aliases that are still available but should not be used in new code.
+
+### Workflow adapters
+
+- `as_legacy_inputs(q, t)` -> use `as_relaxtime_inputs(q, t)`
+  - Current status: deprecated (emits `Base.depwarn`)
+  - Kept for explicit compatibility paths only
+
+### Planned retirement phases
+
+- **Phase A (current)**: keep deprecated helper available; all new examples use `as_relaxtime_inputs`.
+- **Phase B (not earlier than 2026-06-30)**: keep helper but document as legacy-only; no new tests may depend on it.
+- **Phase C (after exit criteria)**: remove `as_legacy_inputs` from runtime surface.
+
+### Exit criteria for removal
+
+1. Compatibility test coverage no longer depends on `as_legacy_inputs` behavior.
+2. Docs/api and migration examples contain only canonical helper (`as_relaxtime_inputs`).
+3. One full release cycle passes without compatibility rollback requests.

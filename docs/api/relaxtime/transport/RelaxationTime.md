@@ -8,6 +8,42 @@
 - `relaxation_rates(densities, rates)`
 - `relaxation_times(quark_params, thermo_params, K_coeffs; densities, ...)`
 
+## 兼容别名与退场节奏
+
+本模块仍保留少量历史兼容入口，便于旧脚本平滑迁移；新代码应统一使用 canonical API。
+
+### 当前兼容别名清单（P1-R4）
+
+- `rate_lookup(rates, key)` -> **替代接口**：`rate_value(rates, key)`
+  - 现状：调用时触发 `Base.depwarn`
+  - 用途：仅历史调用兼容
+
+- `rate_value` 的历史过程键别名（通过 `RATE_ALIASES` 解析）
+  - 示例：`:dubar_to_dubar -> :udbar_to_udbar`
+  - 示例：`:subar_to_subar -> :usbar_to_usbar`
+  - 示例：`:ubardbar_to_ubardbar -> :ud_to_ud`
+  - 示例：`:ubarubar_to_ubarubar -> :uu_to_uu`
+  - 示例：`:ubarsbar_to_ubarsbar -> :us_to_us`
+  - 示例：`:sbarsbar_to_sbarsbar -> :ss_to_ss`
+  - 现状：兼容接受，不主动告警
+  - 用途：旧数据/旧脚本过程名兼容
+
+### 退场计划（文档口径）
+
+- **阶段 A（当前）**：保留兼容入口；新文档与新示例仅展示 canonical 名称。
+- **阶段 B（不早于 2026-06-30）**：
+  - `rate_lookup` 继续保留但强化弃用提示（迁移提示指向 `rate_value`）。
+  - 过程键旧别名继续兼容，但在文档中标记为“legacy only”。
+- **阶段 C（移除门槛达成后）**：移除 `rate_lookup`。
+
+### 移除门槛
+
+满足以下条件后，才允许进入阶段 C：
+
+1. 兼容测试替换完成（`test_relaxation_time_compat.jl` 不再依赖 `rate_lookup`）。
+2. 文档与脚本示例不再出现旧入口。
+3. 至少一个完整发布周期内无新的兼容回归反馈。
+
 ## 数学定义
 $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 
