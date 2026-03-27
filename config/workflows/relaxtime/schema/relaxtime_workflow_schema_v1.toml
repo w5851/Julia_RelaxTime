@@ -1,0 +1,20 @@
+schema_version = "v1"
+schema_name = "relaxtime_workflow"
+
+[required]
+top_level = ["schema_version", "scan", "plot"]
+
+[required.scan]
+sections = ["transport", "cross_section"]
+
+[required.plot]
+sections = ["transport", "cross_section"]
+
+[contracts]
+precedence = "default < TOML < CLI"
+default_xi_list = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3]
+default_T_list_MeV = [150.0, 250.0]
+default_cross_section_processes = ["ud_to_ud", "us_to_us", "udbar_to_udbar", "usbar_to_usbar"]
+
+[scan.cross_section.energy]
+mode_enum = ["list", "linspace"]

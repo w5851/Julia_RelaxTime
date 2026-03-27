@@ -1,0 +1,26 @@
+schema_version = "v1"
+profile_name = "muB0_transport_xi"
+
+[scan.transport]
+muB_MeV = 0.0
+xi_list = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3]
+tmin_MeV = 120.0
+tmax_MeV = 350.0
+tstep_MeV = 10.0
+
+[plot.transport]
+x = "T_MeV"
+group = "xi"
+ys = [
+  "eta_over_s",
+  "zeta_over_s",
+  "sigma_over_T",
+  "sigma_over_T_over_eta_over_s",
+  "zeta_over_s_over_eta_over_s",
+  "tau_u",
+  "tau_d",
+  "tau_s",
+  "tau_ubar",
+  "tau_dbar",
+  "tau_sbar",
+]

@@ -1,0 +1,20 @@
+schema_version = "v1"
+profile_name = "muB0_cross_section_xi"
+
+[scan.cross_section]
+muB_MeV = 0.0
+T_list_MeV = [150.0, 250.0]
+xi_list = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3]
+processes = ["ud_to_ud", "us_to_us", "udbar_to_udbar", "usbar_to_usbar"]
+n_points = 64
+
+[scan.cross_section.energy]
+mode = "linspace"
+sqrt_s_min_MeV = 300.0
+sqrt_s_max_MeV = 2000.0
+sqrt_s_num = 64
+
+[plot.cross_section]
+x = "sqrt_s_MeV"
+group = "xi"
+split = "process"
