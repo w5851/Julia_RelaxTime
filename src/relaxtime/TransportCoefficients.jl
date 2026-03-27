@@ -749,28 +749,25 @@ end
     return _merge_transport_integration_config(base_config, kwargs)
 end
 
-@inline function _validate_transport_inputs(
-    quark_params::NamedTuple,
-    thermo_params::NamedTuple,
-    tau::NamedTuple,
-    config::TransportIntegrationConfig;
-    provider=nothing,
-    charges::Union{Nothing,NamedTuple}=nothing,
-    bulk_coeffs_isentropic::Union{Nothing,NamedTuple}=nothing,
-)
-    T = thermo_params.T
-    require_positive_finite("thermo_params.T", T)
-    require_finite("thermo_params.Φ", thermo_params.Φ)
-    require_finite("thermo_params.Φbar", thermo_params.Φbar)
-
+@inline function _validate_tau_namedtuple(tau::NamedTuple)
     for sp in _SPECIES_ALL
         τ = tau_for_species(sp, tau)
         require_nonnegative_finite("tau.:$sp", τ)
     end
+    return nothing
+end
+
+@inline function _validate_quark_thermo_inputs(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple;
+    provider=nothing,
+)
+    require_positive_finite("thermo_params.T", thermo_params.T)
+    require_finite("thermo_params.Φ", thermo_params.Φ)
+    require_finite("thermo_params.Φbar", thermo_params.Φbar)
 
     check_mass = provider === nothing || !hasproperty(provider, :mass_for_species)
     check_mu = provider === nothing || !hasproperty(provider, :mu_for_species)
-
     for fl in _FLAVORS
         m = getproperty(quark_params.m, fl)
         μ = getproperty(quark_params.μ, fl)
@@ -781,6 +778,37 @@ end
             require_finite("quark_params.μ.$fl", μ)
         end
     end
+    return nothing
+end
+
+@inline function _validate_bulk_coeffs_isentropic(coeffs::NamedTuple)
+    require_finite("bulk_coeffs_isentropic.v_n_sq", coeffs.v_n_sq)
+    require_finite("bulk_coeffs_isentropic.dμB_dT_sigma", coeffs.dμB_dT_sigma)
+
+    length(coeffs.masses) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.masses must have length 3"))
+    length(coeffs.dM_dT) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must have length 3"))
+    length(coeffs.dM_dμB) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must have length 3"))
+
+    all(isfinite, coeffs.masses) || throw(ArgumentError("bulk_coeffs_isentropic.masses must be finite"))
+    if !all(m -> m >= 0.0, coeffs.masses)
+        @warn "bulk_coeffs_isentropic.masses contains negative value(s) — may indicate unphysical gap solution; proceeding with abs(m)" masses=coeffs.masses
+    end
+    all(isfinite, coeffs.dM_dT) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must be finite"))
+    all(isfinite, coeffs.dM_dμB) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must be finite"))
+    return nothing
+end
+
+@inline function _validate_transport_inputs(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple,
+    config::TransportIntegrationConfig;
+    provider=nothing,
+    charges::Union{Nothing,NamedTuple}=nothing,
+    bulk_coeffs_isentropic::Union{Nothing,NamedTuple}=nothing,
+)
+    _validate_quark_thermo_inputs(quark_params, thermo_params; provider=provider)
+    _validate_tau_namedtuple(tau)
 
     require_positive_integer("integration p_nodes", config.p_nodes)
     require_positive_integer("integration cos_nodes", config.cos_nodes)
@@ -793,19 +821,7 @@ end
     end
 
     if bulk_coeffs_isentropic !== nothing
-        require_finite("bulk_coeffs_isentropic.v_n_sq", bulk_coeffs_isentropic.v_n_sq)
-        require_finite("bulk_coeffs_isentropic.dμB_dT_sigma", bulk_coeffs_isentropic.dμB_dT_sigma)
-
-        length(bulk_coeffs_isentropic.masses) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.masses must have length 3"))
-        length(bulk_coeffs_isentropic.dM_dT) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must have length 3"))
-        length(bulk_coeffs_isentropic.dM_dμB) == 3 || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must have length 3"))
-
-        all(isfinite, bulk_coeffs_isentropic.masses) || throw(ArgumentError("bulk_coeffs_isentropic.masses must be finite"))
-        if !all(m -> m >= 0.0, bulk_coeffs_isentropic.masses)
-            @warn "bulk_coeffs_isentropic.masses contains negative value(s) — may indicate unphysical gap solution; proceeding with abs(m)" masses=bulk_coeffs_isentropic.masses
-        end
-        all(isfinite, bulk_coeffs_isentropic.dM_dT) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dT must be finite"))
-        all(isfinite, bulk_coeffs_isentropic.dM_dμB) || throw(ArgumentError("bulk_coeffs_isentropic.dM_dμB must be finite"))
+        _validate_bulk_coeffs_isentropic(bulk_coeffs_isentropic)
     end
 
     return nothing

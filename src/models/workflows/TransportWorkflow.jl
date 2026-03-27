@@ -136,6 +136,40 @@ const A_BUILDER_KEYS = (
     :use_aniso,
 )
 
+const DEFAULT_A_BUILDER_FALLBACK = (
+    p_nodes=16,
+    p_max=20.0,
+    cos_nodes=4,
+    use_aniso=true,
+)
+
+const DEFAULT_PHYSICS_FALLBACK_NT = (
+    physical=(
+        hbarc=197.3269804,
+        alpha_em=0.0072973525664,
+    ),
+    transport_workflow=(
+        prefer_energy_aniso=true,
+        a_builder=DEFAULT_A_BUILDER_FALLBACK,
+    ),
+)
+
+@inline function _namedtuple_to_string_dict(x::NamedTuple)::Dict{String, Any}
+    d = Dict{String, Any}()
+    for (k, v) in pairs(x)
+        if v isa NamedTuple
+            d[String(k)] = _namedtuple_to_string_dict(v)
+        else
+            d[String(k)] = v
+        end
+    end
+    return d
+end
+
+@inline function _default_physics_fallback_dict()::Dict{String, Any}
+    return deepcopy(_namedtuple_to_string_dict(DEFAULT_PHYSICS_FALLBACK_NT))
+end
+
 @inline function _drop_transport_integration_keys(kwargs::NamedTuple)::NamedTuple
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_INTEGRATION_KEYS))...)
 end
@@ -162,15 +196,7 @@ end
 
     physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
 
-    default_physics = Dict{String, Any}(
-        "physical" => Dict(
-            "hbarc" => 197.3269804,
-            "alpha_em" => 0.0072973525664,
-        ),
-        "transport_workflow" => Dict(
-            "prefer_energy_aniso" => true,
-        ),
-    )
+    default_physics = _default_physics_fallback_dict()
 
     data = load_config(physics_dir, default_physics; profile=physics_profile)
     cfg = data.config
@@ -203,21 +229,7 @@ end
 
     physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
 
-    default_physics = Dict{String, Any}(
-        "physical" => Dict(
-            "hbarc" => 197.3269804,
-            "alpha_em" => 0.0072973525664,
-        ),
-        "transport_workflow" => Dict(
-            "prefer_energy_aniso" => true,
-            "a_builder" => Dict(
-                "p_nodes" => 16,
-                "p_max" => 20.0,
-                "cos_nodes" => 4,
-                "use_aniso" => true,
-            ),
-        ),
-    )
+    default_physics = _default_physics_fallback_dict()
 
     data = load_config(physics_dir, default_physics; profile=physics_profile)
     cfg = data.config
