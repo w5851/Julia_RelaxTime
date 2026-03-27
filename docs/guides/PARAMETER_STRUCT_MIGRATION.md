@@ -21,15 +21,15 @@ Phase B extends the migration from RelaxationTime chain to PNJL workflows/scans.
 ### Completed
 
 1. **Workflow normalization adapter extracted**
-     - Added: `src/pnjl/workflows/WorkflowParamAdapters.jl`
+     - Added: `src/models/workflows/WorkflowParamAdapters.jl`
      - Shared helpers:
          - `normalize_quark_params`
          - `normalize_thermo_params`
          - `as_legacy_inputs`（已弃用，仅兼容用途）
 
 2. **Workflow modules switched to shared adapter**
-     - `src/pnjl/workflows/TransportWorkflow.jl`
-     - `src/pnjl/workflows/MesonMassWorkflow.jl`
+     - `src/models/workflows/TransportWorkflow.jl`
+     - `src/models/workflows/MesonMassWorkflow.jl`
 
 3. **Structured scan config objects added (non-breaking)**
      - Added: `src/pnjl/scans/ScanConfig.jl`
