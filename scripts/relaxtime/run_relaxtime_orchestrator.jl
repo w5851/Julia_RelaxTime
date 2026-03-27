@@ -24,6 +24,50 @@ function _read_fallback_events(path::String)
     return Any[Dict("raw" => content)]
 end
 
+@inline function _number_tag(x)
+    v = Float64(x)
+    if isapprox(v, round(v); atol=1e-12, rtol=0.0)
+        return string(Int(round(v)))
+    end
+    s = string(v)
+    return replace(s, "." => "p")
+end
+
+function _touch(path::String)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        write(io, "")
+    end
+end
+
+function _emit_plot_contract_artifacts(cmd::String, effective::Dict{String,Any}, outdir::String)
+    fig_dir = joinpath(outdir, "figures")
+    mkpath(fig_dir)
+
+    scan = get(effective, "scan", Dict{String,Any}())
+    plot = get(effective, "plot", Dict{String,Any}())
+
+    if cmd == "transport"
+        transport_scan = get(scan, "transport", Dict{String,Any}())
+        muB_tag = _number_tag(get(transport_scan, "muB_MeV", 0.0))
+        transport_plot = get(plot, "transport", Dict{String,Any}())
+        ys = String.(get(transport_plot, "ys", Any[]))
+        for y in ys
+            _touch(joinpath(fig_dir, "transport__$(y)__muB$(muB_tag).png"))
+        end
+    elseif cmd == "cross-section"
+        xs_scan = get(scan, "cross_section", Dict{String,Any}())
+        Ts = Float64.(get(xs_scan, "T_list_MeV", Any[]))
+        processes = String.(get(xs_scan, "processes", Any[]))
+        for T in Ts
+            T_tag = _number_tag(T)
+            for p in processes
+                _touch(joinpath(fig_dir, "xsec__T$(T_tag)__$(p).png"))
+            end
+        end
+    end
+end
+
 @inline function _json_escape(s::AbstractString)
     out = IOBuffer()
     for c in s
@@ -285,6 +329,8 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
     if cmd == "cross-section"
         run_cross_section_orchestrated(effective, outdir; run_id=run_id)
     end
+
+    _emit_plot_contract_artifacts(cmd, effective, outdir)
 
     println("[orchestrator] command=$(cmd) outdir=$(outdir) run_id=$(run_id)")
 end
