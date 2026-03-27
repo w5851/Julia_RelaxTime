@@ -17,6 +17,17 @@ Models.pnjl_module()
 
 const _TW = Models.TransportWorkflow
 
+function _contains_mutable_container(x)
+    if x isa Dict || x isa Vector
+        return true
+    elseif x isa NamedTuple
+        for v in values(x)
+            _contains_mutable_container(v) && return true
+        end
+    end
+    return false
+end
+
 # ============================================================================
 
 @testset "TransportWorkflow" begin
@@ -68,5 +79,18 @@ const _TW = Models.TransportWorkflow
         @test haskey(cache.model_cache, :PNJL)
         @test isempty(cache.prefer_energy_aniso_cache)
         @test isempty(cache.a_builder_config_cache)
+    end
+
+    @testset "fallback schema and local dict isolation" begin
+        @test isdefined(_TW, :DEFAULT_PHYSICS_FALLBACK_NT)
+        @test isdefined(_TW, :DEFAULT_A_BUILDER_FALLBACK)
+        @test !_contains_mutable_container(getproperty(_TW, :DEFAULT_PHYSICS_FALLBACK_NT))
+        @test !_contains_mutable_container(getproperty(_TW, :DEFAULT_A_BUILDER_FALLBACK))
+
+        @test isdefined(_TW, :_default_physics_fallback_dict)
+        d1 = _TW._default_physics_fallback_dict()
+        d2 = _TW._default_physics_fallback_dict()
+        d1["transport_workflow"]["prefer_energy_aniso"] = false
+        @test d2["transport_workflow"]["prefer_energy_aniso"] == true
     end
 end

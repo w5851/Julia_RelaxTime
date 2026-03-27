@@ -141,6 +141,12 @@ end
     tau_missing = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0)
     @test_throws ErrorException shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=tau_missing, config=cfg)
 
+    tau_bad_nonfinite = (u=1.0, d=NaN, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+    @test_throws ArgumentError shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=tau_bad_nonfinite, config=cfg)
+
+    tau_bad_negative = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=-1.0, sbar=1.0)
+    @test_throws ArgumentError shear_viscosity(QUARK_PARAMS, THERMO_PARAMS; tau=tau_bad_negative, config=cfg)
+
     bad_charges = (u=NaN, d=-1 / 3, s=-1 / 3)
     @test_throws ArgumentError electric_conductivity(QUARK_PARAMS, THERMO_PARAMS; tau=TAU_ONE, config=cfg, charges=bad_charges)
 
@@ -158,6 +164,21 @@ end
         tau=TAU_ONE,
         config=bad_cfg,
         bulk_coeffs_isentropic=bad_bulk,
+    )
+
+    bad_bulk_nonfinite = (
+        v_n_sq=0.3,
+        dμB_dT_sigma=Inf,
+        masses=[0.3, 0.3, 0.5],
+        dM_dT=[0.0, 0.0, NaN],
+        dM_dμB=[0.0, 0.0, 0.0],
+    )
+    @test_throws ArgumentError bulk_viscosity_isentropic(
+        QUARK_PARAMS,
+        THERMO_PARAMS;
+        tau=TAU_ONE,
+        config=bad_cfg,
+        bulk_coeffs_isentropic=bad_bulk_nonfinite,
     )
 end
 
@@ -466,4 +487,3 @@ end
     @test isapprox(tr_full.prandtl_number, tr_full.eta * 1.8 / (tr_full.lambda * 0.75); rtol=1e-12, atol=0.0)
     @test isnan(tr_full.bulk_to_shear_viscosity_ratio)
 end
-
