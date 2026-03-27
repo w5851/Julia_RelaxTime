@@ -4,9 +4,11 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfig.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfigAudit.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_cross_section_orchestrated_scan.jl"))
 
 using .WorkflowConfig: normalize_merge_validate
 using .WorkflowConfigAudit: build_consumption_report
+using .CrossSectionOrchestratedScan: run_cross_section_orchestrated
 using TOML
 using Dates
 using SHA
@@ -279,6 +281,10 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
         "trace" => String.(merged.trace),
     )
     _write_json(joinpath(outdir, "run_manifest.json"), manifest)
+
+    if cmd == "cross-section"
+        run_cross_section_orchestrated(effective, outdir; run_id=run_id)
+    end
 
     println("[orchestrator] command=$(cmd) outdir=$(outdir) run_id=$(run_id)")
 end
