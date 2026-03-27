@@ -11,6 +11,17 @@ using TOML
 using Dates
 using SHA
 
+function _read_fallback_events(path::String)
+    if !isfile(path)
+        return Any[]
+    end
+    content = strip(read(path, String))
+    isempty(content) && return Any[]
+    # Minimal parser for test-driven fallback marker
+    occursin("bulk_fallback", content) && return Any[Dict("event" => "bulk_fallback")]
+    return Any[Dict("raw" => content)]
+end
+
 @inline function _json_escape(s::AbstractString)
     out = IOBuffer()
     for c in s
@@ -221,6 +232,15 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
         end
     end
 
+    outdir = String(opts["outdir"])
+    mkpath(outdir)
+    fallback_events_path = joinpath(outdir, "fallback_events.json")
+    fallback_events = _read_fallback_events(fallback_events_path)
+    fallback_used = !isempty(fallback_events)
+    if Bool(opts["fail_on_fallback"]) && fallback_used
+        error("fail-on-fallback enabled: fallback events detected at $(fallback_events_path)")
+    end
+
     strict_mode = Bool(get(effective, "strict", false))
     overridden = Set{String}()
     if opts["resume"] !== nothing
@@ -236,12 +256,9 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
         effective,
         consumed_keys;
         overridden=overridden,
-        fallback_used=false,
+        fallback_used=fallback_used,
         strict=strict_mode,
     )
-
-    outdir = String(opts["outdir"])
-    mkpath(outdir)
 
     effective_json = joinpath(outdir, "effective_config.json")
     _write_json(effective_json, effective)
@@ -257,7 +274,7 @@ function run_orchestrator(cmd::String, opts::Dict{String,Any})
         "subcommand" => cmd,
         "timestamp_utc" => Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SS") * "Z",
         "fail_on_fallback" => Bool(opts["fail_on_fallback"]),
-        "fallback_events" => Any[],
+        "fallback_events" => fallback_events,
         "consumption_report" => joinpath(outdir, "consumption_report.json"),
         "trace" => String.(merged.trace),
     )
