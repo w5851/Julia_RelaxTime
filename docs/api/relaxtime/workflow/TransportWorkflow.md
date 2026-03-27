@@ -23,6 +23,7 @@ solve_gap_and_transport(T_fm, mu_fm; xi=0.0, compute_tau=false, K_coeffs=nothing
   1. 调用 `ThermoDerivatives.solve_equilibrium_mu(T_fm, mu_fm; xi=xi, ...)` 得到平衡解 `x_state=(φ_u,φ_d,φ_s,Φ,Φbar)` 与热力学量。
   2. 从 `x_state` 提取 `Φ, Φbar`，并计算三味有效质量 `masses`。
   3. 若 `compute_tau=true`，用 `RelaxationTime.relaxation_times` 计算平均散射率与 τ，并返回 `tau/tau_inv/rates`（需要 `K_coeffs`）。
+  3a. workflow 会在进入输运积分前验证 `tau` 为有限且非负；若出现非有限值（常见于上游 `safe_inv(0)=Inf` 语义传播），会立即抛出 `ArgumentError` 并提示处理方式。
   4. 若 `compute_bulk=true`，用 `ThermoDerivatives.bulk_derivative_coeffs` 生成体粘滞 ζ 所需的导数组合。
   5. 调用 `TransportCoefficients.transport_coefficients(quark_params, thermo_params; tau=..., bulk_coeffs=...)` 返回 `(eta, zeta, sigma)`。
 

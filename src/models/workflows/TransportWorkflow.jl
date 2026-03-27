@@ -313,6 +313,20 @@ end
     )
 end
 
+@inline function _validate_workflow_tau_for_transport(tau::NamedTuple)
+    for sp in (:u, :d, :s, :ubar, :dbar, :sbar)
+        hasproperty(tau, sp) || throw(ArgumentError("tau is missing :$(sp)"))
+        τ = Float64(getproperty(tau, sp))
+        if !isfinite(τ)
+            throw(ArgumentError("workflow received non-finite tau.:$(sp); likely from safe_inv(0)=Inf upstream. Please provide finite tau or avoid zero relaxation rates."))
+        end
+        if τ < 0.0
+            throw(ArgumentError("tau.:$(sp) must be >= 0"))
+        end
+    end
+    return nothing
+end
+
 @inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
     prefer_energy_aniso === nothing && return provider
 
@@ -632,6 +646,8 @@ function solve_transport_from_equilibrium(
         # 若不内部计算 τ，则要求调用方提供 τ
         tau === nothing && error("either provide tau=... or set compute_tau=true")
     end
+
+    _validate_workflow_tau_for_transport(tau)
 
     bulk_coeffs = nothing
     if compute_bulk

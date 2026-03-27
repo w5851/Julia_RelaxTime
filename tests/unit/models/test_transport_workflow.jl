@@ -149,4 +149,28 @@ end
         @test hasproperty(res.reproducibility, :physics_profile)
         @test hasproperty(res.reproducibility, :physics_config_path)
     end
+
+    @testset "workflow rejects non-finite tau from safe_inv semantics" begin
+        tau_bad = (u=Inf, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
+        err = try
+            _TW.solve_gap_and_transport(
+                0.15,
+                0.0;
+                xi=0.0,
+                tau=tau_bad,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=6,
+                t_num=4,
+                solver_kwargs=(iterations=20,),
+                transport_config=_TW.TransportCoefficients.TransportIntegrationConfig(p_nodes=6, p_max=3.0),
+            )
+            nothing
+        catch e
+            e
+        end
+
+        @test err isa ArgumentError
+        @test occursin("safe_inv(0)=Inf", sprint(showerror, err))
+    end
 end
