@@ -179,12 +179,12 @@ Numeric tag format:
 ## Preparation Checklist Before Implementation
 
 - [x] Freeze temperature executable contract as `T_min/T_max/T_step`.
-- [ ] Add dedicated `muB=0` Mott scan entrypoint with frozen default `xi` list.
-- [ ] Add derived-field builder (`M_u_plus_M_d`, `M_u_plus_M_s`).
-- [ ] Add Mode A and Mode B plotting wrappers.
-- [ ] Add smoke tests for row count and figure count contracts.
-- [ ] Document commands and metadata schema in user-facing docs.
+- [x] Add dedicated `muB=0` Mott scan entrypoint with frozen default `xi` list.
+- [x] Add derived-field builder (`M_u_plus_M_d`, `M_u_plus_M_s`).
+- [x] Add Mode A and Mode B plotting wrappers.
+- [x] Add smoke tests for row count and figure count contracts.
+- [x] Document commands and metadata schema in user-facing docs.
 
 ## Recommended Next Step
 
-Temperature executable contract is confirmed as `T_min/T_max/T_step`; next step is direct implementation with smoke-level acceptance checks.
+Core v1 implementation is in place with smoke-level acceptance checks passing. Next step can move to stronger governance/consistency gates if needed.

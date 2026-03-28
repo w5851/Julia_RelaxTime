@@ -282,6 +282,9 @@ function main()
         "run_id",
         "T_MeV", "muB_MeV", "xi",
         "M_pi", "M_K", "Gamma_pi", "Gamma_K",
+        "residual_pi", "residual_K",
+        "root_quality_pi", "root_quality_K",
+        "selected_method_pi", "selected_method_K",
         "m_u", "m_d", "m_s",
         "status", "error_code", "error_message", "timestamp_utc",
     ]
@@ -305,11 +308,15 @@ function main()
             ScanCSV.write_header(io, cols)
         end
 
-        T = opts.T_min_MeV
-        while T <= opts.T_max_MeV + 1e-9
-            for xi in opts.xi_list
+        for xi in opts.xi_list
+            meson_seed_state = nothing
+            mixed_seed_tracking_state = nothing
+
+            T = opts.T_min_MeV
+            while T <= opts.T_max_MeV + 1e-9
                 key = (Float64(T), Float64(opts.muB_MeV), Float64(xi))
                 if key in existing_keys
+                    T += opts.T_step_MeV
                     continue
                 end
 
@@ -323,6 +330,12 @@ function main()
                     "M_K" => NaN,
                     "Gamma_pi" => NaN,
                     "Gamma_K" => NaN,
+                    "residual_pi" => NaN,
+                    "residual_K" => NaN,
+                    "root_quality_pi" => "",
+                    "root_quality_K" => "",
+                    "selected_method_pi" => "",
+                    "selected_method_K" => "",
                     "m_u" => NaN,
                     "m_d" => NaN,
                     "m_s" => NaN,
@@ -340,6 +353,9 @@ function main()
                         mu_fm;
                         xi=xi,
                         mesons=(:pi, :K),
+                        meson_seed_state=meson_seed_state,
+                        mixed_seed_tracking_state=mixed_seed_tracking_state,
+                        mixed_branch_align=:identity_track_label_output,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
                         solver_kwargs=(; iterations=opts.max_iter),
@@ -354,9 +370,18 @@ function main()
                     row["M_K"] = mk.mass
                     row["Gamma_pi"] = mpi.gamma
                     row["Gamma_K"] = mk.gamma
+                    row["residual_pi"] = mpi.residual
+                    row["residual_K"] = mk.residual
+                    row["root_quality_pi"] = String(mpi.root_quality)
+                    row["root_quality_K"] = String(mk.root_quality)
+                    row["selected_method_pi"] = String(mpi.root_diagnostics.selected_method)
+                    row["selected_method_K"] = String(mk.root_diagnostics.selected_method)
                     row["m_u"] = qp.m.u
                     row["m_d"] = qp.m.d
                     row["m_s"] = qp.m.s
+
+                    meson_seed_state = res.meson_seed_state
+                    mixed_seed_tracking_state = res.mixed_seed_tracking
                 catch e
                     row["status"] = "error"
                     row["error_code"] = "E_SOLVE"
@@ -365,8 +390,8 @@ function main()
 
                 println(io, join([_fmt(get(row, c, "")) for c in cols], ','))
                 push!(existing_keys, key)
+                T += opts.T_step_MeV
             end
-            T += opts.T_step_MeV
         end
     end
 

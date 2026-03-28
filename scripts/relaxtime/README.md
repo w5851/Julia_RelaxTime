@@ -35,6 +35,9 @@
   - 推荐默认值：`120.0`, `260.0`, `2.0`
 - 目标因变量：
   - `M_pi`, `M_K`, `Gamma_pi`, `Gamma_K`, `M_u_plus_M_d`, `M_u_plus_M_s`
+- 数值连续性策略：
+  - 扫描按每个 `xi` 的温度升序执行。
+  - 默认启用 meson 连续性初值传递（`meson_seed_state` + `mixed_seed_tracking_state`）以抑制根切换导致的伪跳变。
 - 绘图组织：
   - Mode A：不同因变量同图，不同 `xi` 分图
   - Mode B：不同 `xi` 同图，不同因变量分图

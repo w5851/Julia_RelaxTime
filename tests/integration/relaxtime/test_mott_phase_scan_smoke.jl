@@ -49,6 +49,9 @@ end
     required_cols = Set([
         "T_MeV", "muB_MeV", "xi",
         "M_pi", "M_K", "Gamma_pi", "Gamma_K",
+        "residual_pi", "residual_K",
+        "root_quality_pi", "root_quality_K",
+        "selected_method_pi", "selected_method_K",
         "m_u", "m_d", "m_s",
         "status", "error_code", "error_message", "timestamp_utc",
     ])
