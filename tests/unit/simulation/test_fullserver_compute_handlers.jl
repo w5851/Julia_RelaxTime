@@ -48,5 +48,7 @@ end
         @test body.data === nothing
         @test body.error_code == "COMPUTATION_ERROR"
         @test body.error == "Computation failed"
+        @test haskey(body, :message_id)
+        @test length(String(body.message_id)) > 0
     end
 end

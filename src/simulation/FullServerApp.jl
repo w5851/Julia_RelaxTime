@@ -3,6 +3,7 @@ module FullServerApp
 using HTTP
 using JSON3
 using LinearAlgebra
+using UUIDs: uuid4
 
 include(joinpath(@__DIR__, "MomentumMapping.jl"))
 using .MomentumMapping

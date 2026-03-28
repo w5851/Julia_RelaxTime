@@ -31,6 +31,12 @@ function _reset_jobs_state!()
     lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
         empty!(PSJ._PNJL_SCAN_JOBS)
         PSJ._PNJL_SCAN_JOB_SEQ[] = 0
+        if isdefined(PSJ, :_PNJL_SCAN_PRUNE_METRICS)
+            empty!(PSJ._PNJL_SCAN_PRUNE_METRICS)
+            PSJ._PNJL_SCAN_PRUNE_METRICS["total"] = 0
+            PSJ._PNJL_SCAN_PRUNE_METRICS["ttl"] = 0
+            PSJ._PNJL_SCAN_PRUNE_METRICS["keep_max"] = 0
+        end
     end
     return nothing
 end
@@ -69,6 +75,7 @@ end
         @test body.status == "error"
         @test body.error_code == "INVALID_REQUEST"
         @test occursin("max_retries", String(body.error))
+        @test haskey(body, :message_id)
         @test haskey(body, :diagnostics)
         @test body.diagnostics.error_type in ("ErrorException", "ArgumentError")
     end
@@ -87,6 +94,7 @@ end
         @test body.status == "error"
         @test body.error_code == "INVALID_REQUEST"
         @test occursin("Use only one xi strategy", String(body.error))
+        @test haskey(body, :message_id)
     end
 
     @testset "job lifecycle primitives" begin
@@ -107,6 +115,7 @@ end
         @test result_payload.status == 409
         @test result_body.status == "error"
         @test result_body.error_code == "JOB_NOT_SUCCEEDED"
+        @test haskey(result_body, :message_id)
         @test result_body.job_status == "queued"
         @test haskey(result_body, :diagnostics)
         @test result_body.diagnostics.job_id == job_id
@@ -141,6 +150,7 @@ end
         @test body.status == "error"
         @test body.error_code == "QUEUE_FULL"
         @test body.error == "queue is full"
+        @test haskey(body, :message_id)
     end
 
     @testset "finished jobs pruning keeps active jobs" begin
@@ -241,6 +251,129 @@ end
         lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
             @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_old")
             @test haskey(PSJ._PNJL_SCAN_JOBS, "done_new")
+        end
+    end
+
+    @testset "status endpoint keeps internal errors private" begin
+        _reset_jobs_state!()
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            PSJ._PNJL_SCAN_JOBS["failed_hidden"] = Dict{String, Any}(
+                "job_id" => "failed_hidden",
+                "seq" => 1,
+                "kind" => "tmu",
+                "status" => "failed",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-28T00:00:15",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => nothing,
+                "error" => "scan execution failed",
+                "internal_error" => "Stacktrace: secret",
+                "request" => Dict{String, Any}(),
+            )
+        end
+
+        resp = PSJ.handle_pnjl_scan_job_status("failed_hidden")
+        body = _body_dict(resp)
+        @test resp.status == 200
+        @test body.status == "ok"
+        @test body.job_status == "failed"
+        @test body.error == "scan execution failed"
+        @test !haskey(body, :internal_error)
+    end
+
+    @testset "not-found responses include message_id" begin
+        status_resp = PSJ.handle_pnjl_scan_job_status("missing_job")
+        status_body = _body_dict(status_resp)
+        @test status_resp.status == 404
+        @test status_body.status == "error"
+        @test status_body.error_code == "JOB_NOT_FOUND"
+        @test haskey(status_body, :message_id)
+
+        result_resp = PSJ.handle_pnjl_scan_job_result("missing_job")
+        result_body = _body_dict(result_resp)
+        @test result_resp.status == 404
+        @test result_body.status == "error"
+        @test result_body.error_code == "JOB_NOT_FOUND"
+        @test haskey(result_body, :message_id)
+    end
+
+    @testset "scan policy can be configured by env" begin
+        withenv(
+            "PNJL_SCAN_FINISHED_KEEP_MAX" => "11",
+            "PNJL_SCAN_FINISHED_TTL_SECONDS" => "123",
+        ) do
+            policy = PSJ._scan_jobs_policy()
+            @test policy.keep_max == 11
+            @test policy.ttl_seconds == 123
+        end
+    end
+
+    @testset "status exposes minimal governance metrics" begin
+        _reset_jobs_state!()
+        job_id = PSJ._new_job("tmu", Dict{String, Any}("kind" => "tmu"); total_points=1)
+        resp = PSJ.handle_pnjl_scan_job_status(job_id)
+        body = _body_dict(resp)
+        @test resp.status == 200
+        @test haskey(body, :governance)
+        @test haskey(body.governance, :finished_keep_max)
+        @test haskey(body.governance, :finished_ttl_seconds)
+        @test haskey(body.governance, :pruned_total)
+        @test haskey(body.governance, :pruned_ttl)
+        @test haskey(body.governance, :pruned_keep_max)
+    end
+
+    @testset "prune metrics count ttl and keep-max removals" begin
+        _reset_jobs_state!()
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            PSJ._PNJL_SCAN_JOBS["done_old"] = Dict{String, Any}(
+                "job_id" => "done_old",
+                "seq" => 1,
+                "kind" => "tmu",
+                "status" => "succeeded",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-01T00:00:00",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => Dict{String, Any}(),
+                "error" => nothing,
+                "internal_error" => nothing,
+                "request" => Dict{String, Any}(),
+            )
+            PSJ._PNJL_SCAN_JOBS["done_new_1"] = Dict{String, Any}(
+                "job_id" => "done_new_1",
+                "seq" => 2,
+                "kind" => "tmu",
+                "status" => "failed",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-28T00:00:25",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => Dict{String, Any}(),
+                "error" => "x",
+                "internal_error" => "x",
+                "request" => Dict{String, Any}(),
+            )
+            PSJ._PNJL_SCAN_JOBS["done_new_2"] = Dict{String, Any}(
+                "job_id" => "done_new_2",
+                "seq" => 3,
+                "kind" => "tmu",
+                "status" => "succeeded",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-28T00:00:26",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => Dict{String, Any}(),
+                "error" => nothing,
+                "internal_error" => nothing,
+                "request" => Dict{String, Any}(),
+            )
+
+            _ = PSJ._prune_finished_jobs_locked!(1; now=DateTime(2026, 3, 28, 0, 0, 30), ttl_seconds=10)
+
+            @test PSJ._PNJL_SCAN_PRUNE_METRICS["ttl"] == 1
+            @test PSJ._PNJL_SCAN_PRUNE_METRICS["keep_max"] == 1
+            @test PSJ._PNJL_SCAN_PRUNE_METRICS["total"] == 2
         end
     end
 

@@ -69,6 +69,7 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "simulation", "test_frame_transformations.jl"),
     joinpath(UNIT_DIR, "simulation", "test_momentum_mapping.jl"),
     joinpath(UNIT_DIR, "simulation", "test_fullserver_compute_handlers.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_fullserver_pnjl_handlers.jl"),
     joinpath(UNIT_DIR, "simulation", "test_pnjl_scan_jobs.jl"),
 ]
 

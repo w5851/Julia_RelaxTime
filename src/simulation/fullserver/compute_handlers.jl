@@ -13,15 +13,14 @@ function handle_compute(req::HTTP.Request)
         phi_star = haskey(body, :phi_star) ? Float64(body.phi_star) : π / 6
 
         if any(isnan.([p1; p2; m1; m2; m3; m4; theta_star; phi_star]))
+            message_id = _new_message_id()
             return HTTP.Response(
                 400,
                 ["Content-Type" => "application/json"],
-                JSON3.write(Dict(
+                JSON3.write(merge(Dict(
                     "success" => false,
                     "data" => nothing,
-                    "error_code" => "INVALID_INPUT",
-                    "error" => "Invalid input: NaN detected",
-                )),
+                ), _error_payload("INVALID_INPUT", "Invalid input: NaN detected"; message_id=message_id))),
             )
         end
 
@@ -73,20 +72,17 @@ function handle_compute(req::HTTP.Request)
     catch e
         @error "Computation error" exception = (e, catch_backtrace())
 
+        message_id = _new_message_id()
         response_data = if e isa ArgumentError || e isa DomainError
-            Dict(
+            merge(Dict(
                 "success" => false,
                 "data" => nothing,
-                "error_code" => "INVALID_INPUT",
-                "error" => "Invalid request parameters",
-            )
+            ), _error_payload("INVALID_INPUT", "Invalid request parameters"; message_id=message_id))
         else
-            Dict(
+            merge(Dict(
                 "success" => false,
                 "data" => nothing,
-                "error_code" => "COMPUTATION_ERROR",
-                "error" => "Computation failed",
-            )
+            ), _error_payload("COMPUTATION_ERROR", "Computation failed"; message_id=message_id))
         end
 
         status = e isa ArgumentError || e isa DomainError ? 400 : 500

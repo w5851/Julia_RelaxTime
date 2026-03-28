@@ -11,6 +11,7 @@ export _validate_tau_namedtuple,
     _validate_quark_thermo_inputs,
     _validate_bulk_coeffs_isentropic,
     _validate_transport_inputs,
+    _validate_transport_request_contract,
     _validate_conserved_charge_symbol,
     _validate_diffusion_background
 
@@ -116,6 +117,20 @@ function _validate_diffusion_background(densities::NamedTuple, pressure::Real, e
     h = Float64(pressure) + Float64(energy)
     h > 0.0 || error("enthalpy density must be > 0")
     return charge_densities, h
+end
+
+@inline function _validate_transport_request_contract(
+    densities::Union{Nothing,NamedTuple},
+    pressure::Union{Nothing,Real},
+    energy::Union{Nothing,Real},
+)
+    has_diffusion_background = densities !== nothing || pressure !== nothing || energy !== nothing
+    if has_diffusion_background
+        densities !== nothing || error("transport_coefficients requires densities when pressure/energy is provided")
+        pressure !== nothing || error("transport_coefficients requires pressure when densities/energy is provided")
+        energy !== nothing || error("transport_coefficients requires energy when densities/pressure is provided")
+    end
+    return has_diffusion_background
 end
 
 end # module TransportCoefficientsValidation

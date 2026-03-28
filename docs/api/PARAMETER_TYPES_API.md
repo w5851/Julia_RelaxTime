@@ -606,7 +606,7 @@ Used by:
 
 Phase B adds scan configuration objects:
 
-- `src/pnjl/scans/ScanConfig.jl`
+- `src/models/scans/ScanConfig.jl`
 - `TmuScanConfig`
 - `TrhoScanConfig`
 - `scan_kwargs(cfg)`
