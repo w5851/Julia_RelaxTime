@@ -193,6 +193,6 @@
 - 在扫描入口中新增连续性求解传种（`meson_seed_state` + `mixed_seed_tracking_state`）与诊断列（`residual_*`、`root_quality_*`、`selected_method_*`），用于抑制根切换伪跳变并增强可追溯性。
 - 新增回归：`tests/regression/relaxtime/test_mott_phase_continuity_regression.jl`。
 - 产物已按用户要求清理为仅保留一份最新结果：
-  - `data/outputs/results/relaxtime/mott_phase/chunk3_verify_dense_cont_refine`
-  - `data/outputs/figures/relaxtime/mott_phase/chunk3_verify_dense_cont_refine`
+  - `data/outputs/results/relaxtime/mott_phase/reference_100_300_fine`
+  - `data/outputs/figures/relaxtime/mott_phase/reference_100_300_fine`
 - 当前计划状态：已完成（DoD 满足）。后续若继续推进，建议进入“文献对照报告/阈值对齐”新计划而非继续扩展本计划。
