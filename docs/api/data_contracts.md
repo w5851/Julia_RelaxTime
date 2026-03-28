@@ -22,7 +22,7 @@
 后端约定（迁移期）：
 
 - `solver_backend` 继续支持 `:legacy | :models`；默认保持兼容（不强制切换）。
-- `src/pnjl/core/EquilibriumFacade.jl` 支持 `solver_backend=:auto`（按 `thermo_backend` 推导），但默认仍为 `:legacy` 以避免行为突变。
+- `src/models/pnjl_physics/core/EquilibriumFacade.jl` 支持 `solver_backend=:auto`（按 `thermo_backend` 推导），但默认仍为 `:legacy` 以避免行为突变。
 - `PNJLModel.solve_gap` 在 `solver_backend=:models` 下支持失败时回退 legacy 的受控策略（对称化学势场景）。
 
 ### 0.2 `x_state`（平均场状态）
@@ -112,6 +112,30 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `use_rpnjl_extensions=false` 时，`RPNJLModel` 应退化到 PNJL 参数面（用于 bridge sanity）。
 - `use_rpnjl_extensions=true` 时，允许与 PNJL 基线出现受控偏离，但需通过固定点 smoke 追踪。
 - 阶段 7 期间禁止修改测试外部容差 API；所有容差仅在测试断言层设置。
+
+### 0.6 FullServer 错误响应最小契约（HTTP）
+
+适用链路（当前）：
+
+- `/compute`
+- `/api/modules/pnjl-gap/run`
+- `/api/modules/pnjl-scan/jobs*`
+
+对外错误 payload 最小字段：
+
+- `status`：固定为 `"error"`
+- `error_code`：稳定错误码（如 `INVALID_INPUT`、`INVALID_REQUEST`）
+- `error`：面向调用方的摘要信息（不包含内部栈）
+- `message_id`：每次错误唯一标识，用于检索日志与追踪
+
+可选字段：
+
+- `diagnostics`、`job_id`、`job_status`、`policy` 等上下文字段
+
+安全约束：
+
+- 不向外返回 `backtrace` / `catch_backtrace()` / 内部异常全文。
+- 内部诊断可在服务端日志或内存状态中保留，但不直接透传到公共响应。
 
 ---
 

@@ -243,7 +243,7 @@ pressure = Models.calculate_pressure(model, result)
 | 旧位置 | 新位置 | 说明 |
 | --- | --- | --- |
 | `server*.jl`, `start.bat` | `scripts/server/` | 所有后端/启动脚本集中到单一目录，`start.bat` 会自动回到仓库根目录再拉起 `server_full.jl`。 |
-| `test_unit/` | `tests/unit/` | 原全部单元测试未改名，只调整路径；引用 `../../src/...` 即可。 |
+| `legacy test_unit/` | `tests/unit/` | 原全部单元测试未改名，只调整路径；引用 `../../src/...` 即可。 |
 | `test_other/` | `scripts/analysis/` | 各类分析、调试与诊断脚本集中管理（非测试入口）。 |
 | `results/` | `data/outputs/results/` | 将运行产物与原始数据分离，方便清理或忽略。 |
 | `doc/`（公式、domain-knowledge 等） | `docs/reference/` | 文档分类更明确。 |

@@ -1,6 +1,8 @@
 # 双分支扫描模块 `PNJL.DualBranchScan`
 
-代码位置：`src/pnjl/scans/DualBranchScan.jl`
+代码位置（兼容层历史实现）：`src/models/scans/DualBranchScan.jl`
+
+> 说明：本页属于 `docs/api/pnjl/` 兼容层文档；现行主线入口请使用 `Models` 与 `src/models/entrypoints.jl`。
 
 本模块用于一阶相变区域的“多值解”处理：显式追踪强子/夸克两条分支，并通过比较 Ω 选择物理解，同时定位相变点（Ω 交叉）与自旋odal 边界。
 

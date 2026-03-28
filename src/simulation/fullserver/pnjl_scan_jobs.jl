@@ -12,6 +12,11 @@ const _PNJL_SCAN_MAX_XI_POINTS = 64
 const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
 const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
 const _PNJL_SCAN_FINISHED_TTL_SECONDS = 86400
+const _PNJL_SCAN_PRUNE_METRICS = Dict{String, Int}(
+    "total" => 0,
+    "ttl" => 0,
+    "keep_max" => 0,
+)
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -19,6 +24,33 @@ const _PNJL_SCAN_FINISHED_TTL_SECONDS = 86400
         "Access-Control-Allow-Origin" => "*",
     ]
     return HTTP.Response(status, headers, JSON3.write(payload))
+end
+
+@inline function _error_response(status::Int, code::String, message::String; extras::AbstractDict=Dict{String, Any}())
+    return _json_response(status, _error_payload(code, message; extras=extras))
+end
+
+@inline function _env_nonneg_int(name::String, default::Int)
+    raw = get(ENV, name, nothing)
+    raw === nothing && return default
+    value = try
+        parse(Int, strip(raw))
+    catch
+        @warn "Invalid env integer, fallback to default" name=name raw=raw default=default
+        return default
+    end
+    if value < 0
+        @warn "Negative env integer, fallback to default" name=name value=value default=default
+        return default
+    end
+    return value
+end
+
+@inline function _scan_jobs_policy()
+    return (
+        keep_max=_env_nonneg_int("PNJL_SCAN_FINISHED_KEEP_MAX", _PNJL_SCAN_FINISHED_KEEP_MAX),
+        ttl_seconds=_env_nonneg_int("PNJL_SCAN_FINISHED_TTL_SECONDS", _PNJL_SCAN_FINISHED_TTL_SECONDS),
+    )
 end
 
 @inline _timestamp_now() = Dates.format(Dates.now(), dateformat"yyyy-mm-ddTHH:MM:SS")
@@ -161,11 +193,13 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
         ),
         "result" => nothing,
         "error" => nothing,
+        "internal_error" => nothing,
         "request" => request_snapshot,
     )
     lock(_PNJL_SCAN_JOBS_LOCK) do
         _PNJL_SCAN_JOBS[job_id] = job
-        _prune_finished_jobs_locked!(_PNJL_SCAN_FINISHED_KEEP_MAX; ttl_seconds=_PNJL_SCAN_FINISHED_TTL_SECONDS)
+        policy = _scan_jobs_policy()
+        _prune_finished_jobs_locked!(policy.keep_max; ttl_seconds=policy.ttl_seconds)
     end
     return job_id
 end
@@ -214,24 +248,35 @@ function _prune_finished_jobs_locked!(
     end
 
     removed = 0
+    removed_ttl = 0
     for job_id in expired_ids
         if haskey(_PNJL_SCAN_JOBS, job_id)
             delete!(_PNJL_SCAN_JOBS, job_id)
             removed += 1
+            removed_ttl += 1
         end
     end
 
     excess = length(finished) - keep_max
-    excess <= 0 && return removed
+    if excess <= 0
+        _PNJL_SCAN_PRUNE_METRICS["ttl"] = get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0) + removed_ttl
+        _PNJL_SCAN_PRUNE_METRICS["total"] = get(_PNJL_SCAN_PRUNE_METRICS, "total", 0) + removed
+        return removed
+    end
 
     sort!(finished; by=last)
+    removed_keep_max = 0
     for i in 1:excess
         job_id = finished[i][1]
         if haskey(_PNJL_SCAN_JOBS, job_id)
             delete!(_PNJL_SCAN_JOBS, job_id)
             removed += 1
+            removed_keep_max += 1
         end
     end
+    _PNJL_SCAN_PRUNE_METRICS["ttl"] = get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0) + removed_ttl
+    _PNJL_SCAN_PRUNE_METRICS["keep_max"] = get(_PNJL_SCAN_PRUNE_METRICS, "keep_max", 0) + removed_keep_max
+    _PNJL_SCAN_PRUNE_METRICS["total"] = get(_PNJL_SCAN_PRUNE_METRICS, "total", 0) + removed
     return removed
 end
 
@@ -447,12 +492,14 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                         attempt += 1
                         _with_job(job_id) do job
                             job["status"] = "running"
-                            job["error"] = sprint(showerror, e)
+                            job["error"] = "scan execution retrying"
+                            job["internal_error"] = sprint(showerror, e, catch_backtrace())
                         end
                     else
                         _with_job(job_id) do job
                             job["status"] = "failed"
-                            job["error"] = sprint(showerror, e, catch_backtrace())
+                            job["error"] = "scan execution failed"
+                            job["internal_error"] = sprint(showerror, e, catch_backtrace())
                             job["ended_at"] = _timestamp_now()
                         end
                         break
@@ -476,15 +523,17 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
 
         snap = _queue_snapshot()
         if snap.queued >= _PNJL_SCAN_MAX_PENDING
-            return _json_response(429, Dict(
-                "status" => "error",
-                "error_code" => "QUEUE_FULL",
-                "error" => "queue is full",
-                "policy" => Dict(
-                    "max_running" => _PNJL_SCAN_MAX_RUNNING,
-                    "max_pending" => _PNJL_SCAN_MAX_PENDING,
+            return _error_response(
+                429,
+                "QUEUE_FULL",
+                "queue is full";
+                extras=Dict(
+                    "policy" => Dict(
+                        "max_running" => _PNJL_SCAN_MAX_RUNNING,
+                        "max_pending" => _PNJL_SCAN_MAX_PENDING,
+                    ),
                 ),
-            ))
+            )
         end
 
         max_retries = _to_nonneg_int(get(params, :max_retries, 0), 0; name="max_retries")
@@ -522,18 +571,21 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
             "diagnostics" => _build_job_diagnostics(job_id, kind, "queued"),
         ))
     catch e
-        return _json_response(400, Dict(
-            "status" => "error",
-            "error_code" => "INVALID_REQUEST",
-            "error" => sprint(showerror, e),
-            "diagnostics" => _build_job_diagnostics(nothing, nothing, "rejected"; err=e),
-        ))
+        return _error_response(
+            400,
+            "INVALID_REQUEST",
+            sprint(showerror, e);
+            extras=Dict(
+                "diagnostics" => _build_job_diagnostics(nothing, nothing, "rejected"; err=e),
+            ),
+        )
     end
 end
 
 function handle_pnjl_scan_job_status(job_id::String)
     pos = _queue_position(job_id)
     snap = _queue_snapshot()
+    policy = _scan_jobs_policy()
     payload = _with_job(job_id) do job
         Dict{String, Any}(
             "status" => "ok",
@@ -544,7 +596,7 @@ function handle_pnjl_scan_job_status(job_id::String)
             "started_at" => job["started_at"],
             "ended_at" => job["ended_at"],
             "progress" => job["progress"],
-            "error" => job["error"],
+            "error" => (job["status"] == "failed" ? job["error"] : nothing),
             "queue" => Dict(
                 "position" => pos,
                 "queued" => snap.queued,
@@ -553,11 +605,18 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
             "policy" => get(job, "policy", Dict{String, Any}()),
+            "governance" => Dict(
+                "finished_keep_max" => policy.keep_max,
+                "finished_ttl_seconds" => policy.ttl_seconds,
+                "pruned_total" => get(_PNJL_SCAN_PRUNE_METRICS, "total", 0),
+                "pruned_ttl" => get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0),
+                "pruned_keep_max" => get(_PNJL_SCAN_PRUNE_METRICS, "keep_max", 0),
+            ),
             "diagnostics" => _build_job_diagnostics(job["job_id"], job["kind"], job["status"]),
         )
     end
 
-    payload === nothing && return _json_response(404, Dict("status" => "error", "error_code" => "JOB_NOT_FOUND", "error" => "job not found", "job_id" => job_id))
+    payload === nothing && return _error_response(404, "JOB_NOT_FOUND", "job not found"; extras=Dict("job_id" => job_id))
     return _json_response(200, payload)
 end
 
@@ -566,13 +625,14 @@ function handle_pnjl_scan_job_result(job_id::String)
         status = job["status"]
         result = job["result"]
         if status != "succeeded"
-            return Dict{String, Any}(
-                "status" => "error",
-                "job_id" => job_id,
-                "error_code" => "JOB_NOT_SUCCEEDED",
-                "error" => "job not succeeded",
-                "job_status" => status,
-                "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
+            return _error_payload(
+                "JOB_NOT_SUCCEEDED",
+                "job not succeeded";
+                extras=Dict(
+                    "job_id" => job_id,
+                    "job_status" => status,
+                    "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
+                ),
             )
         end
         output_path = get(result, "output_path", nothing)
@@ -589,7 +649,7 @@ function handle_pnjl_scan_job_result(job_id::String)
         )
     end
 
-    payload === nothing && return _json_response(404, Dict("status" => "error", "error_code" => "JOB_NOT_FOUND", "error" => "job not found", "job_id" => job_id))
+    payload === nothing && return _error_response(404, "JOB_NOT_FOUND", "job not found"; extras=Dict("job_id" => job_id))
     if payload["status"] == "error"
         return _json_response(409, payload)
     end

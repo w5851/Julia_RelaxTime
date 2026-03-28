@@ -15,7 +15,7 @@ end
 end
 
 @inline function _pnjl_error_response(status::Int, code::String, message::String)
-    return _pnjl_json_response(status, Dict("status" => "error", "error_code" => code, "error" => message))
+    return _pnjl_json_response(status, _error_payload(code, message))
 end
 
 function handle_pnjl_single_point(req::HTTP.Request)
@@ -28,7 +28,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
 
     try
         t_mev_raw = get(params_dict, :T_mev, get(params_dict, :t_mev, nothing))
-        t_mev_raw === nothing && error("Missing required parameter: T_mev")
+        t_mev_raw === nothing && throw(ArgumentError("Missing required parameter: T_mev"))
 
         xi = _to_float64(get(params_dict, :xi, 0.0))
         t_mev = _to_float64(t_mev_raw)
@@ -89,7 +89,7 @@ function handle_pnjl_single_point(req::HTTP.Request)
             )
         else
             mu_mev_raw = get(params_dict, :mu_mev, get(params_dict, :mu, nothing))
-            mu_mev_raw === nothing && error("Missing required parameter: mu_mev (for FixedMu mode)")
+            mu_mev_raw === nothing && throw(ArgumentError("Missing required parameter: mu_mev (for FixedMu mode)"))
             mu_fm = _to_float64(mu_mev_raw) / ħc_MeV_fm
             st = Models.solve_gap(model, t_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num)
             x_state = Models.state_vector(st)

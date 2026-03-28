@@ -375,4 +375,4 @@ kinematic_factor = 1.0 / (16π * s_12_plus * s_12_minus)
 
 - **公式推导**: `docs/reference/formula/relaxtime/scattering/DifferentialCrossSection_FromScatteringAmplitude.md`
 - **散射矩阵元**: `docs/api/relaxtime/scattering/ScatteringAmplitude.md`
-- **测试用例**: `test_unit/test_differential_cross_section.jl`
+- **测试用例**: `tests/unit/relaxtime/test_differential_cross_section.jl`

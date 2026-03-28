@@ -27,6 +27,21 @@ const MODULE_REGISTRY = [
     ),
 ]
 
+@inline _new_message_id() = string(uuid4())
+
+function _error_payload(code::String, message::String; message_id::String=_new_message_id(), extras::AbstractDict=Dict{String, Any}())
+    payload = Dict{String, Any}(
+        "status" => "error",
+        "error_code" => code,
+        "error" => message,
+        "message_id" => message_id,
+    )
+    for (k, v) in pairs(extras)
+        payload[string(k)] = v
+    end
+    return payload
+end
+
 @inline function _to_float64(x)
     return x isa Number ? Float64(x) : parse(Float64, String(x))
 end
