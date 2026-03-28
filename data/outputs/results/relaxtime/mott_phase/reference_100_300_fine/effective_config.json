@@ -1,0 +1,1 @@
+{"profile_name":"mott_phase_muB0_xi_scan","scan":{"mott_phase":{"T_max_MeV":300.0,"T_min_MeV":100.0,"T_step_MeV":1.0,"max_iter":40,"muB_MeV":0.0,"overwrite":true,"p_num":12,"resume":true,"t_num":6,"xi_list":[-0.3,-0.15,0.0,0.15,0.3]}},"schema_version":"v1"}
