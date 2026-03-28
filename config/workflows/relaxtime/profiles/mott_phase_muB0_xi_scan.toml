@@ -1,0 +1,14 @@
+schema_version = "v1"
+profile_name = "mott_phase_muB0_xi_scan"
+
+[scan.mott_phase]
+muB_MeV = 0.0
+xi_list = [-0.3, -0.15, 0.0, 0.15, 0.3]
+T_min_MeV = 120.0
+T_max_MeV = 260.0
+T_step_MeV = 2.0
+p_num = 12
+t_num = 6
+max_iter = 40
+resume = true
+overwrite = false
