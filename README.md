@@ -52,6 +52,8 @@ julia --project=. scripts/dev/gen_deps.jl
 
 > Python 脚本环境与前端开发工具的可复现安装步骤请见 [INSTALL.md](INSTALL.md)。
 
+> Latest Release: [v0.1.0](https://github.com/w5851/Julia_RelaxTime/releases/tag/v0.1.0)
+
 ## 当前功能概览
 
 - **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/simulation/test_momentum_mapping.jl`、`tests/unit/simulation/test_frame_transformations.jl` 已覆盖核心校验。

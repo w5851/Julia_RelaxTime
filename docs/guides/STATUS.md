@@ -2,6 +2,8 @@
 
 本页用于给出“当前可用能力 + 已知风险”，状态口径与 `README.md` 保持一致。
 
+Latest Release: [v0.1.0](https://github.com/w5851/Julia_RelaxTime/releases/tag/v0.1.0)
+
 ## 1. 总体状态
 
 - **Web/API 演示链路**：可用（`/health`、`/compute`）
