@@ -1,6 +1,7 @@
 using Test
 using HTTP
 using JSON3
+using Dates: DateTime
 
 const PROJECT_ROOT_PSJ = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -66,6 +67,7 @@ end
         body = _body_dict(resp)
         @test resp.status == 400
         @test body.status == "error"
+        @test body.error_code == "INVALID_REQUEST"
         @test occursin("max_retries", String(body.error))
         @test haskey(body, :diagnostics)
         @test body.diagnostics.error_type in ("ErrorException", "ArgumentError")
@@ -83,6 +85,7 @@ end
         body = _body_dict(resp)
         @test resp.status == 400
         @test body.status == "error"
+        @test body.error_code == "INVALID_REQUEST"
         @test occursin("Use only one xi strategy", String(body.error))
     end
 
@@ -103,6 +106,7 @@ end
         result_body = _body_dict(result_payload)
         @test result_payload.status == 409
         @test result_body.status == "error"
+        @test result_body.error_code == "JOB_NOT_SUCCEEDED"
         @test result_body.job_status == "queued"
         @test haskey(result_body, :diagnostics)
         @test result_body.diagnostics.job_id == job_id
@@ -135,6 +139,7 @@ end
         body = _body_dict(resp)
         @test resp.status == 429
         @test body.status == "error"
+        @test body.error_code == "QUEUE_FULL"
         @test body.error == "queue is full"
     end
 
@@ -196,6 +201,46 @@ end
             @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_3")
             @test haskey(PSJ._PNJL_SCAN_JOBS, "done_4")
             @test haskey(PSJ._PNJL_SCAN_JOBS, "done_5")
+        end
+    end
+
+    @testset "finished jobs pruning honors ttl" begin
+        _reset_jobs_state!()
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            PSJ._PNJL_SCAN_JOBS["done_old"] = Dict{String, Any}(
+                "job_id" => "done_old",
+                "seq" => 1,
+                "kind" => "tmu",
+                "status" => "succeeded",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-01T00:00:00",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => Dict{String, Any}(),
+                "error" => nothing,
+                "request" => Dict{String, Any}(),
+            )
+            PSJ._PNJL_SCAN_JOBS["done_new"] = Dict{String, Any}(
+                "job_id" => "done_new",
+                "seq" => 2,
+                "kind" => "tmu",
+                "status" => "failed",
+                "created_at" => "",
+                "started_at" => nothing,
+                "ended_at" => "2026-03-28T00:00:15",
+                "progress" => Dict{String, Any}("total" => 1, "completed" => 1, "percent" => 100.0),
+                "result" => Dict{String, Any}(),
+                "error" => "x",
+                "request" => Dict{String, Any}(),
+            )
+
+            removed = PSJ._prune_finished_jobs_locked!(10; now=DateTime(2026, 3, 28, 0, 0, 20), ttl_seconds=10)
+            @test removed == 1
+        end
+
+        lock(PSJ._PNJL_SCAN_JOBS_LOCK) do
+            @test !haskey(PSJ._PNJL_SCAN_JOBS, "done_old")
+            @test haskey(PSJ._PNJL_SCAN_JOBS, "done_new")
         end
     end
 

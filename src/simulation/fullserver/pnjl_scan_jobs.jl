@@ -11,6 +11,7 @@ const _PNJL_SCAN_MAX_PENDING = 32
 const _PNJL_SCAN_MAX_XI_POINTS = 64
 const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
 const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
+const _PNJL_SCAN_FINISHED_TTL_SECONDS = 86400
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -164,27 +165,66 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
     )
     lock(_PNJL_SCAN_JOBS_LOCK) do
         _PNJL_SCAN_JOBS[job_id] = job
-        _prune_finished_jobs_locked!(_PNJL_SCAN_FINISHED_KEEP_MAX)
+        _prune_finished_jobs_locked!(_PNJL_SCAN_FINISHED_KEEP_MAX; ttl_seconds=_PNJL_SCAN_FINISHED_TTL_SECONDS)
     end
     return job_id
 end
 
-function _prune_finished_jobs_locked!(keep_max::Int=_PNJL_SCAN_FINISHED_KEEP_MAX)
+@inline function _parse_job_ended_at(raw)
+    raw === nothing && return nothing
+    if raw isa DateTime
+        return raw
+    end
+    if raw isa AbstractString
+        s = strip(raw)
+        isempty(s) && return nothing
+        try
+            return DateTime(s, dateformat"yyyy-mm-ddTHH:MM:SS")
+        catch
+            try
+                return DateTime(s)
+            catch
+                return nothing
+            end
+        end
+    end
+    return nothing
+end
+
+function _prune_finished_jobs_locked!(
+    keep_max::Int=_PNJL_SCAN_FINISHED_KEEP_MAX;
+    now::DateTime=Dates.now(),
+    ttl_seconds::Int=_PNJL_SCAN_FINISHED_TTL_SECONDS,
+)
     keep_max >= 0 || throw(ArgumentError("keep_max must be >= 0"))
+    ttl_seconds >= 0 || throw(ArgumentError("ttl_seconds must be >= 0"))
 
     finished = Tuple{String, Int}[]
+    expired_ids = String[]
     for (job_id, job) in _PNJL_SCAN_JOBS
         st = get(job, "status", "")
         if st == "succeeded" || st == "failed"
+            ended_at = _parse_job_ended_at(get(job, "ended_at", nothing))
+            if ended_at !== nothing && (now - ended_at) > Dates.Second(ttl_seconds)
+                push!(expired_ids, job_id)
+                continue
+            end
             push!(finished, (job_id, Int(get(job, "seq", typemax(Int)))))
         end
     end
 
+    removed = 0
+    for job_id in expired_ids
+        if haskey(_PNJL_SCAN_JOBS, job_id)
+            delete!(_PNJL_SCAN_JOBS, job_id)
+            removed += 1
+        end
+    end
+
     excess = length(finished) - keep_max
-    excess <= 0 && return 0
+    excess <= 0 && return removed
 
     sort!(finished; by=last)
-    removed = 0
     for i in 1:excess
         job_id = finished[i][1]
         if haskey(_PNJL_SCAN_JOBS, job_id)
@@ -438,6 +478,7 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
         if snap.queued >= _PNJL_SCAN_MAX_PENDING
             return _json_response(429, Dict(
                 "status" => "error",
+                "error_code" => "QUEUE_FULL",
                 "error" => "queue is full",
                 "policy" => Dict(
                     "max_running" => _PNJL_SCAN_MAX_RUNNING,
@@ -483,6 +524,7 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
     catch e
         return _json_response(400, Dict(
             "status" => "error",
+            "error_code" => "INVALID_REQUEST",
             "error" => sprint(showerror, e),
             "diagnostics" => _build_job_diagnostics(nothing, nothing, "rejected"; err=e),
         ))
@@ -515,7 +557,7 @@ function handle_pnjl_scan_job_status(job_id::String)
         )
     end
 
-    payload === nothing && return _json_response(404, Dict("status" => "error", "error" => "job not found", "job_id" => job_id))
+    payload === nothing && return _json_response(404, Dict("status" => "error", "error_code" => "JOB_NOT_FOUND", "error" => "job not found", "job_id" => job_id))
     return _json_response(200, payload)
 end
 
@@ -527,6 +569,7 @@ function handle_pnjl_scan_job_result(job_id::String)
             return Dict{String, Any}(
                 "status" => "error",
                 "job_id" => job_id,
+                "error_code" => "JOB_NOT_SUCCEEDED",
                 "error" => "job not succeeded",
                 "job_status" => status,
                 "diagnostics" => _build_job_diagnostics(job_id, job["kind"], status),
@@ -546,7 +589,7 @@ function handle_pnjl_scan_job_result(job_id::String)
         )
     end
 
-    payload === nothing && return _json_response(404, Dict("status" => "error", "error" => "job not found", "job_id" => job_id))
+    payload === nothing && return _json_response(404, Dict("status" => "error", "error_code" => "JOB_NOT_FOUND", "error" => "job not found", "job_id" => job_id))
     if payload["status"] == "error"
         return _json_response(409, payload)
     end

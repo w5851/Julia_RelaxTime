@@ -93,7 +93,7 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 - 必须：更新或新增 API 文档（docs/api/）
 - 可选：更新或新增公式文档（docs/reference/formula/）
 - 必须：补充单元测试（tests/unit/），或在归档说明中写明原因
-- 可选：补充性能测试或分析（tests/perf/ 或 tests/analysis/）
+- 可选：补充性能测试或分析（benchmark/ 或 scripts/perf/ 或 scripts/analysis/）
 
 ## 项目结构约定（合并版）
 
@@ -103,7 +103,11 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 - scripts/：可执行脚本、批处理与实验入口。
 - tests/：测试与诊断。
 	- tests/unit/：可自动化的单元测试。
-	- tests/analysis/：分析/性能/调试脚本与报告。
+	- tests/integration/：跨模块集成测试。
+	- tests/regression/：数值回归测试。
+	- tests/validation/：外部参考验证测试。
+- scripts/analysis/：分析/诊断脚本与报告（非测试入口）。
+- scripts/perf/：性能探针与 profiling 脚本（非测试入口）。
 - docs/：文档中心。
 	- docs/api/：面向使用者的 API 文档。
 	- docs/dev/：开发者文档。
@@ -123,7 +127,7 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 - 以模块边界组织，而不是以功能碎片随意拆文件。
 - 新增模块前先确认：是通用逻辑还是一次性实验。
 	- 通用逻辑 → src/
-	- 实验/临时对比 → scripts/ 或 tests/analysis/
+	- 实验/临时对比 → scripts/ 或 scripts/analysis/
 
 ### 单位与命名
 

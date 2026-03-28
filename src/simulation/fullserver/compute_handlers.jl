@@ -16,7 +16,12 @@ function handle_compute(req::HTTP.Request)
             return HTTP.Response(
                 400,
                 ["Content-Type" => "application/json"],
-                JSON3.write(Dict("success" => false, "error" => "Invalid input: NaN detected")),
+                JSON3.write(Dict(
+                    "success" => false,
+                    "data" => nothing,
+                    "error_code" => "INVALID_INPUT",
+                    "error" => "Invalid input: NaN detected",
+                )),
             )
         end
 
@@ -66,14 +71,29 @@ function handle_compute(req::HTTP.Request)
         ]
         return HTTP.Response(200, headers, JSON3.write(response_data))
     catch e
-        error_msg = sprint(showerror, e, catch_backtrace())
         @error "Computation error" exception = (e, catch_backtrace())
 
-        response_data = Dict("success" => false, "data" => nothing, "error" => error_msg)
+        response_data = if e isa ArgumentError || e isa DomainError
+            Dict(
+                "success" => false,
+                "data" => nothing,
+                "error_code" => "INVALID_INPUT",
+                "error" => "Invalid request parameters",
+            )
+        else
+            Dict(
+                "success" => false,
+                "data" => nothing,
+                "error_code" => "COMPUTATION_ERROR",
+                "error" => "Computation failed",
+            )
+        end
+
+        status = e isa ArgumentError || e isa DomainError ? 400 : 500
         headers = [
             "Content-Type" => "application/json; charset=utf-8",
             "Access-Control-Allow-Origin" => "*",
         ]
-        return HTTP.Response(400, headers, JSON3.write(response_data))
+        return HTTP.Response(status, headers, JSON3.write(response_data))
     end
 end

@@ -227,7 +227,7 @@ end
 
 **高层API层**：
 ```julia
-# src/pnjl/scans/TmuScan.jl
+# src/models/scans/TmuScan.jl
 function run_tmu_scan(model, T_range, mu_range; kwargs...)
     results = []
     for T in T_range, mu in mu_range

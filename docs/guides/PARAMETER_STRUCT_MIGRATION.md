@@ -32,7 +32,7 @@ Phase B extends the migration from RelaxationTime chain to PNJL workflows/scans.
      - `src/models/workflows/MesonMassWorkflow.jl`
 
 3. **Structured scan config objects added (non-breaking)**
-     - Added: `src/pnjl/scans/ScanConfig.jl`
+     - Added: `src/models/scans/ScanConfig.jl`
      - Types:
          - `TmuScanConfig`
          - `TrhoScanConfig`
