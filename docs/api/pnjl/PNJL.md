@@ -1,106 +1,38 @@
-# PNJL 模型 API 参考
+# PNJL 兼容层说明
 
-本文件概述仓库中已实现的 PNJL（多味道 Nambu–Jona-Lasinio + Polyakov）模型核心 API、模块与使用示例。
+本页为历史兼容层说明，不是当前主线开发入口。
 
-**单位约定**：
-- 求解器 `PNJL.solve(...)` 使用自然单位 `fm⁻¹`（`T_fm`, `μ_fm`）。
-- 扫描脚本/扫描模块通常使用 MeV（`T_MeV`, `μ_MeV`, `μB_MeV`），再通过 `ħc_MeV_fm` 换算到 `fm⁻¹`。
+## 当前主线入口
 
-**注意**：仓库已迁移到新架构（位于 `src/pnjl`）。旧版 `SeedCache/AnisoGapSolver/SinglePointSolver` 已移除或废弃；现行 API 说明以本文件及 `docs/api/models/*`、`docs/api/relaxtime/*` 主题页为准。
+仓库已统一使用 `Models` 与 `src/models/entrypoints.jl` 暴露 PNJL 相关能力：
 
-**迁移期定位（2026-02-24）**：
-- `PNJL` 模块当前定位为兼容层与历史入口聚合层。
-- 新增业务调用（尤其 `simulation/fullserver` 运行时链路）应优先通过 `Models` 统一入口（`src/models/entrypoints.jl`）。
-- 既有 `PNJL.run_*` 与求解相关接口可用于存量调用回放与灰度迁移，但不作为新功能默认入口。
+- 平衡求解：`Models.solve_gap(...)`
+- 扫描入口：`Models.run_tmu_scan(...)`、`Models.run_trho_scan(...)`
+- workflow 入口：`Models.solve_gap_and_transport(...)`、`Models.solve_gap_and_meson_point(...)`
+- 相图产线：`Models.run_phase_pipeline(...)`、`Models.find_cep(...)`
 
----
+优先阅读：
 
-## 模块概览
+- `docs/api/models/solver/README.md`
+- `docs/api/models/scans/README.md`
+- `docs/api/models/workflows/README.md`
+- `docs/api/models/phase/README.md`
 
-**模块：PNJL**
+## 兼容层定位
 
-- 位置：`src/pnjl/PNJL.jl`
-- 作用：聚合并导出以下子模块能力：
-  - `PNJL.Integrals` / `PNJL.Thermodynamics`：积分与热力学量
-  - `PNJL.ConstraintModes` / `PNJL.SeedStrategies` / `PNJL.ImplicitSolver`：求解器主链路
-  - `PNJL.ThermoDerivatives`：热力学导数/体粘滞相关导数
-  - `PNJL.TmuScan` / `PNJL.TrhoScan`：扫描与相变分析辅助
-  - `PNJL.MagneticIntegrals` / `PNJL.MagneticThermodynamics`：外磁场 PNJL（Landau 能级）
-  - `PNJL.PhaseTransition`：S 形检测、Maxwell 构造、crossover 扫描等
-  - （按需）`PNJL.DualBranchScan`：一阶相变区域双分支扫描（不进入主线默认加载/导出）
+- `docs/api/pnjl/*` 仅保留历史语义与迁移背景说明。
+- 新功能与新调用方不应以 `PNJL` 兼容层作为默认入口。
+- 若需回放历史流程，可参考兼容说明页并转译为 `Models` 等价调用。
 
-## 核心入口（新架构）
+## 单位约定
 
-### 平衡求解
+- 核心求解内部使用自然单位 `fm^-1`。
+- 面向脚本/HTTP 的参数通常使用 MeV 输入，再在入口处换算。
 
-```julia
-using PNJL
+## 迁移建议
 
-res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=0.0)
-res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=0.0, seed_strategy=PNJL.MultiSeed())
-```
+若你仍在使用旧调用风格，建议按以下顺序迁移：
 
-更多求解器细节见：
-- `docs/api/models/solver/ImplicitSolvers.md`
-- `docs/api/models/solver/SeedStrategies.md`
-- 涨落 AD 接入路径（含隐式求导边界）：`docs/api/models/solver/CoreConcepts.md`
-- 扫描采样模板与禁用区间：`docs/api/models/scans/SamplingGrid.md`
-
-### 扫描
-
-- `PNJL.run_tmu_scan`：T-μ 网格扫描（见 `docs/api/models/scans/TmuScan.md`）
-- `PNJL.run_trho_scan`：T-ρ 网格扫描（见 `docs/api/models/scans/TrhoScan.md`）
-- 统一输出契约：`docs/api/models/scans/Overview.md`
-- （按需）一阶相变区域双分支扫描：先调用 `PNJL.load_dual_branch_scan!()`，再使用 `PNJL.DualBranchScan.*`（见 `docs/api/pnjl/DualBranchScan.md`）
-
-### 外磁场 PNJL
-
-- 主题入口：`docs/api/models/variants/magnetic/README.md`
-- 参数与配置：`docs/api/models/variants/magnetic/ModelAndConfig.md`
-
----
-
-**种子表（CSV）格式与生成**
-- 默认路径：`data/raw/pnjl/seeds/sobol_seed_table.csv`（常量 `PNJL.SeedCache.DEFAULT_SEED_PATH` 指向该位置）。
-- 列（CSV header）：
-  - `T_MeV, mu_MeV, rho, xi, phi_u, phi_d, phi_s, Phi1, Phi2, mu_u_MeV, mu_d_MeV, mu_s_MeV`
-- 生成脚本：`scripts/pnjl/generate_seed_table.jl`
-  - 使用 LHS/Sobol（实现为 Latin Hypercube）在给定参数区间采样，调用 `AnisoGapSolver.solve_fixed_mu` 逐点求解并输出成功的收敛解到 CSV。
-  - 可配置参数（样本数、T/mu/xi 区间、积分节点数等），示例运行：
-
-```pwsh
-julia --project scripts/pnjl/generate_seed_table.jl --samples=200 --output=data/raw/pnjl/seeds/sobol_seed_table.csv
-```
-
-**种子查找微基准**
-- 脚本 `scripts/pnjl/benchmark_seed_lookup.jl` 对 `find_initial_seed` 的热路径（KD-tree 查询、邻居融合）做了 `BenchmarkTools.@btime` 微基准。典型热路径延迟约为几十至百微秒（取决于 k）。
-
----
-
-## 使用示例
-
-```julia
-using PNJL
-
-T_fm = 150.0 / PNJL.ħc_MeV_fm
-μ_fm = 0.0
-xi = 0.0
-
-res = PNJL.solve(PNJL.FixedMu(), T_fm, μ_fm; xi=xi, seed_strategy=PNJL.MultiSeed())
-@show res.converged res.omega res.masses
-```
-
----
-
-## 注意事项
-
-- 若你发现某些点“收敛但落在高 Ω 的非物理/亚稳态分支”，优先用 `MultiSeed()` 或在扫描中使用 `PhaseAwareContinuitySeed(...; bootstrap_multiseed=true)`。
-- 一阶相变区域更适合使用 `DualBranchScan` 做物理分析（两分支显式比较 Ω），而不是只靠单分支连续性。
-
----
-
-若希望把此文档自动生成成网站页面或把函数签名与注释同步为更详细的 API 文档，我可以：
-- 将此文件转为 docs 网站页（例如 MkDocs/Documenter.jl 格式）。
-- 提取并补充每个导出函数的参数类型注释与更丰富的示例（包含 `nlsolve_kwargs` 常用配置示例）。
-
-请告诉我下一步想要的格式或更详细内容（例如增加 `Trho` 种子生成说明、示例输入/输出 JSON 模板或把文档集成到 README）。
+1. 将入口 include/using 切换到 `src/models/Models.jl`。
+2. 将扫描与 workflow 调用改为 `Models.run_*` / `Models.solve_*`。
+3. 对照 `docs/api/models/*` 完成参数与返回结构的口径对齐。

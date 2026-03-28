@@ -54,7 +54,7 @@ julia --project=. scripts/dev/gen_deps.jl
 
 ## 当前功能概览
 
-- **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/test_momentum_mapping.jl`、`test_frame_transformations.jl` 已覆盖核心校验。
+- **散射运动学**：`src/simulation/MomentumMapping.jl` 提供 2→2 运动学求解、Mandelstam 变量与椭球包络，并在 `scripts/server/server_full.jl` 中通过 `/compute` 端点暴露；`tests/unit/simulation/test_momentum_mapping.jl`、`tests/unit/simulation/test_frame_transformations.jl` 已覆盖核心校验。
 - **散射矩阵元（当前可用）**：`src/relaxtime/ScatteringAmplitude.jl` 及依赖模块（`Polarization*`, `EffectiveCouplings`, `MesonPropagator` 等）仍是稳定入口，可提供 Σ|M|² 结果给外部积分器；相关推导见 `docs/api/relaxtime/scattering/ScatteringAmplitude.md` 与 `docs/reference/formula`。
 - **截面/弛豫时间链路（已验证可用）**：`DifferentialCrossSection.jl`, `TotalCrossSection.jl`, `RelaxationTime*.jl` 已完成当前验证集下的可用性校验；默认仍不在服务器或前端中直接暴露，研究性调用建议通过脚本与模块入口执行并保留对比记录。
 - **积分与数值工具**：`src/integration/` 提供 Cauchy 主值与 Gauss-Legendre 节点，`src/utils/` 集中常用校验、数值辅助；`QuarkDistribution*.jl` 暴露各向同性/各向异性分布函数。
@@ -62,8 +62,8 @@ julia --project=. scripts/dev/gen_deps.jl
 - **文档与流程**：`docs/guides/QUICKSTART.md`、`docs/guides/USER_GUIDE.md`、`docs/guides/STATUS.md` 说明部署/排错；`docs/dev/active/` 与 `docs/dev/archived/` 管理开发计划与归档；`docs/reference/` 存放公式与推导。
 - **数据与结果**：`data/outputs/` 用于收集服务器或批处理输出（例如 `data/outputs/results/relaxtime/` 下的扫描 CSV），便于跨语言/跨实现对比。
 	- 目录口径：默认只使用 `data/outputs/` 落盘；根目录 `outputs/` 仅保留历史兼容，不作为新流程默认路径。
-- **PNJL（求解器 + 扫描）**：`src/pnjl/` 提供 PNJL 平衡求解与扫描能力。
-	- 推荐入口：`PNJL.solve(...)` + seed 策略（`MultiSeed/PhaseAwareContinuitySeed` 等），见 `docs/api/pnjl/PNJL.md` 与 `docs/api/pnjl/SeedStrategies.md`。
+- **PNJL（求解器 + 扫描）**：主线入口已统一到 `Models`（`src/models/Models.jl` + `src/models/entrypoints.jl`）。
+	- 推荐入口：`Models.solve_gap(...)`、`Models.run_tmu_scan(...)`、`Models.run_trho_scan(...)` 与 workflow 入口（`Models.solve_gap_and_transport(...)` 等），见 `docs/api/models/` 与 `docs/api/models/workflows/`。
 	- 扫描脚本：`scripts/relaxtime/run_gap_transport_scan.jl` 可批量输出平衡量与输运相关派生量到 CSV。
 	- HTTP 端（实验性）：`scripts/server/server_full.jl` 提供 `POST /api/modules/pnjl-gap/run` 单点调用（请求体仍使用 `T_mev`/`mu_mev` 这类 MeV 输入字段；内部会换算到自然单位）。
 	- HTTP 扫描长任务（实验性）：
@@ -79,7 +79,7 @@ julia --project=. scripts/dev/gen_deps.jl
 
 ## 计算链路概览（各向异性输运）
 
-1. **能隙求解 → 序参量/有效质量**：在各向异性 PNJL 下先解能隙方程，得到序参量与三味夸克有效质量、粒子数密度（`src/pnjl/`）。
+1. **能隙求解 → 序参量/有效质量**：在各向异性 PNJL 下先解能隙方程，得到序参量与三味夸克有效质量、粒子数密度（`src/models/`）。
 2. **弛豫时间近似 (RTA)**：输运系数采用 RTA，需要弛豫时间 \(\tau\)。
 3. **弛豫时间依赖平均散射率**：\(\tau\) 由各散射过程的平均散射率 \(\Gamma\) 决定，\(\Gamma\) 需要在入射动量可行域上对散射截面加权积分。
 4. **总截面需要微分截面积分**：`TotalCrossSection.jl` 对 \(\mathrm{d}\sigma/\mathrm{d}t\) 在 \(t\) 或 \(\theta^*\) 空间积分，包含各向异性分布的阻塞因子（`quark_distribution_aniso(...,\cos\theta^*)`）。
@@ -153,7 +153,8 @@ Pkg.instantiate()
 
 2. 使用模块：
 ```julia
-include("src/relaxtime/relaxtime.jl")
+include("src/models/Models.jl")
+using .Models
 ```
 
 3. 常用入口：
@@ -243,7 +244,7 @@ pressure = Models.calculate_pressure(model, result)
 | --- | --- | --- |
 | `server*.jl`, `start.bat` | `scripts/server/` | 所有后端/启动脚本集中到单一目录，`start.bat` 会自动回到仓库根目录再拉起 `server_full.jl`。 |
 | `test_unit/` | `tests/unit/` | 原全部单元测试未改名，只调整路径；引用 `../../src/...` 即可。 |
-| `test_other/` | `tests/analysis/` | 各类性能分析、调试脚本、诊断报告集中。 |
+| `test_other/` | `scripts/analysis/` | 各类分析、调试与诊断脚本集中管理（非测试入口）。 |
 | `results/` | `data/outputs/results/` | 将运行产物与原始数据分离，方便清理或忽略。 |
 | `doc/`（公式、domain-knowledge 等） | `docs/reference/` | 文档分类更明确。 |
 | `prompt/` | `docs/dev/active/plans/` | 规范类草案与计划统一纳入开发任务区（按 active/archived 生命周期管理）。 |

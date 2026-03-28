@@ -68,6 +68,7 @@ const SMOKE_FILES = [
     # [Simulation] 模拟子系统
     joinpath(UNIT_DIR, "simulation", "test_frame_transformations.jl"),
     joinpath(UNIT_DIR, "simulation", "test_momentum_mapping.jl"),
+    joinpath(UNIT_DIR, "simulation", "test_fullserver_compute_handlers.jl"),
     joinpath(UNIT_DIR, "simulation", "test_pnjl_scan_jobs.jl"),
 ]
 
