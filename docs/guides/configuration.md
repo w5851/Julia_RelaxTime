@@ -60,8 +60,8 @@ QCD模型库使用三层配置结构：
 
 | 配置类型 | 位置 | 用途 | 示例 |
 |---------|------|------|------|
-| **模型参数** | `config/{model}/default.toml` | 物理参数、耦合常数 | G, K, Lambda |
-| **数值参数** | `config/numerical.toml` | 积分节点、容差 | nodes=64, tol=1e-10 |
+| **模型参数** | `config/models/<model>/default.toml` | 物理参数、耦合常数 | G, K, Lambda |
+| **物理常量参数** | `config/physics/default.toml` | 跨模型共享常量 | hbarc, rho0 |
 | **环境配置** | `.env` 或环境变量 | 路径、日志级别 | DATA_DIR, LOG_LEVEL |
 | **运行时配置** | 函数参数 | 特定计算的参数 | T, mu, xi |
 
@@ -77,7 +77,7 @@ QCD模型库使用三层配置结构：
 - 类型明确
 - Julia原生支持
 
-**示例**：`config/pnjl/default.toml`
+**示例**：`config/models/pnjl/default.toml`
 
 ```toml
 # PNJL模型默认参数配置
@@ -131,7 +131,7 @@ xi_max = 1.0
 
 **用途**：与外部工具交互、Web API
 
-**示例**：`config/pnjl/default.json`
+**示例**：`config/models/pnjl/default.json`（概念示例）
 
 ```json
 {
@@ -164,7 +164,7 @@ xi_max = 1.0
 using TOML
 
 """加载PNJL模型配置"""
-function load_pnjl_config(config_file::String="config/pnjl/default.toml")
+function load_pnjl_config(config_file::String="config/models/pnjl/default.toml")
     if !isfile(config_file)
         @warn "Config file not found, using defaults" config_file
         return get_default_pnjl_config()
@@ -264,7 +264,7 @@ const PNJL_CONFIG_SCHEMA = Dict(
 model = create_model(:PNJL)
 
 # 从指定配置文件创建
-model = create_model(:PNJL, config_file="config/pnjl/custom.toml")
+model = create_model(:PNJL, config_file="config/models/pnjl/custom.toml")
 
 # 从配置字典创建
 config = load_pnjl_config()
@@ -297,19 +297,25 @@ model = create_model(:PNJL, params=params)
 
 ```
 config/
-├── pnjl/
-│   ├── default.toml          # 默认参数
-│   ├── high_density.toml     # 高密度场景
-│   └── low_temperature.toml  # 低温场景
-├── rpnjl/
-│   └── default.toml
-├── numerical.toml            # 数值参数
-└── logging.toml              # 日志配置
+├── models/
+│   ├── pnjl/
+│   │   ├── default.toml      # 默认参数
+│   │   └── unittest.toml     # 单测覆盖参数
+│   ├── rpnjl/
+│   │   ├── default.toml
+│   │   └── unittest.toml
+│   ├── njl/
+│   └── njl2/
+├── physics/
+│   ├── default.toml          # 共享物理常量
+│   └── unittest.toml
+└── workflows/
+    └── relaxtime/
 ```
 
 ### 4.3 场景配置
 
-**高密度场景**：`config/pnjl/high_density.toml`
+**高密度场景**：`config/models/pnjl/high_density.toml`
 
 ```toml
 [parameters.coupling]
@@ -438,9 +444,9 @@ data_dir = ENV["QCD_DATA_DIR"]
 ### 7.1 配置继承
 
 ```toml
-# config/pnjl/high_density.toml
+# config/models/pnjl/high_density.toml
 [inherit]
-base = "config/pnjl/default.toml"
+base = "config/models/pnjl/default.toml"
 
 [parameters.coupling]
 # 只覆盖需要改变的参数
@@ -470,7 +476,7 @@ end
 ### 7.2 配置模板
 
 ```toml
-# config/templates/scan.toml
+# config/workflows/templates/scan.toml
 [scan]
 type = "{{SCAN_TYPE}}"  # TmuScan, TrhoScan
 T_min = {{T_MIN}}
@@ -496,7 +502,7 @@ vars = Dict(
     "T_MAX" => 0.3,
     "T_STEPS" => 50
 )
-config = render_config_template("config/templates/scan.toml", vars)
+config = render_config_template("config/workflows/templates/scan.toml", vars)
 ```
 
 ### 7.3 配置验证Schema
@@ -600,7 +606,7 @@ end
 ### 9.1 完整的PNJL配置
 
 ```toml
-# config/pnjl/production.toml
+# config/models/pnjl/production.toml
 # PNJL模型生产环境配置
 
 [meta]
@@ -716,7 +722,7 @@ save_convergence_info = true
 
 ```julia
 # 错误
-ERROR: Config file not found: config/pnjl/custom.toml
+ERROR: Config file not found: config/models/pnjl/custom.toml
 
 # 解决
 # 1. 检查文件路径是否正确
