@@ -15,7 +15,7 @@
 - Modify: `README.md`
 - Modify: `.gitignore` (only if choosing ignore-path strategy for quickstart outputs)
 - Modify: `docs/guides/STATUS.md` (only if README wording change requires sync)
-- Create: `docs/dev/active/readme_v2_content_migration_map.md` (temporary implementation artifact, can be archived/removed after merge)
+- Create: `docs/dev/active/2026-03-28_readme_v2_content_migration_map.md` (temporary implementation artifact, can be archived/removed after merge)
 - Test/Check: `scripts/dev/check_docs_consistency.jl`
 - Test/Check: `scripts/dev/check_script_entrypoints.jl`
 - Test/Check: `tests/unit/runtests.jl` (smoke profile)
@@ -31,7 +31,7 @@
 ### Task 0: Produce migration map, text budget, and verification matrix before README edits
 
 **Files:**
-- Create: `docs/dev/active/readme_v2_content_migration_map.md`
+- Create: `docs/dev/active/2026-03-28_readme_v2_content_migration_map.md`
 - Reference: `README.md`
 - Reference: `docs/superpowers/specs/2026-03-28-readme-v2-layered-entry-design.md`
 
@@ -48,7 +48,7 @@
   - Expected: PASS for mandatory deliverables #1/#2/#3 coverage.
 
 - [ ] **Step 5: Commit**
-  - `git add docs/dev/active/readme_v2_content_migration_map.md`
+  - `git add docs/dev/active/2026-03-28_readme_v2_content_migration_map.md`
   - `git commit -m "docs: add README v2 migration map and validation matrix"`
 
 ## Chunk 1: README v2 Content Skeleton + Quickstart Contract
@@ -218,7 +218,7 @@
 ## Rollback Procedure
 
 - If rewrite introduces drift/noise, revert only files touched by this plan (never full-tree rollback), then re-run:
-  - `git restore --source=<BASE_SHA> -- README.md docs/guides/STATUS.md .gitignore docs/dev/active/readme_v2_content_migration_map.md`
+  - `git restore --source=<BASE_SHA> -- README.md docs/guides/STATUS.md .gitignore docs/dev/active/2026-03-28_readme_v2_content_migration_map.md`
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
   - `julia --project=. scripts/dev/check_script_entrypoints.jl`
 
