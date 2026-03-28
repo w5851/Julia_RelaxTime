@@ -6,6 +6,12 @@
 
 **目标**：提供灵活、可维护的配置系统，支持多种使用场景和环境。
 
+## 阅读指引：实况层 vs 概念层
+
+- **仓库实况（当前支持）**：以本仓 `config/` 真实文件与当前脚本入口为准，可直接复现。
+- **概念示例（非现行实现）**：用于说明可选范式（如 JSON 配置、通用模板渲染、版本迁移脚手架），不代表仓库已默认启用。
+- 若两者有冲突，**一律以仓库实况层为准**。
+
 ## 当前项目 Profile 口径（2026-02）
 
 当前模型参数文件以 `config/models/` 为主：
@@ -37,6 +43,20 @@ julia --project=. scripts/dev/check_model_profile_matrix.jl
 - default+unittest 合并后关键字段完整；
 - unittest 覆盖键必须是 default 已存在键（防止误拼写/静默新增漂移）；
 - 输出各模型覆盖键列表，便于审阅 profile 差异。
+
+## 最小可复现配置矩阵（models / physics / workflows）
+
+| 配置域 | 最小文件集 | 主要消费入口 | 说明 |
+|---|---|---|---|
+| models | `config/models/pnjl/default.toml` + `config/models/pnjl/unittest.toml` | `src/models/Models.jl` | `default` 为基线，`unittest` 为差异覆盖 |
+| physics | `config/physics/default.toml` + `config/physics/unittest.toml` | `src/models/Models.jl` / 相关 workflow | 跨模型共享常量层 |
+| workflows | `config/workflows/relaxtime/default.toml` | `scripts/relaxtime/*` / workflow 入口 | 工作流级参数与 schema/alias 协同 |
+
+推荐快速校验：
+
+```powershell
+julia --project=. scripts/dev/check_model_profile_matrix.jl
+```
 
 ---
 
@@ -127,7 +147,7 @@ xi_min = -1.0
 xi_max = 1.0
 ```
 
-### 2.2 备选格式：JSON
+### 2.2 备选格式：JSON（概念示例，非现行实现）
 
 **用途**：与外部工具交互、Web API
 
@@ -156,7 +176,9 @@ xi_max = 1.0
 
 ---
 
-## 3. 配置加载
+## 3. 配置加载（概念示例，非现行实现）
+
+> 以下代码块用于说明设计范式；当前仓库以 `src/models` 与既有脚本中的实际加载路径为准。
 
 ### 3.1 加载配置文件
 
@@ -439,7 +461,7 @@ data_dir = ENV["QCD_DATA_DIR"]
 
 ---
 
-## 7. 高级配置
+## 7. 高级配置（概念示例，非现行实现）
 
 ### 7.1 配置继承
 
@@ -547,7 +569,7 @@ end
 
 ---
 
-## 8. 配置迁移
+## 8. 配置迁移（概念示例，非现行实现）
 
 ### 8.1 版本兼容性
 
@@ -601,7 +623,9 @@ end
 
 ---
 
-## 9. 配置示例
+## 9. 配置示例（含概念示例）
+
+> 本节含“生产模板/扫描模板”等说明性示例，不等价于仓库默认自动加载策略。
 
 ### 9.1 完整的PNJL配置
 
