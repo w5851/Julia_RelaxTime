@@ -326,6 +326,23 @@ Julia 的首次调用慢是因为 JIT 编译。可以通过以下方式优化：
 - `scripts/debug/test_implicit_differentiation_lib.jl` - ImplicitDifferentiation.jl 测试
 - `scripts/debug/test_higher_order_derivatives.jl` - 高阶导数手动推导测试
 
+## 2026-03-28：关于“手写 Jacobian/Hessian + NLsolve 是否更快”的补充结论
+
+仅记录结论：
+
+1. 在当前仓库主线 PNJL gap 求解链路上，
+   “手写 Jacobian/Hessian 传给 `nlsolve` 稳定加速 5-10ms”不成立，属于场景相关现象，不能泛化为默认规律。
+
+2. “`nlsolve` 默认 `autodiff=:forward` 因为额外内存分配而降性能”不是唯一原因，
+   在本次验证点上也并未表现为稳定成立（默认路径并不总是更高分配/更慢）。
+
+3. 当前链路里 residual 本身是 AD 梯度（`gap_residual` 内部 `ForwardDiff.gradient`），
+   外层 Jacobian 计算策略只是总成本的一部分；实际性能由多因素共同决定，
+   包括但不限于 AD 嵌套层次、ForwardDiff 配置复用、积分分辨率与点位、迭代步数、类型稳定性与闭包分配等。
+
+4. 因此工程上不应基于单一解释（“默认 AD 内存开销”）直接下结论，
+   应以目标参数区间的实测 profile/benchmark 为准。
+
 ## 参考资料
 
 - [ForwardDiff.jl 文档](https://juliadiff.org/ForwardDiff.jl/)
