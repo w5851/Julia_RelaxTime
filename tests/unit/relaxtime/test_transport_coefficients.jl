@@ -5,6 +5,7 @@ if !isdefined(Main, :RelaxTime)
     Base.include(Main, _RELAXTIME_PATH)
 end
 using Main.TransportCoefficients
+const TCV = Main.RelaxTime.TransportCoefficientsValidation
 
 const QUARK_PARAMS = (m=(u=0.3,d=0.3,s=0.5), μ=(u=0.2,d=0.2,s=0.2))
 const THERMO_PARAMS = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
@@ -354,6 +355,52 @@ end
     sigma_req_struct = electric_conductivity(req_struct)
     @test isapprox(eta_req_struct, eta_kw; rtol=1e-12, atol=0.0)
     @test isapprox(sigma_req_struct, sigma_kw; rtol=1e-12, atol=0.0)
+end
+
+@testset "TransportCoefficients: request adapter layering" begin
+    req = TransportCoefficients._build_transport_request(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        TAU_ONE;
+        charges=Main.TransportCoefficients.default_charges(),
+        degeneracy=Main.TransportCoefficients.degeneracy_default(),
+        config=nothing,
+        kwargs=pairs((; p_nodes=12, p_max=5.0)),
+    )
+
+    @test req isa TransportRequest
+    @test req.integration.p_nodes == 12
+    @test req.integration.p_max == 5.0
+    @test req.physics.degeneracy == Main.TransportCoefficients.degeneracy_default()
+end
+
+@testset "TransportCoefficients: contract layer guards" begin
+    @test_throws ErrorException TCV._validate_transport_request_contract(
+        DENSITIES_ONE,
+        PRESSURE_ONE,
+        nothing,
+    )
+    @test_throws ErrorException TCV._validate_transport_request_contract(
+        DENSITIES_ONE,
+        nothing,
+        ENERGY_ONE,
+    )
+    @test_throws ErrorException TCV._validate_transport_request_contract(
+        nothing,
+        PRESSURE_ONE,
+        ENERGY_ONE,
+    )
+
+    @test TCV._validate_transport_request_contract(
+        DENSITIES_ONE,
+        PRESSURE_ONE,
+        ENERGY_ONE,
+    ) == true
+    @test TCV._validate_transport_request_contract(
+        nothing,
+        nothing,
+        nothing,
+    ) == false
 end
 
 @testset "TransportCoefficients: provider injection smoke" begin

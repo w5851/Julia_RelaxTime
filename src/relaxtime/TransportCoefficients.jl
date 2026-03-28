@@ -39,6 +39,7 @@ using ..TransportCoefficientsValidation: _validate_tau_namedtuple,
     _validate_quark_thermo_inputs,
     _validate_bulk_coeffs_isentropic,
     _validate_transport_inputs,
+    _validate_transport_request_contract,
     _validate_conserved_charge_symbol,
     _validate_diffusion_background
 
@@ -1516,54 +1517,114 @@ function transport_coefficients(
     provider=DEFAULT_TRANSPORT_PROVIDER,
     kwargs...
 )::NamedTuple
-    effective_config = _effective_transport_config(config, kwargs)
-
-    eta = shear_viscosity(
+    request = _build_transport_request(
         quark_params,
         thermo_params,
-        effective_config;
-        tau=tau,
-        degeneracy=degeneracy,
-        provider=provider,
-    )
-
-    sigma = electric_conductivity(
-        quark_params,
-        thermo_params,
-        effective_config;
-        tau=tau,
+        tau;
         charges=charges,
         degeneracy=degeneracy,
-        provider=provider,
+        config=config,
+        kwargs=kwargs,
     )
 
-    zeta = bulk_coeffs === nothing ? NaN : bulk_viscosity_isentropic(
-        quark_params,
-        thermo_params,
-        effective_config;
-        tau=tau,
-        bulk_coeffs_isentropic=bulk_coeffs,
-        provider=provider,
-    )
+    eta = _compute_eta(request; provider=provider)
+    sigma = _compute_sigma(request; provider=provider)
 
-    has_diffusion_background = densities !== nothing || pressure !== nothing || energy !== nothing
-    if has_diffusion_background
-        densities !== nothing || error("transport_coefficients requires densities when pressure/energy is provided")
-        pressure !== nothing || error("transport_coefficients requires pressure when densities/energy is provided")
-        energy !== nothing || error("transport_coefficients requires energy when densities/pressure is provided")
-    end
+    zeta = _compute_zeta(request; bulk_coeffs=bulk_coeffs, provider=provider)
 
-    κmat = has_diffusion_background ? diffusion_matrix(
-        quark_params,
-        thermo_params,
-        effective_config;
-        tau=tau,
+    has_diffusion_background = _validate_transport_request_contract(densities, pressure, energy)
+    κmat = _compute_diffusion_matrix(
+        request;
+        has_diffusion_background=has_diffusion_background,
         densities=densities,
         pressure=pressure,
         energy=energy,
-        degeneracy=degeneracy,
         provider=provider,
-    ) : nothing
+    )
+
+    return _assemble_transport_result(
+        request,
+        eta,
+        zeta,
+        sigma,
+        κmat;
+        has_diffusion_background=has_diffusion_background,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        entropy=entropy,
+        c_p=c_p,
+        rho_mass=rho_mass,
+    )
+end
+
+@inline function _build_transport_request(
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    tau::NamedTuple;
+    charges::NamedTuple,
+    degeneracy::Float64,
+    config::Union{Nothing,TransportIntegrationConfig},
+    kwargs::Base.Pairs,
+)::TransportRequest
+    effective_config = _effective_transport_config(config, kwargs)
+    physics = TransportPhysicsConfig(charges=charges, degeneracy=degeneracy)
+    return TransportRequest(QuarkParams(quark_params), ThermoParams(thermo_params), tau, physics, effective_config)
+end
+
+@inline function _compute_eta(req::TransportRequest; provider)::Float64
+    return shear_viscosity(req; tau=req.tau, degeneracy=req.physics.degeneracy, integration=req.integration, provider=provider)
+end
+
+@inline function _compute_sigma(req::TransportRequest; provider)::Float64
+    return electric_conductivity(req; tau=req.tau, charges=req.physics.charges, degeneracy=req.physics.degeneracy, integration=req.integration, provider=provider)
+end
+
+@inline function _compute_zeta(
+    req::TransportRequest;
+    bulk_coeffs::Union{Nothing,NamedTuple},
+    provider,
+)::Float64
+    bulk_coeffs === nothing && return NaN
+    return bulk_viscosity_isentropic(req; tau=req.tau, bulk_coeffs_isentropic=bulk_coeffs, integration=req.integration, provider=provider)
+end
+
+@inline function _compute_diffusion_matrix(
+    req::TransportRequest;
+    has_diffusion_background::Bool,
+    densities::Union{Nothing,NamedTuple},
+    pressure::Union{Nothing,Real},
+    energy::Union{Nothing,Real},
+    provider,
+)
+    has_diffusion_background || return nothing
+    return diffusion_matrix(
+        req;
+        tau=req.tau,
+        densities=densities,
+        pressure=pressure,
+        energy=energy,
+        degeneracy=req.physics.degeneracy,
+        integration=req.integration,
+        provider=provider,
+    )
+end
+
+function _assemble_transport_result(
+    req::TransportRequest,
+    eta::Float64,
+    zeta::Float64,
+    sigma::Float64,
+    κmat;
+    has_diffusion_background::Bool,
+    densities::Union{Nothing,NamedTuple},
+    pressure::Union{Nothing,Real},
+    energy::Union{Nothing,Real},
+    entropy::Union{Nothing,Real},
+    c_p::Union{Nothing,Real},
+    rho_mass::Union{Nothing,Real},
+)::NamedTuple
+    thermo = _tp_view(req.thermo)
 
     κBB = κmat === nothing ? NaN : κmat.BB
     κBQ = κmat === nothing ? NaN : κmat.BQ
@@ -1572,10 +1633,10 @@ function transport_coefficients(
     κQS = κmat === nothing ? NaN : κmat.QS
     κSS = κmat === nothing ? NaN : κmat.SS
 
-    λ = has_diffusion_background ? lambda_from_kappa_BB(κBB, pressure, energy, conserved_charge_densities(densities).B, thermo_params.T) : NaN
-    L = lorenz_number(λ, sigma, thermo_params.T)
-    L_legacy = lorentz_legacy(λ, sigma, thermo_params.T)
-    ratio_eta_sigma = entropy === nothing ? NaN : viscous_conductive_coupling_ratio(eta, entropy, sigma, thermo_params.T)
+    λ = has_diffusion_background ? lambda_from_kappa_BB(κBB, pressure, energy, conserved_charge_densities(densities).B, thermo.T) : NaN
+    L = lorenz_number(λ, sigma, thermo.T)
+    L_legacy = lorentz_legacy(λ, sigma, thermo.T)
+    ratio_eta_sigma = entropy === nothing ? NaN : viscous_conductive_coupling_ratio(eta, entropy, sigma, thermo.T)
     Pr = (c_p === nothing || rho_mass === nothing) ? NaN : prandtl_number(eta, c_p, λ, rho_mass)
     zeta_over_eta = bulk_to_shear_viscosity_ratio(zeta, eta)
 
