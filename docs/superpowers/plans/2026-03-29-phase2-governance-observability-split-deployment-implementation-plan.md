@@ -44,7 +44,7 @@
 
 - [x] **Step 5: Re-run tests and ensure pass**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl tests/unit/simulation/test_scan_job_state_machine.jl`
   - `git commit -m "refactor: enforce scan job state transition contract"`
 
@@ -67,7 +67,7 @@
 
 - [x] **Step 5: Re-run integration tests and ensure pass**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/routing.jl tests/integration/relaxtime/test_pnjl_scan_idempotency.jl`
   - `git commit -m "feat: add idempotent create behavior for PNJL scan jobs"`
 
@@ -93,7 +93,7 @@
 
 - [x] **Step 5: Re-run tests and ensure pass**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/routing.jl tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`
   - `git commit -m "feat: add PNJL scan cancel and timeout governance"`
 
@@ -115,7 +115,7 @@
 
 - [x] **Step 4: Re-run tests and ensure pass**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/shared.jl tests/unit/simulation/test_scan_job_logging_contract.jl`
   - `git commit -m "feat: add structured lifecycle logging for scan jobs"`
 
@@ -134,7 +134,7 @@
 
 - [x] **Step 4: Re-run tests and ensure pass**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/pnjl_handlers.jl tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl`
   - `git commit -m "feat: enrich scan status diagnostics and metrics visibility"`
 
@@ -156,7 +156,7 @@
 
 - [x] **Step 4: Verify localhost still works as default mode**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git add web/js/runtime_config.js web/js/api.js src/simulation/ServerLauncher.jl tests/integration/relaxtime/test_frontend_backend_config_contract.jl`
   - `git commit -m "feat: add split deployment runtime config contract"`
 
@@ -177,7 +177,7 @@
 - [x] **Step 4: Run docs consistency governance check**
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   - `git add docs/reference/ops/phase2_split_deployment_runbook.md docs/dev/active/2026-03-29_phase2_governance_observability_split_deployment_tasklist.md docs/dev/active/2026-03-29_前后端分离中长期目标与前端短期待开发任务单.md`
   - `git commit -m "docs: add phase-2 governance and split deployment runbook"`
 
@@ -188,10 +188,10 @@
 - Stage F split deployment contract is documented and locally verifiable.
 - Localhost default workflow remains intact after all Phase-2 changes.
 
-## Execution Status (2026-03-29)
+## Execution Status (2026-03-29, updated)
 
-- This Phase-2 plan has not entered implementation yet.
-- Current session completed only planning/setup artifacts:
-  - `docs/superpowers/specs/2026-03-29-phase2-governance-observability-split-deployment-design.md`
+- Phase-2 plan implementation has completed for Task 1-7, including commit steps.
+- Execution evidence is tracked in:
   - `docs/dev/active/2026-03-29_phase2_governance_observability_split_deployment_tasklist.md`
-- All task checkboxes in this plan remain pending by design.
+  - `docs/reference/ops/phase2_split_deployment_runbook.md`
+- Governance/observability/split baseline is delivered while keeping localhost default workflow stable.

@@ -43,7 +43,7 @@
 - [x] **Step 5: Verify URL switching**
   - Manual test: default localhost works; override value changes request target without modifying business methods.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add web/js/runtime_config.js web/js/api.js`
   - `git commit -m "feat: make frontend API base URL runtime-configurable"`
 
@@ -71,7 +71,7 @@
 - [x] **Step 5: Verify API adapter behavior manually**
   - Simulate invalid params and unreachable server paths.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add web/js/api.js`
   - `git commit -m "feat: add PNJL scan jobs API adapter and error normalization"`
 
@@ -101,7 +101,7 @@
 - [x] **Step 5: Verify validation and submission manually**
   - Invalid form blocked locally; valid form reaches backend.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
   - `git add web/index.html web/js/ui.js web/css/style.css`
   - `git commit -m "feat: add PNJL scan submission form with local validation"`
 
@@ -131,7 +131,7 @@
 - [x] **Step 6: Verify end-to-end loop manually**
   - Create job, observe progress, complete and render result.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
   - `git add web/js/ui.js web/index.html web/css/style.css`
   - `git commit -m "feat: add scan job polling, result panel, and retry UX"`
 
@@ -152,7 +152,7 @@
 - [x] **Step 3: Verify guidance clarity**
   - Confirm messages are visible and non-blocking.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   - `git add web/index.html web/js/ui.js`
   - `git commit -m "docs: add localhost execution guidance for scan workflow"`
 
@@ -180,7 +180,7 @@
 - [x] **Step 6: Update active doc checkboxes based on evidence**
   - Mark completed P0 items and add short execution evidence notes.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
   - `git add docs/dev/active/2026-03-29_前后端分离中长期目标与前端短期待开发任务单.md`
   - `git commit -m "docs: record localhost 80/20 frontend workflow verification"`
 
@@ -192,12 +192,12 @@
 - Errors are mapped into user-readable and technical-detail layers.
 - Active development task sheet reflects current completion status with evidence.
 
-## Execution Status (2026-03-29)
+## Execution Status (2026-03-29, updated)
 
-- Completed in working tree: Task 1-6 implementation and verification steps (except commit steps).
+- Completed and committed: Task 1-6 implementation, verification, and commit steps.
 - Evidence commands run:
   - `node web/js/api.scan.test.mjs` (PASS)
   - `node web/js/api.scan.integration.test.mjs` with local server warm-up (PASS)
 - Backend unblock included during execution:
   - `src/simulation/FullServerApp.jl` loading path fixed for `Main.Models`.
-- Remaining action in this plan: commit steps are pending.
+- This plan is fully executed for its scoped deliverables.
