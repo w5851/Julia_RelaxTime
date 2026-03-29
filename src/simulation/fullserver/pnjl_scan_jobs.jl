@@ -42,6 +42,14 @@ const _PNJL_SCAN_PRUNE_METRICS = Dict{String, Int}(
     "keep_max" => 0,
 )
 const _PNJL_SCAN_IDEMPOTENCY_CACHE = Dict{String, Dict{String, Any}}()
+const _PNJL_SCAN_RUNTIME_METRICS = Dict{String, Int}(
+    "job_succeeded" => 0,
+    "job_failed" => 0,
+    "job_cancelled" => 0,
+    "duration_le_10s" => 0,
+    "duration_10s_60s" => 0,
+    "duration_gt_60s" => 0,
+)
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -141,11 +149,56 @@ function _job_elapsed_seconds(job::Dict{String, Any}; now_dt::DateTime=Dates.now
     return max(0, Dates.value(now_dt - started_at) ÷ 1000)
 end
 
+function _update_scan_runtime_metrics_on_terminal!(job::Dict{String, Any})
+    status = String(get(job, "status", ""))
+    if status == _SCAN_JOB_STATUS_SUCCEEDED
+        _PNJL_SCAN_RUNTIME_METRICS["job_succeeded"] = get(_PNJL_SCAN_RUNTIME_METRICS, "job_succeeded", 0) + 1
+    elseif status == _SCAN_JOB_STATUS_FAILED
+        _PNJL_SCAN_RUNTIME_METRICS["job_failed"] = get(_PNJL_SCAN_RUNTIME_METRICS, "job_failed", 0) + 1
+    elseif status == _SCAN_JOB_STATUS_CANCELLED
+        _PNJL_SCAN_RUNTIME_METRICS["job_cancelled"] = get(_PNJL_SCAN_RUNTIME_METRICS, "job_cancelled", 0) + 1
+    end
+
+    started_dt = _parse_job_ended_at(get(job, "started_at", nothing))
+    ended_dt = _parse_job_ended_at(get(job, "ended_at", nothing))
+    if started_dt !== nothing && ended_dt !== nothing && ended_dt >= started_dt
+        duration_seconds = Dates.value(ended_dt - started_dt) ÷ 1000
+        if duration_seconds <= 10
+            _PNJL_SCAN_RUNTIME_METRICS["duration_le_10s"] = get(_PNJL_SCAN_RUNTIME_METRICS, "duration_le_10s", 0) + 1
+        elseif duration_seconds <= 60
+            _PNJL_SCAN_RUNTIME_METRICS["duration_10s_60s"] = get(_PNJL_SCAN_RUNTIME_METRICS, "duration_10s_60s", 0) + 1
+        else
+            _PNJL_SCAN_RUNTIME_METRICS["duration_gt_60s"] = get(_PNJL_SCAN_RUNTIME_METRICS, "duration_gt_60s", 0) + 1
+        end
+    end
+    return nothing
+end
+
+function _runtime_metrics_snapshot(queue_snapshot)
+    return Dict{String, Any}(
+        "terminal" => Dict(
+            "succeeded" => get(_PNJL_SCAN_RUNTIME_METRICS, "job_succeeded", 0),
+            "failed" => get(_PNJL_SCAN_RUNTIME_METRICS, "job_failed", 0),
+            "cancelled" => get(_PNJL_SCAN_RUNTIME_METRICS, "job_cancelled", 0),
+        ),
+        "duration_buckets" => Dict(
+            "le_10s" => get(_PNJL_SCAN_RUNTIME_METRICS, "duration_le_10s", 0),
+            "between_10s_60s" => get(_PNJL_SCAN_RUNTIME_METRICS, "duration_10s_60s", 0),
+            "gt_60s" => get(_PNJL_SCAN_RUNTIME_METRICS, "duration_gt_60s", 0),
+        ),
+        "queue" => Dict(
+            "queued" => queue_snapshot.queued,
+            "running" => queue_snapshot.running,
+        ),
+    )
+end
+
 function _mark_job_timeout!(job::Dict{String, Any})
     _set_job_status!(job, _SCAN_JOB_STATUS_FAILED)
     job["error"] = "scan execution timeout"
     job["reason_code"] = "TIMEOUT"
     job["internal_error"] = nothing
+    _update_scan_runtime_metrics_on_terminal!(job)
     return nothing
 end
 
@@ -711,6 +764,7 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                         if total isa Int
                             _update_job_progress!(job, total)
                         end
+                        _update_scan_runtime_metrics_on_terminal!(job)
                         _append_job_event!(job, "ended"; extras=Dict("outcome" => "succeeded"))
                     end
                     break
@@ -731,6 +785,7 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
                             job["error"] = "scan execution failed"
                             job["reason_code"] = "EXECUTION_ERROR"
                             job["internal_error"] = sprint(showerror, e, catch_backtrace())
+                            _update_scan_runtime_metrics_on_terminal!(job)
                             _append_job_event!(job, "ended"; extras=Dict("outcome" => "failed"))
                         end
                         break
@@ -898,6 +953,7 @@ function handle_pnjl_scan_job_cancel(job_id::String)
         job["error"] = "scan job cancelled"
         job["reason_code"] = "CANCELLED"
         job["internal_error"] = nothing
+        _update_scan_runtime_metrics_on_terminal!(job)
         _append_job_event!(job, "ended"; extras=Dict("outcome" => "cancelled"))
 
         return Dict{String, Any}(
@@ -947,6 +1003,7 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "pruned_ttl" => get(_PNJL_SCAN_PRUNE_METRICS, "ttl", 0),
                 "pruned_keep_max" => get(_PNJL_SCAN_PRUNE_METRICS, "keep_max", 0),
             ),
+            "metrics" => _runtime_metrics_snapshot(snap),
             "diagnostics" => _build_job_diagnostics(job["job_id"], job["kind"], job["status"]),
         )
     end
