@@ -71,6 +71,9 @@ async function request_json(path, options = {}) {
 export function normalize_api_error({ status, payload = {}, message = '', originalError = null }) {
     const code = payload.code || payload.error_code || (status === 429 ? 'QUEUE_FULL' : 'API_ERROR');
     const normalized = new Error(message || payload.message || payload.error || '请求失败');
+    if (originalError && typeof originalError.name === 'string' && originalError.name) {
+        normalized.name = originalError.name;
+    }
     normalized.code = code;
     normalized.status = status;
     normalized.diagnostics = payload.diagnostics || null;
@@ -102,12 +105,16 @@ export function validate_scan_request(request) {
 
     if (hasXi && !_is_number(params.xi)) {
         errors.push('xi 必须是数字');
+    } else if (hasXi && (Number(params.xi) < 0 || Number(params.xi) > 1)) {
+        errors.push('xi 必须在 [0, 1] 范围内');
     }
 
     if (hasXiValues) {
         const allNumeric = params.xi_values.every(v => _is_number(v));
         if (!allNumeric) {
             errors.push('xi_values 必须全部是数字');
+        } else if (!params.xi_values.every(v => Number(v) >= 0 && Number(v) <= 1)) {
+            errors.push('xi_values 必须在 [0, 1] 范围内');
         }
     }
 
@@ -121,22 +128,30 @@ export function validate_scan_request(request) {
             errors.push('xi_grid.step 必须大于 0');
         } else if (Number(stop) < Number(start)) {
             errors.push('xi_grid.stop 必须大于等于 xi_grid.start');
+        } else if (Number(start) < 0 || Number(stop) > 1) {
+            errors.push('xi_grid.start/stop 必须在 [0, 1] 范围内');
         }
     }
 
     if (!Array.isArray(params.T_values) || params.T_values.length === 0 || !params.T_values.every(v => _is_number(v))) {
         errors.push('T_values 必须是非空数字数组');
+    } else if (!params.T_values.every(v => Number(v) > 0)) {
+        errors.push('T_values 必须全部大于 0');
     }
 
     if (kind === 'tmu') {
         if (!Array.isArray(params.mu_values) || params.mu_values.length === 0 || !params.mu_values.every(v => _is_number(v))) {
             errors.push('tmu 模式下 mu_values 必须是非空数字数组');
+        } else if (!params.mu_values.every(v => Number(v) >= 0)) {
+            errors.push('tmu 模式下 mu_values 必须全部大于等于 0');
         }
     }
 
     if (kind === 'trho') {
         if (!Array.isArray(params.rho_values) || params.rho_values.length === 0 || !params.rho_values.every(v => _is_number(v))) {
             errors.push('trho 模式下 rho_values 必须是非空数字数组');
+        } else if (!params.rho_values.every(v => Number(v) >= 0)) {
+            errors.push('trho 模式下 rho_values 必须全部大于等于 0');
         }
     }
 

@@ -1,3 +1,15 @@
+---
+title: Phase-2 治理/可观测/分离部署任务单
+archived: true
+original: docs/dev/active/2026-03-29_phase2_governance_observability_split_deployment_tasklist.md
+archived_date: 2026-03-29
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Phase-2 治理/可观测/分离部署任务单
 
 ## 1. 目标
