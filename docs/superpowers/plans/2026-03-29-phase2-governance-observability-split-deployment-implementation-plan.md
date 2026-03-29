@@ -30,19 +30,19 @@
 - Modify: `src/simulation/fullserver/pnjl_scan_jobs.jl`
 - Create: `tests/unit/simulation/test_scan_job_state_machine.jl`
 
-- [ ] **Step 1: Write failing unit tests for legal/illegal transitions**
+- [x] **Step 1: Write failing unit tests for legal/illegal transitions**
   - Include transitions for terminal states and cancel flow.
 
-- [ ] **Step 2: Run tests to confirm failures**
+- [x] **Step 2: Run tests to confirm failures**
   - Run only new test file through unit selector.
 
-- [ ] **Step 3: Implement state transition validator**
+- [x] **Step 3: Implement state transition validator**
   - Centralize transition logic in one helper.
 
-- [ ] **Step 4: Route all status writes through validator**
+- [x] **Step 4: Route all status writes through validator**
   - Prevent ad-hoc state mutation bypass.
 
-- [ ] **Step 5: Re-run tests and ensure pass**
+- [x] **Step 5: Re-run tests and ensure pass**
 
 - [ ] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl tests/unit/simulation/test_scan_job_state_machine.jl`
@@ -55,17 +55,17 @@
 - Modify: `src/simulation/fullserver/routing.jl` (if header/body passthrough adjustments needed)
 - Create: `tests/integration/relaxtime/test_pnjl_scan_idempotency.jl`
 
-- [ ] **Step 1: Write failing integration tests for idempotent replay and conflict**
+- [x] **Step 1: Write failing integration tests for idempotent replay and conflict**
   - same key + same payload -> same job reference
   - same key + different payload -> conflict
 
-- [ ] **Step 2: Implement idempotency key extraction and payload fingerprint**
+- [x] **Step 2: Implement idempotency key extraction and payload fingerprint**
 
-- [ ] **Step 3: Add lookup/store path in create-job handler**
+- [x] **Step 3: Add lookup/store path in create-job handler**
 
-- [ ] **Step 4: Return deterministic response payload for replayed requests**
+- [x] **Step 4: Return deterministic response payload for replayed requests**
 
-- [ ] **Step 5: Re-run integration tests and ensure pass**
+- [x] **Step 5: Re-run integration tests and ensure pass**
 
 - [ ] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/routing.jl tests/integration/relaxtime/test_pnjl_scan_idempotency.jl`
@@ -78,20 +78,20 @@
 - Modify: `src/simulation/fullserver/routing.jl`
 - Create: `tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`
 
-- [ ] **Step 1: Write failing tests for cancel endpoint behavior**
+- [x] **Step 1: Write failing tests for cancel endpoint behavior**
   - cancel queued/running allowed
   - cancel terminal state rejected (or no-op with explicit semantics)
 
-- [ ] **Step 2: Write failing tests for timeout policy**
+- [x] **Step 2: Write failing tests for timeout policy**
   - forced timeout leads to deterministic terminal code/state.
 
-- [ ] **Step 3: Implement cancel route and handler**
+- [x] **Step 3: Implement cancel route and handler**
   - define endpoint path and response schema.
 
-- [ ] **Step 4: Implement timeout enforcement hook in runner loop**
+- [x] **Step 4: Implement timeout enforcement hook in runner loop**
   - use configurable env policy.
 
-- [ ] **Step 5: Re-run tests and ensure pass**
+- [x] **Step 5: Re-run tests and ensure pass**
 
 - [ ] **Step 6: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/routing.jl tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`
@@ -106,14 +106,14 @@
 - Modify: `src/simulation/fullserver/shared.jl` (if shared formatter/helpers needed)
 - Create: `tests/unit/simulation/test_scan_job_logging_contract.jl`
 
-- [ ] **Step 1: Write failing tests for lifecycle log payload shape**
+- [x] **Step 1: Write failing tests for lifecycle log payload shape**
   - required fields: `job_id`, `kind`, `state`, `timestamp`, `event_code`.
 
-- [ ] **Step 2: Implement structured log helper**
+- [x] **Step 2: Implement structured log helper**
 
-- [ ] **Step 3: Emit logs at create/start/progress/end transitions**
+- [x] **Step 3: Emit logs at create/start/progress/end transitions**
 
-- [ ] **Step 4: Re-run tests and ensure pass**
+- [x] **Step 4: Re-run tests and ensure pass**
 
 - [ ] **Step 5: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/shared.jl tests/unit/simulation/test_scan_job_logging_contract.jl`

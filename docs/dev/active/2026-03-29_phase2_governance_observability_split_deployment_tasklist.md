@@ -13,15 +13,15 @@
 
 ## 3. Stage C（任务系统治理）
 
-- [ ] C1 状态机收敛：`queued/running/succeeded/failed/cancelled`。
-- [ ] C2 非法状态迁移拦截并可测试。
-- [ ] C3 创建任务幂等键支持（重放与冲突语义明确）。
-- [ ] C4 任务取消接口与行为语义明确（含终态处理）。
-- [ ] C5 超时策略可配置并在终态可见原因码。
+- [x] C1 状态机收敛：`queued/running/succeeded/failed/cancelled`。
+- [x] C2 非法状态迁移拦截并可测试。
+- [x] C3 创建任务幂等键支持（重放与冲突语义明确）。
+- [x] C4 任务取消接口与行为语义明确（含终态处理）。
+- [x] C5 超时策略可配置并在终态可见原因码。
 
 ## 4. Stage E（可观测与运维）
 
-- [ ] E1 生命周期结构化日志（含 `job_id`）。
+- [x] E1 生命周期结构化日志（含 `job_id`）。
 - [ ] E2 状态接口可见治理与队列关键指标。
 - [ ] E3 错误分类与前端错误映射对齐。
 - [ ] E4 提供最小运维排障说明（日志定位、常见故障）。
@@ -35,14 +35,18 @@
 
 ## 6. 验收清单
 
-- [ ] V1 至少 1 条幂等重放场景通过。
-- [ ] V2 至少 1 条取消场景通过。
-- [ ] V3 至少 1 条超时场景通过。
-- [ ] V4 状态接口返回包含治理与诊断关键字段。
+- [x] V1 至少 1 条幂等重放场景通过。
+- [x] V2 至少 1 条取消场景通过。
+- [x] V3 至少 1 条超时场景通过。
+- [x] V4 状态接口返回包含治理与诊断关键字段。
 - [ ] V5 分离部署 runbook 可按步骤执行（演练环境）。
 - [ ] V6 localhost 现有闭环能力保持可用。
 
 ## 7. 状态记录
 
-- [ ] 执行中持续回填每项完成证据（测试命令、日志片段、结果截图路径）。
+- [x] 执行中持续回填每项完成证据（测试命令、日志片段、结果截图路径）。
+- [x] 2026-03-29 Task1 证据：新增 `tests/unit/simulation/test_scan_job_state_machine.jl`；执行失败验证命令 `julia --project=. -e "ENV[\"UNIT_FILES\"]=\"simulation/test_scan_job_state_machine.jl\"; include(\"tests/unit/runtests.jl\")"`（初次失败，缺失状态机函数）；实现后复跑同命令通过（18/18）；回归 `julia --project=. -e "ENV[\"UNIT_FILES\"]=\"simulation/test_pnjl_scan_jobs.jl\"; include(\"tests/unit/runtests.jl\")"` 通过（69/69）。
+- [x] 2026-03-29 Task2 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_idempotency.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_idempotency.jl\")"` 观察失败（同 key 未重放/冲突未拦截）；实现幂等键提取、请求指纹与缓存后复跑通过（11/11）；并复跑 `simulation/test_scan_job_state_machine.jl`（18/18）与 `simulation/test_pnjl_scan_jobs.jl`（69/69）。
+- [x] 2026-03-29 Task3 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl\")"` 失败（缺失 cancel/timeout 处理）；实现 `/api/modules/pnjl-scan/jobs/{job_id}/cancel`、`handle_pnjl_scan_job_cancel` 与超时钩子 `_maybe_mark_job_timeout!` 后复跑通过（10/10）；回归 `simulation/test_scan_job_state_machine.jl`（18/18）与 `simulation/test_pnjl_scan_jobs.jl`（69/69）。
+- [x] 2026-03-29 Task4 证据：新增 `tests/unit/simulation/test_scan_job_logging_contract.jl`；先运行 `julia --project=. -e "ENV[\"UNIT_FILES\"]=\"simulation/test_scan_job_logging_contract.jl\"; include(\"tests/unit/runtests.jl\")"` 失败（status 未暴露 events）；实现 `_new_job_event/_append_job_event!` 并在 create/start/progress/end 写入结构化事件后复跑通过（13/13）；回归 `test_pnjl_scan_idempotency.jl`（11/11）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`simulation/test_scan_job_state_machine.jl`（18/18）、`simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [ ] 完成后在主任务单中同步 Stage C/E/F 状态。
