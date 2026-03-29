@@ -126,13 +126,13 @@
 - Modify: `src/simulation/fullserver/pnjl_handlers.jl` (if diagnostics shared path needed)
 - Create: `tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl`
 
-- [ ] **Step 1: Write failing tests for queue/metrics fields in status payload**
+- [x] **Step 1: Write failing tests for queue/metrics fields in status payload**
 
-- [ ] **Step 2: Add counters/gauges for success/failure/queue depth/duration buckets (minimal)**
+- [x] **Step 2: Add counters/gauges for success/failure/queue depth/duration buckets (minimal)**
 
-- [ ] **Step 3: Expose governance + diagnostics metadata in status responses**
+- [x] **Step 3: Expose governance + diagnostics metadata in status responses**
 
-- [ ] **Step 4: Re-run tests and ensure pass**
+- [x] **Step 4: Re-run tests and ensure pass**
 
 - [ ] **Step 5: Commit**
   - `git add src/simulation/fullserver/pnjl_scan_jobs.jl src/simulation/fullserver/pnjl_handlers.jl tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl`

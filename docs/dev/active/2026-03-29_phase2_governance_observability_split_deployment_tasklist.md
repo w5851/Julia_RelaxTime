@@ -22,8 +22,8 @@
 ## 4. Stage E（可观测与运维）
 
 - [x] E1 生命周期结构化日志（含 `job_id`）。
-- [ ] E2 状态接口可见治理与队列关键指标。
-- [ ] E3 错误分类与前端错误映射对齐。
+- [x] E2 状态接口可见治理与队列关键指标。
+- [x] E3 错误分类与前端错误映射对齐。
 - [ ] E4 提供最小运维排障说明（日志定位、常见故障）。
 
 ## 5. Stage F（分离部署落地准备）
@@ -49,4 +49,5 @@
 - [x] 2026-03-29 Task2 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_idempotency.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_idempotency.jl\")"` 观察失败（同 key 未重放/冲突未拦截）；实现幂等键提取、请求指纹与缓存后复跑通过（11/11）；并复跑 `simulation/test_scan_job_state_machine.jl`（18/18）与 `simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [x] 2026-03-29 Task3 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl\")"` 失败（缺失 cancel/timeout 处理）；实现 `/api/modules/pnjl-scan/jobs/{job_id}/cancel`、`handle_pnjl_scan_job_cancel` 与超时钩子 `_maybe_mark_job_timeout!` 后复跑通过（10/10）；回归 `simulation/test_scan_job_state_machine.jl`（18/18）与 `simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [x] 2026-03-29 Task4 证据：新增 `tests/unit/simulation/test_scan_job_logging_contract.jl`；先运行 `julia --project=. -e "ENV[\"UNIT_FILES\"]=\"simulation/test_scan_job_logging_contract.jl\"; include(\"tests/unit/runtests.jl\")"` 失败（status 未暴露 events）；实现 `_new_job_event/_append_job_event!` 并在 create/start/progress/end 写入结构化事件后复跑通过（13/13）；回归 `test_pnjl_scan_idempotency.jl`（11/11）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`simulation/test_scan_job_state_machine.jl`（18/18）、`simulation/test_pnjl_scan_jobs.jl`（69/69）。
+- [x] 2026-03-29 Task5 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl\")"` 失败（缺少 runtime metrics 更新函数）；实现 `terminal` 与 `duration_buckets` 最小指标计数并在 status 暴露 `metrics` 后复跑通过（15/15）；回归 `test_pnjl_scan_idempotency.jl`（11/11）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`simulation/test_scan_job_logging_contract.jl`（13/13）、`simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [ ] 完成后在主任务单中同步 Stage C/E/F 状态。
