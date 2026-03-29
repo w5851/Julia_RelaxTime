@@ -1,3 +1,15 @@
+---
+title: README v2 内容迁移映射（实施工件）
+archived: true
+original: docs/dev/active/2026-03-28_readme_v2_content_migration_map.md
+archived_date: 2026-03-30
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # README v2 内容迁移映射（实施工件）
 
 > 用途：在 README 重构期间记录“保留/迁移/下沉”决策，避免把历史长内容重新堆回首页。
