@@ -147,14 +147,14 @@
 - Modify: `src/simulation/ServerLauncher.jl`
 - Create: `tests/integration/relaxtime/test_frontend_backend_config_contract.jl` (if practical)
 
-- [ ] **Step 1: Define failing checklist for environment matrix**
+- [x] **Step 1: Define failing checklist for environment matrix**
   - localhost profile and staged/remote profile both represented.
 
-- [ ] **Step 2: Implement backend env policy exposure (CORS/queue/timeouts) with safe defaults**
+- [x] **Step 2: Implement backend env policy exposure (CORS/queue/timeouts) with safe defaults**
 
-- [ ] **Step 3: Ensure frontend config supports split deployment target cleanly**
+- [x] **Step 3: Ensure frontend config supports split deployment target cleanly**
 
-- [ ] **Step 4: Verify localhost still works as default mode**
+- [x] **Step 4: Verify localhost still works as default mode**
 
 - [ ] **Step 5: Commit**
   - `git add web/js/runtime_config.js web/js/api.js src/simulation/ServerLauncher.jl tests/integration/relaxtime/test_frontend_backend_config_contract.jl`

@@ -28,10 +28,10 @@
 
 ## 5. Stage F（分离部署落地准备）
 
-- [ ] F1 前后端分离部署配置矩阵（localhost/staging/remote）。
+- [x] F1 前后端分离部署配置矩阵（localhost/staging/remote）。
 - [ ] F2 反向代理与 CORS allowlist 基线策略文档化。
-- [ ] F3 前端 API 地址配置与后端环境变量策略可联动。
-- [ ] F4 保证 localhost 默认路径不回退。
+- [x] F3 前端 API 地址配置与后端环境变量策略可联动。
+- [x] F4 保证 localhost 默认路径不回退。
 
 ## 6. 验收清单
 
@@ -50,4 +50,5 @@
 - [x] 2026-03-29 Task3 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_cancel_timeout.jl\")"` 失败（缺失 cancel/timeout 处理）；实现 `/api/modules/pnjl-scan/jobs/{job_id}/cancel`、`handle_pnjl_scan_job_cancel` 与超时钩子 `_maybe_mark_job_timeout!` 后复跑通过（10/10）；回归 `simulation/test_scan_job_state_machine.jl`（18/18）与 `simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [x] 2026-03-29 Task4 证据：新增 `tests/unit/simulation/test_scan_job_logging_contract.jl`；先运行 `julia --project=. -e "ENV[\"UNIT_FILES\"]=\"simulation/test_scan_job_logging_contract.jl\"; include(\"tests/unit/runtests.jl\")"` 失败（status 未暴露 events）；实现 `_new_job_event/_append_job_event!` 并在 create/start/progress/end 写入结构化事件后复跑通过（13/13）；回归 `test_pnjl_scan_idempotency.jl`（11/11）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`simulation/test_scan_job_state_machine.jl`（18/18）、`simulation/test_pnjl_scan_jobs.jl`（69/69）。
 - [x] 2026-03-29 Task5 证据：新增 `tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl`；先运行 `julia --project=. -e "include(\"tests/integration/relaxtime/test_pnjl_scan_metrics_diagnostics.jl\")"` 失败（缺少 runtime metrics 更新函数）；实现 `terminal` 与 `duration_buckets` 最小指标计数并在 status 暴露 `metrics` 后复跑通过（15/15）；回归 `test_pnjl_scan_idempotency.jl`（11/11）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`simulation/test_scan_job_logging_contract.jl`（13/13）、`simulation/test_pnjl_scan_jobs.jl`（69/69）。
+- [x] 2026-03-29 Task6 证据：新增 `tests/integration/relaxtime/test_frontend_backend_config_contract.jl` 与 `web/js/runtime_config.contract.test.mjs`；先运行后端契约测试失败（缺失 `server_runtime_policy/runtime_policy_env`），实现 `ServerLauncher` 的 profile 策略矩阵与 env 导出后复跑通过（16/16）；前端配置契约测试通过（`runtime_config.contract.test.mjs: PASS`）；并复跑 `test_pnjl_scan_metrics_diagnostics.jl`（15/15）、`test_pnjl_scan_cancel_timeout.jl`（10/10）、`test_pnjl_scan_idempotency.jl`（11/11）确认 localhost 主流程未回退。
 - [ ] 完成后在主任务单中同步 Stage C/E/F 状态。
