@@ -161,6 +161,53 @@ export function validate_scan_request(request) {
     };
 }
 
+export async function summarize_scan_request_metrics(requests, submitter = null) {
+    const total_requests = Array.isArray(requests) ? requests.length : 0;
+    let client_blocked = 0;
+    let backend_requests_after = 0;
+    let backend_400_after = 0;
+
+    const execute_submit = typeof submitter === 'function'
+        ? submitter
+        : async (payload) => {
+            await API.createScanJob(payload);
+        };
+
+    for (const payload of (requests || [])) {
+        const validation = validate_scan_request(payload);
+        if (!validation.valid) {
+            client_blocked += 1;
+            continue;
+        }
+
+        backend_requests_after += 1;
+        try {
+            await execute_submit(payload);
+        } catch (error) {
+            if (error && error.status === 400) {
+                backend_400_after += 1;
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    const backend_400_baseline = client_blocked;
+    const backend_400_ratio_baseline = total_requests > 0 ? backend_400_baseline / total_requests : 0;
+    const backend_400_ratio_after = total_requests > 0 ? backend_400_after / total_requests : 0;
+
+    return {
+        total_requests,
+        client_blocked,
+        backend_requests_after,
+        backend_400_baseline,
+        backend_400_after,
+        backend_400_ratio_baseline,
+        backend_400_ratio_after,
+        backend_400_reduction: backend_400_baseline - backend_400_after,
+    };
+}
+
 export class API {
     /**
      * 检查服务器健康状态

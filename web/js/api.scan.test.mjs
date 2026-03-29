@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { build_api_url, normalize_api_error, validate_scan_request } from './api.js';
+import { API, build_api_url, normalize_api_error, summarize_scan_request_metrics, validate_scan_request } from './api.js';
 
 function test_validate_scan_request() {
     const ok = validate_scan_request({
@@ -92,7 +92,6 @@ async function test_format_error_for_timeout_and_offline() {
         throw err;
     };
 
-    const { API } = await import('./api.js');
     let timeoutMessage = '';
     try {
         await API.getJobStatus('job-timeout');
@@ -121,11 +120,86 @@ async function test_format_error_for_timeout_and_offline() {
     delete globalThis.__JRT_API_BASE_URL__;
 }
 
+async function test_scan_request_400_ratio_metrics() {
+    const originalFetch = globalThis.fetch;
+    let fetchCalls = 0;
+
+    globalThis.fetch = async () => {
+        fetchCalls += 1;
+        return {
+            ok: true,
+            status: 202,
+            json: async () => ({ status: 'accepted', job_id: `job-${fetchCalls}` }),
+        };
+    };
+
+    const requests = [
+        {
+            kind: 'tmu',
+            params: {
+                T_values: [150.0],
+                mu_values: [0.0],
+                xi: 0.0,
+            },
+        },
+        {
+            kind: 'tmu',
+            params: {
+                T_values: [-1.0],
+                mu_values: [0.0],
+                xi: 0.0,
+            },
+        },
+        {
+            kind: 'tmu',
+            params: {
+                T_values: [160.0],
+                mu_values: [20.0],
+                xi: 0.2,
+            },
+        },
+        {
+            kind: 'tmu',
+            params: {
+                T_values: [''],
+                mu_values: [0.0],
+                xi: 0.0,
+            },
+        },
+        {
+            kind: 'tmu',
+            params: {
+                T_values: [170.0],
+                mu_values: [50.0],
+                xi: 1.2,
+            },
+        },
+    ];
+
+    const metrics = await summarize_scan_request_metrics(requests, async (payload) => {
+        await API.createScanJob(payload);
+    });
+
+    assert.equal(metrics.total_requests, 5);
+    assert.equal(metrics.client_blocked, 3);
+    assert.equal(metrics.backend_requests_after, 2);
+    assert.equal(metrics.backend_400_baseline, 3);
+    assert.equal(metrics.backend_400_after, 0);
+    assert.equal(metrics.backend_400_ratio_baseline, 0.6);
+    assert.equal(metrics.backend_400_ratio_after, 0);
+    assert.equal(metrics.backend_400_reduction, 3);
+
+    assert.equal(fetchCalls, 2);
+
+    globalThis.fetch = originalFetch;
+}
+
 async function run() {
     test_validate_scan_request();
     test_build_api_url();
     test_normalize_api_error();
     await test_format_error_for_timeout_and_offline();
+    await test_scan_request_400_ratio_metrics();
     console.log('api.scan.test.mjs: PASS');
 }
 
