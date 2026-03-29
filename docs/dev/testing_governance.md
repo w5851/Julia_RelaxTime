@@ -162,3 +162,17 @@ using PkgBenchmark
 benchmarkpkg(".")
 judge(benchmarkpkg("."), "main")
 ```
+
+## Models 入口契约检查（新增）
+
+- 脚本：`scripts/dev/check_models_entry_contract.jl`
+- 目的：检查 `src/models/entrypoints.jl` 与 `src/models/Models.jl` 的公开入口一致性，避免新增能力绕开统一入口。
+- 当前策略：
+  - 硬失败：核心公开入口缺失；
+  - 软告警：历史兼容差异与“直接 include 内部 workflow 文件路径”调用点（用于迁移期观察，不立即阻断）。
+
+建议在本地提交前与 CI 维护流程中执行：
+
+```powershell
+julia --project=. scripts/dev/check_models_entry_contract.jl
+```

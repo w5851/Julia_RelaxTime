@@ -90,6 +90,9 @@ export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
 export solve_rotation_point
 export solve_gas_liquid_point
+export transport_workflow_module, meson_workflow_module
+export gas_liquid_workflow_module, rotation_workflow_module
+export workflow_param_adapters_module
 export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts

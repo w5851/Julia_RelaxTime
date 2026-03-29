@@ -41,6 +41,12 @@
 - 如需新增例外或调整矩阵，请在本文件记录理由与影响范围。
 - 依赖图更新后，请运行 `scripts/dev/analyze_deps.jl` 生成依赖审计报告。
 
+## Models 入口契约联动
+
+- `Models` 统一求解接口契约见：`docs/architecture/models_solver_contract.md`。
+- 新增公开求解入口时，除依赖规则外，还应运行：
+  - `julia --project=. scripts/dev/check_models_entry_contract.jl`
+
 ## world-age 动态调用边界（迁移期规则）
 
 迁移期允许在 `src/models` 保留少量 `Base.invokelatest(...)` 作为 world-age 安全边界，但必须集中、可审计。

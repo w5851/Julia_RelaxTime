@@ -77,6 +77,7 @@ julia --project=. -e 'println(isfile("data/outputs/results/phase_smoke/phase_sum
 ```powershell
 julia --project=. scripts/dev/check_docs_consistency.jl
 julia --project=. scripts/dev/check_script_entrypoints.jl
+julia --project=. scripts/dev/check_models_entry_contract.jl
 julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
 ```
 

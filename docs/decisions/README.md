@@ -127,6 +127,7 @@ NNNN-title-in-kebab-case.md
 | 编号 | 标题 | 状态 | 日期 |
 |------|------|------|------|
 | 0001 | [使用多重分派实现模型多态](0001-use-multiple-dispatch-for-models.md) | 已接受 | 2026-02-01 |
+| 0002 | [采用 Models 求解接口契约（Problem-like + solve）](0002-models-solver-contract.md) | 已接受 | 2026-03-29 |
 
 ## 创建新ADR的流程
 
