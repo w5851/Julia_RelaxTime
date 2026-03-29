@@ -5,9 +5,63 @@ using HTTP
 include(joinpath(@__DIR__, "FullServerApp.jl"))
 using .FullServerApp
 
-export run_full_server, parse_port
+export run_full_server, parse_port, server_runtime_policy, runtime_policy_env
 
 const DEFAULT_PORT = 8080
+const DEFAULT_DEPLOY_PROFILE = "localhost"
+
+function _normalize_profile(profile::AbstractString)
+    normalized = lowercase(strip(String(profile)))
+    if normalized in ("localhost", "staging", "remote")
+        return normalized
+    end
+    @warn "Unknown deploy profile; fallback to localhost" profile=profile
+    return DEFAULT_DEPLOY_PROFILE
+end
+
+function _policy_for_profile(profile::String)
+    if profile == "localhost"
+        return (
+            profile="localhost",
+            cors_allow_origins="*",
+            scan_max_running=2,
+            scan_max_pending=32,
+            scan_job_timeout_seconds=0,
+        )
+    elseif profile == "staging"
+        return (
+            profile="staging",
+            cors_allow_origins="https://staging.jrt.local",
+            scan_max_running=2,
+            scan_max_pending=64,
+            scan_job_timeout_seconds=180,
+        )
+    else
+        return (
+            profile="remote",
+            cors_allow_origins="https://api.jrt.example.com",
+            scan_max_running=4,
+            scan_max_pending=128,
+            scan_job_timeout_seconds=300,
+        )
+    end
+end
+
+function server_runtime_policy(profile::AbstractString=get(ENV, "JRT_DEPLOY_PROFILE", DEFAULT_DEPLOY_PROFILE))
+    normalized = _normalize_profile(profile)
+    return _policy_for_profile(normalized)
+end
+
+function runtime_policy_env(profile::AbstractString=get(ENV, "JRT_DEPLOY_PROFILE", DEFAULT_DEPLOY_PROFILE))
+    policy = server_runtime_policy(profile)
+    return Dict(
+        "JRT_DEPLOY_PROFILE" => policy.profile,
+        "JRT_CORS_ALLOW_ORIGINS" => policy.cors_allow_origins,
+        "PNJL_SCAN_MAX_RUNNING" => string(policy.scan_max_running),
+        "PNJL_SCAN_MAX_PENDING" => string(policy.scan_max_pending),
+        "PNJL_SCAN_JOB_TIMEOUT_SECONDS" => string(policy.scan_job_timeout_seconds),
+    )
+end
 
 function parse_port(args::Vector{String})
     port = DEFAULT_PORT
@@ -25,7 +79,7 @@ function parse_port(args::Vector{String})
     return port
 end
 
-function print_banner(port::Int)
+function print_banner(port::Int, policy)
     println("\n" * "="^60)
     println("🚀 散射计算服务器启动中...")
     println("="^60)
@@ -38,6 +92,12 @@ function print_banner(port::Int)
     println("   POST http://localhost:$port/api/modules/pnjl-scan/jobs")
     println("   GET  http://localhost:$port/api/modules/pnjl-scan/jobs/{job_id}")
     println("   GET  http://localhost:$port/api/modules/pnjl-scan/jobs/{job_id}/result")
+    println("\n⚙️  部署策略:")
+    println("   profile: $(policy.profile)")
+    println("   cors_allow_origins: $(policy.cors_allow_origins)")
+    println("   scan_max_running: $(policy.scan_max_running)")
+    println("   scan_max_pending: $(policy.scan_max_pending)")
+    println("   scan_job_timeout_seconds: $(policy.scan_job_timeout_seconds)")
     println("\n📁 静态文件:")
     println("   http://localhost:$port/")
     println("   http://localhost:$port/index.html")
@@ -50,9 +110,14 @@ end
 
 function run_full_server(repo_root::String, args::Vector{String}=String[])
     port = parse_port(args)
+    policy = server_runtime_policy(get(ENV, "JRT_DEPLOY_PROFILE", DEFAULT_DEPLOY_PROFILE))
+    env_map = runtime_policy_env(policy.profile)
+    for (k, v) in env_map
+        haskey(ENV, k) || (ENV[k] = v)
+    end
     app = FullServerApp.build_app(repo_root)
 
-    print_banner(port)
+    print_banner(port, policy)
 
     try
         HTTP.serve(app, "0.0.0.0", port; verbose=false)

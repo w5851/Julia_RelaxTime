@@ -73,6 +73,78 @@
                 
                 <button type="submit" id="compute-btn">🚀 计算散射</button>
             </form>
+
+            <section class="scan-panel" id="scan-panel">
+                <h2>本机扫描任务（P0）</h2>
+
+                <div class="scan-runtime-note">
+                    当前模式：localhost 同机计算。建议并发任务保持在 1-2 个，避免本机资源拥塞。
+                </div>
+
+                <div class="scan-api-config">
+                    <label for="api-base-url">API Base URL:</label>
+                    <input type="text" id="api-base-url" placeholder="http://localhost:8080">
+                    <button type="button" id="apply-api-base-url">应用地址</button>
+                </div>
+
+                <form id="scan-form">
+                    <fieldset>
+                        <legend>扫描类型</legend>
+                        <label>
+                            kind:
+                            <select id="scan-kind">
+                                <option value="tmu" selected>tmu</option>
+                                <option value="trho">trho</option>
+                            </select>
+                        </label>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>网格参数（逗号分隔）</legend>
+                        <label>T_values:<input type="text" id="scan-t-values" value="150,160"></label>
+                        <label id="scan-mu-row">mu_values:<input type="text" id="scan-mu-values" value="0,100"></label>
+                        <label id="scan-rho-row" style="display:none;">rho_values:<input type="text" id="scan-rho-values" value="0.001,0.002"></label>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>xi 策略（三选一）</legend>
+                        <label><input type="radio" name="xi-strategy" value="xi" checked> xi</label>
+                        <input type="text" id="scan-xi" value="0.0">
+
+                        <label><input type="radio" name="xi-strategy" value="xi_values"> xi_values</label>
+                        <input type="text" id="scan-xi-values" value="0.0,0.1">
+
+                        <label><input type="radio" name="xi-strategy" value="xi_grid"> xi_grid(start,stop,step)</label>
+                        <div class="scan-grid-row">
+                            <input type="text" id="scan-xi-grid-start" value="0.0" placeholder="start">
+                            <input type="text" id="scan-xi-grid-stop" value="0.2" placeholder="stop">
+                            <input type="text" id="scan-xi-grid-step" value="0.1" placeholder="step">
+                        </div>
+                    </fieldset>
+
+                    <div class="scan-actions">
+                        <button type="submit" id="scan-submit-btn">提交扫描任务</button>
+                        <button type="button" id="scan-retry-btn" disabled>失败后重试</button>
+                    </div>
+                </form>
+
+                <div class="scan-status" id="scan-job-status">未提交任务</div>
+                <pre class="scan-details" id="scan-job-details">-</pre>
+
+                <div class="scan-result-panel" id="scan-result-panel" style="display:none;">
+                    <h3>扫描结果</h3>
+                    <div>total: <span id="scan-total">-</span></div>
+                    <div>success: <span id="scan-success">-</span></div>
+                    <div>failure: <span id="scan-failure">-</span></div>
+                    <div>skipped: <span id="scan-skipped">-</span></div>
+                    <div>output_path: <span id="scan-output-path">-</span></div>
+                </div>
+
+                <details class="scan-tech-error" id="scan-tech-error" style="display:none;">
+                    <summary>技术诊断详情</summary>
+                    <pre id="scan-tech-details">-</pre>
+                </details>
+            </section>
             
             <!-- 物理量显示 -->
             <div id="results-panel" class="results-panel" style="display: none;">
