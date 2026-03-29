@@ -167,14 +167,14 @@
 - Create: `docs/dev/active/2026-03-29_phase2_governance_observability_split_deployment_tasklist.md`
 - Modify: `docs/dev/active/2026-03-29_前后端分离中长期目标与前端短期待开发任务单.md`
 
-- [ ] **Step 1: Write runbook for localhost/staging split modes**
+- [x] **Step 1: Write runbook for localhost/staging split modes**
   - include startup, env vars, health checks, rollback steps.
 
-- [ ] **Step 2: Create Phase-2 active tasklist mapped to Stage C/E/F**
+- [x] **Step 2: Create Phase-2 active tasklist mapped to Stage C/E/F**
 
-- [ ] **Step 3: Sync original active doc with Phase-2 cross-reference links**
+- [x] **Step 3: Sync original active doc with Phase-2 cross-reference links**
 
-- [ ] **Step 4: Run docs consistency governance check**
+- [x] **Step 4: Run docs consistency governance check**
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
 
 - [ ] **Step 5: Commit**
