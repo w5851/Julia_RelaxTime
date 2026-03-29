@@ -23,6 +23,14 @@ function route_request(req::HTTP.Request, repo_root::String)
             isempty(job_id) && return HTTP.Response(400, ["Content-Type" => "text/plain"], "Bad Request")
             return handle_pnjl_scan_job_status(job_id)
         end
+    elseif startswith(path, job_prefix) && req.method == "POST"
+        suffix = path[(length(job_prefix) + 1):end]
+        if endswith(suffix, "/cancel")
+            job_id = suffix[1:end-length("/cancel")]
+            isempty(job_id) && return HTTP.Response(400, ["Content-Type" => "text/plain"], "Bad Request")
+            return handle_pnjl_scan_job_cancel(job_id)
+        end
+        return HTTP.Response(404, ["Content-Type" => "text/plain"], "Not Found")
     else
         return serve_static_file(path, repo_root)
     end

@@ -1,4 +1,5 @@
 using Dates
+using SHA
 using UUIDs: uuid4
 
 const _PNJL_SCAN_JOBS_LOCK = ReentrantLock()
@@ -10,13 +11,37 @@ const _PNJL_SCAN_MAX_RUNNING = 2
 const _PNJL_SCAN_MAX_PENDING = 32
 const _PNJL_SCAN_MAX_XI_POINTS = 64
 const _PNJL_SCAN_SEMAPHORE = Base.Semaphore(_PNJL_SCAN_MAX_RUNNING)
+const _PNJL_SCAN_DEFAULT_TIMEOUT_SECONDS = 0
 const _PNJL_SCAN_FINISHED_KEEP_MAX = 64
 const _PNJL_SCAN_FINISHED_TTL_SECONDS = 86400
+const _SCAN_JOB_STATUS_QUEUED = "queued"
+const _SCAN_JOB_STATUS_RUNNING = "running"
+const _SCAN_JOB_STATUS_SUCCEEDED = "succeeded"
+const _SCAN_JOB_STATUS_FAILED = "failed"
+const _SCAN_JOB_STATUS_CANCELLED = "cancelled"
+const _TERMINAL_SCAN_JOB_STATUSES = Set([
+    _SCAN_JOB_STATUS_SUCCEEDED,
+    _SCAN_JOB_STATUS_FAILED,
+    _SCAN_JOB_STATUS_CANCELLED,
+])
+const _ALLOWED_SCAN_JOB_TRANSITIONS = Dict(
+    _SCAN_JOB_STATUS_QUEUED => Set([_SCAN_JOB_STATUS_RUNNING, _SCAN_JOB_STATUS_CANCELLED]),
+    _SCAN_JOB_STATUS_RUNNING => Set([
+        _SCAN_JOB_STATUS_RUNNING,
+        _SCAN_JOB_STATUS_SUCCEEDED,
+        _SCAN_JOB_STATUS_FAILED,
+        _SCAN_JOB_STATUS_CANCELLED,
+    ]),
+    _SCAN_JOB_STATUS_SUCCEEDED => Set{String}(),
+    _SCAN_JOB_STATUS_FAILED => Set{String}(),
+    _SCAN_JOB_STATUS_CANCELLED => Set{String}(),
+)
 const _PNJL_SCAN_PRUNE_METRICS = Dict{String, Int}(
     "total" => 0,
     "ttl" => 0,
     "keep_max" => 0,
 )
+const _PNJL_SCAN_IDEMPOTENCY_CACHE = Dict{String, Dict{String, Any}}()
 
 @inline function _json_response(status::Int, payload::AbstractDict)
     headers = [
@@ -46,6 +71,10 @@ end
     return value
 end
 
+@inline function _default_scan_job_timeout_seconds()
+    return _env_nonneg_int("PNJL_SCAN_JOB_TIMEOUT_SECONDS", _PNJL_SCAN_DEFAULT_TIMEOUT_SECONDS)
+end
+
 @inline function _scan_jobs_policy()
     return (
         keep_max=_env_nonneg_int("PNJL_SCAN_FINISHED_KEEP_MAX", _PNJL_SCAN_FINISHED_KEEP_MAX),
@@ -54,6 +83,92 @@ end
 end
 
 @inline _timestamp_now() = Dates.format(Dates.now(), dateformat"yyyy-mm-ddTHH:MM:SS")
+
+@inline function _is_valid_scan_job_status(status::String)
+    return haskey(_ALLOWED_SCAN_JOB_TRANSITIONS, status)
+end
+
+function _new_job_event(job::Dict{String, Any}, event_code::String; extras::AbstractDict=Dict{String, Any}())
+    event = Dict{String, Any}(
+        "job_id" => get(job, "job_id", nothing),
+        "kind" => get(job, "kind", nothing),
+        "state" => get(job, "status", nothing),
+        "timestamp" => _timestamp_now(),
+        "event_code" => event_code,
+    )
+    for (k, v) in pairs(extras)
+        event[string(k)] = v
+    end
+    return event
+end
+
+function _append_job_event!(job::Dict{String, Any}, event_code::String; extras::AbstractDict=Dict{String, Any}())
+    events = get!(job, "events") do
+        Vector{Dict{String, Any}}()
+    end
+    event = _new_job_event(job, event_code; extras=extras)
+    push!(events, event)
+    @info "PNJL_SCAN_JOB_EVENT" event
+    return event
+end
+
+function _is_valid_job_status_transition(from_status::String, to_status::String)
+    _is_valid_scan_job_status(from_status) || return false
+    _is_valid_scan_job_status(to_status) || return false
+    return to_status in _ALLOWED_SCAN_JOB_TRANSITIONS[from_status]
+end
+
+function _set_job_status!(job::Dict{String, Any}, to_status::String)
+    _is_valid_scan_job_status(to_status) || throw(ArgumentError("invalid target job status: $(to_status)"))
+
+    from_status = String(get(job, "status", ""))
+    _is_valid_scan_job_status(from_status) || throw(ArgumentError("invalid current job status: $(from_status)"))
+    _is_valid_job_status_transition(from_status, to_status) || throw(ArgumentError("illegal job status transition: $(from_status) -> $(to_status)"))
+
+    job["status"] = to_status
+    if to_status == _SCAN_JOB_STATUS_RUNNING && get(job, "started_at", nothing) === nothing
+        job["started_at"] = _timestamp_now()
+    end
+    if to_status in _TERMINAL_SCAN_JOB_STATUSES
+        job["ended_at"] = _timestamp_now()
+    end
+    return nothing
+end
+
+function _job_elapsed_seconds(job::Dict{String, Any}; now_dt::DateTime=Dates.now())
+    started_at = _parse_job_ended_at(get(job, "started_at", nothing))
+    started_at === nothing && return nothing
+    return max(0, Dates.value(now_dt - started_at) ÷ 1000)
+end
+
+function _mark_job_timeout!(job::Dict{String, Any})
+    _set_job_status!(job, _SCAN_JOB_STATUS_FAILED)
+    job["error"] = "scan execution timeout"
+    job["reason_code"] = "TIMEOUT"
+    job["internal_error"] = nothing
+    return nothing
+end
+
+function _maybe_mark_job_timeout!(job_id::String; now_ts::Union{Nothing, String}=nothing)
+    now_dt = now_ts === nothing ? Dates.now() : DateTime(now_ts, dateformat"yyyy-mm-ddTHH:MM:SS")
+    return lock(_PNJL_SCAN_JOBS_LOCK) do
+        haskey(_PNJL_SCAN_JOBS, job_id) || return false
+        job = _PNJL_SCAN_JOBS[job_id]
+        status = String(get(job, "status", ""))
+        status == _SCAN_JOB_STATUS_RUNNING || return false
+
+        policy = get(job, "policy", Dict{String, Any}())
+        timeout_seconds = Int(get(policy, "timeout_seconds", _default_scan_job_timeout_seconds()))
+        timeout_seconds > 0 || return false
+
+        elapsed = _job_elapsed_seconds(job; now_dt=now_dt)
+        elapsed === nothing && return false
+        elapsed >= timeout_seconds || return false
+
+        _mark_job_timeout!(job)
+        return true
+    end
+end
 
 @inline function _to_bool(x, default::Bool)
     x === nothing && return default
@@ -70,6 +185,96 @@ end
         return false
     end
     error("Invalid boolean value: $(x)")
+end
+
+function _request_header(req::HTTP.Request, name::String)
+    target = lowercase(name)
+    for (k, v) in req.headers
+        if lowercase(String(k)) == target
+            return String(v)
+        end
+    end
+    return nothing
+end
+
+function _collect_fingerprint_lines!(acc::Vector{String}, path::String, value)
+    if value === nothing || value isa Number || value isa Bool || value isa AbstractString
+        push!(acc, string(path, "=", repr(value)))
+        return
+    end
+
+    if value isa AbstractVector || value isa Tuple
+        for (idx, item) in pairs(value)
+            _collect_fingerprint_lines!(acc, string(path, "[", idx, "]"), item)
+        end
+        return
+    end
+
+    if value isa AbstractDict
+        key_list = sort!(collect(keys(value)); by=k -> String(k))
+        for key in key_list
+            child = get(value, key, nothing)
+            child_path = isempty(path) ? String(key) : string(path, ".", String(key))
+            _collect_fingerprint_lines!(acc, child_path, child)
+        end
+        return
+    end
+
+    if value isa JSON3.Object
+        dict = _to_symbol_dict(value)
+        _collect_fingerprint_lines!(acc, path, dict)
+        return
+    end
+
+    push!(acc, string(path, "=", repr(string(value))))
+end
+
+function _request_fingerprint(kind::String, params::Dict{Symbol, Any})
+    acc = String[]
+    _collect_fingerprint_lines!(acc, "kind", lowercase(kind))
+    _collect_fingerprint_lines!(acc, "params", params)
+    payload = join(acc, '\n')
+    return bytes2hex(sha1(payload))
+end
+
+function _extract_idempotency_key(req::HTTP.Request, body_dict::Dict{Symbol, Any}, params::Dict{Symbol, Any})
+    key = _request_header(req, "Idempotency-Key")
+    if key === nothing || isempty(strip(key))
+        body_key = get(body_dict, :idempotency_key, get(params, :idempotency_key, nothing))
+        body_key === nothing && return nothing
+        key = String(body_key)
+    end
+    trimmed = strip(key)
+    isempty(trimmed) && return nothing
+    return String(trimmed)
+end
+
+function _check_idempotency_conflict_or_replay(idempotency_key::AbstractString, fingerprint::AbstractString)
+    lock(_PNJL_SCAN_JOBS_LOCK) do
+        if !haskey(_PNJL_SCAN_IDEMPOTENCY_CACHE, idempotency_key)
+            return (mode=:new, job_id=nothing)
+        end
+
+        cached = _PNJL_SCAN_IDEMPOTENCY_CACHE[idempotency_key]
+        cached_fp = String(get(cached, "fingerprint", ""))
+        cached_job_id = String(get(cached, "job_id", ""))
+        if cached_fp == fingerprint
+            haskey(_PNJL_SCAN_JOBS, cached_job_id) || return (mode=:new, job_id=nothing)
+            return (mode=:replay, job_id=cached_job_id)
+        end
+        return (mode=:conflict, job_id=cached_job_id)
+    end
+end
+
+function _record_idempotency_entry!(idempotency_key::AbstractString, fingerprint::AbstractString, job_id::AbstractString)
+    lock(_PNJL_SCAN_JOBS_LOCK) do
+        _PNJL_SCAN_IDEMPOTENCY_CACHE[idempotency_key] = Dict{String, Any}(
+            "fingerprint" => fingerprint,
+            "job_id" => job_id,
+            "created_at" => _timestamp_now(),
+        )
+    end
+    return nothing
 end
 
 function _to_float64_vec(x, name::String)
@@ -182,7 +387,7 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
         "job_id" => job_id,
         "seq" => seq,
         "kind" => kind,
-        "status" => "queued",
+        "status" => _SCAN_JOB_STATUS_QUEUED,
         "created_at" => _timestamp_now(),
         "started_at" => nothing,
         "ended_at" => nothing,
@@ -194,10 +399,13 @@ function _new_job(kind::String, request_snapshot::Dict{String, Any}; total_point
         "result" => nothing,
         "error" => nothing,
         "internal_error" => nothing,
+        "reason_code" => nothing,
         "request" => request_snapshot,
+        "events" => Vector{Dict{String, Any}}(),
     )
     lock(_PNJL_SCAN_JOBS_LOCK) do
         _PNJL_SCAN_JOBS[job_id] = job
+        _append_job_event!(job, "created")
         policy = _scan_jobs_policy()
         _prune_finished_jobs_locked!(policy.keep_max; ttl_seconds=policy.ttl_seconds)
     end
@@ -237,7 +445,7 @@ function _prune_finished_jobs_locked!(
     expired_ids = String[]
     for (job_id, job) in _PNJL_SCAN_JOBS
         st = get(job, "status", "")
-        if st == "succeeded" || st == "failed"
+        if st in _TERMINAL_SCAN_JOB_STATUSES
             ended_at = _parse_job_ended_at(get(job, "ended_at", nothing))
             if ended_at !== nothing && (now - ended_at) > Dates.Second(ttl_seconds)
                 push!(expired_ids, job_id)
@@ -325,6 +533,11 @@ function _update_job_progress!(job::Dict{String, Any}, completed::Int)
     else
         progress["percent"] = nothing
     end
+    _append_job_event!(job, "progress"; extras=Dict(
+        "completed" => progress["completed"],
+        "total" => progress["total"],
+        "percent" => progress["percent"],
+    ))
 end
 
 function _safe_output_path(kind::String, params::Dict{Symbol, Any}, job_id::String)
@@ -350,6 +563,12 @@ end
     )
     if err !== nothing
         payload["error_type"] = string(typeof(err))
+    end
+    if err === nothing && job_id isa AbstractString
+        reason_code = _with_job(String(job_id)) do job
+            get(job, "reason_code", nothing)
+        end
+        reason_code !== nothing && (payload["reason_code"] = reason_code)
     end
     return payload
 end
@@ -461,10 +680,15 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
     Threads.@spawn begin
         Base.acquire(_PNJL_SCAN_SEMAPHORE)
         try
-            _with_job(job_id) do job
-                job["status"] = "running"
-                job["started_at"] = _timestamp_now()
+            started = _with_job(job_id) do job
+                if String(get(job, "status", "")) != _SCAN_JOB_STATUS_QUEUED
+                    return false
+                end
+                _set_job_status!(job, _SCAN_JOB_STATUS_RUNNING)
+                _append_job_event!(job, "started")
+                return true
             end
+            started === true || return
 
             attempt = 0
             max_retries = _with_job(job_id) do job
@@ -474,33 +698,40 @@ function _launch_scan_job(job_id::String, kind::String, params::Dict{Symbol, Any
             max_retries === nothing && (max_retries = 0)
 
             while true
+                _maybe_mark_job_timeout!(job_id) && break
                 try
                     result = _execute_scan_job!(job_id, kind, params)
                     _with_job(job_id) do job
-                        job["status"] = "succeeded"
+                        String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                        _set_job_status!(job, _SCAN_JOB_STATUS_SUCCEEDED)
                         job["result"] = result
-                        job["ended_at"] = _timestamp_now()
+                        job["reason_code"] = nothing
                         stats = get(result, "stats", Dict{String, Any}())
                         total = get(stats, "total", nothing)
                         if total isa Int
                             _update_job_progress!(job, total)
                         end
+                        _append_job_event!(job, "ended"; extras=Dict("outcome" => "succeeded"))
                     end
                     break
                 catch e
                     if attempt < max_retries
                         attempt += 1
                         _with_job(job_id) do job
-                            job["status"] = "running"
+                            String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                            _set_job_status!(job, _SCAN_JOB_STATUS_RUNNING)
                             job["error"] = "scan execution retrying"
                             job["internal_error"] = sprint(showerror, e, catch_backtrace())
+                            _append_job_event!(job, "retry"; extras=Dict("attempt" => attempt))
                         end
                     else
                         _with_job(job_id) do job
-                            job["status"] = "failed"
+                            String(get(job, "status", "")) == _SCAN_JOB_STATUS_RUNNING || return
+                            _set_job_status!(job, _SCAN_JOB_STATUS_FAILED)
                             job["error"] = "scan execution failed"
+                            job["reason_code"] = "EXECUTION_ERROR"
                             job["internal_error"] = sprint(showerror, e, catch_backtrace())
-                            job["ended_at"] = _timestamp_now()
+                            _append_job_event!(job, "ended"; extras=Dict("outcome" => "failed"))
                         end
                         break
                     end
@@ -521,6 +752,51 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
         kind = lowercase(String(kind_raw))
         kind in ("tmu", "trho") || error("Missing/invalid kind; expected tmu or trho")
 
+        idempotency_key = _extract_idempotency_key(req, body_dict, params)
+        req_fingerprint = _request_fingerprint(kind, params)
+        replay_mode = nothing
+        replay_job_id = nothing
+        if idempotency_key !== nothing
+            idem = _check_idempotency_conflict_or_replay(idempotency_key, req_fingerprint)
+            replay_mode = idem.mode
+            replay_job_id = idem.job_id
+            if replay_mode == :conflict
+                return _error_response(
+                    409,
+                    "IDEMPOTENCY_KEY_CONFLICT",
+                    "idempotency key reused with different payload";
+                    extras=Dict(
+                        "idempotency" => Dict(
+                            "key" => idempotency_key,
+                            "replayed" => false,
+                            "conflict" => true,
+                        ),
+                        "job_id" => replay_job_id,
+                    ),
+                )
+            elseif replay_mode == :replay && replay_job_id !== nothing
+                pos = _queue_position(replay_job_id)
+                return _json_response(202, Dict(
+                    "status" => "accepted",
+                    "job_id" => replay_job_id,
+                    "kind" => kind,
+                    "status_url" => "/api/modules/pnjl-scan/jobs/$(replay_job_id)",
+                    "result_url" => "/api/modules/pnjl-scan/jobs/$(replay_job_id)/result",
+                    "queue" => Dict(
+                        "position" => pos,
+                        "max_running" => _PNJL_SCAN_MAX_RUNNING,
+                        "max_pending" => _PNJL_SCAN_MAX_PENDING,
+                    ),
+                    "idempotency" => Dict(
+                        "key" => idempotency_key,
+                        "replayed" => true,
+                        "conflict" => false,
+                    ),
+                    "diagnostics" => _build_job_diagnostics(replay_job_id, kind, _SCAN_JOB_STATUS_QUEUED),
+                ))
+            end
+        end
+
         snap = _queue_snapshot()
         if snap.queued >= _PNJL_SCAN_MAX_PENDING
             return _error_response(
@@ -538,6 +814,8 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
 
         max_retries = _to_nonneg_int(get(params, :max_retries, 0), 0; name="max_retries")
         max_retries <= 3 || error("max_retries must be <= 3")
+        timeout_default = _default_scan_job_timeout_seconds()
+        timeout_seconds = _to_nonneg_int(get(params, :timeout_seconds, timeout_default), timeout_default; name="timeout_seconds")
 
         total_points = _estimate_total_points(kind, params)
         request_snapshot = Dict{String, Any}(
@@ -548,10 +826,14 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
         _with_job(job_id) do job
             job["policy"] = Dict(
                 "max_retries" => max_retries,
+                "timeout_seconds" => timeout_seconds,
                 "max_running" => _PNJL_SCAN_MAX_RUNNING,
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
                 "xi_strategy" => haskey(params, :xi_grid) ? "xi_grid" : (haskey(params, :xi_values) ? "xi_values" : (haskey(params, :xi) ? "xi" : "default")),
             )
+        end
+        if idempotency_key !== nothing
+            _record_idempotency_entry!(idempotency_key, req_fingerprint, job_id)
         end
         _launch_scan_job(job_id, kind, params)
 
@@ -568,7 +850,12 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
                 "max_running" => _PNJL_SCAN_MAX_RUNNING,
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
-            "diagnostics" => _build_job_diagnostics(job_id, kind, "queued"),
+            "idempotency" => Dict(
+                "key" => idempotency_key,
+                "replayed" => false,
+                "conflict" => false,
+            ),
+            "diagnostics" => _build_job_diagnostics(job_id, kind, _SCAN_JOB_STATUS_QUEUED),
         ))
     catch e
         return _error_response(
@@ -580,6 +867,53 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
             ),
         )
     end
+end
+
+function handle_pnjl_scan_job_cancel(job_id::String)
+    payload = _with_job(job_id) do job
+        status = String(get(job, "status", ""))
+        if status in _TERMINAL_SCAN_JOB_STATUSES
+            return _error_payload(
+                "JOB_NOT_CANCELLABLE",
+                "job already in terminal state";
+                extras=Dict(
+                    "job_id" => job_id,
+                    "job_status" => status,
+                ),
+            )
+        end
+
+        if !(status == _SCAN_JOB_STATUS_QUEUED || status == _SCAN_JOB_STATUS_RUNNING)
+            return _error_payload(
+                "JOB_NOT_CANCELLABLE",
+                "job is not cancellable";
+                extras=Dict(
+                    "job_id" => job_id,
+                    "job_status" => status,
+                ),
+            )
+        end
+
+        _set_job_status!(job, _SCAN_JOB_STATUS_CANCELLED)
+        job["error"] = "scan job cancelled"
+        job["reason_code"] = "CANCELLED"
+        job["internal_error"] = nothing
+        _append_job_event!(job, "ended"; extras=Dict("outcome" => "cancelled"))
+
+        return Dict{String, Any}(
+            "status" => "ok",
+            "job_id" => job_id,
+            "kind" => job["kind"],
+            "job_status" => job["status"],
+            "diagnostics" => _build_job_diagnostics(job_id, job["kind"], job["status"]),
+        )
+    end
+
+    payload === nothing && return _error_response(404, "JOB_NOT_FOUND", "job not found"; extras=Dict("job_id" => job_id))
+    if payload["status"] == "error"
+        return _json_response(409, payload)
+    end
+    return _json_response(200, payload)
 end
 
 function handle_pnjl_scan_job_status(job_id::String)
@@ -605,6 +939,7 @@ function handle_pnjl_scan_job_status(job_id::String)
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
             ),
             "policy" => get(job, "policy", Dict{String, Any}()),
+            "events" => get(job, "events", Vector{Dict{String, Any}}()),
             "governance" => Dict(
                 "finished_keep_max" => policy.keep_max,
                 "finished_ttl_seconds" => policy.ttl_seconds,
