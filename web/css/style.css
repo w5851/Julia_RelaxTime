@@ -559,6 +559,65 @@ form legend {
     font-size: 11px;
 }
 
+.scan-visual-panel {
+    margin-top: 10px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.scan-visual-panel h3 {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+}
+
+#scan-progress-chart {
+    width: 100%;
+    height: auto;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.scan-history-heatmap {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 4px;
+}
+
+.scan-heat-cell {
+    aspect-ratio: 1 / 1;
+    border-radius: 3px;
+    border: 1px solid #e2e8f0;
+}
+
+.scan-heat-cell.empty {
+    background: #f1f5f9;
+}
+
+.scan-heat-cell.queued {
+    background: #bfdbfe;
+}
+
+.scan-heat-cell.running {
+    background: #7dd3fc;
+}
+
+.scan-heat-cell.succeeded {
+    background: #86efac;
+}
+
+.scan-heat-cell.failed {
+    background: #fca5a5;
+}
+
+.scan-heat-cell.cancelled {
+    background: #d4d4d8;
+}
+
 .scan-result-panel {
     margin-top: 10px;
     background: #f8fafc;

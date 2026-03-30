@@ -43,6 +43,8 @@ export class UI {
         this.scanResultPreview = null;
         this.downloadResultBtn = null;
         this.lastResultPayload = null;
+        this.progressChart = null;
+        this.historyHeatmap = null;
     }
 
     /**
@@ -73,6 +75,8 @@ export class UI {
         this.scanHistoryList = document.getElementById('scan-history-list');
         this.scanResultPreview = document.getElementById('scan-result-preview');
         this.downloadResultBtn = document.getElementById('scan-download-btn');
+        this.progressChart = document.getElementById('scan-progress-chart');
+        this.historyHeatmap = document.getElementById('scan-history-heatmap');
 
         // 初始化可视化
         this.visualization = new Visualization('canvas-container');
@@ -294,6 +298,52 @@ export class UI {
             row.addEventListener('click', () => this.loadTaskFromHistory(item.job_id));
             this.scanHistoryList.appendChild(row);
         });
+
+        this.renderHistoryHeatmap(history);
+    }
+
+    renderHistoryHeatmap(historyItems) {
+        if (!this.historyHeatmap) {
+            return;
+        }
+        this.historyHeatmap.innerHTML = '';
+        const statuses = Array.isArray(historyItems) ? historyItems.slice(0, 20) : [];
+        for (let i = 0; i < 20; i += 1) {
+            const item = statuses[i];
+            const cell = document.createElement('div');
+            cell.className = `scan-heat-cell ${item?.job_status || 'empty'}`;
+            cell.title = item ? `${item.job_id} | ${item.job_status}` : 'empty';
+            this.historyHeatmap.appendChild(cell);
+        }
+    }
+
+    drawProgressChart(percent) {
+        if (!this.progressChart) {
+            return;
+        }
+        const canvas = this.progressChart;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+        const value = Number.isFinite(Number(percent)) ? Number(percent) : 0;
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.strokeRect(8, h / 2 - 10, w - 16, 20);
+
+        ctx.fillStyle = '#38bdf8';
+        const barWidth = Math.max(0, Math.min(w - 16, (w - 16) * value / 100));
+        ctx.fillRect(8, h / 2 - 10, barWidth, 20);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '12px monospace';
+        ctx.fillText(`Progress ${value.toFixed(1)}%`, 8, h / 2 - 16);
     }
 
     async loadTaskFromHistory(jobId) {
@@ -357,6 +407,7 @@ export class UI {
         try {
             const statusPayload = await API.getJobStatus(jobId);
             this.writeScanDetails(statusPayload);
+            this.drawProgressChart(statusPayload?.progress?.percent ?? 0);
             this.setScanStatus(`已加载任务: ${jobId} (${statusPayload.job_status})`, 'info');
             upsert_task_history_entry({
                 job_id: statusPayload.job_id,
@@ -518,6 +569,7 @@ export class UI {
                 this.writeScanDetails(statusPayload);
                 const jobStatus = statusPayload?.job_status;
                 const percent = statusPayload?.progress?.percent;
+                this.drawProgressChart(percent ?? 0);
                 if (jobStatus === 'queued') {
                     this.setScanStatus(`任务排队中 (${percent ?? 0}%)`, 'queued');
                 } else if (jobStatus === 'running') {
