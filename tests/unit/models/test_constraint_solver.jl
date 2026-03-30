@@ -70,6 +70,17 @@ Models.pnjl_module()
         @test result.pressure ≈ -result.omega rtol=1e-10
     end
 
+    @testset "solve_fixedmu_constraint 默认多初值候选池" begin
+        m = Models.create_model(:NJL)
+        T = 0.5
+        seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
+        result = Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+        @test haskey(result, :candidate_count)
+        @test result.candidate_count >= 1
+        @test haskey(result, :selection_reason)
+        @test result.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
+    end
+
     # --- solve_fixedrho_constraint 接口存在 ---
     @testset "solve_fixedrho_constraint 函数存在" begin
         @test isdefined(Models, :solve_fixedrho_constraint)
@@ -86,5 +97,40 @@ Models.pnjl_module()
 
     @testset "solve_fixedasymrho_constraint 函数存在" begin
         @test isdefined(Models, :solve_fixedasymrho_constraint)
+    end
+
+    @testset "硬约束评估可解耦扩展" begin
+        rules = [
+            c -> (c.mass_min > 0.0, :mass_positive),
+            c -> (c.user_tag != :ban, :user_custom),
+        ]
+
+        passed, failed = Models.evaluate_hard_constraints((mass_min=1.2, user_tag=:ok), rules)
+        @test passed
+        @test isempty(failed)
+
+        passed2, failed2 = Models.evaluate_hard_constraints((mass_min=1.2, user_tag=:ban), rules)
+        @test !passed2
+        @test failed2 == [:user_custom]
+    end
+
+    @testset "pressure_max 仅在约束通过池内选优" begin
+        c1 = (pressure=10.0, residual_norm=1e-8, hard_constraint_ok=true, failed_constraints=Symbol[], converged=true)
+        c2 = (pressure=12.0, residual_norm=1e-8, hard_constraint_ok=false, failed_constraints=[:mass_nonpositive], converged=true)
+
+        selected = Models.select_pressure_max_candidate([c1, c2])
+        @test selected.selection_reason == :pressure_max_under_constraints
+        @test selected.selected_index == 1
+        @test selected.selected_candidate.pressure == 10.0
+    end
+
+    @testset "无约束通过候选时回退并标注原因" begin
+        c1 = (pressure=8.0, residual_norm=1e-6, hard_constraint_ok=false, failed_constraints=[:mass_nonpositive], converged=true)
+        c2 = (pressure=9.0, residual_norm=1e-6, hard_constraint_ok=false, failed_constraints=[:phi_out_of_range], converged=true)
+
+        selected = Models.select_pressure_max_candidate([c1, c2])
+        @test selected.selection_reason == :no_candidate_passed_constraints
+        @test selected.selected_index == 2
+        @test !selected.selected_candidate.hard_constraint_ok
     end
 end
