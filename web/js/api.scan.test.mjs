@@ -194,12 +194,42 @@ async function test_scan_request_400_ratio_metrics() {
     globalThis.fetch = originalFetch;
 }
 
+async function test_cancel_job_request_contract() {
+    const originalFetch = globalThis.fetch;
+    globalThis.__JRT_API_BASE_URL__ = 'http://127.0.0.1:9000';
+
+    let capturedUrl = '';
+    let capturedMethod = '';
+    globalThis.fetch = async (url, options = {}) => {
+        capturedUrl = String(url);
+        capturedMethod = String(options.method || 'GET');
+        return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+                status: 'ok',
+                job_id: 'job-cancel-1',
+                job_status: 'cancelled',
+            }),
+        };
+    };
+
+    const payload = await API.cancelJob('job-cancel-1');
+    assert.equal(capturedMethod, 'POST');
+    assert.equal(capturedUrl, 'http://127.0.0.1:9000/api/modules/pnjl-scan/jobs/job-cancel-1/cancel');
+    assert.equal(payload.job_status, 'cancelled');
+
+    globalThis.fetch = originalFetch;
+    delete globalThis.__JRT_API_BASE_URL__;
+}
+
 async function run() {
     test_validate_scan_request();
     test_build_api_url();
     test_normalize_api_error();
     await test_format_error_for_timeout_and_offline();
     await test_scan_request_400_ratio_metrics();
+    await test_cancel_job_request_contract();
     console.log('api.scan.test.mjs: PASS');
 }
 

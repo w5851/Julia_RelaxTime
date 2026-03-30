@@ -53,6 +53,8 @@ Models.pnjl_module()
         @test isdefined(Models, :run_tmu_scan)
         @test isdefined(Models, :run_trho_scan)
         @test isdefined(Models, :build_default_rho_grid)
+        @test isdefined(Models, :default_scan_numeric_options)
+        @test isdefined(Models, :solve_pnjl_point)
         @test isdefined(Models, :solve_gap_and_transport)
         @test isdefined(Models, :solve_transport_from_equilibrium)
         @test isdefined(Models, :solve_gap_and_meson_point)
@@ -62,5 +64,16 @@ Models.pnjl_module()
         @test isdefined(Models, :build_phase_artifacts)
         @test isdefined(Models, :resolve_phase_output_target)
         @test isdefined(Models, :promote_phase_artifacts)
+    end
+
+    @testset "同步/异步入口默认数值参数对齐" begin
+        opts = Models.default_scan_numeric_options()
+        @test opts.p_num == 24
+        @test opts.t_num == 8
+    end
+
+    @testset "solve_pnjl_point 参数校验" begin
+        @test_throws ArgumentError Models.solve_pnjl_point(T_mev=150.0)
+        @test_throws ArgumentError Models.solve_pnjl_point(T_mev=NaN, mu_mev=0.0)
     end
 end

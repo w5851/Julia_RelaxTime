@@ -1,25 +1,17 @@
 # Smoke tests for PNJL solvers (using new architecture)
 using Printf
-using NLsolve: LineSearches
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
-using .Constants_PNJL: ħc_MeV_fm
-const PNJL = Models.pnjl_module()
-const solve = getproperty(PNJL, :solve)
-const FixedMu = getproperty(PNJL, :FixedMu)
-const FixedRho = getproperty(PNJL, :FixedRho)
+const DEFAULT_SCAN_NUMERIC = Models.default_scan_numeric_options()
 
-function run_case_mu(T_mev, mu_mev; xi=0.0, p_num=32, t_num=16)
+function run_case_mu(T_mev, mu_mev; xi=0.0, p_num=DEFAULT_SCAN_NUMERIC.p_num, t_num=DEFAULT_SCAN_NUMERIC.t_num)
     @printf("\nCase solve(FixedMu()): T=%.2f MeV, mu=%.2f MeV, xi=%.3f\n", T_mev, mu_mev, xi)
     try
-        T_fm = T_mev / ħc_MeV_fm
-        mu_fm = mu_mev / ħc_MeV_fm
-        res = solve(FixedMu(), T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num)
+        res = Models.solve_pnjl_point(T_mev=T_mev, mu_mev=mu_mev; xi=xi, p_num=p_num, t_num=t_num)
         @printf("  converged=%s iterations=%d residual=%.3e pressure=%.6f rho=%.6f energy=%.6f\n",
             string(res.converged), res.iterations, res.residual_norm, res.pressure, res.rho_norm, res.energy)
     catch e
@@ -28,11 +20,10 @@ function run_case_mu(T_mev, mu_mev; xi=0.0, p_num=32, t_num=16)
     end
 end
 
-function run_case_rho(T_mev, rho_target; xi=0.0, p_num=32, t_num=16)
+function run_case_rho(T_mev, rho_target; xi=0.0, p_num=DEFAULT_SCAN_NUMERIC.p_num, t_num=DEFAULT_SCAN_NUMERIC.t_num)
     @printf("\nCase solve(FixedRho()): T=%.2f MeV, rho=%.4f, xi=%.3f\n", T_mev, rho_target, xi)
     try
-        T_fm = T_mev / ħc_MeV_fm
-        res = solve(FixedRho(rho_target), T_fm; xi=xi, p_num=p_num, t_num=t_num, linesearch=LineSearches.BackTracking())
+        res = Models.solve_pnjl_point(T_mev=T_mev, rho_target=rho_target; xi=xi, p_num=p_num, t_num=t_num)
         @printf("  converged=%s iterations=%d residual=%.3e pressure=%.6f rho=%.6f energy=%.6f\n",
             string(res.converged), res.iterations, res.residual_norm, res.pressure, res.rho_norm, res.energy)
     catch e

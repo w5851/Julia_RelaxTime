@@ -89,6 +89,14 @@
 
                 <form id="scan-form">
                     <fieldset>
+                        <legend>常用参数模板</legend>
+                        <div class="scan-template-row">
+                            <select id="scan-template-select"></select>
+                            <button type="button" id="scan-template-apply-btn">应用模板</button>
+                        </div>
+                    </fieldset>
+
+                    <fieldset>
                         <legend>扫描类型</legend>
                         <label>
                             kind:
@@ -124,9 +132,19 @@
 
                     <div class="scan-actions">
                         <button type="submit" id="scan-submit-btn">提交扫描任务</button>
+                        <button type="button" id="scan-cancel-btn" disabled>取消任务</button>
                         <button type="button" id="scan-retry-btn" disabled>失败后重试</button>
                     </div>
                 </form>
+
+                <fieldset>
+                    <legend>历史任务回看</legend>
+                    <div class="scan-job-load-row">
+                        <input type="text" id="scan-job-id-input" placeholder="输入 job_id 回看任务">
+                        <button type="button" id="scan-job-load-btn">加载任务</button>
+                    </div>
+                    <div id="scan-history-list" class="scan-history-list">暂无历史任务</div>
+                </fieldset>
 
                 <div class="scan-status" id="scan-job-status">未提交任务</div>
                 <pre class="scan-details" id="scan-job-details">-</pre>
@@ -138,6 +156,16 @@
                     <div>failure: <span id="scan-failure">-</span></div>
                     <div>skipped: <span id="scan-skipped">-</span></div>
                     <div>output_path: <span id="scan-output-path">-</span></div>
+                    <div class="scan-result-actions">
+                        <button type="button" id="scan-download-btn" disabled>导出结果路径</button>
+                    </div>
+                    <pre id="scan-result-preview" class="scan-result-preview">-</pre>
+                </div>
+
+                <div class="scan-visual-panel" id="scan-visual-panel">
+                    <h3>结果可视化（基础折线/热图）</h3>
+                    <canvas id="scan-progress-chart" width="320" height="140"></canvas>
+                    <div id="scan-history-heatmap" class="scan-history-heatmap"></div>
                 </div>
 
                 <details class="scan-tech-error" id="scan-tech-error" style="display:none;">
@@ -261,6 +289,7 @@
     <script type="module" src="js/api.js"></script>
     <script type="module" src="js/visualization.js"></script>
     <script type="module" src="js/ui.js"></script>
+    <script type="module" src="js/task_store.js"></script>
     
     <script type="module">
         import { UI } from './js/ui.js';

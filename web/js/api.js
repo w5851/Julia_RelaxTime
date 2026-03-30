@@ -340,6 +340,22 @@ export class API {
         });
     }
 
+    static async cancelJob(jobId) {
+        if (!jobId) {
+            throw normalize_api_error({
+                status: 400,
+                payload: { code: 'INVALID_REQUEST' },
+                message: 'jobId 不能为空',
+            });
+        }
+
+        return await request_json(`/api/modules/pnjl-scan/jobs/${encodeURIComponent(jobId)}/cancel`, {
+            method: 'POST',
+            timeoutMs: 10000,
+            retries: 1,
+        });
+    }
+
     /**
      * 格式化错误消息
      * @param {Error} error - 错误对象
