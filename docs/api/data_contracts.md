@@ -113,7 +113,100 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `use_rpnjl_extensions=true` 时，允许与 PNJL 基线出现受控偏离，但需通过固定点 smoke 追踪。
 - 阶段 7 期间禁止修改测试外部容差 API；所有容差仅在测试断言层设置。
 
-### 0.6 FullServer 错误响应最小契约（HTTP）
+### 0.6 FullServer API 契约（HTTP，phase2-v1）
+
+本节定义前端任务中心可依赖的稳定契约基线（版本：`phase2-v1`）。
+
+#### 0.6.1 路由与调用边界
+
+- **同步短任务**（请求完成即返回结果）
+  - `POST /compute`
+  - `POST /api/modules/pnjl-gap/run`
+- **异步扫描任务**（创建任务后轮询）
+  - `POST /api/modules/pnjl-scan/jobs`（创建）
+  - `GET /api/modules/pnjl-scan/jobs/{job_id}`（状态）
+  - `GET /api/modules/pnjl-scan/jobs/{job_id}/result`（结果）
+  - `POST /api/modules/pnjl-scan/jobs/{job_id}/cancel`（取消）
+- **模块发现**
+  - `GET /api/modules`
+
+边界约束：
+
+- 前端不直接调用 `run_*.jl`，仅通过上述 HTTP 契约访问能力。
+- 扫描任务统一走异步 jobs 路由；不提供同步扫描接口。
+
+#### 0.6.2 `POST /api/modules/pnjl-gap/run`（同步）
+
+请求：
+
+- `params.T_mev`（必填，兼容别名 `t_mev`）
+- `params.mu_mev`（`FixedMu` 模式必填，兼容别名 `mu`）
+- `params.rho_target`（可选；提供后进入 `FixedRho` 模式）
+- `params.xi`（可选，默认 `0.0`）
+- `params.p_num`（可选，默认 `24`）
+- `params.t_num`（可选，默认 `12`）
+- `params.allow_seed_fallback`（可选，默认 `true`）
+
+成功响应（`200`）：
+
+- `status="ok"`
+- `result`：`converged/omega/pressure/rho_norm/entropy/energy/iterations/residual_norm/xi/seed_fallback_used/x_state/mu_vec/masses`
+
+#### 0.6.3 `POST /api/modules/pnjl-scan/jobs`（异步创建）
+
+请求：
+
+- `kind`（必填，`tmu | trho`）
+- `params`（可选字典）
+  - 公共：`xi | xi_values | xi_grid`（三选一，默认 `xi=0.0`）
+  - `tmu`：`T_values`、`mu_values`
+  - `trho`：`T_values`、`rho_values`
+  - 可选治理参数：`max_retries`（默认 `0`，最大 `3`）、`timeout_seconds`
+
+成功响应（`202`）：
+
+- `status="accepted"`
+- `job_id`
+- `kind`
+- `status_url`
+- `result_url`
+- `queue.position/max_running/max_pending`
+- `idempotency.key/replayed/conflict`
+- `diagnostics.job_id/kind/job_status`
+
+#### 0.6.4 `GET /api/modules/pnjl-scan/jobs/{job_id}`（状态）
+
+成功响应（`200`）：
+
+- `status="ok"`
+- `job_id/kind/job_status`
+- `created_at/started_at/ended_at`
+- `progress.total/completed/percent`
+- `error`（仅失败态暴露用户可读摘要）
+- `queue.position/queued/running/max_running/max_pending`
+- `policy`（任务策略快照）
+- `events`（结构化生命周期事件）
+- `governance`（保留策略与清理计数）
+- `metrics`（terminal + duration_buckets + queue）
+- `diagnostics.job_id/kind/job_status`
+
+状态机：
+
+- 非终态：`queued`、`running`
+- 终态：`succeeded`、`failed`、`cancelled`
+
+#### 0.6.5 `GET /api/modules/pnjl-scan/jobs/{job_id}/result`（结果）
+
+- 任务成功（`200`）：返回 `status="ok"`、`job_id`、`job_status`、`result(output_path,stats)`、`metadata(output_exists,output_mtime)`、`diagnostics`
+- 任务未成功（`409`）：返回 `JOB_NOT_SUCCEEDED`
+
+#### 0.6.6 `POST /api/modules/pnjl-scan/jobs/{job_id}/cancel`（取消）
+
+- 可取消状态：`queued | running`
+- 已终态或不可取消：返回 `409` + `JOB_NOT_CANCELLABLE`
+- 成功取消：`200`，`job_status="cancelled"`
+
+#### 0.6.7 统一错误响应最小契约
 
 适用链路（当前）：
 
@@ -124,18 +217,87 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 对外错误 payload 最小字段：
 
 - `status`：固定为 `"error"`
-- `error_code`：稳定错误码（如 `INVALID_INPUT`、`INVALID_REQUEST`）
+- `error_code`：稳定错误码
 - `error`：面向调用方的摘要信息（不包含内部栈）
 - `message_id`：每次错误唯一标识，用于检索日志与追踪
 
 可选字段：
 
-- `diagnostics`、`job_id`、`job_status`、`policy` 等上下文字段
+- `diagnostics`、`job_id`、`job_status`、`policy`、`idempotency`
+
+当前稳定错误码（phase2-v1）：
+
+- `INVALID_INPUT`
+- `INVALID_REQUEST`
+- `QUEUE_FULL`
+- `JOB_NOT_FOUND`
+- `JOB_NOT_SUCCEEDED`
+- `JOB_NOT_CANCELLABLE`
+- `IDEMPOTENCY_KEY_CONFLICT`
+- `PNJL_SINGLE_POINT_FAILED`
+- `COMPUTATION_ERROR`
 
 安全约束：
 
 - 不向外返回 `backtrace` / `catch_backtrace()` / 内部异常全文。
 - 内部诊断可在服务端日志或内存状态中保留，但不直接透传到公共响应。
+
+#### 0.6.8 最小契约示例（可复现）
+
+最小请求（创建扫描任务）：
+
+```json
+{
+  "kind": "tmu",
+  "params": {
+    "T_values": [150.0],
+    "mu_values": [0.0],
+    "xi": 0.0,
+    "max_retries": 0
+  }
+}
+```
+
+错误请求示例（非法 kind）：
+
+```json
+{
+  "status": "error",
+  "error_code": "INVALID_REQUEST",
+  "error": "Missing/invalid kind; expected tmu or trho",
+  "message_id": "<uuid>",
+  "diagnostics": {
+    "job_status": "rejected"
+  }
+}
+```
+
+成功响应示例（创建成功）：
+
+```json
+{
+  "status": "accepted",
+  "job_id": "<uuid>",
+  "kind": "tmu",
+  "status_url": "/api/modules/pnjl-scan/jobs/<uuid>",
+  "result_url": "/api/modules/pnjl-scan/jobs/<uuid>/result",
+  "queue": {
+    "position": 1,
+    "max_running": 2,
+    "max_pending": 32
+  },
+  "idempotency": {
+    "key": null,
+    "replayed": false,
+    "conflict": false
+  },
+  "diagnostics": {
+    "job_id": "<uuid>",
+    "kind": "tmu",
+    "job_status": "queued"
+  }
+}
+```
 
 ---
 
