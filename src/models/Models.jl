@@ -82,6 +82,7 @@ export TransportProvider
 export prepare_transport_provider
 export run_tmu_scan, run_trho_scan
 export build_default_rho_grid
+export default_scan_numeric_options, solve_pnjl_point
 export default_momentum_count, default_theta_count
 export default_momentum_nodes, default_momentum_weights
 export load_dual_branch_scan!

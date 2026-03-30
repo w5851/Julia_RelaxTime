@@ -4,49 +4,53 @@
 
 - Source module files: `src/models/entrypoints.jl`
 - Generated page: `docs/api/generated/models/EntryPointsExportIndex.md`
-- Exported symbol count: 25
+- Exported symbol count: 27
 - Mentioned in non-generated docs/api pages: 19
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
-| `analyze_pm_branch_competition` | src/models/entrypoints.jl | 19 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
+| `analyze_pm_branch_competition` | src/models/entrypoints.jl | 20 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
 | `build_default_rho_grid` | src/models/entrypoints.jl | 12 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
-| `build_phase_artifacts` | src/models/entrypoints.jl | 17 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `derive_pm_seed_pair` | src/models/entrypoints.jl | 19 | 0 | - |
-| `find_cep` | src/models/entrypoints.jl | 17 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
-| `gas_liquid_workflow_module` | src/models/entrypoints.jl | 22 | 0 | - |
-| `magnetic_thermodynamics_module` | src/models/entrypoints.jl | 25 | 0 | - |
-| `meson_workflow_module` | src/models/entrypoints.jl | 20 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `normalize_pm_seed_pair` | src/models/entrypoints.jl | 19 | 0 | - |
-| `pm_next_seed_source` | src/models/entrypoints.jl | 19 | 0 | - |
-| `pnjl_module` | src/models/entrypoints.jl | 24 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `promote_phase_artifacts` | src/models/entrypoints.jl | 18 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `resolve_phase_output_target` | src/models/entrypoints.jl | 18 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `rotation_workflow_module` | src/models/entrypoints.jl | 21 | 0 | - |
-| `run_phase_pipeline` | src/models/entrypoints.jl | 17 | 7 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
-| `run_production_phase_pipeline` | src/models/entrypoints.jl | 17 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `build_phase_artifacts` | src/models/entrypoints.jl | 18 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `default_scan_numeric_options` | src/models/entrypoints.jl | 13 | 0 | - |
+| `derive_pm_seed_pair` | src/models/entrypoints.jl | 20 | 0 | - |
+| `find_cep` | src/models/entrypoints.jl | 18 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
+| `gas_liquid_workflow_module` | src/models/entrypoints.jl | 23 | 0 | - |
+| `magnetic_thermodynamics_module` | src/models/entrypoints.jl | 26 | 0 | - |
+| `meson_workflow_module` | src/models/entrypoints.jl | 21 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `normalize_pm_seed_pair` | src/models/entrypoints.jl | 20 | 0 | - |
+| `pm_next_seed_source` | src/models/entrypoints.jl | 20 | 0 | - |
+| `pnjl_module` | src/models/entrypoints.jl | 25 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `promote_phase_artifacts` | src/models/entrypoints.jl | 19 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `resolve_phase_output_target` | src/models/entrypoints.jl | 19 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `rotation_workflow_module` | src/models/entrypoints.jl | 22 | 0 | - |
+| `run_phase_pipeline` | src/models/entrypoints.jl | 18 | 7 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
+| `run_production_phase_pipeline` | src/models/entrypoints.jl | 18 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `run_tmu_scan` | src/models/entrypoints.jl | 12 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md |
 | `run_trho_scan` | src/models/entrypoints.jl | 12 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
-| `solve_gap_and_meson_point` | src/models/entrypoints.jl | 14 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
-| `solve_gap_and_transport` | src/models/entrypoints.jl | 13 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `solve_gas_liquid_point` | src/models/entrypoints.jl | 15 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
-| `solve_rotation_point` | src/models/entrypoints.jl | 16 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
-| `solve_transport_from_equilibrium` | src/models/entrypoints.jl | 13 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `transport_workflow_module` | src/models/entrypoints.jl | 20 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `workflow_param_adapters_module` | src/models/entrypoints.jl | 23 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `solve_gap_and_meson_point` | src/models/entrypoints.jl | 15 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
+| `solve_gap_and_transport` | src/models/entrypoints.jl | 14 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
+| `solve_gas_liquid_point` | src/models/entrypoints.jl | 16 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `solve_pnjl_point` | src/models/entrypoints.jl | 13 | 0 | - |
+| `solve_rotation_point` | src/models/entrypoints.jl | 17 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
+| `solve_transport_from_equilibrium` | src/models/entrypoints.jl | 14 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
+| `transport_workflow_module` | src/models/entrypoints.jl | 21 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `workflow_param_adapters_module` | src/models/entrypoints.jl | 24 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
 
 ## Undocumented Or Not Yet Mentioned
 
 The following exported symbols were not found in non-generated docs/api Markdown pages:
 
+- `default_scan_numeric_options`
 - `derive_pm_seed_pair`
 - `gas_liquid_workflow_module`
 - `magnetic_thermodynamics_module`
 - `normalize_pm_seed_pair`
 - `pm_next_seed_source`
 - `rotation_workflow_module`
+- `solve_pnjl_point`
 
 ## Notes
 
