@@ -1,3 +1,9 @@
+"""
+Status: deprecate-candidate
+Purpose: PNJL single-point smoke self-check script.
+Replacement: prefer unit smoke profile and `scripts/pnjl/run_tmu_scan.jl` for maintained scan workflows.
+"""
+
 # Smoke tests for PNJL solvers (using new architecture)
 using Printf
 
