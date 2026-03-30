@@ -6,6 +6,7 @@
 import { API, validateInput, formatVector, formatScalar, isNearZero } from './api.js';
 import { get_api_base_url, set_api_base_url } from './runtime_config.js';
 import { Visualization } from './visualization.js';
+import { get_default_templates, load_task_history, load_task_templates, upsert_task_history_entry } from './task_store.js';
 
 export class UI {
     constructor() {
@@ -33,6 +34,15 @@ export class UI {
         this.scanTechDetails = null;
         this.apiBaseUrlInput = null;
         this.apiBaseUrlBtn = null;
+        this.scanCancelBtn = null;
+        this.scanTemplateSelect = null;
+        this.scanTemplateApplyBtn = null;
+        this.scanJobIdInput = null;
+        this.scanJobLoadBtn = null;
+        this.scanHistoryList = null;
+        this.scanResultPreview = null;
+        this.downloadResultBtn = null;
+        this.lastResultPayload = null;
     }
 
     /**
@@ -55,6 +65,14 @@ export class UI {
         this.scanTechDetails = document.getElementById('scan-tech-details');
         this.apiBaseUrlInput = document.getElementById('api-base-url');
         this.apiBaseUrlBtn = document.getElementById('apply-api-base-url');
+        this.scanCancelBtn = document.getElementById('scan-cancel-btn');
+        this.scanTemplateSelect = document.getElementById('scan-template-select');
+        this.scanTemplateApplyBtn = document.getElementById('scan-template-apply-btn');
+        this.scanJobIdInput = document.getElementById('scan-job-id-input');
+        this.scanJobLoadBtn = document.getElementById('scan-job-load-btn');
+        this.scanHistoryList = document.getElementById('scan-history-list');
+        this.scanResultPreview = document.getElementById('scan-result-preview');
+        this.downloadResultBtn = document.getElementById('scan-download-btn');
 
         // 初始化可视化
         this.visualization = new Visualization('canvas-container');
@@ -74,11 +92,27 @@ export class UI {
         if (this.apiBaseUrlBtn) {
             this.apiBaseUrlBtn.addEventListener('click', () => this.applyApiBaseUrl());
         }
+        if (this.scanCancelBtn) {
+            this.scanCancelBtn.addEventListener('click', () => this.handleScanCancel());
+        }
+        if (this.scanTemplateApplyBtn) {
+            this.scanTemplateApplyBtn.addEventListener('click', () => this.applyTemplateSelection());
+        }
+        if (this.scanJobLoadBtn) {
+            this.scanJobLoadBtn.addEventListener('click', () => this.handleLoadTaskByJobId());
+        }
+        if (this.downloadResultBtn) {
+            this.downloadResultBtn.addEventListener('click', () => this.handleDownloadResult());
+        }
         const scanKind = document.getElementById('scan-kind');
         if (scanKind) {
             scanKind.addEventListener('change', () => this.syncScanKindRows());
             this.syncScanKindRows();
         }
+
+        this.initializeTemplates();
+        this.renderTaskHistory();
+        this.applyTaskRoute();
         
         // 检查服务器状态
         this.checkServerStatus();
@@ -160,6 +194,237 @@ export class UI {
         return payload;
     }
 
+    initializeTemplates() {
+        if (!this.scanTemplateSelect) {
+            return;
+        }
+        const templates = load_task_templates();
+        this.scanTemplateSelect.innerHTML = '';
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '请选择模板';
+        this.scanTemplateSelect.appendChild(defaultOption);
+
+        const sourceTemplates = Array.isArray(templates) && templates.length > 0 ? templates : get_default_templates();
+        sourceTemplates.forEach((tpl) => {
+            const option = document.createElement('option');
+            option.value = tpl.id;
+            option.textContent = tpl.name;
+            option.dataset.payload = JSON.stringify(tpl.payload);
+            this.scanTemplateSelect.appendChild(option);
+        });
+    }
+
+    applyTemplateSelection() {
+        if (!this.scanTemplateSelect || !this.scanTemplateSelect.value) {
+            return;
+        }
+        const selected = this.scanTemplateSelect.options[this.scanTemplateSelect.selectedIndex];
+        const payload = selected?.dataset?.payload ? JSON.parse(selected.dataset.payload) : null;
+        if (!payload) {
+            return;
+        }
+
+        const kindEl = document.getElementById('scan-kind');
+        if (kindEl && payload.kind) {
+            kindEl.value = payload.kind;
+            this.syncScanKindRows();
+        }
+
+        const params = payload.params || {};
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = value;
+            }
+        };
+
+        if (Array.isArray(params.T_values)) {
+            setText('scan-t-values', params.T_values.join(','));
+        }
+        if (Array.isArray(params.mu_values)) {
+            setText('scan-mu-values', params.mu_values.join(','));
+        }
+        if (Array.isArray(params.rho_values)) {
+            setText('scan-rho-values', params.rho_values.join(','));
+        }
+
+        if (params.xi !== undefined) {
+            const radio = document.querySelector('input[name="xi-strategy"][value="xi"]');
+            if (radio) {
+                radio.checked = true;
+            }
+            setText('scan-xi', String(params.xi));
+        } else if (Array.isArray(params.xi_values)) {
+            const radio = document.querySelector('input[name="xi-strategy"][value="xi_values"]');
+            if (radio) {
+                radio.checked = true;
+            }
+            setText('scan-xi-values', params.xi_values.join(','));
+        } else if (params.xi_grid) {
+            const radio = document.querySelector('input[name="xi-strategy"][value="xi_grid"]');
+            if (radio) {
+                radio.checked = true;
+            }
+            setText('scan-xi-grid-start', params.xi_grid.start);
+            setText('scan-xi-grid-stop', params.xi_grid.stop);
+            setText('scan-xi-grid-step', params.xi_grid.step);
+        }
+
+        this.showSuccess(`已应用模板: ${selected.textContent}`);
+    }
+
+    renderTaskHistory() {
+        if (!this.scanHistoryList) {
+            return;
+        }
+        const history = load_task_history();
+        this.scanHistoryList.innerHTML = '';
+        if (!history || history.length === 0) {
+            this.scanHistoryList.textContent = '暂无历史任务';
+            return;
+        }
+
+        history.slice(0, 10).forEach((item) => {
+            const row = document.createElement('button');
+            row.type = 'button';
+            row.className = 'scan-history-item';
+            row.textContent = `${item.job_id} | ${item.job_status || 'unknown'} | ${item.kind || '-'}`;
+            row.addEventListener('click', () => this.loadTaskFromHistory(item.job_id));
+            this.scanHistoryList.appendChild(row);
+        });
+    }
+
+    async loadTaskFromHistory(jobId) {
+        if (!jobId) {
+            return;
+        }
+        this.activeJobId = jobId;
+        if (this.scanJobIdInput) {
+            this.scanJobIdInput.value = jobId;
+        }
+        this.updateTaskRoute(jobId);
+        await this.fetchAndRenderTask(jobId);
+    }
+
+    async handleLoadTaskByJobId() {
+        const jobId = String(this.scanJobIdInput?.value || '').trim();
+        if (!jobId) {
+            this.setScanStatus('请输入 job_id', 'error');
+            return;
+        }
+        this.activeJobId = jobId;
+        this.updateTaskRoute(jobId);
+        await this.fetchAndRenderTask(jobId);
+    }
+
+    updateTaskRoute(jobId = this.activeJobId) {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const routeParams = new URLSearchParams();
+        if (jobId) {
+            routeParams.set('job_id', jobId);
+        }
+        const query = routeParams.toString();
+        window.location.hash = query ? `task-center?${query}` : 'task-center';
+    }
+
+    applyTaskRoute() {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const hash = String(window.location.hash || '').replace(/^#/, '').trim();
+        if (!hash.startsWith('task-center')) {
+            return;
+        }
+
+        const queryIndex = hash.indexOf('?');
+        const routeQuery = queryIndex >= 0 ? hash.slice(queryIndex + 1) : '';
+        const jobId = new URLSearchParams(routeQuery).get('job_id');
+        if (!jobId) {
+            return;
+        }
+        if (this.scanJobIdInput) {
+            this.scanJobIdInput.value = jobId;
+        }
+        this.activeJobId = jobId;
+        this.fetchAndRenderTask(jobId);
+    }
+
+    async fetchAndRenderTask(jobId) {
+        try {
+            const statusPayload = await API.getJobStatus(jobId);
+            this.writeScanDetails(statusPayload);
+            this.setScanStatus(`已加载任务: ${jobId} (${statusPayload.job_status})`, 'info');
+            upsert_task_history_entry({
+                job_id: statusPayload.job_id,
+                kind: statusPayload.kind,
+                job_status: statusPayload.job_status,
+            });
+            this.renderTaskHistory();
+
+            if (statusPayload.job_status === 'succeeded') {
+                const resultPayload = await API.getJobResult(jobId);
+                this.updateScanResult(resultPayload);
+                this.updateResultPreview(resultPayload);
+            }
+        } catch (error) {
+            this.setScanStatus(API.formatError(error), 'error');
+            this.showTechError(error);
+        }
+    }
+
+    updateResultPreview(resultPayload) {
+        const result = resultPayload?.result || {};
+        this.lastResultPayload = resultPayload;
+        if (this.scanResultPreview) {
+            this.scanResultPreview.textContent = JSON.stringify(
+                {
+                    stats: result.stats || {},
+                    output_path: result.output_path || null,
+                },
+                null,
+                2,
+            );
+        }
+        if (this.downloadResultBtn) {
+            this.downloadResultBtn.disabled = !result.output_path;
+        }
+    }
+
+    handleDownloadResult() {
+        const outputPath = this.lastResultPayload?.result?.output_path;
+        if (!outputPath) {
+            this.setScanStatus('当前结果无可导出 output_path', 'error');
+            return;
+        }
+        this.setScanStatus(`导出路径: ${outputPath}`, 'success');
+    }
+
+    async handleScanCancel() {
+        if (!this.activeJobId) {
+            this.setScanStatus('当前没有可取消任务', 'error');
+            return;
+        }
+        try {
+            const payload = await API.cancelJob(this.activeJobId);
+            this.stopPolling();
+            this.setScanStatus(`任务已取消: ${payload.job_id}`, 'success');
+            this.writeScanDetails(payload);
+            upsert_task_history_entry({
+                job_id: payload.job_id,
+                kind: payload.kind,
+                job_status: payload.job_status,
+            });
+            this.renderTaskHistory();
+        } catch (error) {
+            this.setScanStatus(API.formatError(error), 'error');
+            this.showTechError(error);
+        }
+    }
+
     applyApiBaseUrl() {
         if (!this.apiBaseUrlInput) {
             return;
@@ -231,6 +496,9 @@ export class UI {
             this.scanSubmitBtn.disabled = false;
             this.scanSubmitBtn.textContent = '提交扫描任务';
         }
+        if (this.scanCancelBtn) {
+            this.scanCancelBtn.disabled = true;
+        }
     }
 
     startPolling(jobId) {
@@ -239,6 +507,9 @@ export class UI {
         if (this.scanSubmitBtn) {
             this.scanSubmitBtn.disabled = true;
             this.scanSubmitBtn.textContent = '轮询中...';
+        }
+        if (this.scanCancelBtn) {
+            this.scanCancelBtn.disabled = false;
         }
 
         this.pollTimer = setInterval(async () => {
@@ -267,7 +538,17 @@ export class UI {
                     if (this.scanRetryBtn) {
                         this.scanRetryBtn.disabled = false;
                     }
+                } else if (jobStatus === 'cancelled') {
+                    this.stopPolling();
+                    this.setScanStatus('任务已取消', 'info');
                 }
+
+                upsert_task_history_entry({
+                    job_id: statusPayload.job_id,
+                    kind: statusPayload.kind,
+                    job_status: statusPayload.job_status,
+                });
+                this.renderTaskHistory();
             } catch (error) {
                 this.stopPolling();
                 this.setScanStatus(API.formatError(error), 'error');
@@ -297,6 +578,16 @@ export class UI {
             this.activeJobId = created.job_id;
             this.setScanStatus(`任务已创建: ${created.job_id}`, 'queued');
             this.writeScanDetails(created);
+            this.updateTaskRoute(created.job_id);
+            if (this.scanJobIdInput) {
+                this.scanJobIdInput.value = created.job_id;
+            }
+            upsert_task_history_entry({
+                job_id: created.job_id,
+                kind: created.kind,
+                job_status: 'queued',
+            });
+            this.renderTaskHistory();
             this.startPolling(created.job_id);
         } catch (error) {
             this.setScanStatus(API.formatError(error), 'error');
@@ -318,6 +609,16 @@ export class UI {
             this.activeJobId = created.job_id;
             this.setScanStatus(`重试已创建任务: ${created.job_id}`, 'queued');
             this.writeScanDetails(created);
+            this.updateTaskRoute(created.job_id);
+            if (this.scanJobIdInput) {
+                this.scanJobIdInput.value = created.job_id;
+            }
+            upsert_task_history_entry({
+                job_id: created.job_id,
+                kind: created.kind,
+                job_status: 'queued',
+            });
+            this.renderTaskHistory();
             this.startPolling(created.job_id);
         } catch (error) {
             this.setScanStatus(API.formatError(error), 'error');
