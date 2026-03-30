@@ -30,10 +30,51 @@ body {
     overflow: hidden;
 }
 
+.app-nav {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nav-btn {
+    border: 1px solid var(--border-color);
+    background: #f8fafc;
+    color: var(--text-dark);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.nav-btn.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.task-center-page {
+    height: calc(100vh - 48px);
+    overflow: auto;
+    padding: 16px;
+    background: var(--bg-light);
+}
+
 /* 主容器 */
 .container {
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 48px);
 }
 
 /* 左侧控制面板 */
@@ -316,6 +357,8 @@ form legend {
 @media (max-width: 1024px) {
     .container {
         flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 48px);
     }
     
     .control-panel {
@@ -324,7 +367,7 @@ form legend {
     }
     
     .visualization-area {
-        height: 60vh;
+        height: 50vh;
     }
 }
 
@@ -377,11 +420,12 @@ form legend {
 }
 
 .scan-panel {
-    margin-top: 16px;
+    margin-top: 0;
     padding: 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    background: #fafbfc;
+    background: #ffffff;
+    max-width: 860px;
 }
 
 .scan-panel h2 {

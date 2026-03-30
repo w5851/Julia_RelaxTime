@@ -68,6 +68,7 @@ const INTEGRATION_SMOKE_FILES = [
     joinpath(INTEGRATION_DIR, "relaxtime", "test_orchestrator_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_cross_section_orchestrated_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_plot_contract_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "relaxtime", "test_task_center_point_mode_smoke.jl"),
 
     # Gas-Liquid workflow
     joinpath(INTEGRATION_DIR, "models", "test_gas_liquid_workflow_smoke.jl"),

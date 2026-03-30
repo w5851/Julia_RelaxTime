@@ -158,9 +158,12 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 
 - `kind`（必填，`tmu | trho`）
 - `params`（可选字典）
+  - `mode`（可选，`scan | point`，默认 `scan`）
   - 公共：`xi | xi_values | xi_grid`（三选一，默认 `xi=0.0`）
-  - `tmu`：`T_values`、`mu_values`
-  - `trho`：`T_values`、`rho_values`
+  - `tmu + scan`：`T_values`、`mu_values`
+  - `trho + scan`：`T_values`、`rho_values`
+  - `tmu + point`：`T_mev`、`mu_mev`
+  - `trho + point`：`T_mev`、`rho_value`
   - 可选治理参数：`max_retries`（默认 `0`，最大 `3`）、`timeout_seconds`
 
 成功响应（`202`）：

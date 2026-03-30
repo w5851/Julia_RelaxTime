@@ -16,7 +16,7 @@
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](scripts/pnjl/run_conserved_charge_susceptibilities.jl)
   - 守恒荷广义磁化率、累积量、`Ssigma`、`kappa_sigma2` 的统一单点/小范围扫描入口
 - [scripts/pnjl/run_tmu_scan.jl](scripts/pnjl/run_tmu_scan.jl)
-  - T-μ 参数空间扫描入口
+  - T-μ 单入口（`--mode=scan|point`），覆盖网格扫描与单点求解
 - [scripts/pnjl/calculate_phase_structure.jl](scripts/pnjl/calculate_phase_structure.jl)
   - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
 

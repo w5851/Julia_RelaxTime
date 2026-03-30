@@ -62,6 +62,78 @@ end
 @testset "PNJL scan jobs contract" begin
     _reset_jobs_state!()
 
+    @testset "scan mode contract: point/scan" begin
+        params_point_tmu = Dict{Symbol, Any}(
+            :mode => "point",
+            :T_mev => 150.0,
+            :mu_mev => 0.0,
+            :xi => 0.0,
+        )
+        @test PSJ._estimate_total_points("tmu", params_point_tmu) == 1
+
+        params_point_trho = Dict{Symbol, Any}(
+            :mode => "point",
+            :T_mev => 150.0,
+            :rho_value => 0.001,
+            :xi => 0.0,
+        )
+        @test PSJ._estimate_total_points("trho", params_point_trho) == 1
+
+        params_scan_tmu = Dict{Symbol, Any}(
+            :mode => "scan",
+            :T_values => [150.0, 160.0],
+            :mu_values => [0.0, 100.0],
+            :xi => 0.0,
+        )
+        @test PSJ._estimate_total_points("tmu", params_scan_tmu) == 4
+    end
+
+    @testset "create/status accepts point mode and persists policy mode" begin
+        _reset_jobs_state!()
+        req = _post_jobs_request(Dict(
+            "kind" => "tmu",
+            "params" => Dict(
+                "mode" => "point",
+                "T_mev" => 150.0,
+                "mu_mev" => 0.0,
+                "xi" => 0.0,
+                "max_retries" => 0,
+                "p_num" => 12,
+                "t_num" => 6,
+            ),
+        ))
+        create_resp = PSJ.handle_pnjl_scan_job_create(req)
+        create_body = _body_dict(create_resp)
+        @test create_resp.status == 202
+        @test create_body.status == "accepted"
+        @test haskey(create_body, :job_id)
+
+        job_id = String(create_body.job_id)
+        status_resp = PSJ.handle_pnjl_scan_job_status(job_id)
+        status_body = _body_dict(status_resp)
+        @test status_resp.status == 200
+        @test status_body.status == "ok"
+        @test status_body.policy.mode == "point"
+    end
+
+    @testset "invalid mode rejected" begin
+        req = _post_jobs_request(Dict(
+            "kind" => "tmu",
+            "params" => Dict(
+                "mode" => "badmode",
+                "T_values" => [150.0],
+                "mu_values" => [0.0],
+                "xi" => 0.0,
+            ),
+        ))
+        resp = PSJ.handle_pnjl_scan_job_create(req)
+        body = _body_dict(resp)
+        @test resp.status == 400
+        @test body.status == "error"
+        @test body.error_code == "INVALID_REQUEST"
+        @test occursin("mode", String(body.error))
+    end
+
     @testset "max_retries gate" begin
         req = _post_jobs_request(Dict(
             "kind" => "tmu",

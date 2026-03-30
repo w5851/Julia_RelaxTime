@@ -45,6 +45,8 @@ export class UI {
         this.lastResultPayload = null;
         this.progressChart = null;
         this.historyHeatmap = null;
+        this.navScatteringBtn = null;
+        this.navTaskCenterBtn = null;
     }
 
     /**
@@ -77,6 +79,8 @@ export class UI {
         this.downloadResultBtn = document.getElementById('scan-download-btn');
         this.progressChart = document.getElementById('scan-progress-chart');
         this.historyHeatmap = document.getElementById('scan-history-heatmap');
+        this.navScatteringBtn = document.getElementById('nav-scattering');
+        this.navTaskCenterBtn = document.getElementById('nav-task-center');
 
         // 初始化可视化
         this.visualization = new Visualization('canvas-container');
@@ -108,15 +112,28 @@ export class UI {
         if (this.downloadResultBtn) {
             this.downloadResultBtn.addEventListener('click', () => this.handleDownloadResult());
         }
+        if (this.navScatteringBtn) {
+            this.navScatteringBtn.addEventListener('click', () => this.navigateToPage('scattering'));
+        }
+        if (this.navTaskCenterBtn) {
+            this.navTaskCenterBtn.addEventListener('click', () => this.navigateToPage('task-center'));
+        }
+        if (typeof window !== 'undefined') {
+            window.addEventListener('hashchange', () => this.applyNavigationRoute());
+        }
         const scanKind = document.getElementById('scan-kind');
+        const scanMode = document.getElementById('scan-mode');
         if (scanKind) {
             scanKind.addEventListener('change', () => this.syncScanKindRows());
-            this.syncScanKindRows();
         }
+        if (scanMode) {
+            scanMode.addEventListener('change', () => this.syncScanFormRows());
+        }
+        this.syncScanFormRows();
 
         this.initializeTemplates();
         this.renderTaskHistory();
-        this.applyTaskRoute();
+        this.applyNavigationRoute();
         
         // 检查服务器状态
         this.checkServerStatus();
@@ -129,16 +146,48 @@ export class UI {
         const kind = this.getScanKind();
         const muRow = document.getElementById('scan-mu-row');
         const rhoRow = document.getElementById('scan-rho-row');
+        const pointMuRow = document.getElementById('scan-point-mu-row');
+        const pointRhoRow = document.getElementById('scan-point-rho-row');
         if (!muRow || !rhoRow) {
             return;
         }
         if (kind === 'trho') {
             muRow.style.display = 'none';
             rhoRow.style.display = '';
+            if (pointMuRow) {
+                pointMuRow.style.display = 'none';
+            }
+            if (pointRhoRow) {
+                pointRhoRow.style.display = '';
+            }
         } else {
             muRow.style.display = '';
             rhoRow.style.display = 'none';
+            if (pointMuRow) {
+                pointMuRow.style.display = '';
+            }
+            if (pointRhoRow) {
+                pointRhoRow.style.display = 'none';
+            }
         }
+    }
+
+    getScanMode() {
+        const modeEl = document.getElementById('scan-mode');
+        return modeEl ? String(modeEl.value).toLowerCase() : 'scan';
+    }
+
+    syncScanFormRows() {
+        const mode = this.getScanMode();
+        const gridFieldset = document.getElementById('scan-grid-fieldset');
+        const pointFieldset = document.getElementById('scan-point-fieldset');
+        if (gridFieldset) {
+            gridFieldset.style.display = mode === 'point' ? 'none' : '';
+        }
+        if (pointFieldset) {
+            pointFieldset.style.display = mode === 'point' ? '' : 'none';
+        }
+        this.syncScanKindRows();
     }
 
     getScanKind() {
@@ -163,20 +212,30 @@ export class UI {
 
     collectScanPayload() {
         const kind = this.getScanKind();
-        const tValues = this.parseNumberList(document.getElementById('scan-t-values')?.value, 'T_values');
+        const mode = this.getScanMode();
 
         const payload = {
             kind,
             params: {
-                T_values: tValues,
+                mode,
                 max_retries: 0,
             },
         };
 
-        if (kind === 'trho') {
-            payload.params.rho_values = this.parseNumberList(document.getElementById('scan-rho-values')?.value, 'rho_values');
+        if (mode === 'point') {
+            payload.params.T_mev = Number(document.getElementById('scan-point-t-mev')?.value);
+            if (kind === 'trho') {
+                payload.params.rho_value = Number(document.getElementById('scan-point-rho-value')?.value);
+            } else {
+                payload.params.mu_mev = Number(document.getElementById('scan-point-mu-mev')?.value);
+            }
         } else {
-            payload.params.mu_values = this.parseNumberList(document.getElementById('scan-mu-values')?.value, 'mu_values');
+            payload.params.T_values = this.parseNumberList(document.getElementById('scan-t-values')?.value, 'T_values');
+            if (kind === 'trho') {
+                payload.params.rho_values = this.parseNumberList(document.getElementById('scan-rho-values')?.value, 'rho_values');
+            } else {
+                payload.params.mu_values = this.parseNumberList(document.getElementById('scan-mu-values')?.value, 'mu_values');
+            }
         }
 
         const selectedStrategy = document.querySelector('input[name="xi-strategy"]:checked')?.value;
@@ -233,8 +292,13 @@ export class UI {
         const kindEl = document.getElementById('scan-kind');
         if (kindEl && payload.kind) {
             kindEl.value = payload.kind;
-            this.syncScanKindRows();
         }
+
+        const modeEl = document.getElementById('scan-mode');
+        if (modeEl && payload?.params?.mode) {
+            modeEl.value = payload.params.mode;
+        }
+        this.syncScanFormRows();
 
         const params = payload.params || {};
         const setText = (id, value) => {
@@ -247,11 +311,20 @@ export class UI {
         if (Array.isArray(params.T_values)) {
             setText('scan-t-values', params.T_values.join(','));
         }
+        if (params.T_mev !== undefined) {
+            setText('scan-point-t-mev', String(params.T_mev));
+        }
         if (Array.isArray(params.mu_values)) {
             setText('scan-mu-values', params.mu_values.join(','));
         }
+        if (params.mu_mev !== undefined) {
+            setText('scan-point-mu-mev', String(params.mu_mev));
+        }
         if (Array.isArray(params.rho_values)) {
             setText('scan-rho-values', params.rho_values.join(','));
+        }
+        if (params.rho_value !== undefined) {
+            setText('scan-point-rho-value', String(params.rho_value));
         }
 
         if (params.xi !== undefined) {
@@ -379,6 +452,50 @@ export class UI {
         }
         const query = routeParams.toString();
         window.location.hash = query ? `task-center?${query}` : 'task-center';
+    }
+
+    navigateToPage(pageId) {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        if (pageId === 'task-center') {
+            this.updateTaskRoute(this.activeJobId);
+            return;
+        }
+        window.location.hash = 'scattering';
+    }
+
+    applyNavigationRoute() {
+        if (typeof window === 'undefined') {
+            return;
+        }
+        const hash = String(window.location.hash || '').replace(/^#/, '').trim();
+        if (hash.startsWith('task-center')) {
+            this.setActivePage('task-center');
+            this.applyTaskRoute();
+        } else {
+            this.setActivePage('scattering');
+        }
+    }
+
+    setActivePage(pageId) {
+        const scatteringPage = document.getElementById('page-scattering');
+        const taskCenterPage = document.getElementById('page-task-center');
+        if (scatteringPage) {
+            scatteringPage.classList.toggle('active', pageId === 'scattering');
+        }
+        if (taskCenterPage) {
+            taskCenterPage.classList.toggle('active', pageId === 'task-center');
+        }
+        if (this.navScatteringBtn) {
+            this.navScatteringBtn.classList.toggle('active', pageId === 'scattering');
+        }
+        if (this.navTaskCenterBtn) {
+            this.navTaskCenterBtn.classList.toggle('active', pageId === 'task-center');
+        }
+        if (pageId === 'scattering' && this.visualization) {
+            setTimeout(() => this.visualization.onWindowResize(), 0);
+        }
     }
 
     applyTaskRoute() {
