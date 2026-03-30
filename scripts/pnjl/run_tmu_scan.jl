@@ -11,6 +11,7 @@ PNJL T-μ 参数空间扫描脚本
     julia scripts/pnjl/run_tmu_scan.jl [options]
 
 选项：
+    --mode=scan       运行模式：scan | point（默认 scan）
     --xi=0.0          各向异性参数
     --T_min=50        最低温度 (MeV)
     --T_max=200       最高温度 (MeV)
@@ -18,10 +19,13 @@ PNJL T-μ 参数空间扫描脚本
     --mu_min=0        最低化学势 (MeV)
     --mu_max=400      最高化学势 (MeV)
     --mu_step=10      化学势步长 (MeV)
+    --T_mev=150       point 模式温度 (MeV)
+    --mu_mev=0        point 模式化学势 (MeV)
     --output=...      输出文件路径（默认 data/outputs/results/pnjl/scan/tmu/tmu_scan_xi{xi}.csv）
     --resume          断点续扫（默认启用）
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
+    --solver_backend=models 求解后端：models | legacy | auto（默认 models）
     --p_num=24        动量积分节点数
     --t_num=8         角度积分节点数
     --verbose         详细输出
@@ -44,6 +48,7 @@ PNJL T-μ 参数空间扫描脚本
 用法：julia scripts/pnjl/run_tmu_scan.jl [options]
 
 选项：
+    --mode=scan       运行模式：scan | point（默认 scan）
     --xi=0.0          各向异性参数
     --T_min=50        最低温度 (MeV)
     --T_max=200       最高温度 (MeV)
@@ -51,10 +56,13 @@ PNJL T-μ 参数空间扫描脚本
     --mu_min=0        最低化学势 (MeV)
     --mu_max=400      最高化学势 (MeV)
     --mu_step=10      化学势步长 (MeV)
+    --T_mev=150       point 模式温度 (MeV)
+    --mu_mev=0        point 模式化学势 (MeV)
     --output=...      输出文件路径（默认 data/outputs/results/pnjl/scan/tmu/tmu_scan_xi{xi}.csv）
     --resume          断点续扫（默认启用）
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
+    --solver_backend=models 求解后端：models | legacy | auto（默认 models）
     --p_num=24        动量积分节点数
     --t_num=8         角度积分节点数
     --verbose         详细输出
@@ -80,6 +88,7 @@ using .Models: run_tmu_scan
 const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu")
 
 struct TmuScanConfig
+    mode::Symbol
     xi::Float64
     T_min::Float64
     T_max::Float64
@@ -87,16 +96,20 @@ struct TmuScanConfig
     mu_min::Float64
     mu_max::Float64
     mu_step::Float64
+    T_mev::Float64
+    mu_mev::Float64
     output_path::String
     resume::Bool
     overwrite::Bool
     use_phase_aware::Bool
+    solver_backend::Symbol
     p_num::Int
     t_num::Int
     verbose::Bool
 end
 
 function parse_args(args)
+    mode = :scan
     xi = 0.0
     T_min = 50.0
     T_max = 200.0
@@ -104,16 +117,21 @@ function parse_args(args)
     mu_min = 0.0
     mu_max = 400.0
     mu_step = 10.0
+    T_mev = 150.0
+    mu_mev = 0.0
     output_path = ""
     resume = true
     overwrite = false
     use_phase_aware = true
+    solver_backend = :models
     p_num = 24
     t_num = 8
     verbose = false
     
     for arg in args
-        if startswith(arg, "--xi=")
+        if startswith(arg, "--mode=")
+            mode = Symbol(arg[8:end])
+        elseif startswith(arg, "--xi=")
             xi = parse(Float64, arg[6:end])
         elseif startswith(arg, "--T_min=")
             T_min = parse(Float64, arg[9:end])
@@ -127,6 +145,10 @@ function parse_args(args)
             mu_max = parse(Float64, arg[10:end])
         elseif startswith(arg, "--mu_step=")
             mu_step = parse(Float64, arg[11:end])
+        elseif startswith(arg, "--T_mev=")
+            T_mev = parse(Float64, arg[9:end])
+        elseif startswith(arg, "--mu_mev=")
+            mu_mev = parse(Float64, arg[10:end])
         elseif startswith(arg, "--output=")
             output_path = arg[10:end]
         elseif arg == "--resume"
@@ -136,6 +158,8 @@ function parse_args(args)
             resume = false
         elseif arg == "--no_phase_aware"
             use_phase_aware = false
+        elseif startswith(arg, "--solver_backend=")
+            solver_backend = Symbol(arg[18:end])
         elseif startswith(arg, "--p_num=")
             p_num = parse(Int, arg[9:end])
         elseif startswith(arg, "--t_num=")
@@ -149,15 +173,21 @@ function parse_args(args)
             @warn "未知参数: $arg"
         end
     end
+
+    mode in (:scan, :point) || throw(ArgumentError("invalid --mode=$(mode), accepted: scan|point"))
+    solver_backend in (:models, :legacy, :auto) || throw(ArgumentError("invalid --solver_backend=$(solver_backend), accepted: models|legacy|auto"))
     
     # 默认输出路径
     if isempty(output_path)
-        output_path = joinpath(DEFAULT_OUTPUT_DIR, "tmu_scan_xi$(xi).csv")
+        suffix = mode === :point ? "tmu_point_xi$(xi).csv" : "tmu_scan_xi$(xi).csv"
+        output_path = joinpath(DEFAULT_OUTPUT_DIR, suffix)
     end
     
     return TmuScanConfig(
+        mode,
         xi, T_min, T_max, T_step, mu_min, mu_max, mu_step,
-        output_path, resume, overwrite, use_phase_aware, p_num, t_num, verbose
+        T_mev, mu_mev,
+        output_path, resume, overwrite, use_phase_aware, solver_backend, p_num, t_num, verbose
     )
 end
 
@@ -174,18 +204,33 @@ function main(args=ARGS)
     println("时间: $(now())")
     println()
     println("参数配置:")
+    println("  模式: $(config.mode)")
     println("  ξ = $(config.xi)")
-    println("  T 范围: $(config.T_min) - $(config.T_max) MeV (步长 $(config.T_step))")
-    println("  μ 范围: $(config.mu_min) - $(config.mu_max) MeV (步长 $(config.mu_step))")
+    if config.mode === :scan
+        println("  T 范围: $(config.T_min) - $(config.T_max) MeV (步长 $(config.T_step))")
+        println("  μ 范围: $(config.mu_min) - $(config.mu_max) MeV (步长 $(config.mu_step))")
+    else
+        println("  T 点: $(config.T_mev) MeV")
+        println("  μ 点: $(config.mu_mev) MeV")
+    end
     println("  积分节点: p_num=$(config.p_num), t_num=$(config.t_num)")
+    println("  求解后端: $(config.solver_backend)")
     println("  相变感知: $(config.use_phase_aware ? "启用" : "禁用")")
     println("  断点续扫: $(config.resume ? "启用" : "禁用")")
     println("  输出文件: $(config.output_path)")
     println()
     
     # 构建参数网格
-    T_values = collect(config.T_min:config.T_step:config.T_max)
-    mu_values = collect(config.mu_min:config.mu_step:config.mu_max)
+    T_values = if config.mode === :scan
+        collect(config.T_min:config.T_step:config.T_max)
+    else
+        [config.T_mev]
+    end
+    mu_values = if config.mode === :scan
+        collect(config.mu_min:config.mu_step:config.mu_max)
+    else
+        [config.mu_mev]
+    end
     
     total_points = length(T_values) * length(mu_values)
     println("扫描网格:")
@@ -238,6 +283,7 @@ function main(args=ARGS)
         overwrite = config.overwrite,
         resume = config.resume,
         use_phase_aware = config.use_phase_aware,
+        solver_backend = config.solver_backend,
         p_num = config.p_num,
         t_num = config.t_num,
         progress_cb = progress_cb
