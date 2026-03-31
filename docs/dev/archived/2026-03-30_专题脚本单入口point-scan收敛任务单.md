@@ -1,3 +1,15 @@
+---
+title: 专题脚本单入口 point-scan 收敛任务单
+archived: true
+original: docs/dev/active/2026-03-30_专题脚本单入口point-scan收敛任务单.md
+archived_date: 2026-03-31
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 专题脚本单入口 point-scan 收敛任务单
 
 ## 1. 目标
