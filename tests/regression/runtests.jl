@@ -15,6 +15,7 @@ const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "rpnjl", "test_rpnjl_gap_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_scan_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_constraint_fixedpoint_regression.jl"),
+    joinpath(REGRESSION_DIR, "pnjl", "test_constraint_selection_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_magnetic_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
