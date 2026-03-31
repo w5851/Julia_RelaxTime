@@ -40,18 +40,18 @@
 - Modify: `src/models/solver/ConstraintModes.jl` (if lightweight metadata helpers needed)
 - Modify: `src/models/Models.jl`
 
-- [ ] **Step 1: Write failing unit tests for ProblemSpec shape and mode dimensions**
+- [x] **Step 1: Write failing unit tests for ProblemSpec shape and mode dimensions**
   - Add assertions for `FixedMu`, `FixedRho`, `FixedAsymmetricRho`, `FixedEntropy`, `FixedSigma`.
 
-- [ ] **Step 2: Run tests to verify failures**
+- [x] **Step 2: Run tests to verify failures**
   - Run only the new contract test file.
 
-- [ ] **Step 3: Implement ProblemSpec struct and constructors**
+- [x] **Step 3: Implement ProblemSpec struct and constructors**
   - Keep fields minimal and aligned with design doc.
 
-- [ ] **Step 4: Wire module include/export in `Models.jl`**
+- [x] **Step 4: Wire module include/export in `Models.jl`**
 
-- [ ] **Step 5: Re-run unit tests and confirm pass**
+- [x] **Step 5: Re-run unit tests and confirm pass**
 
 ### Task 2: Bridge Conditions residual builders to explicit-parameter API
 
@@ -59,13 +59,13 @@
 - Modify: `src/models/solver/Conditions.jl`
 - Modify: `src/models/solver/ProblemSpec.jl`
 
-- [ ] **Step 1: Add failing tests for explicit residual interface parity with existing closure path**
+- [x] **Step 1: Add failing tests for explicit residual interface parity with existing closure path**
 
-- [ ] **Step 2: Implement explicit residual entrypoints per mode**
+- [x] **Step 2: Implement explicit residual entrypoints per mode**
 
-- [ ] **Step 3: Keep existing closure builders as adapters**
+- [x] **Step 3: Keep existing closure builders as adapters**
 
-- [ ] **Step 4: Re-run tests and verify parity**
+- [x] **Step 4: Re-run tests and verify parity**
 
 ## Chunk 2: AD/Implicit Differentiation Contract Hardening
 

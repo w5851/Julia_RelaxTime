@@ -27,6 +27,7 @@ import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
 
 export gap_conditions, build_conditions, build_residual!
 export GapParams
+export explicit_residual, explicit_residual!
 
 @inline _model_kind_symbol(::AbstractPNJLModel) = :PNJL
 @inline _model_kind_symbol(::PNJLModel) = :PNJL
@@ -447,6 +448,18 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
         model_kind=_model_kind_symbol(model),
     )
     return build_residual!(mode, params)
+end
+
+@inline function explicit_residual!(F::AbstractVector, x::AbstractVector, θ::AbstractVector, params::GapParams, mode::ConstraintMode)
+    residual = build_conditions(mode, params)(θ, x)
+    F .= residual
+    return nothing
+end
+
+@inline function explicit_residual(mode::ConstraintMode, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    out = zeros(promote_type(eltype(x), eltype(θ)), state_dim(mode))
+    explicit_residual!(out, x, θ, params, mode)
+    return out
 end
 
 end # module Conditions

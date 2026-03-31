@@ -165,15 +165,15 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 定义 `ProblemSpec` 结构与构造器。
-- [ ] 为 `FixedMu/FixedRho/FixedAsymmetricRho/FixedEntropy/FixedSigma` 提供 spec builder。
-- [ ] 在 `Conditions` 增加显式参数 residual 入口。
-- [ ] 保留原 closure 构造函数并改为适配层。
+- [x] 定义 `ProblemSpec` 结构与构造器。
+- [x] 为 `FixedMu/FixedRho/FixedAsymmetricRho/FixedEntropy/FixedSigma` 提供 spec builder。
+- [x] 在 `Conditions` 增加显式参数 residual 入口。
+- [x] 保留原 closure 构造函数并改为适配层。
 
 **验收标准**
 
-- [ ] 各 mode 均可通过 spec 构建求解问题。
-- [ ] 不破坏现有 `Models.solve*` 对外语义。
+- [x] 各 mode 均可通过 spec 构建求解问题。
+- [x] 不破坏现有 `Models.solve*` 对外语义。
 
 ### Task A2：固化 AD/ID 契约与 Dual-safe 边界
 
@@ -335,3 +335,4 @@ selector(candidates, params, context) -> selected_index::Int
 
 - [x] 2026-03-31：完成草案与 `src/models` 兼容性核验，确认“方向兼容、契约需加硬”。
 - [x] 2026-03-31：形成 Wave-A 的 spec+plan（本文档），用于后续实现执行。
+- [x] 2026-03-31：完成 A1（ProblemSpec 契约落地）最小闭环：新增 `ProblemSpec`/`build_problem_spec`，补齐 `explicit_residual/explicit_residual!`，并通过定向单测。
