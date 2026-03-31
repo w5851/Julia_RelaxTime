@@ -1,5 +1,3 @@
-#!/usr/bin/env julia
-
 module CrossSectionOrchestratedScan
 
 export run_cross_section_orchestrated

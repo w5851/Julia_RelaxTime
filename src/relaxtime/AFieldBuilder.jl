@@ -6,6 +6,18 @@ using ..OneLoopIntegralsCorrection: A_aniso
 
 export build_A_triplet, ensure_quark_params_has_A
 
+const _AUTO_A_WARNED_ANISO = Ref(false)
+const _AUTO_A_WARNED_ISO = Ref(false)
+
+@inline _auto_a_warn_enabled() = get(ENV, "RELAXTIME_AUTO_A_WARN", "1") != "0"
+
+@inline function _should_emit_auto_a_warn(use_aniso::Bool)
+    flag = use_aniso ? _AUTO_A_WARNED_ANISO : _AUTO_A_WARNED_ISO
+    flag[] && return false
+    flag[] = true
+    return true
+end
+
 @inline _xi(thermo_params::NamedTuple)::Float64 = hasproperty(thermo_params, :ξ) ? Float64(thermo_params.ξ) : 0.0
 
 @inline function _validate_inputs(quark_params::NamedTuple, thermo_params::NamedTuple)
@@ -82,7 +94,7 @@ function ensure_quark_params_has_A(
     end
 
     ξ = _xi(thermo_params)
-    if warn_on_auto && abs(ξ) > 0.0
+    if warn_on_auto && abs(ξ) > 0.0 && _auto_a_warn_enabled() && _should_emit_auto_a_warn(use_aniso)
         if use_aniso
             @warn "quark_params missing :A under ξ≠0; auto-building anisotropic A via A_aniso" ξ=ξ p_nodes=p_nodes p_max=p_max cos_nodes=cos_nodes
         else
