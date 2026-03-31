@@ -195,7 +195,6 @@ function _build_default_seed_candidates(seed_guess::AbstractVector)
     end
     return collect(values(uniq))
 end
-
 function _solve_gap_with_outer_fallback(
     model::AbstractQCDModel,
     T_fm,
@@ -318,7 +317,6 @@ function solve_fixedmu_constraint(
             push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], converged=false))
         end
     end
-
     selected = select_pressure_max_candidate(candidates)
     s = selected.selected_candidate
 
