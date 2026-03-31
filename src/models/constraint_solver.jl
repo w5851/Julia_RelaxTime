@@ -9,6 +9,8 @@ using NLsolve
 using ForwardDiff
 using Statistics: mean
 
+const HardConstraintRule = Function
+
 @inline function default_mu0_from_seed(seed)::Float64
     if length(seed) >= 8
         return mean(Float64.(seed[6:8]))
@@ -39,6 +41,160 @@ end
     return nothing
 end
 
+@inline function _is_mass_positive(masses)::Bool
+    return all(m -> isfinite(m) && m > 0.0, masses)
+end
+
+@inline function _is_phi_in_range(x_state)::Bool
+    Φ = x_state[4]
+    Φbar = x_state[5]
+    return isfinite(Φ) && isfinite(Φbar) && (0.0 <= Φ <= 1.0) && (0.0 <= Φbar <= 1.0)
+end
+
+function default_hard_constraint_rules(; physicality_check::Function=((_, _) -> true))
+    return HardConstraintRule[
+        c -> (isfinite(c.residual_norm), :residual_nonfinite),
+        c -> (c.residual_norm <= c.residual_norm_max, :residual_too_large),
+        c -> (_is_mass_positive(c.masses), :mass_nonpositive),
+        c -> (_is_phi_in_range(c.x_state), :phi_out_of_range),
+        c -> (isfinite(c.pressure), :pressure_nonfinite),
+        c -> (isfinite(c.omega), :omega_nonfinite),
+        c -> (isfinite(c.rho_norm), :rho_nonfinite),
+        c -> (isfinite(c.entropy), :entropy_nonfinite),
+        c -> (isfinite(c.energy), :energy_nonfinite),
+        c -> (physicality_check(c.x_state, c.masses), :physicality_check_failed),
+    ]
+end
+
+function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule})
+    failed = Symbol[]
+    for rule in rules
+        ok, reason = rule(candidate)
+        if !ok
+            push!(failed, Symbol(reason))
+        end
+    end
+    return isempty(failed), failed
+end
+
+function select_pressure_max_candidate(candidates::AbstractVector)
+    isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+
+    passed = Int[]
+    for i in eachindex(candidates)
+        if Bool(candidates[i].hard_constraint_ok)
+            push!(passed, i)
+        end
+    end
+
+    if !isempty(passed)
+        selected_idx = passed[1]
+        selected = candidates[selected_idx]
+        for i in passed[2:end]
+            cand = candidates[i]
+            if cand.pressure > selected.pressure || (cand.pressure == selected.pressure && cand.residual_norm < selected.residual_norm)
+                selected_idx = i
+                selected = cand
+            end
+        end
+        return (
+            selected_index=selected_idx,
+            selected_candidate=selected,
+            selection_reason=:pressure_max_under_constraints,
+            eligible_indices=passed,
+        )
+    end
+
+    selected_idx = 1
+    selected = candidates[selected_idx]
+    for i in eachindex(candidates)
+        cand = candidates[i]
+        if cand.pressure > selected.pressure || (cand.pressure == selected.pressure && cand.residual_norm < selected.residual_norm)
+            selected_idx = i
+            selected = cand
+        end
+    end
+    return (
+        selected_index=selected_idx,
+        selected_candidate=selected,
+        selection_reason=:no_candidate_passed_constraints,
+        eligible_indices=Int[],
+    )
+end
+
+function _compute_fixedmu_candidate(
+    model::AbstractQCDModel,
+    T_fm::Real,
+    μ_fm::Real,
+    st,
+    residual_norm_max::Real;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    x_state = SVector{5}(Tuple(state_vector(st)))
+    mu_vec = normalize_mu_vec(μ_fm)
+
+    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
+    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
+    rho_norm = sum(rho_vec) / 3.0
+    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    entropy = ForwardDiff.derivative(pressure_T, T_fm)
+    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
+    omega_val = -pressure
+    masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+
+    residual_vec = gap_residual(model, st, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
+    residual_norm = sqrt(sum(abs2, residual_vec))
+
+    return (
+        solution=Vector{Float64}(x_state),
+        x_state=x_state,
+        mu_vec=SVector{3}(Tuple(mu_vec)),
+        omega=omega_val,
+        pressure=pressure,
+        rho_norm=rho_norm,
+        entropy=entropy,
+        energy=energy,
+        masses=masses,
+        iterations=0,
+        residual_norm=residual_norm,
+        residual_norm_max=Float64(residual_norm_max),
+    )
+end
+
+function _build_default_seed_candidates(seed_guess::AbstractVector)
+    base = Float64.(seed_guess)
+    seeds = Vector{Vector{Float64}}()
+    push!(seeds, copy(base))
+
+    length(base) >= 5 || return seeds
+
+    perturb_specs = (
+        (1, 1.01),
+        (1, 0.99),
+        (2, 1.01),
+        (2, 0.99),
+        (3, 1.01),
+        (3, 0.99),
+        (4, 1.05),
+        (5, 1.05),
+    )
+
+    for (idx, scale) in perturb_specs
+        s = copy(base)
+        s[idx] *= scale
+        push!(seeds, s)
+    end
+
+    uniq = Dict{String,Vector{Float64}}()
+    for s in seeds
+        key = join(round.(s; digits=10), ",")
+        uniq[key] = s
+    end
+    return collect(values(uniq))
+end
 function _solve_gap_with_outer_fallback(
     model::AbstractQCDModel,
     T_fm,
@@ -103,52 +259,85 @@ function solve_fixedmu_constraint(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     physicality_check::Function=((_, _) -> true),
+    seed_candidates::Union{Nothing, AbstractVector}=nothing,
+    hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
 )
-    st = solve_gap(
-        model,
-        T_fm,
-        μ_fm;
-        solver_backend=:models,
-        solver=solver,
-        initial_guess=Float64.(seed_guess),
-        residual_norm_max=residual_norm_max,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-    )
+    seed_pool = if seed_candidates === nothing
+        _build_default_seed_candidates(seed_guess)
+    else
+        [Float64.(s) for s in seed_candidates]
+    end
 
-    x_state = SVector{5}(Tuple(state_vector(st)))
-    mu_vec = normalize_mu_vec(μ_fm)
+    rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check=physicality_check) : hard_constraints
 
-    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
-    rho_norm = sum(rho_vec) / 3.0
-    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    entropy = ForwardDiff.derivative(pressure_T, T_fm)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-    omega_val = -pressure
-    masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+    candidates = NamedTuple[]
+    for seed in seed_pool
+        local raw
+        try
+            st = solve_gap(
+                model,
+                T_fm,
+                μ_fm;
+                solver_backend=:models,
+                solver=solver,
+                initial_guess=seed,
+                residual_norm_max=residual_norm_max,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
 
-    residual_vec = gap_residual(model, st, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
-    residual_norm = sqrt(sum(abs2, residual_vec))
-
-    thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
-    converged = physicality_check(x_state, masses) && thermo_finite && isfinite(residual_norm) && residual_norm <= Float64(residual_norm_max)
+            raw = _compute_fixedmu_candidate(
+                model,
+                T_fm,
+                μ_fm,
+                st,
+                residual_norm_max;
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+            ok, failed = evaluate_hard_constraints(raw, rules)
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok))
+        catch
+            raw = (
+                solution=Float64[],
+                x_state=SVector{5}(fill(NaN, 5)),
+                mu_vec=SVector{3}(fill(NaN, 3)),
+                omega=NaN,
+                pressure=-Inf,
+                rho_norm=NaN,
+                entropy=NaN,
+                energy=NaN,
+                masses=SVector{3}(fill(NaN, 3)),
+                iterations=0,
+                residual_norm=Inf,
+                residual_norm_max=Float64(residual_norm_max),
+            )
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], converged=false))
+        end
+    end
+    selected = select_pressure_max_candidate(candidates)
+    s = selected.selected_candidate
 
     return (
-        converged=converged,
-        solution=Vector{Float64}(x_state),
-        x_state=x_state,
-        mu_vec=SVector{3}(Tuple(mu_vec)),
-        omega=omega_val,
-        pressure=pressure,
-        rho_norm=rho_norm,
-        entropy=entropy,
-        energy=energy,
-        masses=masses,
-        iterations=0,
-        residual_norm=residual_norm,
+        converged=s.converged,
+        solution=s.solution,
+        x_state=s.x_state,
+        mu_vec=s.mu_vec,
+        omega=s.omega,
+        pressure=s.pressure,
+        rho_norm=s.rho_norm,
+        entropy=s.entropy,
+        energy=s.energy,
+        masses=s.masses,
+        iterations=s.iterations,
+        residual_norm=s.residual_norm,
+        hard_constraint_ok=s.hard_constraint_ok,
+        failed_constraints=s.failed_constraints,
+        selection_reason=selected.selection_reason,
+        selected_index=selected.selected_index,
+        candidate_count=length(candidates),
     )
 end
 

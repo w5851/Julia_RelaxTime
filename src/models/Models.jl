@@ -56,6 +56,9 @@ export solve_fixedrho_constraint
 export solve_fixedentropy_constraint
 export solve_fixedsigma_constraint
 export solve_fixedasymrho_constraint
+export default_hard_constraint_rules
+export evaluate_hard_constraints
+export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
 export ConstraintModes
