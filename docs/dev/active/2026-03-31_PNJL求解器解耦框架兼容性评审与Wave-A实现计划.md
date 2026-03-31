@@ -191,15 +191,15 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 抽取统一 `forward_solve` 适配。
-- [ ] 抽取统一 `conditions` 适配。
-- [ ] 补充 Dual-safe 清单文档与代码注释锚点。
-- [ ] 补充 smoke 测试覆盖 dual 传播。
+- [x] 抽取统一 `forward_solve` 适配。
+- [x] 抽取统一 `conditions` 适配。
+- [x] 补充 Dual-safe 清单文档与代码注释锚点。
+- [x] 补充 smoke 测试覆盖 dual 传播。
 
 **验收标准**
 
-- [ ] FixedMu 与 flavor-mu Jacobian smoke 通过。
-- [ ] `conditions` 路径无强制 `Float64` 回退。
+- [x] FixedMu 与 flavor-mu Jacobian smoke 通过。
+- [x] `conditions` 路径无强制 `Float64` 回退。
 
 ### Task A3：配置状态治理（移除全局 Ref 热点）
 
@@ -215,14 +215,14 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 定义不可变 config 结构并绑定到 solver 实例。
-- [ ] 将全局配置 setter 改为实例化传参。
-- [ ] 为扫描路径补充“前后调用不串扰”测试。
+- [x] 定义不可变 config 结构并绑定到 solver 实例。
+- [x] 将全局配置 setter 改为实例化传参。
+- [x] 为扫描路径补充“前后调用不串扰”测试。
 
 **验收标准**
 
-- [ ] 连续两次不同配置调用结果互不污染。
-- [ ] 既有导数 API 兼容保留。
+- [x] 连续两次不同配置调用结果互不污染。
+- [x] 既有导数 API 兼容保留。
 
 ### Task A4：统一候选治理接口（规则 + 选择）
 
@@ -336,3 +336,5 @@ selector(candidates, params, context) -> selected_index::Int
 - [x] 2026-03-31：完成草案与 `src/models` 兼容性核验，确认“方向兼容、契约需加硬”。
 - [x] 2026-03-31：形成 Wave-A 的 spec+plan（本文档），用于后续实现执行。
 - [x] 2026-03-31：完成 A1（ProblemSpec 契约落地）最小闭环：新增 `ProblemSpec`/`build_problem_spec`，补齐 `explicit_residual/explicit_residual!`，并通过定向单测。
+- [x] 2026-03-31：完成 A2（AD/ID 契约加固）最小闭环：新增 fixed-mu/flavor-mu 统一 adapter builder，补充 AD 契约 smoke 与架构文档，并通过定向验证。
+- [x] 2026-03-31：完成 A3（配置隔离）最小闭环：新增 solver 配置隔离 smoke，`create_implicit_solver` 切换为实例级 config adapters，同时保留兼容 setter 路径。

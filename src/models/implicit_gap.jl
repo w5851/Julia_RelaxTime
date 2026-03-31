@@ -24,6 +24,8 @@ export create_flavor_mu_implicit_gap_solver
 export create_pnjl_implicit_solver
 export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
+export build_pnjl_fixedmu_adapters
+export build_pnjl_flavor_mu_adapters
 
 @inline function symmetric_mu_direction_derivative(dx_dmu_vec::AbstractMatrix)
     size(dx_dmu_vec, 2) == 3 || throw(ArgumentError("dx_dmu_vec must have 3 columns for (μ_u, μ_d, μ_s), got size=$(size(dx_dmu_vec))"))
@@ -33,6 +35,72 @@ end
 @inline function _normalize_flavor_mu_vec(mu_vec)
     μ = normalize_mu_vec(mu_vec)
     return [Float64(μ[1]), Float64(μ[2]), Float64(μ[3])]
+end
+
+function build_pnjl_fixedmu_adapters(
+    model::AbstractPNJLModel;
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    kwargs...
+)
+    forward_solve = function (θ::AbstractVector)
+        T_fm = Float64(θ[1])
+        μ_fm = Float64(θ[2])
+        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+
+        st = solve_gap(model, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num, kwargs...)
+        return (collect(state_vector(st)), nothing)
+    end
+
+    conditions = function (θ::AbstractVector, x::AbstractVector, z)
+        _ = z
+        T_fm = θ[1]
+        μ_fm = θ[2]
+        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+
+        r = gap_residual(model, x, T_fm, mu_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            kwargs...)
+        return Vector(r)
+    end
+
+    return (forward_solve=forward_solve, conditions=conditions)
+end
+
+function build_pnjl_flavor_mu_adapters(
+    model::AbstractPNJLModel;
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    kwargs...
+)
+    forward_solve = function (θ::AbstractVector)
+        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
+        T_fm = Float64(θ[1])
+        mu_vec = SVector{3, Float64}(Float64(θ[2]), Float64(θ[3]), Float64(θ[4]))
+
+        st = solve_gap(model, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num, kwargs...)
+        return (collect(state_vector(st)), nothing)
+    end
+
+    conditions = function (θ::AbstractVector, x::AbstractVector, z)
+        _ = z
+        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
+        T_fm = θ[1]
+        mu_vec = SVector{3}(θ[2], θ[3], θ[4])
+
+        r = gap_residual(model, x, T_fm, mu_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            kwargs...)
+        return Vector(r)
+    end
+
+    return (forward_solve=forward_solve, conditions=conditions)
 end
 
 """create_implicit_gap_solver(model; kwargs...) -> ImplicitFunction
@@ -201,32 +269,17 @@ function create_flavor_mu_implicit_gap_solver(
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
 
-    forward_solve_impl = function (θ::AbstractVector)
-        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
-        T_fm = Float64(θ[1])
-        mu_vec = SVector{3, Float64}(Float64(θ[2]), Float64(θ[3]), Float64(θ[4]))
-
-        st = solve_gap(model, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num, kwargs...)
-        return (collect(state_vector(st)), nothing)
-    end
-
-    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
-        _ = z
-        length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
-        T_fm = θ[1]
-        mu_vec = SVector{3}(θ[2], θ[3], θ[4])
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
-    end
+    adapters = build_pnjl_flavor_mu_adapters(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        kwargs...,
+    )
 
     return ImplicitFunction(
-        forward_solve_impl,
-        conditions_impl;
+        adapters.forward_solve,
+        adapters.conditions;
         linear_solver=DirectLinearSolver(),
         representation=MatrixRepresentation(),
     )
@@ -340,32 +393,17 @@ function create_implicit_gap_solver(
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
 
-    forward_solve_impl = function (θ::AbstractVector)
-        T_fm = Float64(θ[1])
-        μ_fm = Float64(θ[2])
-        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
-
-        st = solve_gap(model, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num, kwargs...)
-        return (collect(state_vector(st)), nothing)
-    end
-
-    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
-        _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
-    end
+    adapters = build_pnjl_fixedmu_adapters(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        kwargs...,
+    )
 
     return ImplicitFunction(
-        forward_solve_impl,
-        conditions_impl;
+        adapters.forward_solve,
+        adapters.conditions;
         linear_solver=DirectLinearSolver(),
         representation=MatrixRepresentation(),
     )

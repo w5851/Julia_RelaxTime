@@ -76,15 +76,15 @@
 - Modify: `src/models/solver/ImplicitSolver.jl`
 - Create: `docs/architecture/models_ad_implicit_contract.md`
 
-- [ ] **Step 1: Write failing integration smoke for FixedMu and flavor-mu Jacobians**
+- [x] **Step 1: Write failing integration smoke for FixedMu and flavor-mu Jacobians**
 
-- [ ] **Step 2: Refactor adapter layer so forward/conditions signatures are unified**
+- [x] **Step 2: Refactor adapter layer so forward/conditions signatures are unified**
 
-- [ ] **Step 3: Enforce Dual-safe conditions boundary (no forced Float64 on AD path)**
+- [x] **Step 3: Enforce Dual-safe conditions boundary (no forced Float64 on AD path)**
 
-- [ ] **Step 4: Document boundary rules in architecture doc**
+- [x] **Step 4: Document boundary rules in architecture doc**
 
-- [ ] **Step 5: Re-run integration smoke and confirm pass**
+- [x] **Step 5: Re-run integration smoke and confirm pass**
 
 ### Task 4: Remove global mutable configuration hotspots from derivative call paths
 
@@ -94,13 +94,13 @@
 - Modify: `src/models/derivatives/ConservedChargeSusceptibilities.jl`
 - Create: `tests/integration/models/test_solver_config_isolation_smoke.jl`
 
-- [ ] **Step 1: Add failing isolation test for back-to-back distinct config invocations**
+- [x] **Step 1: Add failing isolation test for back-to-back distinct config invocations**
 
-- [ ] **Step 2: Introduce solver-scoped config payloads instead of global mutable refs where feasible**
+- [x] **Step 2: Introduce solver-scoped config payloads instead of global mutable refs where feasible**
 
-- [ ] **Step 3: Keep backward-compatible wrappers if public signatures are impacted**
+- [x] **Step 3: Keep backward-compatible wrappers if public signatures are impacted**
 
-- [ ] **Step 4: Re-run isolation test and key derivative smoke tests**
+- [x] **Step 4: Re-run isolation test and key derivative smoke tests**
 
 ## Chunk 3: Candidate Governance Unification
 

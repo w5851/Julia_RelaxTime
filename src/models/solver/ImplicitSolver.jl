@@ -1005,39 +1005,60 @@ function set_implicit_config(; xi::Real=0.0,
     return nothing
 end
 
+@inline function _build_fixedmu_implicit_adapters(config::NamedTuple)
+    forward_solve = function (θ::AbstractVector)
+        T_fm = Float64(θ[1])
+        μ_fm = Float64(θ[2])
+
+        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+        params = GapParams(T_fm, config.thermal_nodes, config.xi;
+            p_num=config.p_num,
+            t_num=config.t_num,
+            model_kind=config.model_kind,
+        )
+
+        seed = get_seed(DefaultSeed(), θ, FixedMu())
+        residual_fn! = build_residual!(FixedMu(), mu_vec, params)
+        res = nlsolve(residual_fn!, seed; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9)
+
+        return (res.zero, nothing)
+    end
+
+    conditions = function (θ::AbstractVector, x::AbstractVector, z)
+        _ = z
+        T_fm = θ[1]
+        μ_fm = θ[2]
+
+        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+        params = GapParams(T_fm, config.thermal_nodes, config.xi;
+            p_num=config.p_num,
+            t_num=config.t_num,
+            model_kind=config.model_kind,
+        )
+        x_state = SVector{5}(Tuple(x))
+
+        return Vector(gap_conditions(x_state, mu_vec, params))
+    end
+
+    return (forward_solve=forward_solve, conditions=conditions)
+end
+
 """
 前向求解函数（ImplicitDifferentiation.jl 接口）
 
 θ = [T, μ] -> x = [φ_u, φ_d, φ_s, Φ, Φ̄]
 """
 function forward_solve_mu(θ::AbstractVector)
-    T_fm = Float64(θ[1])
-    μ_fm = Float64(θ[2])
     config = IMPLICIT_CONFIG[]
-    
-    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-    params = GapParams(T_fm, config.thermal_nodes, config.xi; p_num=config.p_num, t_num=config.t_num, model_kind=config.model_kind)
-    
-    seed = get_seed(DefaultSeed(), θ, FixedMu())
-    residual_fn! = build_residual!(FixedMu(), mu_vec, params)
-    res = nlsolve(residual_fn!, seed; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9)
-    
-    return (res.zero, nothing)
+    return _build_fixedmu_implicit_adapters(config).forward_solve(θ)
 end
 
 """
 条件函数（ImplicitDifferentiation.jl 接口）
 """
 function conditions_mu(θ::AbstractVector, x::AbstractVector, z)
-    T_fm = θ[1]
-    μ_fm = θ[2]
     config = IMPLICIT_CONFIG[]
-    
-    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-    params = GapParams(T_fm, config.thermal_nodes, config.xi; p_num=config.p_num, t_num=config.t_num, model_kind=config.model_kind)
-    x_state = SVector{5}(Tuple(x))
-    
-    return Vector(gap_conditions(x_state, mu_vec, params))
+    return _build_fixedmu_implicit_adapters(config).conditions(θ, x, z)
 end
 
 """
@@ -1061,15 +1082,27 @@ function create_implicit_solver(; xi::Real=0.0,
                                 p_num::Int=DEFAULT_MOMENTUM_COUNT,
                                 t_num::Int=DEFAULT_THETA_COUNT,
                                 model_kind::Symbol=:PNJL)
-    set_implicit_config(
-        xi=xi,
+    thermal_nodes = cached_nodes(p_num, t_num)
+    local_config = (
+        xi=Float64(xi),
         p_num=p_num,
         t_num=t_num,
         model_kind=model_kind,
+        thermal_nodes=thermal_nodes,
     )
+    adapters = _build_fixedmu_implicit_adapters(local_config)
+
+    # Backward-compatible side effect for callers relying on set_implicit_config/global path.
+    set_implicit_config(
+        xi=local_config.xi,
+        p_num=local_config.p_num,
+        t_num=local_config.t_num,
+        model_kind=local_config.model_kind,
+    )
+
     return ImplicitFunction(
-        forward_solve_mu,
-        conditions_mu;
+        adapters.forward_solve,
+        adapters.conditions;
         linear_solver=DirectLinearSolver(),
         representation=MatrixRepresentation(),
     )
