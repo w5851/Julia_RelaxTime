@@ -4,7 +4,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfig.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfigAudit.jl"))
-include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_cross_section_orchestrated_scan.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "workflow", "cross_section_orchestrated.jl"))
 
 using .WorkflowConfig: normalize_merge_validate
 using .WorkflowConfigAudit: build_consumption_report

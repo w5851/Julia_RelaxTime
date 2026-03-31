@@ -1,3 +1,9 @@
+"""
+Status: deprecate-candidate
+Purpose: PNJL T-mu grid smoke stability self-check.
+Replacement: prefer `scripts/pnjl/run_tmu_scan.jl` for maintained T-mu scan entry.
+"""
+
 # Sweep PNJL solver over a T-μ grid to validate stability (using new architecture)
 using Printf
 

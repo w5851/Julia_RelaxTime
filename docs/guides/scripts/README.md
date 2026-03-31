@@ -11,6 +11,12 @@
 
 ## 1. 推荐稳定入口
 
+全量 `run_*.jl` 脚本功能目录见：
+
+- [run_script_catalog.md](run_script_catalog.md)
+
+该目录用于治理与迁移盘点；本 README 仅保留稳定白名单入口。
+
 ### PNJL
 
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](scripts/pnjl/run_conserved_charge_susceptibilities.jl)

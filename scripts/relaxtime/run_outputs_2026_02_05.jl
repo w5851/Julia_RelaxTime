@@ -1,6 +1,10 @@
 #!/usr/bin/env julia
 
 """
+Status: deprecate-candidate
+Purpose: legacy one-off output bundle script for historical 2026-02-05 task context.
+Replacement: prefer `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` or `scripts/relaxtime/run_relaxtime_orchestrator.jl`.
+
 为 docs/dev/active/2026_02_05_调用扫描脚本and画图脚本输出数据.md 的需求生成数据与图片。
 
 覆盖的输出：
