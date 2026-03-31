@@ -87,11 +87,19 @@ function _is_number(value) {
     return Number.isFinite(Number(value));
 }
 
+function _has_nonempty_numeric_array(value) {
+    return Array.isArray(value) && value.length > 0 && value.every(v => _is_number(v));
+}
+
 export function validate_scan_request(request) {
     const errors = [];
     const kind = String(request?.kind || '').toLowerCase();
+    const mode = String(request?.params?.mode || 'scan').toLowerCase();
     if (!(kind === 'tmu' || kind === 'trho')) {
         errors.push('kind 必须是 tmu 或 trho');
+    }
+    if (!(mode === 'scan' || mode === 'point')) {
+        errors.push('mode 必须是 scan 或 point');
     }
 
     const params = request?.params || {};
@@ -133,25 +141,49 @@ export function validate_scan_request(request) {
         }
     }
 
-    if (!Array.isArray(params.T_values) || params.T_values.length === 0 || !params.T_values.every(v => _is_number(v))) {
-        errors.push('T_values 必须是非空数字数组');
-    } else if (!params.T_values.every(v => Number(v) > 0)) {
-        errors.push('T_values 必须全部大于 0');
-    }
-
-    if (kind === 'tmu') {
-        if (!Array.isArray(params.mu_values) || params.mu_values.length === 0 || !params.mu_values.every(v => _is_number(v))) {
-            errors.push('tmu 模式下 mu_values 必须是非空数字数组');
-        } else if (!params.mu_values.every(v => Number(v) >= 0)) {
-            errors.push('tmu 模式下 mu_values 必须全部大于等于 0');
+    if (mode === 'point') {
+        if (!_is_number(params.T_mev)) {
+            errors.push('point 模式下 T_mev 必须是数字');
+        } else if (Number(params.T_mev) <= 0) {
+            errors.push('point 模式下 T_mev 必须大于 0');
         }
-    }
 
-    if (kind === 'trho') {
-        if (!Array.isArray(params.rho_values) || params.rho_values.length === 0 || !params.rho_values.every(v => _is_number(v))) {
-            errors.push('trho 模式下 rho_values 必须是非空数字数组');
-        } else if (!params.rho_values.every(v => Number(v) >= 0)) {
-            errors.push('trho 模式下 rho_values 必须全部大于等于 0');
+        if (kind === 'tmu') {
+            if (!_is_number(params.mu_mev)) {
+                errors.push('point 模式下 mu_mev 必须是数字');
+            } else if (Number(params.mu_mev) < 0) {
+                errors.push('point 模式下 mu_mev 必须大于等于 0');
+            }
+        }
+
+        if (kind === 'trho') {
+            if (!_is_number(params.rho_value)) {
+                errors.push('point 模式下 rho_value 必须是数字');
+            } else if (Number(params.rho_value) < 0) {
+                errors.push('point 模式下 rho_value 必须大于等于 0');
+            }
+        }
+    } else {
+        if (!_has_nonempty_numeric_array(params.T_values)) {
+            errors.push('scan 模式下 T_values 必须是非空数字数组');
+        } else if (!params.T_values.every(v => Number(v) > 0)) {
+            errors.push('scan 模式下 T_values 必须全部大于 0');
+        }
+
+        if (kind === 'tmu') {
+            if (!_has_nonempty_numeric_array(params.mu_values)) {
+                errors.push('scan 模式下 mu_values 必须是非空数字数组');
+            } else if (!params.mu_values.every(v => Number(v) >= 0)) {
+                errors.push('scan 模式下 mu_values 必须全部大于等于 0');
+            }
+        }
+
+        if (kind === 'trho') {
+            if (!_has_nonempty_numeric_array(params.rho_values)) {
+                errors.push('scan 模式下 rho_values 必须是非空数字数组');
+            } else if (!params.rho_values.every(v => Number(v) >= 0)) {
+                errors.push('scan 模式下 rho_values 必须全部大于等于 0');
+            }
         }
     }
 

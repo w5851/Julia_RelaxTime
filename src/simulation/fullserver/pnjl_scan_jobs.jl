@@ -422,6 +422,39 @@ function _resolve_xi_values(params::Dict{Symbol, Any})
     return unique(vals)
 end
 
+function _resolve_scan_mode(params::Dict{Symbol, Any})
+    mode_raw = get(params, :mode, "scan")
+    mode = lowercase(String(mode_raw))
+    mode in ("scan", "point") || error("mode must be scan or point")
+    return mode
+end
+
+function _resolve_tmu_axes(params::Dict{Symbol, Any})
+    mode = _resolve_scan_mode(params)
+    if mode == "point"
+        T_mev = _to_float64(get(params, :T_mev, nothing))
+        mu_mev = _to_float64(get(params, :mu_mev, nothing))
+        return [T_mev], [mu_mev]
+    end
+
+    t_values = haskey(params, :T_values) ? _to_float64_vec(params[:T_values], "T_values") : nothing
+    mu_values = haskey(params, :mu_values) ? _to_float64_vec(params[:mu_values], "mu_values") : nothing
+    return t_values, mu_values
+end
+
+function _resolve_trho_axes(params::Dict{Symbol, Any})
+    mode = _resolve_scan_mode(params)
+    if mode == "point"
+        T_mev = _to_float64(get(params, :T_mev, nothing))
+        rho_value = _to_float64(get(params, :rho_value, nothing))
+        return [T_mev], [rho_value]
+    end
+
+    t_values = haskey(params, :T_values) ? _to_float64_vec(params[:T_values], "T_values") : nothing
+    rho_values = haskey(params, :rho_values) ? _to_float64_vec(params[:rho_values], "rho_values") : nothing
+    return t_values, rho_values
+end
+
 function _extract_params_dict(req::HTTP.Request)
     body = isempty(req.body) ? Dict{Symbol, Any}() : JSON3.read(String(req.body))
     body_dict = body isa Dict ? body : _to_symbol_dict(body)
@@ -630,15 +663,13 @@ function _estimate_total_points(kind::String, params::Dict{Symbol, Any})
     xi_values = _resolve_xi_values(params)
     n_xi = length(xi_values)
     if kind == "tmu"
-        t_values = haskey(params, :T_values) ? _to_float64_vec(params[:T_values], "T_values") : nothing
-        mu_values = haskey(params, :mu_values) ? _to_float64_vec(params[:mu_values], "mu_values") : nothing
+        t_values, mu_values = _resolve_tmu_axes(params)
         if t_values === nothing || mu_values === nothing
             return nothing
         end
         return length(t_values) * length(mu_values) * n_xi
     elseif kind == "trho"
-        t_values = haskey(params, :T_values) ? _to_float64_vec(params[:T_values], "T_values") : nothing
-        rho_values = haskey(params, :rho_values) ? _to_float64_vec(params[:rho_values], "rho_values") : nothing
+        t_values, rho_values = _resolve_trho_axes(params)
         if t_values === nothing || rho_values === nothing
             return nothing
         end
@@ -659,8 +690,9 @@ function _run_tmu_scan_job!(job_id::String, params::Dict{Symbol, Any})
         :t_num => haskey(params, :t_num) ? _to_int(params[:t_num], 8) : 8,
     )
 
-    haskey(params, :T_values) && (kwargs[:T_values] = _to_float64_vec(params[:T_values], "T_values"))
-    haskey(params, :mu_values) && (kwargs[:mu_values] = _to_float64_vec(params[:mu_values], "mu_values"))
+    t_values, mu_values = _resolve_tmu_axes(params)
+    t_values !== nothing && (kwargs[:T_values] = t_values)
+    mu_values !== nothing && (kwargs[:mu_values] = mu_values)
     kwargs[:xi_values] = _resolve_xi_values(params)
 
     processed_ref = Ref(0)
@@ -695,8 +727,9 @@ function _run_trho_scan_job!(job_id::String, params::Dict{Symbol, Any})
         :t_num => haskey(params, :t_num) ? _to_int(params[:t_num], 8) : 8,
     )
 
-    haskey(params, :T_values) && (kwargs[:T_values] = _to_float64_vec(params[:T_values], "T_values"))
-    haskey(params, :rho_values) && (kwargs[:rho_values] = _to_float64_vec(params[:rho_values], "rho_values"))
+    t_values, rho_values = _resolve_trho_axes(params)
+    t_values !== nothing && (kwargs[:T_values] = t_values)
+    rho_values !== nothing && (kwargs[:rho_values] = rho_values)
     kwargs[:xi_values] = _resolve_xi_values(params)
 
     processed_ref = Ref(0)
@@ -884,6 +917,7 @@ function handle_pnjl_scan_job_create(req::HTTP.Request)
                 "timeout_seconds" => timeout_seconds,
                 "max_running" => _PNJL_SCAN_MAX_RUNNING,
                 "max_pending" => _PNJL_SCAN_MAX_PENDING,
+                "mode" => _resolve_scan_mode(params),
                 "xi_strategy" => haskey(params, :xi_grid) ? "xi_grid" : (haskey(params, :xi_values) ? "xi_values" : (haskey(params, :xi) ? "xi" : "default")),
             )
         end
