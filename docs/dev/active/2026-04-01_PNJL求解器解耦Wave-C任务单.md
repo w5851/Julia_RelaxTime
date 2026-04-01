@@ -8,17 +8,17 @@
 
 ## 1. 目标
 
-- [ ] 将 Wave-B 统一治理能力延伸到扫描/工作流脚本主入口。
-- [ ] 收敛模型特化扫描 SOP 到 unified model-driven 路径。
-- [ ] 固化 Wave-C 迁移状态与稳定性回归基线。
+- [x] 将 Wave-B 统一治理能力延伸到扫描/工作流脚本主入口。
+- [x] 收敛模型特化扫描 SOP 到 unified model-driven 路径。
+- [x] 固化 Wave-C 迁移状态与稳定性回归基线。
 
 ## 2. 范围
 
 ### 2.1 本期范围
 
-- [ ] script/workflow 侧统一路由并轨。
-- [ ] 兼容适配层 migration 状态查询与台账同步。
-- [ ] model-driven 扫描输出稳定性回归。
+- [x] script/workflow 侧统一路由并轨。
+- [x] 兼容适配层 migration 状态查询与台账同步。
+- [x] model-driven 扫描输出稳定性回归。
 
 ### 2.2 非范围
 
@@ -29,44 +29,44 @@
 
 ### C1：脚本与工作流统一路由
 
-- [ ] 为 script 路径与 unified 路径等价性补失败 smoke。
-- [ ] 将 scan 脚本入口收敛到统一 model-driven API。
-- [ ] 保持 CLI/外部调用签名兼容。
+- [x] 为 script 路径与 unified 路径等价性补失败 smoke。
+- [x] 将 scan 脚本入口收敛到统一 model-driven API。
+- [x] 保持 CLI/外部调用签名兼容。
 
 ### C2：SOP 分叉收敛与迁移治理
 
-- [ ] 为兼容适配路由与迁移状态查询补失败测试。
-- [ ] 统一旧 SOP 为 compat adapter（unified-first）。
-- [ ] 更新/维护 Wave-C 扫描与工作流迁移映射台账：`docs/dev/active/2026-04-01_扫描与工作流兼容层迁移映射表_Wave-C.md`。
+- [x] 为兼容适配路由与迁移状态查询补失败测试。
+- [x] 统一旧 SOP 为 compat adapter（unified-first）。
+- [x] 更新/维护 Wave-C 扫描与工作流迁移映射台账：`docs/dev/active/2026-04-01_扫描与工作流兼容层迁移映射表_Wave-C.md`。
 
 ### C3：model-driven 稳定性回归
 
-- [ ] 为 representative points 补失败回归。
-- [ ] 统一诊断与输出顺序，保证断言稳定。
-- [ ] 验证回归可重复通过。
+- [x] 为 representative points 补失败回归。
+- [x] 统一诊断与输出顺序，保证断言稳定。
+- [x] 验证回归可重复通过。
 
 ### C4：文档治理同步
 
-- [ ] 回填 Wave-C 任务单证据与勾选状态。
-- [ ] 同步迁移状态、删除门槛与风险备注。
-- [ ] 通过 docs/governance 检查。
+- [x] 回填 Wave-C 任务单证据与勾选状态。
+- [x] 同步迁移状态、删除门槛与风险备注。
+- [x] 通过 docs/governance 检查。
 
 ## 4. 验收标准
 
-- [ ] 扫描/工作流新调用方默认走 unified model-driven 路径。
-- [ ] legacy SOP 保持 non-breaking 且行为可追溯。
-- [ ] model-driven 扫描回归稳定可复现。
-- [ ] smoke + docs/governance 通过。
+- [x] 扫描/工作流新调用方默认走 unified model-driven 路径。
+- [x] legacy SOP 保持 non-breaking 且行为可追溯。
+- [x] model-driven 扫描回归稳定可复现。
+- [x] smoke + docs/governance 通过。
 
 ## 5. 验证命令
 
-- [ ] `julia --project=. -e 'include("tests/integration/models/test_wavec_scan_workflow_parity_smoke.jl")'`
-- [ ] `julia --project=. -e 'include("tests/regression/pnjl/test_wavec_model_driven_scan_stability.jl")'`
-- [ ] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
-- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
-- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [x] `julia --project=. -e 'include("tests/integration/models/test_wavec_scan_workflow_parity_smoke.jl")'`
+- [x] `julia --project=. -e 'include("tests/regression/pnjl/test_wavec_model_driven_scan_stability.jl")'`
+- [x] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [x] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [x] `julia --project=. scripts/dev/check_active_docs_governance.jl`
 
 ## 5.1 默认零上下文 agent 执行约束
 
@@ -82,10 +82,12 @@
 
 ## 6. DoD
 
-- [ ] 任务项与验收项全部勾选。
-- [ ] 关键验证命令可复现通过。
-- [ ] Wave-C 迁移台账与状态文档同步更新。
+- [x] 任务项与验收项全部勾选。
+- [x] 关键验证命令可复现通过。
+- [x] Wave-C 迁移台账与状态文档同步更新。
 
 ## 7. 执行记录
 
 - [x] 2026-04-01：创建 Wave-C 任务单草案，承接 archived 分层草案（Wave-C：扫描收敛阶段）与 Wave-B 已完成状态。
+- [x] 2026-04-01：完成 C1→C2→C3（TDD）：新增 `tests/integration/models/test_wavec_scan_workflow_parity_smoke.jl` 与 `tests/regression/pnjl/test_wavec_model_driven_scan_stability.jl`，脚本入口 `run_tmu_scan/run_dense_trho_scan/run_adaptive_trho_scan` 收敛到 model-driven 参数化路由（含 `model_kind` 兼容参数）并保持 non-breaking；新增 `Models.scan_workflow_migration_map/status` 迁移查询面并同步台账。
+- [x] 2026-04-01：完成 C4/C5 验证收口：定向测试 + unit/integration/regression smoke + docs governance 全部通过。
