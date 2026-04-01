@@ -288,39 +288,39 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 增加多 mode 维度一致性测试。
-- [ ] 增加 FixedMu + flavor-mu Jacobian smoke。
-- [ ] 增加候选治理稳定性回归。
-- [ ] 增加配置隔离 smoke。
+- [x] 增加多 mode 维度一致性测试。
+- [x] 增加 FixedMu + flavor-mu Jacobian smoke。
+- [x] 增加候选治理稳定性回归。
+- [x] 增加配置隔离 smoke。
 
 **验收标准**
 
-- [ ] Wave-A 新增测试全部通过。
-- [ ] 现有关键回归不退化。
+- [x] Wave-A 新增测试全部通过。
+- [x] 现有关键回归不退化。
 
 ## 7. 验证命令（建议）
 
-- [ ] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
-- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
-- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [x] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [x] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [x] `julia --project=. scripts/dev/check_active_docs_governance.jl`
 
 ## 8. 里程碑
 
-- [ ] M1：ProblemSpec + AD/ID 契约文档冻结（A1 + A2）。
-- [ ] M2：配置治理 + 候选治理接口收敛（A3 + A4）。
-- [ ] M3：兼容映射台账与删除门槛冻结（A5）。
-- [ ] M4：最小验证矩阵通过并回填证据（A6）。
+- [x] M1：ProblemSpec + AD/ID 契约文档冻结（A1 + A2）。
+- [x] M2：配置治理 + 候选治理接口收敛（A3 + A4）。
+- [x] M3：兼容映射台账与删除门槛冻结（A5）。
+- [x] M4：最小验证矩阵通过并回填证据（A6）。
 
 ## 9. DoD（Wave-A）
 
-- [ ] 已有统一 ProblemSpec 契约，且 mode 维度/参数维度可追踪。
-- [ ] AD/ID 接口具备统一 forward/conditions 语义，Dual-safe 规则文档化。
-- [ ] 候选治理规则与选择器接口统一，扫描与单点口径一致。
-- [ ] 全局配置污染风险被治理（实例化配置或等价隔离）。
-- [ ] 迁移映射表与删除门槛已固化。
-- [ ] 最小验证矩阵全部通过并可复现。
+- [x] 已有统一 ProblemSpec 契约，且 mode 维度/参数维度可追踪。
+- [x] AD/ID 接口具备统一 forward/conditions 语义，Dual-safe 规则文档化。
+- [x] 候选治理规则与选择器接口统一，扫描与单点口径一致。
+- [x] 全局配置污染风险被治理（实例化配置或等价隔离）。
+- [x] 迁移映射表与删除门槛已固化。
+- [x] 最小验证矩阵全部通过并可复现。
 
 ## 10. 风险与回退
 
@@ -340,3 +340,4 @@ selector(candidates, params, context) -> selected_index::Int
 - [x] 2026-03-31：完成 A3（配置隔离）最小闭环：新增 solver 配置隔离 smoke，`create_implicit_solver` 切换为实例级 config adapters，同时保留兼容 setter 路径。
 - [x] 2026-03-31：完成 A4（候选治理接口统一）最小闭环：新增 `CandidateGovernance` 与 context 契约，`evaluate_hard_constraints`/`select_pressure_max_candidate` 支持参数化上下文，补齐单测与回归测试。
 - [x] 2026-03-31：完成 A5（兼容层迁移映射）最小闭环：新增迁移台账文档、`solver_migration_map()` 以及 `COMPAT` 非破坏标注，验证统一入口与兼容入口可追溯且行为一致。
+- [x] 2026-04-01：完成 A6（验证矩阵收口）：unit/integration/regression smoke 通过，docs consistency 与 active docs governance 检查通过。

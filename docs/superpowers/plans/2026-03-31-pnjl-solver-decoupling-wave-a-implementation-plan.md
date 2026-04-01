@@ -156,17 +156,17 @@
 - Create/Modify tests listed above
 - Modify docs index links if required
 
-- [ ] **Step 1: Run unit smoke profile**
+- [x] **Step 1: Run unit smoke profile**
   - `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
 
-- [ ] **Step 2: Run integration smoke profile**
+- [x] **Step 2: Run integration smoke profile**
   - `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
 
-- [ ] **Step 3: Run regression smoke profile**
+- [x] **Step 3: Run regression smoke profile**
   - `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
 
-- [ ] **Step 4: Run docs/governance checks**
+- [x] **Step 4: Run docs/governance checks**
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
   - `julia --project=. scripts/dev/check_active_docs_governance.jl`
 
-- [ ] **Step 5: Update active task sheet evidence links and completion states**
+- [x] **Step 5: Update active task sheet evidence links and completion states**
