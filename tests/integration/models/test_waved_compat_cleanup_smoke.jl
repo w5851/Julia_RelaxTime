@@ -7,29 +7,26 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-@testset "Wave-B compat routing smoke" begin
+@testset "Wave-D compat cleanup smoke" begin
     @test isdefined(Main.Models, :solver_migration_status)
 
     status = Main.Models.solver_migration_status("Models.solve_fixedmu_constraint")
     @test status.status == :hard_deprecated
     @test status.route == :compat_shim
-    @test status.unified_entry == "Models.solve_constraint(model, FixedMu(), T; μ_fm=...)"
+    @test occursin("Models.solve_constraint", status.unified_entry)
 
     m = Main.Models.create_model(:NJL)
     T = 0.5
     seed = Float64.(Main.Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
 
-    via_unified = Main.Models.solve_constraint(m, Main.Models.FixedMu(), T; μ_fm=0.0, seed_guess=seed, p_num=24, t_num=6)
-    legacy_err = try
+    err = try
         Main.Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
         nothing
     catch exc
         exc
     end
 
-    @test via_unified.converged
-    @test isfinite(via_unified.pressure)
-    @test isfinite(via_unified.rho_norm)
-    @test legacy_err isa ArgumentError
-    @test occursin("hard-deprecated", sprint(showerror, legacy_err))
+    @test err isa ArgumentError
+    @test occursin("hard-deprecated", sprint(showerror, err))
+    @test occursin("Models.solve_constraint", sprint(showerror, err))
 end

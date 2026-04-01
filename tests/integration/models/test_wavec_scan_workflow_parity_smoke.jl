@@ -10,7 +10,7 @@ end
     @test isdefined(Main.Models, :scan_workflow_migration_status)
 
     migration = Main.Models.scan_workflow_migration_status("scripts/pnjl/run_tmu_scan.jl")
-    @test migration.status == :active
+    @test migration.status == :hard_deprecated
     @test migration.route == :compat_adapter
     @test migration.unified_entry == "Models.run_tmu_scan(...; model_kind=...)"
     @test migration.removal_wave == :D

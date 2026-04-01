@@ -34,14 +34,11 @@
 - 固定化学势可直接使用 `solve(FixedMu(), ...)`
 - 其它约束模式同样可通过 `solve(mode, ...)` 使用标准求解入口
 
-而 `solve_constraint` 及 `solve_fixed*constraint` 系列更偏进阶入口：
+而 `solve_constraint` 是进阶统一入口；`solve_fixed*constraint` 仍保留导出仅用于迁移查询，不建议业务调用：
 
-- `solve_fixedmu_constraint`
-- `solve_fixedrho_constraint`
-- `solve_fixedentropy_constraint`
-- `solve_fixedsigma_constraint`
-- `solve_fixedasymrho_constraint`
 - `solve_constraint`
+
+> Wave-D 兼容清理策略：`solve_fixed*constraint` 处于 `hard_deprecated`，直接调用会抛出带迁移指引的 `ArgumentError`；统一主路径为 `solve_constraint`。
 
 这些接口更适合“我明确要控制某个约束求解子路径”的场景，而不是首页首屏主推荐入口。
 
