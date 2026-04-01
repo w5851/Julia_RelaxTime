@@ -30,9 +30,45 @@ end
 quote_csv(msg::AbstractString) = isempty(msg) ? "" : string('"', msg, '"')
 quote_csv(::Nothing) = ""
 
+@inline function _normalized_fallback_reason(msg::AbstractString)
+    if occursin("weighted-block fallback rescued", msg)
+        return "weighted_block_rescued"
+    elseif occursin("seed[", msg) && occursin(" failed", msg)
+        return "seed_failed"
+    end
+    return ""
+end
+
+@inline function _message_rank(msg::AbstractString)
+    if startswith(msg, "governance.selection=")
+        return 1
+    elseif startswith(msg, "fallback.reason=")
+        return 2
+    end
+    return 3
+end
+
 function join_messages(messages)
-    filtered = filter(!isempty, messages)
-    return isempty(filtered) ? "" : join(filtered, " | ")
+    filtered = filter(!isempty, String.(messages))
+    isempty(filtered) && return ""
+
+    normalized = String[]
+    for msg in filtered
+        if startswith(msg, "governance.selection=")
+            push!(normalized, msg)
+            continue
+        end
+        fallback_reason = _normalized_fallback_reason(msg)
+        if !isempty(fallback_reason)
+            push!(normalized, "fallback.reason=$(fallback_reason)")
+            continue
+        end
+        push!(normalized, msg)
+    end
+
+    sort!(normalized; by=m -> (_message_rank(m), m))
+    unique_msgs = unique(normalized)
+    return join(unique_msgs, " | ")
 end
 
 function format_candidate_failure(label, message, result)
@@ -123,29 +159,57 @@ function attempt_with_candidates(candidates;
     refine::Function,
     promote::Function,
     is_success::Function,
+    stop_on_first_success::Bool=true,
 )
     messages = String[]
+    governance_candidates = NamedTuple{(:pressure, :residual_norm, :hard_constraint_ok, :failed_constraints, :converged), Tuple{Float64, Float64, Bool, Vector{Symbol}, Bool}}[]
+    point_results = Union{Nothing, SolverResult}[]
+    candidate_labels = String[]
 
     for candidate in candidates
         result, msg = solve_point(candidate.state)
+        refine_msg = ""
+        promote_msg = ""
 
         if is_success(result)
-            refined, refine_msg = refine(result)
-            result = refined
-
+            result, refine_msg = refine(result)
             result, promote_msg = promote(result)
-
-            !isempty(msg) && push!(messages, msg)
-            !isempty(promote_msg) && push!(messages, promote_msg)
-            !isempty(refine_msg) && push!(messages, refine_msg)
-
-            return result, join_messages(messages)
         end
 
-        push!(messages, format_candidate_failure(candidate.label, msg, result))
+        success = is_success(result)
+        if success
+            !isempty(msg) && push!(messages, msg)
+            !isempty(refine_msg) && push!(messages, refine_msg)
+            !isempty(promote_msg) && push!(messages, promote_msg)
+        else
+            push!(messages, format_candidate_failure(candidate.label, msg, result))
+        end
+
+        push!(candidate_labels, String(candidate.label))
+        push!(point_results, result)
+        push!(governance_candidates, (
+            pressure=(result === nothing ? -Inf : result.pressure),
+            residual_norm=(result === nothing ? Inf : result.residual_norm),
+            hard_constraint_ok=success,
+            failed_constraints=(success ? Symbol[] : Symbol[:scan_candidate_failed]),
+            converged=success,
+        ))
+
+        if stop_on_first_success && success
+            break
+        end
     end
 
-    return nothing, join_messages(messages)
+    isempty(governance_candidates) && return nothing, join_messages(messages)
+
+    has_success = any(c -> c.converged, governance_candidates)
+    selected = Main.Models.select_pressure_max_candidate(governance_candidates, nothing, nothing)
+    selected_idx = Int(selected.selected_index)
+    selection_note = "governance.selection=$(selected.selection_reason);seed=$(candidate_labels[selected_idx])"
+    push!(messages, selection_note)
+
+    selected_result = has_success ? point_results[selected_idx] : nothing
+    return selected_result, join_messages(messages)
 end
 
 """FixedSeedStrategy(seed)
