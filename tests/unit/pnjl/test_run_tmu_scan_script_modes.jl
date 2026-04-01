@@ -4,6 +4,14 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT_PATH = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
 
 @testset "run_tmu_scan script mode contract" begin
+    if !isfile(SCRIPT_PATH)
+        include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+        migration = Main.Models.scan_workflow_migration_status("scripts/pnjl/run_tmu_scan.jl")
+        @test migration.status in (:removed, :archived)
+        @test occursin("scripts/models/run_unified_scan.jl", migration.unified_entry)
+        return
+    end
+
     include(SCRIPT_PATH)
 
     @testset "parse_args supports point mode" begin

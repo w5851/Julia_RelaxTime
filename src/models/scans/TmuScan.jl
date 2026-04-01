@@ -93,8 +93,15 @@ end
 
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
-    (model_kind === :PNJL || model_kind === :RPNJL) ||
-        throw(ArgumentError("model_kind must be :PNJL or :RPNJL, got $(model_kind)"))
+
+    if model_kind === :pnjl_aniso
+        throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
+    end
+
+    supported_model_kinds = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
+    model_kind in supported_model_kinds ||
+        throw(ArgumentError("model_kind must be one of $(supported_model_kinds), got $(model_kind)"))
+
     if solver_backend === :legacy && model_kind !== :PNJL
         throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
     end

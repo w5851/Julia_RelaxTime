@@ -126,7 +126,7 @@ end
 
 @inline function _validate_trho_scan_inputs(T_values, rho_values, xi_values,
                                             seed_policy::Symbol, constraint_mode::Symbol,
-                                            solver_backend::Symbol)
+                                            solver_backend::Symbol, model_kind::Symbol)
     _validate_real_vector(:T_values, T_values)
     _validate_real_vector(:rho_values, rho_values)
     _validate_real_vector(:xi_values, xi_values)
@@ -137,6 +137,18 @@ end
         throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+
+    if model_kind === :pnjl_aniso
+        throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
+    end
+
+    supported_model_kinds = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
+    model_kind in supported_model_kinds ||
+        throw(ArgumentError("model_kind must be one of $(supported_model_kinds), got $(model_kind)"))
+
+    if solver_backend === :legacy && model_kind !== :PNJL
+        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
+    end
     return nothing
 end
 
@@ -199,7 +211,7 @@ function run_trho_scan(;
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
-    _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend)
+    _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()

@@ -46,24 +46,24 @@ end
     return [
         (
             old_entry="scripts/pnjl/run_tmu_scan.jl",
-            new_entry="Models.run_tmu_scan(...; model_kind=...)",
-            status=:hard_deprecated,
-            removal_wave=:D,
-            removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
+            new_entry="scripts/models/run_unified_scan.jl scan tmu --model_kind=...",
+            status=:removed,
+            removal_wave=:E,
+            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
         ),
         (
             old_entry="scripts/pnjl/run_dense_trho_scan.jl",
-            new_entry="Models.run_trho_scan(...; model_kind=...)",
-            status=:hard_deprecated,
-            removal_wave=:D,
-            removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
+            new_entry="scripts/models/run_unified_scan.jl scan trho --model_kind=...",
+            status=:removed,
+            removal_wave=:E,
+            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
         ),
         (
             old_entry="scripts/pnjl/run_adaptive_trho_scan.jl",
-            new_entry="Models.run_trho_scan(...; model_kind=...)",
-            status=:hard_deprecated,
-            removal_wave=:D,
-            removal_threshold="workflow routes no longer rely on script SOP forks and smoke/regression stay stable",
+            new_entry="scripts/models/run_unified_scan.jl scan trho --model_kind=...",
+            status=:removed,
+            removal_wave=:E,
+            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
         ),
     ]
 end
@@ -77,8 +77,8 @@ function scan_workflow_migration_status(old_entry::AbstractString)
                 status=entry.status,
                 removal_wave=entry.removal_wave,
                 removal_threshold=entry.removal_threshold,
-                route=:compat_adapter,
-                deprecation_ready=false,
+                route=:unified_cli,
+                deprecation_ready=true,
             )
         end
     end
