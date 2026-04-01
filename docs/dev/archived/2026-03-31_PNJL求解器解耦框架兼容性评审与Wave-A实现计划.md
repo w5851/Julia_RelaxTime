@@ -1,3 +1,15 @@
+---
+title: PNJL求解器解耦框架兼容性评审与 Wave-A 实现计划
+archived: true
+original: docs/dev/active/2026-03-31_PNJL求解器解耦框架兼容性评审与Wave-A实现计划.md
+archived_date: 2026-04-01
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL求解器解耦框架兼容性评审与 Wave-A 实现计划
 
 > 执行主线说明：本文档是当前唯一执行主线（任务勾选、进度、验收、证据回填）。
