@@ -87,25 +87,27 @@ using .Models: run_tmu_scan
 
 const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu")
 
-struct TmuScanConfig
-    mode::Symbol
-    xi::Float64
-    T_min::Float64
-    T_max::Float64
-    T_step::Float64
-    mu_min::Float64
-    mu_max::Float64
-    mu_step::Float64
-    T_mev::Float64
-    mu_mev::Float64
-    output_path::String
-    resume::Bool
-    overwrite::Bool
-    use_phase_aware::Bool
-    solver_backend::Symbol
-    p_num::Int
-    t_num::Int
-    verbose::Bool
+if !isdefined(Main, :ScriptTmuScanConfig)
+    struct ScriptTmuScanConfig
+        mode::Symbol
+        xi::Float64
+        T_min::Float64
+        T_max::Float64
+        T_step::Float64
+        mu_min::Float64
+        mu_max::Float64
+        mu_step::Float64
+        T_mev::Float64
+        mu_mev::Float64
+        output_path::String
+        resume::Bool
+        overwrite::Bool
+        use_phase_aware::Bool
+        solver_backend::Symbol
+        p_num::Int
+        t_num::Int
+        verbose::Bool
+    end
 end
 
 function parse_args(args)
@@ -183,7 +185,7 @@ function parse_args(args)
         output_path = joinpath(DEFAULT_OUTPUT_DIR, suffix)
     end
     
-    return TmuScanConfig(
+    return ScriptTmuScanConfig(
         mode,
         xi, T_min, T_max, T_step, mu_min, mu_max, mu_step,
         T_mev, mu_mev,
