@@ -20,13 +20,13 @@ end
     mode::ConstraintMode;
     x_dim::Int=state_dim(mode),
     theta_dim::Int=param_dim(mode),
-    residual!::Function=_unimplemented_residual,
-    forward_solve::Function=_unimplemented_forward_solve,
-    conditions::Function=_unimplemented_conditions,
-    unpack_solution::Function=identity,
-    postprocess::Function=identity,
-    hard_rules::AbstractVector{<:Function}=default_hard_constraint_rules(),
-    selector::Function=select_pressure_max_candidate,
+    residual! = _unimplemented_residual,
+    forward_solve=_unimplemented_forward_solve,
+    conditions=_unimplemented_conditions,
+    unpack_solution=identity,
+    postprocess=identity,
+    hard_rules=default_hard_constraint_rules(),
+    selector=select_pressure_max_candidate,
 )
     x_dim > 0 || throw(ArgumentError("x_dim must be positive, got $(x_dim)"))
     theta_dim > 0 || throw(ArgumentError("theta_dim must be positive, got $(theta_dim)"))

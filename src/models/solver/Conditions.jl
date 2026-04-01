@@ -450,16 +450,84 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
     return build_residual!(mode, params)
 end
 
-@inline function explicit_residual!(F::AbstractVector, x::AbstractVector, θ::AbstractVector, params::GapParams, mode::ConstraintMode)
-    residual = build_conditions(mode, params)(θ, x)
-    F .= residual
-    return nothing
+@inline function _local_gap_params(T_fm, params::GapParams)
+    return GapParams(T_fm, params.thermal_nodes, params.xi;
+        p_num=params.p_num,
+        t_num=params.t_num,
+        model_kind=params.model_kind,
+    )
 end
 
-@inline function explicit_residual(mode::ConstraintMode, x::AbstractVector, θ::AbstractVector, params::GapParams)
-    out = zeros(promote_type(eltype(x), eltype(θ)), state_dim(mode))
-    explicit_residual!(out, x, θ, params, mode)
-    return out
+@inline function explicit_residual(mode::FixedMu, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    T_fm = θ[1]
+    μ_fm = θ[2]
+    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+    x_state = SVector{5}(Tuple(x))
+    return collect(gap_conditions(x_state, mu_vec, _local_gap_params(T_fm, params)))
+end
+
+@inline function explicit_residual(mode::FixedRho, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    T_fm = θ[1]
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
+    mu_vec = SVector{3}(x[6], x[7], x[8])
+    local_params = _local_gap_params(T_fm, params)
+
+    gap = gap_conditions(x_state, mu_vec, local_params)
+    mu_eq1 = x[6] - x[7]
+    mu_eq2 = x[7] - x[8]
+    rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
+    rho_constraint = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
+    return [gap..., mu_eq1, mu_eq2, rho_constraint]
+end
+
+@inline function explicit_residual(mode::FixedAsymmetricRho, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    T_fm = θ[1]
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
+    mu_vec = SVector{3}(x[6], x[7], x[8])
+    local_params = _local_gap_params(T_fm, params)
+
+    gap = gap_conditions(x_state, mu_vec, local_params)
+    rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
+    rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
+    nB_constraint = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
+    ud_ratio_constraint = _safe_density_ratio(rho_u, rho_d) - mode.ud_ratio_target
+    s_constraint = rho_s - mode.s_target
+    return [gap..., nB_constraint, ud_ratio_constraint, s_constraint]
+end
+
+@inline function explicit_residual(mode::FixedEntropy, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    T_fm = θ[1]
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
+    mu_vec = SVector{3}(x[6], x[7], x[8])
+    local_params = _local_gap_params(T_fm, params)
+
+    gap = gap_conditions(x_state, mu_vec, local_params)
+    mu_eq1 = x[6] - x[7]
+    mu_eq2 = x[7] - x[8]
+    _, _, entropy, _ = _thermo_tuple(x_state, mu_vec, T_fm, local_params)
+    s_constraint = entropy - mode.s_target
+    return [gap..., mu_eq1, mu_eq2, s_constraint]
+end
+
+@inline function explicit_residual(mode::FixedSigma, x::AbstractVector, θ::AbstractVector, params::GapParams)
+    T_fm = θ[1]
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
+    mu_vec = SVector{3}(x[6], x[7], x[8])
+    local_params = _local_gap_params(T_fm, params)
+
+    gap = gap_conditions(x_state, mu_vec, local_params)
+    mu_eq1 = x[6] - x[7]
+    mu_eq2 = x[7] - x[8]
+    _, rho_norm, entropy, _ = _thermo_tuple(x_state, mu_vec, T_fm, local_params)
+    n_B = rho_norm * ρ0
+    sigma = n_B > 1e-12 ? entropy / n_B : 0.0
+    sigma_constraint = sigma - mode.sigma_target
+    return [gap..., mu_eq1, mu_eq2, sigma_constraint]
+end
+
+@inline function explicit_residual!(F::AbstractVector, x::AbstractVector, θ::AbstractVector, params::GapParams, mode::ConstraintMode)
+    F .= explicit_residual(mode, x, θ, params)
+    return nothing
 end
 
 end # module Conditions

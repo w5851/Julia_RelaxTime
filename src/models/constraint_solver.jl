@@ -67,14 +67,21 @@ function default_hard_constraint_rules(; physicality_check::Function=((_, _) -> 
 end
 
 function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule}, params=nothing, context=nothing)
-    failed = Symbol[]
-    for rule in rules
-        out = if applicable(rule, candidate, params, context)
-            rule(candidate, params, context)
-        else
-            rule(candidate)
+    prepared_rules = if params === nothing && context === nothing
+        rules
+    else
+        map(rules) do rule
+            if applicable(rule, candidate, params, context)
+                (c -> rule(c, params, context))
+            else
+                rule
+            end
         end
-        ok, reason = out
+    end
+
+    failed = Symbol[]
+    for rule in prepared_rules
+        ok, reason = rule(candidate)
         if !ok
             push!(failed, Symbol(reason))
         end

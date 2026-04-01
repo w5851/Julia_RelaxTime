@@ -1005,42 +1005,45 @@ function set_implicit_config(; xi::Real=0.0,
     return nothing
 end
 
+@inline function _forward_solve_mu_with_config(θ::AbstractVector, config::NamedTuple)
+    T_fm = Float64(θ[1])
+    μ_fm = Float64(θ[2])
+
+    mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+    params = GapParams(T_fm, config.thermal_nodes, config.xi;
+        p_num=config.p_num,
+        t_num=config.t_num,
+        model_kind=config.model_kind,
+    )
+
+    seed = get_seed(DefaultSeed(), θ, FixedMu())
+    residual_fn! = build_residual!(FixedMu(), mu_vec, params)
+    res = nlsolve(residual_fn!, seed; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9)
+
+    return (res.zero, nothing)
+end
+
+@inline function _conditions_mu_with_config(θ::AbstractVector, x::AbstractVector, z, config::NamedTuple)
+    _ = z
+    T_fm = θ[1]
+    μ_fm = θ[2]
+
+    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+    params = GapParams(T_fm, config.thermal_nodes, config.xi;
+        p_num=config.p_num,
+        t_num=config.t_num,
+        model_kind=config.model_kind,
+    )
+    x_state = SVector{5}(Tuple(x))
+
+    return Vector(gap_conditions(x_state, mu_vec, params))
+end
+
 @inline function _build_fixedmu_implicit_adapters(config::NamedTuple)
-    forward_solve = function (θ::AbstractVector)
-        T_fm = Float64(θ[1])
-        μ_fm = Float64(θ[2])
-
-        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
-        params = GapParams(T_fm, config.thermal_nodes, config.xi;
-            p_num=config.p_num,
-            t_num=config.t_num,
-            model_kind=config.model_kind,
-        )
-
-        seed = get_seed(DefaultSeed(), θ, FixedMu())
-        residual_fn! = build_residual!(FixedMu(), mu_vec, params)
-        res = nlsolve(residual_fn!, seed; autodiff=:forward, method=:newton, xtol=1e-9, ftol=1e-9)
-
-        return (res.zero, nothing)
-    end
-
-    conditions = function (θ::AbstractVector, x::AbstractVector, z)
-        _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-        params = GapParams(T_fm, config.thermal_nodes, config.xi;
-            p_num=config.p_num,
-            t_num=config.t_num,
-            model_kind=config.model_kind,
-        )
-        x_state = SVector{5}(Tuple(x))
-
-        return Vector(gap_conditions(x_state, mu_vec, params))
-    end
-
-    return (forward_solve=forward_solve, conditions=conditions)
+    return (
+        forward_solve=(θ -> _forward_solve_mu_with_config(θ, config)),
+        conditions=((θ, x, z) -> _conditions_mu_with_config(θ, x, z, config)),
+    )
 end
 
 """
@@ -1050,7 +1053,7 @@ end
 """
 function forward_solve_mu(θ::AbstractVector)
     config = IMPLICIT_CONFIG[]
-    return _build_fixedmu_implicit_adapters(config).forward_solve(θ)
+    return _forward_solve_mu_with_config(θ, config)
 end
 
 """
@@ -1058,7 +1061,7 @@ end
 """
 function conditions_mu(θ::AbstractVector, x::AbstractVector, z)
     config = IMPLICIT_CONFIG[]
-    return _build_fixedmu_implicit_adapters(config).conditions(θ, x, z)
+    return _conditions_mu_with_config(θ, x, z, config)
 end
 
 """
