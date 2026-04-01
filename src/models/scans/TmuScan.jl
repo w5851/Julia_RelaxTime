@@ -93,8 +93,14 @@ end
 
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
-    (model_kind === :PNJL || model_kind === :RPNJL) ||
-        throw(ArgumentError("model_kind must be :PNJL or :RPNJL, got $(model_kind)"))
+
+    if model_kind in ScanCommon.PARAMETERIZED_MODEL_KIND_ALIASES
+        throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
+    end
+
+    model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
+        throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
+
     if solver_backend === :legacy && model_kind !== :PNJL
         throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
     end

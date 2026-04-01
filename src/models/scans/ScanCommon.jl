@@ -17,6 +17,11 @@ export FixedSeedStrategy
 export key3
 export key2
 export load_completed_keys3
+export SUPPORTED_SCAN_MODEL_KINDS
+export PARAMETERIZED_MODEL_KIND_ALIASES
+
+const SUPPORTED_SCAN_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
+const PARAMETERIZED_MODEL_KIND_ALIASES = (:pnjl_aniso, :PNJL_ANISO)
 
 fmt(x::Float64) = @sprintf("%.6f", x)
 fmt(x::Real) = fmt(Float64(x))
