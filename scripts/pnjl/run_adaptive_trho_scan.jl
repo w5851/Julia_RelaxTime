@@ -103,6 +103,8 @@ function parse_args(args::Vector{String})
         end
         i += 1
     end
+    model_kind = Symbol(opts[:model_kind])
+    model_kind in (:PNJL, :RPNJL) || throw(ArgumentError("invalid --model-kind=$(model_kind), accepted: PNJL|RPNJL"))
     return AdaptiveCLIOptions(
         String(opts[:source]),
         String(opts[:output]),
@@ -119,7 +121,7 @@ function parse_args(args::Vector{String})
         Int(opts[:t_num]),
         String(opts[:seed_path]),
         Symbol(opts[:seed_policy]),
-        Symbol(opts[:model_kind]),
+        model_kind,
     )
 end
 

@@ -89,6 +89,15 @@ end
     ])
     @test getfield(dense_cfg, :model_kind) == :RPNJL
 
+    dense_err = try
+        getfield(dense_script, :parse_args)(["--model-kind", "bad_model"])
+        nothing
+    catch exc
+        exc
+    end
+    @test dense_err isa ArgumentError
+    @test occursin("accepted: PNJL|RPNJL", sprint(showerror, dense_err))
+
     adaptive_script_path = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_adaptive_trho_scan.jl")
     adaptive_script = Module(:WaveCAdaptiveScript)
     Base.include(adaptive_script, adaptive_script_path)
@@ -100,4 +109,16 @@ end
         "--model-kind", "pnjl",
     ])
     @test getfield(adaptive_cfg, :model_kind) == :PNJL
+
+    adaptive_err = try
+        getfield(adaptive_script, :parse_args)([
+            "--source", joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "scan", "trho", "trho_scan.csv"),
+            "--model-kind", "bad_model",
+        ])
+        nothing
+    catch exc
+        exc
+    end
+    @test adaptive_err isa ArgumentError
+    @test occursin("accepted: PNJL|RPNJL", sprint(showerror, adaptive_err))
 end

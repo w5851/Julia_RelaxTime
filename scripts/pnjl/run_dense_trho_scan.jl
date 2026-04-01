@@ -133,6 +133,8 @@ function parse_args(args::Vector{String})
     opts[:medium_step] > 0 || error("medium_step must be positive")
     opts[:fine_step] > 0 || error("fine_step must be positive")
     opts[:ultra_step] > 0 || error("ultra_step must be positive")
+    model_kind = Symbol(opts[:model_kind])
+    model_kind in (:PNJL, :RPNJL) || throw(ArgumentError("invalid --model-kind=$(model_kind), accepted: PNJL|RPNJL"))
     return DenseScanOptions(
         String(opts[:output]),
         Float64.(xi_vals),
@@ -152,7 +154,7 @@ function parse_args(args::Vector{String})
         Int(opts[:p_num]),
         Int(opts[:t_num]),
         Symbol(opts[:seed_policy]),
-        Symbol(opts[:model_kind]),
+        model_kind,
     )
 end
 

@@ -95,6 +95,9 @@ end
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
     (model_kind === :PNJL || model_kind === :RPNJL) ||
         throw(ArgumentError("model_kind must be :PNJL or :RPNJL, got $(model_kind)"))
+    if solver_backend === :legacy && model_kind !== :PNJL
+        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
+    end
     return nothing
 end
 
