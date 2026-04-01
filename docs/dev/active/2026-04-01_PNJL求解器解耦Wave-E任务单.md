@@ -50,6 +50,7 @@
 - [ ] 支持模型族：`PNJL/NJL/RPNJL/PNJLMagnetic/Rotation/GasLiquid`。
 - [ ] 对不支持组合提供统一错误口径，不允许 silent fallback。
 - [ ] 将 `pnjl_aniso` 以参数化方式纳入（`xi/profile`），不新增独立 `model_kind`。
+- [ ] 统一参数容器契约采用 NamedTuple + 语义分层（`control/background/model/numerics`），见 `docs/architecture/models_param_container_contract.md`。
 
 ### E3：compat 退场执行（hard-deprecated -> removed/archived）
 

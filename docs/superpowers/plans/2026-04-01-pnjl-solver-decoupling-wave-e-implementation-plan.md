@@ -8,6 +8,8 @@
 
 **Tech Stack:** Julia (`src/models/entrypoints.jl`, `src/models/scans/*`, `src/models/solver/*`, `scripts/models/*`, `scripts/pnjl/*`), tests in `tests/unit|integration|regression`, docs in `docs/dev|docs/superpowers|docs/api`.
 
+**Param Contract:** Use a single NamedTuple container with semantic partitions (`control/background/model/numerics`) per `docs/architecture/models_param_container_contract.md`.
+
 ---
 
 ## File Structure (Planned)

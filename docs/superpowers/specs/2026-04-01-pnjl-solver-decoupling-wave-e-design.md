@@ -61,6 +61,18 @@ Wave-E 需在文档与 CLI 上显式这一点，防止把 `pnjl_aniso` 再次做
 
 其余 legacy 脚本转为删除或归档说明，不再作为生产入口。
 
+### E5: 参数输入契约采用“统一容器 + 语义分层”
+
+Wave-E 参数契约采用单一 NamedTuple 容器承载全部输入，但按语义分层：
+
+- `control`（`mode/T/mu/rho/...`）
+- `background`（`xi/eB/omega/profile/...`）
+- `model`（`kind/profile`）
+- `numerics`（网格与容差）
+
+其中 `pnjl_aniso` 作为 `PNJL + profile/xi` 的参数化表达，不新增独立 `model_kind`。
+该约束详见：`docs/architecture/models_param_container_contract.md`。
+
 ## Target Artifacts
 
 1. Wave-E active 任务单（含 PR #45 收尾前置门）。
