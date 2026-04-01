@@ -7,8 +7,8 @@
 using CSV
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
+Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
 const PNJL = Models.pnjl_module()
@@ -32,6 +32,7 @@ struct AdaptiveCLIOptions
     t_num::Int
     seed_path::String
     seed_policy::Symbol
+    model_kind::Symbol
 end
 
 function parse_args(args::Vector{String})
@@ -51,6 +52,7 @@ function parse_args(args::Vector{String})
         :t_num => 8,
         :seed_path => DEFAULT_SEED_PATH,
         :seed_policy => :hybrid_continuity,
+        :model_kind => :PNJL,
     )
     i = 1
     while i <= length(args)
@@ -91,6 +93,8 @@ function parse_args(args::Vector{String})
             opts[:seed_path] = require_value()
         elseif arg == "--seed-policy"
             opts[:seed_policy] = Symbol(lowercase(require_value()))
+        elseif arg == "--model-kind"
+            opts[:model_kind] = Symbol(uppercase(require_value()))
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -115,6 +119,7 @@ function parse_args(args::Vector{String})
         Int(opts[:t_num]),
         String(opts[:seed_path]),
         Symbol(opts[:seed_policy]),
+        Symbol(opts[:model_kind]),
     )
 end
 
@@ -134,6 +139,7 @@ function print_usage()
     println("  --p-num / --t-num <int>   透传给 TrhoScan 的积分节点")
     println("  --seed-path <path>        自定义连续种子文件")
     println("  --seed-policy <symbol>    Trho seed policy (default hybrid_continuity)")
+    println("  --model-kind <symbol>     Model kind (default PNJL, supports RPNJL)")
 end
 
 function _maybe_float(row, key::Symbol)
@@ -175,13 +181,13 @@ function load_curves(path::AbstractString; xi::Float64, tol::Float64, tmin, tmax
     return grouped
 end
 
-function plan_refinement(curves::Dict{Float64, Vector{Tuple{Float64, Float64}}}, config::AdaptiveRhoConfig)
+function plan_refinement(curves::Dict{Float64, Vector{Tuple{Float64, Float64}}}, config::AdaptiveRhoRefinement.AdaptiveRhoConfig)
     plan = Dict{Float64, Vector{Float64}}()
     for (T, samples) in curves
         length(samples) < 2 && continue
         rho_vals = Float64[s[1] for s in samples]
         mu_vals = Float64[s[2] for s in samples]
-        suggestions = suggest_refinement_points(rho_vals, mu_vals; config=config)
+        suggestions = AdaptiveRhoRefinement.suggest_refinement_points(rho_vals, mu_vals; config=config)
         if isempty(suggestions)
             continue
         end
@@ -199,7 +205,7 @@ function plan_refinement(curves::Dict{Float64, Vector{Tuple{Float64, Float64}}},
 end
 
 function run_adaptive_scan(opts::AdaptiveCLIOptions)
-    config = AdaptiveRhoConfig(; slope_tol=opts.slope_tol, min_gap=opts.min_gap, max_points=opts.max_points)
+    config = AdaptiveRhoRefinement.AdaptiveRhoConfig(; slope_tol=opts.slope_tol, min_gap=opts.min_gap, max_points=opts.max_points)
     source_path = opts.source
     for pass in 1:opts.passes
         curves = load_curves(source_path; xi=opts.xi, tol=opts.xi_tol, tmin=opts.tmin, tmax=opts.tmax)
@@ -219,6 +225,7 @@ function run_adaptive_scan(opts::AdaptiveCLIOptions)
                   output_path=opts.output,
                   seed_path=opts.seed_path,
                   seed_policy=opts.seed_policy,
+                  model_kind=opts.model_kind,
                   overwrite=false,
                   resume=opts.resume,
                   p_num=opts.p_num,
@@ -230,9 +237,11 @@ function run_adaptive_scan(opts::AdaptiveCLIOptions)
     end
 end
 
-function main()
-    opts = parse_args(copy(ARGS))
+function main(args=ARGS)
+    opts = parse_args(copy(args))
     run_adaptive_scan(opts)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

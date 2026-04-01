@@ -26,6 +26,7 @@ PNJL T-μ 参数空间扫描脚本
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
     --solver_backend=models 求解后端：models | legacy | auto（默认 models）
+    --model_kind=PNJL  模型类型：PNJL | RPNJL（默认 PNJL）
     --p_num=24        动量积分节点数
     --t_num=8         角度积分节点数
     --verbose         详细输出
@@ -63,6 +64,7 @@ PNJL T-μ 参数空间扫描脚本
     --overwrite       覆盖已有文件
     --no_phase_aware  禁用相变感知策略
     --solver_backend=models 求解后端：models | legacy | auto（默认 models）
+    --model_kind=PNJL  模型类型：PNJL | RPNJL（默认 PNJL）
     --p_num=24        动量积分节点数
     --t_num=8         角度积分节点数
     --verbose         详细输出
@@ -76,8 +78,8 @@ using Printf
 using Dates
 
 # 加载模块
-include(joinpath(@__DIR__, "..", "..", "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+Base.include(@__MODULE__, joinpath(@__DIR__, "..", "..", "src", "constants", "Constants_PNJL.jl"))
+Base.include(@__MODULE__, joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 
 using .Models: run_tmu_scan
 
@@ -104,6 +106,7 @@ if !isdefined(Main, :ScriptTmuScanConfig)
         overwrite::Bool
         use_phase_aware::Bool
         solver_backend::Symbol
+        model_kind::Symbol
         p_num::Int
         t_num::Int
         verbose::Bool
@@ -126,6 +129,7 @@ function parse_args(args)
     overwrite = false
     use_phase_aware = true
     solver_backend = :models
+    model_kind = :PNJL
     p_num = 24
     t_num = 8
     verbose = false
@@ -162,6 +166,8 @@ function parse_args(args)
             use_phase_aware = false
         elseif startswith(arg, "--solver_backend=")
             solver_backend = Symbol(arg[18:end])
+        elseif startswith(arg, "--model_kind=")
+            model_kind = Symbol(uppercase(arg[14:end]))
         elseif startswith(arg, "--p_num=")
             p_num = parse(Int, arg[9:end])
         elseif startswith(arg, "--t_num=")
@@ -178,6 +184,7 @@ function parse_args(args)
 
     mode in (:scan, :point) || throw(ArgumentError("invalid --mode=$(mode), accepted: scan|point"))
     solver_backend in (:models, :legacy, :auto) || throw(ArgumentError("invalid --solver_backend=$(solver_backend), accepted: models|legacy|auto"))
+    model_kind in (:PNJL, :RPNJL) || throw(ArgumentError("invalid --model_kind=$(model_kind), accepted: PNJL|RPNJL"))
     
     # 默认输出路径
     if isempty(output_path)
@@ -189,7 +196,7 @@ function parse_args(args)
         mode,
         xi, T_min, T_max, T_step, mu_min, mu_max, mu_step,
         T_mev, mu_mev,
-        output_path, resume, overwrite, use_phase_aware, solver_backend, p_num, t_num, verbose
+        output_path, resume, overwrite, use_phase_aware, solver_backend, model_kind, p_num, t_num, verbose
     )
 end
 
@@ -217,6 +224,7 @@ function main(args=ARGS)
     end
     println("  积分节点: p_num=$(config.p_num), t_num=$(config.t_num)")
     println("  求解后端: $(config.solver_backend)")
+    println("  模型类型: $(config.model_kind)")
     println("  相变感知: $(config.use_phase_aware ? "启用" : "禁用")")
     println("  断点续扫: $(config.resume ? "启用" : "禁用")")
     println("  输出文件: $(config.output_path)")
@@ -286,6 +294,7 @@ function main(args=ARGS)
         resume = config.resume,
         use_phase_aware = config.use_phase_aware,
         solver_backend = config.solver_backend,
+        model_kind = config.model_kind,
         p_num = config.p_num,
         t_num = config.t_num,
         progress_cb = progress_cb
