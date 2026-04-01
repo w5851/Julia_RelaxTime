@@ -87,7 +87,7 @@ using .Models: run_tmu_scan
 
 const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu")
 
-struct TmuScanConfig
+struct ScriptTmuScanConfig
     mode::Symbol
     xi::Float64
     T_min::Float64
@@ -183,7 +183,7 @@ function parse_args(args)
         output_path = joinpath(DEFAULT_OUTPUT_DIR, suffix)
     end
     
-    return TmuScanConfig(
+    return ScriptTmuScanConfig(
         mode,
         xi, T_min, T_max, T_step, mu_min, mu_max, mu_step,
         T_mev, mu_mev,
