@@ -264,14 +264,14 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 产出旧->新接口映射与删除门槛。
-- [ ] 对兼容入口加迁移注记（非破坏）。
-- [ ] 在文档中声明目标删除波次。
+- [x] 产出旧->新接口映射与删除门槛。
+- [x] 对兼容入口加迁移注记（非破坏）。
+- [x] 在文档中声明目标删除波次。
 
 **验收标准**
 
-- [ ] 不新增兼容散点。
-- [ ] 调用方可追溯到主干入口。
+- [x] 不新增兼容散点。
+- [x] 调用方可追溯到主干入口。
 
 ### Task A6：最小验证矩阵落地
 
@@ -339,3 +339,4 @@ selector(candidates, params, context) -> selected_index::Int
 - [x] 2026-03-31：完成 A2（AD/ID 契约加固）最小闭环：新增 fixed-mu/flavor-mu 统一 adapter builder，补充 AD 契约 smoke 与架构文档，并通过定向验证。
 - [x] 2026-03-31：完成 A3（配置隔离）最小闭环：新增 solver 配置隔离 smoke，`create_implicit_solver` 切换为实例级 config adapters，同时保留兼容 setter 路径。
 - [x] 2026-03-31：完成 A4（候选治理接口统一）最小闭环：新增 `CandidateGovernance` 与 context 契约，`evaluate_hard_constraints`/`select_pressure_max_candidate` 支持参数化上下文，补齐单测与回归测试。
+- [x] 2026-03-31：完成 A5（兼容层迁移映射）最小闭环：新增迁移台账文档、`solver_migration_map()` 以及 `COMPAT` 非破坏标注，验证统一入口与兼容入口可追溯且行为一致。

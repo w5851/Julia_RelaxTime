@@ -142,11 +142,11 @@
 - Modify: `src/models/solver/Solver.jl`
 - Modify: `src/models/constraint_solver.jl`
 
-- [ ] **Step 1: Enumerate old/new entry mappings with removal thresholds**
+- [x] **Step 1: Enumerate old/new entry mappings with removal thresholds**
 
-- [ ] **Step 2: Add non-breaking migration markers in compatibility paths**
+- [x] **Step 2: Add non-breaking migration markers in compatibility paths**
 
-- [ ] **Step 3: Verify call sites still route through intended primary entrypoints**
+- [x] **Step 3: Verify call sites still route through intended primary entrypoints**
 
 ## Chunk 5: Verification and Governance Closure
 
