@@ -48,7 +48,15 @@ end
 function solver_migration_status(old_entry::AbstractString)
     for entry in solver_migration_map()
         if entry.old_entry == old_entry
-            return (; entry..., unified_entry=entry.new_entry, route=:compat_shim, deprecation_ready=true)
+            return (
+                old_entry=entry.old_entry,
+                unified_entry=entry.new_entry,
+                status=entry.status,
+                removal_wave=entry.removal_wave,
+                removal_threshold=entry.removal_threshold,
+                route=:compat_shim,
+                deprecation_ready=true,
+            )
         end
     end
     throw(ArgumentError("unknown solver compatibility entry: $(old_entry)"))

@@ -159,6 +159,7 @@ function attempt_with_candidates(candidates;
     refine::Function,
     promote::Function,
     is_success::Function,
+    stop_on_first_success::Bool=true,
 )
     messages = String[]
     governance_candidates = NamedTuple[]
@@ -193,6 +194,10 @@ function attempt_with_candidates(candidates;
             failed_constraints=(success ? Symbol[] : Symbol[:scan_candidate_failed]),
             converged=success,
         ))
+
+        if stop_on_first_success && success
+            break
+        end
     end
 
     selected = Main.Models.select_pressure_max_candidate(governance_candidates, nothing, nothing)
