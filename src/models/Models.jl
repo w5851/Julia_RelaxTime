@@ -63,6 +63,7 @@ export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
 export solver_migration_map
+export solver_migration_status
 export ConstraintModes
 export ProblemSpec, build_problem_spec
 export HardRule, CandidateSelector, build_candidate_context

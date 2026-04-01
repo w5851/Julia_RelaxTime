@@ -45,6 +45,15 @@ const SolverResult = ImplicitSolver.SolverResult
     ]
 end
 
+function solver_migration_status(old_entry::AbstractString)
+    for entry in solver_migration_map()
+        if entry.old_entry == old_entry
+            return (; entry..., unified_entry=entry.new_entry, route=:compat_shim, deprecation_ready=true)
+        end
+    end
+    throw(ArgumentError("unknown solver compatibility entry: $(old_entry)"))
+end
+
 function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
     # COMPAT: unified primary entrypoint; legacy fixedmu helper retained for migration window.
     return solve_fixedmu_constraint(model, T_fm, μ_fm; kwargs...)
