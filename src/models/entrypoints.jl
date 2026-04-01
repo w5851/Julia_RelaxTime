@@ -10,6 +10,7 @@ Models 统一流程入口（阶段 C）：
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export scan_workflow_migration_map, scan_workflow_migration_status
 export default_scan_numeric_options, solve_pnjl_point
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
@@ -39,6 +40,49 @@ end
         error("MesonMassWorkflow module loaded but required API (solve_gap_and_meson_point) is missing")
     end
     return workflow
+end
+
+@inline function scan_workflow_migration_map()
+    return [
+        (
+            old_entry="scripts/pnjl/run_tmu_scan.jl",
+            new_entry="Models.run_tmu_scan(...; model_kind=...)",
+            status=:active,
+            removal_wave=:D,
+            removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
+        ),
+        (
+            old_entry="scripts/pnjl/run_dense_trho_scan.jl",
+            new_entry="Models.run_trho_scan(...; model_kind=...)",
+            status=:active,
+            removal_wave=:D,
+            removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
+        ),
+        (
+            old_entry="scripts/pnjl/run_adaptive_trho_scan.jl",
+            new_entry="Models.run_trho_scan(...; model_kind=...)",
+            status=:active,
+            removal_wave=:D,
+            removal_threshold="workflow routes no longer rely on script SOP forks and smoke/regression stay stable",
+        ),
+    ]
+end
+
+function scan_workflow_migration_status(old_entry::AbstractString)
+    for entry in scan_workflow_migration_map()
+        if entry.old_entry == old_entry
+            return (
+                old_entry=entry.old_entry,
+                unified_entry=entry.new_entry,
+                status=entry.status,
+                removal_wave=entry.removal_wave,
+                removal_threshold=entry.removal_threshold,
+                route=:compat_adapter,
+                deprecation_ready=true,
+            )
+        end
+    end
+    throw(ArgumentError("unknown scan/workflow compatibility entry: $(old_entry)"))
 end
 
 function run_tmu_scan(args...; kwargs...)

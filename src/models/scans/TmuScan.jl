@@ -86,13 +86,18 @@ const HEADER = join((
     return nothing
 end
 
-@inline function _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend::Symbol)
+@inline function _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend::Symbol, model_kind::Symbol)
     _validate_real_vector(:T_values, T_values)
     _validate_real_vector(:mu_values, mu_values)
     _validate_real_vector(:xi_values, xi_values)
 
     (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
         throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+    (model_kind === :PNJL || model_kind === :RPNJL) ||
+        throw(ArgumentError("model_kind must be :PNJL or :RPNJL, got $(model_kind)"))
+    if solver_backend === :legacy && model_kind !== :PNJL
+        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
+    end
     return nothing
 end
 
@@ -146,12 +151,13 @@ function run_tmu_scan(;
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
     solver_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
     nlsolve_kwargs...
 )
-    _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend)
+    _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -211,6 +217,7 @@ function run_tmu_scan(;
                     if tracker !== nothing && bootstrap_multiseed && tracker.previous_solution === nothing
                         result, message = _solve_point_with_seed_strategy(T_fm, μ_fm, xi, tracker;
                             solver_backend=solver_backend,
+                            model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
                             nlsolve_kwargs...)
@@ -222,6 +229,7 @@ function run_tmu_scan(;
 
                         result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
                             solver_backend=solver_backend,
+                            model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
                             nlsolve_kwargs...)
@@ -324,18 +332,21 @@ end
 """尝试多个初值候选"""
 function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     solver_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     return ScanCommon.attempt_with_candidates(candidates;
         solve_point=seed_state -> _solve_point(T_fm, μ_fm, xi, seed_state;
             solver_backend=solver_backend,
+            model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
         ),
         refine=result -> _refine_result(T_fm, μ_fm, xi, result;
             solver_backend=solver_backend,
+            model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -348,6 +359,7 @@ end
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, seed_state;
     solver_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -363,7 +375,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         result = if effective_solver_backend === :models
             _solve_with_models(FixedMu(), T_fm, μ_fm;
                 xi=xi,
-                model_kind=:PNJL,
+                model_kind=model_kind,
                 seed_strategy=strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -382,7 +394,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
             solver_backend=effective_solver_backend,
             p_num=p_num,
             t_num=t_num,
-            model_kind=:PNJL,
+            model_kind=model_kind,
         )
         return result, ""
     catch err
@@ -396,6 +408,7 @@ end
 """单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
 function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
     solver_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -407,7 +420,7 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
         result = if effective_solver_backend === :models
             _solve_with_models(FixedMu(), T_fm, μ_fm;
                 xi=xi,
-                model_kind=:PNJL,
+                model_kind=model_kind,
                 seed_strategy=seed_strategy,
                 p_num=p_num,
                 t_num=t_num,
@@ -426,7 +439,7 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
             solver_backend=effective_solver_backend,
             p_num=p_num,
             t_num=t_num,
-            model_kind=:PNJL,
+            model_kind=model_kind,
         )
         return result, "bootstrap_multiseed"
     catch err
@@ -440,6 +453,7 @@ end
 """精炼近似收敛的结果"""
 function _refine_result(T_fm, μ_fm, xi, result;
     solver_backend::Symbol=:legacy,
+    model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -448,6 +462,7 @@ function _refine_result(T_fm, μ_fm, xi, result;
         acceptable_residual=ACCEPTABLE_RESIDUAL,
         solve_again=seed -> _solve_point(T_fm, μ_fm, xi, seed;
             solver_backend=solver_backend,
+            model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,

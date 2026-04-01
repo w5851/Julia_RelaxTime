@@ -8,8 +8,8 @@ results to the main CSV for CEP/Maxwell analysis.
 """
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
+Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
 using .Models: run_trho_scan, build_default_rho_grid
 
@@ -32,6 +32,7 @@ struct DenseScanOptions
     p_num::Int
     t_num::Int
     seed_policy::Symbol
+    model_kind::Symbol
 end
 
 function parse_args(args::Vector{String})
@@ -54,6 +55,7 @@ function parse_args(args::Vector{String})
         :p_num => 24,
         :t_num => 8,
         :seed_policy => :hybrid_continuity,
+        :model_kind => :PNJL,
     )
     i = 1
     while i <= length(args)
@@ -110,6 +112,8 @@ function parse_args(args::Vector{String})
             opts[:t_num] = parse(Int, require_value())
         elseif arg == "--seed-policy"
             opts[:seed_policy] = Symbol(lowercase(require_value()))
+        elseif arg == "--model-kind"
+            opts[:model_kind] = Symbol(uppercase(require_value()))
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -129,6 +133,8 @@ function parse_args(args::Vector{String})
     opts[:medium_step] > 0 || error("medium_step must be positive")
     opts[:fine_step] > 0 || error("fine_step must be positive")
     opts[:ultra_step] > 0 || error("ultra_step must be positive")
+    model_kind = Symbol(opts[:model_kind])
+    model_kind in (:PNJL, :RPNJL) || throw(ArgumentError("invalid --model-kind=$(model_kind), accepted: PNJL|RPNJL"))
     return DenseScanOptions(
         String(opts[:output]),
         Float64.(xi_vals),
@@ -148,6 +154,7 @@ function parse_args(args::Vector{String})
         Int(opts[:p_num]),
         Int(opts[:t_num]),
         Symbol(opts[:seed_policy]),
+        model_kind,
     )
 end
 
@@ -172,6 +179,7 @@ function print_usage()
     println("  --p-num <int>               Momentum grid size (pass-through)")
     println("  --t-num <int>               Theta grid size (pass-through)")
     println("  --seed-policy <symbol>      Trho seed policy (default hybrid_continuity)")
+    println("  --model-kind <symbol>       Model kind (default PNJL, supports RPNJL)")
     println("  -h, --help                  Show this help text")
 end
 
@@ -201,7 +209,8 @@ function run_dense_scan(opts::DenseScanOptions)
           output_path=opts.output,
           overwrite=opts.overwrite,
           resume=opts.resume,
-            seed_policy=opts.seed_policy,
+          seed_policy=opts.seed_policy,
+          model_kind=opts.model_kind,
           p_num=opts.p_num,
           t_num=opts.t_num,
     )
@@ -209,9 +218,11 @@ function run_dense_scan(opts::DenseScanOptions)
     println("Output written to $(stats.output)")
 end
 
-function main()
-    opts = parse_args(copy(ARGS))
+function main(args=ARGS)
+    opts = parse_args(copy(args))
     run_dense_scan(opts)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end
