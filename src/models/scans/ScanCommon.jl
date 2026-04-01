@@ -66,7 +66,7 @@ function join_messages(messages)
         push!(normalized, msg)
     end
 
-    sort!(normalized; by=_message_rank)
+    sort!(normalized; by=m -> (_message_rank(m), m))
     unique_msgs = unique(normalized)
     return join(unique_msgs, " | ")
 end
@@ -162,8 +162,8 @@ function attempt_with_candidates(candidates;
     stop_on_first_success::Bool=true,
 )
     messages = String[]
-    governance_candidates = NamedTuple[]
-    point_results = Any[]
+    governance_candidates = NamedTuple{(:pressure, :residual_norm, :hard_constraint_ok, :failed_constraints, :converged), Tuple{Float64, Float64, Bool, Vector{Symbol}, Bool}}[]
+    point_results = Union{Nothing, SolverResult}[]
     candidate_labels = String[]
 
     for candidate in candidates
@@ -200,12 +200,15 @@ function attempt_with_candidates(candidates;
         end
     end
 
+    isempty(governance_candidates) && return nothing, join_messages(messages)
+
+    has_success = any(c -> c.converged, governance_candidates)
     selected = Main.Models.select_pressure_max_candidate(governance_candidates, nothing, nothing)
     selected_idx = Int(selected.selected_index)
     selection_note = "governance.selection=$(selected.selection_reason);seed=$(candidate_labels[selected_idx])"
     push!(messages, selection_note)
 
-    selected_result = point_results[selected_idx]
+    selected_result = has_success ? point_results[selected_idx] : nothing
     return selected_result, join_messages(messages)
 end
 
