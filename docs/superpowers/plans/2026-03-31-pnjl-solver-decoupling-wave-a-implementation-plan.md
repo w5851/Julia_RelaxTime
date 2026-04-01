@@ -112,13 +112,13 @@
 - Modify: `src/models/solver/ImplicitSolver.jl`
 - Modify: `src/models/Models.jl`
 
-- [ ] **Step 1: Add failing tests for governance interface signatures and default behavior**
+- [x] **Step 1: Add failing tests for governance interface signatures and default behavior**
 
-- [ ] **Step 2: Implement `hard_rule` and `selector` interface adapters**
+- [x] **Step 2: Implement `hard_rule` and `selector` interface adapters**
 
-- [ ] **Step 3: Add context payload plumbing (mode/continuity/phase/residual policy)**
+- [x] **Step 3: Add context payload plumbing (mode/continuity/phase/residual policy)**
 
-- [ ] **Step 4: Re-run tests and confirm legacy selector parity**
+- [x] **Step 4: Re-run tests and confirm legacy selector parity**
 
 ### Task 6: Align scan and single-point selection behavior through shared governance
 
@@ -127,11 +127,11 @@
 - Modify: `src/models/scans/TrhoScan.jl`
 - Create: `tests/regression/pnjl/test_candidate_governance_stability.jl`
 
-- [ ] **Step 1: Add failing regression for selection stability at representative points**
+- [x] **Step 1: Add failing regression for selection stability at representative points**
 
-- [ ] **Step 2: Route scan-side selection through shared governance interfaces**
+- [x] **Step 2: Route scan-side selection through shared governance interfaces**
 
-- [ ] **Step 3: Re-run regression and verify no unintended drift**
+- [x] **Step 3: Re-run regression and verify no unintended drift**
 
 ## Chunk 4: Compatibility Layer Mapping and Documentation
 

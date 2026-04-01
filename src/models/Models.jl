@@ -64,6 +64,7 @@ export solve_constraint
 export solve, solve_multi, SolverResult
 export ConstraintModes
 export ProblemSpec, build_problem_spec
+export HardRule, CandidateSelector, build_candidate_context
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
@@ -157,6 +158,7 @@ include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
+include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))
 include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
 include(joinpath(@__DIR__, "solver", "Conditions.jl"))
 include(joinpath(@__DIR__, "solver", "GenericRootEngine.jl"))

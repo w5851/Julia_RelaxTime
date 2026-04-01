@@ -240,14 +240,14 @@ selector(candidates, params, context) -> selected_index::Int
 
 **可勾选步骤**
 
-- [ ] 定义 `HardRule`/`Selector` 标准签名。
-- [ ] 接入 context（连续性、phase_hint、模式信息）。
-- [ ] 保留 `select_pressure_max_candidate` 作为默认策略实现。
+- [x] 定义 `HardRule`/`Selector` 标准签名。
+- [x] 接入 context（连续性、phase_hint、模式信息）。
+- [x] 保留 `select_pressure_max_candidate` 作为默认策略实现。
 
 **验收标准**
 
-- [ ] 单点与扫描路径采用同一策略接口。
-- [ ] 选择稳定性回归测试通过。
+- [x] 单点与扫描路径采用同一策略接口。
+- [x] 选择稳定性回归测试通过。
 
 ### Task A5：双轨收敛与兼容层治理台账
 
@@ -338,3 +338,4 @@ selector(candidates, params, context) -> selected_index::Int
 - [x] 2026-03-31：完成 A1（ProblemSpec 契约落地）最小闭环：新增 `ProblemSpec`/`build_problem_spec`，补齐 `explicit_residual/explicit_residual!`，并通过定向单测。
 - [x] 2026-03-31：完成 A2（AD/ID 契约加固）最小闭环：新增 fixed-mu/flavor-mu 统一 adapter builder，补充 AD 契约 smoke 与架构文档，并通过定向验证。
 - [x] 2026-03-31：完成 A3（配置隔离）最小闭环：新增 solver 配置隔离 smoke，`create_implicit_solver` 切换为实例级 config adapters，同时保留兼容 setter 路径。
+- [x] 2026-03-31：完成 A4（候选治理接口统一）最小闭环：新增 `CandidateGovernance` 与 context 契约，`evaluate_hard_constraints`/`select_pressure_max_candidate` 支持参数化上下文，补齐单测与回归测试。

@@ -66,10 +66,15 @@ function default_hard_constraint_rules(; physicality_check::Function=((_, _) -> 
     ]
 end
 
-function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule})
+function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule}, params=nothing, context=nothing)
     failed = Symbol[]
     for rule in rules
-        ok, reason = rule(candidate)
+        out = if applicable(rule, candidate, params, context)
+            rule(candidate, params, context)
+        else
+            rule(candidate)
+        end
+        ok, reason = out
         if !ok
             push!(failed, Symbol(reason))
         end
@@ -77,7 +82,7 @@ function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstr
     return isempty(failed), failed
 end
 
-function select_pressure_max_candidate(candidates::AbstractVector)
+function select_pressure_max_candidate(candidates::AbstractVector, params=nothing, context=nothing)
     isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
 
     passed = Int[]
