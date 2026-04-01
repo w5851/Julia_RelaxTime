@@ -66,9 +66,21 @@ function default_hard_constraint_rules(; physicality_check::Function=((_, _) -> 
     ]
 end
 
-function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule})
+function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstraintRule}, params=nothing, context=nothing)
+    prepared_rules = if params === nothing && context === nothing
+        rules
+    else
+        map(rules) do rule
+            if applicable(rule, candidate, params, context)
+                (c -> rule(c, params, context))
+            else
+                rule
+            end
+        end
+    end
+
     failed = Symbol[]
-    for rule in rules
+    for rule in prepared_rules
         ok, reason = rule(candidate)
         if !ok
             push!(failed, Symbol(reason))
@@ -77,7 +89,7 @@ function evaluate_hard_constraints(candidate, rules::AbstractVector{<:HardConstr
     return isempty(failed), failed
 end
 
-function select_pressure_max_candidate(candidates::AbstractVector)
+function select_pressure_max_candidate(candidates::AbstractVector, params=nothing, context=nothing)
     isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
 
     passed = Int[]
@@ -262,6 +274,7 @@ function solve_fixedmu_constraint(
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
 )
+    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedMu(), T; μ_fm=...).
     seed_pool = if seed_candidates === nothing
         _build_default_seed_candidates(seed_guess)
     else
@@ -357,6 +370,7 @@ function solve_fixedrho_constraint(
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
 )
+    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedRho(...), T).
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -488,6 +502,7 @@ function solve_fixedentropy_constraint(
     mass_positive_constraint::Bool=true,
     nlsolve_kwargs...,
 )
+    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedEntropy(...), T).
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -621,6 +636,7 @@ function solve_fixedsigma_constraint(
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
 )
+    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedSigma(...), T).
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -750,6 +766,7 @@ function solve_fixedasymrho_constraint(
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
 )
+    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedAsymmetricRho(...), T).
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)

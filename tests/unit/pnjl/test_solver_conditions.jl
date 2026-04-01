@@ -143,6 +143,41 @@ end
     end
 end
 
+@testset "explicit residual parity" begin
+    thermal_nodes = P.cached_nodes(24, 6)
+    params = P.GapParams(0.5, thermal_nodes, 0.0)
+
+    @testset "FixedMu explicit parity" begin
+        mode = P.FixedMu()
+        θ = [0.5, 1.0]
+        x = [-1.5, -1.5, -2.1, 0.2, 0.2]
+
+        cond_fn = P.build_conditions(mode, params)
+        expected = cond_fn(θ, x)
+        actual = P.explicit_residual(mode, x, θ, params)
+        @test actual ≈ expected rtol=1e-12 atol=1e-12
+
+        F = zeros(5)
+        P.explicit_residual!(F, x, θ, params, mode)
+        @test F ≈ expected rtol=1e-12 atol=1e-12
+    end
+
+    @testset "FixedRho explicit parity" begin
+        mode = P.FixedRho(1.0)
+        θ = [0.5]
+        x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
+
+        cond_fn = P.build_conditions(mode, params)
+        expected = cond_fn(θ, x)
+        actual = P.explicit_residual(mode, x, θ, params)
+        @test actual ≈ expected rtol=1e-12 atol=1e-12
+
+        F = zeros(8)
+        P.explicit_residual!(F, x, θ, params, mode)
+        @test F ≈ expected rtol=1e-12 atol=1e-12
+    end
+end
+
 # ============================================================================
 # build_residual! 测试
 # ============================================================================
