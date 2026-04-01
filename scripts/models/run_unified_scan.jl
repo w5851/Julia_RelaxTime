@@ -1,7 +1,11 @@
 #!/usr/bin/env julia
 
+using Pkg
+
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PHASE_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_structure.jl")
+
+Pkg.activate(PROJECT_ROOT)
 
 Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 Base.include(@__MODULE__, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
@@ -37,6 +41,17 @@ function _parse_model_kind(raw::AbstractString)
         return :pnjl_aniso
     end
     return Symbol(normalized)
+end
+
+function _assert_required_keys(kwargs::Dict{Symbol, Any}, keys::Tuple{Vararg{Symbol}}, command::AbstractString)
+    missing = Symbol[]
+    for key in keys
+        haskey(kwargs, key) || push!(missing, key)
+    end
+    if !isempty(missing)
+        throw(ArgumentError("missing required options for $(command): $(join(string.(missing), ", "))"))
+    end
+    return nothing
 end
 
 function _parse_tmu_args(args::Vector{String})
@@ -123,6 +138,7 @@ end
 
 function _run_scan_tmu(args::Vector{String})
     kwargs = _parse_tmu_args(args)
+    _assert_required_keys(kwargs, (:model_kind, :T_values, :mu_values, :xi_values, :output_path), "scan tmu")
     stats = Main.Models.run_tmu_scan(; kwargs...)
     println("[scan tmu] total=$(stats.total) success=$(stats.success) failure=$(stats.failure) skipped=$(stats.skipped)")
     println("[scan tmu] output=$(stats.output)")
@@ -131,6 +147,7 @@ end
 
 function _run_scan_trho(args::Vector{String})
     kwargs = _parse_trho_args(args)
+    _assert_required_keys(kwargs, (:model_kind, :T_values, :rho_values, :xi_values, :output_path), "scan trho")
     stats = Main.Models.run_trho_scan(; kwargs...)
     println("[scan trho] total=$(stats.total) success=$(stats.success) failure=$(stats.failure) skipped=$(stats.skipped)")
     println("[scan trho] output=$(stats.output)")
@@ -146,9 +163,9 @@ end
 
 function _usage()
     println("Usage:")
-    println("  julia scripts/models/run_unified_scan.jl scan tmu [--key=value ...]")
-    println("  julia scripts/models/run_unified_scan.jl scan trho [--key=value ...]")
-    println("  julia scripts/models/run_unified_scan.jl workflow phase [--key=value ...]")
+    println("  julia --project=. scripts/models/run_unified_scan.jl scan tmu [--key=value ...]")
+    println("  julia --project=. scripts/models/run_unified_scan.jl scan trho [--key=value ...]")
+    println("  julia --project=. scripts/models/run_unified_scan.jl workflow phase [--key=value ...]")
 end
 
 function main(args=ARGS)
