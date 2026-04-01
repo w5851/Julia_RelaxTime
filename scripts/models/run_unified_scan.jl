@@ -17,7 +17,7 @@ function _parse_bool(raw::AbstractString, name::AbstractString)
     elseif lowered in ("0", "false", "no", "off")
         return false
     end
-    throw(ArgumentError("invalid --$(name)=$(raw), accepted: true|false"))
+    throw(ArgumentError("invalid --$(name)=$(raw), accepted (case-insensitive, trimmed): 1|0|true|false|yes|no|on|off"))
 end
 
 function _parse_real_list(raw::AbstractString, name::AbstractString)
@@ -36,11 +36,19 @@ function _parse_symbol(raw::AbstractString)
 end
 
 function _parse_model_kind(raw::AbstractString)
-    normalized = uppercase(strip(raw))
-    if normalized == "PNJL_ANISO"
+    raw_trimmed = strip(raw)
+    lowered = lowercase(raw_trimmed)
+    if lowered == "pnjl_aniso"
         return :pnjl_aniso
     end
-    return Symbol(normalized)
+
+    for kind in Main.Models.registered_model_kinds()
+        if lowercase(String(kind)) == lowered
+            return kind
+        end
+    end
+
+    return Symbol(raw_trimmed)
 end
 
 function _assert_required_keys(kwargs::Dict{Symbol, Any}, keys::Tuple{Vararg{Symbol}}, command::AbstractString)
