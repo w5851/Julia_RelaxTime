@@ -149,10 +149,11 @@ function main()
             try
                 seed = PNJL.get_seed(PNJL.DefaultSeed(), [T_fm, muq_fm], PNJL.FixedMu())
                 seed_guess = Float64.(seed[1:5])
-                res = Models.solve_fixedmu_constraint(
+                res = Models.solve_constraint(
                     model,
-                    T_fm,
-                    muq_fm;
+                    Models.FixedMu(),
+                    T_fm;
+                    μ_fm=muq_fm,
                     seed_guess=seed_guess,
                     xi=xi,
                     p_num=p_num,

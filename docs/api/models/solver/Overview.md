@@ -71,7 +71,7 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 ### 进阶使用者
 
 - `solve_multi`
-- `solve_constraint` 与固定模式变体
+- `solve_constraint`（固定模式变体 `solve_fixed*constraint` 在 Wave-D 为 hard-deprecated）
 - `MeanFieldState` / `state_vector` / `normalize_mu_vec`
 
 ### 维护者或算法开发者

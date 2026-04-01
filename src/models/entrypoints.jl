@@ -47,21 +47,21 @@ end
         (
             old_entry="scripts/pnjl/run_tmu_scan.jl",
             new_entry="Models.run_tmu_scan(...; model_kind=...)",
-            status=:active,
+            status=:hard_deprecated,
             removal_wave=:D,
             removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
         ),
         (
             old_entry="scripts/pnjl/run_dense_trho_scan.jl",
             new_entry="Models.run_trho_scan(...; model_kind=...)",
-            status=:active,
+            status=:hard_deprecated,
             removal_wave=:D,
             removal_threshold="script callers fully migrate to model-driven entrypoint and parity regression remains stable",
         ),
         (
             old_entry="scripts/pnjl/run_adaptive_trho_scan.jl",
             new_entry="Models.run_trho_scan(...; model_kind=...)",
-            status=:active,
+            status=:hard_deprecated,
             removal_wave=:D,
             removal_threshold="workflow routes no longer rely on script SOP forks and smoke/regression stay stable",
         ),
@@ -78,7 +78,7 @@ function scan_workflow_migration_status(old_entry::AbstractString)
                 removal_wave=entry.removal_wave,
                 removal_threshold=entry.removal_threshold,
                 route=:compat_adapter,
-                deprecation_ready=true,
+                deprecation_ready=false,
             )
         end
     end
@@ -168,10 +168,10 @@ function solve_pnjl_point(;
 
         solver_primary = NLsolveGapSolver(method=:newton, jacobian=:forward, xtol=1e-9, ftol=1e-9)
         solver_secondary = NLsolveGapSolver(method=:trust_region, jacobian=:forward, xtol=1e-9, ftol=1e-9)
-        r = solve_fixedrho_constraint(
+        r = solve_constraint(
             model,
-            T_fm,
-            resolved_rho_target;
+            FixedRho(resolved_rho_target),
+            T_fm;
             seed_guess=seed_state,
             mu0=mu_seed_fm,
             solver_primary=solver_primary,

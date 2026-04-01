@@ -273,8 +273,9 @@ function solve_fixedmu_constraint(
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
+    __allow_hard_deprecated_internal::Bool=false,
 )
-    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedMu(), T; μ_fm=...).
+    __allow_hard_deprecated_internal || throw(ArgumentError("Models.solve_fixedmu_constraint is hard-deprecated in Wave-D; use Models.solve_constraint(model, FixedMu(), T; μ_fm=...)."))
     seed_pool = if seed_candidates === nothing
         _build_default_seed_candidates(seed_guess)
     else
@@ -368,9 +369,10 @@ function solve_fixedrho_constraint(
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:newton,
     physicality_check::Function=((_, _) -> true),
+    __allow_hard_deprecated_internal::Bool=false,
     nlsolve_kwargs...,
 )
-    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedRho(...), T).
+    __allow_hard_deprecated_internal || throw(ArgumentError("Models.solve_fixedrho_constraint is hard-deprecated in Wave-D; use Models.solve_constraint(model, FixedRho(...), T)."))
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -500,9 +502,10 @@ function solve_fixedentropy_constraint(
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
     mass_positive_constraint::Bool=true,
+    __allow_hard_deprecated_internal::Bool=false,
     nlsolve_kwargs...,
 )
-    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedEntropy(...), T).
+    __allow_hard_deprecated_internal || throw(ArgumentError("Models.solve_fixedentropy_constraint is hard-deprecated in Wave-D; use Models.solve_constraint(model, FixedEntropy(...), T)."))
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -634,9 +637,10 @@ function solve_fixedsigma_constraint(
     residual_norm_max::Real=1e-6,
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
+    __allow_hard_deprecated_internal::Bool=false,
     nlsolve_kwargs...,
 )
-    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedSigma(...), T).
+    __allow_hard_deprecated_internal || throw(ArgumentError("Models.solve_fixedsigma_constraint is hard-deprecated in Wave-D; use Models.solve_constraint(model, FixedSigma(...), T)."))
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)
@@ -764,9 +768,10 @@ function solve_fixedasymrho_constraint(
     rho0::Real,
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
+    __allow_hard_deprecated_internal::Bool=false,
     nlsolve_kwargs...,
 )
-    # COMPAT: kept for migration; prefer Models.solve_constraint(model, FixedAsymmetricRho(...), T).
+    __allow_hard_deprecated_internal || throw(ArgumentError("Models.solve_fixedasymrho_constraint is hard-deprecated in Wave-D; use Models.solve_constraint(model, FixedAsymmetricRho(...), T)."))
     st_ref = Ref{Any}(nothing)
     x_state_ref = Ref{Any}(nothing)
     mu_vec_ref = Ref{Any}(nothing)

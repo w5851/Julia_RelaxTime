@@ -14,6 +14,7 @@ end
     @test mapping isa AbstractVector
     @test any(e -> e.old_entry == "Models.solve_fixedmu_constraint" && e.new_entry == "Models.solve_constraint(model, FixedMu(), T; μ_fm=...)", mapping)
     @test any(e -> e.old_entry == "Models.solve_fixedrho_constraint" && e.new_entry == "Models.solve_constraint(model, FixedRho(...), T)", mapping)
+    @test all(e -> e.status == :hard_deprecated, mapping)
 
     @test isdefined(Models, :solve_fixedmu_constraint)
     @test isdefined(Models, :solve_fixedrho_constraint)
@@ -28,9 +29,16 @@ end
     seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
 
     via_unified = Models.solve_constraint(m, Models.FixedMu(), T; μ_fm=0.0, seed_guess=seed, p_num=24, t_num=6)
-    via_legacy = Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+    legacy_err = try
+        Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+        nothing
+    catch exc
+        exc
+    end
 
-    @test via_unified.converged == via_legacy.converged
-    @test isapprox(via_unified.pressure, via_legacy.pressure; rtol=1e-10, atol=1e-12)
-    @test isapprox(via_unified.rho_norm, via_legacy.rho_norm; rtol=1e-10, atol=1e-12)
+    @test via_unified.converged
+    @test isfinite(via_unified.pressure)
+    @test isfinite(via_unified.rho_norm)
+    @test legacy_err isa ArgumentError
+    @test occursin("hard-deprecated", sprint(showerror, legacy_err))
 end

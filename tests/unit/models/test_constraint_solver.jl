@@ -44,12 +44,11 @@ Models.pnjl_module()
         @test μv3[1] ≈ 0.2
     end
 
-    # --- solve_fixedmu_constraint ---
-    @testset "solve_fixedmu_constraint NJL" begin
+    @testset "solve_constraint(FixedMu) NJL" begin
         m = Models.create_model(:NJL)
         T = 0.5
         seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
-        result = Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+        result = Models.solve_constraint(m, Models.FixedMu(), T; μ_fm=0.0, seed_guess=seed, p_num=24, t_num=6)
         @test result isa NamedTuple
         @test haskey(result, :converged)
         @test haskey(result, :pressure)
@@ -60,25 +59,32 @@ Models.pnjl_module()
         @test haskey(result, :residual_norm)
         @test isfinite(result.pressure)
         @test isfinite(result.omega)
-    end
-
-    @testset "solve_fixedmu_constraint 结果一致性 P=-Ω" begin
-        m = Models.create_model(:NJL)
-        T = 0.5
-        seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
-        result = Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
         @test result.pressure ≈ -result.omega rtol=1e-10
     end
 
-    @testset "solve_fixedmu_constraint 默认多初值候选池" begin
+    @testset "solve_constraint(FixedMu) 默认多初值候选池" begin
         m = Models.create_model(:NJL)
         T = 0.5
         seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
-        result = Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+        result = Models.solve_constraint(m, Models.FixedMu(), T; μ_fm=0.0, seed_guess=seed, p_num=24, t_num=6)
         @test haskey(result, :candidate_count)
         @test result.candidate_count >= 1
         @test haskey(result, :selection_reason)
         @test result.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
+    end
+
+    @testset "solve_fixedmu_constraint hard-deprecated" begin
+        m = Models.create_model(:NJL)
+        T = 0.5
+        seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
+        err = try
+            Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
+            nothing
+        catch exc
+            exc
+        end
+        @test err isa ArgumentError
+        @test occursin("hard-deprecated", sprint(showerror, err))
     end
 
     # --- solve_fixedrho_constraint 接口存在 ---

@@ -10,37 +10,37 @@ const SolverResult = ImplicitSolver.SolverResult
         (
             old_entry="Models.solve_fixedmu_constraint",
             new_entry="Models.solve_constraint(model, FixedMu(), T; μ_fm=...)",
-            status=:active,
-            removal_wave=:C,
-            removal_threshold="all call sites route via solve_constraint",
+            status=:hard_deprecated,
+            removal_wave=:D,
+            removal_threshold="hard-deprecate-first; remove only after all external call sites migrate and Wave-D parity/smoke/regression checks stay green",
         ),
         (
             old_entry="Models.solve_fixedrho_constraint",
             new_entry="Models.solve_constraint(model, FixedRho(...), T)",
-            status=:active,
-            removal_wave=:C,
-            removal_threshold="all call sites route via solve_constraint",
+            status=:hard_deprecated,
+            removal_wave=:D,
+            removal_threshold="hard-deprecate-first; remove only after all external call sites migrate and Wave-D parity/smoke/regression checks stay green",
         ),
         (
             old_entry="Models.solve_fixedasymrho_constraint",
             new_entry="Models.solve_constraint(model, FixedAsymmetricRho(...), T)",
-            status=:active,
-            removal_wave=:C,
-            removal_threshold="all call sites route via solve_constraint",
+            status=:hard_deprecated,
+            removal_wave=:D,
+            removal_threshold="hard-deprecate-first; remove only after all external call sites migrate and Wave-D parity/smoke/regression checks stay green",
         ),
         (
             old_entry="Models.solve_fixedentropy_constraint",
             new_entry="Models.solve_constraint(model, FixedEntropy(...), T)",
-            status=:active,
-            removal_wave=:C,
-            removal_threshold="all call sites route via solve_constraint",
+            status=:hard_deprecated,
+            removal_wave=:D,
+            removal_threshold="hard-deprecate-first; remove only after all external call sites migrate and Wave-D parity/smoke/regression checks stay green",
         ),
         (
             old_entry="Models.solve_fixedsigma_constraint",
             new_entry="Models.solve_constraint(model, FixedSigma(...), T)",
-            status=:active,
-            removal_wave=:C,
-            removal_threshold="all call sites route via solve_constraint",
+            status=:hard_deprecated,
+            removal_wave=:D,
+            removal_threshold="hard-deprecate-first; remove only after all external call sites migrate and Wave-D parity/smoke/regression checks stay green",
         ),
     ]
 end
@@ -55,7 +55,7 @@ function solver_migration_status(old_entry::AbstractString)
                 removal_wave=entry.removal_wave,
                 removal_threshold=entry.removal_threshold,
                 route=:compat_shim,
-                deprecation_ready=true,
+                deprecation_ready=false,
             )
         end
     end
@@ -63,28 +63,23 @@ function solver_migration_status(old_entry::AbstractString)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
-    # COMPAT: unified primary entrypoint; legacy fixedmu helper retained for migration window.
-    return solve_fixedmu_constraint(model, T_fm, μ_fm; kwargs...)
+    return solve_fixedmu_constraint(model, T_fm, μ_fm; __allow_hard_deprecated_internal=true, kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; kwargs...)
-    # COMPAT: unified primary entrypoint; legacy fixedrho helper retained for migration window.
-    return solve_fixedrho_constraint(model, T_fm, mode.rho_target; kwargs...)
+    return solve_fixedrho_constraint(model, T_fm, mode.rho_target; __allow_hard_deprecated_internal=true, kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; kwargs...)
-    # COMPAT: unified primary entrypoint; legacy fixedentropy helper retained for migration window.
-    return solve_fixedentropy_constraint(model, T_fm, mode.s_target; kwargs...)
+    return solve_fixedentropy_constraint(model, T_fm, mode.s_target; __allow_hard_deprecated_internal=true, kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; kwargs...)
-    # COMPAT: unified primary entrypoint; legacy fixedsigma helper retained for migration window.
-    return solve_fixedsigma_constraint(model, T_fm, mode.sigma_target; kwargs...)
+    return solve_fixedsigma_constraint(model, T_fm, mode.sigma_target; __allow_hard_deprecated_internal=true, kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
-    # COMPAT: unified primary entrypoint; legacy fixedasymrho helper retained for migration window.
-    return solve_fixedasymrho_constraint(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; kwargs...)
+    return solve_fixedasymrho_constraint(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; __allow_hard_deprecated_internal=true, kwargs...)
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)

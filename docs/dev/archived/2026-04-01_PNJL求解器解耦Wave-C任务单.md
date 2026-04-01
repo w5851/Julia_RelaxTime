@@ -1,3 +1,15 @@
+---
+title: PNJL求解器解耦 Wave-C 任务单
+archived: true
+original: docs/dev/active/2026-04-01_PNJL求解器解耦Wave-C任务单.md
+archived_date: 2026-04-01
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL求解器解耦 Wave-C 任务单
 
 > 执行主线说明：本任务单用于 Wave-C 的唯一执行主线（勾选、证据、验收）。
@@ -22,8 +34,8 @@
 
 ### 2.2 非范围
 
-- [ ] 不更换求解后端。
-- [ ] 不在本波次执行兼容入口强删。
+- [x] 不更换求解后端。
+- [x] 不在本波次执行兼容入口强删。
 
 ## 3. 任务分解
 
@@ -70,15 +82,15 @@
 
 ## 5.1 默认零上下文 agent 执行约束
 
-- [ ] 仅以下三份文档作为 Wave-C 执行主线：
+- [x] 仅以下三份文档作为 Wave-C 执行主线：
   - `docs/dev/active/2026-04-01_PNJL求解器解耦Wave-C任务单.md`
   - `docs/superpowers/specs/2026-04-01-pnjl-solver-decoupling-wave-c-design.md`
   - `docs/superpowers/plans/2026-04-01-pnjl-solver-decoupling-wave-c-implementation-plan.md`
-- [ ] 参考台账：`docs/dev/active/2026-04-01_扫描与工作流兼容层迁移映射表_Wave-C.md`
-- [ ] 执行顺序必须严格按 C1 -> C2 -> C3（文档同步与验证在 C4/C5）。
-- [ ] 每个子步采用 TDD（先失败测试，再最小实现，再回归）。
-- [ ] 每个子步必须运行：本步定向测试 + unit/integration/regression smoke + docs governance checks。
-- [ ] 不执行 Wave-C 之外的代码级改动；兼容路径只做 deprecation-ready，不做破坏性删除。
+- [x] 参考台账：`docs/dev/active/2026-04-01_扫描与工作流兼容层迁移映射表_Wave-C.md`
+- [x] 执行顺序必须严格按 C1 -> C2 -> C3（文档同步与验证在 C4/C5）。
+- [x] 每个子步采用 TDD（先失败测试，再最小实现，再回归）。
+- [x] 每个子步必须运行：本步定向测试 + unit/integration/regression smoke + docs governance checks。
+- [x] 不执行 Wave-C 之外的代码级改动；兼容路径只做 deprecation-ready，不做破坏性删除。
 
 ## 6. DoD
 
