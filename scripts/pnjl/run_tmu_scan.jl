@@ -87,25 +87,27 @@ using .Models: run_tmu_scan
 
 const DEFAULT_OUTPUT_DIR = joinpath(@__DIR__, "..", "..", "data", "outputs", "results", "pnjl", "scan", "tmu")
 
-struct ScriptTmuScanConfig
-    mode::Symbol
-    xi::Float64
-    T_min::Float64
-    T_max::Float64
-    T_step::Float64
-    mu_min::Float64
-    mu_max::Float64
-    mu_step::Float64
-    T_mev::Float64
-    mu_mev::Float64
-    output_path::String
-    resume::Bool
-    overwrite::Bool
-    use_phase_aware::Bool
-    solver_backend::Symbol
-    p_num::Int
-    t_num::Int
-    verbose::Bool
+if !isdefined(Main, :ScriptTmuScanConfig)
+    struct ScriptTmuScanConfig
+        mode::Symbol
+        xi::Float64
+        T_min::Float64
+        T_max::Float64
+        T_step::Float64
+        mu_min::Float64
+        mu_max::Float64
+        mu_step::Float64
+        T_mev::Float64
+        mu_mev::Float64
+        output_path::String
+        resume::Bool
+        overwrite::Bool
+        use_phase_aware::Bool
+        solver_backend::Symbol
+        p_num::Int
+        t_num::Int
+        verbose::Bool
+    end
 end
 
 function parse_args(args)
