@@ -1034,7 +1034,7 @@ end
         t_num=config.t_num,
         model_kind=config.model_kind,
     )
-    x_state = SVector{5}(Tuple(x))
+    x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
 
     return Vector(gap_conditions(x_state, mu_vec, params))
 end
@@ -1096,12 +1096,7 @@ function create_implicit_solver(; xi::Real=0.0,
     adapters = _build_fixedmu_implicit_adapters(local_config)
 
     # Backward-compatible side effect for callers relying on set_implicit_config/global path.
-    set_implicit_config(
-        xi=local_config.xi,
-        p_num=local_config.p_num,
-        t_num=local_config.t_num,
-        model_kind=local_config.model_kind,
-    )
+    IMPLICIT_CONFIG[] = local_config
 
     return ImplicitFunction(
         adapters.forward_solve,
