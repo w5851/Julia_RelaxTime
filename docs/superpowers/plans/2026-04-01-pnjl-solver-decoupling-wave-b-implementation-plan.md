@@ -19,7 +19,7 @@
 - Modify: `src/models/solver/CandidateGovernance.jl`
 - Modify: `src/models/Models.jl`
 - Modify: `docs/dev/active/2026-04-01_PNJL求解器解耦Wave-B任务单.md`
-- Modify: `docs/dev/active/2026-03-31_求解器兼容层迁移映射表.md` (or successor table)
+- Create: `docs/dev/active/2026-04-01_求解器兼容层迁移映射表_Wave-B.md`
 - Create: `tests/regression/pnjl/test_waveb_scan_governance_stability.jl`
 - Create: `tests/integration/models/test_waveb_compat_routing_smoke.jl`
 
@@ -70,7 +70,7 @@
 
 **Files:**
 - Modify: `docs/dev/active/2026-04-01_PNJL求解器解耦Wave-B任务单.md`
-- Modify: `docs/dev/active/2026-03-31_求解器兼容层迁移映射表.md` (or successor)
+- Create/Modify: `docs/dev/active/2026-04-01_求解器兼容层迁移映射表_Wave-B.md`
 - Modify: `docs/architecture/models_solver_contract.md` (if boundary semantics changed)
 
 - [ ] **Step 1: Update migration status and removal thresholds for Wave-B progress**
@@ -85,6 +85,8 @@
 - Create/Modify tests listed above
 
 - [ ] **Step 1: Run targeted new unit/integration/regression tests**
+  - `julia --project=. -e 'include("tests/integration/models/test_waveb_compat_routing_smoke.jl")'`
+  - `julia --project=. -e 'include("tests/regression/pnjl/test_waveb_scan_governance_stability.jl")'`
 - [ ] **Step 2: Run unit smoke profile**
   - `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
 - [ ] **Step 3: Run integration smoke profile**

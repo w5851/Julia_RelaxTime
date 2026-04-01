@@ -4,6 +4,7 @@
 > 设计与实现参考：
 > - `docs/superpowers/specs/2026-04-01-pnjl-solver-decoupling-wave-b-design.md`
 > - `docs/superpowers/plans/2026-04-01-pnjl-solver-decoupling-wave-b-implementation-plan.md`
+> - `docs/architecture/models_solver_contract.md`
 
 ## 1. 目标
 
@@ -37,6 +38,7 @@
 - [ ] 为统一入口/兼容入口等价性补失败 smoke。
 - [ ] 完善迁移状态与查询接口。
 - [ ] 保持外部签名兼容。
+- [ ] 新建/维护 Wave-B 迁移映射台账：`docs/dev/active/2026-04-01_求解器兼容层迁移映射表_Wave-B.md`。
 
 ### B3：fallback 诊断稳定性
 
@@ -59,6 +61,8 @@
 
 ## 5. 验证命令
 
+- [ ] `julia --project=. -e 'include("tests/integration/models/test_waveb_compat_routing_smoke.jl")'`
+- [ ] `julia --project=. -e 'include("tests/regression/pnjl/test_waveb_scan_governance_stability.jl")'`
 - [ ] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
 - [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
 - [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
@@ -74,3 +78,4 @@
 ## 7. 执行记录
 
 - [x] 2026-04-01：基于 Wave-A 完成状态创建 Wave-B 任务单。
+- [x] 2026-04-01：补充 Wave-B 迁移台账路径与新增测试命令，降低执行歧义。

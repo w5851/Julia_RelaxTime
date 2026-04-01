@@ -12,7 +12,7 @@
 - `build_residual!` 闭包风格已可用，但“显式参数接口”契约尚未冻结；
 - AD/隐式微分链路可工作，但配置与边界条件存在全局状态和可重入风险。
 
-同时，`docs/dev/active/2026-03-31_PNJL求解器解耦框架约束与分层草案.md` 与后续评审计划已明确：该事项属于跨模块架构治理，不是局部实现细节。
+同时，Wave-A 草案与后续评审计划已明确：该事项属于跨模块架构治理，不是局部实现细节。
 
 ## 决策
 
@@ -81,8 +81,9 @@
 ## 相关文档
 
 - `docs/decisions/0002-models-solver-contract.md`
-- `docs/dev/active/2026-03-31_PNJL求解器解耦框架约束与分层草案.md`
-- `docs/dev/active/2026-03-31_PNJL求解器解耦框架兼容性评审与Wave-A实现计划.md`
+- `docs/dev/archived/2026-03-31_PNJL求解器解耦框架约束与分层草案.md`
+- `docs/dev/archived/2026-03-31_PNJL求解器解耦框架兼容性评审与Wave-A实现计划.md`
+- `docs/dev/active/2026-04-01_求解器兼容层迁移映射表_Wave-B.md`
 - `docs/superpowers/specs/2026-03-31-pnjl-solver-decoupling-wave-a-design.md`
 - `docs/superpowers/plans/2026-03-31-pnjl-solver-decoupling-wave-a-implementation-plan.md`
 

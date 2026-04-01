@@ -131,5 +131,9 @@
 
 - 主入口固定为 `Models.solve_constraint`。
 - `solve_fixed*` 入口保留为兼容层，不再作为新调用首选。
+
+## 9. Wave-B 兼容层治理补充（2026-04-01）
+
+- Wave-A 映射文档已归档；活动台账切换为 Wave-B 映射表。
 - 兼容层映射与删除门槛由活动台账维护：
-  - `docs/dev/active/2026-03-31_求解器兼容层迁移映射表.md`
+  - `docs/dev/active/2026-04-01_求解器兼容层迁移映射表_Wave-B.md`
