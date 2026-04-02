@@ -60,6 +60,8 @@ export solve, solve_multi, SolverResult
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export ProblemSpec, build_problem_spec
+export AbstractConstraintComponent
+export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
@@ -153,6 +155,7 @@ include(joinpath(@__DIR__, "gap_solver.jl"))
 include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
 include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))

@@ -38,5 +38,14 @@ end
 @inline _unimplemented_conditions(theta, x, meta, cfg, mode) = throw(ArgumentError("conditions is not configured for $(typeof(mode))"))
 
 @inline function build_problem_spec(mode::ConstraintMode; kwargs...)
+    if isempty(kwargs)
+        components = build_constraint_components(mode)
+        return ProblemSpec(
+            mode;
+            x_dim=constraint_total_dim(components),
+            conditions=params -> build_conditions(mode, params),
+            forward_solve=(model, T_fm; fwd_kwargs...) -> solve_constraint(model, mode, T_fm; fwd_kwargs...),
+        )
+    end
     return ProblemSpec(mode; kwargs...)
 end
