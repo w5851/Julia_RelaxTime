@@ -462,7 +462,7 @@ function _solve_constraint_fixedrho(
         omega_val = -pressure_ref[]
         thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
         phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
-        converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-4)
+        converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= Float64(residual_norm_max)
 
         return (
             mode=method,
@@ -519,7 +519,7 @@ function _solve_constraint_fixedrho(
         omega_val = -pressure
         thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
         phys = physicality_check(x_state, masses) && thermo_finite
-        converged = phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-4)
+        converged = phys && isfinite(residual_norm) && residual_norm <= Float64(residual_norm_max)
 
         return (
             mode=:direct_mu,
@@ -627,7 +627,7 @@ function _solve_constraint_fixedrho(
                     end
 
                     f_mid = cmid.rho_norm - rho_target
-                    if abs(f_mid) <= max(Float64(residual_norm_max), 1e-4)
+                    if abs(f_mid) <= Float64(residual_norm_max)
                         break
                     end
                     if f_left * f_mid <= 0.0
