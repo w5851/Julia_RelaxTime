@@ -324,3 +324,6 @@
 - [x] 2026-04-02：完成 `docs/api/models/solver/*` 文档口径同步。
   - 更新 `README.md`、`CoreConcepts.md`、`ConstraintModes.md`，补充 `ProblemSpec` 与 `ConstraintComponents` 的 R1 主链语义。
   - 通过脚本重生成 `docs/api/models/solver/generated/Exports.md`（`generate_api_export_index.jl`）。
+- [x] 2026-04-02：继续推进 B1 增量收敛（PR #50）。
+  - `solve_constraint` 对 `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 已支持 `problem_spec` override（保持旧路径兼容回退）。
+  - 新增 integration 冒烟 `tests/integration/models/test_problem_spec_other_modes_forwardsolve_smoke.jl` 并接入 integration smoke。
