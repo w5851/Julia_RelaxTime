@@ -37,4 +37,10 @@ const _TMS = Models.TmuScan
         @test isdefined(_TMS, :run_tmu_scan)
         @test _TMS.run_tmu_scan isa Function
     end
+
+    @testset "auto backend 语义路由配置" begin
+        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
+        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy
+        @test _TMS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
 end

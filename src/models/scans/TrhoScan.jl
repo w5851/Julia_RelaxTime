@@ -151,11 +151,14 @@ end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
     end
-    return model_kind === :PNJL ? :legacy : :models
+    if model_kind === :PNJL
+        return auto_pnjl_backend
+    end
+    return :models
 end
 
 # ============================================================================
@@ -207,6 +210,7 @@ function run_trho_scan(;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -265,6 +269,7 @@ function run_trho_scan(;
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
+                    auto_pnjl_backend=auto_pnjl_backend,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
             else
@@ -275,6 +280,7 @@ function run_trho_scan(;
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
+                    auto_pnjl_backend=auto_pnjl_backend,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
 
@@ -384,6 +390,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -394,6 +401,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -404,6 +412,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -422,12 +431,13 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
 
-    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
+    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
 
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
@@ -487,6 +497,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -543,12 +554,13 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
 
@@ -620,6 +632,7 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -632,6 +645,7 @@ function _refine_result(T_fm, ρ_fm, xi, result;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
