@@ -50,6 +50,7 @@ const INTEGRATION_SMOKE_FILES = [
     joinpath(INTEGRATION_DIR, "models", "test_models_implicitdiff_flavor_mu_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_rpnjl_model_factory_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_phase_cli_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_solver_backend_semantic_parity_guard.jl"),
 
     # PNJL scans
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),

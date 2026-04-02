@@ -1,3 +1,15 @@
+---
+title: PNJL求解器解耦 Wave-E 任务单
+archived: true
+original: docs/dev/active/2026-04-01_PNJL求解器解耦Wave-E任务单.md
+archived_date: 2026-04-02
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL求解器解耦 Wave-E 任务单
 
 > 执行主线说明：本任务单用于 Wave-E 的唯一执行主线（勾选、证据、验收）。

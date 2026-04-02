@@ -1,3 +1,15 @@
+---
+title: Models 新架构迁移 Program 主任务单（Gate A/B/C）
+archived: true
+original: docs/dev/active/2026-04-01_Models新架构迁移Program主任务单_GateA-B-C.md
+archived_date: 2026-04-02
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Models 新架构迁移 Program 主任务单（Gate A/B/C）
 
 ## 1. Program 背景与目标
@@ -9,9 +21,9 @@
 
 Program 最终目标：
 
-- [ ] 完成从旧架构到新架构的彻底迁移
-- [ ] 清除旧 compat 与回退路径，不保留长期双轨
-- [ ] 在 7 个模型上形成统一边界契约 + 可预测工程结构 + 稳定验证门禁
+- [x] 完成从旧架构到新架构的彻底迁移
+- [x] 清除旧 compat 与回退路径，不保留长期双轨
+- [x] 在 7 个模型上形成统一边界契约 + 可预测工程结构 + 稳定验证门禁
 
 ---
 
@@ -19,18 +31,18 @@ Program 最终目标：
 
 ### 2.1 Spec
 
-- [ ] `docs/superpowers/specs/2026-04-01-models-dimension-agnostic-plan-b-design.md`（Gate A）
-- [ ] `docs/superpowers/specs/2026-04-01-models-homomorphic-architecture-design.md`（Gate B/C）
+- [x] `docs/superpowers/specs/2026-04-01-models-dimension-agnostic-plan-b-design.md`（Gate A）
+- [x] `docs/superpowers/specs/2026-04-01-models-homomorphic-architecture-design.md`（Gate B/C）
 
 ### 2.2 Plan
 
-- [ ] `docs/superpowers/plans/2026-04-01-models-dimension-agnostic-plan-b.md`（A 线实施）
-- [ ] `docs/superpowers/plans/2026-04-01-models-homomorphic-architecture-implementation-plan.md`（B/C 线实施）
-- [ ] `docs/dev/active/2026-04-01_Models固定维度耦合点基线清单_GateA.md`（A 线前置基线）
+- [x] `docs/superpowers/plans/2026-04-01-models-dimension-agnostic-plan-b.md`（A 线实施）
+- [x] `docs/superpowers/plans/2026-04-01-models-homomorphic-architecture-implementation-plan.md`（B/C 线实施）
+- [x] `docs/dev/active/2026-04-01_Models固定维度耦合点基线清单_GateA.md`（A 线前置基线）
 
 执行约束：
 
-- [ ] 若本任务单与上述 spec/plan 冲突，以 spec/plan 为准并先回填本任务单再实施。
+- [x] 若本任务单与上述 spec/plan 冲突，以 spec/plan 为准并先回填本任务单再实施。
 
 ---
 
@@ -52,26 +64,26 @@ Program 最终目标：
 
 ### 3.5.1 基线与清单冻结
 
-- [ ] 固定维度耦合点清单已冻结（文件+符号+预期迁移去向）。
-- [ ] 7 模型当前行为基线已记录（最小可复现实验命令+输出摘要）。
-- [ ] 回归阈值已冻结（残差/关键量容忍区间，至少给出 `rtol/atol` 或范围规则）。
+- [x] 固定维度耦合点清单已冻结（文件+符号+预期迁移去向）。
+- [x] 7 模型当前行为基线已记录（最小可复现实验命令+输出摘要）。
+- [x] 回归阈值已冻结（残差/关键量容忍区间，至少给出 `rtol/atol` 或范围规则）。
 
 ### 3.5.2 工程执行隔离
 
-- [ ] 在隔离分支/工作树中执行（避免与其他开发流互相污染）。
-- [ ] 数据输出目录清理策略已确定（禁止将临时产物混入提交）。
-- [ ] 提交流程策略已确定（按 chunk 小步提交，避免超大混合提交）。
+- [x] 在隔离分支/工作树中执行（避免与其他开发流互相污染）。
+- [x] 数据输出目录清理策略已确定（禁止将临时产物混入提交）。
+- [x] 提交流程策略已确定（按 chunk 小步提交，避免超大混合提交）。
 
 ### 3.5.3 外部契约与回滚策略
 
-- [ ] 外部可见接口影响清单已确认（`Models` 导出、CLI 参数、CSV/JSON 字段）。
-- [ ] deprecation 文案与移除窗口已定义（避免“静默破坏”）。
-- [ ] 回滚策略已定义（触发条件、回滚范围、恢复步骤）。
+- [x] 外部可见接口影响清单已确认（`Models` 导出、CLI 参数、CSV/JSON 字段）。
+- [x] deprecation 文案与移除窗口已定义（避免“静默破坏”）。
+- [x] 回滚策略已定义（触发条件、回滚范围、恢复步骤）。
 
 ### 3.5.4 质量门禁映射
 
-- [ ] 本地验证矩阵与 CI required checks 名称已建立映射。
-- [ ] “停止线”条件已定义（例如：核心模型回归失败、治理检查失败即停止推进下一 Gate）。
+- [x] 本地验证矩阵与 CI required checks 名称已建立映射。
+- [x] “停止线”条件已定义（例如：核心模型回归失败、治理检查失败即停止推进下一 Gate）。
 
 ---
 
@@ -122,11 +134,11 @@ Program 最终目标：
 
 ## 5. 漂移防护规则（执行纪律）
 
-- [ ] 禁止跨 Gate 并行改动核心契约（`state schema / result contract / solver core`）。
-- [ ] 禁止在 Gate A 未稳定时提前推进目录同构化大改。
-- [ ] 禁止以临时 shim 长期替代正式迁移（每个 shim 必须有移除点）。
-- [ ] 每个 Gate 完成后立即回填证据（命令、结果、问题与处置）。
-- [ ] 若发现范围膨胀，先更新 spec/plan，再更新本任务单，再实施代码。
+- [x] 禁止跨 Gate 并行改动核心契约（`state schema / result contract / solver core`）。
+- [x] 禁止在 Gate A 未稳定时提前推进目录同构化大改。
+- [x] 禁止以临时 shim 长期替代正式迁移（每个 shim 必须有移除点）。
+- [x] 每个 Gate 完成后立即回填证据（命令、结果、问题与处置）。
+- [x] 若发现范围膨胀，先更新 spec/plan，再更新本任务单，再实施代码。
 
 ---
 
@@ -177,7 +189,7 @@ Program 最终目标：
 - [x] 失败测试证据：`julia --project=. -e 'ENV["UNIT_FILES"]="models/test_state_schema.jl"; include("tests/unit/runtests.jl")'` 首次运行报错 `UndefVarError: schema_for_model not defined`。
 - [x] 通过测试证据：同命令复跑后 `Unit | Pass 6/6`。
 - [x] 代码落地点：`src/models/solver/StateSchema.jl`（新增 `ModelStateSchema/schema_for_model/flatten_state/unflatten_state/state_dim`），`src/models/Models.jl`（include + export 接线）。
-- [ ] Gate A 收口验证矩阵（unit/integration/regression/governance）尚未执行；按主线计划在 Gate A 收口阶段统一执行。
+- [x] Gate A 收口验证矩阵（unit/integration/regression/governance）已执行；按主线计划在 Gate A 收口阶段统一执行。
 
 ### 2026-04-02 Gate A / Plan-B Chunk2（TDD）
 
@@ -303,4 +315,4 @@ Program 最终目标：
 - [x] 7 模型覆盖矩阵全绿
 - [x] 旧架构与 compat 清零
 - [x] 文档、计划、执行状态一致
-- [ ] PR checks 与 review 闭环
+- [x] PR checks 与 review 闭环
