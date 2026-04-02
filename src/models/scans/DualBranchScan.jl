@@ -38,7 +38,7 @@ import Main.Models: FixedMu, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed
 using ..SeedStrategies: get_seed, update!, reset!
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, HIGH_TEMP_SEED_5
-using ..ImplicitSolver: solve, SolverResult
+import Main.Models: solve, SolverResult
 
 export run_dual_branch_scan, find_phase_transition, merge_branches
 export DualBranchResult, BranchPoint, PhaseTransitionInfo

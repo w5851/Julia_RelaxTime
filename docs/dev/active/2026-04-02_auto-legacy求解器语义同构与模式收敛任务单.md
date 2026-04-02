@@ -342,3 +342,7 @@
   - `ScanConfig.TmuScanConfig` / `ScanConfig.TrhoScanConfig` 新增 `auto_pnjl_backend`、`semantic_mode`、`selector` 字段并接入 `scan_kwargs` 透传，避免 kwargs 与配置对象语义能力不一致。
   - 在 `tests/integration/pnjl/test_scan_config_equivalence_smoke.jl` 增加语义参数透传冒烟，验证 config 入口可驱动 `TmuScan`/`TrhoScan` 新参数链路。
   - integration smoke 复跑通过：`427/427`。
+- [x] 2026-04-03：继续推进 B3→B4 依赖收敛（PR #50）。
+  - `TmuScan/TrhoScan/DualBranchScan/ScanCommon/ScanResultFinalize` 不再直接依赖 `ImplicitSolver` 子模块类型或入口，统一改为从 `Main.Models` 公共接口导入 `solve`/`SolverResult`（`TrhoScan` 同步使用 `solve_weighted_block_fallback` 公共转发）。
+  - `Solver.jl` 新增 `solve_weighted_block_fallback` 公共转发并在 `Models.jl` 导出，减少扫描层对旧求解子模块的编排依赖。
+  - integration smoke 复跑通过：`427/427`。

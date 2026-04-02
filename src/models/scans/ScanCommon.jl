@@ -5,7 +5,7 @@ using Printf
 import Main.Models: ConstraintMode
 using ..SeedStrategies: SeedStrategy
 import ..SeedStrategies: get_seed
-using ..ImplicitSolver: SolverResult
+import Main.Models: SolverResult
 
 export fmt
 export clean_message

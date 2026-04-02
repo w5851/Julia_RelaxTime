@@ -122,6 +122,7 @@ function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwar
 end
 
 @inline create_implicit_solver(; kwargs...) = ImplicitSolver.create_implicit_solver(; kwargs...)
+@inline solve_weighted_block_fallback(args...; kwargs...) = ImplicitSolver.solve_weighted_block_fallback(args...; kwargs...)
 @inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) = ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)
 @inline solve_with_root_diagnostics(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...) = ImplicitSolver.solve_with_root_diagnostics(mode, T_fm, μ_fm; kwargs...)
 @inline solve_with_root_diagnostics(mode::FixedRho, T_fm::Real; kwargs...) = ImplicitSolver.solve_with_root_diagnostics(mode, T_fm; kwargs...)

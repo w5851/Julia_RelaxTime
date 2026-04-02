@@ -37,7 +37,7 @@ using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, HybridContinu
 using ..SeedStrategies: get_seed, update!, reset!, extend_seed
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
-using ..ImplicitSolver: solve, SolverResult, solve_weighted_block_fallback
+import Main.Models: solve, SolverResult, solve_weighted_block_fallback
 using ..ScanCommon
 using ..ScanConfig: TrhoScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged

@@ -38,7 +38,7 @@ using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
 using ..SeedStrategies: auto_phase_hint
 using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
-using ..ImplicitSolver: solve, SolverResult
+import Main.Models: solve, SolverResult
 using ..ScanCommon
 using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
