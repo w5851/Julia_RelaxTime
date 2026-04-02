@@ -124,6 +124,29 @@
 - [ ] unit/integration/regression/governance 与 benchmark 冒烟通过。
 - [ ] 旧求解实现完成下线：无 `ImplicitSolver` 直接业务依赖、无 PNJL 特判回退主路径。
 
+### 7.1 PR-0 准入硬门槛（R1 前置冻结）
+
+- [x] FixedRho 精度护栏（关键点：`T=90/110/130 MeV`, `rho*=0.2/0.6/1.0`）：
+  - [x] `residual_norm <= 1e-6`（目标 `<= 1e-8`）
+  - [x] `abs(rho_norm - rho_target) <= 1e-6`
+- [x] 多初值候选治理固定排序（可重复）：
+  - [x] `hard_constraint_ok` 优先
+  - [x] `residual_norm` 最小优先
+  - [x] `pressure` 最大优先
+  - [x] `seed_index` 最小优先（缺省回退到候选枚举顺序）
+- [x] `auto/models/legacy` 同语义对照矩阵通过：
+  - [x] 收敛一致性
+  - [x] 关键热力学量容差内一致
+  - [x] 分支标签/选择口径一致（当前链路无显式分支标签，按同候选治理口径核对）
+
+### 7.2 PR-0 停止线
+
+- [x] 任一关键点未满足 FixedRho 精度护栏。（未触发）
+- [x] 任一对照点 `auto/models/legacy` 语义不一致。（未触发）
+- [x] regression smoke 相比上一基线出现退化。（未触发）
+
+触发任一停止线：禁止进入 R1，先修复并补齐证据。
+
 ---
 
 ## 8. 验证命令（草案）
@@ -270,3 +293,13 @@
 
 - [x] 2026-04-02：基于当前 PR #47 讨论，确认差异根因是“同语义的两套数值问题定义”未收敛，而非物理目标主动分叉。
 - [x] 2026-04-02：冻结本任务单，明确下一阶段以“组件拼接约束 + 单一求解器双模式（M1/M2）”为主线推进。
+- [x] 2026-04-02：完成 PR-0 硬门槛固化与护栏测试接线。
+  - 新增 `tests/regression/models/test_fixedrho_precision_guard_regression.jl`，覆盖 `T=90/110/130 MeV` + `rho*=0.2/0.6/1.0` 关键点。
+  - 新增 `tests/unit/models/test_multiseed_candidate_governance.jl`，冻结 `hard_constraint > residual > pressure > seed_index` 规则。
+  - 新增 `tests/integration/models/test_solver_backend_semantic_parity_guard.jl`，对照 `auto/models/legacy` 同语义一致性。
+  - `tests/regression/runtests.jl` 与 `tests/integration/runtests.jl` 已接线新护栏测试。
+- [x] 2026-04-02：PR-0 验证矩阵执行通过（R1 准入通过）。
+  - unit smoke：`781/781` 通过。
+  - integration smoke：`394/394` 通过。
+  - regression smoke：`512 pass, 1 broken(optional fixture)`，与既有可选跳过口径一致。
+  - 文档治理：`check_docs_consistency.jl` 与 `check_active_docs_governance.jl` 均通过。

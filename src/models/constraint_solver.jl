@@ -95,6 +95,46 @@ end
 function select_pressure_max_candidate(candidates::AbstractVector, params=nothing, context=nothing)
     isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
 
+    candidate_seed_index(cand, fallback::Int) = if hasproperty(cand, :seed_index)
+        Int(getproperty(cand, :seed_index))
+    else
+        fallback
+    end
+
+    candidate_residual(cand) = begin
+        value = Float64(cand.residual_norm)
+        isfinite(value) ? value : Inf
+    end
+
+    candidate_pressure(cand) = begin
+        value = Float64(cand.pressure)
+        isfinite(value) ? value : -Inf
+    end
+
+    function better_candidate(cand, cand_idx::Int, best, best_idx::Int)
+        cand_ok = Bool(cand.hard_constraint_ok)
+        best_ok = Bool(best.hard_constraint_ok)
+        if cand_ok != best_ok
+            return cand_ok
+        end
+
+        cand_residual = candidate_residual(cand)
+        best_residual = candidate_residual(best)
+        if cand_residual != best_residual
+            return cand_residual < best_residual
+        end
+
+        cand_pressure = candidate_pressure(cand)
+        best_pressure = candidate_pressure(best)
+        if cand_pressure != best_pressure
+            return cand_pressure > best_pressure
+        end
+
+        cand_seed_index = candidate_seed_index(cand, cand_idx)
+        best_seed_index = candidate_seed_index(best, best_idx)
+        return cand_seed_index < best_seed_index
+    end
+
     passed = Int[]
     for i in eachindex(candidates)
         if Bool(candidates[i].hard_constraint_ok)
@@ -107,7 +147,7 @@ function select_pressure_max_candidate(candidates::AbstractVector, params=nothin
         selected = candidates[selected_idx]
         for i in passed[2:end]
             cand = candidates[i]
-            if cand.pressure > selected.pressure || (cand.pressure == selected.pressure && cand.residual_norm < selected.residual_norm)
+            if better_candidate(cand, i, selected, selected_idx)
                 selected_idx = i
                 selected = cand
             end
@@ -124,7 +164,7 @@ function select_pressure_max_candidate(candidates::AbstractVector, params=nothin
     selected = candidates[selected_idx]
     for i in eachindex(candidates)
         cand = candidates[i]
-        if cand.pressure > selected.pressure || (cand.pressure == selected.pressure && cand.residual_norm < selected.residual_norm)
+        if better_candidate(cand, i, selected, selected_idx)
             selected_idx = i
             selected = cand
         end
@@ -286,7 +326,7 @@ function _solve_constraint_fixedmu(
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check=physicality_check) : hard_constraints
 
     candidates = NamedTuple[]
-    for seed in seed_pool
+    for (seed_index, seed) in pairs(seed_pool)
         local raw
         try
             st = solve_gap(
@@ -313,7 +353,7 @@ function _solve_constraint_fixedmu(
                 t_num=t_num,
             )
             ok, failed = evaluate_hard_constraints(raw, rules)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok))
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
         catch
             raw = (
                 solution=Float64[],
@@ -329,7 +369,7 @@ function _solve_constraint_fixedmu(
                 residual_norm=Inf,
                 residual_norm_max=Float64(residual_norm_max),
             )
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], converged=false))
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], converged=false, seed_index=Int(seed_index)))
         end
     end
     selected = select_pressure_max_candidate(candidates)
