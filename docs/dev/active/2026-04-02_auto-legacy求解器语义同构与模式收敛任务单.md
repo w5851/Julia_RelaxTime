@@ -303,3 +303,4 @@
   - integration smoke：`394/394` 通过。
   - regression smoke：`512 pass, 1 broken(optional fixture)`，与既有可选跳过口径一致。
   - 文档治理：`check_docs_consistency.jl` 与 `check_active_docs_governance.jl` 均通过。
+- [x] 2026-04-02：创建 R1 开发分支 `feat/models-solver-semantic-convergence-r1`，按 stacked PR 方式基于 PR #48 开启下一轮功能开发（PR #49）。
