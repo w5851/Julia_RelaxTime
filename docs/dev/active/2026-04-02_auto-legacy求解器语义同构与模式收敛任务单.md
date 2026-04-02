@@ -225,7 +225,7 @@
 
 - [ ] 修改 `src/models/scans/TmuScan.jl`
   - [ ] `solver_backend=:auto` 仅选 backend，不改方程语义
-  - [ ] 新增 `semantic_mode` 透传（默认 `:ground_state`）
+  - [x] 新增 `semantic_mode` 透传（默认 `:ground_state`）
 
 - [ ] 修改 `src/models/scans/TrhoScan.jl`
   - [ ] 删除 PNJL 的历史特判路由（阶段开关保护后下线）
@@ -334,3 +334,7 @@
   - `solve_constraint` 对 `problem_spec` 新增类型校验，`FixedEntropy/FixedSigma/FixedAsymmetricRho` 统一复用 `problem_spec` override 主链适配逻辑。
   - `ProblemSpec` 非 `FixedRho` governed forward_solve 增加 `semantic_mode` selector 路由（`:ground_state` -> 压强优先，`:constrained_manifold` -> 残差优先），并支持自定义 `selector`。
   - `TrhoScan` 新增 `semantic_mode`/`selector` 透传到 models `ProblemSpec` 主链；补充 `tests/unit/models/test_trho_scan.jl` 与 `tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl` 覆盖参数校验与冒烟链路。
+- [x] 2026-04-03：继续推进 B3 扫描语义口径对齐（PR #50）。
+  - `TmuScan` 新增 `semantic_mode` 与 `selector` 参数并接入显式校验：当前 `FixedMu` 语义仅允许 `semantic_mode=:ground_state` 且 `selector=nothing`，避免 `auto` 路径产生隐式语义漂移。
+  - 新增 `tests/unit/models/test_tmu_scan.jl` 参数校验覆盖，并在 `tests/integration/pnjl/test_tmu_scan_smoke.jl` 增加非法 `semantic_mode` 冒烟断言。
+  - integration smoke 全量复跑通过：`427/427`。

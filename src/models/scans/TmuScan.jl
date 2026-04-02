@@ -107,6 +107,18 @@ end
     return nothing
 end
 
+@inline function _validate_semantic_mode(semantic_mode::Symbol, selector::Union{Nothing, Function})
+    (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
+        throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
+
+    semantic_mode === :ground_state ||
+        throw(ArgumentError("run_tmu_scan currently supports semantic_mode=:ground_state only for FixedMu workflow"))
+
+    selector === nothing ||
+        throw(ArgumentError("run_tmu_scan does not support custom selector; selector must be nothing"))
+    return nothing
+end
+
 @inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
@@ -164,6 +176,8 @@ function run_tmu_scan(;
     bootstrap_multiseed::Bool=true,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -171,6 +185,7 @@ function run_tmu_scan(;
     nlsolve_kwargs...
 )
     _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
+    _validate_semantic_mode(semantic_mode, selector)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()

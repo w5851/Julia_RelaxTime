@@ -5,14 +5,28 @@
 """
 const SolverResult = ImplicitSolver.SolverResult
 
-@inline function _forward_with_problem_spec_if_present(model::AbstractQCDModel, T_fm::Real, kwargs)
+@inline function _solve_with_problem_spec_default(
+    model::AbstractQCDModel,
+    mode::ConstraintMode,
+    T_fm::Real,
+    legacy_solver::Function,
+    kwargs,
+)
+    use_problem_spec = get(kwargs, :use_problem_spec, true)
+    use_problem_spec isa Bool || throw(ArgumentError("use_problem_spec must be Bool, got $(typeof(use_problem_spec))"))
+
+    forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec && k != :use_problem_spec)...)
+    if !use_problem_spec
+        return legacy_solver(forwarded)
+    end
+
     spec = get(kwargs, :problem_spec, nothing)
     if spec === nothing
-        return nothing
+        spec = build_problem_spec(mode)
+    else
+        spec isa ProblemSpec || throw(ArgumentError("problem_spec must be ProblemSpec or nothing, got $(typeof(spec))"))
     end
-    spec isa ProblemSpec || throw(ArgumentError("problem_spec must be ProblemSpec or nothing, got $(typeof(spec))"))
-    forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
-    return spec.forward_solve(model, T_fm; forward_kwargs...)
+    return spec.forward_solve(model, T_fm; forwarded...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
@@ -22,34 +36,44 @@ end
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     kwargs...)
-    if problem_spec !== nothing
-        return problem_spec.forward_solve(model, T_fm; kwargs...)
-    end
-    return _solve_constraint_fixedrho(model, T_fm, mode.rho_target; kwargs...)
+    merged = (; kwargs..., problem_spec=problem_spec)
+    return _solve_with_problem_spec_default(
+        model,
+        mode,
+        T_fm,
+        local_kwargs -> _solve_constraint_fixedrho(model, T_fm, mode.rho_target; local_kwargs...),
+        merged,
+    )
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; kwargs...)
-    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
-    if spec_result !== nothing
-        return spec_result
-    end
-    return _solve_constraint_fixedentropy(model, T_fm, mode.s_target; kwargs...)
+    return _solve_with_problem_spec_default(
+        model,
+        mode,
+        T_fm,
+        local_kwargs -> _solve_constraint_fixedentropy(model, T_fm, mode.s_target; local_kwargs...),
+        kwargs,
+    )
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; kwargs...)
-    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
-    if spec_result !== nothing
-        return spec_result
-    end
-    return _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; kwargs...)
+    return _solve_with_problem_spec_default(
+        model,
+        mode,
+        T_fm,
+        local_kwargs -> _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; local_kwargs...),
+        kwargs,
+    )
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
-    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
-    if spec_result !== nothing
-        return spec_result
-    end
-    return _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; kwargs...)
+    return _solve_with_problem_spec_default(
+        model,
+        mode,
+        T_fm,
+        local_kwargs -> _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; local_kwargs...),
+        kwargs,
+    )
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)

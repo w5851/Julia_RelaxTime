@@ -118,6 +118,53 @@ end
         @test_throws ArgumentError Models.solve_constraint(model, mode, 0.5; problem_spec=:invalid)
     end
 
+    @testset "solve_constraint defaults to ProblemSpec chain and supports legacy fallback" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        auto_spec = Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test haskey(auto_spec, :selection_reason)
+        @test haskey(auto_spec, :candidate_count)
+
+        legacy = Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=false,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test !haskey(legacy, :selection_reason)
+        @test !haskey(legacy, :candidate_count)
+
+        @test_throws ArgumentError Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=:yes,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+        )
+    end
+
     @testset "build_problem_spec non-rho forward_solve exposes governed metadata" begin
         model = Models.create_model(:PNJL)
         T_fm = 100.0 / 197.327
