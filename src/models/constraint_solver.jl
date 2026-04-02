@@ -326,7 +326,7 @@ function _solve_constraint_fixedmu(
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check=physicality_check) : hard_constraints
 
     candidates = NamedTuple[]
-    for (seed_index, seed) in pairs(seed_pool)
+    for (seed_index, seed) in enumerate(seed_pool)
         local raw
         try
             st = solve_gap(
