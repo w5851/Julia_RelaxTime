@@ -53,6 +53,48 @@ end
     @test split(line_kw, ',')[1:3] == split(line_cfg, ',')[1:3]
 end
 
+@testset "ScanConfig passthrough: semantic options" begin
+    tmp_dir = mktempdir()
+    out_tmu = joinpath(tmp_dir, "tmu_cfg_semantic.csv")
+    out_trho = joinpath(tmp_dir, "trho_cfg_semantic.csv")
+
+    cfg_tmu = PNJL.TmuScanConfig(
+        T_values=[90.0],
+        mu_values=[10.0],
+        xi_values=[0.0],
+        output_path=out_tmu,
+        overwrite=true,
+        resume=false,
+        solver_backend=:auto,
+        auto_pnjl_backend=:models,
+        semantic_mode=:ground_state,
+        p_num=10,
+        t_num=4,
+        nlsolve_kwargs=(iterations=60,),
+    )
+    stats_tmu = Models.run_tmu_scan(cfg_tmu)
+    @test stats_tmu.total == 1
+    @test stats_tmu.success == 1
+
+    cfg_trho = PNJL.TrhoScanConfig(
+        T_values=[90.0],
+        rho_values=[0.2],
+        xi_values=[0.0],
+        output_path=out_trho,
+        overwrite=true,
+        resume=false,
+        reverse_rho=false,
+        solver_backend=:models,
+        semantic_mode=:constrained_manifold,
+        p_num=10,
+        t_num=4,
+        nlsolve_kwargs=(iterations=60,),
+    )
+    stats_trho = Models.run_trho_scan(cfg_trho)
+    @test stats_trho.total == 1
+    @test stats_trho.success == 1
+end
+
 @testset "ScanConfig equivalence smoke: TrhoScan" begin
     tmp_dir = mktempdir()
     out_kw = joinpath(tmp_dir, "trho_kw.csv")

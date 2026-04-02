@@ -338,3 +338,7 @@
   - `TmuScan` 新增 `semantic_mode` 与 `selector` 参数并接入显式校验：当前 `FixedMu` 语义仅允许 `semantic_mode=:ground_state` 且 `selector=nothing`，避免 `auto` 路径产生隐式语义漂移。
   - 新增 `tests/unit/models/test_tmu_scan.jl` 参数校验覆盖，并在 `tests/integration/pnjl/test_tmu_scan_smoke.jl` 增加非法 `semantic_mode` 冒烟断言。
   - integration smoke 全量复跑通过：`427/427`。
+- [x] 2026-04-03：继续推进 B3 配置入口收敛（PR #50）。
+  - `ScanConfig.TmuScanConfig` / `ScanConfig.TrhoScanConfig` 新增 `auto_pnjl_backend`、`semantic_mode`、`selector` 字段并接入 `scan_kwargs` 透传，避免 kwargs 与配置对象语义能力不一致。
+  - 在 `tests/integration/pnjl/test_scan_config_equivalence_smoke.jl` 增加语义参数透传冒烟，验证 config 入口可驱动 `TmuScan`/`TrhoScan` 新参数链路。
+  - integration smoke 复跑通过：`427/427`。
