@@ -76,7 +76,10 @@ end
 # 物理性判据与兜底求解（Newton → Trust-Region）
 # ============================================================================
 
-@inline function _default_is_physical_solution(x_state::SVector{5, Float64}, masses::SVector{3, Float64}; phi_tol::Float64=1e-8)
+@inline function _default_is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
+    if length(x_state) < 5 || length(masses) < 3
+        return false
+    end
     Φ = x_state[4]
     Φbar = x_state[5]
     if !(isfinite(Φ) && isfinite(Φbar) && (-phi_tol <= Φ <= 1 + phi_tol) && (-phi_tol <= Φbar <= 1 + phi_tol))
@@ -216,18 +219,18 @@ end
 - `residual_norm::Float64`: 残差范数
 - `xi::Float64`: 各向异性参数
 """
-struct SolverResult
+struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
     mode::ConstraintMode
     converged::Bool
     solution::Vector{Float64}
-    x_state::SVector{5, Float64}
-    mu_vec::SVector{3, Float64}
+    x_state::VX
+    mu_vec::VM
     omega::Float64
     pressure::Float64
     rho_norm::Float64
     entropy::Float64
     energy::Float64
-    masses::SVector{3, Float64}
+    masses::MM
     iterations::Int
     residual_norm::Float64
     xi::Float64

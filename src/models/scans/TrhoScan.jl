@@ -151,8 +151,11 @@ end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol)::Symbol
-    return solver_backend === :auto ? :models : solver_backend
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+    if solver_backend !== :auto
+        return solver_backend
+    end
+    return model_kind === :PNJL ? :legacy : :models
 end
 
 # ============================================================================
@@ -203,7 +206,7 @@ function run_trho_scan(;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -380,7 +383,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -418,13 +421,13 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     hybrid_weighted_max_seed_candidates::Int=3,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
 
-    effective_solver_backend = _effective_solver_backend(solver_backend)
+    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
 
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
@@ -539,13 +542,13 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend)
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
 
@@ -616,7 +619,7 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -656,14 +659,14 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
         mode,
         Bool(result.converged),
         Float64.(result.solution),
-        SVector{5, Float64}(Tuple(Float64.(result.x_state))),
-        SVector{3, Float64}(Tuple(Float64.(result.mu_vec))),
+        Float64.(result.x_state),
+        Float64.(result.mu_vec),
         Float64(result.omega),
         Float64(result.pressure),
         Float64(result.rho_norm),
         Float64(result.entropy),
         Float64(result.energy),
-        SVector{3, Float64}(Tuple(Float64.(result.masses))),
+        Float64.(result.masses),
         Int(result.iterations),
         Float64(result.residual_norm),
         Float64(xi),

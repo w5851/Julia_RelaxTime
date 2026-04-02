@@ -42,7 +42,7 @@ export create_pnjl_implicit_solver
 export build_pnjl_fixedmu_adapters, build_pnjl_flavor_mu_adapters
 export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
-export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs, legacy_transport_c_p
+export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 export flavor_pressure_derivatives, conserved_charge_susceptibility
@@ -52,18 +52,12 @@ export chi_Q, chi1_Q, chi2_Q, chi3_Q, chi4_Q
 export chi_S, chi1_S, chi2_S, chi3_S, chi4_S
 export chi11_BQ, chi11_BS, chi11_QS
 export cumulant_B, baryon_Ssigma, baryon_kappa_sigma2
-export solve_fixedmu_constraint
-export solve_fixedrho_constraint
-export solve_fixedentropy_constraint
-export solve_fixedsigma_constraint
-export solve_fixedasymrho_constraint
 export default_hard_constraint_rules
 export evaluate_hard_constraints
 export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
-export solver_migration_map
-export solver_migration_status
+export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export ProblemSpec, build_problem_spec
 export HardRule, CandidateSelector, build_candidate_context
@@ -160,6 +154,7 @@ include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
+include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))
 include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
 include(joinpath(@__DIR__, "solver", "Conditions.jl"))

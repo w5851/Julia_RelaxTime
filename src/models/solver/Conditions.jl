@@ -17,7 +17,7 @@ using StaticArrays
 using ForwardDiff
 
 # 从 Models 域导入
-import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
+import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, ModelStateSchema, state_dim
 const cached_nodes = Main.Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
@@ -204,6 +204,45 @@ function build_conditions(mode::FixedRho, params::GapParams)
         rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
         rho_constraint = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
         
+        return [gap..., mu_eq1, mu_eq2, rho_constraint]
+    end
+end
+
+@inline function _extract_state_mu(schema::ModelStateSchema, x::AbstractVector; mu_dim::Int=3)
+    state_n = state_dim(schema)
+    total_expected = state_n + mu_dim
+    length(x) == total_expected || throw(ArgumentError("state+mu length mismatch: expected $total_expected, got $(length(x))"))
+
+    state_slice = @view x[1:state_n]
+    mu_slice = @view x[(state_n + 1):total_expected]
+    return state_slice, mu_slice
+end
+
+@inline function _gap_conditions_dynamic(x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+    if length(x_state) == 5 && length(mu_vec) == 3
+        return gap_conditions(SVector{5}(Tuple(x_state)), mu_vec, params)
+    end
+    throw(ArgumentError("schema-driven FixedRho conditions currently support PNJL-like dimensions only (state_dim=5, mu_dim=3), got state_dim=$(length(x_state)), mu_dim=$(length(mu_vec))"))
+end
+
+"""
+    build_conditions(mode::FixedRho, params::GapParams, schema::ModelStateSchema; mu_dim=3) -> Function
+
+基于 schema 的条件函数构建路径（迁移期接口）。
+"""
+function build_conditions(mode::FixedRho, params::GapParams, schema::ModelStateSchema; mu_dim::Int=3)
+    return (θ, x) -> begin
+        T_fm = θ[1]
+        x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
+        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
+            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+
+        gap = _gap_conditions_dynamic(x_state, mu_vec, local_params)
+        mu_eq1 = mu_vec[1] - mu_vec[2]
+        mu_eq2 = mu_vec[2] - mu_vec[3]
+        rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
+        rho_constraint = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
+
         return [gap..., mu_eq1, mu_eq2, rho_constraint]
     end
 end

@@ -73,36 +73,33 @@ Models.pnjl_module()
         @test result.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
     end
 
-    @testset "solve_fixedmu_constraint hard-deprecated" begin
-        m = Models.create_model(:NJL)
-        T = 0.5
-        seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
-        err = try
-            Models.solve_fixedmu_constraint(m, T, 0.0; seed_guess=seed, p_num=24, t_num=6)
-            nothing
-        catch exc
-            exc
-        end
-        @test err isa ArgumentError
-        @test occursin("hard-deprecated", sprint(showerror, err))
+    @testset "solve_constraint(FixedRho) PNJL 归一化密度收敛" begin
+        m = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        T_fm = 150.0 / Main.Constants_PNJL.ħc_MeV_fm
+        seed = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
+
+        result = Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            seed_guess=seed,
+            p_num=12,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+
+        @test result.converged
+        @test isfinite(result.rho_norm)
+        @test result.rho_norm ≈ 0.2 atol=1e-3
     end
 
-    # --- solve_fixedrho_constraint 接口存在 ---
-    @testset "solve_fixedrho_constraint 函数存在" begin
-        @test isdefined(Models, :solve_fixedrho_constraint)
-        @test Models.solve_fixedrho_constraint isa Function
-    end
-
-    @testset "solve_fixedentropy_constraint 函数存在" begin
-        @test isdefined(Models, :solve_fixedentropy_constraint)
-    end
-
-    @testset "solve_fixedsigma_constraint 函数存在" begin
-        @test isdefined(Models, :solve_fixedsigma_constraint)
-    end
-
-    @testset "solve_fixedasymrho_constraint 函数存在" begin
-        @test isdefined(Models, :solve_fixedasymrho_constraint)
+    @testset "legacy fixed-* APIs removed" begin
+        @test !isdefined(Models, :solve_fixedmu_constraint)
+        @test !isdefined(Models, :solve_fixedrho_constraint)
+        @test !isdefined(Models, :solve_fixedentropy_constraint)
+        @test !isdefined(Models, :solve_fixedsigma_constraint)
+        @test !isdefined(Models, :solve_fixedasymrho_constraint)
     end
 
     @testset "硬约束评估可解耦扩展" begin

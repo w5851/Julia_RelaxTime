@@ -27,6 +27,12 @@
 - 初值如何扩展
 - `solve` / `solve_constraint` 应该返回什么结构
 
+补充（Plan-B / Gate A 迁移期）：
+
+- `ModelStateSchema` 已作为状态字段布局的显式合同引入；
+- 推荐通过 `schema_for_model(model_kind)` + `flatten_state` / `unflatten_state` 处理状态向量映射；
+- 约束组装层开始支持 schema 驱动入口（例如 `build_conditions(mode, params, schema; mu_dim=...)`），用于逐步替代固定切片假设。
+
 ## `solve` 与 `solve_constraint`
 
 对多数调用方：
@@ -34,11 +40,11 @@
 - 固定化学势可直接使用 `solve(FixedMu(), ...)`
 - 其它约束模式同样可通过 `solve(mode, ...)` 使用标准求解入口
 
-而 `solve_constraint` 是进阶统一入口；`solve_fixed*constraint` 仍保留导出仅用于迁移查询，不建议业务调用：
+而 `solve_constraint` 是进阶统一入口：
 
 - `solve_constraint`
 
-> Wave-D 兼容清理策略：`solve_fixed*constraint` 处于 `hard_deprecated`，直接调用会抛出带迁移指引的 `ArgumentError`；统一主路径为 `solve_constraint`。
+> Plan-B / Gate A 当前主路径为 `solve_constraint`；旧 fixed-* compat 入口已从公开 API 中移除。
 
 这些接口更适合“我明确要控制某个约束求解子路径”的场景，而不是首页首屏主推荐入口。
 

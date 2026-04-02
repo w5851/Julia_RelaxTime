@@ -74,9 +74,5 @@ end
 end
 
 @inline as_relaxtime_inputs(q, t) = (quark_params=normalize_quark_params(q), thermo_params=normalize_thermo_params(t))
-function as_legacy_inputs(args...)
-    Base.depwarn("as_legacy_inputs is deprecated; use as_relaxtime_inputs instead.", :as_legacy_inputs)
-    return as_relaxtime_inputs(args...)
-end
 
 end # module

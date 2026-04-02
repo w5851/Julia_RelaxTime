@@ -578,7 +578,7 @@ function solve_gap_and_meson_point(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     mesons::Tuple{Vararg{Symbol}}=DEFAULT_MESONS,
     k_norm::Real=0.0,
     p_num::Int=DEFAULT_MOMENTUM_COUNT,

@@ -25,7 +25,7 @@
 - `Models.solve_gap`
 - `Models.solve`
 - `Models.solve_multi`
-- `Models.solve_constraint`（Wave-D 起固定模式变体 `solve_fixed*constraint` 为 hard-deprecated 兼容入口）
+- `Models.solve_constraint`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
 - `Models.SeedStrategy` 家族

@@ -7,18 +7,8 @@ if !isdefined(Main, :Models)
 end
 
 @testset "Wave-E unified scan stability regression" begin
-    legacy_entries = (
-        "scripts/pnjl/run_tmu_scan.jl",
-        "scripts/pnjl/run_dense_trho_scan.jl",
-        "scripts/pnjl/run_adaptive_trho_scan.jl",
-    )
-
-    for old_entry in legacy_entries
-        status = Main.Models.scan_workflow_migration_status(old_entry)
-        @test status.status == :removed
-        @test status.route == :unified_cli
-        @test status.removal_wave == :E
-    end
+    @test !isdefined(Main.Models, :scan_workflow_migration_map)
+    @test !isdefined(Main.Models, :scan_workflow_migration_status)
 
     model_kinds = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
     for model_kind in model_kinds

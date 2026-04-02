@@ -24,6 +24,7 @@
 
 - `Models.transport_workflow_module`
 - `Models.meson_workflow_module`
+- `Models.workflow_module_for`
 - `Models.workflow_param_adapters_module`
 - `Models.pnjl_module`
 
@@ -84,7 +85,7 @@ res = Models.solve_gap_and_meson_point(
 它们主要用于：
 
 - 获取底层 workflow 模块本体
-- 明确参数归一化与 legacy 适配职责
+- 明确参数归一化职责（`as_relaxtime_inputs`）
 - 做聚合入口边界检查或调试
 
 这些能力的职责边界见 [CoreConcepts.md](docs/api/models/workflows/CoreConcepts.md)。

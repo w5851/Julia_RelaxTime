@@ -8,9 +8,7 @@ const SCRIPT_PATH = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
     using Main.Models: TmuScanConfig
 
     if !isfile(SCRIPT_PATH)
-        migration = Main.Models.scan_workflow_migration_status("scripts/pnjl/run_tmu_scan.jl")
-        @test migration.status in (:removed, :archived)
-        @test occursin("scripts/models/run_unified_scan.jl", migration.unified_entry)
+        @test !isdefined(Main.Models, :scan_workflow_migration_status)
         return
     end
 
