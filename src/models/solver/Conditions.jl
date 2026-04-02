@@ -213,13 +213,16 @@ end
     total_expected = state_n + mu_dim
     length(x) == total_expected || throw(ArgumentError("state+mu length mismatch: expected $total_expected, got $(length(x))"))
 
-    if state_n == 5 && mu_dim == 3
-        x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
-        mu_vec = SVector{3}(x[6], x[7], x[8])
-        return x_state, mu_vec
-    end
+    state_slice = @view x[1:state_n]
+    mu_slice = @view x[(state_n + 1):total_expected]
+    return state_slice, mu_slice
+end
 
-    throw(ArgumentError("schema-driven conditions currently support state_dim=5 and mu_dim=3, got state_dim=$state_n, mu_dim=$mu_dim"))
+@inline function _gap_conditions_dynamic(x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+    if length(x_state) == 5 && length(mu_vec) == 3
+        return gap_conditions(SVector{5}(Tuple(x_state)), mu_vec, params)
+    end
+    throw(ArgumentError("schema-driven FixedRho conditions currently support PNJL-like dimensions only (state_dim=5, mu_dim=3), got state_dim=$(length(x_state)), mu_dim=$(length(mu_vec))"))
 end
 
 """
@@ -234,7 +237,7 @@ function build_conditions(mode::FixedRho, params::GapParams, schema::ModelStateS
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
 
-        gap = gap_conditions(x_state, mu_vec, local_params)
+        gap = _gap_conditions_dynamic(x_state, mu_vec, local_params)
         mu_eq1 = mu_vec[1] - mu_vec[2]
         mu_eq2 = mu_vec[2] - mu_vec[3]
         rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)

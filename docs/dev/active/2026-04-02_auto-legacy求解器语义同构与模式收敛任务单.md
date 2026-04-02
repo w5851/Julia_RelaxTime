@@ -1,0 +1,272 @@
+# auto/legacy 求解器语义同构与模式收敛任务单
+
+## 1. 背景与目标
+
+本任务单聚焦你指出的核心问题：`legacy` 与 `auto`（models 路径）在同一物理语义下出现行为差异。目标不是继续打补丁维持双轨，而是把“约束问题定义”收敛为单一可组合框架。
+
+本期目标：
+
+- [ ] 统一 `FixedRho` 在 `legacy` 与 `models` 下的数值问题定义（语义同构，不要求实现细节完全同构）。
+- [ ] 建立“基础驻点约束 + 约束组件拼接”的通用残差组装机制，去除维度写死假设。
+- [ ] 给出求解器模式收敛结论：收敛为“两类语义模式”还是“一个求解器下两种大模式”。
+- [ ] 明确 continuity 仅作为策略层（seed/branch tracking），不再作为语义模式。
+- [ ] 最终目标：完全移除旧求解实现与旧路由特判（不保留长期 legacy 双轨）。
+
+---
+
+## 2. 范围与非范围
+
+### 2.1 本期范围
+
+- [ ] `src/models/solver` 与 `src/models/constraint_solver.jl` 的约束组装与求解主链收敛。
+- [ ] `FixedMu/FixedRho/FixedAsymmetricRho/FixedEntropy/FixedSigma` 的约束组件抽象统一。
+- [ ] 扫描入口 `TmuScan/TrhoScan/DualBranchScan` 的 backend 选择口径与行为对齐。
+- [ ] 覆盖 unit/integration/regression 的最小验证矩阵与 benchmark 冒烟证据。
+
+### 2.2 非范围
+
+- [ ] 不新增新的模型物理项（仅重构求解/约束工程结构）。
+- [ ] 不在本期引入新的扫描类型或数据格式。
+- [ ] 不扩大到与该问题无关的大规模目录重排。
+
+---
+
+## 3. 现状诊断（冻结）
+
+- [x] `legacy` FixedRho：当前为联立残差求解主链（等价 8 维语义）。
+- [x] `models` FixedRho：当前为外层 `μ` 一维根 + 内层 gap 解的分层链路。
+- [x] 两条链路虽物理目标一致，但数值问题定义不同，导致收敛域与分支选择差异。
+- [x] `rho_norm` 归一化曾存在实现偏差（已修复），属于差异放大因子而非唯一根因。
+- [x] `auto` 对 PNJL 的路由已临时回退到 `legacy`，属于稳定性兜底，不是终态方案。
+
+---
+
+## 4. 设计约束（必须满足）
+
+- [ ] 禁止写死“5/3/8”维度切片作为通用逻辑前提。
+- [ ] 约束系统必须由组件拼接：
+  - [ ] 基础驻点约束（`∂Ω/∂x_state = 0`）
+  - [ ] 化学势关系约束（如 `μ_u=μ_d=μ_s`、或不对称关系）
+  - [ ] 宏观目标约束（如 `n_B`、`s`、`σ`）
+- [ ] 组件数量与维度由 mode/schema 决定，不由文件内常量硬编码。
+- [ ] continuity 归类为“求解策略插件”，不得承担语义定义职责。
+
+---
+
+## 5. 任务分解（可勾选）
+
+### A0：约束组件抽象层（先测试后实现）
+
+- [ ] 新增失败单测：约束组件可声明输出维度、依赖变量域（state/mu/thermo）。
+- [ ] 定义约束组件契约（建议：`constraint_dim`, `eval_constraint!`, `constraint_name`）。
+- [ ] 将现有 `Fixed*` mode 映射为组件列表，而非写死残差函数。
+- [ ] 验证组件拼接后 residual 总维度一致性（静态检查 + 运行时检查）。
+
+### A1：ProblemSpec 主链收敛
+
+- [ ] 新增失败测试：`build_problem_spec(mode)` 生成的 residual 能覆盖 `FixedRho/FixedAsymmetricRho`。
+- [ ] 将 `ProblemSpec` 从占位结构升级为执行主链（residual/forward_solve/postprocess 同步接线）。
+- [ ] 让 `solve_constraint` 统一走 `ProblemSpec`，仅保留必要适配层。
+- [ ] 对旧特化路径加迁移标记，禁止继续扩散新逻辑。
+
+### A2：FixedRho 同构化改造
+
+- [ ] 新增失败回归：同点同 seed 下 `legacy` 与 `models` 的 residual 口径一致（容差内）。
+- [ ] 将 `models FixedRho` 改为组件拼接后的联立约束主链（而非外1维内5维特化主链）。
+- [ ] 保留可控 fallback，但 fallback 仅做数值稳健兜底，不改变语义定义。
+- [ ] 补充 branch 选择与候选治理规则（pressure/physicality/residual 的统一优先级）。
+
+### A3：扫描入口与 backend 语义收敛
+
+- [ ] 新增失败 integration：`solver_backend=:auto` 与显式 backend 在语义一致时结果一致。
+- [ ] 统一 `auto` 解释为“按 model capability 选实现，不改语义定义”。
+- [ ] 去除 PNJL 上仅因历史差异导致的永久路由特判（以阶段开关受控下线）。
+
+### A4：验证、文档与治理
+
+- [ ] unit：覆盖组件拼接、维度检查、FixedRho/AsymRho 等价性。
+- [ ] integration：覆盖 T-μ/T-ρ 扫描行为与 auto/backend 一致性。
+- [ ] regression：覆盖关键固定点与首阶附近点的分支稳定性。
+- [ ] benchmark：`scripts/perf/pnjl/scan_perf.jl` 收敛率基线不退化。
+- [ ] 同步 `docs/api/models/solver/*` 与相关迁移文档口径。
+
+---
+
+## 6. 架构决策讨论：两类模式 vs 一个求解器两种大模式
+
+### 6.1 备选方案
+
+- [ ] 方案 S1：两个独立求解器（ground-state solver / manifold solver）。
+- [x] 方案 S2：一个统一求解器内的两种语义模式（推荐）。
+
+### 6.2 推荐结论（当前）
+
+- [x] 推荐 S2：单一求解器框架 + 两种语义模式。
+- [x] 语义模式 M1：`GroundState`（物理约束下 Ω 极小优选）。
+- [x] 语义模式 M2：`ConstrainedManifold`（物理约束下返回稳定/亚稳可行分支集）。
+- [x] continuity 定位：策略层（seed continuity / branch tracking / warm start），不是 M1/M2 之一。
+
+### 6.3 选择 S2 的原因
+
+- [x] 避免两套求解器重复维护 residual/thermo/postprocess 逻辑。
+- [x] 可共享同一约束组件拼接内核，降低 `legacy` 与 `auto` 漂移概率。
+- [x] 在首阶附近可由同一内核输出候选集，再按模式进行 selector 分流。
+- [x] 更利于将来扩展非三味化学势关系，不会绑死在“8 维 PNJL 特例”。
+
+---
+
+## 7. 验收标准
+
+- [ ] `FixedRho` 在 `legacy/models/auto` 下语义一致，差异仅限数值容差内。
+- [ ] 约束残差构造不依赖固定维度常量，组件可组合并通过维度一致性检查。
+- [ ] `auto` 不再作为“行为差异入口”，仅作为实现路由入口。
+- [ ] M1/M2 模式边界清晰，continuity 被验证为策略层能力。
+- [ ] unit/integration/regression/governance 与 benchmark 冒烟通过。
+- [ ] 旧求解实现完成下线：无 `ImplicitSolver` 直接业务依赖、无 PNJL 特判回退主路径。
+
+---
+
+## 8. 验证命令（草案）
+
+- [ ] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_components.jl,models/test_problem_spec_modes.jl"; include("tests/unit/runtests.jl")'`
+- [ ] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl"; include("tests/unit/runtests.jl")'`
+- [ ] `julia --project=. -e 'include("tests/integration/models/test_dimension_agnostic_scan_smoke.jl")'`
+- [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+- [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [ ] `julia --project=. scripts/perf/pnjl/scan_perf.jl`
+- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+
+---
+
+## 9. DoD
+
+- [ ] 任务项与验收项全部勾选。
+- [ ] 核心差异问题（legacy vs auto）有可复现实验前后对照证据。
+- [ ] 架构模式（M1/M2）在代码与文档中均有单一口径。
+- [ ] 无新增长期双轨与隐式 fallback 语义漂移点。
+- [ ] 旧实现物理移除完成（含代码、导出、文档与测试口径收敛）。
+
+---
+
+## 10. 可执行实现蓝图（文件级）
+
+### 10.1 目标架构（单求解器 + 双语义模式）
+
+- [ ] 新增 `SolveSemanticMode`：`GroundState`、`ConstrainedManifold`。
+- [ ] 约束改为组件拼接：`Stationarity` + `MuRelations` + `MacroTargets`。
+- [ ] `ConstraintMode` 只表达业务约束目标；不再直接绑定固定维度残差实现。
+- [ ] continuity/multiseed/branch tracking 统一归入 strategy 插件层。
+
+### 10.2 文件改动清单（建议顺序）
+
+#### B0：约束组件层（新增）
+
+- [ ] 新增 `src/models/solver/ConstraintComponents.jl`
+  - [ ] `AbstractConstraintComponent`
+  - [ ] `constraint_dim(component, schema)`
+  - [ ] `eval_constraint!(F, offset, component, state_ctx)`
+  - [ ] 内置组件：
+    - [ ] `StationarityComponent`
+    - [ ] `EqualMuComponent` / `LinearMuRelationComponent`
+    - [ ] `FixedBaryonDensityComponent`
+    - [ ] `FixedEntropyComponent`
+    - [ ] `FixedSigmaComponent`
+    - [ ] `AsymmetricDensityComponent`
+
+#### B1：组装与契约层（扩展）
+
+- [ ] 扩展 `src/models/solver/ProblemSpec.jl`
+  - [ ] `ConstraintAssembly`
+  - [ ] `build_constraint_assembly(mode, schema; kwargs...)`
+  - [ ] `build_residual_from_assembly!(assembly, ...)`
+  - [ ] `solver_spec(mode; semantic, strategy, selector, backend)`
+
+- [ ] 扩展 `src/models/solver/ConstraintModes.jl`
+  - [ ] mode -> 默认 `MuRelations` 映射函数（不写死三味相等）
+  - [ ] 增加 mode 级参数校验入口（防止无效组合静默通过）
+
+#### B2：执行主链（收敛）
+
+- [ ] 重构 `src/models/solver/Solver.jl`
+  - [ ] `solve_constraint` 统一走 `ProblemSpec/SolverSpec` 主链
+  - [ ] 对外保留兼容签名，但内部不再分流到旧特化实现
+
+- [ ] 重构 `src/models/constraint_solver.jl`
+  - [ ] 逐步移除 `_solve_constraint_fixedrho` 外1维/内5维主路径
+  - [ ] 改为“联立 residual + 统一候选治理/fallback”
+  - [ ] 将 fallback 下沉为 backend 细节，不改变语义定义
+
+#### B3：扫描入口与路由（收敛）
+
+- [ ] 修改 `src/models/scans/TmuScan.jl`
+  - [ ] `solver_backend=:auto` 仅选 backend，不改方程语义
+  - [ ] 新增 `semantic_mode` 透传（默认 `:ground_state`）
+
+- [ ] 修改 `src/models/scans/TrhoScan.jl`
+  - [ ] 删除 PNJL 的历史特判路由（阶段开关保护后下线）
+  - [ ] 支持 `semantic_mode=:constrained_manifold` 返回候选集/标签
+
+- [ ] 修改 `src/models/scans/DualBranchScan.jl`
+  - [ ] 用 `semantic_mode + selector` 显式表达双分支扫描行为
+
+#### B4：旧实现下线（最终目标）
+
+- [ ] 清理 `src/models/solver/ImplicitSolver.jl` 的业务入口角色（先冻结、后删除）。
+- [ ] 移除 `Models.jl` 中对旧路径的导出/接线依赖。
+- [ ] 移除临时兼容开关与 legacy-only fallback 分支。
+- [ ] 文档统一更新：不再暴露 legacy solver 作为推荐或默认。
+
+### 10.3 测试新增与迁移清单
+
+#### Unit（新增）
+
+- [ ] `tests/unit/models/test_constraint_components.jl`
+  - [ ] 组件维度声明与拼接顺序稳定
+  - [ ] 组件依赖域校验（state/mu/thermo）
+
+- [ ] `tests/unit/models/test_problem_spec_semantic_modes.jl`
+  - [ ] `GroundState` 与 `ConstrainedManifold` 返回契约
+  - [ ] selector 排序优先级可重复
+
+- [ ] `tests/unit/models/test_mu_relations_component.jl`
+  - [ ] 相等关系/线性关系/不对称关系约束正确
+
+#### Integration（新增）
+
+- [ ] `tests/integration/models/test_solver_auto_backend_semantic_parity.jl`
+  - [ ] 同语义下 `auto` 与显式 backend 结果一致（容差内）
+
+- [ ] `tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`
+  - [ ] 同一扫描点验证 `GroundState` 单解与 `Manifold` 多解关系
+
+#### Regression（新增）
+
+- [ ] `tests/regression/models/test_fixedrho_semantic_equivalence_regression.jl`
+  - [ ] 关键固定点 legacy-era 基线对齐（迁移期）
+
+- [ ] `tests/regression/models/test_firstorder_manifold_branch_stability.jl`
+  - [ ] 首阶附近分支可重复识别与排序稳定
+
+### 10.4 阶段里程碑（含移除旧实现）
+
+- [ ] R1：组件层与 ProblemSpec 主链可运行，旧路径仍保留只读镜像。
+- [ ] R2：`FixedRho` 主路径切换到新链，`auto` 与显式 backend 语义一致。
+- [ ] R3：扫描层语义参数化完成，PNJL 历史特判移除。
+- [ ] R4：旧实现彻底删除（代码/导出/文档/测试全部收敛）。
+
+### 10.5 回滚与安全阈值
+
+- [ ] 回滚策略：仅允许回滚到“新链+旧链并存但新链默认”的前一里程碑，不回到永久 legacy 默认。
+- [ ] 停止线：
+  - [ ] `scan_perf.jl` 收敛率显著退化
+  - [ ] regression 首阶分支不稳定
+  - [ ] docs/governance 检查失败
+- [ ] 任一停止线触发时，冻结下一里程碑推进，先修复当前阶段。
+
+---
+
+## 11. 执行记录（append-only）
+
+- [x] 2026-04-02：基于当前 PR #47 讨论，确认差异根因是“同语义的两套数值问题定义”未收敛，而非物理目标主动分叉。
+- [x] 2026-04-02：冻结本任务单，明确下一阶段以“组件拼接约束 + 单一求解器双模式（M1/M2）”为主线推进。

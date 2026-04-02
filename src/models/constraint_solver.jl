@@ -8,6 +8,9 @@ using StaticArrays
 using NLsolve
 using ForwardDiff
 using Statistics: mean
+using Main.Constants_PNJL: ρ0_inv_fm3
+
+const rho0 = ρ0_inv_fm3
 
 const HardConstraintRule = Function
 
@@ -406,7 +409,7 @@ function _solve_constraint_fixedrho(
 
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
         rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
-        rho_norm = sum(rho_vec) / 3.0
+        rho_norm = sum(rho_vec) / (3.0 * rho0)
 
         pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
@@ -427,59 +430,275 @@ function _solve_constraint_fixedrho(
         return nothing
     end
 
-    res = try
-        nlsolve(
-            residual_fn!,
-            [Float64(mu0)];
-            autodiff=:forward,
-            method=nlsolve_method,
-            xtol=1e-9,
-            ftol=1e-9,
-            nlsolve_kwargs...,
-        )
-    catch
-        if nlsolve_method === :trust_region
-            rethrow()
+    function run_outer_attempt(mu_init::Real, method::Symbol)
+        local res
+        try
+            res = nlsolve(
+                residual_fn!,
+                [Float64(mu_init)];
+                autodiff=:forward,
+                method=method,
+                xtol=1e-9,
+                ftol=1e-9,
+                nlsolve_kwargs...,
+            )
+        catch
+            return nothing
         end
-        nlsolve(
-            residual_fn!,
-            [Float64(mu0)];
-            autodiff=:forward,
-            method=:trust_region,
-            xtol=1e-9,
-            ftol=1e-9,
-            nlsolve_kwargs...,
+
+        _refresh_constraint_state!(residual_fn!, res.zero)
+
+        if st_ref[] === nothing || x_state_ref[] === nothing || mu_vec_ref[] === nothing ||
+           pressure_ref[] === nothing || rho_norm_ref[] === nothing || entropy_ref[] === nothing ||
+           energy_ref[] === nothing || masses_ref[] === nothing
+            return nothing
+        end
+
+        gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
+        gap_norm = sqrt(sum(abs2, gap_vec))
+        rho_residual = abs(rho_norm_ref[] - rho_target)
+        residual_norm = max(gap_norm, rho_residual)
+
+        omega_val = -pressure_ref[]
+        thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
+        phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
+        converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-4)
+
+        return (
+            mode=method,
+            converged=converged,
+            solution=Float64[
+                x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
+                mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
+            ],
+            x_state=x_state_ref[],
+            mu_vec=mu_vec_ref[],
+            omega=omega_val,
+            pressure=pressure_ref[],
+            rho_norm=rho_norm_ref[],
+            entropy=entropy_ref[],
+            energy=energy_ref[],
+            masses=masses_ref[],
+            iterations=res.iterations,
+            residual_norm=residual_norm,
         )
     end
 
-    _refresh_constraint_state!(residual_fn!, res.zero)
+    function evaluate_mu_candidate(mu_eval::Real)
+        μ_vec = normalize_mu_vec(mu_eval)
+        st = _solve_gap_with_outer_fallback(
+            model,
+            T_fm,
+            mu_eval;
+            st_prev=nothing,
+            seed_guess=seed_guess,
+            solver_primary=solver_primary,
+            solver_secondary=solver_secondary,
+            residual_norm_max=residual_norm_max,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
+        st === nothing && return nothing
 
-    gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
-    gap_norm = sqrt(sum(abs2, gap_vec))
-    rho_residual = abs(rho_norm_ref[] - rho_target)
-    residual_norm = max(gap_norm, rho_residual)
+        x_state = SVector{5}(Tuple(state_vector(st)))
+        pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
+        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
+        rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
+        rho_norm = sum(rho_vec) / (3.0 * rho0)
+        pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
+        entropy = ForwardDiff.derivative(pressure_T, T_fm)
+        energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
+        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
 
-    omega_val = -pressure_ref[]
-    thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
-    phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
-    converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-4)
+        gap_vec = gap_residual(model, st, T_fm, SVector{3}(Tuple(μ_vec)); xi=xi, p_num=p_num, t_num=t_num)
+        gap_norm = sqrt(sum(abs2, gap_vec))
+        rho_residual = abs(rho_norm - rho_target)
+        residual_norm = max(gap_norm, rho_residual)
+
+        omega_val = -pressure
+        thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
+        phys = physicality_check(x_state, masses) && thermo_finite
+        converged = phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-4)
+
+        return (
+            mode=:direct_mu,
+            converged=converged,
+            solution=Float64[
+                x_state[1], x_state[2], x_state[3], x_state[4], x_state[5],
+                μ_vec[1], μ_vec[2], μ_vec[3],
+            ],
+            x_state=x_state,
+            mu_vec=SVector{3}(Tuple(μ_vec)),
+            omega=omega_val,
+            pressure=pressure,
+            rho_norm=rho_norm,
+            entropy=entropy,
+            energy=energy,
+            masses=masses,
+            iterations=0,
+            residual_norm=residual_norm,
+        )
+    end
+
+    mu_seed = default_mu0_from_seed(seed_guess)
+    attempt_specs = Tuple{Float64, Symbol}[]
+    push!(attempt_specs, (Float64(mu0), nlsolve_method))
+    nlsolve_method !== :trust_region && push!(attempt_specs, (Float64(mu0), :trust_region))
+    push!(attempt_specs, (Float64(mu_seed), :trust_region))
+    for μ0 in (0.0, 0.2, 0.5, 0.8, 1.2, 1.6, 2.0)
+        push!(attempt_specs, (Float64(μ0), :trust_region))
+    end
+
+    best = nothing
+    for (mu_init, method) in attempt_specs
+        cand = run_outer_attempt(mu_init, method)
+        cand === nothing && continue
+        if best === nothing
+            best = cand
+            continue
+        end
+        if cand.converged && !best.converged
+            best = cand
+        elseif cand.converged == best.converged
+            if cand.residual_norm < best.residual_norm || (cand.residual_norm == best.residual_norm && cand.pressure > best.pressure)
+                best = cand
+            end
+        end
+    end
+
+    if best === nothing || !best.converged
+        mu_min = 0.0
+        mu_max = max(Float64(mu_seed), Float64(mu0), 2.0)
+        mu_grid = collect(range(mu_min, mu_max; length=25))
+        grid_candidates = NamedTuple[]
+        for μ in mu_grid
+            cand = evaluate_mu_candidate(μ)
+            cand === nothing && continue
+            push!(grid_candidates, cand)
+        end
+
+        if !isempty(grid_candidates)
+            for cand in grid_candidates
+                if best === nothing
+                    best = cand
+                elseif cand.converged && !best.converged
+                    best = cand
+                elseif cand.converged == best.converged
+                    if cand.residual_norm < best.residual_norm || (cand.residual_norm == best.residual_norm && cand.pressure > best.pressure)
+                        best = cand
+                    end
+                end
+            end
+
+            sort!(grid_candidates; by=c -> c.mu_vec[1])
+            for i in 1:(length(grid_candidates)-1)
+                c1 = grid_candidates[i]
+                c2 = grid_candidates[i + 1]
+                f1 = c1.rho_norm - rho_target
+                f2 = c2.rho_norm - rho_target
+                if !(isfinite(f1) && isfinite(f2))
+                    continue
+                end
+                if f1 == 0.0
+                    best = c1
+                    break
+                end
+                if f1 * f2 > 0.0
+                    continue
+                end
+
+                left = c1.mu_vec[1]
+                right = c2.mu_vec[1]
+                f_left = f1
+                for _ in 1:16
+                    mid = 0.5 * (left + right)
+                    cmid = evaluate_mu_candidate(mid)
+                    cmid === nothing && break
+
+                    if best === nothing
+                        best = cmid
+                    elseif cmid.converged && !best.converged
+                        best = cmid
+                    elseif cmid.converged == best.converged
+                        if cmid.residual_norm < best.residual_norm || (cmid.residual_norm == best.residual_norm && cmid.pressure > best.pressure)
+                            best = cmid
+                        end
+                    end
+
+                    f_mid = cmid.rho_norm - rho_target
+                    if abs(f_mid) <= max(Float64(residual_norm_max), 1e-4)
+                        break
+                    end
+                    if f_left * f_mid <= 0.0
+                        right = mid
+                    else
+                        left = mid
+                        f_left = f_mid
+                    end
+                end
+                break
+            end
+        end
+    end
+
+    best === nothing && throw(ArgumentError("FixedRho outer solve failed for all attempts"))
+
+    if !best.converged && model isa AbstractPNJLModel
+        seed_legacy = if length(seed_guess) >= 8
+            Float64.(seed_guess[1:8])
+        else
+            Main.Models.extend_seed(Float64.(seed_guess), Main.Models.FixedRho(rho_target))
+        end
+
+        legacy_result = try
+            Main.Models.solve(
+                Main.Models.FixedRho(rho_target),
+                T_fm;
+                xi=xi,
+                seed_strategy=Main.Models.DefaultSeed(seed_legacy, seed_legacy, :hadron),
+                p_num=p_num,
+                t_num=t_num,
+                nlsolve_method=nlsolve_method,
+                trust_region_fallback=true,
+                residual_norm_max=residual_norm_max,
+                nlsolve_kwargs...,
+            )
+        catch
+            nothing
+        end
+
+        if legacy_result !== nothing && legacy_result.converged
+            return (
+                converged=true,
+                solution=Float64.(legacy_result.solution),
+                x_state=legacy_result.x_state,
+                mu_vec=legacy_result.mu_vec,
+                omega=legacy_result.omega,
+                pressure=legacy_result.pressure,
+                rho_norm=legacy_result.rho_norm,
+                entropy=legacy_result.entropy,
+                energy=legacy_result.energy,
+                masses=legacy_result.masses,
+                iterations=legacy_result.iterations,
+                residual_norm=legacy_result.residual_norm,
+            )
+        end
+    end
 
     return (
-        converged=converged,
-        solution=Float64[
-            x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
-            mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
-        ],
-        x_state=x_state_ref[],
-        mu_vec=mu_vec_ref[],
-        omega=omega_val,
-        pressure=pressure_ref[],
-        rho_norm=rho_norm_ref[],
-        entropy=entropy_ref[],
-        energy=energy_ref[],
-        masses=masses_ref[],
-        iterations=res.iterations,
-        residual_norm=residual_norm,
+        converged=best.converged,
+        solution=best.solution,
+        x_state=best.x_state,
+        mu_vec=best.mu_vec,
+        omega=best.omega,
+        pressure=best.pressure,
+        rho_norm=best.rho_norm,
+        entropy=best.entropy,
+        energy=best.energy,
+        masses=best.masses,
+        iterations=best.iterations,
+        residual_norm=best.residual_norm,
     )
 end
 

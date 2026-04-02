@@ -73,6 +73,27 @@ Models.pnjl_module()
         @test result.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
     end
 
+    @testset "solve_constraint(FixedRho) PNJL 归一化密度收敛" begin
+        m = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        T_fm = 150.0 / Main.Constants_PNJL.ħc_MeV_fm
+        seed = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
+
+        result = Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            seed_guess=seed,
+            p_num=12,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+
+        @test result.converged
+        @test isfinite(result.rho_norm)
+        @test result.rho_norm ≈ 0.2 atol=1e-3
+    end
+
     @testset "legacy fixed-* APIs removed" begin
         @test !isdefined(Models, :solve_fixedmu_constraint)
         @test !isdefined(Models, :solve_fixedrho_constraint)

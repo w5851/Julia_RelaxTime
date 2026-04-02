@@ -59,38 +59,37 @@ const P = Models.pnjl_module()
     end
 
     @testset "solver backend defaults are model-agnostic" begin
-        out_tmu = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "scan", "tmu", "_tmp_models_default_tmu.csv")
-        out_trho = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl", "scan", "trho", "_tmp_models_default_trho.csv")
+        mktempdir() do tmpdir
+            out_tmu = joinpath(tmpdir, "_tmp_models_default_tmu.csv")
+            out_trho = joinpath(tmpdir, "_tmp_models_default_trho.csv")
 
-        mkpath(dirname(out_tmu))
-        mkpath(dirname(out_trho))
+            stats_tmu = Models.run_tmu_scan(
+                T_values=[150.0],
+                mu_values=[0.0],
+                xi_values=[0.0],
+                model_kind=:RPNJL,
+                output_path=out_tmu,
+                overwrite=true,
+                resume=false,
+                p_num=8,
+                t_num=4,
+            )
+            @test stats_tmu.total == 1
+            @test stats_tmu.success + stats_tmu.failure == 1
 
-        stats_tmu = Models.run_tmu_scan(
-            T_values=[150.0],
-            mu_values=[0.0],
-            xi_values=[0.0],
-            model_kind=:RPNJL,
-            output_path=out_tmu,
-            overwrite=true,
-            resume=false,
-            p_num=8,
-            t_num=4,
-        )
-        @test stats_tmu.total == 1
-        @test stats_tmu.success + stats_tmu.failure == 1
-
-        stats_trho = Models.run_trho_scan(
-            T_values=[150.0],
-            rho_values=[0.2],
-            xi_values=[0.0],
-            model_kind=:RPNJL,
-            output_path=out_trho,
-            overwrite=true,
-            resume=false,
-            p_num=8,
-            t_num=4,
-        )
-        @test stats_trho.total == 1
-        @test stats_trho.success + stats_trho.failure == 1
+            stats_trho = Models.run_trho_scan(
+                T_values=[150.0],
+                rho_values=[0.2],
+                xi_values=[0.0],
+                model_kind=:RPNJL,
+                output_path=out_trho,
+                overwrite=true,
+                resume=false,
+                p_num=8,
+                t_num=4,
+            )
+            @test stats_trho.total == 1
+            @test stats_trho.success + stats_trho.failure == 1
+        end
     end
 end

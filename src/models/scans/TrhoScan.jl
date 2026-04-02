@@ -151,8 +151,11 @@ end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol)::Symbol
-    return solver_backend === :auto ? :models : solver_backend
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+    if solver_backend !== :auto
+        return solver_backend
+    end
+    return model_kind === :PNJL ? :legacy : :models
 end
 
 # ============================================================================
@@ -424,7 +427,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     t_num,
     nlsolve_kwargs...)
 
-    effective_solver_backend = _effective_solver_backend(solver_backend)
+    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
 
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
@@ -545,7 +548,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend)
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
 
