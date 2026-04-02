@@ -128,7 +128,7 @@ end
 
 function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed_state::AbstractVector{<:Real};
         xi::Real=0.0,
-        solver_backend::Symbol=:legacy,
+        solver_backend::Symbol=:auto,
         p_num::Int=24,
         t_num::Int=8,
         residual_accept_tol::Float64=1e-6)
@@ -186,7 +186,7 @@ end
 
 function _pm_branch_rows_for_temperature(T_MeV::Real, mu_grid, seed_pair::PMSeedPair;
         xi::Real=0.0,
-        solver_backend::Symbol=:legacy,
+        solver_backend::Symbol=:auto,
         p_num::Int=24,
         t_num::Int=8,
         residual_accept_tol::Float64=1e-6,
@@ -393,7 +393,7 @@ function analyze_pm_branch_competition(;
         T_values,
         mu_grid,
         xi::Real=0.0,
-        solver_backend::Symbol=:legacy,
+        solver_backend::Symbol=:auto,
         p_num::Int=24,
         t_num::Int=8,
         seed_pair=nothing,

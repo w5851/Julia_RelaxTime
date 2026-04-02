@@ -53,7 +53,7 @@ if !isdefined(Main, :Constants_PNJL)
 end
 using Main.Constants_PNJL: G_fm2, K_fm5
 
-export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs, legacy_transport_c_p
+export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 
@@ -586,19 +586,6 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
     )
 end
 
-function legacy_transport_c_p(T_fm::Real, mu_fm::Real;
-                              xi::Real=0.0,
-                              p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                              t_num::Int=DEFAULT_THETA_COUNT,
-                              model=nothing)
-    return bulk_viscosity_coefficients(T_fm, mu_fm;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        model=model,
-    ).c_p
-end
-
 """
     compute_B_bracket(p, M, μq, T, v_n_sq, dμB_dT_sigma, dM_dT, dM_dμB; is_antiquark=false)
 
@@ -628,4 +615,3 @@ function compute_B_bracket(p::Real, M::Real, μq::Real, T::Real,
 end
 
 end # module ThermoDerivatives
-

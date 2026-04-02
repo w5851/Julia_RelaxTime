@@ -20,4 +20,4 @@
 
 说明：
 
-- `legacy_transport_c_p` 属于 derivatives 主题中的兼容层导出，不应被误读为首选用户入口。
+- `legacy_transport_c_p` 已从 `Models` 公开导出移除；请使用 `bulk_viscosity_coefficients(...).c_p`。

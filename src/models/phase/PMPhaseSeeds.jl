@@ -23,7 +23,7 @@ end
 function _pm_solve_seed_equilibrium(T_MeV::Real, mu_MeV::Real, seed0::AbstractVector{<:Real};
         branch::Symbol=:hadron,
         xi::Real=0.0,
-        solver_backend::Symbol=:legacy,
+        solver_backend::Symbol=:auto,
         p_num::Int=24,
         t_num::Int=8,
         residual_accept_tol::Float64=1e-6)
@@ -62,7 +62,7 @@ end
 
 function derive_pm_seed_pair(T_MeV::Real, mu_grid;
         xi::Real=0.0,
-        solver_backend::Symbol=:legacy,
+        solver_backend::Symbol=:auto,
         p_num::Int=24,
         t_num::Int=8,
         residual_accept_tol::Float64=1e-6)

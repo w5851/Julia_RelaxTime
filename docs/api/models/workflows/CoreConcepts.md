@@ -30,6 +30,7 @@
 
 - `transport_workflow_module`
 - `meson_workflow_module`
+- `workflow_module_for`
 - `pnjl_module`
 
 这些导出本质上是边界与调试接口，不是首页业务入口。它们的价值主要在于：
@@ -46,13 +47,12 @@
 
 - 校验 `QuarkParams` 与 `ThermoParams`
 - 转换成 workflow 内部稳定使用的 NamedTuple 结构
-- 提供 `as_legacy_inputs` 这类已弃用的兼容桥接能力
+- 提供 `as_relaxtime_inputs` 这类参数归一化桥接能力
 
-兼容说明：
+当前约定：
 
-- `as_legacy_inputs` 仅为历史调用方保留，已进入弃用窗口。
-- workflow 主路径与常规测试已切换到 `as_relaxtime_inputs`。
-- 该旧入口不再属于推荐使用的公开表面，只应在显式兼容场景下访问。
+- workflow 主路径与常规测试统一使用 `as_relaxtime_inputs`。
+- 不再保留 `as_legacy_inputs` 兼容别名，避免双轨入口长期并存。
 
 它的意义不在于“再提供一个业务入口”，而在于把参数归一化从 workflow 主逻辑里抽离出来。
 
@@ -119,3 +119,18 @@ meson workflow 的实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/m
 - 完全不知道这些导出存在，进而在调试和扩展时绕过统一入口自己做一套动态加载逻辑
 
 因此，本主题必须显式把它们定位为“公开但偏进阶的边界接口”。
+
+## 禁止抽象清单（Gate B 守卫）
+
+为保证“接口同构、内核异构”，以下做法在 Models workflow 层明确禁止：
+
+- 使用一个 flag-heavy 的超大函数覆盖全部模型内核分支。
+- 以统一命名/目录为理由删除模型特有物理语义或参数。
+- 以临时 shim 长期替代正式迁移路径且无明确移除点。
+- 在 workflow 适配层引入模型核心方程重写（应留在各模型 `core/`）。
+
+允许的统一化范围：
+
+- 统一入口签名与错误语义。
+- 统一模块访问器与参数归一化边界。
+- 统一 unit/integration/regression 模板与验收矩阵。

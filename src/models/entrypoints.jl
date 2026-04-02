@@ -10,7 +10,6 @@ Models 统一流程入口（阶段 C）：
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
-export scan_workflow_migration_map, scan_workflow_migration_status
 export default_scan_numeric_options, solve_pnjl_point
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
@@ -23,6 +22,7 @@ export transport_workflow_module, meson_workflow_module
 export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
+export workflow_module_for
 export pnjl_module
 export magnetic_thermodynamics_module
 
@@ -40,49 +40,6 @@ end
         error("MesonMassWorkflow module loaded but required API (solve_gap_and_meson_point) is missing")
     end
     return workflow
-end
-
-@inline function scan_workflow_migration_map()
-    return [
-        (
-            old_entry="scripts/pnjl/run_tmu_scan.jl",
-            new_entry="scripts/models/run_unified_scan.jl scan tmu --model_kind=...",
-            status=:removed,
-            removal_wave=:E,
-            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
-        ),
-        (
-            old_entry="scripts/pnjl/run_dense_trho_scan.jl",
-            new_entry="scripts/models/run_unified_scan.jl scan trho --model_kind=...",
-            status=:removed,
-            removal_wave=:E,
-            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
-        ),
-        (
-            old_entry="scripts/pnjl/run_adaptive_trho_scan.jl",
-            new_entry="scripts/models/run_unified_scan.jl scan trho --model_kind=...",
-            status=:removed,
-            removal_wave=:E,
-            removal_threshold="legacy script removed after unified CLI parity + smoke/regression + docs sync",
-        ),
-    ]
-end
-
-function scan_workflow_migration_status(old_entry::AbstractString)
-    for entry in scan_workflow_migration_map()
-        if entry.old_entry == old_entry
-            return (
-                old_entry=entry.old_entry,
-                unified_entry=entry.new_entry,
-                status=entry.status,
-                removal_wave=entry.removal_wave,
-                removal_threshold=entry.removal_threshold,
-                route=:unified_cli,
-                deprecation_ready=true,
-            )
-        end
-    end
-    throw(ArgumentError("unknown scan/workflow compatibility entry: $(old_entry)"))
 end
 
 function run_tmu_scan(args...; kwargs...)
@@ -257,4 +214,16 @@ end
         error("WorkflowParamAdapters module loaded but required API (normalize_quark_params) is missing")
     end
     return adapters
+end
+
+"""返回给定模型类型对应的 workflow 适配模块。"""
+@inline function workflow_module_for(model_kind::Symbol)
+    if model_kind === :Rotation
+        return rotation_workflow_module()
+    elseif model_kind === :GasLiquid
+        return gas_liquid_workflow_module()
+    elseif model_kind === :NJL || model_kind === :NJL2 || model_kind === :PNJL || model_kind === :PNJLMagnetic || model_kind === :RPNJL
+        return transport_workflow_module()
+    end
+    throw(ArgumentError("unsupported model kind for workflow module resolution: $(model_kind)"))
 end

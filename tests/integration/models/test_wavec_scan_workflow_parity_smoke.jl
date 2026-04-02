@@ -7,17 +7,11 @@ if !isdefined(Main, :Models)
 end
 
 @testset "Wave-C scan/workflow parity smoke" begin
-    @test isdefined(Main.Models, :scan_workflow_migration_status)
-
-    migration = Main.Models.scan_workflow_migration_status("scripts/pnjl/run_tmu_scan.jl")
-    @test migration.status in (:hard_deprecated, :removed, :archived)
-    @test migration.route in (:compat_adapter, :unified_cli)
-    @test migration.removal_wave in (:D, :E)
+    @test !isdefined(Main.Models, :scan_workflow_migration_status)
 
     tmu_script_path = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
     if !isfile(tmu_script_path)
-        @test migration.status in (:removed, :archived)
-        @test occursin("scripts/models/run_unified_scan.jl", migration.unified_entry)
+        @test true
         return
     end
 

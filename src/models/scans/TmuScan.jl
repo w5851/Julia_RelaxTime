@@ -156,7 +156,7 @@ function run_tmu_scan(;
     resume::Bool=true,
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -337,7 +337,7 @@ end
 
 """尝试多个初值候选"""
 function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -364,7 +364,7 @@ end
 
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, seed_state;
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -413,7 +413,7 @@ end
 
 """单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
 function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -458,7 +458,7 @@ end
 
 """精炼近似收敛的结果"""
 function _refine_result(T_fm, μ_fm, xi, result;
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -491,14 +491,14 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
         mode,
         Bool(result.converged),
         Float64.(result.solution),
-        SVector{5, Float64}(Tuple(Float64.(result.x_state))),
-        SVector{3, Float64}(Tuple(Float64.(result.mu_vec))),
+        Float64.(result.x_state),
+        Float64.(result.mu_vec),
         Float64(result.omega),
         Float64(result.pressure),
         Float64(result.rho_norm),
         Float64(result.entropy),
         Float64(result.energy),
-        SVector{3, Float64}(Tuple(Float64.(result.masses))),
+        Float64.(result.masses),
         Int(result.iterations),
         Float64(result.residual_norm),
         Float64(xi),

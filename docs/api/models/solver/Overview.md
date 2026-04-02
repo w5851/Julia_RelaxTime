@@ -71,7 +71,7 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 ### 进阶使用者
 
 - `solve_multi`
-- `solve_constraint`（固定模式变体 `solve_fixed*constraint` 在 Wave-D 为 hard-deprecated）
+- `solve_constraint`
 - `MeanFieldState` / `state_vector` / `normalize_mu_vec`
 
 ### 维护者或算法开发者
@@ -85,3 +85,9 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 - phase 主题、workflow 主题、scans 主题都建立在本主题定义的求解合同之上
 - 如果你先理解本主题，再去看 [../workflows/README.md](../workflows/README.md) 或 [../scans/README.md](../scans/README.md)，会更容易看清哪些是“业务流程入口”，哪些是“核心求解公共表面”
+
+## 迁移期契约说明（Plan-B / Gate A）
+
+- `SolverResult` 已从固定 `SVector{5}/SVector{3}` 扩展为向量泛型字段，结果消费侧不应再假设状态维度恒为 5、化学势维度恒为 3。
+- scan 结果适配层（`TmuScan` / `TrhoScan`）已按动态向量透传 `x_state` 与 `mu_vec`，为后续 schema-driven 主链路铺路。
+- 当需要显式状态布局时，优先使用 `ModelStateSchema` 系列 API（`schema_for_model`、`flatten_state`、`unflatten_state`）。

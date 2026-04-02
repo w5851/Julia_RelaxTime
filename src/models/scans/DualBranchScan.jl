@@ -110,7 +110,7 @@ function run_dual_branch_scan(;
     mu_range,
     xi::Real=0.0,
     thermo_backend::Symbol=:models,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     p_num::Int=24,
     t_num::Int=8,
     verbose::Bool=false,
@@ -357,7 +357,7 @@ end
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
     thermo_backend::Symbol=:models,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     p_num,
     t_num,
     nlsolve_kwargs...)

@@ -61,9 +61,6 @@ d1mu = Models.dP_dmu(T_fm, mu_fm)
 
 ## 非首页首选入口
 
-以下接口属于兼容或下游公式接口，不应作为 derivatives 首页首选入口：
+以下接口属于下游公式接口，不应作为 derivatives 首页首选入口：
 
-- `legacy_transport_c_p`
 - `compute_B_bracket`
-
-其中 `legacy_transport_c_p` 明确属于 compatibility 导出，见 [BulkViscosityDerivatives.md](BulkViscosityDerivatives.md)。

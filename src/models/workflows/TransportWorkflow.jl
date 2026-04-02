@@ -515,7 +515,7 @@ function solve_gap_and_transport(
     T_fm::Real,
     mu_fm::Real;
     xi::Real=0.0,
-    solver_backend::Symbol=:legacy,
+    solver_backend::Symbol=:auto,
     equilibrium::Union{Nothing,Any}=nothing,
     compute_tau::Bool=false,
     K_coeffs::Union{Nothing,NamedTuple}=nothing,

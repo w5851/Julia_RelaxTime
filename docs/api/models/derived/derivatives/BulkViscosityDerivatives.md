@@ -6,7 +6,6 @@
 
 - `bulk_viscosity_coefficients`
 - `compute_B_bracket`
-- `legacy_transport_c_p`
 
 ## `bulk_viscosity_coefficients`
 
@@ -41,21 +40,15 @@
 
 通常不建议单独从它开始，而是先获取完整系数再进入该接口。
 
-## `legacy_transport_c_p`
+## `c_p` 读取约定
 
-这是明确的 compatibility / legacy 导出：
-
-- 它本质上只是读取 `bulk_viscosity_coefficients(...).c_p`
-- 应保留在 generated 导出全集中
-- 但不应作为 derivatives 主题首页首选入口
-
-文档和导航上必须显式降级它的优先级，避免误导为长期主 API。
+`c_p` 应通过 `bulk_viscosity_coefficients(...).c_p` 读取，不再提供独立兼容别名。
 
 ## 使用建议
 
 - 需要 bulk viscosity 完整系数时，优先用 `bulk_viscosity_coefficients`
 - 需要公式中的单个 `B` 项时，再调用 `compute_B_bracket`
-- 仅在兼容旧调用方时，才考虑 `legacy_transport_c_p`
+- 需要 `c_p` 时，直接读取 `bulk_viscosity_coefficients(...).c_p`
 
 ## 测试与集成事实源
 

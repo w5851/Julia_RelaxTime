@@ -50,14 +50,12 @@ derivatives 不是模型主流程，而是平衡态求解之后的派生分析�
 
 这条链比 `thermo_derivatives` 更偏下游使用，因此应在主题中后置，而不是放在首页最前。
 
-## 6. `legacy_transport_c_p` 必须被显式降级为兼容层
+## 6. `c_p` 的唯一读取路径
 
-`legacy_transport_c_p` 当前只是从 `bulk_viscosity_coefficients(...).c_p` 取值的兼容导出：
+`c_p` 统一通过 `bulk_viscosity_coefficients(...).c_p` 读取。
 
-- 它应该保留在 generated 导出全集中
-- 但不应和 `thermo_derivatives`、`bulk_viscosity_coefficients` 并列成首选入口
-
-这一点必须在人工维护页中明确写出，避免把历史兼容接口误导为长期主 API。
+- 不再保留 `legacy_transport_c_p` 兼容导出
+- 避免在同一语义上长期维持双 API 入口
 
 ## 7. 与 susceptibility 的边界已经固定
 

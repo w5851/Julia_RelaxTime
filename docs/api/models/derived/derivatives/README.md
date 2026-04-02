@@ -20,9 +20,8 @@
 - `dP_dmu`
 - `bulk_viscosity_coefficients`
 - `compute_B_bracket`
-- `legacy_transport_c_p`
 
 说明：
 
-- `legacy_transport_c_p` 仅作为 compatibility / legacy 导出保留，不应作为 derivatives 主题首页首选入口；
+- 若只需 `c_p`，请从 `bulk_viscosity_coefficients(...).c_p` 读取；
 - 旧 `pnjl` derivatives 兼容页不再承担本主题主说明职责。

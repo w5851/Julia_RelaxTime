@@ -4,22 +4,21 @@
 
 - Source module files: `src/models/Models.jl`
 - Generated page: `docs/api/models/derived/derivatives/generated/Exports.md`
-- Exported symbol count: 8
-- Mentioned in non-generated docs/api pages: 8
-- Topic filter: `mass_derivatives`, `thermo_derivatives`, `bulk_derivative_coeffs`, `dP_dT`, `dP_dmu`, `bulk_viscosity_coefficients`, `compute_B_bracket`, `legacy_transport_c_p`
+- Exported symbol count: 7
+- Mentioned in non-generated docs/api pages: 7
+- Topic filter: `mass_derivatives`, `thermo_derivatives`, `bulk_derivative_coeffs`, `dP_dT`, `dP_dmu`, `bulk_viscosity_coefficients`, `compute_B_bracket`
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
-| `bulk_derivative_coeffs` | src/models/Models.jl | 40 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
-| `bulk_viscosity_coefficients` | src/models/Models.jl | 41 | 9 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `compute_B_bracket` | src/models/Models.jl | 41 | 8 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `dP_dT` | src/models/Models.jl | 42 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
-| `dP_dmu` | src/models/Models.jl | 42 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
-| `legacy_transport_c_p` | src/models/Models.jl | 40 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `mass_derivatives` | src/models/Models.jl | 40 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
-| `thermo_derivatives` | src/models/Models.jl | 40 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `bulk_derivative_coeffs` | src/models/Models.jl | 45 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
+| `bulk_viscosity_coefficients` | src/models/Models.jl | 46 | 9 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `compute_B_bracket` | src/models/Models.jl | 46 | 8 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `dP_dT` | src/models/Models.jl | 47 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
+| `dP_dmu` | src/models/Models.jl | 47 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
+| `mass_derivatives` | src/models/Models.jl | 45 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
+| `thermo_derivatives` | src/models/Models.jl | 45 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
 
 ## Undocumented Or Not Yet Mentioned
 
