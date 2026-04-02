@@ -57,30 +57,30 @@
 
 ### A0：约束组件抽象层（先测试后实现）
 
-- [ ] 新增失败单测：约束组件可声明输出维度、依赖变量域（state/mu/thermo）。
-- [ ] 定义约束组件契约（建议：`constraint_dim`, `eval_constraint!`, `constraint_name`）。
-- [ ] 将现有 `Fixed*` mode 映射为组件列表，而非写死残差函数。
-- [ ] 验证组件拼接后 residual 总维度一致性（静态检查 + 运行时检查）。
+- [x] 新增失败单测：约束组件可声明输出维度、依赖变量域（state/mu/thermo）。
+- [x] 定义约束组件契约（建议：`constraint_dim`, `eval_constraint!`, `constraint_name`）。
+- [x] 将现有 `Fixed*` mode 映射为组件列表，而非写死残差函数。
+- [x] 验证组件拼接后 residual 总维度一致性（静态检查 + 运行时检查）。
 
 ### A1：ProblemSpec 主链收敛
 
-- [ ] 新增失败测试：`build_problem_spec(mode)` 生成的 residual 能覆盖 `FixedRho/FixedAsymmetricRho`。
-- [ ] 将 `ProblemSpec` 从占位结构升级为执行主链（residual/forward_solve/postprocess 同步接线）。
-- [ ] 让 `solve_constraint` 统一走 `ProblemSpec`，仅保留必要适配层。
-- [ ] 对旧特化路径加迁移标记，禁止继续扩散新逻辑。
+- [x] 新增失败测试：`build_problem_spec(mode)` 生成的 residual 能覆盖 `FixedRho/FixedAsymmetricRho`。
+- [x] 将 `ProblemSpec` 从占位结构升级为执行主链（residual/forward_solve/postprocess 同步接线）。
+- [x] 让 `solve_constraint` 统一走 `ProblemSpec`，仅保留必要适配层。
+- [x] 对旧特化路径加迁移标记，禁止继续扩散新逻辑。
 
 ### A2：FixedRho 同构化改造
 
-- [ ] 新增失败回归：同点同 seed 下 `legacy` 与 `models` 的 residual 口径一致（容差内）。
-- [ ] 将 `models FixedRho` 改为组件拼接后的联立约束主链（而非外1维内5维特化主链）。
-- [ ] 保留可控 fallback，但 fallback 仅做数值稳健兜底，不改变语义定义。
-- [ ] 补充 branch 选择与候选治理规则（pressure/physicality/residual 的统一优先级）。
+- [x] 新增失败回归：同点同 seed 下 `legacy` 与 `models` 的 residual 口径一致（容差内）。
+- [x] 将 `models FixedRho` 改为组件拼接后的联立约束主链（而非外1维内5维特化主链）。
+- [x] 保留可控 fallback，但 fallback 仅做数值稳健兜底，不改变语义定义。
+- [x] 补充 branch 选择与候选治理规则（pressure/physicality/residual 的统一优先级）。
 
 ### A3：扫描入口与 backend 语义收敛
 
-- [ ] 新增失败 integration：`solver_backend=:auto` 与显式 backend 在语义一致时结果一致。
-- [ ] 统一 `auto` 解释为“按 model capability 选实现，不改语义定义”。
-- [ ] 去除 PNJL 上仅因历史差异导致的永久路由特判（以阶段开关受控下线）。
+- [x] 新增失败 integration：`solver_backend=:auto` 与显式 backend 在语义一致时结果一致。
+- [x] 统一 `auto` 解释为“按 model capability 选实现，不改语义定义”。
+- [x] 去除 PNJL 上仅因历史差异导致的永久路由特判（以阶段开关受控下线）。
 
 ### A4：验证、文档与治理
 
@@ -304,3 +304,13 @@
   - regression smoke：`512 pass, 1 broken(optional fixture)`，与既有可选跳过口径一致。
   - 文档治理：`check_docs_consistency.jl` 与 `check_active_docs_governance.jl` 均通过。
 - [x] 2026-04-02：创建 R1 开发分支 `feat/models-solver-semantic-convergence-r1`，按 stacked PR 方式基于 PR #48 开启下一轮功能开发（PR #49）。
+- [x] 2026-04-02：R1 A0/A1 首批完成（PR #49）。
+  - 新增 `src/models/solver/ConstraintComponents.jl`，建立 `AbstractConstraintComponent` 契约及默认 mode->components 映射。
+  - `build_problem_spec` 接线 `conditions` 与 `forward_solve`，并通过 `tests/unit/models/test_constraint_components.jl` / `test_problem_spec_contract.jl`。
+- [x] 2026-04-02：R1 A2 深化完成（PR #49）。
+  - `FixedRho` 的 `ProblemSpec.forward_solve` 升级为显式候选池 + 统一 hard constraints + selector 治理。
+  - `solve_constraint(FixedRho)` 支持 `problem_spec` 优先链路；不传时保持兼容旧链路。
+  - 新增对照：`tests/integration/models/test_problem_spec_fixedrho_forwardsolve_smoke.jl`、`tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl`。
+- [x] 2026-04-02：R1 A3 完成（PR #49）。
+  - `TmuScan/TrhoScan` 中 PNJL `solver_backend=:auto` 默认路由改为 `:models`；新增受控开关 `auto_pnjl_backend` 支持回退 `:legacy`。
+  - 新增 `tests/integration/models/test_auto_backend_models_routing_smoke.jl`，并复核 `test_solver_backend_semantic_parity_guard.jl`。
