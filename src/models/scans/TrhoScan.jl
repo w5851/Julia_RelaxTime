@@ -151,6 +151,12 @@ end
     return nothing
 end
 
+@inline function _validate_semantic_mode(semantic_mode::Symbol)
+    (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
+        throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
+    return nothing
+end
+
 @inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
@@ -211,6 +217,8 @@ function run_trho_scan(;
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -218,6 +226,7 @@ function run_trho_scan(;
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
+    _validate_semantic_mode(semantic_mode)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -270,6 +279,8 @@ function run_trho_scan(;
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
                     auto_pnjl_backend=auto_pnjl_backend,
+                    semantic_mode=semantic_mode,
+                    selector=selector,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
             else
@@ -281,6 +292,8 @@ function run_trho_scan(;
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
                     auto_pnjl_backend=auto_pnjl_backend,
+                    semantic_mode=semantic_mode,
+                    selector=selector,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
 
@@ -391,6 +404,8 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -402,6 +417,8 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -413,6 +430,8 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -432,6 +451,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -454,6 +475,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
                 xi=xi,
                 model_kind=model_kind,
                 seed_strategy=strategy,
+                semantic_mode=semantic_mode,
+                selector=selector,
                 p_num=p_num,
                 t_num=t_num,
                 nlsolve_kwargs...)
@@ -498,6 +521,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -555,6 +580,8 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -589,6 +616,8 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
                 xi=xi,
                 model_kind=model_kind,
                 seed_strategy=strategy,
+                semantic_mode=semantic_mode,
+                selector=selector,
                 p_num=p_num,
                 t_num=t_num,
                 nlsolve_kwargs...)
@@ -633,6 +662,8 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -646,6 +677,8 @@ function _refine_result(T_fm, ρ_fm, xi, result;
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -691,22 +724,42 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     xi::Real,
     model_kind::Symbol,
     seed_strategy::SeedStrategy,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     p_num::Int,
     t_num::Int,
     nlsolve_kwargs...)
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
-    raw = Main.Models.solve_constraint(
-        model,
-        mapped_mode,
-        T_fm;
-        seed_guess=seed_guess,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        nlsolve_kwargs...,
-    )
+    use_problem_spec = (semantic_mode !== :ground_state) || (selector !== nothing)
+    raw = if use_problem_spec
+        problem_spec = Main.Models.build_problem_spec(mapped_mode)
+        Main.Models.solve_constraint(
+            model,
+            mapped_mode,
+            T_fm;
+            problem_spec=problem_spec,
+            semantic_mode=semantic_mode,
+            selector=selector,
+            seed_guess=seed_guess,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        )
+    else
+        Main.Models.solve_constraint(
+            model,
+            mapped_mode,
+            T_fm;
+            seed_guess=seed_guess,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        )
+    end
     return _to_solver_result(mode, raw, xi)
 end
 

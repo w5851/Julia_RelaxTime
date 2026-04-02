@@ -52,4 +52,10 @@ const _TS = Models.TrhoScan
         @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy
         @test _TS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
     end
+
+    @testset "semantic_mode 参数校验" begin
+        @test _TS._validate_semantic_mode(:ground_state) === nothing
+        @test _TS._validate_semantic_mode(:constrained_manifold) === nothing
+        @test_throws ArgumentError _TS._validate_semantic_mode(:invalid_mode)
+    end
 end

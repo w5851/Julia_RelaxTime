@@ -229,10 +229,10 @@
 
 - [ ] 修改 `src/models/scans/TrhoScan.jl`
   - [ ] 删除 PNJL 的历史特判路由（阶段开关保护后下线）
-  - [ ] 支持 `semantic_mode=:constrained_manifold` 返回候选集/标签
+  - [x] 支持 `semantic_mode=:constrained_manifold` 返回候选集/标签
 
-- [ ] 修改 `src/models/scans/DualBranchScan.jl`
-  - [ ] 用 `semantic_mode + selector` 显式表达双分支扫描行为
+- [x] 修改 `src/models/scans/DualBranchScan.jl`
+  - [x] 用 `semantic_mode + selector` 显式表达双分支扫描行为
 
 #### B4：旧实现下线（最终目标）
 
@@ -327,3 +327,10 @@
 - [x] 2026-04-02：继续推进 B1 增量收敛（PR #50）。
   - `solve_constraint` 对 `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 已支持 `problem_spec` override（保持旧路径兼容回退）。
   - 新增 integration 冒烟 `tests/integration/models/test_problem_spec_other_modes_forwardsolve_smoke.jl` 并接入 integration smoke。
+- [x] 2026-04-02：继续推进 B3 路由收敛（PR #50）。
+  - `DualBranchScan` 已引入 `auto_pnjl_backend` 参数，`solver_backend=:auto` 下与 `TmuScan/TrhoScan` 对齐：`thermo_backend=:models` 固定走 `:models`，否则由 `auto_pnjl_backend` 显式决定（默认 `:models`）。
+  - 新增 `tests/unit/models/test_dual_branch_scan.jl` 路由规则覆盖，冻结 `auto` 路由行为。
+- [x] 2026-04-02：继续推进 B2/B3 收敛（PR #50）。
+  - `solve_constraint` 对 `problem_spec` 新增类型校验，`FixedEntropy/FixedSigma/FixedAsymmetricRho` 统一复用 `problem_spec` override 主链适配逻辑。
+  - `ProblemSpec` 非 `FixedRho` governed forward_solve 增加 `semantic_mode` selector 路由（`:ground_state` -> 压强优先，`:constrained_manifold` -> 残差优先），并支持自定义 `selector`。
+  - `TrhoScan` 新增 `semantic_mode`/`selector` 透传到 models `ProblemSpec` 主链；补充 `tests/unit/models/test_trho_scan.jl` 与 `tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl` 覆盖参数校验与冒烟链路。

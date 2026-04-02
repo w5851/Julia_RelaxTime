@@ -5,6 +5,16 @@
 """
 const SolverResult = ImplicitSolver.SolverResult
 
+@inline function _forward_with_problem_spec_if_present(model::AbstractQCDModel, T_fm::Real, kwargs)
+    spec = get(kwargs, :problem_spec, nothing)
+    if spec === nothing
+        return nothing
+    end
+    spec isa ProblemSpec || throw(ArgumentError("problem_spec must be ProblemSpec or nothing, got $(typeof(spec))"))
+    forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
+    return spec.forward_solve(model, T_fm; forward_kwargs...)
+end
+
 function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
     return _solve_constraint_fixedmu(model, T_fm, μ_fm; kwargs...)
 end
@@ -19,28 +29,25 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; kwargs...)
-    if haskey(kwargs, :problem_spec)
-        spec = kwargs[:problem_spec]
-        forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
-        return spec.forward_solve(model, T_fm; forward_kwargs...)
+    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
+    if spec_result !== nothing
+        return spec_result
     end
     return _solve_constraint_fixedentropy(model, T_fm, mode.s_target; kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; kwargs...)
-    if haskey(kwargs, :problem_spec)
-        spec = kwargs[:problem_spec]
-        forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
-        return spec.forward_solve(model, T_fm; forward_kwargs...)
+    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
+    if spec_result !== nothing
+        return spec_result
     end
     return _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; kwargs...)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
-    if haskey(kwargs, :problem_spec)
-        spec = kwargs[:problem_spec]
-        forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
-        return spec.forward_solve(model, T_fm; forward_kwargs...)
+    spec_result = _forward_with_problem_spec_if_present(model, T_fm, kwargs)
+    if spec_result !== nothing
+        return spec_result
     end
     return _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; kwargs...)
 end

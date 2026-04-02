@@ -11,6 +11,7 @@ const HBARC_MEV_FM = 197.327
 @testset "problem spec forward_solve smoke for entropy/sigma/asymrho" begin
     model = Models.create_model(:PNJL)
     T_fm = 100.0 / HBARC_MEV_FM
+    seed = copy(Models.pnjl_module().HADRON_SEED_8)
 
     modes = (
         Models.FixedEntropy(0.5),
@@ -19,28 +20,27 @@ const HBARC_MEV_FM = 197.327
     )
 
     for mode in modes
-        spec = Models.ProblemSpec(
-            mode;
-            x_dim=Models.state_dim(mode),
-            theta_dim=Models.param_dim(mode),
-            forward_solve=(m, t; fwd_kwargs...) -> (
-                converged=true,
-                residual_norm=0.0,
-                used_problem_spec=true,
-                mode_tag=string(typeof(mode)),
-            ),
-        )
+        spec = Models.build_problem_spec(mode)
         result = Models.solve_constraint(
             model,
             mode,
             T_fm;
             problem_spec=spec,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
         )
 
         @test result isa NamedTuple
-        @test result.converged
-        @test result.used_problem_spec
-        @test result.residual_norm == 0.0
-        @test occursin("Fixed", result.mode_tag)
+        @test haskey(result, :converged)
+        @test haskey(result, :residual_norm)
+        @test haskey(result, :selection_reason)
+        @test haskey(result, :candidate_count)
+        @test isfinite(result.residual_norm)
+        @test result.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
+        @test result.candidate_count >= 1
     end
 end

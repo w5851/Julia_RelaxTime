@@ -111,4 +111,108 @@ end
             @test occursin("Fixed", result.mode_tag)
         end
     end
+
+    @testset "solve_constraint validates problem_spec type" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        @test_throws ArgumentError Models.solve_constraint(model, mode, 0.5; problem_spec=:invalid)
+    end
+
+    @testset "build_problem_spec non-rho forward_solve exposes governed metadata" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        modes = (
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(10.0),
+            Models.FixedAsymmetricRho(0.05, 1.0, 0.0),
+        )
+
+        for mode in modes
+            spec = Models.build_problem_spec(mode)
+            solved = spec.forward_solve(
+                model,
+                T_fm;
+                seed_guess=seed,
+                rho0=0.16,
+                p_num=8,
+                t_num=4,
+                residual_norm_max=1e-6,
+                iterations=120,
+            )
+
+            @test solved isa NamedTuple
+            @test haskey(solved, :selection_reason)
+            @test haskey(solved, :candidate_count)
+            @test solved.selection_reason in (:pressure_max_under_constraints, :residual_min_under_constraints, :no_candidate_passed_constraints)
+            @test solved.candidate_count >= 1
+        end
+    end
+
+    @testset "problem spec non-rho semantic_mode selects candidate selector" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        spec = Models.build_problem_spec(mode)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        ground = spec.forward_solve(
+            model,
+            T_fm;
+            seed_guess=seed,
+            rho0=0.16,
+            semantic_mode=:ground_state,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test ground.selection_reason in (:pressure_max_under_constraints, :no_candidate_passed_constraints)
+
+        manifold = spec.forward_solve(
+            model,
+            T_fm;
+            seed_guess=seed,
+            rho0=0.16,
+            semantic_mode=:constrained_manifold,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test manifold.selection_reason in (:residual_min_under_constraints, :no_candidate_passed_constraints)
+
+        @test_throws ArgumentError spec.forward_solve(
+            model,
+            T_fm;
+            seed_guess=seed,
+            rho0=0.16,
+            semantic_mode=:bad_mode,
+            p_num=8,
+            t_num=4,
+        )
+
+        custom_selector = candidates -> begin
+            selected = candidates[end]
+            return (
+                selected_index=length(candidates),
+                selected_candidate=selected,
+                selection_reason=:custom_selector,
+                eligible_indices=Int[length(candidates)],
+            )
+        end
+        custom = spec.forward_solve(
+            model,
+            T_fm;
+            seed_guess=seed,
+            rho0=0.16,
+            selector=custom_selector,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test custom.selection_reason == :custom_selector
+    end
 end
