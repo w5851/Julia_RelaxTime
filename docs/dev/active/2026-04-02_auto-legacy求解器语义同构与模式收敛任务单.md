@@ -88,7 +88,7 @@
 - [x] integration：覆盖 T-μ/T-ρ 扫描行为与 auto/backend 一致性。
 - [x] regression：覆盖关键固定点与首阶附近点的分支稳定性。
 - [x] benchmark：`scripts/perf/pnjl/scan_perf.jl` 收敛率基线不退化。
-- [ ] 同步 `docs/api/models/solver/*` 与相关迁移文档口径。
+- [x] 同步 `docs/api/models/solver/*` 与相关迁移文档口径。
 
 ---
 
@@ -320,3 +320,6 @@
   - regression smoke：`530 pass, 1 broken(optional fixture)`，与既有可选跳过口径一致。
   - benchmark smoke：`scripts/perf/pnjl/scan_perf.jl` 收敛率 100%，无退化证据。
   - 治理检查：`check_docs_consistency.jl` 与 `check_active_docs_governance.jl` 通过。
+- [x] 2026-04-02：完成 `docs/api/models/solver/*` 文档口径同步。
+  - 更新 `README.md`、`CoreConcepts.md`、`ConstraintModes.md`，补充 `ProblemSpec` 与 `ConstraintComponents` 的 R1 主链语义。
+  - 通过脚本重生成 `docs/api/models/solver/generated/Exports.md`（`generate_api_export_index.jl`）。
