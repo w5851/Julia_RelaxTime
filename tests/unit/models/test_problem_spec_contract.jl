@@ -53,6 +53,8 @@ end
         @test solved isa NamedTuple
         @test haskey(solved, :converged)
         @test haskey(solved, :residual_norm)
+        @test haskey(solved, :selection_reason)
+        @test haskey(solved, :candidate_count)
     end
 
     @testset "solve_constraint fixedrho prefers problem_spec forward_solve" begin

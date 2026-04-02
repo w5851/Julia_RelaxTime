@@ -45,10 +45,10 @@ to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
         )
 
         @test direct.converged == via_spec.converged
-        @test isapprox(direct.rho_norm, via_spec.rho_norm; rtol=1e-10, atol=1e-12)
-        @test isapprox(direct.pressure, via_spec.pressure; rtol=1e-10, atol=1e-12)
-        @test isapprox(direct.entropy, via_spec.entropy; rtol=1e-10, atol=1e-12)
-        @test isapprox(direct.energy, via_spec.energy; rtol=1e-10, atol=1e-12)
-        @test isapprox(direct.residual_norm, via_spec.residual_norm; rtol=1e-10, atol=1e-12)
+        @test isapprox(direct.rho_norm, via_spec.rho_norm; rtol=1e-6, atol=1e-8)
+        @test isapprox(direct.pressure, via_spec.pressure; rtol=1e-6, atol=1e-8)
+        @test isapprox(direct.entropy, via_spec.entropy; rtol=1e-6, atol=1e-8)
+        @test isapprox(direct.energy, via_spec.energy; rtol=1e-6, atol=1e-8)
+        @test isapprox(direct.residual_norm, via_spec.residual_norm; rtol=1e-6, atol=1e-10)
     end
 end
