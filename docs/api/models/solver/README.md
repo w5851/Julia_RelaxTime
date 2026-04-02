@@ -26,6 +26,8 @@
 - `Models.solve`
 - `Models.solve_multi`
 - `Models.solve_constraint`
+- `Models.ProblemSpec` / `Models.build_problem_spec`
+- `Models.AbstractConstraintComponent` / `Models.build_constraint_components`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
 - `Models.SeedStrategy` 家族

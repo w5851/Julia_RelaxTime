@@ -43,6 +43,20 @@
 
 因此，约束模式不是一个装饰标签，而是直接决定 residual 构造和求解形态的合同对象。
 
+## 4.1 ProblemSpec 与 ConstraintComponents 的职责边界
+
+R1 收敛后，`FixedRho` 主链不再只依赖“单个大 residual 函数”，而是通过“问题规格 + 组件映射”组织：
+
+- `ProblemSpec`：描述某个 mode 的求解契约（`conditions` / `forward_solve` / selector / hard_rules）
+- `ConstraintComponents`：描述约束由哪些职责组件拼接（stationarity、equal-mu、macro targets 等）
+
+这种分层的作用是把“语义定义”与“数值策略”分开：
+
+- 语义定义由 `ConstraintModes + ConstraintComponents` 冻结
+- 数值策略由 `forward_solve` 与候选治理规则演进
+
+在当前实现中，`FixedRho` 的 `ProblemSpec.forward_solve` 已进入显式候选池 + 统一 hard constraints + selector 路径，避免语义漂移被隐藏在特化分支内。
+
 ## 5. Seed strategy 负责“怎么开始”，不负责“怎么收尾”
 
 `SeedStrategy` 家族的职责是给求解器提供初值，而不是代替求解器决定所有分支逻辑。

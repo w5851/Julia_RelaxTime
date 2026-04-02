@@ -13,18 +13,18 @@
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
 | `ConstraintModes` | src/models/Models.jl | 61 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `ContinuitySeed` | src/models/Models.jl | 64 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
-| `DefaultSeed` | src/models/Models.jl | 64 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `GapParams` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/ConstraintModes.md |
-| `HybridContinuitySeed` | src/models/Models.jl | 64 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `ContinuitySeed` | src/models/Models.jl | 66 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
+| `DefaultSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `GapParams` | src/models/Models.jl | 69 | 1 | docs/api/models/solver/ConstraintModes.md |
+| `HybridContinuitySeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `MeanFieldState` | src/models/Models.jl | 34 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `ModelStateSchema` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `MultiSeed` | src/models/Models.jl | 64 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `PhaseAwareContinuitySeed` | src/models/Models.jl | 64 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
-| `PhaseAwareSeed` | src/models/Models.jl | 64 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `SeedStrategy` | src/models/Models.jl | 64 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `build_conditions` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `build_residual!` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `MultiSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `PhaseAwareContinuitySeed` | src/models/Models.jl | 66 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
+| `PhaseAwareSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `SeedStrategy` | src/models/Models.jl | 66 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `build_conditions` | src/models/Models.jl | 69 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `build_residual!` | src/models/Models.jl | 69 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `create_flavor_mu_implicit_gap_solver` | src/models/Models.jl | 40 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `create_implicit_gap_solver` | src/models/Models.jl | 39 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `create_model` | src/models/Models.jl | 29 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
@@ -32,20 +32,20 @@
 | `flatten_state` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `gap_residual` | src/models/Models.jl | 38 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/ImplicitSolvers.md |
 | `gap_state_dim` | src/models/Models.jl | 38 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
-| `get_all_seeds` | src/models/Models.jl | 65 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `get_seed` | src/models/Models.jl | 65 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `get_all_seeds` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `get_seed` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `meanfield_state` | src/models/Models.jl | 35 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/README.md<br>docs/api/models/solver/StateContract.md |
 | `normalize_mu_vec` | src/models/Models.jl | 36 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/StateContract.md |
-| `reset!` | src/models/Models.jl | 65 | 2 | docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/SeedStrategies.md |
+| `reset!` | src/models/Models.jl | 67 | 2 | docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/SeedStrategies.md |
 | `schema_for_model` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `set_phase!` | src/models/Models.jl | 65 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `set_phase!` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `solve` | src/models/Models.jl | 59 | 41 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
 | `solve_constraint` | src/models/Models.jl | 58 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/Models.jl | 37 | 21 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md |
 | `solve_multi` | src/models/Models.jl | 59 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `state_vector` | src/models/Models.jl | 35 | 5 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `unflatten_state` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `update!` | src/models/Models.jl | 65 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `update!` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
 
 ## Undocumented Or Not Yet Mentioned
 
