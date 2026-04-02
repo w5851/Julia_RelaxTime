@@ -54,4 +54,32 @@ end
         @test haskey(solved, :converged)
         @test haskey(solved, :residual_norm)
     end
+
+    @testset "solve_constraint fixedrho prefers problem_spec forward_solve" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        spec = Models.ProblemSpec(
+            mode;
+            x_dim=8,
+            theta_dim=1,
+            forward_solve=(m, T_fm; fwd_kwargs...) -> (
+                converged=true,
+                residual_norm=0.0,
+                pressure=0.0,
+                used_problem_spec=true,
+            ),
+        )
+
+        result = Models.solve_constraint(
+            model,
+            mode,
+            0.5;
+            problem_spec=spec,
+        )
+
+        @test result isa NamedTuple
+        @test result.converged
+        @test result.used_problem_spec
+        @test result.residual_norm == 0.0
+    end
 end
