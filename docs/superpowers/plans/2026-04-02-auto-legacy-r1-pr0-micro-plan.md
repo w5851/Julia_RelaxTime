@@ -32,25 +32,25 @@
 **Files:**
 - Modify: `docs/dev/active/2026-04-02_auto-legacy求解器语义同构与模式收敛任务单.md`
 
-- [ ] **Step 1: 补充 FixedRho 精度硬门槛**
+- [x] **Step 1: 补充 FixedRho 精度硬门槛**
   - 关键点（`T=90/110/130 MeV`, `rho*=0.2/0.6/1.0`）要求：
     - `residual_norm <= 1e-6`（目标：`<=1e-8`）
     - `abs(rho_norm-rho_target) <= 1e-6`
 
-- [ ] **Step 2: 补充候选治理硬规则**
+- [x] **Step 2: 补充候选治理硬规则**
   - 多初值候选排序固定：
     1) `hard_constraint_ok`
     2) `residual_norm` 最小
     3) `pressure` 最大
     4) `seed_index` 最小（保证可重复）
 
-- [ ] **Step 3: 补充语义同构对照矩阵**
+- [x] **Step 3: 补充语义同构对照矩阵**
   - 同点同参数下比较 `solver_backend=:auto/:models/:legacy`：
     - 收敛一致性
     - 关键热力学量容差
     - 分支标签一致性（若有）
 
-- [ ] **Step 4: 定义停止线**
+- [x] **Step 4: 定义停止线**
   - 任一触发即禁止进入 R1：
     - FixedRho 精度门槛不达标
     - auto/models/legacy 同语义不一致
@@ -62,16 +62,16 @@
 - Create: `tests/regression/models/test_fixedrho_precision_guard_regression.jl`
 - Modify: `tests/regression/runtests.jl` (接线)
 
-- [ ] **Step 1: 写失败 regression 测试**
+- [x] **Step 1: 写失败 regression 测试**
   - 断言关键点满足 PR-0 精度门槛。
 
-- [ ] **Step 2: 运行并确认失败（若当前未满足）**
+- [x] **Step 2: 运行并确认失败（若当前未满足）**
   - Run: `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_fixedrho_precision_guard_regression.jl"; include("tests/regression/runtests.jl")'`
 
-- [ ] **Step 3: 最小实现/参数校准使其转绿**
+- [x] **Step 3: 最小实现/参数校准使其转绿**
   - 仅允许修复与门槛直接相关的求解判据与候选治理。
 
-- [ ] **Step 4: 复跑验证**
+- [x] **Step 4: 复跑验证**
   - 同 Step 2，预期 PASS。
 
 ## Task 2: 多初值候选治理护栏（先失败后实现）
@@ -80,16 +80,16 @@
 - Create: `tests/unit/models/test_multiseed_candidate_governance.jl`
 - Modify: `src/models/constraint_solver.jl` (若需)
 
-- [ ] **Step 1: 写失败 unit 测试**
+- [x] **Step 1: 写失败 unit 测试**
   - 覆盖 selector 与 tie-break 可重复性。
 
-- [ ] **Step 2: 运行并确认失败**
+- [x] **Step 2: 运行并确认失败**
   - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_multiseed_candidate_governance.jl"; include("tests/unit/runtests.jl")'`
 
-- [ ] **Step 3: 最小实现使其通过**
+- [x] **Step 3: 最小实现使其通过**
   - 固化排序规则与稳定 tie-break。
 
-- [ ] **Step 4: 回归 unit smoke**
+- [x] **Step 4: 回归 unit smoke**
   - Run: `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
 
 ## Task 3: auto/models/legacy 语义对照护栏
@@ -97,16 +97,16 @@
 **Files:**
 - Create: `tests/integration/models/test_solver_backend_semantic_parity_guard.jl`
 
-- [ ] **Step 1: 写失败 integration 对照测试**
+- [x] **Step 1: 写失败 integration 对照测试**
   - 对照固定点集，比较三类 backend 在同语义下结果。
 
-- [ ] **Step 2: 运行并确认失败（若存在偏差）**
+- [x] **Step 2: 运行并确认失败（若存在偏差）**
   - Run: `julia --project=. -e 'include("tests/integration/models/test_solver_backend_semantic_parity_guard.jl")'`
 
-- [ ] **Step 3: 最小修复并复跑**
+- [x] **Step 3: 最小修复并复跑**
   - 保证 `auto` 仅路由实现，不改变语义定义。
 
-- [ ] **Step 4: integration smoke 回归**
+- [x] **Step 4: integration smoke 回归**
   - Run: `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
 
 ## Task 4: PR-0 收口与进入 R1 准入判定
@@ -114,17 +114,17 @@
 **Files:**
 - Modify: `docs/dev/active/2026-04-02_auto-legacy求解器语义同构与模式收敛任务单.md`
 
-- [ ] **Step 1: 运行最终验证矩阵**
+- [x] **Step 1: 运行最终验证矩阵**
   - `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
   - `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
   - `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
   - `julia --project=. scripts/dev/check_active_docs_governance.jl`
 
-- [ ] **Step 2: 回填 PR-0 证据与结论**
+- [x] **Step 2: 回填 PR-0 证据与结论**
   - 明确：是否达到 R1 准入。
 
-- [ ] **Step 3: 仅在准入通过后开启下一轮功能 PR**
+- [x] **Step 3: 仅在准入通过后开启下一轮功能 PR**
   - 分支命名建议：`feat/models-solver-semantic-convergence-r1`。
 
 ## Done Definition
