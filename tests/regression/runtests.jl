@@ -19,6 +19,7 @@ const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "pnjl", "test_magnetic_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_dimension_agnostic_solver_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_fixedrho_precision_guard_regression.jl"),
+    joinpath(REGRESSION_DIR, "models", "test_problem_spec_fixedrho_parity_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_total_cross_section_fixedpoint_regression.jl"),

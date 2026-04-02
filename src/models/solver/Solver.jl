@@ -9,7 +9,12 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ
     return _solve_constraint_fixedmu(model, T_fm, μ_fm; kwargs...)
 end
 
-function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; kwargs...)
+function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
+    problem_spec::Union{Nothing, ProblemSpec}=nothing,
+    kwargs...)
+    if problem_spec !== nothing
+        return problem_spec.forward_solve(model, T_fm; kwargs...)
+    end
     return _solve_constraint_fixedrho(model, T_fm, mode.rho_target; kwargs...)
 end
 
