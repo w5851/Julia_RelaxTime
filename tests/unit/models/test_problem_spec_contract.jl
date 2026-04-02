@@ -38,4 +38,20 @@ end
             @test spec.selector isa Function
         end
     end
+
+    @testset "fixedrho spec conditions and forward solve are wired" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        spec = Models.build_problem_spec(mode)
+
+        params = Models.GapParams(0.5, Models.cached_nodes(8, 4), 0.0)
+        cond = spec.conditions(params)
+        residual = cond([0.5], [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5])
+        @test length(residual) == 8
+
+        solved = spec.forward_solve(model, 0.5; seed_guess=[-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5], p_num=8, t_num=4)
+        @test solved isa NamedTuple
+        @test haskey(solved, :converged)
+        @test haskey(solved, :residual_norm)
+    end
 end
