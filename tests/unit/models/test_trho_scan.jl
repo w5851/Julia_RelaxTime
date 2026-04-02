@@ -46,4 +46,10 @@ const _TS = Models.TrhoScan
         @test isdefined(_TS, :run_trho_scan)
         @test _TS.run_trho_scan isa Function
     end
+
+    @testset "auto backend 语义路由配置" begin
+        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
+        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy
+        @test _TS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
 end

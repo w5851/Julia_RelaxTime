@@ -107,11 +107,14 @@ end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
     end
-    return model_kind === :PNJL ? :legacy : :models
+    if model_kind === :PNJL
+        return auto_pnjl_backend
+    end
+    return :models
 end
 
 # ============================================================================
@@ -160,6 +163,7 @@ function run_tmu_scan(;
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -226,6 +230,7 @@ function run_tmu_scan(;
                     if tracker !== nothing && bootstrap_multiseed && tracker.previous_solution === nothing
                         result, message = _solve_point_with_seed_strategy(T_fm, μ_fm, xi, tracker;
                             solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
@@ -238,6 +243,7 @@ function run_tmu_scan(;
 
                         result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
                             solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
@@ -341,6 +347,7 @@ end
 """尝试多个初值候选"""
 function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -348,6 +355,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     return ScanCommon.attempt_with_candidates(candidates;
         solve_point=seed_state -> _solve_point(T_fm, μ_fm, xi, seed_state;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -355,6 +363,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
         ),
         refine=result -> _refine_result(T_fm, μ_fm, xi, result;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -368,12 +377,13 @@ end
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, seed_state;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
 
@@ -417,12 +427,13 @@ end
 """单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
 function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
         (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
             error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
 
@@ -462,6 +473,7 @@ end
 """精炼近似收敛的结果"""
 function _refine_result(T_fm, μ_fm, xi, result;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -471,6 +483,7 @@ function _refine_result(T_fm, μ_fm, xi, result;
         acceptable_residual=ACCEPTABLE_RESIDUAL,
         solve_again=seed -> _solve_point(T_fm, μ_fm, xi, seed;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
