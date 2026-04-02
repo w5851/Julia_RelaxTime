@@ -68,6 +68,7 @@
 - [x] 将 `ProblemSpec` 从占位结构升级为执行主链（residual/forward_solve/postprocess 同步接线）。
 - [x] 让 `solve_constraint` 统一走 `ProblemSpec`，仅保留必要适配层。
 - [x] 对旧特化路径加迁移标记，禁止继续扩散新逻辑。
+  - [x] 增量：`solve_constraint` 已支持 `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 的 `problem_spec` override（保留兼容回退）。
 
 ### A2：FixedRho 同构化改造
 

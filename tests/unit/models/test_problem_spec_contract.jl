@@ -84,4 +84,31 @@ end
         @test result.used_problem_spec
         @test result.residual_norm == 0.0
     end
+
+    @testset "solve_constraint supports problem_spec override for other modes" begin
+        model = Models.create_model(:PNJL)
+        modes = (
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(8.0),
+            Models.FixedAsymmetricRho(0.6, 1.0, 0.0),
+        )
+
+        for mode in modes
+            spec = Models.ProblemSpec(
+                mode;
+                x_dim=Models.state_dim(mode),
+                theta_dim=Models.param_dim(mode),
+                forward_solve=(m, T_fm; fwd_kwargs...) -> (
+                    converged=true,
+                    residual_norm=0.0,
+                    mode_tag=string(typeof(mode)),
+                ),
+            )
+
+            result = Models.solve_constraint(model, mode, 0.5; problem_spec=spec)
+            @test result.converged
+            @test result.residual_norm == 0.0
+            @test occursin("Fixed", result.mode_tag)
+        end
+    end
 end
