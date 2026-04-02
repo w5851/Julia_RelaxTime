@@ -84,10 +84,10 @@
 
 ### A4：验证、文档与治理
 
-- [ ] unit：覆盖组件拼接、维度检查、FixedRho/AsymRho 等价性。
-- [ ] integration：覆盖 T-μ/T-ρ 扫描行为与 auto/backend 一致性。
-- [ ] regression：覆盖关键固定点与首阶附近点的分支稳定性。
-- [ ] benchmark：`scripts/perf/pnjl/scan_perf.jl` 收敛率基线不退化。
+- [x] unit：覆盖组件拼接、维度检查、FixedRho/AsymRho 等价性。
+- [x] integration：覆盖 T-μ/T-ρ 扫描行为与 auto/backend 一致性。
+- [x] regression：覆盖关键固定点与首阶附近点的分支稳定性。
+- [x] benchmark：`scripts/perf/pnjl/scan_perf.jl` 收敛率基线不退化。
 - [ ] 同步 `docs/api/models/solver/*` 与相关迁移文档口径。
 
 ---
@@ -314,3 +314,9 @@
 - [x] 2026-04-02：R1 A3 完成（PR #49）。
   - `TmuScan/TrhoScan` 中 PNJL `solver_backend=:auto` 默认路由改为 `:models`；新增受控开关 `auto_pnjl_backend` 支持回退 `:legacy`。
   - 新增 `tests/integration/models/test_auto_backend_models_routing_smoke.jl`，并复核 `test_solver_backend_semantic_parity_guard.jl`。
+- [x] 2026-04-02：完成 A4 验证矩阵（除 API 文档同步项）。
+  - unit smoke：`781/781` 通过。
+  - integration smoke：`402/402` 通过。
+  - regression smoke：`530 pass, 1 broken(optional fixture)`，与既有可选跳过口径一致。
+  - benchmark smoke：`scripts/perf/pnjl/scan_perf.jl` 收敛率 100%，无退化证据。
+  - 治理检查：`check_docs_consistency.jl` 与 `check_active_docs_governance.jl` 通过。
