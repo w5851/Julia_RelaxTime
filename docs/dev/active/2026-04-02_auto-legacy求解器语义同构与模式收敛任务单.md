@@ -414,3 +414,8 @@
 - [x] 2026-04-03：继续推进 B4-7 收口计划建模（PR #50）。
   - 将 B4 主目标拆分为“阶段收敛 vs 终态收口”两层任务，补齐下线窗口 W1/W2/W3 与对应准入标准，避免后续合并阶段出现范围漂移。
   - 明确当前已完成边界（主链默认 + legacy 门禁 + 参数互斥 + 扫描入口拦截）与剩余终态动作（删除兼容参数、清理 legacy 业务入口、文档全量去推荐口径）。
+- [x] 2026-04-03：继续推进 W1 门禁落地（PR #50）。
+  - 新增 `scripts/dev/check_legacy_solver_switch_leakage.jl`，对 `src/**/*.jl` 与 `tests/**/*.jl` 扫描 `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path`，并将可出现位置收敛到“治理边界 allowlist”。
+  - 新增 CI workflow `.github/workflows/legacy-switch-governance.yml`，在 PR/push 上执行该门禁，阻断 legacy 参数外溢回归。
+  - 根据扫描层“拦截型守卫”实现现状，将 allowlist 扩展为 `Solver.jl` + `TrhoScan/TmuScan/DualBranchScan` 守卫实现及对应 unit tests，确保“仅治理边界可见”而非“全仓任意可见”。
+  - 验证通过：`scripts/dev/check_legacy_solver_switch_leakage.jl`（OK）；`tests/unit/models/test_problem_spec_contract.jl`（`109/109`）、`test_trho_scan.jl`（`21/21`）、`test_tmu_scan.jl`（`19/19`）、`test_dual_branch_scan.jl`（`34/34`）。

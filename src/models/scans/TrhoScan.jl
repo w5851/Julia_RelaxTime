@@ -721,8 +721,9 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
 end
 
 @inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    legacy_switches = (:use_problem_spec, :allow_legacy_path, :warn_on_legacy_path)
     for key in keys(nlsolve_kwargs)
-        if key === :use_problem_spec || key === :allow_legacy_path || key === :warn_on_legacy_path || key === :problem_spec
+        if key in legacy_switches || key === :problem_spec
             throw(ArgumentError("legacy solver switch '$key' is not allowed from TrhoScan models path"))
         end
     end
@@ -742,8 +743,8 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
-    use_problem_spec = (semantic_mode !== :ground_state) || (selector !== nothing)
-    raw = if use_problem_spec
+    use_problem_spec_chain = (semantic_mode !== :ground_state) || (selector !== nothing)
+    raw = if use_problem_spec_chain
         problem_spec = Main.Models.build_problem_spec(mapped_mode)
         Main.Models.solve_constraint(
             model,
