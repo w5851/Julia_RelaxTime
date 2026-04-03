@@ -139,7 +139,7 @@ function _nlsolve_with_tr_fallback(residual_fn!, x0;
     primary_method::Symbol,
     fallback_method::Symbol=:trust_region,
     use_fallback::Bool=true,
-    physicality_check::Function=_default_is_physical_solution,
+    physicality_check::Function=default_is_physical_solution,
     residual_norm_max::Float64=1e-6,
     postprocess_fn::Function,
     nlsolve_kwargs...)
@@ -264,7 +264,7 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                trust_region_fallback::Bool=true,
                auto_multiseed_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -393,7 +393,7 @@ function solve(mode::FixedRho, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
 
@@ -479,7 +479,7 @@ function solve(mode::FixedAsymmetricRho, T_fm::Real;
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
                enforce_physicality::Bool=false,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
 
@@ -610,7 +610,7 @@ function solve(mode::FixedEntropy, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -673,7 +673,7 @@ function solve(mode::FixedSigma, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -758,7 +758,7 @@ end
 end
 
 @inline function _is_physically_preferred_result(r::SolverResult)
-    return _default_is_physical_solution(r.x_state, r.masses) &&
+    return default_is_physical_solution(r.x_state, r.masses) &&
            _all_finite_thermo(r.omega, r.pressure, r.rho_norm, r.entropy, r.energy)
 end
 
@@ -1193,7 +1193,7 @@ function solve_with_root_diagnostics(::FixedMu, T_fm::Real, μ_fm::Real;
                                      trust_region_fallback::Bool=true,
                                      auto_multiseed_fallback::Bool=true,
                                      fallback_method::Symbol=:trust_region,
-                                     physicality_check::Function=_default_is_physical_solution,
+                                     physicality_check::Function=default_is_physical_solution,
                                      residual_norm_max::Real=1e-6,
                                      nlsolve_kwargs...)
 
