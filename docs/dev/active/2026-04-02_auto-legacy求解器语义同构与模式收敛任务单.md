@@ -454,3 +454,6 @@
   - `test_wavee_unified_scan_cli_smoke.jl` 中 tmu/trho/phase 三条 CLI 烟测命令统一改为 `--solver_backend=models`，对齐 W3-A 冻结后运行事实。
   - `test_phase_cli_direct_smoke.jl` 内 direct smoke、默认模板运行、manifest 写入与 preset 断言统一收口到 models（含 config fixture 中 `solver_backend` 从 `legacy` 改为 `models`）。
   - 回归验证通过：`test_wavee_unified_scan_cli_smoke.jl`、`test_phase_cli_direct_smoke.jl`。
+- [x] 2026-04-03：继续推进 W4 深化（models 单测遗留口径清理，PR #50）。
+  - `test_pm_phase_diagnostic.jl` 中 Maxwell 参考 wiring 数据夹具的 `solver_backend` 字段及同文件相关调用参数由 `:legacy` 统一改为 `:models`，避免语义冻结后测试数据仍反映旧后端。
+  - 验证通过：`tests/unit/models/test_pm_phase_diagnostic.jl`。
