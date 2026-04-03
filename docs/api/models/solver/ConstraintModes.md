@@ -67,6 +67,12 @@
 - `solve_constraint(...; problem_spec=spec)` 可显式指定契约
 - `FixedRho` 的 `ProblemSpec.forward_solve` 已使用统一候选治理规则
 
+当前默认行为与兼容回退约定：
+
+- `solve_constraint` 对 `FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 默认走 `ProblemSpec` 主链
+- `use_problem_spec=false` 仍可进入过渡 legacy 路径，但默认会发出告警提示该路径计划移除
+- 需要静默过渡告警时，可显式传 `warn_on_legacy_path=false`
+
 配套组件层通过 `build_constraint_components(mode)` 暴露 mode 到约束职责的映射，用于固定“语义同构”口径。当前核心组件语义包括：
 
 - `StationarityComponent`
