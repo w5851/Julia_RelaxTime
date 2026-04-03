@@ -350,3 +350,10 @@
   - 新增 `Models.is_physical_solution` 公共转发（由 `Solver.jl` 暴露），将 `scripts/relaxtime/run_gap_transport_scan.jl` 中对 `Main.Models.ImplicitSolver._default_is_physical_solution` 的直接依赖替换为公共 API。
   - 该改动进一步压缩业务脚本对 `ImplicitSolver` 私有符号的耦合，为后续 `ImplicitSolver` 入口冻结/下线清理提供前置条件。
   - integration smoke 复跑通过：`427/427`。
+- [x] 2026-04-03：继续推进 B4 模块边界收敛（PR #50）。
+  - `Models.jl` 移除对 `ImplicitSolver` 的顶层模块导入（保留 include 与 `Solver.jl` 内部转发），减少外层模块对旧求解子模块命名空间的直接暴露。
+  - 补充回归：`tests/unit/pnjl/test_solver_implicit.jl` 全集与 integration smoke 通过，验证边界收敛未破坏既有求解能力。
+- [x] 2026-04-03：继续推进 B4 私有符号去耦（PR #50）。
+  - `ImplicitSolver` 将物理性判据函数标准化为导出符号 `default_is_physical_solution`，并保留 `_default_is_physical_solution` 兼容别名。
+  - `Solver.jl` 的 `is_physical_solution` 公共转发改为依赖导出符号，避免继续绑定 `ImplicitSolver` 私有命名约定。
+  - 回归验证通过：`tests/unit/pnjl/test_solver_implicit.jl`、`tests/unit/models/test_scan_result_finalize.jl`、integration smoke `427/427`。

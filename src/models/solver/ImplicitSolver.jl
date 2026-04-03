@@ -44,6 +44,7 @@ export solve, SolverResult
 export create_implicit_solver, solve_with_derivatives
 export solve_weighted_block_fallback
 export solve_with_root_diagnostics
+export default_is_physical_solution
 
 @inline function _get_model(model_kind::Symbol)
     if model_kind === :PNJL || model_kind === :RPNJL
@@ -76,7 +77,7 @@ end
 # 物理性判据与兜底求解（Newton → Trust-Region）
 # ============================================================================
 
-@inline function _default_is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
+@inline function default_is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
     if length(x_state) < 5 || length(masses) < 3
         return false
     end
@@ -90,6 +91,8 @@ end
     end
     return true
 end
+
+const _default_is_physical_solution = default_is_physical_solution
 
 @inline function _all_finite_thermo(omega::Float64, pressure::Float64, rho_norm::Float64, entropy::Float64, energy::Float64)
     return isfinite(omega) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)

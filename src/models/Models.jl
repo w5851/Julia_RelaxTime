@@ -180,7 +180,6 @@ include(joinpath(@__DIR__, "scans", "DualBranchScanEntry.jl"))
 
 using .SeedStrategies
 using .Conditions
-import .ImplicitSolver
 const ConstraintModes = @__MODULE__
 using .ThermoDerivatives
 using .ConservedChargeSusceptibilities
