@@ -439,3 +439,6 @@
   - `Models` 公共导出面移除 `create_implicit_solver`、`solve_with_root_diagnostics`、`solve_weighted_block_fallback`，保留 `solve_with_derivatives` 作为稳定导数入口；对应内部能力仍保留在 solver 子模块供受控内部路径使用。
   - `tests/unit/models/test_solver_dimension_agnostic.jl` 增加“上述 3 个入口不再出现在 Models 顶层导出”断言，冻结导出面收敛结果。
   - API 文档同步：`docs/api/models/solver/README.md`、`CoreConcepts.md`、`ImplicitSolvers.md` 移除 `create_implicit_solver` 作为公开推荐入口的描述。
+- [x] 2026-04-03：执行 W3-C 收口（导出索引与治理校验，PR #50）。
+  - 使用 `generate_api_export_index.jl` 重生成导出索引：`docs/api/generated/models/ModelsExportIndex.md` 与 `docs/api/models/solver/generated/Exports.md`，确保导出面剥离后索引与真实导出一致。
+  - 治理检查通过：`scripts/dev/check_docs_consistency.jl`、`scripts/dev/check_active_docs_governance.jl`。
