@@ -368,3 +368,7 @@
   - `Solver.solve_constraint` 的 `use_problem_spec=false` 兼容回退新增显式告警（可通过 `warn_on_legacy_path=false` 静默），用于标注该路径为过渡能力并避免新逻辑继续依赖旧链。
   - 在 `tests/unit/models/test_problem_spec_contract.jl` 增加 legacy 回退告警/静默与参数校验覆盖，确保治理行为可测试。
   - integration smoke 复跑通过：`427/427`。
+- [x] 2026-04-03：继续推进 B4 兼容开关收紧（PR #50）。
+  - `Solver.solve_constraint` 对 `use_problem_spec=false` 增加显式门禁：仅当 `allow_legacy_path=true` 时允许进入 legacy 回退路径；否则抛 `ArgumentError`，避免新调用方继续绑定旧链。
+  - 保留并复用 `warn_on_legacy_path` 告警治理能力，仅在显式放行 legacy 路径时触发告警/静默策略。
+  - `tests/unit/models/test_problem_spec_contract.jl` 新增门禁行为与 `allow_legacy_path` 参数校验覆盖，确保“默认禁用、显式放行”语义可回归。

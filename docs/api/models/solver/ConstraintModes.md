@@ -70,7 +70,8 @@
 当前默认行为与兼容回退约定：
 
 - `solve_constraint` 对 `FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 默认走 `ProblemSpec` 主链
-- `use_problem_spec=false` 仍可进入过渡 legacy 路径，但默认会发出告警提示该路径计划移除
+- `use_problem_spec=false` 仅作为过渡兼容开关，需显式传 `allow_legacy_path=true` 才允许进入 legacy 路径
+- 未显式允许时，`use_problem_spec=false` 会抛 `ArgumentError`，避免新调用继续耦合旧链
 - 需要静默过渡告警时，可显式传 `warn_on_legacy_path=false`
 
 配套组件层通过 `build_constraint_components(mode)` 暴露 mode 到约束职责的映射，用于固定“语义同构”口径。当前核心组件语义包括：

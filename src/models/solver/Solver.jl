@@ -16,9 +16,14 @@ const SolverResult = ImplicitSolver.SolverResult
     use_problem_spec isa Bool || throw(ArgumentError("use_problem_spec must be Bool, got $(typeof(use_problem_spec))"))
     warn_on_legacy_path = get(kwargs, :warn_on_legacy_path, true)
     warn_on_legacy_path isa Bool || throw(ArgumentError("warn_on_legacy_path must be Bool, got $(typeof(warn_on_legacy_path))"))
+    allow_legacy_path = get(kwargs, :allow_legacy_path, false)
+    allow_legacy_path isa Bool || throw(ArgumentError("allow_legacy_path must be Bool, got $(typeof(allow_legacy_path))"))
 
-    forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec && k != :use_problem_spec && k != :warn_on_legacy_path)...)
+    forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec && k != :use_problem_spec && k != :warn_on_legacy_path && k != :allow_legacy_path)...)
     if !use_problem_spec
+        if !allow_legacy_path
+            throw(ArgumentError("use_problem_spec=false is transitional and now gated; pass allow_legacy_path=true only for explicit compatibility or test scenarios"))
+        end
         if warn_on_legacy_path
             @warn "use_problem_spec=false selects transitional legacy solver path; this compatibility route is scheduled for removal"
         end
