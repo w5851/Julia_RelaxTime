@@ -446,3 +446,7 @@
   - 在 W3-B 导出面收敛后修复残余调用：`tests/integration/models/test_solver_config_isolation_smoke.jl` 与 `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl` 的 `create_implicit_solver` 调用统一切换为 `create_pnjl_implicit_solver`。
   - 同步收口 Phase CLI preset：`scripts/pnjl/calculate_phase_structure.jl` 的 `--preset=smoke` 默认 backend 改为 `:models`，并将 CLI 参数校验收紧为 `models|auto`，避免 W3-A 后 preset 仍回落到 legacy 配置。
   - 回归验证通过：上述 2 个 integration 定向测试通过；`tests/integration/models/test_phase_cli_smoke.jl` 通过；integration smoke `427/427`。
+- [x] 2026-04-03：继续推进 W4 深化（phase/integration legacy 参数口径统一，PR #50）。
+  - integration/phase 相关测试中 `solver_backend=:legacy` 统一切换为 `:models`（`test_phase_pipeline_smoke.jl`、`test_phase_artifacts_promotion_smoke.jl`、`test_models_unified_entrypoints_smoke.jl`、`test_pm_phase_diagnostic_smoke.jl`）；对应 unit `test_phase_pipeline.jl` 与 `test_pm_phase_diagnostic.jl` 同步收口。
+  - 该批次确保 W3-A 后“legacy backend 已冻结”语义在 phase 与统一入口测试层不再出现反向示例，减少后续 W4/W5 回归噪声。
+  - 回归验证通过：`test_phase_pipeline.jl`、`test_pm_phase_diagnostic.jl`、`test_phase_pipeline_smoke.jl`、`test_pm_phase_diagnostic_smoke.jl`，integration smoke `427/427`。

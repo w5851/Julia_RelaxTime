@@ -10,7 +10,7 @@ end
 
 @testset "PM phase diagnostic CLI smoke" begin
     output_dir = mktempdir()
-    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --T_values=130.9 --mu_start=290.9 --mu_stop=291.1 --mu_step=0.1 --output_dir=$(output_dir) --solver_backend=legacy --p_num=24 --t_num=8 --xi=0.0`
+    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --T_values=130.9 --mu_start=290.9 --mu_stop=291.1 --mu_step=0.1 --output_dir=$(output_dir) --solver_backend=models --p_num=24 --t_num=8 --xi=0.0`
     run(cmd)
 
     @test isfile(joinpath(output_dir, "pm_branch_scan.csv"))
@@ -24,7 +24,7 @@ end
         T_values=[130.9],
         mu_grid=[290.9, 291.0, 291.1],
         xi=0.0,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=24,
         t_num=8,
         output_dir=output_dir,
