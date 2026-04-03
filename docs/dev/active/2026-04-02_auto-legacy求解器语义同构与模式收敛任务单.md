@@ -450,3 +450,7 @@
   - integration/phase 相关测试中 `solver_backend=:legacy` 统一切换为 `:models`（`test_phase_pipeline_smoke.jl`、`test_phase_artifacts_promotion_smoke.jl`、`test_models_unified_entrypoints_smoke.jl`、`test_pm_phase_diagnostic_smoke.jl`）；对应 unit `test_phase_pipeline.jl` 与 `test_pm_phase_diagnostic.jl` 同步收口。
   - 该批次确保 W3-A 后“legacy backend 已冻结”语义在 phase 与统一入口测试层不再出现反向示例，减少后续 W4/W5 回归噪声。
   - 回归验证通过：`test_phase_pipeline.jl`、`test_pm_phase_diagnostic.jl`、`test_phase_pipeline_smoke.jl`、`test_pm_phase_diagnostic_smoke.jl`，integration smoke `427/427`。
+- [x] 2026-04-03：继续推进 W4 深化（CLI smoke 口径与 models backend 一致，PR #50）。
+  - `test_wavee_unified_scan_cli_smoke.jl` 中 tmu/trho/phase 三条 CLI 烟测命令统一改为 `--solver_backend=models`，对齐 W3-A 冻结后运行事实。
+  - `test_phase_cli_direct_smoke.jl` 内 direct smoke、默认模板运行、manifest 写入与 preset 断言统一收口到 models（含 config fixture 中 `solver_backend` 从 `legacy` 改为 `models`）。
+  - 回归验证通过：`test_wavee_unified_scan_cli_smoke.jl`、`test_phase_cli_direct_smoke.jl`。
