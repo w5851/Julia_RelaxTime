@@ -100,4 +100,12 @@ const _DBS = Models.DualBranchScan
         invalid_selector = (_h, _q) -> :invalid
         @test_throws ArgumentError _DBS._select_physical_branch(hadron, quark, invalid_selector)
     end
+
+    @testset "models 路径禁止 legacy solver 开关" begin
+        @test _DBS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
+        @test_throws ArgumentError _DBS._reject_legacy_solver_kwargs((; use_problem_spec=false))
+        @test_throws ArgumentError _DBS._reject_legacy_solver_kwargs((; allow_legacy_path=true))
+        @test_throws ArgumentError _DBS._reject_legacy_solver_kwargs((; warn_on_legacy_path=false))
+        @test_throws ArgumentError _DBS._reject_legacy_solver_kwargs((; problem_spec=:dummy))
+    end
 end

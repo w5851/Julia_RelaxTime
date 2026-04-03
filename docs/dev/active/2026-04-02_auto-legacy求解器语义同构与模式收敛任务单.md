@@ -372,3 +372,19 @@
   - `Solver.solve_constraint` 对 `use_problem_spec=false` 增加显式门禁：仅当 `allow_legacy_path=true` 时允许进入 legacy 回退路径；否则抛 `ArgumentError`，避免新调用方继续绑定旧链。
   - 保留并复用 `warn_on_legacy_path` 告警治理能力，仅在显式放行 legacy 路径时触发告警/静默策略。
   - `tests/unit/models/test_problem_spec_contract.jl` 新增门禁行为与 `allow_legacy_path` 参数校验覆盖，确保“默认禁用、显式放行”语义可回归。
+- [x] 2026-04-03：继续推进 B4 测试侧兼容最小化（PR #50）。
+  - 完成 `use_problem_spec=false` 全仓扫描与分类：`src/` 生产入口无残余 legacy 调用，仅保留 `Solver.jl` 门禁实现与单测/文档治理记录。
+  - `tests/unit/models/test_problem_spec_contract.jl` 将 legacy 兼容断言收敛为最小必要集合：门禁拒绝、显式放行并告警、显式放行并静默、参数类型校验；去除重复 legacy 调用路径。
+  - 回归验证通过：`julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（`106/106`）。
+- [x] 2026-04-03：继续推进 B4-3 兼容参数暴露面收缩（PR #50）。
+  - `solve_constraint` 在 `use_problem_spec=true`（默认）时，显式拒绝 `allow_legacy_path` / `warn_on_legacy_path`，将 legacy 治理参数限定在兼容回退分支，避免主链调用保留无效开关。
+  - `tests/unit/models/test_problem_spec_contract.jl` 新增“默认主链禁止 legacy 参数”断言覆盖，确保参数可见性收缩可回归。
+  - 同文件回归验证通过：`julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（`108/108`）。
+- [x] 2026-04-03：继续推进 B4-4 兼容参数互斥收敛（PR #50）。
+  - `solve_constraint` 新增互斥守卫：`use_problem_spec=false` 时禁止同时传 `problem_spec`，避免 legacy 回退与 `ProblemSpec` 主链契约发生混合语义。
+  - `tests/unit/models/test_problem_spec_contract.jl` 新增对应断言，固定“legacy 回退 vs 主链契约”参数互斥规则。
+  - 同文件回归验证通过：`julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（`109/109`）。
+- [x] 2026-04-03：继续推进 B4-5 扫描入口 legacy 参数下线准备（PR #50）。
+  - `TrhoScan/TmuScan/DualBranchScan` 在 models 求解路径新增 `_reject_legacy_solver_kwargs` 守卫，显式拒绝 `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `problem_spec` 透传，避免扫描入口绕过主链治理边界。
+  - 三个扫描模块单测新增“models 路径禁止 legacy solver 开关”覆盖，固定外部可见面的收缩行为。
+  - 回归验证通过：`tests/unit/models/test_trho_scan.jl`（`21/21`）、`tests/unit/models/test_tmu_scan.jl`（`19/19`）、`tests/unit/models/test_dual_branch_scan.jl`（`34/34`）。

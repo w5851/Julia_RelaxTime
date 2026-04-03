@@ -14,10 +14,17 @@ const SolverResult = ImplicitSolver.SolverResult
 )
     use_problem_spec = get(kwargs, :use_problem_spec, true)
     use_problem_spec isa Bool || throw(ArgumentError("use_problem_spec must be Bool, got $(typeof(use_problem_spec))"))
-    warn_on_legacy_path = get(kwargs, :warn_on_legacy_path, true)
-    warn_on_legacy_path isa Bool || throw(ArgumentError("warn_on_legacy_path must be Bool, got $(typeof(warn_on_legacy_path))"))
     allow_legacy_path = get(kwargs, :allow_legacy_path, false)
     allow_legacy_path isa Bool || throw(ArgumentError("allow_legacy_path must be Bool, got $(typeof(allow_legacy_path))"))
+    warn_on_legacy_path = get(kwargs, :warn_on_legacy_path, true)
+    warn_on_legacy_path isa Bool || throw(ArgumentError("warn_on_legacy_path must be Bool, got $(typeof(warn_on_legacy_path))"))
+
+    if use_problem_spec
+        haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path is only valid when use_problem_spec=false"))
+        haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path is only valid when use_problem_spec=false"))
+    else
+        haskey(kwargs, :problem_spec) && throw(ArgumentError("problem_spec cannot be combined with use_problem_spec=false"))
+    end
 
     forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec && k != :use_problem_spec && k != :warn_on_legacy_path && k != :allow_legacy_path)...)
     if !use_problem_spec

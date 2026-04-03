@@ -151,7 +151,7 @@ end
             iterations=120,
         )
 
-        legacy = Models.solve_constraint(
+        legacy = @test_logs (:warn, r"use_problem_spec=false") Models.solve_constraint(
             model,
             mode,
             T_fm;
@@ -167,20 +167,6 @@ end
         @test !haskey(legacy, :selection_reason)
         @test !haskey(legacy, :candidate_count)
 
-        @test_logs (:warn, r"use_problem_spec=false") Models.solve_constraint(
-            model,
-            mode,
-            T_fm;
-            use_problem_spec=false,
-            allow_legacy_path=true,
-            seed_guess=seed,
-            rho0=0.16,
-            p_num=8,
-            t_num=4,
-            residual_norm_max=1e-6,
-            iterations=120,
-        )
-
         @test_logs Models.solve_constraint(
             model,
             mode,
@@ -194,6 +180,41 @@ end
             t_num=4,
             residual_norm_max=1e-6,
             iterations=120,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            allow_legacy_path=true,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            warn_on_legacy_path=false,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=false,
+            allow_legacy_path=true,
+            problem_spec=Models.build_problem_spec(mode),
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
         )
 
         @test_throws ArgumentError Models.solve_constraint(

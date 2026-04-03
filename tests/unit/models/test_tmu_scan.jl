@@ -50,4 +50,12 @@ const _TMS = Models.TmuScan
         @test_throws ArgumentError _TMS._validate_semantic_mode(:ground_state, (_h, _q) -> :hadron)
         @test_throws ArgumentError _TMS._validate_semantic_mode(:invalid_mode, nothing)
     end
+
+    @testset "models 路径禁止 legacy solver 开关" begin
+        @test _TMS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; use_problem_spec=false))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; allow_legacy_path=true))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; warn_on_legacy_path=false))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; problem_spec=:dummy))
+    end
 end

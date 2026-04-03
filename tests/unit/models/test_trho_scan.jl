@@ -58,4 +58,12 @@ const _TS = Models.TrhoScan
         @test _TS._validate_semantic_mode(:constrained_manifold) === nothing
         @test_throws ArgumentError _TS._validate_semantic_mode(:invalid_mode)
     end
+
+    @testset "models 路径禁止 legacy solver 开关" begin
+        @test _TS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; use_problem_spec=false))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; allow_legacy_path=true))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; warn_on_legacy_path=false))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; problem_spec=:dummy))
+    end
 end

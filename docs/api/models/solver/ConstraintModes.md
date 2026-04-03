@@ -73,6 +73,8 @@
 - `use_problem_spec=false` 仅作为过渡兼容开关，需显式传 `allow_legacy_path=true` 才允许进入 legacy 路径
 - 未显式允许时，`use_problem_spec=false` 会抛 `ArgumentError`，避免新调用继续耦合旧链
 - 需要静默过渡告警时，可显式传 `warn_on_legacy_path=false`
+- 当 `use_problem_spec=true`（默认）时，`allow_legacy_path` / `warn_on_legacy_path` 不允许传入，避免在主链中保留无效兼容参数
+- 当 `use_problem_spec=false` 时，不允许同时传 `problem_spec`，避免兼容回退与主链契约配置混用
 
 配套组件层通过 `build_constraint_components(mode)` 暴露 mode 到约束职责的映射，用于固定“语义同构”口径。当前核心组件语义包括：
 

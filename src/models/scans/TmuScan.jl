@@ -536,6 +536,15 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
     )
 end
 
+@inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    for key in keys(nlsolve_kwargs)
+        if key === :use_problem_spec || key === :allow_legacy_path || key === :warn_on_legacy_path || key === :problem_spec
+            throw(ArgumentError("legacy solver switch '$key' is not allowed from TmuScan models path"))
+        end
+    end
+    return nothing
+end
+
 function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     xi::Real,
     model_kind::Symbol,
@@ -546,6 +555,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
     raw = Main.Models.solve_constraint(
         model,
