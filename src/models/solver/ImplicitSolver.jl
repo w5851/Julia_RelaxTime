@@ -92,8 +92,6 @@ end
     return true
 end
 
-const _default_is_physical_solution = default_is_physical_solution
-
 @inline function _all_finite_thermo(omega::Float64, pressure::Float64, rho_norm::Float64, entropy::Float64, energy::Float64)
     return isfinite(omega) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
 end

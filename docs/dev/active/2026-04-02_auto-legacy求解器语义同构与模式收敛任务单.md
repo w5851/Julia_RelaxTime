@@ -361,3 +361,6 @@
   - `ImplicitSolver` 内部调用与参数默认中的物理性判据统一切换为 `default_is_physical_solution`，`_default_is_physical_solution` 仅保留兼容别名，不再作为主路径默认符号。
   - 该变更确保“公共导出符号”为代码主语义来源，进一步降低后续私有符号清理的回归风险。
   - 回归验证通过：`tests/unit/pnjl/test_solver_implicit.jl`、`tests/unit/models/test_problem_spec_contract.jl`、integration smoke `427/427`。
+- [x] 2026-04-03：继续推进 B4 私有兼容符号清理（PR #50）。
+  - 移除 `ImplicitSolver` 中 `_default_is_physical_solution` 兼容别名，确认代码库内不再存在该私有符号引用。
+  - 回归验证通过：`tests/unit/pnjl/test_solver_implicit.jl`、`tests/unit/models/test_problem_spec_contract.jl`、integration smoke `427/427`。
