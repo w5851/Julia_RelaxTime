@@ -346,3 +346,7 @@
   - `TmuScan/TrhoScan/DualBranchScan/ScanCommon/ScanResultFinalize` 不再直接依赖 `ImplicitSolver` 子模块类型或入口，统一改为从 `Main.Models` 公共接口导入 `solve`/`SolverResult`（`TrhoScan` 同步使用 `solve_weighted_block_fallback` 公共转发）。
   - `Solver.jl` 新增 `solve_weighted_block_fallback` 公共转发并在 `Models.jl` 导出，减少扫描层对旧求解子模块的编排依赖。
   - integration smoke 复跑通过：`427/427`。
+- [x] 2026-04-03：继续推进 B4 去旧化接口收敛（PR #50）。
+  - 新增 `Models.is_physical_solution` 公共转发（由 `Solver.jl` 暴露），将 `scripts/relaxtime/run_gap_transport_scan.jl` 中对 `Main.Models.ImplicitSolver._default_is_physical_solution` 的直接依赖替换为公共 API。
+  - 该改动进一步压缩业务脚本对 `ImplicitSolver` 私有符号的耦合，为后续 `ImplicitSolver` 入口冻结/下线清理提供前置条件。
+  - integration smoke 复跑通过：`427/427`。

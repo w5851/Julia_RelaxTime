@@ -771,7 +771,7 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
         p_num=opts.p_num,
         t_num=opts.t_num,
         residual_norm_max=1e-4,
-        physicality_check=Main.Models.ImplicitSolver._default_is_physical_solution,
+        physicality_check=Main.Models.is_physical_solution,
     )
     Bool(raw.converged) || return nothing
     masses = SVector{3}(Tuple(Float64.(raw.masses)))

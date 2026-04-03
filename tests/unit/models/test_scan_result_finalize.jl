@@ -10,7 +10,7 @@ if !isdefined(Main, :Models)
 end
 Models.pnjl_module()
 
-# ScanResultFinalize 使用 ..ImplicitSolver 相对导入，只能通过 Models 子模块访问
+# ScanResultFinalize 通过 Models 公共接口访问 SolverResult
 using Main.Models.ScanResultFinalize: is_success, promote_near_converged
 
 const PNJL_SRF = Models.pnjl_module()
