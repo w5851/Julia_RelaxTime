@@ -137,7 +137,8 @@ function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed
     T_fm = Float64(T_MeV) / Main.Constants_PNJL.ħc_MeV_fm
     mu_fm = Float64(mu_MeV) / Main.Constants_PNJL.ħc_MeV_fm
 
-    result = if solver_backend === :models
+    solver_backend === :models || throw(ArgumentError("solver_backend=:legacy has been removed from PM phase diagnostic path; use solver_backend=:models"))
+    result = begin
         model = create_model(:PNJL)
         solve_constraint(
             model,
@@ -150,21 +151,6 @@ function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed
             t_num=t_num,
             residual_norm_max=residual_accept_tol,
         )
-    elseif solver_backend === :legacy
-        strategy = branch === :hadron ?
-            DefaultSeed(Float64.(seed_state), Float64.(seed_state), :hadron) :
-            DefaultSeed(Float64.(seed_state), Float64.(seed_state), :quark)
-        solve(
-            FixedMu(),
-            T_fm,
-            mu_fm;
-            xi=xi,
-            seed_strategy=strategy,
-            p_num=p_num,
-            t_num=t_num,
-        )
-    else
-        throw(ArgumentError("unsupported solver_backend: $solver_backend"))
     end
 
     accept = _pm_accept_branch_point(result; residual_accept_tol=residual_accept_tol)

@@ -424,3 +424,14 @@
   - `tests/unit/models/test_problem_spec_contract.jl` 删除 legacy 回退行为断言，改为“兼容参数已移除并抛错”断言。
   - `docs/api/models/solver/ConstraintModes.md` 同步更新为“兼容参数已移除、problem_spec 仍可显式覆盖”的最终口径。
   - 验证通过：`scripts/dev/check_legacy_solver_switch_leakage.jl`（OK）；`tests/unit/models/test_problem_spec_contract.jl`（`103/103`）、`test_trho_scan.jl`（`21/21`）、`test_tmu_scan.jl`（`19/19`）、`test_dual_branch_scan.jl`（`34/34`）；integration smoke（`427/427`）。
+- [x] 2026-04-03：进入 W3 准备（ImplicitSolver 业务入口物理下线前评估，PR #50）。
+  - 影响面盘点：`src/models/scans/TrhoScan.jl`、`src/models/scans/TmuScan.jl`、`src/models/scans/DualBranchScan.jl` 仍在 `solver_backend=:legacy` 分支调用 `solve(...)`；`src/models/phase/PMPhaseSeeds.jl` 与 `src/models/phase/PMPhaseDiagnostic.jl` 仍保留 `solver_backend=:legacy` 路径。
+  - 公共 API 依赖盘点：`Models.jl` 仍导出 `create_implicit_solver` / `solve_with_derivatives` / `solve_with_root_diagnostics` / `solve_weighted_block_fallback`，且对应 unit/integration/regression 覆盖仍活跃，说明 W3 需按“先冻结业务入口、后拆分底层能力”推进。
+  - W3 建议拆分：
+    - W3-A：冻结 legacy backend 可达面（扫描/phase 入口禁用 `:legacy`，保留受控过渡错误提示）；
+    - W3-B：将 `ImplicitSolver` 中仅用于业务编排的入口从 `Models` 导出面剥离，保留必要数值内核；
+    - W3-C：完成导出/API 文档与回归矩阵收口后，再执行物理删除。
+- [x] 2026-04-03：执行 W3-A（冻结 legacy backend 可达面，PR #50）。
+  - `TmuScan/TrhoScan/DualBranchScan` 运行路径移除 legacy backend 执行分支：调用层仅接受 models 执行（保留 `:auto` 路由语义，但运行时若解析到 legacy 将抛显式 `ArgumentError`）。
+  - `PMPhaseSeeds` 与 `PMPhaseDiagnostic` 移除 legacy backend 执行分支，改为对 `solver_backend=:legacy` 明确报错，冻结 phase 链路对旧业务入口的可达性。
+  - 单测与冒烟验证通过：`test_tmu_scan.jl`（`20/20`）、`test_trho_scan.jl`（`22/22`）、`test_dual_branch_scan.jl`（`34/34`）、`test_pm_phase_diagnostic.jl`（全 testset 通过）、integration `test_tmu_scan_smoke.jl`、`test_trho_scan_solver_backend_models_smoke.jl`、`test_scan_solver_boundary_error_smoke.jl`。

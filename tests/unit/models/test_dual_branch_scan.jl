@@ -63,7 +63,7 @@ const _DBS = Models.DualBranchScan
     @testset "auto backend 路由规则" begin
         @test _DBS._effective_solver_backend(:models, :auto) == :models
         @test _DBS._effective_solver_backend(:legacy, :auto; auto_pnjl_backend=:models) == :models
-        @test _DBS._effective_solver_backend(:legacy, :auto; auto_pnjl_backend=:legacy) == :legacy
+        @test _DBS._effective_solver_backend(:legacy, :auto; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
         @test _DBS._effective_solver_backend(:legacy, :models; auto_pnjl_backend=:legacy) == :models
     end
 

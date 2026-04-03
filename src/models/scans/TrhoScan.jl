@@ -135,8 +135,8 @@ end
         throw(ArgumentError("seed_policy must be :hybrid_continuity or :candidates, got $(seed_policy)"))
     (constraint_mode === :fixed_rho || constraint_mode === :fixed_asymmetric_rho) ||
         throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
-    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
-        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+    (solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :models or :auto (legacy backend removed), got $(solver_backend)"))
 
     if model_kind in ScanCommon.PARAMETERIZED_MODEL_KIND_ALIASES
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
@@ -145,9 +145,6 @@ end
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 
-    if solver_backend === :legacy && model_kind !== :PNJL
-        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
-    end
     return nothing
 end
 
@@ -588,8 +585,8 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     nlsolve_kwargs...)
     try
         effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TrhoScan models path; use :models or :auto"))
 
         mode = if constraint_mode === :fixed_rho
             FixedRho(rho_target)
@@ -611,34 +608,15 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         # 创建自定义策略，直接返回指定种子
         strategy = ScanCommon.FixedSeedStrategy(seed_8)
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(mode, T_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                semantic_mode=semantic_mode,
-                selector=selector,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        elseif mode isa FixedAsymmetricRho
-            solve(mode, T_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        else
-            solve(mode, T_fm;
-                xi=xi,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(mode, T_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=strategy,
+            semantic_mode=semantic_mode,
+            selector=selector,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,

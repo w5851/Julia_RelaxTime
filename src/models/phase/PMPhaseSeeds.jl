@@ -30,34 +30,19 @@ function _pm_solve_seed_equilibrium(T_MeV::Real, mu_MeV::Real, seed0::AbstractVe
     T_fm = Float64(T_MeV) / Main.Constants_PNJL.ħc_MeV_fm
     mu_fm = Float64(mu_MeV) / Main.Constants_PNJL.ħc_MeV_fm
 
-    if solver_backend === :models
-        model = create_model(:PNJL)
-        return solve_constraint(
-            model,
-            FixedMu(),
-            T_fm;
-            μ_fm=mu_fm,
-            seed_guess=Float64.(seed0),
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            residual_norm_max=residual_accept_tol,
-        )
-    elseif solver_backend === :legacy
-        phase_hint = branch === :quark ? :quark : :hadron
-        strategy = DefaultSeed(Float64.(seed0), Float64.(seed0), phase_hint)
-        return solve(
-            FixedMu(),
-            T_fm,
-            mu_fm;
-            xi=xi,
-            seed_strategy=strategy,
-            p_num=p_num,
-            t_num=t_num,
-        )
-    end
-
-    throw(ArgumentError("unsupported solver_backend: $solver_backend"))
+    solver_backend === :models || throw(ArgumentError("solver_backend=:legacy has been removed from PM phase seed path; use solver_backend=:models"))
+    model = create_model(:PNJL)
+    return solve_constraint(
+        model,
+        FixedMu(),
+        T_fm;
+        μ_fm=mu_fm,
+        seed_guess=Float64.(seed0),
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        residual_norm_max=residual_accept_tol,
+    )
 end
 
 function derive_pm_seed_pair(T_MeV::Real, mu_grid;

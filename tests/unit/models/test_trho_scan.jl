@@ -49,8 +49,12 @@ const _TS = Models.TrhoScan
 
     @testset "auto backend 语义路由配置" begin
         @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
-        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy
+        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
         @test _TS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
+
+    @testset "legacy backend removed from input validation" begin
+        @test_throws ArgumentError _TS._validate_trho_scan_inputs([150.0], [0.2], [0.0], :candidates, :fixed_rho, :legacy, :PNJL)
     end
 
     @testset "semantic_mode 参数校验" begin

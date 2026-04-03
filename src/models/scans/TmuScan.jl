@@ -91,8 +91,8 @@ end
     _validate_real_vector(:mu_values, mu_values)
     _validate_real_vector(:xi_values, xi_values)
 
-    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
-        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+    (solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :models or :auto (legacy backend removed), got $(solver_backend)"))
 
     if model_kind in ScanCommon.PARAMETERIZED_MODEL_KIND_ALIASES
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
@@ -101,9 +101,6 @@ end
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 
-    if solver_backend === :legacy && model_kind !== :PNJL
-        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
-    end
     return nothing
 end
 
@@ -399,30 +396,20 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
     nlsolve_kwargs...)
     try
         effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TmuScan models path; use :models or :auto"))
 
         # 创建固定种子策略
         seed_5 = Float64.(seed_state[1:min(5, length(seed_state))])
         strategy = ScanCommon.FixedSeedStrategy(seed_5)
         
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -449,26 +436,16 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
     nlsolve_kwargs...)
     try
         effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TmuScan models path; use :models or :auto"))
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=seed_strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                seed_strategy=seed_strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=seed_strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,

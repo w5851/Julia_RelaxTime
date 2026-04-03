@@ -40,8 +40,12 @@ const _TMS = Models.TmuScan
 
     @testset "auto backend 语义路由配置" begin
         @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
-        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy
+        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
         @test _TMS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
+
+    @testset "legacy backend removed from input validation" begin
+        @test_throws ArgumentError _TMS._validate_tmu_scan_inputs([150.0], [0.0], [0.0], :legacy, :PNJL)
     end
 
     @testset "semantic_mode 参数校验" begin

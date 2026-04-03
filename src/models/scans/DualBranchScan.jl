@@ -397,30 +397,19 @@ function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
     
     try
         effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend; auto_pnjl_backend=auto_pnjl_backend)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
-        if effective_solver_backend === :models && thermo_backend !== :models
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from DualBranchScan models path; use :models or :auto"))
+        if thermo_backend !== :models
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=:PNJL,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                thermo_backend=effective_solver_backend,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=:PNJL,
+            seed_strategy=strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
         return result
     catch
         return nothing
