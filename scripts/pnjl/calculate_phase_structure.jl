@@ -111,7 +111,7 @@ function _apply_preset!(cfg::PhaseCliConfig, preset::Symbol)
     if preset == :smoke
         cfg.mode = :research
         cfg.profile = :smoke
-        cfg.solver_backend = :legacy
+        cfg.solver_backend = :models
         cfg.T_min = 150.0
         cfg.T_max = 150.0
         cfg.T_step = 10.0
@@ -236,7 +236,7 @@ function _usage()
     println("  --profile=default      运行 profile")
     println("  --run_id=...           指定 run_id")
     println("  --output_dir=...       指定输出目录（覆盖默认 processed 路径）")
-    println("  --solver_backend=models|legacy|auto")
+    println("  --solver_backend=models|auto")
     println("  --seed_policy=...      扫描初值策略")
     println("  --reverse_rho=true|false")
     println("  --p_num=12             动量积分点数")
@@ -396,6 +396,7 @@ function parse_args(args)
         end
     end
     cfg.mode in (:production, :research) || throw(ArgumentError("invalid --mode=$(cfg.mode); accepted values: production, research"))
+    cfg.solver_backend in (:models, :auto) || throw(ArgumentError("invalid --solver_backend=$(cfg.solver_backend); accepted values: models, auto"))
     return cfg
 end
 

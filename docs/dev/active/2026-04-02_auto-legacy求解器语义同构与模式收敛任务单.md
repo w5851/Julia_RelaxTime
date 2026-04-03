@@ -442,3 +442,7 @@
 - [x] 2026-04-03：执行 W3-C 收口（导出索引与治理校验，PR #50）。
   - 使用 `generate_api_export_index.jl` 重生成导出索引：`docs/api/generated/models/ModelsExportIndex.md` 与 `docs/api/models/solver/generated/Exports.md`，确保导出面剥离后索引与真实导出一致。
   - 治理检查通过：`scripts/dev/check_docs_consistency.jl`、`scripts/dev/check_active_docs_governance.jl`。
+- [x] 2026-04-03：下一阶段启动（W4 入口一致性收口，PR #50）。
+  - 在 W3-B 导出面收敛后修复残余调用：`tests/integration/models/test_solver_config_isolation_smoke.jl` 与 `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl` 的 `create_implicit_solver` 调用统一切换为 `create_pnjl_implicit_solver`。
+  - 同步收口 Phase CLI preset：`scripts/pnjl/calculate_phase_structure.jl` 的 `--preset=smoke` 默认 backend 改为 `:models`，并将 CLI 参数校验收紧为 `models|auto`，避免 W3-A 后 preset 仍回落到 legacy 配置。
+  - 回归验证通过：上述 2 个 integration 定向测试通过；`tests/integration/models/test_phase_cli_smoke.jl` 通过；integration smoke `427/427`。
