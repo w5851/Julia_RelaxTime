@@ -435,3 +435,7 @@
   - `TmuScan/TrhoScan/DualBranchScan` 运行路径移除 legacy backend 执行分支：调用层仅接受 models 执行（保留 `:auto` 路由语义，但运行时若解析到 legacy 将抛显式 `ArgumentError`）。
   - `PMPhaseSeeds` 与 `PMPhaseDiagnostic` 移除 legacy backend 执行分支，改为对 `solver_backend=:legacy` 明确报错，冻结 phase 链路对旧业务入口的可达性。
   - 单测与冒烟验证通过：`test_tmu_scan.jl`（`20/20`）、`test_trho_scan.jl`（`22/22`）、`test_dual_branch_scan.jl`（`34/34`）、`test_pm_phase_diagnostic.jl`（全 testset 通过）、integration `test_tmu_scan_smoke.jl`、`test_trho_scan_solver_backend_models_smoke.jl`、`test_scan_solver_boundary_error_smoke.jl`。
+- [x] 2026-04-03：执行 W3-B（导出面剥离首批，PR #50）。
+  - `Models` 公共导出面移除 `create_implicit_solver`、`solve_with_root_diagnostics`、`solve_weighted_block_fallback`，保留 `solve_with_derivatives` 作为稳定导数入口；对应内部能力仍保留在 solver 子模块供受控内部路径使用。
+  - `tests/unit/models/test_solver_dimension_agnostic.jl` 增加“上述 3 个入口不再出现在 Models 顶层导出”断言，冻结导出面收敛结果。
+  - API 文档同步：`docs/api/models/solver/README.md`、`CoreConcepts.md`、`ImplicitSolvers.md` 移除 `create_implicit_solver` 作为公开推荐入口的描述。

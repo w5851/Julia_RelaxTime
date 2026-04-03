@@ -72,12 +72,12 @@ R1 收敛后，`FixedRho` 主链不再只依赖“单个大 residual 函数”�
 
 ## 6. 求解器工厂面向导数链路
 
-`create_implicit_gap_solver`、`create_pnjl_implicit_solver`、`create_flavor_mu_implicit_gap_solver`、`create_implicit_solver` 不服务普通单点求解，而是服务隐函数求导与涨落/导数链路。
+`create_implicit_gap_solver`、`create_pnjl_implicit_solver`、`create_flavor_mu_implicit_gap_solver` 不服务普通单点求解，而是服务隐函数求导与涨落/导数链路。
 
 因此它们的职责边界是：
 
 - 普通求解：`solve_gap` / `solve`
-- 需要 `dx/dθ`：implicit solver factory，包括更通用的 `create_implicit_solver`
+- 需要 `dx/dθ`：implicit solver factory（如 `create_pnjl_implicit_solver`）
 - 需要导数组合：`solve_with_derivatives`、`solve_pnjl_with_derivatives` 等高阶接口
 
 ## 7. 为什么这个主题必须吸收旧页内容
