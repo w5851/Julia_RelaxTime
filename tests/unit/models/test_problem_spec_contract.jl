@@ -153,11 +153,50 @@ end
         @test !haskey(legacy, :selection_reason)
         @test !haskey(legacy, :candidate_count)
 
+        @test_logs (:warn, r"use_problem_spec=false") Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=false,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+
+        @test_logs Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=false,
+            warn_on_legacy_path=false,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+
         @test_throws ArgumentError Models.solve_constraint(
             model,
             mode,
             T_fm;
             use_problem_spec=:yes,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            use_problem_spec=false,
+            warn_on_legacy_path=:invalid,
             seed_guess=seed,
             rho0=0.16,
             p_num=8,

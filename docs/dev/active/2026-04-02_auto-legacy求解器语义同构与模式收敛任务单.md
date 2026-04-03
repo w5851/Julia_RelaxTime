@@ -364,3 +364,7 @@
 - [x] 2026-04-03：继续推进 B4 私有兼容符号清理（PR #50）。
   - 移除 `ImplicitSolver` 中 `_default_is_physical_solution` 兼容别名，确认代码库内不再存在该私有符号引用。
   - 回归验证通过：`tests/unit/pnjl/test_solver_implicit.jl`、`tests/unit/models/test_problem_spec_contract.jl`、integration smoke `427/427`。
+- [x] 2026-04-03：继续推进 B4 兼容回退治理（PR #50）。
+  - `Solver.solve_constraint` 的 `use_problem_spec=false` 兼容回退新增显式告警（可通过 `warn_on_legacy_path=false` 静默），用于标注该路径为过渡能力并避免新逻辑继续依赖旧链。
+  - 在 `tests/unit/models/test_problem_spec_contract.jl` 增加 legacy 回退告警/静默与参数校验覆盖，确保治理行为可测试。
+  - integration smoke 复跑通过：`427/427`。
