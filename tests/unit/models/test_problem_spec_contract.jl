@@ -118,7 +118,7 @@ end
         @test_throws ArgumentError Models.solve_constraint(model, mode, 0.5; problem_spec=:invalid)
     end
 
-    @testset "solve_constraint defaults to ProblemSpec chain and gates legacy fallback" begin
+    @testset "solve_constraint defaults to ProblemSpec chain and rejects removed legacy switches" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedEntropy(0.5)
         T_fm = 100.0 / 197.327
@@ -151,37 +151,6 @@ end
             iterations=120,
         )
 
-        legacy = @test_logs (:warn, r"use_problem_spec=false") Models.solve_constraint(
-            model,
-            mode,
-            T_fm;
-            use_problem_spec=false,
-            allow_legacy_path=true,
-            seed_guess=seed,
-            rho0=0.16,
-            p_num=8,
-            t_num=4,
-            residual_norm_max=1e-6,
-            iterations=120,
-        )
-        @test !haskey(legacy, :selection_reason)
-        @test !haskey(legacy, :candidate_count)
-
-        @test_logs Models.solve_constraint(
-            model,
-            mode,
-            T_fm;
-            use_problem_spec=false,
-            allow_legacy_path=true,
-            warn_on_legacy_path=false,
-            seed_guess=seed,
-            rho0=0.16,
-            p_num=8,
-            t_num=4,
-            residual_norm_max=1e-6,
-            iterations=120,
-        )
-
         @test_throws ArgumentError Models.solve_constraint(
             model,
             mode,
@@ -198,19 +167,6 @@ end
             mode,
             T_fm;
             warn_on_legacy_path=false,
-            seed_guess=seed,
-            rho0=0.16,
-            p_num=8,
-            t_num=4,
-        )
-
-        @test_throws ArgumentError Models.solve_constraint(
-            model,
-            mode,
-            T_fm;
-            use_problem_spec=false,
-            allow_legacy_path=true,
-            problem_spec=Models.build_problem_spec(mode),
             seed_guess=seed,
             rho0=0.16,
             p_num=8,
@@ -232,20 +188,6 @@ end
             model,
             mode,
             T_fm;
-            use_problem_spec=false,
-            allow_legacy_path=true,
-            warn_on_legacy_path=:invalid,
-            seed_guess=seed,
-            rho0=0.16,
-            p_num=8,
-            t_num=4,
-        )
-
-        @test_throws ArgumentError Models.solve_constraint(
-            model,
-            mode,
-            T_fm;
-            use_problem_spec=false,
             allow_legacy_path=:invalid,
             seed_guess=seed,
             rho0=0.16,

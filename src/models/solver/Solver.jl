@@ -9,35 +9,14 @@ const SolverResult = ImplicitSolver.SolverResult
     model::AbstractQCDModel,
     mode::ConstraintMode,
     T_fm::Real,
-    legacy_solver::Function,
     kwargs,
 )
-    use_problem_spec = get(kwargs, :use_problem_spec, true)
-    use_problem_spec isa Bool || throw(ArgumentError("use_problem_spec must be Bool, got $(typeof(use_problem_spec))"))
-    allow_legacy_path = get(kwargs, :allow_legacy_path, false)
-    allow_legacy_path isa Bool || throw(ArgumentError("allow_legacy_path must be Bool, got $(typeof(allow_legacy_path))"))
-    warn_on_legacy_path = get(kwargs, :warn_on_legacy_path, true)
-    warn_on_legacy_path isa Bool || throw(ArgumentError("warn_on_legacy_path must be Bool, got $(typeof(warn_on_legacy_path))"))
-
-    if use_problem_spec
-        haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path is only valid when use_problem_spec=false"))
-        haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path is only valid when use_problem_spec=false"))
-    else
-        haskey(kwargs, :problem_spec) && throw(ArgumentError("problem_spec cannot be combined with use_problem_spec=false"))
-    end
-
-    forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec && k != :use_problem_spec && k != :warn_on_legacy_path && k != :allow_legacy_path)...)
-    if !use_problem_spec
-        if !allow_legacy_path
-            throw(ArgumentError("use_problem_spec=false is transitional and now gated; pass allow_legacy_path=true only for explicit compatibility or test scenarios"))
-        end
-        if warn_on_legacy_path
-            @warn "use_problem_spec=false selects transitional legacy solver path; this compatibility route is scheduled for removal"
-        end
-        return legacy_solver(forwarded)
-    end
+    haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; solve_constraint always uses ProblemSpec chain"))
+    haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed together with legacy fallback path"))
+    haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed together with legacy fallback path"))
 
     spec = get(kwargs, :problem_spec, nothing)
+    forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
     if spec === nothing
         spec = build_problem_spec(mode)
     else
@@ -54,43 +33,19 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     kwargs...)
     merged = (; kwargs..., problem_spec=problem_spec)
-    return _solve_with_problem_spec_default(
-        model,
-        mode,
-        T_fm,
-        local_kwargs -> _solve_constraint_fixedrho(model, T_fm, mode.rho_target; local_kwargs...),
-        merged,
-    )
+    return _solve_with_problem_spec_default(model, mode, T_fm, merged)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; kwargs...)
-    return _solve_with_problem_spec_default(
-        model,
-        mode,
-        T_fm,
-        local_kwargs -> _solve_constraint_fixedentropy(model, T_fm, mode.s_target; local_kwargs...),
-        kwargs,
-    )
+    return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; kwargs...)
-    return _solve_with_problem_spec_default(
-        model,
-        mode,
-        T_fm,
-        local_kwargs -> _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; local_kwargs...),
-        kwargs,
-    )
+    return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
-    return _solve_with_problem_spec_default(
-        model,
-        mode,
-        T_fm,
-        local_kwargs -> _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; local_kwargs...),
-        kwargs,
-    )
+    return _solve_with_problem_spec_default(model, mode, T_fm, kwargs)
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)

@@ -419,3 +419,8 @@
   - 新增 CI workflow `.github/workflows/legacy-switch-governance.yml`，在 PR/push 上执行该门禁，阻断 legacy 参数外溢回归。
   - 根据扫描层“拦截型守卫”实现现状，将 allowlist 扩展为 `Solver.jl` + `TrhoScan/TmuScan/DualBranchScan` 守卫实现及对应 unit tests，确保“仅治理边界可见”而非“全仓任意可见”。
   - 验证通过：`scripts/dev/check_legacy_solver_switch_leakage.jl`（OK）；`tests/unit/models/test_problem_spec_contract.jl`（`109/109`）、`test_trho_scan.jl`（`21/21`）、`test_tmu_scan.jl`（`19/19`）、`test_dual_branch_scan.jl`（`34/34`）。
+- [x] 2026-04-03：继续推进 W2 兼容参数移除（PR #50）。
+  - `solve_constraint` 删除 `use_problem_spec=false` legacy 回退分支与 `allow_legacy_path` / `warn_on_legacy_path` 兼容参数；`FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 统一固定为 `ProblemSpec` 主链。
+  - `tests/unit/models/test_problem_spec_contract.jl` 删除 legacy 回退行为断言，改为“兼容参数已移除并抛错”断言。
+  - `docs/api/models/solver/ConstraintModes.md` 同步更新为“兼容参数已移除、problem_spec 仍可显式覆盖”的最终口径。
+  - 验证通过：`scripts/dev/check_legacy_solver_switch_leakage.jl`（OK）；`tests/unit/models/test_problem_spec_contract.jl`（`103/103`）、`test_trho_scan.jl`（`21/21`）、`test_tmu_scan.jl`（`19/19`）、`test_dual_branch_scan.jl`（`34/34`）；integration smoke（`427/427`）。

@@ -4,11 +4,11 @@
 Legacy solver switch leakage guard.
 
 Purpose:
-- keep transitional legacy switches scoped to explicit compatibility boundaries,
+- keep removed legacy switches scoped to explicit governance boundaries,
 - block accidental spread of `use_problem_spec` / `allow_legacy_path` /
   `warn_on_legacy_path` in `src/**/*.jl` and `tests/**/*.jl`.
 
-Allowlist (current transitional boundary):
+Allowlist (current governance boundary):
 - `src/models/solver/Solver.jl`
 - `src/models/scans/TrhoScan.jl`
 - `src/models/scans/TmuScan.jl`
@@ -101,7 +101,7 @@ function main()
         for item in violations
             println(" - " * item)
         end
-        println("hint: keep transitional legacy switches only in solver boundary and contract test")
+        println("hint: keep removed legacy switches only in explicit governance boundaries")
         exit(1)
     end
 
