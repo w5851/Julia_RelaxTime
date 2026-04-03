@@ -237,9 +237,29 @@
 #### B4：旧实现下线（最终目标）
 
 - [ ] 清理 `src/models/solver/ImplicitSolver.jl` 的业务入口角色（先冻结、后删除）。
+  - [x] 阶段收敛：扫描层与脚本层不再直接依赖 `ImplicitSolver` 私有符号；统一走 `Models` 公共转发。
+  - [ ] 终态收口：删除 `ImplicitSolver` 业务入口能力，仅保留必要底层数值内核或彻底移除。
 - [ ] 移除 `Models.jl` 中对旧路径的导出/接线依赖。
+  - [x] 阶段收敛：已移除对 `ImplicitSolver` 的顶层模块导入。
+  - [ ] 终态收口：清理 legacy 相关公共导出与接线残留。
 - [ ] 移除临时兼容开关与 legacy-only fallback 分支。
+  - [x] 阶段收敛：`use_problem_spec=false` 已显式门禁（`allow_legacy_path=true`）、参数互斥和扫描入口透传拦截。
+  - [ ] 终态收口：删除 `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` 兼容参数。
 - [ ] 文档统一更新：不再暴露 legacy solver 作为推荐或默认。
+  - [x] 阶段收敛：`ConstraintModes.md` 已明确 ProblemSpec 主链默认与 legacy 仅兼容路径。
+  - [ ] 终态收口：同步 `docs/api/models/*` 与 `docs/api/data_contracts.md` 全量去 legacy 推荐口径。
+
+##### B4-7 下线窗口与准入标准（收口计划）
+
+- [ ] W1（当前→下一次 PR 合并前）：冻结新增 legacy 调用面
+  - [x] `src/` 新增入口已禁止透传 legacy 开关（扫描/solver 主链收紧完成）。
+  - [ ] CI 侧新增“legacy 参数泄漏检查”脚本或测试门禁（防回归）。
+- [ ] W2（下一里程碑）：移除用户侧兼容开关
+  - [ ] 删除 `solve_constraint` 中 `use_problem_spec=false` 分支与相关参数。
+  - [ ] 保留迁移说明（breaking change）并给出等价调用方式。
+- [ ] W3（R4）：物理删除 legacy 业务路径
+  - [ ] 清理 `ImplicitSolver` 业务入口/导出与扫描层 legacy backend 特判。
+  - [ ] 回归矩阵通过（unit/integration/regression + 文档治理）后归档任务单。
 
 ### 10.3 测试新增与迁移清单
 
@@ -391,3 +411,6 @@
 - [x] 2026-04-03：继续推进 B4-6 集成冒烟回归准入（PR #50）。
   - 执行 integration smoke 全量回归：`julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`。
   - 回归通过：`427/427`，确认 B4-3~B4-5 的 legacy 参数边界收紧未引入集成侧回归。
+- [x] 2026-04-03：继续推进 B4-7 收口计划建模（PR #50）。
+  - 将 B4 主目标拆分为“阶段收敛 vs 终态收口”两层任务，补齐下线窗口 W1/W2/W3 与对应准入标准，避免后续合并阶段出现范围漂移。
+  - 明确当前已完成边界（主链默认 + legacy 门禁 + 参数互斥 + 扫描入口拦截）与剩余终态动作（删除兼容参数、清理 legacy 业务入口、文档全量去推荐口径）。
