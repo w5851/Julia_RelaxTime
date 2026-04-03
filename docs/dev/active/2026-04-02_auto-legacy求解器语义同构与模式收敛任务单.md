@@ -388,3 +388,6 @@
   - `TrhoScan/TmuScan/DualBranchScan` 在 models 求解路径新增 `_reject_legacy_solver_kwargs` 守卫，显式拒绝 `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `problem_spec` 透传，避免扫描入口绕过主链治理边界。
   - 三个扫描模块单测新增“models 路径禁止 legacy solver 开关”覆盖，固定外部可见面的收缩行为。
   - 回归验证通过：`tests/unit/models/test_trho_scan.jl`（`21/21`）、`tests/unit/models/test_tmu_scan.jl`（`19/19`）、`tests/unit/models/test_dual_branch_scan.jl`（`34/34`）。
+- [x] 2026-04-03：继续推进 B4-6 集成冒烟回归准入（PR #50）。
+  - 执行 integration smoke 全量回归：`julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`。
+  - 回归通过：`427/427`，确认 B4-3~B4-5 的 legacy 参数边界收紧未引入集成侧回归。
