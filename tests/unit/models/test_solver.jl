@@ -49,4 +49,41 @@ Models.pnjl_module()
         # FixedRho 可能需要额外参数；确保接口存在即可
         @test Models.solve_constraint isa Function
     end
+
+    @testset "non-FixedMu solve supports semantic bridge kwargs" begin
+        mode = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        result = Models.solve(mode, T_fm;
+            seed_guess=seed,
+            seed_candidates=(seed,),
+            semantic_mode=:constrained_manifold,
+            p_num=8,
+            t_num=4,
+            rho0=0.16,
+            residual_norm_max=1e-6,
+        )
+
+        @test result isa Models.SolverResult
+        @test isfinite(result.residual_norm)
+    end
+
+    @testset "non-FixedMu solve_multi supports semantic bridge kwargs" begin
+        mode = Models.FixedAsymmetricRho(0.05, 1.0, 0.0)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        result = Models.solve_multi(mode, T_fm;
+            seed_candidates=(seed,),
+            semantic_mode=:constrained_manifold,
+            p_num=8,
+            t_num=4,
+            rho0=0.16,
+            residual_norm_max=1e-6,
+        )
+
+        @test result isa Models.SolverResult
+        @test isfinite(result.residual_norm)
+    end
 end

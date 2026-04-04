@@ -308,3 +308,22 @@ Files:
   4) 当前可执行下一步建议：
      - 先做“语义桥接层”拆分（为 non-FixedMu 模式补齐与 `ImplicitSolver.solve` 一致的参数语义），再逐模式迁移；
      - 避免直接把 `solve_constraint` 默认语义替换到 `solve` 旧入口。
+- 2026-04-04：语义桥接层第一步已落地（non-FixedMu）
+  1) 在 `Solver.jl` 新增 `_resolve_nonfixedmu_bridge(...)` 与 `_resolve_solver_model(...)`：
+     - 统一解析 `seed_guess/seed_candidates/semantic_mode/selector/rho0/model_kind`；
+     - 当检测到 problem-spec 语义参数时切换到 `solve_constraint` 路径；
+     - 默认（无桥接参数）仍走 `ImplicitSolver.solve`，保持旧行为稳定。
+  2) 新增单测覆盖桥接参数可用性：`tests/unit/models/test_solver.jl`。
+  3) 验证通过：
+     - unit：`models/test_solver.jl,pnjl/test_solver_implicit.jl`（75/75）；
+     - integration：`tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl`（43/43）。
+- 2026-04-04：语义桥接层第二步已落地（non-FixedMu solve_multi）
+  1) `solve_multi(model, Union{FixedRho,FixedAsymmetricRho}, ...)` 增加桥接语义：
+     - 当携带 `seed_guess/seed_candidates/semantic_mode/selector/problem_spec` 等语义参数时，走 `solve_constraint` 多种子筛选路径；
+     - 默认无桥接参数时仍走 `ImplicitSolver.solve_multi`，保持旧行为。
+  2) 新增单测覆盖：`tests/unit/models/test_solver.jl` 增加 non-FixedMu `solve_multi` 桥接参数测试。
+  3) 验证通过：
+     - unit：`models/test_solver.jl,pnjl/test_solver_implicit.jl`（77/77）；
+     - integration：
+       - `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl`（43/43）
+       - `tests/integration/models/test_models_native_solver_phase1_smoke.jl`（11/11）。

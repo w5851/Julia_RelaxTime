@@ -44,6 +44,59 @@ end
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in blocked))...)
 end
 
+@inline function _resolve_solver_model(model::AbstractPNJLModel, kwargs)
+    if haskey(kwargs, :model_kind)
+        model_kind = kwargs[:model_kind]
+        model_kind isa Symbol || throw(ArgumentError("model_kind must be Symbol, got $(typeof(model_kind))"))
+        return create_model(model_kind)
+    end
+    return model
+end
+
+@inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
+    xi = get(kwargs, :xi, 0.0)
+    p_num = get(kwargs, :p_num, default_momentum_count())
+    t_num = get(kwargs, :t_num, default_theta_count())
+    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
+    rho0 = get(kwargs, :rho0, Main.Constants_PNJL.ρ0_inv_fm3)
+
+    semantic_mode = get(kwargs, :semantic_mode, :ground_state)
+    (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
+        throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
+
+    selector = get(kwargs, :selector, nothing)
+    selector === nothing || selector isa Function ||
+        throw(ArgumentError("selector must be Function or nothing, got $(typeof(selector))"))
+
+    seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
+    seed_guess = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm], mode)
+    seed_candidates = if haskey(kwargs, :seed_candidates)
+        kwargs[:seed_candidates]
+    else
+        (seed_guess,)
+    end
+
+    use_problem_spec_chain =
+        haskey(kwargs, :problem_spec) ||
+        haskey(kwargs, :seed_guess) ||
+        haskey(kwargs, :seed_candidates) ||
+        semantic_mode !== :ground_state ||
+        selector !== nothing
+
+    return (
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        residual_norm_max=residual_norm_max,
+        rho0=rho0,
+        semantic_mode=semantic_mode,
+        selector=selector,
+        seed_guess=seed_guess,
+        seed_candidates=seed_candidates,
+        use_problem_spec_chain=use_problem_spec_chain,
+    )
+end
+
 @inline function _solve_with_problem_spec_default(
     model::AbstractQCDModel,
     mode::ConstraintMode,
@@ -139,7 +192,66 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
-    raw = ImplicitSolver.solve(mode, T_fm; kwargs...)
+    effective_model = _resolve_solver_model(model, kwargs)
+    bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
+
+    if bridge.use_problem_spec_chain
+        problem_spec = get(kwargs, :problem_spec, nothing)
+        forwarded = _strip_forward_kwargs(kwargs, (
+            :problem_spec,
+            :seed_strategy,
+            :seed_guess,
+            :seed_candidates,
+            :semantic_mode,
+            :selector,
+            :rho0,
+            :xi,
+            :p_num,
+            :t_num,
+            :residual_norm_max,
+            :model_kind,
+        ))
+        raw = solve_constraint(
+            effective_model,
+            mode,
+            T_fm;
+            problem_spec=problem_spec,
+            seed_guess=bridge.seed_guess,
+            seed_candidates=bridge.seed_candidates,
+            semantic_mode=bridge.semantic_mode,
+            selector=bridge.selector,
+            rho0=bridge.rho0,
+            xi=bridge.xi,
+            p_num=bridge.p_num,
+            t_num=bridge.t_num,
+            residual_norm_max=bridge.residual_norm_max,
+            forwarded...,
+        )
+        return SolverResult(
+            mode,
+            Bool(raw.converged),
+            Float64.(raw.solution),
+            raw.x_state,
+            raw.mu_vec,
+            Float64(raw.omega),
+            Float64(raw.pressure),
+            Float64(raw.rho_norm),
+            Float64(raw.entropy),
+            Float64(raw.energy),
+            raw.masses,
+            Int(raw.iterations),
+            Float64(raw.residual_norm),
+            Float64(bridge.xi),
+        )
+    end
+
+    forwarded = _strip_forward_kwargs(kwargs, (
+        :seed_guess,
+        :seed_candidates,
+        :semantic_mode,
+        :selector,
+    ))
+    raw = ImplicitSolver.solve(mode, T_fm; forwarded...)
     xi = get(kwargs, :xi, getproperty(raw, :xi))
     return _coerce_solver_result(mode, raw; xi_override=xi)
 end
@@ -243,7 +355,117 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
-    raw = ImplicitSolver.solve_multi(mode, T_fm; kwargs...)
+    effective_model = _resolve_solver_model(model, kwargs)
+    bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
+
+    if bridge.use_problem_spec_chain
+        seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+        seeds = if haskey(kwargs, :seeds)
+            [Float64.(s) for s in kwargs[:seeds]]
+        elseif haskey(kwargs, :seed_candidates)
+            [Float64.(s) for s in kwargs[:seed_candidates]]
+        else
+            get_all_seeds(seed_strategy, [T_fm], mode)
+        end
+        isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
+
+        forwarded = _strip_forward_kwargs(kwargs, (
+            :seed_strategy,
+            :seeds,
+            :seed_candidates,
+            :seed_guess,
+            :semantic_mode,
+            :selector,
+            :rho0,
+            :xi,
+            :p_num,
+            :t_num,
+            :residual_norm_max,
+            :model_kind,
+            :problem_spec,
+        ))
+
+        candidates = NamedTuple[]
+        for (seed_index, seed) in enumerate(seeds)
+            local raw
+            try
+                raw = solve_constraint(
+                    effective_model,
+                    mode,
+                    T_fm;
+                    problem_spec=get(kwargs, :problem_spec, nothing),
+                    seed_guess=seed,
+                    seed_candidates=(seed,),
+                    semantic_mode=bridge.semantic_mode,
+                    selector=bridge.selector,
+                    rho0=bridge.rho0,
+                    xi=bridge.xi,
+                    p_num=bridge.p_num,
+                    t_num=bridge.t_num,
+                    residual_norm_max=bridge.residual_norm_max,
+                    forwarded...,
+                )
+                ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+                push!(candidates, (
+                    converged=Bool(raw.converged),
+                    solution=Float64.(raw.solution),
+                    x_state=raw.x_state,
+                    mu_vec=raw.mu_vec,
+                    omega=Float64(raw.omega),
+                    pressure=Float64(raw.pressure),
+                    rho_norm=Float64(raw.rho_norm),
+                    entropy=Float64(raw.entropy),
+                    energy=Float64(raw.energy),
+                    masses=raw.masses,
+                    iterations=Int(raw.iterations),
+                    residual_norm=Float64(raw.residual_norm),
+                    hard_constraint_ok=ok,
+                    failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
+                    seed_index=Int(seed_index),
+                ))
+            catch
+                push!(candidates, (
+                    converged=false,
+                    solution=Float64[],
+                    x_state=zeros(5),
+                    mu_vec=zeros(3),
+                    omega=NaN,
+                    pressure=-Inf,
+                    rho_norm=NaN,
+                    entropy=NaN,
+                    energy=NaN,
+                    masses=zeros(3),
+                    iterations=0,
+                    residual_norm=Inf,
+                    hard_constraint_ok=false,
+                    failed_constraints=Symbol[:solver_failed],
+                    seed_index=Int(seed_index),
+                ))
+            end
+        end
+
+        selected = select_pressure_max_candidate(candidates)
+        s = selected.selected_candidate
+        return SolverResult(
+            mode,
+            Bool(s.converged),
+            Float64.(s.solution),
+            s.x_state,
+            s.mu_vec,
+            Float64(s.omega),
+            Float64(s.pressure),
+            Float64(s.rho_norm),
+            Float64(s.entropy),
+            Float64(s.energy),
+            s.masses,
+            Int(s.iterations),
+            Float64(s.residual_norm),
+            Float64(bridge.xi),
+        )
+    end
+
+    forwarded = _strip_forward_kwargs(kwargs, (:seed_guess, :seed_candidates, :semantic_mode, :selector))
+    raw = ImplicitSolver.solve_multi(mode, T_fm; forwarded...)
     xi = get(kwargs, :xi, getproperty(raw, :xi))
     return _coerce_solver_result(mode, raw; xi_override=xi)
 end
