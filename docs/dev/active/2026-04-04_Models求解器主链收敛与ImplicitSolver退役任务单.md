@@ -327,3 +327,15 @@ Files:
      - integration：
        - `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl`（43/43）
        - `tests/integration/models/test_models_native_solver_phase1_smoke.jl`（11/11）。
+- 2026-04-04：B3 主迁移进展（当前轮）
+  1) 已完成：
+     - non-FixedMu `solve` / `solve_multi` 的语义桥接路径可用并稳定（显式语义参数时走主链）；
+     - `solve_multi(FixedRho/FixedAsymmetricRho)` 默认路径改为“多种子 + 调 `solve` 聚合筛选”，不再直接依赖 `ImplicitSolver.solve_multi` 语义。
+  2) 保守回退策略：
+     - `solve` 默认路径（无语义桥接参数）对 `FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 仍保留 `ImplicitSolver.solve`，以避免已确认的约束回归。
+  3) 当前剩余 direct forwarding（`Solver.jl`）：
+     - `ImplicitSolver.solve(mode, T_fm; ...)`（默认 non-FixedMu path）
+     - `ImplicitSolver.solve_multi(mode, T_fm; ...)`（保护性尾路径，当前主分支不走）
+  4) 下一步建议：
+     - 为 `FixedRho/FixedEntropy/FixedSigma` 建立“默认语义等价桥接”后，再替换默认路径；
+     - 最后再处理 `FixedAsymmetricRho` 默认路径与 weighted-fallback 协同。
