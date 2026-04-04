@@ -13,28 +13,23 @@ function _read_data_line(path::AbstractString)
 end
 
 @testset "Wave-C model-driven scan stability" begin
-    @testset "legacy backend rejects non-PNJL model_kind" begin
+    @testset "models backend supports non-PNJL model_kind" begin
         mktempdir() do outdir
-            err = try
-                Main.Models.run_tmu_scan(
-                    T_values=[150.0],
-                    mu_values=[0.0],
-                    xi_values=[0.0],
-                    output_path=joinpath(outdir, "legacy_guard.csv"),
-                    overwrite=true,
-                    resume=false,
-                    use_phase_aware=false,
-                    solver_backend=:legacy,
-                    model_kind=:RPNJL,
-                    p_num=8,
-                    t_num=4,
-                )
-                nothing
-            catch exc
-                exc
-            end
-            @test err isa ArgumentError
-            @test occursin("legacy solver_backend only supports model_kind = :PNJL", sprint(showerror, err))
+            stats = Main.Models.run_tmu_scan(
+                T_values=[150.0],
+                mu_values=[0.0],
+                xi_values=[0.0],
+                output_path=joinpath(outdir, "models_rpnjl.csv"),
+                overwrite=true,
+                resume=false,
+                use_phase_aware=false,
+                solver_backend=:models,
+                model_kind=:RPNJL,
+                p_num=8,
+                t_num=4,
+            )
+            @test stats.total == 1
+            @test stats.success == 1
         end
     end
 

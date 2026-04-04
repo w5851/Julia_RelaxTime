@@ -476,3 +476,9 @@
   - `scripts/dev/export_pnjl_scan_fixedpoint_baseline.jl` 中 tmu/trho baseline 导出默认后端由 `thermo_backend=:legacy` 改为 `:models`。
   - `scripts/dev/profile_paramtypes_hotspots.jl` 中 `_transport_inputs_from_equilibrium` 的热力学后端参数由 `:legacy` 改为 `:models`，与当前主线口径保持一致。
   - 验证通过：`scripts/dev/export_pnjl_scan_fixedpoint_baseline.jl --help`。
+- [x] 2026-04-04：继续推进 W4 深化（regression backend 口径收口，PR #50）。
+  - regression 测试中 phase/pnjl 主路径 `solver_backend=:legacy` 统一切换为 `:models`：`test_scan_fixedpoint_regression.jl`、`test_waveb_scan_governance_stability.jl`、`test_phase_pipeline_regression.jl`、`test_phase_pipeline_mode_compare_regression.jl`。
+  - `test_wavec_model_driven_scan_stability.jl` 将“legacy backend 拒绝 RPNJL”回归断言改为“models backend 支持 RPNJL”正向语义，保持与当前后端治理一致。
+  - `test_transport_fixedpoint_regression.jl` 移除 legacy-vs-models 桥接对比，改为 models-only 回归并对 baseline 做一致性校验。
+  - baseline 更新：重导出 `tests/baselines/pnjl/baseline_pnjl_scan_fixedpoints_v1.csv` 以匹配 models backend 结果。
+  - 回归验证通过：`test_scan_fixedpoint_regression.jl`、`test_waveb_scan_governance_stability.jl`、`test_wavec_model_driven_scan_stability.jl`、`test_phase_pipeline_regression.jl`、`test_phase_pipeline_mode_compare_regression.jl`、`test_transport_fixedpoint_regression.jl`。

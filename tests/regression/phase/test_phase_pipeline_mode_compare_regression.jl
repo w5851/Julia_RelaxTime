@@ -12,7 +12,7 @@ end
         rho_grid=collect(0.1:0.1:3.0),
         xi=0.0,
         profile=:regression,
-        solver_backend=:legacy,
+        solver_backend=:models,
         reverse_rho=true,
         seed_policy=:hybrid_continuity,
         p_num=8,
