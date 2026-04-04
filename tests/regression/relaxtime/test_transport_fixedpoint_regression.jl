@@ -53,7 +53,7 @@ function _run_models_case(T, mu, xi, tau, models_solver)
         solver_backend=:models,
         models_solver=models_solver,
         models_residual_norm_max=1e-4,
-        seed_state=TransportWorkflow.HADRON_SEED_5,
+        seed_state=nothing,
     )
 end
 
