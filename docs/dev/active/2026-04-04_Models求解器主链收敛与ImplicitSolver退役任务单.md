@@ -373,3 +373,26 @@ Files:
      - `julia --project=. -e 'include("tests/integration/models/test_models_native_solver_phase1_smoke.jl")'`（11/11）
   4) 当前 direct forwarding 余量（`Solver.jl`）：
      - `ImplicitSolver.solve(mode, T_fm; ...)`：仅保留在默认 `FixedRho/FixedAsymmetricRho` 路径。
+
+- 2026-04-05：B3 收口完成（Rho/Asym 默认路径）
+  1) 红灯验证（先证伪）：
+     - 在 `tests/unit/models/test_solver.jl` 新增两组 parity 用例：
+       - `FixedRho default/bridge semantic parity (single point)`
+       - `FixedAsymmetricRho default/bridge semantic parity (single point)`
+     - 初始失败，确认默认路径与桥接主链在该两模式上仍存在语义差距。
+  2) 绿灯修复（最小收口）：
+     - `constraint_solver.jl`：
+       - `_solve_constraint_fixedasymrho` 增加 PNJL 兜底（失败时显式回退 `Main.Models.ImplicitSolver.solve(...)`）；
+       - 保持 `_solve_constraint_fixedrho` 既有兜底路径；
+       - 结合上一轮 Entropy/Sigma 兜底，形成 non-FixedMu 主链可用闭环。
+     - `Solver.jl`：
+       - 默认 `solve(model, mode::Union{FixedRho,FixedAsymmetricRho,FixedEntropy,FixedSigma}, ...)` 统一改走 ProblemSpec 主链；
+       - 删除 `solve` 中 non-FixedMu 对 `ImplicitSolver.solve` 的最后 direct forwarding 分支。
+  3) 验证通过：
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/unit/pnjl/test_solver_implicit.jl")'`
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+     - `julia --project=. -e 'include("tests/integration/models/test_models_native_solver_phase1_smoke.jl")'`（11/11）
+  4) 状态结论：
+     - `Solver.jl` 已无 `ImplicitSolver.solve`/`solve_multi` direct forwarding；
+     - 剩余 `ImplicitSolver` 依赖已下沉到 `constraint_solver` 的兼容兜底层，用于维持语义与回归稳定。

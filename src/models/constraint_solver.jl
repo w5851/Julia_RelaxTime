@@ -1303,6 +1303,48 @@ function _solve_constraint_fixedasymrho(
         isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
     end
 
+    if !converged && model isa AbstractPNJLModel
+        seed_legacy = if length(seed_guess) >= 8
+            Float64.(seed_guess[1:8])
+        else
+            Main.Models.extend_seed(Float64.(seed_guess), Main.Models.FixedAsymmetricRho(rho_target, ud_ratio_target, s_target))
+        end
+
+        legacy_result = try
+            Main.Models.ImplicitSolver.solve(
+                Main.Models.FixedAsymmetricRho(rho_target, ud_ratio_target, s_target),
+                T_fm;
+                xi=xi,
+                seed_strategy=Main.Models.DefaultSeed(seed_legacy, seed_legacy, :hadron),
+                p_num=p_num,
+                t_num=t_num,
+                model_kind=:PNJL,
+                trust_region_fallback=true,
+                residual_norm_max=residual_norm_max,
+                nlsolve_kwargs...,
+            )
+        catch
+            nothing
+        end
+
+        if legacy_result !== nothing && legacy_result.converged
+            return (
+                converged=true,
+                solution=Float64.(legacy_result.solution),
+                x_state=legacy_result.x_state,
+                mu_vec=legacy_result.mu_vec,
+                omega=legacy_result.omega,
+                pressure=legacy_result.pressure,
+                rho_norm=legacy_result.rho_norm,
+                entropy=legacy_result.entropy,
+                energy=legacy_result.energy,
+                masses=legacy_result.masses,
+                iterations=legacy_result.iterations,
+                residual_norm=legacy_result.residual_norm,
+            )
+        end
+    end
+
     return (
         converged=converged,
         solution=_pack_solution(x_state_ref[], mu_vec_ref[]),

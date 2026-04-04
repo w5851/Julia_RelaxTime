@@ -195,8 +195,9 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
-    if bridge.use_problem_spec_chain || mode isa FixedEntropy || mode isa FixedSigma
+    if bridge.use_problem_spec_chain || mode isa FixedRho || mode isa FixedEntropy || mode isa FixedSigma || mode isa FixedAsymmetricRho
         problem_spec = get(kwargs, :problem_spec, nothing)
+        rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
         forwarded = _strip_forward_kwargs(kwargs, (
             :problem_spec,
             :seed_strategy,
@@ -220,7 +221,7 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
             seed_candidates=bridge.seed_candidates,
             semantic_mode=bridge.semantic_mode,
             selector=bridge.selector,
-            rho0=bridge.rho0,
+            rho0_kwargs...,
             xi=bridge.xi,
             p_num=bridge.p_num,
             t_num=bridge.t_num,
@@ -243,18 +244,6 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
             Float64(raw.residual_norm),
             Float64(bridge.xi),
         )
-    end
-
-    if mode isa FixedRho || mode isa FixedAsymmetricRho
-        forwarded = _strip_forward_kwargs(kwargs, (
-            :seed_guess,
-            :seed_candidates,
-            :semantic_mode,
-            :selector,
-        ))
-        raw = ImplicitSolver.solve(mode, T_fm; forwarded...)
-        xi = get(kwargs, :xi, getproperty(raw, :xi))
-        return _coerce_solver_result(mode, raw; xi_override=xi)
     end
 
     throw(ArgumentError("unsupported mode for solve bridge: $(typeof(mode))"))
@@ -393,6 +382,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         for (seed_index, seed) in enumerate(seeds)
             local raw
             try
+                rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
                 raw = solve_constraint(
                     effective_model,
                     mode,
@@ -402,7 +392,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                     seed_candidates=(seed,),
                     semantic_mode=bridge.semantic_mode,
                     selector=bridge.selector,
-                    rho0=bridge.rho0,
+                    rho0_kwargs...,
                     xi=bridge.xi,
                     p_num=bridge.p_num,
                     t_num=bridge.t_num,
