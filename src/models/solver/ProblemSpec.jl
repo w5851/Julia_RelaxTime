@@ -53,6 +53,13 @@ end
     throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
 end
 
+@inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector)
+        delete!(kwargs, key)
+    end
+    return kwargs
+end
+
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
 
@@ -74,8 +81,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         try
             local_kwargs = Dict{Symbol,Any}(kwargs)
             local_kwargs[:seed_guess] = seed
-            delete!(local_kwargs, :seed_candidates)
-            delete!(local_kwargs, :hard_constraints)
+            _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
             solved = _solve_constraint_fixedrho(model, T_fm, mode.rho_target; pairs(local_kwargs)...)
             raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6))
@@ -139,8 +145,7 @@ function _governed_mode_forward_solve(
         try
             local_kwargs = Dict{Symbol,Any}(kwargs)
             local_kwargs[:seed_guess] = seed
-            delete!(local_kwargs, :seed_candidates)
-            delete!(local_kwargs, :hard_constraints)
+            _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
             solved = solve_one(model, T_fm, local_kwargs)
             raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6))

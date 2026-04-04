@@ -53,6 +53,18 @@ export DualBranchResult, BranchPoint, PhaseTransitionInfo
     return auto_pnjl_backend
 end
 
+@inline function _validate_solver_backend(backend::Symbol, argname::AbstractString)
+    (backend === :models || backend === :auto) ||
+        throw(ArgumentError("$(argname) must be :models or :auto (legacy backend removed), got $(backend)"))
+    return nothing
+end
+
+@inline function _validate_auto_pnjl_backend(auto_pnjl_backend::Symbol)
+    (auto_pnjl_backend === :models || auto_pnjl_backend === :legacy) ||
+        throw(ArgumentError("auto_pnjl_backend must be :models or :legacy, got $(auto_pnjl_backend)"))
+    return nothing
+end
+
 @inline function _select_branch_ground_state(h, q)::Symbol
     return h.omega <= q.omega ? :hadron : :quark
 end
@@ -143,6 +155,9 @@ function run_dual_branch_scan(;
     verbose::Bool=false,
     nlsolve_kwargs...
 )
+    _validate_solver_backend(solver_backend, "solver_backend")
+    _validate_auto_pnjl_backend(auto_pnjl_backend)
+
     mu_values = collect(Float64, mu_range)
     n_points = length(mu_values)
     

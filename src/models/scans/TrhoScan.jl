@@ -154,6 +154,12 @@ end
     return nothing
 end
 
+@inline function _validate_auto_pnjl_backend(auto_pnjl_backend::Symbol)
+    (auto_pnjl_backend === :models || auto_pnjl_backend === :legacy) ||
+        throw(ArgumentError("auto_pnjl_backend must be :models or :legacy, got $(auto_pnjl_backend)"))
+    return nothing
+end
+
 @inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
@@ -224,6 +230,7 @@ function run_trho_scan(;
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode)
+    _validate_auto_pnjl_backend(auto_pnjl_backend)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()

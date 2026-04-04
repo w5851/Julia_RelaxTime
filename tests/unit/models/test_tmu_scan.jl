@@ -55,6 +55,12 @@ const _TMS = Models.TmuScan
         @test_throws ArgumentError _TMS._validate_semantic_mode(:invalid_mode, nothing)
     end
 
+    @testset "auto_pnjl_backend 参数校验" begin
+        @test _TMS._validate_auto_pnjl_backend(:models) === nothing
+        @test _TMS._validate_auto_pnjl_backend(:legacy) === nothing
+        @test_throws ArgumentError _TMS._validate_auto_pnjl_backend(:invalid_backend)
+    end
+
     @testset "models 路径禁止 legacy solver 开关" begin
         @test _TMS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
         @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; use_problem_spec=false))

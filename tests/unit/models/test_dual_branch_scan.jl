@@ -67,6 +67,19 @@ const _DBS = Models.DualBranchScan
         @test _DBS._effective_solver_backend(:legacy, :models; auto_pnjl_backend=:legacy) == :models
     end
 
+    @testset "solver backend 参数校验" begin
+        @test _DBS._validate_solver_backend(:models, "solver_backend") === nothing
+        @test _DBS._validate_solver_backend(:auto, "solver_backend") === nothing
+        @test_throws ArgumentError _DBS._validate_solver_backend(:legacy, "solver_backend")
+        @test_throws ArgumentError _DBS._validate_solver_backend(:invalid, "solver_backend")
+    end
+
+    @testset "auto_pnjl_backend 参数校验" begin
+        @test _DBS._validate_auto_pnjl_backend(:models) === nothing
+        @test _DBS._validate_auto_pnjl_backend(:legacy) === nothing
+        @test_throws ArgumentError _DBS._validate_auto_pnjl_backend(:invalid_backend)
+    end
+
     @testset "semantic_mode selector 解析" begin
         h = _DBS.BranchPoint(100.0, true, -10.0, 10.0, 0.2, 0.3, 0.4, SA[0.1, 0.1, 0.1, 0.2, 0.2], SA[0.3, 0.3, 0.5], 10, 1e-9)
         q = _DBS.BranchPoint(100.0, true, -9.0, 9.0, 0.25, 0.35, 0.45, SA[0.12, 0.1, 0.1, 0.25, 0.25], SA[0.28, 0.28, 0.48], 12, 2e-9)
