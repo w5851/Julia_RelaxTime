@@ -794,7 +794,7 @@ function _solve_constraint_fixedrho(
         end
 
         legacy_result = try
-            Main.Models.solve(
+            Main.Models.ImplicitSolver.solve(
                 Main.Models.FixedRho(rho_target),
                 T_fm;
                 xi=xi,

@@ -276,3 +276,20 @@ Files:
      - B1：将 `solve/solve_multi` 从 `ImplicitSolver` 转发迁移到 models 主链（对应 Step 1 尾项）。
      - B2：收敛 `SolverResult` 与 `is_physical_solution` 到 models 原生实现，解除对 `ImplicitSolver` 类型/函数依赖。
      - B3：完成 B1/B2 后再执行模块删除与 include/export 收口。
+- 2026-04-04：B1 继续推进（分段迁移）：
+  1) `Solver.jl` 中 `solve(model, FixedMu, ...)` 与 `solve_multi(model, FixedMu, ...)` 已迁移到 models 主链（`solve_constraint + selector`）；
+  2) `FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 在本轮尝试全量迁移时引入质量回归（integration smoke 失败），已回滚其迁移部分并保持旧行为；
+  3) 为防止递归路径，`constraint_solver.jl` 中 `FixedRho` 失败回退已改为显式调用 `Main.Models.ImplicitSolver.solve(...)`（避免通过 `Main.Models.solve(...)` 再入新分发）；
+  4) 验证通过：
+     - `tests/unit/pnjl/test_solver_implicit.jl` 全通过；
+     - `tests/unit/models/test_solver.jl` 全通过；
+     - `tests/integration/models/test_models_native_solver_phase1_smoke.jl` 全通过；
+     - `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl` 全通过。
+  5) 当前 B1 状态：**部分完成（FixedMu 主链化完成，其余模式待下一轮拆分迁移）**。
+- 2026-04-04：B1-2 尝试记录（FixedRho 单独迁移实验）：
+  1) 尝试将 `solve(model, FixedRho, ...)` / `solve_multi(model, FixedRho, ...)` 迁移到 models 主链；
+  2) 回归观察到 `fixedrho semantic equivalence` 口径偏移（legacy 与 models 数值误差超阈，且 legacy convergence 断言不稳定）；
+  3) 已回滚该迁移，恢复 FixedRho 走 `ImplicitSolver` 路径，确保当前门禁稳定全绿；
+  4) 仍保留已稳定项：
+     - `solve(model, FixedMu, ...)` 与 `solve_multi(model, FixedMu, ...)` 主链化；
+     - `constraint_solver` 中 FixedRho fallback 明确调用 `Main.Models.ImplicitSolver.solve(...)`，避免递归。

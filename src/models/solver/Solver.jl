@@ -5,6 +5,10 @@
 """
 const SolverResult = ImplicitSolver.SolverResult
 
+@inline function _strip_forward_kwargs(kwargs, blocked::Tuple)
+    return (; (k => v for (k, v) in pairs(kwargs) if !(k in blocked))...)
+end
+
 @inline function _solve_with_problem_spec_default(
     model::AbstractQCDModel,
     mode::ConstraintMode,
@@ -49,7 +53,54 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_f
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
-    return ImplicitSolver.solve(mode, T_fm, μ_fm; kwargs...)
+    xi = get(kwargs, :xi, 0.0)
+    p_num = get(kwargs, :p_num, default_momentum_count())
+    t_num = get(kwargs, :t_num, default_theta_count())
+    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
+    seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
+
+    if seed_strategy isa MultiSeed
+        return solve_multi(model, mode, T_fm, μ_fm; kwargs...)
+    end
+
+    seed_guess = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    forwarded = _strip_forward_kwargs(kwargs, (
+        :seed_strategy,
+        :seed_guess,
+        :xi,
+        :p_num,
+        :t_num,
+        :residual_norm_max,
+    ))
+    raw = solve_constraint(
+        model,
+        mode,
+        T_fm;
+        μ_fm=μ_fm,
+        seed_guess=seed_guess,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        residual_norm_max=residual_norm_max,
+        forwarded...,
+    )
+
+    return SolverResult(
+        mode,
+        Bool(raw.converged),
+        Float64.(raw.solution),
+        raw.x_state,
+        raw.mu_vec,
+        Float64(raw.omega),
+        Float64(raw.pressure),
+        Float64(raw.rho_norm),
+        Float64(raw.entropy),
+        Float64(raw.energy),
+        raw.masses,
+        Int(raw.iterations),
+        Float64(raw.residual_norm),
+        Float64(xi),
+    )
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
@@ -57,7 +108,101 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
-    return ImplicitSolver.solve_multi(mode, T_fm, μ_fm; kwargs...)
+    xi = get(kwargs, :xi, 0.0)
+    p_num = get(kwargs, :p_num, default_momentum_count())
+    t_num = get(kwargs, :t_num, default_theta_count())
+    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
+    seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+
+    seeds = if haskey(kwargs, :seeds)
+        [Float64.(s) for s in kwargs[:seeds]]
+    else
+        get_all_seeds(seed_strategy, [T_fm, μ_fm], mode)
+    end
+    isempty(seeds) && (seeds = [get_seed(DefaultSeed(), [T_fm, μ_fm], mode)])
+
+    forwarded = _strip_forward_kwargs(kwargs, (
+        :seed_strategy,
+        :seeds,
+        :xi,
+        :p_num,
+        :t_num,
+        :residual_norm_max,
+    ))
+    candidates = NamedTuple[]
+    for (seed_index, seed) in enumerate(seeds)
+        local raw
+        try
+            raw = solve_constraint(
+                model,
+                mode,
+                T_fm;
+                μ_fm=μ_fm,
+                seed_guess=seed,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+                residual_norm_max=residual_norm_max,
+                forwarded...,
+            )
+            ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            candidate = (
+                converged=Bool(raw.converged),
+                solution=Float64.(raw.solution),
+                x_state=raw.x_state,
+                mu_vec=raw.mu_vec,
+                omega=Float64(raw.omega),
+                pressure=Float64(raw.pressure),
+                rho_norm=Float64(raw.rho_norm),
+                entropy=Float64(raw.entropy),
+                energy=Float64(raw.energy),
+                masses=raw.masses,
+                iterations=Int(raw.iterations),
+                residual_norm=Float64(raw.residual_norm),
+                hard_constraint_ok=ok,
+                failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
+                seed_index=Int(seed_index),
+            )
+            push!(candidates, candidate)
+        catch
+            push!(candidates, (
+                converged=false,
+                solution=Float64[],
+                x_state=zeros(5),
+                mu_vec=zeros(3),
+                omega=NaN,
+                pressure=-Inf,
+                rho_norm=NaN,
+                entropy=NaN,
+                energy=NaN,
+                masses=zeros(3),
+                iterations=0,
+                residual_norm=Inf,
+                hard_constraint_ok=false,
+                failed_constraints=Symbol[:solver_failed],
+                seed_index=Int(seed_index),
+            ))
+        end
+    end
+
+    selected = select_pressure_max_candidate(candidates)
+    s = selected.selected_candidate
+    return SolverResult(
+        mode,
+        Bool(s.converged),
+        Float64.(s.solution),
+        s.x_state,
+        s.mu_vec,
+        Float64(s.omega),
+        Float64(s.pressure),
+        Float64(s.rho_norm),
+        Float64(s.entropy),
+        Float64(s.energy),
+        s.masses,
+        Int(s.iterations),
+        Float64(s.residual_norm),
+        Float64(xi),
+    )
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)

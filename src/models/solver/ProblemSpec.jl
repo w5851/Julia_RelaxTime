@@ -209,7 +209,18 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 (; legacy..., fixedrho_joint_solve_active=false, fixedrho_joint_fallback=false)
             end
             raw = (
-                ; solved...,
+                converged=Bool(solved.converged),
+                solution=Float64.(solved.solution),
+                x_state=solved.x_state,
+                mu_vec=solved.mu_vec,
+                omega=Float64(solved.omega),
+                pressure=Float64(solved.pressure),
+                rho_norm=Float64(solved.rho_norm),
+                entropy=Float64(solved.entropy),
+                energy=Float64(solved.energy),
+                masses=solved.masses,
+                iterations=Int(solved.iterations),
+                residual_norm=Float64(solved.residual_norm),
                 residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
                 fixedrho_joint_solve_requested=fixedrho_joint_solve,
                 fixedrho_joint_solve_active=get(solved, :fixedrho_joint_solve_active, false),
