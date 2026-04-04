@@ -293,3 +293,11 @@ Files:
   4) 仍保留已稳定项：
      - `solve(model, FixedMu, ...)` 与 `solve_multi(model, FixedMu, ...)` 主链化；
      - `constraint_solver` 中 FixedRho fallback 明确调用 `Main.Models.ImplicitSolver.solve(...)`，避免递归。
+- 2026-04-04：B2 推进完成（类型与物理判据去耦）：
+  1) `src/models/solver/Solver.jl` 新增本地 `SolverResult` 结构定义，解除 `const SolverResult = ImplicitSolver.SolverResult` 依赖；
+  2) 新增 `_coerce_solver_result(...)`，将仍由 `ImplicitSolver` 返回的结果统一转为 models 本地 `SolverResult`；
+  3) `is_physical_solution(...)` 在 `Solver.jl` 本地实现，移除对 `ImplicitSolver.default_is_physical_solution` 的转发；
+  4) 依赖检查：`Solver.jl` 内已无 `ImplicitSolver.SolverResult` / `ImplicitSolver.default_is_physical_solution` 引用；
+  5) 验证通过：
+     - unit：`pnjl/test_solver_implicit.jl,models/test_solver_dimension_agnostic.jl,models/test_constraint_solver.jl`（161/161）；
+     - integration：`test_models_native_solver_phase1_smoke.jl`（11/11），`test_solver_constraints_models_backend_smoke.jl`（43/43）。

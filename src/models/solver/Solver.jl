@@ -3,7 +3,42 @@
 
 统一约束求解入口。根据 `mode` 的类型分发到 models 域约束求解内核实现。
 """
-const SolverResult = ImplicitSolver.SolverResult
+struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
+    mode::ConstraintMode
+    converged::Bool
+    solution::Vector{Float64}
+    x_state::VX
+    mu_vec::VM
+    omega::Float64
+    pressure::Float64
+    rho_norm::Float64
+    entropy::Float64
+    energy::Float64
+    masses::MM
+    iterations::Int
+    residual_norm::Float64
+    xi::Float64
+end
+
+@inline function _coerce_solver_result(mode::ConstraintMode, raw_result; xi_override=nothing)
+    xi_val = xi_override === nothing ? Float64(getproperty(raw_result, :xi)) : Float64(xi_override)
+    return SolverResult(
+        mode,
+        Bool(getproperty(raw_result, :converged)),
+        Float64.(getproperty(raw_result, :solution)),
+        getproperty(raw_result, :x_state),
+        getproperty(raw_result, :mu_vec),
+        Float64(getproperty(raw_result, :omega)),
+        Float64(getproperty(raw_result, :pressure)),
+        Float64(getproperty(raw_result, :rho_norm)),
+        Float64(getproperty(raw_result, :entropy)),
+        Float64(getproperty(raw_result, :energy)),
+        getproperty(raw_result, :masses),
+        Int(getproperty(raw_result, :iterations)),
+        Float64(getproperty(raw_result, :residual_norm)),
+        xi_val,
+    )
+end
 
 @inline function _strip_forward_kwargs(kwargs, blocked::Tuple)
     return (; (k => v for (k, v) in pairs(kwargs) if !(k in blocked))...)
@@ -104,7 +139,9 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
-    return ImplicitSolver.solve(mode, T_fm; kwargs...)
+    raw = ImplicitSolver.solve(mode, T_fm; kwargs...)
+    xi = get(kwargs, :xi, getproperty(raw, :xi))
+    return _coerce_solver_result(mode, raw; xi_override=xi)
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
@@ -206,7 +243,9 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
-    return ImplicitSolver.solve_multi(mode, T_fm; kwargs...)
+    raw = ImplicitSolver.solve_multi(mode, T_fm; kwargs...)
+    xi = get(kwargs, :xi, getproperty(raw, :xi))
+    return _coerce_solver_result(mode, raw; xi_override=xi)
 end
 
 function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
@@ -238,8 +277,20 @@ function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwar
     return solve_multi(model, mode, T_fm; kwargs...)
 end
 
-@inline is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; kwargs...) =
-    ImplicitSolver.default_is_physical_solution(x_state, masses; kwargs...)
+@inline function is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
+    if length(x_state) < 5 || length(masses) < 3
+        return false
+    end
+    Φ = x_state[4]
+    Φbar = x_state[5]
+    if !(isfinite(Φ) && isfinite(Φbar) && (-phi_tol <= Φ <= 1 + phi_tol) && (-phi_tol <= Φbar <= 1 + phi_tol))
+        return false
+    end
+    if any(!isfinite, masses) || any(m -> m <= 0.0, masses)
+        return false
+    end
+    return true
+end
 @inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) =
     solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...)
 
