@@ -154,7 +154,7 @@
 
 - [x] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_components.jl,models/test_problem_spec_modes.jl"; include("tests/unit/runtests.jl")'`
 - [x] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl"; include("tests/unit/runtests.jl")'`
-- [ ] `julia --project=. -e 'include("tests/integration/models/test_dimension_agnostic_scan_smoke.jl")'`
+- [x] `julia --project=. -e 'include("tests/integration/models/test_dimension_agnostic_scan_smoke.jl")'`
 - [x] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
 - [x] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
 - [x] `julia --project=. scripts/perf/pnjl/scan_perf.jl`
@@ -259,45 +259,45 @@
   - [x] 保留迁移说明（breaking change）并给出等价调用方式。
 - [x] W3（R4）：物理删除 legacy 业务路径
   - [x] 清理 `ImplicitSolver` 业务入口/导出与扫描层 legacy backend 特判。
-  - [ ] 回归矩阵通过（unit/integration/regression + 文档治理）后归档任务单。
+  - [x] 回归矩阵通过（unit/integration/regression + 文档治理）后归档任务单。
 
 ### 10.3 测试新增与迁移清单
 
 #### Unit（新增）
 
-- [ ] `tests/unit/models/test_constraint_components.jl`
-  - [ ] 组件维度声明与拼接顺序稳定
-  - [ ] 组件依赖域校验（state/mu/thermo）
+- [x] `tests/unit/models/test_constraint_components.jl`
+  - [x] 组件维度声明与拼接顺序稳定
+  - [x] 组件依赖域校验（state/mu/thermo）
 
-- [ ] `tests/unit/models/test_problem_spec_semantic_modes.jl`
-  - [ ] `GroundState` 与 `ConstrainedManifold` 返回契约
-  - [ ] selector 排序优先级可重复
+- [x] `tests/unit/models/test_problem_spec_semantic_modes.jl`
+  - [x] `GroundState` 与 `ConstrainedManifold` 返回契约
+  - [x] selector 排序优先级可重复
 
-- [ ] `tests/unit/models/test_mu_relations_component.jl`
-  - [ ] 相等关系/线性关系/不对称关系约束正确
+- [x] `tests/unit/models/test_mu_relations_component.jl`
+  - [x] 相等关系/线性关系/不对称关系约束正确
 
 #### Integration（新增）
 
-- [ ] `tests/integration/models/test_solver_auto_backend_semantic_parity.jl`
-  - [ ] 同语义下 `auto` 与显式 backend 结果一致（容差内）
+- [x] `tests/integration/models/test_solver_auto_backend_semantic_parity.jl`
+  - [x] 同语义下 `auto` 与显式 backend 结果一致（容差内）
 
-- [ ] `tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`
-  - [ ] 同一扫描点验证 `GroundState` 单解与 `Manifold` 多解关系
+- [x] `tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`
+  - [x] 同一扫描点验证 `GroundState` 单解与 `Manifold` 多解关系
 
 #### Regression（新增）
 
-- [ ] `tests/regression/models/test_fixedrho_semantic_equivalence_regression.jl`
-  - [ ] 关键固定点 legacy-era 基线对齐（迁移期）
+- [x] `tests/regression/models/test_fixedrho_semantic_equivalence_regression.jl`
+  - [x] 关键固定点 legacy-era 基线对齐（迁移期）
 
-- [ ] `tests/regression/models/test_firstorder_manifold_branch_stability.jl`
-  - [ ] 首阶附近分支可重复识别与排序稳定
+- [x] `tests/regression/models/test_firstorder_manifold_branch_stability.jl`
+  - [x] 首阶附近分支可重复识别与排序稳定
 
 ### 10.4 阶段里程碑（含移除旧实现）
 
 - [x] R1：组件层与 ProblemSpec 主链可运行，旧路径仍保留只读镜像。
 - [x] R2：`FixedRho` 主路径切换到新链，`auto` 与显式 backend 语义一致。
 - [x] R3：扫描层语义参数化完成，PNJL 历史特判移除。
-- [ ] R4：旧实现彻底删除（代码/导出/文档/测试全部收敛）。
+- [x] R4：旧实现彻底删除（代码/导出/文档/测试全部收敛）。
 
 ### 10.5 回滚与安全阈值
 
@@ -520,3 +520,13 @@
 - [x] 2026-04-04：归档前勾选核对（按证据回填）。
   - 依据 2026-04-02~2026-04-04 执行记录与已通过验证，回填本任务单中“已执行且有证据”的目标/范围/约束/验收/B0~B4/W3/R1~R3 等条目，避免文档状态滞后于实现事实。
   - 保留未执行或不具备直接证据的条目（如部分草案命令与新增测试清单）为未勾选，防止超前标记。
+- [x] 2026-04-04：继续执行未完成项补全检查（按证据逐条推进）。
+  - 补跑并通过：`tests/integration/models/test_dimension_agnostic_scan_smoke.jl`（`4/4`）。
+  - 补跑并通过：`UNIT_FILES=models/test_constraint_components.jl,models/test_problem_spec_contract.jl`（`119/119`），确认 `test_constraint_components.jl` 对“组件维度声明/拼接顺序/依赖域契约”已具备有效覆盖。
+  - 补跑并通过：`tests/integration/models/test_solver_backend_semantic_parity_guard.jl`（`39/39`）与 `tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl`（各 testset 全通过），以及 `tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl`（`18/18`）。
+  - 本轮据此仅回填“已有文件且验证通过”的条目；仍不存在或未执行的新增测试清单保持未勾选。
+- [x] 2026-04-04：补建并验证 6 个缺失测试文件（按未完成项逐个补齐）。
+  - 新增 unit：`tests/unit/models/test_problem_spec_semantic_modes.jl`、`tests/unit/models/test_mu_relations_component.jl`；验证 `UNIT_FILES=models/test_problem_spec_semantic_modes.jl,models/test_mu_relations_component.jl`（`17/17`）。
+  - 新增 integration：`tests/integration/models/test_solver_auto_backend_semantic_parity.jl`、`tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`；定向验证均通过，并接入 `tests/integration/runtests.jl` smoke 列表；integration smoke 全量复跑通过（`437/437`）。
+  - 新增 regression：`tests/regression/models/test_fixedrho_semantic_equivalence_regression.jl`、`tests/regression/models/test_firstorder_manifold_branch_stability.jl`；定向验证通过，并接入 `tests/regression/runtests.jl` smoke 列表；regression smoke 全量复跑通过（`408 passed, 1 broken(optional)`）。
+  - 治理复核：`scripts/dev/check_docs_consistency.jl`、`scripts/dev/check_active_docs_governance.jl`（OK）。
