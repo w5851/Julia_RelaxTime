@@ -667,13 +667,7 @@ function _solve_constraint_fixedrho(
     end
 
     mu_seed = default_mu0_from_seed(seed_guess)
-    attempt_specs = Tuple{Float64, Symbol}[]
-    push!(attempt_specs, (Float64(mu0), nlsolve_method))
-    nlsolve_method !== :trust_region && push!(attempt_specs, (Float64(mu0), :trust_region))
-    push!(attempt_specs, (Float64(mu_seed), :trust_region))
-    for μ0 in (0.0, 0.2, 0.5, 0.8, 1.2, 1.6, 2.0)
-        push!(attempt_specs, (Float64(μ0), :trust_region))
-    end
+    attempt_specs = ((Float64(mu0), nlsolve_method),)
 
     best = nothing
     for (mu_init, method) in attempt_specs

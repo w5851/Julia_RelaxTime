@@ -732,6 +732,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             semantic_mode=semantic_mode,
             selector=selector,
             seed_guess=seed_guess,
+            seed_candidates=(seed_guess,),
             xi=xi,
             p_num=p_num,
             t_num=t_num,
@@ -743,6 +744,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             mapped_mode,
             T_fm;
             seed_guess=seed_guess,
+            seed_candidates=(seed_guess,),
             xi=xi,
             p_num=p_num,
             t_num=t_num,
