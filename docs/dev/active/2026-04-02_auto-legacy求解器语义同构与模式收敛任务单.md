@@ -462,3 +462,8 @@
   - `scripts/dev/export_phase_pipeline_regression_baseline.jl` 将 phase pipeline baseline 导出默认 backend 切换为 `:models`。
   - `scripts/analysis/relaxtime_xi_fluctuation_study.jl` 移除 equilibrium 的 legacy fallback 路径，统一使用 models backend。
   - 验证通过：`tests/integration/models/test_pm_phase_diagnostic_smoke.jl`（覆盖 diagnose_pm_phase CLI 路径），以及 `scripts/dev/export_phase_pipeline_regression_baseline.jl --help`。
+- [x] 2026-04-03：继续推进 W4 深化（relaxtime scripts fallback 清理，PR #50）。
+  - `scripts/relaxtime/run_gap_transport_scan.jl` 移除 `solve_legacy_equilibrium` 分支与 metadata 中 legacy fallback 描述；当 models 路径无有效解时改为显式抛错并由单点容错逻辑记录。
+  - `scripts/relaxtime/scan_relaxation_times_vs_T.jl` 与 `scripts/relaxtime/scan_transport_vs_xi_T150_muB800.jl` 去除 models→legacy 回退块，统一仅走 models equilibrium backend。
+  - 同步修复 `scan_transport_vs_xi_T150_muB800.jl` 的 `Models` include 依赖，确保脚本入口可独立加载。
+  - 验证通过：`scripts/relaxtime/run_gap_transport_scan.jl --help`、`scripts/relaxtime/scan_relaxation_times_vs_T.jl --help`、`scripts/relaxtime/scan_transport_vs_xi_T150_muB800.jl --help`。
