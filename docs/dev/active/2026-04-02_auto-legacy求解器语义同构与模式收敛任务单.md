@@ -472,3 +472,7 @@
   - 移除脚本内 legacy 分支导出路径，统一以 models backend 生成 fixed-point baseline。
   - 增补 `Models.jl` include，确保脚本可稳定解析 `Main.Models.NLsolveGapSolver` 依赖。
   - 验证通过：`scripts/dev/export_transport_fixedpoint_baseline.jl --help`。
+- [x] 2026-04-03：继续推进 W4 深化（scripts/dev remaining legacy 口径清理，PR #50）。
+  - `scripts/dev/export_pnjl_scan_fixedpoint_baseline.jl` 中 tmu/trho baseline 导出默认后端由 `thermo_backend=:legacy` 改为 `:models`。
+  - `scripts/dev/profile_paramtypes_hotspots.jl` 中 `_transport_inputs_from_equilibrium` 的热力学后端参数由 `:legacy` 改为 `:models`，与当前主线口径保持一致。
+  - 验证通过：`scripts/dev/export_pnjl_scan_fixedpoint_baseline.jl --help`。
