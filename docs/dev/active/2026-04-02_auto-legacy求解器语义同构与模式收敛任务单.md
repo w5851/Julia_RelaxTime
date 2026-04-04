@@ -467,3 +467,8 @@
   - `scripts/relaxtime/scan_relaxation_times_vs_T.jl` 与 `scripts/relaxtime/scan_transport_vs_xi_T150_muB800.jl` 去除 models→legacy 回退块，统一仅走 models equilibrium backend。
   - 同步修复 `scan_transport_vs_xi_T150_muB800.jl` 的 `Models` include 依赖，确保脚本入口可独立加载。
   - 验证通过：`scripts/relaxtime/run_gap_transport_scan.jl --help`、`scripts/relaxtime/scan_relaxation_times_vs_T.jl --help`、`scripts/relaxtime/scan_transport_vs_xi_T150_muB800.jl --help`。
+- [x] 2026-04-03：继续推进 W4 深化（dev baseline export 脚本收口，PR #50）。
+  - `scripts/dev/export_transport_fixedpoint_baseline.jl` 默认 backend 改为 `:models`，并将 `--backend` 校验收紧为仅接受 models。
+  - 移除脚本内 legacy 分支导出路径，统一以 models backend 生成 fixed-point baseline。
+  - 增补 `Models.jl` include，确保脚本可稳定解析 `Main.Models.NLsolveGapSolver` 依赖。
+  - 验证通过：`scripts/dev/export_transport_fixedpoint_baseline.jl --help`。
