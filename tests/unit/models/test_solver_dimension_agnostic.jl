@@ -23,6 +23,8 @@ const P = Models.pnjl_module()
         @test :create_implicit_solver ∉ names(Models)
         @test :solve_with_root_diagnostics ∉ names(Models)
         @test :solve_weighted_block_fallback ∉ names(Models)
+        @test !isdefined(Models.ImplicitSolver, :create_implicit_solver)
+        @test !isdefined(Models.ImplicitSolver, :solve_with_root_diagnostics)
     end
 
     @testset "SolverResult accepts non-5/3 state and mu" begin

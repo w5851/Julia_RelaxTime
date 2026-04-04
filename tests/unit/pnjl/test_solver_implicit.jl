@@ -81,15 +81,6 @@ const ħc = 197.327  # MeV·fm
         @test result.converged
     end
 
-    @testset "root diagnostics 接口" begin
-        payload = P.solve_with_root_diagnostics(P.FixedMu(), T_fm, μ_fm; p_num=24, t_num=6)
-        @test haskey(payload, :result)
-        @test haskey(payload, :root_diagnostics)
-        @test payload.result isa P.SolverResult
-        @test haskey(payload.root_diagnostics, :selected_method)
-        @test haskey(payload.root_diagnostics, :attempts)
-        @test !isempty(payload.root_diagnostics.attempts)
-    end
 end
 
 # ============================================================================
@@ -128,25 +119,6 @@ end
         end
     end
 
-    @testset "root diagnostics 接口" begin
-        payload = P.solve_with_root_diagnostics(P.FixedRho(1.0), T_fm; p_num=24, t_num=6)
-        @test haskey(payload, :result)
-        @test haskey(payload, :root_diagnostics)
-        @test payload.result isa P.SolverResult
-        @test haskey(payload.root_diagnostics, :attempts)
-        @test !isempty(payload.root_diagnostics.attempts)
-    end
-end
-
-@testset "solve FixedAsymmetricRho root diagnostics" begin
-    T_MeV = 100.0
-    T_fm = T_MeV / ħc
-    payload = P.solve_with_root_diagnostics(P.FixedAsymmetricRho(1.0, 0.876, 0.0), T_fm; p_num=24, t_num=6)
-    @test haskey(payload, :result)
-    @test haskey(payload, :root_diagnostics)
-    @test payload.result isa P.SolverResult
-    @test haskey(payload.root_diagnostics, :attempts)
-    @test !isempty(payload.root_diagnostics.attempts)
 end
 
 # ============================================================================
@@ -165,14 +137,6 @@ end
         @test length(result.solution) == 8
     end
 
-    @testset "root diagnostics 接口" begin
-        payload = P.solve_with_root_diagnostics(P.FixedEntropy(0.5), T_fm; p_num=24, t_num=6)
-        @test haskey(payload, :result)
-        @test haskey(payload, :root_diagnostics)
-        @test payload.result isa P.SolverResult
-        @test haskey(payload.root_diagnostics, :attempts)
-        @test !isempty(payload.root_diagnostics.attempts)
-    end
 end
 
 # ============================================================================
@@ -191,22 +155,14 @@ end
         @test length(result.solution) == 8
     end
 
-    @testset "root diagnostics 接口" begin
-        payload = P.solve_with_root_diagnostics(P.FixedSigma(10.0), T_fm; p_num=24, t_num=6)
-        @test haskey(payload, :result)
-        @test haskey(payload, :root_diagnostics)
-        @test payload.result isa P.SolverResult
-        @test haskey(payload.root_diagnostics, :attempts)
-        @test !isempty(payload.root_diagnostics.attempts)
-    end
 end
 
 # ============================================================================
 # 隐函数求解器测试
 # ============================================================================
 
-@testset "create_implicit_solver" begin
-    solver = P.create_implicit_solver(xi=0.0, p_num=24, t_num=6)
+@testset "create_pnjl_implicit_solver" begin
+    solver = P.create_pnjl_implicit_solver(xi=0.0, p_num=24, t_num=6)
     
     T_fm = 0.5
     μ_fm = 1.0
