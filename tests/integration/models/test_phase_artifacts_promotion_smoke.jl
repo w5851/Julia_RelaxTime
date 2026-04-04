@@ -29,7 +29,7 @@ using .Models
         output_dir=target.run_dir,
         profile=:smoke,
         run_id=run_id,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=12,
         t_num=4,
         iterations=80,

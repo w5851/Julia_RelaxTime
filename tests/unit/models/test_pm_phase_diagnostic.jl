@@ -187,26 +187,26 @@ end
     @test isdefined(Models, :_pm_maxwell_reference_from_rows)
 
     branch_rows = [
-        (T_MeV=130.9, mu_MeV=290.90, branch=:hadron, accepted=true, rho_norm=0.10, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.00, branch=:hadron, accepted=true, rho_norm=0.20, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.10, branch=:hadron, accepted=true, rho_norm=0.30, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.20, branch=:hadron, accepted=true, rho_norm=0.40, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.22, branch=:hadron, accepted=true, rho_norm=0.50, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.18, branch=:hadron, accepted=true, rho_norm=0.60, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.10, branch=:quark, accepted=true, rho_norm=0.70, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.05, branch=:quark, accepted=true, rho_norm=0.80, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.09, branch=:quark, accepted=true, rho_norm=0.90, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.16, branch=:quark, accepted=true, rho_norm=1.00, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.24, branch=:quark, accepted=true, rho_norm=1.10, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.33, branch=:quark, accepted=true, rho_norm=1.20, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
-        (T_MeV=130.9, mu_MeV=291.42, branch=:quark, accepted=true, rho_norm=1.30, xi=0.0, solver_backend=:legacy, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=290.90, branch=:hadron, accepted=true, rho_norm=0.10, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.00, branch=:hadron, accepted=true, rho_norm=0.20, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.10, branch=:hadron, accepted=true, rho_norm=0.30, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.20, branch=:hadron, accepted=true, rho_norm=0.40, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.22, branch=:hadron, accepted=true, rho_norm=0.50, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.18, branch=:hadron, accepted=true, rho_norm=0.60, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.10, branch=:quark, accepted=true, rho_norm=0.70, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.05, branch=:quark, accepted=true, rho_norm=0.80, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.09, branch=:quark, accepted=true, rho_norm=0.90, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.16, branch=:quark, accepted=true, rho_norm=1.00, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.24, branch=:quark, accepted=true, rho_norm=1.10, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.33, branch=:quark, accepted=true, rho_norm=1.20, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
+        (T_MeV=130.9, mu_MeV=291.42, branch=:quark, accepted=true, rho_norm=1.30, xi=0.0, solver_backend=:models, p_num=24, t_num=8),
     ]
 
     maxwell = Models._pm_maxwell_reference_from_rows(
         branch_rows;
         T_MeV=130.9,
         xi=0.0,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=24,
         t_num=8,
     )
@@ -217,7 +217,7 @@ end
         branch_rows;
         T_MeV=130.9,
         xi=0.1,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=24,
         t_num=8,
     )
@@ -246,7 +246,7 @@ end
         T_values=130.9,
         mu_grid=[290.9, 291.0],
         xi=0.0,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=24,
         t_num=8,
         output_dir=tempname(),
@@ -256,7 +256,7 @@ end
         T_values=[130.9],
         mu_grid=[290.9, NaN],
         xi=0.0,
-        solver_backend=:legacy,
+        solver_backend=:models,
         p_num=24,
         t_num=8,
         output_dir=tempname(),

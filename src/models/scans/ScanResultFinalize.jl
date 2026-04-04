@@ -2,7 +2,7 @@ module ScanResultFinalize
 
 using StaticArrays
 
-using ..ImplicitSolver: SolverResult
+import Main.Models: SolverResult
 
 export finalize_solver_result
 export promote_near_converged

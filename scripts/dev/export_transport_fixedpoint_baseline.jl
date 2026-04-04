@@ -3,6 +3,7 @@
 using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 using .TransportWorkflow
 
@@ -10,7 +11,7 @@ const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxtime",
 
 function parse_args(args::Vector{String})
     output = DEFAULT_OUTPUT
-    backend = :legacy
+    backend = :models
     i = 1
     while i <= length(args)
         arg = args[i]
@@ -22,10 +23,10 @@ function parse_args(args::Vector{String})
             i == length(args) && error("missing value for --backend")
             i += 1
             b = Symbol(lowercase(args[i]))
-            b in (:legacy, :models) || error("backend must be legacy or models")
+            b == :models || error("backend must be models")
             backend = b
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/dev/export_transport_fixedpoint_baseline.jl [--output <path>] [--backend legacy|models]")
+            println("Usage: julia --project=. scripts/dev/export_transport_fixedpoint_baseline.jl [--output <path>] [--backend models]")
             exit(0)
         else
             error("unknown option: $arg")
@@ -75,25 +76,15 @@ function main(args::Vector{String})
                 t_num=4,
                 transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
             )
-            result = if backend == :legacy
-                TransportWorkflow.solve_gap_and_transport(
-                    pt.T,
-                    pt.mu;
-                    kwargs...,
-                    solver_backend=:legacy,
-                    solver_kwargs=(iterations=30,),
-                )
-            else
-                TransportWorkflow.solve_gap_and_transport(
-                    pt.T,
-                    pt.mu;
-                    kwargs...,
-                    solver_backend=:models,
-                    models_solver=models_solver,
-                    models_residual_norm_max=1e-4,
-                    seed_state=TransportWorkflow.HADRON_SEED_5,
-                )
-            end
+            result = TransportWorkflow.solve_gap_and_transport(
+                pt.T,
+                pt.mu;
+                kwargs...,
+                solver_backend=:models,
+                models_solver=models_solver,
+                models_residual_norm_max=1e-4,
+                seed_state=TransportWorkflow.HADRON_SEED_5,
+            )
 
             @printf(io, "%.6f,%.6f,%.6f,%.16e,%.16e,%.16e\n",
                 pt.T, pt.mu, pt.xi,

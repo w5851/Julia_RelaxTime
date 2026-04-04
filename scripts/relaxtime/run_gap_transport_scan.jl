@@ -535,20 +535,6 @@ function integration_grids(opts::ScanOptions)
     end
 end
 
-function compute_equilibrium_residual_norm(T_fm::Float64, muq_fm::Float64, x_state, xi::Float64, opts::ScanOptions)
-    mu_vec = Main.Models.normalize_mu_vec(muq_fm)
-    residual_vec = Main.Models.gap_residual(
-        PNJL_MODEL,
-        x_state,
-        T_fm,
-        mu_vec;
-        xi=xi,
-        p_num=opts.p_num,
-        t_num=opts.t_num,
-    )
-    return sqrt(sum(abs2, residual_vec))
-end
-
 function build_phase_tracker(xi::Float64, previous_solution, previous_phase::Symbol)
     boundary_xi_used = xi
     tracker = try
@@ -771,7 +757,7 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
         p_num=opts.p_num,
         t_num=opts.t_num,
         residual_norm_max=1e-4,
-        physicality_check=Main.Models.ImplicitSolver._default_is_physical_solution,
+        physicality_check=Main.Models.is_physical_solution,
     )
     Bool(raw.converged) || return nothing
     masses = SVector{3}(Tuple(Float64.(raw.masses)))
@@ -785,29 +771,6 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
         residual_norm=Float64(raw.residual_norm),
         solver_backend=:models,
         omega=Float64(raw.omega),
-    )
-end
-
-function solve_legacy_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
-    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
-        T_fm,
-        muq_fm;
-        xi=xi,
-        solver_backend=:legacy,
-        p_num=opts.p_num,
-        t_num=opts.t_num,
-        seed_state=nothing,
-        solver_kwargs=(iterations=opts.max_iter,),
-    )
-    residual_norm = compute_equilibrium_residual_norm(T_fm, muq_fm, base.x_state, xi, opts)
-    return (
-        converged=base.converged,
-        x_state=base.x_state,
-        mu_vec=base.mu_vec,
-        masses=base.masses,
-        iterations=-1,
-        residual_norm=residual_norm,
-        solver_backend=:legacy,
     )
 end
 
@@ -864,9 +827,10 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     end
 
     if eq === nothing
-        models_err !== nothing && @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=models_err
-        eq = solve_legacy_equilibrium(T_fm, muq_fm, xi, opts)
-        seed_source = string(seed_source, "+legacy_fallback")
+        if models_err !== nothing
+            rethrow(models_err)
+        end
+        throw(ArgumentError("models equilibrium solver returned no valid candidate"))
     end
 
     next_solution = collect(Float64, eq.x_state)
@@ -957,7 +921,7 @@ function run_scan(opts::ScanOptions)
                 "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
                 "git_commit" => current_git_commit(),
                 "provenance.entrypoint" => "workflow",
-                "provenance.equilibrium_backend" => "models.solve_constraint(FixedMu) with phase-aware xi/T continuity and legacy fallback",
+                "provenance.equilibrium_backend" => "models.solve_constraint(FixedMu) with phase-aware xi/T continuity",
                 "provenance.tau_path" => "TransportWorkflow.solve_gap_and_transport",
                 "provenance.integration_mode" => string(opts.integration_mode),
                 "sigma_grid_n" => string(opts.sigma_grid_n),

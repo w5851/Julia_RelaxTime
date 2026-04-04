@@ -34,4 +34,18 @@ using .Models: run_tmu_scan
     cols = split(lines[2], ',')
     @test length(cols) >= 4
     @test isfinite(parse(Float64, cols[4]))  # pressure_fm4
+
+    @test_throws ArgumentError run_tmu_scan(
+        T_values=[150.0],
+        mu_values=[0.0],
+        xi_values=[0.0],
+        output_path=joinpath(tmp_dir, "tmu_scan_invalid_semantic.csv"),
+        overwrite=true,
+        resume=false,
+        use_phase_aware=false,
+        semantic_mode=:constrained_manifold,
+        p_num=12,
+        t_num=4,
+        iterations=80,
+    )
 end

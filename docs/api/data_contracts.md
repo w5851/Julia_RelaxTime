@@ -10,7 +10,7 @@
 
 ## 0. Models 子系统（阶段 0）契约
 
-本节描述当前仓库 `src/models` 下 **models 子系统** 的“最小稳定入口”，用于支撑 legacy → models 的渐进迁移。
+本节描述当前仓库 `src/models` 下 **models 子系统** 的“最小稳定入口”，用于统一到 models 主链后的对外契约。
 
 ### 0.1 统一入口
 
@@ -19,11 +19,11 @@
 - `Models.omega_components(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
 - （可选扩展）`Models.number_densities(model, x_state, T, mu_vec; kwargs...) -> NamedTuple`
 
-后端约定（迁移期）：
+后端约定（当前）：
 
-- `solver_backend` 继续支持 `:legacy | :models`；默认保持兼容（不强制切换）。
-- `src/models/pnjl_physics/core/EquilibriumFacade.jl` 支持 `solver_backend=:auto`（按 `thermo_backend` 推导），但默认仍为 `:legacy` 以避免行为突变。
-- `PNJLModel.solve_gap` 在 `solver_backend=:models` 下支持失败时回退 legacy 的受控策略（对称化学势场景）。
+- `solver_backend` 在 models 子系统中使用 `:models | :auto`；`:legacy` 业务路径已冻结并从公开调用口径移除。
+- `src/models/pnjl_physics/core/EquilibriumFacade.jl` 支持 `solver_backend=:auto`（按 `thermo_backend` 推导），并以 models 主链为唯一可执行路径。
+- `PNJLModel.solve_gap` 不再提供 models→legacy 运行时回退分支；失败由调用方按统一错误/重试策略处理。
 
 ### 0.2 `x_state`（平均场状态）
 

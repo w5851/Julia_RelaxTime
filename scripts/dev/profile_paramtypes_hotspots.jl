@@ -49,7 +49,7 @@ function main()
 
     inputs = TransportWorkflow._transport_inputs_from_equilibrium(base, T, mu;
         xi=xi,
-        thermo_backend=:legacy,
+        thermo_backend=:models,
         p_num=8,
         t_num=4,
     )

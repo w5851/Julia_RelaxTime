@@ -41,9 +41,9 @@ using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
 export solve, SolverResult
-export create_implicit_solver, solve_with_derivatives
 export solve_weighted_block_fallback
-export solve_with_root_diagnostics
+export default_is_physical_solution
+export solve_with_derivatives
 
 @inline function _get_model(model_kind::Symbol)
     if model_kind === :PNJL || model_kind === :RPNJL
@@ -76,7 +76,7 @@ end
 # 物理性判据与兜底求解（Newton → Trust-Region）
 # ============================================================================
 
-@inline function _default_is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
+@inline function default_is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
     if length(x_state) < 5 || length(masses) < 3
         return false
     end
@@ -136,7 +136,7 @@ function _nlsolve_with_tr_fallback(residual_fn!, x0;
     primary_method::Symbol,
     fallback_method::Symbol=:trust_region,
     use_fallback::Bool=true,
-    physicality_check::Function=_default_is_physical_solution,
+    physicality_check::Function=default_is_physical_solution,
     residual_norm_max::Float64=1e-6,
     postprocess_fn::Function,
     nlsolve_kwargs...)
@@ -261,7 +261,7 @@ function solve(::FixedMu, T_fm::Real, μ_fm::Real;
                trust_region_fallback::Bool=true,
                auto_multiseed_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -390,7 +390,7 @@ function solve(mode::FixedRho, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
 
@@ -476,7 +476,7 @@ function solve(mode::FixedAsymmetricRho, T_fm::Real;
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
                enforce_physicality::Bool=false,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
 
@@ -607,7 +607,7 @@ function solve(mode::FixedEntropy, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -670,7 +670,7 @@ function solve(mode::FixedSigma, T_fm::Real;
                nlsolve_method::Symbol=:newton,
                trust_region_fallback::Bool=true,
                fallback_method::Symbol=:trust_region,
-               physicality_check::Function=_default_is_physical_solution,
+               physicality_check::Function=default_is_physical_solution,
                residual_norm_max::Real=1e-6,
                nlsolve_kwargs...)
     
@@ -755,7 +755,7 @@ end
 end
 
 @inline function _is_physically_preferred_result(r::SolverResult)
-    return _default_is_physical_solution(r.x_state, r.masses) &&
+    return default_is_physical_solution(r.x_state, r.masses) &&
            _all_finite_thermo(r.omega, r.pressure, r.rho_norm, r.entropy, r.energy)
 end
 
@@ -1068,48 +1068,6 @@ function conditions_mu(θ::AbstractVector, x::AbstractVector, z)
 end
 
 """
-    create_implicit_solver(; kwargs...) -> ImplicitFunction
-
-创建支持自动微分的隐函数求解器。
-
-# 返回
-ImplicitFunction 对象，可用于计算解及其对参数的导数。
-
-# 示例
-```julia
-solver = create_implicit_solver(xi=0.0)
-θ = [T_fm, μ_fm]
-x, _ = solver(θ)  # 求解
-# 使用 ForwardDiff 计算导数
-dx_dθ = ForwardDiff.jacobian(θ -> solver(θ)[1], θ)
-```
-"""
-function create_implicit_solver(; xi::Real=0.0,
-                                p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                                t_num::Int=DEFAULT_THETA_COUNT,
-                                model_kind::Symbol=:PNJL)
-    thermal_nodes = cached_nodes(p_num, t_num)
-    local_config = (
-        xi=Float64(xi),
-        p_num=p_num,
-        t_num=t_num,
-        model_kind=model_kind,
-        thermal_nodes=thermal_nodes,
-    )
-    adapters = _build_fixedmu_implicit_adapters(local_config)
-
-    # Backward-compatible side effect for callers relying on set_implicit_config/global path.
-    IMPLICIT_CONFIG[] = local_config
-
-    return ImplicitFunction(
-        adapters.forward_solve,
-        adapters.conditions;
-        linear_solver=DirectLinearSolver(),
-        representation=MatrixRepresentation(),
-    )
-end
-
-"""
     solve_with_derivatives(T_fm, μ_fm; order=1, kwargs...) -> NamedTuple
 
 求解并计算解对参数的导数。
@@ -1132,260 +1090,16 @@ function solve_with_derivatives(T_fm::Real, μ_fm::Real;
                                 model_kind::Symbol=:PNJL,
                                 p_num::Int=DEFAULT_MOMENTUM_COUNT,
                                 t_num::Int=DEFAULT_THETA_COUNT)
-    solver = create_implicit_solver(
+    return Main.Models.solve_pnjl_with_derivatives(
+        T_fm,
+        μ_fm;
+        order=order,
         xi=xi,
         p_num=p_num,
         t_num=t_num,
-        model_kind=model_kind,
+        thermo_backend=:models,
+        solver_backend=:models,
     )
-    θ = [Float64(T_fm), Float64(μ_fm)]
-    
-    # 基础解
-    x, _ = solver(θ)
-    
-    if order == 1
-        # 一阶导数
-        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
-        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
-        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ)
-        
-    elseif order == 2
-        # 一阶导数
-        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
-        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
-        
-        # 二阶导数
-        d2x_dT2 = ForwardDiff.derivative(
-            T -> ForwardDiff.derivative(t -> solver([t, θ[2]])[1], T),
-            θ[1]
-        )
-        d2x_dμ2 = ForwardDiff.derivative(
-            μ -> ForwardDiff.derivative(m -> solver([θ[1], m])[1], μ),
-            θ[2]
-        )
-        d2x_dTdμ = ForwardDiff.derivative(
-            T -> ForwardDiff.derivative(μ -> solver([T, μ])[1], θ[2]),
-            θ[1]
-        )
-        
-        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ, 
-                d2x_dT2=d2x_dT2, d2x_dμ2=d2x_dμ2, d2x_dTdμ=d2x_dTdμ)
-    else
-        error("order must be 1 or 2, got $order")
-    end
-end
-
-"""
-    solve_with_root_diagnostics(mode::FixedMu, T_fm, μ_fm; kwargs...) -> NamedTuple
-
-与 `solve(mode, ...)` 行为一致，但额外返回 root diagnostics 结构，
-用于迁移期诊断兼容。
-"""
-function solve_with_root_diagnostics(::FixedMu, T_fm::Real, μ_fm::Real;
-                                     xi::Real=0.0,
-                                     seed_strategy::SeedStrategy=DefaultSeed(),
-                                     p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                                     t_num::Int=DEFAULT_THETA_COUNT,
-                                     nlsolve_method::Symbol=:newton,
-                                     trust_region_fallback::Bool=true,
-                                     auto_multiseed_fallback::Bool=true,
-                                     fallback_method::Symbol=:trust_region,
-                                     physicality_check::Function=_default_is_physical_solution,
-                                     residual_norm_max::Real=1e-6,
-                                     nlsolve_kwargs...)
-
-    mode = FixedMu()
-    thermal_nodes = cached_nodes(p_num, t_num)
-    params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi); p_num=p_num, t_num=t_num, model_kind=:PNJL)
-    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-
-    θ = [T_fm, μ_fm]
-    seed = get_seed(seed_strategy, θ, mode)
-    x0 = Float64.(seed)
-
-    residual_fn! = build_residual!(mode, mu_vec, params)
-    postprocess_fn = x_sol -> begin
-        x_state = SVector{5}(Tuple(x_sol))
-        return _postprocess_payload(:PNJL, x_state, mu_vec, T_fm;
-            p_num=p_num,
-            t_num=t_num,
-            xi=xi,
-        )
-    end
-
-    cache = Dict{Symbol,Tuple{Any,Any}}()
-    solve_once = function (method::Symbol, seedv::Vector{Float64})
-        res = nlsolve(residual_fn!, seedv; autodiff=:forward, method=method, xtol=1e-9, ftol=1e-9, nlsolve_kwargs...)
-        local cand
-        try
-            cand = _postprocess_candidate(postprocess_fn, physicality_check, res.zero)
-        catch
-            cand = (phys=false,
-                    x_sol=Vector{Float64}(res.zero),
-                    x_state=SVector{5, Float64}(fill(NaN, 5)),
-                    mu_vec=SVector{3, Float64}(fill(NaN, 3)),
-                    omega=NaN,
-                    pressure=NaN,
-                    rho_norm=NaN,
-                    entropy=NaN,
-                    energy=NaN,
-                    masses=SVector{3, Float64}(fill(NaN, 3)))
-        end
-
-        cache[method] = (res, cand)
-        return (
-            x=Vector{Float64}(res.zero),
-            converged=Bool(res.f_converged) && Bool(cand.phys),
-            residual_norm=Float64(res.residual_norm),
-            score=isfinite(cand.omega) ? Float64(cand.omega) : NaN,
-        )
-    end
-
-    policy = RootPolicy(
-        primary_method=nlsolve_method,
-        fallback_method=fallback_method,
-        use_fallback=trust_region_fallback,
-        use_multiseed=false,
-        residual_norm_max=Float64(residual_norm_max),
-        require_converged=true,
-        diagnostics_level=:basic,
-    )
-
-    solved = solve_root_with_policy(solve_once, x0; policy=policy)
-    selected_method = solved.diagnostics.attempts[solved.diagnostics.selected_attempt].method
-    if !haskey(cache, selected_method)
-        _ = solve_once(selected_method, x0)
-    end
-    res, cand = cache[selected_method]
-
-    converged = res.f_converged && cand.phys && isfinite(res.residual_norm) && (res.residual_norm <= Float64(residual_norm_max))
-    single = SolverResult(
-        mode,
-        converged,
-        cand.x_sol,
-        cand.x_state,
-        mu_vec,
-        cand.omega,
-        cand.pressure,
-        cand.rho_norm,
-        cand.entropy,
-        cand.energy,
-        cand.masses,
-        res.iterations,
-        res.residual_norm,
-        Float64(xi),
-    )
-
-    if converged || !auto_multiseed_fallback
-        attempts = map(solved.diagnostics.attempts) do a
-            (
-                method=a.method,
-                seed_source=a.seed_source,
-                converged=a.converged,
-                residual_norm=a.residual_norm,
-                quality_tag=a.quality_tag,
-                score=a.score,
-            )
-        end
-        return (
-            result=single,
-            root_diagnostics=(
-                selected_method=selected_method,
-                selected_attempt=solved.diagnostics.selected_attempt,
-                attempts=attempts,
-            ),
-        )
-    end
-
-    multi = solve_multi(mode, T_fm, μ_fm;
-        seed_strategy=MultiSeed(),
-        nlsolve_method=nlsolve_method,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        trust_region_fallback=trust_region_fallback,
-        auto_multiseed_fallback=false,
-        fallback_method=fallback_method,
-        physicality_check=physicality_check,
-        residual_norm_max=residual_norm_max,
-        nlsolve_kwargs...)
-    attempts = map(solved.diagnostics.attempts) do a
-        (
-            method=a.method,
-            seed_source=a.seed_source,
-            converged=a.converged,
-            residual_norm=a.residual_norm,
-            quality_tag=a.quality_tag,
-            score=a.score,
-        )
-    end
-    return (
-        result=multi,
-        root_diagnostics=(
-            selected_method=:multiseed,
-            selected_attempt=solved.diagnostics.selected_attempt,
-            attempts=attempts,
-        ),
-    )
-end
-
-@inline function _diagnostics_payload_from_result(result::SolverResult; selected_method::Symbol=:unknown, seed_source::Symbol=:seed)
-    attempt = (
-        method=selected_method,
-        seed_source=seed_source,
-        converged=Bool(result.converged),
-        residual_norm=Float64(result.residual_norm),
-        quality_tag=Bool(result.converged) ? :good : :degraded,
-        score=isfinite(result.omega) ? Float64(result.omega) : NaN,
-    )
-    return (
-        result=result,
-        root_diagnostics=(
-            selected_method=selected_method,
-            selected_attempt=1,
-            attempts=[attempt],
-        ),
-    )
-end
-
-"""
-    solve_with_root_diagnostics(mode::FixedRho, T_fm; kwargs...) -> NamedTuple
-
-固定密度模式的兼容诊断入口。
-"""
-function solve_with_root_diagnostics(mode::FixedRho, T_fm::Real; kwargs...)
-    result = solve(mode, T_fm; kwargs...)
-    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
-end
-
-"""
-    solve_with_root_diagnostics(mode::FixedAsymmetricRho, T_fm; kwargs...) -> NamedTuple
-
-固定非对称密度模式的兼容诊断入口。
-"""
-function solve_with_root_diagnostics(mode::FixedAsymmetricRho, T_fm::Real; kwargs...)
-    result = solve(mode, T_fm; kwargs...)
-    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
-end
-
-"""
-    solve_with_root_diagnostics(mode::FixedEntropy, T_fm; kwargs...) -> NamedTuple
-
-固定熵密度模式的兼容诊断入口。
-"""
-function solve_with_root_diagnostics(mode::FixedEntropy, T_fm::Real; kwargs...)
-    result = solve(mode, T_fm; kwargs...)
-    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
-end
-
-"""
-    solve_with_root_diagnostics(mode::FixedSigma, T_fm; kwargs...) -> NamedTuple
-
-固定比熵模式的兼容诊断入口。
-"""
-function solve_with_root_diagnostics(mode::FixedSigma, T_fm::Real; kwargs...)
-    result = solve(mode, T_fm; kwargs...)
-    return _diagnostics_payload_from_result(result; selected_method=:legacy_fallback, seed_source=:seed)
 end
 
 end # module ImplicitSolver

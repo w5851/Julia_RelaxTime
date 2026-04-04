@@ -60,14 +60,16 @@ export solve, solve_multi, SolverResult
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export ProblemSpec, build_problem_spec
+export AbstractConstraintComponent
+export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, GapParams
 export explicit_residual, explicit_residual!
-export create_implicit_solver, solve_with_derivatives
-export solve_with_root_diagnostics
+export solve_with_derivatives
+export is_physical_solution
 export RootProblemSpec, RootPolicy, ContinuationState, RootAttempt, RootDiagnostics, RootSolveResult
 export solve_root_with_policy, solve_root_continuation
 export ρ0
@@ -153,6 +155,7 @@ include(joinpath(@__DIR__, "gap_solver.jl"))
 include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
 include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))
@@ -175,7 +178,6 @@ include(joinpath(@__DIR__, "scans", "DualBranchScanEntry.jl"))
 
 using .SeedStrategies
 using .Conditions
-import .ImplicitSolver
 const ConstraintModes = @__MODULE__
 using .ThermoDerivatives
 using .ConservedChargeSusceptibilities

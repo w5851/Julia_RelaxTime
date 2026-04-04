@@ -39,8 +39,10 @@ function _load_baseline(path::String)
     return rows
 end
 
-function _run_bridge_case(T, mu, xi, tau, models_solver)
-    common_kwargs = (
+function _run_models_case(T, mu, xi, tau, models_solver)
+    return TransportWorkflow.solve_gap_and_transport(
+        T,
+        mu;
         xi=xi,
         tau=tau,
         compute_tau=false,
@@ -48,27 +50,11 @@ function _run_bridge_case(T, mu, xi, tau, models_solver)
         p_num=8,
         t_num=4,
         transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
-    )
-
-    res_legacy = TransportWorkflow.solve_gap_and_transport(
-        T,
-        mu;
-        common_kwargs...,
-        solver_backend=:legacy,
-        solver_kwargs=(iterations=30,),
-    )
-
-    res_models = TransportWorkflow.solve_gap_and_transport(
-        T,
-        mu;
-        common_kwargs...,
         solver_backend=:models,
         models_solver=models_solver,
         models_residual_norm_max=1e-4,
-        seed_state=collect(res_legacy.equilibrium.x_state),
+        seed_state=nothing,
     )
-
-    return res_legacy, res_models
 end
 
 @testset "Transport fixedpoint regression" begin
@@ -89,30 +75,18 @@ end
     for row in rows
         point_label = "T=$(row.T), mu=$(row.mu), xi=$(row.xi)"
         @testset "fixedpoint $(point_label)" begin
-            res_legacy, res_models = _run_bridge_case(row.T, row.mu, row.xi, tau, models_solver)
+            res_models = _run_models_case(row.T, row.mu, row.xi, tau, models_solver)
 
-            @test res_legacy.equilibrium.converged isa Bool
             @test res_models.equilibrium.converged isa Bool
-            @test all(isfinite, res_legacy.masses)
             @test all(isfinite, res_models.masses)
-            @test isfinite(res_legacy.transport.eta)
             @test isfinite(res_models.transport.eta)
-            @test isfinite(res_legacy.transport.sigma)
             @test isfinite(res_models.transport.sigma)
-            @test isfinite(res_legacy.transport.zeta)
             @test isfinite(res_models.transport.zeta)
-
-            @test isapprox(res_models.transport.eta, res_legacy.transport.eta; rtol=rtol, atol=atol)
-            @test isapprox(res_models.transport.sigma, res_legacy.transport.sigma; rtol=rtol, atol=atol)
-            @test isapprox(res_models.transport.zeta, res_legacy.transport.zeta; rtol=rtol, atol=atol)
 
             expected_key = _point_key(row.T, row.mu, row.xi)
             @test haskey(baseline, expected_key)
             expected = baseline[expected_key]
 
-            @test isapprox(res_legacy.transport.eta, expected.eta; rtol=rtol, atol=atol)
-            @test isapprox(res_legacy.transport.sigma, expected.sigma; rtol=rtol, atol=atol)
-            @test isapprox(res_legacy.transport.zeta, expected.zeta; rtol=rtol, atol=atol)
             @test isapprox(res_models.transport.eta, expected.eta; rtol=rtol, atol=atol)
             @test isapprox(res_models.transport.sigma, expected.sigma; rtol=rtol, atol=atol)
             @test isapprox(res_models.transport.zeta, expected.zeta; rtol=rtol, atol=atol)

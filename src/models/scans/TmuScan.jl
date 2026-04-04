@@ -38,7 +38,7 @@ using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
 using ..SeedStrategies: auto_phase_hint
 using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
-using ..ImplicitSolver: solve, SolverResult
+import Main.Models: solve, SolverResult
 using ..ScanCommon
 using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
@@ -91,8 +91,8 @@ end
     _validate_real_vector(:mu_values, mu_values)
     _validate_real_vector(:xi_values, xi_values)
 
-    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
-        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+    (solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :models or :auto (legacy backend removed), got $(solver_backend)"))
 
     if model_kind in ScanCommon.PARAMETERIZED_MODEL_KIND_ALIASES
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
@@ -101,17 +101,35 @@ end
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 
-    if solver_backend === :legacy && model_kind !== :PNJL
-        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
-    end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+@inline function _validate_semantic_mode(semantic_mode::Symbol, selector::Union{Nothing, Function})
+    (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
+        throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
+
+    semantic_mode === :ground_state ||
+        throw(ArgumentError("run_tmu_scan currently supports semantic_mode=:ground_state only for FixedMu workflow"))
+
+    selector === nothing ||
+        throw(ArgumentError("run_tmu_scan does not support custom selector; selector must be nothing"))
+    return nothing
+end
+
+@inline function _validate_auto_pnjl_backend(auto_pnjl_backend::Symbol)
+    (auto_pnjl_backend === :models || auto_pnjl_backend === :legacy) ||
+        throw(ArgumentError("auto_pnjl_backend must be :models or :legacy, got $(auto_pnjl_backend)"))
+    return nothing
+end
+
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
     end
-    return model_kind === :PNJL ? :legacy : :models
+    if model_kind === :PNJL
+        return auto_pnjl_backend
+    end
+    return :models
 end
 
 # ============================================================================
@@ -160,6 +178,9 @@ function run_tmu_scan(;
     use_phase_aware::Bool=true,
     bootstrap_multiseed::Bool=true,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -167,6 +188,8 @@ function run_tmu_scan(;
     nlsolve_kwargs...
 )
     _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
+    _validate_semantic_mode(semantic_mode, selector)
+    _validate_auto_pnjl_backend(auto_pnjl_backend)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -226,6 +249,7 @@ function run_tmu_scan(;
                     if tracker !== nothing && bootstrap_multiseed && tracker.previous_solution === nothing
                         result, message = _solve_point_with_seed_strategy(T_fm, μ_fm, xi, tracker;
                             solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
@@ -238,6 +262,7 @@ function run_tmu_scan(;
 
                         result, message = _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
                             solver_backend=solver_backend,
+                            auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
                             p_num=p_num,
                             t_num=t_num,
@@ -341,6 +366,7 @@ end
 """尝试多个初值候选"""
 function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -348,6 +374,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     return ScanCommon.attempt_with_candidates(candidates;
         solve_point=seed_state -> _solve_point(T_fm, μ_fm, xi, seed_state;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -355,6 +382,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
         ),
         refine=result -> _refine_result(T_fm, μ_fm, xi, result;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -368,36 +396,27 @@ end
 """单点求解"""
 function _solve_point(T_fm, μ_fm, xi, seed_state;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TmuScan models path; use :models or :auto"))
 
         # 创建固定种子策略
         seed_5 = Float64.(seed_state[1:min(5, length(seed_state))])
         strategy = ScanCommon.FixedSeedStrategy(seed_5)
         
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -417,32 +436,23 @@ end
 """单点求解：直接使用一个 SeedStrategy（用于 PhaseAwareContinuitySeed 的 MultiSeed 自举路径）"""
 function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStrategy;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TmuScan models path; use :models or :auto"))
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=seed_strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                seed_strategy=seed_strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=seed_strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -462,6 +472,7 @@ end
 """精炼近似收敛的结果"""
 function _refine_result(T_fm, μ_fm, xi, result;
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -471,6 +482,7 @@ function _refine_result(T_fm, μ_fm, xi, result;
         acceptable_residual=ACCEPTABLE_RESIDUAL,
         solve_again=seed -> _solve_point(T_fm, μ_fm, xi, seed;
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -508,6 +520,16 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
     )
 end
 
+@inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    legacy_switches = (:use_problem_spec, :allow_legacy_path, :warn_on_legacy_path)
+    for key in keys(nlsolve_kwargs)
+        if key in legacy_switches || key === :problem_spec
+            throw(ArgumentError("legacy solver switch '$key' is not allowed from TmuScan models path"))
+        end
+    end
+    return nothing
+end
+
 function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     xi::Real,
     model_kind::Symbol,
@@ -518,6 +540,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
     raw = Main.Models.solve_constraint(
         model,

@@ -27,6 +27,7 @@ include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
@@ -448,26 +449,14 @@ function run_scan(opts::Options)
 
             try  # 单点容错：失败不中断后续扫描
 
-            base = try
-                TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                    xi=xi,
-                    solver_backend=:models,
-                    p_num=opts.p_num,
-                    t_num=opts.t_num,
-                    seed_state=seed_state,
-                    models_residual_norm_max=1e-4,
-                )
-            catch err
-                @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=xi err=err
-                TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
-                    xi=xi,
-                    solver_backend=:legacy,
-                    p_num=opts.p_num,
-                    t_num=opts.t_num,
-                    seed_state=nothing,
-                    solver_kwargs=(iterations=opts.max_iter,),
-                )
-            end
+            base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(T_fm, muq_fm;
+                xi=xi,
+                solver_backend=:models,
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                seed_state=seed_state,
+                models_residual_norm_max=1e-4,
+            )
             seed_state = Vector(base.x_state)
 
             Φ = Float64(base.x_state[4])

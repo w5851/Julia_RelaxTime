@@ -26,10 +26,12 @@
 - `Models.solve`
 - `Models.solve_multi`
 - `Models.solve_constraint`
+- `Models.ProblemSpec` / `Models.build_problem_spec`
+- `Models.AbstractConstraintComponent` / `Models.build_constraint_components`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
 - `Models.SeedStrategy` 家族
 - `Models.create_implicit_gap_solver` / `Models.create_pnjl_implicit_solver` / `Models.create_flavor_mu_implicit_gap_solver`
-- `Models.create_implicit_solver` / `Models.solve_with_derivatives`
+- `Models.solve_with_derivatives`
 
 本主题已经吸收旧 `docs/api/pnjl/` 求解器相关页面中的主要价值。旧页后续应只承担迁移说明或兼容层定位，不再作为新主题主说明页。

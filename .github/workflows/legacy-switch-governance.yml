@@ -1,0 +1,32 @@
+name: legacy-switch-governance
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "scripts/dev/check_legacy_solver_switch_leakage.jl"
+      - ".github/workflows/legacy-switch-governance.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "scripts/dev/check_legacy_solver_switch_leakage.jl"
+      - ".github/workflows/legacy-switch-governance.yml"
+  workflow_dispatch:
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Run legacy switch leakage guard
+        run: julia --project=. scripts/dev/check_legacy_solver_switch_leakage.jl

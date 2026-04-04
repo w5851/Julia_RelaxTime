@@ -38,13 +38,49 @@ import Main.Models: FixedMu, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed
 using ..SeedStrategies: get_seed, update!, reset!
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, HIGH_TEMP_SEED_5
-using ..ImplicitSolver: solve, SolverResult
+import Main.Models: solve, SolverResult
 
 export run_dual_branch_scan, find_phase_transition, merge_branches
 export DualBranchResult, BranchPoint, PhaseTransitionInfo
 
-@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol)::Symbol
-    return solver_backend === :auto ? (thermo_backend === :models ? :models : :legacy) : solver_backend
+@inline function _effective_solver_backend(thermo_backend::Symbol, solver_backend::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
+    if solver_backend !== :auto
+        return solver_backend
+    end
+    if thermo_backend === :models
+        return :models
+    end
+    return auto_pnjl_backend
+end
+
+@inline function _validate_solver_backend(backend::Symbol, argname::AbstractString)
+    (backend === :models || backend === :auto) ||
+        throw(ArgumentError("$(argname) must be :models or :auto (legacy backend removed), got $(backend)"))
+    return nothing
+end
+
+@inline function _validate_auto_pnjl_backend(auto_pnjl_backend::Symbol)
+    (auto_pnjl_backend === :models || auto_pnjl_backend === :legacy) ||
+        throw(ArgumentError("auto_pnjl_backend must be :models or :legacy, got $(auto_pnjl_backend)"))
+    return nothing
+end
+
+@inline function _select_branch_ground_state(h, q)::Symbol
+    return h.omega <= q.omega ? :hadron : :quark
+end
+
+@inline function _select_branch_constrained_manifold(h, q)::Symbol
+    _ = q
+    return :hadron
+end
+
+@inline function _resolve_branch_selector(semantic_mode::Symbol, selector::Union{Nothing, Function})
+    if semantic_mode === :ground_state
+        return selector === nothing ? _select_branch_ground_state : selector
+    elseif semantic_mode === :constrained_manifold
+        return selector === nothing ? _select_branch_constrained_manifold : selector
+    end
+    throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
 end
 
 # ============================================================================
@@ -111,11 +147,17 @@ function run_dual_branch_scan(;
     xi::Real=0.0,
     thermo_backend::Symbol=:models,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     p_num::Int=24,
     t_num::Int=8,
     verbose::Bool=false,
     nlsolve_kwargs...
 )
+    _validate_solver_backend(solver_backend, "solver_backend")
+    _validate_auto_pnjl_backend(auto_pnjl_backend)
+
     mu_values = collect(Float64, mu_range)
     n_points = length(mu_values)
     
@@ -124,6 +166,7 @@ function run_dual_branch_scan(;
     # 初始化结果数组
     hadron_branch = Vector{Union{Nothing, BranchPoint}}(nothing, n_points)
     quark_branch = Vector{Union{Nothing, BranchPoint}}(nothing, n_points)
+    branch_selector = _resolve_branch_selector(semantic_mode, selector)
     
     # ========== 强子分支：从低 μ 向高 μ ==========
     verbose && println("扫描强子分支 (μ: $(mu_values[1]) → $(mu_values[end]) MeV)...")
@@ -136,6 +179,7 @@ function run_dual_branch_scan(;
         result = _solve_point(T_fm, μ_fm, xi, hadron_tracker;
             thermo_backend=thermo_backend,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...)
@@ -169,6 +213,7 @@ function run_dual_branch_scan(;
         result = _solve_point(T_fm, μ_fm, xi, quark_tracker;
             thermo_backend=thermo_backend,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...)
@@ -191,7 +236,7 @@ function run_dual_branch_scan(;
     end
     
     # ========== 选择物理分支（Ω 最小） ==========
-    physical_branch = _select_physical_branch(hadron_branch, quark_branch)
+    physical_branch = _select_physical_branch(hadron_branch, quark_branch, branch_selector)
     
     return DualBranchResult(
         Float64(T_mev),
@@ -358,6 +403,7 @@ end
 function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
     thermo_backend::Symbol=:models,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -365,31 +411,20 @@ function _solve_point(T_fm, μ_fm, xi, tracker::ContinuitySeed;
     strategy = _FixedSeedStrategy(seed)
     
     try
-        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
-        if effective_solver_backend === :models && thermo_backend !== :models
+        effective_solver_backend = _effective_solver_backend(thermo_backend, solver_backend; auto_pnjl_backend=auto_pnjl_backend)
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from DualBranchScan models path; use :models or :auto"))
+        if thermo_backend !== :models
             error("solver_backend=:models requires thermo_backend=:models")
         end
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                model_kind=:PNJL,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        else
-            solve(FixedMu(), T_fm, μ_fm;
-                xi=xi,
-                thermo_backend=effective_solver_backend,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(FixedMu(), T_fm, μ_fm;
+            xi=xi,
+            model_kind=:PNJL,
+            seed_strategy=strategy,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
         return result
     catch
         return nothing
@@ -419,6 +454,16 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
     )
 end
 
+@inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    legacy_switches = (:use_problem_spec, :allow_legacy_path, :warn_on_legacy_path)
+    for key in keys(nlsolve_kwargs)
+        if key in legacy_switches || key === :problem_spec
+            throw(ArgumentError("legacy solver switch '$key' is not allowed from DualBranchScan models path"))
+        end
+    end
+    return nothing
+end
+
 function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     xi::Real,
     model_kind::Symbol,
@@ -429,6 +474,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
     raw = Main.Models.solve_constraint(
         model,
@@ -462,7 +508,7 @@ function _to_branch_point(mu_mev::Float64, result::SolverResult)
 end
 
 """选择物理分支（Ω 最小）"""
-function _select_physical_branch(hadron, quark)
+function _select_physical_branch(hadron, quark, selector::Function)
     n = length(hadron)
     physical = Vector{Union{Nothing, BranchPoint}}(nothing, n)
     
@@ -483,8 +529,15 @@ function _select_physical_branch(hadron, quark)
                 # 同一个解，优先选强子分支（保持连续性）
                 physical[i] = h
             else
-                # 不同解，选 Ω 较小的
-                physical[i] = h.omega <= q.omega ? h : q
+                # 不同解，按 selector 规则选分支
+                branch = selector(h, q)
+                if branch === :hadron
+                    physical[i] = h
+                elseif branch === :quark
+                    physical[i] = q
+                else
+                    throw(ArgumentError("selector must return :hadron or :quark, got $(branch)"))
+                end
             end
         end
     end

@@ -20,6 +20,9 @@ Base.@kwdef struct TmuScanConfig
     bootstrap_multiseed::Union{Nothing, Bool} = nothing
     thermo_backend::Union{Nothing, Symbol} = nothing
     solver_backend::Union{Nothing, Symbol} = nothing
+    auto_pnjl_backend::Union{Nothing, Symbol} = nothing
+    semantic_mode::Union{Nothing, Symbol} = nothing
+    selector::Union{Nothing, Function} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
     progress_cb::Union{Nothing, Function} = nothing
@@ -42,6 +45,9 @@ Base.@kwdef struct TrhoScanConfig
     asym_s_target::Union{Nothing, Float64} = nothing
     thermo_backend::Union{Nothing, Symbol} = nothing
     solver_backend::Union{Nothing, Symbol} = nothing
+    auto_pnjl_backend::Union{Nothing, Symbol} = nothing
+    semantic_mode::Union{Nothing, Symbol} = nothing
+    selector::Union{Nothing, Function} = nothing
     model_kind::Union{Nothing, Symbol} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
@@ -65,6 +71,9 @@ function scan_kwargs(cfg::TmuScanConfig)::NamedTuple
         bootstrap_multiseed=cfg.bootstrap_multiseed,
         thermo_backend=cfg.thermo_backend,
         solver_backend=cfg.solver_backend,
+        auto_pnjl_backend=cfg.auto_pnjl_backend,
+        semantic_mode=cfg.semantic_mode,
+        selector=cfg.selector,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
         progress_cb=cfg.progress_cb,
@@ -88,6 +97,9 @@ function scan_kwargs(cfg::TrhoScanConfig)::NamedTuple
         asym_s_target=cfg.asym_s_target,
         thermo_backend=cfg.thermo_backend,
         solver_backend=cfg.solver_backend,
+        auto_pnjl_backend=cfg.auto_pnjl_backend,
+        semantic_mode=cfg.semantic_mode,
+        selector=cfg.selector,
         model_kind=cfg.model_kind,
         p_num=cfg.p_num,
         t_num=cfg.t_num,

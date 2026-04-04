@@ -37,4 +37,35 @@ const _TMS = Models.TmuScan
         @test isdefined(_TMS, :run_tmu_scan)
         @test _TMS.run_tmu_scan isa Function
     end
+
+    @testset "auto backend 语义路由配置" begin
+        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
+        @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
+        @test _TMS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
+
+    @testset "legacy backend removed from input validation" begin
+        @test_throws ArgumentError _TMS._validate_tmu_scan_inputs([150.0], [0.0], [0.0], :legacy, :PNJL)
+    end
+
+    @testset "semantic_mode 参数校验" begin
+        @test _TMS._validate_semantic_mode(:ground_state, nothing) === nothing
+        @test_throws ArgumentError _TMS._validate_semantic_mode(:constrained_manifold, nothing)
+        @test_throws ArgumentError _TMS._validate_semantic_mode(:ground_state, (_h, _q) -> :hadron)
+        @test_throws ArgumentError _TMS._validate_semantic_mode(:invalid_mode, nothing)
+    end
+
+    @testset "auto_pnjl_backend 参数校验" begin
+        @test _TMS._validate_auto_pnjl_backend(:models) === nothing
+        @test _TMS._validate_auto_pnjl_backend(:legacy) === nothing
+        @test_throws ArgumentError _TMS._validate_auto_pnjl_backend(:invalid_backend)
+    end
+
+    @testset "models 路径禁止 legacy solver 开关" begin
+        @test _TMS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; use_problem_spec=false))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; allow_legacy_path=true))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; warn_on_legacy_path=false))
+        @test_throws ArgumentError _TMS._reject_legacy_solver_kwargs((; problem_spec=:dummy))
+    end
 end

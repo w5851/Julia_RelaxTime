@@ -46,4 +46,34 @@ const _TS = Models.TrhoScan
         @test isdefined(_TS, :run_trho_scan)
         @test _TS.run_trho_scan isa Function
     end
+
+    @testset "auto backend 语义路由配置" begin
+        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
+        @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
+        @test _TS._effective_solver_backend(:auto, :RPNJL; auto_pnjl_backend=:legacy) == :models
+    end
+
+    @testset "legacy backend removed from input validation" begin
+        @test_throws ArgumentError _TS._validate_trho_scan_inputs([150.0], [0.2], [0.0], :candidates, :fixed_rho, :legacy, :PNJL)
+    end
+
+    @testset "semantic_mode 参数校验" begin
+        @test _TS._validate_semantic_mode(:ground_state) === nothing
+        @test _TS._validate_semantic_mode(:constrained_manifold) === nothing
+        @test_throws ArgumentError _TS._validate_semantic_mode(:invalid_mode)
+    end
+
+    @testset "auto_pnjl_backend 参数校验" begin
+        @test _TS._validate_auto_pnjl_backend(:models) === nothing
+        @test _TS._validate_auto_pnjl_backend(:legacy) === nothing
+        @test_throws ArgumentError _TS._validate_auto_pnjl_backend(:invalid_backend)
+    end
+
+    @testset "models 路径禁止 legacy solver 开关" begin
+        @test _TS._reject_legacy_solver_kwargs((; solver=:newton)) === nothing
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; use_problem_spec=false))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; allow_legacy_path=true))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; warn_on_legacy_path=false))
+        @test_throws ArgumentError _TS._reject_legacy_solver_kwargs((; problem_spec=:dummy))
+    end
 end

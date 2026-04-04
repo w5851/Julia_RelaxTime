@@ -98,3 +98,42 @@ end
     @test stats.total == 1
     @test stats.success == 1
 end
+
+@testset "TrhoScan smoke: semantic_mode passthrough" begin
+    tmp_dir = mktempdir()
+
+    output = joinpath(tmp_dir, "trho_scan_semantic_mode.csv")
+    stats = run_trho_scan(
+        T_values=[150.0],
+        rho_values=[0.2],
+        xi_values=[0.0],
+        output_path=output,
+        overwrite=true,
+        resume=false,
+        reverse_rho=false,
+        solver_backend=:models,
+        semantic_mode=:constrained_manifold,
+        p_num=12,
+        t_num=4,
+        iterations=80,
+    )
+
+    @test isfile(output)
+    @test stats.total == 1
+    @test stats.success == 1
+
+    @test_throws ArgumentError run_trho_scan(
+        T_values=[150.0],
+        rho_values=[0.2],
+        xi_values=[0.0],
+        output_path=joinpath(tmp_dir, "trho_scan_semantic_mode_invalid.csv"),
+        overwrite=true,
+        resume=false,
+        reverse_rho=false,
+        solver_backend=:models,
+        semantic_mode=:invalid_mode,
+        p_num=12,
+        t_num=4,
+        iterations=80,
+    )
+end

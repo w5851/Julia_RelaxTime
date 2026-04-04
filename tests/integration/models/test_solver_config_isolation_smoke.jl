@@ -7,11 +7,11 @@ if !isdefined(Main, :Models)
 end
 
 @testset "solver config isolation smoke" begin
-    @testset "implicit solver instances keep independent config" begin
+    @testset "pnjl implicit solver instances keep independent config" begin
         θ = [0.52, 0.16]
 
-        solver_a = Models.create_implicit_solver(xi=0.0, p_num=12, t_num=4)
-        solver_b = Models.create_implicit_solver(xi=0.35, p_num=24, t_num=8)
+        solver_a = Models.create_pnjl_implicit_solver(xi=0.0, p_num=12, t_num=4)
+        solver_b = Models.create_pnjl_implicit_solver(xi=0.35, p_num=24, t_num=8)
 
         x_a, _ = solver_a(θ)
         x_b, _ = solver_b(θ)

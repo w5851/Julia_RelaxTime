@@ -40,7 +40,7 @@ function main(args::Vector{String})
         xi=0.0,
         output_dir=tmp,
         profile=:regression,
-        solver_backend=:legacy,
+        solver_backend=:models,
         reverse_rho=true,
         seed_policy=:hybrid_continuity,
         p_num=8,

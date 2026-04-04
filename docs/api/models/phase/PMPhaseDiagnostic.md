@@ -13,7 +13,7 @@
 当前 v1 主要面向：
 
 - `xi=0.0`
-- `solver_backend=:legacy`
+- `solver_backend=:models`
 - `p_num=24`
 - `t_num=8`
 - CEP 邻域温区
@@ -36,7 +36,7 @@ result = Models.analyze_pm_branch_competition(
     T_values=[130.9],
     mu_grid=collect(290.9:0.1:291.1),
     xi=0.0,
-    solver_backend=:legacy,
+    solver_backend=:models,
     p_num=24,
     t_num=8,
     output_dir=outdir,

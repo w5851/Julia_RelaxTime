@@ -177,6 +177,91 @@ function select_pressure_max_candidate(candidates::AbstractVector, params=nothin
     )
 end
 
+function select_residual_min_candidate(candidates::AbstractVector, params=nothing, context=nothing)
+    isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+
+    candidate_seed_index(cand, fallback::Int) = if hasproperty(cand, :seed_index)
+        Int(getproperty(cand, :seed_index))
+    else
+        fallback
+    end
+
+    candidate_residual(cand) = begin
+        value = Float64(cand.residual_norm)
+        isfinite(value) ? value : Inf
+    end
+
+    candidate_pressure(cand) = begin
+        value = Float64(cand.pressure)
+        isfinite(value) ? value : -Inf
+    end
+
+    function better_candidate(cand, cand_idx::Int, best, best_idx::Int)
+        cand_ok = Bool(cand.hard_constraint_ok)
+        best_ok = Bool(best.hard_constraint_ok)
+        if cand_ok != best_ok
+            return cand_ok
+        end
+
+        cand_residual = candidate_residual(cand)
+        best_residual = candidate_residual(best)
+        if cand_residual != best_residual
+            return cand_residual < best_residual
+        end
+
+        cand_seed_index = candidate_seed_index(cand, cand_idx)
+        best_seed_index = candidate_seed_index(best, best_idx)
+        if cand_seed_index != best_seed_index
+            return cand_seed_index < best_seed_index
+        end
+
+        cand_pressure = candidate_pressure(cand)
+        best_pressure = candidate_pressure(best)
+        return cand_pressure > best_pressure
+    end
+
+    passed = Int[]
+    for i in eachindex(candidates)
+        if Bool(candidates[i].hard_constraint_ok)
+            push!(passed, i)
+        end
+    end
+
+    if !isempty(passed)
+        selected_idx = passed[1]
+        selected = candidates[selected_idx]
+        for i in passed[2:end]
+            cand = candidates[i]
+            if better_candidate(cand, i, selected, selected_idx)
+                selected_idx = i
+                selected = cand
+            end
+        end
+        return (
+            selected_index=selected_idx,
+            selected_candidate=selected,
+            selection_reason=:residual_min_under_constraints,
+            eligible_indices=passed,
+        )
+    end
+
+    selected_idx = 1
+    selected = candidates[selected_idx]
+    for i in eachindex(candidates)
+        cand = candidates[i]
+        if better_candidate(cand, i, selected, selected_idx)
+            selected_idx = i
+            selected = cand
+        end
+    end
+    return (
+        selected_index=selected_idx,
+        selected_candidate=selected,
+        selection_reason=:no_candidate_passed_constraints,
+        eligible_indices=Int[],
+    )
+end
+
 function _compute_fixedmu_candidate(
     model::AbstractQCDModel,
     T_fm::Real,
@@ -582,13 +667,7 @@ function _solve_constraint_fixedrho(
     end
 
     mu_seed = default_mu0_from_seed(seed_guess)
-    attempt_specs = Tuple{Float64, Symbol}[]
-    push!(attempt_specs, (Float64(mu0), nlsolve_method))
-    nlsolve_method !== :trust_region && push!(attempt_specs, (Float64(mu0), :trust_region))
-    push!(attempt_specs, (Float64(mu_seed), :trust_region))
-    for μ0 in (0.0, 0.2, 0.5, 0.8, 1.2, 1.6, 2.0)
-        push!(attempt_specs, (Float64(μ0), :trust_region))
-    end
+    attempt_specs = ((Float64(mu0), nlsolve_method),)
 
     best = nothing
     for (mu_init, method) in attempt_specs

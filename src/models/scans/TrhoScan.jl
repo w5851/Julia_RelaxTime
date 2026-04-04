@@ -37,7 +37,7 @@ using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, HybridContinu
 using ..SeedStrategies: get_seed, update!, reset!, extend_seed
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
-using ..ImplicitSolver: solve, SolverResult, solve_weighted_block_fallback
+import Main.Models: solve, SolverResult
 using ..ScanCommon
 using ..ScanConfig: TrhoScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
@@ -135,8 +135,8 @@ end
         throw(ArgumentError("seed_policy must be :hybrid_continuity or :candidates, got $(seed_policy)"))
     (constraint_mode === :fixed_rho || constraint_mode === :fixed_asymmetric_rho) ||
         throw(ArgumentError("constraint_mode must be :fixed_rho or :fixed_asymmetric_rho, got $(constraint_mode)"))
-    (solver_backend === :legacy || solver_backend === :models || solver_backend === :auto) ||
-        throw(ArgumentError("solver_backend must be :legacy, :models or :auto, got $(solver_backend)"))
+    (solver_backend === :models || solver_backend === :auto) ||
+        throw(ArgumentError("solver_backend must be :models or :auto (legacy backend removed), got $(solver_backend)"))
 
     if model_kind in ScanCommon.PARAMETERIZED_MODEL_KIND_ALIASES
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
@@ -145,17 +145,29 @@ end
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 
-    if solver_backend === :legacy && model_kind !== :PNJL
-        throw(ArgumentError("legacy solver_backend only supports model_kind = :PNJL, got $(model_kind)"))
-    end
     return nothing
 end
 
-@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol)::Symbol
+@inline function _validate_semantic_mode(semantic_mode::Symbol)
+    (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
+        throw(ArgumentError("semantic_mode must be :ground_state or :constrained_manifold, got $(semantic_mode)"))
+    return nothing
+end
+
+@inline function _validate_auto_pnjl_backend(auto_pnjl_backend::Symbol)
+    (auto_pnjl_backend === :models || auto_pnjl_backend === :legacy) ||
+        throw(ArgumentError("auto_pnjl_backend must be :models or :legacy, got $(auto_pnjl_backend)"))
+    return nothing
+end
+
+@inline function _effective_solver_backend(solver_backend::Symbol, model_kind::Symbol; auto_pnjl_backend::Symbol=:models)::Symbol
     if solver_backend !== :auto
         return solver_backend
     end
-    return model_kind === :PNJL ? :legacy : :models
+    if model_kind === :PNJL
+        return auto_pnjl_backend
+    end
+    return :models
 end
 
 # ============================================================================
@@ -207,6 +219,9 @@ function run_trho_scan(;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
@@ -214,6 +229,8 @@ function run_trho_scan(;
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
+    _validate_semantic_mode(semantic_mode)
+    _validate_auto_pnjl_backend(auto_pnjl_backend)
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -265,6 +282,9 @@ function run_trho_scan(;
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
+                    auto_pnjl_backend=auto_pnjl_backend,
+                    semantic_mode=semantic_mode,
+                    selector=selector,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
             else
@@ -275,6 +295,9 @@ function run_trho_scan(;
                     asym_ud_ratio_target=asym_ud_ratio_target,
                     asym_s_target=asym_s_target,
                     solver_backend=solver_backend,
+                    auto_pnjl_backend=auto_pnjl_backend,
+                    semantic_mode=semantic_mode,
+                    selector=selector,
                     model_kind=model_kind,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
 
@@ -384,6 +407,9 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -394,6 +420,9 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -404,6 +433,9 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -422,12 +454,15 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
 
-    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
+    effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
 
     mode = if constraint_mode === :fixed_rho
         FixedRho(rho)
@@ -444,6 +479,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
                 xi=xi,
                 model_kind=model_kind,
                 seed_strategy=strategy,
+                semantic_mode=semantic_mode,
+                selector=selector,
                 p_num=p_num,
                 t_num=t_num,
                 nlsolve_kwargs...)
@@ -487,6 +524,9 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -509,7 +549,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             get_seed(strategy, [T_fm], mode)
         end
 
-        wb_result = solve_weighted_block_fallback(mode, T_fm;
+        wb_result = Main.Models._solve_weighted_block_fallback(mode, T_fm;
             initial_seed=initial_seed,
             max_seed_candidates=hybrid_weighted_max_seed_candidates,
             xi=xi,
@@ -543,14 +583,17 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
     nlsolve_kwargs...)
     try
-        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind)
-        (effective_solver_backend === :legacy || effective_solver_backend === :models) ||
-            error("unknown solver_backend=$solver_backend (expected :legacy, :models or :auto)")
+        effective_solver_backend = _effective_solver_backend(solver_backend, model_kind; auto_pnjl_backend=auto_pnjl_backend)
+        effective_solver_backend === :models ||
+            throw(ArgumentError("solver_backend=:legacy has been removed from TrhoScan models path; use :models or :auto"))
 
         mode = if constraint_mode === :fixed_rho
             FixedRho(rho_target)
@@ -572,32 +615,15 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         # 创建自定义策略，直接返回指定种子
         strategy = ScanCommon.FixedSeedStrategy(seed_8)
 
-        result = if effective_solver_backend === :models
-            _solve_with_models(mode, T_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...)
-        elseif mode isa FixedAsymmetricRho
-            solve(mode, T_fm;
-                xi=xi,
-                model_kind=model_kind,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        else
-            solve(mode, T_fm;
-                xi=xi,
-                seed_strategy=strategy,
-                p_num=p_num,
-                t_num=t_num,
-                nlsolve_kwargs...
-            )
-        end
+        result = _solve_with_models(mode, T_fm;
+            xi=xi,
+            model_kind=model_kind,
+            seed_strategy=strategy,
+            semantic_mode=semantic_mode,
+            selector=selector,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...)
 
         result = finalize_solver_result(result, T_fm, xi;
             solver_backend=effective_solver_backend,
@@ -620,6 +646,9 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     asym_ud_ratio_target::Float64=0.876,
     asym_s_target::Float64=0.0,
     solver_backend::Symbol=:auto,
+    auto_pnjl_backend::Symbol=:models,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
     p_num,
     t_num,
@@ -632,6 +661,9 @@ function _refine_result(T_fm, ρ_fm, xi, result;
             asym_ud_ratio_target=asym_ud_ratio_target,
             asym_s_target=asym_s_target,
             solver_backend=solver_backend,
+            auto_pnjl_backend=auto_pnjl_backend,
+            semantic_mode=semantic_mode,
+            selector=selector,
             model_kind=model_kind,
             p_num=p_num,
             t_num=t_num,
@@ -673,26 +705,59 @@ function _to_solver_result(mode::ConstraintMode, result, xi::Real)
     )
 end
 
+@inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    legacy_switches = (:use_problem_spec, :allow_legacy_path, :warn_on_legacy_path)
+    for key in keys(nlsolve_kwargs)
+        if key in legacy_switches || key === :problem_spec
+            throw(ArgumentError("legacy solver switch '$key' is not allowed from TrhoScan models path"))
+        end
+    end
+    return nothing
+end
+
 function _solve_with_models(mode::ConstraintMode, T_fm;
     xi::Real,
     model_kind::Symbol,
     seed_strategy::SeedStrategy,
+    semantic_mode::Symbol=:ground_state,
+    selector::Union{Nothing, Function}=nothing,
     p_num::Int,
     t_num::Int,
     nlsolve_kwargs...)
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
-    raw = Main.Models.solve_constraint(
-        model,
-        mapped_mode,
-        T_fm;
-        seed_guess=seed_guess,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        nlsolve_kwargs...,
-    )
+    _reject_legacy_solver_kwargs(nlsolve_kwargs)
+    use_problem_spec_chain = (semantic_mode !== :ground_state) || (selector !== nothing)
+    raw = if use_problem_spec_chain
+        problem_spec = Main.Models.build_problem_spec(mapped_mode)
+        Main.Models.solve_constraint(
+            model,
+            mapped_mode,
+            T_fm;
+            problem_spec=problem_spec,
+            semantic_mode=semantic_mode,
+            selector=selector,
+            seed_guess=seed_guess,
+            seed_candidates=(seed_guess,),
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        )
+    else
+        Main.Models.solve_constraint(
+            model,
+            mapped_mode,
+            T_fm;
+            seed_guess=seed_guess,
+            seed_candidates=(seed_guess,),
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            nlsolve_kwargs...,
+        )
+    end
     return _to_solver_result(mode, raw, xi)
 end
 

@@ -371,30 +371,16 @@ function run_scan(opts::Options)
                 residual_norm = missing
 
                 try
-                    base = try
-                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
-                            T_fm,
-                            muq_fm;
-                            xi=opts.xi,
-                            solver_backend=:models,
-                            p_num=opts.p_num,
-                            t_num=opts.t_num,
-                            seed_state=seed_state === nothing ? HADRON_SEED_5 : seed_state,
-                            models_residual_norm_max=1e-4,
-                        )
-                    catch err
-                        @warn "models equilibrium solver failed, fallback to legacy" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=err
-                        TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
-                            T_fm,
-                            muq_fm;
-                            xi=opts.xi,
-                            solver_backend=:legacy,
-                            p_num=opts.p_num,
-                            t_num=opts.t_num,
-                            seed_state=nothing,
-                            solver_kwargs=(iterations=opts.max_iter,),
-                        )
-                    end
+                    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+                        T_fm,
+                        muq_fm;
+                        xi=opts.xi,
+                        solver_backend=:models,
+                        p_num=opts.p_num,
+                        t_num=opts.t_num,
+                        seed_state=seed_state === nothing ? HADRON_SEED_5 : seed_state,
+                        models_residual_norm_max=1e-4,
+                    )
 
                     Φ, Φbar = Float64(base.x_state[4]), Float64(base.x_state[5])
                     masses = (u=Float64(base.masses[1]), d=Float64(base.masses[2]), s=Float64(base.masses[3]))

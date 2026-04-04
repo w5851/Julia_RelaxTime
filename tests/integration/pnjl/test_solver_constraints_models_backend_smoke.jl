@@ -133,7 +133,7 @@ const ħc = 197.327  # MeV·fm
     end
 
     @testset "Implicit solver (models backend)" begin
-        solver = P.create_implicit_solver(p_num=p_num, t_num=t_num)
+        solver = P.create_pnjl_implicit_solver(p_num=p_num, t_num=t_num)
         θ = [T_fm, μ_fm]
         x, _ = solver(θ)
         @test length(x) == 5

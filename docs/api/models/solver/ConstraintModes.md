@@ -59,6 +59,29 @@
 
 这类接口多数更偏维护者或算法开发者，但必须在主题中说明清楚，因为它们定义了 `solve` 系列入口背后的问题形式。
 
+## `ProblemSpec` 与组件化约束主链（R1）
+
+在 R1 迭代中，`FixedRho` 已支持通过 `ProblemSpec` 进入主链：
+
+- `build_problem_spec(mode)` 提供 mode 对应的默认求解契约
+- `solve_constraint(...; problem_spec=spec)` 可显式指定契约
+- `FixedRho` 的 `ProblemSpec.forward_solve` 已使用统一候选治理规则
+
+当前默认行为：
+
+- `solve_constraint` 对 `FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 默认走 `ProblemSpec` 主链
+- `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` 兼容参数已移除；调用时传入会抛 `ArgumentError`
+- `problem_spec` 仍作为可选覆盖项（`ProblemSpec` 或 `nothing`），用于显式契约注入
+
+配套组件层通过 `build_constraint_components(mode)` 暴露 mode 到约束职责的映射，用于固定“语义同构”口径。当前核心组件语义包括：
+
+- `StationarityComponent`
+- `EqualMuComponent`
+- `FixedBaryonDensityComponent`
+- `AsymmetricDensityComponent`
+- `FixedEntropyComponent`
+- `FixedSigmaComponent`
+
 ## 为什么这部分不应继续只放在旧 `pnjl` 页面
 
 约束模式本质上已经是 `Models` 的公共合同，而不只是 legacy PNJL 的内部文档主题。继续把它们主要留在旧页，会让新用户误以为 `Models` 只有流程 façade，没有自己的求解合同。

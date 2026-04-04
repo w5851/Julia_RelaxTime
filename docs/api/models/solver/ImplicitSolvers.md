@@ -9,7 +9,6 @@
 - `create_implicit_gap_solver`
 - `create_flavor_mu_implicit_gap_solver`
 - `create_pnjl_implicit_solver`
-- `create_implicit_solver`
 - `solve_with_derivatives`
 - `solve_pnjl_with_derivatives`
 - `solve_pnjl_with_flavor_mu_derivatives`
@@ -44,17 +43,6 @@
 - `x = [φu, φd, φs, Φ, Φbar]`
 
 如果你的目标就是 PNJL 平衡态对 `T`、`μ` 的导数，这个入口通常比手工组装更合适。
-
-## `create_implicit_solver`
-
-`create_implicit_solver` 是更直接的通用包装入口。它围绕内部 `forward_solve_mu` 与 `conditions_mu` 创建 `ImplicitFunction`，默认服务对称化学势参数 `θ=[T, μ]` 的导数链路。
-
-它与 `create_pnjl_implicit_solver` 的关系可以理解为：
-
-- `create_pnjl_implicit_solver`：从模型/PNJL 主题视角暴露更显式的工厂
-- `create_implicit_solver`：从隐式 AD 工具视角暴露更直接的通用入口
-
-如果你只需要“快速拿到可微的隐函数求解器对象”，而不关心更细的 flavor 版本区分，`create_implicit_solver` 会更直接。
 
 ## `create_flavor_mu_implicit_gap_solver`
 

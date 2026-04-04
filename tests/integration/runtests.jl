@@ -51,9 +51,14 @@ const INTEGRATION_SMOKE_FILES = [
     joinpath(INTEGRATION_DIR, "models", "test_rpnjl_model_factory_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_phase_cli_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_solver_backend_semantic_parity_guard.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_problem_spec_fixedrho_forwardsolve_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_problem_spec_other_modes_forwardsolve_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_auto_backend_models_routing_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_solver_auto_backend_semantic_parity.jl"),
 
     # PNJL scans
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "pnjl", "test_trho_scan_semantic_modes_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_conserved_charge_susceptibilities_smoke.jl"),
     joinpath(INTEGRATION_DIR, "pnjl", "test_solver_random_physical_smoke.jl"),
 
