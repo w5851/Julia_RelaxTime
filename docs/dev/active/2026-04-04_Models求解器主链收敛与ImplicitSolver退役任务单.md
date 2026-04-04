@@ -339,3 +339,18 @@ Files:
   4) 下一步建议：
      - 为 `FixedRho/FixedEntropy/FixedSigma` 建立“默认语义等价桥接”后，再替换默认路径；
      - 最后再处理 `FixedAsymmetricRho` 默认路径与 weighted-fallback 协同。
+
+- 2026-04-05：B3 默认路径收口（solve_multi 尾转发移除）
+  1) 已完成：
+     - `Solver.jl` 中 non-FixedMu `solve_multi` 保护性尾路径已移除，不再调用 `ImplicitSolver.solve_multi(mode, T_fm; ...)`；
+     - 该分支改为显式 `ArgumentError("unsupported mode for solve_multi bridge: ...")`，避免静默回落与语义漂移。
+  2) 当前 direct forwarding 余量：
+     - `ImplicitSolver.solve(mode, T_fm; ...)`（默认 non-FixedMu `solve` 路径，保守保留）。
+  3) 验证通过：
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`
+     - `julia --project=. -e 'include("tests/unit/pnjl/test_solver_implicit.jl")'`
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`
+     - `julia --project=. -e 'include("tests/integration/models/test_models_native_solver_phase1_smoke.jl")'`
+  4) 下一步建议（保持低风险顺序）：
+     - 为 `FixedEntropy/FixedSigma` 先补“默认语义等价桥接”的最小验证集（点位+多 seed 选择一致性）；
+     - 再尝试替换 `solve` 默认 non-FixedMu 对 `ImplicitSolver.solve` 的最后一处转发。

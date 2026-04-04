@@ -504,10 +504,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         return selector_fn(converged)
     end
 
-    forwarded = _strip_forward_kwargs(kwargs, (:seed_guess, :seed_candidates, :semantic_mode, :selector))
-    raw = ImplicitSolver.solve_multi(mode, T_fm; forwarded...)
-    xi = get(kwargs, :xi, getproperty(raw, :xi))
-    return _coerce_solver_result(mode, raw; xi_override=xi)
+    throw(ArgumentError("unsupported mode for solve_multi bridge: $(typeof(mode))"))
 end
 
 function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
