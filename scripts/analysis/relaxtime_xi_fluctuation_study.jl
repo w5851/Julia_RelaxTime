@@ -104,32 +104,17 @@ function integration_grids(cfg::Config)
 end
 
 function solve_equilibrium_with_fallback(T_fm::Float64, muq_fm::Float64, xi::Float64)
-    try
-        base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
-            T_fm,
-            muq_fm;
-            xi=xi,
-            solver_backend=:models,
-            p_num=12,
-            t_num=6,
-            seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
-            models_residual_norm_max=1e-4,
-        )
-        return (base, :models)
-    catch err
-        @warn "models equilibrium solver failed, fallback to legacy" xi=xi err=err
-        base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
-            T_fm,
-            muq_fm;
-            xi=xi,
-            solver_backend=:legacy,
-            p_num=12,
-            t_num=6,
-            seed_state=nothing,
-            solver_kwargs=(iterations=40,),
-        )
-        return (base, :legacy)
-    end
+    base = TransportWorkflow.EquilibriumFacade.solve_equilibrium_backend(
+        T_fm,
+        muq_fm;
+        xi=xi,
+        solver_backend=:models,
+        p_num=12,
+        t_num=6,
+        seed_state=TransportWorkflow.PNJL.HADRON_SEED_5,
+        models_residual_norm_max=1e-4,
+    )
+    return (base, :models)
 end
 
 function solve_tau_result(T_mev::Float64, muB_mev::Float64, xi::Float64, cfg::Config)

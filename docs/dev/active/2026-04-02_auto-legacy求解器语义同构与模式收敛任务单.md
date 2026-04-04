@@ -457,3 +457,8 @@
 - [x] 2026-04-03：继续推进 W4 深化（models 单测遗留口径清理，PR #50）。
   - `test_pm_phase_diagnostic.jl` 中 Maxwell 参考 wiring 数据夹具的 `solver_backend` 字段及同文件相关调用参数由 `:legacy` 统一改为 `:models`，避免语义冻结后测试数据仍反映旧后端。
   - 验证通过：`tests/unit/models/test_pm_phase_diagnostic.jl`。
+- [x] 2026-04-03：继续推进 W4 深化（scripts 层首批清理，PR #50）。
+  - `scripts/pnjl/diagnose_pm_phase.jl` 默认 backend 改为 `:models`，并在参数解析阶段显式拒绝非 models 取值，帮助脚本行为与 PM 诊断主链路冻结语义一致。
+  - `scripts/dev/export_phase_pipeline_regression_baseline.jl` 将 phase pipeline baseline 导出默认 backend 切换为 `:models`。
+  - `scripts/analysis/relaxtime_xi_fluctuation_study.jl` 移除 equilibrium 的 legacy fallback 路径，统一使用 models backend。
+  - 验证通过：`tests/integration/models/test_pm_phase_diagnostic_smoke.jl`（覆盖 diagnose_pm_phase CLI 路径），以及 `scripts/dev/export_phase_pipeline_regression_baseline.jl --help`。
