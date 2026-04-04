@@ -301,3 +301,10 @@ Files:
   5) 验证通过：
      - unit：`pnjl/test_solver_implicit.jl,models/test_solver_dimension_agnostic.jl,models/test_constraint_solver.jl`（161/161）；
      - integration：`test_models_native_solver_phase1_smoke.jl`（11/11），`test_solver_constraints_models_backend_smoke.jl`（43/43）。
+- 2026-04-04：B3 探索结论（本轮）
+  1) 目标：清理 `solve/solve_multi` 对 `ImplicitSolver` 的剩余转发（非 FixedMu 模式）。
+  2) 结果：对 `FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 迁移到 models 主链后，`test_solver_constraints_models_backend_smoke.jl` 出现系统性回归（收敛状态与约束量显著偏移）。
+  3) 处理：已回滚该段迁移，恢复上述模式继续走 `ImplicitSolver` 路径，确保门禁稳定；仅保留 B1/B2 已验证稳定改动。
+  4) 当前可执行下一步建议：
+     - 先做“语义桥接层”拆分（为 non-FixedMu 模式补齐与 `ImplicitSolver.solve` 一致的参数语义），再逐模式迁移；
+     - 避免直接把 `solve_constraint` 默认语义替换到 `solve` 旧入口。
