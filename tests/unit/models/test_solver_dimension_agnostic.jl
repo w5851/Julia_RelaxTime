@@ -22,9 +22,10 @@ const P = Models.pnjl_module()
         @test isdefined(Models, :solve_constraint)
         @test :create_implicit_solver ∉ names(Models)
         @test :solve_with_root_diagnostics ∉ names(Models)
-        @test :solve_weighted_block_fallback ∉ names(Models)
+        @test :solve_weighted_block_fallback in names(Models)
         @test !isdefined(Models.ImplicitSolver, :create_implicit_solver)
         @test !isdefined(Models.ImplicitSolver, :solve_with_root_diagnostics)
+        @test :solve_with_derivatives ∉ names(Models.ImplicitSolver)
     end
 
     @testset "SolverResult accepts non-5/3 state and mu" begin
@@ -61,6 +62,29 @@ const P = Models.pnjl_module()
         schema_driven = P.build_conditions(mode, params, schema; mu_dim=3)
 
         @test schema_driven(θ, x) ≈ legacy(θ, x) rtol=1e-12 atol=1e-12
+    end
+
+    @testset "mode dimension contract" begin
+        modes = (
+            Models.FixedMu(),
+            Models.FixedRho(0.2),
+            Models.FixedAsymmetricRho(0.2, 1.0, 0.0),
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(8.0),
+        )
+
+        for mode in modes
+            @test Models.solution_dim(mode) == Models.state_var_dim(mode) + Models.mu_var_dim(mode)
+            @test Models.state_dim(mode) == Models.solution_dim(mode)
+            @test Models.state_var_dim(mode) > 0
+            @test Models.mu_var_dim(mode) >= 0
+        end
+
+        @test Models.state_var_dim(Models.FixedMu()) == 5
+        @test Models.mu_var_dim(Models.FixedMu()) == 0
+
+        @test Models.state_var_dim(Models.FixedRho(0.2)) == 5
+        @test Models.mu_var_dim(Models.FixedRho(0.2)) == 3
     end
 
     @testset "solver backend defaults are model-agnostic" begin

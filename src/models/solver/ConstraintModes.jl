@@ -56,6 +56,20 @@ state_dim(::FixedAsymmetricRho) = 8
 state_dim(::FixedEntropy) = 8
 state_dim(::FixedSigma) = 8
 
+state_var_dim(::FixedMu) = 5
+state_var_dim(::FixedRho) = 5
+state_var_dim(::FixedAsymmetricRho) = 5
+state_var_dim(::FixedEntropy) = 5
+state_var_dim(::FixedSigma) = 5
+
+mu_var_dim(::FixedMu) = 0
+mu_var_dim(::FixedRho) = 3
+mu_var_dim(::FixedAsymmetricRho) = 3
+mu_var_dim(::FixedEntropy) = 3
+mu_var_dim(::FixedSigma) = 3
+
+solution_dim(mode::ConstraintMode) = state_var_dim(mode) + mu_var_dim(mode)
+
 param_dim(::FixedMu) = 2
 param_dim(::FixedRho) = 1
 param_dim(::FixedAsymmetricRho) = 1

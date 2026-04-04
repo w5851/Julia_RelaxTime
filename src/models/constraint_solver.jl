@@ -14,6 +14,48 @@ const rho0 = ρ0_inv_fm3
 
 const HardConstraintRule = Function
 
+@inline function _pack_solution(x_state::AbstractVector, mu_vec::AbstractVector)
+    return vcat(Float64.(x_state), Float64.(mu_vec))
+end
+
+@inline _to_state_svec(st) = SVector{5}(Tuple(state_vector(st)))
+@inline _to_mu_svec(mu_vec) = SVector{3}(Tuple(mu_vec))
+@inline _to_chiral_triplet(x_state) = SVector{3}(x_state[1], x_state[2], x_state[3])
+@inline _mass_from_state(model::AbstractQCDModel, x_state) = calculate_mass_vec(model, _to_chiral_triplet(x_state))
+
+@inline function _unpack_solution(solution::AbstractVector; state_n::Int=5, mu_n::Int=3)
+    return _unpack_solution(solution, Val(state_n), Val(mu_n))
+end
+
+@inline function _unpack_solution(solution::AbstractVector, ::Val{STATE_N}, ::Val{MU_N}) where {STATE_N, MU_N}
+    expected = STATE_N + MU_N
+    length(solution) == expected || throw(ArgumentError("solution length mismatch: expected $expected, got $(length(solution))"))
+    x_state = SVector{STATE_N}(Tuple(solution[1:STATE_N]))
+    mu_vec = SVector{MU_N}(Tuple(solution[(STATE_N + 1):expected]))
+    return x_state, mu_vec
+end
+
+@inline function _empty_candidate(; state_n::Int=5, mu_n::Int=3, residual_norm_max::Real)
+    solution_n = state_n + mu_n
+    return (
+        solution=fill(NaN, solution_n),
+        x_state=SVector{state_n}(fill(NaN, state_n)),
+        mu_vec=SVector{mu_n}(fill(NaN, mu_n)),
+        omega=NaN,
+        pressure=-Inf,
+        rho_norm=NaN,
+        entropy=NaN,
+        energy=NaN,
+        masses=SVector{3}(fill(NaN, 3)),
+        iterations=0,
+        residual_norm=Inf,
+        residual_norm_max=Float64(residual_norm_max),
+        hard_constraint_ok=false,
+        failed_constraints=Symbol[:solver_failed],
+        converged=false,
+    )
+end
+
 @inline function default_mu0_from_seed(seed)::Float64
     if length(seed) >= 8
         return mean(Float64.(seed[6:8]))
@@ -272,7 +314,7 @@ function _compute_fixedmu_candidate(
     p_num::Int,
     t_num::Int,
 )
-    x_state = SVector{5}(Tuple(state_vector(st)))
+    x_state = _to_state_svec(st)
     mu_vec = normalize_mu_vec(μ_fm)
 
     pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
@@ -283,7 +325,7 @@ function _compute_fixedmu_candidate(
     entropy = ForwardDiff.derivative(pressure_T, T_fm)
     energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
     omega_val = -pressure
-    masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+    masses = _mass_from_state(model, x_state)
 
     residual_vec = gap_residual(model, st, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
     residual_norm = sqrt(sum(abs2, residual_vec))
@@ -440,21 +482,8 @@ function _solve_constraint_fixedmu(
             ok, failed = evaluate_hard_constraints(raw, rules)
             push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
         catch
-            raw = (
-                solution=Float64[],
-                x_state=SVector{5}(fill(NaN, 5)),
-                mu_vec=SVector{3}(fill(NaN, 3)),
-                omega=NaN,
-                pressure=-Inf,
-                rho_norm=NaN,
-                entropy=NaN,
-                energy=NaN,
-                masses=SVector{3}(fill(NaN, 3)),
-                iterations=0,
-                residual_norm=Inf,
-                residual_norm_max=Float64(residual_norm_max),
-            )
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], converged=false, seed_index=Int(seed_index)))
+            raw = _empty_candidate(; state_n=5, mu_n=3, residual_norm_max=residual_norm_max)
+            push!(candidates, (; raw..., seed_index=Int(seed_index)))
         end
     end
     selected = select_pressure_max_candidate(candidates)
@@ -529,7 +558,7 @@ function _solve_constraint_fixedrho(
             return nothing
         end
 
-        x_state = SVector{5}(Tuple(state_vector(st)))
+        x_state = _to_state_svec(st)
         pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
 
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
@@ -540,11 +569,11 @@ function _solve_constraint_fixedrho(
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
 
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        masses = _mass_from_state(model, x_state)
 
         st_ref[] = st
         x_state_ref[] = x_state
-        mu_vec_ref[] = SVector{3}(Tuple(μ_vec))
+        mu_vec_ref[] = _to_mu_svec(μ_vec)
         pressure_ref[] = pressure
         rho_norm_ref[] = rho_norm
         entropy_ref[] = entropy
@@ -592,10 +621,7 @@ function _solve_constraint_fixedrho(
         return (
             mode=method,
             converged=converged,
-            solution=Float64[
-                x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
-                mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
-            ],
+            solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
             x_state=x_state_ref[],
             mu_vec=mu_vec_ref[],
             omega=omega_val,
@@ -626,7 +652,7 @@ function _solve_constraint_fixedrho(
         )
         st === nothing && return nothing
 
-        x_state = SVector{5}(Tuple(state_vector(st)))
+        x_state = _to_state_svec(st)
         pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
         rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
@@ -634,9 +660,9 @@ function _solve_constraint_fixedrho(
         pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        masses = _mass_from_state(model, x_state)
 
-        gap_vec = gap_residual(model, st, T_fm, SVector{3}(Tuple(μ_vec)); xi=xi, p_num=p_num, t_num=t_num)
+        gap_vec = gap_residual(model, st, T_fm, _to_mu_svec(μ_vec); xi=xi, p_num=p_num, t_num=t_num)
         gap_norm = sqrt(sum(abs2, gap_vec))
         rho_residual = abs(rho_norm - rho_target)
         residual_norm = max(gap_norm, rho_residual)
@@ -649,12 +675,9 @@ function _solve_constraint_fixedrho(
         return (
             mode=:direct_mu,
             converged=converged,
-            solution=Float64[
-                x_state[1], x_state[2], x_state[3], x_state[4], x_state[5],
-                μ_vec[1], μ_vec[2], μ_vec[3],
-            ],
+            solution=_pack_solution(x_state, μ_vec),
             x_state=x_state,
-            mu_vec=SVector{3}(Tuple(μ_vec)),
+            mu_vec=_to_mu_svec(μ_vec),
             omega=omega_val,
             pressure=pressure,
             rho_norm=rho_norm,
@@ -870,7 +893,7 @@ function _solve_constraint_fixedentropy(
             return nothing
         end
 
-        x_state = SVector{5}(Tuple(state_vector(st)))
+        x_state = _to_state_svec(st)
         pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
 
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
@@ -881,7 +904,7 @@ function _solve_constraint_fixedentropy(
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
 
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        masses = _mass_from_state(model, x_state)
 
         if mass_positive_constraint && any(m -> !isfinite(m) || m <= 0.0, masses)
             _constraint_failure!(F)
@@ -890,7 +913,7 @@ function _solve_constraint_fixedentropy(
 
         st_ref[] = st
         x_state_ref[] = x_state
-        mu_vec_ref[] = SVector{3}(Tuple(μ_vec))
+        mu_vec_ref[] = _to_mu_svec(μ_vec)
         pressure_ref[] = pressure
         rho_norm_ref[] = rho_norm
         entropy_ref[] = entropy
@@ -938,10 +961,7 @@ function _solve_constraint_fixedentropy(
 
     return (
         converged=converged,
-        solution=Float64[
-            x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
-            mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
-        ],
+        solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
         x_state=x_state_ref[],
         mu_vec=mu_vec_ref[],
         omega=omega_val,
@@ -1003,7 +1023,7 @@ function _solve_constraint_fixedsigma(
             return nothing
         end
 
-        x_state = SVector{5}(Tuple(state_vector(st)))
+        x_state = _to_state_svec(st)
         pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
 
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
@@ -1014,11 +1034,11 @@ function _solve_constraint_fixedsigma(
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
 
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        masses = _mass_from_state(model, x_state)
 
         st_ref[] = st
         x_state_ref[] = x_state
-        mu_vec_ref[] = SVector{3}(Tuple(μ_vec))
+        mu_vec_ref[] = _to_mu_svec(μ_vec)
         pressure_ref[] = pressure
         rho_norm_ref[] = rho_norm
         entropy_ref[] = entropy
@@ -1064,10 +1084,7 @@ function _solve_constraint_fixedsigma(
 
     return (
         converged=converged,
-        solution=Float64[
-            x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
-            mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
-        ],
+        solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
         x_state=x_state_ref[],
         mu_vec=mu_vec_ref[],
         omega=omega_val,
@@ -1132,7 +1149,7 @@ function _solve_constraint_fixedasymrho(
             return nothing
         end
 
-        x_state = SVector{5}(Tuple(state_vector(st)))
+        x_state = _to_state_svec(st)
         pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
 
         pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
@@ -1143,7 +1160,7 @@ function _solve_constraint_fixedasymrho(
         entropy = ForwardDiff.derivative(pressure_T, T_fm)
 
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        masses = _mass_from_state(model, x_state)
 
         rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
         nB = sum(rho_vec) / (3.0 * rho0)
@@ -1161,7 +1178,7 @@ function _solve_constraint_fixedasymrho(
         entropy_ref[] = entropy
         energy_ref[] = energy
         masses_ref[] = masses
-        rho_vec_ref[] = SVector{3}(Tuple(rho_vec))
+        rho_vec_ref[] = _to_mu_svec(rho_vec)
 
         F[1] = convert(eltype(F), nB - rho_target)
         F[2] = convert(eltype(F), ud_ratio - ud_ratio_target)
@@ -1206,10 +1223,7 @@ function _solve_constraint_fixedasymrho(
 
     return (
         converged=converged,
-        solution=Float64[
-            x_state_ref[][1], x_state_ref[][2], x_state_ref[][3], x_state_ref[][4], x_state_ref[][5],
-            mu_vec_ref[][1], mu_vec_ref[][2], mu_vec_ref[][3],
-        ],
+        solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
         x_state=x_state_ref[],
         mu_vec=mu_vec_ref[],
         omega=omega_val,

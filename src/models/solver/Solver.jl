@@ -95,11 +95,10 @@ end
 
 @inline is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; kwargs...) =
     ImplicitSolver.default_is_physical_solution(x_state, masses; kwargs...)
-@inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) = ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)
-@inline _solve_weighted_block_fallback(mode::FixedAsymmetricRho, T_fm::Real; kwargs...) =
-    ImplicitSolver.solve_weighted_block_fallback(mode, T_fm; kwargs...)
+@inline solve_with_derivatives(T_fm::Real, μ_fm::Real; kwargs...) =
+    solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...)
 
 @inline function solve_with_derivatives(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     _ = model, mode
-    return ImplicitSolver.solve_with_derivatives(T_fm, μ_fm; kwargs...)
+    return solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...)
 end

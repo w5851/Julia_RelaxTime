@@ -43,7 +43,6 @@ const ρ0 = ρ0_inv_fm3
 export solve, SolverResult
 export solve_weighted_block_fallback
 export default_is_physical_solution
-export solve_with_derivatives
 
 @inline function _get_model(model_kind::Symbol)
     if model_kind === :PNJL || model_kind === :RPNJL
@@ -1065,41 +1064,6 @@ end
 function conditions_mu(θ::AbstractVector, x::AbstractVector, z)
     config = IMPLICIT_CONFIG[]
     return _conditions_mu_with_config(θ, x, z, config)
-end
-
-"""
-    solve_with_derivatives(T_fm, μ_fm; order=1, kwargs...) -> NamedTuple
-
-求解并计算解对参数的导数。
-
-# 参数
-- `T_fm`: 温度 (fm⁻¹)
-- `μ_fm`: 化学势 (fm⁻¹)
-- `order`: 导数阶数（1 或 2）
-
-# 返回
-NamedTuple 包含：
-- `x`: 解向量
-- `dx_dT`: ∂x/∂T
-- `dx_dμ`: ∂x/∂μ
-- `d2x_dT2`, `d2x_dμ2`, `d2x_dTdμ`（order=2 时）
-"""
-function solve_with_derivatives(T_fm::Real, μ_fm::Real;
-                                order::Int=1,
-                                xi::Real=0.0,
-                                model_kind::Symbol=:PNJL,
-                                p_num::Int=DEFAULT_MOMENTUM_COUNT,
-                                t_num::Int=DEFAULT_THETA_COUNT)
-    return Main.Models.solve_pnjl_with_derivatives(
-        T_fm,
-        μ_fm;
-        order=order,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        thermo_backend=:models,
-        solver_backend=:models,
-    )
 end
 
 end # module ImplicitSolver

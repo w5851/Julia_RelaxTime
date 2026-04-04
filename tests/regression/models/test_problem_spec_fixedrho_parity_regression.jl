@@ -44,11 +44,33 @@ to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
             residual_norm_max=1e-6,
         )
 
+        via_spec_joint = Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            problem_spec=spec,
+            fixedrho_joint_solve=true,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+
         @test direct.converged == via_spec.converged
         @test isapprox(direct.rho_norm, via_spec.rho_norm; rtol=1e-6, atol=1e-8)
         @test isapprox(direct.pressure, via_spec.pressure; rtol=1e-6, atol=1e-8)
         @test isapprox(direct.entropy, via_spec.entropy; rtol=1e-6, atol=1e-8)
         @test isapprox(direct.energy, via_spec.energy; rtol=1e-6, atol=1e-8)
         @test isapprox(direct.residual_norm, via_spec.residual_norm; rtol=1e-6, atol=1e-10)
+
+        @test via_spec_joint.fixedrho_joint_solve_requested
+        @test via_spec_joint.fixedrho_joint_solve_active || via_spec_joint.fixedrho_joint_fallback
+        @test via_spec_joint.selection_reason in (
+            :pressure_max_under_constraints,
+            :residual_min_under_constraints,
+            :no_candidate_passed_constraints,
+        )
+        @test isfinite(via_spec_joint.residual_norm)
+        @test via_spec_joint.residual_norm <= 1e-3
     end
 end
