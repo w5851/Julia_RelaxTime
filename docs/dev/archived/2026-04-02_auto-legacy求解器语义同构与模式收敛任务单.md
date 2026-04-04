@@ -1,3 +1,15 @@
+---
+title: auto/legacy 求解器语义同构与模式收敛任务单
+archived: true
+original: docs/dev/active/2026-04-02_auto-legacy求解器语义同构与模式收敛任务单.md
+archived_date: 2026-04-04
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # auto/legacy 求解器语义同构与模式收敛任务单
 
 ## 1. 背景与目标
