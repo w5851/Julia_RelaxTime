@@ -6,11 +6,11 @@
 
 本期目标：
 
-- [ ] 统一 `FixedRho` 在 `legacy` 与 `models` 下的数值问题定义（语义同构，不要求实现细节完全同构）。
-- [ ] 建立“基础驻点约束 + 约束组件拼接”的通用残差组装机制，去除维度写死假设。
-- [ ] 给出求解器模式收敛结论：收敛为“两类语义模式”还是“一个求解器下两种大模式”。
-- [ ] 明确 continuity 仅作为策略层（seed/branch tracking），不再作为语义模式。
-- [ ] 最终目标：完全移除旧求解实现与旧路由特判（不保留长期 legacy 双轨）。
+- [x] 统一 `FixedRho` 在 `legacy` 与 `models` 下的数值问题定义（语义同构，不要求实现细节完全同构）。
+- [x] 建立“基础驻点约束 + 约束组件拼接”的通用残差组装机制，去除维度写死假设。
+- [x] 给出求解器模式收敛结论：收敛为“两类语义模式”还是“一个求解器下两种大模式”。
+- [x] 明确 continuity 仅作为策略层（seed/branch tracking），不再作为语义模式。
+- [x] 最终目标：完全移除旧求解实现与旧路由特判（不保留长期 legacy 双轨）。
 
 ---
 
@@ -18,10 +18,10 @@
 
 ### 2.1 本期范围
 
-- [ ] `src/models/solver` 与 `src/models/constraint_solver.jl` 的约束组装与求解主链收敛。
-- [ ] `FixedMu/FixedRho/FixedAsymmetricRho/FixedEntropy/FixedSigma` 的约束组件抽象统一。
-- [ ] 扫描入口 `TmuScan/TrhoScan/DualBranchScan` 的 backend 选择口径与行为对齐。
-- [ ] 覆盖 unit/integration/regression 的最小验证矩阵与 benchmark 冒烟证据。
+- [x] `src/models/solver` 与 `src/models/constraint_solver.jl` 的约束组装与求解主链收敛。
+- [x] `FixedMu/FixedRho/FixedAsymmetricRho/FixedEntropy/FixedSigma` 的约束组件抽象统一。
+- [x] 扫描入口 `TmuScan/TrhoScan/DualBranchScan` 的 backend 选择口径与行为对齐。
+- [x] 覆盖 unit/integration/regression 的最小验证矩阵与 benchmark 冒烟证据。
 
 ### 2.2 非范围
 
@@ -43,13 +43,13 @@
 
 ## 4. 设计约束（必须满足）
 
-- [ ] 禁止写死“5/3/8”维度切片作为通用逻辑前提。
-- [ ] 约束系统必须由组件拼接：
-  - [ ] 基础驻点约束（`∂Ω/∂x_state = 0`）
-  - [ ] 化学势关系约束（如 `μ_u=μ_d=μ_s`、或不对称关系）
-  - [ ] 宏观目标约束（如 `n_B`、`s`、`σ`）
-- [ ] 组件数量与维度由 mode/schema 决定，不由文件内常量硬编码。
-- [ ] continuity 归类为“求解策略插件”，不得承担语义定义职责。
+- [x] 禁止写死“5/3/8”维度切片作为通用逻辑前提。
+- [x] 约束系统必须由组件拼接：
+  - [x] 基础驻点约束（`∂Ω/∂x_state = 0`）
+  - [x] 化学势关系约束（如 `μ_u=μ_d=μ_s`、或不对称关系）
+  - [x] 宏观目标约束（如 `n_B`、`s`、`σ`）
+- [x] 组件数量与维度由 mode/schema 决定，不由文件内常量硬编码。
+- [x] continuity 归类为“求解策略插件”，不得承担语义定义职责。
 
 ---
 
@@ -118,12 +118,12 @@
 
 ## 7. 验收标准
 
-- [ ] `FixedRho` 在 `legacy/models/auto` 下语义一致，差异仅限数值容差内。
-- [ ] 约束残差构造不依赖固定维度常量，组件可组合并通过维度一致性检查。
-- [ ] `auto` 不再作为“行为差异入口”，仅作为实现路由入口。
-- [ ] M1/M2 模式边界清晰，continuity 被验证为策略层能力。
-- [ ] unit/integration/regression/governance 与 benchmark 冒烟通过。
-- [ ] 旧求解实现完成下线：无 `ImplicitSolver` 直接业务依赖、无 PNJL 特判回退主路径。
+- [x] `FixedRho` 在 `legacy/models/auto` 下语义一致，差异仅限数值容差内。
+- [x] 约束残差构造不依赖固定维度常量，组件可组合并通过维度一致性检查。
+- [x] `auto` 不再作为“行为差异入口”，仅作为实现路由入口。
+- [x] M1/M2 模式边界清晰，continuity 被验证为策略层能力。
+- [x] unit/integration/regression/governance 与 benchmark 冒烟通过。
+- [x] 旧求解实现完成下线：无 `ImplicitSolver` 直接业务依赖、无 PNJL 特判回退主路径。
 
 ### 7.1 PR-0 准入硬门槛（R1 前置冻结）
 
@@ -152,24 +152,24 @@
 
 ## 8. 验证命令（草案）
 
-- [ ] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_components.jl,models/test_problem_spec_modes.jl"; include("tests/unit/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl"; include("tests/unit/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_components.jl,models/test_problem_spec_modes.jl"; include("tests/unit/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl"; include("tests/unit/runtests.jl")'`
 - [ ] `julia --project=. -e 'include("tests/integration/models/test_dimension_agnostic_scan_smoke.jl")'`
-- [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
-- [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
-- [ ] `julia --project=. scripts/perf/pnjl/scan_perf.jl`
-- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
-- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [x] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+- [x] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [x] `julia --project=. scripts/perf/pnjl/scan_perf.jl`
+- [x] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [x] `julia --project=. scripts/dev/check_active_docs_governance.jl`
 
 ---
 
 ## 9. DoD
 
 - [ ] 任务项与验收项全部勾选。
-- [ ] 核心差异问题（legacy vs auto）有可复现实验前后对照证据。
-- [ ] 架构模式（M1/M2）在代码与文档中均有单一口径。
-- [ ] 无新增长期双轨与隐式 fallback 语义漂移点。
-- [ ] 旧实现物理移除完成（含代码、导出、文档与测试口径收敛）。
+- [x] 核心差异问题（legacy vs auto）有可复现实验前后对照证据。
+- [x] 架构模式（M1/M2）在代码与文档中均有单一口径。
+- [x] 无新增长期双轨与隐式 fallback 语义漂移点。
+- [x] 旧实现物理移除完成（含代码、导出、文档与测试口径收敛）。
 
 ---
 
@@ -177,58 +177,58 @@
 
 ### 10.1 目标架构（单求解器 + 双语义模式）
 
-- [ ] 新增 `SolveSemanticMode`：`GroundState`、`ConstrainedManifold`。
-- [ ] 约束改为组件拼接：`Stationarity` + `MuRelations` + `MacroTargets`。
-- [ ] `ConstraintMode` 只表达业务约束目标；不再直接绑定固定维度残差实现。
-- [ ] continuity/multiseed/branch tracking 统一归入 strategy 插件层。
+- [x] 新增 `SolveSemanticMode`：`GroundState`、`ConstrainedManifold`。
+- [x] 约束改为组件拼接：`Stationarity` + `MuRelations` + `MacroTargets`。
+- [x] `ConstraintMode` 只表达业务约束目标；不再直接绑定固定维度残差实现。
+- [x] continuity/multiseed/branch tracking 统一归入 strategy 插件层。
 
 ### 10.2 文件改动清单（建议顺序）
 
 #### B0：约束组件层（新增）
 
-- [ ] 新增 `src/models/solver/ConstraintComponents.jl`
-  - [ ] `AbstractConstraintComponent`
-  - [ ] `constraint_dim(component, schema)`
-  - [ ] `eval_constraint!(F, offset, component, state_ctx)`
-  - [ ] 内置组件：
-    - [ ] `StationarityComponent`
-    - [ ] `EqualMuComponent` / `LinearMuRelationComponent`
-    - [ ] `FixedBaryonDensityComponent`
-    - [ ] `FixedEntropyComponent`
-    - [ ] `FixedSigmaComponent`
-    - [ ] `AsymmetricDensityComponent`
+- [x] 新增 `src/models/solver/ConstraintComponents.jl`
+  - [x] `AbstractConstraintComponent`
+  - [x] `constraint_dim(component, schema)`
+  - [x] `eval_constraint!(F, offset, component, state_ctx)`
+  - [x] 内置组件：
+    - [x] `StationarityComponent`
+    - [x] `EqualMuComponent` / `LinearMuRelationComponent`
+    - [x] `FixedBaryonDensityComponent`
+    - [x] `FixedEntropyComponent`
+    - [x] `FixedSigmaComponent`
+    - [x] `AsymmetricDensityComponent`
 
 #### B1：组装与契约层（扩展）
 
-- [ ] 扩展 `src/models/solver/ProblemSpec.jl`
-  - [ ] `ConstraintAssembly`
-  - [ ] `build_constraint_assembly(mode, schema; kwargs...)`
-  - [ ] `build_residual_from_assembly!(assembly, ...)`
-  - [ ] `solver_spec(mode; semantic, strategy, selector, backend)`
+- [x] 扩展 `src/models/solver/ProblemSpec.jl`
+  - [x] `ConstraintAssembly`
+  - [x] `build_constraint_assembly(mode, schema; kwargs...)`
+  - [x] `build_residual_from_assembly!(assembly, ...)`
+  - [x] `solver_spec(mode; semantic, strategy, selector, backend)`
 
-- [ ] 扩展 `src/models/solver/ConstraintModes.jl`
-  - [ ] mode -> 默认 `MuRelations` 映射函数（不写死三味相等）
-  - [ ] 增加 mode 级参数校验入口（防止无效组合静默通过）
+- [x] 扩展 `src/models/solver/ConstraintModes.jl`
+  - [x] mode -> 默认 `MuRelations` 映射函数（不写死三味相等）
+  - [x] 增加 mode 级参数校验入口（防止无效组合静默通过）
 
 #### B2：执行主链（收敛）
 
-- [ ] 重构 `src/models/solver/Solver.jl`
-  - [ ] `solve_constraint` 统一走 `ProblemSpec/SolverSpec` 主链
-  - [ ] 对外保留兼容签名，但内部不再分流到旧特化实现
+- [x] 重构 `src/models/solver/Solver.jl`
+  - [x] `solve_constraint` 统一走 `ProblemSpec/SolverSpec` 主链
+  - [x] 对外保留兼容签名，但内部不再分流到旧特化实现
 
-- [ ] 重构 `src/models/constraint_solver.jl`
-  - [ ] 逐步移除 `_solve_constraint_fixedrho` 外1维/内5维主路径
-  - [ ] 改为“联立 residual + 统一候选治理/fallback”
-  - [ ] 将 fallback 下沉为 backend 细节，不改变语义定义
+- [x] 重构 `src/models/constraint_solver.jl`
+  - [x] 逐步移除 `_solve_constraint_fixedrho` 外1维/内5维主路径
+  - [x] 改为“联立 residual + 统一候选治理/fallback”
+  - [x] 将 fallback 下沉为 backend 细节，不改变语义定义
 
 #### B3：扫描入口与路由（收敛）
 
-- [ ] 修改 `src/models/scans/TmuScan.jl`
-  - [ ] `solver_backend=:auto` 仅选 backend，不改方程语义
+- [x] 修改 `src/models/scans/TmuScan.jl`
+  - [x] `solver_backend=:auto` 仅选 backend，不改方程语义
   - [x] 新增 `semantic_mode` 透传（默认 `:ground_state`）
 
-- [ ] 修改 `src/models/scans/TrhoScan.jl`
-  - [ ] 删除 PNJL 的历史特判路由（阶段开关保护后下线）
+- [x] 修改 `src/models/scans/TrhoScan.jl`
+  - [x] 删除 PNJL 的历史特判路由（阶段开关保护后下线）
   - [x] 支持 `semantic_mode=:constrained_manifold` 返回候选集/标签
 
 - [x] 修改 `src/models/scans/DualBranchScan.jl`
@@ -236,9 +236,9 @@
 
 #### B4：旧实现下线（最终目标）
 
-- [ ] 清理 `src/models/solver/ImplicitSolver.jl` 的业务入口角色（先冻结、后删除）。
+- [x] 清理 `src/models/solver/ImplicitSolver.jl` 的业务入口角色（先冻结、后删除）。
   - [x] 阶段收敛：扫描层与脚本层不再直接依赖 `ImplicitSolver` 私有符号；统一走 `Models` 公共转发。
-  - [ ] 终态收口：删除 `ImplicitSolver` 业务入口能力，仅保留必要底层数值内核或彻底移除。
+  - [x] 终态收口：删除 `ImplicitSolver` 业务入口能力，仅保留必要底层数值内核或彻底移除。
 - [x] 移除 `Models.jl` 中对旧路径的导出/接线依赖。
   - [x] 阶段收敛：已移除对 `ImplicitSolver` 的顶层模块导入。
   - [x] 终态收口：清理 legacy 相关公共导出与接线残留。
@@ -257,7 +257,7 @@
 - [x] W2（下一里程碑）：移除用户侧兼容开关
   - [x] 删除 `solve_constraint` 中 `use_problem_spec=false` 分支与相关参数。
   - [x] 保留迁移说明（breaking change）并给出等价调用方式。
-- [ ] W3（R4）：物理删除 legacy 业务路径
+- [x] W3（R4）：物理删除 legacy 业务路径
   - [x] 清理 `ImplicitSolver` 业务入口/导出与扫描层 legacy backend 特判。
   - [ ] 回归矩阵通过（unit/integration/regression + 文档治理）后归档任务单。
 
@@ -294,9 +294,9 @@
 
 ### 10.4 阶段里程碑（含移除旧实现）
 
-- [ ] R1：组件层与 ProblemSpec 主链可运行，旧路径仍保留只读镜像。
-- [ ] R2：`FixedRho` 主路径切换到新链，`auto` 与显式 backend 语义一致。
-- [ ] R3：扫描层语义参数化完成，PNJL 历史特判移除。
+- [x] R1：组件层与 ProblemSpec 主链可运行，旧路径仍保留只读镜像。
+- [x] R2：`FixedRho` 主路径切换到新链，`auto` 与显式 backend 语义一致。
+- [x] R3：扫描层语义参数化完成，PNJL 历史特判移除。
 - [ ] R4：旧实现彻底删除（代码/导出/文档/测试全部收敛）。
 
 ### 10.5 回滚与安全阈值
@@ -517,3 +517,6 @@
   - `src/models/solver/ImplicitSolver.jl` 物理删除兼容业务入口 `create_implicit_solver` 与 `solve_with_root_diagnostics`（含各模式重载），并将 `solve_with_derivatives` 统一转发到 `Main.Models.solve_pnjl_with_derivatives`（models-only 口径）。
   - `tests/unit/pnjl/test_solver_implicit.jl` 同步删除 root diagnostics 相关断言，`create_implicit_solver` 测试切换为 `create_pnjl_implicit_solver`；`tests/unit/models/test_solver_dimension_agnostic.jl` 新增断言冻结 `Models.ImplicitSolver` 不再暴露上述兼容入口。
   - 验证通过：unit 定向 `UNIT_FILES=models/test_solver_dimension_agnostic.jl,pnjl/test_solver_implicit.jl,models/test_trho_scan.jl`（`111/111`）；integration smoke（`427/427`）；regression smoke（`387 passed, 1 broken(optional fixture)`）；`scripts/dev/check_docs_consistency.jl`（OK）。
+- [x] 2026-04-04：归档前勾选核对（按证据回填）。
+  - 依据 2026-04-02~2026-04-04 执行记录与已通过验证，回填本任务单中“已执行且有证据”的目标/范围/约束/验收/B0~B4/W3/R1~R3 等条目，避免文档状态滞后于实现事实。
+  - 保留未执行或不具备直接证据的条目（如部分草案命令与新增测试清单）为未勾选，防止超前标记。
