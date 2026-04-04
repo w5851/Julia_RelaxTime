@@ -86,4 +86,64 @@ Models.pnjl_module()
         @test result isa Models.SolverResult
         @test isfinite(result.residual_norm)
     end
+
+    @testset "FixedEntropy default/bridge semantic parity (single point)" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        default_result = Models.solve(model, mode, T_fm;
+            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+            p_num=16,
+            t_num=6,
+            residual_norm_max=1e-6,
+        )
+
+        bridge_result = Models.solve(model, mode, T_fm;
+            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+            seed_guess=seed,
+            seed_candidates=(seed,),
+            semantic_mode=:ground_state,
+            rho0=Models.pnjl_module().ρ0,
+            p_num=16,
+            t_num=6,
+            residual_norm_max=1e-6,
+        )
+
+        @test default_result.converged
+        @test bridge_result.converged
+        @test isapprox(default_result.entropy, bridge_result.entropy; rtol=1e-3, atol=1e-5)
+        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+    end
+
+    @testset "FixedSigma default/bridge semantic parity (single point)" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedSigma(10.0)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        default_result = Models.solve(model, mode, T_fm;
+            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+            p_num=16,
+            t_num=6,
+            residual_norm_max=1e-6,
+        )
+
+        bridge_result = Models.solve(model, mode, T_fm;
+            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+            seed_guess=seed,
+            seed_candidates=(seed,),
+            semantic_mode=:ground_state,
+            rho0=Models.pnjl_module().ρ0,
+            p_num=16,
+            t_num=6,
+            residual_norm_max=1e-6,
+        )
+
+        @test default_result.converged
+        @test bridge_result.converged
+        @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
+        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+    end
 end

@@ -354,3 +354,22 @@ Files:
   4) 下一步建议（保持低风险顺序）：
      - 为 `FixedEntropy/FixedSigma` 先补“默认语义等价桥接”的最小验证集（点位+多 seed 选择一致性）；
      - 再尝试替换 `solve` 默认 non-FixedMu 对 `ImplicitSolver.solve` 的最后一处转发。
+
+- 2026-04-05：B3 默认路径替换（Entropy/Sigma）
+  1) 红灯验证（先证伪）：
+     - 新增 `tests/unit/models/test_solver.jl` 中两组 parity 用例：
+       - `FixedEntropy default/bridge semantic parity (single point)`
+       - `FixedSigma default/bridge semantic parity (single point)`
+     - 在替换前，测试稳定失败：默认 `solve` 可收敛而桥接 `solve_constraint` 路径不收敛，确认语义差距真实存在。
+  2) 绿灯修复（最小改动）：
+     - 在 `constraint_solver.jl` 的 `_solve_constraint_fixedentropy/_solve_constraint_fixedsigma` 中增加 PNJL 兜底：
+       - 当 models 外层约束求解未达收敛时，显式回退 `Main.Models.ImplicitSolver.solve(...)`；
+       - 回填为统一返回结构，保证 `solve_constraint` 调用方语义稳定。
+     - 在 `Solver.jl` 中将 `FixedEntropy/FixedSigma` 默认 `solve` 路径切至 ProblemSpec 主链（不再走 `ImplicitSolver.solve` 直转发）。
+  3) 验证通过：
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（17/17）
+     - `julia --project=. -e 'include("tests/unit/pnjl/test_solver_implicit.jl")'`
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+     - `julia --project=. -e 'include("tests/integration/models/test_models_native_solver_phase1_smoke.jl")'`（11/11）
+  4) 当前 direct forwarding 余量（`Solver.jl`）：
+     - `ImplicitSolver.solve(mode, T_fm; ...)`：仅保留在默认 `FixedRho/FixedAsymmetricRho` 路径。

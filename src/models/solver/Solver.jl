@@ -195,7 +195,7 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
-    if bridge.use_problem_spec_chain
+    if bridge.use_problem_spec_chain || mode isa FixedEntropy || mode isa FixedSigma
         problem_spec = get(kwargs, :problem_spec, nothing)
         forwarded = _strip_forward_kwargs(kwargs, (
             :problem_spec,
@@ -245,7 +245,7 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
         )
     end
 
-    if mode isa FixedRho || mode isa FixedEntropy || mode isa FixedSigma || mode isa FixedAsymmetricRho
+    if mode isa FixedRho || mode isa FixedAsymmetricRho
         forwarded = _strip_forward_kwargs(kwargs, (
             :seed_guess,
             :seed_candidates,
