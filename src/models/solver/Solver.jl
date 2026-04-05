@@ -145,6 +145,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
     residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
+    auto_multiseed_fallback = get(kwargs, :auto_multiseed_fallback, true)
     seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
 
     if seed_strategy isa MultiSeed
@@ -159,6 +160,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         :p_num,
         :t_num,
         :residual_norm_max,
+        :auto_multiseed_fallback,
     ))
     raw = solve_constraint(
         model,
@@ -173,7 +175,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         forwarded...,
     )
 
-    return SolverResult(
+    single = SolverResult(
         mode,
         Bool(raw.converged),
         Float64.(raw.solution),
@@ -181,7 +183,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         raw.mu_vec,
         Float64(raw.omega),
         Float64(raw.pressure),
-        Float64(raw.rho_norm),
+        Float64(raw.rho_norm) / Float64(rho0),
         Float64(raw.entropy),
         Float64(raw.energy),
         raw.masses,
@@ -189,6 +191,27 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         Float64(raw.residual_norm),
         Float64(xi),
     )
+
+    if single.converged || !Bool(auto_multiseed_fallback)
+        return single
+    end
+
+    try
+        return solve_multi(
+            model,
+            mode,
+            T_fm,
+            μ_fm;
+            seed_strategy=MultiSeed(),
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            residual_norm_max=residual_norm_max,
+            forwarded...,
+        )
+    catch
+        return single
+    end
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
@@ -295,7 +318,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 mu_vec=raw.mu_vec,
                 omega=Float64(raw.omega),
                 pressure=Float64(raw.pressure),
-                rho_norm=Float64(raw.rho_norm),
+                rho_norm=Float64(raw.rho_norm) / Float64(rho0),
                 entropy=Float64(raw.entropy),
                 energy=Float64(raw.energy),
                 masses=raw.masses,

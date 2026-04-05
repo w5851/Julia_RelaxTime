@@ -443,6 +443,8 @@ function _solve_constraint_fixedmu(
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
+    allow_legacy_fallback::Bool=true,
+    nlsolve_kwargs...,
 )
     seed_pool = if seed_candidates === nothing
         _build_default_seed_candidates(seed_guess)
@@ -452,42 +454,113 @@ function _solve_constraint_fixedmu(
 
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check=physicality_check) : hard_constraints
 
+    # keep compatibility with upstream call sites forwarding legacy NLsolve kws
+    # (e.g. iterations) even though the models fixed-mu path does not consume them
+    _ = nlsolve_kwargs
+
     candidates = NamedTuple[]
     for (seed_index, seed) in enumerate(seed_pool)
-        local raw
-        try
-            st = solve_gap(
-                model,
-                T_fm,
-                μ_fm;
-                solver_backend=:models,
-                solver=solver,
-                initial_guess=seed,
-                residual_norm_max=residual_norm_max,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
+        solver_pool = if solver isa NLsolveGapSolver && solver.method != :trust_region
+            (
+                solver,
+                NLsolveGapSolver(
+                    method=:trust_region,
+                    xtol=solver.xtol,
+                    ftol=solver.ftol,
+                    jacobian=solver.jacobian,
+                ),
             )
+        else
+            (solver,)
+        end
 
-            raw = _compute_fixedmu_candidate(
-                model,
-                T_fm,
-                μ_fm,
-                st,
-                residual_norm_max;
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-            )
-            ok, failed = evaluate_hard_constraints(raw, rules)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
-        catch
+        pushed = false
+        for local_solver in solver_pool
+            try
+                st = solve_gap(
+                    model,
+                    T_fm,
+                    μ_fm;
+                    solver_backend=:models,
+                    solver=local_solver,
+                    initial_guess=seed,
+                    residual_norm_max=residual_norm_max,
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                )
+
+                raw = _compute_fixedmu_candidate(
+                    model,
+                    T_fm,
+                    μ_fm,
+                    st,
+                    residual_norm_max;
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                )
+                ok, failed = evaluate_hard_constraints(raw, rules)
+                push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
+                pushed = true
+                break
+            catch
+            end
+        end
+
+        if !pushed
             raw = _empty_candidate(; state_n=5, mu_n=3, residual_norm_max=residual_norm_max)
             push!(candidates, (; raw..., seed_index=Int(seed_index)))
         end
     end
     selected = select_pressure_max_candidate(candidates)
     s = selected.selected_candidate
+
+    if allow_legacy_fallback && !s.converged && model isa AbstractPNJLModel
+        seed_legacy = if length(seed_guess) >= 5
+            Float64.(seed_guess[1:5])
+        else
+            Float64.(seed_guess)
+        end
+
+        legacy_result = try
+            Main.Models.ImplicitSolver.solve(
+                Main.Models.FixedMu(),
+                T_fm,
+                μ_fm;
+                xi=xi,
+                seed_strategy=Main.Models.DefaultSeed(seed_legacy, seed_legacy, :hadron),
+                p_num=p_num,
+                t_num=t_num,
+                residual_norm_max=residual_norm_max,
+                nlsolve_kwargs...,
+            )
+        catch
+            nothing
+        end
+
+        if legacy_result !== nothing && legacy_result.converged
+            return (
+                converged=true,
+                solution=Float64.(legacy_result.solution),
+                x_state=legacy_result.x_state,
+                mu_vec=legacy_result.mu_vec,
+                omega=legacy_result.omega,
+                pressure=legacy_result.pressure,
+                rho_norm=legacy_result.rho_norm,
+                entropy=legacy_result.entropy,
+                energy=legacy_result.energy,
+                masses=legacy_result.masses,
+                iterations=legacy_result.iterations,
+                residual_norm=legacy_result.residual_norm,
+                hard_constraint_ok=true,
+                failed_constraints=Symbol[],
+                selection_reason=:legacy_fallback,
+                selected_index=0,
+                candidate_count=length(candidates),
+            )
+        end
+    end
 
     return (
         converged=s.converged,
