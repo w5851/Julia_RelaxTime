@@ -54,7 +54,7 @@ end
 end
 
 @inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
-    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve)
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed)
         delete!(kwargs, key)
     end
     return kwargs
@@ -478,19 +478,137 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedEntropy forward_solve"))
 
-    seed_pool = if haskey(kwargs, :seed_candidates)
+    provided_seed_pool = if haskey(kwargs, :seed_candidates)
         [Float64.(s) for s in kwargs[:seed_candidates]]
     else
-        _build_default_seed_candidates(seed_guess)
+        Vector{Vector{Float64}}()
     end
+    default_seed_pool = _build_default_seed_candidates(seed_guess)
+
+    primary_seed = Float64.(seed_guess)
+    primary_method = if haskey(kwargs, :nlsolve_method)
+        kwargs[:nlsolve_method]
+    else
+        Bool(get(kwargs, :continuity_seed, false)) ? :newton : :trust_region
+    end
+    primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
+    fallback_method = get(kwargs, :fallback_method, :trust_region)
+
+    fallback_seeds = Vector{Vector{Float64}}()
+    seed_seen = Set{String}()
+    seed_key(seed_vec::AbstractVector{<:Real}) = join(round.(Float64.(seed_vec); digits=12), ",")
+    primary_key = seed_key(primary_seed)
+    push!(seed_seen, primary_key)
+
+    for seed in provided_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+    for seed in default_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+
+    attempt_plan = NamedTuple[]
+    push!(attempt_plan, (
+        seed=primary_seed,
+        method=primary_method,
+        use_fallback=primary_use_fallback,
+        fallback_method=fallback_method,
+        attempt_origin=:primary,
+    ))
+
+    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+        push!(attempt_plan, (
+            seed=primary_seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:method_rescue,
+        ))
+    end
+
+    for seed in fallback_seeds
+        push!(attempt_plan, (
+            seed=seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:seed_rescue,
+        ))
+    end
+
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
 
-    solve_one = (m, t, local_kwargs) -> begin
-        haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedEntropy forward_solve"))
-        return _solve_constraint_fixedentropy(m, t, mode.s_target; pairs(local_kwargs)...)
+    candidates = NamedTuple[]
+    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
+        local raw
+        try
+            local_kwargs = Dict{Symbol,Any}(kwargs)
+            local_kwargs[:seed_guess] = attempt_cfg.seed
+            local_kwargs[:nlsolve_method] = attempt_cfg.method
+            _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+            delete!(local_kwargs, :trust_region_fallback)
+            delete!(local_kwargs, :fallback_method)
+
+            haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedEntropy forward_solve"))
+            solved = _solve_constraint_fixedentropy(model, T_fm, mode.s_target; pairs(local_kwargs)...)
+            raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6), entropy_attempt_origin=attempt_cfg.attempt_origin)
+            ok, failed = evaluate_hard_constraints(raw, hard_constraints)
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            if ok
+                break
+            end
+        catch
+            raw = (
+                converged=false,
+                solution=Float64[],
+                x_state=zeros(5),
+                mu_vec=zeros(3),
+                omega=NaN,
+                pressure=-Inf,
+                rho_norm=NaN,
+                entropy=NaN,
+                energy=NaN,
+                masses=zeros(3),
+                iterations=0,
+                residual_norm=Inf,
+                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                entropy_attempt_origin=attempt_cfg.attempt_origin,
+            )
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
+        end
     end
-    return _governed_mode_forward_solve(model, T_fm, seed_pool, kwargs, hard_constraints, solve_one)
+
+    selector_fn = _resolve_candidate_selector(kwargs)
+    selected = selector_fn(candidates)
+    s = selected.selected_candidate
+    return (
+        converged=Bool(s.converged),
+        solution=Vector{Float64}(s.solution),
+        x_state=s.x_state,
+        mu_vec=s.mu_vec,
+        omega=s.omega,
+        pressure=s.pressure,
+        rho_norm=s.rho_norm,
+        entropy=s.entropy,
+        energy=s.energy,
+        masses=s.masses,
+        iterations=s.iterations,
+        residual_norm=s.residual_norm,
+        hard_constraint_ok=s.hard_constraint_ok,
+        failed_constraints=s.failed_constraints,
+        selection_reason=selected.selection_reason,
+        selected_index=selected.selected_index,
+        candidate_count=length(candidates),
+    )
 end
 
 function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; fwd_kwargs...)
@@ -498,19 +616,137 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedSigma forward_solve"))
 
-    seed_pool = if haskey(kwargs, :seed_candidates)
+    provided_seed_pool = if haskey(kwargs, :seed_candidates)
         [Float64.(s) for s in kwargs[:seed_candidates]]
     else
-        _build_default_seed_candidates(seed_guess)
+        Vector{Vector{Float64}}()
     end
+    default_seed_pool = _build_default_seed_candidates(seed_guess)
+
+    primary_seed = Float64.(seed_guess)
+    primary_method = if haskey(kwargs, :nlsolve_method)
+        kwargs[:nlsolve_method]
+    else
+        Bool(get(kwargs, :continuity_seed, false)) ? :newton : :trust_region
+    end
+    primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
+    fallback_method = get(kwargs, :fallback_method, :trust_region)
+
+    fallback_seeds = Vector{Vector{Float64}}()
+    seed_seen = Set{String}()
+    seed_key(seed_vec::AbstractVector{<:Real}) = join(round.(Float64.(seed_vec); digits=12), ",")
+    primary_key = seed_key(primary_seed)
+    push!(seed_seen, primary_key)
+
+    for seed in provided_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+    for seed in default_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+
+    attempt_plan = NamedTuple[]
+    push!(attempt_plan, (
+        seed=primary_seed,
+        method=primary_method,
+        use_fallback=primary_use_fallback,
+        fallback_method=fallback_method,
+        attempt_origin=:primary,
+    ))
+
+    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+        push!(attempt_plan, (
+            seed=primary_seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:method_rescue,
+        ))
+    end
+
+    for seed in fallback_seeds
+        push!(attempt_plan, (
+            seed=seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:seed_rescue,
+        ))
+    end
+
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
 
-    solve_one = (m, t, local_kwargs) -> begin
-        haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedSigma forward_solve"))
-        return _solve_constraint_fixedsigma(m, t, mode.sigma_target; pairs(local_kwargs)...)
+    candidates = NamedTuple[]
+    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
+        local raw
+        try
+            local_kwargs = Dict{Symbol,Any}(kwargs)
+            local_kwargs[:seed_guess] = attempt_cfg.seed
+            local_kwargs[:nlsolve_method] = attempt_cfg.method
+            _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+            delete!(local_kwargs, :trust_region_fallback)
+            delete!(local_kwargs, :fallback_method)
+
+            haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedSigma forward_solve"))
+            solved = _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; pairs(local_kwargs)...)
+            raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6), sigma_attempt_origin=attempt_cfg.attempt_origin)
+            ok, failed = evaluate_hard_constraints(raw, hard_constraints)
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            if ok
+                break
+            end
+        catch
+            raw = (
+                converged=false,
+                solution=Float64[],
+                x_state=zeros(5),
+                mu_vec=zeros(3),
+                omega=NaN,
+                pressure=-Inf,
+                rho_norm=NaN,
+                entropy=NaN,
+                energy=NaN,
+                masses=zeros(3),
+                iterations=0,
+                residual_norm=Inf,
+                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                sigma_attempt_origin=attempt_cfg.attempt_origin,
+            )
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
+        end
     end
-    return _governed_mode_forward_solve(model, T_fm, seed_pool, kwargs, hard_constraints, solve_one)
+
+    selector_fn = _resolve_candidate_selector(kwargs)
+    selected = selector_fn(candidates)
+    s = selected.selected_candidate
+    return (
+        converged=Bool(s.converged),
+        solution=Vector{Float64}(s.solution),
+        x_state=s.x_state,
+        mu_vec=s.mu_vec,
+        omega=s.omega,
+        pressure=s.pressure,
+        rho_norm=s.rho_norm,
+        entropy=s.entropy,
+        energy=s.energy,
+        masses=s.masses,
+        iterations=s.iterations,
+        residual_norm=s.residual_norm,
+        hard_constraint_ok=s.hard_constraint_ok,
+        failed_constraints=s.failed_constraints,
+        selection_reason=selected.selection_reason,
+        selected_index=selected.selected_index,
+        candidate_count=length(candidates),
+    )
 end
 
 function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; fwd_kwargs...)

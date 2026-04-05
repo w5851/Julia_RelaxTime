@@ -466,3 +466,28 @@ Files:
   5) 阶段结论：
      - `FixedRho` 在 ProblemSpec 层已不再保留 legacy 兼容分支；
      - 仍需后续轮次继续处理 `constraint_solver` 其他 non-FixedMu 模式中的 legacy fallback 依赖，方可推进 Step4 全量退役。
+
+- 2026-04-05：FixedRho 全链路去 legacy + Entropy/Sigma 懒触发策略推广（进行中）
+  1) FixedRho 全链路收口：
+     - `constraint_solver.jl` 中 `_solve_constraint_fixedrho(...)` 已移除对 `Main.Models.ImplicitSolver.solve(...)` 的 PNJL fallback；
+     - 至此 `FixedRho` 在当前主链路径中不再依赖 `ImplicitSolver` 兜底。
+  2) Entropy/Sigma 策略推广（沿用 FixedRho 成熟模式）：
+     - `ProblemSpec._fixedentropy_problem_spec_forward_solve(...)` 与 `_fixedsigma_problem_spec_forward_solve(...)` 改为非 `FixedMu` 懒触发 attempts：
+       - 先 primary 单次尝试；
+       - 失败后触发 method-rescue / seed-rescue；
+       - 命中通过 hard-constraints 的候选后 early-stop；
+     - 默认方法改为 continuity-aware：
+       - `continuity_seed=true` 默认 `:newton`；
+       - 否则默认 `:trust_region`；
+     - 保持 `FixedMu` 强制多 attempts 选优逻辑不变。
+  3) 约束求解器配套改动：
+     - `_solve_constraint_fixedentropy(...)`、`_solve_constraint_fixedsigma(...)` 新增 `nlsolve_method` 参数，并用于外层 nlsolve 方法选择，支持策略层方法切换。
+  4) 本轮验证通过：
+     - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）。
+  5) 当前状态：
+     - `FixedRho` 已进入“joint 主链 + 无 legacy fallback”状态并保持回归稳定；
+     - `FixedEntropy/FixedSigma` 已完成“懒触发 attempts + continuity-aware 默认方法”推广；
+     - 下一步按计划进入 `FixedAsymmetricRho` 同策略迁移与收口。
