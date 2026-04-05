@@ -37,6 +37,88 @@ end
     return vcat(collect(rules), [extra_rule])
 end
 
+@inline function _seed_key(seed_vec::AbstractVector{<:Real})
+    return join(round.(Float64.(seed_vec); digits=12), ",")
+end
+
+function _build_governed_attempt_plan(
+    mode::ConstraintMode,
+    primary_seed::AbstractVector{<:Real},
+    provided_seed_pool,
+    default_seed_pool,
+    extra_constraints::ExtraConstraints;
+    primary_method,
+    primary_use_fallback::Bool,
+    fallback_method,
+    extra_fallback_seeds=Vector{Vector{Float64}}(),
+)
+    primary_seed_vec = _extend_seed_with_extra(Float64.(primary_seed), mode, extra_constraints)
+
+    fallback_seeds = Vector{Vector{Float64}}()
+    seed_seen = Set{String}()
+
+    primary_key = _seed_key(primary_seed_vec)
+    push!(seed_seen, primary_key)
+
+    for seed in extra_fallback_seeds
+        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
+        key = _seed_key(normalized_seed)
+        if !(key in seed_seen)
+            push!(fallback_seeds, normalized_seed)
+            push!(seed_seen, key)
+        end
+    end
+
+    for seed in provided_seed_pool
+        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
+        key = _seed_key(normalized_seed)
+        if !(key in seed_seen)
+            push!(fallback_seeds, normalized_seed)
+            push!(seed_seen, key)
+        end
+    end
+
+    for seed in default_seed_pool
+        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
+        key = _seed_key(normalized_seed)
+        if !(key in seed_seen)
+            push!(fallback_seeds, normalized_seed)
+            push!(seed_seen, key)
+        end
+    end
+
+    attempt_plan = NamedTuple[]
+    push!(attempt_plan, (
+        seed=primary_seed_vec,
+        method=primary_method,
+        use_fallback=primary_use_fallback,
+        fallback_method=fallback_method,
+        attempt_origin=:primary,
+    ))
+
+    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+        push!(attempt_plan, (
+            seed=primary_seed_vec,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:method_rescue,
+        ))
+    end
+
+    for seed in fallback_seeds
+        push!(attempt_plan, (
+            seed=seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:seed_rescue,
+        ))
+    end
+
+    return attempt_plan
+end
+
 struct ProblemSpec{M,R,F,C,U,P,H,S,E}
     mode::M
     x_dim::Int
@@ -294,7 +376,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     end
     default_seed_pool = _build_default_seed_candidates(seed_guess)
 
-    primary_seed = _extend_seed_with_extra(Float64.(seed_guess), mode, extra_constraints)
+    primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)
         kwargs[:nlsolve_method]
     else
@@ -303,69 +385,22 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
     fallback_method = get(kwargs, :fallback_method, :trust_region)
 
-    fallback_seeds = Vector{Vector{Float64}}()
-    seed_seen = Set{String}()
-    seed_key(seed_vec::AbstractVector{<:Real}) = join(round.(Float64.(seed_vec); digits=12), ",")
-
-    primary_key = seed_key(primary_seed)
-    push!(seed_seen, primary_key)
-
     legacy_seed = if length(primary_seed) >= 5
         _extend_seed_with_extra(Float64.(extend_seed(Float64.(primary_seed[1:5]), mode)), mode, extra_constraints)
     else
         _extend_seed_with_extra(Float64.(extend_seed(primary_seed, mode)), mode, extra_constraints)
     end
-    legacy_key = seed_key(legacy_seed)
-    if !(legacy_key in seed_seen)
-        push!(fallback_seeds, legacy_seed)
-        push!(seed_seen, legacy_key)
-    end
-
-    for seed in provided_seed_pool
-        seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        k = seed_key(seed)
-        if !(k in seed_seen)
-            push!(fallback_seeds, seed)
-            push!(seed_seen, k)
-        end
-    end
-    for seed in default_seed_pool
-        seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        k = seed_key(seed)
-        if !(k in seed_seen)
-            push!(fallback_seeds, seed)
-            push!(seed_seen, k)
-        end
-    end
-
-    attempt_plan = NamedTuple[]
-    push!(attempt_plan, (
-        seed=primary_seed,
-        method=primary_method,
-        use_fallback=primary_use_fallback,
+    attempt_plan = _build_governed_attempt_plan(
+        mode,
+        primary_seed,
+        provided_seed_pool,
+        default_seed_pool,
+        extra_constraints;
+        primary_method=primary_method,
+        primary_use_fallback=primary_use_fallback,
         fallback_method=fallback_method,
-        attempt_origin=:primary,
-    ))
-
-    if primary_method != :trust_region
-        push!(attempt_plan, (
-            seed=primary_seed,
-            method=:trust_region,
-            use_fallback=false,
-            fallback_method=:trust_region,
-            attempt_origin=:method_rescue,
-        ))
-    end
-
-    for seed in fallback_seeds
-        push!(attempt_plan, (
-            seed=seed,
-            method=:trust_region,
-            use_fallback=false,
-            fallback_method=:trust_region,
-            attempt_origin=:seed_rescue,
-        ))
-    end
+        extra_fallback_seeds=[legacy_seed],
+    )
 
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
@@ -552,7 +587,7 @@ function _governed_nonrho_problem_spec_forward_solve(
     end
     default_seed_pool = _build_default_seed_candidates(seed_guess)
 
-    primary_seed = _extend_seed_with_extra(Float64.(seed_guess), mode, extra_constraints)
+    primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)
         kwargs[:nlsolve_method]
     else
@@ -561,57 +596,16 @@ function _governed_nonrho_problem_spec_forward_solve(
     primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
     fallback_method = get(kwargs, :fallback_method, :trust_region)
 
-    fallback_seeds = Vector{Vector{Float64}}()
-    seed_seen = Set{String}()
-    seed_key(seed_vec::AbstractVector{<:Real}) = join(round.(Float64.(seed_vec); digits=12), ",")
-    primary_key = seed_key(primary_seed)
-    push!(seed_seen, primary_key)
-
-    for seed in provided_seed_pool
-        seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        k = seed_key(seed)
-        if !(k in seed_seen)
-            push!(fallback_seeds, seed)
-            push!(seed_seen, k)
-        end
-    end
-    for seed in default_seed_pool
-        seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        k = seed_key(seed)
-        if !(k in seed_seen)
-            push!(fallback_seeds, seed)
-            push!(seed_seen, k)
-        end
-    end
-
-    attempt_plan = NamedTuple[]
-    push!(attempt_plan, (
-        seed=primary_seed,
-        method=primary_method,
-        use_fallback=primary_use_fallback,
+    attempt_plan = _build_governed_attempt_plan(
+        mode,
+        primary_seed,
+        provided_seed_pool,
+        default_seed_pool,
+        extra_constraints;
+        primary_method=primary_method,
+        primary_use_fallback=primary_use_fallback,
         fallback_method=fallback_method,
-        attempt_origin=:primary,
-    ))
-
-    if primary_method != :trust_region
-        push!(attempt_plan, (
-            seed=primary_seed,
-            method=:trust_region,
-            use_fallback=false,
-            fallback_method=:trust_region,
-            attempt_origin=:method_rescue,
-        ))
-    end
-
-    for seed in fallback_seeds
-        push!(attempt_plan, (
-            seed=seed,
-            method=:trust_region,
-            use_fallback=false,
-            fallback_method=:trust_region,
-            attempt_origin=:seed_rescue,
-        ))
-    end
+    )
 
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
