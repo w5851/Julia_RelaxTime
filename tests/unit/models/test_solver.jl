@@ -152,18 +152,20 @@ Models.pnjl_module()
         mode = Models.FixedRho(1.0)
         T_fm = 100.0 / 197.327
         seed = copy(Models.pnjl_module().HADRON_SEED_8)
+        seed_strategy = Models.DefaultSeed(seed, seed, :hadron)
+        bridge_seed = Models.get_seed(seed_strategy, [T_fm], mode)
 
         default_result = Models.solve(model, mode, T_fm;
-            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+            seed_strategy=seed_strategy,
             p_num=16,
             t_num=6,
             residual_norm_max=1e-6,
         )
 
         bridge_result = Models.solve(model, mode, T_fm;
-            seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
-            seed_guess=seed,
-            seed_candidates=(seed,),
+            seed_strategy=seed_strategy,
+            seed_guess=bridge_seed,
+            seed_candidates=(bridge_seed,),
             semantic_mode=:ground_state,
             p_num=16,
             t_num=6,

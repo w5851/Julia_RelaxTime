@@ -77,6 +77,9 @@ end
         :physicality_check,
         :fixedrho_joint_solve,
         :nlsolve_method,
+        :continuity_seed,
+        :trust_region_fallback,
+        :fallback_method,
         :residual_norm_max,
         :xi,
         :p_num,
@@ -97,7 +100,10 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     p_num = Int(get(kwargs, :p_num, 24))
     t_num = Int(get(kwargs, :t_num, 8))
     residual_norm_max = Float64(get(kwargs, :residual_norm_max, 1e-6))
-    nlsolve_method = get(kwargs, :nlsolve_method, :newton)
+    nlsolve_method = get(kwargs, :nlsolve_method, :trust_region)
+    trust_region_fallback = Bool(get(kwargs, :trust_region_fallback, true))
+    fallback_method = get(kwargs, :fallback_method, :trust_region)
+    physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
 
     x0 = if length(seed_guess) >= 8
         Float64.(seed_guess[1:8])
@@ -117,97 +123,239 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     _strip_problemspec_forwardsolve_kwargs!(local_nls_kwargs)
     _strip_fixedrho_joint_nlsolve_kwargs!(local_nls_kwargs)
 
-    res = nlsolve(
-        residual_fn!,
-        x0;
-        autodiff=:forward,
-        method=nlsolve_method,
-        xtol=1e-9,
-        ftol=1e-9,
-        pairs(local_nls_kwargs)...,
+    postprocess_solution = function (solution)
+        x_state, mu_vec = _unpack_solution(solution; state_n=5, mu_n=3)
+
+        pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
+        rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
+        rho_norm = sum(rho_vec) / (3.0 * rho0)
+        pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+        entropy = ForwardDiff.derivative(pressure_T, T_fm)
+        energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
+        omega_val = -pressure
+        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
+        thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
+        phys = physicality_check(x_state, masses) && thermo_finite
+
+        residual_vec = zeros(Float64, 8)
+        residual_fn!(residual_vec, solution)
+        residual_norm = sqrt(sum(abs2, residual_vec))
+
+        return (
+            x_state=x_state,
+            mu_vec=mu_vec,
+            omega=omega_val,
+            pressure=pressure,
+            rho_norm=rho_norm,
+            entropy=entropy,
+            energy=energy,
+            masses=masses,
+            residual_norm=residual_norm,
+            phys=phys,
+        )
+    end
+
+    cache = Dict{Symbol,NamedTuple}()
+    solve_once = function (method::Symbol, seed::Vector{Float64})
+        res = nlsolve(
+            residual_fn!,
+            seed;
+            autodiff=:forward,
+            method=method,
+            xtol=1e-9,
+            ftol=1e-9,
+            pairs(local_nls_kwargs)...,
+        )
+
+        solution = Float64.(res.zero)
+        pp = postprocess_solution(solution)
+        converged = Bool(res.f_converged) && pp.phys && isfinite(pp.residual_norm) && pp.residual_norm <= residual_norm_max
+
+        cache[method] = (
+            res=res,
+            solution=solution,
+            x_state=pp.x_state,
+            mu_vec=pp.mu_vec,
+            omega=pp.omega,
+            pressure=pp.pressure,
+            rho_norm=pp.rho_norm,
+            entropy=pp.entropy,
+            energy=pp.energy,
+            masses=pp.masses,
+            residual_norm=pp.residual_norm,
+            converged=converged,
+        )
+
+        return (
+            x=solution,
+            converged=converged,
+            residual_norm=pp.residual_norm,
+            score=Float64(pp.omega),
+        )
+    end
+
+    policy = RootPolicy(
+        primary_method=nlsolve_method,
+        fallback_method=fallback_method,
+        use_fallback=trust_region_fallback,
+        use_multiseed=false,
+        residual_norm_max=residual_norm_max,
+        require_converged=true,
+        diagnostics_level=:basic,
     )
 
-    solution = Float64.(res.zero)
-    x_state, mu_vec = _unpack_solution(solution; state_n=5, mu_n=3)
+    solved = solve_root_with_policy(solve_once, x0; policy=policy)
+    selected_attempt = solved.diagnostics.attempts[solved.diagnostics.selected_attempt]
+    selected_method = selected_attempt.method
 
-    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
-    rho_norm = sum(rho_vec) / (3.0 * rho0)
-    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    entropy = ForwardDiff.derivative(pressure_T, T_fm)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-    omega_val = -pressure
-    masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
-
-    residual_vec = zeros(Float64, 8)
-    residual_fn!(residual_vec, solution)
-    residual_norm = sqrt(sum(abs2, residual_vec))
-
-    converged = res.f_converged && isfinite(residual_norm) && residual_norm <= residual_norm_max
+    if !haskey(cache, selected_method)
+        _ = solve_once(selected_method, copy(x0))
+    end
+    picked = cache[selected_method]
 
     return (
-        converged=converged,
-        solution=solution,
-        x_state=x_state,
-        mu_vec=mu_vec,
-        omega=omega_val,
-        pressure=pressure,
-        rho_norm=rho_norm,
-        entropy=entropy,
-        energy=energy,
-        masses=masses,
-        iterations=res.iterations,
-        residual_norm=residual_norm,
+        converged=picked.converged,
+        solution=picked.solution,
+        x_state=picked.x_state,
+        mu_vec=picked.mu_vec,
+        omega=picked.omega,
+        pressure=picked.pressure,
+        rho_norm=picked.rho_norm,
+        entropy=picked.entropy,
+        energy=picked.energy,
+        masses=picked.masses,
+        iterations=picked.res.iterations,
+        residual_norm=picked.residual_norm,
         fixedrho_joint_solve_active=true,
+        fixedrho_joint_selected_method=selected_method,
+        fixedrho_joint_selected_quality=selected_attempt.quality_tag,
+        fixedrho_joint_fallback_used=(selected_attempt.quality_tag == :fallback),
     )
 end
 
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
-    fixedrho_joint_solve = get(kwargs, :fixedrho_joint_solve, false)
+    fixedrho_joint_solve = get(kwargs, :fixedrho_joint_solve, true)
     fixedrho_joint_solve isa Bool || throw(ArgumentError("fixedrho_joint_solve must be Bool, got $(typeof(fixedrho_joint_solve))"))
+
+    if !fixedrho_joint_solve
+        seed_guess = get(kwargs, :seed_guess, nothing)
+        seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))
+
+        legacy = _solve_constraint_fixedrho(model, T_fm, mode.rho_target; pairs(kwargs)...)
+        return (
+            converged=Bool(legacy.converged),
+            solution=Vector{Float64}(legacy.solution),
+            x_state=legacy.x_state,
+            mu_vec=legacy.mu_vec,
+            omega=legacy.omega,
+            pressure=legacy.pressure,
+            rho_norm=legacy.rho_norm,
+            entropy=legacy.entropy,
+            energy=legacy.energy,
+            masses=legacy.masses,
+            iterations=legacy.iterations,
+            residual_norm=legacy.residual_norm,
+            hard_constraint_ok=Bool(get(legacy, :converged, false)),
+            failed_constraints=(Bool(get(legacy, :converged, false)) ? Symbol[] : Symbol[:legacy_solver_failed]),
+            selection_reason=:legacy_fixedrho_solver,
+            selected_index=1,
+            candidate_count=1,
+            fixedrho_joint_solve_requested=false,
+            fixedrho_joint_solve_active=false,
+            fixedrho_joint_fallback=false,
+            fixedrho_joint_selected_method=:none,
+            fixedrho_joint_selected_quality=:bad,
+            fixedrho_joint_fallback_used=false,
+        )
+    end
 
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))
 
-    seed_pool = if haskey(kwargs, :seed_candidates)
+    provided_seed_pool = if haskey(kwargs, :seed_candidates)
         [Float64.(s) for s in kwargs[:seed_candidates]]
     else
-        _build_default_seed_candidates(seed_guess)
+        Vector{Vector{Float64}}()
+    end
+    default_seed_pool = _build_default_seed_candidates(seed_guess)
+
+    primary_seed = Float64.(seed_guess)
+    primary_method = if haskey(kwargs, :nlsolve_method)
+        kwargs[:nlsolve_method]
+    else
+        Bool(get(kwargs, :continuity_seed, false)) ? :newton : :trust_region
+    end
+    primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
+    fallback_method = get(kwargs, :fallback_method, :trust_region)
+
+    fallback_seeds = Vector{Vector{Float64}}()
+    seed_seen = Set{String}()
+    seed_key(seed_vec::AbstractVector{<:Real}) = join(round.(Float64.(seed_vec); digits=12), ",")
+
+    primary_key = seed_key(primary_seed)
+    push!(seed_seen, primary_key)
+
+    for seed in provided_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+    for seed in default_seed_pool
+        k = seed_key(seed)
+        if !(k in seed_seen)
+            push!(fallback_seeds, seed)
+            push!(seed_seen, k)
+        end
+    end
+
+    attempt_plan = NamedTuple[]
+    push!(attempt_plan, (
+        seed=primary_seed,
+        method=primary_method,
+        use_fallback=primary_use_fallback,
+        fallback_method=fallback_method,
+        attempt_origin=:primary,
+    ))
+
+    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+        push!(attempt_plan, (
+            seed=primary_seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:method_rescue,
+        ))
+    end
+
+    for seed in fallback_seeds
+        push!(attempt_plan, (
+            seed=seed,
+            method=:trust_region,
+            use_fallback=false,
+            fallback_method=:trust_region,
+            attempt_origin=:seed_rescue,
+        ))
     end
 
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
 
     candidates = NamedTuple[]
-    for (seed_index, seed) in enumerate(seed_pool)
+    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
         local raw
         try
             local_kwargs = Dict{Symbol,Any}(kwargs)
-            local_kwargs[:seed_guess] = seed
+            local_kwargs[:seed_guess] = attempt_cfg.seed
+            local_kwargs[:nlsolve_method] = attempt_cfg.method
+            local_kwargs[:trust_region_fallback] = attempt_cfg.use_fallback
+            local_kwargs[:fallback_method] = attempt_cfg.fallback_method
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
-            solved = if fixedrho_joint_solve
-                joint = try
-                    _fixedrho_joint_problem_spec_forward_solve(model, mode, T_fm; pairs(local_kwargs)...)
-                catch
-                    nothing
-                end
-
-                joint_res = joint === nothing ? Inf : get(joint, :residual_norm, Inf)
-                joint_ok = joint !== nothing && isfinite(joint_res) && joint_res <= max(get(local_kwargs, :residual_norm_max, 1e-6), 1e-3)
-
-                if joint_ok
-                    (; joint..., fixedrho_joint_solve_active=true, fixedrho_joint_fallback=false)
-                else
-                    legacy = _solve_constraint_fixedrho(model, T_fm, mode.rho_target; pairs(local_kwargs)...)
-                    (; legacy..., fixedrho_joint_solve_active=false, fixedrho_joint_fallback=true, fixedrho_joint_attempt_residual=joint_res)
-                end
-            else
-                legacy = _solve_constraint_fixedrho(model, T_fm, mode.rho_target; pairs(local_kwargs)...)
-                (; legacy..., fixedrho_joint_solve_active=false, fixedrho_joint_fallback=false)
-            end
+            solved = _fixedrho_joint_problem_spec_forward_solve(model, mode, T_fm; pairs(local_kwargs)...)
             raw = (
                 converged=Bool(solved.converged),
                 solution=Float64.(solved.solution),
@@ -224,10 +372,17 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
                 fixedrho_joint_solve_requested=fixedrho_joint_solve,
                 fixedrho_joint_solve_active=get(solved, :fixedrho_joint_solve_active, false),
-                fixedrho_joint_fallback=get(solved, :fixedrho_joint_fallback, false),
+                fixedrho_joint_fallback=false,
+                fixedrho_joint_selected_method=get(solved, :fixedrho_joint_selected_method, :none),
+                fixedrho_joint_selected_quality=get(solved, :fixedrho_joint_selected_quality, :bad),
+                fixedrho_joint_fallback_used=get(solved, :fixedrho_joint_fallback_used, false),
+                fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
             )
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            if ok
+                break
+            end
         catch
             raw = (
                 converged=false,
@@ -246,8 +401,12 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 fixedrho_joint_solve_requested=fixedrho_joint_solve,
                 fixedrho_joint_solve_active=false,
                 fixedrho_joint_fallback=false,
+                fixedrho_joint_selected_method=:none,
+                fixedrho_joint_selected_quality=:bad,
+                fixedrho_joint_fallback_used=false,
+                fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
             )
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(seed_index)))
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
         end
     end
 
@@ -275,6 +434,9 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         fixedrho_joint_solve_requested=fixedrho_joint_solve,
         fixedrho_joint_solve_active=get(s, :fixedrho_joint_solve_active, false),
         fixedrho_joint_fallback=get(s, :fixedrho_joint_fallback, false),
+        fixedrho_joint_selected_method=get(s, :fixedrho_joint_selected_method, :none),
+        fixedrho_joint_selected_quality=get(s, :fixedrho_joint_selected_quality, :bad),
+        fixedrho_joint_fallback_used=get(s, :fixedrho_joint_fallback_used, false),
     )
 end
 

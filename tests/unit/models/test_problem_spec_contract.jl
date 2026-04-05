@@ -79,6 +79,7 @@ end
         @test result.fixedrho_joint_solve_requested
         @test haskey(result, :fixedrho_joint_solve_active)
         @test haskey(result, :fixedrho_joint_fallback)
+        @test !result.fixedrho_joint_fallback
 
         @test_throws ArgumentError spec.forward_solve(
             model,
@@ -88,6 +89,20 @@ end
             p_num=8,
             t_num=4,
         )
+
+        legacy_result = spec.forward_solve(
+            model,
+            T_fm;
+            fixedrho_joint_solve=false,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test !legacy_result.fixedrho_joint_solve_requested
+        @test !legacy_result.fixedrho_joint_solve_active
+        @test legacy_result.selection_reason == :legacy_fixedrho_solver
+        @test haskey(legacy_result, :hard_constraint_ok)
     end
 
     @testset "fixedrho forward_solve can run joint solve path" begin
@@ -109,7 +124,8 @@ end
         )
 
         @test result.fixedrho_joint_solve_requested
-        @test result.fixedrho_joint_solve_active || result.fixedrho_joint_fallback
+        @test result.fixedrho_joint_solve_active
+        @test !result.fixedrho_joint_fallback
         @test isfinite(result.residual_norm)
         @test result.residual_norm >= 0.0
     end
