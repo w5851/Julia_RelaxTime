@@ -710,3 +710,21 @@ Files:
   5) 阶段结论：
      - `FixedRho` 已完成“外层计划编排”与通用主链的第一层统一；
      - 当前仍保留 `FixedRho` 专用 joint solve 主体，后续若继续统一，应把“候选执行与结果整形”再抽一层通用执行器，并单独跑 parity/regression gate。
+
+- 2026-04-05："额外约束作为通用输入" 阶段 6（候选执行器统一层）
+  1) 目标：
+     - 进一步收敛 `FixedRho` 与 non-rho 的共同外层流程，将“attempt 执行 + hard-rule 评估 + selector 选优”抽成统一执行器。
+  2) 生产实现（`src/models/solver/ProblemSpec.jl`）：
+     - 新增 `_execute_governed_attempt_plan(...)`：
+       - 输入 `attempt_plan + solve_attempt + failure_attempt + hard_constraints + selector`；
+       - 统一处理 candidate 生成、约束评估、提前收敛退出、最终 selector 选取。
+     - `FixedRho` 前向求解与 `_governed_nonrho_problem_spec_forward_solve(...)` 改为复用该统一执行器；
+     - 维持原始输出契约不变（包括 `fixedrho_joint_*` 与 `governed_*` 字段）。
+  3) 验证结果：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（176/176）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+  4) 阶段结论：
+     - `FixedRho` 与 non-rho 已在“计划生成 + 候选执行 + 选优治理”三层对齐；
+     - 当前剩余 mode 差异已主要收敛到“内核 solve closure + 结果字段差异（joint metadata）”，符合逐层去分叉目标。
