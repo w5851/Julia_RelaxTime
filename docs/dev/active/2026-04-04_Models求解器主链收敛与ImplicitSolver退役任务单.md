@@ -396,3 +396,55 @@ Files:
   4) 状态结论：
      - `Solver.jl` 已无 `ImplicitSolver.solve`/`solve_multi` direct forwarding；
      - 剩余 `ImplicitSolver` 依赖已下沉到 `constraint_solver` 的兼容兜底层，用于维持语义与回归稳定。
+
+- 2026-04-05：Step4 强收口尝试与回滚结论（阻塞确认）
+  1) 本轮尝试内容：
+     - 试图删除 `src/models/solver/ImplicitSolver.jl`，并清理 `Models.jl` include 与测试中对 `Models.ImplicitSolver` 的访问。
+  2) 实测结果（失败）：
+     - non-FixedMu 默认语义出现系统性回归：`tests/unit/models/test_solver.jl` 中 `FixedEntropy/FixedSigma/FixedRho/FixedAsymmetricRho` parity 大面积失败；
+     - 独立复现显示默认 `FixedEntropy` 可退化到不收敛（`converged=false`，残差显著偏大）。
+  3) 根因判断：
+     - 当前主链对 non-FixedMu 默认语义仍存在历史算法依赖；`constraint_solver` 侧尚未具备与历史路径完全等价的稳定实现；
+     - 直接移除 `ImplicitSolver` 会破坏既有默认行为与回归基线。
+  4) 处理决定：
+     - 已按低风险策略回滚本轮 Step4 强删尝试，恢复到 `cfb7228` 后的稳定语义状态；
+     - 保持 B3 已完成成果（`Solver.jl` 无 direct forwarding）不变。
+   5) 当前任务单状态：
+      - **未闭环**（Step4 / DoD 尚未满足）；
+      - 下一轮需单独立项完成 non-FixedMu 默认语义等价重构后，方可真正删除 `ImplicitSolver.jl`。
+
+- 2026-04-05：FixedRho joint 策略重构（按“展平与求解策略解耦 + 非 FixedMu 懒触发”执行）
+  1) 根因复核结论：
+     - `ImplicitSolver` 在 `FixedRho` 上是 8 维联合方程单层求解（非双层 μ 外层 + gap 内层）；
+     - 先前 joint 不稳定主因是“求解策略耦合与默认方法不匹配”（非展平方程本身错误）。
+  2) 代码策略调整（`src/models/solver/ProblemSpec.jl`）：
+     - 保留 joint 负责展平残差（`build_residual!(FixedRho, ...)`），求解策略统一走 `solve_root_with_policy(...)`；
+     - `FixedRho` 引入 staged/lazy attempts：
+       - 先 primary 单次尝试；
+       - 失败后才触发 method-rescue / seed-rescue；
+       - 命中满足 hard-constraints 的候选后提前停止（early-stop）；
+     - 方法默认值改为“连续性优先”自适应：
+       - `continuity_seed=true` 默认 `:newton`；
+       - 否则默认 `:trust_region`；
+     - 增补 joint 诊断元信息：
+       - `fixedrho_joint_selected_method`
+       - `fixedrho_joint_selected_quality`
+       - `fixedrho_joint_fallback_used`
+       - `fixedrho_joint_attempt_origin`。
+  3) 测试口径更新：
+     - regression：`tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl`
+       - 新增 continuity-like `joint-only` 稳定性回归（滚动 seed）；
+       - 保留/强化 joint parity gates（no-fallback 与 with-fallback 分支口径）。
+     - unit：`tests/unit/models/test_problem_spec_contract.jl`
+       - 同步 FixedRho forward_solve 合同与元信息断言。
+     - unit：`tests/unit/models/test_solver.jl`
+       - `FixedRho default/bridge semantic parity (single point)` 调整为与默认 seed 语义一致（bridge 使用 `get_seed(...)` 的 mode-extended 初值），避免“手工未扩展 seed”造成非目标分支。
+  4) 本轮验证通过：
+     - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）。
+  5) 当前状态与约束：
+     - `FixedMu` 强制多 attempts 选优逻辑保持不变；
+     - 非 `FixedMu` 按“懒触发 attempts”推进，优先对齐真实扫描使用场景（continuity seed）；
+     - `fixedrho_joint_solve=false` 兼容分支仍保留（便于过渡期对照/回归），尚未进行物理语义层面的全量 legacy 退役。

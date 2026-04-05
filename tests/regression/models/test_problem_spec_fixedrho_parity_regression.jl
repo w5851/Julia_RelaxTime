@@ -9,6 +9,47 @@ end
 
 to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
 
+@testset "problem spec fixedrho continuity-like seeds with joint only" begin
+    model = Models.create_model(:PNJL)
+    base_seed = copy(Models.pnjl_module().HADRON_SEED_8)
+    points = [
+        (T_MeV=90.0, rho_target=0.2),
+        (T_MeV=100.0, rho_target=0.4),
+        (T_MeV=110.0, rho_target=0.6),
+        (T_MeV=120.0, rho_target=0.8),
+        (T_MeV=130.0, rho_target=1.0),
+    ]
+
+    seed = copy(base_seed)
+    for point in points
+        mode = Models.FixedRho(point.rho_target)
+        spec = Models.build_problem_spec(mode)
+        T_fm = to_fm_inv(point.T_MeV)
+
+        result = Models.solve_constraint(
+            model,
+            mode,
+            T_fm;
+            problem_spec=spec,
+            fixedrho_joint_solve=true,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            nlsolve_method=:trust_region,
+            trust_region_fallback=true,
+            fallback_method=:trust_region,
+            residual_norm_max=1e-6,
+        )
+
+        @test result.fixedrho_joint_solve_requested
+        @test result.fixedrho_joint_solve_active
+        @test result.converged
+        @test result.residual_norm <= 1e-6
+
+        seed = copy(result.solution)
+    end
+end
+
 @testset "problem spec fixedrho parity regression" begin
     model = Models.create_model(:PNJL)
     points = [
@@ -17,11 +58,13 @@ to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
         (T_MeV=130.0, rho_target=1.0),
     ]
 
+    rolling_seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
     for point in points
         mode = Models.FixedRho(point.rho_target)
         spec = Models.build_problem_spec(mode)
         T_fm = to_fm_inv(point.T_MeV)
-        seed = Models.pnjl_module().HADRON_SEED_8
+        seed = copy(rolling_seed)
 
         direct = Models.solve_constraint(
             model,
@@ -64,7 +107,8 @@ to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
         @test isapprox(direct.residual_norm, via_spec.residual_norm; rtol=1e-6, atol=1e-10)
 
         @test via_spec_joint.fixedrho_joint_solve_requested
-        @test via_spec_joint.fixedrho_joint_solve_active || via_spec_joint.fixedrho_joint_fallback
+        @test via_spec_joint.fixedrho_joint_solve_active
+        @test !via_spec_joint.fixedrho_joint_fallback
         @test via_spec_joint.selection_reason in (
             :pressure_max_under_constraints,
             :residual_min_under_constraints,
@@ -72,5 +116,97 @@ to_fm_inv(x_mev::Real) = Float64(x_mev) / HBARC_MEV_FM
         )
         @test isfinite(via_spec_joint.residual_norm)
         @test via_spec_joint.residual_norm <= 1e-3
+
+        if via_spec_joint.converged
+            rolling_seed = copy(via_spec_joint.solution)
+        end
     end
+end
+
+@testset "problem spec fixedrho joint parity gates" begin
+    model = Models.create_model(:PNJL)
+    T_fm = to_fm_inv(100.0)
+    mode = Models.FixedRho(0.2)
+    spec = Models.build_problem_spec(mode)
+    seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+    legacy_no_fallback = Models.ImplicitSolver.solve(
+        mode,
+        T_fm;
+        xi=0.0,
+        seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+        p_num=8,
+        t_num=4,
+        nlsolve_method=:trust_region,
+        trust_region_fallback=false,
+        residual_norm_max=1e-6,
+    )
+
+    via_joint_no_fallback = Models.solve_constraint(
+        model,
+        mode,
+        T_fm;
+        problem_spec=spec,
+        fixedrho_joint_solve=true,
+        seed_guess=seed,
+        seed_candidates=(seed,),
+        p_num=8,
+        t_num=4,
+        nlsolve_method=:trust_region,
+        trust_region_fallback=false,
+        residual_norm_max=1e-6,
+    )
+
+    @test legacy_no_fallback.converged
+    @test via_joint_no_fallback.converged
+    @test via_joint_no_fallback.fixedrho_joint_solve_active
+    @test haskey(via_joint_no_fallback, :fixedrho_joint_selected_method)
+    @test via_joint_no_fallback.fixedrho_joint_selected_method == :trust_region
+    @test haskey(via_joint_no_fallback, :fixedrho_joint_fallback_used)
+    @test !via_joint_no_fallback.fixedrho_joint_fallback_used
+    @test isapprox(via_joint_no_fallback.pressure, legacy_no_fallback.pressure; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.rho_norm, legacy_no_fallback.rho_norm; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.entropy, legacy_no_fallback.entropy; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.energy, legacy_no_fallback.energy; rtol=1e-6, atol=1e-8)
+
+    legacy_with_fallback = Models.ImplicitSolver.solve(
+        mode,
+        T_fm;
+        xi=0.0,
+        seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
+        p_num=8,
+        t_num=4,
+        nlsolve_method=:newton,
+        trust_region_fallback=true,
+        fallback_method=:trust_region,
+        residual_norm_max=1e-6,
+    )
+
+    via_joint_with_fallback = Models.solve_constraint(
+        model,
+        mode,
+        T_fm;
+        problem_spec=spec,
+        fixedrho_joint_solve=true,
+        seed_guess=seed,
+        seed_candidates=(seed,),
+        p_num=8,
+        t_num=4,
+        nlsolve_method=:newton,
+        trust_region_fallback=true,
+        fallback_method=:trust_region,
+        residual_norm_max=1e-6,
+    )
+
+    @test legacy_with_fallback.converged
+    @test via_joint_with_fallback.converged
+    @test via_joint_with_fallback.fixedrho_joint_solve_active
+    @test haskey(via_joint_with_fallback, :fixedrho_joint_selected_method)
+    @test via_joint_with_fallback.fixedrho_joint_selected_method in (:newton, :trust_region)
+    @test haskey(via_joint_with_fallback, :fixedrho_joint_fallback_used)
+    @test (via_joint_with_fallback.fixedrho_joint_selected_method == :trust_region) == via_joint_with_fallback.fixedrho_joint_fallback_used
+    @test isapprox(via_joint_with_fallback.pressure, legacy_with_fallback.pressure; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.rho_norm, legacy_with_fallback.rho_norm; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.entropy, legacy_with_fallback.entropy; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.energy, legacy_with_fallback.energy; rtol=1e-6, atol=1e-8)
 end
