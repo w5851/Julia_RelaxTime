@@ -448,3 +448,21 @@ Files:
      - `FixedMu` 强制多 attempts 选优逻辑保持不变；
      - 非 `FixedMu` 按“懒触发 attempts”推进，优先对齐真实扫描使用场景（continuity seed）；
      - `fixedrho_joint_solve=false` 兼容分支仍保留（便于过渡期对照/回归），尚未进行物理语义层面的全量 legacy 退役。
+
+- 2026-04-05：FixedRho legacy 分支收口（ProblemSpec 侧）
+  1) 处理原则：在 `FixedRho` 路径中继续遵循“joint 负责展平、策略层负责求解”，并按非 `FixedMu` 懒触发策略运行。
+  2) 代码收口：
+     - 删除 `ProblemSpec._fixedrho_problem_spec_forward_solve(...)` 中 `fixedrho_joint_solve=false` 时回退 `_solve_constraint_fixedrho(...)` 的分支；
+     - 明确将 `fixedrho_joint_solve=false` 视为不支持参数，抛出 `ArgumentError`；
+     - `FixedRho` 的 ProblemSpec forward_solve 统一走 joint + lazy attempts 主链。
+  3) 测试同步：
+     - `tests/unit/models/test_problem_spec_contract.jl` 中将 `fixedrho_joint_solve=false` 口径更新为抛错断言；
+     - 保留并复用既有 continuity-like/joint parity gates 回归集。
+  4) 验证通过：
+     - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）。
+  5) 阶段结论：
+     - `FixedRho` 在 ProblemSpec 层已不再保留 legacy 兼容分支；
+     - 仍需后续轮次继续处理 `constraint_solver` 其他 non-FixedMu 模式中的 legacy fallback 依赖，方可推进 Step4 全量退役。
