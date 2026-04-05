@@ -508,6 +508,82 @@ Files:
      - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（121/121）
      - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
      - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`（fixedrho guard 全通过，防回归）。
-  4) 阶段状态：
-     - 非 `FixedMu` 三个模式（`FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho`）已统一到“懒触发 attempts + continuity-aware 默认方法”的策略骨架；
-     - `FixedMu` 继续保持“强制多 attempts 选优”作为唯一多解主模式。
+   4) 阶段状态：
+      - 非 `FixedMu` 三个模式（`FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho`）已统一到“懒触发 attempts + continuity-aware 默认方法”的策略骨架；
+      - `FixedMu` 继续保持“强制多 attempts 选优”作为唯一多解主模式。
+
+- 2026-04-05：继续推广到其他求解模式（legacy fallback 治理化收口，非强删）
+  1) 红灯验证（先证伪）：
+     - 直接移除 `constraint_solver` 中 `FixedEntropy/FixedSigma/FixedAsymmetricRho` 的 `ImplicitSolver` fallback 后，回归立即失败：
+       - `tests/unit/models/test_solver.jl` 失败（non-FixedMu parity 中 Entropy/Sigma/Asym convergence 断言红灯）；
+       - `tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl` 失败（43 用例中 6 处红灯，目标量显著偏离）。
+     - 结论：三模式当前仍存在真实稳定性依赖，不能直接移除 fallback。
+  2) 低风险推进（保语义前提下继续“推广”）：
+     - 在 `constraint_solver.jl` 为三模式新增显式治理参数：
+       - `_solve_constraint_fixedentropy(...; allow_legacy_fallback::Bool=true, ...)`
+       - `_solve_constraint_fixedsigma(...; allow_legacy_fallback::Bool=true, ...)`
+       - `_solve_constraint_fixedasymrho(...; allow_legacy_fallback::Bool=true, ...)`
+     - fallback 结果新增可观测元信息：`legacy_fallback_used::Bool`（true/false）。
+     - 在 `ProblemSpec.jl` 将 `allow_legacy_fallback` 贯通为可配置参数并回传到 forward_solve 结果，形成统一观测口径。
+  3) 测试补强：
+     - `tests/unit/models/test_problem_spec_contract.jl` 新增 non-rho governed metadata 断言：
+       - `haskey(solved, :legacy_fallback_used)`
+       - `solved.legacy_fallback_used isa Bool`。
+  4) 验证通过（本轮落地后的绿灯）：
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（127/127）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+     - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`（fixedrho guards 全通过）
+  5) 阶段结论：
+      - 已将“是否启用 legacy fallback”从隐式行为升级为显式可治理开关，并提供可观测证据位；
+      - 这为下一轮按模式逐步压缩 fallback 使用率提供了数据抓手；
+      - 但截至本轮，`FixedEntropy/FixedSigma/FixedAsymmetricRho` 仍不具备无 fallback 的稳定默认语义，暂不进入 Step4 强删。
+
+- 2026-04-05：按 FixedRho 架构继续推广（治理元信息对齐到非 FixedRho 模式）
+  1) 先加红灯契约（TDD）：
+     - 在 `tests/unit/models/test_problem_spec_contract.jl` 为 `FixedEntropy/FixedSigma/FixedAsymmetricRho` 增加治理元信息断言：
+       - `governed_selected_method`
+       - `governed_selected_quality`
+       - `governed_fallback_used`
+     - 并新增 `allow_legacy_fallback=false + nlsolve_method=:newton + trust_region_fallback=false` 场景，约束 `governed_fallback_used == false`。
+  2) 绿灯实现（`ProblemSpec` 非 rho 三模式）：
+     - 在每个 attempt candidate 中补齐并透传治理字段：
+       - `governed_selected_method=attempt_cfg.method`
+       - `governed_selected_quality`（`ok => :good`，否则按 solver 状态标记 `:degraded/:bad`）
+       - `governed_fallback_used=(attempt_origin == :method_rescue)`
+       - `governed_attempt_origin`
+     - 在 forward_solve 最终返回中统一暴露上述三项，形成与 `FixedRho` 同风格的策略可观测面。
+  3) 验证结果：
+     - 通过：
+       - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（160/160）
+       - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+       - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+       - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl"; include("tests/unit/runtests.jl")'`（47/47）
+       - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+       - `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_problem_spec_fixedrho_parity_regression.jl"; include("tests/regression/runtests.jl")'`（78/78）
+     - 已知红灯（独立既有口径，非本轮新增）：
+       - `tests/integration/models/test_solver_backend_semantic_parity_guard.jl` 仍在 `FixedRho` case 失败，表现为 models 与 legacy 在单点语义上不一致（`rho_norm/entropy/energy` 偏离）。
+  4) 阶段结论：
+     - 本轮已完成“按 FixedRho 架构推广”的第一层：非 FixedRho 三模式具备统一策略治理元信息与 fallback 可观测性；
+     - 下一步应进入第二层：利用这些治理字段把 `legacy fallback` 从“兜底可用”推进到“可量化收缩”（按 mode/点位分层）。
+
+- 2026-04-05：FixedRho 红灯快速修复（将 legacy 该点有效初解并入当前初解池）
+  1) 背景：`tests/integration/models/test_solver_backend_semantic_parity_guard.jl` 在 `T=110MeV, rho=0.6` 的 FixedRho case 红灯；
+     诊断显示 models 路径 9 个候选均落入同一坏盆地（`rho≈0.00129`），而 legacy 可收敛到目标分支。
+  2) 实施：
+     - 在 `ProblemSpec._fixedrho_problem_spec_forward_solve(...)` 中，除原有 primary/provided/default seeds 外，显式加入一条 legacy 语义 seed：
+       - `legacy_seed = extend_seed(primary_seed[1:5], mode)`（若主 seed 已是 8 维也重建其 6:8 分量）；
+       - 去重后加入 fallback seed pool。
+     - 目的：把 legacy 在该类点位的有效 mode-aware 初解纳入当前主链候选池，先修收敛盆地覆盖问题。
+  3) 测试补强：
+     - `tests/integration/models/test_solver_backend_semantic_parity_guard.jl` 新增：
+       - `FixedRho ProblemSpec fallback seed pool includes legacy-mode seed`，断言 `T=110MeV, rho=0.6` 下 `models` 路径可收敛并满足目标密度。
+  4) 验证通过：
+     - `julia --project=. -e 'include("tests/integration/models/test_solver_backend_semantic_parity_guard.jl")'`（39/39 + 新 testset 2/2）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（160/160）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+     - `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_problem_spec_fixedrho_parity_regression.jl"; include("tests/regression/runtests.jl")'`（78/78）
+  5) 结论：
+     - 该红灯已由“吸引盆地覆盖不足”被修复；
+     - 该改动不改变求解器主干结构，仅增加一条 mode-aware 候选 seed，属于低风险稳态增强。

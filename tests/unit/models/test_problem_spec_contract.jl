@@ -292,8 +292,51 @@ end
             @test solved isa NamedTuple
             @test haskey(solved, :selection_reason)
             @test haskey(solved, :candidate_count)
+            @test haskey(solved, :legacy_fallback_used)
+            @test haskey(solved, :governed_selected_method)
+            @test haskey(solved, :governed_selected_quality)
+            @test haskey(solved, :governed_fallback_used)
+            @test solved.legacy_fallback_used isa Bool
+            @test solved.governed_selected_method isa Symbol
+            @test solved.governed_selected_quality isa Symbol
+            @test solved.governed_fallback_used isa Bool
             @test solved.selection_reason in (:pressure_max_under_constraints, :residual_min_under_constraints, :no_candidate_passed_constraints)
             @test solved.candidate_count >= 1
+        end
+    end
+
+    @testset "non-rho forward_solve supports allow_legacy_fallback toggle" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        modes = (
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(10.0),
+            Models.FixedAsymmetricRho(0.05, 1.0, 0.0),
+        )
+
+        for mode in modes
+            spec = Models.build_problem_spec(mode)
+            solved = spec.forward_solve(
+                model,
+                T_fm;
+                seed_guess=seed,
+                rho0=0.16,
+                p_num=8,
+                t_num=4,
+                residual_norm_max=1e-6,
+                iterations=120,
+                nlsolve_method=:newton,
+                trust_region_fallback=false,
+                allow_legacy_fallback=false,
+            )
+
+            @test solved isa NamedTuple
+            @test haskey(solved, :legacy_fallback_used)
+            @test solved.legacy_fallback_used isa Bool
+            @test haskey(solved, :governed_fallback_used)
+            @test solved.governed_fallback_used == false
         end
     end
 
