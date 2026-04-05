@@ -406,19 +406,16 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
     hard_constraints = _append_extra_feasible_rule(hard_constraints, extra_constraints, mode)
 
-    candidates = NamedTuple[]
-    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
-        local raw
-        try
-            local_kwargs = Dict{Symbol,Any}(kwargs)
-            local_kwargs[:seed_guess] = attempt_cfg.seed
-            local_kwargs[:nlsolve_method] = attempt_cfg.method
-            local_kwargs[:trust_region_fallback] = attempt_cfg.use_fallback
-            local_kwargs[:fallback_method] = attempt_cfg.fallback_method
+    selector_fn = _resolve_candidate_selector(kwargs)
+    selected, candidates = _execute_governed_attempt_plan(
+        attempt_plan,
+        kwargs,
+        hard_constraints,
+        selector_fn,
+        function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
-
             solved = _fixedrho_joint_problem_spec_forward_solve(model, mode, T_fm; pairs(local_kwargs)...)
-            raw = (
+            return (
                 converged=Bool(solved.converged),
                 solution=Float64.(solved.solution),
                 x_state=solved.x_state,
@@ -440,13 +437,9 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 fixedrho_joint_fallback_used=get(solved, :fixedrho_joint_fallback_used, false),
                 fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
             )
-            ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
-            if ok
-                break
-            end
-        catch
-            raw = (
+        end,
+        function (base_kwargs, attempt_cfg, _)
+            return (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -459,7 +452,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 masses=zeros(3),
                 iterations=0,
                 residual_norm=Inf,
-                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                residual_norm_max=Float64(get(base_kwargs, :residual_norm_max, 1e-6)),
                 fixedrho_joint_solve_requested=fixedrho_joint_solve,
                 fixedrho_joint_solve_active=false,
                 fixedrho_joint_fallback=false,
@@ -468,12 +461,8 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
                 fixedrho_joint_fallback_used=false,
                 fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
             )
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
-        end
-    end
-
-    selector_fn = _resolve_candidate_selector(kwargs)
-    selected = selector_fn(candidates)
+        end,
+    )
     s = selected.selected_candidate
     return (
         converged=Bool(s.converged),
@@ -567,6 +556,39 @@ function _governed_mode_forward_solve(
     )
 end
 
+function _execute_governed_attempt_plan(
+    attempt_plan,
+    kwargs::Dict{Symbol,Any},
+    hard_constraints,
+    selector_fn::Function,
+    solve_attempt::Function,
+    failure_attempt::Function,
+)
+    candidates = NamedTuple[]
+    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
+        try
+            local_kwargs = Dict{Symbol,Any}(kwargs)
+            local_kwargs[:seed_guess] = attempt_cfg.seed
+            local_kwargs[:nlsolve_method] = attempt_cfg.method
+            local_kwargs[:trust_region_fallback] = attempt_cfg.use_fallback
+            local_kwargs[:fallback_method] = attempt_cfg.fallback_method
+
+            raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
+            ok, failed = evaluate_hard_constraints(raw, hard_constraints)
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            if ok
+                break
+            end
+        catch
+            raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
+            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
+        end
+    end
+
+    selected = selector_fn(candidates)
+    return selected, candidates
+end
+
 function _governed_nonrho_problem_spec_forward_solve(
     model::AbstractQCDModel,
     mode::ConstraintMode,
@@ -611,13 +633,13 @@ function _governed_nonrho_problem_spec_forward_solve(
     hard_constraints = get(kwargs, :hard_constraints, default_hard_constraint_rules(; physicality_check=physicality_check))
     hard_constraints = _append_extra_feasible_rule(hard_constraints, extra_constraints, mode)
 
-    candidates = NamedTuple[]
-    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
-        local raw
-        try
-            local_kwargs = Dict{Symbol,Any}(kwargs)
-            local_kwargs[:seed_guess] = attempt_cfg.seed
-            local_kwargs[:nlsolve_method] = attempt_cfg.method
+    selector_fn = _resolve_candidate_selector(kwargs)
+    selected, candidates = _execute_governed_attempt_plan(
+        attempt_plan,
+        kwargs,
+        hard_constraints,
+        selector_fn,
+        function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
             delete!(local_kwargs, :trust_region_fallback)
             delete!(local_kwargs, :fallback_method)
@@ -641,14 +663,9 @@ function _governed_nonrho_problem_spec_forward_solve(
                 governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
                 governed_attempt_origin=attempt_cfg.attempt_origin,
             )
-            raw = (; raw..., attempt_origin_key => attempt_cfg.attempt_origin)
-            ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            selected_quality = ok ? :good : raw.governed_selected_quality
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, governed_selected_quality=selected_quality, seed_index=Int(attempt_index)))
-            if ok
-                break
-            end
-        catch
+            return (; raw..., attempt_origin_key => attempt_cfg.attempt_origin)
+        end,
+        function (base_kwargs, attempt_cfg, _)
             raw = (
                 converged=false,
                 solution=Float64[],
@@ -662,20 +679,16 @@ function _governed_nonrho_problem_spec_forward_solve(
                 masses=zeros(3),
                 iterations=0,
                 residual_norm=Inf,
-                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                residual_norm_max=Float64(get(base_kwargs, :residual_norm_max, 1e-6)),
                 solver_converged=false,
                 governed_selected_method=attempt_cfg.method,
                 governed_selected_quality=:bad,
                 governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
                 governed_attempt_origin=attempt_cfg.attempt_origin,
             )
-            raw = (; raw..., attempt_origin_key => attempt_cfg.attempt_origin)
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
-        end
-    end
-
-    selector_fn = _resolve_candidate_selector(kwargs)
-    selected = selector_fn(candidates)
+            return (; raw..., attempt_origin_key => attempt_cfg.attempt_origin)
+        end,
+    )
     s = selected.selected_candidate
     return (
         converged=Bool(s.converged),
