@@ -238,38 +238,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
     fixedrho_joint_solve = get(kwargs, :fixedrho_joint_solve, true)
     fixedrho_joint_solve isa Bool || throw(ArgumentError("fixedrho_joint_solve must be Bool, got $(typeof(fixedrho_joint_solve))"))
-
-    if !fixedrho_joint_solve
-        seed_guess = get(kwargs, :seed_guess, nothing)
-        seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))
-
-        legacy = _solve_constraint_fixedrho(model, T_fm, mode.rho_target; pairs(kwargs)...)
-        return (
-            converged=Bool(legacy.converged),
-            solution=Vector{Float64}(legacy.solution),
-            x_state=legacy.x_state,
-            mu_vec=legacy.mu_vec,
-            omega=legacy.omega,
-            pressure=legacy.pressure,
-            rho_norm=legacy.rho_norm,
-            entropy=legacy.entropy,
-            energy=legacy.energy,
-            masses=legacy.masses,
-            iterations=legacy.iterations,
-            residual_norm=legacy.residual_norm,
-            hard_constraint_ok=Bool(get(legacy, :converged, false)),
-            failed_constraints=(Bool(get(legacy, :converged, false)) ? Symbol[] : Symbol[:legacy_solver_failed]),
-            selection_reason=:legacy_fixedrho_solver,
-            selected_index=1,
-            candidate_count=1,
-            fixedrho_joint_solve_requested=false,
-            fixedrho_joint_solve_active=false,
-            fixedrho_joint_fallback=false,
-            fixedrho_joint_selected_method=:none,
-            fixedrho_joint_selected_quality=:bad,
-            fixedrho_joint_fallback_used=false,
-        )
-    end
+    fixedrho_joint_solve || throw(ArgumentError("fixedrho_joint_solve=false is no longer supported; FixedRho uses joint solve only"))
 
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))

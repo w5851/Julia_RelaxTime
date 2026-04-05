@@ -90,7 +90,7 @@ end
             t_num=4,
         )
 
-        legacy_result = spec.forward_solve(
+        @test_throws ArgumentError spec.forward_solve(
             model,
             T_fm;
             fixedrho_joint_solve=false,
@@ -99,10 +99,6 @@ end
             t_num=4,
             residual_norm_max=1e-6,
         )
-        @test !legacy_result.fixedrho_joint_solve_requested
-        @test !legacy_result.fixedrho_joint_solve_active
-        @test legacy_result.selection_reason == :legacy_fixedrho_solver
-        @test haskey(legacy_result, :hard_constraint_ok)
     end
 
     @testset "fixedrho forward_solve can run joint solve path" begin
