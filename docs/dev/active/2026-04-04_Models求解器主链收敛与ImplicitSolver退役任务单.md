@@ -491,3 +491,23 @@ Files:
      - `FixedRho` 已进入“joint 主链 + 无 legacy fallback”状态并保持回归稳定；
      - `FixedEntropy/FixedSigma` 已完成“懒触发 attempts + continuity-aware 默认方法”推广；
      - 下一步按计划进入 `FixedAsymmetricRho` 同策略迁移与收口。
+
+- 2026-04-05：FixedAsymmetricRho 策略推广（与 FixedRho/Entropy/Sigma 对齐）
+  1) 目标：将 `FixedAsymmetricRho` 统一到非 `FixedMu` 懒触发 attempts 框架，保持 “joint/约束构造与策略层解耦”。
+  2) 代码落地：
+     - `ProblemSpec._fixedasymrho_problem_spec_forward_solve(...)` 已改为 staged/lazy attempts：
+       - 先 primary 单次尝试；
+       - 失败后触发 method-rescue / seed-rescue；
+       - 命中 hard-constraints 后 early-stop；
+     - 默认方法改为 continuity-aware：
+       - `continuity_seed=true` 默认 `:newton`；
+       - 否则默认 `:trust_region`；
+     - `_solve_constraint_fixedasymrho(...)` 新增 `nlsolve_method` 参数并用于 outer nlsolve 方法选择。
+  3) 验证通过：
+     - `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`（25/25）
+     - `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`（121/121）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+     - `julia --project=. -e 'include("tests/regression/models/test_problem_spec_fixedrho_parity_regression.jl")'`（fixedrho guard 全通过，防回归）。
+  4) 阶段状态：
+     - 非 `FixedMu` 三个模式（`FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho`）已统一到“懒触发 attempts + continuity-aware 默认方法”的策略骨架；
+     - `FixedMu` 继续保持“强制多 attempts 选优”作为唯一多解主模式。

@@ -1154,6 +1154,7 @@ function _solve_constraint_fixedasymrho(
     p_num::Int=24,
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
+    nlsolve_method::Symbol=:trust_region,
     rho0::Real,
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
@@ -1232,7 +1233,7 @@ function _solve_constraint_fixedasymrho(
         residual_fn!,
         Float64.(mu0);
         autodiff=:forward,
-        method=:trust_region,
+        method=nlsolve_method,
         xtol=1e-9,
         ftol=1e-9,
         nlsolve_kwargs...,
