@@ -39,6 +39,60 @@ end
         end
     end
 
+    @testset "problem spec extra constraints shell contract" begin
+        @test isdefined(Models, :ExtraConstraints)
+        @test isdefined(Models, :default_extra_constraints)
+
+        mode = Models.FixedEntropy(0.5)
+        spec = Models.build_problem_spec(mode)
+        @test hasproperty(spec, :extra_constraints)
+
+        ec = spec.extra_constraints
+        @test ec isa Models.ExtraConstraints
+
+        seed = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
+        @test ec.seed_extend(seed, mode) == Float64.(seed)
+        @test ec.feasible((; converged=true), (;), mode)
+
+        residual_vec = zeros(Float64, 0)
+        ec.residual!(residual_vec, Float64[], Float64[], (;), mode)
+        @test isempty(residual_vec)
+    end
+
+    @testset "problem spec extra constraints hooks are wired in forward_solve" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        seed_extend_calls = Ref(0)
+        ec = Models.ExtraConstraints(
+            (F, x, theta, cfg, mode) -> nothing,
+            (candidate, params, mode) -> false,
+            (seed_vec, mode) -> begin
+                seed_extend_calls[] += 1
+                return Float64.(seed_vec)
+            end,
+        )
+
+        spec = Models.build_problem_spec(mode)
+        solved = spec.forward_solve(
+            model,
+            T_fm;
+            extra_constraints=ec,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+
+        @test seed_extend_calls[] >= 1
+        @test solved.hard_constraint_ok == false
+        @test :extra_constraint_failed in solved.failed_constraints
+    end
+
     @testset "fixedrho spec conditions and forward solve are wired" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedRho(0.2)
@@ -404,6 +458,40 @@ end
             iterations=120,
         )
         @test custom.selection_reason == :custom_selector
+    end
+
+    @testset "fixedasymrho forward_solve accepts extra_constraints hook" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedAsymmetricRho(0.05, 1.0, 0.0)
+        spec = Models.build_problem_spec(mode)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        seed_extend_calls = Ref(0)
+        ec = Models.ExtraConstraints(
+            (F, x, theta, cfg, mode) -> nothing,
+            (candidate, params, mode) -> false,
+            (seed_vec, mode) -> begin
+                seed_extend_calls[] += 1
+                return Float64.(seed_vec)
+            end,
+        )
+
+        solved = spec.forward_solve(
+            model,
+            T_fm;
+            extra_constraints=ec,
+            seed_guess=seed,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+
+        @test seed_extend_calls[] >= 1
+        @test solved.hard_constraint_ok == false
+        @test :extra_constraint_failed in solved.failed_constraints
     end
 
     @testset "build_conditions schema path parity for non-rho modes" begin

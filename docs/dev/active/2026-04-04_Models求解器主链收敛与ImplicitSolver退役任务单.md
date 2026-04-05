@@ -584,6 +584,105 @@ Files:
      - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
      - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
      - `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_problem_spec_fixedrho_parity_regression.jl"; include("tests/regression/runtests.jl")'`（78/78）
-  5) 结论：
-     - 该红灯已由“吸引盆地覆盖不足”被修复；
-     - 该改动不改变求解器主干结构，仅增加一条 mode-aware 候选 seed，属于低风险稳态增强。
+   5) 结论：
+      - 该红灯已由“吸引盆地覆盖不足”被修复；
+      - 该改动不改变求解器主干结构，仅增加一条 mode-aware 候选 seed，属于低风险稳态增强。
+
+- 2026-04-05："额外约束作为通用输入" 最小改动实施（阶段 1：护栏 + 壳层）
+  1) 目标与策略：
+     - 按“可回退、可验证、单点替换”推进，不改现有模式求解行为；
+     - 先在 `ProblemSpec` 层引入通用 `ExtraConstraints` 壳层，默认实现为 no-op，确保零行为变化。
+  2) TDD 护栏（先红后绿）：
+     - 在 `tests/unit/models/test_problem_spec_contract.jl` 新增 `problem spec extra constraints shell contract`：
+       - 要求 `Models.ExtraConstraints`、`Models.default_extra_constraints` 可见；
+       - 要求 `build_problem_spec(mode)` 返回的 `spec` 带 `extra_constraints` 字段；
+       - 要求默认 `seed_extend` 为 identity、`feasible` 恒真、`residual!` no-op。
+     - 先运行该测试出现预期红灯（符号/字段不存在），再实现生产代码并转绿。
+  3) 生产实现（零行为变化）：
+     - `src/models/solver/ProblemSpec.jl`：
+       - 新增 `ExtraConstraints` 结构（`residual!`, `feasible`, `seed_extend`）；
+       - 新增默认 no-op 适配 `default_extra_constraints()`；
+       - `ProblemSpec` 增加 `extra_constraints` 字段；
+       - `ProblemSpec(...)` 构造器新增关键字 `extra_constraints=default_extra_constraints()`。
+     - `src/models/Models.jl`：导出 `ExtraConstraints` 与 `default_extra_constraints`。
+  4) 验证：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（167/167）。
+  5) 阶段结论：
+     - 已完成你要求的最小接缝注入："模式差异可转为 extra constraints 输入" 的结构基础到位；
+     - 当前默认实现不改变任何既有解算路径行为，后续可在阶段 2/3 逐步接入主执行器钩子与两模式迁移。
+
+- 2026-04-05："额外约束作为通用输入" 阶段 2（主执行器钩子接入，保持默认行为）
+  1) 目标：
+     - 在不改变默认数值行为的前提下，让 `extra_constraints` 真正进入 `ProblemSpec` 主执行路径；
+     - 接入点仅限两类：`seed_extend` 与 `feasible`（`residual!` 先保留接口，不在本阶段强接）。
+  2) 实施改动：
+     - `src/models/solver/ProblemSpec.jl`
+       - 新增工具函数：
+         - `_resolve_extra_constraints(kwargs)`
+         - `_extend_seed_with_extra(seed, mode, extra)`
+         - `_append_extra_feasible_rule(rules, extra, mode)`
+       - `ProblemSpec(...)` 构造器保持兼容，同时将 `extra_constraints` 注入默认 `forward_solve` keyword；
+       - `_strip_problemspec_forwardsolve_kwargs!` 增加 `:extra_constraints`，防止下游 solver 收到无关键字；
+       - 在 `FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 的 `forward_solve` 中统一接入：
+         - `primary_seed/provided_seed_pool/default_seed_pool` 均经过 `extra.seed_extend(...)`；
+         - `hard_constraints` 追加 `extra.feasible(...) => :extra_constraint_failed` 规则。
+     - `tests/unit/models/test_problem_spec_contract.jl`
+       - 新增 `problem spec extra constraints hooks are wired in forward_solve`：
+         - 通过 `extra_constraints=ec` 显式传入，断言 `seed_extend` 被调用；
+         - 断言 `feasible=false` 会使 `hard_constraint_ok=false` 且失败原因包含 `:extra_constraint_failed`。
+  3) 验证结果：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（170/170）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+  4) 阶段结论：
+     - 已完成“通用额外约束输入”在主执行器的最小可用接入：可影响种子扩展与可行域判定；
+     - 默认 `default_extra_constraints()` 仍为 no-op，故对既有调用方保持行为兼容；
+     - 下阶段可迁移 `FixedEntropy/FixedSigma` 为“仅差异化提供 extra_constraints”以进一步消解 mode 分叉实现。
+
+- 2026-04-05："额外约束作为通用输入" 阶段 3（先迁移 FixedEntropy + FixedSigma）
+  1) 目标：
+     - 将 `FixedEntropy` / `FixedSigma` 的 ProblemSpec 前向求解实现收敛到统一非 rho 主链执行器；
+     - 保持行为等价（只抽公共编排，不变更物理求解内核）。
+  2) TDD 与重构策略：
+     - 先沿用阶段 1/2 已建立的 `problem_spec_contract + solver + semantic_modes + integration smoke` 作为回归护栏；
+     - 在 `ProblemSpec` 中新增统一执行器 `_governed_nonrho_problem_spec_forward_solve(...)`，将重复逻辑（seed pool、attempt plan、hard rules、selector、治理元数据）抽象；
+     - `FixedEntropy/FixedSigma` 改为仅提供：
+       - mode label（报错文本）；
+       - mode 特有 attempt-origin 字段名；
+       - mode 特有 constraint solve 闭包（分别调用 `_solve_constraint_fixedentropy/_fixedsigma`）。
+  3) 关键实现点（`src/models/solver/ProblemSpec.jl`）：
+     - 新增 `_governed_nonrho_problem_spec_forward_solve(...)` 通用函数；
+     - `FixedEntropy/FixedSigma` wrapper 显著瘦身，迁移到“参数化调用通用执行器”；
+     - 保留原有输出契约字段（`governed_*`, `legacy_fallback_used`, `selection_reason`, `candidate_count` 等）不变。
+  4) 验证：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（170/170）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+  5) 阶段结论：
+     - 已完成你指定的“先两模式迁移”：`FixedEntropy` 与 `FixedSigma` 的分叉编排明显收敛；
+     - 当前模式差异主要集中在“额外约束/模式参数输入 + mode 专有内核调用”，符合“把额外约束当作通用输入”的主方向；
+     - 下一步可按同样方式迁移 `FixedAsymmetricRho`，再评估 `FixedRho` 外层编排统一的收益/风险比。
+
+- 2026-04-05："额外约束作为通用输入" 阶段 4（迁移 FixedAsymmetricRho）
+  1) 目标：
+     - 将 `FixedAsymmetricRho` 迁移到与 `FixedEntropy/FixedSigma` 相同的统一非 rho 主执行器，进一步压缩 mode 分叉编排。
+  2) TDD 护栏：
+     - 在 `tests/unit/models/test_problem_spec_contract.jl` 新增
+       `fixedasymrho forward_solve accepts extra_constraints hook`：
+       - 断言 `seed_extend` 被调用；
+       - 断言 `feasible=false` 会触发 `:extra_constraint_failed`。
+  3) 生产实现：
+     - `src/models/solver/ProblemSpec.jl`
+       - `_fixedasymrho_problem_spec_forward_solve(...)` 改为参数化调用
+         `_governed_nonrho_problem_spec_forward_solve(...)`；
+       - 仅保留 mode 差异输入（label / attempt-origin key / mode-specific solve closure）。
+  4) 验证结果：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（173/173）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+  5) 阶段结论：
+     - 非 FixedRho 三模式已全部完成“统一主执行器 + 额外约束输入”收敛；
+     - 后续可进入 `FixedRho` 外层编排统一评估（风险更高，建议单独 gate 与回归矩阵）。
