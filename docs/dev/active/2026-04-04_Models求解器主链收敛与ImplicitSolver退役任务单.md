@@ -686,3 +686,27 @@ Files:
   5) 阶段结论：
      - 非 FixedRho 三模式已全部完成“统一主执行器 + 额外约束输入”收敛；
      - 后续可进入 `FixedRho` 外层编排统一评估（风险更高，建议单独 gate 与回归矩阵）。
+
+- 2026-04-05："额外约束作为通用输入" 阶段 5（FixedRho 外层编排统一第一步）
+  1) 目标：
+     - 在不触碰 `FixedRho` 联合求解内核的前提下，先收敛其外层 attempt-plan 构建逻辑，和 non-rho 主链复用同一套 seed 计划生成器。
+  2) 生产实现（`src/models/solver/ProblemSpec.jl`）：
+     - 新增 `_build_governed_attempt_plan(...)`：
+       - 统一处理 primary/provided/default/extra_fallback seeds 去重；
+       - 统一生成 `:primary / :method_rescue / :seed_rescue` attempt 序列；
+       - 内建 `extra_constraints.seed_extend` 接缝。
+     - `FixedRho` 与 `_governed_nonrho_problem_spec_forward_solve(...)` 均改为复用该统一 attempt-plan 构建器；
+     - 保留 `FixedRho` 既有 legacy-mode seed 注入逻辑，作为 `extra_fallback_seeds` 传入（保持稳定性）。
+  3) 测试补强：
+     - 在 `tests/unit/models/test_problem_spec_contract.jl` 新增
+       `fixedrho forward_solve accepts extra_constraints hook`：
+       - 断言 `seed_extend` 被调用；
+       - 断言 `feasible=false` 会触发 `:extra_constraint_failed`。
+  4) 验证结果：
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`（176/176）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver.jl"; include("tests/unit/runtests.jl")'`（25/25）
+     - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_problem_spec_semantic_modes.jl"; include("tests/unit/runtests.jl")'`（7/7）
+     - `julia --project=. -e 'include("tests/integration/pnjl/test_solver_constraints_models_backend_smoke.jl")'`（43/43）
+  5) 阶段结论：
+     - `FixedRho` 已完成“外层计划编排”与通用主链的第一层统一；
+     - 当前仍保留 `FixedRho` 专用 joint solve 主体，后续若继续统一，应把“候选执行与结果整形”再抽一层通用执行器，并单独跑 parity/regression gate。

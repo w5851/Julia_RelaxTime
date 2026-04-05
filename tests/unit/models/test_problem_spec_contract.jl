@@ -113,6 +113,39 @@ end
         @test haskey(solved, :fixedrho_joint_solve_active)
     end
 
+    @testset "fixedrho forward_solve accepts extra_constraints hook" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        spec = Models.build_problem_spec(mode)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        seed_extend_calls = Ref(0)
+        ec = Models.ExtraConstraints(
+            (F, x, theta, cfg, mode) -> nothing,
+            (candidate, params, mode) -> false,
+            (seed_vec, mode) -> begin
+                seed_extend_calls[] += 1
+                return Float64.(seed_vec)
+            end,
+        )
+
+        solved = spec.forward_solve(
+            model,
+            T_fm;
+            extra_constraints=ec,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+
+        @test seed_extend_calls[] >= 1
+        @test solved.hard_constraint_ok == false
+        @test :extra_constraint_failed in solved.failed_constraints
+    end
+
     @testset "fixedrho forward_solve accepts joint-solve flag" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedRho(0.2)
