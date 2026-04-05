@@ -815,6 +815,7 @@ function _solve_constraint_fixedentropy(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
+    allow_legacy_fallback::Bool=true,
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
     mass_positive_constraint::Bool=true,
@@ -918,7 +919,7 @@ function _solve_constraint_fixedentropy(
         ((phys || soft_phys) && residual_norm <= near_accept_tol)
     )
 
-    if !converged && model isa AbstractPNJLModel
+    if allow_legacy_fallback && !converged && model isa AbstractPNJLModel
         seed_legacy = if length(seed_guess) >= 8
             Float64.(seed_guess[1:8])
         else
@@ -955,6 +956,7 @@ function _solve_constraint_fixedentropy(
                 masses=legacy_result.masses,
                 iterations=legacy_result.iterations,
                 residual_norm=legacy_result.residual_norm,
+                legacy_fallback_used=true,
             )
         end
     end
@@ -972,6 +974,7 @@ function _solve_constraint_fixedentropy(
         masses=masses_ref[],
         iterations=res.iterations,
         residual_norm=residual_norm,
+        legacy_fallback_used=false,
     )
 end
 
@@ -988,6 +991,7 @@ function _solve_constraint_fixedsigma(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
+    allow_legacy_fallback::Bool=true,
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
@@ -1083,7 +1087,7 @@ function _solve_constraint_fixedsigma(
     phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
     converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
 
-    if !converged && model isa AbstractPNJLModel
+    if allow_legacy_fallback && !converged && model isa AbstractPNJLModel
         seed_legacy = if length(seed_guess) >= 8
             Float64.(seed_guess[1:8])
         else
@@ -1120,6 +1124,7 @@ function _solve_constraint_fixedsigma(
                 masses=legacy_result.masses,
                 iterations=legacy_result.iterations,
                 residual_norm=legacy_result.residual_norm,
+                legacy_fallback_used=true,
             )
         end
     end
@@ -1137,6 +1142,7 @@ function _solve_constraint_fixedsigma(
         masses=masses_ref[],
         iterations=res.iterations,
         residual_norm=residual_norm,
+        legacy_fallback_used=false,
     )
 end
 
@@ -1155,6 +1161,7 @@ function _solve_constraint_fixedasymrho(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
+    allow_legacy_fallback::Bool=true,
     rho0::Real,
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
@@ -1264,7 +1271,7 @@ function _solve_constraint_fixedasymrho(
         isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
     end
 
-    if !converged && model isa AbstractPNJLModel
+    if allow_legacy_fallback && !converged && model isa AbstractPNJLModel
         seed_legacy = if length(seed_guess) >= 8
             Float64.(seed_guess[1:8])
         else
@@ -1302,6 +1309,7 @@ function _solve_constraint_fixedasymrho(
                 masses=legacy_result.masses,
                 iterations=legacy_result.iterations,
                 residual_norm=legacy_result.residual_norm,
+                legacy_fallback_used=true,
             )
         end
     end
@@ -1319,5 +1327,6 @@ function _solve_constraint_fixedasymrho(
         masses=masses_ref[],
         iterations=res.iterations,
         residual_norm=residual_norm,
+        legacy_fallback_used=false,
     )
 end

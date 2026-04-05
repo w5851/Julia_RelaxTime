@@ -266,6 +266,17 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     primary_key = seed_key(primary_seed)
     push!(seed_seen, primary_key)
 
+    legacy_seed = if length(primary_seed) >= 5
+        Float64.(Main.Models.extend_seed(Float64.(primary_seed[1:5]), mode))
+    else
+        Float64.(Main.Models.extend_seed(primary_seed, mode))
+    end
+    legacy_key = seed_key(legacy_seed)
+    if !(legacy_key in seed_seen)
+        push!(fallback_seeds, legacy_seed)
+        push!(seed_seen, legacy_key)
+    end
+
     for seed in provided_seed_pool
         k = seed_key(seed)
         if !(k in seed_seen)
@@ -470,6 +481,7 @@ function _governed_mode_forward_solve(
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
 end
 
@@ -559,10 +571,27 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedEntropy forward_solve"))
+            local_kwargs[:allow_legacy_fallback] = Bool(get(kwargs, :allow_legacy_fallback, true))
             solved = _solve_constraint_fixedentropy(model, T_fm, mode.s_target; pairs(local_kwargs)...)
-            raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6), entropy_attempt_origin=attempt_cfg.attempt_origin)
+            solver_converged = Bool(solved.converged)
+            attempt_quality = if solver_converged
+                :degraded
+            else
+                :bad
+            end
+            raw = (
+                ; solved...,
+                residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
+                solver_converged=solver_converged,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=attempt_quality,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
+                entropy_attempt_origin=attempt_cfg.attempt_origin,
+            )
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            selected_quality = ok ? :good : raw.governed_selected_quality
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, governed_selected_quality=selected_quality, seed_index=Int(attempt_index)))
             if ok
                 break
             end
@@ -581,6 +610,11 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
                 iterations=0,
                 residual_norm=Inf,
                 residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                solver_converged=false,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=:bad,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
                 entropy_attempt_origin=attempt_cfg.attempt_origin,
             )
             push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
@@ -608,6 +642,10 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),
+        governed_selected_quality=(hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad),
+        governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
+        legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
 end
 
@@ -697,10 +735,27 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedSigma forward_solve"))
+            local_kwargs[:allow_legacy_fallback] = Bool(get(kwargs, :allow_legacy_fallback, true))
             solved = _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; pairs(local_kwargs)...)
-            raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6), sigma_attempt_origin=attempt_cfg.attempt_origin)
+            solver_converged = Bool(solved.converged)
+            attempt_quality = if solver_converged
+                :degraded
+            else
+                :bad
+            end
+            raw = (
+                ; solved...,
+                residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
+                solver_converged=solver_converged,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=attempt_quality,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
+                sigma_attempt_origin=attempt_cfg.attempt_origin,
+            )
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            selected_quality = ok ? :good : raw.governed_selected_quality
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, governed_selected_quality=selected_quality, seed_index=Int(attempt_index)))
             if ok
                 break
             end
@@ -719,6 +774,11 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
                 iterations=0,
                 residual_norm=Inf,
                 residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                solver_converged=false,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=:bad,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
                 sigma_attempt_origin=attempt_cfg.attempt_origin,
             )
             push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
@@ -746,6 +806,10 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),
+        governed_selected_quality=(hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad),
+        governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
+        legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
 end
 
@@ -835,10 +899,27 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec FixedAsymmetricRho forward_solve"))
+            local_kwargs[:allow_legacy_fallback] = Bool(get(kwargs, :allow_legacy_fallback, true))
             solved = _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; pairs(local_kwargs)...)
-            raw = (; solved..., residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6), asym_attempt_origin=attempt_cfg.attempt_origin)
+            solver_converged = Bool(solved.converged)
+            attempt_quality = if solver_converged
+                :degraded
+            else
+                :bad
+            end
+            raw = (
+                ; solved...,
+                residual_norm_max=get(local_kwargs, :residual_norm_max, 1e-6),
+                solver_converged=solver_converged,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=attempt_quality,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
+                asym_attempt_origin=attempt_cfg.attempt_origin,
+            )
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
+            selected_quality = ok ? :good : raw.governed_selected_quality
+            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, governed_selected_quality=selected_quality, seed_index=Int(attempt_index)))
             if ok
                 break
             end
@@ -857,6 +938,11 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
                 iterations=0,
                 residual_norm=Inf,
                 residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                solver_converged=false,
+                governed_selected_method=attempt_cfg.method,
+                governed_selected_quality=:bad,
+                governed_fallback_used=(attempt_cfg.attempt_origin == :method_rescue),
+                governed_attempt_origin=attempt_cfg.attempt_origin,
                 asym_attempt_origin=attempt_cfg.attempt_origin,
             )
             push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
@@ -884,6 +970,10 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),
+        governed_selected_quality=(hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad),
+        governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
+        legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
 end
 
