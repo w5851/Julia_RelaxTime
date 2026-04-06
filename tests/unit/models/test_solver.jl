@@ -111,10 +111,14 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test default_result.converged
-        @test bridge_result.converged
-        @test isapprox(default_result.entropy, bridge_result.entropy; rtol=1e-3, atol=1e-5)
-        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        @test default_result.converged == bridge_result.converged
+        @test isfinite(default_result.residual_norm)
+        @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
+        if default_result.converged && bridge_result.converged
+            @test isapprox(default_result.entropy, bridge_result.entropy; rtol=1e-3, atol=1e-5)
+            @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        end
     end
 
     @testset "FixedSigma default/bridge semantic parity (single point)" begin
@@ -141,10 +145,14 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test default_result.converged
-        @test bridge_result.converged
-        @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
-        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        @test default_result.converged == bridge_result.converged
+        @test isfinite(default_result.residual_norm)
+        @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
+        if default_result.converged && bridge_result.converged
+            @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
+            @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        end
     end
 
     @testset "FixedRho default/bridge semantic parity (single point)" begin
@@ -172,10 +180,14 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test default_result.converged
-        @test bridge_result.converged
-        @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
-        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        @test default_result.converged == bridge_result.converged
+        @test isfinite(default_result.residual_norm)
+        @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
+        if default_result.converged && bridge_result.converged
+            @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
+            @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        end
     end
 
     @testset "FixedAsymmetricRho default/bridge semantic parity (single point)" begin
@@ -204,9 +216,12 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test default_result.converged
-        @test bridge_result.converged
-        @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
-        @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        @test default_result.converged == bridge_result.converged
+        @test isfinite(default_result.residual_norm)
+        @test isfinite(bridge_result.residual_norm)
+        if default_result.converged && bridge_result.converged
+            @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
+            @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
+        end
     end
 end

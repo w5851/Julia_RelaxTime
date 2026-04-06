@@ -99,13 +99,6 @@ end
         (seed_guess,)
     end
 
-    use_problem_spec_chain =
-        haskey(kwargs, :problem_spec) ||
-        haskey(kwargs, :seed_guess) ||
-        haskey(kwargs, :seed_candidates) ||
-        semantic_mode !== :ground_state ||
-        selector !== nothing
-
     return (
         xi=xi,
         p_num=p_num,
@@ -116,7 +109,6 @@ end
         selector=selector,
         seed_guess=seed_guess,
         seed_candidates=seed_candidates,
-        use_problem_spec_chain=use_problem_spec_chain,
     )
 end
 
@@ -412,122 +404,16 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
-    if bridge.use_problem_spec_chain
-        seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
-        seeds = if haskey(kwargs, :seeds)
-            [Float64.(s) for s in kwargs[:seeds]]
-        elseif haskey(kwargs, :seed_candidates)
-            [Float64.(s) for s in kwargs[:seed_candidates]]
-        else
-            get_all_seeds(seed_strategy, [T_fm], mode)
-        end
-        isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
-
-        forwarded = _strip_forward_kwargs(kwargs, (
-            :seed_strategy,
-            :seeds,
-            :seed_candidates,
-            :seed_guess,
-            :semantic_mode,
-            :selector,
-            :rho0,
-            :xi,
-            :p_num,
-            :t_num,
-            :residual_norm_max,
-            :model_kind,
-            :problem_spec,
-        ))
-
-        candidates = NamedTuple[]
-        for (seed_index, seed) in enumerate(seeds)
-            local raw
-            try
-                rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
-                raw = solve_constraint(
-                    effective_model,
-                    mode,
-                    T_fm;
-                    problem_spec=get(kwargs, :problem_spec, nothing),
-                    seed_guess=seed,
-                    seed_candidates=(seed,),
-                    semantic_mode=bridge.semantic_mode,
-                    selector=bridge.selector,
-                    rho0_kwargs...,
-                    xi=bridge.xi,
-                    p_num=bridge.p_num,
-                    t_num=bridge.t_num,
-                    residual_norm_max=bridge.residual_norm_max,
-                    forwarded...,
-                )
-                ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
-                push!(candidates, (
-                    converged=Bool(raw.converged),
-                    solution=Float64.(raw.solution),
-                    x_state=raw.x_state,
-                    mu_vec=raw.mu_vec,
-                    omega=Float64(raw.omega),
-                    pressure=Float64(raw.pressure),
-                    rho_norm=Float64(raw.rho_norm),
-                    entropy=Float64(raw.entropy),
-                    energy=Float64(raw.energy),
-                    masses=raw.masses,
-                    iterations=Int(raw.iterations),
-                    residual_norm=Float64(raw.residual_norm),
-                    hard_constraint_ok=ok,
-                    failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
-                    seed_index=Int(seed_index),
-                ))
-            catch
-                push!(candidates, (
-                    converged=false,
-                    solution=Float64[],
-                    x_state=zeros(5),
-                    mu_vec=zeros(3),
-                    omega=NaN,
-                    pressure=-Inf,
-                    rho_norm=NaN,
-                    entropy=NaN,
-                    energy=NaN,
-                    masses=zeros(3),
-                    iterations=0,
-                    residual_norm=Inf,
-                    hard_constraint_ok=false,
-                    failed_constraints=Symbol[:solver_failed],
-                    seed_index=Int(seed_index),
-                ))
-            end
-        end
-
-        selected = select_pressure_max_candidate(candidates)
-        s = selected.selected_candidate
-        return SolverResult(
-            mode,
-            Bool(s.converged),
-            Float64.(s.solution),
-            s.x_state,
-            s.mu_vec,
-            Float64(s.omega),
-            Float64(s.pressure),
-            Float64(s.rho_norm),
-            Float64(s.entropy),
-            Float64(s.energy),
-            s.masses,
-            Int(s.iterations),
-            Float64(s.residual_norm),
-            Float64(bridge.xi),
-        )
-    end
-
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
     seeds = if haskey(kwargs, :seeds)
         [Float64.(s) for s in kwargs[:seeds]]
+    elseif haskey(kwargs, :seed_candidates)
+        [Float64.(s) for s in kwargs[:seed_candidates]]
     else
         get_all_seeds(seed_strategy, [T_fm], mode)
     end
     isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
 
-    selector_fn = haskey(kwargs, :selector) ? kwargs[:selector] : SeedStrategies.default_omega_selector
     forwarded = _strip_forward_kwargs(kwargs, (
         :seed_strategy,
         :seeds,
@@ -535,30 +421,102 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         :seed_candidates,
         :semantic_mode,
         :selector,
+        :rho0,
+        :xi,
+        :p_num,
+        :t_num,
+        :residual_norm_max,
+        :model_kind,
+        :problem_spec,
     ))
 
-    results = SolverResult[]
-    failed_seeds = String[]
-    for seed in seeds
+    candidates = NamedTuple[]
+    for (seed_index, seed) in enumerate(seeds)
+        local raw
         try
-            push!(results, solve(effective_model, mode, T_fm;
-                seed_strategy=DefaultSeed(Float64.(seed), Float64.(seed), :hadron),
+            rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
+            raw = solve_constraint(
+                effective_model,
+                mode,
+                T_fm;
+                problem_spec=get(kwargs, :problem_spec, nothing),
+                seed_guess=seed,
+                seed_candidates=(seed,),
+                semantic_mode=bridge.semantic_mode,
+                selector=bridge.selector,
+                rho0_kwargs...,
+                xi=bridge.xi,
+                p_num=bridge.p_num,
+                t_num=bridge.t_num,
+                residual_norm_max=bridge.residual_norm_max,
                 forwarded...,
+            )
+            ok = if hasproperty(raw, :hard_constraint_ok)
+                Bool(getproperty(raw, :hard_constraint_ok))
+            else
+                Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+            end
+            failed = if hasproperty(raw, :failed_constraints)
+                Symbol.(getproperty(raw, :failed_constraints))
+            else
+                (ok ? Symbol[] : Symbol[:residual_too_large])
+            end
+            push!(candidates, (
+                converged=Bool(raw.converged),
+                solution=Float64.(raw.solution),
+                x_state=raw.x_state,
+                mu_vec=raw.mu_vec,
+                omega=Float64(raw.omega),
+                pressure=Float64(raw.pressure),
+                rho_norm=Float64(raw.rho_norm),
+                entropy=Float64(raw.entropy),
+                energy=Float64(raw.energy),
+                masses=raw.masses,
+                iterations=Int(raw.iterations),
+                residual_norm=Float64(raw.residual_norm),
+                hard_constraint_ok=ok,
+                failed_constraints=failed,
+                seed_index=Int(seed_index),
             ))
-        catch err
-            push!(failed_seeds, "seed=$(repr(seed)): $(sprint(showerror, err))")
+        catch
+            push!(candidates, (
+                converged=false,
+                solution=Float64[],
+                x_state=zeros(5),
+                mu_vec=zeros(3),
+                omega=NaN,
+                pressure=-Inf,
+                rho_norm=NaN,
+                entropy=NaN,
+                energy=NaN,
+                masses=zeros(3),
+                iterations=0,
+                residual_norm=Inf,
+                hard_constraint_ok=false,
+                failed_constraints=Symbol[:solver_failed],
+                seed_index=Int(seed_index),
+            ))
         end
     end
 
-    if isempty(results)
-        error(
-            "All seeds failed (exceptions) in solve_multi. " *
-            "Failure summary: " * join(failed_seeds, " | "),
-        )
-    end
-    converged = filter(r -> r.converged, results)
-    isempty(converged) && error("All seeds failed to converge to a physical solution")
-    return selector_fn(converged)
+    selected = select_pressure_max_candidate(candidates)
+    s = selected.selected_candidate
+    return SolverResult(
+        mode,
+        Bool(s.converged),
+        Float64.(s.solution),
+        s.x_state,
+        s.mu_vec,
+        Float64(s.omega),
+        Float64(s.pressure),
+        Float64(s.rho_norm),
+        Float64(s.entropy),
+        Float64(s.energy),
+        s.masses,
+        Int(s.iterations),
+        Float64(s.residual_norm),
+        Float64(bridge.xi),
+    )
 end
 
 function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)

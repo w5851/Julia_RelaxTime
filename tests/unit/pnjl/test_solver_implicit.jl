@@ -21,7 +21,8 @@ const P = Models.pnjl_module()
 # 避免跨测试文件导出冲突：不把符号 `using` 进 Main。
 
 @testset "solver dependency boundary" begin
-    @test !isdefined(P.ImplicitSolver, :PNJLCore)
+    @test !isdefined(P, :ImplicitSolver)
+    @test !isdefined(Models, :ImplicitSolver)
 end
 
 const ħc = 197.327  # MeV·fm
@@ -155,53 +156,6 @@ end
         @test length(result.solution) == 8
     end
 
-end
-
-# ============================================================================
-# 隐函数求解器测试
-# ============================================================================
-
-@testset "create_pnjl_implicit_solver" begin
-    solver = P.create_pnjl_implicit_solver(xi=0.0, p_num=24, t_num=6)
-    
-    T_fm = 0.5
-    μ_fm = 1.0
-    θ = [T_fm, μ_fm]
-    
-    x, _ = solver(θ)
-    
-    @test length(x) == 5
-    @test all(isfinite.(x))
-end
-
-@testset "solve_with_derivatives" begin
-    T_fm = 0.5
-    μ_fm = 1.0
-    
-    @testset "一阶导数" begin
-        result = P.solve_with_derivatives(T_fm, μ_fm; order=1, p_num=24, t_num=6)
-        
-        @test haskey(result, :x)
-        @test haskey(result, :dx_dT)
-        @test haskey(result, :dx_dμ)
-        @test length(result.x) == 5
-        @test length(result.dx_dT) == 5
-        @test length(result.dx_dμ) == 5
-        @test all(isfinite.(result.x))
-        @test all(isfinite.(result.dx_dT))
-        @test all(isfinite.(result.dx_dμ))
-    end
-    
-    @testset "二阶导数" begin
-        result = P.solve_with_derivatives(T_fm, μ_fm; order=2, p_num=24, t_num=6)
-        
-        @test haskey(result, :d2x_dT2)
-        @test haskey(result, :d2x_dμ2)
-        @test haskey(result, :d2x_dTdμ)
-        @test all(isfinite.(result.d2x_dT2))
-        @test all(isfinite.(result.d2x_dμ2))
-        @test all(isfinite.(result.d2x_dTdμ))
-    end
 end
 
 # ============================================================================
