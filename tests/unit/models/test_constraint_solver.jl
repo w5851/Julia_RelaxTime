@@ -44,6 +44,24 @@ Models.pnjl_module()
         @test μv3[1] ≈ 0.2
     end
 
+    @testset "solution pack/unpack helpers" begin
+        x_state = SVector{5}(-1.5, -1.5, -2.1, 0.2, 0.2)
+        mu_vec = SVector{3}(1.5, 1.4, 1.3)
+
+        solution = Models._pack_solution(x_state, mu_vec)
+        @test length(solution) == 8
+
+        x2, mu2 = Models._unpack_solution(solution; state_n=5, mu_n=3)
+        @test x2 == x_state
+        @test mu2 == mu_vec
+
+        empty_candidate = Models._empty_candidate(state_n=5, mu_n=3, residual_norm_max=1e-6)
+        @test length(empty_candidate.solution) == 8
+        @test all(isnan, empty_candidate.solution)
+        @test empty_candidate.failed_constraints == [:solver_failed]
+        @test !empty_candidate.converged
+    end
+
     @testset "solve_constraint(FixedMu) NJL" begin
         m = Models.create_model(:NJL)
         T = 0.5

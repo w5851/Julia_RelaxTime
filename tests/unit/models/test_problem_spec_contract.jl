@@ -55,6 +55,63 @@ end
         @test haskey(solved, :residual_norm)
         @test haskey(solved, :selection_reason)
         @test haskey(solved, :candidate_count)
+        @test haskey(solved, :fixedrho_joint_solve_requested)
+        @test haskey(solved, :fixedrho_joint_solve_active)
+    end
+
+    @testset "fixedrho forward_solve accepts joint-solve flag" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        spec = Models.build_problem_spec(mode)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        result = spec.forward_solve(
+            model,
+            T_fm;
+            fixedrho_joint_solve=true,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+
+        @test result.fixedrho_joint_solve_requested
+        @test haskey(result, :fixedrho_joint_solve_active)
+        @test haskey(result, :fixedrho_joint_fallback)
+
+        @test_throws ArgumentError spec.forward_solve(
+            model,
+            T_fm;
+            fixedrho_joint_solve=:bad,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+        )
+    end
+
+    @testset "fixedrho forward_solve can run joint solve path" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.2)
+        spec = Models.build_problem_spec(mode)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        result = spec.forward_solve(
+            model,
+            T_fm;
+            fixedrho_joint_solve=true,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-5,
+            iterations=120,
+        )
+
+        @test result.fixedrho_joint_solve_requested
+        @test result.fixedrho_joint_solve_active || result.fixedrho_joint_fallback
+        @test isfinite(result.residual_norm)
+        @test result.residual_norm >= 0.0
     end
 
     @testset "solve_constraint fixedrho prefers problem_spec forward_solve" begin
@@ -292,5 +349,41 @@ end
             iterations=120,
         )
         @test custom.selection_reason == :custom_selector
+    end
+
+    @testset "build_conditions schema path parity for non-rho modes" begin
+        params = Models.GapParams(0.5, Models.cached_nodes(8, 4), 0.0)
+        schema = Models.schema_for_model(:PNJL)
+        θ = [0.5]
+        x = [-1.5, -1.5, -2.1, 0.2, 0.2, 1.5, 1.5, 1.5]
+
+        modes = (
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(8.0),
+            Models.FixedAsymmetricRho(0.2, 1.0, 0.0),
+        )
+
+        for mode in modes
+            legacy = Models.build_conditions(mode, params)
+            schema_driven = Models.build_conditions(mode, params, schema; mu_dim=3)
+            @test schema_driven(θ, x) ≈ legacy(θ, x) rtol=1e-12 atol=1e-12
+        end
+    end
+
+    @testset "schema-mode dimension mismatch throws clear error" begin
+        params = Models.GapParams(0.5, Models.cached_nodes(8, 4), 0.0)
+        bad_schema = Models.ModelStateSchema(:PNJL, (:phi_u, :phi_d, :phi_s, :Phi))
+        mode = Models.FixedRho(0.2)
+        cond = Models.build_conditions(mode, params, bad_schema; mu_dim=3)
+
+        err = try
+            cond([0.5], [-1.5, -1.5, -2.1, 0.2, 1.5, 1.5, 1.5])
+            nothing
+        catch e
+            e
+        end
+
+        @test err isa ArgumentError
+        @test occursin("schema state_dim mismatch", sprint(showerror, err))
     end
 end

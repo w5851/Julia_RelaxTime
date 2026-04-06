@@ -17,7 +17,8 @@ using StaticArrays
 using ForwardDiff
 
 # 从 Models 域导入
-import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, ModelStateSchema, state_dim
+import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
+import Main.Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model
 const cached_nodes = Main.Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
@@ -186,26 +187,8 @@ end
 - x = [φ_u, φ_d, φ_s, Φ, Φ̄, μ_u, μ_d, μ_s]（状态变量）
 """
 function build_conditions(mode::FixedRho, params::GapParams)
-    return (θ, x) -> begin
-        T_fm = θ[1]
-        x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
-        mu_vec = SVector{3}(x[6], x[7], x[8])
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
-        
-        # 5 个能隙方程
-        gap = gap_conditions(x_state, mu_vec, local_params)
-        
-        # 化学势相等约束
-        mu_eq1 = x[6] - x[7]  # μ_u = μ_d
-        mu_eq2 = x[7] - x[8]  # μ_d = μ_s
-        
-        # 密度约束
-        rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
-        rho_constraint = sum(rho_vec) / (3.0 * ρ0) - mode.rho_target
-        
-        return [gap..., mu_eq1, mu_eq2, rho_constraint]
-    end
+    schema = schema_for_model(params.model_kind)
+    return build_conditions(mode, params, schema; mu_dim=mu_var_dim(mode))
 end
 
 @inline function _extract_state_mu(schema::ModelStateSchema, x::AbstractVector; mu_dim::Int=3)
@@ -218,11 +201,29 @@ end
     return state_slice, mu_slice
 end
 
-@inline function _gap_conditions_dynamic(x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+@inline function _validate_schema_mode_dims(mode::ConstraintMode, schema::ModelStateSchema, mu_dim::Int)
+    expected_state_dim = state_var_dim(mode)
+    schema_state_dim = state_dim(schema)
+    schema_state_dim == expected_state_dim || throw(ArgumentError("schema state_dim mismatch for $(typeof(mode)): expected $expected_state_dim, got $schema_state_dim"))
+
+    expected_mu_dim = mu_var_dim(mode)
+    mu_dim == expected_mu_dim || throw(ArgumentError("schema mu_dim mismatch for $(typeof(mode)): expected $expected_mu_dim, got $mu_dim"))
+    return nothing
+end
+
+@inline function _gap_conditions_dynamic(
+    mode::ConstraintMode,
+    schema::ModelStateSchema,
+    x_state::AbstractVector,
+    mu_vec::AbstractVector,
+    params::GapParams;
+    mu_dim::Int,
+)
+    _validate_schema_mode_dims(mode, schema, mu_dim)
     if length(x_state) == 5 && length(mu_vec) == 3
         return gap_conditions(SVector{5}(Tuple(x_state)), mu_vec, params)
     end
-    throw(ArgumentError("schema-driven FixedRho conditions currently support PNJL-like dimensions only (state_dim=5, mu_dim=3), got state_dim=$(length(x_state)), mu_dim=$(length(mu_vec))"))
+    throw(ArgumentError("schema/mode dimensions currently support PNJL-like residual only (state_dim=5, mu_dim=3), got state_dim=$(length(x_state)), mu_dim=$(length(mu_vec))"))
 end
 
 """
@@ -237,7 +238,7 @@ function build_conditions(mode::FixedRho, params::GapParams, schema::ModelStateS
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
 
-        gap = _gap_conditions_dynamic(x_state, mu_vec, local_params)
+        gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
         mu_eq1 = mu_vec[1] - mu_vec[2]
         mu_eq2 = mu_vec[2] - mu_vec[3]
         rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
@@ -257,14 +258,18 @@ end
 - x = [φ_u, φ_d, φ_s, Φ, Φ̄, μ_u, μ_d, μ_s]（状态变量）
 """
 function build_conditions(mode::FixedAsymmetricRho, params::GapParams)
+    schema = schema_for_model(params.model_kind)
+    return build_conditions(mode, params, schema; mu_dim=mu_var_dim(mode))
+end
+
+function build_conditions(mode::FixedAsymmetricRho, params::GapParams, schema::ModelStateSchema; mu_dim::Int=3)
     return (θ, x) -> begin
         T_fm = θ[1]
-        x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
-        mu_vec = SVector{3}(x[6], x[7], x[8])
+        x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
 
-        gap = gap_conditions(x_state, mu_vec, local_params)
+        gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
 
         rho_vec = _rho_vec(x_state, mu_vec, T_fm, local_params)
         rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
@@ -283,24 +288,24 @@ end
 构建固定熵密度模式的条件函数。
 """
 function build_conditions(mode::FixedEntropy, params::GapParams)
+    schema = schema_for_model(params.model_kind)
+    return build_conditions(mode, params, schema; mu_dim=mu_var_dim(mode))
+end
+
+function build_conditions(mode::FixedEntropy, params::GapParams, schema::ModelStateSchema; mu_dim::Int=3)
     return (θ, x) -> begin
         T_fm = θ[1]
-        x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
-        mu_vec = SVector{3}(x[6], x[7], x[8])
+        x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
-        
-        # 5 个能隙方程
-        gap = gap_conditions(x_state, mu_vec, local_params)
-        
-        # 化学势相等约束
-        mu_eq1 = x[6] - x[7]
-        mu_eq2 = x[7] - x[8]
-        
-        # 熵密度约束
+
+        gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
+        mu_eq1 = mu_vec[1] - mu_vec[2]
+        mu_eq2 = mu_vec[2] - mu_vec[3]
+
         _, _, entropy, _ = _thermo_tuple(x_state, mu_vec, T_fm, local_params)
         s_constraint = entropy - mode.s_target
-        
+
         return [gap..., mu_eq1, mu_eq2, s_constraint]
     end
 end
@@ -311,26 +316,26 @@ end
 构建固定比熵模式的条件函数。
 """
 function build_conditions(mode::FixedSigma, params::GapParams)
+    schema = schema_for_model(params.model_kind)
+    return build_conditions(mode, params, schema; mu_dim=mu_var_dim(mode))
+end
+
+function build_conditions(mode::FixedSigma, params::GapParams, schema::ModelStateSchema; mu_dim::Int=3)
     return (θ, x) -> begin
         T_fm = θ[1]
-        x_state = SVector{5}(x[1], x[2], x[3], x[4], x[5])
-        mu_vec = SVector{3}(x[6], x[7], x[8])
+        x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
-        
-        # 5 个能隙方程
-        gap = gap_conditions(x_state, mu_vec, local_params)
-        
-        # 化学势相等约束
-        mu_eq1 = x[6] - x[7]
-        mu_eq2 = x[7] - x[8]
-        
-        # 比熵约束 σ = s/n_B
+
+        gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
+        mu_eq1 = mu_vec[1] - mu_vec[2]
+        mu_eq2 = mu_vec[2] - mu_vec[3]
+
         _, rho_norm, entropy, _ = _thermo_tuple(x_state, mu_vec, T_fm, local_params)
-        n_B = rho_norm * ρ0  # 重子数密度
+        n_B = rho_norm * ρ0
         sigma = n_B > 1e-12 ? entropy / n_B : 0.0
         sigma_constraint = sigma - mode.sigma_target
-        
+
         return [gap..., mu_eq1, mu_eq2, sigma_constraint]
     end
 end

@@ -33,7 +33,7 @@ using .Models
             t_num=4,
             n_scan=20,
             max_iter=20,
-            solver_backend=:legacy,
+            solver_backend=:models,
         )
 
         @test result.found
