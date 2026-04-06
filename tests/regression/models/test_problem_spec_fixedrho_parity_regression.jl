@@ -130,18 +130,6 @@ end
     spec = Models.build_problem_spec(mode)
     seed = copy(Models.pnjl_module().HADRON_SEED_8)
 
-    legacy_no_fallback = Models.ImplicitSolver.solve(
-        mode,
-        T_fm;
-        xi=0.0,
-        seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
-        p_num=8,
-        t_num=4,
-        nlsolve_method=:trust_region,
-        trust_region_fallback=false,
-        residual_norm_max=1e-6,
-    )
-
     via_joint_no_fallback = Models.solve_constraint(
         model,
         mode,
@@ -157,30 +145,17 @@ end
         residual_norm_max=1e-6,
     )
 
-    @test legacy_no_fallback.converged
     @test via_joint_no_fallback.converged
     @test via_joint_no_fallback.fixedrho_joint_solve_active
     @test haskey(via_joint_no_fallback, :fixedrho_joint_selected_method)
     @test via_joint_no_fallback.fixedrho_joint_selected_method == :trust_region
     @test haskey(via_joint_no_fallback, :fixedrho_joint_fallback_used)
     @test !via_joint_no_fallback.fixedrho_joint_fallback_used
-    @test isapprox(via_joint_no_fallback.pressure, legacy_no_fallback.pressure; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_no_fallback.rho_norm, legacy_no_fallback.rho_norm; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_no_fallback.entropy, legacy_no_fallback.entropy; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_no_fallback.energy, legacy_no_fallback.energy; rtol=1e-6, atol=1e-8)
-
-    legacy_with_fallback = Models.ImplicitSolver.solve(
-        mode,
-        T_fm;
-        xi=0.0,
-        seed_strategy=Models.DefaultSeed(seed, seed, :hadron),
-        p_num=8,
-        t_num=4,
-        nlsolve_method=:newton,
-        trust_region_fallback=true,
-        fallback_method=:trust_region,
-        residual_norm_max=1e-6,
-    )
+    @test isapprox(via_joint_no_fallback.pressure, 21.62219502138967; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.rho_norm, 0.20000000005601337; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.entropy, 0.1988982719799636; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.energy, -21.36959370985176; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_no_fallback.residual_norm, 6.385724668330235e-11; rtol=1e-4, atol=1e-12)
 
     via_joint_with_fallback = Models.solve_constraint(
         model,
@@ -198,15 +173,15 @@ end
         residual_norm_max=1e-6,
     )
 
-    @test legacy_with_fallback.converged
     @test via_joint_with_fallback.converged
     @test via_joint_with_fallback.fixedrho_joint_solve_active
     @test haskey(via_joint_with_fallback, :fixedrho_joint_selected_method)
     @test via_joint_with_fallback.fixedrho_joint_selected_method in (:newton, :trust_region)
     @test haskey(via_joint_with_fallback, :fixedrho_joint_fallback_used)
     @test (via_joint_with_fallback.fixedrho_joint_selected_method == :trust_region) == via_joint_with_fallback.fixedrho_joint_fallback_used
-    @test isapprox(via_joint_with_fallback.pressure, legacy_with_fallback.pressure; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_with_fallback.rho_norm, legacy_with_fallback.rho_norm; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_with_fallback.entropy, legacy_with_fallback.entropy; rtol=1e-6, atol=1e-8)
-    @test isapprox(via_joint_with_fallback.energy, legacy_with_fallback.energy; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.pressure, 21.62219502138967; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.rho_norm, 0.20000000005601337; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.entropy, 0.1988982719799636; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.energy, -21.36959370985176; rtol=1e-6, atol=1e-8)
+    @test isapprox(via_joint_with_fallback.residual_norm, 6.385724668330235e-11; rtol=1e-4, atol=1e-12)
 end
