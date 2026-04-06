@@ -191,7 +191,7 @@ end
 - `seed_policy`: 初值策略模式，默认 `:hybrid_continuity`
     - `:hybrid_continuity`：连续性优先，失败后回退 MultiSeed（仅 `fixed_asymmetric_rho`）
     - `:candidates`：使用旧的候选初值链路
-- `hybrid_weighted_fallback`: 是否在 `hybrid` 失败后启用 weighted-block 兜底（默认 true）
+- `hybrid_weighted_fallback`: 是否在 `hybrid` 失败后启用 weighted-block 兜底（默认 false）
 - `hybrid_weighted_max_seed_candidates`: weighted fallback 最多尝试的 seed 数（默认 3）
 - `p_num`, `t_num`: 积分节点数
 - `progress_cb`: 进度回调函数 `(point, result) -> nothing`
@@ -213,7 +213,7 @@ function run_trho_scan(;
     resume::Bool=true,
     reverse_rho::Bool=true,
     seed_policy::Symbol=:hybrid_continuity,
-    hybrid_weighted_fallback::Bool=true,
+    hybrid_weighted_fallback::Bool=false,
     hybrid_weighted_max_seed_candidates::Int=3,
     constraint_mode::Symbol=:fixed_rho,
     asym_ud_ratio_target::Float64=0.876,
@@ -236,7 +236,13 @@ function run_trho_scan(;
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
     io_mode = (overwrite || !isfile(output_path)) ? "w" : "a"
 
-    stats = Dict(:total => 0, :success => 0, :failure => 0, :skipped => 0)
+    stats = Dict(
+        :total => 0,
+        :success => 0,
+        :failure => 0,
+        :skipped => 0,
+        :weighted_plugin_rescued => 0,
+    )
     
     # 旧候选链路连续性缓存（按 T, xi 分组）
     continuation_seeds = Dict{Tuple{Float64, Float64}, Vector{Float64}}()
@@ -322,6 +328,10 @@ function run_trho_scan(;
                 stats[:failure] += 1
             end
 
+            if occursin("weighted-block fallback rescued", message)
+                stats[:weighted_plugin_rescued] += 1
+            end
+
             # 进度回调
             if progress_cb !== nothing
                 try
@@ -339,6 +349,8 @@ function run_trho_scan(;
         success=stats[:success],
         failure=stats[:failure],
         skipped=stats[:skipped],
+        weighted_plugin_enabled=hybrid_weighted_fallback,
+        weighted_plugin_rescued=stats[:weighted_plugin_rescued],
         output=output_path
     )
 end
