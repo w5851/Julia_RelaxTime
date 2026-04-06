@@ -442,7 +442,7 @@ function _solve_constraint_fixedmu(
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
-    allow_legacy_fallback::Bool=false,
+    allow_legacy_fallback::Bool=true,
     nlsolve_kwargs...,
 )
     seed_pool = if seed_candidates === nothing
