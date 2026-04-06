@@ -26,6 +26,7 @@ export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
 export build_pnjl_fixedmu_adapters
 export build_pnjl_flavor_mu_adapters
+export derive_vec, derive_named
 
 @inline function symmetric_mu_direction_derivative(dx_dmu_vec::AbstractMatrix)
     size(dx_dmu_vec, 2) == 3 || throw(ArgumentError("dx_dmu_vec must have 3 columns for (μ_u, μ_d, μ_s), got size=$(size(dx_dmu_vec))"))
@@ -248,6 +249,43 @@ function solve_pnjl_with_derivatives(
     else
         throw(ArgumentError("order must be 1 or 2, got $order"))
     end
+end
+
+function derive_vec(
+    model::AbstractPNJLModel,
+    theta_vec::AbstractVector{<:Real};
+    order::Int=1,
+    xi::Real=0.0,
+    p_num::Int=64,
+    t_num::Int=8,
+    thermo_backend::Symbol=:models,
+    solver_backend::Symbol=:models,
+    kwargs...
+)
+    length(theta_vec) == 2 || throw(ArgumentError("derive_vec expects theta_vec length 2 ([T_fm, μ_fm]), got $(length(theta_vec))"))
+    _ = model
+    return solve_pnjl_with_derivatives(
+        theta_vec[1],
+        theta_vec[2];
+        order=order,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        thermo_backend=thermo_backend,
+        solver_backend=solver_backend,
+        kwargs...,
+    )
+end
+
+function derive_named(
+    model::AbstractPNJLModel,
+    theta_named::NamedTuple;
+    kwargs...
+)
+    haskey(theta_named, :T_fm) || throw(ArgumentError("derive_named requires :T_fm"))
+    haskey(theta_named, :μ_fm) || throw(ArgumentError("derive_named requires :μ_fm"))
+    theta_vec = [theta_named[:T_fm], theta_named[:μ_fm]]
+    return derive_vec(model, theta_vec; kwargs...)
 end
 
 """create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction

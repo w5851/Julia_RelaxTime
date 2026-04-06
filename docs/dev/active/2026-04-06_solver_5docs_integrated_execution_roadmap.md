@@ -159,11 +159,11 @@
 - Test: `tests/unit/models/test_implicit_gap_flavor_mu.jl`
 - Test: `tests/integration/models/test_models_implicitdiff_flavor_mu_smoke.jl`
 
-- [ ] **Step 1: 写失败测试（derive_named 与旧接口一致）**
-- [ ] **Step 2: 实现 `derive_vec`（仅向量输入）**
-- [ ] **Step 3: 实现 `derive_named`（边界转换一次）**
-- [ ] **Step 4: 旧 `solve_with_derivatives` 改兼容转发**
-- [ ] **Step 5: 跑 unit + integration 并提交**
+- [x] **Step 1: 写失败测试（derive_named 与旧接口一致）**
+- [x] **Step 2: 实现 `derive_vec`（仅向量输入）**
+- [x] **Step 3: 实现 `derive_named`（边界转换一次）**
+- [x] **Step 4: 旧 `solve_with_derivatives` 改兼容转发**
+- [x] **Step 5: 跑 unit + integration 并提交**
   - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_implicit_gap.jl,models/test_implicit_gap_flavor_mu.jl"; include("tests/unit/runtests.jl")'`
   - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_models_implicitdiff_flavor_mu_smoke.jl"; include("tests/integration/runtests.jl")'`
   - `git commit -m "refactor: decouple derivative engine with named/vec dual API"`
