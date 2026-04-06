@@ -96,7 +96,7 @@ function _build_governed_attempt_plan(
         attempt_origin=:primary,
     ))
 
-    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+    if primary_method != :trust_region
         push!(attempt_plan, (
             seed=primary_seed_vec,
             method=:trust_region,
