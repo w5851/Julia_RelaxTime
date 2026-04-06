@@ -73,3 +73,23 @@ end
         @test abs(models.rho_norm - legacy.rho_norm) <= 1e-6
     end
 end
+
+@testset "FixedRho ProblemSpec converges with default seed pool" begin
+    model = Models.create_model(:PNJL)
+    T_fm = to_fm_inv(110.0)
+    mode = Models.FixedRho(0.6)
+    seed = copy(P.HADRON_SEED_8)
+
+    raw = Models.solve_constraint(
+        model,
+        mode,
+        T_fm;
+        seed_guess=seed,
+        p_num=8,
+        t_num=4,
+        residual_norm_max=1e-6,
+    )
+
+    @test raw.converged
+    @test abs(raw.rho_norm - 0.6) <= 1e-6
+end
