@@ -60,6 +60,10 @@ Models.pnjl_module()
         @test all(isnan, empty_candidate.solution)
         @test empty_candidate.failed_constraints == [:solver_failed]
         @test !empty_candidate.converged
+
+        fixedmu_empty = Models._empty_candidate(state_n=5, mu_n=3, solution_n=5, residual_norm_max=1e-6)
+        @test length(fixedmu_empty.solution) == 5
+        @test all(isnan, fixedmu_empty.solution)
     end
 
     @testset "solve_constraint(FixedMu) NJL" begin

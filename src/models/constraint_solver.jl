@@ -35,8 +35,7 @@ end
     return x_state, mu_vec
 end
 
-@inline function _empty_candidate(; state_n::Int=5, mu_n::Int=3, residual_norm_max::Real)
-    solution_n = state_n + mu_n
+@inline function _empty_candidate(; state_n::Int=5, mu_n::Int=3, solution_n::Int=(state_n + mu_n), residual_norm_max::Real)
     return (
         solution=fill(NaN, solution_n),
         x_state=SVector{state_n}(fill(NaN, state_n)),
@@ -509,7 +508,7 @@ function _solve_constraint_fixedmu(
         end
 
         if !pushed
-            raw = _empty_candidate(; state_n=5, mu_n=3, residual_norm_max=residual_norm_max)
+            raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
             push!(candidates, (; raw..., seed_index=Int(seed_index)))
         end
     end

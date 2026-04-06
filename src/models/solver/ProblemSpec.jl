@@ -759,13 +759,13 @@ end
         components = build_constraint_components(mode)
         extra_constraints = default_extra_constraints()
         forward_solve = if mode isa FixedRho
-            (model, T_fm; fwd_kwargs...) -> _fixedrho_problem_spec_forward_solve(model, mode, T_fm; extra_constraints=extra_constraints, fwd_kwargs...)
+            (model, T_fm; fwd_kwargs...) -> _fixedrho_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         elseif mode isa FixedEntropy
-            (model, T_fm; fwd_kwargs...) -> _fixedentropy_problem_spec_forward_solve(model, mode, T_fm; extra_constraints=extra_constraints, fwd_kwargs...)
+            (model, T_fm; fwd_kwargs...) -> _fixedentropy_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         elseif mode isa FixedSigma
-            (model, T_fm; fwd_kwargs...) -> _fixedsigma_problem_spec_forward_solve(model, mode, T_fm; extra_constraints=extra_constraints, fwd_kwargs...)
+            (model, T_fm; fwd_kwargs...) -> _fixedsigma_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         elseif mode isa FixedAsymmetricRho
-            (model, T_fm; fwd_kwargs...) -> _fixedasymrho_problem_spec_forward_solve(model, mode, T_fm; extra_constraints=extra_constraints, fwd_kwargs...)
+            (model, T_fm; fwd_kwargs...) -> _fixedasymrho_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         else
             (model, T_fm; fwd_kwargs...) -> solve_constraint(model, mode, T_fm; fwd_kwargs...)
         end
