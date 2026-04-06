@@ -345,9 +345,12 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm_max=residual_norm_max,
                 forwarded...,
             )
-            ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            thermo_finite = isfinite(raw.omega) && isfinite(raw.pressure) && isfinite(raw.rho_norm) && isfinite(raw.entropy) && isfinite(raw.energy)
+            phys_ok = thermo_finite && is_physical_solution(raw.x_state, raw.masses)
+            residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            ok = (Bool(raw.converged) || (residual_ok && phys_ok))
             candidate = (
-                converged=Bool(raw.converged),
+                converged=ok,
                 solution=Float64.(raw.solution),
                 x_state=raw.x_state,
                 mu_vec=raw.mu_vec,
