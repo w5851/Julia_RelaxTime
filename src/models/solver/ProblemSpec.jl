@@ -179,10 +179,26 @@ end
 end
 
 @inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
-    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :extra_constraints)
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :extra_constraints, :fixedmu_use_problem_spec, :legacy_fallback_plugin)
         delete!(kwargs, key)
     end
     return kwargs
+end
+
+function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; fwd_kwargs...)
+    kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+
+    μ_fm = get(kwargs, :μ_fm, nothing)
+    μ_fm === nothing && throw(ArgumentError("μ_fm is required for ProblemSpec FixedMu forward_solve"))
+
+    seed_guess = get(kwargs, :seed_guess, nothing)
+    seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedMu forward_solve"))
+
+    local_kwargs = Dict{Symbol,Any}(kwargs)
+    _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+
+    solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
+    return (; solved..., fixedmu_problem_spec_active=true)
 end
 
 @inline function _joint_model_kind(::RPNJLModel)
@@ -645,7 +661,11 @@ function _governed_nonrho_problem_spec_forward_solve(
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec $(mode_label) forward_solve"))
-            local_kwargs[:allow_legacy_fallback] = Bool(get(kwargs, :allow_legacy_fallback, true))
+            allow_legacy_fallback = Bool(get(kwargs, :allow_legacy_fallback, false))
+            if haskey(kwargs, :legacy_fallback_plugin)
+                allow_legacy_fallback = Bool(kwargs[:legacy_fallback_plugin])
+            end
+            local_kwargs[:allow_legacy_fallback] = allow_legacy_fallback
 
             solved = solve_mode_constraint(local_kwargs)
             solver_converged = Bool(solved.converged)
@@ -760,6 +780,8 @@ end
         extra_constraints = default_extra_constraints()
         forward_solve = if mode isa FixedRho
             (model, T_fm; fwd_kwargs...) -> _fixedrho_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
+        elseif mode isa FixedMu
+            (model, T_fm; fwd_kwargs...) -> _fixedmu_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         elseif mode isa FixedEntropy
             (model, T_fm; fwd_kwargs...) -> _fixedentropy_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         elseif mode isa FixedSigma

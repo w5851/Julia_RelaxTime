@@ -38,7 +38,7 @@ using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
 using ..SeedStrategies: auto_phase_hint
 using ..SeedStrategies: load_phase_boundary, interpolate_mu_c
-import Main.Models: solve, SolverResult
+import Main.Models: solve, SolverResult, is_physical_solution
 using ..ScanCommon
 using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
@@ -492,7 +492,14 @@ function _refine_result(T_fm, μ_fm, xi, result;
 end
 
 """判断是否成功"""
-_is_success(result) = is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
+function _is_success(result)
+    result === nothing && return false
+    thermo_finite = isfinite(result.omega) && isfinite(result.pressure) &&
+                   isfinite(result.rho_norm) && isfinite(result.entropy) &&
+                   isfinite(result.energy)
+    phys_ok = thermo_finite && is_physical_solution(result.x_state, result.masses)
+    return phys_ok && is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
+end
 
 """提升近似收敛为成功"""
 _promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)

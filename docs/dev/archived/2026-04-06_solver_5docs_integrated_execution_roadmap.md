@@ -1,0 +1,283 @@
+---
+title: Solver 5-Doc Integration Implementation Plan
+archived: true
+original: docs/dev/active/2026-04-06_solver_5docs_integrated_execution_roadmap.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+# Solver 5-Doc Integration Implementation Plan
+
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Integrate the five active solver design docs into a single, executable, low-risk migration route without changing physics semantics.
+
+**Architecture:** Keep a vector-first numerical kernel shared by solve and derivative paths, move NamedTuple to boundary APIs, and use a schema registry as the only named<->vector mapping source. Adopt spec-first contracts while preserving mode compatibility wrappers and explicit plugin boundaries for legacy/weighted fallback.
+
+**Tech Stack:** Julia, NLsolve, ForwardDiff, ImplicitDifferentiation, existing Models/solver modules, unit+integration+regression tests.
+
+---
+
+## 状态分层快照（避免“主线未完成”误读）
+
+- 主线交付状态：Chunk 1-5 的核心实现目标已完成并已在 PR 主线提交（含 `ProblemSpec` 主链收敛、`primary_strategy`、named/vec 双入口、导数解耦适配、fallback 插件边界化）。
+- 验证状态：Task 9 记录的 smoke/regression/governance 校验已完成，见本文件“Task 9 执行结果回写”。
+- 勾选说明：早期 `Step 5: Commit` 的未勾选项属于执行轨迹遗留，不表示对应功能未落地；以“Done: <commit>`/后续提交记录与 PR 变更”为准。
+- 后续专项状态：本文“后续待办（追加，队列末尾）”属于主线完成后的专项治理，不影响本轮主线 DoD 判定。
+
+---
+
+## 输入文档评审结论（5 份）
+
+- `docs/dev/active/2026-04-06_solver_target_architecture_blueprint.md`
+  - 定位清晰：主链统一、策略中心、兼容层可拔插。
+  - 待落地点：需要将 `primary_strategy` 数据结构明确到字段级。
+- `docs/dev/active/2026-04-06_solver_constraintspec_interface_draft.md`
+  - 主体正确：mode 降格为 spec 输入、`ConstraintDims(x_dim, theta_dim)` 合理。
+  - 待统一点：第 5 节 residual 协议仍需明确“内核统一 `theta_vec`，语义层可用 `theta_named`”。
+- `docs/dev/active/2026-04-06_solver_derivative_decoupling_interface_and_migration.md`
+  - 解耦方向正确：导数层复用 residual 契约，不耦合 solver 迭代细节。
+  - 待统一点：与三层文档保持同一 `residual_vec!(..., theta_vec, ...)` 口径。
+- `docs/dev/active/2026-04-06_solver_three_layer_minimal_interfaces.md`
+  - 可执行性最高：接口/约束/验收口径完整。
+  - 建议作为主基线文档，其他文档对齐它。
+- `docs/dev/active/2026-04-06_solver_project_sequence_diagram.md`
+  - 评审表达好：可作为架构会与 PR 说明图。
+  - 待补：异常分支时序（失败、fallback、治理拒绝、兼容插件介入）。
+
+---
+
+## Chunk 1: 文档口径收敛（先统一再开发）
+
+> 注：本 Chunk 中个别未勾选的 `Commit` 步骤为过程记录遗留；功能是否落地以后续提交与 PR 汇总为准。
+
+### Task 1: 统一 residual 契约与输入分层描述
+
+**Files:**
+- Modify: `docs/dev/active/2026-04-06_solver_constraintspec_interface_draft.md`
+- Modify: `docs/dev/active/2026-04-06_solver_derivative_decoupling_interface_and_migration.md`
+- Modify: `docs/dev/active/2026-04-06_solver_three_layer_minimal_interfaces.md`
+
+- [x] **Step 1: 写明唯一内核契约**
+  - 统一为：`residual_vec!(F, x_vec, theta_vec, cfg)`。
+- [x] **Step 2: 写明边界语义契约**
+  - 统一为：外层可用 `theta_named`，进入内核前一次映射为 `theta_vec`。
+- [x] **Step 3: 消除跨文档冲突描述**
+  - 删除或改写 `residual!(..., theta_named, ...)` 作为内核默认表达。
+- [x] **Step 4: 自查三文档一致性**
+  - 检查术语：`solve_named/solve_vec/derive_named/derive_vec`。
+- [ ] **Step 5: Commit**
+  - `git commit -m "docs: align solver residual contracts across active design docs"`
+
+### Task 2: 补齐异常分支时序图
+
+**Files:**
+- Modify: `docs/dev/active/2026-04-06_solver_project_sequence_diagram.md`
+
+- [x] **Step 1: 增加异常分支图**
+  - 包含主方法失败、fallback 尝试、治理拒绝、legacy 插件可选介入。
+- [x] **Step 2: 对齐术语**
+  - 使用 `primary_strategy`、`Candidate Governance`、`Legacy Adapter`。
+- [ ] **Step 3: Commit**
+  - `git commit -m "docs: add solver exception-path sequence diagram"`
+
+---
+
+## Chunk 2: 低风险代码骨架（不改物理公式）
+
+### Task 3: 引入 schema 基础设施与通用适配器
+
+**Files:**
+- Create: `src/models/solver/SchemaAdapter.jl`
+- Modify: `src/models/Models.jl`
+- Test: `tests/unit/models/test_solver_schema_adapter.jl`
+
+- [x] **Step 1: 先写失败测试（映射往返）**
+  - 覆盖 `named -> vec -> named` 一致性。
+- [x] **Step 2: 实现 `VarSchema` 与 `SchemaRegistry`**
+  - 提供 `register_schema!`、`schema_for`、`validate_schema`。
+- [x] **Step 3: 实现通用转换函数**
+  - `named_to_vec`、`vec_to_named`（泛型元素类型，不做 `Float64` 强转）。
+- [x] **Step 4: 跑单测并确认通过**
+  - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver_schema_adapter.jl"; include("tests/unit/runtests.jl")'`
+- [ ] **Step 5: Commit**
+  - `git commit -m "feat: add schema registry and named-vector adapters for solver"`
+
+### Task 4: 引入 `primary_strategy` 与最小策略对象
+
+**Files:**
+- Create: `src/models/solver/PrimaryStrategy.jl`
+- Modify: `src/models/solver/GenericRootEngine.jl`
+- Modify: `src/models/solver/Solver.jl`
+- Modify: `src/models/Models.jl`
+- Test: `tests/unit/models/test_primary_strategy_contract.jl`
+
+- [x] **Step 1: 写失败测试（策略字段与默认行为）**
+  - method/multi-seed/fallback 合并检查。
+- [x] **Step 2: 定义 `PrimaryStrategy` 数据结构**
+  - 默认值对齐现有行为。
+- [x] **Step 3: 在 Solver 入口接入 `primary_strategy`**
+  - 不改现有求解语义，仅做参数通道收敛。
+- [x] **Step 4: 跑单测并确认通过**
+  - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_primary_strategy_contract.jl,models/test_solver.jl"; include("tests/unit/runtests.jl")'`
+- [ ] **Step 5: Commit**
+  - `git commit -m "refactor: unify solver method multiseed fallback under primary_strategy"`
+
+---
+
+## Chunk 3: Spec-First 主链切入（兼容保留）
+
+### Task 5: 增加 `solve_vec/solve_named` 双入口骨架
+
+**Files:**
+- Modify: `src/models/solver/Solver.jl`
+- Modify: `src/models/solver/ProblemSpec.jl`
+- Modify: `src/models/Models.jl`
+- Test: `tests/unit/models/test_solver_named_vec_parity.jl`
+
+- [x] **Step 1: 写失败测试（named 与 vec 输出一致）**
+- [x] **Step 2: 新增 `solve_vec`**
+  - 内核入口，仅接受 `theta_vec`。
+- [x] **Step 3: 新增 `solve_named`**
+  - 使用 schema 做单次边界转换。
+- [x] **Step 4: 保持旧 `solve(mode,...)` 兼容转发**
+  - 旧路径内部转 spec/named/vec 新入口。
+- [x] **Step 5: 跑测试并提交**
+  - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver_named_vec_parity.jl,models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`
+  - `git commit -m "feat: add named/vec dual solver entry with compatibility wrappers"`
+
+### Task 6: `FixedMu` 向 ProblemSpec 主链对齐（A/B 护栏）
+
+**Files:**
+- Modify: `src/models/solver/ProblemSpec.jl`
+- Modify: `src/models/solver/Solver.jl`
+- Modify: `src/models/constraint_solver.jl`
+- Test: `tests/integration/models/test_solver_auto_backend_semantic_parity.jl`
+- Test: `tests/regression/models/test_dimension_agnostic_solver_regression.jl`
+
+- [x] **Step 1: 先加 A/B 开关与对比测试**
+- [x] **Step 2: 新增 `FixedMu` spec-first forward solve**
+- [x] **Step 3: 在开关下路由到新主链**
+- [x] **Step 4: 跑 integration + regression**
+  - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_solver_auto_backend_semantic_parity.jl"; include("tests/integration/runtests.jl")'`
+  - Run: `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_dimension_agnostic_solver_regression.jl"; include("tests/regression/runtests.jl")'`
+- [ ] **Step 5: Commit**
+  - `git commit -m "refactor: route fixedmu through problemspec chain behind parity guard"`
+
+---
+
+## Chunk 4: 导数层解耦落地
+
+### Task 7: 增加 `derive_vec/derive_named`，复用同一 residual 内核
+
+**Files:**
+- Modify: `src/models/implicit_gap.jl`
+- Modify: `src/models/solver/Solver.jl`
+- Modify: `src/models/Models.jl`
+- Test: `tests/unit/models/test_implicit_gap.jl`
+- Test: `tests/unit/models/test_implicit_gap_flavor_mu.jl`
+- Test: `tests/integration/models/test_models_implicitdiff_flavor_mu_smoke.jl`
+
+- [x] **Step 1: 写失败测试（derive_named 与旧接口一致）**
+- [x] **Step 2: 实现 `derive_vec`（仅向量输入）**
+- [x] **Step 3: 实现 `derive_named`（边界转换一次）**
+- [x] **Step 4: 旧 `solve_with_derivatives` 改兼容转发**
+- [x] **Step 5: 跑 unit + integration 并提交**
+  - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_implicit_gap.jl,models/test_implicit_gap_flavor_mu.jl"; include("tests/unit/runtests.jl")'`
+  - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_models_implicitdiff_flavor_mu_smoke.jl"; include("tests/integration/runtests.jl")'`
+  - `git commit -m "refactor: decouple derivative engine with named/vec dual API"`
+
+---
+
+## Chunk 5: 插件边界与收口
+
+### Task 8: 将 legacy/weighted fallback 明确为插件开关
+
+**Files:**
+- Modify: `src/models/solver/WeightedFallback.jl`
+- Modify: `src/models/constraint_solver.jl`
+- Modify: `src/models/solver/Solver.jl`
+- Test: `tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`
+- Test: `tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl`
+
+- [x] **Step 1: 写失败测试（默认主链不触发插件）**
+- [x] **Step 2: 增加显式开关与诊断标记**
+- [x] **Step 3: 保持开启开关时历史行为可用**
+- [x] **Step 4: 跑相关 integration 并提交**
+  - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="pnjl/test_trho_scan_semantic_modes_smoke.jl,pnjl/test_trho_scan_solver_backend_models_smoke.jl"; include("tests/integration/runtests.jl")'`
+  - `git commit -m "refactor: isolate fallback paths as explicit solver plugins"`
+  - Note: 目标文件级测试 `include("tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl")` 与 `include("tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl")` 已通过；`INTEGRATION_FILES` 入口会触发完整 smoke 编排并暴露仓库既有不稳定项（与本 Task 改动无直接耦合）。
+  - Done: `801f277`
+
+### Task 9: 全量收口验证
+
+**Files:**
+- Modify: `docs/api/models/solver/*` (as needed)
+- Modify: `docs/dev/active/2026-04-06_*.md` (状态回写)
+
+- [x] **Step 1: 跑 smoke 回归闭环**
+  - `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
+  - `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+  - `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
+- [x] **Step 2: 跑治理脚本**
+  - `julia --project=. scripts/dev/check_docs_consistency.jl`
+  - `julia --project=. scripts/dev/check_legacy_solver_switch_leakage.jl`
+- [x] **Step 3: 更新文档状态与风险清单**
+- [x] **Step 4: Commit**
+  - `git commit -m "docs: finalize integrated solver roadmap execution status"`
+  - Done: `725b0c5`
+
+### 后续待办（追加，队列末尾）
+
+> 说明：以下事项为“主线完成后的专项治理队列”，用于持续收敛数值一致性，不回溯否定 Chunk 1-5 的主线完成状态。
+
+- [x] **专项回归治理：定位 FixedMu 新主链与 legacy fallback 的数值不一致根因**
+  - 范围：`tests/integration/pnjl/test_solver_random_physical_smoke.jl` 与 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl` 曾暴露的漂移点。
+  - 目标：在不依赖 legacy fallback 的前提下恢复同等收敛/物理性口径，并形成去 legacy 化迁移补丁。
+  - 完成说明：已在 PR `#56` 的后续提交中完成（含 FixedMu 物理解优先候选治理、默认非 legacy 路径与 scan 成功判据收口），对应回归与 smoke 校验通过。
+
+### 专项排查进展（2026-04-06，第一轮）
+
+- 已复现对照点（Deterministic random sampling）：
+  - `T=6.725043313230272 MeV`, `muB=727.8010053830901 MeV`, `xi=0.3469819335306561`。
+- 对照结果：
+  - `allow_legacy_fallback=false`：返回 `converged=false`，`residual_norm≈2.47e-17`，但 `masses=[-0.175..., -0.175..., 2.351...]`（`mass_nonpositive`），物理性失败。
+  - `allow_legacy_fallback=true`：`selection_reason=:legacy_fallback`，返回物理解并通过 smoke。
+- 进一步对照（FixedMu + MultiSeed，禁用 legacy）：
+  - models 链路在上述点仍出现 `no_candidate_passed_constraints`。
+  - legacy `ImplicitSolver.solve_multi` 在同点可收敛到物理解。
+- 初步根因假设：
+  - `Models.solve_multi(::FixedMu, ...)` 当前候选治理与 legacy `ImplicitSolver.solve_multi` 的“物理解优先”选择/收敛语义存在差异；
+  - 当候选池内全部被 `hard_constraint_ok=false` 标记时，models 链路会选“最小残差但非物理”候选，legacy 链路仍可能找到可用物理解。
+- 下一步（第二轮）：
+  - 在 `src/models/solver/Solver.jl` 的 `solve_multi(::FixedMu, ...)` 引入与 legacy 对齐的“物理解优先”候选治理规则（仅对 FixedMu 生效）；
+  - 新增对应 unit/integration 回归测试，目标是在 `allow_legacy_fallback=false` 下复现点也通过。
+
+### Task 9 执行结果回写（2026-04-06）
+
+- `UNIT_PROFILE=smoke`: 通过（`781/781`）。
+- `INTEGRATION_PROFILE=smoke`: 通过（`453/453`）。
+- `REGRESSION_PROFILE=smoke`: 通过（`468/469`，其中 `1 broken` 为 `tau xi probe regression fixtures` 的可选数据缺失型 `@test_skip`，非失败）。
+- 治理脚本：`check_docs_consistency.jl` 与 `check_legacy_solver_switch_leakage.jl` 均通过。
+- 风险结论：Task 8 的“插件边界化”已完成并通过目标 PNJL 文件级 smoke；全量 smoke/regression（含治理脚本）当前口径下可闭环，后续仅需按常规继续监控可选基线夹具完备性。
+
+---
+
+## 执行注意事项
+
+- 遵循 DRY/YAGNI：只做接口收敛与边界清晰化，不重写物理公式。
+- 每个 Task 结束即提交，避免大批量混改。
+- 若出现性能回退，优先检查是否违反“零重复转换”准则。
+
+## 完成判据（DoD）
+
+- 5 份文档口径一致，术语与契约无冲突。
+- `named` 仅在边界层，内核与 AD 共享 `vec` 契约。
+- `primary_strategy` 成为唯一策略入口（含 multi-seed）。
+- `FixedMu` 能通过 spec-first 主链（至少开关可切并通过 parity）。
+- 导数接口完成解耦并保留兼容别名。
+- fallback 成为显式插件开关，默认不污染主链。

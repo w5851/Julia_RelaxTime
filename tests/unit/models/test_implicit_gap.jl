@@ -67,4 +67,25 @@ Models.pnjl_module()
     @testset "solve_pnjl_with_derivatives" begin
         @test isdefined(Models, :solve_pnjl_with_derivatives)
     end
+
+    @testset "derive_vec and derive_named parity" begin
+        model = Models.create_model(:PNJL)
+        theta_vec = [0.5, 0.1]
+        theta_named = (T_fm=0.5, μ_fm=0.1)
+
+        @test isdefined(Models, :derive_vec)
+        @test isdefined(Models, :derive_named)
+
+        old_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=24, t_num=6)
+        vec_result = Models.derive_vec(model, theta_vec; order=1, p_num=24, t_num=6)
+        named_result = Models.derive_named(model, theta_named; order=1, p_num=24, t_num=6)
+
+        @test all(isapprox.(vec_result.x, old_result.x; rtol=1e-7, atol=1e-9))
+        @test all(isapprox.(vec_result.dx_dT, old_result.dx_dT; rtol=1e-6, atol=1e-8))
+        @test all(isapprox.(vec_result.dx_dμ, old_result.dx_dμ; rtol=1e-6, atol=1e-8))
+
+        @test all(isapprox.(named_result.x, vec_result.x; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(named_result.dx_dT, vec_result.dx_dT; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(named_result.dx_dμ, vec_result.dx_dμ; rtol=1e-12, atol=1e-12))
+    end
 end

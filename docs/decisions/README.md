@@ -129,6 +129,7 @@ NNNN-title-in-kebab-case.md
 | 0001 | [使用多重分派实现模型多态](0001-use-multiple-dispatch-for-models.md) | 已接受 | 2026-02-01 |
 | 0002 | [采用 Models 求解接口契约（Problem-like + solve）](0002-models-solver-contract.md) | 已接受 | 2026-03-29 |
 | 0003 | [PNJL 求解器解耦治理与 AD/隐式微分契约](0003-pnjl-solver-decoupling-governance-and-ad-implicit-contract.md) | 提议 | 2026-03-31 |
+| 0004 | [Solver 三层契约与向量内核统一](0004-solver-three-layer-contract-and-vector-kernel.md) | 提议 | 2026-04-06 |
 
 ## 创建新ADR的流程
 

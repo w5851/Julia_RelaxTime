@@ -39,6 +39,7 @@ export gap_state_dim, gap_residual
 export create_implicit_gap_solver
 export create_flavor_mu_implicit_gap_solver
 export create_pnjl_implicit_solver
+export derive_vec, derive_named
 export build_pnjl_fixedmu_adapters, build_pnjl_flavor_mu_adapters
 export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
@@ -57,6 +58,7 @@ export evaluate_hard_constraints
 export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
+export solve_vec, solve_named
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export state_var_dim, mu_var_dim, solution_dim
@@ -64,6 +66,9 @@ export ProblemSpec, build_problem_spec, ExtraConstraints, default_extra_constrai
 export AbstractConstraintComponent
 export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
+export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
+export named_to_vec, vec_to_named
+export PrimaryStrategy
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
@@ -158,6 +163,8 @@ include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
+include(joinpath(@__DIR__, "solver", "SchemaAdapter.jl"))
+include(joinpath(@__DIR__, "solver", "PrimaryStrategy.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
 include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))

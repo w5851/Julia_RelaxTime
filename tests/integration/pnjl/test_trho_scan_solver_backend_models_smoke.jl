@@ -31,6 +31,10 @@ using .Models: run_trho_scan
     @test isfile(output)
     @test stats.total == 1
     @test stats.success == 1
+    @test hasproperty(stats, :weighted_plugin_enabled)
+    @test hasproperty(stats, :weighted_plugin_rescued)
+    @test stats.weighted_plugin_enabled == false
+    @test stats.weighted_plugin_rescued == 0
 
     lines = readlines(output)
     @test length(lines) == 2
@@ -65,6 +69,7 @@ end
             asym_s_target=0.0,
             solver_backend=:models,
             model_kind=kind,
+            hybrid_weighted_fallback=true,
             p_num=12,
             t_num=4,
             iterations=120,
@@ -73,6 +78,8 @@ end
         @test isfile(output)
         @test stats.total == 1
         @test stats.success == 1
+        @test stats.weighted_plugin_enabled == true
+        @test stats.weighted_plugin_rescued >= 0
     end
 end
 
@@ -97,6 +104,8 @@ end
     @test isfile(output)
     @test stats.total == 1
     @test stats.success == 1
+    @test stats.weighted_plugin_enabled == false
+    @test stats.weighted_plugin_rescued == 0
 end
 
 @testset "TrhoScan smoke: semantic_mode passthrough" begin
@@ -121,6 +130,8 @@ end
     @test isfile(output)
     @test stats.total == 1
     @test stats.success == 1
+    @test stats.weighted_plugin_enabled == false
+    @test stats.weighted_plugin_rescued == 0
 
     @test_throws ArgumentError run_trho_scan(
         T_values=[150.0],

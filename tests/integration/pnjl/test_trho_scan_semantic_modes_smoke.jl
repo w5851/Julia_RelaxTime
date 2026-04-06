@@ -50,4 +50,10 @@ using .Models: run_trho_scan
     @test manifold.total == 1
     @test ground.success == 1
     @test manifold.success == 1
+    @test hasproperty(ground, :weighted_plugin_enabled)
+    @test hasproperty(ground, :weighted_plugin_rescued)
+    @test ground.weighted_plugin_enabled == false
+    @test ground.weighted_plugin_rescued == 0
+    @test manifold.weighted_plugin_enabled == false
+    @test manifold.weighted_plugin_rescued == 0
 end

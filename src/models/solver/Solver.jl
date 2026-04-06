@@ -53,6 +53,29 @@ end
     return model
 end
 
+@inline function _candidate_is_physical_for_selection(cand)::Bool
+    if !Bool(get(cand, :converged, false))
+        return false
+    end
+    if !isfinite(get(cand, :omega, NaN)) || !isfinite(get(cand, :pressure, NaN)) ||
+       !isfinite(get(cand, :rho_norm, NaN)) || !isfinite(get(cand, :entropy, NaN)) ||
+       !isfinite(get(cand, :energy, NaN))
+        return false
+    end
+    if !haskey(cand, :x_state) || !haskey(cand, :masses)
+        return false
+    end
+    return is_physical_solution(cand.x_state, cand.masses)
+end
+
+@inline function _select_fixedmu_multiseed_candidate(candidates::AbstractVector)
+    converged_physical = [c for c in candidates if _candidate_is_physical_for_selection(c)]
+    if !isempty(converged_physical)
+        return select_pressure_max_candidate(converged_physical).selected_candidate
+    end
+    return select_pressure_max_candidate(candidates).selected_candidate
+end
+
 @inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
@@ -117,8 +140,21 @@ end
     return spec.forward_solve(model, T_fm; forwarded...)
 end
 
-function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
-    return _solve_constraint_fixedmu(model, T_fm, μ_fm; kwargs...)
+function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
+    problem_spec::Union{Nothing, ProblemSpec}=nothing,
+    μ_fm::Real,
+    kwargs...)
+    fixedmu_use_problem_spec = Bool(get(kwargs, :fixedmu_use_problem_spec, false))
+
+    if fixedmu_use_problem_spec || problem_spec !== nothing
+        merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
+        raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
+        return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, false)))
+    end
+
+    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec,))
+    raw = _solve_constraint_fixedmu(model, T_fm, μ_fm; filtered...)
+    return (; raw..., fixedmu_problem_spec_active=false)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
@@ -141,6 +177,7 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_f
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
@@ -215,6 +252,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
@@ -269,6 +307,7 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
@@ -306,9 +345,12 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm_max=residual_norm_max,
                 forwarded...,
             )
-            ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            thermo_finite = isfinite(raw.omega) && isfinite(raw.pressure) && isfinite(raw.rho_norm) && isfinite(raw.entropy) && isfinite(raw.energy)
+            phys_ok = thermo_finite && is_physical_solution(raw.x_state, raw.masses)
+            residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            ok = (Bool(raw.converged) || (residual_ok && phys_ok))
             candidate = (
-                converged=Bool(raw.converged),
+                converged=ok,
                 solution=Float64.(raw.solution),
                 x_state=raw.x_state,
                 mu_vec=raw.mu_vec,
@@ -346,8 +388,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         end
     end
 
-    selected = select_pressure_max_candidate(candidates)
-    s = selected.selected_candidate
+    s = _select_fixedmu_multiseed_candidate(candidates)
     return SolverResult(
         mode,
         Bool(s.converged),
@@ -367,6 +408,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
@@ -546,6 +588,40 @@ end
 function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
     model = create_model(:PNJL)
     return solve_multi(model, mode, T_fm; kwargs...)
+end
+
+@inline function _extract_theta_fixedmu(theta_vec::AbstractVector{<:Real})
+    length(theta_vec) == 2 || throw(ArgumentError("FixedMu expects theta_vec length 2 ([T_fm, μ_fm]), got $(length(theta_vec))"))
+    return Float64(theta_vec[1]), Float64(theta_vec[2])
+end
+
+@inline function _extract_theta_nonfixedmu(theta_vec::AbstractVector{<:Real}, mode::ConstraintMode)
+    _ = mode
+    length(theta_vec) == 1 || throw(ArgumentError("$(typeof(mode)) expects theta_vec length 1 ([T_fm]), got $(length(theta_vec))"))
+    return Float64(theta_vec[1])
+end
+
+function solve_vec(model::AbstractPNJLModel, mode::FixedMu, theta_vec::AbstractVector{<:Real}; kwargs...)
+    T_fm, μ_fm = _extract_theta_fixedmu(theta_vec)
+    return solve(model, mode, T_fm, μ_fm; kwargs...)
+end
+
+function solve_vec(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_vec::AbstractVector{<:Real}; kwargs...)
+    T_fm = _extract_theta_nonfixedmu(theta_vec, mode)
+    return solve(model, mode, T_fm; kwargs...)
+end
+
+function solve_named(model::AbstractPNJLModel, mode::FixedMu, theta_named::NamedTuple; kwargs...)
+    haskey(theta_named, :T_fm) || throw(ArgumentError("FixedMu solve_named requires :T_fm"))
+    haskey(theta_named, :μ_fm) || throw(ArgumentError("FixedMu solve_named requires :μ_fm"))
+    theta_vec = [theta_named[:T_fm], theta_named[:μ_fm]]
+    return solve_vec(model, mode, theta_vec; kwargs...)
+end
+
+function solve_named(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_named::NamedTuple; kwargs...)
+    haskey(theta_named, :T_fm) || throw(ArgumentError("$(typeof(mode)) solve_named requires :T_fm"))
+    theta_vec = [theta_named[:T_fm]]
+    return solve_vec(model, mode, theta_vec; kwargs...)
 end
 
 @inline function is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
