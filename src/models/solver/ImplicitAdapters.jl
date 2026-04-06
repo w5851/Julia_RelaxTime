@@ -1,3 +1,5 @@
+using StaticArrays: SVector
+
 """
     ImplicitAdapters
 

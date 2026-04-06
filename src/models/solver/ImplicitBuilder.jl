@@ -1,3 +1,5 @@
+using ImplicitDifferentiation: ImplicitFunction
+
 """
     build_implicit_solver(problem::ImplicitProblem, cfg::ImplicitSolverConfig=ImplicitSolverConfig())
 
