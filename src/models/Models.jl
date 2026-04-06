@@ -57,6 +57,7 @@ export evaluate_hard_constraints
 export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
+export solve_vec, solve_named
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export state_var_dim, mu_var_dim, solution_dim

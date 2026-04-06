@@ -552,6 +552,40 @@ function solve_multi(mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwar
     return solve_multi(model, mode, T_fm; kwargs...)
 end
 
+@inline function _extract_theta_fixedmu(theta_vec::AbstractVector{<:Real})
+    length(theta_vec) == 2 || throw(ArgumentError("FixedMu expects theta_vec length 2 ([T_fm, μ_fm]), got $(length(theta_vec))"))
+    return Float64(theta_vec[1]), Float64(theta_vec[2])
+end
+
+@inline function _extract_theta_nonfixedmu(theta_vec::AbstractVector{<:Real}, mode::ConstraintMode)
+    _ = mode
+    length(theta_vec) == 1 || throw(ArgumentError("$(typeof(mode)) expects theta_vec length 1 ([T_fm]), got $(length(theta_vec))"))
+    return Float64(theta_vec[1])
+end
+
+function solve_vec(model::AbstractPNJLModel, mode::FixedMu, theta_vec::AbstractVector{<:Real}; kwargs...)
+    T_fm, μ_fm = _extract_theta_fixedmu(theta_vec)
+    return solve(model, mode, T_fm, μ_fm; kwargs...)
+end
+
+function solve_vec(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_vec::AbstractVector{<:Real}; kwargs...)
+    T_fm = _extract_theta_nonfixedmu(theta_vec, mode)
+    return solve(model, mode, T_fm; kwargs...)
+end
+
+function solve_named(model::AbstractPNJLModel, mode::FixedMu, theta_named::NamedTuple; kwargs...)
+    haskey(theta_named, :T_fm) || throw(ArgumentError("FixedMu solve_named requires :T_fm"))
+    haskey(theta_named, :μ_fm) || throw(ArgumentError("FixedMu solve_named requires :μ_fm"))
+    theta_vec = [theta_named[:T_fm], theta_named[:μ_fm]]
+    return solve_vec(model, mode, theta_vec; kwargs...)
+end
+
+function solve_named(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, theta_named::NamedTuple; kwargs...)
+    haskey(theta_named, :T_fm) || throw(ArgumentError("$(typeof(mode)) solve_named requires :T_fm"))
+    theta_vec = [theta_named[:T_fm]]
+    return solve_vec(model, mode, theta_vec; kwargs...)
+end
+
 @inline function is_physical_solution(x_state::AbstractVector{<:Real}, masses::AbstractVector{<:Real}; phi_tol::Float64=1e-8)
     if length(x_state) < 5 || length(masses) < 3
         return false

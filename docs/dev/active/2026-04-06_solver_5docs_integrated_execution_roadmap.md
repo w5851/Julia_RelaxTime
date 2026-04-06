@@ -116,14 +116,14 @@
 - Modify: `src/models/Models.jl`
 - Test: `tests/unit/models/test_solver_named_vec_parity.jl`
 
-- [ ] **Step 1: 写失败测试（named 与 vec 输出一致）**
-- [ ] **Step 2: 新增 `solve_vec`**
+- [x] **Step 1: 写失败测试（named 与 vec 输出一致）**
+- [x] **Step 2: 新增 `solve_vec`**
   - 内核入口，仅接受 `theta_vec`。
-- [ ] **Step 3: 新增 `solve_named`**
+- [x] **Step 3: 新增 `solve_named`**
   - 使用 schema 做单次边界转换。
-- [ ] **Step 4: 保持旧 `solve(mode,...)` 兼容转发**
+- [x] **Step 4: 保持旧 `solve(mode,...)` 兼容转发**
   - 旧路径内部转 spec/named/vec 新入口。
-- [ ] **Step 5: 跑测试并提交**
+- [x] **Step 5: 跑测试并提交**
   - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver_named_vec_parity.jl,models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'`
   - `git commit -m "feat: add named/vec dual solver entry with compatibility wrappers"`
 
