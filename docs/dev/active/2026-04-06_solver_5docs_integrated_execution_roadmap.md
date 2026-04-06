@@ -93,13 +93,13 @@
 - Modify: `src/models/Models.jl`
 - Test: `tests/unit/models/test_primary_strategy_contract.jl`
 
-- [ ] **Step 1: 写失败测试（策略字段与默认行为）**
+- [x] **Step 1: 写失败测试（策略字段与默认行为）**
   - method/multi-seed/fallback 合并检查。
-- [ ] **Step 2: 定义 `PrimaryStrategy` 数据结构**
+- [x] **Step 2: 定义 `PrimaryStrategy` 数据结构**
   - 默认值对齐现有行为。
-- [ ] **Step 3: 在 Solver 入口接入 `primary_strategy`**
+- [x] **Step 3: 在 Solver 入口接入 `primary_strategy`**
   - 不改现有求解语义，仅做参数通道收敛。
-- [ ] **Step 4: 跑单测并确认通过**
+- [x] **Step 4: 跑单测并确认通过**
   - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_primary_strategy_contract.jl,models/test_solver.jl"; include("tests/unit/runtests.jl")'`
 - [ ] **Step 5: Commit**
   - `git commit -m "refactor: unify solver method multiseed fallback under primary_strategy"`

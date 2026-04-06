@@ -141,6 +141,7 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_f
 end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
@@ -215,6 +216,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
 end
 
 function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma}, T_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
@@ -269,6 +271,7 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
@@ -367,6 +370,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRho}, T_fm::Real; kwargs...)
+    kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
