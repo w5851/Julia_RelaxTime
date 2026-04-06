@@ -218,58 +218,54 @@ function solve(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymmetricRh
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
 
-    if bridge.use_problem_spec_chain || mode isa FixedRho || mode isa FixedEntropy || mode isa FixedSigma || mode isa FixedAsymmetricRho
-        problem_spec = get(kwargs, :problem_spec, nothing)
-        rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
-        forwarded = _strip_forward_kwargs(kwargs, (
-            :problem_spec,
-            :seed_strategy,
-            :seed_guess,
-            :seed_candidates,
-            :semantic_mode,
-            :selector,
-            :rho0,
-            :xi,
-            :p_num,
-            :t_num,
-            :residual_norm_max,
-            :model_kind,
-        ))
-        raw = solve_constraint(
-            effective_model,
-            mode,
-            T_fm;
-            problem_spec=problem_spec,
-            seed_guess=bridge.seed_guess,
-            seed_candidates=bridge.seed_candidates,
-            semantic_mode=bridge.semantic_mode,
-            selector=bridge.selector,
-            rho0_kwargs...,
-            xi=bridge.xi,
-            p_num=bridge.p_num,
-            t_num=bridge.t_num,
-            residual_norm_max=bridge.residual_norm_max,
-            forwarded...,
-        )
-        return SolverResult(
-            mode,
-            Bool(raw.converged),
-            Float64.(raw.solution),
-            raw.x_state,
-            raw.mu_vec,
-            Float64(raw.omega),
-            Float64(raw.pressure),
-            Float64(raw.rho_norm),
-            Float64(raw.entropy),
-            Float64(raw.energy),
-            raw.masses,
-            Int(raw.iterations),
-            Float64(raw.residual_norm),
-            Float64(bridge.xi),
-        )
-    end
-
-    throw(ArgumentError("unsupported mode for solve bridge: $(typeof(mode))"))
+    problem_spec = get(kwargs, :problem_spec, nothing)
+    rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
+    forwarded = _strip_forward_kwargs(kwargs, (
+        :problem_spec,
+        :seed_strategy,
+        :seed_guess,
+        :seed_candidates,
+        :semantic_mode,
+        :selector,
+        :rho0,
+        :xi,
+        :p_num,
+        :t_num,
+        :residual_norm_max,
+        :model_kind,
+    ))
+    raw = solve_constraint(
+        effective_model,
+        mode,
+        T_fm;
+        problem_spec=problem_spec,
+        seed_guess=bridge.seed_guess,
+        seed_candidates=bridge.seed_candidates,
+        semantic_mode=bridge.semantic_mode,
+        selector=bridge.selector,
+        rho0_kwargs...,
+        xi=bridge.xi,
+        p_num=bridge.p_num,
+        t_num=bridge.t_num,
+        residual_norm_max=bridge.residual_norm_max,
+        forwarded...,
+    )
+    return SolverResult(
+        mode,
+        Bool(raw.converged),
+        Float64.(raw.solution),
+        raw.x_state,
+        raw.mu_vec,
+        Float64(raw.omega),
+        Float64(raw.pressure),
+        Float64(raw.rho_norm),
+        Float64(raw.entropy),
+        Float64(raw.energy),
+        raw.masses,
+        Int(raw.iterations),
+        Float64(raw.residual_norm),
+        Float64(bridge.xi),
+    )
 end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
@@ -481,43 +477,46 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         )
     end
 
-    if mode isa FixedRho || mode isa FixedAsymmetricRho
-        seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
-        seeds = if haskey(kwargs, :seeds)
-            [Float64.(s) for s in kwargs[:seeds]]
-        else
-            get_all_seeds(seed_strategy, [T_fm], mode)
+    seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+    seeds = if haskey(kwargs, :seeds)
+        [Float64.(s) for s in kwargs[:seeds]]
+    else
+        get_all_seeds(seed_strategy, [T_fm], mode)
+    end
+    isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
+
+    selector_fn = haskey(kwargs, :selector) ? kwargs[:selector] : SeedStrategies.default_omega_selector
+    forwarded = _strip_forward_kwargs(kwargs, (
+        :seed_strategy,
+        :seeds,
+        :seed_guess,
+        :seed_candidates,
+        :semantic_mode,
+        :selector,
+    ))
+
+    results = SolverResult[]
+    failed_seeds = String[]
+    for seed in seeds
+        try
+            push!(results, solve(effective_model, mode, T_fm;
+                seed_strategy=DefaultSeed(Float64.(seed), Float64.(seed), :hadron),
+                forwarded...,
+            ))
+        catch err
+            push!(failed_seeds, "seed=$(repr(seed)): $(sprint(showerror, err))")
         end
-        isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
-
-        selector_fn = haskey(kwargs, :selector) ? kwargs[:selector] : SeedStrategies.default_omega_selector
-        forwarded = _strip_forward_kwargs(kwargs, (
-            :seed_strategy,
-            :seeds,
-            :seed_guess,
-            :seed_candidates,
-            :semantic_mode,
-            :selector,
-        ))
-
-        results = SolverResult[]
-        for seed in seeds
-            try
-                push!(results, solve(effective_model, mode, T_fm;
-                    seed_strategy=DefaultSeed(Float64.(seed), Float64.(seed), :hadron),
-                    forwarded...,
-                ))
-            catch
-            end
-        end
-
-        isempty(results) && error("All seeds failed (exceptions) in solve_multi")
-        converged = filter(r -> r.converged, results)
-        isempty(converged) && error("All seeds failed to converge to a physical solution")
-        return selector_fn(converged)
     end
 
-    throw(ArgumentError("unsupported mode for solve_multi bridge: $(typeof(mode))"))
+    if isempty(results)
+        error(
+            "All seeds failed (exceptions) in solve_multi. " *
+            "Failure summary: " * join(failed_seeds, " | "),
+        )
+    end
+    converged = filter(r -> r.converged, results)
+    isempty(converged) && error("All seeds failed to converge to a physical solution")
+    return selector_fn(converged)
 end
 
 function solve(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
