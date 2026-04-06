@@ -204,8 +204,15 @@
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
   - `julia --project=. scripts/dev/check_legacy_solver_switch_leakage.jl`
 - [x] **Step 3: 更新文档状态与风险清单**
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
   - `git commit -m "docs: finalize integrated solver roadmap execution status"`
+  - Done: `725b0c5`
+
+### 后续待办（追加，队列末尾）
+
+- [ ] **专项回归治理：定位 FixedMu 新主链与 legacy fallback 的数值不一致根因**
+  - 范围：`tests/integration/pnjl/test_solver_random_physical_smoke.jl` 与 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl` 曾暴露的漂移点。
+  - 目标：在不依赖 legacy fallback 的前提下恢复同等收敛/物理性口径，并形成去 legacy 化迁移补丁。
 
 ### Task 9 执行结果回写（2026-04-06）
 
