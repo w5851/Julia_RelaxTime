@@ -210,10 +210,10 @@
 ### Task 9 执行结果回写（2026-04-06）
 
 - `UNIT_PROFILE=smoke`: 通过（`781/781`）。
-- `INTEGRATION_PROFILE=smoke`: 未全绿；失败聚焦于 `tests/integration/pnjl/test_solver_random_physical_smoke.jl` 的 deterministic random sampling（2 fail）。
-- `REGRESSION_PROFILE=smoke`: 未全绿；失败聚焦于 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl`（3 fail，`trho` 基线数值偏移）。
+- `INTEGRATION_PROFILE=smoke`: 通过（`453/453`）。
+- `REGRESSION_PROFILE=smoke`: 通过（`468/469`，其中 `1 broken` 为 `tau xi probe regression fixtures` 的可选数据缺失型 `@test_skip`，非失败）。
 - 治理脚本：`check_docs_consistency.jl` 与 `check_legacy_solver_switch_leakage.jl` 均通过。
-- 风险结论：Task 8 的“插件边界化”已完成并通过目标 PNJL 文件级 smoke；仓库级 smoke/regression 仍存在既有数值稳定性/基线偏移风险，建议后续以独立回归治理任务处理，不在本 Task 8/9 的接口收敛提交中混修。
+- 风险结论：Task 8 的“插件边界化”已完成并通过目标 PNJL 文件级 smoke；全量 smoke/regression（含治理脚本）当前口径下可闭环，后续仅需按常规继续监控可选基线夹具完备性。
 
 ---
 
