@@ -1,3 +1,15 @@
+---
+title: Models Solver 文件归位与隐式最小适配实施单
+archived: true
+original: docs/dev/active/2026-04-07_models_solver_file-migration_and_implicit-minimal-adapter_plan.md
+archived_date: 2026-04-07
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Models Solver 文件归位与隐式最小适配实施单
 
 ## 背景与目标
