@@ -181,12 +181,14 @@
 - Test: `tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl`
 - Test: `tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl`
 
-- [ ] **Step 1: 写失败测试（默认主链不触发插件）**
-- [ ] **Step 2: 增加显式开关与诊断标记**
-- [ ] **Step 3: 保持开启开关时历史行为可用**
-- [ ] **Step 4: 跑相关 integration 并提交**
+- [x] **Step 1: 写失败测试（默认主链不触发插件）**
+- [x] **Step 2: 增加显式开关与诊断标记**
+- [x] **Step 3: 保持开启开关时历史行为可用**
+- [x] **Step 4: 跑相关 integration 并提交**
   - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="pnjl/test_trho_scan_semantic_modes_smoke.jl,pnjl/test_trho_scan_solver_backend_models_smoke.jl"; include("tests/integration/runtests.jl")'`
   - `git commit -m "refactor: isolate fallback paths as explicit solver plugins"`
+  - Note: 目标文件级测试 `include("tests/integration/pnjl/test_trho_scan_semantic_modes_smoke.jl")` 与 `include("tests/integration/pnjl/test_trho_scan_solver_backend_models_smoke.jl")` 已通过；`INTEGRATION_FILES` 入口会触发完整 smoke 编排并暴露仓库既有不稳定项（与本 Task 改动无直接耦合）。
+  - Done: `801f277`
 
 ### Task 9: 全量收口验证
 
@@ -194,16 +196,24 @@
 - Modify: `docs/api/models/solver/*` (as needed)
 - Modify: `docs/dev/active/2026-04-06_*.md` (状态回写)
 
-- [ ] **Step 1: 跑 smoke 回归闭环**
+- [x] **Step 1: 跑 smoke 回归闭环**
   - `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
   - `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
   - `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
-- [ ] **Step 2: 跑治理脚本**
+- [x] **Step 2: 跑治理脚本**
   - `julia --project=. scripts/dev/check_docs_consistency.jl`
   - `julia --project=. scripts/dev/check_legacy_solver_switch_leakage.jl`
-- [ ] **Step 3: 更新文档状态与风险清单**
+- [x] **Step 3: 更新文档状态与风险清单**
 - [ ] **Step 4: Commit**
   - `git commit -m "docs: finalize integrated solver roadmap execution status"`
+
+### Task 9 执行结果回写（2026-04-06）
+
+- `UNIT_PROFILE=smoke`: 通过（`781/781`）。
+- `INTEGRATION_PROFILE=smoke`: 未全绿；失败聚焦于 `tests/integration/pnjl/test_solver_random_physical_smoke.jl` 的 deterministic random sampling（2 fail）。
+- `REGRESSION_PROFILE=smoke`: 未全绿；失败聚焦于 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl`（3 fail，`trho` 基线数值偏移）。
+- 治理脚本：`check_docs_consistency.jl` 与 `check_legacy_solver_switch_leakage.jl` 均通过。
+- 风险结论：Task 8 的“插件边界化”已完成并通过目标 PNJL 文件级 smoke；仓库级 smoke/regression 仍存在既有数值稳定性/基线偏移风险，建议后续以独立回归治理任务处理，不在本 Task 8/9 的接口收敛提交中混修。
 
 ---
 
