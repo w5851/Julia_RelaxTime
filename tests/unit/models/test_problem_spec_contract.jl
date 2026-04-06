@@ -340,6 +340,59 @@ end
         end
     end
 
+    @testset "non-rho forward_solve keeps trust_region method_rescue attempt" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        modes = (
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(10.0),
+            Models.FixedAsymmetricRho(0.05, 1.0, 0.0),
+        )
+
+        hard_constraints = [c -> (false, :forced_reject)]
+        selector = candidates -> begin
+            idx = findfirst(c -> get(c, :governed_attempt_origin, :none) == :method_rescue, candidates)
+            if idx === nothing
+                return (
+                    selected_index=1,
+                    selected_candidate=candidates[1],
+                    selection_reason=:missing_method_rescue,
+                    eligible_indices=Int[1],
+                )
+            end
+            return (
+                selected_index=idx,
+                selected_candidate=candidates[idx],
+                selection_reason=:picked_method_rescue,
+                eligible_indices=Int[idx],
+            )
+        end
+
+        for mode in modes
+            spec = Models.build_problem_spec(mode)
+            solved = spec.forward_solve(
+                model,
+                T_fm;
+                seed_guess=seed,
+                rho0=0.16,
+                p_num=8,
+                t_num=4,
+                residual_norm_max=1e-6,
+                iterations=120,
+                nlsolve_method=:newton,
+                trust_region_fallback=true,
+                hard_constraints=hard_constraints,
+                selector=selector,
+            )
+
+            @test solved.selection_reason == :picked_method_rescue
+            @test solved.governed_selected_method == :trust_region
+            @test solved.governed_fallback_used
+        end
+    end
+
     @testset "problem spec non-rho semantic_mode selects candidate selector" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedEntropy(0.5)

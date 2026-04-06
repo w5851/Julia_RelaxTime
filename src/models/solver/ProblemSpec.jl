@@ -267,9 +267,9 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     push!(seed_seen, primary_key)
 
     legacy_seed = if length(primary_seed) >= 5
-        Float64.(Main.Models.extend_seed(Float64.(primary_seed[1:5]), mode))
+        Float64.(extend_seed(Float64.(primary_seed[1:5]), mode))
     else
-        Float64.(Main.Models.extend_seed(primary_seed, mode))
+        Float64.(extend_seed(primary_seed, mode))
     end
     legacy_key = seed_key(legacy_seed)
     if !(legacy_key in seed_seen)
@@ -301,7 +301,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         attempt_origin=:primary,
     ))
 
-    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+    if primary_method != :trust_region
         push!(attempt_plan, (
             seed=primary_seed,
             method=:trust_region,
@@ -536,7 +536,7 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         attempt_origin=:primary,
     ))
 
-    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+    if primary_method != :trust_region
         push!(attempt_plan, (
             seed=primary_seed,
             method=:trust_region,
@@ -700,7 +700,7 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
         attempt_origin=:primary,
     ))
 
-    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+    if primary_method != :trust_region
         push!(attempt_plan, (
             seed=primary_seed,
             method=:trust_region,
@@ -864,7 +864,7 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         attempt_origin=:primary,
     ))
 
-    if primary_method != :trust_region && !(primary_use_fallback && fallback_method == :trust_region)
+    if primary_method != :trust_region
         push!(attempt_plan, (
             seed=primary_seed,
             method=:trust_region,

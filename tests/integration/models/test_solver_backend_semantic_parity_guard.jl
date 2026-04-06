@@ -74,7 +74,7 @@ end
     end
 end
 
-@testset "FixedRho ProblemSpec fallback seed pool includes legacy-mode seed" begin
+@testset "FixedRho ProblemSpec converges with default seed pool" begin
     model = Models.create_model(:PNJL)
     T_fm = to_fm_inv(110.0)
     mode = Models.FixedRho(0.6)
