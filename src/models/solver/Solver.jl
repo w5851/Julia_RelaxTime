@@ -451,7 +451,16 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 residual_norm_max=bridge.residual_norm_max,
                 forwarded...,
             )
-            ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+            ok = if hasproperty(raw, :hard_constraint_ok)
+                Bool(getproperty(raw, :hard_constraint_ok))
+            else
+                Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+            end
+            failed = if hasproperty(raw, :failed_constraints)
+                Symbol.(getproperty(raw, :failed_constraints))
+            else
+                (ok ? Symbol[] : Symbol[:residual_too_large])
+            end
             push!(candidates, (
                 converged=Bool(raw.converged),
                 solution=Float64.(raw.solution),
@@ -466,7 +475,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 iterations=Int(raw.iterations),
                 residual_norm=Float64(raw.residual_norm),
                 hard_constraint_ok=ok,
-                failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
+                failed_constraints=failed,
                 seed_index=Int(seed_index),
             ))
         catch

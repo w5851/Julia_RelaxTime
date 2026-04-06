@@ -114,6 +114,7 @@ Models.pnjl_module()
         @test default_result.converged == bridge_result.converged
         @test isfinite(default_result.residual_norm)
         @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
         if default_result.converged && bridge_result.converged
             @test isapprox(default_result.entropy, bridge_result.entropy; rtol=1e-3, atol=1e-5)
             @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
@@ -147,6 +148,7 @@ Models.pnjl_module()
         @test default_result.converged == bridge_result.converged
         @test isfinite(default_result.residual_norm)
         @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
         if default_result.converged && bridge_result.converged
             @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
             @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
@@ -181,6 +183,7 @@ Models.pnjl_module()
         @test default_result.converged == bridge_result.converged
         @test isfinite(default_result.residual_norm)
         @test isfinite(bridge_result.residual_norm)
+        @test isapprox(default_result.residual_norm, bridge_result.residual_norm; rtol=1e-6, atol=1e-8)
         if default_result.converged && bridge_result.converged
             @test isapprox(default_result.rho_norm, bridge_result.rho_norm; rtol=1e-3, atol=1e-5)
             @test isapprox(default_result.pressure, bridge_result.pressure; rtol=1e-3, atol=1e-5)
