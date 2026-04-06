@@ -43,7 +43,7 @@ struct SolverBenchmark
 end
 
 const BENCHMARKS = [
-    SolverBenchmark("Newton (default line search)", (method = :newton,)),
+    SolverBenchmark("Newton (default line search)", (method = :newton, iterations = 20)),
     SolverBenchmark(
         "Newton + BackTracking line search",
         (method = :newton, linesearch = LineSearches.BackTracking()),
