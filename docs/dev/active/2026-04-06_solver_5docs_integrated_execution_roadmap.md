@@ -73,13 +73,13 @@
 - Modify: `src/models/Models.jl`
 - Test: `tests/unit/models/test_solver_schema_adapter.jl`
 
-- [ ] **Step 1: 先写失败测试（映射往返）**
+- [x] **Step 1: 先写失败测试（映射往返）**
   - 覆盖 `named -> vec -> named` 一致性。
-- [ ] **Step 2: 实现 `VarSchema` 与 `SchemaRegistry`**
+- [x] **Step 2: 实现 `VarSchema` 与 `SchemaRegistry`**
   - 提供 `register_schema!`、`schema_for`、`validate_schema`。
-- [ ] **Step 3: 实现通用转换函数**
+- [x] **Step 3: 实现通用转换函数**
   - `named_to_vec`、`vec_to_named`（泛型元素类型，不做 `Float64` 强转）。
-- [ ] **Step 4: 跑单测并确认通过**
+- [x] **Step 4: 跑单测并确认通过**
   - Run: `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver_schema_adapter.jl"; include("tests/unit/runtests.jl")'`
 - [ ] **Step 5: Commit**
   - `git commit -m "feat: add schema registry and named-vector adapters for solver"`

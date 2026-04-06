@@ -64,6 +64,8 @@ export ProblemSpec, build_problem_spec, ExtraConstraints, default_extra_constrai
 export AbstractConstraintComponent
 export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
+export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
+export named_to_vec, vec_to_named
 export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
@@ -158,6 +160,7 @@ include(joinpath(@__DIR__, "implicit_gap.jl"))
 include(joinpath(@__DIR__, "constraint_solver.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
+include(joinpath(@__DIR__, "solver", "SchemaAdapter.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
 include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))
