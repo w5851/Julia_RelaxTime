@@ -1,3 +1,15 @@
+---
+title: Solver 目标态架构图（To-Be Blueprint）
+archived: true
+original: docs/dev/active/2026-04-06_solver_target_architecture_blueprint.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 目标态架构图（To-Be Blueprint）
 
 更新日期：2026-04-06

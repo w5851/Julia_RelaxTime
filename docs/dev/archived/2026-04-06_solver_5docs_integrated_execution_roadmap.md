@@ -1,3 +1,15 @@
+---
+title: Solver 5-Doc Integration Implementation Plan
+archived: true
+original: docs/dev/active/2026-04-06_solver_5docs_integrated_execution_roadmap.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 5-Doc Integration Implementation Plan
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
@@ -7,6 +19,15 @@
 **Architecture:** Keep a vector-first numerical kernel shared by solve and derivative paths, move NamedTuple to boundary APIs, and use a schema registry as the only named<->vector mapping source. Adopt spec-first contracts while preserving mode compatibility wrappers and explicit plugin boundaries for legacy/weighted fallback.
 
 **Tech Stack:** Julia, NLsolve, ForwardDiff, ImplicitDifferentiation, existing Models/solver modules, unit+integration+regression tests.
+
+---
+
+## 状态分层快照（避免“主线未完成”误读）
+
+- 主线交付状态：Chunk 1-5 的核心实现目标已完成并已在 PR 主线提交（含 `ProblemSpec` 主链收敛、`primary_strategy`、named/vec 双入口、导数解耦适配、fallback 插件边界化）。
+- 验证状态：Task 9 记录的 smoke/regression/governance 校验已完成，见本文件“Task 9 执行结果回写”。
+- 勾选说明：早期 `Step 5: Commit` 的未勾选项属于执行轨迹遗留，不表示对应功能未落地；以“Done: <commit>`/后续提交记录与 PR 变更”为准。
+- 后续专项状态：本文“后续待办（追加，队列末尾）”属于主线完成后的专项治理，不影响本轮主线 DoD 判定。
 
 ---
 
@@ -31,6 +52,8 @@
 ---
 
 ## Chunk 1: 文档口径收敛（先统一再开发）
+
+> 注：本 Chunk 中个别未勾选的 `Commit` 步骤为过程记录遗留；功能是否落地以后续提交与 PR 汇总为准。
 
 ### Task 1: 统一 residual 契约与输入分层描述
 
@@ -210,9 +233,12 @@
 
 ### 后续待办（追加，队列末尾）
 
-- [ ] **专项回归治理：定位 FixedMu 新主链与 legacy fallback 的数值不一致根因**
+> 说明：以下事项为“主线完成后的专项治理队列”，用于持续收敛数值一致性，不回溯否定 Chunk 1-5 的主线完成状态。
+
+- [x] **专项回归治理：定位 FixedMu 新主链与 legacy fallback 的数值不一致根因**
   - 范围：`tests/integration/pnjl/test_solver_random_physical_smoke.jl` 与 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl` 曾暴露的漂移点。
   - 目标：在不依赖 legacy fallback 的前提下恢复同等收敛/物理性口径，并形成去 legacy 化迁移补丁。
+  - 完成说明：已在 PR `#56` 的后续提交中完成（含 FixedMu 物理解优先候选治理、默认非 legacy 路径与 scan 成功判据收口），对应回归与 smoke 校验通过。
 
 ### 专项排查进展（2026-04-06，第一轮）
 

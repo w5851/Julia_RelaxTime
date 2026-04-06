@@ -1,13 +1,30 @@
+---
+title: Solver 与导数能力解耦：接口草案与迁移清单
+archived: true
+original: docs/dev/active/2026-04-06_solver_derivative_decoupling_interface_and_migration.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 与导数能力解耦：接口草案与迁移清单
 
 更新日期：2026-04-06
+
+> 状态说明（2026-04-06 收敛口径）：
+> - 本文 `solve_point/derive_point` 为目标态命名。
+> - 当前仓库稳定入口为 `solve_vec/solve_named` 与 `derive_vec/derive_named`。
+> - 短期不强制新增 `solve_point/derive_point`，避免 API 面重复；若后续统一术语，可先做轻量别名。
 
 ## 1. 目标
 
 - 将导数相关能力从 solver 主链中解耦。
 - solver 仅负责点求解 `x*(theta)`。
 - 导数层仅负责在 `F(x, theta)=0` 上求 `dx/dtheta`。
-- 两层共享统一问题契约（`ConstraintSpec`），不共享实现耦合。
+- 两层共享统一问题契约，不共享实现耦合（当前实现承载名为 `ProblemSpec`）。
 
 ## 2. 分层契约
 
@@ -34,6 +51,18 @@ end
 ```
 
 ## 3. 推荐 API
+
+当前实现映射（落地名）：
+
+```julia
+solve_vec(model, mode, theta_vec; kwargs...)
+solve_named(model, mode, theta_named; kwargs...)
+
+derive_vec(model, theta_vec; kwargs...)
+derive_named(model, theta_named; kwargs...)
+```
+
+目标态命名（保留为演进方向）：
 
 ```julia
 solve_point(model, spec::ConstraintSpec, theta; policy=...) -> SolvePointResult
@@ -77,11 +106,13 @@ derive_point(model, spec::ConstraintSpec, theta;
 
 - `src/models/implicit_gap.jl`：作为 DerivativeEngine 主实现。
 - `src/models/solver/Solver.jl`：导数相关入口仅保留兼容转发，逐步下沉。
-- `src/models/Models.jl`：统一导出 `solve_point/derive_point`，保留旧导数 API 别名。
+- `src/models/Models.jl`：当前统一导出 `solve_vec/solve_named` 与 `derive_vec/derive_named`，并保留旧导数 API 别名。
 
 ## 6. 函数签名级迁移清单
 
 ### 6.1 新增（面向目标态）
+
+状态：暂缓（当前不作为必须落地项；优先保持现有命名收敛）。
 
 文件：`src/models/solver/Solver.jl`
 
@@ -105,12 +136,12 @@ derive_point(model, spec::ConstraintSpec, theta;
 文件：`src/models/solver/Solver.jl`
 
 - 现有导数入口改为兼容壳：
-  - `solve_with_derivatives(...)` -> 内部转发 `derive_point(...)`
+  - `solve_with_derivatives(...)` -> 内部转发当前导数主入口（现状为 `solve_pnjl_with_derivatives` / `derive_vec` 路径）
 
 文件：`src/models/implicit_gap.jl`
 
 - 现有 `solve_pnjl_with_derivatives(...)` 标注为兼容别名：
-  - 保留签名，内部转发 `derive_point(...)`
+  - 保留签名，内部转发当前导数主入口；未来若引入 `derive_point` 再统一切换。
 
 ### 6.3 逐步退役（后续阶段）
 
@@ -120,8 +151,8 @@ derive_point(model, spec::ConstraintSpec, theta;
 
 最小准入标准：
 
-- `solve_point` 与现有 `solve` 在同输入下 `x_star` 与 `residual_norm` 一致（在容差内）。
-- `derive_point` 与现有导数接口在基准点的一阶导一致（在容差内）。
+- `solve_named/solve_vec` 与现有 `solve` 在同输入下 `x_star` 与 `residual_norm` 一致（在容差内）。
+- `derive_named/derive_vec` 与现有导数接口在基准点的一阶导一致（在容差内）。
 - 兼容 API（`solve_with_derivatives`、`solve_pnjl_with_derivatives`）行为不回归。
 
 建议验证维度：

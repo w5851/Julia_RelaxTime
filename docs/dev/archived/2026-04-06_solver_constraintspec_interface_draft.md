@@ -1,6 +1,23 @@
-# Solver ConstraintSpec 接口草案（软去 Mode）
+---
+title: Solver ConstraintSpec 接口草案（软去 Mode，映射到 ProblemSpec）
+archived: true
+original: docs/dev/active/2026-04-06_solver_constraintspec_interface_draft.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+# Solver ConstraintSpec 接口草案（软去 Mode，映射到 ProblemSpec）
 
 更新日期：2026-04-06
+
+> 状态说明（2026-04-06 收敛口径）：
+> - 本文中的 `ConstraintSpec/ConstraintDims/PolicyProfile` 作为“目标概念名”。
+> - 当前仓库稳定实现名分别对应为：`ProblemSpec`、`ProblemSpec.x_dim/theta_dim`、`PrimaryStrategy + 入口策略参数`。
+> - 短期不新增同构类型，避免并行契约。
 
 ## 1. 背景与目标
 
@@ -13,9 +30,14 @@
 - 统一求解内核：内核仅关心 residual、policy、candidate governance。
 - 统一差异表达：`FixedMu/FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho` 差异仅在约束配置。
 - 统一结果契约：`SolverResult + Diagnostics` 字段语义跨模式保持一致。
-- 兼容优先：旧 mode 保留为 `ConstraintSpec` 构造器。
+- 兼容优先：旧 mode 保留为“统一问题契约构造器”（当前实现为 `build_problem_spec`）。
 
 ## 3. 核心数据结构（草案）
+
+当前实现映射（落地名）：
+
+- 概念 `ConstraintSpec` -> 实现 `ProblemSpec`
+- 概念 `ConstraintDims` -> 实现 `ProblemSpec.x_dim/theta_dim`
 
 ```julia
 struct ConstraintDims
@@ -65,6 +87,16 @@ residual_vec!(F, x_vec, theta_vec, cfg)
 
 ## 4. 目标 API（Spec-First）
 
+当前实现映射（落地名）：
+
+```julia
+solve_constraint(model, mode::ConstraintMode, ...)
+solve_multi(model, mode::ConstraintMode, ...)
+build_problem_spec(model, mode; kwargs...) -> ProblemSpec
+```
+
+说明：当前主链已通过 `ProblemSpec` 承载 spec-first 语义；本文 `spec::ConstraintSpec` 签名保留为概念草案，不作为现阶段新增 API 的硬要求。
+
 ```julia
 solve_constraint(model, spec::ConstraintSpec, theta; kwargs...) -> SolverResult
 solve_multi(model, spec::ConstraintSpec, theta; kwargs...) -> SolverResult
@@ -96,6 +128,11 @@ residual_vec!(F, x_vec, theta_vec, cfg) = [base_equations; extra_constraints...]
 
 ## 6. Policy 解耦草案
 
+当前实现映射（落地名）：
+
+- 概念 `PolicyProfile` -> 现阶段由 `PrimaryStrategy` 与入口参数（如 `residual_norm_max`、`allow_legacy_fallback`）共同承载。
+- `primary_strategy` 已作为统一策略入口对象落地。
+
 ```julia
 struct PolicyProfile
     name::Symbol
@@ -116,13 +153,13 @@ end
 
 ### Phase A：引入 Spec，不改变外部调用
 
-- 新增 `build_constraint_spec(mode, model, theta; kwargs...)`。
+- 新增（映射到当前实现）`build_problem_spec(model, mode; kwargs...)`。
 - 旧入口继续可用。
 
 ### Phase B：内核切换为 Spec-First
 
 - `solve_constraint(mode,...)` 入口内部立即转 spec。
-- 主链只处理 `ConstraintSpec`。
+- 主链只处理统一问题契约（当前实现名：`ProblemSpec`）。
 
 ### Phase C：文档与治理收口
 
@@ -132,10 +169,9 @@ end
 ## 8. 最小文件改动建议
 
 - `src/models/solver/ProblemSpec.jl`
-  - 新增 `ConstraintSpec` 定义与构建器。
+  - 以 `ProblemSpec` 作为统一契约承载（不并行新增同构 `ConstraintSpec` 类型）。
 - `src/models/solver/Solver.jl`
-  - 新增 `solve_constraint(..., spec::ConstraintSpec, ...)`。
-  - 旧 mode 入口改为构建 spec 后转调。
+  - 保持 mode 入口稳定，内部构建 `ProblemSpec` 后转调。
 - `src/models/solver/Conditions.jl`
   - 收敛为基础残差 + 额外约束拼装。
 - `src/models/constraint_solver.jl`
@@ -149,8 +185,8 @@ end
 
 ## 10. 决策待确认项
 
-- `ConstraintSpec` 是否直接复用 `ProblemSpec`，或并行存在后再合并。
-- `PolicyProfile` 是否允许 workflow 层覆盖，覆盖边界到哪里。
+- 是否在未来对外暴露 `ConstraintSpec` 作为 `ProblemSpec` 的别名类型（当前默认不新增）。
+- 是否引入显式 `PolicyProfile` 结构，或继续保持 `PrimaryStrategy + 参数` 组合。
 - diagnostics 最小稳定字段集合（跨 mode 强约束）。
 
 ## 11. 推荐实现模式：Schema 注册表（避免模型分支散落）

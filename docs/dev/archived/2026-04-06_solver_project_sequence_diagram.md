@@ -1,3 +1,15 @@
+---
+title: 项目级 Solver 时序图（workflow -> solver -> physics -> result）
+archived: true
+original: docs/dev/active/2026-04-06_solver_project_sequence_diagram.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 项目级 Solver 时序图（workflow -> solver -> physics -> result）
 
 更新日期：2026-04-06

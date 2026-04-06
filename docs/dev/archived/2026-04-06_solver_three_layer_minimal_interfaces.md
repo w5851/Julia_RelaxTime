@@ -1,6 +1,22 @@
+---
+title: Solver 三层模型最小接口清单（实现基线）
+archived: true
+original: docs/dev/active/2026-04-06_solver_three_layer_minimal_interfaces.md
+archived_date: 2026-04-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 三层模型最小接口清单（实现基线）
 
 更新日期：2026-04-06
+
+> 状态说明（2026-04-06 收敛口径）：
+> - 本文作为“实现基线”时，统一采用当前落地命名：`ProblemSpec`、`x_dim/theta_dim`、`PrimaryStrategy`。
+> - `ConstraintSpec/ConstraintDims/PolicyProfile` 在本文仅保留为目标概念映射，不要求并行类型实现。
 
 ## 1. 目的
 
@@ -56,6 +72,8 @@ derive_vec(model, spec, theta_vec; x_star=nothing, method=:implicit_ad, kwargs..
 residual_vec!(F, x_vec, theta_vec, cfg)
 ```
 
+说明：上述 `spec` 记法用于概念层表达；当前仓库稳定入口仍以 `mode` 路径驱动（由入口层转入 `ProblemSpec` 主链）。
+
 职责：
 
 - 统一数值求解执行。
@@ -63,6 +81,34 @@ residual_vec!(F, x_vec, theta_vec, cfg)
 - 统一诊断输出格式。
 
 ## 3. 最小统一契约对象
+
+当前实现映射（推荐用于代码对照）：
+
+```julia
+ProblemSpec(
+    mode,
+    x_dim,
+    theta_dim,
+    residual!,
+    forward_solve,
+    conditions,
+    unpack_solution,
+    postprocess,
+    hard_rules,
+    selector,
+    extra_constraints,
+)
+
+PrimaryStrategy(
+    primary_method,
+    use_fallback,
+    fallback_method,
+    use_multiseed,
+    seed_strategy,
+)
+```
+
+目标概念映射（术语保留）：
 
 ```julia
 ConstraintDims(x_dim, theta_dim)
@@ -90,6 +136,7 @@ PolicyProfile(
 说明：
 
 - `primary_strategy` 应统一包含 method、多 seed、fallback，不做并列分散配置。
+- `ConstraintSpec/ConstraintDims/PolicyProfile` 可用于设计讨论，但当前代码实现以 `ProblemSpec + PrimaryStrategy + 入口参数` 为准。
 
 ## 4. 必做约束（防回归）
 
