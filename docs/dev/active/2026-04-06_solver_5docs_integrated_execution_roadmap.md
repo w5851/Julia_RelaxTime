@@ -136,10 +136,10 @@
 - Test: `tests/integration/models/test_solver_auto_backend_semantic_parity.jl`
 - Test: `tests/regression/models/test_dimension_agnostic_solver_regression.jl`
 
-- [ ] **Step 1: 先加 A/B 开关与对比测试**
-- [ ] **Step 2: 新增 `FixedMu` spec-first forward solve**
-- [ ] **Step 3: 在开关下路由到新主链**
-- [ ] **Step 4: 跑 integration + regression**
+- [x] **Step 1: 先加 A/B 开关与对比测试**
+- [x] **Step 2: 新增 `FixedMu` spec-first forward solve**
+- [x] **Step 3: 在开关下路由到新主链**
+- [x] **Step 4: 跑 integration + regression**
   - Run: `julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_solver_auto_backend_semantic_parity.jl"; include("tests/integration/runtests.jl")'`
   - Run: `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_dimension_agnostic_solver_regression.jl"; include("tests/regression/runtests.jl")'`
 - [ ] **Step 5: Commit**

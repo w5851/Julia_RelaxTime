@@ -117,8 +117,21 @@ end
     return spec.forward_solve(model, T_fm; forwarded...)
 end
 
-function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; μ_fm::Real, kwargs...)
-    return _solve_constraint_fixedmu(model, T_fm, μ_fm; kwargs...)
+function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
+    problem_spec::Union{Nothing, ProblemSpec}=nothing,
+    μ_fm::Real,
+    kwargs...)
+    fixedmu_use_problem_spec = Bool(get(kwargs, :fixedmu_use_problem_spec, false))
+
+    if fixedmu_use_problem_spec || problem_spec !== nothing
+        merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
+        raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
+        return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, false)))
+    end
+
+    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec,))
+    raw = _solve_constraint_fixedmu(model, T_fm, μ_fm; filtered...)
+    return (; raw..., fixedmu_problem_spec_active=false)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
