@@ -60,7 +60,7 @@ export solve, solve_multi, SolverResult
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
 export state_var_dim, mu_var_dim, solution_dim
-export ProblemSpec, build_problem_spec
+export ProblemSpec, build_problem_spec, ExtraConstraints, default_extra_constraints
 export AbstractConstraintComponent
 export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
