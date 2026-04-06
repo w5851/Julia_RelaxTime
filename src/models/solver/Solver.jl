@@ -53,6 +53,29 @@ end
     return model
 end
 
+@inline function _candidate_is_physical_for_selection(cand)::Bool
+    if !Bool(get(cand, :converged, false))
+        return false
+    end
+    if !isfinite(get(cand, :omega, NaN)) || !isfinite(get(cand, :pressure, NaN)) ||
+       !isfinite(get(cand, :rho_norm, NaN)) || !isfinite(get(cand, :entropy, NaN)) ||
+       !isfinite(get(cand, :energy, NaN))
+        return false
+    end
+    if !haskey(cand, :x_state) || !haskey(cand, :masses)
+        return false
+    end
+    return is_physical_solution(cand.x_state, cand.masses)
+end
+
+@inline function _select_fixedmu_multiseed_candidate(candidates::AbstractVector)
+    converged_physical = [c for c in candidates if _candidate_is_physical_for_selection(c)]
+    if !isempty(converged_physical)
+        return select_pressure_max_candidate(converged_physical).selected_candidate
+    end
+    return select_pressure_max_candidate(candidates).selected_candidate
+end
+
 @inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
     xi = get(kwargs, :xi, 0.0)
     p_num = get(kwargs, :p_num, default_momentum_count())
@@ -362,8 +385,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         end
     end
 
-    selected = select_pressure_max_candidate(candidates)
-    s = selected.selected_candidate
+    s = _select_fixedmu_multiseed_candidate(candidates)
     return SolverResult(
         mode,
         Bool(s.converged),

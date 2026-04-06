@@ -214,6 +214,23 @@
   - 范围：`tests/integration/pnjl/test_solver_random_physical_smoke.jl` 与 `tests/regression/pnjl/test_scan_fixedpoint_regression.jl` 曾暴露的漂移点。
   - 目标：在不依赖 legacy fallback 的前提下恢复同等收敛/物理性口径，并形成去 legacy 化迁移补丁。
 
+### 专项排查进展（2026-04-06，第一轮）
+
+- 已复现对照点（Deterministic random sampling）：
+  - `T=6.725043313230272 MeV`, `muB=727.8010053830901 MeV`, `xi=0.3469819335306561`。
+- 对照结果：
+  - `allow_legacy_fallback=false`：返回 `converged=false`，`residual_norm≈2.47e-17`，但 `masses=[-0.175..., -0.175..., 2.351...]`（`mass_nonpositive`），物理性失败。
+  - `allow_legacy_fallback=true`：`selection_reason=:legacy_fallback`，返回物理解并通过 smoke。
+- 进一步对照（FixedMu + MultiSeed，禁用 legacy）：
+  - models 链路在上述点仍出现 `no_candidate_passed_constraints`。
+  - legacy `ImplicitSolver.solve_multi` 在同点可收敛到物理解。
+- 初步根因假设：
+  - `Models.solve_multi(::FixedMu, ...)` 当前候选治理与 legacy `ImplicitSolver.solve_multi` 的“物理解优先”选择/收敛语义存在差异；
+  - 当候选池内全部被 `hard_constraint_ok=false` 标记时，models 链路会选“最小残差但非物理”候选，legacy 链路仍可能找到可用物理解。
+- 下一步（第二轮）：
+  - 在 `src/models/solver/Solver.jl` 的 `solve_multi(::FixedMu, ...)` 引入与 legacy 对齐的“物理解优先”候选治理规则（仅对 FixedMu 生效）；
+  - 新增对应 unit/integration 回归测试，目标是在 `allow_legacy_fallback=false` 下复现点也通过。
+
 ### Task 9 执行结果回写（2026-04-06）
 
 - `UNIT_PROFILE=smoke`: 通过（`781/781`）。
