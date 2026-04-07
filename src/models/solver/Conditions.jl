@@ -25,6 +25,7 @@ const ρ0 = ρ0_inv_fm3
 
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
 import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
+import Main.Models: AbstractNJLModel, NJL2Model, gap_residual
 
 export gap_conditions, gap_core_residual!, build_conditions, build_residual!
 export GapParams
@@ -34,10 +35,12 @@ export explicit_residual, explicit_residual!
 @inline _model_kind_symbol(::PNJLModel) = :PNJL
 @inline _model_kind_symbol(::PNJLMagneticModel) = :PNJL
 @inline _model_kind_symbol(::RPNJLModel) = :RPNJL
+@inline _model_kind_symbol(::AbstractNJLModel) = :NJL
+@inline _model_kind_symbol(::NJL2Model) = :NJL2
 @inline _model_kind_symbol(::AbstractQCDModel) = :PNJL
 
 @inline function _get_model(model_kind::Symbol)
-    if model_kind === :PNJL || model_kind === :RPNJL
+    if model_kind === :PNJL || model_kind === :RPNJL || model_kind === :NJL || model_kind === :NJL2
         return Main.Models.get_cached_model(model_kind)
     end
     error("Unsupported model kind in Conditions: $(model_kind)")
@@ -161,6 +164,35 @@ end
     return F
 end
 
+@inline function gap_core_residual!(F::AbstractVector, x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+    length(mu_vec) == 3 || throw(ArgumentError("gap_core_residual! expects mu_vec length 3, got $(length(mu_vec))"))
+
+    nx = length(x_state)
+    length(F) == nx || throw(ArgumentError("gap_core_residual! expects output length $nx, got $(length(F))"))
+
+    if nx == 5
+        Tx = typeof(x_state[1])
+        x5 = SVector{5, Tx}(x_state[1], x_state[2], x_state[3], x_state[4], x_state[5])
+        return gap_core_residual!(F, x5, mu_vec, params)
+    elseif nx == 2 || nx == 3
+        residual = gap_residual(
+            _get_model(params.model_kind),
+            x_state,
+            params.T_fm,
+            mu_vec;
+            p_num=params.p_num,
+            t_num=params.t_num,
+            xi=params.xi,
+        )
+        @inbounds for i in 1:nx
+            F[i] = residual[i]
+        end
+        return F
+    end
+
+    throw(ArgumentError("gap_core_residual! only supports state_dim in (2,3,5), got $nx"))
+end
+
 # ============================================================================
 # 模式特定条件构建
 # ============================================================================
@@ -226,10 +258,15 @@ end
     mu_dim::Int,
 )
     _validate_schema_mode_dims(mode, schema, mu_dim)
-    if length(x_state) == 5 && length(mu_vec) == 3
-        return gap_conditions(SVector{5}(Tuple(x_state)), mu_vec, params)
+    state_n = length(x_state)
+    mu_n = length(mu_vec)
+    if (state_n == 2 || state_n == 3 || state_n == 5) && mu_n == 3
+        Tout = promote_type(eltype(x_state), eltype(mu_vec), typeof(params.T_fm))
+        out = Vector{Tout}(undef, state_n)
+        gap_core_residual!(out, x_state, mu_vec, params)
+        return out
     end
-    throw(ArgumentError("schema/mode dimensions currently support PNJL-like residual only (state_dim=5, mu_dim=3), got state_dim=$(length(x_state)), mu_dim=$(length(mu_vec))"))
+    throw(ArgumentError("schema/mode dimensions currently support state_dim in (2,3,5) and mu_dim=3, got state_dim=$state_n, mu_dim=$mu_n"))
 end
 
 """

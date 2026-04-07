@@ -1,7 +1,14 @@
 using StaticArrays: SVector
 
 @inline function _model_kind_for_shared_core(model::AbstractQCDModel)
-    return model isa RPNJLModel ? :RPNJL : :PNJL
+    if model isa RPNJLModel
+        return :RPNJL
+    elseif model isa NJL2Model
+        return :NJL2
+    elseif model isa AbstractNJLModel
+        return :NJL
+    end
+    return :PNJL
 end
 
 @inline function _implicit_conditions_with_shared_core(
@@ -14,23 +21,21 @@ end
     kwargs...,
 )
     state_n = gap_state_dim(model)
-    if state_n == 5 && (length(θ) == 2 || length(θ) == 4)
+    if length(x) == state_n && (length(θ) == 2 || length(θ) == 4)
         T_fm = θ[1]
         mu_vec = if length(θ) == 2
             SVector{3}(θ[2], θ[2], θ[2])
         else
             SVector{3}(θ[2], θ[3], θ[4])
         end
-        Tx = typeof(x[1])
-        x_state = SVector{5, Tx}(Tuple(x))
         params = GapParams(T_fm, cached_nodes(p_num, t_num), xi;
             p_num=p_num,
             t_num=t_num,
             model_kind=_model_kind_for_shared_core(model),
         )
-        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
-        out = Vector{Tout}(undef, 5)
-        gap_core_residual!(out, x_state, mu_vec, params)
+        Tout = promote_type(eltype(x), typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, state_n)
+        gap_core_residual!(out, x, mu_vec, params)
         return out
     end
 

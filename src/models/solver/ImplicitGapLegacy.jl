@@ -8,7 +8,7 @@ x(T, μ) 的导数（例如 dφ/dT, dφ/dμ）。
 设计对齐 legacy：
 - legacy PNJL: Conditions.gap_conditions 使用 ForwardDiff.gradient 构造 F(x;θ)=0，
   NLsolve 使用 autodiff=:forward（等价于 Hessian 结构）。
-- models: 复用 gap_residual(model, x, T, mu_vec) 作为条件函数。
+- models: 通过 Conditions.gap_core_residual! 统一构建条件函数（NJL2/NJL3/PNJL 共用入口）。
 
 注意：
 - forward_solve_impl 只用于求“数值解”（primal），因此将 θ 强制转为 Float64 是 OK 的。
