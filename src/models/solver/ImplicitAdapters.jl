@@ -1,5 +1,57 @@
 using StaticArrays: SVector
 
+@inline function _model_kind_for_shared_core(model::AbstractQCDModel)
+    if model isa RPNJLModel
+        return :RPNJL
+    elseif model isa NJL2Model
+        return :NJL2
+    elseif model isa AbstractNJLModel
+        return :NJL
+    end
+    return :PNJL
+end
+
+@inline function _implicit_conditions_with_shared_core(
+    model::AbstractQCDModel,
+    θ::AbstractVector,
+    x::AbstractVector;
+    xi,
+    p_num::Int,
+    t_num::Int,
+    kwargs...,
+)
+    state_n = gap_state_dim(model)
+    if length(x) == state_n && (length(θ) == 2 || length(θ) == 4)
+        T_fm = θ[1]
+        mu_vec = if length(θ) == 2
+            SVector{3}(θ[2], θ[2], θ[2])
+        else
+            SVector{3}(θ[2], θ[3], θ[4])
+        end
+        params = GapParams(T_fm, cached_nodes(p_num, t_num), xi;
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=_model_kind_for_shared_core(model),
+        )
+        Tout = promote_type(eltype(x), typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, state_n)
+        gap_core_residual!(out, model, x, mu_vec, params)
+        return out
+    end
+
+    length(θ) >= 2 || throw(ArgumentError("implicit conditions expects theta length >= 2, got $(length(θ))"))
+
+    T_fm = θ[1]
+    μ_fm = θ[2]
+    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+    r = gap_residual(model, x, T_fm, mu_vec;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        kwargs...)
+    return Vector(r)
+end
+
 """
     ImplicitAdapters
 
@@ -74,15 +126,11 @@ function build_njl_problem(
 
     conditions = function (θ::AbstractVector, x::AbstractVector, z)
         _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-        r = gap_residual(model, x, T_fm, mu_vec;
+        return _implicit_conditions_with_shared_core(model, θ, x;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
             kwargs...)
-        return Vector(r)
     end
 
     return ImplicitProblem(

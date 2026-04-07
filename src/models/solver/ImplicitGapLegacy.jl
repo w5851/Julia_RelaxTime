@@ -8,7 +8,7 @@ x(T, μ) 的导数（例如 dφ/dT, dφ/dμ）。
 设计对齐 legacy：
 - legacy PNJL: Conditions.gap_conditions 使用 ForwardDiff.gradient 构造 F(x;θ)=0，
   NLsolve 使用 autodiff=:forward（等价于 Hessian 结构）。
-- models: 复用 gap_residual(model, x, T, mu_vec) 作为条件函数。
+- models: 通过 Conditions.gap_core_residual! 统一构建条件函数（NJL2/NJL3/PNJL 共用入口）。
 
 注意：
 - forward_solve_impl 只用于求“数值解”（primal），因此将 θ 强制转为 Float64 是 OK 的。
@@ -28,6 +28,10 @@ export build_pnjl_fixedmu_adapters
 export build_pnjl_flavor_mu_adapters
 export derive_vec, derive_named
 
+@inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
+    return model isa RPNJLModel ? :RPNJL : :PNJL
+end
+
 @inline function symmetric_mu_direction_derivative(dx_dmu_vec::AbstractMatrix)
     size(dx_dmu_vec, 2) == 3 || throw(ArgumentError("dx_dmu_vec must have 3 columns for (μ_u, μ_d, μ_s), got size=$(size(dx_dmu_vec))"))
     return vec(sum(dx_dmu_vec; dims=2))
@@ -45,6 +49,8 @@ function build_pnjl_fixedmu_adapters(
     t_num::Int=8,
     kwargs...
 )
+    thermal_nodes = cached_nodes(p_num, t_num)
+
     forward_solve = function (θ::AbstractVector)
         T_fm = Float64(θ[1])
         μ_fm = Float64(θ[2])
@@ -59,13 +65,18 @@ function build_pnjl_fixedmu_adapters(
         T_fm = θ[1]
         μ_fm = θ[2]
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
+        Tx = typeof(x[1])
+        x_state = SVector{5, Tx}(Tuple(x))
+        params = GapParams(T_fm, thermal_nodes, xi;
             p_num=p_num,
             t_num=t_num,
-            kwargs...)
-        return Vector(r)
+            model_kind=_legacy_adapter_model_kind(model),
+        )
+
+        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, 5)
+        gap_core_residual!(out, model, x_state, mu_vec, params)
+        return out
     end
 
     return (forward_solve=forward_solve, conditions=conditions)
@@ -78,6 +89,8 @@ function build_pnjl_flavor_mu_adapters(
     t_num::Int=8,
     kwargs...
 )
+    thermal_nodes = cached_nodes(p_num, t_num)
+
     forward_solve = function (θ::AbstractVector)
         length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
         T_fm = Float64(θ[1])
@@ -92,13 +105,18 @@ function build_pnjl_flavor_mu_adapters(
         length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
         T_fm = θ[1]
         mu_vec = SVector{3}(θ[2], θ[3], θ[4])
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
+        Tx = typeof(x[1])
+        x_state = SVector{5, Tx}(Tuple(x))
+        params = GapParams(T_fm, thermal_nodes, xi;
             p_num=p_num,
             t_num=t_num,
-            kwargs...)
-        return Vector(r)
+            model_kind=_legacy_adapter_model_kind(model),
+        )
+
+        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, 5)
+        gap_core_residual!(out, model, x_state, mu_vec, params)
+        return out
     end
 
     return (forward_solve=forward_solve, conditions=conditions)
