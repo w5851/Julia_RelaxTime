@@ -6,6 +6,66 @@ function _pm_normalize_mev_grid(values, name::String)
     return normalized
 end
 
+@inline function _pm_solver_attempt_origin(result)
+    if hasproperty(result, :governed_attempt_origin)
+        return Symbol(getproperty(result, :governed_attempt_origin))
+    elseif hasproperty(result, :fixedrho_joint_attempt_origin)
+        return Symbol(getproperty(result, :fixedrho_joint_attempt_origin))
+    elseif hasproperty(result, :entropy_attempt_origin)
+        return Symbol(getproperty(result, :entropy_attempt_origin))
+    elseif hasproperty(result, :sigma_attempt_origin)
+        return Symbol(getproperty(result, :sigma_attempt_origin))
+    elseif hasproperty(result, :asym_attempt_origin)
+        return Symbol(getproperty(result, :asym_attempt_origin))
+    end
+    return :fallback
+end
+
+@inline function _pm_extract_solver_diagnostic(result; seed_source::Union{Symbol,Nothing}=nothing)
+    if hasproperty(result, :diagnostic)
+        diag = getproperty(result, :diagnostic)
+        if hasproperty(diag, :seed_source)
+            return diag
+        end
+        return merge(diag, (seed_source=seed_source,))
+    end
+
+    endpoint_cause = if Bool(getproperty(result, :converged))
+        :converged
+    elseif hasproperty(result, :failed_constraints) && !isempty(getproperty(result, :failed_constraints))
+        :hard_constraint_failed
+    else
+        :nonconvergence
+    end
+
+    hard_ok = hasproperty(result, :hard_constraint_ok) ? Bool(getproperty(result, :hard_constraint_ok)) : nothing
+    failed = hasproperty(result, :failed_constraints) ? Symbol.(getproperty(result, :failed_constraints)) : Symbol[]
+    continuity = hasproperty(result, :continuity_distance) ? Float64(getproperty(result, :continuity_distance)) : nothing
+
+    return (
+        attempt_origin=_pm_solver_attempt_origin(result),
+        seed_source=seed_source,
+        hard_constraint_ok=hard_ok,
+        failed_constraints=failed,
+        endpoint_cause=endpoint_cause,
+        continuity_distance=continuity,
+    )
+end
+
+@inline function _pm_infer_phase_status(diag)::Symbol
+    fatal_endpoint = Set((:max_iter, :nan_guard, :nonconvergence, :hard_constraint_failed))
+    hard_ok = get(diag, :hard_constraint_ok, nothing)
+    failed = Symbol.(get(diag, :failed_constraints, Symbol[]))
+    endpoint = get(diag, :endpoint_cause, nothing)
+
+    if hard_ok === true && isempty(failed) && !(endpoint in fatal_endpoint)
+        return :valid
+    elseif hard_ok === false || !isempty(failed)
+        return :invalid
+    end
+    return :unknown
+end
+
 function _pm_interpolate_transition_mu(rows)
     length(rows) >= 2 || return nothing
     left = rows[1]
@@ -150,10 +210,22 @@ function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed
             p_num=p_num,
             t_num=t_num,
             residual_norm_max=residual_accept_tol,
+            diagnostic_level=:summary,
         )
     end
 
     accept = _pm_accept_branch_point(result; residual_accept_tol=residual_accept_tol)
+    seed_hint = branch === :hadron ? :seed : :seed
+    diagnostic = _pm_extract_solver_diagnostic(result; seed_source=seed_hint)
+    diag_status = _pm_infer_phase_status(diagnostic)
+    accepted = accept.accepted && diag_status == :valid
+    branch_status = if accepted
+        accept.branch_status
+    elseif diag_status == :invalid
+        :nonconverged
+    else
+        accept.branch_status
+    end
     return (
         branch=branch,
         T_MeV=Float64(T_MeV),
@@ -164,8 +236,10 @@ function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed
         rho_norm=Float64(getproperty(result, :rho_norm)),
         residual_norm=Float64(getproperty(result, :residual_norm)),
         converged=Bool(getproperty(result, :converged)),
-        branch_status=accept.branch_status,
-        accepted=accept.accepted,
+        branch_status=branch_status,
+        accepted=accepted,
+        diagnostic_status=diag_status,
+        diagnostic=diagnostic,
         raw_result=result,
     )
 end
@@ -214,7 +288,7 @@ function _pm_branch_rows_for_temperature(T_MeV::Real, mu_grid, seed_pair::PMSeed
             endpoint_cause = if accepted
                 nothing
             elseif solve_row.branch_status == :nonconverged
-                :nonconvergence
+                get(solve_row.diagnostic, :endpoint_cause, :nonconvergence)
             elseif solve_row.branch_status == :invalid_thermo
                 :physical_loss_candidate
             else
