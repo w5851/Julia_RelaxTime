@@ -185,6 +185,7 @@ function run_tmu_scan(;
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
+    diagnostic_level::Symbol=:none,
     nlsolve_kwargs...
 )
     _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
@@ -251,6 +252,7 @@ function run_tmu_scan(;
                             solver_backend=solver_backend,
                             auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
+                            diagnostic_level=diagnostic_level,
                             p_num=p_num,
                             t_num=t_num,
                             nlsolve_kwargs...)
@@ -264,6 +266,7 @@ function run_tmu_scan(;
                             solver_backend=solver_backend,
                             auto_pnjl_backend=auto_pnjl_backend,
                             model_kind=model_kind,
+                            diagnostic_level=diagnostic_level,
                             p_num=p_num,
                             t_num=t_num,
                             nlsolve_kwargs...)
@@ -368,6 +371,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -376,6 +380,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -384,6 +389,7 @@ function _attempt_with_candidates(T_fm, μ_fm, xi, candidates;
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -398,6 +404,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -413,6 +420,7 @@ function _solve_point(T_fm, μ_fm, xi, seed_state;
         result = _solve_with_models(FixedMu(), T_fm, μ_fm;
             xi=xi,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             seed_strategy=strategy,
             p_num=p_num,
             t_num=t_num,
@@ -438,6 +446,7 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -449,6 +458,7 @@ function _solve_point_with_seed_strategy(T_fm, μ_fm, xi, seed_strategy::SeedStr
         result = _solve_with_models(FixedMu(), T_fm, μ_fm;
             xi=xi,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             seed_strategy=seed_strategy,
             p_num=p_num,
             t_num=t_num,
@@ -474,6 +484,7 @@ function _refine_result(T_fm, μ_fm, xi, result;
     solver_backend::Symbol=:auto,
     auto_pnjl_backend::Symbol=:models,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -484,6 +495,7 @@ function _refine_result(T_fm, μ_fm, xi, result;
             solver_backend=solver_backend,
             auto_pnjl_backend=auto_pnjl_backend,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -540,6 +552,7 @@ end
 function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     xi::Real,
     model_kind::Symbol,
+    diagnostic_level::Symbol=:none,
     seed_strategy::SeedStrategy,
     p_num::Int,
     t_num::Int,
@@ -558,6 +571,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
         xi=xi,
         p_num=p_num,
         t_num=t_num,
+        diagnostic_level=diagnostic_level,
         models_kwargs...,
     )
     return _to_solver_result(mode, raw, xi)

@@ -41,6 +41,64 @@ end
     return join(round.(Float64.(seed_vec); digits=12), ",")
 end
 
+const DIAGNOSTIC_LEVELS = (:none, :summary, :full)
+
+@inline function _resolve_diagnostic_level(kwargs::Dict{Symbol,Any})::Symbol
+    level = get(kwargs, :diagnostic_level, :none)
+    level isa Symbol || throw(ArgumentError("diagnostic_level must be Symbol, got $(typeof(level))"))
+    level in DIAGNOSTIC_LEVELS || throw(ArgumentError("invalid diagnostic_level: $(level), expected one of $(DIAGNOSTIC_LEVELS)"))
+    return level
+end
+
+@inline function _diagnostic_attempt_origin(candidate)
+    if hasproperty(candidate, :governed_attempt_origin)
+        return Symbol(getproperty(candidate, :governed_attempt_origin))
+    elseif hasproperty(candidate, :fixedrho_joint_attempt_origin)
+        return Symbol(getproperty(candidate, :fixedrho_joint_attempt_origin))
+    elseif hasproperty(candidate, :attempt_origin)
+        return Symbol(getproperty(candidate, :attempt_origin))
+    end
+    return :fallback
+end
+
+@inline function _diagnostic_endpoint_cause(candidate)
+    if hasproperty(candidate, :endpoint_cause)
+        value = getproperty(candidate, :endpoint_cause)
+        return value === nothing ? nothing : Symbol(value)
+    end
+    if !Bool(get(candidate, :converged, false))
+        if hasproperty(candidate, :failed_constraints) && !isempty(getproperty(candidate, :failed_constraints))
+            return :hard_constraint_failed
+        end
+        return :nonconvergence
+    end
+    return :converged
+end
+
+@inline function _solver_diagnostic_from_candidate(candidate; seed_source::Union{Symbol,Nothing})
+    hard_ok = hasproperty(candidate, :hard_constraint_ok) ? Bool(getproperty(candidate, :hard_constraint_ok)) : nothing
+    failed = hasproperty(candidate, :failed_constraints) ? Symbol.(getproperty(candidate, :failed_constraints)) : Symbol[]
+    continuity = hasproperty(candidate, :continuity_distance) ? Float64(getproperty(candidate, :continuity_distance)) : nothing
+    return (
+        attempt_origin=_diagnostic_attempt_origin(candidate),
+        seed_source=seed_source,
+        hard_constraint_ok=hard_ok,
+        failed_constraints=failed,
+        endpoint_cause=_diagnostic_endpoint_cause(candidate),
+        continuity_distance=continuity,
+    )
+end
+
+@inline function _attach_solver_diagnostic(result::NamedTuple, selected_candidate, candidates, diagnostic_level::Symbol; seed_source::Union{Symbol,Nothing}=nothing)
+    diagnostic_level === :none && return result
+    summary = _solver_diagnostic_from_candidate(selected_candidate; seed_source=seed_source)
+    if diagnostic_level === :summary
+        return merge(result, (diagnostic=summary,))
+    end
+    full_candidates = [_solver_diagnostic_from_candidate(c; seed_source=seed_source) for c in candidates]
+    return merge(result, (diagnostic=(; summary..., candidates=full_candidates),))
+end
+
 function _build_governed_attempt_plan(
     mode::ConstraintMode,
     primary_seed::AbstractVector{<:Real},
@@ -179,7 +237,7 @@ end
 end
 
 @inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
-    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :extra_constraints, :fixedmu_use_problem_spec, :legacy_fallback_plugin)
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :extra_constraints, :fixedmu_use_problem_spec, :legacy_fallback_plugin, :diagnostic_level)
         delete!(kwargs, key)
     end
     return kwargs
@@ -187,6 +245,7 @@ end
 
 function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    diagnostic_level = _resolve_diagnostic_level(kwargs)
 
     μ_fm = get(kwargs, :μ_fm, nothing)
     μ_fm === nothing && throw(ArgumentError("μ_fm is required for ProblemSpec FixedMu forward_solve"))
@@ -198,7 +257,24 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
     solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
-    return (; solved..., fixedmu_problem_spec_active=true)
+    result = (; solved..., fixedmu_problem_spec_active=true)
+    if diagnostic_level === :none
+        return result
+    end
+
+    seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
+    summary = (
+        attempt_origin=:seed,
+        seed_source=seed_source,
+        hard_constraint_ok=Bool(get(solved, :hard_constraint_ok, false)),
+        failed_constraints=Symbol.(get(solved, :failed_constraints, Symbol[])),
+        endpoint_cause=Bool(get(solved, :converged, false)) ? :converged : :nonconvergence,
+        continuity_distance=nothing,
+    )
+    if diagnostic_level === :summary
+        return merge(result, (diagnostic=summary,))
+    end
+    return merge(result, (diagnostic=(; summary..., candidates=[summary]),))
 end
 
 @inline function _joint_model_kind(::RPNJLModel)
@@ -377,6 +453,7 @@ end
 
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    diagnostic_level = _resolve_diagnostic_level(kwargs)
     extra_constraints = _resolve_extra_constraints(kwargs)
     fixedrho_joint_solve = get(kwargs, :fixedrho_joint_solve, true)
     fixedrho_joint_solve isa Bool || throw(ArgumentError("fixedrho_joint_solve must be Bool, got $(typeof(fixedrho_joint_solve))"))
@@ -480,7 +557,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         end,
     )
     s = selected.selected_candidate
-    return (
+    result = (
         converged=Bool(s.converged),
         solution=Vector{Float64}(s.solution),
         x_state=s.x_state,
@@ -505,6 +582,8 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         fixedrho_joint_selected_quality=get(s, :fixedrho_joint_selected_quality, :bad),
         fixedrho_joint_fallback_used=get(s, :fixedrho_joint_fallback_used, false),
     )
+    seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
+    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level; seed_source=seed_source)
 end
 
 function _governed_mode_forward_solve(
@@ -615,6 +694,7 @@ function _governed_nonrho_problem_spec_forward_solve(
     solve_mode_constraint::Function,
 )
     extra_constraints = _resolve_extra_constraints(kwargs)
+    diagnostic_level = _resolve_diagnostic_level(kwargs)
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec $(mode_label) forward_solve"))
 
@@ -710,7 +790,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         end,
     )
     s = selected.selected_candidate
-    return (
+    result = (
         converged=Bool(s.converged),
         solution=Vector{Float64}(s.solution),
         x_state=s.x_state,
@@ -733,6 +813,8 @@ function _governed_nonrho_problem_spec_forward_solve(
         governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
         legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
+    seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
+    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level; seed_source=seed_source)
 end
 
 function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; fwd_kwargs...)

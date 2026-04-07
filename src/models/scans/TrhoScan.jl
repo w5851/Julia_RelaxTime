@@ -226,6 +226,7 @@ function run_trho_scan(;
     p_num::Int=24,
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
+    diagnostic_level::Symbol=:none,
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
@@ -292,6 +293,7 @@ function run_trho_scan(;
                     semantic_mode=semantic_mode,
                     selector=selector,
                     model_kind=model_kind,
+                    diagnostic_level=diagnostic_level,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
             else
                 # 兼容旧链路
@@ -305,6 +307,7 @@ function run_trho_scan(;
                     semantic_mode=semantic_mode,
                     selector=selector,
                     model_kind=model_kind,
+                    diagnostic_level=diagnostic_level,
                     p_num=p_num, t_num=t_num, nlsolve_kwargs...)
 
                 if result !== nothing && _is_success(result)
@@ -423,6 +426,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
     semantic_mode::Symbol=:ground_state,
     selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -436,6 +440,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             semantic_mode=semantic_mode,
             selector=selector,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -449,6 +454,7 @@ function _attempt_with_candidates(T_fm, rho, xi, candidates;
             semantic_mode=semantic_mode,
             selector=selector,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -470,6 +476,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
     semantic_mode::Symbol=:ground_state,
     selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -490,6 +497,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             _solve_with_models(mode, T_fm;
                 xi=xi,
                 model_kind=model_kind,
+                diagnostic_level=diagnostic_level,
                 seed_strategy=strategy,
                 semantic_mode=semantic_mode,
                 selector=selector,
@@ -540,6 +548,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             semantic_mode=semantic_mode,
             selector=selector,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -599,6 +608,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
     semantic_mode::Symbol=:ground_state,
     selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -630,6 +640,7 @@ function _solve_point(T_fm, rho_target, xi, seed_state;
         result = _solve_with_models(mode, T_fm;
             xi=xi,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             seed_strategy=strategy,
             semantic_mode=semantic_mode,
             selector=selector,
@@ -662,6 +673,7 @@ function _refine_result(T_fm, ρ_fm, xi, result;
     semantic_mode::Symbol=:ground_state,
     selector::Union{Nothing, Function}=nothing,
     model_kind::Symbol=:PNJL,
+    diagnostic_level::Symbol=:none,
     p_num,
     t_num,
     nlsolve_kwargs...)
@@ -677,6 +689,7 @@ function _refine_result(T_fm, ρ_fm, xi, result;
             semantic_mode=semantic_mode,
             selector=selector,
             model_kind=model_kind,
+            diagnostic_level=diagnostic_level,
             p_num=p_num,
             t_num=t_num,
             nlsolve_kwargs...,
@@ -730,6 +743,7 @@ end
 function _solve_with_models(mode::ConstraintMode, T_fm;
     xi::Real,
     model_kind::Symbol,
+    diagnostic_level::Symbol=:none,
     seed_strategy::SeedStrategy,
     semantic_mode::Symbol=:ground_state,
     selector::Union{Nothing, Function}=nothing,
@@ -755,6 +769,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            diagnostic_level=diagnostic_level,
             nlsolve_kwargs...,
         )
     else
@@ -767,6 +782,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            diagnostic_level=diagnostic_level,
             nlsolve_kwargs...,
         )
     end

@@ -136,7 +136,7 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     μ_fm::Real,
     kwargs...)
-    fixedmu_use_problem_spec = Bool(get(kwargs, :fixedmu_use_problem_spec, false))
+    fixedmu_use_problem_spec = Bool(get(kwargs, :fixedmu_use_problem_spec, false)) || haskey(kwargs, :diagnostic_level)
 
     if fixedmu_use_problem_spec || problem_spec !== nothing
         merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
@@ -144,7 +144,7 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
         return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, false)))
     end
 
-    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec,))
+    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec, :diagnostic_level))
     raw = _solve_constraint_fixedmu(model, T_fm, μ_fm; filtered...)
     return (; raw..., fixedmu_problem_spec_active=false)
 end
