@@ -304,6 +304,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
     p_num = get(kwargs, :p_num, default_momentum_count())
     t_num = get(kwargs, :t_num, default_theta_count())
     residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
+    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
 
     seeds = if haskey(kwargs, :seeds)
@@ -320,11 +321,12 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         :p_num,
         :t_num,
         :residual_norm_max,
+        :evaluate_all_attempts,
     ))
-    candidates = NamedTuple[]
-    for (seed_index, seed) in enumerate(seeds)
-        local raw
-        try
+    candidates = execute_attempt_pool(seeds;
+        stop_on_first_success=true,
+        evaluate_all_attempts=evaluate_all_attempts,
+        evaluate_attempt=(seed, seed_index) -> begin
             raw = solve_constraint(
                 model,
                 mode,
@@ -358,9 +360,10 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
                 seed_index=Int(seed_index),
             )
-            push!(candidates, candidate)
-        catch
-            push!(candidates, (
+            return candidate, ok
+        end,
+        on_error=(_, seed_index, _) -> begin
+            return (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -376,9 +379,9 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
-            ))
-        end
-    end
+            ), false
+        end,
+    )
 
     s = _select_fixedmu_multiseed_candidate(candidates)
     return SolverResult(
@@ -403,6 +406,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
+    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
 
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
     seeds = if haskey(kwargs, :seeds)
@@ -426,14 +430,15 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         :p_num,
         :t_num,
         :residual_norm_max,
+        :evaluate_all_attempts,
         :model_kind,
         :problem_spec,
     ))
 
-    candidates = NamedTuple[]
-    for (seed_index, seed) in enumerate(seeds)
-        local raw
-        try
+    candidates = execute_attempt_pool(seeds;
+        stop_on_first_success=true,
+        evaluate_all_attempts=evaluate_all_attempts,
+        evaluate_attempt=(seed, seed_index) -> begin
             rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
             raw = solve_constraint(
                 effective_model,
@@ -461,7 +466,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
             else
                 (ok ? Symbol[] : Symbol[:residual_too_large])
             end
-            push!(candidates, (
+            candidate = (
                 converged=Bool(raw.converged),
                 solution=Float64.(raw.solution),
                 x_state=raw.x_state,
@@ -477,9 +482,11 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 hard_constraint_ok=ok,
                 failed_constraints=failed,
                 seed_index=Int(seed_index),
-            ))
-        catch
-            push!(candidates, (
+            )
+            return candidate, ok
+        end,
+        on_error=(_, seed_index, _) -> begin
+            return (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -495,9 +502,9 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
-            ))
-        end
-    end
+            ), false
+        end,
+    )
 
     selected = select_pressure_max_candidate(candidates)
     s = selected.selected_candidate
