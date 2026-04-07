@@ -124,36 +124,15 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 2 || throw(ArgumentError("create_implicit_gap_solver(::NJL2Model) expects dim=2"))
-
-    forward_solve_impl = function (θ::AbstractVector)
-        T_fm = Float64(θ[1])
-        μ_fm = Float64(θ[2])
-        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
-
-        st = solve_gap(model, T_fm, mu_vec; solver=solver, xi=xi, p_num=p_num, t_num=t_num, kwargs...)
-        return ([st.phi[1], st.phi[2]], nothing)
-    end
-
-    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
-        _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
-    end
-
-    return ImplicitFunction(
-        forward_solve_impl,
-        conditions_impl;
-        linear_solver=DirectLinearSolver(),
-        representation=MatrixRepresentation(),
+    problem = build_njl_problem(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        solver=solver,
+        kwargs...,
     )
+    return build_implicit_solver(problem)
 end
 
 @inline function _pnjl_model_kind(thermo_backend::Symbol)
@@ -306,21 +285,14 @@ function create_flavor_mu_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
-
-    adapters = build_pnjl_flavor_mu_adapters(
+    problem = build_pnjl_flavor_mu_problem(
         model;
         xi=xi,
         p_num=p_num,
         t_num=t_num,
         kwargs...,
     )
-
-    return ImplicitFunction(
-        adapters.forward_solve,
-        adapters.conditions;
-        linear_solver=DirectLinearSolver(),
-        representation=MatrixRepresentation(),
-    )
+    return build_implicit_solver(problem)
 end
 
 """solve_pnjl_with_flavor_mu_derivatives(T_fm, mu_vec; order=1, kwargs...) -> NamedTuple
@@ -377,38 +349,15 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 3 || throw(ArgumentError("create_implicit_gap_solver currently supports dim=3 only"))
-
-    # primal forward solve (θ -> x)
-    forward_solve_impl = function (θ::AbstractVector)
-        T_fm = Float64(θ[1])
-        μ_fm = Float64(θ[2])
-        mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
-
-        st = solve_gap(model, T_fm, mu_vec; solver=solver, xi=xi, p_num=p_num, t_num=t_num, kwargs...)
-        return (collect(st.phi), nothing)
-    end
-
-    # conditions for implicit differentiation (θ, x) -> F(x;θ)
-    conditions_impl = function (θ::AbstractVector, x::AbstractVector, z)
-        _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
-    end
-
-    return ImplicitFunction(
-        forward_solve_impl,
-        conditions_impl;
-        linear_solver=DirectLinearSolver(),
-        representation=MatrixRepresentation(),
+    problem = build_njl_problem(
+        model;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        solver=solver,
+        kwargs...,
     )
+    return build_implicit_solver(problem)
 end
 
 """create_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
@@ -430,19 +379,12 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
-
-    adapters = build_pnjl_fixedmu_adapters(
+    problem = build_pnjl_fixedmu_problem(
         model;
         xi=xi,
         p_num=p_num,
         t_num=t_num,
         kwargs...,
     )
-
-    return ImplicitFunction(
-        adapters.forward_solve,
-        adapters.conditions;
-        linear_solver=DirectLinearSolver(),
-        representation=MatrixRepresentation(),
-    )
+    return build_implicit_solver(problem)
 end

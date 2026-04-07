@@ -36,6 +36,8 @@ export meanfield_state, state_vector
 export normalize_mu_vec
 export solve_gap
 export gap_state_dim, gap_residual
+export ImplicitProblem, ImplicitSolverConfig, build_implicit_solver
+export build_pnjl_fixedmu_problem, build_pnjl_flavor_mu_problem, build_njl_problem
 export create_implicit_gap_solver
 export create_flavor_mu_implicit_gap_solver
 export create_pnjl_implicit_solver
@@ -158,9 +160,12 @@ include(joinpath(@__DIR__, "factory.jl"))
 # Ω assembly
 include(joinpath(@__DIR__, "omega.jl"))
 include(joinpath(@__DIR__, "thermo_kernel.jl"))
-include(joinpath(@__DIR__, "gap_solver.jl"))
-include(joinpath(@__DIR__, "implicit_gap.jl"))
-include(joinpath(@__DIR__, "constraint_solver.jl"))
+include(joinpath(@__DIR__, "solver", "GapSolver.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitGapLegacy.jl"))
+include(joinpath(@__DIR__, "solver", "ConstraintSolver.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitProblem.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitBuilder.jl"))
+include(joinpath(@__DIR__, "solver", "ImplicitAdapters.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
 include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
 include(joinpath(@__DIR__, "solver", "SchemaAdapter.jl"))
