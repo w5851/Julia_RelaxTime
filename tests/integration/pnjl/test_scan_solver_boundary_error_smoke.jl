@@ -34,7 +34,7 @@ const PNJL = Models.pnjl_module()
     if stats_tmu.failure > 0
         @test occursin("thermo_backend", lowercase(lines_tmu[2])) || occursin("failed", lowercase(lines_tmu[2]))
     else
-        @test occursin("true", lowercase(lines_tmu[2])) || occursin("bootstrap_multiseed", lowercase(lines_tmu[2]))
+        @test occursin("true", lowercase(lines_tmu[2])) || occursin("governance.selection", lowercase(lines_tmu[2]))
     end
 
     output_trho = joinpath(tmp_dir, "trho_invalid_backend.csv")
@@ -59,6 +59,6 @@ const PNJL = Models.pnjl_module()
     if stats_trho.failure > 0
         @test occursin("thermo_backend", lowercase(lines_trho[2])) || occursin("failed", lowercase(lines_trho[2]))
     else
-        @test occursin("true", lowercase(lines_trho[2])) || occursin("bootstrap_multiseed", lowercase(lines_trho[2]))
+        @test occursin("true", lowercase(lines_trho[2])) || occursin("governance.selection", lowercase(lines_trho[2]))
     end
 end

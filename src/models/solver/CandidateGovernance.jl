@@ -20,3 +20,26 @@ const CandidateSelector = Function
         prefer_continuity=Bool(prefer_continuity),
     )
 end
+
+function execute_attempt_pool(
+    attempts;
+    evaluate_attempt::Function,
+    on_error::Function,
+    stop_on_first_success::Bool=true,
+    evaluate_all_attempts::Bool=false,
+)
+    candidates = NamedTuple[]
+    for (attempt_index, attempt_cfg) in enumerate(attempts)
+        candidate, success = try
+            evaluate_attempt(attempt_cfg, attempt_index)
+        catch err
+            err isa InterruptException && rethrow()
+            on_error(attempt_cfg, attempt_index, err)
+        end
+        push!(candidates, candidate)
+        if !evaluate_all_attempts && stop_on_first_success && Bool(success)
+            break
+        end
+    end
+    return candidates
+end

@@ -39,6 +39,8 @@ end
 
 @testset "Task center e2e smoke" begin
     _reset_scan_jobs!()
+    output_path = joinpath(PROJECT_ROOT_TCE2E, "data", "outputs", "results", "pnjl", "scan", "tmu", "tmu_task_center_e2e_smoke.csv")
+    isfile(output_path) && rm(output_path; force=true)
 
     payload = Dict(
         "kind" => "tmu",
@@ -49,6 +51,7 @@ end
             "max_retries" => 0,
             "p_num" => 16,
             "t_num" => 8,
+            "output_path" => output_path,
         ),
     )
 
@@ -81,7 +84,9 @@ end
     @test result_body.job_status == "succeeded"
     @test haskey(result_body, :result)
     @test haskey(result_body.result, :output_path)
-    @test isfile(String(result_body.result.output_path))
+    @test String(result_body.result.output_path) == output_path
+    @test isfile(output_path)
 
     _reset_scan_jobs!()
+    isfile(output_path) && rm(output_path; force=true)
 end

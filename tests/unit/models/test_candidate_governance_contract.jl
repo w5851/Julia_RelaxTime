@@ -51,4 +51,34 @@ end
     selected = Models.select_pressure_max_candidate(candidates, params, context)
     @test selected.selected_index == 1
     @test selected.selection_reason == :pressure_max_under_constraints
+
+    attempts = [
+        (label=:a, ok=true),
+        (label=:b, ok=true),
+    ]
+
+    early_stop = Models.execute_attempt_pool(attempts;
+        evaluate_attempt=(attempt, idx) -> ((label=attempt.label, idx=idx), attempt.ok),
+        on_error=(attempt, idx, err) -> ((label=attempt.label, idx=idx, err=err !== nothing), false),
+        stop_on_first_success=true,
+    )
+    @test length(early_stop) == 1
+    @test early_stop[1].label == :a
+
+    evaluate_all = Models.execute_attempt_pool(attempts;
+        evaluate_attempt=(attempt, idx) -> ((label=attempt.label, idx=idx), attempt.ok),
+        on_error=(attempt, idx, err) -> ((label=attempt.label, idx=idx, err=err !== nothing), false),
+        stop_on_first_success=true,
+        evaluate_all_attempts=true,
+    )
+    @test length(evaluate_all) == 2
+    @test evaluate_all[2].label == :b
+
+    errored = Models.execute_attempt_pool([(; label=:x, ok=false)];
+        evaluate_attempt=(_, _) -> error("boom"),
+        on_error=(attempt, idx, err) -> ((label=attempt.label, idx=idx, err_msg=sprint(showerror, err)), false),
+        stop_on_first_success=true,
+    )
+    @test length(errored) == 1
+    @test occursin("boom", errored[1].err_msg)
 end

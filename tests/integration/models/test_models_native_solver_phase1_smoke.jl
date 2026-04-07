@@ -10,7 +10,6 @@ end
 @testset "Models native solver phase1 smoke" begin
     @test Models.HADRON_SEED_5 isa AbstractVector
     @test Models.MultiSeed() isa Models.SeedStrategy
-    @test Models.PhaseAwareSeed() isa Models.SeedStrategy
 
     model = Models.create_model(:PNJL)
     T_fm = 100.0 / HBARC_MEV_FM

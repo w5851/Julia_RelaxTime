@@ -467,7 +467,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     else
         Vector{Vector{Float64}}()
     end
-    default_seed_pool = _build_default_seed_candidates(seed_guess)
+    default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)
@@ -659,9 +659,11 @@ function _execute_governed_attempt_plan(
     solve_attempt::Function,
     failure_attempt::Function,
 )
-    candidates = NamedTuple[]
-    for (attempt_index, attempt_cfg) in enumerate(attempt_plan)
-        try
+    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, false))
+    candidates = execute_attempt_pool(attempt_plan;
+        stop_on_first_success=true,
+        evaluate_all_attempts=evaluate_all_attempts,
+        evaluate_attempt=(attempt_cfg, attempt_index) -> begin
             local_kwargs = Dict{Symbol,Any}(kwargs)
             local_kwargs[:seed_guess] = attempt_cfg.seed
             local_kwargs[:nlsolve_method] = attempt_cfg.method
@@ -670,15 +672,15 @@ function _execute_governed_attempt_plan(
 
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index)))
-            if ok
-                break
-            end
-        catch
+            candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index))
+            return candidate, ok
+        end,
+        on_error=(attempt_cfg, attempt_index, _) -> begin
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
-            push!(candidates, (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index)))
-        end
-    end
+            candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
+            return candidate, false
+        end,
+    )
 
     selected = selector_fn(candidates)
     return selected, candidates
@@ -703,7 +705,7 @@ function _governed_nonrho_problem_spec_forward_solve(
     else
         Vector{Vector{Float64}}()
     end
-    default_seed_pool = _build_default_seed_candidates(seed_guess)
+    default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)

@@ -376,6 +376,50 @@ function _build_default_seed_candidates(seed_guess::AbstractVector)
     end
     return collect(values(uniq))
 end
+
+@inline function _mode_seed_key(seed::AbstractVector{<:Real})
+    return join(round.(Float64.(seed); digits=10), ",")
+end
+
+@inline function _push_unique_seed!(pool::Vector{Vector{Float64}}, seen::Set{String}, seed::AbstractVector{<:Real})
+    normalized = Float64.(seed)
+    key = _mode_seed_key(normalized)
+    key in seen && return nothing
+    push!(pool, normalized)
+    push!(seen, key)
+    return nothing
+end
+
+function _build_default_seed_candidates(mode, seed_guess::AbstractVector)
+    seeds = _build_default_seed_candidates(seed_guess)
+    seen = Set{String}(_mode_seed_key(s) for s in seeds)
+
+    base5 = if length(seed_guess) >= 5
+        Float64.(seed_guess[1:5])
+    else
+        copy(HADRON_SEED_5)
+    end
+
+    if mode isa FixedEntropy || mode isa FixedSigma
+        mu_anchors = (0.1, 1.0, 1.7)
+        base_candidates = (base5, HADRON_SEED_5, QUARK_SEED_5)
+        for b in base_candidates
+            for μ0 in mu_anchors
+                _push_unique_seed!(seeds, seen, Float64[b[1:5]..., μ0, μ0, μ0])
+            end
+        end
+    elseif mode isa FixedAsymmetricRho
+        for μ0 in (0.5, 1.0)
+            _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])
+        end
+    elseif mode isa FixedRho
+        for μ0 in (0.2, 1.0)
+            _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])
+        end
+    end
+
+    return seeds
+end
 function _solve_gap_with_outer_fallback(
     model::AbstractQCDModel,
     T_fm,
@@ -457,61 +501,64 @@ function _solve_constraint_fixedmu(
     # (e.g. iterations) even though the models fixed-mu path does not consume them
     _ = nlsolve_kwargs
 
-    candidates = NamedTuple[]
-    for (seed_index, seed) in enumerate(seed_pool)
-        solver_pool = if solver isa NLsolveGapSolver && solver.method != :trust_region
-            (
-                solver,
-                NLsolveGapSolver(
-                    method=:trust_region,
-                    xtol=solver.xtol,
-                    ftol=solver.ftol,
-                    jacobian=solver.jacobian,
-                ),
-            )
-        else
-            (solver,)
-        end
-
-        pushed = false
-        for local_solver in solver_pool
-            try
-                st = solve_gap(
-                    model,
-                    T_fm,
-                    μ_fm;
-                    solver_backend=:models,
-                    solver=local_solver,
-                    initial_guess=seed,
-                    residual_norm_max=residual_norm_max,
-                    xi=xi,
-                    p_num=p_num,
-                    t_num=t_num,
+    candidates = Main.Models.execute_attempt_pool(seed_pool;
+        stop_on_first_success=true,
+        evaluate_all_attempts=true,
+        evaluate_attempt=(seed, seed_index) -> begin
+            solver_pool = if solver isa NLsolveGapSolver && solver.method != :trust_region
+                (
+                    solver,
+                    NLsolveGapSolver(
+                        method=:trust_region,
+                        xtol=solver.xtol,
+                        ftol=solver.ftol,
+                        jacobian=solver.jacobian,
+                    ),
                 )
-
-                raw = _compute_fixedmu_candidate(
-                    model,
-                    T_fm,
-                    μ_fm,
-                    st,
-                    residual_norm_max;
-                    xi=xi,
-                    p_num=p_num,
-                    t_num=t_num,
-                )
-                ok, failed = evaluate_hard_constraints(raw, rules)
-                push!(candidates, (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index)))
-                pushed = true
-                break
-            catch
+            else
+                (solver,)
             end
-        end
 
-        if !pushed
+            for local_solver in solver_pool
+                try
+                    st = solve_gap(
+                        model,
+                        T_fm,
+                        μ_fm;
+                        solver_backend=:models,
+                        solver=local_solver,
+                        initial_guess=seed,
+                        residual_norm_max=residual_norm_max,
+                        xi=xi,
+                        p_num=p_num,
+                        t_num=t_num,
+                    )
+
+                    raw = _compute_fixedmu_candidate(
+                        model,
+                        T_fm,
+                        μ_fm,
+                        st,
+                        residual_norm_max;
+                        xi=xi,
+                        p_num=p_num,
+                        t_num=t_num,
+                    )
+                    ok, failed = evaluate_hard_constraints(raw, rules)
+                    candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))
+                    return candidate, ok
+                catch
+                end
+            end
+
             raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
-            push!(candidates, (; raw..., seed_index=Int(seed_index)))
-        end
-    end
+            return (; raw..., seed_index=Int(seed_index)), false
+        end,
+        on_error=(_, seed_index, _) -> begin
+            raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
+            return (; raw..., seed_index=Int(seed_index)), false
+        end,
+    )
     selected = select_pressure_max_candidate(candidates)
     s = selected.selected_candidate
 

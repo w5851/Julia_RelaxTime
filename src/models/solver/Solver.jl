@@ -534,10 +534,9 @@ function solve_multi(mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     if haskey(kwargs, :seeds)
         seeds = kwargs[:seeds]
         candidates = [DefaultSeed(Float64.(seed), Float64.(seed), :hadron) for seed in seeds]
-        selector = haskey(kwargs, :selector) ? kwargs[:selector] : SeedStrategies.default_omega_selector
         forward_kwargs = (; (k => v for (k, v) in pairs(kwargs) if k != :seeds && k != :selector)...)
         return solve_multi(model, mode, T_fm, μ_fm;
-            seed_strategy=MultiSeed(candidates, selector),
+            seed_strategy=MultiSeed(candidates),
             forward_kwargs...)
     end
     return solve_multi(model, mode, T_fm, μ_fm; kwargs...)

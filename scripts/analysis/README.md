@@ -1,25 +1,19 @@
 # scripts/analysis/
 
-探索性分析与诊断脚本，从 `tests/analysis/` 迁入（2026-03-04）。
+探索性分析与诊断脚本目录（非 CI 路径，仅手动运行）。
 
-## 说明
+## 当前内容
 
-这些脚本用于数值探索、收敛分析、缓存调试等场景。它们**不纳入 CI**，仅供开发者手动运行。
+- `convergence/`：数值收敛性分析相关脚本与说明
+- `scan_mott_meson_vs_xi_mu0.jl`：在 `mu=0` 条件下扫描 Mott 点与介子质量随 `xi` 的变化
+- `mott_reference_mapping.jl`：生成/检查 Mott 参考映射数据
 
-## 目录结构
+## 使用说明
 
-- `cache/` — 缓存命中率/开销分析
-- `convergence/` — 数值收敛性测试（节点数、角度、sigma 网格）
-- `pnjl/` — PNJL 求解器参数扫描分析
-- `relaxtime/` — 输运计算数值探索
-- `relaxtime_diagnostics/` — 积分诊断工具
-- `relaxtime_validation/` — 非正式验证脚本（宽松断言）
-- `struct_migration/` — 迁移阶段文档归档
-- `unit_summaries/` — 单元测试摘要文档
-
-## 运行方式
+- 这些脚本用于研究与诊断，不作为测试准入门禁。
+- 建议从仓库根目录执行并显式指定项目环境。
 
 ```bash
-julia --project=. scripts/analysis/relaxtime/analyze_1_over_p.jl
-julia --project=. scripts/analysis/convergence/run_convergence.jl
+julia --project=. scripts/analysis/scan_mott_meson_vs_xi_mu0.jl
+julia --project=. scripts/analysis/mott_reference_mapping.jl
 ```
