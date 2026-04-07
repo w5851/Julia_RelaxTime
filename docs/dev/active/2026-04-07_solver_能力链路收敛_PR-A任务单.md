@@ -56,13 +56,14 @@
   - 输出：标准 candidate 列表（含 diagnostics）
 - [x] T1.2 重写 `Solver.solve_multi` 路径，改用 `execute_attempt_pool`。
 - [x] T1.3 清理 `Solver.solve_multi` 中重复编排逻辑（for/try/catch/本地选择分支）。
-- [ ] T1.4 `ProblemSpec` 侧只保留 plan 构建和参数映射，执行逻辑复用统一引擎。
+- [x] T1.4 `ProblemSpec` 侧只保留 plan 构建和参数映射，执行逻辑复用统一引擎。
 - [x] T1.5 对齐 early-stop/evaluate-all 默认值与透传规则，确保跨层单义。
 
 #### T1 当前进展记录
 
 - 已完成：`src/models/solver/Solver.jl` 的 `solve_multi(FixedMu/FixedRho/FixedAsymmetricRho)` 两条主路径改为统一调用 `execute_attempt_pool`，移除本地 for/try/catch 重复编排。
 - 已完成：`solve_multi` 新增 `evaluate_all_attempts` 统一透传（默认 `true`），并在 forwarded kwargs 中单点剔除，避免多层重复解释。
+- 已完成：删除 `ProblemSpec.jl` 中未再使用的平行编排函数 `_governed_mode_forward_solve`，收敛到 `_execute_governed_attempt_plan + execute_attempt_pool` 主线。
 - 验证通过：
   - `tests/unit/models/test_candidate_governance_contract.jl`
   - `tests/unit/models/test_solver.jl`
@@ -71,12 +72,21 @@
 
 ### 4.3 T1 验证与回归
 
-- [ ] T1.6 更新/新增单测：
+- [x] T1.6 更新/新增单测：
   - `tests/unit/models/test_candidate_governance_contract.jl`
   - `tests/unit/models/test_solver.jl`
   - 必要时补 `tests/unit/models/test_problem_spec_contract.jl`
-- [ ] T1.7 跑 targeted regression（至少含新建收敛回归 + constraint selection 相关回归）。
-- [ ] T1.8 对比基线样本，确认关键字段一致（或记录可解释差异）。
+- [x] T1.7 跑 targeted regression（至少含新建收敛回归 + constraint selection 相关回归）。
+- [x] T1.8 对比基线样本，确认关键字段一致（或记录可解释差异）。
+
+#### T1 验证记录（2026-04-07）
+
+- `julia --project=. -e 'include("tests/unit/models/test_candidate_governance_contract.jl")'`：通过。
+- `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`：通过。
+- `julia --project=. -e 'include("tests/unit/models/test_problem_spec_contract.jl")'`：通过。
+- `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl"; include("tests/regression/runtests.jl")'`：通过。
+
+基线对齐结论：本期基线点关键字段（`converged/residual_norm/selection_reason/seed_index/failed_constraints`）与 T0 快照一致，未出现不可解释漂移。
 
 ## 5. 影响文件列表（PR-A 预期）
 
