@@ -155,6 +155,30 @@ function gap_conditions(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, par
     return SVector{5, grad_type}(Tuple(grad))
 end
 
+@inline function _gap_conditions_with_model(
+    model::AbstractQCDModel,
+    x_state::SVector{5, TF},
+    mu_vec::AbstractVector{TM},
+    params::GapParams,
+) where {TF, TM}
+    pressure_fn = y -> begin
+        eltp = typeof(y[1])
+        y_s = SVector{5, eltp}(Tuple(y))
+        model_pressure(
+            model,
+            y_s,
+            mu_vec,
+            params.T_fm;
+            p_num=params.p_num,
+            t_num=params.t_num,
+            xi=params.xi,
+        )
+    end
+    grad = ForwardDiff.gradient(pressure_fn, x_state)
+    grad_type = typeof(grad[1])
+    return SVector{5, grad_type}(Tuple(grad))
+end
+
 @inline function gap_core_residual!(F::AbstractVector, x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, params::GapParams) where {TF, TM}
     length(F) == 5 || throw(ArgumentError("gap_core_residual! expects output length 5, got $(length(F))"))
     core = gap_conditions(x_state, mu_vec, params)
@@ -164,7 +188,13 @@ end
     return F
 end
 
-@inline function gap_core_residual!(F::AbstractVector, x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+@inline function gap_core_residual!(
+    F::AbstractVector,
+    model::AbstractQCDModel,
+    x_state::AbstractVector,
+    mu_vec::AbstractVector,
+    params::GapParams,
+)
     length(mu_vec) == 3 || throw(ArgumentError("gap_core_residual! expects mu_vec length 3, got $(length(mu_vec))"))
 
     nx = length(x_state)
@@ -173,10 +203,14 @@ end
     if nx == 5
         Tx = typeof(x_state[1])
         x5 = SVector{5, Tx}(x_state[1], x_state[2], x_state[3], x_state[4], x_state[5])
-        return gap_core_residual!(F, x5, mu_vec, params)
+        core = _gap_conditions_with_model(model, x5, mu_vec, params)
+        @inbounds for i in 1:5
+            F[i] = core[i]
+        end
+        return F
     elseif nx == 2 || nx == 3
         residual = gap_residual(
-            _get_model(params.model_kind),
+            model,
             x_state,
             params.T_fm,
             mu_vec;
@@ -191,6 +225,10 @@ end
     end
 
     throw(ArgumentError("gap_core_residual! only supports state_dim in (2,3,5), got $nx"))
+end
+
+@inline function gap_core_residual!(F::AbstractVector, x_state::AbstractVector, mu_vec::AbstractVector, params::GapParams)
+    return gap_core_residual!(F, _get_model(params.model_kind), x_state, mu_vec, params)
 end
 
 # ============================================================================
@@ -211,6 +249,7 @@ function build_conditions(::FixedMu, params::GapParams)
     return (θ, x) -> begin
         T_fm = θ[1]
         μ_fm = θ[2]
+        length(x) == state_dim(schema) || throw(ArgumentError("FixedMu expects x length $(state_dim(schema)), got $(length(x))"))
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
         x_state = SVector{5}(Tuple(state_view(schema, x)))
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,

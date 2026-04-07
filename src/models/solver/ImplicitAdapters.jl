@@ -35,9 +35,11 @@ end
         )
         Tout = promote_type(eltype(x), typeof(T_fm), typeof(mu_vec[1]))
         out = Vector{Tout}(undef, state_n)
-        gap_core_residual!(out, x, mu_vec, params)
+        gap_core_residual!(out, model, x, mu_vec, params)
         return out
     end
+
+    length(θ) >= 2 || throw(ArgumentError("implicit conditions expects theta length >= 2, got $(length(θ))"))
 
     T_fm = θ[1]
     μ_fm = θ[2]

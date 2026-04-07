@@ -24,6 +24,15 @@ end
     end
 end
 
+@testset "build_conditions fixedmu enforces strict x length" begin
+    thermal_nodes = Models.cached_nodes(8, 4)
+    params = Models.GapParams(0.5, thermal_nodes, 0.0; p_num=8, t_num=4, model_kind=:PNJL)
+    cond = Models.build_conditions(Models.FixedMu(), params)
+    theta = [0.5, 0.0]
+
+    @test_throws ArgumentError cond(theta, [-1.84, -1.84, -2.23, 0.5, 0.5, 0.0])
+end
+
 @testset "build_residual delegates core block" begin
     x_state = SVector{5}(-1.84, -1.84, -2.23, 0.5, 0.5)
     mu_vec = SVector{3}(0.0, 0.0, 0.0)

@@ -28,6 +28,10 @@ export build_pnjl_fixedmu_adapters
 export build_pnjl_flavor_mu_adapters
 export derive_vec, derive_named
 
+@inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
+    return model isa RPNJLModel ? :RPNJL : :PNJL
+end
+
 @inline function symmetric_mu_direction_derivative(dx_dmu_vec::AbstractMatrix)
     size(dx_dmu_vec, 2) == 3 || throw(ArgumentError("dx_dmu_vec must have 3 columns for (μ_u, μ_d, μ_s), got size=$(size(dx_dmu_vec))"))
     return vec(sum(dx_dmu_vec; dims=2))
@@ -63,11 +67,15 @@ function build_pnjl_fixedmu_adapters(
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
         Tx = typeof(x[1])
         x_state = SVector{5, Tx}(Tuple(x))
-        params = GapParams(T_fm, thermal_nodes, xi; p_num=p_num, t_num=t_num, model_kind=:PNJL)
+        params = GapParams(T_fm, thermal_nodes, xi;
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=_legacy_adapter_model_kind(model),
+        )
 
         Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
         out = Vector{Tout}(undef, 5)
-        gap_core_residual!(out, x_state, mu_vec, params)
+        gap_core_residual!(out, model, x_state, mu_vec, params)
         return out
     end
 
@@ -99,11 +107,15 @@ function build_pnjl_flavor_mu_adapters(
         mu_vec = SVector{3}(θ[2], θ[3], θ[4])
         Tx = typeof(x[1])
         x_state = SVector{5, Tx}(Tuple(x))
-        params = GapParams(T_fm, thermal_nodes, xi; p_num=p_num, t_num=t_num, model_kind=:PNJL)
+        params = GapParams(T_fm, thermal_nodes, xi;
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=_legacy_adapter_model_kind(model),
+        )
 
         Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
         out = Vector{Tout}(undef, 5)
-        gap_core_residual!(out, x_state, mu_vec, params)
+        gap_core_residual!(out, model, x_state, mu_vec, params)
         return out
     end
 
