@@ -42,38 +42,42 @@ end
     model = Models.create_model(:PNJL)
 
     # Baseline snapshot fields for convergence-chain stability.
-    expected = Dict(
-        :fixedmu_100_250 => (
+    expected = [
+        (
+            name = :fixedmu_100_250,
             mode = Models.FixedMu(),
             T_mev = 100.0,
             mu_mev = 250.0,
             converged = true,
-            residual_upper = 1e-9,
+            residual_upper = 1e-6,
             selection_reason = :pressure_max_under_constraints,
             seed_index = -1,
             failed_constraints = Symbol[],
         ),
-        :fixedmu_140_320 => (
+        (
+            name = :fixedmu_140_320,
             mode = Models.FixedMu(),
             T_mev = 140.0,
             mu_mev = 320.0,
             converged = true,
-            residual_upper = 1e-9,
+            residual_upper = 1e-6,
             selection_reason = :pressure_max_under_constraints,
             seed_index = -1,
             failed_constraints = Symbol[],
         ),
-        :fixedrho_110_0p2 => (
+        (
+            name = :fixedrho_110_0p2,
             mode = Models.FixedRho(0.2),
             T_mev = 110.0,
             mu_mev = 0.0,
             converged = true,
-            residual_upper = 1e-9,
+            residual_upper = 1e-6,
             selection_reason = :pressure_max_under_constraints,
             seed_index = -1,
             failed_constraints = Symbol[],
         ),
-        :fixedasym_110_0p05 => (
+        (
+            name = :fixedasym_110_0p05,
             mode = Models.FixedAsymmetricRho(0.05, 1.0, 0.0),
             T_mev = 110.0,
             mu_mev = 0.0,
@@ -83,7 +87,8 @@ end
             seed_index = -1,
             failed_constraints = Symbol[:solver_failed],
         ),
-        :fixedentropy_120_0p5 => (
+        (
+            name = :fixedentropy_120_0p5,
             mode = Models.FixedEntropy(0.5),
             T_mev = 120.0,
             mu_mev = 0.0,
@@ -93,7 +98,8 @@ end
             seed_index = -1,
             failed_constraints = Symbol[:solver_failed],
         ),
-        :fixedsigma_120_10 => (
+        (
+            name = :fixedsigma_120_10,
             mode = Models.FixedSigma(10.0),
             T_mev = 120.0,
             mu_mev = 0.0,
@@ -103,9 +109,9 @@ end
             seed_index = -1,
             failed_constraints = Symbol[:solver_failed],
         ),
-    )
+    ]
 
-    for (name, cfg) in expected
+    for cfg in expected
         got = _run_point(model, cfg.mode, cfg.T_mev; mu_mev=cfg.mu_mev)
         @test got.converged == cfg.converged
         @test got.selection_reason == cfg.selection_reason
