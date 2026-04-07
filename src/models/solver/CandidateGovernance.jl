@@ -21,6 +21,27 @@ const CandidateSelector = Function
     )
 end
 
+"""
+    execute_attempt_pool(attempts; evaluate_attempt, on_error,
+                         stop_on_first_success=true,
+                         evaluate_all_attempts=false)
+
+统一 attempt 执行引擎。
+
+# 输入契约
+- `attempts`：attempt plan，可包含 seed/method/fallback 等 metadata。
+- `evaluate_attempt(attempt_cfg, attempt_index)`：返回 `(candidate, success::Bool)`。
+- `on_error(attempt_cfg, attempt_index, err)`：异常降级回调，返回 `(candidate, success::Bool)`。
+
+# 执行语义
+- `InterruptException` 直接重抛。
+- 其余异常交由 `on_error` 处理。
+- 当 `evaluate_all_attempts=false` 且 `stop_on_first_success=true` 时，首个成功候选后提前停止。
+
+# 输出契约
+- 返回 `Vector{NamedTuple}`，顺序与已执行 attempt 顺序一致。
+- 候选字段由调用方定义，但需保证后续治理选择所需字段可用。
+"""
 function execute_attempt_pool(
     attempts;
     evaluate_attempt::Function,

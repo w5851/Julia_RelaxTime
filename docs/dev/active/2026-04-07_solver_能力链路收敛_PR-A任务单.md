@@ -50,7 +50,7 @@
 
 ### 4.2 T1 attempt 引擎归一
 
-- [ ] T1.1 在 `CandidateGovernance` 明确统一接口契约：
+- [x] T1.1 在 `CandidateGovernance` 明确统一接口契约：
   - 输入：attempt plan（seed/method/fallback metadata）
   - 回调：`evaluate_attempt`、`on_error`
   - 输出：标准 candidate 列表（含 diagnostics）
@@ -64,6 +64,7 @@
 - 已完成：`src/models/solver/Solver.jl` 的 `solve_multi(FixedMu/FixedRho/FixedAsymmetricRho)` 两条主路径改为统一调用 `execute_attempt_pool`，移除本地 for/try/catch 重复编排。
 - 已完成：`solve_multi` 新增 `evaluate_all_attempts` 统一透传（默认 `true`），并在 forwarded kwargs 中单点剔除，避免多层重复解释。
 - 已完成：删除 `ProblemSpec.jl` 中未再使用的平行编排函数 `_governed_mode_forward_solve`，收敛到 `_execute_governed_attempt_plan + execute_attempt_pool` 主线。
+- 已完成：`CandidateGovernance.execute_attempt_pool` 增加统一接口契约文档（输入/回调/执行语义/输出），明确 attempt 引擎单点能力边界。
 - 验证通过：
   - `tests/unit/models/test_candidate_governance_contract.jl`
   - `tests/unit/models/test_solver.jl`
