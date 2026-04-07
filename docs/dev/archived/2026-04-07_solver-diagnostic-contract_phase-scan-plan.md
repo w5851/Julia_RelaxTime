@@ -1,3 +1,15 @@
+---
+title: Solver Diagnostic Contract Phase Scan Implementation Plan
+archived: true
+original: docs/dev/active/2026-04-07_solver-diagnostic-contract_phase-scan-plan.md
+archived_date: 2026-04-07
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver Diagnostic Contract Phase Scan Implementation Plan
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
