@@ -84,3 +84,16 @@ function vec_to_named(vec::AbstractVector{T}, schema::VarSchema, role::Symbol) w
     length(vec) == length(keys) || throw(ArgumentError("vector length mismatch for role $(role): expected $(length(keys)), got $(length(vec))"))
     return NamedTuple{keys}(Tuple(vec[i] for i in eachindex(keys)))
 end
+
+@inline function state_view(schema, x::AbstractVector)
+    state_n = state_dim(schema)
+    length(x) >= state_n || throw(ArgumentError("state length mismatch: expected at least $state_n, got $(length(x))"))
+    return @view x[1:state_n]
+end
+
+@inline function mu_view(schema, x::AbstractVector; mu_dim::Int=3)
+    state_n = state_dim(schema)
+    total_expected = state_n + mu_dim
+    length(x) == total_expected || throw(ArgumentError("state+mu length mismatch: expected $total_expected, got $(length(x))"))
+    return @view x[(state_n + 1):total_expected]
+end

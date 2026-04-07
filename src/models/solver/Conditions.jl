@@ -18,7 +18,7 @@ using ForwardDiff
 
 # 从 Models 域导入
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
-import Main.Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model
+import Main.Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model, state_view, mu_view
 const cached_nodes = Main.Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
@@ -26,7 +26,7 @@ const ρ0 = ρ0_inv_fm3
 import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
 import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
 
-export gap_conditions, build_conditions, build_residual!
+export gap_conditions, gap_core_residual!, build_conditions, build_residual!
 export GapParams
 export explicit_residual, explicit_residual!
 
@@ -152,6 +152,15 @@ function gap_conditions(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, par
     return SVector{5, grad_type}(Tuple(grad))
 end
 
+@inline function gap_core_residual!(F::AbstractVector, x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, params::GapParams) where {TF, TM}
+    length(F) == 5 || throw(ArgumentError("gap_core_residual! expects output length 5, got $(length(F))"))
+    core = gap_conditions(x_state, mu_vec, params)
+    @inbounds for i in 1:5
+        F[i] = core[i]
+    end
+    return F
+end
+
 # ============================================================================
 # 模式特定条件构建
 # ============================================================================
@@ -166,11 +175,12 @@ end
 - x = [φ_u, φ_d, φ_s, Φ, Φ̄]（状态变量）
 """
 function build_conditions(::FixedMu, params::GapParams)
+    schema = schema_for_model(params.model_kind)
     return (θ, x) -> begin
         T_fm = θ[1]
         μ_fm = θ[2]
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-        x_state = SVector{5}(Tuple(x))
+        x_state = SVector{5}(Tuple(state_view(schema, x)))
         local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
             p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
         return Vector(gap_conditions(x_state, mu_vec, local_params))
@@ -192,12 +202,8 @@ function build_conditions(mode::FixedRho, params::GapParams)
 end
 
 @inline function _extract_state_mu(schema::ModelStateSchema, x::AbstractVector; mu_dim::Int=3)
-    state_n = state_dim(schema)
-    total_expected = state_n + mu_dim
-    length(x) == total_expected || throw(ArgumentError("state+mu length mismatch: expected $total_expected, got $(length(x))"))
-
-    state_slice = @view x[1:state_n]
-    mu_slice = @view x[(state_n + 1):total_expected]
+    state_slice = state_view(schema, x)
+    mu_slice = mu_view(schema, x; mu_dim=mu_dim)
     return state_slice, mu_slice
 end
 
@@ -355,8 +361,7 @@ function build_residual!(::FixedMu, mu_vec::SVector{3}, params::GapParams)
     return (F, x) -> begin
         eltp = typeof(x[1])
         x_state = SVector{5, eltp}(Tuple(x))
-        core_grad = gap_conditions(x_state, mu_vec, params)
-        F .= core_grad
+        gap_core_residual!(F, x_state, mu_vec, params)
         return nothing
     end
 end
@@ -372,8 +377,7 @@ function build_residual!(mode::FixedRho, params::GapParams)
         x_state = SVector{5, eltp}(Tuple(x[1:5]))
         mu_state = SVector{3, eltp}(x[6], x[7], x[8])
         
-        # 能隙方程
-        F[1:5] = gap_conditions(x_state, mu_state, params)
+        gap_core_residual!(@view(F[1:5]), x_state, mu_state, params)
         
         # 化学势相等
         F[6] = x[6] - x[7]
@@ -398,7 +402,7 @@ function build_residual!(mode::FixedAsymmetricRho, params::GapParams)
         x_state = SVector{5, eltp}(Tuple(x[1:5]))
         mu_state = SVector{3, eltp}(x[6], x[7], x[8])
 
-        F[1:5] = gap_conditions(x_state, mu_state, params)
+        gap_core_residual!(@view(F[1:5]), x_state, mu_state, params)
 
         rho = _rho_vec(x_state, mu_state, params.T_fm, params)
         rho_u, rho_d, rho_s = rho[1], rho[2], rho[3]
@@ -422,8 +426,7 @@ function build_residual!(mode::FixedEntropy, params::GapParams)
         x_state = SVector{5, eltp}(Tuple(x[1:5]))
         mu_state = SVector{3, eltp}(x[6], x[7], x[8])
         
-        # 能隙方程
-        F[1:5] = gap_conditions(x_state, mu_state, params)
+        gap_core_residual!(@view(F[1:5]), x_state, mu_state, params)
         
         # 化学势相等
         F[6] = x[6] - x[7]
@@ -448,8 +451,7 @@ function build_residual!(mode::FixedSigma, params::GapParams)
         x_state = SVector{5, eltp}(Tuple(x[1:5]))
         mu_state = SVector{3, eltp}(x[6], x[7], x[8])
         
-        # 能隙方程
-        F[1:5] = gap_conditions(x_state, mu_state, params)
+        gap_core_residual!(@view(F[1:5]), x_state, mu_state, params)
         
         # 化学势相等
         F[6] = x[6] - x[7]

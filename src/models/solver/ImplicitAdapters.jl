@@ -1,5 +1,50 @@
 using StaticArrays: SVector
 
+@inline function _model_kind_for_shared_core(model::AbstractQCDModel)
+    return model isa RPNJLModel ? :RPNJL : :PNJL
+end
+
+@inline function _implicit_conditions_with_shared_core(
+    model::AbstractQCDModel,
+    θ::AbstractVector,
+    x::AbstractVector;
+    xi,
+    p_num::Int,
+    t_num::Int,
+    kwargs...,
+)
+    state_n = gap_state_dim(model)
+    if state_n == 5 && (length(θ) == 2 || length(θ) == 4)
+        T_fm = θ[1]
+        mu_vec = if length(θ) == 2
+            SVector{3}(θ[2], θ[2], θ[2])
+        else
+            SVector{3}(θ[2], θ[3], θ[4])
+        end
+        Tx = typeof(x[1])
+        x_state = SVector{5, Tx}(Tuple(x))
+        params = GapParams(T_fm, cached_nodes(p_num, t_num), xi;
+            p_num=p_num,
+            t_num=t_num,
+            model_kind=_model_kind_for_shared_core(model),
+        )
+        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, 5)
+        gap_core_residual!(out, x_state, mu_vec, params)
+        return out
+    end
+
+    T_fm = θ[1]
+    μ_fm = θ[2]
+    mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+    r = gap_residual(model, x, T_fm, mu_vec;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        kwargs...)
+    return Vector(r)
+end
+
 """
     ImplicitAdapters
 
@@ -74,15 +119,11 @@ function build_njl_problem(
 
     conditions = function (θ::AbstractVector, x::AbstractVector, z)
         _ = z
-        T_fm = θ[1]
-        μ_fm = θ[2]
-        mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
-        r = gap_residual(model, x, T_fm, mu_vec;
+        return _implicit_conditions_with_shared_core(model, θ, x;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
             kwargs...)
-        return Vector(r)
     end
 
     return ImplicitProblem(

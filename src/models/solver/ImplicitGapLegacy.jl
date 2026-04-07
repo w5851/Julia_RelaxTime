@@ -45,6 +45,8 @@ function build_pnjl_fixedmu_adapters(
     t_num::Int=8,
     kwargs...
 )
+    thermal_nodes = cached_nodes(p_num, t_num)
+
     forward_solve = function (θ::AbstractVector)
         T_fm = Float64(θ[1])
         μ_fm = Float64(θ[2])
@@ -59,13 +61,14 @@ function build_pnjl_fixedmu_adapters(
         T_fm = θ[1]
         μ_fm = θ[2]
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
+        Tx = typeof(x[1])
+        x_state = SVector{5, Tx}(Tuple(x))
+        params = GapParams(T_fm, thermal_nodes, xi; p_num=p_num, t_num=t_num, model_kind=:PNJL)
 
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
+        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, 5)
+        gap_core_residual!(out, x_state, mu_vec, params)
+        return out
     end
 
     return (forward_solve=forward_solve, conditions=conditions)
@@ -78,6 +81,8 @@ function build_pnjl_flavor_mu_adapters(
     t_num::Int=8,
     kwargs...
 )
+    thermal_nodes = cached_nodes(p_num, t_num)
+
     forward_solve = function (θ::AbstractVector)
         length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
         T_fm = Float64(θ[1])
@@ -92,13 +97,14 @@ function build_pnjl_flavor_mu_adapters(
         length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))
         T_fm = θ[1]
         mu_vec = SVector{3}(θ[2], θ[3], θ[4])
+        Tx = typeof(x[1])
+        x_state = SVector{5, Tx}(Tuple(x))
+        params = GapParams(T_fm, thermal_nodes, xi; p_num=p_num, t_num=t_num, model_kind=:PNJL)
 
-        r = gap_residual(model, x, T_fm, mu_vec;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            kwargs...)
-        return Vector(r)
+        Tout = promote_type(Tx, typeof(T_fm), typeof(mu_vec[1]))
+        out = Vector{Tout}(undef, 5)
+        gap_core_residual!(out, x_state, mu_vec, params)
+        return out
     end
 
     return (forward_solve=forward_solve, conditions=conditions)
