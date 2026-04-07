@@ -34,7 +34,7 @@ using StaticArrays
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
 using ..SeedStrategies: SeedStrategy, DefaultSeed, HybridContinuitySeed
-using ..SeedStrategies: get_seed, update!, reset!, extend_seed
+using ..SeedStrategies: get_seed, update!, extend_seed
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
 import Main.Models: solve, SolverResult
@@ -189,7 +189,7 @@ end
 - `reverse_rho`: 是否反向扫描 ρ（从大到小），默认 true
   - 反向扫描可避免 ρ=0 奇异点导致的连续性跟踪失败
 - `seed_policy`: 初值策略模式，默认 `:hybrid_continuity`
-    - `:hybrid_continuity`：连续性优先，失败后回退 MultiSeed（仅 `fixed_asymmetric_rho`）
+    - `:hybrid_continuity`：连续性优先（无历史解时使用策略内 fallback seed；仅 `fixed_asymmetric_rho`）
     - `:candidates`：使用旧的候选初值链路
 - `hybrid_weighted_fallback`: 是否在 `hybrid` 失败后启用 weighted-block 兜底（默认 false）
 - `hybrid_weighted_max_seed_candidates`: weighted fallback 最多尝试的 seed 数（默认 3）

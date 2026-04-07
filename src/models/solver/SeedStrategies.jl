@@ -6,7 +6,7 @@ PNJL 求解器初值策略模块。
 ## 支持的策略
 - `DefaultSeed`: 基于物理直觉的固定默认值
 - `MultiSeed`: 多初值尝试（处理多值解）
-- `HybridContinuitySeed`: 连续性优先 + 多初值回退
+- `HybridContinuitySeed`: 连续性优先（无历史解时回落到 continuity fallback）
 
 ## 使用示例
 ```julia
@@ -28,7 +28,6 @@ export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
 export MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
-export default_omega_selector
 
 # ============================================================================
 # 内置默认种子值（基于 trho_seed_table.csv 数据分析，xi=0.0）
@@ -224,32 +223,19 @@ end
 # ============================================================================
 
 """
-    default_omega_selector(results) -> result
-
-默认选择器：选择 Ω 最小的收敛解。
-"""
-function default_omega_selector(results)
-    converged = filter(r -> r.converged, results)
-    isempty(converged) && return first(results)  # 无收敛解时返回第一个
-    return argmin(r -> r.omega, converged)
-end
-
-"""
     MultiSeed <: SeedStrategy
 
 多初值尝试策略，用于处理多值解。
 
 # 字段
 - `candidates::Vector{SeedStrategy}`: 候选策略列表
-- `selector::Function`: 结果选择器
 """
 struct MultiSeed <: SeedStrategy
     candidates::Vector{SeedStrategy}
-    selector::Function
 end
 
 """创建多初值策略，默认尝试强子相和夸克相"""
-function MultiSeed(; selector::Function=default_omega_selector)
+function MultiSeed()
     candidates = [
         DefaultSeed(phase_hint=:hadron),
         DefaultSeed(phase_hint=:quark),
@@ -260,7 +246,7 @@ function MultiSeed(; selector::Function=default_omega_selector)
         DefaultSeed(copy(HT_GUESS_0p9_SEED_5), copy(HT_GUESS_0p9_SEED_5), :hadron),
         DefaultSeed(copy(HT_GUESS_0p95_SEED_5), copy(HT_GUESS_0p95_SEED_5), :hadron),
     ]
-    return MultiSeed(candidates, selector)
+    return MultiSeed(candidates)
 end
 
 function get_seed(s::MultiSeed, θ::AbstractVector, mode::ConstraintMode)
@@ -281,7 +267,7 @@ end
 export get_all_seeds
 
 # ============================================================================
-# 策略3b：连续性优先 + 多初值回退
+# 策略3b：连续性优先
 # ============================================================================
 
 """
@@ -289,19 +275,16 @@ export get_all_seeds
 
 连续性优先的混合策略：
 - 优先使用上一点解（连续性）
-- 若当前点失败，则由求解器侧回退到 `fallback`（通常是 `MultiSeed`）
-
-说明：真正的“失败回退”需要在求解器层面触发，本类型仅承载策略状态与参数。
+- 若当前点无历史解，则回落到 `continuity_fallback`
 """
 mutable struct HybridContinuitySeed <: SeedStrategy
     previous_solution::Union{Nothing, Vector{Float64}}
     continuity_fallback::SeedStrategy
-    fallback::MultiSeed
 end
 
-"""创建混合连续性策略（默认回退为 MultiSeed()）"""
-function HybridContinuitySeed(; fallback::MultiSeed=MultiSeed(), continuity_fallback::SeedStrategy=DefaultSeed())
-    return HybridContinuitySeed(nothing, continuity_fallback, fallback)
+"""创建混合连续性策略"""
+function HybridContinuitySeed(; continuity_fallback::SeedStrategy=DefaultSeed())
+    return HybridContinuitySeed(nothing, continuity_fallback)
 end
 
 function get_seed(s::HybridContinuitySeed, θ::AbstractVector, mode::ConstraintMode)
@@ -321,21 +304,13 @@ function update!(s::HybridContinuitySeed, solution::AbstractVector{<:Real})
     return s
 end
 
-function reset!(s::HybridContinuitySeed)
-    s.previous_solution = nothing
-    return s
-end
-
-export reset!
-
-
 # ============================================================================
 # 显示方法
 # ============================================================================
 
 Base.show(io::IO, s::DefaultSeed) = print(io, "DefaultSeed(phase_hint=$(s.phase_hint))")
 Base.show(io::IO, s::MultiSeed) = print(io, "MultiSeed($(length(s.candidates)) candidates)")
-Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.previous_solution !== nothing), fallback=$(length(s.fallback.candidates)) seeds)")
+Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.previous_solution !== nothing))")
 
 end # module SeedStrategies
 
