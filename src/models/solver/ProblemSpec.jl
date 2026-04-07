@@ -675,7 +675,7 @@ function _execute_governed_attempt_plan(
             candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index))
             return candidate, ok
         end,
-        on_error=(attempt_cfg, attempt_index) -> begin
+        on_error=(attempt_cfg, attempt_index, _) -> begin
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
             candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
             return candidate, false

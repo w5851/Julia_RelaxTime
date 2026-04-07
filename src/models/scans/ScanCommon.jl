@@ -207,7 +207,7 @@ function attempt_with_candidates(candidates;
             )
             return scanned_candidate, success
         end,
-        on_error=(candidate, _) -> begin
+        on_error=(candidate, _, _) -> begin
             push!(messages, format_candidate_failure(candidate.label, "", nothing))
             scanned_candidate = (
                 label=String(candidate.label),

@@ -32,8 +32,9 @@ function execute_attempt_pool(
     for (attempt_index, attempt_cfg) in enumerate(attempts)
         candidate, success = try
             evaluate_attempt(attempt_cfg, attempt_index)
-        catch
-            on_error(attempt_cfg, attempt_index)
+        catch err
+            err isa InterruptException && rethrow()
+            on_error(attempt_cfg, attempt_index, err)
         end
         push!(candidates, candidate)
         if !evaluate_all_attempts && stop_on_first_success && Bool(success)

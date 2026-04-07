@@ -554,7 +554,7 @@ function _solve_constraint_fixedmu(
             raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
             return (; raw..., seed_index=Int(seed_index)), false
         end,
-        on_error=(_, seed_index) -> begin
+        on_error=(_, seed_index, _) -> begin
             raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
             return (; raw..., seed_index=Int(seed_index)), false
         end,
