@@ -535,21 +535,126 @@ function integration_grids(opts::ScanOptions)
     end
 end
 
+mutable struct LocalPhaseTracker
+    boundary_data::Union{Nothing, NamedTuple{(:T_values, :mu_values, :T_CEP, :mu_CEP, :xi), Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64, Float64}}}
+    previous_solution::Union{Nothing, Vector{Float64}}
+    previous_phase::Symbol
+    hadron_seed::Vector{Float64}
+    quark_seed::Vector{Float64}
+end
+
+function load_phase_boundary_data(xi::Float64; boundary_path::String=DEFAULT_PHASE_BOUNDARY_PATH, cep_path::String=DEFAULT_PHASE_CEP_PATH)
+    T_CEP = NaN
+    mu_CEP = NaN
+    if isfile(cep_path)
+        for line in eachline(cep_path)
+            startswith(line, "xi") && continue
+            parts = split(line, ',')
+            length(parts) >= 3 || continue
+            xi_val = tryparse(Float64, parts[1])
+            xi_val === nothing && continue
+            abs(xi_val - xi) > 1e-6 && continue
+            T_CEP = tryparse(Float64, parts[2])
+            mu_CEP = tryparse(Float64, parts[3])
+            break
+        end
+    end
+
+    T_values = Float64[]
+    mu_values = Float64[]
+    if isfile(boundary_path)
+        for line in eachline(boundary_path)
+            startswith(line, "xi") && continue
+            parts = split(line, ',')
+            length(parts) >= 3 || continue
+            xi_val = tryparse(Float64, parts[1])
+            xi_val === nothing && continue
+            abs(xi_val - xi) > 1e-6 && continue
+            T_val = tryparse(Float64, parts[2])
+            mu_val = tryparse(Float64, parts[3])
+            (T_val === nothing || mu_val === nothing) && continue
+            push!(T_values, T_val)
+            push!(mu_values, mu_val)
+        end
+    end
+
+    if !isempty(T_values)
+        order = sortperm(T_values)
+        T_values = T_values[order]
+        mu_values = mu_values[order]
+    end
+
+    return (T_values=T_values, mu_values=mu_values, T_CEP=T_CEP, mu_CEP=mu_CEP, xi=Float64(xi))
+end
+
+function interpolate_boundary_mu_c(data, T_mev::Float64)
+    if !isnan(data.T_CEP) && T_mev > data.T_CEP
+        return NaN
+    end
+    isempty(data.T_values) && return NaN
+    Ts = data.T_values
+    μs = data.mu_values
+    if T_mev <= Ts[1]
+        return μs[1]
+    elseif T_mev >= Ts[end]
+        return μs[end]
+    end
+    for i in 1:(length(Ts)-1)
+        if Ts[i] <= T_mev <= Ts[i+1]
+            t = (T_mev - Ts[i]) / (Ts[i+1] - Ts[i])
+            return μs[i] + t * (μs[i+1] - μs[i])
+        end
+    end
+    return NaN
+end
+
+function current_phase_hint(tracker::LocalPhaseTracker, T_mev::Float64, muq_mev::Float64)
+    data = tracker.boundary_data
+    data === nothing && return :unknown
+    if !isnan(data.T_CEP) && T_mev > data.T_CEP
+        return :crossover
+    end
+    μ_c_mev = interpolate_boundary_mu_c(data, T_mev)
+    isnan(μ_c_mev) && return :unknown
+    return muq_mev < μ_c_mev ? :hadron : :quark
+end
+
+@inline function local_is_phase_transition(prev_phase::Symbol, current_phase::Symbol)
+    return (prev_phase == :hadron && current_phase == :quark) ||
+           (prev_phase == :quark && current_phase == :hadron)
+end
+
+function tracker_seed(tracker::LocalPhaseTracker, T_fm::Float64, muq_fm::Float64)
+    mode = Main.Models.FixedMu()
+    if tracker.previous_solution !== nothing
+        if length(tracker.previous_solution) == Main.Models.state_dim(mode)
+            return copy(tracker.previous_solution)
+        elseif length(tracker.previous_solution) >= 5
+            return Main.Models.extend_seed(tracker.previous_solution, mode)
+        end
+    end
+    hint = Main.Models.auto_phase_hint(T_fm, muq_fm)
+    base = (hint === :quark) ? tracker.quark_seed : tracker.hadron_seed
+    return Main.Models.extend_seed(base, mode)
+end
+
 function build_phase_tracker(xi::Float64, previous_solution, previous_phase::Symbol)
     boundary_xi_used = xi
-    tracker = try
-        TransportWorkflow.PNJL.PhaseAwareContinuitySeed(xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
+    boundary_data = try
+        load_phase_boundary_data(xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
     catch
-        TransportWorkflow.PNJL.PhaseAwareContinuitySeed()
+        nothing
     end
+    tracker = LocalPhaseTracker(boundary_data, nothing, previous_phase, copy(TransportWorkflow.PNJL.HADRON_SEED_5), copy(TransportWorkflow.PNJL.QUARK_SEED_5))
     if tracker.boundary_data !== nothing && isempty(tracker.boundary_data.T_values)
         nearest_xi = nearest_phase_boundary_xi(xi)
         if nearest_xi !== nothing
-            tracker = try
-                TransportWorkflow.PNJL.PhaseAwareContinuitySeed(nearest_xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
+            nearest_data = try
+                load_phase_boundary_data(nearest_xi; boundary_path=DEFAULT_PHASE_BOUNDARY_PATH, cep_path=DEFAULT_PHASE_CEP_PATH)
             catch
-                tracker
+                tracker.boundary_data
             end
+            tracker.boundary_data = nearest_data
             boundary_xi_used = nearest_xi
         end
     end
@@ -685,12 +790,8 @@ function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64)
     return NaN, xi_used
 end
 
-function tracker_phase(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
-    boundary_phase = try
-        Main.Models.SeedStrategies._get_current_phase(tracker, T_mev, muq_mev)
-    catch
-        :unknown
-    end
+function tracker_phase(tracker::LocalPhaseTracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
+    boundary_phase = current_phase_hint(tracker, T_mev, muq_mev)
 
     if boundary_phase in (:hadron, :quark)
         return boundary_phase
@@ -715,11 +816,7 @@ function tracker_phase(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
 end
 
 function is_phase_transition(prev_phase::Symbol, current_phase::Symbol)
-    try
-        return Main.Models.SeedStrategies._is_phase_transition(prev_phase, current_phase)
-    catch
-        return false
-    end
+    return local_is_phase_transition(prev_phase, current_phase)
 end
 
 function describe_seed_source(tracker, current_phase::Symbol)
@@ -803,7 +900,7 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     phase_curr_hint = tracker_phase(tracker, T_mev, muq_mev, xi)
     structure = phase_structure(tracker, T_mev, muq_mev, xi)
     seed_source = describe_seed_source(tracker, phase_curr_hint)
-    seed_state = Main.Models.get_seed(tracker, [T_fm, muq_fm], Main.Models.FixedMu())
+    seed_state = tracker_seed(tracker, T_fm, muq_fm)
 
     eq = nothing
     phase_curr = phase_curr_hint

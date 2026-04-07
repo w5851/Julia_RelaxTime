@@ -45,8 +45,8 @@ const P = Models.pnjl_module()
 end
 
 @testset "PhaseAwareContinuitySeed cleanup" begin
-    s = P.PhaseAwareContinuitySeed()
-    @test :bootstrap_strategy ∉ fieldnames(typeof(s))
+    @test !isdefined(P, :PhaseAwareContinuitySeed)
+    @test !isdefined(P, :set_phase!)
 end
 
 # ============================================================================
@@ -123,97 +123,6 @@ end
         seeds = P.get_all_seeds(s, θ, P.FixedMu())
         @test length(seeds) == length(s.candidates)
         @test all(length.(seeds) .== 5)
-    end
-end
-
-# ============================================================================
-# PhaseAwareContinuitySeed 测试
-# ============================================================================
-
-@testset "PhaseAwareContinuitySeed" begin
-    @testset "构造" begin
-        s = P.PhaseAwareContinuitySeed()
-        @test s isa P.SeedStrategy
-        @test s.previous_solution === nothing
-        @test s.previous_phase == :unknown
-    end
-    
-    @testset "从 xi 构造" begin
-        s = P.PhaseAwareContinuitySeed(0.0)
-        @test s isa P.SeedStrategy
-    end
-    
-    @testset "get_seed 初始" begin
-        s = P.PhaseAwareContinuitySeed()
-        θ = [0.5, 1.0]
-        seed = P.get_seed(s, θ, P.FixedMu())
-        @test length(seed) == 5
-    end
-    
-    @testset "update! 带相位" begin
-        s = P.PhaseAwareContinuitySeed()
-        solution = [-1.5, -1.5, -2.1, 0.2, 0.2]
-        T_MeV = 100.0
-        μ_MeV = 200.0
-        
-        P.update!(s, solution, T_MeV, μ_MeV)
-        
-        @test s.previous_solution !== nothing
-        @test s.previous_solution ≈ solution
-    end
-    
-    @testset "reset!" begin
-        s = P.PhaseAwareContinuitySeed()
-        P.update!(s, [-1.5, -1.5, -2.1, 0.2, 0.2], 100.0, 200.0)
-        
-        P.reset!(s)
-        @test s.previous_solution === nothing
-        @test s.previous_phase == :unknown
-    end
-    
-    @testset "set_phase!" begin
-        s = P.PhaseAwareContinuitySeed()
-        P.set_phase!(s, :hadron)
-        @test s.previous_phase == :hadron
-        
-        P.set_phase!(s, :quark)
-        @test s.previous_phase == :quark
-    end
-end
-
-# ============================================================================
-# PhaseBoundaryData 测试
-# ============================================================================
-
-@testset "PhaseBoundaryData" begin
-    @testset "load_phase_boundary" begin
-        # 尝试加载数据
-        data = P.load_phase_boundary(0.0)
-        @test data isa P.PhaseBoundaryData
-        @test data.xi == 0.0
-        
-        # 如果数据存在，检查基本属性
-        if !isempty(data.T_values)
-            @test length(data.T_values) == length(data.mu_values)
-            @test issorted(data.T_values)
-        end
-    end
-    
-    @testset "interpolate_mu_c" begin
-        data = P.load_phase_boundary(0.0)
-        
-        if !isempty(data.T_values)
-            # 在数据范围内插值
-            T_mid = (data.T_values[1] + data.T_values[end]) / 2
-            μ_c = P.interpolate_mu_c(data, T_mid)
-            @test isfinite(μ_c)
-            
-            # 超过 CEP 返回 NaN
-            if !isnan(data.T_CEP)
-                μ_c_above = P.interpolate_mu_c(data, data.T_CEP + 10)
-                @test isnan(μ_c_above)
-            end
-        end
     end
 end
 

@@ -56,12 +56,12 @@ const ħc = 197.327  # MeV·fm
         @test result.residual_norm <= 1e-2
     end
 
-    @testset "FixedMu PhaseAware bootstrap MultiSeed (models backend)" begin
-        tracker = P.PhaseAwareContinuitySeed(0.0; bootstrap_multiseed=true)
-        result = P.solve(P.FixedMu(), T_fm, μ_fm;
-            seed_strategy=tracker,
+    @testset "FixedMu MultiSeed full-evaluation governance (models backend)" begin
+        result = P.solve_multi(P.FixedMu(), T_fm, μ_fm;
+            seed_strategy=P.MultiSeed(),
             p_num=p_num,
             t_num=t_num,
+            diagnostic_level=:summary,
         )
         @test result.converged
         @test isfinite(result.pressure)

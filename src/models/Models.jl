@@ -72,8 +72,8 @@ export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view
 export PrimaryStrategy
-export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed, PhaseAwareContinuitySeed
-export get_seed, update!, reset!, get_all_seeds, set_phase!
+export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
+export get_seed, update!, reset!, get_all_seeds
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, gap_core_residual!, GapParams
 export explicit_residual, explicit_residual!
