@@ -24,9 +24,9 @@ const P = Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        expected_legacy_keys = Set(keys(legacy))
-        @test !(:diagnostic in expected_legacy_keys)
-        @test Set(keys(legacy)) == expected_legacy_keys
+        @test !haskey(legacy, :diagnostic)
+        @test haskey(legacy, :fixedmu_problem_spec_active)
+        @test legacy.fixedmu_problem_spec_active == false
     end
 
     @testset "diagnostic level none" begin

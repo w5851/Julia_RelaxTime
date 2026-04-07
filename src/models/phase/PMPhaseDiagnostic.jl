@@ -6,6 +6,8 @@ function _pm_normalize_mev_grid(values, name::String)
     return normalized
 end
 
+const PM_FATAL_ENDPOINT_CAUSES = (:max_iter, :nan_guard, :nonconvergence, :hard_constraint_failed)
+
 @inline function _pm_solver_attempt_origin(result)
     if hasproperty(result, :governed_attempt_origin)
         return Symbol(getproperty(result, :governed_attempt_origin))
@@ -53,12 +55,11 @@ end
 end
 
 @inline function _pm_infer_phase_status(diag)::Symbol
-    fatal_endpoint = Set((:max_iter, :nan_guard, :nonconvergence, :hard_constraint_failed))
     hard_ok = get(diag, :hard_constraint_ok, nothing)
     failed = Symbol.(get(diag, :failed_constraints, Symbol[]))
     endpoint = get(diag, :endpoint_cause, nothing)
 
-    if hard_ok === true && isempty(failed) && !(endpoint in fatal_endpoint)
+    if hard_ok === true && isempty(failed) && !(endpoint in PM_FATAL_ENDPOINT_CAUSES)
         return :valid
     elseif hard_ok === false || !isempty(failed)
         return :invalid
@@ -189,6 +190,7 @@ end
 function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed_state::AbstractVector{<:Real};
         xi::Real=0.0,
         solver_backend::Symbol=:auto,
+        seed_source::Union{Symbol,Nothing}=nothing,
         p_num::Int=24,
         t_num::Int=8,
         residual_accept_tol::Float64=1e-6)
@@ -215,8 +217,7 @@ function _pm_solve_single_branch(T_MeV::Real, mu_MeV::Real, branch::Symbol, seed
     end
 
     accept = _pm_accept_branch_point(result; residual_accept_tol=residual_accept_tol)
-    seed_hint = branch === :hadron ? :seed : :seed
-    diagnostic = _pm_extract_solver_diagnostic(result; seed_source=seed_hint)
+    diagnostic = _pm_extract_solver_diagnostic(result; seed_source=seed_source)
     diag_status = _pm_infer_phase_status(diagnostic)
     accepted = accept.accepted && diag_status == :valid
     branch_status = if accepted
@@ -265,6 +266,7 @@ function _pm_branch_rows_for_temperature(T_MeV::Real, mu_grid, seed_pair::PMSeed
             solve_row = _pm_solve_single_branch(T_MeV, mu_MeV, branch, seed_state;
                 xi=xi,
                 solver_backend=solver_backend,
+                seed_source=seed_source,
                 p_num=p_num,
                 t_num=t_num,
                 residual_accept_tol=residual_accept_tol)
