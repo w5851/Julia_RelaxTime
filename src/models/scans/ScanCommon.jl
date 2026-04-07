@@ -165,44 +165,69 @@ function attempt_with_candidates(candidates;
     promote::Function,
     is_success::Function,
     stop_on_first_success::Bool=true,
+    evaluate_all_attempts::Bool=false,
 )
     messages = String[]
     governance_candidates = NamedTuple{(:pressure, :residual_norm, :hard_constraint_ok, :failed_constraints, :converged), Tuple{Float64, Float64, Bool, Vector{Symbol}, Bool}}[]
     point_results = Union{Nothing, SolverResult}[]
     candidate_labels = String[]
 
-    for candidate in candidates
-        result, msg = solve_point(candidate.state)
-        refine_msg = ""
-        promote_msg = ""
+    scanned = Main.Models.execute_attempt_pool(candidates;
+        stop_on_first_success=stop_on_first_success,
+        evaluate_all_attempts=evaluate_all_attempts,
+        evaluate_attempt=(candidate, _) -> begin
+            result, msg = solve_point(candidate.state)
+            refine_msg = ""
+            promote_msg = ""
 
-        if is_success(result)
-            result, refine_msg = refine(result)
-            result, promote_msg = promote(result)
-        end
+            if is_success(result)
+                result, refine_msg = refine(result)
+                result, promote_msg = promote(result)
+            end
 
-        success = is_success(result)
-        if success
-            !isempty(msg) && push!(messages, msg)
-            !isempty(refine_msg) && push!(messages, refine_msg)
-            !isempty(promote_msg) && push!(messages, promote_msg)
-        else
-            push!(messages, format_candidate_failure(candidate.label, msg, result))
-        end
+            success = is_success(result)
+            if success
+                !isempty(msg) && push!(messages, msg)
+                !isempty(refine_msg) && push!(messages, refine_msg)
+                !isempty(promote_msg) && push!(messages, promote_msg)
+            else
+                push!(messages, format_candidate_failure(candidate.label, msg, result))
+            end
 
-        push!(candidate_labels, String(candidate.label))
-        push!(point_results, result)
-        push!(governance_candidates, (
-            pressure=(result === nothing ? -Inf : result.pressure),
-            residual_norm=(result === nothing ? Inf : result.residual_norm),
-            hard_constraint_ok=success,
-            failed_constraints=(success ? Symbol[] : Symbol[:scan_candidate_failed]),
-            converged=success,
-        ))
+            scanned_candidate = (
+                label=String(candidate.label),
+                result=result,
+                governance=(
+                    pressure=(result === nothing ? -Inf : result.pressure),
+                    residual_norm=(result === nothing ? Inf : result.residual_norm),
+                    hard_constraint_ok=success,
+                    failed_constraints=(success ? Symbol[] : Symbol[:scan_candidate_failed]),
+                    converged=success,
+                ),
+            )
+            return scanned_candidate, success
+        end,
+        on_error=(candidate, _) -> begin
+            push!(messages, format_candidate_failure(candidate.label, "", nothing))
+            scanned_candidate = (
+                label=String(candidate.label),
+                result=nothing,
+                governance=(
+                    pressure=-Inf,
+                    residual_norm=Inf,
+                    hard_constraint_ok=false,
+                    failed_constraints=Symbol[:scan_candidate_failed],
+                    converged=false,
+                ),
+            )
+            return scanned_candidate, false
+        end,
+    )
 
-        if stop_on_first_success && success
-            break
-        end
+    for scanned_candidate in scanned
+        push!(candidate_labels, scanned_candidate.label)
+        push!(point_results, scanned_candidate.result)
+        push!(governance_candidates, scanned_candidate.governance)
     end
 
     isempty(governance_candidates) && return nothing, join_messages(messages)
