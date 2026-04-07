@@ -467,7 +467,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     else
         Vector{Vector{Float64}}()
     end
-    default_seed_pool = _build_default_seed_candidates(seed_guess)
+    default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)
@@ -703,7 +703,7 @@ function _governed_nonrho_problem_spec_forward_solve(
     else
         Vector{Vector{Float64}}()
     end
-    default_seed_pool = _build_default_seed_candidates(seed_guess)
+    default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
     primary_method = if haskey(kwargs, :nlsolve_method)

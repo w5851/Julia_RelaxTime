@@ -49,6 +49,32 @@ end
     @test !isdefined(P, :set_phase!)
 end
 
+@testset "mode-specific default seed pool" begin
+    base = Float64[P.HADRON_SEED_5..., 0.2, 0.2, 0.2]
+
+    entropy_seeds = P._build_default_seed_candidates(P.FixedEntropy(0.0016), base)
+    sigma_seeds = P._build_default_seed_candidates(P.FixedSigma(12.0), base)
+    asym_seeds = P._build_default_seed_candidates(P.FixedAsymmetricRho(0.01, 1.0, 0.0), base)
+
+    @test length(entropy_seeds) > length(P._build_default_seed_candidates(base))
+    @test length(sigma_seeds) > length(P._build_default_seed_candidates(base))
+
+    entropy_mu0s = Set(round(seed[6]; digits=3) for seed in entropy_seeds if length(seed) >= 8)
+    sigma_mu0s = Set(round(seed[6]; digits=3) for seed in sigma_seeds if length(seed) >= 8)
+    asym_mu0s = Set(round(seed[6]; digits=3) for seed in asym_seeds if length(seed) >= 8)
+
+    @test 0.1 in entropy_mu0s
+    @test 1.0 in entropy_mu0s
+    @test 1.7 in entropy_mu0s
+
+    @test 0.1 in sigma_mu0s
+    @test 1.0 in sigma_mu0s
+    @test 1.7 in sigma_mu0s
+
+    @test 0.5 in asym_mu0s
+    @test 1.0 in asym_mu0s
+end
+
 # ============================================================================
 # DefaultSeed 测试
 # ============================================================================

@@ -376,6 +376,50 @@ function _build_default_seed_candidates(seed_guess::AbstractVector)
     end
     return collect(values(uniq))
 end
+
+@inline function _mode_seed_key(seed::AbstractVector{<:Real})
+    return join(round.(Float64.(seed); digits=10), ",")
+end
+
+@inline function _push_unique_seed!(pool::Vector{Vector{Float64}}, seen::Set{String}, seed::AbstractVector{<:Real})
+    normalized = Float64.(seed)
+    key = _mode_seed_key(normalized)
+    key in seen && return nothing
+    push!(pool, normalized)
+    push!(seen, key)
+    return nothing
+end
+
+function _build_default_seed_candidates(mode, seed_guess::AbstractVector)
+    seeds = _build_default_seed_candidates(seed_guess)
+    seen = Set{String}(_mode_seed_key(s) for s in seeds)
+
+    base5 = if length(seed_guess) >= 5
+        Float64.(seed_guess[1:5])
+    else
+        copy(HADRON_SEED_5)
+    end
+
+    if mode isa FixedEntropy || mode isa FixedSigma
+        mu_anchors = (0.1, 1.0, 1.7)
+        base_candidates = (base5, HADRON_SEED_5, QUARK_SEED_5)
+        for b in base_candidates
+            for μ0 in mu_anchors
+                _push_unique_seed!(seeds, seen, Float64[b[1:5]..., μ0, μ0, μ0])
+            end
+        end
+    elseif mode isa FixedAsymmetricRho
+        for μ0 in (0.5, 1.0)
+            _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])
+        end
+    elseif mode isa FixedRho
+        for μ0 in (0.2, 1.0)
+            _push_unique_seed!(seeds, seen, Float64[base5..., μ0, μ0, μ0])
+        end
+    end
+
+    return seeds
+end
 function _solve_gap_with_outer_fallback(
     model::AbstractQCDModel,
     T_fm,
