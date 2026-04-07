@@ -33,8 +33,6 @@ end
 """
 module SeedStrategies
 
-using StaticArrays
-
 # 从 Models 域导入约束模式定义
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
@@ -87,7 +85,7 @@ const VERY_HIGH_TEMP_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
 # 额外候选：用于提高极端参数（高温/强各向异性）下的收敛鲁棒性。
 # 与 scripts/pnjl/diagnose_gap_point.jl 里的人工候选保持一致。
 const HT_GUESS_0p8_SEED_5 = [-0.50, -0.50, -1.20, 0.80, 0.80]
-const HT_GUESS_0p9_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
+const HT_GUESS_0p9_SEED_5 = VERY_HIGH_TEMP_SEED_5
 const HT_GUESS_0p95_SEED_5 = [-0.20, -0.20, -0.70, 0.95, 0.95]
 const WEAK_CHIRAL_CONF_SEED_5 = [-0.50, -0.50, -1.20, 1e-3, 1e-3]
 
@@ -730,7 +728,6 @@ mutable struct PhaseAwareContinuitySeed <: SeedStrategy
     hadron_seed::Vector{Float64}
     quark_seed::Vector{Float64}
     bootstrap_multiseed::Bool
-    bootstrap_strategy::MultiSeed
     fallback::SeedStrategy
 end
 
@@ -744,7 +741,6 @@ export PhaseAwareContinuitySeed
 # 参数
 - `xi`: 各向异性参数
 - `bootstrap_multiseed`: 是否在“第一个点”用多初值（MultiSeed）自举，以更稳定地选到 Ω 最小的物理解（默认 false）
-- `bootstrap_strategy`: 自举时使用的 MultiSeed 候选集合（默认 MultiSeed()）
 - `boundary_path`: boundary.csv 路径（可选）
 - `cep_path`: cep.csv 路径（可选）
 
@@ -767,7 +763,7 @@ end
 reset!(tracker)
 ```
 """
-function PhaseAwareContinuitySeed(xi::Real; bootstrap_multiseed::Bool=false, bootstrap_strategy::MultiSeed=MultiSeed(), kwargs...)
+function PhaseAwareContinuitySeed(xi::Real; bootstrap_multiseed::Bool=false, kwargs...)
     boundary_data = try
         load_phase_boundary(xi; kwargs...)
     catch e
@@ -782,13 +778,12 @@ function PhaseAwareContinuitySeed(xi::Real; bootstrap_multiseed::Bool=false, boo
         copy(HADRON_SEED_5),
         copy(QUARK_SEED_5),
         Bool(bootstrap_multiseed),
-        bootstrap_strategy,
         DefaultSeed(phase_hint=:auto),
     )
 end
 
 """无参数构造函数（无相变线数据）"""
-function PhaseAwareContinuitySeed(; bootstrap_multiseed::Bool=false, bootstrap_strategy::MultiSeed=MultiSeed())
+function PhaseAwareContinuitySeed(; bootstrap_multiseed::Bool=false)
     return PhaseAwareContinuitySeed(
         nothing,
         nothing,
@@ -796,7 +791,6 @@ function PhaseAwareContinuitySeed(; bootstrap_multiseed::Bool=false, bootstrap_s
         copy(HADRON_SEED_5),
         copy(QUARK_SEED_5),
         Bool(bootstrap_multiseed),
-        bootstrap_strategy,
         DefaultSeed(phase_hint=:auto),
     )
 end

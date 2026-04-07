@@ -39,6 +39,14 @@ const P = Models.pnjl_module()
     # 夸克相：Polyakov loop 较大
     @test P.QUARK_SEED_5[4] > 0.3
     @test P.QUARK_SEED_5[5] > 0.3
+
+    # 清理约束：重复候选应复用同一常量定义
+    @test P.SeedStrategies.HT_GUESS_0p9_SEED_5 === P.SeedStrategies.VERY_HIGH_TEMP_SEED_5
+end
+
+@testset "PhaseAwareContinuitySeed cleanup" begin
+    s = P.PhaseAwareContinuitySeed()
+    @test :bootstrap_strategy ∉ fieldnames(typeof(s))
 end
 
 # ============================================================================
