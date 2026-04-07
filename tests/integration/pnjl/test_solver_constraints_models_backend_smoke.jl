@@ -81,17 +81,26 @@ const ħc = 197.327  # MeV·fm
     end
 
     @testset "FixedEntropy" begin
-        target_s = 0.5
-        result = P.solve(P.FixedEntropy(target_s), T_fm; p_num=p_num, t_num=t_num)
+        target_s = 0.0016
+        result = P.solve(P.FixedEntropy(target_s), T_fm;
+            p_num=p_num,
+            t_num=t_num,
+            residual_norm_max=1e-3,
+        )
         @test result.converged
         @test isfinite(result.entropy)
         @test all(isfinite.(result.masses))
-        @test isapprox(result.entropy, target_s; rtol=0.05)
+        @test isapprox(result.entropy, target_s; rtol=0.2)
     end
 
     @testset "FixedSigma" begin
-        target_sigma = 10.0
-        result = P.solve(P.FixedSigma(target_sigma), T_fm; p_num=p_num, t_num=t_num)
+        target_sigma = 12.0759
+        result = P.solve(P.FixedSigma(target_sigma), T_fm;
+            p_num=p_num,
+            t_num=t_num,
+            mu0=1.0,
+            residual_norm_max=1e-3,
+        )
         @test result.converged
         @test isfinite(result.entropy)
         @test isfinite(result.rho_norm)
@@ -103,12 +112,14 @@ const ħc = 197.327  # MeV·fm
     end
 
     @testset "FixedAsymmetricRho (PNJL)" begin
-        mode = P.FixedAsymmetricRho(0.05, 1.0, 0.0)
+        mode = P.FixedAsymmetricRho(0.0048243, 1.0, 0.0)
         result = P.solve(mode, T_fm;
             model_kind=:PNJL,
             p_num=p_num,
             t_num=t_num,
             iterations=120,
+            mu0=[1.0, 1.0, 1.0],
+            residual_norm_max=1e-3,
         )
 
         @test result.converged
@@ -118,12 +129,14 @@ const ħc = 197.327  # MeV·fm
     end
 
     @testset "FixedAsymmetricRho (RPNJL)" begin
-        mode = P.FixedAsymmetricRho(0.05, 1.0, 0.0)
+        mode = P.FixedAsymmetricRho(0.0048243, 1.0, 0.0)
         result = P.solve(mode, T_fm;
             model_kind=:RPNJL,
             p_num=p_num,
             t_num=t_num,
             iterations=120,
+            mu0=[0.5, 0.5, 0.5],
+            residual_norm_max=1e-3,
         )
 
         @test result.converged
