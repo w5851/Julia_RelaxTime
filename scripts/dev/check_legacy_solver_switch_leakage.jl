@@ -12,11 +12,9 @@ Allowlist (current governance boundary):
 - `src/models/solver/Solver.jl`
 - `src/models/scans/TrhoScan.jl`
 - `src/models/scans/TmuScan.jl`
-- `src/models/scans/DualBranchScan.jl`
 - `tests/unit/models/test_problem_spec_contract.jl`
 - `tests/unit/models/test_trho_scan.jl`
 - `tests/unit/models/test_tmu_scan.jl`
-- `tests/unit/models/test_dual_branch_scan.jl`
 """
 
 const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
@@ -36,11 +34,9 @@ const ALLOWLIST = Set([
     "src/models/solver/Solver.jl",
     "src/models/scans/TrhoScan.jl",
     "src/models/scans/TmuScan.jl",
-    "src/models/scans/DualBranchScan.jl",
     "tests/unit/models/test_problem_spec_contract.jl",
     "tests/unit/models/test_trho_scan.jl",
     "tests/unit/models/test_tmu_scan.jl",
-    "tests/unit/models/test_dual_branch_scan.jl",
 ])
 
 normalize_rel(path::AbstractString) = replace(path, '\\' => '/')

@@ -72,7 +72,7 @@ export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view
 export PrimaryStrategy
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed, PhaseAwareContinuitySeed
 export get_seed, update!, reset!, get_all_seeds, set_phase!
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export build_conditions, build_residual!, gap_core_residual!, GapParams
@@ -100,7 +100,6 @@ export build_default_rho_grid
 export default_scan_numeric_options, solve_pnjl_point
 export default_momentum_count, default_theta_count
 export default_momentum_nodes, default_momentum_weights
-export load_dual_branch_scan!
 export pnjl_module
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
@@ -188,8 +187,6 @@ include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
-include(joinpath(@__DIR__, "scans", "DualBranchScan.jl"))
-include(joinpath(@__DIR__, "scans", "DualBranchScanEntry.jl"))
 
 using .SeedStrategies
 using .Conditions

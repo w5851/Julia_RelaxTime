@@ -6,9 +6,7 @@ PNJL 求解器初值策略模块。
 ## 支持的策略
 - `DefaultSeed`: 基于物理直觉的固定默认值
 - `MultiSeed`: 多初值尝试（处理多值解）
-- `ContinuitySeed`: 连续性跟踪（参数扫描）
 - `HybridContinuitySeed`: 连续性优先 + 多初值回退
-- `PhaseAwareSeed`: 基于相图的智能选择（一阶相变区域，单点/无状态）
 - `PhaseAwareContinuitySeed`: 相变感知的连续性跟踪（推荐用于扫描；跨相变线时自动切换相的默认种子）
 
 ## 使用示例
@@ -36,7 +34,7 @@ module SeedStrategies
 # 从 Models 域导入约束模式定义
 import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
-export SeedStrategy, DefaultSeed, MultiSeed, ContinuitySeed, HybridContinuitySeed, PhaseAwareSeed, PhaseAwareContinuitySeed
+export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed, PhaseAwareContinuitySeed
 export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
@@ -294,26 +292,6 @@ end
 export get_all_seeds
 
 # ============================================================================
-# 策略3：连续性跟踪
-# ============================================================================
-
-"""
-    ContinuitySeed <: SeedStrategy
-
-连续性跟踪策略，用于参数扫描。
-
-使用前一个收敛解作为下一个点的初值。
-
-# 字段
-- `previous_solution::Union{Nothing, Vector{Float64}}`: 上一个解
-- `fallback::SeedStrategy`: 回退策略
-"""
-mutable struct ContinuitySeed <: SeedStrategy
-    previous_solution::Union{Nothing, Vector{Float64}}
-    fallback::SeedStrategy
-end
-
-# ============================================================================
 # 策略3b：连续性优先 + 多初值回退
 # ============================================================================
 
@@ -321,70 +299,40 @@ end
     HybridContinuitySeed <: SeedStrategy
 
 连续性优先的混合策略：
-- 优先使用 `ContinuitySeed`（上一点解）
+- 优先使用上一点解（连续性）
 - 若当前点失败，则由求解器侧回退到 `fallback`（通常是 `MultiSeed`）
 
 说明：真正的“失败回退”需要在求解器层面触发，本类型仅承载策略状态与参数。
 """
 mutable struct HybridContinuitySeed <: SeedStrategy
-    continuity::ContinuitySeed
+    previous_solution::Union{Nothing, Vector{Float64}}
+    continuity_fallback::SeedStrategy
     fallback::MultiSeed
 end
 
 """创建混合连续性策略（默认回退为 MultiSeed()）"""
 function HybridContinuitySeed(; fallback::MultiSeed=MultiSeed(), continuity_fallback::SeedStrategy=DefaultSeed())
-    return HybridContinuitySeed(ContinuitySeed(fallback=continuity_fallback), fallback)
+    return HybridContinuitySeed(nothing, continuity_fallback, fallback)
 end
 
 function get_seed(s::HybridContinuitySeed, θ::AbstractVector, mode::ConstraintMode)
-    return get_seed(s.continuity, θ, mode)
-end
-
-function update!(s::HybridContinuitySeed, solution::AbstractVector{<:Real})
-    update!(s.continuity, solution)
-    return s
-end
-
-function reset!(s::HybridContinuitySeed)
-    reset!(s.continuity)
-    return s
-end
-
-"""创建连续性跟踪策略"""
-function ContinuitySeed(; fallback::SeedStrategy=DefaultSeed())
-    return ContinuitySeed(nothing, fallback)
-end
-
-function get_seed(s::ContinuitySeed, θ::AbstractVector, mode::ConstraintMode)
     if s.previous_solution !== nothing
-        # 确保维度匹配
         expected_dim = state_dim(mode)
         if length(s.previous_solution) == expected_dim
             return copy(s.previous_solution)
         elseif length(s.previous_solution) >= 5
-            # 尝试扩展
             return extend_seed(s.previous_solution, mode)
         end
     end
-    return get_seed(s.fallback, θ, mode)
+    return get_seed(s.continuity_fallback, θ, mode)
 end
 
-"""
-    update!(s::ContinuitySeed, solution)
-
-更新连续性跟踪器的解。
-"""
-function update!(s::ContinuitySeed, solution::AbstractVector{<:Real})
+function update!(s::HybridContinuitySeed, solution::AbstractVector{<:Real})
     s.previous_solution = collect(Float64, solution)
     return s
 end
 
-"""
-    reset!(s::ContinuitySeed)
-
-重置连续性跟踪器。
-"""
-function reset!(s::ContinuitySeed)
+function reset!(s::HybridContinuitySeed)
     s.previous_solution = nothing
     return s
 end
@@ -392,7 +340,7 @@ end
 export reset!
 
 # ============================================================================
-# 策略4：基于相图的智能选择
+# 相变线数据与工具
 # ============================================================================
 
 """
@@ -519,183 +467,7 @@ function interpolate_mu_c(data::PhaseBoundaryData, T_MeV::Real)
     return NaN
 end
 
-"""
-    PhaseAwareSeed <: SeedStrategy
-
-基于相图的智能选择策略，用于一阶相变区域。
-
-根据 (T, μ) 与相变线的关系选择初值：
-- μ < μ_c(T): 使用强子相初值
-- μ > μ_c(T): 使用夸克相初值
-- T > T_CEP: 使用自动判断（crossover 区域）
-
-# 字段
-- `boundary_data::Union{Nothing, PhaseBoundaryData}`: 相变线数据
-- `hadron_strategy::SeedStrategy`: 强子相策略
-- `quark_strategy::SeedStrategy`: 夸克相策略
-- `crossover_strategy::SeedStrategy`: Crossover 区域策略
-"""
-struct PhaseAwareSeed <: SeedStrategy
-    boundary_data::Union{Nothing, PhaseBoundaryData}
-    hadron_strategy::SeedStrategy
-    quark_strategy::SeedStrategy
-    crossover_strategy::SeedStrategy
-end
-
-"""
-    PhaseAwareSeed(xi; kwargs...) -> PhaseAwareSeed
-
-创建相图感知策略。
-
-# 参数
-- `xi`: 各向异性参数
-- `boundary_path`: boundary.csv 路径（可选）
-- `cep_path`: cep.csv 路径（可选）
-
-# 示例
-```julia
-# 使用默认路径加载 xi=0.0 的数据
-strategy = PhaseAwareSeed(0.0)
-
-# 指定自定义路径
-strategy = PhaseAwareSeed(0.2; boundary_path="my_boundary.csv")
-```
-"""
-function PhaseAwareSeed(xi::Real; kwargs...)
-    boundary_data = try
-        load_phase_boundary(xi; kwargs...)
-    catch e
-        @warn "无法加载相变线数据: $(e)，将使用默认策略"
-        nothing
-    end
-    
-    return PhaseAwareSeed(
-        boundary_data,
-        DefaultSeed(phase_hint=:hadron),
-        DefaultSeed(phase_hint=:quark),
-        DefaultSeed(phase_hint=:auto),
-    )
-end
-
-"""
-    PhaseAwareSeed(phase_boundary::Function) -> PhaseAwareSeed
-
-使用自定义相变线函数创建策略。
-
-# 参数
-- `phase_boundary`: 相变线函数，输入 T (fm⁻¹)，返回 μ_c (fm⁻¹)
-"""
-function PhaseAwareSeed(phase_boundary::Function)
-    # 创建一个包装器，将函数转换为 PhaseBoundaryData 的行为
-    return _PhaseAwareSeedWithFunction(
-        phase_boundary,
-        DefaultSeed(phase_hint=:hadron),
-        DefaultSeed(phase_hint=:quark),
-    )
-end
-
-# 内部类型：使用函数的 PhaseAwareSeed
-struct _PhaseAwareSeedWithFunction <: SeedStrategy
-    phase_boundary::Function
-    hadron_strategy::SeedStrategy
-    quark_strategy::SeedStrategy
-end
-
-function get_seed(s::_PhaseAwareSeedWithFunction, θ::AbstractVector, mode::ConstraintMode)
-    T_fm = θ[1]
-    μ_fm = length(θ) >= 2 ? θ[2] : 0.0
-    
-    μ_c = s.phase_boundary(T_fm)
-    
-    if μ_fm < μ_c
-        return get_seed(s.hadron_strategy, θ, mode)
-    else
-        return get_seed(s.quark_strategy, θ, mode)
-    end
-end
-
-"""创建使用默认相变线的策略（无数据文件时的回退）"""
-function PhaseAwareSeed()
-    return PhaseAwareSeed(
-        nothing,
-        DefaultSeed(phase_hint=:hadron),
-        DefaultSeed(phase_hint=:quark),
-        DefaultSeed(phase_hint=:auto),
-    )
-end
-
 const ħc_MeV_fm = 197.327  # MeV·fm
-
-function get_seed(s::PhaseAwareSeed, θ::AbstractVector, mode::ConstraintMode)
-    T_fm = θ[1]
-    μ_fm = length(θ) >= 2 ? θ[2] : 0.0
-    
-    # 转换为 MeV
-    T_MeV = T_fm * ħc_MeV_fm
-    μ_MeV = μ_fm * ħc_MeV_fm
-    
-    # 如果没有相变线数据，使用 crossover 策略
-    if s.boundary_data === nothing
-        return get_seed(s.crossover_strategy, θ, mode)
-    end
-    
-    data = s.boundary_data
-    
-    # 检查是否在 crossover 区域
-    if !isnan(data.T_CEP) && T_MeV > data.T_CEP
-        return get_seed(s.crossover_strategy, θ, mode)
-    end
-    
-    # 获取相变化学势
-    μ_c_MeV = interpolate_mu_c(data, T_MeV)
-    
-    if isnan(μ_c_MeV)
-        # 无法确定相变点，使用 crossover 策略
-        return get_seed(s.crossover_strategy, θ, mode)
-    end
-    
-    # 根据 μ 与 μ_c 的关系选择初值
-    if μ_MeV < μ_c_MeV
-        return get_seed(s.hadron_strategy, θ, mode)
-    else
-        return get_seed(s.quark_strategy, θ, mode)
-    end
-end
-
-"""
-    get_phase_hint(s::PhaseAwareSeed, T_MeV, μ_MeV) -> Symbol
-
-获取给定 (T, μ) 点的相位提示。
-
-# 返回
-- `:hadron`: 强子相
-- `:quark`: 夸克相
-- `:crossover`: Crossover 区域
-- `:unknown`: 无法确定
-"""
-function get_phase_hint(s::PhaseAwareSeed, T_MeV::Real, μ_MeV::Real)
-    if s.boundary_data === nothing
-        return :unknown
-    end
-    
-    data = s.boundary_data
-    
-    # 检查是否在 crossover 区域
-    if !isnan(data.T_CEP) && T_MeV > data.T_CEP
-        return :crossover
-    end
-    
-    # 获取相变化学势
-    μ_c_MeV = interpolate_mu_c(data, T_MeV)
-    
-    if isnan(μ_c_MeV)
-        return :unknown
-    end
-    
-    return μ_MeV < μ_c_MeV ? :hadron : :quark
-end
-
-export get_phase_hint
 
 # ============================================================================
 # 策略5：相变感知的连续性跟踪
@@ -936,18 +708,7 @@ export set_phase!
 
 Base.show(io::IO, s::DefaultSeed) = print(io, "DefaultSeed(phase_hint=$(s.phase_hint))")
 Base.show(io::IO, s::MultiSeed) = print(io, "MultiSeed($(length(s.candidates)) candidates)")
-Base.show(io::IO, s::ContinuitySeed) = print(io, "ContinuitySeed(has_previous=$(s.previous_solution !== nothing))")
-Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.continuity.previous_solution !== nothing), fallback=$(length(s.fallback.candidates)) seeds)")
-function Base.show(io::IO, s::PhaseAwareSeed)
-    if s.boundary_data !== nothing
-        n = length(s.boundary_data.T_values)
-        xi = s.boundary_data.xi
-        print(io, "PhaseAwareSeed(xi=$xi, $n boundary points)")
-    else
-        print(io, "PhaseAwareSeed(no data)")
-    end
-end
-Base.show(io::IO, s::_PhaseAwareSeedWithFunction) = print(io, "PhaseAwareSeed(custom function)")
+Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.previous_solution !== nothing), fallback=$(length(s.fallback.candidates)) seeds)")
 function Base.show(io::IO, s::PhaseAwareContinuitySeed)
     has_data = s.boundary_data !== nothing
     has_prev = s.previous_solution !== nothing

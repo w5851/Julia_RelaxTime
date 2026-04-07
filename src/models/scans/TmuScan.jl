@@ -33,7 +33,7 @@ using StaticArrays
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedMu, ConstraintMode
-using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, MultiSeed
+using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed
 using ..SeedStrategies: PhaseAwareContinuitySeed, PhaseBoundaryData
 using ..SeedStrategies: get_seed, update!, reset!, HADRON_SEED_5, QUARK_SEED_5
 using ..SeedStrategies: auto_phase_hint

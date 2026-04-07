@@ -33,7 +33,7 @@ using StaticArrays
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
-using ..SeedStrategies: SeedStrategy, DefaultSeed, ContinuitySeed, HybridContinuitySeed
+using ..SeedStrategies: SeedStrategy, DefaultSeed, HybridContinuitySeed
 using ..SeedStrategies: get_seed, update!, reset!, extend_seed
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
@@ -564,8 +564,8 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
 
         initial_seed = if result !== nothing && length(result.solution) >= 8
             copy(result.solution)
-        elseif strategy.continuity.previous_solution !== nothing
-            copy(strategy.continuity.previous_solution)
+        elseif strategy.previous_solution !== nothing
+            copy(strategy.previous_solution)
         else
             get_seed(strategy, [T_fm], mode)
         end

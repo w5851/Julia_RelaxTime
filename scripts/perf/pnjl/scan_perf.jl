@@ -31,7 +31,7 @@ const PNJL = Models.pnjl_module()
 const solve = getproperty(PNJL, :solve)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const FixedRho = getproperty(PNJL, :FixedRho)
-const ContinuitySeed = getproperty(PNJL, :ContinuitySeed)
+const HybridContinuitySeed = getproperty(PNJL, :HybridContinuitySeed)
 const SeedStrategies = getproperty(PNJL, :SeedStrategies)
 const update_seed! = getproperty(SeedStrategies, :update!)
 const run_trho_scan = getproperty(PNJL, :run_trho_scan)
@@ -64,7 +64,7 @@ function run_tmu_scan_benchmark()
     """执行一次完整的 T-μ 扫描"""
     xi = TMU_CONFIG.xi
     mode = FixedMu()
-    seed = ContinuitySeed()
+    seed = HybridContinuitySeed()
     
     n_success = 0
     
