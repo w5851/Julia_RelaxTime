@@ -1,3 +1,15 @@
+---
+title: ModeSchema 与统一残差内核实施任务单
+archived: true
+original: docs/dev/active/2026-04-07_mode-schema_unified-residual-kernel_followup-plan.md
+archived_date: 2026-04-07
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # ModeSchema 与统一残差内核实施任务单
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
