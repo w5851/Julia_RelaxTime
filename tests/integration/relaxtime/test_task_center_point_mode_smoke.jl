@@ -39,6 +39,8 @@ end
 
 @testset "Task center point mode smoke" begin
     _reset_scan_jobs!()
+    output_path = joinpath(PROJECT_ROOT_TCPOINT, "data", "outputs", "results", "pnjl", "scan", "tmu", "tmu_task_center_point_mode_smoke.csv")
+    isfile(output_path) && rm(output_path; force=true)
 
     payload = Dict(
         "kind" => "tmu",
@@ -50,6 +52,7 @@ end
             "max_retries" => 0,
             "p_num" => 16,
             "t_num" => 8,
+            "output_path" => output_path,
         ),
     )
 
@@ -84,6 +87,9 @@ end
     @test haskey(result_body, :result)
     @test haskey(result_body.result, :stats)
     @test Int(result_body.result.stats.total) == 1
+    @test String(result_body.result.output_path) == output_path
+    @test isfile(output_path)
 
     _reset_scan_jobs!()
+    isfile(output_path) && rm(output_path; force=true)
 end
