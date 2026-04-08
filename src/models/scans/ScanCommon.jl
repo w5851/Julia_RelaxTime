@@ -171,6 +171,7 @@ function attempt_with_candidates(candidates;
     governance_candidates = NamedTuple{(:pressure, :residual_norm, :hard_constraint_ok, :failed_constraints, :converged), Tuple{Float64, Float64, Bool, Vector{Symbol}, Bool}}[]
     point_results = Union{Nothing, SolverResult}[]
     candidate_labels = String[]
+    governance_residual_norm_max = 1e-6
 
     scanned = Main.Models.execute_attempt_pool(candidates;
         stop_on_first_success=stop_on_first_success,
@@ -205,7 +206,20 @@ function attempt_with_candidates(candidates;
                     converged=success,
                 ),
             )
-            return scanned_candidate, success
+            normalized = Main.Models.normalize_governance_candidate(scanned_candidate.governance;
+                seed_index=1,
+                residual_norm_max=governance_residual_norm_max,
+                failed_default=:scan_candidate_failed,
+            )
+            governance = (
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                converged=normalized.converged,
+            )
+            merged = (; scanned_candidate..., governance=governance)
+            return merged, Main.Models.evaluate_candidate_success(governance; residual_norm_max=governance_residual_norm_max)
         end,
         on_error=(candidate, _, _) -> begin
             push!(messages, format_candidate_failure(candidate.label, "", nothing))
@@ -220,7 +234,20 @@ function attempt_with_candidates(candidates;
                     converged=false,
                 ),
             )
-            return scanned_candidate, false
+            normalized = Main.Models.normalize_governance_candidate(scanned_candidate.governance;
+                seed_index=1,
+                residual_norm_max=governance_residual_norm_max,
+                failed_default=:scan_candidate_failed,
+            )
+            governance = (
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                converged=normalized.converged,
+            )
+            merged = (; scanned_candidate..., governance=governance)
+            return merged, Main.Models.evaluate_candidate_success(governance; residual_norm_max=governance_residual_norm_max)
         end,
     )
 
@@ -232,7 +259,7 @@ function attempt_with_candidates(candidates;
 
     isempty(governance_candidates) && return nothing, join_messages(messages)
 
-    has_success = any(c -> c.converged, governance_candidates)
+    has_success = any(c -> Main.Models.evaluate_candidate_success(c; residual_norm_max=governance_residual_norm_max), governance_candidates)
     selected = Main.Models.select_pressure_max_candidate(governance_candidates, nothing, nothing)
     selected_idx = Int(selected.selected_index)
     selection_note = "governance.selection=$(selected.selection_reason);seed=$(candidate_labels[selected_idx])"

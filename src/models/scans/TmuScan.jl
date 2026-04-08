@@ -306,41 +306,79 @@ _seed_continuation_key(T, xi) = ScanCommon.key2(T, xi; digits=SEED_KEY_DIGITS)
     return nothing
 end
 
+@inline function _seed_pool_source_to_label(source::Symbol, idx::Int)
+    if source == :primary
+        return "continuation"
+    elseif source == :provided
+        return "multiseed_$(idx)"
+    elseif source == :extra
+        return "fallback_$(idx)"
+    end
+    return "default_$(idx)"
+end
+
 """构建初值候选列表（连续性 + 多初值全评估）"""
 function _build_seed_candidates_v2(cache::Dict, T, mu, xi, T_fm, μ_fm; bootstrap_multiseed::Bool)
-    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
-    seen_states = Set{String}()
-    
+    provided_seed_pool = Vector{Vector{Float64}}()
+    default_seed_pool = Vector{Vector{Float64}}()
+    primary_seed = nothing
+
     # 1. 连续性种子（最优先）
     seed_key = _seed_continuation_key(T, xi)
     if haskey(cache, seed_key)
-        _push_unique_candidate!(candidates, seen_states, "continuation", cache[seed_key])
+        primary_seed = Float64.(cache[seed_key])
     end
 
     # 2. 多初值候选（可选）
     if bootstrap_multiseed
         multiseeds = get_all_seeds(MultiSeed(), [T_fm, μ_fm], FixedMu())
-        for (idx, seed) in enumerate(multiseeds)
-            _push_unique_candidate!(candidates, seen_states, "multiseed_$(idx)", seed)
-        end
+        append!(provided_seed_pool, [Float64.(seed) for seed in multiseeds])
     end
     
     # 3. 基于相位启发式的基础候选（兜底）
     hint = auto_phase_hint(T_fm, μ_fm)
     if hint === :quark
-        _push_unique_candidate!(candidates, seen_states, "quark", QUARK_SEED_5)
-        _push_unique_candidate!(candidates, seen_states, "hadron", HADRON_SEED_5)
+        push!(default_seed_pool, Float64.(QUARK_SEED_5))
+        push!(default_seed_pool, Float64.(HADRON_SEED_5))
     else
-        _push_unique_candidate!(candidates, seen_states, "hadron", HADRON_SEED_5)
-        _push_unique_candidate!(candidates, seen_states, "quark", QUARK_SEED_5)
+        push!(default_seed_pool, Float64.(HADRON_SEED_5))
+        push!(default_seed_pool, Float64.(QUARK_SEED_5))
     end
 
     # 4. 温区兜底候选（高温/弱手征场景）
-    _push_unique_candidate!(candidates, seen_states, "weak_chiral_conf", WEAK_CHIRAL_CONF_SEED_5)
-    _push_unique_candidate!(candidates, seen_states, "ht_0p8", HT_GUESS_0p8_SEED_5)
-    _push_unique_candidate!(candidates, seen_states, "ht_0p9", HT_GUESS_0p9_SEED_5)
-    _push_unique_candidate!(candidates, seen_states, "ht_0p95", HT_GUESS_0p95_SEED_5)
-    
+    append!(default_seed_pool, (
+        Float64.(WEAK_CHIRAL_CONF_SEED_5),
+        Float64.(HT_GUESS_0p8_SEED_5),
+        Float64.(HT_GUESS_0p9_SEED_5),
+        Float64.(HT_GUESS_0p95_SEED_5),
+    ))
+
+    if primary_seed === nothing
+        if !isempty(provided_seed_pool)
+            primary_seed = provided_seed_pool[1]
+            provided_seed_pool = provided_seed_pool[2:end]
+        elseif !isempty(default_seed_pool)
+            primary_seed = default_seed_pool[1]
+            default_seed_pool = default_seed_pool[2:end]
+        else
+            primary_seed = Float64.(HADRON_SEED_5)
+        end
+    end
+
+    seed_pool = Main.Models.build_seed_pool(FixedMu();
+        primary_seed=primary_seed,
+        provided_seed_pool=provided_seed_pool,
+        default_seed_pool=default_seed_pool,
+        seed_extend=(seed, _) -> Float64.(seed),
+    )
+
+    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
+    seen_states = Set{String}()
+    for (idx, entry) in enumerate(seed_pool)
+        label = _seed_pool_source_to_label(entry.source, idx)
+        _push_unique_candidate!(candidates, seen_states, label, entry.seed)
+    end
+
     return candidates
 end
 

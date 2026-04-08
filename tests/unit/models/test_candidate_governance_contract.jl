@@ -6,6 +6,49 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
+@testset "candidate governance normalization helpers" begin
+    normalized_ok = Models.normalize_governance_candidate((;
+        converged=true,
+        pressure=5.0,
+        residual_norm=1e-8,
+        hard_constraint_ok=true,
+        failed_constraints=Symbol[],
+    ); seed_index=3)
+
+    @test normalized_ok.seed_index == 3
+    @test normalized_ok.converged
+    @test normalized_ok.hard_constraint_ok
+    @test normalized_ok.failed_constraints == Symbol[]
+
+    normalized_fail = Models.normalize_governance_candidate((;
+        converged=false,
+        pressure=NaN,
+        residual_norm=Inf,
+    ); seed_index=2)
+
+    @test normalized_fail.seed_index == 2
+    @test !normalized_fail.hard_constraint_ok
+    @test normalized_fail.failed_constraints == Symbol[:solver_failed]
+    @test normalized_fail.pressure == -Inf
+
+    @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
+    @test Models.evaluate_candidate_success((; converged=false, residual_norm=1e-8, hard_constraint_ok=true); residual_norm_max=1e-6)
+    @test !Models.evaluate_candidate_success((; converged=false, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
+    @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-8, hard_constraint_ok=false); residual_norm_max=1e-6)
+
+    pool = Models.build_seed_pool(Models.FixedEntropy(0.5);
+        primary_seed=[1.0, 2.0, 3.0],
+        extra_seed_pool=([4.0, 5.0, 6.0], [1.0, 2.0, 3.0]),
+        provided_seed_pool=([7.0, 8.0, 9.0],),
+        default_seed_pool=([7.0, 8.0, 9.0], [10.0, 11.0, 12.0]),
+    )
+    @test length(pool) == 4
+    @test pool[1].source == :primary
+    @test pool[2].source == :extra
+    @test pool[3].source == :provided
+    @test pool[4].source == :default
+end
+
 @testset "candidate governance contract" begin
     @test isdefined(Models, :build_candidate_context)
     @test isdefined(Models, :evaluate_hard_constraints)

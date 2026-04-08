@@ -307,12 +307,41 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
     evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
 
-    seeds = if haskey(kwargs, :seeds)
+    explicit_seeds = if haskey(kwargs, :seeds)
         [Float64.(s) for s in kwargs[:seeds]]
     else
-        get_all_seeds(seed_strategy, [T_fm, μ_fm], mode)
+        Vector{Vector{Float64}}()
     end
-    isempty(seeds) && (seeds = [get_seed(DefaultSeed(), [T_fm, μ_fm], mode)])
+    strategy_seeds = if isempty(explicit_seeds)
+        if seed_strategy isa MultiSeed
+            get_all_seeds(seed_strategy, [T_fm, μ_fm], mode)
+        else
+            [get_seed(seed_strategy, [T_fm, μ_fm], mode)]
+        end
+    else
+        Vector{Vector{Float64}}()
+    end
+    fallback_default = [get_seed(DefaultSeed(), [T_fm, μ_fm], mode)]
+    seed_pool = if !isempty(explicit_seeds)
+        build_seed_pool(mode;
+            primary_seed=explicit_seeds[1],
+            extra_seed_pool=explicit_seeds[2:end],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    elseif !isempty(strategy_seeds)
+        build_seed_pool(mode;
+            primary_seed=strategy_seeds[1],
+            extra_seed_pool=strategy_seeds[2:end],
+            default_seed_pool=fallback_default,
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    else
+        build_seed_pool(mode;
+            primary_seed=fallback_default[1],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    end
+    seeds = [entry.seed for entry in seed_pool]
 
     forwarded = _strip_forward_kwargs(kwargs, (
         :seed_strategy,
@@ -360,10 +389,23 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
                 seed_index=Int(seed_index),
             )
-            return candidate, ok
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(seed_index),
+                residual_norm_max=residual_norm_max,
+                failed_default=:residual_too_large,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            return merged, evaluate_candidate_success(merged; residual_norm_max=residual_norm_max)
         end,
         on_error=(_, seed_index, _) -> begin
-            return (
+            candidate = (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -379,7 +421,21 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
-            ), false
+            )
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(seed_index),
+                residual_norm_max=residual_norm_max,
+                failed_default=:solver_failed,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            return merged, evaluate_candidate_success(merged; residual_norm_max=residual_norm_max)
         end,
     )
 
@@ -409,14 +465,54 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
 
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
-    seeds = if haskey(kwargs, :seeds)
+    explicit_seeds = if haskey(kwargs, :seeds)
         [Float64.(s) for s in kwargs[:seeds]]
-    elseif haskey(kwargs, :seed_candidates)
+    else
+        Vector{Vector{Float64}}()
+    end
+    provided_seed_pool = if haskey(kwargs, :seed_candidates)
         [Float64.(s) for s in kwargs[:seed_candidates]]
     else
-        get_all_seeds(seed_strategy, [T_fm], mode)
+        Vector{Vector{Float64}}()
     end
-    isempty(seeds) && (seeds = [Float64.(bridge.seed_guess)])
+    strategy_seeds = if isempty(explicit_seeds) && isempty(provided_seed_pool)
+        if seed_strategy isa MultiSeed
+            get_all_seeds(seed_strategy, [T_fm], mode)
+        else
+            [get_seed(seed_strategy, [T_fm], mode)]
+        end
+    else
+        Vector{Vector{Float64}}()
+    end
+    seed_pool = if !isempty(explicit_seeds)
+        build_seed_pool(mode;
+            primary_seed=explicit_seeds[1],
+            extra_seed_pool=explicit_seeds[2:end],
+            provided_seed_pool=provided_seed_pool,
+            default_seed_pool=[Float64.(bridge.seed_guess)],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    elseif !isempty(provided_seed_pool)
+        build_seed_pool(mode;
+            primary_seed=provided_seed_pool[1],
+            extra_seed_pool=provided_seed_pool[2:end],
+            default_seed_pool=[Float64.(bridge.seed_guess)],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    elseif !isempty(strategy_seeds)
+        build_seed_pool(mode;
+            primary_seed=strategy_seeds[1],
+            extra_seed_pool=strategy_seeds[2:end],
+            default_seed_pool=[Float64.(bridge.seed_guess)],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    else
+        build_seed_pool(mode;
+            primary_seed=Float64.(bridge.seed_guess),
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    end
+    seeds = [entry.seed for entry in seed_pool]
 
     forwarded = _strip_forward_kwargs(kwargs, (
         :seed_strategy,
@@ -456,15 +552,12 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 residual_norm_max=bridge.residual_norm_max,
                 forwarded...,
             )
-            ok = if hasproperty(raw, :hard_constraint_ok)
-                Bool(getproperty(raw, :hard_constraint_ok))
-            else
-                Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
-            end
+            inferred_ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+            hard_ok = hasproperty(raw, :hard_constraint_ok) ? Bool(getproperty(raw, :hard_constraint_ok)) : inferred_ok
             failed = if hasproperty(raw, :failed_constraints)
                 Symbol.(getproperty(raw, :failed_constraints))
             else
-                (ok ? Symbol[] : Symbol[:residual_too_large])
+                (hard_ok ? Symbol[] : Symbol[:residual_too_large])
             end
             candidate = (
                 converged=Bool(raw.converged),
@@ -479,14 +572,27 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 masses=raw.masses,
                 iterations=Int(raw.iterations),
                 residual_norm=Float64(raw.residual_norm),
-                hard_constraint_ok=ok,
+                hard_constraint_ok=hard_ok,
                 failed_constraints=failed,
                 seed_index=Int(seed_index),
             )
-            return candidate, ok
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(seed_index),
+                residual_norm_max=max(bridge.residual_norm_max, 1e-3),
+                failed_default=:residual_too_large,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            return merged, evaluate_candidate_success(merged; residual_norm_max=max(bridge.residual_norm_max, 1e-3))
         end,
         on_error=(_, seed_index, _) -> begin
-            return (
+            candidate = (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -502,7 +608,21 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
-            ), false
+            )
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(seed_index),
+                residual_norm_max=max(bridge.residual_norm_max, 1e-3),
+                failed_default=:solver_failed,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            return merged, evaluate_candidate_success(merged; residual_norm_max=max(bridge.residual_norm_max, 1e-3))
         end,
     )
 

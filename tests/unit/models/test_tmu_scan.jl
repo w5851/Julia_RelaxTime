@@ -38,6 +38,18 @@ const _TMS = Models.TmuScan
         @test _TMS.run_tmu_scan isa Function
     end
 
+    @testset "seed pool builder keeps deterministic order" begin
+        cache = Dict{Tuple{Float64, Float64}, Vector{Float64}}(
+            _TMS._seed_continuation_key(120.0, 0.0) => copy(Models.HADRON_SEED_5),
+        )
+        candidates = _TMS._build_seed_candidates_v2(cache, 120.0, 100.0, 0.0, 120.0 / 197.327, 100.0 / 197.327; bootstrap_multiseed=false)
+        @test !isempty(candidates)
+        @test candidates[1].label == "continuation"
+        @test candidates[1].state == Float64.(Models.HADRON_SEED_5)
+        keys = Set(join(round.(c.state; digits=8), ",") for c in candidates)
+        @test length(keys) == length(candidates)
+    end
+
     @testset "auto backend 语义路由配置" begin
         @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
         @test _TMS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
