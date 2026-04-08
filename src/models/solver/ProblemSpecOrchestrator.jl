@@ -63,7 +63,7 @@ function _execute_governed_attempt_plan(
     failure_attempt::Function,
 )
     evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, false))
-    candidates = execute_attempt_pool(attempt_plan;
+    raw_candidates = execute_attempt_pool(attempt_plan;
         stop_on_first_success=true,
         evaluate_all_attempts=evaluate_all_attempts,
         evaluate_attempt=(attempt_cfg, attempt_index) -> begin
@@ -117,8 +117,13 @@ function _execute_governed_attempt_plan(
         end,
     )
 
-    selected = selector_fn(candidates)
-    return selected, candidates
+    residual_norm_max = Float64(get(kwargs, :residual_norm_max, 1e-6))
+    selected = execute_governance_selector(raw_candidates;
+        selector=selector_fn,
+        residual_norm_max=residual_norm_max,
+        require_converged=true,
+    )
+    return selected, selected.normalized_candidates
 end
 
 @inline function _resolve_candidate_selector(kwargs::Dict{Symbol,Any})::Function
@@ -344,6 +349,11 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         _ = solve_once(selected_method, copy(x0))
     end
     picked = cache[selected_method]
+    selected_quality = governance_quality_tag((;
+        converged=Bool(picked.converged),
+        residual_norm=Float64(picked.residual_norm),
+        hard_constraint_ok=Bool(picked.converged),
+    ); residual_norm_max=residual_norm_max, require_converged=true)
 
     return (
         converged=picked.converged,
@@ -360,7 +370,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         residual_norm=picked.residual_norm,
         fixedrho_joint_solve_active=true,
         fixedrho_joint_selected_method=selected_method,
-        fixedrho_joint_selected_quality=selected_attempt.quality_tag,
+        fixedrho_joint_selected_quality=selected_quality,
         fixedrho_joint_fallback_used=(selected_attempt.quality_tag == :fallback),
     )
 end
@@ -480,6 +490,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         masses=s.masses,
         iterations=s.iterations,
         residual_norm=s.residual_norm,
+        selection_score=(hasproperty(s, :selection_score) ? Float64(getproperty(s, :selection_score)) : NaN),
         hard_constraint_ok=s.hard_constraint_ok,
         failed_constraints=s.failed_constraints,
         selection_reason=selected.selection_reason,
@@ -616,6 +627,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         masses=s.masses,
         iterations=s.iterations,
         residual_norm=s.residual_norm,
+        selection_score=(hasproperty(s, :selection_score) ? Float64(getproperty(s, :selection_score)) : NaN),
         hard_constraint_ok=s.hard_constraint_ok,
         failed_constraints=s.failed_constraints,
         selection_reason=selected.selection_reason,
@@ -624,7 +636,8 @@ function _governed_nonrho_problem_spec_forward_solve(
         error_kind=(hasproperty(s, :error_kind) ? Symbol(getproperty(s, :error_kind)) : :none),
         error_msg=(hasproperty(s, :error_msg) ? String(getproperty(s, :error_msg)) : ""),
         governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),
-        governed_selected_quality=(hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad),
+        governed_selected_quality=(hasproperty(s, :quality_tag) ? Symbol(getproperty(s, :quality_tag)) :
+            (hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad)),
         governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
         legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
