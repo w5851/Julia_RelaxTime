@@ -208,8 +208,6 @@ function attempt_with_candidates(candidates;
             )
             normalized = Main.Models.normalize_governance_candidate(scanned_candidate.governance;
                 seed_index=1,
-                residual_norm_max=governance_residual_norm_max,
-                failed_default=:scan_candidate_failed,
             )
             governance = (
                 pressure=normalized.pressure,
@@ -239,8 +237,6 @@ function attempt_with_candidates(candidates;
             )
             normalized = Main.Models.normalize_governance_candidate(scanned_candidate.governance;
                 seed_index=1,
-                residual_norm_max=governance_residual_norm_max,
-                failed_default=:scan_candidate_failed,
             )
             governance = (
                 pressure=normalized.pressure,

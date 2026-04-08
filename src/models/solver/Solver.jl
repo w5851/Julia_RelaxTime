@@ -68,7 +68,7 @@ end
     return is_physical_solution(cand.x_state, cand.masses)
 end
 
-@inline function _select_fixedmu_multiseed_candidate(candidates::AbstractVector)
+@inline function _fixedmu_multiseed_selector_adapter(candidates::AbstractVector)
     converged_physical = [c for c in candidates if _candidate_is_physical_for_selection(c)]
     if !isempty(converged_physical)
         return select_pressure_max_candidate(converged_physical).selected_candidate
@@ -136,7 +136,18 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     μ_fm::Real,
     kwargs...)
-    fixedmu_use_problem_spec = Bool(get(kwargs, :fixedmu_use_problem_spec, false)) || haskey(kwargs, :diagnostic_level)
+    fixedmu_switch = get(kwargs, :fixedmu_use_problem_spec, nothing)
+    fixedmu_use_problem_spec = if fixedmu_switch === nothing
+        true
+    elseif fixedmu_switch isa Bool
+        fixedmu_switch
+    else
+        throw(ArgumentError("fixedmu_use_problem_spec must be Bool or nothing, got $(typeof(fixedmu_switch))"))
+    end
+
+    if haskey(kwargs, :diagnostic_level) && !fixedmu_use_problem_spec && problem_spec === nothing
+        throw(ArgumentError("diagnostic_level requires ProblemSpec FixedMu chain; set fixedmu_use_problem_spec=true or pass problem_spec"))
+    end
 
     if fixedmu_use_problem_spec || problem_spec !== nothing
         merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
@@ -391,8 +402,6 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),
-                residual_norm_max=residual_norm_max,
-                failed_default=:residual_too_large,
             )
             merged = (; candidate...,
                 converged=normalized.converged,
@@ -428,8 +437,6 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),
-                residual_norm_max=residual_norm_max,
-                failed_default=:solver_failed,
             )
             merged = (; candidate...,
                 converged=normalized.converged,
@@ -443,7 +450,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         end,
     )
 
-    s = _select_fixedmu_multiseed_candidate(candidates)
+    s = _fixedmu_multiseed_selector_adapter(candidates)
     return SolverResult(
         mode,
         Bool(s.converged),
@@ -535,121 +542,38 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
         :problem_spec,
     ))
 
-    candidates = execute_attempt_pool(seeds;
-        stop_on_first_success=true,
+    rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
+    raw = solve_constraint(
+        effective_model,
+        mode,
+        T_fm;
+        problem_spec=get(kwargs, :problem_spec, nothing),
+        seed_guess=seeds[1],
+        seed_candidates=seeds,
+        semantic_mode=bridge.semantic_mode,
+        selector=bridge.selector,
+        rho0_kwargs...,
+        xi=bridge.xi,
+        p_num=bridge.p_num,
+        t_num=bridge.t_num,
+        residual_norm_max=bridge.residual_norm_max,
         evaluate_all_attempts=evaluate_all_attempts,
-        evaluate_attempt=(seed, seed_index) -> begin
-            rho0_kwargs = (mode isa FixedRho) ? NamedTuple() : (; rho0=bridge.rho0)
-            raw = solve_constraint(
-                effective_model,
-                mode,
-                T_fm;
-                problem_spec=get(kwargs, :problem_spec, nothing),
-                seed_guess=seed,
-                seed_candidates=(seed,),
-                semantic_mode=bridge.semantic_mode,
-                selector=bridge.selector,
-                rho0_kwargs...,
-                xi=bridge.xi,
-                p_num=bridge.p_num,
-                t_num=bridge.t_num,
-                residual_norm_max=bridge.residual_norm_max,
-                forwarded...,
-            )
-            inferred_ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
-            hard_ok = hasproperty(raw, :hard_constraint_ok) ? Bool(getproperty(raw, :hard_constraint_ok)) : inferred_ok
-            failed = if hasproperty(raw, :failed_constraints)
-                Symbol.(getproperty(raw, :failed_constraints))
-            else
-                (hard_ok ? Symbol[] : Symbol[:residual_too_large])
-            end
-            candidate = (
-                converged=Bool(raw.converged),
-                solution=Float64.(raw.solution),
-                x_state=raw.x_state,
-                mu_vec=raw.mu_vec,
-                omega=Float64(raw.omega),
-                pressure=Float64(raw.pressure),
-                rho_norm=Float64(raw.rho_norm),
-                entropy=Float64(raw.entropy),
-                energy=Float64(raw.energy),
-                masses=raw.masses,
-                iterations=Int(raw.iterations),
-                residual_norm=Float64(raw.residual_norm),
-                hard_constraint_ok=hard_ok,
-                failed_constraints=failed,
-                seed_index=Int(seed_index),
-            )
-            normalized = normalize_governance_candidate(candidate;
-                seed_index=Int(seed_index),
-                residual_norm_max=max(bridge.residual_norm_max, 1e-3),
-                failed_default=:residual_too_large,
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
-            )
-            return merged, evaluate_candidate_success(merged; residual_norm_max=max(bridge.residual_norm_max, 1e-3))
-        end,
-        on_error=(_, seed_index, err) -> begin
-            err_kind = classify_attempt_error(err)
-            err_msg = normalize_error_message(err)
-            candidate = (
-                converged=false,
-                solution=Float64[],
-                x_state=zeros(5),
-                mu_vec=zeros(3),
-                omega=NaN,
-                pressure=-Inf,
-                rho_norm=NaN,
-                entropy=NaN,
-                energy=NaN,
-                masses=zeros(3),
-                iterations=0,
-                residual_norm=Inf,
-                hard_constraint_ok=false,
-                failed_constraints=Symbol[:solver_failed],
-                seed_index=Int(seed_index),
-                error_kind=err_kind,
-                error_msg=err_msg,
-            )
-            normalized = normalize_governance_candidate(candidate;
-                seed_index=Int(seed_index),
-                residual_norm_max=max(bridge.residual_norm_max, 1e-3),
-                failed_default=:solver_failed,
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
-            )
-            return merged, evaluate_candidate_success(merged; residual_norm_max=max(bridge.residual_norm_max, 1e-3))
-        end,
+        forwarded...,
     )
-
-    selected = select_pressure_max_candidate(candidates)
-    s = selected.selected_candidate
     return SolverResult(
         mode,
-        Bool(s.converged),
-        Float64.(s.solution),
-        s.x_state,
-        s.mu_vec,
-        Float64(s.omega),
-        Float64(s.pressure),
-        Float64(s.rho_norm),
-        Float64(s.entropy),
-        Float64(s.energy),
-        s.masses,
-        Int(s.iterations),
-        Float64(s.residual_norm),
+        Bool(raw.converged),
+        Float64.(raw.solution),
+        raw.x_state,
+        raw.mu_vec,
+        Float64(raw.omega),
+        Float64(raw.pressure),
+        Float64(raw.rho_norm),
+        Float64(raw.entropy),
+        Float64(raw.energy),
+        raw.masses,
+        Int(raw.iterations),
+        Float64(raw.residual_norm),
         Float64(bridge.xi),
     )
 end

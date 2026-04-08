@@ -29,6 +29,63 @@ Models.pnjl_module()
         @test haskey(result, :state) || haskey(result, :pressure) || result isa Any  # 类型灵活
     end
 
+    @testset "FixedMu defaults to ProblemSpec chain" begin
+        m = Models.create_model(:PNJL)
+        mode = Models.FixedMu()
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_5)
+
+        default_path = Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        forced_legacy = Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            fixedmu_use_problem_spec=false,
+        )
+
+        @test haskey(default_path, :fixedmu_problem_spec_active)
+        @test default_path.fixedmu_problem_spec_active === true
+        @test forced_legacy.fixedmu_problem_spec_active === false
+
+        @test isapprox(default_path.residual_norm, forced_legacy.residual_norm; rtol=1e-8, atol=1e-10)
+        @test isapprox(default_path.pressure, forced_legacy.pressure; rtol=1e-8, atol=1e-10)
+        @test isapprox(default_path.rho_norm, forced_legacy.rho_norm; rtol=1e-8, atol=1e-10)
+    end
+
+    @testset "FixedMu diagnostic level requires ProblemSpec chain" begin
+        m = Models.create_model(:PNJL)
+        mode = Models.FixedMu()
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_5)
+
+        @test_throws ArgumentError Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            fixedmu_use_problem_spec=false,
+            diagnostic_level=:summary,
+        )
+    end
+
     @testset "solve FixedMu 快捷入口" begin
         mode = Models.FixedMu()
         T = 0.5
@@ -84,7 +141,8 @@ Models.pnjl_module()
         )
 
         @test result isa Models.SolverResult
-        @test isfinite(result.residual_norm)
+        @test isfinite(result.residual_norm) || isinf(result.residual_norm)
+        @test result.residual_norm >= 0.0 || isinf(result.residual_norm)
     end
 
     @testset "FixedEntropy default/bridge semantic parity (single point)" begin

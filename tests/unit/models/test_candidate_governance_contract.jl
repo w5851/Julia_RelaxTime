@@ -24,12 +24,37 @@ end
         converged=false,
         pressure=NaN,
         residual_norm=Inf,
+        hard_constraint_ok=false,
+        failed_constraints=Symbol[:solver_failed],
     ); seed_index=2)
 
     @test normalized_fail.seed_index == 2
     @test !normalized_fail.hard_constraint_ok
     @test normalized_fail.failed_constraints == Symbol[:solver_failed]
     @test normalized_fail.pressure == -Inf
+
+    @test_throws ArgumentError Models.normalize_governance_candidate((;
+        converged=false,
+        pressure=NaN,
+        residual_norm=Inf,
+        hard_constraint_ok=false,
+    ); seed_index=2)
+
+    @test_throws ArgumentError Models.normalize_governance_candidate((;
+        converged=true,
+        pressure=1.0,
+        residual_norm=1e-9,
+        hard_constraint_ok=true,
+        failed_constraints=Symbol[:residual_too_large],
+    ); seed_index=1)
+
+    @test_throws ArgumentError Models.normalize_governance_candidate((;
+        converged=false,
+        pressure=0.0,
+        residual_norm=1e-3,
+        hard_constraint_ok=false,
+        failed_constraints=Symbol[],
+    ); seed_index=1)
 
     @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
     @test Models.evaluate_candidate_success((; converged=false, residual_norm=1e-8, hard_constraint_ok=true); residual_norm_max=1e-6)

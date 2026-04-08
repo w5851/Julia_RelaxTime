@@ -546,6 +546,54 @@ end
         @test custom.selection_reason == :custom_selector
     end
 
+    @testset "selector is called exactly once per solve" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        selector_calls_spec = Ref(0)
+        selector_spec = candidates -> begin
+            selector_calls_spec[] += 1
+            return Models.select_pressure_max_candidate(candidates)
+        end
+
+        spec = Models.build_problem_spec(mode)
+        _ = spec.forward_solve(
+            model,
+            T_fm;
+            seed_guess=seed,
+            seed_candidates=(seed, copy(seed)),
+            rho0=0.16,
+            selector=selector_spec,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test selector_calls_spec[] == 1
+
+        selector_calls_solver = Ref(0)
+        selector_solver = candidates -> begin
+            selector_calls_solver[] += 1
+            return Models.select_pressure_max_candidate(candidates)
+        end
+
+        _ = Models.solve(
+            model,
+            mode,
+            T_fm;
+            seed_candidates=(seed, copy(seed)),
+            selector=selector_solver,
+            rho0=0.16,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            iterations=120,
+        )
+        @test selector_calls_solver[] == 1
+    end
+
     @testset "fixedasymrho forward_solve accepts extra_constraints hook" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedAsymmetricRho(0.05, 1.0, 0.0)
