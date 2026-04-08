@@ -552,6 +552,13 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 residual_norm_max=bridge.residual_norm_max,
                 forwarded...,
             )
+            inferred_ok = Bool(raw.converged) && isfinite(raw.residual_norm) && raw.residual_norm <= max(bridge.residual_norm_max, 1e-3)
+            hard_ok = hasproperty(raw, :hard_constraint_ok) ? Bool(getproperty(raw, :hard_constraint_ok)) : inferred_ok
+            failed = if hasproperty(raw, :failed_constraints)
+                Symbol.(getproperty(raw, :failed_constraints))
+            else
+                (hard_ok ? Symbol[] : Symbol[:residual_too_large])
+            end
             candidate = (
                 converged=Bool(raw.converged),
                 solution=Float64.(raw.solution),
@@ -565,8 +572,8 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 masses=raw.masses,
                 iterations=Int(raw.iterations),
                 residual_norm=Float64(raw.residual_norm),
-                hard_constraint_ok=(hasproperty(raw, :hard_constraint_ok) ? Bool(getproperty(raw, :hard_constraint_ok)) : false),
-                failed_constraints=(hasproperty(raw, :failed_constraints) ? Symbol.(getproperty(raw, :failed_constraints)) : Symbol[]),
+                hard_constraint_ok=hard_ok,
+                failed_constraints=failed,
                 seed_index=Int(seed_index),
             )
             normalized = normalize_governance_candidate(candidate;

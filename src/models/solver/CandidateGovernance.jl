@@ -52,8 +52,8 @@ function build_seed_pool(
 end
 
 @inline function evaluate_candidate_success(candidate; residual_norm_max::Real=1e-6)
-    if hasproperty(candidate, :hard_constraint_ok) && Bool(getproperty(candidate, :hard_constraint_ok))
-        return true
+    if hasproperty(candidate, :hard_constraint_ok)
+        return Bool(getproperty(candidate, :hard_constraint_ok))
     end
     Bool(get(candidate, :converged, false)) && return true
     residual = Float64(get(candidate, :residual_norm, Inf))

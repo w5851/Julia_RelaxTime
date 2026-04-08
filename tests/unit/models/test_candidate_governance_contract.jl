@@ -31,9 +31,10 @@ end
     @test normalized_fail.failed_constraints == Symbol[:solver_failed]
     @test normalized_fail.pressure == -Inf
 
-    @test Models.evaluate_candidate_success((; converged=true, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
+    @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
     @test Models.evaluate_candidate_success((; converged=false, residual_norm=1e-8, hard_constraint_ok=true); residual_norm_max=1e-6)
     @test !Models.evaluate_candidate_success((; converged=false, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
+    @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-8, hard_constraint_ok=false); residual_norm_max=1e-6)
 
     pool = Models.build_seed_pool(Models.FixedEntropy(0.5);
         primary_seed=[1.0, 2.0, 3.0],
