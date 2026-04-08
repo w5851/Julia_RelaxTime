@@ -45,7 +45,7 @@ Models.pnjl_module()
             t_num=4,
             residual_norm_max=1e-6,
         )
-        forced_legacy = Models.solve_constraint(
+        @test_throws ArgumentError Models.solve_constraint(
             m,
             mode,
             T_fm;
@@ -59,11 +59,6 @@ Models.pnjl_module()
 
         @test haskey(default_path, :fixedmu_problem_spec_active)
         @test default_path.fixedmu_problem_spec_active === true
-        @test forced_legacy.fixedmu_problem_spec_active === false
-
-        @test isapprox(default_path.residual_norm, forced_legacy.residual_norm; rtol=1e-8, atol=1e-10)
-        @test isapprox(default_path.pressure, forced_legacy.pressure; rtol=1e-8, atol=1e-10)
-        @test isapprox(default_path.rho_norm, forced_legacy.rho_norm; rtol=1e-8, atol=1e-10)
     end
 
     @testset "FixedMu diagnostic level requires ProblemSpec chain" begin

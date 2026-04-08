@@ -1,7 +1,8 @@
 """
     solve_constraint(model, mode, T_fm; kwargs...)
 
-统一约束求解入口。根据 `mode` 的类型分发到 models 域约束求解内核实现。
+统一约束求解入口，固定单主链：
+`solve* -> solve_constraint -> ProblemSpec.forward_solve -> mode executor`。
 """
 struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
     mode::ConstraintMode
@@ -223,27 +224,17 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     μ_fm::Real,
     kwargs...)
     fixedmu_switch = get(kwargs, :fixedmu_use_problem_spec, nothing)
-    fixedmu_use_problem_spec = if fixedmu_switch === nothing
-        true
-    elseif fixedmu_switch isa Bool
-        fixedmu_switch
-    else
+    fixedmu_switch === nothing || fixedmu_switch isa Bool ||
         throw(ArgumentError("fixedmu_use_problem_spec must be Bool or nothing, got $(typeof(fixedmu_switch))"))
+
+    if fixedmu_switch === false
+        throw(ArgumentError("fixedmu_use_problem_spec=false has been removed; solve_constraint now always uses ProblemSpec chain"))
     end
 
-    if haskey(kwargs, :diagnostic_level) && !fixedmu_use_problem_spec && problem_spec === nothing
-        throw(ArgumentError("diagnostic_level requires ProblemSpec FixedMu chain; set fixedmu_use_problem_spec=true or pass problem_spec"))
-    end
-
-    if fixedmu_use_problem_spec || problem_spec !== nothing
-        merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
-        raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
-        return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, false)))
-    end
-
-    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec, :diagnostic_level))
-    raw = _solve_constraint_fixedmu(model, T_fm, μ_fm; filtered...)
-    return (; raw..., fixedmu_problem_spec_active=false)
+    # FixedMu 与其他 mode 一致，统一走 ProblemSpec 主链。
+    merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
+    raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
+    return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, true)))
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;

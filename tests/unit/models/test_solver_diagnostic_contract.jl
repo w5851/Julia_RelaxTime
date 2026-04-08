@@ -13,7 +13,7 @@ const P = Models.pnjl_module()
     T_fm = 100.0 / 197.327
 
     @testset "FixedMu defaults to ProblemSpec diagnostic chain" begin
-        legacy = Models.solve_constraint(
+        @test_throws ArgumentError Models.solve_constraint(
             model,
             Models.FixedMu(),
             T_fm;
@@ -36,11 +36,8 @@ const P = Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test !haskey(legacy, :diagnostic)
         @test haskey(default_path, :fixedmu_problem_spec_active)
         @test default_path.fixedmu_problem_spec_active == true
-        @test haskey(legacy, :fixedmu_problem_spec_active)
-        @test legacy.fixedmu_problem_spec_active == false
     end
 
     @testset "diagnostic level none" begin

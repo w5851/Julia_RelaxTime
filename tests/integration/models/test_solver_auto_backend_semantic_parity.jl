@@ -63,7 +63,7 @@ end
         residual_norm_max=1e-6,
     )
 
-    legacy = Models.solve_constraint(
+    @test_throws ArgumentError Models.solve_constraint(
         model,
         mode,
         T_fm;
@@ -87,20 +87,13 @@ end
         fixedmu_use_problem_spec=true,
     )
 
-    @test haskey(legacy, :fixedmu_problem_spec_active)
     @test haskey(default_path, :fixedmu_problem_spec_active)
     @test haskey(spec_path, :fixedmu_problem_spec_active)
     @test default_path.fixedmu_problem_spec_active === true
-    @test legacy.fixedmu_problem_spec_active === false
     @test spec_path.fixedmu_problem_spec_active === true
 
     @test default_path.converged == spec_path.converged
     @test isapprox(default_path.pressure, spec_path.pressure; rtol=1e-9, atol=1e-10)
     @test isapprox(default_path.rho_norm, spec_path.rho_norm; rtol=1e-9, atol=1e-10)
     @test isapprox(default_path.residual_norm, spec_path.residual_norm; rtol=1e-9, atol=1e-10)
-
-    @test legacy.converged == spec_path.converged
-    @test isapprox(legacy.pressure, spec_path.pressure; rtol=1e-9, atol=1e-10)
-    @test isapprox(legacy.rho_norm, spec_path.rho_norm; rtol=1e-9, atol=1e-10)
-    @test isapprox(legacy.residual_norm, spec_path.residual_norm; rtol=1e-9, atol=1e-10)
 end
