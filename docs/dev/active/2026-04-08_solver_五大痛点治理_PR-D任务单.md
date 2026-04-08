@@ -14,7 +14,7 @@
 - [ ] D1.3 删除/停用 `GapSolver` 内重复种子常量与 `_PNJL_MULTI_SEEDS`。
 - [ ] D2.1 确立残差主入口（建议：`gap_core_residual!` 为核心残差引擎）。
 - [ ] D2.2 `ConstraintSolver` 中 mode-specific `residual_fn!` 优先组合核心残差入口，而非重写同构逻辑。
-- [ ] D2.3 明确 `gap_residual` 在 NJL/PNJL 下的角色边界（是前端 API 还是核心引擎），并文档化。
+- [x] D2.3 明确 `gap_residual` 在 NJL/PNJL 下的角色边界（是前端 API 还是核心引擎），并文档化。
 
 ### 2.2 非范围
 
@@ -93,7 +93,10 @@
 - [ ] D2 Residual Spine 尚未开始。
 - [x] D2.1 已完成：新增 `ConstraintSolver._gap_norm_from_state(...)`，统一以 `gap_core_residual!` 计算 gap 范数。
 - [x] D2.2 已完成：`ConstraintSolver` 内 FixedMu/FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho 的 gap-norm 计算均改为复用 `_gap_norm_from_state`，移除局部 `gap_residual(...)` 直算路径。
-- [ ] D2.3 文档化边界待补（下一轮在任务单/架构文档补充）。
+- [x] D2.3 已完成：在 `docs/api/models/solver/ConstraintModes.md` 补充角色边界说明：
+  - `gap_residual`：模型级公开残差入口（API/适配层）；
+  - `gap_core_residual!`：solver 主链统一残差内核；
+  - `ConstraintSolver` 的 gap-norm 统一复用主链内核。
 
 ### 本轮验证
 

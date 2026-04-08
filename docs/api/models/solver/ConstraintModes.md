@@ -57,6 +57,12 @@
 - `build_residual!`：生成可直接交给求解器的残差函数
 - `gap_state_dim` / `gap_residual`：提供模型级的状态维度与残差入口
 
+迁移收敛补充（PR-D / Residual Spine）：
+
+- `gap_core_residual!`：作为 solver 主链中的统一残差内核（2/3/5 维）。
+- `ConstraintSolver` 在约束求解中计算 gap-norm 时，统一复用 `gap_core_residual!` 路径，不再在各 mode 重复直调 `gap_residual` 计算。
+- `gap_residual` 的定位是“模型级公开残差入口（API/适配层）”；`gap_core_residual!` 的定位是“solver 内核主链（装配与一致性）”。
+
 这类接口多数更偏维护者或算法开发者，但必须在主题中说明清楚，因为它们定义了 `solve` 系列入口背后的问题形式。
 
 ## `ProblemSpec` 与组件化约束主链（R1）
