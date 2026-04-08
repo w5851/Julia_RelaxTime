@@ -66,6 +66,9 @@ const P = Models.pnjl_module()
         @test haskey(result_summary.diagnostic, :seed_source)
         @test haskey(result_summary.diagnostic, :hard_constraint_ok)
         @test haskey(result_summary.diagnostic, :failed_constraints)
+        @test haskey(result_summary.diagnostic, :error_kind)
+        @test haskey(result_summary.diagnostic, :error_msg)
+        @test haskey(result_summary.diagnostic, :selection_reason)
         @test haskey(result_summary.diagnostic, :endpoint_cause)
         @test haskey(result_summary.diagnostic, :continuity_distance)
     end
@@ -86,5 +89,8 @@ const P = Models.pnjl_module()
         @test haskey(result_full, :diagnostic)
         @test haskey(result_full.diagnostic, :candidates)
         @test result_full.diagnostic.candidates isa AbstractVector
+        @test haskey(result_full, :error_kind)
+        @test haskey(result_full, :error_msg)
+        @test haskey(result_full, :selection_reason)
     end
 end

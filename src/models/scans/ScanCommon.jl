@@ -5,7 +5,7 @@ using Printf
 import Main.Models: ConstraintMode
 using ..SeedStrategies: SeedStrategy
 import ..SeedStrategies: get_seed
-import Main.Models: SolverResult
+import Main.Models: SolverResult, classify_attempt_error, normalize_error_message
 
 export fmt
 export clean_message
@@ -221,8 +221,11 @@ function attempt_with_candidates(candidates;
             merged = (; scanned_candidate..., governance=governance)
             return merged, Main.Models.evaluate_candidate_success(governance; residual_norm_max=governance_residual_norm_max)
         end,
-        on_error=(candidate, _, _) -> begin
+        on_error=(candidate, _, err) -> begin
+            err_kind = classify_attempt_error(err)
+            err_msg = clean_message(normalize_error_message(err))
             push!(messages, format_candidate_failure(candidate.label, "", nothing))
+            push!(messages, "error.kind=$(err_kind);error.msg=$(err_msg)")
             scanned_candidate = (
                 label=String(candidate.label),
                 result=nothing,

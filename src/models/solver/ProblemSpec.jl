@@ -75,19 +75,37 @@ end
     hard_ok = hasproperty(candidate, :hard_constraint_ok) ? Bool(getproperty(candidate, :hard_constraint_ok)) : nothing
     failed = hasproperty(candidate, :failed_constraints) ? Symbol.(getproperty(candidate, :failed_constraints)) : Symbol[]
     continuity = hasproperty(candidate, :continuity_distance) ? Float64(getproperty(candidate, :continuity_distance)) : nothing
+    error_kind = hasproperty(candidate, :error_kind) ? Symbol(getproperty(candidate, :error_kind)) : :none
+    error_msg = hasproperty(candidate, :error_msg) ? String(getproperty(candidate, :error_msg)) : ""
+    selection_reason = hasproperty(candidate, :selection_reason) ? Symbol(getproperty(candidate, :selection_reason)) : :none
     return (
         attempt_origin=_diagnostic_attempt_origin(candidate),
         seed_source=seed_source,
         hard_constraint_ok=hard_ok,
         failed_constraints=failed,
+        error_kind=error_kind,
+        error_msg=error_msg,
+        selection_reason=selection_reason,
         endpoint_cause=_diagnostic_endpoint_cause(candidate),
         continuity_distance=continuity,
     )
 end
 
-@inline function _attach_solver_diagnostic(result::NamedTuple, selected_candidate, candidates, diagnostic_level::Symbol; seed_source::Union{Symbol,Nothing}=nothing)
+@inline function _attach_solver_diagnostic(
+    result::NamedTuple,
+    selected_candidate,
+    candidates,
+    diagnostic_level::Symbol;
+    seed_source::Union{Symbol,Nothing}=nothing,
+    selection_reason::Union{Nothing,Symbol}=nothing,
+)
     diagnostic_level === :none && return result
-    summary = _solver_diagnostic_from_candidate(selected_candidate; seed_source=seed_source)
+    summary_raw = _solver_diagnostic_from_candidate(selected_candidate; seed_source=seed_source)
+    summary = if selection_reason === nothing
+        summary_raw
+    else
+        (; summary_raw..., selection_reason=selection_reason)
+    end
     if diagnostic_level === :summary
         return merge(result, (diagnostic=summary,))
     end
@@ -242,6 +260,9 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
         seed_source=seed_source,
         hard_constraint_ok=Bool(get(solved, :hard_constraint_ok, false)),
         failed_constraints=Symbol.(get(solved, :failed_constraints, Symbol[])),
+        error_kind=:none,
+        error_msg="",
+        selection_reason=Symbol(get(solved, :selection_reason, :none)),
         endpoint_cause=Bool(get(solved, :converged, false)) ? :converged : :nonconvergence,
         continuity_distance=nothing,
     )
@@ -549,6 +570,8 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        error_kind=(hasproperty(s, :error_kind) ? Symbol(getproperty(s, :error_kind)) : :none),
+        error_msg=(hasproperty(s, :error_msg) ? String(getproperty(s, :error_msg)) : ""),
         fixedrho_joint_solve_requested=fixedrho_joint_solve,
         fixedrho_joint_solve_active=get(s, :fixedrho_joint_solve_active, false),
         fixedrho_joint_fallback=get(s, :fixedrho_joint_fallback, false),
@@ -557,7 +580,10 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         fixedrho_joint_fallback_used=get(s, :fixedrho_joint_fallback_used, false),
     )
     seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
-    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level; seed_source=seed_source)
+    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level;
+        seed_source=seed_source,
+        selection_reason=selected.selection_reason,
+    )
 end
 
 function _execute_governed_attempt_plan(
@@ -600,8 +626,10 @@ function _execute_governed_attempt_plan(
             )
             return merged, success
         end,
-        on_error=(attempt_cfg, attempt_index, _) -> begin
+        on_error=(attempt_cfg, attempt_index, err) -> begin
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
+            err_kind = classify_attempt_error(err)
+            err_msg = normalize_error_message(err)
             candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(attempt_index),
@@ -615,6 +643,8 @@ function _execute_governed_attempt_plan(
                 hard_constraint_ok=normalized.hard_constraint_ok,
                 failed_constraints=normalized.failed_constraints,
                 seed_index=normalized.seed_index,
+                error_kind=err_kind,
+                error_msg=err_msg,
             )
             success = evaluate_candidate_success(merged;
                 residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
@@ -751,13 +781,18 @@ function _governed_nonrho_problem_spec_forward_solve(
         selection_reason=selected.selection_reason,
         selected_index=selected.selected_index,
         candidate_count=length(candidates),
+        error_kind=(hasproperty(s, :error_kind) ? Symbol(getproperty(s, :error_kind)) : :none),
+        error_msg=(hasproperty(s, :error_msg) ? String(getproperty(s, :error_msg)) : ""),
         governed_selected_method=(hasproperty(s, :governed_selected_method) ? getproperty(s, :governed_selected_method) : :none),
         governed_selected_quality=(hasproperty(s, :governed_selected_quality) ? getproperty(s, :governed_selected_quality) : :bad),
         governed_fallback_used=(hasproperty(s, :governed_fallback_used) ? Bool(getproperty(s, :governed_fallback_used)) : false),
         legacy_fallback_used=(hasproperty(s, :legacy_fallback_used) ? Bool(getproperty(s, :legacy_fallback_used)) : false),
     )
     seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
-    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level; seed_source=seed_source)
+    return _attach_solver_diagnostic(result, s, candidates, diagnostic_level;
+        seed_source=seed_source,
+        selection_reason=selected.selection_reason,
+    )
 end
 
 function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; fwd_kwargs...)

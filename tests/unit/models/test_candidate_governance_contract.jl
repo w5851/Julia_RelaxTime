@@ -35,6 +35,10 @@ end
     @test Models.evaluate_candidate_success((; converged=false, residual_norm=1e-8, hard_constraint_ok=true); residual_norm_max=1e-6)
     @test !Models.evaluate_candidate_success((; converged=false, residual_norm=1e-2, hard_constraint_ok=false); residual_norm_max=1e-6)
     @test !Models.evaluate_candidate_success((; converged=true, residual_norm=1e-8, hard_constraint_ok=false); residual_norm_max=1e-6)
+    @test Models.classify_attempt_error(ArgumentError("bad")) == :constraint_error
+    @test Models.classify_attempt_error(DomainError(1.0, "bad")) == :constraint_error
+    @test Models.classify_attempt_error(ErrorException("boom")) == :solver_error
+    @test length(Models.normalize_error_message(ErrorException("line1\nline2"))) > 0
 
     pool = Models.build_seed_pool(Models.FixedEntropy(0.5);
         primary_seed=[1.0, 2.0, 3.0],

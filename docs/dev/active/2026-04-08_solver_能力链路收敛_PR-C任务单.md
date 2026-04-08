@@ -10,10 +10,10 @@
 
 ### 2.1 本期范围（PR-C）
 
-- [ ] C4.1 全链统一异常语义：`InterruptException` 重抛；普通异常降级为候选失败。
-- [ ] C4.2 统一 diagnostics 字段：`error_kind/error_msg/attempt_origin/selection_reason` 等最小契约。
-- [ ] C4.3 贯通 scan 输出消息，避免多套字符串拼接语义。
-- [ ] C4.4 新增“异常注入回归 + 诊断契约回归”。
+- [x] C4.1 全链统一异常语义：`InterruptException` 重抛；普通异常降级为候选失败。
+- [x] C4.2 统一 diagnostics 字段：`error_kind/error_msg/attempt_origin/selection_reason` 等最小契约。
+- [x] C4.3 贯通 scan 输出消息，避免多套字符串拼接语义。
+- [x] C4.4 新增“异常注入回归 + 诊断契约回归”。
 
 ### 2.2 非范围
 
@@ -27,18 +27,27 @@
 - [ ] 在统一 attempt 执行链上固化错误分类（至少区分 interrupt / solver_error / constraint_error）。
 - [ ] on_error 回调统一返回结构，不允许调用方私有格式。
 - [ ] 清理历史 catch 分支中的语义不一致字段。
+- [x] 在统一 attempt 执行链上固化错误分类（至少区分 interrupt / solver_error / constraint_error）。
+- [x] on_error 回调统一返回结构，不允许调用方私有格式。
+- [x] 清理历史 catch 分支中的语义不一致字段。
 
 ### 3.2 诊断契约统一
 
 - [ ] 定义最小诊断字段集合与含义（文档化）。
 - [ ] `ProblemSpec` / `Solver` / `ScanCommon` 输出对齐该集合。
 - [ ] `_attach_solver_diagnostic`（若继续沿用）字段来源与优先级统一。
+- [x] 定义最小诊断字段集合与含义（文档化）。
+- [x] `ProblemSpec` / `Solver` / `ScanCommon` 输出对齐该集合。
+- [x] `_attach_solver_diagnostic`（若继续沿用）字段来源与优先级统一。
 
 ### 3.3 回归守护
 
 - [ ] 新增异常注入测试（验证 interrupt 不被吞、普通异常被降级）。
 - [ ] 新增诊断契约测试（字段存在性 + 语义稳定性）。
 - [ ] 关键回归纳入 smoke 或确保可通过 `REGRESSION_FILES` 单跑。
+- [x] 新增异常注入测试（验证 interrupt 不被吞、普通异常被降级）。
+- [x] 新增诊断契约测试（字段存在性 + 语义稳定性）。
+- [x] 关键回归纳入 smoke 或确保可通过 `REGRESSION_FILES` 单跑。
 
 ## 4. 影响文件（预期）
 
@@ -64,6 +73,33 @@ julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine
 - [ ] diagnostics 字段集合稳定、可追踪、可回归。
 - [ ] scan 输出消息与 solver 诊断语义一致。
 - [ ] 相关 unit/regression 全通过，任务单记录与实现一致。
+- [x] 错误语义全链一致，`InterruptException` 行为受测试保护。
+- [x] diagnostics 字段集合稳定、可追踪、可回归。
+- [x] scan 输出消息与 solver 诊断语义一致。
+- [x] 相关 unit/regression 全通过，任务单记录与实现一致。
+
+## 8. PR-C 最小诊断契约（落地）
+
+- 最小字段集合：`error_kind` / `error_msg` / `attempt_origin` / `selection_reason`
+- 字段语义：
+  - `error_kind`：`:none | :interrupt | :solver_error | :constraint_error`
+  - `error_msg`：归一化短消息（去换行，长度受限）
+  - `attempt_origin`：attempt 来源（primary/method_rescue/seed_rescue 等）
+  - `selection_reason`：selector 最终选择原因
+- 落地点：
+  - `CandidateGovernance`: `classify_attempt_error`, `normalize_error_message`
+  - `ProblemSpec`: on_error 注入 `error_kind/error_msg`，`_attach_solver_diagnostic` 汇总
+  - `Solver`: `solve_multi` on_error 注入统一错误语义
+  - `ScanCommon`: scan 失败消息追加 `error.kind=...;error.msg=...`
+
+## 9. 本轮验证记录（2026-04-08）
+
+- unit:
+  - `ENV["UNIT_FILES"]="models/test_candidate_governance_contract.jl;models/test_solver_diagnostic_contract.jl;models/test_scan_common.jl"`
+  - 结果：`72 passed`
+- regression:
+  - `ENV["REGRESSION_FILES"]="models/test_solver_diagnostic_exception_regression.jl;models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl"`
+  - 结果：`40 passed`
 
 ## 7. 风险与回退
 
