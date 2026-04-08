@@ -40,21 +40,21 @@
 
 ## 2. 任务分解（可勾选）
 
-- [ ] 标记 `ProblemSpec.jl` 中契约定义与执行编排边界（注释或 section）。
-- [ ] 迁移 `_execute_governed_attempt_plan` 到 orchestrator 文件。
-- [ ] 迁移 `_solver_diagnostic_from_candidate` 与 `_attach_solver_diagnostic` 到 diagnostics 文件。
-- [ ] 迁移 `_build_governed_attempt_plan` 到 orchestrator 文件并保留调用兼容。
-- [ ] 将 `ProblemSpec` 保持为“mode 契约 + dim + forward_solve 注册”主职责。
-- [ ] 更新 `src/models/Models.jl` include 顺序，确保加载依赖正确。
-- [ ] 补 unit/regression：覆盖 `diagnostic_level=:none/:summary/:full` 输出结构。
-- [ ] 更新 solver API 文档中“维护者阅读顺序”。
+- [x] 标记 `ProblemSpec.jl` 中契约定义与执行编排边界（注释或 section）。
+- [x] 迁移 `_execute_governed_attempt_plan` 到 orchestrator 文件。
+- [x] 迁移 `_solver_diagnostic_from_candidate` 与 `_attach_solver_diagnostic` 到 diagnostics 文件。
+- [x] 迁移 `_build_governed_attempt_plan` 到 orchestrator 文件并保留调用兼容。
+- [x] 将 `ProblemSpec` 保持为“mode 契约 + dim + forward_solve 注册”主职责。
+- [x] 更新 `src/models/Models.jl` include 顺序，确保加载依赖正确。
+- [x] 补 unit/regression：覆盖 `diagnostic_level=:none/:summary/:full` 输出结构。
+- [x] 更新 solver API 文档中“维护者阅读顺序”。
 
 ## 3. 验证与验收标准
 
-- [ ] `ProblemSpec.jl` 体量明显下降（目标区间约 300-450 行）。
-- [ ] 迁移前后诊断字段完全兼容。
-- [ ] 关键 integration 与 regression 测试全绿。
-- [ ] 无循环 include 或初始化顺序错误。
+- [x] `ProblemSpec.jl` 体量明显下降（目标区间约 300-450 行）。
+- [x] 迁移前后诊断字段完全兼容。
+- [x] 关键 integration 与 regression 测试全绿。
+- [x] 无循环 include 或初始化顺序错误。
 
 建议最小验证命令（按顺序）：
 
@@ -81,6 +81,30 @@
 - [ ] PR 已通过评审并采用 `squash + delete` 合并。
 - [ ] 本地执行：`git switch main`，删除本地开发分支。
 - [ ] 本任务单状态已更新（含 `ProblemSpec.jl` 行数变化与诊断兼容证据）。
+
+## 8. 实际结果摘要（PR-2 首轮）
+
+- 结构拆分：
+  - 新增 `src/models/solver/ProblemSpecOrchestrator.jl`（attempt plan / governed attempt 编排 / mode forward_solve 组织）
+  - 新增 `src/models/solver/SolverDiagnostics.jl`（diagnostic level 解析与诊断拼装）
+  - `src/models/solver/ProblemSpec.jl` 收敛为契约核心与 forward_solve 注册绑定。
+- include 顺序：`src/models/Models.jl` 已在 `ProblemSpec.jl` 后、`Solver.jl` 前加入上述两个新文件。
+- 文档：`docs/api/models/solver/README.md` 已补充维护者阅读顺序（ProblemSpec -> Orchestrator -> Diagnostics -> Solver）。
+
+### 验证证据
+
+- `ProblemSpec.jl` 行数：`113`（命令：`julia --project=. -e 'include("src/models/Models.jl"); println(length(readlines("src/models/solver/ProblemSpec.jl")))'`）
+  - 说明：低于任务单中的“约 300-450 行”参考区间，按职责边界结果属于“超额瘦身”；当前更符合 PR-2 目标“ProblemSpec 仅保留契约核心，执行与诊断外置”。
+- unit：
+  - 命令：`julia --project=. -e 'ENV["UNIT_FILES"]="models/test_solver_diagnostic_contract.jl,models/test_solver.jl"; include("tests/unit/runtests.jl")'`
+  - 结果：`Unit | Pass 76 / Total 76`
+- regression：
+  - 命令：`julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_diagnostic_exception_regression.jl,models/test_solver_attempt_engine_convergence_regression.jl"; include("tests/regression/runtests.jl")'`
+  - 结果：`Regression | Pass 37 / Total 37`
+- integration smoke：
+  - 命令：`julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
+  - 结果：`Integration | Pass 463 / Total 463`
+  - 备注：日志中出现既有 `fail-on-fallback` 提示，但测试汇总仍为全绿（仓库现存已知现象，非本次改动引入）。
 
 ## 7. 与下一 PR 的衔接检查（PR-2 -> PR-3）
 
