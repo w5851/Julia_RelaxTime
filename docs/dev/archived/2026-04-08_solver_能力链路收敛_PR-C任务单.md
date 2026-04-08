@@ -1,3 +1,15 @@
+---
+title: Solver 能力链路收敛 PR-C 任务单（错误语义 + 诊断契约）
+archived: true
+original: docs/dev/active/2026-04-08_solver_能力链路收敛_PR-C任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 能力链路收敛 PR-C 任务单（错误语义 + 诊断契约）
 
 ## 1. 背景与目标

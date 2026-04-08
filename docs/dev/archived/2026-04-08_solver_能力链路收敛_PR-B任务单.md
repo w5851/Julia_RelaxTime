@@ -1,3 +1,15 @@
+---
+title: Solver 能力链路收敛 PR-B 任务单（治理口径 + seed pool 归一）
+archived: true
+original: docs/dev/active/2026-04-08_solver_能力链路收敛_PR-B任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 能力链路收敛 PR-B 任务单（治理口径 + seed pool 归一）
 
 ## 1. 背景与目标

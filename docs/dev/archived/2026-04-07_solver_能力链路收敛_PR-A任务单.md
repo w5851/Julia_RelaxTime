@@ -1,3 +1,15 @@
+---
+title: Solver 能力链路收敛 PR-A 任务单（attempt 引擎归一）
+archived: true
+original: docs/dev/active/2026-04-07_solver_能力链路收敛_PR-A任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 能力链路收敛 PR-A 任务单（attempt 引擎归一）
 
 ## 1. 背景与目标
