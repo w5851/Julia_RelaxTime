@@ -23,6 +23,37 @@ end
 @inline _to_chiral_triplet(x_state) = SVector{3}(x_state[1], x_state[2], x_state[3])
 @inline _mass_from_state(model::AbstractQCDModel, x_state) = calculate_mass_vec(model, _to_chiral_triplet(x_state))
 
+@inline function _model_kind_for_shared_core(model::AbstractQCDModel)
+    if model isa RPNJLModel
+        return :RPNJL
+    elseif model isa NJL2Model
+        return :NJL2
+    elseif model isa AbstractNJLModel
+        return :NJL
+    end
+    return :PNJL
+end
+
+@inline function _gap_norm_from_state(
+    model::AbstractQCDModel,
+    x_state::AbstractVector,
+    mu_vec::AbstractVector,
+    T_fm::Real;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num), Float64(xi);
+        p_num=p_num,
+        t_num=t_num,
+        model_kind=_model_kind_for_shared_core(model),
+    )
+    Tout = promote_type(eltype(x_state), eltype(mu_vec), Float64)
+    out = Vector{Tout}(undef, length(x_state))
+    gap_core_residual!(out, model, x_state, mu_vec, params)
+    return sqrt(sum(abs2, out))
+end
+
 @inline function _unpack_solution(solution::AbstractVector; state_n::Int=5, mu_n::Int=3)
     return _unpack_solution(solution, Val(state_n), Val(mu_n))
 end
@@ -326,8 +357,7 @@ function _compute_fixedmu_candidate(
     omega_val = -pressure
     masses = _mass_from_state(model, x_state)
 
-    residual_vec = gap_residual(model, st, T_fm, mu_vec; xi=xi, p_num=p_num, t_num=t_num)
-    residual_norm = sqrt(sum(abs2, residual_vec))
+    residual_norm = _gap_norm_from_state(model, x_state, mu_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
 
     return (
         solution=Vector{Float64}(x_state),
@@ -681,8 +711,7 @@ function _solve_constraint_fixedrho(
             return nothing
         end
 
-        gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
-        gap_norm = sqrt(sum(abs2, gap_vec))
+        gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
         rho_residual = abs(rho_norm_ref[] - rho_target)
         residual_norm = max(gap_norm, rho_residual)
 
@@ -735,8 +764,7 @@ function _solve_constraint_fixedrho(
         energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
         masses = _mass_from_state(model, x_state)
 
-        gap_vec = gap_residual(model, st, T_fm, _to_mu_svec(μ_vec); xi=xi, p_num=p_num, t_num=t_num)
-        gap_norm = sqrt(sum(abs2, gap_vec))
+        gap_norm = _gap_norm_from_state(model, x_state, μ_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
         rho_residual = abs(rho_norm - rho_target)
         residual_norm = max(gap_norm, rho_residual)
 
@@ -969,8 +997,7 @@ function _solve_constraint_fixedentropy(
 
     _refresh_constraint_state!(residual_fn!, res.zero)
 
-    gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
-    gap_norm = sqrt(sum(abs2, gap_vec))
+    gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
     entropy_residual = abs(entropy_ref[] - s_target)
     residual_norm = max(gap_norm, entropy_residual)
 
@@ -1103,8 +1130,7 @@ function _solve_constraint_fixedsigma(
 
     _refresh_constraint_state!(residual_fn!, res.zero)
 
-    gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
-    gap_norm = sqrt(sum(abs2, gap_vec))
+    gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
     n_B_ref = rho_norm_ref[] * rho0
     sigma_residual = if isfinite(n_B_ref) && abs(n_B_ref) > 1e-12
         abs(entropy_ref[] / n_B_ref - sigma_target)
@@ -1237,8 +1263,7 @@ function _solve_constraint_fixedasymrho(
 
     _refresh_constraint_state!(residual_fn!, res.zero)
 
-    gap_vec = gap_residual(model, st_ref[], T_fm, mu_vec_ref[]; xi=xi, p_num=p_num, t_num=t_num)
-    gap_norm = sqrt(sum(abs2, gap_vec))
+    gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
     rho_u, rho_d, rho_s = rho_vec_ref[][1], rho_vec_ref[][2], rho_vec_ref[][3]
     nB = sum(rho_vec_ref[]) / (3.0 * rho0)
     ud_ratio = if abs(rho_d) > 1e-12

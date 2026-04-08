@@ -18,30 +18,9 @@ using ForwardDiff
 
 export NLsolveGapSolver
 
-# ============================================================================
-# PNJL 多种子初值（来自 legacy SeedStrategies.jl，用于 multi-seed 求解）
-# ============================================================================
-
-# 强子相典型种子（T<150 MeV 区间，禁闭相，Polyakov loop 接近零）
-const _HADRON_SEED_5 = [-1.84329, -1.84329, -2.22701, 1.0e-5, 4.0e-5]
-# 高温初值（T≈200 MeV，Polyakov loop ≈ 0.6）
-const _HIGH_TEMP_SEED_5 = [-0.73192, -0.73192, -1.79539, 0.60532, 0.60532]
-# 弱手征+禁闭（避免卡到坏分支）
-const _WEAK_CHIRAL_CONF_SEED_5 = [-0.50, -0.50, -1.20, 1e-3, 1e-3]
-# 人工高温候选
-const _HT_GUESS_0p8_SEED_5 = [-0.50, -0.50, -1.20, 0.80, 0.80]
-const _HT_GUESS_0p9_SEED_5 = [-0.30, -0.30, -0.90, 0.90, 0.90]
-const _HT_GUESS_0p95_SEED_5 = [-0.20, -0.20, -0.70, 0.95, 0.95]
-
-"""默认 PNJL 多种子列表（与 legacy MultiSeed() 一致）"""
-const _PNJL_MULTI_SEEDS = [
-    _HADRON_SEED_5,
-    _HIGH_TEMP_SEED_5,
-    _WEAK_CHIRAL_CONF_SEED_5,
-    _HT_GUESS_0p8_SEED_5,
-    _HT_GUESS_0p9_SEED_5,
-    _HT_GUESS_0p95_SEED_5,
-]
+@inline function _pnjl_multi_seeds()
+    return seed_catalog(FixedMu(), Float64[])
+end
 
 abstract type AbstractGapSolver end
 
@@ -380,7 +359,8 @@ function solve_gap(
     best_omega = Inf
     any_converged = false
 
-    for seed in _PNJL_MULTI_SEEDS
+    seeds = _pnjl_multi_seeds()
+    for seed in seeds
         x0 = copy(seed)
         st = _try_solve_gap_pnjl(model, T, mu_vec, residual!, x0, s, residual_norm_max; kwargs...)
         st === nothing && continue
@@ -394,7 +374,7 @@ function solve_gap(
     end
 
     if !any_converged
-        error("solve_gap did not converge: all $(length(_PNJL_MULTI_SEEDS)) seeds failed at T=$T")
+        error("solve_gap did not converge: all $(length(seeds)) seeds failed at T=$T")
     end
 
     return best_state

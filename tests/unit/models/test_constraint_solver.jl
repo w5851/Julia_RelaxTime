@@ -158,4 +158,11 @@ Models.pnjl_module()
         @test selected.selected_index == 2
         @test !selected.selected_candidate.hard_constraint_ok
     end
+
+    @testset "residual spine guard" begin
+        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolver.jl")
+        source = read(solver_path, String)
+        @test occursin("_gap_norm_from_state", source)
+        @test !occursin("gap_residual(model", source)
+    end
 end

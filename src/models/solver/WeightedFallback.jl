@@ -66,7 +66,7 @@ function solve_weighted_block_fallback(mode::FixedAsymmetricRho, T_fm::Real;
     seed_candidates = Vector{Vector{Float64}}()
     push!(seed_candidates, copy(base_seed))
     extra = max(max_seed_candidates - 1, 0)
-    for seed in Iterators.take(get_all_seeds(MultiSeed(), [T_fm], mode), extra)
+    for seed in Iterators.take(seed_catalog(mode, [T_fm]), extra)
         s8 = length(seed) >= 8 ? Float64.(seed[1:8]) : extend_seed(Float64.(seed), mode)
         push!(seed_candidates, s8)
     end

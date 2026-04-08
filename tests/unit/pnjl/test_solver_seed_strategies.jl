@@ -152,6 +152,22 @@ end
     end
 end
 
+@testset "Seed SoT guard" begin
+    @testset "default_multiseed_candidates_5 contract" begin
+        seeds = P.default_multiseed_candidates_5()
+        @test seeds isa Vector{Vector{Float64}}
+        @test length(seeds) >= 2
+        @test all(length.(seeds) .== 5)
+    end
+
+    @testset "GapSolver does not own default seed constants" begin
+        gap_solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "GapSolver.jl")
+        source = read(gap_solver_path, String)
+        @test !occursin("const _HADRON_SEED_5", source)
+        @test !occursin("const _PNJL_MULTI_SEEDS", source)
+    end
+end
+
 # ============================================================================
 # extend_seed 测试
 # ============================================================================
