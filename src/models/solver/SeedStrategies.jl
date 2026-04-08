@@ -28,7 +28,7 @@ export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
 export MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
-export default_multiseed_candidates_5
+export default_multiseed_candidates_5, seed_catalog
 
 # ============================================================================
 # 内置默认种子值（基于 trho_seed_table.csv 数据分析，xi=0.0）
@@ -244,6 +244,10 @@ end
         copy(HT_GUESS_0p9_SEED_5),
         copy(HT_GUESS_0p95_SEED_5),
     ]
+end
+
+@inline function seed_catalog(mode::ConstraintMode, θ::AbstractVector)
+    return [extend_seed(seed, mode) for seed in default_multiseed_candidates_5()]
 end
 
 """创建多初值策略，默认尝试强子相和夸克相"""

@@ -19,7 +19,7 @@ using ForwardDiff
 export NLsolveGapSolver
 
 @inline function _pnjl_multi_seeds()
-    return default_multiseed_candidates_5()
+    return seed_catalog(FixedMu(), Float64[])
 end
 
 abstract type AbstractGapSolver end
