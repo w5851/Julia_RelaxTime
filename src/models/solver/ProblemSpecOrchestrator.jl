@@ -144,6 +144,15 @@ end
     return kwargs
 end
 
+@inline function _resolve_optional_seed_candidates(kwargs::Dict{Symbol,Any})::Vector{Vector{Float64}}
+    if !haskey(kwargs, :seed_candidates)
+        return Vector{Vector{Float64}}()
+    end
+    raw = kwargs[:seed_candidates]
+    raw === nothing && return Vector{Vector{Float64}}()
+    return [Float64.(s) for s in raw]
+end
+
 function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedMu, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
     diagnostic_level = _resolve_diagnostic_level(kwargs)
@@ -164,9 +173,9 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
     end
 
     seed_source = Bool(get(kwargs, :continuity_seed, false)) ? :warm_start : :seed
-    summary = (
+    summary_candidate = (
+        ; solved...,
         attempt_origin=:seed,
-        seed_source=seed_source,
         hard_constraint_ok=Bool(get(solved, :hard_constraint_ok, false)),
         failed_constraints=Symbol.(get(solved, :failed_constraints, Symbol[])),
         error_kind=:none,
@@ -175,6 +184,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
         endpoint_cause=Bool(get(solved, :converged, false)) ? :converged : :nonconvergence,
         continuity_distance=nothing,
     )
+    summary = _solver_diagnostic_from_candidate(summary_candidate; seed_source=seed_source)
     if diagnostic_level === :summary
         return merge(result, (diagnostic=summary,))
     end
@@ -366,11 +376,7 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))
 
-    provided_seed_pool = if haskey(kwargs, :seed_candidates)
-        [Float64.(s) for s in kwargs[:seed_candidates]]
-    else
-        Vector{Vector{Float64}}()
-    end
+    provided_seed_pool = _resolve_optional_seed_candidates(kwargs)
     default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
@@ -509,11 +515,7 @@ function _governed_nonrho_problem_spec_forward_solve(
     seed_guess = get(kwargs, :seed_guess, nothing)
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec $(mode_label) forward_solve"))
 
-    provided_seed_pool = if haskey(kwargs, :seed_candidates)
-        [Float64.(s) for s in kwargs[:seed_candidates]]
-    else
-        Vector{Vector{Float64}}()
-    end
+    provided_seed_pool = _resolve_optional_seed_candidates(kwargs)
     default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
