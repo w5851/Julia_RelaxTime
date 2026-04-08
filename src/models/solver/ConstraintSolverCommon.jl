@@ -393,12 +393,15 @@ function _build_default_seed_candidates(seed_guess::AbstractVector)
         push!(seeds, s)
     end
 
-    uniq = Dict{String,Vector{Float64}}()
+    uniq = Vector{Vector{Float64}}()
+    seen = Set{String}()
     for s in seeds
         key = join(round.(s; digits=10), ",")
-        uniq[key] = s
+        key in seen && continue
+        push!(uniq, s)
+        push!(seen, key)
     end
-    return collect(values(uniq))
+    return uniq
 end
 
 @inline function _mode_seed_key(seed::AbstractVector{<:Real})
@@ -477,7 +480,8 @@ function _solve_gap_with_outer_fallback(
             p_num=p_num,
             t_num=t_num,
         )
-    catch
+    catch err
+        err isa InterruptException && rethrow()
         solver_secondary === nothing && return nothing
         try
             return solve_gap(
@@ -492,7 +496,8 @@ function _solve_gap_with_outer_fallback(
                 p_num=p_num,
                 t_num=t_num,
             )
-        catch
+        catch err2
+            err2 isa InterruptException && rethrow()
             return nothing
         end
     end

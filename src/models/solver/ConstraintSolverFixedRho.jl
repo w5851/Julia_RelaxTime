@@ -84,7 +84,8 @@ function _solve_constraint_fixedrho(
                 ftol=1e-9,
                 nlsolve_kwargs...,
             )
-        catch
+        catch err
+            err isa InterruptException && rethrow()
             return nothing
         end
 

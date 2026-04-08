@@ -71,7 +71,8 @@ function _solve_constraint_fixedmu(
                     ok, failed = evaluate_hard_constraints(raw, rules)
                     candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))
                     return candidate, ok
-                catch
+                catch err
+                    err isa InterruptException && rethrow()
                 end
             end
 
