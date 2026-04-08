@@ -35,3 +35,12 @@
 - `Models.solve_with_derivatives`
 
 本主题已经吸收旧 `docs/api/pnjl/` 求解器相关页面中的主要价值。旧页后续应只承担迁移说明或兼容层定位，不再作为新主题主说明页。
+
+## 维护者阅读顺序（ProblemSpec 主链）
+
+当你需要维护 `ProblemSpec` 路径时，建议按以下顺序读源码：
+
+1. `src/models/solver/ProblemSpec.jl`：只看契约核心（`ExtraConstraints`、`ProblemSpec`、`build_problem_spec` 绑定入口）
+2. `src/models/solver/ProblemSpecOrchestrator.jl`：看 attempt plan 生成、governed attempt 执行编排、mode forward_solve 组织
+3. `src/models/solver/SolverDiagnostics.jl`：看 `diagnostic_level=:none/:summary/:full` 的摘要/全量候选诊断拼装逻辑
+4. `src/models/solver/Solver.jl`：看入口层如何将 runtime options 传入 `ProblemSpec.forward_solve`
