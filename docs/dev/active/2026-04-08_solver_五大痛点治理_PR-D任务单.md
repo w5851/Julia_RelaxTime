@@ -58,10 +58,10 @@
 
 - [x] 单测：新增 `tests/unit/models/test_seed_catalog_contract.jl`（或等价文件）。
 - [x] 单测：新增 `tests/unit/models/test_residual_spine_contract.jl`（或等价文件）。
-- [ ] 回归：
+- [x] 回归：
   - `models/test_solver_attempt_engine_convergence_regression.jl`
   - `pnjl/test_constraint_selection_regression.jl`
-- [ ] 针对 5 类 mode 的代表点做 before/after 快照对比（记录 residual_norm/selection_reason/seed_index）。
+- [x] 针对 5 类 mode 的代表点做 before/after 快照对比（记录 residual_norm/selection_reason/seed_index）。
 - [x] 新增“唯一实现点守护测试”：扫描断言 `GapSolver` 不再定义默认 PNJL seed 常量。
 - [x] 新增“残差主链守护测试”：主要调用链经过统一 residual 入口（可用契约/spy 方式验证）。
 
@@ -102,6 +102,12 @@
   - 非 `FixedMu` 模式扩展后仍保持同序；
   - `GapSolver` 与 `WeightedFallback` 均消费 `seed_catalog`。
 - [x] 4.2 新增残差主链契约测试：`tests/unit/models/test_residual_spine_contract.jl`，覆盖 `_gap_norm_from_state` 与 `gap_core_residual!` 范数等价关系，并守护 `ConstraintSolver` 不回退到 `gap_residual(model, ...)` 直算。
+- [x] 5 类 mode 代表点 before/after 快照完成（pre=`3adb4c0`，post=`f5e2ad4`）：
+  - FixedMu@T=100MeV,μ=250MeV：`converged=true`，`residual_norm=2.3562268645305217e-14`，`selection_reason=:pressure_max_under_constraints`，`seed_index=-1`（一致）
+  - FixedRho@T=110MeV,ρ=0.2：`converged=true`，`residual_norm=1.8366093460261402e-15`，`selection_reason=:pressure_max_under_constraints`，`seed_index=-1`（一致）
+  - FixedAsymmetricRho@T=110MeV：`converged=false`，`residual_norm=Inf`，`selection_reason=:no_candidate_passed_constraints`，`seed_index=-1`（一致）
+  - FixedEntropy@T=120MeV,s=0.5：`converged=false`，`residual_norm=Inf`，`selection_reason=:no_candidate_passed_constraints`，`seed_index=-1`（一致）
+  - FixedSigma@T=120MeV,σ=10：`converged=false`，`residual_norm=Inf`，`selection_reason=:no_candidate_passed_constraints`，`seed_index=-1`（一致）
 
 ### 本轮验证
 
@@ -113,6 +119,8 @@
 - [x] `julia --project=. -e 'include("tests/unit/models/test_gap_core_residual.jl")'`
 - [x] `julia --project=. -e 'include("tests/unit/models/test_gap_core_residual_njl_parity.jl")'`
 - [x] `julia --project=. -e 'ENV["UNIT_FILES"]="pnjl/test_solver_seed_strategies.jl;models/test_seed_catalog_contract.jl;models/test_residual_spine_contract.jl;models/test_constraint_solver.jl;models/test_gap_solver.jl"; include("tests/unit/runtests.jl")'`
+- [x] before 快照（`3adb4c0` worktree）：5-mode 指标采样脚本（`mode|T_MeV|mu_MeV|converged|residual_norm|selection_reason|seed_index`）
+- [x] after 快照（`f5e2ad4` 当前分支）：同脚本复测，5-mode 指标逐项一致
 
 ### 删除重复路径清单（本轮）
 
