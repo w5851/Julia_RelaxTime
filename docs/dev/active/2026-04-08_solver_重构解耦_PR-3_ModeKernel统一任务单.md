@@ -139,9 +139,22 @@
 - [ ] 本任务单条目已全部完成并回写，再创建 PR。
 - [ ] PR 创建后等待 CI 全通过。
 - [ ] PR 创建后等待 GitHub Copilot 自动 review（PR 触发）并完成 review 问题处理。
+- [x] 本任务单条目已全部完成并回写，再创建 PR。
+- [x] PR 创建后等待 CI 全通过。
+- [x] PR 创建后等待 GitHub Copilot 自动 review（PR 触发）并完成 review 问题处理。
 - [ ] PR 已通过评审并采用 `squash + delete` 合并。
 - [ ] 本地执行：`git switch main`，删除本地开发分支。
-- [ ] 本任务单状态已更新（含重复度下降依据与关键模式回归结果）。
+- [x] 本任务单状态已更新（含重复度下降依据与关键模式回归结果）。
+
+### Completion Signal 进展记录（2026-04-08）
+
+- PR 已创建：`https://github.com/w5851/Julia_RelaxTime/pull/70`
+- CI 状态：全部检查通过（`mergeStateStatus=CLEAN`）。
+- Copilot review：已产生 2 条评论并已完成修复、回帖说明。
+  - 修复 `FixedRho` residual 变量引用错误（使用 `thermo.rho_norm`）。
+  - 修复 `FixedSigma` 非有限残差传播风险（`NaN -> Inf`），并在 `_residual_component_value` 增加非有限值统一映射 `Inf` 防护。
+- 修复后本地复验：
+  - `julia --project=. -e 'ENV["UNIT_FILES"]="models/test_constraint_solver.jl;models/test_solver.jl;models/test_problem_spec_contract.jl"; include("tests/unit/runtests.jl")'` 通过（320/320）。
 
 ## 7. 与下一 PR 的衔接检查（PR-3 -> PR-4）
 
