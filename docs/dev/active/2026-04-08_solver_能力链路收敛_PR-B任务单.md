@@ -15,8 +15,8 @@
 - [ ] B2.3 统一 selector 调用点，避免二次筛选与语义漂移。
 - [x] B2.4 清理 `Solver.jl` 与 `ScanCommon.jl` 中重复治理判断。
 - [x] B3.1 提取 mode-aware seed pool builder（单一入口）。
-- [ ] B3.2 `solve_multi`、`ProblemSpec`、scan 侧统一复用 builder。
-- [ ] B3.3 统一 seed 去重/顺序/continuity 注入规则并文档化。
+- [x] B3.2 `solve_multi`、`ProblemSpec`、scan 侧统一复用 builder。
+- [x] B3.3 统一 seed 去重/顺序/continuity 注入规则并文档化。
 
 ### 2.2 非范围（延后到 PR-C）
 
@@ -54,11 +54,12 @@
 
 - 新增统一入口：`CandidateGovernance.build_seed_pool(mode; primary_seed, extra_seed_pool, provided_seed_pool, default_seed_pool, seed_extend)`。
 - `ProblemSpec._build_governed_attempt_plan` 已改为复用 `build_seed_pool`，固定顺序为主 seed -> extra -> provided -> default，并统一去重键。
-- `Solver/scan` 侧 seed 组装复用尚未完成（留在 B3.2）。
+- `Solver.solve_multi(FixedMu/FixedRho/FixedAsymmetricRho)` 与 `TmuScan/TrhoScan` 已改为复用 `build_seed_pool`。
+- 去重/顺序/continuity 规则：continuity(若有) 作为 primary；随后 explicit/provided；最后默认候选；统一按 12 位 round-key 去重。
 
 ### 3.3 文档与契约同步
 
-- [ ] 在本任务单中补“能力 -> 唯一实现点”矩阵。
+- [x] 在本任务单中补“能力 -> 唯一实现点”矩阵。
 - [ ] 若导出 API 发生变化，更新 `docs/api/` 对应页面（仅在必要时）。
 
 ## 4. 影响文件（预期）
@@ -85,7 +86,28 @@ julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine
 - [ ] 治理口径单点实现，调用方不再自行拼装 success/hard-constraint 判定。
 - [ ] seed pool 单点组装，调用方不再重复拼接候选。
 - [ ] 关键 unit/regression 全通过，无不可解释行为漂移。
+- [x] 关键 unit/regression 全通过，无不可解释行为漂移。
 - [ ] 本任务单状态、验证记录与代码实际一致。
+- [x] 本任务单状态、验证记录与代码实际一致。
+
+#### 本轮验证（2026-04-08，seed 收敛后）
+
+- unit:
+  - `ENV["UNIT_FILES"]="models/test_candidate_governance_contract.jl;models/test_solver.jl;models/test_problem_spec_contract.jl;models/test_scan_common.jl;models/test_tmu_scan.jl;models/test_trho_scan.jl"`
+  - 结果：`310 passed`
+- regression:
+  - `ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl"`
+  - 结果：`36 passed`
+
+## 8. 能力 -> 唯一实现点矩阵（PR-B）
+
+| 能力 | 唯一实现点 | 说明 |
+|---|---|---|
+| candidate success 判定 | `CandidateGovernance.evaluate_candidate_success` | 各层统一调用，避免局部口径分叉。 |
+| candidate 最小 schema 归一 | `CandidateGovernance.normalize_governance_candidate` | 统一 `converged/residual_norm/hard_constraint_ok/failed_constraints/pressure/seed_index`。 |
+| seed pool 组装与去重 | `CandidateGovernance.build_seed_pool` | 统一 primary -> extra/provided -> default 顺序与去重规则。 |
+| ProblemSpec 治理执行 | `ProblemSpec._execute_governed_attempt_plan` | 统一调用 governance helper，不再本地判定 success。 |
+| scan 治理候选聚合 | `ScanCommon.attempt_with_candidates` | 统一调用 governance helper，selection 仍由 selector 决定。 |
 
 ## 7. 风险与回退
 

@@ -373,6 +373,17 @@ end
 
 _seed_continuation_key(T, xi) = ScanCommon.key2(T, xi; digits=SEED_KEY_DIGITS)
 
+@inline function _seed_pool_source_to_label(source::Symbol, idx::Int)
+    if source == :primary
+        return "continuation"
+    elseif source == :provided
+        return "provided_$(idx)"
+    elseif source == :extra
+        return "extra_$(idx)"
+    end
+    return "default_$(idx)"
+end
+
 """根据密度选择合适的初值"""
 function _select_seed_for_rho(rho::Float64)
     if rho < 0.5
@@ -386,31 +397,48 @@ end
 
 """构建初值候选列表"""
 function _build_seed_candidates(cache::Dict, seed_key, T, rho)
-    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
-    
+    primary_seed = nothing
+    default_seed_pool = Vector{Vector{Float64}}()
+
     # 1. 连续性种子（优先）
     if haskey(cache, seed_key)
         cached = cache[seed_key]
         # 确保是 8 维
         if length(cached) == 8
-            push!(candidates, (label="continuation", state=copy(cached)))
+            primary_seed = Float64.(cached)
         elseif length(cached) >= 5
             # 扩展为 8 维
             extended = extend_seed(cached, FixedRho(rho))
-            push!(candidates, (label="continuation-ext", state=extended))
+            primary_seed = Float64.(extended)
         end
     end
     
     # 2. 基于密度的默认种子
     primary = _select_seed_for_rho(rho)
-    push!(candidates, (label="density-based", state=copy(primary)))
+    push!(default_seed_pool, copy(primary))
     
     # 3. 其他候选
     if rho >= 0.5
-        push!(candidates, (label="hadron", state=copy(HADRON_SEED_8)))
+        push!(default_seed_pool, copy(HADRON_SEED_8))
     end
     if rho < 2.0
-        push!(candidates, (label="high-density", state=copy(HIGH_DENSITY_SEED_8)))
+        push!(default_seed_pool, copy(HIGH_DENSITY_SEED_8))
+    end
+
+    if primary_seed === nothing
+        primary_seed = default_seed_pool[1]
+        default_seed_pool = default_seed_pool[2:end]
+    end
+
+    seed_pool = Main.Models.build_seed_pool(FixedRho(rho);
+        primary_seed=primary_seed,
+        default_seed_pool=default_seed_pool,
+        seed_extend=(seed, _) -> Float64.(seed),
+    )
+
+    candidates = NamedTuple{(:label, :state), Tuple{String, Vector{Float64}}}[]
+    for (idx, entry) in enumerate(seed_pool)
+        push!(candidates, (label=_seed_pool_source_to_label(entry.source, idx), state=entry.seed))
     end
     
     return candidates

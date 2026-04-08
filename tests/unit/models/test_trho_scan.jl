@@ -47,6 +47,17 @@ const _TS = Models.TrhoScan
         @test _TS.run_trho_scan isa Function
     end
 
+    @testset "seed pool builder uses continuation as primary" begin
+        key = _TS._seed_continuation_key(120.0, 0.0)
+        cache = Dict{Tuple{Float64, Float64}, Vector{Float64}}(key => copy(Models.HADRON_SEED_8))
+        candidates = _TS._build_seed_candidates(cache, key, 120.0, 0.2)
+        @test !isempty(candidates)
+        @test candidates[1].label == "continuation"
+        @test candidates[1].state == Float64.(Models.HADRON_SEED_8)
+        keys = Set(join(round.(c.state; digits=8), ",") for c in candidates)
+        @test length(keys) == length(candidates)
+    end
+
     @testset "auto backend 语义路由配置" begin
         @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:models) == :models
         @test _TS._effective_solver_backend(:auto, :PNJL; auto_pnjl_backend=:legacy) == :legacy  # route preserved; execution guard rejects legacy backend
