@@ -10,11 +10,11 @@
 
 ### 2.1 本期范围（PR-B）
 
-- [ ] B2.1 统一 candidate 最小 schema：`converged/residual_norm/hard_constraint_ok/failed_constraints/pressure/seed_index`。
-- [ ] B2.2 统一 success 判定入口，各层不再各写一套判定。
+- [x] B2.1 统一 candidate 最小 schema：`converged/residual_norm/hard_constraint_ok/failed_constraints/pressure/seed_index`。
+- [x] B2.2 统一 success 判定入口，各层不再各写一套判定。
 - [ ] B2.3 统一 selector 调用点，避免二次筛选与语义漂移。
-- [ ] B2.4 清理 `Solver.jl` 与 `ScanCommon.jl` 中重复治理判断。
-- [ ] B3.1 提取 mode-aware seed pool builder（单一入口）。
+- [x] B2.4 清理 `Solver.jl` 与 `ScanCommon.jl` 中重复治理判断。
+- [x] B3.1 提取 mode-aware seed pool builder（单一入口）。
 - [ ] B3.2 `solve_multi`、`ProblemSpec`、scan 侧统一复用 builder。
 - [ ] B3.3 统一 seed 去重/顺序/continuity 注入规则并文档化。
 
@@ -27,15 +27,34 @@
 
 ### 3.1 治理契约收敛
 
-- [ ] 提供 `normalize_candidate_for_governance(...)`（或等价入口），把不同来源 candidate 归一到最小 schema。
-- [ ] 提供 `evaluate_candidate_success(...)`（或等价入口）作为唯一 success 判定。
-- [ ] 在 `Solver` / `ProblemSpec` / `ScanCommon` 替换本地治理拼装逻辑，统一走上述入口。
+- [x] 提供 `normalize_candidate_for_governance(...)`（或等价入口），把不同来源 candidate 归一到最小 schema。
+- [x] 提供 `evaluate_candidate_success(...)`（或等价入口）作为唯一 success 判定。
+- [x] 在 `Solver` / `ProblemSpec` / `ScanCommon` 替换本地治理拼装逻辑，统一走上述入口。
+
+#### 3.1 进展记录（2026-04-08）
+
+- 新增统一入口：`CandidateGovernance.evaluate_candidate_success` 与 `CandidateGovernance.normalize_governance_candidate`。
+- `Solver.solve_multi(FixedMu/FixedRho/FixedAsymmetricRho)` 已改为统一调用归一化与 success 入口，移除局部口径分叉。
+- 已补单测：`tests/unit/models/test_candidate_governance_contract.jl` 新增 helper 契约测试。
+- 已回归验证：
+  - `tests/unit/models/test_candidate_governance_contract.jl`
+  - `tests/unit/models/test_solver.jl`
+  - `REGRESSION_FILES=models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl`
+- 追加收敛（本轮）：
+  - `ProblemSpec._execute_governed_attempt_plan` 接入统一 `normalize_governance_candidate/evaluate_candidate_success`。
+  - `ScanCommon.attempt_with_candidates` 接入统一 governance helper，移除本地 success 口径分叉。
 
 ### 3.2 seed pool 收敛
 
 - [ ] 提取 `build_seed_pool(mode, seed_guess, kwargs...)`（命名可按现有风格调整）。
 - [ ] 合并当前 `_build_default_seed_candidates` 的重复使用场景与散点 fallback。
 - [ ] 固化顺序稳定性（主 seed、显式候选、默认候选、去重策略）。
+
+#### 3.2 进展记录（2026-04-08）
+
+- 新增统一入口：`CandidateGovernance.build_seed_pool(mode; primary_seed, extra_seed_pool, provided_seed_pool, default_seed_pool, seed_extend)`。
+- `ProblemSpec._build_governed_attempt_plan` 已改为复用 `build_seed_pool`，固定顺序为主 seed -> extra -> provided -> default，并统一去重键。
+- `Solver/scan` 侧 seed 组装复用尚未完成（留在 B3.2）。
 
 ### 3.3 文档与契约同步
 

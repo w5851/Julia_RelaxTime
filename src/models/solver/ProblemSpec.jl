@@ -37,10 +37,6 @@ end
     return vcat(collect(rules), [extra_rule])
 end
 
-@inline function _seed_key(seed_vec::AbstractVector{<:Real})
-    return join(round.(Float64.(seed_vec); digits=12), ",")
-end
-
 const DIAGNOSTIC_LEVELS = (:none, :summary, :full)
 
 @inline function _resolve_diagnostic_level(kwargs::Dict{Symbol,Any})::Symbol
@@ -110,40 +106,18 @@ function _build_governed_attempt_plan(
     fallback_method,
     extra_fallback_seeds=Vector{Vector{Float64}}(),
 )
-    primary_seed_vec = _extend_seed_with_extra(Float64.(primary_seed), mode, extra_constraints)
+    seed_extend = (seed, local_mode) -> _extend_seed_with_extra(seed, local_mode, extra_constraints)
+    seed_pool = build_seed_pool(mode;
+        primary_seed=primary_seed,
+        extra_seed_pool=extra_fallback_seeds,
+        provided_seed_pool=provided_seed_pool,
+        default_seed_pool=default_seed_pool,
+        seed_extend=seed_extend,
+    )
 
-    fallback_seeds = Vector{Vector{Float64}}()
-    seed_seen = Set{String}()
-
-    primary_key = _seed_key(primary_seed_vec)
-    push!(seed_seen, primary_key)
-
-    for seed in extra_fallback_seeds
-        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        key = _seed_key(normalized_seed)
-        if !(key in seed_seen)
-            push!(fallback_seeds, normalized_seed)
-            push!(seed_seen, key)
-        end
-    end
-
-    for seed in provided_seed_pool
-        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        key = _seed_key(normalized_seed)
-        if !(key in seed_seen)
-            push!(fallback_seeds, normalized_seed)
-            push!(seed_seen, key)
-        end
-    end
-
-    for seed in default_seed_pool
-        normalized_seed = _extend_seed_with_extra(seed, mode, extra_constraints)
-        key = _seed_key(normalized_seed)
-        if !(key in seed_seen)
-            push!(fallback_seeds, normalized_seed)
-            push!(seed_seen, key)
-        end
-    end
+    isempty(seed_pool) && throw(ArgumentError("build_seed_pool produced empty pool for $(typeof(mode))"))
+    primary_seed_vec = seed_pool[1].seed
+    fallback_seeds = [entry.seed for entry in seed_pool[2:end]]
 
     attempt_plan = NamedTuple[]
     push!(attempt_plan, (
@@ -608,12 +582,44 @@ function _execute_governed_attempt_plan(
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
             candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index))
-            return candidate, ok
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(attempt_index),
+                residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
+                failed_default=:residual_too_large,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            success = evaluate_candidate_success(merged;
+                residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
+            )
+            return merged, success
         end,
         on_error=(attempt_cfg, attempt_index, _) -> begin
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
             candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
-            return candidate, false
+            normalized = normalize_governance_candidate(candidate;
+                seed_index=Int(attempt_index),
+                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+                failed_default=:solver_failed,
+            )
+            merged = (; candidate...,
+                converged=normalized.converged,
+                pressure=normalized.pressure,
+                residual_norm=normalized.residual_norm,
+                hard_constraint_ok=normalized.hard_constraint_ok,
+                failed_constraints=normalized.failed_constraints,
+                seed_index=normalized.seed_index,
+            )
+            success = evaluate_candidate_success(merged;
+                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
+            )
+            return merged, success
         end,
     )
 
