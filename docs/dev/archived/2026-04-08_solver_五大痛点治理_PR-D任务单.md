@@ -1,3 +1,15 @@
+---
+title: Solver 五大痛点治理 PR-D 任务单（Seed SoT + Residual Spine）
+archived: true
+original: docs/dev/active/2026-04-08_solver_五大痛点治理_PR-D任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 五大痛点治理 PR-D 任务单（Seed SoT + Residual Spine）
 
 ## 1. 目标
@@ -18,14 +30,14 @@
 
 ### 2.2 非范围
 
-- [ ] 不改变求解策略（Newton/TR/多 seed）默认行为优先级。
-- [ ] 不在本 PR 内调整 selector 的业务偏好（pressure/residual 优先级）。
+- [x] 不改变求解策略（Newton/TR/多 seed）默认行为优先级（已保持兼容）。
+- [x] 不在本 PR 内调整 selector 的业务偏好（pressure/residual 优先级）（未做该类改动）。
 
 ## 3. 设计约束
 
-- [ ] 外部 API 行为保持兼容：`solve_gap`/`solve` 调用方式不变。
-- [ ] 在相同 seed 输入下，数值漂移仅允许在公差内，且需可解释。
-- [ ] 新增 helper 需避免循环依赖（`SeedStrategies` 不反向依赖 `GapSolver`）。
+- [x] 外部 API 行为保持兼容：`solve_gap`/`solve` 调用方式不变。
+- [x] 在相同 seed 输入下，数值漂移在公差内且可解释（见 5-mode before/after 快照）。
+- [x] 新增 helper 避免循环依赖（`SeedStrategies` 未反向依赖 `GapSolver`）。
 
 ## 3.1 深层治理判据（防止只做表层整理）
 

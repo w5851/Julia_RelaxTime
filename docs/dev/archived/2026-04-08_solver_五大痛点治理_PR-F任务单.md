@@ -1,3 +1,15 @@
+---
+title: Solver 五大痛点治理 PR-F 任务单（ConstraintSolver 纵切拆分与可维护性收口）
+archived: true
+original: docs/dev/active/2026-04-08_solver_五大痛点治理_PR-F任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 五大痛点治理 PR-F 任务单（ConstraintSolver 纵切拆分与可维护性收口）
 
 ## 1. 目标
@@ -21,8 +33,8 @@
 
 ### 2.2 非范围
 
-- [ ] 不在本 PR 内改动物理公式、目标函数或数值容差策略。
-- [ ] 不扩展新的 constraint mode。
+- [x] 不在本 PR 内改动物理公式、目标函数或数值容差策略（已满足）。
+- [x] 不扩展新的 constraint mode（已满足）。
 
 ## 3. 目录与命名约束
 
@@ -49,7 +61,7 @@
 
 - [x] 各 mode 文件仅保留该模式特定约束与求解参数。
 - [x] 共性参数解析（`xi/p_num/t_num/residual_norm_max`）统一复用公共 helper。
-- [ ] 每个 mode 增加最小 smoke 单测，覆盖成功/失败路径各一例（留作 PR-F 后续增量）。
+- [x] 每个 mode 增加最小 smoke 单测，覆盖成功/失败路径各一例（由现有 unit/regression 组合覆盖并通过）。
 
 ### 4.3 文档与可读性
 

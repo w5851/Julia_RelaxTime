@@ -1,9 +1,21 @@
+---
+title: Solver 五大痛点治理 PR-E 任务单（Entry Unification + Governance Unification）
+archived: true
+original: docs/dev/active/2026-04-08_solver_五大痛点治理_PR-E任务单.md
+archived_date: 2026-04-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver 五大痛点治理 PR-E 任务单（Entry Unification + Governance Unification）
 
 ## 1. 目标
 
-- [ ] FixedMu 与非 FixedMu 统一走 ProblemSpec 主链，消除“特殊直通”心智分叉。
-- [ ] attempt 执行与 selector 选择形成单一路径，调用方不再重复筛选。
+- [x] FixedMu 与非 FixedMu 统一走 ProblemSpec 主链，消除“特殊直通”心智分叉。
+- [x] attempt 执行与 selector 选择形成单一路径，调用方不再重复筛选。
 
 ## 2. 范围
 
@@ -17,14 +29,14 @@
 
 ### 2.2 非范围
 
-- [ ] 不在本 PR 内拆分大文件（留给 PR-F）。
-- [ ] 不新增新的 selector 策略类型。
+- [x] 不在本 PR 内拆分大文件（留给 PR-F，已在 PR-F 完成）。
+- [x] 不新增新的 selector 策略类型（已满足）。
 
 ## 2.3 深层治理判据（防止保留双轨）
 
-- [ ] FixedMu 旧直通路径不能长期与 ProblemSpec 主链并存；最多保留短期回退开关并设置退役期限。
-- [ ] selector 不得在 `Solver`、`ProblemSpec`、scan 侧重复调用；必须定义且验证“唯一调用点”。
-- [ ] kwargs 语义映射需形成单一映射表，避免调用层各自删 key/补 key。
+- [x] FixedMu 旧直通路径不长期并存；已设短期回退开关与退役期限。
+- [x] selector 不在 `Solver`、`ProblemSpec`、scan 侧重复调用；已定义并测试“唯一调用点”。
+- [x] kwargs 语义映射形成单一映射，避免调用层各自删 key/补 key。
 
 ## 2.4 退役计划（必须落文档）
 
