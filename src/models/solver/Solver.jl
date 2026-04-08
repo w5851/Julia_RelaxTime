@@ -205,9 +205,9 @@ end
     T_fm::Real,
     kwargs,
 )
-    haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; solve_constraint always uses ProblemSpec chain"))
-    haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed together with legacy fallback path"))
-    haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed together with legacy fallback path"))
+    haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; use solve_constraint(...; problem_spec=...) or default ProblemSpec chain"))
+    haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
+    haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
 
     spec = get(kwargs, :problem_spec, nothing)
     forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
