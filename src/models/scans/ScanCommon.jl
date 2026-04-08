@@ -223,7 +223,7 @@ function attempt_with_candidates(candidates;
         end,
         on_error=(candidate, _, err) -> begin
             err_kind = classify_attempt_error(err)
-            err_msg = normalize_error_message(err)
+            err_msg = clean_message(normalize_error_message(err))
             push!(messages, format_candidate_failure(candidate.label, "", nothing))
             push!(messages, "error.kind=$(err_kind);error.msg=$(err_msg)")
             scanned_candidate = (

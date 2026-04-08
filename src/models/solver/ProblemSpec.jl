@@ -262,7 +262,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
         failed_constraints=Symbol.(get(solved, :failed_constraints, Symbol[])),
         error_kind=:none,
         error_msg="",
-        selection_reason=(haskey(solved, :selection_reason) ? Symbol(get(solved, :selection_reason, :none)) : :none),
+        selection_reason=Symbol(get(solved, :selection_reason, :none)),
         endpoint_cause=Bool(get(solved, :converged, false)) ? :converged : :nonconvergence,
         continuity_distance=nothing,
     )

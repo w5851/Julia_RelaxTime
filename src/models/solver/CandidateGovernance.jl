@@ -15,7 +15,7 @@ end
 @inline function normalize_error_message(err; max_chars::Int=240)::String
     msg = sprint(showerror, err)
     msg = replace(strip(msg), '\n' => ' ', '\r' => ' ')
-    if ncodeunits(msg) <= max_chars
+    if length(msg) <= max_chars
         return msg
     end
     return first(msg, max_chars)
