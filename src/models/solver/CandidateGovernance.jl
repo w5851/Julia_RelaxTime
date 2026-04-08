@@ -78,8 +78,6 @@ end
 
 @inline function normalize_governance_candidate(candidate;
     seed_index::Int,
-    residual_norm_max::Real=1e-6,
-    failed_default::Symbol=:residual_too_large,
 )
     hasproperty(candidate, :converged) || throw(ArgumentError("governance candidate missing field :converged"))
     hasproperty(candidate, :pressure) || throw(ArgumentError("governance candidate missing field :pressure"))
@@ -100,8 +98,6 @@ end
         throw(ArgumentError("governance candidate hard_constraint_ok=false requires non-empty failed_constraints"))
     end
 
-    _ = residual_norm_max
-    _ = failed_default
     return (
         converged=converged,
         pressure=(isfinite(pressure) ? pressure : -Inf),

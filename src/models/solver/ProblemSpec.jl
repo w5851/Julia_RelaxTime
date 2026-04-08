@@ -615,8 +615,6 @@ function _execute_governed_attempt_plan(
             candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index))
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(attempt_index),
-                residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
-                failed_default=:residual_too_large,
             )
             merged = (; candidate...,
                 converged=normalized.converged,
@@ -638,8 +636,6 @@ function _execute_governed_attempt_plan(
             candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(attempt_index),
-                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
-                failed_default=:solver_failed,
             )
             merged = (; candidate...,
                 converged=normalized.converged,

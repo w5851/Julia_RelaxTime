@@ -402,8 +402,6 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),
-                residual_norm_max=residual_norm_max,
-                failed_default=:residual_too_large,
             )
             merged = (; candidate...,
                 converged=normalized.converged,
@@ -439,8 +437,6 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),
-                residual_norm_max=residual_norm_max,
-                failed_default=:solver_failed,
             )
             merged = (; candidate...,
                 converged=normalized.converged,
