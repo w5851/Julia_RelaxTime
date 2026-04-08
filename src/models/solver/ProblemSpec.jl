@@ -98,18 +98,23 @@ end
     diagnostic_level::Symbol;
     seed_source::Union{Symbol,Nothing}=nothing,
     selection_reason::Union{Nothing,Symbol}=nothing,
+    selection_reason_source::Symbol=:problem_spec_selector,
 )
     diagnostic_level === :none && return result
     summary_raw = _solver_diagnostic_from_candidate(selected_candidate; seed_source=seed_source)
     summary = if selection_reason === nothing
-        summary_raw
+        (; summary_raw..., selection_reason_source=selection_reason_source)
     else
-        (; summary_raw..., selection_reason=selection_reason)
+        (; summary_raw..., selection_reason=selection_reason, selection_reason_source=selection_reason_source)
     end
     if diagnostic_level === :summary
         return merge(result, (diagnostic=summary,))
     end
-    full_candidates = [_solver_diagnostic_from_candidate(c; seed_source=seed_source) for c in candidates]
+    full_candidates = [
+        (; _solver_diagnostic_from_candidate(c; seed_source=seed_source)...,
+            selection_reason_source=selection_reason_source,
+        ) for c in candidates
+    ]
     return merge(result, (diagnostic=(; summary..., candidates=full_candidates),))
 end
 

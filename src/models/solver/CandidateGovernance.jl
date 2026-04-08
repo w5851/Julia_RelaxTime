@@ -81,25 +81,27 @@ end
     residual_norm_max::Real=1e-6,
     failed_default::Symbol=:residual_too_large,
 )
-    pressure = Float64(get(candidate, :pressure, -Inf))
-    residual_norm = Float64(get(candidate, :residual_norm, Inf))
-    converged = Bool(get(candidate, :converged, false))
-    hard_ok = if hasproperty(candidate, :hard_constraint_ok)
-        Bool(getproperty(candidate, :hard_constraint_ok))
-    else
-        evaluate_candidate_success(candidate; residual_norm_max=residual_norm_max)
+    hasproperty(candidate, :converged) || throw(ArgumentError("governance candidate missing field :converged"))
+    hasproperty(candidate, :pressure) || throw(ArgumentError("governance candidate missing field :pressure"))
+    hasproperty(candidate, :residual_norm) || throw(ArgumentError("governance candidate missing field :residual_norm"))
+    hasproperty(candidate, :hard_constraint_ok) || throw(ArgumentError("governance candidate missing field :hard_constraint_ok"))
+    hasproperty(candidate, :failed_constraints) || throw(ArgumentError("governance candidate missing field :failed_constraints"))
+
+    pressure = Float64(getproperty(candidate, :pressure))
+    residual_norm = Float64(getproperty(candidate, :residual_norm))
+    converged = Bool(getproperty(candidate, :converged))
+    hard_ok = Bool(getproperty(candidate, :hard_constraint_ok))
+    failed_constraints = Symbol.(getproperty(candidate, :failed_constraints))
+
+    if hard_ok && !isempty(failed_constraints)
+        throw(ArgumentError("governance candidate hard_constraint_ok=true requires empty failed_constraints"))
     end
-    failed_constraints = if hasproperty(candidate, :failed_constraints)
-        Symbol.(getproperty(candidate, :failed_constraints))
-    elseif hard_ok
-        Symbol[]
-    elseif !isfinite(residual_norm) && !converged
-        Symbol[:solver_failed]
-    elseif failed_default == :solver_failed
-        Symbol[:solver_failed]
-    else
-        Symbol[failed_default]
+    if !hard_ok && isempty(failed_constraints)
+        throw(ArgumentError("governance candidate hard_constraint_ok=false requires non-empty failed_constraints"))
     end
+
+    _ = residual_norm_max
+    _ = failed_default
     return (
         converged=converged,
         pressure=(isfinite(pressure) ? pressure : -Inf),
