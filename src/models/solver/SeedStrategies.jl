@@ -246,21 +246,18 @@ end
     ]
 end
 
+@inline function seed_catalog(::FixedMu, θ::AbstractVector)
+    return default_multiseed_candidates_5()
+end
+
 @inline function seed_catalog(mode::ConstraintMode, θ::AbstractVector)
     return [extend_seed(seed, mode) for seed in default_multiseed_candidates_5()]
 end
 
-"""创建多初值策略，默认尝试强子相和夸克相"""
+"""创建多初值策略，默认尝试 catalog 中定义的候选序列"""
 function MultiSeed()
     default_candidates = default_multiseed_candidates_5()
-    candidates = SeedStrategy[
-        DefaultSeed(default_candidates[1], default_candidates[1], :hadron),
-        DefaultSeed(default_candidates[2], default_candidates[2], :hadron),
-        DefaultSeed(default_candidates[3], default_candidates[3], :hadron),
-        DefaultSeed(default_candidates[4], default_candidates[4], :hadron),
-        DefaultSeed(default_candidates[5], default_candidates[5], :hadron),
-        DefaultSeed(default_candidates[6], default_candidates[6], :hadron),
-    ]
+    candidates = SeedStrategy[DefaultSeed(seed, seed, :hadron) for seed in default_candidates]
     return MultiSeed(candidates)
 end
 

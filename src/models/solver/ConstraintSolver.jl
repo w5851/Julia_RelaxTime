@@ -23,6 +23,17 @@ end
 @inline _to_chiral_triplet(x_state) = SVector{3}(x_state[1], x_state[2], x_state[3])
 @inline _mass_from_state(model::AbstractQCDModel, x_state) = calculate_mass_vec(model, _to_chiral_triplet(x_state))
 
+@inline function _model_kind_for_shared_core(model::AbstractQCDModel)
+    if model isa RPNJLModel
+        return :RPNJL
+    elseif model isa NJL2Model
+        return :NJL2
+    elseif model isa AbstractNJLModel
+        return :NJL
+    end
+    return :PNJL
+end
+
 @inline function _gap_norm_from_state(
     model::AbstractQCDModel,
     x_state::AbstractVector,
@@ -32,21 +43,13 @@ end
     p_num::Int,
     t_num::Int,
 )
-    model_kind = if model isa RPNJLModel
-        :RPNJL
-    elseif model isa NJL2Model
-        :NJL2
-    elseif model isa AbstractNJLModel
-        :NJL
-    else
-        :PNJL
-    end
     params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num), Float64(xi);
         p_num=p_num,
         t_num=t_num,
-        model_kind=model_kind,
+        model_kind=_model_kind_for_shared_core(model),
     )
-    out = zeros(promote_type(eltype(x_state), eltype(mu_vec), Float64), length(x_state))
+    Tout = promote_type(eltype(x_state), eltype(mu_vec), Float64)
+    out = Vector{Tout}(undef, length(x_state))
     gap_core_residual!(out, model, x_state, mu_vec, params)
     return sqrt(sum(abs2, out))
 end
