@@ -78,3 +78,23 @@
 - [ ] 残差主路径被明确且在主要调用链唯一化。
 - [ ] 关键 unit/regression 通过，且无不可解释漂移。
 - [ ] 代码审计可证明“并行 seed/residual 通道数量下降”，并附删除路径清单。
+
+## 8. 进展记录（2026-04-08）
+
+- [x] D1.1 已完成：新增 `SeedStrategies.default_multiseed_candidates_5()` 作为默认 5 维候选单一来源。
+- [x] D1.2 已完成：`GapSolver.solve_gap(::AbstractPNJLModel, ...)` 多种子路径改为消费 `default_multiseed_candidates_5()`。
+- [x] D1.3 已完成：删除 `GapSolver` 中 `_HADRON_SEED_5` 等重复常量与 `_PNJL_MULTI_SEEDS`。
+- [x] 4.1 seed catalog 已落地（当前为 `default_multiseed_candidates_5()` 命名）。
+- [x] 4.1 GapSolver 多种子分支已切换到 catalog。
+- [x] 4.1 增加守护测试：`tests/unit/pnjl/test_solver_seed_strategies.jl` 新增 `Seed SoT guard`，覆盖
+  - catalog 合约
+  - `GapSolver` 不再持有默认种子常量副本。
+- [ ] 4.1 `WeightedFallback` 显式改用 catalog（当前通过 `MultiSeed()` 间接复用，后续可做显式收敛）。
+- [ ] D2 Residual Spine 尚未开始。
+
+### 本轮验证
+
+- [x] `julia --project=. -e 'include("tests/unit/pnjl/test_solver_seed_strategies.jl")'`
+- [x] `julia --project=. -e 'include("tests/unit/models/test_gap_solver.jl")'`
+- [x] `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`
+- [x] `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl"; include("tests/regression/runtests.jl")'`

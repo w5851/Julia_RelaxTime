@@ -28,6 +28,7 @@ export get_seed, update!, extend_seed
 export HADRON_SEED_5, QUARK_SEED_5, HADRON_SEED_8, QUARK_SEED_8
 export MEDIUM_SEED_5, HIGH_DENSITY_SEED_5, HIGH_TEMP_SEED_5, VERY_HIGH_TEMP_SEED_5
 export MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
+export default_multiseed_candidates_5
 
 # ============================================================================
 # 内置默认种子值（基于 trho_seed_table.csv 数据分析，xi=0.0）
@@ -234,17 +235,27 @@ struct MultiSeed <: SeedStrategy
     candidates::Vector{SeedStrategy}
 end
 
+@inline function default_multiseed_candidates_5()
+    return [
+        copy(HADRON_SEED_5),
+        copy(HIGH_TEMP_SEED_5),
+        copy(WEAK_CHIRAL_CONF_SEED_5),
+        copy(HT_GUESS_0p8_SEED_5),
+        copy(HT_GUESS_0p9_SEED_5),
+        copy(HT_GUESS_0p95_SEED_5),
+    ]
+end
+
 """创建多初值策略，默认尝试强子相和夸克相"""
 function MultiSeed()
-    candidates = [
-        DefaultSeed(phase_hint=:hadron),
-        DefaultSeed(phase_hint=:quark),
-        # 更偏禁闭：Φ 很小，但凝聚较弱（用于避免卡到坏分支）
-        DefaultSeed(copy(WEAK_CHIRAL_CONF_SEED_5), copy(WEAK_CHIRAL_CONF_SEED_5), :hadron),
-        # 人工高温候选：凝聚幅度更小、Polyakov loop 更高
-        DefaultSeed(copy(HT_GUESS_0p8_SEED_5), copy(HT_GUESS_0p8_SEED_5), :hadron),
-        DefaultSeed(copy(HT_GUESS_0p9_SEED_5), copy(HT_GUESS_0p9_SEED_5), :hadron),
-        DefaultSeed(copy(HT_GUESS_0p95_SEED_5), copy(HT_GUESS_0p95_SEED_5), :hadron),
+    default_candidates = default_multiseed_candidates_5()
+    candidates = SeedStrategy[
+        DefaultSeed(default_candidates[1], default_candidates[1], :hadron),
+        DefaultSeed(default_candidates[2], default_candidates[2], :hadron),
+        DefaultSeed(default_candidates[3], default_candidates[3], :hadron),
+        DefaultSeed(default_candidates[4], default_candidates[4], :hadron),
+        DefaultSeed(default_candidates[5], default_candidates[5], :hadron),
+        DefaultSeed(default_candidates[6], default_candidates[6], :hadron),
     ]
     return MultiSeed(candidates)
 end
@@ -313,4 +324,3 @@ Base.show(io::IO, s::MultiSeed) = print(io, "MultiSeed($(length(s.candidates)) c
 Base.show(io::IO, s::HybridContinuitySeed) = print(io, "HybridContinuitySeed(prev=$(s.previous_solution !== nothing))")
 
 end # module SeedStrategies
-
