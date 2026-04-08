@@ -349,12 +349,6 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         _ = solve_once(selected_method, copy(x0))
     end
     picked = cache[selected_method]
-    selected_quality = governance_quality_tag((;
-        converged=Bool(picked.converged),
-        residual_norm=Float64(picked.residual_norm),
-        hard_constraint_ok=Bool(picked.converged),
-    ); residual_norm_max=residual_norm_max, require_converged=true)
-
     return (
         converged=picked.converged,
         solution=picked.solution,
@@ -370,7 +364,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         residual_norm=picked.residual_norm,
         fixedrho_joint_solve_active=true,
         fixedrho_joint_selected_method=selected_method,
-        fixedrho_joint_selected_quality=selected_quality,
+        fixedrho_joint_selected_quality=selected_attempt.quality_tag,
         fixedrho_joint_fallback_used=(selected_attempt.quality_tag == :fallback),
     )
 end

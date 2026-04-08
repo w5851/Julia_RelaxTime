@@ -145,12 +145,8 @@ end
         throw(ArgumentError("governance candidate hard_constraint_ok=false requires non-empty failed_constraints"))
     end
 
-    score = if hasproperty(candidate, :selection_score)
-        value = Float64(getproperty(candidate, :selection_score))
-        isfinite(value) ? value : NaN
-    else
-        NaN
-    end
+    score = _candidate_selection_score(candidate)
+    isfinite(score) || (score = NaN)
 
     return (
         converged=converged,
@@ -163,7 +159,7 @@ end
     )
 end
 
-function normalize_selector_candidates(candidates::AbstractVector;
+function normalize_selector_candidates(candidates::AbstractVector{<:NamedTuple};
     residual_norm_max::Real=1e-6,
     require_converged::Bool=true,
 )
@@ -191,7 +187,7 @@ function normalize_selector_candidates(candidates::AbstractVector;
     return normalized
 end
 
-function execute_governance_selector(candidates::AbstractVector;
+function execute_governance_selector(candidates::AbstractVector{<:NamedTuple};
     selector::Function=select_pressure_max_candidate,
     residual_norm_max::Real=1e-6,
     require_converged::Bool=true,
