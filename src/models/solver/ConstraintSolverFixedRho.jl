@@ -67,7 +67,7 @@ function _solve_constraint_fixedrho(
         energy_ref[] = thermo.energy
         masses_ref[] = thermo.masses
 
-        F[1] = convert(eltype(F), rho_norm - rho_target)
+        F[1] = convert(eltype(F), thermo.rho_norm - rho_target)
         return nothing
     end
 

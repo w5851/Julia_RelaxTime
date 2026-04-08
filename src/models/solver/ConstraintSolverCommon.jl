@@ -480,8 +480,15 @@ function _compute_mode_thermo_quantities(
     )
 end
 
-@inline _residual_component_value(v::Real) = abs(Float64(v))
-@inline _residual_component_value(v::Tuple{<:Real, <:Real}) = abs(Float64(v[1]) - Float64(v[2]))
+@inline function _residual_component_value(v::Real)
+    value = abs(Float64(v))
+    return isfinite(value) ? value : Inf
+end
+
+@inline function _residual_component_value(v::Tuple{<:Real, <:Real})
+    value = abs(Float64(v[1]) - Float64(v[2]))
+    return isfinite(value) ? value : Inf
+end
 
 function _compose_mode_residual_norm(
     model::AbstractQCDModel,

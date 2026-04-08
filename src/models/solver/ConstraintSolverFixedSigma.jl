@@ -90,7 +90,7 @@ function _solve_constraint_fixedsigma(
     sigma_ratio = if isfinite(n_B_ref) && abs(n_B_ref) > 1e-12
         entropy_ref[] / n_B_ref
     else
-        NaN
+        Inf
     end
     residual_norm = _compose_mode_residual_norm(
         model,
