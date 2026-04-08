@@ -71,6 +71,9 @@ export HardRule, CandidateSelector, build_candidate_context
 export evaluate_candidate_success, normalize_governance_candidate, build_seed_pool
 export classify_attempt_error, normalize_error_message
 export governance_quality_tag, normalize_selector_candidates, execute_governance_selector
+export build_governance_candidate
+export SolverDiagnosticSummary, SolverDiagnosticCandidate, SolverDiagnosticFull
+export to_namedtuple
 export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view
@@ -175,6 +178,8 @@ include(joinpath(@__DIR__, "solver", "SchemaAdapter.jl"))
 include(joinpath(@__DIR__, "solver", "PrimaryStrategy.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
 include(joinpath(@__DIR__, "solver", "SolverDiagnostics.jl"))
+include(joinpath(@__DIR__, "solver", "SolverDiagnosticsTypes.jl"))
+include(joinpath(@__DIR__, "solver", "SolverRuntimeConfig.jl"))
 include(joinpath(@__DIR__, "solver", "ProblemSpecOrchestrator.jl"))
 include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
 include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))

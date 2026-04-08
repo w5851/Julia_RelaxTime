@@ -130,6 +130,49 @@ end
         hard_constraint_ok=true,
         governed_attempt_origin=:method_rescue,
     ); residual_norm_max=1e-6) == :fallback
+
+    built = Models.build_governance_candidate((;
+        converged=true,
+        pressure=8.0,
+        residual_norm=1e-8,
+        solution=[1.0, 2.0],
+        x_state=[1.0, 2.0, 3.0, 0.5, 0.5],
+        mu_vec=[0.1, 0.1, 0.1],
+        omega=-8.0,
+        rho_norm=0.5,
+        entropy=0.2,
+        energy=1.0,
+        masses=[0.3, 0.3, 0.5],
+        iterations=1,
+    );
+        hard_constraint_ok=true,
+        failed_constraints=Symbol[],
+        seed_index=5,
+        residual_norm_max=1e-6,
+    )
+    @test built.seed_index == 5
+    @test built.quality_tag == :good
+
+    selector_checked = Models.execute_governance_selector([
+        (
+            converged=true,
+            pressure=1.0,
+            residual_norm=1e-9,
+            hard_constraint_ok=true,
+            failed_constraints=Symbol[],
+        ),
+    ]; selector=cands -> begin
+        c = cands[1]
+        @test hasproperty(c, :seed_index)
+        @test hasproperty(c, :selection_score)
+        @test hasproperty(c, :quality_tag)
+        return (
+            selected_index=1,
+            selected_candidate=c,
+            selection_reason=:pressure_max_under_constraints,
+        )
+    end)
+    @test selector_checked.selected_index == 1
 end
 
 @testset "candidate governance contract" begin

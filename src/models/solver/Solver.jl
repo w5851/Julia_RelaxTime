@@ -444,7 +444,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             phys_ok = thermo_finite && is_physical_solution(raw.x_state, raw.masses)
             residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= opts.residual_norm_max
             ok = (Bool(raw.converged) || (residual_ok && phys_ok))
-            candidate = (
+            raw_candidate = (
                 converged=ok,
                 solution=Float64.(raw.solution),
                 x_state=raw.x_state,
@@ -459,25 +459,19 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm=Float64(raw.residual_norm),
                 hard_constraint_ok=ok,
                 failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
-                seed_index=Int(seed_index),
             )
-            normalized = normalize_governance_candidate(candidate;
+            merged = build_governance_candidate(raw_candidate;
+                hard_constraint_ok=ok,
+                failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
                 seed_index=Int(seed_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
+                residual_norm_max=opts.residual_norm_max,
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,
         on_error=(_, seed_index, err) -> begin
             err_kind = classify_attempt_error(err)
             err_msg = normalize_error_message(err)
-            candidate = (
+            raw_candidate = (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -492,20 +486,14 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm=Inf,
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
+            )
+            merged = build_governance_candidate(raw_candidate;
+                hard_constraint_ok=false,
+                failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
+                residual_norm_max=opts.residual_norm_max,
                 error_kind=err_kind,
                 error_msg=err_msg,
-            )
-            normalized = normalize_governance_candidate(candidate;
-                seed_index=Int(seed_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,

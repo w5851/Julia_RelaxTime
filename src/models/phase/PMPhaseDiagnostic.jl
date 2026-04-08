@@ -24,9 +24,25 @@ const PM_FATAL_ENDPOINT_CAUSES = (:max_iter, :nan_guard, :nonconvergence, :hard_
 end
 
 @inline function _pm_extract_solver_diagnostic(result; seed_source::Union{Symbol,Nothing}=nothing)
+    _diag_view(diag) = if diag isa NamedTuple
+        diag
+    elseif applicable(to_namedtuple, diag)
+        to_namedtuple(diag)
+    else
+        (
+            attempt_origin=(hasproperty(diag, :attempt_origin) ? Symbol(getproperty(diag, :attempt_origin)) : :fallback),
+            seed_source=(hasproperty(diag, :seed_source) ? getproperty(diag, :seed_source) : nothing),
+            hard_constraint_ok=(hasproperty(diag, :hard_constraint_ok) ? getproperty(diag, :hard_constraint_ok) : nothing),
+            failed_constraints=(hasproperty(diag, :failed_constraints) ? Symbol.(getproperty(diag, :failed_constraints)) : Symbol[]),
+            selection_reason=(hasproperty(diag, :selection_reason) ? Symbol(getproperty(diag, :selection_reason)) : :none),
+            endpoint_cause=(hasproperty(diag, :endpoint_cause) ? getproperty(diag, :endpoint_cause) : :nonconvergence),
+            continuity_distance=(hasproperty(diag, :continuity_distance) ? getproperty(diag, :continuity_distance) : nothing),
+        )
+    end
+
     if hasproperty(result, :diagnostic)
-        diag = getproperty(result, :diagnostic)
-        if hasproperty(diag, :seed_source)
+        diag = _diag_view(getproperty(result, :diagnostic))
+        if haskey(diag, :seed_source)
             return diag
         end
         return merge(diag, (seed_source=seed_source,))
@@ -55,6 +71,7 @@ end
 end
 
 @inline function _pm_infer_phase_status(diag)::Symbol
+    diag = diag isa NamedTuple ? diag : (applicable(to_namedtuple, diag) ? to_namedtuple(diag) : diag)
     hard_ok = get(diag, :hard_constraint_ok, nothing)
     failed = Symbol.(get(diag, :failed_constraints, Symbol[]))
     endpoint = get(diag, :endpoint_cause, nothing)

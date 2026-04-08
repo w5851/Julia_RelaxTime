@@ -4,6 +4,16 @@
 
 const HardRule = Function
 const CandidateSelector = Function
+const SELECTOR_INPUT_REQUIRED_FIELDS = (
+    :converged,
+    :pressure,
+    :residual_norm,
+    :hard_constraint_ok,
+    :failed_constraints,
+    :seed_index,
+    :selection_score,
+    :quality_tag,
+)
 
 @inline function _candidate_seed_index(candidate, fallback::Int)::Int
     return hasproperty(candidate, :seed_index) ? Int(getproperty(candidate, :seed_index)) : fallback
@@ -159,6 +169,50 @@ end
     )
 end
 
+@inline function build_governance_candidate(
+    raw_candidate;
+    hard_constraint_ok::Bool,
+    failed_constraints,
+    seed_index::Int,
+    residual_norm_max::Real=1e-6,
+    error_kind::Symbol=:none,
+    error_msg::AbstractString="",
+)
+    candidate = (
+        ; raw_candidate...,
+        hard_constraint_ok=hard_constraint_ok,
+        failed_constraints=Symbol.(failed_constraints),
+    )
+    normalized = normalize_governance_candidate(candidate; seed_index=seed_index)
+    quality_tag = governance_quality_tag((; candidate...,
+        converged=normalized.converged,
+        residual_norm=normalized.residual_norm,
+        hard_constraint_ok=normalized.hard_constraint_ok,
+    ); residual_norm_max=residual_norm_max)
+    return (
+        ; candidate...,
+        converged=normalized.converged,
+        pressure=normalized.pressure,
+        residual_norm=normalized.residual_norm,
+        hard_constraint_ok=normalized.hard_constraint_ok,
+        failed_constraints=normalized.failed_constraints,
+        seed_index=normalized.seed_index,
+        selection_score=normalized.selection_score,
+        quality_tag=quality_tag,
+        error_kind=error_kind,
+        error_msg=String(error_msg),
+    )
+end
+
+@inline function _ensure_selector_input_contract(candidate, index::Int)
+    for field in SELECTOR_INPUT_REQUIRED_FIELDS
+        hasproperty(candidate, field) || throw(ArgumentError(
+            "selector input candidate #$(index) missing required field :$(field)"
+        ))
+    end
+    return nothing
+end
+
 function normalize_selector_candidates(candidates::AbstractVector{<:NamedTuple};
     residual_norm_max::Real=1e-6,
     require_converged::Bool=true,
@@ -196,10 +250,14 @@ function execute_governance_selector(candidates::AbstractVector{<:NamedTuple};
         residual_norm_max=residual_norm_max,
         require_converged=require_converged,
     )
+    for (idx, candidate) in enumerate(normalized)
+        _ensure_selector_input_contract(candidate, idx)
+    end
     selected = selector(normalized)
     hasproperty(selected, :selected_index) || throw(ArgumentError("selector must return field :selected_index"))
     hasproperty(selected, :selected_candidate) || throw(ArgumentError("selector must return field :selected_candidate"))
     hasproperty(selected, :selection_reason) || throw(ArgumentError("selector must return field :selection_reason"))
+    _ensure_selector_input_contract(getproperty(selected, :selected_candidate), Int(getproperty(selected, :selected_index)))
     return (; selected..., normalized_candidates=normalized)
 end
 

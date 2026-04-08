@@ -237,6 +237,106 @@ Models.pnjl_module()
         @test result.residual_norm >= 0.0 || isinf(result.residual_norm)
     end
 
+    @testset "ThermoPostprocess unified helpers are available" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed5 = copy(Models.pnjl_module().HADRON_SEED_5)
+        solution = Float64[seed5..., 0.0, 0.0, 0.0]
+
+        thermo = Models.compute_thermo_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=0.0,
+            p_num=8,
+            t_num=4,
+            rho0_scale=Models.pnjl_module().ρ0,
+        )
+        residual_norm = Models.compute_residual_norm_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=0.0,
+            p_num=8,
+            t_num=4,
+        )
+        candidate = Models.build_solver_candidate(
+            solution,
+            thermo,
+            residual_norm;
+            converged=true,
+            iterations=1,
+            residual_norm_max=1e-6,
+        )
+
+        @test isfinite(thermo.pressure)
+        @test isfinite(residual_norm)
+        @test candidate.solution == solution
+        @test candidate.iterations == 1
+    end
+
+    @testset "SolverRuntimeConfig typed parsers for FixedRho/FixedEntropy" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        rho_mode = Models.FixedRho(1.0)
+        rho_kwargs = Dict{Symbol,Any}(
+            :seed_guess => seed,
+            :residual_norm_max => 1e-6,
+        )
+        rho_cfg = Models._fixedrho_runtime_config_from_kwargs(rho_mode, rho_kwargs)
+        @test rho_cfg isa Models.FixedRhoRuntimeConfig
+        @test rho_cfg.fixedrho_joint_solve === true
+        @test rho_cfg.seed_guess == Float64.(seed)
+
+        entropy_mode = Models.FixedEntropy(0.5)
+        entropy_kwargs = Dict{Symbol,Any}(
+            :seed_guess => seed,
+            :residual_norm_max => 1e-6,
+            :rho0 => Models.pnjl_module().ρ0,
+        )
+        entropy_cfg = Models._fixedentropy_runtime_config_from_kwargs(entropy_mode, entropy_kwargs)
+        @test entropy_cfg isa Models.FixedEntropyRuntimeConfig
+        @test entropy_cfg.seed_guess == Float64.(seed)
+        @test entropy_cfg.primary_method == :trust_region
+
+        @test_throws ArgumentError Models._fixedrho_runtime_config_from_kwargs(
+            rho_mode,
+            Dict{Symbol,Any}(:seed_guess => seed, :fixedrho_joint_solve => "bad"),
+        )
+        @test_throws ArgumentError Models._fixedentropy_runtime_config_from_kwargs(
+            entropy_mode,
+            Dict{Symbol,Any}(),
+        )
+    end
+
+    @testset "SolverDiagnostics typed structures map to legacy NamedTuple" begin
+        summary = Models.SolverDiagnosticSummary(
+            :primary,
+            :seed,
+            true,
+            Symbol[],
+            :none,
+            "",
+            :pressure_max_under_constraints,
+            :converged,
+            nothing,
+            :problem_spec_selector,
+        )
+        candidate = Models.SolverDiagnosticCandidate(summary)
+        full = Models.SolverDiagnosticFull(summary, [candidate])
+
+        summary_nt = Models.to_namedtuple(summary)
+        candidate_nt = Models.to_namedtuple(candidate)
+        full_nt = Models.to_namedtuple(full)
+
+        @test summary_nt.selection_reason == :pressure_max_under_constraints
+        @test candidate_nt.error_kind == :none
+        @test full_nt.selection_reason_source == :problem_spec_selector
+        @test length(full_nt.candidates) == 1
+    end
+
     @testset "FixedEntropy default/bridge semantic parity (single point)" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedEntropy(0.5)
