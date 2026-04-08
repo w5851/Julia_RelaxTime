@@ -47,26 +47,25 @@ function _solve_constraint_fixedrho(
         end
 
         x_state = _to_state_svec(st)
-        pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-
-        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-        rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
-        rho_norm = sum(rho_vec) / (3.0 * rho0)
-
-        pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-        entropy = ForwardDiff.derivative(pressure_T, T_fm)
-
-        energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = _mass_from_state(model, x_state)
+        thermo = _compute_mode_thermo_quantities(
+            model,
+            x_state,
+            T_fm,
+            μ_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            rho0_scale=rho0,
+        )
 
         st_ref[] = st
         x_state_ref[] = x_state
         mu_vec_ref[] = _to_mu_svec(μ_vec)
-        pressure_ref[] = pressure
-        rho_norm_ref[] = rho_norm
-        entropy_ref[] = entropy
-        energy_ref[] = energy
-        masses_ref[] = masses
+        pressure_ref[] = thermo.pressure
+        rho_norm_ref[] = thermo.rho_norm
+        entropy_ref[] = thermo.entropy
+        energy_ref[] = thermo.energy
+        masses_ref[] = thermo.masses
 
         F[1] = convert(eltype(F), rho_norm - rho_target)
         return nothing
@@ -75,13 +74,10 @@ function _solve_constraint_fixedrho(
     function run_outer_attempt(mu_init::Real, method::Symbol)
         local res
         try
-            res = nlsolve(
+            res = _run_outer_nlsolve(
                 residual_fn!,
-                [Float64(mu_init)];
-                autodiff=:forward,
-                method=method,
-                xtol=1e-9,
-                ftol=1e-9,
+                [mu_init];
+                nlsolve_method=method,
                 nlsolve_kwargs...,
             )
         catch err
@@ -89,38 +85,39 @@ function _solve_constraint_fixedrho(
             return nothing
         end
 
-        _refresh_constraint_state!(residual_fn!, res.zero)
-
-        if st_ref[] === nothing || x_state_ref[] === nothing || mu_vec_ref[] === nothing ||
-           pressure_ref[] === nothing || rho_norm_ref[] === nothing || entropy_ref[] === nothing ||
-           energy_ref[] === nothing || masses_ref[] === nothing
+        if !_mode_outer_state_ready(st_ref, x_state_ref, mu_vec_ref, pressure_ref, rho_norm_ref, entropy_ref, energy_ref, masses_ref)
             return nothing
         end
 
-        gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
-        rho_residual = abs(rho_norm_ref[] - rho_target)
-        residual_norm = max(gap_norm, rho_residual)
+        residual_norm = _compose_mode_residual_norm(
+            model,
+            x_state_ref[],
+            mu_vec_ref[],
+            T_fm,
+            (rho_norm_ref[], rho_target);
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
         omega_val = -pressure_ref[]
         thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
         phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
         converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= Float64(residual_norm_max)
 
-        return (
-            mode=method,
-            converged=converged,
-            solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
-            x_state=x_state_ref[],
-            mu_vec=mu_vec_ref[],
-            omega=omega_val,
-            pressure=pressure_ref[],
-            rho_norm=rho_norm_ref[],
-            entropy=entropy_ref[],
-            energy=energy_ref[],
-            masses=masses_ref[],
+        base = _build_mode_result_from_outer_state(
+            x_state_ref[],
+            mu_vec_ref[],
+            pressure_ref[],
+            rho_norm_ref[],
+            entropy_ref[],
+            energy_ref[],
+            masses_ref[],
+            residual_norm;
             iterations=res.iterations,
-            residual_norm=residual_norm,
+            converged=converged,
         )
+        return (; base..., mode=method)
     end
 
     function evaluate_mu_candidate(mu_eval::Real)
@@ -141,39 +138,56 @@ function _solve_constraint_fixedrho(
         st === nothing && return nothing
 
         x_state = _to_state_svec(st)
-        pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-        rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
-        rho_norm = sum(rho_vec) / (3.0 * rho0)
-        pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-        entropy = ForwardDiff.derivative(pressure_T, T_fm)
-        energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = _mass_from_state(model, x_state)
+        thermo = _compute_mode_thermo_quantities(
+            model,
+            x_state,
+            T_fm,
+            μ_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            rho0_scale=rho0,
+        )
 
-        gap_norm = _gap_norm_from_state(model, x_state, μ_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
-        rho_residual = abs(rho_norm - rho_target)
-        residual_norm = max(gap_norm, rho_residual)
+        residual_norm = _compose_mode_residual_norm(
+            model,
+            x_state,
+            μ_vec,
+            T_fm,
+            (thermo.rho_norm, rho_target);
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
-        omega_val = -pressure
-        thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
-        phys = physicality_check(x_state, masses) && thermo_finite
+        thermo_finite = isfinite(thermo.omega) && isfinite(thermo.pressure) && isfinite(thermo.rho_norm) && isfinite(thermo.entropy) && isfinite(thermo.energy)
+        phys = physicality_check(x_state, thermo.masses) && thermo_finite
         converged = phys && isfinite(residual_norm) && residual_norm <= Float64(residual_norm_max)
 
-        return (
-            mode=:direct_mu,
-            converged=converged,
-            solution=_pack_solution(x_state, μ_vec),
-            x_state=x_state,
-            mu_vec=_to_mu_svec(μ_vec),
-            omega=omega_val,
-            pressure=pressure,
-            rho_norm=rho_norm,
-            entropy=entropy,
-            energy=energy,
-            masses=masses,
+        base = _build_mode_result_from_outer_state(
+            x_state,
+            _to_mu_svec(μ_vec),
+            thermo.pressure,
+            thermo.rho_norm,
+            thermo.entropy,
+            thermo.energy,
+            thermo.masses,
+            residual_norm;
             iterations=0,
-            residual_norm=residual_norm,
+            converged=converged,
         )
+        return (; base..., mode=:direct_mu)
+    end
+
+    @inline function prefer_candidate(cand, incumbent)
+        if incumbent === nothing
+            return true
+        end
+        if cand.converged != incumbent.converged
+            return cand.converged
+        end
+        return cand.residual_norm < incumbent.residual_norm ||
+               (cand.residual_norm == incumbent.residual_norm && cand.pressure > incumbent.pressure)
     end
 
     mu_seed = default_mu0_from_seed(seed_guess)
@@ -183,16 +197,8 @@ function _solve_constraint_fixedrho(
     for (mu_init, method) in attempt_specs
         cand = run_outer_attempt(mu_init, method)
         cand === nothing && continue
-        if best === nothing
+        if prefer_candidate(cand, best)
             best = cand
-            continue
-        end
-        if cand.converged && !best.converged
-            best = cand
-        elseif cand.converged == best.converged
-            if cand.residual_norm < best.residual_norm || (cand.residual_norm == best.residual_norm && cand.pressure > best.pressure)
-                best = cand
-            end
         end
     end
 
@@ -209,14 +215,8 @@ function _solve_constraint_fixedrho(
 
         if !isempty(grid_candidates)
             for cand in grid_candidates
-                if best === nothing
+                if prefer_candidate(cand, best)
                     best = cand
-                elseif cand.converged && !best.converged
-                    best = cand
-                elseif cand.converged == best.converged
-                    if cand.residual_norm < best.residual_norm || (cand.residual_norm == best.residual_norm && cand.pressure > best.pressure)
-                        best = cand
-                    end
                 end
             end
 
@@ -245,14 +245,8 @@ function _solve_constraint_fixedrho(
                     cmid = evaluate_mu_candidate(mid)
                     cmid === nothing && break
 
-                    if best === nothing
+                    if prefer_candidate(cmid, best)
                         best = cmid
-                    elseif cmid.converged && !best.converged
-                        best = cmid
-                    elseif cmid.converged == best.converged
-                        if cmid.residual_norm < best.residual_norm || (cmid.residual_norm == best.residual_norm && cmid.pressure > best.pressure)
-                            best = cmid
-                        end
                     end
 
                     f_mid = cmid.rho_norm - rho_target

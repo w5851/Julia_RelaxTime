@@ -52,17 +52,17 @@ function _solve_constraint_fixedasymrho(
         end
 
         x_state = _to_state_svec(st)
-        pressure = -omega(model, x_state, T_fm, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-
-        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-        rho_vec = ForwardDiff.gradient(pressure_mu, μ_vec)
-        rho_norm = sum(rho_vec) / (3.0 * rho0)
-
-        pressure_T = τ -> -omega(model, x_state, τ, μ_vec; p_num=p_num, t_num=t_num, xi=xi)
-        entropy = ForwardDiff.derivative(pressure_T, T_fm)
-
-        energy = -pressure + sum(μ_vec .* rho_vec) + T_fm * entropy
-        masses = _mass_from_state(model, x_state)
+        thermo = _compute_mode_thermo_quantities(
+            model,
+            x_state,
+            T_fm,
+            μ_vec;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            rho0_scale=rho0,
+        )
+        rho_vec = thermo.rho_vec
 
         rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
         nB = sum(rho_vec) / (3.0 * rho0)
@@ -75,11 +75,11 @@ function _solve_constraint_fixedasymrho(
         st_ref[] = st
         x_state_ref[] = x_state
         mu_vec_ref[] = μ_vec
-        pressure_ref[] = pressure
-        rho_norm_ref[] = rho_norm
-        entropy_ref[] = entropy
-        energy_ref[] = energy
-        masses_ref[] = masses
+        pressure_ref[] = thermo.pressure
+        rho_norm_ref[] = thermo.rho_norm
+        entropy_ref[] = thermo.entropy
+        energy_ref[] = thermo.energy
+        masses_ref[] = thermo.masses
         rho_vec_ref[] = _to_mu_svec(rho_vec)
 
         F[1] = convert(eltype(F), nB - rho_target)
@@ -88,19 +88,13 @@ function _solve_constraint_fixedasymrho(
         return nothing
     end
 
-    res = nlsolve(
+    res = _run_outer_nlsolve(
         residual_fn!,
-        Float64.(mu0);
-        autodiff=:forward,
-        method=nlsolve_method,
-        xtol=1e-9,
-        ftol=1e-9,
+        mu0;
+        nlsolve_method=nlsolve_method,
         nlsolve_kwargs...,
     )
 
-    _refresh_constraint_state!(residual_fn!, res.zero)
-
-    gap_norm = _gap_norm_from_state(model, x_state_ref[], mu_vec_ref[], T_fm; xi=xi, p_num=p_num, t_num=t_num)
     rho_u, rho_d, rho_s = rho_vec_ref[][1], rho_vec_ref[][2], rho_vec_ref[][3]
     nB = sum(rho_vec_ref[]) / (3.0 * rho0)
     ud_ratio = if abs(rho_d) > 1e-12
@@ -108,10 +102,18 @@ function _solve_constraint_fixedasymrho(
     else
         rho_u / (rho_d >= 0 ? 1e-12 : -1e-12)
     end
-    nB_residual = abs(nB - rho_target)
-    ud_residual = abs(ud_ratio - ud_ratio_target)
-    s_residual = abs(rho_s - s_target)
-    residual_norm = max(gap_norm, nB_residual, ud_residual, s_residual)
+    residual_norm = _compose_mode_residual_norm(
+        model,
+        x_state_ref[],
+        mu_vec_ref[],
+        T_fm,
+        (nB, rho_target),
+        (ud_ratio, ud_ratio_target),
+        (rho_s, s_target);
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
 
     omega_val = -pressure_ref[]
     thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
@@ -123,19 +125,17 @@ function _solve_constraint_fixedasymrho(
     end
 
     _ = allow_legacy_fallback
-    return (
-        converged=converged,
-        solution=_pack_solution(x_state_ref[], mu_vec_ref[]),
-        x_state=x_state_ref[],
-        mu_vec=mu_vec_ref[],
-        omega=omega_val,
-        pressure=pressure_ref[],
-        rho_norm=rho_norm_ref[],
-        entropy=entropy_ref[],
-        energy=energy_ref[],
-        masses=masses_ref[],
+    return _build_mode_result_from_outer_state(
+        x_state_ref[],
+        mu_vec_ref[],
+        pressure_ref[],
+        rho_norm_ref[],
+        entropy_ref[],
+        energy_ref[],
+        masses_ref[],
+        residual_norm;
         iterations=res.iterations,
-        residual_norm=residual_norm,
+        converged=converged,
         legacy_fallback_used=false,
     )
 end
