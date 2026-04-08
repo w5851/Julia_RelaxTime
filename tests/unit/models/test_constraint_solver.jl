@@ -66,6 +66,44 @@ Models.pnjl_module()
         @test all(isnan, fixedmu_empty.solution)
     end
 
+    @testset "mode kernel shared helpers" begin
+        m = Models.create_model(:NJL)
+        T = 0.5
+        seed = Float64.(Models.gap_initial_guess(m, T, SVector{3}(0.0, 0.0, 0.0)))
+        solved = Models.solve_constraint(m, Models.FixedMu(), T; μ_fm=0.0, seed_guess=seed, p_num=24, t_num=6)
+
+        thermo = Models._compute_mode_thermo_quantities(
+            m,
+            solved.x_state,
+            T,
+            solved.mu_vec;
+            xi=0.0,
+            p_num=24,
+            t_num=6,
+            rho0_scale=nothing,
+        )
+
+        @test isfinite(thermo.pressure)
+        @test isfinite(thermo.rho_norm)
+        @test isfinite(thermo.entropy)
+        @test isfinite(thermo.energy)
+        @test all(isfinite, thermo.masses)
+
+        combined = Models._compose_mode_residual_norm(
+            m,
+            solved.x_state,
+            solved.mu_vec,
+            T,
+            (thermo.rho_norm, solved.rho_norm),
+            (thermo.entropy, solved.entropy);
+            xi=0.0,
+            p_num=24,
+            t_num=6,
+        )
+        @test isfinite(combined)
+        @test combined >= 0.0
+    end
+
     @testset "solve_constraint(FixedMu) NJL" begin
         m = Models.create_model(:NJL)
         T = 0.5
@@ -116,6 +154,41 @@ Models.pnjl_module()
         @test result.rho_norm ≈ 0.2 atol=1e-3
     end
 
+    @testset "multi-mode output contract keeps converged/iterations/residual_norm semantics" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / Main.Constants_PNJL.ħc_MeV_fm
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        modes = (
+            Models.FixedRho(0.2),
+            Models.FixedEntropy(0.5),
+            Models.FixedSigma(10.0),
+            Models.FixedAsymmetricRho(0.05, 1.0, 0.0),
+        )
+
+        for mode in modes
+            result = Models.solve_constraint(
+                model,
+                mode,
+                T_fm;
+                seed_guess=seed,
+                rho0=0.16,
+                p_num=8,
+                t_num=4,
+                residual_norm_max=1e-6,
+                iterations=120,
+            )
+
+            @test haskey(result, :converged)
+            @test haskey(result, :iterations)
+            @test haskey(result, :residual_norm)
+            @test result.converged isa Bool
+            @test result.iterations isa Integer
+            @test isfinite(result.residual_norm) || isinf(result.residual_norm)
+            @test result.residual_norm >= 0.0 || isinf(result.residual_norm)
+        end
+    end
+
     @testset "legacy fixed-* APIs removed" begin
         @test !isdefined(Models, :solve_fixedmu_constraint)
         @test !isdefined(Models, :solve_fixedrho_constraint)
@@ -160,7 +233,7 @@ Models.pnjl_module()
     end
 
     @testset "residual spine guard" begin
-        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolver.jl")
+        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolverCommon.jl")
         source = read(solver_path, String)
         @test occursin("_gap_norm_from_state", source)
         @test !occursin("gap_residual(model", source)

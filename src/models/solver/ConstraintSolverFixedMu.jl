@@ -76,12 +76,12 @@ function _solve_constraint_fixedmu(
                 end
             end
 
-            raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
-            return (; raw..., seed_index=Int(seed_index)), false
+            raw = _build_mode_failure_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max, seed_index=Int(seed_index))
+            return raw, false
         end,
         on_error=(_, seed_index, _) -> begin
-            raw = _empty_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max)
-            return (; raw..., seed_index=Int(seed_index)), false
+            raw = _build_mode_failure_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max, seed_index=Int(seed_index))
+            return raw, false
         end,
     )
     selected = select_pressure_max_candidate(candidates)

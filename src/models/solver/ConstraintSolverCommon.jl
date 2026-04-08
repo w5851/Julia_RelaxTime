@@ -80,6 +80,11 @@ end
     )
 end
 
+@inline function _build_mode_failure_candidate(; state_n::Int=5, mu_n::Int=3, solution_n::Int=(state_n + mu_n), residual_norm_max::Real, seed_index::Union{Nothing, Int}=nothing)
+    raw = _empty_candidate(state_n=state_n, mu_n=mu_n, solution_n=solution_n, residual_norm_max=residual_norm_max)
+    return seed_index === nothing ? raw : (; raw..., seed_index=Int(seed_index))
+end
+
 @inline function default_mu0_from_seed(seed)::Float64
     if length(seed) >= 8
         return mean(Float64.(seed[6:8]))
@@ -108,6 +113,70 @@ end
     tmpF = zeros(length(root))
     residual_fn!(tmpF, root)
     return nothing
+end
+
+function _run_outer_nlsolve(
+    residual_fn!::Function,
+    x0::AbstractVector;
+    nlsolve_method::Symbol,
+    nlsolve_kwargs...,
+)
+    res = nlsolve(
+        residual_fn!,
+        Float64.(x0);
+        autodiff=:forward,
+        method=nlsolve_method,
+        xtol=1e-9,
+        ftol=1e-9,
+        nlsolve_kwargs...,
+    )
+    _refresh_constraint_state!(residual_fn!, res.zero)
+    return res
+end
+
+@inline function _mode_outer_state_ready(
+    st_ref,
+    x_state_ref,
+    mu_vec_ref,
+    pressure_ref,
+    rho_norm_ref,
+    entropy_ref,
+    energy_ref,
+    masses_ref,
+)
+    return !(st_ref[] === nothing || x_state_ref[] === nothing || mu_vec_ref[] === nothing ||
+             pressure_ref[] === nothing || rho_norm_ref[] === nothing || entropy_ref[] === nothing ||
+             energy_ref[] === nothing || masses_ref[] === nothing)
+end
+
+@inline function _build_mode_result_from_outer_state(
+    x_state,
+    mu_vec,
+    pressure,
+    rho_norm,
+    entropy,
+    energy,
+    masses,
+    residual_norm;
+    iterations::Integer,
+    converged::Bool,
+    legacy_fallback_used::Bool=false,
+)
+    return (
+        converged=converged,
+        solution=_pack_solution(x_state, mu_vec),
+        x_state=x_state,
+        mu_vec=mu_vec,
+        omega=-pressure,
+        pressure=pressure,
+        rho_norm=rho_norm,
+        entropy=entropy,
+        energy=energy,
+        masses=masses,
+        iterations=Int(iterations),
+        residual_norm=residual_norm,
+        legacy_fallback_used=legacy_fallback_used,
+    )
 end
 
 @inline function _is_mass_positive(masses)::Bool
@@ -341,32 +410,103 @@ function _compute_fixedmu_candidate(
     x_state = _to_state_svec(st)
     mu_vec = normalize_mu_vec(μ_fm)
 
-    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
-    rho_norm = sum(rho_vec) / 3.0
-    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    entropy = ForwardDiff.derivative(pressure_T, T_fm)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-    omega_val = -pressure
-    masses = _mass_from_state(model, x_state)
-
-    residual_norm = _gap_norm_from_state(model, x_state, mu_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+    thermo = _compute_mode_thermo_quantities(
+        model,
+        x_state,
+        T_fm,
+        mu_vec;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        rho0_scale=nothing,
+    )
+    residual_norm = _compose_mode_residual_norm(
+        model,
+        x_state,
+        mu_vec,
+        T_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
 
     return (
         solution=Vector{Float64}(x_state),
         x_state=x_state,
         mu_vec=SVector{3}(Tuple(mu_vec)),
-        omega=omega_val,
-        pressure=pressure,
-        rho_norm=rho_norm,
-        entropy=entropy,
-        energy=energy,
-        masses=masses,
+        omega=thermo.omega,
+        pressure=thermo.pressure,
+        rho_norm=thermo.rho_norm,
+        entropy=thermo.entropy,
+        energy=thermo.energy,
+        masses=thermo.masses,
         iterations=0,
         residual_norm=residual_norm,
         residual_norm_max=Float64(residual_norm_max),
     )
+end
+
+function _compute_mode_thermo_quantities(
+    model::AbstractQCDModel,
+    x_state::AbstractVector,
+    T_fm::Real,
+    mu_vec::AbstractVector;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+    rho0_scale::Union{Nothing, Real}=rho0,
+)
+    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
+    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
+    rho_norm = if rho0_scale === nothing
+        sum(rho_vec) / 3.0
+    else
+        sum(rho_vec) / (3.0 * Float64(rho0_scale))
+    end
+    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    entropy = ForwardDiff.derivative(pressure_T, T_fm)
+    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
+    masses = _mass_from_state(model, x_state)
+
+    return (
+        pressure=pressure,
+        omega=-pressure,
+        rho_vec=rho_vec,
+        rho_norm=rho_norm,
+        entropy=entropy,
+        energy=energy,
+        masses=masses,
+    )
+end
+
+@inline function _residual_component_value(v::Real)
+    value = abs(Float64(v))
+    return isfinite(value) ? value : Inf
+end
+
+@inline function _residual_component_value(v::Tuple{<:Real, <:Real})
+    value = abs(Float64(v[1]) - Float64(v[2]))
+    return isfinite(value) ? value : Inf
+end
+
+function _compose_mode_residual_norm(
+    model::AbstractQCDModel,
+    x_state::AbstractVector,
+    mu_vec::AbstractVector,
+    T_fm::Real,
+    components...;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    gap_norm = _gap_norm_from_state(model, x_state, mu_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+    residual_norm = gap_norm
+    for component in components
+        comp = _residual_component_value(component)
+        residual_norm = max(residual_norm, comp)
+    end
+    return residual_norm
 end
 
 function _build_default_seed_candidates(seed_guess::AbstractVector)
