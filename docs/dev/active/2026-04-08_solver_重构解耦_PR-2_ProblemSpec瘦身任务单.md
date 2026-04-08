@@ -75,12 +75,12 @@
 
 ## 6. 完成信号（Completion Signal）
 
-- [ ] 本任务单条目已全部完成并回写，再创建 PR。
-- [ ] PR 创建后等待 CI 全通过。
-- [ ] PR 创建后等待 GitHub Copilot 自动 review（PR 触发）并完成 review 问题处理。
-- [ ] PR 已通过评审并采用 `squash + delete` 合并。
-- [ ] 本地执行：`git switch main`，删除本地开发分支。
-- [ ] 本任务单状态已更新（含 `ProblemSpec.jl` 行数变化与诊断兼容证据）。
+- [x] 本任务单条目已全部完成并回写，再创建 PR。
+- [x] PR 创建后等待 CI 全通过。
+- [x] PR 创建后等待 GitHub Copilot 自动 review（PR 触发）并完成 review 问题处理。
+- [x] PR 已通过评审并采用 `squash + delete` 合并。
+- [x] 本地执行：`git switch main`，删除本地开发分支。
+- [x] 本任务单状态已更新（含 `ProblemSpec.jl` 行数变化与诊断兼容证据）。
 
 ## 8. 实际结果摘要（PR-2 首轮）
 
@@ -111,3 +111,13 @@
 - [ ] `ProblemSpec` 与 orchestrator/diagnostics 职责边界已稳定。
 - [ ] mode kernel 改造所需调用点已统一，不再依赖旧内联实现细节。
 - [ ] 已在 PR 描述中标注“对 PR-3 的输入契约与兼容约束”。
+
+## 9. PR/CI/Review 实际闭环记录
+
+- PR：`https://github.com/w5851/Julia_RelaxTime/pull/69`
+- 合并方式：`squash + delete`（已合并到 `main`）
+- Copilot review：3 条 inline 评论，均已修复并在线程回复：
+  - FixedMu 诊断拼装复用 `SolverDiagnostics` helper，避免字段规则漂移。
+  - `seed_candidates=nothing` 在 FixedRho 与 non-rho 路径均改为安全回退到空池/默认池。
+- CI：全部检查通过（包括 `unit-smoke`、`integration-smoke`、`validation`、`pnjl-benchmark`）。
+- 本地收尾：已回到 `main`，与 `origin/main` 同步；远端分支已删除（`git fetch --prune` 验证）。
