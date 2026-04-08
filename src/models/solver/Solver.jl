@@ -53,6 +53,48 @@ end
     return model
 end
 
+@inline function _normalize_seed_vector(seed, key::Symbol)::Vector{Float64}
+    seed isa AbstractVector || throw(ArgumentError("$(key) must be an AbstractVector, got $(typeof(seed))"))
+    return Float64.(seed)
+end
+
+@inline function _normalize_seed_pool(seed_input, key::Symbol)::Vector{Vector{Float64}}
+    raw = try
+        collect(seed_input)
+    catch
+        throw(ArgumentError("$(key) must be an iterable of AbstractVector, got $(typeof(seed_input))"))
+    end
+    seeds = Vector{Vector{Float64}}(undef, length(raw))
+    for i in eachindex(raw)
+        seeds[i] = _normalize_seed_vector(raw[i], key)
+    end
+    return seeds
+end
+
+@inline function _resolve_common_runtime_options(kwargs)
+    xi_raw = get(kwargs, :xi, 0.0)
+    xi_raw isa Real || throw(ArgumentError("xi must be Real, got $(typeof(xi_raw))"))
+
+    p_num_raw = get(kwargs, :p_num, default_momentum_count())
+    p_num_raw isa Integer || throw(ArgumentError("p_num must be Integer, got $(typeof(p_num_raw))"))
+    p_num_raw > 0 || throw(ArgumentError("p_num must be positive, got $(p_num_raw)"))
+
+    t_num_raw = get(kwargs, :t_num, default_theta_count())
+    t_num_raw isa Integer || throw(ArgumentError("t_num must be Integer, got $(typeof(t_num_raw))"))
+    t_num_raw > 0 || throw(ArgumentError("t_num must be positive, got $(t_num_raw)"))
+
+    residual_norm_max_raw = get(kwargs, :residual_norm_max, 1e-6)
+    residual_norm_max_raw isa Real || throw(ArgumentError("residual_norm_max must be Real, got $(typeof(residual_norm_max_raw))"))
+    residual_norm_max_raw > 0 || throw(ArgumentError("residual_norm_max must be positive, got $(residual_norm_max_raw)"))
+
+    return (
+        xi=Float64(xi_raw),
+        p_num=Int(p_num_raw),
+        t_num=Int(t_num_raw),
+        residual_norm_max=Float64(residual_norm_max_raw),
+    )
+end
+
 @inline function _candidate_is_physical_for_selection(cand)::Bool
     if !Bool(get(cand, :converged, false))
         return false
@@ -77,11 +119,10 @@ end
 end
 
 @inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
-    xi = get(kwargs, :xi, 0.0)
-    p_num = get(kwargs, :p_num, default_momentum_count())
-    t_num = get(kwargs, :t_num, default_theta_count())
-    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
-    rho0 = get(kwargs, :rho0, Main.Constants_PNJL.ρ0_inv_fm3)
+    common = _resolve_common_runtime_options(kwargs)
+    rho0_raw = get(kwargs, :rho0, Main.Constants_PNJL.ρ0_inv_fm3)
+    rho0_raw isa Real || throw(ArgumentError("rho0 must be Real, got $(typeof(rho0_raw))"))
+    rho0 = Float64(rho0_raw)
 
     semantic_mode = get(kwargs, :semantic_mode, :ground_state)
     (semantic_mode === :ground_state || semantic_mode === :constrained_manifold) ||
@@ -93,22 +134,61 @@ end
 
     seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
     seed_guess = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm], mode)
+    seed_guess = _normalize_seed_vector(seed_guess, :seed_guess)
     seed_candidates = if haskey(kwargs, :seed_candidates)
-        kwargs[:seed_candidates]
+        _normalize_seed_pool(kwargs[:seed_candidates], :seed_candidates)
     else
-        (seed_guess,)
+        [seed_guess]
     end
 
     return (
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        residual_norm_max=residual_norm_max,
+        xi=common.xi,
+        p_num=common.p_num,
+        t_num=common.t_num,
+        residual_norm_max=common.residual_norm_max,
         rho0=rho0,
         semantic_mode=semantic_mode,
         selector=selector,
+        seed_strategy=seed_strategy,
         seed_guess=seed_guess,
         seed_candidates=seed_candidates,
+    )
+end
+
+@inline function _resolve_fixedmu_runtime_options(mode::FixedMu, T_fm::Real, μ_fm::Real, kwargs)
+    common = _resolve_common_runtime_options(kwargs)
+    auto_multiseed_fallback = Bool(get(kwargs, :auto_multiseed_fallback, true))
+    seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
+    seed_guess_raw = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm, μ_fm], mode)
+    seed_guess = _normalize_seed_vector(seed_guess_raw, :seed_guess)
+    return (
+        xi=common.xi,
+        p_num=common.p_num,
+        t_num=common.t_num,
+        residual_norm_max=common.residual_norm_max,
+        auto_multiseed_fallback=auto_multiseed_fallback,
+        seed_strategy=seed_strategy,
+        seed_guess=seed_guess,
+    )
+end
+
+@inline function _resolve_fixedmu_multi_runtime_options(mode::FixedMu, T_fm::Real, μ_fm::Real, kwargs)
+    common = _resolve_common_runtime_options(kwargs)
+    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
+    seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+    explicit_seeds = if haskey(kwargs, :seeds)
+        _normalize_seed_pool(kwargs[:seeds], :seeds)
+    else
+        Vector{Vector{Float64}}()
+    end
+    return (
+        xi=common.xi,
+        p_num=common.p_num,
+        t_num=common.t_num,
+        residual_norm_max=common.residual_norm_max,
+        evaluate_all_attempts=evaluate_all_attempts,
+        seed_strategy=seed_strategy,
+        explicit_seeds=explicit_seeds,
     )
 end
 
@@ -181,18 +261,12 @@ end
 
 function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
-    xi = get(kwargs, :xi, 0.0)
-    p_num = get(kwargs, :p_num, default_momentum_count())
-    t_num = get(kwargs, :t_num, default_theta_count())
-    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
-    auto_multiseed_fallback = get(kwargs, :auto_multiseed_fallback, true)
-    seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
+    opts = _resolve_fixedmu_runtime_options(mode, T_fm, μ_fm, kwargs)
 
-    if seed_strategy isa MultiSeed
+    if opts.seed_strategy isa MultiSeed
         return solve_multi(model, mode, T_fm, μ_fm; kwargs...)
     end
 
-    seed_guess = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm, μ_fm], mode)
     forwarded = _strip_forward_kwargs(kwargs, (
         :seed_strategy,
         :seed_guess,
@@ -207,11 +281,11 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         mode,
         T_fm;
         μ_fm=μ_fm,
-        seed_guess=seed_guess,
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        residual_norm_max=residual_norm_max,
+        seed_guess=opts.seed_guess,
+        xi=opts.xi,
+        p_num=opts.p_num,
+        t_num=opts.t_num,
+        residual_norm_max=opts.residual_norm_max,
         forwarded...,
     )
 
@@ -229,10 +303,10 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         raw.masses,
         Int(raw.iterations),
         Float64(raw.residual_norm),
-        Float64(xi),
+        Float64(opts.xi),
     )
 
-    if single.converged || !Bool(auto_multiseed_fallback)
+    if single.converged || !opts.auto_multiseed_fallback
         return single
     end
 
@@ -243,10 +317,10 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
             T_fm,
             μ_fm;
             seed_strategy=MultiSeed(),
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            residual_norm_max=residual_norm_max,
+            xi=opts.xi,
+            p_num=opts.p_num,
+            t_num=opts.t_num,
+            residual_norm_max=opts.residual_norm_max,
             forwarded...,
         )
     catch
@@ -311,32 +385,22 @@ end
 
 function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real; kwargs...)
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
-    xi = get(kwargs, :xi, 0.0)
-    p_num = get(kwargs, :p_num, default_momentum_count())
-    t_num = get(kwargs, :t_num, default_theta_count())
-    residual_norm_max = get(kwargs, :residual_norm_max, 1e-6)
-    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
-    seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+    opts = _resolve_fixedmu_multi_runtime_options(mode, T_fm, μ_fm, kwargs)
 
-    explicit_seeds = if haskey(kwargs, :seeds)
-        [Float64.(s) for s in kwargs[:seeds]]
-    else
-        Vector{Vector{Float64}}()
-    end
-    strategy_seeds = if isempty(explicit_seeds)
-        if seed_strategy isa MultiSeed
-            get_all_seeds(seed_strategy, [T_fm, μ_fm], mode)
+    strategy_seeds = if isempty(opts.explicit_seeds)
+        if opts.seed_strategy isa MultiSeed
+            get_all_seeds(opts.seed_strategy, [T_fm, μ_fm], mode)
         else
-            [get_seed(seed_strategy, [T_fm, μ_fm], mode)]
+            [get_seed(opts.seed_strategy, [T_fm, μ_fm], mode)]
         end
     else
         Vector{Vector{Float64}}()
     end
     fallback_default = [get_seed(DefaultSeed(), [T_fm, μ_fm], mode)]
-    seed_pool = if !isempty(explicit_seeds)
+    seed_pool = if !isempty(opts.explicit_seeds)
         build_seed_pool(mode;
-            primary_seed=explicit_seeds[1],
-            extra_seed_pool=explicit_seeds[2:end],
+            primary_seed=opts.explicit_seeds[1],
+            extra_seed_pool=opts.explicit_seeds[2:end],
             seed_extend=(seed, _) -> Float64.(seed),
         )
     elseif !isempty(strategy_seeds)
@@ -365,7 +429,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
     ))
     candidates = execute_attempt_pool(seeds;
         stop_on_first_success=true,
-        evaluate_all_attempts=evaluate_all_attempts,
+        evaluate_all_attempts=opts.evaluate_all_attempts,
         evaluate_attempt=(seed, seed_index) -> begin
             raw = solve_constraint(
                 model,
@@ -373,15 +437,15 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 T_fm;
                 μ_fm=μ_fm,
                 seed_guess=seed,
-                xi=xi,
-                p_num=p_num,
-                t_num=t_num,
-                residual_norm_max=residual_norm_max,
+                xi=opts.xi,
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                residual_norm_max=opts.residual_norm_max,
                 forwarded...,
             )
             thermo_finite = isfinite(raw.omega) && isfinite(raw.pressure) && isfinite(raw.rho_norm) && isfinite(raw.entropy) && isfinite(raw.energy)
             phys_ok = thermo_finite && is_physical_solution(raw.x_state, raw.masses)
-            residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= residual_norm_max
+            residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= opts.residual_norm_max
             ok = (Bool(raw.converged) || (residual_ok && phys_ok))
             candidate = (
                 converged=ok,
@@ -411,7 +475,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 failed_constraints=normalized.failed_constraints,
                 seed_index=normalized.seed_index,
             )
-            return merged, evaluate_candidate_success(merged; residual_norm_max=residual_norm_max)
+            return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,
         on_error=(_, seed_index, err) -> begin
             err_kind = classify_attempt_error(err)
@@ -446,7 +510,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 failed_constraints=normalized.failed_constraints,
                 seed_index=normalized.seed_index,
             )
-            return merged, evaluate_candidate_success(merged; residual_norm_max=residual_norm_max)
+            return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,
     )
 
@@ -465,7 +529,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
         s.masses,
         Int(s.iterations),
         Float64(s.residual_norm),
-        Float64(xi),
+        Float64(opts.xi),
     )
 end
 
@@ -475,14 +539,14 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
     evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
 
-    seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
+    seed_strategy = haskey(kwargs, :seed_strategy) ? bridge.seed_strategy : MultiSeed()
     explicit_seeds = if haskey(kwargs, :seeds)
-        [Float64.(s) for s in kwargs[:seeds]]
+        _normalize_seed_pool(kwargs[:seeds], :seeds)
     else
         Vector{Vector{Float64}}()
     end
     provided_seed_pool = if haskey(kwargs, :seed_candidates)
-        [Float64.(s) for s in kwargs[:seed_candidates]]
+        _normalize_seed_pool(kwargs[:seed_candidates], :seed_candidates)
     else
         Vector{Vector{Float64}}()
     end

@@ -86,6 +86,82 @@ Models.pnjl_module()
         )
     end
 
+    @testset "runtime option type validation" begin
+        m = Models.create_model(:PNJL)
+        mode_fixedmu = Models.FixedMu()
+        mode_entropy = Models.FixedEntropy(0.5)
+        T_fm = 100.0 / 197.327
+        seed_mu = copy(Models.pnjl_module().HADRON_SEED_5)
+        seed_entropy = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            xi="bad",
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            p_num=0,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            p_num=8,
+            t_num="bad",
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=0.0,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess="bad",
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve_multi(m, mode_fixedmu, T_fm, 0.0;
+            seeds=(seed_mu, "bad"),
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+
+        @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
+            seed_guess=seed_entropy,
+            semantic_mode=:bad_mode,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
+            seed_guess=seed_entropy,
+            selector=1,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
+            seed_guess=seed_entropy,
+            rho0="bad",
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
+            seed_guess=seed_entropy,
+            seed_candidates=(seed_entropy, "bad"),
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+    end
+
     @testset "solve FixedMu 快捷入口" begin
         mode = Models.FixedMu()
         T = 0.5
