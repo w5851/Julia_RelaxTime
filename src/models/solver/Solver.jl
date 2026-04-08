@@ -95,6 +95,12 @@ end
     )
 end
 
+@inline function _resolve_bool_option(kwargs, key::Symbol, default::Bool)::Bool
+    value_raw = get(kwargs, key, default)
+    value_raw isa Bool || throw(ArgumentError("$(key) must be Bool, got $(typeof(value_raw))"))
+    return value_raw
+end
+
 @inline function _candidate_is_physical_for_selection(cand)::Bool
     if !Bool(get(cand, :converged, false))
         return false
@@ -157,7 +163,7 @@ end
 
 @inline function _resolve_fixedmu_runtime_options(mode::FixedMu, T_fm::Real, μ_fm::Real, kwargs)
     common = _resolve_common_runtime_options(kwargs)
-    auto_multiseed_fallback = Bool(get(kwargs, :auto_multiseed_fallback, true))
+    auto_multiseed_fallback = _resolve_bool_option(kwargs, :auto_multiseed_fallback, true)
     seed_strategy = get(kwargs, :seed_strategy, DefaultSeed())
     seed_guess_raw = haskey(kwargs, :seed_guess) ? kwargs[:seed_guess] : get_seed(seed_strategy, [T_fm, μ_fm], mode)
     seed_guess = _normalize_seed_vector(seed_guess_raw, :seed_guess)
@@ -174,7 +180,7 @@ end
 
 @inline function _resolve_fixedmu_multi_runtime_options(mode::FixedMu, T_fm::Real, μ_fm::Real, kwargs)
     common = _resolve_common_runtime_options(kwargs)
-    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
+    evaluate_all_attempts = _resolve_bool_option(kwargs, :evaluate_all_attempts, true)
     seed_strategy = get(kwargs, :seed_strategy, MultiSeed())
     explicit_seeds = if haskey(kwargs, :seeds)
         _normalize_seed_pool(kwargs[:seeds], :seeds)
@@ -537,7 +543,7 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
     kwargs = _resolve_primary_strategy_kwargs(kwargs)
     effective_model = _resolve_solver_model(model, kwargs)
     bridge = _resolve_nonfixedmu_bridge(mode, T_fm, kwargs)
-    evaluate_all_attempts = Bool(get(kwargs, :evaluate_all_attempts, true))
+    evaluate_all_attempts = _resolve_bool_option(kwargs, :evaluate_all_attempts, true)
 
     seed_strategy = haskey(kwargs, :seed_strategy) ? bridge.seed_strategy : MultiSeed()
     explicit_seeds = if haskey(kwargs, :seeds)

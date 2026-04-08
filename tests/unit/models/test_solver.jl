@@ -131,6 +131,20 @@ Models.pnjl_module()
             t_num=4,
             residual_norm_max=1e-6,
         )
+        @test_throws ArgumentError Models.solve(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            auto_multiseed_fallback="bad",
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve_multi(m, mode_fixedmu, T_fm, 0.0;
+            seed_guess=seed_mu,
+            evaluate_all_attempts="bad",
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
 
         @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
             seed_guess=seed_entropy,
@@ -156,6 +170,13 @@ Models.pnjl_module()
         @test_throws ArgumentError Models.solve(m, mode_entropy, T_fm;
             seed_guess=seed_entropy,
             seed_candidates=(seed_entropy, "bad"),
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        @test_throws ArgumentError Models.solve_multi(m, Models.FixedAsymmetricRho(0.05, 1.0, 0.0), T_fm;
+            seed_candidates=(seed_entropy,),
+            evaluate_all_attempts="bad",
             p_num=8,
             t_num=4,
             residual_norm_max=1e-6,
