@@ -5,6 +5,53 @@
 const HardRule = Function
 const CandidateSelector = Function
 
+@inline function _candidate_seed_index(candidate, fallback::Int)::Int
+    return hasproperty(candidate, :seed_index) ? Int(getproperty(candidate, :seed_index)) : fallback
+end
+
+@inline function _candidate_attempt_origin(candidate)::Symbol
+    if hasproperty(candidate, :governed_attempt_origin)
+        return Symbol(getproperty(candidate, :governed_attempt_origin))
+    elseif hasproperty(candidate, :fixedrho_joint_attempt_origin)
+        return Symbol(getproperty(candidate, :fixedrho_joint_attempt_origin))
+    elseif hasproperty(candidate, :attempt_origin)
+        return Symbol(getproperty(candidate, :attempt_origin))
+    end
+    return :unknown
+end
+
+@inline function _candidate_selection_score(candidate)::Float64
+    if hasproperty(candidate, :selection_score)
+        val = Float64(getproperty(candidate, :selection_score))
+        return isfinite(val) ? val : NaN
+    elseif hasproperty(candidate, :pressure)
+        val = Float64(getproperty(candidate, :pressure))
+        return isfinite(val) ? val : -Inf
+    end
+    return -Inf
+end
+
+@inline function governance_quality_tag(candidate;
+    residual_norm_max::Real=1e-6,
+    require_converged::Bool=true,
+)::Symbol
+    converged = Bool(get(candidate, :converged, false))
+    residual = Float64(get(candidate, :residual_norm, Inf))
+    hard_ok = Bool(get(candidate, :hard_constraint_ok, false))
+    residual_ok = isfinite(residual) && residual <= Float64(residual_norm_max)
+    converged_ok = !require_converged || converged
+    attempt_origin = _candidate_attempt_origin(candidate)
+    is_fallback_attempt = attempt_origin == :method_rescue || attempt_origin == :fallback
+
+    if converged_ok && residual_ok && hard_ok
+        return is_fallback_attempt ? :fallback : :good
+    end
+    if converged || residual_ok || hard_ok
+        return :degraded
+    end
+    return :bad
+end
+
 @inline function classify_attempt_error(err)::Symbol
     err isa InterruptException && return :interrupt
     err isa ArgumentError && return :constraint_error
@@ -98,6 +145,9 @@ end
         throw(ArgumentError("governance candidate hard_constraint_ok=false requires non-empty failed_constraints"))
     end
 
+    score = _candidate_selection_score(candidate)
+    isfinite(score) || (score = NaN)
+
     return (
         converged=converged,
         pressure=(isfinite(pressure) ? pressure : -Inf),
@@ -105,7 +155,52 @@ end
         hard_constraint_ok=hard_ok,
         failed_constraints=failed_constraints,
         seed_index=seed_index,
+        selection_score=score,
     )
+end
+
+function normalize_selector_candidates(candidates::AbstractVector{<:NamedTuple};
+    residual_norm_max::Real=1e-6,
+    require_converged::Bool=true,
+)
+    isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+    normalized = NamedTuple[]
+    for (idx, cand) in enumerate(candidates)
+        seed_index = _candidate_seed_index(cand, idx)
+        base = normalize_governance_candidate(cand; seed_index=seed_index)
+        quality_tag = governance_quality_tag((; cand...,
+            converged=base.converged,
+            residual_norm=base.residual_norm,
+            hard_constraint_ok=base.hard_constraint_ok,
+        ); residual_norm_max=residual_norm_max, require_converged=require_converged)
+        push!(normalized, (; cand...,
+            converged=base.converged,
+            pressure=base.pressure,
+            residual_norm=base.residual_norm,
+            hard_constraint_ok=base.hard_constraint_ok,
+            failed_constraints=base.failed_constraints,
+            seed_index=base.seed_index,
+            selection_score=base.selection_score,
+            quality_tag=quality_tag,
+        ))
+    end
+    return normalized
+end
+
+function execute_governance_selector(candidates::AbstractVector{<:NamedTuple};
+    selector::Function=select_pressure_max_candidate,
+    residual_norm_max::Real=1e-6,
+    require_converged::Bool=true,
+)
+    normalized = normalize_selector_candidates(candidates;
+        residual_norm_max=residual_norm_max,
+        require_converged=require_converged,
+    )
+    selected = selector(normalized)
+    hasproperty(selected, :selected_index) || throw(ArgumentError("selector must return field :selected_index"))
+    hasproperty(selected, :selected_candidate) || throw(ArgumentError("selector must return field :selected_candidate"))
+    hasproperty(selected, :selection_reason) || throw(ArgumentError("selector must return field :selection_reason"))
+    return (; selected..., normalized_candidates=normalized)
 end
 
 @inline function build_candidate_context(

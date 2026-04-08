@@ -35,6 +35,8 @@ function _run_point(model, mode, T_mev::Real; mu_mev::Real=0.0)
         selection_reason = Symbol(get(raw, :selection_reason, :none)),
         seed_index = Int(get(raw, :seed_index, -1)),
         failed_constraints = Symbol.(get(raw, :failed_constraints, Symbol[])),
+        quality_tag = Symbol(get(raw, :governed_selected_quality, get(raw, :fixedrho_joint_selected_quality, :none))),
+        fallback_used = Bool(get(raw, :governed_fallback_used, get(raw, :fixedrho_joint_fallback_used, false))),
     )
 end
 
@@ -117,6 +119,14 @@ end
         @test got.selection_reason == cfg.selection_reason
         @test got.seed_index == cfg.seed_index
         @test got.failed_constraints == cfg.failed_constraints
+        if cfg.selection_reason == :no_candidate_passed_constraints
+            @test got.quality_tag in (:bad, :degraded, :none)
+        elseif cfg.selection_reason == :pressure_max_under_constraints
+            @test got.quality_tag in (:good, :fallback, :none)
+        end
+        if got.fallback_used
+            @test got.quality_tag in (:fallback, :none)
+        end
         if isfinite(cfg.residual_upper)
             @test isfinite(got.residual_norm)
             @test got.residual_norm <= cfg.residual_upper

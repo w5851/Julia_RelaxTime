@@ -16,6 +16,7 @@ end
     ); seed_index=3)
 
     @test normalized_ok.seed_index == 3
+    @test haskey(normalized_ok, :selection_score)
     @test normalized_ok.converged
     @test normalized_ok.hard_constraint_ok
     @test normalized_ok.failed_constraints == Symbol[]
@@ -76,6 +77,59 @@ end
     @test pool[2].source == :extra
     @test pool[3].source == :provided
     @test pool[4].source == :default
+end
+
+@testset "candidate governance quality tags and selector contract" begin
+    candidates = [
+        (
+            converged=true,
+            pressure=9.0,
+            residual_norm=1e-8,
+            hard_constraint_ok=true,
+            failed_constraints=Symbol[],
+            governed_attempt_origin=:primary,
+            seed_index=2,
+        ),
+        (
+            converged=true,
+            pressure=10.0,
+            residual_norm=2e-8,
+            hard_constraint_ok=true,
+            failed_constraints=Symbol[],
+            governed_attempt_origin=:method_rescue,
+            seed_index=1,
+        ),
+        (
+            converged=false,
+            pressure=11.0,
+            residual_norm=1e-3,
+            hard_constraint_ok=false,
+            failed_constraints=Symbol[:solver_failed],
+            seed_index=3,
+        ),
+    ]
+
+    tagged = Models.normalize_selector_candidates(candidates; residual_norm_max=1e-6)
+    @test length(tagged) == 3
+    @test tagged[1].quality_tag == :good
+    @test tagged[2].quality_tag == :fallback
+    @test tagged[3].quality_tag == :bad
+
+    selected = Models.execute_governance_selector(candidates;
+        selector=Models.select_pressure_max_candidate,
+        residual_norm_max=1e-6,
+    )
+    @test selected.selected_index == 1
+    @test selected.selection_reason == :pressure_max_under_constraints
+    @test haskey(selected, :normalized_candidates)
+    @test selected.selected_candidate.quality_tag == :good
+
+    @test Models.governance_quality_tag((;
+        converged=true,
+        residual_norm=1e-8,
+        hard_constraint_ok=true,
+        governed_attempt_origin=:method_rescue,
+    ); residual_norm_max=1e-6) == :fallback
 end
 
 @testset "candidate governance contract" begin

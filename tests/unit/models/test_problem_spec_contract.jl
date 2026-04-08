@@ -383,10 +383,12 @@ end
             @test haskey(solved, :governed_selected_method)
             @test haskey(solved, :governed_selected_quality)
             @test haskey(solved, :governed_fallback_used)
+            @test haskey(solved, :selection_score)
             @test solved.legacy_fallback_used isa Bool
             @test solved.governed_selected_method isa Symbol
             @test solved.governed_selected_quality isa Symbol
             @test solved.governed_fallback_used isa Bool
+            @test solved.governed_selected_quality in (:good, :fallback, :degraded, :bad)
             @test solved.selection_reason in (:pressure_max_under_constraints, :residual_min_under_constraints, :no_candidate_passed_constraints)
             @test solved.candidate_count >= 1
         end
