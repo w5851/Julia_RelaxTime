@@ -69,6 +69,7 @@ export AbstractConstraintComponent
 export constraint_name, constraint_dim, build_constraint_components, constraint_total_dim
 export HardRule, CandidateSelector, build_candidate_context
 export evaluate_candidate_success, normalize_governance_candidate, build_seed_pool
+export classify_attempt_error, normalize_error_message
 export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view

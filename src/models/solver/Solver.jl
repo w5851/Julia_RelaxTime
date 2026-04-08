@@ -404,7 +404,9 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=residual_norm_max)
         end,
-        on_error=(_, seed_index, _) -> begin
+        on_error=(_, seed_index, err) -> begin
+            err_kind = classify_attempt_error(err)
+            err_msg = normalize_error_message(err)
             candidate = (
                 converged=false,
                 solution=Float64[],
@@ -421,6 +423,8 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
+                error_kind=err_kind,
+                error_msg=err_msg,
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),
@@ -591,7 +595,9 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=max(bridge.residual_norm_max, 1e-3))
         end,
-        on_error=(_, seed_index, _) -> begin
+        on_error=(_, seed_index, err) -> begin
+            err_kind = classify_attempt_error(err)
+            err_msg = normalize_error_message(err)
             candidate = (
                 converged=false,
                 solution=Float64[],
@@ -608,6 +614,8 @@ function solve_multi(model::AbstractPNJLModel, mode::Union{FixedRho, FixedAsymme
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
+                error_kind=err_kind,
+                error_msg=err_msg,
             )
             normalized = normalize_governance_candidate(candidate;
                 seed_index=Int(seed_index),

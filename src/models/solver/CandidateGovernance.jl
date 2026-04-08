@@ -5,6 +5,22 @@
 const HardRule = Function
 const CandidateSelector = Function
 
+@inline function classify_attempt_error(err)::Symbol
+    err isa InterruptException && return :interrupt
+    err isa ArgumentError && return :constraint_error
+    err isa DomainError && return :constraint_error
+    return :solver_error
+end
+
+@inline function normalize_error_message(err; max_chars::Int=240)::String
+    msg = sprint(showerror, err)
+    msg = replace(strip(msg), '\n' => ' ', '\r' => ' ')
+    if ncodeunits(msg) <= max_chars
+        return msg
+    end
+    return first(msg, max_chars)
+end
+
 @inline function _seed_pool_key(seed_vec::AbstractVector{<:Real})
     return join(round.(Float64.(seed_vec); digits=12), ",")
 end
