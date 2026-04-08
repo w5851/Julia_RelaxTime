@@ -91,6 +91,9 @@
   - `GapSolver` 不再持有默认种子常量副本。
 - [ ] 4.1 `WeightedFallback` 显式改用 catalog（当前通过 `MultiSeed()` 间接复用，后续可做显式收敛）。
 - [ ] D2 Residual Spine 尚未开始。
+- [x] D2.1 已完成：新增 `ConstraintSolver._gap_norm_from_state(...)`，统一以 `gap_core_residual!` 计算 gap 范数。
+- [x] D2.2 已完成：`ConstraintSolver` 内 FixedMu/FixedRho/FixedEntropy/FixedSigma/FixedAsymmetricRho 的 gap-norm 计算均改为复用 `_gap_norm_from_state`，移除局部 `gap_residual(...)` 直算路径。
+- [ ] D2.3 文档化边界待补（下一轮在任务单/架构文档补充）。
 
 ### 本轮验证
 
@@ -98,3 +101,11 @@
 - [x] `julia --project=. -e 'include("tests/unit/models/test_gap_solver.jl")'`
 - [x] `julia --project=. -e 'include("tests/unit/models/test_solver.jl")'`
 - [x] `julia --project=. -e 'ENV["REGRESSION_FILES"]="models/test_solver_attempt_engine_convergence_regression.jl;pnjl/test_constraint_selection_regression.jl"; include("tests/regression/runtests.jl")'`
+- [x] `julia --project=. -e 'include("tests/unit/models/test_constraint_solver.jl")'`
+- [x] `julia --project=. -e 'include("tests/unit/models/test_gap_core_residual.jl")'`
+- [x] `julia --project=. -e 'include("tests/unit/models/test_gap_core_residual_njl_parity.jl")'`
+
+### 删除重复路径清单（本轮）
+
+- [x] 删除 `ConstraintSolver.jl` 中 6 处 `gap_residual(model, ...)` 直接计算 gap-norm 的并行路径。
+- [x] 统一替换为 `_gap_norm_from_state -> gap_core_residual!` 主链。
