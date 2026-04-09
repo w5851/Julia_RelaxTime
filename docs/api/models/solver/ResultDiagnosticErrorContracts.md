@@ -56,6 +56,49 @@
 - 旧 raw NamedTuple 没有 `contract_version` 时，`coerce_solver_result` 自动补为 `:v1`。
 - 不支持未知版本；传入 `contract_version != :v1` 会抛 `ArgumentError`。
 
+## Batch-D 收口（2026-04-09）
+
+### 已移除的过渡字段/参数
+
+- `fixedmu_problem_spec_active`（结果兼容标记）已移除。
+- `fixedmu_use_problem_spec`（true/false 开关）已移除。
+- `legacy_fallback_plugin`（ProblemSpec 兜底插件开关）已移除。
+- `allow_legacy_fallback`（mode solver 过渡参数）已从对外主链与 mode solver 入口移除。
+
+### 迁移窗口期
+
+- 迁移窗口：2026-04-09 至 2026-04-30。
+- 在窗口期内，调用上述已移除参数会收到明确 `ArgumentError`，并提示统一使用 ProblemSpec 主链与稳定契约 API。
+
+### 门禁上线日期
+
+- `scripts/dev/check_solver_contract_leakage.jl` 已于 2026-04-09 上线。
+- 门禁策略：在 `phase/scans/workflows` 禁止读取 solver 私有字段与已移除兼容标记。
+
+### 替代方式
+
+- 替代 `fixedmu_problem_spec_active`：直接以“调用成功 + 稳定契约字段存在性”判定（`SolverResult.contract_version` / 诊断公共字段）。
+- 替代 `fixedmu_use_problem_spec=*`：直接调用 `solve_constraint(...)`，ProblemSpec 为唯一主链。
+- 诊断消费统一走 `coerce_solver_diagnostic_public_view` 或 `to_public_namedtuple`。
+
+示例：
+
+```julia
+raw = Models.solve_constraint(model, Models.FixedMu(), T_fm;
+    μ_fm=μ_fm,
+    seed_guess=seed,
+    p_num=8,
+    t_num=4,
+)
+
+res = Models.coerce_solver_result(Models.FixedMu(), raw)
+view = Models.solver_result_view(res)
+
+diag_public = haskey(raw, :diagnostic) ?
+    Models.coerce_solver_diagnostic_public_view(raw.diagnostic) :
+    nothing
+```
+
 ## Diagnostic Contract（`SolverDiagnosticSummary`）
 
 当前稳定版本：`diagnostic_version = :v1`（常量 `Models.SOLVER_DIAGNOSTIC_VERSION_V1`）。

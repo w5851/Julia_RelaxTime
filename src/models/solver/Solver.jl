@@ -350,6 +350,8 @@ end
     haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; use solve_constraint(...; problem_spec=...) or default ProblemSpec chain"))
     haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
     haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
+    haskey(kwargs, :fixedmu_use_problem_spec) && throw(ArgumentError("fixedmu_use_problem_spec has been removed; solve_constraint now always uses ProblemSpec chain"))
+    haskey(kwargs, :legacy_fallback_plugin) && throw(ArgumentError("legacy_fallback_plugin has been removed; governed solver no longer accepts legacy fallback plugin path"))
 
     spec = get(kwargs, :problem_spec, nothing)
     forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
@@ -365,18 +367,9 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     μ_fm::Real,
     kwargs...)
-    fixedmu_switch = get(kwargs, :fixedmu_use_problem_spec, nothing)
-    fixedmu_switch === nothing || fixedmu_switch isa Bool ||
-        throw(ArgumentError("fixedmu_use_problem_spec must be Bool or nothing, got $(typeof(fixedmu_switch))"))
-
-    if fixedmu_switch === false
-        throw(ArgumentError("fixedmu_use_problem_spec=false has been removed; solve_constraint now always uses ProblemSpec chain"))
-    end
-
     # FixedMu 与其他 mode 一致，统一走 ProblemSpec 主链。
     merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
-    raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
-    return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, true)))
+    return _solve_with_problem_spec_default(model, mode, T_fm, merged)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;

@@ -11,7 +11,6 @@ function _solve_constraint_fixedentropy(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
-    allow_legacy_fallback::Bool=false,
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
     mass_positive_constraint::Bool=true,
@@ -115,7 +114,6 @@ function _solve_constraint_fixedentropy(
         ((phys || soft_phys) && residual_norm <= near_accept_tol)
     )
 
-    _ = allow_legacy_fallback
     return _build_mode_result_from_outer_state(
         x_state_ref[],
         mu_vec_ref[],

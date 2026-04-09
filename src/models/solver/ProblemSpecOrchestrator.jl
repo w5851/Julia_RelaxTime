@@ -131,7 +131,7 @@ end
 end
 
 @inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
-    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :evaluate_all_attempts, :extra_constraints, :fixedmu_use_problem_spec, :legacy_fallback_plugin, :diagnostic_level)
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :evaluate_all_attempts, :extra_constraints, :diagnostic_level)
         delete!(kwargs, key)
     end
     return kwargs
@@ -160,7 +160,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
     solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
-    result = (; solved..., fixedmu_problem_spec_active=true)
+    result = solved
     if diagnostic_level === :none
         return result
     end
@@ -563,12 +563,6 @@ function _governed_nonrho_problem_spec_forward_solve(
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec $(mode_label) forward_solve"))
-            allow_legacy_fallback = Bool(get(kwargs, :allow_legacy_fallback, false))
-            if haskey(kwargs, :legacy_fallback_plugin)
-                allow_legacy_fallback = Bool(kwargs[:legacy_fallback_plugin])
-            end
-            local_kwargs[:allow_legacy_fallback] = allow_legacy_fallback
-
             solved = solve_mode_constraint(local_kwargs)
             solver_converged = Bool(solved.converged)
             attempt_quality = if solver_converged

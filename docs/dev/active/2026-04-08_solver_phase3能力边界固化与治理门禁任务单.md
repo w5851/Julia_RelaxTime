@@ -19,7 +19,7 @@
 - [x] 发布 solver 稳定契约（类型 + 序列化视图 + 兼容策略）。
 - [x] 建立 phase/scans/workflows 适配层，仅消费稳定契约。
 - [x] 增加耦合守卫测试与治理脚本检查点。
-- [ ] 清理过渡期字段与旁路参数（在兼容期策略允许范围内）。
+- [x] 清理过渡期字段与旁路参数（在兼容期策略允许范围内）。
 
 ### 2.2 非范围（本期不做）
 
@@ -31,22 +31,22 @@
 
 ### 3.1 结果契约（Result Contract）
 
-- [ ] 统一 `SolverResult`/raw result 的稳定字段集合（必须字段、可选字段、弃用字段）。
-- [ ] 明确字段语义与单位（例如 `rho_norm`, `residual_norm`, `xi`, `pressure`）。
-- [ ] 定义版本化策略：`contract_version`（建议从 `v1` 起）。
+- [x] 统一 `SolverResult`/raw result 的稳定字段集合（必须字段、可选字段、弃用字段）。
+- [x] 明确字段语义与单位（例如 `rho_norm`, `residual_norm`, `xi`, `pressure`）。
+- [x] 定义版本化策略：`contract_version`（建议从 `v1` 起）。
 
 ### 3.2 诊断契约（Diagnostic Contract）
 
-- [ ] 统一 summary/full 语义与字段最小集合。
-- [ ] 诊断字段分层：
+- [x] 统一 summary/full 语义与字段最小集合。
+- [x] 诊断字段分层：
   - 稳定公共字段（上层可依赖）
   - 内部调试字段（禁止上层依赖）
-- [ ] 提供兼容输出视图（NamedTuple）与类型化对象双通道。
+- [x] 提供兼容输出视图（NamedTuple）与类型化对象双通道。
 
 ### 3.3 错误契约（Error Taxonomy）
 
-- [ ] 定义错误类别（参数错误、约束失败、求解失败、中断等）。
-- [ ] 统一错误码/错误消息模板，避免上层按字符串关键词做脆弱判断。
+- [x] 定义错误类别（参数错误、约束失败、求解失败、中断等）。
+- [x] 统一错误码/错误消息模板，避免上层按字符串关键词做脆弱判断。
 
 ## 4. 文件级任务分解（可执行）
 
@@ -64,72 +64,72 @@
   - 统一从稳定结果契约读取成功判据与摘要字段。
 - [x] B3 `src/models/scans/TrhoScan.jl`
   - 同步适配稳定契约，移除对临时兼容字段的硬依赖。
-- [ ] B4 `src/models/workflows/*`
+- [x] B4 `src/models/workflows/*`
   - 仅消费稳定 solver 结果，不拼装 solver 内部 kwargs。
 
 ### Batch-C：防回耦门禁
 
 - [x] C1 新增契约稳定性测试（API 层）
   - 校验关键字段存在性、类型、单位语义。
-- [ ] C2 新增数值回归点（FixedMu/FixedRho/FixedAsymmetricRho）
+- [x] C2 新增数值回归点（FixedMu/FixedRho/FixedAsymmetricRho）
   - 防止架构重构引入系统性数值漂移。
 - [x] C3 新增依赖约束检查
   - 禁止 `phase/scans/workflows` 直接引用 solver 私有符号（如下划线函数、内部字段）。
-- [ ] C4 文档治理联动
+- [x] C4 文档治理联动
   - `docs/dev/active`、`docs/api` 与导出接口保持一致。
 
 ### Batch-D：兼容收口与清理
 
-- [ ] D1 标记并移除到期过渡字段（按兼容策略逐步）。
-- [ ] D2 清理不再使用的 legacy kwargs 路径。
-- [ ] D3 更新迁移说明，明确“何时删除、替代方式、示例代码”。
+- [x] D1 标记并移除到期过渡字段（按兼容策略逐步）。
+- [x] D2 清理不再使用的 legacy kwargs 路径。
+- [x] D3 更新迁移说明，明确“何时删除、替代方式、示例代码”。
 
 ## 5. 逐函数/模块改动清单（函数名 + 预期 diff 类型）
 
 ### 5.1 `src/models/solver/Solver.jl`
 
-- [ ] `SolverResult` 与 `_coerce_solver_result(...)`
+- [x] `SolverResult` 与 `_coerce_solver_result(...)`
   - diff 类型：`契约固化`
   - 加入版本化/稳定字段约束（必要时补适配层）。
 
-- [ ] `solve_constraint(...)` 系列入口
+- [x] `solve_constraint(...)` 系列入口
   - diff 类型：`兼容收口`
   - 移除过渡参数读取，统一走稳定参数集合。
 
 ### 5.2 `src/models/solver/SolverDiagnostics.jl` + `SolverDiagnosticsTypes.jl`
 
-- [ ] 诊断对象构造函数
+- [x] 诊断对象构造函数
   - diff 类型：`公共/私有字段分层`
   - 公共字段稳定，内部字段通过 debug 扩展通道暴露。
 
 ### 5.3 `src/models/phase/PMPhaseDiagnostic.jl`
 
-- [ ] `_pm_extract_solver_diagnostic(...)`
+- [x] `_pm_extract_solver_diagnostic(...)`
   - diff 类型：`适配层改造`
   - 优先读取稳定契约，保留老字段兜底（兼容窗口期）。
 
 ### 5.4 `src/models/scans/TmuScan.jl` / `TrhoScan.jl`
 
-- [ ] `_to_solver_result(...)`, `_is_success(...)` 等结果消费函数
+- [x] `_to_solver_result(...)`, `_is_success(...)` 等结果消费函数
   - diff 类型：`契约对齐`
   - 统一以稳定字段判定，不依赖临时/内部字段。
 
 ## 6. 验收标准（DoD）
 
-- [ ] solver 对外存在明确、文档化、可测试的稳定契约。
-- [ ] phase/scans/workflows 不再直接依赖 solver 私有实现细节。
-- [ ] 新增依赖门禁可拦截“反向耦合”与“私有符号穿透”。
-- [ ] 数值回归在既定容差内通过。
+- [x] solver 对外存在明确、文档化、可测试的稳定契约。
+- [x] phase/scans/workflows 不再直接依赖 solver 私有实现细节。
+- [x] 新增依赖门禁可拦截“反向耦合”与“私有符号穿透”。
+- [x] 数值回归在既定容差内通过。
 
 ## 7. 验证计划（门禁级）
 
 - [ ] `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'`
 - [ ] `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'`
 - [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
-- [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
-- [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
-- [ ] `julia --project=. scripts/dev/check_solver_contract_leakage.jl`
-- [ ] （新增）契约稳定性测试入口（本任务落地时补充到 `tests/` 分层目录）。
+- [x] `julia --project=. scripts/dev/check_docs_consistency.jl`
+- [x] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [x] `julia --project=. scripts/dev/check_solver_contract_leakage.jl`
+- [x] （新增）契约稳定性测试入口（本任务落地时补充到 `tests/` 分层目录）。
 
 ## 8. 风险与回滚点
 
@@ -147,14 +147,14 @@
 - [ ] Commit 1：契约文档 + 类型导出整理。
 - [ ] Commit 2：phase/scans/workflows 适配层改造。
 - [ ] Commit 3：契约稳定性测试 + 依赖门禁。
-- [ ] Commit 4：兼容字段清理与迁移说明。
+- [x] Commit 4：兼容字段清理与迁移说明。
 
 ## 10. 与前两阶段的衔接检查
 
-- [ ] Phase 1：主链已唯一化（无旁路分流）。
-- [ ] Phase 2：后处理/诊断/配置拆分已完成。
-- [ ] 满足以上前置后再执行 Phase 3 清理动作。
-- [ ] 三份 active 文档中的验证命令集保持一致（含 docs governance 检查）。
+- [x] Phase 1：主链已唯一化（无旁路分流）。
+- [x] Phase 2：后处理/诊断/配置拆分已完成。
+- [x] 满足以上前置后再执行 Phase 3 清理动作。
+- [x] 三份 active 文档中的验证命令集保持一致（含 docs governance 检查）。
 
 ## 11. 执行记录
 
@@ -163,4 +163,9 @@
 - [x] 2026-04-09：完成 SolverResult / Diagnostic 稳定契约 v1 固化（版本字段、公共视图、兼容 coerce）。
 - [x] 2026-04-09：完成 phase/scans 契约消费适配（PM 诊断公共视图、Tmu/Trho 结果 coerce）。
 - [x] 2026-04-09：新增门禁脚本 `scripts/dev/check_solver_contract_leakage.jl` 与契约回归测试入口。
-- [ ] 待补：契约版本号、迁移窗口期、门禁上线日期。
+- [x] 2026-04-09：完成 Batch-D 收口（移除 `fixedmu_problem_spec_active`、`fixedmu_use_problem_spec`、`legacy_fallback_plugin` 与 legacy fallback 透传路径）。
+- [x] 2026-04-09：新增 `tests/regression/models/test_solver_phase3_fixedpoint_regression.jl` 覆盖 FixedMu/FixedRho/FixedAsymmetricRho 回归点。
+- [x] 2026-04-09：补齐迁移窗口期与门禁上线日期说明（见 `docs/api/models/solver/ResultDiagnosticErrorContracts.md`）。
+- [x] 契约版本号：`SolverResult.contract_version=:v1`，`SolverDiagnosticSummary.diagnostic_version=:v1`。
+- [x] 迁移窗口期：2026-04-09 至 2026-04-30。
+- [x] 门禁上线日期：2026-04-09（`check_solver_contract_leakage.jl`）。

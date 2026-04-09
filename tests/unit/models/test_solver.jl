@@ -29,7 +29,7 @@ Models.pnjl_module()
         @test haskey(result, :state) || haskey(result, :pressure) || result isa Any  # 类型灵活
     end
 
-    @testset "FixedMu defaults to ProblemSpec chain" begin
+    @testset "FixedMu ProblemSpec-only guard" begin
         m = Models.create_model(:PNJL)
         mode = Models.FixedMu()
         T_fm = 100.0 / 197.327
@@ -57,11 +57,10 @@ Models.pnjl_module()
             fixedmu_use_problem_spec=false,
         )
 
-        @test haskey(default_path, :fixedmu_problem_spec_active)
-        @test default_path.fixedmu_problem_spec_active === true
+        @test !haskey(default_path, :fixedmu_problem_spec_active)
     end
 
-    @testset "FixedMu diagnostic level requires ProblemSpec chain" begin
+    @testset "FixedMu rejects removed ProblemSpec switches" begin
         m = Models.create_model(:PNJL)
         mode = Models.FixedMu()
         T_fm = 100.0 / 197.327
@@ -78,6 +77,18 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
             fixedmu_use_problem_spec=false,
             diagnostic_level=:summary,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            fixedmu_use_problem_spec=true,
         )
     end
 

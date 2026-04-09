@@ -27,6 +27,7 @@ const PRIVATE_PATTERNS = (
     :sigma_attempt_origin => r"\bsigma_attempt_origin\b",
     :asym_attempt_origin => r"\basym_attempt_origin\b",
     :selection_reason_source => r"\bselection_reason_source\b",
+    :fixedmu_problem_spec_active => r"\bfixedmu_problem_spec_active\b",
 )
 
 const RUNTIME_ALLOWLIST = Set([

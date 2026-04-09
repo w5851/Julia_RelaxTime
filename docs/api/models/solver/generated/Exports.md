@@ -48,7 +48,7 @@
 | `PNJLModel` | src/models/Models.jl | 24 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `PhasePipelineResult` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `PrimaryStrategy` | src/models/Models.jl | 86 | 0 | - |
-| `ProblemSpec` | src/models/Models.jl | 70 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/README.md |
+| `ProblemSpec` | src/models/Models.jl | 70 | 5 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `ProductionPipelineConfig` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `PromotionResult` | src/models/Models.jl | 126 | 1 | docs/api/models/phase/Overview.md |
 | `QUARK_CHARGE_ABS` | src/models/Models.jl | 98 | 1 | docs/api/models/variants/magnetic/LandauIntegrals.md |
@@ -219,7 +219,7 @@
 | `smooth_cutoff` | src/models/Models.jl | 99 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `solution_dim` | src/models/Models.jl | 69 | 0 | - |
 | `solve` | src/models/Models.jl | 62 | 42 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
-| `solve_constraint` | src/models/Models.jl | 61 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `solve_constraint` | src/models/Models.jl | 61 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/Models.jl | 37 | 21 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md |
 | `solve_gap_and_meson_point` | src/models/Models.jl | 117 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
 | `solve_gap_and_transport` | src/models/Models.jl | 116 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |

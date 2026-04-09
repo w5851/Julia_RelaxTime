@@ -11,7 +11,6 @@ function _solve_constraint_fixedmu(
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
     hard_constraints::Union{Nothing, AbstractVector{<:HardConstraintRule}}=nothing,
-    allow_legacy_fallback::Bool=false,
     nlsolve_kwargs...,
 )
     seed_pool = if seed_candidates === nothing
@@ -22,7 +21,6 @@ function _solve_constraint_fixedmu(
 
     rules = hard_constraints === nothing ? default_hard_constraint_rules(; physicality_check=physicality_check) : hard_constraints
 
-    _ = allow_legacy_fallback
     _ = nlsolve_kwargs
 
     candidates = Main.Models.execute_attempt_pool(seed_pool;

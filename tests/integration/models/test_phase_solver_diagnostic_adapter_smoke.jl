@@ -24,7 +24,7 @@ const P = Models.pnjl_module()
             t_num=4,
             residual_norm_max=1e-6,
         )
-        @test raw.fixedmu_problem_spec_active
+        @test !haskey(raw, :fixedmu_problem_spec_active)
         diag = Models._pm_extract_solver_diagnostic(raw; seed_source=:seed0)
         @test haskey(diag, :attempt_origin)
         @test haskey(diag, :hard_constraint_ok)

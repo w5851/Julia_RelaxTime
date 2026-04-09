@@ -12,7 +12,7 @@ const P = Models.pnjl_module()
     model = Models.create_model(:PNJL)
     T_fm = 100.0 / 197.327
 
-    @testset "FixedMu defaults to ProblemSpec diagnostic chain" begin
+    @testset "FixedMu removed switch and no compatibility marker" begin
         @test_throws ArgumentError Models.solve_constraint(
             model,
             Models.FixedMu(),
@@ -36,8 +36,7 @@ const P = Models.pnjl_module()
             residual_norm_max=1e-6,
         )
 
-        @test haskey(default_path, :fixedmu_problem_spec_active)
-        @test default_path.fixedmu_problem_spec_active == true
+        @test !haskey(default_path, :fixedmu_problem_spec_active)
     end
 
     @testset "diagnostic level none" begin

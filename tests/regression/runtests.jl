@@ -23,6 +23,7 @@ const SMOKE_FILES = [
     joinpath(REGRESSION_DIR, "models", "test_solver_attempt_engine_convergence_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_solver_diagnostic_exception_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_solver_contract_regression.jl"),
+    joinpath(REGRESSION_DIR, "models", "test_solver_phase3_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_fixedrho_semantic_equivalence_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_firstorder_manifold_branch_stability.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),

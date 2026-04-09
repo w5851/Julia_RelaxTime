@@ -12,6 +12,8 @@
 4. `Models.solve_multi`：当你明确需要多初值筛选物理解时使用
 5. `Models.coerce_solver_result` / `Models.solver_result_view`：当你需要稳定序列化视图或版本化契约检查时使用
 
+Phase 3 收口说明：`fixedmu_problem_spec_active` 兼容字段与 `fixedmu_use_problem_spec` 开关均已移除，`solve_constraint` 统一走 ProblemSpec 主链。
+
 ## 什么时候用 `create_model`
 
 当你明确在 `Models` 多重派发体系下工作时，先构造模型对象：
