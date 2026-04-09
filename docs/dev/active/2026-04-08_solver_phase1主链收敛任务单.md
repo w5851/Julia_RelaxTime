@@ -42,13 +42,13 @@
     2) 无论是否传 `problem_spec`，均走 `_solve_with_problem_spec_default(...)`。
     3) 保留返回字段 `fixedmu_problem_spec_active`（兼容上游读取），并确保值为 `true` 或按 raw 回传。
 
-- [ ] `_solve_with_problem_spec_default(model, mode, T_fm, kwargs)`
+- [x] `_solve_with_problem_spec_default(model, mode, T_fm, kwargs)`
   - diff 类型：`防御性增强 + 文案统一`
   - 改动要点：
     1) 统一 legacy 开关错误文案：明确“已移除 + 请使用 ProblemSpec 主链”。
     2) 确保 `problem_spec` 类型校验与转发规则保持稳定。
 
-- [ ] `_strip_forward_kwargs(kwargs, blocked)`（如需）
+- [x] `_strip_forward_kwargs(kwargs, blocked)`（如需）
   - diff 类型：`小幅兼容`
   - 改动要点：仅在必要时调整被剔除键，避免遗留键泄漏到下游造成行为分叉。
 
@@ -107,7 +107,7 @@
   - 应对：抛出 `ArgumentError`，文案给出替代用法。
   - 回滚点：仅临时恢复参数容忍（warning），不恢复 direct 分流逻辑。
 
-- [ ] 风险 B：自定义 `problem_spec` 依赖旧 kwargs 清洗顺序。
+- [x] 风险 B：自定义 `problem_spec` 依赖旧 kwargs 清洗顺序。
   - 应对：在 `_solve_with_problem_spec_default` 内补兼容映射。
   - 回滚点：只回滚参数映射，不回滚主链统一。
 
@@ -118,9 +118,9 @@
 ## 7. 建议提交粒度（便于 bisect/回滚）
 
 - [x] Commit 1：`Solver.jl` 主链收敛（只动 FixedMu 入口分流）。
-- [ ] Commit 2：legacy 开关治理 + 注释对齐。
-- [ ] Commit 3：上层兼容修补（若测试暴露依赖）。
-- [ ] Commit 4：文档/治理脚本收口。
+- [x] Commit 2：legacy 开关治理 + 注释对齐。
+- [x] Commit 3：上层兼容修补（若测试暴露依赖）。
+- [x] Commit 4：文档/治理脚本收口。
 
 ## 8. DoD（Phase 1）
 
@@ -141,6 +141,9 @@
   - `_solve_with_problem_spec_default(...)` legacy 开关报错文案统一为“已移除 + ProblemSpec 替代路径”。
   - 完成风险 B 专项回归（`test_problem_spec_contract.jl` + solver 相关 unit/integration 目标集）。
   - docs 治理检查通过：`check_docs_consistency.jl`、`check_active_docs_governance.jl`。
+- [x] 2026-04-09：补齐记录型收口项（本分支审计回填）。
+  - 将 3.1 第二项、3.1 第三项、风险 B、建议提交粒度 Commit 2/3/4 与执行记录统一对齐。
+  - 关联提交：`87f30b0`（主链强制）、`ca02092`（Phase1 护栏收口）。
 
 ## 10. 剩余项（未完成即不宣称 Phase 1 完结）
 

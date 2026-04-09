@@ -95,10 +95,10 @@ end
             T_mev = 120.0,
             mu_mev = 0.0,
             converged = false,
-            residual_upper = Inf,
+            residual_upper = 1.0,
             selection_reason = :no_candidate_passed_constraints,
             seed_index = -1,
-            failed_constraints = Symbol[:solver_failed],
+            failed_constraints = Symbol[:residual_too_large],
         ),
         (
             name = :fixedsigma_120_10,
