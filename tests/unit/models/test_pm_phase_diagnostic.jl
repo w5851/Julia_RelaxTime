@@ -269,3 +269,36 @@ end
     @test !Base.isexported(Models, :_pm_maxwell_reference_from_rows)
     @test !Base.isexported(Models, :_pm_refine_transition_bracket)
 end
+
+@testset "PM diagnostic accepts typed solver diagnostics" begin
+    summary = Models.SolverDiagnosticSummary(
+        Models.SOLVER_DIAGNOSTIC_VERSION_V1,
+        :primary,
+        :seed0,
+        true,
+        Symbol[],
+        :none,
+        "",
+        :pressure_max_under_constraints,
+        :converged,
+        nothing,
+        :problem_spec_selector,
+    )
+    result = (
+        converged=true,
+        diagnostic=summary,
+        failed_constraints=Symbol[],
+    )
+
+    diag = Models._pm_extract_solver_diagnostic(result; seed_source=:seed0)
+    @test haskey(diag, :diagnostic_version)
+    @test diag.diagnostic_version == Models.SOLVER_DIAGNOSTIC_VERSION_V1
+    @test haskey(diag, :attempt_origin)
+    @test haskey(diag, :selection_reason)
+    @test diag.seed_source == :seed0
+    @test Models._pm_infer_phase_status(diag) == :valid
+
+    public_diag = Models.coerce_solver_diagnostic_public_view(summary)
+    @test haskey(public_diag, :diagnostic_version)
+    @test !haskey(public_diag, :selection_reason_source)
+end

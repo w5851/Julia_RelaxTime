@@ -446,7 +446,7 @@ function _compute_fixedmu_candidate(
     )
 end
 
-function _compute_mode_thermo_quantities(
+@inline function _compute_mode_thermo_quantities(
     model::AbstractQCDModel,
     x_state::AbstractVector,
     T_fm::Real,
@@ -456,38 +456,16 @@ function _compute_mode_thermo_quantities(
     t_num::Int,
     rho0_scale::Union{Nothing, Real}=rho0,
 )
-    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-    rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
-    rho_norm = if rho0_scale === nothing
-        sum(rho_vec) / 3.0
-    else
-        sum(rho_vec) / (3.0 * Float64(rho0_scale))
-    end
-    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    entropy = ForwardDiff.derivative(pressure_T, T_fm)
-    energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-    masses = _mass_from_state(model, x_state)
-
-    return (
-        pressure=pressure,
-        omega=-pressure,
-        rho_vec=rho_vec,
-        rho_norm=rho_norm,
-        entropy=entropy,
-        energy=energy,
-        masses=masses,
+    return _compute_mode_thermo_quantities_impl(
+        model,
+        x_state,
+        T_fm,
+        mu_vec;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        rho0_scale=rho0_scale,
     )
-end
-
-@inline function _residual_component_value(v::Real)
-    value = abs(Float64(v))
-    return isfinite(value) ? value : Inf
-end
-
-@inline function _residual_component_value(v::Tuple{<:Real, <:Real})
-    value = abs(Float64(v[1]) - Float64(v[2]))
-    return isfinite(value) ? value : Inf
 end
 
 function _compose_mode_residual_norm(
@@ -500,13 +478,16 @@ function _compose_mode_residual_norm(
     p_num::Int,
     t_num::Int,
 )
-    gap_norm = _gap_norm_from_state(model, x_state, mu_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
-    residual_norm = gap_norm
-    for component in components
-        comp = _residual_component_value(component)
-        residual_norm = max(residual_norm, comp)
-    end
-    return residual_norm
+    return _compose_mode_residual_norm_impl(
+        model,
+        x_state,
+        mu_vec,
+        T_fm,
+        components...;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+    )
 end
 
 function _build_default_seed_candidates(seed_guess::AbstractVector)

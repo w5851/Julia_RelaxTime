@@ -11,7 +11,6 @@ function _solve_constraint_fixedsigma(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
-    allow_legacy_fallback::Bool=false,
     rho0::Real,
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
@@ -108,7 +107,6 @@ function _solve_constraint_fixedsigma(
     phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
     converged = res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
 
-    _ = allow_legacy_fallback
     return _build_mode_result_from_outer_state(
         x_state_ref[],
         mu_vec_ref[],

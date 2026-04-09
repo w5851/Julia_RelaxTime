@@ -75,17 +75,11 @@ function _execute_governed_attempt_plan(
 
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
-            candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(attempt_index))
-            normalized = normalize_governance_candidate(candidate;
+            merged = build_governance_candidate(raw;
+                hard_constraint_ok=ok,
+                failed_constraints=failed,
                 seed_index=Int(attempt_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
+                residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
             )
             success = evaluate_candidate_success(merged;
                 residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
@@ -96,17 +90,11 @@ function _execute_governed_attempt_plan(
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
             err_kind = classify_attempt_error(err)
             err_msg = normalize_error_message(err)
-            candidate = (; raw..., hard_constraint_ok=false, failed_constraints=Symbol[:solver_failed], seed_index=Int(attempt_index))
-            normalized = normalize_governance_candidate(candidate;
+            merged = build_governance_candidate(raw;
+                hard_constraint_ok=false,
+                failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(attempt_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
+                residual_norm_max=Float64(get(kwargs, :residual_norm_max, 1e-6)),
                 error_kind=err_kind,
                 error_msg=err_msg,
             )
@@ -143,7 +131,7 @@ end
 end
 
 @inline function _strip_problemspec_forwardsolve_kwargs!(kwargs::Dict{Symbol,Any})
-    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :extra_constraints, :fixedmu_use_problem_spec, :legacy_fallback_plugin, :diagnostic_level)
+    for key in (:seed_candidates, :hard_constraints, :semantic_mode, :selector, :fixedrho_joint_solve, :continuity_seed, :evaluate_all_attempts, :extra_constraints, :diagnostic_level)
         delete!(kwargs, key)
     end
     return kwargs
@@ -172,7 +160,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
 
     solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
-    result = (; solved..., fixedmu_problem_spec_active=true)
+    result = solved
     if diagnostic_level === :none
         return result
     end
@@ -260,33 +248,39 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     _strip_fixedrho_joint_nlsolve_kwargs!(local_nls_kwargs)
 
     postprocess_solution = function (solution)
-        x_state, mu_vec = _unpack_solution(solution; state_n=5, mu_n=3)
-
-        pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-        pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
-        rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
-        rho_norm = sum(rho_vec) / (3.0 * rho0)
-        pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-        entropy = ForwardDiff.derivative(pressure_T, T_fm)
-        energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
-        omega_val = -pressure
-        masses = calculate_mass_vec(model, SVector{3}(x_state[1], x_state[2], x_state[3]))
-        thermo_finite = isfinite(omega_val) && isfinite(pressure) && isfinite(rho_norm) && isfinite(entropy) && isfinite(energy)
-        phys = physicality_check(x_state, masses) && thermo_finite
-
-        residual_vec = zeros(Float64, 8)
-        residual_fn!(residual_vec, solution)
-        residual_norm = sqrt(sum(abs2, residual_vec))
+        thermo = compute_thermo_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            rho0_scale=rho0,
+            state_n=5,
+            mu_n=3,
+        )
+        residual_norm = compute_residual_norm_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            state_n=5,
+            mu_n=3,
+            residual_fn=residual_fn!,
+        )
+        phys = physicality_check(thermo.x_state, thermo.masses) && _thermo_quantities_finite(thermo)
 
         return (
-            x_state=x_state,
-            mu_vec=mu_vec,
-            omega=omega_val,
-            pressure=pressure,
-            rho_norm=rho_norm,
-            entropy=entropy,
-            energy=energy,
-            masses=masses,
+            x_state=thermo.x_state,
+            mu_vec=thermo.mu_vec,
+            omega=thermo.omega,
+            pressure=thermo.pressure,
+            rho_norm=thermo.rho_norm,
+            entropy=thermo.entropy,
+            energy=thermo.energy,
+            masses=thermo.masses,
             residual_norm=residual_norm,
             phys=phys,
         )
@@ -371,26 +365,19 @@ end
 
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    cfg = _fixedrho_runtime_config_from_kwargs(mode, kwargs)
     diagnostic_level = _resolve_diagnostic_level(kwargs)
     extra_constraints = _resolve_extra_constraints(kwargs)
-    fixedrho_joint_solve = get(kwargs, :fixedrho_joint_solve, true)
-    fixedrho_joint_solve isa Bool || throw(ArgumentError("fixedrho_joint_solve must be Bool, got $(typeof(fixedrho_joint_solve))"))
+    fixedrho_joint_solve = cfg.fixedrho_joint_solve
     fixedrho_joint_solve || throw(ArgumentError("fixedrho_joint_solve=false is no longer supported; FixedRho uses joint solve only"))
 
-    seed_guess = get(kwargs, :seed_guess, nothing)
-    seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec FixedRho forward_solve"))
+    provided_seed_pool = cfg.seed_candidates
+    default_seed_pool = _build_default_seed_candidates(mode, cfg.seed_guess)
 
-    provided_seed_pool = _resolve_optional_seed_candidates(kwargs)
-    default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
-
-    primary_seed = Float64.(seed_guess)
-    primary_method = if haskey(kwargs, :nlsolve_method)
-        kwargs[:nlsolve_method]
-    else
-        Bool(get(kwargs, :continuity_seed, false)) ? :newton : :trust_region
-    end
-    primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
-    fallback_method = get(kwargs, :fallback_method, :trust_region)
+    primary_seed = cfg.seed_guess
+    primary_method = cfg.primary_method
+    primary_use_fallback = cfg.trust_region_fallback
+    fallback_method = cfg.fallback_method
 
     legacy_seed = if length(primary_seed) >= 5
         _extend_seed_with_extra(Float64.(extend_seed(Float64.(primary_seed[1:5]), mode)), mode, extra_constraints)
@@ -414,6 +401,12 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
     hard_constraints = _append_extra_feasible_rule(hard_constraints, extra_constraints, mode)
 
     selector_fn = _resolve_candidate_selector(kwargs)
+    kwargs[:evaluate_all_attempts] = cfg.evaluate_all_attempts
+    kwargs[:residual_norm_max] = cfg.residual_norm_max
+    kwargs[:xi] = cfg.xi
+    kwargs[:p_num] = cfg.p_num
+    kwargs[:t_num] = cfg.t_num
+    kwargs[:continuity_seed] = cfg.continuity_seed
     selected, candidates = _execute_governed_attempt_plan(
         attempt_plan,
         kwargs,
@@ -514,23 +507,26 @@ function _governed_nonrho_problem_spec_forward_solve(
     mode_label::AbstractString,
     attempt_origin_key::Symbol,
     solve_mode_constraint::Function,
+    runtime_config=nothing,
 )
     extra_constraints = _resolve_extra_constraints(kwargs)
     diagnostic_level = _resolve_diagnostic_level(kwargs)
-    seed_guess = get(kwargs, :seed_guess, nothing)
+    seed_guess = runtime_config === nothing ? get(kwargs, :seed_guess, nothing) : runtime_config.seed_guess
     seed_guess === nothing && throw(ArgumentError("seed_guess is required for ProblemSpec $(mode_label) forward_solve"))
 
-    provided_seed_pool = _resolve_optional_seed_candidates(kwargs)
+    provided_seed_pool = runtime_config === nothing ? _resolve_optional_seed_candidates(kwargs) : runtime_config.seed_candidates
     default_seed_pool = _build_default_seed_candidates(mode, seed_guess)
 
     primary_seed = Float64.(seed_guess)
-    primary_method = if haskey(kwargs, :nlsolve_method)
+    primary_method = if runtime_config !== nothing
+        runtime_config.primary_method
+    elseif haskey(kwargs, :nlsolve_method)
         kwargs[:nlsolve_method]
     else
         Bool(get(kwargs, :continuity_seed, false)) ? :newton : :trust_region
     end
-    primary_use_fallback = Bool(get(kwargs, :trust_region_fallback, true))
-    fallback_method = get(kwargs, :fallback_method, :trust_region)
+    primary_use_fallback = runtime_config === nothing ? Bool(get(kwargs, :trust_region_fallback, true)) : runtime_config.trust_region_fallback
+    fallback_method = runtime_config === nothing ? get(kwargs, :fallback_method, :trust_region) : runtime_config.fallback_method
 
     attempt_plan = _build_governed_attempt_plan(
         mode,
@@ -548,6 +544,14 @@ function _governed_nonrho_problem_spec_forward_solve(
     hard_constraints = _append_extra_feasible_rule(hard_constraints, extra_constraints, mode)
 
     selector_fn = _resolve_candidate_selector(kwargs)
+    if runtime_config !== nothing
+        kwargs[:evaluate_all_attempts] = runtime_config.evaluate_all_attempts
+        kwargs[:residual_norm_max] = runtime_config.residual_norm_max
+        kwargs[:xi] = runtime_config.xi
+        kwargs[:p_num] = runtime_config.p_num
+        kwargs[:t_num] = runtime_config.t_num
+        kwargs[:continuity_seed] = runtime_config.continuity_seed
+    end
     selected, candidates = _execute_governed_attempt_plan(
         attempt_plan,
         kwargs,
@@ -559,12 +563,6 @@ function _governed_nonrho_problem_spec_forward_solve(
             delete!(local_kwargs, :fallback_method)
 
             haskey(local_kwargs, :rho0) || throw(ArgumentError("rho0 is required for ProblemSpec $(mode_label) forward_solve"))
-            allow_legacy_fallback = Bool(get(kwargs, :allow_legacy_fallback, false))
-            if haskey(kwargs, :legacy_fallback_plugin)
-                allow_legacy_fallback = Bool(kwargs[:legacy_fallback_plugin])
-            end
-            local_kwargs[:allow_legacy_fallback] = allow_legacy_fallback
-
             solved = solve_mode_constraint(local_kwargs)
             solver_converged = Bool(solved.converged)
             attempt_quality = if solver_converged
@@ -644,6 +642,8 @@ end
 
 function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedEntropy, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    cfg = _fixedentropy_runtime_config_from_kwargs(mode, kwargs)
+    kwargs[:rho0] = cfg.rho0
     return _governed_nonrho_problem_spec_forward_solve(
         model,
         mode,
@@ -652,6 +652,7 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         "FixedEntropy",
         :entropy_attempt_origin,
         local_kwargs -> _solve_constraint_fixedentropy(model, T_fm, mode.s_target; pairs(local_kwargs)...),
+        cfg,
     )
 end
 

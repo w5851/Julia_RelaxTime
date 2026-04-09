@@ -29,7 +29,7 @@ Models.pnjl_module()
         @test haskey(result, :state) || haskey(result, :pressure) || result isa Any  # 类型灵活
     end
 
-    @testset "FixedMu defaults to ProblemSpec chain" begin
+    @testset "FixedMu ProblemSpec-only guard" begin
         m = Models.create_model(:PNJL)
         mode = Models.FixedMu()
         T_fm = 100.0 / 197.327
@@ -45,7 +45,7 @@ Models.pnjl_module()
             t_num=4,
             residual_norm_max=1e-6,
         )
-        forced_legacy = Models.solve_constraint(
+        @test_throws ArgumentError Models.solve_constraint(
             m,
             mode,
             T_fm;
@@ -57,16 +57,10 @@ Models.pnjl_module()
             fixedmu_use_problem_spec=false,
         )
 
-        @test haskey(default_path, :fixedmu_problem_spec_active)
-        @test default_path.fixedmu_problem_spec_active === true
-        @test forced_legacy.fixedmu_problem_spec_active === false
-
-        @test isapprox(default_path.residual_norm, forced_legacy.residual_norm; rtol=1e-8, atol=1e-10)
-        @test isapprox(default_path.pressure, forced_legacy.pressure; rtol=1e-8, atol=1e-10)
-        @test isapprox(default_path.rho_norm, forced_legacy.rho_norm; rtol=1e-8, atol=1e-10)
+        @test !haskey(default_path, :fixedmu_problem_spec_active)
     end
 
-    @testset "FixedMu diagnostic level requires ProblemSpec chain" begin
+    @testset "FixedMu rejects removed ProblemSpec switches" begin
         m = Models.create_model(:PNJL)
         mode = Models.FixedMu()
         T_fm = 100.0 / 197.327
@@ -83,6 +77,18 @@ Models.pnjl_module()
             residual_norm_max=1e-6,
             fixedmu_use_problem_spec=false,
             diagnostic_level=:summary,
+        )
+
+        @test_throws ArgumentError Models.solve_constraint(
+            m,
+            mode,
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=seed,
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+            fixedmu_use_problem_spec=true,
         )
     end
 
@@ -240,6 +246,107 @@ Models.pnjl_module()
         @test result isa Models.SolverResult
         @test isfinite(result.residual_norm) || isinf(result.residual_norm)
         @test result.residual_norm >= 0.0 || isinf(result.residual_norm)
+    end
+
+    @testset "ThermoPostprocess unified helpers are available" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed5 = copy(Models.pnjl_module().HADRON_SEED_5)
+        solution = Float64[seed5..., 0.0, 0.0, 0.0]
+
+        thermo = Models.compute_thermo_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=0.0,
+            p_num=8,
+            t_num=4,
+            rho0_scale=Models.pnjl_module().ρ0,
+        )
+        residual_norm = Models.compute_residual_norm_from_solution(
+            model,
+            solution,
+            T_fm;
+            xi=0.0,
+            p_num=8,
+            t_num=4,
+        )
+        candidate = Models.build_solver_candidate(
+            solution,
+            thermo,
+            residual_norm;
+            converged=true,
+            iterations=1,
+            residual_norm_max=1e-6,
+        )
+
+        @test isfinite(thermo.pressure)
+        @test isfinite(residual_norm)
+        @test candidate.solution == solution
+        @test candidate.iterations == 1
+    end
+
+    @testset "SolverRuntimeConfig typed parsers for FixedRho/FixedEntropy" begin
+        model = Models.create_model(:PNJL)
+        T_fm = 100.0 / 197.327
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+
+        rho_mode = Models.FixedRho(1.0)
+        rho_kwargs = Dict{Symbol,Any}(
+            :seed_guess => seed,
+            :residual_norm_max => 1e-6,
+        )
+        rho_cfg = Models._fixedrho_runtime_config_from_kwargs(rho_mode, rho_kwargs)
+        @test rho_cfg isa Models.FixedRhoRuntimeConfig
+        @test rho_cfg.fixedrho_joint_solve === true
+        @test rho_cfg.seed_guess == Float64.(seed)
+
+        entropy_mode = Models.FixedEntropy(0.5)
+        entropy_kwargs = Dict{Symbol,Any}(
+            :seed_guess => seed,
+            :residual_norm_max => 1e-6,
+            :rho0 => Models.pnjl_module().ρ0,
+        )
+        entropy_cfg = Models._fixedentropy_runtime_config_from_kwargs(entropy_mode, entropy_kwargs)
+        @test entropy_cfg isa Models.FixedEntropyRuntimeConfig
+        @test entropy_cfg.seed_guess == Float64.(seed)
+        @test entropy_cfg.primary_method == :trust_region
+
+        @test_throws ArgumentError Models._fixedrho_runtime_config_from_kwargs(
+            rho_mode,
+            Dict{Symbol,Any}(:seed_guess => seed, :fixedrho_joint_solve => "bad"),
+        )
+        @test_throws ArgumentError Models._fixedentropy_runtime_config_from_kwargs(
+            entropy_mode,
+            Dict{Symbol,Any}(),
+        )
+    end
+
+    @testset "SolverDiagnostics typed structures map to legacy NamedTuple" begin
+        summary = Models.SolverDiagnosticSummary(
+            Models.SOLVER_DIAGNOSTIC_VERSION_V1,
+            :primary,
+            :seed,
+            true,
+            Symbol[],
+            :none,
+            "",
+            :pressure_max_under_constraints,
+            :converged,
+            nothing,
+            :problem_spec_selector,
+        )
+        candidate = Models.SolverDiagnosticCandidate(summary)
+        full = Models.SolverDiagnosticFull(summary, [candidate])
+
+        summary_nt = Models.to_namedtuple(summary)
+        candidate_nt = Models.to_namedtuple(candidate)
+        full_nt = Models.to_namedtuple(full)
+
+        @test summary_nt.selection_reason == :pressure_max_under_constraints
+        @test candidate_nt.error_kind == :none
+        @test full_nt.selection_reason_source == :problem_spec_selector
+        @test length(full_nt.candidates) == 1
     end
 
     @testset "FixedEntropy default/bridge semantic parity (single point)" begin

@@ -86,7 +86,7 @@ end
 
 
 
-# Registration Core: bind mode to forward_solve orchestration entry.
+# Registration Core: build mode -> ProblemSpec.forward_solve 唯一注册入口。
 @inline function build_problem_spec(mode::ConstraintMode; kwargs...)
     if isempty(kwargs)
         components = build_constraint_components(mode)

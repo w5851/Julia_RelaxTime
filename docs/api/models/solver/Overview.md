@@ -10,6 +10,9 @@
 2. `Models.solve_gap`：直接求平衡态平均场状态
 3. `Models.solve`：在 PNJL 约束模式下求完整 `SolverResult`
 4. `Models.solve_multi`：当你明确需要多初值筛选物理解时使用
+5. `Models.coerce_solver_result` / `Models.solver_result_view`：当你需要稳定序列化视图或版本化契约检查时使用
+
+Phase 3 收口说明：`fixedmu_problem_spec_active` 兼容字段与 `fixedmu_use_problem_spec` 开关均已移除，`solve_constraint` 统一走 ProblemSpec 主链。
 
 ## 什么时候用 `create_model`
 
@@ -91,3 +94,5 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 - `SolverResult` 已从固定 `SVector{5}/SVector{3}` 扩展为向量泛型字段，结果消费侧不应再假设状态维度恒为 5、化学势维度恒为 3。
 - scan 结果适配层（`TmuScan` / `TrhoScan`）已按动态向量透传 `x_state` 与 `mu_vec`，为后续 schema-driven 主链路铺路。
 - 当需要显式状态布局时，优先使用 `ModelStateSchema` 系列 API（`schema_for_model`、`flatten_state`、`unflatten_state`）。
+- `SolverResult` 稳定契约版本字段为 `contract_version=:v1`；上层消费建议统一通过 `solver_result_view` 取公共视图。
+- 诊断契约稳定公共视图与内部调试视图已分层；上层默认应消费 `to_public_namedtuple` / `coerce_solver_diagnostic_public_view`。

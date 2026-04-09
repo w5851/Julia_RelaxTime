@@ -1,7 +1,8 @@
 """
     solve_constraint(model, mode, T_fm; kwargs...)
 
-统一约束求解入口。根据 `mode` 的类型分发到 models 域约束求解内核实现。
+统一约束求解入口，固定单主链：
+`solve* -> solve_constraint -> ProblemSpec.forward_solve -> mode executor`。
 """
 struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
     mode::ConstraintMode
@@ -18,10 +19,141 @@ struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:
     iterations::Int
     residual_norm::Float64
     xi::Float64
+    contract_version::Symbol
+end
+
+const SOLVER_CONTRACT_VERSION_V1 = :v1
+const SOLVER_RESULT_REQUIRED_FIELDS = (
+    :contract_version,
+    :mode,
+    :converged,
+    :solution,
+    :x_state,
+    :mu_vec,
+    :omega,
+    :pressure,
+    :rho_norm,
+    :entropy,
+    :energy,
+    :masses,
+    :iterations,
+    :residual_norm,
+    :xi,
+)
+
+@inline function _normalize_solver_contract_version(version)::Symbol
+    if version isa Symbol
+        version == SOLVER_CONTRACT_VERSION_V1 || throw(ArgumentError("unsupported solver contract_version: $(version), expected $(SOLVER_CONTRACT_VERSION_V1)"))
+        return version
+    end
+    version isa AbstractString || throw(ArgumentError("contract_version must be Symbol or AbstractString, got $(typeof(version))"))
+    normalized = Symbol(version)
+    normalized == SOLVER_CONTRACT_VERSION_V1 || throw(ArgumentError("unsupported solver contract_version: $(normalized), expected $(SOLVER_CONTRACT_VERSION_V1)"))
+    return normalized
+end
+
+function SolverResult(
+    mode::ConstraintMode,
+    converged::Bool,
+    solution::Vector{Float64},
+    x_state::VX,
+    mu_vec::VM,
+    omega::Float64,
+    pressure::Float64,
+    rho_norm::Float64,
+    entropy::Float64,
+    energy::Float64,
+    masses::MM,
+    iterations::Int,
+    residual_norm::Float64,
+    xi::Float64,
+) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
+    return SolverResult(
+        mode,
+        converged,
+        solution,
+        x_state,
+        mu_vec,
+        omega,
+        pressure,
+        rho_norm,
+        entropy,
+        energy,
+        masses,
+        iterations,
+        residual_norm,
+        xi,
+        SOLVER_CONTRACT_VERSION_V1,
+    )
+end
+
+function SolverResult(
+    mode::ConstraintMode,
+    converged::Bool,
+    solution::Vector{Float64},
+    x_state::VX,
+    mu_vec::VM,
+    omega::Float64,
+    pressure::Float64,
+    rho_norm::Float64,
+    entropy::Float64,
+    energy::Float64,
+    masses::MM,
+    iterations::Int,
+    residual_norm::Float64,
+    xi::Float64,
+    contract_version,
+) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
+    return SolverResult{VX, VM, MM}(
+        mode,
+        converged,
+        solution,
+        x_state,
+        mu_vec,
+        omega,
+        pressure,
+        rho_norm,
+        entropy,
+        energy,
+        masses,
+        iterations,
+        residual_norm,
+        xi,
+        _normalize_solver_contract_version(contract_version),
+    )
+end
+
+@inline solver_contract_version(result::SolverResult) = result.contract_version
+
+@inline function to_namedtuple(result::SolverResult)
+    return (
+        contract_version=result.contract_version,
+        mode=result.mode,
+        converged=result.converged,
+        solution=result.solution,
+        x_state=result.x_state,
+        mu_vec=result.mu_vec,
+        omega=result.omega,
+        pressure=result.pressure,
+        rho_norm=result.rho_norm,
+        entropy=result.entropy,
+        energy=result.energy,
+        masses=result.masses,
+        iterations=result.iterations,
+        residual_norm=result.residual_norm,
+        xi=result.xi,
+    )
 end
 
 @inline function _coerce_solver_result(mode::ConstraintMode, raw_result; xi_override=nothing)
-    xi_val = xi_override === nothing ? Float64(getproperty(raw_result, :xi)) : Float64(xi_override)
+    xi_val = if xi_override === nothing
+        hasproperty(raw_result, :xi) ? Float64(getproperty(raw_result, :xi)) : 0.0
+    else
+        Float64(xi_override)
+    end
+    contract_version = hasproperty(raw_result, :contract_version) ?
+        _normalize_solver_contract_version(getproperty(raw_result, :contract_version)) :
+        SOLVER_CONTRACT_VERSION_V1
     return SolverResult(
         mode,
         Bool(getproperty(raw_result, :converged)),
@@ -37,7 +169,18 @@ end
         Int(getproperty(raw_result, :iterations)),
         Float64(getproperty(raw_result, :residual_norm)),
         xi_val,
+        contract_version,
     )
+end
+
+@inline coerce_solver_result(mode::ConstraintMode, raw_result; xi_override=nothing) =
+    _coerce_solver_result(mode, raw_result; xi_override=xi_override)
+
+@inline solver_result_view(result::SolverResult) = to_namedtuple(result)
+
+@inline function solver_result_is_success(result::SolverResult; residual_norm_max::Real=1e-6, require_converged::Bool=true)
+    require_converged && !result.converged && return false
+    return isfinite(result.residual_norm) && result.residual_norm <= Float64(residual_norm_max)
 end
 
 @inline function _strip_forward_kwargs(kwargs, blocked::Tuple)
@@ -204,9 +347,11 @@ end
     T_fm::Real,
     kwargs,
 )
-    haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; solve_constraint always uses ProblemSpec chain"))
-    haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed together with legacy fallback path"))
-    haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed together with legacy fallback path"))
+    haskey(kwargs, :use_problem_spec) && throw(ArgumentError("use_problem_spec has been removed; use solve_constraint(...; problem_spec=...) or default ProblemSpec chain"))
+    haskey(kwargs, :allow_legacy_path) && throw(ArgumentError("allow_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
+    haskey(kwargs, :warn_on_legacy_path) && throw(ArgumentError("warn_on_legacy_path has been removed; solve_constraint now only uses ProblemSpec chain"))
+    haskey(kwargs, :fixedmu_use_problem_spec) && throw(ArgumentError("fixedmu_use_problem_spec has been removed; solve_constraint now always uses ProblemSpec chain"))
+    haskey(kwargs, :legacy_fallback_plugin) && throw(ArgumentError("legacy_fallback_plugin has been removed; governed solver no longer accepts legacy fallback plugin path"))
 
     spec = get(kwargs, :problem_spec, nothing)
     forwarded = (; (k => v for (k, v) in pairs(kwargs) if k != :problem_spec)...)
@@ -222,28 +367,9 @@ function solve_constraint(model::AbstractQCDModel, mode::FixedMu, T_fm::Real;
     problem_spec::Union{Nothing, ProblemSpec}=nothing,
     μ_fm::Real,
     kwargs...)
-    fixedmu_switch = get(kwargs, :fixedmu_use_problem_spec, nothing)
-    fixedmu_use_problem_spec = if fixedmu_switch === nothing
-        true
-    elseif fixedmu_switch isa Bool
-        fixedmu_switch
-    else
-        throw(ArgumentError("fixedmu_use_problem_spec must be Bool or nothing, got $(typeof(fixedmu_switch))"))
-    end
-
-    if haskey(kwargs, :diagnostic_level) && !fixedmu_use_problem_spec && problem_spec === nothing
-        throw(ArgumentError("diagnostic_level requires ProblemSpec FixedMu chain; set fixedmu_use_problem_spec=true or pass problem_spec"))
-    end
-
-    if fixedmu_use_problem_spec || problem_spec !== nothing
-        merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
-        raw = _solve_with_problem_spec_default(model, mode, T_fm, merged)
-        return (; raw..., fixedmu_problem_spec_active=Bool(get(raw, :fixedmu_problem_spec_active, false)))
-    end
-
-    filtered = _strip_forward_kwargs(kwargs, (:fixedmu_use_problem_spec, :diagnostic_level))
-    raw = _solve_constraint_fixedmu(model, T_fm, μ_fm; filtered...)
-    return (; raw..., fixedmu_problem_spec_active=false)
+    # FixedMu 与其他 mode 一致，统一走 ProblemSpec 主链。
+    merged = (; kwargs..., μ_fm=μ_fm, problem_spec=problem_spec)
+    return _solve_with_problem_spec_default(model, mode, T_fm, merged)
 end
 
 function solve_constraint(model::AbstractQCDModel, mode::FixedRho, T_fm::Real;
@@ -453,7 +579,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
             phys_ok = thermo_finite && is_physical_solution(raw.x_state, raw.masses)
             residual_ok = isfinite(raw.residual_norm) && raw.residual_norm <= opts.residual_norm_max
             ok = (Bool(raw.converged) || (residual_ok && phys_ok))
-            candidate = (
+            raw_candidate = (
                 converged=ok,
                 solution=Float64.(raw.solution),
                 x_state=raw.x_state,
@@ -468,25 +594,19 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm=Float64(raw.residual_norm),
                 hard_constraint_ok=ok,
                 failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
-                seed_index=Int(seed_index),
             )
-            normalized = normalize_governance_candidate(candidate;
+            merged = build_governance_candidate(raw_candidate;
+                hard_constraint_ok=ok,
+                failed_constraints=(ok ? Symbol[] : Symbol[:residual_too_large]),
                 seed_index=Int(seed_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
+                residual_norm_max=opts.residual_norm_max,
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,
         on_error=(_, seed_index, err) -> begin
             err_kind = classify_attempt_error(err)
             err_msg = normalize_error_message(err)
-            candidate = (
+            raw_candidate = (
                 converged=false,
                 solution=Float64[],
                 x_state=zeros(5),
@@ -501,20 +621,14 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 residual_norm=Inf,
                 hard_constraint_ok=false,
                 failed_constraints=Symbol[:solver_failed],
+            )
+            merged = build_governance_candidate(raw_candidate;
+                hard_constraint_ok=false,
+                failed_constraints=Symbol[:solver_failed],
                 seed_index=Int(seed_index),
+                residual_norm_max=opts.residual_norm_max,
                 error_kind=err_kind,
                 error_msg=err_msg,
-            )
-            normalized = normalize_governance_candidate(candidate;
-                seed_index=Int(seed_index),
-            )
-            merged = (; candidate...,
-                converged=normalized.converged,
-                pressure=normalized.pressure,
-                residual_norm=normalized.residual_norm,
-                hard_constraint_ok=normalized.hard_constraint_ok,
-                failed_constraints=normalized.failed_constraints,
-                seed_index=normalized.seed_index,
             )
             return merged, evaluate_candidate_success(merged; residual_norm_max=opts.residual_norm_max)
         end,

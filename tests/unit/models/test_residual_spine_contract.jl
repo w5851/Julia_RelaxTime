@@ -26,7 +26,7 @@ end
 
     @test isapprox(gap_norm, expected_norm; rtol=1e-9, atol=1e-9)
 
-    solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolver.jl")
+    solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolverCommon.jl")
     source = read(solver_path, String)
     @test occursin("_gap_norm_from_state", source)
     @test !occursin("gap_residual(model", source)

@@ -13,7 +13,6 @@ function _solve_constraint_fixedasymrho(
     t_num::Int=8,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:trust_region,
-    allow_legacy_fallback::Bool=false,
     rho0::Real,
     enforce_physicality::Bool=false,
     physicality_check::Function=((_, _) -> true),
@@ -124,7 +123,6 @@ function _solve_constraint_fixedasymrho(
         isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
     end
 
-    _ = allow_legacy_fallback
     return _build_mode_result_from_outer_state(
         x_state_ref[],
         mu_vec_ref[],

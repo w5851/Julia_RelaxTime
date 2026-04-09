@@ -14,10 +14,11 @@
 1. [Overview.md](Overview.md)：先理解 `create_model`、`solve_gap`、`solve`、`solve_multi` 怎么选
 2. [CoreConcepts.md](CoreConcepts.md)：理解状态合同、约束模式、seed 与 solver factory 的职责边界
 3. [StateContract.md](StateContract.md)：平均场状态与化学势输入口径
-4. [ConstraintModes.md](ConstraintModes.md)：固定化学势/密度/熵/比熵等约束入口
-5. [SeedStrategies.md](SeedStrategies.md)：默认、多初值、连续性与相变感知策略
-6. [ImplicitSolvers.md](ImplicitSolvers.md)：隐式求解器工厂与导数接口
-7. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
+4. [ResultDiagnosticErrorContracts.md](ResultDiagnosticErrorContracts.md)：稳定 Result/Diagnostic/Error 契约与版本策略
+5. [ConstraintModes.md](ConstraintModes.md)：固定化学势/密度/熵/比熵等约束入口
+6. [SeedStrategies.md](SeedStrategies.md)：默认、多初值、连续性与相变感知策略
+7. [ImplicitSolvers.md](ImplicitSolvers.md)：隐式求解器工厂与导数接口
+8. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
 
 本主题优先覆盖的 `Models` 公开表面包括：
 
@@ -26,6 +27,8 @@
 - `Models.solve`
 - `Models.solve_multi`
 - `Models.solve_constraint`
+- `Models.coerce_solver_result` / `Models.solver_result_view`
+- `Models.coerce_solver_diagnostic_public_view` / `Models.to_public_namedtuple`
 - `Models.ProblemSpec` / `Models.build_problem_spec`
 - `Models.AbstractConstraintComponent` / `Models.build_constraint_components`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`

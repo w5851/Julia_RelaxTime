@@ -8,25 +8,12 @@ end
 
 const PM_FATAL_ENDPOINT_CAUSES = (:max_iter, :nan_guard, :nonconvergence, :hard_constraint_failed)
 
-@inline function _pm_solver_attempt_origin(result)
-    if hasproperty(result, :governed_attempt_origin)
-        return Symbol(getproperty(result, :governed_attempt_origin))
-    elseif hasproperty(result, :fixedrho_joint_attempt_origin)
-        return Symbol(getproperty(result, :fixedrho_joint_attempt_origin))
-    elseif hasproperty(result, :entropy_attempt_origin)
-        return Symbol(getproperty(result, :entropy_attempt_origin))
-    elseif hasproperty(result, :sigma_attempt_origin)
-        return Symbol(getproperty(result, :sigma_attempt_origin))
-    elseif hasproperty(result, :asym_attempt_origin)
-        return Symbol(getproperty(result, :asym_attempt_origin))
-    end
-    return :fallback
-end
-
 @inline function _pm_extract_solver_diagnostic(result; seed_source::Union{Symbol,Nothing}=nothing)
+    _diag_view(diag) = coerce_solver_diagnostic_public_view(diag)
+
     if hasproperty(result, :diagnostic)
-        diag = getproperty(result, :diagnostic)
-        if hasproperty(diag, :seed_source)
+        diag = _diag_view(getproperty(result, :diagnostic))
+        if haskey(diag, :seed_source)
             return diag
         end
         return merge(diag, (seed_source=seed_source,))
@@ -45,16 +32,21 @@ end
     continuity = hasproperty(result, :continuity_distance) ? Float64(getproperty(result, :continuity_distance)) : nothing
 
     return (
-        attempt_origin=_pm_solver_attempt_origin(result),
+        diagnostic_version=:v1,
+        attempt_origin=:fallback,
         seed_source=seed_source,
         hard_constraint_ok=hard_ok,
         failed_constraints=failed,
+        error_kind=:none,
+        error_msg="",
+        selection_reason=:none,
         endpoint_cause=endpoint_cause,
         continuity_distance=continuity,
     )
 end
 
 @inline function _pm_infer_phase_status(diag)::Symbol
+    diag = diag isa NamedTuple ? diag : (applicable(to_namedtuple, diag) ? to_namedtuple(diag) : diag)
     hard_ok = get(diag, :hard_constraint_ok, nothing)
     failed = Symbol.(get(diag, :failed_constraints, Symbol[]))
     endpoint = get(diag, :endpoint_cause, nothing)
