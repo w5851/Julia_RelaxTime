@@ -500,22 +500,7 @@ _promote_success(result) = promote_near_converged(result; acceptable_residual=AC
 end
 
 function _to_solver_result(mode::ConstraintMode, result, xi::Real)
-    return SolverResult(
-        mode,
-        Bool(result.converged),
-        Float64.(result.solution),
-        Float64.(result.x_state),
-        Float64.(result.mu_vec),
-        Float64(result.omega),
-        Float64(result.pressure),
-        Float64(result.rho_norm),
-        Float64(result.entropy),
-        Float64(result.energy),
-        Float64.(result.masses),
-        Int(result.iterations),
-        Float64(result.residual_norm),
-        Float64(xi),
-    )
+    return Main.Models.coerce_solver_result(mode, result; xi_override=xi)
 end
 
 @inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)

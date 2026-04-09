@@ -82,8 +82,15 @@ const P = Models.pnjl_module()
         @test haskey(result_summary.diagnostic, :selection_reason)
         @test haskey(result_summary.diagnostic, :selection_reason_source)
         @test result_summary.diagnostic.selection_reason_source == :problem_spec_selector
+        @test haskey(result_summary.diagnostic, :diagnostic_version)
+        @test result_summary.diagnostic.diagnostic_version == Models.SOLVER_DIAGNOSTIC_VERSION_V1
         @test haskey(result_summary.diagnostic, :endpoint_cause)
         @test haskey(result_summary.diagnostic, :continuity_distance)
+
+        public_diag = Models.to_public_namedtuple(Models.coerce_solver_diagnostic_summary(result_summary.diagnostic))
+        @test !haskey(public_diag, :selection_reason_source)
+        @test haskey(public_diag, :diagnostic_version)
+        @test public_diag.diagnostic_version == Models.SOLVER_DIAGNOSTIC_VERSION_V1
     end
 
     @testset "diagnostic level full" begin
@@ -106,8 +113,33 @@ const P = Models.pnjl_module()
         @test result_full.diagnostic.selection_reason_source == :problem_spec_selector
         @test all(hasproperty(c, :selection_reason_source) for c in result_full.diagnostic.candidates)
         @test all(getproperty(c, :selection_reason_source) == :problem_spec_selector for c in result_full.diagnostic.candidates)
+        @test haskey(result_full.diagnostic, :diagnostic_version)
+        @test result_full.diagnostic.diagnostic_version == Models.SOLVER_DIAGNOSTIC_VERSION_V1
         @test haskey(result_full, :error_kind)
         @test haskey(result_full, :error_msg)
         @test haskey(result_full, :selection_reason)
+    end
+
+    @testset "SolverResult contract version and public view" begin
+        raw = Models.solve_constraint(
+            model,
+            Models.FixedMu(),
+            T_fm;
+            μ_fm=0.0,
+            seed_guess=copy(P.HADRON_SEED_5),
+            p_num=8,
+            t_num=4,
+            residual_norm_max=1e-6,
+        )
+        result = Models.coerce_solver_result(Models.FixedMu(), raw)
+        @test Models.solver_contract_version(result) == Models.SOLVER_CONTRACT_VERSION_V1
+        @test Models.solver_result_is_success(result; residual_norm_max=1e-2, require_converged=false)
+
+        view = Models.solver_result_view(result)
+        @test haskey(view, :contract_version)
+        @test view.contract_version == Models.SOLVER_CONTRACT_VERSION_V1
+        for key in Models.SOLVER_RESULT_REQUIRED_FIELDS
+            @test haskey(view, key)
+        end
     end
 end

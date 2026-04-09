@@ -46,6 +46,11 @@ const P = Models.pnjl_module()
 
         @test length(result.x_state) == 4
         @test length(result.mu_vec) == 2
+        @test Models.solver_contract_version(result) == Models.SOLVER_CONTRACT_VERSION_V1
+
+        view = Models.solver_result_view(result)
+        @test haskey(view, :contract_version)
+        @test view.contract_version == Models.SOLVER_CONTRACT_VERSION_V1
     end
 
     @testset "build_conditions can dispatch with schema" begin

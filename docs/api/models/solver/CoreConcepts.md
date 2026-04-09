@@ -90,3 +90,18 @@ R1 收敛后，`FixedRho` 主链不再只依赖“单个大 residual 函数”�
 - `ImplicitFunction` 路径和 AD 边界
 
 如果这些信息继续只留在旧页，新 `models/solver` 主题就只是一个空壳入口。这个任务的目标正是把这些说明吸收进来，让新主题独立成立。
+
+## 8. 稳定契约分层（Phase 3）
+
+为防止上层回耦到 solver 私有字段，当前约定把 solver 输出分成两层：
+
+- 公共稳定契约：可被 `phase/scans/workflows` 长期依赖。
+- 内部调试字段：仅用于 solver 内部排障与开发调试。
+
+具体实践：
+
+- 结果契约通过 `SolverResult.contract_version` 固化（当前 `:v1`）。
+- 诊断契约通过 `diagnostic_version` + 公共字段白名单固化。
+- 上层如需消费诊断，默认走 `to_public_namedtuple` / `coerce_solver_diagnostic_public_view`，避免直接依赖内部字段。
+
+该分层对应“能力边界固化”目标：新增功能可演进，但上层不再通过私有字段穿透 solver 实现。

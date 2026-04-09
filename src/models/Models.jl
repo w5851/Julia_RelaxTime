@@ -60,6 +60,9 @@ export evaluate_hard_constraints
 export select_pressure_max_candidate
 export solve_constraint
 export solve, solve_multi, SolverResult
+export SOLVER_CONTRACT_VERSION_V1, SOLVER_RESULT_REQUIRED_FIELDS
+export solver_contract_version, to_namedtuple
+export coerce_solver_result, solver_result_view, solver_result_is_success
 export solve_vec, solve_named
 export ModelStateSchema, schema_for_model, flatten_state, unflatten_state
 export ConstraintModes
@@ -73,7 +76,10 @@ export classify_attempt_error, normalize_error_message
 export governance_quality_tag, normalize_selector_candidates, execute_governance_selector
 export build_governance_candidate
 export SolverDiagnosticSummary, SolverDiagnosticCandidate, SolverDiagnosticFull
-export to_namedtuple
+export SOLVER_DIAGNOSTIC_VERSION_V1, SOLVER_DIAGNOSTIC_PUBLIC_FIELDS, SOLVER_DIAGNOSTIC_INTERNAL_FIELDS
+export solver_diagnostic_version, solver_diagnostic_public_fields, solver_diagnostic_internal_fields
+export to_public_namedtuple
+export coerce_solver_diagnostic_summary, coerce_solver_diagnostic_public_view
 export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view

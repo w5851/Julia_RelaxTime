@@ -4,213 +4,262 @@
 
 - Source module files: `src/models/Models.jl`
 - Generated page: `docs/api/models/solver/generated/Exports.md`
-- Exported symbol count: 200
-- Mentioned in non-generated docs/api pages: 144
+- Exported symbol count: 249
+- Mentioned in non-generated docs/api pages: 159
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
-| `AbstractConstraintComponent` | src/models/Models.jl | 63 | 1 | docs/api/models/solver/README.md |
+| `AbstractConstraintComponent` | src/models/Models.jl | 71 | 1 | docs/api/models/solver/README.md |
 | `AbstractNJLModel` | src/models/Models.jl | 18 | 0 | - |
 | `AbstractPNJLModel` | src/models/Models.jl | 18 | 1 | docs/api/data_contracts.md |
 | `AbstractQCDModel` | src/models/Models.jl | 18 | 1 | docs/api/data_contracts.md |
-| `CEPResult` | src/models/Models.jl | 105 | 2 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md |
-| `CandidateSelector` | src/models/Models.jl | 65 | 0 | - |
-| `Constants_PNJL` | src/models/Models.jl | 110 | 13 | docs/api/integrals/GaussLegendre.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/models/derived/derivatives/Overview.md |
-| `ConstraintModes` | src/models/Models.jl | 61 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `ContinuationState` | src/models/Models.jl | 73 | 0 | - |
-| `ContinuitySeed` | src/models/Models.jl | 66 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
-| `DefaultSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `FirstOrderSweepResult` | src/models/Models.jl | 105 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `GapParams` | src/models/Models.jl | 69 | 1 | docs/api/models/solver/ConstraintModes.md |
+| `CEPResult` | src/models/Models.jl | 126 | 2 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md |
+| `CandidateSelector` | src/models/Models.jl | 73 | 0 | - |
+| `Constants_PNJL` | src/models/Models.jl | 131 | 13 | docs/api/integrals/GaussLegendre.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/models/derived/derivatives/Overview.md |
+| `ConstraintModes` | src/models/Models.jl | 68 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
+| `ContinuationState` | src/models/Models.jl | 95 | 0 | - |
+| `DefaultSeed` | src/models/Models.jl | 87 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `ExtraConstraints` | src/models/Models.jl | 70 | 1 | docs/api/models/solver/README.md |
+| `FirstOrderSweepResult` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `GapParams` | src/models/Models.jl | 90 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `GasLiquidModel` | src/models/Models.jl | 28 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
-| `HADRON_SEED_5` | src/models/Models.jl | 68 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `HADRON_SEED_8` | src/models/Models.jl | 68 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `HardRule` | src/models/Models.jl | 65 | 0 | - |
-| `HybridContinuitySeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `Integrals` | src/models/Models.jl | 109 | 13 | docs/api/integrals/CauchyPV.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/integrals/OneLoopIntegralsAniso.md |
-| `MagneticConfig` | src/models/Models.jl | 80 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `MagneticIMCParams` | src/models/Models.jl | 79 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
+| `HADRON_SEED_5` | src/models/Models.jl | 89 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `HADRON_SEED_8` | src/models/Models.jl | 89 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `HardRule` | src/models/Models.jl | 73 | 0 | - |
+| `HybridContinuitySeed` | src/models/Models.jl | 87 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `ImplicitProblem` | src/models/Models.jl | 39 | 0 | - |
+| `ImplicitSolverConfig` | src/models/Models.jl | 39 | 0 | - |
+| `Integrals` | src/models/Models.jl | 130 | 13 | docs/api/integrals/CauchyPV.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/integrals/OneLoopIntegralsAniso.md |
+| `MagneticConfig` | src/models/Models.jl | 102 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `MagneticIMCParams` | src/models/Models.jl | 101 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
 | `MeanFieldState` | src/models/Models.jl | 34 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `ModelStateSchema` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `MultiSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `ModelStateSchema` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `MultiSeed` | src/models/Models.jl | 87 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `NJL2Model` | src/models/Models.jl | 23 | 0 | - |
 | `NJLModel` | src/models/Models.jl | 22 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
-| `PMSeedPair` | src/models/Models.jl | 107 | 0 | - |
-| `PM_BRANCH_STATUSES` | src/models/Models.jl | 106 | 0 | - |
-| `PM_COMPARISON_STATUSES` | src/models/Models.jl | 106 | 0 | - |
-| `PM_ENDPOINT_CAUSES` | src/models/Models.jl | 106 | 0 | - |
-| `PM_SEED_SOURCES` | src/models/Models.jl | 106 | 0 | - |
+| `PMSeedPair` | src/models/Models.jl | 128 | 0 | - |
+| `PM_BRANCH_STATUSES` | src/models/Models.jl | 127 | 0 | - |
+| `PM_COMPARISON_STATUSES` | src/models/Models.jl | 127 | 0 | - |
+| `PM_ENDPOINT_CAUSES` | src/models/Models.jl | 127 | 0 | - |
+| `PM_SEED_SOURCES` | src/models/Models.jl | 127 | 0 | - |
 | `PNJLMagneticModel` | src/models/Models.jl | 25 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
 | `PNJLModel` | src/models/Models.jl | 24 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
-| `PhaseAwareContinuitySeed` | src/models/Models.jl | 66 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/CoreConcepts.md |
-| `PhaseAwareSeed` | src/models/Models.jl | 66 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `PhasePipelineResult` | src/models/Models.jl | 105 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `ProblemSpec` | src/models/Models.jl | 62 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/README.md |
-| `ProductionPipelineConfig` | src/models/Models.jl | 105 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `PromotionResult` | src/models/Models.jl | 105 | 1 | docs/api/models/phase/Overview.md |
-| `QUARK_CHARGE_ABS` | src/models/Models.jl | 76 | 1 | docs/api/models/variants/magnetic/LandauIntegrals.md |
-| `QUARK_SEED_5` | src/models/Models.jl | 68 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `QUARK_SEED_8` | src/models/Models.jl | 68 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `PhasePipelineResult` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `PrimaryStrategy` | src/models/Models.jl | 86 | 0 | - |
+| `ProblemSpec` | src/models/Models.jl | 70 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/README.md |
+| `ProductionPipelineConfig` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `PromotionResult` | src/models/Models.jl | 126 | 1 | docs/api/models/phase/Overview.md |
+| `QUARK_CHARGE_ABS` | src/models/Models.jl | 98 | 1 | docs/api/models/variants/magnetic/LandauIntegrals.md |
+| `QUARK_SEED_5` | src/models/Models.jl | 89 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `QUARK_SEED_8` | src/models/Models.jl | 89 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `RPNJLModel` | src/models/Models.jl | 26 | 1 | docs/api/data_contracts.md |
-| `RootAttempt` | src/models/Models.jl | 73 | 0 | - |
-| `RootDiagnostics` | src/models/Models.jl | 73 | 0 | - |
-| `RootPolicy` | src/models/Models.jl | 73 | 0 | - |
-| `RootProblemSpec` | src/models/Models.jl | 73 | 0 | - |
-| `RootSolveResult` | src/models/Models.jl | 73 | 0 | - |
+| `RootAttempt` | src/models/Models.jl | 95 | 0 | - |
+| `RootDiagnostics` | src/models/Models.jl | 95 | 0 | - |
+| `RootPolicy` | src/models/Models.jl | 95 | 0 | - |
+| `RootProblemSpec` | src/models/Models.jl | 95 | 0 | - |
+| `RootSolveResult` | src/models/Models.jl | 95 | 0 | - |
 | `RotationModel` | src/models/Models.jl | 27 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
-| `SeedStrategy` | src/models/Models.jl | 66 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `SolverResult` | src/models/Models.jl | 59 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `TmuScanConfig` | src/models/Models.jl | 111 | 1 | docs/api/PARAMETER_TYPES_API.md |
-| `TransportProvider` | src/models/Models.jl | 86 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/relaxtime/transport/CoreConcepts.md<br>docs/api/relaxtime/transport/README.md |
-| `TrhoScanConfig` | src/models/Models.jl | 111 | 1 | docs/api/PARAMETER_TYPES_API.md |
-| `alpha_n` | src/models/Models.jl | 77 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `analyze_pm_branch_competition` | src/models/Models.jl | 108 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
-| `baryon_Ssigma` | src/models/Models.jl | 54 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
-| `baryon_kappa_sigma2` | src/models/Models.jl | 54 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
-| `build_candidate_context` | src/models/Models.jl | 65 | 0 | - |
-| `build_conditions` | src/models/Models.jl | 69 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `build_constraint_components` | src/models/Models.jl | 64 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
-| `build_default_rho_grid` | src/models/Models.jl | 89 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
-| `build_phase_artifacts` | src/models/Models.jl | 103 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `build_pnjl_fixedmu_adapters` | src/models/Models.jl | 42 | 0 | - |
-| `build_pnjl_flavor_mu_adapters` | src/models/Models.jl | 42 | 0 | - |
-| `build_problem_spec` | src/models/Models.jl | 62 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
-| `build_residual!` | src/models/Models.jl | 69 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `bulk_derivative_coeffs` | src/models/Models.jl | 45 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
-| `bulk_viscosity_coefficients` | src/models/Models.jl | 46 | 9 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `cached_nodes` | src/models/Models.jl | 109 | 0 | - |
+| `SOLVER_CONTRACT_VERSION_V1` | src/models/Models.jl | 63 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SOLVER_DIAGNOSTIC_INTERNAL_FIELDS` | src/models/Models.jl | 79 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SOLVER_DIAGNOSTIC_PUBLIC_FIELDS` | src/models/Models.jl | 79 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SOLVER_DIAGNOSTIC_VERSION_V1` | src/models/Models.jl | 79 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SOLVER_RESULT_REQUIRED_FIELDS` | src/models/Models.jl | 63 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SchemaRegistry` | src/models/Models.jl | 83 | 0 | - |
+| `SeedStrategy` | src/models/Models.jl | 87 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `SolverDiagnosticCandidate` | src/models/Models.jl | 78 | 0 | - |
+| `SolverDiagnosticFull` | src/models/Models.jl | 78 | 0 | - |
+| `SolverDiagnosticSummary` | src/models/Models.jl | 78 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SolverResult` | src/models/Models.jl | 62 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `TmuScanConfig` | src/models/Models.jl | 132 | 1 | docs/api/PARAMETER_TYPES_API.md |
+| `TransportProvider` | src/models/Models.jl | 108 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/relaxtime/transport/CoreConcepts.md<br>docs/api/relaxtime/transport/README.md |
+| `TrhoScanConfig` | src/models/Models.jl | 132 | 1 | docs/api/PARAMETER_TYPES_API.md |
+| `VarSchema` | src/models/Models.jl | 83 | 0 | - |
+| `alpha_n` | src/models/Models.jl | 99 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `analyze_pm_branch_competition` | src/models/Models.jl | 129 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
+| `baryon_Ssigma` | src/models/Models.jl | 57 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
+| `baryon_kappa_sigma2` | src/models/Models.jl | 57 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
+| `build_candidate_context` | src/models/Models.jl | 73 | 0 | - |
+| `build_conditions` | src/models/Models.jl | 90 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `build_constraint_components` | src/models/Models.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
+| `build_default_rho_grid` | src/models/Models.jl | 111 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
+| `build_governance_candidate` | src/models/Models.jl | 77 | 0 | - |
+| `build_implicit_solver` | src/models/Models.jl | 39 | 0 | - |
+| `build_njl_problem` | src/models/Models.jl | 40 | 0 | - |
+| `build_phase_artifacts` | src/models/Models.jl | 124 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `build_pnjl_fixedmu_adapters` | src/models/Models.jl | 45 | 0 | - |
+| `build_pnjl_fixedmu_problem` | src/models/Models.jl | 40 | 0 | - |
+| `build_pnjl_flavor_mu_adapters` | src/models/Models.jl | 45 | 0 | - |
+| `build_pnjl_flavor_mu_problem` | src/models/Models.jl | 40 | 0 | - |
+| `build_problem_spec` | src/models/Models.jl | 70 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
+| `build_residual!` | src/models/Models.jl | 90 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `build_seed_pool` | src/models/Models.jl | 74 | 0 | - |
+| `bulk_derivative_coeffs` | src/models/Models.jl | 48 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
+| `bulk_viscosity_coefficients` | src/models/Models.jl | 49 | 9 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `cached_nodes` | src/models/Models.jl | 130 | 0 | - |
 | `calculate_chiral` | src/models/Models.jl | 19 | 1 | docs/api/data_contracts.md |
-| `calculate_energy_sum` | src/models/Models.jl | 109 | 0 | - |
-| `calculate_magnetic_number_densities` | src/models/Models.jl | 83 | 4 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `calculate_magnetic_omega` | src/models/Models.jl | 81 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `calculate_magnetic_omega_components` | src/models/Models.jl | 81 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
-| `calculate_magnetic_pressure` | src/models/Models.jl | 82 | 3 | docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
-| `calculate_magnetic_rho` | src/models/Models.jl | 82 | 2 | docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `calculate_energy_sum` | src/models/Models.jl | 130 | 0 | - |
+| `calculate_magnetic_number_densities` | src/models/Models.jl | 105 | 4 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `calculate_magnetic_omega` | src/models/Models.jl | 103 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `calculate_magnetic_omega_components` | src/models/Models.jl | 103 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `calculate_magnetic_pressure` | src/models/Models.jl | 104 | 3 | docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `calculate_magnetic_rho` | src/models/Models.jl | 104 | 2 | docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
 | `calculate_mass_vec` | src/models/Models.jl | 19 | 1 | docs/api/data_contracts.md |
-| `calculate_number_densities` | src/models/Models.jl | 109 | 0 | - |
-| `chi11_BQ` | src/models/Models.jl | 53 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi11_BS` | src/models/Models.jl | 53 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi11_QS` | src/models/Models.jl | 53 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi1_B` | src/models/Models.jl | 50 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi1_Q` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi1_S` | src/models/Models.jl | 52 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi2_B` | src/models/Models.jl | 50 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi2_Q` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi2_S` | src/models/Models.jl | 52 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi3_B` | src/models/Models.jl | 50 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi3_Q` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi3_S` | src/models/Models.jl | 52 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi4_B` | src/models/Models.jl | 50 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi4_Q` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi4_S` | src/models/Models.jl | 52 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi_B` | src/models/Models.jl | 50 | 5 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md |
-| `chi_BQS` | src/models/Models.jl | 49 | 5 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md |
-| `chi_Q` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
-| `chi_S` | src/models/Models.jl | 52 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `calculate_number_densities` | src/models/Models.jl | 130 | 0 | - |
+| `chi11_BQ` | src/models/Models.jl | 56 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi11_BS` | src/models/Models.jl | 56 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi11_QS` | src/models/Models.jl | 56 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi1_B` | src/models/Models.jl | 53 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi1_Q` | src/models/Models.jl | 54 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi1_S` | src/models/Models.jl | 55 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi2_B` | src/models/Models.jl | 53 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi2_Q` | src/models/Models.jl | 54 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi2_S` | src/models/Models.jl | 55 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi3_B` | src/models/Models.jl | 53 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi3_Q` | src/models/Models.jl | 54 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi3_S` | src/models/Models.jl | 55 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi4_B` | src/models/Models.jl | 53 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi4_Q` | src/models/Models.jl | 54 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi4_S` | src/models/Models.jl | 55 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi_B` | src/models/Models.jl | 53 | 5 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md |
+| `chi_BQS` | src/models/Models.jl | 52 | 5 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md |
+| `chi_Q` | src/models/Models.jl | 54 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `chi_S` | src/models/Models.jl | 55 | 2 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/README.md |
+| `classify_attempt_error` | src/models/Models.jl | 75 | 0 | - |
 | `clear_model_cache!` | src/models/Models.jl | 30 | 0 | - |
-| `compute_B_bracket` | src/models/Models.jl | 46 | 8 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `conserved_charge_susceptibility` | src/models/Models.jl | 48 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/README.md |
-| `constraint_dim` | src/models/Models.jl | 64 | 0 | - |
-| `constraint_name` | src/models/Models.jl | 64 | 0 | - |
-| `constraint_total_dim` | src/models/Models.jl | 64 | 0 | - |
-| `coupling_GB` | src/models/Models.jl | 79 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
-| `create_flavor_mu_implicit_gap_solver` | src/models/Models.jl | 40 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `create_implicit_gap_solver` | src/models/Models.jl | 39 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
+| `coerce_solver_diagnostic_public_view` | src/models/Models.jl | 82 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `coerce_solver_diagnostic_summary` | src/models/Models.jl | 82 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `coerce_solver_result` | src/models/Models.jl | 65 | 3 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md<br>docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `compute_B_bracket` | src/models/Models.jl | 49 | 8 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `conserved_charge_susceptibility` | src/models/Models.jl | 51 | 3 | docs/api/models/derived/susceptibility/ConservedChargeSusceptibilities.md<br>docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/README.md |
+| `constraint_dim` | src/models/Models.jl | 72 | 0 | - |
+| `constraint_name` | src/models/Models.jl | 72 | 0 | - |
+| `constraint_total_dim` | src/models/Models.jl | 72 | 0 | - |
+| `coupling_GB` | src/models/Models.jl | 101 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `create_flavor_mu_implicit_gap_solver` | src/models/Models.jl | 42 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `create_implicit_gap_solver` | src/models/Models.jl | 41 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `create_model` | src/models/Models.jl | 29 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `create_pnjl_implicit_solver` | src/models/Models.jl | 41 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `cumulant_B` | src/models/Models.jl | 54 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
-| `cumulant_BQS` | src/models/Models.jl | 49 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
-| `dP_dT` | src/models/Models.jl | 47 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
-| `dP_dmu` | src/models/Models.jl | 47 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
-| `default_hard_constraint_rules` | src/models/Models.jl | 55 | 0 | - |
-| `default_imc_params` | src/models/Models.jl | 79 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
-| `default_magnetic_config` | src/models/Models.jl | 80 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `default_momentum_count` | src/models/Models.jl | 91 | 0 | - |
-| `default_momentum_nodes` | src/models/Models.jl | 92 | 0 | - |
-| `default_momentum_weights` | src/models/Models.jl | 92 | 0 | - |
-| `default_scan_numeric_options` | src/models/Models.jl | 90 | 0 | - |
-| `default_theta_count` | src/models/Models.jl | 91 | 0 | - |
-| `density_flavor_landau` | src/models/Models.jl | 78 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `derive_pm_seed_pair` | src/models/Models.jl | 108 | 0 | - |
-| `energy_landau` | src/models/Models.jl | 77 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `evaluate_hard_constraints` | src/models/Models.jl | 56 | 0 | - |
-| `explicit_residual` | src/models/Models.jl | 70 | 0 | - |
-| `explicit_residual!` | src/models/Models.jl | 70 | 0 | - |
-| `find_cep` | src/models/Models.jl | 103 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
-| `flatten_state` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `flavor_pressure_derivatives` | src/models/Models.jl | 48 | 2 | docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `create_pnjl_implicit_solver` | src/models/Models.jl | 43 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `cumulant_B` | src/models/Models.jl | 57 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
+| `cumulant_BQS` | src/models/Models.jl | 52 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
+| `dP_dT` | src/models/Models.jl | 50 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
+| `dP_dmu` | src/models/Models.jl | 50 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
+| `default_extra_constraints` | src/models/Models.jl | 70 | 0 | - |
+| `default_hard_constraint_rules` | src/models/Models.jl | 58 | 0 | - |
+| `default_imc_params` | src/models/Models.jl | 101 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
+| `default_magnetic_config` | src/models/Models.jl | 102 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `default_momentum_count` | src/models/Models.jl | 113 | 0 | - |
+| `default_momentum_nodes` | src/models/Models.jl | 114 | 0 | - |
+| `default_momentum_weights` | src/models/Models.jl | 114 | 0 | - |
+| `default_scan_numeric_options` | src/models/Models.jl | 112 | 0 | - |
+| `default_theta_count` | src/models/Models.jl | 113 | 0 | - |
+| `density_flavor_landau` | src/models/Models.jl | 100 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `derive_named` | src/models/Models.jl | 44 | 0 | - |
+| `derive_pm_seed_pair` | src/models/Models.jl | 129 | 0 | - |
+| `derive_vec` | src/models/Models.jl | 44 | 0 | - |
+| `energy_landau` | src/models/Models.jl | 99 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `evaluate_candidate_success` | src/models/Models.jl | 74 | 0 | - |
+| `evaluate_hard_constraints` | src/models/Models.jl | 59 | 0 | - |
+| `execute_governance_selector` | src/models/Models.jl | 76 | 1 | docs/api/models/solver/README.md |
+| `explicit_residual` | src/models/Models.jl | 91 | 0 | - |
+| `explicit_residual!` | src/models/Models.jl | 91 | 0 | - |
+| `find_cep` | src/models/Models.jl | 124 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
+| `flatten_state` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `flavor_pressure_derivatives` | src/models/Models.jl | 51 | 2 | docs/api/models/derived/susceptibility/Overview.md<br>docs/api/models/derived/susceptibility/README.md |
+| `gap_core_residual!` | src/models/Models.jl | 90 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `gap_residual` | src/models/Models.jl | 38 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/ImplicitSolvers.md |
 | `gap_state_dim` | src/models/Models.jl | 38 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
-| `gas_liquid_workflow_module` | src/models/Models.jl | 100 | 0 | - |
-| `get_all_seeds` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `gas_liquid_workflow_module` | src/models/Models.jl | 121 | 0 | - |
+| `get_all_seeds` | src/models/Models.jl | 88 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `get_cached_model` | src/models/Models.jl | 30 | 0 | - |
-| `get_seed` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `get_seed` | src/models/Models.jl | 88 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `governance_quality_tag` | src/models/Models.jl | 76 | 1 | docs/api/models/solver/README.md |
 | `grand_potential` | src/models/Models.jl | 32 | 0 | - |
-| `is_physical_solution` | src/models/Models.jl | 72 | 0 | - |
-| `load_dual_branch_scan!` | src/models/Models.jl | 93 | 1 | docs/api/pnjl/DualBranchScan.md |
-| `magnetic_nmax_convergence_report` | src/models/Models.jl | 84 | 6 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
-| `magnetic_thermodynamics_module` | src/models/Models.jl | 102 | 0 | - |
-| `mass_derivatives` | src/models/Models.jl | 45 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
+| `is_physical_solution` | src/models/Models.jl | 94 | 0 | - |
+| `magnetic_nmax_convergence_report` | src/models/Models.jl | 106 | 6 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
+| `magnetic_thermodynamics_module` | src/models/Models.jl | 123 | 0 | - |
+| `mass_derivatives` | src/models/Models.jl | 48 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
 | `meanfield_state` | src/models/Models.jl | 35 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/README.md<br>docs/api/models/solver/StateContract.md |
-| `meson_workflow_module` | src/models/Models.jl | 99 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `meson_workflow_module` | src/models/Models.jl | 120 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
 | `model_pressure` | src/models/Models.jl | 33 | 0 | - |
 | `model_rho` | src/models/Models.jl | 33 | 0 | - |
 | `model_thermo` | src/models/Models.jl | 33 | 1 | docs/api/models/solver/Overview.md |
+| `mu_var_dim` | src/models/Models.jl | 69 | 0 | - |
+| `mu_view` | src/models/Models.jl | 85 | 0 | - |
+| `named_to_vec` | src/models/Models.jl | 84 | 0 | - |
+| `normalize_error_message` | src/models/Models.jl | 75 | 0 | - |
+| `normalize_governance_candidate` | src/models/Models.jl | 74 | 0 | - |
 | `normalize_mu_vec` | src/models/Models.jl | 36 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/StateContract.md |
-| `normalize_pm_seed_pair` | src/models/Models.jl | 107 | 0 | - |
+| `normalize_pm_seed_pair` | src/models/Models.jl | 128 | 0 | - |
+| `normalize_selector_candidates` | src/models/Models.jl | 76 | 0 | - |
 | `number_densities` | src/models/Models.jl | 21 | 7 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md |
-| `omega` | src/models/Models.jl | 32 | 14 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md |
-| `omega0_flavor_landau` | src/models/Models.jl | 78 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `omega` | src/models/Models.jl | 32 | 15 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md |
+| `omega0_flavor_landau` | src/models/Models.jl | 100 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `omega_components` | src/models/Models.jl | 32 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md |
-| `omegat_flavor_landau` | src/models/Models.jl | 78 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `pm_next_seed_source` | src/models/Models.jl | 107 | 0 | - |
-| `pnjl_module` | src/models/Models.jl | 94 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `omegat_flavor_landau` | src/models/Models.jl | 100 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `pm_next_seed_source` | src/models/Models.jl | 128 | 0 | - |
+| `pnjl_module` | src/models/Models.jl | 115 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
 | `polyakov_potential` | src/models/Models.jl | 20 | 1 | docs/api/data_contracts.md |
-| `prepare_transport_provider` | src/models/Models.jl | 87 | 6 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/TransportWorkflow.md<br>docs/api/relaxtime/transport/CoreConcepts.md |
-| `promote_phase_artifacts` | src/models/Models.jl | 104 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `prepare_transport_provider` | src/models/Models.jl | 109 | 6 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/TransportWorkflow.md<br>docs/api/relaxtime/transport/CoreConcepts.md |
+| `promote_phase_artifacts` | src/models/Models.jl | 125 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `register_model!` | src/models/Models.jl | 31 | 0 | - |
+| `register_schema!` | src/models/Models.jl | 83 | 0 | - |
 | `registered_model_kinds` | src/models/Models.jl | 31 | 0 | - |
-| `reset!` | src/models/Models.jl | 67 | 2 | docs/api/models/scans/TmuScan.md<br>docs/api/models/solver/SeedStrategies.md |
-| `resolve_nmax_from_cutoff` | src/models/Models.jl | 77 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md |
-| `resolve_phase_output_target` | src/models/Models.jl | 104 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `rotation_workflow_module` | src/models/Models.jl | 100 | 0 | - |
-| `run_phase_pipeline` | src/models/Models.jl | 103 | 7 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
-| `run_production_phase_pipeline` | src/models/Models.jl | 103 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `run_tmu_scan` | src/models/Models.jl | 88 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md |
-| `run_trho_scan` | src/models/Models.jl | 88 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
-| `schema_for_model` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `select_pressure_max_candidate` | src/models/Models.jl | 57 | 0 | - |
-| `set_phase!` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `smooth_cutoff` | src/models/Models.jl | 77 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `solve` | src/models/Models.jl | 59 | 41 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
-| `solve_constraint` | src/models/Models.jl | 58 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `resolve_nmax_from_cutoff` | src/models/Models.jl | 99 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `resolve_phase_output_target` | src/models/Models.jl | 125 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `rotation_workflow_module` | src/models/Models.jl | 121 | 0 | - |
+| `run_phase_pipeline` | src/models/Models.jl | 124 | 7 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
+| `run_production_phase_pipeline` | src/models/Models.jl | 124 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `run_tmu_scan` | src/models/Models.jl | 110 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md |
+| `run_trho_scan` | src/models/Models.jl | 110 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
+| `schema_for` | src/models/Models.jl | 83 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `schema_for_model` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `select_pressure_max_candidate` | src/models/Models.jl | 60 | 1 | docs/api/models/solver/README.md |
+| `smooth_cutoff` | src/models/Models.jl | 99 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `solution_dim` | src/models/Models.jl | 69 | 0 | - |
+| `solve` | src/models/Models.jl | 62 | 42 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
+| `solve_constraint` | src/models/Models.jl | 61 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/Models.jl | 37 | 21 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md |
-| `solve_gap_and_meson_point` | src/models/Models.jl | 96 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
-| `solve_gap_and_transport` | src/models/Models.jl | 95 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `solve_gas_liquid_point` | src/models/Models.jl | 98 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
-| `solve_multi` | src/models/Models.jl | 59 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `solve_pnjl_point` | src/models/Models.jl | 90 | 0 | - |
-| `solve_pnjl_with_derivatives` | src/models/Models.jl | 43 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md |
-| `solve_pnjl_with_flavor_mu_derivatives` | src/models/Models.jl | 44 | 1 | docs/api/models/solver/ImplicitSolvers.md |
-| `solve_root_continuation` | src/models/Models.jl | 74 | 0 | - |
-| `solve_root_with_policy` | src/models/Models.jl | 74 | 0 | - |
-| `solve_rotation_point` | src/models/Models.jl | 97 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
-| `solve_transport_from_equilibrium` | src/models/Models.jl | 95 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `solve_with_derivatives` | src/models/Models.jl | 71 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `solve_gap_and_meson_point` | src/models/Models.jl | 117 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
+| `solve_gap_and_transport` | src/models/Models.jl | 116 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
+| `solve_gas_liquid_point` | src/models/Models.jl | 119 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `solve_multi` | src/models/Models.jl | 62 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `solve_named` | src/models/Models.jl | 66 | 0 | - |
+| `solve_pnjl_point` | src/models/Models.jl | 112 | 0 | - |
+| `solve_pnjl_with_derivatives` | src/models/Models.jl | 46 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md |
+| `solve_pnjl_with_flavor_mu_derivatives` | src/models/Models.jl | 47 | 1 | docs/api/models/solver/ImplicitSolvers.md |
+| `solve_root_continuation` | src/models/Models.jl | 96 | 0 | - |
+| `solve_root_with_policy` | src/models/Models.jl | 96 | 0 | - |
+| `solve_rotation_point` | src/models/Models.jl | 118 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
+| `solve_transport_from_equilibrium` | src/models/Models.jl | 116 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
+| `solve_vec` | src/models/Models.jl | 66 | 0 | - |
+| `solve_weighted_block_fallback` | src/models/Models.jl | 92 | 0 | - |
+| `solve_with_derivatives` | src/models/Models.jl | 93 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `solver_contract_version` | src/models/Models.jl | 64 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `solver_diagnostic_internal_fields` | src/models/Models.jl | 80 | 0 | - |
+| `solver_diagnostic_public_fields` | src/models/Models.jl | 80 | 0 | - |
+| `solver_diagnostic_version` | src/models/Models.jl | 80 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `solver_result_is_success` | src/models/Models.jl | 65 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `solver_result_view` | src/models/Models.jl | 65 | 3 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md<br>docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `state_var_dim` | src/models/Models.jl | 69 | 0 | - |
 | `state_vector` | src/models/Models.jl | 35 | 5 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
+| `state_view` | src/models/Models.jl | 85 | 0 | - |
 | `thermal_contribution` | src/models/Models.jl | 20 | 0 | - |
-| `thermo_derivatives` | src/models/Models.jl | 45 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
-| `transport_provider` | src/models/Models.jl | 85 | 6 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/TransportWorkflow.md<br>docs/api/relaxtime/transport/CoreConcepts.md |
-| `transport_workflow_module` | src/models/Models.jl | 99 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `unflatten_state` | src/models/Models.jl | 60 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `thermo_derivatives` | src/models/Models.jl | 48 | 10 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/BulkViscosityDerivatives.md<br>docs/api/models/derived/derivatives/CoreConcepts.md |
+| `to_namedtuple` | src/models/Models.jl | 64 | 0 | - |
+| `to_public_namedtuple` | src/models/Models.jl | 81 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `transport_provider` | src/models/Models.jl | 107 | 6 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/TransportWorkflow.md<br>docs/api/relaxtime/transport/CoreConcepts.md |
+| `transport_workflow_module` | src/models/Models.jl | 120 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `unflatten_state` | src/models/Models.jl | 67 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `unregister_model!` | src/models/Models.jl | 31 | 0 | - |
-| `update!` | src/models/Models.jl | 67 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `update!` | src/models/Models.jl | 88 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `vacuum_contribution` | src/models/Models.jl | 20 | 0 | - |
-| `vacuum_integral` | src/models/Models.jl | 109 | 0 | - |
-| `workflow_param_adapters_module` | src/models/Models.jl | 101 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `ρ0` | src/models/Models.jl | 75 | 0 | - |
+| `vacuum_integral` | src/models/Models.jl | 130 | 0 | - |
+| `validate_schema` | src/models/Models.jl | 83 | 0 | - |
+| `vec_to_named` | src/models/Models.jl | 84 | 0 | - |
+| `workflow_param_adapters_module` | src/models/Models.jl | 122 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `ρ0` | src/models/Models.jl | 97 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
 
 ## Undocumented Or Not Yet Mentioned
 
@@ -220,34 +269,52 @@ The following exported symbols were not found in non-generated docs/api Markdown
 - `CandidateSelector`
 - `ContinuationState`
 - `HardRule`
+- `ImplicitProblem`
+- `ImplicitSolverConfig`
 - `NJL2Model`
 - `PMSeedPair`
 - `PM_BRANCH_STATUSES`
 - `PM_COMPARISON_STATUSES`
 - `PM_ENDPOINT_CAUSES`
 - `PM_SEED_SOURCES`
+- `PrimaryStrategy`
 - `RootAttempt`
 - `RootDiagnostics`
 - `RootPolicy`
 - `RootProblemSpec`
 - `RootSolveResult`
+- `SchemaRegistry`
+- `SolverDiagnosticCandidate`
+- `SolverDiagnosticFull`
+- `VarSchema`
 - `build_candidate_context`
+- `build_governance_candidate`
+- `build_implicit_solver`
+- `build_njl_problem`
 - `build_pnjl_fixedmu_adapters`
+- `build_pnjl_fixedmu_problem`
 - `build_pnjl_flavor_mu_adapters`
+- `build_pnjl_flavor_mu_problem`
+- `build_seed_pool`
 - `cached_nodes`
 - `calculate_energy_sum`
 - `calculate_number_densities`
+- `classify_attempt_error`
 - `clear_model_cache!`
 - `constraint_dim`
 - `constraint_name`
 - `constraint_total_dim`
+- `default_extra_constraints`
 - `default_hard_constraint_rules`
 - `default_momentum_count`
 - `default_momentum_nodes`
 - `default_momentum_weights`
 - `default_scan_numeric_options`
 - `default_theta_count`
+- `derive_named`
 - `derive_pm_seed_pair`
+- `derive_vec`
+- `evaluate_candidate_success`
 - `evaluate_hard_constraints`
 - `explicit_residual`
 - `explicit_residual!`
@@ -258,20 +325,36 @@ The following exported symbols were not found in non-generated docs/api Markdown
 - `magnetic_thermodynamics_module`
 - `model_pressure`
 - `model_rho`
+- `mu_var_dim`
+- `mu_view`
+- `named_to_vec`
+- `normalize_error_message`
+- `normalize_governance_candidate`
 - `normalize_pm_seed_pair`
+- `normalize_selector_candidates`
 - `pm_next_seed_source`
 - `register_model!`
+- `register_schema!`
 - `registered_model_kinds`
 - `rotation_workflow_module`
-- `select_pressure_max_candidate`
+- `solution_dim`
+- `solve_named`
 - `solve_pnjl_point`
 - `solve_root_continuation`
 - `solve_root_with_policy`
+- `solve_vec`
+- `solve_weighted_block_fallback`
+- `solver_diagnostic_internal_fields`
+- `solver_diagnostic_public_fields`
+- `state_var_dim`
+- `state_view`
 - `thermal_contribution`
+- `to_namedtuple`
 - `unregister_model!`
 - `vacuum_contribution`
 - `vacuum_integral`
-- `ρ0`
+- `validate_schema`
+- `vec_to_named`
 
 ## Notes
 

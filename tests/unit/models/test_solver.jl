@@ -313,6 +313,7 @@ Models.pnjl_module()
 
     @testset "SolverDiagnostics typed structures map to legacy NamedTuple" begin
         summary = Models.SolverDiagnosticSummary(
+            Models.SOLVER_DIAGNOSTIC_VERSION_V1,
             :primary,
             :seed,
             true,

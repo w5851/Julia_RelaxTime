@@ -19,10 +19,141 @@ struct SolverResult{VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:
     iterations::Int
     residual_norm::Float64
     xi::Float64
+    contract_version::Symbol
+end
+
+const SOLVER_CONTRACT_VERSION_V1 = :v1
+const SOLVER_RESULT_REQUIRED_FIELDS = (
+    :contract_version,
+    :mode,
+    :converged,
+    :solution,
+    :x_state,
+    :mu_vec,
+    :omega,
+    :pressure,
+    :rho_norm,
+    :entropy,
+    :energy,
+    :masses,
+    :iterations,
+    :residual_norm,
+    :xi,
+)
+
+@inline function _normalize_solver_contract_version(version)::Symbol
+    if version isa Symbol
+        version == SOLVER_CONTRACT_VERSION_V1 || throw(ArgumentError("unsupported solver contract_version: $(version), expected $(SOLVER_CONTRACT_VERSION_V1)"))
+        return version
+    end
+    version isa AbstractString || throw(ArgumentError("contract_version must be Symbol or AbstractString, got $(typeof(version))"))
+    normalized = Symbol(version)
+    normalized == SOLVER_CONTRACT_VERSION_V1 || throw(ArgumentError("unsupported solver contract_version: $(normalized), expected $(SOLVER_CONTRACT_VERSION_V1)"))
+    return normalized
+end
+
+function SolverResult(
+    mode::ConstraintMode,
+    converged::Bool,
+    solution::Vector{Float64},
+    x_state::VX,
+    mu_vec::VM,
+    omega::Float64,
+    pressure::Float64,
+    rho_norm::Float64,
+    entropy::Float64,
+    energy::Float64,
+    masses::MM,
+    iterations::Int,
+    residual_norm::Float64,
+    xi::Float64,
+) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
+    return SolverResult(
+        mode,
+        converged,
+        solution,
+        x_state,
+        mu_vec,
+        omega,
+        pressure,
+        rho_norm,
+        entropy,
+        energy,
+        masses,
+        iterations,
+        residual_norm,
+        xi,
+        SOLVER_CONTRACT_VERSION_V1,
+    )
+end
+
+function SolverResult(
+    mode::ConstraintMode,
+    converged::Bool,
+    solution::Vector{Float64},
+    x_state::VX,
+    mu_vec::VM,
+    omega::Float64,
+    pressure::Float64,
+    rho_norm::Float64,
+    entropy::Float64,
+    energy::Float64,
+    masses::MM,
+    iterations::Int,
+    residual_norm::Float64,
+    xi::Float64,
+    contract_version,
+) where {VX<:AbstractVector{<:Real}, VM<:AbstractVector{<:Real}, MM<:AbstractVector{<:Real}}
+    return SolverResult{VX, VM, MM}(
+        mode,
+        converged,
+        solution,
+        x_state,
+        mu_vec,
+        omega,
+        pressure,
+        rho_norm,
+        entropy,
+        energy,
+        masses,
+        iterations,
+        residual_norm,
+        xi,
+        _normalize_solver_contract_version(contract_version),
+    )
+end
+
+@inline solver_contract_version(result::SolverResult) = result.contract_version
+
+@inline function to_namedtuple(result::SolverResult)
+    return (
+        contract_version=result.contract_version,
+        mode=result.mode,
+        converged=result.converged,
+        solution=result.solution,
+        x_state=result.x_state,
+        mu_vec=result.mu_vec,
+        omega=result.omega,
+        pressure=result.pressure,
+        rho_norm=result.rho_norm,
+        entropy=result.entropy,
+        energy=result.energy,
+        masses=result.masses,
+        iterations=result.iterations,
+        residual_norm=result.residual_norm,
+        xi=result.xi,
+    )
 end
 
 @inline function _coerce_solver_result(mode::ConstraintMode, raw_result; xi_override=nothing)
-    xi_val = xi_override === nothing ? Float64(getproperty(raw_result, :xi)) : Float64(xi_override)
+    xi_val = if xi_override === nothing
+        hasproperty(raw_result, :xi) ? Float64(getproperty(raw_result, :xi)) : 0.0
+    else
+        Float64(xi_override)
+    end
+    contract_version = hasproperty(raw_result, :contract_version) ?
+        _normalize_solver_contract_version(getproperty(raw_result, :contract_version)) :
+        SOLVER_CONTRACT_VERSION_V1
     return SolverResult(
         mode,
         Bool(getproperty(raw_result, :converged)),
@@ -38,7 +169,18 @@ end
         Int(getproperty(raw_result, :iterations)),
         Float64(getproperty(raw_result, :residual_norm)),
         xi_val,
+        contract_version,
     )
+end
+
+@inline coerce_solver_result(mode::ConstraintMode, raw_result; xi_override=nothing) =
+    _coerce_solver_result(mode, raw_result; xi_override=xi_override)
+
+@inline solver_result_view(result::SolverResult) = to_namedtuple(result)
+
+@inline function solver_result_is_success(result::SolverResult; residual_norm_max::Real=1e-6, require_converged::Bool=true)
+    require_converged && !result.converged && return false
+    return isfinite(result.residual_norm) && result.residual_norm <= Float64(residual_norm_max)
 end
 
 @inline function _strip_forward_kwargs(kwargs, blocked::Tuple)

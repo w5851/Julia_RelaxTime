@@ -16,9 +16,9 @@
 
 ### 2.1 本期范围（Phase 3）
 
-- [ ] 发布 solver 稳定契约（类型 + 序列化视图 + 兼容策略）。
-- [ ] 建立 phase/scans/workflows 适配层，仅消费稳定契约。
-- [ ] 增加耦合守卫测试与治理脚本检查点。
+- [x] 发布 solver 稳定契约（类型 + 序列化视图 + 兼容策略）。
+- [x] 建立 phase/scans/workflows 适配层，仅消费稳定契约。
+- [x] 增加耦合守卫测试与治理脚本检查点。
 - [ ] 清理过渡期字段与旁路参数（在兼容期策略允许范围内）。
 
 ### 2.2 非范围（本期不做）
@@ -52,28 +52,28 @@
 
 ### Batch-A：契约发布与文档化
 
-- [ ] A1 新增/更新 `docs/api/` 中 solver 契约文档（Result/Diagnostic/Error）。
-- [ ] A2 在 `src/models/solver` 增加契约导出入口（建议集中在 `Solver.jl` 或新契约模块）。
-- [ ] A3 更新 `src/models/Models.jl` 导出清单，避免导出私有实现符号。
+- [x] A1 新增/更新 `docs/api/` 中 solver 契约文档（Result/Diagnostic/Error）。
+- [x] A2 在 `src/models/solver` 增加契约导出入口（建议集中在 `Solver.jl` 或新契约模块）。
+- [x] A3 更新 `src/models/Models.jl` 导出清单，避免导出私有实现符号。
 
 ### Batch-B：上层适配层收敛
 
-- [ ] B1 `src/models/phase/PMPhaseDiagnostic.jl`
+- [x] B1 `src/models/phase/PMPhaseDiagnostic.jl`
   - 通过适配器读取稳定诊断字段，不再直接枚举 solver 私有字段。
-- [ ] B2 `src/models/scans/TmuScan.jl`
+- [x] B2 `src/models/scans/TmuScan.jl`
   - 统一从稳定结果契约读取成功判据与摘要字段。
-- [ ] B3 `src/models/scans/TrhoScan.jl`
+- [x] B3 `src/models/scans/TrhoScan.jl`
   - 同步适配稳定契约，移除对临时兼容字段的硬依赖。
 - [ ] B4 `src/models/workflows/*`
   - 仅消费稳定 solver 结果，不拼装 solver 内部 kwargs。
 
 ### Batch-C：防回耦门禁
 
-- [ ] C1 新增契约稳定性测试（API 层）
+- [x] C1 新增契约稳定性测试（API 层）
   - 校验关键字段存在性、类型、单位语义。
 - [ ] C2 新增数值回归点（FixedMu/FixedRho/FixedAsymmetricRho）
   - 防止架构重构引入系统性数值漂移。
-- [ ] C3 新增依赖约束检查
+- [x] C3 新增依赖约束检查
   - 禁止 `phase/scans/workflows` 直接引用 solver 私有符号（如下划线函数、内部字段）。
 - [ ] C4 文档治理联动
   - `docs/dev/active`、`docs/api` 与导出接口保持一致。
@@ -128,6 +128,7 @@
 - [ ] `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'`
 - [ ] `julia --project=. scripts/dev/check_docs_consistency.jl`
 - [ ] `julia --project=. scripts/dev/check_active_docs_governance.jl`
+- [ ] `julia --project=. scripts/dev/check_solver_contract_leakage.jl`
 - [ ] （新增）契约稳定性测试入口（本任务落地时补充到 `tests/` 分层目录）。
 
 ## 8. 风险与回滚点
@@ -159,4 +160,7 @@
 
 - [x] 2026-04-08：完成 Phase 3 任务单草案，作为三阶段计划收口文档。
 - [x] 2026-04-08：完成与 Phase 1/2 文档的联动校对（前置、命令、衔接项对齐）。
+- [x] 2026-04-09：完成 SolverResult / Diagnostic 稳定契约 v1 固化（版本字段、公共视图、兼容 coerce）。
+- [x] 2026-04-09：完成 phase/scans 契约消费适配（PM 诊断公共视图、Tmu/Trho 结果 coerce）。
+- [x] 2026-04-09：新增门禁脚本 `scripts/dev/check_solver_contract_leakage.jl` 与契约回归测试入口。
 - [ ] 待补：契约版本号、迁移窗口期、门禁上线日期。
