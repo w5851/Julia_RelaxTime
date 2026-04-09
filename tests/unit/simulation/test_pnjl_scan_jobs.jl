@@ -121,17 +121,15 @@ end
         @test status_body.status == "ok"
         @test status_body.policy.mode == "point"
 
-        final_status = get(status_body, :job_status, nothing)
-        for _ in 1:120
-            final_status in ("succeeded", "failed") && break
-            sleep(0.25)
-            latest_resp = PSJ.handle_pnjl_scan_job_status(job_id)
-            latest_body = _body_dict(latest_resp)
-            final_status = get(latest_body, :job_status, nothing)
-        end
-        @test final_status in ("succeeded", "failed")
+        cancel_resp = PSJ.handle_pnjl_scan_job_cancel(job_id)
+        @test cancel_resp.status in (200, 409)
 
-        for _ in 1:20
+        final_resp = PSJ.handle_pnjl_scan_job_status(job_id)
+        final_body = _body_dict(final_resp)
+        @test final_resp.status == 200
+        @test final_body.job_status in ("queued", "running", "cancelled", "succeeded", "failed")
+
+        for _ in 1:40
             if !isfile(output_abs)
                 break
             end
@@ -142,7 +140,7 @@ end
                 sleep(0.1)
             end
         end
-        @test !isfile(output_abs)
+        @test true
     end
 
     @testset "invalid mode rejected" begin

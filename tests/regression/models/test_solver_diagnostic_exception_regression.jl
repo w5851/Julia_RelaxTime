@@ -6,7 +6,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-@testset "solver diagnostic exception regression" begin
+@testset "solver diagnostic summary regression" begin
     model = Models.create_model(:PNJL)
     mode = Models.FixedEntropy(0.5)
     spec = Models.build_problem_spec(mode)
@@ -29,4 +29,10 @@ end
     @test result.diagnostic.error_kind in (:none, :constraint_error)
     @test result.diagnostic.error_msg isa String
     @test result.selection_reason in (:pressure_max_under_constraints, :residual_min_under_constraints, :no_candidate_passed_constraints)
+
+    @test haskey(result.diagnostic, :attempt_origin)
+    @test haskey(result.diagnostic, :seed_source)
+    @test haskey(result.diagnostic, :hard_constraint_ok)
+    @test haskey(result.diagnostic, :failed_constraints)
+    @test haskey(result.diagnostic, :selection_reason)
 end
