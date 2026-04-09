@@ -90,6 +90,9 @@ end
 
     @testset "create/status accepts point mode and persists policy mode" begin
         _reset_jobs_state!()
+        output_rel = joinpath("data", "outputs", "results", "pnjl", "scan", "tmu", "unit_contract_point_$(time_ns()).csv")
+        output_abs = joinpath(PROJECT_ROOT_PSJ, output_rel)
+
         req = _post_jobs_request(Dict(
             "kind" => "tmu",
             "params" => Dict(
@@ -97,6 +100,9 @@ end
                 "T_mev" => 150.0,
                 "mu_mev" => 0.0,
                 "xi" => 0.0,
+                "output_path" => output_rel,
+                "overwrite" => true,
+                "resume" => false,
                 "max_retries" => 0,
                 "p_num" => 12,
                 "t_num" => 6,
@@ -114,6 +120,29 @@ end
         @test status_resp.status == 200
         @test status_body.status == "ok"
         @test status_body.policy.mode == "point"
+
+        final_status = get(status_body, :job_status, nothing)
+        for _ in 1:120
+            final_status in ("succeeded", "failed") && break
+            sleep(0.25)
+            latest_resp = PSJ.handle_pnjl_scan_job_status(job_id)
+            latest_body = _body_dict(latest_resp)
+            final_status = get(latest_body, :job_status, nothing)
+        end
+        @test final_status in ("succeeded", "failed")
+
+        for _ in 1:20
+            if !isfile(output_abs)
+                break
+            end
+            try
+                rm(output_abs; force=true)
+                break
+            catch
+                sleep(0.1)
+            end
+        end
+        @test !isfile(output_abs)
     end
 
     @testset "invalid mode rejected" begin
