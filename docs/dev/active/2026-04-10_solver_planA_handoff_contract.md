@@ -48,9 +48,11 @@ solve_named(model::AbstractPNJLModel,
 
 补充冻结语义：
 
-- `solve_constraint` 统一走 ProblemSpec 主链；`use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `fixedmu_use_problem_spec` 已移除，传入即 `ArgumentError`。
+- `solve_constraint` 统一走 ProblemSpec 主链；`use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `fixedmu_use_problem_spec` / `legacy_fallback_plugin` 已移除，传入即 `ArgumentError`。
 - `solve_named(FixedMu, ...)` 要求 `:T_fm` + `:μ_fm`；非 `FixedMu` 要求 `:T_fm`。
 - `solve_vec(FixedMu, ...)` 约定 `theta_vec` 长度为 2；非 `FixedMu` 约定长度为 1。
+
+冻结锚点（A4）：`HEAD=954adadfd7edb7e0f82bba0c49a435a710f15585`。
 
 ## 2) A2 后 include 拓扑摘要
 
@@ -69,11 +71,11 @@ solve_named(model::AbstractPNJLModel,
 
 来源风险定义：`docs/dev/archived/2026-03-31_PNJL求解器解耦框架兼容性评审与Wave-A实现计划.md`。
 
-- [ ] R1 双轨职责重叠：确认 `solve_constraint`/`ProblemSpec` 为唯一主链，禁止旧路径回流。
-- [ ] R2 显式参数接口：确认 residual 组装仍可经 `build_conditions`/`build_residual!` 与契约入口对齐。
-- [ ] R3 全局可变配置：确认并发/多任务路径不依赖旧全局可变状态。
-- [ ] R4 维度与类型硬编码：确认 `solve_vec`/`solve_named` 对长度与键名守卫正常，消费侧不硬编码固定维度。
-- [ ] R5 候选治理 context：确认候选选择仍走治理契约（hard rules + selector + diagnostics 公共视图）。
+- [x] R1 双轨职责重叠：已验证 `solve_constraint`/`ProblemSpec` 为唯一主链，旧参数旁路移除。证据：`3a5758a`（Phase 3 contract hardening）、`954adad`（A4 契约冻结）。
+- [x] R2 显式参数接口：已验证 residual 组装经 `build_conditions`/`build_residual!` 与契约入口对齐。证据：`766b31d`（boundary rules coverage）、`tests/unit/models/test_solver.jl`。
+- [x] R3 全局可变配置：已验证并发路径不依赖旧全局可变状态。证据：`3a5758a`（runtime option/contract 收敛）、`tests/integration/models/test_solver_auto_backend_semantic_parity.jl`。
+- [x] R4 维度与类型硬编码：已验证 `solve_vec`/`solve_named` 长度与键名守卫。证据：`3a5758a`（Result/contract 固化）、`tests/unit/models/test_problem_spec_contract.jl`。
+- [x] R5 候选治理 context：已验证候选选择走治理契约（hard rules + selector + diagnostics 公共视图）。证据：`032ab81`、`173e8fd`、`tests/unit/models/test_candidate_governance_contract.jl`。
 
 建议执行证据（交接最低集）：
 

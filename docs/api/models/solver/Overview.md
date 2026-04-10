@@ -61,6 +61,8 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 `Models.solve_multi` 适合一阶相变附近或多值解区域，需要显式尝试多组初值并按物理判据选解的场景。
 
+模式支持说明：`solve_multi` 当前仅支持 `FixedMu | FixedRho | FixedAsymmetricRho`，不覆盖 `FixedEntropy` / `FixedSigma`。
+
 它不是常规入口的默认替代品，而是“我明确知道这里有分支竞争”的增强入口。
 
 ## Models 边界签名与参数合同（Plan-A）
@@ -75,9 +77,11 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 关键参数合同：
 
-- `solve_constraint` 统一走 `ProblemSpec` 主链；`use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `fixedmu_use_problem_spec` 已移除。
+- `solve_constraint` 统一走 `ProblemSpec` 主链；`use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `fixedmu_use_problem_spec` / `legacy_fallback_plugin` 已移除。
 - `solve_vec`：`FixedMu` 约定 `theta_vec=[T_fm, μ_fm]`（长度 2）；其它模式约定 `theta_vec=[T_fm]`（长度 1）。
 - `solve_named`：`FixedMu` 需要 `(:T_fm, :μ_fm)`；其它模式需要 `:T_fm`。
+
+`solve_vec` / `solve_named` 在本页按签名与参数契约层覆盖；逐符号细节以自动生成导出索引为准（见 `docs/api/models/solver/generated/Exports.md`）。
 
 ## 用户入口分层建议
 
