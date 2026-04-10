@@ -45,15 +45,35 @@ end
 const API_SYMBOLS = [
     "SolverResult",
     "SOLVER_CONTRACT_VERSION_V1",
+    "SOLVER_RESULT_REQUIRED_FIELDS",
+    "solver_contract_version",
+    "to_namedtuple",
+    "_normalize_solver_contract_version",
+    "_coerce_solver_result",
     "coerce_solver_result",
     "solver_result_view",
     "solver_result_is_success",
+    "solve_multi",
+    "solve_vec",
+    "solve_named",
+    "solve_with_derivatives",
+    "is_physical_solution",
 ]
 
 const SPEC_SYMBOLS = [
     "ProblemSpec",
     "build_problem_spec",
     "ExtraConstraints",
+]
+
+const ORCHESTRATOR_SYMBOLS = [
+    "PrimaryStrategy",
+    "_resolve_primary_strategy_kwargs",
+    "_fixedmu_problem_spec_forward_solve",
+    "_fixedrho_problem_spec_forward_solve",
+    "_fixedentropy_problem_spec_forward_solve",
+    "_fixedsigma_problem_spec_forward_solve",
+    "_fixedasymrho_problem_spec_forward_solve",
 ]
 
 const GOVERNANCE_SYMBOLS = [
@@ -69,10 +89,24 @@ const GOVERNANCE_SYMBOLS = [
 ]
 
 const RUNTIME_SYMBOLS = [
+    "_solve_constraint_fixedmu",
+    "_solve_constraint_fixedrho",
+    "_solve_constraint_fixedentropy",
+    "_solve_constraint_fixedsigma",
+    "_solve_constraint_fixedasymrho",
     "select_pressure_max_candidate",
     "select_residual_min_candidate",
     "default_hard_constraint_rules",
     "evaluate_hard_constraints",
+    "_build_default_seed_candidates",
+    "_build_mode_failure_candidate",
+    "_compute_fixedmu_candidate",
+    "_fixedrho_runtime_config_from_kwargs",
+    "_fixedentropy_runtime_config_from_kwargs",
+    "_solve_gap_with_outer_fallback",
+    "_compute_mode_thermo_quantities",
+    "_compose_mode_residual_norm",
+    "_build_mode_result_from_outer_state",
 ]
 
 const COMPAT_SYMBOLS = [
@@ -114,6 +148,10 @@ end
             d = _domain_for_path(file)
             d == :orchestrator || d == :spec
         end; label="R1 forbids orchestrator/spec -> api")
+
+        api_files = filter(file -> _domain_for_path(file) == :api, files)
+        api_contract_refs = _find_references(api_files, vcat(SPEC_SYMBOLS, ORCHESTRATOR_SYMBOLS))
+        @test !isempty(api_contract_refs)
     end
 
     @testset "R2 runtime cannot depend on api" begin
