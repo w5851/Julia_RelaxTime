@@ -9,11 +9,27 @@ end
 
 @testset "pipeline types contract" begin
     @testset "type existence and field contracts" begin
+        @test isdefined(Models, :AbstractPipelineIOContract)
+        @test isdefined(Models, :PipelineIOContract)
+        @test isdefined(Models, :PipelineProvenance)
         @test isdefined(Models, :PipelineSpec)
         @test isdefined(Models, :PipelineStage)
         @test isdefined(Models, :PipelineContext)
         @test isdefined(Models, :PipelineArtifact)
         @test isdefined(Models, :StageResult)
+
+        @test fieldnames(Models.PipelineIOContract) == (
+            :contract_version,
+            :required_inputs,
+            :required_outputs,
+            :artifact_schema_version,
+            :manifest_schema_version,
+        )
+        @test fieldtype(Models.PipelineIOContract, :contract_version) == Symbol
+        @test fieldtype(Models.PipelineIOContract, :required_inputs) == Vector{Symbol}
+        @test fieldtype(Models.PipelineIOContract, :required_outputs) == Vector{Symbol}
+        @test fieldtype(Models.PipelineIOContract, :artifact_schema_version) == Symbol
+        @test fieldtype(Models.PipelineIOContract, :manifest_schema_version) == Symbol
 
         @test fieldnames(Models.PipelineSpec) == (
             :name,
@@ -23,17 +39,18 @@ end
             :params,
             :io_contract,
         )
-        @test fieldtype(Models.PipelineSpec, :name) == String
-        @test fieldtype(Models.PipelineSpec, :version) == String
-        @test fieldtype(Models.PipelineSpec, :model_kind) == Symbol
-        @test fieldtype(Models.PipelineSpec, :stages) == Vector{Symbol}
-        @test fieldtype(Models.PipelineSpec, :params) == NamedTuple
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :name) == String
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :version) == String
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :model_kind) == Symbol
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :stages) == Vector{Symbol}
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :params) == NamedTuple{(:alpha,), Tuple{Float64}}
+        @test fieldtype(Models.PipelineSpec{NamedTuple{(:alpha,), Tuple{Float64}}, Models.PipelineIOContract}, :io_contract) == Models.PipelineIOContract
 
-        @test fieldnames(Models.PipelineStage) == (:id, :requires, :provides, :run!)
-        @test fieldtype(Models.PipelineStage, :id) == Symbol
-        @test fieldtype(Models.PipelineStage, :requires) == Vector{Symbol}
-        @test fieldtype(Models.PipelineStage, :provides) == Vector{Symbol}
-        @test fieldtype(Models.PipelineStage, :run!) == Function
+        @test fieldnames(Models.PipelineStage{typeof(identity)}) == (:id, :requires, :provides, :run!)
+        @test fieldtype(Models.PipelineStage{typeof(identity)}, :id) == Symbol
+        @test fieldtype(Models.PipelineStage{typeof(identity)}, :requires) == Vector{Symbol}
+        @test fieldtype(Models.PipelineStage{typeof(identity)}, :provides) == Vector{Symbol}
+        @test fieldtype(Models.PipelineStage{typeof(identity)}, :run!) == typeof(identity)
 
         ctx_fields = fieldnames(Models.PipelineContext)
         @test ctx_fields == (:state, :provenance)
@@ -48,6 +65,24 @@ end
         @test fieldtype(Models.StageResult, :produced) == Dict{Symbol, Any}
         @test fieldtype(Models.StageResult, :artifacts) == Vector{Models.PipelineArtifact}
         @test fieldtype(Models.StageResult, :metrics) == Dict{Symbol, Float64}
+
+        io_contract = Models.PipelineIOContract(
+            :v1,
+            [:model_kind, :grid],
+            [:artifact_paths],
+            :artifact_v1,
+            :manifest_v1,
+        )
+        spec = Models.PipelineSpec(
+            "phase_pipeline",
+            "v1",
+            :PNJL,
+            [:build_model, :solve_points],
+            (alpha=1.0,),
+            io_contract,
+        )
+        @test spec.io_contract isa Models.PipelineIOContract
+        @test spec.params isa NamedTuple{(:alpha,), Tuple{Float64}}
 
         provenance = (
             git_commit="abc123",
@@ -82,19 +117,59 @@ end
     end
 
     @testset "basic constructor validation" begin
+        io_contract = Models.PipelineIOContract(
+            :v1,
+            [:model_kind, :grid],
+            [:artifact_paths],
+            :artifact_v1,
+            :manifest_v1,
+        )
+
         @test_throws ArgumentError Models.PipelineSpec(
             "core",
             "v1",
             :PNJL,
             Symbol[],
             (alpha=1.0,),
-            (;),
+            io_contract,
+        )
+
+        @test_throws ArgumentError Models.PipelineSpec(
+            "phase_pipeline",
+            "v1",
+            :PNJL,
+            ["build_model"],
+            (alpha=1.0,),
+            io_contract,
+        )
+
+        @test_throws ArgumentError Models.PipelineSpec(
+            "phase_pipeline",
+            "v1",
+            :PNJL,
+            [:build_model],
+            (alpha=1.0,),
+            Dict(:contract => :v1),
         )
 
         @test_throws ArgumentError Models.PipelineStage(
             "load",
             Symbol[:input],
             Symbol[:output],
+            (ctx) -> nothing,
+        )
+
+        @test_throws ArgumentError Models.PipelineStage(
+            :load,
+            ["input"],
+            Symbol[:output],
+            (ctx) -> nothing,
+        )
+
+        @test_throws ArgumentError Models.PipelineStage(
+            :load,
+            Symbol[:input],
+            ["output"],
             (ctx) -> nothing,
         )
 
@@ -106,6 +181,63 @@ end
                 run_id="run-1",
                 timestamp=DateTime(2026, 4, 10, 12, 0, 0),
             ),
+        )
+
+        @test_throws ArgumentError Models.PipelineContext(
+            Dict{Symbol, Any}(:x => 1),
+            (
+                git_commit="abc123",
+                config_hash="cfg001",
+                run_id="run-1",
+            ),
+        )
+
+        @test_throws ArgumentError Models.PipelineContext(
+            Dict{Symbol, Any}(:x => 1),
+            (
+                git_commit="abc123",
+                config_hash="cfg001",
+                run_id="run-1",
+                timestamp="2026-04-10T12:00:00",
+            ),
+        )
+
+        @test_throws ArgumentError Models.PipelineProvenance("", "cfg001", "run-1", DateTime(2026, 4, 10, 12, 0, 0))
+        @test_throws ArgumentError Models.PipelineProvenance("abc123", "", "run-1", DateTime(2026, 4, 10, 12, 0, 0))
+        @test_throws ArgumentError Models.PipelineProvenance("abc123", "cfg001", "", DateTime(2026, 4, 10, 12, 0, 0))
+
+        @test_throws ArgumentError Models.PipelineIOContract(
+            "v1",
+            [:model_kind],
+            [:artifact_paths],
+            :artifact_v1,
+            :manifest_v1,
+        )
+        @test_throws ArgumentError Models.PipelineIOContract(
+            :v1,
+            [:model_kind],
+            [:artifact_paths],
+            "artifact_v1",
+            :manifest_v1,
+        )
+        @test_throws ArgumentError Models.PipelineIOContract(
+            :v1,
+            [:model_kind],
+            [:artifact_paths],
+            :artifact_v1,
+            "manifest_v1",
+        )
+
+        @test_throws ArgumentError Models.StageResult(
+            Dict{Symbol, Any}(:x => 1),
+            Any[(path="out.csv", hash="abc", schema_version="v1")],
+            Dict{Symbol, Any}(:elapsed_ms => 1.0),
+        )
+
+        @test_throws ArgumentError Models.StageResult(
+            Dict{Symbol, Any}(:x => 1),
+            Models.PipelineArtifact[],
+            Dict{Symbol, Any}(:elapsed_ms => "bad"),
         )
     end
 end

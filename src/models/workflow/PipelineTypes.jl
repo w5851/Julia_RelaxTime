@@ -1,5 +1,43 @@
 using Dates: DateTime
 
+abstract type AbstractPipelineIOContract end
+
+struct PipelineIOContract <: AbstractPipelineIOContract
+    contract_version::Symbol
+    required_inputs::Vector{Symbol}
+    required_outputs::Vector{Symbol}
+    artifact_schema_version::Symbol
+    manifest_schema_version::Symbol
+
+    function PipelineIOContract(
+        contract_version,
+        required_inputs::AbstractVector,
+        required_outputs::AbstractVector,
+        artifact_schema_version,
+        manifest_schema_version,
+    )
+        contract_version isa Symbol || throw(ArgumentError("contract_version must be Symbol, got $(typeof(contract_version))"))
+        artifact_schema_version isa Symbol || throw(ArgumentError("artifact_schema_version must be Symbol, got $(typeof(artifact_schema_version))"))
+        manifest_schema_version isa Symbol || throw(ArgumentError("manifest_schema_version must be Symbol, got $(typeof(manifest_schema_version))"))
+        return new(
+            contract_version,
+            _coerce_symbol_vector(required_inputs; field_name="required_inputs"),
+            _coerce_symbol_vector(required_outputs; field_name="required_outputs"),
+            artifact_schema_version,
+            manifest_schema_version,
+        )
+    end
+end
+
+function _coerce_symbol_vector(values::AbstractVector; field_name::AbstractString)
+    syms = Symbol[]
+    for value in values
+        value isa Symbol || throw(ArgumentError("$(field_name) entries must be Symbol, got $(typeof(value))"))
+        push!(syms, value)
+    end
+    return syms
+end
+
 struct PipelineProvenance
     git_commit::String
     config_hash::String
@@ -19,41 +57,47 @@ struct PipelineProvenance
     end
 end
 
-struct PipelineSpec
+struct PipelineSpec{P<:NamedTuple, I}
     name::String
     version::String
     model_kind::Symbol
     stages::Vector{Symbol}
-    params::NamedTuple
-    io_contract
+    params::P
+    io_contract::I
 
     function PipelineSpec(
         name::AbstractString,
         version::AbstractString,
         model_kind::Symbol,
         stages::AbstractVector,
-        params::NamedTuple,
-        io_contract,
-    )
+        params::P,
+        io_contract::I,
+    ) where {P<:NamedTuple, I}
+        io_contract isa AbstractPipelineIOContract || io_contract isa NamedTuple || throw(ArgumentError("io_contract must be AbstractPipelineIOContract or NamedTuple, got $(typeof(io_contract))"))
         isempty(strip(name)) && throw(ArgumentError("name must be non-empty"))
         isempty(strip(version)) && throw(ArgumentError("version must be non-empty"))
 
-        stage_syms = Symbol.(stages)
+        stage_syms = _coerce_symbol_vector(stages; field_name="stages")
         isempty(stage_syms) && throw(ArgumentError("stages must be non-empty"))
 
-        return new(String(name), String(version), model_kind, stage_syms, params, io_contract)
+        return new{P, I}(String(name), String(version), model_kind, stage_syms, params, io_contract)
     end
 end
 
-struct PipelineStage
+struct PipelineStage{F}
     id::Symbol
     requires::Vector{Symbol}
     provides::Vector{Symbol}
-    run!::Function
+    run!::F
 
-    function PipelineStage(id, requires::AbstractVector, provides::AbstractVector, run!::Function)
+    function PipelineStage(id, requires::AbstractVector, provides::AbstractVector, run!::F) where {F}
         id isa Symbol || throw(ArgumentError("stage id must be Symbol, got $(typeof(id))"))
-        return new(id, Symbol.(requires), Symbol.(provides), run!)
+        return new{F}(
+            id,
+            _coerce_symbol_vector(requires; field_name="requires"),
+            _coerce_symbol_vector(provides; field_name="provides"),
+            run!,
+        )
     end
 end
 

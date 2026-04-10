@@ -124,6 +124,7 @@ export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export AbstractPipelineIOContract, PipelineIOContract
 export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, PipelineArtifact, StageResult
 export persisted_symbol_to_string, persisted_string_to_symbol
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
