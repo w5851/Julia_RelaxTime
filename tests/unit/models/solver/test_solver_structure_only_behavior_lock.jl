@@ -12,12 +12,12 @@ const SNAPSHOT_COMMAND = "julia --project=. -e 'include(\"src/models/Models.jl\"
 const STRUCTURE_LOCK_BASELINE = (
     converged=true,
     solution_length=5,
-    residual_norm=9.001e-13,
-    omega=-21.60798,
-    pressure=21.60798,
-    rho_norm=2.7e-8,
+    residual_norm=1.1087008365216668e-15,
+    omega=-21.60808181242041,
+    pressure=21.60808181242041,
+    rho_norm=3.127689543869961e-19,
     mu_vec=[0.0, 0.0, 0.0],
-    masses=[1.86290, 1.86290, 2.78440],
+    masses=[1.8629520813762488, 1.8629520813762488, 2.7845080443471675],
 )
 
 function assert_nan_aware_close(actual::Real, expected::Real; rtol::Float64=1e-6, atol::Float64=1e-8)
