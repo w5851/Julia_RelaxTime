@@ -47,12 +47,19 @@ function compute_pipeline_config_hash(spec::PipelineSpec, ctx::PipelineContext, 
 end
 
 function compute_pipeline_artifact_hash(state::Dict{Symbol, Any}, stage_records::Vector{PipelineStageRecord})
-    state_keys = sort(String.(collect(keys(state))))
+    state_tokens = String[]
+    for key in sort(collect(keys(state)); by=String)
+        value_repr = sprint(show, MIME("text/plain"), state[key])
+        push!(state_tokens, String(key) * "=" * value_repr)
+    end
     record_tokens = String[]
     for rec in sort(stage_records; by=r -> String(r.id))
-        push!(record_tokens, String(rec.id) * ":" * String(rec.status))
+        push!(record_tokens,
+            String(rec.id) * ":" * String(rec.status) * ":" *
+            (isnothing(rec.error_kind) ? "none" : String(rec.error_kind)) * ":" *
+            (isnothing(rec.error_msg) ? "" : String(rec.error_msg)))
     end
-    payload = join([join(state_keys, ","), join(record_tokens, ";")], "|")
+    payload = join([join(state_tokens, ";"), join(record_tokens, ";")], "|")
     return bytes2hex(sha1(payload))
 end
 
@@ -132,9 +139,46 @@ end
 
 function _validate_stage_coverage(spec::PipelineSpec, stages::Vector{<:PipelineStage})
     stage_ids = Set{Symbol}(stage.id for stage in stages)
+    spec_ids = Set{Symbol}(spec.stages)
     for id in spec.stages
         id in stage_ids || throw(ArgumentError("spec stage not provided: $(id)"))
     end
+    for id in stage_ids
+        id in spec_ids || throw(ArgumentError("stage provided but not listed in spec: $(id)"))
+    end
+    return nothing
+end
+
+function _resolve_manifest_schema_version(io_contract)::String
+    if io_contract isa AbstractPipelineIOContract
+        return String(getproperty(io_contract, :manifest_schema_version))
+    end
+    io_contract isa NamedTuple || throw(ArgumentError("io_contract must be AbstractPipelineIOContract or NamedTuple, got $(typeof(io_contract))"))
+    hasproperty(io_contract, :manifest_schema_version) || throw(ArgumentError("io_contract missing :manifest_schema_version"))
+    value = getproperty(io_contract, :manifest_schema_version)
+    value isa Symbol || throw(ArgumentError("io_contract.manifest_schema_version must be Symbol, got $(typeof(value))"))
+    return String(value)
+end
+
+function _resolve_required_outputs(io_contract)::Vector{Symbol}
+    raw = if io_contract isa AbstractPipelineIOContract
+        getproperty(io_contract, :required_outputs)
+    elseif io_contract isa NamedTuple
+        hasproperty(io_contract, :required_outputs) || throw(ArgumentError("io_contract missing :required_outputs"))
+        getproperty(io_contract, :required_outputs)
+    else
+        throw(ArgumentError("io_contract must be AbstractPipelineIOContract or NamedTuple, got $(typeof(io_contract))"))
+    end
+    raw isa AbstractVector || throw(ArgumentError("io_contract.required_outputs must be AbstractVector, got $(typeof(raw))"))
+    return Symbol.(raw)
+end
+
+function _validate_stage_runtime_inputs(stage::PipelineStage, ctx::PipelineContext)
+    missing = Symbol[]
+    for dep in stage.requires
+        haskey(ctx.state, dep) || push!(missing, dep)
+    end
+    isempty(missing) || throw(ArgumentError("missing runtime dependencies for stage $(stage.id): $(join(String.(missing), ", "))"))
     return nothing
 end
 
@@ -160,7 +204,7 @@ function _write_manifest(
         "model_kind" => String(spec.model_kind),
         "run_id" => ctx.provenance.run_id,
         "git_commit" => ctx.provenance.git_commit,
-        "manifest_schema_version" => spec.io_contract.manifest_schema_version isa Symbol ? String(spec.io_contract.manifest_schema_version) : "unknown",
+        "manifest_schema_version" => _resolve_manifest_schema_version(spec.io_contract),
         "timestamp" => _utc_now_iso8601(),
         "success" => result.success,
         "failed_stage" => isnothing(result.failed_stage) ? nothing : String(result.failed_stage),
@@ -209,6 +253,7 @@ function run_pipeline(
         stage = stage_by_id[id]
         started_at = _utc_now_iso8601()
         try
+            _validate_stage_runtime_inputs(stage, ctx)
             stage_result = stage.run!(ctx)
             stage_result isa StageResult || throw(ArgumentError("stage $(id) must return StageResult"))
             merge!(ctx.state, stage_result.produced)
@@ -237,7 +282,7 @@ function run_pipeline(
             end
         end
     else
-        required_outputs = spec.io_contract.required_outputs
+        required_outputs = _resolve_required_outputs(spec.io_contract)
         missing = Symbol[]
         for sym in required_outputs
             haskey(ctx.state, sym) || push!(missing, sym)

@@ -65,6 +65,17 @@ end
         @test_throws ArgumentError Models.run_pipeline(spec, stages, _mk_ctx(); manifest_path=manifest_path)
     end
 
+    @testset "stage provided but not listed in spec throws before run" begin
+        spec = _mk_spec([:a])
+        stages = [
+            _ok_stage(:a; provides=[:x]),
+            _ok_stage(:extra; provides=[:y]),
+        ]
+        manifest_path = joinpath(mktempdir(), "manifest_extra_stage.json")
+
+        @test_throws ArgumentError Models.run_pipeline(spec, stages, _mk_ctx(); manifest_path=manifest_path)
+    end
+
     @testset "duplicate stage id throws before run" begin
         spec = _mk_spec([:a, :b])
         stages = [
@@ -121,6 +132,22 @@ end
         @test by_id[:c].status == :skipped
         @test by_id[:c].started_at === nothing
         @test by_id[:c].ended_at === nothing
+    end
+
+    @testset "runtime dependency check before stage execution" begin
+        spec = _mk_spec([:a, :b, :c])
+        stages = [
+            _ok_stage(:a; provides=[:x]),
+            Models.PipelineStage(:b, [:late_dep], [:y], (ctx) -> Models.StageResult(Dict{Symbol, Any}(:y => 1), Models.PipelineArtifact[], Dict{Symbol, Float64}())),
+            _ok_stage(:c; provides=[:late_dep]),
+        ]
+        manifest_path = joinpath(mktempdir(), "manifest_runtime_dep_guard.json")
+        result = Models.run_pipeline(spec, stages, _mk_ctx(); manifest_path=manifest_path)
+
+        @test result.success == false
+        @test result.failed_stage == :b
+        @test result.error_kind == :ArgumentError
+        @test occursin("missing runtime dependencies", result.error_msg)
     end
 
     @testset "required_outputs only checked on success path" begin
@@ -197,5 +224,12 @@ end
         success_manifest_2 = JSON3.read(read(success_manifest_path_2, String))
         @test String(success_manifest.pipeline.config_hash) == String(success_manifest_2.pipeline.config_hash)
         @test String(success_manifest.pipeline.artifact_hash) == String(success_manifest_2.pipeline.artifact_hash)
+
+        success_manifest_path_3 = joinpath(mktempdir(), "manifest_success_3.json")
+        changed_ctx = _mk_ctx()
+        changed_ctx.state[:seed] = 42
+        _ = Models.run_pipeline(spec_success, stages_success, changed_ctx; manifest_path=success_manifest_path_3)
+        success_manifest_3 = JSON3.read(read(success_manifest_path_3, String))
+        @test String(success_manifest.pipeline.artifact_hash) != String(success_manifest_3.pipeline.artifact_hash)
     end
 end
