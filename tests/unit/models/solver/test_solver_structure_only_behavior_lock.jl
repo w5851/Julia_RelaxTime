@@ -20,7 +20,7 @@ const STRUCTURE_LOCK_BASELINE = (
     masses=[1.86290, 1.86290, 2.78440],
 )
 
-@inline function assert_nan_aware_close(actual::Real, expected::Real; rtol::Float64=1e-6, atol::Float64=1e-8)
+function assert_nan_aware_close(actual::Real, expected::Real; rtol::Float64=1e-6, atol::Float64=1e-8)
     if isnan(expected)
         @test isnan(actual)
     else
@@ -28,7 +28,7 @@ const STRUCTURE_LOCK_BASELINE = (
     end
 end
 
-@inline function assert_nan_aware_close(actual::AbstractVector{<:Real}, expected::AbstractVector{<:Real}; rtol::Float64=1e-6, atol::Float64=1e-8)
+function assert_nan_aware_close(actual::AbstractVector{<:Real}, expected::AbstractVector{<:Real}; rtol::Float64=1e-6, atol::Float64=1e-8)
     @test length(actual) == length(expected)
     for i in eachindex(actual, expected)
         if isnan(expected[i])
