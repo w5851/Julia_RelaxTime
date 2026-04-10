@@ -218,6 +218,13 @@ end
             _include_dir(joinpath(UNIT_DIR, "models"))
         end
 
+        solver_dir = joinpath(UNIT_DIR, "models", "solver")
+        if isdir(solver_dir)
+            @testset "Models/Solver" begin
+                _include_dir(solver_dir)
+            end
+        end
+
         @testset "PNJL" begin
             _include_dir(joinpath(UNIT_DIR, "pnjl"))
         end
