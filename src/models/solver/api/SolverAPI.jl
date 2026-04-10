@@ -259,12 +259,26 @@ end
     return is_physical_solution(cand.x_state, cand.masses)
 end
 
+@inline function _select_pressure_max_local(candidates::AbstractVector)
+    isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+    selected = candidates[1]
+    selected_pressure = get(selected, :pressure, -Inf)
+    for cand in candidates[2:end]
+        pressure = get(cand, :pressure, -Inf)
+        if isfinite(pressure) && (!isfinite(selected_pressure) || pressure > selected_pressure)
+            selected = cand
+            selected_pressure = pressure
+        end
+    end
+    return selected
+end
+
 @inline function _fixedmu_multiseed_selector_adapter(candidates::AbstractVector)
     converged_physical = [c for c in candidates if _candidate_is_physical_for_selection(c)]
     if !isempty(converged_physical)
-        return select_pressure_max_candidate(converged_physical).selected_candidate
+        return _select_pressure_max_local(converged_physical)
     end
-    return select_pressure_max_candidate(candidates).selected_candidate
+    return _select_pressure_max_local(candidates)
 end
 
 @inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
@@ -429,7 +443,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         raw.mu_vec,
         Float64(raw.omega),
         Float64(raw.pressure),
-        Float64(raw.rho_norm) / Float64(rho0),
+        Float64(raw.rho_norm) / Float64(Main.Constants_PNJL.ρ0_inv_fm3),
         Float64(raw.entropy),
         Float64(raw.energy),
         raw.masses,
@@ -586,7 +600,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 mu_vec=raw.mu_vec,
                 omega=Float64(raw.omega),
                 pressure=Float64(raw.pressure),
-                rho_norm=Float64(raw.rho_norm) / Float64(rho0),
+                rho_norm=Float64(raw.rho_norm) / Float64(Main.Constants_PNJL.ρ0_inv_fm3),
                 entropy=Float64(raw.entropy),
                 energy=Float64(raw.energy),
                 masses=raw.masses,

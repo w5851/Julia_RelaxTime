@@ -23,65 +23,62 @@ function _solve_constraint_fixedmu(
 
     _ = nlsolve_kwargs
 
-    candidates = Main.Models.execute_attempt_pool(seed_pool;
-        stop_on_first_success=true,
-        evaluate_all_attempts=true,
-        evaluate_attempt=(seed, seed_index) -> begin
-            solver_pool = if solver isa NLsolveGapSolver && solver.method != :trust_region
-                (
-                    solver,
-                    NLsolveGapSolver(
-                        method=:trust_region,
-                        xtol=solver.xtol,
-                        ftol=solver.ftol,
-                        jacobian=solver.jacobian,
-                    ),
+    candidates = NamedTuple[]
+    for (seed_index, seed) in enumerate(seed_pool)
+        solver_pool = if solver isa NLsolveGapSolver && solver.method != :trust_region
+            (
+                solver,
+                NLsolveGapSolver(
+                    method=:trust_region,
+                    xtol=solver.xtol,
+                    ftol=solver.ftol,
+                    jacobian=solver.jacobian,
+                ),
+            )
+        else
+            (solver,)
+        end
+
+        accepted = false
+        for local_solver in solver_pool
+            try
+                st = solve_gap(
+                    model,
+                    T_fm,
+                    μ_fm;
+                    solver_backend=:models,
+                    solver=local_solver,
+                    initial_guess=seed,
+                    residual_norm_max=residual_norm_max,
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
                 )
-            else
-                (solver,)
+
+                raw = _compute_fixedmu_candidate(
+                    model,
+                    T_fm,
+                    μ_fm,
+                    st,
+                    residual_norm_max;
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                )
+                ok, failed = evaluate_hard_constraints(raw, rules)
+                candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))
+                push!(candidates, candidate)
+                accepted = true
+                break
+            catch err
+                err isa InterruptException && rethrow()
             end
+        end
 
-            for local_solver in solver_pool
-                try
-                    st = solve_gap(
-                        model,
-                        T_fm,
-                        μ_fm;
-                        solver_backend=:models,
-                        solver=local_solver,
-                        initial_guess=seed,
-                        residual_norm_max=residual_norm_max,
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-
-                    raw = _compute_fixedmu_candidate(
-                        model,
-                        T_fm,
-                        μ_fm,
-                        st,
-                        residual_norm_max;
-                        xi=xi,
-                        p_num=p_num,
-                        t_num=t_num,
-                    )
-                    ok, failed = evaluate_hard_constraints(raw, rules)
-                    candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))
-                    return candidate, ok
-                catch err
-                    err isa InterruptException && rethrow()
-                end
-            end
-
-            raw = _build_mode_failure_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max, seed_index=Int(seed_index))
-            return raw, false
-        end,
-        on_error=(_, seed_index, _) -> begin
-            raw = _build_mode_failure_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max, seed_index=Int(seed_index))
-            return raw, false
-        end,
-    )
+        if !accepted
+            push!(candidates, _build_mode_failure_candidate(; state_n=5, mu_n=3, solution_n=5, residual_norm_max=residual_norm_max, seed_index=Int(seed_index)))
+        end
+    end
     selected = select_pressure_max_candidate(candidates)
     s = selected.selected_candidate
 
