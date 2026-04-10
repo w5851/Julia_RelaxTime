@@ -34,3 +34,6 @@ test/SuppositionDB/
 
 # Git worktrees
 /.worktrees/
+
+# 编译产物
+/build/
