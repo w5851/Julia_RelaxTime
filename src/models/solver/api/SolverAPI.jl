@@ -261,13 +261,47 @@ end
 
 @inline function _select_pressure_max_local(candidates::AbstractVector)
     isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
-    selected = candidates[1]
-    selected_pressure = get(selected, :pressure, -Inf)
-    for cand in candidates[2:end]
-        pressure = get(cand, :pressure, -Inf)
-        if isfinite(pressure) && (!isfinite(selected_pressure) || pressure > selected_pressure)
+    candidate_seed_index(cand, fallback::Int) = haskey(cand, :seed_index) ? Int(get(cand, :seed_index, fallback)) : fallback
+    candidate_residual(cand) = begin
+        value = Float64(get(cand, :residual_norm, Inf))
+        isfinite(value) ? value : Inf
+    end
+    candidate_pressure(cand) = begin
+        value = Float64(get(cand, :pressure, -Inf))
+        isfinite(value) ? value : -Inf
+    end
+
+    function better_candidate(cand, cand_idx::Int, best, best_idx::Int)
+        cand_ok = Bool(get(cand, :hard_constraint_ok, false))
+        best_ok = Bool(get(best, :hard_constraint_ok, false))
+        if cand_ok != best_ok
+            return cand_ok
+        end
+
+        cand_residual = candidate_residual(cand)
+        best_residual = candidate_residual(best)
+        if cand_residual != best_residual
+            return cand_residual < best_residual
+        end
+
+        cand_pressure = candidate_pressure(cand)
+        best_pressure = candidate_pressure(best)
+        if cand_pressure != best_pressure
+            return cand_pressure > best_pressure
+        end
+
+        cand_seed_index = candidate_seed_index(cand, cand_idx)
+        best_seed_index = candidate_seed_index(best, best_idx)
+        return cand_seed_index < best_seed_index
+    end
+
+    selected_idx = 1
+    selected = candidates[selected_idx]
+    for i in eachindex(candidates)
+        cand = candidates[i]
+        if better_candidate(cand, i, selected, selected_idx)
+            selected_idx = i
             selected = cand
-            selected_pressure = pressure
         end
     end
     return selected

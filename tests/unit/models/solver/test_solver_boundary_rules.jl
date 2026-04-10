@@ -25,7 +25,9 @@ function _solver_files()
 end
 
 function _occurs_identifier(source::String, ident::String)
-    return occursin(Regex("\\b" * ident * "\\b"), source)
+    escaped = replace(ident, r"([\\.^$|?*+(){}\[\]])" => s"\\\1")
+    pattern = string("(^|[^A-Za-z0-9_!])", escaped, "([^A-Za-z0-9_!]|\\z)")
+    return occursin(Regex(pattern), source)
 end
 
 function _find_references(files::Vector{String}, symbols::Vector{String})
@@ -53,12 +55,21 @@ const API_SYMBOLS = [
     "coerce_solver_result",
     "solver_result_view",
     "solver_result_is_success",
+    "solve_constraint",
     "solve_multi",
     "solve_vec",
     "solve_named",
     "solve_with_derivatives",
     "is_physical_solution",
 ]
+
+const API_BOUNDARY_SYMBOLS = filter(sym -> sym != "solve_constraint", API_SYMBOLS)
+
+@testset "identifier matcher" begin
+    @test _occurs_identifier("register_schema!(registry, schema)", "register_schema!")
+    @test _occurs_identifier("x = a+b", "a+b")
+    @test !_occurs_identifier("register_schema_extra!(registry)", "register_schema!")
+end
 
 const SPEC_SYMBOLS = [
     "ProblemSpec",
@@ -138,7 +149,7 @@ end
 
 @testset "solver boundary rules R1-R5" begin
     files = _solver_files()
-    api_refs = _find_references(files, API_SYMBOLS)
+    api_refs = _find_references(files, API_BOUNDARY_SYMBOLS)
     governance_refs = _find_references(files, GOVERNANCE_SYMBOLS)
     runtime_refs = _find_references(files, RUNTIME_SYMBOLS)
     compat_refs = _find_references(files, COMPAT_SYMBOLS)
@@ -152,6 +163,10 @@ end
         api_files = filter(file -> _domain_for_path(file) == :api, files)
         api_contract_refs = _find_references(api_files, vcat(SPEC_SYMBOLS, ORCHESTRATOR_SYMBOLS))
         @test !isempty(api_contract_refs)
+
+        api_symbol_refs = _find_references(api_files, API_SYMBOLS)
+        missing_api_symbols = [sym for sym in API_SYMBOLS if !any(sym in hits for hits in values(api_symbol_refs))]
+        @test isempty(missing_api_symbols)
     end
 
     @testset "R2 runtime cannot depend on api" begin
