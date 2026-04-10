@@ -9,7 +9,7 @@ Models 侧约束求解聚合入口。
 """
 
 include(joinpath(@__DIR__, "ConstraintSolverCommon.jl"))
-include(joinpath(@__DIR__, "ThermoPostprocess.jl"))
+include(joinpath(@__DIR__, "..", "diagnostics", "ThermoPostprocess.jl"))
 include(joinpath(@__DIR__, "ConstraintSolverFixedMu.jl"))
 include(joinpath(@__DIR__, "ConstraintSolverFixedRho.jl"))
 include(joinpath(@__DIR__, "ConstraintSolverFixedEntropy.jl"))
