@@ -173,6 +173,13 @@ end
             (ctx) -> nothing,
         )
 
+        @test_throws ArgumentError Models.PipelineStage(
+            :load,
+            Symbol[:input],
+            Symbol[:output],
+            123,
+        )
+
         @test_throws ArgumentError Models.PipelineContext(
             Dict{Any, Any}("x" => 1),
             (
