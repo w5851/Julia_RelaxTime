@@ -63,6 +63,22 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 
 它不是常规入口的默认替代品，而是“我明确知道这里有分支竞争”的增强入口。
 
+## Models 边界签名与参数合同（Plan-A）
+
+在 `Models` 边界，`solve*` 系列当前稳定公共表面为：
+
+- `solve(model, mode, ...)` 与 `solve(mode, ...)`
+- `solve_multi(model, mode, ...)` 与 `solve_multi(mode, ...)`
+- `solve_constraint(model, mode, T_fm; ...)`
+- `solve_vec(model, mode, theta_vec; ...)`
+- `solve_named(model, mode, theta_named; ...)`
+
+关键参数合同：
+
+- `solve_constraint` 统一走 `ProblemSpec` 主链；`use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` / `fixedmu_use_problem_spec` 已移除。
+- `solve_vec`：`FixedMu` 约定 `theta_vec=[T_fm, μ_fm]`（长度 2）；其它模式约定 `theta_vec=[T_fm]`（长度 1）。
+- `solve_named`：`FixedMu` 需要 `(:T_fm, :μ_fm)`；其它模式需要 `:T_fm`。
+
 ## 用户入口分层建议
 
 ### 新使用者
