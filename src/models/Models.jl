@@ -124,6 +124,8 @@ export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, PipelineArtifact, StageResult
+export persisted_symbol_to_string, persisted_string_to_symbol
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
 export derive_pm_seed_pair, analyze_pm_branch_competition
@@ -236,6 +238,7 @@ include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
 include(joinpath(@__DIR__, "phase", "ProductionPhasePipeline.jl"))
+include(joinpath(@__DIR__, "workflow", "PipelineTypes.jl"))
 include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
