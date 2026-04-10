@@ -261,19 +261,28 @@ end
 
 @inline function _select_pressure_max_local(candidates::AbstractVector)
     isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+    candidate_required(cand, field::Symbol) = begin
+        if hasproperty(cand, field)
+            return getproperty(cand, field)
+        end
+        if hasmethod(haskey, Tuple{typeof(cand), Symbol}) && haskey(cand, field)
+            return get(cand, field, nothing)
+        end
+        throw(ArgumentError("candidate missing required field :$(field) for _select_pressure_max_local"))
+    end
     candidate_seed_index(cand, fallback::Int) = haskey(cand, :seed_index) ? Int(get(cand, :seed_index, fallback)) : fallback
     candidate_residual(cand) = begin
-        value = Float64(get(cand, :residual_norm, Inf))
+        value = Float64(candidate_required(cand, :residual_norm))
         isfinite(value) ? value : Inf
     end
     candidate_pressure(cand) = begin
-        value = Float64(get(cand, :pressure, -Inf))
+        value = Float64(candidate_required(cand, :pressure))
         isfinite(value) ? value : -Inf
     end
 
     function better_candidate(cand, cand_idx::Int, best, best_idx::Int)
-        cand_ok = Bool(get(cand, :hard_constraint_ok, false))
-        best_ok = Bool(get(best, :hard_constraint_ok, false))
+        cand_ok = Bool(candidate_required(cand, :hard_constraint_ok))
+        best_ok = Bool(candidate_required(best, :hard_constraint_ok))
         if cand_ok != best_ok
             return cand_ok
         end

@@ -201,6 +201,31 @@ Models.pnjl_module()
         @test isdefined(Models, :SolverResult) || true  # 软检查
     end
 
+    @testset "_select_pressure_max_local requires mandatory candidate fields" begin
+        missing_hard_constraint_ok = [(
+            pressure=1.0,
+            residual_norm=1e-8,
+            seed_index=1,
+            converged=true,
+        )]
+        missing_residual_norm = [(
+            pressure=1.0,
+            hard_constraint_ok=true,
+            seed_index=1,
+            converged=true,
+        )]
+        missing_pressure = [(
+            residual_norm=1e-8,
+            hard_constraint_ok=true,
+            seed_index=1,
+            converged=true,
+        )]
+
+        @test_throws ArgumentError Models._select_pressure_max_local(missing_hard_constraint_ok)
+        @test_throws ArgumentError Models._select_pressure_max_local(missing_residual_norm)
+        @test_throws ArgumentError Models._select_pressure_max_local(missing_pressure)
+    end
+
     @testset "solve_constraint FixedRho 可调用" begin
         m = Models.create_model(:NJL)
         mode = Models.FixedRho(0.5)
