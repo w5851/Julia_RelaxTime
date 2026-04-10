@@ -22,6 +22,11 @@ using JSON3
 include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
 using .Models
 
+if get(ENV, "PHASE_PRECOMPILE_WARMUP", "1") in ("1", "true", "TRUE", "yes", "YES")
+    profile = Symbol(lowercase(get(ENV, "PHASE_PRECOMPILE_PROFILE", "scan")))
+    Models.run_precompile_profile(profile)
+end
+
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 Base.@kwdef mutable struct PhaseCliConfig

@@ -31,3 +31,6 @@ jobs:
         env:
           DEPS_STRICT: "1"
         run: julia --project=. scripts/dev/analyze_deps.jl
+
+      - name: Check precompile profile coverage
+        run: julia --project=. scripts/dev/check_precompile_profile_coverage.jl

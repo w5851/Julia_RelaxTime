@@ -48,7 +48,7 @@ jobs:
       - name: Check model profile matrix
         run: julia --project=. scripts/dev/check_model_profile_matrix.jl
 
-      - name: Run unit smoke profile
+      - name: Run unit core profile
         env:
-          UNIT_PROFILE: smoke
+          UNIT_PROFILE: core
         run: julia --project=. tests/unit/runtests.jl

@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  integration-smoke:
+  integration-core:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-      - name: Run integration smoke profile
+      - name: Run integration core profile
         env:
-          INTEGRATION_PROFILE: smoke
+          INTEGRATION_PROFILE: core
         run: julia --project=. tests/integration/runtests.jl

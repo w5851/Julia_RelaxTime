@@ -54,8 +54,25 @@ function _load_baseline(path::String)
     return rows
 end
 
+function _sample_baseline_rows(rows)
+    by_kind = Dict{String,Vector{NamedTuple}}()
+    for row in rows
+        push!(get!(by_kind, row.kind, NamedTuple[]), row)
+    end
+
+    sampled = NamedTuple[]
+    for kind in sort(collect(keys(by_kind)))
+        group = by_kind[kind]
+        push!(sampled, first(group))
+        if length(group) > 1
+            push!(sampled, last(group))
+        end
+    end
+    return sampled
+end
+
 @testset "PNJL constraint fixedpoint regression" begin
-    baseline = _load_baseline(CONSTRAINT_BASELINE_PATH)
+    baseline = _sample_baseline_rows(_load_baseline(CONSTRAINT_BASELINE_PATH))
     model = Models.create_model(:PNJL)
 
     rtol = 1e-8

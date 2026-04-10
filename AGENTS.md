@@ -57,6 +57,24 @@ Start the API plus web server:
 julia --project=. scripts/server/server_full.jl
 ```
 
+Run phase CLI with optional precompile warmup (enabled by default):
+
+```sh
+julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke
+```
+
+Disable phase CLI warmup if needed:
+
+```sh
+julia --project=. -e 'ENV["PHASE_PRECOMPILE_WARMUP"]="0"; include("scripts/pnjl/calculate_phase_structure.jl")'
+```
+
+Select phase CLI precompile profile (default `scan`):
+
+```sh
+julia --project=. -e 'ENV["PHASE_PRECOMPILE_PROFILE"]="core"; include("scripts/pnjl/calculate_phase_structure.jl")'
+```
+
 Install JS tooling used for dependency graph rendering:
 
 ```sh
@@ -77,10 +95,18 @@ julia --project=. scripts/dev/gen_deps.jl
 
 ## Test Commands
 
-Unit smoke profile used by CI:
+Unit smoke profile (ultra-fast local edit-run loop):
 
 ```sh
 julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
+```
+
+Note: local non-smoke profiles emit a warning to encourage smoke-first edit-run loops.
+
+Unit core profile (broader pre-merge gate):
+
+```sh
+julia --project=. -e 'ENV["UNIT_PROFILE"]="core"; include("tests/unit/runtests.jl")'
 ```
 
 Unit full profile:
@@ -101,10 +127,16 @@ Direct single-file unit iteration:
 julia --project=. -e 'include("tests/unit/relaxtime/test_transport_coefficients.jl")'
 ```
 
-Integration smoke profile:
+Integration smoke profile (ultra-fast local edit-run loop):
 
 ```sh
 julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'
+```
+
+Integration core profile (broader pre-merge gate):
+
+```sh
+julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="core"; include("tests/integration/runtests.jl")'
 ```
 
 Integration full profile:
@@ -113,16 +145,28 @@ Integration full profile:
 julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="full"; include("tests/integration/runtests.jl")'
 ```
 
+Run a single integration test file through the supported selector:
+
+```sh
+julia --project=. -e 'ENV["INTEGRATION_FILES"]="relaxtime/test_transport_workflow_smoke.jl"; include("tests/integration/runtests.jl")'
+```
+
 Direct single integration test file:
 
 ```sh
 julia --project=. -e 'include("tests/integration/relaxtime/test_transport_workflow_smoke.jl")'
 ```
 
-Regression smoke profile:
+Regression smoke profile (ultra-fast local edit-run loop):
 
 ```sh
 julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")'
+```
+
+Regression core profile (broader pre-merge gate):
+
+```sh
+julia --project=. -e 'ENV["REGRESSION_PROFILE"]="core"; include("tests/regression/runtests.jl")'
 ```
 
 Regression full profile:
@@ -143,6 +187,36 @@ Validation suite:
 julia --project=. tests/validation/runtests.jl
 ```
 
+Validation smoke profile:
+
+```sh
+julia --project=. -e 'ENV["VALIDATION_PROFILE"]="smoke"; include("tests/validation/runtests.jl")'
+```
+
+Validation core profile:
+
+```sh
+julia --project=. -e 'ENV["VALIDATION_PROFILE"]="core"; include("tests/validation/runtests.jl")'
+```
+
+Enable optional precompile warmup for test runners (helps AD-heavy cold start):
+
+```sh
+julia --project=. -e 'ENV["TEST_PRECOMPILE_WARMUP"]="1"; ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'
+```
+
+Choose precompile capability profile for test runners (default `test`):
+
+```sh
+julia --project=. -e 'ENV["TEST_PRECOMPILE_WARMUP"]="1"; ENV["TEST_PRECOMPILE_PROFILE"]="core"; ENV["INTEGRATION_PROFILE"]="core"; include("tests/integration/runtests.jl")'
+```
+
+Run a single validation file through the supported selector:
+
+```sh
+julia --project=. -e 'ENV["VALIDATION_FILES"]="relaxtime/test_mott_reference_mapping.jl"; include("tests/validation/runtests.jl")'
+```
+
 VS Code / TestItems wrapper entrypoint:
 
 ```sh
@@ -160,6 +234,20 @@ julia --project=. scripts/dev/check_docs_consistency.jl
 julia --project=. scripts/dev/check_active_docs_governance.jl
 julia --project=. scripts/dev/check_pnjl_migration_guard.jl
 julia --project=. scripts/dev/analyze_deps.jl
+julia --project=. scripts/dev/check_precompile_profile_coverage.jl
+julia --project=. scripts/dev/check_precompile_trace_budget.jl
+```
+
+Build persistent sysimage for AD-heavy test/script workflows:
+
+```sh
+julia --project=. scripts/dev/build_sysimage.jl
+```
+
+Use the sysimage for faster cold-start test runs:
+
+```sh
+julia --sysimage=build/JuliaRelaxTime.dll --project=. -e 'ENV["INTEGRATION_PROFILE"]="core"; include("tests/integration/runtests.jl")'
 ```
 
 ## Benchmark Commands

@@ -1,6 +1,28 @@
 using Test
 
 const REGRESSION_DIR = @__DIR__
+const PROJECT_ROOT = normpath(joinpath(REGRESSION_DIR, "..", ".."))
+
+function _maybe_precompile_warmup()
+    enabled = get(ENV, "TEST_PRECOMPILE_WARMUP", "0") in ("1", "true", "TRUE", "yes", "YES")
+    enabled || return
+    try
+        if !isdefined(Main, :Models)
+            Base.include(Main, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+        end
+        profile = Symbol(lowercase(get(ENV, "TEST_PRECOMPILE_PROFILE", "test")))
+        Main.Models.run_precompile_profile(profile)
+    catch err
+        @warn "Regression precompile warmup failed; continuing without warmup" exception=(err, catch_backtrace())
+    end
+end
+
+function _warn_local_non_smoke(profile::String)
+    is_ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+    is_ci && return
+    profile == "smoke" && return
+    @warn "Local regression test run uses non-smoke profile; prefer smoke for edit-run loop" profile=profile recommended="REGRESSION_PROFILE=smoke"
+end
 
 const EXPECTED_OPTIONAL_FIXTURE_SKIPS = [
     (
@@ -11,24 +33,27 @@ const EXPECTED_OPTIONAL_FIXTURE_SKIPS = [
 ]
 
 const SMOKE_FILES = [
+    joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
+]
+
+const CORE_SMOKE_FILES = [
+    # NJL: fixed-point guard
     joinpath(REGRESSION_DIR, "njl", "test_njl_gap_fixedpoint_regression.jl"),
+
+    # RPNJL: fixed-point guard
     joinpath(REGRESSION_DIR, "rpnjl", "test_rpnjl_gap_fixedpoint_regression.jl"),
+
+    # PNJL: fixed-point + semantic selection guard
     joinpath(REGRESSION_DIR, "pnjl", "test_scan_fixedpoint_regression.jl"),
-    joinpath(REGRESSION_DIR, "pnjl", "test_constraint_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "pnjl", "test_constraint_selection_regression.jl"),
-    joinpath(REGRESSION_DIR, "pnjl", "test_magnetic_fixedpoint_regression.jl"),
+
+    # Models: one fixed-point + one contract semantic guard
     joinpath(REGRESSION_DIR, "models", "test_dimension_agnostic_solver_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_fixedrho_precision_guard_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_problem_spec_fixedrho_parity_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_solver_attempt_engine_convergence_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_solver_diagnostic_exception_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_solver_contract_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_solver_phase3_fixedpoint_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_fixedrho_semantic_equivalence_regression.jl"),
-    joinpath(REGRESSION_DIR, "models", "test_firstorder_manifold_branch_stability.jl"),
+
+    # RelaxTime: transport fixed-point + workflow consistency
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
-    joinpath(REGRESSION_DIR, "relaxtime", "test_total_cross_section_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_workflow_vs_direct_consistency.jl"),
 ]
 
@@ -72,6 +97,8 @@ function _print_expected_regression_skips()
 end
 
 @testset "Regression" begin
+    _maybe_precompile_warmup()
+
     _print_expected_regression_skips()
 
     selected = _selected_regression_files()
@@ -86,10 +113,17 @@ end
     end
 
     profile = lowercase(get(ENV, "REGRESSION_PROFILE", "smoke"))
+    _warn_local_non_smoke(profile)
 
     if profile == "smoke"
         @testset "Smoke" begin
             for file in SMOKE_FILES
+                include(file)
+            end
+        end
+    elseif profile == "core"
+        @testset "Core" begin
+            for file in CORE_SMOKE_FILES
                 include(file)
             end
         end
@@ -118,6 +152,6 @@ end
             _include_regression_dir(joinpath(REGRESSION_DIR, "phase"))
         end
     else
-        error("Unknown REGRESSION_PROFILE=$(profile). Use smoke or full")
+        error("Unknown REGRESSION_PROFILE=$(profile). Use smoke, core, or full")
     end
 end

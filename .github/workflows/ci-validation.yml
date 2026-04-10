@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  validation:
+  regression-validation-core:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,5 +42,12 @@ jobs:
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-      - name: Run regression smoke
+      - name: Run regression core
+        env:
+          REGRESSION_PROFILE: core
         run: julia --project=. tests/regression/runtests.jl
+
+      - name: Run validation core
+        env:
+          VALIDATION_PROFILE: core
+        run: julia --project=. tests/validation/runtests.jl

@@ -12,22 +12,54 @@
 # Optional ENV knobs:
 #   UNIT_INCLUDE_PERF=1   # also include files whose name contains "performance"
 #   UNIT_INCLUDE_WIP=1    # include entries in DEFAULT_SKIP (for migration/debug only)
-#   UNIT_PROFILE=smoke|full
-#     - smoke (default): curated fast subset, should be green
+#   UNIT_PROFILE=smoke|core|full
+#     - smoke (default): ultra-fast core subset for edit-run loop
+#     - core: previous broader smoke gate used by CI / pre-merge
 #     - full: all test_*.jl across all unit subdirectories
 
 using Test
 
 const UNIT_DIR = @__DIR__
+const PROJECT_ROOT = normpath(joinpath(UNIT_DIR, "..", ".."))
+
+function _maybe_precompile_warmup()
+    enabled = get(ENV, "TEST_PRECOMPILE_WARMUP", "0") in ("1", "true", "TRUE", "yes", "YES")
+    enabled || return
+    try
+        if !isdefined(Main, :Models)
+            Base.include(Main, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+        end
+        profile = Symbol(lowercase(get(ENV, "TEST_PRECOMPILE_PROFILE", "test")))
+        Main.Models.run_precompile_profile(profile)
+    catch err
+        @warn "Unit precompile warmup failed; continuing without warmup" exception=(err, catch_backtrace())
+    end
+end
+
+function _warn_local_non_smoke(profile::String)
+    is_ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+    is_ci && return
+    profile == "smoke" && return
+    @warn "Local unit test run uses non-smoke profile; prefer smoke for edit-run loop" profile=profile recommended="UNIT_PROFILE=smoke"
+end
 
 # Blacklist for tests temporarily excluded.
 const DEFAULT_SKIP = Set([
     # (currently empty — all tests should pass)
 ])
 
-# Curated fast subset for CI / daily smoke runs.
-# Only references files that exist under tests/unit/.
+# Ultra-fast subset for local edit-run loop (<~1 min target on warm cache).
 const SMOKE_FILES = [
+    joinpath(UNIT_DIR, "numerics", "test_gausslegendre.jl"),
+    joinpath(UNIT_DIR, "types", "test_parameter_types.jl"),
+    joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
+    joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
+]
+
+# Broader gate retained for CI / pre-merge confidence.
+# Only references files that exist under tests/unit/.
+const CORE_SMOKE_FILES = [
     # [Core Numerics] 基础数值模块
     joinpath(UNIT_DIR, "numerics", "test_gausslegendre.jl"),
     joinpath(UNIT_DIR, "numerics", "test_cauchypv.jl"),
@@ -133,6 +165,8 @@ function _include_dir(dir::String)
 end
 
 @testset "Unit" begin
+    _maybe_precompile_warmup()
+
     selected = _selected_unit_files()
 
     if selected !== nothing
@@ -145,10 +179,17 @@ end
     end
 
     profile = lowercase(get(ENV, "UNIT_PROFILE", "smoke"))
+    _warn_local_non_smoke(profile)
 
     if profile == "smoke"
         @testset "Smoke" begin
             for f in SMOKE_FILES
+                include(f)
+            end
+        end
+    elseif profile == "core"
+        @testset "Core" begin
+            for f in CORE_SMOKE_FILES
                 include(f)
             end
         end
@@ -189,6 +230,6 @@ end
             _include_dir(joinpath(UNIT_DIR, "simulation"))
         end
     else
-        error("Unknown UNIT_PROFILE=$(profile). Use UNIT_PROFILE=smoke or UNIT_PROFILE=full")
+        error("Unknown UNIT_PROFILE=$(profile). Use UNIT_PROFILE=smoke, UNIT_PROFILE=core, or UNIT_PROFILE=full")
     end
 end

@@ -36,3 +36,13 @@ jobs:
           REGRESSION_PROFILE: full
           REGRESSION_MAGNETIC_SCOPE: nightly
         run: julia --project=. tests/regression/runtests.jl
+
+      - name: Run integration full profile
+        env:
+          INTEGRATION_PROFILE: full
+        run: julia --project=. tests/integration/runtests.jl
+
+      - name: Run validation full profile
+        env:
+          VALIDATION_PROFILE: full
+        run: julia --project=. tests/validation/runtests.jl

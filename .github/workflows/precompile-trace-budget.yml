@@ -1,0 +1,32 @@
+name: precompile-trace-budget
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * *"
+
+jobs:
+  trace-budget:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-precompile-trace-budget
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Build sysimage
+        run: julia --project=. scripts/dev/build_sysimage.jl
+
+      - name: Check precompile trace budget
+        run: julia --project=. scripts/dev/check_precompile_trace_budget.jl

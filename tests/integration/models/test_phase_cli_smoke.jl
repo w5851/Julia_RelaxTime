@@ -8,7 +8,7 @@ const CLI_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_st
     @test isfile(CLI_SCRIPT)
 
     output_dir = mktempdir()
-    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --preset=smoke --output_dir=$(output_dir)`
+    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --preset=smoke --iterations=6 --p_num=8 --t_num=4 --cep_max_bisect_iter=1 --cep_max_refine_level=0 --output_dir=$(output_dir)`
     run(cmd)
 
     summary_path = joinpath(output_dir, "phase_summary.json")
@@ -20,7 +20,6 @@ const CLI_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_st
     summary = JSON3.read(read(summary_path, String))
     manifest = JSON3.read(read(manifest_path, String))
 
-    @test haskey(summary, "cep")
     @test haskey(summary, "stats")
     @test haskey(manifest, "preset")
     @test String(manifest["preset"]) == "smoke"

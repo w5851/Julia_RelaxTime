@@ -130,6 +130,9 @@ export derive_pm_seed_pair, analyze_pm_branch_competition
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
 export Constants_PNJL
 export TmuScanConfig, TrhoScanConfig
+export run_precompile_workload
+export run_precompile_profile, run_precompile_capability
+export list_precompile_capabilities, list_precompile_profile
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
 
@@ -238,6 +241,11 @@ include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
+include(joinpath(@__DIR__, "precompile", "registry.jl"))
+include(joinpath(@__DIR__, "precompile_workload.jl"))
+
+using .PrecompileRegistry: run_precompile_profile, run_precompile_capability
+using .PrecompileRegistry: list_precompile_capabilities, list_precompile_profile
 
 const Integrals = PNJLCore.PNJLIntegrals
 const Constants_PNJL = Main.Constants_PNJL
