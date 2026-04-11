@@ -179,6 +179,15 @@ end
 
 function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vector{String}, result)
     manifest_path = joinpath(output_dir, "run_manifest.json")
+    existing_manifest = if isfile(manifest_path)
+        try
+            JSON3.read(read(manifest_path, String))
+        catch
+            nothing
+        end
+    else
+        nothing
+    end
     git_commit = try
         readchomp(`git -C $(joinpath(@__DIR__, "..", "..")) rev-parse HEAD`)
     catch
@@ -218,6 +227,13 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "artifact_paths" => result.artifact_paths,
         "effective_config" => effective_config,
     )
+
+    if existing_manifest !== nothing
+        haskey(existing_manifest, :pipeline) && (payload["pipeline"] = existing_manifest[:pipeline])
+        haskey(existing_manifest, :completed_stages) && (payload["completed_stages"] = existing_manifest[:completed_stages])
+        haskey(existing_manifest, :stage_records) && (payload["stage_records"] = existing_manifest[:stage_records])
+    end
+
     open(manifest_path, "w") do io
         write(io, JSON3.write(payload))
     end
