@@ -12,13 +12,15 @@
 
 ## 首选公开入口
 
-相关导出位于 [src/models/entrypoints.jl](src/models/entrypoints.jl#L13) 与 [src/models/Models.jl](src/models/Models.jl#L80)。
+相关导出位于 [src/models/entrypoints.jl](../../../../src/models/entrypoints.jl#L13) 与 [src/models/Models.jl](../../../../src/models/Models.jl#L80)。
 
 优先使用的 API：
 
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 - `Models.solve_gap_and_meson_point`
+- `Models.run_workflow_pipeline`
+- `Models.run_scan_pipeline`
 
 进阶接口：
 
@@ -28,7 +30,7 @@
 - `Models.workflow_param_adapters_module`
 - `Models.pnjl_module`
 
-完整导出基线见 [generated/Exports.md](docs/api/models/workflows/generated/Exports.md)。
+完整导出基线见 [generated/Exports.md](generated/Exports.md)。
 
 ## 三条典型路径
 
@@ -36,7 +38,7 @@
 
 `Models.solve_gap_and_transport` 适合“给定 `(T_fm, mu_fm, xi)`，直接得到平衡态与 `(eta, zeta, sigma)`”的场景。
 
-更详细的输入合同与性能提示见 [docs/api/relaxtime/workflow/TransportWorkflow.md](docs/api/relaxtime/workflow/TransportWorkflow.md)。
+更详细的输入合同与性能提示见 [docs/api/relaxtime/workflow/TransportWorkflow.md](../../relaxtime/workflow/TransportWorkflow.md)。
 
 ### 2. 基于已知平衡态直接算输运
 
@@ -46,7 +48,20 @@
 
 `Models.solve_gap_and_meson_point` 适合“给定一个点，直接求出多个介子通道的质量、宽度、阈值与 gap”的场景。
 
-更详细的通道与返回结构见 [docs/api/pnjl/MesonMassWorkflow.md](docs/api/pnjl/MesonMassWorkflow.md)。
+更详细的通道与返回结构见 [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md)。
+
+## 声明式编排入口（pipeline facade）
+
+当你希望以“声明任务类型 + 参数”的方式调用统一编排层，而不是直接绑定具体 workflow/scan 函数时，使用以下入口：
+
+- `Models.run_workflow_pipeline(kind; kwargs...)`
+  - 当前稳定支持 `kind=:transport`
+  - 语义上等价于 transport workflow 的声明式 facade，适合需要统一 run manifest 管理的调用方
+- `Models.run_scan_pipeline(kind; kwargs...)`
+  - 当前稳定支持 `kind=:tmu` 与 `kind=:trho`
+  - 语义上等价于扫描族入口的声明式 facade，适合统一统计口径（`total/success/failure/skipped`）与 manifest 归档
+
+这两个入口负责“编排与可复现记录”；具体物理求解与数值语义仍由各自的 workflow/scan 核心模块负责。
 
 ## 最短示例
 
@@ -88,4 +103,4 @@ res = Models.solve_gap_and_meson_point(
 - 明确参数归一化职责（`as_relaxtime_inputs`）
 - 做聚合入口边界检查或调试
 
-这些能力的职责边界见 [CoreConcepts.md](docs/api/models/workflows/CoreConcepts.md)。
+这些能力的职责边界见 [CoreConcepts.md](CoreConcepts.md)。

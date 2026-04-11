@@ -6,6 +6,16 @@
 
 如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 `../../models/workflows/TransportWorkflow.md`；本页不重复承担入口选择与使用场景导航。
 
+## 与 `run_relaxtime_orchestrator_pipeline` 的关系（入口职责边界）
+
+- `solve_gap_and_transport`（本页）是 **单点 transport workflow** 入口：关注一个 `(T_fm, mu_fm, xi)` 点上的平衡态 + 输运系数求解与参数契约。
+- `Models.run_relaxtime_orchestrator_pipeline(:cross_section; ...)` 是 **任务级编排入口**：面向跨配置、跨流程的 orchestrator 执行（例如截面批处理、配置合并校验、产物与 manifest 归档）。
+- 二者边界：
+  - transport workflow 负责物理求解链路与输入优先级；
+  - orchestrator pipeline 负责命令编排、工件落盘、消费报告与运行治理元数据。
+
+因此，当目标是“算一个 transport 点并拿到 `(eta, zeta, sigma)`”，优先本页入口；当目标是“跑编排命令并管理成套产物/manifest”，优先 orchestrator pipeline 入口。
+
 ## 入口
 
 ### `solve_gap_and_transport`
