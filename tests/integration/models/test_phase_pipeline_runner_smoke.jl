@@ -46,6 +46,9 @@ const EXPECTED_STAGE_SEQUENCE = [
     @test haskey(manifest, :completed_stages)
     @test collect(String.(manifest.completed_stages)) == EXPECTED_STAGE_SEQUENCE
     @test haskey(manifest, :pipeline)
+    @test String(manifest.pipeline.run_id) == basename(normpath(tmp))
+    @test !isempty(String(manifest.pipeline.git_commit))
+    @test !isempty(String(manifest.pipeline.config_hash))
     @test haskey(manifest.pipeline, :artifact_hash)
     @test !isempty(String(manifest.pipeline.artifact_hash))
 end

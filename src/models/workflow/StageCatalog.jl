@@ -1,6 +1,6 @@
 using Dates
 
-const PHASE_PIPELINE_STAGE_IDS = [
+const PHASE_PIPELINE_STAGE_IDS = (
     :build_model,
     :prepare_grid,
     :solve_points,
@@ -8,7 +8,7 @@ const PHASE_PIPELINE_STAGE_IDS = [
     :analyze_phase,
     :export_artifacts,
     :emit_repro_manifest,
-]
+)
 
 function _resolve_phase_runner_output_dir(
         model_kind::Symbol;
@@ -20,11 +20,28 @@ function _resolve_phase_runner_output_dir(
     return isnothing(output_dir) ? target.run_dir : output_dir
 end
 
-function _phase_runner_run_id(run_id::Union{Nothing, String})
+function _phase_runner_run_id(run_id::Union{Nothing, String}, run_dir::String)
     if run_id === nothing || isempty(strip(run_id))
-        return "phase-runner-" * Dates.format(Dates.now(Dates.UTC), dateformat"yyyymmddTHHMMSS")
+        return basename(normpath(run_dir))
     end
     return String(run_id)
+end
+
+function _phase_runner_git_commit()
+    try
+        return readchomp(`git -C $(joinpath(@__DIR__, "..", "..", "..")) rev-parse HEAD`)
+    catch
+        return "unknown"
+    end
+end
+
+function _phase_runner_config_hash(model_kind::Symbol, phase_kwargs)
+    payload = String[]
+    push!(payload, String(model_kind))
+    for key in sort(collect(keys(phase_kwargs)); by=String)
+        push!(payload, String(key) * "=" * sprint(show, getproperty(phase_kwargs, key)))
+    end
+    return bytes2hex(SHA.sha1(join(payload, "|")))
 end
 
 function _build_phase_pipeline_stages(core_run_phase_pipeline)
@@ -113,6 +130,8 @@ function run_phase_pipeline_via_runner(core_run_phase_pipeline, model_kind::Symb
     manifest_path = joinpath(run_dir, "run_manifest.json")
 
     core_kwargs = merge((; output_dir=run_dir), (; kwargs...))
+    effective_run_id = _phase_runner_run_id(run_id, run_dir)
+    provenance_config_hash = _phase_runner_config_hash(model_kind, core_kwargs)
 
     ctx = PipelineContext(
         Dict{Symbol, Any}(
@@ -120,9 +139,9 @@ function run_phase_pipeline_via_runner(core_run_phase_pipeline, model_kind::Symb
             :phase_kwargs => core_kwargs,
         ),
         PipelineProvenance(
-            "phase-runner",
-            "phase-runner",
-            _phase_runner_run_id(run_id),
+            _phase_runner_git_commit(),
+            provenance_config_hash,
+            effective_run_id,
             Dates.now(Dates.UTC),
         ),
     )
@@ -131,7 +150,7 @@ function run_phase_pipeline_via_runner(core_run_phase_pipeline, model_kind::Symb
         "phase_pipeline_runner",
         "v1",
         model_kind,
-        PHASE_PIPELINE_STAGE_IDS,
+        collect(PHASE_PIPELINE_STAGE_IDS),
         (;),
         PipelineIOContract(
             :v1,
