@@ -129,6 +129,7 @@ export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, Pipelin
 export persisted_symbol_to_string, persisted_string_to_symbol
 export PipelineStageRecord, PipelineRunResult
 export run_pipeline, compute_pipeline_config_hash, compute_pipeline_artifact_hash
+export PHASE_PIPELINE_STAGE_IDS, run_phase_pipeline_via_runner
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
 export derive_pm_seed_pair, analyze_pm_branch_competition
@@ -243,6 +244,7 @@ include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
 include(joinpath(@__DIR__, "phase", "ProductionPhasePipeline.jl"))
 include(joinpath(@__DIR__, "workflow", "PipelineTypes.jl"))
 include(joinpath(@__DIR__, "workflow", "PipelineRunner.jl"))
+include(joinpath(@__DIR__, "workflow", "StageCatalog.jl"))
 include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))
