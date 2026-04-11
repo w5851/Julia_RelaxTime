@@ -259,12 +259,69 @@ end
     return is_physical_solution(cand.x_state, cand.masses)
 end
 
+@inline function _select_pressure_max_local(candidates::AbstractVector)
+    isempty(candidates) && throw(ArgumentError("candidates must be non-empty"))
+    candidate_required(cand, field::Symbol) = begin
+        if hasproperty(cand, field)
+            return getproperty(cand, field)
+        end
+        if hasmethod(haskey, Tuple{typeof(cand), Symbol}) && haskey(cand, field)
+            return get(cand, field, nothing)
+        end
+        throw(ArgumentError("candidate missing required field :$(field) for _select_pressure_max_local"))
+    end
+    candidate_seed_index(cand, fallback::Int) = haskey(cand, :seed_index) ? Int(get(cand, :seed_index, fallback)) : fallback
+    candidate_residual(cand) = begin
+        value = Float64(candidate_required(cand, :residual_norm))
+        isfinite(value) ? value : Inf
+    end
+    candidate_pressure(cand) = begin
+        value = Float64(candidate_required(cand, :pressure))
+        isfinite(value) ? value : -Inf
+    end
+
+    function better_candidate(cand, cand_idx::Int, best, best_idx::Int)
+        cand_ok = Bool(candidate_required(cand, :hard_constraint_ok))
+        best_ok = Bool(candidate_required(best, :hard_constraint_ok))
+        if cand_ok != best_ok
+            return cand_ok
+        end
+
+        cand_residual = candidate_residual(cand)
+        best_residual = candidate_residual(best)
+        if cand_residual != best_residual
+            return cand_residual < best_residual
+        end
+
+        cand_pressure = candidate_pressure(cand)
+        best_pressure = candidate_pressure(best)
+        if cand_pressure != best_pressure
+            return cand_pressure > best_pressure
+        end
+
+        cand_seed_index = candidate_seed_index(cand, cand_idx)
+        best_seed_index = candidate_seed_index(best, best_idx)
+        return cand_seed_index < best_seed_index
+    end
+
+    selected_idx = 1
+    selected = candidates[selected_idx]
+    for i in eachindex(candidates)
+        cand = candidates[i]
+        if better_candidate(cand, i, selected, selected_idx)
+            selected_idx = i
+            selected = cand
+        end
+    end
+    return selected
+end
+
 @inline function _fixedmu_multiseed_selector_adapter(candidates::AbstractVector)
     converged_physical = [c for c in candidates if _candidate_is_physical_for_selection(c)]
     if !isempty(converged_physical)
-        return select_pressure_max_candidate(converged_physical).selected_candidate
+        return _select_pressure_max_local(converged_physical)
     end
-    return select_pressure_max_candidate(candidates).selected_candidate
+    return _select_pressure_max_local(candidates)
 end
 
 @inline function _resolve_nonfixedmu_bridge(mode::ConstraintMode, T_fm::Real, kwargs)
@@ -429,7 +486,7 @@ function solve(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm::Real;
         raw.mu_vec,
         Float64(raw.omega),
         Float64(raw.pressure),
-        Float64(raw.rho_norm) / Float64(rho0),
+        Float64(raw.rho_norm) / Float64(Main.Constants_PNJL.ρ0_inv_fm3),
         Float64(raw.entropy),
         Float64(raw.energy),
         raw.masses,
@@ -586,7 +643,7 @@ function solve_multi(model::AbstractPNJLModel, mode::FixedMu, T_fm::Real, μ_fm:
                 mu_vec=raw.mu_vec,
                 omega=Float64(raw.omega),
                 pressure=Float64(raw.pressure),
-                rho_norm=Float64(raw.rho_norm) / Float64(rho0),
+                rho_norm=Float64(raw.rho_norm) / Float64(Main.Constants_PNJL.ρ0_inv_fm3),
                 entropy=Float64(raw.entropy),
                 energy=Float64(raw.energy),
                 masses=raw.masses,

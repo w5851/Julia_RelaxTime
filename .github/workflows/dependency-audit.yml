@@ -24,6 +24,9 @@ jobs:
         with:
           version: "1.12.5"
 
+      - name: Instantiate Julia project
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+
       - name: Generate dependency graph
         run: julia --project=. scripts/dev/gen_deps.jl
 

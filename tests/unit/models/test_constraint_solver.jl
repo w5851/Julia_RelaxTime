@@ -233,7 +233,7 @@ Models.pnjl_module()
     end
 
     @testset "residual spine guard" begin
-        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "ConstraintSolverCommon.jl")
+        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "runtime", "ConstraintSolverCommon.jl")
         source = read(solver_path, String)
         @test occursin("_gap_norm_from_state", source)
         @test !occursin("gap_residual(model", source)

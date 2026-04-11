@@ -161,7 +161,7 @@ end
     end
 
     @testset "GapSolver does not own default seed constants" begin
-        gap_solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "GapSolver.jl")
+        gap_solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "runtime", "GapSolver.jl")
         source = read(gap_solver_path, String)
         @test !occursin("const _HADRON_SEED_5", source)
         @test !occursin("const _PNJL_MULTI_SEEDS", source)

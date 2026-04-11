@@ -97,6 +97,7 @@ const INTEGRATION_CORE_FILES = [
     # Models: 1 e2e + 1 contract guard
     joinpath(INTEGRATION_DIR, "models", "test_models_phase0_smoke.jl"),
     joinpath(INTEGRATION_DIR, "models", "test_models_dispatch_interface_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "models", "test_phase_pipeline_runner_smoke.jl"),
 
     # PNJL: 1 e2e + 1 contract guard
     joinpath(INTEGRATION_DIR, "pnjl", "test_tmu_scan_smoke.jl"),

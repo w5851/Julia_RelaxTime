@@ -124,6 +124,12 @@ export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export AbstractPipelineIOContract, PipelineIOContract
+export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, PipelineArtifact, StageResult
+export persisted_symbol_to_string, persisted_string_to_symbol
+export PipelineStageRecord, PipelineRunResult
+export run_pipeline, compute_pipeline_config_hash, compute_pipeline_artifact_hash
+export PHASE_PIPELINE_STAGE_IDS, run_phase_pipeline_via_runner
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
 export derive_pm_seed_pair, analyze_pm_branch_competition
@@ -175,28 +181,28 @@ include(joinpath(@__DIR__, "factory.jl"))
 # Ω assembly
 include(joinpath(@__DIR__, "omega.jl"))
 include(joinpath(@__DIR__, "thermo_kernel.jl"))
-include(joinpath(@__DIR__, "solver", "GapSolver.jl"))
-include(joinpath(@__DIR__, "solver", "ImplicitGapLegacy.jl"))
-include(joinpath(@__DIR__, "solver", "ConstraintSolver.jl"))
+include(joinpath(@__DIR__, "solver", "runtime", "GapSolver.jl"))
+include(joinpath(@__DIR__, "solver", "compat", "ImplicitGapLegacy.jl"))
+include(joinpath(@__DIR__, "solver", "runtime", "ConstraintSolver.jl"))
 include(joinpath(@__DIR__, "solver", "ImplicitProblem.jl"))
 include(joinpath(@__DIR__, "solver", "ImplicitBuilder.jl"))
-include(joinpath(@__DIR__, "solver", "ImplicitAdapters.jl"))
-include(joinpath(@__DIR__, "solver", "ConstraintModes.jl"))
-include(joinpath(@__DIR__, "solver", "ConstraintComponents.jl"))
-include(joinpath(@__DIR__, "solver", "SchemaAdapter.jl"))
-include(joinpath(@__DIR__, "solver", "PrimaryStrategy.jl"))
-include(joinpath(@__DIR__, "solver", "ProblemSpec.jl"))
-include(joinpath(@__DIR__, "solver", "SolverDiagnostics.jl"))
-include(joinpath(@__DIR__, "solver", "SolverDiagnosticsTypes.jl"))
-include(joinpath(@__DIR__, "solver", "SolverRuntimeConfig.jl"))
-include(joinpath(@__DIR__, "solver", "ProblemSpecOrchestrator.jl"))
-include(joinpath(@__DIR__, "solver", "StateSchema.jl"))
-include(joinpath(@__DIR__, "solver", "CandidateGovernance.jl"))
-include(joinpath(@__DIR__, "solver", "SeedStrategies.jl"))
-include(joinpath(@__DIR__, "solver", "Conditions.jl"))
-include(joinpath(@__DIR__, "solver", "GenericRootEngine.jl"))
-include(joinpath(@__DIR__, "solver", "WeightedFallback.jl"))
-include(joinpath(@__DIR__, "solver", "Solver.jl"))
+include(joinpath(@__DIR__, "solver", "compat", "ImplicitAdapters.jl"))
+include(joinpath(@__DIR__, "solver", "spec", "ConstraintModes.jl"))
+include(joinpath(@__DIR__, "solver", "spec", "ConstraintComponents.jl"))
+include(joinpath(@__DIR__, "solver", "compat", "SchemaAdapter.jl"))
+include(joinpath(@__DIR__, "solver", "orchestrator", "PrimaryStrategy.jl"))
+include(joinpath(@__DIR__, "solver", "spec", "ProblemSpec.jl"))
+include(joinpath(@__DIR__, "solver", "diagnostics", "SolverDiagnostics.jl"))
+include(joinpath(@__DIR__, "solver", "diagnostics", "SolverDiagnosticsTypes.jl"))
+include(joinpath(@__DIR__, "solver", "config", "SolverRuntimeConfig.jl"))
+include(joinpath(@__DIR__, "solver", "orchestrator", "ProblemSpecOrchestrator.jl"))
+include(joinpath(@__DIR__, "solver", "config", "StateSchema.jl"))
+include(joinpath(@__DIR__, "solver", "governance", "CandidateGovernance.jl"))
+include(joinpath(@__DIR__, "solver", "orchestrator", "SeedStrategies.jl"))
+include(joinpath(@__DIR__, "solver", "spec", "Conditions.jl"))
+include(joinpath(@__DIR__, "solver", "runtime", "GenericRootEngine.jl"))
+include(joinpath(@__DIR__, "solver", "governance", "WeightedFallback.jl"))
+include(joinpath(@__DIR__, "solver", "api", "SolverAPI.jl"))
 include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
 include(joinpath(@__DIR__, "derivatives", "ConservedChargeSusceptibilities.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
@@ -236,6 +242,9 @@ include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
 include(joinpath(@__DIR__, "phase", "ProductionPhasePipeline.jl"))
+include(joinpath(@__DIR__, "workflow", "PipelineTypes.jl"))
+include(joinpath(@__DIR__, "workflow", "PipelineRunner.jl"))
+include(joinpath(@__DIR__, "workflow", "StageCatalog.jl"))
 include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))

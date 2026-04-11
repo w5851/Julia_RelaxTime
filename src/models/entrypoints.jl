@@ -216,6 +216,10 @@ end
     return adapters
 end
 
+function run_phase_pipeline(args...; kwargs...)
+    return run_phase_pipeline_via_runner(_run_phase_pipeline_core, args...; kwargs...)
+end
+
 """返回给定模型类型对应的 workflow 适配模块。"""
 @inline function workflow_module_for(model_kind::Symbol)
     if model_kind === :Rotation

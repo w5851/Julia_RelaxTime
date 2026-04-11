@@ -34,8 +34,8 @@ end
     end
 
     @testset "single-source consumption guards" begin
-        gap_solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "GapSolver.jl")
-        weighted_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "WeightedFallback.jl")
+        gap_solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "runtime", "GapSolver.jl")
+        weighted_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "governance", "WeightedFallback.jl")
 
         gap_source = read(gap_solver_path, String)
         weighted_source = read(weighted_path, String)

@@ -242,7 +242,7 @@ function normalize_selector_candidates(candidates::AbstractVector{<:NamedTuple};
 end
 
 function execute_governance_selector(candidates::AbstractVector{<:NamedTuple};
-    selector::Function=select_pressure_max_candidate,
+    selector::Function,
     residual_norm_max::Real=1e-6,
     require_converged::Bool=true,
 )

@@ -102,7 +102,7 @@ end
         elseif mode isa FixedAsymmetricRho
             (model, T_fm; fwd_kwargs...) -> _fixedasymrho_problem_spec_forward_solve(model, mode, T_fm; fwd_kwargs...)
         else
-            (model, T_fm; fwd_kwargs...) -> solve_constraint(model, mode, T_fm; fwd_kwargs...)
+            (model, T_fm; fwd_kwargs...) -> throw(ArgumentError("unsupported mode in build_problem_spec: $(typeof(mode))"))
         end
         return ProblemSpec(
             mode;

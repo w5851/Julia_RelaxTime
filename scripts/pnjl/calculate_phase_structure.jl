@@ -179,6 +179,42 @@ end
 
 function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vector{String}, result)
     manifest_path = joinpath(output_dir, "run_manifest.json")
+    existing_manifest = if isfile(manifest_path)
+        try
+            JSON3.read(read(manifest_path, String))
+        catch err
+            @warn "Failed to parse existing run_manifest.json; writing fresh CLI manifest projection" manifest_path exception=(err, catch_backtrace())
+            nothing
+        end
+    else
+        nothing
+    end
+
+    existing_pipeline_payload = if existing_manifest !== nothing && haskey(existing_manifest, :pipeline)
+        pipe = existing_manifest[:pipeline]
+        same_model_kind = haskey(pipe, :model_kind) && String(pipe[:model_kind]) == String(cfg.model_kind)
+        if same_model_kind
+            Dict(
+                "name" => get(pipe, :name, "phase_pipeline_runner"),
+                "version" => get(pipe, :version, "v1"),
+                "model_kind" => String(cfg.model_kind),
+                "run_id" => String(result.run_id),
+                "git_commit" => get(pipe, :git_commit, nothing),
+                "manifest_schema_version" => get(pipe, :manifest_schema_version, "phase_manifest_v1"),
+                "timestamp" => get(pipe, :timestamp, nothing),
+                "success" => get(pipe, :success, true),
+                "failed_stage" => get(pipe, :failed_stage, nothing),
+                "error_kind" => get(pipe, :error_kind, nothing),
+                "error_msg" => get(pipe, :error_msg, nothing),
+                "config_hash" => get(result.config_snapshot, "config_hash", nothing),
+                "artifact_hash" => get(pipe, :artifact_hash, nothing),
+            )
+        else
+            nothing
+        end
+    else
+        nothing
+    end
     git_commit = try
         readchomp(`git -C $(joinpath(@__DIR__, "..", "..")) rev-parse HEAD`)
     catch
@@ -218,6 +254,13 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "artifact_paths" => result.artifact_paths,
         "effective_config" => effective_config,
     )
+
+    if existing_pipeline_payload !== nothing
+        payload["pipeline"] = existing_pipeline_payload
+        haskey(existing_manifest, :completed_stages) && (payload["completed_stages"] = existing_manifest[:completed_stages])
+        haskey(existing_manifest, :stage_records) && (payload["stage_records"] = existing_manifest[:stage_records])
+    end
+
     open(manifest_path, "w") do io
         write(io, JSON3.write(payload))
     end

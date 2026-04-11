@@ -44,9 +44,7 @@ function _warn_local_non_smoke(profile::String)
 end
 
 # Blacklist for tests temporarily excluded.
-const DEFAULT_SKIP = Set([
-    # (currently empty — all tests should pass)
-])
+const DEFAULT_SKIP = Set([])
 
 # Ultra-fast subset for local edit-run loop (<~1 min target on warm cache).
 const SMOKE_FILES = [
@@ -216,6 +214,13 @@ end
 
         @testset "Models" begin
             _include_dir(joinpath(UNIT_DIR, "models"))
+        end
+
+        solver_dir = joinpath(UNIT_DIR, "models", "solver")
+        if isdir(solver_dir)
+            @testset "Models/Solver" begin
+                _include_dir(solver_dir)
+            end
         end
 
         @testset "PNJL" begin

@@ -119,7 +119,7 @@ function _collect_spinodal(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{F
     return rows
 end
 
-function run_phase_pipeline(model_kind::Symbol=:PNJL;
+function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         mode::Symbol=:production,
         T_grid::AbstractVector=[150.0],
         rho_grid::AbstractVector=[0.2],
