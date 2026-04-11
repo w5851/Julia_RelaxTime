@@ -9,6 +9,9 @@ whether called with QuarkParams/ThermoParams structs or NamedTuple parameters.
 """
 
 using Test
+const INTEGRATION_VERBOSE = get(ENV, "INTEGRATION_VERBOSE", "0") in ("1", "true", "TRUE", "yes", "YES")
+@inline integration_println(args...) = INTEGRATION_VERBOSE ? Base.println(args...) : nothing
+
 using Supposition
 
 # Load required modules
@@ -43,10 +46,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
     # NamedTuple parameters across a wide range of random inputs.
     
     @testset "Property: Struct-NamedTuple Equivalence" begin
-        println("\n" * "="^70)
-        println("Property Test: Average Scattering Rate Struct-NamedTuple Equivalence")
-        println("Testing average_scattering_rate with random parameters")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: Average Scattering Rate Struct-NamedTuple Equivalence")
+        integration_println("Testing average_scattering_rate with random parameters")
+        integration_println("="^70)
         
         RTOL = 1e-12  # Relative tolerance for floating-point comparison
         ATOL = 1e-14  # Absolute tolerance
@@ -142,7 +145,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
                 error("Scattering rate must be finite (nt): $rate_nt")
         end
         
-        println("✓ Property test passed: Struct-NamedTuple equivalence verified for uu_to_uu")
+        integration_println("✓ Property test passed: Struct-NamedTuple equivalence verified for uu_to_uu")
     end
     
     # ========================================================================
@@ -150,10 +153,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
     # ========================================================================
     
     @testset "Property: Multiple Scattering Processes" begin
-        println("\n" * "="^70)
-        println("Property Test: Multiple Scattering Processes")
-        println("Testing struct-NamedTuple equivalence across different processes")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: Multiple Scattering Processes")
+        integration_println("Testing struct-NamedTuple equivalence across different processes")
+        integration_println("="^70)
         
         RTOL = 1e-12
         ATOL = 1e-14
@@ -213,7 +216,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             true
         end
         
-        println("✓ Property test passed: All tested processes show struct-NamedTuple equivalence")
+        integration_println("✓ Property test passed: All tested processes show struct-NamedTuple equivalence")
     end
     
     # ========================================================================
@@ -221,10 +224,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
     # ========================================================================
     
     @testset "Property: Cache Construction" begin
-        println("\n" * "="^70)
-        println("Property Test: Cache Construction with Structs")
-        println("Testing build_w0cdf_pchip_cache with struct parameters")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: Cache Construction with Structs")
+        integration_println("Testing build_w0cdf_pchip_cache with struct parameters")
+        integration_println("="^70)
         
         RTOL = 1e-12
         ATOL = 1e-14
@@ -303,17 +306,17 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             true
         end
         
-        println("✓ Property test passed: Cache construction with structs verified")
+        integration_println("✓ Property test passed: Cache construction with structs verified")
     end
     
 end
 
-println("\n" * "="^70)
-println("AverageScatteringRate Property Tests Complete!")
-println("="^70)
-println("\nAll property tests passed:")
-println("  1. Struct-NamedTuple equivalence for average_scattering_rate")
-println("  2. Multiple scattering processes tested")
-println("  3. Cache construction with struct parameters verified")
-println("  4. Physical constraints maintained (non-negative, finite rates)")
-println("="^70)
+integration_println("\n" * "="^70)
+integration_println("AverageScatteringRate Property Tests Complete!")
+integration_println("="^70)
+integration_println("\nAll property tests passed:")
+integration_println("  1. Struct-NamedTuple equivalence for average_scattering_rate")
+integration_println("  2. Multiple scattering processes tested")
+integration_println("  3. Cache construction with struct parameters verified")
+integration_println("  4. Physical constraints maintained (non-negative, finite rates)")
+integration_println("="^70)

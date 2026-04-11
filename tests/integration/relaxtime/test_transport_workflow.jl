@@ -5,7 +5,9 @@ if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_PATH)
 end
 
-const TransportWorkflow = Main.Models.transport_workflow_module()
+if !isdefined(Main, :TransportWorkflow)
+    const TransportWorkflow = Main.Models.transport_workflow_module()
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow: gap -> transport (single point)" begin

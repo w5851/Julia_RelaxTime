@@ -12,6 +12,9 @@ edge cases and boundary conditions.
 """
 
 using Test
+const INTEGRATION_VERBOSE = get(ENV, "INTEGRATION_VERBOSE", "0") in ("1", "true", "TRUE", "yes", "YES")
+@inline integration_println(args...) = INTEGRATION_VERBOSE ? Base.println(args...) : nothing
+
 
 # Load required modules
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
@@ -66,9 +69,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "calculate_all_total_cross_sections with structs" begin
-        println("\n" * "="^70)
-        println("Test: calculate_all_total_cross_sections with struct parameters")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: calculate_all_total_cross_sections with struct parameters")
+        integration_println("="^70)
         
         s = 31.0  # fm⁻²
         
@@ -95,8 +98,8 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         finite_count = count(isfinite, values(all_σ))
         @test finite_count > 0
         
-        println("✓ calculate_all_total_cross_sections works with struct parameters")
-        println("  Finite results: $finite_count / $(length(all_σ))")
+        integration_println("✓ calculate_all_total_cross_sections works with struct parameters")
+        integration_println("  Finite results: $finite_count / $(length(all_σ))")
     end
 
     @testset "Structured failure contract" begin
@@ -132,9 +135,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "scan_s_dependence smoothness" begin
-        println("\n" * "="^70)
-        println("Test: scan_s_dependence produces smooth curves")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: scan_s_dependence produces smooth curves")
+        integration_println("="^70)
         
         # Test with uu_to_uu process
         process = :uu_to_uu
@@ -164,9 +167,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             end
         end
         
-        println("✓ scan_s_dependence produces smooth curves")
-        println("  s range: $(s_values[1]) to $(s_values[end]) fm⁻²")
-        println("  σ range: $(minimum(σ_values)) to $(maximum(σ_values)) fm²")
+        integration_println("✓ scan_s_dependence produces smooth curves")
+        integration_println("  s range: $(s_values[1]) to $(s_values[end]) fm⁻²")
+        integration_println("  σ range: $(minimum(σ_values)) to $(maximum(σ_values)) fm²")
     end
     
     # ========================================================================
@@ -174,9 +177,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "Threshold behavior" begin
-        println("\n" * "="^70)
-        println("Test: Cross-section behavior near kinematic threshold")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: Cross-section behavior near kinematic threshold")
+        integration_println("="^70)
         
         process = :uu_to_uu
         s_threshold = (2.0 * m_u)^2
@@ -208,11 +211,11 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         # (though this may not always be strictly true due to quantum effects)
         @test σ_above >= σ_at
         
-        println("✓ Threshold behavior verified")
-        println("  s_threshold = $s_threshold fm⁻²")
-        println("  σ(below) = $σ_below fm²")
-        println("  σ(at) = $σ_at fm²")
-        println("  σ(above) = $σ_above fm²")
+        integration_println("✓ Threshold behavior verified")
+        integration_println("  s_threshold = $s_threshold fm⁻²")
+        integration_println("  σ(below) = $σ_below fm²")
+        integration_println("  σ(at) = $σ_at fm²")
+        integration_println("  σ(above) = $σ_above fm²")
     end
     
     # ========================================================================
@@ -220,9 +223,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "Different scattering processes" begin
-        println("\n" * "="^70)
-        println("Test: Cross-sections for different scattering processes")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: Cross-sections for different scattering processes")
+        integration_println("="^70)
         
         s = 31.0  # fm⁻²
         
@@ -247,7 +250,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             @test isfinite(σ)
             @test σ >= 0.0
             
-            println("  $process: σ = $σ fm²")
+            integration_println("  $process: σ = $σ fm²")
         end
         
         # Test symmetry: uu_to_uu should equal ubarubar_to_ubarubar (charge conjugate)
@@ -260,7 +263,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             @test results[:uu_to_uu] != results[:ss_to_ss]
         end
         
-        println("✓ Different scattering processes tested successfully")
+        integration_println("✓ Different scattering processes tested successfully")
     end
     
     # ========================================================================
@@ -268,9 +271,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "Integration point convergence" begin
-        println("\n" * "="^70)
-        println("Test: Cross-section convergence with integration points")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: Cross-section convergence with integration points")
+        integration_println("="^70)
         
         process = :uu_to_uu
         s = 31.0  # fm⁻²
@@ -284,7 +287,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
                 process, s, q_struct_with_A, t_struct, K_coeffs, n_points=n_points
             )
             push!(σ_list, σ)
-            println("  n_points=$n_points: σ = $σ fm²")
+            integration_println("  n_points=$n_points: σ = $σ fm²")
         end
         
         # Verify all results are finite and non-negative
@@ -302,7 +305,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             end
         end
         
-        println("✓ Integration point convergence verified")
+        integration_println("✓ Integration point convergence verified")
     end
     
     # ========================================================================
@@ -310,9 +313,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # ========================================================================
     
     @testset "Struct-NamedTuple consistency for batch operations" begin
-        println("\n" * "="^70)
-        println("Test: Struct-NamedTuple consistency for batch operations")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Test: Struct-NamedTuple consistency for batch operations")
+        integration_println("="^70)
         
         s = 31.0  # fm⁻²
         
@@ -361,19 +364,19 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             end
         end
         
-        println("✓ Struct-NamedTuple consistency verified for batch operations")
+        integration_println("✓ Struct-NamedTuple consistency verified for batch operations")
     end
     
 end
 
-println("\n" * "="^70)
-println("TotalCrossSection Edge Case Tests Complete!")
-println("="^70)
-println("\nAll edge case tests passed:")
-println("  1. calculate_all_total_cross_sections with struct parameters")
-println("  2. scan_s_dependence produces smooth curves")
-println("  3. Threshold behavior (below, at, above)")
-println("  4. Different scattering processes tested")
-println("  5. Integration point convergence")
-println("  6. Struct-NamedTuple consistency for batch operations")
-println("="^70)
+integration_println("\n" * "="^70)
+integration_println("TotalCrossSection Edge Case Tests Complete!")
+integration_println("="^70)
+integration_println("\nAll edge case tests passed:")
+integration_println("  1. calculate_all_total_cross_sections with struct parameters")
+integration_println("  2. scan_s_dependence produces smooth curves")
+integration_println("  3. Threshold behavior (below, at, above)")
+integration_println("  4. Different scattering processes tested")
+integration_println("  5. Integration point convergence")
+integration_println("  6. Struct-NamedTuple consistency for batch operations")
+integration_println("="^70)

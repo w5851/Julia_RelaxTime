@@ -4,7 +4,9 @@ if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
 
-const TransportWorkflow = Main.Models.transport_workflow_module()
+if !isdefined(Main, :TransportWorkflow)
+    const TransportWorkflow = Main.Models.transport_workflow_module()
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solver_backend switch (legacy vs models)" begin

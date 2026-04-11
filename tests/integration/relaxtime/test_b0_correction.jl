@@ -12,6 +12,9 @@ include("test/test_b0_correction.jl")
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
+const INTEGRATION_VERBOSE = get(ENV, "INTEGRATION_VERBOSE", "0") in ("1", "true", "TRUE", "yes", "YES")
+@inline integration_println(args...) = INTEGRATION_VERBOSE ? Base.println(args...) : nothing
+
 using Printf
 
 const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
@@ -91,21 +94,21 @@ TEST_PARAMS = (
         # 测试不同的 ξ 值
         ξ_values = [0.0, 0.05, 0.1, 0.2, 0.3, 0.5]
         
-        println("\n" * "="^70)
-        println("B0_correction 随 ξ 变化的系统性测试")
-        println("="^70)
-        println(@sprintf("%-10s %-20s %-20s", "ξ", "实部", "虚部"))
-        println("-"^70)
+        integration_println("\n" * "="^70)
+        integration_println("B0_correction 随 ξ 变化的系统性测试")
+        integration_println("="^70)
+        integration_println(@sprintf("%-10s %-20s %-20s", "ξ", "实部", "虚部"))
+        integration_println("-"^70)
         
         results = []
         for ξ in ξ_values
             result = B0_correction(λ, k, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
             push!(results, (ξ=ξ, real=result[1], imag=result[2]))
-            println(@sprintf("%-10.2f %-20.10e %-20.10e", ξ, result[1], result[2]))
+            integration_println(@sprintf("%-10.2f %-20.10e %-20.10e", ξ, result[1], result[2]))
             
             @test all(isfinite, result)
         end
-        println("="^70 * "\n")
+        integration_println("="^70 * "\n")
         
         # 验证 ξ 增加时，修正项的绝对值也应该增加（一般情况）
         for i in (firstindex(results) + 1):lastindex(results)
@@ -127,25 +130,25 @@ TEST_PARAMS = (
         
         ξ_values = [0.0, 0.1, 0.2, 0.3]
         
-        println("\n" * "="^70)
-        println("B0_correction (k=0) 随 ξ 变化的测试")
-        println("="^70)
-        println(@sprintf("%-10s %-20s %-20s", "ξ", "实部", "虚部"))
-        println("-"^70)
+        integration_println("\n" * "="^70)
+        integration_println("B0_correction (k=0) 随 ξ 变化的测试")
+        integration_println("="^70)
+        integration_println(@sprintf("%-10s %-20s %-20s", "ξ", "实部", "虚部"))
+        integration_println("-"^70)
         
         for ξ in ξ_values
             result = B0_correction(λ, 0.0, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
-            println(@sprintf("%-10.2f %-20.10e %-20.10e", ξ, result[1], result[2]))
+            integration_println(@sprintf("%-10.2f %-20.10e %-20.10e", ξ, result[1], result[2]))
             
             @test all(isfinite, result)
         end
-        println("="^70 * "\n")
+        integration_println("="^70 * "\n")
     end
     
     @testset "不同物理参数下的 ξ 依赖性" begin
-        println("\n" * "="^70)
-        println("不同物理参数组合下的 B0_correction (ξ=0.2)")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("不同物理参数组合下的 B0_correction (ξ=0.2)")
+        integration_println("="^70)
         
         test_cases = [
             (λ=0.3, k=0.2, m1=0.2, m2=0.3, μ1=0.1, μ2=0.0, T=0.15, name="Case 1"),
@@ -157,17 +160,17 @@ TEST_PARAMS = (
         Φbar = TEST_PARAMS.Φbar
         ξ = 0.2
         
-        println(@sprintf("%-10s %-20s %-20s", "测试用例", "实部", "虚部"))
-        println("-"^70)
+        integration_println(@sprintf("%-10s %-20s %-20s", "测试用例", "实部", "虚部"))
+        integration_println("-"^70)
         
         for case in test_cases
             result = B0_correction(case.λ, case.k, case.m1, case.m2, 
                                   case.μ1, case.μ2, case.T, Φ, Φbar, ξ)
-            println(@sprintf("%-10s %-20.10e %-20.10e", case.name, result[1], result[2]))
+            integration_println(@sprintf("%-10s %-20.10e %-20.10e", case.name, result[1], result[2]))
             
             @test all(isfinite, result)
         end
-        println("="^70 * "\n")
+        integration_println("="^70 * "\n")
     end
     
     @testset "精度测试" begin
@@ -216,10 +219,10 @@ TEST_PARAMS = (
         ratio_imag = result2[2] / result1[2]
         expected_ratio = ξ2 / ξ1
         
-        println("\n线性近似检验:")
-        println(@sprintf("ξ1 = %.2f, ξ2 = %.2f, 预期比值 = %.2f", ξ1, ξ2, expected_ratio))
-        println(@sprintf("实部比值: %.4f", ratio_real))
-        println(@sprintf("虚部比值: %.4f", ratio_imag))
+        integration_println("\n线性近似检验:")
+        integration_println(@sprintf("ξ1 = %.2f, ξ2 = %.2f, 预期比值 = %.2f", ξ1, ξ2, expected_ratio))
+        integration_println(@sprintf("实部比值: %.4f", ratio_real))
+        integration_println(@sprintf("虚部比值: %.4f", ratio_imag))
         
         # 对于小的 ξ，比值应该接近 2.0 (允许一定偏差)
         if abs(result1[1]) > 1e-10
@@ -244,13 +247,13 @@ TEST_PARAMS = (
         # 计算零阶项 B0（不含各向异性修正）
         b0_result = B0(λ, k, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
         
-        println("\n" * "="^80)
-        println("B0_correction 相对于 B0 的大小比较")
-        println("="^80)
-        println(@sprintf("B0 (零阶项): 实部 = %20.10e, 虚部 = %20.10e", b0_result[1], b0_result[2]))
-        println("-"^80)
-        println(@sprintf("%-10s %-22s %-22s %-12s %-12s", "ξ", "B0_correction 实部", "B0_correction 虚部", "实部比值(%)", "虚部比值(%)"))
-        println("-"^80)
+        integration_println("\n" * "="^80)
+        integration_println("B0_correction 相对于 B0 的大小比较")
+        integration_println("="^80)
+        integration_println(@sprintf("B0 (零阶项): 实部 = %20.10e, 虚部 = %20.10e", b0_result[1], b0_result[2]))
+        integration_println("-"^80)
+        integration_println(@sprintf("%-10s %-22s %-22s %-12s %-12s", "ξ", "B0_correction 实部", "B0_correction 虚部", "实部比值(%)", "虚部比值(%)"))
+        integration_println("-"^80)
         
         ξ_values = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5]
         
@@ -261,7 +264,7 @@ TEST_PARAMS = (
             ratio_real_percent = abs(correction_result[1] / b0_result[1]) * 100
             ratio_imag_percent = abs(correction_result[2] / b0_result[2]) * 100
             
-            println(@sprintf("%-10.2f %-22.10e %-22.10e %-12.4f %-12.4f", 
+            integration_println(@sprintf("%-10.2f %-22.10e %-22.10e %-12.4f %-12.4f", 
                             ξ, correction_result[1], correction_result[2], 
                             ratio_real_percent, ratio_imag_percent))
             
@@ -273,7 +276,7 @@ TEST_PARAMS = (
                 @test abs(correction_result[1]) < abs(b0_result[1]) || abs(b0_result[1]) < 1e-10
             end
         end
-        println("="^80 * "\n")
+        integration_println("="^80 * "\n")
         
         @info "B0 零阶项" real_part=b0_result[1] imag_part=b0_result[2]
     end
@@ -291,17 +294,17 @@ TEST_PARAMS = (
         
         k_values = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
         
-        println("\n" * "="^80)
-        println("不同 k 值下的 B0 与 B0_correction 比较 (ξ = 0.2)")
-        println("="^80)
-        println(@sprintf("%-8s %-20s %-20s %-20s %-20s", "k", "B0 实部", "B0 虚部", "Correction 实部", "Correction 虚部"))
-        println("-"^80)
+        integration_println("\n" * "="^80)
+        integration_println("不同 k 值下的 B0 与 B0_correction 比较 (ξ = 0.2)")
+        integration_println("="^80)
+        integration_println(@sprintf("%-8s %-20s %-20s %-20s %-20s", "k", "B0 实部", "B0 虚部", "Correction 实部", "Correction 虚部"))
+        integration_println("-"^80)
         
         for k in k_values
             b0_result = B0(λ, k, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
             correction_result = B0_correction(λ, k, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
             
-            println(@sprintf("%-8.2f %-20.10e %-20.10e %-20.10e %-20.10e", 
+            integration_println(@sprintf("%-8.2f %-20.10e %-20.10e %-20.10e %-20.10e", 
                             k, b0_result[1], b0_result[2], 
                             correction_result[1], correction_result[2]))
             
@@ -313,7 +316,7 @@ TEST_PARAMS = (
                 @test abs(correction_result[1]) < abs(b0_result[1]) * 2.0  # 允许一定的灵活度
             end
         end
-        println("="^80 * "\n")
+        integration_println("="^80 * "\n")
     end
     
     @testset "B0_correction/B0 比值的 ξ 依赖性" begin
@@ -329,11 +332,11 @@ TEST_PARAMS = (
         
         b0_result = B0(λ, k, m1, μ1, m2, μ2, T; Φ=Φ, Φbar=Φbar)
         
-        println("\n" * "="^80)
-        println("B0_correction/B0 比值随 ξ 的变化")
-        println("="^80)
-        println(@sprintf("%-10s %-20s %-20s", "ξ", "实部比值", "虚部比值"))
-        println("-"^80)
+        integration_println("\n" * "="^80)
+        integration_println("B0_correction/B0 比值随 ξ 的变化")
+        integration_println("="^80)
+        integration_println(@sprintf("%-10s %-20s %-20s", "ξ", "实部比值", "虚部比值"))
+        integration_println("-"^80)
         
         ξ_values = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]
         ratios_real = Float64[]
@@ -349,12 +352,12 @@ TEST_PARAMS = (
             push!(ratios_real, ratio_real)
             push!(ratios_imag, ratio_imag)
             
-            println(@sprintf("%-10.3f %-20.10e %-20.10e", ξ, ratio_real, ratio_imag))
+            integration_println(@sprintf("%-10.3f %-20.10e %-20.10e", ξ, ratio_real, ratio_imag))
             
             @test isfinite(ratio_real)
             @test isfinite(ratio_imag)  # 现在应该总是有限的
         end
-        println("="^80 * "\n")
+        integration_println("="^80 * "\n")
         
         # 验证对于小的 ξ，比值近似与 ξ 成正比
         if length(ratios_real) >= 3
@@ -371,7 +374,7 @@ TEST_PARAMS = (
     end
 end
 
-println("\n✓ 所有 B0_correction 测试完成")
+integration_println("\n✓ 所有 B0_correction 测试完成")
 
 
 

@@ -9,6 +9,9 @@ whether called with QuarkParams/ThermoParams structs or NamedTuple parameters.
 """
 
 using Test
+const INTEGRATION_VERBOSE = get(ENV, "INTEGRATION_VERBOSE", "0") in ("1", "true", "TRUE", "yes", "YES")
+@inline integration_println(args...) = INTEGRATION_VERBOSE ? Base.println(args...) : nothing
+
 using Supposition
 
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
@@ -30,10 +33,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
 
 @testset "TotalPropagator Property Tests" begin
     @testset "Property: total_propagator_simple Equivalence" begin
-        println("\n" * "="^70)
-        println("Property Test: total_propagator_simple Struct-NamedTuple Equivalence")
-        println("Testing with random parameters")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: total_propagator_simple Struct-NamedTuple Equivalence")
+        integration_println("Testing with random parameters")
+        integration_println("="^70)
 
         RTOL = 1e-12
         ATOL = 1e-14
@@ -72,14 +75,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             isfinite(D_nt) || error("Propagator must be finite (nt): $D_nt")
         end
 
-        println("✓ Property test passed: total_propagator_simple struct-NamedTuple equivalence verified")
+        integration_println("✓ Property test passed: total_propagator_simple struct-NamedTuple equivalence verified")
     end
 
     @testset "Property: total_propagator_mixed Equivalence" begin
-        println("\n" * "="^70)
-        println("Property Test: total_propagator_mixed Struct-NamedTuple Equivalence")
-        println("Testing with random parameters")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: total_propagator_mixed Struct-NamedTuple Equivalence")
+        integration_println("Testing with random parameters")
+        integration_println("="^70)
 
         RTOL = 1e-12
         ATOL = 1e-14
@@ -122,14 +125,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             isapprox(imag(D_struct_S), imag(D_nt_S), rtol=RTOL, atol=ATOL) || error("Imag part mismatch (S channel)")
         end
 
-        println("✓ Property test passed: total_propagator_mixed struct-NamedTuple equivalence verified")
+        integration_println("✓ Property test passed: total_propagator_mixed struct-NamedTuple equivalence verified")
     end
 
     @testset "Property: calculate_cms_momentum Equivalence" begin
-        println("\n" * "="^70)
-        println("Property Test: calculate_cms_momentum Struct-NamedTuple Equivalence")
-        println("Testing with random kinematic variables")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: calculate_cms_momentum Struct-NamedTuple Equivalence")
+        integration_println("Testing with random kinematic variables")
+        integration_println("="^70)
 
         RTOL = 1e-12
         ATOL = 1e-14
@@ -159,14 +162,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             isfinite(result_nt.k) || error("k must be finite (nt)")
         end
 
-        println("✓ Property test passed: calculate_cms_momentum struct-NamedTuple equivalence verified")
+        integration_println("✓ Property test passed: calculate_cms_momentum struct-NamedTuple equivalence verified")
     end
 
     @testset "Property: Multiple Channels and Processes" begin
-        println("\n" * "="^70)
-        println("Property Test: Multiple Channels and Processes")
-        println("Testing struct-NamedTuple equivalence across representative valid configurations")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: Multiple Channels and Processes")
+        integration_println("Testing struct-NamedTuple equivalence across representative valid configurations")
+        integration_println("="^70)
 
         RTOL = 1e-12
         ATOL = 1e-14
@@ -228,14 +231,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             end
         end
 
-        println("✓ Property test passed: representative multi-config propagator equivalence verified")
+        integration_println("✓ Property test passed: representative multi-config propagator equivalence verified")
     end
 
     @testset "Property: Normalization Helpers" begin
-        println("\n" * "="^70)
-        println("Property Test: Normalization Helper Functions")
-        println("Testing ParameterAdapters normalization helpers")
-        println("="^70)
+        integration_println("\n" * "="^70)
+        integration_println("Property Test: Normalization Helper Functions")
+        integration_println("Testing ParameterAdapters normalization helpers")
+        integration_println("="^70)
 
         representative_points = [
             (m_u=0.8, m_s=2.8, μ_u=0.0, μ_s=0.1, T=0.08, Φ=0.1, Φbar=0.2),
@@ -269,18 +272,18 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
             @test t_nt == t_nt_2
         end
 
-        println("✓ Property test passed: Normalization helpers work correctly")
+        integration_println("✓ Property test passed: Normalization helpers work correctly")
     end
 end
 
-println("\n" * "="^70)
-println("TotalPropagator Property Tests Complete!")
-println("="^70)
-println("\nAll enabled property tests passed:")
-println("  1. total_propagator_simple struct-NamedTuple equivalence")
-println("  2. total_propagator_mixed struct-NamedTuple equivalence (P and S channels)")
-println("  3. calculate_cms_momentum struct-NamedTuple equivalence")
-println("  4. Representative multiple processes and channels equivalence")
-println("  5. Normalization helpers verified")
-println("  6. Physical constraints maintained (non-negative momenta, finite values)")
-println("="^70)
+integration_println("\n" * "="^70)
+integration_println("TotalPropagator Property Tests Complete!")
+integration_println("="^70)
+integration_println("\nAll enabled property tests passed:")
+integration_println("  1. total_propagator_simple struct-NamedTuple equivalence")
+integration_println("  2. total_propagator_mixed struct-NamedTuple equivalence (P and S channels)")
+integration_println("  3. calculate_cms_momentum struct-NamedTuple equivalence")
+integration_println("  4. Representative multiple processes and channels equivalence")
+integration_println("  5. Normalization helpers verified")
+integration_println("  6. Physical constraints maintained (non-negative momenta, finite values)")
+integration_println("="^70)

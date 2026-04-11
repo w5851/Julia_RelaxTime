@@ -4,7 +4,9 @@ if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
 
-const TransportWorkflow = Main.Models.transport_workflow_module()
+if !isdefined(Main, :TransportWorkflow)
+    const TransportWorkflow = Main.Models.transport_workflow_module()
+end
 using .TransportWorkflow
 
 @testset "TransportWorkflow smoke: solve_gap_and_transport (no tau/bulk)" begin
