@@ -248,6 +248,11 @@ function _write_manifest(
         "config_hash" => result.config_hash,
         "artifact_hash" => result.artifact_hash,
     )
+    if haskey(ctx.state, :manifest_extensions)
+        extensions = ctx.state[:manifest_extensions]
+        extensions isa AbstractDict || throw(ArgumentError("ctx.state[:manifest_extensions] must be AbstractDict, got $(typeof(extensions))"))
+        merge!(pipeline_meta, normalize_manifest_extensions(extensions))
+    end
     payload = Dict(
         "pipeline" => pipeline_meta,
         "completed_stages" => String.(result.completed_stages),

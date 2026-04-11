@@ -120,6 +120,7 @@ export solve_gas_liquid_point
 export transport_workflow_module, meson_workflow_module
 export gas_liquid_workflow_module, rotation_workflow_module
 export workflow_param_adapters_module
+export workflow_module_for
 export magnetic_thermodynamics_module
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
@@ -129,7 +130,13 @@ export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, Pipelin
 export persisted_symbol_to_string, persisted_string_to_symbol
 export PipelineStageRecord, PipelineRunResult
 export run_pipeline, compute_pipeline_config_hash, compute_pipeline_artifact_hash
+export build_manifest_extensions
+export normalize_adapter_kwargs, classify_pipeline_error
 export PHASE_PIPELINE_STAGE_IDS, run_phase_pipeline_via_runner
+export workflow_pipeline_stage_ids, scan_pipeline_stage_ids, relaxtime_orchestrator_stage_ids
+export run_workflow_pipeline
+export run_scan_pipeline
+export run_relaxtime_orchestrator_pipeline
 export PM_BRANCH_STATUSES, PM_SEED_SOURCES, PM_ENDPOINT_CAUSES, PM_COMPARISON_STATUSES
 export PMSeedPair, normalize_pm_seed_pair, pm_next_seed_source
 export derive_pm_seed_pair, analyze_pm_branch_competition
@@ -222,8 +229,16 @@ include(joinpath(@__DIR__, "phase", "PhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "PhasePipeline.jl"))
 include(joinpath(@__DIR__, "phase", "ProductionPhasePipeline.jl"))
 include(joinpath(@__DIR__, "workflow", "PipelineTypes.jl"))
+include(joinpath(@__DIR__, "workflow", "io", "ManifestExtensions.jl"))
 include(joinpath(@__DIR__, "workflow", "PipelineRunner.jl"))
+include(joinpath(@__DIR__, "workflow", "adapters", "CommonAdapterUtils.jl"))
+include(joinpath(@__DIR__, "workflow", "adapters", "WorkflowAdapter.jl"))
+include(joinpath(@__DIR__, "workflow", "adapters", "ScanAdapter.jl"))
+include(joinpath(@__DIR__, "workflow", "adapters", "RelaxtimeOrchestratorAdapter.jl"))
 include(joinpath(@__DIR__, "workflow", "StageCatalog.jl"))
+include(joinpath(@__DIR__, "workflow", "catalog", "WorkflowCatalog.jl"))
+include(joinpath(@__DIR__, "workflow", "catalog", "ScanCatalog.jl"))
+include(joinpath(@__DIR__, "workflow", "catalog", "RelaxtimeOrchestratorCatalog.jl"))
 include(joinpath(@__DIR__, "workflows", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflows", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflows", "MesonMassWorkflow.jl"))

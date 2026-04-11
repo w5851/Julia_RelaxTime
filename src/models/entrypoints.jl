@@ -23,6 +23,9 @@ export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
 export workflow_module_for
+export run_workflow_pipeline
+export run_scan_pipeline
+export run_relaxtime_orchestrator_pipeline
 export pnjl_module
 export magnetic_thermodynamics_module
 
@@ -218,6 +221,18 @@ end
 
 function run_phase_pipeline(args...; kwargs...)
     return run_phase_pipeline_via_runner(_run_phase_pipeline_core, args...; kwargs...)
+end
+
+function run_workflow_pipeline(kind::Symbol; kwargs...)
+    return run_workflow_pipeline_adapter(kind; kwargs...)
+end
+
+function run_scan_pipeline(kind::Symbol; kwargs...)
+    return run_scan_pipeline_adapter(kind; kwargs...)
+end
+
+function run_relaxtime_orchestrator_pipeline(cmd::Symbol; kwargs...)
+    return run_relaxtime_orchestrator_pipeline_adapter(cmd; kwargs...)
 end
 
 """返回给定模型类型对应的 workflow 适配模块。"""
