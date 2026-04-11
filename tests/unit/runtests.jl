@@ -44,11 +44,7 @@ function _warn_local_non_smoke(profile::String)
 end
 
 # Blacklist for tests temporarily excluded.
-const DEFAULT_SKIP = Set([
-    "test_solver_include_topology.jl",
-    "test_solver_api_facade_contract.jl",
-    "test_solver_structure_only_behavior_lock.jl",
-])
+const DEFAULT_SKIP = Set([])
 
 # Ultra-fast subset for local edit-run loop (<~1 min target on warm cache).
 const SMOKE_FILES = [

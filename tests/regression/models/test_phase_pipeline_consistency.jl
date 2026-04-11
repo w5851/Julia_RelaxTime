@@ -52,6 +52,40 @@ function _read_manifest(path::String)
     return JSON3.read(read(path, String))
 end
 
+function _write_stale_runner_manifest(path::String)
+    stale = Dict(
+        "pipeline" => Dict(
+            "name" => "phase_pipeline_runner",
+            "version" => "v1",
+            "model_kind" => "PNJL",
+            "run_id" => "stale-run-id",
+            "git_commit" => "stale-commit",
+            "manifest_schema_version" => "phase_manifest_v1",
+            "timestamp" => "2026-01-01T00:00:00.000Z",
+            "success" => true,
+            "failed_stage" => nothing,
+            "error_kind" => nothing,
+            "error_msg" => nothing,
+            "config_hash" => "stale-config-hash",
+            "artifact_hash" => "stale-artifact-hash",
+        ),
+        "completed_stages" => ["build_model"],
+        "stage_records" => [
+            Dict(
+                "id" => "build_model",
+                "status" => "completed",
+                "started_at" => "2026-01-01T00:00:00.000Z",
+                "ended_at" => "2026-01-01T00:00:01.000Z",
+                "error_kind" => nothing,
+                "error_msg" => nothing,
+            ),
+        ],
+    )
+    open(path, "w") do io
+        write(io, JSON3.write(stale))
+    end
+end
+
 function _is_utc_iso8601(value::AbstractString)
     return occursin(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$", value)
 end
@@ -132,4 +166,21 @@ end
     @test !isempty(strip(String(pipe["run_id"])))
     @test !isempty(strip(String(manifest["config_hash"])))
     @test !isempty(strip(String(pipe["config_hash"])))
+end
+
+@testset "Phase CLI manifest stale pipeline payload replacement" begin
+    @test isfile(CLI_SCRIPT)
+    output_dir = mktempdir()
+    stale_manifest_path = joinpath(output_dir, "run_manifest.json")
+    _write_stale_runner_manifest(stale_manifest_path)
+
+    cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(CLI_SCRIPT) --preset=smoke --iterations=8 --p_num=8 --t_num=4 --cep_max_bisect_iter=1 --cep_max_refine_level=0 --output_dir=$(output_dir)`
+    run(cmd)
+
+    manifest = _read_manifest(stale_manifest_path)
+    @test haskey(manifest, "pipeline")
+    pipe = manifest["pipeline"]
+    @test String(pipe["run_id"]) != "stale-run-id"
+    @test String(pipe["config_hash"]) != "stale-config-hash"
+    @test String(pipe["artifact_hash"]) != "stale-artifact-hash"
 end
