@@ -2,120 +2,8 @@
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfig.jl"))
-include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "config", "WorkflowConfigAudit.jl"))
-include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "workflow", "cross_section_orchestrated.jl"))
-
-using .WorkflowConfig: normalize_merge_validate
-using .WorkflowConfigAudit: build_consumption_report
-using .CrossSectionOrchestratedScan: run_cross_section_orchestrated
-using TOML
-using Dates
-using SHA
-
-function _read_fallback_events(path::String)
-    if !isfile(path)
-        return Any[]
-    end
-    content = strip(read(path, String))
-    isempty(content) && return Any[]
-    # Minimal parser for test-driven fallback marker
-    occursin("bulk_fallback", content) && return Any[Dict("event" => "bulk_fallback")]
-    return Any[Dict("raw" => content)]
-end
-
-@inline function _number_tag(x)
-    v = Float64(x)
-    if isapprox(v, round(v); atol=1e-12, rtol=0.0)
-        return string(Int(round(v)))
-    end
-    s = string(v)
-    return replace(s, "." => "p")
-end
-
-function _touch(path::String)
-    mkpath(dirname(path))
-    open(path, "w") do io
-        write(io, "")
-    end
-end
-
-function _emit_plot_contract_artifacts(cmd::String, effective::Dict{String,Any}, outdir::String)
-    fig_dir = joinpath(outdir, "figures")
-    mkpath(fig_dir)
-
-    scan = get(effective, "scan", Dict{String,Any}())
-    plot = get(effective, "plot", Dict{String,Any}())
-
-    if cmd == "transport"
-        transport_scan = get(scan, "transport", Dict{String,Any}())
-        muB_tag = _number_tag(get(transport_scan, "muB_MeV", 0.0))
-        transport_plot = get(plot, "transport", Dict{String,Any}())
-        ys = String.(get(transport_plot, "ys", Any[]))
-        for y in ys
-            _touch(joinpath(fig_dir, "transport__$(y)__muB$(muB_tag).png"))
-        end
-    elseif cmd == "cross-section"
-        xs_scan = get(scan, "cross_section", Dict{String,Any}())
-        Ts = Float64.(get(xs_scan, "T_list_MeV", Any[]))
-        processes = String.(get(xs_scan, "processes", Any[]))
-        for T in Ts
-            T_tag = _number_tag(T)
-            for p in processes
-                _touch(joinpath(fig_dir, "xsec__T$(T_tag)__$(p).png"))
-            end
-        end
-    end
-end
-
-@inline function _json_escape(s::AbstractString)
-    out = IOBuffer()
-    for c in s
-        if c == '"'
-            print(out, "\\\"")
-        elseif c == '\\'
-            print(out, "\\\\")
-        elseif c == '\n'
-            print(out, "\\n")
-        elseif c == '\r'
-            print(out, "\\r")
-        elseif c == '\t'
-            print(out, "\\t")
-        else
-            print(out, c)
-        end
-    end
-    return String(take!(out))
-end
-
-function _to_json(x)
-    if x === nothing
-        return "null"
-    elseif x isa Bool
-        return x ? "true" : "false"
-    elseif x isa Integer || x isa AbstractFloat
-        return string(x)
-    elseif x isa AbstractString
-        return "\"$(_json_escape(x))\""
-    elseif x isa AbstractVector
-        return "[" * join((_to_json(v) for v in x), ",") * "]"
-    elseif x isa AbstractDict
-        pairs_sorted = sort(collect(pairs(x)); by=kv -> String(kv.first))
-        parts = String[]
-        for (k, v) in pairs_sorted
-            push!(parts, "\"$(_json_escape(String(k)))\":" * _to_json(v))
-        end
-        return "{" * join(parts, ",") * "}"
-    else
-        return "\"$(_json_escape(string(x)))\""
-    end
-end
-
-function _write_json(path::String, x)
-    mkpath(dirname(path))
-    open(path, "w") do io
-        write(io, _to_json(x))
-    end
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
 function print_usage()
@@ -128,18 +16,6 @@ function print_usage()
     println("  --fail-on-fallback          Reserve switch (recorded in manifest)")
     println("  --processes p1,p2,...       cross-section only; overrides process list")
     println("  -h, --help                  Show help")
-end
-
-function _deep_set!(cfg::Dict{String,Any}, keys::Vector{String}, value)
-    cur = cfg
-    for k in keys[1:end-1]
-        if !haskey(cur, k) || !(cur[k] isa Dict{String,Any})
-            cur[k] = Dict{String,Any}()
-        end
-        cur = cur[k]
-    end
-    cur[keys[end]] = value
-    return cfg
 end
 
 function _canonicalize_processes(raw::AbstractString)
@@ -200,139 +76,28 @@ function parse_args(args::Vector{String})
     return cmd, opts
 end
 
-function _build_cli_cfg(cmd::String, opts::Dict{String,Any})
-    cli = Dict{String,Any}()
-    if opts["resume"] !== nothing
-        _deep_set!(cli, ["scan", "transport", "resume"], Bool(opts["resume"]))
+@inline function _cmd_string_to_symbol(cmd::String)
+    if cmd == "transport"
+        return :transport
     end
-    if opts["overwrite"] !== nothing
-        _deep_set!(cli, ["scan", "transport", "overwrite"], Bool(opts["overwrite"]))
+    if cmd == "cross-section"
+        return :cross_section
     end
-    if cmd == "cross-section" && opts["processes"] !== nothing
-        _deep_set!(cli, ["scan", "cross_section", "processes"], opts["processes"])
-    end
-    return cli
+    throw(ArgumentError("unknown subcommand: $(cmd)"))
 end
 
 function run_orchestrator(cmd::String, opts::Dict{String,Any})
-    default_cfg = TOML.parsefile(joinpath(PROJECT_ROOT, "config", "workflows", "relaxtime", "default.toml"))
-    toml_cfg = TOML.parsefile(String(opts["config_path"]))
-    aliases = TOML.parsefile(joinpath(PROJECT_ROOT, "config", "workflows", "relaxtime", "schema", "aliases_v1.toml"))
-    cli_cfg = _build_cli_cfg(cmd, opts)
-
-    merged = normalize_merge_validate(default_cfg, toml_cfg, cli_cfg, aliases)
-    effective = merged.effective
-
-    consumed_keys = Set{String}()
-    # minimal consumption for current orchestrator stage
-    push!(consumed_keys, "schema_version")
-    push!(consumed_keys, "profile_name")
-    push!(consumed_keys, "scan.transport.muB_MeV")
-    push!(consumed_keys, "scan.transport.xi_list")
-    push!(consumed_keys, "scan.transport.tmin_MeV")
-    push!(consumed_keys, "scan.transport.tmax_MeV")
-    push!(consumed_keys, "scan.transport.tstep_MeV")
-    push!(consumed_keys, "scan.transport.resume")
-    push!(consumed_keys, "scan.transport.overwrite")
-    push!(consumed_keys, "scan.transport.solver.p_num")
-    push!(consumed_keys, "scan.transport.solver.t_num")
-    push!(consumed_keys, "scan.transport.solver.max_iter")
-    push!(consumed_keys, "scan.transport.tau.mode")
-    push!(consumed_keys, "scan.transport.tau.tau_p_nodes")
-    push!(consumed_keys, "scan.transport.tau.tau_angle_nodes")
-    push!(consumed_keys, "scan.transport.tau.tau_phi_nodes")
-    push!(consumed_keys, "scan.transport.tau.tau_n_sigma")
-    push!(consumed_keys, "scan.transport.tau.sigma_grid_n")
-    push!(consumed_keys, "scan.transport.transport.compute_bulk")
-    push!(consumed_keys, "scan.transport.transport.tr_p_nodes")
-    push!(consumed_keys, "scan.transport.transport.tr_p_max_fm")
-    push!(consumed_keys, "scan.cross_section.muB_MeV")
-    push!(consumed_keys, "scan.cross_section.T_list_MeV")
-    push!(consumed_keys, "scan.cross_section.xi_list")
-    push!(consumed_keys, "scan.cross_section.processes")
-    push!(consumed_keys, "scan.cross_section.n_points")
-    push!(consumed_keys, "scan.cross_section.energy.mode")
-    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_min_MeV")
-    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_max_MeV")
-    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_num")
-    push!(consumed_keys, "plot.transport.x")
-    push!(consumed_keys, "plot.transport.group")
-    push!(consumed_keys, "plot.transport.ys")
-    push!(consumed_keys, "plot.cross_section.x")
-    push!(consumed_keys, "plot.cross_section.group")
-    push!(consumed_keys, "plot.cross_section.split")
-
-    if haskey(effective, "strict")
-        push!(consumed_keys, "strict")
-    end
-    if haskey(effective, "scan") && effective["scan"] isa AbstractDict
-        scan = effective["scan"]
-        if haskey(scan, "cross_section") && scan["cross_section"] isa AbstractDict
-            xs = scan["cross_section"]
-            if haskey(xs, "energy") && xs["energy"] isa AbstractDict
-                energy = xs["energy"]
-                if haskey(energy, "sqrt_s_list_MeV")
-                    push!(consumed_keys, "scan.cross_section.energy.sqrt_s_list_MeV")
-                end
-            end
-        end
-    end
-
-    outdir = String(opts["outdir"])
-    mkpath(outdir)
-    fallback_events_path = joinpath(outdir, "fallback_events.json")
-    fallback_events = _read_fallback_events(fallback_events_path)
-    fallback_used = !isempty(fallback_events)
-    if Bool(opts["fail_on_fallback"]) && fallback_used
-        error("fail-on-fallback enabled: fallback events detected at $(fallback_events_path)")
-    end
-
-    strict_mode = Bool(get(effective, "strict", false))
-    overridden = Set{String}()
-    if opts["resume"] !== nothing
-        push!(overridden, "scan.transport.resume")
-    end
-    if opts["overwrite"] !== nothing
-        push!(overridden, "scan.transport.overwrite")
-    end
-    if cmd == "cross-section" && opts["processes"] !== nothing
-        push!(overridden, "scan.cross_section.processes")
-    end
-    report = build_consumption_report(
-        effective,
-        consumed_keys;
-        overridden=overridden,
-        fallback_used=fallback_used,
-        strict=strict_mode,
+    cmd_symbol = _cmd_string_to_symbol(cmd)
+    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+        cmd_symbol;
+        config_path=String(opts["config_path"]),
+        outdir=String(opts["outdir"]),
+        processes=opts["processes"],
+        resume=opts["resume"],
+        overwrite=opts["overwrite"],
+        fail_on_fallback=Bool(opts["fail_on_fallback"]),
     )
-
-    effective_json = joinpath(outdir, "effective_config.json")
-    _write_json(effective_json, effective)
-    _write_json(joinpath(outdir, "consumption_report.json"), report)
-
-    cfg_hash = bytes2hex(sha256(_to_json(effective)))
-    run_id = string("relaxtime-orch-", Dates.format(now(UTC), "yyyymmddTHHMMSS"), "-", first(cfg_hash, 8))
-    manifest = Dict{String,Any}(
-        "schema_version" => get(effective, "schema_version", "v1"),
-        "config_path" => String(opts["config_path"]),
-        "config_hash" => cfg_hash,
-        "run_id" => run_id,
-        "subcommand" => cmd,
-        "timestamp_utc" => Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SS") * "Z",
-        "fail_on_fallback" => Bool(opts["fail_on_fallback"]),
-        "fallback_events" => fallback_events,
-        "consumption_report" => joinpath(outdir, "consumption_report.json"),
-        "trace" => String.(merged.trace),
-    )
-    _write_json(joinpath(outdir, "run_manifest.json"), manifest)
-
-    if cmd == "cross-section"
-        run_cross_section_orchestrated(effective, outdir; run_id=run_id)
-    end
-
-    _emit_plot_contract_artifacts(cmd, effective, outdir)
-
-    println("[orchestrator] command=$(cmd) outdir=$(outdir) run_id=$(run_id)")
+    println("[orchestrator] command=$(cmd) outdir=$(result.outdir) run_id=$(result.run_id)")
 end
 
 function main()
