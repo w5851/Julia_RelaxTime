@@ -1,4 +1,5 @@
 using Dates
+using SHA
 
 const PHASE_PIPELINE_STAGE_IDS = (
     :build_model,
