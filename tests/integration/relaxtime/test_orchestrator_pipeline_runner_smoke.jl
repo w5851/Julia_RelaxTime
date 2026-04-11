@@ -43,6 +43,26 @@ sqrt_s_list_MeV = [500.0]
     return path
 end
 
+function _write_strict_cross_section_config(path::String)
+    open(path, "w") do io
+        write(io, """
+schema_version = "v1"
+strict = true
+
+[scan.cross_section]
+muB_MeV = 0.0
+T_list_MeV = [150.0]
+xi_list = [0.0]
+processes = ["ud_to_ud"]
+
+[scan.cross_section.energy]
+mode = "list"
+sqrt_s_list_MeV = [500.0]
+""")
+    end
+    return path
+end
+
 @testset "relaxtime orchestrator pipeline runner smoke" begin
     outdir = mktempdir()
     cfg_dir = mktempdir()
@@ -107,4 +127,27 @@ end
 
     manifest = JSON3.read(read(manifest_path, String))
     @test String(manifest.pipeline.run_id) == String(result.run_id)
+end
+
+@testset "relaxtime orchestrator pipeline strict cross-section keeps transport overrides isolated" begin
+    outdir = mktempdir()
+    cfg_dir = mktempdir()
+    cfg = _write_strict_cross_section_config(joinpath(cfg_dir, "strict_cfg.toml"))
+
+    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+        :cross_section;
+        config_path=cfg,
+        outdir=outdir,
+        processes=["ud_to_ud"],
+        resume=true,
+        overwrite=true,
+    )
+
+    report = JSON3.read(read(String(result.consumption_report_path), String))
+    overridden = Set(String.(collect(report.overridden_keys)))
+    unused = Set(String.(collect(report.unused_keys)))
+
+    @test "scan.cross_section.processes" in overridden
+    @test !("scan.transport.resume" in unused)
+    @test !("scan.transport.overwrite" in unused)
 end

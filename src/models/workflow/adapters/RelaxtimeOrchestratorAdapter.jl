@@ -153,15 +153,30 @@ function _build_consumed_keys(cmd::Symbol, effective::Dict{String, Any})
     if haskey(effective, "strict")
         push!(consumed, "strict")
     end
-    if cmd === :transport
-        union!(consumed, Set{String}([
-            "scan.transport.muB_MeV",
-            "scan.transport.xi_list",
-            "scan.transport.resume",
-            "scan.transport.overwrite",
-            "plot.transport.ys",
-        ]))
-    end
+    union!(consumed, Set{String}([
+        "scan.transport.muB_MeV",
+        "scan.transport.xi_list",
+        "scan.transport.tmin_MeV",
+        "scan.transport.tmax_MeV",
+        "scan.transport.tstep_MeV",
+        "scan.transport.resume",
+        "scan.transport.overwrite",
+        "scan.transport.solver.p_num",
+        "scan.transport.solver.t_num",
+        "scan.transport.solver.max_iter",
+        "scan.transport.tau.mode",
+        "scan.transport.tau.tau_p_nodes",
+        "scan.transport.tau.tau_angle_nodes",
+        "scan.transport.tau.tau_phi_nodes",
+        "scan.transport.tau.tau_n_sigma",
+        "scan.transport.tau.sigma_grid_n",
+        "scan.transport.transport.compute_bulk",
+        "scan.transport.transport.tr_p_nodes",
+        "scan.transport.transport.tr_p_max_fm",
+        "plot.transport.x",
+        "plot.transport.group",
+        "plot.transport.ys",
+    ]))
     if haskey(effective, "scan") && effective["scan"] isa AbstractDict
         scan = effective["scan"]
         if haskey(scan, "cross_section") && scan["cross_section"] isa AbstractDict
@@ -204,19 +219,27 @@ function _build_orchestrator_stages()
                 aliases = TOML.parsefile(_RELAXTIME_ALIASES_PATH)
 
                 cli_cfg = Dict{String, Any}()
-                if resume !== nothing
+                overridden_keys = Set{String}()
+                if cmd === :transport && resume !== nothing
                     cli_cfg["scan"] = get(cli_cfg, "scan", Dict{String, Any}())
                     cli_cfg["scan"]["transport"] = get(cli_cfg["scan"], "transport", Dict{String, Any}())
                     cli_cfg["scan"]["transport"]["resume"] = Bool(resume)
+                    push!(overridden_keys, "scan.transport.resume")
                 end
-                if overwrite !== nothing
+                if cmd === :transport && overwrite !== nothing
                     cli_cfg["scan"] = get(cli_cfg, "scan", Dict{String, Any}())
                     cli_cfg["scan"]["transport"] = get(cli_cfg["scan"], "transport", Dict{String, Any}())
                     cli_cfg["scan"]["transport"]["overwrite"] = Bool(overwrite)
+                    push!(overridden_keys, "scan.transport.overwrite")
                 end
                 if cmd === :cross_section && hasproperty(kwargs, :processes)
                     processes = _canonicalize_processes(kwargs.processes)
-                    processes !== nothing && (cli_cfg["scan"] = Dict("cross_section" => Dict("processes" => processes)))
+                    if processes !== nothing
+                        cli_cfg["scan"] = get(cli_cfg, "scan", Dict{String, Any}())
+                        cli_cfg["scan"]["cross_section"] = get(cli_cfg["scan"], "cross_section", Dict{String, Any}())
+                        cli_cfg["scan"]["cross_section"]["processes"] = processes
+                        push!(overridden_keys, "scan.cross_section.processes")
+                    end
                 end
 
                 merged = normalize_merge_validate(default_cfg, toml_cfg, cli_cfg, aliases)
@@ -238,6 +261,7 @@ function _build_orchestrator_stages()
                     strict_mode=Bool(get(effective, "strict", false)),
                     fallback_events=fallback_events,
                     fallback_used=fallback_used,
+                    overridden_keys=overridden_keys,
                 )
 
                 if prepared.fail_on_fallback && prepared.fallback_used
@@ -282,7 +306,7 @@ function _build_orchestrator_stages()
                 report = build_consumption_report(
                     prepared.effective,
                     consumed_keys;
-                    overridden=Set{String}(),
+                    overridden=prepared.overridden_keys,
                     fallback_used=prepared.fallback_used,
                     strict=prepared.strict_mode,
                 )

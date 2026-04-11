@@ -1,14 +1,6 @@
 using Dates
 using SHA
 
-const _WORKFLOW_ADAPTER_STAGE_IDS = [
-    :prepare_inputs,
-    :solve_core,
-    :postprocess,
-    :export_artifacts,
-    :emit_repro_manifest,
-]
-
 @inline function _workflow_adapter_output_dir(output_dir)
     output_dir === nothing && return mktempdir()
     return String(output_dir)
@@ -179,7 +171,7 @@ function _run_transport_workflow_pipeline(; kwargs...)
         "workflow_adapter_transport",
         "v1",
         :PNJL,
-        _WORKFLOW_ADAPTER_STAGE_IDS,
+        collect(workflow_pipeline_stage_ids()),
         (; kind=:transport),
         PipelineIOContract(
             :v1,
