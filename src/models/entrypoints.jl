@@ -11,6 +11,7 @@ Models 统一流程入口（阶段 C）：
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export default_scan_numeric_options, solve_pnjl_point
+export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
 export solve_gas_liquid_point
@@ -202,6 +203,10 @@ end
 
 function solve_rotation_point(args...; kwargs...)
     return rotation_workflow_module().solve_rotation_point(args...; kwargs...)
+end
+
+@inline function auto_phase_hint(T_fm::Real, μ_fm::Real)
+    return SeedStrategies.auto_phase_hint(T_fm, μ_fm)
 end
 
 @inline transport_workflow_module() = _transport_workflow_module()

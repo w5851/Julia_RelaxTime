@@ -64,6 +64,7 @@ Models.pnjl_module()
         @test isdefined(Models, :build_phase_artifacts)
         @test isdefined(Models, :resolve_phase_output_target)
         @test isdefined(Models, :promote_phase_artifacts)
+        @test isdefined(Models, :auto_phase_hint)
     end
 
     @testset "同步/异步入口默认数值参数对齐" begin

@@ -15,6 +15,9 @@ utility rather than introducing a second implementation path.
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
+using Dates
+using SHA
+
 struct Options
     sections::Set{Symbol}
     overwrite::Bool
@@ -37,6 +40,13 @@ struct Options
     xi_min::Float64
     xi_max::Float64
     xi_step::Float64
+    base_output_dir::String
+end
+
+struct RunContext
+    run_id::String
+    timestamp_utc::String
+    argv::Vector{String}
 end
 
 function print_usage()
@@ -63,6 +73,7 @@ function print_usage()
     println("  --xi-min <value>       plan_b xi min (default -0.5)")
     println("  --xi-max <value>       plan_b xi max (default 0.5)")
     println("  --xi-step <value>      plan_b xi step (default 0.02)")
+    println("  --base-output-dir <path>  base directory for outputs (default data/outputs)")
     println("  -h, --help             show help")
 end
 
@@ -112,6 +123,7 @@ function parse_args(args::Vector{String})::Options
         :xi_min => -0.5,
         :xi_max => 0.5,
         :xi_step => 0.02,
+        :base_output_dir => joinpath("data", "outputs"),
     )
 
     i = 1
@@ -168,6 +180,8 @@ function parse_args(args::Vector{String})::Options
             opts[:xi_max] = parse(Float64, require_value())
         elseif arg == "--xi-step"
             opts[:xi_step] = parse(Float64, require_value())
+        elseif arg == "--base-output-dir"
+            opts[:base_output_dir] = require_value()
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -202,6 +216,7 @@ function parse_args(args::Vector{String})::Options
         Float64(opts[:xi_min]),
         Float64(opts[:xi_max]),
         Float64(opts[:xi_step]),
+        String(opts[:base_output_dir]),
     )
 end
 
@@ -237,6 +252,233 @@ function xi_list_string(xmin::Float64, xmax::Float64, xstep::Float64)::String
     vals = collect(range(xmin; stop=xmax, step=xstep))
     fmt(x) = abs(x) < 1e-12 ? "0.0" : string(x)
     return join(fmt.(vals), ",")
+end
+
+@inline function _json_escape(s::AbstractString)
+    out = IOBuffer()
+    for c in s
+        if c == '"'
+            print(out, "\\\"")
+        elseif c == '\\'
+            print(out, "\\\\")
+        elseif c == '\n'
+            print(out, "\\n")
+        elseif c == '\r'
+            print(out, "\\r")
+        elseif c == '\t'
+            print(out, "\\t")
+        else
+            print(out, c)
+        end
+    end
+    return String(take!(out))
+end
+
+function _to_json(x)
+    if x === nothing
+        return "null"
+    elseif x isa Bool
+        return x ? "true" : "false"
+    elseif x isa Integer || x isa AbstractFloat
+        return string(x)
+    elseif x isa AbstractString
+        return "\"$(_json_escape(x))\""
+    elseif x isa AbstractVector
+        return "[" * join((_to_json(v) for v in x), ",") * "]"
+    elseif x isa AbstractDict
+        pairs_sorted = sort(collect(pairs(x)); by=kv -> String(kv.first))
+        parts = String[]
+        for (k, v) in pairs_sorted
+            push!(parts, "\"$(_json_escape(String(k)))\":" * _to_json(v))
+        end
+        return "{" * join(parts, ",") * "}"
+    else
+        return "\"$(_json_escape(string(x)))\""
+    end
+end
+
+function _write_json(path::String, x)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        write(io, _to_json(x))
+    end
+end
+
+function _current_git_commit()
+    try
+        return readchomp(`git -C $(PROJECT_ROOT) rev-parse HEAD`)
+    catch
+        return "unknown"
+    end
+end
+
+function _current_git_branch()
+    try
+        return readchomp(`git -C $(PROJECT_ROOT) rev-parse --abbrev-ref HEAD`)
+    catch
+        return "unknown"
+    end
+end
+
+function _git_dirty()
+    try
+        return !isempty(readchomp(`git -C $(PROJECT_ROOT) status --porcelain`))
+    catch
+        return false
+    end
+end
+
+function _sha256_file(path::String)
+    open(path, "r") do io
+        return bytes2hex(sha256(read(io)))
+    end
+end
+
+function _count_csv_rows(path::String)
+    rows = 0
+    seen_header = false
+    open(path, "r") do io
+        for line in eachline(io)
+            s = strip(line)
+            isempty(s) && continue
+            startswith(s, "#") && continue
+            if !seen_header
+                seen_header = true
+                continue
+            end
+            rows += 1
+        end
+    end
+    return rows
+end
+
+function _first_csv_header(path::String)
+    open(path, "r") do io
+        for line in eachline(io)
+            s = strip(line)
+            isempty(s) && continue
+            startswith(s, "#") && continue
+            return [strip(x) for x in split(s, ',')]
+        end
+    end
+    return String[]
+end
+
+function _csv_stats(path::String)
+    header = String[]
+    idx_seed = 0
+    idx_conv = 0
+    total = 0
+    success = 0
+    fallback = 0
+    errors = 0
+
+    open(path, "r") do io
+        for line in eachline(io)
+            s = strip(line)
+            isempty(s) && continue
+            startswith(s, "#") && continue
+            if isempty(header)
+                header = [strip(x) for x in split(s, ',')]
+                idx_seed = findfirst(==("seed_source"), header)
+                idx_conv = findfirst(==("converged"), header)
+                continue
+            end
+
+            parts = split(s, ',')
+            total += 1
+
+            if idx_conv > 0 && idx_conv <= length(parts)
+                v = lowercase(strip(parts[idx_conv]))
+                if v == "true"
+                    success += 1
+                else
+                    errors += 1
+                end
+            end
+
+            if idx_seed > 0 && idx_seed <= length(parts)
+                occursin("legacy_fallback", parts[idx_seed]) && (fallback += 1)
+            end
+        end
+    end
+
+    return (points_total=total, success_count=success, fallback_count=fallback, error_count=errors)
+end
+
+function _annotate_csv_with_run_id(path::String, run_id::String)
+    tmp = path * ".tmp"
+    open(path, "r") do src
+        open(tmp, "w") do dst
+            seen_header = false
+            for line in eachline(src)
+                s = chomp(line)
+                if startswith(strip(s), "#") || isempty(strip(s))
+                    println(dst, s)
+                    continue
+                end
+                if !seen_header
+                    println(dst, s, ",run_id")
+                    seen_header = true
+                else
+                    println(dst, s, ",", run_id)
+                end
+            end
+        end
+    end
+    mv(tmp, path; force=true)
+end
+
+function _source_T_from_path(path::String)
+    m = match(r"transport_vs_xi_T([0-9]+)_muB0", basename(path))
+    return m === nothing ? "" : m.captures[1]
+end
+
+function _artifact_entry(path::String)
+    abs_path = abspath(path)
+    return Dict{String,Any}(
+        "path" => relpath(abs_path, PROJECT_ROOT),
+        "sha256" => _sha256_file(abs_path),
+        "rows" => _count_csv_rows(abs_path),
+        "schema_version" => "scan_csv_v1",
+    )
+end
+
+function _write_provenance_sidecars(opts::Options, ctx::RunContext, section::String, out_dir::String, config::Dict{String,Any}, artifacts::Vector{String}, summary::Dict{String,Any})
+    effective = Dict{String,Any}(
+        "schema_version" => "v1",
+        "workflow" => "manual_relaxation_scan",
+        "section" => section,
+        "options" => config,
+    )
+    effective_json = _to_json(effective)
+    config_hash = bytes2hex(sha256(effective_json))
+
+    project_toml = joinpath(PROJECT_ROOT, "Project.toml")
+    manifest_toml = joinpath(PROJECT_ROOT, "Manifest.toml")
+
+    manifest = Dict{String,Any}(
+        "run_id" => ctx.run_id,
+        "timestamp_utc" => ctx.timestamp_utc,
+        "script" => "scripts/relaxtime/run_manual_relaxation_scan_workflow.jl",
+        "argv" => copy(ctx.argv),
+        "cwd" => pwd(),
+        "project_path" => PROJECT_ROOT,
+        "julia_version" => string(VERSION),
+        "threads" => Threads.nthreads(),
+        "git_commit" => _current_git_commit(),
+        "git_branch" => _current_git_branch(),
+        "git_dirty" => _git_dirty(),
+        "project_toml_hash" => isfile(project_toml) ? _sha256_file(project_toml) : "",
+        "manifest_toml_hash" => isfile(manifest_toml) ? _sha256_file(manifest_toml) : "",
+        "config_hash" => config_hash,
+        "schema_version" => "v1",
+        "artifacts" => [_artifact_entry(p) for p in artifacts],
+        "summary" => summary,
+    )
+
+    _write_json(joinpath(out_dir, "effective_config.json"), effective)
+    _write_json(joinpath(out_dir, "run_manifest.json"), manifest)
 end
 
 function split_cross_section_csv_by_process_groups(xs_csv::AbstractString; overwrite::Bool)::Vector{Tuple{String,String}}
@@ -319,16 +561,19 @@ function split_cross_section_csv_by_process_groups(xs_csv::AbstractString; overw
     return outputs
 end
 
-function merge_csvs(inputs::Vector{String}, output::String; overwrite::Bool)
+function merge_csvs(inputs::Vector{String}, output::String, run_id::String; overwrite::Bool)
     isempty(inputs) && error("no input CSVs to merge")
     ensure_parent_dir(output)
     maybe_rm(output; overwrite=overwrite)
 
     meta_lines = String[]
     header_line = nothing
+    merged_header = nothing
     rows = String[]
 
     for (index, path) in enumerate(inputs)
+        source_file = basename(path)
+        source_T = _source_T_from_path(path)
         open(path, "r") do io
             for line in eachline(io)
                 s = chomp(line)
@@ -339,24 +584,30 @@ function merge_csvs(inputs::Vector{String}, output::String; overwrite::Bool)
                 end
                 if header_line === nothing
                     header_line = s
+                    merged_header = string(s, ",source_file,source_T_MeV")
                     continue
                 end
-                if index == 1 || s != header_line
-                    push!(rows, s)
+                if s == header_line
+                    continue
                 end
+                push!(rows, string(s, ",", source_file, ",", source_T))
             end
         end
     end
+
+    header_line === nothing && error("merged CSV missing header")
+    merged_header === nothing && error("failed to compose merged header")
 
     open(output, "w") do io
         for line in meta_lines
             println(io, line)
         end
-        println(io, header_line)
+        println(io, merged_header)
         for row in rows
             println(io, row)
         end
     end
+
 end
 
 function run_cross_section(opts::Options)
@@ -428,9 +679,10 @@ function run_cross_section(opts::Options)
     end
 end
 
-function run_plan_a(opts::Options)
-    out_csv = joinpath("data", "outputs", "results", "relaxtime", "plan_a", "gap_transport_vs_T_muB0_xi0.csv")
-    out_fig = joinpath("data", "outputs", "figures", "relaxtime", "plan_a")
+function run_plan_a(opts::Options, ctx::RunContext)
+    out_dir = joinpath(opts.base_output_dir, "results", "relaxtime", "plan_a")
+    out_csv = joinpath(out_dir, "gap_transport_vs_T_muB0_xi0.csv")
+    out_fig = joinpath(opts.base_output_dir, "figures", "relaxtime", "plan_a")
 
     ensure_parent_dir(out_csv)
     if opts.overwrite
@@ -459,6 +711,29 @@ function run_plan_a(opts::Options)
     opts.compute_bulk && push!(args, "--compute-bulk")
     opts.overwrite && push!(args, "--overwrite")
     run_cmd(julia_cmd(args))
+    _annotate_csv_with_run_id(out_csv, ctx.run_id)
+
+    stats = _csv_stats(out_csv)
+    summary = Dict{String,Any}(
+        "points_total" => stats.points_total,
+        "success_count" => stats.success_count,
+        "fallback_count" => stats.fallback_count,
+        "error_count" => stats.error_count,
+    )
+    config = Dict{String,Any}(
+        "plan_a_Tmin_mev" => opts.plan_a_Tmin_mev,
+        "plan_a_Tmax_mev" => opts.plan_a_Tmax_mev,
+        "plan_a_Tstep_mev" => opts.plan_a_Tstep_mev,
+        "integration_mode" => opts.integration_mode,
+        "tau_p_nodes" => opts.tau_p_nodes,
+        "tau_angle_nodes" => opts.tau_angle_nodes,
+        "tau_phi_nodes" => opts.tau_phi_nodes,
+        "tau_n_sigma_points" => opts.tau_n_sigma_points,
+        "sigma_grid_n" => opts.sigma_grid_n,
+        "compute_bulk" => opts.compute_bulk,
+        "seed_policy" => "phase_aware_xi_T_continuity",
+    )
+    _write_provenance_sidecars(opts, ctx, "plan_a", out_dir, config, [out_csv], summary)
 
     if opts.make_plots
         ensure_parent_dir(joinpath(out_fig, "dummy.txt"))
@@ -501,10 +776,10 @@ function run_plan_a(opts::Options)
     end
 end
 
-function run_plan_b(opts::Options)
+function run_plan_b(opts::Options, ctx::RunContext)
     xi_list = xi_list_string(opts.xi_min, opts.xi_max, opts.xi_step)
-    result_dir = joinpath("data", "outputs", "results", "relaxtime", "plan_b")
-    figure_dir = joinpath("data", "outputs", "figures", "relaxtime", "plan_b")
+    result_dir = joinpath(opts.base_output_dir, "results", "relaxtime", "plan_b")
+    figure_dir = joinpath(opts.base_output_dir, "figures", "relaxtime", "plan_b")
     merged_csv = joinpath(result_dir, "plan_b_merged.csv")
     csv_paths = String[]
 
@@ -539,6 +814,7 @@ function run_plan_b(opts::Options)
         opts.compute_bulk && push!(args, "--compute-bulk")
         opts.overwrite && push!(args, "--overwrite")
         run_cmd(julia_cmd(args))
+        _annotate_csv_with_run_id(csv_path, ctx.run_id)
         push!(csv_paths, csv_path)
 
         if opts.make_plots
@@ -565,7 +841,30 @@ function run_plan_b(opts::Options)
         end
     end
 
-    merge_csvs(csv_paths, merged_csv; overwrite=opts.overwrite)
+    merge_csvs(csv_paths, merged_csv, ctx.run_id; overwrite=opts.overwrite)
+
+    merged_stats = _csv_stats(merged_csv)
+    summary = Dict{String,Any}(
+        "points_total" => merged_stats.points_total,
+        "success_count" => merged_stats.success_count,
+        "fallback_count" => merged_stats.fallback_count,
+        "error_count" => merged_stats.error_count,
+    )
+    config = Dict{String,Any}(
+        "plan_b_T_list_mev" => opts.plan_b_T_list_mev,
+        "xi_min" => opts.xi_min,
+        "xi_max" => opts.xi_max,
+        "xi_step" => opts.xi_step,
+        "integration_mode" => opts.integration_mode,
+        "tau_p_nodes" => opts.tau_p_nodes,
+        "tau_angle_nodes" => opts.tau_angle_nodes,
+        "tau_phi_nodes" => opts.tau_phi_nodes,
+        "tau_n_sigma_points" => opts.tau_n_sigma_points,
+        "sigma_grid_n" => opts.sigma_grid_n,
+        "compute_bulk" => opts.compute_bulk,
+        "seed_policy" => "phase_aware_xi_T_continuity",
+    )
+    _write_provenance_sidecars(opts, ctx, "plan_b", result_dir, config, vcat(copy(csv_paths), [merged_csv]), summary)
 
     if opts.make_plots
         combined_dir = joinpath(figure_dir, "combined")
@@ -594,10 +893,13 @@ end
 
 function main()
     opts = parse_args(copy(ARGS))
+    run_id = string(Dates.format(now(UTC), dateformat"yyyymmddTHHMMSS"), "_", bytes2hex(rand(UInt8, 4)))
+    timestamp_utc = Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ")
+    ctx = RunContext(run_id, timestamp_utc, copy(ARGS))
     cd(PROJECT_ROOT) do
         :cross_section in opts.sections && run_cross_section(opts)
-        :plan_a in opts.sections && run_plan_a(opts)
-        :plan_b in opts.sections && run_plan_b(opts)
+        :plan_a in opts.sections && run_plan_a(opts, ctx)
+        :plan_b in opts.sections && run_plan_b(opts, ctx)
     end
 end
 
