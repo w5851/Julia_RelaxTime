@@ -9,7 +9,7 @@ Purpose:
   `warn_on_legacy_path` in `src/**/*.jl` and `tests/**/*.jl`.
 
 Allowlist (current governance boundary):
-- `src/models/solver/Solver.jl`
+- `src/models/solver/api/SolverAPI.jl`
 - `src/models/scans/TrhoScan.jl`
 - `src/models/scans/TmuScan.jl`
 - `tests/unit/models/test_problem_spec_contract.jl`
@@ -31,7 +31,7 @@ const SWITCH_PATTERNS = (
 )
 
 const ALLOWLIST = Set([
-    "src/models/solver/Solver.jl",
+    "src/models/solver/api/SolverAPI.jl",
     "src/models/scans/TrhoScan.jl",
     "src/models/scans/TmuScan.jl",
     "tests/unit/models/test_problem_spec_contract.jl",

@@ -2,13 +2,14 @@
 
 using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", ".."))
+using Libdl
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const TRACE_DIR = joinpath(PROJECT_ROOT, "build", "trace")
 
 const _TRACE_EXPR = "ENV[\"UNIT_FILES\"]=\"pnjl/test_conserved_charge_susceptibilities.jl\"; include(\"tests/unit/runtests.jl\")"
 const NO_SYS_CMD = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_no_sys.jl")) -e $(_TRACE_EXPR)`
-const WITH_SYS_CMD = `$(Base.julia_cmd()) --sysimage=$(joinpath(PROJECT_ROOT, "build", "JuliaRelaxTime.dll")) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_with_sys.jl")) -e $(_TRACE_EXPR)`
+const WITH_SYS_CMD = `$(Base.julia_cmd()) --sysimage=$(joinpath(PROJECT_ROOT, "build", "JuliaRelaxTime.$(Libdl.dlext)")) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_with_sys.jl")) -e $(_TRACE_EXPR)`
 
 const MAX_WITH_SYS_LINES = 1000
 const MAX_DELTA_LINES = 450
