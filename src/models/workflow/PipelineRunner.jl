@@ -49,7 +49,7 @@ end
 function compute_pipeline_artifact_hash(state::Dict{Symbol, Any}, stage_records::Vector{PipelineStageRecord})
     state_tokens = String[]
     for key in sort(collect(keys(state)); by=String)
-        value_repr = sprint(show, MIME("text/plain"), state[key])
+        value_repr = _stable_hash_repr(state[key])
         push!(state_tokens, String(key) * "=" * value_repr)
     end
     record_tokens = String[]
@@ -61,6 +61,41 @@ function compute_pipeline_artifact_hash(state::Dict{Symbol, Any}, stage_records:
     end
     payload = join([join(state_tokens, ";"), join(record_tokens, ";")], "|")
     return bytes2hex(sha1(payload))
+end
+
+function _stable_hash_repr(value)
+    if value === nothing
+        return "null"
+    elseif value isa Bool
+        return value ? "true" : "false"
+    elseif value isa Real
+        return isnan(value) ? "NaN" : string(value)
+    elseif value isa AbstractString
+        return repr(String(value))
+    elseif value isa Symbol
+        return "symbol:" * String(value)
+    elseif value isa DateTime
+        return Dates.format(value, dateformat"yyyy-mm-ddTHH:MM:SS.sss")
+    elseif value isa AbstractVector
+        return "[" * join((_stable_hash_repr(v) for v in value), ",") * "]"
+    elseif value isa AbstractSet
+        normalized = sort([_stable_hash_repr(v) for v in value])
+        return "set{" * join(normalized, ",") * "}"
+    elseif value isa AbstractDict
+        tokens = String[]
+        for key in sort(collect(keys(value)); by=k -> _stable_hash_repr(k))
+            push!(tokens, _stable_hash_repr(key) * ":" * _stable_hash_repr(value[key]))
+        end
+        return "{" * join(tokens, ",") * "}"
+    elseif value isa NamedTuple
+        names = sort!(collect(keys(value)); by=String)
+        tokens = String[]
+        for name in names
+            push!(tokens, String(name) * ":" * _stable_hash_repr(getproperty(value, name)))
+        end
+        return "(" * join(tokens, ",") * ")"
+    end
+    return repr(value)
 end
 
 function _validate_stage_id_uniqueness(stages::Vector{<:PipelineStage})
