@@ -165,6 +165,7 @@ function run_phase_pipeline_via_runner(core_run_phase_pipeline, model_kind::Symb
     stages = _build_phase_pipeline_stages(core_run_phase_pipeline)
     run_result = run_pipeline(spec, stages, ctx; manifest_path=manifest_path)
     if !run_result.success
+        run_result.error_kind == :ArgumentError && throw(ArgumentError(run_result.error_msg))
         throw(ErrorException("phase runner stage failed at $(run_result.failed_stage): $(run_result.error_msg)"))
     end
 
