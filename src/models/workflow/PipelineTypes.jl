@@ -92,7 +92,8 @@ struct PipelineStage{F}
 
     function PipelineStage(id, requires::AbstractVector, provides::AbstractVector, run!::F) where {F}
         id isa Symbol || throw(ArgumentError("stage id must be Symbol, got $(typeof(id))"))
-        isempty(methods(run!)) && throw(ArgumentError("stage run! must be callable, got $(typeof(run!))"))
+        is_callable = (run! isa Function) || !isempty(methods(run!))
+        is_callable || throw(ArgumentError("stage run! must be callable, got $(typeof(run!))"))
         return new{F}(
             id,
             _coerce_symbol_vector(requires; field_name="requires"),

@@ -344,7 +344,7 @@ Hash and timestamp normalization:
 
 Canonical in-memory types:
 
-- `PipelineSpec.version::Symbol`
+- `PipelineSpec.version::String`
 - `io_contract.contract_version::Symbol`
 - `io_contract.artifact_schema_version::Symbol`
 - `io_contract.manifest_schema_version::Symbol`
@@ -357,7 +357,7 @@ Canonical persisted manifest types:
 
 Normalization rule table:
 
-- Persist: `Symbol` -> `String(symbol)`
+- Persist: `PipelineSpec.version` is already canonical `String`
 - Load: `String` -> `Symbol(string)` only for known enum-like fields
 - Comparison tests:
   - in-memory compare on `Symbol`

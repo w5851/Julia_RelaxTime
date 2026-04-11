@@ -43,7 +43,7 @@ function compute_pipeline_config_hash(spec::PipelineSpec, ctx::PipelineContext, 
             String(ctx.provenance.git_commit),
             join(stage_tokens, ";"),
         ], "|")
-    return bytes2hex(sha1(payload))
+    return bytes2hex(sha2_256(payload))
 end
 
 function compute_pipeline_artifact_hash(state::Dict{Symbol, Any}, stage_records::Vector{PipelineStageRecord})
@@ -60,7 +60,7 @@ function compute_pipeline_artifact_hash(state::Dict{Symbol, Any}, stage_records:
             (isnothing(rec.error_msg) ? "" : String(rec.error_msg)))
     end
     payload = join([join(state_tokens, ";"), join(record_tokens, ";")], "|")
-    return bytes2hex(sha1(payload))
+    return bytes2hex(sha2_256(payload))
 end
 
 function _stable_hash_repr(value)

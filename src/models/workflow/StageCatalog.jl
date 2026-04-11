@@ -42,7 +42,7 @@ function _phase_runner_config_hash(model_kind::Symbol, phase_kwargs)
     for key in sort(collect(keys(phase_kwargs)); by=String)
         push!(payload, String(key) * "=" * sprint(show, getproperty(phase_kwargs, key)))
     end
-    return bytes2hex(SHA.sha1(join(payload, "|")))
+    return bytes2hex(SHA.sha2_256(join(payload, "|")))
 end
 
 function _build_phase_pipeline_stages(core_run_phase_pipeline)

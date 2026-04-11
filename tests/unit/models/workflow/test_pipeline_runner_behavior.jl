@@ -189,6 +189,8 @@ end
         @test haskey(success_manifest.pipeline, :artifact_hash)
         @test !isempty(String(success_manifest.pipeline.config_hash))
         @test !isempty(String(success_manifest.pipeline.artifact_hash))
+        @test length(String(success_manifest.pipeline.config_hash)) == 64
+        @test length(String(success_manifest.pipeline.artifact_hash)) == 64
 
         success_records = success_manifest.stage_records
         @test length(success_records) == 1
