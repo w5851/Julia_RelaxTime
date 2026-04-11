@@ -1,4 +1,25 @@
+---
+title: Solver Plan-A 交接契约冻结（A4）
+archived: true
+original: docs/dev/active/2026-04-10_solver_planA_handoff_contract.md
+archived_date: 2026-04-11
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Solver Plan-A 交接契约冻结（A4）
+
+## 0) 任务状态（2026-04-11）
+
+- [x] Plan-A A1：拓扑/Facade/行为锁定测试建立并转绿
+- [x] Plan-A A2：solver 子域拆分与 include 拓扑迁移完成
+- [x] Plan-A A3：R1-R5 边界规则测试与依赖清理完成
+- [x] Plan-A A4：交接契约与 API 文档同步完成
+- [x] Plan-B B1-B4：声明式 Pipeline、Runner、CLI 迁移与一致性回归完成
+- [x] V1：关键门禁与治理检查完成（含 unit/integration/regression 关键验证与 docs/migration guard）
 
 ## 1) 冻结 API 签名（Models 边界）
 

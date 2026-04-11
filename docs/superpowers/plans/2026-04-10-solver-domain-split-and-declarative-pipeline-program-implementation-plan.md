@@ -60,9 +60,9 @@
 - Create: `tests/unit/models/solver/test_solver_api_facade_contract.jl`
 - Create: `tests/unit/models/solver/test_solver_structure_only_behavior_lock.jl`
 
-- [ ] **Step 1: 写 include 拓扑失败测试（旧路径不再被直接 include）**
-- [ ] **Step 2: 写 API facade 失败测试（`solve/solve_multi/solve_constraint/solve_vec/solve_named` 均可从 `Models` 调用）**
-- [ ] **Step 3: 写行为锁定失败测试（固定 smoke 输入关键字段快照）**
+- [x] **Step 1: 写 include 拓扑失败测试（旧路径不再被直接 include）**
+- [x] **Step 2: 写 API facade 失败测试（`solve/solve_multi/solve_constraint/solve_vec/solve_named` 均可从 `Models` 调用）**
+- [x] **Step 3: 写行为锁定失败测试（固定 smoke 输入关键字段快照）**
 Contract:
 - 锁定字段清单：`converged`, `solution` 长度, `residual_norm`, `omega`, `pressure`, `rho_norm`, `mu_vec`, `masses`
 - 比较规则：
@@ -70,10 +70,10 @@ Contract:
   - 数值标量与向量字段使用 `rtol=1e-6`, `atol=1e-8`
   - `NaN` 字段按“同位置均为 `NaN`”判定通过
 - 基线来源：使用迁移前主分支 smoke 样例输出（记录在同测试文件头部）
-- [ ] **Step 4: 运行单测确认失败**
+- [x] **Step 4: 运行单测确认失败**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_include_topology.jl"); include("tests/unit/models/solver/test_solver_api_facade_contract.jl"); include("tests/unit/models/solver/test_solver_structure_only_behavior_lock.jl")'`
 Expected: FAIL，报缺失新路径或导出契约未满足
-- [ ] **Step 5: 提交测试基线**
+- [x] **Step 5: 提交测试基线**
 Run: `git add tests/unit/models/solver/test_solver_include_topology.jl tests/unit/models/solver/test_solver_api_facade_contract.jl tests/unit/models/solver/test_solver_structure_only_behavior_lock.jl && git commit -m "test(models/solver): lock topology facade and structure-only behavior before split"`
 
 ### Task A2: 迁移 solver 文件到子域目录并建立 re-export 壳
@@ -108,30 +108,30 @@ Run: `git add tests/unit/models/solver/test_solver_include_topology.jl tests/uni
 - Move: `src/models/solver/SolverRuntimeConfig.jl` -> `src/models/solver/config/SolverRuntimeConfig.jl`
 - Move: `src/models/solver/StateSchema.jl` -> `src/models/solver/config/StateSchema.jl`
 
-- [ ] **Step 1: 先迁移 `spec` 子域文件（`ProblemSpec/ConstraintComponents/ConstraintModes/Conditions`）**
-- [ ] **Step 2: 再迁移 `orchestrator` 与 `governance` 子域文件（`ProblemSpecOrchestrator/PrimaryStrategy/SeedStrategies/CandidateGovernance/WeightedFallback`）**
-- [ ] **Step 3: 迁移 `runtime` 子域文件（保持实现不变）**
-- [ ] **Step 4: 迁移 `diagnostics` 子域文件（保持实现不变）**
-- [ ] **Step 5: 迁移 `compat` 与 `config` 子域文件（保持实现不变）**
-- [ ] **Step 6: 更新 `src/models/Models.jl` include 顺序到新目录**
-- [ ] **Step 7: 在 `solver/api/SolverAPI.jl` 统一保留公开入口函数定义与转发**
-- [ ] **Step 8: 校验 facade 通过标准（导出含 `solve/solve_multi/solve_constraint/solve_vec/solve_named`，且对外求解入口不再散落在非 `api/` 文件）**
+- [x] **Step 1: 先迁移 `spec` 子域文件（`ProblemSpec/ConstraintComponents/ConstraintModes/Conditions`）**
+- [x] **Step 2: 再迁移 `orchestrator` 与 `governance` 子域文件（`ProblemSpecOrchestrator/PrimaryStrategy/SeedStrategies/CandidateGovernance/WeightedFallback`）**
+- [x] **Step 3: 迁移 `runtime` 子域文件（保持实现不变）**
+- [x] **Step 4: 迁移 `diagnostics` 子域文件（保持实现不变）**
+- [x] **Step 5: 迁移 `compat` 与 `config` 子域文件（保持实现不变）**
+- [x] **Step 6: 更新 `src/models/Models.jl` include 顺序到新目录**
+- [x] **Step 7: 在 `solver/api/SolverAPI.jl` 统一保留公开入口函数定义与转发**
+- [x] **Step 8: 校验 facade 通过标准（导出含 `solve/solve_multi/solve_constraint/solve_vec/solve_named`，且对外求解入口不再散落在非 `api/` 文件）**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_api_facade_contract.jl")'`
 Expected: PASS
-- [ ] **Step 9: 执行 facade 单一职责校验（`SolverAPI.jl` 仅保留上述 5 个入口及轻量转发；业务 helper 必须下沉到 `spec/orchestrator/runtime/governance/diagnostics/compat/config`）**
+- [x] **Step 9: 执行 facade 单一职责校验（`SolverAPI.jl` 仅保留上述 5 个入口及轻量转发；业务 helper 必须下沉到 `spec/orchestrator/runtime/governance/diagnostics/compat/config`）**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_api_facade_contract.jl")'`
 Expected: PASS，且无“api 层承载业务逻辑”断言失败
-- [ ] **Step 10: 在 `docs/dev/active/2026-04-10_solver_planA_handoff_contract.md` 写入 old->new 映射表并标注已迁移状态**
-- [ ] **Step 11: 运行 A1 测试并确认转绿**
+- [x] **Step 10: 在 `docs/dev/active/2026-04-10_solver_planA_handoff_contract.md` 写入 old->new 映射表并标注已迁移状态**
+- [x] **Step 11: 运行 A1 测试并确认转绿**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_include_topology.jl"); include("tests/unit/models/solver/test_solver_api_facade_contract.jl")'`
 Expected: PASS
-- [ ] **Step 12: 运行行为锁定测试（固定 smoke 输入关键字段不漂移）**
+- [x] **Step 12: 运行行为锁定测试（固定 smoke 输入关键字段不漂移）**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_structure_only_behavior_lock.jl")'`
 Expected: PASS
-- [ ] **Step 13: 跑 unit smoke/core 门禁**
+- [x] **Step 13: 跑 unit smoke/core 门禁**
 Run: `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")' && julia --project=. -e 'ENV["UNIT_PROFILE"]="core"; include("tests/unit/runtests.jl")'`
 Expected: PASS
-- [ ] **Step 14: 提交结构重排与映射表**
+- [x] **Step 14: 提交结构重排与映射表**
 Run: `git add src/models/Models.jl src/models/solver tests/unit/models/solver docs/dev/active/2026-04-10_solver_planA_handoff_contract.md && git commit -m "refactor(models/solver): split solver into domain subfolders with facade compatibility"`
 
 ### Task A3: 添加边界违规防回归测试并清理跨层直连
@@ -140,26 +140,26 @@ Run: `git add src/models/Models.jl src/models/solver tests/unit/models/solver do
 - Create: `tests/unit/models/solver/test_solver_boundary_rules.jl`
 - Modify: `src/models/solver/**/*.jl` (仅依赖关系调整)
 
-- [ ] **Step 1: 写失败测试规则-R1（允许 `api -> orchestrator/spec`，禁止反向依赖 `orchestrator/spec -> api`）**
-- [ ] **Step 2: 写失败测试规则-R2（禁止 `runtime -> api`）**
-- [ ] **Step 3: 写失败测试规则-R3（禁止 `governance -> ConstraintSolver*`）**
-- [ ] **Step 4: 写失败测试规则-R4（`compat` 仅允许被 `api/orchestrator` 引用；`spec/governance/runtime/diagnostics/config` 任一引用都应失败）**
-- [ ] **Step 5: 写失败测试规则-R5（仅 `orchestrator` 允许同时调用 `runtime` 与 `governance`）**
-- [ ] **Step 6: 运行边界测试确认失败**
+- [x] **Step 1: 写失败测试规则-R1（允许 `api -> orchestrator/spec`，禁止反向依赖 `orchestrator/spec -> api`）**
+- [x] **Step 2: 写失败测试规则-R2（禁止 `runtime -> api`）**
+- [x] **Step 3: 写失败测试规则-R3（禁止 `governance -> ConstraintSolver*`）**
+- [x] **Step 4: 写失败测试规则-R4（`compat` 仅允许被 `api/orchestrator` 引用；`spec/governance/runtime/diagnostics/config` 任一引用都应失败）**
+- [x] **Step 5: 写失败测试规则-R5（仅 `orchestrator` 允许同时调用 `runtime` 与 `governance`）**
+- [x] **Step 6: 运行边界测试确认失败**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_boundary_rules.jl")'`
 Expected: FAIL，提示非法依赖
-- [ ] **Step 7: 修复 R1 违规依赖（反向依赖 `orchestrator/spec -> api`）**
-- [ ] **Step 8: 修复 R2 违规依赖（`runtime -> api`）**
-- [ ] **Step 9: 修复 R3 违规依赖（`governance -> ConstraintSolver*`）**
-- [ ] **Step 10: 修复 R4 违规依赖（`compat` 被非 `api/orchestrator` 引用）**
-- [ ] **Step 11: 修复 R5 违规依赖（非 `orchestrator` 同时桥接 `runtime+governance`）**
-- [ ] **Step 12: 重跑边界测试确认通过**
+- [x] **Step 7: 修复 R1 违规依赖（反向依赖 `orchestrator/spec -> api`）**
+- [x] **Step 8: 修复 R2 违规依赖（`runtime -> api`）**
+- [x] **Step 9: 修复 R3 违规依赖（`governance -> ConstraintSolver*`）**
+- [x] **Step 10: 修复 R4 违规依赖（`compat` 被非 `api/orchestrator` 引用）**
+- [x] **Step 11: 修复 R5 违规依赖（非 `orchestrator` 同时桥接 `runtime+governance`）**
+- [x] **Step 12: 重跑边界测试确认通过**
 Run: `julia --project=. -e 'include("tests/unit/models/solver/test_solver_boundary_rules.jl")'`
 Expected: PASS
-- [ ] **Step 13: 跑 unit+integration core 门禁**
+- [x] **Step 13: 跑 unit+integration core 门禁**
 Run: `julia --project=. -e 'ENV["UNIT_PROFILE"]="core"; include("tests/unit/runtests.jl")' && julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="core"; include("tests/integration/runtests.jl")'`
 Expected: PASS
-- [ ] **Step 14: 提交边界硬化**
+- [x] **Step 14: 提交边界硬化**
 Run: `git add tests/unit/models/solver/test_solver_boundary_rules.jl src/models/solver && git commit -m "refactor(models/solver): enforce domain boundary dependency rules"`
 
 ### Task A4: 冻结 Plan-A 交接契约
@@ -168,13 +168,13 @@ Run: `git add tests/unit/models/solver/test_solver_boundary_rules.jl src/models/
 - Modify: `docs/dev/active/2026-04-10_solver_planA_handoff_contract.md`
 - Modify (if needed): `docs/api/**/*.md`
 
-- [ ] **Step 1: 若交接文档不存在则先创建，最小模板包含冻结 API 签名、include 拓扑、边界测试清单、old->new 映射表**
-- [ ] **Step 2: 写明 Plan-A 冻结项（facade 签名、include 拓扑、边界测试清单）**
-- [ ] **Step 3: 若 `Models` 稳定入口变化，同步 `docs/api`**
-- [ ] **Step 4: 跑文档治理检查**
+- [x] **Step 1: 若交接文档不存在则先创建，最小模板包含冻结 API 签名、include 拓扑、边界测试清单、old->new 映射表**
+- [x] **Step 2: 写明 Plan-A 冻结项（facade 签名、include 拓扑、边界测试清单）**
+- [x] **Step 3: 若 `Models` 稳定入口变化，同步 `docs/api`**
+- [x] **Step 4: 跑文档治理检查**
 Run: `julia --project=. scripts/dev/check_docs_consistency.jl && julia --project=. scripts/dev/check_active_docs_governance.jl`
 Expected: PASS
-- [ ] **Step 5: 提交 Plan-A 冻结契约文档**
+- [x] **Step 5: 提交 Plan-A 冻结契约文档**
 Run: `git add docs/dev/active/2026-04-10_solver_planA_handoff_contract.md docs/api && git commit -m "docs(dev): record Plan-A handoff contract for pipeline migration"`
 
 ## Chunk 2: Plan-B (Declarative Pipeline + CLI Migration)
@@ -185,16 +185,16 @@ Run: `git add docs/dev/active/2026-04-10_solver_planA_handoff_contract.md docs/a
 - Create: `tests/unit/models/workflow/test_pipeline_types_contract.jl`
 - Create: `src/models/workflow/PipelineTypes.jl`
 
-- [ ] **Step 1: 写失败测试覆盖 `PipelineSpec/PipelineStage/PipelineContext/StageResult/PipelineArtifact` 字段与类型**
-- [ ] **Step 2: 写失败测试覆盖 Symbol<->String 规范化规则**
-- [ ] **Step 3: 运行测试确认失败**
+- [x] **Step 1: 写失败测试覆盖 `PipelineSpec/PipelineStage/PipelineContext/StageResult/PipelineArtifact` 字段与类型**
+- [x] **Step 2: 写失败测试覆盖 Symbol<->String 规范化规则**
+- [x] **Step 3: 运行测试确认失败**
 Run: `julia --project=. -e 'include("tests/unit/models/workflow/test_pipeline_types_contract.jl")'`
 Expected: FAIL，提示缺失类型或字段
-- [ ] **Step 4: 实现最小类型定义与规范化函数**
-- [ ] **Step 5: 重跑测试确认通过**
+- [x] **Step 4: 实现最小类型定义与规范化函数**
+- [x] **Step 5: 重跑测试确认通过**
 Run: `julia --project=. -e 'include("tests/unit/models/workflow/test_pipeline_types_contract.jl")'`
 Expected: PASS
-- [ ] **Step 6: 提交类型契约**
+- [x] **Step 6: 提交类型契约**
 Run: `git add src/models/workflow/PipelineTypes.jl tests/unit/models/workflow/test_pipeline_types_contract.jl && git commit -m "feat(models/workflow): add pipeline core contract types and normalization"`
 
 ### Task B2: 实现 PipelineRunner（依赖校验、fail-fast、manifest 持久化）
@@ -204,17 +204,17 @@ Run: `git add src/models/workflow/PipelineTypes.jl tests/unit/models/workflow/te
 - Create: `tests/unit/models/workflow/test_pipeline_runner_behavior.jl`
 - Create: `tests/unit/models/solver/test_solver_structure_only_behavior_lock.jl`
 
-- [ ] **Step 1: 写失败测试覆盖依赖校验（缺依赖、循环依赖、重复 provide、重复 stage id）**
-- [ ] **Step 2: 写失败测试覆盖失败路径（failed+skipped stage、error_kind/error_msg、required_outputs 仅成功路径校验）**
-- [ ] **Step 3: 写失败测试覆盖 Runner 统一落盘 manifest（成功/失败都写）**
-- [ ] **Step 4: 运行测试确认失败**
+- [x] **Step 1: 写失败测试覆盖依赖校验（缺依赖、循环依赖、重复 provide、重复 stage id）**
+- [x] **Step 2: 写失败测试覆盖失败路径（failed+skipped stage、error_kind/error_msg、required_outputs 仅成功路径校验）**
+- [x] **Step 3: 写失败测试覆盖 Runner 统一落盘 manifest（成功/失败都写）**
+- [x] **Step 4: 运行测试确认失败**
 Run: `julia --project=. -e 'include("tests/unit/models/workflow/test_pipeline_runner_behavior.jl")'`
 Expected: FAIL
-- [ ] **Step 5: 实现 Runner 最小功能并让测试转绿**
-- [ ] **Step 6: 重跑测试确认通过**
+- [x] **Step 5: 实现 Runner 最小功能并让测试转绿**
+- [x] **Step 6: 重跑测试确认通过**
 Run: `julia --project=. -e 'include("tests/unit/models/workflow/test_pipeline_runner_behavior.jl")'`
 Expected: PASS
-- [ ] **Step 7: 提交 Runner**
+- [x] **Step 7: 提交 Runner**
 Run: `git add src/models/workflow/PipelineRunner.jl tests/unit/models/workflow/test_pipeline_runner_behavior.jl && git commit -m "feat(models/workflow): add fail-fast pipeline runner with manifest persistence"`
 
 ### Task B3: 实现 StageCatalog 并接入 `Models.run_phase_pipeline`
@@ -225,16 +225,16 @@ Run: `git add src/models/workflow/PipelineRunner.jl tests/unit/models/workflow/t
 - Modify: `src/models/Models.jl`
 - Create: `tests/integration/models/test_phase_pipeline_runner_smoke.jl`
 
-- [ ] **Step 1: 写失败集成测试覆盖 7 个标准 stage 串行执行**
-- [ ] **Step 2: 写失败测试覆盖 `run_phase_pipeline` 薄封装转调 Runner**
-- [ ] **Step 3: 运行集成测试确认失败**
+- [x] **Step 1: 写失败集成测试覆盖 7 个标准 stage 串行执行**
+- [x] **Step 2: 写失败测试覆盖 `run_phase_pipeline` 薄封装转调 Runner**
+- [x] **Step 3: 运行集成测试确认失败**
 Run: `julia --project=. -e 'include("tests/integration/models/test_phase_pipeline_runner_smoke.jl")'`
 Expected: FAIL
-- [ ] **Step 4: 实现 StageCatalog 与 entrypoint 接线**
-- [ ] **Step 5: 重跑集成测试确认通过**
+- [x] **Step 4: 实现 StageCatalog 与 entrypoint 接线**
+- [x] **Step 5: 重跑集成测试确认通过**
 Run: `julia --project=. -e 'include("tests/integration/models/test_phase_pipeline_runner_smoke.jl")'`
 Expected: PASS
-- [ ] **Step 6: 提交阶段编排接线**
+- [x] **Step 6: 提交阶段编排接线**
 Run: `git add src/models/workflow src/models/entrypoints.jl src/models/Models.jl tests/integration/models/test_phase_pipeline_runner_smoke.jl && git commit -m "refactor(models): route phase pipeline through declarative runner"`
 
 ### Task B4: 迁移 CLI 到 PipelineSpec 并补齐回归一致性测试
@@ -243,16 +243,16 @@ Run: `git add src/models/workflow src/models/entrypoints.jl src/models/Models.jl
 - Modify: `scripts/pnjl/calculate_phase_structure.jl`
 - Create: `tests/regression/models/test_phase_pipeline_consistency.jl`
 
-- [ ] **Step 1: 写失败回归测试覆盖旧/新 pipeline 关键字段一致性（rtol=1e-6, atol=1e-8）**
-- [ ] **Step 2: 写失败测试覆盖 manifest_v1 必填字段、UTC 时间格式、SHA-256 hash 字段存在**
-- [ ] **Step 3: 运行回归测试确认失败**
+- [x] **Step 1: 写失败回归测试覆盖旧/新 pipeline 关键字段一致性（rtol=1e-6, atol=1e-8）**
+- [x] **Step 2: 写失败测试覆盖 manifest_v1 必填字段、UTC 时间格式、SHA-256 hash 字段存在**
+- [x] **Step 3: 运行回归测试确认失败**
 Run: `julia --project=. -e 'include("tests/regression/models/test_phase_pipeline_consistency.jl")'`
 Expected: FAIL
-- [ ] **Step 4: 改造 CLI：参数解析 -> 构造 `PipelineSpec` -> Runner 执行**
-- [ ] **Step 5: 重跑回归测试确认通过**
+- [x] **Step 4: 改造 CLI：参数解析 -> 构造 `PipelineSpec` -> Runner 执行**
+- [x] **Step 5: 重跑回归测试确认通过**
 Run: `julia --project=. -e 'include("tests/regression/models/test_phase_pipeline_consistency.jl")'`
 Expected: PASS
-- [ ] **Step 6: 提交 CLI 迁移与一致性回归**
+- [x] **Step 6: 提交 CLI 迁移与一致性回归**
 Run: `git add scripts/pnjl/calculate_phase_structure.jl tests/regression/models/test_phase_pipeline_consistency.jl && git commit -m "refactor(scripts/pnjl): migrate phase CLI to PipelineSpec orchestration"`
 
 ## Chunk 3: Program Verification and Closure
@@ -263,20 +263,20 @@ Run: `git add scripts/pnjl/calculate_phase_structure.jl tests/regression/models/
 - Modify: `docs/dev/active/2026-04-10_solver_planA_handoff_contract.md`
 - Modify: `docs/api/**/*.md` (if needed)
 
-- [ ] **Step 1: 跑 unit smoke/core**
+- [x] **Step 1: 跑 unit smoke/core**
 Run: `julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")' && julia --project=. -e 'ENV["UNIT_PROFILE"]="core"; include("tests/unit/runtests.jl")'`
 Expected: PASS
-- [ ] **Step 2: 跑 integration smoke/core**
+- [x] **Step 2: 跑 integration smoke/core**
 Run: `julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")' && julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="core"; include("tests/integration/runtests.jl")'`
 Expected: PASS
-- [ ] **Step 3: 跑 regression smoke/core**
+- [x] **Step 3: 跑 regression smoke/core**
 Run: `julia --project=. -e 'ENV["REGRESSION_PROFILE"]="smoke"; include("tests/regression/runtests.jl")' && julia --project=. -e 'ENV["REGRESSION_PROFILE"]="core"; include("tests/regression/runtests.jl")'`
 Expected: PASS
-- [ ] **Step 4: 跑脚本 smoke（PipelineSpec 路径）**
+- [x] **Step 4: 跑脚本 smoke（PipelineSpec 路径）**
 Run: `julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke`
 Expected: PASS，生成 manifest 与 artifact 元数据
-- [ ] **Step 5: 跑治理检查**
+- [x] **Step 5: 跑治理检查**
 Run: `julia --project=. scripts/dev/check_unit_skip_policy.jl && julia --project=. scripts/dev/check_docs_consistency.jl && julia --project=. scripts/dev/check_active_docs_governance.jl && julia --project=. scripts/dev/check_pnjl_migration_guard.jl`
 Expected: PASS
-- [ ] **Step 6: 提交收尾**
+- [ ] **Step 6: 提交收尾**（状态：待你确认是否执行最终收尾提交）
 Run: `git add docs/dev/active/2026-04-10_solver_planA_handoff_contract.md docs/api tests src/models scripts/pnjl && git commit -m "refactor(models/workflow): close solver split and declarative pipeline program gates"`
