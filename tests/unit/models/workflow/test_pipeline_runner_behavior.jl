@@ -232,4 +232,31 @@ end
         success_manifest_3 = JSON3.read(read(success_manifest_path_3, String))
         @test String(success_manifest.pipeline.artifact_hash) != String(success_manifest_3.pipeline.artifact_hash)
     end
+
+    @testset "artifact hash canonical stability for complex state" begin
+        records = [
+            Models.PipelineStageRecord(:a, :completed, "2026-04-10T12:00:00.000Z", "2026-04-10T12:00:01.000Z", nothing, nothing),
+        ]
+
+        state_dict_a = Dict{Symbol, Any}(
+            :cfg => Dict("b" => 2, "a" => 1),
+            :tags => Set(["x", "y", "z"]),
+            :nested => (alpha=1, beta=[3, 2, 1]),
+        )
+        state_dict_b = Dict{Symbol, Any}(
+            :nested => (beta=[3, 2, 1], alpha=1),
+            :tags => Set(["z", "x", "y"]),
+            :cfg => Dict("a" => 1, "b" => 2),
+        )
+
+        hash_a = Models.compute_pipeline_artifact_hash(state_dict_a, records)
+        hash_b = Models.compute_pipeline_artifact_hash(state_dict_b, records)
+        @test hash_a == hash_b
+
+        state_symbol = Dict{Symbol, Any}(:key => :a)
+        state_string = Dict{Symbol, Any}(:key => "a")
+        hash_symbol = Models.compute_pipeline_artifact_hash(state_symbol, records)
+        hash_string = Models.compute_pipeline_artifact_hash(state_string, records)
+        @test hash_symbol != hash_string
+    end
 end
