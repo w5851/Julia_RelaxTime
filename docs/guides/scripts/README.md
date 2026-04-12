@@ -63,6 +63,25 @@ julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --
 - [scripts/server/server.jl](scripts/server/server.jl)
   - 仅 API 入口
 
+### RelaxTime
+
+- [scripts/relaxtime/run_manual_relaxation_scan_workflow.jl](scripts/relaxtime/run_manual_relaxation_scan_workflow.jl)
+  - 手动组合产物入口（`cross_section` / `plan_a` / `plan_b`）
+  - 支持 `--base-output-dir` 将结果写到隔离目录（默认 `data/outputs`）
+
+`plan_a` / `plan_b` 目录最小溯源产物：
+
+- 扫描 CSV（行级 `run_id`）
+- `effective_config.json`（最终有效参数快照）
+- `run_manifest.json`（`argv`、`git_commit`、`config_hash`、`artifacts`、`summary`）
+
+其中 `plan_b_merged.csv` 额外包含：
+
+- `source_file`
+- `source_T_MeV`
+
+用于将合并行反向定位到温度分片 CSV。
+
 ---
 
 ## 2. 不应视为稳定用户入口的目录
