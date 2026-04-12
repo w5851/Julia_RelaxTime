@@ -8,6 +8,7 @@ on:
 jobs:
   full-regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,12 +38,30 @@ jobs:
           REGRESSION_MAGNETIC_SCOPE: nightly
         run: julia --project=. tests/regression/runtests.jl
 
-      - name: Run integration full profile
-        env:
-          INTEGRATION_PROFILE: full
-        run: julia --project=. tests/integration/runtests.jl
+      - name: Run integration full profile (models + pnjl shard)
+        timeout-minutes: 60
+        run: |
+          files=$(git ls-files "tests/integration/models/test_*.jl" "tests/integration/pnjl/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
+          if [ -z "$files" ]; then
+            echo "No integration files found for models+pnjl shard" >&2
+            exit 1
+          fi
+          echo "INTEGRATION_FILES=$files"
+          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
+
+      - name: Run integration full profile (relaxtime + config shard)
+        timeout-minutes: 90
+        run: |
+          files=$(git ls-files "tests/integration/relaxtime/test_*.jl" "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils\.jl$' | paste -sd ';' -)
+          if [ -z "$files" ]; then
+            echo "No integration files found for relaxtime+config shard" >&2
+            exit 1
+          fi
+          echo "INTEGRATION_FILES=$files"
+          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
 
       - name: Run validation full profile
+        timeout-minutes: 45
         env:
           VALIDATION_PROFILE: full
         run: julia --project=. tests/validation/runtests.jl

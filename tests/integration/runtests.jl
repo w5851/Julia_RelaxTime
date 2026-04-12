@@ -76,6 +76,7 @@ function _include_integration_dir(dir::String)
     for f in files
         _should_include_integration_file(f) || continue
         rel = relpath(f, INTEGRATION_DIR)
+        println("[integration-full] including: " * rel)
         try
             include(f)
         catch err
@@ -123,6 +124,8 @@ const INTEGRATION_CORE_FILES = [
     if selected !== nothing
         @testset "Selected" begin
             for file in selected
+                rel = relpath(file, INTEGRATION_DIR)
+                println("[integration-selected] including: " * rel)
                 include(file)
             end
         end
