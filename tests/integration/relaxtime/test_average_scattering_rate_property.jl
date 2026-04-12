@@ -19,16 +19,13 @@ push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
 
 include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/AverageScatteringRate.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
+include("../../../src/relaxtime/RelaxTime.jl")
 
-using .AverageScatteringRate
 using .Constants_PNJL
-using .EffectiveCouplings
-using .OneLoopIntegrals: A
-using .GaussLegendre: gauleg
+using Main.RelaxTime.AverageScatteringRate: average_scattering_rate, build_w0cdf_pchip_cache
+using Main.RelaxTime.EffectiveCouplings
+using Main.RelaxTime.OneLoopIntegrals: A
+using Main.RelaxTime.GaussLegendre: gauleg
 
 # Load test utilities
 include("test_utils.jl")
@@ -74,13 +71,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
             
             # Compute G functions
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
             
             # Compute K_coeffs
             G_fm2 = Constants_PNJL.G_fm2
             K_fm5 = Constants_PNJL.K_fm5
-            K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
             
             # Create struct parameters
             q_struct = QuarkParams(
@@ -178,9 +175,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             
@@ -246,9 +243,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             

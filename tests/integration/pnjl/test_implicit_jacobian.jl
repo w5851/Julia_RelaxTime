@@ -71,11 +71,14 @@ end
     T_fm = 150.0 / 197.327
     μ_fm = 300.0 / 197.327
 
-    # 求解
+    # 用隐函数求解器获得基准平衡态，确保后续隐函数定理比较在同一根附近进行
     thermal_nodes = cached_nodes(64, 16)
-    result = solve(FixedMu(), T_fm, μ_fm)
-    x_star = result.x_state
-    
+    set_config(xi=0.0, p_num=64, t_num=16)
+    θ = [T_fm, μ_fm]
+    x_star, _ = IMPLICIT_SOLVER(θ)
+
+    # 与显式求解器交叉验证（不要求完全相同根）
+    result = solve(FixedMu(), T_fm, μ_fm; p_num=64, t_num=16)
     @test result.converged
 
     # 验证 F(x*, θ) ≈ 0
@@ -114,14 +117,11 @@ end
     dx_dμ_implicit = -dF_dx \ dF_dμ
 
     # 与 ImplicitDifferentiation.jl 的结果比较
-    set_config(xi=0.0, p_num=64, t_num=16)
-
     function solve_state(θ_in)
         (x_out, _) = IMPLICIT_SOLVER(θ_in)
         return collect(x_out)
     end
 
-    θ = [T_fm, μ_fm]
     dx_dθ_lib = ForwardDiff.jacobian(solve_state, θ)
 
     # 验证相对误差 < 1%
