@@ -18,122 +18,128 @@ function _solve_constraint_fixedasymrho(
     physicality_check::Function=((_, _) -> true),
     nlsolve_kwargs...,
 )
-    st_ref = Ref{Any}(nothing)
-    x_state_ref = Ref{Any}(nothing)
-    mu_vec_ref = Ref{Any}(nothing)
-    pressure_ref = Ref{Any}(nothing)
-    rho_norm_ref = Ref{Any}(nothing)
-    entropy_ref = Ref{Any}(nothing)
-    energy_ref = Ref{Any}(nothing)
-    masses_ref = Ref{Any}(nothing)
-    rho_vec_ref = Ref{Any}(nothing)
+    _ = solver_primary, solver_secondary, nlsolve_method, enforce_physicality
 
-    residual_fn! = (F, x) -> begin
-        μ_vec = SVector{3}(x[1], x[2], x[3])
+    mode = FixedAsymmetricRho(Float64(rho_target), Float64(ud_ratio_target), Float64(s_target))
+    model_kind = _model_kind_for_shared_core(model)
+    joint_params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num), Float64(xi);
+        p_num=p_num,
+        t_num=t_num,
+        model_kind=model_kind,
+    )
+    joint_residual! = build_residual!(mode, joint_params)
 
-        st = _solve_gap_with_outer_fallback(
-            model,
-            T_fm,
-            μ_vec;
-            st_prev=st_ref[],
-            seed_guess=seed_guess,
-            solver_primary=solver_primary,
-            solver_secondary=solver_secondary,
-            residual_norm_max=residual_norm_max,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-        )
-
-        if st === nothing
-            _constraint_failure!(F)
-            return nothing
+    candidate_seeds = Vector{Vector{Float64}}()
+    if length(seed_guess) >= 8
+        push!(candidate_seeds, Float64.(seed_guess[1:8]))
+    else
+        push!(candidate_seeds, extend_seed(Float64.(seed_guess), mode))
+    end
+    if length(seed_guess) >= 5 && length(mu0) >= 3
+        push!(candidate_seeds, Float64[Float64.(seed_guess[1:5])..., Float64.(mu0[1:3])...])
+    end
+    for seed in seed_catalog(mode, [T_fm])
+        if length(seed) >= 8
+            push!(candidate_seeds, Float64.(seed[1:8]))
+        else
+            push!(candidate_seeds, extend_seed(Float64.(seed), mode))
         end
+    end
 
-        x_state = _to_state_svec(st)
-        thermo = _compute_mode_thermo_quantities(
+    uniq = Dict{String, Vector{Float64}}()
+    for s in candidate_seeds
+        key = join(round.(s; digits=10), ",")
+        haskey(uniq, key) || (uniq[key] = s)
+    end
+
+    nls_kwargs = Dict{Symbol,Any}(pairs(nlsolve_kwargs))
+    joint_iterations = Int(get(nls_kwargs, :iterations, 600))
+    best_joint = nothing
+
+    for x0 in values(uniq)
+        joint = try
+            nlsolve(
+                joint_residual!,
+                x0;
+                autodiff=:forward,
+                method=:trust_region,
+                xtol=1e-9,
+                ftol=1e-9,
+                iterations=max(joint_iterations, 300),
+            )
+        catch err
+            err isa InterruptException && rethrow()
+            nothing
+        end
+        joint === nothing && continue
+
+        joint_solution = Float64.(joint.zero)
+        joint_thermo = compute_thermo_from_solution(
             model,
-            x_state,
-            T_fm,
-            μ_vec;
+            joint_solution,
+            T_fm;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
             rho0_scale=rho0,
+            state_n=5,
+            mu_n=3,
         )
-        rho_vec = thermo.rho_vec
 
-        rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
-        nB = sum(rho_vec) / (3.0 * rho0)
-        ud_ratio = if abs(rho_d) > 1e-12
+        rho_u, rho_d, rho_s = joint_thermo.rho_vec[1], joint_thermo.rho_vec[2], joint_thermo.rho_vec[3]
+        nB_joint = sum(joint_thermo.rho_vec) / (3.0 * rho0)
+        ud_ratio_joint = if abs(rho_d) > 1e-12
             rho_u / rho_d
         else
             rho_u / (rho_d >= 0 ? 1e-12 : -1e-12)
         end
 
-        st_ref[] = st
-        x_state_ref[] = x_state
-        mu_vec_ref[] = μ_vec
-        pressure_ref[] = thermo.pressure
-        rho_norm_ref[] = thermo.rho_norm
-        entropy_ref[] = thermo.entropy
-        energy_ref[] = thermo.energy
-        masses_ref[] = thermo.masses
-        rho_vec_ref[] = _to_mu_svec(rho_vec)
+        joint_residual_norm = _compose_mode_residual_norm(
+            model,
+            joint_thermo.x_state,
+            joint_thermo.mu_vec,
+            T_fm,
+            (nB_joint, rho_target),
+            (ud_ratio_joint, ud_ratio_target),
+            (rho_s, s_target);
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+        )
 
-        F[1] = convert(eltype(F), nB - rho_target)
-        F[2] = convert(eltype(F), ud_ratio - ud_ratio_target)
-        F[3] = convert(eltype(F), rho_s - s_target)
-        return nothing
+        joint_thermo_finite = isfinite(joint_thermo.omega) && isfinite(joint_thermo.pressure) &&
+            isfinite(joint_thermo.rho_norm) && isfinite(joint_thermo.entropy) && isfinite(joint_thermo.energy)
+        joint_phys = physicality_check(joint_thermo.x_state, joint_thermo.masses) &&
+            joint_thermo_finite && _is_mass_positive(joint_thermo.masses) && _is_phi_in_range(joint_thermo.x_state)
+        joint_converged = Bool(joint.f_converged) && joint_phys && isfinite(joint_residual_norm) &&
+            joint_residual_norm <= max(Float64(residual_norm_max), 1e-3)
+
+        joint_result = _build_mode_result_from_outer_state(
+            joint_thermo.x_state,
+            joint_thermo.mu_vec,
+            joint_thermo.pressure,
+            joint_thermo.rho_norm,
+            joint_thermo.entropy,
+            joint_thermo.energy,
+            joint_thermo.masses,
+            joint_residual_norm;
+            iterations=joint.iterations,
+            converged=joint_converged,
+            legacy_fallback_used=false,
+        )
+
+        if best_joint === nothing ||
+           (joint_result.converged != best_joint.converged && joint_result.converged) ||
+           (joint_result.converged == best_joint.converged && joint_result.residual_norm < best_joint.residual_norm)
+            best_joint = joint_result
+        end
     end
 
-    res = _run_outer_nlsolve(
-        residual_fn!,
-        mu0;
-        nlsolve_method=nlsolve_method,
-        nlsolve_kwargs...,
-    )
-
-    rho_u, rho_d, rho_s = rho_vec_ref[][1], rho_vec_ref[][2], rho_vec_ref[][3]
-    nB = sum(rho_vec_ref[]) / (3.0 * rho0)
-    ud_ratio = if abs(rho_d) > 1e-12
-        rho_u / rho_d
-    else
-        rho_u / (rho_d >= 0 ? 1e-12 : -1e-12)
-    end
-    residual_norm = _compose_mode_residual_norm(
-        model,
-        x_state_ref[],
-        mu_vec_ref[],
-        T_fm,
-        (nB, rho_target),
-        (ud_ratio, ud_ratio_target),
-        (rho_s, s_target);
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-    )
-
-    omega_val = -pressure_ref[]
-    thermo_finite = isfinite(omega_val) && isfinite(pressure_ref[]) && isfinite(rho_norm_ref[]) && isfinite(entropy_ref[]) && isfinite(energy_ref[])
-    phys = physicality_check(x_state_ref[], masses_ref[]) && thermo_finite
-    converged = if enforce_physicality
-        res.f_converged && phys && isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
-    else
-        isfinite(residual_norm) && residual_norm <= max(Float64(residual_norm_max), 1e-3)
+    if best_joint !== nothing
+        return best_joint
     end
 
-    return _build_mode_result_from_outer_state(
-        x_state_ref[],
-        mu_vec_ref[],
-        pressure_ref[],
-        rho_norm_ref[],
-        entropy_ref[],
-        energy_ref[],
-        masses_ref[],
-        residual_norm;
-        iterations=res.iterations,
-        converged=converged,
-        legacy_fallback_used=false,
+    return _build_mode_failure_candidate(
+        residual_norm_max=Float64(residual_norm_max),
     )
 end

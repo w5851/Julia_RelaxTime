@@ -644,6 +644,7 @@ function _fixedentropy_problem_spec_forward_solve(model::AbstractQCDModel, mode:
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
     cfg = _fixedentropy_runtime_config_from_kwargs(mode, kwargs)
     kwargs[:rho0] = cfg.rho0
+    kwargs[:mu0] = cfg.mu0
     return _governed_nonrho_problem_spec_forward_solve(
         model,
         mode,
@@ -658,6 +659,9 @@ end
 
 function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedSigma, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    cfg = _fixedsigma_runtime_config_from_kwargs(mode, kwargs)
+    kwargs[:rho0] = cfg.rho0
+    kwargs[:mu0] = cfg.mu0
     return _governed_nonrho_problem_spec_forward_solve(
         model,
         mode,
@@ -666,11 +670,15 @@ function _fixedsigma_problem_spec_forward_solve(model::AbstractQCDModel, mode::F
         "FixedSigma",
         :sigma_attempt_origin,
         local_kwargs -> _solve_constraint_fixedsigma(model, T_fm, mode.sigma_target; pairs(local_kwargs)...),
+        cfg,
     )
 end
 
 function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedAsymmetricRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    cfg = _fixedasymrho_runtime_config_from_kwargs(mode, kwargs)
+    kwargs[:rho0] = cfg.rho0
+    kwargs[:mu0] = cfg.mu0
     return _governed_nonrho_problem_spec_forward_solve(
         model,
         mode,
@@ -679,5 +687,6 @@ function _fixedasymrho_problem_spec_forward_solve(model::AbstractQCDModel, mode:
         "FixedAsymmetricRho",
         :asym_attempt_origin,
         local_kwargs -> _solve_constraint_fixedasymrho(model, T_fm, mode.rho_target, mode.ud_ratio_target, mode.s_target; pairs(local_kwargs)...),
+        cfg,
     )
 end

@@ -33,8 +33,9 @@ using StaticArrays
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
-using ..SeedStrategies: SeedStrategy, DefaultSeed, HybridContinuitySeed
+using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
 using ..SeedStrategies: get_seed, update!, extend_seed
+using ..SeedStrategies: get_all_seeds
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
 import Main.Models: solve, SolverResult
@@ -765,7 +766,13 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     nlsolve_kwargs...)
     model = Main.Models.create_model(model_kind)
     mapped_mode = _models_mode(mode)
+    rho0_kwargs = (mapped_mode isa Main.Models.FixedRho) ? NamedTuple() : (; rho0=Main.Constants_PNJL.ρ0_inv_fm3)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
+    seed_candidates = if seed_strategy isa MultiSeed
+        get_all_seeds(seed_strategy, [T_fm], mode)
+    else
+        [seed_guess]
+    end
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
     use_problem_spec_chain = (semantic_mode !== :ground_state) || (selector !== nothing)
     raw = if use_problem_spec_chain
@@ -778,7 +785,8 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             semantic_mode=semantic_mode,
             selector=selector,
             seed_guess=seed_guess,
-            seed_candidates=(seed_guess,),
+            seed_candidates=seed_candidates,
+            rho0_kwargs...,
             xi=xi,
             p_num=p_num,
             t_num=t_num,
@@ -791,7 +799,8 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             mapped_mode,
             T_fm;
             seed_guess=seed_guess,
-            seed_candidates=(seed_guess,),
+            seed_candidates=seed_candidates,
+            rho0_kwargs...,
             xi=xi,
             p_num=p_num,
             t_num=t_num,

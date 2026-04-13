@@ -20,6 +20,8 @@ end
 @inline function _model_kind_for_shared_core(model::AbstractQCDModel)
     if model isa RPNJLModel
         return :RPNJL
+    elseif model isa PNJLModel
+        return :PNJL
     elseif model isa NJL2Model
         return :NJL2
     elseif model isa AbstractNJLModel
