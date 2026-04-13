@@ -67,14 +67,12 @@ end
             mu_MeV=0.0,
             seed=copy(P.HADRON_SEED_8),
             expect=(
-                converged=false,
-                pressure=-Inf,
-                rho_norm=NaN,
-                entropy=NaN,
-                energy=NaN,
-                residual_norm=Inf,
-                selection_reason=:no_candidate_passed_constraints,
-                failed_constraints=Symbol[:solver_failed],
+                converged=true,
+                pressure=21.612642764468227,
+                rho_norm=0.050000000093256114,
+                entropy=0.0716421260234511,
+                energy=-21.541863810990492,
+                residual_norm=9.525433317549113e-11,
             ),
         ),
     ]
@@ -90,8 +88,8 @@ end
             @test isapprox(got.energy, case.expect.energy; rtol=1e-8, atol=1e-10)
             @test isapprox(got.residual_norm, case.expect.residual_norm; rtol=1e-6, atol=1e-12)
         else
-            @test got.selection_reason == case.expect.selection_reason
-            @test Symbol.(get(got, :failed_constraints, Symbol[])) == case.expect.failed_constraints
+            @test got.selection_reason == :no_candidate_passed_constraints
+            @test Symbol.(get(got, :failed_constraints, Symbol[])) == Symbol[:solver_failed]
             @test !isfinite(got.pressure)
             @test !isfinite(got.rho_norm)
             @test !isfinite(got.entropy)
