@@ -74,13 +74,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
             
             # Compute G functions
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
             
             # Compute K_coeffs
             G_fm2 = Constants_PNJL.G_fm2
             K_fm5 = Constants_PNJL.K_fm5
-            K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
             
             # Create struct parameters
             q_struct = QuarkParams(
@@ -104,13 +104,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             process = :uu_to_uu
             
             # Compute total cross-section with struct parameters (with A field)
-            σ_struct = total_cross_section(
+            σ_struct = TotalCrossSection.total_cross_section(
                 process, s, q_struct_with_A, t_struct, K_coeffs,
                 n_points=6  # Use default integration points
             )
             
             # Compute total cross-section with NamedTuple parameters (with A field)
-            σ_nt = total_cross_section(
+            σ_nt = TotalCrossSection.total_cross_section(
                 process, s, q_nt, t_nt, K_coeffs,
                 n_points=6
             )
@@ -168,9 +168,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             
@@ -182,10 +182,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             # Test each process
             for process in test_processes
-                σ_struct = total_cross_section(
+                σ_struct = TotalCrossSection.total_cross_section(
                     process, s, q_struct_with_A, t_struct, K_coeffs, n_points=6
                 )
-                σ_nt = total_cross_section(
+                σ_nt = TotalCrossSection.total_cross_section(
                     process, s, q_nt, t_nt, K_coeffs, n_points=6
                 )
                 
@@ -232,9 +232,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             
@@ -250,10 +250,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             process = :uu_to_uu
             
-            σ_struct = total_cross_section(
+            σ_struct = TotalCrossSection.total_cross_section(
                 process, s_near, q_struct_with_A, t_struct, K_coeffs, n_points=6
             )
-            σ_nt = total_cross_section(
+            σ_nt = TotalCrossSection.total_cross_section(
                 process, s_near, q_nt, t_nt, K_coeffs, n_points=6
             )
             
@@ -298,9 +298,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             
@@ -311,7 +311,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             # Test that calculate_all_total_cross_sections works with structs
             s = 20.0
-            all_σ_struct = calculate_all_total_cross_sections(
+            all_σ_struct = TotalCrossSection.calculate_all_total_cross_sections(
                 s, q_struct_with_A, t_struct, K_coeffs, n_points=6
             )
             

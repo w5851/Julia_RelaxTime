@@ -46,9 +46,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
     
     # Compute G functions and K_coeffs
-    G_u = calculate_G_from_A(A_u, m_u)
-    G_s = calculate_G_from_A(A_s, m_s)
-    K_coeffs = calculate_effective_couplings(
+    G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+    G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+    K_coeffs = EffectiveCouplings.calculate_effective_couplings(
         Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
     )
     
@@ -64,10 +64,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # Test uu_to_uu process
     process = :uu_to_uu
     
-    M_squared_struct = scattering_amplitude_squared(
+    M_squared_struct = ScatteringAmplitude.scattering_amplitude_squared(
         process, s, t, q_struct_with_A, t_nt, K_coeffs
     )
-    M_squared_nt = scattering_amplitude_squared(
+    M_squared_nt = ScatteringAmplitude.scattering_amplitude_squared(
         process, s, t, q_nt_with_A, t_nt, K_coeffs
     )
     
@@ -83,10 +83,10 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
     # Test uubar_to_uubar process
     process = :uubar_to_uubar
     
-    M_squared_struct = scattering_amplitude_squared(
+    M_squared_struct = ScatteringAmplitude.scattering_amplitude_squared(
         process, s, t, q_struct_with_A, t_nt, K_coeffs
     )
-    M_squared_nt = scattering_amplitude_squared(
+    M_squared_nt = ScatteringAmplitude.scattering_amplitude_squared(
         process, s, t, q_nt_with_A, t_nt, K_coeffs
     )
     

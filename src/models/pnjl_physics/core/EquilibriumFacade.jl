@@ -84,7 +84,13 @@ function solve_equilibrium_backend(
             solver_kwargs...,
         )
     elseif effective_solver_backend === :models
-        m isa Main.Models.PNJLModel || error("solver_backend=:models requires a PNJLModel (got $(typeof(m)))")
+        # In long-lived include-driven sessions (integration full profile), Main.Models
+        # may be re-included by different test files. A cached model created before a
+        # re-include can fail strict `isa Main.Models.PNJLModel` even when semantically
+        # equivalent. Rebuild from current Main.Models in that case.
+        if !(m isa Main.Models.PNJLModel)
+            m = Main.Models.create_model(kind)
+        end
 
         solver = models_solver === nothing ? Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward) : models_solver
         Main.Models.solve_gap(m, T_fm, mu_fm;
@@ -117,4 +123,3 @@ end
 
 end # module EquilibriumFacade
 end
-

@@ -49,9 +49,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
     A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
     
     # Compute K_coeffs
-    G_u = calculate_G_from_A(A_u, m_u)
-    G_s = calculate_G_from_A(A_s, m_s)
-    K_coeffs = calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
+    G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+    G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+    K_coeffs = EffectiveCouplings.calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
     
     # Create test parameters
     q_struct = QuarkParams((u=m_u, d=m_u, s=m_s), (u=μ_u, d=μ_u, s=μ_s))
@@ -69,21 +69,23 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("\nTest: compute_average_rates with struct parameters")
         
         # Compute with struct parameters (minimal nodes for speed)
-        rates_struct = compute_average_rates(
+        rates_struct = RelaxationTime.compute_average_rates(
             q_struct, t_struct, K_coeffs,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Compute with NamedTuple parameters
-        rates_nt = compute_average_rates(
+        rates_nt = RelaxationTime.compute_average_rates(
             q_nt, t_nt, K_coeffs,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Verify both produce results
@@ -125,16 +127,17 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("\nTest: relaxation_rates with struct-derived densities")
         
         # First compute some rates
-        rates = compute_average_rates(
+        rates = RelaxationTime.compute_average_rates(
             q_struct, t_struct, K_coeffs,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Compute relaxation rates
-        tau_inv = relaxation_rates(densities, rates)
+        tau_inv = RelaxationTime.relaxation_rates(densities, rates)
         
         # Verify structure
         @test tau_inv isa NamedTuple
@@ -167,23 +170,25 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("\nTest: relaxation_times with pre-computed rates")
         
         # First compute rates separately
-        rates = compute_average_rates(
+        rates = RelaxationTime.compute_average_rates(
             q_struct, t_struct, K_coeffs,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Now call relaxation_times with existing_rates
-        result = relaxation_times(
+        result = RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
             densities=densities,
             existing_rates=rates,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Verify structure
@@ -228,23 +233,25 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("\nTest: relaxation_times struct-NamedTuple equivalence")
         
         # Compute with struct parameters
-        result_struct = relaxation_times(
+        result_struct = RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
             densities=densities,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Compute with NamedTuple parameters
-        result_nt = relaxation_times(
+        result_nt = RelaxationTime.relaxation_times(
             q_nt, t_nt, K_coeffs;
             densities=densities,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Verify tau values are equivalent
@@ -272,23 +279,25 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("\nTest: Mixed struct/NamedTuple usage patterns")
         
         # Test with struct quark_params and NamedTuple thermo_params
-        result1 = relaxation_times(
+        result1 = RelaxationTime.relaxation_times(
             q_struct, t_nt, K_coeffs;
             densities=densities,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Test with NamedTuple quark_params and struct thermo_params
-        result2 = relaxation_times(
+        result2 = RelaxationTime.relaxation_times(
             q_nt, t_struct, K_coeffs;
             densities=densities,
             p_nodes=2,
             angle_nodes=2,
             phi_nodes=2,
-            n_sigma_points=3
+            n_sigma_points=3,
+            sigma_cutoff=5.0
         )
         
         # Both should produce valid results

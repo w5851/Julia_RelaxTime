@@ -75,13 +75,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
             
             # Compute G functions
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
             
             # Compute K_coeffs
             G_fm2 = Constants_PNJL.G_fm2
             K_fm5 = Constants_PNJL.K_fm5
-            K_coeffs = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
             
             # Create struct parameters
             q_struct = QuarkParams(
@@ -109,12 +109,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             # Pre-compute rates once to avoid expensive computation in the test
             # This tests that the struct interface works correctly with pre-computed rates
-            rates = compute_average_rates(
+            rates = RelaxationTime.compute_average_rates(
                 q_nt, t_nt, K_coeffs,
                 p_nodes=2,
                 angle_nodes=2,
                 phi_nodes=2,
-                n_sigma_points=3
+                n_sigma_points=3,
+                sigma_cutoff=5.0
             )
             
             # Compute relaxation times with struct parameters using pre-computed rates
@@ -199,9 +200,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(
                 Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s
             )
             
@@ -211,21 +212,23 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             t_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
             
             # Compute average rates with struct parameters (minimal nodes)
-            rates_struct = compute_average_rates(
+            rates_struct = RelaxationTime.compute_average_rates(
                 q_struct, t_struct, K_coeffs,
                 p_nodes=2,
                 angle_nodes=2,
                 phi_nodes=2,
-                n_sigma_points=3
+                n_sigma_points=3,
+                sigma_cutoff=5.0
             )
             
             # Compute average rates with NamedTuple parameters
-            rates_nt = compute_average_rates(
+            rates_nt = RelaxationTime.compute_average_rates(
                 q_nt, t_nt, K_coeffs,
                 p_nodes=2,
                 angle_nodes=2,
                 phi_nodes=2,
-                n_sigma_points=3
+                n_sigma_points=3,
+                sigma_cutoff=5.0
             )
             
             # Verify all rates are equivalent (test a subset for performance)

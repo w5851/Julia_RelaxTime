@@ -19,9 +19,29 @@ end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
+const _MODEL_ENTRY = joinpath(@__DIR__, "../../../src/models/Models.jl")
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODEL_ENTRY)
+end
+using .Main: Models
+
 # Load RelaxationTime module (which includes all dependencies)
 if !isdefined(Main, :RelaxationTime)
-    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxationTime.jl"))
+    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
+end
+
+function _build_k_coeffs(q, t)
+    nodes_p, weights_p = Main.RelaxTime.GaussLegendre.gauleg(0.0, 20.0, 64)
+    A_u = Main.RelaxTime.OneLoopIntegrals.A(q.m.u, q.μ.u, t.T, t.Φ, t.Φbar, nodes_p, weights_p)
+    A_s = Main.RelaxTime.OneLoopIntegrals.A(q.m.s, q.μ.s, t.T, t.Φ, t.Φbar, nodes_p, weights_p)
+    G_u = Main.RelaxTime.EffectiveCouplings.calculate_G_from_A(A_u, q.m.u)
+    G_s = Main.RelaxTime.EffectiveCouplings.calculate_G_from_A(A_s, q.m.s)
+    return Main.RelaxTime.EffectiveCouplings.calculate_effective_couplings(
+        Main.Constants_PNJL.G_fm2,
+        Main.Constants_PNJL.K_fm5,
+        G_u,
+        G_s,
+    )
 end
 
 @testset "Integration: Full Call Chain" begin
@@ -34,15 +54,7 @@ end
         )
         t_struct = ThermoParams(0.15, 0.5, 0.5, 0.0)
         
-        # Create K_coeffs (coupling coefficients)
-        K_coeffs = (
-            K_pi = 1.0,
-            K_K = 1.0,
-            K_eta = 1.0,
-            K_sigma = 1.0,
-            K_kappa = 1.0,
-            K_a0 = 1.0
-        )
+        K_coeffs = _build_k_coeffs(q_struct, t_struct)
         
         # Create test densities
         densities = (
@@ -55,9 +67,10 @@ end
         )
         
         # Call top-level function with struct parameters
-        result = Main.RelaxationTime.relaxation_times(
+        result = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         # Verify result structure
@@ -103,14 +116,7 @@ end
         q_nt = as_namedtuple(q_struct)
         t_nt = as_namedtuple(t_struct)
         
-        K_coeffs = (
-            K_pi = 1.0,
-            K_K = 1.0,
-            K_eta = 1.0,
-            K_sigma = 1.0,
-            K_kappa = 1.0,
-            K_a0 = 1.0
-        )
+        K_coeffs = _build_k_coeffs(q_struct, t_struct)
         
         densities = (
             u = 0.1,
@@ -122,15 +128,17 @@ end
         )
         
         # Call with struct parameters
-        result_struct = Main.RelaxationTime.relaxation_times(
+        result_struct = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_struct, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         # Call with NamedTuple parameters
-        result_nt = Main.RelaxationTime.relaxation_times(
+        result_nt = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_nt, t_nt, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         # Verify equivalence of relaxation times
@@ -151,14 +159,9 @@ end
     end
     
     @testset "Different parameter combinations" begin
-        K_coeffs = (
-            K_pi = 1.0,
-            K_K = 1.0,
-            K_eta = 1.0,
-            K_sigma = 1.0,
-            K_kappa = 1.0,
-            K_a0 = 1.0
-        )
+        qk = QuarkParams((u=1.52, d=1.52, s=3.04), (u=0.3, d=0.3, s=0.3))
+        tk = ThermoParams(0.15, 0.5, 0.5, 0.0)
+        K_coeffs = _build_k_coeffs(qk, tk)
         
         densities = (
             u = 0.1,
@@ -173,9 +176,10 @@ end
         q1 = QuarkParams((u=1.5, d=1.5, s=3.0), (u=0.2, d=0.2, s=0.2))
         t1 = ThermoParams(0.10, 0.3, 0.3, 0.0)
         
-        result1 = Main.RelaxationTime.relaxation_times(
+        result1 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q1, t1, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         @test haskey(result1, :tau)
@@ -186,9 +190,10 @@ end
         q2 = QuarkParams((u=1.5, d=1.5, s=3.0), (u=0.4, d=0.4, s=0.4))
         t2 = ThermoParams(0.20, 0.7, 0.7, 0.0)
         
-        result2 = Main.RelaxationTime.relaxation_times(
+        result2 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q2, t2, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         @test haskey(result2, :tau)
@@ -199,9 +204,10 @@ end
         q3 = QuarkParams((u=2.0, d=2.0, s=4.0), (u=0.3, d=0.3, s=0.3))
         t3 = ThermoParams(0.15, 0.5, 0.5, 0.0)
         
-        result3 = Main.RelaxationTime.relaxation_times(
+        result3 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q3, t3, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         @test haskey(result3, :tau)
@@ -217,31 +223,25 @@ end
         )
         t_struct = ThermoParams(0.15, 0.5, 0.5, 0.0)
         
-        K_coeffs = (
-            K_pi = 1.0,
-            K_K = 1.0,
-            K_eta = 1.0,
-            K_sigma = 1.0,
-            K_kappa = 1.0,
-            K_a0 = 1.0
-        )
+        K_coeffs = _build_k_coeffs(q_struct, t_struct)
         
         # Ensure quark_params has A field for propagator calculations
-        q_with_A = Main.RelaxationTime.ensure_quark_params_has_A(q_struct, t_struct)
+        q_with_A = Main.RelaxTime.RelaxationTime.ensure_quark_params_has_A(q_struct, t_struct)
         
         # Test AverageScatteringRate with struct parameters
         process = :us_to_us
-        avg_rate = Main.RelaxationTime.AverageScatteringRate.average_scattering_rate(
-            process, q_struct, t_struct, K_coeffs
+        avg_rate = Main.RelaxTime.AverageScatteringRate.average_scattering_rate(
+            process, q_with_A, t_struct, K_coeffs;
+            sigma_cutoff=5.0
         )
         
         @test isfinite(avg_rate)
         @test avg_rate >= 0
         
         # Test TotalCrossSection with struct parameters
-        s = 5.0  # Mandelstam variable
-        xs = Main.RelaxationTime.TotalCrossSection.total_cross_section(
-            process, s, q_struct, t_struct, K_coeffs
+        s = 30.0  # Mandelstam variable (above threshold)
+        xs = Main.RelaxTime.TotalCrossSection.total_cross_section(
+            process, s, q_with_A, t_struct, K_coeffs
         )
         
         @test isfinite(xs)
@@ -249,16 +249,22 @@ end
         
         # Test ScatteringAmplitude with struct parameters (needs A field)
         t_var = -1.0  # Mandelstam variable t
-        amp_sq = Main.RelaxationTime.ScatteringAmplitude.scattering_amplitude_squared(
+        amp_sq = Main.RelaxTime.ScatteringAmplitude.scattering_amplitude_squared(
             process, s, t_var, q_with_A, t_struct, K_coeffs
         )
         
         @test isfinite(amp_sq)
         @test amp_sq >= 0
         
-        # Test DifferentialCrossSection with struct parameters
-        dxs = Main.RelaxationTime.DifferentialCrossSection.differential_cross_section(
-            process, s, t_var, q_struct, t_struct, K_coeffs
+        # Test DifferentialCrossSection core API with kinematic inputs
+        m1, m2, m3, m4 = Main.RelaxTime.ParticleSymbols.get_quark_masses_for_process(process, q_with_A)
+        u_var = m1^2 + m2^2 + m3^2 + m4^2 - s - t_var
+        vars = Main.RelaxTime.ScatteringAmplitude.calculate_mandelstam_variables(s, t_var, u_var, m1, m2, m3, m4)
+        M2 = Main.RelaxTime.ScatteringAmplitude.scattering_amplitude_squared(
+            process, s, t_var, q_with_A, t_struct, K_coeffs
+        )
+        dxs = Main.RelaxTime.DifferentialCrossSection.differential_cross_section(
+            vars.s_12_plus, vars.s_12_minus, M2
         )
         
         @test isfinite(dxs)
@@ -273,14 +279,7 @@ end
         )
         t_nt = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
         
-        K_coeffs = (
-            K_pi = 1.0,
-            K_K = 1.0,
-            K_eta = 1.0,
-            K_sigma = 1.0,
-            K_kappa = 1.0,
-            K_a0 = 1.0
-        )
+        K_coeffs = _build_k_coeffs(q_struct, ThermoParams(t_nt))
         
         densities = (
             u = 0.1,
@@ -292,9 +291,10 @@ end
         )
         
         # Call with struct quark_params and NamedTuple thermo_params
-        result1 = Main.RelaxationTime.relaxation_times(
+        result1 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_struct, t_nt, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         @test haskey(result1, :tau)
@@ -305,9 +305,10 @@ end
         q_nt = as_namedtuple(q_struct)
         t_struct = ThermoParams(0.15, 0.5, 0.5, 0.0)
         
-        result2 = Main.RelaxationTime.relaxation_times(
+        result2 = Main.RelaxTime.RelaxationTime.relaxation_times(
             q_nt, t_struct, K_coeffs;
-            densities = densities
+            densities = densities,
+            sigma_cutoff=5.0
         )
         
         @test haskey(result2, :tau)

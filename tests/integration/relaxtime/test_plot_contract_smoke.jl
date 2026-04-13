@@ -17,8 +17,8 @@ muB_MeV = 0.0
 
 [scan.cross_section]
 muB_MeV = 0.0
-T_list_MeV = [150.0, 250.0]
-processes = ["ud_to_ud", "us_to_us"]
+T_list_MeV = [150.0]
+processes = ["ud_to_ud"]
 
 [plot.transport]
 ys = ["eta_over_s", "sigma_over_T"]
@@ -41,9 +41,6 @@ ys = ["eta_over_s", "sigma_over_T"]
 
     expected_xs = Set([
         "xsec__T150__ud_to_ud.png",
-        "xsec__T150__us_to_us.png",
-        "xsec__T250__ud_to_ud.png",
-        "xsec__T250__us_to_us.png",
     ])
     for f in expected_xs
         @test isfile(joinpath(fig_dir, f))

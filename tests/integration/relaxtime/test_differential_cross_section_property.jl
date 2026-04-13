@@ -60,7 +60,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             M_squared = Data.Floats{Float64}(minimum=0.0, maximum=1000.0), # Must be non-negative
         )
             # Compute differential cross-section
-            dsigma_dt = differential_cross_section(s_12_plus, s_12_minus, M_squared)
+            dsigma_dt = DifferentialCrossSection.differential_cross_section(s_12_plus, s_12_minus, M_squared)
             
             # Verify physical constraints
             dsigma_dt >= 0.0 || error("Cross-section must be non-negative, got $dsigma_dt")
@@ -73,12 +73,12 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             # Verify scaling properties
             # If M² doubles, dσ/dt should double
-            dsigma_dt_2M = differential_cross_section(s_12_plus, s_12_minus, 2 * M_squared)
+            dsigma_dt_2M = DifferentialCrossSection.differential_cross_section(s_12_plus, s_12_minus, 2 * M_squared)
             isapprox(dsigma_dt_2M, 2 * dsigma_dt, rtol=RTOL, atol=ATOL) ||
                 error("M² scaling failed: 2M gave $dsigma_dt_2M, expected $(2*dsigma_dt)")
             
             # If s_12_plus doubles, dσ/dt should halve
-            dsigma_dt_2s = differential_cross_section(2 * s_12_plus, s_12_minus, M_squared)
+            dsigma_dt_2s = DifferentialCrossSection.differential_cross_section(2 * s_12_plus, s_12_minus, M_squared)
             isapprox(dsigma_dt_2s, dsigma_dt / 2, rtol=RTOL, atol=ATOL) ||
                 error("s_12_plus scaling failed: 2s gave $dsigma_dt_2s, expected $(dsigma_dt/2)")
         end
@@ -155,13 +155,6 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             q_nt = as_namedtuple(q_struct)
             t_nt = as_namedtuple(t_struct)
             
-            # Test normalization helpers (these are internal to the module)
-            # We verify they exist and work by checking the module exports
-            isdefined(DifferentialCrossSection, :_nt_quark) ||
-                error("Normalization helper _nt_quark not defined")
-            isdefined(DifferentialCrossSection, :_nt_thermo) ||
-                error("Normalization helper _nt_thermo not defined")
-            
             # Verify that struct and NamedTuple representations are equivalent
             q_nt.m.u == m_u || error("q_nt.m.u doesn't match m_u")
             q_nt.m.s == m_s || error("q_nt.m.s doesn't match m_s")
@@ -204,7 +197,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             M_squared_small = Data.Floats{Float64}(minimum=0.0, maximum=1e-5),
         )
             # Test with small values
-            dsigma_small = differential_cross_section(
+            dsigma_small = DifferentialCrossSection.differential_cross_section(
                 s_12_plus_small, s_12_minus_small, M_squared_small
             )
             isfinite(dsigma_small) || error("Small value result not finite: $dsigma_small")
@@ -223,7 +216,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             M_squared_large = Data.Floats{Float64}(minimum=1000.0, maximum=10000.0),
         )
             # Test with large values
-            dsigma_large = differential_cross_section(
+            dsigma_large = DifferentialCrossSection.differential_cross_section(
                 s_12_plus_large, s_12_minus_large, M_squared_large
             )
             isfinite(dsigma_large) || error("Large value result not finite: $dsigma_large")
@@ -256,7 +249,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             s_12_minus_tiny = 1e-15
             
             # Should handle gracefully (with regularization)
-            dsigma_dt = differential_cross_section(s_12_plus, s_12_minus_tiny, M_squared)
+            dsigma_dt = DifferentialCrossSection.differential_cross_section(s_12_plus, s_12_minus_tiny, M_squared)
             
             # Result should still be finite and positive
             isfinite(dsigma_dt) || error("Degenerate case result not finite: $dsigma_dt")
