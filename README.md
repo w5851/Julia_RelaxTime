@@ -2,6 +2,16 @@
 
 Julia PNJL/NJL 计算平台：相图与扫描、各向异性输运/弛豫时间、`Models` 统一入口与可复现工作流。
 
+[![Latest Release](https://img.shields.io/github/v/release/w5851/Julia_RelaxTime?label=release)](https://github.com/w5851/Julia_RelaxTime/releases/latest)
+
+[中文](#中文) | [面向-llm--agent](#面向-llm--agent)
+
+---
+
+<a name="中文"></a>
+
+## 中文
+
 Latest Release: [releases/latest](https://github.com/w5851/Julia_RelaxTime/releases/latest)
 
 ## 1) 三步 Quickstart（脚本链路优先）
@@ -9,6 +19,9 @@ Latest Release: [releases/latest](https://github.com/w5851/Julia_RelaxTime/relea
 下面是新用户默认路径：先跑通相图最小产线，再按文档扩展。
 
 > 预期时长：完成环境准备后，主命令通常在 5-10 分钟内得到最小产物（视机器配置而定）。
+
+<details open>
+<summary><b>面向人类用户</b></summary>
 
 ### Step 1. 环境准备
 
@@ -42,9 +55,66 @@ Quickstart 运行后若不希望保留示例产物，可清理：
 Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
 ```
 
+</details>
+
+<details>
+<summary><b>面向 LLM / Agent</b></summary>
+
+请在执行任何修改前先遵循以下规则（与“面向人类”说明分离）：
+
+1. 先读取仓库协作约束：`AGENTS.md`、`.github/copilot-instructions.md`。
+2. 统一入口优先：`Models` 与 `src/models/entrypoints.jl`。
+3. non-fixedmu 求解模式按“展平联合求解”治理，不要引入新的分层默认路径。
+4. 目录治理：
+   - 分析脚本放 `scripts/analysis/`
+   - 性能探针放 `scripts/perf/`
+   - 非测试脚本不要放入 `tests/`
+5. 测试执行顺序优先 smoke profile；测试分层保持 `unit/integration/regression/validation`。
+6. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
+7. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
+
+建议最小验证命令（agent 默认基线）：
+
+```powershell
+julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
+julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'
+```
+
+</details>
+
 ## 2) 稳定脚本入口矩阵（白名单）
 
 稳定用户入口以 `docs/guides/scripts/README.md` 为准；README 仅列核心白名单。
+
+### 这个项目能做哪些物理计算（以及用哪个脚本）
+
+下面按“核心稳定入口 + 专题能力入口”给出可执行能力矩阵。
+
+#### A. 核心稳定入口（默认优先）
+
+| 计算能力 | 典型用途 | 推荐脚本入口 | 最小用法（示例） |
+|---|---|---|---|
+| PNJL 相结构 / 相图产线 | 生成 boundary/spinodal/crossover/CEP 与报告 | `scripts/pnjl/calculate_phase_structure.jl` | `julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke` |
+| PNJL T-μ 扫描 | 温度-化学势网格扫描、单点/批量求解 | `scripts/pnjl/run_tmu_scan.jl` | `julia --project=. scripts/pnjl/run_tmu_scan.jl --help` |
+| 守恒荷易感性与累积量 | `chi_BQS` / cumulant / `Ssigma` / `kappa_sigma2` | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `julia --project=. scripts/pnjl/run_conserved_charge_susceptibilities.jl --help` |
+| 各向异性 PNJL 输运系数扫描（PNJL_aniso） | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help` |
+| RelxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `julia --project=. scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
+| 模型服务/API 调用 | 通过 HTTP 服务调用模型求解能力 | `scripts/server/server_full.jl` | `julia --project=. scripts/server/server_full.jl` |
+
+#### B. 专题能力入口（研究/后处理常用）
+
+| 计算能力 | 典型用途 | 脚本入口 | 最小用法（示例） |
+|---|---|---|---|
+| Mott 相变扫描 | 介子质量与 Mott 阈值随 `T/xi` 变化扫描 | `scripts/relaxtime/run_mott_phase_scan.jl` | `julia --project=. scripts/relaxtime/run_mott_phase_scan.jl --help` |
+| Gap + 介子质量联合扫描 | 生成 Mott 相关基础数据（mass/width/threshold） | `scripts/relaxtime/run_gap_meson_mass_scan.jl` | `julia --project=. scripts/relaxtime/run_gap_meson_mass_scan.jl --help` |
+| Mott 派生 CSV / 可视化模式 | 从主扫描结果生成派生字段与绘图输入 | `scripts/relaxtime/run_mott_phase_derived_csv.jl` / `scripts/relaxtime/run_mott_phase_plot_modes.jl` | `julia --project=. scripts/relaxtime/run_mott_phase_derived_csv.jl --help` |
+| 各向异性相图模板实验 | 按 `xi` 批量跑扫描 + 相结构 + 可选绘图 | `scripts/pnjl/run_aniso_phase_template.jl` | `julia --project=. scripts/pnjl/run_aniso_phase_template.jl --profile=smoke --xi-values=0.0,0.2` |
+| 磁场 PNJL 单点/扫描 | `eB` 依赖的热力学与密度计算 | `scripts/pnjl/run_magnetic_point.jl` / `scripts/pnjl/run_magnetic_eb_scan.jl` | `julia --project=. scripts/pnjl/run_magnetic_eb_scan.jl` |
+| 手动工作流产物编排 | 人工控制 `cross_section/plan_a/plan_b` 产物生成 | `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` | `julia --project=. scripts/relaxtime/run_manual_relaxation_scan_workflow.jl --help` |
+
+说明：
+- 稳定白名单以 `docs/guides/scripts/README.md` 为准。
+- `run_*.jl` 全量能力目录见 `docs/guides/scripts/run_script_catalog.md`。
 
 ### PNJL
 
