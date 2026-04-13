@@ -39,4 +39,7 @@ const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_mott_phase_
     for obs in observables
         @test isfile(joinpath(out_dir, "mode_b", "mott_mode_b__$(obs).png"))
     end
+
+    @test isfile(joinpath(out_dir, "mode_ab", "mott_mode_ab__M_K__xi3.png"))
+    @test isfile(joinpath(out_dir, "mode_ab", "mott_mode_ab__M_pi__xi3.png"))
 end

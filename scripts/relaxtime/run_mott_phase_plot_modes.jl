@@ -4,6 +4,11 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PLOT_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "plot_scan_csv.py")
 
 const OBSERVABLES = ["M_pi", "M_K", "Gamma_pi", "Gamma_K", "M_u_plus_M_d", "M_u_plus_M_s"]
+const MODE_AB_XIS = (-0.3, 0.0, 0.3)
+const MODE_AB_GROUPS = [
+    ("M_K", ["M_K", "Gamma_K", "M_u_plus_M_s"]),
+    ("M_pi", ["M_pi", "Gamma_pi", "M_u_plus_M_d"]),
+]
 
 function _print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl --in <derived_csv> --out-dir <fig_dir>")
@@ -83,6 +88,60 @@ function _run_python(args::Vector{String})
     run(Cmd(vcat("python3", args)))
 end
 
+@inline function _is_mode_ab_xi(x::Real)
+    xf = Float64(x)
+    return any(t -> isapprox(xf, t; atol=1e-12, rtol=0.0), MODE_AB_XIS)
+end
+
+function _write_mode_ab_long_csv(input_csv::String, ys_list::Vector{String})
+    out_csv = joinpath(mktempdir(), "mode_ab_long.csv")
+    open(input_csv, "r") do src
+        open(out_csv, "w") do dst
+            println(dst, "T_MeV,series,value")
+            header_seen = false
+            t_idx = 0
+            xi_idx = 0
+            y_idxs = Int[]
+
+            for line in eachline(src)
+                s = strip(line)
+                isempty(s) && continue
+                startswith(s, "#") && continue
+
+                if !header_seen
+                    cols = [strip(x) for x in split(s, ',')]
+                    t_idx = findfirst(==("T_MeV"), cols)
+                    xi_idx = findfirst(==("xi"), cols)
+                    (t_idx === nothing || xi_idx === nothing) && throw(ArgumentError("input csv missing T_MeV or xi column"))
+                    for y in ys_list
+                        yi = findfirst(==(y), cols)
+                        yi === nothing && throw(ArgumentError("input csv missing $y column"))
+                        push!(y_idxs, yi)
+                    end
+                    header_seen = true
+                    continue
+                end
+
+                parts = split(s, ',')
+                max_idx = maximum(vcat([t_idx, xi_idx], y_idxs))
+                length(parts) < max_idx && continue
+
+                t = tryparse(Float64, strip(parts[t_idx]))
+                xi = tryparse(Float64, strip(parts[xi_idx]))
+                (t === nothing || xi === nothing || !_is_mode_ab_xi(xi)) && continue
+
+                xi_tag = _number_tag(xi)
+                for (y, yi) in zip(ys_list, y_idxs)
+                    yv = tryparse(Float64, strip(parts[yi]))
+                    yv === nothing && continue
+                    println(dst, string(t, ',', y, "__xi", xi_tag, ',', yv))
+                end
+            end
+        end
+    end
+    return out_csv
+end
+
 function _mode_a(input_csv::String, out_root::String, xis::Vector{Float64})
     mode_a_dir = joinpath(out_root, "mode_a")
     mkpath(mode_a_dir)
@@ -143,6 +202,36 @@ function _mode_b(input_csv::String, out_root::String)
     end
 end
 
+function _mode_ab(input_csv::String, out_root::String)
+    mode_ab_dir = joinpath(out_root, "mode_ab")
+    mkpath(mode_ab_dir)
+
+    for (label, ys_list) in MODE_AB_GROUPS
+        long_csv = _write_mode_ab_long_csv(input_csv, ys_list)
+        tmp_out = mktempdir()
+        args = String[
+            PLOT_SCRIPT,
+            "--mode", "lines",
+            "--csv", long_csv,
+            "--x", "T_MeV",
+            "--ys", "value",
+            "--group", "series",
+            "--out-dir", tmp_out,
+        ]
+        _run_python(args)
+
+        src = joinpath(tmp_out, "value_vs_T_MeV.png")
+        if !isfile(src)
+            pngs = filter(f -> endswith(lowercase(f), ".png"), readdir(tmp_out; join=true))
+            isempty(pngs) && continue
+            src = pngs[1]
+        end
+
+        dst = joinpath(mode_ab_dir, "mott_mode_ab__$(label)__xi3.png")
+        cp(src, dst; force=true)
+    end
+end
+
 function main()
     input_csv, out_dir = _parse_args(ARGS)
     isfile(PLOT_SCRIPT) || throw(ArgumentError("plot script not found: $PLOT_SCRIPT"))
@@ -152,6 +241,7 @@ function main()
     xis = _collect_xi_values(input_csv)
     _mode_a(input_csv, out_dir, xis)
     _mode_b(input_csv, out_dir)
+    _mode_ab(input_csv, out_dir)
     println("Wrote plot modes under: ", out_dir)
 end
 
