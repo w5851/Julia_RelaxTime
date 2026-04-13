@@ -21,9 +21,9 @@ end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
-# Load RelaxationTime module to access ensure_quark_params_has_A
-if !isdefined(Main, :RelaxationTime)
-    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxationTime.jl"))
+# Load RelaxTime entrypoint to access RelaxationTime module dependencies
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
 end
 
 @testset "Property: Extended QuarkParams with A Field" begin
@@ -40,6 +40,9 @@ end
             μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
             T = Data.Floats{Float64}(minimum=0.1, maximum=0.25)
         )
+            vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
+            all(isfinite, vals) || return
+
             # Create struct parameters without A field
             q_struct = QuarkParams(
                 (u=m_u, d=m_d, s=m_s),  # m
@@ -96,6 +99,9 @@ end
             μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
             T = Data.Floats{Float64}(minimum=0.1, maximum=0.25)
         )
+            vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
+            all(isfinite, vals) || return
+
             # Create NamedTuple parameters without A field
             q_nt = (
                 m = (u=m_u, d=m_d, s=m_s),
@@ -203,6 +209,9 @@ end
             μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
             T = Data.Floats{Float64}(minimum=0.1, maximum=0.25)
         )
+            vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
+            all(isfinite, vals) || return
+
             # Create struct parameters
             q_struct = QuarkParams(
                 (u=m_u, d=m_d, s=m_s),  # m
