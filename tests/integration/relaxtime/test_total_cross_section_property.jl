@@ -12,14 +12,9 @@ using Test
 using Supposition
 
 # Load required modules
-push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
-push!(LOAD_PATH, joinpath(@__DIR__, "../../../src/relaxtime"))
-
-include("../../../src/constants/Constants_PNJL.jl")
-include("../../../src/relaxtime/TotalCrossSection.jl")
-include("../../../src/relaxtime/EffectiveCouplings.jl")
-include("../../../src/relaxtime/OneLoopIntegrals.jl")
-include("../../../src/integration/GaussLegendre.jl")
+if !isdefined(Main, :RelaxTime)
+    include("../../../src/relaxtime/RelaxTime.jl")
+end
 
 using .TotalCrossSection
 using .Constants_PNJL
@@ -328,7 +323,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             
             # Test scan_s_dependence with structs
             s_values = [10.0, 20.0, 30.0]
-            σ_values = scan_s_dependence(
+            σ_values = TotalCrossSection.scan_s_dependence(
                 s_values, :uu_to_uu, q_struct_with_A, t_struct, K_coeffs, n_points=6
             )
             

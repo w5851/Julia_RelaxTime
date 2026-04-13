@@ -20,6 +20,13 @@ const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_mott_phase_
         end
     end
 
+    python_cmd = Sys.which("python") !== nothing ? "python" : (Sys.which("python3") !== nothing ? "python3" : nothing)
+    has_matplotlib = python_cmd !== nothing && success(`$(python_cmd) -c "import matplotlib"`)
+    if !has_matplotlib
+        @test_skip "python/matplotlib 不可用，跳过绘图烟测"
+        return
+    end
+
     run(`julia --project=. $SCRIPT_PATH --in $in_csv --out-dir $out_dir`)
 
     @test isfile(joinpath(out_dir, "mode_a", "mott_mode_a__xi-0p3.png"))

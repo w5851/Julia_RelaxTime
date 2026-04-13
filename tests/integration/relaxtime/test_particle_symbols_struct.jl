@@ -191,6 +191,9 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
                 μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
                 μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
             )
+                vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
+                all(isfinite, vals) || return
+
                 # Create struct parameters
                 q_struct = QuarkParams((u=m_u, d=m_d, s=m_s), (u=μ_u, d=μ_d, s=μ_s))
                 
