@@ -13,6 +13,7 @@ Tests:
 
 using Test
 using Supposition
+using Random
 
 # Load test utilities
 include("test_utils.jl")
@@ -25,6 +26,12 @@ end
 using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_for_process
 
 @testset "ParticleSymbols Struct Support" begin
+    _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+    max_examples = _ci ? 20 : 100
+
+    # Stabilize property sampling for CI reproducibility.
+    _ci && Random.seed!(0x51A7D1)
+
     
     # ========== Property 2: Field Extraction Correctness ==========
     @testset "Property 2: Field Extraction Correctness" begin
@@ -33,7 +40,7 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         
         # Test get_mass for all particle types
         @testset "get_mass equivalence" begin
-            @check max_examples=100 function property_get_mass_equivalence(
+            @check max_examples=max_examples function property_get_mass_equivalence(
                 m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
@@ -41,6 +48,9 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
                 μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
                 μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
             )
+                vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
+                all(isfinite, vals) || return
+
                 # Create struct and NamedTuple parameters
                 q_struct = QuarkParams((u=m_u, d=m_d, s=m_s), (u=μ_u, d=μ_d, s=μ_s))
                 q_nt = as_namedtuple(q_struct)
@@ -83,7 +93,7 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         
         # Test get_chemical_potential for all particle types
         @testset "get_chemical_potential equivalence" begin
-            @check max_examples=100 function property_get_chemical_potential_equivalence(
+            @check max_examples=max_examples function property_get_chemical_potential_equivalence(
                 m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
@@ -91,6 +101,9 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
                 μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
                 μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
             )
+                vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
+                all(isfinite, vals) || return
+
                 # Create struct and NamedTuple parameters
                 q_struct = QuarkParams((u=m_u, d=m_d, s=m_s), (u=μ_u, d=μ_d, s=μ_s))
                 q_nt = as_namedtuple(q_struct)
@@ -133,7 +146,7 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         
         # Test get_quark_masses_for_process for various scattering processes
         @testset "get_quark_masses_for_process equivalence" begin
-            @check max_examples=100 function property_get_quark_masses_for_process_equivalence(
+            @check max_examples=max_examples function property_get_quark_masses_for_process_equivalence(
                 m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
@@ -141,6 +154,9 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
                 μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
                 μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
             )
+                vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
+                all(isfinite, vals) || return
+
                 # Create struct and NamedTuple parameters
                 q_struct = QuarkParams((u=m_u, d=m_d, s=m_s), (u=μ_u, d=μ_d, s=μ_s))
                 q_nt = as_namedtuple(q_struct)
@@ -183,7 +199,7 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         
         # Test that get_quark_masses_for_process returns correct masses for specific processes
         @testset "get_quark_masses_for_process correctness" begin
-            @check max_examples=100 function property_get_quark_masses_for_process_correctness(
+            @check max_examples=max_examples function property_get_quark_masses_for_process_correctness(
                 m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
                 m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),

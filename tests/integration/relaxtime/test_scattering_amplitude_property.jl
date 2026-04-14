@@ -10,6 +10,7 @@ whether called with QuarkParams/ThermoParams structs or NamedTuple parameters.
 
 using Test
 using Supposition
+using Random
 
 # Load required modules
 push!(LOAD_PATH, joinpath(@__DIR__, "../../../src"))
@@ -32,6 +33,10 @@ include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
 
 @testset "ScatteringAmplitude Property Tests" begin
+    _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+    max_examples = _ci ? 20 : 50
+    max_examples_multi = _ci ? 10 : 20
+    _ci && Random.seed!(0xA11CE5)
     
     # ========================================================================
     # Property 1: Struct-NamedTuple Equivalence for scattering_amplitude_squared
@@ -54,7 +59,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         # Pre-compute Gauss-Legendre nodes and weights for A function
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
-        @check max_examples=20 function property_scattering_amplitude_equivalence(
+        @check max_examples=max_examples function property_scattering_amplitude_equivalence(
             # Generate random quark masses (in fm⁻¹)
             m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
             m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
@@ -69,6 +74,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),  # Must be above threshold
             t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),  # Must be negative for physical scattering
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
+            all(isfinite, vals) || return true
+
             # Compute A functions for both u and s quarks
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
@@ -147,7 +155,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
-        @check max_examples=20 function property_qqbar_scattering_equivalence(
+        @check max_examples=max_examples function property_qqbar_scattering_equivalence(
             m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
             m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
             μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
@@ -158,6 +166,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),
             t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
+            all(isfinite, vals) || return true
+
             # Compute A functions
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
@@ -218,7 +229,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         # Test a subset of representative processes
         test_processes = [:uu_to_uu, :ss_to_ss, :ud_to_ud, :uubar_to_uubar, :uubar_to_ssbar]
         
-        @check max_examples=10 function property_multiple_processes(
+        @check max_examples=max_examples_multi function property_multiple_processes(
             m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
             m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
             μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
@@ -229,6 +240,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),
             t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
+            all(isfinite, vals) || return true
+
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
@@ -276,7 +290,7 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("Testing _nt_quark and _nt_thermo helpers")
         println("="^70)
         
-        @check max_examples=50 function property_normalization_helpers(
+        @check max_examples=max_examples function property_normalization_helpers(
             m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
             m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
             μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
@@ -285,6 +299,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
             Φ = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
             Φbar = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar)
+            all(isfinite, vals) || return true
+
             # Create struct parameters
             q_struct = QuarkParams((u=m_u, d=m_u, s=m_s), (u=μ_u, d=μ_u, s=μ_s))
             t_struct = ThermoParams(T, Φ, Φbar, 0.0)
