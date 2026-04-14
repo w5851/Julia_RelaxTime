@@ -49,16 +49,34 @@ jobs:
           echo "INTEGRATION_FILES=$files"
           INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
 
-      - name: Run integration full profile (relaxtime + config shard)
-        timeout-minutes: 90
+      - name: Run integration full profile (config shard)
+        timeout-minutes: 20
         run: |
-          files=$(git ls-files "tests/integration/relaxtime/test_*.jl" "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils\.jl$' | paste -sd ';' -)
+          files=$(git ls-files "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
           if [ -z "$files" ]; then
-            echo "No integration files found for relaxtime+config shard" >&2
+            echo "No integration files found for config shard" >&2
             exit 1
           fi
           echo "INTEGRATION_FILES=$files"
           INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
+
+      - name: Run integration full profile (relaxtime shard except ensure-A)
+        timeout-minutes: 75
+        run: |
+          files=$(git ls-files "tests/integration/relaxtime/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils\.jl$' | grep -v '^relaxtime/test_ensure_quark_params_has_A_property\.jl$' | paste -sd ';' -)
+          if [ -z "$files" ]; then
+            echo "No integration files found for relaxtime shard" >&2
+            exit 1
+          fi
+          echo "INTEGRATION_FILES=$files"
+          INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
+
+      - name: Run integration full profile (relaxtime ensure-A watchdog)
+        timeout-minutes: 15
+        run: |
+          file="relaxtime/test_ensure_quark_params_has_A_property.jl"
+          echo "INTEGRATION_FILES=$file"
+          INTEGRATION_FILES="$file" julia --project=. tests/integration/runtests.jl
 
       - name: Run validation full profile
         timeout-minutes: 45
