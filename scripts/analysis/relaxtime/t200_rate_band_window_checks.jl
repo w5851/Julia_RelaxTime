@@ -4,6 +4,7 @@ using CSV
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(@__DIR__, "t190_sigma_chain_decomposition_lib.jl"))
+const DEFAULT_IO_DIR = joinpath(PROJECT_ROOT, "data", "outputs", "tmp", "relaxtime_t200_window")
 
 const BAND_EDGES = [0.0, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, Inf]
 
@@ -161,43 +162,57 @@ function compute_rate_band_stats(process::Symbol, state;
 end
 
 function main()
+    input_dir = DEFAULT_IO_DIR
+    output_dir = DEFAULT_IO_DIR
+    for arg in ARGS
+        if startswith(arg, "--input-dir=")
+            input_dir = split(arg, '='; limit=2)[2]
+        elseif startswith(arg, "--output-dir=")
+            output_dir = split(arg, '='; limit=2)[2]
+        elseif arg in ("-h", "--help")
+            println("Usage: julia --project=. scripts/analysis/relaxtime/t200_rate_band_window_checks.jl [--input-dir=<dir>] [--output-dir=<dir>]")
+            println("Defaults: --input-dir=$(DEFAULT_IO_DIR) --output-dir=$(DEFAULT_IO_DIR)")
+            return
+        end
+    end
+
     scenarios = [
         (
             name="tauu_neg_udbar",
             process=:udbar_to_udbar,
             species="u",
             xis=[-0.34, -0.32, -0.30],
-            main_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_main.csv",
-            channel_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_channel_diag.csv",
+            main_csv=joinpath(input_dir, "t200_dual_window_main.csv"),
+            channel_csv=joinpath(input_dir, "t200_dual_window_channel_diag.csv"),
         ),
         (
             name="taus_usbar",
             process=:usbar_to_usbar,
             species="s",
             xis=[-0.22, -0.20, -0.18],
-            main_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_taus_window_main.csv",
-            channel_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_taus_window_channel_diag.csv",
+            main_csv=joinpath(input_dir, "t200_taus_window_main.csv"),
+            channel_csv=joinpath(input_dir, "t200_taus_window_channel_diag.csv"),
         ),
         (
             name="tauu_pos_uubarddbar",
             process=:uubar_to_ddbar,
             species="u",
             xis=[0.34, 0.36, 0.38],
-            main_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_main.csv",
-            channel_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_channel_diag.csv",
+            main_csv=joinpath(input_dir, "t200_dual_window_main.csv"),
+            channel_csv=joinpath(input_dir, "t200_dual_window_channel_diag.csv"),
         ),
         (
             name="tauu_pos_uubaruubar",
             process=:uubar_to_uubar,
             species="u",
             xis=[0.34, 0.36, 0.38],
-            main_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_main.csv",
-            channel_csv=raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_channel_diag.csv",
+            main_csv=joinpath(input_dir, "t200_dual_window_main.csv"),
+            channel_csv=joinpath(input_dir, "t200_dual_window_channel_diag.csv"),
         ),
     ]
 
-    out_detail = raw"D:\Desktop\Temp\relaxtime_t200_window\t200_rate_band_window_checks_detail.csv"
-    out_pair = raw"D:\Desktop\Temp\relaxtime_t200_window\t200_rate_band_window_checks_pair_delta.csv"
+    out_detail = joinpath(output_dir, "t200_rate_band_window_checks_detail.csv")
+    out_pair = joinpath(output_dir, "t200_rate_band_window_checks_pair_delta.csv")
     ensure_parent_dir(out_detail)
     ensure_parent_dir(out_pair)
 

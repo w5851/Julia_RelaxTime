@@ -7,10 +7,10 @@
 1. `T=150, muB=0` 在小 `xi` 前段（重点是 `xi=-0.5`）出现平衡解未收敛并被跳过，导致缺点。
 2. `T=190/200` 数据存在明显不光滑波动（毛刺），需给出可审计、可复核的解释。
 
-本轮范围约束：
+本轮范围约束（按实际落地更新）：
 
-- 不改 `src` 实现。
 - 允许改 `scripts`，且优先通过 `scripts` 调用 `src` 中已有 fallback 能力，而不是脚本层重造求解器。
+- 允许最小化 `src` 变更：为 workflow pipeline 增补 diagnostics stage 与 manifest 扩展字段、为平均散射率补充 band 统计输出接口。
 - 主分析数据口径以 `D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv` 为准。
 
 ## 2. 范围与非范围
@@ -25,7 +25,6 @@
 
 ### 2.2 Out of Scope
 
-- 不修改 `src/models/*` 或 `src/relaxtime/*` 内核实现。
 - 不做全量重跑 `T150/190/200`。
 - 不引入新的物理模型参数与新基线准入流程。
 

@@ -18,6 +18,8 @@ function _trapz(x::Vector{Float64}, y::Vector{Float64})
 end
 
 function _ensure_t190_chain_lib_loaded(repo_root::String)
+    lib_path = joinpath(repo_root, "scripts", "analysis", "relaxtime", "t190_sigma_chain_decomposition_lib.jl")
+    isfile(lib_path) || throw(ArgumentError("t190 diagnostics library not found: $(lib_path)"))
     if !isdefined(Main, :PROJECT_ROOT)
         Core.eval(Main, :(PROJECT_ROOT = $repo_root))
     end
@@ -27,7 +29,7 @@ function _ensure_t190_chain_lib_loaded(repo_root::String)
         :decompose_mixed_p_propagator_chain,
     )
     if any(sym -> !isdefined(Main, sym), required_symbols)
-        Base.include(Main, joinpath(repo_root, "scripts", "analysis", "relaxtime", "t190_sigma_chain_decomposition_lib.jl"))
+        Base.include(Main, lib_path)
     end
     return nothing
 end
@@ -210,8 +212,6 @@ function _emit_workflow_diagnostics_index(prepared, output)::NamedTuple
     mkpath(prepared.diagnostics_output_dir)
     index_path = joinpath(prepared.diagnostics_output_dir, "diagnostics_index.json")
 
-    chain_artifacts = mode === :t190_chain ? _write_t190_mixed_p_chain_artifacts(prepared.diagnostics_output_dir) : nothing
-
     run_context = Dict(
         "T_fm" => prepared.T_fm,
         "mu_fm" => prepared.mu_fm,
@@ -222,9 +222,23 @@ function _emit_workflow_diagnostics_index(prepared, output)::NamedTuple
     artifacts = Dict{String, String}(
         "run_manifest" => output.run_manifest,
     )
-    if chain_artifacts !== nothing
-        artifacts["t190_mixed_p_chain_csv"] = chain_artifacts.csv_path
-        artifacts["t190_mixed_p_chain_summary_csv"] = chain_artifacts.summary_path
+    status = :success
+    error_payload = nothing
+    chain_summary = Dict{String, Any}()
+
+    if mode === :t190_chain
+        try
+            chain_artifacts = _write_t190_mixed_p_chain_artifacts(prepared.diagnostics_output_dir)
+            artifacts["t190_mixed_p_chain_csv"] = chain_artifacts.csv_path
+            artifacts["t190_mixed_p_chain_summary_csv"] = chain_artifacts.summary_path
+            chain_summary = chain_artifacts.summary
+        catch err
+            status = err isa ArgumentError ? :unavailable : :failed
+            error_payload = Dict(
+                "type" => string(typeof(err)),
+                "message" => sprint(showerror, err),
+            )
+        end
     end
 
     eta_val = isfinite(output.transport.eta) ? Float64(output.transport.eta) : nothing
@@ -233,7 +247,7 @@ function _emit_workflow_diagnostics_index(prepared, output)::NamedTuple
 
     payload = Dict(
         "mode" => String(mode),
-        "status" => "success",
+        "status" => String(status),
         "run_context" => run_context,
         "artifacts" => artifacts,
         "summary" => Dict(
@@ -241,22 +255,23 @@ function _emit_workflow_diagnostics_index(prepared, output)::NamedTuple
             "sigma" => sigma_val,
             "zeta" => zeta_val,
         ),
-        "t190_chain_summary" => chain_artifacts === nothing ? Dict{String, Any}() : chain_artifacts.summary,
+        "error" => error_payload,
+        "t190_chain_summary" => chain_summary,
     )
 
     open(index_path, "w") do io
         write(io, JSON3.write(payload))
     end
 
-    t190_summary = if chain_artifacts === nothing
+    t190_summary = if isempty(chain_summary)
         Dict{String, Float64}()
     else
-        get(chain_artifacts.summary, "uubar_to_ddbar", Dict{String, Float64}())
+        get(chain_summary, "uubar_to_ddbar", Dict{String, Float64}())
     end
 
     return (
         mode=mode,
-        status=:success,
+        status=status,
         index_path=index_path,
         artifacts=artifacts,
         t190_summary=t190_summary,

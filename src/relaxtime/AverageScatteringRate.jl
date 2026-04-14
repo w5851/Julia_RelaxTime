@@ -1151,12 +1151,15 @@ end
     if n < 2
         return 0
     end
-    @inbounds for i in 1:(n - 1)
-        if ds > edges[i] && ds <= edges[i + 1]
-            return i
-        end
+    if ds < edges[1]
+        return 0
     end
-    return 0
+    bi = searchsortedlast(edges, ds)
+    bi <= 0 && return 0
+    if bi >= n
+        return n - 1
+    end
+    return bi
 end
 
 function _omega_integral_5d(

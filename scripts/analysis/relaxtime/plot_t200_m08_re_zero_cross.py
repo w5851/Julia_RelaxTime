@@ -14,6 +14,8 @@ from cycler import cycler
 
 
 APS_COLOR_CYCLE = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_IO_DIR = PROJECT_ROOT / "data" / "outputs" / "tmp" / "relaxtime_t200_window"
 
 
 def configure_style(dpi: int) -> None:
@@ -48,12 +50,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--csv",
         type=Path,
-        default=Path(r"D:\Desktop\Temp\relaxtime_t200_window\t200_m08_re_zero_cross_trace.csv"),
+        default=DEFAULT_IO_DIR / "t200_m08_re_zero_cross_trace.csv",
     )
     parser.add_argument(
         "--summary-csv",
         type=Path,
-        default=Path(r"D:\Desktop\Temp\relaxtime_t200_window\t200_m08_re_zero_cross_summary.csv"),
+        default=DEFAULT_IO_DIR / "t200_m08_re_zero_cross_summary.csv",
     )
     parser.add_argument("--out-dir", type=Path, default=Path("docs/analysis/relaxtime"))
     parser.add_argument("--x-scale", choices=("log", "linear"), default="log")
@@ -134,6 +136,10 @@ def focus_ylim(rows: list[dict[str, float]], ds_min: float, ds_max: float, pad_r
 
 def main() -> None:
     args = parse_args()
+    if not args.csv.is_file():
+        raise FileNotFoundError(f"input trace csv not found: {args.csv}. Pass --csv to override.")
+    if not args.summary_csv.is_file():
+        raise FileNotFoundError(f"input summary csv not found: {args.summary_csv}. Pass --summary-csv to override.")
     configure_style(args.dpi)
     rows = read_trace(args.csv)
     zero_ds = read_summary(args.summary_csv)

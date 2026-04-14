@@ -1,13 +1,15 @@
 using Test
 
+const _SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_gap_transport_scan.jl")
+if !isdefined(Main, :ScanOptions)
+    include(_SCAN_SCRIPT)
+end
+
 @testset "run_gap_transport_scan solver entry" begin
-    include(joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_gap_transport_scan.jl"))
     @test isdefined(Main, :_solve_fixedmu_via_models_solve)
 end
 
 @testset "prefer Models.solve over solve_constraint" begin
-    include(joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_gap_transport_scan.jl"))
-
     opts = Main.ScanOptions(
         "tmp.csv",
         nothing,
@@ -53,8 +55,6 @@ end
 end
 
 @testset "failed point sidecar" begin
-    include(joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_gap_transport_scan.jl"))
-
     opts = Main.parse_args([
         "--output", "tmp.csv",
         "--failed-points-output", "tmp_failed.csv",

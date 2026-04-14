@@ -30,6 +30,43 @@ using .Models
     @test String(manifest.pipeline.pipeline_family) == "workflow"
 end
 
+@testset "Workflow adapter diagnostics unavailable is auditable" begin
+    tmp = mktempdir()
+    diag_dir = joinpath(tmp, "diag")
+    repo_root = normpath(joinpath(@__DIR__, "..", "..", ".."))
+    lib_path = joinpath(repo_root, "scripts", "analysis", "relaxtime", "t190_sigma_chain_decomposition_lib.jl")
+    backup_path = lib_path * ".bak_unavailable"
+
+    mv(lib_path, backup_path; force=true)
+    try
+        result = Models.run_workflow_pipeline(
+            :transport;
+            T_fm=0.15,
+            mu_fm=0.0,
+            xi=0.0,
+            output_dir=tmp,
+            compute_tau=false,
+            tau=(u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0),
+            compute_bulk=false,
+            diagnostics_mode=:t190_chain,
+            diagnostics_output_dir=diag_dir,
+            diagnostics_strict=false,
+        )
+
+        @test result.diagnostics.status == :unavailable
+        @test isfile(String(result.diagnostics.index_path))
+
+        index_json = JSON3.read(read(String(result.diagnostics.index_path), String))
+        @test String(index_json.status) == "unavailable"
+        @test haskey(index_json, :error)
+
+        manifest = JSON3.read(read(String(result.run_manifest), String))
+        @test String(manifest.pipeline.diagnostics_status) == "unavailable"
+    finally
+        mv(backup_path, lib_path; force=true)
+    end
+end
+
 @testset "Workflow adapter diagnostics index smoke" begin
     tmp = mktempdir()
     diag_dir = joinpath(tmp, "diag")
