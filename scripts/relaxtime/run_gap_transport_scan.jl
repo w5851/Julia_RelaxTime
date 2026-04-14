@@ -29,6 +29,7 @@ using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.OneLoopIntegrals: A
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS, gauleg
 using StaticArrays
+using Dates
 using .ScanCSV: ScanCSV
 using .ScanQuality: assess_point_quality
 
@@ -56,6 +57,7 @@ const PHASE_CROSSOVER_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 struct ScanOptions
     output::String
     channel_diagnostics_output::Union{Nothing, String}
+    failed_points_output::Union{Nothing, String}
     xi_values::Vector{Float64}
     tmin_mev::Float64
     tmax_mev::Float64
@@ -92,6 +94,7 @@ function print_usage()
     println("Options:")
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_transport_scan.csv)")
     println("  --channel-diagnostics-output <path>  可选：输出每点每通道的 τ^-1 贡献明细 CSV")
+    println("  --failed-points-output <path>        可选：输出跳过失败点 sidecar CSV")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -124,6 +127,7 @@ function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_transport_scan.csv"),
         :channel_diagnostics_output => nothing,
+        :failed_points_output => nothing,
         :xi_values => Float64[0.0],
         :tmin => 50.0,
         :tmax => 200.0,
@@ -166,6 +170,8 @@ function parse_args(args::Vector{String})
             opts[:output] = require_value()
         elseif arg == "--channel-diagnostics-output"
             opts[:channel_diagnostics_output] = require_value()
+        elseif arg == "--failed-points-output"
+            opts[:failed_points_output] = require_value()
         elseif arg == "--xi"
             val = parse(Float64, require_value())
             if opts[:xi_values] == Float64[0.0]
@@ -260,6 +266,7 @@ function parse_args(args::Vector{String})
     return ScanOptions(
         String(opts[:output]),
         isnothing(opts[:channel_diagnostics_output]) ? nothing : String(opts[:channel_diagnostics_output]),
+        isnothing(opts[:failed_points_output]) ? nothing : String(opts[:failed_points_output]),
         xi_vals,
         Float64(opts[:tmin]),
         Float64(opts[:tmax]),
@@ -298,6 +305,41 @@ function write_channel_diagnostics_header_if_needed(io)
         "equilibrium_backend", "phase_curr", "phase_structure",
     ], ',')
     println(io, header)
+end
+
+@inline function _csv_quote(text::AbstractString)
+    return "\"" * replace(text, "\"" => "\"\"") * "\""
+end
+
+function write_failed_points_header_if_needed(io)
+    header = join([
+        "T_MeV", "muB_MeV", "xi",
+        "seed_source", "phase_prev", "phase_curr_hint",
+        "error_type", "error_message", "timestamp",
+    ], ',')
+    println(io, header)
+end
+
+function write_failed_point_row!(io, T_mev::Float64, muB_mev::Float64, xi::Float64, diag, err)
+    seed_source = hasproperty(diag, :seed_source) ? string(getproperty(diag, :seed_source)) : "unknown"
+    phase_prev = hasproperty(diag, :phase_prev) ? string(getproperty(diag, :phase_prev)) : "unknown"
+    phase_curr_hint = hasproperty(diag, :phase_curr) ? string(getproperty(diag, :phase_curr)) : "unknown"
+    error_type = string(typeof(err))
+    error_message = sprint(showerror, err)
+    timestamp = Dates.format(Dates.now(), dateformat"yyyy-mm-ddTHH:MM:SS")
+    row = join([
+        string(T_mev),
+        string(muB_mev),
+        string(xi),
+        _csv_quote(seed_source),
+        _csv_quote(phase_prev),
+        _csv_quote(phase_curr_hint),
+        _csv_quote(error_type),
+        _csv_quote(error_message),
+        _csv_quote(timestamp),
+    ], ',')
+    println(io, row)
+    flush(io)
 end
 
 @inline function _rate_with_alias(rates, key::Symbol)
@@ -843,32 +885,76 @@ function phase_structure(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
     return :unknown
 end
 
-function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
-    raw = Main.Models.solve_constraint(
+@inline function _seed_state_5(seed_state)
+    return Float64.(seed_state[1:min(5, length(seed_state))])
+end
+
+function _normalize_equilibrium_result(raw; solver_backend::Symbol=:models)
+    Bool(raw.converged) || return nothing
+    x_state = SVector{5}(Tuple(Float64.(raw.x_state[1:5])))
+    mu_vec = SVector{3}(Tuple(Float64.(raw.mu_vec[1:3])))
+    masses = SVector{3}(Tuple(Float64.(raw.masses[1:3])))
+    (all(isfinite, masses) && all(>(0.0), masses)) || return nothing
+    return (
+        converged=true,
+        x_state=x_state,
+        mu_vec=mu_vec,
+        masses=masses,
+        iterations=Int(raw.iterations),
+        residual_norm=Float64(raw.residual_norm),
+        solver_backend=solver_backend,
+        omega=Float64(raw.omega),
+    )
+end
+
+function _solve_fixedmu_via_models_solve(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
+    return Main.Models.solve(
+        PNJL_MODEL,
+        Main.Models.FixedMu(),
+        T_fm,
+        muq_fm;
+        seed_guess=_seed_state_5(seed_state),
+        xi=xi,
+        p_num=opts.p_num,
+        t_num=opts.t_num,
+        residual_norm_max=1e-4,
+    )
+end
+
+function _solve_fixedmu_via_models_constraint(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
+    return Main.Models.solve_constraint(
         PNJL_MODEL,
         Main.Models.FixedMu(),
         T_fm;
         μ_fm=muq_fm,
-        seed_guess=Float64.(seed_state[1:min(5, length(seed_state))]),
+        seed_guess=_seed_state_5(seed_state),
         xi=xi,
         p_num=opts.p_num,
         t_num=opts.t_num,
         residual_norm_max=1e-4,
         physicality_check=Main.Models.is_physical_solution,
     )
-    Bool(raw.converged) || return nothing
-    masses = SVector{3}(Tuple(Float64.(raw.masses)))
-    (all(isfinite, masses) && all(>(0.0), masses)) || return nothing
-    return (
-        converged=true,
-        x_state=SVector{5}(Tuple(Float64.(raw.x_state))),
-        mu_vec=SVector{3}(Tuple(Float64.(raw.mu_vec))),
-        masses=masses,
-        iterations=Int(raw.iterations),
-        residual_norm=Float64(raw.residual_norm),
-        solver_backend=:models,
-        omega=Float64(raw.omega),
-    )
+end
+
+function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
+    models_err = nothing
+    try
+        raw = _solve_fixedmu_via_models_solve(T_fm, muq_fm, xi, seed_state, opts)
+        eq = _normalize_equilibrium_result(raw; solver_backend=:models)
+        eq !== nothing && return eq
+    catch err
+        models_err = err
+    end
+
+    try
+        raw = _solve_fixedmu_via_models_constraint(T_fm, muq_fm, xi, seed_state, opts)
+        return _normalize_equilibrium_result(raw; solver_backend=:models)
+    catch
+        if models_err !== nothing
+            rethrow(models_err)
+        end
+        rethrow()
+    end
 end
 
 function compete_phase_branches(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
@@ -989,6 +1075,9 @@ function run_scan(opts::ScanOptions)
     if opts.channel_diagnostics_output !== nothing
         ensure_parent_dir(opts.channel_diagnostics_output)
     end
+    if opts.failed_points_output !== nothing
+        ensure_parent_dir(opts.failed_points_output)
+    end
 
     if opts.resume && isfile(opts.output) && !opts.overwrite
         ensure_output_header_compatible(opts.output)
@@ -1002,6 +1091,9 @@ function run_scan(opts::ScanOptions)
     if opts.channel_diagnostics_output !== nothing && opts.overwrite && isfile(opts.channel_diagnostics_output)
         rm(opts.channel_diagnostics_output)
     end
+    if opts.failed_points_output !== nothing && opts.overwrite && isfile(opts.failed_points_output)
+        rm(opts.failed_points_output)
+    end
 
     new_file = !isfile(opts.output) || filesize(opts.output) == 0
     p_grid, p_w, sigma_cutoff = integration_grids(opts)
@@ -1010,6 +1102,7 @@ function run_scan(opts::ScanOptions)
     solver_kwargs = (iterations=opts.max_iter,)
     io = open(opts.output, "a")
     channel_io = opts.channel_diagnostics_output === nothing ? nothing : open(opts.channel_diagnostics_output, "a")
+    failed_io = opts.failed_points_output === nothing ? nothing : open(opts.failed_points_output, "a")
     try
         if new_file
             ScanCSV.write_metadata(io, Dict(
@@ -1055,6 +1148,19 @@ function run_scan(opts::ScanOptions)
                     "source_csv" => opts.output,
                 ))
                 write_channel_diagnostics_header_if_needed(channel_io)
+            end
+        end
+        if failed_io !== nothing
+            failed_new_file = !isfile(opts.failed_points_output) || filesize(opts.failed_points_output) == 0
+            if failed_new_file
+                ScanCSV.write_metadata(failed_io, Dict(
+                    "schema" => "scan_csv_v1",
+                    "title" => "gap_transport_scan_failed_points",
+                    "script" => "scripts/relaxtime/run_gap_transport_scan.jl",
+                    "git_commit" => current_git_commit(),
+                    "source_csv" => opts.output,
+                ))
+                write_failed_points_header_if_needed(failed_io)
             end
         end
 
@@ -1242,6 +1348,10 @@ function run_scan(opts::ScanOptions)
                     end
                 catch point_err
                     @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+                    if failed_io !== nothing
+                        diag_or_hint = (seed_source="unknown", phase_prev=previous_phase, phase_curr=:unknown)
+                        write_failed_point_row!(failed_io, T_mev, muB_mev, xi, diag_or_hint, point_err)
+                    end
                 end
 
                 if opts.gc_every_n > 0 && done % opts.gc_every_n == 0
@@ -1446,6 +1556,10 @@ function run_scan(opts::ScanOptions)
 
                     catch point_err
                         @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+                        if failed_io !== nothing
+                            diag_or_hint = (seed_source="unknown", phase_prev=previous_phase, phase_curr=:unknown)
+                            write_failed_point_row!(failed_io, T_mev, muB_mev, xi, diag_or_hint, point_err)
+                        end
                     end  # try 单点容错
 
                     if opts.gc_every_n > 0 && done % opts.gc_every_n == 0
@@ -1463,6 +1577,9 @@ function run_scan(opts::ScanOptions)
         close(io)
         if channel_io !== nothing
             close(channel_io)
+        end
+        if failed_io !== nothing
+            close(failed_io)
         end
     end
 
