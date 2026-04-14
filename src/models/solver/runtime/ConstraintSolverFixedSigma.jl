@@ -85,18 +85,14 @@ function _solve_constraint_fixedsigma(
         )
 
         n_B = joint_thermo.rho_norm * rho0
-        sigma_ratio = if isfinite(n_B) && abs(n_B) > 1e-12
-            joint_thermo.entropy / n_B
-        else
-            Inf
-        end
+        sigma_ratio = joint_thermo.entropy - n_B * sigma_target
 
         joint_residual_norm = _compose_mode_residual_norm(
             model,
             joint_thermo.x_state,
             joint_thermo.mu_vec,
             T_fm,
-            (sigma_ratio, sigma_target);
+            (sigma_ratio, 0.0);
             xi=xi,
             p_num=p_num,
             t_num=t_num,

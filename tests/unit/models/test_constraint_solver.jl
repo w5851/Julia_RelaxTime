@@ -238,4 +238,18 @@ Models.pnjl_module()
         @test occursin("_gap_norm_from_state", source)
         @test !occursin("gap_residual(model", source)
     end
+
+    @testset "FixedAsymmetricRho ratio residual uses affine form" begin
+        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "runtime", "ConstraintSolverFixedAsymmetricRho.jl")
+        source = read(solver_path, String)
+        @test occursin("rho_u - rho_d * ud_ratio_target", source)
+        @test !occursin("rho_u / rho_d", source)
+    end
+
+    @testset "FixedSigma ratio residual uses affine form" begin
+        solver_path = joinpath(PROJECT_ROOT, "src", "models", "solver", "runtime", "ConstraintSolverFixedSigma.jl")
+        source = read(solver_path, String)
+        @test occursin("joint_thermo.entropy - n_B * sigma_target", source)
+        @test !occursin("joint_thermo.entropy / n_B", source)
+    end
 end

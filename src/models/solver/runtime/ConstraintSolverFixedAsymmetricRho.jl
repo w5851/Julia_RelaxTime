@@ -88,11 +88,7 @@ function _solve_constraint_fixedasymrho(
 
         rho_u, rho_d, rho_s = joint_thermo.rho_vec[1], joint_thermo.rho_vec[2], joint_thermo.rho_vec[3]
         nB_joint = sum(joint_thermo.rho_vec) / (3.0 * rho0)
-        ud_ratio_joint = if abs(rho_d) > 1e-12
-            rho_u / rho_d
-        else
-            rho_u / (rho_d >= 0 ? 1e-12 : -1e-12)
-        end
+        ud_ratio_joint = rho_u - rho_d * ud_ratio_target
 
         joint_residual_norm = _compose_mode_residual_norm(
             model,
@@ -100,7 +96,7 @@ function _solve_constraint_fixedasymrho(
             joint_thermo.mu_vec,
             T_fm,
             (nB_joint, rho_target),
-            (ud_ratio_joint, ud_ratio_target),
+            (ud_ratio_joint, 0.0),
             (rho_s, s_target);
             xi=xi,
             p_num=p_num,
