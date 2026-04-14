@@ -18,6 +18,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "scan_quality.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "provenance_metadata.jl"))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
@@ -32,6 +33,7 @@ using StaticArrays
 using Dates
 using .ScanCSV: ScanCSV
 using .ScanQuality: assess_point_quality
+using .ProvenanceMetadata: ProvenanceMetadata
 
 const PNJL_MODEL = Models.create_model(:PNJL)
 const TransportWorkflow = Models.transport_workflow_module()
@@ -58,6 +60,7 @@ struct ScanOptions
     output::String
     channel_diagnostics_output::Union{Nothing, String}
     failed_points_output::Union{Nothing, String}
+    provenance_dir::Union{Nothing, String}
     xi_values::Vector{Float64}
     tmin_mev::Float64
     tmax_mev::Float64
@@ -95,6 +98,7 @@ function print_usage()
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/gap_transport_scan.csv)")
     println("  --channel-diagnostics-output <path>  可选：输出每点每通道的 τ^-1 贡献明细 CSV")
     println("  --failed-points-output <path>        可选：输出跳过失败点 sidecar CSV")
+    println("  --provenance-dir <path>              可选：写入 run_manifest/effective_config 的目录（默认 output 同目录）")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -128,6 +132,7 @@ function parse_args(args::Vector{String})
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "gap_transport_scan.csv"),
         :channel_diagnostics_output => nothing,
         :failed_points_output => nothing,
+        :provenance_dir => nothing,
         :xi_values => Float64[0.0],
         :tmin => 50.0,
         :tmax => 200.0,
@@ -172,6 +177,8 @@ function parse_args(args::Vector{String})
             opts[:channel_diagnostics_output] = require_value()
         elseif arg == "--failed-points-output"
             opts[:failed_points_output] = require_value()
+        elseif arg == "--provenance-dir"
+            opts[:provenance_dir] = require_value()
         elseif arg == "--xi"
             val = parse(Float64, require_value())
             if opts[:xi_values] == Float64[0.0]
@@ -267,6 +274,7 @@ function parse_args(args::Vector{String})
         String(opts[:output]),
         isnothing(opts[:channel_diagnostics_output]) ? nothing : String(opts[:channel_diagnostics_output]),
         isnothing(opts[:failed_points_output]) ? nothing : String(opts[:failed_points_output]),
+        isnothing(opts[:provenance_dir]) ? nothing : String(opts[:provenance_dir]),
         xi_vals,
         Float64(opts[:tmin]),
         Float64(opts[:tmax]),
@@ -546,7 +554,7 @@ function write_header_if_needed(io)
         "tauinv_u", "tauinv_d", "tauinv_s", "tauinv_ubar", "tauinv_dbar", "tauinv_sbar",
         "eta", "sigma", "zeta", "eta_over_s", "zeta_over_s",
         "sigma_over_T", "sigma_over_T_over_eta_over_s", "zeta_over_s_over_eta_over_s",
-        "quality_flag", "quality_reason", "quality_metric",
+        "quality_flag", "quality_reason", "quality_metric", "run_id",
     ], ',')
     println(io, header)
 end
@@ -1070,7 +1078,7 @@ function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_p
     return caches
 end
 
-function run_scan(opts::ScanOptions)
+function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
     ensure_parent_dir(opts.output)
     if opts.channel_diagnostics_output !== nothing
         ensure_parent_dir(opts.channel_diagnostics_output)
@@ -1078,6 +1086,8 @@ function run_scan(opts::ScanOptions)
     if opts.failed_points_output !== nothing
         ensure_parent_dir(opts.failed_points_output)
     end
+    provenance_dir = isnothing(opts.provenance_dir) ? dirname(opts.output) : opts.provenance_dir
+    ensure_parent_dir(joinpath(provenance_dir, "dummy.txt"))
 
     if opts.resume && isfile(opts.output) && !opts.overwrite
         ensure_output_header_compatible(opts.output)
@@ -1103,6 +1113,9 @@ function run_scan(opts::ScanOptions)
     io = open(opts.output, "a")
     channel_io = opts.channel_diagnostics_output === nothing ? nothing : open(opts.channel_diagnostics_output, "a")
     failed_io = opts.failed_points_output === nothing ? nothing : open(opts.failed_points_output, "a")
+    stats_success = 0
+    stats_error = 0
+    stats_skipped = 0
     try
         if new_file
             ScanCSV.write_metadata(io, Dict(
@@ -1181,6 +1194,7 @@ function run_scan(opts::ScanOptions)
                 done += 1
                 key = (T_mev, muB_mev, xi)
                 if opts.resume && (key in existing)
+                    stats_skipped += 1
                     continue
                 end
 
@@ -1337,7 +1351,7 @@ function run_scan(opts::ScanOptions)
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
                         string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
-                        csv_bool(quality_flag), quality_reason, string(quality_metric),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric), string(ctx.run_id),
                     ], ',')
                     println(io, row)
                     flush(io)
@@ -1346,6 +1360,7 @@ function run_scan(opts::ScanOptions)
                         write_channel_diagnostics_rows!(channel_io, T_mev, muq_mev, muB_mev, xi,
                             dens, rates, tauinv, eq.solver_backend, diag)
                     end
+                    stats_success += 1
                 catch point_err
                     @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
                     if failed_io !== nothing
@@ -1371,6 +1386,7 @@ function run_scan(opts::ScanOptions)
                     done += 1
                     key = (T_mev, muB_mev, xi)
                     if opts.resume && (key in existing)
+                        stats_skipped += 1
                         continue
                     end
 
@@ -1544,7 +1560,7 @@ function run_scan(opts::ScanOptions)
                         string(tauinv.u), string(tauinv.d), string(tauinv.s), string(tauinv.ubar), string(tauinv.dbar), string(tauinv.sbar),
                         string(tr.eta), string(tr.sigma), string(tr.zeta), string(eta_over_s), string(zeta_over_s),
                         string(sigma_over_T), string(sigma_over_T_over_eta_over_s), string(zeta_over_s_over_eta_over_s),
-                        csv_bool(quality_flag), quality_reason, string(quality_metric),
+                        csv_bool(quality_flag), quality_reason, string(quality_metric), string(ctx.run_id),
                     ], ',')
                     println(io, row)
                     flush(io)
@@ -1553,6 +1569,7 @@ function run_scan(opts::ScanOptions)
                         write_channel_diagnostics_rows!(channel_io, T_mev, muq_mev, muB_mev, xi,
                             dens, rates, tauinv, eq.solver_backend, diag)
                     end
+                    stats_success += 1
 
                     catch point_err
                         @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
@@ -1560,6 +1577,7 @@ function run_scan(opts::ScanOptions)
                             diag_or_hint = (seed_source="unknown", phase_prev=previous_phase, phase_curr=:unknown)
                             write_failed_point_row!(failed_io, T_mev, muB_mev, xi, diag_or_hint, point_err)
                         end
+                        stats_error += 1
                     end  # try 单点容错
 
                     if opts.gc_every_n > 0 && done % opts.gc_every_n == 0
@@ -1583,12 +1601,69 @@ function run_scan(opts::ScanOptions)
         end
     end
 
+    effective_config = Dict{String,Any}(
+        "output" => opts.output,
+        "channel_diagnostics_output" => opts.channel_diagnostics_output,
+        "failed_points_output" => opts.failed_points_output,
+        "xi_values" => opts.xi_values,
+        "tmin_mev" => opts.tmin_mev,
+        "tmax_mev" => opts.tmax_mev,
+        "tstep_mev" => opts.tstep_mev,
+        "mubmin_mev" => opts.mubmin_mev,
+        "mubmax_mev" => opts.mubmax_mev,
+        "mubstep_mev" => opts.mubstep_mev,
+        "overwrite" => opts.overwrite,
+        "resume" => opts.resume,
+        "compute_bulk" => opts.compute_bulk,
+        "p_num" => opts.p_num,
+        "t_num" => opts.t_num,
+        "max_iter" => opts.max_iter,
+        "tau_p_nodes" => opts.tau_p_nodes,
+        "tau_angle_nodes" => opts.tau_angle_nodes,
+        "tau_phi_nodes" => opts.tau_phi_nodes,
+        "tau_n_sigma_points" => opts.tau_n_sigma_points,
+        "tau_threshold_subtraction" => opts.tau_threshold_subtraction,
+        "tau_asym_window" => opts.tau_asym_window,
+        "tau_asym_fit_min_points" => opts.tau_asym_fit_min_points,
+        "tau_asym_extra_points" => opts.tau_asym_extra_points,
+        "tau_interpolation_mode" => String(opts.tau_interpolation_mode),
+        "sigma_grid_n" => opts.sigma_grid_n,
+        "integration_mode" => String(opts.integration_mode),
+        "gc_every_n" => opts.gc_every_n,
+        "tr_p_nodes" => opts.tr_p_nodes,
+        "tr_p_max_fm" => opts.tr_p_max_fm,
+    )
+
+    summary = Dict{String,Any}(
+        "points_total" => stats_success + stats_error,
+        "success_count" => stats_success,
+        "error_count" => stats_error,
+        "skipped_count" => stats_skipped,
+    )
+
+    artifacts = String[opts.output]
+    if opts.channel_diagnostics_output !== nothing
+        push!(artifacts, opts.channel_diagnostics_output)
+    end
+    if opts.failed_points_output !== nothing
+        push!(artifacts, opts.failed_points_output)
+    end
+
+    ProvenanceMetadata.write_run_sidecars(
+        provenance_dir;
+        ctx=ctx,
+        effective_config=effective_config,
+        artifacts=artifacts,
+        summary=summary,
+    )
+
     println("Scan finished. Output: $(opts.output)")
 end
 
 function main()
     opts = parse_args(copy(ARGS))
-    run_scan(opts)
+    ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/run_gap_transport_scan.jl", copy(ARGS))
+    run_scan(opts, ctx)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
