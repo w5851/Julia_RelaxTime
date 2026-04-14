@@ -11,6 +11,7 @@ const EXPECTED_STAGE_IDS = (
     :solve_core,
     :postprocess,
     :export_artifacts,
+    :emit_diagnostics,
     :emit_repro_manifest,
 )
 

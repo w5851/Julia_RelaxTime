@@ -351,12 +351,37 @@ function _build_orchestrator_stages()
 
     push!(stages,
         PipelineStage(
-            :emit_repro_manifest,
+            :emit_diagnostics,
             [:prepared_orchestrator_inputs, :orchestrator_artifact_paths],
+            [:orchestrator_diagnostics],
+            (ctx) -> begin
+                prepared = ctx.state[:prepared_orchestrator_inputs]
+                diagnostics = (
+                    status=:success,
+                    mode=:builtin,
+                    command=prepared.command_name,
+                    fallback_used=prepared.fallback_used,
+                    artifact_count=length(ctx.state[:orchestrator_artifact_paths]),
+                )
+
+                extensions = ctx.state[:manifest_extensions]
+                extensions["diagnostics_mode"] = String(diagnostics.mode)
+                extensions["diagnostics_status"] = String(diagnostics.status)
+
+                StageResult(Dict{Symbol, Any}(:orchestrator_diagnostics => diagnostics), PipelineArtifact[], Dict{Symbol, Float64}())
+            end,
+        ),
+    )
+
+    push!(stages,
+        PipelineStage(
+            :emit_repro_manifest,
+            [:prepared_orchestrator_inputs, :orchestrator_artifact_paths, :orchestrator_diagnostics],
             [:orchestrator_pipeline_output],
             (ctx) -> begin
                 prepared = ctx.state[:prepared_orchestrator_inputs]
                 artifacts = ctx.state[:orchestrator_artifact_paths]
+                diagnostics = ctx.state[:orchestrator_diagnostics]
                 output = (
                     command=prepared.command_name,
                     outdir=prepared.outdir,
@@ -369,6 +394,7 @@ function _build_orchestrator_stages()
                     effective_config_path=artifacts["effective_config"],
                     consumption_report_path=artifacts["consumption_report"],
                     cross_section_path=get(artifacts, "cross_section_orchestrated", ""),
+                    diagnostics=diagnostics,
                 )
                 StageResult(Dict{Symbol, Any}(:orchestrator_pipeline_output => output), PipelineArtifact[], Dict{Symbol, Float64}())
             end,

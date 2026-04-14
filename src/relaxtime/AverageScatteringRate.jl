@@ -1022,6 +1022,9 @@ function average_scattering_rate(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
+    band_edges::Union{Nothing,Vector{Float64}}=nothing,
+    band_omega_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
+    band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
 )::Float64
     quark_params = normalize_quark_input(quark_params)
     thermo_params = normalize_thermo_input(thermo_params)
@@ -1066,7 +1069,8 @@ function average_scattering_rate(
         p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
         cs_cache, n_sigma_points,
         density_p_grid, density_p_w, density_p_nodes, density_scale,
-        mc, md, apply_s_domain_cut, sigma_cutoff, interpolation_mode
+        mc, md, apply_s_domain_cut, sigma_cutoff, interpolation_mode,
+        band_edges, band_omega_out, band_omega_sigma_out,
     )
 end
 
@@ -1079,7 +1083,10 @@ function _average_scattering_rate_semi_infinite(
     cs_cache, n_sigma_points,
     density_p_grid, density_p_w, density_p_nodes, density_scale,
     mc, md, apply_s_domain_cut, sigma_cutoff,
-    interpolation_mode::Symbol
+    interpolation_mode::Symbol,
+    band_edges::Union{Nothing,Vector{Float64}},
+    band_omega_out::Union{Nothing,Base.RefValue{Vector{Float64}}},
+    band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}},
 )
     validate_grid_weight_pair("average_scattering_rate", "p_grid", p_grid, "p_w", p_w)
     validate_grid_weight_pair("average_scattering_rate", "cos_grid", cos_grid, "cos_w", cos_w)
@@ -1118,6 +1125,8 @@ function _average_scattering_rate_semi_infinite(
     prefactor = (DQ^2) / (32.0 * π^5 * ρ_i * ρ_j)
     # 当提供了 sigma_cutoff 或有限动量网格时，应用 s 范围截断
     apply_s_cut = apply_s_domain_cut && (!isnan(Λ))
+    s_th = max((mi + mj)^2, (mc + md)^2)
+
     ω = _omega_integral_5d(
         process, pi_sym, pj_sym,
         mi, mj, μi, μj, T, Φ, Φbar, ξ,
@@ -1128,9 +1137,29 @@ function _average_scattering_rate_semi_infinite(
         cs_cache, n_sigma_points,
         apply_s_cut, s_bo, s_up,
         interpolation_mode,
+        s_th,
+        band_edges,
+        band_omega_out,
+        band_omega_sigma_out,
     )
 
     return prefactor * ω
+end
+
+@inline function _band_index(ds::Float64, edges::Vector{Float64})
+    n = length(edges)
+    if n < 2
+        return 0
+    end
+    if ds < edges[1]
+        return 0
+    end
+    bi = searchsortedlast(edges, ds)
+    bi <= 0 && return 0
+    if bi >= n
+        return n - 1
+    end
+    return bi
 end
 
 function _omega_integral_5d(
@@ -1160,8 +1189,19 @@ function _omega_integral_5d(
     s_bo::Float64,
     s_up::Float64,
     interpolation_mode::Symbol,
+    s_th::Float64,
+    band_edges::Union{Nothing,Vector{Float64}},
+    band_omega_out::Union{Nothing,Base.RefValue{Vector{Float64}}},
+    band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}},
 )::Float64
     ω = 0.0
+    band_omega = nothing
+    band_omega_sigma = nothing
+    if band_edges !== nothing && length(band_edges) >= 2
+        nbin = length(band_edges) - 1
+        band_omega = zeros(Float64, nbin)
+        band_omega_sigma = zeros(Float64, nbin)
+    end
 
     for (p_i, w_pi) in zip(p_vals, quadrature_wts)
         Ei = energy_from_p(p_i, mi)
@@ -1204,10 +1244,28 @@ function _omega_integral_5d(
 
                         σ = _get_sigma_core(cs_cache, s, quark_params, thermo_params, K_coeffs;
                             n_points=n_sigma_points, interpolation_mode=interpolation_mode)
-                        ω += w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel * σ
+                        base = w_pi * w_pj * w_cθi * w_cθj * wφ * (p_i^2) * (p_j^2) * f_i * f_j * v_rel
+                        ω += base * σ
+                        if band_omega !== nothing
+                            ds = s - s_th
+                            bi = _band_index(ds, band_edges)
+                            if bi > 0
+                                @inbounds band_omega[bi] += base
+                                @inbounds band_omega_sigma[bi] += base * σ
+                            end
+                        end
                     end
                 end
             end
+        end
+    end
+
+    if band_omega !== nothing
+        if band_omega_out !== nothing
+            band_omega_out[] = band_omega
+        end
+        if band_omega_sigma_out !== nothing
+            band_omega_sigma_out[] = band_omega_sigma
         end
     end
 

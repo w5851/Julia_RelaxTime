@@ -94,6 +94,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "relaxtime", "test_mott_transition.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_afieldbuilder.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_run_gap_transport_scan_solver_entry.jl"),
 
     # [Simulation] 模拟子系统
     joinpath(UNIT_DIR, "simulation", "test_frame_transformations.jl"),

@@ -105,12 +105,49 @@ function _build_scan_pipeline_stages()
 
     push!(stages,
         PipelineStage(
+            :emit_diagnostics,
+            [:scan_inputs, :scan_summary, :scan_artifact_paths],
+            [:scan_diagnostics],
+            (ctx) -> begin
+                scan_inputs = ctx.state[:scan_inputs]
+                summary = ctx.state[:scan_summary]
+                diagnostics = (
+                    status=:success,
+                    mode=:builtin,
+                    kind=scan_inputs.kind,
+                    total=getproperty(summary, :total),
+                    success=getproperty(summary, :success),
+                    failure=getproperty(summary, :failure),
+                    skipped=getproperty(summary, :skipped),
+                )
+
+                extensions = ctx.state[:manifest_extensions]
+                extensions["diagnostics_mode"] = String(diagnostics.mode)
+                extensions["diagnostics_status"] = String(diagnostics.status)
+
+                StageResult(
+                    Dict{Symbol, Any}(:scan_diagnostics => diagnostics),
+                    PipelineArtifact[],
+                    Dict{Symbol, Float64}(),
+                )
+            end,
+        ),
+    )
+
+    push!(stages,
+        PipelineStage(
             :emit_repro_manifest,
-            [:scan_summary, :scan_artifact_paths],
+            [:scan_summary, :scan_artifact_paths, :scan_diagnostics],
             [:scan_pipeline_output],
             (ctx) -> begin
                 summary = ctx.state[:scan_summary]
-                output = merge((; summary...), (manifest_path=ctx.state[:scan_artifact_paths]["run_manifest"],))
+                output = merge(
+                    (; summary...),
+                    (
+                        manifest_path=ctx.state[:scan_artifact_paths]["run_manifest"],
+                        diagnostics=ctx.state[:scan_diagnostics],
+                    ),
+                )
                 StageResult(
                     Dict{Symbol, Any}(:scan_pipeline_output => output),
                     PipelineArtifact[],

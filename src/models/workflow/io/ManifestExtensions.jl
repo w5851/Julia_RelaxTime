@@ -3,6 +3,13 @@ const _MANIFEST_EXTENSION_ALLOWED_KEYS = Set{String}([
     "baseline_suite",
     "physics_profile",
     "adapter_version",
+    "diagnostics_mode",
+    "diagnostics_status",
+    "diagnostics_index_path",
+    "diagnostics_t190_ratio_detM_area_B_over_A",
+    "diagnostics_t190_ratio_Dmixed_area_B_over_A",
+    "diagnostics_t190_ratio_detM_point_B_over_A",
+    "diagnostics_t190_ratio_Dmixed_point_B_over_A",
 ])
 
 function _validate_manifest_extension_keys(keys_iter)
@@ -30,6 +37,13 @@ function build_manifest_extensions(meta::NamedTuple)
         "baseline_suite" => "none",
         "physics_profile" => "default",
         "adapter_version" => "v1",
+        "diagnostics_mode" => "none",
+        "diagnostics_status" => "disabled",
+        "diagnostics_index_path" => "",
+        "diagnostics_t190_ratio_detM_area_B_over_A" => nothing,
+        "diagnostics_t190_ratio_Dmixed_area_B_over_A" => nothing,
+        "diagnostics_t190_ratio_detM_point_B_over_A" => nothing,
+        "diagnostics_t190_ratio_Dmixed_point_B_over_A" => nothing,
     )
 
     merged = Dict{String, Any}()
