@@ -3,6 +3,7 @@ const WORKFLOW_STAGE_SKELETON = (
     :solve_core,
     :postprocess,
     :export_artifacts,
+    :emit_diagnostics,
     :emit_repro_manifest,
 )
 

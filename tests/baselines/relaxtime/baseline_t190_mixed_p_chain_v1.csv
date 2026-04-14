@@ -1,0 +1,5 @@
+metric,expected,rtol,atol
+ratio_detM_area_B_over_A,1.1258971058206375,0.08,1.0e-6
+ratio_Dmixed_area_B_over_A,0.34937636592896354,0.08,1.0e-6
+ratio_detM_point_B_over_A,8.032602354974214,0.15,1.0e-6
+ratio_Dmixed_point_B_over_A,0.1227259974570782,0.15,1.0e-6
