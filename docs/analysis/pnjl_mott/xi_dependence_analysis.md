@@ -419,3 +419,15 @@ rmdir D:\Desktop\Julia_RelaxTime\paper_lib
 ```
 
 注：`rmdir` 仅移除链接本身，不会删除 `D:\Desktop\paper` 实体内容。
+
+<!-- AUX_FIGURES:BEGIN -->
+## 8. 辅助图集（新增）
+
+- 图1：`figures/fig1_tmott_vs_xi_fit.png`
+- 图4：`figures/fig4_orderparam_direct_indirect.png`
+- 图2：`figures/fig2_gamma_delta_dualaxis.png`
+- 图3（轻增强复用）：`mode_ab/mott_mode_ab__M_K__xi3_annotated.png` 与 `mode_ab/mott_mode_ab__M_pi__xi3_annotated.png`
+- 图5：`figures/fig5_taylor_decomposition.png` (generated)，定义为 ReΠ/ImΠ 的 xi 直接-间接分解示意（双面板：pi/K）。
+
+符号统一：`Delta = M_thr - M_mes`（若旧段落使用相反定义，请按符号翻转理解）。
+<!-- AUX_FIGURES:END -->
