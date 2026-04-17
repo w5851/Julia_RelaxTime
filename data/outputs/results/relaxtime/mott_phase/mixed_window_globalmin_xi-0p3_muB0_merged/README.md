@@ -11,6 +11,13 @@ Merged temporary experiment outputs for eta/eta_prime window diagnostics.
 - mixed_window_globalmin_xi-0p3_muB0
 - mixed_window_globalmin_xi-0p3_muB0_next2
 
+## Optimizer Libraries (full names)
+- `nlopt` -> `NLopt.jl` (global search via DIRECT family)
+- `metaheuristics` -> `Metaheuristics.jl` (DE-based global search)
+- `evolutionary` -> `Evolutionary.jl` (CMA-ES used in this batch)
+- `cmaes` -> `CMAEvolutionStrategy.jl`
+- `optim_samin` -> `Optim.jl` (`SAMIN` global optimizer)
+
 ## Files
 - window_eta_etap.csv: merged pointwise outputs (Gamma/mass, residual, selected method)
 - window_jump_summary.csv: jump-count summary under jump-threshold=0.25
