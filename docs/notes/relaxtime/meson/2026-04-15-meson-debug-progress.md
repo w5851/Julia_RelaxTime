@@ -12,7 +12,7 @@
 - Legacy all8 mismatch count improved from about `37` to `20`.
 
 2. Hard equation mismatch is largely excluded for current failing set.
-- Script: `scripts/analysis/relaxtime/compare_equation_semantics_hard_sources.jl`
+- Script: `scripts/analysis/relaxtime/meson_mixed/compare_equation_semantics_hard_sources.jl`
 - On current `20` failing rows:
   - mixed channels (`eta/eta_prime/sigma/sigma_prime`): Julia vs Fortran equation core is numerically equivalent (`~1e-16`).
   - nonmixed channels have one implementation-form difference in imaginary equation component:
@@ -157,7 +157,7 @@ Action taken:
 - Updated target data README governance note:
   - `tests/validation/data/targets/relaxtime/legacy/meson/README.md`
 - Updated analysis script to skip excluded rows:
-  - `scripts/analysis/relaxtime/check_meson_target_backsub_residuals.jl`
+  - `scripts/analysis/relaxtime/meson_mixed/check_meson_target_backsub_residuals.jl`
 
 Result after governance correction:
 
@@ -231,7 +231,7 @@ Generated artifacts:
 
 ### Anomaly summary script
 
-- Added: `scripts/analysis/relaxtime/summarize_mixed_scan_anomalies.jl`
+- Added: `scripts/analysis/relaxtime/meson_mixed/summarize_mixed_scan_anomalies.jl`
 - Purpose: report per-xi temperature-step absolute jumps for mixed observables above threshold.
 
 Observed with threshold `0.25`:
@@ -425,7 +425,7 @@ User hypothesis:
   - derived: `data/outputs/results/relaxtime/mott_phase/mixed_xi_window_probe_wideT/mott_phase_scan_mixed_xi_window_probe_wideT_derived.csv`
   - figures: `data/outputs/results/relaxtime/mott_phase/mixed_xi_window_probe_wideT/figures`
 - Added analysis script:
-  - `scripts/analysis/relaxtime/analyze_eta_prime_window_shift.jl`
+  - `scripts/analysis/relaxtime/meson_mixed/analyze_eta_prime_window_shift.jl`
 
 ### Main findings (eta' jump threshold |Δ|>=0.25)
 
@@ -543,10 +543,10 @@ Additional local evidence:
 
 To support direct visual audit of the two-equation residual system, added export+plot tooling:
 
-- exporter: `scripts/analysis/relaxtime/export_mixed_residual_surface.jl`
+- exporter: `scripts/analysis/relaxtime/meson_mixed/export_mixed_residual_surface.jl`
   - computes complex mixed residual `F(m, gamma)` on grid
   - outputs `Re(F)`, `Im(F)`, `||F||`, `log10||F||` surface CSV + mass/gamma slices
-- plotter: `scripts/analysis/relaxtime/plot_mixed_residual_surface.py`
+- plotter: `scripts/analysis/relaxtime/meson_mixed/plot_mixed_residual_surface.py`
   - outputs heatmap (`log10||F||`) and 1D slices for quick visual inspection
 
 Generated example datasets/figures:
@@ -575,7 +575,7 @@ Observation:
 
 To answer “is this only step-size/precision too low?” directly, ran high-precision multi-seed probe:
 
-- script: `tmp/final_root_existence_probe.jl`
+- script (historical temporary probe, cleaned from repo): `tmp/final_root_existence_probe.jl`
 - dense seeds around suspected basin (`m0: 2.60..3.00, g0: 1.80..2.80, step 0.02`, two methods)
 - strict solver settings (`iterations=1200`, `ftol=xtol=1e-14`)
 
@@ -603,9 +603,9 @@ Interpretation:
 
 To address interpolation-illusion risk explicitly, added direct-evaluation overlay tools:
 
-- exporter: `scripts/analysis/relaxtime/export_direct_eval_scatter.jl`
+- exporter: `scripts/analysis/relaxtime/meson_mixed/export_direct_eval_scatter.jl`
   - computes residual norm directly from equation evaluations on dense `(m,gamma)` lattice
-- overlay plotter: `scripts/analysis/relaxtime/plot_direct_vs_surface_overlay.py`
+- overlay plotter: `scripts/analysis/relaxtime/meson_mixed/plot_direct_vs_surface_overlay.py`
   - overlays direct low-residual points (`<=1e-2`, `<=1e-3`, `<=1e-4`) on top of interpolated surface background
 
 Generated overlays:
