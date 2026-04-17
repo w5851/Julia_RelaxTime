@@ -108,7 +108,8 @@ end
     @test isfile(manifest_path)
     manifest = JSON3.read(read(manifest_path, String))
     @test haskey(manifest, "config_path")
-    @test occursin(joinpath("config", "models", "pnjl", "phase_pipeline_default.toml"), String(manifest["config_path"]))
+    @test occursin("config/models/pnjl/phase_pipeline_default.toml", String(manifest["config_path"]))
+    @test !occursin('\\', String(manifest["config_path"]))
 end
 
 @testset "Phase CLI supports --preset=smoke" begin
@@ -188,6 +189,12 @@ end
     @test haskey(manifest, "config_hash")
     @test haskey(manifest, "run_id")
     @test haskey(manifest, "artifact_paths")
+    artifact_paths = manifest["artifact_paths"]
+    for (_, p) in pairs(artifact_paths)
+        p_str = String(p)
+        @test !occursin('\\', p_str)
+        @test !occursin(r"^[A-Za-z]:", p_str)
+    end
     @test haskey(manifest, "effective_config")
 end
 

@@ -2,6 +2,59 @@ using Dates
 using JSON3
 using SHA
 
+const _PIPELINE_PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+
+@inline function _pipeline_norm_slash(path::AbstractString)
+    return replace(String(path), '\\' => '/')
+end
+
+@inline function _is_path_key(key::AbstractString)
+    return endswith(key, "_path") || key in ("run_manifest", "config_path")
+end
+
+function _pipeline_relpath(path::AbstractString)
+    abs_path = normpath(abspath(String(path)))
+    rel = try
+        relpath(abs_path, _PIPELINE_PROJECT_ROOT)
+    catch
+        nothing
+    end
+    if rel !== nothing
+        return _pipeline_norm_slash(String(rel))
+    end
+    return _pipeline_norm_slash(abs_path)
+end
+
+function _normalize_manifest_paths!(x)
+    if x isa AbstractDict
+        for (k, v) in collect(pairs(x))
+            if v isa AbstractString && _is_path_key(String(k))
+                x[k] = _pipeline_relpath(String(v))
+            end
+        end
+
+        if haskey(x, "artifact_paths")
+            ap = x["artifact_paths"]
+            if ap isa AbstractDict
+                for (k, v) in collect(pairs(ap))
+                    if v isa AbstractString
+                        ap[k] = _pipeline_relpath(String(v))
+                    end
+                end
+            end
+        end
+
+        for (_, v) in pairs(x)
+            _normalize_manifest_paths!(v)
+        end
+    elseif x isa AbstractVector
+        for item in x
+            _normalize_manifest_paths!(item)
+        end
+    end
+    return x
+end
+
 struct PipelineStageRecord
     id::Symbol
     status::Symbol
@@ -258,6 +311,7 @@ function _write_manifest(
         "completed_stages" => String.(result.completed_stages),
         "stage_records" => [_record_to_manifest(rec) for rec in result.stage_records],
     )
+    _normalize_manifest_paths!(payload)
     mkpath(dirname(manifest_path))
     open(manifest_path, "w") do io
         write(io, JSON3.write(payload))

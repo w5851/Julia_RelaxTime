@@ -29,6 +29,36 @@ end
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
+@inline function _norm_slash(path::AbstractString)
+    return replace(String(path), '\\' => '/')
+end
+
+function _repo_relpath(path::AbstractString)
+    abs_path = normpath(abspath(String(path)))
+    rel = try
+        relpath(abs_path, PROJECT_ROOT)
+    catch
+        nothing
+    end
+    if rel !== nothing
+        return _norm_slash(String(rel))
+    end
+    return _norm_slash(abs_path)
+end
+
+function _normalize_artifact_paths(paths)
+    normalized = Dict{String, Any}()
+    for (key, value) in pairs(paths)
+        key_str = String(key)
+        if value isa AbstractString
+            normalized[key_str] = _repo_relpath(String(value))
+        else
+            normalized[key_str] = value
+        end
+    end
+    return normalized
+end
+
 Base.@kwdef mutable struct PhaseCliConfig
     config_path::Union{Nothing, String} = nothing
     preset::Union{Nothing, Symbol} = nothing
@@ -245,13 +275,13 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "generated_at" => string(now()),
         "git_commit" => git_commit,
         "argv" => collect(String.(args)),
-        "config_path" => cfg.config_path,
+        "config_path" => isnothing(cfg.config_path) ? nothing : _repo_relpath(cfg.config_path),
         "preset" => isnothing(cfg.preset) ? nothing : String(cfg.preset),
         "config_hash" => get(result.config_snapshot, "config_hash", nothing),
         "run_id" => result.run_id,
         "mode" => String(cfg.mode),
         "model_kind" => String(cfg.model_kind),
-        "artifact_paths" => result.artifact_paths,
+        "artifact_paths" => _normalize_artifact_paths(result.artifact_paths),
         "effective_config" => effective_config,
     )
 

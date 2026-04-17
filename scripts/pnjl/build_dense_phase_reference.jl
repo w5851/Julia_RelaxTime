@@ -158,6 +158,24 @@ function project_root()
     return normpath(joinpath(@__DIR__, "..", ".."))
 end
 
+@inline function _norm_slash(path::AbstractString)
+    return replace(String(path), '\\' => '/')
+end
+
+function _repo_relpath(path::AbstractString)
+    root = project_root()
+    abs_path = normpath(abspath(String(path)))
+    rel = try
+        relpath(abs_path, root)
+    catch
+        nothing
+    end
+    if rel !== nothing
+        return _norm_slash(String(rel))
+    end
+    return _norm_slash(abs_path)
+end
+
 function xi_token(xi::Float64)
     return replace(@sprintf("%.3f", xi), "." => "p", "-" => "m")
 end
@@ -267,8 +285,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     crossover_rows = NamedTuple[]
     manifest = Dict{String, Any}(
         "generated_at" => string(now()),
-        "output_root" => output_root,
-        "reference_root" => reference_root,
+        "output_root" => _repo_relpath(output_root),
+        "reference_root" => _repo_relpath(reference_root),
         "tag" => cfg.tag,
         "xi_values" => cfg.xi_values,
         "runs" => Any[],
@@ -285,7 +303,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
             push!(manifest["runs"], Dict(
                 "xi" => xi,
                 "run_id" => "crossover_only",
-                "run_dir" => run_dir,
+                "run_dir" => _repo_relpath(run_dir),
                 "boundary_count" => 0,
                 "spinodal_count" => 0,
                 "crossover_count" => length(local_rows),
@@ -328,7 +346,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
             push!(manifest["runs"], Dict(
                 "xi" => xi,
                 "run_id" => result.run_id,
-                "run_dir" => run_dir,
+                "run_dir" => _repo_relpath(run_dir),
                 "boundary_count" => length(result.first_order_boundary),
                 "spinodal_count" => length(result.spinodal),
                 "crossover_count" => length(result.crossover_line),
