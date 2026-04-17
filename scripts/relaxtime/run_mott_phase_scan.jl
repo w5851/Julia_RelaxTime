@@ -82,6 +82,27 @@ function _write_json(path::String, x)
     end
 end
 
+@inline function _norm_slash(path::AbstractString)
+    return replace(String(path), '\\' => '/')
+end
+
+function _repo_relpath(path::AbstractString)
+    abs_path = normpath(abspath(String(path)))
+    rel = try
+        relpath(abs_path, PROJECT_ROOT)
+    catch
+        nothing
+    end
+    if rel !== nothing
+        rel_s = String(rel)
+        if rel_s == "." || !(startswith(rel_s, "..") || startswith(rel_s, string("..", Base.Filesystem.path_separator)))
+            return _norm_slash(rel_s)
+        end
+        return _norm_slash(rel_s)
+    end
+    return _norm_slash(abs_path)
+end
+
 @inline function _fmt(x)
     x isa Bool && return x ? "true" : "false"
     return string(x)
@@ -267,9 +288,9 @@ function _write_run_artifacts(opts::ScanOptions, cfg::Dict{String,Any}, out_csv:
         "run_id" => run_id,
         "timestamp_utc" => Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ"),
         "script" => "scripts/relaxtime/run_mott_phase_scan.jl",
-        "config_path" => opts.config_path,
+        "config_path" => _repo_relpath(opts.config_path),
         "config_hash" => config_hash,
-        "output_csv" => out_csv,
+        "output_csv" => _repo_relpath(out_csv),
         "schema_version" => "v1",
     )
 

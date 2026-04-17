@@ -2,9 +2,12 @@ using Test
 
 const SCRIPT_PATH = joinpath(@__DIR__, "..", "..", "..", "scripts", "analysis", "relaxtime", "meson_mixed", "run_globalmin_window_experiment.jl")
 
+if !isdefined(Main, :_parse_args)
+    include(SCRIPT_PATH)
+end
+
 @testset "meson mixed globalmin window script" begin
     @test isfile(SCRIPT_PATH)
-    include(SCRIPT_PATH)
 
     opts = Main._parse_args([
         "--outdir", "tmp_out",
@@ -24,7 +27,6 @@ const SCRIPT_PATH = joinpath(@__DIR__, "..", "..", "..", "scripts", "analysis", 
 end
 
 @testset "parser accepts next-batch libraries" begin
-    include(SCRIPT_PATH)
     opts = Main._parse_args([
         "--outdir", "tmp_out",
         "--libs", "cmaes,optim_samin",

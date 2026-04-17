@@ -1,4 +1,5 @@
 using Test
+using JSON3
 
 const REPO_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_mott_phase_scan.jl")
@@ -68,4 +69,14 @@ end
     @test occursin("\"T_max_MeV\":150", cfg_text)
     @test occursin("\"T_step_MeV\":10", cfg_text)
     @test occursin("\"xi_list\":[-0.3,-0.15,0.0,0.15,0.3]", cfg_text)
+
+    manifest_obj = JSON3.read(read(manifest, String))
+    config_path = String(manifest_obj["config_path"])
+    output_csv_path = String(manifest_obj["output_csv"])
+    @test !occursin('\\', config_path)
+    @test !occursin('\\', output_csv_path)
+    @test !occursin(r"^[A-Za-z]:", config_path)
+    @test !occursin(r"^[A-Za-z]:", output_csv_path)
+    @test occursin("config/workflows/relaxtime/profiles/mott_phase_muB0_xi_scan.toml", config_path)
+    @test endswith(output_csv_path, "mott_phase_scan.csv")
 end
