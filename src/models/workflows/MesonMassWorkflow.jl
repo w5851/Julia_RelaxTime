@@ -123,23 +123,50 @@ function _blackbox_global_fallback_seed(
     upper::Vector{Float64};
     max_steps::Int=80,
 )
+    fallback = 0.5 .* (lower .+ upper)
+
     if _BBO_AVAILABLE
         dim = length(lower)
         search_range = collect(zip(lower, upper))
-        res = BlackBoxOptim.bboptimize(
-            x -> objective(collect(x));
-            SearchRange=search_range,
-            NumDimensions=dim,
-            MaxSteps=max_steps,
-            Method=:adaptive_de_rand_1_bin_radiuslimited,
-            TraceMode=:silent,
-        )
-        best = BlackBoxOptim.best_candidate(res)
-        return Float64[best...]
+        wrapped_objective = x -> objective(collect(x))
+
+        res = try
+            BlackBoxOptim.bboptimize(
+                wrapped_objective;
+                SearchRange=search_range,
+                NumDimensions=dim,
+                MaxSteps=max_steps,
+                Method=:adaptive_de_rand_1_bin_radiuslimited,
+                TraceMode=:silent,
+            )
+        catch
+            try
+                BlackBoxOptim.bboptimize(
+                    wrapped_objective;
+                    SearchRange=search_range,
+                    NumDimensions=dim,
+                    MaxSteps=max_steps,
+                    TraceMode=:silent,
+                )
+            catch
+                nothing
+            end
+        end
+
+        if res !== nothing
+            best = try
+                BlackBoxOptim.best_candidate(res)
+            catch
+                nothing
+            end
+            if best !== nothing
+                return Float64[best...]
+            end
+        end
     end
 
-    # Fallback when BlackBoxOptim is unavailable: center point.
-    return 0.5 .* (lower .+ upper)
+    # Fallback when BlackBoxOptim is unavailable or optimizer fails.
+    return fallback
 end
 
 function _mixed_branch_scores(

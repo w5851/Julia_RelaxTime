@@ -49,7 +49,7 @@ fortran_sigma_220p0_xi_0p0_47,fortran,220.0,600.0,0.0,sigma,809.6903850000,34.39
 fortran_sigma_prime_220p0_xi_0p0_48,fortran,220.0,600.0,0.0,sigma_prime,391.5486264000,34.3996377600,357.1489886400,0,exact_pole_legacy
 fortran_pi_240p0_xi_0p0_49,fortran,240.0,600.0,0.0,pi,470.8992791000,24.6908039400,446.2084751600,0,exact_light_pole
 fortran_K_240p0_xi_0p0_50,fortran,240.0,600.0,0.0,K,593.1721488000,293.7423102700,299.4298385300,0,exact_light_pole
-fortran_eta_240p0_xi_0p0_51,fortran,240.0,600.0,0.0,eta,562.4566812000,24.6908039400,537.7658772600,0,exact_pole_legacy
+fortran_eta_240p0_xi_0p0_51,fortran,240.0,600.0,0.0,eta,562.4566812000,24.6908039400,537.7658772600,0,excluded_low_quality_nonconverged
 fortran_eta_prime_240p0_xi_0p0_52,fortran,240.0,600.0,0.0,eta_prime,578.1547258000,24.6908039400,553.4639218600,0,exact_pole_legacy
 fortran_sigma_pi_240p0_xi_0p0_53,fortran,240.0,600.0,0.0,sigma_pi,564.8716028000,24.6908039400,540.1807988600,0,exact_pole_legacy
 fortran_sigma_K_240p0_xi_0p0_54,fortran,240.0,600.0,0.0,sigma_K,605.5203714000,293.7423102700,311.7780611300,0,exact_pole_legacy

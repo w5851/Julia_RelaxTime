@@ -71,6 +71,7 @@ function solve_equilibrium_backend(
     solved_mu_vec = nothing
     solved_iterations = missing
     solved_residual_norm = missing
+    solved_converged = true
 
     effective_solver_backend = if solver_backend === :auto
         :models
@@ -113,6 +114,8 @@ function solve_equilibrium_backend(
                     residual_norm_max=models_residual_norm_max,
                 )
             end
+            solved_converged = Bool(solved.converged)
+            solved_converged || throw(ArgumentError("models FixedMu solve did not converge"))
             st = Main.Models.MeanFieldState(solved.x_state)
             solved_mu_vec = solved.mu_vec
             solved_iterations = solved.iterations
@@ -139,7 +142,7 @@ function solve_equilibrium_backend(
     masses = Main.Models.calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
 
     return (
-        converged=true,
+        converged=solved_converged,
         x_state=SVector{5}(Tuple(x_state)),
         mu_vec=SVector{3}(Tuple(mu_vec)),
         masses=masses,
