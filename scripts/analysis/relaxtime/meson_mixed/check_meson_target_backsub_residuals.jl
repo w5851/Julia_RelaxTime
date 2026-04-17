@@ -1,9 +1,9 @@
 if !isdefined(Main, :Constants_PNJL)
-    include(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
+    include(joinpath(@__DIR__, "..", "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
 end
 
 if !isdefined(Main, :Models)
-    include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+    include(joinpath(@__DIR__, "..", "..", "..", "..", "src", "models", "Models.jl"))
 end
 
 const WF = Main.Models.meson_workflow_module()
@@ -98,7 +98,7 @@ function _build_qp_tp_from_workflow_result(res)
 end
 
 function run_literature_targets()
-    path = joinpath(@__DIR__, "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "literature", "meson", "relaxtime_meson_mass_literature_targets_v1.csv")
+    path = joinpath(@__DIR__, "..", "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "literature", "meson", "relaxtime_meson_mass_literature_targets_v1.csv")
     rows = _read_csv_dict_rows(path)
 
     failed = 0
@@ -155,8 +155,8 @@ end
 
 function run_legacy_all8_targets()
     paths = (
-        joinpath(@__DIR__, "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB0_v1.csv"),
-        joinpath(@__DIR__, "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB600_v1.csv"),
+        joinpath(@__DIR__, "..", "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB0_v1.csv"),
+        joinpath(@__DIR__, "..", "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB600_v1.csv"),
     )
 
     targets = Dict{Tuple{Float64,Float64,Symbol},Float64}()

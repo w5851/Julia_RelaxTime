@@ -1,9 +1,9 @@
 if !isdefined(Main, :Constants_PNJL)
-    include(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
+    include(joinpath(@__DIR__, "..", "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
 end
 
 if !isdefined(Main, :Models)
-    include(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+    include(joinpath(@__DIR__, "..", "..", "..", "..", "src", "models", "Models.jl"))
 end
 
 const HBARC = Main.Constants_PNJL.ħc_MeV_fm
@@ -67,8 +67,8 @@ end
 
 function _collect_legacy_fail_rows()
     paths = (
-        joinpath(@__DIR__, "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB0_v1.csv"),
-        joinpath(@__DIR__, "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB600_v1.csv"),
+        joinpath(@__DIR__, "..", "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB0_v1.csv"),
+        joinpath(@__DIR__, "..", "..", "..", "..", "tests", "validation", "data", "targets", "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB600_v1.csv"),
     )
 
     targets = Dict{Tuple{Float64, Float64, Symbol}, Float64}()
