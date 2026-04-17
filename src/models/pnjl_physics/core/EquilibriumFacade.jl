@@ -68,6 +68,9 @@ function solve_equilibrium_backend(
     isdefined(Main.Models, :normalize_mu_vec) || error("Models.normalize_mu_vec is not defined")
 
     m = model === nothing ? _get_model(kind) : model
+    solved_mu_vec = nothing
+    solved_iterations = missing
+    solved_residual_norm = missing
 
     effective_solver_backend = if solver_backend === :auto
         :models
@@ -91,23 +94,47 @@ function solve_equilibrium_backend(
         if !(m isa Main.Models.PNJLModel)
             m = Main.Models.create_model(kind)
         end
-
-        solver = models_solver === nothing ? Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward) : models_solver
-        Main.Models.solve_gap(m, T_fm, mu_fm;
-            solver_backend=:models,
-            solver=solver,
-            initial_guess=seed_state,
-            residual_norm_max=models_residual_norm_max,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-        )
+        if models_solver === nothing
+            fixed_mode = Main.Models.FixedMu()
+            if seed_state === nothing
+                solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                    residual_norm_max=models_residual_norm_max,
+                )
+            else
+                solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
+                    seed_guess=seed_state,
+                    continuity_seed=true,
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                    residual_norm_max=models_residual_norm_max,
+                )
+            end
+            st = Main.Models.MeanFieldState(solved.x_state)
+            solved_mu_vec = solved.mu_vec
+            solved_iterations = solved.iterations
+            solved_residual_norm = solved.residual_norm
+            st
+        else
+            Main.Models.solve_gap(m, T_fm, mu_fm;
+                solver_backend=:models,
+                solver=models_solver,
+                initial_guess=seed_state,
+                residual_norm_max=models_residual_norm_max,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+        end
     else
         throw(ArgumentError("unknown solver_backend=$solver_backend (expected :auto, :legacy or :models)"))
     end
 
     x_state = Main.Models.state_vector(st)
-    mu_vec = Main.Models.normalize_mu_vec(mu_fm)
+    mu_vec = solved_mu_vec === nothing ? Main.Models.normalize_mu_vec(mu_fm) : Main.Models.normalize_mu_vec(solved_mu_vec)
 
     masses = Main.Models.calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
 
@@ -116,8 +143,8 @@ function solve_equilibrium_backend(
         x_state=SVector{5}(Tuple(x_state)),
         mu_vec=SVector{3}(Tuple(mu_vec)),
         masses=masses,
-        iterations=missing,
-        residual_norm=missing,
+        iterations=solved_iterations,
+        residual_norm=solved_residual_norm,
     )
 end
 

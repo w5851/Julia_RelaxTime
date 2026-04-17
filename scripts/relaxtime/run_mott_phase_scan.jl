@@ -28,6 +28,8 @@ struct ScanOptions
     p_num::Int
     t_num::Int
     max_iter::Int
+    include_mixed::Bool
+    force_global_fallback::Bool
 end
 
 @inline function _json_escape(s::AbstractString)
@@ -100,6 +102,8 @@ function _print_usage()
     println("  --p-num <int>        Gap solver momentum nodes")
     println("  --t-num <int>        Gap solver angle nodes")
     println("  --max-iter <int>     Solver iteration cap")
+    println("  --include-mixed      Also compute/output mixed mesons (eta, eta_prime, sigma, sigma_prime)")
+    println("  --force-global-fallback  Force global fallback path in meson workflow (experimental)")
     println("  -h, --help           Show help")
 end
 
@@ -126,6 +130,8 @@ function _default_cfg_dict()
                 "p_num" => 12,
                 "t_num" => 6,
                 "max_iter" => 40,
+                "include_mixed" => false,
+                "force_global_fallback" => false,
                 "resume" => true,
                 "overwrite" => false,
             ),
@@ -174,6 +180,10 @@ function _build_options(args::Vector{String})
             cli["t_num"] = parse(Int, require_value())
         elseif arg == "--max-iter"
             cli["max_iter"] = parse(Int, require_value())
+        elseif arg == "--include-mixed"
+            cli["include_mixed"] = true
+        elseif arg == "--force-global-fallback"
+            cli["force_global_fallback"] = true
         elseif arg in ("-h", "--help")
             _print_usage()
             exit(0)
@@ -203,6 +213,8 @@ function _build_options(args::Vector{String})
     p_num = Int(get(mp, "p_num", 12))
     t_num = Int(get(mp, "t_num", 6))
     max_iter = Int(get(mp, "max_iter", 40))
+    include_mixed = Bool(get(mp, "include_mixed", false))
+    force_global_fallback = Bool(get(mp, "force_global_fallback", false))
 
     T_step_MeV > 0 || throw(ArgumentError("T_step_MeV must be positive"))
     T_max_MeV >= T_min_MeV || throw(ArgumentError("T_max_MeV must be >= T_min_MeV"))
@@ -221,6 +233,8 @@ function _build_options(args::Vector{String})
         p_num,
         t_num,
         max_iter,
+        include_mixed,
+        force_global_fallback,
     ), cfg
 end
 
@@ -239,6 +253,8 @@ function _write_run_artifacts(opts::ScanOptions, cfg::Dict{String,Any}, out_csv:
                 "p_num" => opts.p_num,
                 "t_num" => opts.t_num,
                 "max_iter" => opts.max_iter,
+                "include_mixed" => opts.include_mixed,
+                "force_global_fallback" => opts.force_global_fallback,
                 "resume" => opts.resume,
                 "overwrite" => opts.overwrite,
             ),
@@ -285,9 +301,27 @@ function main()
         "residual_pi", "residual_K",
         "root_quality_pi", "root_quality_K",
         "selected_method_pi", "selected_method_K",
+        "governance_candidate_count_pi", "governance_candidate_count_K",
+        "governance_selection_reason_pi", "governance_selection_reason_K",
+        "second_pass_triggered_pi", "second_pass_triggered_K",
+        "second_pass_candidate_count_pi", "second_pass_candidate_count_K",
         "m_u", "m_d", "m_s",
         "status", "error_code", "error_message", "timestamp_utc",
     ]
+
+    if opts.include_mixed
+        append!(cols, [
+            "M_eta", "M_eta_prime", "M_sigma", "M_sigma_prime",
+            "Gamma_eta", "Gamma_eta_prime", "Gamma_sigma", "Gamma_sigma_prime",
+            "residual_eta", "residual_eta_prime", "residual_sigma", "residual_sigma_prime",
+            "root_quality_eta", "root_quality_eta_prime", "root_quality_sigma", "root_quality_sigma_prime",
+            "selected_method_eta", "selected_method_eta_prime", "selected_method_sigma", "selected_method_sigma_prime",
+            "governance_candidate_count_eta", "governance_candidate_count_eta_prime", "governance_candidate_count_sigma", "governance_candidate_count_sigma_prime",
+            "governance_selection_reason_eta", "governance_selection_reason_eta_prime", "governance_selection_reason_sigma", "governance_selection_reason_sigma_prime",
+            "second_pass_triggered_eta", "second_pass_triggered_eta_prime", "second_pass_triggered_sigma", "second_pass_triggered_sigma_prime",
+            "second_pass_candidate_count_eta", "second_pass_candidate_count_eta_prime", "second_pass_candidate_count_sigma", "second_pass_candidate_count_sigma_prime",
+        ])
+    end
 
     is_new = !isfile(out_csv)
     open(out_csv, is_new ? "w" : "a") do io
@@ -301,6 +335,14 @@ function main()
                 "y_unit.M_K" => "fm^-1",
                 "y_unit.Gamma_pi" => "fm^-1",
                 "y_unit.Gamma_K" => "fm^-1",
+                "y_unit.M_eta" => "fm^-1",
+                "y_unit.M_eta_prime" => "fm^-1",
+                "y_unit.M_sigma" => "fm^-1",
+                "y_unit.M_sigma_prime" => "fm^-1",
+                "y_unit.Gamma_eta" => "fm^-1",
+                "y_unit.Gamma_eta_prime" => "fm^-1",
+                "y_unit.Gamma_sigma" => "fm^-1",
+                "y_unit.Gamma_sigma_prime" => "fm^-1",
                 "y_unit.m_u" => "fm^-1",
                 "y_unit.m_d" => "fm^-1",
                 "y_unit.m_s" => "fm^-1",
@@ -309,6 +351,7 @@ function main()
         end
 
         for xi in opts.xi_list
+            equilibrium_seed_state = nothing
             meson_seed_state = nothing
             mixed_seed_tracking_state = nothing
 
@@ -321,7 +364,7 @@ function main()
                 end
 
                 timestamp = Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ")
-                row = Dict{String,Any}(
+                    row = Dict{String,Any}(
                     "run_id" => run_id,
                     "T_MeV" => T,
                     "muB_MeV" => opts.muB_MeV,
@@ -336,30 +379,80 @@ function main()
                     "root_quality_K" => "",
                     "selected_method_pi" => "",
                     "selected_method_K" => "",
+                    "governance_candidate_count_pi" => 0,
+                    "governance_candidate_count_K" => 0,
+                    "governance_selection_reason_pi" => "",
+                    "governance_selection_reason_K" => "",
+                    "second_pass_triggered_pi" => false,
+                    "second_pass_triggered_K" => false,
+                    "second_pass_candidate_count_pi" => 0,
+                    "second_pass_candidate_count_K" => 0,
                     "m_u" => NaN,
                     "m_d" => NaN,
                     "m_s" => NaN,
                     "status" => "ok",
                     "error_code" => "",
                     "error_message" => "",
-                    "timestamp_utc" => timestamp,
-                )
+                        "timestamp_utc" => timestamp,
+                    )
+
+                    if opts.include_mixed
+                        row["M_eta"] = NaN
+                        row["M_eta_prime"] = NaN
+                        row["M_sigma"] = NaN
+                        row["M_sigma_prime"] = NaN
+                        row["Gamma_eta"] = NaN
+                        row["Gamma_eta_prime"] = NaN
+                        row["Gamma_sigma"] = NaN
+                        row["Gamma_sigma_prime"] = NaN
+                        row["residual_eta"] = NaN
+                        row["residual_eta_prime"] = NaN
+                        row["residual_sigma"] = NaN
+                        row["residual_sigma_prime"] = NaN
+                        row["root_quality_eta"] = ""
+                        row["root_quality_eta_prime"] = ""
+                        row["root_quality_sigma"] = ""
+                        row["root_quality_sigma_prime"] = ""
+                        row["selected_method_eta"] = ""
+                        row["selected_method_eta_prime"] = ""
+                        row["selected_method_sigma"] = ""
+                        row["selected_method_sigma_prime"] = ""
+                        row["governance_candidate_count_eta"] = 0
+                        row["governance_candidate_count_eta_prime"] = 0
+                        row["governance_candidate_count_sigma"] = 0
+                        row["governance_candidate_count_sigma_prime"] = 0
+                        row["governance_selection_reason_eta"] = ""
+                        row["governance_selection_reason_eta_prime"] = ""
+                        row["governance_selection_reason_sigma"] = ""
+                        row["governance_selection_reason_sigma_prime"] = ""
+                        row["second_pass_triggered_eta"] = false
+                        row["second_pass_triggered_eta_prime"] = false
+                        row["second_pass_triggered_sigma"] = false
+                        row["second_pass_triggered_sigma_prime"] = false
+                        row["second_pass_candidate_count_eta"] = 0
+                        row["second_pass_candidate_count_eta_prime"] = 0
+                        row["second_pass_candidate_count_sigma"] = 0
+                        row["second_pass_candidate_count_sigma_prime"] = 0
+                    end
 
                 try
                     T_fm = T / ħc_MeV_fm
                     mu_fm = (opts.muB_MeV / ħc_MeV_fm) / 3.0
+                    mesons = opts.include_mixed ? (:pi, :K, :eta, :eta_prime, :sigma, :sigma_prime) : (:pi, :K)
                     res = solve_gap_and_meson_point(
                         T_fm,
                         mu_fm;
                         xi=xi,
-                        mesons=(:pi, :K),
+                        seed_state=(equilibrium_seed_state === nothing ? Main.Models.HADRON_SEED_5 : equilibrium_seed_state),
+                        mesons=mesons,
                         meson_seed_state=meson_seed_state,
                         mixed_seed_tracking_state=mixed_seed_tracking_state,
-                        mixed_branch_align=:identity_track_label_output,
+                        mixed_branch_align=:strict_sign_binding,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
                         solver_kwargs=(; iterations=opts.max_iter),
                         mass_kwargs=(; iterations=opts.max_iter),
+                        force_global_fallback=opts.force_global_fallback,
                     )
 
                     qp = res.quark_params
@@ -376,10 +469,63 @@ function main()
                     row["root_quality_K"] = String(mk.root_quality)
                     row["selected_method_pi"] = String(mpi.root_diagnostics.selected_method)
                     row["selected_method_K"] = String(mk.root_diagnostics.selected_method)
+                    row["governance_candidate_count_pi"] = Int(getproperty(mpi.root_diagnostics, :governance_candidate_count))
+                    row["governance_candidate_count_K"] = Int(getproperty(mk.root_diagnostics, :governance_candidate_count))
+                    row["governance_selection_reason_pi"] = String(getproperty(mpi.root_diagnostics, :governance_selection_reason))
+                    row["governance_selection_reason_K"] = String(getproperty(mk.root_diagnostics, :governance_selection_reason))
+                    row["second_pass_triggered_pi"] = Bool(getproperty(mpi.root_diagnostics, :second_pass_triggered))
+                    row["second_pass_triggered_K"] = Bool(getproperty(mk.root_diagnostics, :second_pass_triggered))
+                    row["second_pass_candidate_count_pi"] = Int(getproperty(mpi.root_diagnostics, :second_pass_candidate_count))
+                    row["second_pass_candidate_count_K"] = Int(getproperty(mk.root_diagnostics, :second_pass_candidate_count))
                     row["m_u"] = qp.m.u
                     row["m_d"] = qp.m.d
                     row["m_s"] = qp.m.s
 
+                    if opts.include_mixed
+                        eta = res.meson_results[:eta]
+                        eta_prime = res.meson_results[:eta_prime]
+                        sigma = res.meson_results[:sigma]
+                        sigma_prime = res.meson_results[:sigma_prime]
+
+                        row["M_eta"] = eta.mass
+                        row["M_eta_prime"] = eta_prime.mass
+                        row["M_sigma"] = sigma.mass
+                        row["M_sigma_prime"] = sigma_prime.mass
+                        row["Gamma_eta"] = eta.gamma
+                        row["Gamma_eta_prime"] = eta_prime.gamma
+                        row["Gamma_sigma"] = sigma.gamma
+                        row["Gamma_sigma_prime"] = sigma_prime.gamma
+                        row["residual_eta"] = eta.residual
+                        row["residual_eta_prime"] = eta_prime.residual
+                        row["residual_sigma"] = sigma.residual
+                        row["residual_sigma_prime"] = sigma_prime.residual
+                        row["root_quality_eta"] = String(eta.root_quality)
+                        row["root_quality_eta_prime"] = String(eta_prime.root_quality)
+                        row["root_quality_sigma"] = String(sigma.root_quality)
+                        row["root_quality_sigma_prime"] = String(sigma_prime.root_quality)
+                        row["selected_method_eta"] = String(eta.root_diagnostics.selected_method)
+                        row["selected_method_eta_prime"] = String(eta_prime.root_diagnostics.selected_method)
+                        row["selected_method_sigma"] = String(sigma.root_diagnostics.selected_method)
+                        row["selected_method_sigma_prime"] = String(sigma_prime.root_diagnostics.selected_method)
+                        row["governance_candidate_count_eta"] = Int(getproperty(eta.root_diagnostics, :governance_candidate_count))
+                        row["governance_candidate_count_eta_prime"] = Int(getproperty(eta_prime.root_diagnostics, :governance_candidate_count))
+                        row["governance_candidate_count_sigma"] = Int(getproperty(sigma.root_diagnostics, :governance_candidate_count))
+                        row["governance_candidate_count_sigma_prime"] = Int(getproperty(sigma_prime.root_diagnostics, :governance_candidate_count))
+                        row["governance_selection_reason_eta"] = String(getproperty(eta.root_diagnostics, :governance_selection_reason))
+                        row["governance_selection_reason_eta_prime"] = String(getproperty(eta_prime.root_diagnostics, :governance_selection_reason))
+                        row["governance_selection_reason_sigma"] = String(getproperty(sigma.root_diagnostics, :governance_selection_reason))
+                        row["governance_selection_reason_sigma_prime"] = String(getproperty(sigma_prime.root_diagnostics, :governance_selection_reason))
+                        row["second_pass_triggered_eta"] = Bool(getproperty(eta.root_diagnostics, :second_pass_triggered))
+                        row["second_pass_triggered_eta_prime"] = Bool(getproperty(eta_prime.root_diagnostics, :second_pass_triggered))
+                        row["second_pass_triggered_sigma"] = Bool(getproperty(sigma.root_diagnostics, :second_pass_triggered))
+                        row["second_pass_triggered_sigma_prime"] = Bool(getproperty(sigma_prime.root_diagnostics, :second_pass_triggered))
+                        row["second_pass_candidate_count_eta"] = Int(getproperty(eta.root_diagnostics, :second_pass_candidate_count))
+                        row["second_pass_candidate_count_eta_prime"] = Int(getproperty(eta_prime.root_diagnostics, :second_pass_candidate_count))
+                        row["second_pass_candidate_count_sigma"] = Int(getproperty(sigma.root_diagnostics, :second_pass_candidate_count))
+                        row["second_pass_candidate_count_sigma_prime"] = Int(getproperty(sigma_prime.root_diagnostics, :second_pass_candidate_count))
+                    end
+
+                    equilibrium_seed_state = collect(res.equilibrium.x_state)
                     meson_seed_state = res.meson_seed_state
                     mixed_seed_tracking_state = res.mixed_seed_tracking
                 catch e
