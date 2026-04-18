@@ -12,7 +12,7 @@ fields without embedded commas.
 
 module ScanCSV
 
-export write_metadata, write_header, read_existing_keys
+export write_metadata, write_header, read_existing_keys, assert_required_columns
 
 """Write metadata lines as `# key: value` (one per line)."""
 function write_metadata(io, metadata::AbstractDict{<:AbstractString,<:AbstractString})
@@ -87,6 +87,19 @@ function read_existing_keys(path::AbstractString, key_cols::AbstractVector{<:Abs
     end
 
     return keys
+end
+
+"""Assert that an existing scan CSV header contains all required columns."""
+function assert_required_columns(path::AbstractString, required_cols::AbstractVector{<:AbstractString})
+    isfile(path) || return
+    open(path, "r") do io
+        header = _first_non_comment_line(io)
+        header === nothing && error("existing output CSV has no header: $(path)")
+        colmap = _parse_header_map(header)
+        for c in required_cols
+            haskey(colmap, String(c)) || error("existing output CSV header is incompatible (missing column: $(c)). Please rerun with --overwrite or choose a new output path.")
+        end
+    end
 end
 
 end # module

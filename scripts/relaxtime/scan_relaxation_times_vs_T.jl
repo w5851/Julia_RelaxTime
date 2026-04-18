@@ -284,7 +284,10 @@ end
 function run_scan(opts::Options, ctx::ProvenanceMetadata.RunContext)
     ensure_parent_dir(opts.out)
     provenance_dir = isnothing(opts.provenance_dir) ? dirname(opts.out) : opts.provenance_dir
-    ensure_parent_dir(joinpath(provenance_dir, "dummy.txt"))
+    mkpath(provenance_dir)
+    if opts.resume && isfile(opts.out) && !opts.overwrite
+        ScanCSV.assert_required_columns(opts.out, ["run_id"])
+    end
     existing = opts.resume && isfile(opts.out) && !opts.overwrite ? 
         ScanCSV.read_existing_keys(opts.out, ["T_MeV", "muB_MeV", "xi"]) : Set{Tuple{Float64,Float64,Float64}}()
     opts.overwrite && isfile(opts.out) && rm(opts.out)

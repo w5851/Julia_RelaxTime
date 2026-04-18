@@ -15,32 +15,17 @@ Base.@kwdef struct RunContext
     argv::Vector{String}
 end
 
-@inline function _json_escape(s::AbstractString)
-    out = IOBuffer()
-    for c in s
-        if c == '"'
-            print(out, "\\\"")
-        elseif c == '\\'
-            print(out, "\\\\")
-        elseif c == '\n'
-            print(out, "\\n")
-        elseif c == '\r'
-            print(out, "\\r")
-        elseif c == '\t'
-            print(out, "\\t")
-        else
-            print(out, c)
-        end
-    end
-    return String(take!(out))
-end
+@inline _json_escape(s::AbstractString) = Base.escape_string(s)
 
 function _to_json(x)
     if x === nothing
         return "null"
     elseif x isa Bool
         return x ? "true" : "false"
-    elseif x isa Integer || x isa AbstractFloat
+    elseif x isa Integer
+        return string(x)
+    elseif x isa AbstractFloat
+        isfinite(x) || throw(ArgumentError("non-finite float cannot be serialized to JSON: $(x)"))
         return string(x)
     elseif x isa AbstractString
         return "\"$(_json_escape(x))\""
@@ -91,7 +76,14 @@ end
 
 function _sha256_file(path::String)
     open(path, "r") do io
-        return bytes2hex(sha256(read(io)))
+        ctx = SHA.SHA2_256_CTX()
+        buffer = Vector{UInt8}(undef, 1024 * 1024)
+        while !eof(io)
+            n = readbytes!(io, buffer)
+            n == 0 && break
+            SHA.update!(ctx, @view buffer[1:n])
+        end
+        return bytes2hex(SHA.digest!(ctx))
     end
 end
 
@@ -123,8 +115,9 @@ function _artifact_entry(path::String, project_root::String)
 end
 
 function new_run_context(script::String, argv::Vector{String}=copy(ARGS))::RunContext
-    run_id = string(Dates.format(now(UTC), dateformat"yyyymmddTHHMMSS"), "_", bytes2hex(rand(UInt8, 4)))
-    timestamp_utc = Dates.format(now(UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ")
+    t = now(UTC)
+    run_id = string(Dates.format(t, dateformat"yyyymmddTHHMMSS"), "_", bytes2hex(rand(UInt8, 4)))
+    timestamp_utc = Dates.format(t, dateformat"yyyy-mm-ddTHH:MM:SSZ")
     return RunContext(run_id=run_id, timestamp_utc=timestamp_utc, script=script, argv=copy(argv))
 end
 
@@ -180,14 +173,15 @@ function write_run_sidecars(outdir::String;
     project_toml = joinpath(project_root, "Project.toml")
     manifest_toml = joinpath(project_root, "Manifest.toml")
 
+    cwd_rel = relpath(pwd(), project_root)
     manifest = Dict{String,Any}(
         "schema_version" => "v1",
         "run_id" => ctx.run_id,
         "timestamp_utc" => ctx.timestamp_utc,
         "script" => ctx.script,
         "argv" => ctx.argv,
-        "cwd" => pwd(),
-        "project_path" => project_root,
+        "cwd" => cwd_rel,
+        "project_path" => ".",
         "julia_version" => string(VERSION),
         "threads" => Threads.nthreads(),
         "git_commit" => _current_git_commit(project_root),

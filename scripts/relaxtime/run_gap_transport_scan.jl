@@ -526,6 +526,7 @@ function ensure_output_header_compatible(path::AbstractString)
         "quality_flag",
         "quality_reason",
         "quality_metric",
+        "run_id",
         "equilibrium_backend",
         "seed_source",
         "phase_prev",
@@ -1087,7 +1088,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
         ensure_parent_dir(opts.failed_points_output)
     end
     provenance_dir = isnothing(opts.provenance_dir) ? dirname(opts.output) : opts.provenance_dir
-    ensure_parent_dir(joinpath(provenance_dir, "dummy.txt"))
+    mkpath(provenance_dir)
 
     if opts.resume && isfile(opts.output) && !opts.overwrite
         ensure_output_header_compatible(opts.output)
@@ -1363,6 +1364,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
                     stats_success += 1
                 catch point_err
                     @warn "SCAN POINT FAILED — skipped" T_mev=T_mev muB_mev=muB_mev xi=xi err=point_err
+                    stats_error += 1
                     if failed_io !== nothing
                         diag_or_hint = (seed_source="unknown", phase_prev=previous_phase, phase_curr=:unknown)
                         write_failed_point_row!(failed_io, T_mev, muB_mev, xi, diag_or_hint, point_err)

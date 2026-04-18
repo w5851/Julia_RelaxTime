@@ -1,4 +1,5 @@
 using Test
+using JSON3
 
 const _PROVENANCE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "provenance_metadata.jl"))
 if !isdefined(Main, :ProvenanceMetadata)
@@ -42,9 +43,22 @@ using Main.ProvenanceMetadata
     @test isfile(effective_path)
     @test isfile(manifest_path)
 
-    manifest_text = read(manifest_path, String)
-    @test occursin("\"run_id\"", manifest_text)
-    @test occursin("\"artifacts\"", manifest_text)
-    @test occursin("\"sha256\"", manifest_text)
-    @test occursin("\"rows\"", manifest_text)
+    manifest_obj = JSON3.read(read(manifest_path, String))
+    effective_obj = JSON3.read(read(effective_path, String))
+    @test String(manifest_obj["run_id"]) == ctx.run_id
+    @test haskey(manifest_obj, "artifacts")
+    @test length(manifest_obj["artifacts"]) == 1
+    @test haskey(manifest_obj["artifacts"][1], "sha256")
+    @test haskey(manifest_obj["artifacts"][1], "rows")
+    @test String(manifest_obj["project_path"]) == "."
+    @test !isabspath(String(manifest_obj["cwd"]))
+    @test String(effective_obj["run_id"]) == ctx.run_id
+
+    @test_throws ArgumentError ProvenanceMetadata.write_run_sidecars(
+        outdir;
+        ctx=ctx,
+        effective_config=Dict{String,Any}("bad" => NaN),
+        artifacts=[csv_path],
+        summary=Dict{String,Any}("points_total" => 2),
+    )
 end
