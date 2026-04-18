@@ -31,6 +31,9 @@ end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 # Load RelaxTime entrypoint to access RelaxationTime module dependencies
 if !isdefined(Main, :RelaxTime)
     Base.include(Main, joinpath(@__DIR__, "../../../src/relaxtime/RelaxTime.jl"))
@@ -55,13 +58,13 @@ end
         # Feature: parameter-struct-migration, Property 5: Extended QuarkParams with A Field
         # **Validates: Requirements 9.4**
         @check max_examples=max_examples_main function property_struct_workflow_support(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_d = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_s = Data.Floats{Float64}(minimum=1.0, maximum=4.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_d = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.4),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.22)
+            m_u = finite_float(0.5, 3.0),
+            m_d = finite_float(0.5, 3.0),
+            m_s = finite_float(1.0, 4.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_d = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.4),
+            T = finite_float(0.1, 0.22)
         )
             vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
             all(isfinite, vals) || return
@@ -114,13 +117,13 @@ end
         # Feature: parameter-struct-migration, Property 5: Extended QuarkParams with A Field
         # **Validates: Requirements 9.4**
         @check max_examples=max_examples_main function property_namedtuple_workflow_support(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_d = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_s = Data.Floats{Float64}(minimum=1.0, maximum=4.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_d = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.4),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.22)
+            m_u = finite_float(0.5, 3.0),
+            m_d = finite_float(0.5, 3.0),
+            m_s = finite_float(1.0, 4.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_d = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.4),
+            T = finite_float(0.1, 0.22)
         )
             vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
             all(isfinite, vals) || return
@@ -224,13 +227,13 @@ end
         # Feature: parameter-struct-migration, Property 5: Extended QuarkParams with A Field
         # **Validates: Requirements 9.4**
         @check max_examples=max_examples_equiv function property_struct_namedtuple_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_d = Data.Floats{Float64}(minimum=0.5, maximum=3.0),
-            m_s = Data.Floats{Float64}(minimum=1.0, maximum=4.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_d = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.4),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.22)
+            m_u = finite_float(0.5, 3.0),
+            m_d = finite_float(0.5, 3.0),
+            m_s = finite_float(1.0, 4.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_d = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.4),
+            T = finite_float(0.1, 0.22)
         )
             vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s, T)
             all(isfinite, vals) || return

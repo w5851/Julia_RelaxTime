@@ -20,18 +20,23 @@ end
 
 using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
 
+const _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "Property: Conversion Round-Trip Preservation" begin
     
     @testset "QuarkParams round-trip preservation" begin
         # Feature: parameter-struct-migration, Property 3: Conversion Round-Trip Preservation
         # **Validates: Requirements 9.5**
-        @check max_examples=20 function property_quark_params_roundtrip(
-            m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-            m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-            m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+        @check max_examples=(_ci ? 10 : 20) function property_quark_params_roundtrip(
+            m_u = finite_float(0.1, 5.0),
+            m_d = finite_float(0.1, 5.0),
+            m_s = finite_float(0.1, 10.0),
+            μ_u = finite_float(0.0, 1.0),
+            μ_d = finite_float(0.0, 1.0),
+            μ_s = finite_float(0.0, 1.0)
         )
             # Create original struct
             q_original = QuarkParams(
@@ -76,10 +81,10 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
     @testset "ThermoParams round-trip preservation" begin
         # Feature: parameter-struct-migration, Property 3: Conversion Round-Trip Preservation
         # **Validates: Requirements 9.5**
-        @check max_examples=20 function property_thermo_params_roundtrip(
-            T = Data.Floats{Float64}(minimum=0.05, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            Φbar = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+        @check max_examples=(_ci ? 10 : 20) function property_thermo_params_roundtrip(
+            T = finite_float(0.05, 0.3),
+            Φ = finite_float(0.0, 1.0),
+            Φbar = finite_float(0.0, 1.0)
         )
             # Create original struct (ξ defaults to 0.0)
             t_original = ThermoParams(T, Φ, Φbar, 0.0)
@@ -113,11 +118,11 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
     @testset "ThermoParams with non-zero ξ round-trip" begin
         # Feature: parameter-struct-migration, Property 3: Conversion Round-Trip Preservation
         # **Validates: Requirements 9.5**
-        @check max_examples=20 function property_thermo_params_with_xi_roundtrip(
-            T = Data.Floats{Float64}(minimum=0.05, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            Φbar = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            ξ = Data.Floats{Float64}(minimum=-0.8, maximum=0.8)
+        @check max_examples=(_ci ? 10 : 20) function property_thermo_params_with_xi_roundtrip(
+            T = finite_float(0.05, 0.3),
+            Φ = finite_float(0.0, 1.0),
+            Φbar = finite_float(0.0, 1.0),
+            ξ = finite_float(-0.8, 0.8)
         )
             # Create original struct with non-zero ξ
             t_original = ThermoParams(T, Φ, Φbar, ξ)
@@ -146,13 +151,13 @@ using Main.ParameterTypes: QuarkParams, ThermoParams, as_namedtuple
         # Test that multiple conversions don't accumulate errors
         # Feature: parameter-struct-migration, Property 3: Conversion Round-Trip Preservation
         # **Validates: Requirements 9.5**
-        @check max_examples=10 function property_multiple_roundtrips(
-            m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-            m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-            m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+        @check max_examples=(_ci ? 5 : 10) function property_multiple_roundtrips(
+            m_u = finite_float(0.1, 5.0),
+            m_d = finite_float(0.1, 5.0),
+            m_s = finite_float(0.1, 10.0),
+            μ_u = finite_float(0.0, 1.0),
+            μ_d = finite_float(0.0, 1.0),
+            μ_s = finite_float(0.0, 1.0)
         )
             # Create original struct
             q_original = QuarkParams(

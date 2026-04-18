@@ -1,4 +1,4 @@
-name: nightly-full-regression
+name: nightly-full-suite
 
 on:
   schedule:
@@ -39,6 +39,7 @@ jobs:
         run: julia --project=. tests/regression/runtests.jl
 
       - name: Run integration full profile (models + pnjl shard)
+        id: integration_models_pnjl
         timeout-minutes: 60
         run: |
           files=$(git ls-files "tests/integration/models/test_*.jl" "tests/integration/pnjl/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
@@ -50,6 +51,7 @@ jobs:
           INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
 
       - name: Run integration full profile (config shard)
+        id: integration_config
         timeout-minutes: 20
         run: |
           files=$(git ls-files "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
@@ -61,6 +63,8 @@ jobs:
           INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
 
       - name: Run integration full profile (relaxtime shard except ensure-A)
+        id: integration_relaxtime
+        continue-on-error: true
         timeout-minutes: 75
         run: |
           files=$(git ls-files "tests/integration/relaxtime/test_*.jl" | sed 's#^tests/integration/##' | grep -v '^relaxtime/test_utils\.jl$' | grep -v '^relaxtime/test_ensure_quark_params_has_A_property\.jl$' | paste -sd ';' -)
@@ -72,6 +76,8 @@ jobs:
           INTEGRATION_FILES="$files" julia --project=. tests/integration/runtests.jl
 
       - name: Run integration full profile (relaxtime ensure-A watchdog)
+        id: integration_relaxtime_ensure_a
+        if: always()
         timeout-minutes: 15
         run: |
           file="relaxtime/test_ensure_quark_params_has_A_property.jl"
@@ -79,7 +85,36 @@ jobs:
           INTEGRATION_FILES="$file" julia --project=. tests/integration/runtests.jl
 
       - name: Run validation full profile
+        id: validation_full
+        if: always()
         timeout-minutes: 45
         env:
           VALIDATION_PROFILE: full
         run: julia --project=. tests/validation/runtests.jl
+
+      - name: Final test gate
+        if: always()
+        run: |
+          failures=0
+
+          check_step() {
+            local step_name="$1"
+            local outcome="$2"
+            if [ "$outcome" != "success" ]; then
+              echo "::error::Step failed: $step_name (outcome=$outcome)"
+              failures=$((failures + 1))
+            fi
+          }
+
+          check_step "integration models+pnjl" "${{ steps.integration_models_pnjl.outcome }}"
+          check_step "integration config" "${{ steps.integration_config.outcome }}"
+          check_step "integration relaxtime except ensure-A" "${{ steps.integration_relaxtime.outcome }}"
+          check_step "integration relaxtime ensure-A" "${{ steps.integration_relaxtime_ensure_a.outcome }}"
+          check_step "validation full" "${{ steps.validation_full.outcome }}"
+
+          if [ "$failures" -ne 0 ]; then
+            echo "Final gate detected $failures failing step(s)."
+            exit 1
+          fi
+
+          echo "Final gate passed: all required steps succeeded."

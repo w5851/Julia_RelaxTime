@@ -36,6 +36,9 @@ using Main.GaussLegendre: gauleg
 include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
 
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "RelaxationTime Property Tests" begin
     _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
     max_examples_relax = _ci ? 1 : 5
@@ -69,19 +72,22 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         @check max_examples=max_examples_relax function property_relaxation_times_equivalence(
             # Generate random quark masses (in fm⁻¹)
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=4.0),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 4.0),
             # Generate random chemical potentials (in fm⁻¹)
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.4),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.4),
             # Generate random thermodynamic parameters
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
             # Generate random densities
-            n_u = Data.Floats{Float64}(minimum=0.01, maximum=0.5),
-            n_s = Data.Floats{Float64}(minimum=0.01, maximum=0.2),
+            n_u = finite_float(0.01, 0.5),
+            n_s = finite_float(0.01, 0.2),
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, n_u, n_s)
+            all(isfinite, vals) || return true
+
             # Compute A functions for both u and s quarks
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
@@ -203,14 +209,17 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
         @check max_examples=max_examples_rates function property_compute_average_rates_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=4.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.4),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 4.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.4),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
         )
+            vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar)
+            all(isfinite, vals) || return true
+
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)

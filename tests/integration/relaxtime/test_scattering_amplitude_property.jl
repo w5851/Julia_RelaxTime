@@ -32,6 +32,9 @@ using .GaussLegendre: gauleg
 include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
 
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "ScatteringAmplitude Property Tests" begin
     _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
     max_examples = _ci ? 20 : 50
@@ -61,18 +64,18 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         @check max_examples=max_examples function property_scattering_amplitude_equivalence(
             # Generate random quark masses (in fm⁻¹)
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
             # Generate random chemical potentials (in fm⁻¹)
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
             # Generate random thermodynamic parameters (avoid extreme values)
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
             # Generate random kinematic variables
-            s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),  # Must be above threshold
-            t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),  # Must be negative for physical scattering
+            s = finite_float(5.0, 15.0),  # Must be above threshold
+            t = finite_float(-1.5, -0.2),  # Must be negative for physical scattering
         )
             vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
             all(isfinite, vals) || return true
@@ -156,15 +159,15 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
         @check max_examples=max_examples function property_qqbar_scattering_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),
-            t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
+            s = finite_float(5.0, 15.0),
+            t = finite_float(-1.5, -0.2),
         )
             vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
             all(isfinite, vals) || return true
@@ -230,15 +233,15 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         test_processes = [:uu_to_uu, :ss_to_ss, :ud_to_ud, :uubar_to_uubar, :uubar_to_ssbar]
         
         @check max_examples=max_examples_multi function property_multiple_processes(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),
-            t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
+            s = finite_float(5.0, 15.0),
+            t = finite_float(-1.5, -0.2),
         )
             vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar, s, t)
             all(isfinite, vals) || return true
@@ -291,13 +294,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("="^70)
         
         @check max_examples=max_examples function property_normalization_helpers(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            T = Data.Floats{Float64}(minimum=0.05, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            Φbar = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 1.0),
+            μ_s = finite_float(0.0, 1.0),
+            T = finite_float(0.05, 0.3),
+            Φ = finite_float(0.0, 1.0),
+            Φbar = finite_float(0.0, 1.0),
         )
             vals = (m_u, m_s, μ_u, μ_s, T, Φ, Φbar)
             all(isfinite, vals) || return true

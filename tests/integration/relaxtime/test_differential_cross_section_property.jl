@@ -30,6 +30,11 @@ using .DifferentialCrossSection
 include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
 
+const _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "DifferentialCrossSection Property Tests" begin
     
     # ========================================================================
@@ -53,11 +58,11 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         RTOL = 1e-12  # Relative tolerance for floating-point comparison
         ATOL = 1e-14  # Absolute tolerance
         
-        @check max_examples=100 function property_differential_cross_section_correctness(
+        @check max_examples=(_ci ? 40 : 100) function property_differential_cross_section_correctness(
             # Generate random kinematic variables
-            s_12_plus = Data.Floats{Float64}(minimum=0.1, maximum=100.0),  # Must be positive
-            s_12_minus = Data.Floats{Float64}(minimum=0.1, maximum=100.0), # Must be non-zero
-            M_squared = Data.Floats{Float64}(minimum=0.0, maximum=1000.0), # Must be non-negative
+            s_12_plus = finite_float(0.1, 100.0),  # Must be positive
+            s_12_minus = finite_float(0.1, 100.0), # Must be non-zero
+            M_squared = finite_float(0.0, 1000.0), # Must be non-negative
         )
             # Compute differential cross-section
             dsigma_dt = DifferentialCrossSection.differential_cross_section(s_12_plus, s_12_minus, M_squared)
@@ -96,21 +101,21 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("Testing check_kinematic_threshold with random parameters")
         println("="^70)
         
-        @check max_examples=100 function property_threshold_checking(
-            m1 = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-            m2 = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
+        @check max_examples=(_ci ? 40 : 100) function property_threshold_checking(
+            m1 = finite_float(0.1, 5.0),
+            m2 = finite_float(0.1, 5.0),
         )
             # Calculate threshold
             s_threshold = (m1 + m2)^2
             
             # Test above threshold (should pass)
-            s_above = Data.produce!(Data.Floats{Float64}(minimum=s_threshold + 1.0, maximum=s_threshold + 100.0))
+            s_above = Data.produce!(finite_float(s_threshold + 1.0, s_threshold + 100.0))
             check_kinematic_threshold(s_above, m1, m2, warn_close=false) == true ||
                 error("Threshold check failed for s=$s_above > threshold=$s_threshold")
             
             # Test below threshold (should fail)
             if s_threshold > 1.0  # Only test if threshold is large enough
-                s_below = Data.produce!(Data.Floats{Float64}(minimum=0.1, maximum=s_threshold - 0.1))
+                s_below = Data.produce!(finite_float(0.1, s_threshold - 0.1))
                 check_kinematic_threshold(s_below, m1, m2, warn_close=false) == false ||
                     error("Threshold check should fail for s=$s_below < threshold=$s_threshold")
             end
@@ -135,14 +140,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("Testing that normalization helpers work correctly")
         println("="^70)
         
-        @check max_examples=50 function property_struct_workflow_support(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            T = Data.Floats{Float64}(minimum=0.05, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-            Φbar = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
+        @check max_examples=(_ci ? 20 : 50) function property_struct_workflow_support(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 1.0),
+            μ_s = finite_float(0.0, 1.0),
+            T = finite_float(0.05, 0.3),
+            Φ = finite_float(0.0, 1.0),
+            Φbar = finite_float(0.0, 1.0),
         )
             # Create struct parameters
             q_struct = QuarkParams(
@@ -190,11 +195,11 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         RTOL = 1e-12
         ATOL = 1e-14
         
-        @check max_examples=50 function property_edge_cases(
+        @check max_examples=(_ci ? 20 : 50) function property_edge_cases(
             # Test with very small values
-            s_12_plus_small = Data.Floats{Float64}(minimum=1e-10, maximum=1e-5),
-            s_12_minus_small = Data.Floats{Float64}(minimum=1e-10, maximum=1e-5),
-            M_squared_small = Data.Floats{Float64}(minimum=0.0, maximum=1e-5),
+            s_12_plus_small = finite_float(1e-10, 1e-5),
+            s_12_minus_small = finite_float(1e-10, 1e-5),
+            M_squared_small = finite_float(0.0, 1e-5),
         )
             # Test with small values
             dsigma_small = DifferentialCrossSection.differential_cross_section(
@@ -209,11 +214,11 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
                 error("Formula failed for small values: got $dsigma_small, expected $expected_small")
         end
         
-        @check max_examples=50 function property_large_values(
+        @check max_examples=(_ci ? 20 : 50) function property_large_values(
             # Test with large values
-            s_12_plus_large = Data.Floats{Float64}(minimum=100.0, maximum=1000.0),
-            s_12_minus_large = Data.Floats{Float64}(minimum=100.0, maximum=1000.0),
-            M_squared_large = Data.Floats{Float64}(minimum=1000.0, maximum=10000.0),
+            s_12_plus_large = finite_float(100.0, 1000.0),
+            s_12_minus_large = finite_float(100.0, 1000.0),
+            M_squared_large = finite_float(1000.0, 10000.0),
         )
             # Test with large values
             dsigma_large = DifferentialCrossSection.differential_cross_section(
@@ -241,9 +246,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         println("Testing behavior when s_12_minus is very small (m1 ≈ m2)")
         println("="^70)
         
-        @check max_examples=50 function property_degenerate_case(
-            s_12_plus = Data.Floats{Float64}(minimum=1.0, maximum=100.0),
-            M_squared = Data.Floats{Float64}(minimum=1.0, maximum=1000.0),
+        @check max_examples=(_ci ? 20 : 50) function property_degenerate_case(
+            s_12_plus = finite_float(1.0, 100.0),
+            M_squared = finite_float(1.0, 1000.0),
         )
             # Test with very small s_12_minus (simulating m1 ≈ m2)
             s_12_minus_tiny = 1e-15

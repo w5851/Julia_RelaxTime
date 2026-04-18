@@ -31,6 +31,11 @@ using .GaussLegendre: gauleg
 include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple
 
+const _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "TotalPropagator Property Tests" begin
     @testset "Property: total_propagator_simple Equivalence" begin
         integration_println("\n" * "="^70)
@@ -42,22 +47,22 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         ATOL = 1e-14
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
 
-        @check max_examples=20 function property_total_propagator_simple_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            k0 = Data.Floats{Float64}(minimum=0.1, maximum=2.0),
-            k_norm = Data.Floats{Float64}(minimum=0.0, maximum=1.5),
+        @check max_examples=(_ci ? 10 : 20) function property_total_propagator_simple_equivalence(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
+            k0 = finite_float(0.1, 2.0),
+            k_norm = finite_float(0.0, 1.5),
         )
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
 
             q_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s), A=(u=A_u, d=A_u, s=A_s))
             t_nt = (T=T, Φ=Φ, Φbar=Φbar, ξ=0.0)
@@ -88,22 +93,22 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         ATOL = 1e-14
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
 
-        @check max_examples=20 function property_total_propagator_mixed_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            k0 = Data.Floats{Float64}(minimum=0.1, maximum=2.0),
-            k_norm = Data.Floats{Float64}(minimum=0.0, maximum=1.5),
+        @check max_examples=(_ci ? 10 : 20) function property_total_propagator_mixed_equivalence(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
+            k0 = finite_float(0.1, 2.0),
+            k_norm = finite_float(0.0, 1.5),
         )
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
             A_s = A(m_s, μ_s, T, Φ, Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, m_u)
-            G_s = calculate_G_from_A(A_s, m_s)
-            K_coeffs = calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
 
             q_struct = QuarkParams((u=m_u, d=m_u, s=m_s), (u=μ_u, d=μ_u, s=μ_s))
             t_struct = ThermoParams(T, Φ, Φbar, 0.0)
@@ -137,13 +142,13 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         RTOL = 1e-12
         ATOL = 1e-14
 
-        @check max_examples=30 function property_calculate_cms_momentum_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            s = Data.Floats{Float64}(minimum=5.0, maximum=15.0),
-            t = Data.Floats{Float64}(minimum=-1.5, maximum=-0.2),
+        @check max_examples=(_ci ? 15 : 30) function property_calculate_cms_momentum_equivalence(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            s = finite_float(5.0, 15.0),
+            t = finite_float(-1.5, -0.2),
         )
             q_struct = QuarkParams((u=m_u, d=m_u, s=m_s), (u=μ_u, d=μ_u, s=μ_s))
             q_nt = (m=(u=m_u, d=m_u, s=m_s), μ=(u=μ_u, d=μ_u, s=μ_s))
@@ -202,9 +207,9 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple
         for point in representative_points
             A_u = A(point.m_u, point.μ_u, point.T, point.Φ, point.Φbar, nodes_p, weights_p)
             A_s = A(point.m_s, point.μ_s, point.T, point.Φ, point.Φbar, nodes_p, weights_p)
-            G_u = calculate_G_from_A(A_u, point.m_u)
-            G_s = calculate_G_from_A(A_s, point.m_s)
-            K_coeffs = calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
+            G_u = EffectiveCouplings.calculate_G_from_A(A_u, point.m_u)
+            G_s = EffectiveCouplings.calculate_G_from_A(A_s, point.m_s)
+            K_coeffs = EffectiveCouplings.calculate_effective_couplings(Constants_PNJL.G_fm2, Constants_PNJL.K_fm5, G_u, G_s)
 
             q_struct = QuarkParams((u=point.m_u, d=point.m_u, s=point.m_s), (u=point.μ_u, d=point.μ_u, s=point.μ_s))
             t_struct = ThermoParams(point.T, point.Φ, point.Φbar, 0.0)

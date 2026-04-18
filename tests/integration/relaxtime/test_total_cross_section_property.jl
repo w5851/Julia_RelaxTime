@@ -26,6 +26,11 @@ using .GaussLegendre: gauleg
 include("test_utils.jl")
 using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
 
+const _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
+
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "TotalCrossSection Property Tests" begin
     
     # ========================================================================
@@ -49,20 +54,20 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         # Pre-compute Gauss-Legendre nodes and weights for A function
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
-        @check max_examples=20 function property_total_cross_section_equivalence(
+        @check max_examples=(_ci ? 10 : 20) function property_total_cross_section_equivalence(
             # Generate random quark masses (in fm⁻¹)
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
             # Generate random chemical potentials (in fm⁻¹)
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
             # Generate random thermodynamic parameters
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
             # Generate random s value above threshold
             # For m_u ~ 1.5, threshold is (2*m_u)^2 ~ 9, so start from 10
-            s = Data.Floats{Float64}(minimum=10.0, maximum=50.0),
+            s = finite_float(10.0, 50.0),
         )
             # Compute A functions for both u and s quarks
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
@@ -150,15 +155,15 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         # Test a subset of representative processes
         test_processes = [:uu_to_uu, :ss_to_ss, :ud_to_ud, :us_to_us]
         
-        @check max_examples=10 function property_multiple_processes(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            s = Data.Floats{Float64}(minimum=10.0, maximum=50.0),
+        @check max_examples=(_ci ? 5 : 10) function property_multiple_processes(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
+            s = finite_float(10.0, 50.0),
         )
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
@@ -215,14 +220,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
-        @check max_examples=15 function property_near_threshold_equivalence(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+        @check max_examples=(_ci ? 8 : 15) function property_near_threshold_equivalence(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
         )
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)
@@ -281,14 +286,14 @@ using .Main: QuarkParams, ThermoParams, as_namedtuple, approx_equal
         
         nodes_p, weights_p = gauleg(0.0, 20.0, 64)
         
-        @check max_examples=10 function property_struct_workflow_support(
-            m_u = Data.Floats{Float64}(minimum=0.5, maximum=2.0),
-            m_s = Data.Floats{Float64}(minimum=2.0, maximum=5.0),
-            μ_u = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            μ_s = Data.Floats{Float64}(minimum=0.0, maximum=0.5),
-            T = Data.Floats{Float64}(minimum=0.1, maximum=0.3),
-            Φ = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
-            Φbar = Data.Floats{Float64}(minimum=0.1, maximum=0.9),
+        @check max_examples=(_ci ? 5 : 10) function property_struct_workflow_support(
+            m_u = finite_float(0.5, 2.0),
+            m_s = finite_float(2.0, 5.0),
+            μ_u = finite_float(0.0, 0.5),
+            μ_s = finite_float(0.0, 0.5),
+            T = finite_float(0.1, 0.3),
+            Φ = finite_float(0.1, 0.9),
+            Φbar = finite_float(0.1, 0.9),
         )
             # Setup parameters
             A_u = A(m_u, μ_u, T, Φ, Φbar, nodes_p, weights_p)

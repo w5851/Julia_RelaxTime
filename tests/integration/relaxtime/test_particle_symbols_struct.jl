@@ -25,6 +25,9 @@ end
 
 using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_for_process
 
+@inline finite_float(minimum::Float64, maximum::Float64) =
+    Data.Floats{Float64}(minimum=minimum, maximum=maximum, nans=false, infs=false)
+
 @testset "ParticleSymbols Struct Support" begin
     _ci = get(ENV, "CI", "") in ("1", "true", "TRUE", "yes", "YES")
     max_examples = _ci ? 20 : 100
@@ -41,12 +44,12 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         # Test get_mass for all particle types
         @testset "get_mass equivalence" begin
             @check max_examples=max_examples function property_get_mass_equivalence(
-                m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-                μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+                m_u = finite_float(0.1, 5.0),
+                m_d = finite_float(0.1, 5.0),
+                m_s = finite_float(0.1, 10.0),
+                μ_u = finite_float(0.0, 1.0),
+                μ_d = finite_float(0.0, 1.0),
+                μ_s = finite_float(0.0, 1.0)
             )
                 vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
                 all(isfinite, vals) || return
@@ -94,12 +97,12 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         # Test get_chemical_potential for all particle types
         @testset "get_chemical_potential equivalence" begin
             @check max_examples=max_examples function property_get_chemical_potential_equivalence(
-                m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-                μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+                m_u = finite_float(0.1, 5.0),
+                m_d = finite_float(0.1, 5.0),
+                m_s = finite_float(0.1, 10.0),
+                μ_u = finite_float(0.0, 1.0),
+                μ_d = finite_float(0.0, 1.0),
+                μ_s = finite_float(0.0, 1.0)
             )
                 vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
                 all(isfinite, vals) || return
@@ -147,12 +150,12 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         # Test get_quark_masses_for_process for various scattering processes
         @testset "get_quark_masses_for_process equivalence" begin
             @check max_examples=max_examples function property_get_quark_masses_for_process_equivalence(
-                m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-                μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+                m_u = finite_float(0.1, 5.0),
+                m_d = finite_float(0.1, 5.0),
+                m_s = finite_float(0.1, 10.0),
+                μ_u = finite_float(0.0, 1.0),
+                μ_d = finite_float(0.0, 1.0),
+                μ_s = finite_float(0.0, 1.0)
             )
                 vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
                 all(isfinite, vals) || return
@@ -200,12 +203,12 @@ using Main.ParticleSymbols: get_mass, get_chemical_potential, get_quark_masses_f
         # Test that get_quark_masses_for_process returns correct masses for specific processes
         @testset "get_quark_masses_for_process correctness" begin
             @check max_examples=max_examples function property_get_quark_masses_for_process_correctness(
-                m_u = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_d = Data.Floats{Float64}(minimum=0.1, maximum=5.0),
-                m_s = Data.Floats{Float64}(minimum=0.1, maximum=10.0),
-                μ_u = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_d = Data.Floats{Float64}(minimum=0.0, maximum=1.0),
-                μ_s = Data.Floats{Float64}(minimum=0.0, maximum=1.0)
+                m_u = finite_float(0.1, 5.0),
+                m_d = finite_float(0.1, 5.0),
+                m_s = finite_float(0.1, 10.0),
+                μ_u = finite_float(0.0, 1.0),
+                μ_d = finite_float(0.0, 1.0),
+                μ_s = finite_float(0.0, 1.0)
             )
                 vals = (m_u, m_d, m_s, μ_u, μ_d, μ_s)
                 all(isfinite, vals) || return
