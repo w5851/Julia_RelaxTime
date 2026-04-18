@@ -15,6 +15,27 @@ utility rather than introducing a second implementation path.
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
+@inline function _norm_slash(path::AbstractString)
+    return replace(String(path), '\\' => '/')
+end
+
+function _repo_relpath(path::AbstractString)
+    abs_path = normpath(abspath(String(path)))
+    rel = try
+        relpath(abs_path, PROJECT_ROOT)
+    catch
+        nothing
+    end
+    if rel !== nothing
+        rel_s = String(rel)
+        if rel_s == "." || !(startswith(rel_s, "..") || startswith(rel_s, string("..", Base.Filesystem.path_separator)))
+            return _norm_slash(rel_s)
+        end
+        return _norm_slash(rel_s)
+    end
+    return _norm_slash(abs_path)
+end
+
 using Dates
 using SHA
 
@@ -437,7 +458,7 @@ end
 function _artifact_entry(path::String)
     abs_path = abspath(path)
     return Dict{String,Any}(
-        "path" => relpath(abs_path, PROJECT_ROOT),
+        "path" => _repo_relpath(abs_path),
         "sha256" => _sha256_file(abs_path),
         "rows" => _count_csv_rows(abs_path),
         "schema_version" => "scan_csv_v1",
@@ -462,8 +483,8 @@ function _write_provenance_sidecars(opts::Options, ctx::RunContext, section::Str
         "timestamp_utc" => ctx.timestamp_utc,
         "script" => "scripts/relaxtime/run_manual_relaxation_scan_workflow.jl",
         "argv" => copy(ctx.argv),
-        "cwd" => pwd(),
-        "project_path" => PROJECT_ROOT,
+        "cwd" => _repo_relpath(pwd()),
+        "project_path" => ".",
         "julia_version" => string(VERSION),
         "threads" => Threads.nthreads(),
         "git_commit" => _current_git_commit(),

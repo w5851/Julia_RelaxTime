@@ -21,11 +21,47 @@ if !isdefined(Main, :EquilibriumFacade)
 end
 
 using Main.EquilibriumFacade: pnjl_model_kind
+using Main.EquilibriumFacade: solve_equilibrium_backend
 
 @testset "EquilibriumFacade" begin
     @testset "pnjl_model_kind 返回符号" begin
         kind = pnjl_model_kind(:legacy)
         @test kind isa Symbol
         @test kind == :PNJL
+    end
+
+    @testset "models backend 默认走 FixedMu 治理链" begin
+        res = solve_equilibrium_backend(
+            0.15,
+            0.0;
+            solver_backend=:models,
+            p_num=8,
+            t_num=4,
+            seed_state=Main.Models.HADRON_SEED_5,
+            models_residual_norm_max=1e-4,
+        )
+
+        @test res.converged === true
+        @test !ismissing(res.iterations)
+        @test !ismissing(res.residual_norm)
+        @test isfinite(Float64(res.residual_norm))
+    end
+
+    @testset "models backend 显式 models_solver 仍走 solve_gap 路径" begin
+        custom_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward)
+        res = solve_equilibrium_backend(
+            0.15,
+            0.0;
+            solver_backend=:models,
+            models_solver=custom_solver,
+            p_num=8,
+            t_num=4,
+            seed_state=Main.Models.HADRON_SEED_5,
+            models_residual_norm_max=1e-4,
+        )
+
+        @test res.converged === true
+        @test ismissing(res.iterations)
+        @test ismissing(res.residual_norm)
     end
 end

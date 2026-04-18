@@ -1,0 +1,11 @@
+T_MeV=255.0
+muB_MeV=0.0
+xi=-0.3
+meson=eta_prime
+branch=plus
+center_mass_fm=2.7994813428314154
+center_gamma_fm=2.2604622697981633
+center_mass_MeV=552.4132000670604
+center_gamma_MeV=446.05019400740167
+grid_mass=2.2:0.01:3.3
+grid_gamma=0.0:0.01:3.0

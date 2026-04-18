@@ -46,6 +46,10 @@ function _derived_vals(row::Dict{String,String})
     return mu + md, mu + ms
 end
 
+function _col_exists(header::AbstractVector{<:AbstractString}, name::String)
+    return any(==(name), header)
+end
+
 function _process(input_csv::String, output_csv::String)
     lines = readlines(input_csv)
 
@@ -85,6 +89,12 @@ function _process(input_csv::String, output_csv::String)
         push!(out_header, "M_u_plus_M_s")
     end
 
+    if _col_exists(header, "M_eta")
+        if !("M_eta_plus_M_eta_prime" in out_header)
+            push!(out_header, "M_eta_plus_M_eta_prime")
+        end
+    end
+
     mkpath(dirname(output_csv))
     open(output_csv, "w") do io
         for m in metadata
@@ -98,6 +108,12 @@ function _process(input_csv::String, output_csv::String)
             mud, mus = _derived_vals(row)
             row["M_u_plus_M_d"] = string(mud)
             row["M_u_plus_M_s"] = string(mus)
+
+            if haskey(row, "M_eta") && haskey(row, "M_eta_prime")
+                meta = _safe_parse_float(get(row, "M_eta", "NaN"))
+                metap = _safe_parse_float(get(row, "M_eta_prime", "NaN"))
+                row["M_eta_plus_M_eta_prime"] = string(meta + metap)
+            end
 
             vals = [get(row, c, "") for c in out_header]
             println(io, join(vals, ','))

@@ -96,6 +96,30 @@ end
         @test String(payload.pipeline.adapter_version) == "v3"
     end
 
+    @testset "run_pipeline normalizes repo-internal extension paths without parent segments" begin
+        spec = _mk_spec([:a])
+        stages = [_ok_stage(:a; provides=[:x])]
+        ctx = _mk_ctx()
+        abs_diag_path = joinpath(PROJECT_ROOT, "data", "outputs", "results", "diag", "index.json")
+        ctx.state[:manifest_extensions] = Models.build_manifest_extensions((
+            pipeline_family="scan",
+            baseline_suite="nightly",
+            physics_profile="core",
+            adapter_version="v3",
+            diagnostics_index_path=abs_diag_path,
+        ))
+
+        manifest_path = joinpath(mktempdir(), "manifest_extensions_path_norm_234.json")
+        result = Models.run_pipeline(spec, stages, ctx; manifest_path=manifest_path)
+
+        @test result.success == true
+        payload = JSON3.read(read(manifest_path, String))
+        diag_path = String(payload.pipeline.diagnostics_index_path)
+        @test diag_path == "data/outputs/results/diag/index.json"
+        @test !occursin("..", diag_path)
+        @test !occursin('\\', diag_path)
+    end
+
     @testset "build_manifest_extensions rejects non-whitelisted keys" begin
         @test_throws ArgumentError Models.build_manifest_extensions((
             pipeline_family="scan",

@@ -97,3 +97,35 @@ end
         @test haskey(tracking_state, :eta_plus)
     end
 end
+
+@testset "strict_sign_binding keeps fixed mixed sign mapping" begin
+    muq_fm = (600.0 / 3.0) / _HBARC_MEV_FM
+
+    seed_state = nothing
+    tracking_state = nothing
+    for T_MeV in (220.0, 240.0)
+        T_fm = T_MeV / _HBARC_MEV_FM
+        res = _MESON_WORKFLOW_MOD.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:eta, :eta_prime),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=25,),
+            mass_kwargs=(iterations=40,),
+            meson_seed_state=seed_state,
+            mixed_seed_tracking_state=tracking_state,
+            mixed_branch_align=:strict_sign_binding,
+        )
+
+        seed_state = res.meson_seed_state
+        tracking_state = res.mixed_seed_tracking
+
+        @test res.meson_results[:eta].branch_sign == -1
+        @test res.meson_results[:eta_prime].branch_sign == 1
+        @test tracking_state !== nothing
+        @test haskey(tracking_state, :eta_minus)
+        @test haskey(tracking_state, :eta_plus)
+    end
+end

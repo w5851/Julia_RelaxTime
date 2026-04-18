@@ -212,6 +212,24 @@ Models.pnjl_module()
         @test failed2 == [:user_custom]
     end
 
+    @testset "默认硬约束要求 m_s > m_u" begin
+        rules = Models.default_hard_constraint_rules()
+        candidate = (
+            residual_norm=1e-8,
+            residual_norm_max=1e-6,
+            masses=SVector{3}(300.0, 300.0, 250.0),
+            x_state=SVector{5}(-1.0, -1.0, -1.5, 0.5, 0.5),
+            pressure=1.0,
+            omega=-1.0,
+            rho_norm=0.0,
+            entropy=0.1,
+            energy=0.2,
+        )
+        passed, failed = Models.evaluate_hard_constraints(candidate, rules)
+        @test !passed
+        @test :mass_hierarchy_invalid in failed
+    end
+
     @testset "pressure_max 仅在约束通过池内选优" begin
         c1 = (pressure=10.0, residual_norm=1e-8, hard_constraint_ok=true, failed_constraints=Symbol[], converged=true)
         c2 = (pressure=12.0, residual_norm=1e-8, hard_constraint_ok=false, failed_constraints=[:mass_nonpositive], converged=true)

@@ -68,6 +68,9 @@ function _load_fortran_targets(files)
         for r in rows
             String(r[:source_impl]) == "fortran" || continue
             isapprox(r[:xi], 0.0; atol=1e-12) || continue
+            if haskey(r, :solver_status) && String(r[:solver_status]) == "excluded_low_quality_nonconverged"
+                continue
+            end
             meson = Symbol(r[:meson])
             meson in _MESONS || continue
             key = (Float64(r[:muB_MeV]), Float64(r[:T_MeV]), meson)
@@ -75,6 +78,27 @@ function _load_fortran_targets(files)
         end
     end
     return out
+end
+
+function _load_fortran_targets_with_excluded(files)
+    out = Dict{Tuple{Float64,Float64,Symbol},Float64}()
+    excluded = Set{Tuple{Float64,Float64,Symbol}}()
+    for path in files
+        rows = validate_reference_schema(load_reference_table(path))
+        for r in rows
+            String(r[:source_impl]) == "fortran" || continue
+            isapprox(r[:xi], 0.0; atol=1e-12) || continue
+            meson = Symbol(r[:meson])
+            meson in _MESONS || continue
+            key = (Float64(r[:muB_MeV]), Float64(r[:T_MeV]), meson)
+            if haskey(r, :solver_status) && String(r[:solver_status]) == "excluded_low_quality_nonconverged"
+                push!(excluded, key)
+                continue
+            end
+            out[key] = Float64(r[:mass_MeV])
+        end
+    end
+    return out, excluded
 end
 
 function _julia_masses_at(T_MeV::Float64, muB_MeV::Float64)
@@ -98,7 +122,7 @@ function _julia_masses_at(T_MeV::Float64, muB_MeV::Float64)
 end
 
 @testset "Julia vs Fortran all-8 meson numeric targets (muB=0 and 600, xi=0)" begin
-    targets = _load_fortran_targets(_FORTRAN_FILES)
+    targets, excluded_keys = _load_fortran_targets_with_excluded(_FORTRAN_FILES)
 
     expected_mus = (0.0, 600.0)
     expected_Ts = (120.0, 140.0, 160.0, 180.0, 200.0, 220.0, 240.0, 260.0)
@@ -108,7 +132,10 @@ end
             julia_m = _julia_masses_at(T, muB)
             for meson in _MESONS
                 key = (muB, T, meson)
-                @test haskey(targets, key)
+                if !haskey(targets, key)
+                    @test key in excluded_keys
+                    continue
+                end
                 legacy_mass = targets[key]
                 actual = julia_m[_julia_symbol_for_legacy(meson)]
                 @test isfinite(actual)

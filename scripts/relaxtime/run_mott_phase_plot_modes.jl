@@ -3,7 +3,8 @@
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PLOT_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "plot_scan_csv.py")
 
-const OBSERVABLES = ["M_pi", "M_K", "Gamma_pi", "Gamma_K", "M_u_plus_M_d", "M_u_plus_M_s"]
+const OBSERVABLES_BASE = ["M_pi", "M_K", "Gamma_pi", "Gamma_K", "M_u_plus_M_d", "M_u_plus_M_s"]
+const OBSERVABLES_MIXED = ["M_eta", "M_eta_prime", "M_sigma", "M_sigma_prime", "Gamma_eta", "Gamma_eta_prime", "Gamma_sigma", "Gamma_sigma_prime", "M_eta_plus_M_eta_prime"]
 const MODE_AB_XIS = (-0.3, 0.0, 0.3)
 const MODE_AB_GROUPS = [
     ("M_K", ["M_K", "Gamma_K", "M_u_plus_M_s"]),
@@ -12,11 +13,14 @@ const MODE_AB_GROUPS = [
 
 function _print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl --in <derived_csv> --out-dir <fig_dir>")
+    println("Options:")
+    println("  --include-mixed      Include mixed observables in plotting list")
 end
 
 function _parse_args(args::Vector{String})
     input_csv = nothing
     out_dir = nothing
+    include_mixed = false
     i = 1
     while i <= length(args)
         arg = args[i]
@@ -30,6 +34,8 @@ function _parse_args(args::Vector{String})
             input_csv = require_value()
         elseif arg == "--out-dir"
             out_dir = require_value()
+        elseif arg == "--include-mixed"
+            include_mixed = true
         elseif arg in ("-h", "--help")
             _print_usage()
             exit(0)
@@ -41,7 +47,11 @@ function _parse_args(args::Vector{String})
 
     input_csv === nothing && throw(ArgumentError("--in is required"))
     out_dir === nothing && throw(ArgumentError("--out-dir is required"))
-    return String(input_csv), String(out_dir)
+    return String(input_csv), String(out_dir), include_mixed
+end
+
+function _observable_list(include_mixed::Bool)
+    return include_mixed ? vcat(OBSERVABLES_BASE, OBSERVABLES_MIXED) : copy(OBSERVABLES_BASE)
 end
 
 @inline function _number_tag(v::Real)
@@ -142,11 +152,11 @@ function _write_mode_ab_long_csv(input_csv::String, ys_list::Vector{String})
     return out_csv
 end
 
-function _mode_a(input_csv::String, out_root::String, xis::Vector{Float64})
+function _mode_a(input_csv::String, out_root::String, xis::Vector{Float64}, observables::Vector{String})
     mode_a_dir = joinpath(out_root, "mode_a")
     mkpath(mode_a_dir)
 
-    ys = join(OBSERVABLES, ',')
+    ys = join(observables, ',')
     tmp_out = mktempdir()
     args = String[
         PLOT_SCRIPT,
@@ -165,7 +175,7 @@ function _mode_a(input_csv::String, out_root::String, xis::Vector{Float64})
         if !isdir(split_dir)
             continue
         end
-        src = joinpath(split_dir, "multi_y_M_pi_M_K_Gamma_pi_Gamma_K_M_u_plus_M_d_M_u_plus_M_s_vs_T_MeV.png")
+        src = joinpath(split_dir, "multi_y_$(join(observables, '_'))_vs_T_MeV.png")
         if !isfile(src)
             files = readdir(split_dir; join=true)
             pngs = filter(f -> endswith(lowercase(f), ".png"), files)
@@ -177,11 +187,11 @@ function _mode_a(input_csv::String, out_root::String, xis::Vector{Float64})
     end
 end
 
-function _mode_b(input_csv::String, out_root::String)
+function _mode_b(input_csv::String, out_root::String, observables::Vector{String})
     mode_b_dir = joinpath(out_root, "mode_b")
     mkpath(mode_b_dir)
 
-    ys = join(OBSERVABLES, ',')
+    ys = join(observables, ',')
     tmp_out = mktempdir()
     args = String[
         PLOT_SCRIPT,
@@ -194,7 +204,7 @@ function _mode_b(input_csv::String, out_root::String)
     ]
     _run_python(args)
 
-    for obs in OBSERVABLES
+    for obs in observables
         src = joinpath(tmp_out, "$(obs)_vs_T_MeV.png")
         isfile(src) || continue
         dst = joinpath(mode_b_dir, "mott_mode_b__$(obs).png")
@@ -233,14 +243,15 @@ function _mode_ab(input_csv::String, out_root::String)
 end
 
 function main()
-    input_csv, out_dir = _parse_args(ARGS)
+    input_csv, out_dir, include_mixed = _parse_args(ARGS)
     isfile(PLOT_SCRIPT) || throw(ArgumentError("plot script not found: $PLOT_SCRIPT"))
     isfile(input_csv) || throw(ArgumentError("input csv not found: $input_csv"))
 
+    observables = _observable_list(include_mixed)
     mkpath(out_dir)
     xis = _collect_xi_values(input_csv)
-    _mode_a(input_csv, out_dir, xis)
-    _mode_b(input_csv, out_dir)
+    _mode_a(input_csv, out_dir, xis, observables)
+    _mode_b(input_csv, out_dir, observables)
     _mode_ab(input_csv, out_dir)
     println("Wrote plot modes under: ", out_dir)
 end

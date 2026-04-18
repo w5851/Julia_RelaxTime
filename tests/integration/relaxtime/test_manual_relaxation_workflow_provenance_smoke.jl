@@ -1,4 +1,5 @@
 using Test
+using JSON3
 
 const REPO_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const WORKFLOW_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_manual_relaxation_scan_workflow.jl")
@@ -47,4 +48,18 @@ end
     @test occursin("\"artifacts\"", manifest_text)
     @test occursin("\"summary\"", manifest_text)
     @test occursin("\"fallback_count\"", manifest_text)
+
+    manifest_obj = JSON3.read(manifest_text)
+    cwd_path = String(manifest_obj["cwd"])
+    project_path = String(manifest_obj["project_path"])
+    @test !occursin('\\', cwd_path)
+    @test !occursin('\\', project_path)
+    @test !occursin(r"^[A-Za-z]:", cwd_path)
+    @test project_path == "."
+
+    artifacts = manifest_obj["artifacts"]
+    @test length(artifacts) > 0
+    first_artifact_path = String(artifacts[1]["path"])
+    @test !occursin('\\', first_artifact_path)
+    @test !occursin(r"^[A-Za-z]:", first_artifact_path)
 end

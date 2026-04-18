@@ -185,6 +185,13 @@ end
     return all(m -> isfinite(m) && m > 0.0, masses)
 end
 
+@inline function _is_mass_hierarchy_physical(masses)::Bool
+    length(masses) >= 3 || return false
+    m_u = masses[1]
+    m_s = masses[3]
+    return isfinite(m_u) && isfinite(m_s) && (m_s > m_u)
+end
+
 @inline function _is_phi_in_range(x_state)::Bool
     Φ = x_state[4]
     Φbar = x_state[5]
@@ -196,6 +203,7 @@ function default_hard_constraint_rules(; physicality_check::Function=((_, _) -> 
         c -> (isfinite(c.residual_norm), :residual_nonfinite),
         c -> (c.residual_norm <= c.residual_norm_max, :residual_too_large),
         c -> (_is_mass_positive(c.masses), :mass_nonpositive),
+        c -> (_is_mass_hierarchy_physical(c.masses), :mass_hierarchy_invalid),
         c -> (_is_phi_in_range(c.x_state), :phi_out_of_range),
         c -> (isfinite(c.pressure), :pressure_nonfinite),
         c -> (isfinite(c.omega), :omega_nonfinite),
