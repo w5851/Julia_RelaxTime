@@ -32,6 +32,7 @@
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "provenance_metadata.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
@@ -49,6 +50,7 @@ const DEFAULT_MOMENTUM_WEIGHTS = getproperty(Integrals, :DEFAULT_MOMENTUM_WEIGHT
 using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScanCSV: ScanCSV
+using .ProvenanceMetadata: ProvenanceMetadata
 using .GaussLegendre: gauleg
 
 const TransportWorkflow = Models.transport_workflow_module()
@@ -66,6 +68,7 @@ const MODULE_DEFAULT_SIGMA_GRID_N = RT_ASR.DEFAULT_SIGMA_GRID_N # 60
 struct Options
     out::String
     diagnostics_out::Union{Nothing,String}
+    provenance_dir::Union{Nothing, String}
     overwrite::Bool
     resume::Bool
     xi::Float64
@@ -90,6 +93,7 @@ function print_usage()
     println("Options:")
     println("  --out <path>                 输出 CSV (default data/outputs/results/relaxtime/scan/relaxation_times_vs_T.csv)")
     println("  --diagnostics-out <path>     过程级诊断 CSV（按 species/channel 导出贡献）")
+    println("  --provenance-dir <path>      可选：写入 run_manifest/effective_config 的目录（默认 out 同目录）")
     println("  --overwrite                  覆盖输出文件")
     println("  --no-resume                  禁用跳过逻辑，强制重算")
     println("  --xi <value>                 各向异性参数 ξ (default 0.0)")
@@ -116,6 +120,7 @@ function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :out => joinpath("data", "outputs", "results", "relaxtime", "scan", "relaxation_times_vs_T.csv"),
         :diagnostics_out => nothing,
+        :provenance_dir => nothing,
         :overwrite => false,
         :resume => true,
         :xi => 0.0,
@@ -149,6 +154,8 @@ function parse_args(args::Vector{String})
             opts[:out] = require_value()
         elseif arg == "--diagnostics-out"
             opts[:diagnostics_out] = require_value()
+        elseif arg == "--provenance-dir"
+            opts[:provenance_dir] = require_value()
         elseif arg == "--overwrite"
             opts[:overwrite] = true
         elseif arg == "--no-resume"
@@ -199,7 +206,10 @@ function parse_args(args::Vector{String})
 
     tstep = Float64(opts[:tstep]); tstep > 0 || error("tstep must be positive")
     return Options(
-        String(opts[:out]), opts[:diagnostics_out] === nothing ? nothing : String(opts[:diagnostics_out]), Bool(opts[:overwrite]), Bool(opts[:resume]),
+        String(opts[:out]),
+        opts[:diagnostics_out] === nothing ? nothing : String(opts[:diagnostics_out]),
+        opts[:provenance_dir] === nothing ? nothing : String(opts[:provenance_dir]),
+        Bool(opts[:overwrite]), Bool(opts[:resume]),
         Float64(opts[:xi]), Float64(opts[:tmin]), Float64(opts[:tmax]), Float64(opts[:tstep]),
         Float64.(opts[:mub_list]), Int(opts[:p_num]), Int(opts[:t_num]), Int(opts[:max_iter]),
         Int(opts[:tau_p_nodes]), Int(opts[:tau_angle_nodes]), Int(opts[:tau_phi_nodes]),
@@ -233,7 +243,7 @@ function write_header(io, opts::Options)
         "tauinv_u", "tauinv_s", "tauinv_ubar", "tauinv_sbar",
         "tau_p_nodes", "tau_angle_nodes", "tau_phi_nodes", "tau_n_sigma_points",
         "sigma_grid_n", "integration_mode",
-        "gc_every_n",
+        "gc_every_n", "run_id",
     ]
     println(io, join(cols, ','))
 end
@@ -271,8 +281,13 @@ function build_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::NamedTuple, Φ::
     return (K_coeffs=calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s), A_vals=(u=A_u, d=A_u, s=A_s))
 end
 
-function run_scan(opts::Options)
+function run_scan(opts::Options, ctx::ProvenanceMetadata.RunContext)
     ensure_parent_dir(opts.out)
+    provenance_dir = isnothing(opts.provenance_dir) ? dirname(opts.out) : opts.provenance_dir
+    mkpath(provenance_dir)
+    if opts.resume && isfile(opts.out) && !opts.overwrite
+        ScanCSV.assert_required_columns(opts.out, ["run_id"])
+    end
     existing = opts.resume && isfile(opts.out) && !opts.overwrite ? 
         ScanCSV.read_existing_keys(opts.out, ["T_MeV", "muB_MeV", "xi"]) : Set{Tuple{Float64,Float64,Float64}}()
     opts.overwrite && isfile(opts.out) && rm(opts.out)
@@ -284,6 +299,9 @@ function run_scan(opts::Options)
     new_file = !isfile(opts.out) || filesize(opts.out) == 0
     io = open(opts.out, "a")
     diag_io = nothing
+    stats_success = 0
+    stats_error = 0
+    stats_skipped = 0
     try
         if opts.diagnostics_out !== nothing
             new_diag_file = !isfile(opts.diagnostics_out) || filesize(opts.diagnostics_out) == 0
@@ -356,7 +374,10 @@ function run_scan(opts::Options)
             seed_state = nothing
 
             for T_mev in T_vals
-                opts.resume && !opts.overwrite && (T_mev, muB_mev, opts.xi) in existing && continue
+                if opts.resume && !opts.overwrite && (T_mev, muB_mev, opts.xi) in existing
+                    stats_skipped += 1
+                    continue
+                end
                 T_fm = T_mev / ħc_MeV_fm
 
                 tau = (u=NaN, s=NaN, ubar=NaN, sbar=NaN)
@@ -422,8 +443,10 @@ function run_scan(opts::Options)
                     tau, tauinv = res.tau, res.tau_inv
                     rates = res.rates
                     seed_state = res.equilibrium.x_state
+                    stats_success += 1
                 catch point_err
                     @warn "tau scan point failed; writing NaN row" T_mev=T_mev muB_mev=muB_mev xi=opts.xi err=point_err
+                    stats_error += 1
                 end
 
                 row = Any[
@@ -435,7 +458,7 @@ function run_scan(opts::Options)
                     tauinv.u, tauinv.s, tauinv.ubar, tauinv.sbar,
                     opts.tau_p_nodes, opts.tau_angle_nodes, opts.tau_phi_nodes, opts.tau_n_sigma_points,
                     opts.sigma_grid_n, string(opts.integration_mode),
-                    opts.gc_every_n,
+                    opts.gc_every_n, ctx.run_id,
                 ]
                 println(io, join(row, ',')); flush(io)
 
@@ -466,10 +489,53 @@ function run_scan(opts::Options)
         close(io)
         diag_io === nothing || close(diag_io)
     end
+
+    effective_config = Dict{String,Any}(
+        "out" => opts.out,
+        "diagnostics_out" => opts.diagnostics_out,
+        "xi" => opts.xi,
+        "tmin_mev" => opts.tmin_mev,
+        "tmax_mev" => opts.tmax_mev,
+        "tstep_mev" => opts.tstep_mev,
+        "mub_list_mev" => opts.mub_list_mev,
+        "overwrite" => opts.overwrite,
+        "resume" => opts.resume,
+        "p_num" => opts.p_num,
+        "t_num" => opts.t_num,
+        "max_iter" => opts.max_iter,
+        "tau_p_nodes" => opts.tau_p_nodes,
+        "tau_angle_nodes" => opts.tau_angle_nodes,
+        "tau_phi_nodes" => opts.tau_phi_nodes,
+        "tau_n_sigma_points" => opts.tau_n_sigma_points,
+        "sigma_grid_n" => opts.sigma_grid_n,
+        "integration_mode" => String(opts.integration_mode),
+        "gc_every_n" => opts.gc_every_n,
+    )
+
+    summary = Dict{String,Any}(
+        "points_total" => stats_success + stats_error,
+        "success_count" => stats_success,
+        "error_count" => stats_error,
+        "skipped_count" => stats_skipped,
+    )
+
+    artifacts = String[opts.out]
+    if opts.diagnostics_out !== nothing
+        push!(artifacts, opts.diagnostics_out)
+    end
+    ProvenanceMetadata.write_run_sidecars(
+        provenance_dir;
+        ctx=ctx,
+        effective_config=effective_config,
+        artifacts=artifacts,
+        summary=summary,
+    )
+
     @printf("Done. Wrote %s\n", opts.out)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
     opts = parse_args(ARGS)
-    run_scan(opts)
+    ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/scan_relaxation_times_vs_T.jl", copy(ARGS))
+    run_scan(opts, ctx)
 end
