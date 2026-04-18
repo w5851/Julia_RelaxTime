@@ -33,6 +33,7 @@ jobs:
         run: julia --project=. tests/unit/runtests.jl
 
       - name: Run regression full profile
+        if: always()
         env:
           REGRESSION_PROFILE: full
           REGRESSION_MAGNETIC_SCOPE: nightly
@@ -40,6 +41,7 @@ jobs:
 
       - name: Run integration full profile (models + pnjl shard)
         id: integration_models_pnjl
+        if: always()
         timeout-minutes: 60
         run: |
           files=$(git ls-files "tests/integration/models/test_*.jl" "tests/integration/pnjl/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
@@ -52,6 +54,7 @@ jobs:
 
       - name: Run integration full profile (config shard)
         id: integration_config
+        if: always()
         timeout-minutes: 20
         run: |
           files=$(git ls-files "tests/integration/config/test_*.jl" | sed 's#^tests/integration/##' | paste -sd ';' -)
@@ -64,6 +67,7 @@ jobs:
 
       - name: Run integration full profile (relaxtime shard except ensure-A)
         id: integration_relaxtime
+        if: always()
         continue-on-error: true
         timeout-minutes: 75
         run: |
