@@ -1,19 +1,37 @@
 name: Bug 报告
-description: 报告可复现的问题（请提供最小复现与日志）
+description: 报告可复现的问题（请提供最小复现、影响范围与回归证据）
 title: "[Bug]: "
 labels: [bug]
 body:
   - type: markdown
     attributes:
       value: |
-        感谢你提交 Bug。为了更快定位问题，请尽量提供最小复现与环境信息。
+        请尽量提供最小复现与可执行命令，便于快速定位与回归验证。
+
+  - type: dropdown
+    id: module_scope
+    attributes:
+      label: 问题模块范围
+      description: 选择最接近的问题归属模块。
+      options:
+        - models/workflow
+        - models/phase
+        - relaxtime
+        - simulation/server
+        - config/docs/tooling
+        - tests/ci
+        - other
+    validations:
+      required: true
+
   - type: input
     id: julia_version
     attributes:
       label: Julia 版本
-      placeholder: "例如 1.11.x"
+      placeholder: "例如 1.12.5"
     validations:
       required: true
+
   - type: input
     id: os
     attributes:
@@ -21,31 +39,76 @@ body:
       placeholder: "例如 Windows 11 / Ubuntu 22.04"
     validations:
       required: true
+
+  - type: input
+    id: git_commit
+    attributes:
+      label: 复现提交（commit SHA，可选）
+      placeholder: "例如 8c1dd16"
+
+  - type: textarea
+    id: reproduce_cmd
+    attributes:
+      label: 最小复现命令/脚本
+      description: 建议提供可直接复制执行的命令（如 tests/unit、tests/integration、脚本入口）。
+      render: bash
+      placeholder: |
+        julia --project=. -e 'ENV["UNIT_FILES"]="..."; include("tests/unit/runtests.jl")'
+    validations:
+      required: true
+
   - type: textarea
     id: steps
     attributes:
       label: 复现步骤
-      description: 请输入可以复现问题的最小步骤（命令/脚本/输入参数）
+      description: 若仅命令不足以表达，请补充关键操作步骤。
       placeholder: |
         1. ...
         2. ...
         3. ...
     validations:
       required: true
+
   - type: textarea
     id: expected
     attributes:
       label: 期望行为
     validations:
       required: true
+
   - type: textarea
     id: actual
     attributes:
       label: 实际行为
     validations:
       required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响评估
+      description: 说明影响范围（功能错误、结果偏差、CI 阻塞、性能退化等）。
+      placeholder: |
+        - 影响对象：...
+        - 严重程度：...
+        - 是否阻塞当前迭代：是/否
+    validations:
+      required: true
+
   - type: textarea
     id: logs
     attributes:
-      label: 日志/报错栈（可选）
+      label: 日志/报错栈
       render: text
+
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: 提交前自检
+      options:
+        - label: 已在最新 `main` 或明确 commit 上复现
+          required: true
+        - label: 已提供最小复现命令/脚本
+          required: true
+        - label: 已说明影响范围与期望行为
+          required: true

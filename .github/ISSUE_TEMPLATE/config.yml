@@ -1,5 +1,5 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: 提问与讨论（Discussions）
-    url: https://github.com/<OWNER>/<REPO>/discussions
-    about: 适合使用问题、想法讨论与不确定是否为 bug 的情况（请将 <OWNER>/<REPO> 替换为实际仓库地址）。
+    url: https://github.com/w5851/Julia_RelaxTime/discussions
+    about: 适合问题咨询、方案讨论与暂不确定是否为 bug 的情况。
