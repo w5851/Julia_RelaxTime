@@ -94,11 +94,7 @@ function _repo_relpath(path::AbstractString)
         nothing
     end
     if rel !== nothing
-        rel_s = String(rel)
-        if rel_s == "." || !(startswith(rel_s, "..") || startswith(rel_s, string("..", Base.Filesystem.path_separator)))
-            return _norm_slash(rel_s)
-        end
-        return _norm_slash(rel_s)
+        return _norm_slash(String(rel))
     end
     return _norm_slash(abs_path)
 end

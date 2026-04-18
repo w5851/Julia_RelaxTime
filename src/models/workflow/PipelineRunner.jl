@@ -2,7 +2,20 @@ using Dates
 using JSON3
 using SHA
 
-const _PIPELINE_PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+function _pipeline_project_root()
+    dir = normpath(@__DIR__)
+    while true
+        if isfile(joinpath(dir, "Project.toml"))
+            return dir
+        end
+        parent = dirname(dir)
+        parent == dir && break
+        dir = parent
+    end
+    return normpath(joinpath(@__DIR__, "..", "..", ".."))
+end
+
+const _PIPELINE_PROJECT_ROOT = _pipeline_project_root()
 
 @inline function _pipeline_norm_slash(path::AbstractString)
     return replace(String(path), '\\' => '/')
