@@ -116,3 +116,18 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 - 当需要显式状态布局时，优先使用 `ModelStateSchema` 系列 API（`schema_for_model`、`flatten_state`、`unflatten_state`）。
 - `SolverResult` 稳定契约版本字段为 `contract_version=:v1`；上层消费建议统一通过 `solver_result_view` 取公共视图。
 - 诊断契约稳定公共视图与内部调试视图已分层；上层默认应消费 `to_public_namedtuple` / `coerce_solver_diagnostic_public_view`。
+
+## 导数契约骨架（Phase-1 / Issue #79）
+
+solver/diff 当前提供最小稳定骨架，先冻结“上下文 + 目标 + 参数 + Jacobian 形状”约定，再在后续阶段接入真实导数数值实现：
+
+- `build_thermo_diff_context(result; mode, model, theta, spec_override=nothing)`
+  - 构建 `ThermoDiffContext`；`theta` 采用 NamedTuple 口径（首批支持 `T_fm` / `mu_fm` / `xi`）。
+- `ParamSpec([:T_fm, :mu_fm, :xi])`
+  - 约束外参导数输入维度与顺序；非法参数名会抛 `ArgumentError`。
+- `diff_target(:pressure | :entropy | :rho_norm | :energy)`
+  - 目标注册入口；未知目标名抛 `ArgumentError`。
+- `jacobian(ctx, target, params)` / `jacobian(ctx, targets, params)`
+  - 始终返回矩阵；单目标单参数固定 `1x1`，多目标单参数返回 `N x 1`。
+
+当前阶段约束：默认 backend 为占位实现，调用 `jacobian(...)` 会返回“not implemented”错误；这是刻意保留的契约骨架行为，用于在 Issue #80 中安全接入真实 Jacobian 数值路径。
