@@ -592,3 +592,24 @@ end
     @test isfinite(v2)
     @test isapprox(v2, v1; rtol=1e-12, atol=0.0)
 end
+
+@testset "auto threshold subtraction uses tolerant heavy-initial detection" begin
+    m = 1.52
+    mi = nextfloat(m)
+    mj = m
+    mc = m
+    md = m
+
+    lhs = mi^2 + mj^2
+    rhs = mc^2 + md^2
+    @test lhs > rhs
+
+    auto_equal = AverageScatteringRate._resolve_auto_threshold_subtraction(false, mi, mj, mc, md)
+    @test auto_equal == false
+
+    manual_equal = AverageScatteringRate._resolve_auto_threshold_subtraction(true, mi, mj, mc, md)
+    @test manual_equal == true
+
+    auto_heavy = AverageScatteringRate._resolve_auto_threshold_subtraction(false, 2.0, 2.0, 1.0, 1.0)
+    @test auto_heavy == true
+end

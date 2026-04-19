@@ -932,7 +932,11 @@ end
     mc::Float64,
     md::Float64,
 )::Bool
-    if (mi^2 + mj^2) > (mc^2 + md^2)
+    lhs = mi^2 + mj^2
+    rhs = mc^2 + md^2
+    scale = max(abs(lhs), abs(rhs), 1.0)
+    tol = 64 * eps(scale)
+    if lhs > rhs + tol
         return true
     end
     return threshold_subtraction
