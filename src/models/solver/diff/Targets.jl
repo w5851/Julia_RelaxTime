@@ -5,11 +5,54 @@ end
 
 @inline DiffTarget(name::Symbol) = DiffTarget(name, _ctx -> throw(ErrorException("DiffTarget $(name) evaluator is not implemented")))
 
+@inline function _theta_value(theta::NamedTuple, key::Symbol)
+    hasproperty(theta, key) || throw(ArgumentError("theta is missing required key $(key)"))
+    value = getproperty(theta, key)
+    value isa Real || throw(ArgumentError("theta.$(key) must be Real, got $(typeof(value))"))
+    return Float64(value)
+end
+
+@inline function _finite_target_value(name::Symbol, value)
+    value isa Real || throw(ArgumentError("target $(name) must evaluate to Real, got $(typeof(value))"))
+    out = Float64(value)
+    isfinite(out) || throw(ArgumentError("target $(name) evaluated to non-finite value: $(value)"))
+    return out
+end
+
+@inline _eval_pressure(ctx::ThermoDiffContext) = _finite_target_value(:pressure, ctx.result.pressure)
+@inline _eval_entropy(ctx::ThermoDiffContext) = _finite_target_value(:entropy, ctx.result.entropy)
+@inline _eval_rho_norm(ctx::ThermoDiffContext) = _finite_target_value(:rho_norm, ctx.result.rho_norm)
+@inline _eval_energy(ctx::ThermoDiffContext) = _finite_target_value(:energy, ctx.result.energy)
+
+@inline function _eval_dP_dT(ctx::ThermoDiffContext)
+    deriv = Main.Models.ThermoDerivatives
+    T_fm = _theta_value(ctx.theta, :T_fm)
+    mu_fm = _theta_value(ctx.theta, :mu_fm)
+    xi = hasproperty(ctx.theta, :xi) ? Float64(getproperty(ctx.theta, :xi)) : 0.0
+    p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
+    t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
+    value = deriv.dP_dT(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
+    return _finite_target_value(:dP_dT, value)
+end
+
+@inline function _eval_dP_dmu(ctx::ThermoDiffContext)
+    deriv = Main.Models.ThermoDerivatives
+    T_fm = _theta_value(ctx.theta, :T_fm)
+    mu_fm = _theta_value(ctx.theta, :mu_fm)
+    xi = hasproperty(ctx.theta, :xi) ? Float64(getproperty(ctx.theta, :xi)) : 0.0
+    p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
+    t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
+    value = deriv.dP_dmu(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
+    return _finite_target_value(:dP_dmu, value)
+end
+
 const _DIFF_TARGET_REGISTRY = Dict{Symbol, DiffTarget}(
-    :pressure => DiffTarget(:pressure),
-    :entropy => DiffTarget(:entropy),
-    :rho_norm => DiffTarget(:rho_norm),
-    :energy => DiffTarget(:energy),
+    :pressure => DiffTarget(:pressure, _eval_pressure),
+    :entropy => DiffTarget(:entropy, _eval_entropy),
+    :rho_norm => DiffTarget(:rho_norm, _eval_rho_norm),
+    :energy => DiffTarget(:energy, _eval_energy),
+    :dP_dT => DiffTarget(:dP_dT, _eval_dP_dT),
+    :dP_dmu => DiffTarget(:dP_dmu, _eval_dP_dmu),
 )
 
 @inline function diff_target(name::Symbol)
