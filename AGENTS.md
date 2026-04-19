@@ -13,6 +13,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Prefer unified entrypoints exposed through `Models` and `src/models/entrypoints.jl`.
 - `src/pnjl/PNJL.jl` 已从主线移除；若历史文档仍提及该路径，应按“兼容层历史说明”理解，不作为当前实现入口。
 - 统一入口请使用 `Models` 与 `src/models/entrypoints.jl`。
+- Post-PR76 contract alignment: keep mixed-meson governance and non-fixedmu unified joint-solve semantics unchanged unless explicitly required by task scope.
 - Default user-facing communication language is Chinese.
 
 ## Repo Rules From Copilot / Cursor
@@ -43,6 +44,15 @@ Run the standard package test entrypoint:
 
 ```sh
 julia --project=. test/runtests.jl
+```
+
+Run layered wrapper entrypoints (preferred for focused local loops):
+
+```sh
+julia --project=. test/unit.jl
+julia --project=. test/integration.jl
+julia --project=. test/regression.jl
+julia --project=. test/validation.jl
 ```
 
 Alternative package test command:
@@ -232,6 +242,10 @@ Preserve local style and use the governance scripts as the nearest equivalent to
 julia --project=. scripts/dev/check_unit_skip_policy.jl
 julia --project=. scripts/dev/check_docs_consistency.jl
 julia --project=. scripts/dev/check_active_docs_governance.jl
+julia --project=. scripts/dev/check_script_entrypoints.jl
+julia --project=. scripts/dev/check_models_entry_contract.jl
+julia --project=. scripts/dev/check_solver_contract_leakage.jl
+julia --project=. scripts/dev/check_relaxtime_script_governance.jl
 julia --project=. scripts/dev/check_pnjl_migration_guard.jl
 julia --project=. scripts/dev/analyze_deps.jl
 julia --project=. scripts/dev/check_precompile_profile_coverage.jl

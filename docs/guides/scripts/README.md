@@ -19,11 +19,11 @@
 
 ### PNJL
 
-- [scripts/pnjl/run_conserved_charge_susceptibilities.jl](scripts/pnjl/run_conserved_charge_susceptibilities.jl)
+- [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
   - 守恒荷广义磁化率、累积量、`Ssigma`、`kappa_sigma2` 的统一单点/小范围扫描入口
-- [scripts/pnjl/run_tmu_scan.jl](scripts/pnjl/run_tmu_scan.jl)
+- [scripts/pnjl/run_tmu_scan.jl](../../../scripts/pnjl/run_tmu_scan.jl)
   - T-μ 单入口（`--mode=scan|point`），覆盖网格扫描与单点求解
-- [scripts/pnjl/calculate_phase_structure.jl](scripts/pnjl/calculate_phase_structure.jl)
+- [scripts/pnjl/calculate_phase_structure.jl](../../../scripts/pnjl/calculate_phase_structure.jl)
   - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
 
 #### 相图最小单命令产线（PNJL）
@@ -58,14 +58,14 @@ julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --
 
 ### Server
 
-- [scripts/server/server_full.jl](scripts/server/server_full.jl)
+- [scripts/server/server_full.jl](../../../scripts/server/server_full.jl)
   - Web + API 联调用完整入口
-- [scripts/server/server.jl](scripts/server/server.jl)
+- [scripts/server/server.jl](../../../scripts/server/server.jl)
   - 仅 API 入口
 
 ### RelaxTime
 
-- [scripts/relaxtime/run_manual_relaxation_scan_workflow.jl](scripts/relaxtime/run_manual_relaxation_scan_workflow.jl)
+- [scripts/relaxtime/run_manual_relaxation_scan_workflow.jl](../../../scripts/relaxtime/run_manual_relaxation_scan_workflow.jl)
   - 手动组合产物入口（`cross_section` / `plan_a` / `plan_b`）
   - 支持 `--base-output-dir` 将结果写到隔离目录（默认 `data/outputs`）
 

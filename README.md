@@ -65,19 +65,23 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
 1. 先读取仓库协作约束：`AGENTS.md`、`.github/copilot-instructions.md`。
 2. 统一入口优先：`Models` 与 `src/models/entrypoints.jl`。
 3. non-fixedmu 求解模式按“展平联合求解”治理，不要引入新的分层默认路径。
-4. 目录治理：
+4. PR76 后契约对齐：mixed-meson 治理与 non-fixedmu 联合求解语义默认保持不变；若需变更必须在任务范围内显式声明并补回归证据。
+5. 目录治理：
    - 分析脚本放 `scripts/analysis/`
    - 性能探针放 `scripts/perf/`
    - 非测试脚本不要放入 `tests/`
-5. 测试执行顺序优先 smoke profile；测试分层保持 `unit/integration/regression/validation`。
-6. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
-7. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
+6. 测试执行顺序优先 smoke profile；测试分层保持 `unit/integration/regression/validation`。
+7. 可优先使用分层 wrapper 入口：`test/unit.jl`、`test/integration.jl`、`test/regression.jl`、`test/validation.jl`。
+8. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
+9. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
 
 建议最小验证命令（agent 默认基线）：
 
 ```powershell
 julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
 julia --project=. -e 'ENV["INTEGRATION_PROFILE"]="smoke"; include("tests/integration/runtests.jl")'
+julia --project=. scripts/dev/check_docs_consistency.jl
+julia --project=. scripts/dev/check_models_entry_contract.jl
 ```
 
 </details>
