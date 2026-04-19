@@ -21,6 +21,47 @@ export solve_equilibrium_backend
 
 const _MODEL_CACHE = Dict{Symbol, Any}()
 
+@inline function _build_fixedmu_physicality_check(
+    model;
+    enforce_mass_floor::Bool,
+    phi_max_positive::Float64,
+    phi_min_negative::Float64,
+)
+    if !enforce_mass_floor && !isfinite(phi_max_positive) && !isfinite(phi_min_negative)
+        return ((_, _) -> true)
+    end
+
+    m0_vec = Main.Models.calculate_mass_vec(model, SVector{3}(0.0, 0.0, 0.0))
+    mass_floor = (
+        u=Float64(m0_vec[1]),
+        d=Float64(m0_vec[2]),
+        s=Float64(m0_vec[3]),
+    )
+
+    return function (x_state, masses)
+        if length(x_state) >= 3
+            phi_u = Float64(x_state[1])
+            phi_d = Float64(x_state[2])
+            phi_s = Float64(x_state[3])
+            if isfinite(phi_max_positive)
+                (phi_u <= phi_max_positive && phi_d <= phi_max_positive && phi_s <= phi_max_positive) || return false
+            end
+            if isfinite(phi_min_negative)
+                (phi_u >= phi_min_negative && phi_d >= phi_min_negative && phi_s >= phi_min_negative) || return false
+            end
+        end
+
+        if enforce_mass_floor && length(masses) >= 3
+            mu = Float64(masses[1])
+            md = Float64(masses[2])
+            ms = Float64(masses[3])
+            (mu >= mass_floor.u && md >= mass_floor.d && ms >= mass_floor.s) || return false
+        end
+
+        return true
+    end
+end
+
 @inline function _get_model(model_kind::Symbol)
     return get!(_MODEL_CACHE, model_kind) do
         Main.Models.create_model(model_kind)
@@ -58,6 +99,9 @@ function solve_equilibrium_backend(
     solver_kwargs::NamedTuple=(;),
     models_solver=nothing,
     models_residual_norm_max::Real=1e-4,
+    enforce_fixedmu_mass_floor::Bool=true,
+    fixedmu_phi_max_positive::Real=0.1,
+    fixedmu_phi_min_negative::Real=-Inf,
     model=nothing,
 )
     kind = :PNJL
@@ -96,6 +140,12 @@ function solve_equilibrium_backend(
             m = Main.Models.create_model(kind)
         end
         if models_solver === nothing
+            fixedmu_physicality_check = _build_fixedmu_physicality_check(
+                m;
+                enforce_mass_floor=Bool(enforce_fixedmu_mass_floor),
+                phi_max_positive=Float64(fixedmu_phi_max_positive),
+                phi_min_negative=Float64(fixedmu_phi_min_negative),
+            )
             fixed_mode = Main.Models.FixedMu()
             if seed_state === nothing
                 solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
@@ -103,6 +153,7 @@ function solve_equilibrium_backend(
                     p_num=p_num,
                     t_num=t_num,
                     residual_norm_max=models_residual_norm_max,
+                    physicality_check=fixedmu_physicality_check,
                 )
             else
                 solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
@@ -112,15 +163,29 @@ function solve_equilibrium_backend(
                     p_num=p_num,
                     t_num=t_num,
                     residual_norm_max=models_residual_norm_max,
+                    physicality_check=fixedmu_physicality_check,
                 )
             end
             solved_converged = Bool(solved.converged)
-            solved_converged || throw(ArgumentError("models FixedMu solve did not converge"))
-            st = Main.Models.MeanFieldState(solved.x_state)
-            solved_mu_vec = solved.mu_vec
-            solved_iterations = solved.iterations
-            solved_residual_norm = solved.residual_norm
-            st
+            fixedmu_solution_ok = solved_converged && fixedmu_physicality_check(solved.x_state, solved.masses)
+            if fixedmu_solution_ok
+                st = Main.Models.MeanFieldState(solved.x_state)
+                solved_mu_vec = solved.mu_vec
+                solved_iterations = solved.iterations
+                solved_residual_norm = solved.residual_norm
+                st
+            else
+                fallback_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward)
+                Main.Models.solve_gap(m, T_fm, mu_fm;
+                    solver_backend=:models,
+                    solver=fallback_solver,
+                    initial_guess=seed_state,
+                    residual_norm_max=models_residual_norm_max,
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                )
+            end
         else
             Main.Models.solve_gap(m, T_fm, mu_fm;
                 solver_backend=:models,
