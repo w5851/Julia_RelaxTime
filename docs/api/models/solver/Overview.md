@@ -131,4 +131,15 @@ solver/diff 当前提供最小稳定骨架，先冻结“上下文 + 目标 + �
   - 始终返回矩阵；单目标单参数固定 `1x1`，多目标单参数返回 `N x 1`。
   - 当 `ParamSpec` 包含多个参数时，要求 backend 返回 `N x P` 矩阵（`N=目标数`, `P=参数数`）。
 
-当前阶段约束：默认 backend 为占位实现，调用 `jacobian(...)` 会返回“not implemented”错误；这是刻意保留的契约骨架行为，用于在 Issue #80 中安全接入真实 Jacobian 数值路径。
+Issue #80 已接入默认数值 Jacobian（当前主路径聚焦 `FixedMu`），并保持 `N x P` 形状契约与输入校验语义。
+
+## 试点统一导数服务（Issue #81）
+
+在不改动 `ProblemSpec` 主契约前提下，solver/diff 提供两条试点服务入口，供脚本链与分析链以统一方式接入导数：
+
+- `build_pilot_diff_context(result; mode, model, theta, spec_override=nothing, jacobian_backend=nothing)`
+  - 对 `build_thermo_diff_context` 的薄封装；统一 `mu_fm`/`μ_fm` 别名语义。
+- `eval_pilot_derivatives(ctx; target_names, param_names)`
+  - 统一执行 `DiffTarget + ParamSpec + jacobian`，并返回 `jacobian` 与 `by_name` 命名映射。
+
+该层定位为“试点评估服务”，用于验证可维护性、稳定性与性能边界；是否回收进 `ProblemSpec` 由后续 Phase-2 决策确定。

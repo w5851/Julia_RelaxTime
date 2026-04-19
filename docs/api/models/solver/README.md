@@ -38,6 +38,7 @@
 - `Models.solve_with_derivatives`
 - `Models.ThermoDiffContext` / `Models.ParamSpec` / `Models.DiffTarget`
 - `Models.build_thermo_diff_context` / `Models.diff_target` / `Models.jacobian`
+- `Models.build_pilot_diff_context` / `Models.eval_pilot_derivatives`（Issue #81 试点统一导数服务）
 
 本主题已经吸收旧 `docs/api/pnjl/` 求解器相关页面中的主要价值。旧页后续应只承担迁移说明或兼容层定位，不再作为新主题主说明页。
 

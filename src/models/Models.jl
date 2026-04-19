@@ -149,6 +149,7 @@ export run_precompile_profile, run_precompile_capability
 export list_precompile_capabilities, list_precompile_profile
 export ThermoDiffContext, DiffTarget, ParamSpec
 export build_thermo_diff_context, diff_target, jacobian
+export build_pilot_diff_context, eval_pilot_derivatives
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
 
