@@ -34,3 +34,15 @@ python scripts/plot_scan_csv.py \
 ```bash
 python scripts/plot_scan_csv.py --help
 ```
+
+## 图像 sidecar 溯源（Issue #82）
+
+- `plot_scan_csv.py` 在输出 PNG/TIFF 图像后，会默认生成同目录 sidecar：`<image>.provenance.json`。
+- sidecar 必填字段包含 `schema_version`、`generated_at_utc`、`image_sha256`、`script_path`、`command`、`git_commit`、`input_data_hashes` 等，用于受控环境复现实验。
+- 方案边界：sidecar 与图像分离存储；不保证图像脱离 sidecar 后仍可验证来源，也不覆盖开放传播溯源。
+
+校验示例：
+
+```bash
+python scripts/plot_scan_csv.py --verify-provenance data/examples/figures/plot_scan_csv/example.png
+```

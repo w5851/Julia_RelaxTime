@@ -52,6 +52,8 @@ import argparse
 import csv
 import io
 import math
+import subprocess
+import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -85,6 +87,55 @@ def _find_project_root() -> Path:
 
 PROJECT_ROOT = _find_project_root()
 DEFAULT_OUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures"
+
+# Ensure project root is importable when script is executed as `python scripts/plot_scan_csv.py`.
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+try:
+    from scripts.common.provenance_image import (
+        compute_sha256,
+        verify_image_provenance,
+        write_image_provenance_sidecar,
+    )
+except Exception:
+    compute_sha256 = None
+    verify_image_provenance = None
+    write_image_provenance_sidecar = None
+
+
+def _git_commit_or_unknown() -> str:
+    try:
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(PROJECT_ROOT), text=True).strip()
+    except Exception:
+        return "unknown"
+
+
+def _build_input_data_hashes(csv_path: Path) -> List[Dict[str, str]]:
+    if compute_sha256 is None:
+        return []
+    if not csv_path.exists():
+        return []
+    return [{"path": str(csv_path), "sha256": compute_sha256(csv_path)}]
+
+
+def _write_image_sidecars(saved_paths: List[Path], *, csv_path: Path, command: str) -> None:
+    if write_image_provenance_sidecar is None:
+        print("[provenance] WARNING: sidecar module unavailable, skip provenance sidecar writing")
+        return
+    git_commit = _git_commit_or_unknown()
+    input_data_hashes = _build_input_data_hashes(csv_path)
+    for out in saved_paths:
+        if out.suffix.lower() not in {".png", ".tif", ".tiff"}:
+            continue
+        sidecar = write_image_provenance_sidecar(
+            image_path=out,
+            script_path="scripts/plot_scan_csv.py",
+            command=command,
+            git_commit=git_commit,
+            input_data_hashes=input_data_hashes,
+        )
+        print(f"[provenance] wrote sidecar: {sidecar}")
 
 
 def _parse_float(x: str) -> float:
@@ -264,6 +315,8 @@ def plot_lines(
     formats: List[str] | None = None,
     dpi: int = 600,
     check: bool = False,
+    provenance_csv_path: Path | None = None,
+    provenance_command: str | None = None,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     _figsize = figsize or APS_FIGSIZE["default"]
@@ -348,6 +401,8 @@ def plot_lines(
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if provenance_csv_path is not None and provenance_command is not None:
+            _write_image_sidecars(saved, csv_path=provenance_csv_path, command=provenance_command)
         if check:
             _post_save_checks(saved, expected_dpi=dpi)
         return
@@ -436,6 +491,8 @@ def plot_lines(
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if provenance_csv_path is not None and provenance_command is not None:
+            _write_image_sidecars(saved, csv_path=provenance_csv_path, command=provenance_command)
         if check:
             _post_save_checks(saved, expected_dpi=dpi)
 
@@ -568,6 +625,8 @@ def plot_heatmaps(
     formats: List[str] | None = None,
     dpi: int = 600,
     check: bool = False,
+    provenance_csv_path: Path | None = None,
+    provenance_command: str | None = None,
 ) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     _figsize_hm = figsize or APS_FIGSIZE["double-column"]
@@ -673,6 +732,8 @@ def plot_heatmaps(
             saved.append(out)
         plt.close(fig)
         print(f"Saved {out_dir} ({', '.join(fmts)})")
+        if provenance_csv_path is not None and provenance_command is not None:
+            _write_image_sidecars(saved, csv_path=provenance_csv_path, command=provenance_command)
         if check:
             _post_save_checks(saved, expected_dpi=dpi)
 
@@ -789,15 +850,15 @@ def _post_save_checks(paths: List[Path], *, expected_dpi: int = 600) -> None:
             print(f"[check] Error inspecting {p}: {e}")
 
 
-def main() -> None:
+def main() -> int:
     ap = argparse.ArgumentParser(
         description="Plot scan CSV (lines/heatmap)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"Project root: {PROJECT_ROOT}\nDefault output: {DEFAULT_OUT_DIR}",
     )
-    ap.add_argument("--csv", type=Path, required=True, help="Input scan CSV (relative to project root or absolute)")
+    ap.add_argument("--csv", type=Path, required=False, help="Input scan CSV (relative to project root or absolute)")
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR, help="Output directory")
-    ap.add_argument("--mode", type=str, choices=["lines", "heatmap"], required=True)
+    ap.add_argument("--mode", type=str, choices=["lines", "heatmap"], required=False)
     ap.add_argument("--title", type=str, default=None, help="Optional title prefix (hidden by default; use --show-title to render)")
     ap.add_argument("--show-title", action="store_true", help="Render in-figure titles; disabled by default for publication-style output")
     ap.add_argument("--where", action="append", default=[], help="Filter clause col=value (repeatable)")
@@ -848,8 +909,20 @@ def main() -> None:
     # output formats and quality
     ap.add_argument("--formats", type=str, default="png", help="Comma-separated output formats (e.g. png,pdf,eps)")
     ap.add_argument("--dpi", type=int, default=600, help="Output DPI for saved figures (default 600)")
+    ap.add_argument("--verify-provenance", type=Path, default=None, help="Verify image sidecar provenance and exit")
 
     args = ap.parse_args()
+
+    if args.verify_provenance is not None:
+        if verify_image_provenance is None:
+            print("FAIL provenance module unavailable")
+            return 2
+        ok, reason = verify_image_provenance(image_path=_resolve_path(args.verify_provenance))
+        print(("PASS " if ok else "FAIL ") + reason)
+        return 0 if ok else 2
+
+    if args.csv is None or args.mode is None:
+        raise ValueError("normal plotting mode requires --csv and --mode")
 
     # Resolve paths relative to project root
     csv_path = _resolve_path(args.csv)
@@ -920,6 +993,8 @@ def main() -> None:
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),
+                provenance_csv_path=csv_path,
+                provenance_command=" ".join(sys.argv),
             )
         else:
             if not args.x or not args.y or not args.fields:
@@ -945,8 +1020,12 @@ def main() -> None:
                 formats=[s.strip() for s in args.formats.split(",") if s.strip()],
                 dpi=int(args.dpi),
                 check=bool(args.check),
+                provenance_csv_path=csv_path,
+                provenance_command=" ".join(sys.argv),
             )
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
