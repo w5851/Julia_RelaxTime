@@ -1,3 +1,15 @@
+---
+title: Issue #81 Solver/Diff Pilot Evaluation
+archived: true
+original: docs/dev/active/2026-04-19_issue-81-solver-diff-pilot-evaluation.md
+archived_date: 2026-04-19
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #81 Solver/Diff Pilot Evaluation
 
 ## Scope
