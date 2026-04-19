@@ -1,8 +1,5 @@
-@inline function _fd_step(value::Float64, key::Symbol)
+@inline function _fd_step(value::Float64)
     base = max(abs(value), 1.0)
-    if key === :xi
-        return max(1e-5, sqrt(eps(Float64)) * base)
-    end
     return max(1e-5, sqrt(eps(Float64)) * base)
 end
 
@@ -53,12 +50,25 @@ end
     return out
 end
 
+@inline function _evaluate_targets_at_theta(ctx::ThermoDiffContext, targets::AbstractVector{<:DiffTarget}, theta::NamedTuple)
+    solved = _solve_result_at_theta(ctx, theta)
+    local_ctx = ThermoDiffContext(solved, ctx.mode, ctx.model, theta, ctx.spec_override, ctx.jacobian_backend)
+    out = Vector{Float64}(undef, length(targets))
+    for i in eachindex(targets)
+        value = targets[i].evaluator(local_ctx)
+        value isa Real || throw(ArgumentError("target $(targets[i].name) evaluator must return Real, got $(typeof(value))"))
+        out[i] = Float64(value)
+        isfinite(out[i]) || throw(ArgumentError("target $(targets[i].name) evaluator returned non-finite value"))
+    end
+    return out
+end
+
 @inline function _default_numeric_jacobian(ctx::ThermoDiffContext, target::DiffTarget, params::ParamSpec)
     n_params = length(params.names)
     if n_params == 1
         key = params.names[1]
         center = _resolve_theta_value(ctx.theta, key)
-        h = _fd_step(center, key)
+        h = _fd_step(center)
         f_p = _evaluate_target_at_theta(ctx, target, _theta_with_perturb(ctx.theta, key, h))
         f_m = _evaluate_target_at_theta(ctx, target, _theta_with_perturb(ctx.theta, key, -h))
         return (f_p - f_m) / (2h)
@@ -67,7 +77,7 @@ end
     out = Matrix{Float64}(undef, 1, n_params)
     for (j, key) in enumerate(params.names)
         center = _resolve_theta_value(ctx.theta, key)
-        h = _fd_step(center, key)
+        h = _fd_step(center)
         f_p = _evaluate_target_at_theta(ctx, target, _theta_with_perturb(ctx.theta, key, h))
         f_m = _evaluate_target_at_theta(ctx, target, _theta_with_perturb(ctx.theta, key, -h))
         out[1, j] = (f_p - f_m) / (2h)
@@ -83,14 +93,14 @@ end
     if n_params == 1
         key = params.names[1]
         center = _resolve_theta_value(ctx.theta, key)
-        h = _fd_step(center, key)
+        h = _fd_step(center)
         out = Vector{Float64}(undef, n_targets)
         theta_p = _theta_with_perturb(ctx.theta, key, h)
         theta_m = _theta_with_perturb(ctx.theta, key, -h)
-        for i in eachindex(targets)
-            f_p = _evaluate_target_at_theta(ctx, targets[i], theta_p)
-            f_m = _evaluate_target_at_theta(ctx, targets[i], theta_m)
-            out[i] = (f_p - f_m) / (2h)
+        values_p = _evaluate_targets_at_theta(ctx, targets, theta_p)
+        values_m = _evaluate_targets_at_theta(ctx, targets, theta_m)
+        @inbounds for i in eachindex(targets)
+            out[i] = (values_p[i] - values_m[i]) / (2h)
         end
         return out
     end
@@ -98,13 +108,13 @@ end
     out = Matrix{Float64}(undef, n_targets, n_params)
     for (j, key) in enumerate(params.names)
         center = _resolve_theta_value(ctx.theta, key)
-        h = _fd_step(center, key)
+        h = _fd_step(center)
         theta_p = _theta_with_perturb(ctx.theta, key, h)
         theta_m = _theta_with_perturb(ctx.theta, key, -h)
-        for i in eachindex(targets)
-            f_p = _evaluate_target_at_theta(ctx, targets[i], theta_p)
-            f_m = _evaluate_target_at_theta(ctx, targets[i], theta_m)
-            out[i, j] = (f_p - f_m) / (2h)
+        values_p = _evaluate_targets_at_theta(ctx, targets, theta_p)
+        values_m = _evaluate_targets_at_theta(ctx, targets, theta_m)
+        @inbounds for i in eachindex(targets)
+            out[i, j] = (values_p[i] - values_m[i]) / (2h)
         end
     end
     return out

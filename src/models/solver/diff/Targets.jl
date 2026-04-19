@@ -19,6 +19,20 @@ end
     return out
 end
 
+@inline function _resolve_target_xi(ctx::ThermoDiffContext)
+    if hasproperty(ctx.theta, :xi)
+        return _theta_value(ctx.theta, :xi)
+    end
+    if ctx.spec_override !== nothing && haskey(ctx.spec_override, :xi)
+        xi = Float64(get(ctx.spec_override, :xi, 0.0))
+        isfinite(xi) || throw(ArgumentError("spec_override.xi must be finite, got $(xi)"))
+        return xi
+    end
+    xi = Float64(ctx.result.xi)
+    isfinite(xi) || throw(ArgumentError("context result xi must be finite, got $(xi)"))
+    return xi
+end
+
 @inline _eval_pressure(ctx::ThermoDiffContext) = _finite_target_value(:pressure, ctx.result.pressure)
 @inline _eval_entropy(ctx::ThermoDiffContext) = _finite_target_value(:entropy, ctx.result.entropy)
 @inline _eval_rho_norm(ctx::ThermoDiffContext) = _finite_target_value(:rho_norm, ctx.result.rho_norm)
@@ -28,7 +42,7 @@ end
     deriv = Main.Models.ThermoDerivatives
     T_fm = _theta_value(ctx.theta, :T_fm)
     mu_fm = _theta_value(ctx.theta, :mu_fm)
-    xi = hasproperty(ctx.theta, :xi) ? Float64(getproperty(ctx.theta, :xi)) : 0.0
+    xi = _resolve_target_xi(ctx)
     p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
     t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
     value = deriv.dP_dT(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
@@ -39,7 +53,7 @@ end
     deriv = Main.Models.ThermoDerivatives
     T_fm = _theta_value(ctx.theta, :T_fm)
     mu_fm = _theta_value(ctx.theta, :mu_fm)
-    xi = hasproperty(ctx.theta, :xi) ? Float64(getproperty(ctx.theta, :xi)) : 0.0
+    xi = _resolve_target_xi(ctx)
     p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
     t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
     value = deriv.dP_dmu(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
