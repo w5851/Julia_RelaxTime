@@ -122,12 +122,13 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 solver/diff 当前提供最小稳定骨架，先冻结“上下文 + 目标 + 参数 + Jacobian 形状”约定，再在后续阶段接入真实导数数值实现：
 
 - `build_thermo_diff_context(result; mode, model, theta, spec_override=nothing)`
-  - 构建 `ThermoDiffContext`；`theta` 采用 NamedTuple 口径（首批支持 `T_fm` / `mu_fm` / `xi`）。
+  - 构建 `ThermoDiffContext`；`theta` 采用 NamedTuple 口径（首批支持 `T_fm` / `mu_fm(兼容 μ_fm)` / `xi`，并归一化到 `mu_fm`）。
 - `ParamSpec([:T_fm, :mu_fm, :xi])`
   - 约束外参导数输入维度与顺序；非法参数名会抛 `ArgumentError`。
 - `diff_target(:pressure | :entropy | :rho_norm | :energy)`
   - 目标注册入口；未知目标名抛 `ArgumentError`。
 - `jacobian(ctx, target, params)` / `jacobian(ctx, targets, params)`
   - 始终返回矩阵；单目标单参数固定 `1x1`，多目标单参数返回 `N x 1`。
+  - 当 `ParamSpec` 包含多个参数时，要求 backend 返回 `N x P` 矩阵（`N=目标数`, `P=参数数`）。
 
 当前阶段约束：默认 backend 为占位实现，调用 `jacobian(...)` 会返回“not implemented”错误；这是刻意保留的契约骨架行为，用于在 Issue #80 中安全接入真实 Jacobian 数值路径。

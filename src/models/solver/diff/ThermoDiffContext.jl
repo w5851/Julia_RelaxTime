@@ -38,7 +38,23 @@ end
     isfinite(Float64(value)) || throw(ArgumentError("theta.$(key) must be finite, got $(value)"))
 end
 
+@inline function _normalize_theta_mu_key(theta::NamedTuple)
+    has_mu_ascii = hasproperty(theta, :mu_fm)
+    has_mu_unicode = hasproperty(theta, :μ_fm)
+
+    if has_mu_ascii && has_mu_unicode
+        throw(ArgumentError("theta cannot contain both :mu_fm and :μ_fm"))
+    end
+
+    if has_mu_unicode
+        return merge(theta, (mu_fm=getproperty(theta, :μ_fm),))
+    end
+
+    return theta
+end
+
 @inline function _normalize_diff_theta(theta::NamedTuple)
+    theta = _normalize_theta_mu_key(theta)
     _require_finite_theta_value(theta, :T_fm)
     _require_finite_theta_value(theta, :mu_fm)
     _require_finite_theta_value(theta, :xi)
@@ -48,7 +64,13 @@ end
 @inline function _default_jacobian_backend(ctx::ThermoDiffContext, target, params::ParamSpec)
     _ = ctx
     _ = params
-    throw(ErrorException("jacobian backend is not implemented for target $(target.name)"))
+    if target isa DiffTarget
+        throw(ErrorException("jacobian backend is not implemented for target $(target.name)"))
+    elseif target isa AbstractVector{<:DiffTarget}
+        names = join(string.(getfield.(target, :name)), ",")
+        throw(ErrorException("jacobian backend is not implemented for targets [$(names)]"))
+    end
+    throw(ErrorException("jacobian backend is not implemented for target input type $(typeof(target))"))
 end
 
 @inline function build_thermo_diff_context(
@@ -61,7 +83,6 @@ end
 )
     mode isa ConstraintMode || throw(ArgumentError("mode must be ConstraintMode, got $(typeof(mode))"))
     theta isa NamedTuple || throw(ArgumentError("theta must be NamedTuple, got $(typeof(theta))"))
-    jacobian_backend isa Function || throw(ArgumentError("jacobian_backend must be callable"))
 
     theta_norm = _normalize_diff_theta(theta)
     return ThermoDiffContext(result, mode, model, theta_norm, spec_override, jacobian_backend)

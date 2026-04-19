@@ -32,6 +32,21 @@ end
             model=model,
             theta=(T_fm=NaN, mu_fm=mu_fm, xi=0.0),
         )
+
+        ctx_mu_alias = Models.build_thermo_diff_context(
+            result;
+            mode=mode,
+            model=model,
+            theta=(T_fm=T_fm, μ_fm=mu_fm, xi=0.0),
+        )
+        @test hasproperty(ctx_mu_alias.theta, :mu_fm)
+        @test ctx_mu_alias.theta.mu_fm == mu_fm
+        @test_throws ArgumentError Models.build_thermo_diff_context(
+            result;
+            mode=mode,
+            model=model,
+            theta=(T_fm=T_fm, mu_fm=mu_fm, μ_fm=mu_fm, xi=0.0),
+        )
     end
 
     @testset "target registry and unimplemented path" begin
@@ -75,5 +90,37 @@ end
 
         J2 = Models.jacobian(ctx, [target, target], params)
         @test size(J2) == (2, 1)
+
+        params2 = Models.ParamSpec([:T_fm, :mu_fm])
+        backend2 = function (ctx, target_or_targets, params)
+            _ = ctx
+            n_targets = target_or_targets isa AbstractVector ? length(target_or_targets) : 1
+            return fill(1.25, n_targets, length(params.names))
+        end
+        ctx2 = Models.build_thermo_diff_context(
+            result;
+            mode=mode,
+            model=model,
+            theta=(T_fm=T_fm, mu_fm=mu_fm, xi=0.0),
+            jacobian_backend=backend2,
+        )
+        J3 = Models.jacobian(ctx2, target, params2)
+        @test size(J3) == (1, 2)
+        J4 = Models.jacobian(ctx2, [target, target], params2)
+        @test size(J4) == (2, 2)
+
+        ctx_default = Models.build_thermo_diff_context(
+            result;
+            mode=mode,
+            model=model,
+            theta=(T_fm=T_fm, mu_fm=mu_fm, xi=0.0),
+        )
+        err_msg = try
+            Models.jacobian(ctx_default, [target, target], params)
+            ""
+        catch err
+            sprint(showerror, err)
+        end
+        @test occursin("targets", err_msg)
     end
 end
