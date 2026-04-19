@@ -202,79 +202,153 @@ const DERIVATIVES_HEADER = join([
     "converged"
 ], ",")
 
+@inline function _require_pilot_derivative(payload, key::Symbol)
+    value = if payload isa AbstractDict
+        haskey(payload, key) || throw(ArgumentError("pilot derivative key is missing: $(key)"))
+        payload[key]
+    elseif payload isa NamedTuple
+        hasproperty(payload, key) || throw(ArgumentError("pilot derivative key is missing: $(key)"))
+        getproperty(payload, key)
+    else
+        throw(ArgumentError("unsupported pilot derivative payload type: $(typeof(payload))"))
+    end
+
+    value isa Real || throw(ArgumentError("pilot derivative $(key) must be Real, got $(typeof(value))"))
+    out = Float64(value)
+    isfinite(out) || throw(ArgumentError("pilot derivative $(key) is non-finite: $(value)"))
+    return out
+end
+
+@inline function _eval_pilot_thermo_derivatives(model, mode, T_fm::Float64, μ_fm::Float64, config::DerivativesConfig)
+    solver_result = Models.solve(model, mode, T_fm, μ_fm;
+        xi=config.xi,
+        p_num=config.p_num,
+        t_num=config.t_num,
+        residual_norm_max=1e-6,
+    )
+
+    pilot_ctx = Models.build_pilot_diff_context(
+        solver_result;
+        mode=mode,
+        model=model,
+        theta=(T_fm=T_fm, mu_fm=μ_fm, xi=config.xi),
+        spec_override=(
+            xi=config.xi,
+            p_num=config.p_num,
+            t_num=config.t_num,
+            residual_norm_max=1e-6,
+        ),
+    )
+
+    pilot_out = Models.eval_pilot_derivatives(
+        pilot_ctx;
+        targets=[:pressure, :energy, :rho_norm],
+        params=[:T_fm, :mu_fm],
+    )
+    by_name = pilot_out.by_name
+    rho0 = Float64(Models.ρ0)
+    dP_dT = _require_pilot_derivative(by_name, Symbol("pressure__dT_fm"))
+    dP_dmu = _require_pilot_derivative(by_name, Symbol("pressure__dmu_fm"))
+    dEpsilon_dT = _require_pilot_derivative(by_name, Symbol("energy__dT_fm"))
+    dEpsilon_dmu = _require_pilot_derivative(by_name, Symbol("energy__dmu_fm"))
+    dn_dT = _require_pilot_derivative(by_name, Symbol("rho_norm__dT_fm")) * rho0
+    dn_dmu_quark = _require_pilot_derivative(by_name, Symbol("rho_norm__dmu_fm")) * rho0
+
+    return (
+        dP_dT=dP_dT,
+        dP_dmu=dP_dmu,
+        dEpsilon_dT=dEpsilon_dT,
+        dEpsilon_dmu=dEpsilon_dmu,
+        dn_dT=dn_dT,
+        dn_dmu=dn_dmu_quark,
+    )
+end
+
+@inline function _step1_values_row(T_MeV::Float64, μ_MeV::Float64, config::DerivativesConfig, result, pilot_derivs)
+    M_MeV = result.masses .* hbarc
+    # CSV 列 dn_dmu 的语义保持为 ∂n/∂μ_q（夸克化学势导数）。
+    dn_dmu_quark = pilot_derivs.dn_dmu
+    return (
+        @sprintf("%.2f", T_MeV),
+        @sprintf("%.2f", μ_MeV),
+        @sprintf("%.2f", config.xi),
+        @sprintf("%.6f", M_MeV[1]),
+        @sprintf("%.6f", M_MeV[2]),
+        @sprintf("%.6f", M_MeV[3]),
+        @sprintf("%.6e", result.dM_dT[1]),
+        @sprintf("%.6e", result.dM_dT[2]),
+        @sprintf("%.6e", result.dM_dT[3]),
+        @sprintf("%.6e", result.dM_dmu[1]),
+        @sprintf("%.6e", result.dM_dmu[2]),
+        @sprintf("%.6e", result.dM_dmu[3]),
+        @sprintf("%.6e", pilot_derivs.dP_dT),
+        @sprintf("%.6e", pilot_derivs.dP_dmu),
+        @sprintf("%.6e", pilot_derivs.dEpsilon_dT),
+        @sprintf("%.6e", pilot_derivs.dEpsilon_dmu),
+        @sprintf("%.6e", pilot_derivs.dn_dT),
+        @sprintf("%.6e", dn_dmu_quark),
+        @sprintf("%.6e", result.pressure),
+        @sprintf("%.6e", result.energy),
+        @sprintf("%.6e", result.entropy),
+        @sprintf("%.6f", result.rho_norm),
+        string(result.converged),
+    )
+end
+
+@inline function _for_each_grid_point(f, T_values, mu_values, verbose::Bool)
+    for T_MeV in T_values
+        for μ_MeV in mu_values
+            f(T_MeV, μ_MeV)
+        end
+        if verbose
+            println(" T=$(T_MeV) MeV")
+        end
+    end
+end
+
 function step1_mass_derivatives(config::DerivativesConfig, T_values, mu_values, output_path)
     println("[Step 1] 质量导数计算")
     println("-" ^ 40)
+    println("  注: 失败网格点不写入 CSV 数据行，仅计入失败统计")
     
     t_start = time()
     success_count = 0
     failure_count = 0
+    model = Models.create_model(:PNJL)
+    mode = Models.FixedMu()
     
     open(output_path, "w") do io
         println(io, DERIVATIVES_HEADER)
         
-        for T_MeV in T_values
-            for μ_MeV in mu_values
-                # 转换单位
-                T_fm = T_MeV / hbarc
-                μ_fm = μ_MeV / hbarc
-                
-                try
-                    # 计算热力学导数
-                    result = thermo_derivatives(T_fm, μ_fm;
-                        xi=config.xi,
-                        p_num=config.p_num,
-                        t_num=config.t_num
-                    )
-                    
-                    # 转换质量单位
-                    M_MeV = result.masses .* hbarc
-                    
-                    # 写入结果
-                    values = (
-                        @sprintf("%.2f", T_MeV),
-                        @sprintf("%.2f", μ_MeV),
-                        @sprintf("%.2f", config.xi),
-                        @sprintf("%.6f", M_MeV[1]),
-                        @sprintf("%.6f", M_MeV[2]),
-                        @sprintf("%.6f", M_MeV[3]),
-                        @sprintf("%.6e", result.dM_dT[1]),
-                        @sprintf("%.6e", result.dM_dT[2]),
-                        @sprintf("%.6e", result.dM_dT[3]),
-                        @sprintf("%.6e", result.dM_dmu[1]),
-                        @sprintf("%.6e", result.dM_dmu[2]),
-                        @sprintf("%.6e", result.dM_dmu[3]),
-                        @sprintf("%.6e", result.dP_dT),
-                        @sprintf("%.6e", result.dP_dmu),
-                        @sprintf("%.6e", result.dEpsilon_dT),
-                        @sprintf("%.6e", result.dEpsilon_dmu),
-                        @sprintf("%.6e", result.dn_dT),
-                        @sprintf("%.6e", result.dn_dmu),
-                        @sprintf("%.6e", result.pressure),
-                        @sprintf("%.6e", result.energy),
-                        @sprintf("%.6e", result.entropy),
-                        @sprintf("%.6f", result.rho_norm),
-                        string(result.converged)
-                    )
-                    println(io, join(values, ","))
-                    flush(io)
-                    
-                    success_count += 1
-                    if config.verbose
-                        print(".")
-                    end
-                    
-                catch e
-                    failure_count += 1
-                    if config.verbose
-                        print("x")
-                        @warn "T=$(T_MeV), μ=$(μ_MeV) 失败: $(e)"
-                    end
+        _for_each_grid_point(T_values, mu_values, config.verbose) do T_MeV, μ_MeV
+            # 转换单位
+            T_fm = T_MeV / hbarc
+            μ_fm = μ_MeV / hbarc
+
+            try
+                # 计算热力学导数
+                result = ThermoDerivatives.thermo_derivatives(T_fm, μ_fm;
+                    xi=config.xi,
+                    p_num=config.p_num,
+                    t_num=config.t_num
+                )
+                pilot_derivs = _eval_pilot_thermo_derivatives(model, mode, T_fm, μ_fm, config)
+                values = _step1_values_row(T_MeV, μ_MeV, config, result, pilot_derivs)
+                println(io, join(values, ","))
+                flush(io)
+
+                success_count += 1
+                if config.verbose
+                    print(".")
                 end
-            end
-            
-            if config.verbose
-                println(" T=$(T_MeV) MeV")
+
+            catch e
+                # 失败点不落盘，仅记录失败计数。
+                failure_count += 1
+                if config.verbose
+                    print("x")
+                    @warn "T=$(T_MeV), μ=$(μ_MeV) 失败: $(e)"
+                end
             end
         end
     end
@@ -305,6 +379,7 @@ const BULK_HEADER = join([
 function step2_bulk_viscosity(config::DerivativesConfig, T_values, mu_values, output_path)
     println("\n[Step 2] 体粘滞系数计算")
     println("-" ^ 40)
+    println("  注: 失败网格点不写入 CSV 数据行，仅计入失败统计")
     
     t_start = time()
     success_count = 0
@@ -313,65 +388,60 @@ function step2_bulk_viscosity(config::DerivativesConfig, T_values, mu_values, ou
     open(output_path, "w") do io
         println(io, BULK_HEADER)
         
-        for T_MeV in T_values
-            for μ_MeV in mu_values
-                # 转换单位
-                T_fm = T_MeV / hbarc
-                μ_fm = μ_MeV / hbarc
-                
-                try
-                    # 计算体粘滞系数
-                    result = bulk_viscosity_coefficients(T_fm, μ_fm;
-                        xi=config.xi,
-                        p_num=config.p_num,
-                        t_num=config.t_num
-                    )
-                    
-                    # 转换质量单位
-                    M_MeV = result.masses .* hbarc
-                    
-                    # 检查结果有效性
-                    is_valid = isfinite(result.v_n_sq) && isfinite(result.dμB_dT_sigma)
-                    
-                    # 写入结果
-                    values = (
-                        @sprintf("%.2f", T_MeV),
-                        @sprintf("%.2f", μ_MeV),
-                        @sprintf("%.2f", config.xi),
-                        @sprintf("%.6e", result.v_n_sq),
-                        @sprintf("%.6e", result.dμB_dT_sigma),
-                        @sprintf("%.6f", M_MeV[1]),
-                        @sprintf("%.6f", M_MeV[2]),
-                        @sprintf("%.6f", M_MeV[3]),
-                        @sprintf("%.6e", result.dM_dT[1]),
-                        @sprintf("%.6e", result.dM_dT[2]),
-                        @sprintf("%.6e", result.dM_dT[3]),
-                        @sprintf("%.6e", result.dM_dμB[1]),
-                        @sprintf("%.6e", result.dM_dμB[2]),
-                        @sprintf("%.6e", result.dM_dμB[3]),
-                        @sprintf("%.6e", result.s),
-                        @sprintf("%.6e", result.n_B),
-                        string(is_valid)
-                    )
-                    println(io, join(values, ","))
-                    flush(io)
-                    
-                    success_count += 1
-                    if config.verbose
-                        print(".")
-                    end
-                    
-                catch e
-                    failure_count += 1
-                    if config.verbose
-                        print("x")
-                        @warn "T=$(T_MeV), μ=$(μ_MeV) 失败: $(e)"
-                    end
+        _for_each_grid_point(T_values, mu_values, config.verbose) do T_MeV, μ_MeV
+            # 转换单位
+            T_fm = T_MeV / hbarc
+            μ_fm = μ_MeV / hbarc
+
+            try
+                # 计算体粘滞系数
+                result = ThermoDerivatives.bulk_viscosity_coefficients(T_fm, μ_fm;
+                    xi=config.xi,
+                    p_num=config.p_num,
+                    t_num=config.t_num
+                )
+
+                # 转换质量单位
+                M_MeV = result.masses .* hbarc
+
+                # 检查结果有效性
+                is_valid = isfinite(result.v_n_sq) && isfinite(result.dμB_dT_sigma)
+
+                # 写入结果
+                values = (
+                    @sprintf("%.2f", T_MeV),
+                    @sprintf("%.2f", μ_MeV),
+                    @sprintf("%.2f", config.xi),
+                    @sprintf("%.6e", result.v_n_sq),
+                    @sprintf("%.6e", result.dμB_dT_sigma),
+                    @sprintf("%.6f", M_MeV[1]),
+                    @sprintf("%.6f", M_MeV[2]),
+                    @sprintf("%.6f", M_MeV[3]),
+                    @sprintf("%.6e", result.dM_dT[1]),
+                    @sprintf("%.6e", result.dM_dT[2]),
+                    @sprintf("%.6e", result.dM_dT[3]),
+                    @sprintf("%.6e", result.dM_dμB[1]),
+                    @sprintf("%.6e", result.dM_dμB[2]),
+                    @sprintf("%.6e", result.dM_dμB[3]),
+                    @sprintf("%.6e", result.s),
+                    @sprintf("%.6e", result.n_B),
+                    string(is_valid)
+                )
+                println(io, join(values, ","))
+                flush(io)
+
+                success_count += 1
+                if config.verbose
+                    print(".")
                 end
-            end
-            
-            if config.verbose
-                println(" T=$(T_MeV) MeV")
+
+            catch e
+                # 失败点不落盘，仅记录失败计数。
+                failure_count += 1
+                if config.verbose
+                    print("x")
+                    @warn "T=$(T_MeV), μ=$(μ_MeV) 失败: $(e)"
+                end
             end
         end
     end

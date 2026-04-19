@@ -35,6 +35,7 @@ struct StatePoint
     quark_params::NamedTuple
     thermo_params::NamedTuple
     K_coeffs::NamedTuple
+    pilot_derivs::NamedTuple
 end
 
 function ensure_parent_dir(path::AbstractString)
@@ -94,7 +95,50 @@ function build_state(T_MeV::Float64, muB_MeV::Float64, xi::Float64)
 
     quark_params = (m=masses, μ=(u=muq_fm, d=muq_fm, s=muq_fm), A=(u=A_u, d=A_u, s=A_s))
     thermo_params = (T=T_fm, Φ=Phi, Φbar=Phibar, ξ=xi)
-    return StatePoint(xi, quark_params, thermo_params, K_coeffs)
+    pilot_derivs = evaluate_pilot_derivatives(xi, T_fm, muq_fm; p_num=12, t_num=6)
+    return StatePoint(xi, quark_params, thermo_params, K_coeffs, pilot_derivs)
+end
+
+@inline function require_pilot_value(by_name::AbstractDict{Symbol, <:Real}, key::Symbol)
+    haskey(by_name, key) || error("pilot derivative key missing: $key")
+    value = Float64(by_name[key])
+    isfinite(value) || error("pilot derivative key non-finite: $key")
+    return value
+end
+
+function evaluate_pilot_derivatives(xi::Float64, T_fm::Float64, muq_fm::Float64; p_num::Int, t_num::Int)
+    model = Models.create_model(:PNJL)
+    mode = Models.FixedMu()
+    result = Models.solve(model, mode, T_fm, muq_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        residual_norm_max=1e-6,
+    )
+    Bool(result.converged) || error("pilot derivative solve not converged for xi=$xi")
+
+    ctx = Models.build_pilot_diff_context(
+        result;
+        mode=mode,
+        model=model,
+        theta=(T_fm=T_fm, mu_fm=muq_fm, xi=xi),
+        spec_override=(
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            residual_norm_max=1e-6,
+        ),
+    )
+    out = Models.eval_pilot_derivatives(
+        ctx;
+        targets=[:pressure, :entropy],
+        params=[:T_fm],
+    )
+    by_name = out.by_name
+    return (
+        dpressure_dT=require_pilot_value(by_name, Symbol("pressure__dT_fm")),
+        dentropy_dT=require_pilot_value(by_name, Symbol("entropy__dT_fm")),
+    )
 end
 
 function process_threshold(process::Symbol, quark_params::NamedTuple)
@@ -108,6 +152,8 @@ function process_threshold(process::Symbol, quark_params::NamedTuple)
 end
 
 function sigma_no_blocking(process::Symbol, s::Float64, quark_params::NamedTuple, thermo_params::NamedTuple, K_coeffs::NamedTuple; n_points::Int)
+    # Control case: keep matrix element and phase-space integration,
+    # but remove final-state blocking factor in the integrand.
     ctx = prepare_scattering_context(process, quark_params)
     mi, mj, mc, md = ctx.m1, ctx.m2, ctx.m3, ctx.m4
     s <= max((mi + mj)^2, (mc + md)^2) && return 0.0
@@ -141,6 +187,7 @@ function sigma_no_blocking(process::Symbol, s::Float64, quark_params::NamedTuple
 end
 
 function mean_blocking_factor(process::Symbol, s::Float64, quark_params::NamedTuple, thermo_params::NamedTuple; n_points::Int)
+    # Diagnostic observable: angular average of final-state blocking factor only.
     i, j, c, d = Main.AverageScatteringRate.parse_particles_from_process(process)
     mi, mj = get_mass(i, quark_params), get_mass(j, quark_params)
     mc, md = get_mass(c, quark_params), get_mass(d, quark_params)
@@ -194,8 +241,8 @@ function main()
     io = open(out, "w")
     io_sum = open(out_summary, "w")
     try
-        println(io, "process,xi_state,s_th,s,s_minus_sth,t_width,sigma_base,sigma_no_block,sigma_Kswap,mean_blocking")
-        println(io_sum, "process,delta_s_max,area_base_A,area_base_B,ratio_base_B_over_A,area_no_block_A,area_no_block_B,ratio_no_block_B_over_A,block_factor_area_A,block_factor_area_B,area_A_with_KB,area_B_with_KA,K_sensitivity_A_rel,K_sensitivity_B_rel,t_width_mean_A,t_width_mean_B")
+        println(io, "process,xi_state,s_th,s,s_minus_sth,t_width,sigma_base,sigma_no_block,sigma_Kswap,mean_blocking,pilot_dpressure_dT,pilot_dentropy_dT")
+        println(io_sum, "process,delta_s_max,area_base_A,area_base_B,ratio_base_B_over_A,area_no_block_A,area_no_block_B,ratio_no_block_B_over_A,block_factor_area_A,block_factor_area_B,area_A_with_KB,area_B_with_KA,K_sensitivity_A_rel,K_sensitivity_B_rel,t_width_mean_A,t_width_mean_B,pilot_dpressure_dT_A,pilot_dpressure_dT_B,pilot_dentropy_dT_A,pilot_dentropy_dT_B")
 
         for process in processes
             thA = process_threshold(process, state_A.quark_params)
@@ -216,6 +263,10 @@ function main()
             blkB = Float64[]
             twA = Float64[]
             twB = Float64[]
+            pilot_dpressure_A_vals = Float64[]
+            pilot_dpressure_B_vals = Float64[]
+            pilot_dentropy_A_vals = Float64[]
+            pilot_dentropy_B_vals = Float64[]
 
             for (idx, ds) in enumerate(ds_vals)
                 sA = sA_vals[idx]
@@ -240,9 +291,13 @@ function main()
                 push!(kswA, s_ksw_A); push!(kswB, s_ksw_B)
                 push!(blkA, bA); push!(blkB, bB)
                 push!(twA, widthA); push!(twB, widthB)
+                push!(pilot_dpressure_A_vals, state_A.pilot_derivs.dpressure_dT)
+                push!(pilot_dpressure_B_vals, state_B.pilot_derivs.dpressure_dT)
+                push!(pilot_dentropy_A_vals, state_A.pilot_derivs.dentropy_dT)
+                push!(pilot_dentropy_B_vals, state_B.pilot_derivs.dentropy_dT)
 
-                println(io, join((string(process), string(xi_A), thA.s_th, sA, ds, widthA, s_base_A, s_nob_A, s_ksw_A, bA), ','))
-                println(io, join((string(process), string(xi_B), thB.s_th, sB, ds, widthB, s_base_B, s_nob_B, s_ksw_B, bB), ','))
+                println(io, join((string(process), string(xi_A), thA.s_th, sA, ds, widthA, s_base_A, s_nob_A, s_ksw_A, bA, state_A.pilot_derivs.dpressure_dT, state_A.pilot_derivs.dentropy_dT), ','))
+                println(io, join((string(process), string(xi_B), thB.s_th, sB, ds, widthB, s_base_B, s_nob_B, s_ksw_B, bB, state_B.pilot_derivs.dpressure_dT, state_B.pilot_derivs.dentropy_dT), ','))
             end
 
             area_base_A = trapz(ds_vals, baseA)
@@ -257,7 +312,11 @@ function main()
             block_factor_A = area_nob_A > 0 ? area_base_A / area_nob_A : NaN
             block_factor_B = area_nob_B > 0 ? area_base_B / area_nob_B : NaN
             sens_A = area_base_A > 0 ? (area_ksw_A / area_base_A - 1.0) : NaN
-            sens_B = area_ksw_B > 0 ? (area_base_B / area_ksw_B - 1.0) : NaN
+            sens_B = area_base_B > 0 ? (area_ksw_B / area_base_B - 1.0) : NaN
+            pilot_dpressure_dT_A = mean(pilot_dpressure_A_vals)
+            pilot_dpressure_dT_B = mean(pilot_dpressure_B_vals)
+            pilot_dentropy_dT_A = mean(pilot_dentropy_A_vals)
+            pilot_dentropy_dT_B = mean(pilot_dentropy_B_vals)
 
             println(io_sum, join((
                 string(process),
@@ -276,6 +335,10 @@ function main()
                 sens_B,
                 mean(twA),
                 mean(twB),
+                pilot_dpressure_dT_A,
+                pilot_dpressure_dT_B,
+                pilot_dentropy_dT_A,
+                pilot_dentropy_dT_B,
             ), ','))
             flush(io)
             flush(io_sum)

@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/Models.jl`
 - Generated page: `docs/api/models/solver/generated/Exports.md`
-- Exported symbol count: 288
-- Mentioned in non-generated docs/api pages: 177
+- Exported symbol count: 290
+- Mentioned in non-generated docs/api pages: 179
 
 ## Exported Symbols
 
@@ -22,7 +22,7 @@
 | `ConstraintModes` | src/models/Models.jl | 68 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `ContinuationState` | src/models/Models.jl | 95 | 0 | - |
 | `DefaultSeed` | src/models/Models.jl | 87 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `DiffTarget` | src/models/Models.jl | 150 | 1 | docs/api/models/solver/README.md |
+| `DiffTarget` | src/models/Models.jl | 150 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `ExtraConstraints` | src/models/Models.jl | 70 | 1 | docs/api/models/solver/README.md |
 | `FirstOrderSweepResult` | src/models/Models.jl | 128 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `GapParams` | src/models/Models.jl | 90 | 1 | docs/api/models/solver/ConstraintModes.md |
@@ -104,6 +104,7 @@
 | `build_manifest_extensions` | src/models/Models.jl | 134 | 0 | - |
 | `build_njl_problem` | src/models/Models.jl | 40 | 0 | - |
 | `build_phase_artifacts` | src/models/Models.jl | 126 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `build_pilot_diff_context` | src/models/Models.jl | 152 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `build_pnjl_fixedmu_adapters` | src/models/Models.jl | 45 | 0 | - |
 | `build_pnjl_fixedmu_problem` | src/models/Models.jl | 40 | 0 | - |
 | `build_pnjl_flavor_mu_adapters` | src/models/Models.jl | 45 | 0 | - |
@@ -180,6 +181,7 @@
 | `derive_vec` | src/models/Models.jl | 44 | 0 | - |
 | `diff_target` | src/models/Models.jl | 151 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `energy_landau` | src/models/Models.jl | 99 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `eval_pilot_derivatives` | src/models/Models.jl | 152 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `evaluate_candidate_success` | src/models/Models.jl | 74 | 0 | - |
 | `evaluate_hard_constraints` | src/models/Models.jl | 59 | 0 | - |
 | `execute_governance_selector` | src/models/Models.jl | 76 | 1 | docs/api/models/solver/README.md |
