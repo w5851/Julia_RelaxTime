@@ -51,7 +51,7 @@ include(joinpath(@__DIR__, "variants", "rotation", "RotationModel.jl"))
 include(joinpath(@__DIR__, "variants", "rotation", "workflows", "RotationWorkflow.jl"))
 
 # Backward-compatible access path used by some tests/callers:
-# Main.Models.PNJLIntegrals.*
+# Models.PNJLIntegrals.*
 const PNJLIntegrals = PNJLCore.PNJLIntegrals
 
 # Stable accessor contract for workflow-side thermal grid defaults.
