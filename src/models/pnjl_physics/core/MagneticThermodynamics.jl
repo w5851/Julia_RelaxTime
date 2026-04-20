@@ -137,10 +137,10 @@ function calculate_magnetic_omega_components(
         χ0 = PNJLCore.chiral_potential(params, φ0)
         U0 = PNJLCore.polyakov_potential(params, Φ0, Φbar0, T_fm)
         thermal_p_mesh, cosθ_mesh, thermal_coefficients = thermal_nodes
-        ω0 = χ0 + U0 +
-             calculate_energy_sum(masses0) +
-             calculate_log_sum(masses0, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ0, Φbar0, mu_vec, T_fm, xi)
-        return (chi=χ0, poly=U0, vac=0.0, therm=0.0, masses=masses0, omega=ω0, n_max=0, G_B=G_fm2)
+        vac0 = calculate_energy_sum(masses0)
+        therm0 = calculate_log_sum(masses0, thermal_p_mesh, cosθ_mesh, thermal_coefficients, Φ0, Φbar0, mu_vec, T_fm, xi)
+        ω0 = χ0 + U0 + vac0 + therm0
+        return (chi=χ0, poly=U0, vac=vac0, therm=therm0, masses=masses0, omega=ω0, n_max=0, G_B=G_fm2)
     end
 
     φ = SVector{3, T}(x_state[1], x_state[2], x_state[3])
@@ -286,4 +286,3 @@ function magnetic_nmax_convergence_report(
 end
 
 end # module MagneticThermodynamics
-

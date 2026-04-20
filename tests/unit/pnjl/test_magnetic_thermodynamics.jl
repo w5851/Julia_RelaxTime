@@ -69,5 +69,16 @@ const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
         omega_legacy = Models.omega(PNJL_MODEL, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=0.0)
         omega_b0 = calculate_magnetic_omega(x_state, mu_vec, T_fm, MagneticConfig(eB_fm2=0.0, p_num=24, pz_max=10.0))
         @test isapprox(omega_b0, omega_legacy; rtol=1e-7, atol=1e-8)
+
+        comp_b0 = calculate_magnetic_omega_components(x_state, mu_vec, T_fm, MagneticConfig(eB_fm2=0.0, p_num=24, pz_max=10.0))
+        masses_ref = Models.calculate_mass_vec(PNJL_MODEL, SVector{3, Float64}(x_state[1], x_state[2], x_state[3]))
+        vac_ref = Models.vacuum_contribution(PNJL_MODEL, masses_ref)
+        therm_ref = Models.thermal_contribution(PNJL_MODEL, masses_ref, x_state[4], x_state[5], mu_vec, T_fm; p_num=24, t_num=8, xi=0.0)
+
+        @test isfinite(comp_b0.vac)
+        @test isfinite(comp_b0.therm)
+        @test isapprox(comp_b0.vac, vac_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(comp_b0.therm, therm_ref; rtol=1e-8, atol=1e-10)
+        @test isapprox(comp_b0.omega, comp_b0.chi + comp_b0.poly + comp_b0.vac + comp_b0.therm; rtol=1e-10, atol=1e-12)
     end
 end

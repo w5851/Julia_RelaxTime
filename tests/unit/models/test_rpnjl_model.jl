@@ -107,6 +107,34 @@ Models.pnjl_module()
         @test isapprox(actual, expected; rtol=1e-12, atol=1e-12)
     end
 
+    @testset "非零扩展开关在固定点可检测" begin
+        m_ext = Models.RPNJLModel(; use_rpnjl_extensions=true)
+        m_base = Models.RPNJLModel(; use_rpnjl_extensions=false)
+
+        @test m_ext.ext.kappa > 0
+        @test abs(m_ext.ext.g1_fm8) > 0
+        @test abs(m_ext.ext.g2_fm8) > 0
+
+        x = SVector{5}(-0.03, -0.03, -0.04, 0.2, 0.2)
+        T = 0.8
+        μ = SVector{3}(0.45, 0.45, 0.45)
+
+        comp_ext = Models.omega_components(m_ext, x, T, μ; p_num=24, t_num=8, xi=0.0)
+        comp_base = Models.omega_components(m_base, x, T, μ; p_num=24, t_num=8, xi=0.0)
+        residual_ext = Models.gap_residual(m_ext, x, T, μ; p_num=24, t_num=8, xi=0.0)
+        residual_base = Models.gap_residual(m_base, x, T, μ; p_num=24, t_num=8, xi=0.0)
+
+        @test isfinite(comp_ext.omega)
+        @test isfinite(comp_base.omega)
+        @test all(isfinite.(comp_ext.masses))
+        @test all(isfinite.(comp_base.masses))
+        @test all(isfinite.(residual_ext))
+        @test all(isfinite.(residual_base))
+
+        @test abs(comp_ext.omega - comp_base.omega) > 1e-10
+        @test abs(comp_ext.poly - comp_base.poly) > 1e-10 || abs(comp_ext.chi - comp_base.chi) > 1e-10
+    end
+
     # --- gap_residual 可调用 ---
     @testset "gap_residual RPNJL" begin
         m = Models.RPNJLModel()
