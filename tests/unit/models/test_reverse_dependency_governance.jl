@@ -20,6 +20,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
         joinpath(PROJECT_ROOT, "src", "models", "variants", "rotation", "workflows", "RotationWorkflow.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "variants", "gas_liquid", "workflows", "GasLiquidWorkflow.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "pnjl_physics", "PNJLMagneticModel.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "derivatives", "ThermoDerivatives.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "pnjl_physics", "core", "ModelThermodynamics.jl"),
     ]
 
     for file in tracked_files

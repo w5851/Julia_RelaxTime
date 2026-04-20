@@ -35,6 +35,7 @@ using ForwardDiff
 using StaticArrays
 using ImplicitDifferentiation
 using LinearAlgebra: dot
+import ..Models
 
 # 导入默认积分规模常量（保持旧 API 习惯：p_num/t_num 默认值与 legacy 一致）。
 using ..PNJLCore: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT, cached_nodes
@@ -71,12 +72,12 @@ const _MODEL_CACHE = Dict{Symbol, Any}()
 
 @inline function _get_model(model_kind::Symbol)
     return get!(_MODEL_CACHE, model_kind) do
-        Main.Models.create_model(model_kind)
+        Models.create_model(model_kind)
     end
 end
 
 @inline calculate_thermo(x_state, mu_vec, T_fm, thermal_nodes, xi) =
-    Main.Models.model_thermo(
+    Models.model_thermo(
         _get_model(:PNJL),
         x_state,
         mu_vec,
@@ -87,7 +88,7 @@ end
     )
 
 @inline calculate_rho(x_state, mu_vec, T_fm, thermal_nodes, xi) =
-    Main.Models.model_rho(
+    Models.model_rho(
         _get_model(:PNJL),
         x_state,
         mu_vec,
@@ -110,16 +111,13 @@ end
 const _IMPLICIT_GAP_SOLVER_CACHE = Dict{Tuple{Float64, Int, Int, UInt}, Any}()
 
 @inline function _implicit_gap_solver(; model=nothing)
-    isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
-    isdefined(Main.Models, :create_implicit_gap_solver) || error("Models.create_implicit_gap_solver is not defined")
-
     m = model === nothing ? _get_model(:PNJL) : model
     key = (Float64(CURRENT_XI[]), Int(CURRENT_P_NUM[]), Int(CURRENT_T_NUM[]), Base.objectid(m))
     if haskey(_IMPLICIT_GAP_SOLVER_CACHE, key)
         return _IMPLICIT_GAP_SOLVER_CACHE[key]
     end
 
-    f = Main.Models.create_implicit_gap_solver(m;
+    f = Models.create_implicit_gap_solver(m;
         xi=CURRENT_XI[],
         p_num=CURRENT_P_NUM[],
         t_num=CURRENT_T_NUM[],
@@ -138,7 +136,7 @@ end
     model=nothing)
 
     m = model === nothing ? _get_model(:PNJL) : model
-    return Main.Models.model_thermo(
+    return Models.model_thermo(
         m,
         x_state,
         mu_vec,
@@ -159,7 +157,7 @@ end
     model=nothing)
 
     m = model === nothing ? _get_model(:PNJL) : model
-    return Main.Models.model_rho(
+    return Models.model_rho(
         m,
         x_state,
         mu_vec,
@@ -298,7 +296,7 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
     mu_vec = SVector{3}(θ[2], θ[2], θ[2])
     rho_vec0 = _rho_backend(x_sv, mu_vec, θ[1], nothing, CURRENT_XI[];
         p_num=p_num, t_num=t_num, model=model)
-    rho_norm = sum(rho_vec0) / (3.0 * Main.Models.ρ0)
+    rho_norm = sum(rho_vec0) / (3.0 * Models.ρ0)
     
     P_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[1], θ[1])
     P_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[1], θ[2])

@@ -15,6 +15,7 @@
 module ModelThermodynamics
 
 using StaticArrays
+import ...Models
 
 # constants
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants", "Constants_PNJL.jl"))
@@ -30,12 +31,12 @@ const ρ0 = ρ0_inv_fm3
 const _MODELS_ENTRY_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "models", "Models.jl"))
 
 # Eager load Models at module load time to avoid world-age issues in nested AD.
-if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Main.Models, :omega_components))
+if !(isdefined(Main, :Models) && isdefined(Models, :omega) && isdefined(Models, :omega_components))
     Base.include(Main, _MODELS_ENTRY_PATH)
 end
 
 @inline function ensure_models_loaded()
-    if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Main.Models, :omega_components))
+    if !(isdefined(Main, :Models) && isdefined(Models, :omega) && isdefined(Models, :omega_components))
         Base.include(Main, _MODELS_ENTRY_PATH)
     end
     return nothing
@@ -47,7 +48,7 @@ end
     t_num::Int,
     xi)
     ensure_models_loaded()
-    return Main.Models.model_pressure(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+    return Models.model_pressure(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算数密度向量：ρ_i = ∂P/∂μ_i。"""
@@ -56,7 +57,7 @@ function rho_model(model, x_state, mu_vec, T_fm;
     t_num::Int,
     xi)
     ensure_models_loaded()
-    return Main.Models.model_rho(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+    return Models.model_rho(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算 (pressure, rho_norm, entropy, energy)。"""
@@ -65,7 +66,7 @@ function thermo_model(model, x_state, mu_vec, T_fm;
     t_num::Int,
     xi)
     ensure_models_loaded()
-    return Main.Models.model_thermo(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+    return Models.model_thermo(model, x_state, mu_vec, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 """基于新模型计算 (quark, antiquark) 数密度。
@@ -76,9 +77,8 @@ end
     thermal_nodes,
     xi)
     ensure_models_loaded()
-    isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
-    isdefined(Main.Models, :number_densities) || error("Models.number_densities is not defined")
-    return Main.Models.number_densities(model, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=xi)
+    isdefined(Models, :number_densities) || error("Models.number_densities is not defined")
+    return Models.number_densities(model, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=xi)
 end
 
 export ρ0
@@ -87,4 +87,3 @@ export pressure_model, rho_model, thermo_model
 export number_densities_model
 
 end # module ModelThermodynamics
-
