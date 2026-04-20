@@ -1,16 +1,23 @@
 module GasLiquidWorkflow
 
 using StaticArrays
+import ...Models
+
+@inline _create_model(args...; kwargs...) = getfield(Models, :create_model)(args...; kwargs...)
+@inline _solve_gap(args...; kwargs...) = getfield(Models, :solve_gap)(args...; kwargs...)
+@inline _omega_components(args...; kwargs...) = getfield(Models, :omega_components)(args...; kwargs...)
+@inline _model_rho(args...; kwargs...) = getfield(Models, :model_rho)(args...; kwargs...)
+@inline _model_thermo(args...; kwargs...) = getfield(Models, :model_thermo)(args...; kwargs...)
 
 export solve_gas_liquid_point
 
 """最小单点 workflow：给定 (T, mu) 返回可观测量。"""
 function solve_gas_liquid_point(T_fm::Real, mu_fm::Real; model_kind::Symbol=:GasLiquid)
-    model = Main.Models.create_model(model_kind)
-    x_state = Main.Models.solve_gap(model, T_fm, mu_fm)
-    comp = Main.Models.omega_components(model, x_state, T_fm, mu_fm)
-    rho = Main.Models.model_rho(model, x_state, mu_fm, T_fm)
-    pressure, _, entropy, energy = Main.Models.model_thermo(model, x_state, mu_fm, T_fm)
+    model = _create_model(model_kind)
+    x_state = _solve_gap(model, T_fm, mu_fm)
+    comp = _omega_components(model, x_state, T_fm, mu_fm)
+    rho = _model_rho(model, x_state, mu_fm, T_fm)
+    pressure, _, entropy, energy = _model_thermo(model, x_state, mu_fm, T_fm)
 
     return (
         model_kind=model_kind,

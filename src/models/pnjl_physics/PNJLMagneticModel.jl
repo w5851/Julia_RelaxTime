@@ -4,6 +4,7 @@ models 侧外磁场 PNJL 适配器（最小可用版）。
 """
 
 using StaticArrays
+import ..Models
 
 export PNJLMagneticModel
 
@@ -13,8 +14,8 @@ if !isdefined(Main, :MagneticThermodynamics)
 end
 
 @inline function _magnetic_thermodynamics_module()
-    if isdefined(Main, :Models) && isdefined(Main.Models, :magnetic_thermodynamics_module)
-        return Main.Models.magnetic_thermodynamics_module()
+    if isdefined(Models, :MagneticThermodynamics)
+        return Models.MagneticThermodynamics
     end
     return Main.MagneticThermodynamics
 end
