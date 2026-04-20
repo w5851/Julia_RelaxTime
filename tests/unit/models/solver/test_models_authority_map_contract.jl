@@ -57,7 +57,7 @@ const AUTHORITY_MAP_CHECK_SCRIPT = joinpath(
     end
 
     if isfile(AUTHORITY_MAP_CHECK_SCRIPT)
-        cmd = `julia --project=. scripts/dev/check_models_authority_map.jl`
+        cmd = `julia --project=$(PROJECT_ROOT) $(AUTHORITY_MAP_CHECK_SCRIPT)`
         result = run(cmd; wait=false)
         wait(result)
         @test result.exitcode == 0

@@ -19,14 +19,16 @@ const CHI4_B_BASELINE = Dict(
 
 @testset "Models PNJL chi4_B fixed-point baseline" begin
     kwargs = (; p_num=16, t_num=6)
+    chi4_by_label = Dict{String, Float64}()
 
     for point in FIXED_POINTS
         chi4 = Models.chi4_B(point.T_fm, point.muB_fm; kwargs...)
         @test isfinite(chi4)
+        chi4_by_label[point.label] = chi4
     end
 
     for point in FIXED_POINTS
-        chi4 = Models.chi4_B(point.T_fm, point.muB_fm; kwargs...)
+        chi4 = chi4_by_label[point.label]
         ref = CHI4_B_BASELINE[point.label]
         @test isapprox(chi4, ref.expected; rtol=ref.rtol, atol=ref.atol)
     end

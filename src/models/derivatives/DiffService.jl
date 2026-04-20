@@ -39,7 +39,7 @@ end
     param_names::AbstractVector{Symbol},
 )
     isempty(target_names) && throw(ArgumentError("target_names must be non-empty"))
-    length(unique(target_names)) == length(target_names) || throw(ArgumentError("target_names must not contain duplicates"))
+    length(unique(target_names)) == length(target_names) || throw(ArgumentError("target list must not contain duplicates"))
     isempty(param_names) && throw(ArgumentError("param_names must be non-empty"))
 
     normalized_param_names = _normalize_diff_service_param_name.(param_names)

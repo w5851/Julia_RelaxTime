@@ -68,7 +68,6 @@ end
             e
         end
 
-        @test err isa ArgumentError
-        @test occursin("duplicated", sprint(showerror, err))
+        @test err isa ArgumentError && occursin("duplicated", sprint(showerror, err))
     end
 end

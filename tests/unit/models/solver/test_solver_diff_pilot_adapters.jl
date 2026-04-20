@@ -116,8 +116,7 @@ end
             ex
         end
 
-        @test err isa ArgumentError
-        @test occursin("target_names must not contain duplicates", sprint(showerror, err))
+        @test err isa ArgumentError && occursin("target list must not contain duplicates", sprint(showerror, err))
     end
 
     @testset "params alias equivalence on params keyword path" begin

@@ -42,7 +42,7 @@ end
 
     if !isfile(t190_path) || !isfile(t200_path)
         @info "tau xi probe fixtures are not present in current workspace outputs; skipping fixture hash regression checks"
-        @test true
+        @test_skip "tau xi probe regression fixtures are unavailable in current workspace outputs"
         return
     end
 
