@@ -28,6 +28,11 @@ export build_pnjl_fixedmu_adapters
 export build_pnjl_flavor_mu_adapters
 export derive_vec, derive_named
 
+# Compat-only guard:
+# This file is a legacy compatibility bridge and must not become a new primary
+# solver/diff implementation surface.
+const IMPLICIT_GAP_LEGACY_COMPAT_ONLY = true
+
 @inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
     return model isa RPNJLModel ? :RPNJL : :PNJL
 end

@@ -3,6 +3,9 @@ struct DiffTarget{F}
     evaluator::F
 end
 
+# Diff target layer only maps symbolic targets to existing services/results.
+# It must not host standalone derivative kernels or duplicate differentiation logic.
+
 @inline DiffTarget(name::Symbol) = DiffTarget(name, _ctx -> throw(ErrorException("DiffTarget $(name) evaluator is not implemented")))
 
 @inline function _theta_value(theta::NamedTuple, key::Symbol)

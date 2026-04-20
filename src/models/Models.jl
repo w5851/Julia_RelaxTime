@@ -50,6 +50,8 @@ export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 export flavor_pressure_derivatives, conserved_charge_susceptibility
 export chi_BQS, cumulant_BQS
+export nth_derivative, susceptibility_scale
+export AbstractChiProvider, chi_provider_name
 export chi_B, chi1_B, chi2_B, chi3_B, chi4_B
 export chi_Q, chi1_Q, chi2_Q, chi3_Q, chi4_Q
 export chi_S, chi1_S, chi2_S, chi3_S, chi4_S
@@ -150,6 +152,7 @@ export list_precompile_capabilities, list_precompile_profile
 export ThermoDiffContext, DiffTarget, ParamSpec
 export build_thermo_diff_context, diff_target, jacobian
 export build_pilot_diff_context, eval_pilot_derivatives
+export build_diff_service_context, eval_diff_service_jacobian
 
 include(joinpath(@__DIR__, "abstract_model.jl"))
 
@@ -194,6 +197,8 @@ include(joinpath(@__DIR__, "omega.jl"))
 include(joinpath(@__DIR__, "thermo_kernel.jl"))
 include(joinpath(@__DIR__, "solver", "topology.jl"))
 include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
+include(joinpath(@__DIR__, "derivatives", "HigherOrderDerivatives.jl"))
+include(joinpath(@__DIR__, "derivatives", "AbstractSusceptibilityProvider.jl"))
 include(joinpath(@__DIR__, "derivatives", "ConservedChargeSusceptibilities.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
@@ -207,6 +212,8 @@ using .SeedStrategies
 using .Conditions
 const ConstraintModes = @__MODULE__
 using .ThermoDerivatives
+using .HigherOrderDerivatives
+using .AbstractSusceptibilityProvider
 using .ConservedChargeSusceptibilities
 using .MagneticIntegrals
 using .MagneticThermodynamics

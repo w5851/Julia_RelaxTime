@@ -19,6 +19,10 @@
 
 - `C_{ijk}^{BQS} = V * T^3 * chi_{ijk}^{BQS}`
 
+其中 `chi_{ijk}^{BQS}` 采用主题级缩放：
+
+- `chi_{ijk}^{BQS} ~ T^(i + j + k - 4) * d^(i + j + k)P / d(mu_B)^i d(mu_Q)^j d(mu_S)^k`
+
 因此它与 `chi_BQS` 的关系是主题级核心合同，而不是单独一条实现细节。
 
 ## `cumulant_B`
@@ -28,6 +32,10 @@
 - `cumulant_B(T_fm, muB_fm, V; order=n)`
 
 当你只关心 `C_n^B` 时，优先使用它，而不是手动拼 `orders=(n, 0, 0)`。
+
+四阶常见读取方式：
+
+- `cumulant_B(T_fm, muB_fm, V; order=4)` 对应 `C_4^B`
 
 ## `baryon_Ssigma`
 
@@ -42,6 +50,8 @@
 返回：
 
 - `kappa_sigma2 = chi_4^B / chi_2^B`
+
+该比值直接使用四阶接口 `chi4_B` 与二阶接口 `chi2_B`，不需要脚本侧重复实现高阶导数。
 
 与 `baryon_Ssigma` 一样，这个接口更偏结果读取，而不是底层导数构造。
 
