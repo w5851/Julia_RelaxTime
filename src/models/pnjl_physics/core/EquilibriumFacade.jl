@@ -15,6 +15,18 @@ if !isdefined(Main, :EquilibriumFacade)
 """
 
 using StaticArrays
+import Main: Models
+
+const calculate_mass_vec = Models.calculate_mass_vec
+const create_model = Models.create_model
+const solve_gap = Models.solve_gap
+const state_vector = Models.state_vector
+const normalize_mu_vec = Models.normalize_mu_vec
+const PNJLModel = Models.PNJLModel
+const FixedMu = Models.FixedMu
+const solve = Models.solve
+const MeanFieldState = Models.MeanFieldState
+const NLsolveGapSolver = Models.NLsolveGapSolver
 
 export pnjl_model_kind
 export solve_equilibrium_backend
@@ -31,7 +43,7 @@ const _MODEL_CACHE = Dict{Symbol, Any}()
         return ((_, _) -> true)
     end
 
-    m0_vec = Main.Models.calculate_mass_vec(model, SVector{3}(0.0, 0.0, 0.0))
+    m0_vec = calculate_mass_vec(model, SVector{3}(0.0, 0.0, 0.0))
     mass_floor = (
         u=Float64(m0_vec[1]),
         d=Float64(m0_vec[2]),
@@ -64,7 +76,7 @@ end
 
 @inline function _get_model(model_kind::Symbol)
     return get!(_MODEL_CACHE, model_kind) do
-        Main.Models.create_model(model_kind)
+        create_model(model_kind)
     end
 end
 
@@ -106,11 +118,6 @@ function solve_equilibrium_backend(
 )
     kind = :PNJL
 
-    isdefined(Main, :Models) || error("Models not loaded; expected Main.Models")
-    isdefined(Main.Models, :solve_gap) || error("Models.solve_gap is not defined")
-    isdefined(Main.Models, :state_vector) || error("Models.state_vector is not defined")
-    isdefined(Main.Models, :normalize_mu_vec) || error("Models.normalize_mu_vec is not defined")
-
     m = model === nothing ? _get_model(kind) : model
     solved_mu_vec = nothing
     solved_iterations = missing
@@ -125,19 +132,19 @@ function solve_equilibrium_backend(
 
     st = if effective_solver_backend === :legacy
         # Legacy solver backend still accepts legacy-style solver kwargs.
-        Main.Models.solve_gap(m, T_fm, mu_fm;
+        solve_gap(m, T_fm, mu_fm;
             xi=xi,
             p_num=p_num,
             t_num=t_num,
             solver_kwargs...,
         )
     elseif effective_solver_backend === :models
-        # In long-lived include-driven sessions (integration full profile), Main.Models
+        # In long-lived include-driven sessions (integration full profile), Models
         # may be re-included by different test files. A cached model created before a
-        # re-include can fail strict `isa Main.Models.PNJLModel` even when semantically
-        # equivalent. Rebuild from current Main.Models in that case.
-        if !(m isa Main.Models.PNJLModel)
-            m = Main.Models.create_model(kind)
+        # re-include can fail strict `isa PNJLModel` even when semantically
+        # equivalent. Rebuild from current Models module in that case.
+        if !(m isa PNJLModel)
+            m = create_model(kind)
         end
         if models_solver === nothing
             fixedmu_physicality_check = _build_fixedmu_physicality_check(
@@ -146,9 +153,9 @@ function solve_equilibrium_backend(
                 phi_max_positive=Float64(fixedmu_phi_max_positive),
                 phi_min_negative=Float64(fixedmu_phi_min_negative),
             )
-            fixed_mode = Main.Models.FixedMu()
+            fixed_mode = FixedMu()
             if seed_state === nothing
-                solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
+                solved = solve(m, fixed_mode, T_fm, mu_fm;
                     xi=xi,
                     p_num=p_num,
                     t_num=t_num,
@@ -156,7 +163,7 @@ function solve_equilibrium_backend(
                     physicality_check=fixedmu_physicality_check,
                 )
             else
-                solved = Main.Models.solve(m, fixed_mode, T_fm, mu_fm;
+                solved = solve(m, fixed_mode, T_fm, mu_fm;
                     seed_guess=seed_state,
                     continuity_seed=true,
                     xi=xi,
@@ -169,14 +176,14 @@ function solve_equilibrium_backend(
             solved_converged = Bool(solved.converged)
             fixedmu_solution_ok = solved_converged && fixedmu_physicality_check(solved.x_state, solved.masses)
             if fixedmu_solution_ok
-                st = Main.Models.MeanFieldState(solved.x_state)
+                st = MeanFieldState(solved.x_state)
                 solved_mu_vec = solved.mu_vec
                 solved_iterations = solved.iterations
                 solved_residual_norm = solved.residual_norm
                 st
             else
-                fallback_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward)
-                Main.Models.solve_gap(m, T_fm, mu_fm;
+                fallback_solver = NLsolveGapSolver(method=:trust_region, jacobian=:forward)
+                solve_gap(m, T_fm, mu_fm;
                     solver_backend=:models,
                     solver=fallback_solver,
                     initial_guess=seed_state,
@@ -187,7 +194,7 @@ function solve_equilibrium_backend(
                 )
             end
         else
-            Main.Models.solve_gap(m, T_fm, mu_fm;
+            solve_gap(m, T_fm, mu_fm;
                 solver_backend=:models,
                 solver=models_solver,
                 initial_guess=seed_state,
@@ -201,10 +208,10 @@ function solve_equilibrium_backend(
         throw(ArgumentError("unknown solver_backend=$solver_backend (expected :auto, :legacy or :models)"))
     end
 
-    x_state = Main.Models.state_vector(st)
-    mu_vec = solved_mu_vec === nothing ? Main.Models.normalize_mu_vec(mu_fm) : Main.Models.normalize_mu_vec(solved_mu_vec)
+    x_state = state_vector(st)
+    mu_vec = solved_mu_vec === nothing ? normalize_mu_vec(mu_fm) : normalize_mu_vec(solved_mu_vec)
 
-    masses = Main.Models.calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
+    masses = calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
 
     return (
         converged=solved_converged,
