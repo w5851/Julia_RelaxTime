@@ -40,11 +40,6 @@ jobs:
         with:
           version: "1.12.5"
 
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-benchmark
-
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
@@ -77,11 +72,6 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
-
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-script-smoke
 
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'

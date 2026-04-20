@@ -34,11 +34,6 @@ jobs:
         with:
           version: "1.12.5"
 
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-validation
-
       - name: Install dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
