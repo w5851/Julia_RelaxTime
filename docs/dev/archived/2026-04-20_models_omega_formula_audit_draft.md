@@ -1,3 +1,15 @@
+---
+title: models Ω 公式一致性核查草表（本地草案）
+archived: true
+original: docs/dev/active/2026-04-20_models_omega_formula_audit_draft.md
+archived_date: 2026-04-20
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # models Ω 公式一致性核查草表（本地草案）
 
 > 日期：2026-04-20
