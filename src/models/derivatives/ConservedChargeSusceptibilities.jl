@@ -21,6 +21,7 @@ using StaticArrays
 
 using ..PNJLCore: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
 using ..HigherOrderDerivatives: nth_derivative, susceptibility_scale
+using ..Models: create_model, create_flavor_mu_implicit_gap_solver, normalize_mu_vec, model_pressure
 
 export flavor_pressure_derivatives, conserved_charge_susceptibility
 export chi_BQS, cumulant_BQS
@@ -46,7 +47,7 @@ end
 
 @inline function _get_model(model_kind::Symbol)
     return get!(_MODEL_CACHE, model_kind) do
-        Main.Models.create_model(model_kind)
+        create_model(model_kind)
     end
 end
 
@@ -56,12 +57,12 @@ end
         return _FLAVOR_IMPLICIT_GAP_SOLVER_CACHE[key]
     end
 
-    f = Main.Models.create_flavor_mu_implicit_gap_solver(model; xi=xi, p_num=p_num, t_num=t_num)
+    f = create_flavor_mu_implicit_gap_solver(model; xi=xi, p_num=p_num, t_num=t_num)
     _FLAVOR_IMPLICIT_GAP_SOLVER_CACHE[key] = f
     return f
 end
 
-@inline _normalize_flavor_mu(mu_vec) = Main.Models.normalize_mu_vec(mu_vec)
+@inline _normalize_flavor_mu(mu_vec) = normalize_mu_vec(mu_vec)
 
 @inline function _flavor_mu_from_bqs(muB_fm::Real, muQ_fm::Real, muS_fm::Real)
     return SVector(
@@ -109,7 +110,7 @@ function _pressure_from_flavor_mu(
     θ = [T_fm, μ[1], μ[2], μ[3]]
     x, _ = solver(θ)
     x_sv = SVector{5}(Tuple(x))
-    return Main.Models.model_pressure(m, x_sv, μ, T_fm; p_num=p_num, t_num=t_num, xi=xi)
+    return model_pressure(m, x_sv, μ, T_fm; p_num=p_num, t_num=t_num, xi=xi)
 end
 
 function _single_axis_susceptibility(

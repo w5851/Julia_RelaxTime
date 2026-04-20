@@ -27,10 +27,10 @@ end
         T_fm = _resolve_theta_value(theta, :T_fm)
         mu_fm = _resolve_theta_value(theta, :mu_fm)
         xi = hasproperty(theta, :xi) ? Float64(getproperty(theta, :xi)) : Float64(_runtime_option(ctx, :xi, ctx.result.xi))
-        p_num = Int(_runtime_option(ctx, :p_num, Main.Models.default_momentum_count()))
-        t_num = Int(_runtime_option(ctx, :t_num, Main.Models.default_theta_count()))
+        p_num = Int(_runtime_option(ctx, :p_num, default_momentum_count()))
+        t_num = Int(_runtime_option(ctx, :t_num, default_theta_count()))
         residual_norm_max = Float64(_runtime_option(ctx, :residual_norm_max, 1e-6))
-        return Main.Models.solve(ctx.model, ctx.mode, T_fm, mu_fm;
+        return solve(ctx.model, ctx.mode, T_fm, mu_fm;
             xi=xi,
             p_num=p_num,
             t_num=t_num,

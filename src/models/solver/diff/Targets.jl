@@ -42,23 +42,23 @@ end
 @inline _eval_energy(ctx::ThermoDiffContext) = _finite_target_value(:energy, ctx.result.energy)
 
 @inline function _eval_dP_dT(ctx::ThermoDiffContext)
-    deriv = Main.Models.ThermoDerivatives
+    deriv = ThermoDerivatives
     T_fm = _theta_value(ctx.theta, :T_fm)
     mu_fm = _theta_value(ctx.theta, :mu_fm)
     xi = _resolve_target_xi(ctx)
-    p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
-    t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
+    p_num = ctx.spec_override === nothing ? default_momentum_count() : Int(get(ctx.spec_override, :p_num, default_momentum_count()))
+    t_num = ctx.spec_override === nothing ? default_theta_count() : Int(get(ctx.spec_override, :t_num, default_theta_count()))
     value = deriv.dP_dT(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
     return _finite_target_value(:dP_dT, value)
 end
 
 @inline function _eval_dP_dmu(ctx::ThermoDiffContext)
-    deriv = Main.Models.ThermoDerivatives
+    deriv = ThermoDerivatives
     T_fm = _theta_value(ctx.theta, :T_fm)
     mu_fm = _theta_value(ctx.theta, :mu_fm)
     xi = _resolve_target_xi(ctx)
-    p_num = ctx.spec_override === nothing ? Main.Models.default_momentum_count() : Int(get(ctx.spec_override, :p_num, Main.Models.default_momentum_count()))
-    t_num = ctx.spec_override === nothing ? Main.Models.default_theta_count() : Int(get(ctx.spec_override, :t_num, Main.Models.default_theta_count()))
+    p_num = ctx.spec_override === nothing ? default_momentum_count() : Int(get(ctx.spec_override, :p_num, default_momentum_count()))
+    t_num = ctx.spec_override === nothing ? default_theta_count() : Int(get(ctx.spec_override, :t_num, default_theta_count()))
     value = deriv.dP_dmu(T_fm, mu_fm; xi=xi, p_num=p_num, t_num=t_num, model=ctx.model)
     return _finite_target_value(:dP_dmu, value)
 end

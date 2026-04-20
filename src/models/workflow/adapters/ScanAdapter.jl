@@ -1,32 +1,5 @@
 using Dates
-using SHA
 
-function _scan_adapter_git_commit()
-    try
-        return readchomp(`git -C $(joinpath(@__DIR__, "..", "..", "..")) rev-parse HEAD`)
-    catch
-        return "unknown"
-    end
-end
-
-function _scan_adapter_config_hash(kind::Symbol, kwargs::NamedTuple)
-    payload = String[]
-    push!(payload, String(kind))
-    for key in sort(collect(keys(kwargs)); by=String)
-        push!(payload, String(key) * "=" * sprint(show, getproperty(kwargs, key)))
-    end
-    return bytes2hex(SHA.sha2_256(join(payload, "|")))
-end
-
-function _scan_adapter_output_dir(scan_kwargs::NamedTuple)
-    if hasproperty(scan_kwargs, :output_dir)
-        return String(getproperty(scan_kwargs, :output_dir))
-    end
-    if hasproperty(scan_kwargs, :output_path)
-        return dirname(String(getproperty(scan_kwargs, :output_path)))
-    end
-    return mktempdir()
-end
 
 function _run_scan(kind::Symbol, scan_kwargs::NamedTuple)
     if kind === :tmu
@@ -163,7 +136,7 @@ end
 function run_scan_pipeline_adapter(kind::Symbol; kwargs...)
     (kind === :tmu || kind === :trho) || throw(ArgumentError("unsupported scan kind: $(kind)"))
     scan_kwargs = (; kwargs...)
-    output_dir = _scan_adapter_output_dir(scan_kwargs)
+    output_dir = resolve_adapter_output_dir(scan_kwargs, (:output_dir, :output_path); path_keys=(:output_path,))
     manifest_path = joinpath(output_dir, "run_manifest.json")
     run_id = basename(normpath(output_dir))
     model_kind = hasproperty(scan_kwargs, :model_kind) ? Symbol(getproperty(scan_kwargs, :model_kind)) : :PNJL
@@ -180,8 +153,8 @@ function run_scan_pipeline_adapter(kind::Symbol; kwargs...)
             )),
         ),
         PipelineProvenance(
-            _scan_adapter_git_commit(),
-            _scan_adapter_config_hash(kind, scan_kwargs),
+            adapter_git_commit(),
+            adapter_config_hash(kind, scan_kwargs),
             run_id,
             Dates.now(Dates.UTC),
         ),

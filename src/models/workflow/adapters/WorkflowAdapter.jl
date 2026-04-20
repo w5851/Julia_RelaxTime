@@ -1,6 +1,5 @@
 using Dates
 using JSON3
-using SHA
 
 @inline function _workflow_repo_root()
     return normpath(joinpath(@__DIR__, "..", "..", "..", ".."))
@@ -146,23 +145,6 @@ end
 @inline function _workflow_adapter_output_dir(output_dir)
     output_dir === nothing && return mktempdir()
     return String(output_dir)
-end
-
-function _workflow_adapter_git_commit()
-    try
-        return readchomp(`git -C $(joinpath(@__DIR__, "..", "..", "..")) rev-parse HEAD`)
-    catch
-        return "unknown"
-    end
-end
-
-function _workflow_adapter_config_hash(kind::Symbol, prepared::NamedTuple)
-    payload = String[]
-    push!(payload, String(kind))
-    for key in sort(collect(keys(prepared)); by=String)
-        push!(payload, String(key) * "=" * sprint(show, getproperty(prepared, key)))
-    end
-    return bytes2hex(SHA.sha2_256(join(payload, "|")))
 end
 
 function _resolve_transport_inputs(kwargs::NamedTuple)
@@ -424,8 +406,8 @@ function _run_transport_workflow_pipeline(; kwargs...)
             )),
         ),
         PipelineProvenance(
-            _workflow_adapter_git_commit(),
-            _workflow_adapter_config_hash(:transport, prepared),
+            adapter_git_commit(),
+            adapter_config_hash(:transport, prepared),
             run_id,
             Dates.now(Dates.UTC),
         ),
