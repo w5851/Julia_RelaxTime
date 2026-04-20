@@ -8,6 +8,11 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
         joinpath(PROJECT_ROOT, "src", "models", "solver", "diff", "Targets.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "solver", "diff", "JacobianEngine.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "workflows", "MesonMassWorkflow.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "precompile", "registry.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "scans", "ScanCommon.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "scans", "TmuScan.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "scans", "TrhoScan.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"),
     ]
 
     for file in tracked_files

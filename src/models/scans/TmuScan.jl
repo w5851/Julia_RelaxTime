@@ -32,11 +32,11 @@ using StaticArrays
 
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
-import Main.Models: FixedMu, ConstraintMode
+using ..Models: FixedMu, ConstraintMode, solve, SolverResult, is_physical_solution
+using ..Models: build_seed_pool, coerce_solver_result, create_model, solve_constraint
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed
 using ..SeedStrategies: get_seed, get_all_seeds, HADRON_SEED_5, QUARK_SEED_5, HT_GUESS_0p8_SEED_5, HT_GUESS_0p9_SEED_5, HT_GUESS_0p95_SEED_5, WEAK_CHIRAL_CONF_SEED_5
 using ..SeedStrategies: auto_phase_hint
-import Main.Models: solve, SolverResult, is_physical_solution
 using ..ScanCommon
 using ..ScanConfig: TmuScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
@@ -365,7 +365,7 @@ function _build_seed_candidates_v2(cache::Dict, T, mu, xi, T_fm, μ_fm; bootstra
         end
     end
 
-    seed_pool = Main.Models.build_seed_pool(FixedMu();
+    seed_pool = build_seed_pool(FixedMu();
         primary_seed=primary_seed,
         provided_seed_pool=provided_seed_pool,
         default_seed_pool=default_seed_pool,
@@ -496,11 +496,11 @@ end
 _promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
 
 @inline function _models_mode(mode::FixedMu)
-    return Main.Models.FixedMu()
+    return FixedMu()
 end
 
 function _to_solver_result(mode::ConstraintMode, result, xi::Real)
-    return Main.Models.coerce_solver_result(mode, result; xi_override=xi)
+    return coerce_solver_result(mode, result; xi_override=xi)
 end
 
 @inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
@@ -521,12 +521,12 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     p_num::Int,
     t_num::Int,
     nlsolve_kwargs...)
-    model = Main.Models.create_model(model_kind)
+    model = create_model(model_kind)
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
     models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
-    raw = Main.Models.solve_constraint(
+    raw = solve_constraint(
         model,
         mapped_mode,
         T_fm;

@@ -88,27 +88,27 @@ using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, a
 const TransportCoefficients = Main.TransportCoefficients
 
 using StaticArrays
+using ..Models: HADRON_SEED_5, default_momentum_count, default_theta_count
+using ..Models: bulk_viscosity_coefficients, default_momentum_nodes, default_momentum_weights
+using ..Models: create_model, number_densities, model_thermo
+using ..Models: transport_provider, TransportProvider, prepare_transport_provider
 
-const HADRON_SEED_5 = Main.Models.HADRON_SEED_5
-const DEFAULT_MOMENTUM_COUNT = Main.Models.default_momentum_count()
-const DEFAULT_THETA_COUNT = Main.Models.default_theta_count()
-const bulk_viscosity_coefficients = Main.Models.bulk_viscosity_coefficients
-const DEFAULT_MOMENTUM_NODES = Main.Models.default_momentum_nodes()
-const DEFAULT_MOMENTUM_WEIGHTS = Main.Models.default_momentum_weights()
+const DEFAULT_MOMENTUM_COUNT = default_momentum_count()
+const DEFAULT_THETA_COUNT = default_theta_count()
+const DEFAULT_MOMENTUM_NODES = default_momentum_nodes()
+const DEFAULT_MOMENTUM_WEIGHTS = default_momentum_weights()
 using Main.RelaxationTime: relaxation_times
 using .TransportCoefficients: transport_coefficients, TransportIntegrationConfig
 using .TransportCoefficients: rho_mass_from_densities
 
-const PNJL = Main.Models
-
 @inline function _models_api()
     return (
-        create_model=Main.Models.create_model,
-        number_densities=Main.Models.number_densities,
-        model_thermo=Main.Models.model_thermo,
-        transport_provider=isdefined(Main.Models, :transport_provider) ? Main.Models.transport_provider : nothing,
-        transport_provider_type=isdefined(Main.Models, :TransportProvider) ? Main.Models.TransportProvider : nothing,
-        prepare_transport_provider=isdefined(Main.Models, :prepare_transport_provider) ? Main.Models.prepare_transport_provider : nothing,
+        create_model=create_model,
+        number_densities=number_densities,
+        model_thermo=model_thermo,
+        transport_provider=transport_provider,
+        transport_provider_type=TransportProvider,
+        prepare_transport_provider=prepare_transport_provider,
     )
 end
 
@@ -330,8 +330,8 @@ end
 @inline function _apply_prefer_energy_aniso(provider, prefer_energy_aniso)
     prefer_energy_aniso === nothing && return provider
 
-    if isdefined(Main, :Models) && isdefined(Main.Models, :TransportProvider) && provider isa Main.Models.TransportProvider
-        return Main.Models.TransportProvider(
+    if provider isa TransportProvider
+        return TransportProvider(
             provider.energy_from_p,
             provider.energy_from_p_aniso,
             provider.quark_distribution,

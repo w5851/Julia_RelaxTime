@@ -3,6 +3,12 @@ module PrecompileRegistry
 using StaticArrays
 using ForwardDiff
 using NLsolve
+using ..Models: create_model, solve_constraint, FixedMu, HADRON_SEED_5
+using ..Models: thermo_derivatives, mass_derivatives, bulk_viscosity_coefficients
+using ..Models: chi1_B, chi2_B, chi3_B, chi4_B, chi2_Q, chi2_S, chi11_BQ, chi11_BS, chi11_QS
+using ..Models: chi_BQS, conserved_charge_susceptibility, cumulant_B, cumulant_BQS
+using ..Models: baryon_Ssigma, baryon_kappa_sigma2, flavor_pressure_derivatives
+using Main.Constants_PNJL: ħc_MeV_fm
 
 const _VALID_CAPABILITIES = Set([
     :gap_solver_ad,
@@ -42,16 +48,16 @@ end
 end
 
 function _cap_gap_solver_ad()
-    model = Main.Models.create_model(:PNJL)
-    T_fm = 150.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
-    mu_fm = 250.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
+    model = create_model(:PNJL)
+    T_fm = 150.0 / ħc_MeV_fm
+    mu_fm = 250.0 / ħc_MeV_fm
 
-    Main.Models.solve_constraint(
+    solve_constraint(
         model,
-        Main.Models.FixedMu(),
+        FixedMu(),
         T_fm;
         μ_fm=mu_fm,
-        seed_guess=Main.Models.HADRON_SEED_5,
+        seed_guess=HADRON_SEED_5,
         p_num=6,
         t_num=3,
         residual_norm_max=1e-4,
@@ -62,12 +68,12 @@ function _cap_gap_solver_ad()
 end
 
 function _cap_thermo_derivatives_ad()
-    T_fm = 150.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
-    mu_fm = 250.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
+    T_fm = 150.0 / ħc_MeV_fm
+    mu_fm = 250.0 / ħc_MeV_fm
 
-    Main.Models.thermo_derivatives(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
-    Main.Models.mass_derivatives(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
-    Main.Models.bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
+    thermo_derivatives(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
+    mass_derivatives(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
+    bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num=6, t_num=3)
 
     return nothing
 end
@@ -81,39 +87,39 @@ function _cap_conserved_charge_highorder()
     kwargs = (; xi=0.0, p_num=8, t_num=4)
 
     # Match high-order unit test hot paths (large-grid signatures).
-    T_hi = 140.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
-    muB_hi = 360.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
-    Main.Models.chi1_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
-    Main.Models.chi2_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
-    Main.Models.chi3_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
-    Main.Models.chi4_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
+    T_hi = 140.0 / ħc_MeV_fm
+    muB_hi = 360.0 / ħc_MeV_fm
+    chi1_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
+    chi2_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
+    chi3_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
+    chi4_B(T_hi, muB_hi; xi=0.0, p_num=48, t_num=12)
 
-    T_map = 130.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
-    muB_map = 300.0 / Main.Models.Constants_PNJL.ħc_MeV_fm
+    T_map = 130.0 / ħc_MeV_fm
+    muB_map = 300.0 / ħc_MeV_fm
     muq_map = muB_map / 3
-    Main.Models.thermo_derivatives(T_map, muq_map; xi=0.0, p_num=48, t_num=12)
-    Main.Models.chi1_B(T_map, muB_map; xi=0.0, p_num=48, t_num=12)
+    thermo_derivatives(T_map, muq_map; xi=0.0, p_num=48, t_num=12)
+    chi1_B(T_map, muB_map; xi=0.0, p_num=48, t_num=12)
 
-    Main.Models.chi2_B(T_fm, muB_fm; kwargs...)
-    Main.Models.chi3_B(T_fm, muB_fm; kwargs...)
-    Main.Models.chi4_B(T_fm, muB_fm; kwargs...)
-    Main.Models.chi2_Q(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
-    Main.Models.chi2_S(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
-    Main.Models.chi11_BQ(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
-    Main.Models.chi11_BS(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
-    Main.Models.chi11_QS(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
+    chi2_B(T_fm, muB_fm; kwargs...)
+    chi3_B(T_fm, muB_fm; kwargs...)
+    chi4_B(T_fm, muB_fm; kwargs...)
+    chi2_Q(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
+    chi2_S(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
+    chi11_BQ(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
+    chi11_BS(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
+    chi11_QS(T_fm, muB_fm, muQ_fm, muS_fm; kwargs...)
 
-    Main.Models.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 3, 0), kwargs...)
-    Main.Models.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 0, 4), kwargs...)
-    Main.Models.conserved_charge_susceptibility(T_fm, muB_fm, 0.0, 0.0; orders=(2, 0, 0), kwargs...)
-    Main.Models.cumulant_B(T_fm, muB_fm, V; order=4, kwargs...)
-    Main.Models.cumulant_BQS(T_fm, muB_fm, muQ_fm, muS_fm, V; orders=(1, 1, 0), kwargs...)
-    Main.Models.baryon_Ssigma(T_fm, muB_fm; kwargs...)
-    Main.Models.baryon_kappa_sigma2(T_fm, muB_fm; kwargs...)
+    chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 3, 0), kwargs...)
+    chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 0, 4), kwargs...)
+    conserved_charge_susceptibility(T_fm, muB_fm, 0.0, 0.0; orders=(2, 0, 0), kwargs...)
+    cumulant_B(T_fm, muB_fm, V; order=4, kwargs...)
+    cumulant_BQS(T_fm, muB_fm, muQ_fm, muS_fm, V; orders=(1, 1, 0), kwargs...)
+    baryon_Ssigma(T_fm, muB_fm; kwargs...)
+    baryon_kappa_sigma2(T_fm, muB_fm; kwargs...)
 
     # Shape stabilization for StaticArrays + AD wrappers
     mu_vec = SVector{3, Float64}(muB_fm, muQ_fm, muS_fm)
-    Main.Models.flavor_pressure_derivatives(T_fm, mu_vec; order=2, kwargs...)
+    flavor_pressure_derivatives(T_fm, mu_vec; order=2, kwargs...)
 
     return nothing
 end

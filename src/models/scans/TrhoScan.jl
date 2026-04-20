@@ -32,13 +32,16 @@ using StaticArrays
 
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
-import Main.Models: FixedRho, FixedAsymmetricRho, ConstraintMode
+using ..Models: FixedRho, FixedAsymmetricRho, ConstraintMode, SolverResult
+using ..Models: build_seed_pool, solve_weighted_block_fallback
+using ..Models: coerce_solver_result, create_model, build_problem_spec, solve_constraint
+using ..Models: model_rho
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
 using ..SeedStrategies: get_seed, update!, extend_seed
 using ..SeedStrategies: get_all_seeds
 using ..SeedStrategies: HADRON_SEED_5, QUARK_SEED_5, MEDIUM_SEED_5, HIGH_DENSITY_SEED_5
 using ..SeedStrategies: HADRON_SEED_8, MEDIUM_SEED_8, HIGH_DENSITY_SEED_8
-import Main.Models: solve, SolverResult
+using ..Models: solve
 using ..ScanCommon
 using ..ScanConfig: TrhoScanConfig, scan_kwargs
 using ..ScanResultFinalize: finalize_solver_result, promote_near_converged, is_success, refine_near_converged
@@ -431,7 +434,7 @@ function _build_seed_candidates(cache::Dict, seed_key, T, rho)
         default_seed_pool = default_seed_pool[2:end]
     end
 
-    seed_pool = Main.Models.build_seed_pool(FixedRho(rho);
+    seed_pool = build_seed_pool(FixedRho(rho);
         primary_seed=primary_seed,
         default_seed_pool=default_seed_pool,
         seed_extend=(seed, _) -> Float64.(seed),
@@ -599,7 +602,7 @@ function _attempt_with_strategy(T_fm, rho, xi, strategy::SeedStrategy;
             get_seed(strategy, [T_fm], mode)
         end
 
-        wb_result = Main.Models.solve_weighted_block_fallback(mode, T_fm;
+        wb_result = solve_weighted_block_fallback(mode, T_fm;
             initial_seed=initial_seed,
             max_seed_candidates=hybrid_weighted_max_seed_candidates,
             xi=xi,
@@ -733,15 +736,15 @@ _is_success(result) = is_success(result; acceptable_residual=ACCEPTABLE_RESIDUAL
 _promote_success(result) = promote_near_converged(result; acceptable_residual=ACCEPTABLE_RESIDUAL)
 
 @inline function _models_mode(mode::FixedRho)
-    return Main.Models.FixedRho(mode.rho_target)
+    return FixedRho(mode.rho_target)
 end
 
 @inline function _models_mode(mode::FixedAsymmetricRho)
-    return Main.Models.FixedAsymmetricRho(mode.rho_target, mode.ud_ratio_target, mode.s_target)
+    return FixedAsymmetricRho(mode.rho_target, mode.ud_ratio_target, mode.s_target)
 end
 
 function _to_solver_result(mode::ConstraintMode, result, xi::Real)
-    return Main.Models.coerce_solver_result(mode, result; xi_override=xi)
+    return coerce_solver_result(mode, result; xi_override=xi)
 end
 
 @inline function _reject_legacy_solver_kwargs(nlsolve_kwargs)
@@ -764,9 +767,9 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     p_num::Int,
     t_num::Int,
     nlsolve_kwargs...)
-    model = Main.Models.create_model(model_kind)
+    model = create_model(model_kind)
     mapped_mode = _models_mode(mode)
-    rho0_kwargs = (mapped_mode isa Main.Models.FixedRho) ? NamedTuple() : (; rho0=Main.Constants_PNJL.ρ0_inv_fm3)
+    rho0_kwargs = (mapped_mode isa FixedRho) ? NamedTuple() : (; rho0=Main.Constants_PNJL.ρ0_inv_fm3)
     seed_guess = get_seed(seed_strategy, [T_fm], mode)
     seed_candidates = if seed_strategy isa MultiSeed
         get_all_seeds(seed_strategy, [T_fm], mode)
@@ -776,8 +779,8 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
     use_problem_spec_chain = (semantic_mode !== :ground_state) || (selector !== nothing)
     raw = if use_problem_spec_chain
-        problem_spec = Main.Models.build_problem_spec(mapped_mode)
-        Main.Models.solve_constraint(
+        problem_spec = build_problem_spec(mapped_mode)
+        solve_constraint(
             model,
             mapped_mode,
             T_fm;
@@ -794,7 +797,7 @@ function _solve_with_models(mode::ConstraintMode, T_fm;
             nlsolve_kwargs...,
         )
     else
-        Main.Models.solve_constraint(
+        solve_constraint(
             model,
             mapped_mode,
             T_fm;
@@ -841,8 +844,8 @@ function _write_row(io, T, rho, xi, result, message;
     mu_S = mu_vec_mev[2] - mu_vec_mev[3]
 
     T_fm = T / ħc_MeV_fm
-    rho_vec = Main.Models.model_rho(
-        Main.Models.create_model(model_kind),
+    rho_vec = model_rho(
+        create_model(model_kind),
         result.x_state,
         result.mu_vec,
         T_fm;
