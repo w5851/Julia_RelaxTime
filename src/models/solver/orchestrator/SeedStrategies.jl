@@ -21,7 +21,7 @@ result = solve(FixedMu(), T, μ; xi=xi, seed_strategy=MultiSeed())
 module SeedStrategies
 
 # 从 Models 域导入约束模式定义
-import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
+using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
 
 export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
 export get_seed, update!, extend_seed

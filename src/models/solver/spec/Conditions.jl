@@ -15,17 +15,18 @@ module Conditions
 
 using StaticArrays
 using ForwardDiff
+import ..Models
 
 # 从 Models 域导入
-import Main.Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
-import Main.Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model, state_view, mu_view
-const cached_nodes = Main.Models.cached_nodes
+using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma
+using ..Models: ModelStateSchema, state_dim, state_var_dim, mu_var_dim, schema_for_model, state_view, mu_view
+const cached_nodes = Models.cached_nodes
 using Main.Constants_PNJL: ρ0_inv_fm3
 const ρ0 = ρ0_inv_fm3
 
-import Main.Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
-import Main.Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
-import Main.Models: AbstractNJLModel, NJL2Model, gap_residual
+using ..Models: AbstractQCDModel, AbstractPNJLModel, PNJLModel, PNJLMagneticModel, RPNJLModel
+using ..Models: model_pressure, model_rho, model_thermo, calculate_mass_vec
+using ..Models: AbstractNJLModel, NJL2Model, gap_residual
 
 export gap_conditions, gap_core_residual!, build_conditions, build_residual!
 export GapParams
@@ -41,7 +42,7 @@ export explicit_residual, explicit_residual!
 
 @inline function _get_model(model_kind::Symbol)
     if model_kind === :PNJL || model_kind === :RPNJL || model_kind === :NJL || model_kind === :NJL2
-        return Main.Models.get_cached_model(model_kind)
+        return Models.get_cached_model(model_kind)
     end
     error("Unsupported model kind in Conditions: $(model_kind)")
 end
