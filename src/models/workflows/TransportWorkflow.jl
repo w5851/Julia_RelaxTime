@@ -88,10 +88,14 @@ using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params, a
 const TransportCoefficients = Main.TransportCoefficients
 
 using StaticArrays
+import ..Models
 using ..Models: HADRON_SEED_5, default_momentum_count, default_theta_count
 using ..Models: bulk_viscosity_coefficients, default_momentum_nodes, default_momentum_weights
 using ..Models: create_model, number_densities, model_thermo
 using ..Models: transport_provider, TransportProvider, prepare_transport_provider
+
+# Backward-compatible alias for legacy tests/scripts referencing TransportWorkflow.PNJL
+const PNJL = Models
 
 const DEFAULT_MOMENTUM_COUNT = default_momentum_count()
 const DEFAULT_THETA_COUNT = default_theta_count()
