@@ -30,6 +30,14 @@ end
     @test isfinite(comp.omega)
     @test isfinite(comp.therm)
 
+    comp_core = Models.RotationThermo.omega_components(st.phi[1], st.Phi, st.PhiBar, T, mu, 0.1, m.params)
+    chi_model = Models.calculate_chiral(m, st.phi; omega=0.1)
+    vac_model = Models.vacuum_contribution(m, comp_core.masses; omega=0.1)
+    therm_model = Models.thermal_contribution(m, comp_core.masses, st.Phi, st.PhiBar, mu, T; omega=0.1)
+    @test isapprox(chi_model, comp_core.chi; rtol=1e-10, atol=1e-12)
+    @test isapprox(vac_model, comp_core.vac; rtol=1e-10, atol=1e-12)
+    @test isapprox(therm_model, comp_core.therm; rtol=1e-8, atol=1e-10)
+
     dens = Models.number_densities(m, st, T, mu; omega=0.1)
     @test all(isfinite, dens.quark)
     @test all(isfinite, dens.antiquark)

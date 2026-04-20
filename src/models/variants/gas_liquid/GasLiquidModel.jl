@@ -51,9 +51,14 @@ function calculate_mass_vec(model::GasLiquidModel, φ; kwargs...)
     return GasLiquidThermodynamics.effective_masses(gl, model.params)
 end
 
-@inline function calculate_chiral(::GasLiquidModel, φ; kwargs...)
+@inline function calculate_chiral(model::GasLiquidModel, φ; kwargs...)
     _ = kwargs
-    return 0.0
+    sigma = float(φ[1])
+    delta = float(φ[2])
+    p = model.params
+    x = p.g_sigma * sigma
+    us = (1 / 3) * p.b * p.m_nucleon_inv_fm * x^3 + (1 / 4) * p.c * x^4
+    return us + 0.5 * p.m_delta_inv_fm^2 * delta^2
 end
 
 @inline function polyakov_potential(::GasLiquidModel, Φ, Φbar, T; kwargs...)
@@ -62,14 +67,41 @@ end
 end
 
 @inline function vacuum_contribution(model::GasLiquidModel, masses; kwargs...)
-    _ = (kwargs,)
-    return 0.0
+    mu_vec = get(kwargs, :mu_vec, 0.0)
+    p_num = Int(get(kwargs, :p_num, 96))
+    gl = _state_from_masses_and_mu(model, masses, mu_vec)
+    return gasliquid_omega_components(gl, 0.0, model.params; p_num=p_num).vac
+end
+
+@inline function _state_from_masses_and_mu(model::GasLiquidModel, masses, mu_vec)
+    p = model.params
+    mp = float(masses[1])
+    mn = float(masses[2])
+    muB = mu_baryon(mu_vec)
+
+    sigma = (p.m_nucleon_inv_fm - 0.5 * (mp + mn)) / (p.g_sigma + eps(Float64))
+    delta = if abs(p.g_delta) <= eps(Float64)
+        0.0
+    else
+        (mn - mp) / (2 * p.g_delta)
+    end
+
+    Tprom = promote_type(typeof(sigma), typeof(delta), typeof(muB))
+    return GasLiquidState(Tprom(sigma), Tprom(delta), Tprom(muB), Tprom(muB))
+end
+
+@inline function _chi_from_state(model::GasLiquidModel, st::GasLiquidState)
+    p = model.params
+    x = p.g_sigma * st.sigma
+    us = (1 / 3) * p.b * p.m_nucleon_inv_fm * x^3 + (1 / 4) * p.c * x^4
+    return us + 0.5 * p.m_delta_inv_fm^2 * st.delta^2
 end
 
 @inline function thermal_contribution(model::GasLiquidModel, masses, Φ, Φbar, mu_vec, T; kwargs...)
-    _ = (model, masses, Φ, Φbar, kwargs)
-    gl = GasLiquidState(0.0, 0.0, mu_baryon(mu_vec), mu_baryon(mu_vec))
-    return -pressure_density_entropy_energy(gl, float(T), model.params).pressure
+    _ = (Φ, Φbar)
+    p_num = Int(get(kwargs, :p_num, 96))
+    gl = _state_from_masses_and_mu(model, masses, mu_vec)
+    return gasliquid_omega_components(gl, T, model.params; p_num=p_num).therm
 end
 
 function number_densities(model::GasLiquidModel, x_state, T, mu_vec; kwargs...)
@@ -81,10 +113,4 @@ function number_densities(model::GasLiquidModel, x_state, T, mu_vec; kwargs...)
     q = SVector{3, Tm}(thermo.rho / 3, thermo.rho / 3, thermo.rho / 3)
     aq = SVector{3, Tm}(zero(Tm), zero(Tm), zero(Tm))
     return (quark=q, antiquark=aq)
-end
-
-function omega_components(model::GasLiquidModel, x_state, T, mu_vec; kwargs...)
-    p_num = Int(get(kwargs, :p_num, 96))
-    gl = _to_gasliquid_state(x_state, mu_vec)
-    return gasliquid_omega_components(gl, T, model.params; p_num=p_num)
 end

@@ -58,27 +58,31 @@ end
 function calculate_mass_vec(model::RotationModel, φ; kwargs...)
     _ = kwargs
     m = model.params.m0_inv_fm - 2 * model.params.G_fm2 * φ[1]
-    return SVector{3, typeof(m)}(m, m, model.params.m0_inv_fm)
+    return SVector{3, typeof(m)}(m, m, m)
 end
 
-@inline calculate_chiral(::RotationModel, φ; kwargs...) = 0.05 * (φ[1]^2)
+@inline calculate_chiral(model::RotationModel, φ; kwargs...) = model.params.G_fm2 * (φ[1]^2)
 
 @inline function polyakov_potential(model::RotationModel, Φ, Φbar, T; kwargs...)
     _ = kwargs
     return rotation_polyakov_potential(Φ, Φbar, T, model.params)
 end
 
-@inline vacuum_contribution(::RotationModel, masses; kwargs...) = -0.04 * masses[1]
+@inline function vacuum_contribution(::RotationModel, masses; kwargs...)
+    _ = (masses, kwargs)
+    return 0.0
+end
+
+@inline function _phi_from_masses(model::RotationModel, masses)
+    return (model.params.m0_inv_fm - masses[1]) / (2 * model.params.G_fm2)
+end
 
 function thermal_contribution(model::RotationModel, masses, Φ, Φbar, mu_vec, T; omega::Real=0.0, kwargs...)
     p_num = Int(get(kwargs, :p_num, 48))
     z_num = Int(get(kwargs, :z_num, 48))
-    _ = masses
     mu = _mu_scalar(mu_vec)
-    thermo = rotation_pressure_density_entropy_energy(0.0, T, mu, omega, model.params; Φ=Φ, Φbar=Φbar, p_num=p_num, z_num=z_num)
-    chi = model.params.G_fm2 * 0.0
-    vac = 0.0
-    return -thermo.pressure - chi - vac
+    phi = _phi_from_masses(model, masses)
+    return rotation_omega_components(phi, Φ, Φbar, T, mu, omega, model.params; p_num=p_num, z_num=z_num).therm
 end
 
 function number_densities(model::RotationModel, x_state, T, mu_vec; omega::Real=0.0, kwargs...)
@@ -91,12 +95,4 @@ function number_densities(model::RotationModel, x_state, T, mu_vec; omega::Real=
     q = SVector{3, Tm}(thermo.rho, thermo.rho, thermo.rho)
     aq = SVector{3, Tm}(zero(Tm), zero(Tm), zero(Tm))
     return (quark=q, antiquark=aq)
-end
-
-function omega_components(model::RotationModel, x_state, T, mu_vec; omega::Real=0.0, kwargs...)
-    p_num = Int(get(kwargs, :p_num, 48))
-    z_num = Int(get(kwargs, :z_num, 48))
-    st = x_state isa MeanFieldState ? x_state : MeanFieldState(x_state)
-    mu = _mu_scalar(mu_vec)
-    return rotation_omega_components(st.phi[1], st.Phi, st.PhiBar, T, mu, omega, model.params; p_num=p_num, z_num=z_num)
 end

@@ -32,7 +32,7 @@ function omega_components(
     mu_vec = normalize_mu_vec(mu_vec)
 
     masses = calculate_mass_vec(model, φ)
-    vac = vacuum_contribution(model, masses; kwargs...)
+    vac = vacuum_contribution(model, masses; x_state=x_state, T=T, mu_vec=mu_vec, Phi=Φ, PhiBar=Φbar, kwargs...)
     poly = polyakov_potential(model, Φ, Φbar, T; kwargs...)
     therm = thermal_contribution(model, masses, Φ, Φbar, mu_vec, T; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
     chi = calculate_chiral(model, φ)
