@@ -20,6 +20,7 @@ using ForwardDiff
 using StaticArrays
 
 using ..PNJLCore: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
+using ..HigherOrderDerivatives: nth_derivative, susceptibility_scale
 
 export flavor_pressure_derivatives, conserved_charge_susceptibility
 export chi_BQS, cumulant_BQS
@@ -93,18 +94,6 @@ end
     return T_fm^(order - 4)
 end
 
-@inline function _susceptibility_scale(T_fm::Real, total_order::Int)
-    T_fm > 0 || throw(ArgumentError("T_fm must be positive, got $T_fm"))
-    return T_fm^(total_order - 4)
-end
-
-@inline function _nth_derivative(f, x, n::Int)
-    n >= 1 || throw(ArgumentError("order must be >= 1, got $n"))
-    n == 1 && return ForwardDiff.derivative(f, x)
-    inner = y -> _nth_derivative(f, y, n - 1)
-    return ForwardDiff.derivative(inner, x)
-end
-
 function _pressure_from_flavor_mu(
     T_fm::Real,
     mu_vec;
@@ -143,7 +132,7 @@ function _single_axis_susceptibility(
     m = model === nothing ? _get_model(:PNJL) : model
     pressure_axis = δ -> _pressure_from_flavor_mu(T_fm, μ0 + δ * direction; xi=xi, p_num=p_num, t_num=t_num, model=m)
     δ0 = zero(promote_type(typeof(T_fm), typeof(muB_fm), typeof(muQ_fm), typeof(muS_fm)))
-    return _nth_derivative(pressure_axis, δ0, order) * _susceptibility_scale(T_fm, order)
+    return nth_derivative(pressure_axis, δ0, order) * susceptibility_scale(T_fm, order)
 end
 
 """
@@ -218,7 +207,7 @@ function conserved_charge_susceptibility(
         derivs = flavor_pressure_derivatives(T_fm, μ; order=2, xi=xi, p_num=p_num, t_num=t_num, model=model)
         h_bqs = transpose(_BQS_TO_FLAVOR) * derivs.hessian_mu * _BQS_TO_FLAVOR
         i, j = _second_order_bqs_indices(orders)
-        return h_bqs[i, j] * _susceptibility_scale(T_fm, total_order)
+        return h_bqs[i, j] * susceptibility_scale(T_fm, total_order)
     else
         throw(ArgumentError("conserved_charge_susceptibility currently supports total second order and pure single-axis B/Q/S order 1..4, got orders=$orders"))
     end

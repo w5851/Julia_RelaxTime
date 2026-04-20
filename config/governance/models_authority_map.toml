@@ -1,0 +1,8 @@
+[authority_map]
+doc = "docs/dev/models-capability-map-and-dedup-table.md"
+required_markers = [
+  "## Capability Map",
+  "## Dedup Adjudication",
+  "authority boundary",
+  "compatibility-only",
+]

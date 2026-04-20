@@ -105,11 +105,19 @@ end
             theta=(T_fm=T_fm, mu_fm=mu_fm, xi=0.0),
         )
 
-        @test_throws ArgumentError Models.eval_pilot_derivatives(
-            ctx;
-            target_names=[:pressure, :pressure],
-            param_names=[:T_fm],
-        )
+        err = try
+            Models.eval_pilot_derivatives(
+                ctx;
+                target_names=[:pressure, :pressure],
+                param_names=[:T_fm],
+            )
+            nothing
+        catch ex
+            ex
+        end
+
+        @test err isa ArgumentError
+        @test occursin("target_names must not contain duplicates", sprint(showerror, err))
     end
 
     @testset "params alias equivalence on params keyword path" begin
