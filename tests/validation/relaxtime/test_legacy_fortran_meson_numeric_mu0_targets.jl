@@ -30,7 +30,7 @@ using .MottReferenceMapping: load_reference_table, validate_reference_schema
 const _FORTRAN_FILE = validation_targets_path(
     "relaxtime", "legacy", "meson", "legacy_meson_scan_fortran_muB0_v1.csv",
 )
-const _MESON_WORKFLOW_MOD = Main.Models.meson_workflow_module()
+const _MESON_WORKFLOW_MOD = Models.meson_workflow_module()
 const _HBARC_MEV_FM = Main.Constants_PNJL.ħc_MeV_fm
 
 function _fortran_mass_targets(rows, meson::String)

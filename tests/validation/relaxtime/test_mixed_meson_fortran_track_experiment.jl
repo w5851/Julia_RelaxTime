@@ -15,7 +15,7 @@ if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_SCRIPT)
 end
 
-const _MESON_WORKFLOW_MOD = Main.Models.meson_workflow_module()
+const _MESON_WORKFLOW_MOD = Models.meson_workflow_module()
 const _HBARC_MEV_FM = Main.Constants_PNJL.ħc_MeV_fm
 
 @testset "Fortran-track experiment path remains non-trivial" begin

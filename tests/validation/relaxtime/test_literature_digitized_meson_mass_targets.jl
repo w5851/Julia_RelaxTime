@@ -26,7 +26,7 @@ const RELAXTIME_MESON_MASS_VALIDATION_DATA_PATH = validation_targets_path(
     "relaxtime_meson_mass_literature_targets_v1.csv",
 )
 
-const _MESON_WORKFLOW_MOD = Main.Models.meson_workflow_module()
+const _MESON_WORKFLOW_MOD = Models.meson_workflow_module()
 const _HBARC_MEV_FM = Main.Constants_PNJL.ħc_MeV_fm
 
 function _load_meson_mass_targets(path::String)
