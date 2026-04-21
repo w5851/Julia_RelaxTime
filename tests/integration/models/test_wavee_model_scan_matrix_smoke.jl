@@ -14,7 +14,7 @@ const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :G
             tmpdir = mktempdir()
 
             tmu_output = joinpath(tmpdir, "tmu_$(model_kind).csv")
-            tmu_stats = Main.Models.run_tmu_scan(
+            tmu_stats = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -33,7 +33,7 @@ const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :G
             @test isfile(tmu_output)
 
             trho_output = joinpath(tmpdir, "trho_$(model_kind).csv")
-            trho_stats = Main.Models.run_trho_scan(
+            trho_stats = Models.run_trho_scan(
                 T_values=[150.0],
                 rho_values=[0.2],
                 xi_values=[0.0],
@@ -57,7 +57,7 @@ const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :G
 
     @testset "pnjl_aniso stays parameterized mode" begin
         err_tmu = try
-            Main.Models.run_tmu_scan(
+            Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.1],
@@ -82,7 +82,7 @@ const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :G
         @test occursin("profile", msg_tmu)
 
         err_trho = try
-            Main.Models.run_trho_scan(
+            Models.run_trho_scan(
                 T_values=[150.0],
                 rho_values=[0.2],
                 xi_values=[0.1],

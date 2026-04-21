@@ -10,7 +10,7 @@ end
     @testset "all model kinds expose dedicated workflow module" begin
         kinds = (:NJL, :NJL2, :PNJL, :PNJLMagnetic, :RPNJL, :Rotation, :GasLiquid)
         for kind in kinds
-            mod = Main.Models.workflow_module_for(kind)
+            mod = Models.workflow_module_for(kind)
             @test mod isa Module
             if kind === :Rotation
                 @test isdefined(mod, :solve_rotation_point)

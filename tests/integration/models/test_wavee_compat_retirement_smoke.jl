@@ -17,6 +17,6 @@ const LEGACY_SCAN_SCRIPTS = (
         @test !isfile(joinpath(PROJECT_ROOT, splitpath(rel_path)...))
     end
 
-    @test !isdefined(Main.Models, :scan_workflow_migration_map)
-    @test !isdefined(Main.Models, :scan_workflow_migration_status)
+    @test !isdefined(Models, :scan_workflow_migration_map)
+    @test !isdefined(Models, :scan_workflow_migration_status)
 end

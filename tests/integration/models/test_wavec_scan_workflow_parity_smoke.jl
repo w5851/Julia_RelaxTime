@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
 end
 
 @testset "Wave-C scan/workflow parity smoke" begin
-    @test !isdefined(Main.Models, :scan_workflow_migration_status)
+    @test !isdefined(Models, :scan_workflow_migration_status)
 
     tmu_script_path = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
     if !isfile(tmu_script_path)
@@ -53,7 +53,7 @@ end
             "--t_num=4",
         ])
 
-        via_unified = Main.Models.run_tmu_scan(
+        via_unified = Models.run_tmu_scan(
             T_values=[150.0],
             mu_values=[0.0],
             xi_values=[0.0],
