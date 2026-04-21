@@ -5,9 +5,11 @@
 # - 任何新增 Base.invokelatest 若不命中本清单，将被迁移门禁拦截
 
 [models_invokelatest_allowlist]
-"src/models/gap_solver.jl" = [
-  "Base\\.invokelatest\\(omega,\\s*model,\\s*st,\\s*T,\\s*μ;",
-]
-"src/models/factory.jl" = [
-  "Base\\.invokelatest\\(ctor;\\s*kwargs\\.\\.\\.\\)",
+"src/models/workflow/adapters/WorkflowAdapter.jl" = [
+  "stA\\s*=\\s*Base\\.invokelatest",
+  "stB\\s*=\\s*Base\\.invokelatest",
+  "thA\\s*=\\s*Base\\.invokelatest",
+  "thB\\s*=\\s*Base\\.invokelatest",
+  "pA\\s*=\\s*Base\\.invokelatest",
+  "pB\\s*=\\s*Base\\.invokelatest"
 ]
