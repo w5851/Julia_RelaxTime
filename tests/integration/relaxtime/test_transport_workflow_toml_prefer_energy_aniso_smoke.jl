@@ -4,7 +4,7 @@ const _MODELS_PATH = abspath(joinpath(@__DIR__, "..", "..", "..", "src", "models
 if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_PATH)
 end
-const TW = Main.Models.transport_workflow_module()
+const TW = Models.transport_workflow_module()
 
 @testset "TransportWorkflow config smoke: prefer_energy_aniso via PHYSICS_PARAM_PROFILE" begin
     # This test validates toml-based defaults in the workflow layer.

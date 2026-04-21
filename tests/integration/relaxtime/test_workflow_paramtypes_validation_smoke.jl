@@ -5,10 +5,10 @@ if !isdefined(Main, :Models)
 end
 
 if !isdefined(Main, :TransportWorkflow)
-    const TransportWorkflow = Main.Models.transport_workflow_module()
+    const TransportWorkflow = Models.transport_workflow_module()
 end
 if !isdefined(Main, :MesonMassWorkflow)
-    const MesonMassWorkflow = Main.Models.meson_workflow_module()
+    const MesonMassWorkflow = Models.meson_workflow_module()
 end
 
 using .TransportWorkflow

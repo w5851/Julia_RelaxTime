@@ -67,7 +67,7 @@ end
     outdir = mktempdir()
     cfg_dir = mktempdir()
     cfg = _write_minimal_cross_section_config(joinpath(cfg_dir, "smoke_cfg.toml"))
-    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+    result = Models.run_relaxtime_orchestrator_pipeline(
         :cross_section;
         config_path=cfg,
         outdir=outdir,
@@ -102,7 +102,7 @@ end
 @testset "relaxtime orchestrator pipeline default output dir" begin
     cfg_dir = mktempdir()
     cfg = _write_minimal_cross_section_config(joinpath(cfg_dir, "default_cfg.toml"))
-    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+    result = Models.run_relaxtime_orchestrator_pipeline(
         :cross_section;
         config_path=cfg,
         processes=["ud_to_ud"],
@@ -134,7 +134,7 @@ end
     cfg_dir = mktempdir()
     cfg = _write_strict_cross_section_config(joinpath(cfg_dir, "strict_cfg.toml"))
 
-    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+    result = Models.run_relaxtime_orchestrator_pipeline(
         :cross_section;
         config_path=cfg,
         outdir=outdir,

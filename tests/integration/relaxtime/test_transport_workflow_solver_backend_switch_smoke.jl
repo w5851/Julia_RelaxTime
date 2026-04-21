@@ -5,7 +5,7 @@ if !isdefined(Main, :Models)
 end
 
 if !isdefined(Main, :TransportWorkflow)
-    const TransportWorkflow = Main.Models.transport_workflow_module()
+    const TransportWorkflow = Models.transport_workflow_module()
 end
 using .TransportWorkflow
 
@@ -28,7 +28,7 @@ using .TransportWorkflow
 
     res_legacy = TransportWorkflow.solve_gap_and_transport(T, mu; common_kwargs..., solver_backend=:legacy, solver_kwargs=(iterations=30,))
 
-    models_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite, xtol=1e-10, ftol=1e-10)
+    models_solver = Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite, xtol=1e-10, ftol=1e-10)
     res_models = TransportWorkflow.solve_gap_and_transport(T, mu;
         common_kwargs...,
         solver_backend=:models,
@@ -49,9 +49,9 @@ using .TransportWorkflow
     @test isfinite(res_models.transport.sigma)
 
     # Comparability: omega at the two equilibria should be close (smoke-level tolerance).
-    m = Main.Models.create_model(:PNJL)
-    ωL = Main.Models.omega(m, res_legacy.equilibrium.x_state, T, Main.Models.normalize_mu_vec(mu); xi=xi, p_num=8, t_num=4)
-    ωM = Main.Models.omega(m, res_models.equilibrium.x_state, T, Main.Models.normalize_mu_vec(mu); xi=xi, p_num=8, t_num=4)
+    m = Models.create_model(:PNJL)
+    ωL = Models.omega(m, res_legacy.equilibrium.x_state, T, Models.normalize_mu_vec(mu); xi=xi, p_num=8, t_num=4)
+    ωM = Models.omega(m, res_models.equilibrium.x_state, T, Models.normalize_mu_vec(mu); xi=xi, p_num=8, t_num=4)
 
     @test isfinite(ωL)
     @test isfinite(ωM)

@@ -4,7 +4,7 @@ if !isdefined(Main, :Models)
     include("../../../src/models/Models.jl")
 end
 
-const MesonMassWorkflow = Main.Models.meson_workflow_module()
+const MesonMassWorkflow = Models.meson_workflow_module()
 using .MesonMassWorkflow
 
 @testset "MesonMassWorkflow smoke: solve_gap_and_meson_point (single meson)" begin
