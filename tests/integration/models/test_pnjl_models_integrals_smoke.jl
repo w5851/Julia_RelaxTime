@@ -9,22 +9,22 @@ if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Mai
 end
 
 @testset "Models PNJL integrals (no legacy Thermodynamics include)" begin
-    m = Main.Models.create_model(:PNJL; profile="default", physics_profile="default")
+    m = Models.create_model(:PNJL; profile="default", physics_profile="default")
 
     φ = SVector{3, Float64}(0.010, 0.020, 0.030)
-    masses = Main.Models.calculate_mass_vec(m, φ)
+    masses = Models.calculate_mass_vec(m, φ)
 
     Φ = 0.12
     Φbar = 0.34
     T_fm = 0.20
     mu_vec = SVector{3, Float64}(0.0, 0.0, 0.0)
 
-    therm1 = Main.Models.thermal_contribution(m, masses, Φ, Φbar, mu_vec, T_fm; p_num=10, t_num=2, xi=0.3)
-    therm2 = Main.Models.thermal_contribution(m, masses, Φ, Φbar, mu_vec, T_fm; p_num=10, t_num=2, xi=0.3)
+    therm1 = Models.thermal_contribution(m, masses, Φ, Φbar, mu_vec, T_fm; p_num=10, t_num=2, xi=0.3)
+    therm2 = Models.thermal_contribution(m, masses, Φ, Φbar, mu_vec, T_fm; p_num=10, t_num=2, xi=0.3)
 
     @test isfinite(therm1)
     @test therm1 == therm2
 
     # Node cache should be populated (implementation detail but useful smoke guard).
-    @test haskey(Main.Models.PNJLIntegrals.NODE_CACHE, (10, 2))
+    @test haskey(Models.PNJLIntegrals.NODE_CACHE, (10, 2))
 end

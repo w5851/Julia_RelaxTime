@@ -16,10 +16,10 @@ if !(isdefined(Main, :Models) && isdefined(Main.Models, :create_implicit_gap_sol
 end
 
 @testset "Models implicit differentiation (NJL)" begin
-    model = Main.Models.create_model(:NJL)
+    model = Models.create_model(:NJL)
 
     # Keep this intentionally cheap; just validates the plumbing.
-    f = Main.Models.create_implicit_gap_solver(model; p_num=10, t_num=4, xi=0.0)
+    f = Models.create_implicit_gap_solver(model; p_num=10, t_num=4, xi=0.0)
 
     θ = [0.12, 0.0]
     x, _ = f(θ)

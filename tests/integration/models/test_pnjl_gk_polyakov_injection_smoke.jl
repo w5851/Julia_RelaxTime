@@ -20,8 +20,8 @@ end
 end
 
 @testset "Models PNJL G/K + Polyakov params injection" begin
-    m_default = Main.Models.create_model(:PNJL; profile="default", physics_profile="default")
-    m_custom = Main.Models.create_model(:PNJL; profile="unittest_gk_polyakov", physics_profile="default")
+    m_default = Models.create_model(:PNJL; profile="default", physics_profile="default")
+    m_custom = Models.create_model(:PNJL; profile="unittest_gk_polyakov", physics_profile="default")
 
     @test m_custom.consts.G_fm2 != m_default.consts.G_fm2
     @test m_custom.consts.K_fm5 != m_default.consts.K_fm5
@@ -32,8 +32,8 @@ end
 
     φ = SVector{3, Float64}(0.010, 0.020, 0.030)
 
-    masses = Main.Models.calculate_mass_vec(m_custom, φ)
-    chi = Main.Models.calculate_chiral(m_custom, φ)
+    masses = Models.calculate_mass_vec(m_custom, φ)
+    chi = Models.calculate_chiral(m_custom, φ)
 
     # Manual checks: must match injected-consts formulas.
     c = m_custom.consts
@@ -55,8 +55,8 @@ end
     @test isapprox(chi, expected_chi; rtol=0, atol=1e-12)
 
     # Should differ from default profile if injection is actually used.
-    masses_default = Main.Models.calculate_mass_vec(m_default, φ)
-    chi_default = Main.Models.calculate_chiral(m_default, φ)
+    masses_default = Models.calculate_mass_vec(m_default, φ)
+    chi_default = Models.calculate_chiral(m_default, φ)
     @test masses != masses_default
     @test chi != chi_default
 
@@ -65,9 +65,9 @@ end
     Φbar = 0.34
     T_fm = 0.20
 
-    U_custom = Main.Models.polyakov_potential(m_custom, Φ, Φbar, T_fm)
+    U_custom = Models.polyakov_potential(m_custom, Φ, Φbar, T_fm)
     U_manual = _polyakov_U_manual(m_custom.consts, Φ, Φbar, T_fm)
-    U_default = Main.Models.polyakov_potential(m_default, Φ, Φbar, T_fm)
+    U_default = Models.polyakov_potential(m_default, Φ, Φbar, T_fm)
 
     @test isfinite(U_custom)
     @test isfinite(U_default)

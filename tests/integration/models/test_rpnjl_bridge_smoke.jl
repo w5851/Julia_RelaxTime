@@ -7,11 +7,11 @@ if !(isdefined(Main, :Models) && isdefined(Main.Models, :create_model) && isdefi
 end
 
 @testset "Models bridge smoke: PNJL vs RPNJL(degenerate)" begin
-    pnjl = Main.Models.create_model(:PNJL)
-    rpnjl_deg = Main.Models.create_model(:RPNJL; use_rpnjl_extensions=false)
-    rpnjl_ext = Main.Models.create_model(:RPNJL; use_rpnjl_extensions=true)
+    pnjl = Models.create_model(:PNJL)
+    rpnjl_deg = Models.create_model(:RPNJL; use_rpnjl_extensions=false)
+    rpnjl_ext = Models.create_model(:RPNJL; use_rpnjl_extensions=true)
 
-    solver = Main.Models.NLsolveGapSolver(
+    solver = Models.NLsolveGapSolver(
         method=:trust_region,
         jacobian=:finite,
         xtol=1e-10,
@@ -46,7 +46,7 @@ end
         T_fm = pt.T
         mu = pt.mu
 
-        x_pnjl = Main.Models.solve_gap(
+        x_pnjl = Models.solve_gap(
             pnjl,
             T_fm,
             mu;
@@ -58,7 +58,7 @@ end
             residual_norm_max=1e-4,
         )
 
-        x_rpnjl_deg = Main.Models.solve_gap(
+        x_rpnjl_deg = Models.solve_gap(
             rpnjl_deg,
             T_fm,
             mu;
@@ -69,7 +69,7 @@ end
             residual_norm_max=1e-4,
         )
 
-        x_rpnjl_ext = Main.Models.solve_gap(
+        x_rpnjl_ext = Models.solve_gap(
             rpnjl_ext,
             T_fm,
             mu;
@@ -80,9 +80,9 @@ end
             residual_norm_max=1e-4,
         )
 
-        ω_pnjl = Main.Models.omega(pnjl, x_pnjl, T_fm, mu; p_num=8, t_num=4, xi=0.0)
-        ω_rpnjl_deg = Main.Models.omega(rpnjl_deg, x_rpnjl_deg, T_fm, mu; p_num=8, t_num=4, xi=0.0)
-        ω_rpnjl_ext = Main.Models.omega(rpnjl_ext, x_rpnjl_ext, T_fm, mu; p_num=8, t_num=4, xi=0.0)
+        ω_pnjl = Models.omega(pnjl, x_pnjl, T_fm, mu; p_num=8, t_num=4, xi=0.0)
+        ω_rpnjl_deg = Models.omega(rpnjl_deg, x_rpnjl_deg, T_fm, mu; p_num=8, t_num=4, xi=0.0)
+        ω_rpnjl_ext = Models.omega(rpnjl_ext, x_rpnjl_ext, T_fm, mu; p_num=8, t_num=4, xi=0.0)
 
         @test isfinite(ω_pnjl)
         @test isfinite(ω_rpnjl_deg)

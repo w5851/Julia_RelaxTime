@@ -9,16 +9,16 @@ if !(isdefined(Main, :Models) && isdefined(Main.Models, :omega) && isdefined(Mai
 end
 
 @testset "Models PNJL Λ injection (vacuum term)" begin
-    m_default = Main.Models.create_model(:PNJL; profile="default", physics_profile="default")
-    m_bigΛ = Main.Models.create_model(:PNJL; profile="unittest_lambda", physics_profile="default")
+    m_default = Models.create_model(:PNJL; profile="default", physics_profile="default")
+    m_bigΛ = Models.create_model(:PNJL; profile="unittest_lambda", physics_profile="default")
 
     @test m_default.consts.Λ_inv_fm != m_bigΛ.consts.Λ_inv_fm
     @test m_bigΛ.consts.Λ_inv_fm > m_default.consts.Λ_inv_fm
 
     masses = SVector{3, Float64}(0.30, 0.40, 0.50)
 
-    vac_default = Main.Models.vacuum_contribution(m_default, masses)
-    vac_bigΛ = Main.Models.vacuum_contribution(m_bigΛ, masses)
+    vac_default = Models.vacuum_contribution(m_default, masses)
+    vac_bigΛ = Models.vacuum_contribution(m_bigΛ, masses)
 
     @test isfinite(vac_default)
     @test isfinite(vac_bigΛ)
