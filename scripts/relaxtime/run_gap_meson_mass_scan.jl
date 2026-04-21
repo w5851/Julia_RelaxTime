@@ -18,7 +18,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "MesonMassWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm
 using .MesonMassWorkflow: solve_gap_and_meson_point, DEFAULT_MESONS

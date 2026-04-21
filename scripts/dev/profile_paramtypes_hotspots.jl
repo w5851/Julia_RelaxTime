@@ -11,8 +11,8 @@ Parameter Types 热点 profiling（Phase D）
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "MesonMassWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TransportCoefficients.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxationTime.jl"))
 

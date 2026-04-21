@@ -9,7 +9,7 @@ Purpose:
 
 Policy:
 - Allowed in `src/models/solver/**` and tests (internal implementation/testing scope).
-- Disallowed in runtime consumers under `src/models/phase/**`, `src/models/scans/**`, `src/models/workflows/**`.
+- Disallowed in runtime consumers under `src/models/phase/**`, `src/models/scans/**`, `src/models/workflow_apps/**`.
 """
 
 const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
@@ -17,7 +17,7 @@ const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const RUNTIME_TARGET_DIRS = (
     "src/models/phase",
     "src/models/scans",
-    "src/models/workflows",
+    "src/models/workflow_apps",
 )
 
 const PRIVATE_PATTERNS = (

@@ -4,7 +4,7 @@ using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"))
+include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "TransportWorkflow.jl"))
 using .TransportWorkflow
 
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "relaxtime", "baseline_transport_fixedpoints_v1.csv")

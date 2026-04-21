@@ -5,7 +5,7 @@
 # - 任何新增 Base.invokelatest 若不命中本清单，将被迁移门禁拦截
 
 [models_invokelatest_allowlist]
-"src/models/workflow/adapters/WorkflowAdapter.jl" = [
+"src/models/workflow_engine/adapters/WorkflowAdapter.jl" = [
   "stA\\s*=\\s*Base\\.invokelatest",
   "stB\\s*=\\s*Base\\.invokelatest",
   "thA\\s*=\\s*Base\\.invokelatest",

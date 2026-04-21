@@ -77,7 +77,7 @@ if !isdefined(Main, :ParameterTypes)
 end
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
-const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "..", "..", "models", "workflows", "WorkflowParamAdapters.jl"))
+const _WORKFLOW_PARAM_ADAPTERS_PATH = normpath(joinpath(@__DIR__, "WorkflowParamAdapters.jl"))
 if !isdefined(Main, :WorkflowParamAdapters)
     Base.include(Main, _WORKFLOW_PARAM_ADAPTERS_PATH)
 end

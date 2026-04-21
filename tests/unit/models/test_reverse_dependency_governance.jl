@@ -7,12 +7,12 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
         joinpath(PROJECT_ROOT, "src", "models", "derivatives", "ConservedChargeSusceptibilities.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "solver", "diff", "Targets.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "solver", "diff", "JacobianEngine.jl"),
-        joinpath(PROJECT_ROOT, "src", "models", "workflows", "MesonMassWorkflow.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "precompile", "registry.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "scans", "ScanCommon.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "scans", "TmuScan.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "scans", "TrhoScan.jl"),
-        joinpath(PROJECT_ROOT, "src", "models", "workflows", "TransportWorkflow.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "TransportWorkflow.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "pnjl_physics", "core", "EquilibriumFacade.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "solver", "spec", "Conditions.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "solver", "orchestrator", "SeedStrategies.jl"),
@@ -22,7 +22,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
         joinpath(PROJECT_ROOT, "src", "models", "pnjl_physics", "PNJLMagneticModel.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "derivatives", "ThermoDerivatives.jl"),
         joinpath(PROJECT_ROOT, "src", "models", "pnjl_physics", "core", "ModelThermodynamics.jl"),
-        joinpath(PROJECT_ROOT, "src", "models", "workflow", "adapters", "WorkflowAdapter.jl"),
+        joinpath(PROJECT_ROOT, "src", "models", "workflow_engine", "adapters", "WorkflowAdapter.jl"),
     ]
 
     for file in tracked_files
