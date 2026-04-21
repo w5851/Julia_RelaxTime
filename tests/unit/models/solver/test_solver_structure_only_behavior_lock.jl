@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
 end
 
 const SNAPSHOT_SOURCE = "migration-pre-main smoke sample"
-const SNAPSHOT_COMMAND = "julia --project=. -e 'include(\"src/models/Models.jl\"); model=Main.Models.create_model(:PNJL); mode=Main.Models.FixedMu(); T_fm=100.0/197.327; mu_fm=0.0; r=Main.Models.solve(model, mode, T_fm, mu_fm; p_num=8, t_num=4, residual_norm_max=1e-6); println((converged=r.converged, solution_length=length(r.solution), residual_norm=r.residual_norm, omega=r.omega, pressure=r.pressure, rho_norm=r.rho_norm, mu_vec=collect(r.mu_vec), masses=collect(r.masses)))'"
+const SNAPSHOT_COMMAND = "julia --project=. -e 'include(\"src/models/Models.jl\"); model=Models.create_model(:PNJL); mode=Models.FixedMu(); T_fm=100.0/197.327; mu_fm=0.0; r=Models.solve(model, mode, T_fm, mu_fm; p_num=8, t_num=4, residual_norm_max=1e-6); println((converged=r.converged, solution_length=length(r.solution), residual_norm=r.residual_norm, omega=r.omega, pressure=r.pressure, rho_norm=r.rho_norm, mu_vec=collect(r.mu_vec), masses=collect(r.masses)))'"
 
 const STRUCTURE_LOCK_BASELINE = (
     converged=true,
