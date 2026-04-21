@@ -57,7 +57,7 @@ function main(args::Vector{String})
     )
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
-    models_solver = Main.Models.NLsolveGapSolver(
+    models_solver = Models.NLsolveGapSolver(
         method=:trust_region,
         jacobian=:finite,
         xtol=1e-10,

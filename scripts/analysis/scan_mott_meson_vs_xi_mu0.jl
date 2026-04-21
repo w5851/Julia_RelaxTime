@@ -16,7 +16,7 @@ using .Constants_PNJL: ħc_MeV_fm
 using .MottReferenceMapping: estimate_mott_temperature
 using .ScanCSV: ScanCSV
 
-const _MESON_WORKFLOW_MOD = Main.Models.meson_workflow_module()
+const _MESON_WORKFLOW_MOD = Models.meson_workflow_module()
 
 struct Options
     output::String

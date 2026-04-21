@@ -6,7 +6,7 @@ if !isdefined(Main, :Models)
     include(joinpath(@__DIR__, "..", "..", "..", "..", "src", "models", "Models.jl"))
 end
 
-const WF = Main.Models.meson_workflow_module()
+const WF = Models.meson_workflow_module()
 const HBARC = Main.Constants_PNJL.ħc_MeV_fm
 
 const _MESONS = (:pi, :K, :eta, :eta_prime, :sigma_pi, :sigma_K, :sigma, :sigma_prime)

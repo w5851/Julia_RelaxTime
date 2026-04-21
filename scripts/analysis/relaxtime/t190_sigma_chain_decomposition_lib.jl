@@ -9,7 +9,7 @@ end
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-Main.Models.pnjl_module()
+Models.pnjl_module()
 if !isdefined(Main, :OneLoopIntegrals)
     include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 end
@@ -34,7 +34,7 @@ using .OneLoopIntegrals: A
 using .EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using .ScatteringAmplitude: calculate_mandelstam_variables
 
-const PNJL_LIB = Main.Models.pnjl_module()
+const PNJL_LIB = Models.pnjl_module()
 const solve_lib = getproperty(PNJL_LIB, :solve)
 const FixedMu_lib = getproperty(PNJL_LIB, :FixedMu)
 const Integrals_lib = getproperty(PNJL_LIB, :Integrals)

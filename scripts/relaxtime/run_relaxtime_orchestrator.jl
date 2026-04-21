@@ -88,7 +88,7 @@ end
 
 function run_orchestrator(cmd::String, opts::Dict{String,Any})
     cmd_symbol = _cmd_string_to_symbol(cmd)
-    result = Main.Models.run_relaxtime_orchestrator_pipeline(
+    result = Models.run_relaxtime_orchestrator_pipeline(
         cmd_symbol;
         config_path=String(opts["config_path"]),
         outdir=String(opts["outdir"]),

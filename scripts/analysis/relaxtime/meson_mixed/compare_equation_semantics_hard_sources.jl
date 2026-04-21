@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
 end
 
 const HBARC = Main.Constants_PNJL.ħc_MeV_fm
-const WF = Main.Models.meson_workflow_module()
+const WF = Models.meson_workflow_module()
 
 const _MESONS = (:pi, :K, :eta, :eta_prime, :sigma_pi, :sigma_K, :sigma, :sigma_prime)
 const _RTOL_BY_MESON = Dict(
