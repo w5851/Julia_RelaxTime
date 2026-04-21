@@ -460,7 +460,7 @@ function main()
                         T_fm,
                         mu_fm;
                         xi=xi,
-                        seed_state=(equilibrium_seed_state === nothing ? Main.Models.HADRON_SEED_5 : equilibrium_seed_state),
+                        seed_state=(equilibrium_seed_state === nothing ? Models.HADRON_SEED_5 : equilibrium_seed_state),
                         mesons=mesons,
                         meson_seed_state=meson_seed_state,
                         mixed_seed_tracking_state=mixed_seed_tracking_state,

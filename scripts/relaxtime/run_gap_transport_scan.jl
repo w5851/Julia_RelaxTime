@@ -676,17 +676,17 @@ end
 end
 
 function tracker_seed(tracker::LocalPhaseTracker, T_fm::Float64, muq_fm::Float64)
-    mode = Main.Models.FixedMu()
+    mode = Models.FixedMu()
     if tracker.previous_solution !== nothing
-        if length(tracker.previous_solution) == Main.Models.state_dim(mode)
+        if length(tracker.previous_solution) == Models.state_dim(mode)
             return copy(tracker.previous_solution)
         elseif length(tracker.previous_solution) >= 5
-            return Main.Models.extend_seed(tracker.previous_solution, mode)
+            return Models.extend_seed(tracker.previous_solution, mode)
         end
     end
-    hint = Main.Models.auto_phase_hint(T_fm, muq_fm)
+    hint = Models.auto_phase_hint(T_fm, muq_fm)
     base = (hint === :quark) ? tracker.quark_seed : tracker.hadron_seed
-    return Main.Models.extend_seed(base, mode)
+    return Models.extend_seed(base, mode)
 end
 
 function build_phase_tracker(xi::Float64, previous_solution, previous_phase::Symbol)
@@ -917,9 +917,9 @@ function _normalize_equilibrium_result(raw; solver_backend::Symbol=:models)
 end
 
 function _solve_fixedmu_via_models_solve(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
-    return Main.Models.solve(
+    return Models.solve(
         PNJL_MODEL,
-        Main.Models.FixedMu(),
+        Models.FixedMu(),
         T_fm,
         muq_fm;
         seed_guess=_seed_state_5(seed_state),
@@ -931,9 +931,9 @@ function _solve_fixedmu_via_models_solve(T_fm::Float64, muq_fm::Float64, xi::Flo
 end
 
 function _solve_fixedmu_via_models_constraint(T_fm::Float64, muq_fm::Float64, xi::Float64, seed_state, opts::ScanOptions)
-    return Main.Models.solve_constraint(
+    return Models.solve_constraint(
         PNJL_MODEL,
-        Main.Models.FixedMu(),
+        Models.FixedMu(),
         T_fm;
         μ_fm=muq_fm,
         seed_guess=_seed_state_5(seed_state),
@@ -941,7 +941,7 @@ function _solve_fixedmu_via_models_constraint(T_fm::Float64, muq_fm::Float64, xi
         p_num=opts.p_num,
         t_num=opts.t_num,
         residual_norm_max=1e-4,
-        physicality_check=Main.Models.is_physical_solution,
+        physicality_check=Models.is_physical_solution,
     )
 end
 

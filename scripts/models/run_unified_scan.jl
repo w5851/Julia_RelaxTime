@@ -42,7 +42,7 @@ function _parse_model_kind(raw::AbstractString)
         return :pnjl_aniso
     end
 
-    for kind in Main.Models.registered_model_kinds()
+    for kind in Models.registered_model_kinds()
         if lowercase(String(kind)) == lowered
             return kind
         end
@@ -147,7 +147,7 @@ end
 function _run_scan_tmu(args::Vector{String})
     kwargs = _parse_tmu_args(args)
     _assert_required_keys(kwargs, (:model_kind, :T_values, :mu_values, :xi_values, :output_path), "scan tmu")
-    stats = Main.Models.run_scan_pipeline(:tmu; kwargs...)
+    stats = Models.run_scan_pipeline(:tmu; kwargs...)
     println("[scan tmu] total=$(stats.total) success=$(stats.success) failure=$(stats.failure) skipped=$(stats.skipped)")
     println("[scan tmu] output=$(stats.output)")
     return nothing
@@ -156,7 +156,7 @@ end
 function _run_scan_trho(args::Vector{String})
     kwargs = _parse_trho_args(args)
     _assert_required_keys(kwargs, (:model_kind, :T_values, :rho_values, :xi_values, :output_path), "scan trho")
-    stats = Main.Models.run_scan_pipeline(:trho; kwargs...)
+    stats = Models.run_scan_pipeline(:trho; kwargs...)
     println("[scan trho] total=$(stats.total) success=$(stats.success) failure=$(stats.failure) skipped=$(stats.skipped)")
     println("[scan trho] output=$(stats.output)")
     return nothing
