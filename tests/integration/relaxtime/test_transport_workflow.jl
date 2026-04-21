@@ -6,7 +6,7 @@ if !isdefined(Main, :Models)
 end
 
 if !isdefined(Main, :TransportWorkflow)
-    const TransportWorkflow = Main.Models.transport_workflow_module()
+    const TransportWorkflow = Models.transport_workflow_module()
 end
 using .TransportWorkflow
 

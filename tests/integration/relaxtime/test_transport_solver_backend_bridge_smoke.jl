@@ -6,7 +6,7 @@ if !isdefined(Main, :Models)
 end
 
 if !isdefined(Main, :TransportWorkflow)
-    const TransportWorkflow = Main.Models.transport_workflow_module()
+    const TransportWorkflow = Models.transport_workflow_module()
 end
 using .TransportWorkflow
 
@@ -86,7 +86,7 @@ using .TransportWorkflow
         return res_legacy, res_models
     end
 
-    models_solver = Main.Models.NLsolveGapSolver(
+    models_solver = Models.NLsolveGapSolver(
         method=:trust_region,
         jacobian=:finite,
         xtol=1e-10,

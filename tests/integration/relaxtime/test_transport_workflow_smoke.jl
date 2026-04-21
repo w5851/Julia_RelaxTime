@@ -5,7 +5,7 @@ if !isdefined(Main, :Models)
 end
 
 if !isdefined(Main, :TransportWorkflow)
-    const TransportWorkflow = Main.Models.transport_workflow_module()
+    const TransportWorkflow = Models.transport_workflow_module()
 end
 using .TransportWorkflow
 
@@ -31,13 +31,13 @@ using .TransportWorkflow
     )
 
     @testset "provider injection smoke" begin
-        m = Main.Models.create_model(:PNJL)
-        prov = Main.Models.transport_provider(m)
-        prov_model = Main.Models.transport_provider(m)
+        m = Models.create_model(:PNJL)
+        prov = Models.transport_provider(m)
+        prov_model = Models.transport_provider(m)
 
         qp_nt = Main.ParameterTypes.as_namedtuple(res.quark_params)
         tp_nt = Main.ParameterTypes.as_namedtuple(res.thermo_params)
-        prov_prepared = Main.Models.prepare_transport_provider(
+        prov_prepared = Models.prepare_transport_provider(
             prov,
             res.equilibrium;
             quark_params=qp_nt,
@@ -236,7 +236,7 @@ using .TransportWorkflow
             transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
         )
 
-        prov = Main.Models.transport_provider(Main.Models.create_model(:PNJL))
+        prov = Models.transport_provider(Models.create_model(:PNJL))
         res2_prov = TransportWorkflow.solve_transport_from_equilibrium(
             eq,
             T,
