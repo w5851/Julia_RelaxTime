@@ -14,6 +14,7 @@ Models 统一入口契约检查（轻量骨架）
 
 const ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const MODELS_FILE = joinpath(ROOT, "src", "models", "Models.jl")
+const EXPORTS_PUBLIC_FILE = joinpath(ROOT, "src", "models", "exports_public.jl")
 const ENTRYPOINTS_FILE = joinpath(ROOT, "src", "models", "entrypoints.jl")
 const ENTRY_DOC_FILE = joinpath(ROOT, "docs", "api", "generated", "models", "EntryPointsExportIndex.md")
 
@@ -105,7 +106,17 @@ function main()
     soft_warnings = String[]
 
     models_exports = collect_exports(MODELS_FILE)
+    public_exports = collect_exports(EXPORTS_PUBLIC_FILE)
     entry_exports = collect_exports(ENTRYPOINTS_FILE)
+
+    overlap = sort(collect(intersect(models_exports, public_exports)))
+    if !isempty(overlap)
+        push!(violations, "Models.jl explicit exports overlap with exports_public.jl ($(length(overlap)) symbols)")
+        for sym in Iterators.take(overlap, 10)
+            push!(violations, "  overlap symbol: $(sym)")
+        end
+        length(overlap) > 10 && push!(violations, "  ... (truncated)")
+    end
 
     # Soft check: entrypoints 导出与 Models 导出差异（历史兼容期仅告警，不阻断）
     for sym in sort(collect(entry_exports))
@@ -146,7 +157,7 @@ function main()
     end
 
     println("[models-entry-contract] OK")
-    println("  entrypoints_exports=$(length(entry_exports)) models_exports=$(length(models_exports))")
+    println("  entrypoints_exports=$(length(entry_exports)) models_explicit_exports=$(length(models_exports)) public_exports=$(length(public_exports))")
 
     if !isempty(soft_warnings)
         println("[models-entry-contract] WARNINGS: $(length(soft_warnings))")
