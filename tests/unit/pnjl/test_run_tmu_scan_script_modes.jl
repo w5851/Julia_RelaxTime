@@ -6,7 +6,7 @@ const SCRIPT_PATH = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
 @testset "run_tmu_scan script mode contract" begin
     if !isfile(SCRIPT_PATH)
         include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-        @test !isdefined(Main.Models, :scan_workflow_migration_status)
+        @test !isdefined(getproperty(Main, :Models), :scan_workflow_migration_status)
         return
     end
 

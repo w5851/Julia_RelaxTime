@@ -12,7 +12,7 @@ const _MODELS_PATH = normpath(joinpath(@__DIR__, "..", "models", "Models.jl"))
 if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_PATH)
 end
-using Main.Models
+using Main: Models
 
 const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "constants", "Constants_PNJL.jl"))
 if !isdefined(Main, :Constants_PNJL)

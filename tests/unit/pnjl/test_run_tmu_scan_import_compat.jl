@@ -5,10 +5,11 @@ const SCRIPT_PATH = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
 
 @testset "run_tmu_scan script import compatibility" begin
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-    using Main.Models: TmuScanConfig
+    _MODELS = getproperty(Main, :Models)
+    TmuScanConfig = getproperty(_MODELS, :TmuScanConfig)
 
     if !isfile(SCRIPT_PATH)
-        @test !isdefined(Main.Models, :scan_workflow_migration_status)
+        @test !isdefined(_MODELS, :scan_workflow_migration_status)
         return
     end
 
