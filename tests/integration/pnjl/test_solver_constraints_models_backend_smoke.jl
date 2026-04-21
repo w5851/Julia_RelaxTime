@@ -19,10 +19,10 @@ if !isdefined(Main, :PNJL)
     if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
-    Main.Models.pnjl_module()
+    Models.pnjl_module()
 end
 
-const P = Main.Models.pnjl_module()
+const P = Models.pnjl_module()
 
 const ħc = 197.327  # MeV·fm
 

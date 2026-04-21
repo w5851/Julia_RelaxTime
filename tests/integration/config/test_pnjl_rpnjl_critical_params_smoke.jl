@@ -22,7 +22,7 @@ end
     @test cfg.K_fm5 > 0
     @test cfg.T0_inv_fm > 0
 
-    model = Main.Models.create_model(:RPNJL; log_config=true)
+    model = Models.create_model(:RPNJL; log_config=true)
     @test model.ext.kappa >= 0
     @test isfinite(model.ext.g1_fm8)
     @test isfinite(model.ext.g2_fm8)

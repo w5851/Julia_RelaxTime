@@ -121,7 +121,7 @@ end
     T_fm = 0.5
     μ_fm = 1.5
 
-    models_model = Main.Models.create_model(:PNJL)
+    models_model = Models.create_model(:PNJL)
 
     default_result = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10)
     models = bulk_viscosity_coefficients(T_fm, μ_fm; xi=0.0, p_num=32, t_num=10, model=models_model)
