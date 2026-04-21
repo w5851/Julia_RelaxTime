@@ -30,7 +30,7 @@ function _maybe_precompile_warmup()
             Base.include(Main, joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
         end
         profile = Symbol(lowercase(get(ENV, "TEST_PRECOMPILE_PROFILE", "test")))
-        Main.Models.run_precompile_profile(profile)
+        Models.run_precompile_profile(profile)
     catch err
         @warn "Unit precompile warmup failed; continuing without warmup" exception=(err, catch_backtrace())
     end

@@ -37,7 +37,7 @@ using Main.EquilibriumFacade: solve_equilibrium_backend
             solver_backend=:models,
             p_num=8,
             t_num=4,
-            seed_state=Main.Models.HADRON_SEED_5,
+            seed_state=Models.HADRON_SEED_5,
             models_residual_norm_max=1e-4,
         )
 
@@ -48,7 +48,7 @@ using Main.EquilibriumFacade: solve_equilibrium_backend
     end
 
     @testset "models backend 显式 models_solver 仍走 solve_gap 路径" begin
-        custom_solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward)
+        custom_solver = Models.NLsolveGapSolver(method=:trust_region, jacobian=:forward)
         res = solve_equilibrium_backend(
             0.15,
             0.0;
@@ -56,7 +56,7 @@ using Main.EquilibriumFacade: solve_equilibrium_backend
             models_solver=custom_solver,
             p_num=8,
             t_num=4,
-            seed_state=Main.Models.HADRON_SEED_5,
+            seed_state=Models.HADRON_SEED_5,
             models_residual_norm_max=1e-4,
         )
 

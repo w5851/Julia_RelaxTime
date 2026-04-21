@@ -13,7 +13,7 @@ if !isdefined(Main, :Models)
     Base.include(Main, _MODELS_PATH_WPA)
 end
 
-const WorkflowParamAdaptersModule = Main.Models.workflow_param_adapters_module()
+const WorkflowParamAdaptersModule = Models.workflow_param_adapters_module()
 
 using .WorkflowParamAdaptersModule: normalize_quark_params, normalize_thermo_params, as_relaxtime_inputs
 using Main.ParameterTypes: QuarkParams, ThermoParams
