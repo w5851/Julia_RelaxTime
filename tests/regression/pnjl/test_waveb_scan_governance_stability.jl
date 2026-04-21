@@ -16,7 +16,7 @@ end
     @testset "Tmu scan emits governance selection tag" begin
         mktempdir() do outdir
             out = joinpath(outdir, "tmu_waveb_governance.csv")
-            stats = Main.Models.run_tmu_scan(
+            stats = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -38,7 +38,7 @@ end
     @testset "Trho scan emits governance selection tag" begin
         mktempdir() do outdir
             out = joinpath(outdir, "trho_waveb_governance.csv")
-            stats = Main.Models.run_trho_scan(
+            stats = Models.run_trho_scan(
                 T_values=[150.0],
                 rho_values=[0.2],
                 xi_values=[0.0],
@@ -59,7 +59,7 @@ end
     end
 
     @testset "fallback reason tags are normalized and ordered" begin
-        msg = Main.Models.ScanCommon.join_messages([
+        msg = Models.ScanCommon.join_messages([
             "seed[quark] failed (iterations=20, residual=0.100000, converged=false): bad",
             "hybrid weighted-block fallback rescued",
             "governance.selection=pressure_max_under_constraints;seed=hadron",

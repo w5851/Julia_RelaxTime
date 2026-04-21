@@ -15,7 +15,7 @@ end
 @testset "Wave-C model-driven scan stability" begin
     @testset "models backend supports non-PNJL model_kind" begin
         mktempdir() do outdir
-            stats = Main.Models.run_tmu_scan(
+            stats = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -39,7 +39,7 @@ end
             out_pnjl_b = joinpath(outdir, "tmu_pnjl_b.csv")
             out_rpnjl = joinpath(outdir, "tmu_rpnjl.csv")
 
-            stats_pnjl_a = Main.Models.run_tmu_scan(
+            stats_pnjl_a = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -52,7 +52,7 @@ end
                 p_num=8,
                 t_num=4,
             )
-            stats_pnjl_b = Main.Models.run_tmu_scan(
+            stats_pnjl_b = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -65,7 +65,7 @@ end
                 p_num=8,
                 t_num=4,
             )
-            stats_rpnjl = Main.Models.run_tmu_scan(
+            stats_rpnjl = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],

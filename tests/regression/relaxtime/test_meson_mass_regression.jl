@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-const MesonMassWorkflow = Main.Models.meson_workflow_module()
+const MesonMassWorkflow = Models.meson_workflow_module()
 using .MesonMassWorkflow
 
 function _load_rows(path::String)

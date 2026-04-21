@@ -8,7 +8,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-const TransportWorkflow = Main.Models.transport_workflow_module()
+const TransportWorkflow = Models.transport_workflow_module()
 using .TransportWorkflow
 
 function _point_key(T::Float64, mu::Float64, xi::Float64)
@@ -62,7 +62,7 @@ end
     baseline = Dict(_point_key(row.T, row.mu, row.xi) => row for row in rows)
 
     tau = (u=1.0, d=1.0, s=1.0, ubar=1.0, dbar=1.0, sbar=1.0)
-    models_solver = Main.Models.NLsolveGapSolver(
+    models_solver = Models.NLsolveGapSolver(
         method=:trust_region,
         jacobian=:finite,
         xtol=1e-10,

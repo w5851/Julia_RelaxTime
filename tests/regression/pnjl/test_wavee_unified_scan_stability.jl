@@ -7,13 +7,13 @@ if !isdefined(Main, :Models)
 end
 
 @testset "Wave-E unified scan stability regression" begin
-    @test !isdefined(Main.Models, :scan_workflow_migration_map)
-    @test !isdefined(Main.Models, :scan_workflow_migration_status)
+    @test !isdefined(Models, :scan_workflow_migration_map)
+    @test !isdefined(Models, :scan_workflow_migration_status)
 
     model_kinds = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
     for model_kind in model_kinds
         mktempdir() do tmpdir
-            tmu_stats = Main.Models.run_tmu_scan(
+            tmu_stats = Models.run_tmu_scan(
                 T_values=[150.0],
                 mu_values=[0.0],
                 xi_values=[0.0],
@@ -30,7 +30,7 @@ end
             @test tmu_stats.total == 1
             @test tmu_stats.success + tmu_stats.failure == 1
 
-            trho_stats = Main.Models.run_trho_scan(
+            trho_stats = Models.run_trho_scan(
                 T_values=[150.0],
                 rho_values=[0.2],
                 xi_values=[0.0],
