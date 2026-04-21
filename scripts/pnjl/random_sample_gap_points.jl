@@ -28,11 +28,9 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-Models.pnjl_module()
 
 using .Constants_PNJL: ħc_MeV_fm
 const PNJL = Models.pnjl_module()
-const Models = Main.Models
 
 @inline function env_int(key::String, default::Int)
     return parse(Int, get(ENV, key, string(default)))

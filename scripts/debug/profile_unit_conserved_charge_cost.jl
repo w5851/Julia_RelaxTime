@@ -12,7 +12,7 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
 using Main.Constants_PNJL: ħc_MeV_fm
-const PNJL = Main.Models.pnjl_module()
+const PNJL = Models.pnjl_module()
 
 function _time_block(f::Function, name::String)
     t = @elapsed f()

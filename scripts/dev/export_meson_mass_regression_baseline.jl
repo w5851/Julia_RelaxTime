@@ -37,7 +37,7 @@ function main(args::Vector{String})
     output = parse_args(args)
     mkpath(dirname(output))
 
-    Main.Models.meson_workflow_module()
+    Models.meson_workflow_module()
     mesons = (:pi, :K)
 
     open(output, "w") do io

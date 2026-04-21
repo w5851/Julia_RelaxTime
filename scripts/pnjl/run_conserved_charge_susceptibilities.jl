@@ -54,7 +54,7 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
 using Main.Constants_PNJL: ħc_MeV_fm
-const PNJL = Main.Models.pnjl_module()
+const PNJL = Models.pnjl_module()
 
 Base.@kwdef struct SusceptibilityCLIConfig
     T_MeV::Float64 = 150.0

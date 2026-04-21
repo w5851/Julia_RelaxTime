@@ -18,8 +18,6 @@ include(joinpath(PROJECT_ROOT, "src", "relaxtime", "OneLoopIntegrals.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "TotalCrossSection.jl"))
 
-const Models = Main.Models
-
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
 using .GaussLegendre: DEFAULT_MOMENTUM_NODES, DEFAULT_MOMENTUM_WEIGHTS
 using .OneLoopIntegrals: A
