@@ -20,14 +20,14 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-const MODEL = Main.Models.PNJLModel()
-const STATE = Main.Models.MeanFieldState(SVector{3, Float64}(-1.5, -1.5, -2.0); Phi=0.3, PhiBar=0.3)
+const MODEL = Models.PNJLModel()
+const STATE = Models.MeanFieldState(SVector{3, Float64}(-1.5, -1.5, -2.0); Phi=0.3, PhiBar=0.3)
 const TEMPERATURE = 0.5
 const MU_VEC = SVector{3, Float64}(1.0, 1.0, 1.0)
 const P_NUM = 24
 const T_NUM = 6
 const XI = 0.0
-const THERMAL_NODES = Main.Models.cached_nodes(P_NUM, T_NUM)
+const THERMAL_NODES = Models.cached_nodes(P_NUM, T_NUM)
 
 function summarize_trial(name::String, trial::BenchmarkTools.Trial)
     estimate = median(trial)
@@ -46,7 +46,7 @@ end
 function register_suite!()
     isdefined(Main, :SUITE) || return nothing
 
-    Main.SUITE["pnjl"]["number_densities_default"] = @benchmarkable Main.Models.number_densities(
+    Main.SUITE["pnjl"]["number_densities_default"] = @benchmarkable Models.number_densities(
         $MODEL,
         $STATE,
         $TEMPERATURE,
@@ -56,7 +56,7 @@ function register_suite!()
         xi=$XI,
     ) evals=1
 
-    Main.SUITE["pnjl"]["number_densities_reuse_thermal_nodes"] = @benchmarkable Main.Models.number_densities(
+    Main.SUITE["pnjl"]["number_densities_reuse_thermal_nodes"] = @benchmarkable Models.number_densities(
         $MODEL,
         $STATE,
         $TEMPERATURE,
@@ -69,7 +69,7 @@ function register_suite!()
 end
 
 function run_report(; samples::Int=20)
-    bench_default = @benchmark Main.Models.number_densities(
+    bench_default = @benchmark Models.number_densities(
         $MODEL,
         $STATE,
         $TEMPERATURE,
@@ -79,7 +79,7 @@ function run_report(; samples::Int=20)
         xi=$XI,
     ) samples=samples evals=1
 
-    bench_reuse = @benchmark Main.Models.number_densities(
+    bench_reuse = @benchmark Models.number_densities(
         $MODEL,
         $STATE,
         $TEMPERATURE,
