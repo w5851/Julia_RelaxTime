@@ -1,0 +1,1 @@
+const PNJL_MAGNETIC_WORKFLOW_NOOP = :pnjl_magnetic_workflow_noop

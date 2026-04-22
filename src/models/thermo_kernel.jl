@@ -63,6 +63,7 @@ function model_thermo(
     xi=0.0,
     kwargs...
 )
+    require_capability(model, :model_thermo)
     ρ0 = _rho0_ref()
     μ0 = normalize_mu_vec(mu_vec)
     rho_vec = model_rho(model, x_state, μ0, T_fm; p_num=p_num, t_num=t_num, xi=xi, kwargs...)

@@ -25,6 +25,12 @@ struct PNJLMagneticModel{MT} <: AbstractPNJLModel
     magnetic::MT
 end
 
+@inline model_capabilities(::PNJLMagneticModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 function PNJLMagneticModel(; eB_fm2::Real=0.0, profile::String=get(ENV, "PNJL_PARAM_PROFILE", "default"), physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"), kwargs...)
     base = PNJLModel(; profile=profile, physics_profile=physics_profile)
     conf = _magnetic_thermodynamics_module().default_magnetic_config(eB_fm2=float(eB_fm2))

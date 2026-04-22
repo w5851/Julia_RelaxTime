@@ -1,4 +1,5 @@
 export AbstractQCDModel, AbstractNJLModel, AbstractPNJLModel
+export UnsupportedCapabilityError, ModelCapabilities, model_capabilities, require_capability
 export calculate_mass_vec, calculate_chiral
 export vacuum_contribution, thermal_contribution, polyakov_potential
 export number_densities

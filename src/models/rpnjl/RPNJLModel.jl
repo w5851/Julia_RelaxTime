@@ -169,6 +169,12 @@ struct RPNJLModel <: AbstractPNJLModel
     use_extensions::Bool
 end
 
+@inline model_capabilities(::RPNJLModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 function RPNJLModel(
     ;
     profile::String=_rpnjl_profile_default(),

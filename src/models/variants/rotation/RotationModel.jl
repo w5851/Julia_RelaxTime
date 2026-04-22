@@ -23,6 +23,12 @@ struct RotationModel <: AbstractQCDModel
     params::RotationParams
 end
 
+@inline model_capabilities(::RotationModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 RotationModel(; kwargs...) = RotationModel(RotationParams(; kwargs...))
 
 @inline gap_state_dim(::RotationModel) = 3

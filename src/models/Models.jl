@@ -50,6 +50,42 @@ include(joinpath(@__DIR__, "variants", "gas_liquid", "workflows", "GasLiquidWork
 include(joinpath(@__DIR__, "variants", "rotation", "RotationModel.jl"))
 include(joinpath(@__DIR__, "variants", "rotation", "workflows", "RotationWorkflow.jl"))
 
+# Canonical per-model homomorphic anchors
+include(joinpath(@__DIR__, "njl", "capabilities.jl"))
+include(joinpath(@__DIR__, "njl", "api.jl"))
+include(joinpath(@__DIR__, "njl", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "njl", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "njl2", "capabilities.jl"))
+include(joinpath(@__DIR__, "njl2", "api.jl"))
+include(joinpath(@__DIR__, "njl2", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "njl2", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "pnjl", "capabilities.jl"))
+include(joinpath(@__DIR__, "pnjl", "api.jl"))
+include(joinpath(@__DIR__, "pnjl", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "pnjl", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "rpnjl", "capabilities.jl"))
+include(joinpath(@__DIR__, "rpnjl", "api.jl"))
+include(joinpath(@__DIR__, "rpnjl", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "rpnjl", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "pnjl_magnetic", "capabilities.jl"))
+include(joinpath(@__DIR__, "pnjl_magnetic", "api.jl"))
+include(joinpath(@__DIR__, "pnjl_magnetic", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "pnjl_magnetic", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "rotation", "capabilities.jl"))
+include(joinpath(@__DIR__, "rotation", "api.jl"))
+include(joinpath(@__DIR__, "rotation", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "rotation", "workflows", "noop.jl"))
+
+include(joinpath(@__DIR__, "gas_liquid", "capabilities.jl"))
+include(joinpath(@__DIR__, "gas_liquid", "api.jl"))
+include(joinpath(@__DIR__, "gas_liquid", "adapters", "entrypoint_adapter.jl"))
+include(joinpath(@__DIR__, "gas_liquid", "workflows", "noop.jl"))
+
 # Backward-compatible access path used by some tests/callers:
 # Models.PNJLIntegrals.*
 const PNJLIntegrals = PNJLCore.PNJLIntegrals

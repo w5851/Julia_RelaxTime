@@ -24,6 +24,12 @@ struct PNJLModel <: AbstractPNJLModel
     consts::NamedTuple
 end
 
+@inline model_capabilities(::PNJLModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 function PNJLModel(; profile::String=get(ENV, "PNJL_PARAM_PROFILE", "default"), physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"))
     params = PNJLCore.pnjl_params(profile=profile, physics_profile=physics_profile)
     return PNJLModel(params)

@@ -85,6 +85,12 @@ struct NJLModel <: AbstractNJLModel
     params::NJLCore.NJLParams
 end
 
+@inline model_capabilities(::NJLModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 """从 config profile 构造 NJLModel。"""
 function NJLModel(; profile::String=get(ENV, "NJL_PARAM_PROFILE", "default"))
     return NJLModel(NJLCore.njl_params(profile=profile))

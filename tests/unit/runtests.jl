@@ -78,6 +78,8 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
     joinpath(UNIT_DIR, "models", "test_adaptive_rho_refinement.jl"),
     joinpath(UNIT_DIR, "models", "test_workflow_param_adapters.jl"),
+    joinpath(UNIT_DIR, "models", "test_model_structure_homomorphism.jl"),
+    joinpath(UNIT_DIR, "models", "test_model_api_homomorphism.jl"),
 
     # [PNJL Solver] 求解器核心
     joinpath(UNIT_DIR, "pnjl", "test_solver_conditions.jl"),

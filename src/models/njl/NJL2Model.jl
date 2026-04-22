@@ -75,6 +75,12 @@ struct NJL2Model <: AbstractNJLModel
     params::NJL2Core.NJL2Params
 end
 
+@inline model_capabilities(::NJL2Model) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 function NJL2Model(; profile::String=get(ENV, "NJL2_PARAM_PROFILE", "default"))
     return NJL2Model(NJL2Core.njl2_params(profile=profile))
 end

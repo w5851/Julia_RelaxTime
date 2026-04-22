@@ -27,6 +27,12 @@ struct GasLiquidModel <: AbstractQCDModel
     params::GasLiquidCoreParams
 end
 
+@inline model_capabilities(::GasLiquidModel) = ModelCapabilities(
+    supports_solve_gap=true,
+    supports_model_thermo=true,
+    supports_number_densities=true,
+)
+
 GasLiquidModel(; kwargs...) = GasLiquidModel(GasLiquidCoreParams(; kwargs...))
 
 @inline gap_state_dim(::GasLiquidModel) = 4

@@ -26,6 +26,35 @@ abstract type AbstractNJLModel <: AbstractQCDModel end
 """
 abstract type AbstractPNJLModel <: AbstractNJLModel end
 
+struct UnsupportedCapabilityError <: Exception
+    model_kind::Symbol
+    capability::Symbol
+end
+
+Base.@kwdef struct ModelCapabilities
+    supports_solve_gap::Bool = true
+    supports_model_thermo::Bool = true
+    supports_number_densities::Bool = true
+end
+
+@inline model_kind_symbol(model::AbstractQCDModel) = Symbol(nameof(typeof(model)))
+
+@inline function model_capabilities(::AbstractQCDModel)
+    return ModelCapabilities()
+end
+
+function Base.showerror(io::IO, err::UnsupportedCapabilityError)
+    print(io, "unsupported capability ", err.capability, " for model ", err.model_kind)
+end
+
+@inline function require_capability(model::AbstractQCDModel, capability::Symbol)
+    caps = model_capabilities(model)
+    key = Symbol("supports_", capability)
+    hasproperty(caps, key) || throw(UnsupportedCapabilityError(model_kind_symbol(model), capability))
+    getproperty(caps, key) || throw(UnsupportedCapabilityError(model_kind_symbol(model), capability))
+    return nothing
+end
+
 # -------------------------
 # Gap residual (stationarity conditions)
 # -------------------------
@@ -66,6 +95,7 @@ function gap_residual end
 说明：这是“求解层”的入口；后续阶段会把 legacy 求解器包装成实现此接口的适配器。
 """
 function solve_gap(model::AbstractQCDModel, T, mu_vec; kwargs...)
+    require_capability(model, :solve_gap)
     throw(MethodError(solve_gap, (model, T, mu_vec)))
 end
 
@@ -80,6 +110,7 @@ end
 - PNJL/rPNJL 通常需要 `thermal_nodes` 与各向异性参数 `xi`。
 """
 function number_densities(model::AbstractQCDModel, x_state, T, mu_vec; kwargs...)
+    require_capability(model, :number_densities)
     throw(MethodError(number_densities, (model, x_state, T, mu_vec)))
 end
 
