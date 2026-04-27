@@ -64,9 +64,9 @@ julia --project=. scripts/relaxtime/merge_xi_smoothness_review.jl \
 
 ```csv
 sample_id,field,manual_label,reason
-s0001,tau_u,confirm_not_smooth,"spike near xi=0.14, recheck local grid"
-s0001,eta_over_s,undecided,"needs cross-check with figure set A"
-s0012,sigma_over_T,confirm_smooth,curve monotonic and stable
+S001,tau_u,confirm_not_smooth,"spike near xi=0.14, recheck local grid"
+S001,eta_over_s,undecided,"needs cross-check with figure set A"
+S012,sigma_over_T,confirm_smooth,curve monotonic and stable
 ```
 
 ## 4. 产物检查点

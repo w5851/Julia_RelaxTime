@@ -286,13 +286,42 @@ function _evaluate_manifest(opts::Options)
     haskey(payload, "samples") || throw(ArgumentError("manifest missing samples"))
 
     rows = NamedTuple[]
+    skipped_samples = 0
+    total_samples = 0
     for (idx, sample) in enumerate(payload["samples"])
+        total_samples += 1
         sample_id = haskey(sample, "sample_id") ? strip(String(sample["sample_id"])) : "sample_$(idx)"
         isempty(sample_id) && (sample_id = "sample_$(idx)")
-        haskey(sample, "result_csv") || throw(ArgumentError("sample $(sample_id) missing result_csv"))
-        result_csv = _resolve_result_csv(String(sample["result_csv"]), manifest_dir)
 
-        series_map = _read_scan_field_series(result_csv, DEFAULT_FIELDS)
+        if haskey(sample, "status")
+            status = lowercase(strip(String(sample["status"])))
+            if status != "success"
+                skipped_samples += 1
+                @warn "skip sample with non-success status" sample_id status
+                continue
+            end
+        end
+
+        if !haskey(sample, "result_csv")
+            skipped_samples += 1
+            @warn "skip sample: missing result_csv" sample_id
+            continue
+        end
+        result_csv = _resolve_result_csv(String(sample["result_csv"]), manifest_dir)
+        if !isfile(result_csv)
+            skipped_samples += 1
+            @warn "skip sample: result_csv not found" sample_id result_csv
+            continue
+        end
+
+        series_map = try
+            _read_scan_field_series(result_csv, DEFAULT_FIELDS)
+        catch err
+            skipped_samples += 1
+            @warn "skip sample: failed to parse result_csv" sample_id result_csv exception=(err, catch_backtrace())
+            continue
+        end
+
         for field in DEFAULT_FIELDS
             ys = series_map[field]
             s2 = compute_s2(ys)
@@ -319,12 +348,17 @@ function _evaluate_manifest(opts::Options)
             ))
         end
     end
-    return rows
+
+    length(rows) == 0 && throw(ArgumentError(
+        "all samples were skipped (skipped_samples=$(skipped_samples), total_samples=$(total_samples)); ensure manifest has at least one success sample with a readable result_csv",
+    ))
+
+    return rows, skipped_samples
 end
 
 function main(args::Vector{String}=copy(ARGS))
     opts = parse_args(args)
-    rows = _evaluate_manifest(opts)
+    rows, skipped_samples = _evaluate_manifest(opts)
     mkpath(opts.out_root)
 
     scores_csv = joinpath(opts.out_root, "smoothness_scores.csv")
@@ -338,7 +372,7 @@ function main(args::Vector{String}=copy(ARGS))
     smooth_count = count(r -> r.label == "smooth", rows)
     suspect_count = count(r -> r.label == "suspect", rows)
     not_smooth_count = count(r -> r.label == "not_smooth", rows)
-    println("xi smoothness evaluation done: total=$(length(rows)), smooth=$(smooth_count), suspect=$(suspect_count), not_smooth=$(not_smooth_count)")
+    println("xi smoothness evaluation done: total=$(length(rows)), smooth=$(smooth_count), suspect=$(suspect_count), not_smooth=$(not_smooth_count), skipped_samples=$(skipped_samples)")
     println("scores: " * _norm_slash(scores_csv))
     println("flags: " * _norm_slash(flags_csv))
     println("review_queue: " * _norm_slash(review_csv))
