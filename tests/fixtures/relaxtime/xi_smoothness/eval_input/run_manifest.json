@@ -1,0 +1,13 @@
+{
+  "schema_version": "v1",
+  "samples": [
+    {
+      "sample_id": "S001",
+      "result_csv": "sample_results/S001/gap_transport_scan.csv"
+    },
+    {
+      "sample_id": "S002",
+      "result_csv": "sample_results/S002/gap_transport_scan.csv"
+    }
+  ]
+}
