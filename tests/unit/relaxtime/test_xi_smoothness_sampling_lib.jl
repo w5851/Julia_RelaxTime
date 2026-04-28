@@ -98,6 +98,21 @@ end
         )
         @test rows == rows_again
 
+        @testset "near phase anchors keep mu as mu_q (no extra division)" begin
+            near_rows = sample_params(
+                6;
+                seed=cfg.seed,
+                random_count=0,
+                near_count=6,
+                T_range=cfg.T_range,
+                muq_range=cfg.muq_range,
+                boundary_csv=cfg.boundary_csv,
+                crossover_csv=cfg.crossover_csv,
+            )
+            observed_anchor_muq = sort(unique(r.anchor_muq_MeV for r in near_rows if r.source == "near_phase_line"))
+            @test observed_anchor_muq == [0.0, 120.0, 260.0, 300.0, 330.0]
+        end
+
         @testset "bad anchor row raises ArgumentError with file and line" begin
             bad_boundary_csv = joinpath(tmp, "bad_boundary.csv")
             _write_anchor_csv(

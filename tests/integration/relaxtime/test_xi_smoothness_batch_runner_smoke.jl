@@ -85,6 +85,26 @@ end
     @test String(sample["reason"]) == "dry_run"
 end
 
+@testset "xi smoothness batch runner marks resume_hit as success when result exists" begin
+    tmp = mktempdir()
+    params_csv = joinpath(tmp, "params.csv")
+    out_root = joinpath(tmp, "batch_out")
+    _write_params_csv(params_csv, [
+        "S001,random_uniform,150.0,50.0,150.0,none,,,,,42",
+    ])
+
+    sample_dir = joinpath(out_root, "S001")
+    mkpath(sample_dir)
+    result_csv = joinpath(sample_dir, "gap_transport_scan.csv")
+    write(result_csv, "xi,tau_u,tau_s,eta_over_s,zeta_over_s,sigma_over_T\n0.0,1,1,1,1,1\n")
+
+    run(`julia --project=. $BATCH_SCRIPT --params $params_csv --out-root $out_root --resume`)
+    manifest = _read_manifest(out_root)
+    sample = manifest["samples"][1]
+    @test String(sample["status"]) == "success"
+    @test String(sample["reason"]) == "resume_hit"
+end
+
 @testset "xi smoothness batch runner rejects duplicate sample_id" begin
     tmp = mktempdir()
     params_csv = joinpath(tmp, "params.csv")

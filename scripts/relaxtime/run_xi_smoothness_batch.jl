@@ -218,7 +218,7 @@ function _run_sample(opts::Options, sample::Sample, xi_list::String)
             "sample_id" => sample.sample_id,
             "T_MeV" => sample.T_MeV,
             "muB_MeV" => sample.muB_MeV,
-            "status" => "skipped",
+            "status" => "success",
             "reason" => "resume_hit",
             "result_csv" => _repo_relpath(result_csv),
             "failed_points_path" => _repo_relpath(failed_points_csv),

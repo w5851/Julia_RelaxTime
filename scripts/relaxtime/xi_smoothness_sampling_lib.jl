@@ -94,7 +94,7 @@ function _read_boundary_anchors(path::String)
             T = _parse_required_float(parts, idx_T; path=path, line_no=line_no, col="T_MeV")
             mu_transition = _parse_required_float(parts, idx_mu; path=path, line_no=line_no, col="mu_transition_MeV")
             _xi_is_zero(xi) || continue
-            push!(anchors, AnchorPoint("boundary", T, mu_transition / 3.0))
+            push!(anchors, AnchorPoint("boundary", T, mu_transition))
         end
 
         header_seen || return anchors
@@ -137,7 +137,7 @@ function _read_crossover_anchors(path::String)
             mu = _parse_required_float(parts, idx_mu; path=path, line_no=line_no, col="mu_MeV")
             T = _parse_required_float(parts, idx_T; path=path, line_no=line_no, col="T_crossover_chiral_MeV")
             _xi_is_zero(xi) || continue
-            push!(anchors, AnchorPoint("crossover", T, mu / 3.0))
+            push!(anchors, AnchorPoint("crossover", T, mu))
         end
 
         header_seen || return anchors

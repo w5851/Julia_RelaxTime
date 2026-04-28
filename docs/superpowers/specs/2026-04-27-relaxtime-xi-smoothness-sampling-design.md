@@ -42,5 +42,5 @@ julia --project=. scripts/relaxtime/merge_xi_smoothness_review.jl --flags data/o
 
 ## Notes
 
-- 运行手册详见：`docs/dev/active/2026-04-27-xi-smoothness-runbook.md`。
+- 运行手册详见：`docs/dev/active/2026-04-27_xi-smoothness-runbook.md`。
 - 本设计文档仅维护入口与治理契约，不重复维护逐参数说明。

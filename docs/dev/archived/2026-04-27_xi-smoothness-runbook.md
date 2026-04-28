@@ -1,3 +1,15 @@
+---
+title: xi smoothness Plan-C 运行手册（Task6）
+archived: true
+original: docs/dev/active/2026-04-27_xi-smoothness-runbook.md
+archived_date: 2026-04-27
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # xi smoothness Plan-C 运行手册（Task6）
 
 ## 1. 目标与约定
