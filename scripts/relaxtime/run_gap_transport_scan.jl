@@ -966,20 +966,38 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
     end
 end
 
-function compete_phase_branches(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
-    candidates = NamedTuple[]
-    for (label, seed) in ((:hadron, TransportWorkflow.PNJL.HADRON_SEED_5), (:quark, TransportWorkflow.PNJL.QUARK_SEED_5))
-        eq = try
-            solve_models_equilibrium(T_fm, muq_fm, xi, seed, opts)
-        catch
-            nothing
-        end
-        eq === nothing && continue
-        push!(candidates, (label=label, eq=eq))
+# 多初值池治理求解：使用 6 种子池 + governance 选优，不依赖 boundary 数据
+# 与旧的 2 种子 omega 比较不同，solve_multi 使用 physicality → residual → pressure 优先级
+function solve_with_multiseed_governance(T_fm::Float64, muq_fm::Float64, xi::Float64, opts::ScanOptions)
+    result = try
+        Models.solve_multi(
+            PNJL_MODEL,
+            Models.FixedMu(),
+            T_fm,
+            muq_fm;
+            xi=xi,
+            p_num=opts.p_num,
+            t_num=opts.t_num,
+            residual_norm_max=1e-4,
+            evaluate_all_attempts=true,
+        )
+    catch
+        nothing
     end
-    isempty(candidates) && return nothing
-    sort!(candidates, by=row -> row.eq.omega)
-    return first(candidates)
+    result === nothing && return nothing
+    return _normalize_equilibrium_result(result; solver_backend=:models_multi)
+end
+
+# 从解的状态推断物相（强子/夸克），作为 boundary 数据的备选
+function classify_phase_from_solution(eq)
+    m_u = eq.masses[1]
+    Phi = eq.x_state[4]
+    # 夸克相判据：质量较轻（手征部分恢复）或有明显的 Polyakov loop（退禁闭）
+    if m_u < 0.8 || Phi > 0.1
+        return :quark
+    else
+        return :hadron
+    end
 end
 
 function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi::Float64, opts::ScanOptions;
@@ -1002,11 +1020,16 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     models_err = nothing
 
     if tracker.previous_solution !== nothing && is_phase_transition(phase_prev, phase_curr_hint) && phase_curr_hint in (:hadron, :quark)
-        winner = compete_phase_branches(T_fm, muq_fm, xi, opts)
-        if winner !== nothing
-            eq = winner.eq
-            phase_curr = winner.label
-            seed_source = "phase_aware_branch_competition_$(String(winner.label))"
+        eq_multi = solve_with_multiseed_governance(T_fm, muq_fm, xi, opts)
+        if eq_multi !== nothing
+            eq = eq_multi
+            # 物相标签：优先使用 boundary 判定（现已准确），仅在其不可用时回退到解的分类
+            phase_curr = if phase_curr_hint in (:hadron, :quark)
+                phase_curr_hint
+            else
+                classify_phase_from_solution(eq)
+            end
+            seed_source = "phase_aware_multiseed_governance_$(String(phase_curr))"
         end
     end
 
