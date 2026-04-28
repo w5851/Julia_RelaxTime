@@ -96,7 +96,12 @@ end
             boundary_csv=cfg.boundary_csv,
             crossover_csv=cfg.crossover_csv,
         )
-        @test rows == rows_again
+        @test length(rows) == length(rows_again)
+        for (r1, r2) in zip(rows, rows_again)
+            for fn in fieldnames(typeof(r1))
+                @test isequal(getfield(r1, fn), getfield(r2, fn))
+            end
+        end
 
         @testset "near phase anchors keep mu as mu_q (no extra division)" begin
             near_rows = sample_params(

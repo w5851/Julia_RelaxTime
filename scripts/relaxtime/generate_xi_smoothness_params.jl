@@ -156,4 +156,6 @@ function main()
     println("Wrote sampling params CSV: " * output)
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
+end

@@ -170,14 +170,29 @@ function classify_smoothness(
     return "not_smooth", join(reasons, ";")
 end
 
+@inline function _is_subpath(child::AbstractString, parent::AbstractString)
+    abs_child = normpath(abspath(String(child)))
+    abs_parent = normpath(abspath(String(parent)))
+    rel = relpath(abs_child, abs_parent)
+    return rel == "." || rel == abs_parent || !startswith(rel, "..")
+end
+
 function _resolve_result_csv(path_like::AbstractString, manifest_dir::String)
+    allowed_roots = (normpath(abspath(manifest_dir)), normpath(abspath(PROJECT_ROOT)))
+
+    function _validate_path(path::AbstractString)
+        any(root -> _is_subpath(path, root), allowed_roots) ||
+            throw(ArgumentError("result_csv path escapes allowed roots: $(path)"))
+        return path
+    end
+
     p = String(path_like)
     if isabspath(p)
-        return normpath(p)
+        return _validate_path(normpath(abspath(p)))
     end
-    cand_manifest = normpath(joinpath(manifest_dir, p))
-    isfile(cand_manifest) && return cand_manifest
-    return normpath(joinpath(PROJECT_ROOT, p))
+    cand_manifest = normpath(abspath(joinpath(manifest_dir, p)))
+    isfile(cand_manifest) && return _validate_path(cand_manifest)
+    return _validate_path(normpath(abspath(joinpath(PROJECT_ROOT, p))))
 end
 
 function _read_scan_field_series(path::String, fields::Tuple{Vararg{String}})

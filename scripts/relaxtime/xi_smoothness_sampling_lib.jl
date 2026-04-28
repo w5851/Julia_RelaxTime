@@ -162,6 +162,10 @@ end
     return lo + rand(rng) * (hi - lo)
 end
 
+# near-phase-line 扰动窗口（T 和 μq 的半宽，单位 MeV）
+const NEAR_PHASE_DELTA_T_HALF = 18.0
+const NEAR_PHASE_DELTA_MUQ_HALF = 36.0
+
 function sample_params(total::Int;
     seed::Int=42,
     random_count::Int=12,
@@ -170,6 +174,8 @@ function sample_params(total::Int;
     muq_range::Tuple{Float64, Float64}=(0.0, 360.0),
     boundary_csv::String=joinpath("data", "reference", "pnjl", "boundary.csv"),
     crossover_csv::String=joinpath("data", "reference", "pnjl", "crossover.csv"),
+    near_delta_T_half::Float64=NEAR_PHASE_DELTA_T_HALF,
+    near_delta_muq_half::Float64=NEAR_PHASE_DELTA_MUQ_HALF,
 )
     total > 0 || throw(ArgumentError("total must be positive"))
     random_count >= 0 || throw(ArgumentError("random_count must be non-negative"))
@@ -210,8 +216,8 @@ function sample_params(total::Int;
         for i in 1:near_count
             seq += 1
             anchor = anchors[mod1(i, length(anchors))]
-            raw_delta_T = (2.0 * rand(rng) - 1.0) * 18.0
-            raw_delta_muq = (2.0 * rand(rng) - 1.0) * 36.0
+            raw_delta_T = (2.0 * rand(rng) - 1.0) * near_delta_T_half
+            raw_delta_muq = (2.0 * rand(rng) - 1.0) * near_delta_muq_half
             T = _clamp_range(anchor.T_MeV + raw_delta_T, T_range)
             muq = _clamp_range(anchor.muq_MeV + raw_delta_muq, muq_range)
             push!(rows, (
