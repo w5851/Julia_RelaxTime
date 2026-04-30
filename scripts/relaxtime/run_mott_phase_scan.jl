@@ -8,8 +8,11 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"))
 
 using .ScanCSV: ScanCSV
-using .Constants_PNJL: ħc_MeV_fm
+using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
 using .MesonMassWorkflow: solve_gap_and_meson_point
+using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using Main.PolarizationAniso: polarization_with_width
+using Main.MesonMass: ensure_quark_params_has_A
 using TOML
 using Dates
 using SHA
@@ -30,6 +33,12 @@ struct ScanOptions
     max_iter::Int
     include_mixed::Bool
     force_global_fallback::Bool
+    # optional Π(ω) curve output
+    pi_omega_csv::Union{String,Nothing}
+    pi_omega_Ts::Vector{Float64}
+    pi_omega_min::Float64
+    pi_omega_max::Float64
+    pi_omega_step::Float64
 end
 
 @inline function _json_escape(s::AbstractString)
@@ -104,6 +113,20 @@ end
     return string(x)
 end
 
+const _PI_OMEGA_LOCK = ReentrantLock()
+function _append_pi_omega(csv_path::String, channel::String, xi::Float64, T_MeV::Int,
+                          omega::Float64, K::Float64, re_val::Float64, im_val::Float64)
+    lock(_PI_OMEGA_LOCK) do
+        existed = isfile(csv_path)
+        open(csv_path, "a") do io
+            if !existed
+                println(io, "channel,xi,T_MeV,omega_fm,K_eff,re_pi,im_pi")
+            end
+            println(io, join([channel, string(xi), string(T_MeV), string(omega), string(K), string(re_val), string(im_val)], ','))
+        end
+    end
+end
+
 function _print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_mott_phase_scan.jl [options]")
     println("Options:")
@@ -121,6 +144,9 @@ function _print_usage()
     println("  --max-iter <int>     Solver iteration cap")
     println("  --include-mixed      Also compute/output mixed mesons (eta, eta_prime, sigma, sigma_prime)")
     println("  --force-global-fallback  Force global fallback path in meson workflow (experimental)")
+    println("  --pi-omega-csv <path>    Output Π(ω) curves to separate CSV at selected T")
+    println("  --pi-omega-Ts <csv>      Comma-sep T values for Π(ω) (default: 220)")
+    println("  --pi-omega-range <csv>   ω min,max,step in fm⁻¹ (default: 0.3,3.5,0.02)")
     println("  -h, --help           Show help")
 end
 
@@ -201,6 +227,12 @@ function _build_options(args::Vector{String})
             cli["include_mixed"] = true
         elseif arg == "--force-global-fallback"
             cli["force_global_fallback"] = true
+        elseif arg == "--pi-omega-csv"
+            cli["pi_omega_csv"] = require_value()
+        elseif arg == "--pi-omega-Ts"
+            cli["pi_omega_Ts"] = require_value()
+        elseif arg == "--pi-omega-range"
+            cli["pi_omega_range"] = require_value()
         elseif arg in ("-h", "--help")
             _print_usage()
             exit(0)
@@ -233,25 +265,23 @@ function _build_options(args::Vector{String})
     include_mixed = Bool(get(mp, "include_mixed", false))
     force_global_fallback = Bool(get(mp, "force_global_fallback", false))
 
+    # optional Π(ω) curve output
+    pi_omega_csv = get(mp, "pi_omega_csv", nothing)
+    pi_omega_Ts_raw = get(mp, "pi_omega_Ts", "220")
+    pi_omega_range_raw = get(mp, "pi_omega_range", "0.3,3.5,0.02")
+    pi_omega_Ts = [parse(Float64, strip(x)) for x in split(string(pi_omega_Ts_raw), ',')]
+    pi_range_vals = [parse(Float64, strip(x)) for x in split(string(pi_omega_range_raw), ',')]
+    pi_omega_min, pi_omega_max, pi_omega_step = pi_range_vals[1], pi_range_vals[2], pi_range_vals[3]
+
     T_step_MeV > 0 || throw(ArgumentError("T_step_MeV must be positive"))
     T_max_MeV >= T_min_MeV || throw(ArgumentError("T_max_MeV must be >= T_min_MeV"))
 
     return ScanOptions(
-        outdir,
-        output_csv,
-        config_path,
-        xi_list,
-        T_min_MeV,
-        T_max_MeV,
-        T_step_MeV,
-        muB_MeV,
-        resume,
-        overwrite,
-        p_num,
-        t_num,
-        max_iter,
-        include_mixed,
-        force_global_fallback,
+        outdir, output_csv, config_path,
+        xi_list, T_min_MeV, T_max_MeV, T_step_MeV, muB_MeV,
+        resume, overwrite, p_num, t_num, max_iter,
+        include_mixed, force_global_fallback,
+        pi_omega_csv, pi_omega_Ts, pi_omega_min, pi_omega_max, pi_omega_step,
     ), cfg
 end
 
@@ -540,6 +570,38 @@ function main()
                         row["second_pass_candidate_count_eta_prime"] = Int(getproperty(eta_prime.root_diagnostics, :second_pass_candidate_count))
                         row["second_pass_candidate_count_sigma"] = Int(getproperty(sigma.root_diagnostics, :second_pass_candidate_count))
                         row["second_pass_candidate_count_sigma_prime"] = Int(getproperty(sigma_prime.root_diagnostics, :second_pass_candidate_count))
+                    end
+
+                    # ── optional Π(ω) curve output (same computational path) ──
+                    if opts.pi_omega_csv !== nothing
+                        _T_probes = opts.pi_omega_Ts
+                        if any(tprobe -> abs(T - tprobe) < 0.5, _T_probes)
+                            # Build A integrals using exactly the solver's ensure_quark_params_has_A
+                            qp_norm = (m=(u=Float64(qp.m.u), d=Float64(qp.m.d), s=Float64(qp.m.s)),
+                                       μ=(u=0.0, d=0.0, s=0.0))
+                            tp_norm = (T=Float64(T_fm), Φ=Float64(res.thermo_params.Φ),
+                                       Φbar=Float64(res.thermo_params.Φbar), ξ=Float64(xi))
+                            qpA = ensure_quark_params_has_A(qp_norm, tp_norm)
+                            G_u = calculate_G_from_A(qpA.A.u, qpA.m.u)
+                            G_s = calculate_G_from_A(qpA.A.s, qpA.m.s)
+                            Kc = calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
+
+                            ω_step = opts.pi_omega_step
+                            for ω in opts.pi_omega_min:ω_step:opts.pi_omega_max
+                                re_pi, im_pi = polarization_with_width(:P, ω, 0.0, 0.0,
+                                    qpA.m.u, qpA.m.u, 0.0, 0.0, tp_norm.T,
+                                    tp_norm.Φ, tp_norm.Φbar, tp_norm.ξ,
+                                    qpA.A.u, qpA.A.u, 0)
+                                re_K, im_K  = polarization_with_width(:P, ω, 0.0, 0.0,
+                                    qpA.m.u, qpA.m.s, 0.0, 0.0, tp_norm.T,
+                                    tp_norm.Φ, tp_norm.Φbar, tp_norm.ξ,
+                                    qpA.A.u, qpA.A.s, 1)
+                                _append_pi_omega(opts.pi_omega_csv,
+                                    "pi", xi, Int(T), ω, Kc.K123_plus, re_pi, im_pi)
+                                _append_pi_omega(opts.pi_omega_csv,
+                                    "K", xi, Int(T), ω, Kc.K4567_plus, re_K, im_K)
+                            end
+                        end
                     end
 
                     equilibrium_seed_state = collect(res.equilibrium.x_state)
