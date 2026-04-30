@@ -2,6 +2,10 @@
 
 本目录用于记录开发过程中的计划、约定与变更说明。以下约定用于保持任务追踪与文档结构一致。
 
+## 常用内部手册
+
+- [Codex高阶使用手册](D:\Desktop\Julia_RelaxTime\docs\dev\Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
+
 ## active 与 archived 的区别
 
 - active：进行中的任务与临时草案。

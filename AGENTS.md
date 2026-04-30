@@ -32,6 +32,39 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Smoke tests must stay deterministic, fast, and free of external dependencies.
 - Performance work should be justified by profiling or benchmark evidence.
 
+## Codex Collaboration Rules
+
+### Task Execution
+
+- For changes touching `src/models/`, `src/relaxtime/`, or `src/simulation/`, read the relevant entrypoints and the corresponding test layer before editing.
+- For changes on unified solver or workflow paths, keep mixed-meson governance and non-fixedmu unified joint-solve semantics unchanged unless the task explicitly requires otherwise.
+- For cross-module refactors, prefer the smallest convergent change first; only introduce new shared abstractions when they are clearly required by the task.
+- Unless the user explicitly asks for analysis only, prefer implementing, validating, and reporting instead of stopping at a proposal.
+
+### Numerical And Regression Governance
+
+- For changes affecting numerical results, scan logic, solver paths, cross sections, or relaxation-time workflows, explicitly decide which test layer must cover the change: `tests/unit/`, `tests/integration/`, `tests/regression/`, or `tests/validation/`.
+- If a change may introduce numerical drift, run or update the corresponding regression coverage unless there is a concrete reason not to; when regression coverage is skipped, explain the reason and risk.
+- Do not loosen tolerances just to make tests pass. Any tolerance adjustment must explain the error source, physical meaning, and validation evidence.
+- Performance-oriented changes should be backed by profiling, benchmarks, or existing performance evidence before broad hot-path rewrites are made.
+
+### Documentation And Paper Collaboration
+
+- When stable entrypoints, script contracts, or front/back-end data contracts change, explicitly evaluate whether `docs/api/`, `docs/dev/`, and `docs/guides/` must be updated.
+- Paper-writing assistance must not invent experimental conclusions, numerical trends, figure provenance, or literature conclusions. Only write from code, result files, figures, or clearly provided references.
+- For tasks involving method description, experimental setup, captions, or result interpretation, check terminology, variable names, units, and implementation consistency before drafting prose.
+
+### Frontend Contract First
+
+- For frontend-facing work where UI implementation is not explicitly requested, prioritize backend contract deliverables: field definitions, units, example payloads, error semantics, and boundary-state behavior.
+- Any numerical field exposed to frontend consumers should document units, value domain, missing-value semantics, error semantics, and ordering assumptions where applicable.
+- If an interface is not yet stable, prefer producing a mock or intermediate contract document before hard-coding frontend behavior.
+
+### Reusable Workflow Capture
+
+- If the same collaboration pattern or high-frequency task appears three or more times, prefer capturing it as a skill, script entrypoint, or reusable template instead of relying on repeated ad hoc prompting.
+- After substantial tasks, when a reusable process or governance rule becomes clear, prefer updating `docs/dev/` or the relevant skill instructions rather than leaving the workflow only in chat history.
+
 ## Setup Commands
 
 Instantiate and precompile the main Julia environment:

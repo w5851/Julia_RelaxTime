@@ -1,0 +1,4 @@
+interface:
+  display_name: "Experiment Logbook Append"
+  short_description: "Append reproducible experiment logbook entries."
+  default_prompt: "Use this skill to append commands, outputs, observations, and next actions to an experiment logbook."

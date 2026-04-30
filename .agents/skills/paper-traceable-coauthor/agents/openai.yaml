@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Traceable Coauthor"
+  short_description: "Draft paper prose from traceable evidence."
+  default_prompt: "Use this skill to draft paper text from code, figures, and result artifacts without inventing unsupported claims."
