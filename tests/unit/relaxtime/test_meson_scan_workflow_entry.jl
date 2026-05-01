@@ -14,11 +14,12 @@ const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", 
 
     @test occursin("using .Models: solve_gap_and_meson_density_point", density_scan)
     @test occursin("workflow_entry\" => \"Models.solve_gap_and_meson_density_point", density_scan)
-    @test occursin("equilibrium_seed_state = nothing", density_scan)
-    @test occursin("meson_seed_state = nothing", density_scan)
-    @test occursin("seed_state=(equilibrium_seed_state === nothing ? Models.HADRON_SEED_5 : equilibrium_seed_state)", density_scan)
-    @test occursin("meson_seed_state=meson_seed_state", density_scan)
+    @test occursin("continuation_state = nothing", density_scan)
+    @test occursin("continuation_state=continuation_state", density_scan)
+    @test occursin("continuation_state = res.continuation_state", density_scan)
 
     @test occursin("using .Models: solve_gap_and_meson_point", mott_scan)
     @test !occursin("using .MesonMassWorkflow: solve_gap_and_meson_point", mott_scan)
+    @test occursin("continuation_state = nothing", mott_scan)
+    @test occursin("continuation_state=continuation_state", mott_scan)
 end

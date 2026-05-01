@@ -37,6 +37,18 @@
 - 非混合通道的 `threshold`, `gap`
 - 混合通道的 `threshold=(uu, ss, min)`, `gaps=(uu, ss, min)`
 
+此外，workflow 返回值还包含：
+
+- `continuation_state`
+
+它打包了后续温度/参数续算所需的最小状态：
+
+- `equilibrium_seed_state`
+- `meson_seed_state`
+- `mixed_seed_tracking_state`
+
+扫描脚本应优先传递这一对象，而不是在脚本层分别维护多份 seed。
+
 ## 默认通道与复用接口
 
 workflow 模块同时导出：

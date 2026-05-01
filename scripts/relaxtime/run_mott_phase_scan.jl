@@ -397,9 +397,7 @@ function main()
         end
 
         for xi in opts.xi_list
-            equilibrium_seed_state = nothing
-            meson_seed_state = nothing
-            mixed_seed_tracking_state = nothing
+            continuation_state = nothing
 
             T = opts.T_min_MeV
             while T <= opts.T_max_MeV + 1e-9
@@ -489,10 +487,8 @@ function main()
                         T_fm,
                         mu_fm;
                         xi=xi,
-                        seed_state=(equilibrium_seed_state === nothing ? Models.HADRON_SEED_5 : equilibrium_seed_state),
+                        continuation_state=continuation_state,
                         mesons=mesons,
-                        meson_seed_state=meson_seed_state,
-                        mixed_seed_tracking_state=mixed_seed_tracking_state,
                         mixed_branch_align=:strict_sign_binding,
                         p_num=opts.p_num,
                         t_num=opts.t_num,
@@ -603,9 +599,7 @@ function main()
                         end
                     end
 
-                    equilibrium_seed_state = collect(res.equilibrium.x_state)
-                    meson_seed_state = res.meson_seed_state
-                    mixed_seed_tracking_state = res.mixed_seed_tracking
+                    continuation_state = res.continuation_state
                 catch e
                     row["status"] = "error"
                     row["error_code"] = "E_SOLVE"

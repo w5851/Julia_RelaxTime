@@ -184,7 +184,7 @@ function main()
                 "script" => "scripts/relaxtime/run_meson_density_scan.jl",
                 "workflow_entry" => "Models.solve_gap_and_meson_density_point",
                 "mesons" => "pi,K",
-                "continuation" => "equilibrium_seed_state + meson_seed_state",
+                "continuation" => "MesonMassWorkflow.continuation_state",
                 "note" => "mu_fm denotes quark chemical potential (muB/3)"
             ))
             ScanCSV.write_header(io, OUTPUT_COLUMNS)
@@ -195,9 +195,7 @@ function main()
         mu_fm = muB_fm / 3.0
 
         for xi in opts.xi_values
-            equilibrium_seed_state = nothing
-            meson_seed_state = nothing
-            mixed_seed_tracking_state = nothing
+            continuation_state = nothing
             T = opts.tmin_mev
             while T <= opts.tmax_mev + 1e-9
                 key = (Float64(T), Float64(muB), Float64(xi))
@@ -212,9 +210,7 @@ function main()
                     mu_fm;
                     xi=xi,
                     mesons=(:pi, :K),
-                    seed_state=(equilibrium_seed_state === nothing ? Models.HADRON_SEED_5 : equilibrium_seed_state),
-                    meson_seed_state=meson_seed_state,
-                    mixed_seed_tracking_state=mixed_seed_tracking_state,
+                    continuation_state=continuation_state,
                     mixed_branch_align=:strict_sign_binding,
                     p_num=opts.p_num,
                     t_num=opts.t_num,
@@ -254,9 +250,7 @@ function main()
                 println(io, join(_row_to_values(OUTPUT_COLUMNS, row), ','))
                 flush(io)
 
-                equilibrium_seed_state = collect(res.equilibrium.x_state)
-                meson_seed_state = res.meson_seed_state
-                mixed_seed_tracking_state = res.mixed_seed_tracking
+                continuation_state = res.continuation_state
 
                 T += opts.tstep_mev
             end
