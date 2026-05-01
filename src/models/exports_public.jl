@@ -93,8 +93,6 @@ export magnetic_nmax_convergence_report
 export transport_provider
 export TransportProvider
 export prepare_transport_provider
-export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
-export meson_density_workflow_module
 export default_momentum_count, default_theta_count
 export default_momentum_nodes, default_momentum_weights
 export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult

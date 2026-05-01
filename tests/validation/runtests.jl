@@ -30,6 +30,7 @@ const VALIDATION_CORE_FILES = [
     joinpath(VALIDATION_DIR, "pnjl", "reference", "test_crossover_legacy_source_consistency.jl"),
     joinpath(VALIDATION_DIR, "relaxtime", "test_mott_reference_mapping.jl"),
     joinpath(VALIDATION_DIR, "relaxtime", "test_legacy_fortran_meson_trend_and_xi_label.jl"),
+    joinpath(VALIDATION_DIR, "relaxtime", "test_meson_density_matches_mott_reference_continuation.jl"),
 ]
 
 function _selected_validation_files()
