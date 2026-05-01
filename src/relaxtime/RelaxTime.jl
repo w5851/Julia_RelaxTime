@@ -48,6 +48,7 @@ include("MesonPropagator.jl")
 include("TotalPropagator.jl")
 include("MesonMass.jl")
 include("MottTransition.jl")
+include("MesonDensity.jl")
 include("DifferentialCrossSection.jl")
 include("ScatteringAmplitude.jl")
 include("TotalCrossSection.jl")
@@ -67,6 +68,7 @@ using .MesonPropagator
 using .TotalPropagator
 using .MesonMass
 using .MottTransition
+using .MesonDensity
 using .DifferentialCrossSection
 using .ScatteringAmplitude
 using .TotalCrossSection
@@ -81,7 +83,7 @@ end # module RelaxTime
 # 使现有代码中 `using Main.OneLoopIntegrals` 等引用继续工作。
 for _name in (:OneLoopIntegrals, :OneLoopIntegralsCorrection, :PolarizationAniso,
               :PolarizationCache, :AFieldBuilder, :EffectiveCouplings,
-              :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition,
+              :MesonPropagator, :TotalPropagator, :MesonMass, :MottTransition, :MesonDensity,
               :DifferentialCrossSection, :ScatteringAmplitude, :TotalCrossSection,
               :AverageScatteringRate, :RelaxationTime, :TransportCoefficients,
               :GaussLegendre, :ParticleSymbols, :ParameterAdapters, :ValidationUtils, :KinematicChecks)

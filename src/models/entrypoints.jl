@@ -14,12 +14,14 @@ export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
 export solve_gas_liquid_point
 export solve_rotation_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
 export transport_workflow_module, meson_workflow_module
+export meson_density_workflow_module
 export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
@@ -42,6 +44,15 @@ end
     workflow = MesonMassWorkflow
     if !isdefined(workflow, :solve_gap_and_meson_point)
         error("MesonMassWorkflow module loaded but required API (solve_gap_and_meson_point) is missing")
+    end
+    return workflow
+end
+
+@inline function _meson_density_workflow_module()
+    workflow = MesonDensityWorkflow
+    if !(isdefined(workflow, :solve_meson_density_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_meson_density_point))
+        error("MesonDensityWorkflow module loaded but required API is missing")
     end
     return workflow
 end
@@ -197,6 +208,14 @@ function solve_gap_and_meson_point(args...; kwargs...)
     return _meson_workflow_module().solve_gap_and_meson_point(args...; kwargs...)
 end
 
+function solve_meson_density_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_meson_density_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_meson_density_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_gap_and_meson_density_point(args...; kwargs...)
+end
+
 function solve_gas_liquid_point(args...; kwargs...)
     return gas_liquid_workflow_module().solve_gas_liquid_point(args...; kwargs...)
 end
@@ -211,6 +230,7 @@ end
 
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
+@inline meson_density_workflow_module() = _meson_density_workflow_module()
 @inline gas_liquid_workflow_module() = GasLiquidWorkflow
 @inline rotation_workflow_module() = RotationWorkflow
 @inline pnjl_module() = @__MODULE__

@@ -22,8 +22,9 @@ export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
-export solve_gap_and_meson_point, solve_gas_liquid_point, solve_rotation_point
-export transport_workflow_module, meson_workflow_module
+export solve_gap_and_meson_point, solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
+export solve_gas_liquid_point, solve_rotation_point
+export transport_workflow_module, meson_workflow_module, meson_density_workflow_module
 export rotation_workflow_module, gas_liquid_workflow_module
 export workflow_param_adapters_module, workflow_module_for
 export run_workflow_pipeline, run_scan_pipeline, run_relaxtime_orchestrator_pipeline
@@ -167,6 +168,7 @@ include(joinpath(@__DIR__, "workflow_engine", "catalog", "RelaxtimeOrchestratorC
 include(joinpath(@__DIR__, "workflow_apps", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
+include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
 include(joinpath(@__DIR__, "precompile", "registry.jl"))

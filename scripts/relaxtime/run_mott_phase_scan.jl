@@ -5,11 +5,10 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 include(joinpath(PROJECT_ROOT, "scripts", "utils", "scan_csv.jl"))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "workflow_apps", "MesonMassWorkflow.jl"))
 
 using .ScanCSV: ScanCSV
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
-using .MesonMassWorkflow: solve_gap_and_meson_point
+using .Models: solve_gap_and_meson_point
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.PolarizationAniso: polarization_with_width
 using Main.MesonMass: ensure_quark_params_has_A
