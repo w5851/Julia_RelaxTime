@@ -69,4 +69,48 @@ const _MDW = Models.MesonDensityWorkflow
         @test full.meson_density.n_K ≈ post.n_K rtol=1e-10
         @test full.meson_density.kpi_ratio ≈ post.kpi_ratio rtol=1e-10
     end
+
+    @testset "扫描 continuation 下与 meson workflow 质量结果一致" begin
+        continuation_meson = nothing
+        continuation_density = nothing
+
+        for T_MeV in (150.0, 170.0, 190.0)
+            T_fm = T_MeV / Main.Constants_PNJL.ħc_MeV_fm
+
+            meson_only = Models.solve_gap_and_meson_point(
+                T_fm,
+                0.0;
+                xi=0.0,
+                mesons=(:pi, :K),
+                continuation_state=continuation_meson,
+                mixed_branch_align=:strict_sign_binding,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(; iterations=20),
+                mass_kwargs=(; iterations=20),
+            )
+
+            with_density = Models.solve_gap_and_meson_density_point(
+                T_fm,
+                0.0;
+                xi=0.0,
+                mesons=(:pi, :K),
+                continuation_state=continuation_density,
+                mixed_branch_align=:strict_sign_binding,
+                p_num=8,
+                t_num=4,
+                solver_kwargs=(; iterations=20),
+                mass_kwargs=(; iterations=20),
+                density_kwargs=(; num_q_nodes=64),
+            )
+
+            @test with_density.meson_results[:pi].mass ≈ meson_only.meson_results[:pi].mass rtol=1e-10
+            @test with_density.meson_results[:K].mass ≈ meson_only.meson_results[:K].mass rtol=1e-10
+            @test with_density.meson_density.m_pi ≈ meson_only.meson_results[:pi].mass rtol=1e-10
+            @test with_density.meson_density.m_K ≈ meson_only.meson_results[:K].mass rtol=1e-10
+
+            continuation_meson = meson_only.continuation_state
+            continuation_density = with_density.continuation_state
+        end
+    end
 end
