@@ -106,6 +106,45 @@ const _MDW = Models.MesonDensityWorkflow
         @test full.strict_bw_meson_density.gamma_K ≈ density.gamma_K rtol=1e-10
     end
 
+    @testset "strict BW Stage2 q-pole 入口可运行" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        density = Models.solve_strict_bw_meson_density_from_meson_point(
+            meson_point;
+            stage=:stage2_qpole,
+            qmax=12.0,
+            q_nodes=4,
+            omega_max=10.0,
+            omega_nodes=8,
+            solver_iterations=12,
+            pole_residual_norm_max=1e-4,
+            pole_require_converged=false,
+        )
+
+        @test density.stage == :strict_bw_stage2_qpole
+        @test isfinite(density.n_pi)
+        @test isfinite(density.n_K)
+        @test density.n_pi >= 0.0
+        @test density.n_K >= 0.0
+        @test length(density.pi_density.q_values) == 4
+        @test length(density.k_density.q_values) == 4
+        @test all(isfinite, density.pi_density.residual_norms)
+        @test all(isfinite, density.k_density.residual_norms)
+    end
+
     @testset "完整入口复用 meson workflow 主链" begin
         T_fm = 170.0 / Main.Constants_PNJL.ħc_MeV_fm
         muq_fm = 0.0

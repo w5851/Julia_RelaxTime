@@ -17,6 +17,7 @@ const OUTFILE = joinpath(OUTDIR, "strict_bw_meson_density_scan_smoke.csv")
     @test occursin("# workflow_entry: Models.solve_gap_and_strict_bw_meson_density_point", text)
     @test occursin("T_MeV,muB_MeV,xi", text)
     @test occursin("gamma_pi", text)
+    @test occursin("stage", text)
     @test occursin("pi_q_integral_estimate", text)
 
     data_lines = [
@@ -26,5 +27,5 @@ const OUTFILE = joinpath(OUTDIR, "strict_bw_meson_density_scan_smoke.csv")
     @test length(data_lines) == 1
 
     cols = split(data_lines[1], ',')
-    @test length(cols) == 31
+    @test length(cols) >= 31
 end

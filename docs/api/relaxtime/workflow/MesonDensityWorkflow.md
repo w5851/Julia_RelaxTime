@@ -92,6 +92,17 @@ solve_strict_bw_meson_density_from_meson_point(
 - 采用 `Gamma(q)=Gamma(q=0)`
 - 尚未进入 `q` 依赖复极点求解
 
+当前同一入口也支持：
+
+- `stage = :stage1_reduced`
+- `stage = :stage2_qpole`
+
+当选择 `stage = :stage2_qpole` 时：
+
+1. `q` 网格上的每个节点都会重解一次介子复极点；
+2. 前一个 `q` 点的 `(mass, gamma)` 会被用作下一个 `q` 点的续算 seed；
+3. 输出中会带上 `q_values / E_values / gamma_values / residual_norms` 等 pole 诊断量。
+
 ### `solve_gap_and_strict_bw_meson_density_point`
 
 ```julia
@@ -221,4 +232,4 @@ Models.solve_gap_and_phase_shift_meson_density_point
 2. 脚本只能消费 workflow 返回值；
 3. 数密度层不重写 meson 求解链；
 4. 稳定粒子与相移双积分都应作为 meson workflow 的后处理层演进；
-5. reduced strict BW、full strict BW 与 BU 扩展都应在此后处理边界内继续演进。
+5. Stage1 reduced strict BW、Stage2 q-pole strict BW、以及未来更完整的 BU 扩展都应在此后处理边界内继续演进。

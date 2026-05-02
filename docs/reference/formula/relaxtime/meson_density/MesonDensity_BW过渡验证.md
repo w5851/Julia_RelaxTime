@@ -123,6 +123,33 @@ g_M(\omega)\frac{\Gamma_M}{(\omega-E_M)^2+\Gamma_M^2/4}.
 
 这样做可以保证 BW 近似仍服从当前仓库的传播子和极点口径。
 
+### 7.1 复极点定义不等于 BW 一阶展开
+
+这里需要把三个层级明确分开：
+
+1. **复极点定义**
+   ```math
+   \mathcal{G}_M(z,q)=0,
+   \qquad
+   z_p(q)=E_M(q)-i\Gamma_M(q)/2
+   ```
+   这是对传播子极点位置的定义；
+2. **把 `z_p(q)` 参数化成 `E_M(q)-i\Gamma_M(q)/2`**
+   只是把复根拆成实部与虚部，仍然属于极点定义层；
+3. **BW 一阶展开**
+   ```math
+   \mathcal{G}_M(z,q)
+   \approx
+   \mathcal{G}_M'(z_p(q),q)\,[z-z_p(q)]
+   ```
+   这一步才是真正把传播子压缩成 Breit-Wigner 极点近似。
+
+因此：
+
+- `z_M = E_M - i\Gamma_M/2` 本身不自动等于 BW；
+- `1-4K_M\Pi_M(M_M+i\Gamma_M/2, q)=0` 若按复变量完整求值，也仍属于“复极点定义”；
+- strict BW 则是在已经得到该复极点后，再对分母做极点邻域一阶线性化。
+
 ## 8. 基于当前项目传播子的 strict BW 推导
 
 对当前项目简单介子道，传播子写为：
@@ -270,6 +297,33 @@ g_M(\omega)
 \frac{\Gamma_M(q)/2}
 {\left[\omega-E_M(q)\right]^2+\Gamma_M^2(q)/4}.
 ```
+
+### 8.6 对应到当前项目实现层级
+
+把上述 strict BW 落到当前仓库时，还要再区分两个实现层级：
+
+1. **Stage 1 reduced strict BW**
+   - 只使用 `q=0` 处 meson workflow 已给出的 `(M_M,\Gamma_M)`；
+   - 在积分中采用
+     ```math
+     E_M(q)\approx \sqrt{q^2+M_M^2},
+     \qquad
+     \Gamma_M(q)\approx \Gamma_M(0).
+     ```
+2. **Stage 2 q-pole strict BW**
+   - 在 `q` 网格上逐点求解
+     ```math
+     \mathcal{G}_M(z_p(q),q)=0,
+     \qquad
+     z_p(q)=E_M(q)-i\Gamma_M(q)/2,
+     ```
+   - 再把该 `E_M(q),\Gamma_M(q)` 回填到 BW 双积分。
+
+因此，本项目里：
+
+- `z_p(q)=E_M(q)-i\Gamma_M(q)/2` 属于**复极点定义层**；
+- 在极点邻域把传播子分母线性化，并得到 Lorentzian 型相移/导数，才属于**BW 近似层**；
+- Stage 1 与 Stage 2 的差异，不在于“有没有复极点”，而在于是否真正保留了 `q` 依赖极点信息。
 
 这就是当前项目传播子口径下应实现的 strict BW 目标公式。
 

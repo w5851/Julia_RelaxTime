@@ -32,7 +32,7 @@
 
 ## `solve_strict_bw_meson_density_from_meson_point`
 
-这是当前 Stage-1 reduced strict BW 的后处理入口。它继续只消费
+这是 strict BW workflow 的后处理入口。它继续只消费
 `Models.solve_gap_and_meson_point` 的返回值，但把稳定粒子极限替换为 reduced strict BW 双积分后处理。
 
 它适合：
@@ -45,6 +45,13 @@
 - `E(q)=sqrt(q^2+m^2)`
 - `Gamma(q)=Gamma(q=0)`
 - `omega = E(q) + Delta omega`
+
+当前也支持：
+
+- `stage = :stage1_reduced`
+- `stage = :stage2_qpole`
+
+其中 `stage2_qpole` 会在 `q` 网格上逐点重解复极点 `z_p(q)`，再回填 strict BW 积分。
 
 ## `solve_gap_and_strict_bw_meson_density_point`
 
@@ -106,14 +113,19 @@
 当前 workflow 已覆盖：
 
 1. 稳定粒子极限
-2. reduced strict BW
+2. strict BW Stage1 reduced
+3. strict BW Stage2 q-pole
 3. Phase E3 最小相移双积分
 
 其中 strict BW 与 phase-shift 入口当前仍处于严格受限状态：
 
 - reduced strict BW：
   - 只消费 workflow 当前点给出的 `mass/gamma`
-  - 尚未进入 `q` 依赖复极点求解
+  - 对应 `stage = :stage1_reduced`
+- q-pole strict BW：
+  - 在 `q` 网格上逐点调用介子极点方程
+  - 当前依赖 continuation seed 串行续算
+  - 对应 `stage = :stage2_qpole`
 - Phase E3 phase-shift：
   - 仅支持 `xi = 0`
   - 仅支持 `π/K` 聚合通道

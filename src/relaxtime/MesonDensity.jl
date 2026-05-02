@@ -15,6 +15,7 @@ module MesonDensity
 using ..GaussLegendre: gauleg
 using ..AFieldBuilder: ensure_quark_params_has_A
 using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using ..MesonMass: solve_meson_mass
 using ..PolarizationAniso: polarization_with_width
 using ..MesonPropagator: meson_propagator_simple
 using Main.Constants_PNJL: G_fm2, K_fm5
@@ -25,6 +26,7 @@ export DEFAULT_PHASE_SHIFT_OMEGA_MAX, DEFAULT_PHASE_SHIFT_OMEGA_NODES
 export bose_distribution, meson_degeneracy
 export stable_meson_number_density, stable_kpi_ratio, stable_kpi_scan
 export strict_bw_meson_number_density, strict_bw_meson_density_summary
+export strict_bw_qpole_meson_number_density, strict_bw_qpole_density_summary
 export phase_shift_meson_number_density, phase_shift_meson_density_summary
 
 const DEFAULT_MESON_DENSITY_Q_NODES = 256
@@ -348,6 +350,328 @@ function strict_bw_meson_density_summary(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         gamma_zero_tol=gamma_zero_tol,
+    )
+end
+
+@inline function _sorted_gauleg(a::Float64, b::Float64, n::Int)
+    nodes, weights = gauleg(a, b, n)
+    perm = sortperm(nodes)
+    return nodes[perm], weights[perm]
+end
+
+@inline function _strict_bw_stage_symbol(stage::Symbol)::Symbol
+    if stage === :stage1_reduced || stage === :reduced
+        return :strict_bw_stage1_reduced
+    elseif stage === :stage2_qpole || stage === :qpole
+        return :strict_bw_stage2_qpole
+    end
+    throw(ArgumentError("strict BW stage must be :stage1_reduced/:reduced or :stage2_qpole/:qpole, got $(stage)"))
+end
+
+function _solve_qpole_at_q(
+    meson::Symbol,
+    q::Float64,
+    quark_params,
+    thermo_params;
+    initial_mass::Float64,
+    initial_gamma::Float64,
+    solver_iterations::Int,
+    residual_norm_max::Float64,
+    require_converged::Bool,
+)
+    seeds = (
+        (initial_mass, max(initial_gamma, 0.0)),
+        (max(initial_mass, 1e-6), 0.0),
+        (hypot(q, max(initial_mass, 1e-6)), max(initial_gamma, 0.0)),
+    )
+
+    best = nothing
+    for (m0, g0) in seeds
+        for method in (:trust_region, :newton)
+            rr = try
+                solve_meson_mass(
+                    meson,
+                    quark_params,
+                    thermo_params;
+                    k_norm=q,
+                    initial_mass=Float64(m0),
+                    initial_gamma=Float64(max(g0, 0.0)),
+                    method=method,
+                    iterations=solver_iterations,
+                )
+            catch
+                nothing
+            end
+            rr === nothing && continue
+            if best === nothing || Float64(rr.residual_norm) < Float64(best.residual_norm)
+                best = rr
+            end
+            if isfinite(Float64(rr.residual_norm)) &&
+               Float64(rr.residual_norm) <= residual_norm_max &&
+               (!require_converged || Bool(rr.converged))
+                return (
+                    mass=Float64(rr.mass),
+                    gamma=max(Float64(rr.gamma), 0.0),
+                    residual_norm=Float64(rr.residual_norm),
+                    converged=Bool(rr.converged),
+                    accepted=true,
+                    method=method,
+                )
+            end
+        end
+    end
+
+    best === nothing && return (
+        mass=NaN,
+        gamma=NaN,
+        residual_norm=Inf,
+        converged=false,
+        accepted=false,
+        method=:failed,
+    )
+
+    return (
+        mass=Float64(best.mass),
+        gamma=max(Float64(best.gamma), 0.0),
+        residual_norm=Float64(best.residual_norm),
+        converged=Bool(best.converged),
+        accepted=isfinite(Float64(best.residual_norm)) &&
+                 Float64(best.residual_norm) <= residual_norm_max &&
+                 (!require_converged || Bool(best.converged)),
+        method=:best_effort,
+    )
+end
+
+"""
+    strict_bw_qpole_meson_number_density(meson, mass0, gamma0, quark_params, thermo_params; ...) -> NamedTuple
+
+Stage-2 q 依赖复极点版本的 strict BW 单通道介子数密度。
+"""
+function strict_bw_qpole_meson_number_density(
+    meson::Symbol,
+    mass0::Float64,
+    gamma0::Float64,
+    quark_params,
+    thermo_params;
+    μ::Float64=0.0,
+    degeneracy::Integer=1,
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    gamma_zero_tol::Float64=1e-12,
+    solver_iterations::Int=20,
+    pole_residual_norm_max::Float64=1e-6,
+    pole_require_converged::Bool=true,
+)
+    degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
+    _require_nonnegative("mass0", mass0)
+    _require_nonnegative("gamma0", gamma0)
+    _require_nonnegative("temperature T", Float64(thermo_params.T))
+    qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
+    _require_positive_node_count("q_nodes", q_nodes)
+    _require_positive_node_count("omega_nodes", omega_nodes)
+    omega_max > 0.0 || throw(ArgumentError("omega_max must be positive, got $(omega_max)"))
+
+    T = Float64(thermo_params.T)
+    T == 0.0 && return (
+        meson=meson,
+        density=0.0,
+        q_integral_estimate=0.0,
+        omega_shell_at_qmax=0.0,
+        q_values=Float64[],
+        E_values=Float64[],
+        gamma_values=Float64[],
+        residual_norms=Float64[],
+        converged_flags=Bool[],
+        accepted_flags=Bool[],
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        degeneracy=Int(degeneracy),
+        mode=:strict_bw_stage2_qpole,
+    )
+
+    if gamma0 <= gamma_zero_tol
+        density = stable_meson_number_density(
+            mass0,
+            T;
+            μ=μ,
+            degeneracy=degeneracy,
+            qmax=qmax,
+            num_q_nodes=q_nodes,
+        )
+        return (
+            meson=meson,
+            density=density,
+            q_integral_estimate=density / Float64(degeneracy),
+            omega_shell_at_qmax=0.0,
+            q_values=Float64[],
+            E_values=Float64[],
+            gamma_values=Float64[],
+            residual_norms=Float64[],
+            converged_flags=Bool[],
+            accepted_flags=Bool[],
+            qmax=qmax,
+            q_nodes=q_nodes,
+            omega_max=omega_max,
+            omega_nodes=omega_nodes,
+            degeneracy=Int(degeneracy),
+            mode=:stable_limit,
+        )
+    end
+
+    qp = ensure_quark_params_has_A(quark_params, thermo_params)
+    q_grid, q_w = _sorted_gauleg(0.0, qmax, q_nodes)
+    dω_grid, dω_w = gauleg(0.0, omega_max, omega_nodes)
+
+    q_values = Float64[]
+    E_values = Float64[]
+    gamma_values = Float64[]
+    residual_norms = Float64[]
+    converged_flags = Bool[]
+    accepted_flags = Bool[]
+
+    q_shell_weighted_sum = 0.0
+    q_shell_at_qmax = NaN
+    prev_mass = mass0
+    prev_gamma = gamma0
+
+    @inbounds for iq in eachindex(q_grid, q_w)
+        q = Float64(q_grid[iq])
+        pole = _solve_qpole_at_q(
+            meson,
+            q,
+            qp,
+            thermo_params;
+            initial_mass=prev_mass,
+            initial_gamma=prev_gamma,
+            solver_iterations=solver_iterations,
+            residual_norm_max=pole_residual_norm_max,
+            require_converged=pole_require_converged,
+        )
+
+        E_q = pole.mass
+        gamma_q = pole.gamma
+        push!(q_values, q)
+        push!(E_values, E_q)
+        push!(gamma_values, gamma_q)
+        push!(residual_norms, pole.residual_norm)
+        push!(converged_flags, pole.converged)
+        push!(accepted_flags, pole.accepted)
+
+        if pole.accepted && isfinite(E_q) && isfinite(gamma_q) && E_q > μ
+            omega_val = 0.0
+            for iω in eachindex(dω_grid, dω_w)
+                Δω = dω_grid[iω]
+                ω = E_q + Δω
+                omega_val += dω_w[iω] * bose_distribution(ω, μ, T) * _strict_bw_kernel(Δω, gamma_q)
+            end
+            omega_val /= (2.0 * π)
+            q_shell = (q^2 / (2.0 * π^2)) * omega_val
+            q_shell_weighted_sum += q_w[iq] * q_shell
+            if iq == length(q_grid)
+                q_shell_at_qmax = q_shell
+            end
+            prev_mass = E_q
+            prev_gamma = gamma_q
+        else
+            if iq == length(q_grid)
+                q_shell_at_qmax = NaN
+            end
+        end
+    end
+
+    return (
+        meson=meson,
+        density=Float64(degeneracy) * q_shell_weighted_sum,
+        q_integral_estimate=q_shell_weighted_sum,
+        omega_shell_at_qmax=q_shell_at_qmax,
+        q_values=q_values,
+        E_values=E_values,
+        gamma_values=gamma_values,
+        residual_norms=residual_norms,
+        converged_flags=converged_flags,
+        accepted_flags=accepted_flags,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        degeneracy=Int(degeneracy),
+        mode=:strict_bw_stage2_qpole,
+    )
+end
+
+function strict_bw_qpole_density_summary(
+    pi_mass::Float64,
+    pi_gamma::Float64,
+    k_mass::Float64,
+    k_gamma::Float64,
+    quark_params,
+    thermo_params;
+    μ_pi::Float64=0.0,
+    μ_K::Float64=0.0,
+    d_pi::Integer=meson_degeneracy(:pi),
+    d_K::Integer=meson_degeneracy(:K),
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    gamma_zero_tol::Float64=1e-12,
+    solver_iterations::Int=20,
+    pole_residual_norm_max::Float64=1e-6,
+    pole_require_converged::Bool=true,
+)
+    pi_density = strict_bw_qpole_meson_number_density(
+        :pi,
+        pi_mass,
+        pi_gamma,
+        quark_params,
+        thermo_params;
+        μ=μ_pi,
+        degeneracy=Int(d_pi),
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        gamma_zero_tol=gamma_zero_tol,
+        solver_iterations=solver_iterations,
+        pole_residual_norm_max=pole_residual_norm_max,
+        pole_require_converged=pole_require_converged,
+    )
+    k_density = strict_bw_qpole_meson_number_density(
+        :K,
+        k_mass,
+        k_gamma,
+        quark_params,
+        thermo_params;
+        μ=μ_K,
+        degeneracy=Int(d_K),
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        gamma_zero_tol=gamma_zero_tol,
+        solver_iterations=solver_iterations,
+        pole_residual_norm_max=pole_residual_norm_max,
+        pole_require_converged=pole_require_converged,
+    )
+
+    return (
+        n_pi=pi_density.density,
+        n_K=k_density.density,
+        kpi_ratio=iszero(pi_density.density) ? NaN : k_density.density / pi_density.density,
+        pi_density=pi_density,
+        k_density=k_density,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        gamma_zero_tol=gamma_zero_tol,
+        solver_iterations=solver_iterations,
+        pole_residual_norm_max=pole_residual_norm_max,
+        pole_require_converged=pole_require_converged,
     )
 end
 

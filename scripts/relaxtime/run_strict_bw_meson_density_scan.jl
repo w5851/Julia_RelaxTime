@@ -20,6 +20,7 @@ using .Models: solve_gap_and_strict_bw_meson_density_point
 
 struct ScanOptions
     output::String
+    stage::Symbol
     xi_values::Vector{Float64}
     tmin_mev::Float64
     tmax_mev::Float64
@@ -35,12 +36,16 @@ struct ScanOptions
     omega_max::Float64
     omega_nodes::Int
     gamma_zero_tol::Float64
+    solver_iterations::Int
+    pole_residual_norm_max::Float64
+    pole_require_converged::Bool
 end
 
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_strict_bw_meson_density_scan.jl [options]\n")
     println("Options:")
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/strict_bw_meson_density_scan.csv)")
+    println("  --stage <stage1|stage2>     strict BW 阶段 (default stage1)")
     println("  --xi <value>                追加一个 ξ 值（可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -55,12 +60,16 @@ function print_usage()
     println("  --omega-max <fm^-1>         内层 Delta-omega 上限 (default 10)")
     println("  --omega-nodes <int>         内层 Delta-omega 节点数 (default 48)")
     println("  --gamma-zero-tol <float>    退化回 stable 的宽度阈值 (default 1e-12)")
+    println("  --solver-iterations <int>   Stage2 q-pole 求解迭代上限 (default 20)")
+    println("  --pole-residual-max <float> Stage2 q-pole 残差门限 (default 1e-6)")
+    println("  --pole-best-effort          Stage2 允许接受未收敛 best-effort 极点")
     println("  -h, --help                  显示帮助")
 end
 
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "strict_bw_meson_density_scan.csv"),
+        :stage => :stage1_reduced,
         :xi_values => Float64[0.0],
         :tmin => 208.0,
         :tmax => 220.0,
@@ -76,6 +85,9 @@ function parse_args(args::Vector{String})
         :omega_max => 10.0,
         :omega_nodes => 48,
         :gamma_zero_tol => 1e-12,
+        :solver_iterations => 20,
+        :pole_residual_norm_max => 1e-6,
+        :pole_require_converged => true,
     )
 
     i = 1
@@ -90,6 +102,9 @@ function parse_args(args::Vector{String})
 
         if arg == "--output"
             opts[:output] = require_value()
+        elseif arg == "--stage"
+            raw = lowercase(strip(require_value()))
+            opts[:stage] = raw == "stage2" ? :stage2_qpole : :stage1_reduced
         elseif arg == "--xi"
             val = parse(Float64, require_value())
             if opts[:xi_values] == Float64[0.0]
@@ -128,6 +143,12 @@ function parse_args(args::Vector{String})
             opts[:omega_nodes] = parse(Int, require_value())
         elseif arg == "--gamma-zero-tol"
             opts[:gamma_zero_tol] = parse(Float64, require_value())
+        elseif arg == "--solver-iterations"
+            opts[:solver_iterations] = parse(Int, require_value())
+        elseif arg == "--pole-residual-max"
+            opts[:pole_residual_norm_max] = parse(Float64, require_value())
+        elseif arg == "--pole-best-effort"
+            opts[:pole_require_converged] = false
         elseif arg in ("-h", "--help")
             print_usage(); exit(0)
         else
@@ -148,6 +169,7 @@ function parse_args(args::Vector{String})
 
     return ScanOptions(
         String(opts[:output]),
+        Symbol(opts[:stage]),
         xi_vals,
         Float64(opts[:tmin]),
         Float64(opts[:tmax]),
@@ -163,6 +185,9 @@ function parse_args(args::Vector{String})
         omega_max,
         omega_nodes,
         gamma_zero_tol,
+        Int(opts[:solver_iterations]),
+        Float64(opts[:pole_residual_norm_max]),
+        Bool(opts[:pole_require_converged]),
     )
 end
 
@@ -180,9 +205,11 @@ const OUTPUT_COLUMNS = [
     "gamma_pi", "gamma_K",
     "n_pi", "n_K", "kpi_ratio",
     "d_pi", "d_K",
+    "stage",
     "qmax", "q_nodes",
     "omega_max", "omega_nodes",
     "gamma_zero_tol",
+    "solver_iterations", "pole_residual_norm_max", "pole_require_converged",
     "pi_q_integral_estimate", "pi_omega_shell_at_qmax", "pi_mode",
     "K_q_integral_estimate", "K_omega_shell_at_qmax", "K_mode",
 ]
@@ -217,7 +244,7 @@ function main()
                 "workflow_entry" => "Models.solve_gap_and_strict_bw_meson_density_point",
                 "mesons" => "pi,K",
                 "continuation" => "MesonMassWorkflow.continuation_state",
-                "strict_bw_stage" => "reduced_stage1",
+                "strict_bw_stage" => string(opts.stage),
                 "note" => "mu_fm denotes quark chemical potential (muB/3)"
             ))
             ScanCSV.write_header(io, OUTPUT_COLUMNS)
@@ -250,11 +277,15 @@ function main()
                     solver_kwargs=(; iterations=opts.max_iter),
                     mass_kwargs=(; iterations=opts.max_iter),
                     density_kwargs=(;
+                        stage=opts.stage,
                         qmax=opts.qmax,
                         q_nodes=opts.q_nodes,
                         omega_max=opts.omega_max,
                         omega_nodes=opts.omega_nodes,
                         gamma_zero_tol=opts.gamma_zero_tol,
+                        solver_iterations=opts.solver_iterations,
+                        pole_residual_norm_max=opts.pole_residual_norm_max,
+                        pole_require_converged=opts.pole_require_converged,
                     ),
                 )
 
@@ -283,11 +314,15 @@ function main()
                     "kpi_ratio" => md.kpi_ratio,
                     "d_pi" => md.d_pi,
                     "d_K" => md.d_K,
+                    "stage" => md.stage,
                     "qmax" => md.qmax,
                     "q_nodes" => md.q_nodes,
                     "omega_max" => md.omega_max,
                     "omega_nodes" => md.omega_nodes,
                     "gamma_zero_tol" => md.gamma_zero_tol,
+                    "solver_iterations" => get(md, :solver_iterations, ""),
+                    "pole_residual_norm_max" => get(md, :pole_residual_norm_max, ""),
+                    "pole_require_converged" => get(md, :pole_require_converged, ""),
                     "pi_q_integral_estimate" => md.pi_density.q_integral_estimate,
                     "pi_omega_shell_at_qmax" => md.pi_density.omega_shell_at_qmax,
                     "pi_mode" => md.pi_density.mode,

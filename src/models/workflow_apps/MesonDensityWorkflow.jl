@@ -25,6 +25,7 @@ using Main.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                          meson_degeneracy,
                          phase_shift_meson_density_summary,
                          strict_bw_meson_density_summary,
+                         strict_bw_qpole_density_summary,
                          stable_meson_number_density
 using ..WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 using Main.MesonMass: ensure_quark_params_has_A
@@ -170,6 +171,7 @@ function solve_strict_bw_meson_density_from_meson_point(
     meson_point;
     pi_channel::Symbol=:pi,
     k_channel::Symbol=:K,
+    stage::Symbol=:stage1_reduced,
     μ_pi::Real=0.0,
     μ_K::Real=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
@@ -179,6 +181,9 @@ function solve_strict_bw_meson_density_from_meson_point(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     gamma_zero_tol::Float64=1e-12,
+    solver_iterations::Int=20,
+    pole_residual_norm_max::Float64=1e-6,
+    pole_require_converged::Bool=true,
 )
     thermo_params = _require_result_field(meson_point, :thermo_params)
     meson_results = _require_result_field(meson_point, :meson_results)
@@ -190,26 +195,57 @@ function solve_strict_bw_meson_density_from_meson_point(
     gamma_pi = _require_finite_gamma(meson_results, pi_channel)
     gamma_K = _require_finite_gamma(meson_results, k_channel)
 
-    density = strict_bw_meson_density_summary(
-        m_pi,
-        gamma_pi,
-        m_K,
-        gamma_K,
-        T_fm;
-        μ_pi=Float64(μ_pi),
-        μ_K=Float64(μ_K),
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
-        qmax=qmax,
-        q_nodes=q_nodes,
-        omega_max=omega_max,
-        omega_nodes=omega_nodes,
-        gamma_zero_tol=gamma_zero_tol,
-    )
+    stage_sym = Main.MesonDensity._strict_bw_stage_symbol(stage)
+    density = if stage_sym === :strict_bw_stage1_reduced
+        strict_bw_meson_density_summary(
+            m_pi,
+            gamma_pi,
+            m_K,
+            gamma_K,
+            T_fm;
+            μ_pi=Float64(μ_pi),
+            μ_K=Float64(μ_K),
+            d_pi=Int(d_pi),
+            d_K=Int(d_K),
+            qmax=qmax,
+            q_nodes=q_nodes,
+            omega_max=omega_max,
+            omega_nodes=omega_nodes,
+            gamma_zero_tol=gamma_zero_tol,
+        )
+    else
+        thermo_params_norm = normalize_thermo_params(thermo_params)
+        quark_params_raw = _require_result_field(meson_point, :quark_params)
+        quark_params_norm = ensure_quark_params_has_A(
+            normalize_quark_params(quark_params_raw),
+            thermo_params_norm,
+        )
+        strict_bw_qpole_density_summary(
+            m_pi,
+            gamma_pi,
+            m_K,
+            gamma_K,
+            quark_params_norm,
+            thermo_params_norm;
+            μ_pi=Float64(μ_pi),
+            μ_K=Float64(μ_K),
+            d_pi=Int(d_pi),
+            d_K=Int(d_K),
+            qmax=qmax,
+            q_nodes=q_nodes,
+            omega_max=omega_max,
+            omega_nodes=omega_nodes,
+            gamma_zero_tol=gamma_zero_tol,
+            solver_iterations=solver_iterations,
+            pole_residual_norm_max=pole_residual_norm_max,
+            pole_require_converged=pole_require_converged,
+        )
+    end
 
     return merge(density, (
         T_fm=T_fm,
         xi=xi,
+        stage=stage_sym,
         pi_channel=pi_channel,
         k_channel=k_channel,
         m_pi=m_pi,

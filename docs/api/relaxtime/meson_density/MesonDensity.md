@@ -2,12 +2,13 @@
 
 ## 模块概述
 
-`MesonDensity` 模块提供当前介子数密度主线的最小实现入口，当前覆盖三层最小数值 helper：
+`MesonDensity` 模块提供当前介子数密度主线的最小实现入口，当前覆盖四层最小数值 helper：
 
 - `π/K` 聚合通道默认简并因子
 - 玻色分布函数
 - 稳定粒子极限数密度
 - reduced strict BW 数密度
+- Stage2 q 依赖复极点 strict BW 数密度
 - `K/π` 比值与温度扫描
 - Phase E3 当前最小口径下的 `π/K` 相移双积分 helper
 
@@ -99,6 +100,35 @@ g(E_M(q)+\Delta\omega)
 ### `strict_bw_meson_density_summary(pi_mass, pi_gamma, k_mass, k_gamma, T; ...)`
 
 基于 `strict_bw_meson_number_density` 聚合 `π/K` 两个通道，返回：
+
+- `n_pi`
+- `n_K`
+- `kpi_ratio`
+- `pi_density`
+- `k_density`
+
+### `strict_bw_qpole_meson_number_density(meson, mass0, gamma0, quark_params, thermo_params; ...)`
+
+计算当前 Stage-2 的 `q` 依赖复极点 strict BW 单通道介子数密度 helper。
+
+当前做法是：
+
+1. 在 `q` 网格上逐点调用介子极点方程求解器；
+2. 用上一个 `q` 点的 `(mass, gamma)` 作为下一个 `q` 点的 continuation seed；
+3. 将得到的 `E_M(q)` 与 `Gamma_M(q)` 代回 strict BW 双积分核。
+
+当前返回除 `density` 外，还包含：
+
+- `q_values`
+- `E_values`
+- `gamma_values`
+- `residual_norms`
+- `converged_flags`
+- `accepted_flags`
+
+### `strict_bw_qpole_density_summary(pi_mass, pi_gamma, k_mass, k_gamma, quark_params, thermo_params; ...)`
+
+基于 `strict_bw_qpole_meson_number_density` 聚合 `π/K` 两个通道，返回：
 
 - `n_pi`
 - `n_K`
