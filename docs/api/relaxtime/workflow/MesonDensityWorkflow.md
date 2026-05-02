@@ -61,9 +61,164 @@ script 手工取温度与质量
   -> 自行拼数密度
 ```
 
+### `solve_strict_bw_meson_density_from_meson_point`
+
+```julia
+solve_strict_bw_meson_density_from_meson_point(
+    meson_point;
+    qmax=12.0,
+    q_nodes=48,
+    omega_max=10.0,
+    omega_nodes=48,
+    gamma_zero_tol=1e-12,
+)
+```
+
+它继续消费现有 meson workflow 返回值中的：
+
+- `thermo_params`
+- `meson_results[:pi].mass`
+- `meson_results[:pi].gamma`
+- `meson_results[:K].mass`
+- `meson_results[:K].gamma`
+
+然后把 reduced strict BW 数值内核委托给
+`Main.MesonDensity.strict_bw_meson_density_summary`。
+
+当前它是 **Stage-1 reduced strict BW** 的正式 workflow helper，物理上保持以下约束：
+
+- 只消费 workflow 当前点给出的 `q=0` 质量与宽度
+- 采用 `E(q)=sqrt(q^2+m^2)`
+- 采用 `Gamma(q)=Gamma(q=0)`
+- 尚未进入 `q` 依赖复极点求解
+
+### `solve_gap_and_strict_bw_meson_density_point`
+
+```julia
+solve_gap_and_strict_bw_meson_density_point(T_fm, mu_fm; density_kwargs=(;), kwargs...)
+```
+
+它内部先调用：
+
+```julia
+solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
+```
+
+再执行：
+
+```julia
+solve_strict_bw_meson_density_from_meson_point(meson_point; density_kwargs...)
+```
+
+因此它继续保持同一个 workflow 契约：
+
+```text
+gap / equilibrium
+  -> meson mass / threshold / width
+  -> reduced strict BW meson density
+```
+
+### `solve_phase_shift_meson_density_from_meson_point`
+
+```julia
+solve_phase_shift_meson_density_from_meson_point(
+    meson_point;
+    qmax=12.0,
+    q_nodes=48,
+    omega_min=0.05,
+    omega_max=10.0,
+    omega_nodes=48,
+    eta=1e-6,
+)
+```
+
+它消费现有 meson workflow 返回值中的：
+
+- `quark_params`
+- `thermo_params`
+- `meson_results`
+
+然后把数值内核委托给 `Main.MesonDensity.phase_shift_meson_density_summary`。
+
+当前它是 **Phase E3 最小 BU 相移双积分** 的正式 workflow helper，物理上仍保持以下约束：
+
+- 仅支持 `xi = 0`
+- 仅支持 `π/K` 聚合通道
+- 积分方案固定为 GL + 硬截断
+
+### `solve_gap_and_phase_shift_meson_density_point`
+
+```julia
+solve_gap_and_phase_shift_meson_density_point(T_fm, mu_fm; density_kwargs=(;), kwargs...)
+```
+
+它内部先调用：
+
+```julia
+solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
+```
+
+再执行：
+
+```julia
+solve_phase_shift_meson_density_from_meson_point(meson_point; density_kwargs...)
+```
+
+因此它继续保持同一个 workflow 契约：
+
+```text
+gap / equilibrium
+  -> meson mass / threshold / gap
+  -> phase-shift meson density
+```
+
+## 当前最小扫描入口
+
+当前已提供脚本级最小扫描入口：
+
+```text
+scripts/relaxtime/run_strict_bw_meson_density_scan.jl
+scripts/relaxtime/run_phase_shift_meson_density_scan.jl
+```
+
+其中 strict BW 扫描固定通过：
+
+```text
+Models.solve_gap_and_strict_bw_meson_density_point
+```
+
+并输出：
+
+- `n_pi`
+- `n_K`
+- `kpi_ratio`
+- `gamma_pi`, `gamma_K`
+- `qmax`, `q_nodes`
+- `omega_max`, `omega_nodes`
+- `pi/K` 两个通道的 `q_integral_estimate`
+- `pi/K` 两个通道的 `omega_shell_at_qmax`
+- `pi/K` 两个通道的 `mode`
+
+phase-shift 扫描固定通过：
+
+```text
+Models.solve_gap_and_phase_shift_meson_density_point
+```
+
+进入 workflow，并把下列结果输出到 scan CSV：
+
+- `n_pi`
+- `n_K`
+- `kpi_ratio`
+- `qmax`, `q_nodes`
+- `omega_min`, `omega_max`, `omega_nodes`
+- `pi/K` 两个通道的 `q_integral_estimate`
+- `pi/K` 两个通道的 `omega_shell_at_qmax`
+
 ## 当前设计原则
 
 1. workflow 是唯一计算入口；
 2. 脚本只能消费 workflow 返回值；
 3. 数密度层不重写 meson 求解链；
-4. 后续 BW / BU 扩展仍应在此后处理边界内继续演进。
+4. 稳定粒子与相移双积分都应作为 meson workflow 的后处理层演进；
+5. reduced strict BW、full strict BW 与 BU 扩展都应在此后处理边界内继续演进。

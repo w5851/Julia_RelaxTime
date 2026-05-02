@@ -18,11 +18,23 @@ end
 
 using ..MesonMassWorkflow: solve_gap_and_meson_point
 using Main.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
+                         DEFAULT_PHASE_SHIFT_Q_MAX,
+                         DEFAULT_PHASE_SHIFT_Q_NODES,
+                         DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+                         DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                          meson_degeneracy,
+                         phase_shift_meson_density_summary,
+                         strict_bw_meson_density_summary,
                          stable_meson_number_density
+using ..WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
+using Main.MesonMass: ensure_quark_params_has_A
 
 export solve_meson_density_from_meson_point
 export solve_gap_and_meson_density_point
+export solve_strict_bw_meson_density_from_meson_point
+export solve_gap_and_strict_bw_meson_density_point
+export solve_phase_shift_meson_density_from_meson_point
+export solve_gap_and_phase_shift_meson_density_point
 
 @inline function _require_result_field(result, field::Symbol)
     hasproperty(result, field) || throw(ArgumentError("meson workflow result missing required field: $(field)"))
@@ -40,6 +52,16 @@ end
         "this point is outside the current stable-particle validity window and should be treated by BW/BU extensions instead"
     ))
     return mass
+end
+
+@inline function _require_finite_gamma(meson_results, meson::Symbol)::Float64
+    haskey(meson_results, meson) || throw(ArgumentError("meson_results missing required channel $(meson)"))
+    entry = meson_results[meson]
+    hasproperty(entry, :gamma) || throw(ArgumentError("meson_results[$(meson)] missing gamma field"))
+    gamma = Float64(entry.gamma)
+    isfinite(gamma) || throw(ArgumentError("meson_results[$(meson)].gamma must be finite, got $(gamma)"))
+    gamma >= 0.0 || throw(ArgumentError("meson_results[$(meson)].gamma must be nonnegative, got $(gamma)"))
+    return gamma
 end
 
 """
@@ -133,6 +155,139 @@ function solve_gap_and_meson_density_point(
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
     density = solve_meson_density_from_meson_point(meson_point; density_kwargs...)
     return merge(meson_point, (meson_density=density,))
+end
+
+"""
+    solve_strict_bw_meson_density_from_meson_point(meson_point; kwargs...) -> NamedTuple
+
+消费 meson workflow 返回值，执行 Stage-1 reduced strict BW 数密度后处理。
+
+当前约束：
+- 只消费 workflow 已返回的 `mass` / `gamma`
+- 不在此层重求 `q` 依赖复极点
+"""
+function solve_strict_bw_meson_density_from_meson_point(
+    meson_point;
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
+    μ_pi::Real=0.0,
+    μ_K::Real=0.0,
+    d_pi::Integer=meson_degeneracy(:pi),
+    d_K::Integer=meson_degeneracy(:K),
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    gamma_zero_tol::Float64=1e-12,
+)
+    thermo_params = _require_result_field(meson_point, :thermo_params)
+    meson_results = _require_result_field(meson_point, :meson_results)
+
+    T_fm = Float64(thermo_params.T)
+    xi = Float64(getproperty(thermo_params, :ξ))
+    m_pi = _require_finite_mass(meson_results, pi_channel)
+    m_K = _require_finite_mass(meson_results, k_channel)
+    gamma_pi = _require_finite_gamma(meson_results, pi_channel)
+    gamma_K = _require_finite_gamma(meson_results, k_channel)
+
+    density = strict_bw_meson_density_summary(
+        m_pi,
+        gamma_pi,
+        m_K,
+        gamma_K,
+        T_fm;
+        μ_pi=Float64(μ_pi),
+        μ_K=Float64(μ_K),
+        d_pi=Int(d_pi),
+        d_K=Int(d_K),
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        gamma_zero_tol=gamma_zero_tol,
+    )
+
+    return merge(density, (
+        T_fm=T_fm,
+        xi=xi,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
+        m_pi=m_pi,
+        m_K=m_K,
+        gamma_pi=gamma_pi,
+        gamma_K=gamma_K,
+        μ_pi=Float64(μ_pi),
+        μ_K=Float64(μ_K),
+        d_pi=Int(d_pi),
+        d_K=Int(d_K),
+    ))
+end
+
+function solve_gap_and_strict_bw_meson_density_point(
+    T_fm::Real,
+    mu_fm::Real;
+    density_kwargs::NamedTuple=(;),
+    kwargs...,
+)
+    meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
+    density = solve_strict_bw_meson_density_from_meson_point(meson_point; density_kwargs...)
+    return merge(meson_point, (strict_bw_meson_density=density,))
+end
+
+"""
+    solve_phase_shift_meson_density_from_meson_point(meson_point; kwargs...) -> NamedTuple
+
+消费 meson workflow 返回值，执行当前最小 Phase-E3 口径下的相移双积分介子数密度后处理。
+
+当前约束：
+- 仅支持 `xi = 0`
+- 仅支持 `π/K` 聚合通道
+- 积分方案固定为 GL + 硬截断
+"""
+function solve_phase_shift_meson_density_from_meson_point(
+    meson_point;
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=0.05,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    eta::Float64=1e-6,
+)
+    thermo_params_raw = _require_result_field(meson_point, :thermo_params)
+    quark_params_raw = _require_result_field(meson_point, :quark_params)
+
+    thermo_params = normalize_thermo_params(thermo_params_raw)
+    quark_params = ensure_quark_params_has_A(
+        normalize_quark_params(quark_params_raw),
+        thermo_params,
+    )
+
+    density = phase_shift_meson_density_summary(
+        quark_params,
+        thermo_params;
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_min=omega_min,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        eta=eta,
+    )
+
+    return merge(density, (
+        m_pi=haskey(meson_point.meson_results, :pi) ? Float64(meson_point.meson_results[:pi].mass) : NaN,
+        m_K=haskey(meson_point.meson_results, :K) ? Float64(meson_point.meson_results[:K].mass) : NaN,
+    ))
+end
+
+function solve_gap_and_phase_shift_meson_density_point(
+    T_fm::Real,
+    mu_fm::Real;
+    density_kwargs::NamedTuple=(;),
+    kwargs...,
+)
+    meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
+    density = solve_phase_shift_meson_density_from_meson_point(meson_point; density_kwargs...)
+    return merge(meson_point, (phase_shift_meson_density=density,))
 end
 
 end # module

@@ -2,12 +2,14 @@
 
 ## 模块概述
 
-`MesonDensity` 模块提供当前介子数密度主线的最小实现入口，当前仅覆盖稳定粒子极限：
+`MesonDensity` 模块提供当前介子数密度主线的最小实现入口，当前覆盖三层最小数值 helper：
 
 - `π/K` 聚合通道默认简并因子
 - 玻色分布函数
 - 稳定粒子极限数密度
+- reduced strict BW 数密度
 - `K/π` 比值与温度扫描
+- Phase E3 当前最小口径下的 `π/K` 相移双积分 helper
 
 后续 BU / BW / 各向异性扩展将在该模块基础上继续演化。
 
@@ -62,3 +64,80 @@ n_M = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
 - `n_pi`
 - `n_K`
 - `kpi_ratio`
+
+### `strict_bw_meson_number_density(mass, gamma, T; ...)`
+
+计算当前 Stage-1 的 reduced strict BW 单通道介子数密度 helper。
+
+当前采用：
+
+```math
+E_M(q)=\sqrt{q^2+m_M^2},
+\qquad
+\Gamma_M(q)=\Gamma_M,
+\qquad
+\omega=E_M(q)+\Delta\omega.
+```
+
+并计算：
+
+```math
+n_M^{BW,red}(T)
+= d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
+\int_0^{\omega_{\max}} \frac{d\Delta\omega}{2\pi}
+g(E_M(q)+\Delta\omega)
+\frac{\Gamma_M/2}{\Delta\omega^2+\Gamma_M^2/4}.
+```
+
+当前返回除 `density` 外，还包含：
+
+- `q_integral_estimate`
+- `omega_shell_at_qmax`
+- `mode`
+- 当前积分配置回显
+
+### `strict_bw_meson_density_summary(pi_mass, pi_gamma, k_mass, k_gamma, T; ...)`
+
+基于 `strict_bw_meson_number_density` 聚合 `π/K` 两个通道，返回：
+
+- `n_pi`
+- `n_K`
+- `kpi_ratio`
+- `pi_density`
+- `k_density`
+
+### `phase_shift_meson_number_density(meson, quark_params, thermo_params; ...)`
+
+当前 Phase E3 最小口径下的单通道相移介子数密度 helper。
+
+当前约束：
+
+- 仅支持 `xi = 0`
+- 仅支持 `:pi` / `:K`
+- 积分方案固定为 GL + 硬截断
+
+当前默认参数：
+
+- `qmax = 12`
+- `q_nodes = 48`
+- `omega_min = 0.05`
+- `omega_max = 10`
+- `omega_nodes = 48`
+
+返回值除 `density` 外，还包含：
+
+- `q_integral_estimate`
+- `omega_shell_at_qmax`
+- 当前积分配置回显
+
+### `phase_shift_meson_density_summary(quark_params, thermo_params; ...)`
+
+基于 `phase_shift_meson_number_density` 聚合 `π/K` 两个通道，返回：
+
+- `n_pi`
+- `n_K`
+- `kpi_ratio`
+- `pi_density`
+- `k_density`
+
+当前它是 workflow 层 Phase-E3 后处理入口所依赖的正式数值 helper。

@@ -17,6 +17,7 @@
 - `test_total_propagator_performance.jl`：总传播子计算相关性能测试（并对比极化函数）。
 - `test_total_cross_section_performance.jl`：总截面完整链路性能测试（可选“完整计算”开关）。
 - `test_average_scattering_rate_performance.jl`：平均散射率的轻量性能烟囱测试。
+- `bench_bu_double_integral_phase_e3.jl`：Phase E3 最小 BU 双积分点计算基准，拆分平衡态求解与后续双积分成本。
 
 ## 运行
 

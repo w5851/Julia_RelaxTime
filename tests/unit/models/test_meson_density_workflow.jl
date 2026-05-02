@@ -13,8 +13,16 @@ const _MDW = Models.MesonDensityWorkflow
     @testset "接口存在" begin
         @test isdefined(_MDW, :solve_meson_density_from_meson_point)
         @test isdefined(_MDW, :solve_gap_and_meson_density_point)
+        @test isdefined(_MDW, :solve_strict_bw_meson_density_from_meson_point)
+        @test isdefined(_MDW, :solve_gap_and_strict_bw_meson_density_point)
+        @test isdefined(_MDW, :solve_phase_shift_meson_density_from_meson_point)
+        @test isdefined(_MDW, :solve_gap_and_phase_shift_meson_density_point)
         @test _MDW.solve_meson_density_from_meson_point isa Function
         @test _MDW.solve_gap_and_meson_density_point isa Function
+        @test _MDW.solve_strict_bw_meson_density_from_meson_point isa Function
+        @test _MDW.solve_gap_and_strict_bw_meson_density_point isa Function
+        @test _MDW.solve_phase_shift_meson_density_from_meson_point isa Function
+        @test _MDW.solve_gap_and_phase_shift_meson_density_point isa Function
     end
 
     @testset "后处理消费 meson workflow 返回值" begin
@@ -42,6 +50,60 @@ const _MDW = Models.MesonDensityWorkflow
         @test density.n_pi > 0.0
         @test density.n_K > 0.0
         @test 0.0 < density.kpi_ratio < 1.0
+    end
+
+    @testset "strict BW 入口复用 meson workflow 主链" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        density = Models.solve_strict_bw_meson_density_from_meson_point(
+            meson_point;
+            qmax=12.0,
+            q_nodes=16,
+            omega_max=10.0,
+            omega_nodes=16,
+        )
+
+        full = Models.solve_gap_and_strict_bw_meson_density_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            density_kwargs=(; qmax=12.0, q_nodes=16, omega_max=10.0, omega_nodes=16),
+        )
+
+        @test density.m_pi ≈ meson_point.meson_results[:pi].mass
+        @test density.m_K ≈ meson_point.meson_results[:K].mass
+        @test density.gamma_pi ≈ meson_point.meson_results[:pi].gamma
+        @test density.gamma_K ≈ meson_point.meson_results[:K].gamma
+        @test isfinite(density.n_pi)
+        @test isfinite(density.n_K)
+        @test density.n_pi > 0.0
+        @test density.n_K > 0.0
+        @test 0.0 < density.kpi_ratio < 2.0
+
+        @test hasproperty(full, :strict_bw_meson_density)
+        @test full.strict_bw_meson_density.n_pi ≈ density.n_pi rtol=1e-10
+        @test full.strict_bw_meson_density.n_K ≈ density.n_K rtol=1e-10
+        @test full.strict_bw_meson_density.gamma_pi ≈ density.gamma_pi rtol=1e-10
+        @test full.strict_bw_meson_density.gamma_K ≈ density.gamma_K rtol=1e-10
     end
 
     @testset "完整入口复用 meson workflow 主链" begin
@@ -112,5 +174,59 @@ const _MDW = Models.MesonDensityWorkflow
             continuation_meson = meson_only.continuation_state
             continuation_density = with_density.continuation_state
         end
+    end
+
+    @testset "Phase-E3 相移数密度入口复用 meson workflow 主链" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        density = Models.solve_phase_shift_meson_density_from_meson_point(
+            meson_point;
+            qmax=12.0,
+            q_nodes=16,
+            omega_max=10.0,
+            omega_nodes=16,
+        )
+
+        full = Models.solve_gap_and_phase_shift_meson_density_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            density_kwargs=(; qmax=12.0, q_nodes=16, omega_max=10.0, omega_nodes=16),
+        )
+
+        @test density.m_pi ≈ meson_point.meson_results[:pi].mass
+        @test density.m_K ≈ meson_point.meson_results[:K].mass
+        @test isfinite(density.n_pi)
+        @test isfinite(density.n_K)
+        @test density.n_pi > 0.0
+        @test density.n_K > 0.0
+        @test 0.0 < density.kpi_ratio < 2.0
+        @test density.qmax == 12.0
+        @test density.q_nodes == 16
+        @test density.omega_max == 10.0
+        @test density.omega_nodes == 16
+
+        @test hasproperty(full, :phase_shift_meson_density)
+        @test full.phase_shift_meson_density.n_pi ≈ density.n_pi rtol=1e-10
+        @test full.phase_shift_meson_density.n_K ≈ density.n_K rtol=1e-10
     end
 end
