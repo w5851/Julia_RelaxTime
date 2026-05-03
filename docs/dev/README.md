@@ -6,11 +6,16 @@
 
 - [Codex高阶使用手册](D:\Desktop\Julia_RelaxTime\docs\dev\Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
 
-## active 与 archived 的区别
+## active / backlog / archived 的区别
 
 - active：进行中的任务与临时草案。
 	- 只保留当前仍需推进的内容。
+	- 应当是近期会继续执行的任务单，而不是长期路线图。
 	- 任务完成后必须移出。
+- backlog：长期路线图、候选需求、分阶段能力盘点。
+	- 适用于“尚未进入当前执行批次、但仍需保留并滚动维护”的文档。
+	- 不作为 active 治理检查对象。
+	- 当 backlog 条目被正式拉起执行时，应拆成新的 active 任务单。
 - archived：已完成任务的归档区。
 	- 按统一格式记录“做了什么、验证了什么、对应了哪些文档”。
 	- 保持可追溯，便于后续审计与复盘。
@@ -73,10 +78,12 @@ archived_date: 2026-01-19
 ## active 命名与归档触发规则（新增）
 
 - `docs/dev/active` 下任务文档命名统一为：`YYYY-MM-DD_描述.md`
+- `docs/dev/backlog` 下文档建议沿用同一命名格式：`YYYY-MM-DD_描述.md`
 - 归档触发条件（满足任一）：
 	- 任务单 DoD 全部勾选完成；
 	- 文档创建后超过 60 天仍停留在 active；
 	- 任务被新任务单替代，旧文档仅保留历史价值。
+- 长期路线图、候选能力盘点、未进入当前执行批次的规划文档，不应继续放在 `docs/dev/active`；应迁移到 `docs/dev/backlog`。
 - 建议校验命令：
 
 ```powershell

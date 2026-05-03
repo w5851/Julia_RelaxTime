@@ -42,6 +42,10 @@ export class UI {
         this.scanHistoryList = null;
         this.scanResultPreview = null;
         this.downloadResultBtn = null;
+        this.copyParamsBtn = null;
+        this.copyCurlBtn = null;
+        this.scanReproPanel = null;
+        this.scanReproPreview = null;
         this.lastResultPayload = null;
         this.progressChart = null;
         this.historyHeatmap = null;
@@ -77,6 +81,10 @@ export class UI {
         this.scanHistoryList = document.getElementById('scan-history-list');
         this.scanResultPreview = document.getElementById('scan-result-preview');
         this.downloadResultBtn = document.getElementById('scan-download-btn');
+        this.copyParamsBtn = document.getElementById('scan-copy-params-btn');
+        this.copyCurlBtn = document.getElementById('scan-copy-curl-btn');
+        this.scanReproPanel = document.getElementById('scan-repro-panel');
+        this.scanReproPreview = document.getElementById('scan-repro-preview');
         this.progressChart = document.getElementById('scan-progress-chart');
         this.historyHeatmap = document.getElementById('scan-history-heatmap');
         this.navScatteringBtn = document.getElementById('nav-scattering');
@@ -111,6 +119,12 @@ export class UI {
         }
         if (this.downloadResultBtn) {
             this.downloadResultBtn.addEventListener('click', () => this.handleDownloadResult());
+        }
+        if (this.copyParamsBtn) {
+            this.copyParamsBtn.addEventListener('click', () => this.handleCopyScanParams());
+        }
+        if (this.copyCurlBtn) {
+            this.copyCurlBtn.addEventListener('click', () => this.handleCopyScanCurl());
         }
         if (this.navScatteringBtn) {
             this.navScatteringBtn.addEventListener('click', () => this.navigateToPage('scattering'));
@@ -560,6 +574,7 @@ export class UI {
         if (this.downloadResultBtn) {
             this.downloadResultBtn.disabled = !result.output_path;
         }
+        this.updateScanReproInfo();
     }
 
     handleDownloadResult() {
@@ -569,6 +584,71 @@ export class UI {
             return;
         }
         this.setScanStatus(`导出路径: ${outputPath}`, 'success');
+    }
+
+    getScanPayloadJson() {
+        if (!this.lastScanPayload) {
+            return '';
+        }
+        return JSON.stringify(this.lastScanPayload, null, 2);
+    }
+
+    buildScanCurlCommand() {
+        if (!this.lastScanPayload) {
+            return '';
+        }
+        const body = JSON.stringify(this.lastScanPayload);
+        const escapedBody = body.replace(/'/g, "'\"'\"'");
+        return `curl -X POST "${API.buildJobCreateUrl()}" -H "Content-Type: application/json" --data-raw '${escapedBody}'`;
+    }
+
+    updateScanReproInfo() {
+        const hasPayload = !!this.lastScanPayload;
+        if (this.scanReproPanel) {
+            this.scanReproPanel.style.display = hasPayload ? '' : 'none';
+        }
+        if (this.copyParamsBtn) {
+            this.copyParamsBtn.disabled = !hasPayload;
+        }
+        if (this.copyCurlBtn) {
+            this.copyCurlBtn.disabled = !hasPayload;
+        }
+        if (this.scanReproPreview) {
+            this.scanReproPreview.textContent = hasPayload
+                ? JSON.stringify(
+                    {
+                        params: this.lastScanPayload,
+                        create_job_curl: this.buildScanCurlCommand(),
+                    },
+                    null,
+                    2,
+                )
+                : '-';
+        }
+    }
+
+    async copyTextToClipboard(text, successMessage) {
+        if (!text) {
+            this.setScanStatus('当前没有可复制内容', 'error');
+            return;
+        }
+        try {
+            if (!navigator?.clipboard?.writeText) {
+                throw new Error('clipboard API unavailable');
+            }
+            await navigator.clipboard.writeText(text);
+            this.setScanStatus(successMessage, 'success');
+        } catch (_error) {
+            this.setScanStatus('复制失败，请手动从复现信息区块复制', 'error');
+        }
+    }
+
+    async handleCopyScanParams() {
+        await this.copyTextToClipboard(this.getScanPayloadJson(), '已复制参数 JSON');
+    }
+
+    async handleCopyScanCurl() {
+        await this.copyTextToClipboard(this.buildScanCurlCommand(), '已复制 curl 命令');
     }
 
     async handleScanCancel() {
@@ -652,6 +732,7 @@ export class UI {
         if (this.scanResultPanel) {
             this.scanResultPanel.style.display = '';
         }
+        this.updateScanReproInfo();
     }
 
     stopPolling() {
@@ -740,9 +821,11 @@ export class UI {
         if (this.scanResultPanel) {
             this.scanResultPanel.style.display = 'none';
         }
+        this.lastResultPayload = null;
         try {
             const payload = this.collectScanPayload();
             this.lastScanPayload = payload;
+            this.updateScanReproInfo();
             const created = await API.createScanJob(payload);
             this.activeJobId = created.job_id;
             this.setScanStatus(`任务已创建: ${created.job_id}`, 'queued');
@@ -773,6 +856,8 @@ export class UI {
             return;
         }
         this.clearTechError();
+        this.lastResultPayload = null;
+        this.updateScanReproInfo();
         try {
             const created = await API.createScanJob(this.lastScanPayload);
             this.activeJobId = created.job_id;

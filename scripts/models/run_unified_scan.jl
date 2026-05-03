@@ -1,5 +1,11 @@
 #!/usr/bin/env julia
 
+"""
+Status: core-candidate
+Purpose: unified scan/workflow CLI entry for current `Models`-based pipelines.
+Replacement: authoritative current entry; prefer this over removed legacy scan wrappers such as `scripts/pnjl/run_tmu_scan.jl`.
+"""
+
 using Pkg
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))

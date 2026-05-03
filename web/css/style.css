@@ -592,6 +592,18 @@ form legend {
     cursor: not-allowed;
 }
 
+.scan-repro-panel {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+}
+
+.scan-repro-panel h4 {
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--secondary-color);
+}
+
 .scan-result-preview {
     margin-top: 8px;
     background: #0f172a;

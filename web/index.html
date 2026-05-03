@@ -297,6 +297,14 @@
                 <div class="scan-result-actions">
                     <button type="button" id="scan-download-btn" disabled>导出结果路径</button>
                 </div>
+                <div class="scan-repro-panel" id="scan-repro-panel" style="display:none;">
+                    <h4>复现信息</h4>
+                    <div class="scan-result-actions">
+                        <button type="button" id="scan-copy-params-btn" disabled>复制参数 JSON</button>
+                        <button type="button" id="scan-copy-curl-btn" disabled>复制 curl 命令</button>
+                    </div>
+                    <pre id="scan-repro-preview" class="scan-result-preview">-</pre>
+                </div>
                 <pre id="scan-result-preview" class="scan-result-preview">-</pre>
             </div>
 

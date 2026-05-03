@@ -99,7 +99,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 | 计算能力 | 典型用途 | 推荐脚本入口 | 最小用法（示例） |
 |---|---|---|---|
 | PNJL 相结构 / 相图产线 | 生成 boundary/spinodal/crossover/CEP 与报告 | `scripts/pnjl/calculate_phase_structure.jl` | `julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke` |
-| PNJL T-μ 扫描 | 温度-化学势网格扫描、单点/批量求解 | `scripts/pnjl/run_tmu_scan.jl` | `julia --project=. scripts/pnjl/run_tmu_scan.jl --help` |
+| PNJL T-μ / T-ρ 扫描 | `Models` 主链统一网格扫描、单点/批量求解 | `scripts/models/run_unified_scan.jl` | `julia --project=. scripts/models/run_unified_scan.jl scan tmu --help` |
 | 守恒荷易感性与累积量 | `chi_BQS` / cumulant / `Ssigma` / `kappa_sigma2` | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `julia --project=. scripts/pnjl/run_conserved_charge_susceptibilities.jl --help` |
 | 各向异性 PNJL 输运系数扫描（PNJL_aniso） | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help` |
 | RelxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `julia --project=. scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
@@ -123,7 +123,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 ### PNJL
 
 - `scripts/pnjl/run_conserved_charge_susceptibilities.jl`
-- `scripts/pnjl/run_tmu_scan.jl`
+- `scripts/models/run_unified_scan.jl`
 - `scripts/pnjl/calculate_phase_structure.jl`
 
 ### Server/API
