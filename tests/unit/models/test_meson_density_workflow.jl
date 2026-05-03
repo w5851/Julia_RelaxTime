@@ -268,4 +268,66 @@ const _MDW = Models.MesonDensityWorkflow
         @test full.phase_shift_meson_density.n_pi ≈ density.n_pi rtol=1e-10
         @test full.phase_shift_meson_density.n_K ≈ density.n_K rtol=1e-10
     end
+
+    @testset "Phase-E3 generalized BU reference 复用同一 workflow 入口" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        current = Models.solve_phase_shift_meson_density_from_meson_point(
+            meson_point;
+            scheme=:current,
+            qmax=12.0,
+            q_nodes=12,
+            omega_max=10.0,
+            omega_nodes=12,
+        )
+        gbu = Models.solve_phase_shift_meson_density_from_meson_point(
+            meson_point;
+            scheme=:gbu_reference,
+            qmax=12.0,
+            q_nodes=12,
+            omega_max=10.0,
+            omega_nodes=12,
+        )
+
+        full = Models.solve_gap_and_phase_shift_meson_density_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            density_kwargs=(; scheme=:gbu_reference, qmax=12.0, q_nodes=12, omega_max=10.0, omega_nodes=12),
+        )
+
+        @test current.scheme == :phase_shift_current
+        @test gbu.scheme == :phase_shift_gbu_reference
+        @test hasproperty(full, :phase_shift_meson_density)
+        @test full.phase_shift_meson_density.scheme == :phase_shift_gbu_reference
+        @test full.phase_shift_meson_density.pi_density.scheme == :phase_shift_gbu_reference
+        @test full.phase_shift_meson_density.k_density.scheme == :phase_shift_gbu_reference
+        @test isfinite(gbu.n_pi)
+        @test isfinite(gbu.n_K)
+        @test gbu.n_pi > 0.0
+        @test gbu.n_K > 0.0
+        @test !isapprox(current.n_pi, gbu.n_pi; rtol=1e-6, atol=1e-10)
+        @test !isapprox(current.n_K, gbu.n_K; rtol=1e-6, atol=1e-10)
+        @test full.phase_shift_meson_density.n_pi ≈ gbu.n_pi rtol=1e-10
+        @test full.phase_shift_meson_density.n_K ≈ gbu.n_K rtol=1e-10
+    end
 end

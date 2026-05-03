@@ -21,6 +21,7 @@ using .Models: solve_gap_and_phase_shift_meson_density_point
 
 struct ScanOptions
     output::String
+    scheme::Symbol
     xi_values::Vector{Float64}
     tmin_mev::Float64
     tmax_mev::Float64
@@ -43,6 +44,7 @@ function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_phase_shift_meson_density_scan.jl [options]\n")
     println("Options:")
     println("  --output <path>             输出 CSV (default data/outputs/results/relaxtime/scan/phase_shift_meson_density_scan.csv)")
+    println("  --scheme <current|gbu>      相位函数口径 (default current)")
     println("  --xi <value>                追加一个 ξ 值（当前仅支持 0，可多次传入）")
     println("  --xi-list v1,v2,...         用逗号分隔的 ξ 列表替换（当前仅支持 0）")
     println("  --tmin/--tmax/--tstep <MeV> 温度范围与步长")
@@ -64,6 +66,7 @@ end
 function parse_args(args::Vector{String})
     opts = Dict{Symbol,Any}(
         :output => joinpath("data", "outputs", "results", "relaxtime", "scan", "phase_shift_meson_density_scan.csv"),
+        :scheme => :current,
         :xi_values => Float64[0.0],
         :tmin => 208.0,
         :tmax => 212.0,
@@ -94,6 +97,9 @@ function parse_args(args::Vector{String})
 
         if arg == "--output"
             opts[:output] = require_value()
+        elseif arg == "--scheme"
+            raw = lowercase(strip(require_value()))
+            opts[:scheme] = raw == "gbu" ? :gbu_reference : :current
         elseif arg == "--xi"
             val = parse(Float64, require_value())
             if opts[:xi_values] == Float64[0.0]
@@ -155,6 +161,7 @@ function parse_args(args::Vector{String})
 
     return ScanOptions(
         String(opts[:output]),
+        Symbol(opts[:scheme]),
         xi_vals,
         Float64(opts[:tmin]),
         Float64(opts[:tmax]),
@@ -187,6 +194,7 @@ const OUTPUT_COLUMNS = [
     "m_pi", "m_K",
     "n_pi", "n_K", "kpi_ratio",
     "d_pi", "d_K",
+    "scheme",
     "qmax", "q_nodes",
     "omega_min", "omega_max", "omega_nodes",
     "eta",
@@ -224,7 +232,8 @@ function main()
                 "workflow_entry" => "Models.solve_gap_and_phase_shift_meson_density_point",
                 "mesons" => "pi,K",
                 "continuation" => "MesonMassWorkflow.continuation_state",
-                "phase_shift_scheme" => "GL_hard_cutoff_phase_e3",
+                "phase_shift_scheme" => string(opts.scheme),
+                "phase_shift_integrator" => "GL_hard_cutoff_phase_e3",
                 "note" => "mu_fm denotes quark chemical potential (muB/3); current helper only supports xi=0"
             ))
             ScanCSV.write_header(io, OUTPUT_COLUMNS)
@@ -257,6 +266,7 @@ function main()
                     solver_kwargs=(; iterations=opts.max_iter),
                     mass_kwargs=(; iterations=opts.max_iter),
                     density_kwargs=(;
+                        scheme=opts.scheme,
                         qmax=opts.qmax,
                         q_nodes=opts.q_nodes,
                         omega_min=opts.omega_min,
@@ -289,6 +299,7 @@ function main()
                     "kpi_ratio" => md.kpi_ratio,
                     "d_pi" => md.d_pi,
                     "d_K" => md.d_K,
+                    "scheme" => md.scheme,
                     "qmax" => md.qmax,
                     "q_nodes" => md.q_nodes,
                     "omega_min" => md.omega_min,

@@ -115,7 +115,8 @@ g(E_M(q)+\Delta\omega)
 
 1. 在 `q` 网格上逐点调用介子极点方程求解器；
 2. 用上一个 `q` 点的 `(mass, gamma)` 作为下一个 `q` 点的 continuation seed；
-3. 将得到的 `E_M(q)` 与 `Gamma_M(q)` 代回 strict BW 双积分核。
+3. 将得到的 `E_M(q)` 与 `Gamma_M(q)` 代回 strict BW 双积分核；
+4. 内层积分按严格口径直接执行 `\omega \in [0,\omega_{\max}]`，而不是只积 `\omega \ge E_M(q)` 的右半边。
 
 当前返回除 `density` 外，还包含：
 
@@ -136,7 +137,7 @@ g(E_M(q)+\Delta\omega)
 - `pi_density`
 - `k_density`
 
-### `phase_shift_meson_number_density(meson, quark_params, thermo_params; ...)`
+### `phase_shift_meson_number_density(meson, quark_params, thermo_params; scheme=:current, ...)`
 
 当前 Phase E3 最小口径下的单通道相移介子数密度 helper。
 
@@ -154,13 +155,29 @@ g(E_M(q)+\Delta\omega)
 - `omega_max = 10`
 - `omega_nodes = 48`
 
+当前支持两个正式 `scheme`：
+
+- `:current` -> `:phase_shift_current`
+  - 当前生产默认口径
+  - 使用 `F(\delta)=\delta`
+- `:gbu_reference`（兼容别名 `:gbu`, `:generalized_bu`）-> `:phase_shift_gbu_reference`
+  - 当前更严格参考口径
+  - 使用 `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
+
+治理约束：
+
+- `current` 保持默认正式生产主线
+- `gbu_reference` 作为可重复运行的 stricter reference / analysis branch
+- 二者共用同一套 `workflow + continuation + scan` 契约，不允许脚本层平行重组流程
+
 返回值除 `density` 外，还包含：
 
 - `q_integral_estimate`
 - `omega_shell_at_qmax`
+- `scheme`
 - 当前积分配置回显
 
-### `phase_shift_meson_density_summary(quark_params, thermo_params; ...)`
+### `phase_shift_meson_density_summary(quark_params, thermo_params; scheme=:current, ...)`
 
 基于 `phase_shift_meson_number_density` 聚合 `π/K` 两个通道，返回：
 
@@ -169,5 +186,6 @@ g(E_M(q)+\Delta\omega)
 - `kpi_ratio`
 - `pi_density`
 - `k_density`
+- `scheme`
 
 当前它是 workflow 层 Phase-E3 后处理入口所依赖的正式数值 helper。

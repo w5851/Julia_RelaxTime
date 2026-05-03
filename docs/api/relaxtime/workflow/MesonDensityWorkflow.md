@@ -101,7 +101,8 @@ solve_strict_bw_meson_density_from_meson_point(
 
 1. `q` 网格上的每个节点都会重解一次介子复极点；
 2. 前一个 `q` 点的 `(mass, gamma)` 会被用作下一个 `q` 点的续算 seed；
-3. 输出中会带上 `q_values / E_values / gamma_values / residual_norms` 等 pole 诊断量。
+3. 内层 BW 积分会按严格 `\omega \in [0,\omega_{\max}]` 口径执行；
+4. 输出中会带上 `q_values / E_values / gamma_values / residual_norms` 等 pole 诊断量。
 
 ### `solve_gap_and_strict_bw_meson_density_point`
 
@@ -126,7 +127,7 @@ solve_strict_bw_meson_density_from_meson_point(meson_point; density_kwargs...)
 ```text
 gap / equilibrium
   -> meson mass / threshold / width
-  -> reduced strict BW meson density
+  -> strict BW meson density
 ```
 
 ### `solve_phase_shift_meson_density_from_meson_point`
@@ -134,6 +135,7 @@ gap / equilibrium
 ```julia
 solve_phase_shift_meson_density_from_meson_point(
     meson_point;
+    scheme=:current,
     qmax=12.0,
     q_nodes=48,
     omega_min=0.05,
@@ -156,6 +158,15 @@ solve_phase_shift_meson_density_from_meson_point(
 - 仅支持 `xi = 0`
 - 仅支持 `π/K` 聚合通道
 - 积分方案固定为 GL + 硬截断
+
+当前 `scheme` 治理口径：
+
+- `:current`
+  - `F(\delta)=\delta`
+  - 默认正式生产主线
+- `:gbu_reference`（兼容 `:gbu` / `:generalized_bu`）
+  - `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
+  - 可重复运行的 stricter reference 输出链
 
 ### `solve_gap_and_phase_shift_meson_density_point`
 
@@ -221,6 +232,7 @@ Models.solve_gap_and_phase_shift_meson_density_point
 - `n_pi`
 - `n_K`
 - `kpi_ratio`
+- `scheme`
 - `qmax`, `q_nodes`
 - `omega_min`, `omega_max`, `omega_nodes`
 - `pi/K` 两个通道的 `q_integral_estimate`

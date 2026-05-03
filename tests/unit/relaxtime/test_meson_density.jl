@@ -16,8 +16,10 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                                    DEFAULT_PHASE_SHIFT_Q_MAX,
                                    DEFAULT_PHASE_SHIFT_Q_NODES,
+                                   _phase_shift_scheme_symbol,
                                    bose_distribution,
                                    meson_degeneracy,
+                                   phase_shift_meson_number_density,
                                    phase_shift_meson_density_summary,
                                    strict_bw_meson_density_summary,
                                    strict_bw_meson_number_density,
@@ -64,6 +66,8 @@ end
     @test DEFAULT_PHASE_SHIFT_Q_NODES == 48
     @test DEFAULT_PHASE_SHIFT_OMEGA_MAX == 10.0
     @test DEFAULT_PHASE_SHIFT_OMEGA_NODES == 48
+    @test _phase_shift_scheme_symbol(:current) == :phase_shift_current
+    @test _phase_shift_scheme_symbol(:gbu) == :phase_shift_gbu_reference
 
     qp = (m=(u=1.0, d=1.0, s=1.2), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.1))
     tp_bad = (T=0.2, Φ=0.5, Φbar=0.5, ξ=0.1)
@@ -126,4 +130,58 @@ end
     @test summary.n_pi > 0.0
     @test summary.n_K > 0.0
     @test 0.0 < summary.kpi_ratio < 1.5
+end
+
+@testset "MesonDensity generalized BU reference scheme" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+
+    current = phase_shift_meson_number_density(
+        :pi,
+        qp,
+        tp;
+        scheme=:current,
+        degeneracy=3,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    gbu = phase_shift_meson_number_density(
+        :pi,
+        qp,
+        tp;
+        scheme=:gbu_reference,
+        degeneracy=3,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+
+    @test current.scheme == :phase_shift_current
+    @test gbu.scheme == :phase_shift_gbu_reference
+    @test isfinite(current.density)
+    @test isfinite(gbu.density)
+    @test current.density > 0.0
+    @test gbu.density > 0.0
+    @test !isapprox(current.density, gbu.density; rtol=1e-6, atol=1e-10)
+
+    summary = phase_shift_meson_density_summary(
+        qp,
+        tp;
+        scheme=:gbu_reference,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    @test summary.scheme == :phase_shift_gbu_reference
+    @test summary.pi_density.scheme == :phase_shift_gbu_reference
+    @test summary.k_density.scheme == :phase_shift_gbu_reference
+    @test summary.n_pi > 0.0
+    @test summary.n_K > 0.0
 end

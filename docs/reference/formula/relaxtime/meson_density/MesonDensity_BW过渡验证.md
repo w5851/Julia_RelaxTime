@@ -317,7 +317,12 @@ g_M(\omega)
      \qquad
      z_p(q)=E_M(q)-i\Gamma_M(q)/2,
      ```
-   - 再把该 `E_M(q),\Gamma_M(q)` 回填到 BW 双积分。
+   - 再把该 `E_M(q),\Gamma_M(q)` 回填到 BW 双积分；
+   - 且内层积分按严格口径直接执行
+     ```math
+     \omega \in [0,\omega_{\max}],
+     ```
+     而不是改写成仅覆盖 `\omega \ge E_M(q)` 的右半边变量积分。
 
 因此，本项目里：
 

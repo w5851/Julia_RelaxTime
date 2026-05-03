@@ -282,6 +282,7 @@ end
 """
 function solve_phase_shift_meson_density_from_meson_point(
     meson_point;
+    scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
     omega_min::Float64=0.05,
@@ -301,6 +302,7 @@ function solve_phase_shift_meson_density_from_meson_point(
     density = phase_shift_meson_density_summary(
         quark_params,
         thermo_params;
+        scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_min=omega_min,

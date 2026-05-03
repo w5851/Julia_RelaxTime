@@ -51,7 +51,8 @@
 - `stage = :stage1_reduced`
 - `stage = :stage2_qpole`
 
-其中 `stage2_qpole` 会在 `q` 网格上逐点重解复极点 `z_p(q)`，再回填 strict BW 积分。
+其中 `stage2_qpole` 会在 `q` 网格上逐点重解复极点 `z_p(q)`，并按严格口径对
+`\omega \in [0,\omega_{\max}]` 执行 BW 双积分。
 
 ## `solve_gap_and_strict_bw_meson_density_point`
 
@@ -74,6 +75,15 @@
 - `q_nodes = 48`
 - `omega_max = 10`
 - `omega_nodes = 48`
+
+当前同一 workflow 入口支持两套 `scheme`：
+
+- `scheme = :current`
+  - 输出 `scheme = :phase_shift_current`
+  - 作为默认正式生产主线
+- `scheme = :gbu_reference`（兼容 `:gbu` / `:generalized_bu`）
+  - 输出 `scheme = :phase_shift_gbu_reference`
+  - 作为可重复运行的 stricter reference / analysis branch
 
 ## `solve_gap_and_phase_shift_meson_density_point`
 
@@ -105,6 +115,7 @@
   - `m_pi`, `m_K`
   - `n_pi`, `n_K`
   - `kpi_ratio`
+  - `scheme`
   - `pi_density`, `k_density`
   - `qmax`, `q_nodes`, `omega_max`, `omega_nodes`, `eta`
 
@@ -124,11 +135,13 @@
   - 对应 `stage = :stage1_reduced`
 - q-pole strict BW：
   - 在 `q` 网格上逐点调用介子极点方程
+  - 内层 `\omega` 积分按完整 ` [0,\omega_{\max}] ` 口径执行
   - 当前依赖 continuation seed 串行续算
   - 对应 `stage = :stage2_qpole`
 - Phase E3 phase-shift：
   - 仅支持 `xi = 0`
   - 仅支持 `π/K` 聚合通道
   - 积分方案固定为 GL + 硬截断
+  - `current` 为默认生产口径，`gbu_reference` 为并列参考分支
 
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。
