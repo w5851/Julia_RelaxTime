@@ -2,44 +2,47 @@
 
 本页用于给出“当前可用能力 + 已知风险”，状态口径与 `README.md` 保持一致。
 
-Latest Release: [v0.1.0](https://github.com/w5851/Julia_RelaxTime/releases/tag/v0.1.0)
-
 ## 1. 总体状态
 
-- **Web/API 演示链路**：可用（`/health`、`/compute`）
-- **PNJL 求解与扫描链路**：可用（建议结合对比报告验证数值一致性）
-- **截面/弛豫时间链路**：已验证可用（建议持续执行关键点回归与跨实现对比）
+- **Web/API 演示链路**：可用，适合联调与能力展示
+- **PNJL 相图与统一扫描链路**：可用，稳定脚本入口已统一到白名单
+- **截面/弛豫时间链路**：可用，建议持续执行关键点回归与跨实现对比
 
 ## 2. 关键入口
 
+- 稳定脚本白名单：`docs/guides/scripts/README.md`
+- 相图主产线：`scripts/pnjl/calculate_phase_structure.jl`
+- 统一扫描入口：`scripts/models/run_unified_scan.jl`
 - 服务端：`scripts/server/server_full.jl`
-- 一键启动：`scripts/server/start.bat`
 - 前端页面：`web/index.html`
-- 单元测试入口：`tests/unit/runtests.jl`
+
+如需查看更深层实现说明：
+
+- 相图 API：`docs/api/models/phase/README.md`
+- 扫描 API：`docs/api/models/scans/README.md`
+- workflow API：`docs/api/models/workflows/README.md`
+- transport API：`docs/api/relaxtime/transport/README.md`
 
 ## 3. 推荐验证命令
 
 ```powershell
-# 启动服务
-julia --project=. scripts/server/server_full.jl
+# 相图最小产线
+julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke
 
-# 运行单元 smoke
-$env:UNIT_PROFILE='smoke'
-julia --project=. tests/unit/runtests.jl
+# 单元 smoke
+julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
+
+# 文档与入口治理
+julia --project=. scripts/dev/check_docs_consistency.jl
+julia --project=. scripts/dev/check_script_entrypoints.jl
 ```
 
 ## 4. 已知注意事项
 
-- 不建议将“前端可用”解读为“全部参数区间与全部场景均已覆盖验收”
-- 对研究结论请优先参考 `docs/reference/` 与 `docs/dev/archived/` 的比对记录
-- 发生路径疑问时，统一以仓库根目录当前结构为准（`scripts/server/`、`tests/unit/`、`docs/reference/`）
-
-## 4.1 近期变更（2026-02-19）
-
-- PNJL/rPNJL 配置链路已补“关键参数校验 + 可控日志开关”，用于异常回溯：
-	- `PNJL_CONFIG_LOG=1`：输出 PNJL 配置解析来源
-	- `RPNJL_CONFIG_LOG=1`：输出 rPNJL 配置解析来源
-- `docs/dev/active/2026-02-19_PNJL集成方向提炼待办.md` 已完成并归档到 `docs/dev/archived/`。
+- 稳定用户入口以 `docs/guides/scripts/README.md` 为准；并非所有 `run_*.jl` 都自动属于白名单。
+- API 主题主导航以 `docs/api/models/*` 与 `docs/api/relaxtime/*` 为准；历史 `docs/api/pnjl/` 页面只保留兼容层说明。
+- 不建议将“前端可用”解读为“全部参数区间与全部场景均已覆盖验收”。
+- 对研究结论请优先参考 `docs/reference/` 与 `docs/dev/archived/` 的比对记录。
 
 ## 5. 输出目录口径
 

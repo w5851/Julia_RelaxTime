@@ -120,16 +120,21 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 - 稳定白名单以 `docs/guides/scripts/README.md` 为准。
 - `run_*.jl` 全量能力目录见 `docs/guides/scripts/run_script_catalog.md`。
 
-### PNJL
+### 从稳定入口到深层文档
 
-- `scripts/pnjl/run_conserved_charge_susceptibilities.jl`
-- `scripts/models/run_unified_scan.jl`
-- `scripts/pnjl/calculate_phase_structure.jl`
-
-### Server/API
-
-- `scripts/server/server_full.jl`
-- `scripts/server/server.jl`
+- 相图主产线：`scripts/pnjl/calculate_phase_structure.jl`
+  - 用户说明：`docs/guides/scripts/README.md`
+  - API 入口：`docs/api/models/phase/README.md`
+- T-μ / T-ρ 扫描：`scripts/models/run_unified_scan.jl`
+  - 用户说明：`docs/guides/scripts/README.md`
+  - API 入口：`docs/api/models/scans/README.md`
+- `Models` 工作流与统一编排
+  - API 入口：`docs/api/models/workflows/README.md`
+- 各向异性输运 / Relaxtime 工作流
+  - 用户说明：`docs/guides/scripts/README.md`
+  - API 入口：`docs/api/relaxtime/transport/README.md`
+- Web/API 服务入口：`scripts/server/server_full.jl`
+  - 当前状态：`docs/guides/STATUS.md`
 
 ## 3) 能力边界与非目标
 
@@ -166,13 +171,15 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 ### 开发/治理
 
+- `docs/dev/README.md`
 - `docs/dev/active/`
+- `docs/dev/backlog/`
 - `docs/dev/archived/`
 - `docs/guides/RELEASE_GOVERNANCE_v0.1.1.md`
 
 ### API/实现细节
 
-- `docs/api/`
+- `docs/api/README.md`
 - `docs/architecture/`
 - `docs/reference/`
 
