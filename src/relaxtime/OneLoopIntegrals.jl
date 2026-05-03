@@ -10,6 +10,7 @@ module OneLoopIntegrals
 import ..GaussLegendre  # needed by IntervalQuadratureStrategies (bare `GaussLegendre.gauleg`)
 include("../integration/IntervalQuadratureStrategies.jl")
 using ..GaussLegendre: gauleg
+using ForwardDiff
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution,
     quark_distribution_integral, antiquark_distribution_integral
 using Main.Constants_PNJL: Λ_inv_fm
@@ -42,6 +43,9 @@ end
     m_pos = max(m, 0.0)
     return sqrt(E * E - m_pos * m_pos)
 end
+
+@inline _primal_value(x::Float64) = x
+@inline _primal_value(x::ForwardDiff.Dual) = ForwardDiff.value(x)
 
 """计算夸克有效分布函数的值（供 A 积分使用：分别用夸克/反夸克分布）"""
 @inline function distribution_value(mode::Symbol, sign_flag::Symbol, E::Float64, μ::Float64,
@@ -112,10 +116,10 @@ end
 # -----------------------------------------------------------------------------
 # k=0 时的积分计算相关函数
 """k=0时的积分实部被积函数"""
-@inline function real_integrand_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, denominator_term::Float64,
-    μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, E::Float64)
+@inline function real_integrand_k_zero(sign_flag::Symbol, λ::T, m::Float64, denominator_term::T,
+    μ::Float64, T0::Float64, Φ::Float64, Φbar::Float64, E::Float64) where {T<:Real}
     p = internal_momentum(E, m)
-    dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
+    dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
     denominator = λ * E + denominator_term
     if !isfinite(p) || !isfinite(dist) || !isfinite(denominator)
         return 0.0
@@ -130,8 +134,10 @@ end
 
 """k=0时的奇点计算函数
 返回位于 (Emin, Emax) 内的 E 奇点值列表；若无奇点则返回空列表"""
-@inline function singularity_k_zero(λ::Float64, Emin::Float64, Emax::Float64, denominator_term::Float64)::Vector{Float64}
-    E0 = -denominator_term / λ
+@inline function singularity_k_zero(λ::T, Emin::Float64, Emax::Float64, denominator_term::T)::Vector{Float64} where {T<:Real}
+    λ0 = _primal_value(λ)
+    denominator0 = _primal_value(denominator_term)
+    E0 = -denominator0 / λ0
     if !isfinite(E0)
         return Float64[]
     end
@@ -146,21 +152,21 @@ end
 end
 
 """三动量大小k=0(小于EPS_K)时的 B0分量 积分计算"""
-@inline function tilde_B0_k_zero(sign_flag::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64)
+@inline function tilde_B0_k_zero(sign_flag::Symbol, λ::T, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64) where {T<:Real}
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
     Emax = energy_cutoff(m_pos)
-    denominator_term = (λ ^ 2 + m_pos ^ 2 - m_prime_pos ^ 2) / 2.0
+    denominator_term = (λ ^ 2 + m_pos ^ 2 - m_prime_pos ^ 2) / T(2)
     singularity = singularity_k_zero(λ, Emin, Emax, denominator_term)
     integrand_fun(E) = real_integrand_k_zero(sign_flag, λ, m_pos, denominator_term,
-        μ, T, Φ, Φbar, E) # 闭包被积函数
+        μ, T0, Φ, Φbar, E) # 闭包被积函数
 
-    imag_part = 0.0
+    imag_part = zero(T)
     if isempty(singularity) # 无奇点
         real_part = integrate_hybrid_interval(integrand_fun, Emin, Emax, SING_NONE; n=HYBRID_N_SMOOTH)
-        return real_part * 2.0, imag_part / λ
+        return real_part * T(2), imag_part / λ
     end
 
     # 有奇点：主值积分（PV）。
@@ -169,7 +175,7 @@ end
 
     @inline function numer(E::Float64)
         p = internal_momentum(E, m_pos)
-        dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
+        dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
         if !isfinite(p) || !isfinite(dist)
             return 0.0
         end
@@ -215,18 +221,18 @@ end
 
     # 解析虚部（残数项）
     p0 = internal_momentum(E0, m_pos)
-    imag_part = 2.0 * π * p0 * distribution_value_b0(sign_flag, E0, μ, T, Φ, Φbar)
+    imag_part = T(2π * p0 * distribution_value_b0(sign_flag, E0, μ, T0, Φ, Φbar))
 
     # 与无奇点分支保持相同归一化：返回 2×(PV 积分结果)
-    return pv_integral * 2.0, imag_part / λ
+    return pv_integral * T(2), imag_part / λ
 end
 # ----------------------------------------------------------------------------
 # k>0 时的积分计算相关函数
 """k>0 时的积分实部被积函数"""
-@inline @fastmath function real_integrand_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64,
-    μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, E::Float64)
+@inline @fastmath function real_integrand_k_positive(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64,
+    μ::Float64, T0::Float64, Φ::Float64, Φbar::Float64, E::Float64) where {T<:Real}
     p = internal_momentum(E, m)
-    dist = distribution_value_b0(sign_flag, E, μ, T, Φ, Φbar)
+    dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
     common_part = (λ + E)^2 - m_prime^2
     numerator = common_part - (p - k)^2
     denominator = common_part - (p + k)^2
@@ -241,14 +247,14 @@ end
 
     # 避免除以 0 造成 Inf/NaN
     if abs(denominator) < EPS_SEGMENT
-        denominator = (denominator == 0.0) ? EPS_SEGMENT : sign(denominator) * EPS_SEGMENT
+        denominator = (denominator == zero(T)) ? T(EPS_SEGMENT) : sign(denominator) * T(EPS_SEGMENT)
     end
 
     ratio = abs(numerator / denominator)
     if !isfinite(ratio)
         return 0.0
     end
-    ratio = max(ratio, 1e-300)
+    ratio = max(ratio, T(1e-300))
     log_term = log(ratio)
     if !isfinite(log_term)
         return 0.0
@@ -268,15 +274,16 @@ k>0 时的奇点计算函数
 - a < 0 (λ² < k²): 虚部积分区间为 [Emin, E1] ∪ [E2, Emax]
 - a ≈ 0 (λ² ≈ k²): 退化为线性情况，特殊处理
 """
-@inline function singularity_k_positive(λ::Float64, k::Float64, m::Float64, m_prime::Float64,
-    Emin::Float64, Emax::Float64)::Tuple{Vector{Tuple{Float64, Float64}}, Symbol}
+@inline function singularity_k_positive(λ::T, k::Float64, m::Float64, m_prime::Float64,
+    Emin::Float64, Emax::Float64)::Tuple{Vector{Tuple{Float64, Float64}}, Symbol} where {T<:Real}
     # 解析解：
     # E_{1,2} = [λ(λ^2 - k^2 + m^2 - m'^2) ± k * sqrt((λ^2 - k^2 + m^2 - m'^2)^2 - 4 m^2 (k^2 - λ^2))] / [2 (k^2 - λ^2)]
     
     intervals = Tuple{Float64, Float64}[]
     
-    a = λ ^ 2 - k ^ 2                # 二次项系数
-    d0 = k ^ 2 - λ ^ 2               # 分母的一半系数 (未乘 2) = -a
+    λ0 = _primal_value(λ)
+    a = λ0 ^ 2 - k ^ 2                # 二次项系数
+    d0 = k ^ 2 - λ0 ^ 2               # 分母的一半系数 (未乘 2) = -a
     denom = 2.0 * d0                 # 实际分母 2(k^2 - λ^2) = -2a
     
     # 情况3: a ≈ 0 (λ² ≈ k²)，退化为线性情况
@@ -286,10 +293,10 @@ k>0 时的奇点计算函数
         # 有解条件: λ > 0 且 m' > m
         # 解的范围: E > (m'² - m²)/(4λ) + λm²/(m'² - m²)
         
-        if λ > 0.0 && m_prime > m
+        if λ0 > 0.0 && m_prime > m
             # 计算临界能量
             m2_diff = m_prime ^ 2 - m ^ 2
-            E_crit = m2_diff / (4.0 * λ) + λ * m ^ 2 / m2_diff
+            E_crit = m2_diff / (4.0 * λ0) + λ0 * m ^ 2 / m2_diff
             
             # 虚部积分区间为 [max(E_crit, Emin), Emax]
             if E_crit < Emax
@@ -301,7 +308,7 @@ k>0 时的奇点计算函数
         return (intervals, :none)
     end
     
-    A = λ ^ 2 - k ^ 2 + m ^ 2 - m_prime ^ 2
+    A = λ0 ^ 2 - k ^ 2 + m ^ 2 - m_prime ^ 2
     disc = A ^ 2 + 4.0 * m ^ 2 * d0    # 判别式
     
     # 判别式为负无实根
@@ -310,8 +317,8 @@ k>0 时的奇点计算函数
     end
     
     sqrt_disc = sqrt(disc)
-    E1 = (λ * A - k * sqrt_disc) / denom
-    E2 = (λ * A + k * sqrt_disc) / denom
+    E1 = (λ0 * A - k * sqrt_disc) / denom
+    E2 = (λ0 * A + k * sqrt_disc) / denom
     
     # 保证 E1 <= E2
     if E1 > E2
@@ -450,36 +457,36 @@ end
     return total
 end
 
-function tilde_B0_k_positive(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64)
+function tilde_B0_k_positive(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64) where {T<:Real}
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
     Emax = energy_cutoff(m_pos)
-    integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m_pos, m_prime_pos, μ, T, Φ, Φbar, E) # 闭包被积函数
-    intervals, sign_type = singularity_k_positive(λ, k, m_pos, m_prime_pos, Emin, Emax)
+    integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m_pos, m_prime_pos, μ, T0, Φ, Φbar, E) # 闭包被积函数
+    intervals, _ = singularity_k_positive(λ, k, m_pos, m_prime_pos, Emin, Emax)
     
-    imag_part = 0.0
+    imag_part = zero(T)
     real_part = integrate_piecewise_hybrid(integrand_fun, Emin, Emax, intervals)
     
     # 根据区间类型计算虚部
     if !isempty(intervals)
         for (E1, E2) in intervals
-            imag_part += distribution_integral_b0(sign_flag, E1, E2, μ, T, Φ, Φbar)
+            imag_part += T(distribution_integral_b0(sign_flag, E1, E2, μ, T0, Φ, Φbar))
         end
-        imag_part *= π * sign(λ)
+        imag_part *= T(π) * sign(λ)
     end
     
     return real_part / k, imag_part / k
 end
 
 """计算单个 ̃B0 分量的函数"""
-@inline function tilde_B0(sign_flag::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64)
+@inline function tilde_B0(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64) where {T<:Real}
     if abs(k) < EPS_K
-        return tilde_B0_k_zero(sign_flag, λ, m, m_prime, μ, T, Φ, Φbar)
+        return tilde_B0_k_zero(sign_flag, λ, m, m_prime, μ, T0, Φ, Φbar)
     else
-        return tilde_B0_k_positive(sign_flag, λ, k, m, m_prime, μ, T, Φ, Φbar)
+        return tilde_B0_k_positive(sign_flag, λ, k, m, m_prime, μ, T0, Φ, Φbar)
     end
 end
 
@@ -488,12 +495,12 @@ end
 根据文档公式组合四个 ̃B0 项得到完整的 B₀ 积分。
 λ = k0 + μ1 - μ2, 其中k0是传播子能量
 """
-function B0(λ::Float64, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T::Float64;
-    Φ::Float64=0.0, Φbar::Float64=0.0)
-    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T, Φ, Φbar)
-    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T, Φ, Φbar)
-    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T, Φ, Φbar)
-    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T, Φ, Φbar)
+function B0(λ::T, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T0::Float64;
+    Φ::Float64=0.0, Φbar::Float64=0.0) where {T<:Real}
+    term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T0, Φ, Φbar)
+    term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T0, Φ, Φbar)
+    term4 = tilde_B0(:minus, -λ, k, m2, m1, μ2, T0, Φ, Φbar)
 
     real_part = term1[1] - term2[1] + term3[1] - term4[1]
     imag_part = term1[2] - term2[2] + term3[2] - term4[2]
