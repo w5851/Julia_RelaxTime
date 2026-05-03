@@ -17,7 +17,7 @@ using Dates
 using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const SCRIPT_TMU = joinpath(PROJECT_ROOT, "scripts", "pnjl", "run_tmu_scan.jl")
+const SCRIPT_TMU = joinpath(PROJECT_ROOT, "scripts", "models", "run_unified_scan.jl")
 const SCRIPT_PHASE = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_structure.jl")
 const SCRIPT_PLOT = joinpath(PROJECT_ROOT, "scripts", "pnjl", "plot_phase_diagram.py")
 
@@ -64,6 +64,18 @@ function _help()
   --python=python         Python 命令名（默认 python）
   --help                  显示帮助
 """)
+end
+
+function _range_values(min_v::Real, max_v::Real, step_v::Real)
+    step_v > 0 || error("step must be positive")
+    max_v >= min_v || error("max must be >= min")
+    values = collect(Float64(min_v):Float64(step_v):Float64(max_v))
+    isempty(values) && error("range cannot be empty")
+    return values
+end
+
+function _csv_values(values::AbstractVector{<:Real})
+    return join((@sprintf("%.6g", v) for v in values), ",")
 end
 
 function _run_cmd(args::Vector{String}; title::String)
@@ -124,20 +136,21 @@ function main(args=ARGS)
         xi_str = @sprintf("%.3f", xi)
 
         tmu_out = joinpath(out_scan_dir, "tmu_scan_xi$(xi_str).csv")
+        T_values = _csv_values(_range_values(cfg.tmu.T_min, cfg.tmu.T_max, cfg.tmu.T_step))
+        mu_values = _csv_values(_range_values(cfg.tmu.mu_min, cfg.tmu.mu_max, cfg.tmu.mu_step))
         _run_cmd([
             julia_bin,
             "--project=.",
             SCRIPT_TMU,
-            "--xi=$(xi)",
-            "--T_min=$(cfg.tmu.T_min)",
-            "--T_max=$(cfg.tmu.T_max)",
-            "--T_step=$(cfg.tmu.T_step)",
-            "--mu_min=$(cfg.tmu.mu_min)",
-            "--mu_max=$(cfg.tmu.mu_max)",
-            "--mu_step=$(cfg.tmu.mu_step)",
+            "scan",
+            "tmu",
+            "--model_kind=pnjl_aniso",
+            "--T_values=$(T_values)",
+            "--mu_values=$(mu_values)",
+            "--xi_values=$(xi)",
             "--p_num=$(cfg.tmu.p_num)",
             "--t_num=$(cfg.tmu.t_num)",
-            "--output=$(tmu_out)",
+            "--output_path=$(tmu_out)",
             "--overwrite",
         ]; title="T-μ 扫描 xi=$(xi)")
 

@@ -14,6 +14,10 @@ export function build_api_url(path) {
     return `${base}${normalizedPath}`;
 }
 
+export function buildJobCreateUrl() {
+    return build_api_url('/api/modules/pnjl-scan/jobs');
+}
+
 function is_retryable_error(error) {
     return error && (error.name === 'AbortError' || error.name === 'TypeError');
 }
