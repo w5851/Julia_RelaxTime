@@ -122,14 +122,14 @@ end
     dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
     denominator = λ * E + denominator_term
     if !isfinite(p) || !isfinite(dist) || !isfinite(denominator)
-        return 0.0
+        return zero(denominator)
     end
     if abs(denominator) < EPS_SEGMENT
         # PV 附近直接返回 0，避免 1/0 -> Inf/NaN
-        return 0.0
+        return zero(denominator)
     end
     val = p * dist / denominator
-    return isfinite(val) ? val : 0.0
+    return isfinite(val) ? val : zero(val)
 end
 
 """k=0时的奇点计算函数
@@ -237,12 +237,12 @@ end
     numerator = common_part - (p - k)^2
     denominator = common_part - (p + k)^2
     if !isfinite(p) || !isfinite(dist) || !isfinite(numerator) || !isfinite(denominator)
-        return 0.0
+        return zero(common_part)
     end
 
     # 避免 0/0 -> NaN（这是你看到 quadgk 报 NaN 的典型触发点）
     if abs(numerator) < EPS_SEGMENT && abs(denominator) < EPS_SEGMENT
-        return 0.0
+        return zero(common_part)
     end
 
     # 避免除以 0 造成 Inf/NaN
@@ -252,15 +252,15 @@ end
 
     ratio = abs(numerator / denominator)
     if !isfinite(ratio)
-        return 0.0
+        return zero(ratio)
     end
     ratio = max(ratio, T(1e-300))
     log_term = log(ratio)
     if !isfinite(log_term)
-        return 0.0
+        return zero(log_term)
     end
     val = dist * log_term
-    return isfinite(val) ? val : 0.0
+    return isfinite(val) ? val : zero(val)
 end
 
 """

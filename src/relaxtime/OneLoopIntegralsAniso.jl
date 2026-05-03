@@ -86,7 +86,7 @@ function real_integrand_k_zero(sign_::Symbol, λ::R, m::Float64, m_prime::Float6
     ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
     num = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T, μ, Φ, Φbar)
     den = real_integrand_k_zero_denom(λ, m, m_prime, E)
-    return isfinite(den) && isfinite(num) ? num / den : 0.0
+    return isfinite(den) && isfinite(num) ? num / den : zero(den)
 end
 
 """k>0时的积分实部被积函数"""
@@ -107,7 +107,7 @@ function imag_integrand_k_zero(sign_::Symbol, λ::R, m::Float64, m_prime::Float6
     E_pole = -denominator_const / coeff_E
     Θ = heaviside_step(coeff_E, denominator_const, m, energy_cutoff(m))
     if Θ == 0.0
-        return 0.0
+        return zero(coeff_E)
     else
         p_pole = internal_momentum(E_pole,m)
         # 含各向异性修正项

@@ -157,6 +157,6 @@ end
 
 register_suite!()
 
-if abspath(PROGRAM_FILE) == @__FILE__
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
     run_report()
 end

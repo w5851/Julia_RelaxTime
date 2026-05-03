@@ -906,11 +906,7 @@ function phase_shift_meson_number_density_derivative_reference(
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
     omega_grid, omega_w = gauleg(omega_min, omega_max, omega_nodes)
 
-    q_shell_weighted_sum = 0.0
-    q_shell_at_qmax = NaN
-    max_formula_abs_diff = 0.0
-    @inbounds for iq in eachindex(q_grid, q_w)
-        q = q_grid[iq]
+    function q_shell_from_q(q::Float64)
         omega_val = 0.0
         for iω in eachindex(omega_grid, omega_w)
             ω = Float64(omega_grid[iω])
@@ -933,12 +929,18 @@ function phase_shift_meson_number_density_derivative_reference(
             omega_val += omega_w[iω] * gω * dweighted_ad
         end
         omega_val /= (2.0 * π)
-        q_shell = (q^2 / (2.0 * π^2)) * omega_val
-        q_shell_weighted_sum += q_w[iq] * q_shell
-        if iq == length(q_grid)
-            q_shell_at_qmax = q_shell
-        end
+        return (q^2 / (2.0 * π^2)) * omega_val
     end
+
+    q_shell_weighted_sum = 0.0
+    q_shell_at_qmax = 0.0
+    max_formula_abs_diff = 0.0
+    @inbounds for iq in eachindex(q_grid, q_w)
+        q = q_grid[iq]
+        q_shell = q_shell_from_q(q)
+        q_shell_weighted_sum += q_w[iq] * q_shell
+    end
+    q_shell_at_qmax = q_shell_from_q(qmax)
 
     density = Float64(degeneracy) * q_shell_weighted_sum
     return (
