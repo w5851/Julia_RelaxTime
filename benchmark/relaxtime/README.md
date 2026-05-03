@@ -18,6 +18,8 @@
 - `test_total_cross_section_performance.jl`：总截面完整链路性能测试（可选“完整计算”开关）。
 - `test_average_scattering_rate_performance.jl`：平均散射率的轻量性能烟囱测试。
 - `bench_bu_double_integral_phase_e3.jl`：Phase E3 最小 BU 双积分点计算基准，拆分平衡态求解与后续双积分成本。
+- `bench_meson_density_ad_diagnostic_chain.jl`：介子数密度 AD 诊断链基准，拆分平衡点求解、AD 诊断点与正式 phase-shift density 单点成本。
+- `bench_meson_density_generic_signature_overhead.jl`：`dδ/dω` 关键 helper 从 `Float64` 签名放宽为 Dual-compatible generic 后，在普通 `Float64` 调用下的微观开销对比。
 
 ## 运行
 
