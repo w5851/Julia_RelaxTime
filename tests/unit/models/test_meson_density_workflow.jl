@@ -17,12 +17,14 @@ const _MDW = Models.MesonDensityWorkflow
         @test isdefined(_MDW, :solve_gap_and_strict_bw_meson_density_point)
         @test isdefined(_MDW, :solve_phase_shift_meson_density_from_meson_point)
         @test isdefined(_MDW, :solve_gap_and_phase_shift_meson_density_point)
+        @test isdefined(_MDW, :solve_phase_shift_derivative_reference_from_meson_point)
         @test _MDW.solve_meson_density_from_meson_point isa Function
         @test _MDW.solve_gap_and_meson_density_point isa Function
         @test _MDW.solve_strict_bw_meson_density_from_meson_point isa Function
         @test _MDW.solve_gap_and_strict_bw_meson_density_point isa Function
         @test _MDW.solve_phase_shift_meson_density_from_meson_point isa Function
         @test _MDW.solve_gap_and_phase_shift_meson_density_point isa Function
+        @test _MDW.solve_phase_shift_derivative_reference_from_meson_point isa Function
     end
 
     @testset "后处理消费 meson workflow 返回值" begin
@@ -329,5 +331,37 @@ const _MDW = Models.MesonDensityWorkflow
         @test !isapprox(current.n_K, gbu.n_K; rtol=1e-6, atol=1e-10)
         @test full.phase_shift_meson_density.n_pi ≈ gbu.n_pi rtol=1e-10
         @test full.phase_shift_meson_density.n_K ≈ gbu.n_K rtol=1e-10
+    end
+
+    @testset "Phase-E5 derivative reference 复用同一 workflow 入口" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        density = Models.solve_phase_shift_derivative_reference_from_meson_point(
+            meson_point;
+            scheme=:current,
+            qmax=4.0,
+            q_nodes=6,
+            omega_max=3.0,
+            omega_nodes=6,
+        )
+
+        @test density.derivative_backend == :forwarddiff
+        @test density.scheme == :phase_shift_current
+        @test isfinite(density.n_pi)
+        @test isfinite(density.n_K)
+        @test density.max_formula_abs_diff < 1e-8
     end
 end

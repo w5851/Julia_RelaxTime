@@ -12,6 +12,7 @@ MesonDensity
 """
 module MesonDensity
 
+using ForwardDiff
 using ..GaussLegendre: gauleg
 using ..AFieldBuilder: ensure_quark_params_has_A
 using ..EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
@@ -28,6 +29,8 @@ export stable_meson_number_density, stable_kpi_ratio, stable_kpi_scan
 export strict_bw_meson_number_density, strict_bw_meson_density_summary
 export strict_bw_qpole_meson_number_density, strict_bw_qpole_density_summary
 export phase_shift_meson_number_density, phase_shift_meson_density_summary
+export phase_shift_meson_number_density_derivative_reference, phase_shift_meson_density_derivative_reference_summary
+export phase_shift_point_diagnostic
 
 const DEFAULT_MESON_DENSITY_Q_NODES = 256
 const DEFAULT_PHASE_SHIFT_Q_MAX = 12.0
@@ -691,8 +694,13 @@ end
     throw(ArgumentError("$(name) must be > 1, got $(n)"))
 end
 
-@inline function _complex_phase(z::ComplexF64)::Float64
+@inline function _complex_phase(z::Complex{T})::T where {T<:Real}
     return atan(imag(z), real(z))
+end
+
+@inline function _phase_derivative_from_components(reD::T, imD::T, dre::T, dim::T) where {T<:Real}
+    denom = reD * reD + imD * imD
+    return (reD * dim - imD * dre) / denom
 end
 
 function _unwrap_phases(phases::Vector{Float64})
@@ -721,16 +729,24 @@ end
     throw(ArgumentError("phase-shift scheme must be :current/:phase_e3 or :gbu/:gbu_reference/:generalized_bu, got $(scheme)"))
 end
 
-@inline function _gbu_phase_function(δ::Float64)::Float64
+@inline function _gbu_phase_function(δ::T)::T where {T<:Real}
     return δ - 0.5 * sin(2.0 * δ)
 end
 
-@inline function _phase_shift_weighted_phase(δ::Float64, scheme::Symbol)::Float64
+@inline function _phase_shift_weighted_phase(δ::T, scheme::Symbol)::T where {T<:Real}
     scheme_sym = _phase_shift_scheme_symbol(scheme)
     if scheme_sym === :phase_shift_current
         return δ
     end
     return _gbu_phase_function(δ)
+end
+
+@inline function _phase_shift_weight_derivative_factor(δ::T, scheme::Symbol)::T where {T<:Real}
+    scheme_sym = _phase_shift_scheme_symbol(scheme)
+    if scheme_sym === :phase_shift_current
+        return one(T)
+    end
+    return T(2) * sin(δ)^2
 end
 
 function _simple_meson_pol_params(meson::Symbol, qp)
@@ -760,7 +776,7 @@ function _build_k_coeffs(qp)
     return calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 end
 
-function _propagator_phase(meson::Symbol, ω::Float64, q::Float64, qp, tp, K_coeffs; eta::Float64)
+function _propagator_components(meson::Symbol, ω::T, q::Float64, qp, tp, K_coeffs; eta::Float64) where {T<:Real}
     pol = _simple_meson_pol_params(meson, qp)
     Π_re, Π_im = polarization_with_width(
         pol.channel, ω, 2.0 * eta, q,
@@ -769,9 +785,230 @@ function _propagator_phase(meson::Symbol, ω::Float64, q::Float64, qp, tp, K_coe
         Float64(tp.T), Float64(tp.Φ), Float64(tp.Φbar), Float64(tp.ξ),
         pol.A1, pol.A2, pol.num_s_quark,
     )
-    Π = ComplexF64(Π_re, Π_im)
+    Π = Complex{T}(Π_re, Π_im)
     D = meson_propagator_simple(meson, K_coeffs, Π)
-    return _complex_phase(D)
+    return real(D), imag(D)
+end
+
+function _propagator_phase(meson::Symbol, ω::T, q::Float64, qp, tp, K_coeffs; eta::Float64) where {T<:Real}
+    reD, imD = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta)
+    return atan(imD, reD)
+end
+
+function phase_shift_point_diagnostic(
+    meson::Symbol,
+    ω::Float64,
+    q::Float64,
+    quark_params,
+    thermo_params;
+    scheme::Symbol=:current,
+    eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+    fd_step::Float64=1e-5,
+)
+    fd_step > 0.0 || throw(ArgumentError("fd_step must be positive, got $(fd_step)"))
+    qp = ensure_quark_params_has_A(quark_params, thermo_params)
+    tp = thermo_params
+    K_coeffs = _build_k_coeffs(qp)
+    scheme_sym = _phase_shift_scheme_symbol(scheme)
+
+    re0, im0 = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta)
+    phase0 = atan(im0, re0)
+    weighted0 = _phase_shift_weighted_phase(phase0, scheme_sym)
+
+    re_fun(x) = first(_propagator_components(meson, x, q, qp, tp, K_coeffs; eta=eta))
+    im_fun(x) = last(_propagator_components(meson, x, q, qp, tp, K_coeffs; eta=eta))
+    phase_fun(x) = _propagator_phase(meson, x, q, qp, tp, K_coeffs; eta=eta)
+    weighted_fun(x) = _phase_shift_weighted_phase(phase_fun(x), scheme_sym)
+
+    dre = ForwardDiff.derivative(re_fun, ω)
+    dim = ForwardDiff.derivative(im_fun, ω)
+    dphase_ad = ForwardDiff.derivative(phase_fun, ω)
+    dphase_formula = _phase_derivative_from_components(re0, im0, dre, dim)
+    dweighted_ad = ForwardDiff.derivative(weighted_fun, ω)
+
+    dre_fd = (re_fun(ω + fd_step) - re_fun(ω - fd_step)) / (2fd_step)
+    dim_fd = (im_fun(ω + fd_step) - im_fun(ω - fd_step)) / (2fd_step)
+    dphase_fd = _phase_derivative_from_components(re0, im0, dre_fd, dim_fd)
+    dphase_raw_fd = (phase_fun(ω + fd_step) - phase_fun(ω - fd_step)) / (2fd_step)
+    dweighted_fd = (weighted_fun(ω + fd_step) - weighted_fun(ω - fd_step)) / (2fd_step)
+
+    return (
+        meson=meson,
+        omega=ω,
+        q=q,
+        xi=Float64(tp.ξ),
+        temperature=Float64(tp.T),
+        eta=eta,
+        fd_step=fd_step,
+        scheme=scheme_sym,
+        reD=Float64(re0),
+        imD=Float64(im0),
+        phase=Float64(phase0),
+        weighted_phase=Float64(weighted0),
+        dReD_domega=Float64(dre),
+        dImD_domega=Float64(dim),
+        dReD_fd=Float64(dre_fd),
+        dImD_fd=Float64(dim_fd),
+        dphase_ad=Float64(dphase_ad),
+        dphase_formula=Float64(dphase_formula),
+        dphase_fd=Float64(dphase_fd),
+        dphase_raw_fd=Float64(dphase_raw_fd),
+        dphase_abs_diff=abs(Float64(dphase_ad) - Float64(dphase_fd)),
+        dphase_formula_abs_diff=abs(Float64(dphase_formula) - Float64(dphase_ad)),
+        dphase_raw_fd_abs_diff=abs(Float64(dphase_ad) - Float64(dphase_raw_fd)),
+        dweighted_ad=Float64(dweighted_ad),
+        dweighted_fd=Float64(dweighted_fd),
+        dweighted_abs_diff=abs(Float64(dweighted_ad) - Float64(dweighted_fd)),
+    )
+end
+
+function phase_shift_meson_number_density_derivative_reference(
+    meson::Symbol,
+    quark_params,
+    thermo_params;
+    degeneracy::Integer=meson_degeneracy(meson),
+    scheme::Symbol=:current,
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=0.05,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+)
+    degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
+    _require_positive_node_count("q_nodes", q_nodes)
+    _require_positive_node_count("omega_nodes", omega_nodes)
+    qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
+    omega_max > omega_min || throw(ArgumentError("omega_max must exceed omega_min"))
+    scheme_sym = _phase_shift_scheme_symbol(scheme)
+
+    tp = thermo_params
+    _require_nonnegative("temperature T", Float64(tp.T))
+    _require_phase_shift_isotropic_xi(Float64(tp.ξ))
+    Float64(tp.T) > 0.0 || return (
+        meson=meson,
+        density=0.0,
+        q_integral_estimate=0.0,
+        omega_shell_at_qmax=0.0,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_min=omega_min,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        degeneracy=Int(degeneracy),
+        scheme=scheme_sym,
+        derivative_backend=:forwarddiff,
+        max_formula_abs_diff=0.0,
+    )
+
+    qp = ensure_quark_params_has_A(quark_params, tp)
+    K_coeffs = _build_k_coeffs(qp)
+    q_grid, q_w = gauleg(0.0, qmax, q_nodes)
+    omega_grid, omega_w = gauleg(omega_min, omega_max, omega_nodes)
+
+    function q_shell_from_q(q::Float64)
+        omega_val = 0.0
+        for iω in eachindex(omega_grid, omega_w)
+            ω = Float64(omega_grid[iω])
+            gω = bose_distribution(ω, 0.0, Float64(tp.T))
+            re0, im0 = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta)
+            phase0 = atan(im0, re0)
+            weight_factor = _phase_shift_weight_derivative_factor(phase0, scheme_sym)
+
+            re_fun(x) = first(_propagator_components(meson, x, q, qp, tp, K_coeffs; eta=eta))
+            im_fun(x) = last(_propagator_components(meson, x, q, qp, tp, K_coeffs; eta=eta))
+            weighted_fun(x) = _phase_shift_weighted_phase(_propagator_phase(meson, x, q, qp, tp, K_coeffs; eta=eta), scheme_sym)
+
+            dre = ForwardDiff.derivative(re_fun, ω)
+            dim = ForwardDiff.derivative(im_fun, ω)
+            dphase_formula = _phase_derivative_from_components(re0, im0, dre, dim)
+            dweighted_formula = weight_factor * dphase_formula
+            dweighted_ad = ForwardDiff.derivative(weighted_fun, ω)
+            max_formula_abs_diff = max(max_formula_abs_diff, abs(Float64(dweighted_ad) - Float64(dweighted_formula)))
+
+            omega_val += omega_w[iω] * gω * dweighted_ad
+        end
+        omega_val /= (2.0 * π)
+        return (q^2 / (2.0 * π^2)) * omega_val
+    end
+
+    q_shell_weighted_sum = 0.0
+    q_shell_at_qmax = 0.0
+    max_formula_abs_diff = 0.0
+    @inbounds for iq in eachindex(q_grid, q_w)
+        q = q_grid[iq]
+        q_shell = q_shell_from_q(q)
+        q_shell_weighted_sum += q_w[iq] * q_shell
+    end
+    q_shell_at_qmax = q_shell_from_q(qmax)
+
+    density = Float64(degeneracy) * q_shell_weighted_sum
+    return (
+        meson=meson,
+        density=density,
+        q_integral_estimate=q_shell_weighted_sum,
+        omega_shell_at_qmax=q_shell_at_qmax,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_min=omega_min,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        degeneracy=Int(degeneracy),
+        scheme=scheme_sym,
+        derivative_backend=:forwarddiff,
+        max_formula_abs_diff=max_formula_abs_diff,
+    )
+end
+
+function phase_shift_meson_density_derivative_reference_summary(
+    quark_params,
+    thermo_params;
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
+    d_pi::Integer=meson_degeneracy(:pi),
+    d_K::Integer=meson_degeneracy(:K),
+    scheme::Symbol=:current,
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=0.05,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+)
+    pi_density = phase_shift_meson_number_density_derivative_reference(
+        pi_channel, quark_params, thermo_params;
+        degeneracy=Int(d_pi), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
+        omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes, eta=eta,
+    )
+    k_density = phase_shift_meson_number_density_derivative_reference(
+        k_channel, quark_params, thermo_params;
+        degeneracy=Int(d_K), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
+        omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes, eta=eta,
+    )
+    n_pi = Float64(pi_density.density)
+    n_K = Float64(k_density.density)
+    return (
+        T_fm=Float64(thermo_params.T),
+        xi=Float64(thermo_params.ξ),
+        pi_channel=pi_channel,
+        k_channel=k_channel,
+        d_pi=Int(d_pi),
+        d_K=Int(d_K),
+        n_pi=n_pi,
+        n_K=n_K,
+        kpi_ratio=iszero(n_pi) ? NaN : n_K / n_pi,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_min=omega_min,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        eta=eta,
+        scheme=_phase_shift_scheme_symbol(scheme),
+        derivative_backend=:forwarddiff,
+        max_formula_abs_diff=max(pi_density.max_formula_abs_diff, k_density.max_formula_abs_diff),
+        pi_density=pi_density,
+        k_density=k_density,
+    )
 end
 
 """

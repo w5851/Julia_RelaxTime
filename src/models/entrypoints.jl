@@ -17,6 +17,8 @@ export solve_gap_and_meson_point
 export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
 export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
 export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
+export solve_phase_shift_point_diagnostic_from_meson_point
+export solve_phase_shift_derivative_reference_from_meson_point
 export solve_gas_liquid_point
 export solve_rotation_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
@@ -57,7 +59,9 @@ end
          isdefined(workflow, :solve_strict_bw_meson_density_from_meson_point) &&
          isdefined(workflow, :solve_gap_and_strict_bw_meson_density_point) &&
          isdefined(workflow, :solve_phase_shift_meson_density_from_meson_point) &&
-         isdefined(workflow, :solve_gap_and_phase_shift_meson_density_point))
+         isdefined(workflow, :solve_gap_and_phase_shift_meson_density_point) &&
+         isdefined(workflow, :solve_phase_shift_derivative_reference_from_meson_point) &&
+         isdefined(workflow, :solve_phase_shift_point_diagnostic_from_meson_point))
         error("MesonDensityWorkflow module loaded but required API is missing")
     end
     return workflow
@@ -236,6 +240,14 @@ end
 
 function solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
     return _meson_density_workflow_module().solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
+end
+
+function solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
+end
+
+function solve_phase_shift_derivative_reference_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_phase_shift_derivative_reference_from_meson_point(args...; kwargs...)
 end
 
 function solve_gas_liquid_point(args...; kwargs...)

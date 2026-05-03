@@ -23,6 +23,8 @@ using Main.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                          DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                          DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                          meson_degeneracy,
+                         phase_shift_point_diagnostic,
+                         phase_shift_meson_density_derivative_reference_summary,
                          phase_shift_meson_density_summary,
                          strict_bw_meson_density_summary,
                          strict_bw_qpole_density_summary,
@@ -36,6 +38,8 @@ export solve_strict_bw_meson_density_from_meson_point
 export solve_gap_and_strict_bw_meson_density_point
 export solve_phase_shift_meson_density_from_meson_point
 export solve_gap_and_phase_shift_meson_density_point
+export solve_phase_shift_point_diagnostic_from_meson_point
+export solve_phase_shift_derivative_reference_from_meson_point
 
 @inline function _require_result_field(result, field::Symbol)
     hasproperty(result, field) || throw(ArgumentError("meson workflow result missing required field: $(field)"))
@@ -326,6 +330,85 @@ function solve_gap_and_phase_shift_meson_density_point(
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
     density = solve_phase_shift_meson_density_from_meson_point(meson_point; density_kwargs...)
     return merge(meson_point, (phase_shift_meson_density=density,))
+end
+
+function solve_phase_shift_derivative_reference_from_meson_point(
+    meson_point;
+    scheme::Symbol=:current,
+    qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
+    q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=0.05,
+    omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
+    omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
+    eta::Float64=1e-6,
+)
+    thermo_params_raw = _require_result_field(meson_point, :thermo_params)
+    quark_params_raw = _require_result_field(meson_point, :quark_params)
+
+    thermo_params = normalize_thermo_params(thermo_params_raw)
+    quark_params = ensure_quark_params_has_A(
+        normalize_quark_params(quark_params_raw),
+        thermo_params,
+    )
+
+    density = phase_shift_meson_density_derivative_reference_summary(
+        quark_params,
+        thermo_params;
+        scheme=scheme,
+        qmax=qmax,
+        q_nodes=q_nodes,
+        omega_min=omega_min,
+        omega_max=omega_max,
+        omega_nodes=omega_nodes,
+        eta=eta,
+    )
+
+    return merge(density, (
+        m_pi=haskey(meson_point.meson_results, :pi) ? Float64(meson_point.meson_results[:pi].mass) : NaN,
+        m_K=haskey(meson_point.meson_results, :K) ? Float64(meson_point.meson_results[:K].mass) : NaN,
+    ))
+end
+
+function solve_phase_shift_point_diagnostic_from_meson_point(
+    meson_point;
+    mesons::Tuple=(:pi, :K),
+    q_values::AbstractVector{<:Real}=[0.0],
+    omega_values::AbstractVector{<:Real}=[0.2],
+    scheme::Symbol=:current,
+    eta::Float64=1e-6,
+    fd_step::Float64=1e-5,
+)
+    thermo_params_raw = _require_result_field(meson_point, :thermo_params)
+    quark_params_raw = _require_result_field(meson_point, :quark_params)
+
+    thermo_params = normalize_thermo_params(thermo_params_raw)
+    quark_params = ensure_quark_params_has_A(
+        normalize_quark_params(quark_params_raw),
+        thermo_params,
+    )
+
+    rows = NamedTuple[]
+    for meson in mesons, q in q_values, ω in omega_values
+        push!(rows, phase_shift_point_diagnostic(
+            meson,
+            Float64(ω),
+            Float64(q),
+            quark_params,
+            thermo_params;
+            scheme=scheme,
+            eta=eta,
+            fd_step=fd_step,
+        ))
+    end
+
+    return (
+        T_fm=Float64(thermo_params.T),
+        xi=Float64(thermo_params.ξ),
+        scheme=scheme,
+        eta=eta,
+        fd_step=fd_step,
+        rows=rows,
+    )
 end
 
 end # module
