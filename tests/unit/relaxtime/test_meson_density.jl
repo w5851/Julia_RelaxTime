@@ -19,6 +19,9 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    _phase_shift_scheme_symbol,
                                    bose_distribution,
                                    meson_degeneracy,
+                                   phase_shift_point_diagnostic,
+                                   phase_shift_meson_density_derivative_reference_summary,
+                                   phase_shift_meson_number_density_derivative_reference,
                                    phase_shift_meson_number_density,
                                    phase_shift_meson_density_summary,
                                    strict_bw_meson_density_summary,
@@ -184,4 +187,62 @@ end
     @test summary.k_density.scheme == :phase_shift_gbu_reference
     @test summary.n_pi > 0.0
     @test summary.n_K > 0.0
+end
+
+@testset "MesonDensity derivative-reference helper is AD-backed" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+
+    single = phase_shift_meson_number_density_derivative_reference(
+        :pi, qp, tp;
+        scheme=:current,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    @test single.derivative_backend == :forwarddiff
+    @test isfinite(single.density)
+    @test single.max_formula_abs_diff < 1e-8
+
+    summary = phase_shift_meson_density_derivative_reference_summary(
+        qp, tp;
+        scheme=:gbu_reference,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    @test summary.derivative_backend == :forwarddiff
+    @test summary.scheme == :phase_shift_gbu_reference
+    @test isfinite(summary.n_pi)
+    @test isfinite(summary.n_K)
+    @test summary.max_formula_abs_diff < 1e-8
+end
+
+@testset "MesonDensity phase-shift point diagnostic AD vs FD" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp_iso = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+    tp_aniso = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.1)
+
+    diag_iso = phase_shift_point_diagnostic(:pi, 0.4, 0.5, qp, tp_iso; scheme=:current, fd_step=1e-5)
+    @test isfinite(diag_iso.dphase_ad)
+    @test isfinite(diag_iso.dphase_fd)
+    @test isfinite(diag_iso.dphase_raw_fd)
+    @test isfinite(diag_iso.dweighted_ad)
+    @test isfinite(diag_iso.dweighted_fd)
+    @test diag_iso.dphase_formula_abs_diff < 1e-8
+    @test abs(diag_iso.dReD_domega - diag_iso.dReD_fd) > 1e-3
+    @test abs(diag_iso.dImD_domega - diag_iso.dImD_fd) > 1e-3
+
+    diag_aniso = phase_shift_point_diagnostic(:pi, 0.4, 0.5, qp, tp_aniso; scheme=:current, fd_step=1e-5)
+    @test diag_aniso.xi ≈ 0.1
+    @test isfinite(diag_aniso.dphase_ad)
+    @test isfinite(diag_aniso.dphase_fd)
+    @test isfinite(diag_aniso.dphase_raw_fd)
+    @test diag_aniso.dphase_formula_abs_diff < 1e-8
+    @test abs(diag_aniso.dReD_domega - diag_aniso.dReD_fd) > 1e-3
+    @test abs(diag_aniso.dImD_domega - diag_aniso.dImD_fd) > 1e-3
 end

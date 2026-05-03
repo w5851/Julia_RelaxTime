@@ -38,7 +38,7 @@ const PV_GAP_REL = 1e-6
 end
 
 """计算给定能量和质量对应的动量"""
-@inline @fastmath function internal_momentum(E::Float64, m::Float64)
+@inline @fastmath function internal_momentum(E::T, m::Float64) where {T<:Real}
     m_pos = max(m, 0.0)
     return sqrt(E * E - m_pos * m_pos)
 end

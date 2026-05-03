@@ -8,10 +8,14 @@ export B0_correction, A_correction, A_aniso,
 
 import ..GaussLegendre  # needed by IntervalQuadratureStrategies
 include("../integration/IntervalQuadratureStrategies.jl")
+using ForwardDiff
 using ..GaussLegendre: transform_standard16, transform_standard32, gauleg, gausslegendre
 using Main.PNJLQuarkDistributions_Aniso: correction_cos_theta_coefficient, distribution_aniso
 using ..OneLoopIntegrals: internal_momentum, EPS_K,
     energy_cutoff, singularity_k_positive, const_integral_term_A
+
+@inline _primal_value(x::Float64) = x
+@inline _primal_value(x::ForwardDiff.Dual) = ForwardDiff.value(x)
 
 """ k>0时
 对x积分所得结果的Sokhotski–Plemelj formula实部部分(柯西主值积分)
@@ -21,7 +25,7 @@ using ..OneLoopIntegrals: internal_momentum, EPS_K,
 A对应的形参名:coeff_x
 B对应的形参名:denominator_const
 """
-function real_integral_tool(coeff_x::Float64, denominator_const::Float64)
+function real_integral_tool(coeff_x::Float64, denominator_const::T) where {T<:Real}
     term1 = -2*denominator_const/coeff_x^2
     term2 = denominator_const^2/coeff_x^3
     log_arg = (coeff_x + denominator_const) / (coeff_x - denominator_const)
@@ -31,19 +35,19 @@ function real_integral_tool(coeff_x::Float64, denominator_const::Float64)
 end
 
 """对x积分的虚部部分"""
-function imag_integral_tool(coeff_x::Float64, denominator_const::Float64)
+function imag_integral_tool(coeff_x::Float64, denominator_const::T) where {T<:Real}
     return π *denominator_const ^ 2 / coeff_x^3
 end
 
 """阶跃函数,确保奇点出现在积分范围内时才贡献虚部"""
-@inline function heaviside_step(coeff_x::Float64, denominator_const::Float64, x_min::Float64, x_max::Float64)
+@inline function heaviside_step(coeff_x::T1, denominator_const::T2, x_min::Float64, x_max::Float64) where {T1<:Real,T2<:Real}
     # 计算奇点位置
-    x = -denominator_const / coeff_x 
+    x = -_primal_value(denominator_const) / _primal_value(coeff_x)
     return (x >= x_min && x <= x_max) ? 1.0 : 0.0
 end
 
 """coeff_x和denominator_const的计算函数"""
-@inline function compute_coefficients(λ::Float64, k::Float64, m::Float64, m_prime::Float64, E::Float64)
+@inline function compute_coefficients(λ::T, k::Float64, m::Float64, m_prime::Float64, E::Float64) where {T<:Real}
     if k>EPS_K # k>0
         denominator_const = λ^2+2*λ*E + m^2 - m_prime^2-k^2
         p = internal_momentum(E,m)
@@ -61,8 +65,8 @@ end
 返回值 f(E) = (4/3) * p(E) * correction_cos_theta_coefficient(...)
 此函数仅计算分子部分，便于在外部进行奇点减法或在不同分母下复用。
 """
-function real_integrand_k_zero_numer(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+function real_integrand_k_zero_numer(sign_::Symbol, λ::R, m::Float64, m_prime::Float64, E::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
     p = internal_momentum(E, m)
     return (4.0/3.0) * p * correction_cos_theta_coefficient(sign_, p, m, μ, T, Φ, Φbar, ξ)
 end
@@ -72,22 +76,22 @@ end
 返回值 denom(E) = coeff_E * E + denominator_const
 此处复用 `compute_coefficients` 的 k=0 分支以确保与其它代码一致。
 """
-@inline function real_integrand_k_zero_denom(λ::Float64, m::Float64, m_prime::Float64, E::Float64)
+@inline function real_integrand_k_zero_denom(λ::T, m::Float64, m_prime::Float64, E::Float64) where {T<:Real}
     coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, E)
     return coeff_E * E + denominator_const
 end
 
 """k=0时的积分实部被积函数（保留原名，用分子/分母组合）"""
-function real_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+function real_integrand_k_zero(sign_::Symbol, λ::R, m::Float64, m_prime::Float64, E::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
     num = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T, μ, Φ, Φbar)
     den = real_integrand_k_zero_denom(λ, m, m_prime, E)
     return isfinite(den) && isfinite(num) ? num / den : 0.0
 end
 
 """k>0时的积分实部被积函数"""
-function real_integrand_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+function real_integrand_k_positive(sign_::Symbol, λ::R, k::Float64, m::Float64, m_prime::Float64, E::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
     coeff_x, denominator_const = compute_coefficients(λ, k, m, m_prime, E)
     p = internal_momentum(E,m)
     # 含各向异性修正项
@@ -97,8 +101,8 @@ function real_integrand_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Fl
 end
 
 """k=0时的积分虚部函数"""
-function imag_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+function imag_integrand_k_zero(sign_::Symbol, λ::R, m::Float64, m_prime::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
     coeff_E, denominator_const = compute_coefficients(λ, 0.0, m, m_prime, 0.0)
     E_pole = -denominator_const / coeff_E
     Θ = heaviside_step(coeff_E, denominator_const, m, energy_cutoff(m))
@@ -107,15 +111,14 @@ function imag_integrand_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::
     else
         p_pole = internal_momentum(E_pole,m)
         # 含各向异性修正项
-        imag_ = π*(4.0/3.0)*p_pole/coeff_E*
-            correction_cos_theta_coefficient(sign_, p_pole, m, μ, T, Φ, Φbar, ξ)
+        imag_ = R(π*(4.0/3.0)*p_pole)*correction_cos_theta_coefficient(sign_, p_pole, m, μ, T, Φ, Φbar, ξ) / coeff_E
         return imag_
     end
 end
 
 """k>0时的积分虚部被积函数"""
-function imag_integrand_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, E::Float64,
-    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64)
+function imag_integrand_k_positive(sign_::Symbol, λ::R, k::Float64, m::Float64, m_prime::Float64, E::Float64,
+    ξ::Float64, T::Float64, μ::Float64, Φ::Float64, Φbar::Float64) where {R<:Real}
 
     coeff_x, denominator_const = compute_coefficients(λ, k, m, m_prime, E)
     
@@ -127,18 +130,18 @@ function imag_integrand_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Fl
 end
 
 """k=0时的 B0分量 含各向异性修正项的积分计算"""
-function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64)
+function tilde_B0_correction_k_zero(sign_::Symbol, λ::T, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
     Emin = m
     Emax = energy_cutoff(m)
     # 采用奇点减法：f(E) = (4/3)*p(E)*correction(...) ，integrand = f(E) / (coeff_E*E + denominator_const)
-    coeff_E = 2.0 * λ
+    coeff_E = T(2) * λ
     denominator_const = λ^2 + m^2 - m_prime^2
 
     # 寻找奇点 E0，当 coeff_E != 0 时
     E0 = nothing
-    if coeff_E != 0.0
-        E0_val = -denominator_const / coeff_E
+    if _primal_value(coeff_E) != 0.0
+        E0_val = -_primal_value(denominator_const) / _primal_value(coeff_E)
         if isfinite(E0_val) && (E0_val >= Emin) && (E0_val <= Emax)
             E0 = E0_val
         end
@@ -155,34 +158,37 @@ function tilde_B0_correction_k_zero(sign_::Symbol, λ::Float64, m::Float64, m_pr
     # 使用 GL 节点处直接评估剩余函数 (f(E)-A)/den，节点恰好命中奇点的概率极小。
     if E0 !== nothing
         # 直接调用分子函数计算 A = f(E0)
-        A = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E0, ξ, T, μ, Φ, Φbar)
-        vals = similar(nodes)
+        A = real_integrand_k_zero_numer(sign_, λ, m, m_prime, E0, ξ, T0, μ, Φ, Φbar)
+        real_part = zero(T)
         @inbounds for i in eachindex(nodes)
             E = nodes[i]
             den = coeff_E * E + denominator_const
-            v = (real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T, μ, Φ, Φbar) - A)
-            vals[i] = isfinite(den) && isfinite(v) ? v / den : 0.0
+            v = (real_integrand_k_zero_numer(sign_, λ, m, m_prime, E, ξ, T0, μ, Φ, Φbar) - A)
+            if isfinite(den) && isfinite(v)
+                real_part += weights[i] * (v / den)
+            end
         end
-        real_part = sum(weights .* vals)
         # 将常数项 A 的主值积分解析部分加回：
         # PV ∫_Emin^Emax A / (coeff_E * E + denominator_const) dE = A/coeff_E * ln|coeff_E*E + denominator_const| |_Emin^Emax
-        if coeff_E != 0.0
+        if _primal_value(coeff_E) != 0.0
             real_part += A/coeff_E * (log(abs(coeff_E * Emax + denominator_const)) - log(abs(coeff_E * Emin + denominator_const)))
         end
         imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
-            ξ, T, μ, Φ, Φbar)
+            ξ, T0, μ, Φ, Φbar)
         return real_part, imag_part
     else
         # 无奇点或 coeff_E == 0：直接用 GL 对原始实部被积函数求积
-        vals = similar(nodes)
+        real_part = zero(T)
         @inbounds for i in eachindex(nodes)
             E = nodes[i]
-            vals[i] = real_integrand_k_zero(sign_, λ, m, m_prime, E,
-                ξ, T, μ, Φ, Φbar)
+            v = real_integrand_k_zero(sign_, λ, m, m_prime, E,
+                ξ, T0, μ, Φ, Φbar)
+            if isfinite(v)
+                real_part += weights[i] * v
+            end
         end
-        real_part = sum(weights .* vals)
         imag_part = imag_integrand_k_zero(sign_, λ, m, m_prime,
-            ξ, T, μ, Φ, Φbar)
+            ξ, T0, μ, Φ, Φbar)
         return real_part , imag_part
     end
 end
@@ -202,11 +208,12 @@ end
 
 返回在 [Emin, Emax] 范围内的有效根。
 """
-function find_roots_AB(λ::Float64, k::Float64, m::Float64, m_prime::Float64, Emin::Float64, Emax::Float64)
-    C = λ^2 + m^2 - m_prime^2 - k^2
+function find_roots_AB(λ::T, k::Float64, m::Float64, m_prime::Float64, Emin::Float64, Emax::Float64) where {T<:Real}
+    λ0 = _primal_value(λ)
+    C = λ0^2 + m^2 - m_prime^2 - k^2
     
-    a = k^2 - λ^2
-    b = -λ * C
+    a = k^2 - λ0^2
+    b = -λ0 * C
     c = -(k^2 * m^2 + C^2 / 4)
     
     # 处理 a ≈ 0 的情况 (k ≈ |λ|)
@@ -220,7 +227,7 @@ function find_roots_AB(λ::Float64, k::Float64, m::Float64, m_prime::Float64, Em
             # 验证原方程
             p = sqrt(max(0.0, E^2 - m^2))
             A = 2*k*p
-            B = λ^2 + 2*λ*E + m^2 - m_prime^2 - k^2
+            B = λ0^2 + 2*λ0*E + m^2 - m_prime^2 - k^2
             if abs(A + B) < 1e-10 || abs(A - B) < 1e-10
                 return [E]
             end
@@ -249,7 +256,7 @@ function find_roots_AB(λ::Float64, k::Float64, m::Float64, m_prime::Float64, Em
             # 验证原方程 A ± B = 0
             p = sqrt(E^2 - m^2)
             A = 2*k*p
-            B = λ^2 + 2*λ*E + m^2 - m_prime^2 - k^2
+            B = λ0^2 + 2*λ0*E + m^2 - m_prime^2 - k^2
             
             # A + B = 0 或 A - B = 0
             if abs(A + B) < 1e-10 || abs(A - B) < 1e-10
@@ -295,17 +302,17 @@ end
 返回:
 - (real_part, imag_part) 或 (real_part, imag_part, diagnostics)
 """
-function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
+function tilde_B0_correction_k_positive(sign_::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
     Φ::Float64, Φbar::Float64, ξ::Float64;
-    diagnostics::Bool=false)
+    diagnostics::Bool=false) where {T<:Real}
     
     t_start = time()
     Emin = m
     Emax = energy_cutoff(m)
 
     # 被积函数闭包
-    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T, μ, Φ, Φbar)
-    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T, μ, Φ, Φbar)
+    integrand_real(E) = real_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar)
+    integrand_imag(E) = imag_integrand_k_positive(sign_, λ, k, m, m_prime, E, ξ, T0, μ, Φ, Φbar)
 
     # 获取虚部积分区间
     intervals_imag, _ = singularity_k_positive(λ, k, m, m_prime, Emin, Emax)
@@ -344,7 +351,7 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
     end
     
     # 计算虚部（使用标准 16 节点 GL，无分配）
-    imag_part = 0.0
+    imag_part = zero(T)
     if !isempty(intervals_imag)
         for (E1, E2) in intervals_imag
             half = (E2 - E1) / 2
@@ -376,13 +383,13 @@ function tilde_B0_correction_k_positive(sign_::Symbol, λ::Float64, k::Float64, 
 end
 
 """含各向异性修正项的 B0分量 积分计算"""
-function tilde_B0_correction(sign_::Symbol, λ::Float64, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64)
+function tilde_B0_correction(sign_::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
     if k > EPS_K
-        return tilde_B0_correction_k_positive(sign_, λ, k, m, m_prime, μ, T,
+        return tilde_B0_correction_k_positive(sign_, λ, k, m, m_prime, μ, T0,
             Φ, Φbar, ξ)
     else
-        return tilde_B0_correction_k_zero(sign_, λ, m, m_prime, μ, T,
+        return tilde_B0_correction_k_zero(sign_, λ, m, m_prime, μ, T0,
             Φ, Φbar, ξ)
     end
 end
@@ -391,13 +398,13 @@ end
     B0_correction(λ, k, m1, m2, μ1, μ2, T, Φ, Φbar, ξ)
 动量各向异性下B0的一阶修正
 """
-function B0_correction(λ::Float64, k::Float64, m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, T::Float64,
-    Φ::Float64, Φbar::Float64, ξ::Float64)
+function B0_correction(λ::T, k::Float64, m1::Float64, m2::Float64, μ1::Float64, μ2::Float64, T0::Float64,
+    Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
 
-    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T, Φ, Φbar, ξ)
-    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T, Φ, Φbar, ξ)
-    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T, Φ, Φbar, ξ)
-    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T, Φ, Φbar, ξ)
+    term1 = tilde_B0_correction(:quark, -λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ)
+    term2 = tilde_B0_correction(:antiquark, λ, k, m1, m2, μ1, T0, Φ, Φbar, ξ)
+    term3 = tilde_B0_correction(:quark, λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ)
+    term4 = tilde_B0_correction(:antiquark, -λ, k, m2, m1, μ2, T0, Φ, Φbar, ξ)
 
     # 注意：B0 的 pm=-1(antiquark) 分支语义是 NJL 中的f(-E-μ)=1-f(E+μ)
     # 这里f(E+μ)是NJL中反粒子的分布函数，为避免 PNJL 分布在负能量下的数值溢出，
