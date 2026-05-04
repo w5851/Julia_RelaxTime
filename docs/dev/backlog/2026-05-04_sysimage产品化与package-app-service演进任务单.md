@@ -2,7 +2,7 @@
 
 更新日期：2026-05-04
 
-当前状态：backlog；用于承接 `2026-05-03_并行安全任务盘点与优先级任务单.md` 收尾后的下一阶段工作。
+当前状态：Phase A 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md`；其余阶段仍保留在 backlog。
 
 > 目的：把当前已验证有效的 sysimage / precompile 冷启动优化，从“仓库内工程能力”推进到“用户默认入口、跨重启稳定复用、跨机器可分发、长期架构演进”。
 
@@ -49,12 +49,13 @@
 
 ### Phase A：wrapper 默认化
 
-- [ ] A1 盘点所有稳定 CLI，定义哪些必须默认经 `run_with_sysimage` 启动
+- [x] A1 盘点所有稳定 CLI，定义哪些必须默认经 `run_with_sysimage` 启动
   - 验收：形成白名单映射表
-- [ ] A2 为 Windows 用户入口补齐统一命令示例
+- [x] A2 为 Windows 用户入口补齐统一命令示例
   - 验收：README / guides / scripts 文档不再以裸 `julia --project=.` 作为稳定入口主示例
-- [ ] A3 评估是否补 `run_with_sysimage.sh`
+- [x] A3 评估是否补 `run_with_sysimage.sh`
   - 验收：明确 Linux/macOS 是否进入同一产品化路径
+  - 2026-05-04：Phase A 已拆到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md` 并完成首轮收口；若后续需要跨平台实机验证，可作为补充批次继续推进。
 
 ### Phase B：sysimage 获取与分发
 
@@ -98,7 +99,7 @@
 
 ## 4. 推荐顺序
 
-- [ ] Step 1：先做 Phase A wrapper 默认化
+- [x] Step 1：先做 Phase A wrapper 默认化
 - [ ] Step 2：再做 Phase B sysimage 分发
 - [ ] Step 3：然后推进 Phase C package 化
 - [ ] Step 4：在入口收敛后做 Phase D app 化
