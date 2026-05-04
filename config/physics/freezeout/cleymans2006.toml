@@ -1,0 +1,10 @@
+profile_name = "cleymans2006"
+family = "cleymans_polynomial_rational_v1"
+source_tag = "cleymans2006_like"
+
+[coefficients]
+a_GeV = 0.166
+b_GeV_inv1 = 0.139
+c_GeV_inv3 = 0.053
+d_GeV = 1.308
+e_GeV_inv1 = 0.273

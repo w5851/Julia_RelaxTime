@@ -1677,14 +1677,15 @@ end
 end
 
 """将 PNJL 平衡求解结果转换成 (quark_params, thermo_params)。"""
-function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
+function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0, mu_vec_override=nothing)
     Φ = Float64(base.x_state[4])
     Φbar = Float64(base.x_state[5])
 
     masses = base.masses
+    mu_vec = mu_vec_override === nothing ? Main.Models.normalize_mu_vec(mu_fm) : Main.Models.normalize_mu_vec(mu_vec_override)
     quark_params = QuarkParams((
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
-        μ=(u=Float64(mu_fm), d=Float64(mu_fm), s=Float64(mu_fm)),
+        μ=(u=Float64(mu_vec[1]), d=Float64(mu_vec[2]), s=Float64(mu_vec[3])),
     ))
     thermo_params = ThermoParams((T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi)))
     return (quark_params=quark_params, thermo_params=thermo_params)
@@ -1725,6 +1726,7 @@ function solve_gap_and_meson_point(
     mixed_branch_align::Symbol=:identity_track_label_output,
     mixed_seed_tracking_state=nothing,
     force_global_fallback::Bool=false,
+    flavor_mu_override=nothing,
 )
     continuation = _normalize_meson_continuation_state(continuation_state)
     effective_seed_state = (continuation.equilibrium_seed_state !== nothing && _is_default_hadron_seed(seed_state)) ? continuation.equilibrium_seed_state : seed_state
@@ -1738,20 +1740,35 @@ function solve_gap_and_meson_point(
         effective_seed_state
     end
 
-    base = Main.EquilibriumFacade.solve_equilibrium_backend(
-        T_fm,
-        mu_fm;
-        xi=xi,
-        solver_backend=solver_backend,
-        p_num=p_num,
-        t_num=t_num,
-        seed_state=seed_guess,
-        solver_kwargs=solver_kwargs,
-        models_solver=models_solver,
-        models_residual_norm_max=models_residual_norm_max,
-    )
+    base = if flavor_mu_override === nothing
+        Main.EquilibriumFacade.solve_equilibrium_backend(
+            T_fm,
+            mu_fm;
+            xi=xi,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            seed_state=seed_guess,
+            solver_kwargs=solver_kwargs,
+            models_solver=models_solver,
+            models_residual_norm_max=models_residual_norm_max,
+        )
+    else
+        Main.EquilibriumFacade.solve_equilibrium_backend(
+            T_fm,
+            collect(Main.Models.normalize_mu_vec(collect(flavor_mu_override)));
+            xi=xi,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            seed_state=seed_guess,
+            solver_kwargs=solver_kwargs,
+            models_solver=models_solver,
+            models_residual_norm_max=models_residual_norm_max,
+        )
+    end
 
-    params = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
+    params = build_equilibrium_params(base, T_fm, mu_fm; xi=xi, mu_vec_override=base.mu_vec)
     quark_params = params.quark_params
     thermo_params = params.thermo_params
 

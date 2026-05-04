@@ -7,6 +7,7 @@
 module ScanConfig
 
 export TmuScanConfig, TrhoScanConfig
+export FreezeoutScanConfig
 export scan_kwargs
 
 Base.@kwdef struct TmuScanConfig
@@ -51,6 +52,27 @@ Base.@kwdef struct TrhoScanConfig
     model_kind::Union{Nothing, Symbol} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
+    progress_cb::Union{Nothing, Function} = nothing
+    nlsolve_kwargs::NamedTuple = (;)
+end
+
+Base.@kwdef struct FreezeoutScanConfig
+    sqrt_s_NN_values::Union{Nothing, AbstractVector{<:Real}} = nothing
+    xi_values::Union{Nothing, AbstractVector{<:Real}} = nothing
+    output_path::Union{Nothing, AbstractString} = nothing
+    overwrite::Union{Nothing, Bool} = nothing
+    resume::Union{Nothing, Bool} = nothing
+    bootstrap_multiseed::Union{Nothing, Bool} = nothing
+    solver_backend::Union{Nothing, Symbol} = nothing
+    auto_pnjl_backend::Union{Nothing, Symbol} = nothing
+    semantic_mode::Union{Nothing, Symbol} = nothing
+    selector::Union{Nothing, Function} = nothing
+    model_kind::Union{Nothing, Symbol} = nothing
+    p_num::Union{Nothing, Int} = nothing
+    t_num::Union{Nothing, Int} = nothing
+    profile_name::Union{Nothing, AbstractString} = nothing
+    path_profile_name::Union{Nothing, AbstractString} = nothing
+    traversal::Union{Nothing, Symbol} = nothing
     progress_cb::Union{Nothing, Function} = nothing
     nlsolve_kwargs::NamedTuple = (;)
 end
@@ -103,6 +125,28 @@ function scan_kwargs(cfg::TrhoScanConfig)::NamedTuple
         model_kind=cfg.model_kind,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
+        progress_cb=cfg.progress_cb,
+    ))
+end
+
+function scan_kwargs(cfg::FreezeoutScanConfig)::NamedTuple
+    return _drop_nothing((
+        sqrt_s_NN_values=cfg.sqrt_s_NN_values,
+        xi_values=cfg.xi_values,
+        output_path=cfg.output_path,
+        overwrite=cfg.overwrite,
+        resume=cfg.resume,
+        bootstrap_multiseed=cfg.bootstrap_multiseed,
+        solver_backend=cfg.solver_backend,
+        auto_pnjl_backend=cfg.auto_pnjl_backend,
+        semantic_mode=cfg.semantic_mode,
+        selector=cfg.selector,
+        model_kind=cfg.model_kind,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+        profile_name=cfg.profile_name,
+        path_profile_name=cfg.path_profile_name,
+        traversal=cfg.traversal,
         progress_cb=cfg.progress_cb,
     ))
 end

@@ -14,13 +14,17 @@
 2. [Algorithms.md](Algorithms.md)：理解采样策略、扫描顺序与契约边界
 3. [TmuScan.md](TmuScan.md)：T-μ 扫描入口与参数口径
 4. [TrhoScan.md](TrhoScan.md)：T-ρ 扫描入口与参数口径
-5. [SamplingGrid.md](SamplingGrid.md)：默认密度网格与加密策略
-6. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
+5. [FreezeoutScan.md](FreezeoutScan.md)：freeze-out 路径扫描入口与路径契约
+6. [FreezeoutMesonDensityScan.md](FreezeoutMesonDensityScan.md)：freeze-out 路径上的介子数密度 workflow
+7. [SamplingGrid.md](SamplingGrid.md)：默认密度网格与加密策略
+8. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
 
 本主题覆盖的 `Models` 公开导出为：
 
 - `Models.run_tmu_scan`
 - `Models.run_trho_scan`
+- `Models.run_freezeout_fixedmu_scan`
+- `Models.run_freezeout_meson_density_scan`
 - `Models.build_default_rho_grid`
 
 本主题已直接吸收以下内容，不再依赖旧 `pnjl` 页面承载主体说明：

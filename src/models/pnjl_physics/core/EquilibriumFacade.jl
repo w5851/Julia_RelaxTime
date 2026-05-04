@@ -15,6 +15,7 @@ if !isdefined(Main, :EquilibriumFacade)
 """
 
 using StaticArrays
+using LinearAlgebra: norm
 import Main: Models
 
 const calculate_mass_vec = Models.calculate_mass_vec
@@ -22,6 +23,7 @@ const create_model = Models.create_model
 const solve_gap = Models.solve_gap
 const state_vector = Models.state_vector
 const normalize_mu_vec = Models.normalize_mu_vec
+const gap_residual = Models.gap_residual
 const PNJLModel = Models.PNJLModel
 const FixedMu = Models.FixedMu
 const solve = Models.solve
@@ -220,6 +222,81 @@ function solve_equilibrium_backend(
         masses=masses,
         iterations=solved_iterations,
         residual_norm=solved_residual_norm,
+    )
+end
+
+"""solve_equilibrium_backend(T_fm, mu_vec; ...) -> NamedTuple
+
+Flavor-chemical-potential overload used by workflow/path layers when
+`μ_u, μ_d, μ_s` must differ explicitly.
+"""
+function solve_equilibrium_backend(
+    T_fm::Real,
+    mu_vec::AbstractVector{<:Real};
+    xi::Real=0.0,
+    solver_backend::Symbol=:auto,
+    p_num::Int=24,
+    t_num::Int=8,
+    seed_state=nothing,
+    solver_kwargs::NamedTuple=(;),
+    models_solver=nothing,
+    models_residual_norm_max::Real=1e-4,
+    model=nothing,
+)
+    kind = :PNJL
+    m = model === nothing ? _get_model(kind) : model
+    μ = normalize_mu_vec(mu_vec)
+
+    effective_solver_backend = if solver_backend === :auto
+        :models
+    else
+        solver_backend
+    end
+
+    st = if effective_solver_backend === :legacy
+        solve_gap(m, T_fm, μ;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            solver_kwargs...,
+        )
+    elseif effective_solver_backend === :models
+        if models_solver === nothing
+            solve_gap(m, T_fm, μ;
+                solver_backend=:models,
+                initial_guess=seed_state,
+                residual_norm_max=models_residual_norm_max,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+        else
+            solve_gap(m, T_fm, μ;
+                solver_backend=:models,
+                solver=models_solver,
+                initial_guess=seed_state,
+                residual_norm_max=models_residual_norm_max,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+            )
+        end
+    else
+        throw(ArgumentError("unknown solver_backend=$solver_backend (expected :auto, :legacy or :models)"))
+    end
+
+    x_state = state_vector(st)
+    masses = calculate_mass_vec(m, SVector{3}(Tuple(x_state[1:3])))
+    residual = gap_residual(m, x_state, T_fm, μ; xi=xi, p_num=p_num, t_num=t_num)
+    residual_norm = norm(residual)
+
+    return (
+        converged=isfinite(residual_norm) && residual_norm <= Float64(models_residual_norm_max),
+        x_state=SVector{5}(Tuple(x_state)),
+        mu_vec=SVector{3}(Tuple(μ)),
+        masses=masses,
+        iterations=-1,
+        residual_norm=Float64(residual_norm),
     )
 end
 

@@ -10,6 +10,8 @@ Models 统一流程入口（阶段 C）：
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_freezeout_fixedmu_scan
+export run_freezeout_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
@@ -73,6 +75,14 @@ end
 
 function run_trho_scan(args...; kwargs...)
     return TrhoScan.run_trho_scan(args...; kwargs...)
+end
+
+function run_freezeout_fixedmu_scan(args...; kwargs...)
+    return FreezeoutPathScan.run_freezeout_fixedmu_scan(args...; kwargs...)
+end
+
+function run_freezeout_meson_density_scan(args...; kwargs...)
+    return FreezeoutMesonDensityScan.run_freezeout_meson_density_scan(args...; kwargs...)
 end
 
 function build_default_rho_grid(args...; kwargs...)

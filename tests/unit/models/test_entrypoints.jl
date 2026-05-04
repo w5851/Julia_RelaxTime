@@ -57,6 +57,8 @@ Models.pnjl_module()
     @testset "薄转发接口存在" begin
         @test isdefined(Models, :run_tmu_scan)
         @test isdefined(Models, :run_trho_scan)
+        @test isdefined(Models, :run_freezeout_fixedmu_scan)
+        @test isdefined(Models, :run_freezeout_meson_density_scan)
         @test isdefined(Models, :build_default_rho_grid)
         @test isdefined(Models, :default_scan_numeric_options)
         @test isdefined(Models, :solve_pnjl_point)

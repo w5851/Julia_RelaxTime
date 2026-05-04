@@ -1,0 +1,7 @@
+profile_name = "freezeout_plus_constT_proxy"
+family = "freezeout_plus_constT_v1"
+source_tag = "provisional_proxy_not_strict_literature_reproduction"
+
+[parameters]
+switch_sqrt_s_NN_GeV = 8.0
+constant_T_MeV = 166.0

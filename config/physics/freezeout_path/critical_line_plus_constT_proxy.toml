@@ -1,0 +1,7 @@
+profile_name = "critical_line_plus_constT_proxy"
+family = "freezeout_plus_constT_v1"
+source_tag = "semantic_proxy_for_blaschke2019col_right_panel_not_strict_reproduction"
+
+[parameters]
+switch_sqrt_s_NN_GeV = 8.0
+constant_T_MeV = 166.0

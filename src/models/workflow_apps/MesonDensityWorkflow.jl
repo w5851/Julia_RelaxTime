@@ -286,6 +286,10 @@ end
 """
 function solve_phase_shift_meson_density_from_meson_point(
     meson_point;
+    μ_pi::Float64=0.0,
+    μ_K::Float64=0.0,
+    d_pi::Integer=meson_degeneracy(:pi),
+    d_K::Integer=meson_degeneracy(:K),
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -306,6 +310,10 @@ function solve_phase_shift_meson_density_from_meson_point(
     density = phase_shift_meson_density_summary(
         quark_params,
         thermo_params;
+        μ_pi=μ_pi,
+        μ_K=μ_K,
+        d_pi=Int(d_pi),
+        d_K=Int(d_K),
         scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,
@@ -334,6 +342,10 @@ end
 
 function solve_phase_shift_derivative_reference_from_meson_point(
     meson_point;
+    μ_pi::Float64=0.0,
+    μ_K::Float64=0.0,
+    d_pi::Integer=meson_degeneracy(:pi),
+    d_K::Integer=meson_degeneracy(:K),
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -354,6 +366,10 @@ function solve_phase_shift_derivative_reference_from_meson_point(
     density = phase_shift_meson_density_derivative_reference_summary(
         quark_params,
         thermo_params;
+        μ_pi=μ_pi,
+        μ_K=μ_K,
+        d_pi=Int(d_pi),
+        d_K=Int(d_K),
         scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,

@@ -19,6 +19,8 @@ include(joinpath(@__DIR__, "exports_public.jl"))
 
 # Keep key entrypoint exports explicitly in this file for governance checks.
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_freezeout_fixedmu_scan
+export run_freezeout_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
@@ -122,7 +124,12 @@ include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
 include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutPathProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "FlavorChemicalProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "MesonChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
 
 using .SeedStrategies
@@ -134,7 +141,12 @@ using .AbstractSusceptibilityProvider
 using .ConservedChargeSusceptibilities
 using .MagneticIntegrals
 using .MagneticThermodynamics
+using .FreezeoutProfiles
+using .FreezeoutPathProfiles
+using .FlavorChemicalProfiles
+using .MesonChemicalProfiles
 using .TmuScan
+using .FreezeoutPathScan
 using .TrhoScan
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
@@ -171,6 +183,7 @@ include(joinpath(@__DIR__, "workflow_apps", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutMesonDensityScan.jl"))
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
 include(joinpath(@__DIR__, "precompile", "registry.jl"))
@@ -183,6 +196,8 @@ const Integrals = PNJLCore.PNJLIntegrals
 const Constants_PNJL = Main.Constants_PNJL
 const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
+const FreezeoutScanConfig = ScanConfig.FreezeoutScanConfig
+const MesonChemicalProfile = MesonChemicalProfiles.MesonChemicalProfile
 const update! = SeedStrategies.update!
 
 @inline function vacuum_integral(mass)

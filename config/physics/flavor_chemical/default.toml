@@ -1,0 +1,9 @@
+profile_name = "default"
+source_tag = "equal_flavor_fixedmu"
+family = "flavor_ratio_to_muq_v1"
+apply_to_equilibrium = true
+
+[coefficients]
+mu_u_over_muq = 1.0
+mu_d_over_muq = 1.0
+mu_s_over_muq = 1.0

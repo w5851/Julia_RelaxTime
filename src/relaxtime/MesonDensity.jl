@@ -694,6 +694,10 @@ end
     throw(ArgumentError("$(name) must be > 1, got $(n)"))
 end
 
+@inline function _phase_shift_omega_lower_bound(omega_min::Float64, μ::Float64)::Float64
+    return omega_min > μ ? omega_min : nextfloat(μ)
+end
+
 @inline function _complex_phase(z::Complex{T})::T where {T<:Real}
     return atan(imag(z), real(z))
 end
@@ -867,6 +871,7 @@ function phase_shift_meson_number_density_derivative_reference(
     quark_params,
     thermo_params;
     degeneracy::Integer=meson_degeneracy(meson),
+    μ::Float64=0.0,
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -879,7 +884,8 @@ function phase_shift_meson_number_density_derivative_reference(
     _require_positive_node_count("q_nodes", q_nodes)
     _require_positive_node_count("omega_nodes", omega_nodes)
     qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
-    omega_max > omega_min || throw(ArgumentError("omega_max must exceed omega_min"))
+    omega_lower = _phase_shift_omega_lower_bound(omega_min, μ)
+    omega_max > omega_lower || throw(ArgumentError("omega_max must exceed effective omega_min=$(omega_lower)"))
     scheme_sym = _phase_shift_scheme_symbol(scheme)
 
     tp = thermo_params
@@ -904,13 +910,13 @@ function phase_shift_meson_number_density_derivative_reference(
     qp = ensure_quark_params_has_A(quark_params, tp)
     K_coeffs = _build_k_coeffs(qp)
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
-    omega_grid, omega_w = gauleg(omega_min, omega_max, omega_nodes)
+    omega_grid, omega_w = gauleg(omega_lower, omega_max, omega_nodes)
 
     function q_shell_from_q(q::Float64)
         omega_val = 0.0
         for iω in eachindex(omega_grid, omega_w)
             ω = Float64(omega_grid[iω])
-            gω = bose_distribution(ω, 0.0, Float64(tp.T))
+            gω = bose_distribution(ω, μ, Float64(tp.T))
             re0, im0 = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta)
             phase0 = atan(im0, re0)
             weight_factor = _phase_shift_weight_derivative_factor(phase0, scheme_sym)
@@ -950,7 +956,7 @@ function phase_shift_meson_number_density_derivative_reference(
         omega_shell_at_qmax=q_shell_at_qmax,
         qmax=qmax,
         q_nodes=q_nodes,
-        omega_min=omega_min,
+        omega_min=omega_lower,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
@@ -965,6 +971,8 @@ function phase_shift_meson_density_derivative_reference_summary(
     thermo_params;
     pi_channel::Symbol=:pi,
     k_channel::Symbol=:K,
+    μ_pi::Float64=0.0,
+    μ_K::Float64=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
     d_K::Integer=meson_degeneracy(:K),
     scheme::Symbol=:current,
@@ -977,11 +985,13 @@ function phase_shift_meson_density_derivative_reference_summary(
 )
     pi_density = phase_shift_meson_number_density_derivative_reference(
         pi_channel, quark_params, thermo_params;
+        μ=μ_pi,
         degeneracy=Int(d_pi), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
         omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes, eta=eta,
     )
     k_density = phase_shift_meson_number_density_derivative_reference(
         k_channel, quark_params, thermo_params;
+        μ=μ_K,
         degeneracy=Int(d_K), scheme=scheme, qmax=qmax, q_nodes=q_nodes,
         omega_min=omega_min, omega_max=omega_max, omega_nodes=omega_nodes, eta=eta,
     )
@@ -1026,6 +1036,7 @@ function phase_shift_meson_number_density(
     quark_params,
     thermo_params;
     degeneracy::Integer=meson_degeneracy(meson),
+    μ::Float64=0.0,
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -1038,7 +1049,8 @@ function phase_shift_meson_number_density(
     _require_positive_node_count("q_nodes", q_nodes)
     _require_positive_node_count("omega_nodes", omega_nodes)
     qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
-    omega_max > omega_min || throw(ArgumentError("omega_max must exceed omega_min"))
+    omega_lower = _phase_shift_omega_lower_bound(omega_min, μ)
+    omega_max > omega_lower || throw(ArgumentError("omega_max must exceed effective omega_min=$(omega_lower)"))
     scheme_sym = _phase_shift_scheme_symbol(scheme)
 
     tp = thermo_params
@@ -1061,7 +1073,7 @@ function phase_shift_meson_number_density(
     qp = ensure_quark_params_has_A(quark_params, tp)
     K_coeffs = _build_k_coeffs(qp)
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
-    omega_grid, omega_w = gauleg(omega_min, omega_max, omega_nodes)
+    omega_grid, omega_w = gauleg(omega_lower, omega_max, omega_nodes)
 
     q_shell_weighted_sum = 0.0
     q_shell_at_qmax = NaN
@@ -1071,7 +1083,7 @@ function phase_shift_meson_number_density(
         phase_unwrapped = _unwrap_phases(phases)
         omega_val = 0.0
         for iω in eachindex(omega_grid, omega_w, phase_unwrapped)
-            gω = bose_distribution(Float64(omega_grid[iω]), 0.0, Float64(tp.T))
+            gω = bose_distribution(Float64(omega_grid[iω]), μ, Float64(tp.T))
             omega_val += omega_w[iω] * gω * (1.0 + gω) * _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
         end
         omega_val /= (2.0 * π)
@@ -1090,7 +1102,7 @@ function phase_shift_meson_number_density(
         omega_shell_at_qmax=q_shell_at_qmax,
         qmax=qmax,
         q_nodes=q_nodes,
-        omega_min=omega_min,
+        omega_min=omega_lower,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
@@ -1108,6 +1120,8 @@ function phase_shift_meson_density_summary(
     thermo_params;
     pi_channel::Symbol=:pi,
     k_channel::Symbol=:K,
+    μ_pi::Float64=0.0,
+    μ_K::Float64=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
     d_K::Integer=meson_degeneracy(:K),
     scheme::Symbol=:current,
@@ -1120,6 +1134,7 @@ function phase_shift_meson_density_summary(
 )
     pi_density = phase_shift_meson_number_density(
         pi_channel, quark_params, thermo_params;
+        μ=μ_pi,
         degeneracy=Int(d_pi),
         scheme=scheme,
         qmax=qmax,
@@ -1131,6 +1146,7 @@ function phase_shift_meson_density_summary(
     )
     k_density = phase_shift_meson_number_density(
         k_channel, quark_params, thermo_params;
+        μ=μ_K,
         degeneracy=Int(d_K),
         scheme=scheme,
         qmax=qmax,
