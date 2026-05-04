@@ -17,6 +17,24 @@
 
 该目录用于治理与迁移盘点；本 README 仅保留稳定白名单入口。
 
+### 默认运行规则
+
+在 Windows / PowerShell 环境下，稳定 CLI 默认优先通过以下 wrapper 启动：
+
+- `scripts/dev/run_with_sysimage.ps1`
+
+用途：
+
+- 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
+- 若本机没有 sysimage，则仍回退到普通 `julia --project=.` 运行
+- 可配合 `-BuildIfMissing` 在本机构建缺失的 sysimage
+
+最小示例：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true
+```
+
 ### PNJL
 
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
@@ -31,7 +49,7 @@
 在仓库根目录执行：
 
 ```powershell
-julia --project=. scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --solver_backend=legacy --output_dir=<your_output_dir>
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --solver_backend=legacy --output_dir=<your_output_dir>
 ```
 
 说明：
