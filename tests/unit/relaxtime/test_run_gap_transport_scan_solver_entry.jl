@@ -6,7 +6,8 @@ if !isdefined(Main, :ScanOptions)
 end
 
 @testset "run_gap_transport_scan solver entry" begin
-    @test isdefined(Main, :_solve_fixedmu_via_models_solve)
+    @test isdefined(Main, :solve_models_equilibrium)
+    @test isdefined(Main, :solve_equilibrium_with_diagnostics)
 end
 
 @testset "gap transport scan provenance shell" begin
