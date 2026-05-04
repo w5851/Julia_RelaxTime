@@ -1,0 +1,127 @@
+name: sysimage-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to publish assets to; leave empty for packaging-only run"
+        required: false
+        default: ""
+        type: string
+      publish_to_release:
+        description: "Upload packaged assets to a GitHub Release"
+        required: false
+        default: false
+        type: boolean
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-assets:
+    name: build-${{ matrix.platform_family }}-${{ matrix.platform_arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            platform_family: windows
+            platform_arch: x86_64
+          - runner: ubuntu-latest
+            platform_family: linux
+            platform_arch: x86_64
+          - runner: macos-latest
+            platform_family: macos
+            platform_arch: aarch64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-sysimage-${{ matrix.platform_family }}-${{ matrix.platform_arch }}
+
+      - name: Install dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Build sysimage
+        run: julia --project=. scripts/dev/build_sysimage.jl
+
+      - name: Package release asset
+        run: julia --project=. scripts/dev/package_sysimage_release.jl --overwrite
+
+      - name: Upload packaged assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: sysimage-${{ matrix.platform_family }}-${{ matrix.platform_arch }}
+          path: |
+            build/releases/JuliaRelaxTime-sysimage-*
+          retention-days: 30
+
+  publish-release:
+    name: publish-release-assets
+    needs: build-assets
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && inputs.publish_to_release == true && inputs.release_tag != '')
+
+    steps:
+      - name: Download packaged assets
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Resolve release tag
+        id: release_tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify GitHub CLI
+        run: gh --version
+
+      - name: Create draft release when missing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.release_tag.outputs.tag }}"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --draft --title "$tag" --notes "Automated sysimage asset publication"
+
+      - name: Upload release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.release_tag.outputs.tag }}"
+          mapfile -t files < <(find dist -type f \( -name 'JuliaRelaxTime-sysimage-*' -o -name 'JuliaRelaxTime-sysimage-*.sha256' \) | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No packaged sysimage assets found under dist/" >&2
+            exit 1
+          fi
+          gh release upload "$tag" "${files[@]}" --clobber
+
+      - name: Write summary
+        shell: bash
+        run: |
+          echo "## Sysimage Release Assets" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- tag: \`${{ steps.release_tag.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- packaged platforms: windows/x86_64, linux/x86_64, macos/aarch64" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          find dist -type f | sort | sed 's#^#- `#; s#$#`#' >> "$GITHUB_STEP_SUMMARY"
