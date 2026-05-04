@@ -28,8 +28,22 @@
 
 - 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
 - 若本机没有 sysimage，则仍回退到普通 `julia --project=.` 运行
-- PowerShell wrapper 可配合 `-BuildIfMissing`
-- POSIX wrapper 可配合 `--build-if-missing`
+- 默认 mismatch policy 为 `fallback`
+- PowerShell wrapper 可配合 `-MismatchPolicy strict|fallback|rebuild`
+- POSIX wrapper 可配合 `--mismatch-policy=strict|fallback|rebuild`
+- `-BuildIfMissing` / `--build-if-missing` 仍保留，作为 `rebuild` 别名
+
+如需先获取预构建 sysimage：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/bootstrap_sysimage.ps1
+```
+
+```bash
+sh scripts/dev/bootstrap_sysimage.sh
+```
+
+bootstrap 脚本会根据当前平台、架构和 Julia 版本，解析 GitHub Release 资产名并解包到 `build/`。
 
 最小示例（Windows / PowerShell）：
 

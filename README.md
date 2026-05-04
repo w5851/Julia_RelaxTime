@@ -131,6 +131,8 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 - 若在 Windows / PowerShell 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.ps1`。
 - 若在 Linux / macOS 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.sh`。
 - 两个 wrapper 都会在本机 sysimage 可用时自动接管冷启动优化；若 sysimage 缺失，则回退到普通 `julia --project=.`。
+- fresh clone / 新机器如需获取匹配的预构建 sysimage，可先运行 `scripts/dev/bootstrap_sysimage.ps1` 或 `scripts/dev/bootstrap_sysimage.sh`。
+- wrapper 首版 mismatch policy 为 `fallback | strict | rebuild`，默认 `fallback`。
 
 ### 从稳定入口到深层文档
 

@@ -20,6 +20,20 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 <scri
 sh scripts/dev/run_with_sysimage.sh <script> [args...]
 ```
 
+如需在 fresh clone / 新机器上直接获取匹配的预构建 sysimage，可先执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/bootstrap_sysimage.ps1
+```
+
+或：
+
+```bash
+sh scripts/dev/bootstrap_sysimage.sh
+```
+
+wrapper 默认采用 `fallback` 策略；如需强制要求兼容 sysimage，可改用 `-MismatchPolicy strict` 或 `--mismatch-policy=strict`。
+
 ## 2) 启动服务（API + 前端静态资源）
 
 ```powershell
