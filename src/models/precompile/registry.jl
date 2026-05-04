@@ -5,6 +5,7 @@ using ForwardDiff
 using NLsolve
 using ..Models: create_model, solve_constraint, FixedMu, HADRON_SEED_5
 using ..Models: thermo_derivatives, mass_derivatives, bulk_viscosity_coefficients
+using ..Models: run_scan_pipeline
 using ..Models: chi1_B, chi2_B, chi3_B, chi4_B, chi2_Q, chi2_S, chi11_BQ, chi11_BS, chi11_QS
 using ..Models: chi_BQS, conserved_charge_susceptibility, cumulant_B, cumulant_BQS
 using ..Models: baryon_Ssigma, baryon_kappa_sigma2, flavor_pressure_derivatives
@@ -15,15 +16,16 @@ const _VALID_CAPABILITIES = Set([
     :thermo_derivatives_ad,
     :conserved_charge_highorder,
     :ad_shape_stabilization,
+    :scan_pipeline_cli,
 ])
 
 const _PROFILE_CAPABILITIES = Dict(
     :smoke => [:gap_solver_ad],
     :test => [:gap_solver_ad, :thermo_derivatives_ad],
-    :scan => [:gap_solver_ad, :thermo_derivatives_ad],
-    :core => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization],
-    :all => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization],
-    :full => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization],
+    :scan => [:gap_solver_ad, :thermo_derivatives_ad, :scan_pipeline_cli],
+    :core => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
+    :all => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
+    :full => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
 )
 
 @inline function list_precompile_capabilities()
@@ -155,6 +157,32 @@ function _cap_ad_shape_stabilization()
     return nothing
 end
 
+function _cap_scan_pipeline_cli()
+    out_root = mktempdir()
+
+    run_scan_pipeline(
+        :tmu;
+        model_kind=:PNJL,
+        T_values=[150.0],
+        mu_values=[0.0, 100.0],
+        xi_values=[0.0],
+        output_path=joinpath(out_root, "tmu.csv"),
+        overwrite=true,
+    )
+
+    run_scan_pipeline(
+        :trho;
+        model_kind=:PNJL,
+        T_values=[150.0],
+        rho_values=[0.1, 0.2],
+        xi_values=[0.0],
+        output_path=joinpath(out_root, "trho.csv"),
+        overwrite=true,
+    )
+
+    return nothing
+end
+
 function run_precompile_capability(capability::Symbol; strict::Bool=false)
     capability in _VALID_CAPABILITIES || throw(ArgumentError("unknown precompile capability: $(capability)"))
 
@@ -166,6 +194,8 @@ function run_precompile_capability(capability::Symbol; strict::Bool=false)
         _safe_run!(capability, _cap_conserved_charge_highorder; strict=strict)
     elseif capability === :ad_shape_stabilization
         _safe_run!(capability, _cap_ad_shape_stabilization; strict=strict)
+    elseif capability === :scan_pipeline_cli
+        _safe_run!(capability, _cap_scan_pipeline_cli; strict=strict)
     else
         throw(ArgumentError("unhandled precompile capability: $(capability)"))
     end
