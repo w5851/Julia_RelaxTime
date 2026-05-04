@@ -77,8 +77,9 @@
 
 ### Phase C：package 化
 
-- [ ] C1 盘点当前稳定脚本中仍过厚的顶层逻辑
+- [x] C1 盘点当前稳定脚本中仍过厚的顶层逻辑
   - 验收：形成 thin-wrapper 候选列表
+  - 2026-05-04：已拉起 `docs/dev/active/2026-05-04_sysimage产品化_PhaseC_package化_C1薄封装盘点任务单.md` 并完成首轮盘点；`run_gap_transport_scan.jl` 被识别为首要收敛对象。
 - [ ] C2 把稳定 CLI 执行路径进一步收敛到 `src/models` / `src/simulation` 暴露的稳定 API
   - 验收：脚本更多承担参数解析与入口职责
 - [ ] C3 扩展 precompile capability 与 workload，使其绑定稳定 API 而非脚本偶然路径
