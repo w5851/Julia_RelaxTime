@@ -2,7 +2,7 @@
 
 更新日期：2026-05-04
 
-当前状态：Phase A 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md` 并完成首轮收口；Phase B 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseB_metadata与release资产任务单.md`，且 B1-B4 首轮已收口。
+当前状态：Phase A 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md` 并完成首轮收口；Phase B 已拆成两批活动文档并完成首轮收口：`docs/dev/active/2026-05-04_sysimage产品化_PhaseB_metadata与release资产任务单.md`（B1-B4）与 `docs/dev/active/2026-05-04_sysimage产品化_PhaseB_release-workflow与资产打包任务单.md`（B5-B6）。
 
 > 目的：把当前已验证有效的 sysimage / precompile 冷启动优化，从“仓库内工程能力”推进到“用户默认入口、跨重启稳定复用、跨机器可分发、长期架构演进”。
 
@@ -69,6 +69,11 @@
 - [x] B4 设计“版本不匹配时”的回退策略
   - 验收：明确 strict / fallback / rebuild 行为
   - 2026-05-04：已新增 `scripts/dev/bootstrap_sysimage.ps1/.sh`，并为 `run_with_sysimage.ps1/.sh` 固定 mismatch policy 契约；后续只需补 release workflow 即可落真实分发。
+- [x] B5 实现 release 资产打包脚本
+  - 验收：本地可基于 metadata 产出可上传的压缩资产与校验文件
+- [x] B6 实现 GitHub Actions release workflow
+  - 验收：平台矩阵构建结果可作为 workflow artifact / release asset 发布
+  - 2026-05-04：已新增 `scripts/dev/package_sysimage_release.jl` 与 `.github/workflows/sysimage-release.yml`；本地已验证 Windows 资产打包输出。
 
 ### Phase C：package 化
 
