@@ -31,8 +31,16 @@ julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
 ### Step 2. 运行最小可复现实验
 
+Windows / PowerShell：
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke
+```
+
+Linux / macOS：
+
+```bash
+sh scripts/dev/run_with_sysimage.sh scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke
 ```
 
 ### Step 3. 校验产物
@@ -120,7 +128,9 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 说明：
 - 稳定白名单以 `docs/guides/scripts/README.md` 为准。
 - `run_*.jl` 全量能力目录见 `docs/guides/scripts/run_script_catalog.md`。
-- 若在 Windows / PowerShell 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.ps1`；它会在本机 sysimage 可用时自动接管冷启动优化。
+- 若在 Windows / PowerShell 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.ps1`。
+- 若在 Linux / macOS 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.sh`。
+- 两个 wrapper 都会在本机 sysimage 可用时自动接管冷启动优化；若 sysimage 缺失，则回退到普通 `julia --project=.`。
 
 ### 从稳定入口到深层文档
 

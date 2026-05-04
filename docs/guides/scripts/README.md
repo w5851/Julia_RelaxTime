@@ -19,21 +19,42 @@
 
 ### 默认运行规则
 
-在 Windows / PowerShell 环境下，稳定 CLI 默认优先通过以下 wrapper 启动：
+稳定 CLI 默认优先通过以下 wrapper 启动：
 
 - `scripts/dev/run_with_sysimage.ps1`
+- `scripts/dev/run_with_sysimage.sh`
 
 用途：
 
 - 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
 - 若本机没有 sysimage，则仍回退到普通 `julia --project=.` 运行
-- 可配合 `-BuildIfMissing` 在本机构建缺失的 sysimage
+- PowerShell wrapper 可配合 `-BuildIfMissing`
+- POSIX wrapper 可配合 `--build-if-missing`
 
-最小示例：
+最小示例（Windows / PowerShell）：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true
 ```
+
+最小示例（Linux / macOS）：
+
+```bash
+sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true
+```
+
+### Phase A 默认 wrapper 白名单
+
+以下稳定 CLI 默认应经 wrapper 启动：
+
+| 类别 | 入口 | Windows 默认 | Linux/macOS 默认 |
+|---|---|---|---|
+| PNJL 相图 | `scripts/pnjl/calculate_phase_structure.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
+| 统一扫描 | `scripts/models/run_unified_scan.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
+| 守恒荷易感性 | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
+| Relaxtime 编排 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
+| 输运扫描 | `scripts/relaxtime/run_gap_transport_scan.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
+| 服务器入口 | `scripts/server/server_full.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
 
 ### PNJL
 

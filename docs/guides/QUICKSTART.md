@@ -14,6 +14,12 @@ julia --project=. -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
 powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 <script> [args...]
 ```
 
+或在 Linux / macOS 环境下使用：
+
+```bash
+sh scripts/dev/run_with_sysimage.sh <script> [args...]
+```
+
 ## 2) 启动服务（API + 前端静态资源）
 
 ```powershell
