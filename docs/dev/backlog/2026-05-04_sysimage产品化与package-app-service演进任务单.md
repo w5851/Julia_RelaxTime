@@ -2,7 +2,7 @@
 
 更新日期：2026-05-04
 
-当前状态：Phase A 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md`；其余阶段仍保留在 backlog。
+当前状态：Phase A 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseA_wrapper默认化任务单.md` 并完成首轮收口；Phase B 已拉起到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseB_metadata与release资产任务单.md`，且 B1-B4 首轮已收口。
 
 > 目的：把当前已验证有效的 sysimage / precompile 冷启动优化，从“仓库内工程能力”推进到“用户默认入口、跨重启稳定复用、跨机器可分发、长期架构演进”。
 
@@ -59,14 +59,16 @@
 
 ### Phase B：sysimage 获取与分发
 
-- [ ] B1 定义 sysimage metadata 契约
+- [x] B1 定义 sysimage metadata 契约
   - 验收：至少包含 `julia_version / git_commit / platform / generated_at / artifact_name`
-- [ ] B2 设计 GitHub Release 资产命名与平台矩阵
+- [x] B2 设计 GitHub Release 资产命名与平台矩阵
   - 验收：明确 win/linux/macos 与 x64/arm64 支持策略
-- [ ] B3 设计 bootstrap 下载脚本
+  - 2026-05-04：Phase B 已拆到 `docs/dev/active/2026-05-04_sysimage产品化_PhaseB_metadata与release资产任务单.md`；metadata 契约与 release 资产命名 / 平台矩阵在该文档中持续维护。
+- [x] B3 设计 bootstrap 下载脚本
   - 验收：fresh clone 可通过一条命令获取匹配 sysimage
-- [ ] B4 设计“版本不匹配时”的回退策略
+- [x] B4 设计“版本不匹配时”的回退策略
   - 验收：明确 strict / fallback / rebuild 行为
+  - 2026-05-04：已新增 `scripts/dev/bootstrap_sysimage.ps1/.sh`，并为 `run_with_sysimage.ps1/.sh` 固定 mismatch policy 契约；后续只需补 release workflow 即可落真实分发。
 
 ### Phase C：package 化
 
@@ -100,7 +102,7 @@
 ## 4. 推荐顺序
 
 - [x] Step 1：先做 Phase A wrapper 默认化
-- [ ] Step 2：再做 Phase B sysimage 分发
+- [x] Step 2：再做 Phase B sysimage 分发
 - [ ] Step 3：然后推进 Phase C package 化
 - [ ] Step 4：在入口收敛后做 Phase D app 化
 - [ ] Step 5：最后做 Phase E service 化
