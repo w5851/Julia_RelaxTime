@@ -32,7 +32,7 @@ julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 ### Step 2. 运行最小可复现实验
 
 ```powershell
-julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke
 ```
 
 ### Step 3. 校验产物
@@ -72,8 +72,9 @@ Remove-Item -Recurse -Force "data/outputs/results/phase_smoke"
    - 非测试脚本不要放入 `tests/`
 6. 测试执行顺序优先 smoke profile；测试分层保持 `unit/integration/regression/validation`。
 7. 可优先使用分层 wrapper 入口：`test/unit.jl`、`test/integration.jl`、`test/regression.jl`、`test/validation.jl`。
-8. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
-9. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
+8. 运行稳定 CLI 时，优先走 `scripts/dev/run_with_sysimage.ps1`，以便在本机存在 sysimage 时稳定复用冷启动优化。
+9. 稳定公共入口变更需同步更新 `docs/api/`；新增核心模块必须补 unit tests。
+10. 若工作区有用户已有改动：不要覆盖/回滚无关改动；仅提交本任务相关文件。
 
 建议最小验证命令（agent 默认基线）：
 
@@ -98,12 +99,12 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 
 | 计算能力 | 典型用途 | 推荐脚本入口 | 最小用法（示例） |
 |---|---|---|---|
-| PNJL 相结构 / 相图产线 | 生成 boundary/spinodal/crossover/CEP 与报告 | `scripts/pnjl/calculate_phase_structure.jl` | `julia --project=. scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke` |
-| PNJL T-μ / T-ρ 扫描 | `Models` 主链统一网格扫描、单点/批量求解 | `scripts/models/run_unified_scan.jl` | `julia --project=. scripts/models/run_unified_scan.jl scan tmu --help` |
-| 守恒荷易感性与累积量 | `chi_BQS` / cumulant / `Ssigma` / `kappa_sigma2` | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `julia --project=. scripts/pnjl/run_conserved_charge_susceptibilities.jl --help` |
-| 各向异性 PNJL 输运系数扫描（PNJL_aniso） | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `julia --project=. scripts/relaxtime/run_gap_transport_scan.jl --help` |
-| RelxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `julia --project=. scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
-| 模型服务/API 调用 | 通过 HTTP 服务调用模型求解能力 | `scripts/server/server_full.jl` | `julia --project=. scripts/server/server_full.jl` |
+| PNJL 相结构 / 相图产线 | 生成 boundary/spinodal/crossover/CEP 与报告 | `scripts/pnjl/calculate_phase_structure.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke` |
+| PNJL T-μ / T-ρ 扫描 | `Models` 主链统一网格扫描、单点/批量求解 | `scripts/models/run_unified_scan.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true` |
+| 守恒荷易感性与累积量 | `chi_BQS` / cumulant / `Ssigma` / `kappa_sigma2` | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/run_conserved_charge_susceptibilities.jl --help` |
+| 各向异性 PNJL 输运系数扫描（PNJL_aniso） | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl --help` |
+| RelxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
+| 模型服务/API 调用 | 通过 HTTP 服务调用模型求解能力 | `scripts/server/server_full.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/server/server_full.jl` |
 
 #### B. 专题能力入口（研究/后处理常用）
 
@@ -119,6 +120,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 说明：
 - 稳定白名单以 `docs/guides/scripts/README.md` 为准。
 - `run_*.jl` 全量能力目录见 `docs/guides/scripts/run_script_catalog.md`。
+- 若在 Windows / PowerShell 环境运行稳定 CLI，默认优先使用 `scripts/dev/run_with_sysimage.ps1`；它会在本机 sysimage 可用时自动接管冷启动优化。
 
 ### 从稳定入口到深层文档
 

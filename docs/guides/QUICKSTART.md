@@ -8,10 +8,16 @@
 julia --project=. -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
 ```
 
+如需在本机稳定复用冷启动优化，建议后续稳定 CLI 统一通过：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 <script> [args...]
+```
+
 ## 2) 启动服务（API + 前端静态资源）
 
 ```powershell
-julia --project=. scripts/server/server_full.jl
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/server/server_full.jl
 ```
 
 或在 Windows 下使用：
