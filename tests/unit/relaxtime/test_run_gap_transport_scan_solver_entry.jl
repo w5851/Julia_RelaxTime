@@ -9,6 +9,85 @@ end
     @test isdefined(Main, :_solve_fixedmu_via_models_solve)
 end
 
+@testset "gap transport scan provenance shell" begin
+    effective = Main.build_effective_config(Main.ScanOptions(
+        "tmp.csv",
+        "diag.csv",
+        "failed.csv",
+        "prov",
+        [-0.5, 0.0],
+        150.0,
+        160.0,
+        10.0,
+        0.0,
+        60.0,
+        60.0,
+        true,
+        false,
+        false,
+        12,
+        6,
+        40,
+        28,
+        8,
+        8,
+        6,
+        true,
+        0.6,
+        8,
+        10,
+        :linear,
+        128,
+        :finite_15,
+        5,
+        24,
+        8.0,
+    ))
+    @test effective["output"] == "tmp.csv"
+    @test effective["tau_interpolation_mode"] == "linear"
+    @test effective["integration_mode"] == "finite_15"
+
+    summary = Main.build_summary(3, 1, 2)
+    @test summary["points_total"] == 4
+    @test summary["success_count"] == 3
+    @test summary["skipped_count"] == 2
+
+    artifacts = Main.collect_artifacts(Main.ScanOptions(
+        "tmp.csv",
+        "diag.csv",
+        "failed.csv",
+        nothing,
+        [-0.5],
+        150.0,
+        150.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        true,
+        false,
+        false,
+        12,
+        6,
+        40,
+        28,
+        8,
+        8,
+        6,
+        true,
+        0.6,
+        8,
+        10,
+        :linear,
+        128,
+        :finite_15,
+        5,
+        24,
+        8.0,
+    ))
+    @test artifacts == ["tmp.csv", "diag.csv", "failed.csv"]
+end
+
 @testset "prefer Models.solve over solve_constraint" begin
     opts = Main.ScanOptions(
         "tmp.csv",

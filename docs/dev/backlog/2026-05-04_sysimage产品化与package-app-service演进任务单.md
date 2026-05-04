@@ -83,6 +83,7 @@
 - [ ] C2 把稳定 CLI 执行路径进一步收敛到 `src/models` / `src/simulation` 暴露的稳定 API
   - 验收：脚本更多承担参数解析与入口职责
   - 2026-05-04：已拉起 `docs/dev/active/2026-05-04_sysimage产品化_PhaseC_package化_C2首批边界收敛任务单.md` 并完成首批收敛；`run_gap_transport_scan.jl` 的 CLI 与脚本 IO 层已抽离为 helper，但核心求解执行体仍保留在脚本中。
+  - 2026-05-04：已继续拉起 `docs/dev/active/2026-05-04_sysimage产品化_PhaseC_package化_C2第二批provenance壳层收敛任务单.md` 并完成第二批收敛；`effective_config / summary / artifacts / sidecar` 汇总壳层已抽离为 helper。
 - [ ] C3 扩展 precompile capability 与 workload，使其绑定稳定 API 而非脚本偶然路径
   - 验收：precompile registry 与 stable API 对齐
 
