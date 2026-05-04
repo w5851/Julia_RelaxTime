@@ -58,6 +58,7 @@ const PHASE_BOUNDARY_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 const PHASE_CROSSOVER_XI_CACHE = Ref{Union{Nothing, Vector{Float64}}}(nothing)
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_cli.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_io.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_provenance.jl"))
 
 using .GapTransportScanCLI: ScanOptions, parse_args, print_usage
 using .GapTransportScanIO: write_channel_diagnostics_header_if_needed,
@@ -67,6 +68,7 @@ using .GapTransportScanIO: write_channel_diagnostics_header_if_needed,
     current_git_commit,
     ensure_output_header_compatible,
     write_header_if_needed
+using .GapTransportScanProvenance: build_effective_config, build_summary, collect_artifacts, write_scan_sidecars
 
 
 @inline function _rate_with_alias(rates, key::Symbol)
@@ -1272,61 +1274,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
         end
     end
 
-    effective_config = Dict{String,Any}(
-        "output" => opts.output,
-        "channel_diagnostics_output" => opts.channel_diagnostics_output,
-        "failed_points_output" => opts.failed_points_output,
-        "xi_values" => opts.xi_values,
-        "tmin_mev" => opts.tmin_mev,
-        "tmax_mev" => opts.tmax_mev,
-        "tstep_mev" => opts.tstep_mev,
-        "mubmin_mev" => opts.mubmin_mev,
-        "mubmax_mev" => opts.mubmax_mev,
-        "mubstep_mev" => opts.mubstep_mev,
-        "overwrite" => opts.overwrite,
-        "resume" => opts.resume,
-        "compute_bulk" => opts.compute_bulk,
-        "p_num" => opts.p_num,
-        "t_num" => opts.t_num,
-        "max_iter" => opts.max_iter,
-        "tau_p_nodes" => opts.tau_p_nodes,
-        "tau_angle_nodes" => opts.tau_angle_nodes,
-        "tau_phi_nodes" => opts.tau_phi_nodes,
-        "tau_n_sigma_points" => opts.tau_n_sigma_points,
-        "tau_threshold_subtraction" => opts.tau_threshold_subtraction,
-        "tau_asym_window" => opts.tau_asym_window,
-        "tau_asym_fit_min_points" => opts.tau_asym_fit_min_points,
-        "tau_asym_extra_points" => opts.tau_asym_extra_points,
-        "tau_interpolation_mode" => String(opts.tau_interpolation_mode),
-        "sigma_grid_n" => opts.sigma_grid_n,
-        "integration_mode" => String(opts.integration_mode),
-        "gc_every_n" => opts.gc_every_n,
-        "tr_p_nodes" => opts.tr_p_nodes,
-        "tr_p_max_fm" => opts.tr_p_max_fm,
-    )
-
-    summary = Dict{String,Any}(
-        "points_total" => stats_success + stats_error,
-        "success_count" => stats_success,
-        "error_count" => stats_error,
-        "skipped_count" => stats_skipped,
-    )
-
-    artifacts = String[opts.output]
-    if opts.channel_diagnostics_output !== nothing
-        push!(artifacts, opts.channel_diagnostics_output)
-    end
-    if opts.failed_points_output !== nothing
-        push!(artifacts, opts.failed_points_output)
-    end
-
-    ProvenanceMetadata.write_run_sidecars(
-        provenance_dir;
-        ctx=ctx,
-        effective_config=effective_config,
-        artifacts=artifacts,
-        summary=summary,
-    )
+    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped)
 
     println("Scan finished. Output: $(opts.output)")
 end
