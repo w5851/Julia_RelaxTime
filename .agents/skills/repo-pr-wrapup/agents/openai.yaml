@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo PR Wrapup"
+  short_description: "Standardize commit and PR wrap-up for Julia_RelaxTime."
+  default_prompt: "Use $repo-pr-wrapup to finish staging, validation, commit, and PR wrap-up for this repository."
