@@ -71,6 +71,38 @@ struct GapParams{TT, TN, TX}
     model_kind::Symbol
 end
 
+struct GapPressureFn{TMODEL, TMU, TPARAMS}
+    model::TMODEL
+    mu_vec::TMU
+    params::TPARAMS
+end
+
+@inline function (f::GapPressureFn)(y)
+    eltp = typeof(y[1])
+    y_s = SVector{5, eltp}(Tuple(y))
+    params = f.params
+    return model_pressure(
+        f.model,
+        y_s,
+        f.mu_vec,
+        params.T_fm;
+        p_num=params.p_num,
+        t_num=params.t_num,
+        xi=params.xi,
+    )
+end
+
+@inline function _gap_gradient(
+    model::AbstractQCDModel,
+    x_state::SVector{5, TF},
+    mu_vec::AbstractVector{TM},
+    params::GapParams,
+) where {TF, TM}
+    grad = ForwardDiff.gradient(GapPressureFn(model, mu_vec, params), x_state)
+    grad_type = typeof(grad[1])
+    return SVector{5, grad_type}(Tuple(grad))
+end
+
 @inline function GapParams(
     T_fm::TT,
     thermal_nodes::TN,
@@ -138,22 +170,7 @@ end
 """
 function gap_conditions(x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, params::GapParams) where {TF, TM}
     model = _get_model(params.model_kind)
-    pressure_fn = y -> begin
-        eltp = typeof(y[1])
-        y_s = SVector{5, eltp}(Tuple(y))
-        model_pressure(
-            model,
-            y_s,
-            mu_vec,
-            params.T_fm;
-            p_num=params.p_num,
-            t_num=params.t_num,
-            xi=params.xi,
-        )
-    end
-    grad = ForwardDiff.gradient(pressure_fn, x_state)
-    grad_type = typeof(grad[1])
-    return SVector{5, grad_type}(Tuple(grad))
+    return _gap_gradient(model, x_state, mu_vec, params)
 end
 
 @inline function _gap_conditions_with_model(
@@ -162,22 +179,7 @@ end
     mu_vec::AbstractVector{TM},
     params::GapParams,
 ) where {TF, TM}
-    pressure_fn = y -> begin
-        eltp = typeof(y[1])
-        y_s = SVector{5, eltp}(Tuple(y))
-        model_pressure(
-            model,
-            y_s,
-            mu_vec,
-            params.T_fm;
-            p_num=params.p_num,
-            t_num=params.t_num,
-            xi=params.xi,
-        )
-    end
-    grad = ForwardDiff.gradient(pressure_fn, x_state)
-    grad_type = typeof(grad[1])
-    return SVector{5, grad_type}(Tuple(grad))
+    return _gap_gradient(model, x_state, mu_vec, params)
 end
 
 @inline function gap_core_residual!(F::AbstractVector, x_state::SVector{5, TF}, mu_vec::AbstractVector{TM}, params::GapParams) where {TF, TM}

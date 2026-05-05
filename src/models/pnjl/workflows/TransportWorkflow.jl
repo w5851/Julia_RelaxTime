@@ -29,17 +29,18 @@ end
 const RelaxationTime = Main.RelaxationTime
 const AFieldBuilder = Main.AFieldBuilder
 
-# Shared config loader (TOML)
-const _CONFIG_LOADER_PATH = normpath(joinpath(@__DIR__, "..", "..", "config", "ConfigLoader.jl"))
-if !isdefined(@__MODULE__, :ConfigLoader)
-    include(_CONFIG_LOADER_PATH)
+# Shared config loader: reuse Main.Constants_PNJL include path to avoid duplicate ConfigLoader module instances.
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
 end
-using .ConfigLoader: load_config
+using Main.Constants_PNJL: load_config
 
 Base.@kwdef mutable struct WorkflowCache
     model_cache::Dict{Symbol, Any} = Dict{Symbol, Any}()
     prefer_energy_aniso_cache::Dict{String, Bool} = Dict{String, Bool}()
     a_builder_config_cache::Dict{String, NamedTuple} = Dict{String, NamedTuple}()
+    transport_workflow_defaults_cache::Dict{String, NamedTuple} = Dict{String, NamedTuple}()
     lock::ReentrantLock = ReentrantLock()
 end
 
@@ -57,6 +58,7 @@ function reset_transport_workflow_config_cache!(cache::WorkflowCache=_DEFAULT_WO
     try
         empty!(cache.prefer_energy_aniso_cache)
         empty!(cache.a_builder_config_cache)
+        empty!(cache.transport_workflow_defaults_cache)
     finally
         unlock(cache.lock)
     end
@@ -186,58 +188,37 @@ end
     return deepcopy(_namedtuple_to_string_dict(DEFAULT_PHYSICS_FALLBACK_NT))
 end
 
+@generated function _select_namedtuple_keys(kwargs::NamedTuple{K}, ::Val{SELECT}) where {K, SELECT}
+    selected = Tuple(k for k in K if k in SELECT)
+    assignments = [Expr(:kw, key, :(getproperty(kwargs, $(QuoteNode(key))))) for key in selected]
+    return Expr(:tuple, Expr(:parameters, assignments...))
+end
+
+@generated function _drop_namedtuple_keys(kwargs::NamedTuple{K}, ::Val{DROP}) where {K, DROP}
+    dropped = Tuple(k for k in K if k in DROP)
+    isempty(dropped) && return :(kwargs)
+    return :(Base.structdiff(kwargs, NamedTuple{$(QuoteNode(dropped))}))
+end
+
 @inline function _drop_transport_integration_keys(kwargs::NamedTuple)::NamedTuple
-    return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_INTEGRATION_KEYS))...)
+    return _drop_namedtuple_keys(kwargs, Val(TRANSPORT_INTEGRATION_KEYS))
 end
 
 @inline function _extract_transport_integration_kwargs(kwargs::NamedTuple)::NamedTuple
-    return (; (k => v for (k, v) in pairs(kwargs) if (k in TRANSPORT_INTEGRATION_KEYS))...)
+    return _select_namedtuple_keys(kwargs, Val(TRANSPORT_INTEGRATION_KEYS))
 end
 
 @inline function _provider_prefer_energy_aniso_from_kwargs(kwargs::NamedTuple)
     return hasproperty(kwargs, :prefer_energy_aniso) ? kwargs.prefer_energy_aniso : nothing
 end
 
-@inline function _default_prefer_energy_aniso_from_toml(cache::WorkflowCache)::Bool
+@inline function _transport_workflow_defaults_from_toml(cache::WorkflowCache)::NamedTuple
     physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
 
     lock(cache.lock)
     try
-        if haskey(cache.prefer_energy_aniso_cache, physics_profile)
-            return cache.prefer_energy_aniso_cache[physics_profile]
-        end
-    finally
-        unlock(cache.lock)
-    end
-
-    physics_dir = normpath(joinpath(@__DIR__, "..", "..", "..", "config", "physics"))
-
-    default_physics = _default_physics_fallback_dict()
-
-    data = load_config(physics_dir, default_physics; profile=physics_profile)
-    cfg = data.config
-    tw = get(cfg, "transport_workflow", Dict{String, Any}())
-    val = Bool(get(tw, "prefer_energy_aniso", true))
-
-    lock(cache.lock)
-    try
-        cache.prefer_energy_aniso_cache[physics_profile] = val
-    finally
-        unlock(cache.lock)
-    end
-
-    return val
-end
-
-@inline _default_prefer_energy_aniso_from_toml() = _default_prefer_energy_aniso_from_toml(_DEFAULT_WORKFLOW_CACHE)
-
-@inline function _default_a_builder_config_from_toml(cache::WorkflowCache)::NamedTuple
-    physics_profile = get(ENV, "PHYSICS_PARAM_PROFILE", "default")
-
-    lock(cache.lock)
-    try
-        if haskey(cache.a_builder_config_cache, physics_profile)
-            return cache.a_builder_config_cache[physics_profile]
+        if haskey(cache.transport_workflow_defaults_cache, physics_profile)
+            return cache.transport_workflow_defaults_cache[physics_profile]
         end
     finally
         unlock(cache.lock)
@@ -251,22 +232,38 @@ end
     cfg = data.config
     tw = get(cfg, "transport_workflow", Dict{String, Any}())
     a_builder = get(tw, "a_builder", Dict{String, Any}())
-
-    val = (
-        p_nodes=Int(get(a_builder, "p_nodes", 16)),
-        p_max=Float64(get(a_builder, "p_max", 20.0)),
-        cos_nodes=Int(get(a_builder, "cos_nodes", 4)),
-        use_aniso=Bool(get(a_builder, "use_aniso", true)),
+    defaults = (
+        prefer_energy_aniso=Bool(get(tw, "prefer_energy_aniso", true)),
+        a_builder_config=(
+            p_nodes=Int(get(a_builder, "p_nodes", 16)),
+            p_max=Float64(get(a_builder, "p_max", 20.0)),
+            cos_nodes=Int(get(a_builder, "cos_nodes", 4)),
+            use_aniso=Bool(get(a_builder, "use_aniso", true)),
+        ),
     )
 
     lock(cache.lock)
     try
-        cache.a_builder_config_cache[physics_profile] = val
+        cache.transport_workflow_defaults_cache[physics_profile] = defaults
+        cache.prefer_energy_aniso_cache[physics_profile] = defaults.prefer_energy_aniso
+        cache.a_builder_config_cache[physics_profile] = defaults.a_builder_config
     finally
         unlock(cache.lock)
     end
 
-    return val
+    return defaults
+end
+
+@inline _transport_workflow_defaults_from_toml() = _transport_workflow_defaults_from_toml(_DEFAULT_WORKFLOW_CACHE)
+
+@inline function _default_prefer_energy_aniso_from_toml(cache::WorkflowCache)::Bool
+    return _transport_workflow_defaults_from_toml(cache).prefer_energy_aniso
+end
+
+@inline _default_prefer_energy_aniso_from_toml() = _default_prefer_energy_aniso_from_toml(_DEFAULT_WORKFLOW_CACHE)
+
+@inline function _default_a_builder_config_from_toml(cache::WorkflowCache)::NamedTuple
+    return _transport_workflow_defaults_from_toml(cache).a_builder_config
 end
 
 @inline _default_a_builder_config_from_toml() = _default_a_builder_config_from_toml(_DEFAULT_WORKFLOW_CACHE)
@@ -294,7 +291,12 @@ end
 @inline _effective_a_builder_config(a_builder_config::Union{Nothing,NamedTuple}) = _effective_a_builder_config(_DEFAULT_WORKFLOW_CACHE, a_builder_config)
 
 @inline function _drop_transport_provider_keys(kwargs::NamedTuple)::NamedTuple
-    return (; (k => v for (k, v) in pairs(kwargs) if !(k in TRANSPORT_PROVIDER_KEYS))...)
+    return _drop_namedtuple_keys(kwargs, Val(TRANSPORT_PROVIDER_KEYS))
+end
+
+@inline function _finalize_transport_kwargs(kwargs::NamedTuple, drop_provider::Bool)::NamedTuple
+    cleaned = _drop_transport_provider_keys(_drop_transport_integration_keys(kwargs))
+    return drop_provider ? _drop_namedtuple_keys(cleaned, Val((:provider,))) : cleaned
 end
 
 @inline function _workflow_warning_diagnostics(; job_id=nothing, T_fm::Real, mu_fm::Real, xi::Real, error_type::Union{Nothing,String}=nothing)
@@ -719,11 +721,7 @@ function solve_transport_from_equilibrium(
         end
     end
     integration_kwargs = _extract_transport_integration_kwargs(transport_kwargs)
-    transport_kwargs_clean = _drop_transport_integration_keys(transport_kwargs)
-    transport_kwargs_clean = _drop_transport_provider_keys(transport_kwargs_clean)
-    if effective_provider !== nothing
-        transport_kwargs_clean = (; (k => v for (k, v) in pairs(transport_kwargs_clean) if k != :provider)...)
-    end
+    transport_kwargs_clean = _finalize_transport_kwargs(transport_kwargs, effective_provider !== nothing)
     effective_transport_config = if transport_config !== nothing
         transport_config
     elseif length(keys(integration_kwargs)) > 0

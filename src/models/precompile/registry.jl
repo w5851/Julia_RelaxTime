@@ -3,9 +3,10 @@ module PrecompileRegistry
 using StaticArrays
 using ForwardDiff
 using NLsolve
+import ..Models
 using ..Models: create_model, solve_constraint, FixedMu, HADRON_SEED_5
 using ..Models: thermo_derivatives, mass_derivatives, bulk_viscosity_coefficients
-using ..Models: run_scan_pipeline
+using ..Models: run_scan_pipeline, solve, solve_transport_from_equilibrium, transport_workflow_module
 using ..Models: chi1_B, chi2_B, chi3_B, chi4_B, chi2_Q, chi2_S, chi11_BQ, chi11_BS, chi11_QS
 using ..Models: chi_BQS, conserved_charge_susceptibility, cumulant_B, cumulant_BQS
 using ..Models: baryon_Ssigma, baryon_kappa_sigma2, flavor_pressure_derivatives
@@ -13,19 +14,21 @@ using Main.Constants_PNJL: ħc_MeV_fm
 
 const _VALID_CAPABILITIES = Set([
     :gap_solver_ad,
+    :solver_residual_ad,
     :thermo_derivatives_ad,
     :conserved_charge_highorder,
     :ad_shape_stabilization,
+    :transport_point_api,
     :scan_pipeline_cli,
 ])
 
 const _PROFILE_CAPABILITIES = Dict(
     :smoke => [:gap_solver_ad],
     :test => [:gap_solver_ad, :thermo_derivatives_ad],
-    :scan => [:gap_solver_ad, :thermo_derivatives_ad, :scan_pipeline_cli],
-    :core => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
-    :all => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
-    :full => [:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli],
+    :scan => [:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :transport_point_api, :scan_pipeline_cli],
+    :core => [:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :transport_point_api, :scan_pipeline_cli],
+    :all => [:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :transport_point_api, :scan_pipeline_cli],
+    :full => [:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :transport_point_api, :scan_pipeline_cli],
 )
 
 @inline function list_precompile_capabilities()
@@ -54,6 +57,19 @@ function _cap_gap_solver_ad()
     T_fm = 150.0 / ħc_MeV_fm
     mu_fm = 250.0 / ħc_MeV_fm
 
+    solve(
+        model,
+        FixedMu(),
+        T_fm,
+        mu_fm;
+        seed_guess=HADRON_SEED_5,
+        xi=0.0,
+        p_num=6,
+        t_num=3,
+        residual_norm_max=1e-4,
+        iterations=24,
+    )
+
     solve_constraint(
         model,
         FixedMu(),
@@ -66,6 +82,31 @@ function _cap_gap_solver_ad()
         iterations=24,
     )
 
+    return nothing
+end
+
+function _cap_solver_residual_ad()
+    model = create_model(:PNJL)
+    T_fm = 150.0 / ħc_MeV_fm
+    mu_fm = 250.0 / ħc_MeV_fm
+    residual! = Models.Conditions.build_residual!(
+        model,
+        FixedMu(),
+        T_fm,
+        mu_fm;
+        xi=0.0,
+        p_num=6,
+        t_num=3,
+    )
+    x0 = Float64.(HADRON_SEED_5)
+
+    vec_residual = x -> begin
+        F = similar(x)
+        residual!(F, x)
+        return F
+    end
+
+    ForwardDiff.jacobian(vec_residual, x0)
     return nothing
 end
 
@@ -157,6 +198,64 @@ function _cap_ad_shape_stabilization()
     return nothing
 end
 
+function _cap_transport_point_api()
+    model = create_model(:PNJL)
+    workflow = transport_workflow_module()
+    T_fm = 150.0 / ħc_MeV_fm
+    mu_fm = 0.0
+
+    # Explicitly hit transport workflow config-loader miss paths so the sysimage
+    # captures config-loading specializations instead of leaving them to runtime.
+    reset_fn = getproperty(workflow, :reset_transport_workflow_config_cache!)
+    reset_fn()
+    if isdefined(workflow, Symbol("_default_prefer_energy_aniso_from_toml"))
+        getproperty(workflow, Symbol("_default_prefer_energy_aniso_from_toml"))()
+    end
+    if isdefined(workflow, Symbol("_default_a_builder_config_from_toml"))
+        getproperty(workflow, Symbol("_default_a_builder_config_from_toml"))()
+    end
+    if isdefined(Main, :Constants_PNJL) && isdefined(Main.Constants_PNJL, :load_pnjl_config)
+        Main.Constants_PNJL.load_pnjl_config()
+    end
+
+    eq = solve(
+        model,
+        FixedMu(),
+        T_fm,
+        mu_fm;
+        seed_guess=HADRON_SEED_5,
+        xi=0.0,
+        p_num=6,
+        t_num=3,
+        residual_norm_max=1e-4,
+        iterations=24,
+    )
+
+    unit_tau = (
+        u=1.0,
+        d=1.0,
+        s=1.0,
+        ubar=1.0,
+        dbar=1.0,
+        sbar=1.0,
+    )
+
+    solve_transport_from_equilibrium(
+        eq,
+        T_fm,
+        mu_fm;
+        xi=0.0,
+        compute_tau=false,
+        tau=unit_tau,
+        compute_bulk=false,
+        p_num=6,
+        t_num=3,
+        transport_config=workflow.TransportIntegrationConfig(p_nodes=24, p_max=8.0),
+    )
+
+    return nothing
+end
+
 function _cap_scan_pipeline_cli()
     out_root = mktempdir()
 
@@ -188,12 +287,16 @@ function run_precompile_capability(capability::Symbol; strict::Bool=false)
 
     if capability === :gap_solver_ad
         _safe_run!(capability, _cap_gap_solver_ad; strict=strict)
+    elseif capability === :solver_residual_ad
+        _safe_run!(capability, _cap_solver_residual_ad; strict=strict)
     elseif capability === :thermo_derivatives_ad
         _safe_run!(capability, _cap_thermo_derivatives_ad; strict=strict)
     elseif capability === :conserved_charge_highorder
         _safe_run!(capability, _cap_conserved_charge_highorder; strict=strict)
     elseif capability === :ad_shape_stabilization
         _safe_run!(capability, _cap_ad_shape_stabilization; strict=strict)
+    elseif capability === :transport_point_api
+        _safe_run!(capability, _cap_transport_point_api; strict=strict)
     elseif capability === :scan_pipeline_cli
         _safe_run!(capability, _cap_scan_pipeline_cli; strict=strict)
     else

@@ -8,6 +8,15 @@ end
 @testset "run_gap_transport_scan solver entry" begin
     @test isdefined(Main, :solve_models_equilibrium)
     @test isdefined(Main, :solve_equilibrium_with_diagnostics)
+    @test isdefined(Main, :build_scan_runtime)
+    @test isdefined(Main, :execute_gap_transport_scan_point!)
+    @test isdefined(Main, :build_scan_plan)
+    @test isdefined(Main, :execute_scan_plan!)
+end
+
+@testset "precompile transport point capability coverage" begin
+    @test :transport_point_api in Main.Models.list_precompile_capabilities()
+    @test :transport_point_api in Main.Models.list_precompile_profile(:scan)
 end
 
 @testset "gap transport scan provenance shell" begin

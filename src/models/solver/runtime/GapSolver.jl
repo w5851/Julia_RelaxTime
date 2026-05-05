@@ -18,6 +18,47 @@ using ForwardDiff
 
 export NLsolveGapSolver
 
+@inline function _materialize_gap_kwargs(kwargs)
+    return (; pairs(kwargs)...)
+end
+
+struct GapOmegaFn{N, TMODEL, TT, TMU, TKW, TX}
+    model::TMODEL
+    T::TT
+    mu_vec::TMU
+    p_num::Int
+    t_num::Int
+    xi::TX
+    kwargs::TKW
+end
+
+@inline function (f::GapOmegaFn{3})(y)
+    Ty = eltype(y)
+    st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=one(Ty), PhiBar=one(Ty))
+    return _omega_worldsafe(f.model, st, f.T, f.mu_vec; p_num=f.p_num, t_num=f.t_num, xi=f.xi, f.kwargs...)
+end
+
+@inline function (f::GapOmegaFn{5})(y)
+    Ty = eltype(y)
+    st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=y[4], PhiBar=y[5])
+    return _omega_worldsafe(f.model, st, f.T, f.mu_vec; p_num=f.p_num, t_num=f.t_num, xi=f.xi, f.kwargs...)
+end
+
+struct GapResidualInplace{TMODEL, TT, TMU, TKW, N}
+    model::TMODEL
+    T::TT
+    mu_vec::TMU
+    kwargs::TKW
+end
+
+@inline function (rf::GapResidualInplace{TMODEL, TT, TMU, TKW, N})(F, x) where {TMODEL, TT, TMU, TKW, N}
+    r = gap_residual(rf.model, x, rf.T, rf.mu_vec; rf.kwargs...)
+    @inbounds for i in 1:N
+        F[i] = convert(eltype(F), r[i])
+    end
+    return nothing
+end
+
 @inline function _pnjl_multi_seeds()
     return seed_catalog(FixedMu(), Float64[])
 end
@@ -128,6 +169,7 @@ function gap_residual(
     kwargs...
 )
     μ = normalize_mu_vec(mu_vec)
+    residual_kwargs = _materialize_gap_kwargs(kwargs)
     N = gap_state_dim(model)
     (N == 3 || N == 5) || throw(ArgumentError("gap_state_dim(model) must be 3 or 5, got $N"))
 
@@ -143,17 +185,15 @@ function gap_residual(
         _as_svec(x, Val(N))
     end
 
-    omega_fn = y -> begin
-        Ty = eltype(y)
-        if N == 3
-            st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=one(Ty), PhiBar=one(Ty))
-            return _omega_worldsafe(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-        else
-            st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=y[4], PhiBar=y[5])
-            return _omega_worldsafe(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-        end
-    end
-
+    omega_fn = GapOmegaFn{N, typeof(model), typeof(T), typeof(μ), typeof(residual_kwargs), typeof(xi)}(
+        model,
+        T,
+        μ,
+        p_num,
+        t_num,
+        xi,
+        residual_kwargs,
+    )
     g = ForwardDiff.gradient(omega_fn, x_state)
     return SVector{N, eltype(g)}(Tuple(g))
 end
@@ -169,6 +209,7 @@ function gap_residual(
     kwargs...
 )
     μ = normalize_mu_vec(mu_vec)
+    residual_kwargs = _materialize_gap_kwargs(kwargs)
 
     x_state = if x isa MeanFieldState
         v = state_vector(x)
@@ -179,12 +220,15 @@ function gap_residual(
         SVector{2, Tx}(x[1], x[2])
     end
 
-    omega_fn = y -> begin
-        Ty = eltype(y)
-        st = MeanFieldState(SVector{3, Ty}(y[1], y[2], zero(Ty)); Phi=one(Ty), PhiBar=one(Ty))
-        return omega(model, st, T, μ; p_num=p_num, t_num=t_num, xi=xi, kwargs...)
-    end
-
+    omega_fn = GapOmegaFn{3, typeof(model), typeof(T), typeof(μ), typeof(residual_kwargs), typeof(xi)}(
+        model,
+        T,
+        μ,
+        p_num,
+        t_num,
+        xi,
+        residual_kwargs,
+    )
     g = ForwardDiff.gradient(omega_fn, x_state)
     return SVector{2, eltype(g)}(Tuple(g))
 end
@@ -256,14 +300,13 @@ function solve_gap(
     kwargs...
 )
     x0 = initial_guess === nothing ? gap_initial_guess(model, T, mu_vec) : _as_seed_vec2(initial_guess)
-
-    function residual!(F, x)
-        r = gap_residual(model, x, T, mu_vec; kwargs...)
-        @inbounds for i in 1:2
-            F[i] = convert(eltype(F), r[i])
-        end
-        return nothing
-    end
+    residual_kwargs = _materialize_gap_kwargs(kwargs)
+    residual! = GapResidualInplace{typeof(model), typeof(T), typeof(mu_vec), typeof(residual_kwargs), 2}(
+        model,
+        T,
+        mu_vec,
+        residual_kwargs,
+    )
 
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
@@ -292,15 +335,13 @@ function solve_gap(
     dim == 3 || throw(ArgumentError("generic solve_gap currently supports dim=3 only, got $dim"))
 
     x0 = initial_guess === nothing ? gap_initial_guess(model, T, mu_vec) : _as_seed_vec3(initial_guess)
-
-    # NLsolve expects an in-place residual! of Float64 arrays.
-    function residual!(F, x)
-        r = gap_residual(model, x, T, mu_vec; kwargs...)
-        @inbounds for i in 1:3
-            F[i] = convert(eltype(F), r[i])
-        end
-        return nothing
-    end
+    residual_kwargs = _materialize_gap_kwargs(kwargs)
+    residual! = GapResidualInplace{typeof(model), typeof(T), typeof(mu_vec), typeof(residual_kwargs), 3}(
+        model,
+        T,
+        mu_vec,
+        residual_kwargs,
+    )
 
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
     autodiff_mode = s.jacobian === :forward ? :forward : :finite
@@ -339,14 +380,13 @@ function solve_gap(
     dim == 5 || throw(ArgumentError("generic PNJL solve_gap expects dim=5, got $dim"))
 
     s = solver isa NLsolveGapSolver ? solver : NLsolveGapSolver()
-
-    function residual!(F, x)
-        r = gap_residual(model, x, T, mu_vec; kwargs...)
-        @inbounds for i in 1:5
-            F[i] = convert(eltype(F), r[i])
-        end
-        return nothing
-    end
+    residual_kwargs = _materialize_gap_kwargs(kwargs)
+    residual! = GapResidualInplace{typeof(model), typeof(T), typeof(mu_vec), typeof(residual_kwargs), 5}(
+        model,
+        T,
+        mu_vec,
+        residual_kwargs,
+    )
 
     # 如果提供了 initial_guess，走单种子路径（与旧行为一致）
     if initial_guess !== nothing
