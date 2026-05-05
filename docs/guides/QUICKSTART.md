@@ -2,6 +2,8 @@
 
 本指南对应当前仓库结构（`scripts/server/`、`tests/unit/`、`docs/reference/`）。
 
+说明：根项目运行兼容范围仍以仓库根 `Project.toml` 为准（当前 `julia = "1.10"`）；但 sysimage / launcher 的预构建与发布流程统一固定在 CI 基线 Julia `1.12.5`，以保证 `Manifest.toml`、预编译产物和 release 资产口径一致。
+
 ## 1) 初始化环境
 
 ```powershell
