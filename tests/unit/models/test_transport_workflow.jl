@@ -62,6 +62,7 @@ end
         @test isempty(cache.model_cache)
         @test isempty(cache.prefer_energy_aniso_cache)
         @test isempty(cache.a_builder_config_cache)
+        @test isempty(cache.transport_workflow_defaults_cache)
 
         model = _TW._get_model(cache, :PNJL)
         prefer = _TW._default_prefer_energy_aniso_from_toml(cache)
@@ -71,6 +72,7 @@ end
         @test haskey(cache.model_cache, :PNJL)
         @test haskey(cache.prefer_energy_aniso_cache, profile)
         @test haskey(cache.a_builder_config_cache, profile)
+        @test haskey(cache.transport_workflow_defaults_cache, profile)
         @test prefer isa Bool
         @test a_cfg.p_nodes > 0
 
@@ -79,6 +81,7 @@ end
         @test haskey(cache.model_cache, :PNJL)
         @test isempty(cache.prefer_energy_aniso_cache)
         @test isempty(cache.a_builder_config_cache)
+        @test isempty(cache.transport_workflow_defaults_cache)
     end
 
     @testset "fallback schema and local dict isolation" begin
@@ -107,6 +110,25 @@ end
         @test diag.mu_fm == 0.02
         @test diag.xi == 0.1
         @test diag.error_type == "ArgumentError"
+    end
+
+    @testset "transport kwargs materialize helpers" begin
+        kwargs = (
+            p_nodes=24,
+            p_max=8.0,
+            cos_nodes=6,
+            prefer_energy_aniso=false,
+            provider=:toy,
+            extra_flag=true,
+        )
+
+        integration = _TW._extract_transport_integration_kwargs(kwargs)
+        cleaned_keep_provider = _TW._finalize_transport_kwargs(kwargs, false)
+        cleaned_drop_provider = _TW._finalize_transport_kwargs(kwargs, true)
+
+        @test integration == (p_nodes=24, p_max=8.0, cos_nodes=6)
+        @test cleaned_keep_provider == (provider=:toy, extra_flag=true)
+        @test cleaned_drop_provider == (extra_flag=true,)
     end
 
     @testset "models API facade exists and wired" begin

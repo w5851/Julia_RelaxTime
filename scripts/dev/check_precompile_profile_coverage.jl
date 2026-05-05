@@ -11,9 +11,9 @@ using .Models
 const REQUIRED_PROFILES = Dict(
     :smoke => Set([:gap_solver_ad]),
     :test => Set([:gap_solver_ad, :thermo_derivatives_ad]),
-    :scan => Set([:gap_solver_ad, :thermo_derivatives_ad, :scan_pipeline_cli]),
-    :core => Set([:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli]),
-    :full => Set([:gap_solver_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :scan_pipeline_cli]),
+    :scan => Set([:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :transport_point_api, :scan_pipeline_cli]),
+    :core => Set([:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :transport_point_api, :scan_pipeline_cli]),
+    :full => Set([:gap_solver_ad, :solver_residual_ad, :thermo_derivatives_ad, :conserved_charge_highorder, :ad_shape_stabilization, :transport_point_api, :scan_pipeline_cli]),
 )
 
 all_capabilities = Set(Models.list_precompile_capabilities())
