@@ -44,6 +44,8 @@ jobs:
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
         with:
+          # Sysimage / launcher release assets follow the CI build baseline rather than
+          # the root package's broader runtime compat range.
           version: "1.12.5"
 
       - name: Cache Julia artifacts
