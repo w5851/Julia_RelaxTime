@@ -1,3 +1,15 @@
+---
+title: sysimage 产品化 Phase C：package 化 C2 第三批 phase/equilibrium 边界收敛任务单
+archived: true
+original: docs/dev/active/2026-05-04_sysimage产品化_PhaseC_package化_C2第三批phase-equilibrium边界收敛任务单.md
+archived_date: 2026-05-05
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # sysimage 产品化 Phase C：package 化 C2 第三批 phase/equilibrium 边界收敛任务单
 
 更新日期：2026-05-04

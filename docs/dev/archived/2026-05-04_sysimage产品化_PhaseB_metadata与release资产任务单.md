@@ -1,3 +1,15 @@
+---
+title: sysimage 产品化 Phase B：metadata、bootstrap 与 release 资产任务单
+archived: true
+original: docs/dev/active/2026-05-04_sysimage产品化_PhaseB_metadata与release资产任务单.md
+archived_date: 2026-05-05
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # sysimage 产品化 Phase B：metadata、bootstrap 与 release 资产任务单
 
 更新日期：2026-05-04
