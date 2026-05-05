@@ -2,7 +2,7 @@
 
 更新日期：2026-05-05
 
-当前状态：Phase A 已完成首轮收口；Phase B 已完成首轮收口并具备 metadata / bootstrap / release workflow 基础；Phase C 已完成 package 化主路径收敛与首轮性能精修验证；Phase D 已完成 D1 launcher 设计、D2 `create_app(...)` 适配性评估与 D3 最小 launcher app PoC 主收口；Phase E 已完成 E1 服务化候选能力盘点、E2 服务预热策略首批收口与 E3 CLI/服务职责边界首批固化。本轮 sysimage 产品化主线已完成阶段性收尾，后续若继续做 `transport-point` endpoint 或 phase job/artifact 扩展，应另起新的 active 任务单承接。
+当前状态：Phase A 已完成首轮收口；Phase B 已完成首轮收口并具备 metadata / bootstrap / release workflow 基础；Phase C 已完成 package 化主路径收敛与首轮性能精修验证；Phase D 已完成 D1 launcher 设计、D2 `create_app(...)` 适配性评估与 D3 最小 launcher app PoC 主收口；Phase E 已完成 E1 服务化候选能力盘点、E2 服务预热策略首批收口、E3 CLI/服务职责边界首批固化，以及 E4 `transport-point` 同步 point endpoint 最小落地。本轮 sysimage 产品化主线已完成阶段性收尾，后续若继续做 phase job/artifact 扩展，应另起新的 active 任务单承接。
 
 > 目的：把当前已验证有效的 sysimage / precompile 冷启动优化，从“仓库内工程能力”推进到“用户默认入口、跨重启稳定复用、跨机器可分发、长期架构演进”。
 
@@ -192,5 +192,7 @@
 - [x] Phase E 已完成 E1：服务化候选白名单 / 暂缓名单与同步-异步边界盘点
 - [x] Phase E 已完成 E2：服务预热 profile / 默认映射 / 最小启动 hook 首批收口
 - [x] Phase E 已完成 E3：CLI 入口与服务入口职责边界首批固化
+- [x] Phase E 已完成 E4：`transport-point` 作为 point-family 服务入口最小落地
 - [x] 当前总任务单已完成本轮主线收尾；后续扩展改由新任务单承接
  - [x] 后续扩展已起新单：`docs/dev/active/2026-05-05_sysimage产品化_PhaseE_E4_transport-point服务入口任务单.md`
+ - [x] `transport-point` 新单已完成，可归档；后续若继续推进 service 化，应改为 `phase` job / artifact 或更完整在线契约的独立新单
