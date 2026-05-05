@@ -3,6 +3,14 @@ const MODULE_REGISTRY = [
         "id" => "pnjl-gap",
         "name" => "PNJL Gap Single Point",
         "description" => "Run PNJL-compatible single-point solve via Models unified interfaces",
+        "invocation_style" => "sync",
+        "service_surface" => "point",
+        "default_client_surface" => "service",
+        "stable_entrypoint" => "Models.solve_pnjl_point",
+        "http" => Dict(
+            "method" => "POST",
+            "path" => "/api/modules/pnjl-gap/run",
+        ),
         "params_schema" => Dict(
             "T_mev" => "Float64 (required)",
             "mu_mev" => "Float64 (required for FixedMu)",
@@ -16,6 +24,16 @@ const MODULE_REGISTRY = [
         "id" => "pnjl-scan",
         "name" => "PNJL Scan Job",
         "description" => "Run PNJL T-mu / T-rho scans as background jobs with status/result endpoints",
+        "invocation_style" => "async",
+        "service_surface" => "job",
+        "default_client_surface" => "service",
+        "stable_entrypoint" => "Models.run_scan_pipeline",
+        "http" => Dict(
+            "create" => Dict("method" => "POST", "path" => "/api/modules/pnjl-scan/jobs"),
+            "status" => Dict("method" => "GET", "path" => "/api/modules/pnjl-scan/jobs/{job_id}"),
+            "result" => Dict("method" => "GET", "path" => "/api/modules/pnjl-scan/jobs/{job_id}/result"),
+            "cancel" => Dict("method" => "POST", "path" => "/api/modules/pnjl-scan/jobs/{job_id}/cancel"),
+        ),
         "params_schema" => Dict(
             "kind" => "String (required): tmu | trho",
             "params" => "Dict (optional): scan kwargs, e.g. T_values/mu_values/rho_values/output_path",
