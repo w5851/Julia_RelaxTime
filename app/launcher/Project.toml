@@ -1,0 +1,10 @@
+name = "JRTLauncherApp"
+uuid = "7d8e4ab4-19e2-4df5-b8a4-cbd4b55806d5"
+authors = ["Wmzx"]
+version = "0.1.0"
+
+[deps]
+Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
+[compat]
+julia = "1.10"
