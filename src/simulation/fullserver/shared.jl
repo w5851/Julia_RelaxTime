@@ -43,6 +43,31 @@ const MODULE_REGISTRY = [
             "params.max_retries" => "Int (optional, default 0, max 3)",
         ),
     ),
+    Dict(
+        "id" => "transport-point",
+        "name" => "Transport Point",
+        "description" => "Run transport post-processing for a single PNJL equilibrium point via Models stable workflow APIs",
+        "invocation_style" => "sync",
+        "service_surface" => "point",
+        "default_client_surface" => "service",
+        "stable_entrypoint" => "Models.solve_transport_from_equilibrium",
+        "http" => Dict(
+            "method" => "POST",
+            "path" => "/api/modules/transport-point/run",
+        ),
+        "params_schema" => Dict(
+            "T_mev" => "Float64 (required)",
+            "mu_mev" => "Float64 (required for FixedMu; alias mu)",
+            "xi" => "Float64 (optional, default 0.0)",
+            "tau" => "Float64 or Dict(u,d,s,ubar,dbar,sbar) (required, finite, non-negative)",
+            "compute_bulk" => "Bool (optional, default false)",
+            "p_num" => "Int (optional): equilibrium momentum nodes",
+            "t_num" => "Int (optional): equilibrium angular nodes",
+            "transport.p_nodes" => "Int (optional): transport integration momentum nodes",
+            "transport.p_max" => "Float64 (optional): transport momentum cutoff in fm^-1",
+            "transport.cos_nodes" => "Int (optional): transport angular nodes",
+        ),
+    ),
 ]
 
 @inline _new_message_id() = string(uuid4())

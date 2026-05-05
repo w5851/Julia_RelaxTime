@@ -122,6 +122,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - **同步短任务**（请求完成即返回结果）
   - `POST /compute`
   - `POST /api/modules/pnjl-gap/run`
+  - `POST /api/modules/transport-point/run`
 - **异步扫描任务**（创建任务后轮询）
   - `POST /api/modules/pnjl-scan/jobs`（创建）
   - `GET /api/modules/pnjl-scan/jobs/{job_id}`（状态）
@@ -176,6 +177,10 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
   - `invocation_style=async`
   - `service_surface=job`
   - `stable_entrypoint=Models.run_scan_pipeline`
+- `transport-point`
+  - `invocation_style=sync`
+  - `service_surface=point`
+  - `stable_entrypoint=Models.solve_transport_from_equilibrium`
 
 #### 0.6.2 `POST /api/modules/pnjl-gap/run`（同步）
 
@@ -219,6 +224,46 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `idempotency.key/replayed/conflict`
 - `diagnostics.job_id/kind/job_status`
 
+#### 0.6.3A `POST /api/modules/transport-point/run`（同步）
+
+请求：
+
+- `params.T_mev`（必填，兼容别名 `t_mev`）
+- `params.mu_mev`（必填，兼容别名 `mu`）
+- `params.xi`（可选，默认 `0.0`）
+- `params.tau`（必填）
+  - 可为单个 `Float64`，表示六个粒子/反粒子物种共用同一 `tau`
+  - 或为字典：`u/d/s/ubar/dbar/sbar`，所有值都必须有限且非负
+- `params.compute_bulk`（可选，默认 `false`）
+- `params.p_num`（可选，平衡态积分节点）
+- `params.t_num`（可选，平衡态角节点）
+- `params.transport.p_nodes`（可选，输运积分动量节点）
+- `params.transport.p_max`（可选，输运积分动量截断，单位 `fm^-1`）
+- `params.transport.cos_nodes`（可选，输运积分角节点）
+
+成功响应（`200`）：
+
+- `status="ok"`
+- `result.inputs`
+  - `T_mev/mu_mev/xi`
+  - `tau.u/d/s/ubar/dbar/sbar`
+- `result.equilibrium`
+  - `converged/iterations/residual_norm/x_state/mu_vec/masses`
+- `result.thermo_background`
+  - `pressure/entropy/energy/rho_mass/c_p`
+- `result.densities`
+  - `u/d/s/ubar/dbar/sbar`
+- `result.transport`
+  - `eta/zeta/sigma`
+  - `kappa_BB/kappa_BQ/kappa_BS/kappa_QQ/kappa_QS/kappa_SS`
+  - `lambda/lorenz_number/lorentz_legacy/viscous_conductive_coupling_ratio/prandtl_number/bulk_to_shear_viscosity_ratio`
+- `result.reproducibility`
+  - `physics_profile/physics_config_path`
+
+缺失值语义：
+
+- 对于当前请求口径下自然不可得或未计算出的浮点量（例如 `compute_bulk=false` 时的 `zeta`、`prandtl_number`），HTTP 响应中统一返回 `null`，不返回 JSON `NaN` 字面量。
+
 #### 0.6.4 `GET /api/modules/pnjl-scan/jobs/{job_id}`（状态）
 
 成功响应（`200`）：
@@ -257,6 +302,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 
 - `/compute`
 - `/api/modules/pnjl-gap/run`
+- `/api/modules/transport-point/run`
 - `/api/modules/pnjl-scan/jobs*`
 
 对外错误 payload 最小字段：
@@ -280,6 +326,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `JOB_NOT_CANCELLABLE`
 - `IDEMPOTENCY_KEY_CONFLICT`
 - `PNJL_SINGLE_POINT_FAILED`
+- `TRANSPORT_POINT_FAILED`
 - `COMPUTATION_ERROR`
 
 安全约束：

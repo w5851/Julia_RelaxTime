@@ -20,10 +20,10 @@
 
 ## 2. 本批目标
 
-- [ ] E4-1 为 `transport-point` 设计最小 HTTP 契约
-- [ ] E4-2 复用现有 `Models.solve_transport_from_equilibrium` 稳定 API，不再引入脚本耦合
-- [ ] E4-3 接入 `FullServerApp` 路由与 module discovery
-- [ ] E4-4 补 service contract / integration test
+- [x] E4-1 为 `transport-point` 设计最小 HTTP 契约
+- [x] E4-2 复用现有 `Models.solve_transport_from_equilibrium` 稳定 API，不再引入脚本耦合
+- [x] E4-3 接入 `FullServerApp` 路由与 module discovery
+- [x] E4-4 补 service contract / integration test
 
 ---
 
@@ -31,10 +31,10 @@
 
 ### 3.1 本批范围
 
-- [ ] `transport-point` request/response contract
-- [ ] `FullServerApp` handler / route / module registry 接入
-- [ ] `docs/api/data_contracts.md` 更新
-- [ ] integration contract / smoke test
+- [x] `transport-point` request/response contract
+- [x] `FullServerApp` handler / route / module registry 接入
+- [x] `docs/api/data_contracts.md` 更新
+- [x] integration contract / smoke test
 
 ### 3.2 非范围
 
@@ -47,24 +47,24 @@
 
 ## 4. 初步边界
 
-- [ ] 入口类型：`sync + point`
-- [ ] discovery：纳入 `/api/modules`
-- [ ] 默认在线入口：service
+- [x] 入口类型：`sync + point`
+- [x] discovery：纳入 `/api/modules`
+- [x] 默认在线入口：service
 - [ ] CLI 仍保留现有批处理入口，不以本批新增 transport-point CLI 为目标
 
 ---
 
 ## 5. 验收标准
 
-- [ ] `/api/modules` 可发现 `transport-point`
-- [ ] 存在稳定 `POST` point endpoint
-- [ ] 请求/响应字段、错误语义、单位约定已写入数据契约
-- [ ] integration 测试覆盖最小 happy path 与参数校验
+- [x] `/api/modules` 可发现 `transport-point`
+- [x] 存在稳定 `POST` point endpoint
+- [x] 请求/响应字段、错误语义、单位约定已写入数据契约
+- [x] integration 测试覆盖最小 happy path 与参数校验
 
 ---
 
 ## 6. DoD
 
-- [ ] `transport-point` 已成为 E3 边界内的真实 service module
-- [ ] 不与现有 CLI/job 路径冲突
+- [x] `transport-point` 已成为 E3 边界内的真实 service module
+- [x] 不与现有 CLI/job 路径冲突
 - [ ] 后续若继续扩 `phase` job / artifact endpoint，可在此基础上独立推进
