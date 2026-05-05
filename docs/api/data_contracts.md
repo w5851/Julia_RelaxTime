@@ -135,6 +135,48 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - 前端不直接调用 `run_*.jl`，仅通过上述 HTTP 契约访问能力。
 - 扫描任务统一走异步 jobs 路由；不提供同步扫描接口。
 
+服务/CLI 职责边界（E3 固化）：
+
+- **service 默认入口**
+  - 面向交互式调用、前端、零知识 agent 的在线请求
+  - 仅暴露同步 `point` 与异步 `job` 两类服务表面
+- **CLI 默认入口**
+  - 面向研究批处理、本地离线运行、产物落盘和人工调参
+  - 继续作为 `phase / transport-scan / orchestrator / suscept / unified-scan` 的权威脚本入口
+
+边界规则：
+
+- `point-family`：优先同时保留 CLI/API，但 service 为默认在线入口
+- `scan / phase / orchestrator`：CLI 保持权威执行入口；service 仅在需要时提供 job 壳，不提供同步长任务入口
+- 前端或 agent 若已选择 service 面，不应绕回直接执行脚本来模拟在线接口
+
+#### 0.6.1.1 `GET /api/modules` 发现契约
+
+`GET /api/modules` 返回的模块清单除 `id/name/description/params_schema` 外，还稳定包含：
+
+- `invocation_style`
+  - `sync | async`
+- `service_surface`
+  - `point | job`
+- `default_client_surface`
+  - 当前固定为 `service`
+- `stable_entrypoint`
+  - 对应的 `Models.*` 稳定入口
+- `http`
+  - point 模块：`method/path`
+  - job 模块：`create/status/result/cancel`
+
+当前稳定 discovery 项：
+
+- `pnjl-gap`
+  - `invocation_style=sync`
+  - `service_surface=point`
+  - `stable_entrypoint=Models.solve_pnjl_point`
+- `pnjl-scan`
+  - `invocation_style=async`
+  - `service_surface=job`
+  - `stable_entrypoint=Models.run_scan_pipeline`
+
 #### 0.6.2 `POST /api/modules/pnjl-gap/run`（同步）
 
 请求：

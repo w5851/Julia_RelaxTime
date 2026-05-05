@@ -4,8 +4,12 @@ using HTTP
 
 include(joinpath(@__DIR__, "FullServerApp.jl"))
 using .FullServerApp
+include(joinpath(@__DIR__, "ServerWarmup.jl"))
+using .ServerWarmup
 
 export run_full_server, parse_port, server_runtime_policy, runtime_policy_env
+export list_server_warmup_steps, resolve_server_warmup_profile
+export run_server_warmup, run_server_warmup_from_env
 
 const DEFAULT_PORT = 8080
 const DEFAULT_DEPLOY_PROFILE = "localhost"
@@ -27,6 +31,8 @@ function _policy_for_profile(profile::String)
             scan_max_running=2,
             scan_max_pending=32,
             scan_job_timeout_seconds=0,
+            warmup_profile="none",
+            warmup_strict=false,
         )
     elseif profile == "staging"
         return (
@@ -35,6 +41,8 @@ function _policy_for_profile(profile::String)
             scan_max_running=2,
             scan_max_pending=64,
             scan_job_timeout_seconds=180,
+            warmup_profile="point",
+            warmup_strict=false,
         )
     else
         return (
@@ -43,6 +51,8 @@ function _policy_for_profile(profile::String)
             scan_max_running=4,
             scan_max_pending=128,
             scan_job_timeout_seconds=300,
+            warmup_profile="service_core",
+            warmup_strict=false,
         )
     end
 end
@@ -60,6 +70,8 @@ function runtime_policy_env(profile::AbstractString=get(ENV, "JRT_DEPLOY_PROFILE
         "PNJL_SCAN_MAX_RUNNING" => string(policy.scan_max_running),
         "PNJL_SCAN_MAX_PENDING" => string(policy.scan_max_pending),
         "PNJL_SCAN_JOB_TIMEOUT_SECONDS" => string(policy.scan_job_timeout_seconds),
+        "JRT_SERVER_WARMUP_PROFILE" => policy.warmup_profile,
+        "JRT_SERVER_WARMUP_STRICT" => policy.warmup_strict ? "1" : "0",
     )
 end
 
@@ -98,6 +110,8 @@ function print_banner(port::Int, policy)
     println("   scan_max_running: $(policy.scan_max_running)")
     println("   scan_max_pending: $(policy.scan_max_pending)")
     println("   scan_job_timeout_seconds: $(policy.scan_job_timeout_seconds)")
+    println("   warmup_profile: $(policy.warmup_profile)")
+    println("   warmup_strict: $(policy.warmup_strict)")
     println("\n📁 静态文件:")
     println("   http://localhost:$port/")
     println("   http://localhost:$port/index.html")
@@ -116,8 +130,15 @@ function run_full_server(repo_root::String, args::Vector{String}=String[])
         haskey(ENV, k) || (ENV[k] = v)
     end
     app = FullServerApp.build_app(repo_root)
+    warmup_profile = resolve_server_warmup_profile(get(ENV, "JRT_SERVER_WARMUP_PROFILE", policy.warmup_profile))
+    warmup_strict = get(ENV, "JRT_SERVER_WARMUP_STRICT", policy.warmup_strict ? "1" : "0")
 
     print_banner(port, policy)
+
+    if warmup_profile !== :none
+        @info "Running server warmup" warmup_profile=warmup_profile strict=warmup_strict
+        run_server_warmup_from_env()
+    end
 
     try
         HTTP.serve(app, "0.0.0.0", port; verbose=false)
