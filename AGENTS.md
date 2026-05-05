@@ -39,6 +39,7 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - For changes touching `src/models/`, `src/relaxtime/`, or `src/simulation/`, read the relevant entrypoints and the corresponding test layer before editing.
 - For changes on unified solver or workflow paths, keep mixed-meson governance and non-fixedmu unified joint-solve semantics unchanged unless the task explicitly requires otherwise.
 - For cross-module refactors, prefer the smallest convergent change first; only introduce new shared abstractions when they are clearly required by the task.
+- For stable CLI workflows documented in `docs/guides/scripts/README.md`, prefer the `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` wrappers so local sysimage reuse follows repo convention.
 - Unless the user explicitly asks for analysis only, prefer implementing, validating, and reporting instead of stopping at a proposal.
 
 ### Numerical And Regression Governance
@@ -98,6 +99,30 @@ Start the API plus web server:
 
 ```sh
 julia --project=. scripts/server/server_full.jl
+```
+
+Prefer the stable CLI wrapper on Windows / PowerShell when available:
+
+```sh
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --preset=smoke
+```
+
+Prefer the stable CLI wrapper on Linux / macOS when available:
+
+```sh
+sh scripts/dev/run_with_sysimage.sh scripts/pnjl/calculate_phase_structure.jl --preset=smoke
+```
+
+Bootstrap a matching prebuilt sysimage on Windows / PowerShell:
+
+```sh
+powershell -ExecutionPolicy Bypass -File scripts/dev/bootstrap_sysimage.ps1
+```
+
+Bootstrap a matching prebuilt sysimage on Linux / macOS:
+
+```sh
+sh scripts/dev/bootstrap_sysimage.sh
 ```
 
 Run phase CLI with optional precompile warmup (enabled by default):
@@ -281,6 +306,8 @@ julia --project=. scripts/dev/check_solver_contract_leakage.jl
 julia --project=. scripts/dev/check_relaxtime_script_governance.jl
 julia --project=. scripts/dev/check_pnjl_migration_guard.jl
 julia --project=. scripts/dev/analyze_deps.jl
+julia --project=. scripts/dev/check_model_profile_matrix.jl
+julia --project=. scripts/dev/check_data_output_path_guard.jl
 julia --project=. scripts/dev/check_precompile_profile_coverage.jl
 julia --project=. scripts/dev/check_precompile_trace_budget.jl
 ```
