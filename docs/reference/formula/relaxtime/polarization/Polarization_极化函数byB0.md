@@ -51,6 +51,19 @@ end
 详细说明与推导见：
 - [B0.md](B0.md) 的 “3.2.1 NJL vs PNJL：分布函数导致的等价改写”
 - [PNJL_夸克有效分布函数.md](PNJL_夸克有效分布函数.md)
+- [B0与文献I2的归一化映射说明.md](../../../domain-knowledge/relaxtime/B0%E4%B8%8E%E6%96%87%E7%8C%AEI2%E7%9A%84%E5%BD%92%E4%B8%80%E5%8C%96%E6%98%A0%E5%B0%84%E8%AF%B4%E6%98%8E.md)
+
+### 3.4 与文献记号的最小结论
+
+对当前项目主线口径，文献中常见的 `I_2^{ij}` 与本项目 `B_0^{ij}` 满足
+```math
+I_2^{ij} = -\frac{N_c}{16\pi^2} B_0^{ij},
+```
+而文献侧 `\Pi_{ij,\mathrm{lit}}^P` 与项目侧 `\Pi_{ij,\mathrm{proj}}^P` 满足
+```math
+\Pi_{ij,\mathrm{lit}}^P = 2\,\Pi_{ij,\mathrm{proj}}^P.
+```
+这不会改变极点方程，因为同时有 `P_\pi = 2K_{123}^+`、`P_K = 2K_{4567}^+`。完整推导见上面的独立说明页。
 
 ## 4. 参数说明表
 

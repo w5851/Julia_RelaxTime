@@ -70,7 +70,11 @@ $$
 
 ## 3. 计算流程（与工程实现对齐）
 1. 输入 $T,\mu$ 与模型参数（$G,K,m_{0f},\Lambda$ 等）。
-2. 在平均场模块求解动力学夸克质量 $M_f = m_{0f} - 2G\sigma_f$。
+2. 在平均场模块先求解动力学夸克质量；对当前 2+1 flavor PNJL 主线口径，应与 [models/pnjl/Omega_各向同性.md](../../models/pnjl/Omega_%E5%90%84%E5%90%91%E5%90%8C%E6%80%A7.md) 中的能隙方程保持一致：
+
+$$
+M_i = m_i - 4G\phi_i + 2K\phi_j\phi_k,\quad i\neq j\neq k.
+$$
 3. 调用极化函数模块计算 $\Pi_{ff'}^{P(S)}(p_0,\mathbf{0})$。
 4. 求解介子质量：
    - π/K：在复平面搜索极点方程根，实部为 $M$、虚部为 $\Gamma/2$。

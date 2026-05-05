@@ -10,7 +10,7 @@
 
 ### 2.1 原始各向同性表达式
 ```math
-A(m, \mu, \beta, \Lambda) = 4\int_0^{\Lambda} p^2 dp \frac{1}{E} \left(f(E - \mu) + f(E + \mu) - 1\right)
+A(m, \mu, \beta, \Lambda) = -4\int_0^{\Lambda} p^2 dp \frac{1}{E} \left(1-f(E - \mu)-f(E + \mu)\right)
 ```
 
 ### 2.2 各向异性分布函数修正
@@ -81,6 +81,7 @@ A(m, \mu, T, \Lambda, \xi, \Phi, \bar{\Phi}) = 4\int_0^{\Lambda} p^2 dp \frac{1}
 \]
 
 **重要说明**：
+- 第一项已经等价于 `-4\int dp\, p^2/E [1-f_q^+-f_q^-]`，这里只是按当前代码实现改写成 `f_q^+ + f_q^- - 1`；
 - 积分中的分母统一使用各向同性能量 $E = \sqrt{p^2 + m^2}$
 - 各向异性效应**仅**通过修改分布函数 $f^{\text{aniso}}$ 体现
 - 这保证了常数项 $-1$ 的积分在各向同性和各向异性情况下保持一致
