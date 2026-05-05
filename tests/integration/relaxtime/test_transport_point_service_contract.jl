@@ -57,6 +57,8 @@ end
         @test isfinite(body.result.thermo_background.pressure)
         @test isfinite(body.result.transport.eta)
         @test isfinite(body.result.transport.sigma)
+        @test body.result.transport.zeta === nothing
+        @test body.result.transport.prandtl_number === nothing
         @test body.result.reproducibility.physics_profile isa AbstractString
     end
 
@@ -79,6 +81,17 @@ end
         @test resp.status == 400
         @test body.status == "error"
         @test body.error_code == "INVALID_REQUEST"
+        @test haskey(body, :message_id)
+    end
+
+    @testset "method mismatch returns JSON error contract" begin
+        req = HTTP.Request("GET", "/api/modules/transport-point/run", ["Content-Type" => "application/json"], UInt8[])
+        resp = TPSC.handle_transport_point(req)
+        body = _transport_point_body(resp)
+
+        @test resp.status == 405
+        @test body.status == "error"
+        @test body.error_code == "METHOD_NOT_ALLOWED"
         @test haskey(body, :message_id)
     end
 end

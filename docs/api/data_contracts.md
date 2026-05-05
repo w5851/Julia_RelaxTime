@@ -224,7 +224,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `idempotency.key/replayed/conflict`
 - `diagnostics.job_id/kind/job_status`
 
-#### 0.6.3A `POST /api/modules/transport-point/run`（同步）
+#### 0.6.3 `POST /api/modules/transport-point/run`（同步）
 
 请求：
 
@@ -320,6 +320,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 
 - `INVALID_INPUT`
 - `INVALID_REQUEST`
+- `METHOD_NOT_ALLOWED`
 - `QUEUE_FULL`
 - `JOB_NOT_FOUND`
 - `JOB_NOT_SUCCEEDED`

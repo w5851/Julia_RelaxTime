@@ -56,8 +56,8 @@ const MODULE_REGISTRY = [
             "path" => "/api/modules/transport-point/run",
         ),
         "params_schema" => Dict(
-            "T_mev" => "Float64 (required)",
-            "mu_mev" => "Float64 (required for FixedMu; alias mu)",
+            "T_mev" => "Float64 (required; alias t_mev)",
+            "mu_mev" => "Float64 (required; alias mu)",
             "xi" => "Float64 (optional, default 0.0)",
             "tau" => "Float64 or Dict(u,d,s,ubar,dbar,sbar) (required, finite, non-negative)",
             "compute_bulk" => "Bool (optional, default false)",

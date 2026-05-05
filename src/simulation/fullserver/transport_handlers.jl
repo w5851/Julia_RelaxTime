@@ -3,6 +3,7 @@
 end
 
 @inline function _transport_real_option(value, name::String)
+    value === nothing && throw(ArgumentError("Missing required parameter: $(name)"))
     val = _to_float64(value)
     isfinite(val) || throw(ArgumentError("$(name) must be finite"))
     return Float64(val)
@@ -21,6 +22,10 @@ end
         return isfinite(value) ? value : nothing
     elseif value isa Integer || value isa Bool || value isa Nothing || value isa AbstractString
         return value
+    elseif value isa AbstractDict
+        return Dict(string(k) => _json_safe_value(v) for (k, v) in pairs(value))
+    elseif value isa NamedTuple
+        return Dict(string(k) => _json_safe_value(v) for (k, v) in pairs(value))
     elseif value isa AbstractVector
         return [_json_safe_value(v) for v in value]
     elseif value isa Tuple
@@ -139,10 +144,10 @@ end
 
 function handle_transport_point(req::HTTP.Request)
     if req.method != "POST"
-        return HTTP.Response(405, ["Content-Type" => "text/plain"], "Method Not Allowed")
+        return _transport_error_response(405, "METHOD_NOT_ALLOWED", "Method Not Allowed")
     end
 
-    body = isempty(req.body) ? Dict{Symbol,Any}() : JSON3.read(String(req.body))
+    body = isempty(req.body) ? Dict{Symbol,Any}() : JSON3.read(req.body)
     params_obj = haskey(body, :params) ? body[:params] : body
     params_dict = params_obj isa Dict ? params_obj : _to_symbol_dict(params_obj)
 
