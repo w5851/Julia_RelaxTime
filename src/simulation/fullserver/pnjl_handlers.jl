@@ -58,10 +58,10 @@ function handle_pnjl_single_point(req::HTTP.Request)
 
         return _pnjl_json_response(200, Dict("status" => "ok", "result" => result))
     catch e
-        @error "PNJL single-point request failed" exception=(e, catch_backtrace())
         if e isa ArgumentError || e isa DomainError
             return _pnjl_error_response(400, "INVALID_REQUEST", "Invalid PNJL request parameters")
         end
+        @error "PNJL single-point request failed" exception=(e, catch_backtrace())
         return _pnjl_error_response(500, "PNJL_SINGLE_POINT_FAILED", "PNJL single-point solve failed")
     end
 end
