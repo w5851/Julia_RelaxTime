@@ -10,6 +10,8 @@ function route_request(req::HTTP.Request, repo_root::String)
         return handle_modules_list()
     elseif path == "/api/modules/pnjl-gap/run"
         return handle_pnjl_single_point(req)
+    elseif path == "/api/modules/transport-point/run"
+        return handle_transport_point(req)
     elseif path == "/api/modules/pnjl-scan/jobs" && req.method == "POST"
         return handle_pnjl_scan_job_create(req)
     elseif startswith(path, job_prefix) && req.method == "GET"

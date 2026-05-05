@@ -18,11 +18,12 @@ const SMRC = Main.FullServerApp
     @test resp.status == 200
 
     body = JSON3.read(String(resp.body))
-    @test length(body) >= 2
+    @test length(body) >= 3
 
     modules_by_id = Dict(String(item.id) => item for item in body)
     @test haskey(modules_by_id, "pnjl-gap")
     @test haskey(modules_by_id, "pnjl-scan")
+    @test haskey(modules_by_id, "transport-point")
 
     gap = modules_by_id["pnjl-gap"]
     @test gap.invocation_style == "sync"
@@ -41,4 +42,12 @@ const SMRC = Main.FullServerApp
     @test scan.http.status.path == "/api/modules/pnjl-scan/jobs/{job_id}"
     @test scan.http.result.path == "/api/modules/pnjl-scan/jobs/{job_id}/result"
     @test scan.http.cancel.path == "/api/modules/pnjl-scan/jobs/{job_id}/cancel"
+
+    transport = modules_by_id["transport-point"]
+    @test transport.invocation_style == "sync"
+    @test transport.service_surface == "point"
+    @test transport.default_client_surface == "service"
+    @test transport.stable_entrypoint == "Models.solve_transport_from_equilibrium"
+    @test transport.http.method == "POST"
+    @test transport.http.path == "/api/modules/transport-point/run"
 end
