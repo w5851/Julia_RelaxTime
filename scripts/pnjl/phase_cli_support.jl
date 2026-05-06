@@ -6,6 +6,8 @@ using JSON3
 
 export PhaseCliConfig, parse_args, main
 
+const DEFAULT_PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
+
 Base.@kwdef mutable struct PhaseCliConfig
     config_path::Union{Nothing, String} = nothing
     preset::Union{Nothing, Symbol} = nothing
@@ -455,6 +457,8 @@ function parse_args(args, project_root::AbstractString)
     cfg.solver_backend in (:models, :auto) || throw(ArgumentError("invalid --solver_backend=$(cfg.solver_backend); accepted values: models, auto"))
     return cfg
 end
+
+parse_args(args) = parse_args(args, DEFAULT_PROJECT_ROOT)
 
 function main(models_module, project_root::AbstractString, args::Vector{String}=collect(String.(ARGS)))
     cfg = parse_args(args, project_root)

@@ -25,15 +25,19 @@ end
 
 @testset "Phase legacy path detach smoke" begin
     cli_file = joinpath(PROJECT_ROOT, "scripts", "pnjl", "calculate_phase_structure.jl")
+    support_file = joinpath(PROJECT_ROOT, "scripts", "pnjl", "phase_cli_support.jl")
     pipeline_file = joinpath(PROJECT_ROOT, "src", "models", "phase", "PhasePipeline.jl")
     entrypoints_file = joinpath(PROJECT_ROOT, "src", "models", "entrypoints.jl")
 
     cli_text = _read_text(cli_file)
+    support_text = _read_text(support_file)
     pipeline_text = _read_text(pipeline_file)
     entrypoints_text = _read_text(entrypoints_file)
 
-    @test occursin("Models.run_phase_pipeline", cli_text)
+    @test occursin("PhaseCliSupport.main", cli_text)
+    @test occursin("run_phase_pipeline", support_text)
     @test !occursin("PhaseTransition", cli_text)
+    @test !occursin("PhaseTransition", support_text)
     @test !occursin("PhaseTransition", pipeline_text)
     @test occursin("export run_phase_pipeline", entrypoints_text)
 

@@ -32,6 +32,12 @@ struct GapOmegaFn{N, TMODEL, TT, TMU, TKW, TX}
     kwargs::TKW
 end
 
+@inline function (f::GapOmegaFn{2})(y)
+    Ty = eltype(y)
+    st = MeanFieldState(SVector{3, Ty}(y[1], y[2], zero(Ty)); Phi=one(Ty), PhiBar=one(Ty))
+    return _omega_worldsafe(f.model, st, f.T, f.mu_vec; p_num=f.p_num, t_num=f.t_num, xi=f.xi, f.kwargs...)
+end
+
 @inline function (f::GapOmegaFn{3})(y)
     Ty = eltype(y)
     st = MeanFieldState(SVector{3, Ty}(y[1], y[2], y[3]); Phi=one(Ty), PhiBar=one(Ty))
@@ -146,7 +152,9 @@ end
         return x
     end
     Tx = typeof(x[1])
-    if N == 3
+    if N == 2
+        return SVector{2, Tx}(x[1], x[2])
+    elseif N == 3
         return SVector{3, Tx}(x[1], x[2], x[3])
     elseif N == 5
         return SVector{5, Tx}(x[1], x[2], x[3], x[4], x[5])
@@ -171,11 +179,13 @@ function gap_residual(
     μ = normalize_mu_vec(mu_vec)
     residual_kwargs = _materialize_gap_kwargs(kwargs)
     N = gap_state_dim(model)
-    (N == 3 || N == 5) || throw(ArgumentError("gap_state_dim(model) must be 3 or 5, got $N"))
+    (N == 2 || N == 3 || N == 5) || throw(ArgumentError("gap_state_dim(model) must be 2, 3, or 5, got $N"))
 
     x_state = if x isa MeanFieldState
         v = state_vector(x)
-        if N == 3
+        if N == 2
+            SVector{2, eltype(v)}(v[1], v[2])
+        elseif N == 3
             SVector{3, eltype(v)}(v[1], v[2], v[3])
         else
             v
@@ -220,7 +230,7 @@ function gap_residual(
         SVector{2, Tx}(x[1], x[2])
     end
 
-    omega_fn = GapOmegaFn{3, typeof(model), typeof(T), typeof(μ), typeof(residual_kwargs), typeof(xi)}(
+    omega_fn = GapOmegaFn{2, typeof(model), typeof(T), typeof(μ), typeof(residual_kwargs), typeof(xi)}(
         model,
         T,
         μ,
