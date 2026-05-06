@@ -1,3 +1,15 @@
+---
+title: charged / freeze-out validation 最小契约设计
+archived: true
+original: docs/dev/active/2026-05-03_charged_freezeout_validation最小契约设计.md
+archived_date: 2026-05-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # charged / freeze-out validation 最小契约设计
 
 更新日期：2026-05-03

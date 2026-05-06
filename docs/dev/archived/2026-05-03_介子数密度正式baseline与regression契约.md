@@ -1,3 +1,15 @@
+---
+title: 介子数密度正式 baseline 与 regression 契约
+archived: true
+original: docs/dev/active/2026-05-03_介子数密度正式baseline与regression契约.md
+archived_date: 2026-05-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 介子数密度正式 baseline 与 regression 契约
 
 更新日期：2026-05-03

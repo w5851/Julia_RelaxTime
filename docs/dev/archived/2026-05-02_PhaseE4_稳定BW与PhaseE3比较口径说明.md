@@ -1,3 +1,15 @@
+---
+title: Phase E4 稳定BW与PhaseE3比较口径说明
+archived: true
+original: docs/dev/active/2026-05-02_PhaseE4_稳定BW与PhaseE3比较口径说明.md
+archived_date: 2026-05-06
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Phase E4 稳定BW与PhaseE3比较口径说明
 
 更新日期：2026-05-02
