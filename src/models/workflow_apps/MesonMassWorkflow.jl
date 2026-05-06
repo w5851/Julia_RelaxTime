@@ -50,6 +50,7 @@ using .WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
 using Main.Constants_PNJL: ħc_MeV_fm
 using ..Models: RootPolicy, solve_root_with_policy, execute_governance_selector, select_residual_min_candidate
 using ..Models: HADRON_SEED_5, default_momentum_count, default_theta_count
+using ..Models: normalize_mu_vec
 const DEFAULT_MOMENTUM_COUNT = default_momentum_count()
 const DEFAULT_THETA_COUNT = default_theta_count()
 using Main.MesonMass: solve_meson_mass, default_meson_mass_guess, ensure_quark_params_has_A
@@ -1682,7 +1683,7 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0, m
     Φbar = Float64(base.x_state[5])
 
     masses = base.masses
-    mu_vec = mu_vec_override === nothing ? Main.Models.normalize_mu_vec(mu_fm) : Main.Models.normalize_mu_vec(mu_vec_override)
+    mu_vec = mu_vec_override === nothing ? normalize_mu_vec(mu_fm) : normalize_mu_vec(mu_vec_override)
     quark_params = QuarkParams((
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
         μ=(u=Float64(mu_vec[1]), d=Float64(mu_vec[2]), s=Float64(mu_vec[3])),
@@ -1756,7 +1757,7 @@ function solve_gap_and_meson_point(
     else
         Main.EquilibriumFacade.solve_equilibrium_backend(
             T_fm,
-            collect(Main.Models.normalize_mu_vec(collect(flavor_mu_override)));
+            collect(normalize_mu_vec(collect(flavor_mu_override)));
             xi=xi,
             solver_backend=solver_backend,
             p_num=p_num,

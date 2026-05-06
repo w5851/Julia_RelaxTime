@@ -25,6 +25,7 @@ end
     @test isfinite(therm1)
     @test therm1 == therm2
 
-    # Node cache should be populated (implementation detail but useful smoke guard).
-    @test haskey(Models.PNJLIntegrals.NODE_CACHE, (10, 2))
+    # Node cache should be populated with the current (p_num, t_num, p_max_inv_fm) key shape.
+    key = (10, 2, Models.PNJLIntegrals.DEFAULT_THERMAL_P_MAX_INV_FM)
+    @test haskey(Models.PNJLIntegrals.NODE_CACHE, key)
 end

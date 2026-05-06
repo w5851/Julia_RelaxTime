@@ -20,6 +20,7 @@ using ..FlavorChemicalProfiles
 using ..MesonChemicalProfiles
 using ..MesonDensityWorkflow
 using ..ScanCommon
+using ..Models: build_crossover_line
 
 export run_crossover_meson_density_scan, DEFAULT_CROSSOVER_MESON_DENSITY_OUTPUT_PATH
 
@@ -373,7 +374,7 @@ function run_crossover_meson_density_scan(;
 
     flavor_profile = FlavorChemicalProfiles.load_flavor_chemical_profile(profile=String(flavor_chemical_profile_name))
     chemical_profile = MesonChemicalProfiles.load_meson_chemical_profile(profile=String(meson_chemical_profile_name))
-    line_rows = Main.Models.build_crossover_line(
+    line_rows = build_crossover_line(
         mu_max_MeV=mu_max_MeV,
         T_min_MeV=T_min_MeV,
         T_max_MeV=T_max_MeV,
