@@ -2,7 +2,7 @@
 
 更新日期：2026-05-06
 
-当前状态：设计中；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
+当前状态：Phase R0/R1 已完成，Phase R2 首个 `plot_review` case 已落盘；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
 
 ---
 
@@ -160,6 +160,19 @@
 - `crossover_kplus_piplus_mu055`
 - `phase_shift_vs_strictbw_window_208_220`
 
+当前已落地的首个正式 case：
+
+- `data/outputs/results/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/`
+  - 来源脚本：`scripts/relaxtime/build_meson_density_plot_review_case.py`
+  - 来源样本：`data/outputs/results/relaxtime/meson_density/freezeout_validation/blaschke2019col_kminus_piminus_mu_pi_100_phase_shift_gbu_default/`
+  - 当前最小产物：
+    - `workflow_scan.csv`
+    - `comparison_vs_target.csv`
+    - `plot_review_comparison.csv`
+    - `overlay_kminus_piminus_mu_pi_100.png`
+    - `residual_kminus_piminus_mu_pi_100.png`
+    - `README.md`
+
 ### 4.5 图形人工验收口径
 
 人工看图时，不要求逐点数值一致；只要求以下趋势层判断：
@@ -187,19 +200,21 @@
 
 ### Phase R0：治理文档落盘
 
-- [ ] 在活动文档中正式引用本方案
+- [x] 在活动文档中正式引用本方案
   - 验收：`2026-04-30` 与 `2026-05-06` 任务单都链接到本页
 
 ### Phase R1：plot-review 目录契约
 
-- [ ] 固定 `plot_review/` 目录结构与命名规则
+- [x] 固定 `plot_review/` 目录结构与命名规则
   - 验收：文档写明目录、case slug、最小文件集合
 
 ### Phase R2：首个 plot-review case
 
-- [ ] 选择一个已有样本做首个正式 plot-review case
+- [x] 选择一个已有样本做首个正式 plot-review case
   - 推荐：`freezeout_validation/blaschke2019col_kminus_piminus_mu_pi_100_*`
   - 验收：生成单独 `plot_review/<case_slug>/` 目录，含 CSV + 图 + README
+  - 当前产物：
+    - `data/outputs/results/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/`
 
 ### Phase R3：path-level regression 评估
 
@@ -218,11 +233,11 @@
 
 ## 6. 验收标准
 
-- [ ] 已有一页明确的 regression fallback 方案文档
-- [ ] 已定义 plot-review 目录与最小产物合同
-- [ ] 已明确 regression / plot-review / validation 三层边界
-- [ ] 已给出首个推荐 case
-- [ ] 已明确何时不能把结果纳入 validation
+- [x] 已有一页明确的 regression fallback 方案文档
+- [x] 已定义 plot-review 目录与最小产物合同
+- [x] 已明确 regression / plot-review / validation 三层边界
+- [x] 已给出首个推荐 case
+- [x] 已明确何时不能把结果纳入 validation
 
 ---
 
@@ -241,7 +256,7 @@
 
 满足以下条件即可视为本方案设计完成：
 
-- [ ] 方案文档已落到 `docs/dev/active/`
-- [ ] 方案已被主任务单引用
-- [ ] 首个推荐 plot-review case 已明确
-- [ ] regression 兜底与 validation 边界已写清
+- [x] 方案文档已落到 `docs/dev/active/`
+- [x] 方案已被主任务单引用
+- [x] 首个推荐 plot-review case 已明确
+- [x] regression 兜底与 validation 边界已写清
