@@ -54,6 +54,7 @@ const CORE_SMOKE_FILES = [
     # RelaxTime: transport fixed-point + workflow consistency
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_t190_mixed_p_chain_regression.jl"),
+    joinpath(REGRESSION_DIR, "relaxtime", "test_meson_density_plot_review_case_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_tau_xi_probe_regression.jl"),
     joinpath(REGRESSION_DIR, "relaxtime", "test_workflow_vs_direct_consistency.jl"),
 ]

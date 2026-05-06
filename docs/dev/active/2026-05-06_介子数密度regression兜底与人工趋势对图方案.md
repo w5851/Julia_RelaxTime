@@ -2,7 +2,7 @@
 
 更新日期：2026-05-06
 
-当前状态：Phase R0/R1 已完成，Phase R2 首个 `plot_review` case 已落盘；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
+当前状态：Phase R0/R1 已完成，Phase R2 首个 `plot_review` case 已落盘，Phase R3 已形成“轻量 bundle consistency regression + 暂不加入重计算型 path-level regression”的执行结论；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
 
 ---
 
@@ -218,8 +218,22 @@
 
 ### Phase R3：path-level regression 评估
 
-- [ ] 判断是否需要新增 path-level regression 测试
+- [x] 判断是否需要新增 path-level regression 测试
   - 验收：给出“新增 / 暂不新增”的明确结论与理由
+  - 当前结论：
+    - 暂不把 `phase_shift_gbu` freeze-out 路径的重计算型 workflow rerun 直接纳入 PR 级 regression gate
+    - 原因：本地用正式入口对少量 `sqrt(s_NN)` 采样点做 cold-start probe 时，三点级别已超过两分钟，不适合作为常规 PR gate
+    - 当前替代落地：
+      - 新增 canonical `plot_review` bundle consistency regression
+      - 基线：`tests/baselines/relaxtime/baseline_meson_density_plot_review_case_v1.csv`
+      - 测试：`tests/regression/relaxtime/test_meson_density_plot_review_case_regression.jl`
+    - 该 regression 当前锁定：
+      - `comparison_vs_target.csv` 与 `plot_review_comparison.csv` 的逐行一致性
+      - `README.md` 中的摘要指标与“非 validation gate”标注
+      - overlay / residual PNG 产物存在且非空
+    - 因此当前 R3 的正式收口应理解为：
+      - 暂不新增重计算型 path-level regression
+      - 已新增 plot-review bundle 的轻量回归门禁
 
 ### Phase R4：validation 升格门槛
 
