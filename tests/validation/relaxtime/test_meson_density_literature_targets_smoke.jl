@@ -1,9 +1,14 @@
 using Test
 
-const _LITERATURE_TARGETS_DIR = normpath(joinpath(
-    @__DIR__, "..", "..", "..",
-    "data", "outputs", "results", "relaxtime", "literature", "meson_density_targets",
-))
+if !isdefined(Main, :validation_targets_path)
+    include(joinpath(@__DIR__, "..", "common", "data_paths.jl"))
+end
+
+const _LITERATURE_TARGETS_DIR = validation_targets_path(
+    "relaxtime",
+    "literature",
+    "meson_density",
+)
 
 const _EXPECTED_LITERATURE_TARGETS = [
     "blaschke2019col_kminus_piminus_mu_pi_100_fig4_right",

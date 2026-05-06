@@ -4,6 +4,7 @@
 
 - 我应该用 `Models.run_tmu_scan` 还是 `Models.run_trho_scan`？
 - 什么时候应该改用 `Models.run_freezeout_fixedmu_scan`？
+- 什么时候应该直接进入 `Models.run_crossover_meson_density_scan`？
 - 什么时候应该直接进入 `Models.run_freezeout_meson_density_scan`？
 - 什么时候应该直接进入 `Models.run_external_path_meson_density_scan`？
 - 什么时候需要 `Models.build_default_rho_grid`？
@@ -22,6 +23,7 @@
 
 当你不只需要 equilibrium 点，而是要直接产出 `n_\pi(T)`、`n_K(T)`、`K/\pi(T)` 或其 BW/BU 版本时，应进一步改用：
 
+- `Models.run_crossover_meson_density_scan`
 - `Models.run_freezeout_meson_density_scan`
 
 当路径已经由外部数据明确给出，例如文献提取后的 phase-line 离散点，而你不希望再让本仓库内部路径生成器介入时，应改用：
@@ -74,6 +76,20 @@
 - 支持 `profile_name` 选择 freeze-out 参数化
 - 支持 `traversal` 固定 continuation 方向
 - 续扫键以 `sqrt_s_NN_GeV, muB_MeV, xi` 为主
+
+### 选择 `Models.run_crossover_meson_density_scan`
+
+适用于：
+
+- 路径天然来自内部 crossover locator
+- 目标是 charged / neutral `K/\pi` 的 crossover-line reproduction
+- 需要让 stable / strict BW / current BU / generalized BU 共用同一条内部 path shell
+
+关键特征：
+
+- 上游路径由 `Models.build_crossover_line` 统一生成
+- continuation 契约与其他 meson-density workflow 保持一致
+- 输出 CSV 会保留 `crossover_method`、`crossover_variable` 与 `T/\mu_B` 对齐字段
 
 ### 选择 `Models.run_freezeout_meson_density_scan`
 
