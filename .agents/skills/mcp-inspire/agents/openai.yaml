@@ -1,0 +1,7 @@
+interface:
+  display_name: "MCP Inspire"
+  short_description: "INSPIRE 检索与合规取文流程"
+  default_prompt: "Use $mcp-inspire to search INSPIRE first, download open files when available, and only use supervised institution-access workflows for legally authorized publisher PDFs."
+
+policy:
+  allow_implicit_invocation: true
