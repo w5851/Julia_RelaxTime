@@ -32,6 +32,11 @@ Models.pnjl_module()
         @test mod === Models.MesonMassWorkflow
     end
 
+    @testset "meson_density_workflow_module" begin
+        mod = Models.meson_density_workflow_module()
+        @test mod === Models.MesonDensityWorkflow
+    end
+
     @testset "magnetic_thermodynamics_module" begin
         mod = Models.magnetic_thermodynamics_module()
         @test mod === Models.MagneticThermodynamics
@@ -52,12 +57,17 @@ Models.pnjl_module()
     @testset "薄转发接口存在" begin
         @test isdefined(Models, :run_tmu_scan)
         @test isdefined(Models, :run_trho_scan)
+        @test isdefined(Models, :run_freezeout_fixedmu_scan)
+        @test isdefined(Models, :run_freezeout_meson_density_scan)
+        @test isdefined(Models, :run_external_path_meson_density_scan)
         @test isdefined(Models, :build_default_rho_grid)
         @test isdefined(Models, :default_scan_numeric_options)
         @test isdefined(Models, :solve_pnjl_point)
         @test isdefined(Models, :solve_gap_and_transport)
         @test isdefined(Models, :solve_transport_from_equilibrium)
         @test isdefined(Models, :solve_gap_and_meson_point)
+        @test isdefined(Models, :solve_meson_density_from_meson_point)
+        @test isdefined(Models, :solve_gap_and_meson_density_point)
         @test isdefined(Models, :run_phase_pipeline)
         @test isdefined(Models, :run_production_phase_pipeline)
         @test isdefined(Models, :find_cep)

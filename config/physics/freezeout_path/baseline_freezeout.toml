@@ -1,0 +1,7 @@
+profile_name = "baseline_freezeout"
+family = "baseline_freezeout_v1"
+source_tag = "raw_chemical_freezeout_baseline"
+
+[parameters]
+switch_sqrt_s_NN_GeV = -1.0
+constant_T_MeV = -1.0

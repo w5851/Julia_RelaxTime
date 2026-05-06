@@ -61,6 +61,7 @@ using Main.MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses,
 export DEFAULT_MESONS
 export solve_gap_and_meson_point
 export build_equilibrium_params
+export build_meson_continuation_state
 
 const _DEFAULT_MESON_ROOT_POLICY = (
     residual_norm_max=1e-6,
@@ -74,6 +75,46 @@ const _DEFAULT_MESON_ROOT_POLICY = (
         return Float64[x[1], x[2]]
     end
     return nothing
+end
+
+@inline function _is_default_hadron_seed(seed_state)::Bool
+    seed_state === HADRON_SEED_5 && return true
+    if seed_state isa AbstractVector && length(seed_state) >= 5
+        return all(Float64.(seed_state[1:5]) .== Float64.(HADRON_SEED_5[1:5]))
+    end
+    return false
+end
+
+@inline function _normalize_meson_continuation_state(continuation_state)
+    continuation_state === nothing && return (
+        equilibrium_seed_state=nothing,
+        meson_seed_state=nothing,
+        mixed_seed_tracking_state=nothing,
+    )
+
+    eq_seed = hasproperty(continuation_state, :equilibrium_seed_state) ? getproperty(continuation_state, :equilibrium_seed_state) : nothing
+    meson_seed_state = hasproperty(continuation_state, :meson_seed_state) ? getproperty(continuation_state, :meson_seed_state) : nothing
+    mixed_seed_tracking_state = hasproperty(continuation_state, :mixed_seed_tracking_state) ? getproperty(continuation_state, :mixed_seed_tracking_state) : nothing
+
+    return (
+        equilibrium_seed_state=eq_seed,
+        meson_seed_state=meson_seed_state,
+        mixed_seed_tracking_state=mixed_seed_tracking_state,
+    )
+end
+
+"""
+    build_meson_continuation_state(result) -> NamedTuple
+
+从一次 meson workflow 结果中提取 continuation 所需的最小状态。
+调用方应优先传递该对象，而不是在脚本层手工维护三份 seed。
+"""
+function build_meson_continuation_state(result)
+    return (
+        equilibrium_seed_state=collect(result.equilibrium.x_state),
+        meson_seed_state=result.meson_seed_state,
+        mixed_seed_tracking_state=result.mixed_seed_tracking,
+    )
 end
 
 @inline function _mass_result_good(res, policy)::Bool
@@ -1636,14 +1677,15 @@ end
 end
 
 """将 PNJL 平衡求解结果转换成 (quark_params, thermo_params)。"""
-function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0)
+function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0, mu_vec_override=nothing)
     Φ = Float64(base.x_state[4])
     Φbar = Float64(base.x_state[5])
 
     masses = base.masses
+    mu_vec = mu_vec_override === nothing ? Main.Models.normalize_mu_vec(mu_fm) : Main.Models.normalize_mu_vec(mu_vec_override)
     quark_params = QuarkParams((
         m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
-        μ=(u=Float64(mu_fm), d=Float64(mu_fm), s=Float64(mu_fm)),
+        μ=(u=Float64(mu_vec[1]), d=Float64(mu_vec[2]), s=Float64(mu_vec[3])),
     ))
     thermo_params = ThermoParams((T=Float64(T_fm), Φ=Φ, Φbar=Φbar, ξ=Float64(xi)))
     return (quark_params=quark_params, thermo_params=thermo_params)
@@ -1673,6 +1715,7 @@ function solve_gap_and_meson_point(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     seed_state=HADRON_SEED_5,
+    continuation_state=nothing,
     solver_kwargs::NamedTuple=(;),
     models_solver=nothing,
     models_residual_norm_max::Real=1e-4,
@@ -1683,28 +1726,49 @@ function solve_gap_and_meson_point(
     mixed_branch_align::Symbol=:identity_track_label_output,
     mixed_seed_tracking_state=nothing,
     force_global_fallback::Bool=false,
+    flavor_mu_override=nothing,
 )
-    seed_guess = if seed_state isa AbstractVector
-        length(seed_state) >= 5 || throw(ArgumentError("seed_state must have length >= 5 (got $(length(seed_state)))"))
-        Float64.(seed_state[1:5])
+    continuation = _normalize_meson_continuation_state(continuation_state)
+    effective_seed_state = (continuation.equilibrium_seed_state !== nothing && _is_default_hadron_seed(seed_state)) ? continuation.equilibrium_seed_state : seed_state
+    effective_meson_seed_state = meson_seed_state === nothing ? continuation.meson_seed_state : meson_seed_state
+    effective_mixed_seed_tracking_state = mixed_seed_tracking_state === nothing ? continuation.mixed_seed_tracking_state : mixed_seed_tracking_state
+
+    seed_guess = if effective_seed_state isa AbstractVector
+        length(effective_seed_state) >= 5 || throw(ArgumentError("seed_state must have length >= 5 (got $(length(effective_seed_state)))"))
+        Float64.(effective_seed_state[1:5])
     else
-        seed_state
+        effective_seed_state
     end
 
-    base = Main.EquilibriumFacade.solve_equilibrium_backend(
-        T_fm,
-        mu_fm;
-        xi=xi,
-        solver_backend=solver_backend,
-        p_num=p_num,
-        t_num=t_num,
-        seed_state=seed_guess,
-        solver_kwargs=solver_kwargs,
-        models_solver=models_solver,
-        models_residual_norm_max=models_residual_norm_max,
-    )
+    base = if flavor_mu_override === nothing
+        Main.EquilibriumFacade.solve_equilibrium_backend(
+            T_fm,
+            mu_fm;
+            xi=xi,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            seed_state=seed_guess,
+            solver_kwargs=solver_kwargs,
+            models_solver=models_solver,
+            models_residual_norm_max=models_residual_norm_max,
+        )
+    else
+        Main.EquilibriumFacade.solve_equilibrium_backend(
+            T_fm,
+            collect(Main.Models.normalize_mu_vec(collect(flavor_mu_override)));
+            xi=xi,
+            solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
+            seed_state=seed_guess,
+            solver_kwargs=solver_kwargs,
+            models_solver=models_solver,
+            models_residual_norm_max=models_residual_norm_max,
+        )
+    end
 
-    params = build_equilibrium_params(base, T_fm, mu_fm; xi=xi)
+    params = build_equilibrium_params(base, T_fm, mu_fm; xi=xi, mu_vec_override=base.mu_vec)
     quark_params = params.quark_params
     thermo_params = params.thermo_params
 
@@ -1714,9 +1778,9 @@ function solve_gap_and_meson_point(
     meson_seed_out = Dict{Symbol,Vector{Float64}}()
 
     seed_in = Dict{Symbol,Vector{Float64}}()
-    tracking_seed_in = _normalize_tracking_seed_state(mixed_seed_tracking_state)
-    if meson_seed_state isa AbstractDict
-        for (k, v) in meson_seed_state
+    tracking_seed_in = _normalize_tracking_seed_state(effective_mixed_seed_tracking_state)
+    if effective_meson_seed_state isa AbstractDict
+        for (k, v) in effective_meson_seed_state
             k isa Symbol || continue
             vv = _as_vec2(v)
             vv === nothing && continue
@@ -1873,6 +1937,11 @@ function solve_gap_and_meson_point(
         meson_results=meson_results,
         meson_seed_state=meson_seed_out,
         mixed_seed_tracking=mixed_seed_tracking_out,
+        continuation_state=build_meson_continuation_state((
+            equilibrium=base,
+            meson_seed_state=meson_seed_out,
+            mixed_seed_tracking=mixed_seed_tracking_out,
+        )),
     )
 end
 

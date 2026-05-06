@@ -551,7 +551,7 @@ function build_residual!(model::AbstractQCDModel, mode::FixedMu, T_fm::Real, μ_
     p_num::Int=24,
     t_num::Int=8,
 )
-    thermal_nodes = cached_nodes(p_num, t_num)
+    thermal_nodes = cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model))
     params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi);
         p_num=p_num,
         t_num=t_num,
@@ -566,7 +566,7 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
     p_num::Int=24,
     t_num::Int=8,
 )
-    thermal_nodes = cached_nodes(p_num, t_num)
+    thermal_nodes = cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model))
     params = GapParams(Float64(T_fm), thermal_nodes, Float64(xi);
         p_num=p_num,
         t_num=t_num,

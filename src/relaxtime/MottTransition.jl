@@ -30,8 +30,16 @@ end
 @inline function mott_threshold_mass(meson::Symbol, quark_params::NamedTuple)::Float64
     if meson == :pi
         return quark_params.m.u + quark_params.m.d
+    elseif meson == :pi_plus
+        return quark_params.m.u + quark_params.m.d
+    elseif meson == :pi_minus
+        return quark_params.m.d + quark_params.m.u
     elseif meson == :K
         return quark_params.m.u + quark_params.m.s
+    elseif meson == :K_plus
+        return quark_params.m.u + quark_params.m.s
+    elseif meson == :K_minus
+        return quark_params.m.s + quark_params.m.u
     elseif meson == :sigma_pi
         return quark_params.m.u + quark_params.m.d
     elseif meson == :sigma_K
@@ -41,7 +49,7 @@ end
         thr = mott_threshold_masses(meson, quark_params)
         return thr.min
     else
-        error("Unknown meson type: $meson. Use :pi, :K, :sigma_pi, :sigma_K, :eta, :eta_prime, :sigma, or :sigma_prime")
+        error("Unknown meson type: $meson. Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, :sigma_K, :eta, :eta_prime, :sigma, or :sigma_prime")
     end
 end
 

@@ -22,7 +22,7 @@ end
 using .TransportConstants: SCATTERING_MESON_MAP, SCATTERING_PROCESS_KEYS
 
 export ħc_MeV_fm, α
-export N_color, N_flavor, ρ0_inv_fm3, m_ud0_inv_fm, m_s0_inv_fm, Λ_inv_fm, G_fm2, K_fm5
+export N_color, N_flavor, ρ0_inv_fm3, m_ud0_inv_fm, m_s0_inv_fm, Λ_inv_fm, G_fm2, K_fm5, thermal_p_max_inv_fm
 export T0_inv_fm, polyakov_scheme, a0, a1, a2, a3, b3, b4, fukushima_a_inv_fm, fukushima_b_inv_fm3
 export λ₀, λ₈, ψ_u, ψ_d, ψ_s, ψbar_u, ψbar_d, ψbar_s
 export PNJL_PROFILE, PNJL_CONFIG_PATH, load_pnjl_config
@@ -50,6 +50,7 @@ const DEFAULT_PNJL_MODEL_CONFIG = Dict{String, Any}(
         "K_over_Lambda5" => 12.36,
         "m_ud0_MeV" => 5.5,
         "m_s0_MeV" => 140.7,
+        "thermal_p_max_MeV" => 1973.269804,
     ),
     "polyakov" => Dict(
         "scheme" => "log",
@@ -82,6 +83,12 @@ end
     return value
 end
 
+@inline function _require_finite_nonzero(value::Float64, label::String)
+    isfinite(value) || error("invalid config: $(label) must be finite, got $(value)")
+    value != 0 || error("invalid config: $(label) must be != 0, got $(value)")
+    return value
+end
+
 function _validate_pnjl_critical_params(
     ;
     hbarc_MeV_fm::Float64,
@@ -94,6 +101,7 @@ function _validate_pnjl_critical_params(
     m_s0_MeV::Float64,
     G_over_Lambda2::Float64,
     K_over_Lambda5::Float64,
+    thermal_p_max_MeV::Float64,
     T0_MeV::Float64,
 )
     _require_finite_positive(hbarc_MeV_fm, "physical.hbarc")
@@ -105,7 +113,8 @@ function _validate_pnjl_critical_params(
     _require_finite_nonnegative(m_ud0_MeV, "model.m_ud0_MeV")
     _require_finite_nonnegative(m_s0_MeV, "model.m_s0_MeV")
     _require_finite_positive(G_over_Lambda2, "model.G_over_Lambda2")
-    _require_finite_positive(K_over_Lambda5, "model.K_over_Lambda5")
+    _require_finite_nonzero(K_over_Lambda5, "model.K_over_Lambda5")
+    _require_finite_positive(thermal_p_max_MeV, "model.thermal_p_max_MeV")
     _require_finite_positive(T0_MeV, "polyakov.T0_MeV")
     return nothing
 end
@@ -178,6 +187,8 @@ function pnjl_constants(
     K_over_Lambda5 = Float64(get(model_cfg, "K_over_Lambda5", 12.36))
     G_fm2 = G_over_Lambda2 / (Λ_inv_fm^2)
     K_fm5 = K_over_Lambda5 / (Λ_inv_fm^5)
+    thermal_p_max_MeV = Float64(get(model_cfg, "thermal_p_max_MeV", 1973.269804))
+    thermal_p_max_inv_fm = thermal_p_max_MeV / hbarc_MeV_fm
 
     T0_MeV = Float64(get(polyakov_cfg, "T0_MeV", 210.0))
     T0_inv_fm = T0_MeV / hbarc_MeV_fm
@@ -206,6 +217,7 @@ function pnjl_constants(
             m_s0_MeV=m_s0_MeV,
             G_over_Lambda2=G_over_Lambda2,
             K_over_Lambda5=K_over_Lambda5,
+            thermal_p_max_MeV=thermal_p_max_MeV,
             T0_MeV=T0_MeV,
         )
     end
@@ -224,6 +236,7 @@ function pnjl_constants(
         m_s0_inv_fm=m_s0_inv_fm,
         G_fm2=G_fm2,
         K_fm5=K_fm5,
+        thermal_p_max_inv_fm=thermal_p_max_inv_fm,
         T0_inv_fm=T0_inv_fm,
         polyakov_scheme=polyakov_scheme,
         a0=a0,
@@ -257,6 +270,7 @@ const m_ud0_inv_fm = Float64(model_cfg["m_ud0_MeV"]) / ħc_MeV_fm  # u,d夸克�
 const m_s0_inv_fm = Float64(model_cfg["m_s0_MeV"]) / ħc_MeV_fm  # s夸克裸质量
 const G_fm2 = Float64(model_cfg["G_over_Lambda2"]) / Λ_inv_fm^2  # NJL四夸克耦合
 const K_fm5 = Float64(model_cfg["K_over_Lambda5"]) / Λ_inv_fm^5  # NJL六夸克耦合
+const thermal_p_max_inv_fm = Float64(get(model_cfg, "thermal_p_max_MeV", 1973.269804)) / ħc_MeV_fm  # 热项动量积分上限
 
 # Polyakov环有效势参数-------------------------------------
 const polyakov_cfg = PNJL_CONFIG["polyakov"]

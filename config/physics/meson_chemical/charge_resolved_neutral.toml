@@ -1,0 +1,13 @@
+profile_name = "charge_resolved_neutral"
+source_tag = "charged_baseline_zero_mu"
+pi_label = "pi_minus"
+k_label = "K_minus"
+charge_resolved = true
+
+[chemical_potentials]
+mu_pi_MeV = 0.0
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 1
+d_K = 1

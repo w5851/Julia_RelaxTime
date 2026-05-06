@@ -7,7 +7,7 @@
 ## 2. 物理意义
 - **物理背景**: 在3味PNJL模型中，有效耦合系数描述了夸克-反夸克相互作用通过介子传播的有效强度，是随机相位近似下介子传播子的关键参数
 - **在计算链中的作用**: 作为介子传播子和散射截面的输入，直接影响驰豫时间和输运系数的计算
-- **相关物理量**: 原始耦合常数G、K，夸克凝聚G^μ 、G^s，温度T，化学势μ
+- **相关物理量**: 原始耦合常数G、K，夸克凝聚 \(\phi_u,\phi_s\)，温度T，化学势μ
 
 ## 3. 数学表达式
 
@@ -22,13 +22,37 @@ K_{08}^{\pm} &= \pm \frac{1}{6} \sqrt{2} K(G^\mu - G^s)
 \end{aligned}
 ```
 
-其中：
+其中，物理上应优先从夸克凝聚
 ```math
 \begin{aligned}
-G^f &= -\frac{N_c}{4\pi^2} \; m_f\; A_f(T, \mu) \\
-A_f(T, \mu) &= 16\pi^2 \int_0^\Lambda \frac{d^3 p}{(2\pi)^3} \left[ 1 - n_f^+ \frac{1}{2E} - n_f^- \frac{1}{2E} \right]
+\phi_f &= \frac{N_c}{4\pi^2} \; m_f\; A_f(T, \mu), \\
+A_f(T, \mu) &= -16\pi^2 \int_0^\Lambda \frac{d^3 p}{(2\pi)^3} \frac{1}{2E}\left[ 1 - n_f^+ - n_f^- \right].
 \end{aligned}
 ```
+出发，其中
+```math
+\phi_f \equiv \langle \bar q_f q_f \rangle.
+```
+
+等价地，把角积分做掉后，
+```math
+A_f(T,\mu)= -4\int_0^\Lambda dp\,\frac{p^2}{E}
+\left[1-n_q(E;\mu,\Phi,\bar\Phi)-n_{\bar q}(E;\mu,\Phi,\bar\Phi)\right].
+```
+
+若改写成当前项目代码直接实现的积分核，则同一个 `A_f` 也可写成
+```math
+A_f(T,\mu)= 4\int_0^\Lambda dp\,\frac{p^2}{E}
+\left[n_q(E;\mu,\Phi,\bar\Phi)+n_{\bar q}(E;\mu,\Phi,\bar\Phi)-1\right].
+```
+
+这两式之所以等价，是因为第二式把第一式中整体的负号吸收到括号里，改写成了 `n_q+n_{\bar q}-1`；这里的物理凝聚主口径始终是 `\phi_f`，而不是 `-\phi_f`。
+
+- 需要注意：当前实现中的辅助函数 `calculate_G_from_A(A_f, m_f)` 返回的是
+```math
+G^f_{\text{helper}} = -\phi_f,
+```
+这是历史实现中为适配后续有效耦合公式而保留的中间变量口径；在文档解释层，应优先把 `\phi_f` 视为基本物理量。
 
 ### 3.2 程序实现形式
 ```julia
@@ -60,8 +84,8 @@ end
 |------|------|------|------|----------|----------|
 | G | G | 输入 | fm² | 四夸克相互作用耦合常数 | 正实数 |
 | K | K | 输入 | fm⁵ | 't Hooft相互作用耦合常数 | 实数 |
-| G_u | G^μ | 输入 | 无量纲 | u,d夸克凝聚相关函数 | 实数 |
-| G_s | G^s | 输入 | 无量纲 | s夸克凝聚相关函数 | 实数 |
+| G_u | \(G^u_{\text{helper}}=-\phi_u\) | 输入 | 无量纲 | 当前实现中进入耦合公式的中间变量 | 实数 |
+| G_s | \(G^s_{\text{helper}}=-\phi_s\) | 输入 | 无量纲 | 当前实现中进入耦合公式的中间变量 | 实数 |
 | Nc | N_c | 输入 | 无量纲 | 色数 | 3(固定) |
 | K0± | K₀± | 输出 | fm² | 单态道有效耦合系数 | 实数 |
 | K123± | K₁₂₃± | 输出 | fm² | π介子道有效耦合系数 | 实数 |
@@ -74,7 +98,8 @@ end
 ### 5.1 必需参数
 - **G**: 基础四夸克相互作用耦合常数，典型值约为5.0×10⁻⁶ MeV⁻²，决定手征对称性自发破缺强度,在src/Constants/Constants_PNJL.jl中定义
 - **K**: 't Hooft六夸克相互作用耦合常数，典型值约为1.0×10⁻¹³ MeV⁻⁵，描述U_A(1)反常,在src/Constants/Constants_PNJL.jl中定义
-- **G_u,G_d**: u,d夸克凝聚相关函数，通过积分计算得到，依赖温度T和化学势μ,依赖函数src/relaxtime/OneLoopIntegrals.jl中的A函数
+- **\(\phi_u,\phi_s\)**: 物理上的夸克凝聚，通过 A 积分确定
+- **G_u,G_s**: 当前实现中传给 `calculate_effective_couplings` 的 helper 变量，满足 `G_u=-\phi_u, G_s=-\phi_s`
 
 
 ### 5.2 可选参数
@@ -91,7 +116,11 @@ end
 ## 7. 依赖关系
 
 ### 7.1 输入依赖
-- **夸克凝聚计算**: 需要先计算 $G^f = -N_c/(4\pi^2)\, m_f\, A_f(T,\mu)$，对应函数为 `calculate_G_from_A(A_f, m_f)`
+- **夸克凝聚计算**: 物理口径上先计算
+```math
+\phi_f = \frac{N_c}{4\pi^2}\, m_f\, A_f(T,\mu),
+```
+当前 helper `calculate_G_from_A(A_f, m_f)` 返回的则是 `-\phi_f`
 - **分布函数**: n_f±依赖于Polyakov环Φ、温度T和化学势μ_f
 - **能隙方程求解**: 夸克质量m_f需要通过能隙方程自洽求解
 

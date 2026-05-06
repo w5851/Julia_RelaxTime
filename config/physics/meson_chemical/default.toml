@@ -1,0 +1,13 @@
+profile_name = "default"
+source_tag = "neutral_aggregate_default"
+pi_label = "pi"
+k_label = "K"
+charge_resolved = false
+
+[chemical_potentials]
+mu_pi_MeV = 0.0
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 3
+d_K = 4

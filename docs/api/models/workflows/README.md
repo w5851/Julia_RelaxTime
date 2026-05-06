@@ -15,8 +15,11 @@
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 - `Models.solve_gap_and_meson_point`
+- `Models.solve_meson_density_from_meson_point`
+- `Models.solve_gap_and_meson_density_point`
 - `Models.transport_workflow_module`
 - `Models.meson_workflow_module`
+- `Models.meson_density_workflow_module`
 - `Models.workflow_param_adapters_module`
 - `Models.pnjl_module`
 
@@ -30,5 +33,6 @@
 
 - [docs/api/relaxtime/workflow/TransportWorkflow.md](docs/api/relaxtime/workflow/TransportWorkflow.md) 保留为 transport 领域细节页
 - [docs/api/pnjl/MesonMassWorkflow.md](docs/api/pnjl/MesonMassWorkflow.md) 保留为 meson 领域细节页
+- [docs/api/relaxtime/workflow/MesonDensityWorkflow.md](docs/api/relaxtime/workflow/MesonDensityWorkflow.md) 保留为介子数密度 workflow 领域细节页
 
 本目录不试图替代这些领域文档，而是从 `Models` 统一入口视角重新组织它们。

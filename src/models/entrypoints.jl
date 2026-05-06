@@ -10,16 +10,26 @@ Models 统一流程入口（阶段 C）：
 """
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_freezeout_fixedmu_scan
+export run_freezeout_meson_density_scan
+export run_crossover_meson_density_scan
+export run_external_path_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
+export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
+export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
+export solve_phase_shift_point_diagnostic_from_meson_point
+export solve_phase_shift_derivative_reference_from_meson_point
 export solve_gas_liquid_point
 export solve_rotation_point
 export run_phase_pipeline, run_production_phase_pipeline, find_cep, build_phase_artifacts
 export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
 export transport_workflow_module, meson_workflow_module
+export meson_density_workflow_module
 export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
@@ -46,12 +56,43 @@ end
     return workflow
 end
 
+@inline function _meson_density_workflow_module()
+    workflow = MesonDensityWorkflow
+    if !(isdefined(workflow, :solve_meson_density_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_meson_density_point) &&
+         isdefined(workflow, :solve_strict_bw_meson_density_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_strict_bw_meson_density_point) &&
+         isdefined(workflow, :solve_phase_shift_meson_density_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_phase_shift_meson_density_point) &&
+         isdefined(workflow, :solve_phase_shift_derivative_reference_from_meson_point) &&
+         isdefined(workflow, :solve_phase_shift_point_diagnostic_from_meson_point))
+        error("MesonDensityWorkflow module loaded but required API is missing")
+    end
+    return workflow
+end
+
 function run_tmu_scan(args...; kwargs...)
     return TmuScan.run_tmu_scan(args...; kwargs...)
 end
 
 function run_trho_scan(args...; kwargs...)
     return TrhoScan.run_trho_scan(args...; kwargs...)
+end
+
+function run_freezeout_fixedmu_scan(args...; kwargs...)
+    return FreezeoutPathScan.run_freezeout_fixedmu_scan(args...; kwargs...)
+end
+
+function run_freezeout_meson_density_scan(args...; kwargs...)
+    return FreezeoutMesonDensityScan.run_freezeout_meson_density_scan(args...; kwargs...)
+end
+
+function run_crossover_meson_density_scan(args...; kwargs...)
+    return CrossoverMesonDensityScan.run_crossover_meson_density_scan(args...; kwargs...)
+end
+
+function run_external_path_meson_density_scan(args...; kwargs...)
+    return ExternalPathMesonDensityScan.run_external_path_meson_density_scan(args...; kwargs...)
 end
 
 function build_default_rho_grid(args...; kwargs...)
@@ -197,6 +238,38 @@ function solve_gap_and_meson_point(args...; kwargs...)
     return _meson_workflow_module().solve_gap_and_meson_point(args...; kwargs...)
 end
 
+function solve_meson_density_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_meson_density_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_meson_density_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_gap_and_meson_density_point(args...; kwargs...)
+end
+
+function solve_strict_bw_meson_density_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_strict_bw_meson_density_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_strict_bw_meson_density_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_gap_and_strict_bw_meson_density_point(args...; kwargs...)
+end
+
+function solve_phase_shift_meson_density_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_phase_shift_meson_density_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
+end
+
+function solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
+end
+
+function solve_phase_shift_derivative_reference_from_meson_point(args...; kwargs...)
+    return _meson_density_workflow_module().solve_phase_shift_derivative_reference_from_meson_point(args...; kwargs...)
+end
+
 function solve_gas_liquid_point(args...; kwargs...)
     return gas_liquid_workflow_module().solve_gas_liquid_point(args...; kwargs...)
 end
@@ -211,6 +284,7 @@ end
 
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
+@inline meson_density_workflow_module() = _meson_density_workflow_module()
 @inline gas_liquid_workflow_module() = GasLiquidWorkflow
 @inline rotation_workflow_module() = RotationWorkflow
 @inline pnjl_module() = @__MODULE__

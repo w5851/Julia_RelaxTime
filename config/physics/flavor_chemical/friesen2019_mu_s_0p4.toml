@@ -1,0 +1,9 @@
+profile_name = "friesen2019_mu_s_0p4"
+source_tag = "Friesen2019_mu_s_equals_0p4_muq"
+family = "flavor_ratio_to_muq_v1"
+apply_to_equilibrium = true
+
+[coefficients]
+mu_u_over_muq = 1.0
+mu_d_over_muq = 1.0
+mu_s_over_muq = 0.4

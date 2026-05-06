@@ -9,7 +9,7 @@ if !isdefined(Main, :ScanConfig)
     Base.include(Main, _SCAN_CONFIG_PATH)
 end
 
-using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, scan_kwargs
+using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, FreezeoutScanConfig, scan_kwargs
 
 @testset "ScanConfig" begin
     @testset "TmuScanConfig 默认构建" begin
@@ -39,5 +39,22 @@ using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, scan_kwargs
         )
         kw = scan_kwargs(cfg)
         @test kw isa NamedTuple
+    end
+
+    @testset "FreezeoutScanConfig 默认构建" begin
+        cfg = FreezeoutScanConfig(
+            sqrt_s_NN_values=[7.7, 11.5],
+            xi_values=[0.0],
+            output_path=tempname(),
+            profile_name="default",
+            path_profile_name="baseline_freezeout",
+        )
+        @test cfg.sqrt_s_NN_values == [7.7, 11.5]
+        @test cfg.profile_name == "default"
+        @test cfg.path_profile_name == "baseline_freezeout"
+        kw = scan_kwargs(cfg)
+        @test haskey(kw, :sqrt_s_NN_values)
+        @test haskey(kw, :profile_name)
+        @test haskey(kw, :path_profile_name)
     end
 end

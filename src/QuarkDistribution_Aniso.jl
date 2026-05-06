@@ -8,19 +8,26 @@ module PNJLQuarkDistributions_Aniso
 
 export distribution_aniso_correction, distribution_aniso, correction_cos_theta_coefficient
 
+using ForwardDiff
+
 const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "QuarkDistribution.jl"))
 if !isdefined(Main, :PNJLQuarkDistributions)
     Base.include(Main, _QUARK_DISTRIBUTION_PATH)
 end
 
 using Main.PNJLQuarkDistributions: quark_distribution, antiquark_distribution
+
+@inline _primal_value(x::Float64) = x
+@inline _primal_value(x::ForwardDiff.Dual) = ForwardDiff.value(x)
+@inline _exp_clamped(x::T) where {T<:Real} = exp(clamp(_primal_value(x), -460.0, 460.0))
+
 """计算PNJL模型中夸克有效分布函数对能量的导数"""
-function quark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
+function quark_df_dE(E_inv_fm::T, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64) where {T<:Real}
     # 计算温度的倒数
     β_fm = 1 / T_inv_fm
 
     # 计算指数项
-    exp_term = clamp(exp(-(E_inv_fm - μ_inv_fm) * β_fm), 1e-200, 1e200)
+    exp_term = _exp_clamped(-(E_inv_fm - μ_inv_fm) * β_fm)
     exp_term2 = exp_term * exp_term
     exp_term3 = exp_term2 * exp_term
 
@@ -41,12 +48,12 @@ function quark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, �
 end
 
 """计算PNJL模型中反夸克有效分布函数对能量的导数"""
-function antiquark_df_dE(E_inv_fm::Float64, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64)
+function antiquark_df_dE(E_inv_fm::T, μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64) where {T<:Real}
     # 计算温度的倒数
     β_fm = 1 / T_inv_fm
 
     # 计算指数项
-    exp_term = clamp(exp(-(E_inv_fm + μ_inv_fm) * β_fm), 1e-200, 1e200)
+    exp_term = _exp_clamped(-(E_inv_fm + μ_inv_fm) * β_fm)
     exp_term2 = exp_term * exp_term
     exp_term3 = exp_term2 * exp_term
 
@@ -72,8 +79,8 @@ end
 计算PNJL模型中分布函数一阶修正项中cosθ的系数
 # ps:x=cosθ,x^2对立体角积分相比于没有x^2的结果多了个1/3因子,如果原积分函数不含x,在调用此函数时需乘以1/3
 """
-function correction_cos_theta_coefficient(sign_::Symbol, p_inv_fm::Float64, m_inv_fm::Float64, 
-    μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64)
+function correction_cos_theta_coefficient(sign_::Symbol, p_inv_fm::T, m_inv_fm::Float64,
+    μ_inv_fm::Float64, T_inv_fm::Float64, Φ::Float64, Φbar::Float64, ξ::Float64) where {T<:Real}
     E_inv_fm = sqrt(p_inv_fm^2 + m_inv_fm^2)
     coeff = 0.5 * ξ * (p_inv_fm^2) / E_inv_fm
     if sign_ === :quark

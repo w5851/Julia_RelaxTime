@@ -21,7 +21,7 @@ using LinearAlgebra: det
 # 注意：这不是物理“宽度”建模，只是数值稳健性保护；值应尽量小。
 const PROPAGATOR_DENOM_EPS = 1e-12
 
-@inline function _isfinite_complex(z::ComplexF64)::Bool
+@inline function _isfinite_complex(z::Complex{T})::Bool where {T<:Real}
     return isfinite(real(z)) && isfinite(imag(z))
 end
 
@@ -250,29 +250,29 @@ D_sigma_pi = meson_propagator_simple(:sigma_pi, K_coeffs, Π_uu_S)
 ```
 """
 @inline @fastmath function meson_propagator_simple(meson_type::Symbol, K_coeffs::NamedTuple, 
-                                                   Π::ComplexF64)
+                                                   Π::Complex{T}) where {T<:Real}
     # 根据介子类型自动选择K系数
-    if meson_type == :pi
+    if meson_type == :pi || meson_type == :pi_plus || meson_type == :pi_minus
         K = K_coeffs.K123_plus  # π是赝标量P通道，用K⁺
-    elseif meson_type == :K
+    elseif meson_type == :K || meson_type == :K_plus || meson_type == :K_minus
         K = K_coeffs.K4567_plus  # K是赝标量P通道，用K⁺
     elseif meson_type == :sigma_pi
         K = K_coeffs.K123_minus  # σ_π是标量S通道，用K⁻
     elseif meson_type == :sigma_K
         K = K_coeffs.K4567_minus  # σ_K是标量S通道，用K⁻
     else
-        error("Unknown meson type: $meson_type. Use :pi, :K, :sigma_pi, or :sigma_K")
+        error("Unknown meson type: $meson_type. Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, or :sigma_K")
     end
     
     # D = 2K / (1 - 4KΠ)
-    denom = 1.0 - 4.0 * K * Π
+    denom = one(Π) - T(4) * T(K) * Π
     if !_isfinite_complex(denom)
-        return 0.0 + 0.0im
+        return zero(Π)
     end
-    if abs(denom) < PROPAGATOR_DENOM_EPS
-        denom += complex(0.0, PROPAGATOR_DENOM_EPS)
+    if abs(denom) < T(PROPAGATOR_DENOM_EPS)
+        denom += Complex{T}(zero(T), T(PROPAGATOR_DENOM_EPS))
     end
-    return (2.0 * K) / denom
+    return (T(2) * T(K)) / denom
 end
 
 # ----------------------------------------------------------------------------

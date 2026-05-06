@@ -3,6 +3,9 @@
 本页回答三个问题：
 
 - 我应该用 `Models.run_tmu_scan` 还是 `Models.run_trho_scan`？
+- 什么时候应该改用 `Models.run_freezeout_fixedmu_scan`？
+- 什么时候应该直接进入 `Models.run_freezeout_meson_density_scan`？
+- 什么时候应该直接进入 `Models.run_external_path_meson_density_scan`？
 - 什么时候需要 `Models.build_default_rho_grid`？
 - 扫描结果会进入哪些下游链路？
 
@@ -12,6 +15,18 @@
 
 - `Models.run_tmu_scan`：在 `(T, μ, ξ)` 网格上扫描，适合热力学趋势、边界线预扫、与固定化学势链路对接
 - `Models.run_trho_scan`：在 `(T, ρ, ξ)` 网格上扫描，适合相结构、S 形检测、Maxwell 构造、CEP 与 phase pipeline 前置数据生成
+
+当输入天然是 freeze-out 路径参数，而不是独立的 `(T,\mu)` 网格时，应改用：
+
+- `Models.run_freezeout_fixedmu_scan`：在 `\sqrt{s_{NN}}` 路径上扫描，内部先映射到 `(T,\mu_B)`，再复用 `FixedMu` 主链
+
+当你不只需要 equilibrium 点，而是要直接产出 `n_\pi(T)`、`n_K(T)`、`K/\pi(T)` 或其 BW/BU 版本时，应进一步改用：
+
+- `Models.run_freezeout_meson_density_scan`
+
+当路径已经由外部数据明确给出，例如文献提取后的 phase-line 离散点，而你不希望再让本仓库内部路径生成器介入时，应改用：
+
+- `Models.run_external_path_meson_density_scan`
 
 `Models.build_default_rho_grid` 是公开导出，但它的定位是辅助入口：当你需要默认的多分辨率 `ρ` 网格，或要在相图流程前自定义低密度加密策略时再直接调用。
 
@@ -44,6 +59,52 @@
 - 默认 `reverse_rho=true`，降低低密度端连续性跟踪失败风险
 - 默认 `rho_values=DEFAULT_RHO_VALUES`
 - 导出的 `build_default_rho_grid` 与此入口天然配套
+
+### 选择 `Models.run_freezeout_fixedmu_scan`
+
+适用于：
+
+- 输入自然以 `\sqrt{s_{NN}}` 或等价一维路径参数组织
+- 需要沿 chemical freeze-out baseline 做 continuity 求解
+- 需要把 freeze-out 路径结果接到 charged / meson-density workflow
+
+关键特征：
+
+- 不是独立 solver，而是 `path parameter -> (T,\mu_B) -> FixedMu solve`
+- 支持 `profile_name` 选择 freeze-out 参数化
+- 支持 `traversal` 固定 continuation 方向
+- 续扫键以 `sqrt_s_NN_GeV, muB_MeV, xi` 为主
+
+### 选择 `Models.run_freezeout_meson_density_scan`
+
+适用于：
+
+- 输入天然是 `\sqrt{s_{NN}}`
+- 目标已经是介子数密度或 `K/\pi`
+- 需要同时固定 freeze-out baseline 与 meson chemical profile
+- 需要在有需要时显式指定 flavor-level `\mu_s` phenomenology profile
+- 需要在 stable / strict BW / current BU / generalized BU 间复用同一条路径扫描壳
+
+关键特征：
+
+- 仍复用统一 meson workflow，而不是脚本层平行拼接
+- continuation 契约来自 `MesonMassWorkflow.continuation_state`
+- 当前已经能表达 charge-resolved `\mu_\pi` profile
+- 当前也已能表达最小 flavor-level `\mu_s` profile
+
+### 选择 `Models.run_external_path_meson_density_scan`
+
+适用于：
+
+- 路径来自文献提取、外部 CSV、人工整理点列
+- 你要先固定外部 `(T,\mu_B)` 点，再比较物理量
+- 你希望 continuation 仍由正式 workflow 管理，而不是在脚本层自己缓存种子
+
+关键特征：
+
+- 输入是离散路径点列，而不是内部 path generator
+- 输出会保留 `path_source / path_case_id / path_line_style` 元数据
+- 可直接复用 stable / strict BW / current BU / generalized BU 同一套物理核
 
 ## 典型工作流
 

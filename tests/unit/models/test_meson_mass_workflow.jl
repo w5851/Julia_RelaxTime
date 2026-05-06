@@ -40,6 +40,11 @@ const _MW = Models.MesonMassWorkflow
         @test _MW.build_equilibrium_params isa Function
     end
 
+    @testset "build_meson_continuation_state 接口存在" begin
+        @test isdefined(_MW, :build_meson_continuation_state)
+        @test _MW.build_meson_continuation_state isa Function
+    end
+
     @testset "meson root diagnostics expose governance fields" begin
         T_fm = 240.0 / Main.Constants_PNJL.ħc_MeV_fm
         muq_fm = 0.0
@@ -57,6 +62,26 @@ const _MW = Models.MesonMassWorkflow
         @test hasproperty(diag, :governance_candidate_count)
         @test hasproperty(diag, :governance_selection_reason)
         @test diag.governance_candidate_count >= 0
+    end
+
+    @testset "workflow result exposes continuation_state" begin
+        T_fm = 170.0 / Main.Constants_PNJL.ħc_MeV_fm
+        res = _MW.solve_gap_and_meson_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :K),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+        @test hasproperty(res, :continuation_state)
+        cont = res.continuation_state
+        @test hasproperty(cont, :equilibrium_seed_state)
+        @test hasproperty(cont, :meson_seed_state)
+        @test hasproperty(cont, :mixed_seed_tracking_state)
+        @test length(cont.equilibrium_seed_state) >= 5
     end
 
     @testset "mixed diagnostics expose continuity and second-pass fields" begin

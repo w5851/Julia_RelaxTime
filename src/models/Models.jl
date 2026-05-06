@@ -19,11 +19,18 @@ include(joinpath(@__DIR__, "exports_public.jl"))
 
 # Keep key entrypoint exports explicitly in this file for governance checks.
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_freezeout_fixedmu_scan
+export run_freezeout_meson_density_scan
+export run_crossover_meson_density_scan
+export run_external_path_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
-export solve_gap_and_meson_point, solve_gas_liquid_point, solve_rotation_point
-export transport_workflow_module, meson_workflow_module
+export solve_gap_and_meson_point, solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
+export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
+export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
+export solve_gas_liquid_point, solve_rotation_point
+export transport_workflow_module, meson_workflow_module, meson_density_workflow_module
 export rotation_workflow_module, gas_liquid_workflow_module
 export workflow_param_adapters_module, workflow_module_for
 export run_workflow_pipeline, run_scan_pipeline, run_relaxtime_orchestrator_pipeline
@@ -95,12 +102,18 @@ const PNJLIntegrals = PNJLCore.PNJLIntegrals
 @inline default_theta_count() = PNJLCore.DEFAULT_THETA_COUNT
 @inline default_momentum_nodes() = PNJLIntegrals.THERMAL_DEFAULT_NODES
 @inline default_momentum_weights() = PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
+@inline thermal_p_max_inv_fm(::AbstractQCDModel) = PNJLIntegrals.DEFAULT_THERMAL_P_MAX_INV_FM
+@inline thermal_p_max_inv_fm(model::PNJLModel) = model.params.thermal_p_max_inv_fm
+@inline thermal_p_max_inv_fm(model::PNJLMagneticModel) = model.base.params.thermal_p_max_inv_fm
+@inline thermal_p_max_inv_fm(model::RPNJLModel) = model.base.params.thermal_p_max_inv_fm
 
 @inline function cached_nodes(
 	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
 	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+	;
+	p_max_inv_fm::Float64=PNJLIntegrals.DEFAULT_THERMAL_P_MAX_INV_FM,
 )
-	return PNJLCore.cached_nodes(p_num, t_num)
+	return PNJLCore.cached_nodes(p_num, t_num; p_max_inv_fm=p_max_inv_fm)
 end
 
 # Factory
@@ -119,7 +132,12 @@ include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
 include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutPathProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "FlavorChemicalProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "MesonChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
 
 using .SeedStrategies
@@ -131,7 +149,12 @@ using .AbstractSusceptibilityProvider
 using .ConservedChargeSusceptibilities
 using .MagneticIntegrals
 using .MagneticThermodynamics
+using .FreezeoutProfiles
+using .FreezeoutPathProfiles
+using .FlavorChemicalProfiles
+using .MesonChemicalProfiles
 using .TmuScan
+using .FreezeoutPathScan
 using .TrhoScan
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
@@ -167,6 +190,10 @@ include(joinpath(@__DIR__, "workflow_engine", "catalog", "RelaxtimeOrchestratorC
 include(joinpath(@__DIR__, "workflow_apps", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
+include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
+include(joinpath(@__DIR__, "scans", "FreezeoutMesonDensityScan.jl"))
+include(joinpath(@__DIR__, "scans", "CrossoverMesonDensityScan.jl"))
+include(joinpath(@__DIR__, "scans", "ExternalPathMesonDensityScan.jl"))
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
 include(joinpath(@__DIR__, "precompile", "registry.jl"))
@@ -179,6 +206,8 @@ const Integrals = PNJLCore.PNJLIntegrals
 const Constants_PNJL = Main.Constants_PNJL
 const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
+const FreezeoutScanConfig = ScanConfig.FreezeoutScanConfig
+const MesonChemicalProfile = MesonChemicalProfiles.MesonChemicalProfile
 const update! = SeedStrategies.update!
 
 @inline function vacuum_integral(mass)

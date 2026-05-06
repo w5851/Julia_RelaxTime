@@ -80,6 +80,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_workflow_param_adapters.jl"),
     joinpath(UNIT_DIR, "models", "test_model_structure_homomorphism.jl"),
     joinpath(UNIT_DIR, "models", "test_model_api_homomorphism.jl"),
+    joinpath(UNIT_DIR, "models", "test_meson_density_workflow.jl"),
 
     # [PNJL Solver] 求解器核心
     joinpath(UNIT_DIR, "pnjl", "test_solver_conditions.jl"),
@@ -92,6 +93,8 @@ const CORE_SMOKE_FILES = [
     # [RelaxTime Core] 输运核心模块
     joinpath(UNIT_DIR, "relaxtime", "test_oneloopintegrals.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_effective_couplings.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_meson_density.jl"),
+    joinpath(UNIT_DIR, "relaxtime", "test_meson_scan_workflow_entry.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_meson_mass.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_mott_transition.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),

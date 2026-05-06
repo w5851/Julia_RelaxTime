@@ -1,0 +1,14 @@
+[model_shared]
+Lambda_MeV = 652.0
+# Friesen 2019 uses:
+#   m_i = m0_i - 2 gS <qbar q>_i - 2 gD <qbar q>_j <qbar q>_k
+#   Ω_chiral = gS Σ<qbar q>_i^2 + 4 gD ∏<qbar q>_i
+# while this repo uses:
+#   m_i = m0_i - 4 G φ_i + 2 K φ_j φ_k
+#   Ω_chiral = 2 G Σφ_i^2 - 4 K ∏φ_i
+# With φ_i identified directly with the literature condensate,
+# the consistent parameter mapping is G = gS / 2 and K = -gD.
+G_over_Lambda2 = 0.9139736
+K_over_Lambda5 = -10.592480432297679
+m_ud0_MeV = 5.5
+m_s0_MeV = 131.0

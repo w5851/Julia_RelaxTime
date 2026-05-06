@@ -111,6 +111,15 @@ export PMSeedPair
 export Integrals, cached_nodes, vacuum_integral, calculate_energy_sum, calculate_number_densities
 export Constants_PNJL
 export TmuScanConfig, TrhoScanConfig
+export FreezeoutScanConfig
+export FreezeoutParameterProfile
+export load_freezeout_profile, freezeout_profile_dir
+export freezeout_muB_GeV, freezeout_temperature_GeV
+export freezeout_point_GeV, freezeout_point_MeV
+export build_freezeout_scan_points
+export MesonChemicalProfile
+export meson_chemical_profile_dir, load_meson_chemical_profile
+export meson_chemical_profile_MeV, meson_chemical_profile_fm
 export run_precompile_workload
 export run_precompile_profile, run_precompile_capability
 export list_precompile_capabilities, list_precompile_profile

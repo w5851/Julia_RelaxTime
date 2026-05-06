@@ -30,7 +30,7 @@ end
         else
             SVector{3}(θ[2], θ[3], θ[4])
         end
-        params = GapParams(T_fm, cached_nodes(p_num, t_num), xi;
+        params = GapParams(T_fm, cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model)), xi;
             p_num=p_num,
             t_num=t_num,
             model_kind=_model_kind_for_shared_core(model),
