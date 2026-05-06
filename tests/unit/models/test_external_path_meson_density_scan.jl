@@ -25,4 +25,13 @@ const _EPMDS = Models.ExternalPathMesonDensityScan
         @test occursin("muB_MeV", _EPMDS.HEADER)
         @test occursin("kpi_ratio", _EPMDS.HEADER)
     end
+
+    @testset "continuation resets on path group change" begin
+        pt_a0 = (path_source="figA", path_case_id="caseA", path_line_style="solid")
+        pt_a1 = (path_source="figA", path_case_id="caseA", path_line_style="solid")
+        pt_b0 = (path_source="figB", path_case_id="caseB", path_line_style="dashed")
+
+        @test _EPMDS._path_group_key(pt_a0) == _EPMDS._path_group_key(pt_a1)
+        @test _EPMDS._path_group_key(pt_a0) != _EPMDS._path_group_key(pt_b0)
+    end
 end

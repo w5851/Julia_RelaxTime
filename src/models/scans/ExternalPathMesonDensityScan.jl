@@ -109,6 +109,8 @@ end
     )
 end
 
+@inline _path_group_key(pt) = (pt.path_source, pt.path_case_id, pt.path_line_style)
+
 @inline function _write_failure_row(io, pt, xi::Float64, flavor_profile, flavor_chemical, chem_profile, regime::Symbol, message::AbstractString)
     muq_MeV = pt.muB_MeV / 3.0
     x = pt.muB_MeV > 0.0 ? pt.T_MeV / pt.muB_MeV : NaN
@@ -240,9 +242,15 @@ function run_external_path_meson_density_scan(;
     solver_kwargs = (iterations=max_iter,)
     mass_kwargs = (iterations=max_iter,)
     continuation_state = nothing
+    previous_group_key = nothing
     open(output_path, "w") do io
         println(io, HEADER)
         for pt in normalized
+            group_key = _path_group_key(pt)
+            if previous_group_key !== nothing && group_key != previous_group_key
+                continuation_state = nothing
+            end
+            previous_group_key = group_key
             muq_MeV = pt.muB_MeV / 3.0
             muq_fm = muq_MeV / ħc_MeV_fm
             T_fm = pt.T_MeV / ħc_MeV_fm
