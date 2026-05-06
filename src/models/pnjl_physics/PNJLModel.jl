@@ -74,7 +74,7 @@ function vacuum_contribution(model::PNJLModel, masses::SVector{3, T}; kwargs...)
 end
 
 function thermal_contribution(
-    ::PNJLModel,
+    model::PNJLModel,
     masses::SVector{3, T},
     Φ,
     Φbar,
@@ -85,7 +85,11 @@ function thermal_contribution(
     xi=0.0,
     kwargs...
 ) where {T}
-    p_mesh, cosθ_mesh, coefficients = _pnjl_model_cached_nodes(p_num, t_num)
+    p_mesh, cosθ_mesh, coefficients = _pnjl_model_cached_nodes(
+        p_num,
+        t_num;
+        p_max_inv_fm=model.params.thermal_p_max_inv_fm,
+    )
     return _pnjl_model_log_sum(masses, p_mesh, cosθ_mesh, coefficients, Φ, Φbar, mu_vec, T_fm, xi)
 end
 
@@ -115,7 +119,9 @@ function number_densities(
     masses = SVector{3, Float64}(calculate_mass_vec(model, φ))
     μ_values = SVector{3, Float64}(normalize_mu_vec(mu_vec))
 
-    nodes = isnothing(thermal_nodes) ? _pnjl_model_cached_nodes(p_num, t_num) : thermal_nodes
+    nodes = isnothing(thermal_nodes) ?
+        _pnjl_model_cached_nodes(p_num, t_num; p_max_inv_fm=model.params.thermal_p_max_inv_fm) :
+        thermal_nodes
     thermal_p_mesh, cosθ_mesh, thermal_coefficients = nodes
     pref = Float64(2 * model.params.N_color)
     invT = inv(T_val)

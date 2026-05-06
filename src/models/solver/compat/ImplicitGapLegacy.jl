@@ -54,7 +54,7 @@ function build_pnjl_fixedmu_adapters(
     t_num::Int=8,
     kwargs...
 )
-    thermal_nodes = cached_nodes(p_num, t_num)
+    thermal_nodes = cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model))
 
     forward_solve = function (θ::AbstractVector)
         T_fm = Float64(θ[1])
@@ -94,7 +94,7 @@ function build_pnjl_flavor_mu_adapters(
     t_num::Int=8,
     kwargs...
 )
-    thermal_nodes = cached_nodes(p_num, t_num)
+    thermal_nodes = cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model))
 
     forward_solve = function (θ::AbstractVector)
         length(θ) == 4 || throw(ArgumentError("flavor-mu implicit solver expects θ=[T, μ_u, μ_d, μ_s]"))

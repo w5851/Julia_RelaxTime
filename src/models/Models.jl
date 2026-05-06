@@ -21,6 +21,8 @@ include(joinpath(@__DIR__, "exports_public.jl"))
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
 export run_freezeout_meson_density_scan
+export run_crossover_meson_density_scan
+export run_external_path_meson_density_scan
 export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
@@ -100,12 +102,18 @@ const PNJLIntegrals = PNJLCore.PNJLIntegrals
 @inline default_theta_count() = PNJLCore.DEFAULT_THETA_COUNT
 @inline default_momentum_nodes() = PNJLIntegrals.THERMAL_DEFAULT_NODES
 @inline default_momentum_weights() = PNJLIntegrals.THERMAL_DEFAULT_WEIGHTS
+@inline thermal_p_max_inv_fm(::AbstractQCDModel) = PNJLIntegrals.DEFAULT_THERMAL_P_MAX_INV_FM
+@inline thermal_p_max_inv_fm(model::PNJLModel) = model.params.thermal_p_max_inv_fm
+@inline thermal_p_max_inv_fm(model::PNJLMagneticModel) = model.base.params.thermal_p_max_inv_fm
+@inline thermal_p_max_inv_fm(model::RPNJLModel) = model.base.params.thermal_p_max_inv_fm
 
 @inline function cached_nodes(
 	p_num::Int=PNJLCore.DEFAULT_MOMENTUM_COUNT,
 	t_num::Int=PNJLCore.DEFAULT_THETA_COUNT,
+	;
+	p_max_inv_fm::Float64=PNJLIntegrals.DEFAULT_THERMAL_P_MAX_INV_FM,
 )
-	return PNJLCore.cached_nodes(p_num, t_num)
+	return PNJLCore.cached_nodes(p_num, t_num; p_max_inv_fm=p_max_inv_fm)
 end
 
 # Factory
@@ -184,6 +192,8 @@ include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutMesonDensityScan.jl"))
+include(joinpath(@__DIR__, "scans", "CrossoverMesonDensityScan.jl"))
+include(joinpath(@__DIR__, "scans", "ExternalPathMesonDensityScan.jl"))
 
 include(joinpath(@__DIR__, "entrypoints.jl"))
 include(joinpath(@__DIR__, "precompile", "registry.jl"))

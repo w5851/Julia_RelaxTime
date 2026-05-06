@@ -53,6 +53,7 @@ Base.@kwdef struct PNJLParams
     m_s0_inv_fm::Float64
     G_fm2::Float64
     K_fm5::Float64
+    thermal_p_max_inv_fm::Float64 = 10.0
 
     T0_inv_fm::Float64
     polyakov_scheme::Symbol = :log
@@ -97,6 +98,7 @@ function pnjl_params(constants::NamedTuple)
         m_s0_inv_fm=Float64(constants.m_s0_inv_fm),
         G_fm2=Float64(constants.G_fm2),
         K_fm5=Float64(constants.K_fm5),
+        thermal_p_max_inv_fm=Float64(get(constants, :thermal_p_max_inv_fm, 10.0)),
         T0_inv_fm=Float64(constants.T0_inv_fm),
         polyakov_scheme=Symbol(lowercase(String(get(constants, :polyakov_scheme, :log)))),
         a0=Float64(constants.a0),
@@ -129,6 +131,7 @@ end
         m_s0_inv_fm=p.m_s0_inv_fm,
         G_fm2=p.G_fm2,
         K_fm5=p.K_fm5,
+        thermal_p_max_inv_fm=p.thermal_p_max_inv_fm,
         T0_inv_fm=p.T0_inv_fm,
         polyakov_scheme=p.polyakov_scheme,
         a0=p.a0,
@@ -223,8 +226,8 @@ end
     return (poly_part - log_term) / (16 * π^2)
 end
 
-@inline cached_nodes(p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT) =
-    PNJLIntegrals.cached_nodes(p_num, t_num)
+@inline cached_nodes(p_num::Int=DEFAULT_MOMENTUM_COUNT, t_num::Int=DEFAULT_THETA_COUNT; p_max_inv_fm::Float64=10.0) =
+    PNJLIntegrals.cached_nodes(p_num, t_num; p_max_inv_fm=p_max_inv_fm)
 
 @inline calculate_log_sum(args...) = PNJLIntegrals.calculate_log_sum(args...)
 

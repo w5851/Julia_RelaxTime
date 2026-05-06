@@ -96,4 +96,54 @@ const polyakov_potential = PNJLCore_mod.polyakov_potential
         bad_params = PNJLCore_mod.PNJLParams(; base..., polyakov_scheme=:unknown_scheme)
         @test_throws ArgumentError polyakov_potential(bad_params, Φ, Φbar, T_fm)
     end
+
+    @testset "Friesen 2019 profile 映射正确" begin
+        params_friesen = pnjl_params(profile="friesen2019_poly", physics_profile="friesen2019_base")
+        hbarc = params_friesen.hbarc_MeV_fm
+
+        @test params_friesen.polyakov_scheme === :poly
+        @test isapprox(params_friesen.Λ_inv_fm * hbarc, 652.0; atol=1e-10, rtol=0.0)
+        @test isapprox(params_friesen.m_ud0_inv_fm * hbarc, 5.5; atol=1e-10, rtol=0.0)
+        @test isapprox(params_friesen.m_s0_inv_fm * hbarc, 131.0; atol=1e-10, rtol=0.0)
+        @test isapprox(params_friesen.thermal_p_max_inv_fm * hbarc, 1973.269804; atol=1e-9, rtol=0.0)
+
+        @test isapprox(params_friesen.G_fm2 * params_friesen.Λ_inv_fm^2, 0.9139736; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.K_fm5 * params_friesen.Λ_inv_fm^5, -10.592480432297679; atol=1e-12, rtol=0.0)
+
+        @test isapprox(params_friesen.T0_inv_fm * hbarc, 190.0; atol=1e-10, rtol=0.0)
+        @test isapprox(params_friesen.a0, 6.75; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.a1, -1.95; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.a2, 2.625; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.a3, -7.44; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.b3, 0.75; atol=1e-12, rtol=0.0)
+        @test isapprox(params_friesen.b4, 7.5; atol=1e-12, rtol=0.0)
+    end
+
+    @testset "K_over_Lambda5 允许负号约定" begin
+        consts = Main.Constants_PNJL.pnjl_constants(profile="friesen2019_poly", physics_profile="friesen2019_base")
+        @test consts.K_fm5 < 0
+        @test isfinite(consts.K_fm5)
+    end
+
+    @testset "Friesen 2019 文献公式与当前实现记号匹配" begin
+        params_friesen = pnjl_params(profile="friesen2019_poly", physics_profile="friesen2019_base")
+        φ = SVector{3, Float64}(-0.028, -0.031, -0.041)
+
+        masses_repo = calculate_mass_vec(params_friesen, φ)
+        V_repo = chiral_potential(params_friesen, φ)
+
+        gS = 2 * params_friesen.G_fm2
+        gD = -params_friesen.K_fm5
+        m0 = SVector(params_friesen.m_ud0_inv_fm, params_friesen.m_ud0_inv_fm, params_friesen.m_s0_inv_fm)
+
+        masses_lit = SVector(
+            m0[1] - 2 * gS * φ[1] - 2 * gD * φ[2] * φ[3],
+            m0[2] - 2 * gS * φ[2] - 2 * gD * φ[1] * φ[3],
+            m0[3] - 2 * gS * φ[3] - 2 * gD * φ[1] * φ[2],
+        )
+        V_lit = gS * sum(φ .^ 2) + 4 * gD * prod(φ)
+
+        @test masses_repo ≈ masses_lit atol=1e-12 rtol=0.0
+        @test V_repo ≈ V_lit atol=1e-12 rtol=0.0
+    end
 end

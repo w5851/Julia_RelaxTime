@@ -27,17 +27,18 @@ using Main.GaussLegendre:
     DEFAULT_MOMENTUM_WEIGHTS
 
 export cached_nodes, calculate_log_sum
-export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT
+export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT, DEFAULT_THERMAL_P_MAX_INV_FM
 
 const DEFAULT_THETA_COUNT = length(DEFAULT_COSΘ_HALF_NODES)
 const DEFAULT_MOMENTUM_COUNT = length(DEFAULT_MOMENTUM_NODES)
+const DEFAULT_THERMAL_P_MAX_INV_FM = 10.0
 const THETA_DEFAULT_NODES = DEFAULT_COSΘ_HALF_NODES
 const THETA_DEFAULT_WEIGHTS = DEFAULT_COSΘ_HALF_WEIGHTS .* 2.0
 const THERMAL_DEFAULT_NODES = DEFAULT_MOMENTUM_NODES
 const THERMAL_DEFAULT_WEIGHTS = DEFAULT_MOMENTUM_WEIGHTS
 
-"""积分节点缓存：(p_num, t_num) -> (p_mesh, cosθ_mesh, coefficients)"""
-const NODE_CACHE = Dict{Tuple{Int, Int}, NTuple{3, Matrix{Float64}}}()
+"""积分节点缓存：(p_num, t_num, p_max_inv_fm) -> (p_mesh, cosθ_mesh, coefficients)"""
+const NODE_CACHE = Dict{Tuple{Int, Int, Float64}, NTuple{3, Matrix{Float64}}}()
 
 @inline function theta_nodes(t_num::Int)
     if t_num == DEFAULT_THETA_COUNT
@@ -47,15 +48,15 @@ const NODE_CACHE = Dict{Tuple{Int, Int}, NTuple{3, Matrix{Float64}}}()
     return nodes, weights .* 2.0
 end
 
-@inline function thermal_nodes(p_num::Int)
-    if p_num == DEFAULT_MOMENTUM_COUNT
+@inline function thermal_nodes(p_num::Int, p_max_inv_fm::Float64=DEFAULT_THERMAL_P_MAX_INV_FM)
+    if p_num == DEFAULT_MOMENTUM_COUNT && isapprox(p_max_inv_fm, DEFAULT_THERMAL_P_MAX_INV_FM; atol=1e-12, rtol=0.0)
         return THERMAL_DEFAULT_NODES, THERMAL_DEFAULT_WEIGHTS
     end
-    return gauleg(0.0, 10.0, p_num)
+    return gauleg(0.0, p_max_inv_fm, p_num)
 end
 
-function build_nodes(p_num::Int, t_num::Int)
-    momentum_nodes, momentum_weights = thermal_nodes(p_num)
+function build_nodes(p_num::Int, t_num::Int, p_max_inv_fm::Float64=DEFAULT_THERMAL_P_MAX_INV_FM)
+    momentum_nodes, momentum_weights = thermal_nodes(p_num, p_max_inv_fm)
     cosθ_nodes, cosθ_weights = theta_nodes(t_num)
 
     thermal_p_mesh = repeat(momentum_nodes, 1, t_num)
@@ -66,10 +67,10 @@ function build_nodes(p_num::Int, t_num::Int)
     return (thermal_p_mesh, cosθ_mesh, thermal_coefficients)
 end
 
-function cached_nodes(p_num::Int, t_num::Int)
-    key = (p_num, t_num)
+function cached_nodes(p_num::Int, t_num::Int; p_max_inv_fm::Float64=DEFAULT_THERMAL_P_MAX_INV_FM)
+    key = (p_num, t_num, p_max_inv_fm)
     return get!(NODE_CACHE, key) do
-        build_nodes(p_num, t_num)
+        build_nodes(p_num, t_num, p_max_inv_fm)
     end
 end
 

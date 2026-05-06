@@ -39,7 +39,7 @@ end
     p_num::Int,
     t_num::Int,
 )
-    params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num), Float64(xi);
+    params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model)), Float64(xi);
         p_num=p_num,
         t_num=t_num,
         model_kind=_model_kind_for_shared_core(model),
