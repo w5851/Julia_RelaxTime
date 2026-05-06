@@ -35,6 +35,10 @@ const ZETA3 = 1.2020569031595942
 @testset "MesonDensity 简并因子与玻色分布" begin
     @test meson_degeneracy(:pi) == 3
     @test meson_degeneracy(:K) == 4
+    @test meson_degeneracy(:pi_plus) == 1
+    @test meson_degeneracy(:pi_minus) == 1
+    @test meson_degeneracy(:K_plus) == 1
+    @test meson_degeneracy(:K_minus) == 1
     @test meson_degeneracy(:pi; charge_resolved=true) == 1
     @test meson_degeneracy(:K; charge_resolved=true) == 1
 
@@ -140,11 +144,11 @@ end
     tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
 
     current = phase_shift_meson_number_density(
-        :pi,
+        :pi_plus,
         qp,
         tp;
         scheme=:current,
-        degeneracy=3,
+        degeneracy=1,
         qmax=4.0,
         q_nodes=6,
         omega_min=0.05,
@@ -152,11 +156,11 @@ end
         omega_nodes=6,
     )
     gbu = phase_shift_meson_number_density(
-        :pi,
+        :pi_plus,
         qp,
         tp;
         scheme=:gbu_reference,
-        degeneracy=3,
+        degeneracy=1,
         qmax=4.0,
         q_nodes=6,
         omega_min=0.05,

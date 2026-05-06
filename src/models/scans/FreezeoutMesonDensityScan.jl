@@ -133,9 +133,11 @@ function _load_completed_keys(path::AbstractString)
     return completed
 end
 
-@inline function _density_kwargs_for_profile(profile::MesonChemicalProfiles.MesonChemicalProfile)
-    chemical = MesonChemicalProfiles.meson_chemical_profile_fm(profile)
+@inline function _density_kwargs_for_profile(profile::MesonChemicalProfiles.MesonChemicalProfile, flavor_chemical)
+    chemical = MesonChemicalProfiles.meson_chemical_profile_fm(profile; flavor_mev=flavor_chemical)
     return (
+        pi_channel=chemical.pi_channel,
+        k_channel=chemical.k_channel,
         μ_pi=chemical.mu_pi_fm,
         μ_K=chemical.mu_K_fm,
         d_pi=chemical.d_pi,
@@ -167,7 +169,7 @@ function _solve_density_point(
     phase_shift_eta::Float64,
 )
     flavor_chemical = FlavorChemicalProfiles.flavor_mu_profile_fm(flavor_profile, pt.muq_MeV)
-    common_density = _density_kwargs_for_profile(chemical_profile)
+    common_density = _density_kwargs_for_profile(chemical_profile, flavor_chemical)
     flavor_override = flavor_profile.apply_to_equilibrium ? (
         flavor_chemical.mu_u_fm,
         flavor_chemical.mu_d_fm,

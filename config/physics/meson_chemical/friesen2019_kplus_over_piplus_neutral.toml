@@ -1,0 +1,13 @@
+profile_name = "friesen2019_kplus_over_piplus_neutral"
+source_tag = "Friesen2019_Kplus_over_piplus_neutral"
+pi_label = "pi_plus"
+k_label = "K_plus"
+charge_resolved = true
+
+[chemical_potentials]
+mu_pi_MeV = 0.0
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 1
+d_K = 1

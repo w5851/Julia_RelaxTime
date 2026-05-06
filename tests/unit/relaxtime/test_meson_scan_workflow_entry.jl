@@ -4,6 +4,7 @@ const _GAP_MESON_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "
 const _MESON_DENSITY_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_meson_density_scan.jl")
 const _STRICT_BW_MESON_DENSITY_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_strict_bw_meson_density_scan.jl")
 const _PHASE_SHIFT_MESON_DENSITY_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_phase_shift_meson_density_scan.jl")
+const _CROSSOVER_MESON_DENSITY_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_crossover_meson_density_scan.jl")
 const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_mott_phase_scan.jl")
 
 @testset "meson scan scripts use Models entrypoint" begin
@@ -11,6 +12,7 @@ const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", 
     density_scan = read(_MESON_DENSITY_SCAN_SCRIPT, String)
     strict_bw_density_scan = read(_STRICT_BW_MESON_DENSITY_SCAN_SCRIPT, String)
     phase_shift_density_scan = read(_PHASE_SHIFT_MESON_DENSITY_SCAN_SCRIPT, String)
+    crossover_density_scan = read(_CROSSOVER_MESON_DENSITY_SCAN_SCRIPT, String)
     mott_scan = read(_MOTT_PHASE_SCAN_SCRIPT, String)
 
     @test occursin("using .Models: solve_gap_and_meson_point", gap_scan)
@@ -34,6 +36,9 @@ const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", 
     @test occursin("continuation_state=continuation_state", phase_shift_density_scan)
     @test occursin("continuation_state = res.continuation_state", phase_shift_density_scan)
     @test occursin("current Phase-E3 phase-shift meson-density scan only supports xi = 0", phase_shift_density_scan)
+
+    @test occursin("using .Models: run_crossover_meson_density_scan", crossover_density_scan)
+    @test occursin("println(\"workflow_entry=\$(result.workflow_entry)\")", crossover_density_scan)
 
     @test occursin("using .Models: solve_gap_and_meson_point", mott_scan)
     @test !occursin("using .MesonMassWorkflow: solve_gap_and_meson_point", mott_scan)

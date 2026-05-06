@@ -10,23 +10,15 @@ const _CONSTANTS_PNJL_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "s
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PNJL_PATH_MT)
 end
-const _EFFECTIVE_COUPLINGS_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "EffectiveCouplings.jl"))
-if !isdefined(Main, :EffectiveCouplings)
-    Base.include(Main, _EFFECTIVE_COUPLINGS_PATH_MT)
-end
-const _MESON_MASS_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "MesonMass.jl"))
-if !isdefined(Main, :MesonMass)
-    Base.include(Main, _MESON_MASS_PATH_MT)
-end
-const _MOTT_TRANSITION_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "MottTransition.jl"))
-if !isdefined(Main, :MottTransition)
-    Base.include(Main, _MOTT_TRANSITION_PATH_MT)
+const _RELAXTIME_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "RelaxTime.jl"))
+if !isdefined(Main, :RelaxTime)
+    Base.include(Main, _RELAXTIME_PATH_MT)
 end
 
-using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.Constants_PNJL: G_fm2, K_fm5
-using Main.MesonMass: ensure_quark_params_has_A
-using Main.MottTransition: mott_threshold_mass, mott_gap, is_mott_point, mott_threshold_masses, mott_gaps
+using Main.RelaxTime.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
+using Main.RelaxTime.MesonMass: ensure_quark_params_has_A
+using Main.RelaxTime.MottTransition: mott_threshold_mass, mott_gap, is_mott_point, mott_threshold_masses, mott_gaps
 
 @testset "MottTransition 基础测试" begin
     quark_params = (m=(u=0.3, d=0.31, s=0.5), μ=(u=0.0, d=0.0, s=0.0))
@@ -36,6 +28,8 @@ using Main.MottTransition: mott_threshold_mass, mott_gap, is_mott_point, mott_th
 
     threshold = mott_threshold_mass(:K, qp)
     @test threshold ≈ qp.m.u + qp.m.s
+    @test mott_threshold_mass(:pi_plus, qp) ≈ qp.m.u + qp.m.d
+    @test mott_threshold_mass(:K_minus, qp) ≈ qp.m.u + qp.m.s
     gap = mott_gap(:K, threshold, qp)
     @test is_mott_point(:K, threshold, qp; atol=1e-12)
 

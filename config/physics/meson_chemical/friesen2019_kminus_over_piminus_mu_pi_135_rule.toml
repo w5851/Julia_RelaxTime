@@ -1,0 +1,16 @@
+profile_name = "friesen2019_kminus_over_piminus_mu_pi_135_rule"
+source_tag = "Friesen2019_Kminus_over_piminus_mu_pi_135_muK_from_flavor"
+pi_label = "pi_minus"
+k_label = "K_minus"
+charge_resolved = true
+
+[chemical_potential_rules]
+mu_K_rule = "mu_u_minus_mu_s_signed"
+
+[chemical_potentials]
+mu_pi_MeV = 135.0
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 1
+d_K = 1

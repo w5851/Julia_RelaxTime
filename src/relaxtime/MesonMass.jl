@@ -93,11 +93,35 @@ end
                 μ1 = quark_params.μ.u, μ2 = quark_params.μ.u,
                 A1 = quark_params.A.u, A2 = quark_params.A.u,
                 num_s_quark = 0)
+    elseif meson == :pi_plus
+        return (channel = :P,
+                m1 = quark_params.m.u, m2 = quark_params.m.d,
+                μ1 = quark_params.μ.u, μ2 = quark_params.μ.d,
+                A1 = quark_params.A.u, A2 = quark_params.A.d,
+                num_s_quark = 0)
+    elseif meson == :pi_minus
+        return (channel = :P,
+                m1 = quark_params.m.d, m2 = quark_params.m.u,
+                μ1 = quark_params.μ.d, μ2 = quark_params.μ.u,
+                A1 = quark_params.A.d, A2 = quark_params.A.u,
+                num_s_quark = 0)
     elseif meson == :K
         return (channel = :P,
                 m1 = quark_params.m.u, m2 = quark_params.m.s,
                 μ1 = quark_params.μ.u, μ2 = quark_params.μ.s,
                 A1 = quark_params.A.u, A2 = quark_params.A.s,
+                num_s_quark = 1)
+    elseif meson == :K_plus
+        return (channel = :P,
+                m1 = quark_params.m.u, m2 = quark_params.m.s,
+                μ1 = quark_params.μ.u, μ2 = quark_params.μ.s,
+                A1 = quark_params.A.u, A2 = quark_params.A.s,
+                num_s_quark = 1)
+    elseif meson == :K_minus
+        return (channel = :P,
+                m1 = quark_params.m.s, m2 = quark_params.m.u,
+                μ1 = quark_params.μ.s, μ2 = quark_params.μ.u,
+                A1 = quark_params.A.s, A2 = quark_params.A.u,
                 num_s_quark = 1)
     elseif meson == :sigma_pi
         return (channel = :S,
@@ -117,24 +141,32 @@ end
 end
 
 @inline function _meson_coupling(meson::Symbol, K_coeffs::NamedTuple)::Float64
-    if meson == :pi
+    if meson == :pi || meson == :pi_plus || meson == :pi_minus
         return K_coeffs.K123_plus
-    elseif meson == :K
+    elseif meson == :K || meson == :K_plus || meson == :K_minus
         return K_coeffs.K4567_plus
     elseif meson == :sigma_pi
         return K_coeffs.K123_minus
     elseif meson == :sigma_K
         return K_coeffs.K4567_minus
     else
-        error("Unknown meson type: $meson. Use :pi, :K, :sigma_pi, or :sigma_K")
+        error("Unknown meson type: $meson. Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, or :sigma_K")
     end
 end
 
 @inline function default_meson_mass_guess(meson::Symbol, quark_params::NamedTuple)::Float64
     if meson == :pi
         return quark_params.m.u + quark_params.m.d
+    elseif meson == :pi_plus
+        return quark_params.m.u + quark_params.m.d
+    elseif meson == :pi_minus
+        return quark_params.m.d + quark_params.m.u
     elseif meson == :K
         return quark_params.m.u + quark_params.m.s
+    elseif meson == :K_plus
+        return quark_params.m.u + quark_params.m.s
+    elseif meson == :K_minus
+        return quark_params.m.s + quark_params.m.u
     elseif meson == :sigma_pi
         return 2.0 * quark_params.m.u
     elseif meson == :sigma_K
@@ -148,7 +180,7 @@ end
     elseif meson == :sigma_prime
         return 2.0 * quark_params.m.s
     else
-        error("Unknown meson type: $meson. Use :pi, :K, :sigma_pi, :sigma_K, :eta, :eta_prime, :sigma, or :sigma_prime")
+        error("Unknown meson type: $meson. Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, :sigma_K, :eta, :eta_prime, :sigma, or :sigma_prime")
     end
 end
 

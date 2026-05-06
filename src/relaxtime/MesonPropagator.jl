@@ -252,16 +252,16 @@ D_sigma_pi = meson_propagator_simple(:sigma_pi, K_coeffs, Π_uu_S)
 @inline @fastmath function meson_propagator_simple(meson_type::Symbol, K_coeffs::NamedTuple, 
                                                    Π::Complex{T}) where {T<:Real}
     # 根据介子类型自动选择K系数
-    if meson_type == :pi
+    if meson_type == :pi || meson_type == :pi_plus || meson_type == :pi_minus
         K = K_coeffs.K123_plus  # π是赝标量P通道，用K⁺
-    elseif meson_type == :K
+    elseif meson_type == :K || meson_type == :K_plus || meson_type == :K_minus
         K = K_coeffs.K4567_plus  # K是赝标量P通道，用K⁺
     elseif meson_type == :sigma_pi
         K = K_coeffs.K123_minus  # σ_π是标量S通道，用K⁻
     elseif meson_type == :sigma_K
         K = K_coeffs.K4567_minus  # σ_K是标量S通道，用K⁻
     else
-        error("Unknown meson type: $meson_type. Use :pi, :K, :sigma_pi, or :sigma_K")
+        error("Unknown meson type: $meson_type. Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, or :sigma_K")
     end
     
     # D = 2K / (1 - 4KΠ)

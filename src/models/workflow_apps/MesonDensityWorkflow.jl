@@ -231,6 +231,8 @@ function solve_strict_bw_meson_density_from_meson_point(
             gamma_K,
             quark_params_norm,
             thermo_params_norm;
+            pi_channel=pi_channel,
+            k_channel=k_channel,
             μ_pi=Float64(μ_pi),
             μ_K=Float64(μ_K),
             d_pi=Int(d_pi),
@@ -286,6 +288,8 @@ end
 """
 function solve_phase_shift_meson_density_from_meson_point(
     meson_point;
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
@@ -310,6 +314,8 @@ function solve_phase_shift_meson_density_from_meson_point(
     density = phase_shift_meson_density_summary(
         quark_params,
         thermo_params;
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         μ_pi=μ_pi,
         μ_K=μ_K,
         d_pi=Int(d_pi),
@@ -324,8 +330,8 @@ function solve_phase_shift_meson_density_from_meson_point(
     )
 
     return merge(density, (
-        m_pi=haskey(meson_point.meson_results, :pi) ? Float64(meson_point.meson_results[:pi].mass) : NaN,
-        m_K=haskey(meson_point.meson_results, :K) ? Float64(meson_point.meson_results[:K].mass) : NaN,
+        m_pi=haskey(meson_point.meson_results, pi_channel) ? Float64(meson_point.meson_results[pi_channel].mass) : NaN,
+        m_K=haskey(meson_point.meson_results, k_channel) ? Float64(meson_point.meson_results[k_channel].mass) : NaN,
     ))
 end
 
@@ -342,6 +348,8 @@ end
 
 function solve_phase_shift_derivative_reference_from_meson_point(
     meson_point;
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
@@ -366,6 +374,8 @@ function solve_phase_shift_derivative_reference_from_meson_point(
     density = phase_shift_meson_density_derivative_reference_summary(
         quark_params,
         thermo_params;
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         μ_pi=μ_pi,
         μ_K=μ_K,
         d_pi=Int(d_pi),

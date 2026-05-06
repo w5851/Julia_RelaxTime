@@ -5,6 +5,7 @@
 - 我应该用 `Models.run_tmu_scan` 还是 `Models.run_trho_scan`？
 - 什么时候应该改用 `Models.run_freezeout_fixedmu_scan`？
 - 什么时候应该直接进入 `Models.run_freezeout_meson_density_scan`？
+- 什么时候应该直接进入 `Models.run_external_path_meson_density_scan`？
 - 什么时候需要 `Models.build_default_rho_grid`？
 - 扫描结果会进入哪些下游链路？
 
@@ -22,6 +23,10 @@
 当你不只需要 equilibrium 点，而是要直接产出 `n_\pi(T)`、`n_K(T)`、`K/\pi(T)` 或其 BW/BU 版本时，应进一步改用：
 
 - `Models.run_freezeout_meson_density_scan`
+
+当路径已经由外部数据明确给出，例如文献提取后的 phase-line 离散点，而你不希望再让本仓库内部路径生成器介入时，应改用：
+
+- `Models.run_external_path_meson_density_scan`
 
 `Models.build_default_rho_grid` 是公开导出，但它的定位是辅助入口：当你需要默认的多分辨率 `ρ` 网格，或要在相图流程前自定义低密度加密策略时再直接调用。
 
@@ -86,6 +91,20 @@
 - continuation 契约来自 `MesonMassWorkflow.continuation_state`
 - 当前已经能表达 charge-resolved `\mu_\pi` profile
 - 当前也已能表达最小 flavor-level `\mu_s` profile
+
+### 选择 `Models.run_external_path_meson_density_scan`
+
+适用于：
+
+- 路径来自文献提取、外部 CSV、人工整理点列
+- 你要先固定外部 `(T,\mu_B)` 点，再比较物理量
+- 你希望 continuation 仍由正式 workflow 管理，而不是在脚本层自己缓存种子
+
+关键特征：
+
+- 输入是离散路径点列，而不是内部 path generator
+- 输出会保留 `path_source / path_case_id / path_line_style` 元数据
+- 可直接复用 stable / strict BW / current BU / generalized BU 同一套物理核
 
 ## 典型工作流
 

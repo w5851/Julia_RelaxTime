@@ -62,8 +62,10 @@ end
         return charge_resolved ? 1 : 3
     elseif meson === :K
         return charge_resolved ? 1 : 4
+    elseif meson === :pi_plus || meson === :pi_minus || meson === :K_plus || meson === :K_minus
+        return 1
     else
-        throw(ArgumentError("Unsupported meson $(meson). Use :pi or :K."))
+        throw(ArgumentError("Unsupported meson $(meson). Use :pi, :pi_plus, :pi_minus, :K, :K_plus, or :K_minus."))
     end
 end
 
@@ -617,6 +619,8 @@ function strict_bw_qpole_density_summary(
     k_gamma::Float64,
     quark_params,
     thermo_params;
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
     d_pi::Integer=meson_degeneracy(:pi),
@@ -631,7 +635,7 @@ function strict_bw_qpole_density_summary(
     pole_require_converged::Bool=true,
 )
     pi_density = strict_bw_qpole_meson_number_density(
-        :pi,
+        pi_channel,
         pi_mass,
         pi_gamma,
         quark_params,
@@ -648,7 +652,7 @@ function strict_bw_qpole_density_summary(
         pole_require_converged=pole_require_converged,
     )
     k_density = strict_bw_qpole_meson_number_density(
-        :K,
+        k_channel,
         k_mass,
         k_gamma,
         quark_params,
@@ -669,6 +673,8 @@ function strict_bw_qpole_density_summary(
         n_pi=pi_density.density,
         n_K=k_density.density,
         kpi_ratio=iszero(pi_density.density) ? NaN : k_density.density / pi_density.density,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         pi_density=pi_density,
         k_density=k_density,
         qmax=qmax,
@@ -762,12 +768,44 @@ function _simple_meson_pol_params(meson::Symbol, qp)
             A1=Float64(qp.A.u), A2=Float64(qp.A.u),
             num_s_quark=0,
         )
+    elseif meson === :pi_plus
+        return (
+            channel=:P,
+            m1=Float64(qp.m.u), m2=Float64(qp.m.d),
+            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.d),
+            A1=Float64(qp.A.u), A2=Float64(qp.A.d),
+            num_s_quark=0,
+        )
+    elseif meson === :pi_minus
+        return (
+            channel=:P,
+            m1=Float64(qp.m.d), m2=Float64(qp.m.u),
+            μ1=Float64(qp.μ.d), μ2=Float64(qp.μ.u),
+            A1=Float64(qp.A.d), A2=Float64(qp.A.u),
+            num_s_quark=0,
+        )
     elseif meson === :K
         return (
             channel=:P,
             m1=Float64(qp.m.u), m2=Float64(qp.m.s),
             μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
             A1=Float64(qp.A.u), A2=Float64(qp.A.s),
+            num_s_quark=1,
+        )
+    elseif meson === :K_plus
+        return (
+            channel=:P,
+            m1=Float64(qp.m.u), m2=Float64(qp.m.s),
+            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
+            A1=Float64(qp.A.u), A2=Float64(qp.A.s),
+            num_s_quark=1,
+        )
+    elseif meson === :K_minus
+        return (
+            channel=:P,
+            m1=Float64(qp.m.s), m2=Float64(qp.m.u),
+            μ1=Float64(qp.μ.s), μ2=Float64(qp.μ.u),
+            A1=Float64(qp.A.s), A2=Float64(qp.A.u),
             num_s_quark=1,
         )
     end
