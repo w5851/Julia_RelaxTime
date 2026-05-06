@@ -2,7 +2,7 @@
 
 更新日期：2026-05-06
 
-当前状态：Phase R0/R1 已完成，Phase R2 首个 `plot_review` case 已落盘，Phase R3 已形成“轻量 bundle consistency regression + 暂不加入重计算型 path-level regression”的执行结论；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
+当前状态：Phase R0/R1 已完成，Phase R2 首个 `plot_review` case 已落盘，Phase R3 已形成“双层治理：core 保留轻量 bundle consistency regression，full 新增 freeze-out `phase_shift_gbu` 全路径 rerun regression”的执行结论；用于承接 `F4.6` 在文献 direct validation 难以稳定落地时的工程兜底路线。
 
 ---
 
@@ -221,19 +221,24 @@
 - [x] 判断是否需要新增 path-level regression 测试
   - 验收：给出“新增 / 暂不新增”的明确结论与理由
   - 当前结论：
-    - 暂不把 `phase_shift_gbu` freeze-out 路径的重计算型 workflow rerun 直接纳入 PR 级 regression gate
-    - 原因：本地用正式入口对少量 `sqrt(s_NN)` 采样点做 cold-start probe 时，三点级别已超过两分钟，不适合作为常规 PR gate
-    - 当前替代落地：
-      - 新增 canonical `plot_review` bundle consistency regression
-      - 基线：`tests/baselines/relaxtime/baseline_meson_density_plot_review_case_v1.csv`
-      - 测试：`tests/regression/relaxtime/test_meson_density_plot_review_case_regression.jl`
-    - 该 regression 当前锁定：
+    - 不把 freeze-out `phase_shift_gbu` 的重计算型 rerun 放入 `core`
+    - 但将其正式纳入 `full`
+    - 当前双层落地：
+      - `core`：
+        - canonical `plot_review` bundle consistency regression
+        - 基线：`tests/baselines/relaxtime/baseline_meson_density_plot_review_case_v1.csv`
+        - 测试：`tests/regression/relaxtime/test_meson_density_plot_review_case_regression.jl`
+      - `full`：
+        - freeze-out `phase_shift_gbu` 全路径 48 点 rerun regression
+        - 基线：`tests/baselines/relaxtime/baseline_meson_density_freezeout_phase_shift_gbu_path_v1.csv`
+        - 测试：`tests/regression/relaxtime/test_meson_density_freezeout_phase_shift_gbu_path_regression.jl`
+    - `core` 当前锁定：
       - `comparison_vs_target.csv` 与 `plot_review_comparison.csv` 的逐行一致性
       - `README.md` 中的摘要指标与“非 validation gate”标注
       - overlay / residual PNG 产物存在且非空
-    - 因此当前 R3 的正式收口应理解为：
-      - 暂不新增重计算型 path-level regression
-      - 已新增 plot-review bundle 的轻量回归门禁
+    - `full` 当前锁定：
+      - 同一 freeze-out profile / path profile / meson chemical profile / `phase_shift_gbu` 入口下的 48 点 `workflow_scan` 重算一致性
+      - 逐行比较 `T_MeV`、`muB_MeV`、`n_pi`、`n_K`、`kpi_ratio`、`equilibrium_converged`
 
 ### Phase R4：validation 升格门槛
 
