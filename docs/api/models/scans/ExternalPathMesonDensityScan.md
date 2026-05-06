@@ -115,4 +115,4 @@ CSV 头部固定包含路径元数据：
 
 - [Overview.md](Overview.md)
 - [FreezeoutMesonDensityScan.md](FreezeoutMesonDensityScan.md)
-- [../../../dev/active/2026-05-04_Friesen2019曲线验证口径说明.md](../../../dev/active/2026-05-04_Friesen2019%E6%9B%B2%E7%BA%BF%E9%AA%8C%E8%AF%81%E5%8F%A3%E5%BE%84%E8%AF%B4%E6%98%8E.md)
+- [../../../dev/archived/2026-05-04_Friesen2019曲线验证口径说明.md](../../../dev/archived/2026-05-04_Friesen2019%E6%9B%B2%E7%BA%BF%E9%AA%8C%E8%AF%81%E5%8F%A3%E5%BE%84%E8%AF%B4%E6%98%8E.md)
