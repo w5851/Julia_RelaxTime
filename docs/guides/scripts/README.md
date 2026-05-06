@@ -27,8 +27,9 @@
 用途：
 
 - 若本机已有可用 sysimage，则自动追加 `--sysimage=...`
-- 若本机没有 sysimage，则仍回退到普通 `julia --project=.` 运行
-- 默认 mismatch policy 为 `fallback`
+- wrapper 会同时校验 Julia 版本、平台信息与 `git_commit`
+- 默认 mismatch policy 为 `rebuild`
+- 若 sysimage 缺失、元数据缺失或 `git_commit` 与当前 `HEAD` 不一致，则默认自动重建本地 sysimage
 - PowerShell wrapper 可配合 `-MismatchPolicy strict|fallback|rebuild`
 - POSIX wrapper 可配合 `--mismatch-policy=strict|fallback|rebuild`
 - `-BuildIfMissing` / `--build-if-missing` 仍保留，作为 `rebuild` 别名

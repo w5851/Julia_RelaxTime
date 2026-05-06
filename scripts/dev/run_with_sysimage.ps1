@@ -1,7 +1,7 @@
 param(
     [switch]$BuildIfMissing,
     [ValidateSet("fallback", "strict", "rebuild")]
-    [string]$MismatchPolicy = "fallback",
+    [string]$MismatchPolicy = "rebuild",
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$JuliaArgs
 )
@@ -59,12 +59,24 @@ function Build-LocalSysimage {
     }
 }
 
+function Get-HeadCommit {
+    try {
+        $head = (& git -C $RepoRoot rev-parse HEAD 2>$null)
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($head)) {
+            return $head.Trim()
+        }
+    } catch {
+    }
+    return $null
+}
+
 function Get-SysimageCompatibility {
     param(
         $Meta,
         [string]$CurrentVersion,
         [string]$CurrentFamily,
-        [string]$CurrentArch
+        [string]$CurrentArch,
+        [string]$HeadCommit
     )
 
     if (-not $Meta.julia_version) {
@@ -79,12 +91,21 @@ function Get-SysimageCompatibility {
     if ($Meta.platform_arch -and $Meta.platform_arch -ne $CurrentArch) {
         return @{ Compatible = $false; Reason = "platform arch $($Meta.platform_arch) does not match current arch $CurrentArch" }
     }
+    if (-not [string]::IsNullOrWhiteSpace($HeadCommit)) {
+        if (-not $Meta.git_commit) {
+            return @{ Compatible = $false; Reason = "metadata missing git_commit" }
+        }
+        if ($Meta.git_commit -ne $HeadCommit) {
+            return @{ Compatible = $false; Reason = "sysimage git commit $($Meta.git_commit) does not match current HEAD $HeadCommit" }
+        }
+    }
     return @{ Compatible = $true; Reason = "ok" }
 }
 
 $currentVersion = Get-JuliaVersion
 $currentFamily = Get-PlatformFamily
 $currentArch = Get-PlatformArch
+$headCommit = Get-HeadCommit
 
 if (-not ((Test-Path $SysimagePath) -and (Test-Path $MetaPath))) {
     switch ($MismatchPolicy) {
@@ -103,7 +124,7 @@ if (-not ((Test-Path $SysimagePath) -and (Test-Path $MetaPath))) {
 $UseSysimage = $false
 if ((Test-Path $SysimagePath) -and (Test-Path $MetaPath)) {
     $meta = Get-Content $MetaPath | ConvertFrom-Json
-    $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch
+    $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -HeadCommit $headCommit
     if ($compat.Compatible) {
         $UseSysimage = $true
     } else {
@@ -115,7 +136,7 @@ if ((Test-Path $SysimagePath) -and (Test-Path $MetaPath)) {
                 Write-Warning "Incompatible sysimage detected; rebuilding local sysimage. Reason: $($compat.Reason)"
                 Build-LocalSysimage
                 $meta = Get-Content $MetaPath | ConvertFrom-Json
-                $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch
+                $compat = Get-SysimageCompatibility -Meta $meta -CurrentVersion $currentVersion -CurrentFamily $currentFamily -CurrentArch $currentArch -HeadCommit $headCommit
                 if (-not $compat.Compatible) {
                     throw "Rebuilt sysimage is still incompatible: $($compat.Reason)"
                 }

@@ -3,7 +3,7 @@
 set -eu
 
 BUILD_IF_MISSING=0
-MISMATCH_POLICY=fallback
+MISMATCH_POLICY=rebuild
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -74,6 +74,12 @@ build_local_sysimage() {
     julia --project="$REPO_ROOT" "$REPO_ROOT/scripts/dev/build_sysimage.jl"
 }
 
+get_head_commit() {
+    if command -v git >/dev/null 2>&1; then
+        git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || true
+    fi
+}
+
 json_value() {
     key=$1
     sed -n -E "s/.*\"$key\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*/\1/p" "$META_PATH" | head -n 1
@@ -96,6 +102,7 @@ handle_missing_sysimage() {
 
 CURRENT_VERSION=$(get_julia_version)
 CURRENT_ARCH=$(get_platform_arch)
+CURRENT_HEAD=$(get_head_commit)
 
 if [ ! -f "$SYSIMAGE_PATH" ] || [ ! -f "$META_PATH" ]; then
     handle_missing_sysimage
@@ -116,6 +123,10 @@ if [ -f "$SYSIMAGE_PATH" ] && [ -f "$META_PATH" ]; then
         MISMATCH_REASON="platform family $META_FAMILY does not match current platform $PLATFORM_FAMILY"
     elif [ -n "$META_ARCH" ] && [ "$META_ARCH" != "$CURRENT_ARCH" ]; then
         MISMATCH_REASON="platform arch $META_ARCH does not match current arch $CURRENT_ARCH"
+    elif [ -n "$CURRENT_HEAD" ] && [ -z "$(json_value git_commit)" ]; then
+        MISMATCH_REASON="metadata missing git_commit"
+    elif [ -n "$CURRENT_HEAD" ] && [ "$(json_value git_commit)" != "$CURRENT_HEAD" ]; then
+        MISMATCH_REASON="sysimage git commit $(json_value git_commit) does not match current HEAD $CURRENT_HEAD"
     fi
 
     if [ -z "$MISMATCH_REASON" ]; then
@@ -132,7 +143,8 @@ if [ -f "$SYSIMAGE_PATH" ] && [ -f "$META_PATH" ]; then
                 META_VERSION=$(json_value julia_version)
                 META_FAMILY=$(json_value platform_family)
                 META_ARCH=$(json_value platform_arch)
-                if [ -z "$META_VERSION" ] || [ "$META_VERSION" != "$CURRENT_VERSION" ] || { [ -n "$META_FAMILY" ] && [ "$META_FAMILY" != "$PLATFORM_FAMILY" ]; } || { [ -n "$META_ARCH" ] && [ "$META_ARCH" != "$CURRENT_ARCH" ]; }; then
+                META_COMMIT=$(json_value git_commit)
+                if [ -z "$META_VERSION" ] || [ "$META_VERSION" != "$CURRENT_VERSION" ] || { [ -n "$META_FAMILY" ] && [ "$META_FAMILY" != "$PLATFORM_FAMILY" ]; } || { [ -n "$META_ARCH" ] && [ "$META_ARCH" != "$CURRENT_ARCH" ]; } || { [ -n "$CURRENT_HEAD" ] && { [ -z "$META_COMMIT" ] || [ "$META_COMMIT" != "$CURRENT_HEAD" ]; }; }; then
                     printf '%s\n' "Rebuilt sysimage is still incompatible." >&2
                     exit 1
                 fi
