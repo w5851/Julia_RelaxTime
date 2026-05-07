@@ -1,3 +1,15 @@
+---
+title: 介子数密度 regression 兜底与人工趋势对图方案
+archived: true
+original: docs/dev/active/2026-05-06_介子数密度regression兜底与人工趋势对图方案.md
+archived_date: 2026-05-07
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # 介子数密度 regression 兜底与人工趋势对图方案
 
 更新日期：2026-05-06
