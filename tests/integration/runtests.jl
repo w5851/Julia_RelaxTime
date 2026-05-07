@@ -94,6 +94,7 @@ const INTEGRATION_SMOKE_FILES = [
     joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_batch_runner_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_plot_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_evaluation_smoke.jl"),
+    joinpath(INTEGRATION_DIR, "relaxtime", "test_phase_guided_transport_scan_smoke.jl"),
 ]
 
 # Broader gate retained for CI / pre-merge confidence.

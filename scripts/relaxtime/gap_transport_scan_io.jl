@@ -81,6 +81,12 @@ function ensure_output_header_compatible(path::AbstractString)
     end
     header === nothing && return
     required = (
+        "mode",
+        "phase_reference_kind",
+        "scan_group",
+        "group_label",
+        "T_phase_base_MeV",
+        "alpha_T",
         "omega_fm4inv",
         "P_fm4inv",
         "epsilon_fm4inv",
@@ -110,6 +116,7 @@ end
 function write_header_if_needed(io)
     header = join([
         "T_MeV", "muq_MeV", "muB_MeV", "xi",
+        "mode", "phase_reference_kind", "scan_group", "group_label", "T_phase_base_MeV", "alpha_T",
         "T_fm", "muq_fm",
         "converged", "iterations", "residual_norm", "equilibrium_backend", "seed_source", "phase_prev", "phase_curr", "phase_structure", "phase_boundary_xi_used",
         "Phi", "Phibar",

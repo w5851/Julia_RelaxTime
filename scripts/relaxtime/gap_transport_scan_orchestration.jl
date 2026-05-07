@@ -78,7 +78,7 @@ function _solve_transport_with_bulk_retry(eq, T_fm::Float64, muq_fm::Float64, xi
     return result, compute_bulk_this_point
 end
 
-function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx)
+function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, point_meta)
     T_fm = T_mev / Main.ħc_MeV_fm
     muq_mev = muB_mev / 3.0
     muq_fm = muq_mev / Main.ħc_MeV_fm
@@ -129,6 +129,12 @@ function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Fl
 
     row = join([
         string(T_mev), string(muq_mev), string(muB_mev), string(xi),
+        string(get(point_meta, :mode, :grid)),
+        string(get(point_meta, :phase_reference_kind, :regular_grid)),
+        string(get(point_meta, :scan_group, "")),
+        string(get(point_meta, :group_label, "")),
+        string(get(point_meta, :T_phase_base_MeV, NaN)),
+        string(get(point_meta, :alpha_T, NaN)),
         string(T_fm), string(muq_fm),
         Main.csv_bool(eq.converged), string(eq.iterations), string(eq.residual_norm), string(eq.solver_backend), diag.seed_source, string(diag.phase_prev), string(diag.phase_curr), string(diag.phase_structure), string(diag.phase_boundary_xi_used),
         string(Φ), string(Φbar),
@@ -158,6 +164,7 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
     T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, runtime;
     previous_solution=nothing,
     previous_phase::Symbol=:unknown,
+    point_meta=(; mode=:grid, phase_reference_kind=:regular_grid, scan_group="", group_label="", T_phase_base_MeV=NaN, alpha_T=NaN),
 )
     next_solution = previous_solution
     next_phase = previous_phase
@@ -180,7 +187,7 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
         masses = (u=Float64(eq.masses[1]), d=Float64(eq.masses[2]), s=Float64(eq.masses[3]))
         ktmp = Main.build_K_data(T_fm, muq_fm, masses, Float64(eq.x_state[4]), Float64(eq.x_state[5]))
         res, _ = _solve_transport_with_bulk_retry(eq, T_fm, muq_fm, xi, opts, runtime, ktmp.K_coeffs)
-        payload = _build_scan_row(eq, diag, res, T_mev, muB_mev, xi, opts, ctx)
+        payload = _build_scan_row(eq, diag, res, T_mev, muB_mev, xi, opts, ctx, point_meta)
 
         println(io, payload.row)
         flush(io)

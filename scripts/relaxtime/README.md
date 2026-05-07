@@ -13,6 +13,25 @@
 
 ## 当前与 Mott 扫描相关的脚本能力（现状声明）
 
+## 当前与 transport 相图邻域扫描相关的脚本能力（2026-05-07 之后）
+
+### 1) 基础规则网格
+
+- `run_gap_transport_scan.jl`
+  - 保留为 `(T, mu_B, xi)` 规则网格扫描入口。
+  - 继续承担逐点求平衡态 + transport 后处理 + CSV/provenance 落盘。
+
+### 2) phase-guided 上层计划
+
+- `run_phase_guided_transport_scan.jl`
+  - 新增 phase-guided transport 上层入口。
+  - mode a：固定 `mu_B`，沿 `T/T_phase` 倍率带连续扫描 `xi`。
+  - mode b：固定 `T`、离散 `mu_B`、连续扫描 `xi`。
+  - 默认 canonical 输出根目录：
+    - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
+    - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
+  - 当前支持 `--dry-run`，先固化 `sampling_plan.csv`、`README.md`、`effective_config.json`、`run_manifest.json`。
+
 ### 1) 计算侧
 
 - `run_gap_meson_mass_scan.jl`
@@ -52,6 +71,8 @@
   - `run_mott_phase_scan.jl`
   - `run_mott_phase_derived_csv.jl`
   - `run_mott_phase_plot_modes.jl`
+- 对于 phase-guided transport：
+  - `run_phase_guided_transport_scan.jl`
 
 ## Mott v1 快速使用
 
