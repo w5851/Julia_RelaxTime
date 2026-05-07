@@ -50,6 +50,10 @@ def _to_float(row: dict[str, str], key: str) -> float:
     return float(row[key])
 
 
+def _relative_posix(path: Path) -> str:
+    return path.relative_to(PROJECT_ROOT).as_posix()
+
+
 def build_plot_review_case() -> dict[str, Path]:
     comparison_rows = _read_csv(SOURCE_DIR / "comparison_vs_target.csv")
     workflow_rows = _read_csv(SOURCE_DIR / "workflow_scan.csv")
@@ -136,8 +140,8 @@ def build_plot_review_case() -> dict[str, Path]:
                 "",
                 "Inputs:",
                 "",
-                f"- workflow source: `{SOURCE_DIR.relative_to(PROJECT_ROOT) / 'workflow_scan.csv'}`",
-                f"- comparison source: `{SOURCE_DIR.relative_to(PROJECT_ROOT) / 'comparison_vs_target.csv'}`",
+                f"- workflow source: `{_relative_posix(SOURCE_DIR / 'workflow_scan.csv')}`",
+                f"- comparison source: `{_relative_posix(SOURCE_DIR / 'comparison_vs_target.csv')}`",
                 "",
                 "Outputs:",
                 "",

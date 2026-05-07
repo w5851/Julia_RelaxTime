@@ -8,8 +8,8 @@ Current role:
 
 Inputs:
 
-- workflow source: `data\outputs\results\relaxtime\meson_density\freezeout_validation\blaschke2019col_kminus_piminus_mu_pi_100_phase_shift_gbu_default\workflow_scan.csv`
-- comparison source: `data\outputs\results\relaxtime\meson_density\freezeout_validation\blaschke2019col_kminus_piminus_mu_pi_100_phase_shift_gbu_default\comparison_vs_target.csv`
+- workflow source: `data/outputs/results/relaxtime/meson_density/freezeout_validation/blaschke2019col_kminus_piminus_mu_pi_100_phase_shift_gbu_default/workflow_scan.csv`
+- comparison source: `data/outputs/results/relaxtime/meson_density/freezeout_validation/blaschke2019col_kminus_piminus_mu_pi_100_phase_shift_gbu_default/comparison_vs_target.csv`
 
 Outputs:
 
