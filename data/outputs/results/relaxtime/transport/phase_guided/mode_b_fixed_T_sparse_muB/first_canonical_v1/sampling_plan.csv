@@ -1,0 +1,17 @@
+T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,T_phase_base_MeV,alpha_T
+120.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,T=120.0 MeV, muB=0.0 MeV,120.0,NaN
+120.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,T=120.0 MeV, muB=0.0 MeV,120.0,NaN
+120.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,T=120.0 MeV, muB=0.0 MeV,120.0,NaN
+120.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,T=120.0 MeV, muB=0.0 MeV,120.0,NaN
+120.0,260.0,-0.5,mode_b_fixed_T_sparse_muB,first_order,T120.0_muB260.0,T=120.0 MeV, muB=260.0 MeV,120.0,NaN
+120.0,260.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,T=120.0 MeV, muB=260.0 MeV,120.0,NaN
+120.0,260.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,T=120.0 MeV, muB=260.0 MeV,120.0,NaN
+120.0,260.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,T=120.0 MeV, muB=260.0 MeV,120.0,NaN
+138.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,T=138.0 MeV, muB=0.0 MeV,138.0,NaN
+138.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,T=138.0 MeV, muB=0.0 MeV,138.0,NaN
+138.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,T=138.0 MeV, muB=0.0 MeV,138.0,NaN
+138.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,T=138.0 MeV, muB=0.0 MeV,138.0,NaN
+138.0,260.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB260.0,T=138.0 MeV, muB=260.0 MeV,138.0,NaN
+138.0,260.0,-0.2,mode_b_fixed_T_sparse_muB,cep_neighbor,T138.0_muB260.0,T=138.0 MeV, muB=260.0 MeV,138.0,NaN
+138.0,260.0,0.0,mode_b_fixed_T_sparse_muB,cep_neighbor,T138.0_muB260.0,T=138.0 MeV, muB=260.0 MeV,138.0,NaN
+138.0,260.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB260.0,T=138.0 MeV, muB=260.0 MeV,138.0,NaN

@@ -32,6 +32,11 @@
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
   - 当前支持 `--dry-run`，先固化 `sampling_plan.csv`、`README.md`、`effective_config.json`、`run_manifest.json`。
 
+- `run_phase_guided_transport_plots.jl`
+  - 面向 canonical case 的 post-processing wrapper。
+  - 复用 `scripts/plot_scan_csv.py`，按 `scan_group` split 输出 `tau_u/tau_d/tau_s`、`eta`、`sigma`、`zeta`、`eta_over_s`、`sigma_over_T`。
+  - 会同步写出 `figures/plot_manifest.json`，并把图层清单追加回 case `README.md`。
+
 ### 1) 计算侧
 
 - `run_gap_meson_mass_scan.jl`

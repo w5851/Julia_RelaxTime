@@ -1,5 +1,9 @@
 module GapTransportScanOrchestration
 
+@inline function _csv_quote(text::AbstractString)
+    return "\"" * replace(String(text), "\"" => "\"\"") * "\""
+end
+
 function build_scan_runtime(opts)
     p_grid, p_w, sigma_cutoff = Main.integration_grids(opts)
     cos_grid, cos_w = Main.gauleg(-1.0, 1.0, opts.tau_angle_nodes)
@@ -132,7 +136,7 @@ function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Fl
         string(get(point_meta, :mode, :grid)),
         string(get(point_meta, :phase_reference_kind, :regular_grid)),
         string(get(point_meta, :scan_group, "")),
-        string(get(point_meta, :group_label, "")),
+        _csv_quote(string(get(point_meta, :group_label, ""))),
         string(get(point_meta, :T_phase_base_MeV, NaN)),
         string(get(point_meta, :alpha_T, NaN)),
         string(T_fm), string(muq_fm),
