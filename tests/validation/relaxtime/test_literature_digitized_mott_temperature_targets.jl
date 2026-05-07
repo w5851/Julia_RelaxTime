@@ -4,6 +4,10 @@ if !isdefined(Main, :validation_targets_path)
     include(joinpath(@__DIR__, "..", "common", "data_paths.jl"))
 end
 
+if !isdefined(Main, :_solve_relaxtime_literature_validation_equilibrium)
+    include(joinpath(@__DIR__, "literature_validation_helpers.jl"))
+end
+
 const _PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const _MODELS_SCRIPT = joinpath(_PROJECT_ROOT, "src", "models", "Models.jl")
 const _CONSTANTS_SCRIPT = joinpath(_PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl")
@@ -70,6 +74,7 @@ function _compute_relaxtime_mott_temperature_mev(muB_MeV::Float64, xi::Float64, 
     for T_MeV in Ts
         T_fm = T_MeV / _HBARC_MEV_FM
         muq_fm = (muB_MeV / 3.0) / _HBARC_MEV_FM
+        equilibrium = _solve_relaxtime_literature_validation_equilibrium(T_fm, muq_fm, xi)
         res = _MESON_WORKFLOW_MOD.solve_gap_and_meson_point(
             T_fm,
             muq_fm;
@@ -77,6 +82,7 @@ function _compute_relaxtime_mott_temperature_mev(muB_MeV::Float64, xi::Float64, 
             mesons=(meson,),
             p_num=8,
             t_num=4,
+            seed_state=Vector(equilibrium.x_state),
             solver_kwargs=(iterations=25,),
             mass_kwargs=(iterations=25,),
         )
