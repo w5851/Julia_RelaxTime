@@ -137,6 +137,10 @@ function _build_scan_row(eq, diag, res, T_mev::Float64, muB_mev::Float64, xi::Fl
         string(get(point_meta, :phase_reference_kind, :regular_grid)),
         string(get(point_meta, :scan_group, "")),
         _csv_quote(string(get(point_meta, :group_label, ""))),
+        string(get(point_meta, :plot_panel, "")),
+        _csv_quote(string(get(point_meta, :plot_panel_label, ""))),
+        string(get(point_meta, :plot_series, "")),
+        _csv_quote(string(get(point_meta, :plot_series_label, ""))),
         string(get(point_meta, :T_phase_base_MeV, NaN)),
         string(get(point_meta, :alpha_T, NaN)),
         string(T_fm), string(muq_fm),
@@ -168,7 +172,7 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
     T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, runtime;
     previous_solution=nothing,
     previous_phase::Symbol=:unknown,
-    point_meta=(; mode=:grid, phase_reference_kind=:regular_grid, scan_group="", group_label="", T_phase_base_MeV=NaN, alpha_T=NaN),
+    point_meta=(; mode=:grid, phase_reference_kind=:regular_grid, scan_group="", group_label="", plot_panel="", plot_panel_label="", plot_series="", plot_series_label="", T_phase_base_MeV=NaN, alpha_T=NaN),
 )
     next_solution = previous_solution
     next_phase = previous_phase

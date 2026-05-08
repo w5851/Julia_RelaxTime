@@ -8,7 +8,7 @@ end
 
 function write_plan_csv(path::String, plan)
     open(path, "w") do io
-        println(io, "T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,T_phase_base_MeV,alpha_T")
+        println(io, "T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,plot_panel,plot_panel_label,plot_series,plot_series_label,T_phase_base_MeV,alpha_T")
         for point in plan.points
             println(io, join([
                 string(point.T_MeV),
@@ -18,6 +18,10 @@ function write_plan_csv(path::String, plan)
                 string(point.phase_reference_kind),
                 point.scan_group,
                 _csv_quote(point.group_label),
+                point.plot_panel,
+                _csv_quote(point.plot_panel_label),
+                point.plot_series,
+                _csv_quote(point.plot_series_label),
                 string(point.T_phase_base_MeV),
                 string(point.alpha_T),
             ], ','))
@@ -25,7 +29,7 @@ function write_plan_csv(path::String, plan)
     end
 end
 
-function write_readme(path::String, opts, plan; result_csv_name::String="phase_guided_transport_scan.csv")
+function write_readme(path::String, opts, plan; result_csv_name::String="phase_guided_transport_scan.csv", figure_dir::Union{Nothing,String}=nothing)
     mode_dir = opts.mode == :mode_a_fixed_muB_phase_scaled ? "mode_a_fixed_muB_phase_scaled" : "mode_b_fixed_T_sparse_muB"
     mode_summary = opts.mode == :mode_a_fixed_muB_phase_scaled ?
         "固定 muB，沿相变参考温度做 T/T_phase 倍率带，并对每个倍率带连续扫描 xi。" :
@@ -54,7 +58,11 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "- `$(result_csv_name)`: transport scan output CSV")
         println(io, "- `effective_config.json`: effective run config snapshot")
         println(io, "- `run_manifest.json`: provenance metadata")
-        println(io, "- `figures/`: reserved for plot-review / canonical figures")
+        if isnothing(figure_dir)
+            println(io, "- canonical figures: generated separately under `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`")
+        else
+            println(io, "- canonical figures: `$(replace(String(figure_dir), '\\' => '/'))`")
+        end
         println(io)
         println(io, "## Interpretation Boundary")
         println(io, "- This directory is a user-facing result asset, not an external validation truth set.")
@@ -62,13 +70,14 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
     end
 end
 
-function build_effective_config(opts, result_csv::String, plan_csv::String)
+function build_effective_config(opts, result_csv::String, plan_csv::String; figure_dir::Union{Nothing,String}=nothing)
     return Dict(
         "mode" => String(opts.mode),
         "outdir" => opts.outdir,
         "case_name" => opts.case_name,
         "result_csv" => result_csv,
         "plan_csv" => plan_csv,
+        "figure_dir" => figure_dir,
         "xi_values" => opts.xi_values,
         "muB_values" => opts.muB_values,
         "alpha_T_values" => opts.alpha_T_values,

@@ -21,6 +21,8 @@ end
     )
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
     @test plan.total == 16
+    @test unique(p.plot_panel for p in plan.points if p.muB_MeV == 0.0) == ["muB0.0"]
+    @test unique(p.plot_series for p in plan.points if p.alpha_T == 1.0) == ["alpha1.0"]
     refs_0 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 0.0)
     refs_400 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 400.0)
     # With crossover_dense.csv present for the current xi anchors, mu_B = 0
@@ -46,6 +48,8 @@ end
     )
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
     @test plan.total == 24
+    @test unique(p.plot_panel for p in plan.points if p.T_MeV == 120.0) == ["T120.0"]
+    @test unique(p.plot_series for p in plan.points if p.muB_MeV == 260.0) == ["muB260.0"]
     @test any(p.phase_reference_kind == :cep_neighbor for p in plan.points)
     @test any(p.phase_reference_kind == :first_order for p in plan.points)
     @test any(p.phase_reference_kind == :crossover for p in plan.points)

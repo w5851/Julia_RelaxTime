@@ -22,6 +22,11 @@ function _default_output_paths(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
     return (; result_csv, plan_csv, readme, effective_config)
 end
 
+function _default_figure_dir(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
+    mode_dir = opts.mode == :mode_a_fixed_muB_phase_scaled ? "mode_a_fixed_muB_phase_scaled" : "mode_b_fixed_T_sparse_muB"
+    return joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "transport", "phase_guided", mode_dir, opts.case_name)
+end
+
 function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
     base_args = String[
         "--output", result_csv,
@@ -40,6 +45,10 @@ function _point_meta(point)
         phase_reference_kind=point.phase_reference_kind,
         scan_group=point.scan_group,
         group_label=point.group_label,
+        plot_panel=point.plot_panel,
+        plot_panel_label=point.plot_panel_label,
+        plot_series=point.plot_series,
+        plot_series_label=point.plot_series_label,
         T_phase_base_MeV=point.T_phase_base_MeV,
         alpha_T=point.alpha_T,
     )
@@ -47,8 +56,8 @@ end
 
 function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     paths = _default_output_paths(opts)
+    figure_dir = _default_figure_dir(opts)
     mkpath(opts.outdir)
-    mkpath(joinpath(opts.outdir, "figures"))
 
     if opts.overwrite
         for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config)
@@ -58,14 +67,14 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
 
     plan = PhaseGuidedPlan.build_plan(opts)
     PhaseGuidedAssets.write_plan_csv(paths.plan_csv, plan)
-    PhaseGuidedAssets.write_readme(paths.readme, opts, plan; result_csv_name=basename(paths.result_csv))
-    PhaseGuidedAssets.write_effective_config(paths.effective_config, PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv))
+    PhaseGuidedAssets.write_readme(paths.readme, opts, plan; result_csv_name=basename(paths.result_csv), figure_dir=replace(figure_dir, '\\' => '/'))
+    PhaseGuidedAssets.write_effective_config(paths.effective_config, PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')))
 
     if opts.dry_run
         Main.ProvenanceMetadata.write_run_sidecars(
             opts.outdir;
             ctx=ctx,
-            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv),
+            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
             artifacts=[paths.plan_csv, paths.readme, paths.effective_config],
             summary=Dict{String,Any}("points_total" => plan.total, "dry_run" => true),
         )
@@ -123,7 +132,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
         Main.ProvenanceMetadata.write_run_sidecars(
             opts.outdir;
             ctx=ctx,
-            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv),
+            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
             artifacts=[paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, joinpath(opts.outdir, "failed_points.csv")],
             summary=Dict{String,Any}(
                 "points_total" => stats.total,

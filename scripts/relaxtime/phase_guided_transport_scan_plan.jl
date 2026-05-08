@@ -8,6 +8,10 @@ struct PhaseGuidedPoint
     phase_reference_kind::Symbol
     scan_group::String
     group_label::String
+    plot_panel::String
+    plot_panel_label::String
+    plot_series::String
+    plot_series_label::String
     T_phase_base_MeV::Float64
     alpha_T::Float64
 end
@@ -98,6 +102,10 @@ function build_plan(opts)
             for alpha_T in opts.alpha_T_values
                 scan_group = "muB$(round(muB_MeV; digits=3))_alpha$(round(alpha_T; digits=3))"
                 group_label = "muB=$(muB_MeV) MeV, alpha_T=$(alpha_T)"
+                plot_panel = "muB$(round(muB_MeV; digits=3))"
+                plot_panel_label = "muB=$(muB_MeV) MeV"
+                plot_series = "alpha$(round(alpha_T; digits=3))"
+                plot_series_label = "alpha_T=$(alpha_T)"
                 for xi in opts.xi_values
                     phase_reference_kind, T_phase_base_MeV = _phase_reference_for_mode_a(muB_MeV, xi)
                     isfinite(T_phase_base_MeV) || error("no phase reference temperature for mode a point: muB=$(muB_MeV), xi=$(xi)")
@@ -109,6 +117,10 @@ function build_plan(opts)
                         phase_reference_kind,
                         scan_group,
                         group_label,
+                        plot_panel,
+                        plot_panel_label,
+                        plot_series,
+                        plot_series_label,
                         T_phase_base_MeV,
                         alpha_T,
                     ))
@@ -120,6 +132,10 @@ function build_plan(opts)
             for muB_MeV in opts.muB_values
                 scan_group = "T$(round(T_MeV; digits=3))_muB$(round(muB_MeV; digits=3))"
                 group_label = "T=$(T_MeV) MeV, muB=$(muB_MeV) MeV"
+                plot_panel = "T$(round(T_MeV; digits=3))"
+                plot_panel_label = "T=$(T_MeV) MeV"
+                plot_series = "muB$(round(muB_MeV; digits=3))"
+                plot_series_label = "muB=$(muB_MeV) MeV"
                 for xi in opts.xi_values
                     phase_reference_kind = _phase_reference_for_mode_b(T_MeV, muB_MeV, xi)
                     push!(points, PhaseGuidedPoint(
@@ -130,6 +146,10 @@ function build_plan(opts)
                         phase_reference_kind,
                         scan_group,
                         group_label,
+                        plot_panel,
+                        plot_panel_label,
+                        plot_series,
+                        plot_series_label,
                         T_MeV,
                         NaN,
                     ))

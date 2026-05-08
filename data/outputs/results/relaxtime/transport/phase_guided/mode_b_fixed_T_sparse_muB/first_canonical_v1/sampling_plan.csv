@@ -1,17 +1,37 @@
-T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,T_phase_base_MeV,alpha_T
-120.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",120.0,NaN
-120.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",120.0,NaN
-120.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",120.0,NaN
-120.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",120.0,NaN
-120.0,260.0,-0.5,mode_b_fixed_T_sparse_muB,first_order,T120.0_muB260.0,"T=120.0 MeV, muB=260.0 MeV",120.0,NaN
-120.0,260.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,"T=120.0 MeV, muB=260.0 MeV",120.0,NaN
-120.0,260.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,"T=120.0 MeV, muB=260.0 MeV",120.0,NaN
-120.0,260.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB260.0,"T=120.0 MeV, muB=260.0 MeV",120.0,NaN
-138.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,"T=138.0 MeV, muB=0.0 MeV",138.0,NaN
-138.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,"T=138.0 MeV, muB=0.0 MeV",138.0,NaN
-138.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,"T=138.0 MeV, muB=0.0 MeV",138.0,NaN
-138.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB0.0,"T=138.0 MeV, muB=0.0 MeV",138.0,NaN
-138.0,260.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB260.0,"T=138.0 MeV, muB=260.0 MeV",138.0,NaN
-138.0,260.0,-0.2,mode_b_fixed_T_sparse_muB,cep_neighbor,T138.0_muB260.0,"T=138.0 MeV, muB=260.0 MeV",138.0,NaN
-138.0,260.0,0.0,mode_b_fixed_T_sparse_muB,cep_neighbor,T138.0_muB260.0,"T=138.0 MeV, muB=260.0 MeV",138.0,NaN
-138.0,260.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T138.0_muB260.0,"T=138.0 MeV, muB=260.0 MeV",138.0,NaN
+T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,plot_panel,plot_panel_label,plot_series,plot_series_label,T_phase_base_MeV,alpha_T
+120.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",T120.0,"T=120.0 MeV",muB0.0,"muB=0.0 MeV",120.0,NaN
+120.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",T120.0,"T=120.0 MeV",muB0.0,"muB=0.0 MeV",120.0,NaN
+120.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",T120.0,"T=120.0 MeV",muB0.0,"muB=0.0 MeV",120.0,NaN
+120.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB0.0,"T=120.0 MeV, muB=0.0 MeV",T120.0,"T=120.0 MeV",muB0.0,"muB=0.0 MeV",120.0,NaN
+120.0,450.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB450.0,"T=120.0 MeV, muB=450.0 MeV",T120.0,"T=120.0 MeV",muB450.0,"muB=450.0 MeV",120.0,NaN
+120.0,450.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB450.0,"T=120.0 MeV, muB=450.0 MeV",T120.0,"T=120.0 MeV",muB450.0,"muB=450.0 MeV",120.0,NaN
+120.0,450.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB450.0,"T=120.0 MeV, muB=450.0 MeV",T120.0,"T=120.0 MeV",muB450.0,"muB=450.0 MeV",120.0,NaN
+120.0,450.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB450.0,"T=120.0 MeV, muB=450.0 MeV",T120.0,"T=120.0 MeV",muB450.0,"muB=450.0 MeV",120.0,NaN
+120.0,900.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB900.0,"T=120.0 MeV, muB=900.0 MeV",T120.0,"T=120.0 MeV",muB900.0,"muB=900.0 MeV",120.0,NaN
+120.0,900.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB900.0,"T=120.0 MeV, muB=900.0 MeV",T120.0,"T=120.0 MeV",muB900.0,"muB=900.0 MeV",120.0,NaN
+120.0,900.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB900.0,"T=120.0 MeV, muB=900.0 MeV",T120.0,"T=120.0 MeV",muB900.0,"muB=900.0 MeV",120.0,NaN
+120.0,900.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T120.0_muB900.0,"T=120.0 MeV, muB=900.0 MeV",T120.0,"T=120.0 MeV",muB900.0,"muB=900.0 MeV",120.0,NaN
+160.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB0.0,"T=160.0 MeV, muB=0.0 MeV",T160.0,"T=160.0 MeV",muB0.0,"muB=0.0 MeV",160.0,NaN
+160.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB0.0,"T=160.0 MeV, muB=0.0 MeV",T160.0,"T=160.0 MeV",muB0.0,"muB=0.0 MeV",160.0,NaN
+160.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB0.0,"T=160.0 MeV, muB=0.0 MeV",T160.0,"T=160.0 MeV",muB0.0,"muB=0.0 MeV",160.0,NaN
+160.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB0.0,"T=160.0 MeV, muB=0.0 MeV",T160.0,"T=160.0 MeV",muB0.0,"muB=0.0 MeV",160.0,NaN
+160.0,450.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB450.0,"T=160.0 MeV, muB=450.0 MeV",T160.0,"T=160.0 MeV",muB450.0,"muB=450.0 MeV",160.0,NaN
+160.0,450.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB450.0,"T=160.0 MeV, muB=450.0 MeV",T160.0,"T=160.0 MeV",muB450.0,"muB=450.0 MeV",160.0,NaN
+160.0,450.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB450.0,"T=160.0 MeV, muB=450.0 MeV",T160.0,"T=160.0 MeV",muB450.0,"muB=450.0 MeV",160.0,NaN
+160.0,450.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB450.0,"T=160.0 MeV, muB=450.0 MeV",T160.0,"T=160.0 MeV",muB450.0,"muB=450.0 MeV",160.0,NaN
+160.0,900.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB900.0,"T=160.0 MeV, muB=900.0 MeV",T160.0,"T=160.0 MeV",muB900.0,"muB=900.0 MeV",160.0,NaN
+160.0,900.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB900.0,"T=160.0 MeV, muB=900.0 MeV",T160.0,"T=160.0 MeV",muB900.0,"muB=900.0 MeV",160.0,NaN
+160.0,900.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB900.0,"T=160.0 MeV, muB=900.0 MeV",T160.0,"T=160.0 MeV",muB900.0,"muB=900.0 MeV",160.0,NaN
+160.0,900.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T160.0_muB900.0,"T=160.0 MeV, muB=900.0 MeV",T160.0,"T=160.0 MeV",muB900.0,"muB=900.0 MeV",160.0,NaN
+200.0,0.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB0.0,"T=200.0 MeV, muB=0.0 MeV",T200.0,"T=200.0 MeV",muB0.0,"muB=0.0 MeV",200.0,NaN
+200.0,0.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB0.0,"T=200.0 MeV, muB=0.0 MeV",T200.0,"T=200.0 MeV",muB0.0,"muB=0.0 MeV",200.0,NaN
+200.0,0.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB0.0,"T=200.0 MeV, muB=0.0 MeV",T200.0,"T=200.0 MeV",muB0.0,"muB=0.0 MeV",200.0,NaN
+200.0,0.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB0.0,"T=200.0 MeV, muB=0.0 MeV",T200.0,"T=200.0 MeV",muB0.0,"muB=0.0 MeV",200.0,NaN
+200.0,450.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB450.0,"T=200.0 MeV, muB=450.0 MeV",T200.0,"T=200.0 MeV",muB450.0,"muB=450.0 MeV",200.0,NaN
+200.0,450.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB450.0,"T=200.0 MeV, muB=450.0 MeV",T200.0,"T=200.0 MeV",muB450.0,"muB=450.0 MeV",200.0,NaN
+200.0,450.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB450.0,"T=200.0 MeV, muB=450.0 MeV",T200.0,"T=200.0 MeV",muB450.0,"muB=450.0 MeV",200.0,NaN
+200.0,450.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB450.0,"T=200.0 MeV, muB=450.0 MeV",T200.0,"T=200.0 MeV",muB450.0,"muB=450.0 MeV",200.0,NaN
+200.0,900.0,-0.5,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB900.0,"T=200.0 MeV, muB=900.0 MeV",T200.0,"T=200.0 MeV",muB900.0,"muB=900.0 MeV",200.0,NaN
+200.0,900.0,-0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB900.0,"T=200.0 MeV, muB=900.0 MeV",T200.0,"T=200.0 MeV",muB900.0,"muB=900.0 MeV",200.0,NaN
+200.0,900.0,0.0,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB900.0,"T=200.0 MeV, muB=900.0 MeV",T200.0,"T=200.0 MeV",muB900.0,"muB=900.0 MeV",200.0,NaN
+200.0,900.0,0.2,mode_b_fixed_T_sparse_muB,crossover,T200.0_muB900.0,"T=200.0 MeV, muB=900.0 MeV",T200.0,"T=200.0 MeV",muB900.0,"muB=900.0 MeV",200.0,NaN

@@ -34,8 +34,10 @@
 
 - `run_phase_guided_transport_plots.jl`
   - 面向 canonical case 的 post-processing wrapper。
-  - 复用 `scripts/plot_scan_csv.py`，按 `scan_group` split 输出 `tau_u/tau_d/tau_s`、`eta`、`sigma`、`zeta`、`eta_over_s`、`sigma_over_T`。
-  - 会同步写出 `figures/plot_manifest.json`，并把图层清单追加回 case `README.md`。
+  - 复用 `scripts/plot_scan_csv.py`，输出目录固定到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`。
+  - `fixed-muB-phase-scaled`：按固定 `mu_B` 分图、同图按 `alpha_T` 多线。
+  - `fixed-T-sparse-muB`：按固定 `T` 分图、同图按 `mu_B` 多线。
+  - 会同步写出 `plot_manifest.json`，并把图层清单追加回 case `README.md`。
 
 ### 1) 计算侧
 

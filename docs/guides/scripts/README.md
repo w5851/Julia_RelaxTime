@@ -129,13 +129,19 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `fixed-T-sparse-muB`（兼容短别名 `b`）
   - `fixed-muB-phase-scaled`：固定 `mu_B`，沿 `T/T_phase` 倍率带扫描 `xi`
   - `fixed-T-sparse-muB`：固定 `T`、离散 `mu_B`、连续扫描 `xi`
+  - 当前 canonical 口径：
+    - mode a 固定 `mu_B = 0, 450, 900 MeV`
+    - mode b 固定 `T = 120, 160, 200 MeV`
   - 默认 canonical 输出根目录：
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
-  - 复用 `scripts/plot_scan_csv.py`，输出 `figures/plot_manifest.json` 并回写 case README
+  - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`
+  - `fixed-muB-phase-scaled`：每个固定 `mu_B` 一张图，图内多条 `alpha_T`
+  - `fixed-T-sparse-muB`：每个固定 `T` 一张图，图内多条 `mu_B`
+  - 输出 `plot_manifest.json` 并回写 case README
 
 `plan_a` / `plan_b` 目录最小溯源产物：
 

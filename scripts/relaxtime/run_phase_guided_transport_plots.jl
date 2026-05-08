@@ -64,13 +64,33 @@ function parse_args(args::Vector{String})
     isnothing(opts[:case_dir]) && error("--case-dir is required")
     case_dir = normpath(abspath(String(opts[:case_dir])))
     csv_path = isnothing(opts[:csv_path]) ? joinpath(case_dir, "phase_guided_transport_scan.csv") : normpath(abspath(String(opts[:csv_path])))
-    fig_dir = isnothing(opts[:fig_dir]) ? joinpath(case_dir, "figures") : normpath(abspath(String(opts[:fig_dir])))
+    fig_dir = isnothing(opts[:fig_dir]) ? _default_fig_dir(case_dir) : normpath(abspath(String(opts[:fig_dir])))
 
     isdir(case_dir) || error("case directory not found: $(case_dir)")
     isfile(csv_path) || error("case csv not found: $(csv_path)")
     isfile(PLOT_SCRIPT) || error("plot script not found: $(PLOT_SCRIPT)")
 
     return Options(case_dir, csv_path, fig_dir, String(opts[:python_cmd]), Bool(opts[:overwrite]))
+end
+
+function _default_fig_dir(case_dir::String)
+    mode_dir = basename(dirname(case_dir))
+    case_name = basename(case_dir)
+    config_path = joinpath(case_dir, "effective_config.json")
+    if isfile(config_path)
+        cfg = JSON3.read(read(config_path, String))
+        config_view = haskey(cfg, "options") ? cfg["options"] : cfg
+        if haskey(config_view, "mode")
+            mode_value = String(config_view["mode"])
+            if mode_value == "mode_a_fixed_muB_phase_scaled"
+                mode_dir = "mode_a_fixed_muB_phase_scaled"
+            elseif mode_value == "mode_b_fixed_T_sparse_muB"
+                mode_dir = "mode_b_fixed_T_sparse_muB"
+            end
+        end
+        haskey(config_view, "case_name") && (case_name = String(config_view["case_name"]))
+    end
+    return normpath(joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "transport", "phase_guided", mode_dir, case_name))
 end
 
 function _python_bin(cmd::String)
@@ -81,20 +101,59 @@ function _python_bin(cmd::String)
     error("python interpreter not found: $(cmd)")
 end
 
-function _run_plot(py::String, csv_path::String, fig_dir::String, ys::String; multi_y::Bool=false)
+function _run_plot(py::String, csv_path::String, fig_dir::String, ys::String; split::String, group::String)
     args = String[
         PLOT_SCRIPT,
         "--mode", "lines",
         "--csv", csv_path,
         "--x", "xi",
         "--ys", ys,
-        "--split", "scan_group",
+        "--split", split,
+        "--group", group,
         "--out-dir", fig_dir,
         "--check",
     ]
-    multi_y && append!(args, ["--multi-y"])
     cmd = Cmd(vcat([py], args))
     run(Cmd(cmd; dir=PROJECT_ROOT))
+end
+
+function _detect_mode(case_dir::String, csv_path::String)
+    config_path = joinpath(case_dir, "effective_config.json")
+    if isfile(config_path)
+        cfg = JSON3.read(read(config_path, String))
+        config_view = haskey(cfg, "options") ? cfg["options"] : cfg
+        if haskey(config_view, "mode")
+            mode_value = String(config_view["mode"])
+            mode_value == "mode_a_fixed_muB_phase_scaled" && return :mode_a_fixed_muB_phase_scaled
+            mode_value == "mode_b_fixed_T_sparse_muB" && return :mode_b_fixed_T_sparse_muB
+        end
+    end
+    open(csv_path, "r") do io
+        header_seen = false
+        for line in eachline(io)
+            s = strip(line)
+            (isempty(s) || startswith(s, "#")) && continue
+            if !header_seen
+                header_seen = true
+                continue
+            end
+            parts = split(s, ',')
+            length(parts) >= 5 || continue
+            mode_value = strip(parts[5])
+            mode_value == "mode_a_fixed_muB_phase_scaled" && return :mode_a_fixed_muB_phase_scaled
+            mode_value == "mode_b_fixed_T_sparse_muB" && return :mode_b_fixed_T_sparse_muB
+        end
+    end
+    error("unable to detect phase-guided mode from csv: $(csv_path)")
+end
+
+function _plot_layout(mode::Symbol)
+    if mode == :mode_a_fixed_muB_phase_scaled
+        return (; split="plot_panel", group="plot_series", panel_desc="fixed mu_B panel", series_desc="alpha_T lines")
+    elseif mode == :mode_b_fixed_T_sparse_muB
+        return (; split="plot_panel", group="plot_series", panel_desc="fixed T panel", series_desc="mu_B lines")
+    end
+    error("unsupported phase-guided mode: $(mode)")
 end
 
 function _write_plot_manifest(fig_dir::String)
@@ -117,7 +176,7 @@ function _write_plot_manifest(fig_dir::String)
     end
 end
 
-function _append_readme(case_dir::String, fig_dir::String)
+function _append_readme(case_dir::String, fig_dir::String, layout)
     readme_path = joinpath(case_dir, "README.md")
     isfile(readme_path) || return
 
@@ -127,7 +186,7 @@ function _append_readme(case_dir::String, fig_dir::String)
         for sub in sort(readdir(path; join=true))
             isfile(sub) || continue
             endswith(lowercase(sub), ".png") || continue
-            push!(files, replace(relpath(sub, case_dir), '\\' => '/'))
+            push!(files, replace(relpath(sub, PROJECT_ROOT), '\\' => '/'))
         end
     end
 
@@ -143,9 +202,10 @@ function _append_readme(case_dir::String, fig_dir::String)
     open(readme_path, "w") do io
         write(io, text)
         println(io, marker)
-        println(io, "- tau flavor-resolved same-panel figures by `scan_group`")
-        println(io, "- individual `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` figures by `scan_group`")
-        println(io, "- plot manifest: `figures/plot_manifest.json`")
+        println(io, "- `tau_u`, `tau_d`, `tau_s`, `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` all plot against `xi`")
+        println(io, "- panel rule: `$(layout.panel_desc)`")
+        println(io, "- line rule: `$(layout.series_desc)`")
+        println(io, "- plot manifest: `$(replace(relpath(joinpath(fig_dir, "plot_manifest.json"), PROJECT_ROOT), '\\' => '/'))`")
         if !isempty(files)
             println(io)
             println(io, "Generated PNG files:")
@@ -158,18 +218,19 @@ end
 
 function run_phase_guided_plots(opts::Options)
     py = _python_bin(opts.python_cmd)
+    mode = _detect_mode(opts.case_dir, opts.csv_path)
+    layout = _plot_layout(mode)
     if opts.overwrite && isdir(opts.fig_dir)
         rm(opts.fig_dir; recursive=true, force=true)
     end
     mkpath(opts.fig_dir)
 
-    _run_plot(py, opts.csv_path, opts.fig_dir, "tau_u,tau_d,tau_s"; multi_y=true)
-    for y in ("eta", "sigma", "zeta", "eta_over_s", "sigma_over_T")
-        _run_plot(py, opts.csv_path, opts.fig_dir, y; multi_y=false)
+    for y in ("tau_u", "tau_d", "tau_s", "eta", "sigma", "zeta", "eta_over_s", "sigma_over_T")
+        _run_plot(py, opts.csv_path, opts.fig_dir, y; split=layout.split, group=layout.group)
     end
 
     _write_plot_manifest(opts.fig_dir)
-    _append_readme(opts.case_dir, opts.fig_dir)
+    _append_readme(opts.case_dir, opts.fig_dir, layout)
     println("Phase-guided transport plotting finished. Output: $(opts.fig_dir)")
 end
 
