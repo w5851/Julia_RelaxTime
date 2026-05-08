@@ -20,6 +20,9 @@ include(joinpath(@__DIR__, "exports_public.jl"))
 # Keep key entrypoint exports explicitly in this file for governance checks.
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
+export run_meson_mass_path_scan
+export run_freezeout_meson_mass_scan
+export run_isentropic_meson_mass_scan
 export run_freezeout_meson_density_scan
 export run_crossover_meson_density_scan
 export run_external_path_meson_density_scan
@@ -134,6 +137,7 @@ include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutPathProfiles.jl"))
+include(joinpath(@__DIR__, "scans", "IsentropicPathProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "FlavorChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "MesonChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
@@ -151,6 +155,7 @@ using .MagneticIntegrals
 using .MagneticThermodynamics
 using .FreezeoutProfiles
 using .FreezeoutPathProfiles
+using .IsentropicPathProfiles
 using .FlavorChemicalProfiles
 using .MesonChemicalProfiles
 using .TmuScan
@@ -192,6 +197,7 @@ include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutMesonDensityScan.jl"))
+include(joinpath(@__DIR__, "scans", "MesonMassPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "CrossoverMesonDensityScan.jl"))
 include(joinpath(@__DIR__, "scans", "ExternalPathMesonDensityScan.jl"))
 

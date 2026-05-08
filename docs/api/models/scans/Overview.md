@@ -7,6 +7,7 @@
 - 什么时候应该直接进入 `Models.run_crossover_meson_density_scan`？
 - 什么时候应该直接进入 `Models.run_freezeout_meson_density_scan`？
 - 什么时候应该直接进入 `Models.run_external_path_meson_density_scan`？
+- 什么时候应该直接进入 `Models.run_freezeout_meson_mass_scan` 或 `Models.run_isentropic_meson_mass_scan`？
 - 什么时候需要 `Models.build_default_rho_grid`？
 - 扫描结果会进入哪些下游链路？
 
@@ -29,6 +30,11 @@
 当路径已经由外部数据明确给出，例如文献提取后的 phase-line 离散点，而你不希望再让本仓库内部路径生成器介入时，应改用：
 
 - `Models.run_external_path_meson_density_scan`
+
+当目标不是介子数密度，而是沿正式路径直接输出介子质量/宽度与阈值时，应改用：
+
+- `Models.run_freezeout_meson_mass_scan`
+- `Models.run_isentropic_meson_mass_scan`
 
 `Models.build_default_rho_grid` 是公开导出，但它的定位是辅助入口：当你需要默认的多分辨率 `ρ` 网格，或要在相图流程前自定义低密度加密策略时再直接调用。
 
@@ -121,6 +127,21 @@
 - 输入是离散路径点列，而不是内部 path generator
 - 输出会保留 `path_source / path_case_id / path_line_style` 元数据
 - 可直接复用 stable / strict BW / current BU / generalized BU 同一套物理核
+
+### 选择 `Models.run_freezeout_meson_mass_scan` / `Models.run_isentropic_meson_mass_scan`
+
+适用于：
+
+- 目标是沿正式路径输出 meson mass / width / threshold / gap
+- 不希望继续在规则网格脚本上手工拼装 continuation
+- 路径天然来自 chemical freeze-out 或 fixed-`σ` 等熵线
+
+关键特征：
+
+- 两条入口都复用 `MesonMassWorkflow.continuation_state`
+- freeze-out 路径直接消费 `(T,\mu_B)` 点列
+- isentropic 路径先通过 `FixedSigma` 求出路径点，再回到统一 meson workflow
+- 输出 CSV 在现有 meson-mass 字段前补齐路径元数据
 
 ## 典型工作流
 
