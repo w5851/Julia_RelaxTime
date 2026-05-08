@@ -266,7 +266,7 @@ function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
                 "step" => xi_step,
                 "values" => cfg.xi_values,
             ),
-            "mu_B_sampling" => Dict(
+            "mu_q_sampling" => Dict(
                 "strategy" => "fixed_single_value",
                 "values_MeV" => [0.0],
             ),
@@ -283,7 +283,7 @@ function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
             "step" => xi_step,
             "values" => cfg.xi_values,
         ),
-        "mu_B_sampling" => Dict(
+        "mu_q_sampling" => Dict(
             "strategy" => "uniform_grid",
             "count" => length(mu_samples),
             "min_MeV" => first(mu_samples),
@@ -318,7 +318,7 @@ function write_crossover_meta(path::String, cfg::DensePhaseReferenceConfig, rows
             "max" => isempty(xi_values) ? nothing : last(xi_values),
             "values" => xi_values,
         ),
-        "mu_B_coverage" => Dict(
+        "mu_q_coverage" => Dict(
             "count" => length(mu_values),
             "min_MeV" => isempty(mu_values) ? nothing : first(mu_values),
             "max_MeV" => isempty(mu_values) ? nothing : last(mu_values),

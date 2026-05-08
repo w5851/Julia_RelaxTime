@@ -19,7 +19,8 @@ function _default_output_paths(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
     plan_csv = joinpath(opts.outdir, "sampling_plan.csv")
     readme = joinpath(opts.outdir, "README.md")
     effective_config = joinpath(opts.outdir, "effective_config.json")
-    return (; result_csv, plan_csv, readme, effective_config)
+    failed_points = joinpath(opts.outdir, "failed_points.csv")
+    return (; result_csv, plan_csv, readme, effective_config, failed_points)
 end
 
 function _default_figure_dir(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
@@ -60,7 +61,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     mkpath(opts.outdir)
 
     if opts.overwrite
-        for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config)
+        for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points)
             isfile(path) && rm(path)
         end
     end
@@ -93,7 +94,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     end
 
     io = open(paths.result_csv, "a")
-    failed_io = open(joinpath(opts.outdir, "failed_points.csv"), "a")
+    failed_io = open(paths.failed_points, "a")
     try
         if filesize(paths.result_csv) == 0
             Main.ScanCSV.write_metadata(io, Dict(
@@ -104,7 +105,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
             ))
             Main.write_header_if_needed(io)
         end
-        if filesize(joinpath(opts.outdir, "failed_points.csv")) == 0
+        if filesize(paths.failed_points) == 0
             Main.write_failed_points_header_if_needed(failed_io)
         end
 
@@ -133,7 +134,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
             opts.outdir;
             ctx=ctx,
             effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
-            artifacts=[paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, joinpath(opts.outdir, "failed_points.csv")],
+            artifacts=[paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
             summary=Dict{String,Any}(
                 "points_total" => stats.total,
                 "success_count" => stats.success,

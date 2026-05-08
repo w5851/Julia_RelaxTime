@@ -5,7 +5,7 @@
             "min": 60
         },
         "kind": "xi_mu_dense_reference",
-        "mu_B_sampling": {
+        "mu_q_sampling": {
             "max_MeV": 450,
             "values_MeV": [
                 0,
@@ -93,7 +93,7 @@
             "description": "order-parameter-like variable used by the detector"
         }
     ],
-    "mu_B_coverage": {
+    "mu_q_coverage": {
         "max_MeV": 450,
         "values_MeV": [
             0,
