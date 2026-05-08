@@ -3,6 +3,7 @@ Unified relaxtime scan entrypoint.
 
 Subcommands:
 - gap-transport   -> scripts/relaxtime/run_gap_transport_scan.jl
+- phase-guided-transport -> scripts/relaxtime/run_phase_guided_transport_scan.jl
 - tau-vs-t        -> scripts/relaxtime/scan_relaxation_times_vs_T.jl
 - manual-workflow -> scripts/relaxtime/run_manual_relaxation_scan_workflow.jl
 """
@@ -15,6 +16,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 const _SUBCOMMAND_MAP = Dict{String,Symbol}(
     "gap-transport" => :gap_transport,
+    "phase-guided-transport" => :phase_guided_transport,
     "tau-vs-t" => :tau_vs_t,
     "manual-workflow" => :manual_workflow,
 )
@@ -24,6 +26,7 @@ function print_usage(io::IO=stdout)
     println(io)
     println(io, "Subcommands:")
     println(io, "  gap-transport    Scan (T, mu_B, xi) and compute gap + transport")
+    println(io, "  phase-guided-transport  Build/run phase-guided transport sampling plans")
     println(io, "  tau-vs-t         Scan relaxation times versus temperature")
     println(io, "  manual-workflow  Run manual relaxation scan workflow")
     println(io)
@@ -44,6 +47,8 @@ end
 function resolve_target_script(subcommand::Symbol)::String
     if subcommand === :gap_transport
         return joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_gap_transport_scan.jl")
+    elseif subcommand === :phase_guided_transport
+        return joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_phase_guided_transport_scan.jl")
     elseif subcommand === :tau_vs_t
         return joinpath(PROJECT_ROOT, "scripts", "relaxtime", "scan_relaxation_times_vs_T.jl")
     elseif subcommand === :manual_workflow

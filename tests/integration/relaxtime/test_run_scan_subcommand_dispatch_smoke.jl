@@ -12,6 +12,10 @@ using Main.SingleEntryScanCLI
     @test sub == :gap_transport
     @test rest == ["--tmin", "120"]
 
+    sub_pg, rest_pg = SingleEntryScanCLI.parse_entry_args(["phase-guided-transport", "--mode", "a"])
+    @test sub_pg == :phase_guided_transport
+    @test rest_pg == ["--mode", "a"]
+
     sub2, rest2 = SingleEntryScanCLI.parse_entry_args(["tau-vs-t"])
     @test sub2 == :tau_vs_t
     @test isempty(rest2)
@@ -26,10 +30,12 @@ end
 
 @testset "run_scan subcommand target resolution" begin
     gap_script = SingleEntryScanCLI.resolve_target_script(:gap_transport)
+    phase_guided_script = SingleEntryScanCLI.resolve_target_script(:phase_guided_transport)
     tau_script = SingleEntryScanCLI.resolve_target_script(:tau_vs_t)
     manual_script = SingleEntryScanCLI.resolve_target_script(:manual_workflow)
 
     @test endswith(gap_script, joinpath("scripts", "relaxtime", "run_gap_transport_scan.jl"))
+    @test endswith(phase_guided_script, joinpath("scripts", "relaxtime", "run_phase_guided_transport_scan.jl"))
     @test endswith(tau_script, joinpath("scripts", "relaxtime", "scan_relaxation_times_vs_T.jl"))
     @test endswith(manual_script, joinpath("scripts", "relaxtime", "run_manual_relaxation_scan_workflow.jl"))
 end
@@ -39,6 +45,7 @@ end
     SingleEntryScanCLI.print_usage(io)
     help_text = String(take!(io))
     @test occursin("gap-transport", help_text)
+    @test occursin("phase-guided-transport", help_text)
     @test occursin("tau-vs-t", help_text)
     @test occursin("manual-workflow", help_text)
 

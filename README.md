@@ -119,6 +119,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 | 计算能力 | 典型用途 | 脚本入口 | 最小用法（示例） |
 |---|---|---|---|
 | Mott 相变扫描 | 介子质量与 Mott 阈值随 `T/xi` 变化扫描 | `scripts/relaxtime/run_mott_phase_scan.jl` | `julia --project=. scripts/relaxtime/run_mott_phase_scan.jl --help` |
+| Phase-guided transport 邻域扫描 | 围绕相变线 / 固定温度稀疏窗口生成 canonical transport case | `scripts/relaxtime/run_phase_guided_transport_scan.jl` | `julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl --mode fixed-T-sparse-muB --xi-list -0.5,-0.2,0.0,0.2 --muB-list 0,450,900 --T-list 120,160,200 --dry-run` |
 | Gap + 介子质量联合扫描 | 生成 Mott 相关基础数据（mass/width/threshold） | `scripts/relaxtime/run_gap_meson_mass_scan.jl` | `julia --project=. scripts/relaxtime/run_gap_meson_mass_scan.jl --help` |
 | Mott 派生 CSV / 可视化模式 | 从主扫描结果生成派生字段与绘图输入 | `scripts/relaxtime/run_mott_phase_derived_csv.jl` / `scripts/relaxtime/run_mott_phase_plot_modes.jl` | `julia --project=. scripts/relaxtime/run_mott_phase_derived_csv.jl --help` |
 | 各向异性相图模板实验 | 按 `xi` 批量跑扫描 + 相结构 + 可选绘图 | `scripts/pnjl/run_aniso_phase_template.jl` | `julia --project=. scripts/pnjl/run_aniso_phase_template.jl --profile=smoke --xi-values=0.0,0.2` |
@@ -147,6 +148,8 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 - 各向异性输运 / Relaxtime 工作流
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
+  - phase-guided canonical asset 示例：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
+  - phase-guided canonical 图层示例：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
 - Web/API 服务入口：`scripts/server/server_full.jl`
   - 当前状态：`docs/guides/STATUS.md`
 

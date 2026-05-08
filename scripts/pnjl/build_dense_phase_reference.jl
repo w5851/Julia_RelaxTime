@@ -34,6 +34,7 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     crossover_method::Symbol = :peak
     crossover_variable::Symbol = :phi_u
     crossover_n_mu::Int = 16
+    crossover_mu_max_MeV::Float64 = 450.0
     crossover_only::Bool = false
     crossover_mu_only_zero::Bool = false
 end
@@ -58,6 +59,7 @@ function usage()
     println("  --overwrite              overwrite existing aggregated outputs")
     println("  --no-crossover           skip crossover generation")
     println("  --crossover-n-mu <int>   crossover mu sampling count (default 16)")
+    println("  --crossover-mu-max <MeV> crossover mu_q upper bound (default 450)")
     println("  --crossover-only         skip phase pipeline; only generate crossover reference")
     println("  --crossover-mu0-only     with --crossover-only, compute only mu=0 crossover point")
     println("  -h, --help               show help")
@@ -128,6 +130,8 @@ function parse_args(args::Vector{String})
             cfg.compute_crossover = false
         elseif arg == "--crossover-n-mu"
             cfg.crossover_n_mu = parse(Int, require_value())
+        elseif arg == "--crossover-mu-max"
+            cfg.crossover_mu_max_MeV = parse(Float64, require_value())
         elseif arg == "--crossover-only"
             cfg.crossover_only = true
         elseif arg == "--crossover-mu0-only"
@@ -150,12 +154,23 @@ function parse_args(args::Vector{String})
     cfg.T_step > 0 || error("T-step must be positive")
     cfg.rho_step > 0 || error("rho-step must be positive")
     cfg.crossover_n_mu > 0 || error("crossover-n-mu must be positive")
+    cfg.crossover_mu_max_MeV > 0 || error("crossover-mu-max must be positive")
     isempty(cfg.xi_values) && error("xi grid cannot be empty")
     return cfg
 end
 
 function project_root()
     return normpath(joinpath(@__DIR__, "..", ".."))
+end
+
+function current_git_commit()
+    root = project_root()
+    try
+        commit = readchomp(`git -C $root rev-parse HEAD`)
+        return isempty(strip(commit)) ? nothing : String(strip(commit))
+    catch
+        return nothing
+    end
 end
 
 @inline function _norm_slash(path::AbstractString)
@@ -222,6 +237,102 @@ function write_crossover_csv(path::String, rows)
     end
 end
 
+function _crossover_column_definitions()
+    return [
+        Dict("name" => "xi", "type" => "Float64", "unit" => "dimensionless", "description" => "anisotropy control parameter"),
+        Dict("name" => "mu_MeV", "type" => "Float64", "unit" => "MeV", "description" => "quark chemical potential sample (mu_q) on the crossover scan"),
+        Dict("name" => "T_crossover_MeV", "type" => "Float64", "unit" => "MeV", "description" => "detected crossover temperature at the sampled xi and mu_q"),
+        Dict("name" => "rho", "type" => "Float64", "unit" => "rho0", "description" => "density-like coordinate returned by the crossover builder for the sampled point"),
+        Dict("name" => "method", "type" => "String", "unit" => nothing, "description" => "crossover detector method"),
+        Dict("name" => "converged", "type" => "Bool", "unit" => nothing, "description" => "whether the crossover detector reported a valid point"),
+        Dict("name" => "derivative", "type" => "Float64", "unit" => nothing, "description" => "peak/response diagnostic returned by the detector"),
+        Dict("name" => "variable", "type" => "String", "unit" => nothing, "description" => "order-parameter-like variable used by the detector"),
+    ]
+end
+
+function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
+    xi_diffs = length(cfg.xi_values) > 1 ? diff(cfg.xi_values) : Float64[]
+    xi_uniform = !isempty(xi_diffs) && all(isapprox(d, xi_diffs[1]; atol=1e-10, rtol=1e-10) for d in xi_diffs)
+    xi_strategy = xi_uniform ? "uniform_grid" : "explicit_anchor_list"
+    xi_step = xi_uniform ? xi_diffs[1] : nothing
+
+    if cfg.crossover_mu_only_zero
+        return Dict(
+            "kind" => "mu0_only",
+            "description" => "dense in xi only; for each xi solve the crossover point at mu_q = 0 MeV",
+            "xi_sampling" => Dict(
+                "strategy" => xi_strategy,
+                "count" => length(cfg.xi_values),
+                "step" => xi_step,
+                "values" => cfg.xi_values,
+            ),
+            "mu_q_sampling" => Dict(
+                "strategy" => "fixed_single_value",
+                "values_MeV" => [0.0],
+            ),
+        )
+    end
+
+    mu_samples = collect(range(0.0; stop=cfg.crossover_mu_max_MeV, length=cfg.crossover_n_mu))
+    return Dict(
+        "kind" => "xi_mu_dense_reference",
+        "description" => "uniform xi grid combined with uniform mu_q sampling; each (xi, mu_q) slice runs crossover detection on a T window and stores the detected T_crossover",
+        "xi_sampling" => Dict(
+            "strategy" => xi_strategy,
+            "count" => length(cfg.xi_values),
+            "step" => xi_step,
+            "values" => cfg.xi_values,
+        ),
+        "mu_q_sampling" => Dict(
+            "strategy" => "uniform_grid",
+            "count" => length(mu_samples),
+            "min_MeV" => first(mu_samples),
+            "max_MeV" => last(mu_samples),
+            "values_MeV" => mu_samples,
+        ),
+        "temperature_window_MeV" => Dict(
+            "min" => cfg.T_min,
+            "max" => min(cfg.T_max, 220.0),
+        ),
+    )
+end
+
+function write_crossover_meta(path::String, cfg::DensePhaseReferenceConfig, rows, crossover_csv_path::String)
+    xi_values = sort(unique(Float64[row.xi for row in rows]))
+    mu_values = sort(unique(Float64[row.mu_MeV for row in rows]))
+
+    payload = Dict(
+        "schema_version" => "v1",
+        "artifact" => Dict(
+            "path" => _repo_relpath(crossover_csv_path),
+            "row_count" => length(rows),
+        ),
+        "generator" => Dict(
+            "script" => _repo_relpath(joinpath(@__DIR__, "build_dense_phase_reference.jl")),
+            "git_commit" => current_git_commit(),
+            "generated_at" => Dates.format(Dates.now(Dates.UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ"),
+        ),
+        "xi_coverage" => Dict(
+            "count" => length(xi_values),
+            "min" => isempty(xi_values) ? nothing : first(xi_values),
+            "max" => isempty(xi_values) ? nothing : last(xi_values),
+            "values" => xi_values,
+        ),
+        "mu_q_coverage" => Dict(
+            "count" => length(mu_values),
+            "min_MeV" => isempty(mu_values) ? nothing : first(mu_values),
+            "max_MeV" => isempty(mu_values) ? nothing : last(mu_values),
+            "values_MeV" => mu_values,
+        ),
+        "column_definitions" => _crossover_column_definitions(),
+        "dense_meaning" => _crossover_dense_meaning(cfg),
+    )
+
+    open(path, "w") do io
+        JSON3.pretty(io, payload)
+    end
+end
+
 function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
     rows = NamedTuple[]
     if cfg.crossover_mu_only_zero
@@ -252,10 +363,9 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
         return rows
     end
 
-    mu_max = 300.0
     local_rows = Models.build_crossover_line(
         ;
-        mu_max_MeV=mu_max,
+        mu_max_MeV=cfg.crossover_mu_max_MeV,
         T_min_MeV=cfg.T_min,
         T_max_MeV=min(cfg.T_max, 220.0),
         xi=xi,
@@ -364,9 +474,10 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     cep_path = joinpath(reference_root, "cep_$(cfg.tag).csv")
     spinodal_path = joinpath(reference_root, "spinodals_$(cfg.tag).csv")
     crossover_path = joinpath(reference_root, "crossover_$(cfg.tag).csv")
+    crossover_meta_path = joinpath(reference_root, "crossover_$(cfg.tag).meta.json")
     manifest_path = joinpath(reference_root, "phase_reference_$(cfg.tag)_manifest.json")
 
-    output_paths = cfg.crossover_only ? (crossover_path, manifest_path) : (boundary_path, cep_path, spinodal_path, crossover_path, manifest_path)
+    output_paths = cfg.crossover_only ? (crossover_path, crossover_meta_path, manifest_path) : (boundary_path, cep_path, spinodal_path, crossover_path, crossover_meta_path, manifest_path)
     for path in output_paths
         ensure_writable(path, cfg.overwrite)
     end
@@ -377,6 +488,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         write_spinodal_csv(spinodal_path, spinodal_rows)
     end
     write_crossover_csv(crossover_path, crossover_rows)
+    write_crossover_meta(crossover_meta_path, cfg, crossover_rows, crossover_path)
     open(manifest_path, "w") do io
         write(io, JSON3.write(manifest))
     end
@@ -388,6 +500,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         println("  spinodals  = $(spinodal_path)")
     end
     println("  crossover  = $(crossover_path)")
+    println("  crossover-meta = $(crossover_meta_path)")
     println("  manifest   = $(manifest_path)")
 end
 

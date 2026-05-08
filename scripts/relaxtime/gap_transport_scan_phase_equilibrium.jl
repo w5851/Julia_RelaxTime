@@ -157,6 +157,33 @@ function nearest_phase_crossover_xi(xi::Float64)
     return xis[argmin(distances)]
 end
 
+function build_phase_tracker(xi::Float64, previous_solution=nothing, previous_phase::Symbol=:unknown)
+    boundary_xi = nearest_phase_boundary_xi(xi)
+    boundary_data = boundary_xi === nothing ? nothing : load_phase_boundary_data(boundary_xi)
+
+    hadron_seed = Float64.(Main.Models.HADRON_SEED_5)
+    quark_seed = Float64.(Main.Models.QUARK_SEED_5)
+    normalized_previous = previous_solution === nothing ? nothing : collect(Float64, previous_solution)
+
+    if normalized_previous !== nothing
+        seed5 = _seed_state_5(normalized_previous)
+        if previous_phase == :hadron || previous_phase == :crossover
+            hadron_seed = copy(seed5)
+        elseif previous_phase == :quark
+            quark_seed = copy(seed5)
+        end
+    end
+
+    tracker = LocalPhaseTracker(
+        boundary_data,
+        normalized_previous,
+        previous_phase,
+        hadron_seed,
+        quark_seed,
+    )
+    return tracker, boundary_xi
+end
+
 function load_crossover_reference(xi::Float64)
     isfile(Main.DEFAULT_PHASE_CROSSOVER_PATH) || return nothing, nothing
 

@@ -52,7 +52,8 @@ function print_usage()
     println("  --mumin/--mumax/--mustep <MeV> (兼容旧参数) 夸克化学势 μ_q 范围与步长")
     println("  --overwrite                 覆盖输出文件")
     println("  --no-resume                 禁用跳过逻辑，强制重算")
-    println("  --compute-bulk              计算体粘滞 ζ（很慢；默认关闭）")
+    println("  --compute-bulk              显式开启体粘滞 ζ 计算（默认开启）")
+    println("  --no-compute-bulk           显式关闭体粘滞 ζ 计算")
     println("  --p-num <int>               能隙/密度的动量节点数 (default 12)")
     println("  --t-num <int>               能隙/密度的角度节点数 (default 6)")
     println("  --max-iter <int>            NLsolve iterations 上限 (default 40)")
@@ -88,7 +89,7 @@ function parse_args(args::Vector{String})
         :mubstep => 60.0,
         :overwrite => false,
         :resume => true,
-        :compute_bulk => false,
+        :compute_bulk => true,
         :p_num => 12,
         :t_num => 6,
         :max_iter => 40,
@@ -159,6 +160,8 @@ function parse_args(args::Vector{String})
             opts[:resume] = false
         elseif arg == "--compute-bulk"
             opts[:compute_bulk] = true
+        elseif arg == "--no-compute-bulk"
+            opts[:compute_bulk] = false
         elseif arg == "--p-num"
             opts[:p_num] = parse(Int, require_value())
         elseif arg == "--t-num"
