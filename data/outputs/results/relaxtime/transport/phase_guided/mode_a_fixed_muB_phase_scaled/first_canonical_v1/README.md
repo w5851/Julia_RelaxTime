@@ -26,7 +26,7 @@ phase-guided transport canonical case for `mode_a_fixed_muB_phase_scaled`.
 ## Generated Figures
 - `tau_u`, `tau_d`, `tau_s`, `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` all plot against `xi`
 - panel rule: `fixed mu_B panel`
-- line rule: `alpha_T lines`
+- line rule: `alpha_T lines with explicit T`
 - plot manifest: `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1/plot_manifest.json`
 
 Generated PNG files:

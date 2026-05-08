@@ -19,7 +19,7 @@
             "strategy": "uniform_grid",
             "count": 6
         },
-        "description": "uniform xi grid combined with uniform mu_B sampling; each (xi, mu_B) slice runs crossover detection on a T window and stores the detected T_crossover",
+        "description": "uniform xi grid combined with uniform mu_q sampling; each (xi, mu_q) slice runs crossover detection on a T window and stores the detected T_crossover",
         "xi_sampling": {
             "step": null,
             "values": [
@@ -54,13 +54,13 @@
             "name": "mu_MeV",
             "unit": "MeV",
             "type": "Float64",
-            "description": "baryon chemical potential sample on the crossover scan"
+            "description": "quark chemical potential sample (mu_q) on the crossover scan"
         },
         {
             "name": "T_crossover_MeV",
             "unit": "MeV",
             "type": "Float64",
-            "description": "detected crossover temperature at the sampled xi and mu_B"
+            "description": "detected crossover temperature at the sampled xi and mu_q"
         },
         {
             "name": "rho",

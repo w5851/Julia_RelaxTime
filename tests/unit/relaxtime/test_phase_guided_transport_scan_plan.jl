@@ -11,7 +11,7 @@ end
         "tmp",
         "unit_case_a",
         [-0.5, -0.2, 0.0, 0.2],
-        [0.0, 400.0],
+        [0.0, 450.0, 900.0],
         [1.0, 1.1],
         Float64[],
         true,
@@ -20,16 +20,19 @@ end
         false,
     )
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
-    @test plan.total == 16
+    @test plan.total == 24
     @test unique(p.plot_panel for p in plan.points if p.muB_MeV == 0.0) == ["muB0.0"]
     @test unique(p.plot_series for p in plan.points if p.alpha_T == 1.0) == ["alpha1.0"]
+    @test any(occursin("T=", p.plot_series_label) for p in plan.points if p.muB_MeV == 450.0)
     refs_0 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 0.0)
-    refs_400 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 400.0)
-    # With crossover_dense.csv present for the current xi anchors, mu_B = 0
-    # now consumes crossover references directly.
+    refs_450 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 450.0)
+    refs_900 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 900.0)
     @test refs_0 == [:crossover]
-    @test :first_order in refs_400
+    @test refs_450 == [:crossover]
+    @test refs_900 == [:first_order]
     @test all(isfinite(p.T_phase_base_MeV) for p in plan.points)
+    base_450 = unique(p.T_phase_base_MeV for p in plan.points if p.muB_MeV == 450.0)
+    @test length(base_450) == 1
 end
 
 @testset "phase-guided transport plan mode b" begin
@@ -38,9 +41,9 @@ end
         "tmp",
         "unit_case_b",
         [-0.5, -0.2, 0.0, 0.2],
-        [0.0, 260.0, 420.0],
+        [0.0, 900.0],
         Float64[1.0],
-        [120.0, 138.0],
+        [120.0, 130.0, 138.0],
         true,
         true,
         false,
@@ -49,7 +52,7 @@ end
     plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts)
     @test plan.total == 24
     @test unique(p.plot_panel for p in plan.points if p.T_MeV == 120.0) == ["T120.0"]
-    @test unique(p.plot_series for p in plan.points if p.muB_MeV == 260.0) == ["muB260.0"]
+    @test unique(p.plot_series for p in plan.points if p.muB_MeV == 900.0) == ["muB900.0"]
     @test any(p.phase_reference_kind == :cep_neighbor for p in plan.points)
     @test any(p.phase_reference_kind == :first_order for p in plan.points)
     @test any(p.phase_reference_kind == :crossover for p in plan.points)

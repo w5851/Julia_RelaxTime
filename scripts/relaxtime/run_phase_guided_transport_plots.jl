@@ -149,9 +149,9 @@ end
 
 function _plot_layout(mode::Symbol)
     if mode == :mode_a_fixed_muB_phase_scaled
-        return (; split="plot_panel", group="plot_series", panel_desc="fixed mu_B panel", series_desc="alpha_T lines")
+        return (; split="plot_panel", group="plot_series_label", panel_desc="fixed mu_B panel", series_desc="alpha_T lines with explicit T")
     elseif mode == :mode_b_fixed_T_sparse_muB
-        return (; split="plot_panel", group="plot_series", panel_desc="fixed T panel", series_desc="mu_B lines")
+        return (; split="plot_panel", group="plot_series_label", panel_desc="fixed T panel", series_desc="mu_B lines")
     end
     error("unsupported phase-guided mode: $(mode)")
 end

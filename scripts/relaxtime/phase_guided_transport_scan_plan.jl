@@ -21,6 +21,8 @@ struct PhaseGuidedPlan
     total::Int
 end
 
+const MODE_A_REFERENCE_XI = 0.0
+
 function _interp(x::Float64, xs::Vector{Float64}, ys::Vector{Float64})
     isempty(xs) && return NaN
     length(xs) == 1 && return ys[1]
@@ -46,12 +48,13 @@ function _interpolate_first_order_temperature(muB_MeV::Float64, xi::Float64)
     data, xi_used = _load_first_order_line(xi)
     isempty(data.mu_values) && return NaN, xi_used
 
+    muq_MeV = muB_MeV / 3.0
     mus = copy(data.mu_values)
     Ts = copy(data.T_values)
     order = sortperm(mus)
     mus = mus[order]
     Ts = Ts[order]
-    return _interp(muB_MeV, mus, Ts), xi_used
+    return _interp(muq_MeV, mus, Ts), xi_used
 end
 
 function _interpolate_crossover_temperature(muB_MeV::Float64, xi::Float64)
@@ -61,13 +64,13 @@ end
 
 function _cep_muB(xi::Float64)
     data, _ = _load_first_order_line(xi)
-    return data.mu_CEP
+    return 3.0 * data.mu_CEP
 end
 
 function _phase_reference_for_mode_a(muB_MeV::Float64, xi::Float64)
-    T_cross, _ = _interpolate_crossover_temperature(muB_MeV, xi)
-    T_first, _ = _interpolate_first_order_temperature(muB_MeV, xi)
-    mu_CEP = _cep_muB(xi)
+    T_cross, _ = _interpolate_crossover_temperature(muB_MeV, MODE_A_REFERENCE_XI)
+    T_first, _ = _interpolate_first_order_temperature(muB_MeV, MODE_A_REFERENCE_XI)
+    mu_CEP = _cep_muB(MODE_A_REFERENCE_XI)
 
     if isfinite(mu_CEP) && muB_MeV > mu_CEP + 1e-6 && isfinite(T_first)
         return (:first_order, T_first)
@@ -82,7 +85,7 @@ end
 
 function _phase_reference_for_mode_b(T_MeV::Float64, muB_MeV::Float64, xi::Float64)
     data, _ = _load_first_order_line(xi)
-    mu_CEP = data.mu_CEP
+    mu_CEP = 3.0 * data.mu_CEP
     T_CEP = data.T_CEP
     T_first, _ = _interpolate_first_order_temperature(muB_MeV, xi)
     if isfinite(T_CEP) && isfinite(mu_CEP) && abs(T_MeV - T_CEP) <= 8.0 && abs(muB_MeV - mu_CEP) <= 40.0
@@ -105,10 +108,10 @@ function build_plan(opts)
                 plot_panel = "muB$(round(muB_MeV; digits=3))"
                 plot_panel_label = "muB=$(muB_MeV) MeV"
                 plot_series = "alpha$(round(alpha_T; digits=3))"
-                plot_series_label = "alpha_T=$(alpha_T)"
                 for xi in opts.xi_values
                     phase_reference_kind, T_phase_base_MeV = _phase_reference_for_mode_a(muB_MeV, xi)
                     isfinite(T_phase_base_MeV) || error("no phase reference temperature for mode a point: muB=$(muB_MeV), xi=$(xi)")
+                    plot_series_label = "alpha_T=$(alpha_T), T=$(round(alpha_T * T_phase_base_MeV; digits=3)) MeV"
                     push!(points, PhaseGuidedPoint(
                         alpha_T * T_phase_base_MeV,
                         muB_MeV,

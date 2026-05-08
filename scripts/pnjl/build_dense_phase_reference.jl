@@ -59,7 +59,7 @@ function usage()
     println("  --overwrite              overwrite existing aggregated outputs")
     println("  --no-crossover           skip crossover generation")
     println("  --crossover-n-mu <int>   crossover mu sampling count (default 16)")
-    println("  --crossover-mu-max <MeV> crossover mu_B upper bound (default 450)")
+    println("  --crossover-mu-max <MeV> crossover mu_q upper bound (default 450)")
     println("  --crossover-only         skip phase pipeline; only generate crossover reference")
     println("  --crossover-mu0-only     with --crossover-only, compute only mu=0 crossover point")
     println("  -h, --help               show help")
@@ -240,8 +240,8 @@ end
 function _crossover_column_definitions()
     return [
         Dict("name" => "xi", "type" => "Float64", "unit" => "dimensionless", "description" => "anisotropy control parameter"),
-        Dict("name" => "mu_MeV", "type" => "Float64", "unit" => "MeV", "description" => "baryon chemical potential sample on the crossover scan"),
-        Dict("name" => "T_crossover_MeV", "type" => "Float64", "unit" => "MeV", "description" => "detected crossover temperature at the sampled xi and mu_B"),
+        Dict("name" => "mu_MeV", "type" => "Float64", "unit" => "MeV", "description" => "quark chemical potential sample (mu_q) on the crossover scan"),
+        Dict("name" => "T_crossover_MeV", "type" => "Float64", "unit" => "MeV", "description" => "detected crossover temperature at the sampled xi and mu_q"),
         Dict("name" => "rho", "type" => "Float64", "unit" => "rho0", "description" => "density-like coordinate returned by the crossover builder for the sampled point"),
         Dict("name" => "method", "type" => "String", "unit" => nothing, "description" => "crossover detector method"),
         Dict("name" => "converged", "type" => "Bool", "unit" => nothing, "description" => "whether the crossover detector reported a valid point"),
@@ -259,7 +259,7 @@ function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
     if cfg.crossover_mu_only_zero
         return Dict(
             "kind" => "mu0_only",
-            "description" => "dense in xi only; for each xi solve the crossover point at mu_B = 0 MeV",
+            "description" => "dense in xi only; for each xi solve the crossover point at mu_q = 0 MeV",
             "xi_sampling" => Dict(
                 "strategy" => xi_strategy,
                 "count" => length(cfg.xi_values),
@@ -276,7 +276,7 @@ function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
     mu_samples = collect(range(0.0; stop=cfg.crossover_mu_max_MeV, length=cfg.crossover_n_mu))
     return Dict(
         "kind" => "xi_mu_dense_reference",
-        "description" => "uniform xi grid combined with uniform mu_B sampling; each (xi, mu_B) slice runs crossover detection on a T window and stores the detected T_crossover",
+        "description" => "uniform xi grid combined with uniform mu_q sampling; each (xi, mu_q) slice runs crossover detection on a T window and stores the detected T_crossover",
         "xi_sampling" => Dict(
             "strategy" => xi_strategy,
             "count" => length(cfg.xi_values),
