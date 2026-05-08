@@ -9,6 +9,7 @@
 - 先求平衡态，再计算输运系数
 - 基于已有平衡态结果，直接计算输运系数
 - 先求平衡态，再计算介子质量、宽度与 Mott 阈值
+- 先求平衡态，再计算介子 pressure / EOS 组合量
 
 ## 首选公开入口
 
@@ -19,6 +20,7 @@
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 - `Models.solve_gap_and_meson_point`
+- `Models.solve_gap_and_meson_thermo_point`
 - `Models.run_workflow_pipeline`
 - `Models.run_scan_pipeline`
 
@@ -49,6 +51,16 @@
 `Models.solve_gap_and_meson_point` 适合“给定一个点，直接求出多个介子通道的质量、宽度、阈值与 gap”的场景。
 
 更详细的通道与返回结构见 [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md)。
+
+### 4. 平衡态 + 介子热力学一体化
+
+`Models.solve_gap_and_meson_thermo_point` 适合“给定一个点，直接得到 mesonic contribution 与最小 EOS 组合量”的场景。
+
+若你需要 phase-shift / generalized BU reference 口径，使用：
+
+- `Models.solve_gap_and_phase_shift_meson_thermo_point`
+
+更详细的字段合同见 [MesonThermoWorkflow.md](MesonThermoWorkflow.md)。
 
 ## 声明式编排入口（pipeline facade）
 
