@@ -6,11 +6,11 @@ phase-guided transport canonical case for `mode_a_fixed_muB_phase_scaled`.
 - mode: `mode_a_fixed_muB_phase_scaled`
 - case name: `first_canonical_v1`
 - summary: 固定 muB，沿相变参考温度做 T/T_phase 倍率带，并对每个倍率带连续扫描 xi。
-- xi list: `-0.5, -0.2, 0.0, 0.2`
+- xi list: `-0.5, -0.45, -0.4, -0.35, -0.3, -0.25, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5`
 - muB list (MeV): `0.0, 450.0, 900.0`
 - alpha_T list: `1.0, 1.1, 1.2`
 - compute bulk viscosity (`zeta`): `true`
-- total planned points: `36`
+- total planned points: `189`
 
 ## Key Files
 - `sampling_plan.csv`: phase-guided sampling plan

@@ -1,13 +1,13 @@
 {
   "command": "D:\\Desktop\\Julia_RelaxTime\\scripts\\plot_scan_csv.py --mode lines --csv D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v1\\phase_guided_transport_scan.csv --x xi --ys sigma_over_T --split plot_panel --group plot_series_label --out-dir D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v1 --check",
-  "generated_at_utc": "2026-05-08T04:49:20Z",
-  "git_commit": "9d32909c988bfe345295a20fa810326d1216c1c0",
+  "generated_at_utc": "2026-05-08T05:38:23Z",
+  "git_commit": "3247deeae268a1b56ae3278452d97a3e57c03861",
   "image_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v1\\plot_panel=muB900.0\\sigma_over_T_vs_xi.png",
-  "image_sha256": "7f717ffbd632308764c6f45636745fb17607e69028aab6f3064f8c2d3e2b1d10",
+  "image_sha256": "153235bf474eb4425646316e4ed1bb0e5f0e69c102af629bd4d2c617df26c686",
   "input_data_hashes": [
     {
       "path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v1\\phase_guided_transport_scan.csv",
-      "sha256": "1938b90bf960c265b7a0493f426e31ff0e07a719fcdf6a06db7d19166dc8a68a"
+      "sha256": "4cc1c40439ffb9cb3ad75b0d9fb05d0227c22f9a6c8c75834653bebb22f40498"
     }
   ],
   "julia_version": "python-3.13.2",

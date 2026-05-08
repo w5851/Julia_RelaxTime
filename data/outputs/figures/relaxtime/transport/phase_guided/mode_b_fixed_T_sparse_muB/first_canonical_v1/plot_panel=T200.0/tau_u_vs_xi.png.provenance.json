@@ -1,13 +1,13 @@
 {
-  "command": "D:\\Desktop\\Julia_RelaxTime\\scripts\\plot_scan_csv.py --mode lines --csv D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1\\phase_guided_transport_scan.csv --x xi --ys tau_u --split plot_panel --group plot_series --out-dir D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1 --check",
-  "generated_at_utc": "2026-05-08T04:11:20Z",
-  "git_commit": "aa4ed9dcca3efd2d97d6243c9c000f041b8a481c",
+  "command": "D:\\Desktop\\Julia_RelaxTime\\scripts\\plot_scan_csv.py --mode lines --csv D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1\\phase_guided_transport_scan.csv --x xi --ys tau_u --split plot_panel --group plot_series_label --out-dir D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1 --check",
+  "generated_at_utc": "2026-05-08T06:26:54Z",
+  "git_commit": "3247deeae268a1b56ae3278452d97a3e57c03861",
   "image_path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\figures\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1\\plot_panel=T200.0\\tau_u_vs_xi.png",
-  "image_sha256": "b53454d3b96e84ee4ca2742e2cb91ddabef9d3cb05a597fb02501b75ef6c6be0",
+  "image_sha256": "459ac97ff8b2b1ef16f7bee9fe749fc060937a39781ba62e855030bae2a073f5",
   "input_data_hashes": [
     {
       "path": "D:\\Desktop\\Julia_RelaxTime\\data\\outputs\\results\\relaxtime\\transport\\phase_guided\\mode_b_fixed_T_sparse_muB\\first_canonical_v1\\phase_guided_transport_scan.csv",
-      "sha256": "32e6caa0f6b3e2ac25c48608850db800805db12ae08ac66ab18835db1145dcea"
+      "sha256": "beba755d76eb0901b71c5d0934b4704a3124e6e5557050f37c448517ac706082"
     }
   ],
   "julia_version": "python-3.13.2",

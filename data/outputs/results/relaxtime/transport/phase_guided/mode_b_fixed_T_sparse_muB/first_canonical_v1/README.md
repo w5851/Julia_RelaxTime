@@ -6,11 +6,11 @@ phase-guided transport canonical case for `mode_b_fixed_T_sparse_muB`.
 - mode: `mode_b_fixed_T_sparse_muB`
 - case name: `first_canonical_v1`
 - summary: 固定温度、离散 muB、连续 xi 的相图邻域稀疏扫描。
-- xi list: `-0.5, -0.2, 0.0, 0.2`
+- xi list: `-0.5, -0.45, -0.4, -0.35, -0.3, -0.25, -0.2, -0.15, -0.1, -0.05, 0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5`
 - muB list (MeV): `0.0, 450.0, 900.0`
 - fixed T list (MeV): `120.0, 160.0, 200.0`
 - compute bulk viscosity (`zeta`): `true`
-- total planned points: `36`
+- total planned points: `189`
 
 ## Key Files
 - `sampling_plan.csv`: phase-guided sampling plan
