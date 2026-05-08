@@ -58,11 +58,6 @@ on:
         required: false
         default: "0.05"
         type: string
-      crossover_only:
-        description: "仅生成 crossover reference"
-        required: false
-        default: true
-        type: boolean
       crossover_mu0_only:
         description: "仅生成 mu_q = 0 的 crossover 点"
         required: false
@@ -138,6 +133,7 @@ jobs:
             --rho-step "${{ inputs.rho_step || '0.05' }}"
             --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
             --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
+            --crossover-only
           )
 
           if [ -n "${{ inputs.xi_values }}" ]; then
@@ -150,9 +146,6 @@ jobs:
             )
           fi
 
-          if [ "${{ inputs.crossover_only }}" = "true" ]; then
-            cmd+=(--crossover-only)
-          fi
           if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
             cmd+=(--crossover-mu0-only)
           fi
@@ -170,7 +163,7 @@ jobs:
             --reference-root "${REFERENCE_ROOT}" \
             --tag "${{ inputs.tag || 'dense' }}" \
             --min-crossover-rows 1 \
-            ${{ inputs.crossover_only == true && '--expect-crossover-only' || '' }} \
+            --expect-crossover-only \
             ${{ inputs.crossover_mu0_only == true && '--expect-mu0-only' || '' }} \
             --report-path "${REPORT_PATH}"
 
@@ -183,7 +176,7 @@ jobs:
             ${{ env.REFERENCE_ROOT }}/crossover_${{ inputs.tag || 'dense' }}.meta.json
             ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag || 'dense' }}_manifest.json
             ${{ env.REPORT_PATH }}
-          retention-days: 30
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
           if-no-files-found: error
 
       - name: Create step summary
@@ -204,7 +197,7 @@ jobs:
               fh.write("- requested xi_values input: `${{ inputs.xi_values }}`\n")
               fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV (step `${{ inputs.T_step || '5' }}`)\n")
               fh.write(f"- rho range: `${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }}` rho0 (step `${{ inputs.rho_step || '0.05' }}`)\n")
-              fh.write(f"- crossover_only: `{str(report['crossover_only']).lower()}`\n")
+              fh.write("- crossover_only: `true` (fixed in workflow v1)\n")
               fh.write(f"- crossover_mu0_only: `{str(report['mu0_only']).lower()}`\n")
               fh.write(f"- crossover_n_mu: `${{ inputs.crossover_n_mu || '16' }}`\n")
               fh.write(f"- crossover_mu_max: `${{ inputs.crossover_mu_max || '450' }}` MeV\n\n")
@@ -212,7 +205,7 @@ jobs:
               fh.write(f"- git commit: `{report['git_commit']}`\n")
               fh.write(f"- generated_at_utc: `{report['generated_at_utc']}`\n")
               fh.write(f"- artifact: `{artifact_name}`\n")
-              fh.write("- retention_days: `30`\n\n")
+              fh.write(f"- retention_days: `{os.environ['ARTIFACT_RETENTION_DAYS']}`\n\n")
               fh.write("### Coverage\n")
               fh.write(f"- resolved xi values: `{report['xi_values']}`\n")
               fh.write(f"- mu_q values (MeV): `{report['mu_values_MeV']}`\n")
