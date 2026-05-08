@@ -1,0 +1,224 @@
+name: PNJL Dense Reference
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "artifact 标签后缀"
+        required: false
+        default: "dense"
+        type: string
+      xi_values:
+        description: '显式 ξ 列表（逗号分隔；为空时使用区间参数）'
+        required: false
+        default: "-0.5,-0.2,0.0,0.2"
+        type: string
+      xi_min:
+        description: "ξ 最小值（仅在 xi_values 为空时使用）"
+        required: false
+        default: "-0.5"
+        type: string
+      xi_max:
+        description: "ξ 最大值（仅在 xi_values 为空时使用）"
+        required: false
+        default: "0.5"
+        type: string
+      xi_step:
+        description: "ξ 步长（仅在 xi_values 为空时使用）"
+        required: false
+        default: "0.05"
+        type: string
+      T_min:
+        description: "最低温度 T_min (MeV)"
+        required: false
+        default: "60"
+        type: string
+      T_max:
+        description: "最高温度 T_max (MeV)"
+        required: false
+        default: "240"
+        type: string
+      T_step:
+        description: "温度步长 ΔT (MeV)"
+        required: false
+        default: "5"
+        type: string
+      rho_min:
+        description: "最低密度 ρ_min (ρ/ρ₀)"
+        required: false
+        default: "0.0"
+        type: string
+      rho_max:
+        description: "最高密度 ρ_max (ρ/ρ₀)"
+        required: false
+        default: "4.0"
+        type: string
+      rho_step:
+        description: "密度步长 Δρ (ρ/ρ₀)"
+        required: false
+        default: "0.05"
+        type: string
+      crossover_only:
+        description: "仅生成 crossover reference"
+        required: false
+        default: true
+        type: boolean
+      crossover_mu0_only:
+        description: "仅生成 mu_q = 0 的 crossover 点"
+        required: false
+        default: false
+        type: boolean
+      crossover_n_mu:
+        description: "crossover mu_q 采样点数"
+        required: false
+        default: "16"
+        type: string
+      crossover_mu_max:
+        description: "crossover mu_q 最大值 (MeV)"
+        required: false
+        default: "450"
+        type: string
+      overwrite:
+        description: "覆盖已存在的同名输出"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      STAGING_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/reference
+      PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/validation_report.json
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-dense-reference
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Prepare output directories
+        run: |
+          rm -rf "${STAGING_ROOT}" "${PROCESS_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}" "${PROCESS_ROOT}"
+
+      - name: Run dense reference builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmd=(
+            julia --project=. scripts/pnjl/build_dense_phase_reference.jl
+            --tag "${{ inputs.tag || 'dense' }}"
+            --output-root "${PROCESS_ROOT}"
+            --reference-root "${REFERENCE_ROOT}"
+            --T-min "${{ inputs.T_min || '60' }}"
+            --T-max "${{ inputs.T_max || '240' }}"
+            --T-step "${{ inputs.T_step || '5' }}"
+            --rho-min "${{ inputs.rho_min || '0.0' }}"
+            --rho-max "${{ inputs.rho_max || '4.0' }}"
+            --rho-step "${{ inputs.rho_step || '0.05' }}"
+            --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
+            --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
+          )
+
+          if [ -n "${{ inputs.xi_values }}" ]; then
+            cmd+=(--xi-list "${{ inputs.xi_values }}")
+          else
+            cmd+=(
+              --xi-min "${{ inputs.xi_min || '-0.5' }}"
+              --xi-max "${{ inputs.xi_max || '0.5' }}"
+              --xi-step "${{ inputs.xi_step || '0.05' }}"
+            )
+          fi
+
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            cmd+=(--crossover-only)
+          fi
+          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
+            cmd+=(--crossover-mu0-only)
+          fi
+          if [ "${{ inputs.overwrite }}" = "true" ]; then
+            cmd+=(--overwrite)
+          fi
+
+          printf 'Running command:\n  %q' "${cmd[@]}"
+          printf '\n'
+          "${cmd[@]}"
+
+      - name: Validate dense reference artifact
+        run: |
+          python scripts/pnjl/validate_dense_reference_artifact.py \
+            --reference-root "${REFERENCE_ROOT}" \
+            --tag "${{ inputs.tag || 'dense' }}" \
+            --min-crossover-rows 1 \
+            ${{ inputs.crossover_only == true && '--expect-crossover-only' || '' }} \
+            ${{ inputs.crossover_mu0_only == true && '--expect-mu0-only' || '' }} \
+            --report-path "${REPORT_PATH}"
+
+      - name: Upload dense reference artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-${{ inputs.tag || 'dense' }}
+          path: |
+            ${{ env.REFERENCE_ROOT }}/crossover_${{ inputs.tag || 'dense' }}.csv
+            ${{ env.REFERENCE_ROOT }}/crossover_${{ inputs.tag || 'dense' }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag || 'dense' }}_manifest.json
+            ${{ env.REPORT_PATH }}
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Create step summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path(os.environ["REPORT_PATH"]).read_text(encoding="utf-8"))
+          summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
+          artifact_name = "pnjl-dense-reference-${{ inputs.tag || 'dense' }}"
+          with summary_path.open("a", encoding="utf-8") as fh:
+              fh.write("## PNJL Dense Reference Summary\n\n")
+              fh.write("### Workflow Inputs\n")
+              fh.write(f"- tag: `{report['tag']}`\n")
+              fh.write("- requested xi_values input: `${{ inputs.xi_values }}`\n")
+              fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV (step `${{ inputs.T_step || '5' }}`)\n")
+              fh.write(f"- rho range: `${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }}` rho0 (step `${{ inputs.rho_step || '0.05' }}`)\n")
+              fh.write(f"- crossover_only: `{str(report['crossover_only']).lower()}`\n")
+              fh.write(f"- crossover_mu0_only: `{str(report['mu0_only']).lower()}`\n")
+              fh.write(f"- crossover_n_mu: `${{ inputs.crossover_n_mu || '16' }}`\n")
+              fh.write(f"- crossover_mu_max: `${{ inputs.crossover_mu_max || '450' }}` MeV\n\n")
+              fh.write("### Provenance\n")
+              fh.write(f"- git commit: `{report['git_commit']}`\n")
+              fh.write(f"- generated_at_utc: `{report['generated_at_utc']}`\n")
+              fh.write(f"- artifact: `{artifact_name}`\n")
+              fh.write("- retention_days: `30`\n\n")
+              fh.write("### Coverage\n")
+              fh.write(f"- resolved xi values: `{report['xi_values']}`\n")
+              fh.write(f"- mu_q values (MeV): `{report['mu_values_MeV']}`\n")
+              fh.write(f"- crossover rows: `{report['crossover_rows']}`\n")
+              fh.write(f"- converged rows: `{report['converged_rows']}`\n\n")
+              fh.write("### Files\n")
+              for _, relpath in report["files"].items():
+                  fh.write(f"- `{relpath}`\n")
+          PY

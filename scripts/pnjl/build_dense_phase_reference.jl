@@ -333,6 +333,37 @@ function write_crossover_meta(path::String, cfg::DensePhaseReferenceConfig, rows
     end
 end
 
+function manifest_generator_payload(cfg::DensePhaseReferenceConfig)
+    return Dict(
+        "script" => _repo_relpath(joinpath(@__DIR__, "build_dense_phase_reference.jl")),
+        "git_commit" => current_git_commit(),
+        "generated_at" => Dates.format(Dates.now(Dates.UTC), dateformat"yyyy-mm-ddTHH:MM:SSZ"),
+        "crossover_only" => cfg.crossover_only,
+        "crossover_mu0_only" => cfg.crossover_mu_only_zero,
+    )
+end
+
+function manifest_config_payload(cfg::DensePhaseReferenceConfig)
+    return Dict(
+        "tag" => cfg.tag,
+        "xi_values" => cfg.xi_values,
+        "T_min_MeV" => cfg.T_min,
+        "T_max_MeV" => cfg.T_max,
+        "T_step_MeV" => cfg.T_step,
+        "rho_min" => cfg.rho_min,
+        "rho_max" => cfg.rho_max,
+        "rho_step" => cfg.rho_step,
+        "mode" => String(cfg.mode),
+        "compute_crossover" => cfg.compute_crossover,
+        "crossover_method" => String(cfg.crossover_method),
+        "crossover_variable" => String(cfg.crossover_variable),
+        "crossover_n_mu" => cfg.crossover_n_mu,
+        "crossover_mu_max_MeV" => cfg.crossover_mu_max_MeV,
+        "crossover_only" => cfg.crossover_only,
+        "crossover_mu0_only" => cfg.crossover_mu_only_zero,
+    )
+end
+
 function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
     rows = NamedTuple[]
     if cfg.crossover_mu_only_zero
@@ -394,11 +425,12 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     spinodal_rows = NamedTuple[]
     crossover_rows = NamedTuple[]
     manifest = Dict{String, Any}(
-        "generated_at" => string(now()),
+        "schema_version" => "v1",
+        "generator" => manifest_generator_payload(cfg),
+        "config" => manifest_config_payload(cfg),
         "output_root" => _repo_relpath(output_root),
         "reference_root" => _repo_relpath(reference_root),
-        "tag" => cfg.tag,
-        "xi_values" => cfg.xi_values,
+        "artifacts" => Dict{String, Any}(),
         "runs" => Any[],
     )
 
@@ -489,8 +521,32 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     end
     write_crossover_csv(crossover_path, crossover_rows)
     write_crossover_meta(crossover_meta_path, cfg, crossover_rows, crossover_path)
+    manifest["artifacts"]["crossover"] = Dict(
+        "path" => _repo_relpath(crossover_path),
+        "row_count" => length(crossover_rows),
+    )
+    manifest["artifacts"]["crossover_meta"] = Dict(
+        "path" => _repo_relpath(crossover_meta_path),
+    )
     open(manifest_path, "w") do io
-        write(io, JSON3.write(manifest))
+        if !cfg.crossover_only
+            manifest["artifacts"]["boundary"] = Dict(
+                "path" => _repo_relpath(boundary_path),
+                "row_count" => length(boundary_rows),
+            )
+            manifest["artifacts"]["cep"] = Dict(
+                "path" => _repo_relpath(cep_path),
+                "row_count" => length(cep_rows),
+            )
+            manifest["artifacts"]["spinodals"] = Dict(
+                "path" => _repo_relpath(spinodal_path),
+                "row_count" => length(spinodal_rows),
+            )
+        end
+        manifest["artifacts"]["manifest"] = Dict(
+            "path" => _repo_relpath(manifest_path),
+        )
+        JSON3.pretty(io, manifest)
     end
 
     println("dense reference written:")

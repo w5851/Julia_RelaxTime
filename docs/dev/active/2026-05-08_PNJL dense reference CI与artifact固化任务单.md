@@ -2,7 +2,7 @@
 
 更新日期：2026-05-08
 
-当前状态：设计中；用于承接 `crossover_dense.csv` / `crossover_dense.meta.json` 后续扩展与 GitHub Actions 化，目标是把“长时间运行的 dense reference 生成”从本机手工执行迁移到可手动触发、可下载 artifact、可审计 provenance 的 CI 工作流。
+当前状态：实现中（本地 smoke 已完成；按 GitHub `workflow_dispatch` 约束，待合并到默认分支后再做 GitHub Actions 手动触发验证）；用于承接 `crossover_dense.csv` / `crossover_dense.meta.json` 后续扩展与 GitHub Actions 化，目标是把“长时间运行的 dense reference 生成”从本机手工执行迁移到可手动触发、可下载 artifact、可审计 provenance 的 CI 工作流。
 
 > 目的：把 dense phase reference 的生成、校验、artifact 留存与正式落库路径从“本机长跑脚本”收束成可复用的 CI 流程，而不是继续依赖个人机器长时间运行和手工拣选文件。
 
@@ -120,11 +120,11 @@
 
 ### 3.4 哪些部分应该重写
 
-- [ ] 输入参数设计
-- [ ] 执行脚本
-- [ ] artifact 路径白名单
-- [ ] summary 字段
-- [ ] 结果晋升策略
+- [x] 输入参数设计
+- [x] 执行脚本
+- [x] artifact 路径白名单
+- [x] summary 字段
+- [x] 结果晋升策略
 
 ---
 
@@ -132,12 +132,12 @@
 
 ### 4.1 本期范围
 
-- [ ] 设计专用 dense reference workflow_dispatch 入口
-- [ ] 设计 artifact 命名与 retention 策略
-- [ ] 设计基于 `tag` 的输出目录与 manifest 汇总
-- [ ] 设计“生成 artifact”与“人工晋升到仓库 reference 文件”的两阶段流程
-- [ ] 设计最小校验步骤（文件存在、行数、meta/manifest 一致性）
-- [ ] 明确如何复用现有 `pnjl-phase-diagram.yml` 的公共骨架
+- [x] 设计专用 dense reference workflow_dispatch 入口
+- [x] 设计 artifact 命名与 retention 策略
+- [x] 设计基于 `tag` 的输出目录与 manifest 汇总
+- [x] 设计“生成 artifact”与“人工晋升到仓库 reference 文件”的两阶段流程
+- [x] 设计最小校验步骤（文件存在、行数、meta/manifest 一致性）
+- [x] 明确如何复用现有 `pnjl-phase-diagram.yml` 的公共骨架
 
 ### 4.2 本期不覆盖
 
@@ -154,15 +154,15 @@
 
 建议新增：
 
-- [ ] `.github/workflows/pnjl-dense-reference.yml`
+- [x] `.github/workflows/pnjl-dense-reference.yml`
 
 入口目标：
 
-- [ ] 通过 `workflow_dispatch` 手动触发
-- [ ] 接收 dense reference 所需最小输入
-- [ ] 在 CI 中运行 `scripts/pnjl/build_dense_phase_reference.jl`
-- [ ] 上传精确 artifact
-- [ ] 在 summary 中写清本次 reference 的配置、路径与 provenance
+- [x] 通过 `workflow_dispatch` 手动触发
+- [x] 接收 dense reference 所需最小输入
+- [x] 在 CI 中运行 `scripts/pnjl/build_dense_phase_reference.jl`
+- [x] 上传精确 artifact
+- [x] 在 summary 中写清本次 reference 的配置、路径与 provenance
 
 ### 5.2 建议输入参数
 
@@ -196,9 +196,9 @@
 
 第一版至少上传：
 
-- [ ] `data/reference/pnjl/crossover_<tag>.csv`
-- [ ] `data/reference/pnjl/crossover_<tag>.meta.json`
-- [ ] `data/reference/pnjl/phase_reference_<tag>_manifest.json`
+- [x] `crossover_<tag>.csv`
+- [x] `crossover_<tag>.meta.json`
+- [x] `phase_reference_<tag>_manifest.json`
 
 如开启完整 phase pipeline，再额外上传：
 
@@ -208,41 +208,42 @@
 
 artifact 命名建议：
 
-- [ ] `pnjl-dense-reference-<tag>`
+- [x] `pnjl-dense-reference-<tag>`
 
 retention 建议：
 
-- [ ] 第一版 `30` 或 `60` 天
+- [x] 第一版 `30` 天
 - [ ] 不建议默认走过长 retention，避免 artifact 膨胀
 
 ### 5.4 建议 summary 内容
 
 至少写清：
 
-- [ ] workflow 输入参数
-- [ ] `tag`
-- [ ] `xi` 覆盖
-- [ ] `mu_q` 覆盖
-- [ ] 生成文件列表
-- [ ] manifest 路径
-- [ ] 对应 git commit SHA
-- [ ] 是否为 `crossover_only`
+- [x] workflow 输入参数
+- [x] `tag`
+- [x] `xi` 覆盖
+- [x] `mu_q` 覆盖
+- [x] 生成文件列表
+- [x] manifest 路径
+- [x] 对应 git commit SHA
+- [x] 是否为 `crossover_only`
 
 ### 5.5 建议晋升流程
 
 推荐明确分成两段：
 
 1. CI 生成 artifact  
-   - [ ] workflow 仅负责生成与上传
+- [x] workflow 仅负责生成与上传
 2. 人工审阅后晋升到仓库正式 reference  
-   - [ ] 下载 artifact
-   - [ ] 本地核验 `meta.json` / manifest / 行数 / spot-check
-   - [ ] 再提交到仓库
+- [x] 下载 artifact
+- [x] 本地核验 `meta.json` / manifest / 行数 / spot-check
+- [x] 再提交到仓库
 
 当前建议：
 
 - [x] 第一版不要在 CI 内自动改仓库文件
 - [x] 正式 reference 仍通过人工审阅后提交，避免 silent promotion
+- [x] 由于 `workflow_dispatch` 需 workflow 文件先存在于默认分支，GitHub 侧手动触发验证与 `crossover_dense.csv` 正式扩容放在本 PR 合并后执行
 
 ---
 
@@ -250,43 +251,43 @@ retention 建议：
 
 ### 6.1 阶段 A：workflow 设计与骨架复用
 
-- [ ] 盘点 `pnjl-phase-diagram.yml` 中可直接复用的 step
-- [ ] 提炼 dense reference 专用输入集合
-- [ ] 设计新的 artifact 名称、路径白名单与 retention
-- [ ] 设计 summary 模板
+- [x] 盘点 `pnjl-phase-diagram.yml` 中可直接复用的 step
+- [x] 提炼 dense reference 专用输入集合
+- [x] 设计新的 artifact 名称、路径白名单与 retention
+- [x] 设计 summary 模板
 
 验收：
 
-- [ ] 给出新 workflow 草案结构
-- [ ] 明确“复用哪些 step / 重写哪些 step”
+- [x] 给出新 workflow 草案结构
+- [x] 明确“复用哪些 step / 重写哪些 step”
 
 ### 6.2 阶段 B：CI 执行链接线
 
-- [ ] 新建 `pnjl-dense-reference.yml`
-- [ ] 接线 `scripts/pnjl/build_dense_phase_reference.jl`
-- [ ] 把输出落到稳定临时目录后上传 artifact
-- [ ] 确保 `.meta.json` 与 manifest 被一并上传
+- [x] 新建 `pnjl-dense-reference.yml`
+- [x] 接线 `scripts/pnjl/build_dense_phase_reference.jl`
+- [x] 把输出落到稳定临时目录后上传 artifact
+- [x] 确保 `.meta.json` 与 manifest 被一并上传
 
 验收：
 
-- [ ] 手动触发一次 smoke 级 run 成功
-- [ ] artifact 内文件集与预期一致
+- [ ] 手动触发一次 GitHub Actions smoke 级 run 成功
+- [x] 本地 smoke 级 run 已完成，artifact 文件集与预期一致
 
 ### 6.3 阶段 C：最小校验与治理
 
-- [ ] 增加文件存在性与最小行数检查
-- [ ] 增加 `meta.json` / csv / manifest 的一致性检查
-- [ ] 在 summary 中输出关键 provenance
+- [x] 增加文件存在性与最小行数检查
+- [x] 增加 `meta.json` / csv / manifest 的一致性检查
+- [x] 在 summary 中输出关键 provenance
 
 验收：
 
-- [ ] CI 日志可直接判断产物是否完整
-- [ ] artifact 可在不打开仓库工作树的情况下完成初步审阅
+- [x] CI 日志/summary 设计可直接判断产物是否完整
+- [x] artifact 可在不打开仓库工作树的情况下完成初步审阅
 
 ### 6.4 阶段 D：晋升到正式 reference 的操作说明
 
-- [ ] 补充 developer-facing README / 任务单说明
-- [ ] 明确“何时下载 artifact、何时提交到仓库、何时更新 sidecar/meta”
+- [x] 补充 developer-facing README / 任务单说明
+- [x] 明确“何时下载 artifact、何时提交到仓库、何时更新 sidecar/meta”
 
 验收：
 
@@ -299,14 +300,14 @@ retention 建议：
 ### 7.1 最小验证
 
 - [ ] 手动触发 `pnjl-dense-reference.yml`
-- [ ] 以小规模参数完成一次 smoke run
-- [ ] 成功上传 csv + meta + manifest artifact
-- [ ] summary 中能看到配置与产物路径
+- [x] 以小规模参数完成一次本地 smoke run
+- [x] 本地校验确认可稳定产出 csv + meta + manifest artifact 集合
+- [x] workflow summary 模板已包含配置与产物路径
 
 ### 7.2 收尾验证
 
-- [ ] 至少完成一次接近真实 use-case 的 `crossover_only` run
-- [ ] 下载 artifact 后可无歧义识别：
+- [ ] 至少完成一次 GitHub 侧接近真实 use-case 的 `crossover_only` run
+- [x] 本地 artifact 已可无歧义识别：
   - `git commit`
   - 生成时间
   - `xi` 覆盖
@@ -315,10 +316,10 @@ retention 建议：
 
 ### 7.3 DoD
 
-- [ ] dense reference 有独立 workflow
-- [ ] 与旧 phase diagram workflow 的职责边界清晰
-- [ ] artifact 契约稳定
-- [ ] 晋升流程明确且不依赖本机长时间运行
+- [x] dense reference 有独立 workflow
+- [x] 与旧 phase diagram workflow 的职责边界清晰
+- [x] artifact 契约稳定
+- [x] 晋升流程明确且不依赖本机长时间运行
 
 ---
 
@@ -347,3 +348,51 @@ retention 建议：
   - 新 workflow 专门服务 dense reference artifact
 - [x] dense reference 的正式落库应保持“artifact 先生成，人工审阅后再提交”的治理口径
 
+---
+
+## 10. 2026-05-08 本线实施记录
+
+已完成的实现：
+
+- [x] 新增专用 workflow：
+  - `.github/workflows/pnjl-dense-reference.yml`
+- [x] 新增最小 artifact 校验脚本：
+  - `scripts/pnjl/validate_dense_reference_artifact.py`
+- [x] 补强 `build_dense_phase_reference.jl` manifest：
+  - 增加 `schema_version`
+  - 增加 `generator`
+  - 增加 `config`
+  - 增加 `artifacts` 文件与行数字段
+
+当前 workflow 固化口径：
+
+- [x] artifact 名称：
+  - `pnjl-dense-reference-<tag>`
+- [x] upload 白名单：
+  - `crossover_<tag>.csv`
+  - `crossover_<tag>.meta.json`
+  - `phase_reference_<tag>_manifest.json`
+  - `validation_report.json`
+- [x] retention：
+  - `30` 天
+- [x] 输出 staging 路径：
+  - `data/outputs/artifacts/pnjl_dense_reference/<run_id>/reference`
+- [x] processed run 路径：
+  - `data/processed/pnjl/ci_dense_reference/<run_id>`
+
+本地 smoke 验证记录：
+
+- [x] 执行命令：
+  - `julia --project=. scripts/pnjl/build_dense_phase_reference.jl --tag ci_smoke --xi-list 0.0 --T-min 150 --T-max 160 --T-step 10 --output-root data/processed/pnjl/local_dense_reference_smoke --reference-root data/outputs/artifacts/local_dense_reference_smoke --overwrite --crossover-only --crossover-mu0-only`
+- [x] 校验命令：
+  - `python scripts/pnjl/validate_dense_reference_artifact.py --reference-root data/outputs/artifacts/local_dense_reference_smoke --tag ci_smoke --min-crossover-rows 1 --expect-crossover-only --expect-mu0-only --report-path data/outputs/artifacts/local_dense_reference_smoke/validation_report.json`
+- [x] 结果：
+  - 生成 `csv + meta + manifest + validation_report`
+  - validator 通过
+  - artifact provenance / 覆盖范围 / 文件列表可读
+
+仍待完成：
+
+- [ ] 本 PR 合并到 `main` 后，在 GitHub Actions 上手动触发一次 `pnjl-dense-reference.yml`
+- [ ] 在 `main` 上用一次接近真实 `crossover_dense` use-case 的参数确认 runner 时长与 artifact 行为
+- [ ] 若 workflow 行为正常，在 `main` 上直接提交更新后的 `data/reference/pnjl/crossover_dense.csv` 与 sidecar/meta（无需新 PR）
