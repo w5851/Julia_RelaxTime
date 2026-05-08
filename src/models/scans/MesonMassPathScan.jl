@@ -240,7 +240,12 @@ end
 function _row_to_values(cols::Vector{String}, row::Dict{String,Any})
     return map(cols) do col
         value = get(row, col, "")
-        col == "message" ? ScanCommon.quote_csv(ScanCommon.clean_message(String(value))) : _format_cell(value)
+        if col == "message"
+            return ScanCommon.quote_csv(ScanCommon.clean_message(String(value)))
+        elseif col == "path_point_index"
+            return string(Int(round(Float64(value))))
+        end
+        return _format_cell(value)
     end
 end
 
@@ -351,6 +356,10 @@ function run_meson_mass_path_scan(;
             muB_MeV = pt.muB_MeV
 
             try
+                pt.T_MeV > 0.0 || throw(ArgumentError("path point T_MeV must be positive, got $(pt.T_MeV) for $(pt.path_family) path point index $(pt.path_point_index)"))
+                if isfinite(pt.muB_MeV)
+                    pt.muB_MeV >= 0.0 || throw(ArgumentError("path point muB_MeV must be nonnegative, got $(pt.muB_MeV) for path point index $(pt.path_point_index)"))
+                end
                 result = if isfinite(pt.muB_MeV)
                     muq_fm = (pt.muB_MeV / 3.0) / ħc_MeV_fm
                     res = MesonMassWorkflow.solve_gap_and_meson_point(
