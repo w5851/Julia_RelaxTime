@@ -72,7 +72,9 @@ function _baseline_map(path::String)
             tau_s=parse(Float64, row["tau_s"]),
             eta=parse(Float64, row["eta"]),
             sigma=parse(Float64, row["sigma"]),
+            zeta=parse(Float64, row["zeta"]),
             eta_over_s=parse(Float64, row["eta_over_s"]),
+            zeta_over_s=parse(Float64, row["zeta_over_s"]),
             sigma_over_T=parse(Float64, row["sigma_over_T"]),
         )
     end
@@ -89,6 +91,7 @@ end
         [0.0, 260.0],
         Float64[1.0],
         [120.0, 138.0],
+        true,
         false,
         true,
         false,
@@ -120,7 +123,9 @@ end
         @test isapprox(parse(Float64, row["tau_s"]), expected.tau_s; rtol=rtol, atol=atol)
         @test isapprox(parse(Float64, row["eta"]), expected.eta; rtol=rtol, atol=atol)
         @test isapprox(parse(Float64, row["sigma"]), expected.sigma; rtol=rtol, atol=atol)
+        @test isapprox(parse(Float64, row["zeta"]), expected.zeta; rtol=rtol, atol=atol)
         @test isapprox(parse(Float64, row["eta_over_s"]), expected.eta_over_s; rtol=rtol, atol=atol)
+        @test isapprox(parse(Float64, row["zeta_over_s"]), expected.zeta_over_s; rtol=rtol, atol=atol)
         @test isapprox(parse(Float64, row["sigma_over_T"]), expected.sigma_over_T; rtol=rtol, atol=atol)
     end
 end

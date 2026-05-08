@@ -18,7 +18,7 @@ end
 
 @testset "phase guided transport one-point execution smoke" begin
     outdir = mktempdir()
-    cmd = `julia --project=. $SCRIPT_PATH --mode b --outdir $outdir --case-name exec_smoke --xi-list 0.0 --muB-list 0 --T-list 120 --overwrite`
+    cmd = `julia --project=. $SCRIPT_PATH --mode fixed-T-sparse-muB --outdir $outdir --case-name exec_smoke --xi-list 0.0 --muB-list 0 --T-list 120 --overwrite`
     run(cmd)
 
     result_csv = joinpath(outdir, "phase_guided_transport_scan.csv")

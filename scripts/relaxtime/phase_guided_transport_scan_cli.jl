@@ -8,6 +8,7 @@ struct PhaseGuidedScanOptions
     muB_values::Vector{Float64}
     alpha_T_values::Vector{Float64}
     T_values::Vector{Float64}
+    compute_bulk::Bool
     dry_run::Bool
     overwrite::Bool
     resume::Bool
@@ -16,13 +17,15 @@ end
 function print_usage(io::IO=stdout)
     println(io, "Usage: julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl [options]\n")
     println(io, "Options:")
-    println(io, "  --mode <a|b>                 扫描模式：a=fixed muB + T/T_phase, b=fixed T + sparse muB")
+    println(io, "  --mode <a|b|fixed-muB-phase-scaled|fixed-T-sparse-muB>  扫描模式（推荐使用描述性模式名）")
     println(io, "  --outdir <dir>               输出目录（可选；默认写入 canonical results 路径）")
     println(io, "  --case-name <name>           canonical case 名称（default manual_case）")
     println(io, "  --xi-list v1,v2,...          连续 xi 采样列表（required）")
     println(io, "  --muB-list v1,v2,...         mode a/b 使用的离散 muB 列表（required）")
     println(io, "  --alphaT-list v1,v2,...      mode a 的 T/T_phase 倍率列表（default 1.0,1.1,1.2)")
     println(io, "  --T-list v1,v2,...           mode b 的固定温度列表（required for mode b）")
+    println(io, "  --compute-bulk               显式开启体粘滞 ζ 计算（默认开启）")
+    println(io, "  --no-compute-bulk            显式关闭体粘滞 ζ 计算")
     println(io, "  --dry-run                    仅生成 sampling plan/README/provenance，不执行计算")
     println(io, "  --resume                     若 result CSV 已存在则跳过已有点")
     println(io, "  --overwrite                  覆盖已有输出")
@@ -48,6 +51,7 @@ function parse_args(args::Vector{String})
         :muB_values => nothing,
         :alpha_T_values => Float64[1.0, 1.1, 1.2],
         :T_values => Float64[],
+        :compute_bulk => true,
         :dry_run => false,
         :overwrite => false,
         :resume => false,
@@ -64,9 +68,9 @@ function parse_args(args::Vector{String})
 
         if arg == "--mode"
             mode_raw = lowercase(strip(require_value()))
-            if mode_raw == "a"
+            if mode_raw in ("a", "fixed-mub-phase-scaled", "fixed_mub_phase_scaled")
                 opts[:mode] = :mode_a_fixed_muB_phase_scaled
-            elseif mode_raw == "b"
+            elseif mode_raw in ("b", "fixed-t-sparse-mub", "fixed_t_sparse_mub")
                 opts[:mode] = :mode_b_fixed_T_sparse_muB
             else
                 error("unsupported mode: $(mode_raw)")
@@ -83,6 +87,10 @@ function parse_args(args::Vector{String})
             opts[:alpha_T_values] = _parse_float_list(require_value())
         elseif arg == "--T-list"
             opts[:T_values] = _parse_float_list(require_value())
+        elseif arg == "--compute-bulk"
+            opts[:compute_bulk] = true
+        elseif arg == "--no-compute-bulk"
+            opts[:compute_bulk] = false
         elseif arg == "--dry-run"
             opts[:dry_run] = true
         elseif arg == "--overwrite"
@@ -123,6 +131,7 @@ function parse_args(args::Vector{String})
         Float64.(opts[:muB_values]),
         Float64.(opts[:alpha_T_values]),
         Float64.(opts[:T_values]),
+        Bool(opts[:compute_bulk]),
         Bool(opts[:dry_run]),
         Bool(opts[:overwrite]),
         Bool(opts[:resume]),

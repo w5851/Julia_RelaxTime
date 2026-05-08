@@ -9,6 +9,7 @@ phase-guided transport canonical case for `mode_b_fixed_T_sparse_muB`.
 - xi list: `-0.5, -0.2, 0.0, 0.2`
 - muB list (MeV): `0.0, 260.0`
 - fixed T list (MeV): `120.0, 138.0`
+- compute bulk viscosity (`zeta`): `true`
 - total planned points: `16`
 
 ## Key Files
@@ -26,8 +27,6 @@ phase-guided transport canonical case for `mode_b_fixed_T_sparse_muB`.
 - tau flavor-resolved same-panel figures by `scan_group`
 - individual `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` figures by `scan_group`
 - plot manifest: `figures/plot_manifest.json`
-- current manifest count: `20` generated PNG files
-- `zeta` / `zeta_over_s` are present in the CSV contract, but this canonical case currently yields `NaN` across all sampled points, so no `zeta` PNG is emitted by the plotting pass
 
 Generated PNG files:
 - `figures/scan_group=T120.0_muB0.0/eta_over_s_vs_xi.png`
@@ -35,18 +34,22 @@ Generated PNG files:
 - `figures/scan_group=T120.0_muB0.0/multi_y_tau_u_tau_d_tau_s_vs_xi.png`
 - `figures/scan_group=T120.0_muB0.0/sigma_over_T_vs_xi.png`
 - `figures/scan_group=T120.0_muB0.0/sigma_vs_xi.png`
+- `figures/scan_group=T120.0_muB0.0/zeta_vs_xi.png`
 - `figures/scan_group=T120.0_muB260.0/eta_over_s_vs_xi.png`
 - `figures/scan_group=T120.0_muB260.0/eta_vs_xi.png`
 - `figures/scan_group=T120.0_muB260.0/multi_y_tau_u_tau_d_tau_s_vs_xi.png`
 - `figures/scan_group=T120.0_muB260.0/sigma_over_T_vs_xi.png`
 - `figures/scan_group=T120.0_muB260.0/sigma_vs_xi.png`
+- `figures/scan_group=T120.0_muB260.0/zeta_vs_xi.png`
 - `figures/scan_group=T138.0_muB0.0/eta_over_s_vs_xi.png`
 - `figures/scan_group=T138.0_muB0.0/eta_vs_xi.png`
 - `figures/scan_group=T138.0_muB0.0/multi_y_tau_u_tau_d_tau_s_vs_xi.png`
 - `figures/scan_group=T138.0_muB0.0/sigma_over_T_vs_xi.png`
 - `figures/scan_group=T138.0_muB0.0/sigma_vs_xi.png`
+- `figures/scan_group=T138.0_muB0.0/zeta_vs_xi.png`
 - `figures/scan_group=T138.0_muB260.0/eta_over_s_vs_xi.png`
 - `figures/scan_group=T138.0_muB260.0/eta_vs_xi.png`
 - `figures/scan_group=T138.0_muB260.0/multi_y_tau_u_tau_d_tau_s_vs_xi.png`
 - `figures/scan_group=T138.0_muB260.0/sigma_over_T_vs_xi.png`
 - `figures/scan_group=T138.0_muB260.0/sigma_vs_xi.png`
+- `figures/scan_group=T138.0_muB260.0/zeta_vs_xi.png`

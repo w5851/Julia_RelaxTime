@@ -15,6 +15,7 @@ end
         [1.0, 1.1],
         Float64[],
         true,
+        true,
         false,
         false,
     )
@@ -38,6 +39,7 @@ end
         [0.0, 260.0, 420.0],
         Float64[1.0],
         [120.0, 138.0],
+        true,
         true,
         false,
         false,

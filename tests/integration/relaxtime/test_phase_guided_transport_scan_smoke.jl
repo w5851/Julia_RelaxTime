@@ -8,7 +8,7 @@ const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guide
     @test isfile(SCRIPT_PATH)
 
     outdir = mktempdir()
-    cmd = `julia --project=. $SCRIPT_PATH --mode a --outdir $outdir --case-name smoke_case --xi-list -0.2,0.0,0.2 --muB-list 150,400 --alphaT-list 1.0,1.1 --dry-run --overwrite`
+    cmd = `julia --project=. $SCRIPT_PATH --mode fixed-muB-phase-scaled --outdir $outdir --case-name smoke_case --xi-list -0.2,0.0,0.2 --muB-list 150,400 --alphaT-list 1.0,1.1 --dry-run --overwrite`
     run(cmd)
 
     plan_csv = joinpath(outdir, "sampling_plan.csv")

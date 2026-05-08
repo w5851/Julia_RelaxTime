@@ -2,6 +2,10 @@ module PhaseGuidedTransportScanAssets
 
 using JSON3
 
+@inline function _csv_quote(text::AbstractString)
+    return "\"" * replace(String(text), "\"" => "\"\"") * "\""
+end
+
 function write_plan_csv(path::String, plan)
     open(path, "w") do io
         println(io, "T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,T_phase_base_MeV,alpha_T")
@@ -13,7 +17,7 @@ function write_plan_csv(path::String, plan)
                 string(point.mode),
                 string(point.phase_reference_kind),
                 point.scan_group,
-                point.group_label,
+                _csv_quote(point.group_label),
                 string(point.T_phase_base_MeV),
                 string(point.alpha_T),
             ], ','))
@@ -42,6 +46,7 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         else
             println(io, "- fixed T list (MeV): `$(join(opts.T_values, ", "))`")
         end
+        println(io, "- compute bulk viscosity (`zeta`): `$(opts.compute_bulk)`")
         println(io, "- total planned points: `$(plan.total)`")
         println(io)
         println(io, "## Key Files")
@@ -68,6 +73,7 @@ function build_effective_config(opts, result_csv::String, plan_csv::String)
         "muB_values" => opts.muB_values,
         "alpha_T_values" => opts.alpha_T_values,
         "T_values" => opts.T_values,
+        "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,
         "overwrite" => opts.overwrite,
         "resume" => opts.resume,

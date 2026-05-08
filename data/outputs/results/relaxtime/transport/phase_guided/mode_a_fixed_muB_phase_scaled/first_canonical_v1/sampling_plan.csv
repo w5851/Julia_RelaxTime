@@ -1,0 +1,17 @@
+T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,T_phase_base_MeV,alpha_T
+121.96691037862763,260.0,-0.5,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.0,"muB=260.0 MeV, alpha_T=1.0",121.96691037862763,1.0
+130.0,260.0,-0.2,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.0,"muB=260.0 MeV, alpha_T=1.0",130.0,1.0
+130.0,260.0,0.0,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.0,"muB=260.0 MeV, alpha_T=1.0",130.0,1.0
+110.0,260.0,0.2,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.0,"muB=260.0 MeV, alpha_T=1.0",110.0,1.0
+134.1636014164904,260.0,-0.5,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.1,"muB=260.0 MeV, alpha_T=1.1",121.96691037862763,1.1
+143.0,260.0,-0.2,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.1,"muB=260.0 MeV, alpha_T=1.1",130.0,1.1
+143.0,260.0,0.0,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.1,"muB=260.0 MeV, alpha_T=1.1",130.0,1.1
+121.00000000000001,260.0,0.2,mode_a_fixed_muB_phase_scaled,first_order,muB260.0_alpha1.1,"muB=260.0 MeV, alpha_T=1.1",110.0,1.1
+50.0,400.0,-0.5,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.0,"muB=400.0 MeV, alpha_T=1.0",50.0,1.0
+50.0,400.0,-0.2,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.0,"muB=400.0 MeV, alpha_T=1.0",50.0,1.0
+50.0,400.0,0.0,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.0,"muB=400.0 MeV, alpha_T=1.0",50.0,1.0
+50.0,400.0,0.2,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.0,"muB=400.0 MeV, alpha_T=1.0",50.0,1.0
+55.00000000000001,400.0,-0.5,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.1,"muB=400.0 MeV, alpha_T=1.1",50.0,1.1
+55.00000000000001,400.0,-0.2,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.1,"muB=400.0 MeV, alpha_T=1.1",50.0,1.1
+55.00000000000001,400.0,0.0,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.1,"muB=400.0 MeV, alpha_T=1.1",50.0,1.1
+55.00000000000001,400.0,0.2,mode_a_fixed_muB_phase_scaled,first_order,muB400.0_alpha1.1,"muB=400.0 MeV, alpha_T=1.1",50.0,1.1

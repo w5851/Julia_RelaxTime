@@ -14,7 +14,7 @@ const PLOT_SCRIPT = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guide
     end
 
     outdir = mktempdir()
-    run(`julia --project=. $SCAN_SCRIPT --mode b --outdir $outdir --case-name plot_smoke --xi-list -0.2,0.0,0.2 --muB-list 0 --T-list 120 --overwrite`)
+    run(`julia --project=. $SCAN_SCRIPT --mode fixed-T-sparse-muB --outdir $outdir --case-name plot_smoke --xi-list -0.2,0.0,0.2 --muB-list 0 --T-list 120 --overwrite`)
     run(`julia --project=. $PLOT_SCRIPT --case-dir $outdir --python $python_cmd --overwrite`)
 
     fig_dir = joinpath(outdir, "figures")
@@ -26,9 +26,10 @@ const PLOT_SCRIPT = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guide
     @test isfile(readme_path)
 
     manifest = JSON3.read(read(manifest_path, String))
-    @test Int(manifest["count"]) >= 4
+    @test Int(manifest["count"]) >= 6
 
     readme = read(readme_path, String)
     @test occursin("Generated Figures", readme)
     @test occursin("plot_manifest.json", readme)
+    @test occursin("zeta_vs_xi.png", readme)
 end

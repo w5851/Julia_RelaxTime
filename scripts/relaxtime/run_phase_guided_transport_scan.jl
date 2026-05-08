@@ -28,6 +28,7 @@ function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.Phase
         "--provenance-dir", opts.outdir,
         "--failed-points-output", joinpath(opts.outdir, "failed_points.csv"),
     ]
+    !opts.compute_bulk && push!(base_args, "--no-compute-bulk")
     opts.overwrite && push!(base_args, "--overwrite")
     opts.resume && push!(base_args, "--resume")
     return Main.parse_args(base_args)

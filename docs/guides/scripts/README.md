@@ -122,6 +122,20 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - [scripts/relaxtime/run_manual_relaxation_scan_workflow.jl](../../../scripts/relaxtime/run_manual_relaxation_scan_workflow.jl)
   - 手动组合产物入口（`cross_section` / `plan_a` / `plan_b`）
   - 支持 `--base-output-dir` 将结果写到隔离目录（默认 `data/outputs`）
+- [scripts/relaxtime/run_phase_guided_transport_scan.jl](../../../scripts/relaxtime/run_phase_guided_transport_scan.jl)
+  - phase-guided transport 上层扫描入口
+  - 推荐模式名：
+    - `fixed-muB-phase-scaled`（兼容短别名 `a`）
+    - `fixed-T-sparse-muB`（兼容短别名 `b`）
+  - `fixed-muB-phase-scaled`：固定 `mu_B`，沿 `T/T_phase` 倍率带扫描 `xi`
+  - `fixed-T-sparse-muB`：固定 `T`、离散 `mu_B`、连续扫描 `xi`
+  - 默认 canonical 输出根目录：
+    - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
+    - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
+  - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
+- [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
+  - canonical case 的 post-processing / plot-review wrapper
+  - 复用 `scripts/plot_scan_csv.py`，输出 `figures/plot_manifest.json` 并回写 case README
 
 `plan_a` / `plan_b` 目录最小溯源产物：
 
