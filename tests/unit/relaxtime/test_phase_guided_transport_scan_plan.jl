@@ -23,9 +23,9 @@ end
     @test plan.total == 16
     refs_0 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 0.0)
     refs_400 = unique(p.phase_reference_kind for p in plan.points if p.muB_MeV == 400.0)
-    # Current repository reference set does not yet ship crossover_dense.csv,
-    # so mode a falls back to first-order reference temperatures.
-    @test refs_0 == [:first_order]
+    # With crossover_dense.csv present for the current xi anchors, mu_B = 0
+    # now consumes crossover references directly.
+    @test refs_0 == [:crossover]
     @test :first_order in refs_400
     @test all(isfinite(p.T_phase_base_MeV) for p in plan.points)
 end

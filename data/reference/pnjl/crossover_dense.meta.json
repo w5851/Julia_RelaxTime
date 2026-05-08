@@ -1,0 +1,119 @@
+{
+    "dense_meaning": {
+        "temperature_window_MeV": {
+            "max": 220,
+            "min": 60
+        },
+        "kind": "xi_mu_dense_reference",
+        "mu_B_sampling": {
+            "max_MeV": 450,
+            "values_MeV": [
+                0,
+                90,
+                180,
+                270,
+                360,
+                450
+            ],
+            "min_MeV": 0,
+            "strategy": "uniform_grid",
+            "count": 6
+        },
+        "description": "uniform xi grid combined with uniform mu_B sampling; each (xi, mu_B) slice runs crossover detection on a T window and stores the detected T_crossover",
+        "xi_sampling": {
+            "step": null,
+            "values": [
+                -0.5,
+                -0.2,
+                0.0,
+                0.2
+            ],
+            "strategy": "explicit_anchor_list",
+            "count": 4
+        }
+    },
+    "xi_coverage": {
+        "max": 0.2,
+        "min": -0.5,
+        "values": [
+            -0.5,
+            -0.2,
+            0.0,
+            0.2
+        ],
+        "count": 4
+    },
+    "column_definitions": [
+        {
+            "name": "xi",
+            "unit": "dimensionless",
+            "type": "Float64",
+            "description": "anisotropy control parameter"
+        },
+        {
+            "name": "mu_MeV",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "baryon chemical potential sample on the crossover scan"
+        },
+        {
+            "name": "T_crossover_MeV",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "detected crossover temperature at the sampled xi and mu_B"
+        },
+        {
+            "name": "rho",
+            "unit": "rho0",
+            "type": "Float64",
+            "description": "density-like coordinate returned by the crossover builder for the sampled point"
+        },
+        {
+            "name": "method",
+            "unit": null,
+            "type": "String",
+            "description": "crossover detector method"
+        },
+        {
+            "name": "converged",
+            "unit": null,
+            "type": "Bool",
+            "description": "whether the crossover detector reported a valid point"
+        },
+        {
+            "name": "derivative",
+            "unit": null,
+            "type": "Float64",
+            "description": "peak/response diagnostic returned by the detector"
+        },
+        {
+            "name": "variable",
+            "unit": null,
+            "type": "String",
+            "description": "order-parameter-like variable used by the detector"
+        }
+    ],
+    "mu_B_coverage": {
+        "max_MeV": 450,
+        "values_MeV": [
+            0,
+            90,
+            180,
+            270,
+            360,
+            450
+        ],
+        "min_MeV": 0,
+        "count": 6
+    },
+    "generator": {
+        "git_commit": "5cc9eb0bc4c8b28eb7ccfcc5e85a488a34767e99",
+        "script": "scripts/pnjl/build_dense_phase_reference.jl",
+        "generated_at": "2026-05-08T03:29:32Z"
+    },
+    "schema_version": "v1",
+    "artifact": {
+        "path": "data/reference/pnjl/crossover_dense.csv",
+        "row_count": 24
+    }
+}
