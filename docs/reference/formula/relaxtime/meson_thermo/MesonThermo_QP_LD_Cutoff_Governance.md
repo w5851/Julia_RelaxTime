@@ -184,6 +184,42 @@ d_M \int_0^{\Lambda_{\mathrm{QP}}}
 
 其中通常可取 `\Lambda_{\mathrm{QP}} = q_{\max}`。
 
+这里应特别强调：`QP` 与 `LD` 在文献口径下是两块**独立定义**的积分，而不是
+“总积分减去 LD 后剩余的部分”。
+
+因此当 `q > \Lambda_{\mathrm{LD}}` 时：
+
+- `LD` 部分 simply 不再计入；
+- 不应把同一 `q` 壳层中 `0 < \omega < q` 的 spacelike 区域自动并回 `QP`。
+
+实现层与公式层一致时，应该满足：
+
+```math
+P_M^{\mathrm{QP}}
+=
+d_M \int_0^{\Lambda_{\mathrm{QP}}}
+\frac{d^3q}{(2\pi)^3}
+\int_q^{\omega_{\max}} \frac{d\omega}{\pi}
+\frac{\delta_M(\omega,q;T)}{e^{\omega/T}-1},
+```
+
+```math
+P_M^{\mathrm{LD}}
+=
+d_M \int_0^{\Lambda_{\mathrm{LD}}}
+\frac{d^3q}{(2\pi)^3}
+\int_0^q \frac{d\omega}{\pi}
+\frac{\delta_M(\omega,q;T)}{e^{\omega/T}-1},
+```
+
+并且总压强是
+
+```math
+P_M = P_M^{\mathrm{QP}} + P_M^{\mathrm{LD}},
+```
+
+而不是通过“补集重分账”得到。
+
 对当前项目，若目标是优先贴近 `Maslov & Blaschke 2023` 的默认口径，则更合适的默认治理是：
 
 ```math
@@ -275,6 +311,44 @@ d_M \int_0^{\Lambda_{\mathrm{QP}}}
 2. `P_meson_qp(T)`
 3. `P_meson_ld(T)`
 4. `trace_anomaly(T)`
+
+---
+
+## 9. 真空基线与 QP/LD 的关系
+
+根据 `Maslov & Blaschke 2023` 在 “Pressure of the meson gas” 一节的口径：
+
+- 介子压强在总公式层面已经先做了
+
+```math
+\text{dropping the vacuum mesonic pressure},
+```
+
+即只保留热介子相关压强，不再包含独立的真空介子压强常数项。
+
+在此基础上，文献再把热介子压强分成：
+
+```math
+P_M = P_M^{\mathrm{QP}} + P_M^{\mathrm{LD}}.
+```
+
+因此：
+
+1. `QP / LD` 是**同一个热介子压强**的区域分拆；
+2. 文献没有再对 `P_M^{QP}` 或 `P_M^{LD}` 各自单独做一次
+   - `P^{QP}(T) - P^{QP}(0)`
+   - `P^{LD}(T) - P^{LD}(0)`
+   这样的额外真空基线平移；
+3. 若项目中需要对 `P_quark_meanfield / P_total` 做 vacuum-normalized reference，
+   该操作也只应作用在 mean-field / total pressure 零点上，而不应额外平移
+   `P_meson_qp / P_meson_ld`。
+
+换句话说，当前项目更合适的口径应是：
+
+- `P_quark_meanfield` / `P_total`：
+  - 可以做 vacuum-normalized pressure reference；
+- `P_meson_qp` / `P_meson_ld`：
+  - 保持“热介子相关贡献的分区”语义，不再额外做独立 baseline subtraction。
 5. `ld_cutoff sensitivity`
 
 其中 `ld_cutoff sensitivity` 至少应对两组不同 `\Lambda_{\mathrm{LD}}` 给出可对比结果。

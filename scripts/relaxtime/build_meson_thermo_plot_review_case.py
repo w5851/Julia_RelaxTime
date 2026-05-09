@@ -110,6 +110,8 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
         p_total_t4 = _to_float(row, "P_total_over_T4")
         p_q_t4 = _to_float(row, "P_quark_meanfield_over_T4")
         p_m_t4 = _to_float(row, "P_meson_over_T4")
+        p_qp_t4 = p_qp / (t_fm**4)
+        p_ld_t4 = p_ld / (t_fm**4)
         trace = _to_float(row, "trace_anomaly")
         qp_share = float("nan") if p_m == 0.0 else p_qp / p_m
         ld_share = float("nan") if p_m == 0.0 else p_ld / p_m
@@ -130,6 +132,8 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
                 "P_total_over_T4": p_total_t4,
                 "P_quark_meanfield_over_T4": p_q_t4,
                 "P_meson_over_T4": p_m_t4,
+                "P_meson_qp_over_T4": p_qp_t4,
+                "P_meson_ld_over_T4": p_ld_t4,
                 "trace_anomaly": trace,
                 "qp_share": qp_share,
                 "ld_share": ld_share,
@@ -158,6 +162,8 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
             "P_total_over_T4",
             "P_quark_meanfield_over_T4",
             "P_meson_over_T4",
+            "P_meson_qp_over_T4",
+            "P_meson_ld_over_T4",
             "trace_anomaly",
             "qp_share",
             "ld_share",
@@ -175,6 +181,8 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
     p_total_t4 = [float(row["P_total_over_T4"]) for row in summary_rows]
     p_q_t4 = [float(row["P_quark_meanfield_over_T4"]) for row in summary_rows]
     p_m_t4 = [float(row["P_meson_over_T4"]) for row in summary_rows]
+    p_qp_t4 = [float(row["P_meson_qp_over_T4"]) for row in summary_rows]
+    p_ld_t4 = [float(row["P_meson_ld_over_T4"]) for row in summary_rows]
     trace = [float(row["trace_anomaly"]) for row in summary_rows]
     qp_share = [float(row["qp_share"]) for row in summary_rows]
     ld_share = [float(row["ld_share"]) for row in summary_rows]
@@ -238,6 +246,23 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
     fig.savefig(split_png, dpi=160)
     plt.close(fig)
 
+    fig, axes = plt.subplots(2, 1, figsize=(8.8, 6.9), constrained_layout=True, sharex=True)
+    axes[0].plot(xs, p_qp_t4, linewidth=2.0, color="#2ca02c", label="P_meson_qp/T^4")
+    axes[0].plot(xs, p_ld_t4, linewidth=2.0, color="#ff7f0e", label="P_meson_ld/T^4")
+    axes[0].set_ylabel("P / T^4")
+    axes[0].set_title("Canonical mu_B=0 meson thermo: QP/LD split over T^4")
+    axes[0].grid(True, alpha=0.25)
+    axes[0].legend(frameon=False)
+    axes[1].plot(xs, qp_share, linewidth=2.0, color="#2ca02c", label="QP share in P/T^4")
+    axes[1].plot(xs, ld_share, linewidth=2.0, color="#ff7f0e", label="LD share in P/T^4")
+    axes[1].set_xlabel("T [MeV]")
+    axes[1].set_ylabel("share of P_meson/T^4")
+    axes[1].grid(True, alpha=0.25)
+    axes[1].legend(frameon=False)
+    split_t4_png = out_dir / "qp_ld_split_over_t4.png"
+    fig.savefig(split_t4_png, dpi=160)
+    plt.close(fig)
+
     fig, ax = plt.subplots(figsize=(8.8, 5.4), constrained_layout=True)
     ax.plot(xs, phi_u, linewidth=2.0, color="#1f77b4", label="phi_u")
     ax.plot(xs, phi_d, linewidth=2.0, color="#ff7f0e", label="phi_d")
@@ -286,6 +311,7 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
                 "- `pressure_over_t4_overlay.png`",
                 "- `trace_anomaly_overlay.png`",
                 "- `qp_ld_split.png`",
+                "- `qp_ld_split_over_t4.png`",
                 "- `order_parameters_phi_overlay.png`",
                 "- `README.md`",
                 "",
@@ -324,6 +350,7 @@ def build_plot_review_case(source_dir: Path, out_dir: Path) -> dict[str, Path]:
         "pressure_t4_png": pressure_t4_png,
         "trace_png": trace_png,
         "split_png": split_png,
+        "split_t4_png": split_t4_png,
         "order_png": order_png,
         "readme": readme,
     }

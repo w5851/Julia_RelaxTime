@@ -170,6 +170,7 @@ end
     )
     @test ld_trimmed.pressure ≈ ld_trimmed.pressure_qp + ld_trimmed.pressure_ld rtol=1e-12
     @test ld_trimmed.pressure_ld < current.pressure_ld
+    @test ld_trimmed.pressure < current.pressure
 
     summary = phase_shift_meson_pressure_summary(
         qp,

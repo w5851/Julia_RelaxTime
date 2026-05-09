@@ -437,11 +437,13 @@ function phase_shift_meson_pressure(
             gω = bose_distribution(omega_grid[iω], μ, tp.T)
             weighted_phase = _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
             contribution = omega_w[iω] * gω * weighted_phase
-            omega_val += contribution
-            if ld_active && _is_ld_region(omega_grid[iω], q, ld_threshold_mode_sym)
+            is_ld_region = _is_ld_region(omega_grid[iω], q, ld_threshold_mode_sym)
+            if ld_active && is_ld_region
                 omega_val_ld += contribution
-            else
+                omega_val += contribution
+            elseif !is_ld_region
                 omega_val_qp += contribution
+                omega_val += contribution
             end
         end
         omega_val /= (2.0 * π)
