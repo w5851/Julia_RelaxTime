@@ -1,8 +1,20 @@
+---
+title: PNJL dense reference CI 与 artifact 固化任务单
+archived: true
+original: docs/dev/active/2026-05-08_PNJL dense reference CI与artifact固化任务单.md
+archived_date: 2026-05-09
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL dense reference CI 与 artifact 固化任务单
 
-更新日期：2026-05-08
+更新日期：2026-05-09
 
-当前状态：实现中（本地 smoke 已完成；按 GitHub `workflow_dispatch` 约束，待合并到默认分支后再做 GitHub Actions 手动触发验证）；用于承接 `crossover_dense.csv` / `crossover_dense.meta.json` 后续扩展与 GitHub Actions 化，目标是把“长时间运行的 dense reference 生成”从本机手工执行迁移到可手动触发、可下载 artifact、可审计 provenance 的 CI 工作流。
+当前状态：已完成；专用 dense reference workflow 已合并到 `main`，GitHub Actions 手动触发 run `25547205076` 已成功完成，`crossover_dense.csv` / `crossover_dense.meta.json` / `phase_reference_dense_manifest.json` 已从 CI artifact 审阅后正式晋升到仓库主路径。
 
 > 目的：把 dense phase reference 的生成、校验、artifact 留存与正式落库路径从“本机长跑脚本”收束成可复用的 CI 流程，而不是继续依赖个人机器长时间运行和手工拣选文件。
 
@@ -270,7 +282,7 @@ retention 建议：
 
 验收：
 
-- [ ] 手动触发一次 GitHub Actions smoke 级 run 成功
+- [x] 手动触发一次 GitHub Actions smoke 级 run 成功
 - [x] 本地 smoke 级 run 已完成，artifact 文件集与预期一致
 
 ### 6.3 阶段 C：最小校验与治理
@@ -291,7 +303,7 @@ retention 建议：
 
 验收：
 
-- [ ] 仓库内有清晰的“CI 生成 -> 人工审阅 -> 正式落库”说明
+- [x] 仓库内有清晰的“CI 生成 -> 人工审阅 -> 正式落库”说明
 
 ---
 
@@ -299,14 +311,14 @@ retention 建议：
 
 ### 7.1 最小验证
 
-- [ ] 手动触发 `pnjl-dense-reference.yml`
+- [x] 手动触发 `pnjl-dense-reference.yml`
 - [x] 以小规模参数完成一次本地 smoke run
 - [x] 本地校验确认可稳定产出 csv + meta + manifest artifact 集合
 - [x] workflow summary 模板已包含配置与产物路径
 
 ### 7.2 收尾验证
 
-- [ ] 至少完成一次 GitHub 侧接近真实 use-case 的 `crossover_only` run
+- [x] 至少完成一次 GitHub 侧接近真实 use-case 的 `crossover_only` run
 - [x] 本地 artifact 已可无歧义识别：
   - `git commit`
   - 生成时间
@@ -391,8 +403,16 @@ retention 建议：
   - validator 通过
   - artifact provenance / 覆盖范围 / 文件列表可读
 
-仍待完成：
+收尾结果：
 
-- [ ] 本 PR 合并到 `main` 后，在 GitHub Actions 上手动触发一次 `pnjl-dense-reference.yml`
-- [ ] 在 `main` 上用一次接近真实 `crossover_dense` use-case 的参数确认 runner 时长与 artifact 行为
-- [ ] 若 workflow 行为正常，在 `main` 上直接提交更新后的 `data/reference/pnjl/crossover_dense.csv` 与 sidecar/meta（无需新 PR）
+- [x] PR #104 已合并到 `main`
+- [x] GitHub Actions `pnjl-dense-reference.yml` 已在 `main` 上手动触发并成功完成：
+  - run id: `25547205076`
+- [x] 本次 run 已确认 `crossover_dense` 正式 use-case 可运行：
+  - `xi = -0.5:0.05:0.5`
+  - `mu_q = 0:30:450 MeV`
+  - `336` 行 `crossover` 数据全部收敛
+- [x] `data/reference/pnjl/crossover_dense.csv`
+- [x] `data/reference/pnjl/crossover_dense.meta.json`
+- [x] `data/reference/pnjl/phase_reference_dense_manifest.json`
+  - 已在 `main` 上由提交 `08d387d feat(data): expand dense crossover reference grid` 正式晋升
