@@ -42,8 +42,7 @@
 
 当前尚缺：
 
-1. plot-review 图资产；
-2. external validation gate。
+1. external validation gate。
 
 ---
 
@@ -246,26 +245,31 @@ path-level regression 不需要复刻全部 CSV 列，只建议锁：
 
 ## 6. plot-review 层建议
 
-当前 meson thermo 还没有 figure 资产，因此先不进入自动 regression。
+当前 canonical `mu_B = 0` case 已有首个 plot-review 资产，并已进入独立 regression。
 
-后续若要补 plot-review，建议目录：
+当前目录：
 
 - `data/outputs/results/relaxtime/meson_thermo/plot_review/<case_slug>/`
 
-建议首个 case：
+当前首个 case：
 
 - `canonical_muB0_phase_shift_current_pi_sigma_pi`
 
-建议最小产物：
+当前最小产物：
 
 1. `workflow_scan.csv`
-2. `plot_review_comparison.csv`
+2. `plot_review_summary.csv`
 3. `pressure_overlay.png`
 4. `trace_anomaly_overlay.png`
 5. `qp_ld_split.png`
 6. `README.md`
 
-但在图资产未稳定前，不建议把 plot-review 目录直接纳入 regression gate。
+当前已新增：
+
+- baseline：
+  - `tests/baselines/relaxtime/baseline_meson_thermo_plot_review_case_v1.csv`
+- regression：
+  - `tests/regression/relaxtime/test_meson_thermo_plot_review_case_regression.jl`
 
 ---
 
