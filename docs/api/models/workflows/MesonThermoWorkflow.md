@@ -21,7 +21,7 @@
 当前派生热力学量有两种实现状态：
 
 - `stable` / `strict BW`：已切到 `Omega_total -> Models.model_thermo -> ForwardDiff`
-- `phase-shift`：已接入同一总线入口，但当前默认仍会回落到 workflow 层 legacy FD，直到 pressure kernel 去掉 AD 阻点
+- `phase-shift`：已接入同一总线入口，当前默认直接走 `omega_total_ad`
 
 ## 公开入口
 
@@ -134,7 +134,7 @@
 - `phase_structure` 当前固定写为 `unknown`，尚未与 phase pipeline 做正式联动
 - `QP / LD` 目前只在 phase-shift pressure 口径下显式输出；stable / strict BW 仍为空值
 - 兼容字段 `P_pi/P_K` 仍保留，但当第二通道切到 `sigma_pi` 时，更应使用 `primary/secondary` 字段解读合同
-- `phase-shift` 口径的总热力学派生量当前仍可能标记为 `workflow_fd_legacy`
+- 当前三类 meson thermo workflow 的总热力学派生量都应标记为 `omega_total_ad`
 - 尚未提供 canonical temperature scan 脚本与结果目录落盘
 - 尚未沉淀 regression baseline
 - 尚未做 channel 扩张决策

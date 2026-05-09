@@ -39,7 +39,7 @@ const DEFAULT_PHASE_SHIFT_OMEGA_MAX = 10.0
 const DEFAULT_PHASE_SHIFT_OMEGA_NODES = 48
 const DEFAULT_PHASE_SHIFT_ETA = 1e-6
 
-@inline function _require_nonnegative(name::AbstractString, value::Float64)
+@inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
 end
@@ -82,7 +82,7 @@ raw"""
 g(E) = 1 / (\exp((E-\mu)/T) - 1)
 ```
 """
-function bose_distribution(E::Float64, μ::Float64, T::Float64)::Float64
+function bose_distribution(E::Real, μ::Real, T::Real)
     _require_nonnegative("temperature T", T)
     T == 0.0 && return 0.0
     E > μ || throw(ArgumentError("Bose distribution requires E > μ to avoid pole, got E=$(E), μ=$(μ)"))
@@ -717,11 +717,11 @@ end
     return (reD * dim - imD * dre) / denom
 end
 
-function _unwrap_phases(phases::Vector{Float64})
+function _unwrap_phases(phases::AbstractVector{<:Real})
     out = similar(phases)
     isempty(phases) && return out
     out[1] = phases[1]
-    shift = 0.0
+    shift = zero(eltype(phases))
     for i in 2:length(phases)
         Δ = phases[i] - phases[i - 1]
         if Δ > π
@@ -767,65 +767,65 @@ function _simple_meson_pol_params(meson::Symbol, qp)
     if meson === :pi
         return (
             channel=:P,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.u),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.u),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.u),
+            m1=qp.m.u, m2=qp.m.u,
+            μ1=qp.μ.u, μ2=qp.μ.u,
+            A1=qp.A.u, A2=qp.A.u,
             num_s_quark=0,
         )
     elseif meson === :pi_plus
         return (
             channel=:P,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.d),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.d),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.d),
+            m1=qp.m.u, m2=qp.m.d,
+            μ1=qp.μ.u, μ2=qp.μ.d,
+            A1=qp.A.u, A2=qp.A.d,
             num_s_quark=0,
         )
     elseif meson === :pi_minus
         return (
             channel=:P,
-            m1=Float64(qp.m.d), m2=Float64(qp.m.u),
-            μ1=Float64(qp.μ.d), μ2=Float64(qp.μ.u),
-            A1=Float64(qp.A.d), A2=Float64(qp.A.u),
+            m1=qp.m.d, m2=qp.m.u,
+            μ1=qp.μ.d, μ2=qp.μ.u,
+            A1=qp.A.d, A2=qp.A.u,
             num_s_quark=0,
         )
     elseif meson === :K
         return (
             channel=:P,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.s),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.s),
+            m1=qp.m.u, m2=qp.m.s,
+            μ1=qp.μ.u, μ2=qp.μ.s,
+            A1=qp.A.u, A2=qp.A.s,
             num_s_quark=1,
         )
     elseif meson === :K_plus
         return (
             channel=:P,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.s),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.s),
+            m1=qp.m.u, m2=qp.m.s,
+            μ1=qp.μ.u, μ2=qp.μ.s,
+            A1=qp.A.u, A2=qp.A.s,
             num_s_quark=1,
         )
     elseif meson === :K_minus
         return (
             channel=:P,
-            m1=Float64(qp.m.s), m2=Float64(qp.m.u),
-            μ1=Float64(qp.μ.s), μ2=Float64(qp.μ.u),
-            A1=Float64(qp.A.s), A2=Float64(qp.A.u),
+            m1=qp.m.s, m2=qp.m.u,
+            μ1=qp.μ.s, μ2=qp.μ.u,
+            A1=qp.A.s, A2=qp.A.u,
             num_s_quark=1,
         )
     elseif meson === :sigma_pi
         return (
             channel=:S,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.u),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.u),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.u),
+            m1=qp.m.u, m2=qp.m.u,
+            μ1=qp.μ.u, μ2=qp.μ.u,
+            A1=qp.A.u, A2=qp.A.u,
             num_s_quark=0,
         )
     elseif meson === :sigma_K
         return (
             channel=:S,
-            m1=Float64(qp.m.u), m2=Float64(qp.m.s),
-            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
-            A1=Float64(qp.A.u), A2=Float64(qp.A.s),
+            m1=qp.m.u, m2=qp.m.s,
+            μ1=qp.μ.u, μ2=qp.μ.s,
+            A1=qp.A.u, A2=qp.A.s,
             num_s_quark=1,
         )
     end
@@ -833,26 +833,27 @@ function _simple_meson_pol_params(meson::Symbol, qp)
 end
 
 function _build_k_coeffs(qp)
-    G_u = calculate_G_from_A(Float64(qp.A.u), Float64(qp.m.u))
-    G_s = calculate_G_from_A(Float64(qp.A.s), Float64(qp.m.s))
+    G_u = calculate_G_from_A(qp.A.u, qp.m.u)
+    G_s = calculate_G_from_A(qp.A.s, qp.m.s)
     return calculate_effective_couplings(G_fm2, K_fm5, G_u, G_s)
 end
 
-function _propagator_components(meson::Symbol, ω::T, q::Float64, qp, tp, K_coeffs; eta::Float64) where {T<:Real}
+function _propagator_components(meson::Symbol, ω::T, q::Real, qp, tp, K_coeffs; eta::Real) where {T<:Real}
     pol = _simple_meson_pol_params(meson, qp)
     Π_re, Π_im = polarization_with_width(
         pol.channel, ω, 2.0 * eta, q,
         pol.m1, pol.m2,
         pol.μ1, pol.μ2,
-        Float64(tp.T), Float64(tp.Φ), Float64(tp.Φbar), Float64(tp.ξ),
+        tp.T, tp.Φ, tp.Φbar, tp.ξ,
         pol.A1, pol.A2, pol.num_s_quark,
     )
-    Π = Complex{T}(Π_re, Π_im)
+    TΠ = promote_type(typeof(Π_re), typeof(Π_im))
+    Π = Complex{TΠ}(Π_re, Π_im)
     D = meson_propagator_simple(meson, K_coeffs, Π)
     return real(D), imag(D)
 end
 
-function _propagator_phase(meson::Symbol, ω::T, q::Float64, qp, tp, K_coeffs; eta::Float64) where {T<:Real}
+function _propagator_phase(meson::Symbol, ω::T, q::Real, qp, tp, K_coeffs; eta::Real) where {T<:Real}
     reD, imD = _propagator_components(meson, ω, q, qp, tp, K_coeffs; eta=eta)
     return atan(imD, reD)
 end

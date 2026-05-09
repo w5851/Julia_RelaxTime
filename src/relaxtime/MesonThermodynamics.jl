@@ -40,25 +40,29 @@ export phase_shift_meson_pressure, phase_shift_meson_pressure_summary
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
 end
 
-@inline function _default_qmax(mass::Float64, T::Float64, μ::Float64)::Float64
-    gap = max(mass - μ, 0.0)
-    return max(8.0, 20.0 * T + 10.0 * gap, 8.0 * mass + 10.0 * T)
+@inline function _default_qmax(mass::Real, T::Real, μ::Real)::Float64
+    gap = max(Float64(mass - μ), 0.0)
+    return max(8.0, 20.0 * Float64(T) + 10.0 * gap, 8.0 * Float64(mass) + 10.0 * Float64(T))
 end
 
 @inline function _normalize_thermo_namedtuple(tp)
     return (
-        T=Float64(tp.T),
-        Φ=Float64(tp.Φ),
-        Φbar=Float64(tp.Φbar),
-        ξ=Float64(tp.ξ),
+        T=tp.T,
+        Φ=tp.Φ,
+        Φbar=tp.Φbar,
+        ξ=tp.ξ,
     )
 end
 
 @inline function _normalize_quark_namedtuple(qp)
-    return (
+    base = (
         m=(u=Float64(qp.m.u), d=Float64(qp.m.d), s=Float64(qp.m.s)),
         μ=(u=Float64(qp.μ.u), d=Float64(qp.μ.d), s=Float64(qp.μ.s)),
     )
+    if hasproperty(qp, :A)
+        return merge(base, (A=(u=qp.A.u, d=qp.A.d, s=qp.A.s),))
+    end
+    return base
 end
 
 @inline function _resolve_channel_degeneracy(meson::Symbol, degeneracy::Union{Nothing,Integer})::Int
@@ -80,7 +84,7 @@ end
 end
 
 @inline function _resolve_ld_cutoff(
-    ld_cutoff::Union{Nothing,Float64},
+    ld_cutoff::Union{Nothing,Real},
     qmax::Float64,
     mode::Symbol,
 )::Float64
@@ -92,7 +96,7 @@ end
     return Float64(ld_cutoff)
 end
 
-@inline function _is_ld_region(ω::Float64, q::Float64, threshold_mode::Symbol)::Bool
+@inline function _is_ld_region(ω::Real, q::Real, threshold_mode::Symbol)::Bool
     mode_sym = _normalize_ld_threshold_mode(threshold_mode)
     if mode_sym === :omega_lt_q
         return ω < q
@@ -142,8 +146,8 @@ function stable_meson_pressure_summary(
     pi_mass::Float64,
     k_mass::Float64,
     T::Real;
-    μ_pi::Float64=0.0,
-    μ_K::Float64=0.0,
+    μ_pi::Real=0.0,
+    μ_K::Real=0.0,
     d_pi::Union{Nothing,Integer}=nothing,
     d_K::Union{Nothing,Integer}=nothing,
     pi_channel::Symbol=:pi,
@@ -355,7 +359,7 @@ function phase_shift_meson_pressure(
     quark_params,
     thermo_params;
     degeneracy::Integer=meson_degeneracy(meson),
-    μ::Float64=0.0,
+    μ::Real=0.0,
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -363,7 +367,7 @@ function phase_shift_meson_pressure(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
-    ld_cutoff::Union{Nothing,Float64}=nothing,
+    ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_qmax,
     ld_threshold_mode::Symbol=:omega_lt_q,
 )
@@ -381,9 +385,9 @@ function phase_shift_meson_pressure(
     ld_threshold_mode_sym = _normalize_ld_threshold_mode(ld_threshold_mode)
 
     tp = _normalize_thermo_namedtuple(thermo_params)
-    _require_nonnegative("temperature T", Float64(tp.T))
+    _require_nonnegative("temperature T", tp.T)
     _require_phase_shift_isotropic_xi(Float64(tp.ξ))
-    Float64(tp.T) > 0.0 || return (
+    tp.T > 0.0 || return (
         meson=meson,
         pressure=0.0,
         pressure_qp=0.0,
@@ -411,9 +415,9 @@ function phase_shift_meson_pressure(
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
     omega_grid, omega_w = gauleg(omega_lower, omega_max, omega_nodes)
 
-    q_shell_weighted_sum = 0.0
-    q_shell_weighted_sum_qp = 0.0
-    q_shell_weighted_sum_ld = 0.0
+    q_shell_weighted_sum = zero(tp.T)
+    q_shell_weighted_sum_qp = zero(tp.T)
+    q_shell_weighted_sum_ld = zero(tp.T)
     q_shell_at_qmax = NaN
     q_shell_at_qmax_qp = NaN
     q_shell_at_qmax_ld = NaN
@@ -421,16 +425,16 @@ function phase_shift_meson_pressure(
         q = q_grid[iq]
         phases = [_propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta) for ω in omega_grid]
         phase_unwrapped = _unwrap_phases(phases)
-        omega_val = 0.0
-        omega_val_qp = 0.0
-        omega_val_ld = 0.0
+        omega_val = zero(tp.T)
+        omega_val_qp = zero(tp.T)
+        omega_val_ld = zero(tp.T)
         ld_active = q <= ld_cutoff_value
         for iω in eachindex(omega_grid, omega_w, phase_unwrapped)
-            gω = bose_distribution(Float64(omega_grid[iω]), μ, Float64(tp.T))
+            gω = bose_distribution(omega_grid[iω], μ, tp.T)
             weighted_phase = _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
             contribution = omega_w[iω] * gω * weighted_phase
             omega_val += contribution
-            if ld_active && _is_ld_region(Float64(omega_grid[iω]), Float64(q), ld_threshold_mode_sym)
+            if ld_active && _is_ld_region(omega_grid[iω], q, ld_threshold_mode_sym)
                 omega_val_ld += contribution
             else
                 omega_val_qp += contribution
@@ -452,8 +456,8 @@ function phase_shift_meson_pressure(
         end
     end
 
-    pressure_qp = Float64(degeneracy) * q_shell_weighted_sum_qp
-    pressure_ld = Float64(degeneracy) * q_shell_weighted_sum_ld
+    pressure_qp = degeneracy * q_shell_weighted_sum_qp
+    pressure_ld = degeneracy * q_shell_weighted_sum_ld
     pressure = pressure_qp + pressure_ld
     return (
         meson=meson,
@@ -495,7 +499,7 @@ function phase_shift_meson_pressure_summary(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
-    ld_cutoff::Union{Nothing,Float64}=nothing,
+    ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_qmax,
     ld_threshold_mode::Symbol=:omega_lt_q,
 )
@@ -536,15 +540,15 @@ function phase_shift_meson_pressure_summary(
         ld_threshold_mode=ld_threshold_mode,
     )
 
-    p_pi = Float64(pi_pressure.pressure)
-    p_K = Float64(k_pressure.pressure)
-    p_pi_qp = Float64(pi_pressure.pressure_qp)
-    p_pi_ld = Float64(pi_pressure.pressure_ld)
-    p_K_qp = Float64(k_pressure.pressure_qp)
-    p_K_ld = Float64(k_pressure.pressure_ld)
+    p_pi = pi_pressure.pressure
+    p_K = k_pressure.pressure
+    p_pi_qp = pi_pressure.pressure_qp
+    p_pi_ld = pi_pressure.pressure_ld
+    p_K_qp = k_pressure.pressure_qp
+    p_K_ld = k_pressure.pressure_ld
     return (
-        T_fm=Float64(thermo_params.T),
-        xi=Float64(thermo_params.ξ),
+        T_fm=thermo_params.T,
+        xi=thermo_params.ξ,
         pi_channel=pi_channel,
         k_channel=k_channel,
         d_pi=d_pi_resolved,
@@ -566,7 +570,7 @@ function phase_shift_meson_pressure_summary(
         omega_nodes=omega_nodes,
         eta=eta,
         scheme=_phase_shift_scheme_symbol(scheme),
-        ld_cutoff=Float64(pi_pressure.ld_cutoff),
+        ld_cutoff=pi_pressure.ld_cutoff,
         ld_cutoff_mode=pi_pressure.ld_cutoff_mode,
         ld_threshold_mode=pi_pressure.ld_threshold_mode,
         pi_pressure=pi_pressure,

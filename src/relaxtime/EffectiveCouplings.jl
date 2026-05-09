@@ -50,13 +50,13 @@ A_u = A(T_inv_fm, μ_inv_fm, m_inv_fm, Φ, Φbar)
 G_u = calculate_G_from_A(A_u)
 ```
 """
-@inline @fastmath function calculate_G_from_A(A_f::Float64, m_f::Float64; Nc::Int=3)
+@inline @fastmath function calculate_G_from_A(A_f::Real, m_f::Real; Nc::Int=3)
     # 与 C++ set_pse() 中 G[i] 的构造一致（去掉了外层的 K_f 因子，
     # 该因子会在 calculate_effective_couplings 的 K * G_f 中引入）
     return -Nc / (4.0 * π^2) * (m_f * A_f)
 end
 
-@inline @fastmath function calculate_G_from_A(A_f::Float64; Nc::Int=3)
+@inline @fastmath function calculate_G_from_A(A_f::Real; Nc::Int=3)
     throw(ArgumentError("calculate_G_from_A(A_f) is deprecated; call calculate_G_from_A(A_f, m_f)"))
 end
 
@@ -107,8 +107,8 @@ det_K_S = coupling_matrix_determinant(K_coeffs.K0_minus, K_coeffs.K8_minus, K_co
 2. det K的符号直接关系到介子传播子的因果性
 3. 在某些极端参数下（如非常高的温度或密度），det K可能变负，表示模型失效
 """
-@inline @fastmath function coupling_matrix_determinant(K0::Float64, K8::Float64, 
-                                                       K08::Float64)
+@inline @fastmath function coupling_matrix_determinant(K0::Real, K8::Real,
+                                                       K08::Real)
     return K0 * K8 - K08^2
 end
 
@@ -236,8 +236,8 @@ println("det(K⁻) = ", K_coeffs.det_K_minus, " fm⁴ (σ/σ'混合)")
 3. 在手征极限下（G^μ = G^s = 0），所有K_α^±均退化为G
 4. K_{08}^±的符号差异来自于η-η'混合的非对角项
 """
-@inline @fastmath function calculate_effective_couplings(G::Float64, K::Float64, 
-                                                         G_u::Float64, G_s::Float64)
+@inline @fastmath function calculate_effective_couplings(G::Real, K::Real,
+                                                         G_u::Real, G_s::Real)
     # K₀± = G ∓ (1/3)K(2G^μ + G^s)
     term_0 = (1.0 / 3.0) * K * (2.0 * G_u + G_s)
     K0_plus = G - term_0

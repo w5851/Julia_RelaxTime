@@ -16,9 +16,9 @@ using ..OneLoopIntegralsCorrection: B0_correction
 计算PNJL模型中两粒子碰撞下的赝标量(P)或标量(S)介子(通过channel标记区分)的极化函数(动量各向异性下)
 返回 polarization_real, polarization_imag
 """
-function polarization_aniso(channel::Symbol, k0::Float64, k_norm::Float64, m1::Float64, m2::Float64, 
-                                  μ1::Float64, μ2::Float64, T::Float64, Φ::Float64, Φbar::Float64, 
-                                  ξ::Float64, A1_value::Float64, A2_value::Float64, num_s_quark::Int)
+function polarization_aniso(channel::Symbol, k0::Real, k_norm::Real, m1::Real, m2::Real,
+                                  μ1::Real, μ2::Real, T::Real, Φ::Real, Φbar::Real,
+                                  ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int)
     # 计算总系数
     factor = -N_color / (8π^2)
     # 计算能量-化学势组合参数
@@ -68,11 +68,12 @@ end
 在保持实数B0积分路径的前提下，引入复数能量 p0 = k0 + i*gamma/2 的宽度效应。
 返回 polarization_real, polarization_imag
 """
-function polarization_with_width(channel::Symbol, k0::T, gamma::Float64, k_norm::Float64,
-                                 m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
-                                 T0::Float64, Φ::Float64, Φbar::Float64,
-                                 ξ::Float64, A1_value::Float64, A2_value::Float64, num_s_quark::Int) where {T<:Real}
-    factor = T(-N_color / (8π^2))
+function polarization_with_width(channel::Symbol, k0::T, gamma::Real, k_norm::Real,
+                                 m1::Real, m2::Real, μ1::Real, μ2::Real,
+                                 T0::Real, Φ::Real, Φbar::Real,
+                                 ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int) where {T<:Real}
+    Tout = promote_type(T, typeof(gamma), typeof(k_norm), typeof(m1), typeof(m2), typeof(μ1), typeof(μ2), typeof(T0), typeof(Φ), typeof(Φbar), typeof(ξ), typeof(A1_value), typeof(A2_value))
+    factor = Tout(-N_color / (8π^2))
     λ = k0 + μ1 - μ2
 
     # 计算B0函数项（仍走实数路径）
@@ -80,8 +81,8 @@ function polarization_with_width(channel::Symbol, k0::T, gamma::Float64, k_norm:
     if num_s_quark == 1
         λ_extra = -k0 + μ1 - μ2
         B0_real_extra, B0_imag_extra = B0(λ_extra, k_norm, m1, μ1, m2, μ2, T0; Φ=Φ, Φbar=Φbar)
-        B0_real = T(0.5) * (B0_real + B0_real_extra)
-        B0_imag = T(0.5) * (B0_imag + B0_imag_extra)
+        B0_real = Tout(0.5) * (B0_real + B0_real_extra)
+        B0_imag = Tout(0.5) * (B0_imag + B0_imag_extra)
     end
 
     # 计算B0函数项的修正
@@ -89,16 +90,16 @@ function polarization_with_width(channel::Symbol, k0::T, gamma::Float64, k_norm:
         B0_corr_real, B0_corr_imag = B0_correction(λ, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ)
         if num_s_quark == 1
             B0_corr_real_extra, B0_corr_imag_extra = B0_correction(λ_extra, k_norm, m1, m2, μ1, μ2, T0, Φ, Φbar, ξ)
-            B0_corr_real = T(0.5) * (B0_corr_real + B0_corr_real_extra)
-            B0_corr_imag = T(0.5) * (B0_corr_imag + B0_corr_imag_extra)
+            B0_corr_real = Tout(0.5) * (B0_corr_real + B0_corr_real_extra)
+            B0_corr_imag = Tout(0.5) * (B0_corr_imag + B0_corr_imag_extra)
         end
-        B0_real += T(B0_corr_real)
-        B0_imag += T(B0_corr_imag)
+        B0_real += Tout(B0_corr_real)
+        B0_imag += Tout(B0_corr_imag)
     end
 
     # 组合极化函数实部/虚部（宽度通过组合项进入）
-    real_part = T(A1_value + A2_value)
-    imag_part = zero(T)
+    real_part = Tout(A1_value + A2_value)
+    imag_part = zero(Tout)
     prefactor = k_norm^2 - λ^2
     if channel == :P
         prefactor += (m1 - m2)^2
@@ -108,7 +109,7 @@ function polarization_with_width(channel::Symbol, k0::T, gamma::Float64, k_norm:
         throw(ArgumentError("Unsupported channel: $channel. Use :P or :S."))
     end
 
-    prefactor += T((gamma^2) / 4.0)
+    prefactor += Tout((gamma^2) / 4.0)
     real_part += prefactor * B0_real - gamma * λ * B0_imag
     imag_part += prefactor * B0_imag + gamma * λ * B0_real
 
@@ -119,10 +120,10 @@ end
     polarization_complex(channel, p0, k_norm, m1, m2, μ1, μ2, T, Φ, Φbar, ξ, A1_value, A2_value, num_s_quark)
 复数能量包装接口：p0 = k0 + i*gamma/2
 """
-function polarization_complex(channel::Symbol, p0::ComplexF64, k_norm::Float64,
-                              m1::Float64, m2::Float64, μ1::Float64, μ2::Float64,
-                              T::Float64, Φ::Float64, Φbar::Float64,
-                              ξ::Float64, A1_value::Float64, A2_value::Float64, num_s_quark::Int)
+function polarization_complex(channel::Symbol, p0::Complex{<:Real}, k_norm::Real,
+                              m1::Real, m2::Real, μ1::Real, μ2::Real,
+                              T::Real, Φ::Real, Φbar::Real,
+                              ξ::Real, A1_value::Real, A2_value::Real, num_s_quark::Int)
     k0 = real(p0)
     gamma = 2.0 * imag(p0)
     return polarization_with_width(channel, k0, gamma, k_norm,

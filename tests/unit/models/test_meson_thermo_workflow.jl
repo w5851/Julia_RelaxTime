@@ -132,7 +132,7 @@ const _MTW = Models.MesonThermoWorkflow
         @test row.ld_threshold_mode == "omega_lt_q"
     end
 
-    @testset "gap-and-phase-shift thermo currently falls back from omega_total AD" begin
+    @testset "gap-and-phase-shift thermo now uses omega_total AD" begin
         T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
         point = Models.solve_gap_and_phase_shift_meson_thermo_point(
             T_fm,
@@ -148,8 +148,8 @@ const _MTW = Models.MesonThermoWorkflow
         )
         thermo = point.phase_shift_meson_thermo
         row = Models.build_meson_thermo_contract_row(point)
-        @test thermo.thermo_derivation_mode == :workflow_fd_legacy
-        @test row.thermo_derivation_mode == "workflow_fd_legacy"
+        @test thermo.thermo_derivation_mode == :omega_total_ad
+        @test row.thermo_derivation_mode == "omega_total_ad"
         @test isfinite(thermo.entropy)
         @test isfinite(thermo.epsilon)
     end
