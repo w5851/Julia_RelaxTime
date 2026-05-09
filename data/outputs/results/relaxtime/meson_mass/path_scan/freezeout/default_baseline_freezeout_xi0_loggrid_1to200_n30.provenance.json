@@ -1,0 +1,37 @@
+{
+  "schema_version": "v1",
+  "case_name": "default_baseline_freezeout_xi0_loggrid_1to200_n30",
+  "generated_at_utc": "2026-05-09T03:11:35Z",
+  "source_csv": "data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30.csv",
+  "valid_points_csv": "data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30.valid_points.csv",
+  "figures": [
+    "data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_path_overview.png",
+    "data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_pseudoscalar_masses.png",
+    "data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_scalar_masses.png"
+  ],
+  "git_commit": "66411efb58f403b4358ec682748426472d204aaa",
+  "git_branch": "codex/meson-mass-path-scan",
+  "points_total": 30,
+  "points_plotted": 28,
+  "points_excluded": 2,
+  "exclusion_rule": "exclude rows with equilibrium_converged != true or T_MeV <= 0.0",
+  "known_invalid_points": [
+    {
+      "path_point_index": 0,
+      "sqrt_s_NN_GeV": 1.0,
+      "T_MeV": -39.822008,
+      "muB_MeV": 1027.494108,
+      "message": "ArgumentError: path point T_MeV must be positive, got -39.82200768912389 for freezeout path point index 0"
+    },
+    {
+      "path_point_index": 1,
+      "sqrt_s_NN_GeV": 1.200455,
+      "T_MeV": -18.820897,
+      "muB_MeV": 985.144356,
+      "message": "ArgumentError: path point T_MeV must be positive, got -18.820897490114305 for freezeout path point index 1"
+    }
+  ],
+  "freezeout_default_zero_temperature_threshold_sqrt_s_NN_GeV": 1.411898175100664,
+  "recommended_physical_lower_bound_sqrt_s_NN_GeV": 1.45,
+  "note": "Formal production CSV remains [1, 200] GeV as requested; future physical freezeout scans should use sqrt(s_NN) >= 1.45 GeV for the default baseline profile."
+}
