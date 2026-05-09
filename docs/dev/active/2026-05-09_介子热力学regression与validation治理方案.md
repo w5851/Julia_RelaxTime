@@ -2,7 +2,7 @@
 
 更新日期：2026-05-09
 
-当前状态：方案已落盘；本页只定义 meson thermo 主线的测试分层、baseline 候选资产与 validation 升格门槛，不在本轮直接新增 baseline 文件，也不更新现有 regression 入口。
+当前状态：首版 point-level fixedpoint baseline 与 regression 已落地；本页继续作为 meson thermo 主线的测试分层、path-level 候选资产与 validation 升格门槛说明。
 
 ---
 
@@ -42,10 +42,9 @@
 
 当前尚缺：
 
-1. 正式 point-level baseline CSV；
-2. 正式 path-level regression baseline；
-3. plot-review 图资产；
-4. external validation gate。
+1. 正式 path-level regression baseline；
+2. plot-review 图资产；
+3. external validation gate。
 
 ---
 
@@ -66,7 +65,7 @@
    - 锁外部 reference 或文献 target；
    - 必须先证明路径、口径、模型差异都足够可解释。
 
-当前 meson thermo 已完成前两层；后续优先补第 3 层，再决定第 4 层。
+当前 meson thermo 已完成前 3 层中的第一版 point-level regression；后续继续补 path-level regression，再决定第 4 层。
 
 ---
 
@@ -80,19 +79,19 @@ point-level regression 的目的不是追求“最终物理真值”，而是先
 2. `phase_shift_current` 主口径没有意外变号、爆炸或回退到 legacy 差分；
 3. `pi/sigma_pi` 主双通道的量级关系没有被无意改写。
 
-### 4.2 候选 baseline 文件
+### 4.2 首版 baseline 文件
 
-建议后续新增：
+当前已落地：
 
 - `tests/baselines/relaxtime/baseline_meson_thermo_fixedpoints_v1.csv`
 
-建议后续新增 regression 文件：
+当前已落地 regression 文件：
 
 - `tests/regression/relaxtime/test_meson_thermo_fixedpoint_regression.jl`
 
 ### 4.3 建议固定点集合
 
-首版只锁最小代表点，不追求大覆盖：
+当前首版固定点只锁最小代表点，不追求大覆盖：
 
 1. canonical `mu_B = 0`, `xi = 0`
 2. 温点建议：
@@ -179,7 +178,7 @@ path-level regression 用来锁：
 2. 温度路径上没有明显跳点、缺点、字段漂移；
 3. `README` 摘要与 `run_manifest` 语义没有退化。
 
-### 5.2 候选 baseline 与测试文件
+### 5.2 path-level baseline 与测试文件候选
 
 建议后续新增：
 
