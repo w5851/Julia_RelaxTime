@@ -46,6 +46,17 @@ T \log(1 - e^{-(E_M-\mu_M)/T})^{-1}.
 - `:current`
 - `:gbu_reference`
 
+当前已显式拆出：
+
+- `QP`（timelike / `omega >= q`）部分
+- `LD`（Landau damping / `omega < q`）部分
+
+并支持最小治理参数：
+
+- `ld_cutoff`
+- `ld_cutoff_mode`
+- `ld_threshold_mode`
+
 ## 输出摘要
 
 summary helper 统一返回：
@@ -58,6 +69,12 @@ summary helper 统一返回：
 phase-shift 摘要还会携带：
 
 - `scheme`
+- `P_pi_qp`, `P_pi_ld`
+- `P_K_qp`, `P_K_ld`
+- `P_meson_qp`, `P_meson_ld`
+- `ld_cutoff`
+- `ld_cutoff_mode`
+- `ld_threshold_mode`
 - `pi_pressure`
 - `k_pressure`
 

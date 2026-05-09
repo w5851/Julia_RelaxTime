@@ -61,6 +61,41 @@ end
     )
 end
 
+@inline function _normalize_ld_cutoff_mode(mode::Symbol)::Symbol
+    if mode === :match_qmax || mode === :explicit
+        return mode
+    end
+    throw(ArgumentError("ld_cutoff_mode must be :match_qmax or :explicit, got $(mode)"))
+end
+
+@inline function _normalize_ld_threshold_mode(mode::Symbol)::Symbol
+    if mode === :omega_lt_q || mode === :spacelike_strict
+        return mode
+    end
+    throw(ArgumentError("ld_threshold_mode must be :omega_lt_q or :spacelike_strict, got $(mode)"))
+end
+
+@inline function _resolve_ld_cutoff(
+    ld_cutoff::Union{Nothing,Float64},
+    qmax::Float64,
+    mode::Symbol,
+)::Float64
+    mode_sym = _normalize_ld_cutoff_mode(mode)
+    if mode_sym === :match_qmax
+        return ld_cutoff === nothing ? qmax : Float64(ld_cutoff)
+    end
+    ld_cutoff === nothing && throw(ArgumentError("ld_cutoff must be provided when ld_cutoff_mode = :explicit"))
+    return Float64(ld_cutoff)
+end
+
+@inline function _is_ld_region(ω::Float64, q::Float64, threshold_mode::Symbol)::Bool
+    mode_sym = _normalize_ld_threshold_mode(threshold_mode)
+    if mode_sym === :omega_lt_q
+        return ω < q
+    end
+    return ω * ω < q * q
+end
+
 function bosonic_log_pressure_factor(E::Float64, μ::Float64, T::Float64)::Float64
     _require_nonnegative("temperature T", T)
     T == 0.0 && return 0.0
@@ -312,6 +347,9 @@ function phase_shift_meson_pressure(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+    ld_cutoff::Union{Nothing,Float64}=nothing,
+    ld_cutoff_mode::Symbol=:match_qmax,
+    ld_threshold_mode::Symbol=:omega_lt_q,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
     _require_positive_node_count("q_nodes", q_nodes)
@@ -320,6 +358,11 @@ function phase_shift_meson_pressure(
     omega_lower = _phase_shift_omega_lower_bound(omega_min, μ)
     omega_max > omega_lower || throw(ArgumentError("omega_max must exceed effective omega_min=$(omega_lower)"))
     scheme_sym = _phase_shift_scheme_symbol(scheme)
+    ld_cutoff_value = _resolve_ld_cutoff(ld_cutoff, qmax, ld_cutoff_mode)
+    ld_cutoff_value > 0.0 || throw(ArgumentError("ld_cutoff must be positive, got $(ld_cutoff_value)"))
+    ld_cutoff_value <= qmax || throw(ArgumentError("ld_cutoff must not exceed qmax=$(qmax), got $(ld_cutoff_value)"))
+    ld_cutoff_mode_sym = _normalize_ld_cutoff_mode(ld_cutoff_mode)
+    ld_threshold_mode_sym = _normalize_ld_threshold_mode(ld_threshold_mode)
 
     tp = _normalize_thermo_namedtuple(thermo_params)
     _require_nonnegative("temperature T", Float64(tp.T))
@@ -327,8 +370,14 @@ function phase_shift_meson_pressure(
     Float64(tp.T) > 0.0 || return (
         meson=meson,
         pressure=0.0,
+        pressure_qp=0.0,
+        pressure_ld=0.0,
         q_integral_estimate=0.0,
+        q_integral_estimate_qp=0.0,
+        q_integral_estimate_ld=0.0,
         omega_shell_at_qmax=0.0,
+        omega_shell_at_qmax_qp=0.0,
+        omega_shell_at_qmax_ld=0.0,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_min=omega_lower,
@@ -336,6 +385,9 @@ function phase_shift_meson_pressure(
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         scheme=scheme_sym,
+        ld_cutoff=ld_cutoff_value,
+        ld_cutoff_mode=ld_cutoff_mode_sym,
+        ld_threshold_mode=ld_threshold_mode_sym,
     )
 
     qp = ensure_quark_params_has_A(_normalize_quark_namedtuple(quark_params), tp)
@@ -344,30 +396,60 @@ function phase_shift_meson_pressure(
     omega_grid, omega_w = gauleg(omega_lower, omega_max, omega_nodes)
 
     q_shell_weighted_sum = 0.0
+    q_shell_weighted_sum_qp = 0.0
+    q_shell_weighted_sum_ld = 0.0
     q_shell_at_qmax = NaN
+    q_shell_at_qmax_qp = NaN
+    q_shell_at_qmax_ld = NaN
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
         phases = [_propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta) for ω in omega_grid]
         phase_unwrapped = _unwrap_phases(phases)
         omega_val = 0.0
+        omega_val_qp = 0.0
+        omega_val_ld = 0.0
+        ld_active = q <= ld_cutoff_value
         for iω in eachindex(omega_grid, omega_w, phase_unwrapped)
             gω = bose_distribution(Float64(omega_grid[iω]), μ, Float64(tp.T))
-            omega_val += omega_w[iω] * gω * _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
+            weighted_phase = _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
+            contribution = omega_w[iω] * gω * weighted_phase
+            omega_val += contribution
+            if ld_active && _is_ld_region(Float64(omega_grid[iω]), Float64(q), ld_threshold_mode_sym)
+                omega_val_ld += contribution
+            else
+                omega_val_qp += contribution
+            end
         end
         omega_val /= (2.0 * π)
+        omega_val_qp /= (2.0 * π)
+        omega_val_ld /= (2.0 * π)
         q_shell = (q^2 / (2.0 * π^2)) * omega_val
+        q_shell_qp = (q^2 / (2.0 * π^2)) * omega_val_qp
+        q_shell_ld = (q^2 / (2.0 * π^2)) * omega_val_ld
         q_shell_weighted_sum += q_w[iq] * q_shell
+        q_shell_weighted_sum_qp += q_w[iq] * q_shell_qp
+        q_shell_weighted_sum_ld += q_w[iq] * q_shell_ld
         if iq == length(q_grid)
             q_shell_at_qmax = q_shell
+            q_shell_at_qmax_qp = q_shell_qp
+            q_shell_at_qmax_ld = q_shell_ld
         end
     end
 
-    pressure = Float64(degeneracy) * q_shell_weighted_sum
+    pressure_qp = Float64(degeneracy) * q_shell_weighted_sum_qp
+    pressure_ld = Float64(degeneracy) * q_shell_weighted_sum_ld
+    pressure = pressure_qp + pressure_ld
     return (
         meson=meson,
         pressure=pressure,
+        pressure_qp=pressure_qp,
+        pressure_ld=pressure_ld,
         q_integral_estimate=q_shell_weighted_sum,
+        q_integral_estimate_qp=q_shell_weighted_sum_qp,
+        q_integral_estimate_ld=q_shell_weighted_sum_ld,
         omega_shell_at_qmax=q_shell_at_qmax,
+        omega_shell_at_qmax_qp=q_shell_at_qmax_qp,
+        omega_shell_at_qmax_ld=q_shell_at_qmax_ld,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_min=omega_lower,
@@ -375,6 +457,9 @@ function phase_shift_meson_pressure(
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         scheme=scheme_sym,
+        ld_cutoff=ld_cutoff_value,
+        ld_cutoff_mode=ld_cutoff_mode_sym,
+        ld_threshold_mode=ld_threshold_mode_sym,
     )
 end
 
@@ -394,6 +479,9 @@ function phase_shift_meson_pressure_summary(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+    ld_cutoff::Union{Nothing,Float64}=nothing,
+    ld_cutoff_mode::Symbol=:match_qmax,
+    ld_threshold_mode::Symbol=:omega_lt_q,
 )
     pi_pressure = phase_shift_meson_pressure(
         pi_channel,
@@ -408,6 +496,9 @@ function phase_shift_meson_pressure_summary(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        ld_cutoff=ld_cutoff,
+        ld_cutoff_mode=ld_cutoff_mode,
+        ld_threshold_mode=ld_threshold_mode,
     )
     k_pressure = phase_shift_meson_pressure(
         k_channel,
@@ -422,10 +513,17 @@ function phase_shift_meson_pressure_summary(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        ld_cutoff=ld_cutoff,
+        ld_cutoff_mode=ld_cutoff_mode,
+        ld_threshold_mode=ld_threshold_mode,
     )
 
     p_pi = Float64(pi_pressure.pressure)
     p_K = Float64(k_pressure.pressure)
+    p_pi_qp = Float64(pi_pressure.pressure_qp)
+    p_pi_ld = Float64(pi_pressure.pressure_ld)
+    p_K_qp = Float64(k_pressure.pressure_qp)
+    p_K_ld = Float64(k_pressure.pressure_ld)
     return (
         T_fm=Float64(thermo_params.T),
         xi=Float64(thermo_params.ξ),
@@ -435,6 +533,12 @@ function phase_shift_meson_pressure_summary(
         d_K=Int(d_K),
         P_pi=p_pi,
         P_K=p_K,
+        P_pi_qp=p_pi_qp,
+        P_pi_ld=p_pi_ld,
+        P_K_qp=p_K_qp,
+        P_K_ld=p_K_ld,
+        P_meson_qp=p_pi_qp + p_K_qp,
+        P_meson_ld=p_pi_ld + p_K_ld,
         P_meson=p_pi + p_K,
         P_K_over_P_pi=iszero(p_pi) ? NaN : p_K / p_pi,
         qmax=qmax,
@@ -444,6 +548,9 @@ function phase_shift_meson_pressure_summary(
         omega_nodes=omega_nodes,
         eta=eta,
         scheme=_phase_shift_scheme_symbol(scheme),
+        ld_cutoff=Float64(pi_pressure.ld_cutoff),
+        ld_cutoff_mode=pi_pressure.ld_cutoff_mode,
+        ld_threshold_mode=pi_pressure.ld_threshold_mode,
         pi_pressure=pi_pressure,
         k_pressure=k_pressure,
     )

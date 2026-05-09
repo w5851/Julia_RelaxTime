@@ -10,6 +10,8 @@
 - 在 `π/K` 通道上补齐 mesonic pressure
 - 给出用户可消费的最小 EOS 合同：
   - `P_meson`
+  - `P_meson_qp`
+  - `P_meson_ld`
   - `P_quark_meanfield`
   - `P_total`
   - `entropy`
@@ -55,16 +57,25 @@
 - `workflow`
 - `channel_set`
 - `P_meson`
+- `P_meson_qp`
+- `P_meson_ld`
 - `P_quark_meanfield`
 - `P_total`
 - `delta_P_vs_no_meson`
 - `P_meson_over_P_total`
+- `P_pi_qp`
+- `P_pi_ld`
+- `P_K_qp`
+- `P_K_ld`
 - `entropy`
 - `epsilon`
 - `trace_anomaly`
 - `equilibrium_converged`
 - `phase_structure`
 - `phase_shift_variant`
+- `ld_cutoff`
+- `ld_cutoff_mode`
+- `ld_threshold_mode`
 
 ## CSV 合同
 
@@ -75,6 +86,8 @@
 - `workflow`
 - `channel_set`
 - `P_meson`
+- `P_meson_qp`
+- `P_meson_ld`
 - `P_total`
 - `P_quark_meanfield`
 - `epsilon`
@@ -82,13 +95,21 @@
 - `trace_anomaly`
 - `P_meson_over_P_total`
 - `delta_P_vs_no_meson`
+- `P_pi_qp`
+- `P_pi_ld`
+- `P_K_qp`
+- `P_K_ld`
 - `equilibrium_converged`
 - `phase_structure`
 - `phase_shift_variant`
+- `ld_cutoff`
+- `ld_cutoff_mode`
+- `ld_threshold_mode`
 
 ## 当前边界
 
 - `phase_structure` 当前固定写为 `unknown`，尚未与 phase pipeline 做正式联动
+- `QP / LD` 目前只在 phase-shift pressure 口径下显式输出；stable / strict BW 仍为空值
 - 尚未提供 canonical temperature scan 脚本与结果目录落盘
 - 尚未沉淀 regression baseline
 - 尚未做 channel 扩张决策

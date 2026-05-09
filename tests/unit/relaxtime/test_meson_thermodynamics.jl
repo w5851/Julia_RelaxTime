@@ -110,7 +110,28 @@ end
     @test isfinite(gbu.pressure)
     @test current.pressure > 0.0
     @test gbu.pressure > 0.0
+    @test current.pressure ≈ current.pressure_qp + current.pressure_ld rtol=1e-12
+    @test gbu.pressure ≈ gbu.pressure_qp + gbu.pressure_ld rtol=1e-12
+    @test isfinite(current.pressure_qp)
+    @test current.pressure_ld ≥ 0.0
     @test !isapprox(current.pressure, gbu.pressure; rtol=1e-6, atol=1e-10)
+
+    ld_trimmed = phase_shift_meson_pressure(
+        :pi_plus,
+        qp,
+        tp;
+        scheme=:current,
+        degeneracy=1,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        ld_cutoff=1.0,
+        ld_cutoff_mode=:explicit,
+    )
+    @test ld_trimmed.pressure ≈ ld_trimmed.pressure_qp + ld_trimmed.pressure_ld rtol=1e-12
+    @test ld_trimmed.pressure_ld < current.pressure_ld
 
     summary = phase_shift_meson_pressure_summary(
         qp,
@@ -125,5 +146,8 @@ end
     @test summary.scheme == :phase_shift_gbu_reference
     @test summary.P_pi > 0.0
     @test summary.P_K > 0.0
+    @test summary.P_pi ≈ summary.P_pi_qp + summary.P_pi_ld rtol=1e-12
+    @test summary.P_K ≈ summary.P_K_qp + summary.P_K_ld rtol=1e-12
+    @test summary.P_meson ≈ summary.P_meson_qp + summary.P_meson_ld rtol=1e-12
     @test summary.P_meson ≈ summary.P_pi + summary.P_K rtol=1e-12
 end
