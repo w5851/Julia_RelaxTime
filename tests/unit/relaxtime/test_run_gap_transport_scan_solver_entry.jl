@@ -19,6 +19,16 @@ end
     @test :transport_point_api in Main.Models.list_precompile_profile(:scan)
 end
 
+@testset "preloaded Models identity remains stable" begin
+    original_models = Main.Models
+    solver = Main.Models.NLsolveGapSolver(method=:trust_region, jacobian=:finite)
+
+    include(_SCAN_SCRIPT)
+
+    @test Main.Models === original_models
+    @test solver isa Main.Models.AbstractGapSolver
+end
+
 @testset "gap transport scan provenance shell" begin
     effective = Main.build_effective_config(Main.ScanOptions(
         "tmp.csv",

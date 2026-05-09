@@ -22,7 +22,9 @@ include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "provenance_metadata.jl")
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "integration", "GaussLegendre.jl"))
-include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+end
 include(joinpath(PROJECT_ROOT, "src", "relaxtime", "EffectiveCouplings.jl"))
 
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5, Λ_inv_fm, ρ0_inv_fm3
