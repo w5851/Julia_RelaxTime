@@ -9,39 +9,83 @@
             "max_MeV": 450,
             "values_MeV": [
                 0,
+                30,
+                60,
                 90,
+                120,
+                150,
                 180,
+                210,
+                240,
                 270,
+                300,
+                330,
                 360,
+                390,
+                420,
                 450
             ],
             "min_MeV": 0,
             "strategy": "uniform_grid",
-            "count": 6
+            "count": 16
         },
         "description": "uniform xi grid combined with uniform mu_q sampling; each (xi, mu_q) slice runs crossover detection on a T window and stores the detected T_crossover",
         "xi_sampling": {
-            "step": null,
+            "step": 0.04999999999999999,
             "values": [
                 -0.5,
+                -0.45,
+                -0.4,
+                -0.35,
+                -0.3,
+                -0.25,
                 -0.2,
+                -0.15,
+                -0.1,
+                -0.05,
                 0.0,
-                0.2
+                0.05,
+                0.1,
+                0.15,
+                0.2,
+                0.25,
+                0.3,
+                0.35,
+                0.4,
+                0.45,
+                0.5
             ],
-            "strategy": "explicit_anchor_list",
-            "count": 4
+            "strategy": "uniform_grid",
+            "count": 21
         }
     },
     "xi_coverage": {
-        "max": 0.2,
+        "max": 0.5,
         "min": -0.5,
         "values": [
             -0.5,
+            -0.45,
+            -0.4,
+            -0.35,
+            -0.3,
+            -0.25,
             -0.2,
+            -0.15,
+            -0.1,
+            -0.05,
             0.0,
-            0.2
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
         ],
-        "count": 4
+        "count": 21
     },
     "column_definitions": [
         {
@@ -97,23 +141,33 @@
         "max_MeV": 450,
         "values_MeV": [
             0,
+            30,
+            60,
             90,
+            120,
+            150,
             180,
+            210,
+            240,
             270,
+            300,
+            330,
             360,
+            390,
+            420,
             450
         ],
         "min_MeV": 0,
-        "count": 6
+        "count": 16
     },
     "generator": {
-        "git_commit": "5cc9eb0bc4c8b28eb7ccfcc5e85a488a34767e99",
+        "git_commit": "16edba6b88e125f524159fb1356269a90384f7a0",
         "script": "scripts/pnjl/build_dense_phase_reference.jl",
-        "generated_at": "2026-05-08T03:29:32Z"
+        "generated_at": "2026-05-08T10:38:13Z"
     },
     "schema_version": "v1",
     "artifact": {
         "path": "data/reference/pnjl/crossover_dense.csv",
-        "row_count": 24
+        "row_count": 336
     }
 }
