@@ -42,9 +42,8 @@
 
 当前尚缺：
 
-1. 正式 path-level regression baseline；
-2. plot-review 图资产；
-3. external validation gate。
+1. plot-review 图资产；
+2. external validation gate。
 
 ---
 
@@ -178,9 +177,9 @@ path-level regression 用来锁：
 2. 温度路径上没有明显跳点、缺点、字段漂移；
 3. `README` 摘要与 `run_manifest` 语义没有退化。
 
-### 5.2 path-level baseline 与测试文件候选
+### 5.2 path-level baseline 与测试文件
 
-建议后续新增：
+当前已落地：
 
 - baseline：
   - `tests/baselines/relaxtime/baseline_meson_thermo_canonical_muB0_path_v1.csv`
