@@ -29,6 +29,7 @@ using ..MesonDensity: DEFAULT_PHASE_SHIFT_ETA,
                       _unwrap_phases,
                       bose_distribution,
                       meson_degeneracy
+using Main.Constants_PNJL: Λ_inv_fm
 
 export bosonic_log_pressure_factor
 export stable_meson_pressure, stable_meson_pressure_summary
@@ -70,10 +71,10 @@ end
 end
 
 @inline function _normalize_ld_cutoff_mode(mode::Symbol)::Symbol
-    if mode === :match_qmax || mode === :explicit
+    if mode === :match_model_lambda || mode === :match_qmax || mode === :explicit
         return mode
     end
-    throw(ArgumentError("ld_cutoff_mode must be :match_qmax or :explicit, got $(mode)"))
+    throw(ArgumentError("ld_cutoff_mode must be :match_model_lambda, :match_qmax or :explicit, got $(mode)"))
 end
 
 @inline function _normalize_ld_threshold_mode(mode::Symbol)::Symbol
@@ -89,6 +90,9 @@ end
     mode::Symbol,
 )::Float64
     mode_sym = _normalize_ld_cutoff_mode(mode)
+    if mode_sym === :match_model_lambda
+        return ld_cutoff === nothing ? min(Float64(Λ_inv_fm), qmax) : Float64(ld_cutoff)
+    end
     if mode_sym === :match_qmax
         return ld_cutoff === nothing ? qmax : Float64(ld_cutoff)
     end
@@ -368,7 +372,7 @@ function phase_shift_meson_pressure(
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     ld_cutoff::Union{Nothing,Real}=nothing,
-    ld_cutoff_mode::Symbol=:match_qmax,
+    ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
@@ -500,7 +504,7 @@ function phase_shift_meson_pressure_summary(
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     ld_cutoff::Union{Nothing,Real}=nothing,
-    ld_cutoff_mode::Symbol=:match_qmax,
+    ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
 )
     d_pi_resolved = _resolve_channel_degeneracy(pi_channel, d_pi)

@@ -31,6 +31,13 @@
 
 该 reference 只平移 mean-field / total pressure 零点，不改变 `P_meson` 本身；总派生量仍通过 `Omega_total -> Models.model_thermo -> ForwardDiff` 统一给出。
 
+对 phase-shift meson thermo，`LD cutoff` 的默认治理也已调整为：
+
+- `ld_cutoff_mode = :match_model_lambda`
+- 即默认取 `\Lambda_{LD} = \Lambda_{PNJL}`
+
+其中 `:match_qmax` 仍保留为 legacy 对照口径，适合做 cutoff sensitivity 或回看旧结果时显式启用。
+
 ## 公开入口
 
 - `Models.solve_meson_thermo_from_meson_point`

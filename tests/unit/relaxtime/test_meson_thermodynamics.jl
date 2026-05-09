@@ -14,6 +14,7 @@ using Main.RelaxTime.MesonThermodynamics: bosonic_log_pressure_factor,
                                           stable_meson_pressure_summary,
                                           strict_bw_meson_pressure,
                                           strict_bw_meson_pressure_summary
+using Main.Constants_PNJL: Λ_inv_fm
 
 @testset "MesonThermodynamics stable pressure" begin
     @test bosonic_log_pressure_factor(1.0, 0.0, 0.2) > 0.0
@@ -149,6 +150,8 @@ end
     @test gbu.pressure ≈ gbu.pressure_qp + gbu.pressure_ld rtol=1e-12
     @test isfinite(current.pressure_qp)
     @test current.pressure_ld ≥ 0.0
+    @test current.ld_cutoff ≈ min(Λ_inv_fm, 4.0) rtol=1e-12
+    @test current.ld_cutoff_mode == :match_model_lambda
     @test !isapprox(current.pressure, gbu.pressure; rtol=1e-6, atol=1e-10)
 
     ld_trimmed = phase_shift_meson_pressure(
@@ -185,4 +188,6 @@ end
     @test summary.P_K ≈ summary.P_K_qp + summary.P_K_ld rtol=1e-12
     @test summary.P_meson ≈ summary.P_meson_qp + summary.P_meson_ld rtol=1e-12
     @test summary.P_meson ≈ summary.P_pi + summary.P_K rtol=1e-12
+    @test summary.ld_cutoff ≈ min(Λ_inv_fm, 4.0) rtol=1e-12
+    @test summary.ld_cutoff_mode == :match_model_lambda
 end

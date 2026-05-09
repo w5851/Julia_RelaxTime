@@ -489,7 +489,7 @@ function solve_phase_shift_meson_thermo_from_meson_point(
     omega_nodes::Int=48,
     eta::Float64=1e-6,
     ld_cutoff::Union{Nothing,Float64}=nothing,
-    ld_cutoff_mode::Symbol=:match_qmax,
+    ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
     p_num::Int=default_momentum_count(),
     t_num::Int=default_theta_count(),
@@ -761,7 +761,7 @@ function solve_gap_and_phase_shift_meson_thermo_point(
         omega_nodes=Int(result.omega_nodes),
         eta=Float64(result.eta),
         ld_cutoff=isnan(Float64(result.ld_cutoff)) ? nothing : Float64(result.ld_cutoff),
-        ld_cutoff_mode=result.ld_cutoff_mode === nothing ? :match_qmax : Symbol(result.ld_cutoff_mode),
+        ld_cutoff_mode=result.ld_cutoff_mode === nothing ? :match_model_lambda : Symbol(result.ld_cutoff_mode),
         ld_threshold_mode=result.ld_threshold_mode === nothing ? :omega_lt_q : Symbol(result.ld_threshold_mode),
     ).P_meson
     pressure_shift_fn = _with_pressure_reference_shift(

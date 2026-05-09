@@ -55,7 +55,7 @@ Base.@kwdef struct ScanOptions
     omega_nodes::Int=48
     eta::Float64=1e-6
     ld_cutoff::Union{Nothing,Float64}=nothing
-    ld_cutoff_mode::Symbol=:match_qmax
+    ld_cutoff_mode::Symbol=:match_model_lambda
     ld_threshold_mode::Symbol=:omega_lt_q
     allow_legacy_fd_fallback::Bool=false
     pressure_reference_mode::Symbol=:raw_absolute
@@ -82,7 +82,7 @@ function print_usage()
     println("  --omega-nodes <int>           内层 omega 节点数 (default 48)")
     println("  --eta <float>                 相移诊断小虚部参数 (default 1e-6)")
     println("  --ld-cutoff <fm^-1>           显式 LD cutoff；未给出时沿 workflow 默认治理")
-    println("  --ld-cutoff-mode <symbol>     LD cutoff 治理口径 (default match_qmax)")
+    println("  --ld-cutoff-mode <symbol>     LD cutoff 治理口径 (default match_model_lambda)")
     println("  --ld-threshold-mode <symbol>  QP/LD 分区口径 (default omega_lt_q)")
     println("  --allow-legacy-fd-fallback    允许 AD 失败时回落 workflow 私有差分")
     println("  --pressure-reference <mode>   压强参考口径: raw_absolute | vacuum_subtracted_mu0")

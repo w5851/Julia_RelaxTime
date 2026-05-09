@@ -6,6 +6,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 Models.pnjl_module()
+const Λ_INV_FM = Main.Constants_PNJL.Λ_inv_fm
 
 const _MTW = Models.MesonThermoWorkflow
 
@@ -118,8 +119,8 @@ const _MTW = Models.MesonThermoWorkflow
         @test gbu.P_meson > 0.0
         @test current.P_meson ≈ current.P_meson_qp + current.P_meson_ld rtol=1e-12
         @test gbu.P_meson ≈ gbu.P_meson_qp + gbu.P_meson_ld rtol=1e-12
-        @test current.ld_cutoff ≈ 4.0 rtol=1e-12
-        @test current.ld_cutoff_mode == :match_qmax
+        @test current.ld_cutoff ≈ min(Λ_INV_FM, 4.0) rtol=1e-12
+        @test current.ld_cutoff_mode == :match_model_lambda
         @test current.ld_threshold_mode == :omega_lt_q
         @test !isapprox(current.P_meson, gbu.P_meson; rtol=1e-6, atol=1e-10)
 
@@ -128,7 +129,7 @@ const _MTW = Models.MesonThermoWorkflow
         @test row.P_meson_ld ≈ current.P_meson_ld rtol=1e-12
         @test row.P_meson ≈ row.P_meson_qp + row.P_meson_ld rtol=1e-12
         @test row.ld_cutoff ≈ current.ld_cutoff rtol=1e-12
-        @test row.ld_cutoff_mode == "match_qmax"
+        @test row.ld_cutoff_mode == "match_model_lambda"
         @test row.ld_threshold_mode == "omega_lt_q"
     end
 

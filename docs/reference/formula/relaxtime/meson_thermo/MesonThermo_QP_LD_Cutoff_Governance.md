@@ -152,7 +152,7 @@ P_{\mathrm{meson}}
 - `ld_cutoff`
   - `LD` 动量截断
 - `ld_cutoff_mode`
-  - 例如 `:match_qmax`、`:fixed_multiple_of_Lambda`、`:explicit`
+  - 例如 `:match_model_lambda`、`:match_qmax`、`:fixed_multiple_of_Lambda`、`:explicit`
 - `ld_threshold_mode`
   - 例如 `:spacelike_strict`、`:omega_lt_q`
 - `scheme`
@@ -183,6 +183,23 @@ d_M \int_0^{\Lambda_{\mathrm{QP}}}
 ```
 
 其中通常可取 `\Lambda_{\mathrm{QP}} = q_{\max}`。
+
+对当前项目，若目标是优先贴近 `Maslov & Blaschke 2023` 的默认口径，则更合适的默认治理是：
+
+```math
+\Lambda_{\mathrm{LD}} = \Lambda,
+```
+
+其中 `\Lambda` 是 PNJL 模型自身使用的三动量 cutoff，而不是外层数值扫描给出的 `q_{\max}`。
+
+因此当前项目建议：
+
+- `ld_cutoff_mode = :match_model_lambda`
+  - 语义：默认把 `\Lambda_{\mathrm{LD}}` 取为 PNJL 模型 cutoff `\Lambda`
+- `ld_cutoff_mode = :match_qmax`
+  - 语义：legacy 数值口径，令 `\Lambda_{\mathrm{LD}} = q_{\max}`
+- `ld_cutoff_mode = :explicit`
+  - 语义：由调用方显式给出 `ld_cutoff`
 
 ---
 
