@@ -57,3 +57,17 @@ end
     @test any(p.phase_reference_kind == :first_order for p in plan.points)
     @test any(p.phase_reference_kind == :crossover for p in plan.points)
 end
+
+@testset "phase-guided transport crossover reference uses muq" begin
+    xi = 0.0
+    muq_ref_MeV = 90.0
+    muB_MeV = 3.0 * muq_ref_MeV
+
+    direct_T, direct_xi = Main.GapTransportScanPhaseEquilibrium.interpolate_crossover_temperature(xi, muq_ref_MeV)
+    via_plan_T, via_plan_xi = Main.PhaseGuidedTransportScanPlan._interpolate_crossover_temperature(muB_MeV, xi)
+
+    @test isfinite(direct_T)
+    @test isfinite(via_plan_T)
+    @test direct_xi == via_plan_xi
+    @test isapprox(via_plan_T, direct_T; atol=1e-12, rtol=0.0)
+end
