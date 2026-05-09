@@ -11,6 +11,9 @@ Models 统一流程入口（阶段 C）：
 
 export run_tmu_scan, run_trho_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
+export run_meson_mass_path_scan
+export run_freezeout_meson_mass_scan
+export run_isentropic_meson_mass_scan
 export run_freezeout_meson_density_scan
 export run_crossover_meson_density_scan
 export run_external_path_meson_density_scan
@@ -85,6 +88,18 @@ end
 
 function run_freezeout_meson_density_scan(args...; kwargs...)
     return FreezeoutMesonDensityScan.run_freezeout_meson_density_scan(args...; kwargs...)
+end
+
+function run_meson_mass_path_scan(args...; kwargs...)
+    return MesonMassPathScan.run_meson_mass_path_scan(args...; kwargs...)
+end
+
+function run_freezeout_meson_mass_scan(args...; kwargs...)
+    return MesonMassPathScan.run_freezeout_meson_mass_scan(args...; kwargs...)
+end
+
+function run_isentropic_meson_mass_scan(args...; kwargs...)
+    return MesonMassPathScan.run_isentropic_meson_mass_scan(args...; kwargs...)
 end
 
 function run_crossover_meson_density_scan(args...; kwargs...)
