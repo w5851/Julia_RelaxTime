@@ -52,9 +52,9 @@ end
 """
     meson_degeneracy(meson; charge_resolved=false) -> Int
 
-返回当前主线下的 `π/K` 简并因子。
+返回当前主线下的一般介子简并因子。
 
-- 聚合通道（默认）：`d_π = 3`、`d_K = 4`
+- 聚合通道（默认）：`d_π = 3`、`d_K = 4`、`d_σπ = 1`、`d_σK = 4`
 - 电荷分辨通道：`d = 1`
 """
 @inline function meson_degeneracy(meson::Symbol; charge_resolved::Bool=false)::Int
@@ -62,10 +62,14 @@ end
         return charge_resolved ? 1 : 3
     elseif meson === :K
         return charge_resolved ? 1 : 4
+    elseif meson === :sigma_pi
+        return 1
+    elseif meson === :sigma_K
+        return 4
     elseif meson === :pi_plus || meson === :pi_minus || meson === :K_plus || meson === :K_minus
         return 1
     else
-        throw(ArgumentError("Unsupported meson $(meson). Use :pi, :pi_plus, :pi_minus, :K, :K_plus, or :K_minus."))
+        throw(ArgumentError("Unsupported meson $(meson). Use :pi, :pi_plus, :pi_minus, :K, :K_plus, :K_minus, :sigma_pi, or :sigma_K."))
     end
 end
 
@@ -806,6 +810,22 @@ function _simple_meson_pol_params(meson::Symbol, qp)
             m1=Float64(qp.m.s), m2=Float64(qp.m.u),
             μ1=Float64(qp.μ.s), μ2=Float64(qp.μ.u),
             A1=Float64(qp.A.s), A2=Float64(qp.A.u),
+            num_s_quark=1,
+        )
+    elseif meson === :sigma_pi
+        return (
+            channel=:S,
+            m1=Float64(qp.m.u), m2=Float64(qp.m.u),
+            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.u),
+            A1=Float64(qp.A.u), A2=Float64(qp.A.u),
+            num_s_quark=0,
+        )
+    elseif meson === :sigma_K
+        return (
+            channel=:S,
+            m1=Float64(qp.m.u), m2=Float64(qp.m.s),
+            μ1=Float64(qp.μ.u), μ2=Float64(qp.μ.s),
+            A1=Float64(qp.A.u), A2=Float64(qp.A.s),
             num_s_quark=1,
         )
     end

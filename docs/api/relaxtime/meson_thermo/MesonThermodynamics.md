@@ -80,6 +80,7 @@ phase-shift 摘要还会携带：
 
 ## 当前边界
 
-- 只承诺 `π/K`
+- 已支持把第二通道切换为 `sigma_pi` / `sigma_K`
+- 当前推荐把 `pi/K` 视为原型口径，把 `pi/sigma_pi` 视为文献方向的下一步主通道
 - 尚未覆盖 scalar partner / pseudoscalar nonet 扩张
 - 尚未提供 validation / regression baseline 资产

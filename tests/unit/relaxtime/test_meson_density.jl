@@ -39,6 +39,8 @@ const ZETA3 = 1.2020569031595942
     @test meson_degeneracy(:pi_minus) == 1
     @test meson_degeneracy(:K_plus) == 1
     @test meson_degeneracy(:K_minus) == 1
+    @test meson_degeneracy(:sigma_pi) == 1
+    @test meson_degeneracy(:sigma_K) == 4
     @test meson_degeneracy(:pi; charge_resolved=true) == 1
     @test meson_degeneracy(:K; charge_resolved=true) == 1
 

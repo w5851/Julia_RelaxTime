@@ -107,4 +107,43 @@ const _MTW = Models.MesonThermoWorkflow
         @test row.ld_cutoff_mode == "match_qmax"
         @test row.ld_threshold_mode == "omega_lt_q"
     end
+
+    @testset "phase-shift meson thermo workflow supports pi/sigma_pi channel set" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :sigma_pi),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        thermo = Models.solve_phase_shift_meson_thermo_from_meson_point(
+            meson_point;
+            pi_channel=:pi,
+            k_channel=:sigma_pi,
+            qmax=4.0,
+            q_nodes=6,
+            omega_max=3.0,
+            omega_nodes=6,
+            p_num=8,
+            t_num=4,
+        )
+        row = Models.build_meson_thermo_contract_row((; meson_point..., phase_shift_meson_thermo=thermo))
+
+        @test thermo.channel_set == "pi,sigma_pi"
+        @test thermo.primary_channel == :pi
+        @test thermo.secondary_channel == :sigma_pi
+        @test thermo.d_K == 1
+        @test isfinite(thermo.P_secondary)
+        @test row.channel_set == "pi,sigma_pi"
+        @test row.primary_channel == "pi"
+        @test row.secondary_channel == "sigma_pi"
+        @test row.P_secondary ≈ thermo.P_secondary rtol=1e-12
+        @test row.P_meson ≈ row.P_meson_qp + row.P_meson_ld rtol=1e-12
+    end
 end

@@ -31,6 +31,41 @@ using Main.RelaxTime.MesonThermodynamics: bosonic_log_pressure_factor,
     @test summary.P_meson ≈ summary.P_pi + summary.P_K rtol=1e-12
 end
 
+@testset "MesonThermodynamics supports sigma_pi channel" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+
+    sigma = phase_shift_meson_pressure(
+        :sigma_pi,
+        qp,
+        tp;
+        scheme=:current,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    @test isfinite(sigma.pressure)
+    @test sigma.pressure ≈ sigma.pressure_qp + sigma.pressure_ld rtol=1e-12
+
+    summary = phase_shift_meson_pressure_summary(
+        qp,
+        tp;
+        pi_channel=:pi,
+        k_channel=:sigma_pi,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+    )
+    @test summary.k_channel == :sigma_pi
+    @test summary.d_K == 1
+    @test isfinite(summary.P_K)
+    @test summary.P_K ≈ summary.P_K_qp + summary.P_K_ld rtol=1e-12
+end
+
 @testset "MesonThermodynamics strict BW pressure" begin
     T = 0.20
     stable = stable_meson_pressure(0.14, T; degeneracy=3, qmax=12.0, num_q_nodes=48)

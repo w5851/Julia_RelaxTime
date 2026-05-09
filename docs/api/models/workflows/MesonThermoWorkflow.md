@@ -7,7 +7,7 @@
 当前第一版目标很窄：
 
 - 复用 `Models.solve_gap_and_meson_point` 的平衡态与介子质量主链
-- 在 `π/K` 通道上补齐 mesonic pressure
+- 在双通道 meson set 上补齐 mesonic pressure；当前已验证 `π/K` 与 `π/sigma_pi`
 - 给出用户可消费的最小 EOS 合同：
   - `P_meson`
   - `P_meson_qp`
@@ -56,6 +56,8 @@
 - `T_fm`
 - `workflow`
 - `channel_set`
+- `primary_channel`
+- `secondary_channel`
 - `P_meson`
 - `P_meson_qp`
 - `P_meson_ld`
@@ -67,6 +69,12 @@
 - `P_pi_ld`
 - `P_K_qp`
 - `P_K_ld`
+- `P_primary`
+- `P_secondary`
+- `P_primary_qp`
+- `P_primary_ld`
+- `P_secondary_qp`
+- `P_secondary_ld`
 - `entropy`
 - `epsilon`
 - `trace_anomaly`
@@ -85,6 +93,8 @@
 - `muB_MeV`
 - `workflow`
 - `channel_set`
+- `primary_channel`
+- `secondary_channel`
 - `P_meson`
 - `P_meson_qp`
 - `P_meson_ld`
@@ -99,6 +109,12 @@
 - `P_pi_ld`
 - `P_K_qp`
 - `P_K_ld`
+- `P_primary`
+- `P_secondary`
+- `P_primary_qp`
+- `P_primary_ld`
+- `P_secondary_qp`
+- `P_secondary_ld`
 - `equilibrium_converged`
 - `phase_structure`
 - `phase_shift_variant`
@@ -110,6 +126,7 @@
 
 - `phase_structure` 当前固定写为 `unknown`，尚未与 phase pipeline 做正式联动
 - `QP / LD` 目前只在 phase-shift pressure 口径下显式输出；stable / strict BW 仍为空值
+- 兼容字段 `P_pi/P_K` 仍保留，但当第二通道切到 `sigma_pi` 时，更应使用 `primary/secondary` 字段解读合同
 - 尚未提供 canonical temperature scan 脚本与结果目录落盘
 - 尚未沉淀 regression baseline
 - 尚未做 channel 扩张决策

@@ -61,6 +61,10 @@ end
     )
 end
 
+@inline function _resolve_channel_degeneracy(meson::Symbol, degeneracy::Union{Nothing,Integer})::Int
+    return degeneracy === nothing ? meson_degeneracy(meson) : Int(degeneracy)
+end
+
 @inline function _normalize_ld_cutoff_mode(mode::Symbol)::Symbol
     if mode === :match_qmax || mode === :explicit
         return mode
@@ -140,17 +144,21 @@ function stable_meson_pressure_summary(
     T::Float64;
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
     qmax_pi::Union{Nothing,Float64}=nothing,
     qmax_K::Union{Nothing,Float64}=nothing,
     num_q_nodes::Int=256,
 )
+    d_pi_resolved = _resolve_channel_degeneracy(pi_channel, d_pi)
+    d_K_resolved = _resolve_channel_degeneracy(k_channel, d_K)
     p_pi = stable_meson_pressure(
         pi_mass,
         T;
         μ=μ_pi,
-        degeneracy=Int(d_pi),
+        degeneracy=d_pi_resolved,
         qmax=qmax_pi,
         num_q_nodes=num_q_nodes,
     )
@@ -158,7 +166,7 @@ function stable_meson_pressure_summary(
         k_mass,
         T;
         μ=μ_K,
-        degeneracy=Int(d_K),
+        degeneracy=d_K_resolved,
         qmax=qmax_K,
         num_q_nodes=num_q_nodes,
     )
@@ -168,10 +176,12 @@ function stable_meson_pressure_summary(
         P_K=p_K,
         P_meson=total,
         P_K_over_P_pi=iszero(p_pi) ? NaN : p_K / p_pi,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         μ_pi=μ_pi,
         μ_K=μ_K,
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
+        d_pi=d_pi_resolved,
+        d_K=d_K_resolved,
         qmax_pi=qmax_pi,
         qmax_K=qmax_K,
         num_q_nodes=num_q_nodes,
@@ -284,20 +294,24 @@ function strict_bw_meson_pressure_summary(
     T::Float64;
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
+    pi_channel::Symbol=:pi,
+    k_channel::Symbol=:K,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     gamma_zero_tol::Float64=1e-12,
 )
+    d_pi_resolved = _resolve_channel_degeneracy(pi_channel, d_pi)
+    d_K_resolved = _resolve_channel_degeneracy(k_channel, d_K)
     pi_pressure = strict_bw_meson_pressure(
         pi_mass,
         pi_gamma,
         T;
         μ=μ_pi,
-        degeneracy=Int(d_pi),
+        degeneracy=d_pi_resolved,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_max=omega_max,
@@ -309,7 +323,7 @@ function strict_bw_meson_pressure_summary(
         k_gamma,
         T;
         μ=μ_K,
-        degeneracy=Int(d_K),
+        degeneracy=d_K_resolved,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_max=omega_max,
@@ -324,6 +338,8 @@ function strict_bw_meson_pressure_summary(
         P_K=p_K,
         P_meson=p_pi + p_K,
         P_K_over_P_pi=iszero(p_pi) ? NaN : p_K / p_pi,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         pi_pressure=pi_pressure,
         k_pressure=k_pressure,
         qmax=qmax,
@@ -470,8 +486,8 @@ function phase_shift_meson_pressure_summary(
     k_channel::Symbol=:K,
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
     scheme::Symbol=:current,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -483,12 +499,14 @@ function phase_shift_meson_pressure_summary(
     ld_cutoff_mode::Symbol=:match_qmax,
     ld_threshold_mode::Symbol=:omega_lt_q,
 )
+    d_pi_resolved = _resolve_channel_degeneracy(pi_channel, d_pi)
+    d_K_resolved = _resolve_channel_degeneracy(k_channel, d_K)
     pi_pressure = phase_shift_meson_pressure(
         pi_channel,
         quark_params,
         thermo_params;
         μ=μ_pi,
-        degeneracy=Int(d_pi),
+        degeneracy=d_pi_resolved,
         scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,
@@ -505,7 +523,7 @@ function phase_shift_meson_pressure_summary(
         quark_params,
         thermo_params;
         μ=μ_K,
-        degeneracy=Int(d_K),
+        degeneracy=d_K_resolved,
         scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,
@@ -529,8 +547,8 @@ function phase_shift_meson_pressure_summary(
         xi=Float64(thermo_params.ξ),
         pi_channel=pi_channel,
         k_channel=k_channel,
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
+        d_pi=d_pi_resolved,
+        d_K=d_K_resolved,
         P_pi=p_pi,
         P_K=p_K,
         P_pi_qp=p_pi_qp,

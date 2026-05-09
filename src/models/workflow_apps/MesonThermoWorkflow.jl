@@ -33,6 +33,10 @@ export solve_phase_shift_meson_thermo_from_meson_point
 export solve_gap_and_phase_shift_meson_thermo_point
 export build_meson_thermo_contract_row
 
+@inline function _channel_label(meson::Symbol)::String
+    return String(meson)
+end
+
 @inline function _require_result_field(result, field::Symbol)
     hasproperty(result, field) || throw(ArgumentError("meson workflow result missing required field: $(field)"))
     return getproperty(result, field)
@@ -110,6 +114,8 @@ end
         xi=Float64(thermo_params.ξ),
         workflow=workflow,
         channel_set=String(channel_set),
+        primary_channel="",
+        secondary_channel="",
         P_meson=meson_pressure,
         P_meson_qp=P_meson_qp,
         P_meson_ld=P_meson_ld,
@@ -125,6 +131,10 @@ end
         μ_K=Float64(getproperty(density_summary, :μ_K)),
         n_pi=Float64(getproperty(density_summary, :n_pi)),
         n_K=Float64(getproperty(density_summary, :n_K)),
+        μ_primary=Float64(getproperty(density_summary, :μ_pi)),
+        μ_secondary=Float64(getproperty(density_summary, :μ_K)),
+        n_primary=Float64(getproperty(density_summary, :n_pi)),
+        n_secondary=Float64(getproperty(density_summary, :n_K)),
         equilibrium_converged=Bool(equilibrium.converged),
         phase_structure=:unknown,
         phase_shift_variant=phase_shift_variant,
@@ -178,8 +188,8 @@ function solve_meson_thermo_from_meson_point(
     k_channel::Symbol=:K,
     μ_pi::Real=0.0,
     μ_K::Real=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
     qmax_pi::Union{Nothing,Real}=nothing,
     qmax_K::Union{Nothing,Real}=nothing,
     num_q_nodes::Int=256,
@@ -190,12 +200,14 @@ function solve_meson_thermo_from_meson_point(
     m_pi = _require_finite_mass(meson_results, pi_channel)
     m_K = _require_finite_mass(meson_results, k_channel)
     thermo_params = _require_result_field(meson_point, :thermo_params)
+    d_pi_resolved = d_pi === nothing ? meson_degeneracy(pi_channel) : Int(d_pi)
+    d_K_resolved = d_K === nothing ? meson_degeneracy(k_channel) : Int(d_K)
 
     density_summary = (
         μ_pi=Float64(μ_pi),
         μ_K=Float64(μ_K),
-        n_pi=stable_meson_number_density(m_pi, Float64(thermo_params.T); μ=Float64(μ_pi), degeneracy=Int(d_pi), qmax=qmax_pi === nothing ? nothing : Float64(qmax_pi), num_q_nodes=num_q_nodes),
-        n_K=stable_meson_number_density(m_K, Float64(thermo_params.T); μ=Float64(μ_K), degeneracy=Int(d_K), qmax=qmax_K === nothing ? nothing : Float64(qmax_K), num_q_nodes=num_q_nodes),
+        n_pi=stable_meson_number_density(m_pi, Float64(thermo_params.T); μ=Float64(μ_pi), degeneracy=d_pi_resolved, qmax=qmax_pi === nothing ? nothing : Float64(qmax_pi), num_q_nodes=num_q_nodes),
+        n_K=stable_meson_number_density(m_K, Float64(thermo_params.T); μ=Float64(μ_K), degeneracy=d_K_resolved, qmax=qmax_K === nothing ? nothing : Float64(qmax_K), num_q_nodes=num_q_nodes),
     )
     pressure_summary = stable_meson_pressure_summary(
         m_pi,
@@ -203,8 +215,10 @@ function solve_meson_thermo_from_meson_point(
         Float64(thermo_params.T);
         μ_pi=Float64(μ_pi),
         μ_K=Float64(μ_K),
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
+        d_pi=d_pi_resolved,
+        d_K=d_K_resolved,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         qmax_pi=qmax_pi === nothing ? nothing : Float64(qmax_pi),
         qmax_K=qmax_K === nothing ? nothing : Float64(qmax_K),
         num_q_nodes=num_q_nodes,
@@ -220,12 +234,16 @@ function solve_meson_thermo_from_meson_point(
             background,
         ),
         (
+            primary_channel=pi_channel,
+            secondary_channel=k_channel,
+            P_primary=Float64(pressure_summary.P_pi),
+            P_secondary=Float64(pressure_summary.P_K),
             pi_channel=pi_channel,
             k_channel=k_channel,
             m_pi=m_pi,
             m_K=m_K,
-            d_pi=Int(d_pi),
-            d_K=Int(d_K),
+            d_pi=d_pi_resolved,
+            d_K=d_K_resolved,
             qmax_pi=qmax_pi === nothing ? nothing : Float64(qmax_pi),
             qmax_K=qmax_K === nothing ? nothing : Float64(qmax_K),
             num_q_nodes=num_q_nodes,
@@ -241,8 +259,8 @@ function solve_strict_bw_meson_thermo_from_meson_point(
     k_channel::Symbol=:K,
     μ_pi::Real=0.0,
     μ_K::Real=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
     qmax::Float64=12.0,
     q_nodes::Int=48,
     omega_max::Float64=10.0,
@@ -256,6 +274,8 @@ function solve_strict_bw_meson_thermo_from_meson_point(
     m_K = _require_finite_mass(meson_results, k_channel)
     gamma_pi = _require_finite_gamma(meson_results, pi_channel)
     gamma_K = _require_finite_gamma(meson_results, k_channel)
+    d_pi_resolved = d_pi === nothing ? meson_degeneracy(pi_channel) : Int(d_pi)
+    d_K_resolved = d_K === nothing ? meson_degeneracy(k_channel) : Int(d_K)
 
     pressure_summary = strict_bw_meson_pressure_summary(
         m_pi,
@@ -265,8 +285,10 @@ function solve_strict_bw_meson_thermo_from_meson_point(
         Float64(meson_point.thermo_params.T);
         μ_pi=Float64(μ_pi),
         μ_K=Float64(μ_K),
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
+        d_pi=d_pi_resolved,
+        d_K=d_K_resolved,
+        pi_channel=pi_channel,
+        k_channel=k_channel,
         qmax=qmax,
         q_nodes=q_nodes,
         omega_max=omega_max,
@@ -282,8 +304,8 @@ function solve_strict_bw_meson_thermo_from_meson_point(
             Float64(meson_point.thermo_params.T);
             μ_pi=Float64(μ_pi),
             μ_K=Float64(μ_K),
-            d_pi=Int(d_pi),
-            d_K=Int(d_K),
+            d_pi=d_pi_resolved,
+            d_K=d_K_resolved,
             qmax=qmax,
             q_nodes=q_nodes,
             omega_max=omega_max,
@@ -306,14 +328,18 @@ function solve_strict_bw_meson_thermo_from_meson_point(
             background,
         ),
         (
+            primary_channel=pi_channel,
+            secondary_channel=k_channel,
+            P_primary=Float64(pressure_summary.P_pi),
+            P_secondary=Float64(pressure_summary.P_K),
             pi_channel=pi_channel,
             k_channel=k_channel,
             m_pi=m_pi,
             m_K=m_K,
             gamma_pi=gamma_pi,
             gamma_K=gamma_K,
-            d_pi=Int(d_pi),
-            d_K=Int(d_K),
+            d_pi=d_pi_resolved,
+            d_K=d_K_resolved,
             qmax=qmax,
             q_nodes=q_nodes,
             omega_max=omega_max,
@@ -331,8 +357,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
     k_channel::Symbol=:K,
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
-    d_pi::Integer=meson_degeneracy(:pi),
-    d_K::Integer=meson_degeneracy(:K),
+    d_pi::Union{Nothing,Integer}=nothing,
+    d_K::Union{Nothing,Integer}=nothing,
     scheme::Symbol=:current,
     qmax::Float64=12.0,
     q_nodes::Int=48,
@@ -348,6 +374,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
 )
     quark_params = normalize_quark_params(_require_result_field(meson_point, :quark_params))
     thermo_params = normalize_thermo_params(_require_result_field(meson_point, :thermo_params))
+    d_pi_resolved = d_pi === nothing ? meson_degeneracy(pi_channel) : Int(d_pi)
+    d_K_resolved = d_K === nothing ? meson_degeneracy(k_channel) : Int(d_K)
 
     pressure_summary = phase_shift_meson_pressure_summary(
         quark_params,
@@ -356,8 +384,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
         k_channel=k_channel,
         μ_pi=μ_pi,
         μ_K=μ_K,
-        d_pi=Int(d_pi),
-        d_K=Int(d_K),
+        d_pi=d_pi_resolved,
+        d_K=d_K_resolved,
         scheme=scheme,
         qmax=qmax,
         q_nodes=q_nodes,
@@ -377,8 +405,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             k_channel=k_channel,
             μ_pi=μ_pi,
             μ_K=μ_K,
-            d_pi=Int(d_pi),
-            d_K=Int(d_K),
+            d_pi=d_pi_resolved,
+            d_K=d_K_resolved,
             scheme=scheme,
             qmax=qmax,
             q_nodes=q_nodes,
@@ -413,12 +441,20 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             ld_threshold_mode=pressure_summary.ld_threshold_mode,
         ),
         (
+            primary_channel=pi_channel,
+            secondary_channel=k_channel,
+            P_primary=Float64(pressure_summary.P_pi),
+            P_secondary=Float64(pressure_summary.P_K),
+            P_primary_qp=Float64(pressure_summary.P_pi_qp),
+            P_primary_ld=Float64(pressure_summary.P_pi_ld),
+            P_secondary_qp=Float64(pressure_summary.P_K_qp),
+            P_secondary_ld=Float64(pressure_summary.P_K_ld),
             pi_channel=pi_channel,
             k_channel=k_channel,
             m_pi=haskey(meson_point.meson_results, pi_channel) ? Float64(meson_point.meson_results[pi_channel].mass) : NaN,
             m_K=haskey(meson_point.meson_results, k_channel) ? Float64(meson_point.meson_results[k_channel].mass) : NaN,
-            d_pi=Int(d_pi),
-            d_K=Int(d_K),
+            d_pi=d_pi_resolved,
+            d_K=d_K_resolved,
             qmax=qmax,
             q_nodes=q_nodes,
             omega_min=omega_min,
@@ -530,6 +566,8 @@ function build_meson_thermo_contract_row(point_result)
         muB_MeV=Float64(equilibrium.mu_vec[1]) * 3.0 * ħc_MeV_fm,
         workflow=String(Symbol(result.workflow)),
         channel_set=String(result.channel_set),
+        primary_channel=hasproperty(result, :primary_channel) ? _channel_label(Symbol(result.primary_channel)) : "",
+        secondary_channel=hasproperty(result, :secondary_channel) ? _channel_label(Symbol(result.secondary_channel)) : "",
         P_meson=Float64(result.P_meson),
         P_meson_qp=hasproperty(result, :P_meson_qp) ? Float64(result.P_meson_qp) : NaN,
         P_meson_ld=hasproperty(result, :P_meson_ld) ? Float64(result.P_meson_ld) : NaN,
@@ -544,6 +582,12 @@ function build_meson_thermo_contract_row(point_result)
         P_pi_ld=hasproperty(result, :P_pi_ld) ? Float64(result.P_pi_ld) : NaN,
         P_K_qp=hasproperty(result, :P_K_qp) ? Float64(result.P_K_qp) : NaN,
         P_K_ld=hasproperty(result, :P_K_ld) ? Float64(result.P_K_ld) : NaN,
+        P_primary=hasproperty(result, :P_primary) ? Float64(result.P_primary) : NaN,
+        P_secondary=hasproperty(result, :P_secondary) ? Float64(result.P_secondary) : NaN,
+        P_primary_qp=hasproperty(result, :P_primary_qp) ? Float64(result.P_primary_qp) : NaN,
+        P_primary_ld=hasproperty(result, :P_primary_ld) ? Float64(result.P_primary_ld) : NaN,
+        P_secondary_qp=hasproperty(result, :P_secondary_qp) ? Float64(result.P_secondary_qp) : NaN,
+        P_secondary_ld=hasproperty(result, :P_secondary_ld) ? Float64(result.P_secondary_ld) : NaN,
         equilibrium_converged=Bool(result.equilibrium_converged),
         phase_structure=String(Symbol(result.phase_structure)),
         phase_shift_variant=result.phase_shift_variant === nothing ? "" : String(Symbol(result.phase_shift_variant)),
