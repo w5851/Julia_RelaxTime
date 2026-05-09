@@ -93,12 +93,14 @@ def build_case_artifacts(csv_path: Path) -> dict[str, Path]:
     figures_dir = out_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
-    valid_rows = [
-        row
-        for row in rows
-        if row["equilibrium_converged"].strip().lower() == "true" and _to_float(row, "T_MeV") > 0.0
-    ]
-    invalid_rows = [row for row in rows if row not in valid_rows]
+    valid_rows: list[dict[str, str]] = []
+    invalid_rows: list[dict[str, str]] = []
+    for row in rows:
+        is_valid = row["equilibrium_converged"].strip().lower() == "true" and _to_float(row, "T_MeV") > 0.0
+        if is_valid:
+            valid_rows.append(row)
+        else:
+            invalid_rows.append(row)
     if not valid_rows:
         raise ValueError(f"No valid rows available for plotting: {csv_path}")
 

@@ -47,9 +47,11 @@ const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", 
     @test occursin("using .Models: run_freezeout_meson_mass_scan", freezeout_meson_mass_path_scan)
     @test occursin("default_baseline_freezeout_xi0_loggrid_1to200_n30", freezeout_meson_mass_path_scan)
     @test occursin("build_log10_sqrts_grid(1.0, 200.0, 30)", freezeout_meson_mass_path_scan)
+    @test !occursin("sort!(sqrt_s_vals)", freezeout_meson_mass_path_scan)
 
     @test occursin("using .Models: run_isentropic_meson_mass_scan", isentropic_meson_mass_path_scan)
     @test occursin("missing required option: --sigma-target", isentropic_meson_mass_path_scan)
+    @test !occursin("sort!(T_values)", isentropic_meson_mass_path_scan)
 
     @test occursin("using .Models: solve_gap_and_meson_point", mott_scan)
     @test !occursin("using .MesonMassWorkflow: solve_gap_and_meson_point", mott_scan)

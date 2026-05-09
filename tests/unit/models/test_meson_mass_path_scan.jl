@@ -40,4 +40,25 @@ const _MMPS = Models.MesonMassPathScan
         @test !isfinite(fixedsigma.muB_MeV)
         @test fixedsigma.sigma_target == 25.0
     end
+
+    @testset "row formatting keeps integer index and equilibrium iterations" begin
+        cols = ["path_point_index", "equilibrium_iterations", "message"]
+        row = Dict{String,Any}(
+            "path_point_index" => 3,
+            "equilibrium_iterations" => -1,
+            "message" => "",
+        )
+        values = _MMPS._row_to_values(cols, row)
+        @test values[1] == "3"
+        @test values[2] == "-1"
+    end
+
+    @testset "schedule points preserves input order" begin
+        points = [
+            (path_family="freezeout", path_profile="p", path_label="a", path_order_key=3.0, path_point_index=0),
+            (path_family="freezeout", path_profile="p", path_label="a", path_order_key=1.0, path_point_index=1),
+        ]
+        scheduled = _MMPS._schedule_points(copy(points))
+        @test scheduled == points
+    end
 end

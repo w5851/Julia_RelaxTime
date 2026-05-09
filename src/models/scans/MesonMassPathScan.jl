@@ -156,10 +156,7 @@ const HEADER = join(_header_cols(MesonMassWorkflow.DEFAULT_MESONS), ',')
     return (pt.path_family, pt.path_profile, pt.path_label)
 end
 
-@inline function _schedule_points(points)
-    sort!(points; by=pt -> (pt.path_family, pt.path_profile, pt.path_label, pt.path_order_key, pt.path_point_index))
-    return points
-end
+@inline _schedule_points(points) = points
 
 @inline function _equilibrium_diag(eq_result)
     if eq_result === nothing
@@ -242,7 +239,7 @@ function _row_to_values(cols::Vector{String}, row::Dict{String,Any})
         value = get(row, col, "")
         if col == "message"
             return ScanCommon.quote_csv(ScanCommon.clean_message(String(value)))
-        elseif col == "path_point_index"
+        elseif col == "path_point_index" || col == "equilibrium_iterations"
             return string(Int(round(Float64(value))))
         end
         return _format_cell(value)

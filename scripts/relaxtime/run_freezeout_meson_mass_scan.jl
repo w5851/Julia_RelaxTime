@@ -153,7 +153,6 @@ function parse_args(args::Vector{String})
 
     sqrt_s_vals = unique(Float64.(opts[:sqrts_values]))
     isempty(sqrt_s_vals) && error("sqrt(s_NN) grid must not be empty")
-    sort!(sqrt_s_vals)
 
     output = opts[:output] === nothing ? default_output_path(String(opts[:case_name])) : String(opts[:output])
     return ScanOptions(

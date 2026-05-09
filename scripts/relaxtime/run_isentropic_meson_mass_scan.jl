@@ -100,7 +100,6 @@ function parse_args(args::Vector{String})
     opts[:sigma_target] === nothing && error("missing required option: --sigma-target")
     T_values = unique(Float64.(opts[:T_values]))
     isempty(T_values) && error("T grid must not be empty")
-    sort!(T_values)
 
     return ScanOptions(
         String(opts[:output]),
