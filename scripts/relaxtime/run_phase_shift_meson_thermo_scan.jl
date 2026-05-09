@@ -24,7 +24,11 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 using .ScanCSV: ScanCSV
 using .ProvenanceMetadata: ProvenanceMetadata
 using .Constants_PNJL: ħc_MeV_fm
-using .Models: build_meson_thermo_contract_row, solve_gap_and_phase_shift_meson_thermo_point
+using .Models: build_meson_thermo_contract_row,
+               create_model,
+               model_thermo,
+               solve_gap_and_meson_point,
+               solve_gap_and_phase_shift_meson_thermo_point
 
 Base.@kwdef struct ScanOptions
     outdir::String=joinpath(
@@ -54,6 +58,8 @@ Base.@kwdef struct ScanOptions
     ld_cutoff_mode::Symbol=:match_qmax
     ld_threshold_mode::Symbol=:omega_lt_q
     allow_legacy_fd_fallback::Bool=false
+    pressure_reference_mode::Symbol=:raw_absolute
+    reference_t_mev::Union{Nothing,Float64}=nothing
 end
 
 function print_usage()
@@ -79,7 +85,17 @@ function print_usage()
     println("  --ld-cutoff-mode <symbol>     LD cutoff 治理口径 (default match_qmax)")
     println("  --ld-threshold-mode <symbol>  QP/LD 分区口径 (default omega_lt_q)")
     println("  --allow-legacy-fd-fallback    允许 AD 失败时回落 workflow 私有差分")
+    println("  --pressure-reference <mode>   压强参考口径: raw_absolute | vacuum_subtracted_mu0")
+    println("  --reference-t-mev <MeV>       近零温参考点；仅 vacuum_subtracted_mu0 使用，默认 5 MeV")
     println("  -h, --help                    显示帮助")
+end
+
+@inline function _parse_pressure_reference_mode(raw::AbstractString)::Symbol
+    normalized = replace(lowercase(strip(raw)), '-' => '_')
+    normalized in ("raw_absolute", "raw") && return :raw_absolute
+    normalized in ("vacuum_subtracted_mu0", "vacuum_subtracted", "vacuum_subtracted_mu_zero") &&
+        return :vacuum_subtracted_mu0
+    error("unknown pressure reference mode: $raw")
 end
 
 function _parse_channels(raw::AbstractString)
@@ -146,6 +162,10 @@ function parse_args(args::Vector{String})
             opts[:ld_threshold_mode] = Symbol(strip(require_value()))
         elseif arg == "--allow-legacy-fd-fallback"
             opts[:allow_legacy_fd_fallback] = true
+        elseif arg == "--pressure-reference"
+            opts[:pressure_reference_mode] = _parse_pressure_reference_mode(require_value())
+        elseif arg == "--reference-t-mev"
+            opts[:reference_t_mev] = parse(Float64, require_value())
         elseif arg in ("-h", "--help")
             print_usage()
             exit(0)
@@ -181,6 +201,8 @@ function parse_args(args::Vector{String})
         ld_cutoff_mode=Symbol(get(opts, :ld_cutoff_mode, base.ld_cutoff_mode)),
         ld_threshold_mode=Symbol(get(opts, :ld_threshold_mode, base.ld_threshold_mode)),
         allow_legacy_fd_fallback=Bool(get(opts, :allow_legacy_fd_fallback, base.allow_legacy_fd_fallback)),
+        pressure_reference_mode=Symbol(get(opts, :pressure_reference_mode, base.pressure_reference_mode)),
+        reference_t_mev=get(opts, :reference_t_mev, base.reference_t_mev),
     )
 
     resolved.tstep_mev > 0.0 || error("tstep must be positive")
@@ -189,6 +211,11 @@ function parse_args(args::Vector{String})
     resolved.q_nodes > 1 || error("q-nodes must be > 1")
     resolved.omega_nodes > 1 || error("omega-nodes must be > 1")
     resolved.omega_max > resolved.omega_min || error("omega-max must exceed omega-min")
+    if resolved.pressure_reference_mode === :vacuum_subtracted_mu0 && resolved.reference_t_mev !== nothing
+        tref = Float64(resolved.reference_t_mev)
+        tref > 0.0 || error("reference-t-mev must be positive")
+        tref < resolved.tmin_mev || error("reference-t-mev must stay below tmin for vacuum-like baseline")
+    end
     return resolved
 end
 
@@ -202,16 +229,22 @@ function _row_to_values(cols::Vector{String}, row::Dict{String,Any})
     return [_format(get(row, c, "")) for c in cols]
 end
 
+@inline function _normalize_resume_key(values::Tuple{Vararg{Float64}})
+    return ntuple(i -> round(values[i]; digits=8), length(values))
+end
+
 function _output_columns()
     return [
         "T_MeV", "muB_MeV", "xi",
         "T_fm", "muB_fm", "mu_fm",
         "workflow", "channel_set", "primary_channel", "secondary_channel",
+        "phi_u", "phi_d", "phi_s",
         "Phi", "Phibar",
         "m_u", "m_d", "m_s",
         "m_primary", "m_secondary",
         "P_meson", "P_meson_qp", "P_meson_ld",
         "P_quark_meanfield", "P_total",
+        "P_meson_over_T4", "P_quark_meanfield_over_T4", "P_total_over_T4",
         "entropy", "epsilon", "trace_anomaly",
         "P_meson_over_P_total", "delta_P_vs_no_meson",
         "P_pi_qp", "P_pi_ld", "P_K_qp", "P_K_ld",
@@ -224,7 +257,78 @@ function _output_columns()
     ]
 end
 
-function _effective_config(opts::ScanOptions, out_csv::String)
+@inline function _reference_temperature_candidates_mev(opts::ScanOptions)
+    opts.pressure_reference_mode === :raw_absolute && return Float64[]
+    base = opts.reference_t_mev === nothing ? 5.0 : Float64(opts.reference_t_mev)
+    fallback_cap = min(max(opts.tmin_mev - 1.0, base), 15.0)
+    raw = [base, 10.0, fallback_cap]
+    ordered = Float64[]
+    for candidate in raw
+        candidate > 0.0 || continue
+        candidate < opts.tmin_mev || continue
+        any(isapprox(candidate, seen; atol=1e-12, rtol=0.0) for seen in ordered) && continue
+        push!(ordered, candidate)
+    end
+    isempty(ordered) && error("no valid reference temperature candidate found below tmin=$(opts.tmin_mev) MeV")
+    return ordered
+end
+
+function _resolve_pressure_reference(opts::ScanOptions)
+    opts.pressure_reference_mode === :raw_absolute && return (
+        mode=:raw_absolute,
+        value=0.0,
+        requested_t_mev=nothing,
+        used_t_mev=nothing,
+        fallback_used=false,
+    )
+
+    candidates = _reference_temperature_candidates_mev(opts)
+    last_error = nothing
+    for (idx, tref_mev) in enumerate(candidates)
+        try
+            tref_fm = tref_mev / ħc_MeV_fm
+            point = solve_gap_and_meson_point(
+                tref_fm,
+                0.0;
+                xi=opts.xi,
+                mesons=(opts.primary_channel, opts.secondary_channel),
+                mixed_branch_align=:strict_sign_binding,
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                solver_kwargs=(; iterations=opts.max_iter),
+                mass_kwargs=(; iterations=opts.max_iter),
+            )
+            point.equilibrium.converged || error("reference equilibrium did not converge")
+            model = create_model(:PNJL)
+            pressure, _, _, _ = model_thermo(
+                model,
+                point.equilibrium.x_state,
+                point.equilibrium.mu_vec,
+                tref_fm;
+                p_num=opts.p_num,
+                t_num=opts.t_num,
+                xi=opts.xi,
+            )
+            pressure_value = Float64(pressure)
+            isfinite(pressure_value) || error("reference pressure is not finite")
+            return (
+                mode=:vacuum_subtracted_mu0,
+                value=pressure_value,
+                requested_t_mev=opts.reference_t_mev,
+                used_t_mev=tref_mev,
+                fallback_used=idx > 1,
+            )
+        catch err
+            last_error = err
+        end
+    end
+
+    throw(ErrorException(
+        "failed to resolve vacuum-subtracted reference pressure below tmin=$(opts.tmin_mev) MeV; last_error=$(last_error)"
+    ))
+end
+
+function _effective_config(opts::ScanOptions, out_csv::String, pressure_reference)
     return Dict{String,Any}(
         "schema_version" => "v1",
         "profile_name" => "canonical_muB0_phase_shift_meson_thermo",
@@ -245,6 +349,13 @@ function _effective_config(opts::ScanOptions, out_csv::String)
             "max_iter" => opts.max_iter,
             "allow_legacy_fd_fallback" => opts.allow_legacy_fd_fallback,
         ),
+        "pressure_reference" => Dict{String,Any}(
+            "mode" => String(pressure_reference.mode),
+            "value_fm4" => pressure_reference.value,
+            "requested_t_mev" => pressure_reference.requested_t_mev,
+            "used_t_mev" => pressure_reference.used_t_mev,
+            "fallback_used" => pressure_reference.fallback_used,
+        ),
         "phase_shift" => Dict{String,Any}(
             "qmax" => opts.qmax,
             "q_nodes" => opts.q_nodes,
@@ -259,7 +370,7 @@ function _effective_config(opts::ScanOptions, out_csv::String)
     )
 end
 
-function _write_readme(path::String, opts::ScanOptions, out_csv::String, stats)
+function _write_readme(path::String, opts::ScanOptions, out_csv::String, stats, pressure_reference)
     open(path, "w") do io
         println(io, "# canonical mu_B = 0 phase-shift meson thermo case")
         println(io)
@@ -272,6 +383,13 @@ function _write_readme(path::String, opts::ScanOptions, out_csv::String, stats)
         println(io, "- solver_grid: `p_num=$(opts.p_num)`, `t_num=$(opts.t_num)`, `max_iter=$(opts.max_iter)`")
         println(io, "- phase_shift_grid: `qmax=$(opts.qmax) fm^-1`, `q_nodes=$(opts.q_nodes)`, `omega=[$(opts.omega_min), $(opts.omega_max)] fm^-1`, `omega_nodes=$(opts.omega_nodes)`, `eta=$(opts.eta)`")
         println(io, "- AD_fallback_allowed: `$(opts.allow_legacy_fd_fallback)`")
+        println(io, "- pressure_reference_mode: `$(pressure_reference.mode)`")
+        if pressure_reference.mode == :vacuum_subtracted_mu0
+            println(io, "- pressure_reference_value: `$(pressure_reference.value) fm^-4`")
+            println(io, "- pressure_reference_requested_T: `$(pressure_reference.requested_t_mev === nothing ? "auto" : string(pressure_reference.requested_t_mev) * " MeV")`")
+            println(io, "- pressure_reference_used_T: `$(string(pressure_reference.used_t_mev) * " MeV")`")
+            println(io, "- pressure_reference_fallback_used: `$(pressure_reference.fallback_used)`")
+        end
         println(io, "- points_total: `$(stats.points_total)`")
         println(io, "- success_count: `$(stats.success_count)`")
         println(io, "- error_count: `$(stats.error_count)`")
@@ -296,6 +414,7 @@ function main()
     outdir = opts.outdir
     out_csv = joinpath(outdir, "scan.csv")
     readme_path = joinpath(outdir, "README.md")
+    pressure_reference = _resolve_pressure_reference(opts)
 
     mkpath(outdir)
 
@@ -307,7 +426,11 @@ function main()
 
     output_columns = _output_columns()
     key_cols = ["T_MeV", "muB_MeV", "xi"]
-    existing = (isfile(out_csv) && opts.resume && !opts.overwrite) ? ScanCSV.read_existing_keys(out_csv, key_cols) : Set{Tuple{Vararg{Float64}}}()
+    existing = if isfile(out_csv) && opts.resume && !opts.overwrite
+        Set(_normalize_resume_key(key) for key in ScanCSV.read_existing_keys(out_csv, key_cols))
+    else
+        Set{Tuple{Vararg{Float64}}}()
+    end
 
     if isfile(out_csv)
         ScanCSV.assert_required_columns(out_csv, output_columns)
@@ -324,6 +447,9 @@ function main()
                 "phase_shift_scheme" => String(opts.scheme),
                 "channel_set" => string(opts.primary_channel, ",", opts.secondary_channel),
                 "thermo_derivation" => "Omega_total -> Models.model_thermo -> ForwardDiff",
+                "pressure_reference_mode" => String(pressure_reference.mode),
+                "pressure_reference_value_fm4" => string(pressure_reference.value),
+                "pressure_reference_used_t_mev" => pressure_reference.used_t_mev === nothing ? "" : string(pressure_reference.used_t_mev),
                 "note" => "Prefer primary/secondary columns when second channel is sigma_pi; legacy P_K_* columns map to the secondary slot.",
             ))
             ScanCSV.write_header(io, output_columns)
@@ -336,7 +462,7 @@ function main()
         T = opts.tmin_mev
 
         while T <= opts.tmax_mev + 1e-9
-            key = (Float64(T), muB, Float64(opts.xi))
+            key = _normalize_resume_key((Float64(T), muB, Float64(opts.xi)))
             if key in existing
                 T += opts.tstep_mev
                 continue
@@ -367,6 +493,8 @@ function main()
                     ld_cutoff=opts.ld_cutoff,
                     ld_cutoff_mode=opts.ld_cutoff_mode,
                     ld_threshold_mode=opts.ld_threshold_mode,
+                    pressure_reference_mode=pressure_reference.mode,
+                    pressure_reference_value=pressure_reference.value,
                     p_num=opts.p_num,
                     t_num=opts.t_num,
                 ),
@@ -377,6 +505,8 @@ function main()
             qp = point.quark_params
             tp = point.thermo_params
             thermo = point.phase_shift_meson_thermo
+            eq_state = point.equilibrium.x_state
+            T4 = T_fm^4
             output_row = Dict{String,Any}(
                 "T_MeV" => row.T_MeV,
                 "muB_MeV" => row.muB_MeV,
@@ -388,6 +518,9 @@ function main()
                 "channel_set" => replace(row.channel_set, "," => "|"),
                 "primary_channel" => row.primary_channel,
                 "secondary_channel" => row.secondary_channel,
+                "phi_u" => Float64(eq_state[1]),
+                "phi_d" => Float64(eq_state[2]),
+                "phi_s" => Float64(eq_state[3]),
                 "Phi" => tp.Φ,
                 "Phibar" => tp.Φbar,
                 "m_u" => qp.m.u,
@@ -400,6 +533,9 @@ function main()
                 "P_meson_ld" => row.P_meson_ld,
                 "P_quark_meanfield" => row.P_quark_meanfield,
                 "P_total" => row.P_total,
+                "P_meson_over_T4" => iszero(T_fm) ? NaN : row.P_meson / T4,
+                "P_quark_meanfield_over_T4" => iszero(T_fm) ? NaN : row.P_quark_meanfield / T4,
+                "P_total_over_T4" => iszero(T_fm) ? NaN : row.P_total / T4,
                 "entropy" => row.entropy,
                 "epsilon" => row.epsilon,
                 "trace_anomaly" => row.trace_anomaly,
@@ -440,12 +576,12 @@ function main()
     end
 
     stats = ProvenanceMetadata.csv_stats(out_csv; converged_col="equilibrium_converged")
-    _write_readme(readme_path, opts, out_csv, stats)
+    _write_readme(readme_path, opts, out_csv, stats, pressure_reference)
     ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl", copy(ARGS))
     ProvenanceMetadata.write_run_sidecars(
         outdir;
         ctx=ctx,
-        effective_config=_effective_config(opts, out_csv),
+        effective_config=_effective_config(opts, out_csv, pressure_reference),
         artifacts=[out_csv, readme_path],
         summary=Dict{String,Any}(
             "points_total" => stats.points_total,

@@ -192,4 +192,92 @@ const _MTW = Models.MesonThermoWorkflow
         @test row.P_secondary ≈ thermo.P_secondary rtol=1e-12
         @test row.P_meson ≈ row.P_meson_qp + row.P_meson_ld rtol=1e-12
     end
+
+    @testset "pressure reference mode shifts mean-field and total pressure by a constant" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :sigma_pi),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        raw = Models.solve_phase_shift_meson_thermo_from_meson_point(
+            meson_point;
+            pi_channel=:pi,
+            k_channel=:sigma_pi,
+            qmax=4.0,
+            q_nodes=6,
+            omega_max=3.0,
+            omega_nodes=6,
+            p_num=8,
+            t_num=4,
+        )
+        shifted = Models.solve_phase_shift_meson_thermo_from_meson_point(
+            meson_point;
+            pi_channel=:pi,
+            k_channel=:sigma_pi,
+            qmax=4.0,
+            q_nodes=6,
+            omega_max=3.0,
+            omega_nodes=6,
+            p_num=8,
+            t_num=4,
+            pressure_reference_mode=:vacuum_subtracted_mu0,
+            pressure_reference_value=1.25,
+        )
+
+        @test shifted.P_meson ≈ raw.P_meson rtol=1e-12
+        @test shifted.P_quark_meanfield ≈ raw.P_quark_meanfield - 1.25 rtol=1e-12
+        @test shifted.P_total ≈ raw.P_total - 1.25 rtol=1e-12
+        @test shifted.pressure_reference_mode == :vacuum_subtracted_mu0
+        @test shifted.pressure_reference_value ≈ 1.25 rtol=1e-12
+    end
+
+    @testset "gap-and-phase-shift thermo keeps AD derivatives under pressure reference shift" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        raw = Models.solve_gap_and_phase_shift_meson_thermo_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :sigma_pi),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            thermo_kwargs=(; pi_channel=:pi, k_channel=:sigma_pi, qmax=4.0, q_nodes=6, omega_max=3.0, omega_nodes=6, p_num=8, t_num=4),
+        )
+        shifted = Models.solve_gap_and_phase_shift_meson_thermo_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :sigma_pi),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            thermo_kwargs=(;
+                pi_channel=:pi,
+                k_channel=:sigma_pi,
+                qmax=4.0,
+                q_nodes=6,
+                omega_max=3.0,
+                omega_nodes=6,
+                p_num=8,
+                t_num=4,
+                pressure_reference_mode=:vacuum_subtracted_mu0,
+                pressure_reference_value=1.25,
+            ),
+        )
+
+        @test shifted.phase_shift_meson_thermo.thermo_derivation_mode == :omega_total_ad
+        @test shifted.phase_shift_meson_thermo.P_total ≈ raw.phase_shift_meson_thermo.P_total - 1.25 rtol=1e-12
+        @test shifted.phase_shift_meson_thermo.P_quark_meanfield ≈ raw.phase_shift_meson_thermo.P_quark_meanfield - 1.25 rtol=1e-12
+        @test shifted.phase_shift_meson_thermo.entropy ≈ raw.phase_shift_meson_thermo.entropy rtol=1e-8 atol=1e-10
+    end
 end

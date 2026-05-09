@@ -23,6 +23,14 @@
 - `stable` / `strict BW`：已切到 `Omega_total -> Models.model_thermo -> ForwardDiff`
 - `phase-shift`：已接入同一总线入口，当前默认直接走 `omega_total_ad`
 
+当前 workflow 还支持局部的 pressure reference 治理：
+
+- `pressure_reference_mode = :raw_absolute`：保持当前原始绝对压强口径
+- `pressure_reference_mode = :vacuum_subtracted_mu0`：对 `P_quark_meanfield / P_total` 扣除预先给定的近零温 `μ=0` mean-field 参考压强
+- `pressure_reference_value`：当启用 `:vacuum_subtracted_mu0` 时传入的常数基线，单位 `fm^-4`
+
+该 reference 只平移 mean-field / total pressure 零点，不改变 `P_meson` 本身；总派生量仍通过 `Omega_total -> Models.model_thermo -> ForwardDiff` 统一给出。
+
 ## 公开入口
 
 - `Models.solve_meson_thermo_from_meson_point`
@@ -89,6 +97,8 @@
 - `ld_cutoff`
 - `ld_cutoff_mode`
 - `ld_threshold_mode`
+- `pressure_reference_mode`
+- `pressure_reference_value`
 - `thermo_derivation_mode`
 
 ## CSV 合同
@@ -127,6 +137,8 @@
 - `ld_cutoff`
 - `ld_cutoff_mode`
 - `ld_threshold_mode`
+- `pressure_reference_mode`
+- `pressure_reference_value`
 - `thermo_derivation_mode`
 
 ## Canonical Scan
@@ -145,6 +157,7 @@
   - `run_manifest.json`
 - `scan.csv` 的核心平铺字段来自 `Models.build_meson_thermo_contract_row`
 - 为避免 CSV 歧义，脚本落盘时会把 `channel_set` 编码为无逗号形式；解释双通道结果时仍优先使用 `primary_channel / secondary_channel`
+- 正式文献比较可在脚本侧启用 `--pressure-reference vacuum-subtracted-mu0 --reference-t-mev <T_ref>`；脚本会先求一次近零温参考态，再把基线通过 workflow 统一并入 `Omega_total`
 
 ## 当前边界
 

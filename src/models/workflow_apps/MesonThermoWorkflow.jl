@@ -33,6 +33,23 @@ export solve_phase_shift_meson_thermo_from_meson_point
 export solve_gap_and_phase_shift_meson_thermo_point
 export build_meson_thermo_contract_row
 
+@inline function _normalize_pressure_reference_mode(mode::Symbol)::Symbol
+    mode in (:raw_absolute, :vacuum_subtracted_mu0) ||
+        throw(ArgumentError("pressure_reference_mode must be :raw_absolute or :vacuum_subtracted_mu0, got $(mode)"))
+    return mode
+end
+
+@inline function _resolve_pressure_reference_value(
+    pressure_reference_mode::Symbol,
+    pressure_reference_value::Real,
+)::Float64
+    mode = _normalize_pressure_reference_mode(pressure_reference_mode)
+    mode === :raw_absolute && return 0.0
+    value = Float64(pressure_reference_value)
+    isfinite(value) || throw(ArgumentError("pressure_reference_value must be finite for mode $(mode), got $(pressure_reference_value)"))
+    return value
+end
+
 @inline function _channel_label(meson::Symbol)::String
     return String(meson)
 end
@@ -87,6 +104,32 @@ end
     )
 end
 
+@inline function _apply_pressure_reference_to_background(
+    background,
+    pressure_reference_mode::Symbol,
+    pressure_reference_value::Float64,
+)
+    mode = _normalize_pressure_reference_mode(pressure_reference_mode)
+    mode === :raw_absolute && return background
+    return (
+        P_quark_meanfield=Float64(background.P_quark_meanfield) - pressure_reference_value,
+        rho_norm=Float64(background.rho_norm),
+        entropy_quark_meanfield=Float64(background.entropy_quark_meanfield),
+        epsilon_quark_meanfield=Float64(background.epsilon_quark_meanfield) + pressure_reference_value,
+    )
+end
+
+@inline function _with_pressure_reference_shift(
+    pressure_shift_fn::Function,
+    pressure_reference_mode::Symbol,
+    pressure_reference_value::Float64,
+)
+    mode = _normalize_pressure_reference_mode(pressure_reference_mode)
+    mode === :raw_absolute && return pressure_shift_fn
+    return (model, x_state, mu_vec, T_probe) ->
+        pressure_shift_fn(model, x_state, mu_vec, T_probe) - pressure_reference_value
+end
+
 @inline function _total_thermo_from_pressure_shift(
     meson_point,
     pressure_shift_fn::Function;
@@ -131,6 +174,8 @@ end
     ld_cutoff=nothing,
     ld_cutoff_mode=nothing,
     ld_threshold_mode=nothing,
+    pressure_reference_mode::Symbol=:raw_absolute,
+    pressure_reference_value::Float64=0.0,
 )
     thermo_params = _require_result_field(meson_point, :thermo_params)
     equilibrium = _require_result_field(meson_point, :equilibrium)
@@ -168,6 +213,8 @@ end
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
+        pressure_reference_mode=_normalize_pressure_reference_mode(pressure_reference_mode),
+        pressure_reference_value=pressure_reference_value,
         entropy_quark_meanfield=Float64(background.entropy_quark_meanfield),
         epsilon_quark_meanfield=Float64(background.epsilon_quark_meanfield),
         rho_norm=Float64(background.rho_norm),
@@ -246,6 +293,8 @@ function solve_meson_thermo_from_meson_point(
     num_q_nodes::Int=256,
     p_num::Int=default_momentum_count(),
     t_num::Int=default_theta_count(),
+    pressure_reference_mode::Symbol=:raw_absolute,
+    pressure_reference_value::Real=0.0,
 )
     meson_results = _require_result_field(meson_point, :meson_results)
     m_pi = _require_finite_mass(meson_results, pi_channel)
@@ -274,7 +323,15 @@ function solve_meson_thermo_from_meson_point(
         qmax_K=qmax_K === nothing ? nothing : Float64(qmax_K),
         num_q_nodes=num_q_nodes,
     )
-    background = _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num)
+    pressure_reference_value_resolved = _resolve_pressure_reference_value(
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num),
+        pressure_reference_mode,
+        pressure_reference_value_resolved,
+    )
     return merge(
         _common_contract_fields(
             meson_point,
@@ -282,7 +339,9 @@ function solve_meson_thermo_from_meson_point(
             density_summary,
             :stable_meson_pressure,
             nothing,
-            background,
+            background;
+            pressure_reference_mode=pressure_reference_mode,
+            pressure_reference_value=pressure_reference_value_resolved,
         ),
         (
             primary_channel=pi_channel,
@@ -319,6 +378,8 @@ function solve_strict_bw_meson_thermo_from_meson_point(
     gamma_zero_tol::Float64=1e-12,
     p_num::Int=default_momentum_count(),
     t_num::Int=default_theta_count(),
+    pressure_reference_mode::Symbol=:raw_absolute,
+    pressure_reference_value::Real=0.0,
 )
     meson_results = _require_result_field(meson_point, :meson_results)
     m_pi = _require_finite_mass(meson_results, pi_channel)
@@ -368,7 +429,15 @@ function solve_strict_bw_meson_thermo_from_meson_point(
             μ_K=Float64(μ_K),
         ),
     )
-    background = _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num)
+    pressure_reference_value_resolved = _resolve_pressure_reference_value(
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num),
+        pressure_reference_mode,
+        pressure_reference_value_resolved,
+    )
     return merge(
         _common_contract_fields(
             meson_point,
@@ -376,7 +445,9 @@ function solve_strict_bw_meson_thermo_from_meson_point(
             density_summary,
             :strict_bw_stage1_reduced_pressure,
             nothing,
-            background,
+            background;
+            pressure_reference_mode=pressure_reference_mode,
+            pressure_reference_value=pressure_reference_value_resolved,
         ),
         (
             primary_channel=pi_channel,
@@ -422,6 +493,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
     ld_threshold_mode::Symbol=:omega_lt_q,
     p_num::Int=default_momentum_count(),
     t_num::Int=default_theta_count(),
+    pressure_reference_mode::Symbol=:raw_absolute,
+    pressure_reference_value::Real=0.0,
 )
     quark_params = normalize_quark_params(_require_result_field(meson_point, :quark_params))
     thermo_params = normalize_thermo_params(_require_result_field(meson_point, :thermo_params))
@@ -471,7 +544,15 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             μ_K=Float64(μ_K),
         ),
     )
-    background = _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num)
+    pressure_reference_value_resolved = _resolve_pressure_reference_value(
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(meson_point; p_num=p_num, t_num=t_num),
+        pressure_reference_mode,
+        pressure_reference_value_resolved,
+    )
     return merge(
         _common_contract_fields(
             meson_point,
@@ -490,6 +571,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             ld_cutoff=Float64(pressure_summary.ld_cutoff),
             ld_cutoff_mode=pressure_summary.ld_cutoff_mode,
             ld_threshold_mode=pressure_summary.ld_threshold_mode,
+            pressure_reference_mode=pressure_reference_mode,
+            pressure_reference_value=pressure_reference_value_resolved,
         ),
         (
             primary_channel=pi_channel,
@@ -534,8 +617,18 @@ function solve_gap_and_meson_thermo_point(
     if !derive_thermo
         return merge(meson_point, (meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
-    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> stable_meson_pressure_summary(
+    pressure_reference_mode = hasproperty(result, :pressure_reference_mode) ? Symbol(result.pressure_reference_mode) : :raw_absolute
+    pressure_reference_value = hasproperty(result, :pressure_reference_value) ? Float64(result.pressure_reference_value) : 0.0
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(
+            meson_point;
+            p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+            t_num=get(thermo_kwargs, :t_num, default_theta_count()),
+        ),
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    pressure_shift_fn_raw = (model, x_state, mu_vec, T_probe) -> stable_meson_pressure_summary(
         Float64(result.m_pi),
         Float64(result.m_K),
         T_probe;
@@ -549,6 +642,11 @@ function solve_gap_and_meson_thermo_point(
         qmax_K=result.qmax_K,
         num_q_nodes=Int(result.num_q_nodes),
     ).P_meson
+    pressure_shift_fn = _with_pressure_reference_shift(
+        pressure_shift_fn_raw,
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
     total_thermo = _total_thermo_from_pressure_shift(
         meson_point,
         pressure_shift_fn;
@@ -572,8 +670,18 @@ function solve_gap_and_strict_bw_meson_thermo_point(
     if !derive_thermo
         return merge(meson_point, (strict_bw_meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
-    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> strict_bw_meson_pressure_summary(
+    pressure_reference_mode = hasproperty(result, :pressure_reference_mode) ? Symbol(result.pressure_reference_mode) : :raw_absolute
+    pressure_reference_value = hasproperty(result, :pressure_reference_value) ? Float64(result.pressure_reference_value) : 0.0
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(
+            meson_point;
+            p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+            t_num=get(thermo_kwargs, :t_num, default_theta_count()),
+        ),
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    pressure_shift_fn_raw = (model, x_state, mu_vec, T_probe) -> strict_bw_meson_pressure_summary(
         Float64(result.m_pi),
         Float64(result.gamma_pi),
         Float64(result.m_K),
@@ -591,6 +699,11 @@ function solve_gap_and_strict_bw_meson_thermo_point(
         omega_nodes=Int(result.omega_nodes),
         gamma_zero_tol=Float64(result.gamma_zero_tol),
     ).P_meson
+    pressure_shift_fn = _with_pressure_reference_shift(
+        pressure_shift_fn_raw,
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
     total_thermo = _total_thermo_from_pressure_shift(
         meson_point,
         pressure_shift_fn;
@@ -615,8 +728,18 @@ function solve_gap_and_phase_shift_meson_thermo_point(
     if !derive_thermo
         return merge(meson_point, (phase_shift_meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
-    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> phase_shift_meson_pressure_summary(
+    pressure_reference_mode = hasproperty(result, :pressure_reference_mode) ? Symbol(result.pressure_reference_mode) : :raw_absolute
+    pressure_reference_value = hasproperty(result, :pressure_reference_value) ? Float64(result.pressure_reference_value) : 0.0
+    background = _apply_pressure_reference_to_background(
+        _background_thermo_from_meson_point(
+            meson_point;
+            p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+            t_num=get(thermo_kwargs, :t_num, default_theta_count()),
+        ),
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
+    pressure_shift_fn_raw = (model, x_state, mu_vec, T_probe) -> phase_shift_meson_pressure_summary(
         normalize_quark_params(_require_result_field(meson_point, :quark_params)),
         (
             T=T_probe,
@@ -641,6 +764,11 @@ function solve_gap_and_phase_shift_meson_thermo_point(
         ld_cutoff_mode=result.ld_cutoff_mode === nothing ? :match_qmax : Symbol(result.ld_cutoff_mode),
         ld_threshold_mode=result.ld_threshold_mode === nothing ? :omega_lt_q : Symbol(result.ld_threshold_mode),
     ).P_meson
+    pressure_shift_fn = _with_pressure_reference_shift(
+        pressure_shift_fn_raw,
+        pressure_reference_mode,
+        pressure_reference_value,
+    )
     derived = try
         total_thermo = _total_thermo_from_pressure_shift(
             meson_point,
@@ -711,6 +839,8 @@ function build_meson_thermo_contract_row(point_result)
         ld_cutoff=hasproperty(result, :ld_cutoff) && result.ld_cutoff !== nothing ? Float64(result.ld_cutoff) : NaN,
         ld_cutoff_mode=hasproperty(result, :ld_cutoff_mode) && result.ld_cutoff_mode !== nothing ? String(Symbol(result.ld_cutoff_mode)) : "",
         ld_threshold_mode=hasproperty(result, :ld_threshold_mode) && result.ld_threshold_mode !== nothing ? String(Symbol(result.ld_threshold_mode)) : "",
+        pressure_reference_mode=hasproperty(result, :pressure_reference_mode) ? String(Symbol(result.pressure_reference_mode)) : "",
+        pressure_reference_value=hasproperty(result, :pressure_reference_value) ? Float64(result.pressure_reference_value) : 0.0,
     )
 end
 
