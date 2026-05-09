@@ -35,7 +35,7 @@ export stable_meson_pressure, stable_meson_pressure_summary
 export strict_bw_meson_pressure, strict_bw_meson_pressure_summary
 export phase_shift_meson_pressure, phase_shift_meson_pressure_summary
 
-@inline function _require_nonnegative(name::AbstractString, value::Float64)
+@inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
 end
@@ -100,7 +100,7 @@ end
     return ω * ω < q * q
 end
 
-function bosonic_log_pressure_factor(E::Float64, μ::Float64, T::Float64)::Float64
+function bosonic_log_pressure_factor(E::Real, μ::Real, T::Real)
     _require_nonnegative("temperature T", T)
     T == 0.0 && return 0.0
     E > μ || throw(ArgumentError("Bosonic pressure kernel requires E > μ, got E=$(E), μ=$(μ)"))
@@ -112,12 +112,12 @@ end
 
 function stable_meson_pressure(
     mass::Float64,
-    T::Float64;
-    μ::Float64=0.0,
+    T::Real;
+    μ::Real=0.0,
     degeneracy::Integer=1,
     qmax::Union{Nothing,Float64}=nothing,
     num_q_nodes::Int=256,
-)::Float64
+)
     _require_nonnegative("mass", mass)
     _require_nonnegative("temperature T", T)
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
@@ -125,7 +125,7 @@ function stable_meson_pressure(
     mass > μ || throw(ArgumentError("Stable meson pressure requires mass > μ, got mass=$(mass), μ=$(μ)"))
     T == 0.0 && return 0.0
 
-    q_upper = qmax === nothing ? _default_qmax(mass, T, μ) : Float64(qmax)
+    q_upper = qmax === nothing ? _default_qmax(mass, Float64(T), Float64(μ)) : Float64(qmax)
     q_upper > 0.0 || throw(ArgumentError("qmax must be positive, got $(q_upper)"))
 
     nodes, weights = gauleg(0.0, q_upper, num_q_nodes)
@@ -135,13 +135,13 @@ function stable_meson_pressure(
         E = hypot(q, mass)
         integral += weights[i] * q^2 * bosonic_log_pressure_factor(E, μ, T)
     end
-    return Float64(degeneracy) * integral / (2.0 * π^2)
+    return degeneracy * integral / (2.0 * π^2)
 end
 
 function stable_meson_pressure_summary(
     pi_mass::Float64,
     k_mass::Float64,
-    T::Float64;
+    T::Real;
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
     d_pi::Union{Nothing,Integer}=nothing,
@@ -182,8 +182,8 @@ function stable_meson_pressure_summary(
         μ_K=μ_K,
         d_pi=d_pi_resolved,
         d_K=d_K_resolved,
-        qmax_pi=qmax_pi,
-        qmax_K=qmax_K,
+        qmax_pi=qmax_pi === nothing ? _default_qmax(pi_mass, Float64(T), Float64(μ_pi)) : qmax_pi,
+        qmax_K=qmax_K === nothing ? _default_qmax(k_mass, Float64(T), Float64(μ_K)) : qmax_K,
         num_q_nodes=num_q_nodes,
     )
 end
@@ -191,8 +191,8 @@ end
 function strict_bw_meson_pressure(
     mass::Float64,
     gamma::Float64,
-    T::Float64;
-    μ::Float64=0.0,
+    T::Real;
+    μ::Real=0.0,
     degeneracy::Integer=1,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
@@ -272,7 +272,7 @@ function strict_bw_meson_pressure(
     end
 
     return (
-        pressure=Float64(degeneracy) * q_shell_weighted_sum,
+        pressure=degeneracy * q_shell_weighted_sum,
         q_integral_estimate=q_shell_weighted_sum,
         omega_shell_at_qmax=q_shell_at_qmax,
         qmax=qmax,
@@ -291,7 +291,7 @@ function strict_bw_meson_pressure_summary(
     pi_gamma::Float64,
     k_mass::Float64,
     k_gamma::Float64,
-    T::Float64;
+    T::Real;
     μ_pi::Float64=0.0,
     μ_K::Float64=0.0,
     d_pi::Union{Nothing,Integer}=nothing,
@@ -331,8 +331,8 @@ function strict_bw_meson_pressure_summary(
         gamma_zero_tol=gamma_zero_tol,
     )
 
-    p_pi = Float64(pi_pressure.pressure)
-    p_K = Float64(k_pressure.pressure)
+    p_pi = pi_pressure.pressure
+    p_K = k_pressure.pressure
     return (
         P_pi=p_pi,
         P_K=p_K,

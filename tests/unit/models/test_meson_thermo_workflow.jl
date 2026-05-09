@@ -44,9 +44,33 @@ const _MTW = Models.MesonThermoWorkflow
         @test isfinite(thermo.entropy)
         @test isfinite(thermo.epsilon)
         @test isfinite(thermo.trace_anomaly)
+        @test thermo.thermo_derivation_mode == :omega_total_ad
         @test row.workflow == "stable_meson_pressure"
         @test row.channel_set == "pi,K"
+        @test row.thermo_derivation_mode == "omega_total_ad"
         @test row.P_meson ≈ thermo.P_meson rtol=1e-12
+    end
+
+    @testset "strict BW meson thermo workflow uses omega_total AD" begin
+        T_fm = 170.0 / Main.Constants_PNJL.ħc_MeV_fm
+        point = Models.solve_gap_and_strict_bw_meson_thermo_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :K),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            thermo_kwargs=(; qmax=8.0, q_nodes=16, omega_max=6.0, omega_nodes=16, p_num=8, t_num=4),
+            temperature_step_fm=0.5 / Main.Constants_PNJL.ħc_MeV_fm,
+        )
+        thermo = point.strict_bw_meson_thermo
+        row = Models.build_meson_thermo_contract_row(point)
+        @test thermo.thermo_derivation_mode == :omega_total_ad
+        @test row.thermo_derivation_mode == "omega_total_ad"
+        @test isfinite(thermo.entropy)
+        @test isfinite(thermo.epsilon)
     end
 
     @testset "phase-shift meson thermo workflow 支持 current / gbu 两口径" begin
@@ -106,6 +130,28 @@ const _MTW = Models.MesonThermoWorkflow
         @test row.ld_cutoff ≈ current.ld_cutoff rtol=1e-12
         @test row.ld_cutoff_mode == "match_qmax"
         @test row.ld_threshold_mode == "omega_lt_q"
+    end
+
+    @testset "gap-and-phase-shift thermo currently falls back from omega_total AD" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        point = Models.solve_gap_and_phase_shift_meson_thermo_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :K),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+            thermo_kwargs=(; qmax=4.0, q_nodes=6, omega_max=3.0, omega_nodes=6, p_num=8, t_num=4),
+            temperature_step_fm=0.5 / Main.Constants_PNJL.ħc_MeV_fm,
+        )
+        thermo = point.phase_shift_meson_thermo
+        row = Models.build_meson_thermo_contract_row(point)
+        @test thermo.thermo_derivation_mode == :workflow_fd_legacy
+        @test row.thermo_derivation_mode == "workflow_fd_legacy"
+        @test isfinite(thermo.entropy)
+        @test isfinite(thermo.epsilon)
     end
 
     @testset "phase-shift meson thermo workflow supports pi/sigma_pi channel set" begin

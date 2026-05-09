@@ -87,6 +87,33 @@ end
     )
 end
 
+@inline function _total_thermo_from_pressure_shift(
+    meson_point,
+    pressure_shift_fn::Function;
+    p_num::Int=default_momentum_count(),
+    t_num::Int=default_theta_count(),
+)
+    model = create_model(:PNJL)
+    equilibrium = _require_result_field(meson_point, :equilibrium)
+    thermo_params = _require_result_field(meson_point, :thermo_params)
+    pressure, rho_norm, entropy, energy = model_thermo(
+        model,
+        equilibrium.x_state,
+        equilibrium.mu_vec,
+        Float64(thermo_params.T);
+        p_num=p_num,
+        t_num=t_num,
+        xi=Float64(thermo_params.ξ),
+        pressure_shift_fn=pressure_shift_fn,
+    )
+    return (
+        P_total=Float64(pressure),
+        rho_norm=Float64(rho_norm),
+        entropy_total=Float64(entropy),
+        epsilon_total=Float64(energy),
+    )
+end
+
 @inline function _common_contract_fields(
     meson_point,
     meson_pressure::Float64,
@@ -182,6 +209,30 @@ function _attach_derived_thermo(
     ))
 end
 
+@inline function _attach_total_thermo(
+    base_result,
+    background,
+    total_thermo;
+    mode::Symbol,
+)
+    entropy_total = Float64(total_thermo.entropy_total)
+    epsilon_total = Float64(total_thermo.epsilon_total)
+    entropy_meson = entropy_total - Float64(background.entropy_quark_meanfield)
+    epsilon_meson = epsilon_total - Float64(background.epsilon_quark_meanfield)
+    T_fm = Float64(base_result.T_fm)
+    trace_anomaly = T_fm == 0.0 ? NaN : (epsilon_total - 3.0 * Float64(total_thermo.P_total)) / T_fm^4
+
+    return merge(base_result, (
+        P_total=Float64(total_thermo.P_total),
+        entropy_meson=entropy_meson,
+        entropy=entropy_total,
+        epsilon_meson=epsilon_meson,
+        epsilon=epsilon_total,
+        trace_anomaly=trace_anomaly,
+        thermo_derivation_mode=mode,
+    ))
+end
+
 function solve_meson_thermo_from_meson_point(
     meson_point;
     pi_channel::Symbol=:pi,
@@ -244,8 +295,8 @@ function solve_meson_thermo_from_meson_point(
             m_K=m_K,
             d_pi=d_pi_resolved,
             d_K=d_K_resolved,
-            qmax_pi=qmax_pi === nothing ? nothing : Float64(qmax_pi),
-            qmax_K=qmax_K === nothing ? nothing : Float64(qmax_K),
+            qmax_pi=Float64(pressure_summary.qmax_pi),
+            qmax_K=Float64(pressure_summary.qmax_K),
             num_q_nodes=num_q_nodes,
             meson_pressure=pressure_summary,
             meson_density=density_summary,
@@ -481,20 +532,30 @@ function solve_gap_and_meson_thermo_point(
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
     result = solve_meson_thermo_from_meson_point(meson_point; thermo_kwargs...)
     if !derive_thermo
-        return merge(meson_point, (meson_thermo=result,))
+        return merge(meson_point, (meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-
-    pressure_at_temperature = T_probe -> begin
-        probe = solve_gap_and_meson_thermo_point(
-            T_probe,
-            mu_fm;
-            thermo_kwargs=thermo_kwargs,
-            derive_thermo=false,
-            kwargs...,
-        )
-        return Float64(probe.meson_thermo.P_meson)
-    end
-    derived = _attach_derived_thermo(result, pressure_at_temperature; temperature_step_fm=temperature_step_fm)
+    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
+    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> stable_meson_pressure_summary(
+        Float64(result.m_pi),
+        Float64(result.m_K),
+        T_probe;
+        μ_pi=Float64(result.μ_pi),
+        μ_K=Float64(result.μ_K),
+        d_pi=Int(result.d_pi),
+        d_K=Int(result.d_K),
+        pi_channel=Symbol(result.pi_channel),
+        k_channel=Symbol(result.k_channel),
+        qmax_pi=result.qmax_pi,
+        qmax_K=result.qmax_K,
+        num_q_nodes=Int(result.num_q_nodes),
+    ).P_meson
+    total_thermo = _total_thermo_from_pressure_shift(
+        meson_point,
+        pressure_shift_fn;
+        p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+        t_num=get(thermo_kwargs, :t_num, default_theta_count()),
+    )
+    derived = _attach_total_thermo(result, background, total_thermo; mode=:omega_total_ad)
     return merge(meson_point, (meson_thermo=derived,))
 end
 
@@ -509,20 +570,34 @@ function solve_gap_and_strict_bw_meson_thermo_point(
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
     result = solve_strict_bw_meson_thermo_from_meson_point(meson_point; thermo_kwargs...)
     if !derive_thermo
-        return merge(meson_point, (strict_bw_meson_thermo=result,))
+        return merge(meson_point, (strict_bw_meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-
-    pressure_at_temperature = T_probe -> begin
-        probe = solve_gap_and_strict_bw_meson_thermo_point(
-            T_probe,
-            mu_fm;
-            thermo_kwargs=thermo_kwargs,
-            derive_thermo=false,
-            kwargs...,
-        )
-        return Float64(probe.strict_bw_meson_thermo.P_meson)
-    end
-    derived = _attach_derived_thermo(result, pressure_at_temperature; temperature_step_fm=temperature_step_fm)
+    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
+    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> strict_bw_meson_pressure_summary(
+        Float64(result.m_pi),
+        Float64(result.gamma_pi),
+        Float64(result.m_K),
+        Float64(result.gamma_K),
+        T_probe;
+        μ_pi=Float64(result.μ_pi),
+        μ_K=Float64(result.μ_K),
+        d_pi=Int(result.d_pi),
+        d_K=Int(result.d_K),
+        pi_channel=Symbol(result.pi_channel),
+        k_channel=Symbol(result.k_channel),
+        qmax=Float64(result.qmax),
+        q_nodes=Int(result.q_nodes),
+        omega_max=Float64(result.omega_max),
+        omega_nodes=Int(result.omega_nodes),
+        gamma_zero_tol=Float64(result.gamma_zero_tol),
+    ).P_meson
+    total_thermo = _total_thermo_from_pressure_shift(
+        meson_point,
+        pressure_shift_fn;
+        p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+        t_num=get(thermo_kwargs, :t_num, default_theta_count()),
+    )
+    derived = _attach_total_thermo(result, background, total_thermo; mode=:omega_total_ad)
     return merge(meson_point, (strict_bw_meson_thermo=derived,))
 end
 
@@ -532,25 +607,66 @@ function solve_gap_and_phase_shift_meson_thermo_point(
     thermo_kwargs::NamedTuple=(;),
     derive_thermo::Bool=true,
     temperature_step_fm::Float64=(1.0 / ħc_MeV_fm),
+    allow_legacy_fd_fallback::Bool=true,
     kwargs...,
 )
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
     result = solve_phase_shift_meson_thermo_from_meson_point(meson_point; thermo_kwargs...)
     if !derive_thermo
-        return merge(meson_point, (phase_shift_meson_thermo=result,))
+        return merge(meson_point, (phase_shift_meson_thermo=merge(result, (thermo_derivation_mode=:none,)),))
     end
-
-    pressure_at_temperature = T_probe -> begin
-        probe = solve_gap_and_phase_shift_meson_thermo_point(
-            T_probe,
-            mu_fm;
-            thermo_kwargs=thermo_kwargs,
-            derive_thermo=false,
-            kwargs...,
+    background = _background_thermo_from_meson_point(meson_point; p_num=get(thermo_kwargs, :p_num, default_momentum_count()), t_num=get(thermo_kwargs, :t_num, default_theta_count()))
+    pressure_shift_fn = (model, x_state, mu_vec, T_probe) -> phase_shift_meson_pressure_summary(
+        normalize_quark_params(_require_result_field(meson_point, :quark_params)),
+        (
+            T=T_probe,
+            Φ=_require_result_field(meson_point, :thermo_params).Φ,
+            Φbar=_require_result_field(meson_point, :thermo_params).Φbar,
+            ξ=_require_result_field(meson_point, :thermo_params).ξ,
+        );
+        pi_channel=Symbol(result.pi_channel),
+        k_channel=Symbol(result.k_channel),
+        μ_pi=Float64(result.μ_pi),
+        μ_K=Float64(result.μ_K),
+        d_pi=Int(result.d_pi),
+        d_K=Int(result.d_K),
+        scheme=Symbol(result.phase_shift_variant),
+        qmax=Float64(result.qmax),
+        q_nodes=Int(result.q_nodes),
+        omega_min=Float64(result.omega_min),
+        omega_max=Float64(result.omega_max),
+        omega_nodes=Int(result.omega_nodes),
+        eta=Float64(result.eta),
+        ld_cutoff=isnan(Float64(result.ld_cutoff)) ? nothing : Float64(result.ld_cutoff),
+        ld_cutoff_mode=result.ld_cutoff_mode === nothing ? :match_qmax : Symbol(result.ld_cutoff_mode),
+        ld_threshold_mode=result.ld_threshold_mode === nothing ? :omega_lt_q : Symbol(result.ld_threshold_mode),
+    ).P_meson
+    derived = try
+        total_thermo = _total_thermo_from_pressure_shift(
+            meson_point,
+            pressure_shift_fn;
+            p_num=get(thermo_kwargs, :p_num, default_momentum_count()),
+            t_num=get(thermo_kwargs, :t_num, default_theta_count()),
         )
-        return Float64(probe.phase_shift_meson_thermo.P_meson)
+        _attach_total_thermo(result, background, total_thermo; mode=:omega_total_ad)
+    catch err
+        allow_legacy_fd_fallback || rethrow(err)
+        pressure_at_temperature = T_local -> begin
+            probe = solve_gap_and_phase_shift_meson_thermo_point(
+                T_local,
+                mu_fm;
+                thermo_kwargs=thermo_kwargs,
+                derive_thermo=false,
+                allow_legacy_fd_fallback=allow_legacy_fd_fallback,
+                kwargs...,
+            )
+            return Float64(probe.phase_shift_meson_thermo.P_meson)
+        end
+        merge(
+            _attach_derived_thermo(result, pressure_at_temperature; temperature_step_fm=temperature_step_fm),
+            (thermo_derivation_mode=:workflow_fd_legacy, thermo_derivation_fallback_error=string(typeof(err)),),
+        )
     end
-    derived = _attach_derived_thermo(result, pressure_at_temperature; temperature_step_fm=temperature_step_fm)
     return merge(meson_point, (phase_shift_meson_thermo=derived,))
 end
 
@@ -591,6 +707,7 @@ function build_meson_thermo_contract_row(point_result)
         equilibrium_converged=Bool(result.equilibrium_converged),
         phase_structure=String(Symbol(result.phase_structure)),
         phase_shift_variant=result.phase_shift_variant === nothing ? "" : String(Symbol(result.phase_shift_variant)),
+        thermo_derivation_mode=hasproperty(result, :thermo_derivation_mode) ? String(Symbol(result.thermo_derivation_mode)) : "",
         ld_cutoff=hasproperty(result, :ld_cutoff) && result.ld_cutoff !== nothing ? Float64(result.ld_cutoff) : NaN,
         ld_cutoff_mode=hasproperty(result, :ld_cutoff_mode) && result.ld_cutoff_mode !== nothing ? String(Symbol(result.ld_cutoff_mode)) : "",
         ld_threshold_mode=hasproperty(result, :ld_threshold_mode) && result.ld_threshold_mode !== nothing ? String(Symbol(result.ld_threshold_mode)) : "",
