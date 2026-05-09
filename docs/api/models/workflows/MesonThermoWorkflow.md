@@ -46,7 +46,7 @@
 
 - `stable` 与 `strict BW` 直接消费 `meson_results[:pi/:K].mass/gamma`
 - `phase-shift` 复用现有 propagator / polarization / weighted-phase 链
-- 第一版只承诺 `π/K` 通道，不主动扩到 full nonet
+- workflow 已验证 `π/K` 与 `π/sigma_pi` 两套双通道组合；当前仍不主动扩到 full nonet
 
 ## 返回结构
 
@@ -129,12 +129,29 @@
 - `ld_threshold_mode`
 - `thermo_derivation_mode`
 
+## Canonical Scan
+
+仓库内现已提供首个 canonical `mu_B = 0` 扫描脚本：
+
+- `scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl`
+
+当前脚本约定：
+
+- 默认 case：`phase_shift_current + pi/sigma_pi + mu_B=0 + xi=0`
+- 输出目录内至少包含：
+  - `scan.csv`
+  - `README.md`
+  - `effective_config.json`
+  - `run_manifest.json`
+- `scan.csv` 的核心平铺字段来自 `Models.build_meson_thermo_contract_row`
+- 为避免 CSV 歧义，脚本落盘时会把 `channel_set` 编码为无逗号形式；解释双通道结果时仍优先使用 `primary_channel / secondary_channel`
+
 ## 当前边界
 
 - `phase_structure` 当前固定写为 `unknown`，尚未与 phase pipeline 做正式联动
 - `QP / LD` 目前只在 phase-shift pressure 口径下显式输出；stable / strict BW 仍为空值
 - 兼容字段 `P_pi/P_K` 仍保留，但当第二通道切到 `sigma_pi` 时，更应使用 `primary/secondary` 字段解读合同
 - 当前三类 meson thermo workflow 的总热力学派生量都应标记为 `omega_total_ad`
-- 尚未提供 canonical temperature scan 脚本与结果目录落盘
+- canonical `mu_B = 0` 脚本与最小结果目录已落地，但图资产仍未在脚本内自动生成
 - 尚未沉淀 regression baseline
 - 尚未做 channel 扩张决策
