@@ -121,7 +121,7 @@ include(joinpath(@__DIR__, "xi_smoothness_sampling_lib.jl"))
 using .XiSmoothnessSampling
 
 # parse args, call sample_params(...), write:
-# data/outputs/results/relaxtime/plan_c/sampling/params_24_seed<seed>.csv
+# data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/params_24_seed<seed>.csv
 ```
 
 - [ ] **Step 5: Re-run unit test and confirm pass**
@@ -366,10 +366,10 @@ git commit -m "feat(relaxtime): add manual review merge for xi smoothness labels
 - [ ] **Step 1: Add executable runbook commands (no placeholders)**
 
 ```bash
-julia --project=. scripts/relaxtime/generate_xi_smoothness_params.jl --seed 20260427 --out data/outputs/results/relaxtime/plan_c/sampling/params_24_seed20260427.csv
-julia --project=. scripts/relaxtime/run_xi_smoothness_batch.jl --params data/outputs/results/relaxtime/plan_c/sampling/params_24_seed20260427.csv --xi-min -0.5 --xi-max 0.5 --xi-step 0.02
-julia --project=. scripts/relaxtime/plot_xi_smoothness_batch.jl --manifest data/outputs/results/relaxtime/plan_c/run_manifest.json
-julia --project=. scripts/relaxtime/evaluate_xi_smoothness.jl --manifest data/outputs/results/relaxtime/plan_c/run_manifest.json
+julia --project=. scripts/relaxtime/generate_xi_smoothness_params.jl --seed 20260427 --out data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/params_24_seed20260427.csv
+julia --project=. scripts/relaxtime/run_xi_smoothness_batch.jl --params data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/params_24_seed20260427.csv --xi-min -0.5 --xi-max 0.5 --xi-step 0.02
+julia --project=. scripts/relaxtime/plot_xi_smoothness_batch.jl --manifest data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/run_manifest.json
+julia --project=. scripts/relaxtime/evaluate_xi_smoothness.jl --manifest data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/run_manifest.json
 ```
 
 - [ ] **Step 2: Add manual review template example**

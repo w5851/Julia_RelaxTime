@@ -1,0 +1,6 @@
+﻿# git_commit: c066bcc387acdd3a84cc36c497d336f6ba4456f8
+# script: scripts/relaxtime/run_gap_transport_scan.jl
+# source_csv: data/outputs/results/relaxtime/xi_smoothness_sampling/sampling\S041\gap_transport_scan.csv
+# title: gap_transport_scan_failed_points
+# schema: scan_csv_v1
+T_MeV,muB_MeV,xi,seed_source,phase_prev,phase_curr_hint,error_type,error_message,timestamp

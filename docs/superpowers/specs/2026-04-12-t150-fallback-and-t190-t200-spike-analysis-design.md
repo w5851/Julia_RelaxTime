@@ -2,7 +2,7 @@
 
 ## 1. 背景与目标
 
-本设计面向同一条 `plan_b` 产数链路的两类问题：
+本设计面向同一条 `fixed_temperature_xi_scan_muB0` 产数链路（旧名 `plan_b`）的两类问题：
 
 1. `T=150, muB=0` 在小 `xi` 前段（重点是 `xi=-0.5`）出现平衡解未收敛并被跳过，导致缺点。
 2. `T=190/200` 数据存在明显不光滑波动（毛刺），需给出可审计、可复核的解释。
@@ -11,7 +11,7 @@
 
 - 允许改 `scripts`，且优先通过 `scripts` 调用 `src` 中已有 fallback 能力，而不是脚本层重造求解器。
 - 允许最小化 `src` 变更：为 workflow pipeline 增补 diagnostics stage 与 manifest 扩展字段、为平均散射率补充 band 统计输出接口。
-- 主分析数据口径以 `D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv` 为准。
+- 主分析数据口径以 `D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv` 为准。
 
 ## 2. 范围与非范围
 
@@ -32,7 +32,7 @@
 
 ### 3.1 现状主链
 
-- 入口：`scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` 编排 `plan_b`。
+- 入口：`scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` 编排 `fixed_temperature_xi_scan_muB0`（兼容旧别名 `plan_b`）。
 - 计算：`scripts/relaxtime/run_gap_transport_scan.jl`。
 - 平衡态：当前脚本 `solve_models_equilibrium` 直接调用 `Models.solve_constraint(FixedMu)`。
 - 输运：`TransportWorkflow.solve_gap_and_transport`。

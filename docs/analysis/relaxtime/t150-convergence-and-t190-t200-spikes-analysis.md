@@ -4,7 +4,7 @@
 
 - 现象 A（T150）：此前 `xi=-0.5` 首点在部分扫描中被跳过，导致 `xi` 连续链路起点缺失。
 - 现象 B（T190/T200）：`(sigma/T)/(eta/s)` 在局部 `xi` 区间出现“毛刺感”（局部斜率突变或平台不平滑）。
-- 主数据口径：`D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv`。
+- 主数据口径：`D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv`。
 - 最小复跑口径：`D:\Desktop\Temp\relaxtime_t150_repro\transport_vs_xi_T150_muB0_xim05.csv` 与 sidecar `D:\Desktop\Temp\relaxtime_t150_repro\transport_vs_xi_T150_muB0_xim05_failed_points.csv`。
 
 ## 2) 问题1根因链
@@ -22,7 +22,7 @@
 
 ## 4) 问题2毛刺解释
 
-- 先更正口径：当前结果文件并非“只输出比值”。`plan_b_merged.csv` 同时包含分子分母与比值（`sigma_over_T`,`eta_over_s`,`sigma_over_T_over_eta_over_s`），并同时包含 `tau_u/tau_s` 与 `tauinv_u/tauinv_s`。
+- 先更正口径：当前结果文件并非“只输出比值”。`fixed_temperature_xi_scan_muB0_merged.csv` 同时包含分子分母与比值（`sigma_over_T`,`eta_over_s`,`sigma_over_T_over_eta_over_s`），并同时包含 `tau_u/tau_s` 与 `tauinv_u/tauinv_s`。
 - 数值链路（主导，约 70%）：
   - 比值结构放大：`(sigma/T)/(eta/s)` 对分子分母相对变化高度敏感；在 `eta/s` 偏低区小幅波动可被放大为“毛刺感”。
   - T190 证据：`eta_over_s` 范围约 `0.0856~0.3601`，`sigma_over_T` 仅约 `0.00606~0.01933`，比值约 `0.0509~0.1041`，比值振幅显著高于单项量纲振幅。
@@ -36,7 +36,7 @@
 
 - 目标：让未参与本轮分析的读者，按固定顺序重现“`xi` 局部异常 -> 主导通道 -> `sigma` 下移 -> `mixed_P` 分母增强”链路。
 - 最小输入：
-  - 主数据：`D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv`
+  - 主数据：`D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv`
   - 窗口重跑输出目录：`D:\Desktop\Temp\relaxtime_t190_window\`
 - 最小复现步骤（按顺序）：
   1. 先看观测层折点（4.1）：确认 `xi=-0.10 -> -0.08` 是 T190 主异常段；
@@ -53,7 +53,7 @@
 
 ### 4.1 针对 T190 的 `sigma_over_T` 图（`xi∈[-0.2,0]`）异常段解释
 
-- 图位点：`data/outputs/figures/relaxtime/plan_b/T190/sigma_over_T_vs_xi.png`。
+- 图位点：`data/outputs/figures/relaxtime/fixed_temperature_xi_scan_muB0/T190/sigma_over_T_vs_xi.png`。
 - 该区间在主数据中的对应行为不是单调平滑，而是“先降后升”：
   - 从 `xi=-0.20` 到 `xi=-0.14`，`sigma_over_T` 由 `0.01851` 下降到 `0.01679`。
   - 在 `xi=-0.14 -> -0.12` 出现局部反弹（`+1.20e-4`）。
@@ -98,9 +98,9 @@
 | 链路环节 | 输入 | 核心函数/阶段（声明式） | 输出字段（结构化） | 证据文件 |
 |---|---|---|---|---|
 | 统一入口 | `T_fm,mu_fm,xi` 与 workflow kwargs | `Models.solve_gap_and_transport`（`src/models/entrypoints.jl`）或 `Models.run_workflow_pipeline(:transport)` | workflow output tuple（含 `equilibrium`,`tau`,`transport`） | `run_manifest.json`（workflow adapter 输出） |
-| 平衡解（主线） | `T_fm,mu_fm,xi,p_num,t_num` | `TransportWorkflow.solve_gap_and_transport` -> `_solve_equilibrium`（`src/models/workflows/TransportWorkflow.jl`） | `equilibrium.x_state`,`equilibrium.masses`,`equilibrium.converged` | 主 CSV（plan_b）与窗口重跑点位 |
+| 平衡解（主线） | `T_fm,mu_fm,xi,p_num,t_num` | `TransportWorkflow.solve_gap_and_transport` -> `_solve_equilibrium`（`src/models/workflows/TransportWorkflow.jl`） | `equilibrium.x_state`,`equilibrium.masses`,`equilibrium.converged` | 主 CSV（fixed_temperature_xi_scan_muB0）与窗口重跑点位 |
 | 率核与通道聚合（主线） | `quark_params,thermo_params,K_coeffs/densities` | `RelaxationTime.relaxation_times`（`src/relaxtime/RelaxationTime.jl`） | `tau`,`tau_inv`,`rates`; 且满足 `tauinv_i=sum_j n_j*w_ij` | `t190_window_channel_diag.csv` |
-| 输运系数组装（主线） | `tau,bulk,densities,pressure,energy` | `transport_coefficients`（`src/relaxtime/TransportCoefficients.jl`） | `eta,zeta,sigma,kappa_**,lambda,lorenz...` | `plan_b_merged.csv` |
+| 输运系数组装（主线） | `tau,bulk,densities,pressure,energy` | `transport_coefficients`（`src/relaxtime/TransportCoefficients.jl`） | `eta,zeta,sigma,kappa_**,lambda,lorenz...` | `fixed_temperature_xi_scan_muB0_merged.csv` |
 | K/Π 到混合传播子分解（诊断） | `equilibrium + process + (s,t)` | `decompose_mixed_p_propagator_chain`（`scripts/analysis/relaxtime/t190_sigma_chain_decomposition_lib.jl`） | `M00/M08/M88`, `detM` 三项，`|D_mixed^P|^2` | `t190_mixed_p_propagator_chain_decomposition.csv` |
 | 振幅/传播子分项（诊断） | 同上 | `decompose_qqbar_amplitude_terms` / `decompose_p_channel_propagator_strength`（同一 lib） | `M_s/M_t/干涉`, `|D_s^P|^2` simple/mixed 分项 | `t190_sigma_amplitude_decomposition_summary.csv`、`t190_p_channel_propagator_absolute_strength_summary.csv` |
 | 机制回归门禁（治理） | 固定点配置（T190, `xi=-0.10/-0.08`） | regression 测试 `tests/regression/relaxtime/test_t190_mixed_p_chain_regression.jl` | `ratio_detM_area_B_over_A`, `ratio_Dmixed_area_B_over_A`, 阈值点 ratio | `tests/baselines/relaxtime/baseline_t190_mixed_p_chain_v1.csv` |
@@ -455,7 +455,7 @@
     - `D:\Desktop\Temp\relaxtime_t190_window\t190_xi_window_full_chain_summary.csv`
     - `D:\Desktop\Temp\relaxtime_t190_window\t190_xi_window_adjacent_transition_summary.csv`
 
-- 观测层（主数据 `plan_b_merged.csv`）确认：`sigma_over_T` 在 `[-0.2,0]` 呈“先降后升”，并带一个小回跳：
+- 观测层（主数据 `fixed_temperature_xi_scan_muB0_merged.csv`）确认：`sigma_over_T` 在 `[-0.2,0]` 呈“先降后升”，并带一个小回跳：
   - `-0.20 -> -0.14` 连续下降；
   - `-0.14 -> -0.12` 小回跳（相邻比值约 `1.007`）；
   - `-0.12 -> -0.10` 再次回落；

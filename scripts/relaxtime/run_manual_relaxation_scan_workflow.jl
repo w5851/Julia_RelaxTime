@@ -6,8 +6,8 @@ Manual relaxation-time workflow entrypoint.
 This script is intended for explicit, user-triggered generation of three output
 families under data/outputs/figures/relaxtime:
 1. cross_section
-2. plan_a
-3. plan_b
+2. temperature_scan_muB0_xi0
+3. fixed_temperature_xi_scan_muB0
 
 It reuses the existing scan scripts and the generic plot_scan_csv.py plotting
 utility rather than introducing a second implementation path.
@@ -39,6 +39,18 @@ end
 using Dates
 using SHA
 
+const SECTION_CROSS_SECTION = :cross_section
+const SECTION_TEMPERATURE_SCAN = :temperature_scan_muB0_xi0
+const SECTION_FIXED_T_XI_SCAN = :fixed_temperature_xi_scan_muB0
+const LEGACY_SECTION_ALIASES = Dict(
+    :plan_a => SECTION_TEMPERATURE_SCAN,
+    :plan_b => SECTION_FIXED_T_XI_SCAN,
+)
+const ALL_SECTIONS = Set([SECTION_CROSS_SECTION, SECTION_TEMPERATURE_SCAN, SECTION_FIXED_T_XI_SCAN])
+const TEMPERATURE_SCAN_DIR = "temperature_scan_muB0_xi0"
+const FIXED_T_XI_SCAN_DIR = "fixed_temperature_xi_scan_muB0"
+const FIXED_T_XI_SCAN_MERGED_CSV = "fixed_temperature_xi_scan_muB0_merged.csv"
+
 struct Options
     sections::Set{Symbol}
     overwrite::Bool
@@ -54,10 +66,10 @@ struct Options
     xs_T_mev::Float64
     xs_muB_mev::Float64
     xs_xi::Float64
-    plan_a_Tmin_mev::Float64
-    plan_a_Tmax_mev::Float64
-    plan_a_Tstep_mev::Float64
-    plan_b_T_list_mev::Vector{Float64}
+    temperature_scan_Tmin_mev::Float64
+    temperature_scan_Tmax_mev::Float64
+    temperature_scan_Tstep_mev::Float64
+    fixed_temperature_xi_scan_T_list_mev::Vector{Float64}
     xi_min::Float64
     xi_max::Float64
     xi_step::Float64
@@ -73,7 +85,7 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_manual_relaxation_scan_workflow.jl [options]\n")
     println("Options:")
-    println("  --sections <list>      all|cross_section|plan_a|plan_b (comma separated, default all)")
+    println("  --sections <list>      all|cross_section|temperature_scan_muB0_xi0|fixed_temperature_xi_scan_muB0 (legacy aliases: plan_a, plan_b)")
     println("  --overwrite            overwrite existing CSVs/figures")
     println("  --no-plots             only write CSVs")
     println("  --python <cmd>         python executable (default python)")
@@ -87,13 +99,13 @@ function print_usage()
     println("  --xs-T <MeV>           cross section T (default 200)")
     println("  --xs-muB <MeV>         cross section mu_B (default 0)")
     println("  --xs-xi <value>        cross section xi (default 0)")
-    println("  --plan-a-Tmin <MeV>    plan_a Tmin (default 120)")
-    println("  --plan-a-Tmax <MeV>    plan_a Tmax (default 350)")
-    println("  --plan-a-Tstep <MeV>   plan_a Tstep (default 10)")
-    println("  --plan-b-T-list <csv>  fixed-T list for plan_b (default 150,190,200,250)")
-    println("  --xi-min <value>       plan_b xi min (default -0.5)")
-    println("  --xi-max <value>       plan_b xi max (default 0.5)")
-    println("  --xi-step <value>      plan_b xi step (default 0.02)")
+    println("  --temperature-scan-Tmin <MeV>   temperature scan Tmin (legacy: --plan-a-Tmin, default 120)")
+    println("  --temperature-scan-Tmax <MeV>   temperature scan Tmax (legacy: --plan-a-Tmax, default 350)")
+    println("  --temperature-scan-Tstep <MeV>  temperature scan Tstep (legacy: --plan-a-Tstep, default 10)")
+    println("  --fixed-temperature-xi-scan-T-list <csv>  fixed-T list for xi scan (legacy: --plan-b-T-list, default 150,190,200,250)")
+    println("  --xi-min <value>       fixed-temperature xi scan xi min (default -0.5)")
+    println("  --xi-max <value>       fixed-temperature xi scan xi max (default 0.5)")
+    println("  --xi-step <value>      fixed-temperature xi scan xi step (default 0.02)")
     println("  --base-output-dir <path>  base directory for outputs (default data/outputs)")
     println("  -h, --help             show help")
 end
@@ -101,9 +113,10 @@ end
 function parse_sections(raw::AbstractString)::Set{Symbol}
     items = Set{Symbol}()
     for part in split(raw, ',')
-        token = Symbol(strip(part))
-        token == :all && return Set([:cross_section, :plan_a, :plan_b])
-        token in (:cross_section, :plan_a, :plan_b) || error("unknown section: $(part)")
+        token_raw = Symbol(strip(part))
+        token = get(LEGACY_SECTION_ALIASES, token_raw, token_raw)
+        token == :all && return copy(ALL_SECTIONS)
+        token in ALL_SECTIONS || error("unknown section: $(part)")
         push!(items, token)
     end
     isempty(items) && error("--sections cannot be empty")
@@ -123,7 +136,7 @@ end
 
 function parse_args(args::Vector{String})::Options
     opts = Dict{Symbol,Any}(
-        :sections => Set([:cross_section, :plan_a, :plan_b]),
+        :sections => copy(ALL_SECTIONS),
         :overwrite => false,
         :make_plots => true,
         :python_cmd => "python",
@@ -137,10 +150,10 @@ function parse_args(args::Vector{String})::Options
         :xs_T_mev => 200.0,
         :xs_muB_mev => 0.0,
         :xs_xi => 0.0,
-        :plan_a_Tmin_mev => 120.0,
-        :plan_a_Tmax_mev => 350.0,
-        :plan_a_Tstep_mev => 10.0,
-        :plan_b_T_list_mev => Float64[150.0, 190.0, 200.0, 250.0],
+        :temperature_scan_Tmin_mev => 120.0,
+        :temperature_scan_Tmax_mev => 350.0,
+        :temperature_scan_Tstep_mev => 10.0,
+        :fixed_temperature_xi_scan_T_list_mev => Float64[150.0, 190.0, 200.0, 250.0],
         :xi_min => -0.5,
         :xi_max => 0.5,
         :xi_step => 0.02,
@@ -187,14 +200,14 @@ function parse_args(args::Vector{String})::Options
             opts[:xs_muB_mev] = parse(Float64, require_value())
         elseif arg == "--xs-xi"
             opts[:xs_xi] = parse(Float64, require_value())
-        elseif arg == "--plan-a-Tmin"
-            opts[:plan_a_Tmin_mev] = parse(Float64, require_value())
-        elseif arg == "--plan-a-Tmax"
-            opts[:plan_a_Tmax_mev] = parse(Float64, require_value())
-        elseif arg == "--plan-a-Tstep"
-            opts[:plan_a_Tstep_mev] = parse(Float64, require_value())
-        elseif arg == "--plan-b-T-list"
-            opts[:plan_b_T_list_mev] = parse_float_list(require_value())
+        elseif arg in ("--temperature-scan-Tmin", "--plan-a-Tmin")
+            opts[:temperature_scan_Tmin_mev] = parse(Float64, require_value())
+        elseif arg in ("--temperature-scan-Tmax", "--plan-a-Tmax")
+            opts[:temperature_scan_Tmax_mev] = parse(Float64, require_value())
+        elseif arg in ("--temperature-scan-Tstep", "--plan-a-Tstep")
+            opts[:temperature_scan_Tstep_mev] = parse(Float64, require_value())
+        elseif arg in ("--fixed-temperature-xi-scan-T-list", "--plan-b-T-list")
+            opts[:fixed_temperature_xi_scan_T_list_mev] = parse_float_list(require_value())
         elseif arg == "--xi-min"
             opts[:xi_min] = parse(Float64, require_value())
         elseif arg == "--xi-max"
@@ -213,7 +226,7 @@ function parse_args(args::Vector{String})::Options
     end
 
     opts[:xi_step] > 0 || error("xi-step must be positive")
-    opts[:plan_a_Tstep_mev] > 0 || error("plan-a-Tstep must be positive")
+    opts[:temperature_scan_Tstep_mev] > 0 || error("temperature-scan-Tstep must be positive")
 
     return Options(
         Set{Symbol}(opts[:sections]),
@@ -230,10 +243,10 @@ function parse_args(args::Vector{String})::Options
         Float64(opts[:xs_T_mev]),
         Float64(opts[:xs_muB_mev]),
         Float64(opts[:xs_xi]),
-        Float64(opts[:plan_a_Tmin_mev]),
-        Float64(opts[:plan_a_Tmax_mev]),
-        Float64(opts[:plan_a_Tstep_mev]),
-        Float64.(opts[:plan_b_T_list_mev]),
+        Float64(opts[:temperature_scan_Tmin_mev]),
+        Float64(opts[:temperature_scan_Tmax_mev]),
+        Float64(opts[:temperature_scan_Tstep_mev]),
+        Float64.(opts[:fixed_temperature_xi_scan_T_list_mev]),
         Float64(opts[:xi_min]),
         Float64(opts[:xi_max]),
         Float64(opts[:xi_step]),
@@ -700,10 +713,10 @@ function run_cross_section(opts::Options)
     end
 end
 
-function run_plan_a(opts::Options, ctx::RunContext)
-    out_dir = joinpath(opts.base_output_dir, "results", "relaxtime", "plan_a")
+function run_temperature_scan(opts::Options, ctx::RunContext)
+    out_dir = joinpath(opts.base_output_dir, "results", "relaxtime", TEMPERATURE_SCAN_DIR)
     out_csv = joinpath(out_dir, "gap_transport_vs_T_muB0_xi0.csv")
-    out_fig = joinpath(opts.base_output_dir, "figures", "relaxtime", "plan_a")
+    out_fig = joinpath(opts.base_output_dir, "figures", "relaxtime", TEMPERATURE_SCAN_DIR)
 
     ensure_parent_dir(out_csv)
     if opts.overwrite
@@ -714,9 +727,9 @@ function run_plan_a(opts::Options, ctx::RunContext)
     args = String[
         "--project=.",
         "scripts/relaxtime/run_gap_transport_scan.jl",
-        "--tmin", string(opts.plan_a_Tmin_mev),
-        "--tmax", string(opts.plan_a_Tmax_mev),
-        "--tstep", string(opts.plan_a_Tstep_mev),
+        "--tmin", string(opts.temperature_scan_Tmin_mev),
+        "--tmax", string(opts.temperature_scan_Tmax_mev),
+        "--tstep", string(opts.temperature_scan_Tstep_mev),
         "--mubmin", "0",
         "--mubmax", "0",
         "--mubstep", "1",
@@ -742,9 +755,9 @@ function run_plan_a(opts::Options, ctx::RunContext)
         "error_count" => stats.error_count,
     )
     config = Dict{String,Any}(
-        "plan_a_Tmin_mev" => opts.plan_a_Tmin_mev,
-        "plan_a_Tmax_mev" => opts.plan_a_Tmax_mev,
-        "plan_a_Tstep_mev" => opts.plan_a_Tstep_mev,
+        "temperature_scan_Tmin_mev" => opts.temperature_scan_Tmin_mev,
+        "temperature_scan_Tmax_mev" => opts.temperature_scan_Tmax_mev,
+        "temperature_scan_Tstep_mev" => opts.temperature_scan_Tstep_mev,
         "integration_mode" => opts.integration_mode,
         "tau_p_nodes" => opts.tau_p_nodes,
         "tau_angle_nodes" => opts.tau_angle_nodes,
@@ -754,7 +767,7 @@ function run_plan_a(opts::Options, ctx::RunContext)
         "compute_bulk" => opts.compute_bulk,
         "seed_policy" => "phase_aware_xi_T_continuity",
     )
-    _write_provenance_sidecars(opts, ctx, "plan_a", out_dir, config, [out_csv], summary)
+    _write_provenance_sidecars(opts, ctx, TEMPERATURE_SCAN_DIR, out_dir, config, [out_csv], summary)
 
     if opts.make_plots
         ensure_parent_dir(joinpath(out_fig, "dummy.txt"))
@@ -797,11 +810,11 @@ function run_plan_a(opts::Options, ctx::RunContext)
     end
 end
 
-function run_plan_b(opts::Options, ctx::RunContext)
+function run_fixed_temperature_xi_scan(opts::Options, ctx::RunContext)
     xi_list = xi_list_string(opts.xi_min, opts.xi_max, opts.xi_step)
-    result_dir = joinpath(opts.base_output_dir, "results", "relaxtime", "plan_b")
-    figure_dir = joinpath(opts.base_output_dir, "figures", "relaxtime", "plan_b")
-    merged_csv = joinpath(result_dir, "plan_b_merged.csv")
+    result_dir = joinpath(opts.base_output_dir, "results", "relaxtime", FIXED_T_XI_SCAN_DIR)
+    figure_dir = joinpath(opts.base_output_dir, "figures", "relaxtime", FIXED_T_XI_SCAN_DIR)
+    merged_csv = joinpath(result_dir, FIXED_T_XI_SCAN_MERGED_CSV)
     csv_paths = String[]
 
     if opts.overwrite
@@ -809,7 +822,7 @@ function run_plan_b(opts::Options, ctx::RunContext)
         maybe_rmdir(figure_dir; overwrite=true)
     end
 
-    for T_mev in opts.plan_b_T_list_mev
+    for T_mev in opts.fixed_temperature_xi_scan_T_list_mev
         csv_path = joinpath(result_dir, "transport_vs_xi_T$(Int(round(T_mev)))_muB0.csv")
         fig_path = joinpath(figure_dir, "T$(Int(round(T_mev)))")
         ensure_parent_dir(csv_path)
@@ -872,7 +885,7 @@ function run_plan_b(opts::Options, ctx::RunContext)
         "error_count" => merged_stats.error_count,
     )
     config = Dict{String,Any}(
-        "plan_b_T_list_mev" => opts.plan_b_T_list_mev,
+        "fixed_temperature_xi_scan_T_list_mev" => opts.fixed_temperature_xi_scan_T_list_mev,
         "xi_min" => opts.xi_min,
         "xi_max" => opts.xi_max,
         "xi_step" => opts.xi_step,
@@ -885,7 +898,7 @@ function run_plan_b(opts::Options, ctx::RunContext)
         "compute_bulk" => opts.compute_bulk,
         "seed_policy" => "phase_aware_xi_T_continuity",
     )
-    _write_provenance_sidecars(opts, ctx, "plan_b", result_dir, config, vcat(copy(csv_paths), [merged_csv]), summary)
+    _write_provenance_sidecars(opts, ctx, FIXED_T_XI_SCAN_DIR, result_dir, config, vcat(copy(csv_paths), [merged_csv]), summary)
 
     if opts.make_plots
         combined_dir = joinpath(figure_dir, "combined")
@@ -919,8 +932,8 @@ function main()
     ctx = RunContext(run_id, timestamp_utc, copy(ARGS))
     cd(PROJECT_ROOT) do
         :cross_section in opts.sections && run_cross_section(opts)
-        :plan_a in opts.sections && run_plan_a(opts, ctx)
-        :plan_b in opts.sections && run_plan_b(opts, ctx)
+        SECTION_TEMPERATURE_SCAN in opts.sections && run_temperature_scan(opts, ctx)
+        SECTION_FIXED_T_XI_SCAN in opts.sections && run_fixed_temperature_xi_scan(opts, ctx)
     end
 end
 

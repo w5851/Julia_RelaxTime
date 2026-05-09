@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const DEFAULT_OUT_ROOT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "plan_c", "smoothness")
+const DEFAULT_OUT_ROOT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "xi_smoothness_sampling", "smoothness")
 const DEFAULT_FIELDS = ("tau_u", "tau_s", "eta_over_s", "zeta_over_s", "sigma_over_T")
 
 using JSON3
@@ -24,7 +24,7 @@ function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/evaluate_xi_smoothness.jl --manifest <run_manifest.json> [options]")
     println("Options:")
     println("  --manifest <path>            输入 run_manifest.json (required)")
-    println("  --out-root <dir>             输出目录 (default data/outputs/results/relaxtime/plan_c/smoothness)")
+    println("  --out-root <dir>             输出目录 (default data/outputs/results/relaxtime/xi_smoothness_sampling/smoothness)")
     println("  --smooth-s2 <float>          smooth 的 S2 阈值 (default 0.05)")
     println("  --suspect-s2 <float>         suspect 的 S2 阈值 (default 0.15)")
     println("  --smooth-s1jump <float>      smooth 的 S1jump 阈值 (default 0.15)")

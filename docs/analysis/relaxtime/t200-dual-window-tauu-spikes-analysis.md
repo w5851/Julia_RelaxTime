@@ -3,7 +3,7 @@
 ## 1) 现象与范围
 
 - 目标：针对 `T=200, muB=0` 的 `tau_u` 双异常窗口做与 T190 同构深拆，并回答“机制是否同构、虚部是否为 0”。
-- 观测图：`data/outputs/figures/relaxtime/plan_b/T200/multi_y_tau_u_tau_ubar_tau_s_tau_sbar_vs_xi.png`。
+- 观测图：`data/outputs/figures/relaxtime/fixed_temperature_xi_scan_muB0/T200/multi_y_tau_u_tau_ubar_tau_s_tau_sbar_vs_xi.png`。
 - 本文聚焦两个窗口：
   1. `xi∈[-0.4,-0.2]`
   2. `xi∈[0.2,0.4]`

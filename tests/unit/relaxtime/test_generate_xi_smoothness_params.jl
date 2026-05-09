@@ -95,7 +95,7 @@ end
             "outputs",
             "results",
             "relaxtime",
-            "plan_c",
+            "xi_smoothness_sampling",
             "sampling",
             "params_$(total)_seed$(seed).csv",
         )

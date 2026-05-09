@@ -124,7 +124,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 | Mott 派生 CSV / 可视化模式 | 从主扫描结果生成派生字段与绘图输入 | `scripts/relaxtime/run_mott_phase_derived_csv.jl` / `scripts/relaxtime/run_mott_phase_plot_modes.jl` | `julia --project=. scripts/relaxtime/run_mott_phase_derived_csv.jl --help` |
 | 各向异性相图模板实验 | 按 `xi` 批量跑扫描 + 相结构 + 可选绘图 | `scripts/pnjl/run_aniso_phase_template.jl` | `julia --project=. scripts/pnjl/run_aniso_phase_template.jl --profile=smoke --xi-values=0.0,0.2` |
 | 磁场 PNJL 单点/扫描 | `eB` 依赖的热力学与密度计算 | `scripts/pnjl/run_magnetic_point.jl` / `scripts/pnjl/run_magnetic_eb_scan.jl` | `julia --project=. scripts/pnjl/run_magnetic_eb_scan.jl` |
-| 手动工作流产物编排 | 人工控制 `cross_section/plan_a/plan_b` 产物生成 | `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` | `julia --project=. scripts/relaxtime/run_manual_relaxation_scan_workflow.jl --help` |
+| 手动工作流产物编排 | 人工控制 `cross_section/temperature_scan_muB0_xi0/fixed_temperature_xi_scan_muB0` 产物生成（兼容旧别名 `plan_a/plan_b`） | `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` | `julia --project=. scripts/relaxtime/run_manual_relaxation_scan_workflow.jl --help` |
 
 说明：
 - 稳定白名单以 `docs/guides/scripts/README.md` 为准。

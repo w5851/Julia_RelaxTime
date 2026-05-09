@@ -1,0 +1,16 @@
+﻿{
+  "command": "D:\\Desktop\\Julia_RelaxTime\\.worktrees\\xi-smoothness-planc\\scripts\\plot_scan_csv.py --mode lines --csv D:\\Desktop\\Julia_RelaxTime\\.worktrees\\xi-smoothness-planc\\data\\outputs\\results\\relaxtime\\xi_smoothness_sampling\\sampling\\S029\\gap_transport_scan.csv --x xi --ys tau_u,tau_s,eta_over_s,zeta_over_s,sigma_over_T --out-dir D:\\Desktop\\Julia_RelaxTime\\.worktrees\\xi-smoothness-planc\\data\\outputs\\figures\\relaxtime\\xi_smoothness_sampling\\S029 --check",
+  "generated_at_utc": "2026-04-27T14:56:22Z",
+  "git_commit": "c066bcc387acdd3a84cc36c497d336f6ba4456f8",
+  "image_path": "D:\\Desktop\\Julia_RelaxTime\\.worktrees\\xi-smoothness-planc\\data\\outputs\\figures\\relaxtime\\xi_smoothness_sampling\\S029\\eta_over_s_vs_xi.png",
+  "image_sha256": "fefdf012a7b672f5752828f35d2fd7dfc7cec05af4722f94578088f43c26f7c3",
+  "input_data_hashes": [
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\.worktrees\\xi-smoothness-planc\\data\\outputs\\results\\relaxtime\\xi_smoothness_sampling\\sampling\\S029\\gap_transport_scan.csv",
+      "sha256": "843786ff56118428d52670ca0bf91b7c0b42dd6fa7a4e8da81f3266d00745465"
+    }
+  ],
+  "julia_version": "python-3.13.2",
+  "schema_version": "v1",
+  "script_path": "scripts/plot_scan_csv.py"
+}

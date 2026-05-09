@@ -26,7 +26,7 @@ function main()
     ds_vals = collect(range(1e-6, 2.0; length=36))
     process = :uubar_to_ddbar
 
-    merged_csv = raw"D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv"
+    merged_csv = raw"D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv"
     out = raw"D:\Desktop\Temp\relaxtime_t190_window\t190_xi_positive_chain_contrast.csv"
     ensure_parent_dir(out)
 

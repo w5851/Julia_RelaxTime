@@ -2,7 +2,7 @@
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PLOT_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "plot_scan_csv.py")
-const DEFAULT_FIG_ROOT = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "plan_c")
+const DEFAULT_FIG_ROOT = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "xi_smoothness_sampling")
 const DEFAULT_YS = "tau_u,tau_s,eta_over_s,zeta_over_s,sigma_over_T"
 
 using JSON3
@@ -27,7 +27,7 @@ function _usage()
     println("Usage: julia --project=. scripts/relaxtime/plot_xi_smoothness_batch.jl --manifest <run_manifest.json> [--fig-root <dir>]")
     println("Options:")
     println("  --manifest <path>   batch manifest json (required)")
-    println("  --fig-root <path>   figure root dir (default data/outputs/figures/relaxtime/plan_c)")
+    println("  --fig-root <path>   figure root dir (default data/outputs/figures/relaxtime/xi_smoothness_sampling)")
     println("  -h, --help          show help")
 end
 

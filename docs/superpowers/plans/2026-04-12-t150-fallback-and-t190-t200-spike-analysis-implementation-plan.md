@@ -290,7 +290,7 @@ git commit -m "docs: record minimal T150 xi=-0.5 rerun evidence"
 **Files:**
 - Create: `docs/analysis/relaxtime/t150-convergence-and-t190-t200-spikes-analysis.md`
 - Modify: `docs/analysis/relaxtime/t150_minimal_rerun_notes.md`
-- Test: `D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv`
+- Test: `D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv`
 
 - [x] **Step 1: 写文档骨架（6 段结构）**
 

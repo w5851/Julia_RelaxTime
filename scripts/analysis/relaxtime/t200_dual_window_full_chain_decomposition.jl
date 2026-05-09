@@ -28,7 +28,7 @@ function main()
     processes = Symbol[:uubar_to_ddbar, :uubar_to_uubar]
     ds_vals = collect(range(1e-6, 2.0; length=36))
 
-    merged_csv = raw"D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\plan_b\plan_b_merged.csv"
+    merged_csv = raw"D:\Desktop\Julia_RelaxTime\.worktrees\repro-main-oldparams\data\outputs\tmp\repro_main_oldparams\results\relaxtime\fixed_temperature_xi_scan_muB0\fixed_temperature_xi_scan_muB0_merged.csv"
     out_detail = raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_full_chain_detail.csv"
     out_summary = raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_full_chain_summary.csv"
     out_adjacent = raw"D:\Desktop\Temp\relaxtime_t200_window\t200_dual_window_adjacent_transition_summary.csv"

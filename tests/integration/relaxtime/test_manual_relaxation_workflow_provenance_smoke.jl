@@ -20,15 +20,15 @@ end
     @test isfile(WORKFLOW_PATH)
 
     base_output_dir = mktempdir()
-    cmd = `julia --project=. $WORKFLOW_PATH --sections plan_a,plan_b --no-plots --overwrite --base-output-dir $base_output_dir --plan-a-Tmin 150 --plan-a-Tmax 150 --plan-a-Tstep 10 --plan-b-T-list 190 --xi-min -0.5 --xi-max -0.5 --xi-step 0.1 --mode finite_15 --tau-p-nodes 8 --tau-angle-nodes 2 --tau-phi-nodes 2 --tau-n-sigma 4 --sigma-grid-n 32 --no-bulk`
+    cmd = `julia --project=. $WORKFLOW_PATH --sections temperature_scan_muB0_xi0,fixed_temperature_xi_scan_muB0 --no-plots --overwrite --base-output-dir $base_output_dir --temperature-scan-Tmin 150 --temperature-scan-Tmax 150 --temperature-scan-Tstep 10 --fixed-temperature-xi-scan-T-list 190 --xi-min -0.5 --xi-max -0.5 --xi-step 0.1 --mode finite_15 --tau-p-nodes 8 --tau-angle-nodes 2 --tau-phi-nodes 2 --tau-n-sigma 4 --sigma-grid-n 32 --no-bulk`
     run(cmd)
 
-    plan_a_dir = joinpath(base_output_dir, "results", "relaxtime", "plan_a")
-    plan_b_dir = joinpath(base_output_dir, "results", "relaxtime", "plan_b")
+    plan_a_dir = joinpath(base_output_dir, "results", "relaxtime", "temperature_scan_muB0_xi0")
+    plan_b_dir = joinpath(base_output_dir, "results", "relaxtime", "fixed_temperature_xi_scan_muB0")
 
     plan_a_csv = joinpath(plan_a_dir, "gap_transport_vs_T_muB0_xi0.csv")
     plan_b_csv = joinpath(plan_b_dir, "transport_vs_xi_T190_muB0.csv")
-    plan_b_merged = joinpath(plan_b_dir, "plan_b_merged.csv")
+    plan_b_merged = joinpath(plan_b_dir, "fixed_temperature_xi_scan_muB0_merged.csv")
 
     @test isfile(plan_a_csv)
     @test isfile(plan_b_csv)

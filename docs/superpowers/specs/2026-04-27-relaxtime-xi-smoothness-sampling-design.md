@@ -33,11 +33,11 @@
 标准入口命令如下（在仓库根目录执行）：
 
 ```bash
-julia --project=. scripts/relaxtime/generate_xi_smoothness_params.jl --output data/outputs/results/relaxtime/plan_c/sampling/params_24_seed42.csv
-julia --project=. scripts/relaxtime/run_xi_smoothness_batch.jl --params data/outputs/results/relaxtime/plan_c/sampling/params_24_seed42.csv --out-root data/outputs/results/relaxtime/plan_c/sampling --resume
-julia --project=. scripts/relaxtime/plot_xi_smoothness_batch.jl --manifest data/outputs/results/relaxtime/plan_c/sampling/run_manifest.json --fig-root data/outputs/figures/relaxtime/plan_c
-julia --project=. scripts/relaxtime/evaluate_xi_smoothness.jl --manifest data/outputs/results/relaxtime/plan_c/sampling/run_manifest.json --out-root data/outputs/results/relaxtime/plan_c/smoothness
-julia --project=. scripts/relaxtime/merge_xi_smoothness_review.jl --flags data/outputs/results/relaxtime/plan_c/smoothness/smoothness_flags.csv --manual-review data/outputs/results/relaxtime/plan_c/smoothness/manual_review.csv --out data/outputs/results/relaxtime/plan_c/smoothness/smoothness_final.csv
+julia --project=. scripts/relaxtime/generate_xi_smoothness_params.jl --output data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/params_24_seed42.csv
+julia --project=. scripts/relaxtime/run_xi_smoothness_batch.jl --params data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/params_24_seed42.csv --out-root data/outputs/results/relaxtime/xi_smoothness_sampling/sampling --resume
+julia --project=. scripts/relaxtime/plot_xi_smoothness_batch.jl --manifest data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/run_manifest.json --fig-root data/outputs/figures/relaxtime/xi_smoothness_sampling
+julia --project=. scripts/relaxtime/evaluate_xi_smoothness.jl --manifest data/outputs/results/relaxtime/xi_smoothness_sampling/sampling/run_manifest.json --out-root data/outputs/results/relaxtime/xi_smoothness_sampling/smoothness
+julia --project=. scripts/relaxtime/merge_xi_smoothness_review.jl --flags data/outputs/results/relaxtime/xi_smoothness_sampling/smoothness/smoothness_flags.csv --manual-review data/outputs/results/relaxtime/xi_smoothness_sampling/smoothness/manual_review.csv --out data/outputs/results/relaxtime/xi_smoothness_sampling/smoothness/smoothness_final.csv
 ```
 
 ## Notes

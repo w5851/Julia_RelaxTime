@@ -35,7 +35,7 @@
 | `scripts/relaxtime/run_mott_phase_derived_csv.jl` | Mott 扫描派生字段 CSV 生成 | `domain-candidate` | 后处理脚本 |
 | `scripts/relaxtime/run_mott_phase_plot_modes.jl` | Mott 图像模式产出（mode A/B） | `domain-candidate` | 绘图包装脚本 |
 | `scripts/relaxtime/run_offline_transport_patch.jl` | 对质量异常点离线补算并输出 patch | `domain-candidate` | 维护/后处理工具 |
-| `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` | 手动组合产物工作流（cross_section/plan_a/plan_b） | `domain-candidate` | 可作为迁移期桥接入口 |
+| `scripts/relaxtime/run_manual_relaxation_scan_workflow.jl` | 手动组合产物工作流（cross_section/temperature_scan_muB0_xi0/fixed_temperature_xi_scan_muB0；兼容旧别名 `plan_a`/`plan_b`） | `domain-candidate` | 可作为迁移期桥接入口 |
 | `scripts/relaxtime/run_scan.jl` | relaxtime 单入口分发器（`gap-transport` / `tau-vs-t` / `manual-workflow`） | `domain-candidate` | 作为 relaxtime 子命令包装层使用 |
 | `scripts/relaxtime/run_xi_smoothness_batch.jl` | xi smoothness 批处理扫描入口 | `analysis-experimental` | 研究分析资产，不作为稳定用户白名单 |
 | `scripts/analysis/convergence/run_convergence.jl` | 收敛性分析扫描 | `gate` | 分析脚本 |

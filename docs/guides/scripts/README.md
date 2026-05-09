@@ -120,7 +120,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 ### RelaxTime
 
 - [scripts/relaxtime/run_manual_relaxation_scan_workflow.jl](../../../scripts/relaxtime/run_manual_relaxation_scan_workflow.jl)
-  - 手动组合产物入口（`cross_section` / `plan_a` / `plan_b`）
+  - 手动组合产物入口（`cross_section` / `temperature_scan_muB0_xi0` / `fixed_temperature_xi_scan_muB0`；兼容旧别名 `plan_a` / `plan_b`）
   - 支持 `--base-output-dir` 将结果写到隔离目录（默认 `data/outputs`）
 - [scripts/relaxtime/run_phase_guided_transport_scan.jl](../../../scripts/relaxtime/run_phase_guided_transport_scan.jl)
   - phase-guided transport 上层扫描入口
@@ -143,13 +143,13 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - `fixed-T-sparse-muB`：每个固定 `T` 一张图，图内多条 `mu_B`
   - 输出 `plot_manifest.json` 并回写 case README
 
-`plan_a` / `plan_b` 目录最小溯源产物：
+`temperature_scan_muB0_xi0` / `fixed_temperature_xi_scan_muB0` 目录最小溯源产物：
 
 - 扫描 CSV（行级 `run_id`）
 - `effective_config.json`（最终有效参数快照）
 - `run_manifest.json`（`argv`、`git_commit`、`config_hash`、`artifacts`、`summary`）
 
-其中 `plan_b_merged.csv` 额外包含：
+其中 `fixed_temperature_xi_scan_muB0_merged.csv` 额外包含：
 
 - `source_file`
 - `source_T_MeV`
