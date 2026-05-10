@@ -38,6 +38,7 @@ const DEFAULT_PHASE_SHIFT_Q_NODES = 48
 const DEFAULT_PHASE_SHIFT_OMEGA_MAX = 10.0
 const DEFAULT_PHASE_SHIFT_OMEGA_NODES = 48
 const DEFAULT_PHASE_SHIFT_ETA = 1e-6
+const PHASE_UNWRAP_BRANCH_TOL = 1e-4
 
 @inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
@@ -724,9 +725,9 @@ function _unwrap_phases(phases::AbstractVector{<:Real})
     shift = zero(eltype(phases))
     for i in 2:length(phases)
         Δ = phases[i] - phases[i - 1]
-        if Δ > π
+        if Δ > (π - PHASE_UNWRAP_BRANCH_TOL)
             shift -= 2π
-        elseif Δ < -π
+        elseif Δ < (-π + PHASE_UNWRAP_BRANCH_TOL)
             shift += 2π
         end
         out[i] = phases[i] + shift
