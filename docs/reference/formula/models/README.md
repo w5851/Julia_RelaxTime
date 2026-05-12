@@ -19,6 +19,7 @@
 - `gas_liquid/GasLiquid_RMF_CoreEquations.md`：Gas-Liquid (RMF/Walecka) 核心方程与约束求解口径。
 - `rotation/Rotation_PNJL_CoreEquations.md`：Rotation-PNJL 在 `T-mu-omega` 语义下的最小公式集。
 - `shared/Lagrangian_to_GrandPotential_MFA_Workflow.md`：从拉氏量到巨热力学势的统一平均场推导流程。
+- `shared/OmegaTotal_并入介子压强后的统一AD热力学流程.md`：固定 meson pressure 并入后，派生量仍走统一 AD 热力学主线。
 
 ## 使用建议
 

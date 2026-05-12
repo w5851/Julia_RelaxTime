@@ -32,8 +32,14 @@ export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point, solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
 export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
 export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
+export solve_phase_shift_point_diagnostic_from_meson_point
+export solve_phase_shift_derivative_reference_from_meson_point
+export solve_meson_thermo_from_meson_point, solve_gap_and_meson_thermo_point
+export solve_strict_bw_meson_thermo_from_meson_point, solve_gap_and_strict_bw_meson_thermo_point
+export solve_phase_shift_meson_thermo_from_meson_point, solve_gap_and_phase_shift_meson_thermo_point
+export build_meson_thermo_contract_row
 export solve_gas_liquid_point, solve_rotation_point
-export transport_workflow_module, meson_workflow_module, meson_density_workflow_module
+export transport_workflow_module, meson_workflow_module, meson_density_workflow_module, meson_thermo_workflow_module
 export rotation_workflow_module, gas_liquid_workflow_module
 export workflow_param_adapters_module, workflow_module_for
 export run_workflow_pipeline, run_scan_pipeline, run_relaxtime_orchestrator_pipeline
@@ -196,6 +202,7 @@ include(joinpath(@__DIR__, "workflow_apps", "WorkflowParamAdapters.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "TransportWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonMassWorkflow.jl"))
 include(joinpath(@__DIR__, "workflow_apps", "MesonDensityWorkflow.jl"))
+include(joinpath(@__DIR__, "workflow_apps", "MesonThermoWorkflow.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutMesonDensityScan.jl"))
 include(joinpath(@__DIR__, "scans", "MesonMassPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "CrossoverMesonDensityScan.jl"))

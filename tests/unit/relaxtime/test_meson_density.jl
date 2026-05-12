@@ -17,6 +17,7 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    DEFAULT_PHASE_SHIFT_Q_MAX,
                                    DEFAULT_PHASE_SHIFT_Q_NODES,
                                    _phase_shift_scheme_symbol,
+                                   _unwrap_phases,
                                    bose_distribution,
                                    meson_degeneracy,
                                    phase_shift_point_diagnostic,
@@ -39,6 +40,8 @@ const ZETA3 = 1.2020569031595942
     @test meson_degeneracy(:pi_minus) == 1
     @test meson_degeneracy(:K_plus) == 1
     @test meson_degeneracy(:K_minus) == 1
+    @test meson_degeneracy(:sigma_pi) == 1
+    @test meson_degeneracy(:sigma_K) == 4
     @test meson_degeneracy(:pi; charge_resolved=true) == 1
     @test meson_degeneracy(:K; charge_resolved=true) == 1
 
@@ -79,6 +82,13 @@ end
     qp = (m=(u=1.0, d=1.0, s=1.2), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.1))
     tp_bad = (T=0.2, Φ=0.5, Φbar=0.5, ξ=0.1)
     @test_throws ArgumentError phase_shift_meson_density_summary(qp, tp_bad)
+end
+
+@testset "MesonDensity unwrap phases tolerates near-pi branch jumps" begin
+    phases = [0.2, 0.4, -π + 2e-5, -π + 3e-5]
+    unwrapped = _unwrap_phases(phases)
+    @test unwrapped[3] > 3.0
+    @test unwrapped[4] > unwrapped[3]
 end
 
 @testset "MesonDensity K/π 扫描" begin

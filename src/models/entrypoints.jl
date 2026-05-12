@@ -24,6 +24,10 @@ export solve_gap_and_meson_point
 export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
 export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
 export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
+export solve_meson_thermo_from_meson_point, solve_gap_and_meson_thermo_point
+export solve_strict_bw_meson_thermo_from_meson_point, solve_gap_and_strict_bw_meson_thermo_point
+export solve_phase_shift_meson_thermo_from_meson_point, solve_gap_and_phase_shift_meson_thermo_point
+export build_meson_thermo_contract_row
 export solve_phase_shift_point_diagnostic_from_meson_point
 export solve_phase_shift_derivative_reference_from_meson_point
 export solve_gas_liquid_point
@@ -33,6 +37,7 @@ export resolve_phase_output_target, promote_phase_artifacts
 export normalize_pm_seed_pair, pm_next_seed_source, derive_pm_seed_pair, analyze_pm_branch_competition
 export transport_workflow_module, meson_workflow_module
 export meson_density_workflow_module
+export meson_thermo_workflow_module
 export rotation_workflow_module
 export gas_liquid_workflow_module
 export workflow_param_adapters_module
@@ -70,6 +75,20 @@ end
          isdefined(workflow, :solve_phase_shift_derivative_reference_from_meson_point) &&
          isdefined(workflow, :solve_phase_shift_point_diagnostic_from_meson_point))
         error("MesonDensityWorkflow module loaded but required API is missing")
+    end
+    return workflow
+end
+
+@inline function _meson_thermo_workflow_module()
+    workflow = MesonThermoWorkflow
+    if !(isdefined(workflow, :solve_meson_thermo_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_meson_thermo_point) &&
+         isdefined(workflow, :solve_strict_bw_meson_thermo_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_strict_bw_meson_thermo_point) &&
+         isdefined(workflow, :solve_phase_shift_meson_thermo_from_meson_point) &&
+         isdefined(workflow, :solve_gap_and_phase_shift_meson_thermo_point) &&
+         isdefined(workflow, :build_meson_thermo_contract_row))
+        error("MesonThermoWorkflow module loaded but required API is missing")
     end
     return workflow
 end
@@ -277,6 +296,34 @@ function solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
     return _meson_density_workflow_module().solve_gap_and_phase_shift_meson_density_point(args...; kwargs...)
 end
 
+function solve_meson_thermo_from_meson_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_meson_thermo_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_meson_thermo_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_gap_and_meson_thermo_point(args...; kwargs...)
+end
+
+function solve_strict_bw_meson_thermo_from_meson_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_strict_bw_meson_thermo_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_strict_bw_meson_thermo_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_gap_and_strict_bw_meson_thermo_point(args...; kwargs...)
+end
+
+function solve_phase_shift_meson_thermo_from_meson_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_phase_shift_meson_thermo_from_meson_point(args...; kwargs...)
+end
+
+function solve_gap_and_phase_shift_meson_thermo_point(args...; kwargs...)
+    return _meson_thermo_workflow_module().solve_gap_and_phase_shift_meson_thermo_point(args...; kwargs...)
+end
+
+function build_meson_thermo_contract_row(args...; kwargs...)
+    return _meson_thermo_workflow_module().build_meson_thermo_contract_row(args...; kwargs...)
+end
+
 function solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
     return _meson_density_workflow_module().solve_phase_shift_point_diagnostic_from_meson_point(args...; kwargs...)
 end
@@ -300,6 +347,7 @@ end
 @inline transport_workflow_module() = _transport_workflow_module()
 @inline meson_workflow_module() = _meson_workflow_module()
 @inline meson_density_workflow_module() = _meson_density_workflow_module()
+@inline meson_thermo_workflow_module() = _meson_thermo_workflow_module()
 @inline gas_liquid_workflow_module() = GasLiquidWorkflow
 @inline rotation_workflow_module() = RotationWorkflow
 @inline pnjl_module() = @__MODULE__

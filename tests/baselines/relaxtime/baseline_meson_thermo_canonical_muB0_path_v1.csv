@@ -1,0 +1,5 @@
+T_MeV,muB_MeV,xi,workflow,channel_set,primary_channel,secondary_channel,phase_shift_variant,thermo_derivation_mode,equilibrium_converged,P_meson,P_meson_qp,P_meson_ld,P_total,trace_anomaly
+170.0,0.0,0.0,phase_shift_current,pi|sigma_pi,pi,sigma_pi,phase_shift_current,omega_total_ad,true,0.36998714212476197,0.02620706694512298,0.343780075179639,22.04217131518739,-156.6208692895409
+190.0,0.0,0.0,phase_shift_current,pi|sigma_pi,pi,sigma_pi,phase_shift_current,omega_total_ad,true,0.3536934055783062,0.03341902063413235,0.3202743849441739,22.503119465864383,-95.60924051687216
+210.0,0.0,0.0,phase_shift_current,pi|sigma_pi,pi,sigma_pi,phase_shift_current,omega_total_ad,true,0.2898414284507625,0.03811738683649665,0.25172404161426587,23.601775825175597,-61.23033677845463
+230.00000000000003,0.0,0.0,phase_shift_current,pi|sigma_pi,pi,sigma_pi,phase_shift_current,omega_total_ad,true,0.25353041882428895,0.021975205454245816,0.23155521337004314,25.451648717058294,-41.08826892948465

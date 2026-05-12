@@ -33,13 +33,13 @@ const HYBRID_N_SING = 32
 """
 const PV_GAP_REL = 1e-6
 """计算给定质量下的能量截断值"""
-@inline @fastmath function energy_cutoff(m::Float64)
+@inline @fastmath function energy_cutoff(m::Real)
     m_pos = max(m, 0.0)
     return sqrt(m_pos * m_pos + Λ_inv_fm * Λ_inv_fm)
 end
 
 """计算给定能量和质量对应的动量"""
-@inline @fastmath function internal_momentum(E::T, m::Float64) where {T<:Real}
+@inline @fastmath function internal_momentum(E::T, m::Real) where {T<:Real}
     m_pos = max(m, 0.0)
     return sqrt(E * E - m_pos * m_pos)
 end
@@ -48,8 +48,8 @@ end
 @inline _primal_value(x::ForwardDiff.Dual) = ForwardDiff.value(x)
 
 """计算夸克有效分布函数的值（供 A 积分使用：分别用夸克/反夸克分布）"""
-@inline function distribution_value(mode::Symbol, sign_flag::Symbol, E::Float64, μ::Float64,
-    T::Float64, Φ::Float64, Φbar::Float64)
+@inline function distribution_value(mode::Symbol, sign_flag::Symbol, E::Real, μ::Real,
+    T::Real, Φ::Real, Φbar::Real)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
     if mode === :pnjl
         if sign_flag === :plus
@@ -69,7 +69,7 @@ end
 注意：当前 PNJL 分布的实现形式在 E<0 时会出现 exp_term^2 溢出，
 因此这里必须使用稳定恒等式把 `fd(-E,mu)` 映射回正能量表达。
 """
-@inline function distribution_value_b0(sign_flag::Symbol, E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
+@inline function distribution_value_b0(sign_flag::Symbol, E::Real, μ::Real, T::Real, Φ::Real, Φbar::Real)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
 
     # 重要：这里的 μ 具有“真实物理含义”，允许为负；不能用 μ 的正负来暗示粒子/反粒子。
@@ -84,8 +84,8 @@ end
     end
 end
 
-@inline function distribution_integral_b0(sign_flag::Symbol, E_min::Float64, E_max::Float64,
-    μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
+@inline function distribution_integral_b0(sign_flag::Symbol, E_min::Real, E_max::Real,
+    μ::Real, T::Real, Φ::Real, Φbar::Real)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
 
     # 与 distribution_value_b0 保持一致：
@@ -100,8 +100,8 @@ end
 end
 
 """计算夸克有效分布函数在给定能量区间的积分"""
-@inline function distribution_integral(mode::Symbol, sign_flag::Symbol, E_min::Float64   , E_max::Float64,
-    μ::Float64, T::Float64, Φ::Float64, Φbar::Float64)
+@inline function distribution_integral(mode::Symbol, sign_flag::Symbol, E_min::Real, E_max::Real,
+    μ::Real, T::Real, Φ::Real, Φbar::Real)
     @assert sign_flag === :plus || sign_flag === :minus "sign_flag must be :plus or :minus"
     if mode === :pnjl
         if sign_flag === :plus
@@ -116,8 +116,8 @@ end
 # -----------------------------------------------------------------------------
 # k=0 时的积分计算相关函数
 """k=0时的积分实部被积函数"""
-@inline function real_integrand_k_zero(sign_flag::Symbol, λ::T, m::Float64, denominator_term::T,
-    μ::Float64, T0::Float64, Φ::Float64, Φbar::Float64, E::Float64) where {T<:Real}
+@inline function real_integrand_k_zero(sign_flag::Symbol, λ::T, m::Real, denominator_term::T,
+    μ::Real, T0::Real, Φ::Real, Φbar::Real, E::Real) where {T<:Real}
     p = internal_momentum(E, m)
     dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
     denominator = λ * E + denominator_term
@@ -152,8 +152,9 @@ end
 end
 
 """三动量大小k=0(小于EPS_K)时的 B0分量 积分计算"""
-@inline function tilde_B0_k_zero(sign_flag::Symbol, λ::T, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
-    Φ::Float64, Φbar::Float64) where {T<:Real}
+@inline function tilde_B0_k_zero(sign_flag::Symbol, λ::T, m::Real, m_prime::Real, μ::Real, T0::Real,
+    Φ::Real, Φbar::Real) where {T<:Real}
+    Tout = promote_type(T, typeof(T0), typeof(Φ), typeof(Φbar))
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -163,10 +164,10 @@ end
     integrand_fun(E) = real_integrand_k_zero(sign_flag, λ, m_pos, denominator_term,
         μ, T0, Φ, Φbar, E) # 闭包被积函数
 
-    imag_part = zero(T)
+    imag_part = zero(Tout)
     if isempty(singularity) # 无奇点
         real_part = integrate_hybrid_interval(integrand_fun, Emin, Emax, SING_NONE; n=HYBRID_N_SMOOTH)
-        return real_part * T(2), imag_part / λ
+        return real_part * Tout(2), imag_part / λ
     end
 
     # 有奇点：主值积分（PV）。
@@ -221,16 +222,16 @@ end
 
     # 解析虚部（残数项）
     p0 = internal_momentum(E0, m_pos)
-    imag_part = T(2π * p0 * distribution_value_b0(sign_flag, E0, μ, T0, Φ, Φbar))
+    imag_part = Tout(2π) * p0 * distribution_value_b0(sign_flag, E0, μ, T0, Φ, Φbar)
 
     # 与无奇点分支保持相同归一化：返回 2×(PV 积分结果)
-    return pv_integral * T(2), imag_part / λ
+    return pv_integral * Tout(2), imag_part / λ
 end
 # ----------------------------------------------------------------------------
 # k>0 时的积分计算相关函数
 """k>0 时的积分实部被积函数"""
-@inline @fastmath function real_integrand_k_positive(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64,
-    μ::Float64, T0::Float64, Φ::Float64, Φbar::Float64, E::Float64) where {T<:Real}
+@inline @fastmath function real_integrand_k_positive(sign_flag::Symbol, λ::T, k::Real, m::Real, m_prime::Real,
+    μ::Real, T0::Real, Φ::Real, Φbar::Real, E::Real) where {T<:Real}
     p = internal_momentum(E, m)
     dist = distribution_value_b0(sign_flag, E, μ, T0, Φ, Φbar)
     common_part = (λ + E)^2 - m_prime^2
@@ -457,8 +458,9 @@ end
     return total
 end
 
-function tilde_B0_k_positive(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
-    Φ::Float64, Φbar::Float64) where {T<:Real}
+function tilde_B0_k_positive(sign_flag::Symbol, λ::T, k::Real, m::Real, m_prime::Real, μ::Real, T0::Real,
+    Φ::Real, Φbar::Real) where {T<:Real}
+    Tout = promote_type(T, typeof(T0), typeof(Φ), typeof(Φbar))
     m_pos = max(m, 0.0)
     m_prime_pos = max(m_prime, 0.0)
     Emin = m_pos
@@ -466,23 +468,23 @@ function tilde_B0_k_positive(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m
     integrand_fun(E) = real_integrand_k_positive(sign_flag, λ, k, m_pos, m_prime_pos, μ, T0, Φ, Φbar, E) # 闭包被积函数
     intervals, _ = singularity_k_positive(λ, k, m_pos, m_prime_pos, Emin, Emax)
     
-    imag_part = zero(T)
+    imag_part = zero(Tout)
     real_part = integrate_piecewise_hybrid(integrand_fun, Emin, Emax, intervals)
     
     # 根据区间类型计算虚部
     if !isempty(intervals)
         for (E1, E2) in intervals
-            imag_part += T(distribution_integral_b0(sign_flag, E1, E2, μ, T0, Φ, Φbar))
+            imag_part += distribution_integral_b0(sign_flag, E1, E2, μ, T0, Φ, Φbar)
         end
-        imag_part *= T(π) * sign(λ)
+        imag_part *= Tout(π) * sign(λ)
     end
     
     return real_part / k, imag_part / k
 end
 
 """计算单个 ̃B0 分量的函数"""
-@inline function tilde_B0(sign_flag::Symbol, λ::T, k::Float64, m::Float64, m_prime::Float64, μ::Float64, T0::Float64,
-    Φ::Float64, Φbar::Float64) where {T<:Real}
+@inline function tilde_B0(sign_flag::Symbol, λ::T, k::Real, m::Real, m_prime::Real, μ::Real, T0::Real,
+    Φ::Real, Φbar::Real) where {T<:Real}
     if abs(k) < EPS_K
         return tilde_B0_k_zero(sign_flag, λ, m, m_prime, μ, T0, Φ, Φbar)
     else
@@ -495,8 +497,8 @@ end
 根据文档公式组合四个 ̃B0 项得到完整的 B₀ 积分。
 λ = k0 + μ1 - μ2, 其中k0是传播子能量
 """
-function B0(λ::T, k::Float64, m1::Float64, μ1::Float64, m2::Float64, μ2::Float64, T0::Float64;
-    Φ::Float64=0.0, Φbar::Float64=0.0) where {T<:Real}
+function B0(λ::T, k::Real, m1::Real, μ1::Real, m2::Real, μ2::Real, T0::Real;
+    Φ::Real=0.0, Φbar::Real=0.0) where {T<:Real}
     term1 = tilde_B0(:plus, -λ, k, m1, m2, μ1, T0, Φ, Φbar)
     term2 = tilde_B0(:minus, λ, k, m1, m2, μ1, T0, Φ, Φbar)
     term3 = tilde_B0(:plus, λ, k, m2, m1, μ2, T0, Φ, Φbar)
@@ -509,7 +511,7 @@ end
 
 # ---------------------------------------------------------------------------
 """计算A的辅助函数,处理对常数项的积分"""
-function const_integral_term_A(m::Float64)
+function const_integral_term_A(m::Real)
     m_pos = max(m, 0.0)
     # m -> 0 极限：term2 -> 0，term1 = Λ^2
     if m_pos < 1e-14
@@ -533,8 +535,8 @@ end
 
 推荐：根据精度/性能需求自行生成节点；一个常用折中是 gauleg(0.0, 20.0, 16)。
 """
-function A(m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64,
-    nodes_p::Vector{Float64}, weights_p::Vector{Float64})
+function A(m::Real, μ::Real, T::Real, Φ::Real, Φbar::Real,
+    nodes_p::AbstractVector{<:Real}, weights_p::AbstractVector{<:Real})
     integral = -const_integral_term_A(m) # 计算常数项积分部分
     @inbounds @simd for i in eachindex(nodes_p)
         node_p = nodes_p[i]

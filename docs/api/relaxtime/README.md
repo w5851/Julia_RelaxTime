@@ -7,6 +7,7 @@
 - propagator：介子传播子、Mott 阈值与有效耦合
 - polarization：极化函数与缓存
 - meson_density：稳定粒子极限数密度与 `K/\pi` 比值主线
+- meson_thermo：介子 pressure 与最小 EOS 组合量
 
 ## 推荐阅读入口
 
@@ -19,6 +20,7 @@
 - `workflow/TransportWorkflow.md`
 - `workflow/MesonDensityWorkflow.md`
 - `meson_density/MesonDensity.md`
+- `meson_thermo/MesonThermodynamics.md`
 
 如果你的目标是“从统一 workflow 直接生成 `n_pi(T)` / `n_K(T)` / `K/\pi(T)` 的扫描输出”，优先结合以下页面与脚本：
 
@@ -42,6 +44,7 @@
 - `transport/AverageScatteringRate.md`
 - `workflow/TransportWorkflow.md`
 - `workflow/MesonDensityWorkflow.md`
+- `meson_thermo/MesonThermodynamics.md`
 - `scattering/*`
 - `propagator/*`
 - `polarization/*`

@@ -7,6 +7,7 @@
 - [2026-05-01_介子数密度BU主线公式草案.md](../../../../dev/archived/2026-05-01_%E4%BB%8B%E5%AD%90%E6%95%B0%E5%AF%86%E5%BA%A6BU%E4%B8%BB%E7%BA%BF%E5%85%AC%E5%BC%8F%E8%8D%89%E6%A1%88.md)
 - [2026-05-01_PhaseB_介子数密度记号对照与最小物理口径.md](../../../../dev/archived/2026-05-01_PhaseB_%E4%BB%8B%E5%AD%90%E6%95%B0%E5%AF%86%E5%BA%A6%E8%AE%B0%E5%8F%B7%E5%AF%B9%E7%85%A7%E4%B8%8E%E6%9C%80%E5%B0%8F%E7%89%A9%E7%90%86%E5%8F%A3%E5%BE%84.md)
 - [Propagator_传播子byPolarization.md](../propagator/Propagator_%E4%BC%A0%E6%92%AD%E5%AD%90byPolarization.md)
+- [../meson_thermo/MesonThermo_BU_EOS_OffShell_LD.md](../meson_thermo/MesonThermo_BU_EOS_OffShell_LD.md)
 
 ## 1. 引用口径与文献分工
 
@@ -160,3 +161,7 @@ S_M \sim \frac{1}{1-2P_M\Pi_M}
 2. 稳定粒子极限；
 3. 冻结线现象学拟合；
 4. 各向异性下的完整角向积分实现细节。
+
+对应的 pressure / EOS 主线已单独整理到：
+
+- [../meson_thermo/MesonThermo_BU_EOS_OffShell_LD.md](../meson_thermo/MesonThermo_BU_EOS_OffShell_LD.md)
