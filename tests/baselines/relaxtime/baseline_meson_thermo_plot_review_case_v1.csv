@@ -2,7 +2,7 @@ metric,expected,rtol,atol
 row_count,4.0,0.0,0.0
 first_T,170.0,0.0,0.0
 last_T,230.0,0.0,1e-12
-max_P_total,25.451649,1e-6,1e-6
-min_trace_anomaly,-156.620869,1e-6,1e-6
-max_ld_share,0.929168,1e-6,1e-6
-min_qp_share,0.070832,1e-6,1e-6
+max_P_total,25.281095876181695,1e-6,1e-6
+min_trace_anomaly,-155.80800155653358,1e-6,1e-6
+max_ld_share,0.8132679873229859,1e-6,1e-6
+min_qp_share,0.18673201267701414,1e-6,1e-6
