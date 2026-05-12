@@ -33,7 +33,6 @@ const _MTW = Models.MesonThermoWorkflow
             solver_kwargs=(iterations=20,),
             mass_kwargs=(iterations=20,),
             thermo_kwargs=(; num_q_nodes=64, p_num=8, t_num=4),
-            temperature_step_fm=0.5 / Main.Constants_PNJL.ħc_MeV_fm,
         )
 
         thermo = point.meson_thermo
@@ -64,7 +63,6 @@ const _MTW = Models.MesonThermoWorkflow
             solver_kwargs=(iterations=20,),
             mass_kwargs=(iterations=20,),
             thermo_kwargs=(; qmax=8.0, q_nodes=16, omega_max=6.0, omega_nodes=16, p_num=8, t_num=4),
-            temperature_step_fm=0.5 / Main.Constants_PNJL.ħc_MeV_fm,
         )
         thermo = point.strict_bw_meson_thermo
         row = Models.build_meson_thermo_contract_row(point)

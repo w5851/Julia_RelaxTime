@@ -75,3 +75,9 @@ end
     @test String(manifest_obj["script"]) == "scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl"
     @test length(manifest_obj["artifacts"]) == 2
 end
+
+@testset "phase-shift meson thermo scan rejects unknown scheme" begin
+    outdir = mktempdir()
+    cmd = `julia --project=. $SCRIPT --outdir $outdir --overwrite --tmin 210 --tmax 210 --scheme typo`
+    @test !success(pipeline(ignorestatus(cmd); stdout=devnull, stderr=devnull))
+end

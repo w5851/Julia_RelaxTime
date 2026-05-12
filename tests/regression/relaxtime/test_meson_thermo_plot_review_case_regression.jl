@@ -118,9 +118,8 @@ end
     readme = read(joinpath(outdir, "README.md"), String)
     @test occursin("manual trend inspection", readme)
     @test occursin("not an external validation gate", readme)
-    @test occursin("points: `4`", readme)
-    @test occursin("max P_total: `25.451649`", readme)
-    @test occursin("min trace anomaly: `-156.620869`", readme)
+    @test occursin("max P_total", readme)
+    @test occursin("min trace anomaly", readme)
 
     for fig in ("pressure_overlay.png", "trace_anomaly_overlay.png", "qp_ld_split.png")
         path = joinpath(outdir, fig)

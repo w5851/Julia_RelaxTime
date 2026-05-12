@@ -98,6 +98,13 @@ end
     error("unknown pressure reference mode: $raw")
 end
 
+@inline function _parse_phase_shift_scheme(raw::AbstractString)::Symbol
+    normalized = replace(lowercase(strip(raw)), '-' => '_')
+    normalized in ("current", "phase_shift_current") && return :current
+    normalized in ("gbu", "gbu_reference", "phase_shift_gbu_reference") && return :gbu_reference
+    error("unknown phase-shift scheme: $raw")
+end
+
 function _parse_channels(raw::AbstractString)
     parts = [Symbol(strip(seg)) for seg in split(raw, ',') if !isempty(strip(seg))]
     length(parts) == 2 || error("--mesons must contain exactly two channels, got: $(raw)")
@@ -120,8 +127,7 @@ function parse_args(args::Vector{String})
         if arg == "--outdir"
             opts[:outdir] = require_value()
         elseif arg == "--scheme"
-            raw = lowercase(strip(require_value()))
-            opts[:scheme] = raw == "gbu" ? :gbu_reference : :current
+            opts[:scheme] = _parse_phase_shift_scheme(require_value())
         elseif arg == "--mesons"
             opts[:channels] = _parse_channels(require_value())
         elseif arg == "--xi"

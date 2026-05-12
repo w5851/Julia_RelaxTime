@@ -609,7 +609,6 @@ function solve_gap_and_meson_thermo_point(
     mu_fm::Real;
     thermo_kwargs::NamedTuple=(;),
     derive_thermo::Bool=true,
-    temperature_step_fm::Float64=(1.0 / ħc_MeV_fm),
     kwargs...,
 )
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
@@ -662,7 +661,6 @@ function solve_gap_and_strict_bw_meson_thermo_point(
     mu_fm::Real;
     thermo_kwargs::NamedTuple=(;),
     derive_thermo::Bool=true,
-    temperature_step_fm::Float64=(1.0 / ħc_MeV_fm),
     kwargs...,
 )
     meson_point = solve_gap_and_meson_point(T_fm, mu_fm; kwargs...)
