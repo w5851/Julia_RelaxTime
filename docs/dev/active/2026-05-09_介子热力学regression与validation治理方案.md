@@ -4,6 +4,11 @@
 
 当前状态：首版 point-level fixedpoint baseline 与 regression 已落地；本页继续作为 meson thermo 主线的测试分层、path-level 候选资产与 validation 升格门槛说明。
 
+前序任务说明：
+
+- `2026-05-07_介子热力学扩展任务单.md` 已在第一阶段工程落地完成后归档；
+- 文献忠实复现问题不在本页内收口，而由独立审计分支继续处理。
+
 ---
 
 ## 1. 目标
