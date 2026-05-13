@@ -84,11 +84,19 @@ end
     @test_throws ArgumentError phase_shift_meson_density_summary(qp, tp_bad)
 end
 
-@testset "MesonDensity unwrap phases tolerates near-pi branch jumps" begin
-    phases = [0.2, 0.4, -π + 2e-5, -π + 3e-5]
+@testset "MesonDensity unwrap phases defaults to strict pi threshold" begin
+    phases = [0.0, π - 2e-5, π - 1e-5]
     unwrapped = _unwrap_phases(phases)
-    @test unwrapped[3] > 3.0
-    @test unwrapped[4] > unwrapped[3]
+    tolerant = _unwrap_phases(phases; branch_tol=1e-4)
+    @test unwrapped[2] > 3.0
+    @test unwrapped[3] > unwrapped[2]
+    @test tolerant[2] < -3.0
+    @test tolerant[3] > tolerant[2]
+end
+
+@testset "MesonDensity unwrap phases rejects negative tolerance" begin
+    phases = [0.1, 0.2]
+    @test_throws ArgumentError _unwrap_phases(phases; branch_tol=-1e-6)
 end
 
 @testset "MesonDensity K/π 扫描" begin

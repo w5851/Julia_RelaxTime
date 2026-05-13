@@ -36,6 +36,8 @@ export stable_meson_pressure, stable_meson_pressure_summary
 export strict_bw_meson_pressure, strict_bw_meson_pressure_summary
 export phase_shift_meson_pressure, phase_shift_meson_pressure_summary
 
+const PHASE_UNWRAP_BRANCH_TOL = 1e-4
+
 @inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
@@ -374,6 +376,7 @@ function phase_shift_meson_pressure(
     ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
+    phase_unwrap_branch_tol::Real=PHASE_UNWRAP_BRANCH_TOL,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
     _require_positive_node_count("q_nodes", q_nodes)
@@ -428,7 +431,7 @@ function phase_shift_meson_pressure(
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
         phases = [_propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta) for ω in omega_grid]
-        phase_unwrapped = _unwrap_phases(phases)
+        phase_unwrapped = _unwrap_phases(phases; branch_tol=phase_unwrap_branch_tol)
         omega_val = zero(tp.T)
         omega_val_qp = zero(tp.T)
         omega_val_ld = zero(tp.T)
@@ -508,6 +511,7 @@ function phase_shift_meson_pressure_summary(
     ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
+    phase_unwrap_branch_tol::Real=PHASE_UNWRAP_BRANCH_TOL,
 )
     d_pi_resolved = _resolve_channel_degeneracy(pi_channel, d_pi)
     d_K_resolved = _resolve_channel_degeneracy(k_channel, d_K)
@@ -527,6 +531,7 @@ function phase_shift_meson_pressure_summary(
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
+        phase_unwrap_branch_tol=phase_unwrap_branch_tol,
     )
     k_pressure = phase_shift_meson_pressure(
         k_channel,
@@ -544,6 +549,7 @@ function phase_shift_meson_pressure_summary(
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
+        phase_unwrap_branch_tol=phase_unwrap_branch_tol,
     )
 
     p_pi = pi_pressure.pressure
