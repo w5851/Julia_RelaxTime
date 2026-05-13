@@ -382,6 +382,7 @@ function phase_shift_meson_pressure(
     _require_positive_node_count("q_nodes", q_nodes)
     _require_positive_node_count("omega_nodes", omega_nodes)
     qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
+    phase_unwrap_branch_tol >= 0.0 || throw(ArgumentError("phase_unwrap_branch_tol must be nonnegative, got $(phase_unwrap_branch_tol)"))
     omega_lower = _phase_shift_omega_lower_bound(omega_min, μ)
     omega_max > omega_lower || throw(ArgumentError("omega_max must exceed effective omega_min=$(omega_lower)"))
     scheme_sym = _phase_shift_scheme_symbol(scheme)

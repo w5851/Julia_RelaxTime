@@ -717,11 +717,11 @@ end
 end
 
 function _unwrap_phases(phases::AbstractVector{<:Real}; branch_tol::Real=0.0)
+    branch_tol >= 0.0 || throw(ArgumentError("branch_tol must be nonnegative, got $(branch_tol)"))
     out = similar(phases)
     isempty(phases) && return out
     out[1] = phases[1]
     shift = zero(eltype(phases))
-    branch_tol >= 0.0 || throw(ArgumentError("branch_tol must be nonnegative, got $(branch_tol)"))
     for i in 2:length(phases)
         Δ = phases[i] - phases[i - 1]
         if Δ > (π - branch_tol)
