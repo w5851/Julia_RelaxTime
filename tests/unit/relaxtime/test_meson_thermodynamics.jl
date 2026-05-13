@@ -6,6 +6,10 @@ const _RELAXTIME_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", 
 if !isdefined(Main, :RelaxTime)
     Base.include(Main, _RELAXTIME_PATH_MT)
 end
+const _MODELS_PATH_MT = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "Models.jl"))
+if !isdefined(Main, :Models)
+    Base.include(Main, _MODELS_PATH_MT)
+end
 
 using Main.RelaxTime.MesonThermodynamics: bosonic_log_pressure_factor,
                                           phase_shift_meson_pressure,
@@ -191,4 +195,119 @@ end
     @test summary.P_meson ≈ summary.P_pi + summary.P_K rtol=1e-12
     @test summary.ld_cutoff ≈ min(Λ_inv_fm, 4.0) rtol=1e-12
     @test summary.ld_cutoff_mode == :match_model_lambda
+end
+
+@testset "MesonThermodynamics phase unwrap tolerance validation and effect" begin
+    @test_throws ArgumentError phase_shift_meson_pressure(
+        :pi,
+        (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08)),
+        (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0);
+        scheme=:current,
+        degeneracy=1,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        phase_unwrap_branch_tol=-1e-6,
+    )
+
+    point = Main.Models.solve_gap_and_phase_shift_meson_thermo_point(
+        170.0 / Main.Constants_PNJL.ħc_MeV_fm,
+        0.0;
+        xi=0.0,
+        mesons=(:pi, :sigma_pi),
+        mixed_branch_align=:strict_sign_binding,
+        p_num=8,
+        t_num=4,
+        solver_kwargs=(iterations=20,),
+        mass_kwargs=(iterations=20,),
+        thermo_kwargs=(;
+            pi_channel=:pi,
+            k_channel=:sigma_pi,
+            scheme=:current,
+            qmax=4.0,
+            q_nodes=6,
+            omega_min=0.05,
+            omega_max=3.0,
+            omega_nodes=6,
+            eta=1.0e-6,
+            ld_cutoff=4.0,
+            ld_cutoff_mode=:match_qmax,
+            ld_threshold_mode=:omega_lt_q,
+            p_num=8,
+            t_num=4,
+        ),
+        allow_legacy_fd_fallback=false,
+    )
+    qp = point.quark_params
+    tp = point.thermo_params
+
+    strict = phase_shift_meson_pressure(
+        :pi,
+        qp,
+        tp;
+        scheme=:current,
+        degeneracy=3,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        ld_cutoff=4.0,
+        ld_cutoff_mode=:match_qmax,
+        ld_threshold_mode=:omega_lt_q,
+        phase_unwrap_branch_tol=0.0,
+    )
+    tolerant = phase_shift_meson_pressure(
+        :pi,
+        qp,
+        tp;
+        scheme=:current,
+        degeneracy=3,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        ld_cutoff=4.0,
+        ld_cutoff_mode=:match_qmax,
+        ld_threshold_mode=:omega_lt_q,
+        phase_unwrap_branch_tol=1e-4,
+    )
+    summary_strict = phase_shift_meson_pressure_summary(
+        qp,
+        tp;
+        pi_channel=:pi,
+        k_channel=:sigma_pi,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        ld_cutoff=4.0,
+        ld_cutoff_mode=:match_qmax,
+        ld_threshold_mode=:omega_lt_q,
+        phase_unwrap_branch_tol=0.0,
+    )
+    summary_tolerant = phase_shift_meson_pressure_summary(
+        qp,
+        tp;
+        pi_channel=:pi,
+        k_channel=:sigma_pi,
+        qmax=4.0,
+        q_nodes=6,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=6,
+        ld_cutoff=4.0,
+        ld_cutoff_mode=:match_qmax,
+        ld_threshold_mode=:omega_lt_q,
+        phase_unwrap_branch_tol=1e-4,
+    )
+
+    @test tolerant.pressure > strict.pressure
+    @test tolerant.pressure_qp > strict.pressure_qp
+    @test summary_tolerant.P_meson > summary_strict.P_meson
+    @test summary_tolerant.P_pi > summary_strict.P_pi
 end

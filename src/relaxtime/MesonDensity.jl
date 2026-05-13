@@ -38,8 +38,6 @@ const DEFAULT_PHASE_SHIFT_Q_NODES = 48
 const DEFAULT_PHASE_SHIFT_OMEGA_MAX = 10.0
 const DEFAULT_PHASE_SHIFT_OMEGA_NODES = 48
 const DEFAULT_PHASE_SHIFT_ETA = 1e-6
-const PHASE_UNWRAP_BRANCH_TOL = 1e-4
-
 @inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
@@ -718,16 +716,17 @@ end
     return (reD * dim - imD * dre) / denom
 end
 
-function _unwrap_phases(phases::AbstractVector{<:Real})
+function _unwrap_phases(phases::AbstractVector{<:Real}; branch_tol::Real=0.0)
+    branch_tol >= 0.0 || throw(ArgumentError("branch_tol must be nonnegative, got $(branch_tol)"))
     out = similar(phases)
     isempty(phases) && return out
     out[1] = phases[1]
     shift = zero(eltype(phases))
     for i in 2:length(phases)
         Δ = phases[i] - phases[i - 1]
-        if Δ > (π - PHASE_UNWRAP_BRANCH_TOL)
+        if Δ > (π - branch_tol)
             shift -= 2π
-        elseif Δ < (-π + PHASE_UNWRAP_BRANCH_TOL)
+        elseif Δ < (-π + branch_tol)
             shift += 2π
         end
         out[i] = phases[i] + shift
