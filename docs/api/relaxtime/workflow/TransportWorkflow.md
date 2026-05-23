@@ -6,6 +6,10 @@
 
 如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 `../../models/workflows/TransportWorkflow.md`；本页不重复承担入口选择与使用场景导航。
 
+如果你要看从 `equilibrium -> quark_params/thermo_params -> A/B0 -> Pi -> propagator -> |M|^2 -> dσ/dt -> σ -> wbar -> tau -> eta/zeta/sigma` 的整条主链路，以及每一步对象/单位/符号边界，请结合阅读：
+
+- [../../../reference/formula/relaxtime/transport/Transport_EndToEnd_Pipeline.md](../../../reference/formula/relaxtime/transport/Transport_EndToEnd_Pipeline.md)
+
 ## 与 `run_relaxtime_orchestrator_pipeline` 的关系（入口职责边界）
 
 - `solve_gap_and_transport`（本页）是 **单点 transport workflow** 入口：关注一个 `(T_fm, mu_fm, xi)` 点上的平衡态 + 输运系数求解与参数契约。
