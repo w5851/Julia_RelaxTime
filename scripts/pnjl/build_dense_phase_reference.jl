@@ -212,9 +212,9 @@ end
 
 function write_cep_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_CEP_MeV,mu_CEP_MeV")
+        println(io, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV")
         for row in rows
-            println(io, "$(row.xi),$(row.T_CEP_MeV),$(row.mu_CEP_MeV)")
+            println(io, "$(row.xi),$(row.T_CEP_MeV),$(row.muq_CEP_MeV),$(row.muB_CEP_MeV)")
         end
     end
 end
@@ -476,7 +476,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 push!(boundary_rows, merge((xi=xi,), row))
             end
             if result.cep.found && isfinite(result.cep.T_cep_MeV) && isfinite(result.cep.mu_cep_MeV)
-                push!(cep_rows, (xi=xi, T_CEP_MeV=result.cep.T_cep_MeV, mu_CEP_MeV=result.cep.mu_cep_MeV))
+                muq_CEP_MeV = result.cep.mu_cep_MeV
+                push!(cep_rows, (xi=xi, T_CEP_MeV=result.cep.T_cep_MeV, muq_CEP_MeV=muq_CEP_MeV, muB_CEP_MeV=3.0 * muq_CEP_MeV))
             end
             for row in result.spinodal
                 push!(spinodal_rows, merge((xi=xi,), row))

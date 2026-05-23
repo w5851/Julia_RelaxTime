@@ -66,7 +66,7 @@ julia scripts/pnjl/calculate_phase_structure.jl --xi=0.4 --T_min=50 --T_max=130 
 
 | 文件 | 内容 | 列 |
 |------|------|-----|
-| `cep.csv` | 临界终点 | xi, T_CEP_MeV, mu_CEP_MeV |
+| `cep.csv` | 临界终点 | xi, T_CEP_MeV, muq_CEP_MeV, muB_CEP_MeV |
 | `boundary.csv` | 一阶相变线 | xi, T_MeV, mu_transition_MeV, rho_hadron, rho_quark |
 | `spinodals.csv` | Spinodal 线 | xi, T_MeV, mu_spinodal_hadron_MeV, mu_spinodal_quark_MeV, rho_spinodal_hadron, rho_spinodal_quark |
 
@@ -75,7 +75,7 @@ julia scripts/pnjl/calculate_phase_structure.jl --xi=0.4 --T_min=50 --T_max=130 
 **脚本**: `scripts/pnjl/plot_phase_diagram.py`
 
 **功能**:
-- T-μ 相图（一阶相变线 + CEP + spinodal 虚线）
+- T-μq 相图（一阶相变线 + CEP + spinodal 虚线；相图参考 CSV 中的 `mu_*_MeV` 默认是夸克化学势 `mu_q`，需要和外部 `mu_B` 对接时使用 `mu_B=3mu_q`）
 - T-ρ 相图（共存区 + spinodal 虚线）
 - 组合相图
 

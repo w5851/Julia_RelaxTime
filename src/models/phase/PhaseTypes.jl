@@ -1,6 +1,9 @@
 Base.@kwdef struct CEPResult
     found::Bool = false
     T_cep_MeV::Float64 = NaN
+    # Phase solvers work in the quark chemical potential mu_q. Keep the
+    # historical field name for API compatibility; public artifacts should also
+    # expose explicit muq_cep_MeV and muB_cep_MeV names.
     mu_cep_MeV::Float64 = NaN
     uncertainty_T_MeV::Float64 = NaN
     eval_count::Int = 0
