@@ -1,0 +1,5 @@
+point,channel,mu_rule,mu_pi_MeV,mu_K_MeV,n_pi,n_K,kpi_ratio
+charged_diag_T170_muq80_muS0p2muq,Kplus_over_piplus,muK_zero,100.0,0.0,2.113081716837971,0.04122036695252506,0.019507228056569192
+charged_diag_T170_muq80_muS0p2muq,Kplus_over_piplus,muK_u_minus_s,100.0,64.0,2.113081716837971,0.5237389428760321,0.247855508238346
+charged_diag_T170_muq80_muS0p2muq,Kminus_over_piminus,muK_zero,100.0,0.0,2.113081716837971,0.059721147879508565,0.028262583223177793
+charged_diag_T170_muq80_muS0p2muq,Kminus_over_piminus,muK_s_minus_u,100.0,-64.0,2.113081716837971,0.040729469254457216,0.01927491441997097

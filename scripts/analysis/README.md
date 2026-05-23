@@ -7,6 +7,7 @@
 - `convergence/`：数值收敛性分析相关脚本与说明
 - `scan_mott_meson_vs_xi_mu0.jl`：在 `mu=0` 条件下扫描 Mott 点与介子质量随 `xi` 的变化
 - `mott_reference_mapping.jl`：生成/检查 Mott 参考映射数据
+- `relaxtime/audit_bu_meson_density_literature_alignment.jl`：面向 BU 介子数密度文献对齐审查的 fixed-point / phase normalization / charged `μ_K` 规则诊断脚本
 
 ## 使用说明
 

@@ -110,3 +110,24 @@ sqrt(s_NN)
 
 - 让 charged / freeze-out 子链先进入统一 workflow
 - 不过早把 flavor-level 现象学和路径代理混进底层公式层
+
+### 5.1 与旧 `K / sigma_K` 标签的边界
+
+需要特别注意，charged meson-density 子链里的：
+
+- `K_plus`
+- `K_minus`
+
+是后加入的 charged / ordered strange-light label；它们不同于更早主链里的 generic：
+
+- `K`
+- `sigma_K`
+
+当前代码语义下：
+
+- `K_plus` 走 ordered `(u,s)` 赝标量分支
+- `K_minus` 走 ordered `(s,u)` 赝标量分支
+- 旧的 generic `K` 在已支持 charged label 的实现里，通常与 `(u,s)` 分支同向
+- 旧的 generic `sigma_K` 仍不是 charge-resolved scalar label
+
+因此，charged meson-density workflow 不应把旧 `sigma_K` 自动解释成某个固定电荷态；若需要这一步，必须在更低层传播子 / 极化函数语义上显式拆分。
