@@ -23,6 +23,7 @@ node_modules/
 test/SuppositionDB/
 
 # 临时日志与一次性排查输出
+/temp*/
 /.tmp_*.log
 /.tmp_*.txt
 /test_full.log
