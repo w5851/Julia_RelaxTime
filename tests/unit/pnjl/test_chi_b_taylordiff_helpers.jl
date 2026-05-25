@@ -72,10 +72,9 @@ end
 
     td3 = PNJL.chi_B(T_fm, muB_fm; order=3, derivative_backend=:taylordiff, kwargs...)
     auto3 = PNJL.chi_B(T_fm, muB_fm; order=3, derivative_backend=:auto, kwargs...)
-    fd3 = PNJL.chi_B(T_fm, muB_fm; order=3, derivative_backend=:forwarddiff, kwargs...)
     @test isfinite(td3)
     @test isapprox(auto3, td3; rtol=1e-12, atol=1e-12)
-    @test isapprox(td3, fd3; rtol=1e-10, atol=1e-12)
+    @test_throws ArgumentError PNJL.chi_B(T_fm, muB_fm; order=3, derivative_backend=:forwarddiff, kwargs...)
 
     for call in (
         (backend -> PNJL.chi_Q(T_fm, muB_fm, muQ_fm, muS_fm; order=2, derivative_backend=backend, kwargs...)),
@@ -83,10 +82,9 @@ end
     )
         td = call(:taylordiff)
         auto = call(:auto)
-        fd = call(:forwarddiff)
         @test isfinite(td)
         @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
-        @test isapprox(td, fd; rtol=1e-10, atol=1e-12)
+        @test_throws ArgumentError call(:forwarddiff)
     end
 
     td_q4 = PNJL.chi_Q(T_fm, muB_fm, muQ_fm, muS_fm; order=4, derivative_backend=:taylordiff, kwargs...)
@@ -96,10 +94,11 @@ end
 
     td_mixed = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:taylordiff, kwargs...)
     auto_mixed = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:auto, kwargs...)
-    fd_mixed = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:forwarddiff, kwargs...)
+    jet_mixed = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:mixedjet, kwargs...)
     @test isfinite(td_mixed)
     @test isapprox(auto_mixed, td_mixed; rtol=1e-12, atol=1e-12)
-    @test isapprox(td_mixed, fd_mixed; rtol=1e-10, atol=1e-12)
+    @test isapprox(jet_mixed, td_mixed; rtol=1e-12, atol=1e-12)
+    @test_throws ArgumentError PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:forwarddiff, kwargs...)
 end
 
 @testset "mixed BQS Taylor jet supports higher-order mixed derivatives" begin
@@ -111,9 +110,8 @@ end
 
     chi11_auto = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:auto, kwargs...)
     chi11_jet = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:mixedjet, kwargs...)
-    chi11_fd = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:forwarddiff, kwargs...)
     @test isapprox(chi11_auto, chi11_jet; rtol=1e-12, atol=1e-12)
-    @test isapprox(chi11_jet, chi11_fd; rtol=1e-10, atol=1e-12)
+    @test_throws ArgumentError PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 0), derivative_backend=:forwarddiff, kwargs...)
 
     chi211 = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 1), derivative_backend=:auto, kwargs...)
     chi211_jet = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 1), derivative_backend=:mixedjet, kwargs...)
