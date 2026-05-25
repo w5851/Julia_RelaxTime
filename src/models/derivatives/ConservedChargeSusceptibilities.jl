@@ -4,13 +4,13 @@
 守恒荷静态涨落对象的首版实现。
 
 当前阶段覆盖：
-- baryon 方向 `chi_B(...; order=n)`
+- `B/Q/S` 单轴 `chi_*(...; order=n)`
 - baryon 累积量与比值量
-- 二阶 `B/Q/S` 与 mixed susceptibilities
+- 二阶 `B/Q/S` 与任意总阶数的 mixed BQS susceptibilities
 - flavor 基底下总压强对化学势的一阶/二阶导数
 
 实现约定：
-- 主路线使用 AD。
+- 主路线使用 AD/TaylorDiff。
 - 内部主对象优先取 `P(T, μ_u, μ_d, μ_s)` 对 flavor 化学势的导数。
 - `χ_n` 的 `T` 缩放因子在导数完成后解析施加，避免直接对 `P/T^4` 做底层高阶 AD。
 """
@@ -21,6 +21,8 @@ using StaticArrays
 
 using ..PNJLCore: DEFAULT_MOMENTUM_COUNT, DEFAULT_THETA_COUNT
 using ..HigherOrderDerivatives: nth_derivative, susceptibility_scale
+using ..PNJLChiBTaylorDiff: chi_BQS_mixed_taylorjet, chi_direction_taylordiff
+using ..PNJLChiBTaylorDiff: nth_derivative_from_series, pressure_series_direction
 using ..Models: create_model, create_flavor_mu_implicit_gap_solver, normalize_mu_vec, model_pressure
 
 export flavor_pressure_derivatives, conserved_charge_susceptibility
@@ -38,11 +40,25 @@ const _BQS_TO_FLAVOR = @SMatrix [
     1.0 / 3.0  -1.0 / 3.0   0.0
     1.0 / 3.0  -1.0 / 3.0  -1.0
 ]
+const _DERIVATIVE_BACKENDS = (:auto, :forwarddiff, :taylordiff, :mixedjet)
 
 @inline function _validate_baryon_inputs(T_fm::Real, order::Int)
     T_fm > 0 || throw(ArgumentError("T_fm must be positive, got $T_fm"))
     order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
     return nothing
+end
+
+@inline function _validate_derivative_backend(derivative_backend::Symbol)
+    derivative_backend in _DERIVATIVE_BACKENDS && return derivative_backend
+    throw(ArgumentError("derivative_backend must be one of $(_DERIVATIVE_BACKENDS), got $(derivative_backend)"))
+end
+
+@inline function _resolve_single_axis_backend(axis::Int, order::Int, derivative_backend::Symbol)
+    _ = axis
+    _ = order
+    backend = _validate_derivative_backend(derivative_backend)
+    backend === :mixedjet && return :taylordiff
+    return backend === :auto ? :taylordiff : backend
 end
 
 @inline function _get_model(model_kind::Symbol)
@@ -124,13 +140,36 @@ function _single_axis_susceptibility(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     model=nothing,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
 )
     T_fm > 0 || throw(ArgumentError("T_fm must be positive, got $T_fm"))
     order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
 
+    backend = _resolve_single_axis_backend(axis, order, derivative_backend)
+    m = model === nothing ? _get_model(:PNJL) : model
+    if backend === :taylordiff
+        base_mu_vec = _flavor_mu_from_bqs(muB_fm, muQ_fm, muS_fm)
+        direction = _flavor_direction_from_axis(axis)
+        return chi_direction_taylordiff(
+            T_fm,
+            base_mu_vec,
+            direction;
+            order=order,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            model=m,
+            series_iterations=series_iterations,
+            linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
+    end
+
     μ0 = _flavor_mu_from_bqs(muB_fm, muQ_fm, muS_fm)
     direction = _flavor_direction_from_axis(axis)
-    m = model === nothing ? _get_model(:PNJL) : model
     pressure_axis = δ -> _pressure_from_flavor_mu(T_fm, μ0 + δ * direction; xi=xi, p_num=p_num, t_num=t_num, model=m)
     δ0 = zero(promote_type(typeof(T_fm), typeof(muB_fm), typeof(muQ_fm), typeof(muS_fm)))
     return nth_derivative(pressure_axis, δ0, order) * susceptibility_scale(T_fm, order)
@@ -149,10 +188,54 @@ function flavor_pressure_derivatives(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     model=nothing,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
 )
     T_fm > 0 || throw(ArgumentError("T_fm must be positive, got $T_fm"))
     μ0 = _normalize_flavor_mu(mu_vec)
     m = model === nothing ? _get_model(:PNJL) : model
+    backend = _validate_derivative_backend(derivative_backend)
+
+    if backend !== :forwarddiff
+        order == 1 || order == 2 || throw(ArgumentError("flavor_pressure_derivatives currently supports order=1 or 2, got $order"))
+        e1 = SVector{3}(1.0, 0.0, 0.0)
+        e2 = SVector{3}(0.0, 1.0, 0.0)
+        e3 = SVector{3}(0.0, 0.0, 1.0)
+        series_kwargs = (; xi=xi, p_num=p_num, t_num=t_num, model=m, series_iterations=series_iterations, linear_solve=linear_solve, series_residual_tol=series_residual_tol)
+
+        s1 = pressure_series_direction(T_fm, μ0, e1; order=order, series_kwargs...)
+        s2 = pressure_series_direction(T_fm, μ0, e2; order=order, series_kwargs...)
+        s3 = pressure_series_direction(T_fm, μ0, e3; order=order, series_kwargs...)
+
+        pressure = nth_derivative_from_series(s1, 0)
+        grad_mu = Vector{Float64}(undef, 3)
+        grad_mu[1] = nth_derivative_from_series(s1, 1)
+        grad_mu[2] = nth_derivative_from_series(s2, 1)
+        grad_mu[3] = nth_derivative_from_series(s3, 1)
+
+        if order == 1
+            return (pressure=pressure, grad_mu=grad_mu)
+        end
+
+        hessian_mu = Matrix{Float64}(undef, 3, 3)
+        diag11 = nth_derivative_from_series(s1, 2)
+        diag22 = nth_derivative_from_series(s2, 2)
+        diag33 = nth_derivative_from_series(s3, 2)
+        hessian_mu[1, 1] = diag11
+        hessian_mu[2, 2] = diag22
+        hessian_mu[3, 3] = diag33
+
+        s12 = pressure_series_direction(T_fm, μ0, e1 + e2; order=order, series_kwargs...)
+        s13 = pressure_series_direction(T_fm, μ0, e1 + e3; order=order, series_kwargs...)
+        s23 = pressure_series_direction(T_fm, μ0, e2 + e3; order=order, series_kwargs...)
+        hessian_mu[1, 2] = hessian_mu[2, 1] = (nth_derivative_from_series(s12, 2) - diag11 - diag22) / 2
+        hessian_mu[1, 3] = hessian_mu[3, 1] = (nth_derivative_from_series(s13, 2) - diag11 - diag33) / 2
+        hessian_mu[2, 3] = hessian_mu[3, 2] = (nth_derivative_from_series(s23, 2) - diag22 - diag33) / 2
+        return (pressure=pressure, grad_mu=grad_mu, hessian_mu=hessian_mu)
+    end
+
     pressure_mu = μ -> _pressure_from_flavor_mu(T_fm, μ; xi=xi, p_num=p_num, t_num=t_num, model=m)
 
     pressure = pressure_mu(μ0)
@@ -182,9 +265,10 @@ end
 """
     conserved_charge_susceptibility(T_fm, muB_fm, muQ_fm, muS_fm; orders=(i,j,k), kwargs...) -> Float64
 
-返回 `χ_{ijk}^{BQS}` 的当前首版实现：
-- 支持总二阶 `(2,0,0)`, `(0,2,0)`, `(0,0,2)`, `(1,1,0)`, `(1,0,1)`, `(0,1,1)`
-- 支持纯 `B/Q/S` 方向 `χ_n, n=1..4`
+返回 `χ_{ijk}^{BQS}`：
+- 纯 `B/Q/S` 单方向由 `:auto`/`:taylordiff` 路由到单变量 TaylorDiff fast path
+- mixed BQS 组合由 `:auto`/`:taylordiff`/`:mixedjet` 路由到内部 multivariate Taylor jet
+- `:forwarddiff` fallback 仍保留纯方向 `n=1..4` 与 mixed 总二阶 reference
 """
 function conserved_charge_susceptibility(
     T_fm::Real,
@@ -196,21 +280,73 @@ function conserved_charge_susceptibility(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     model=nothing,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
 )
     total_order = orders[1] + orders[2] + orders[3]
     pure_axis = _single_axis_order(orders)
 
-    if pure_axis !== nothing && 1 <= pure_axis[2] <= 4
+    if pure_axis !== nothing
         axis, order = pure_axis
-        return _single_axis_susceptibility(T_fm, muB_fm, muQ_fm, muS_fm, axis, order; xi=xi, p_num=p_num, t_num=t_num, model=model)
-    elseif total_order == 2
+        backend = _resolve_single_axis_backend(axis, order, derivative_backend)
+        if backend === :forwarddiff && !(1 <= order <= 4)
+            throw(ArgumentError("conserved_charge_susceptibility supports pure B/Q/S order 1..4 with derivative_backend=:forwarddiff; TaylorDiff supports higher single-axis orders"))
+        end
+        return _single_axis_susceptibility(
+            T_fm,
+            muB_fm,
+            muQ_fm,
+            muS_fm,
+            axis,
+            order;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            model=model,
+            derivative_backend=backend,
+            series_iterations=series_iterations,
+            linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
+    else
+        backend = _validate_derivative_backend(derivative_backend)
+        if backend !== :forwarddiff
+            return chi_BQS_mixed_taylorjet(
+                T_fm,
+                muB_fm,
+                muQ_fm,
+                muS_fm;
+                orders=orders,
+                xi=xi,
+                p_num=p_num,
+                t_num=t_num,
+                model=model,
+                series_iterations=series_iterations,
+                linear_solve=linear_solve,
+                series_residual_tol=series_residual_tol,
+            )
+        end
+
+        total_order == 2 || throw(ArgumentError("conserved_charge_susceptibility supports mixed total order 2 with derivative_backend=:forwarddiff; TaylorDiff/:auto/:mixedjet support higher mixed B/Q/S orders"))
         μ = _flavor_mu_from_bqs(muB_fm, muQ_fm, muS_fm)
-        derivs = flavor_pressure_derivatives(T_fm, μ; order=2, xi=xi, p_num=p_num, t_num=t_num, model=model)
+        derivs = flavor_pressure_derivatives(
+            T_fm,
+            μ;
+            order=2,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            model=model,
+            derivative_backend=derivative_backend,
+            series_iterations=series_iterations,
+            linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
         h_bqs = transpose(_BQS_TO_FLAVOR) * derivs.hessian_mu * _BQS_TO_FLAVOR
         i, j = _second_order_bqs_indices(orders)
         return h_bqs[i, j] * susceptibility_scale(T_fm, total_order)
-    else
-        throw(ArgumentError("conserved_charge_susceptibility currently supports total second order and pure single-axis B/Q/S order 1..4, got orders=$orders"))
     end
 end
 
@@ -278,9 +414,28 @@ function chi_B(
     p_num::Int=DEFAULT_MOMENTUM_COUNT,
     t_num::Int=DEFAULT_THETA_COUNT,
     model=nothing,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
 )
     _validate_baryon_inputs(T_fm, order)
-    return _single_axis_susceptibility(T_fm, muB_fm, zero(muB_fm), zero(muB_fm), 1, order; xi=xi, p_num=p_num, t_num=t_num, model=model)
+    return _single_axis_susceptibility(
+        T_fm,
+        muB_fm,
+        zero(muB_fm),
+        zero(muB_fm),
+        1,
+        order;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=model,
+        derivative_backend=derivative_backend,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
 end
 
 @inline chi1_B(T_fm::Real, muB_fm::Real; kwargs...) = chi_B(T_fm, muB_fm; order=1, kwargs...)

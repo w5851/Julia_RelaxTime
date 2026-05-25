@@ -32,6 +32,15 @@ export derive_vec, derive_named
 # This file is a legacy compatibility bridge and must not become a new primary
 # solver/diff implementation surface.
 const IMPLICIT_GAP_LEGACY_COMPAT_ONLY = true
+const _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS = (:auto, :taylordiff, :forwarddiff)
+
+@inline function _validate_implicit_compat_derivative_backend(derivative_backend::Symbol)
+    derivative_backend in _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS && return derivative_backend
+    throw(ArgumentError("derivative_backend must be one of $(_IMPLICIT_COMPAT_DERIVATIVE_BACKENDS), got $(derivative_backend)"))
+end
+
+@inline _implicit_compat_backend(derivative_backend::Symbol) =
+    _validate_implicit_compat_derivative_backend(derivative_backend) === :auto ? :taylordiff : derivative_backend
 
 @inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
     return model isa RPNJLModel ? :RPNJL : :PNJL
@@ -45,6 +54,135 @@ end
 @inline function _normalize_flavor_mu_vec(mu_vec)
     μ = normalize_mu_vec(mu_vec)
     return [Float64(μ[1]), Float64(μ[2]), Float64(μ[3])]
+end
+
+@inline _td_zero_mu_direction() = SVector{3, Float64}(0.0, 0.0, 0.0)
+@inline _td_symmetric_mu_direction() = SVector{3, Float64}(1.0, 1.0, 1.0)
+
+@inline function _td_series_derivative_vector(v::SVector{N}, order::Int) where {N}
+    return collect(SVector{N, Float64}(ntuple(i -> PNJLChiBTaylorDiff.nth_derivative_from_series(v[i], order), Val(N))))
+end
+
+function _td_gap_state_series(
+    model::AbstractPNJLModel,
+    T_fm::Real,
+    mu_vec0,
+    T_direction::Real,
+    mu_direction;
+    order::Int,
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+    series_iterations::Union{Nothing, Int},
+    linear_solve::Symbol,
+    series_residual_tol::Real,
+)
+    return PNJLChiBTaylorDiff.gap_series_parameter_direction(
+        T_fm,
+        mu_vec0,
+        T_direction,
+        mu_direction;
+        order=order,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=model,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+end
+
+function _solve_pnjl_with_derivatives_taylordiff(
+    model::AbstractPNJLModel,
+    T_fm::Real,
+    μ_fm::Real;
+    order::Int,
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+    series_iterations::Union{Nothing, Int},
+    linear_solve::Symbol,
+    series_residual_tol::Real,
+)
+    order == 1 || order == 2 || throw(ArgumentError("order must be 1 or 2, got $order"))
+    mu_vec0 = SVector{3, Float64}(Float64(μ_fm), Float64(μ_fm), Float64(μ_fm))
+
+    s_T = _td_gap_state_series(
+        model, T_fm, mu_vec0, 1.0, _td_zero_mu_direction();
+        order=order, xi=xi, p_num=p_num, t_num=t_num,
+        series_iterations=series_iterations, linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+    s_μ = _td_gap_state_series(
+        model, T_fm, mu_vec0, 0.0, _td_symmetric_mu_direction();
+        order=order, xi=xi, p_num=p_num, t_num=t_num,
+        series_iterations=series_iterations, linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+
+    x = _td_series_derivative_vector(s_T.x_state, 0)
+    dx_dT = _td_series_derivative_vector(s_T.x_state, 1)
+    dx_dμ = _td_series_derivative_vector(s_μ.x_state, 1)
+
+    if order == 1
+        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ)
+    end
+
+    s_Tμ = _td_gap_state_series(
+        model, T_fm, mu_vec0, 1.0, _td_symmetric_mu_direction();
+        order=2, xi=xi, p_num=p_num, t_num=t_num,
+        series_iterations=series_iterations, linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+
+    d2x_dT2 = _td_series_derivative_vector(s_T.x_state, 2)
+    d2x_dμ2 = _td_series_derivative_vector(s_μ.x_state, 2)
+    d2x_Tμ_total = _td_series_derivative_vector(s_Tμ.x_state, 2)
+    d2x_dTdμ = (d2x_Tμ_total .- d2x_dT2 .- d2x_dμ2) ./ 2
+
+    return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ,
+            d2x_dT2=d2x_dT2, d2x_dμ2=d2x_dμ2, d2x_dTdμ=d2x_dTdμ)
+end
+
+function _solve_pnjl_with_flavor_mu_derivatives_taylordiff(
+    model::AbstractPNJLModel,
+    T_fm::Real,
+    mu_vec;
+    order::Int,
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+    series_iterations::Union{Nothing, Int},
+    linear_solve::Symbol,
+    series_residual_tol::Real,
+)
+    order == 1 || throw(ArgumentError("solve_pnjl_with_flavor_mu_derivatives currently supports order=1 only"))
+    μ0_arr = _normalize_flavor_mu_vec(mu_vec)
+    μ0 = SVector{3, Float64}(μ0_arr[1], μ0_arr[2], μ0_arr[3])
+
+    s_T = _td_gap_state_series(
+        model, T_fm, μ0, 1.0, _td_zero_mu_direction();
+        order=1, xi=xi, p_num=p_num, t_num=t_num,
+        series_iterations=series_iterations, linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+    x = _td_series_derivative_vector(s_T.x_state, 0)
+    dx_dT = _td_series_derivative_vector(s_T.x_state, 1)
+
+    dx_dmu_vec = Matrix{Float64}(undef, 5, 3)
+    for j in 1:3
+        direction = SVector{3, Float64}(ntuple(i -> i == j ? 1.0 : 0.0, Val(3)))
+        s_μj = _td_gap_state_series(
+            model, T_fm, μ0, 0.0, direction;
+            order=1, xi=xi, p_num=p_num, t_num=t_num,
+            series_iterations=series_iterations, linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
+        dx_dmu_vec[:, j] = _td_series_derivative_vector(s_μj.x_state, 1)
+    end
+
+    return (x=x, mu_vec=μ0, dx_dT=dx_dT, dx_dmu_vec=dx_dmu_vec)
 end
 
 function build_pnjl_fixedmu_adapters(
@@ -197,7 +335,9 @@ end
 
 """solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...) -> NamedTuple
 
-通过 models 隐函数求解器计算 PNJL 解及其导数：
+通过 models 求解器计算 PNJL 解及其导数。默认使用 TaylorDiff
+explicit Taylor-series gap Newton；显式 `derivative_backend=:forwarddiff`
+保留旧 ImplicitFunction reference/fallback：
 - `order=1`：返回 `x, dx_dT, dx_dμ`
 - `order=2`：额外返回 `d2x_dT2, d2x_dμ2, d2x_dTdμ`
 """
@@ -210,8 +350,30 @@ function solve_pnjl_with_derivatives(
     t_num::Int=8,
     thermo_backend::Symbol=:models,
     solver_backend::Symbol=:models,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
     kwargs...
 )
+    backend = _implicit_compat_backend(derivative_backend)
+    if backend === :taylordiff
+        kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
+        model = create_model(kind)
+        return _solve_pnjl_with_derivatives_taylordiff(
+            model,
+            T_fm,
+            μ_fm;
+            order=order,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            series_iterations=series_iterations,
+            linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
+    end
+
     solver = create_pnjl_implicit_solver(
         ;
         xi=xi,
@@ -337,12 +499,33 @@ function solve_pnjl_with_flavor_mu_derivatives(
     t_num::Int=8,
     thermo_backend::Symbol=:models,
     solver_backend::Symbol=:models,
+    derivative_backend::Symbol=:auto,
+    series_iterations::Union{Nothing, Int}=nothing,
+    linear_solve::Symbol=:auto,
+    series_residual_tol::Real=1e-7,
     kwargs...
 )
     order == 1 || throw(ArgumentError("solve_pnjl_with_flavor_mu_derivatives currently supports order=1 only"))
 
     kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
     model = create_model(kind)
+
+    backend = _implicit_compat_backend(derivative_backend)
+    if backend === :taylordiff
+        _ = solver_backend
+        return _solve_pnjl_with_flavor_mu_derivatives_taylordiff(
+            model,
+            T_fm,
+            mu_vec;
+            order=order,
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            series_iterations=series_iterations,
+            linear_solve=linear_solve,
+            series_residual_tol=series_residual_tol,
+        )
+    end
 
     solver = create_flavor_mu_implicit_gap_solver(
         model;
