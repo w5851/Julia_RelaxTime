@@ -1,7 +1,7 @@
 # flavor-mu implicit_gap 单元测试
 #
 # 测试内容：
-# 1. flavor 化学势版本的隐函数求解器可构造与 forward solve
+# 1. flavor 化学势版本的 legacy factory retirement 与 residual problem forward solve
 # 2. flavor 化学势版本的一阶导数接口
 # 3. 对称路径退化到旧标量 μ 接口时的一致性
 
@@ -20,20 +20,20 @@ Models.pnjl_module()
         @test !(:create_flavor_mu_implicit_gap_solver in names(Models))
     end
 
-    @testset "compat create_flavor_mu_implicit_gap_solver" begin
+    @testset "retired flavor factory throws migration error" begin
         m = Models.create_model(:PNJL)
-        igf = Models.create_flavor_mu_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test igf isa Any
+        @test_throws ArgumentError Models.create_flavor_mu_implicit_gap_solver(m; p_num=24, t_num=6)
     end
 
-    @testset "forward solve flavor mu symmetric point" begin
+    @testset "residual problem forward solve flavor mu symmetric point" begin
         m = Models.create_model(:PNJL)
-        igf = Models.create_flavor_mu_implicit_gap_solver(m; p_num=24, t_num=6)
+        problem = Models.build_pnjl_flavor_mu_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0, 0.0, 0.0]
-        result = igf(θ)
+        result = problem.forward_solve(θ)
         x = result isa Tuple ? result[1] : result
         @test length(x) == 5
         @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, nothing)) == 5
     end
 
     @testset "solve_pnjl_with_flavor_mu_derivatives symmetric consistency" begin

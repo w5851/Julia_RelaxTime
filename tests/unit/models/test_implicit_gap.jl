@@ -1,8 +1,8 @@
 # implicit_gap.jl 单元测试
 #
 # 测试内容：
-# 1. create_implicit_gap_solver NJL2/NJL/PNJL
-# 2. 隐函数求解 forward solve
+# 1. legacy create_*_implicit* factory retirement
+# 2. residual problem builder forward solve
 # 3. solve_pnjl_with_derivatives (PNJL wrapper)
 
 using Test
@@ -24,48 +24,47 @@ Models.pnjl_module()
         @test !(:create_pnjl_implicit_solver in exported)
     end
 
-    # --- compat create_implicit_gap_solver NJL2 ---
-    @testset "compat create_implicit_gap_solver NJL2" begin
+    @testset "retired compat factories throw migration errors" begin
+        @test isdefined(Models, :create_pnjl_implicit_solver)
         m = Models.create_model(:NJL2)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test igf isa Any  # ImplicitFunction 类型
+        @test_throws ArgumentError Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
+        @test_throws ArgumentError Models.create_implicit_gap_solver(Models.create_model(:NJL); p_num=24, t_num=6)
+        @test_throws ArgumentError Models.create_implicit_gap_solver(Models.create_model(:PNJL); p_num=24, t_num=6)
+        @test_throws ArgumentError Models.create_pnjl_implicit_solver(p_num=24, t_num=6)
     end
 
-    # --- compat create_implicit_gap_solver NJL ---
-    @testset "compat create_implicit_gap_solver NJL" begin
-        m = Models.create_model(:NJL)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test igf isa Any
-    end
-
-    # --- forward solve NJL2 ---
-    @testset "隐函数 forward solve NJL2" begin
+    @testset "residual problem forward solve NJL2" begin
         m = Models.create_model(:NJL2)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
+        problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = igf(θ)
-        # ImplicitFunction 返回 (x, z) tuple
+        result = problem.forward_solve(θ)
         x = result isa Tuple ? result[1] : result
         @test length(x) >= 2
         @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, nothing)) == 2
+        @test_throws ArgumentError Models.build_implicit_solver(problem)
     end
 
-    # --- forward solve NJL ---
-    @testset "隐函数 forward solve NJL" begin
+    @testset "residual problem forward solve NJL" begin
         m = Models.create_model(:NJL)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
+        problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = igf(θ)
+        result = problem.forward_solve(θ)
         x = result isa Tuple ? result[1] : result
         @test length(x) >= 3
         @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, nothing)) == 3
     end
 
-    # --- create_pnjl_implicit_solver ---
-    @testset "create_pnjl_implicit_solver" begin
-        @test isdefined(Models, :create_pnjl_implicit_solver)
-        igf = Models.create_pnjl_implicit_solver(p_num=24, t_num=6)
-        @test igf isa Any
+    @testset "residual problem forward solve PNJL" begin
+        m = Models.create_model(:PNJL)
+        problem = Models.build_pnjl_fixedmu_problem(m; p_num=24, t_num=6)
+        θ = [0.5, 0.0]  # [T, μ]
+        result = problem.forward_solve(θ)
+        x = result isa Tuple ? result[1] : result
+        @test length(x) == 5
+        @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, nothing)) == 5
     end
 
     # --- solve_pnjl_with_derivatives ---

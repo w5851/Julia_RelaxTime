@@ -1,5 +1,3 @@
-using ImplicitDifferentiation
-
 """
     ImplicitProblem
 
@@ -7,7 +5,7 @@ using ImplicitDifferentiation
 - `forward_solve(θ) -> (x, meta)`
 - `conditions(θ, x, z) -> residual`
 
-其中 `z` 为隐式微分库预留上下文参数。
+其中 `z` 为 residual adapter 预留上下文参数。
 """
 struct ImplicitProblem{F,C}
     forward_solve::F
@@ -27,6 +25,6 @@ end
 end
 
 Base.@kwdef struct ImplicitSolverConfig
-    linear_solver = DirectLinearSolver()
-    representation = MatrixRepresentation()
+    linear_solver = nothing
+    representation = nothing
 end

@@ -29,7 +29,7 @@ const _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS = (:auto, :taylordiff)
 
 @inline function _validate_implicit_compat_derivative_backend(derivative_backend::Symbol)
     if derivative_backend === :forwarddiff
-        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from PNJL derivative wrappers; use derivative_backend=:auto or :taylordiff. Low-level create_*_implicit* factories remain qualified compat-only entrypoints for explicit legacy reference tests."))
+        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from PNJL derivative wrappers; use derivative_backend=:auto or :taylordiff. Low-level create_*_implicit* factories are retired compat wrappers and no longer construct ImplicitFunction objects."))
     end
     derivative_backend in _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS && return derivative_backend
     throw(ArgumentError("derivative_backend must be one of $(_IMPLICIT_COMPAT_DERIVATIVE_BACKENDS), got $(derivative_backend)"))
@@ -41,7 +41,11 @@ end
 @inline function _reject_unsupported_td_wrapper_kwargs(kwargs)
     isempty(kwargs) && return nothing
     names = join(string.(keys(kwargs)), ", ")
-    throw(ArgumentError("unsupported keyword(s) for TD-only PNJL derivative wrapper: $names. Legacy solver-specific keywords now apply only to qualified compat factories such as Models.create_implicit_gap_solver."))
+    throw(ArgumentError("unsupported keyword(s) for TD-only PNJL derivative wrapper: $names. Legacy solver-specific ImplicitFunction keywords are no longer supported; use residual problem builders for adapter audits."))
+end
+
+@noinline function _retired_implicit_factory_error(factory::Symbol)
+    throw(ArgumentError("$(factory) has been retired with the ImplicitDifferentiation backend and no longer constructs an ImplicitFunction. Use build_pnjl_fixedmu_problem/build_pnjl_flavor_mu_problem/build_njl_problem for residual adapter audits, or solve_pnjl_with_derivatives/solve_pnjl_with_flavor_mu_derivatives for TD-based PNJL derivatives."))
 end
 
 @inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
@@ -267,13 +271,14 @@ function build_pnjl_flavor_mu_adapters(
     return (forward_solve=forward_solve, conditions=conditions)
 end
 
-"""create_implicit_gap_solver(model; kwargs...) -> ImplicitFunction
+"""create_implicit_gap_solver(model; kwargs...) -> throws ArgumentError
 
-Compat-only: 创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs]。
+Retired compat wrapper: legacy `ImplicitFunction` 工厂已下线。
 
-该工厂已从公共 export 面降级，只供显式 legacy reference 测试或诊断脚本
-qualified 调用。PNJL 生产导数入口请使用 `solve_pnjl_with_derivatives`
-默认 TD 路线。
+如需 residual adapter 审计，请使用 `build_njl_problem` /
+`build_pnjl_fixedmu_problem` / `build_pnjl_flavor_mu_problem` 的
+`forward_solve` 与 `conditions`；PNJL 生产导数入口请使用
+`solve_pnjl_with_derivatives` 默认 TD 路线。
 
 关键 kwargs：
 - `xi`, `p_num`, `t_num`: 传给 omega/gap_residual
@@ -289,15 +294,12 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 2 || throw(ArgumentError("create_implicit_gap_solver(::NJL2Model) expects dim=2"))
-    problem = build_njl_problem(
-        model;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        solver=solver,
-        kwargs...,
-    )
-    return build_implicit_solver(problem)
+    _ = xi
+    _ = p_num
+    _ = t_num
+    _ = solver
+    _ = kwargs
+    return _retired_implicit_factory_error(:create_implicit_gap_solver)
 end
 
 @inline function _pnjl_model_kind(thermo_backend::Symbol)
@@ -309,14 +311,11 @@ end
     throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :legacy or :models)"))
 end
 
-"""create_pnjl_implicit_solver(; kwargs...) -> ImplicitFunction
+"""create_pnjl_implicit_solver(; kwargs...) -> throws ArgumentError
 
-Compat-only: 基于 models 入口创建 PNJL 5 维隐函数求解器：
-- 参数 θ = [T, μ]
-- 解向量 x = [φu, φd, φs, Φ, Φbar]
+Retired compat wrapper: legacy PNJL 5 维 `ImplicitFunction` 工厂已下线。
 
-默认使用 models backend；可通过 `thermo_backend/solver_backend` 切换。
-该入口不再作为推荐公开导数入口导出。
+PNJL 导数生产入口请使用 `solve_pnjl_with_derivatives` 的 TD 默认路径。
 """
 function create_pnjl_implicit_solver(;
     xi::Real=0.0,
@@ -327,15 +326,13 @@ function create_pnjl_implicit_solver(;
     kwargs...
 )
     kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
-    model = create_model(kind)
-    return create_implicit_gap_solver(
-        model;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        solver_backend=solver_backend,
-        kwargs...,
-    )
+    _ = kind
+    _ = xi
+    _ = p_num
+    _ = t_num
+    _ = solver_backend
+    _ = kwargs
+    return _retired_implicit_factory_error(:create_pnjl_implicit_solver)
 end
 
 """solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...) -> NamedTuple
@@ -418,17 +415,14 @@ function derive_named(
     return derive_vec(model, theta_vec; kwargs...)
 end
 
-"""create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
+"""create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> throws ArgumentError
 
-Compat-only: 创建一个 flavor 化学势版本的隐函数求解器：
-- 参数 `θ = [T, μ_u, μ_d, μ_s]`
-- 解向量 `x = [φu, φd, φs, Φ, Φbar]`
+Retired compat wrapper: flavor 化学势版本的 legacy `ImplicitFunction`
+工厂已下线。
 
-实现约定：
-- `forward_solve_impl` 仅负责 primal solve，可安全使用 `Float64` 转换。
-- `conditions_impl` 必须对 Dual 友好，不能把 `θ` 中的化学势分量压回 `Float64`。
-该工厂已从公共 export 面降级，只供显式 legacy reference 测试或诊断脚本
-qualified 调用。
+如需 flavor-mu residual adapter 审计，请使用
+`build_pnjl_flavor_mu_problem`；PNJL flavor-mu 导数入口请使用
+`solve_pnjl_with_flavor_mu_derivatives` 默认 TD 路线。
 """
 function create_flavor_mu_implicit_gap_solver(
     model::AbstractPNJLModel;
@@ -438,14 +432,11 @@ function create_flavor_mu_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
-    problem = build_pnjl_flavor_mu_problem(
-        model;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        kwargs...,
-    )
-    return build_implicit_solver(problem)
+    _ = xi
+    _ = p_num
+    _ = t_num
+    _ = kwargs
+    return _retired_implicit_factory_error(:create_flavor_mu_implicit_gap_solver)
 end
 
 """solve_pnjl_with_flavor_mu_derivatives(T_fm, mu_vec; order=1, kwargs...) -> NamedTuple
@@ -507,20 +498,17 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 3 || throw(ArgumentError("create_implicit_gap_solver currently supports dim=3 only"))
-    problem = build_njl_problem(
-        model;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        solver=solver,
-        kwargs...,
-    )
-    return build_implicit_solver(problem)
+    _ = xi
+    _ = p_num
+    _ = t_num
+    _ = solver
+    _ = kwargs
+    return _retired_implicit_factory_error(:create_implicit_gap_solver)
 end
 
-"""create_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
+"""create_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> throws ArgumentError
 
-Compat-only: 创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs, Φ, Φbar]。
+Retired compat wrapper: PNJL fixed-μ legacy `ImplicitFunction` 工厂已下线。
 
 实现说明：
 - forward_solve_impl：调用 `solve_gap(model, T, μ)` 得到 `MeanFieldState`，再展开为 5 维向量。
@@ -528,8 +516,7 @@ Compat-only: 创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs, Φ
 
 注意：
 - 目前默认假设对称化学势（μu=μd=μs），与 legacy FixedMu / 当前 PNJLModel.solve_gap 的限制一致。
-- 该工厂已从公共 export 面降级；PNJL 导数生产入口请使用
-  `solve_pnjl_with_derivatives` 的 TD 默认路径。
+- PNJL 导数生产入口请使用 `solve_pnjl_with_derivatives` 的 TD 默认路径。
 """
 function create_implicit_gap_solver(
     model::AbstractPNJLModel;
@@ -539,12 +526,9 @@ function create_implicit_gap_solver(
     kwargs...
 )
     gap_state_dim(model) == 5 || throw(ArgumentError("create_implicit_gap_solver(model::AbstractPNJLModel) expects dim=5"))
-    problem = build_pnjl_fixedmu_problem(
-        model;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        kwargs...,
-    )
-    return build_implicit_solver(problem)
+    _ = xi
+    _ = p_num
+    _ = t_num
+    _ = kwargs
+    return _retired_implicit_factory_error(:create_implicit_gap_solver)
 end

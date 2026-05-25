@@ -145,16 +145,9 @@ const ħc = 197.327  # MeV·fm
         @test all(isfinite.(result.masses))
     end
 
-    @testset "Implicit solver (models backend)" begin
-        solver = P.create_pnjl_implicit_solver(p_num=p_num, t_num=t_num)
-        θ = [T_fm, μ_fm]
-        x, _ = solver(θ)
-        @test length(x) == 5
-        @test all(isfinite.(x))
-
+    @testset "TD derivative wrapper (models backend)" begin
         d = P.solve_with_derivatives(T_fm, μ_fm;
             order=1,
-            model_kind=:PNJL,
             p_num=p_num,
             t_num=t_num,
         )

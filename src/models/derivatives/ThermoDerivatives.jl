@@ -181,7 +181,7 @@ end
 
 @inline function _validate_derivative_backend(derivative_backend::Symbol)
     if derivative_backend === :forwarddiff
-        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from ThermoDerivatives; use derivative_backend=:auto or :taylordiff. For explicit legacy implicit-solver audits, call the solver compat factory directly from a dedicated test or diagnostic script."))
+        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from ThermoDerivatives; use derivative_backend=:auto or :taylordiff. For residual adapter audits, use build_*_problem(...).forward_solve/conditions instead of retired implicit-solver factories."))
     end
     derivative_backend in _DERIVATIVE_BACKENDS && return derivative_backend
     throw(ArgumentError("derivative_backend must be one of $(_DERIVATIVE_BACKENDS), got $(derivative_backend)"))

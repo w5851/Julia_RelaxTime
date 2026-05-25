@@ -1,18 +1,13 @@
-using ImplicitDifferentiation: ImplicitFunction
-
 """
     build_implicit_solver(problem::ImplicitProblem, cfg::ImplicitSolverConfig=ImplicitSolverConfig())
 
-根据最小隐式问题契约构建 `ImplicitFunction`。
+legacy `ImplicitDifferentiation` builder 已下线。
 """
 @inline function build_implicit_solver(
     problem::ImplicitProblem,
     cfg::ImplicitSolverConfig=ImplicitSolverConfig(),
 )
-    return ImplicitFunction(
-        problem.forward_solve,
-        problem.conditions;
-        linear_solver=cfg.linear_solver,
-        representation=cfg.representation,
-    )
+    _ = problem
+    _ = cfg
+    throw(ArgumentError("build_implicit_solver has been retired with the ImplicitDifferentiation backend. Use build_*_problem(...).forward_solve/conditions for residual adapter audits, or solve_pnjl_with_derivatives(...; derivative_backend=:auto/:taylordiff) for PNJL derivatives."))
 end
