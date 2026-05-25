@@ -1,13 +1,13 @@
 # Models 核心求解与约束主题 API
 
-本主题组织 `Models` 统一入口下最核心的求解公共表面：模型创建、状态合同、约束模式、初值策略与隐式求解器工厂。
+本主题组织 `Models` 统一入口下最核心的求解公共表面：模型创建、状态合同、约束模式、初值策略与导数入口。
 
 它回答的不是“某个流程怎么跑完”，而是更基础的问题：
 
 - `Models` 的最小稳定求解入口是什么
 - 平衡态状态 `x_state` 与 `mu_vec` 的统一合同是什么
 - `solve_gap`、`solve`、`solve_multi` 分别适合什么场景
-- 约束模式、seed strategy、implicit solver factory 各自承担什么职责
+- 约束模式、seed strategy、导数入口和 legacy implicit compat factory 各自承担什么职责
 
 推荐阅读顺序：
 
@@ -17,7 +17,7 @@
 4. [ResultDiagnosticErrorContracts.md](ResultDiagnosticErrorContracts.md)：稳定 Result/Diagnostic/Error 契约与版本策略
 5. [ConstraintModes.md](ConstraintModes.md)：固定化学势/密度/熵/比熵等约束入口
 6. [SeedStrategies.md](SeedStrategies.md)：默认、多初值、连续性与相变感知策略
-7. [ImplicitSolvers.md](ImplicitSolvers.md)：隐式求解器工厂与导数接口
+7. [ImplicitSolvers.md](ImplicitSolvers.md)：TD-first 导数接口与 legacy implicit compat factory
 8. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
 
 本主题优先覆盖的 `Models` 公开表面包括：
@@ -31,11 +31,13 @@
 - `Models.coerce_solver_diagnostic_public_view` / `Models.to_public_namedtuple`
 - `Models.ProblemSpec` / `Models.build_problem_spec`
 - `Models.AbstractConstraintComponent` / `Models.build_constraint_components`
+- `Models.ImplicitProblem` / `Models.ImplicitSolverConfig` / `Models.build_implicit_solver`
+- `Models.build_pnjl_fixedmu_problem` / `Models.build_pnjl_flavor_mu_problem` / `Models.build_njl_problem`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
 - `Models.SeedStrategy` 家族
-- `Models.create_implicit_gap_solver` / `Models.create_pnjl_implicit_solver` / `Models.create_flavor_mu_implicit_gap_solver`
 - `Models.solve_with_derivatives`
+- `Models.solve_pnjl_with_derivatives` / `Models.solve_pnjl_with_flavor_mu_derivatives`
 - `Models.ThermoDiffContext` / `Models.ParamSpec` / `Models.DiffTarget`
 - `Models.build_thermo_diff_context` / `Models.diff_target` / `Models.jacobian`
 - `Models.build_pilot_diff_context` / `Models.eval_pilot_derivatives`（Issue #81 试点统一导数服务）
