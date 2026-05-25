@@ -22,11 +22,7 @@ export solve_gap
 export gap_state_dim, gap_residual
 export ImplicitProblem, ImplicitSolverConfig, build_implicit_solver
 export build_pnjl_fixedmu_problem, build_pnjl_flavor_mu_problem, build_njl_problem
-export create_implicit_gap_solver
-export create_flavor_mu_implicit_gap_solver
-export create_pnjl_implicit_solver
 export derive_vec, derive_named
-export build_pnjl_fixedmu_adapters, build_pnjl_flavor_mu_adapters
 export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
 export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs

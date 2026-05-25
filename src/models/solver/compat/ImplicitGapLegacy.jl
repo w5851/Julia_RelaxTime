@@ -1,6 +1,6 @@
 """implicit_gap.jl
 
-Models 侧的 ImplicitDifferentiation 接口（阶段 1 组件）。
+Models 侧的 legacy ImplicitDifferentiation 兼容层。
 
 目标：在不对 NLsolve 迭代过程求导的前提下，通过隐函数定理获取 gap 解
 x(T, μ) 的导数（例如 dφ/dT, dφ/dμ）。
@@ -16,31 +16,33 @@ x(T, μ) 的导数（例如 dφ/dT, dφ/dμ）。
 """
 
 using StaticArrays
-using ForwardDiff
-using ImplicitDifferentiation
 
-export create_implicit_gap_solver
-export create_flavor_mu_implicit_gap_solver
-export create_pnjl_implicit_solver
 export solve_pnjl_with_derivatives
 export solve_pnjl_with_flavor_mu_derivatives
-export build_pnjl_fixedmu_adapters
-export build_pnjl_flavor_mu_adapters
 export derive_vec, derive_named
 
 # Compat-only guard:
 # This file is a legacy compatibility bridge and must not become a new primary
 # solver/diff implementation surface.
 const IMPLICIT_GAP_LEGACY_COMPAT_ONLY = true
-const _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS = (:auto, :taylordiff, :forwarddiff)
+const _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS = (:auto, :taylordiff)
 
 @inline function _validate_implicit_compat_derivative_backend(derivative_backend::Symbol)
+    if derivative_backend === :forwarddiff
+        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from PNJL derivative wrappers; use derivative_backend=:auto or :taylordiff. Low-level create_*_implicit* factories remain qualified compat-only entrypoints for explicit legacy reference tests."))
+    end
     derivative_backend in _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS && return derivative_backend
     throw(ArgumentError("derivative_backend must be one of $(_IMPLICIT_COMPAT_DERIVATIVE_BACKENDS), got $(derivative_backend)"))
 end
 
 @inline _implicit_compat_backend(derivative_backend::Symbol) =
     _validate_implicit_compat_derivative_backend(derivative_backend) === :auto ? :taylordiff : derivative_backend
+
+@inline function _reject_unsupported_td_wrapper_kwargs(kwargs)
+    isempty(kwargs) && return nothing
+    names = join(string.(keys(kwargs)), ", ")
+    throw(ArgumentError("unsupported keyword(s) for TD-only PNJL derivative wrapper: $names. Legacy solver-specific keywords now apply only to qualified compat factories such as Models.create_implicit_gap_solver."))
+end
 
 @inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
     return model isa RPNJLModel ? :RPNJL : :PNJL
@@ -267,9 +269,11 @@ end
 
 """create_implicit_gap_solver(model; kwargs...) -> ImplicitFunction
 
-创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs]，并可通过 AD 获取 dx/dθ。
+Compat-only: 创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs]。
 
-当前仅对 `AbstractNJLModel` 提供 3 维实现；PNJL 家族可在后续扩展到 5 维或更高。
+该工厂已从公共 export 面降级，只供显式 legacy reference 测试或诊断脚本
+qualified 调用。PNJL 生产导数入口请使用 `solve_pnjl_with_derivatives`
+默认 TD 路线。
 
 关键 kwargs：
 - `xi`, `p_num`, `t_num`: 传给 omega/gap_residual
@@ -307,11 +311,12 @@ end
 
 """create_pnjl_implicit_solver(; kwargs...) -> ImplicitFunction
 
-基于 models 入口创建 PNJL 5 维隐函数求解器：
+Compat-only: 基于 models 入口创建 PNJL 5 维隐函数求解器：
 - 参数 θ = [T, μ]
 - 解向量 x = [φu, φd, φs, Φ, Φbar]
 
 默认使用 models backend；可通过 `thermo_backend/solver_backend` 切换。
+该入口不再作为推荐公开导数入口导出。
 """
 function create_pnjl_implicit_solver(;
     xi::Real=0.0,
@@ -335,9 +340,9 @@ end
 
 """solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...) -> NamedTuple
 
-通过 models 求解器计算 PNJL 解及其导数。默认使用 TaylorDiff
-explicit Taylor-series gap Newton；显式 `derivative_backend=:forwarddiff`
-保留旧 ImplicitFunction reference/fallback：
+通过 models 求解器计算 PNJL 解及其导数。使用 TaylorDiff explicit
+Taylor-series gap Newton；旧 `derivative_backend=:forwarddiff`
+ImplicitFunction fallback 已下线：
 - `order=1`：返回 `x, dx_dT, dx_dμ`
 - `order=2`：额外返回 `d2x_dT2, d2x_dμ2, d2x_dTdμ`
 """
@@ -357,62 +362,23 @@ function solve_pnjl_with_derivatives(
     kwargs...
 )
     backend = _implicit_compat_backend(derivative_backend)
-    if backend === :taylordiff
-        kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
-        model = create_model(kind)
-        return _solve_pnjl_with_derivatives_taylordiff(
-            model,
-            T_fm,
-            μ_fm;
-            order=order,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-    end
-
-    solver = create_pnjl_implicit_solver(
-        ;
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    _reject_unsupported_td_wrapper_kwargs(kwargs)
+    _ = solver_backend
+    kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
+    model = create_model(kind)
+    return _solve_pnjl_with_derivatives_taylordiff(
+        model,
+        T_fm,
+        μ_fm;
+        order=order,
         xi=xi,
         p_num=p_num,
         t_num=t_num,
-        thermo_backend=thermo_backend,
-        solver_backend=solver_backend,
-        kwargs...,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
     )
-
-    θ = [Float64(T_fm), Float64(μ_fm)]
-    x, _ = solver(θ)
-
-    if order == 1
-        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
-        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
-        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ)
-    elseif order == 2
-        dx_dT = ForwardDiff.derivative(T -> solver([T, θ[2]])[1], θ[1])
-        dx_dμ = ForwardDiff.derivative(μ -> solver([θ[1], μ])[1], θ[2])
-
-        d2x_dT2 = ForwardDiff.derivative(
-            T -> ForwardDiff.derivative(t -> solver([t, θ[2]])[1], T),
-            θ[1],
-        )
-        d2x_dμ2 = ForwardDiff.derivative(
-            μ -> ForwardDiff.derivative(m -> solver([θ[1], m])[1], μ),
-            θ[2],
-        )
-        d2x_dTdμ = ForwardDiff.derivative(
-            T -> ForwardDiff.derivative(μ -> solver([T, μ])[1], θ[2]),
-            θ[1],
-        )
-
-        return (x=x, dx_dT=dx_dT, dx_dμ=dx_dμ,
-                d2x_dT2=d2x_dT2, d2x_dμ2=d2x_dμ2, d2x_dTdμ=d2x_dTdμ)
-    else
-        throw(ArgumentError("order must be 1 or 2, got $order"))
-    end
 end
 
 function derive_vec(
@@ -454,13 +420,15 @@ end
 
 """create_flavor_mu_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
 
-创建一个 flavor 化学势版本的隐函数求解器：
+Compat-only: 创建一个 flavor 化学势版本的隐函数求解器：
 - 参数 `θ = [T, μ_u, μ_d, μ_s]`
 - 解向量 `x = [φu, φd, φs, Φ, Φbar]`
 
 实现约定：
 - `forward_solve_impl` 仅负责 primal solve，可安全使用 `Float64` 转换。
 - `conditions_impl` 必须对 Dual 友好，不能把 `θ` 中的化学势分量压回 `Float64`。
+该工厂已从公共 export 面降级，只供显式 legacy reference 测试或诊断脚本
+qualified 调用。
 """
 function create_flavor_mu_implicit_gap_solver(
     model::AbstractPNJLModel;
@@ -482,12 +450,14 @@ end
 
 """solve_pnjl_with_flavor_mu_derivatives(T_fm, mu_vec; order=1, kwargs...) -> NamedTuple
 
-通过 flavor 化学势版本的隐函数求解器计算 PNJL 解及其导数：
+通过 flavor 化学势版本计算 PNJL 解及其导数，默认使用 TaylorDiff
+方向 series：
 - `x`: 5 维平衡态向量
 - `dx_dT`: 对温度的一阶导数
 - `dx_dmu_vec`: 对 `(μ_u, μ_d, μ_s)` 的 5×3 Jacobian
 
-当前仅支持 `order=1`。更高阶张量留待 susceptibility 层真正需要时再接入，
+当前仅支持 `order=1`。旧 `derivative_backend=:forwarddiff` ImplicitFunction
+fallback 已下线；更高阶张量留待 susceptibility 层真正需要时再接入，
 避免在底层接口过早固化不稳定的张量布局。
 """
 function solve_pnjl_with_flavor_mu_derivatives(
@@ -511,39 +481,21 @@ function solve_pnjl_with_flavor_mu_derivatives(
     model = create_model(kind)
 
     backend = _implicit_compat_backend(derivative_backend)
-    if backend === :taylordiff
-        _ = solver_backend
-        return _solve_pnjl_with_flavor_mu_derivatives_taylordiff(
-            model,
-            T_fm,
-            mu_vec;
-            order=order,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-    end
-
-    solver = create_flavor_mu_implicit_gap_solver(
-        model;
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    _reject_unsupported_td_wrapper_kwargs(kwargs)
+    _ = solver_backend
+    return _solve_pnjl_with_flavor_mu_derivatives_taylordiff(
+        model,
+        T_fm,
+        mu_vec;
+        order=order,
         xi=xi,
         p_num=p_num,
         t_num=t_num,
-        solver_backend=solver_backend,
-        kwargs...,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
     )
-
-    μ0 = _normalize_flavor_mu_vec(mu_vec)
-    θ = [Float64(T_fm), μ0[1], μ0[2], μ0[3]]
-    x, _ = solver(θ)
-
-    dx_dT = ForwardDiff.derivative(T -> solver([T, μ0[1], μ0[2], μ0[3]])[1], θ[1])
-    dx_dmu_vec = ForwardDiff.jacobian(μ -> solver([θ[1], μ[1], μ[2], μ[3]])[1], μ0)
-
-    return (x=x, mu_vec=SVector{3}(μ0[1], μ0[2], μ0[3]), dx_dT=dx_dT, dx_dmu_vec=dx_dmu_vec)
 end
 
 function create_implicit_gap_solver(
@@ -568,7 +520,7 @@ end
 
 """create_implicit_gap_solver(model::AbstractPNJLModel; kwargs...) -> ImplicitFunction
 
-创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs, Φ, Φbar]。
+Compat-only: 创建一个隐函数求解器：θ=[T, μ] -> x=[φu, φd, φs, Φ, Φbar]。
 
 实现说明：
 - forward_solve_impl：调用 `solve_gap(model, T, μ)` 得到 `MeanFieldState`，再展开为 5 维向量。
@@ -576,6 +528,8 @@ end
 
 注意：
 - 目前默认假设对称化学势（μu=μd=μs），与 legacy FixedMu / 当前 PNJLModel.solve_gap 的限制一致。
+- 该工厂已从公共 export 面降级；PNJL 导数生产入口请使用
+  `solve_pnjl_with_derivatives` 的 TD 默认路径。
 """
 function create_implicit_gap_solver(
     model::AbstractPNJLModel;

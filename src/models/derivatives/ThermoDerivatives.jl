@@ -6,9 +6,10 @@
 ## 核心思想
 
 对于非线性方程 F(x; θ) = 0，其中 x 是状态变量，θ = (T, μ) 是参数，
-默认路线先求 primal gap 解，再在单变量 Taylor 代数中显式求解
-`F(x(δ), T(δ), μ(δ)) = 0`。`ForwardDiff + ImplicitDifferentiation.jl`
-保留为显式 `derivative_backend=:forwarddiff` reference/fallback。
+路线先求 primal gap 解，再在单变量 Taylor 代数中显式求解
+`F(x(δ), T(δ), μ(δ)) = 0`。`derivative_backend=:auto` 与
+`:taylordiff` 都使用这条 TD-only 生产路径；旧
+`derivative_backend=:forwarddiff` implicit fallback 已下线。
 
 ## 主要函数
 
@@ -30,10 +31,7 @@ println(md2.d2M_dT2)  # ∂²M/∂T²
 """
 module ThermoDerivatives
 
-using ForwardDiff
 using StaticArrays
-using ImplicitDifferentiation
-using LinearAlgebra: dot
 import ..Models
 using ..PNJLChiBTaylorDiff: gap_series_parameter_direction, pressure_series_parameter_direction
 using ..PNJLChiBTaylorDiff: nth_derivative_from_series
@@ -59,7 +57,7 @@ export mass_derivatives, thermo_derivatives, bulk_derivative_coeffs
 export bulk_viscosity_coefficients, compute_B_bracket
 export dP_dT, dP_dmu
 
-const _DERIVATIVE_BACKENDS = (:auto, :taylordiff, :forwarddiff)
+const _DERIVATIVE_BACKENDS = (:auto, :taylordiff)
 
 # -----------------------------------------------------------------------------
 # Compatibility helpers (used by tests / debugging)
@@ -101,33 +99,9 @@ end
         xi=xi,
     )
 
-"""IMPLICIT_SOLVER(θ)
-
-返回当前 `set_config` 指定的后端/积分规模下的隐函数求解器输出 `(x_state, meta)`。
-"""
-@inline IMPLICIT_SOLVER(θ) = _implicit_gap_solver()(θ)
-
 # ============================================================================
 # Thermo backend selector
 # ============================================================================
-
-const _IMPLICIT_GAP_SOLVER_CACHE = Dict{Tuple{Float64, Int, Int, UInt}, Any}()
-
-@inline function _implicit_gap_solver(; model=nothing)
-    m = model === nothing ? _get_model(:PNJL) : model
-    key = (Float64(CURRENT_XI[]), Int(CURRENT_P_NUM[]), Int(CURRENT_T_NUM[]), Base.objectid(m))
-    if haskey(_IMPLICIT_GAP_SOLVER_CACHE, key)
-        return _IMPLICIT_GAP_SOLVER_CACHE[key]
-    end
-
-    f = Models.create_implicit_gap_solver(m;
-        xi=CURRENT_XI[],
-        p_num=CURRENT_P_NUM[],
-        t_num=CURRENT_T_NUM[],
-    )
-    _IMPLICIT_GAP_SOLVER_CACHE[key] = f
-    return f
-end
 
 @inline function _thermo_backend(x_state::SVector{5},
     mu_vec,
@@ -206,6 +180,9 @@ end
 # ============================================================================
 
 @inline function _validate_derivative_backend(derivative_backend::Symbol)
+    if derivative_backend === :forwarddiff
+        throw(ArgumentError("derivative_backend=:forwarddiff has been retired from ThermoDerivatives; use derivative_backend=:auto or :taylordiff. For explicit legacy implicit-solver audits, call the solver compat factory directly from a dedicated test or diagnostic script."))
+    end
     derivative_backend in _DERIVATIVE_BACKENDS && return derivative_backend
     throw(ArgumentError("derivative_backend must be one of $(_DERIVATIVE_BACKENDS), got $(derivative_backend)"))
 end
@@ -613,59 +590,19 @@ function mass_derivatives(T_fm::Real, mu_fm::Real;
                           series_residual_tol::Real=1e-7)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
-    if backend === :taylordiff
-        return _mass_derivatives_taylordiff(
-            T_fm,
-            mu_fm;
-            order=order,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            model=resolved_model,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-    end
-
-    θ = [T_fm, mu_fm]
-    implicit = _implicit_gap_solver(model=model)
-    
-    function mass_vec_func(θ_in)
-        (x_out, _) = implicit(θ_in)
-        return collect(compute_masses_from_state(x_out))
-    end
-    
-    masses_vec = mass_vec_func(θ)
-    masses = SVector{3}(masses_vec...)
-    
-    if order == 1
-        dM_dT = SVector{3}(ForwardDiff.derivative(T -> mass_vec_func([T, θ[2]])[i], θ[1]) for i in 1:3)
-        dM_dmu = SVector{3}(ForwardDiff.derivative(μ -> mass_vec_func([θ[1], μ])[i], θ[2]) for i in 1:3)
-        return (masses=masses, dM_dT=dM_dT, dM_dmu=dM_dmu)
-        
-    elseif order == 2
-        dM_dT = SVector{3}(ForwardDiff.derivative(T -> mass_vec_func([T, θ[2]])[i], θ[1]) for i in 1:3)
-        dM_dmu = SVector{3}(ForwardDiff.derivative(μ -> mass_vec_func([θ[1], μ])[i], θ[2]) for i in 1:3)
-        
-        d2M_dT2 = SVector{3}(
-            ForwardDiff.derivative(T -> ForwardDiff.derivative(t -> mass_vec_func([t, θ[2]])[i], T), θ[1])
-            for i in 1:3
-        )
-        d2M_dmu2 = SVector{3}(
-            ForwardDiff.derivative(μ -> ForwardDiff.derivative(m -> mass_vec_func([θ[1], m])[i], μ), θ[2])
-            for i in 1:3
-        )
-        d2M_dTdmu = SVector{3}(
-            ForwardDiff.derivative(T -> ForwardDiff.derivative(μ -> mass_vec_func([T, μ])[i], θ[2]), θ[1])
-            for i in 1:3
-        )
-        
-        return (masses=masses, dM_dT=dM_dT, dM_dmu=dM_dmu,
-                d2M_dT2=d2M_dT2, d2M_dTdmu=d2M_dTdmu, d2M_dmu2=d2M_dmu2)
-    else
-        error("order must be 1 or 2, got $order")
-    end
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    return _mass_derivatives_taylordiff(
+        T_fm,
+        mu_fm;
+        order=order,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=resolved_model,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
 end
 
 # ============================================================================
@@ -688,83 +625,17 @@ function thermo_derivatives(T_fm::Real, mu_fm::Real;
                             series_residual_tol::Real=1e-7)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
-    if backend === :taylordiff
-        return _thermo_derivatives_taylordiff(
-            T_fm,
-            mu_fm;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            model=resolved_model,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-    end
-
-    θ = [T_fm, mu_fm]
-    implicit = _implicit_gap_solver(model=model)
-    
-    function thermo_func(θ_in)
-        (x_out, _) = implicit(θ_in)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(θ_in[2], θ_in[2], θ_in[2])
-
-        P, rho_norm, s, ε = _thermo_backend(x_sv, mu_vec, θ_in[1], nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        rho_vec = _rho_backend(x_sv, mu_vec, θ_in[1], nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        n = sum(rho_vec) / 3
-        
-        return [P, ε, n, s]
-    end
-    
-    base_vals = thermo_func(θ)
-    pressure, energy, rho, entropy = base_vals[1], base_vals[2], base_vals[3], base_vals[4]
-
-    # Derivative routines above treat x_state as implicit function of θ.
-    # Here we also compute a consistent rho_norm for reporting.
-    (x_base, _) = implicit(θ)
-    x_sv = SVector{5}(Tuple(x_base))
-    mu_vec = SVector{3}(θ[2], θ[2], θ[2])
-    rho_vec0 = _rho_backend(x_sv, mu_vec, θ[1], nothing, CURRENT_XI[];
-        p_num=p_num, t_num=t_num, model=model)
-    rho_norm = sum(rho_vec0) / (3.0 * Models.ρ0)
-    
-    P_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[1], θ[1])
-    P_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[1], θ[2])
-    E_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[2], θ[1])
-    E_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[2], θ[2])
-    n_T = ForwardDiff.derivative(T -> thermo_func([T, θ[2]])[3], θ[1])
-    n_mu = ForwardDiff.derivative(μ -> thermo_func([θ[1], μ])[3], θ[2])
-    
-    denom_eps = E_T * n_mu - E_mu * n_T
-    denom_n = n_T * E_mu - n_mu * E_T
-    dP_depsilon_n = denom_eps == 0 ? NaN : (P_T * n_mu - P_mu * n_T) / denom_eps
-    dP_dn_epsilon = denom_n == 0 ? NaN : (P_T * E_mu - P_mu * E_T) / denom_n
-    
-    md = mass_derivatives(T_fm, mu_fm; order=1, xi=xi, p_num=p_num, t_num=t_num, model=model)
-    
-    return (
-        pressure=pressure,
-        energy=energy,
-        rho=rho,
-        rho_norm=rho_norm,
-        entropy=entropy,
-        dP_dT=P_T,
-        dP_dmu=P_mu,
-        dEpsilon_dT=E_T,
-        dEpsilon_dmu=E_mu,
-        dn_dT=n_T,
-        dn_dmu=n_mu,
-        dP_depsilon_n=dP_depsilon_n,
-        dP_dn_epsilon=dP_dn_epsilon,
-        masses=md.masses,
-        dM_dT=md.dM_dT,
-        dM_dmu=md.dM_dmu,
-        converged=true,
-        iterations=missing,
-        residual_norm=missing,
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    return _thermo_derivatives_taylordiff(
+        T_fm,
+        mu_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=resolved_model,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
     )
 end
 
@@ -783,17 +654,6 @@ function bulk_derivative_coeffs(T_fm::Real, mu_fm::Real; kwargs...)
     )
 end
 
-# ============================================================================
-# 高阶导数
-# ============================================================================
-
-function _nth_derivative(f, x, n::Int)
-    n >= 1 || error("order must be ≥ 1")
-    n == 1 && return ForwardDiff.derivative(f, x)
-    inner = y -> _nth_derivative(f, y, n - 1)
-    return ForwardDiff.derivative(inner, x)
-end
-
 """
     dP_dT(T_fm, mu_fm; order=1, kwargs...)
 
@@ -808,38 +668,23 @@ function dP_dT(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
                series_residual_tol::Real=1e-7)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
-    if backend === :taylordiff
-        order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
-        series = _pressure_series_taylordiff(
-            resolved_model,
-            T_fm,
-            mu_fm,
-            1.0,
-            _zero_mu_direction();
-            order=order,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-        return nth_derivative_from_series(series, order)
-    end
-
-    implicit = _implicit_gap_solver(model=model)
-    
-    function P_func(T)
-        θ = [T, mu_fm]
-        (x_out, _) = implicit(θ)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(mu_fm, mu_fm, mu_fm)
-        P, _, _, _ = _thermo_backend(x_sv, mu_vec, T, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return P
-    end
-    
-    return _nth_derivative(P_func, T_fm, order)
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
+    series = _pressure_series_taylordiff(
+        resolved_model,
+        T_fm,
+        mu_fm,
+        1.0,
+        _zero_mu_direction();
+        order=order,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+    return nth_derivative_from_series(series, order)
 end
 
 """
@@ -856,38 +701,23 @@ function dP_dmu(T_fm::Real, mu_fm::Real; order::Int=1, xi::Real=0.0,
                 series_residual_tol::Real=1e-7)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
-    if backend === :taylordiff
-        order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
-        series = _pressure_series_taylordiff(
-            resolved_model,
-            T_fm,
-            mu_fm,
-            0.0,
-            _symmetric_mu_direction();
-            order=order,
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-        return nth_derivative_from_series(series, order)
-    end
-
-    implicit = _implicit_gap_solver(model=model)
-    
-    function P_func(μ)
-        θ = [T_fm, μ]
-        (x_out, _) = implicit(θ)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(μ, μ, μ)
-        P, _, _, _ = _thermo_backend(x_sv, mu_vec, T_fm, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return P
-    end
-    
-    return _nth_derivative(P_func, mu_fm, order)
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    order >= 1 || throw(ArgumentError("order must be >= 1, got $order"))
+    series = _pressure_series_taylordiff(
+        resolved_model,
+        T_fm,
+        mu_fm,
+        0.0,
+        _symmetric_mu_direction();
+        order=order,
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+    return nth_derivative_from_series(series, order)
 end
 
 # ============================================================================
@@ -899,21 +729,13 @@ end
 
 计算体粘滞系数公式所需的所有热力学导数系数。
 
-使用 ForwardDiff + ImplicitDifferentiation.jl 实现自动微分。
+使用 TaylorDiff explicit Taylor-series gap Newton 实现导数传播。
 
 ## 技术说明
 
-通过 ImplicitDifferentiation.jl 计算 dx/dθ，然后使用链式法则计算热力学量的导数。
-热力学量统一通过 ModelThermodynamics（内部调用 Models.omega 并使用 ForwardDiff）计算，
-因此会出现嵌套 AD（类似 legacy 的结构）。经测试在当前环境下可以正常工作。
-
-链式法则：
-- ds/dT = ∂s/∂T|_x + ∂s/∂x · dx/dT
-- ds/dμ = ∂s/∂μ|_x + ∂s/∂x · dx/dμ
-- dn/dT = ∂n/∂T|_x + ∂n/∂x · dx/dT
-- dn/dμ = ∂n/∂μ|_x + ∂n/∂x · dx/dμ
-
-其中 dx/dθ 通过 ImplicitDifferentiation.jl 计算。
+默认后端从压强与质量的 Taylor series 中解析装配 `ds/dT`、
+`ds/dμB`、`dn/dT`、`dn/dμB` 等组合，不再调用旧 `ImplicitFunction`
+fallback。
 """
 function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
                                      xi::Real=0.0,
@@ -926,161 +748,17 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
                                      series_residual_tol::Real=1e-7)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
-    if backend === :taylordiff
-        return _bulk_viscosity_coefficients_taylordiff(
-            T_fm,
-            mu_fm;
-            xi=xi,
-            p_num=p_num,
-            t_num=t_num,
-            model=resolved_model,
-            series_iterations=series_iterations,
-            linear_solve=linear_solve,
-            series_residual_tol=series_residual_tol,
-        )
-    end
-
-    implicit = _implicit_gap_solver(model=model)
-    
-    T_val = T_fm
-    μ_val = mu_fm
-    θ = [T_val, μ_val]
-    
-    # 定义只计算状态变量的函数（通过 ImplicitFunction）
-    function solve_state(θ_in)
-        (x_out, _) = implicit(θ_in)
-        return collect(x_out)
-    end
-    
-    # 计算基础状态
-    x_base = solve_state(θ)
-    x_sv = SVector{5}(Tuple(x_base))
-    mu_vec = SVector{3}(μ_val, μ_val, μ_val)
-    
-    # 计算基础热力学量（内部使用 ForwardDiff；legacy 与 models 都支持嵌套 AD）
-    _, _, s, _ = _thermo_backend(x_sv, mu_vec, T_val, nothing, CURRENT_XI[];
-        p_num=p_num, t_num=t_num, model=model)
-    rho_vec = _rho_backend(x_sv, mu_vec, T_val, nothing, CURRENT_XI[];
-        p_num=p_num, t_num=t_num, model=model)
-    n_B = sum(rho_vec) / 3
-    masses = compute_masses_from_state(x_base)
-    
-    # 使用 ForwardDiff.jacobian 计算 dx/dθ
-    dx_dθ = ForwardDiff.jacobian(solve_state, θ)
-    """
-    # 中心差分替代方案（仅用于测试/诊断，默认不使用）
-    _fd_step = sqrt(eps(Float64))
-    ΔT = max(1e-5, _fd_step * abs(T_val))       # fm⁻¹，约 1e-5
-    Δμ = max(1e-5, _fd_step * (abs(μ_val) + 1e-6))
-    x_T_p = solve_state([T_val + ΔT, μ_val]);  x_T_m = solve_state([T_val - ΔT, μ_val])
-    x_μ_p = solve_state([T_val, μ_val + Δμ]);  x_μ_m = solve_state([T_val, μ_val - Δμ])
-    dx_dθ = hcat((x_T_p .- x_T_m) ./ (2ΔT), (x_μ_p .- x_μ_m) ./ (2Δμ))
-    """
-    # 计算 ∂s/∂x, ∂n/∂x（固定 T, μ）
-    # 通过 ModelThermodynamics（嵌套 ForwardDiff 可以工作）
-    function s_of_x(x_vec)
-        x_s = SVector{5}(Tuple(x_vec))
-        _, _, s_val, _ = _thermo_backend(x_s, mu_vec, T_val, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return s_val
-    end
-    ds_dx = ForwardDiff.gradient(s_of_x, x_base)
-    
-    function n_of_x(x_vec)
-        x_s = SVector{5}(Tuple(x_vec))
-        rho = _rho_backend(x_s, mu_vec, T_val, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return sum(rho) / 3
-    end
-    dn_dx = ForwardDiff.gradient(n_of_x, x_base)
-    
-    # 计算 ∂s/∂T, ∂s/∂μ, ∂n/∂T, ∂n/∂μ（固定 x）
-    function s_of_T(T)
-        _, _, s_val, _ = _thermo_backend(x_sv, mu_vec, T, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return s_val
-    end
-    s_T_partial = ForwardDiff.derivative(s_of_T, T_val)
-    
-    function s_of_mu(μ)
-        mu_v = SVector{3}(μ, μ, μ)
-        _, _, s_val, _ = _thermo_backend(x_sv, mu_v, T_val, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return s_val
-    end
-    s_μ_partial = ForwardDiff.derivative(s_of_mu, μ_val)
-    
-    function n_of_T(T)
-        rho = _rho_backend(x_sv, mu_vec, T, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return sum(rho) / 3
-    end
-    n_T_partial = ForwardDiff.derivative(n_of_T, T_val)
-    
-    function n_of_mu(μ)
-        mu_v = SVector{3}(μ, μ, μ)
-        rho = _rho_backend(x_sv, mu_v, T_val, nothing, CURRENT_XI[];
-            p_num=p_num, t_num=t_num, model=model)
-        return sum(rho) / 3
-    end
-    n_μ_partial = ForwardDiff.derivative(n_of_mu, μ_val)
-    
-    # 计算 ∂M/∂x（质量只依赖于 x，不直接依赖于 T, μ）
-    function M_of_x(x_vec)
-        m = compute_masses_from_state(x_vec)
-        return collect(m)
-    end
-    dM_dx = ForwardDiff.jacobian(M_of_x, x_base)
-    
-    # 应用链式法则
-    # ds/dT = ∂s/∂T + ∂s/∂x · dx/dT
-    # ds/dμ = ∂s/∂μ + ∂s/∂x · dx/dμ
-    ds_dT = s_T_partial + dot(ds_dx, dx_dθ[:, 1])
-    ds_dμq = s_μ_partial + dot(ds_dx, dx_dθ[:, 2])
-    
-    dn_dT = n_T_partial + dot(dn_dx, dx_dθ[:, 1])
-    dn_dμq = n_μ_partial + dot(dn_dx, dx_dθ[:, 2])
-    
-    # dM/dT = ∂M/∂x · dx/dT
-    # dM/dμ = ∂M/∂x · dx/dμ
-    dM_dT_vec = dM_dx * dx_dθ[:, 1]
-    dM_dμq_vec = dM_dx * dx_dθ[:, 2]
-    dM_dT = SVector{3}(dM_dT_vec...)
-    dM_dμq = SVector{3}(dM_dμq_vec...)
-    
-    # 转换到重子化学势：∂/∂μ_B = (1/3)·∂/∂μ_q
-    ds_dμB = ds_dμq / 3.0
-    dn_dμB = dn_dμq / 3.0
-    dM_dμB = dM_dμq ./ 3.0
-    
-    # v_n² = (s·∂n_B/∂μ_B - n_B·∂n_B/∂T) / [T·(∂s/∂T·∂n_B/∂μ_B - ∂s/∂μ_B·∂n_B/∂T)]
-    numerator_vn = s * dn_dμB - n_B * dn_dT
-    denominator_vn = T_val * (ds_dT * dn_dμB - ds_dμB * dn_dT)
-    v_n_sq = numerator_vn / denominator_vn
-    
-    # ∂μ_B/∂T|_σ = - (∂σ/∂T) / (∂σ/∂μ_B), 其中 σ = s/n_B。
-    # 为避免 n_B=0 时的除零问题，将分子分母同乘 n_B^2，得到等价形式：
-    #   ∂μ_B/∂T|_σ = - (n_B·ds/dT - s·dn_B/dT) / (n_B·ds/dμ_B - s·dn_B/dμ_B)
-    # 该形式在 n_B→0 的极限下通常是良定义的（例如 μ=0 线）。
-    num_muB_T = n_B * ds_dT - s * dn_dT
-    den_muB_T = n_B * ds_dμB - s * dn_dμB
-    dμB_dT_sig = -num_muB_T / den_muB_T
-
-    c_p = abs(n_B) <= sqrt(eps(Float64)) ? NaN : T_val * (ds_dT - ds_dμB * s / n_B)
-    
-    return (
-        v_n_sq = v_n_sq,
-        dμB_dT_sigma = dμB_dT_sig,
-        masses = SVector{3}(masses...),
-        dM_dT = dM_dT,
-        dM_dμB = dM_dμB,
-        ds_dT = ds_dT,
-        ds_dμB = ds_dμB,
-        dn_dT = dn_dT,
-        dn_dμB = dn_dμB,
-        c_p = c_p,
-        s = s,
-        n_B = n_B,
+    backend === :taylordiff || error("unreachable derivative backend: $backend")
+    return _bulk_viscosity_coefficients_taylordiff(
+        T_fm,
+        mu_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        model=resolved_model,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
     )
 end
 

@@ -18,16 +18,21 @@ Models.pnjl_module()
 # ============================================================================
 
 @testset "implicit_gap" begin
+    @testset "legacy factories are qualified compat-only" begin
+        exported = names(Models)
+        @test !(:create_implicit_gap_solver in exported)
+        @test !(:create_pnjl_implicit_solver in exported)
+    end
 
-    # --- create_implicit_gap_solver NJL2 ---
-    @testset "create_implicit_gap_solver NJL2" begin
+    # --- compat create_implicit_gap_solver NJL2 ---
+    @testset "compat create_implicit_gap_solver NJL2" begin
         m = Models.create_model(:NJL2)
         igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
         @test igf isa Any  # ImplicitFunction 类型
     end
 
-    # --- create_implicit_gap_solver NJL ---
-    @testset "create_implicit_gap_solver NJL" begin
+    # --- compat create_implicit_gap_solver NJL ---
+    @testset "compat create_implicit_gap_solver NJL" begin
         m = Models.create_model(:NJL)
         igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
         @test igf isa Any
@@ -77,7 +82,7 @@ Models.pnjl_module()
         @test isdefined(Models, :derive_named)
 
         old_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=24, t_num=6)
-        fd_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        auto_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:auto)
         td_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:taylordiff)
         vec_result = Models.derive_vec(model, theta_vec; order=1, p_num=24, t_num=6)
         named_result = Models.derive_named(model, theta_named; order=1, p_num=24, t_num=6)
@@ -85,9 +90,10 @@ Models.pnjl_module()
         @test all(isapprox.(vec_result.x, old_result.x; rtol=1e-7, atol=1e-9))
         @test all(isapprox.(vec_result.dx_dT, old_result.dx_dT; rtol=1e-6, atol=1e-8))
         @test all(isapprox.(vec_result.dx_dμ, old_result.dx_dμ; rtol=1e-6, atol=1e-8))
-        @test all(isapprox.(td_result.x, fd_result.x; rtol=1e-7, atol=1e-9))
-        @test all(isapprox.(td_result.dx_dT, fd_result.dx_dT; rtol=1e-6, atol=1e-8))
-        @test all(isapprox.(td_result.dx_dμ, fd_result.dx_dμ; rtol=1e-6, atol=1e-8))
+        @test all(isapprox.(td_result.x, auto_result.x; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(td_result.dx_dT, auto_result.dx_dT; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(td_result.dx_dμ, auto_result.dx_dμ; rtol=1e-12, atol=1e-12))
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
 
         @test all(isapprox.(named_result.x, vec_result.x; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(named_result.dx_dT, vec_result.dx_dT; rtol=1e-12, atol=1e-12))
