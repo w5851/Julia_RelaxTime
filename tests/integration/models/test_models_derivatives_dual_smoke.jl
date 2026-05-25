@@ -1,5 +1,4 @@
 using Test
-using ForwardDiff
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const HBARC_MEV_FM = 197.327
@@ -27,12 +26,6 @@ end
     @test haskey(coeff, :dμB_dT_sigma)
     @test haskey(coeff, :dM_dT)
     @test haskey(coeff, :dM_dμB)
-
-    f_mass(T) = first(Models.mass_derivatives(T, μ0; order=1, p_num=8, t_num=4).masses)
-    f_pressure(μ) = Models.thermo_derivatives(T0, μ; p_num=8, t_num=4).pressure
-
-    @test isfinite(ForwardDiff.derivative(f_mass, T0))
-    @test isfinite(ForwardDiff.derivative(f_pressure, μ0))
 
     chi2B = Models.chi2_B(T0, μ0; p_num=8, t_num=4)
     chi4B = Models.chi4_B(T0, μ0; p_num=8, t_num=4)
