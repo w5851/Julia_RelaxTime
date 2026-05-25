@@ -106,6 +106,63 @@ end
     @test all(isfinite, vals)
 end
 
+@testset "TaylorDiff routes match ForwardDiff fallback on representative BQS points" begin
+    T_fm = 0.57
+    muB_fm = 0.18
+    muQ_fm = 0.05
+    muS_fm = 0.02
+    kwargs = (; xi=0.0, p_num=8, t_num=4)
+
+    axis_calls = (
+        (:B, (order, backend) -> PNJL.chi_B(T_fm, muB_fm; order=order, derivative_backend=backend, kwargs...)),
+        (:Q, (order, backend) -> PNJL.chi_Q(T_fm, muB_fm, muQ_fm, muS_fm; order=order, derivative_backend=backend, kwargs...)),
+        (:S, (order, backend) -> PNJL.chi_S(T_fm, muB_fm, muQ_fm, muS_fm; order=order, derivative_backend=backend, kwargs...)),
+    )
+
+    for order in 1:2
+        for (_, call) in axis_calls
+            td = call(order, :taylordiff)
+            auto = call(order, :auto)
+            fd = call(order, :forwarddiff)
+            @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
+            @test isapprox(td, fd; rtol=1e-10, atol=1e-12)
+        end
+    end
+
+    for (_, call) in axis_calls
+        td4 = call(4, :taylordiff)
+        auto4 = call(4, :auto)
+        @test isfinite(td4)
+        @test isapprox(auto4, td4; rtol=1e-12, atol=1e-12)
+    end
+
+    for orders in ((1, 1, 0),)
+        td = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:taylordiff, kwargs...)
+        auto = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:auto, kwargs...)
+        fd = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:forwarddiff, kwargs...)
+        @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
+        @test isapprox(td, fd; rtol=1e-10, atol=1e-12)
+    end
+
+    for orders in ((1, 0, 1), (0, 1, 1))
+        td = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:taylordiff, kwargs...)
+        auto = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:auto, kwargs...)
+        @test isfinite(td)
+        @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
+    end
+
+    flavor_td = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:taylordiff, kwargs...)
+    flavor_auto = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:auto, kwargs...)
+    flavor_fd = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:forwarddiff, kwargs...)
+
+    @test isapprox(flavor_auto.pressure, flavor_td.pressure; rtol=1e-12, atol=1e-12)
+    @test all(isapprox.(flavor_auto.grad_mu, flavor_td.grad_mu; rtol=1e-12, atol=1e-12))
+    @test all(isapprox.(flavor_auto.hessian_mu, flavor_td.hessian_mu; rtol=1e-12, atol=1e-12))
+    @test isapprox(flavor_td.pressure, flavor_fd.pressure; rtol=1e-10, atol=1e-12)
+    @test all(isapprox.(flavor_td.grad_mu, flavor_fd.grad_mu; rtol=1e-10, atol=1e-12))
+    @test all(isapprox.(flavor_td.hessian_mu, flavor_fd.hessian_mu; rtol=1e-10, atol=1e-12))
+end
+
 @testset "chi2_B agrees with second-order BQS mapping" begin
     T_fm = 0.60
     muB_fm = 0.24
@@ -170,6 +227,28 @@ end
         rtol=1e-10,
         atol=1e-12,
     )
+end
+
+@testset "mixed high-order chi_BQS routes through mixed Taylor jet" begin
+    T_fm = 0.57
+    muB_fm = 0.18
+    muQ_fm = 0.05
+    muS_fm = 0.02
+    kwargs = (; xi=0.0, p_num=4, t_num=2)
+
+    chi210_auto = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 0), derivative_backend=:auto, kwargs...)
+    chi210_jet = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 0), derivative_backend=:mixedjet, kwargs...)
+    chi111_jet = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(1, 1, 1), derivative_backend=:mixedjet, kwargs...)
+
+    @test isfinite(chi210_auto)
+    @test isfinite(chi111_jet)
+    @test isapprox(chi210_auto, chi210_jet; rtol=1e-12, atol=1e-12)
+
+    q4_td = PNJL.chi_Q(T_fm, muB_fm, muQ_fm, muS_fm; order=4, derivative_backend=:taylordiff, kwargs...)
+    q4_mixed_backend = PNJL.chi_Q(T_fm, muB_fm, muQ_fm, muS_fm; order=4, derivative_backend=:mixedjet, kwargs...)
+    @test isapprox(q4_mixed_backend, q4_td; rtol=1e-12, atol=1e-12)
+
+    @test_throws ArgumentError PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 0), derivative_backend=:forwarddiff, kwargs...)
 end
 
 @testset "cumulant_BQS wrapper matches VT^3 chi" begin

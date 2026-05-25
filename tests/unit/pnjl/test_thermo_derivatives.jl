@@ -86,6 +86,25 @@ end
     @test all(isfinite.(md.dM_dmu))
 end
 
+@testset "mass and bulk backend selector" begin
+    T_fm = 0.5
+    μ_fm = 1.5
+    kwargs = (; xi=0.0, p_num=8, t_num=4)
+
+    md_td = PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:taylordiff, kwargs...)
+    md_fd = PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:forwarddiff, kwargs...)
+    @test all(isapprox.(md_td.masses, md_fd.masses; rtol=1e-10, atol=1e-12))
+    @test all(isapprox.(md_td.dM_dT, md_fd.dM_dT; rtol=1e-10, atol=1e-12))
+    @test all(isapprox.(md_td.dM_dmu, md_fd.dM_dmu; rtol=1e-10, atol=1e-12))
+    @test all(isapprox.(md_td.d2M_dTdmu, md_fd.d2M_dTdmu; rtol=1e-9, atol=1e-11))
+
+    bv_td = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...)
+    bv_fd = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
+    @test isapprox(bv_td.v_n_sq, bv_fd.v_n_sq; rtol=1e-10, atol=1e-12)
+    @test isapprox(bv_td.dμB_dT_sigma, bv_fd.dμB_dT_sigma; rtol=1e-10, atol=1e-12)
+    @test all(isapprox.(bv_td.masses, bv_fd.masses; rtol=1e-10, atol=1e-12))
+end
+
 @testset "thermo_derivatives (new interface)" begin
     T_fm = 0.5
     μ_fm = 1.5
@@ -99,6 +118,28 @@ end
     @test isfinite(td.pressure)
     @test isfinite(td.dP_dT)
     @test isfinite(td.dP_dmu)
+end
+
+@testset "thermo derivative backend selector" begin
+    T_fm = 0.5
+    μ_fm = 1.5
+    kwargs = (; xi=0.0, p_num=8, t_num=4)
+
+    auto = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:auto, kwargs...)
+    td = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...)
+    fd = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
+
+    @test isapprox(auto.dP_dT, td.dP_dT; rtol=1e-12, atol=1e-12)
+    @test isapprox(auto.dP_dmu, td.dP_dmu; rtol=1e-12, atol=1e-12)
+    @test isapprox(td.dP_dT, fd.dP_dT; rtol=1e-10, atol=1e-12)
+    @test isapprox(td.dP_dmu, fd.dP_dmu; rtol=1e-10, atol=1e-12)
+
+    @test isapprox(PNJL.dP_dT(T_fm, μ_fm; derivative_backend=:auto, kwargs...),
+        PNJL.dP_dT(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...);
+        rtol=1e-12, atol=1e-12)
+    @test isapprox(PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...),
+        PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...);
+        rtol=1e-10, atol=1e-12)
 end
 
 @testset "bulk_viscosity_coefficients (new interface)" begin

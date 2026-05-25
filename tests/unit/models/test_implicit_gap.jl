@@ -77,12 +77,17 @@ Models.pnjl_module()
         @test isdefined(Models, :derive_named)
 
         old_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=24, t_num=6)
+        fd_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        td_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:taylordiff)
         vec_result = Models.derive_vec(model, theta_vec; order=1, p_num=24, t_num=6)
         named_result = Models.derive_named(model, theta_named; order=1, p_num=24, t_num=6)
 
         @test all(isapprox.(vec_result.x, old_result.x; rtol=1e-7, atol=1e-9))
         @test all(isapprox.(vec_result.dx_dT, old_result.dx_dT; rtol=1e-6, atol=1e-8))
         @test all(isapprox.(vec_result.dx_dμ, old_result.dx_dμ; rtol=1e-6, atol=1e-8))
+        @test all(isapprox.(td_result.x, fd_result.x; rtol=1e-7, atol=1e-9))
+        @test all(isapprox.(td_result.dx_dT, fd_result.dx_dT; rtol=1e-6, atol=1e-8))
+        @test all(isapprox.(td_result.dx_dμ, fd_result.dx_dμ; rtol=1e-6, atol=1e-8))
 
         @test all(isapprox.(named_result.x, vec_result.x; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(named_result.dx_dT, vec_result.dx_dT; rtol=1e-12, atol=1e-12))
