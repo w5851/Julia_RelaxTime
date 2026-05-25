@@ -10,12 +10,14 @@
 
 接口形式：
 
-- `mass_derivatives(T_fm, mu_fm; order=1|2, xi=0.0, p_num, t_num, model=nothing)`
+- `mass_derivatives(T_fm, mu_fm; order=1|2, xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto)`
 
 它返回夸克有效质量以及对应导数。当前支持：
 
 - 一阶：`masses`, `dM_dT`, `dM_dmu`
 - 二阶：额外返回 `d2M_dT2`, `d2M_dTdmu`, `d2M_dmu2`
+
+PNJL 默认 `derivative_backend=:auto` 会走 TaylorDiff series gap 路线；显式 `:forwarddiff` 保留旧 ImplicitDifferentiation reference/fallback。这里的 `mu_fm` 是对称 quark 化学势方向。
 
 ## 结果结构
 

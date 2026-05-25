@@ -12,15 +12,16 @@ derivatives 不是模型主流程，而是平衡态求解之后的派生分析�
 
 因此，它应归入 `derived` 总层，而不是与 `phase`、`solver` 同层平铺。
 
-## 2. 实现主线是隐函数求导
+## 2. 实现主线是显式 Taylor-series 隐函数求解
 
-当前 derivatives 主实现位于 `src/models/derivatives/ThermoDerivatives.jl`，核心路线是：
+当前 derivatives 主实现位于 `src/models/derivatives/ThermoDerivatives.jl`，PNJL 默认核心路线是：
 
-- 用隐函数求解器获得平衡态 `x_state(θ)`
-- 令 `θ = (T, mu)`
-- 对 `x_state(θ)`、热力学量和质量应用 AD 与链式法则
+- 先求 primal 平衡态 `x0`
+- 在单变量 Taylor 代数中构造 `T(δ)`、`mu(δ)` 与 `x(δ)`
+- 显式迭代求解 `F(x(δ), T(δ), mu(δ)) = 0`
+- 从压强、质量或状态量 series 中提取所需导数
 
-这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态求解 + 导数传播”的统一逻辑。
+这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态求解 + 导数传播”的统一逻辑。`ForwardDiff + ImplicitDifferentiation` 仍保留为显式 fallback/reference，但不再是 PNJL derivatives 的默认主线。
 
 ## 3. 热力学导数与质量导数是同一条链上的两个读出层
 

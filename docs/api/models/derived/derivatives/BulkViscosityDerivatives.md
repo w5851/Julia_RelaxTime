@@ -11,7 +11,7 @@
 
 接口形式：
 
-- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing)`
+- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto)`
 
 它返回体粘滞公式所需的一组派生量，包括：
 
@@ -26,6 +26,8 @@
 - `s`, `n_B`
 
 这组结果面向下游 transport 或 bulk viscosity 公式装配，而不是新用户的最短入门接口。
+
+PNJL 默认后端同样是 TaylorDiff series gap：先从压强 Taylor series 解析得到 `ds/dT`、`ds/dμB`、`dn/dT`、`dn/dμB`，再装配 bulk viscosity 所需组合。旧 `ForwardDiff + ImplicitDifferentiation` 路线保留为显式 `derivative_backend=:forwarddiff` fallback。
 
 ## `compute_B_bracket`
 

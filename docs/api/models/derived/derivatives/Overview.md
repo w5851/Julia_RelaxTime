@@ -48,6 +48,7 @@ d1mu = Models.dP_dmu(T_fm, mu_fm)
 
 - `T_fm`、`mu_fm` 使用 `fm^-1`
 - `order` 当前主要用于 `mass_derivatives` 与 `dP_dT` / `dP_dmu` 的阶数控制
+- PNJL 默认 `derivative_backend=:auto` 会解析为 `:taylordiff`；`derivative_backend=:forwarddiff` 只用于显式 reference/fallback
 - 本主题默认采用 `Models` 聚合导出接口，而不是旧 `PNJL.*` 兼容路径
 
 ## 推荐使用顺序
