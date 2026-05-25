@@ -23,8 +23,3 @@ end
 @inline function ImplicitProblem(; forward_solve, conditions, x_dim::Int, theta_dim::Int)
     return ImplicitProblem(forward_solve, conditions, x_dim, theta_dim)
 end
-
-Base.@kwdef struct ImplicitSolverConfig
-    linear_solver = nothing
-    representation = nothing
-end

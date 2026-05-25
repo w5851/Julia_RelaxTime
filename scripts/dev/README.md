@@ -200,8 +200,6 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol normalize_mu_vec \
 	--include-symbol solve_gap \
 	--include-symbol ImplicitProblem \
-	--include-symbol ImplicitSolverConfig \
-	--include-symbol build_implicit_solver \
 	--include-symbol build_pnjl_fixedmu_problem \
 	--include-symbol build_pnjl_flavor_mu_problem \
 	--include-symbol build_njl_problem \

@@ -1,7 +1,7 @@
 # implicit_gap.jl 单元测试
 #
 # 测试内容：
-# 1. legacy create_*_implicit* factory retirement
+# 1. legacy create_*_implicit* factories and implicit builder are removed
 # 2. residual problem builder forward solve
 # 3. solve_pnjl_with_derivatives (PNJL wrapper)
 
@@ -18,19 +18,14 @@ Models.pnjl_module()
 # ============================================================================
 
 @testset "implicit_gap" begin
-    @testset "legacy factories are qualified compat-only" begin
+    @testset "legacy implicit factories and builder are removed" begin
         exported = names(Models)
         @test !(:create_implicit_gap_solver in exported)
         @test !(:create_pnjl_implicit_solver in exported)
-    end
-
-    @testset "retired compat factories throw migration errors" begin
-        @test isdefined(Models, :create_pnjl_implicit_solver)
-        m = Models.create_model(:NJL2)
-        @test_throws ArgumentError Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test_throws ArgumentError Models.create_implicit_gap_solver(Models.create_model(:NJL); p_num=24, t_num=6)
-        @test_throws ArgumentError Models.create_implicit_gap_solver(Models.create_model(:PNJL); p_num=24, t_num=6)
-        @test_throws ArgumentError Models.create_pnjl_implicit_solver(p_num=24, t_num=6)
+        @test !isdefined(Models, :create_implicit_gap_solver)
+        @test !isdefined(Models, :create_pnjl_implicit_solver)
+        @test !isdefined(Models, :ImplicitSolverConfig)
+        @test !isdefined(Models, :build_implicit_solver)
     end
 
     @testset "residual problem forward solve NJL2" begin
@@ -42,7 +37,6 @@ Models.pnjl_module()
         @test length(x) >= 2
         @test all(isfinite.(x))
         @test length(problem.conditions(θ, x, nothing)) == 2
-        @test_throws ArgumentError Models.build_implicit_solver(problem)
     end
 
     @testset "residual problem forward solve NJL" begin

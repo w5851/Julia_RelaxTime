@@ -130,9 +130,6 @@ const COMPAT_SYMBOLS = [
     "vec_to_named",
     "build_pnjl_fixedmu_adapters",
     "build_pnjl_flavor_mu_adapters",
-    "create_implicit_gap_solver",
-    "create_flavor_mu_implicit_gap_solver",
-    "create_pnjl_implicit_solver",
 ]
 
 function _assert_no_refs(refs::Dict{String, Vector{String}}, predicate::Function; label::String)

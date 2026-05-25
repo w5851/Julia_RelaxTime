@@ -11,7 +11,6 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", "..", ".."))
         "ImplicitGapLegacy.jl",
         "ConstraintSolver.jl",
         "ImplicitProblem.jl",
-        "ImplicitBuilder.jl",
         "ImplicitAdapters.jl",
         "ConstraintModes.jl",
         "ConstraintComponents.jl",

@@ -1,7 +1,7 @@
 # flavor-mu implicit_gap 单元测试
 #
 # 测试内容：
-# 1. flavor 化学势版本的 legacy factory retirement 与 residual problem forward solve
+# 1. flavor 化学势版本的 legacy factory removal 与 residual problem forward solve
 # 2. flavor 化学势版本的一阶导数接口
 # 3. 对称路径退化到旧标量 μ 接口时的一致性
 
@@ -16,13 +16,9 @@ end
 Models.pnjl_module()
 
 @testset "implicit_gap flavor mu" begin
-    @testset "legacy flavor factory is qualified compat-only" begin
+    @testset "legacy flavor factory is removed" begin
         @test !(:create_flavor_mu_implicit_gap_solver in names(Models))
-    end
-
-    @testset "retired flavor factory throws migration error" begin
-        m = Models.create_model(:PNJL)
-        @test_throws ArgumentError Models.create_flavor_mu_implicit_gap_solver(m; p_num=24, t_num=6)
+        @test !isdefined(Models, :create_flavor_mu_implicit_gap_solver)
     end
 
     @testset "residual problem forward solve flavor mu symmetric point" begin

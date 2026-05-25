@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/generated/models/ModelsExportIndex.md`
-- Exported symbol count: 337
-- Mentioned in non-generated docs/api pages: 206
+- Exported symbol count: 335
+- Mentioned in non-generated docs/api pages: 204
 
 ## Exported Symbols
 
@@ -35,7 +35,6 @@
 | `HardRule` | src/models/exports_public.jl | 55 | 0 | - |
 | `HybridContinuitySeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `ImplicitProblem` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `ImplicitSolverConfig` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `Integrals` | src/models/exports_public.jl | 107 | 13 | docs/api/integrals/CauchyPV.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/integrals/OneLoopIntegralsAniso.md |
 | `MagneticConfig` | src/models/exports_public.jl | 84 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `MagneticIMCParams` | src/models/exports_public.jl | 83 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
@@ -111,14 +110,13 @@
 | `build_diff_service_context` | src/models/exports_public.jl | 125 | 0 | - |
 | `build_freezeout_scan_points` | src/models/exports_public.jl | 115 | 0 | - |
 | `build_governance_candidate` | src/models/exports_public.jl | 59 | 0 | - |
-| `build_implicit_solver` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `build_manifest_extensions` | src/models/exports_public.jl | 100 | 0 | - |
 | `build_meson_thermo_contract_row` | src/models/Models.jl | 40 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
-| `build_njl_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_njl_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `build_phase_artifacts` | src/models/Models.jl | 47 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `build_pilot_diff_context` | src/models/exports_public.jl | 124 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
+| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `build_problem_spec` | src/models/exports_public.jl | 52 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
 | `build_residual!` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `build_seed_pool` | src/models/exports_public.jl | 56 | 0 | - |
@@ -205,7 +203,7 @@
 | `freezeout_profile_dir` | src/models/exports_public.jl | 112 | 0 | - |
 | `freezeout_temperature_GeV` | src/models/exports_public.jl | 113 | 0 | - |
 | `gap_core_residual!` | src/models/exports_public.jl | 72 | 1 | docs/api/models/solver/ConstraintModes.md |
-| `gap_residual` | src/models/exports_public.jl | 22 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/ImplicitSolvers.md |
+| `gap_residual` | src/models/exports_public.jl | 22 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `gap_state_dim` | src/models/exports_public.jl | 22 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
 | `gas_liquid_workflow_module` | src/models/Models.jl | 43 | 0 | - |
 | `get_all_seeds` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |

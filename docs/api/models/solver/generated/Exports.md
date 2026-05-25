@@ -4,9 +4,9 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/models/solver/generated/Exports.md`
-- Exported symbol count: 31
-- Mentioned in non-generated docs/api pages: 31
-- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `ImplicitSolverConfig`, `build_implicit_solver`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`
+- Exported symbol count: 29
+- Mentioned in non-generated docs/api pages: 29
+- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`
 
 ## Exported Symbols
 
@@ -17,18 +17,16 @@
 | `GapParams` | src/models/exports_public.jl | 72 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `HybridContinuitySeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `ImplicitProblem` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `ImplicitSolverConfig` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `MeanFieldState` | src/models/exports_public.jl | 18 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `MultiSeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `SeedStrategy` | src/models/exports_public.jl | 69 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `build_conditions` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `build_implicit_solver` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_njl_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_njl_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
+| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
+| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `build_residual!` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `create_model` | src/models/exports_public.jl | 13 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `gap_residual` | src/models/exports_public.jl | 22 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/ImplicitSolvers.md |
+| `gap_residual` | src/models/exports_public.jl | 22 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `gap_state_dim` | src/models/exports_public.jl | 22 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
 | `get_all_seeds` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `get_seed` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |

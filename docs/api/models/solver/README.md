@@ -7,7 +7,7 @@
 - `Models` 的最小稳定求解入口是什么
 - 平衡态状态 `x_state` 与 `mu_vec` 的统一合同是什么
 - `solve_gap`、`solve`、`solve_multi` 分别适合什么场景
-- 约束模式、seed strategy、导数入口和 retired implicit compat wrapper 各自承担什么职责
+- 约束模式、seed strategy、导数入口和 residual problem builders 各自承担什么职责
 
 推荐阅读顺序：
 
@@ -17,7 +17,7 @@
 4. [ResultDiagnosticErrorContracts.md](ResultDiagnosticErrorContracts.md)：稳定 Result/Diagnostic/Error 契约与版本策略
 5. [ConstraintModes.md](ConstraintModes.md)：固定化学势/密度/熵/比熵等约束入口
 6. [SeedStrategies.md](SeedStrategies.md)：默认、多初值、连续性与相变感知策略
-7. [ImplicitSolvers.md](ImplicitSolvers.md)：TD-first 导数接口与 retired implicit compat wrapper
+7. [ImplicitSolvers.md](ImplicitSolvers.md)：TD-first 导数接口与 residual problem builders
 8. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
 
 本主题优先覆盖的 `Models` 公开表面包括：
@@ -31,7 +31,7 @@
 - `Models.coerce_solver_diagnostic_public_view` / `Models.to_public_namedtuple`
 - `Models.ProblemSpec` / `Models.build_problem_spec`
 - `Models.AbstractConstraintComponent` / `Models.build_constraint_components`
-- `Models.ImplicitProblem` / `Models.ImplicitSolverConfig` / `Models.build_implicit_solver`（builder 为 retired wrapper）
+- `Models.ImplicitProblem`
 - `Models.build_pnjl_fixedmu_problem` / `Models.build_pnjl_flavor_mu_problem` / `Models.build_njl_problem`
 - `Models.MeanFieldState` / `Models.meanfield_state` / `Models.state_vector`
 - `Models.ConstraintModes`
