@@ -3,26 +3,54 @@ module GapTransportScanPhaseEquilibrium
 using StaticArrays
 
 mutable struct LocalPhaseTracker
-    boundary_data::Union{Nothing, NamedTuple{(:T_values, :mu_values, :T_CEP, :mu_CEP, :xi), Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64, Float64}}}
+    boundary_data::Union{Nothing, NamedTuple{(:T_values, :mu_values, :T_CEP, :mu_CEP, :muq_CEP, :muB_CEP, :xi), Tuple{Vector{Float64}, Vector{Float64}, Float64, Float64, Float64, Float64, Float64}}}
     previous_solution::Union{Nothing, Vector{Float64}}
     previous_phase::Symbol
     hadron_seed::Vector{Float64}
     quark_seed::Vector{Float64}
 end
 
+function _column_index(header::AbstractVector{<:AbstractString}, names::Tuple{Vararg{String}})
+    for name in names
+        idx = findfirst(==(name), header)
+        idx !== nothing && return idx
+    end
+    return nothing
+end
+
 function load_phase_boundary_data(xi::Float64; boundary_path::String=Main.DEFAULT_PHASE_BOUNDARY_PATH, cep_path::String=Main.DEFAULT_PHASE_CEP_PATH)
     T_CEP = NaN
-    mu_CEP = NaN
+    muq_CEP = NaN
+    muB_CEP = NaN
     if isfile(cep_path)
+        header = SubString{String}[]
         for line in eachline(cep_path)
-            startswith(line, "xi") && continue
+            if startswith(line, "xi")
+                header = split(strip(line), ',')
+                continue
+            end
             parts = split(line, ',')
             length(parts) >= 3 || continue
             xi_val = tryparse(Float64, parts[1])
             xi_val === nothing && continue
             abs(xi_val - xi) > 1e-6 && continue
-            T_CEP = tryparse(Float64, parts[2])
-            mu_CEP = tryparse(Float64, parts[3])
+
+            idx_T = isempty(header) ? 2 : something(_column_index(header, ("T_CEP_MeV",)), 2)
+            idx_muq = isempty(header) ? 3 : _column_index(header, ("muq_CEP_MeV", "mu_CEP_MeV"))
+            idx_muB = isempty(header) ? nothing : _column_index(header, ("muB_CEP_MeV",))
+
+            T_val = idx_T <= length(parts) ? tryparse(Float64, parts[idx_T]) : nothing
+            muq_val = idx_muq !== nothing && idx_muq <= length(parts) ? tryparse(Float64, parts[idx_muq]) : nothing
+            muB_val = idx_muB !== nothing && idx_muB <= length(parts) ? tryparse(Float64, parts[idx_muB]) : nothing
+
+            T_CEP = T_val === nothing ? NaN : T_val
+            if muq_val !== nothing
+                muq_CEP = muq_val
+                muB_CEP = muB_val === nothing ? 3.0 * muq_CEP : muB_val
+            elseif muB_val !== nothing
+                muB_CEP = muB_val
+                muq_CEP = muB_CEP / 3.0
+            end
             break
         end
     end
@@ -51,7 +79,15 @@ function load_phase_boundary_data(xi::Float64; boundary_path::String=Main.DEFAUL
         mu_values = mu_values[order]
     end
 
-    return (T_values=T_values, mu_values=mu_values, T_CEP=T_CEP, mu_CEP=mu_CEP, xi=Float64(xi))
+    return (
+        T_values=T_values,
+        mu_values=mu_values,
+        T_CEP=T_CEP,
+        mu_CEP=muq_CEP, # compatibility alias: phase-reference mu is mu_q, not mu_B
+        muq_CEP=muq_CEP,
+        muB_CEP=muB_CEP,
+        xi=Float64(xi),
+    )
 end
 
 function interpolate_boundary_mu_c(data, T_mev::Float64)

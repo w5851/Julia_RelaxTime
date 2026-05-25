@@ -20,4 +20,5 @@
 
 说明：
 
+- PNJL 默认导数后端现已切到 `TaylorDiff`；`derivative_backend=:forwarddiff` 仅作为 reference/fallback 保留。
 - `legacy_transport_c_p` 已从 `Models` 公开导出移除；请使用 `bulk_viscosity_coefficients(...).c_p`。

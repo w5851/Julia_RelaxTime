@@ -8,7 +8,8 @@
 2. [CoreConcepts.md](CoreConcepts.md)：理解 flavor 化学势、BQS 变换与 `T` 缩放口径
 3. [ConservedChargeSusceptibilities.md](ConservedChargeSusceptibilities.md)：守恒荷 susceptibility 主接口
 4. [Cumulants.md](Cumulants.md)：累积量与 `baryon_*` 组合量
-5. [generated/Exports.md](generated/Exports.md)：自动生成的公开导出全集
+5. [TaylorDiffPerformance.md](TaylorDiffPerformance.md)：TaylorDiff high-order `chi_B` 代表性性能快照
+6. [generated/Exports.md](generated/Exports.md)：自动生成的公开导出全集
 
 本主题覆盖的 `Models` 公开表面包括：
 
@@ -25,7 +26,7 @@
 
 以下导出暂不纳入本主题主体说明，而留给后续 derivatives 子主题：
 
-- `flavor_pressure_derivatives`
+- `flavor_pressure_derivatives`（flavor 级梯度/Hessian 对照入口；`derivative_backend=:auto` 现在也默认走 TaylorDiff）
 - `mass_derivatives`
 - `bulk_derivative_coeffs`
 - `dP_dT`

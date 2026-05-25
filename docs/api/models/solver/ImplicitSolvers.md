@@ -62,6 +62,8 @@
 
 它们适合“不想自己管理 `ImplicitFunction` 对象，但需要直接拿到 `x` 和导数”的场景。
 
+当前 PNJL 便捷导数包装默认已经切到 TaylorDiff series Newton；`derivative_backend=:forwarddiff` 仍可显式回到旧 `ImplicitFunction + ImplicitDifferentiation` reference/fallback。`create_implicit_gap_solver` / `create_flavor_mu_implicit_gap_solver` 作为兼容工厂仍保留，主要供旧调用点和 fallback 使用。
+
 ## 与涨落/导数治理的关系
 
 旧 `FluctuationADPath` 页里最有价值的内容，是对隐式求导边界的整理：

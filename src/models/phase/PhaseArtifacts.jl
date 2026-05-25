@@ -102,7 +102,9 @@ function _write_phase_report(path::String, result::PhasePipelineResult)
         println(io, "## CEP")
         println(io, "- found: $(result.cep.found)")
         println(io, "- T_cep_MeV: $(isfinite(result.cep.T_cep_MeV) ? result.cep.T_cep_MeV : "null")")
-        println(io, "- mu_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? result.cep.mu_cep_MeV : "null")")
+        println(io, "- muq_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? result.cep.mu_cep_MeV : "null")")
+        println(io, "- muB_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? 3.0 * result.cep.mu_cep_MeV : "null")")
+        println(io, "- mu_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? result.cep.mu_cep_MeV : "null")  # compatibility alias for muq_cep_MeV")
         println(io, "- uncertainty_T_MeV: $(isfinite(result.cep.uncertainty_T_MeV) ? result.cep.uncertainty_T_MeV : "null")")
         println(io, "- eval_count: $(result.cep.eval_count)")
         println(io, "- unknown_count: $(result.cep.unknown_count)")
@@ -171,6 +173,8 @@ function _build_summary(result::PhasePipelineResult)
         "cep" => Dict(
             "found" => result.cep.found,
             "T_cep_MeV" => _json_number(result.cep.T_cep_MeV),
+            "muq_cep_MeV" => _json_number(result.cep.mu_cep_MeV),
+            "muB_cep_MeV" => _json_number(3.0 * result.cep.mu_cep_MeV),
             "mu_cep_MeV" => _json_number(result.cep.mu_cep_MeV),
             "uncertainty_T_MeV" => _json_number(result.cep.uncertainty_T_MeV),
             "eval_count" => result.cep.eval_count,

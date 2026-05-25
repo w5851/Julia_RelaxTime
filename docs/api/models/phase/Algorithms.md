@@ -73,13 +73,15 @@
 
 `CEPResult` 的关键诊断字段包括：
 
+- `T_cep_MeV`
+- `mu_cep_MeV`：历史兼容字段，表示夸克化学势 `mu_q`，不是重子化学势 `mu_B`
 - `eval_count`
 - `unknown_count`
 - `uncertainty_T_MeV`
 - `reason`
 - `method`
 
-这些字段主要服务于回归治理、失败解释与策略比较，而不只是展示一个 `T_cep_MeV` 数值。
+相图模块内部的 `mu_MeV` / `mu_transition_MeV` / `mu_cep_MeV` 口径均为 `mu_q`。面向 `mu_B` 的外层扫描或输运脚本需要显式使用 `mu_B = 3mu_q`；新生成的 CEP reference CSV 与 phase artifact 会同时给出 `muq_cep_MeV` 和 `muB_cep_MeV` 以避免歧义。这些字段主要服务于回归治理、失败解释与策略比较，而不只是展示一个 `T_cep_MeV` 数值。
 
 ### production 收口路径
 

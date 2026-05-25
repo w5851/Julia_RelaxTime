@@ -154,6 +154,7 @@ function _cap_conserved_charge_highorder()
 
     chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 3, 0), kwargs...)
     chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(0, 0, 4), kwargs...)
+    chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=(2, 1, 0), kwargs...)
     conserved_charge_susceptibility(T_fm, muB_fm, 0.0, 0.0; orders=(2, 0, 0), kwargs...)
     cumulant_B(T_fm, muB_fm, V; order=4, kwargs...)
     cumulant_BQS(T_fm, muB_fm, muQ_fm, muS_fm, V; orders=(1, 1, 0), kwargs...)

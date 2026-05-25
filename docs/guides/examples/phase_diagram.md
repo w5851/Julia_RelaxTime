@@ -42,7 +42,7 @@ julia --project scripts/pnjl/plot_phase_diagram.jl \
 - `curves.csv`：`build_curves` 生成的各温度 `(μ, ρ)` 轨迹；
 - `maxwell_results.csv`：每个温度对应的 Maxwell 收敛状态与原因；
 - `spinodals.csv`：`detect_s_shape` 得到的上下自旋odal；
-- `cep.csv`：CEP 搜索结果（若未找到则只记录 `false`）。
+- `cep.csv`：CEP 搜索结果（若未找到则只记录 `false`）；相图内部坐标使用夸克化学势 `mu_q`，新 reference CSV 会同时给出 `muq_CEP_MeV` 与 `muB_CEP_MeV`。
 - `curves.png / spinodals.png / maxwell.png`：位于 `--processed-figures-dir`，分别展示所有曲线、上下自旋odal 以及 Maxwell 成功/失败分布，便于快速目视检查。
 
 ## 3. 图像内容

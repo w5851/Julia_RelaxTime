@@ -64,7 +64,7 @@ end
 
 function _cep_muB(xi::Float64)
     data, _ = _load_first_order_line(xi)
-    return 3.0 * data.mu_CEP
+    return data.muB_CEP
 end
 
 function _phase_reference_for_mode_a(muB_MeV::Float64, xi::Float64)
@@ -85,7 +85,7 @@ end
 
 function _phase_reference_for_mode_b(T_MeV::Float64, muB_MeV::Float64, xi::Float64)
     data, _ = _load_first_order_line(xi)
-    mu_CEP = 3.0 * data.mu_CEP
+    mu_CEP = data.muB_CEP
     T_CEP = data.T_CEP
     T_first, _ = _interpolate_first_order_temperature(muB_MeV, xi)
     if isfinite(T_CEP) && isfinite(mu_CEP) && abs(T_MeV - T_CEP) <= 8.0 && abs(muB_MeV - mu_CEP) <= 40.0

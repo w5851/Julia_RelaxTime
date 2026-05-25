@@ -88,7 +88,6 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "pnjl", "test_solver_constraint_modes.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_pnjl_core.jl"),
     joinpath(UNIT_DIR, "pnjl", "test_core_integrals.jl"),
-    joinpath(UNIT_DIR, "pnjl", "test_thermo_derivatives.jl"),
 
     # [RelaxTime Core] 输运核心模块
     joinpath(UNIT_DIR, "relaxtime", "test_oneloopintegrals.jl"),

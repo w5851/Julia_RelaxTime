@@ -12,13 +12,25 @@ susceptibility 不是模型主流程，而是模型热力学状态继续派生�
 
 因此，它更接近 `Models` 的衍生量主题，而不是与 `phase`、`solver` 平级的流程主题。
 
-## 2. 实现主线是 flavor 压强导数
+## 2. 实现主线是 flavor 压强导数与 baryon Taylor-mode
 
 当前实现位于 `src/models/derivatives/ConservedChargeSusceptibilities.jl`，主路线采用 AD，并优先围绕：
 
 - `P(T, mu_u, mu_d, mu_s)`
 
 来构造 `B/Q/S` 方向的 susceptibility。也就是说，BQS 不是独立重新求解的一套对象，而是 flavor 化学势导数经过线性变换后的主题级表达。
+
+迁移说明：高阶单方向 `chi_B` 不再把高阶导数默认压在嵌套 ForwardDiff Dual 上。`derivative_backend=:auto` 现在对纯 B/Q/S 单方向都走 TaylorDiff 单变量 fast path：
+
+1. 先在目标点求 primal gap 解 `x0`；
+2. 用 ForwardDiff 在 primal 点构造 `J0 = dF/dx`，这里仍保留 ForwardDiff 作为低阶 Jacobian 工具；
+3. 令单一方向变量与 `x(δ)` 携带 TaylorDiff univariate series；
+4. 逐阶求解 Taylor 系数，使 `F(x(δ), μ(δ))=0`；
+5. 从 pressure series 提取 `d^nP/dδ^n` 并乘以 `T^(n - 4)`。
+
+mixed BQS 高阶导数走单独的内部 multivariate Taylor jet backend。它复用相同的 primal gap solve、`J0 = dF/dx`、逐阶线性求解、残差检查和 pressure extraction，但多变量系数布局只在非零 B/Q/S 轴数量超过 1 时启用。单方向 `B/Q/S` 不会退回通用 `D=1` jet，而是继续委派给单变量 TaylorDiff fast path。
+
+ForwardDiff 路径没有移除：它仍作为显式 `:forwarddiff` reference/fallback，以及 TaylorDiff/jet 路径中的 primal Jacobian/gradient。
 
 ## 3. BQS 与 flavor 的边界
 
@@ -29,14 +41,15 @@ susceptibility 不是模型主流程，而是模型热力学状态继续派生�
 
 统一接口 `conserved_charge_susceptibility` 与 `chi_BQS` 隐含了 BQS 到 flavor 的映射，因此多数用户不需要直接处理 flavor Jacobian；但这也意味着当前支持范围由底层映射和导数阶数共同限定。
 
-## 4. 当前支持范围不是“任意阶任意组合”
+## 4. 当前支持范围
 
-按照当前实现，首轮稳定支持范围是：
+按照当前实现，稳定支持范围是：
 
-- 纯单轴 `B/Q/S` 方向 `1..4` 阶
-- 总二阶 mixed susceptibilities：`(1,1,0)`、`(1,0,1)`、`(0,1,1)` 以及纯二阶 `(2,0,0)`、`(0,2,0)`、`(0,0,2)`
+- 纯单轴 `B/Q/S` 方向在 TaylorDiff backend 下可扩展到更高单方向阶数；`ForwardDiff` fallback 仍保留 `1..4`
+- mixed BQS susceptibilities 在 `:auto` / `:taylordiff` / `:mixedjet` 下由内部 multivariate jet 支持，阶数由 `sum(orders)` 决定
+- `ForwardDiff` fallback 对 mixed 组合只保留总二阶 reference：`(1,1,0)`、`(1,0,1)`、`(0,1,1)`
 
-因此，文档必须把“当前支持范围”写清楚，避免把统一入口误读为任意高阶泛化接口。
+因此，统一入口可以表达高阶 mixed BQS，但成本会随 jet 变量数和总阶数增长；性能敏感的纯单方向仍应保留默认 `:auto`。
 
 ## 5. `T` 缩放是主题级合同
 
