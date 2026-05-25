@@ -14,7 +14,9 @@ end
 
 @testset "phase CEP reference mu contract" begin
     @test isfile(_PHASE_EQUILIBRIUM_PATH)
-    Base.include(Main, _PHASE_EQUILIBRIUM_PATH)
+    if !isdefined(Main, :GapTransportScanPhaseEquilibrium)
+        Base.include(Main, _PHASE_EQUILIBRIUM_PATH)
+    end
 
     tmp = mktempdir()
     boundary_csv = joinpath(tmp, "boundary.csv")
