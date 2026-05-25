@@ -25,6 +25,7 @@ julia --project=. scripts/dev/check_docs_consistency.jl
 
 ```powershell
 julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--output docs/api/generated/models/ModelsExportIndex.md \
 	--title "Models Export API Index"
@@ -81,6 +82,7 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 
 ```powershell
 julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol PNJLMagneticModel \
 	--include-symbol alpha_n \
@@ -109,6 +111,7 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 
 ```powershell
 julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol conserved_charge_susceptibility \
 	--include-symbol chi_BQS \
@@ -142,6 +145,7 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 
 ```powershell
 julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol mass_derivatives \
 	--include-symbol thermo_derivatives \
@@ -150,7 +154,6 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol dP_dmu \
 	--include-symbol bulk_viscosity_coefficients \
 	--include-symbol compute_B_bracket \
-	--include-symbol legacy_transport_c_p \
 	--output docs/api/models/derived/derivatives/generated/Exports.md \
 	--title "Models Derivatives Export API Index"
 ```
@@ -188,6 +191,7 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 
 ```powershell
 julia --project=. scripts/dev/generate_api_export_index.jl \
+	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol create_model \
 	--include-symbol MeanFieldState \
@@ -195,6 +199,10 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol state_vector \
 	--include-symbol normalize_mu_vec \
 	--include-symbol solve_gap \
+	--include-symbol ImplicitProblem \
+	--include-symbol build_pnjl_fixedmu_problem \
+	--include-symbol build_pnjl_flavor_mu_problem \
+	--include-symbol build_njl_problem \
 	--include-symbol solve \
 	--include-symbol solve_multi \
 	--include-symbol ConstraintModes \
@@ -206,25 +214,13 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol SeedStrategy \
 	--include-symbol DefaultSeed \
 	--include-symbol MultiSeed \
-	--include-symbol ContinuitySeed \
 	--include-symbol HybridContinuitySeed \
-	--include-symbol PhaseAwareSeed \
-	--include-symbol PhaseAwareContinuitySeed \
 	--include-symbol get_seed \
 	--include-symbol get_all_seeds \
 	--include-symbol update! \
-	--include-symbol reset! \
-	--include-symbol set_phase! \
-	--include-symbol create_implicit_gap_solver \
-	--include-symbol create_flavor_mu_implicit_gap_solver \
-	--include-symbol create_pnjl_implicit_solver \
-	--include-symbol create_implicit_solver \
 	--include-symbol solve_with_derivatives \
-	--include-symbol solve_fixedmu_constraint \
-	--include-symbol solve_fixedrho_constraint \
-	--include-symbol solve_fixedentropy_constraint \
-	--include-symbol solve_fixedsigma_constraint \
-	--include-symbol solve_fixedasymrho_constraint \
+	--include-symbol solve_pnjl_with_derivatives \
+	--include-symbol solve_pnjl_with_flavor_mu_derivatives \
 	--include-symbol solve_constraint \
 	--output docs/api/models/solver/generated/Exports.md \
 	--title "Solver Export API Index"

@@ -1,6 +1,6 @@
 # Derivatives 主题职责核心
 
-本页说明 derivatives 为什么应作为 `Models` 的“衍生量主题”，以及隐函数求导、链式法则、体粘滞组合导数和兼容层之间的职责边界。
+本页说明 derivatives 为什么应作为 `Models` 的“衍生量主题”，以及 Taylor-series gap 路线、链式读出、体粘滞组合导数和兼容层之间的职责边界。
 
 ## 1. 为什么它不是普通一级主题
 
@@ -21,7 +21,7 @@ derivatives 不是模型主流程，而是平衡态求解之后的派生分析�
 - 显式迭代求解 `F(x(δ), T(δ), mu(δ)) = 0`
 - 从压强、质量或状态量 series 中提取所需导数
 
-这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态求解 + 导数传播”的统一逻辑。`ForwardDiff + ImplicitDifferentiation` 仍保留为显式 fallback/reference，但不再是 PNJL derivatives 的默认主线。
+这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态求解 + 导数传播”的统一逻辑。ThermoDerivatives 生产路径不再提供 `ForwardDiff + ImplicitDifferentiation` fallback；迁移时使用默认 `:auto` 或显式 `:taylordiff`。
 
 ## 3. 热力学导数与质量导数是同一条链上的两个读出层
 

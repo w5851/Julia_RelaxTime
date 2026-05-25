@@ -1,4 +1,5 @@
 using Test
+using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -7,14 +8,17 @@ if !isdefined(Main, :Models)
 end
 
 @testset "solver config isolation smoke" begin
-    @testset "pnjl implicit solver instances keep independent config" begin
-        θ = [0.52, 0.16]
+    @testset "pnjl solve_gap calls keep independent config" begin
+        T_fm = 0.52
+        μ_fm = 0.16
+        μ_vec = SVector(μ_fm, μ_fm, μ_fm)
+        model = Models.create_model(:PNJL)
 
-        solver_a = Models.create_pnjl_implicit_solver(xi=0.0, p_num=12, t_num=4)
-        solver_b = Models.create_pnjl_implicit_solver(xi=0.35, p_num=24, t_num=8)
+        state_a = Models.solve_gap(model, T_fm, μ_vec; xi=0.0, p_num=12, t_num=4)
+        state_b = Models.solve_gap(model, T_fm, μ_vec; xi=0.35, p_num=24, t_num=8)
 
-        x_a, _ = solver_a(θ)
-        x_b, _ = solver_b(θ)
+        x_a = collect(Models.state_vector(state_a))
+        x_b = collect(Models.state_vector(state_b))
 
         @test length(x_a) == 5
         @test length(x_b) == 5

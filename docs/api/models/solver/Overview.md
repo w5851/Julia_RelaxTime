@@ -37,7 +37,7 @@ st = Models.solve_gap(model, T_fm, mu_vec)
 
 - `omega` / `omega_components`
 - `state_vector`
-- 自定义后处理或隐式导数链路
+- 自定义后处理或 TD-first 导数链路
 
 它是最轻量的统一入口，不承担 CSV、扫描或完整 workflow 打包职责。
 
@@ -102,7 +102,8 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 - `ConstraintModes`
 - `SeedStrategy` 家族
 - `build_conditions` / `build_residual!`
-- `create_implicit_gap_solver` 与相关导数接口
+- `solve_pnjl_with_derivatives` / `solve_pnjl_with_flavor_mu_derivatives`
+- residual problem builders：`build_njl_problem` / `build_pnjl_fixedmu_problem` / `build_pnjl_flavor_mu_problem`
 
 ## 与其它主题的关系
 

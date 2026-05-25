@@ -1,8 +1,8 @@
 # implicit_gap.jl 单元测试
 #
 # 测试内容：
-# 1. create_implicit_gap_solver NJL2/NJL/PNJL
-# 2. 隐函数求解 forward solve
+# 1. legacy create_*_implicit* factories and implicit builder are removed
+# 2. residual problem builder forward solve
 # 3. solve_pnjl_with_derivatives (PNJL wrapper)
 
 using Test
@@ -18,49 +18,44 @@ Models.pnjl_module()
 # ============================================================================
 
 @testset "implicit_gap" begin
-
-    # --- create_implicit_gap_solver NJL2 ---
-    @testset "create_implicit_gap_solver NJL2" begin
-        m = Models.create_model(:NJL2)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test igf isa Any  # ImplicitFunction 类型
+    @testset "legacy implicit factories and builder are removed" begin
+        exported = names(Models)
+        @test !(:create_implicit_gap_solver in exported)
+        @test !(:create_pnjl_implicit_solver in exported)
+        @test !isdefined(Models, :create_implicit_gap_solver)
+        @test !isdefined(Models, :create_pnjl_implicit_solver)
+        @test !isdefined(Models, :ImplicitSolverConfig)
+        @test !isdefined(Models, :build_implicit_solver)
     end
 
-    # --- create_implicit_gap_solver NJL ---
-    @testset "create_implicit_gap_solver NJL" begin
-        m = Models.create_model(:NJL)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
-        @test igf isa Any
-    end
-
-    # --- forward solve NJL2 ---
-    @testset "隐函数 forward solve NJL2" begin
+    @testset "residual problem forward solve NJL2" begin
         m = Models.create_model(:NJL2)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
+        problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = igf(θ)
-        # ImplicitFunction 返回 (x, z) tuple
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) >= 2
         @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, meta)) == 2
     end
 
-    # --- forward solve NJL ---
-    @testset "隐函数 forward solve NJL" begin
+    @testset "residual problem forward solve NJL" begin
         m = Models.create_model(:NJL)
-        igf = Models.create_implicit_gap_solver(m; p_num=24, t_num=6)
+        problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = igf(θ)
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) >= 3
         @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, meta)) == 3
     end
 
-    # --- create_pnjl_implicit_solver ---
-    @testset "create_pnjl_implicit_solver" begin
-        @test isdefined(Models, :create_pnjl_implicit_solver)
-        igf = Models.create_pnjl_implicit_solver(p_num=24, t_num=6)
-        @test igf isa Any
+    @testset "residual problem forward solve PNJL" begin
+        m = Models.create_model(:PNJL)
+        problem = Models.build_pnjl_fixedmu_problem(m; p_num=24, t_num=6)
+        θ = [0.5, 0.0]  # [T, μ]
+        x, meta = problem.forward_solve(θ)
+        @test length(x) == 5
+        @test all(isfinite.(x))
+        @test length(problem.conditions(θ, x, meta)) == 5
     end
 
     # --- solve_pnjl_with_derivatives ---
@@ -77,7 +72,7 @@ Models.pnjl_module()
         @test isdefined(Models, :derive_named)
 
         old_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=24, t_num=6)
-        fd_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        auto_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:auto)
         td_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:taylordiff)
         vec_result = Models.derive_vec(model, theta_vec; order=1, p_num=24, t_num=6)
         named_result = Models.derive_named(model, theta_named; order=1, p_num=24, t_num=6)
@@ -85,9 +80,12 @@ Models.pnjl_module()
         @test all(isapprox.(vec_result.x, old_result.x; rtol=1e-7, atol=1e-9))
         @test all(isapprox.(vec_result.dx_dT, old_result.dx_dT; rtol=1e-6, atol=1e-8))
         @test all(isapprox.(vec_result.dx_dμ, old_result.dx_dμ; rtol=1e-6, atol=1e-8))
-        @test all(isapprox.(td_result.x, fd_result.x; rtol=1e-7, atol=1e-9))
-        @test all(isapprox.(td_result.dx_dT, fd_result.dx_dT; rtol=1e-6, atol=1e-8))
-        @test all(isapprox.(td_result.dx_dμ, fd_result.dx_dμ; rtol=1e-6, atol=1e-8))
+        @test all(isapprox.(td_result.x, auto_result.x; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(td_result.dx_dT, auto_result.dx_dT; rtol=1e-12, atol=1e-12))
+        @test all(isapprox.(td_result.dx_dμ, auto_result.dx_dμ; rtol=1e-12, atol=1e-12))
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, thermo_backend=:legacy)
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, solver_backend=:legacy)
 
         @test all(isapprox.(named_result.x, vec_result.x; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(named_result.dx_dT, vec_result.dx_dT; rtol=1e-12, atol=1e-12))

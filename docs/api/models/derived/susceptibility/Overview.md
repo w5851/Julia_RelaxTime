@@ -55,7 +55,7 @@ ks2 = Models.baryon_kappa_sigma2(T_fm, muB_fm)
 - `V` 使用 `fm^3`
 - `order` 表示对 `(mu_X / T)` 的导数阶数，其中 `X` 可以是 `B`、`Q`、`S`
 - susceptibility 归一化采用主题级缩放 `chi_n ~ T^(n - 4) * d^n P / d(mu_X)^n`
-- 默认 `derivative_backend=:auto`：纯 B/Q/S 单方向走单变量 TaylorDiff fast path；mixed BQS 组合走内部 multivariate Taylor jet；`ForwardDiff` 只保留为显式 reference/fallback
+- 默认 `derivative_backend=:auto`：纯 B/Q/S 单方向走单变量 TaylorDiff fast path；mixed BQS 组合走内部 multivariate Taylor jet。显式 `derivative_backend=:forwarddiff` 已下线，会抛出迁移错误
 - cumulant 口径保持 `C_n = V * T^3 * chi_n`，因此四阶接口 `C_4^B` 可直接由 `cumulant_B(...; order=4)` 读取
 - 当前统一入口以静态涨落为主，不包含传输系数或体粘滞导数主线
 

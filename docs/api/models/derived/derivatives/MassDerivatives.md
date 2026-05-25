@@ -17,7 +17,7 @@
 - 一阶：`masses`, `dM_dT`, `dM_dmu`
 - 二阶：额外返回 `d2M_dT2`, `d2M_dTdmu`, `d2M_dmu2`
 
-PNJL 默认 `derivative_backend=:auto` 会走 TaylorDiff series gap 路线；显式 `:forwarddiff` 保留旧 ImplicitDifferentiation reference/fallback。这里的 `mu_fm` 是对称 quark 化学势方向。
+PNJL 默认 `derivative_backend=:auto` 会走 TaylorDiff series gap 路线；显式 `:forwarddiff` 已从 ThermoDerivatives 下线。这里的 `mu_fm` 是对称 quark 化学势方向。
 
 ## 结果结构
 

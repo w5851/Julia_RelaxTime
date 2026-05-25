@@ -26,7 +26,7 @@
 
 以下导出暂不纳入本主题主体说明，而留给后续 derivatives 子主题：
 
-- `flavor_pressure_derivatives`（flavor 级梯度/Hessian 对照入口；`derivative_backend=:auto` 现在也默认走 TaylorDiff）
+- `flavor_pressure_derivatives`（flavor 级梯度/Hessian 入口；`derivative_backend=:auto` 现在默认走 TaylorDiff，`:forwarddiff` 已下线）
 - `mass_derivatives`
 - `bulk_derivative_coeffs`
 - `dP_dT`

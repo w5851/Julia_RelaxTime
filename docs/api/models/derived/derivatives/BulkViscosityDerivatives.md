@@ -27,7 +27,7 @@
 
 这组结果面向下游 transport 或 bulk viscosity 公式装配，而不是新用户的最短入门接口。
 
-PNJL 默认后端同样是 TaylorDiff series gap：先从压强 Taylor series 解析得到 `ds/dT`、`ds/dμB`、`dn/dT`、`dn/dμB`，再装配 bulk viscosity 所需组合。旧 `ForwardDiff + ImplicitDifferentiation` 路线保留为显式 `derivative_backend=:forwarddiff` fallback。
+PNJL 默认后端同样是 TaylorDiff series gap：先从压强 Taylor series 解析得到 `ds/dT`、`ds/dμB`、`dn/dT`、`dn/dμB`，再装配 bulk viscosity 所需组合。旧 `ForwardDiff + ImplicitDifferentiation` 路线已不再作为本接口 fallback。
 
 ## `compute_B_bracket`
 

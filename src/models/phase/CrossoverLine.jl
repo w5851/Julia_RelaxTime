@@ -12,28 +12,35 @@ CrossoverResult(; method::Symbol=:peak) = CrossoverResult(false, nothing, nothin
 
 const HBARC_MEV_FM = 197.327
 
+@inline function _validate_crossover_solver_backend(solver_backend::Symbol)
+	(solver_backend === :models || solver_backend === :auto) && return nothing
+	throw(ArgumentError("solver_backend=$solver_backend is not supported for TD crossover derivatives; use solver_backend=:models or :auto."))
+end
+
 function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num::Int,
 		model_kind::Symbol, solver_backend::Symbol)
-	solver = create_pnjl_implicit_solver(
-		xi=xi,
-		p_num=p_num,
-		t_num=t_num,
-		thermo_backend=:models,
-		solver_backend=solver_backend,
-	)
+	_validate_crossover_solver_backend(solver_backend)
 	model = create_model(model_kind)
 	mu_vec = normalize_mu_vec(μ_fm)
 
 	function evaluate_point(T::Float64; order::Int=1, var_idx::Int=1, need_rho::Bool=false)
-		x, _ = solver([T, μ_fm])
-		dx_dT = ForwardDiff.derivative(t -> solver([t, μ_fm])[1], T)
+		derivative_order = order >= 2 ? 2 : 1
+		result = solve_pnjl_with_derivatives(
+			T,
+			μ_fm;
+			order=derivative_order,
+			xi=xi,
+			p_num=p_num,
+			t_num=t_num,
+			thermo_backend=:models,
+			derivative_backend=:taylordiff,
+		)
+		x = result.x
+		dx_dT = result.dx_dT
 		d1 = Float64(dx_dT[var_idx])
 		d2 = NaN
 		if order >= 2
-			d2x_dT2 = ForwardDiff.derivative(
-				T0 -> ForwardDiff.derivative(t -> solver([t, μ_fm])[1], T0),
-				T,
-			)
+			d2x_dT2 = result.d2x_dT2
 			d2 = Float64(d2x_dT2[var_idx])
 		end
 

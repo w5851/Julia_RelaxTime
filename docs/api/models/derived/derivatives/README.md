@@ -5,7 +5,7 @@
 推荐阅读顺序：
 
 1. [Overview.md](Overview.md)：先看 `thermo_derivatives`、`mass_derivatives` 与 `bulk_derivative_coeffs` 的最短使用路径
-2. [CoreConcepts.md](CoreConcepts.md)：理解隐函数求导、链式法则、AD 口径与兼容层边界
+2. [CoreConcepts.md](CoreConcepts.md)：理解 Taylor-series gap 路线、导数读出与兼容层边界
 3. [MassDerivatives.md](MassDerivatives.md)：质量导数结果结构与使用场景
 4. [ThermoDerivatives.md](ThermoDerivatives.md)：热力学导数主接口与高阶 `dP_dT` / `dP_dmu`
 5. [BulkViscosityDerivatives.md](BulkViscosityDerivatives.md)：体粘滞组合导数、B bracket 与兼容入口

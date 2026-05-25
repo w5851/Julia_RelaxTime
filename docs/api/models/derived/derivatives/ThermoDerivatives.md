@@ -2,7 +2,7 @@
 
 本页集中说明 derivatives 主题中与热力学量导数直接相关的公开接口。实现位于 `src/models/derivatives/ThermoDerivatives.jl`。
 
-当前 PNJL 默认导数后端是 `TaylorDiff + explicit Taylor-series gap Newton`。`ForwardDiff + ImplicitDifferentiation` 仍通过 `derivative_backend=:forwarddiff` 保留为 reference/fallback；默认 `:auto` 对 PNJL 解析为 `:taylordiff`。
+当前 PNJL 导数后端是 `TaylorDiff + explicit Taylor-series gap Newton`。默认 `:auto` 对 PNJL 解析为 `:taylordiff`；旧 `derivative_backend=:forwarddiff` implicit fallback 已下线，会抛出迁移错误。
 
 ## 主要导出
 
@@ -58,7 +58,7 @@
 - 控制导数阶数
 - 与中心差分或其它诊断方法做一致性比较
 
-对 PNJL 单方向高阶导数，默认后端一次构造单变量 Taylor series，避免嵌套 Dual 随阶数膨胀。显式 `:forwarddiff` 路径仍可用于低阶对照，但不建议作为高阶热路径。
+对 PNJL 单方向高阶导数，默认后端一次构造单变量 Taylor series，避免嵌套 Dual 随阶数膨胀。旧 `:forwarddiff` 低阶对照不再属于 ThermoDerivatives API；如需 residual adapter 审计，请直接使用 `build_*_problem(...).forward_solve` 与 `conditions`。
 
 ## 使用建议
 

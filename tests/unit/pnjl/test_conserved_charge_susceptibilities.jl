@@ -106,7 +106,7 @@ end
     @test all(isfinite, vals)
 end
 
-@testset "TaylorDiff routes match ForwardDiff fallback on representative BQS points" begin
+@testset "TaylorDiff and MixedTaylorJet routes are the susceptibility backends" begin
     T_fm = 0.57
     muB_fm = 0.18
     muQ_fm = 0.05
@@ -123,9 +123,8 @@ end
         for (_, call) in axis_calls
             td = call(order, :taylordiff)
             auto = call(order, :auto)
-            fd = call(order, :forwarddiff)
             @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
-            @test isapprox(td, fd; rtol=1e-10, atol=1e-12)
+            @test_throws ArgumentError call(order, :forwarddiff)
         end
     end
 
@@ -139,9 +138,10 @@ end
     for orders in ((1, 1, 0),)
         td = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:taylordiff, kwargs...)
         auto = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:auto, kwargs...)
-        fd = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:forwarddiff, kwargs...)
+        jet = PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:mixedjet, kwargs...)
         @test isapprox(auto, td; rtol=1e-12, atol=1e-12)
-        @test isapprox(td, fd; rtol=1e-10, atol=1e-12)
+        @test isapprox(td, jet; rtol=1e-12, atol=1e-12)
+        @test_throws ArgumentError PNJL.chi_BQS(T_fm, muB_fm, muQ_fm, muS_fm; orders=orders, derivative_backend=:forwarddiff, kwargs...)
     end
 
     for orders in ((1, 0, 1), (0, 1, 1))
@@ -153,14 +153,15 @@ end
 
     flavor_td = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:taylordiff, kwargs...)
     flavor_auto = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:auto, kwargs...)
-    flavor_fd = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:forwarddiff, kwargs...)
+    flavor_jet = PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:mixedjet, kwargs...)
 
     @test isapprox(flavor_auto.pressure, flavor_td.pressure; rtol=1e-12, atol=1e-12)
     @test all(isapprox.(flavor_auto.grad_mu, flavor_td.grad_mu; rtol=1e-12, atol=1e-12))
     @test all(isapprox.(flavor_auto.hessian_mu, flavor_td.hessian_mu; rtol=1e-12, atol=1e-12))
-    @test isapprox(flavor_td.pressure, flavor_fd.pressure; rtol=1e-10, atol=1e-12)
-    @test all(isapprox.(flavor_td.grad_mu, flavor_fd.grad_mu; rtol=1e-10, atol=1e-12))
-    @test all(isapprox.(flavor_td.hessian_mu, flavor_fd.hessian_mu; rtol=1e-10, atol=1e-12))
+    @test isapprox(flavor_jet.pressure, flavor_td.pressure; rtol=1e-12, atol=1e-12)
+    @test all(isapprox.(flavor_jet.grad_mu, flavor_td.grad_mu; rtol=1e-12, atol=1e-12))
+    @test all(isapprox.(flavor_jet.hessian_mu, flavor_td.hessian_mu; rtol=1e-12, atol=1e-12))
+    @test_throws ArgumentError PNJL.flavor_pressure_derivatives(T_fm, SVector(0.10, 0.06, 0.02); order=2, derivative_backend=:forwarddiff, kwargs...)
 end
 
 @testset "chi2_B agrees with second-order BQS mapping" begin

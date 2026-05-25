@@ -39,4 +39,16 @@ Models.pnjl_module()
         @test isdefined(Models, :build_crossover_line)
         @test Models.build_crossover_line isa Function
     end
+
+    @testset "legacy solver backend is rejected" begin
+        @test_throws ArgumentError Models.detect_crossover(
+            0.0,
+            (0.45, 0.55);
+            solver_backend=:legacy,
+            n_scan=3,
+            max_iter=1,
+            p_num=8,
+            t_num=4,
+        )
+    end
 end

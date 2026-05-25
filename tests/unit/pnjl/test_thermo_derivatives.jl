@@ -91,18 +91,20 @@ end
     μ_fm = 1.5
     kwargs = (; xi=0.0, p_num=8, t_num=4)
 
+    md_auto = PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:auto, kwargs...)
     md_td = PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:taylordiff, kwargs...)
-    md_fd = PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:forwarddiff, kwargs...)
-    @test all(isapprox.(md_td.masses, md_fd.masses; rtol=1e-10, atol=1e-12))
-    @test all(isapprox.(md_td.dM_dT, md_fd.dM_dT; rtol=1e-10, atol=1e-12))
-    @test all(isapprox.(md_td.dM_dmu, md_fd.dM_dmu; rtol=1e-10, atol=1e-12))
-    @test all(isapprox.(md_td.d2M_dTdmu, md_fd.d2M_dTdmu; rtol=1e-9, atol=1e-11))
+    @test all(isapprox.(md_auto.masses, md_td.masses; rtol=1e-12, atol=1e-12))
+    @test all(isapprox.(md_auto.dM_dT, md_td.dM_dT; rtol=1e-12, atol=1e-12))
+    @test all(isapprox.(md_auto.dM_dmu, md_td.dM_dmu; rtol=1e-12, atol=1e-12))
+    @test all(isapprox.(md_auto.d2M_dTdmu, md_td.d2M_dTdmu; rtol=1e-12, atol=1e-12))
+    @test_throws ArgumentError PNJL.mass_derivatives(T_fm, μ_fm; order=2, derivative_backend=:forwarddiff, kwargs...)
 
+    bv_auto = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:auto, kwargs...)
     bv_td = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...)
-    bv_fd = PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
-    @test isapprox(bv_td.v_n_sq, bv_fd.v_n_sq; rtol=1e-10, atol=1e-12)
-    @test isapprox(bv_td.dμB_dT_sigma, bv_fd.dμB_dT_sigma; rtol=1e-10, atol=1e-12)
-    @test all(isapprox.(bv_td.masses, bv_fd.masses; rtol=1e-10, atol=1e-12))
+    @test isapprox(bv_auto.v_n_sq, bv_td.v_n_sq; rtol=1e-12, atol=1e-12)
+    @test isapprox(bv_auto.dμB_dT_sigma, bv_td.dμB_dT_sigma; rtol=1e-12, atol=1e-12)
+    @test all(isapprox.(bv_auto.masses, bv_td.masses; rtol=1e-12, atol=1e-12))
+    @test_throws ArgumentError PNJL.bulk_viscosity_coefficients(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
 end
 
 @testset "thermo_derivatives (new interface)" begin
@@ -127,19 +129,19 @@ end
 
     auto = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:auto, kwargs...)
     td = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...)
-    fd = PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
 
     @test isapprox(auto.dP_dT, td.dP_dT; rtol=1e-12, atol=1e-12)
     @test isapprox(auto.dP_dmu, td.dP_dmu; rtol=1e-12, atol=1e-12)
-    @test isapprox(td.dP_dT, fd.dP_dT; rtol=1e-10, atol=1e-12)
-    @test isapprox(td.dP_dmu, fd.dP_dmu; rtol=1e-10, atol=1e-12)
+    @test_throws ArgumentError PNJL.thermo_derivatives(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
 
     @test isapprox(PNJL.dP_dT(T_fm, μ_fm; derivative_backend=:auto, kwargs...),
         PNJL.dP_dT(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...);
         rtol=1e-12, atol=1e-12)
-    @test isapprox(PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...),
-        PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...);
-        rtol=1e-10, atol=1e-12)
+    @test isapprox(PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:auto, kwargs...),
+        PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:taylordiff, kwargs...);
+        rtol=1e-12, atol=1e-12)
+    @test_throws ArgumentError PNJL.dP_dT(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
+    @test_throws ArgumentError PNJL.dP_dmu(T_fm, μ_fm; derivative_backend=:forwarddiff, kwargs...)
 end
 
 @testset "bulk_viscosity_coefficients (new interface)" begin
@@ -170,50 +172,7 @@ end
     @test all(isfinite.(bv.masses))
 end
 
-# ============================================================================
-# 类型检查测试（确保无 Dual 泄漏）
-# ============================================================================
-
-using ForwardDiff
-using StaticArrays
-
-@testset "all_quantities type check" begin
+@testset "ThermoDerivatives legacy implicit entry removed" begin
     local ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
-    local IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
-    local get_thermal_nodes = getproperty(ThermoDerivatives, :get_thermal_nodes)
-    local set_config = getproperty(ThermoDerivatives, :set_config)
-    local CURRENT_XI = getproperty(ThermoDerivatives, :CURRENT_XI)
-    local CURRENT_P_NUM = getproperty(ThermoDerivatives, :CURRENT_P_NUM)
-    local CURRENT_T_NUM = getproperty(ThermoDerivatives, :CURRENT_T_NUM)
-    local calculate_thermo = getproperty(ThermoDerivatives, :calculate_thermo)
-    local calculate_rho = getproperty(ThermoDerivatives, :calculate_rho)
-    local compute_masses_from_state = getproperty(ThermoDerivatives, :compute_masses_from_state)
-
-    set_config(xi=0.0)
-    
-    function all_quantities(θ::AbstractVector)
-        (x_out, _) = IMPLICIT_SOLVER(θ)
-        x_sv = SVector{5}(Tuple(x_out))
-        mu_vec = SVector{3}(θ[2], θ[2], θ[2])
-        
-        nodes = get_thermal_nodes(CURRENT_P_NUM[], CURRENT_T_NUM[])
-        _, _, s, _ = calculate_thermo(x_sv, mu_vec, θ[1], nodes, CURRENT_XI[])
-        rho_vec = calculate_rho(x_sv, mu_vec, θ[1], nodes, CURRENT_XI[])
-        n = sum(rho_vec) / 3
-        masses = compute_masses_from_state(x_out)
-        
-        return [s, n, masses[1], masses[2], masses[3]]
-    end
-
-    θ = [0.5, 1.5]
-
-    # 直接调用
-    result = all_quantities(θ)
-    @test eltype(result) == Float64
-
-    # 计算 Jacobian
-    J = ForwardDiff.jacobian(all_quantities, θ)
-    @test size(J) == (5, 2)
-    @test eltype(J) == Float64
-    @test all(isfinite.(J))
+    @test !isdefined(ThermoDerivatives, :IMPLICIT_SOLVER)
 end

@@ -2,7 +2,7 @@
 
 julia_version = "1.12.5"
 manifest_format = "2.0"
-project_hash = "4e5774053ff58f85492a91dbb64262557db9faeb"
+project_hash = "04090d5977d99acec073ca06a080abdab4f0d813"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "8b2b045b22740e4be20654175cc38291d48539db"
@@ -655,22 +655,6 @@ git-tree-sha1 = "2eaa69a7cab70a52b9687c8bf950a5a93ec895ae"
 uuid = "076d061b-32b6-4027-95e0-9a2c6f6d7e74"
 version = "0.2.0"
 
-[[deps.ImplicitDifferentiation]]
-deps = ["ADTypes", "DifferentiationInterface", "KrylovKit", "LinearAlgebra"]
-git-tree-sha1 = "98dc2834abadbb808408b1e31f70b7a2df24a647"
-uuid = "57b37032-215b-411a-8a7c-41a003a55207"
-version = "0.9.1"
-
-    [deps.ImplicitDifferentiation.extensions]
-    ImplicitDifferentiationChainRulesCoreExt = "ChainRulesCore"
-    ImplicitDifferentiationForwardDiffExt = "ForwardDiff"
-    ImplicitDifferentiationZygoteExt = "Zygote"
-
-    [deps.ImplicitDifferentiation.weakdeps]
-    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
-
 [[deps.Indexing]]
 git-tree-sha1 = "ce1566720fd6b19ff3411404d4b977acd4814f9f"
 uuid = "313cdc1a-70c2-5d6a-ae34-0150d3930a38"
@@ -801,16 +785,6 @@ version = "3.1.3+0"
 deps = ["StyledStrings"]
 uuid = "ac6e5ff7-fb65-4e79-a425-ec3bc9c03011"
 version = "1.12.0"
-
-[[deps.KrylovKit]]
-deps = ["LinearAlgebra", "PackageExtensionCompat", "Printf", "Random", "VectorInterface"]
-git-tree-sha1 = "6dcba71deb016d646f1c1bcfcaacc764a198b8e6"
-uuid = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
-version = "0.10.2"
-weakdeps = ["ChainRulesCore"]
-
-    [deps.KrylovKit.extensions]
-    KrylovKitChainRulesCoreExt = "ChainRulesCore"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1114,12 +1088,6 @@ deps = ["Artifacts", "Glob", "LazyArtifacts", "Libdl", "Pkg", "Printf", "Relocat
 git-tree-sha1 = "7b2dbae3d0eda41dad445b5f36f40588c208a942"
 uuid = "9b87118b-4619-50d2-8e1e-99f35a4d4d9d"
 version = "2.2.5"
-
-[[deps.PackageExtensionCompat]]
-git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
-uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
-version = "1.0.2"
-weakdeps = ["Requires", "TOML"]
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
@@ -1693,12 +1661,6 @@ version = "0.4.1"
 git-tree-sha1 = "ca0969166a028236229f63514992fc073799bb78"
 uuid = "41fe7b60-77ed-43a1-b4f0-825fd5a5650d"
 version = "0.2.0"
-
-[[deps.VectorInterface]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "9166406dedd38c111a6574e9814be83d267f8aec"
-uuid = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
-version = "0.5.0"
 
 [[deps.Vulkan_Loader_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Wayland_jll", "Xorg_libX11_jll", "Xorg_libXrandr_jll", "xkbcommon_jll"]

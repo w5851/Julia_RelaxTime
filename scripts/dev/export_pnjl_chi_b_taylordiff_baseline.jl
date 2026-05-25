@@ -3,7 +3,7 @@
 using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_chi_b_taylordiff_fd_reference_v1.csv")
+const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_chi_b_taylordiff_v2.csv")
 const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "cep.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
@@ -21,7 +21,7 @@ function parse_args(args::Vector{String})
             i += 1
             output = args[i]
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/dev/export_pnjl_chi_b_taylordiff_fd_reference_baseline.jl [--output <path>]")
+            println("Usage: julia --project=. scripts/dev/export_pnjl_chi_b_taylordiff_baseline.jl [--output <path>]")
             exit(0)
         else
             error("unknown option: $arg")
@@ -67,11 +67,11 @@ function main(args::Vector{String})
     PNJL = Models.pnjl_module()
 
     open(output, "w") do io
-        println(io, "label,T_fm,muB_fm,xi,p_num,t_num,order,chi_B_forwarddiff")
+        println(io, "label,T_fm,muB_fm,xi,p_num,t_num,order,chi_B_taylordiff")
         for pt in baseline_points()
             kwargs = (; xi=pt.xi, p_num=pt.p_num, t_num=pt.t_num)
             for order in pt.orders
-                value = PNJL.chi_B(pt.T_fm, pt.muB_fm; order=order, derivative_backend=:forwarddiff, kwargs...)
+                value = PNJL.chi_B(pt.T_fm, pt.muB_fm; order=order, derivative_backend=:taylordiff, kwargs...)
                 @printf(io, "%s,%.16e,%.16e,%.6f,%d,%d,%d,%.16e\n",
                     pt.label,
                     pt.T_fm,
@@ -86,7 +86,7 @@ function main(args::Vector{String})
         end
     end
 
-    println("PNJL chi_B ForwardDiff reference baseline written to: " * output)
+    println("PNJL chi_B TaylorDiff baseline written to: " * output)
 end
 
 main(ARGS)
