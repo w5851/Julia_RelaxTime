@@ -36,7 +36,7 @@
 
 ## `detect_crossover`
 
-实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L209)。
+实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L360)。
 
 ```julia
 detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
@@ -54,11 +54,14 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 - `max_iter`
 - `p_num`
 - `t_num`
+- `solver_backend`
 
 支持的检测变量通常包括：
 
 - `:phi_u`
 - `:Phi`
+
+`solver_backend` 仅保留 `:models` 与 `:auto`。crossover 的序参量导数使用 TD 状态导数包装；旧 `:legacy` backend 已移除，传入时会抛出迁移错误。
 
 ### 峰值法 `:peak`
 
@@ -70,7 +73,7 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 
 ## `scan_crossover_line`
 
-实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L253)。
+实现位于 [src/models/phase/CrossoverLine.jl](src/models/phase/CrossoverLine.jl#L388)。
 
 ```julia
 scan_crossover_line(mu_range, T_range; method=:peak, variable=:phi_u, kwargs...)

@@ -25,11 +25,10 @@ Models.pnjl_module()
         m = Models.create_model(:PNJL)
         problem = Models.build_pnjl_flavor_mu_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0, 0.0, 0.0]
-        result = problem.forward_solve(θ)
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) == 5
         @test all(isfinite.(x))
-        @test length(problem.conditions(θ, x, nothing)) == 5
+        @test length(problem.conditions(θ, x, meta)) == 5
     end
 
     @testset "solve_pnjl_with_flavor_mu_derivatives symmetric consistency" begin
@@ -58,6 +57,8 @@ Models.pnjl_module()
         @test all(isapprox.(td_result.dx_dT, auto_result.dx_dT; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(td_result.dx_dmu_vec, auto_result.dx_dmu_vec; rtol=1e-12, atol=1e-12))
         @test_throws ArgumentError Models.solve_pnjl_with_flavor_mu_derivatives(T_fm, μ_vec; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        @test_throws ArgumentError Models.solve_pnjl_with_flavor_mu_derivatives(T_fm, μ_vec; order=1, p_num=8, t_num=4, thermo_backend=:legacy)
+        @test_throws ArgumentError Models.solve_pnjl_with_flavor_mu_derivatives(T_fm, μ_vec; order=1, p_num=8, t_num=4, solver_backend=:legacy)
     end
 
     @testset "solve_pnjl_with_flavor_mu_derivatives asymmetric point" begin

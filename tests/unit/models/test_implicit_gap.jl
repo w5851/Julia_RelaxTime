@@ -32,33 +32,30 @@ Models.pnjl_module()
         m = Models.create_model(:NJL2)
         problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = problem.forward_solve(θ)
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) >= 2
         @test all(isfinite.(x))
-        @test length(problem.conditions(θ, x, nothing)) == 2
+        @test length(problem.conditions(θ, x, meta)) == 2
     end
 
     @testset "residual problem forward solve NJL" begin
         m = Models.create_model(:NJL)
         problem = Models.build_njl_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = problem.forward_solve(θ)
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) >= 3
         @test all(isfinite.(x))
-        @test length(problem.conditions(θ, x, nothing)) == 3
+        @test length(problem.conditions(θ, x, meta)) == 3
     end
 
     @testset "residual problem forward solve PNJL" begin
         m = Models.create_model(:PNJL)
         problem = Models.build_pnjl_fixedmu_problem(m; p_num=24, t_num=6)
         θ = [0.5, 0.0]  # [T, μ]
-        result = problem.forward_solve(θ)
-        x = result isa Tuple ? result[1] : result
+        x, meta = problem.forward_solve(θ)
         @test length(x) == 5
         @test all(isfinite.(x))
-        @test length(problem.conditions(θ, x, nothing)) == 5
+        @test length(problem.conditions(θ, x, meta)) == 5
     end
 
     # --- solve_pnjl_with_derivatives ---
@@ -87,6 +84,8 @@ Models.pnjl_module()
         @test all(isapprox.(td_result.dx_dT, auto_result.dx_dT; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(td_result.dx_dμ, auto_result.dx_dμ; rtol=1e-12, atol=1e-12))
         @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, thermo_backend=:legacy)
+        @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, solver_backend=:legacy)
 
         @test all(isapprox.(named_result.x, vec_result.x; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(named_result.dx_dT, vec_result.dx_dT; rtol=1e-12, atol=1e-12))

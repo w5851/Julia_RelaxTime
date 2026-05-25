@@ -12,8 +12,14 @@ CrossoverResult(; method::Symbol=:peak) = CrossoverResult(false, nothing, nothin
 
 const HBARC_MEV_FM = 197.327
 
+@inline function _validate_crossover_solver_backend(solver_backend::Symbol)
+	(solver_backend === :models || solver_backend === :auto) && return nothing
+	throw(ArgumentError("solver_backend=$solver_backend is not supported for TD crossover derivatives; use solver_backend=:models or :auto."))
+end
+
 function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num::Int,
 		model_kind::Symbol, solver_backend::Symbol)
+	_validate_crossover_solver_backend(solver_backend)
 	model = create_model(model_kind)
 	mu_vec = normalize_mu_vec(μ_fm)
 
@@ -27,7 +33,6 @@ function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num:
 			p_num=p_num,
 			t_num=t_num,
 			thermo_backend=:models,
-			solver_backend=solver_backend,
 			derivative_backend=:taylordiff,
 		)
 		x = result.x

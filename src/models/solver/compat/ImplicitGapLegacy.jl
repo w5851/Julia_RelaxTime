@@ -25,6 +25,7 @@ export derive_vec, derive_named
 # solver/diff implementation surface.
 const IMPLICIT_GAP_LEGACY_COMPAT_ONLY = true
 const _IMPLICIT_COMPAT_DERIVATIVE_BACKENDS = (:auto, :taylordiff)
+const _TD_WRAPPER_SOLVER_BACKENDS = (:auto, :models)
 
 @inline function _validate_implicit_compat_derivative_backend(derivative_backend::Symbol)
     if derivative_backend === :forwarddiff
@@ -41,6 +42,14 @@ end
     isempty(kwargs) && return nothing
     names = join(string.(keys(kwargs)), ", ")
     throw(ArgumentError("unsupported keyword(s) for TD-only PNJL derivative wrapper: $names. Use residual problem builders for adapter audits."))
+end
+
+@inline function _validate_td_wrapper_backends(thermo_backend::Symbol, solver_backend::Symbol)
+    thermo_backend === :models ||
+        throw(ArgumentError("thermo_backend=$thermo_backend is not supported by TD-only PNJL derivative wrappers; use thermo_backend=:models."))
+    solver_backend in _TD_WRAPPER_SOLVER_BACKENDS ||
+        throw(ArgumentError("solver_backend=$solver_backend is not supported by TD-only PNJL derivative wrappers; use solver_backend=:models or :auto."))
+    return nothing
 end
 
 @inline function _legacy_adapter_model_kind(model::AbstractQCDModel)
@@ -267,12 +276,10 @@ function build_pnjl_flavor_mu_adapters(
 end
 
 @inline function _pnjl_model_kind(thermo_backend::Symbol)
-    if thermo_backend === :legacy
-        return :LegacyPNJL
-    elseif thermo_backend === :models
+    if thermo_backend === :models
         return :PNJL
     end
-    throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :legacy or :models)"))
+    throw(ArgumentError("unknown thermo_backend=$thermo_backend (expected :models)"))
 end
 
 """solve_pnjl_with_derivatives(T_fm, μ_fm; kwargs...) -> NamedTuple
@@ -301,8 +308,8 @@ function solve_pnjl_with_derivatives(
     backend = _implicit_compat_backend(derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
     _reject_unsupported_td_wrapper_kwargs(kwargs)
-    _ = solver_backend
-    kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
+    _validate_td_wrapper_backends(thermo_backend, solver_backend)
+    kind = _pnjl_model_kind(thermo_backend)
     model = create_model(kind)
     return _solve_pnjl_with_derivatives_taylordiff(
         model,
@@ -384,13 +391,12 @@ function solve_pnjl_with_flavor_mu_derivatives(
 )
     order == 1 || throw(ArgumentError("solve_pnjl_with_flavor_mu_derivatives currently supports order=1 only"))
 
-    kind = thermo_backend === :legacy ? :PNJL : _pnjl_model_kind(thermo_backend)
-    model = create_model(kind)
-
     backend = _implicit_compat_backend(derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
     _reject_unsupported_td_wrapper_kwargs(kwargs)
-    _ = solver_backend
+    _validate_td_wrapper_backends(thermo_backend, solver_backend)
+    kind = _pnjl_model_kind(thermo_backend)
+    model = create_model(kind)
     return _solve_pnjl_with_flavor_mu_derivatives_taylordiff(
         model,
         T_fm,

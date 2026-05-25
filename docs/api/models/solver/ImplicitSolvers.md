@@ -42,7 +42,7 @@
 
 它们适合“不想自己管理低层求解对象，但需要直接拿到 `x` 和导数”的场景。
 
-当前 PNJL 便捷导数包装默认使用 TaylorDiff series Newton；`derivative_backend=:auto` 与 `:taylordiff` 等价。旧 `derivative_backend=:forwarddiff` fallback 已下线，会抛出迁移错误。
+当前 PNJL 便捷导数包装默认使用 TaylorDiff series Newton；`derivative_backend=:auto` 与 `:taylordiff` 等价。旧 `derivative_backend=:forwarddiff` fallback 已下线，会抛出迁移错误。该导数包装只接受 `thermo_backend=:models`，`solver_backend` 只接受 `:models` 或 `:auto`；旧 `:legacy` 后端不会被静默映射，会直接抛出 `ArgumentError`。
 
 ## Minimal residual problem 契约
 
