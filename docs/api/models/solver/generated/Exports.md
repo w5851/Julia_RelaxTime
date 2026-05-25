@@ -23,9 +23,9 @@
 | `SeedStrategy` | src/models/exports_public.jl | 69 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `build_conditions` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `build_implicit_solver` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_njl_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_njl_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `build_residual!` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `create_model` | src/models/exports_public.jl | 13 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `gap_residual` | src/models/exports_public.jl | 22 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/ImplicitSolvers.md |

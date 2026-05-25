@@ -114,11 +114,11 @@
 | `build_implicit_solver` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `build_manifest_extensions` | src/models/exports_public.jl | 100 | 0 | - |
 | `build_meson_thermo_contract_row` | src/models/Models.jl | 40 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
-| `build_njl_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_njl_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `build_phase_artifacts` | src/models/Models.jl | 47 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `build_pilot_diff_context` | src/models/exports_public.jl | 124 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `build_problem_spec` | src/models/exports_public.jl | 52 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/README.md |
 | `build_residual!` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `build_seed_pool` | src/models/exports_public.jl | 56 | 0 | - |

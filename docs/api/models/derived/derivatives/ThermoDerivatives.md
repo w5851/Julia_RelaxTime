@@ -58,7 +58,7 @@
 - 控制导数阶数
 - 与中心差分或其它诊断方法做一致性比较
 
-对 PNJL 单方向高阶导数，默认后端一次构造单变量 Taylor series，避免嵌套 Dual 随阶数膨胀。旧 `:forwarddiff` 低阶对照不再属于 ThermoDerivatives API；如需 legacy implicit reference，请在专门诊断脚本中 qualified 调用 solver compat factory。
+对 PNJL 单方向高阶导数，默认后端一次构造单变量 Taylor series，避免嵌套 Dual 随阶数膨胀。旧 `:forwarddiff` 低阶对照不再属于 ThermoDerivatives API；如需 residual adapter 审计，请直接使用 `build_*_problem(...).forward_solve` 与 `conditions`。
 
 ## 使用建议
 

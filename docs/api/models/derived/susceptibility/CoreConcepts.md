@@ -30,7 +30,7 @@ susceptibility 不是模型主流程，而是模型热力学状态继续派生�
 
 mixed BQS 高阶导数走单独的内部 multivariate Taylor jet backend。它复用相同的 primal gap solve、`J0 = dF/dx`、逐阶线性求解、残差检查和 pressure extraction，但多变量系数布局只在非零 B/Q/S 轴数量超过 1 时启用。单方向 `B/Q/S` 不会退回通用 `D=1` jet，而是继续委派给单变量 TaylorDiff fast path。
 
-ForwardDiff 路径没有移除：它仍作为显式 `:forwarddiff` reference/fallback，以及 TaylorDiff/jet 路径中的 primal Jacobian/gradient。
+显式 `:forwarddiff` susceptibility reference/fallback 已下线；ForwardDiff 只保留为 TD/jet 路径内部构造 primal Jacobian/gradient 的低阶工具。
 
 ## 3. BQS 与 flavor 的边界
 
@@ -45,9 +45,9 @@ ForwardDiff 路径没有移除：它仍作为显式 `:forwarddiff` reference/fal
 
 按照当前实现，稳定支持范围是：
 
-- 纯单轴 `B/Q/S` 方向在 TaylorDiff backend 下可扩展到更高单方向阶数；`ForwardDiff` fallback 仍保留 `1..4`
+- 纯单轴 `B/Q/S` 方向在 TaylorDiff backend 下可扩展到更高单方向阶数
 - mixed BQS susceptibilities 在 `:auto` / `:taylordiff` / `:mixedjet` 下由内部 multivariate jet 支持，阶数由 `sum(orders)` 决定
-- `ForwardDiff` fallback 对 mixed 组合只保留总二阶 reference：`(1,1,0)`、`(1,0,1)`、`(0,1,1)`
+- `derivative_backend=:forwarddiff` 会抛出迁移错误；低阶 mixed 二阶也不再走 ImplicitDifferentiation reference
 
 因此，统一入口可以表达高阶 mixed BQS，但成本会随 jet 变量数和总阶数增长；性能敏感的纯单方向仍应保留默认 `:auto`。
 

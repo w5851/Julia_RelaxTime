@@ -20,5 +20,5 @@
 
 说明：
 
-- PNJL derivatives 默认导数后端现已切到 `TaylorDiff`；ThermoDerivatives 主题不再提供 `derivative_backend=:forwarddiff` fallback。susceptibility 主题中的显式 `:forwarddiff` reference 仍单独保留。
+- PNJL derivatives 与 conserved-charge susceptibility 默认导数后端现已切到 TD-first：纯 B/Q/S 单方向使用 TaylorDiff fast path，mixed BQS 使用 MixedTaylorJet；`derivative_backend=:forwarddiff` fallback 已下线。
 - `legacy_transport_c_p` 已从 `Models` 公开导出移除；请使用 `bulk_viscosity_coefficients(...).c_p`。

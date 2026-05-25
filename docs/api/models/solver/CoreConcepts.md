@@ -70,18 +70,18 @@ R1 收敛后，`FixedRho` 主链不再只依赖“单个大 residual 函数”�
 
 它们与 `solve` / `solve_multi` 的配合关系，是本主题最关键的维护知识之一。
 
-## 6. 导数入口 TD-first，implicit factory 降级为 compat-only
+## 6. 导数入口 TD-first，implicit factory 已退休
 
 `solve_pnjl_with_derivatives` 与 `solve_pnjl_with_flavor_mu_derivatives` 是 PNJL 状态导数的推荐入口，默认走 TaylorDiff explicit Taylor-series gap Newton。
 
-旧 `create_implicit_gap_solver`、`create_pnjl_implicit_solver`、`create_flavor_mu_implicit_gap_solver` 已从公共 export 面降级为 compat-only factory。它们仍可用 `Models.create_*` qualified 调用，主要用于显式 legacy reference 测试、诊断脚本，或还未迁完的低层对照路径。
+旧 `create_implicit_gap_solver`、`create_pnjl_implicit_solver`、`create_flavor_mu_implicit_gap_solver` 已从公共 export 面移除，并进一步降级为 retired compat wrapper。它们仍可用 `Models.create_*` qualified 调用，但只会抛出迁移错误，不再构造 `ImplicitFunction`。
 
 因此职责边界是：
 
 - 普通求解：`solve_gap` / `solve`
 - 需要 PNJL `dx/dθ`：`solve_pnjl_with_derivatives` / `solve_pnjl_with_flavor_mu_derivatives`
 - 需要导数组合：`solve_with_derivatives` 与 derivatives / susceptibility 主题入口
-- 需要旧隐函数 reference：qualified 调用 compat factory，不作为生产默认路径
+- 需要 residual adapter 审计：直接使用 `build_njl_problem` / `build_pnjl_fixedmu_problem` / `build_pnjl_flavor_mu_problem` 的 `forward_solve` 与 `conditions`
 
 ## 7. 为什么这个主题必须吸收旧页内容
 
@@ -90,7 +90,7 @@ R1 收敛后，`FixedRho` 主链不再只依赖“单个大 residual 函数”�
 - `solve_multi` 与 `MultiSeed` 的关系
 - `PhaseAwareContinuitySeed` 的首点自举语义
 - 约束模式对应的状态维度与参数维度
-- TD-first 导数路径、legacy `ImplicitFunction` compat 边界
+- TD-first 导数路径、retired implicit compat 边界
 
 如果这些信息继续只留在旧页，新 `models/solver` 主题就只是一个空壳入口。这个任务的目标正是把这些说明吸收进来，让新主题独立成立。
 

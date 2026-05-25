@@ -103,7 +103,7 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 - `SeedStrategy` 家族
 - `build_conditions` / `build_residual!`
 - `solve_pnjl_with_derivatives` / `solve_pnjl_with_flavor_mu_derivatives`
-- legacy implicit compat factory（qualified 调用，不作为首选公开入口）
+- residual problem builders；legacy implicit compat factory 已退休，qualified 调用只会抛迁移错误
 
 ## 与其它主题的关系
 
