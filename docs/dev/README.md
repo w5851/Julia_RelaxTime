@@ -185,5 +185,5 @@ julia --project=. scripts/dev/archive_docs.jl <filename.md>
 ## 运行时入口迁移现状（2026-02-24）
 
 - `src/simulation/fullserver` 的扫描与单点求解主路径已切到 `Models` 统一入口。
-- `src/pnjl/PNJL.jl` 当前定位为兼容层，保留对外导出以支持迁移过渡。
+- `src/pnjl/PNJL.jl` 仅保留为迁移历史说明，不作为当前新增调用入口。
 - 新增调用方默认应优先使用 `src/models/entrypoints.jl` 暴露的入口；仅在兼容需求下使用 `PNJL` 导出。

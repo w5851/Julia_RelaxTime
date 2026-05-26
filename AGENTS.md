@@ -42,6 +42,14 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - For stable CLI workflows documented in `docs/guides/scripts/README.md`, prefer the `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` wrappers so local sysimage reuse follows repo convention.
 - Unless the user explicitly asks for analysis only, prefer implementing, validating, and reporting instead of stopping at a proposal.
 
+### Scope, Verification, And Knowledge Governance
+
+- User approval or task consent applies only to the current stated target, scope, files, approach, risk level, and external impact; if any of these materially changes, stop and re-state the plan before proceeding.
+- For changes affecting stable entrypoints, unified solver behavior, numerical results, script contracts, server/API behavior, or user-visible workflows, distinguish "written/configured" from "effective/usable" in the final report.
+- When a task intentionally changes semantics, verify both that the target change works and that the explicitly non-changing constraints still hold.
+- Keep long-lived facts, stable entrypoints, directory responsibilities, and governance rules in the existing `docs/` structure; keep task process notes in `docs/dev/active/` or archived task records rather than mixing process history into API or architecture references.
+- Parallel read-only investigation is acceptable, but edits to the same file, module, or logical block must have a single active writer and be reconciled by the main agent before validation or commit.
+
 ### Numerical And Regression Governance
 
 - For changes affecting numerical results, scan logic, solver paths, cross sections, or relaxation-time workflows, explicitly decide which test layer must cover the change: `tests/unit/`, `tests/integration/`, `tests/regression/`, or `tests/validation/`.
