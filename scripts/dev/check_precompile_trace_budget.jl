@@ -12,11 +12,13 @@ const _TRACE_EXPR = "ENV[\"UNIT_FILES\"]=\"pnjl/test_conserved_charge_susceptibi
 const NO_SYS_CMD = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_no_sys.jl")) -e $(_TRACE_EXPR)`
 const WITH_SYS_CMD = `$(Base.julia_cmd()) --sysimage=$(SYSIMAGE_PATH) --project=$(PROJECT_ROOT) --trace-compile=$(joinpath(TRACE_DIR, "unit_conserved_with_sys.jl")) -e $(_TRACE_EXPR)`
 
-# GitHub Actions (Ubuntu 24.04, Julia 1.12.5) currently stabilizes at 1002 lines
-# for this with-sys trace. Keep a modest buffer for normal src-side evolution
-# without disabling the regression signal entirely.
+# GitHub Actions (Ubuntu 24.04, Julia 1.12.5) previously stabilized at 1002
+# lines before TaylorDiff joined the sysimage package set. Including TaylorDiff
+# lowers the with-sys trace substantially and raises `delta` because more
+# no-sys lines are now covered by the sysimage; keep focus delta bounded so the
+# AD-facing specialization surface remains guarded.
 const MAX_WITH_SYS_LINES = 1025
-const MAX_DELTA_LINES = 450
+const MAX_DELTA_LINES = 650
 const MAX_FOCUS_DELTA_LINES = 120
 
 mkpath(TRACE_DIR)

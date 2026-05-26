@@ -35,7 +35,7 @@ end
 mkpath(dirname(SYSIMAGE_PATH))
 
 create_sysimage(
-    ["CSV", "ForwardDiff", "JSON3", "NLsolve", "StaticArrays", "Test", "TestItemRunner"],
+    ["CSV", "ForwardDiff", "JSON3", "NLsolve", "StaticArrays", "TaylorDiff", "Test", "TestItemRunner"],
     project=PROJECT_ROOT,
     sysimage_path=SYSIMAGE_PATH,
     precompile_execution_file=PRECOMPILE_SCRIPT,

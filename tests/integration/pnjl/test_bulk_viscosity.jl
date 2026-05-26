@@ -15,11 +15,11 @@ Models.pnjl_module()
 const PNJL = Models.pnjl_module()
 const bulk_viscosity_coefficients = getproperty(PNJL, :bulk_viscosity_coefficients)
 const solve = getproperty(PNJL, :solve)
+const solve_with_derivatives = getproperty(PNJL, :solve_with_derivatives)
 const FixedMu = getproperty(PNJL, :FixedMu)
 const ThermoDerivatives = getproperty(PNJL, :ThermoDerivatives)
 const get_thermal_nodes = getproperty(ThermoDerivatives, :get_thermal_nodes)
 const set_config = getproperty(ThermoDerivatives, :set_config)
-const IMPLICIT_SOLVER = getproperty(ThermoDerivatives, :IMPLICIT_SOLVER)
 const calculate_thermo = getproperty(ThermoDerivatives, :calculate_thermo)
 const calculate_rho = getproperty(ThermoDerivatives, :calculate_rho)
 
@@ -61,17 +61,18 @@ end
     thermal_nodes = get_thermal_nodes(64, 16)
 
     function solve_state(θ_in)
-        (x_out, _) = IMPLICIT_SOLVER(θ_in)
-        return collect(x_out)
+        result = solve(FixedMu(), θ_in[1], θ_in[2]; xi=0.0, p_num=64, t_num=16)
+        return collect(result.x_state)
     end
 
     θ = [T_fm, μ_fm]
-    x_base = solve_state(θ)
+    derivative_result = solve_with_derivatives(T_fm, μ_fm; order=1, xi=0.0, p_num=64, t_num=16)
+    x_base = collect(derivative_result.x)
     x_sv = SVector{5}(Tuple(x_base))
     mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
 
     # 计算 dx/dθ
-    dx_dθ = ForwardDiff.jacobian(solve_state, θ)
+    dx_dθ = hcat(collect(derivative_result.dx_dT), collect(derivative_result.dx_dμ))
 
     # 使用有限差分验证 dx/dT
     x_T_plus = solve_state([T_fm + ε, μ_fm])
