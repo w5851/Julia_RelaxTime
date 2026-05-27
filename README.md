@@ -1,6 +1,6 @@
 # Julia RelaxTime
 
-Julia PNJL/NJL 计算平台：相图与扫描、各向异性输运/弛豫时间、`Models` 统一入口与可复现工作流。
+Julia PNJL/NJL 计算平台：相图与扫描、Mott 相变/介子质量、各向异性输运/弛豫时间、介子热力学、`Models` 统一入口与可复现工作流。
 
 [![Latest Release](https://img.shields.io/github/v/release/w5851/Julia_RelaxTime?label=release)](https://github.com/w5851/Julia_RelaxTime/releases/latest)
 

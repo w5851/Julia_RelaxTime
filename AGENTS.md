@@ -50,6 +50,12 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - Keep long-lived facts, stable entrypoints, directory responsibilities, and governance rules in the existing `docs/` structure; keep task process notes in `docs/dev/active/` or archived task records rather than mixing process history into API or architecture references.
 - Parallel read-only investigation is acceptable, but edits to the same file, module, or logical block must have a single active writer and be reconciled by the main agent before validation or commit.
 
+### Search Scope And Historical Archives
+
+- Default content search should prioritize current fact sources: `README.md`, `AGENTS.md`, `.github/copilot-instructions.md`, `docs/api/`, `docs/guides/`, `docs/dev/active/`, `docs/dev/backlog/`, `src/`, `scripts/`, `tests/`, and `config/`.
+- `docs/dev/archived/**` is a historical audit and completed-task record. Do not include it in broad default content searches because it may preserve obsolete paths, old status, or superseded implementation plans.
+- Only search `docs/dev/archived/**` when the task explicitly needs historical traceability, provenance, archived task evidence, old PR context, or an explanation of why a prior decision was made. When using archived content, label it as historical evidence rather than current repository state.
+
 ### Numerical And Regression Governance
 
 - For changes affecting numerical results, scan logic, solver paths, cross sections, or relaxation-time workflows, explicitly decide which test layer must cover the change: `tests/unit/`, `tests/integration/`, `tests/regression/`, or `tests/validation/`.
