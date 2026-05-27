@@ -6,12 +6,29 @@ function handle_modules_list()
     return HTTP.Response(200, headers, JSON3.write(MODULE_REGISTRY))
 end
 
+@inline function _pnjl_json_safe_value(value)
+    if value isa AbstractFloat
+        return isfinite(value) ? value : nothing
+    elseif value isa Integer || value isa Bool || value isa Nothing || value isa AbstractString
+        return value
+    elseif value isa AbstractDict
+        return Dict(string(k) => _pnjl_json_safe_value(v) for (k, v) in pairs(value))
+    elseif value isa NamedTuple
+        return Dict(string(k) => _pnjl_json_safe_value(v) for (k, v) in pairs(value))
+    elseif value isa AbstractVector
+        return [_pnjl_json_safe_value(v) for v in value]
+    elseif value isa Tuple
+        return [_pnjl_json_safe_value(v) for v in value]
+    end
+    return value
+end
+
 @inline function _pnjl_json_response(status::Int, payload::AbstractDict)
     headers = [
         "Content-Type" => "application/json; charset=utf-8",
         "Access-Control-Allow-Origin" => "*",
     ]
-    return HTTP.Response(status, headers, JSON3.write(payload))
+    return HTTP.Response(status, headers, JSON3.write(_pnjl_json_safe_value(payload)))
 end
 
 @inline function _pnjl_error_response(status::Int, code::String, message::String)

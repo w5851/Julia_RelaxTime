@@ -18,6 +18,14 @@ export function buildJobCreateUrl() {
     return build_api_url('/api/modules/pnjl-scan/jobs');
 }
 
+export function buildPnjlGapUrl() {
+    return build_api_url('/api/modules/pnjl-gap/run');
+}
+
+export function buildTransportPointUrl() {
+    return build_api_url('/api/modules/transport-point/run');
+}
+
 function is_retryable_error(error) {
     return error && (error.name === 'AbortError' || error.name === 'TypeError');
 }
@@ -93,6 +101,27 @@ function _is_number(value) {
 
 function _has_nonempty_numeric_array(value) {
     return Array.isArray(value) && value.length > 0 && value.every(v => _is_number(v));
+}
+
+function _validate_positive_int(value, fieldName, errors, required = false) {
+    if (value === undefined || value === null || value === '') {
+        if (required) {
+            errors.push(`${fieldName} 必须是正整数`);
+        }
+        return;
+    }
+    if (!_is_number(value) || !Number.isInteger(Number(value)) || Number(value) <= 0) {
+        errors.push(`${fieldName} 必须是正整数`);
+    }
+}
+
+function _validate_optional_nonnegative_number(value, fieldName, errors) {
+    if (value === undefined || value === null || value === '') {
+        return;
+    }
+    if (!_is_number(value) || Number(value) < 0) {
+        errors.push(`${fieldName} 必须是大于等于 0 的数字`);
+    }
 }
 
 export function validate_scan_request(request) {
@@ -197,6 +226,89 @@ export function validate_scan_request(request) {
     };
 }
 
+export function validate_pnjl_gap_request(request) {
+    const errors = [];
+    const params = request?.params || {};
+
+    if (!_is_number(params.T_mev)) {
+        errors.push('T_mev 必须是数字');
+    } else if (Number(params.T_mev) <= 0) {
+        errors.push('T_mev 必须大于 0');
+    }
+
+    const hasRhoTarget = params.rho_target !== undefined && params.rho_target !== null && params.rho_target !== '';
+    if (!hasRhoTarget) {
+        if (!_is_number(params.mu_mev)) {
+            errors.push('mu_mev 必须是数字');
+        } else if (Number(params.mu_mev) < 0) {
+            errors.push('mu_mev 必须大于等于 0');
+        }
+    } else {
+        _validate_optional_nonnegative_number(params.rho_target, 'rho_target', errors);
+        _validate_optional_nonnegative_number(params.mu_mev, 'mu_mev', errors);
+    }
+
+    if (params.xi !== undefined && params.xi !== null && params.xi !== '') {
+        if (!_is_number(params.xi)) {
+            errors.push('xi 必须是数字');
+        } else if (Number(params.xi) < 0 || Number(params.xi) > 1) {
+            errors.push('xi 必须在 [0, 1] 范围内');
+        }
+    }
+
+    _validate_positive_int(params.p_num, 'p_num', errors);
+    _validate_positive_int(params.t_num, 't_num', errors);
+
+    return {
+        valid: errors.length === 0,
+        errors,
+    };
+}
+
+export function validate_transport_point_request(request) {
+    const errors = [];
+    const params = request?.params || {};
+
+    if (!_is_number(params.T_mev)) {
+        errors.push('T_mev 必须是数字');
+    } else if (Number(params.T_mev) <= 0) {
+        errors.push('T_mev 必须大于 0');
+    }
+
+    if (!_is_number(params.mu_mev)) {
+        errors.push('mu_mev 必须是数字');
+    } else if (Number(params.mu_mev) < 0) {
+        errors.push('mu_mev 必须大于等于 0');
+    }
+
+    if (params.xi !== undefined && params.xi !== null && params.xi !== '') {
+        if (!_is_number(params.xi)) {
+            errors.push('xi 必须是数字');
+        } else if (Number(params.xi) < 0 || Number(params.xi) > 1) {
+            errors.push('xi 必须在 [0, 1] 范围内');
+        }
+    }
+
+    if (!_is_number(params.tau)) {
+        errors.push('tau 必须是数字');
+    } else if (Number(params.tau) < 0) {
+        errors.push('tau 必须大于等于 0');
+    }
+
+    _validate_positive_int(params.p_num, 'p_num', errors);
+    _validate_positive_int(params.t_num, 't_num', errors);
+
+    const transport = params.transport || {};
+    _validate_positive_int(transport.p_nodes, 'transport.p_nodes', errors);
+    _validate_optional_nonnegative_number(transport.p_max, 'transport.p_max', errors);
+    _validate_positive_int(transport.cos_nodes, 'transport.cos_nodes', errors);
+
+    return {
+        valid: errors.length === 0,
+        errors,
+    };
+}
+
 export async function summarize_scan_request_metrics(requests, submitter = null) {
     const total_requests = Array.isArray(requests) ? requests.length : 0;
     let client_blocked = 0;
@@ -245,6 +357,18 @@ export async function summarize_scan_request_metrics(requests, submitter = null)
 }
 
 export class API {
+    static buildJobCreateUrl() {
+        return buildJobCreateUrl();
+    }
+
+    static buildPnjlGapUrl() {
+        return buildPnjlGapUrl();
+    }
+
+    static buildTransportPointUrl() {
+        return buildTransportPointUrl();
+    }
+
     /**
      * 检查服务器健康状态
      * @returns {Promise<boolean>} 服务器是否在线
@@ -340,6 +464,48 @@ export class API {
             method: 'POST',
             body: JSON.stringify(payload),
             timeoutMs: 20000,
+            retries: 0,
+        });
+    }
+
+    static async runPnjlGap(payload) {
+        const validation = validate_pnjl_gap_request(payload);
+        if (!validation.valid) {
+            throw normalize_api_error({
+                status: 400,
+                payload: {
+                    code: 'INVALID_REQUEST',
+                    diagnostics: { errors: validation.errors },
+                },
+                message: validation.errors.join('\n'),
+            });
+        }
+
+        return await request_json('/api/modules/pnjl-gap/run', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            timeoutMs: 30000,
+            retries: 0,
+        });
+    }
+
+    static async runTransportPoint(payload) {
+        const validation = validate_transport_point_request(payload);
+        if (!validation.valid) {
+            throw normalize_api_error({
+                status: 400,
+                payload: {
+                    code: 'INVALID_REQUEST',
+                    diagnostics: { errors: validation.errors },
+                },
+                message: validation.errors.join('\n'),
+            });
+        }
+
+        return await request_json('/api/modules/transport-point/run', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            timeoutMs: 60000,
             retries: 0,
         });
     }

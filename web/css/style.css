@@ -71,6 +71,37 @@ body {
     background: var(--bg-light);
 }
 
+.service-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 12px;
+    max-width: 860px;
+}
+
+.service-tab {
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-dark);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.service-tab.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.service-panel {
+    display: none;
+}
+
+.service-panel.active {
+    display: block;
+}
+
 /* 主容器 */
 .container {
     display: flex;
@@ -501,6 +532,10 @@ form legend {
     margin-top: 8px;
 }
 
+.point-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .scan-actions button {
     padding: 8px;
     border: none;
@@ -681,4 +716,36 @@ form legend {
     border-radius: 6px;
     padding: 10px;
     font-size: 12px;
+}
+
+.point-result-panel {
+    margin-top: 10px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.inline-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-option input {
+    width: auto;
+    margin: 0;
+}
+
+@media (max-width: 720px) {
+    .service-tabs,
+    .scan-actions,
+    .point-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .service-tabs {
+        flex-direction: column;
+    }
 }

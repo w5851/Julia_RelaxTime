@@ -51,6 +51,26 @@ export class UI {
         this.historyHeatmap = null;
         this.navScatteringBtn = null;
         this.navTaskCenterBtn = null;
+        this.serviceTabs = [];
+        this.servicePanels = [];
+        this.pnjlGapForm = null;
+        this.pnjlGapSubmitBtn = null;
+        this.pnjlGapCopyParamsBtn = null;
+        this.pnjlGapCopyCurlBtn = null;
+        this.pnjlGapStatus = null;
+        this.pnjlGapResultPanel = null;
+        this.pnjlGapResultPreview = null;
+        this.lastPnjlGapPayload = null;
+        this.lastPnjlGapResultPayload = null;
+        this.transportPointForm = null;
+        this.transportPointSubmitBtn = null;
+        this.transportPointCopyParamsBtn = null;
+        this.transportPointCopyCurlBtn = null;
+        this.transportPointStatus = null;
+        this.transportPointResultPanel = null;
+        this.transportPointResultPreview = null;
+        this.lastTransportPointPayload = null;
+        this.lastTransportPointResultPayload = null;
     }
 
     /**
@@ -89,6 +109,22 @@ export class UI {
         this.historyHeatmap = document.getElementById('scan-history-heatmap');
         this.navScatteringBtn = document.getElementById('nav-scattering');
         this.navTaskCenterBtn = document.getElementById('nav-task-center');
+        this.serviceTabs = Array.from(document.querySelectorAll('[data-service-tab]'));
+        this.servicePanels = Array.from(document.querySelectorAll('[data-service-panel]'));
+        this.pnjlGapForm = document.getElementById('pnjl-gap-form');
+        this.pnjlGapSubmitBtn = document.getElementById('pnjl-gap-submit-btn');
+        this.pnjlGapCopyParamsBtn = document.getElementById('pnjl-gap-copy-params-btn');
+        this.pnjlGapCopyCurlBtn = document.getElementById('pnjl-gap-copy-curl-btn');
+        this.pnjlGapStatus = document.getElementById('pnjl-gap-status');
+        this.pnjlGapResultPanel = document.getElementById('pnjl-gap-result-panel');
+        this.pnjlGapResultPreview = document.getElementById('pnjl-gap-result-preview');
+        this.transportPointForm = document.getElementById('transport-point-form');
+        this.transportPointSubmitBtn = document.getElementById('transport-point-submit-btn');
+        this.transportPointCopyParamsBtn = document.getElementById('transport-point-copy-params-btn');
+        this.transportPointCopyCurlBtn = document.getElementById('transport-point-copy-curl-btn');
+        this.transportPointStatus = document.getElementById('transport-point-status');
+        this.transportPointResultPanel = document.getElementById('transport-point-result-panel');
+        this.transportPointResultPreview = document.getElementById('transport-point-result-preview');
 
         // 初始化可视化
         this.visualization = new Visualization('canvas-container');
@@ -131,6 +167,27 @@ export class UI {
         }
         if (this.navTaskCenterBtn) {
             this.navTaskCenterBtn.addEventListener('click', () => this.navigateToPage('task-center'));
+        }
+        this.serviceTabs.forEach((tab) => {
+            tab.addEventListener('click', () => this.switchServicePanel(tab.dataset.serviceTab));
+        });
+        if (this.pnjlGapForm) {
+            this.pnjlGapForm.addEventListener('submit', (e) => this.handlePnjlGapSubmit(e));
+        }
+        if (this.pnjlGapCopyParamsBtn) {
+            this.pnjlGapCopyParamsBtn.addEventListener('click', () => this.handleCopyPnjlGapParams());
+        }
+        if (this.pnjlGapCopyCurlBtn) {
+            this.pnjlGapCopyCurlBtn.addEventListener('click', () => this.handleCopyPnjlGapCurl());
+        }
+        if (this.transportPointForm) {
+            this.transportPointForm.addEventListener('submit', (e) => this.handleTransportPointSubmit(e));
+        }
+        if (this.transportPointCopyParamsBtn) {
+            this.transportPointCopyParamsBtn.addEventListener('click', () => this.handleCopyTransportPointParams());
+        }
+        if (this.transportPointCopyCurlBtn) {
+            this.transportPointCopyCurlBtn.addEventListener('click', () => this.handleCopyTransportPointCurl());
         }
         if (typeof window !== 'undefined') {
             window.addEventListener('hashchange', () => this.applyNavigationRoute());
@@ -207,6 +264,76 @@ export class UI {
     getScanKind() {
         const kindEl = document.getElementById('scan-kind');
         return kindEl ? String(kindEl.value).toLowerCase() : 'tmu';
+    }
+
+    switchServicePanel(panelId) {
+        const target = panelId || 'scan';
+        this.serviceTabs.forEach((tab) => {
+            tab.classList.toggle('active', tab.dataset.serviceTab === target);
+        });
+        this.servicePanels.forEach((panel) => {
+            panel.classList.toggle('active', panel.dataset.servicePanel === target);
+        });
+    }
+
+    readNumberInput(id, fieldName) {
+        const raw = String(document.getElementById(id)?.value || '').trim();
+        if (!raw) {
+            throw new Error(`${fieldName} 不能为空`);
+        }
+        const value = Number(raw);
+        if (!Number.isFinite(value)) {
+            throw new Error(`${fieldName} 必须是数字`);
+        }
+        return value;
+    }
+
+    readOptionalNumberInput(id, fieldName) {
+        const raw = String(document.getElementById(id)?.value || '').trim();
+        if (!raw) {
+            return null;
+        }
+        const value = Number(raw);
+        if (!Number.isFinite(value)) {
+            throw new Error(`${fieldName} 必须是数字`);
+        }
+        return value;
+    }
+
+    readOptionalIntInput(id, fieldName) {
+        const value = this.readOptionalNumberInput(id, fieldName);
+        if (value === null) {
+            return null;
+        }
+        if (!Number.isInteger(value)) {
+            throw new Error(`${fieldName} 必须是整数`);
+        }
+        return value;
+    }
+
+    setPointStatus(statusEl, text, level = 'info') {
+        if (!statusEl) {
+            return;
+        }
+        statusEl.textContent = text;
+        statusEl.className = `scan-status ${level}`;
+    }
+
+    setButtonBusy(button, busy, busyText, idleText) {
+        if (!button) {
+            return;
+        }
+        button.disabled = busy;
+        button.textContent = busy ? busyText : idleText;
+    }
+
+    buildPointCurlCommand(url, payload) {
+        if (!payload) {
+            return '';
+        }
+        const body = JSON.stringify(payload);
+        const escapedBody = body.replace(/'/g, "'\"'\"'");
+        return `curl -X POST "${url}" -H "Content-Type: application/json" --data-raw '${escapedBody}'`;
     }
 
     parseNumberList(raw, fieldName, required = true) {
@@ -649,6 +776,179 @@ export class UI {
 
     async handleCopyScanCurl() {
         await this.copyTextToClipboard(this.buildScanCurlCommand(), '已复制 curl 命令');
+    }
+
+    collectPnjlGapPayload() {
+        const rhoTarget = this.readOptionalNumberInput('pnjl-gap-rho-target', 'rho_target');
+        const params = {
+            T_mev: this.readNumberInput('pnjl-gap-t-mev', 'T_mev'),
+            xi: this.readNumberInput('pnjl-gap-xi', 'xi'),
+            allow_seed_fallback: !!document.getElementById('pnjl-gap-allow-seed-fallback')?.checked,
+        };
+        const muMev = rhoTarget === null
+            ? this.readNumberInput('pnjl-gap-mu-mev', 'mu_mev')
+            : this.readOptionalNumberInput('pnjl-gap-mu-mev', 'mu_mev');
+        const pNum = this.readOptionalIntInput('pnjl-gap-p-num', 'p_num');
+        const tNum = this.readOptionalIntInput('pnjl-gap-t-num', 't_num');
+        if (muMev !== null) {
+            params.mu_mev = muMev;
+        }
+        if (rhoTarget !== null) {
+            params.rho_target = rhoTarget;
+        }
+        if (pNum !== null) {
+            params.p_num = pNum;
+        }
+        if (tNum !== null) {
+            params.t_num = tNum;
+        }
+        return { params };
+    }
+
+    updatePnjlGapResult(payload) {
+        const result = payload?.result || {};
+        this.lastPnjlGapResultPayload = payload;
+        document.getElementById('pnjl-gap-converged').textContent = String(result.converged ?? '-');
+        document.getElementById('pnjl-gap-iterations').textContent = result.iterations ?? '-';
+        document.getElementById('pnjl-gap-residual').textContent = result.residual_norm ?? '-';
+        document.getElementById('pnjl-gap-pressure').textContent = result.pressure ?? '-';
+        if (this.pnjlGapResultPreview) {
+            this.pnjlGapResultPreview.textContent = JSON.stringify(payload, null, 2);
+        }
+        if (this.pnjlGapResultPanel) {
+            this.pnjlGapResultPanel.style.display = '';
+        }
+        if (this.pnjlGapCopyParamsBtn) {
+            this.pnjlGapCopyParamsBtn.disabled = !this.lastPnjlGapPayload;
+        }
+        if (this.pnjlGapCopyCurlBtn) {
+            this.pnjlGapCopyCurlBtn.disabled = !this.lastPnjlGapPayload;
+        }
+    }
+
+    async handlePnjlGapSubmit(event) {
+        event.preventDefault();
+        this.clearError();
+        this.setButtonBusy(this.pnjlGapSubmitBtn, true, '运行中...', '运行单点');
+        if (this.pnjlGapResultPanel) {
+            this.pnjlGapResultPanel.style.display = 'none';
+        }
+        try {
+            const payload = this.collectPnjlGapPayload();
+            this.lastPnjlGapPayload = payload;
+            this.setPointStatus(this.pnjlGapStatus, '运行中...', 'running');
+            const resultPayload = await API.runPnjlGap(payload);
+            this.updatePnjlGapResult(resultPayload);
+            this.setPointStatus(this.pnjlGapStatus, '运行完成', 'success');
+        } catch (error) {
+            this.setPointStatus(this.pnjlGapStatus, API.formatError(error), 'error');
+            this.showError(API.formatError(error));
+        } finally {
+            this.setButtonBusy(this.pnjlGapSubmitBtn, false, '运行中...', '运行单点');
+        }
+    }
+
+    async handleCopyPnjlGapParams() {
+        const text = this.lastPnjlGapPayload ? JSON.stringify(this.lastPnjlGapPayload, null, 2) : '';
+        await this.copyTextToClipboard(text, '已复制 PNJL 参数 JSON');
+    }
+
+    async handleCopyPnjlGapCurl() {
+        await this.copyTextToClipboard(
+            this.buildPointCurlCommand(API.buildPnjlGapUrl(), this.lastPnjlGapPayload),
+            '已复制 PNJL curl 命令',
+        );
+    }
+
+    collectTransportPointPayload() {
+        const params = {
+            T_mev: this.readNumberInput('transport-point-t-mev', 'T_mev'),
+            mu_mev: this.readNumberInput('transport-point-mu-mev', 'mu_mev'),
+            xi: this.readNumberInput('transport-point-xi', 'xi'),
+            tau: this.readNumberInput('transport-point-tau', 'tau'),
+            compute_bulk: !!document.getElementById('transport-point-compute-bulk')?.checked,
+        };
+        const pNum = this.readOptionalIntInput('transport-point-p-num', 'p_num');
+        const tNum = this.readOptionalIntInput('transport-point-t-num', 't_num');
+        const pNodes = this.readOptionalIntInput('transport-point-p-nodes', 'transport.p_nodes');
+        const pMax = this.readOptionalNumberInput('transport-point-p-max', 'transport.p_max');
+        const cosNodes = this.readOptionalIntInput('transport-point-cos-nodes', 'transport.cos_nodes');
+        if (pNum !== null) {
+            params.p_num = pNum;
+        }
+        if (tNum !== null) {
+            params.t_num = tNum;
+        }
+        const transport = {};
+        if (pNodes !== null) {
+            transport.p_nodes = pNodes;
+        }
+        if (pMax !== null) {
+            transport.p_max = pMax;
+        }
+        if (cosNodes !== null) {
+            transport.cos_nodes = cosNodes;
+        }
+        if (Object.keys(transport).length > 0) {
+            params.transport = transport;
+        }
+        return { params };
+    }
+
+    updateTransportPointResult(payload) {
+        const result = payload?.result || {};
+        const transport = result.transport || {};
+        this.lastTransportPointResultPayload = payload;
+        document.getElementById('transport-point-converged').textContent = String(result.equilibrium?.converged ?? '-');
+        document.getElementById('transport-point-eta').textContent = transport.eta ?? '-';
+        document.getElementById('transport-point-sigma').textContent = transport.sigma ?? '-';
+        document.getElementById('transport-point-zeta').textContent = transport.zeta ?? '-';
+        if (this.transportPointResultPreview) {
+            this.transportPointResultPreview.textContent = JSON.stringify(payload, null, 2);
+        }
+        if (this.transportPointResultPanel) {
+            this.transportPointResultPanel.style.display = '';
+        }
+        if (this.transportPointCopyParamsBtn) {
+            this.transportPointCopyParamsBtn.disabled = !this.lastTransportPointPayload;
+        }
+        if (this.transportPointCopyCurlBtn) {
+            this.transportPointCopyCurlBtn.disabled = !this.lastTransportPointPayload;
+        }
+    }
+
+    async handleTransportPointSubmit(event) {
+        event.preventDefault();
+        this.clearError();
+        this.setButtonBusy(this.transportPointSubmitBtn, true, '运行中...', '运行单点');
+        if (this.transportPointResultPanel) {
+            this.transportPointResultPanel.style.display = 'none';
+        }
+        try {
+            const payload = this.collectTransportPointPayload();
+            this.lastTransportPointPayload = payload;
+            this.setPointStatus(this.transportPointStatus, '运行中...', 'running');
+            const resultPayload = await API.runTransportPoint(payload);
+            this.updateTransportPointResult(resultPayload);
+            this.setPointStatus(this.transportPointStatus, '运行完成', 'success');
+        } catch (error) {
+            this.setPointStatus(this.transportPointStatus, API.formatError(error), 'error');
+            this.showError(API.formatError(error));
+        } finally {
+            this.setButtonBusy(this.transportPointSubmitBtn, false, '运行中...', '运行单点');
+        }
+    }
+
+    async handleCopyTransportPointParams() {
+        const text = this.lastTransportPointPayload ? JSON.stringify(this.lastTransportPointPayload, null, 2) : '';
+        await this.copyTextToClipboard(text, '已复制 Transport 参数 JSON');
+    }
+
+    async handleCopyTransportPointCurl() {
+        await this.copyTextToClipboard(
+            this.buildPointCurlCommand(API.buildTransportPointUrl(), this.lastTransportPointPayload),
+            '已复制 Transport curl 命令',
+        );
     }
 
     async handleScanCancel() {

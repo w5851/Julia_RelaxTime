@@ -191,13 +191,14 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `params.rho_target`（可选；提供后进入 `FixedRho` 模式）
 - `params.xi`（可选，默认 `0.0`）
 - `params.p_num`（可选，默认 `24`）
-- `params.t_num`（可选，默认 `12`）
+- `params.t_num`（可选，默认 `8`）
 - `params.allow_seed_fallback`（可选，默认 `true`）
 
 成功响应（`200`）：
 
 - `status="ok"`
 - `result`：`converged/omega/pressure/rho_norm/entropy/energy/iterations/residual_norm/xi/seed_fallback_used/x_state/mu_vec/masses`
+- 对当前单点口径下未计算或不可得的浮点量，HTTP 响应中统一返回 `null`，不返回 JSON `NaN` 字面量。
 
 #### 0.6.3 `POST /api/modules/pnjl-scan/jobs`（异步创建）
 

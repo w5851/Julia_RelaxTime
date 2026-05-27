@@ -37,6 +37,10 @@ julia --project=. scripts/server/server.jl
 1. 健康检查：访问 `http://localhost:8080/health`，应返回 `OK`
 2. 打开 `web/index.html`，确认页面状态指示器显示在线
 3. 使用默认参数发起一次 `/compute` 请求并观察结果
+4. 切到“扫描任务中心”，可触发：
+   - `pnjl-scan` 异步任务：`tmu/trho` + `scan/point`
+   - `pnjl-gap` 同步单点：`POST /api/modules/pnjl-gap/run`
+   - `transport-point` 同步单点：`POST /api/modules/transport-point/run`
 
 ## 4. 测试建议
 

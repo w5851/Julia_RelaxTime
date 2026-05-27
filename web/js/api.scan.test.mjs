@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import { API, build_api_url, normalize_api_error, summarize_scan_request_metrics, validate_scan_request } from './api.js';
+import {
+    API,
+    build_api_url,
+    normalize_api_error,
+    summarize_scan_request_metrics,
+    validate_pnjl_gap_request,
+    validate_scan_request,
+    validate_transport_point_request,
+} from './api.js';
 
 function test_validate_scan_request() {
     const ok = validate_scan_request({
@@ -58,6 +66,59 @@ function test_validate_scan_request() {
         },
     });
     assert.equal(bad_empty_numeric.valid, false);
+}
+
+function test_validate_point_requests() {
+    const gapOk = validate_pnjl_gap_request({
+        params: {
+            T_mev: 150.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+        },
+    });
+    assert.equal(gapOk.valid, true);
+
+    const gapFixedRhoOk = validate_pnjl_gap_request({
+        params: {
+            T_mev: 150.0,
+            rho_target: 0.1,
+            xi: 0.0,
+        },
+    });
+    assert.equal(gapFixedRhoOk.valid, true);
+
+    const gapBad = validate_pnjl_gap_request({
+        params: {
+            T_mev: -1.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+        },
+    });
+    assert.equal(gapBad.valid, false);
+
+    const transportOk = validate_transport_point_request({
+        params: {
+            T_mev: 150.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+            tau: 1.0,
+            transport: {
+                p_nodes: 8,
+                p_max: 3.5,
+            },
+        },
+    });
+    assert.equal(transportOk.valid, true);
+
+    const transportBad = validate_transport_point_request({
+        params: {
+            T_mev: 150.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+            tau: -1.0,
+        },
+    });
+    assert.equal(transportBad.valid, false);
 }
 
 function test_build_api_url() {
@@ -223,13 +284,69 @@ async function test_cancel_job_request_contract() {
     delete globalThis.__JRT_API_BASE_URL__;
 }
 
+async function test_point_service_request_contracts() {
+    const originalFetch = globalThis.fetch;
+    globalThis.__JRT_API_BASE_URL__ = 'http://127.0.0.1:9000';
+
+    const calls = [];
+    globalThis.fetch = async (url, options = {}) => {
+        calls.push({
+            url: String(url),
+            method: String(options.method || 'GET'),
+            body: JSON.parse(String(options.body || '{}')),
+        });
+        return {
+            ok: true,
+            status: 200,
+            json: async () => ({ status: 'ok', result: {} }),
+        };
+    };
+
+    await API.runPnjlGap({
+        params: {
+            T_mev: 150.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+        },
+    });
+    await API.runTransportPoint({
+        params: {
+            T_mev: 150.0,
+            mu_mev: 0.0,
+            xi: 0.0,
+            tau: 1.0,
+            p_num: 8,
+            t_num: 4,
+            transport: {
+                p_nodes: 8,
+                p_max: 3.5,
+            },
+        },
+    });
+
+    assert.equal(calls[0].method, 'POST');
+    assert.equal(calls[0].url, 'http://127.0.0.1:9000/api/modules/pnjl-gap/run');
+    assert.equal(calls[0].body.params.T_mev, 150.0);
+    assert.equal(calls[1].method, 'POST');
+    assert.equal(calls[1].url, 'http://127.0.0.1:9000/api/modules/transport-point/run');
+    assert.equal(calls[1].body.params.transport.p_nodes, 8);
+
+    assert.equal(API.buildPnjlGapUrl(), 'http://127.0.0.1:9000/api/modules/pnjl-gap/run');
+    assert.equal(API.buildTransportPointUrl(), 'http://127.0.0.1:9000/api/modules/transport-point/run');
+
+    globalThis.fetch = originalFetch;
+    delete globalThis.__JRT_API_BASE_URL__;
+}
+
 async function run() {
     test_validate_scan_request();
+    test_validate_point_requests();
     test_build_api_url();
     test_normalize_api_error();
     await test_format_error_for_timeout_and_offline();
     await test_scan_request_400_ratio_metrics();
     await test_cancel_job_request_contract();
+    await test_point_service_request_contracts();
     console.log('api.scan.test.mjs: PASS');
 }
 

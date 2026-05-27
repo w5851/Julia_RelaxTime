@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2→2散射动量可视化</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="css/style.css">
     <script type="importmap">
     {
@@ -194,7 +195,13 @@
     </section>
 
     <section id="page-task-center" class="page task-center-page">
-        <section class="scan-panel" id="scan-panel">
+        <div class="service-tabs" role="tablist" aria-label="任务模块">
+            <button type="button" class="service-tab active" data-service-tab="scan">扫描任务</button>
+            <button type="button" class="service-tab" data-service-tab="pnjl-gap">PNJL 单点</button>
+            <button type="button" class="service-tab" data-service-tab="transport-point">Transport 单点</button>
+        </div>
+
+        <section class="scan-panel service-panel active" id="scan-panel" data-service-panel="scan">
             <h2>本机扫描任务（P0）</h2>
 
             <div class="scan-runtime-note">
@@ -318,6 +325,81 @@
                 <summary>技术诊断详情</summary>
                 <pre id="scan-tech-details">-</pre>
             </details>
+        </section>
+
+        <section class="scan-panel service-panel" id="pnjl-gap-panel" data-service-panel="pnjl-gap">
+            <h2>PNJL 单点</h2>
+
+            <form id="pnjl-gap-form">
+                <fieldset>
+                    <legend>输入参数</legend>
+                    <label>T_mev:<input type="number" id="pnjl-gap-t-mev" step="any" value="150"></label>
+                    <label>mu_mev:<input type="number" id="pnjl-gap-mu-mev" step="any" value="0"></label>
+                    <label>rho_target:<input type="number" id="pnjl-gap-rho-target" step="any" placeholder="可选"></label>
+                    <label>xi:<input type="number" id="pnjl-gap-xi" step="any" min="0" max="1" value="0.0"></label>
+                </fieldset>
+
+                <fieldset>
+                    <legend>数值选项</legend>
+                    <label>p_num:<input type="number" id="pnjl-gap-p-num" min="1" step="1" placeholder="默认 24"></label>
+                    <label>t_num:<input type="number" id="pnjl-gap-t-num" min="1" step="1" placeholder="默认 8"></label>
+                    <label class="inline-option"><input type="checkbox" id="pnjl-gap-allow-seed-fallback" checked> allow_seed_fallback</label>
+                </fieldset>
+
+                <div class="scan-actions point-actions">
+                    <button type="submit" id="pnjl-gap-submit-btn">运行单点</button>
+                    <button type="button" id="pnjl-gap-copy-params-btn" disabled>复制参数 JSON</button>
+                    <button type="button" id="pnjl-gap-copy-curl-btn" disabled>复制 curl 命令</button>
+                </div>
+            </form>
+
+            <div class="scan-status" id="pnjl-gap-status">未运行</div>
+            <div class="point-result-panel" id="pnjl-gap-result-panel" style="display:none;">
+                <div>converged: <span id="pnjl-gap-converged">-</span></div>
+                <div>iterations: <span id="pnjl-gap-iterations">-</span></div>
+                <div>residual_norm: <span id="pnjl-gap-residual">-</span></div>
+                <div>pressure: <span id="pnjl-gap-pressure">-</span></div>
+                <pre id="pnjl-gap-result-preview" class="scan-result-preview">-</pre>
+            </div>
+        </section>
+
+        <section class="scan-panel service-panel" id="transport-point-panel" data-service-panel="transport-point">
+            <h2>Transport 单点</h2>
+
+            <form id="transport-point-form">
+                <fieldset>
+                    <legend>平衡态输入</legend>
+                    <label>T_mev:<input type="number" id="transport-point-t-mev" step="any" value="150"></label>
+                    <label>mu_mev:<input type="number" id="transport-point-mu-mev" step="any" value="0"></label>
+                    <label>xi:<input type="number" id="transport-point-xi" step="any" min="0" max="1" value="0.0"></label>
+                    <label>tau:<input type="number" id="transport-point-tau" step="any" min="0" value="1.0"></label>
+                </fieldset>
+
+                <fieldset>
+                    <legend>数值选项</legend>
+                    <label>p_num:<input type="number" id="transport-point-p-num" min="1" step="1" value="8"></label>
+                    <label>t_num:<input type="number" id="transport-point-t-num" min="1" step="1" value="4"></label>
+                    <label>transport.p_nodes:<input type="number" id="transport-point-p-nodes" min="1" step="1" value="8"></label>
+                    <label>transport.p_max:<input type="number" id="transport-point-p-max" min="0" step="any" value="3.5"></label>
+                    <label>transport.cos_nodes:<input type="number" id="transport-point-cos-nodes" min="1" step="1" placeholder="可选"></label>
+                    <label class="inline-option"><input type="checkbox" id="transport-point-compute-bulk"> compute_bulk</label>
+                </fieldset>
+
+                <div class="scan-actions point-actions">
+                    <button type="submit" id="transport-point-submit-btn">运行单点</button>
+                    <button type="button" id="transport-point-copy-params-btn" disabled>复制参数 JSON</button>
+                    <button type="button" id="transport-point-copy-curl-btn" disabled>复制 curl 命令</button>
+                </div>
+            </form>
+
+            <div class="scan-status" id="transport-point-status">未运行</div>
+            <div class="point-result-panel" id="transport-point-result-panel" style="display:none;">
+                <div>equilibrium.converged: <span id="transport-point-converged">-</span></div>
+                <div>eta: <span id="transport-point-eta">-</span></div>
+                <div>sigma: <span id="transport-point-sigma">-</span></div>
+                <div>zeta: <span id="transport-point-zeta">-</span></div>
+                <pre id="transport-point-result-preview" class="scan-result-preview">-</pre>
+            </div>
         </section>
     </section>
     
