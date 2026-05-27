@@ -44,6 +44,10 @@ julia --project=. scripts/perf/pnjl_chi_b_taylordiff_probe.jl --max_order=10 --p
 - warm runtime 保持在几十毫秒以下，满足当前 high-order 单方向 `chi_B` 路径的目标。
 - `linear_solve=:auto` 当前低阶到 `order=10` 使用 `:refactor_each_order`，`order >= 16` 才切到 `:factorized_each_order`；这是基于旧探针中 order 4/10 未稳定受益、order 16 明显受益的策略。
 
+## 回归基线说明
+
+`tests/baselines/pnjl/baseline_pnjl_chi_b_taylordiff_fd_reference_v1.csv` 是冻结的历史 ForwardDiff 对照。保留 `fd_reference_v1` 的原因是固定点与 CEP 邻域测试中 ForwardDiff 和 TaylorDiff 在目标阶数上达到机器精度一致，数值结果应相同；当前生产实现选择 TaylorDiff 是因为同等结果下性能和高阶稳定性更好。后续若需要刷新门禁，应另行生成当前 TaylorDiff 基线，而不是覆盖这个历史对照文件。
+
 ## Mixed BQS Jet Probe
 
 高阶 mixed BQS 走内部 multivariate Taylor jet，不替代单方向 TaylorDiff fast path。代表性探针命令：
