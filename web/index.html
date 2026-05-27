@@ -199,6 +199,7 @@
             <button type="button" class="service-tab active" data-service-tab="scan">扫描任务</button>
             <button type="button" class="service-tab" data-service-tab="pnjl-gap">PNJL 单点</button>
             <button type="button" class="service-tab" data-service-tab="transport-point">Transport 单点</button>
+            <button type="button" class="service-tab" data-service-tab="script-tasks">脚本长任务</button>
         </div>
 
         <section class="scan-panel service-panel active" id="scan-panel" data-service-panel="scan">
@@ -399,6 +400,69 @@
                 <div>sigma: <span id="transport-point-sigma">-</span></div>
                 <div>zeta: <span id="transport-point-zeta">-</span></div>
                 <pre id="transport-point-result-preview" class="scan-result-preview">-</pre>
+            </div>
+        </section>
+
+        <section class="scan-panel service-panel" id="script-tasks-panel" data-service-panel="script-tasks">
+            <h2>脚本长任务目录</h2>
+
+            <div class="scan-runtime-note">
+                默认只推荐 smoke preset。canonical/custom 会占用本机较久，提交前必须显式确认。
+            </div>
+
+            <div class="script-task-grid">
+                <div>
+                    <div class="script-task-toolbar">
+                        <button type="button" id="script-task-refresh-btn">刷新目录</button>
+                    </div>
+                    <div id="script-task-catalog" class="script-task-catalog">正在加载任务目录...</div>
+                </div>
+
+                <div>
+                    <form id="script-task-form">
+                        <fieldset>
+                            <legend>任务与 preset</legend>
+                            <label>
+                                task_id:
+                                <select id="script-task-select"></select>
+                            </label>
+                            <label>
+                                preset:
+                                <select id="script-task-preset"></select>
+                            </label>
+                            <label class="inline-option">
+                                <input type="checkbox" id="script-task-confirm-heavy">
+                                confirm_heavy
+                            </label>
+                        </fieldset>
+
+                        <fieldset id="script-task-custom-fieldset" style="display:none;">
+                            <legend>custom_args（每行一个 argv 参数）</legend>
+                            <textarea id="script-task-custom-args" rows="8" placeholder="例如：&#10;--outdir&#10;data/outputs/results/my_case&#10;--overwrite"></textarea>
+                        </fieldset>
+
+                        <div class="script-task-selected" id="script-task-selected-summary">请选择任务</div>
+
+                        <div class="scan-actions script-task-actions">
+                            <button type="submit" id="script-task-submit-btn">提交脚本任务</button>
+                            <button type="button" id="script-task-cancel-btn" disabled>取消任务</button>
+                            <button type="button" id="script-task-copy-curl-btn" disabled>复制 curl 命令</button>
+                        </div>
+                    </form>
+
+                    <div class="scan-status" id="script-task-status">未提交任务</div>
+                    <pre class="scan-details" id="script-task-details">-</pre>
+
+                    <div class="scan-result-panel" id="script-task-result-panel" style="display:none;">
+                        <h3>脚本任务结果</h3>
+                        <div>task_id: <span id="script-task-result-task">-</span></div>
+                        <div>job_status: <span id="script-task-result-status">-</span></div>
+                        <div>exit_code: <span id="script-task-result-exit-code">-</span></div>
+                        <div>output_dir: <span id="script-task-output-dir">-</span></div>
+                        <div>artifacts: <span id="script-task-artifact-count">-</span></div>
+                        <pre id="script-task-result-preview" class="scan-result-preview">-</pre>
+                    </div>
+                </div>
             </div>
         </section>
     </section>

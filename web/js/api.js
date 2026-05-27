@@ -26,6 +26,14 @@ export function buildTransportPointUrl() {
     return build_api_url('/api/modules/transport-point/run');
 }
 
+export function buildScriptTaskCatalogUrl() {
+    return build_api_url('/api/modules/script-tasks');
+}
+
+export function buildScriptTaskCreateUrl() {
+    return build_api_url('/api/modules/script-tasks/jobs');
+}
+
 function is_retryable_error(error) {
     return error && (error.name === 'AbortError' || error.name === 'TypeError');
 }
@@ -309,6 +317,56 @@ export function validate_transport_point_request(request) {
     };
 }
 
+export function validate_script_task_request(request, task = null) {
+    const errors = [];
+    const taskId = String(request?.task_id || request?.id || '').trim();
+    const preset = String(request?.preset || task?.default_preset || 'smoke').toLowerCase();
+
+    if (!taskId) {
+        errors.push('task_id 不能为空');
+    }
+
+    const presets = task?.presets || null;
+    if (presets && !Object.prototype.hasOwnProperty.call(presets, preset)) {
+        errors.push(`preset 不存在: ${preset}`);
+    }
+
+    const presetData = presets ? presets[preset] : null;
+    const isHeavy = !!presetData?.heavy || preset === 'canonical' || preset === 'custom';
+    if (isHeavy && request?.confirm_heavy !== true) {
+        errors.push('canonical/custom 或重任务必须勾选 confirm_heavy');
+    }
+
+    if (preset === 'custom') {
+        if (!Array.isArray(request?.custom_args) || request.custom_args.length === 0) {
+            errors.push('custom preset 需要 custom_args，每行一个 argv 参数');
+        }
+    }
+
+    if (request?.custom_args !== undefined) {
+        if (!Array.isArray(request.custom_args)) {
+            errors.push('custom_args 必须是字符串数组');
+        } else if (request.custom_args.length > 80) {
+            errors.push('custom_args 不能超过 80 项');
+        } else {
+            request.custom_args.forEach((item, index) => {
+                if (typeof item !== 'string') {
+                    errors.push(`custom_args[${index}] 必须是字符串`);
+                } else if (item.includes('\n') || item.includes('\r')) {
+                    errors.push(`custom_args[${index}] 不能包含换行`);
+                } else if (item.length > 300) {
+                    errors.push(`custom_args[${index}] 过长`);
+                }
+            });
+        }
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors,
+    };
+}
+
 export async function summarize_scan_request_metrics(requests, submitter = null) {
     const total_requests = Array.isArray(requests) ? requests.length : 0;
     let client_blocked = 0;
@@ -367,6 +425,14 @@ export class API {
 
     static buildTransportPointUrl() {
         return buildTransportPointUrl();
+    }
+
+    static buildScriptTaskCatalogUrl() {
+        return buildScriptTaskCatalogUrl();
+    }
+
+    static buildScriptTaskCreateUrl() {
+        return buildScriptTaskCreateUrl();
     }
 
     /**
@@ -552,6 +618,83 @@ export class API {
         }
 
         return await request_json(`/api/modules/pnjl-scan/jobs/${encodeURIComponent(jobId)}/cancel`, {
+            method: 'POST',
+            timeoutMs: 10000,
+            retries: 1,
+        });
+    }
+
+    static async getScriptTaskCatalog() {
+        return await request_json('/api/modules/script-tasks', {
+            method: 'GET',
+            timeoutMs: 10000,
+            retries: 1,
+        });
+    }
+
+    static async createScriptTaskJob(payload, task = null) {
+        const validation = validate_script_task_request(payload, task);
+        if (!validation.valid) {
+            throw normalize_api_error({
+                status: 400,
+                payload: {
+                    code: 'INVALID_REQUEST',
+                    diagnostics: { errors: validation.errors },
+                },
+                message: validation.errors.join('\n'),
+            });
+        }
+
+        return await request_json('/api/modules/script-tasks/jobs', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            timeoutMs: 20000,
+            retries: 0,
+        });
+    }
+
+    static async getScriptTaskJobStatus(jobId) {
+        if (!jobId) {
+            throw normalize_api_error({
+                status: 400,
+                payload: { code: 'INVALID_REQUEST' },
+                message: 'jobId 不能为空',
+            });
+        }
+
+        return await request_json(`/api/modules/script-tasks/jobs/${encodeURIComponent(jobId)}`, {
+            method: 'GET',
+            timeoutMs: 10000,
+            retries: 1,
+        });
+    }
+
+    static async getScriptTaskJobResult(jobId) {
+        if (!jobId) {
+            throw normalize_api_error({
+                status: 400,
+                payload: { code: 'INVALID_REQUEST' },
+                message: 'jobId 不能为空',
+            });
+        }
+
+        return await request_json(`/api/modules/script-tasks/jobs/${encodeURIComponent(jobId)}/result`, {
+            method: 'GET',
+            timeoutMs: 10000,
+            retries: 1,
+        });
+    }
+
+    static async cancelScriptTaskJob(jobId) {
+        if (!jobId) {
+            throw normalize_api_error({
+                status: 400,
+                payload: { code: 'INVALID_REQUEST' },
+                message: 'jobId 不能为空',
+            });
+        }
+
+        return await request_json(`/api/modules/script-tasks/jobs/${encodeURIComponent(jobId)}/cancel`, {
             method: 'POST',
             timeoutMs: 10000,
             retries: 1,

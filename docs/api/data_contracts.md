@@ -128,6 +128,12 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
   - `GET /api/modules/pnjl-scan/jobs/{job_id}`（状态）
   - `GET /api/modules/pnjl-scan/jobs/{job_id}/result`（结果）
   - `POST /api/modules/pnjl-scan/jobs/{job_id}/cancel`（取消）
+- **异步脚本长任务**（前端任务目录 + wrapper 执行）
+  - `GET /api/modules/script-tasks`（目录）
+  - `POST /api/modules/script-tasks/jobs`（创建）
+  - `GET /api/modules/script-tasks/jobs/{job_id}`（状态）
+  - `GET /api/modules/script-tasks/jobs/{job_id}/result`（结果/日志/产物）
+  - `POST /api/modules/script-tasks/jobs/{job_id}/cancel`（取消）
 - **模块发现**
   - `GET /api/modules`
 
@@ -135,6 +141,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 
 - 前端不直接调用 `run_*.jl`，仅通过上述 HTTP 契约访问能力。
 - 扫描任务统一走异步 jobs 路由；不提供同步扫描接口。
+- 脚本长任务只暴露治理目录中的稳定/候选 `run_*` 入口；`scripts/dev`、`scripts/analysis`、`scripts/debug`、`scripts/perf` 默认仅作为只读诊断/治理信息展示，不作为普通用户可点选执行入口。
 
 服务/CLI 职责边界（E3 固化）：
 
@@ -181,6 +188,11 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
   - `invocation_style=sync`
   - `service_surface=point`
   - `stable_entrypoint=Models.solve_transport_from_equilibrium`
+- `script-tasks`
+  - `invocation_style=async`
+  - `service_surface=job`
+  - `stable_entrypoint=scripts/dev/run_with_sysimage + curated run_* scripts`
+  - `GET /api/modules/script-tasks` 返回可解释任务目录，前端以该目录渲染任务用途、关键参数、preset 与输出语义。
 
 #### 0.6.2 `POST /api/modules/pnjl-gap/run`（同步）
 
@@ -297,7 +309,87 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - 已终态或不可取消：返回 `409` + `JOB_NOT_CANCELLABLE`
 - 成功取消：`200`，`job_status="cancelled"`
 
-#### 0.6.7 统一错误响应最小契约
+#### 0.6.7 `GET /api/modules/script-tasks`（脚本任务目录）
+
+成功响应（`200`）：
+
+- `status="ok"`
+- `tasks[]`
+  - `id/name/script`
+  - `purpose`：面向前端展示的任务作用说明。
+  - `use_cases[]`：典型使用场景。
+  - `key_params[]`：用户需要理解或调整的关键参数。
+  - `default_preset`：默认 preset，通常为 `smoke`；需要已有输入文件的后处理入口可为 `custom`。
+  - `estimated_time.smoke/canonical/custom`：粗略本机耗时说明。
+  - `local_recommendation`：本机运行建议与风险提示。
+  - `outputs[]`：预期输出资产类型。
+  - `manifest_candidates[]`：结果目录中可作为 manifest 的文件名。
+  - `presets.<name>.heavy`：是否需要 `confirm_heavy=true`。
+  - `presets.<name>.args`：服务端模板 argv；前端只展示命令预览，不应自行拼接执行。
+- `template_tiers=["smoke","canonical","custom"]`
+- `default_allowed_tier="smoke"`
+- `heavy_requires_confirmation=true`
+- `non_default_frontend_policy`：说明 `scripts/dev`、`scripts/analysis`、`scripts/debug`、`scripts/perf` 默认不作为普通前端任务。
+
+#### 0.6.8 `POST /api/modules/script-tasks/jobs`（脚本任务创建）
+
+请求：
+
+- `task_id`（必填）：来自目录的 `tasks[].id`。
+- `preset`（可选）：`smoke | canonical | custom`，默认使用该任务 `default_preset`。
+- `confirm_heavy`（重任务必填 `true`）：`canonical/custom` 或目录标记 `heavy=true` 的 preset 必须确认。
+- `custom_args`（`custom` 必填）：字符串数组，每个元素是一个 argv 参数；不能包含换行。
+
+执行语义：
+
+- Windows 默认使用 `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 -MismatchPolicy fallback <script> <args...>`。
+- Linux/macOS 默认使用 `sh scripts/dev/run_with_sysimage.sh --mismatch-policy=fallback <script> <args...>`。
+- wrapper 不可用时回退到 `julia --project=. <script> <args...>`。
+- 模板中的 `{job_id}` 和 `{job_output}` 由服务端替换；默认输出目录为 `data/outputs/frontend_jobs/{job_id}`。
+- stdout/stderr 日志默认写入 `data/outputs/logs/frontend_jobs/{job_id}.out.log` 与 `.err.log`。
+
+成功响应（`202`）：
+
+- `status="accepted"`
+- `job_id/kind/task_id/preset`
+- `status_url/result_url`
+- `queue.position/max_running/max_pending`
+- `command.wrapper/argv/display`
+
+#### 0.6.9 `GET /api/modules/script-tasks/jobs/{job_id}`（脚本任务状态）
+
+成功响应（`200`）：
+
+- `status="ok"`
+- `job_id/kind/task_id/task_name/preset/job_status`
+- `created_at/started_at/ended_at`
+- `progress.total/completed/percent`
+- `queue.position/queued/running/max_running/max_pending`
+- `events[]`
+- `command`
+- `logs.stdout_path/stderr_path/stdout_tail/stderr_tail`
+- `error/reason_code`（失败或取消时提供摘要）
+
+#### 0.6.10 `GET /api/modules/script-tasks/jobs/{job_id}/result`（脚本任务结果）
+
+- 任务未结束（`409`）：返回 `JOB_NOT_FINISHED`。
+- 任务已结束（`200`）：返回 `status="ok"`、`job_id`、`job_status`、`result`。
+- `result` 包含：
+  - `task_id/task_name/preset/exit_code`
+  - `output_dir/stdout_path/stderr_path`
+  - `stdout_tail/stderr_tail`
+  - `artifacts[]`：`path/relative_path/bytes/mtime`
+  - `manifest_paths[]`
+  - `command`
+
+#### 0.6.11 `POST /api/modules/script-tasks/jobs/{job_id}/cancel`（脚本任务取消）
+
+- 可取消状态：`queued | running`
+- 若底层进程已启动，服务端会尝试 kill 该进程。
+- 已终态或不可取消：返回 `409` + `JOB_NOT_CANCELLABLE`
+- 成功取消：`200`，`job_status="cancelled"`
+
+#### 0.6.12 统一错误响应最小契约
 
 适用链路（当前）：
 
@@ -305,6 +397,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `/api/modules/pnjl-gap/run`
 - `/api/modules/transport-point/run`
 - `/api/modules/pnjl-scan/jobs*`
+- `/api/modules/script-tasks*`
 
 对外错误 payload 最小字段：
 
@@ -326,6 +419,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `JOB_NOT_FOUND`
 - `JOB_NOT_SUCCEEDED`
 - `JOB_NOT_CANCELLABLE`
+- `JOB_NOT_FINISHED`
 - `IDEMPOTENCY_KEY_CONFLICT`
 - `PNJL_SINGLE_POINT_FAILED`
 - `TRANSPORT_POINT_FAILED`
@@ -336,7 +430,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - 不向外返回 `backtrace` / `catch_backtrace()` / 内部异常全文。
 - 内部诊断可在服务端日志或内存状态中保留，但不直接透传到公共响应。
 
-#### 0.6.8 最小契约示例（可复现）
+#### 0.6.13 最小契约示例（可复现）
 
 最小请求（创建扫描任务）：
 

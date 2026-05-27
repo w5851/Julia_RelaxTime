@@ -6,6 +6,10 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
+using .Models: calculate_magnetic_omega_components,
+               calculate_magnetic_rho,
+               default_magnetic_config
+
 const PNJL = Models.pnjl_module()
 
 function run_magnetic_point(; T_MeV::Float64=150.0, mu_MeV::Float64=0.0, eB_MeV2::Float64=2.0e4)

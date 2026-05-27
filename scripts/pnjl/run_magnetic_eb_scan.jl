@@ -9,6 +9,12 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
+using .Models: calculate_magnetic_number_densities,
+               calculate_magnetic_omega_components,
+               calculate_magnetic_rho,
+               default_magnetic_config,
+               magnetic_nmax_convergence_report
+
 const PNJL = Models.pnjl_module()
 
 function main(; T_MeV::Float64=150.0, mu_MeV::Float64=60.0, eB_min_MeV2::Float64=5.0e3, eB_max_MeV2::Float64=4.0e4, points::Int=8, output::String=joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl_magnetic", "scan", "pnjl_magnetic_eb_scan.csv"))

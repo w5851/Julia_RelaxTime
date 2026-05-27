@@ -9,6 +9,11 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
+using .Models: calculate_magnetic_number_densities,
+               calculate_magnetic_omega_components,
+               default_magnetic_config,
+               magnetic_nmax_convergence_report
+
 const PNJL = Models.pnjl_module()
 
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl_magnetic", "stability", "pnjl_magnetic_stability_scan_latest.csv")

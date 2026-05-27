@@ -71,6 +71,29 @@ export class UI {
         this.transportPointResultPreview = null;
         this.lastTransportPointPayload = null;
         this.lastTransportPointResultPayload = null;
+        this.scriptTaskCatalog = [];
+        this.activeScriptTaskId = null;
+        this.activeScriptTaskJobId = null;
+        this.scriptTaskPollTimer = null;
+        this.scriptTaskRunning = false;
+        this.lastScriptTaskPayload = null;
+        this.lastScriptTaskResultPayload = null;
+        this.scriptTaskCatalogEl = null;
+        this.scriptTaskRefreshBtn = null;
+        this.scriptTaskForm = null;
+        this.scriptTaskSelect = null;
+        this.scriptTaskPresetSelect = null;
+        this.scriptTaskConfirmHeavy = null;
+        this.scriptTaskCustomFieldset = null;
+        this.scriptTaskCustomArgs = null;
+        this.scriptTaskSelectedSummary = null;
+        this.scriptTaskSubmitBtn = null;
+        this.scriptTaskCancelBtn = null;
+        this.scriptTaskCopyCurlBtn = null;
+        this.scriptTaskStatus = null;
+        this.scriptTaskDetails = null;
+        this.scriptTaskResultPanel = null;
+        this.scriptTaskResultPreview = null;
     }
 
     /**
@@ -125,6 +148,22 @@ export class UI {
         this.transportPointStatus = document.getElementById('transport-point-status');
         this.transportPointResultPanel = document.getElementById('transport-point-result-panel');
         this.transportPointResultPreview = document.getElementById('transport-point-result-preview');
+        this.scriptTaskCatalogEl = document.getElementById('script-task-catalog');
+        this.scriptTaskRefreshBtn = document.getElementById('script-task-refresh-btn');
+        this.scriptTaskForm = document.getElementById('script-task-form');
+        this.scriptTaskSelect = document.getElementById('script-task-select');
+        this.scriptTaskPresetSelect = document.getElementById('script-task-preset');
+        this.scriptTaskConfirmHeavy = document.getElementById('script-task-confirm-heavy');
+        this.scriptTaskCustomFieldset = document.getElementById('script-task-custom-fieldset');
+        this.scriptTaskCustomArgs = document.getElementById('script-task-custom-args');
+        this.scriptTaskSelectedSummary = document.getElementById('script-task-selected-summary');
+        this.scriptTaskSubmitBtn = document.getElementById('script-task-submit-btn');
+        this.scriptTaskCancelBtn = document.getElementById('script-task-cancel-btn');
+        this.scriptTaskCopyCurlBtn = document.getElementById('script-task-copy-curl-btn');
+        this.scriptTaskStatus = document.getElementById('script-task-status');
+        this.scriptTaskDetails = document.getElementById('script-task-details');
+        this.scriptTaskResultPanel = document.getElementById('script-task-result-panel');
+        this.scriptTaskResultPreview = document.getElementById('script-task-result-preview');
 
         // 初始化可视化
         this.visualization = new Visualization('canvas-container');
@@ -189,6 +228,24 @@ export class UI {
         if (this.transportPointCopyCurlBtn) {
             this.transportPointCopyCurlBtn.addEventListener('click', () => this.handleCopyTransportPointCurl());
         }
+        if (this.scriptTaskRefreshBtn) {
+            this.scriptTaskRefreshBtn.addEventListener('click', () => this.initializeScriptTasks());
+        }
+        if (this.scriptTaskForm) {
+            this.scriptTaskForm.addEventListener('submit', (e) => this.handleScriptTaskSubmit(e));
+        }
+        if (this.scriptTaskSelect) {
+            this.scriptTaskSelect.addEventListener('change', () => this.selectScriptTask(this.scriptTaskSelect.value));
+        }
+        if (this.scriptTaskPresetSelect) {
+            this.scriptTaskPresetSelect.addEventListener('change', () => this.syncScriptTaskPresetState());
+        }
+        if (this.scriptTaskCancelBtn) {
+            this.scriptTaskCancelBtn.addEventListener('click', () => this.handleScriptTaskCancel());
+        }
+        if (this.scriptTaskCopyCurlBtn) {
+            this.scriptTaskCopyCurlBtn.addEventListener('click', () => this.handleCopyScriptTaskCurl());
+        }
         if (typeof window !== 'undefined') {
             window.addEventListener('hashchange', () => this.applyNavigationRoute());
         }
@@ -203,6 +260,7 @@ export class UI {
         this.syncScanFormRows();
 
         this.initializeTemplates();
+        this.initializeScriptTasks();
         this.renderTaskHistory();
         this.applyNavigationRoute();
         
@@ -274,6 +332,420 @@ export class UI {
         this.servicePanels.forEach((panel) => {
             panel.classList.toggle('active', panel.dataset.servicePanel === target);
         });
+    }
+
+    async initializeScriptTasks() {
+        if (!this.scriptTaskCatalogEl) {
+            return;
+        }
+        this.scriptTaskCatalogEl.textContent = '正在加载任务目录...';
+        try {
+            const payload = await API.getScriptTaskCatalog();
+            this.scriptTaskCatalog = Array.isArray(payload?.tasks) ? payload.tasks : [];
+            this.renderScriptTaskCatalog();
+            this.populateScriptTaskSelect();
+            if (this.scriptTaskCatalog.length > 0) {
+                this.selectScriptTask(this.activeScriptTaskId || this.scriptTaskCatalog[0].id);
+            }
+        } catch (error) {
+            this.scriptTaskCatalogEl.textContent = API.formatError(error);
+            this.setScriptTaskStatus(API.formatError(error), 'error');
+        }
+    }
+
+    getScriptTaskById(taskId = this.activeScriptTaskId) {
+        return this.scriptTaskCatalog.find((task) => String(task.id) === String(taskId)) || null;
+    }
+
+    renderScriptTaskCatalog() {
+        if (!this.scriptTaskCatalogEl) {
+            return;
+        }
+        this.scriptTaskCatalogEl.innerHTML = '';
+        if (!this.scriptTaskCatalog.length) {
+            this.scriptTaskCatalogEl.textContent = '暂无脚本任务';
+            return;
+        }
+
+        this.scriptTaskCatalog.forEach((task) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'script-task-card';
+            card.dataset.taskId = task.id;
+
+            const title = document.createElement('h3');
+            title.textContent = task.name || task.id;
+            card.appendChild(title);
+
+            const script = document.createElement('code');
+            script.textContent = task.script || '-';
+            card.appendChild(script);
+
+            const purpose = document.createElement('p');
+            purpose.textContent = task.purpose || '未提供用途说明';
+            card.appendChild(purpose);
+
+            const addField = (label, value) => {
+                const field = document.createElement('div');
+                field.className = 'script-task-field';
+                field.textContent = `${label}: ${value || '-'}`;
+                card.appendChild(field);
+            };
+
+            const useCases = Array.isArray(task.use_cases) ? task.use_cases.slice(0, 3) : [];
+            if (useCases.length > 0) {
+                const list = document.createElement('ul');
+                useCases.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    list.appendChild(li);
+                });
+                card.appendChild(list);
+            }
+
+            addField('关键参数', Array.isArray(task.key_params) ? task.key_params.join(', ') : '-');
+            addField('输出产物', Array.isArray(task.outputs) ? task.outputs.join(', ') : '-');
+            addField('预计耗时', this.formatScriptTaskEstimatedTime(task));
+            addField('本机建议', task.local_recommendation || '-');
+
+            const meta = document.createElement('div');
+            meta.className = 'script-task-meta';
+            const presetNames = Object.keys(task.presets || {}).join(' / ');
+            meta.textContent = `默认 ${task.default_preset || 'smoke'} | presets: ${presetNames || '-'}`;
+            card.appendChild(meta);
+
+            card.addEventListener('click', () => this.selectScriptTask(task.id));
+            this.scriptTaskCatalogEl.appendChild(card);
+        });
+    }
+
+    populateScriptTaskSelect() {
+        if (!this.scriptTaskSelect) {
+            return;
+        }
+        this.scriptTaskSelect.innerHTML = '';
+        this.scriptTaskCatalog.forEach((task) => {
+            const option = document.createElement('option');
+            option.value = task.id;
+            option.textContent = `${task.id} - ${task.name || task.id}`;
+            this.scriptTaskSelect.appendChild(option);
+        });
+    }
+
+    selectScriptTask(taskId) {
+        const task = this.getScriptTaskById(taskId);
+        if (!task) {
+            return;
+        }
+        this.activeScriptTaskId = task.id;
+        if (this.scriptTaskSelect) {
+            this.scriptTaskSelect.value = task.id;
+        }
+        if (this.scriptTaskCatalogEl) {
+            Array.from(this.scriptTaskCatalogEl.querySelectorAll('.script-task-card')).forEach((card) => {
+                card.classList.toggle('active', card.dataset.taskId === String(task.id));
+            });
+        }
+        if (this.scriptTaskPresetSelect) {
+            this.scriptTaskPresetSelect.innerHTML = '';
+            Object.keys(task.presets || {}).forEach((preset) => {
+                const option = document.createElement('option');
+                option.value = preset;
+                const heavy = task.presets[preset]?.heavy ? '重任务' : '安全预览';
+                option.textContent = `${preset} (${heavy})`;
+                this.scriptTaskPresetSelect.appendChild(option);
+            });
+            this.scriptTaskPresetSelect.value = task.default_preset || Object.keys(task.presets || {})[0] || 'smoke';
+        }
+        this.renderScriptTaskSummary(task);
+        this.syncScriptTaskPresetState();
+    }
+
+    renderScriptTaskSummary(task = this.getScriptTaskById()) {
+        if (!this.scriptTaskSelectedSummary || !task) {
+            return;
+        }
+        const keyParams = Array.isArray(task.key_params) ? task.key_params.join(', ') : '-';
+        const outputs = Array.isArray(task.outputs) ? task.outputs.join(', ') : '-';
+        const estimatedTime = this.formatScriptTaskEstimatedTime(task);
+        const recommendation = task.local_recommendation || '-';
+        this.scriptTaskSelectedSummary.textContent = [
+            `用途: ${task.purpose || '-'}`,
+            `关键参数: ${keyParams}`,
+            `输出: ${outputs}`,
+            `预计耗时: ${estimatedTime}`,
+            `本机建议: ${recommendation}`,
+        ].join('\n');
+    }
+
+    formatScriptTaskEstimatedTime(task) {
+        const estimated = task?.estimated_time || {};
+        if (!estimated || typeof estimated !== 'object') {
+            return '-';
+        }
+        const order = ['smoke', 'canonical', 'custom'];
+        const keys = [
+            ...order.filter((key) => estimated[key]),
+            ...Object.keys(estimated).filter((key) => !order.includes(key)),
+        ];
+        if (keys.length === 0) {
+            return '-';
+        }
+        return keys.map((key) => `${key}: ${estimated[key]}`).join('；');
+    }
+
+    syncScriptTaskPresetState() {
+        const task = this.getScriptTaskById();
+        const preset = String(this.scriptTaskPresetSelect?.value || task?.default_preset || 'smoke');
+        const presetData = task?.presets?.[preset] || {};
+        const isCustom = preset === 'custom';
+        const isHeavy = !!presetData.heavy;
+        if (this.scriptTaskCustomFieldset) {
+            this.scriptTaskCustomFieldset.style.display = isCustom ? '' : 'none';
+        }
+        if (this.scriptTaskConfirmHeavy) {
+            this.scriptTaskConfirmHeavy.disabled = !isHeavy;
+            if (!isHeavy) {
+                this.scriptTaskConfirmHeavy.checked = false;
+            }
+        }
+    }
+
+    readScriptTaskCustomArgs() {
+        const text = String(this.scriptTaskCustomArgs?.value || '').trim();
+        if (!text) {
+            return [];
+        }
+        return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    }
+
+    collectScriptTaskPayload() {
+        const task = this.getScriptTaskById();
+        if (!task) {
+            throw new Error('请先选择脚本任务');
+        }
+        const preset = String(this.scriptTaskPresetSelect?.value || task.default_preset || 'smoke');
+        const payload = {
+            task_id: task.id,
+            preset,
+            confirm_heavy: !!this.scriptTaskConfirmHeavy?.checked,
+        };
+        if (preset === 'custom') {
+            payload.custom_args = this.readScriptTaskCustomArgs();
+        }
+        return payload;
+    }
+
+    buildScriptTaskCurlCommand() {
+        if (!this.lastScriptTaskPayload) {
+            return '';
+        }
+        const body = JSON.stringify(this.lastScriptTaskPayload);
+        const escapedBody = body.replace(/'/g, "'\"'\"'");
+        return `curl -X POST "${API.buildScriptTaskCreateUrl()}" -H "Content-Type: application/json" --data-raw '${escapedBody}'`;
+    }
+
+    setScriptTaskStatus(text, level = 'info') {
+        if (!this.scriptTaskStatus) {
+            return;
+        }
+        this.scriptTaskStatus.textContent = text;
+        this.scriptTaskStatus.className = `scan-status ${level}`;
+    }
+
+    writeScriptTaskDetails(data) {
+        if (!this.scriptTaskDetails) {
+            return;
+        }
+        this.scriptTaskDetails.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    }
+
+    stopScriptTaskPolling() {
+        if (this.scriptTaskPollTimer) {
+            clearInterval(this.scriptTaskPollTimer);
+            this.scriptTaskPollTimer = null;
+        }
+        this.scriptTaskRunning = false;
+        if (this.scriptTaskSubmitBtn) {
+            this.scriptTaskSubmitBtn.disabled = false;
+            this.scriptTaskSubmitBtn.textContent = '提交脚本任务';
+        }
+        if (this.scriptTaskCancelBtn) {
+            this.scriptTaskCancelBtn.disabled = true;
+        }
+    }
+
+    startScriptTaskPolling(jobId) {
+        this.stopScriptTaskPolling();
+        this.scriptTaskRunning = true;
+        if (this.scriptTaskSubmitBtn) {
+            this.scriptTaskSubmitBtn.disabled = true;
+            this.scriptTaskSubmitBtn.textContent = '轮询中...';
+        }
+        if (this.scriptTaskCancelBtn) {
+            this.scriptTaskCancelBtn.disabled = false;
+        }
+
+        this.scriptTaskPollTimer = setInterval(async () => {
+            try {
+                const statusPayload = await API.getScriptTaskJobStatus(jobId);
+                this.writeScriptTaskDetails(statusPayload);
+                const jobStatus = statusPayload?.job_status;
+                if (jobStatus === 'queued') {
+                    this.setScriptTaskStatus('任务排队中', 'queued');
+                } else if (jobStatus === 'running') {
+                    this.setScriptTaskStatus('任务运行中', 'running');
+                } else if (['succeeded', 'failed', 'cancelled'].includes(jobStatus)) {
+                    this.stopScriptTaskPolling();
+                    const resultPayload = await API.getScriptTaskJobResult(jobId);
+                    this.updateScriptTaskResult(resultPayload);
+                    this.writeScriptTaskDetails(resultPayload);
+                    const level = jobStatus === 'succeeded' ? 'success' : (jobStatus === 'failed' ? 'error' : 'info');
+                    this.setScriptTaskStatus(`任务结束: ${jobStatus}`, level);
+                }
+
+                upsert_task_history_entry({
+                    job_id: statusPayload.job_id,
+                    kind: statusPayload.kind,
+                    module: 'script-tasks',
+                    task_id: statusPayload.task_id,
+                    job_status: statusPayload.job_status,
+                });
+                this.renderTaskHistory();
+            } catch (error) {
+                this.stopScriptTaskPolling();
+                this.setScriptTaskStatus(API.formatError(error), 'error');
+                this.showTechError(error);
+            }
+        }, 3000);
+    }
+
+    updateScriptTaskResult(resultPayload) {
+        const result = resultPayload?.result || {};
+        this.lastScriptTaskResultPayload = resultPayload;
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value ?? '-';
+            }
+        };
+        setText('script-task-result-task', resultPayload?.task_id || result.task_id || '-');
+        setText('script-task-result-status', resultPayload?.job_status || '-');
+        setText('script-task-result-exit-code', result.exit_code ?? '-');
+        setText('script-task-output-dir', result.output_dir || '-');
+        setText('script-task-artifact-count', Array.isArray(result.artifacts) ? result.artifacts.length : '-');
+        if (this.scriptTaskResultPreview) {
+            this.scriptTaskResultPreview.textContent = JSON.stringify({
+                command: result.command || null,
+                stdout_tail: result.stdout_tail || '',
+                stderr_tail: result.stderr_tail || '',
+                artifacts: result.artifacts || [],
+                manifest_paths: result.manifest_paths || [],
+            }, null, 2);
+        }
+        if (this.scriptTaskResultPanel) {
+            this.scriptTaskResultPanel.style.display = '';
+        }
+    }
+
+    async handleScriptTaskSubmit(event) {
+        event.preventDefault();
+        if (this.scriptTaskRunning) {
+            return;
+        }
+        this.clearError();
+        if (this.scriptTaskResultPanel) {
+            this.scriptTaskResultPanel.style.display = 'none';
+        }
+        try {
+            const task = this.getScriptTaskById();
+            const payload = this.collectScriptTaskPayload();
+            this.lastScriptTaskPayload = payload;
+            if (this.scriptTaskCopyCurlBtn) {
+                this.scriptTaskCopyCurlBtn.disabled = false;
+            }
+            const created = await API.createScriptTaskJob(payload, task);
+            this.activeScriptTaskJobId = created.job_id;
+            this.setScriptTaskStatus(`任务已创建: ${created.job_id}`, 'queued');
+            this.writeScriptTaskDetails(created);
+            upsert_task_history_entry({
+                job_id: created.job_id,
+                kind: created.kind,
+                module: 'script-tasks',
+                task_id: created.task_id,
+                job_status: 'queued',
+            });
+            this.renderTaskHistory();
+            this.startScriptTaskPolling(created.job_id);
+        } catch (error) {
+            this.setScriptTaskStatus(API.formatError(error), 'error');
+            this.showError(API.formatError(error));
+            this.showTechError(error);
+        }
+    }
+
+    async handleScriptTaskCancel() {
+        if (!this.activeScriptTaskJobId) {
+            this.setScriptTaskStatus('当前没有可取消任务', 'error');
+            return;
+        }
+        try {
+            const payload = await API.cancelScriptTaskJob(this.activeScriptTaskJobId);
+            this.stopScriptTaskPolling();
+            this.setScriptTaskStatus(`任务已取消: ${payload.job_id}`, 'success');
+            this.writeScriptTaskDetails(payload);
+            upsert_task_history_entry({
+                job_id: payload.job_id,
+                kind: payload.kind,
+                module: 'script-tasks',
+                task_id: payload.task_id,
+                job_status: payload.job_status,
+            });
+            this.renderTaskHistory();
+        } catch (error) {
+            this.setScriptTaskStatus(API.formatError(error), 'error');
+            this.showTechError(error);
+        }
+    }
+
+    async handleCopyScriptTaskCurl() {
+        const text = this.buildScriptTaskCurlCommand();
+        if (!text) {
+            this.setScriptTaskStatus('当前没有可复制 curl 命令', 'error');
+            return;
+        }
+        try {
+            if (!navigator?.clipboard?.writeText) {
+                throw new Error('clipboard API unavailable');
+            }
+            await navigator.clipboard.writeText(text);
+            this.setScriptTaskStatus('已复制脚本任务 curl 命令', 'success');
+        } catch (_error) {
+            this.setScriptTaskStatus('复制失败，请从详情区手动复制', 'error');
+        }
+    }
+
+    async loadScriptTaskFromHistory(jobId) {
+        if (!jobId) {
+            return;
+        }
+        this.activeScriptTaskJobId = jobId;
+        this.switchServicePanel('script-tasks');
+        try {
+            const statusPayload = await API.getScriptTaskJobStatus(jobId);
+            this.writeScriptTaskDetails(statusPayload);
+            this.setScriptTaskStatus(`已加载脚本任务: ${jobId} (${statusPayload.job_status})`, 'info');
+            if (statusPayload.task_id) {
+                this.selectScriptTask(statusPayload.task_id);
+            }
+            if (['succeeded', 'failed', 'cancelled'].includes(statusPayload.job_status)) {
+                const resultPayload = await API.getScriptTaskJobResult(jobId);
+                this.updateScriptTaskResult(resultPayload);
+            }
+        } catch (error) {
+            this.setScriptTaskStatus(API.formatError(error), 'error');
+            this.showTechError(error);
+        }
     }
 
     readNumberInput(id, fieldName) {
@@ -508,8 +980,15 @@ export class UI {
             const row = document.createElement('button');
             row.type = 'button';
             row.className = 'scan-history-item';
-            row.textContent = `${item.job_id} | ${item.job_status || 'unknown'} | ${item.kind || '-'}`;
-            row.addEventListener('click', () => this.loadTaskFromHistory(item.job_id));
+            const label = item.task_id ? `${item.task_id}` : (item.kind || '-');
+            row.textContent = `${item.job_id} | ${item.job_status || 'unknown'} | ${label}`;
+            row.addEventListener('click', () => {
+                if (item.module === 'script-tasks' || item.kind === 'script-task') {
+                    this.loadScriptTaskFromHistory(item.job_id);
+                } else {
+                    this.loadTaskFromHistory(item.job_id);
+                }
+            });
             this.scanHistoryList.appendChild(row);
         });
 

@@ -41,6 +41,7 @@ julia --project=. scripts/server/server.jl
    - `pnjl-scan` 异步任务：`tmu/trho` + `scan/point`
    - `pnjl-gap` 同步单点：`POST /api/modules/pnjl-gap/run`
    - `transport-point` 同步单点：`POST /api/modules/transport-point/run`
+   - `script-tasks` 异步脚本长任务：前端先展示任务用途、关键参数、输出与 preset，再通过 `POST /api/modules/script-tasks/jobs` 提交
 
 ## 4. 测试建议
 
@@ -69,4 +70,15 @@ julia --project=. tests/unit/runtests.jl
 ## 7. 输出目录
 
 - 默认：`data/outputs/`
+- 前端脚本长任务默认写入：`data/outputs/frontend_jobs/{job_id}`
+- 前端脚本长任务日志默认写入：`data/outputs/logs/frontend_jobs/{job_id}.out.log` 与 `.err.log`
 - `outputs/` 仅作历史兼容目录，不作为新流程默认落盘路径
+
+## 8. 脚本长任务安全口径
+
+- `smoke` 是默认 preset，适合先理解任务作用与产物形状。
+- `canonical` 和 `custom` 属于重任务，前端必须勾选 `confirm_heavy` 才会提交。
+- 前端脚本任务使用 `run_with_sysimage` 的 fallback policy：有兼容 sysimage 时复用，没有时回退到普通 Julia，不在点击时自动重建 sysimage。
+- `custom_args` 按“每行一个 argv 参数”填写，不按 shell 字符串拆分。
+- `scripts/dev/`、`scripts/analysis/`、`scripts/debug/`、`scripts/perf/` 默认只作为诊断/治理信息，不作为普通前端可点选执行入口。
+- 若任务需要已有输入文件（例如 Mott 派生 CSV、plot modes、离线补点），前端只提供 `custom` 入口，用户需显式填写 `--in/--input` 与输出参数。

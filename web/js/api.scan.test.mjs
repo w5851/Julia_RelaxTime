@@ -6,6 +6,7 @@ import {
     summarize_scan_request_metrics,
     validate_pnjl_gap_request,
     validate_scan_request,
+    validate_script_task_request,
     validate_transport_point_request,
 } from './api.js';
 
@@ -119,6 +120,46 @@ function test_validate_point_requests() {
         },
     });
     assert.equal(transportBad.valid, false);
+}
+
+function test_validate_script_task_request() {
+    const task = {
+        id: 'run-gap-transport-scan',
+        default_preset: 'smoke',
+        presets: {
+            smoke: { heavy: false },
+            canonical: { heavy: true },
+            custom: { heavy: true },
+        },
+    };
+
+    const smoke = validate_script_task_request({
+        task_id: 'run-gap-transport-scan',
+        preset: 'smoke',
+    }, task);
+    assert.equal(smoke.valid, true);
+
+    const heavyWithoutConfirm = validate_script_task_request({
+        task_id: 'run-gap-transport-scan',
+        preset: 'canonical',
+    }, task);
+    assert.equal(heavyWithoutConfirm.valid, false);
+
+    const customOk = validate_script_task_request({
+        task_id: 'run-gap-transport-scan',
+        preset: 'custom',
+        confirm_heavy: true,
+        custom_args: ['--output', 'data/outputs/results/demo.csv'],
+    }, task);
+    assert.equal(customOk.valid, true);
+
+    const customMissingArgs = validate_script_task_request({
+        task_id: 'run-gap-transport-scan',
+        preset: 'custom',
+        confirm_heavy: true,
+        custom_args: [],
+    }, task);
+    assert.equal(customMissingArgs.valid, false);
 }
 
 function test_build_api_url() {
@@ -338,15 +379,92 @@ async function test_point_service_request_contracts() {
     delete globalThis.__JRT_API_BASE_URL__;
 }
 
+async function test_script_task_request_contracts() {
+    const originalFetch = globalThis.fetch;
+    globalThis.__JRT_API_BASE_URL__ = 'http://127.0.0.1:9000';
+
+    const calls = [];
+    globalThis.fetch = async (url, options = {}) => {
+        calls.push({
+            url: String(url),
+            method: String(options.method || 'GET'),
+            body: options.body ? JSON.parse(String(options.body)) : null,
+        });
+        const last = calls[calls.length - 1];
+        if (last.url.endsWith('/api/modules/script-tasks')) {
+            return {
+                ok: true,
+                status: 200,
+                json: async () => ({
+                    status: 'ok',
+                    tasks: [{
+                        id: 'run-gap-transport-scan',
+                        default_preset: 'smoke',
+                        presets: { smoke: { heavy: false } },
+                    }],
+                }),
+            };
+        }
+        if (last.url.endsWith('/api/modules/script-tasks/jobs')) {
+            return {
+                ok: true,
+                status: 202,
+                json: async () => ({ status: 'accepted', job_id: 'script-job-1', kind: 'script-task' }),
+            };
+        }
+        if (last.url.endsWith('/cancel')) {
+            return {
+                ok: true,
+                status: 200,
+                json: async () => ({ status: 'ok', job_id: 'script-job-1', job_status: 'cancelled' }),
+            };
+        }
+        if (last.url.endsWith('/result')) {
+            return {
+                ok: true,
+                status: 200,
+                json: async () => ({ status: 'ok', job_id: 'script-job-1', job_status: 'succeeded', result: {} }),
+            };
+        }
+        return {
+            ok: true,
+            status: 200,
+            json: async () => ({ status: 'ok', job_id: 'script-job-1', job_status: 'running' }),
+        };
+    };
+
+    const catalog = await API.getScriptTaskCatalog();
+    await API.createScriptTaskJob({ task_id: 'run-gap-transport-scan', preset: 'smoke' }, catalog.tasks[0]);
+    await API.getScriptTaskJobStatus('script-job-1');
+    await API.getScriptTaskJobResult('script-job-1');
+    await API.cancelScriptTaskJob('script-job-1');
+
+    assert.equal(calls[0].method, 'GET');
+    assert.equal(calls[0].url, 'http://127.0.0.1:9000/api/modules/script-tasks');
+    assert.equal(calls[1].method, 'POST');
+    assert.equal(calls[1].url, 'http://127.0.0.1:9000/api/modules/script-tasks/jobs');
+    assert.equal(calls[1].body.task_id, 'run-gap-transport-scan');
+    assert.equal(calls[2].url, 'http://127.0.0.1:9000/api/modules/script-tasks/jobs/script-job-1');
+    assert.equal(calls[3].url, 'http://127.0.0.1:9000/api/modules/script-tasks/jobs/script-job-1/result');
+    assert.equal(calls[4].url, 'http://127.0.0.1:9000/api/modules/script-tasks/jobs/script-job-1/cancel');
+    assert.equal(API.buildScriptTaskCatalogUrl(), 'http://127.0.0.1:9000/api/modules/script-tasks');
+    assert.equal(API.buildScriptTaskCreateUrl(), 'http://127.0.0.1:9000/api/modules/script-tasks/jobs');
+
+    globalThis.fetch = originalFetch;
+    delete globalThis.__JRT_API_BASE_URL__;
+}
+
 async function run() {
     test_validate_scan_request();
     test_validate_point_requests();
+    test_validate_script_task_request();
     test_build_api_url();
     test_normalize_api_error();
     await test_format_error_for_timeout_and_offline();
     await test_scan_request_400_ratio_metrics();
     await test_cancel_job_request_contract();
     await test_point_service_request_contracts();
+    await test_script_task_request_contracts();
     console.log('api.scan.test.mjs: PASS');
 }
 

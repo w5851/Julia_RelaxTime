@@ -46,6 +46,17 @@ sh scripts/dev/bootstrap_sysimage.sh
 
 bootstrap 脚本会根据当前平台、架构和 Julia 版本，解析 GitHub Release 资产名并解包到 `build/`。
 
+### 前端脚本长任务目录
+
+Web 前端的“脚本长任务”面板通过 `GET /api/modules/script-tasks` 获取可解释任务目录，并通过异步 job 路由提交：
+
+- `POST /api/modules/script-tasks/jobs`
+- `GET /api/modules/script-tasks/jobs/{job_id}`
+- `GET /api/modules/script-tasks/jobs/{job_id}/result`
+- `POST /api/modules/script-tasks/jobs/{job_id}/cancel`
+
+前端目录的定位是帮助用户先理解每个 `run_*` 的用途、关键参数、输出与运行风险；默认只推荐 `smoke` preset。`canonical` 和 `custom` 必须显式确认，且仍优先经 `run_with_sysimage` wrapper 启动。为避免前端点击时隐式重建 sysimage，脚本任务服务端使用 wrapper 的 `fallback` mismatch policy：兼容时复用 sysimage，不兼容或缺失时回退到普通 `julia --project=.`。
+
 最小示例（Windows / PowerShell）：
 
 ```powershell
