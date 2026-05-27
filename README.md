@@ -145,6 +145,9 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
   - API 入口：`docs/api/models/scans/README.md`
 - `Models` 工作流与统一编排
   - API 入口：`docs/api/models/workflows/README.md`
+- 守恒荷 susceptibility / cumulant
+  - API 入口：`docs/api/models/derived/susceptibility/README.md`
+  - 当前导数后端口径：单方向 `B/Q/S` 默认走 TaylorDiff fast path，mixed BQS 走内部 multivariate Taylor jet；旧 `:forwarddiff` susceptibility fallback 已下线。
 - 各向异性输运 / Relaxtime 工作流
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`

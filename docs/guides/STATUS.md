@@ -6,13 +6,16 @@
 
 - **Web/API 演示链路**：可用，适合联调与能力展示
 - **PNJL 相图与统一扫描链路**：可用，稳定脚本入口已统一到白名单
+- **守恒荷 susceptibility / cumulant 链路**：可用，`Models` 入口下单方向导数默认采用 TaylorDiff fast path，mixed BQS 采用内部 multivariate Taylor jet
 - **截面/弛豫时间链路**：可用，建议持续执行关键点回归与跨实现对比
+- **介子热力学 / 介子数密度链路**：可用，当前以 `Models` workflow 与 `docs/api/relaxtime/*` 文档为主导航
 
 ## 2. 关键入口
 
 - 稳定脚本白名单：`docs/guides/scripts/README.md`
 - 相图主产线：`scripts/pnjl/calculate_phase_structure.jl`
 - 统一扫描入口：`scripts/models/run_unified_scan.jl`
+- 守恒荷 susceptibility 脚本：`scripts/pnjl/run_conserved_charge_susceptibilities.jl`
 - 服务端：`scripts/server/server_full.jl`
 - 前端页面：`web/index.html`
 
@@ -21,7 +24,9 @@
 - 相图 API：`docs/api/models/phase/README.md`
 - 扫描 API：`docs/api/models/scans/README.md`
 - workflow API：`docs/api/models/workflows/README.md`
+- susceptibility API：`docs/api/models/derived/susceptibility/README.md`
 - transport API：`docs/api/relaxtime/transport/README.md`
+- meson thermo API：`docs/api/relaxtime/meson_thermo/MesonThermodynamics.md`
 
 ## 3. 推荐验证命令
 
