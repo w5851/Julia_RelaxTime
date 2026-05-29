@@ -18,6 +18,7 @@ const _SCRIPT_TASK_TERMINAL = Set([
 ])
 const _SCRIPT_TASK_JOB_ROOT = joinpath(_PROJECT_ROOT, "data", "outputs", "frontend_jobs")
 const _SCRIPT_TASK_LOG_ROOT = joinpath(_PROJECT_ROOT, "data", "outputs", "logs", "frontend_jobs")
+const _SCRIPT_TASK_LOG_TAIL_BYTES = 8192
 
 function _job_token_path(parts::AbstractString...)
     return joinpath("data", "outputs", "frontend_jobs", parts...)
@@ -162,14 +163,13 @@ function _script_task_catalog_items()
             "purpose" => "对已有 phase-guided case_dir 生成 plot_manifest 与 PNG 图层，并回写 README。",
             "use_cases" => ["复用扫描 case_dir 做可视化", "生成 plot review 包", "检查 phase-guided 输出是否可画"],
             "key_params" => ["case-dir", "csv", "fig-dir", "python", "overwrite"],
-            "default_preset" => "smoke",
-            "estimated_time" => Dict("smoke" => "需要已有 case_dir；通常数十秒到数分钟", "canonical" => "取决于图数", "custom" => "取决于输入 CSV"),
-            "local_recommendation" => "必须先有有效 case_dir；前端默认只展示和要求 custom 确认。",
+            "default_preset" => "custom",
+            "estimated_time" => Dict("custom" => "通常数十秒到数分钟，取决于输入 case_dir 和图数"),
+            "local_recommendation" => "必须先有有效 case_dir；前端仅提供 custom 参数入口。",
             "outputs" => ["PNG figures", "plot_manifest.json", "README plot-review 追加段落"],
+            "requires_existing_input" => true,
             "manifest_candidates" => ["plot_manifest.json"],
             "presets" => Dict(
-                "smoke" => Dict("label" => "smoke", "heavy" => false, "args" => ["--case-dir", "{job_output}/missing_case_dir"]),
-                "canonical" => Dict("label" => "canonical", "heavy" => true, "args" => ["--case-dir", "{job_output}/missing_case_dir", "--overwrite"]),
                 "custom" => Dict("label" => "custom", "heavy" => true, "args" => String[]),
             ),
         ),
@@ -330,14 +330,14 @@ function _extended_script_task_catalog_items()
             "name" => "PNJL 磁场 eB 扫描",
             "purpose" => "按脚本默认 eB 网格输出磁场热力学与收敛性 CSV。",
             "use_cases" => ["磁场 eB 轴 smoke", "生成 pnjl_magnetic_eb_scan.csv", "检查 nmax 收敛列"],
-            "key_params" => ["当前脚本无 CLI 参数；使用脚本默认 T/mu/eB/points/output"],
+            "key_params" => ["output", "可选 T/mu/eB_min/eB_max/points"],
             "default_preset" => "smoke",
-            "estimated_time" => Dict("smoke" => "通常数分钟内", "canonical" => "同 smoke，脚本当前无 CLI 扩展"),
-            "local_recommendation" => "当前输出路径由脚本默认决定；若要隔离到 job 目录，需后续给脚本补 CLI 参数。",
+            "estimated_time" => Dict("smoke" => "通常数分钟内"),
+            "local_recommendation" => "前端 smoke 会把 CSV 写入当前 job 目录，避免覆盖默认 latest 输出。",
             "outputs" => ["pnjl_magnetic_eb_scan.csv", "stdout/stderr 日志"],
             "manifest_candidates" => String[],
             "presets" => Dict(
-                "smoke" => Dict("label" => "smoke", "heavy" => false, "args" => String[]),
+                "smoke" => Dict("label" => "smoke", "heavy" => false, "args" => ["--output", "{job_output}/pnjl_magnetic_eb_scan.csv"]),
             ),
         ),
         Dict(
@@ -346,14 +346,14 @@ function _extended_script_task_catalog_items()
             "name" => "PNJL 磁场稳定性扫描",
             "purpose" => "扫描默认 T/mu/eB 组合并输出 pass/fail 与失败点 CSV，用于磁场专题稳定性检查。",
             "use_cases" => ["磁场稳定性 smoke", "生成 stability/failures CSV", "排查 nmax_not_converged"],
-            "key_params" => ["当前脚本无 CLI 参数；使用脚本默认网格/output/failures_output"],
+            "key_params" => ["output", "failures-output", "脚本默认 T/mu/eB 网格"],
             "default_preset" => "smoke",
-            "estimated_time" => Dict("smoke" => "数分钟到十几分钟", "custom" => "脚本当前不消费自定义 CLI 参数"),
-            "local_recommendation" => "这是专题检查入口；运行前应确认默认输出可被覆盖。",
+            "estimated_time" => Dict("smoke" => "数分钟到十几分钟"),
+            "local_recommendation" => "前端 smoke 会把主 CSV 和 failures CSV 写入当前 job 目录。",
             "outputs" => ["stability scan CSV", "failures CSV", "stdout/stderr 日志"],
             "manifest_candidates" => String[],
             "presets" => Dict(
-                "smoke" => Dict("label" => "smoke", "heavy" => false, "args" => String[]),
+                "smoke" => Dict("label" => "smoke", "heavy" => false, "args" => ["--output", "{job_output}/pnjl_magnetic_stability_scan.csv", "--failures-output", "{job_output}/pnjl_magnetic_stability_failures.csv"]),
             ),
         ),
         Dict(
@@ -637,11 +637,16 @@ function _new_script_task_job(job_id::String, resolved)
     return job_id
 end
 
-function _tail_file(path::String, max_chars::Int=8000)
+function _tail_file(path::String, max_bytes::Int=_SCRIPT_TASK_LOG_TAIL_BYTES)
     isfile(path) || return ""
-    data = read(path, String)
-    length(data) <= max_chars && return data
-    return last(data, max_chars)
+    max_bytes > 0 || return ""
+    open(path, "r") do io
+        size = filesize(path)
+        if size > max_bytes
+            seek(io, size - max_bytes)
+        end
+        return read(io, String)
+    end
 end
 
 function _script_task_artifacts(job::Dict{String, Any})
@@ -799,7 +804,11 @@ function handle_script_task_job_create(req::HTTP.Request)
             end,
         ))
     catch e
-        return _script_task_error_response(400, "INVALID_REQUEST", sprint(showerror, e))
+        if e isa ArgumentError
+            return _script_task_error_response(400, "INVALID_REQUEST", sprint(showerror, e))
+        end
+        @error "script task create failed" exception=(e, catch_backtrace())
+        return _script_task_error_response(500, "COMPUTATION_ERROR", "script task create failed")
     end
 end
 

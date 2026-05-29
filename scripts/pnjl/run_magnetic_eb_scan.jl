@@ -53,4 +53,43 @@ function main(; T_MeV::Float64=150.0, mu_MeV::Float64=60.0, eB_min_MeV2::Float64
     println("magnetic eB scan saved to: $output")
 end
 
-main()
+function _option_value(args::Vector{String}, i::Int)
+    arg = args[i]
+    if occursin("=", arg)
+        return split(arg, "="; limit=2)[2], i + 1
+    end
+    i < length(args) || error("missing value for $arg")
+    return args[i + 1], i + 2
+end
+
+function _parse_cli_args(args::Vector{String})
+    kwargs = Dict{Symbol, Any}()
+    i = 1
+    while i <= length(args)
+        arg = args[i]
+        if arg in ("--output",) || startswith(arg, "--output=")
+            value, i = _option_value(args, i)
+            kwargs[:output] = value
+        elseif arg in ("--T", "--T-MeV", "--T_MeV") || startswith(arg, "--T=") || startswith(arg, "--T-MeV=") || startswith(arg, "--T_MeV=")
+            value, i = _option_value(args, i)
+            kwargs[:T_MeV] = parse(Float64, value)
+        elseif arg in ("--mu", "--mu-MeV", "--mu_MeV") || startswith(arg, "--mu=") || startswith(arg, "--mu-MeV=") || startswith(arg, "--mu_MeV=")
+            value, i = _option_value(args, i)
+            kwargs[:mu_MeV] = parse(Float64, value)
+        elseif arg in ("--eB-min", "--eB_min", "--eB_min_MeV2") || startswith(arg, "--eB-min=") || startswith(arg, "--eB_min=") || startswith(arg, "--eB_min_MeV2=")
+            value, i = _option_value(args, i)
+            kwargs[:eB_min_MeV2] = parse(Float64, value)
+        elseif arg in ("--eB-max", "--eB_max", "--eB_max_MeV2") || startswith(arg, "--eB-max=") || startswith(arg, "--eB_max=") || startswith(arg, "--eB_max_MeV2=")
+            value, i = _option_value(args, i)
+            kwargs[:eB_max_MeV2] = parse(Float64, value)
+        elseif arg in ("--points",) || startswith(arg, "--points=")
+            value, i = _option_value(args, i)
+            kwargs[:points] = parse(Int, value)
+        else
+            error("unknown argument: $arg")
+        end
+    end
+    return kwargs
+end
+
+main(; _parse_cli_args(ARGS)...)

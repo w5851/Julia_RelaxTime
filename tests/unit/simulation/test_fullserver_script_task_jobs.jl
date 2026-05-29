@@ -36,6 +36,11 @@ end
     @test catalog["heavy_requires_confirmation"] == true
     @test haskey(catalog["non_default_frontend_policy"], "scripts/dev")
 
+    phase_plots = STJ._script_task_by_id("run-phase-guided-transport-plots")
+    @test phase_plots["default_preset"] == "custom"
+    @test collect(keys(phase_plots["presets"])) == ["custom"]
+    @test get(phase_plots, "requires_existing_input", false) == true
+
     resp = STJ.handle_script_task_catalog(_script_task_req("GET", "/api/modules/script-tasks"))
     body = _script_task_body(resp)
     @test resp.status == 200
@@ -81,6 +86,20 @@ end
     )
     @test custom.args == ["--in", "data/outputs/in.csv", "--out", "data/outputs/out.csv"]
 
+    magnetic_eb = STJ._script_task_resolve_request(
+        Dict{Symbol, Any}(:task_id => "run-magnetic-eb-scan", :preset => "smoke"),
+        job_id,
+    )
+    @test any(arg -> occursin(job_id, arg), magnetic_eb.args)
+    @test any(arg -> occursin("pnjl_magnetic_eb_scan.csv", arg), magnetic_eb.args)
+
+    magnetic_stability = STJ._script_task_resolve_request(
+        Dict{Symbol, Any}(:task_id => "run-magnetic-stability-scan", :preset => "smoke"),
+        job_id,
+    )
+    @test any(arg -> occursin("pnjl_magnetic_stability_scan.csv", arg), magnetic_stability.args)
+    @test any(arg -> occursin("pnjl_magnetic_stability_failures.csv", arg), magnetic_stability.args)
+
     @test_throws ArgumentError STJ._script_task_resolve_request(
         Dict{Symbol, Any}(
             :task_id => "run-mott-phase-derived-csv",
@@ -116,6 +135,29 @@ end
     route_body = _script_task_body(route_resp)
     @test route_resp.status == 200
     @test route_body.status == "ok"
+
+    broken_task = Dict{String, Any}(
+        "id" => "unit-broken-task",
+        "name" => "Broken task",
+        "script" => "scripts/pnjl/missing.jl",
+        "default_preset" => "smoke",
+        "presets" => Dict("smoke" => Dict("label" => "smoke", "heavy" => false)),
+    )
+    push!(STJ.SCRIPT_TASK_CATALOG, broken_task)
+    try
+        @test_logs (:error, "script task create failed") begin
+            broken_resp = STJ.handle_script_task_job_create(_script_task_req("POST", "/api/modules/script-tasks/jobs", Dict(
+                "task_id" => "unit-broken-task",
+                "preset" => "smoke",
+            )))
+            broken_body = _script_task_body(broken_resp)
+            @test broken_resp.status == 500
+            @test broken_body.error_code == "COMPUTATION_ERROR"
+            @test broken_body.error == "script task create failed"
+        end
+    finally
+        filter!(task -> String(get(task, "id", "")) != "unit-broken-task", STJ.SCRIPT_TASK_CATALOG)
+    end
 end
 
 @testset "FullServer script task command preview" begin
@@ -128,4 +170,15 @@ end
     @test preview["wrapper"] in ("run_with_sysimage.ps1", "run_with_sysimage.sh", "julia --project fallback")
     @test preview["argv"] isa Vector
     @test cmd isa Cmd
+end
+
+@testset "FullServer script task log tail" begin
+    mktempdir() do dir
+        path = joinpath(dir, "long.log")
+        write(path, repeat("a", 4096) * "tail-window")
+        tail = STJ._tail_file(path, 64)
+        @test !occursin(repeat("a", 100), tail)
+        @test occursin("tail-window", tail)
+        @test length(tail) <= 64
+    end
 end

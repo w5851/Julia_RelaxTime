@@ -339,6 +339,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `preset`（可选）：`smoke | canonical | custom`，默认使用该任务 `default_preset`。
 - `confirm_heavy`（重任务必填 `true`）：`canonical/custom` 或目录标记 `heavy=true` 的 preset 必须确认。
 - `custom_args`（`custom` 必填）：字符串数组，每个元素是一个 argv 参数；不能包含换行。
+- 请求参数校验失败返回 `400 INVALID_REQUEST`；服务端内部执行失败返回 `500 COMPUTATION_ERROR`，不透传内部栈。
 
 执行语义：
 
@@ -367,7 +368,7 @@ Models.MeanFieldState(phi::SVector{3}, Phi::Real, PhiBar::Real)
 - `queue.position/queued/running/max_running/max_pending`
 - `events[]`
 - `command`
-- `logs.stdout_path/stderr_path/stdout_tail/stderr_tail`
+- `logs.stdout_path/stderr_path/stdout_tail/stderr_tail`：tail 为固定字节窗口截取，避免按全量日志读取。
 - `error/reason_code`（失败或取消时提供摘要）
 
 #### 0.6.10 `GET /api/modules/script-tasks/jobs/{job_id}/result`（脚本任务结果）
