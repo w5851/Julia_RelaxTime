@@ -68,6 +68,28 @@ const MODULE_REGISTRY = [
             "transport.cos_nodes" => "Int (optional): transport angular nodes",
         ),
     ),
+    Dict(
+        "id" => "script-tasks",
+        "name" => "Stable Script Task Catalog",
+        "description" => "Discover and run curated long-running run_* script workflows as background jobs with safe presets, log tails, and artifact discovery",
+        "invocation_style" => "async",
+        "service_surface" => "job",
+        "default_client_surface" => "service",
+        "stable_entrypoint" => "scripts/dev/run_with_sysimage + curated run_* scripts",
+        "http" => Dict(
+            "catalog" => Dict("method" => "GET", "path" => "/api/modules/script-tasks"),
+            "create" => Dict("method" => "POST", "path" => "/api/modules/script-tasks/jobs"),
+            "status" => Dict("method" => "GET", "path" => "/api/modules/script-tasks/jobs/{job_id}"),
+            "result" => Dict("method" => "GET", "path" => "/api/modules/script-tasks/jobs/{job_id}/result"),
+            "cancel" => Dict("method" => "POST", "path" => "/api/modules/script-tasks/jobs/{job_id}/cancel"),
+        ),
+        "params_schema" => Dict(
+            "task_id" => "String (required): id from GET /api/modules/script-tasks",
+            "preset" => "String (optional): smoke | canonical | custom; defaults to task default_preset",
+            "confirm_heavy" => "Bool (required for heavy presets)",
+            "custom_args" => "Vector{String} (required for custom preset): one argv item per element",
+        ),
+    ),
 ]
 
 @inline _new_message_id() = string(uuid4())

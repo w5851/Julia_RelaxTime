@@ -24,6 +24,7 @@ const SMRC = Main.FullServerApp
     @test haskey(modules_by_id, "pnjl-gap")
     @test haskey(modules_by_id, "pnjl-scan")
     @test haskey(modules_by_id, "transport-point")
+    @test haskey(modules_by_id, "script-tasks")
 
     gap = modules_by_id["pnjl-gap"]
     @test gap.invocation_style == "sync"
@@ -50,4 +51,15 @@ const SMRC = Main.FullServerApp
     @test transport.stable_entrypoint == "Models.solve_transport_from_equilibrium"
     @test transport.http.method == "POST"
     @test transport.http.path == "/api/modules/transport-point/run"
+
+    script_tasks = modules_by_id["script-tasks"]
+    @test script_tasks.invocation_style == "async"
+    @test script_tasks.service_surface == "job"
+    @test script_tasks.default_client_surface == "service"
+    @test occursin("run_with_sysimage", String(script_tasks.stable_entrypoint))
+    @test script_tasks.http.catalog.path == "/api/modules/script-tasks"
+    @test script_tasks.http.create.path == "/api/modules/script-tasks/jobs"
+    @test script_tasks.http.status.path == "/api/modules/script-tasks/jobs/{job_id}"
+    @test script_tasks.http.result.path == "/api/modules/script-tasks/jobs/{job_id}/result"
+    @test script_tasks.http.cancel.path == "/api/modules/script-tasks/jobs/{job_id}/cancel"
 end

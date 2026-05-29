@@ -71,6 +71,37 @@ body {
     background: var(--bg-light);
 }
 
+.service-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 12px;
+    max-width: 860px;
+}
+
+.service-tab {
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-dark);
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.service-tab.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.service-panel {
+    display: none;
+}
+
+.service-panel.active {
+    display: block;
+}
+
 /* 主容器 */
 .container {
     display: flex;
@@ -501,6 +532,10 @@ form legend {
     margin-top: 8px;
 }
 
+.point-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .scan-actions button {
     padding: 8px;
     border: none;
@@ -681,4 +716,144 @@ form legend {
     border-radius: 6px;
     padding: 10px;
     font-size: 12px;
+}
+
+.point-result-panel {
+    margin-top: 10px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+}
+
+.script-task-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.script-task-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.script-task-toolbar button {
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--accent-color);
+    color: #ffffff;
+}
+
+.script-task-catalog {
+    display: grid;
+    gap: 8px;
+    max-height: 660px;
+    overflow: auto;
+}
+
+.script-task-card {
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.script-task-card.active {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.12);
+}
+
+.script-task-card h3 {
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: var(--primary-color);
+}
+
+.script-task-card p,
+.script-task-card li,
+.script-task-selected {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.script-task-card code {
+    display: inline-block;
+    margin-bottom: 5px;
+    color: #475569;
+    font-size: 11px;
+    word-break: break-all;
+}
+
+.script-task-card ul {
+    margin: 6px 0 0 16px;
+}
+
+.script-task-field {
+    margin-top: 5px;
+    color: #334155;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.script-task-meta {
+    margin-top: 6px;
+    color: #475569;
+}
+
+.script-task-selected {
+    margin: 8px 0;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: #f8fafc;
+    white-space: pre-wrap;
+}
+
+#script-task-custom-args {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    resize: vertical;
+}
+
+.script-task-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.inline-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.inline-option input {
+    width: auto;
+    margin: 0;
+}
+
+@media (max-width: 720px) {
+    .service-tabs,
+    .scan-actions,
+    .point-actions,
+    .script-task-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .service-tabs {
+        flex-direction: column;
+    }
+
+    .script-task-grid {
+        grid-template-columns: 1fr;
+    }
 }

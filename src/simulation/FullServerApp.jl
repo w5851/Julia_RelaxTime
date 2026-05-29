@@ -25,6 +25,7 @@ include(joinpath(@__DIR__, "fullserver", "compute_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "pnjl_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "transport_handlers.jl"))
 include(joinpath(@__DIR__, "fullserver", "pnjl_scan_jobs.jl"))
+include(joinpath(@__DIR__, "fullserver", "script_task_jobs.jl"))
 include(joinpath(@__DIR__, "fullserver", "http_utils.jl"))
 include(joinpath(@__DIR__, "fullserver", "routing.jl"))
 

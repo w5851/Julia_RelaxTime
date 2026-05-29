@@ -242,7 +242,7 @@ function solve_pnjl_point(;
     pressure = -omega_val
     rho = number_densities(model, x_state, T_fm, mu_vec; p_num=resolved_p_num, t_num=resolved_t_num, xi=resolved_xi)
     rho_norm = sum(rho.quark) / 3.0
-    masses = calculate_mass_vec(model, x_state)
+    masses = calculate_mass_vec(model, meanfield_state(x_state).phi)
     return (
         converged=true,
         omega=omega_val,
