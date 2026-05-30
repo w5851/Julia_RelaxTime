@@ -6,6 +6,7 @@ if !isdefined(Main, :RelaxTime)
     Base.include(Main, _RELAX_TIME_MODULE_PATH)
 end
 using Main.RelaxationTime
+using Main.AverageScatteringRate: CrossSectionCache
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const DENSITIES_SAMPLE = (u=1.0, d=1.0, s=2.0, ubar=3.0, dbar=3.0, sbar=4.0)
@@ -42,9 +43,31 @@ const EXPECTED_TAU = (
 )
 
 # Minimal parameter sets (values unused when existing_rates covers all processes)
-const QUARK_PARAMS = (m=(u=0.1,d=0.1,s=0.2), μ=(u=0.0,d=0.0,s=0.0))
+const QUARK_PARAMS = (m=(u=0.1,d=0.1,s=0.2), μ=(u=0.0,d=0.0,s=0.0), A=(u=0.0,d=0.0,s=0.0))
 const THERMO_PARAMS = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
 const K_COEFFS = (K_σπ=1.0, K_σK=1.0, K_σ=1.0, K_δπ=1.0, K_δK=1.0)
+
+function rates_without(process::Symbol)
+    return (; (p => 1.0 for p in RelaxationTime.REQUIRED_PROCESSES if p !== process)...)
+end
+
+function fingerprinted_constant_cache(process::Symbol)
+    cache = CrossSectionCache(process, [0.0, 500.0], [1.0, 1.0])
+    cache.fingerprint = Main.AverageScatteringRate._cross_section_cache_fingerprint(
+        process,
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        n_points=4,
+        threshold_subtraction=false,
+        asym_window=0.6,
+        asym_fit_min_points=8,
+        asym_extra_points=10,
+        s_grid=cache.s_vals,
+        grid_metadata=(kind=:explicit,),
+    )
+    return cache
+end
 
 @testset "relaxation_rates algebra" begin
     tau_inv = relaxation_rates(DENSITIES_SAMPLE, RATES_SAMPLE)
@@ -174,4 +197,81 @@ end
 
     @test result.tau_inv == EXPECTED_TAU_INV
     @test result.tau == EXPECTED_TAU
+end
+
+@testset "compute_average_rates validates populated cs_caches" begin
+    process = :uu_to_uu
+    cache = fingerprinted_constant_cache(process)
+
+    rates = compute_average_rates(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        existing_rates=rates_without(process),
+        cs_caches=Dict(process => cache),
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+    @test hasproperty(rates, process)
+    @test isfinite(getproperty(rates, process))
+
+    thermo_changed = (; THERMO_PARAMS..., Φbar=THERMO_PARAMS.Φbar + 0.01)
+    @test_throws ArgumentError compute_average_rates(
+        QUARK_PARAMS,
+        thermo_changed,
+        K_COEFFS;
+        existing_rates=rates_without(process),
+        cs_caches=Dict(process => cache),
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+end
+
+@testset "CSV sigma cache loader keeps legacy no-fingerprint contract" begin
+    mktempdir() do dir
+        for process in RelaxationTime.REQUIRED_PROCESSES
+            write(joinpath(dir, "sigma_$(process).csv"), "s,sigma\n0.0,1.0\n500.0,1.0\n")
+        end
+
+        caches = RelaxationTime.load_cross_section_caches_from_dir(dir)
+        @test length(caches) == length(RelaxationTime.REQUIRED_PROCESSES)
+        @test all(cache -> cache.fingerprint === nothing, values(caches))
+
+        @test_logs (:warn, r"has no fingerprint") begin
+            rates = compute_average_rates(
+                QUARK_PARAMS,
+                THERMO_PARAMS,
+                K_COEFFS;
+                existing_rates=rates_without(:uu_to_uu),
+                cs_caches=Dict(:uu_to_uu => caches[:uu_to_uu]),
+                p_nodes=2,
+                angle_nodes=2,
+                phi_nodes=2,
+                n_sigma_points=4,
+                sigma_cutoff=nothing,
+            )
+            @test hasproperty(rates, :uu_to_uu)
+            @test isfinite(rates.uu_to_uu)
+        end
+
+        @test_throws ArgumentError compute_average_rates(
+            QUARK_PARAMS,
+            THERMO_PARAMS,
+            K_COEFFS;
+            existing_rates=rates_without(:uu_to_uu),
+            cs_caches=Dict(:uu_to_uu => caches[:uu_to_uu]),
+            p_nodes=2,
+            angle_nodes=2,
+            phi_nodes=2,
+            n_sigma_points=4,
+            sigma_cutoff=nothing,
+            require_cache_fingerprint=true,
+        )
+    end
 end

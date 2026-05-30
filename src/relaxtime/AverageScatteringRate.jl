@@ -146,14 +146,17 @@ mutable struct CrossSectionCache
     data::CrossSectionData
     interpolation::CachedInterpolation
     asymptotic::AsymptoticConfig
+    fingerprint::Union{Nothing,NamedTuple}
 end
 
 CrossSectionData() = CrossSectionData(Float64[], Float64[])
 CachedInterpolation() = CachedInterpolation(Float64[], true, 0.0, 0.0, true, Float64[], Float64[], true, 0, 0.0)
 AsymptoticConfig() = AsymptoticConfig(false, 0.0, 0.0, false)
+CrossSectionCache(process::Symbol, data::CrossSectionData, interpolation::CachedInterpolation, asymptotic::AsymptoticConfig) =
+    CrossSectionCache(process, data, interpolation, asymptotic, nothing)
 
 function Base.propertynames(::CrossSectionCache, private::Bool=false)
-    names = (:process, :data, :interpolation, :asymptotic,
+    names = (:process, :data, :interpolation, :asymptotic, :fingerprint,
         :s_vals, :sigma_vals, :pchip_slopes, :pchip_dirty,
         :peak_ratio, :peak_s, :peak_dirty,
         :local_s_vals, :local_sigma_vals, :local_dirty, :local_n_points, :local_upper_s,
@@ -162,7 +165,7 @@ function Base.propertynames(::CrossSectionCache, private::Bool=false)
 end
 
 function Base.getproperty(cache::CrossSectionCache, name::Symbol)
-    if name === :process || name === :data || name === :interpolation || name === :asymptotic
+    if name === :process || name === :data || name === :interpolation || name === :asymptotic || name === :fingerprint
         return getfield(cache, name)
     elseif name === :s_vals || name === :sigma_vals
         return getfield(getfield(cache, :data), name)
@@ -194,6 +197,245 @@ function Base.setproperty!(cache::CrossSectionCache, name::Symbol, value)
 end
 
 CrossSectionCache(process::Symbol) = CrossSectionCache(process, CrossSectionData(), CachedInterpolation(), AsymptoticConfig())
+
+const _CACHE_FINGERPRINT_VERSION = 1
+const _CACHE_FINGERPRINT_CONTEXT_FIELDS = (
+    :version,
+    :process,
+    :quark,
+    :thermo,
+    :K_coeffs,
+    :n_points,
+    :threshold_subtraction,
+    :asym_window,
+    :asym_fit_min_points,
+    :asym_extra_points,
+)
+const _CACHE_FINGERPRINT_WARNED = IdDict{CrossSectionCache,Bool}()
+const _CACHE_FINGERPRINT_WARN_LOCK = ReentrantLock()
+const _FNV64_OFFSET = UInt64(0xcbf29ce484222325)
+const _FNV64_PRIME = UInt64(0x00000100000001b3)
+
+@inline _fingerprint_value(x::Nothing) = nothing
+@inline _fingerprint_value(x::Bool) = x
+@inline _fingerprint_value(x::Symbol) = x
+@inline _fingerprint_value(x::Unsigned) = x
+@inline _fingerprint_value(x::Integer) = Int(x)
+@inline _fingerprint_value(x::AbstractFloat) = Float64(x)
+@inline _fingerprint_value(x::Real) = Float64(x)
+_fingerprint_value(x::Tuple) = map(_fingerprint_value, x)
+
+function _fingerprint_value(x::NamedTuple)
+    names = sort(collect(keys(x)); by=String)
+    return Tuple(name => _fingerprint_value(getproperty(x, name)) for name in names)
+end
+
+@inline function _fnv64_mix(h::UInt64, x::UInt64)::UInt64
+    return (h ⊻ x) * _FNV64_PRIME
+end
+
+function _float_vector_fingerprint_hash(values::Vector{Float64})::UInt64
+    h = _FNV64_OFFSET
+    for value in values
+        h = _fnv64_mix(h, reinterpret(UInt64, value))
+    end
+    return h
+end
+
+function _s_grid_fingerprint(values::Vector{Float64})
+    return (
+        length=length(values),
+        first=isempty(values) ? nothing : values[1],
+        last=isempty(values) ? nothing : values[end],
+        hash=_float_vector_fingerprint_hash(values),
+    )
+end
+
+function _quark_fingerprint(quark_params::NamedTuple)
+    return (
+        m=_fingerprint_value(quark_params.m),
+        μ=_fingerprint_value(quark_params.μ),
+        A=hasproperty(quark_params, :A) ? _fingerprint_value(quark_params.A) : nothing,
+    )
+end
+
+function _thermo_fingerprint(thermo_params::NamedTuple)
+    return (
+        T=_fingerprint_value(thermo_params.T),
+        Φ=_fingerprint_value(thermo_params.Φ),
+        Φbar=_fingerprint_value(thermo_params.Φbar),
+        ξ=hasproperty(thermo_params, :ξ) ? _fingerprint_value(thermo_params.ξ) : 0.0,
+    )
+end
+
+function _cross_section_cache_fingerprint(
+    process::Symbol,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    n_points::Int,
+    threshold_subtraction::Bool,
+    asym_window::Float64,
+    asym_fit_min_points::Int,
+    asym_extra_points::Int,
+    s_grid::Vector{Float64},
+    grid_metadata::NamedTuple=(kind=:explicit,),
+)
+    return (
+        version=_CACHE_FINGERPRINT_VERSION,
+        process=process,
+        quark=_quark_fingerprint(quark_params),
+        thermo=_thermo_fingerprint(thermo_params),
+        K_coeffs=_fingerprint_value(K_coeffs),
+        n_points=Int(n_points),
+        threshold_subtraction=Bool(threshold_subtraction),
+        asym_window=Float64(asym_window),
+        asym_fit_min_points=Int(asym_fit_min_points),
+        asym_extra_points=Int(asym_extra_points),
+        s_grid=_s_grid_fingerprint(s_grid),
+        grid=_fingerprint_value(grid_metadata),
+    )
+end
+
+function _explicit_grid_metadata(input_s_grid::Vector{Float64})
+    return (
+        kind=:explicit,
+        input_s_grid=_s_grid_fingerprint(input_s_grid),
+    )
+end
+
+function _w0cdf_grid_metadata(
+    input_s_grid::Vector{Float64};
+    N::Int,
+    design_p_nodes::Int,
+    design_angle_nodes::Int,
+    design_phi_nodes::Int,
+    p_cutoff::Union{Nothing,Float64},
+    scale::Float64,
+)
+    return (
+        kind=:w0cdf,
+        N=Int(N),
+        design_p_nodes=Int(design_p_nodes),
+        design_angle_nodes=Int(design_angle_nodes),
+        design_phi_nodes=Int(design_phi_nodes),
+        p_cutoff=_fingerprint_value(p_cutoff),
+        scale=Float64(scale),
+        input_s_grid=_s_grid_fingerprint(input_s_grid),
+    )
+end
+
+@inline function _fingerprint_grid_kind(fingerprint::NamedTuple)
+    grid = fingerprint.grid
+    return grid isa Tuple ? _fingerprint_grid_value(grid, :kind) : :unknown
+end
+
+function _fingerprint_grid_value(grid::Tuple, key::Symbol)
+    for pair in grid
+        pair.first === key && return pair.second
+    end
+    return nothing
+end
+
+function _fingerprint_context_mismatch(actual::NamedTuple, expected::NamedTuple)
+    for field in _CACHE_FINGERPRINT_CONTEXT_FIELDS
+        hasproperty(actual, field) || return field
+        getproperty(actual, field) == getproperty(expected, field) || return field
+    end
+    return nothing
+end
+
+function _w0cdf_grid_mismatch(actual::NamedTuple, sigma_cutoff::Union{Nothing,Float64}, scale::Float64)
+    _fingerprint_grid_kind(actual) === :w0cdf || return nothing
+
+    expected = (
+        kind=:w0cdf,
+        N=DEFAULT_SIGMA_GRID_N,
+        design_p_nodes=DEFAULT_W0CDF_P_NODES,
+        design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
+        design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
+        p_cutoff=_fingerprint_value(sigma_cutoff),
+        scale=Float64(scale),
+    )
+    for field in keys(expected)
+        actual_value = _fingerprint_grid_value(actual.grid, field)
+        actual_value == getproperty(expected, field) || return field
+    end
+    return nothing
+end
+
+function _warn_missing_cache_fingerprint_once(cache::CrossSectionCache)
+    should_warn = false
+    lock(_CACHE_FINGERPRINT_WARN_LOCK)
+    try
+        if !haskey(_CACHE_FINGERPRINT_WARNED, cache)
+            _CACHE_FINGERPRINT_WARNED[cache] = true
+            should_warn = true
+        end
+    finally
+        unlock(_CACHE_FINGERPRINT_WARN_LOCK)
+    end
+
+    if should_warn
+        @warn "CrossSectionCache has no fingerprint; allowing legacy/manual cache reuse. Rebuild the cache with precompute_cross_section! or build_w0cdf_pchip_cache for strict validation, or pass require_cache_fingerprint=true to reject fingerprint-less caches." process=cache.process
+    end
+    return nothing
+end
+
+function _validate_cross_section_cache!(
+    cache::CrossSectionCache,
+    process::Symbol,
+    quark_params::NamedTuple,
+    thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    n_points::Int,
+    threshold_subtraction::Bool,
+    asym_window::Float64,
+    asym_fit_min_points::Int,
+    asym_extra_points::Int,
+    sigma_cutoff::Union{Nothing,Float64},
+    scale::Float64,
+    require_cache_fingerprint::Bool,
+)
+    cache.process === process || throw(ArgumentError("CrossSectionCache process mismatch: cache is for $(cache.process), but current process is $(process)"))
+    isempty(cache.s_vals) && return cache
+
+    if cache.fingerprint === nothing
+        if require_cache_fingerprint
+            throw(ArgumentError("CrossSectionCache for $(process) has no fingerprint; rebuild it with precompute_cross_section! or build_w0cdf_pchip_cache before strict reuse"))
+        end
+        _warn_missing_cache_fingerprint_once(cache)
+        return cache
+    end
+
+    cache.fingerprint.s_grid == _s_grid_fingerprint(cache.s_vals) ||
+        throw(ArgumentError("CrossSectionCache fingerprint for $(process) no longer matches the cached s_grid; rebuild the cache before reuse"))
+
+    expected = _cross_section_cache_fingerprint(
+        process,
+        quark_params,
+        thermo_params,
+        K_coeffs;
+        n_points=n_points,
+        threshold_subtraction=threshold_subtraction,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points,
+        s_grid=cache.s_vals,
+        grid_metadata=(kind=:validation_context,),
+    )
+
+    mismatch = _fingerprint_context_mismatch(cache.fingerprint, expected)
+    if mismatch !== nothing
+        throw(ArgumentError("CrossSectionCache fingerprint mismatch for $(process): $(mismatch) differs from current parameters; rebuild the cache for the current quark_params, thermo_params, K_coeffs, n_sigma_points, and threshold_subtraction settings"))
+    end
+
+    grid_mismatch = _w0cdf_grid_mismatch(cache.fingerprint, sigma_cutoff, scale)
+    if grid_mismatch !== nothing
+        throw(ArgumentError("CrossSectionCache fingerprint mismatch for $(process): w0cdf grid field $(grid_mismatch) differs from the current average_scattering_rate cache strategy; rebuild with build_w0cdf_pchip_cache using the current sigma_cutoff/default grid settings"))
+    end
+    return cache
+end
 
 function CrossSectionCache(process::Symbol, s_vals::Vector{Float64}, sigma_vals::Vector{Float64})
     length(s_vals) == length(sigma_vals) || error("CrossSectionCache: s_vals and sigma_vals length mismatch")
@@ -321,7 +563,8 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10)
+    asym_extra_points::Int=10,
+    fingerprint_grid_metadata::Union{Nothing,NamedTuple}=nothing)
     # compute raw σ(s) for grid
     raw = Float64[]
     # prepare containers for potential extra samples (defined regardless of threshold_subtraction)
@@ -334,6 +577,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
 
     # optional threshold asymptotic subtraction
     cache.asym_enabled = false
+    cache.asym_requested = threshold_subtraction
     if threshold_subtraction
         # compute s_th from process masses
         pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(cache.process)
@@ -418,6 +662,20 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
     cache.peak_dirty = true
     cache.local_dirty = true
     _ensure_pchip_slopes!(cache)
+    grid_metadata = fingerprint_grid_metadata === nothing ? _explicit_grid_metadata(s_grid) : fingerprint_grid_metadata
+    cache.fingerprint = _cross_section_cache_fingerprint(
+        cache.process,
+        quark_params,
+        thermo_params,
+        K_coeffs;
+        n_points=n_points,
+        threshold_subtraction=threshold_subtraction,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points,
+        s_grid=cache.s_vals,
+        grid_metadata=grid_metadata,
+    )
     return cache
 end
 
@@ -765,14 +1023,21 @@ function build_w0cdf_pchip_cache(
         scale=scale,
     )
     cache = CrossSectionCache(process)
-    # record whether asymptotic subtraction was requested (explicitly or auto-enabled)
-    cache.asym_requested = threshold_subtraction
     _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_sigma_points,
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
-        asym_extra_points=asym_extra_points)
+        asym_extra_points=asym_extra_points,
+        fingerprint_grid_metadata=_w0cdf_grid_metadata(
+            s_grid;
+            N=N,
+            design_p_nodes=design_p_nodes,
+            design_angle_nodes=design_angle_nodes,
+            design_phi_nodes=design_phi_nodes,
+            p_cutoff=p_cutoff,
+            scale=scale,
+        ))
     _ensure_pchip_slopes!(cache)
     return cache
 end
@@ -998,6 +1263,8 @@ end
 - `p_nodes::Int`: 动量积分节点数 (默认6)
 - `angle_nodes::Int`: 角度积分节点数 (默认2)
 - `phi_nodes::Int`: 方位角积分节点数 (默认4)
+- `n_sigma_points::Int`: σ(s) 计算时的 t 积分点数
+- `require_cache_fingerprint::Bool`: 为 `true` 时拒绝无指纹的外部 σ(s) 缓存
 - `scale::Float64`: 半无穷积分尺度参数
 """
 function average_scattering_rate(
@@ -1026,6 +1293,7 @@ function average_scattering_rate(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
+    require_cache_fingerprint::Bool=false,
     band_edges::Union{Nothing,Vector{Float64}}=nothing,
     band_omega_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
     band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
@@ -1044,8 +1312,8 @@ function average_scattering_rate(
 
     # Build the finalized σ-cache strategy by default.
     # 如果指定了 sigma_cutoff，则使用有限截断的 w0cdf 设计
+    thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
     if cs_cache === nothing
-        thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
         cs_cache = build_w0cdf_pchip_cache(
             process,
             quark_params,
@@ -1062,6 +1330,22 @@ function average_scattering_rate(
             asym_window=asym_window,
             asym_fit_min_points=asym_fit_min_points,
             asym_extra_points=asym_extra_points,
+        )
+    elseif interpolation_mode !== :direct
+        _validate_cross_section_cache!(
+            cs_cache,
+            process,
+            quark_params,
+            thermo_params,
+            K_coeffs;
+            n_points=n_sigma_points,
+            threshold_subtraction=thr_for_build,
+            asym_window=asym_window,
+            asym_fit_min_points=asym_fit_min_points,
+            asym_extra_points=asym_extra_points,
+            sigma_cutoff=sigma_cutoff,
+            scale=scale,
+            require_cache_fingerprint=require_cache_fingerprint,
         )
     end
 
