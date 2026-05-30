@@ -220,6 +220,8 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range (defaults to Λ)
+- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
+- `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 
 # Returns
@@ -477,6 +479,8 @@ and the averaged rates for reuse.
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range
+- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
+- `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 
 # Returns

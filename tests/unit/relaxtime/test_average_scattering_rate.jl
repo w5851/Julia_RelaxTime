@@ -291,6 +291,21 @@ end
         sigma_cutoff=nothing,
         require_cache_fingerprint=true,
     )
+
+    malformed_cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
+    malformed_cache.fingerprint = (version=1,)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=malformed_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
 end
 
 @testset "average_scattering_rate default cache construction remains usable" begin
@@ -668,6 +683,20 @@ end
     @test isfinite(ω_direct)
     @test ω_cached == 0.0
     @test ω_direct > 0.0
+
+    wrong_process_cache = constant_sigma_cache(:ud_to_ud; sigma=0.0)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=wrong_process_cache,
+        n_sigma_points=4,
+        interpolation_mode=:direct,
+    )
 end
 
 @testset "average_scattering_rate hybrid_threshold mode stays finite" begin

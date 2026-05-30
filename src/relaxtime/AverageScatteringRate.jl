@@ -382,6 +382,31 @@ function _warn_missing_cache_fingerprint_once(cache::CrossSectionCache)
     return nothing
 end
 
+function _validate_cross_section_cache_process!(cache::CrossSectionCache, process::Symbol)
+    cache.process === process ||
+        throw(ArgumentError("CrossSectionCache process mismatch: cache is for $(cache.process), but current process is $(process)"))
+    return cache
+end
+
+function _require_cache_fingerprint_fields(fingerprint::NamedTuple, process::Symbol)
+    required = (
+        _CACHE_FINGERPRINT_CONTEXT_FIELDS...,
+        :s_grid,
+        :grid,
+    )
+    for field in required
+        hasproperty(fingerprint, field) ||
+            throw(ArgumentError("CrossSectionCache fingerprint for $(process) is missing required field $(field); rebuild the cache with precompute_cross_section! or build_w0cdf_pchip_cache"))
+    end
+
+    s_grid = fingerprint.s_grid
+    for field in (:length, :first, :last, :hash)
+        hasproperty(s_grid, field) ||
+            throw(ArgumentError("CrossSectionCache fingerprint for $(process) has an invalid s_grid summary; rebuild the cache with precompute_cross_section! or build_w0cdf_pchip_cache"))
+    end
+    return nothing
+end
+
 function _validate_cross_section_cache!(
     cache::CrossSectionCache,
     process::Symbol,
@@ -397,7 +422,7 @@ function _validate_cross_section_cache!(
     scale::Float64,
     require_cache_fingerprint::Bool,
 )
-    cache.process === process || throw(ArgumentError("CrossSectionCache process mismatch: cache is for $(cache.process), but current process is $(process)"))
+    _validate_cross_section_cache_process!(cache, process)
     isempty(cache.s_vals) && return cache
 
     if cache.fingerprint === nothing
@@ -408,6 +433,7 @@ function _validate_cross_section_cache!(
         return cache
     end
 
+    _require_cache_fingerprint_fields(cache.fingerprint, process)
     cache.fingerprint.s_grid == _s_grid_fingerprint(cache.s_vals) ||
         throw(ArgumentError("CrossSectionCache fingerprint for $(process) no longer matches the cached s_grid; rebuild the cache before reuse"))
 
@@ -1331,22 +1357,25 @@ function average_scattering_rate(
             asym_fit_min_points=asym_fit_min_points,
             asym_extra_points=asym_extra_points,
         )
-    elseif interpolation_mode !== :direct
-        _validate_cross_section_cache!(
-            cs_cache,
-            process,
-            quark_params,
-            thermo_params,
-            K_coeffs;
-            n_points=n_sigma_points,
-            threshold_subtraction=thr_for_build,
-            asym_window=asym_window,
-            asym_fit_min_points=asym_fit_min_points,
-            asym_extra_points=asym_extra_points,
-            sigma_cutoff=sigma_cutoff,
-            scale=scale,
-            require_cache_fingerprint=require_cache_fingerprint,
-        )
+    else
+        _validate_cross_section_cache_process!(cs_cache, process)
+        if interpolation_mode !== :direct
+            _validate_cross_section_cache!(
+                cs_cache,
+                process,
+                quark_params,
+                thermo_params,
+                K_coeffs;
+                n_points=n_sigma_points,
+                threshold_subtraction=thr_for_build,
+                asym_window=asym_window,
+                asym_fit_min_points=asym_fit_min_points,
+                asym_extra_points=asym_extra_points,
+                sigma_cutoff=sigma_cutoff,
+                scale=scale,
+                require_cache_fingerprint=require_cache_fingerprint,
+            )
+        end
     end
 
     # 使用半无穷积分 [0, ∞)
