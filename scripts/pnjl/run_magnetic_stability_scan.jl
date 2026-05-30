@@ -9,6 +9,11 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
+using .Models: calculate_magnetic_number_densities,
+               calculate_magnetic_omega_components,
+               default_magnetic_config,
+               magnetic_nmax_convergence_report
+
 const PNJL = Models.pnjl_module()
 
 const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "data", "outputs", "results", "pnjl_magnetic", "stability", "pnjl_magnetic_stability_scan_latest.csv")
@@ -111,4 +116,31 @@ function main(; output::String=DEFAULT_OUTPUT, failures_output::String=DEFAULT_F
     println("failures: " * failures_output)
 end
 
-main()
+function _option_value(args::Vector{String}, i::Int)
+    arg = args[i]
+    if occursin("=", arg)
+        return split(arg, "="; limit=2)[2], i + 1
+    end
+    i < length(args) || error("missing value for $arg")
+    return args[i + 1], i + 2
+end
+
+function _parse_cli_args(args::Vector{String})
+    kwargs = Dict{Symbol, Any}()
+    i = 1
+    while i <= length(args)
+        arg = args[i]
+        if arg in ("--output",) || startswith(arg, "--output=")
+            value, i = _option_value(args, i)
+            kwargs[:output] = value
+        elseif arg in ("--failures-output", "--failures_output") || startswith(arg, "--failures-output=") || startswith(arg, "--failures_output=")
+            value, i = _option_value(args, i)
+            kwargs[:failures_output] = value
+        else
+            error("unknown argument: $arg")
+        end
+    end
+    return kwargs
+end
+
+main(; _parse_cli_args(ARGS)...)
