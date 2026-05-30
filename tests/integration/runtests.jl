@@ -87,14 +87,15 @@ function _include_integration_dir(dir::String)
 end
 
 # Ultra-fast subset for local edit-run loop (<~1 min target on warm cache).
+# Full-only budget exclusions:
+# - config/test_config_profile_smoke.jl: local subprocess/config load cost exceeded smoke budget.
+# - relaxtime/test_plot_contract_smoke.jl: launches orchestrator Julia subprocesses.
+# - relaxtime/test_cross_section_orchestrated_smoke.jl: orchestrated cross-section path is too slow for smoke.
+# - relaxtime/test_xi_smoothness_batch_runner_smoke.jl: batch runner subprocess path is too slow for smoke.
+# - relaxtime/test_phase_guided_transport_scan_smoke.jl: dry-run CLI subprocess path is too slow for smoke.
 const INTEGRATION_SMOKE_FILES = [
-    joinpath(INTEGRATION_DIR, "config", "test_config_profile_smoke.jl"),
-    joinpath(INTEGRATION_DIR, "relaxtime", "test_plot_contract_smoke.jl"),
-    joinpath(INTEGRATION_DIR, "relaxtime", "test_cross_section_orchestrated_smoke.jl"),
-    joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_batch_runner_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_plot_smoke.jl"),
     joinpath(INTEGRATION_DIR, "relaxtime", "test_xi_smoothness_evaluation_smoke.jl"),
-    joinpath(INTEGRATION_DIR, "relaxtime", "test_phase_guided_transport_scan_smoke.jl"),
 ]
 
 # Broader gate retained for CI / pre-merge confidence.

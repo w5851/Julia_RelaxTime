@@ -78,8 +78,13 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
     - 这通过内部变量 `cs_cache_arg` 实现（若缓存缺失或为空则传入 `nothing`）。
 
 - 推荐调用模式：
-    1. 如果需在多个参数点复用截面，调用者应先用 `build_w0cdf_pchip_cache(...)` 构建并缓存 `CrossSectionCache`，放入 `cs_caches[process]`，以避免重复构建开销。
+    1. 如果需复用截面，调用者应先用 `build_w0cdf_pchip_cache(...)` 或 `precompute_cross_section!` 构建带 `fingerprint` 的 `CrossSectionCache`，放入 `cs_caches[process]`，以避免重复构建开销。
     2. 对于一次性评估，可传 `cs_cache=nothing` 或不传该参数，让内部按需构建（会使用 `threshold_subtraction` 等参数）。
+    3. 多个参数点之间只允许在同一生成指纹下复用截面；`quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、`threshold_subtraction` 或 w0cdf 网格策略不一致时，已填充缓存会被拒绝并抛出 `ArgumentError`。
+
+- 兼容策略：
+    - 旧的手工 `CrossSectionCache(process, s_vals, sigma_vals)` 和 `load_cross_section_caches_from_dir` 读取的两列 CSV 表没有 `fingerprint`；默认允许复用但会 warning。
+    - 若调用方需要严格治理，可传 `require_cache_fingerprint=true`，此时无指纹缓存会被拒绝。
 
 - 关键影响：性能（避免重复构建）和语义（当启用阈值减法时，缓存保存的是 `raw - asym`，返回值会把解析项加回）。
 

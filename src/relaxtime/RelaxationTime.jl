@@ -220,6 +220,9 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range (defaults to Λ)
+- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
+- `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
+- `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 
 # Returns
 A NamedTuple containing average scattering rates for all required processes.
@@ -254,7 +257,13 @@ function compute_average_rates(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
-    sigma_cutoff::Union{Nothing,Float64}=nothing  # σ(s)有效范围的动量截断，默认使用 Λ
+    sigma_cutoff::Union{Nothing,Float64}=nothing,  # σ(s)有效范围的动量截断，默认使用 Λ
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10,
+    interpolation_mode::Symbol=:pchip,
+    require_cache_fingerprint::Bool=false,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -277,6 +286,12 @@ function compute_average_rates(
         phi_w=phi_w,
         n_sigma_points=n_sigma_points,
         sigma_cutoff=sigma_cutoff,
+        threshold_subtraction=threshold_subtraction,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points,
+        interpolation_mode=interpolation_mode,
+        require_cache_fingerprint=require_cache_fingerprint,
     )
 end
 
@@ -302,6 +317,7 @@ function _compute_average_rates_core(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
+    require_cache_fingerprint::Bool=false,
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -358,6 +374,7 @@ function _compute_average_rates_core(
             asym_fit_min_points=asym_fit_min_points,
             asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
+            require_cache_fingerprint=require_cache_fingerprint,
         )
     end
 
@@ -462,6 +479,9 @@ and the averaged rates for reuse.
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range
+- `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
+- `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
+- `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 
 # Returns
 A NamedTuple with fields:
@@ -507,6 +527,7 @@ function relaxation_times(
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
+    require_cache_fingerprint::Bool=false,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -538,6 +559,7 @@ function relaxation_times(
             asym_fit_min_points=asym_fit_min_points,
             asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
+            require_cache_fingerprint=require_cache_fingerprint,
         )
     end
 

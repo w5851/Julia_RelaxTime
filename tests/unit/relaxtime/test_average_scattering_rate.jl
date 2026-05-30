@@ -47,6 +47,13 @@ function constant_sigma_cache(process::Symbol; sigma::Float64=1.0)
     return cache
 end
 
+function perturb_first_coeff(nt::NamedTuple, factor::Float64)
+    names = keys(nt)
+    first_name = first(names)
+    values = map(name -> name === first_name ? getproperty(nt, name) * factor : getproperty(nt, name), names)
+    return NamedTuple{names}(values)
+end
+
 @testset "average_scattering_rate (isotropic)" begin
     cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
     ω = average_scattering_rate(
@@ -134,6 +141,187 @@ end
 
     @test cache_sigma(cache, 9.999) == 0.0
     @test cache_sigma(cache, 20.001) == 0.0
+end
+
+@testset "CrossSectionCache fingerprint validation" begin
+    s_grid = [0.0, 20.0, 500.0]
+    cache = CrossSectionCache(:uu_to_uu)
+    precompute_cross_section!(
+        cache,
+        s_grid,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        threshold_subtraction=false,
+    )
+
+    @test cache.fingerprint !== nothing
+    @test cache.fingerprint.process === :uu_to_uu
+    @test cache.fingerprint.n_points == 4
+    @test cache.fingerprint.s_grid.length == length(cache.s_vals)
+
+    ω = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+    @test isfinite(ω)
+    @test ω >= 0.0
+
+    thermo_changed = (; THERMO_ISO..., Φ=THERMO_ISO.Φ + 0.01)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        thermo_changed,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+
+    quark_changed = (; QUARK_PARAMS..., m=(; QUARK_PARAMS.m..., u=QUARK_PARAMS.m.u + 0.01))
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        quark_changed,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+
+    K_changed = perturb_first_coeff(K_COEFFS, 1.01)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_changed;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=5,
+        sigma_cutoff=nothing,
+    )
+
+    w0cdf_cache = build_w0cdf_pchip_cache(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        N=4,
+        n_sigma_points=4,
+        p_cutoff=nothing,
+    )
+    @test w0cdf_cache.fingerprint !== nothing
+    @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :kind) === :w0cdf
+    @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :N) == 4
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=w0cdf_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+end
+
+@testset "legacy fingerprint-less cache compatibility" begin
+    legacy_cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
+    @test legacy_cache.fingerprint === nothing
+
+    @test_logs (:warn, r"has no fingerprint") begin
+        ω = average_scattering_rate(
+            :uu_to_uu,
+            QUARK_PARAMS,
+            THERMO_ISO,
+            K_COEFFS;
+            p_nodes=2,
+            angle_nodes=2,
+            phi_nodes=2,
+            cs_cache=legacy_cache,
+            n_sigma_points=4,
+            sigma_cutoff=nothing,
+        )
+        @test isfinite(ω)
+        @test ω > 0.0
+    end
+
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=legacy_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        require_cache_fingerprint=true,
+    )
+
+    malformed_cache = constant_sigma_cache(:uu_to_uu; sigma=1.0)
+    malformed_cache.fingerprint = (version=1,)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=malformed_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+end
+
+@testset "average_scattering_rate default cache construction remains usable" begin
+    ω = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+    @test isfinite(ω)
+    @test ω >= 0.0
 end
 
 @testset "threshold injection invariants: trigger, sorted, unique" begin
@@ -495,6 +683,20 @@ end
     @test isfinite(ω_direct)
     @test ω_cached == 0.0
     @test ω_direct > 0.0
+
+    wrong_process_cache = constant_sigma_cache(:ud_to_ud; sigma=0.0)
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=4,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=wrong_process_cache,
+        n_sigma_points=4,
+        interpolation_mode=:direct,
+    )
 end
 
 @testset "average_scattering_rate hybrid_threshold mode stays finite" begin
