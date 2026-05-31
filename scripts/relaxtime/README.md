@@ -131,20 +131,20 @@ julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl \
 
 ```bash
 python scripts/relaxtime/build_paper_p1_figure_assets.py \
-  --mott-grid-csv data/outputs/results/relaxtime/paper_p1/mott_grid.csv \
-  --isentropic-csv data/outputs/results/relaxtime/paper_p1/isentropic_sigma30.csv \
-  --phase-dir data/outputs/results/relaxtime/paper_p1/phase_xi0 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
+  --phase-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/phase_xi0 \
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
 ```
 
 如果 phase 已汇总为正式 reference 产物，可直接消费 `boundary_<tag>.csv`、`spinodals_<tag>.csv`、`crossover_<tag>.csv`、`cep_<tag>.csv`：
 
 ```bash
 python scripts/relaxtime/build_paper_p1_figure_assets.py \
-  --mott-grid-csv data/outputs/results/relaxtime/paper_p1/mott_grid.csv \
-  --phase-reference-root data/reference/pnjl/paper_p1_xi3 \
-  --phase-reference-tag paper_p1_xi3 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
+  --phase-reference-tag paper_p1_mott_phase_isentropic_xi3 \
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
 ```
 
 若需要把本轮 P1 生产链路统一编排，可使用 `run_paper_p1_pipeline.jl`。各 stage 相互独立，可只跑数据生产或只跑后处理：
@@ -152,11 +152,11 @@ python scripts/relaxtime/build_paper_p1_figure_assets.py \
 ```bash
 julia --project=. scripts/relaxtime/run_paper_p1_pipeline.jl \
   --stage=assets \
-  --mott-grid-csv data/outputs/results/relaxtime/paper_p1/mott_grid.csv \
-  --phase-reference-root data/reference/pnjl/paper_p1_xi3 \
-  --phase-tag paper_p1_xi3 \
-  --isentropic-csv data/outputs/results/relaxtime/paper_p1/isentropic_sigma30.csv \
-  --figure-dir data/outputs/figures/relaxtime/paper_p1
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
+  --phase-tag paper_p1_mott_phase_isentropic_xi3 \
+  --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
+  --figure-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
 ```
 
 当 Mott 主网格在不同 `muB` 区间需要不同温度覆盖时，使用 slice plan CSV，而不是手工拆多批命令。CSV 必须包含 `muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV`：
@@ -173,8 +173,8 @@ muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV
 ```bash
 julia --project=. scripts/relaxtime/run_paper_p1_pipeline.jl \
   --stage=mott \
-  --mott-slice-plan data/outputs/results/relaxtime/paper_p1/mott_slice_plan.csv \
-  --result-dir data/outputs/results/relaxtime/paper_p1/production
+  --mott-slice-plan data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_slice_plan.csv \
+  --result-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production
 ```
 
 `stage=mott` 会在合并网格旁写出 `mott_grid_combined_manifest.json`，显式记录 `equilibrium_branch_mode`、`equilibrium_selector_policy`、`equilibrium_selector_tiebreak` 和每个 `muB` slice 的温度范围。`stage=phase` 默认从 `T=30 MeV` 开始，以便低温高密 Mott bracket 能有 phase reference 覆盖；可用 `--phase-tmin` 覆盖。phase 生产默认使用 `--phase-p-num 24 --phase-t-num 8`，与既有正式 PNJL 相图 reference 的 `T-rho` 曲线口径对齐；降低节点数可能在低温 quark-side spinodal 附近产生伪回折。

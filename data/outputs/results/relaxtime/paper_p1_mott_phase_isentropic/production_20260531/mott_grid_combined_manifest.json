@@ -1,0 +1,26 @@
+{
+  "schema_version": "paper_p1_mott_combined_v1",
+  "produced_by": "scripts/relaxtime/run_paper_p1_pipeline.jl",
+  "output_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_grid_combined.csv",
+  "scan": {
+    "mott_phase": {
+      "xi_list": [-0.3, 0.0, 0.3],
+      "equilibrium_branch_mode": "stable",
+      "equilibrium_selector_policy": "pressure_max_under_constraints",
+      "equilibrium_selector_tiebreak": "residual_norm_then_seed_index",
+      "p_num": 12,
+      "t_num": 6,
+      "max_iter": 40
+    }
+  },
+  "slices": [
+    {"muB_MeV": 0.0, "T_min_MeV": 100.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0000\\mott_phase_scan.csv"},
+    {"muB_MeV": 200.0, "T_min_MeV": 100.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0200\\mott_phase_scan.csv"},
+    {"muB_MeV": 400.0, "T_min_MeV": 100.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0400\\mott_phase_scan.csv"},
+    {"muB_MeV": 600.0, "T_min_MeV": 100.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0600\\mott_phase_scan.csv"},
+    {"muB_MeV": 800.0, "T_min_MeV": 100.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0800\\mott_phase_scan.csv"},
+    {"muB_MeV": 900.0, "T_min_MeV": 30.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB0900\\mott_phase_scan.csv"},
+    {"muB_MeV": 1000.0, "T_min_MeV": 30.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB1000\\mott_phase_scan.csv"},
+    {"muB_MeV": 1100.0, "T_min_MeV": 30.0, "T_max_MeV": 300.0, "T_step_MeV": 5.0, "source_csv": "data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531\\mott_muB1100\\mott_phase_scan.csv"}
+  ]
+}

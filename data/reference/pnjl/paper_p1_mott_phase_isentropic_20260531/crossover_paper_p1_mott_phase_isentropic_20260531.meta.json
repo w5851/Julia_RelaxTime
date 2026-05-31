@@ -173,7 +173,7 @@
     },
     "schema_version": "v1",
     "artifact": {
-        "path": "data/reference/pnjl/paper_p1_20260531/crossover_paper_p1_20260531.csv",
+        "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/crossover_paper_p1_mott_phase_isentropic_20260531.csv",
         "row_count": 48
     }
 }

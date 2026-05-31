@@ -6,8 +6,8 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 
 Base.@kwdef mutable struct PaperP1Options
     stages::Vector{Symbol} = Symbol[:assets]
-    result_dir::String = joinpath("data", "outputs", "results", "relaxtime", "paper_p1", "orchestrated")
-    figure_dir::String = joinpath("data", "outputs", "figures", "relaxtime", "paper_p1", "orchestrated")
+    result_dir::String = joinpath("data", "outputs", "results", "relaxtime", "paper_p1_mott_phase_isentropic", "orchestrated")
+    figure_dir::String = joinpath("data", "outputs", "figures", "relaxtime", "paper_p1_mott_phase_isentropic", "orchestrated")
     xi_values::Vector{Float64} = [-0.3, 0.0, 0.3]
     mott_mub_values::Vector{Float64} = [0.0, 200.0, 400.0, 600.0, 800.0]
     mott_tmin::Float64 = 100.0
@@ -24,10 +24,10 @@ Base.@kwdef mutable struct PaperP1Options
     isentropic_t_values::Vector{Float64} = collect(100.0:10.0:300.0)
     isentropic_csvs::Vector{String} = String[]
     phase_dirs::Vector{String} = String[]
-    phase_output_root::String = joinpath("data", "processed", "pnjl", "phase_diagram", "paper_p1_orchestrated")
-    phase_reference_root::String = joinpath("data", "reference", "pnjl", "paper_p1_orchestrated")
+    phase_output_root::String = joinpath("data", "processed", "pnjl", "phase_diagram", "paper_p1_mott_phase_isentropic_orchestrated")
+    phase_reference_root::String = joinpath("data", "reference", "pnjl", "paper_p1_mott_phase_isentropic_orchestrated")
     use_phase_reference::Bool = false
-    phase_tag::String = "paper_p1"
+    phase_tag::String = "paper_p1_mott_phase_isentropic"
     phase_tmin::Float64 = 30.0
     phase_tmax::Float64 = 240.0
     phase_tstep::Float64 = 5.0

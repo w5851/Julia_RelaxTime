@@ -17,14 +17,14 @@
         "iterations": 80,
         "compute_crossover": true,
         "T_max_MeV": 240,
-        "tag": "paper_p1_20260531",
+        "tag": "paper_p1_mott_phase_isentropic_20260531",
         "T_min_MeV": 30,
         "crossover_variable": "phi_u",
         "rho_max": 4,
         "p_num": 24,
         "rho_min": 0
     },
-    "output_root": "data/processed/pnjl/phase_diagram/paper_p1_20260531",
+    "output_root": "data/processed/pnjl/phase_diagram/paper_p1_mott_phase_isentropic_20260531",
     "generator": {
         "git_commit": "dfd5878ad5f8757935ca2c62a4d57383a6a7f748",
         "crossover_only": false,
@@ -34,7 +34,7 @@
     },
     "runs": [
         {
-            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_m0p300",
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_mott_phase_isentropic_20260531/xi_m0p300",
             "cep_found": true,
             "run_id": "phase_dense_reference_20260531_200133",
             "spinodal_count": 23,
@@ -43,7 +43,7 @@
             "crossover_count": 16
         },
         {
-            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_0p000",
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_mott_phase_isentropic_20260531/xi_0p000",
             "cep_found": true,
             "run_id": "phase_dense_reference_20260531_201541",
             "spinodal_count": 20,
@@ -52,7 +52,7 @@
             "crossover_count": 16
         },
         {
-            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_0p300",
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_mott_phase_isentropic_20260531/xi_0p300",
             "cep_found": true,
             "run_id": "phase_dense_reference_20260531_202914",
             "spinodal_count": 17,
@@ -64,27 +64,27 @@
     "schema_version": "v1",
     "artifacts": {
         "manifest": {
-            "path": "data/reference/pnjl/paper_p1_20260531/phase_reference_paper_p1_20260531_manifest.json"
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/phase_reference_paper_p1_mott_phase_isentropic_20260531_manifest.json"
         },
         "crossover_meta": {
-            "path": "data/reference/pnjl/paper_p1_20260531/crossover_paper_p1_20260531.meta.json"
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/crossover_paper_p1_mott_phase_isentropic_20260531.meta.json"
         },
         "cep": {
-            "path": "data/reference/pnjl/paper_p1_20260531/cep_paper_p1_20260531.csv",
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/cep_paper_p1_mott_phase_isentropic_20260531.csv",
             "row_count": 3
         },
         "crossover": {
-            "path": "data/reference/pnjl/paper_p1_20260531/crossover_paper_p1_20260531.csv",
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/crossover_paper_p1_mott_phase_isentropic_20260531.csv",
             "row_count": 48
         },
         "spinodals": {
-            "path": "data/reference/pnjl/paper_p1_20260531/spinodals_paper_p1_20260531.csv",
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/spinodals_paper_p1_mott_phase_isentropic_20260531.csv",
             "row_count": 60
         },
         "boundary": {
-            "path": "data/reference/pnjl/paper_p1_20260531/boundary_paper_p1_20260531.csv",
+            "path": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/boundary_paper_p1_mott_phase_isentropic_20260531.csv",
             "row_count": 60
         }
     },
-    "reference_root": "data/reference/pnjl/paper_p1_20260531"
+    "reference_root": "data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531"
 }
