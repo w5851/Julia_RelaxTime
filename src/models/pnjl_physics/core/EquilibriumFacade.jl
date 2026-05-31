@@ -113,6 +113,8 @@ function solve_equilibrium_backend(
     solver_kwargs::NamedTuple=(;),
     models_solver=nothing,
     models_residual_norm_max::Real=1e-4,
+    fixedmu_seed_strategy=nothing,
+    fixedmu_evaluate_all_attempts::Bool=true,
     enforce_fixedmu_mass_floor::Bool=true,
     fixedmu_phi_max_positive::Real=0.1,
     fixedmu_phi_min_negative::Real=-Inf,
@@ -156,7 +158,17 @@ function solve_equilibrium_backend(
                 phi_min_negative=Float64(fixedmu_phi_min_negative),
             )
             fixed_mode = FixedMu()
-            if seed_state === nothing
+            if fixedmu_seed_strategy !== nothing
+                solved = solve(m, fixed_mode, T_fm, mu_fm;
+                    seed_strategy=fixedmu_seed_strategy,
+                    evaluate_all_attempts=Bool(fixedmu_evaluate_all_attempts),
+                    xi=xi,
+                    p_num=p_num,
+                    t_num=t_num,
+                    residual_norm_max=models_residual_norm_max,
+                    physicality_check=fixedmu_physicality_check,
+                )
+            elseif seed_state === nothing
                 solved = solve(m, fixed_mode, T_fm, mu_fm;
                     xi=xi,
                     p_num=p_num,

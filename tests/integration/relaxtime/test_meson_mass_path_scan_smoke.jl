@@ -28,6 +28,7 @@ const ISENTROPIC_OUTFILE = joinpath(OUTDIR, "isentropic_meson_mass_path_scan_smo
     @test isfile(FREEZEOUT_OUTFILE)
     freezeout_text = read(FREEZEOUT_OUTFILE, String)
     @test occursin("path_family,path_profile,path_segment,path_point_index,path_order_key,path_label", freezeout_text)
+    @test occursin("root_sign_flipped_K", freezeout_text)
     @test occursin("freezeout", freezeout_text)
 
     isentropic = Models.run_isentropic_meson_mass_scan(
@@ -45,4 +46,5 @@ const ISENTROPIC_OUTFILE = joinpath(OUTDIR, "isentropic_meson_mass_path_scan_smo
     isentropic_text = read(ISENTROPIC_OUTFILE, String)
     @test occursin("sigma_target", isentropic_text)
     @test occursin("isentropic", isentropic_text)
+    @test !occursin("seed_guess is required", isentropic_text)
 end

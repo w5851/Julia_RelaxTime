@@ -20,8 +20,8 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     rho_min::Float64 = 0.0
     rho_max::Float64 = 4.0
     rho_step::Float64 = 0.05
-    p_num::Int = 12
-    t_num::Int = 4
+    p_num::Int = 24
+    t_num::Int = 8
     iterations::Int = 80
     solver_backend::Symbol = :models
     seed_policy::Symbol = :hybrid_continuity
@@ -53,6 +53,9 @@ function usage()
     println("  --rho-min <value>        default 0.0")
     println("  --rho-max <value>        default 4.0")
     println("  --rho-step <value>       default 0.05")
+    println("  --p-num <int>            gap/thermo momentum nodes (default 24)")
+    println("  --t-num <int>            gap/thermo angle nodes (default 8)")
+    println("  --iterations <int>       solver iteration cap (default 80)")
     println("  --tag <name>             output suffix, writes boundary_<tag>.csv etc. default dense")
     println("  --output-root <path>     processed run root")
     println("  --reference-root <path>  reference output directory")
@@ -118,6 +121,12 @@ function parse_args(args::Vector{String})
             cfg.rho_max = parse(Float64, require_value())
         elseif arg == "--rho-step"
             cfg.rho_step = parse(Float64, require_value())
+        elseif arg == "--p-num"
+            cfg.p_num = parse(Int, require_value())
+        elseif arg == "--t-num"
+            cfg.t_num = parse(Int, require_value())
+        elseif arg == "--iterations"
+            cfg.iterations = parse(Int, require_value())
         elseif arg == "--tag"
             cfg.tag = String(require_value())
         elseif arg == "--output-root"
@@ -153,6 +162,9 @@ function parse_args(args::Vector{String})
 
     cfg.T_step > 0 || error("T-step must be positive")
     cfg.rho_step > 0 || error("rho-step must be positive")
+    cfg.p_num > 0 || error("p-num must be positive")
+    cfg.t_num > 0 || error("t-num must be positive")
+    cfg.iterations > 0 || error("iterations must be positive")
     cfg.crossover_n_mu > 0 || error("crossover-n-mu must be positive")
     cfg.crossover_mu_max_MeV > 0 || error("crossover-mu-max must be positive")
     isempty(cfg.xi_values) && error("xi grid cannot be empty")
@@ -203,9 +215,9 @@ end
 
 function write_boundary_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark")
+        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark,curve_parameter,plot_order_key")
         for row in rows
-            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark)")
+            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.T_MeV),$(row.T_MeV)")
         end
     end
 end
@@ -221,18 +233,18 @@ end
 
 function write_spinodal_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,rho_spinodal_hadron,rho_spinodal_quark")
+        println(io, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,rho_spinodal_hadron,rho_spinodal_quark,curve_parameter,plot_order_key")
         for row in rows
-            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_spinodal_hadron_MeV),$(row.mu_spinodal_quark_MeV),$(row.rho_spinodal_hadron),$(row.rho_spinodal_quark)")
+            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_spinodal_hadron_MeV),$(row.mu_spinodal_quark_MeV),$(row.rho_spinodal_hadron),$(row.rho_spinodal_quark),$(row.T_MeV),$(row.T_MeV)")
         end
     end
 end
 
 function write_crossover_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable")
+        println(io, "xi,mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable,curve_parameter,plot_order_key")
         for row in rows
-            println(io, "$(row.xi),$(row.mu_MeV),$(row.T_crossover_MeV),$(row.rho),$(row.method),$(row.converged),$(row.derivative),$(row.variable)")
+            println(io, "$(row.xi),$(row.mu_MeV),$(row.T_crossover_MeV),$(row.rho),$(row.method),$(row.converged),$(row.derivative),$(row.variable),$(row.mu_MeV),$(row.mu_MeV)")
         end
     end
 end
@@ -247,6 +259,8 @@ function _crossover_column_definitions()
         Dict("name" => "converged", "type" => "Bool", "unit" => nothing, "description" => "whether the crossover detector reported a valid point"),
         Dict("name" => "derivative", "type" => "Float64", "unit" => nothing, "description" => "peak/response diagnostic returned by the detector"),
         Dict("name" => "variable", "type" => "String", "unit" => nothing, "description" => "order-parameter-like variable used by the detector"),
+        Dict("name" => "curve_parameter", "type" => "Float64", "unit" => "MeV", "description" => "physical parameter used to connect this curve in plots; for crossover this is mu_q"),
+        Dict("name" => "plot_order_key", "type" => "Float64", "unit" => "MeV", "description" => "stable sort key for plotting this curve; for crossover this is mu_q"),
     ]
 end
 
@@ -353,6 +367,9 @@ function manifest_config_payload(cfg::DensePhaseReferenceConfig)
         "rho_min" => cfg.rho_min,
         "rho_max" => cfg.rho_max,
         "rho_step" => cfg.rho_step,
+        "p_num" => cfg.p_num,
+        "t_num" => cfg.t_num,
+        "iterations" => cfg.iterations,
         "mode" => String(cfg.mode),
         "compute_crossover" => cfg.compute_crossover,
         "crossover_method" => String(cfg.crossover_method),
@@ -438,10 +455,14 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     rho_grid = collect(cfg.rho_min:cfg.rho_step:cfg.rho_max)
 
     for xi in cfg.xi_values
+        println("phase reference xi=$(xi): start T=$(cfg.T_min):$(cfg.T_step):$(cfg.T_max), rho=$(cfg.rho_min):$(cfg.rho_step):$(cfg.rho_max)")
+        flush(stdout)
         run_dir = joinpath(output_root, "xi_$(xi_token(xi))")
         if cfg.crossover_only
             local_rows = cfg.compute_crossover ? build_crossover_only_rows(cfg, xi) : NamedTuple[]
             append!(crossover_rows, local_rows)
+            println("phase reference xi=$(xi): crossover-only rows=$(length(local_rows))")
+            flush(stdout)
             push!(manifest["runs"], Dict(
                 "xi" => xi,
                 "run_id" => "crossover_only",
@@ -486,6 +507,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 push!(crossover_rows, merge((xi=xi,), row))
             end
 
+            println("phase reference xi=$(xi): boundary=$(length(result.first_order_boundary)) spinodal=$(length(result.spinodal)) crossover=$(length(result.crossover_line)) cep_found=$(result.cep.found)")
+            flush(stdout)
             push!(manifest["runs"], Dict(
                 "xi" => xi,
                 "run_id" => result.run_id,

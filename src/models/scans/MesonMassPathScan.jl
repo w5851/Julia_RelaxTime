@@ -132,6 +132,7 @@ function _header_cols(mesons::Tuple{Vararg{Symbol}})
         push!(cols, "Gamma_" * String(m))
         push!(cols, "converged_" * String(m))
         push!(cols, "residual_" * String(m))
+        push!(cols, "root_sign_flipped_" * String(m))
 
         if m in (:eta, :eta_prime, :sigma, :sigma_prime)
             push!(cols, "thr_uu_" * String(m))
@@ -209,6 +210,7 @@ function _meson_row_dict(pt, xi::Float64, muB_MeV::Float64, eq_diag, result)
         row["Gamma_" * String(meson)] = mr.gamma
         row["converged_" * String(meson)] = mr.converged
         row["residual_" * String(meson)] = mr.residual
+        row["root_sign_flipped_" * String(meson)] = Bool(get(mr, :root_sign_flipped, false))
 
         if meson in (:eta, :eta_prime, :sigma, :sigma_prime)
             thr = mr.threshold
@@ -298,6 +300,24 @@ function _solve_isentropic_equilibrium(model, pt, xi::Float64, seed_guess, mu0;
     )
 end
 
+function _initial_isentropic_seed(pt, xi::Float64, mu0::Float64, solver_backend::Symbol;
+    p_num::Int,
+    t_num::Int,
+    solver_kwargs::NamedTuple,
+)
+    res = MesonMassWorkflow.solve_gap_and_meson_point(
+        pt.T_MeV / ħc_MeV_fm,
+        mu0;
+        xi=xi,
+        solver_backend=solver_backend,
+        mesons=(),
+        p_num=p_num,
+        t_num=t_num,
+        solver_kwargs=solver_kwargs,
+    )
+    return collect(res.equilibrium.x_state)
+end
+
 function _decorate_freezeout_points(points, freezeout_profile_name::String)
     label = "freezeout:" * freezeout_profile_name
     return map(points) do pt
@@ -374,6 +394,17 @@ function run_meson_mass_path_scan(;
                     eq_diag = _equilibrium_diag(res.equilibrium)
                     res
                 else
+                    if sigma_seed_state === nothing
+                        sigma_seed_state = _initial_isentropic_seed(
+                            pt,
+                            xi,
+                            sigma_mu0,
+                            solver_backend;
+                            p_num=p_num,
+                            t_num=t_num,
+                            solver_kwargs=effective_solver_kwargs,
+                        )
+                    end
                     sigma_result = _solve_isentropic_equilibrium(
                         model,
                         pt,

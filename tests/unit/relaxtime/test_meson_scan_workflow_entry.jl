@@ -57,4 +57,6 @@ const _MOTT_PHASE_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", 
     @test !occursin("using .MesonMassWorkflow: solve_gap_and_meson_point", mott_scan)
     @test occursin("continuation_state = nothing", mott_scan)
     @test occursin("continuation_state=continuation_state", mott_scan)
+    @test occursin("\"equilibrium_branch_mode\" => \"stable\"", mott_scan)
+    @test occursin("equilibrium_seed_strategy = opts.equilibrium_branch_mode === :stable ? MultiSeed() : nothing", mott_scan)
 end

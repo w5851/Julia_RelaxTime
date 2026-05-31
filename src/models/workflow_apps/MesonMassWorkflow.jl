@@ -128,6 +128,13 @@ end
     return true
 end
 
+@inline function _normalize_physical_pole_sign(mass::Float64, gamma::Float64)
+    if isfinite(mass) && mass < 0.0
+        return (-mass, isfinite(gamma) ? abs(gamma) : gamma, true)
+    end
+    return (mass, gamma, false)
+end
+
 @inline function _mixed_pair(meson::Symbol)
     if meson === :eta || meson === :eta_prime
         return (:eta, :eta_prime, :P)
@@ -1677,6 +1684,38 @@ end
     return meson === :eta || meson === :eta_prime || meson === :sigma || meson === :sigma_prime
 end
 
+function _apply_physical_pole_sign_convention!(meson_results::Dict{Symbol,NamedTuple}, quark_params)
+    qp = normalize_quark_params(quark_params)
+    for (meson, entry) in collect(meson_results)
+        hasproperty(entry, :mass) && hasproperty(entry, :gamma) || continue
+        mass, gamma, flipped = _normalize_physical_pole_sign(Float64(entry.mass), Float64(entry.gamma))
+        prior_flipped = hasproperty(entry, :root_sign_flipped) ? Bool(entry.root_sign_flipped) : false
+        root_sign_flipped = prior_flipped || flipped
+        if _is_mixed_meson(meson)
+            thr = mott_threshold_masses(meson, qp)
+            gaps = isfinite(mass) ? mott_gaps(meson, mass, qp) : (uu=NaN, ss=NaN, min=NaN)
+            meson_results[meson] = merge(entry, (
+                mass=mass,
+                gamma=gamma,
+                root_sign_flipped=root_sign_flipped,
+                threshold=thr,
+                gaps=gaps,
+            ))
+        else
+            thr = mott_threshold_mass(meson, qp)
+            gapv = isfinite(mass) ? mott_gap(meson, mass, qp) : NaN
+            meson_results[meson] = merge(entry, (
+                mass=mass,
+                gamma=gamma,
+                root_sign_flipped=root_sign_flipped,
+                threshold=thr,
+                gap=gapv,
+            ))
+        end
+    end
+    return meson_results
+end
+
 """将 PNJL 平衡求解结果转换成 (quark_params, thermo_params)。"""
 function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0, mu_vec_override=nothing)
     Φ = Float64(base.x_state[4])
@@ -1703,6 +1742,8 @@ end
 - xi: 各向异性参数 ξ
 - p_num/t_num: 能隙/密度积分节点（传给 PNJL.solve）
 - seed_state: 初值策略（默认 HADRON_SEED_5）
+- equilibrium_seed_strategy: 可选 FixedMu seed strategy；设为 `MultiSeed()` 时每点按压力选优选择稳定平衡分支，
+  不沿上一点 equilibrium seed 继续，但仍可复用 meson continuation seed
 - solver_kwargs: 透传到 PNJL.solve
 - mass_kwargs: 透传到 MesonMass.solve_meson_mass（例如 nlsolve 的参数）
 """
@@ -1720,6 +1761,8 @@ function solve_gap_and_meson_point(
     solver_kwargs::NamedTuple=(;),
     models_solver=nothing,
     models_residual_norm_max::Real=1e-4,
+    equilibrium_seed_strategy=nothing,
+    equilibrium_evaluate_all_attempts::Bool=true,
     mass_kwargs::NamedTuple=(;),
     meson_seed_state=nothing,
     meson_root_policy::NamedTuple=(;),
@@ -1741,6 +1784,7 @@ function solve_gap_and_meson_point(
         effective_seed_state
     end
 
+    equilibrium_seed = equilibrium_seed_strategy === nothing ? seed_guess : nothing
     base = if flavor_mu_override === nothing
         Main.EquilibriumFacade.solve_equilibrium_backend(
             T_fm,
@@ -1749,10 +1793,12 @@ function solve_gap_and_meson_point(
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
-            seed_state=seed_guess,
+            seed_state=equilibrium_seed,
             solver_kwargs=solver_kwargs,
             models_solver=models_solver,
             models_residual_norm_max=models_residual_norm_max,
+            fixedmu_seed_strategy=equilibrium_seed_strategy,
+            fixedmu_evaluate_all_attempts=equilibrium_evaluate_all_attempts,
         )
     else
         Main.EquilibriumFacade.solve_equilibrium_backend(
@@ -1762,7 +1808,7 @@ function solve_gap_and_meson_point(
             solver_backend=solver_backend,
             p_num=p_num,
             t_num=t_num,
-            seed_state=seed_guess,
+            seed_state=equilibrium_seed,
             solver_kwargs=solver_kwargs,
             models_solver=models_solver,
             models_residual_norm_max=models_residual_norm_max,
@@ -1814,14 +1860,9 @@ function solve_gap_and_meson_point(
             force_global_fallback=force_global_fallback,
         )
 
-        mass = res === nothing ? NaN : Float64(res.mass)
-        gamma = res === nothing ? NaN : Float64(res.gamma)
-        if _is_mixed_meson(meson) && isfinite(mass) && mass < 0.0
-            mass = -mass
-            if isfinite(gamma)
-                gamma = abs(gamma)
-            end
-        end
+        mass_raw = res === nothing ? NaN : Float64(res.mass)
+        gamma_raw = res === nothing ? NaN : Float64(res.gamma)
+        mass, gamma, root_sign_flipped = _normalize_physical_pole_sign(mass_raw, gamma_raw)
         converged = res === nothing ? false : Bool(res.converged)
         residual = res === nothing ? Inf : Float64(res.residual_norm)
 
@@ -1832,6 +1873,7 @@ function solve_gap_and_meson_point(
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     root_quality=root_quality,
                                     root_diagnostics=root_diagnostics,
+                                    root_sign_flipped=root_sign_flipped,
                                     threshold=thr, gaps=gaps)
         else
             qp = normalize_quark_params(quark_params)
@@ -1840,10 +1882,13 @@ function solve_gap_and_meson_point(
             meson_results[meson] = (mass=mass, gamma=gamma, converged=converged, residual=residual,
                                     root_quality=root_quality,
                                     root_diagnostics=root_diagnostics,
+                                    root_sign_flipped=root_sign_flipped,
                                     threshold=thr, gap=gapv)
         end
 
-        if seed_vec !== nothing && isfinite(seed_vec[1]) && isfinite(seed_vec[2])
+        if isfinite(mass) && isfinite(gamma)
+            meson_seed_out[meson] = Float64[mass, gamma]
+        elseif seed_vec !== nothing && isfinite(seed_vec[1]) && isfinite(seed_vec[2])
             meson_seed_out[meson] = seed_vec
         end
     end
@@ -1871,6 +1916,8 @@ function solve_gap_and_meson_point(
             effective_policy,
         )
     end
+
+    _apply_physical_pole_sign_convention!(meson_results, quark_params)
 
     _annotate_mixed_branch_scores(meson_results, quark_params, thermo_params, Float64(k_norm))
     for meson in mesons

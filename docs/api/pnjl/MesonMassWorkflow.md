@@ -17,6 +17,7 @@ solve_gap_and_meson_point(
     k_norm=0.0,
     p_num=..., t_num=...,
     seed_state=..., 
+    equilibrium_seed_strategy=nothing,
     solver_kwargs=(;),
     mass_kwargs=(;),
 )
@@ -26,6 +27,7 @@ solve_gap_and_meson_point(
   - `T_fm`, `mu_fm`：fm⁻¹
   - `xi`：无量纲各向异性参数
   - `k_norm`：介子外部三动量模（fm⁻¹）；默认 0 表示静止极点
+  - `equilibrium_seed_strategy`：可选 FixedMu 平衡态初值策略；设为 `Models.MultiSeed()` 时，每个点按压力选优选取稳定相分支，不沿上一点 equilibrium seed 追踪亚稳分支
 - **流程**
   1. 调用 `PNJL.solve(FixedMu(), T_fm, mu_fm; xi=xi, ...)` 得到平衡解与三味有效质量。
   2. 组装 `quark_params=(m=(u,d,s), μ=(u,d,s))` 与 `thermo_params=(T, Φ, Φbar, ξ)`。
@@ -39,7 +41,7 @@ solve_gap_and_meson_point(
   - `equilibrium`：PNJL 平衡求解输出（含 `x_state`, `masses` 等）
   - `quark_params`, `thermo_params`
   - `meson_results::Dict{Symbol,NamedTuple}`：每个介子的结果：
-    - `mass`, `gamma`, `converged`, `residual`
+    - `mass`, `gamma`, `converged`, `residual`, `root_sign_flipped`
     - 非混合：`threshold`, `gap`
     - 混合：`threshold=(uu,ss,min)`, `gaps=(uu,ss,min)`
 
@@ -95,6 +97,7 @@ res = solve_gap_and_meson_point(
 
 - 单个介子通道的 `MesonMass.solve_meson_mass` 若因数值原因失败（例如求解过程中出现非有限数），工作流会将该通道结果标记为 `converged=false`，并返回 `NaN/Inf` 占位，但不会中断整点/整网格扫描。
 - 内部包含“多初值重试”的策略（对质量/宽度的初值做几组尝试），以减少偶发的 `NaN` 与求解失败。
+- 介子 pole 方程可能返回负号等价根；workflow 输出层统一采用 `mass >= 0` 的物理符号约定，并用 `root_sign_flipped=true` 标记发生过符号翻转。
 
 ## 与 Fortran 结果对照
 

@@ -10,5 +10,6 @@ T_step_MeV = 2.0
 p_num = 12
 t_num = 6
 max_iter = 40
+equilibrium_branch_mode = "stable"
 resume = true
 overwrite = false

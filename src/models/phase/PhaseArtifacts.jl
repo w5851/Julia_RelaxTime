@@ -39,10 +39,10 @@ end
 
 function _write_first_order_boundary(path::String, rows::Vector{NamedTuple})
     open(path, "w") do io
-        println(io, "T_MeV,mu_transition_MeV,rho_hadron,rho_quark,area_residual,converged")
+        println(io, "T_MeV,mu_transition_MeV,rho_hadron,rho_quark,area_residual,converged,curve_parameter,plot_order_key")
         for row in rows
             println(io,
-                "$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.area_residual),$(row.converged)"
+                "$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.area_residual),$(row.converged),$(row.T_MeV),$(row.T_MeV)"
             )
         end
     end
@@ -50,10 +50,10 @@ end
 
 function _write_spinodal(path::String, rows::Vector{NamedTuple})
     open(path, "w") do io
-        println(io, "T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,rho_spinodal_hadron,rho_spinodal_quark")
+        println(io, "T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,rho_spinodal_hadron,rho_spinodal_quark,curve_parameter,plot_order_key")
         for row in rows
             println(io,
-                "$(row.T_MeV),$(row.mu_spinodal_hadron_MeV),$(row.mu_spinodal_quark_MeV),$(row.rho_spinodal_hadron),$(row.rho_spinodal_quark)"
+                "$(row.T_MeV),$(row.mu_spinodal_hadron_MeV),$(row.mu_spinodal_quark_MeV),$(row.rho_spinodal_hadron),$(row.rho_spinodal_quark),$(row.T_MeV),$(row.T_MeV)"
             )
         end
     end
@@ -61,10 +61,10 @@ end
 
 function _write_crossover_line(path::String, rows::Vector{NamedTuple})
     open(path, "w") do io
-        println(io, "mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable")
+        println(io, "mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable,curve_parameter,plot_order_key")
         for row in rows
             println(io,
-                "$(row.mu_MeV),$(row.T_crossover_MeV),$(row.rho),$(row.method),$(row.converged),$(row.derivative),$(row.variable)"
+                "$(row.mu_MeV),$(row.T_crossover_MeV),$(row.rho),$(row.method),$(row.converged),$(row.derivative),$(row.variable),$(row.mu_MeV),$(row.mu_MeV)"
             )
         end
     end
