@@ -243,6 +243,45 @@ end
     @test w0cdf_cache.fingerprint !== nothing
     @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :kind) === :w0cdf
     @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :N) == 4
+    heavy_initial_cache = build_w0cdf_pchip_cache(
+        :ssbar_to_uubar,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        N=4,
+        n_sigma_points=4,
+        p_cutoff=nothing,
+    )
+    @test heavy_initial_cache.fingerprint.threshold_subtraction == true
+
+    ω_custom_w0cdf = average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=w0cdf_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+    @test isfinite(ω_custom_w0cdf)
+    @test ω_custom_w0cdf >= 0.0
+
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=w0cdf_cache,
+        n_sigma_points=4,
+        sigma_cutoff=1.0,
+    )
+
     @test_throws ArgumentError average_scattering_rate(
         :uu_to_uu,
         QUARK_PARAMS,
@@ -254,6 +293,7 @@ end
         cs_cache=w0cdf_cache,
         n_sigma_points=4,
         sigma_cutoff=nothing,
+        scale=11.0,
     )
 end
 

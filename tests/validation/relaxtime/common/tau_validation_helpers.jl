@@ -46,6 +46,12 @@ const RELAXTIME_TAU_VALIDATION_SIGMA_GRID_N = 24
 const RELAXTIME_TAU_VALIDATION_W0CDF_P_NODES = 8
 const RELAXTIME_TAU_VALIDATION_W0CDF_ANGLE_NODES = 3
 const RELAXTIME_TAU_VALIDATION_W0CDF_PHI_NODES = 4
+const RELAXTIME_TAU_VALIDATION_A_BUILDER_CONFIG = (
+    p_nodes=length(RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_NODES),
+    p_max=10.0,
+    cos_nodes=length(Main.GaussLegendre.DEFAULT_COSΘ_NODES),
+    use_aniso=true,
+)
 const RELAXTIME_TAU_VALIDATION_P_NUM = 12
 const RELAXTIME_TAU_VALIDATION_T_NUM = 6
 const RELAXTIME_TAU_VALIDATION_MAX_ITER = 40
@@ -96,26 +102,19 @@ function _load_tau_targets(path::String)
 end
 
 function _build_tau_validation_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::NamedTuple, Phi::Float64, Phibar::Float64)
-    A_u = Main.OneLoopIntegrals.A(
-        masses.u,
-        muq_fm,
-        T_fm,
-        Phi,
-        Phibar,
-        RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_NODES,
-        RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_WEIGHTS,
+    quark_params = (
+        m=masses,
+        μ=(u=muq_fm, d=muq_fm, s=muq_fm),
     )
-    A_s = Main.OneLoopIntegrals.A(
-        masses.s,
-        muq_fm,
-        T_fm,
-        Phi,
-        Phibar,
-        RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_NODES,
-        RELAXTIME_TAU_VALIDATION_DEFAULT_MOMENTUM_WEIGHTS,
+    thermo_params = (T=T_fm, Φ=Phi, Φbar=Phibar, ξ=0.0)
+    A_vals = Main.AFieldBuilder.build_A_triplet(
+        quark_params,
+        thermo_params;
+        RELAXTIME_TAU_VALIDATION_A_BUILDER_CONFIG...,
     )
-    G_u = Main.EffectiveCouplings.calculate_G_from_A(A_u, masses.u)
-    G_s = Main.EffectiveCouplings.calculate_G_from_A(A_s, masses.s)
+
+    G_u = Main.EffectiveCouplings.calculate_G_from_A(A_vals.u, masses.u)
+    G_s = Main.EffectiveCouplings.calculate_G_from_A(A_vals.s, masses.s)
     return (
         K_coeffs=Main.EffectiveCouplings.calculate_effective_couplings(
             RELAXTIME_TAU_VALIDATION_G_FM2,
@@ -123,7 +122,7 @@ function _build_tau_validation_K_coeffs(T_fm::Float64, muq_fm::Float64, masses::
             G_u,
             G_s,
         ),
-        A_vals=(u=A_u, d=A_u, s=A_s),
+        A_vals=A_vals,
     )
 end
 
@@ -229,6 +228,7 @@ function _compute_relaxtime_tau_point(T_MeV::Float64, muB_MeV::Float64)
         t_num=RELAXTIME_TAU_VALIDATION_T_NUM,
         seed_state=Vector(base.x_state),
         solver_kwargs=(iterations=RELAXTIME_TAU_VALIDATION_MAX_ITER,),
+        a_builder_config=RELAXTIME_TAU_VALIDATION_A_BUILDER_CONFIG,
         tau_kwargs=(; _tau_validation_kwargs()..., cs_caches=cs_caches),
     )
 

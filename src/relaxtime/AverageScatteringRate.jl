@@ -350,10 +350,6 @@ function _w0cdf_grid_mismatch(actual::NamedTuple, sigma_cutoff::Union{Nothing,Fl
 
     expected = (
         kind=:w0cdf,
-        N=DEFAULT_SIGMA_GRID_N,
-        design_p_nodes=DEFAULT_W0CDF_P_NODES,
-        design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
-        design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
         p_cutoff=_fingerprint_value(sigma_cutoff),
         scale=Float64(scale),
     )
@@ -1037,6 +1033,12 @@ function build_w0cdf_pchip_cache(
 )
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
+    pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
+    mi = get_mass(pi_sym, quark_nt)
+    mj = get_mass(pj_sym, quark_nt)
+    mc = get_mass(pc_sym, quark_nt)
+    md = get_mass(pd_sym, quark_nt)
+    thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
     s_grid = _design_w0cdf_s_grid_core(
         process,
         quark_nt,
@@ -1051,7 +1053,7 @@ function build_w0cdf_pchip_cache(
     cache = CrossSectionCache(process)
     _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_sigma_points,
-        threshold_subtraction=threshold_subtraction,
+        threshold_subtraction=thr_for_build,
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
         asym_extra_points=asym_extra_points,

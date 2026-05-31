@@ -80,7 +80,7 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - 推荐调用模式：
     1. 如果需复用截面，调用者应先用 `build_w0cdf_pchip_cache(...)` 或 `precompute_cross_section!` 构建带 `fingerprint` 的 `CrossSectionCache`，放入 `cs_caches[process]`，以避免重复构建开销。
     2. 对于一次性评估，可传 `cs_cache=nothing` 或不传该参数，让内部按需构建（会使用 `threshold_subtraction` 等参数）。
-    3. 多个参数点之间只允许在同一生成指纹下复用截面；`quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、`threshold_subtraction` 或 w0cdf 网格策略不一致时，已填充缓存会被拒绝并抛出 `ArgumentError`。
+    3. 多个参数点之间只允许在同一生成指纹下复用截面；`quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、有效 `threshold_subtraction`、w0cdf `p_cutoff` 或 `scale` 不一致时，已填充缓存会被拒绝并抛出 `ArgumentError`。自定义 `N` 或设计节点数生成的 w0cdf 缓存可以复用，但缓存自身的 s-grid 摘要必须与已存表一致。
 
 - 兼容策略：
     - 旧的手工 `CrossSectionCache(process, s_vals, sigma_vals)` 和 `load_cross_section_caches_from_dir` 读取的两列 CSV 表没有 `fingerprint`；默认允许复用但会 warning。

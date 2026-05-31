@@ -49,23 +49,23 @@ $$\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p
 
 ## 截面缓存指纹（fingerprint）
 
-`CrossSectionCache` 会在通过 `precompute_cross_section!` 或 `build_w0cdf_pchip_cache` 生成 σ(s) 表时写入 `fingerprint` 元数据。该元数据记录过程名、夸克质量/化学势/A、热力学参数、`K_coeffs`、σ 积分点数、阈值渐近正则化参数，以及 σ 网格摘要（长度、端点和哈希）。w0cdf 构建路径还记录 `N`、设计节点数、`p_cutoff` 与 `scale`。
+`CrossSectionCache` 会在通过 `precompute_cross_section!` 或 `build_w0cdf_pchip_cache` 生成 σ(s) 表时写入 `fingerprint` 元数据。该元数据记录过程名、夸克质量/化学势/A、热力学参数、`K_coeffs`、σ 积分点数、阈值渐近正则化参数，以及 σ 网格摘要（长度、端点和哈希）。w0cdf 构建路径还记录 `N`、设计节点数、`p_cutoff` 与 `scale`，其中 `N` 与设计节点数用于溯源，不要求等于 `average_scattering_rate` 的当前默认值。
 
-当调用方把已填充的 `cs_cache` 传给 `average_scattering_rate` 时，默认会校验当前参数上下文与缓存指纹。若过程、物理参数、`K_coeffs`、`n_sigma_points`、`threshold_subtraction` 相关参数，或 w0cdf 的当前默认网格策略不一致，会抛出 `ArgumentError`，避免静默复用不同参数点生成的 σ(s) 表。
+当调用方把已填充的 `cs_cache` 传给 `average_scattering_rate` 时，默认会校验当前参数上下文与缓存指纹。若过程、物理参数、`K_coeffs`、`n_sigma_points`、有效 `threshold_subtraction` 相关参数，或 w0cdf 的 `p_cutoff`/`scale` 口径不一致，会抛出 `ArgumentError`，避免静默复用不同参数点生成的 σ(s) 表。自定义 `N` 或设计节点数生成的 w0cdf 缓存可以复用，但缓存自身的 s-grid 摘要必须与已存表一致。
 
 兼容策略：
 
 - `CrossSectionCache(process, s_vals, sigma_vals)` 和手工 `insert_sigma!` 填充的旧缓存默认没有 `fingerprint`；调用时允许复用，但会发出 warning。
 - `load_cross_section_caches_from_dir` 读取的两列 CSV 旧表同样没有 `fingerprint`；默认允许但 warning。
 - 若希望严格拒绝无指纹缓存，传入 `require_cache_fingerprint=true`。
-- 多个参数点之间只应复用同一生成指纹下的缓存；跨 `quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、`threshold_subtraction` 或 σ 网格策略复用时，应重新构建缓存。
+- 多个参数点之间只应复用同一生成指纹下的缓存；跨 `quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、有效 `threshold_subtraction`、`p_cutoff` 或 `scale` 复用时，应重新构建缓存。
 
 ## 阈值渐近正则化（threshold_subtraction）
 
 - 新增字段与参数（2026-01-29 提交引入）：
     - `CrossSectionCache` 字段：`asym_enabled::Bool`, `asym_s0::Float64`, `asym_A::Float64`, `asym_requested::Bool`。
     - `precompute_cross_section!(cache, s_grid, quark_params, thermo_params, K_coeffs; n_points, threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10)`：新增关键字参数以启用阈值附近的额外采样与拟合，用于检测并减去形如 $A/\sqrt{s-s_0}$ 的渐近项，再把已正则化的值缓存起来。
-    - `build_w0cdf_pchip_cache(...; threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10)`：构建缓存时会记录 `asym_requested` 并传给 `precompute_cross_section!`。
+    - `build_w0cdf_pchip_cache(...; threshold_subtraction=false, asym_window=0.6, asym_fit_min_points=8, asym_extra_points=10)`：构建缓存时会采用与 `average_scattering_rate` 相同的自动阈值减法判定；若初态质量平方和大于末态质量平方和，实际写入 fingerprint 的 `threshold_subtraction` 会被解析为 `true`，并传给 `precompute_cross_section!`。
 
 - 查询与返回语义：
     - 当查询点 `s` 在缓存外且 `asym_enabled` 时，`get_sigma(cache,s)` 会返回仅由解析渐近项给出的近似值 $A/\sqrt{s-s_0}$（若适用）。
