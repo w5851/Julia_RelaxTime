@@ -230,7 +230,18 @@ function _python_cmd(args::Vector{String})
 end
 
 function _float_tag(x::Float64)
-    return replace(replace(string(round(Int, x)), "-" => "m"), "." => "p")
+    isfinite(x) || throw(ArgumentError("muB value must be finite: $(x)"))
+    if isapprox(x, round(x); atol=1e-9, rtol=0.0)
+        value = Int(round(x))
+        prefix = value < 0 ? "m" : ""
+        return prefix * lpad(string(abs(value)), 4, '0')
+    end
+    raw = @sprintf("%.3f", abs(x))
+    raw = replace(raw, r"0+$" => "")
+    raw = replace(raw, r"\.$" => "")
+    tag = replace(raw, "." => "p")
+    prefix = x < 0 ? "m" : ""
+    return prefix * lpad(tag, 4, '0')
 end
 
 function _parse_csv_line(line::AbstractString)
@@ -384,7 +395,7 @@ function run_mott_stage!(opts::PaperP1Options)
         println("mott slice plan: $(opts.mott_slice_plan)")
     end
     for slice in slices
-        tag = lpad(string(round(Int, slice.muB)), 4, '0')
+        tag = _float_tag(slice.muB)
         cfg_path = joinpath(config_dir, "mott_muB$(tag).toml")
         outdir = joinpath(opts.result_dir, "mott_muB$(tag)")
         write_mott_config(cfg_path, opts, slice)

@@ -1,0 +1,90 @@
+{
+    "config": {
+        "crossover_mu_max_MeV": 450,
+        "crossover_only": false,
+        "mode": "production",
+        "crossover_mu0_only": false,
+        "xi_values": [
+            -0.3,
+            0.0,
+            0.3
+        ],
+        "T_step_MeV": 5,
+        "crossover_method": "peak",
+        "rho_step": 0.05,
+        "t_num": 8,
+        "crossover_n_mu": 16,
+        "iterations": 80,
+        "compute_crossover": true,
+        "T_max_MeV": 240,
+        "tag": "paper_p1_20260531",
+        "T_min_MeV": 30,
+        "crossover_variable": "phi_u",
+        "rho_max": 4,
+        "p_num": 24,
+        "rho_min": 0
+    },
+    "output_root": "data/processed/pnjl/phase_diagram/paper_p1_20260531",
+    "generator": {
+        "git_commit": "dfd5878ad5f8757935ca2c62a4d57383a6a7f748",
+        "crossover_only": false,
+        "script": "scripts/pnjl/build_dense_phase_reference.jl",
+        "crossover_mu0_only": false,
+        "generated_at": "2026-05-31T12:00:57Z"
+    },
+    "runs": [
+        {
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_m0p300",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260531_200133",
+            "spinodal_count": 23,
+            "boundary_count": 23,
+            "xi": -0.3,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_0p000",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260531_201541",
+            "spinodal_count": 20,
+            "boundary_count": 20,
+            "xi": 0,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/phase_diagram/paper_p1_20260531/xi_0p300",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260531_202914",
+            "spinodal_count": 17,
+            "boundary_count": 17,
+            "xi": 0.3,
+            "crossover_count": 16
+        }
+    ],
+    "schema_version": "v1",
+    "artifacts": {
+        "manifest": {
+            "path": "data/reference/pnjl/paper_p1_20260531/phase_reference_paper_p1_20260531_manifest.json"
+        },
+        "crossover_meta": {
+            "path": "data/reference/pnjl/paper_p1_20260531/crossover_paper_p1_20260531.meta.json"
+        },
+        "cep": {
+            "path": "data/reference/pnjl/paper_p1_20260531/cep_paper_p1_20260531.csv",
+            "row_count": 3
+        },
+        "crossover": {
+            "path": "data/reference/pnjl/paper_p1_20260531/crossover_paper_p1_20260531.csv",
+            "row_count": 48
+        },
+        "spinodals": {
+            "path": "data/reference/pnjl/paper_p1_20260531/spinodals_paper_p1_20260531.csv",
+            "row_count": 60
+        },
+        "boundary": {
+            "path": "data/reference/pnjl/paper_p1_20260531/boundary_paper_p1_20260531.csv",
+            "row_count": 60
+        }
+    },
+    "reference_root": "data/reference/pnjl/paper_p1_20260531"
+}

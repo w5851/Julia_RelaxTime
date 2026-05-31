@@ -1,0 +1,15 @@
+schema_version = "v1"
+profile_name = "paper_p1_mott_muB200"
+
+[scan.mott_phase]
+muB_MeV = 200.0
+xi_list = [-0.3, 0.0, 0.3]
+T_min_MeV = 100.0
+T_max_MeV = 300.0
+T_step_MeV = 5.0
+p_num = 12
+t_num = 6
+max_iter = 40
+equilibrium_branch_mode = "stable"
+resume = true
+overwrite = false

@@ -12,16 +12,25 @@ const P1_PIPELINE_SCRIPT = joinpath(REPO_ROOT_P1_PIPELINE, "scripts", "relaxtime
     write(slice_plan, join([
         "muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV",
         "0,100,300,5",
+        "100.4,100,120,5",
+        "100.5,100,120,5",
         "1100,30,300,5",
     ], "\n") * "\n")
 
     mott_output = read(`$(Base.julia_cmd()) --project=$REPO_ROOT_P1_PIPELINE $P1_PIPELINE_SCRIPT --stage=mott --dry-run --result-dir $result_dir --mott-slice-plan $slice_plan --xi-list -0.3,0,0.3`, String)
     @test occursin("mott slice plan:", mott_output)
     @test occursin("mott_muB0000", mott_output)
+    @test occursin("mott_muB100p4", mott_output)
+    @test occursin("mott_muB100p5", mott_output)
     @test occursin("mott_muB1100", mott_output)
     @test occursin("write_mott_combined_manifest", mott_output)
 
+    noninteger_mu_cfg = read(joinpath(result_dir, "configs", "mott_muB100p4.toml"), String)
+    @test occursin("profile_name = \"paper_p1_mott_muB100p4\"", noninteger_mu_cfg)
+    @test occursin("muB_MeV = 100.4", noninteger_mu_cfg)
+
     high_mu_cfg = read(joinpath(result_dir, "configs", "mott_muB1100.toml"), String)
+    @test occursin("profile_name = \"paper_p1_mott_muB1100\"", high_mu_cfg)
     @test occursin("muB_MeV = 1100.0", high_mu_cfg)
     @test occursin("T_min_MeV = 30.0", high_mu_cfg)
     @test occursin("equilibrium_branch_mode = \"stable\"", high_mu_cfg)

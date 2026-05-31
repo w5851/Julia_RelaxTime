@@ -113,6 +113,31 @@ end
     return string(x)
 end
 
+function _first_data_line(path::AbstractString)
+    first_line = nothing
+    open(path, "r") do io
+        for line in eachline(io)
+            s = strip(line)
+            (isempty(s) || startswith(s, "#")) && continue
+            first_line = s
+            break
+        end
+    end
+    return first_line
+end
+
+function _assert_existing_header_compatible(path::AbstractString, cols::Vector{String})
+    isfile(path) || return
+    header = _first_data_line(path)
+    header === nothing && throw(ArgumentError("existing output CSV has no header: $(path)"))
+    expected = join(cols, ',')
+    header == expected && return
+    throw(ArgumentError(
+        "existing output CSV header is incompatible with current schema: $(path). " *
+        "Please rerun with --overwrite or choose a new output path.",
+    ))
+end
+
 const _PI_OMEGA_LOCK = ReentrantLock()
 const FIXEDMU_STABLE_SELECTOR_POLICY = "pressure_max_under_constraints"
 const FIXEDMU_STABLE_SELECTOR_TIEBREAK = "residual_norm_then_seed_index"
@@ -349,16 +374,6 @@ function main()
     mkpath(opts.outdir)
     out_csv = joinpath(opts.outdir, opts.output_csv)
 
-    if opts.overwrite && isfile(out_csv)
-        rm(out_csv)
-    end
-
-    key_cols = ["T_MeV", "muB_MeV", "xi"]
-    existing_keys = (isfile(out_csv) && opts.resume && !opts.overwrite) ?
-        ScanCSV.read_existing_keys(out_csv, key_cols) : Set{Tuple{Vararg{Float64}}}()
-
-    run_id = _write_run_artifacts(opts, _cfg, out_csv)
-
     cols = [
         "run_id",
         "T_MeV", "muB_MeV", "xi",
@@ -389,6 +404,20 @@ function main()
             "second_pass_candidate_count_eta", "second_pass_candidate_count_eta_prime", "second_pass_candidate_count_sigma", "second_pass_candidate_count_sigma_prime",
         ])
     end
+
+    if opts.overwrite && isfile(out_csv)
+        rm(out_csv)
+    end
+
+    if isfile(out_csv) && opts.resume && !opts.overwrite
+        _assert_existing_header_compatible(out_csv, cols)
+    end
+
+    key_cols = ["T_MeV", "muB_MeV", "xi"]
+    existing_keys = (isfile(out_csv) && opts.resume && !opts.overwrite) ?
+        ScanCSV.read_existing_keys(out_csv, key_cols) : Set{Tuple{Vararg{Float64}}}()
+
+    run_id = _write_run_artifacts(opts, _cfg, out_csv)
 
     is_new = !isfile(out_csv)
     open(out_csv, is_new ? "w" : "a") do io
