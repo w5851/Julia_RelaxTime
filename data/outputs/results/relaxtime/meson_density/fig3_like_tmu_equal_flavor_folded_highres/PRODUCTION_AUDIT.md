@@ -29,6 +29,14 @@
 - Production cutoff check `qmax=12`, `omega_max=10`, `16x16`: folded phase range remains `[0.0, pi]`, out-of-range samples `0/256`.
 - Interpretation: negative `n_pi` is caused by feeding the unwrapped negative phase branch into the GBU weight; it is not an anomalous-mode effect in the equal-flavor chemical-potential path.
 
+## Strict-BW Stage1 Outlier Diagnostic
+
+- Reviewed strict-BW heatmap points `(mu_q, T)=(300, 130) MeV` and `(100, 200) MeV`.
+- `(300, 130) MeV`: `gamma_pi=5.310276 MeV`, `gamma_K=0`; strict-BW `n_pi/stable_n_pi=0.24141930278683565`, while K remains on the stable fallback. This raises `K/pi` from the stable value `0.246869` to `1.022588`.
+- `(100, 200) MeV`: `gamma_pi=0`, `gamma_K=25.515541 MeV`; strict-BW `n_K/stable_n_K=0.21658756237069487`, while pi remains on the stable fallback. This lowers `K/pi` from the stable value `0.543079` to `0.117696`.
+- Cause: Stage1 reduced strict-BW switches discontinuously at `gamma_zero_tol`. At `gamma=0` it uses stable-particle fallback, but at any `gamma>tol` it integrates the half-line Lorentzian kernel over `Delta omega >= 0`; for small width and `omega_max=10 fm^-1`, the kernel normalization entering the current formula is close to `1/4`, so a single channel crossing from zero to finite width creates an apparent heatmap outlier.
+- This is a Stage1 reduced-BW policy artifact, not a phase-display issue and not an integration-node insufficiency. Changing it would be a semantics change to the strict-BW density kernel.
+
 ## K/pi Range By Regime
 
 | regime | min | max | mean |

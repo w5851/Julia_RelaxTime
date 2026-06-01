@@ -15,6 +15,7 @@ date: 2026-06-01
 
 - CSV: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.csv`
 - SVG: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.svg`
+- PNG: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.png`
 
 ## Regime Definitions
 
@@ -27,6 +28,7 @@ date: 2026-06-01
 
 - `real_axis_mode=pv_b0_eta0`
 - `phase_convention=arg_inverse_propagator`
+- `phase_display=fold_0_pi`
 - `density_policy=strict_normal_domain`
 - `noanom_policy=none`
 - `gamma_zero_tol=1.0e-6`
