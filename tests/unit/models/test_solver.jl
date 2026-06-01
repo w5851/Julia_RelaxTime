@@ -226,6 +226,38 @@ Models.pnjl_module()
         @test_throws ArgumentError Models._select_pressure_max_local(missing_pressure)
     end
 
+    @testset "_select_pressure_max_local prioritizes pressure after constraints" begin
+        lower_residual = (
+            pressure=10.0,
+            residual_norm=1e-10,
+            hard_constraint_ok=true,
+            seed_index=1,
+            converged=true,
+        )
+        higher_pressure = (
+            pressure=12.0,
+            residual_norm=1e-6,
+            hard_constraint_ok=true,
+            seed_index=2,
+            converged=true,
+        )
+
+        selected = Models._select_pressure_max_local([lower_residual, higher_pressure])
+        @test selected === higher_pressure
+    end
+
+    @testset "meson pole sign convention normalizes negative mass root" begin
+        mass, gamma, flipped = Models.MesonMassWorkflow._normalize_physical_pole_sign(-2.5, -0.3)
+        @test mass == 2.5
+        @test gamma == 0.3
+        @test flipped
+
+        mass2, gamma2, flipped2 = Models.MesonMassWorkflow._normalize_physical_pole_sign(2.5, -0.3)
+        @test mass2 == 2.5
+        @test gamma2 == -0.3
+        @test !flipped2
+    end
+
     @testset "solve_constraint FixedRho 可调用" begin
         m = Models.create_model(:NJL)
         mode = Models.FixedRho(0.5)

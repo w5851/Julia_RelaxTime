@@ -287,16 +287,16 @@ end
             return cand_ok
         end
 
-        cand_residual = candidate_residual(cand)
-        best_residual = candidate_residual(best)
-        if cand_residual != best_residual
-            return cand_residual < best_residual
-        end
-
         cand_pressure = candidate_pressure(cand)
         best_pressure = candidate_pressure(best)
         if cand_pressure != best_pressure
             return cand_pressure > best_pressure
+        end
+
+        cand_residual = candidate_residual(cand)
+        best_residual = candidate_residual(best)
+        if cand_residual != best_residual
+            return cand_residual < best_residual
         end
 
         cand_seed_index = candidate_seed_index(cand, cand_idx)

@@ -34,6 +34,7 @@
 - `gamma`
 - `converged`
 - `residual`
+- `root_sign_flipped`：若求解器落到负号等价 pole，workflow 已按物理约定输出 `mass >= 0`，并将该字段置为 `true`
 - 非混合通道的 `threshold`, `gap`
 - 混合通道的 `threshold=(uu, ss, min)`, `gaps=(uu, ss, min)`
 
@@ -48,6 +49,10 @@
 - `mixed_seed_tracking_state`
 
 扫描脚本应优先传递这一对象，而不是在脚本层分别维护多份 seed。
+
+对于需要热力学稳定相而不是沿上一温度点追踪亚稳分支的扫描，可传入
+`equilibrium_seed_strategy=Models.MultiSeed()`。此时平衡态 FixedMu 求解会在每个点执行多初值压力选优；
+`continuation_state` 仍可用于介子根的连续性，但不会强制 equilibrium 沿上一点分支延拓。
 
 ## 默认通道与复用接口
 

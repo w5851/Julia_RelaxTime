@@ -238,6 +238,13 @@ Models.pnjl_module()
         @test selected.selection_reason == :pressure_max_under_constraints
         @test selected.selected_index == 1
         @test selected.selected_candidate.pressure == 10.0
+
+        c3 = (pressure=10.0, residual_norm=1e-10, hard_constraint_ok=true, failed_constraints=Symbol[], converged=true)
+        c4 = (pressure=12.0, residual_norm=1e-6, hard_constraint_ok=true, failed_constraints=Symbol[], converged=true)
+        selected_pressure = Models.select_pressure_max_candidate([c3, c4])
+        @test selected_pressure.selection_reason == :pressure_max_under_constraints
+        @test selected_pressure.selected_index == 2
+        @test selected_pressure.selected_candidate.pressure == 12.0
     end
 
     @testset "无约束通过候选时回退并标注原因" begin

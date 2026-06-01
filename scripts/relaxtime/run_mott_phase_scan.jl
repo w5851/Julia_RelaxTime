@@ -8,7 +8,7 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 
 using .ScanCSV: ScanCSV
 using .Constants_PNJL: ħc_MeV_fm, G_fm2, K_fm5
-using .Models: solve_gap_and_meson_point
+using .Models: solve_gap_and_meson_point, MultiSeed
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.PolarizationAniso: polarization_with_width
 using Main.MesonMass: ensure_quark_params_has_A
@@ -32,6 +32,7 @@ struct ScanOptions
     max_iter::Int
     include_mixed::Bool
     force_global_fallback::Bool
+    equilibrium_branch_mode::Symbol
     # optional Π(ω) curve output
     pi_omega_csv::Union{String,Nothing}
     pi_omega_Ts::Vector{Float64}
@@ -112,7 +113,34 @@ end
     return string(x)
 end
 
+function _first_data_line(path::AbstractString)
+    first_line = nothing
+    open(path, "r") do io
+        for line in eachline(io)
+            s = strip(line)
+            (isempty(s) || startswith(s, "#")) && continue
+            first_line = s
+            break
+        end
+    end
+    return first_line
+end
+
+function _assert_existing_header_compatible(path::AbstractString, cols::Vector{String})
+    isfile(path) || return
+    header = _first_data_line(path)
+    header === nothing && throw(ArgumentError("existing output CSV has no header: $(path)"))
+    expected = join(cols, ',')
+    header == expected && return
+    throw(ArgumentError(
+        "existing output CSV header is incompatible with current schema: $(path). " *
+        "Please rerun with --overwrite or choose a new output path.",
+    ))
+end
+
 const _PI_OMEGA_LOCK = ReentrantLock()
+const FIXEDMU_STABLE_SELECTOR_POLICY = "pressure_max_under_constraints"
+const FIXEDMU_STABLE_SELECTOR_TIEBREAK = "residual_norm_then_seed_index"
 function _append_pi_omega(csv_path::String, channel::String, xi::Float64, T_MeV::Int,
                           omega::Float64, K::Float64, re_val::Float64, im_val::Float64)
     lock(_PI_OMEGA_LOCK) do
@@ -135,6 +163,7 @@ function _print_usage()
     println("  --tmin <MeV>         Temperature min (default 120)")
     println("  --tmax <MeV>         Temperature max (default 260)")
     println("  --tstep <MeV>        Temperature step (default 2)")
+    println("  --muB <MeV>          Baryon chemical potential")
     println("  --xi-list v1,v2,...  Xi list override")
     println("  --resume             Resume by existing key")
     println("  --overwrite          Overwrite output csv")
@@ -143,6 +172,8 @@ function _print_usage()
     println("  --max-iter <int>     Solver iteration cap")
     println("  --include-mixed      Also compute/output mixed mesons (eta, eta_prime, sigma, sigma_prime)")
     println("  --force-global-fallback  Force global fallback path in meson workflow (experimental)")
+    println("  --equilibrium-branch-mode <stable|continuation>  Equilibrium branch policy (default stable)")
+    println("  --stable-equilibrium Use pressure-selected multiseed equilibrium at every point")
     println("  --pi-omega-csv <path>    Output Π(ω) curves to separate CSV at selected T")
     println("  --pi-omega-Ts <csv>      Comma-sep T values for Π(ω) (default: 220)")
     println("  --pi-omega-range <csv>   ω min,max,step in fm⁻¹ (default: 0.3,3.5,0.02)")
@@ -174,6 +205,7 @@ function _default_cfg_dict()
                 "max_iter" => 40,
                 "include_mixed" => false,
                 "force_global_fallback" => false,
+                "equilibrium_branch_mode" => "stable",
                 "resume" => true,
                 "overwrite" => false,
             ),
@@ -210,6 +242,8 @@ function _build_options(args::Vector{String})
             cli["T_max_MeV"] = parse(Float64, require_value())
         elseif arg == "--tstep"
             cli["T_step_MeV"] = parse(Float64, require_value())
+        elseif arg == "--muB" || arg == "--mub" || arg == "--muB-MeV" || arg == "--mub-MeV"
+            cli["muB_MeV"] = parse(Float64, require_value())
         elseif arg == "--xi-list"
             cli["xi_list"] = _parse_xi_list(require_value())
         elseif arg == "--resume"
@@ -226,6 +260,10 @@ function _build_options(args::Vector{String})
             cli["include_mixed"] = true
         elseif arg == "--force-global-fallback"
             cli["force_global_fallback"] = true
+        elseif arg == "--equilibrium-branch-mode"
+            cli["equilibrium_branch_mode"] = require_value()
+        elseif arg == "--stable-equilibrium"
+            cli["equilibrium_branch_mode"] = "stable"
         elseif arg == "--pi-omega-csv"
             cli["pi_omega_csv"] = require_value()
         elseif arg == "--pi-omega-Ts"
@@ -263,6 +301,9 @@ function _build_options(args::Vector{String})
     max_iter = Int(get(mp, "max_iter", 40))
     include_mixed = Bool(get(mp, "include_mixed", false))
     force_global_fallback = Bool(get(mp, "force_global_fallback", false))
+    equilibrium_branch_mode = Symbol(lowercase(String(get(mp, "equilibrium_branch_mode", "stable"))))
+    equilibrium_branch_mode in (:continuation, :stable) ||
+        throw(ArgumentError("equilibrium_branch_mode must be continuation or stable, got $(equilibrium_branch_mode)"))
 
     # optional Π(ω) curve output
     pi_omega_csv = get(mp, "pi_omega_csv", nothing)
@@ -279,7 +320,7 @@ function _build_options(args::Vector{String})
         outdir, output_csv, config_path,
         xi_list, T_min_MeV, T_max_MeV, T_step_MeV, muB_MeV,
         resume, overwrite, p_num, t_num, max_iter,
-        include_mixed, force_global_fallback,
+        include_mixed, force_global_fallback, equilibrium_branch_mode,
         pi_omega_csv, pi_omega_Ts, pi_omega_min, pi_omega_max, pi_omega_step,
     ), cfg
 end
@@ -301,6 +342,9 @@ function _write_run_artifacts(opts::ScanOptions, cfg::Dict{String,Any}, out_csv:
                 "max_iter" => opts.max_iter,
                 "include_mixed" => opts.include_mixed,
                 "force_global_fallback" => opts.force_global_fallback,
+                "equilibrium_branch_mode" => String(opts.equilibrium_branch_mode),
+                "equilibrium_selector_policy" => opts.equilibrium_branch_mode === :stable ? FIXEDMU_STABLE_SELECTOR_POLICY : "continuation_seed",
+                "equilibrium_selector_tiebreak" => opts.equilibrium_branch_mode === :stable ? FIXEDMU_STABLE_SELECTOR_TIEBREAK : "not_applicable",
                 "resume" => opts.resume,
                 "overwrite" => opts.overwrite,
             ),
@@ -330,22 +374,13 @@ function main()
     mkpath(opts.outdir)
     out_csv = joinpath(opts.outdir, opts.output_csv)
 
-    if opts.overwrite && isfile(out_csv)
-        rm(out_csv)
-    end
-
-    key_cols = ["T_MeV", "muB_MeV", "xi"]
-    existing_keys = (isfile(out_csv) && opts.resume && !opts.overwrite) ?
-        ScanCSV.read_existing_keys(out_csv, key_cols) : Set{Tuple{Vararg{Float64}}}()
-
-    run_id = _write_run_artifacts(opts, _cfg, out_csv)
-
     cols = [
         "run_id",
         "T_MeV", "muB_MeV", "xi",
         "M_pi", "M_K", "Gamma_pi", "Gamma_K",
         "residual_pi", "residual_K",
         "root_quality_pi", "root_quality_K",
+        "root_sign_flipped_pi", "root_sign_flipped_K",
         "selected_method_pi", "selected_method_K",
         "governance_candidate_count_pi", "governance_candidate_count_K",
         "governance_selection_reason_pi", "governance_selection_reason_K",
@@ -361,6 +396,7 @@ function main()
             "Gamma_eta", "Gamma_eta_prime", "Gamma_sigma", "Gamma_sigma_prime",
             "residual_eta", "residual_eta_prime", "residual_sigma", "residual_sigma_prime",
             "root_quality_eta", "root_quality_eta_prime", "root_quality_sigma", "root_quality_sigma_prime",
+            "root_sign_flipped_eta", "root_sign_flipped_eta_prime", "root_sign_flipped_sigma", "root_sign_flipped_sigma_prime",
             "selected_method_eta", "selected_method_eta_prime", "selected_method_sigma", "selected_method_sigma_prime",
             "governance_candidate_count_eta", "governance_candidate_count_eta_prime", "governance_candidate_count_sigma", "governance_candidate_count_sigma_prime",
             "governance_selection_reason_eta", "governance_selection_reason_eta_prime", "governance_selection_reason_sigma", "governance_selection_reason_sigma_prime",
@@ -368,6 +404,20 @@ function main()
             "second_pass_candidate_count_eta", "second_pass_candidate_count_eta_prime", "second_pass_candidate_count_sigma", "second_pass_candidate_count_sigma_prime",
         ])
     end
+
+    if opts.overwrite && isfile(out_csv)
+        rm(out_csv)
+    end
+
+    if isfile(out_csv) && opts.resume && !opts.overwrite
+        _assert_existing_header_compatible(out_csv, cols)
+    end
+
+    key_cols = ["T_MeV", "muB_MeV", "xi"]
+    existing_keys = (isfile(out_csv) && opts.resume && !opts.overwrite) ?
+        ScanCSV.read_existing_keys(out_csv, key_cols) : Set{Tuple{Vararg{Float64}}}()
+
+    run_id = _write_run_artifacts(opts, _cfg, out_csv)
 
     is_new = !isfile(out_csv)
     open(out_csv, is_new ? "w" : "a") do io
@@ -421,6 +471,8 @@ function main()
                     "residual_K" => NaN,
                     "root_quality_pi" => "",
                     "root_quality_K" => "",
+                    "root_sign_flipped_pi" => false,
+                    "root_sign_flipped_K" => false,
                     "selected_method_pi" => "",
                     "selected_method_K" => "",
                     "governance_candidate_count_pi" => 0,
@@ -457,6 +509,10 @@ function main()
                         row["root_quality_eta_prime"] = ""
                         row["root_quality_sigma"] = ""
                         row["root_quality_sigma_prime"] = ""
+                        row["root_sign_flipped_eta"] = false
+                        row["root_sign_flipped_eta_prime"] = false
+                        row["root_sign_flipped_sigma"] = false
+                        row["root_sign_flipped_sigma_prime"] = false
                         row["selected_method_eta"] = ""
                         row["selected_method_eta_prime"] = ""
                         row["selected_method_sigma"] = ""
@@ -483,11 +539,14 @@ function main()
                     T_fm = T / ħc_MeV_fm
                     mu_fm = (opts.muB_MeV / ħc_MeV_fm) / 3.0
                     mesons = opts.include_mixed ? (:pi, :K, :eta, :eta_prime, :sigma, :sigma_prime) : (:pi, :K)
+                    equilibrium_seed_strategy = opts.equilibrium_branch_mode === :stable ? MultiSeed() : nothing
                     res = solve_gap_and_meson_point(
                         T_fm,
                         mu_fm;
                         xi=xi,
                         continuation_state=continuation_state,
+                        equilibrium_seed_strategy=equilibrium_seed_strategy,
+                        equilibrium_evaluate_all_attempts=true,
                         mesons=mesons,
                         mixed_branch_align=:strict_sign_binding,
                         p_num=opts.p_num,
@@ -509,6 +568,8 @@ function main()
                     row["residual_K"] = mk.residual
                     row["root_quality_pi"] = String(mpi.root_quality)
                     row["root_quality_K"] = String(mk.root_quality)
+                    row["root_sign_flipped_pi"] = Bool(get(mpi, :root_sign_flipped, false))
+                    row["root_sign_flipped_K"] = Bool(get(mk, :root_sign_flipped, false))
                     row["selected_method_pi"] = String(mpi.root_diagnostics.selected_method)
                     row["selected_method_K"] = String(mk.root_diagnostics.selected_method)
                     row["governance_candidate_count_pi"] = Int(getproperty(mpi.root_diagnostics, :governance_candidate_count))
@@ -545,6 +606,10 @@ function main()
                         row["root_quality_eta_prime"] = String(eta_prime.root_quality)
                         row["root_quality_sigma"] = String(sigma.root_quality)
                         row["root_quality_sigma_prime"] = String(sigma_prime.root_quality)
+                        row["root_sign_flipped_eta"] = Bool(get(eta, :root_sign_flipped, false))
+                        row["root_sign_flipped_eta_prime"] = Bool(get(eta_prime, :root_sign_flipped, false))
+                        row["root_sign_flipped_sigma"] = Bool(get(sigma, :root_sign_flipped, false))
+                        row["root_sign_flipped_sigma_prime"] = Bool(get(sigma_prime, :root_sign_flipped, false))
                         row["selected_method_eta"] = String(eta.root_diagnostics.selected_method)
                         row["selected_method_eta_prime"] = String(eta_prime.root_diagnostics.selected_method)
                         row["selected_method_sigma"] = String(sigma.root_diagnostics.selected_method)
@@ -607,6 +672,7 @@ function main()
                 end
 
                 println(io, join([_fmt(get(row, c, "")) for c in cols], ','))
+                flush(io)
                 push!(existing_keys, key)
                 T += opts.T_step_MeV
             end

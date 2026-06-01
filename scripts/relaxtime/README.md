@@ -63,7 +63,9 @@
   - `M_pi`, `M_K`, `Gamma_pi`, `Gamma_K`, `M_u_plus_M_d`, `M_u_plus_M_s`
 - 数值连续性策略：
   - 扫描按每个 `xi` 的温度升序执行。
-  - 默认启用 meson 连续性初值传递（`meson_seed_state` + `mixed_seed_tracking_state`）以抑制根切换导致的伪跳变。
+  - 默认平衡态使用 `stable` 分支策略，即 FixedMu 多初值压力选优；需要亚稳分支追踪时必须显式传 `--equilibrium-branch-mode continuation`。
+  - 默认仍启用 meson 连续性初值传递（`meson_seed_state` + `mixed_seed_tracking_state`）以抑制介子根切换导致的伪跳变。
+  - 介子 pole 输出采用 `M >= 0` 符号约定；若求解落到负号等价根，CSV 中 `root_sign_flipped_*` 会标记为 `true`。
 - 绘图组织：
   - Mode A：不同因变量同图，不同 `xi` 分图
   - Mode B：不同 `xi` 同图，不同因变量分图
@@ -104,3 +106,77 @@ julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl \
   --in data/outputs/results/relaxtime/mott_phase/demo/mott_phase_derived.csv \
   --out-dir data/outputs/figures/relaxtime/mott_phase/demo
 ```
+
+## Paper P1 图件资产后处理
+
+`build_paper_p1_figure_assets.py` 面向论文 P1 图件，只消费已有主计算产物，不运行求解器：
+
+- `run_gap_meson_mass_scan.jl` 的 `(T, muB, xi)` Mott gap 网格；
+- `calculate_phase_structure.jl` 的 phase artifacts；
+- `run_isentropic_meson_mass_scan.jl` 的 fixed-`s/nB` 路径 CSV。
+
+输出固定为：
+
+- `mott_lines.csv`
+- `isentropic_trajectories.csv`
+- `isentropic_mott_crossings.csv`
+- `phase_overlay.csv`
+- `figure_manifest.json`
+- 可选 `figures/p1_mott_phase_diagram.*` 与 `figures/p1_isentropic_mott_paths.*`
+- 可选 per-`xi` 子图 `figures/p1_mott_phase_diagram_xi_*.*`
+
+`mott_lines.csv` 会保留 bracket 诊断字段；其中 `bracket_kind=branch_jump` 表示 gap 过零 bracket 同时跨过明显质量分支跳变，不应直接当作普通连续 Mott root 解释。P1 生产入口默认把 Mott 平衡态设为 `stable` 模式，即每个点用 FixedMu 多初值压力选优选择稳定分支；如需复现旧的温度连续亚稳分支扫描，可显式传 `--mott-equilibrium-branch-mode continuation`。
+
+示例：
+
+```bash
+python scripts/relaxtime/build_paper_p1_figure_assets.py \
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
+  --phase-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/phase_xi0 \
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+```
+
+如果 phase 已汇总为正式 reference 产物，可直接消费 `boundary_<tag>.csv`、`spinodals_<tag>.csv`、`crossover_<tag>.csv`、`cep_<tag>.csv`：
+
+```bash
+python scripts/relaxtime/build_paper_p1_figure_assets.py \
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
+  --phase-reference-tag paper_p1_mott_phase_isentropic_xi3 \
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+```
+
+若需要把本轮 P1 生产链路统一编排，可使用 `run_paper_p1_pipeline.jl`。各 stage 相互独立，可只跑数据生产或只跑后处理：
+
+```bash
+julia --project=. scripts/relaxtime/run_paper_p1_pipeline.jl \
+  --stage=assets \
+  --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
+  --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
+  --phase-tag paper_p1_mott_phase_isentropic_xi3 \
+  --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
+  --figure-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+```
+
+当 Mott 主网格在不同 `muB` 区间需要不同温度覆盖时，使用 slice plan CSV，而不是手工拆多批命令。CSV 必须包含 `muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV`：
+
+```csv
+muB_MeV,T_min_MeV,T_max_MeV,T_step_MeV
+0,100,300,5
+200,100,300,5
+800,100,300,5
+900,30,300,5
+1100,30,300,5
+```
+
+```bash
+julia --project=. scripts/relaxtime/run_paper_p1_pipeline.jl \
+  --stage=mott \
+  --mott-slice-plan data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_slice_plan.csv \
+  --result-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production
+```
+
+`stage=mott` 会在合并网格旁写出 `mott_grid_combined_manifest.json`，显式记录 `equilibrium_branch_mode`、`equilibrium_selector_policy`、`equilibrium_selector_tiebreak` 和每个 `muB` slice 的温度范围。`stage=phase` 默认从 `T=30 MeV` 开始，以便低温高密 Mott bracket 能有 phase reference 覆盖；可用 `--phase-tmin` 覆盖。phase 生产默认使用 `--phase-p-num 24 --phase-t-num 8`，与既有正式 PNJL 相图 reference 的 `T-rho` 曲线口径对齐；降低节点数可能在低温 quark-side spinodal 附近产生伪回折。
+
+对应任务单：`docs/dev/active/2026-05-30_P1论文图后端能力任务单.md`。
