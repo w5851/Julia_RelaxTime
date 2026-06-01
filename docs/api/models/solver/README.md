@@ -58,6 +58,6 @@
 PR-4 后，solver 主链的 attempt/fallback/selection 采用单治理引擎语义；维护时建议按以下顺序阅读：
 
 1. `src/models/solver/CandidateGovernance.jl`：`execute_attempt_pool`、`governance_quality_tag`、`execute_governance_selector`（主治理入口）
-2. `src/models/solver/ConstraintSolverCommon.jl`：`select_pressure_max_candidate` / `select_residual_min_candidate`（统一排序规则）
+2. `src/models/solver/ConstraintSolverCommon.jl`：`select_pressure_max_candidate` / `select_residual_min_candidate`（统一排序规则）。`select_pressure_max_candidate` 的语义是硬约束通过优先，其后按压强最大选取候选，`residual_norm` 只作为压强并列时的 tie-break。
 3. `src/models/solver/ProblemSpecOrchestrator.jl`：模式求解如何接入主治理入口与诊断拼装
 4. `src/models/solver/GenericRootEngine.jl`：保留为通用根求解兼容层，不再承担 solver 主链治理语义

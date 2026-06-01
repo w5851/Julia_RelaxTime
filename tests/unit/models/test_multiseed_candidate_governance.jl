@@ -7,7 +7,7 @@ if !isdefined(Main, :Models)
 end
 
 @testset "multiseed candidate governance" begin
-    @testset "priority is hard_constraint > residual > pressure > seed_index" begin
+    @testset "priority is hard_constraint > pressure > residual > seed_index" begin
         candidates = [
             (pressure=10.0, residual_norm=1e-8, hard_constraint_ok=false, seed_index=1, converged=true, failed_constraints=Symbol[:residual_too_large]),
             (pressure=8.0, residual_norm=2e-7, hard_constraint_ok=true, seed_index=4, converged=true, failed_constraints=Symbol[]),

@@ -119,10 +119,10 @@ end
         selector=Models.select_pressure_max_candidate,
         residual_norm_max=1e-6,
     )
-    @test selected.selected_index == 1
+    @test selected.selected_index == 2
     @test selected.selection_reason == :pressure_max_under_constraints
     @test haskey(selected, :normalized_candidates)
-    @test selected.selected_candidate.quality_tag == :good
+    @test selected.selected_candidate.quality_tag == :fallback
 
     @test Models.governance_quality_tag((;
         converged=true,
