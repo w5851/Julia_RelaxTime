@@ -117,11 +117,11 @@ julia --project=. scripts/relaxtime/run_mott_phase_plot_modes.jl \
 
 输出固定为：
 
-- `mott_lines.csv`
-- `isentropic_trajectories.csv`
-- `isentropic_mott_crossings.csv`
-- `phase_overlay.csv`
-- `figure_manifest.json`
+- result-side `figure_assets/mott_lines.csv`
+- result-side `figure_assets/isentropic_trajectories.csv`
+- result-side `figure_assets/isentropic_mott_crossings.csv`
+- result-side `figure_assets/phase_overlay.csv`
+- figure-side `plot_manifest.json`
 - 可选 `figures/p1_mott_phase_diagram.*` 与 `figures/p1_isentropic_mott_paths.*`
 - 可选 per-`xi` 子图 `figures/p1_mott_phase_diagram_xi_*.*`
 
@@ -134,7 +134,8 @@ python scripts/relaxtime/build_paper_p1_figure_assets.py \
   --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
   --isentropic-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/isentropic_sigma30.csv \
   --phase-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/phase_xi0 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic \
+  --asset-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/figure_assets
 ```
 
 如果 phase 已汇总为正式 reference 产物，可直接消费 `boundary_<tag>.csv`、`spinodals_<tag>.csv`、`crossover_<tag>.csv`、`cep_<tag>.csv`：
@@ -144,7 +145,8 @@ python scripts/relaxtime/build_paper_p1_figure_assets.py \
   --mott-grid-csv data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/mott_grid.csv \
   --phase-reference-root data/reference/pnjl/paper_p1_mott_phase_isentropic_xi3 \
   --phase-reference-tag paper_p1_mott_phase_isentropic_xi3 \
-  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic
+  --out-dir data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic \
+  --asset-dir data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/figure_assets
 ```
 
 若需要把本轮 P1 生产链路统一编排，可使用 `run_paper_p1_pipeline.jl`。各 stage 相互独立，可只跑数据生产或只跑后处理：

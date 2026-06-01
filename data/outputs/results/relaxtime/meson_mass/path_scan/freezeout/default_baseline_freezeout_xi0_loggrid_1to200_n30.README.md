@@ -15,7 +15,7 @@ Known path-validity note:
 
 Plotting policy:
 
-- Figures in `figures/` exclude rows with `equilibrium_converged != true` or `T_MeV <= 0`.
+- Figure PNGs under `data/outputs/figures/relaxtime/meson_mass/path_scan/freezeout/` exclude rows with `equilibrium_converged != true` or `T_MeV <= 0`.
 - Excluded points in this case: `2`.
 
 Files:
@@ -23,9 +23,10 @@ Files:
 - source CSV: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30.csv`
 - valid-points CSV: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30.valid_points.csv`
 - provenance: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30.provenance.json`
-- path overview: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_path_overview.png`
-- pseudoscalar masses: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_pseudoscalar_masses.png`
-- scalar masses: `data/outputs/results/relaxtime/meson_mass/path_scan/freezeout/figures/default_baseline_freezeout_xi0_loggrid_1to200_n30_scalar_masses.png`
+- plot manifest: `data/outputs/figures/relaxtime/meson_mass/path_scan/freezeout/plot_manifest.json`
+- path overview: `data/outputs/figures/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30_path_overview.png`
+- pseudoscalar masses: `data/outputs/figures/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30_pseudoscalar_masses.png`
+- scalar masses: `data/outputs/figures/relaxtime/meson_mass/path_scan/freezeout/default_baseline_freezeout_xi0_loggrid_1to200_n30_scalar_masses.png`
 
 Quick summary:
 

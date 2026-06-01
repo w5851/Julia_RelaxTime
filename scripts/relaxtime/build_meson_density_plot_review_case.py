@@ -31,6 +31,16 @@ OUT_DIR = (
     / "plot_review"
     / "freezeout_kminus_piminus_mu_pi_100"
 )
+FIGURE_DIR = (
+    PROJECT_ROOT
+    / "data"
+    / "outputs"
+    / "figures"
+    / "relaxtime"
+    / "meson_density"
+    / "plot_review"
+    / "freezeout_kminus_piminus_mu_pi_100"
+)
 
 
 def _read_csv(path: Path) -> list[dict[str, str]]:
@@ -59,6 +69,7 @@ def build_plot_review_case() -> dict[str, Path]:
     workflow_rows = _read_csv(SOURCE_DIR / "workflow_scan.csv")
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURE_DIR.mkdir(parents=True, exist_ok=True)
 
     plot_rows: list[dict[str, object]] = []
     for row in comparison_rows:
@@ -106,7 +117,7 @@ def build_plot_review_case() -> dict[str, Path]:
     ax.set_title("Freeze-out plot review: kminus/piminus, mu_pi=100 MeV")
     ax.grid(True, alpha=0.25)
     ax.legend(frameon=False)
-    overlay_png = OUT_DIR / "overlay_kminus_piminus_mu_pi_100.png"
+    overlay_png = FIGURE_DIR / "overlay_kminus_piminus_mu_pi_100.png"
     fig.savefig(overlay_png, dpi=160)
     plt.close(fig)
 
@@ -120,7 +131,7 @@ def build_plot_review_case() -> dict[str, Path]:
     axes[1].set_xlabel("sqrt(s_NN) [GeV]")
     axes[1].set_ylabel("rel diff")
     axes[1].grid(True, alpha=0.25)
-    residual_png = OUT_DIR / "residual_kminus_piminus_mu_pi_100.png"
+    residual_png = FIGURE_DIR / "residual_kminus_piminus_mu_pi_100.png"
     fig.savefig(residual_png, dpi=160)
     plt.close(fig)
 
@@ -148,8 +159,10 @@ def build_plot_review_case() -> dict[str, Path]:
                 "- `workflow_scan.csv`",
                 "- `comparison_vs_target.csv`",
                 "- `plot_review_comparison.csv`",
-                "- `overlay_kminus_piminus_mu_pi_100.png`",
-                "- `residual_kminus_piminus_mu_pi_100.png`",
+                f"- figures: `{_relative_posix(FIGURE_DIR)}`",
+                f"- `{_relative_posix(overlay_png)}`",
+                f"- `{_relative_posix(residual_png)}`",
+                f"- plot manifest: `{_relative_posix(FIGURE_DIR / 'plot_manifest.json')}`",
                 "",
                 "Manual review checklist:",
                 "",
@@ -171,6 +184,26 @@ def build_plot_review_case() -> dict[str, Path]:
             ]
         )
         + "\n",
+        encoding="utf-8",
+    )
+    (FIGURE_DIR / "plot_manifest.json").write_text(
+        "\n".join([
+            "{",
+            '  "format": "meson_density_plot_review_manifest_v1",',
+            f'  "source_comparison_csv": "{_relative_posix(comparison_csv)}",',
+            '  "figures": [',
+            "    {",
+            f'      "path": "{_relative_posix(overlay_png)}",',
+            '      "kind": "overlay_png"',
+            "    },",
+            "    {",
+            f'      "path": "{_relative_posix(residual_png)}",',
+            '      "kind": "residual_png"',
+            "    }",
+            "  ]",
+            "}",
+            "",
+        ]),
         encoding="utf-8",
     )
 

@@ -2,7 +2,9 @@
 """Build figure-ready assets for the P1 Mott/isentropic paper figures.
 
 This script does not run the PNJL or meson solvers. It consumes existing
-main-computation CSV artifacts and produces stable post-processing outputs:
+main-computation CSV artifacts and produces stable post-processing outputs.
+CSV assets are written to the result tree; plot files and plot manifests are
+written to the figure tree:
 
 * mott_lines.csv: pion/kaon Mott lines in the T-muB plane
 * isentropic_trajectories.csv: fixed-sigma path points with meson observables
@@ -10,6 +12,7 @@ main-computation CSV artifacts and produces stable post-processing outputs:
 * phase_overlay.csv: optional phase-line/CEP overlay data
 * figures/p1_mott_phase_diagram.{png,pdf}
 * figures/p1_isentropic_mott_paths.{png,pdf}
+* plot_manifest.json
 """
 
 from __future__ import annotations
@@ -49,7 +52,13 @@ def parse_args() -> argparse.Namespace:
         description="Build P1 paper figure assets from Mott, phase, and isentropic scan outputs."
     )
     parser.add_argument("--mott-grid-csv", "--mott-csv", type=Path, required=True)
-    parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--out-dir", type=Path, required=True, help="Figure output directory.")
+    parser.add_argument(
+        "--asset-dir",
+        type=Path,
+        default=None,
+        help="CSV asset output directory. Defaults to the matching data/outputs/results/.../figure_assets path.",
+    )
     parser.add_argument("--isentropic-csv", type=Path, action="append", default=[])
     parser.add_argument("--phase-dir", type=Path, action="append", default=[])
     parser.add_argument(
@@ -72,6 +81,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--formats", default="png,pdf", help="Comma-separated plot formats.")
     parser.add_argument("--skip-plots", action="store_true")
     return parser.parse_args()
+
+
+def default_asset_dir(out_dir: Path) -> Path:
+    parts = list(out_dir.parts)
+    lowered = [part.lower() for part in parts]
+    for idx in range(len(parts) - 2):
+        if lowered[idx:idx + 3] == ["data", "outputs", "figures"]:
+            parts[idx + 2] = "results"
+            return Path(*parts) / "figure_assets"
+    return out_dir / "figure_assets"
 
 
 def read_scan_csv(path: Path) -> list[dict[str, str]]:
@@ -882,6 +901,8 @@ def plot_assets(
 def main() -> int:
     args = parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    asset_dir = args.asset_dir if args.asset_dir is not None else default_asset_dir(args.out_dir)
+    asset_dir.mkdir(parents=True, exist_ok=True)
 
     mott_rows = read_scan_csv(args.mott_grid_csv)
     mott_lines = build_mott_lines(mott_rows, args.mott_grid_csv)
@@ -949,10 +970,10 @@ def main() -> int:
     phase_fields = ["kind", "xi", "muB_MeV", "T_MeV", "variable", "curve_parameter", "plot_order_key", "source_csv"]
 
     assets = {
-        "mott_lines": str(args.out_dir / "mott_lines.csv"),
-        "isentropic_trajectories": str(args.out_dir / "isentropic_trajectories.csv"),
-        "isentropic_mott_crossings": str(args.out_dir / "isentropic_mott_crossings.csv"),
-        "phase_overlay": str(args.out_dir / "phase_overlay.csv"),
+        "mott_lines": str(asset_dir / "mott_lines.csv"),
+        "isentropic_trajectories": str(asset_dir / "isentropic_trajectories.csv"),
+        "isentropic_mott_crossings": str(asset_dir / "isentropic_mott_crossings.csv"),
+        "phase_overlay": str(asset_dir / "phase_overlay.csv"),
     }
     write_csv(Path(assets["mott_lines"]), mott_lines, mott_fields)
     write_csv(Path(assets["isentropic_trajectories"]), trajectories, trajectory_fields)
@@ -982,13 +1003,15 @@ def main() -> int:
             "phase_overlay_points": len(phase_overlay),
             "mott_line_quality": dict(Counter(fmt(row.get("bracket_kind", "unknown")) for row in mott_lines)),
         },
+        "asset_dir": str(asset_dir),
         "assets": assets,
         "figures": figure_paths,
     }
-    manifest_path = args.out_dir / "figure_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    manifest_path = args.out_dir / "plot_manifest.json"
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=True), encoding="utf-8")
 
     print(f"Wrote P1 paper figure assets under: {args.out_dir}")
+    print(f"  csv_asset_dir={asset_dir}")
     print(f"  mott_line_points={len(mott_lines)}")
     print(f"  isentropic_points={len(trajectories)}")
     print(f"  isentropic_crossings={len(isentropic_crossings)}")

@@ -12,10 +12,16 @@ const PLOT_REVIEW_DIR = joinpath(
     "data", "outputs", "results", "relaxtime", "meson_density", "plot_review",
     "freezeout_kminus_piminus_mu_pi_100",
 )
+const PLOT_REVIEW_FIGURE_DIR = joinpath(
+    PROJECT_ROOT,
+    "data", "outputs", "figures", "relaxtime", "meson_density", "plot_review",
+    "freezeout_kminus_piminus_mu_pi_100",
+)
 const PLOT_COMPARISON_PATH = joinpath(PLOT_REVIEW_DIR, "plot_review_comparison.csv")
 const README_PATH = joinpath(PLOT_REVIEW_DIR, "README.md")
-const OVERLAY_PNG_PATH = joinpath(PLOT_REVIEW_DIR, "overlay_kminus_piminus_mu_pi_100.png")
-const RESIDUAL_PNG_PATH = joinpath(PLOT_REVIEW_DIR, "residual_kminus_piminus_mu_pi_100.png")
+const OVERLAY_PNG_PATH = joinpath(PLOT_REVIEW_FIGURE_DIR, "overlay_kminus_piminus_mu_pi_100.png")
+const RESIDUAL_PNG_PATH = joinpath(PLOT_REVIEW_FIGURE_DIR, "residual_kminus_piminus_mu_pi_100.png")
+const PLOT_MANIFEST_PATH = joinpath(PLOT_REVIEW_FIGURE_DIR, "plot_manifest.json")
 
 function _load_metric_baseline(path::String)
     isfile(path) || error("baseline CSV not found: $path")
@@ -118,6 +124,7 @@ end
 
     @test isfile(OVERLAY_PNG_PATH)
     @test isfile(RESIDUAL_PNG_PATH)
+    @test isfile(PLOT_MANIFEST_PATH)
     @test filesize(OVERLAY_PNG_PATH) > 10_000
     @test filesize(RESIDUAL_PNG_PATH) > 10_000
 end

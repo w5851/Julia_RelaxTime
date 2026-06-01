@@ -49,7 +49,8 @@ end
     isentropic_csv = joinpath(tmp, "isentropic.csv")
     phase_dir = joinpath(tmp, "phase")
     phase_ref_root = joinpath(tmp, "phase_reference")
-    out_dir = joinpath(tmp, "assets")
+    out_dir = joinpath(tmp, "figures")
+    asset_dir = joinpath(tmp, "results", "figure_assets")
     mkpath(phase_dir)
     mkpath(phase_ref_root)
 
@@ -95,15 +96,15 @@ end
     write(joinpath(phase_ref_root, "crossover_demo.csv"), "xi,mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable,curve_parameter,plot_order_key\n0.3,42.0,132.0,0.2,peak,true,1.0,phi_u,42.0,42.0\n")
     write(joinpath(phase_ref_root, "cep_demo.csv"), "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV\n0.3,121.0,81.0,243.0\n")
 
-    run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-dir $phase_dir --out-dir $out_dir --skip-plots`)
+    run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-dir $phase_dir --out-dir $out_dir --asset-dir $asset_dir --skip-plots`)
 
-    @test isfile(joinpath(out_dir, "mott_lines.csv"))
-    @test isfile(joinpath(out_dir, "isentropic_trajectories.csv"))
-    @test isfile(joinpath(out_dir, "isentropic_mott_crossings.csv"))
-    @test isfile(joinpath(out_dir, "phase_overlay.csv"))
-    @test isfile(joinpath(out_dir, "figure_manifest.json"))
+    @test isfile(joinpath(asset_dir, "mott_lines.csv"))
+    @test isfile(joinpath(asset_dir, "isentropic_trajectories.csv"))
+    @test isfile(joinpath(asset_dir, "isentropic_mott_crossings.csv"))
+    @test isfile(joinpath(asset_dir, "phase_overlay.csv"))
+    @test isfile(joinpath(out_dir, "plot_manifest.json"))
 
-    _, mott_rows = _read_plain_csv(joinpath(out_dir, "mott_lines.csv"))
+    _, mott_rows = _read_plain_csv(joinpath(asset_dir, "mott_lines.csv"))
     @test haskey(first(mott_rows), "bracket_kind")
     @test all(haskey(row, "bracket_mass_jump_inv_fm") for row in mott_rows)
     pi_mu0 = only(filter(r -> r["channel"] == "pi" && parse(Float64, r["muB_MeV"]) == 0.0, mott_rows))
@@ -111,12 +112,12 @@ end
     k_mu120 = only(filter(r -> r["channel"] == "K" && parse(Float64, r["muB_MeV"]) == 120.0, mott_rows))
     @test parse(Float64, k_mu120["T_Mott_MeV"]) ≈ 158.0
 
-    _, crossing_rows = _read_plain_csv(joinpath(out_dir, "isentropic_mott_crossings.csv"))
+    _, crossing_rows = _read_plain_csv(joinpath(asset_dir, "isentropic_mott_crossings.csv"))
     path_pi = only(filter(r -> r["channel"] == "pi", crossing_rows))
     @test parse(Float64, path_pi["T_MeV"]) ≈ 150.0
     @test parse(Float64, path_pi["muB_MeV"]) ≈ 20.0
 
-    _, phase_rows = _read_plain_csv(joinpath(out_dir, "phase_overlay.csv"))
+    _, phase_rows = _read_plain_csv(joinpath(asset_dir, "phase_overlay.csv"))
     first_order = only(filter(r -> r["kind"] == "first_order", phase_rows))
     @test parse(Float64, first_order["muB_MeV"]) ≈ 150.0
     @test haskey(first_order, "curve_parameter")
@@ -124,15 +125,16 @@ end
     @test parse(Float64, first_order["plot_order_key"]) ≈ 100.0
     @test any(r -> r["kind"] == "cep" && parse(Float64, r["muB_MeV"]) ≈ 240.0, phase_rows)
 
-    out_dir_ref = joinpath(tmp, "assets_reference")
-    run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-reference-root $phase_ref_root --phase-reference-tag demo --out-dir $out_dir_ref --skip-plots`)
-    _, phase_ref_rows = _read_plain_csv(joinpath(out_dir_ref, "phase_overlay.csv"))
+    out_dir_ref = joinpath(tmp, "figures_reference")
+    asset_dir_ref = joinpath(tmp, "results_reference", "figure_assets")
+    run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-reference-root $phase_ref_root --phase-reference-tag demo --out-dir $out_dir_ref --asset-dir $asset_dir_ref --skip-plots`)
+    _, phase_ref_rows = _read_plain_csv(joinpath(asset_dir_ref, "phase_overlay.csv"))
     @test any(r -> r["kind"] == "first_order" && parse(Float64, r["xi"]) ≈ 0.3 && parse(Float64, r["muB_MeV"]) ≈ 156.0, phase_ref_rows)
     @test all(haskey(row, "plot_order_key") for row in phase_ref_rows)
-    manifest_ref = JSON3.read(read(joinpath(out_dir_ref, "figure_manifest.json"), String))
+    manifest_ref = JSON3.read(read(joinpath(out_dir_ref, "plot_manifest.json"), String))
     @test manifest_ref["inputs"]["phase_reference_tag"] == "demo"
 
-    manifest = JSON3.read(read(joinpath(out_dir, "figure_manifest.json"), String))
+    manifest = JSON3.read(read(joinpath(out_dir, "plot_manifest.json"), String))
     @test manifest["schema_version"] == "paper_p1_assets_v1"
     @test manifest["inputs"]["mott_source"]["equilibrium_branch_mode"] == "stable"
     @test manifest["inputs"]["mott_source"]["equilibrium_selector_policy"] == "pressure_max_under_constraints"
@@ -141,8 +143,9 @@ end
 
     has_matplotlib = success(`$python -c "import matplotlib"`)
     if has_matplotlib
-        out_dir_plot = joinpath(tmp, "assets_with_plots")
-        run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-dir $phase_dir --out-dir $out_dir_plot --formats png`)
+        out_dir_plot = joinpath(tmp, "figures_with_plots")
+        asset_dir_plot = joinpath(tmp, "results_with_plots", "figure_assets")
+        run(`$python $P1_SCRIPT_PATH --mott-grid-csv $mott_csv --isentropic-csv $isentropic_csv --phase-dir $phase_dir --out-dir $out_dir_plot --asset-dir $asset_dir_plot --formats png`)
         @test isfile(joinpath(out_dir_plot, "figures", "p1_mott_phase_diagram.png"))
         @test isfile(joinpath(out_dir_plot, "figures", "p1_mott_phase_diagram_xi_0.png"))
         @test isfile(joinpath(out_dir_plot, "figures", "p1_isentropic_mott_paths.png"))
