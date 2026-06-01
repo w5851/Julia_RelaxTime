@@ -7,7 +7,7 @@ date: 2026-06-01
 - path strategy: `tmu`
 - density regimes: `stable`, `strict_bw_stage1`, `phase_shift_current`, `phase_shift_gbu_reference`
 - fixed chemical potential: `mu_q=0.0 MeV`, `mu_B=0.0 MeV`
-- temperature range: `120.0:20.0:220.0 MeV`
+- temperature range: `120.0:10.0:240.0 MeV`
 - flavor profile: `default`
 - meson profile: `default`
 
@@ -36,4 +36,4 @@ date: 2026-06-01
 
 ## Status Counts
 
-- `ok`: `24`
+- `ok`: `52`
