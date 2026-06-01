@@ -174,4 +174,11 @@ BU2020/temp7 审计相关参数：
   - strict Bose-domain policy 默认标记 unsafe；诊断延拓必须显式传入
   - no-anomalous 只作为显式 reconstructed diagnostic policy；默认 full phase shift 不扣除 anomalous 分支
 
+脚本层组合入口：
+
+- `scripts/relaxtime/run_combined_meson_density_scan.jl`
+  - Bridge-style 组合：`scan path` × `density regime`
+  - 当前实现 `--path tmu`，默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
+  - 输出 CSV、README 与 SVG，适合把同一批状态点的多口径介子数密度结果放在同一份可审计产物中
+
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。

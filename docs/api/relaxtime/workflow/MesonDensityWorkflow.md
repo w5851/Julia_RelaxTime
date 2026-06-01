@@ -273,6 +273,14 @@ scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
 
 该脚本不复制 temp7 代码，只通过 `Models` workflow 输出一个可审计 CSV/README，覆盖 stable、strict BW Stage1、`phase_shift_current`、`phase_shift_gbu_reference`，并显式记录 charged-channel 化学势、`pv_b0_eta0`、inverse-propagator phase、Bose-domain policy 和 `low_energy_branch_subtraction` no-anomalous 诊断状态。
 
+组合式扫描入口：
+
+```text
+scripts/relaxtime/run_combined_meson_density_scan.jl
+```
+
+该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。输出包含 CSV、README 与 SVG 图像，适合做正式数据产物和后续路径扩展的桥接入口。
+
 ## 当前设计原则
 
 1. workflow 是唯一计算入口；
