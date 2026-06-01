@@ -301,6 +301,10 @@ function solve_phase_shift_meson_density_from_meson_point(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
+    phase_convention::Symbol=:arg_propagator,
+    density_policy::Symbol=:strict_normal_domain,
+    bose_x_min::Float64=0.0,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -327,6 +331,10 @@ function solve_phase_shift_meson_density_from_meson_point(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
+        density_policy=density_policy,
+        bose_x_min=bose_x_min,
     )
 
     return merge(density, (
@@ -361,6 +369,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -387,6 +396,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
     )
 
     return merge(density, (
@@ -402,6 +412,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
     omega_values::AbstractVector{<:Real}=[0.2],
     scheme::Symbol=:current,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
+    phase_convention::Symbol=:arg_propagator,
     fd_step::Float64=1e-5,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
@@ -423,6 +435,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
             thermo_params;
             scheme=scheme,
             eta=eta,
+            real_axis_mode=real_axis_mode,
+            phase_convention=phase_convention,
             fd_step=fd_step,
         ))
     end
@@ -432,6 +446,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
         xi=Float64(thermo_params.ξ),
         scheme=scheme,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
         fd_step=fd_step,
         rows=rows,
     )

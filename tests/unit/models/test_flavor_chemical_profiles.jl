@@ -25,4 +25,13 @@ const _FCP = Models.FlavorChemicalProfiles
         @test vals.mu_d_MeV == 150.0
         @test vals.mu_s_MeV == 30.0
     end
+
+    @testset "BU2020 alias keeps mu_s equals 0p2 muq" begin
+        profile = _FCP.load_flavor_chemical_profile(profile="bu2020_mu_s_0p2")
+        vals = _FCP.flavor_mu_profile_MeV(profile, 350.0)
+        @test vals.profile_name == "bu2020_mu_s_0p2"
+        @test vals.mu_u_MeV == 350.0
+        @test vals.mu_d_MeV == 350.0
+        @test vals.mu_s_MeV == 70.0
+    end
 end

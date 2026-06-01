@@ -4,7 +4,7 @@
 
 本页是 meson density workflow 的领域细节页，重点说明它如何与现有 meson workflow 对接，以及为什么它被约束为后处理层。
 
-如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 [docs/api/models/workflows/MesonDensityWorkflow.md](/C:/Users/Wmzx/.codex/worktrees/346c/Julia_RelaxTime/docs/api/models/workflows/MesonDensityWorkflow.md)。
+如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 `docs/api/models/workflows/MesonDensityWorkflow.md`。
 
 ## 入口
 
@@ -142,6 +142,10 @@ solve_phase_shift_meson_density_from_meson_point(
     omega_max=10.0,
     omega_nodes=48,
     eta=1e-6,
+    real_axis_mode=:finite_eta,
+    phase_convention=:arg_propagator,
+    density_policy=:strict_normal_domain,
+    bose_x_min=0.0,
 )
 ```
 
@@ -156,7 +160,7 @@ solve_phase_shift_meson_density_from_meson_point(
 当前它是 **Phase E3 最小 BU 相移双积分** 的正式 workflow helper，物理上仍保持以下约束：
 
 - 仅支持 `xi = 0`
-- 仅支持 `π/K` 聚合通道
+- 支持 `π/K` 聚合通道以及 `pi_plus/pi_minus/K_plus/K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
 
 当前 `scheme` 治理口径：
@@ -167,6 +171,22 @@ solve_phase_shift_meson_density_from_meson_point(
 - `:gbu_reference`（兼容 `:gbu` / `:generalized_bu`）
   - `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
   - 可重复运行的 stricter reference 输出链
+
+当前 real-axis / Bose-domain 治理口径：
+
+- `real_axis_mode=:finite_eta`
+  - legacy 默认路径，使用有限虚部展宽；`eta` 必须大于 0
+- `real_axis_mode=:pv_b0_eta0`
+  - BU2020/temp7 FIG2 审计所需的独立 `eta=0 + PV B0` 实轴分支
+  - 返回 metadata 中 `eta=0.0` 与 `polarization_backend=:pv_b0_real_axis`
+- `phase_convention=:arg_propagator`
+  - legacy 默认相位口径
+- `phase_convention=:arg_inverse_propagator`
+  - BU2020 诊断用 inverse-propagator phase 口径
+- `density_policy=:strict_normal_domain`
+  - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
+- `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
+  - 只作为显式诊断延拓，不能视作文献明示公式
 
 ### `solve_gap_and_phase_shift_meson_density_point`
 
@@ -235,8 +255,18 @@ Models.solve_gap_and_phase_shift_meson_density_point
 - `scheme`
 - `qmax`, `q_nodes`
 - `omega_min`, `omega_max`, `omega_nodes`
+- `real_axis_mode`, `eta`, `phase_convention`
+- `density_policy`, `unsafe_bose_count`, `min_E_minus_mu`, `bose_x_min`, `status`
 - `pi/K` 两个通道的 `q_integral_estimate`
 - `pi/K` 两个通道的 `omega_shell_at_qmax`
+
+BU2020/temp7 主线审计脚本：
+
+```text
+scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
+```
+
+该脚本不复制 temp7 代码，只通过 `Models` workflow 输出一个可审计 CSV/README，覆盖 stable、strict BW Stage1、`phase_shift_current`、`phase_shift_gbu_reference`，并显式记录 charged-channel 化学势、`pv_b0_eta0`、inverse-propagator phase、Bose-domain policy 和 no-anomalous 状态。
 
 ## 当前设计原则
 

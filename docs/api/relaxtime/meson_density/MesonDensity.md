@@ -11,6 +11,7 @@
 - Stage2 q 依赖复极点 strict BW 数密度
 - `K/π` 比值与温度扫描
 - Phase E3 当前最小口径下的 `π/K` 相移双积分 helper
+- BU2020 审计所需的 real-axis 分支、相位口径与 Bose-domain policy metadata
 
 后续 BU / BW / 各向异性扩展将在该模块基础上继续演化。
 
@@ -144,7 +145,7 @@ g(E_M(q)+\Delta\omega)
 当前约束：
 
 - 仅支持 `xi = 0`
-- 仅支持 `:pi` / `:K`
+- 支持 `:pi` / `:K` 聚合通道以及 `:pi_plus` / `:pi_minus` / `:K_plus` / `:K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
 
 当前默认参数：
@@ -154,6 +155,10 @@ g(E_M(q)+\Delta\omega)
 - `omega_min = 0.05`
 - `omega_max = 10`
 - `omega_nodes = 48`
+- `eta = 1e-6`
+- `real_axis_mode = :finite_eta`
+- `phase_convention = :arg_propagator`
+- `density_policy = :strict_normal_domain`
 
 当前支持两个正式 `scheme`：
 
@@ -164,17 +169,54 @@ g(E_M(q)+\Delta\omega)
   - 当前更严格参考口径
   - 使用 `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
 
+real-axis 分支：
+
+- `real_axis_mode=:finite_eta`
+  - legacy / 默认路径
+  - 通过有限虚部展宽调用 finite-width polarization backend
+  - 要求 `eta > 0`，不允许把 `eta=0` 静默塞进 finite-width backend
+- `real_axis_mode=:pv_b0_eta0`（兼容别名 `:bu2020_pv_eta0`, `:eta0_pv_b0`）
+  - BU2020 FIG2 审计所需的独立实轴 principal-value 分支
+  - 返回 metadata 中 `eta=0.0`
+  - 通过 real-axis polarization 路径进入 `OneLoopIntegrals.B0` 的 PV 实部与解析虚部处理
+
+相位口径：
+
+- `phase_convention=:arg_propagator`：legacy 默认，对传播子取相位
+- `phase_convention=:arg_inverse_propagator`：BU2020 诊断口径，对 inverse propagator 取相位并按当前符号约定返回
+
+Bose-domain policy：
+
+- `density_policy=:strict_normal_domain`
+  - 默认生产/审计口径
+  - 当积分支持触及 `omega <= μ_M` 时不继续积分，返回 `density=NaN` 与 `status=:unsafe_bose_domain`
+- `density_policy=:excitation_only_E_gt_mu`
+  - 显式诊断延拓，只在 `omega > μ_M` 区域积分
+- `density_policy=:x_min_cut`
+  - 显式诊断延拓，按 `(omega-μ_M)/T >= bose_x_min` 设定下界
+
 治理约束：
 
 - `current` 保持默认正式生产主线
 - `gbu_reference` 作为可重复运行的 stricter reference / analysis branch
 - 二者共用同一套 `workflow + continuation + scan` 契约，不允许脚本层平行重组流程
+- `pv_b0_eta0` 与 `finite_eta` 必须在 API 和返回 metadata 中保持可区分；`B0` PV 奇点处理不能和 Bose occupation pole 混为一谈
 
 返回值除 `density` 外，还包含：
 
 - `q_integral_estimate`
 - `omega_shell_at_qmax`
 - `scheme`
+- `real_axis_mode`
+- `eta`
+- `polarization_backend`
+- `phase_convention`
+- `density_policy`
+- `unsafe_bose_count`
+- `min_E_minus_mu`
+- `bose_x_min`
+- `status`
+- `message`
 - 当前积分配置回显
 
 ### `phase_shift_meson_density_summary(quark_params, thermo_params; scheme=:current, ...)`
@@ -187,5 +229,12 @@ g(E_M(q)+\Delta\omega)
 - `pi_density`
 - `k_density`
 - `scheme`
+- `real_axis_mode`
+- `phase_convention`
+- `density_policy`
+- `unsafe_bose_count`
+- `min_E_minus_mu`
+- `status`
+- `message`
 
 当前它是 workflow 层 Phase-E3 后处理入口所依赖的正式数值 helper。

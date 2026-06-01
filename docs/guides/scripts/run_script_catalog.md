@@ -27,6 +27,7 @@
 | `scripts/relaxtime/run_gap_meson_mass_scan.jl` | 平衡求解 + 介子质量/宽度 + Mott 阈值扫描 | `core-candidate` | 支撑 Mott 相关产线 |
 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | relaxtime 工作流编排入口 | `core-candidate` | 更适合 CI 手动触发入口 |
 | `scripts/relaxtime/run_mott_phase_scan.jl` | Mott 相扫描主入口（含 manifest） | `core-candidate` | 可与派生 CSV / plot 脚本联动 |
+| `scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl` | BU2020/temp7 介子数密度主线审计扫描，输出 stable / strict BW / phase-shift 多口径 CSV 与 README | `domain-candidate` | 研究审计入口；不进入稳定白名单，默认通过 `Models` workflow 而非复制 temp7 |
 | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | 守恒荷广义磁化率与累积量入口 | `domain-candidate` | 已在脚本指南稳定入口中出现 |
 | `scripts/pnjl/run_aniso_phase_template.jl` | 各向异性相图实验模板（扫描 + 相结构 + 绘图） | `domain-candidate` | 偏实验模板 |
 | `scripts/pnjl/run_magnetic_point.jl` | 磁场单点计算 | `domain-candidate` | 磁场专题 |

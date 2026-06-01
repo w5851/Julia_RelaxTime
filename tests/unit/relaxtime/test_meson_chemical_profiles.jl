@@ -44,4 +44,18 @@ using Main.Models.FlavorChemicalProfiles: load_flavor_chemical_profile, flavor_m
     @test friesen_plus_fm.mu_pi_fm > 0.0
     @test friesen_plus_fm.mu_K_fm ≈ (300.0 - 165.0) / Main.Constants_PNJL.ħc_MeV_fm
     @test friesen_minus_fm.mu_K_fm ≈ -(300.0 - 165.0) / Main.Constants_PNJL.ħc_MeV_fm
+
+    bu_flavor_profile = load_flavor_chemical_profile(profile="bu2020_mu_s_0p2")
+    bu_flavor_mev = flavor_mu_profile_MeV(bu_flavor_profile, 350.0)
+    bu_plus = load_meson_chemical_profile(profile="bu2020_kplus_over_piplus_mu_pi_100")
+    bu_minus = load_meson_chemical_profile(profile="bu2020_kminus_over_piminus_mu_pi_134p5")
+    bu_plus_fm = meson_chemical_profile_fm(bu_plus; flavor_mev=bu_flavor_mev)
+    bu_minus_fm = meson_chemical_profile_fm(bu_minus; flavor_mev=bu_flavor_mev)
+
+    @test bu_plus.pi_channel === :pi_plus
+    @test bu_plus.k_channel === :K_plus
+    @test bu_minus.pi_channel === :pi_minus
+    @test bu_minus.k_channel === :K_minus
+    @test bu_plus_fm.mu_K_fm ≈ 280.0 / Main.Constants_PNJL.ħc_MeV_fm
+    @test bu_minus_fm.mu_K_fm ≈ -280.0 / Main.Constants_PNJL.ħc_MeV_fm
 end

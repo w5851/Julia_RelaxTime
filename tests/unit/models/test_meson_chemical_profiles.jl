@@ -37,4 +37,23 @@ const _MCP = Models.MesonChemicalProfiles
         @test isfinite(out.mu_K_fm)
         @test out.d_pi == 1
     end
+
+    @testset "BU2020 charged signed muK profiles load" begin
+        flavor = Models.FlavorChemicalProfiles.flavor_mu_profile_MeV(
+            Models.FlavorChemicalProfiles.load_flavor_chemical_profile(profile="bu2020_mu_s_0p2"),
+            350.0,
+        )
+        plus = _MCP.load_meson_chemical_profile(profile="bu2020_kplus_over_piplus_mu_pi_100")
+        minus = _MCP.load_meson_chemical_profile(profile="bu2020_kminus_over_piminus_mu_pi_100")
+        plus_fm = _MCP.meson_chemical_profile_fm(plus; flavor_mev=flavor)
+        minus_fm = _MCP.meson_chemical_profile_fm(minus; flavor_mev=flavor)
+
+        @test plus.pi_channel === :pi_plus
+        @test plus.k_channel === :K_plus
+        @test minus.pi_channel === :pi_minus
+        @test minus.k_channel === :K_minus
+        @test plus.mu_K_rule === :mu_u_minus_mu_s_signed
+        @test plus_fm.mu_K_fm ≈ 280.0 / Main.Constants_PNJL.ħc_MeV_fm
+        @test minus_fm.mu_K_fm ≈ -280.0 / Main.Constants_PNJL.ħc_MeV_fm
+    end
 end

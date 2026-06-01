@@ -17,6 +17,8 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    DEFAULT_PHASE_SHIFT_Q_MAX,
                                    DEFAULT_PHASE_SHIFT_Q_NODES,
                                    _phase_shift_scheme_symbol,
+                                   _real_axis_mode_symbol,
+                                   _density_policy_symbol,
                                    _unwrap_phases,
                                    bose_distribution,
                                    meson_degeneracy,
@@ -78,6 +80,10 @@ end
     @test DEFAULT_PHASE_SHIFT_OMEGA_NODES == 48
     @test _phase_shift_scheme_symbol(:current) == :phase_shift_current
     @test _phase_shift_scheme_symbol(:gbu) == :phase_shift_gbu_reference
+    @test _real_axis_mode_symbol(:finite_eta) == :finite_eta
+    @test _real_axis_mode_symbol(:bu2020_pv_eta0) == :pv_b0_eta0
+    @test _density_policy_symbol(:strict) == :strict_normal_domain
+    @test _density_policy_symbol(:excitation_only) == :excitation_only_E_gt_mu
 
     qp = (m=(u=1.0, d=1.0, s=1.2), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.1))
     tp_bad = (T=0.2, Φ=0.5, Φbar=0.5, ξ=0.1)
@@ -209,6 +215,90 @@ end
     @test summary.k_density.scheme == :phase_shift_gbu_reference
     @test summary.n_pi > 0.0
     @test summary.n_K > 0.0
+end
+
+@testset "MesonDensity real-axis mode and Bose-domain policy metadata" begin
+    qp = (m=(u=0.098, d=0.098, s=0.42), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.08))
+    tp = (T=0.18, Φ=0.25, Φbar=0.25, ξ=0.0)
+
+    @test_throws ArgumentError phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        eta=0.0,
+        real_axis_mode=:finite_eta,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+    )
+
+    pv = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        real_axis_mode=:pv_b0_eta0,
+        phase_convention=:arg_inverse_propagator,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+    )
+    @test pv.real_axis_mode == :pv_b0_eta0
+    @test pv.polarization_backend == :pv_b0_real_axis
+    @test pv.phase_convention == :arg_inverse_propagator
+    @test pv.eta == 0.0
+    @test pv.status == :ok
+
+    strict = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        μ=0.5,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+        density_policy=:strict_normal_domain,
+    )
+    @test strict.status == :unsafe_bose_domain
+    @test isnan(strict.density)
+    @test strict.unsafe_bose_count > 0
+    @test strict.min_E_minus_mu < 0.0
+
+    boundary_strict = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        μ=0.06,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=2,
+        density_policy=:strict_normal_domain,
+    )
+    @test boundary_strict.status == :unsafe_bose_domain
+    @test boundary_strict.unsafe_bose_count >= 1
+
+    excitation_only = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        μ=0.5,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+        density_policy=:excitation_only_E_gt_mu,
+    )
+    @test excitation_only.status == :ok
+    @test excitation_only.omega_min > 0.5
+    @test isfinite(excitation_only.density)
 end
 
 @testset "MesonDensity derivative-reference helper is AD-backed" begin

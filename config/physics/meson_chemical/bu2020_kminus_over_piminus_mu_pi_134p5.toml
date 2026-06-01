@@ -1,0 +1,16 @@
+profile_name = "bu2020_kminus_over_piminus_mu_pi_134p5"
+source_tag = "BU2020_Kminus_over_piminus_mu_pi_134p5_muK_from_flavor"
+pi_label = "pi_minus"
+k_label = "K_minus"
+charge_resolved = true
+
+[chemical_potential_rules]
+mu_K_rule = "mu_u_minus_mu_s_signed"
+
+[chemical_potentials]
+mu_pi_MeV = 134.5
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 1
+d_K = 1
