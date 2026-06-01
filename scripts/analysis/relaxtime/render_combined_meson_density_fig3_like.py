@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+import datetime as dt
+import json
 import math
 from pathlib import Path
 
@@ -72,10 +74,54 @@ def finite_max(mats: list[np.ndarray]) -> float:
     return max(0.2, float(np.max(vals)))
 
 
+def manifest_path(path: Path) -> str:
+    root = Path.cwd().resolve()
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
+def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argparse.Namespace) -> None:
+    payload: dict[str, object]
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            payload = {}
+    else:
+        payload = {}
+
+    payload["format"] = "combined_meson_density_plot_manifest_v1"
+    payload["date"] = dt.date.today().isoformat()
+    payload["source_csv"] = manifest_path(csv_path)
+
+    figures = payload.get("figures")
+    if not isinstance(figures, list):
+        figures = []
+    out_rel = manifest_path(out_path)
+    figures = [
+        item for item in figures
+        if not (isinstance(item, dict) and item.get("path") == out_rel)
+    ]
+    figures.append({
+        "path": out_rel,
+        "kind": "fig3_like_heatmap_png",
+        "field": args.field,
+        "dpi": args.dpi,
+        "title": args.title,
+        "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py",
+    })
+    payload["figures"] = figures
+    path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
+    parser.add_argument("--manifest", default=None, type=Path)
     parser.add_argument("--field", default="kpi_ratio")
     parser.add_argument("--dpi", type=int, default=220)
     parser.add_argument("--vmax", type=float, default=None)
@@ -118,6 +164,8 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.out, dpi=args.dpi)
     plt.close(fig)
+    manifest = args.manifest if args.manifest is not None else args.out.parent / "plot_manifest.json"
+    write_plot_manifest(manifest, args.csv, args.out, args)
     print(args.out)
 
 

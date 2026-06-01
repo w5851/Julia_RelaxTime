@@ -10,10 +10,10 @@
 
 ## Outputs
 
-- `combined_meson_density_scan.csv`
-- `combined_meson_density_scan.svg`
-- `combined_meson_density_fig3_like.png`
-- `run.stdout.log`, `run.stderr.log`
+- Result directory: `data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/`
+- Data/audit assets: `combined_meson_density_scan.csv`, `README.md`, `PRODUCTION_AUDIT.md`, `run.stdout.log`, `run.stderr.log`
+- Figure directory: `data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/`
+- Figure assets: `combined_meson_density_scan.svg`, `combined_meson_density_fig3_like.png`, `plot_manifest.json`
 
 ## Validation Summary
 

@@ -183,7 +183,8 @@ BU2020/temp7 审计相关参数：
   - Bridge-style 组合：`scan path` × `density regime`
 - 当前实现 `--path tmu`，默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
 - 支持 `--muq-values` 或 `--mumin/--mumax/--mustep` 生成多个固定 `mu_q` 的 T 扫描；多 `mu_q` 输出会生成 FIG3-like heatmap SVG
+- 正式数据默认写入 `data/outputs/results/...`；图像和 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`，也可通过 `--figure-dir` 覆盖
 - `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从统一 CSV 渲染高 DPI PNG
-  - 输出 CSV、README 与 SVG，适合把同一批状态点的多口径介子数密度结果放在同一份可审计产物中
+  - 输出 CSV、README、SVG 与图像 manifest，适合把同一批状态点的多口径介子数密度结果放在同一份可审计产物中
 
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。

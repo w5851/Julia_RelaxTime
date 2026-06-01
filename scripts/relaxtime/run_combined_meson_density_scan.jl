@@ -51,6 +51,7 @@ const OUTPUT_COLUMNS = [
 
 struct CombinedOptions
     output_dir::String
+    figure_dir::String
     path_strategy::Symbol
     regimes::Vector{Symbol}
     tmin_MeV::Float64
@@ -85,7 +86,9 @@ end
 function print_usage()
     println("Usage: julia --project=. scripts/relaxtime/run_combined_meson_density_scan.jl [options]\n")
     println("Options:")
-    println("  --output-dir <path>         Output directory")
+    println("  --output-dir <path>         Result output directory")
+    println("  --figure-dir <path>         Figure output directory")
+    println("                              default replaces data/outputs/results with data/outputs/figures")
     println("  --path <tmu>                Scan path strategy (default tmu)")
     println("  --regimes <list>            Comma-separated regimes")
     println("                              default stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference")
@@ -148,6 +151,19 @@ function _range_values(lo::Float64, hi::Float64, step::Float64)
     return values
 end
 
+function _default_figure_dir(output_dir::AbstractString)
+    parts = collect(splitpath(normpath(String(output_dir))))
+    if length(parts) >= 3
+        for i in 1:(length(parts) - 2)
+            if lowercase(parts[i]) == "data" && lowercase(parts[i + 1]) == "outputs" && lowercase(parts[i + 2]) == "results"
+                parts[i + 2] = "figures"
+                return joinpath(parts...)
+            end
+        end
+    end
+    return joinpath(String(output_dir), "figures")
+end
+
 function _path_strategy_symbol(value::Symbol)
     value in (:tmu, :Tmu, :temperature_mu, :temperature_scan) && return :tmu
     throw(ArgumentError("unsupported path strategy $(value); currently supported: tmu"))
@@ -171,6 +187,7 @@ end
 function parse_args(args::Vector{String})
     opts = Dict{Symbol, Any}(
         :output_dir => DEFAULT_OUTPUT_DIR,
+        :figure_dir => nothing,
         :path => :tmu,
         :regimes => copy(DEFAULT_REGIMES),
         :tmin => 120.0,
@@ -217,6 +234,8 @@ function parse_args(args::Vector{String})
 
         if arg == "--output-dir"
             opts[:output_dir] = require_value()
+        elseif arg == "--figure-dir"
+            opts[:figure_dir] = require_value()
         elseif arg == "--path"
             opts[:path] = Symbol(require_value())
         elseif arg == "--regimes"
@@ -323,6 +342,7 @@ function parse_args(args::Vector{String})
 
     return CombinedOptions(
         String(opts[:output_dir]),
+        opts[:figure_dir] === nothing ? _default_figure_dir(String(opts[:output_dir])) : String(opts[:figure_dir]),
         _path_strategy_symbol(Symbol(opts[:path])),
         regimes,
         Float64(opts[:tmin]),
@@ -361,6 +381,7 @@ end
 @inline _fmt(x::Bool) = x ? "true" : "false"
 @inline _fmt(::Nothing) = ""
 @inline _fmt(x) = string(x)
+@inline _rel(path::AbstractString) = replace(relpath(String(path), PROJECT_ROOT), '\\' => '/')
 
 function _csv_escape(value)
     s = _fmt(value)
@@ -846,7 +867,49 @@ function _write_svg_plot(path::String, rows)
     end
 end
 
-function _write_summary(path::String, opts::CombinedOptions, csv_path::String, plot_path::Union{Nothing, String}, rows)
+function _json_escape(value)
+    s = string(value)
+    s = replace(s, '\\' => "\\\\")
+    s = replace(s, '"' => "\\\"")
+    s = replace(s, '\n' => "\\n")
+    s = replace(s, '\r' => "\\r")
+    return s
+end
+
+function _write_json_string(io, key::AbstractString, value; comma::Bool=true, indent::String="  ")
+    suffix = comma ? "," : ""
+    println(io, "$(indent)\"$(_json_escape(key))\": \"$(_json_escape(value))\"$(suffix)")
+end
+
+function _write_plot_manifest(path::String, opts::CombinedOptions, csv_path::String, figure_paths::Vector{String})
+    mkpath(dirname(path))
+    open(path, "w") do io
+        println(io, "{")
+        _write_json_string(io, "format", "combined_meson_density_plot_manifest_v1")
+        _write_json_string(io, "date", Dates.today())
+        _write_json_string(io, "generated_by", "scripts/relaxtime/run_combined_meson_density_scan.jl")
+        _write_json_string(io, "source_csv", _rel(csv_path))
+        _write_json_string(io, "path_strategy", opts.path_strategy)
+        println(io, "  \"density_regimes\": [")
+        for (idx, regime) in enumerate(opts.regimes)
+            suffix = idx == length(opts.regimes) ? "" : ","
+            println(io, "    \"$(_json_escape(regime))\"$(suffix)")
+        end
+        println(io, "  ],")
+        println(io, "  \"figures\": [")
+        for (idx, figure_path) in enumerate(figure_paths)
+            suffix = idx == length(figure_paths) ? "" : ","
+            println(io, "    {")
+            _write_json_string(io, "path", _rel(figure_path); indent="      ")
+            _write_json_string(io, "kind", "quicklook_svg"; comma=false, indent="      ")
+            println(io, "    }$(suffix)")
+        end
+        println(io, "  ]")
+        println(io, "}")
+    end
+end
+
+function _write_summary(path::String, opts::CombinedOptions, csv_path::String, plot_path::Union{Nothing, String}, plot_manifest_path::Union{Nothing, String}, rows)
     counts = Dict{String, Int}()
     for row in rows
         key = string(get(row, "status", ""))
@@ -873,9 +936,14 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io)
         println(io, "## Outputs")
         println(io)
-        println(io, "- CSV: `$(relpath(csv_path, PROJECT_ROOT))`")
+        println(io, "- result directory: `$(_rel(dirname(csv_path)))`")
+        println(io, "- CSV: `$(_rel(csv_path))`")
         if plot_path !== nothing
-            println(io, "- SVG: `$(relpath(plot_path, PROJECT_ROOT))`")
+            println(io, "- figure directory: `$(_rel(dirname(plot_path)))`")
+            println(io, "- SVG: `$(_rel(plot_path))`")
+        end
+        if plot_manifest_path !== nothing
+            println(io, "- plot manifest: `$(_rel(plot_manifest_path))`")
         end
         println(io)
         println(io, "## Regime Definitions")
@@ -983,12 +1051,14 @@ end
 function main()
     opts = parse_args(ARGS)
     outdir = normpath(joinpath(PROJECT_ROOT, opts.output_dir))
+    figdir = normpath(joinpath(PROJECT_ROOT, opts.figure_dir))
     mkpath(outdir)
     csv_path = joinpath(outdir, "combined_meson_density_scan.csv")
     summary_path = joinpath(outdir, "README.md")
-    plot_path = opts.plot ? joinpath(outdir, "combined_meson_density_scan.svg") : nothing
+    plot_path = opts.plot ? joinpath(figdir, "combined_meson_density_scan.svg") : nothing
+    plot_manifest_path = opts.plot ? joinpath(figdir, "plot_manifest.json") : nothing
 
-    if !opts.overwrite && (isfile(csv_path) || isfile(summary_path) || (plot_path !== nothing && isfile(plot_path)))
+    if !opts.overwrite && (isfile(csv_path) || isfile(summary_path) || (plot_path !== nothing && isfile(plot_path)) || (plot_manifest_path !== nothing && isfile(plot_manifest_path)))
         error("output exists; pass --overwrite to replace $(relpath(outdir, PROJECT_ROOT))")
     end
 
@@ -996,14 +1066,16 @@ function main()
     _write_csv(csv_path, opts, rows)
     if plot_path !== nothing
         _write_svg_plot(plot_path, rows)
+        _write_plot_manifest(plot_manifest_path, opts, csv_path, [plot_path])
     end
-    _write_summary(summary_path, opts, csv_path, plot_path, rows)
+    _write_summary(summary_path, opts, csv_path, plot_path, plot_manifest_path, rows)
 
-    println("csv=$(relpath(csv_path, PROJECT_ROOT))")
+    println("csv=$(_rel(csv_path))")
     if plot_path !== nothing
-        println("plot=$(relpath(plot_path, PROJECT_ROOT))")
+        println("plot=$(_rel(plot_path))")
+        println("plot_manifest=$(_rel(plot_manifest_path))")
     end
-    println("summary=$(relpath(summary_path, PROJECT_ROOT))")
+    println("summary=$(_rel(summary_path))")
 end
 
 if abspath(PROGRAM_FILE) == abspath(@__FILE__)

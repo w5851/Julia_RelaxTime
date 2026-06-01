@@ -723,6 +723,7 @@ save_convergence_info = true
 ### 9.3 输出目录迁移说明（root `outputs/` -> `data/outputs/`）
 
 - 当前默认口径：所有新脚本输出应写入 `data/outputs/`（按 `results/`、`figures/` 分层）。
+- 正式入库产物默认分层：CSV/JSON/README/audit/manifest/logs 写入 `data/outputs/results/<module>/<topic>/<case_slug>/`；PNG/SVG/PDF 与 `plot_manifest.json` 写入 `data/outputs/figures/<module>/<topic>/<case_slug>/`，并由 result README 反向链接。
 - 推荐细分：
     - 性能基准产物写入 `data/outputs/perf/<module>/`；
     - 参数扫描产物写入 `data/outputs/results/<module>/scan/<feature>/`；
@@ -730,6 +731,7 @@ save_convergence_info = true
     - 回归校验产物写入 `data/outputs/results/<module>/regression/`；
     - 调试比对产物写入 `data/outputs/results/debug/<topic>/`；
     - 图像产物写入 `data/outputs/figures/<module>/`。
+- 快速检查图或一次性诊断图可以保留为临时运行产物；一旦纳入正式入库或 PR 产物，不应继续放在 `data/outputs/results/` 下。
 - 历史兼容口径：根目录 `outputs/` 仅用于读取历史产物，不再作为默认落盘路径。
 - 迁移建议：
     - 旧命令若显式写 `--output outputs/...`，请改为 `--output data/outputs/...`。

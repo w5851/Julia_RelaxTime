@@ -274,6 +274,15 @@ active 文档治理检查（命名 + 归档触发）：
 julia --project=. scripts/dev/check_active_docs_governance.jl
 ```
 
+数据与图像输出路径门禁：
+
+```powershell
+julia --project=. scripts/dev/check_data_output_path_guard.jl
+julia --project=. scripts/dev/check_data_output_path_guard.jl --base origin/main --head HEAD
+```
+
+该门禁禁止新增默认输出回流到根目录 `outputs/results`，并禁止新增 tracked PNG/SVG/PDF 正式图像资产写入 `data/outputs/results/`；正式图像应写入对应的 `data/outputs/figures/`。
+
 PNJL 迁移门禁检查（限制 src/pnjl 新增核心实现）：
 
 ```powershell

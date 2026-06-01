@@ -13,8 +13,13 @@ date: 2026-06-01
 
 ## Outputs
 
-- CSV: `data\outputs\results\relaxtime\meson_density\fig3_like_tmu_equal_flavor_folded_highres\combined_meson_density_scan.csv`
-- SVG: `data\outputs\results\relaxtime\meson_density\fig3_like_tmu_equal_flavor_folded_highres\combined_meson_density_scan.svg`
+- result directory: `data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres`
+- CSV: `data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_scan.csv`
+- run logs: `data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/run.stdout.log`, `data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/run.stderr.log`
+- figure directory: `data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres`
+- SVG: `data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_scan.svg`
+- PNG: `data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_fig3_like.png`
+- plot manifest: `data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/plot_manifest.json`
 
 ## Regime Definitions
 

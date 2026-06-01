@@ -13,9 +13,12 @@ date: 2026-06-01
 
 ## Outputs
 
-- CSV: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.csv`
-- SVG: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.svg`
-- PNG: `data\outputs\results\relaxtime\meson_density\combined_tmu_mu0_temperature_scan\combined_meson_density_scan.png`
+- result directory: `data/outputs/results/relaxtime/meson_density/combined_tmu_mu0_temperature_scan`
+- CSV: `data/outputs/results/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.csv`
+- figure directory: `data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan`
+- SVG: `data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.svg`
+- PNG: `data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.png`
+- plot manifest: `data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/plot_manifest.json`
 
 ## Regime Definitions
 

@@ -284,7 +284,7 @@ scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
 scripts/relaxtime/run_combined_meson_density_scan.jl
 ```
 
-该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。输出包含 CSV、README 与 SVG 图像，适合做正式数据产物和后续路径扩展的桥接入口。
+该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
 
 ## 当前设计原则
 

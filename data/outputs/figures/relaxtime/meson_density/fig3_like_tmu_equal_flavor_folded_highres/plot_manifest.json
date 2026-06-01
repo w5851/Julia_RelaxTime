@@ -1,0 +1,19 @@
+{
+  "format": "combined_meson_density_plot_manifest_v1",
+  "date": "2026-06-01",
+  "source_csv": "data/outputs/results/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_scan.csv",
+  "figures": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_scan.svg",
+      "kind": "quicklook_svg",
+      "generated_by": "scripts/relaxtime/run_combined_meson_density_scan.jl"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/fig3_like_tmu_equal_flavor_folded_highres/combined_meson_density_fig3_like.png",
+      "kind": "fig3_like_heatmap_png",
+      "field": "kpi_ratio",
+      "dpi": 260,
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
+    }
+  ]
+}
