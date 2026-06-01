@@ -79,6 +79,7 @@
 - `real_axis_mode = :finite_eta`
 - `phase_convention = :arg_propagator`
 - `density_policy = :strict_normal_domain`
+- `noanom_policy = :none`
 
 当前同一 workflow 入口支持两套 `scheme`：
 
@@ -103,6 +104,9 @@ BU2020/temp7 审计相关参数：
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain`，不静默 clamp/skip
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
   - 仅作为显式诊断延拓，不应解释为文献明示事实
+- `noanom_policy=:low_energy_branch_subtraction`
+  - 按 temp7 审计通过的 reconstructed diagnostic 口径删除 `K_plus` 低能 anomalous 分支
+  - 只影响相移 density kernel 的 no-anomalous 对照，不改变 FixedMu 默认分支选择
 
 ## `solve_gap_and_phase_shift_meson_density_point`
 
@@ -139,6 +143,7 @@ BU2020/temp7 审计相关参数：
   - `qmax`, `q_nodes`, `omega_min`, `omega_max`, `omega_nodes`, `eta`
   - `real_axis_mode`, `polarization_backend`, `phase_convention`
   - `density_policy`, `unsafe_bose_count`, `min_E_minus_mu`, `bose_x_min`
+  - `noanom_policy`, `noanom_removed_component_count`, `noanom_landau_omega_min`, `noanom_landau_omega_max`
   - `status`, `message`
 
 ## 当前边界
@@ -167,5 +172,6 @@ BU2020/temp7 审计相关参数：
   - `current` 为默认生产口径，`gbu_reference` 为并列参考分支
   - `finite_eta` 为 legacy 默认 real-axis 分支，`pv_b0_eta0` 为 BU2020 审计所需的独立 PV 分支
   - strict Bose-domain policy 默认标记 unsafe；诊断延拓必须显式传入
+  - no-anomalous 只作为显式 reconstructed diagnostic policy；默认 full phase shift 不扣除 anomalous 分支
 
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。

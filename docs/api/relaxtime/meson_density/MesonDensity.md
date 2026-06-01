@@ -159,6 +159,7 @@ g(E_M(q)+\Delta\omega)
 - `real_axis_mode = :finite_eta`
 - `phase_convention = :arg_propagator`
 - `density_policy = :strict_normal_domain`
+- `noanom_policy = :none`
 
 当前支持两个正式 `scheme`：
 
@@ -195,6 +196,15 @@ Bose-domain policy：
 - `density_policy=:x_min_cut`
   - 显式诊断延拓，按 `(omega-μ_M)/T >= bose_x_min` 设定下界
 
+No-anomalous policy：
+
+- `noanom_policy=:none`
+  - 默认 full phase-shift 输出，不做 anomalous-mode 扣除
+- `noanom_policy=:low_energy_branch_subtraction`
+  - reconstructed diagnostic policy
+  - 按 temp7 审计口径，在 `K_plus` 的 folded `0..pi` display phase 上识别 positive-energy Landau window 内的低能正相位连通分量，并把该低能分量置零
+  - 该口径用于显式输出 no-anomalous 对照，不改变默认生产口径，也不改变上游 FixedMu 分支选择策略
+
 治理约束：
 
 - `current` 保持默认正式生产主线
@@ -212,6 +222,13 @@ Bose-domain policy：
 - `polarization_backend`
 - `phase_convention`
 - `density_policy`
+- `noanom_policy`
+- `noanom_applied`
+- `noanom_removed_component_count`
+- `noanom_removed_omega_min`
+- `noanom_removed_omega_max`
+- `noanom_landau_omega_min`
+- `noanom_landau_omega_max`
 - `unsafe_bose_count`
 - `min_E_minus_mu`
 - `bose_x_min`
@@ -232,6 +249,8 @@ Bose-domain policy：
 - `real_axis_mode`
 - `phase_convention`
 - `density_policy`
+- `noanom_policy`
+- `noanom_removed_component_count`
 - `unsafe_bose_count`
 - `min_E_minus_mu`
 - `status`

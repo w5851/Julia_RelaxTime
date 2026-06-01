@@ -459,11 +459,13 @@ const _MDW = Models.MesonDensityWorkflow
             omega_nodes=4,
             real_axis_mode=:pv_b0_eta0,
             phase_convention=:arg_inverse_propagator,
+            noanom_policy=:low_energy_branch_subtraction,
         )
 
         @test density.real_axis_mode == :pv_b0_eta0
         @test density.polarization_backend == :pv_b0_real_axis
         @test density.phase_convention == :arg_inverse_propagator
+        @test density.noanom_policy == :low_energy_branch_subtraction
         @test density.eta == 0.0
         @test density.status == :ok
     end

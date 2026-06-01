@@ -41,6 +41,10 @@ const DEFAULT_PHASE_SHIFT_ETA = 1e-6
 const DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE = :finite_eta
 const DEFAULT_PHASE_SHIFT_PHASE_CONVENTION = :arg_propagator
 const DEFAULT_PHASE_SHIFT_DENSITY_POLICY = :strict_normal_domain
+const DEFAULT_PHASE_SHIFT_NOANOM_POLICY = :none
+const DEFAULT_NOANOM_COMPONENT_EPS = 1e-8
+const DEFAULT_NOANOM_LEADING_COMPONENT_PEAK_MIN = 0.02 * π
+const DEFAULT_NOANOM_LANDAU_MARGIN_STEPS = 0.5
 @inline function _require_nonnegative(name::AbstractString, value::Real)
     value >= 0.0 && return
     throw(ArgumentError("$(name) must be nonnegative, got $(value)"))
@@ -739,6 +743,29 @@ end
     throw(ArgumentError("density_policy must be :strict_normal_domain, :excitation_only_E_gt_mu, or :x_min_cut, got $(density_policy)"))
 end
 
+@inline function _noanom_policy_symbol(noanom_policy::Symbol)::Symbol
+    if noanom_policy === :none || noanom_policy === :full
+        return :none
+    elseif noanom_policy === :low_energy_branch_subtraction ||
+           noanom_policy === :temp7_low_energy_branch_subtraction
+        return :low_energy_branch_subtraction
+    end
+    throw(ArgumentError("noanom_policy must be :none or :low_energy_branch_subtraction, got $(noanom_policy)"))
+end
+
+@inline function _empty_noanom_diag(noanom_policy::Symbol)
+    policy = _noanom_policy_symbol(noanom_policy)
+    return (
+        noanom_policy=policy,
+        noanom_applied=false,
+        noanom_removed_component_count=0,
+        noanom_removed_omega_min=NaN,
+        noanom_removed_omega_max=NaN,
+        noanom_landau_omega_min=NaN,
+        noanom_landau_omega_max=NaN,
+    )
+end
+
 @inline function _phase_shift_omega_lower_bound(omega_min::Float64, μ::Float64)::Float64
     return omega_min > μ ? omega_min : nextfloat(μ)
 end
@@ -853,6 +880,145 @@ function _unwrap_phases(phases::AbstractVector{<:Real}; branch_tol::Real=0.0)
         out[i] = phases[i] + shift
     end
     return out
+end
+
+@inline function _fold_phase_0_pi(δ::Real)
+    return π - abs(mod(Float64(δ), 2π) - π)
+end
+
+function _strip_small_leading_components(
+    δs::Vector{Float64};
+    eps::Float64=DEFAULT_NOANOM_COMPONENT_EPS,
+    leading_peak_min::Float64=DEFAULT_NOANOM_LEADING_COMPONENT_PEAK_MIN,
+)
+    out = copy(δs)
+    i = 1
+    while i <= length(out)
+        while i <= length(out) && !(isfinite(out[i]) && out[i] > eps)
+            i += 1
+        end
+        i > length(out) && return out
+
+        j = i
+        peak = out[i]
+        while j < length(out) && isfinite(out[j + 1]) && out[j + 1] > eps
+            j += 1
+            peak = max(peak, out[j])
+        end
+        peak >= leading_peak_min && return out
+        out[i:j] .= 0.0
+        i = j + 1
+    end
+    return out
+end
+
+function _connected_positive_components(
+    ωs::AbstractVector{<:Real},
+    δs::AbstractVector{<:Real};
+    eps::Float64=DEFAULT_NOANOM_COMPONENT_EPS,
+)
+    length(ωs) == length(δs) || throw(ArgumentError("omega and phase arrays must have the same length"))
+    comps = NamedTuple[]
+    i = 1
+    while i <= length(δs)
+        while i <= length(δs) && !(isfinite(Float64(δs[i])) && Float64(δs[i]) > eps)
+            i += 1
+        end
+        i > length(δs) && break
+
+        j = i
+        peak = Float64(δs[i])
+        peak_idx = i
+        while j < length(δs) && isfinite(Float64(δs[j + 1])) && Float64(δs[j + 1]) > eps
+            j += 1
+            if Float64(δs[j]) >= peak
+                peak = Float64(δs[j])
+                peak_idx = j
+            end
+        end
+        push!(comps, (
+            i=i,
+            j=j,
+            ω_lo=Float64(ωs[i]),
+            ω_hi=Float64(ωs[j]),
+            peak=peak,
+            peak_ω=Float64(ωs[peak_idx]),
+        ))
+        i = j + 1
+    end
+    return comps
+end
+
+function _noanom_landau_window(meson::Symbol, qp)
+    meson === :K_plus || return nothing
+    μ_shift = Float64(qp.μ.u) - Float64(qp.μ.s)
+    hi = μ_shift + abs(Float64(qp.m.s) - Float64(qp.m.u))
+    hi <= 0.0 && return nothing
+    return (lo=max(0.0, μ_shift), hi=hi)
+end
+
+function _apply_noanom_policy(
+    meson::Symbol,
+    omega_grid::AbstractVector{<:Real},
+    phase_unwrapped::AbstractVector{<:Real},
+    qp;
+    noanom_policy::Symbol,
+)
+    policy = _noanom_policy_symbol(noanom_policy)
+    base_diag = (
+        noanom_policy=policy,
+        noanom_applied=false,
+        noanom_removed_component_count=0,
+        noanom_removed_omega_min=NaN,
+        noanom_removed_omega_max=NaN,
+        noanom_landau_omega_min=NaN,
+        noanom_landau_omega_max=NaN,
+    )
+    policy === :none && return [Float64(δ) for δ in phase_unwrapped], base_diag
+
+    display_phases = _strip_small_leading_components([_fold_phase_0_pi(δ) for δ in phase_unwrapped])
+    window = _noanom_landau_window(meson, qp)
+    window === nothing && return display_phases, merge(base_diag, (noanom_applied=(meson === :K_plus),))
+
+    comps = _connected_positive_components(omega_grid, display_phases)
+    isempty(comps) && return display_phases, merge(base_diag, (
+        noanom_applied=true,
+        noanom_landau_omega_min=window.lo,
+        noanom_landau_omega_max=window.hi,
+    ))
+
+    out = copy(display_phases)
+    steps = [
+        abs(Float64(omega_grid[i + 1]) - Float64(omega_grid[i]))
+        for i in 1:(length(omega_grid) - 1)
+        if isfinite(Float64(omega_grid[i + 1])) && isfinite(Float64(omega_grid[i]))
+    ]
+    omega_margin = isempty(steps) ? 0.0 : DEFAULT_NOANOM_LANDAU_MARGIN_STEPS * minimum(steps)
+    removed_min = Inf
+    removed_max = -Inf
+    removed_count = 0
+
+    for comp in comps
+        overlaps_landau = comp.ω_hi >= window.lo - omega_margin && comp.ω_lo <= window.hi + omega_margin
+        ends_in_landau = comp.ω_hi <= window.hi + omega_margin
+        has_visible_weight = comp.peak > DEFAULT_NOANOM_COMPONENT_EPS
+        if overlaps_landau && ends_in_landau && has_visible_weight
+            out[comp.i:comp.j] .= 0.0
+            removed_count += 1
+            removed_min = min(removed_min, comp.ω_lo)
+            removed_max = max(removed_max, comp.ω_hi)
+        end
+    end
+
+    return out, (
+        noanom_policy=policy,
+        noanom_applied=true,
+        noanom_removed_component_count=removed_count,
+        noanom_removed_omega_min=removed_count == 0 ? NaN : removed_min,
+        noanom_removed_omega_max=removed_count == 0 ? NaN : removed_max,
+        noanom_landau_omega_min=window.lo,
+        noanom_landau_omega_max=window.hi,
+    )
 end
 
 @inline function _phase_shift_scheme_symbol(scheme::Symbol)::Symbol
@@ -1343,6 +1509,7 @@ function phase_shift_meson_number_density(
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
+    noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
 )
     degeneracy > 0 || throw(ArgumentError("degeneracy must be positive, got $(degeneracy)"))
     _require_positive_node_count("q_nodes", q_nodes)
@@ -1351,6 +1518,7 @@ function phase_shift_meson_number_density(
     scheme_sym = _phase_shift_scheme_symbol(scheme)
     axis = _resolve_real_axis_config(real_axis_mode, eta)
     convention = _phase_convention_symbol(phase_convention)
+    noanom_diag_empty = _empty_noanom_diag(noanom_policy)
 
     tp = thermo_params
     T_fm = Float64(tp.T)
@@ -1385,6 +1553,7 @@ function phase_shift_meson_number_density(
             polarization_backend=axis.polarization_backend,
             phase_convention=convention,
             density_policy=domain.policy,
+            noanom_diag_empty...,
             unsafe_bose_count=0,
             min_E_minus_mu=omega_min - μ,
             bose_x_min=domain.bose_x_min,
@@ -1413,6 +1582,7 @@ function phase_shift_meson_number_density(
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
         density_policy=domain.policy,
+        noanom_diag_empty...,
         unsafe_bose_count=domain.unsafe_bose_count,
         min_E_minus_mu=domain.min_E_minus_mu,
         bose_x_min=domain.bose_x_min,
@@ -1428,6 +1598,12 @@ function phase_shift_meson_number_density(
 
     q_shell_weighted_sum = 0.0
     q_shell_at_qmax = NaN
+    noanom_removed_component_count = 0
+    noanom_removed_omega_min = Inf
+    noanom_removed_omega_max = -Inf
+    noanom_landau_omega_min = Inf
+    noanom_landau_omega_max = -Inf
+    noanom_applied = false
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
         phases = [
@@ -1439,10 +1615,27 @@ function phase_shift_meson_number_density(
             ) for ω in omega_grid
         ]
         phase_unwrapped = _unwrap_phases(phases)
+        effective_phases, noanom_diag = _apply_noanom_policy(
+            meson,
+            omega_grid,
+            phase_unwrapped,
+            qp;
+            noanom_policy=noanom_policy,
+        )
+        noanom_applied |= Bool(noanom_diag.noanom_applied)
+        noanom_removed_component_count += Int(noanom_diag.noanom_removed_component_count)
+        if isfinite(noanom_diag.noanom_removed_omega_min)
+            noanom_removed_omega_min = min(noanom_removed_omega_min, noanom_diag.noanom_removed_omega_min)
+            noanom_removed_omega_max = max(noanom_removed_omega_max, noanom_diag.noanom_removed_omega_max)
+        end
+        if isfinite(noanom_diag.noanom_landau_omega_min)
+            noanom_landau_omega_min = min(noanom_landau_omega_min, noanom_diag.noanom_landau_omega_min)
+            noanom_landau_omega_max = max(noanom_landau_omega_max, noanom_diag.noanom_landau_omega_max)
+        end
         omega_val = 0.0
-        for iω in eachindex(omega_grid, omega_w, phase_unwrapped)
+        for iω in eachindex(omega_grid, omega_w, effective_phases)
             gω = bose_distribution(Float64(omega_grid[iω]), μ, T_fm)
-            omega_val += omega_w[iω] * gω * (1.0 + gω) * _phase_shift_weighted_phase(phase_unwrapped[iω], scheme_sym)
+            omega_val += omega_w[iω] * gω * (1.0 + gω) * _phase_shift_weighted_phase(effective_phases[iω], scheme_sym)
         end
         omega_val /= (2.0 * π)
         q_shell = (q^2 / (2.0 * π^2)) * omega_val
@@ -1471,6 +1664,13 @@ function phase_shift_meson_number_density(
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
         density_policy=domain.policy,
+        noanom_policy=_noanom_policy_symbol(noanom_policy),
+        noanom_applied=noanom_applied,
+        noanom_removed_component_count=noanom_removed_component_count,
+        noanom_removed_omega_min=noanom_removed_component_count == 0 ? NaN : noanom_removed_omega_min,
+        noanom_removed_omega_max=noanom_removed_component_count == 0 ? NaN : noanom_removed_omega_max,
+        noanom_landau_omega_min=isfinite(noanom_landau_omega_min) ? noanom_landau_omega_min : NaN,
+        noanom_landau_omega_max=isfinite(noanom_landau_omega_max) ? noanom_landau_omega_max : NaN,
         unsafe_bose_count=domain.unsafe_bose_count,
         min_E_minus_mu=domain.min_E_minus_mu,
         bose_x_min=domain.bose_x_min,
@@ -1504,6 +1704,7 @@ function phase_shift_meson_density_summary(
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
+    noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
 )
     pi_density = phase_shift_meson_number_density(
         pi_channel, quark_params, thermo_params;
@@ -1520,6 +1721,7 @@ function phase_shift_meson_density_summary(
         phase_convention=phase_convention,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
+        noanom_policy=noanom_policy,
     )
     k_density = phase_shift_meson_number_density(
         k_channel, quark_params, thermo_params;
@@ -1536,6 +1738,7 @@ function phase_shift_meson_density_summary(
         phase_convention=phase_convention,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
+        noanom_policy=noanom_policy,
     )
 
     n_pi = Float64(pi_density.density)
@@ -1550,6 +1753,10 @@ function phase_shift_meson_density_summary(
         :non_ok
     end
     message = join(filter(!isempty, (String(pi_density.message), String(k_density.message))), " | ")
+    removed_mins = filter(isfinite, (pi_density.noanom_removed_omega_min, k_density.noanom_removed_omega_min))
+    removed_maxs = filter(isfinite, (pi_density.noanom_removed_omega_max, k_density.noanom_removed_omega_max))
+    landau_mins = filter(isfinite, (pi_density.noanom_landau_omega_min, k_density.noanom_landau_omega_min))
+    landau_maxs = filter(isfinite, (pi_density.noanom_landau_omega_max, k_density.noanom_landau_omega_max))
     return (
         T_fm=Float64(thermo_params.T),
         xi=Float64(thermo_params.ξ),
@@ -1570,6 +1777,13 @@ function phase_shift_meson_density_summary(
         polarization_backend=pi_density.polarization_backend,
         phase_convention=pi_density.phase_convention,
         density_policy=pi_density.density_policy,
+        noanom_policy=pi_density.noanom_policy,
+        noanom_applied=pi_density.noanom_applied || k_density.noanom_applied,
+        noanom_removed_component_count=pi_density.noanom_removed_component_count + k_density.noanom_removed_component_count,
+        noanom_removed_omega_min=isempty(removed_mins) ? NaN : minimum(removed_mins),
+        noanom_removed_omega_max=isempty(removed_maxs) ? NaN : maximum(removed_maxs),
+        noanom_landau_omega_min=isempty(landau_mins) ? NaN : minimum(landau_mins),
+        noanom_landau_omega_max=isempty(landau_maxs) ? NaN : maximum(landau_maxs),
         unsafe_bose_count=pi_density.unsafe_bose_count + k_density.unsafe_bose_count,
         min_E_minus_mu=min(pi_density.min_E_minus_mu, k_density.min_E_minus_mu),
         bose_x_min=max(pi_density.bose_x_min, k_density.bose_x_min),

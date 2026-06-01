@@ -146,6 +146,7 @@ solve_phase_shift_meson_density_from_meson_point(
     phase_convention=:arg_propagator,
     density_policy=:strict_normal_domain,
     bose_x_min=0.0,
+    noanom_policy=:none,
 )
 ```
 
@@ -187,6 +188,9 @@ solve_phase_shift_meson_density_from_meson_point(
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
   - 只作为显式诊断延拓，不能视作文献明示公式
+- `noanom_policy=:low_energy_branch_subtraction`
+  - 按 temp7 reconstructed diagnostic 口径删除 `K_plus` low-energy anomalous branch
+  - 不改变上游 FixedMu 默认分支选择，也不作为 full phase-shift 默认值
 
 ### `solve_gap_and_phase_shift_meson_density_point`
 
@@ -257,6 +261,7 @@ Models.solve_gap_and_phase_shift_meson_density_point
 - `omega_min`, `omega_max`, `omega_nodes`
 - `real_axis_mode`, `eta`, `phase_convention`
 - `density_policy`, `unsafe_bose_count`, `min_E_minus_mu`, `bose_x_min`, `status`
+- `noanom_policy`, `noanom_removed_component_count`, `noanom_landau_omega_min`, `noanom_landau_omega_max`
 - `pi/K` 两个通道的 `q_integral_estimate`
 - `pi/K` 两个通道的 `omega_shell_at_qmax`
 
@@ -266,7 +271,7 @@ BU2020/temp7 主线审计脚本：
 scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
 ```
 
-该脚本不复制 temp7 代码，只通过 `Models` workflow 输出一个可审计 CSV/README，覆盖 stable、strict BW Stage1、`phase_shift_current`、`phase_shift_gbu_reference`，并显式记录 charged-channel 化学势、`pv_b0_eta0`、inverse-propagator phase、Bose-domain policy 和 no-anomalous 状态。
+该脚本不复制 temp7 代码，只通过 `Models` workflow 输出一个可审计 CSV/README，覆盖 stable、strict BW Stage1、`phase_shift_current`、`phase_shift_gbu_reference`，并显式记录 charged-channel 化学势、`pv_b0_eta0`、inverse-propagator phase、Bose-domain policy 和 `low_energy_branch_subtraction` no-anomalous 诊断状态。
 
 ## 当前设计原则
 

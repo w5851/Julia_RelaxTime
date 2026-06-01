@@ -31,6 +31,9 @@ const OUTPUT_COLUMNS = [
     "qmax", "q_nodes", "omega_min", "omega_max", "omega_nodes",
     "n_pi", "n_K", "kpi_ratio",
     "unsafe_bose_count", "min_E_minus_mu", "bose_x_min",
+    "noanom_applied", "noanom_removed_component_count",
+    "noanom_removed_omega_min", "noanom_removed_omega_max",
+    "noanom_landau_omega_min", "noanom_landau_omega_max",
     "status", "message",
 ]
 
@@ -166,7 +169,7 @@ function density_row(base::Dict{String, Any}, regime::Symbol, density)
         "real_axis_mode" => getprop_or(density, :real_axis_mode, ""),
         "eta" => getprop_or(density, :eta, ""),
         "density_policy" => getprop_or(density, :density_policy, :not_applicable),
-        "noanom_policy" => :none,
+        "noanom_policy" => getprop_or(density, :noanom_policy, :none),
         "phase_convention" => getprop_or(density, :phase_convention, ""),
         "qmax" => getprop_or(density, :qmax, ""),
         "q_nodes" => getprop_or(density, :q_nodes, getprop_or(density, :num_q_nodes, "")),
@@ -179,6 +182,12 @@ function density_row(base::Dict{String, Any}, regime::Symbol, density)
         "unsafe_bose_count" => getprop_or(density, :unsafe_bose_count, 0),
         "min_E_minus_mu" => getprop_or(density, :min_E_minus_mu, ""),
         "bose_x_min" => getprop_or(density, :bose_x_min, ""),
+        "noanom_applied" => getprop_or(density, :noanom_applied, false),
+        "noanom_removed_component_count" => getprop_or(density, :noanom_removed_component_count, 0),
+        "noanom_removed_omega_min" => getprop_or(density, :noanom_removed_omega_min, ""),
+        "noanom_removed_omega_max" => getprop_or(density, :noanom_removed_omega_max, ""),
+        "noanom_landau_omega_min" => getprop_or(density, :noanom_landau_omega_min, ""),
+        "noanom_landau_omega_max" => getprop_or(density, :noanom_landau_omega_max, ""),
         "status" => getprop_or(density, :status, :ok),
         "message" => getprop_or(density, :message, ""),
     ))
@@ -204,6 +213,12 @@ function failure_row(base::Dict{String, Any}, regime::Symbol, err)
         "unsafe_bose_count" => "",
         "min_E_minus_mu" => "",
         "bose_x_min" => "",
+        "noanom_applied" => "",
+        "noanom_removed_component_count" => "",
+        "noanom_removed_omega_min" => "",
+        "noanom_removed_omega_max" => "",
+        "noanom_landau_omega_min" => "",
+        "noanom_landau_omega_max" => "",
         "status" => :failed,
         "message" => replace(sprint(showerror, err), ',' => ';'),
     ))
@@ -243,7 +258,7 @@ function write_summary(path::String, opts::AuditOptions, csv_path::String, rows)
         println(io, "- `real_axis_mode=:pv_b0_eta0` is emitted as a separate branch from finite-eta smoothing.")
         println(io, "- `density_policy=:strict_normal_domain` marks Bose-domain unsafe rows instead of silently skipping `omega <= mu_M`.")
         println(io, "- `density_policy=:excitation_only_E_gt_mu` is an explicit diagnostic continuation, not a literature fact.")
-        println(io, "- no-anomalous subtraction is not enabled in this mainline audit output.")
+        println(io, "- `noanom_policy=:low_energy_branch_subtraction` rows are reconstructed diagnostic outputs following the temp7 audit prescription.")
         println(io)
         println(io, "## Status Counts")
         println(io)
@@ -385,6 +400,22 @@ function main()
                 real_axis_mode=:pv_b0_eta0,
                 phase_convention=:arg_inverse_propagator,
                 density_policy=:excitation_only_E_gt_mu,
+            )
+        end
+        append_density!(rows, base, :phase_shift_gbu_noanom_excitation_only_pv) do
+            Models.solve_phase_shift_meson_density_from_meson_point(
+                meson_point;
+                common_density...,
+                scheme=:gbu_reference,
+                qmax=opts.qmax,
+                q_nodes=opts.q_nodes,
+                omega_min=opts.omega_min,
+                omega_max=opts.omega_max,
+                omega_nodes=opts.omega_nodes,
+                real_axis_mode=:pv_b0_eta0,
+                phase_convention=:arg_inverse_propagator,
+                density_policy=:excitation_only_E_gt_mu,
+                noanom_policy=:low_energy_branch_subtraction,
             )
         end
     end

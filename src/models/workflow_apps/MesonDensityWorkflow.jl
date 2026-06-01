@@ -305,6 +305,7 @@ function solve_phase_shift_meson_density_from_meson_point(
     phase_convention::Symbol=:arg_propagator,
     density_policy::Symbol=:strict_normal_domain,
     bose_x_min::Float64=0.0,
+    noanom_policy::Symbol=:none,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -335,6 +336,7 @@ function solve_phase_shift_meson_density_from_meson_point(
         phase_convention=phase_convention,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
+        noanom_policy=noanom_policy,
     )
 
     return merge(density, (

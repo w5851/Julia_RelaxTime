@@ -14,9 +14,9 @@ date: 2026-06-01
 - `real_axis_mode=:pv_b0_eta0` is emitted as a separate branch from finite-eta smoothing.
 - `density_policy=:strict_normal_domain` marks Bose-domain unsafe rows instead of silently skipping `omega <= mu_M`.
 - `density_policy=:excitation_only_E_gt_mu` is an explicit diagnostic continuation, not a literature fact.
-- no-anomalous subtraction is not enabled in this mainline audit output.
+- `noanom_policy=:low_energy_branch_subtraction` rows are reconstructed diagnostic outputs following the temp7 audit prescription.
 
 ## Status Counts
 
-- `ok`: `12`
+- `ok`: `16`
 - `unsafe_bose_domain`: `8`
