@@ -732,6 +732,17 @@ end
     throw(ArgumentError("phase_convention must be :arg_propagator or :arg_inverse_propagator, got $(phase_convention)"))
 end
 
+@inline function _phase_display_symbol(phase_display::Symbol)::Symbol
+    if phase_display === :unwrapped || phase_display === :phase_unwrapped
+        return :unwrapped
+    elseif phase_display === :fold_0_pi ||
+           phase_display === :folded_0_pi ||
+           phase_display === :display_fold_0_pi
+        return :fold_0_pi
+    end
+    throw(ArgumentError("phase_display must be :unwrapped or :fold_0_pi, got $(phase_display)"))
+end
+
 @inline function _density_policy_symbol(density_policy::Symbol)::Symbol
     if density_policy === :strict_normal_domain || density_policy === :strict
         return :strict_normal_domain
@@ -886,6 +897,14 @@ end
     return π - abs(mod(Float64(δ), 2π) - π)
 end
 
+function _apply_phase_display(phase_unwrapped::AbstractVector{<:Real}, phase_display::Symbol)
+    display = _phase_display_symbol(phase_display)
+    if display === :fold_0_pi
+        return [_fold_phase_0_pi(δ) for δ in phase_unwrapped]
+    end
+    return [Float64(δ) for δ in phase_unwrapped]
+end
+
 function _strip_small_leading_components(
     δs::Vector{Float64};
     eps::Float64=DEFAULT_NOANOM_COMPONENT_EPS,
@@ -963,6 +982,7 @@ function _apply_noanom_policy(
     phase_unwrapped::AbstractVector{<:Real},
     qp;
     noanom_policy::Symbol,
+    phase_display::Symbol=:unwrapped,
 )
     policy = _noanom_policy_symbol(noanom_policy)
     base_diag = (
@@ -974,7 +994,7 @@ function _apply_noanom_policy(
         noanom_landau_omega_min=NaN,
         noanom_landau_omega_max=NaN,
     )
-    policy === :none && return [Float64(δ) for δ in phase_unwrapped], base_diag
+    policy === :none && return _apply_phase_display(phase_unwrapped, phase_display), base_diag
 
     display_phases = _strip_small_leading_components([_fold_phase_0_pi(δ) for δ in phase_unwrapped])
     window = _noanom_landau_window(meson, qp)
@@ -1507,6 +1527,7 @@ function phase_shift_meson_number_density(
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
+    phase_display::Symbol=:unwrapped,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
@@ -1518,6 +1539,7 @@ function phase_shift_meson_number_density(
     scheme_sym = _phase_shift_scheme_symbol(scheme)
     axis = _resolve_real_axis_config(real_axis_mode, eta)
     convention = _phase_convention_symbol(phase_convention)
+    display = _phase_display_symbol(phase_display)
     noanom_diag_empty = _empty_noanom_diag(noanom_policy)
 
     tp = thermo_params
@@ -1552,6 +1574,7 @@ function phase_shift_meson_number_density(
             real_axis_mode=axis.mode,
             polarization_backend=axis.polarization_backend,
             phase_convention=convention,
+            phase_display=display,
             density_policy=domain.policy,
             noanom_diag_empty...,
             unsafe_bose_count=0,
@@ -1581,6 +1604,7 @@ function phase_shift_meson_number_density(
         real_axis_mode=axis.mode,
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
+        phase_display=display,
         density_policy=domain.policy,
         noanom_diag_empty...,
         unsafe_bose_count=domain.unsafe_bose_count,
@@ -1621,6 +1645,7 @@ function phase_shift_meson_number_density(
             phase_unwrapped,
             qp;
             noanom_policy=noanom_policy,
+            phase_display=display,
         )
         noanom_applied |= Bool(noanom_diag.noanom_applied)
         noanom_removed_component_count += Int(noanom_diag.noanom_removed_component_count)
@@ -1663,6 +1688,7 @@ function phase_shift_meson_number_density(
         real_axis_mode=axis.mode,
         polarization_backend=axis.polarization_backend,
         phase_convention=convention,
+        phase_display=_noanom_policy_symbol(noanom_policy) === :none ? display : :fold_0_pi,
         density_policy=domain.policy,
         noanom_policy=_noanom_policy_symbol(noanom_policy),
         noanom_applied=noanom_applied,
@@ -1702,6 +1728,7 @@ function phase_shift_meson_density_summary(
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
     real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
     phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
+    phase_display::Symbol=:unwrapped,
     density_policy::Symbol=DEFAULT_PHASE_SHIFT_DENSITY_POLICY,
     bose_x_min::Float64=0.0,
     noanom_policy::Symbol=DEFAULT_PHASE_SHIFT_NOANOM_POLICY,
@@ -1719,6 +1746,7 @@ function phase_shift_meson_density_summary(
         eta=eta,
         real_axis_mode=real_axis_mode,
         phase_convention=phase_convention,
+        phase_display=phase_display,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
         noanom_policy=noanom_policy,
@@ -1736,6 +1764,7 @@ function phase_shift_meson_density_summary(
         eta=eta,
         real_axis_mode=real_axis_mode,
         phase_convention=phase_convention,
+        phase_display=phase_display,
         density_policy=density_policy,
         bose_x_min=bose_x_min,
         noanom_policy=noanom_policy,
@@ -1776,6 +1805,7 @@ function phase_shift_meson_density_summary(
         real_axis_mode=pi_density.real_axis_mode,
         polarization_backend=pi_density.polarization_backend,
         phase_convention=pi_density.phase_convention,
+        phase_display=pi_density.phase_display,
         density_policy=pi_density.density_policy,
         noanom_policy=pi_density.noanom_policy,
         noanom_applied=pi_density.noanom_applied || k_density.noanom_applied,

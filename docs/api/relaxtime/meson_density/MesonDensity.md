@@ -158,6 +158,7 @@ g(E_M(q)+\Delta\omega)
 - `eta = 1e-6`
 - `real_axis_mode = :finite_eta`
 - `phase_convention = :arg_propagator`
+- `phase_display = :unwrapped`
 - `density_policy = :strict_normal_domain`
 - `noanom_policy = :none`
 
@@ -185,6 +186,8 @@ real-axis 分支：
 
 - `phase_convention=:arg_propagator`：legacy 默认，对传播子取相位
 - `phase_convention=:arg_inverse_propagator`：BU2020 诊断口径，对 inverse propagator 取相位并按当前符号约定返回
+- `phase_display=:unwrapped`：默认密度核使用 unwrap 后的相移，不强制限制到 `0..pi`
+- `phase_display=:fold_0_pi`：显式诊断/FIG3-like 口径，先用 `pi - abs(mod(delta, 2pi) - pi)` 映射到 `0..pi` 再进入密度权重
 
 Bose-domain policy：
 
@@ -221,6 +224,7 @@ No-anomalous policy：
 - `eta`
 - `polarization_backend`
 - `phase_convention`
+- `phase_display`
 - `density_policy`
 - `noanom_policy`
 - `noanom_applied`

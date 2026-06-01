@@ -38,7 +38,7 @@ const OUTPUT_COLUMNS = [
     "pi_channel", "k_channel", "charge_resolved",
     "mu_pi_MeV", "mu_K_MeV", "d_pi", "d_K",
     "regime", "phase_scheme", "strict_bw_stage",
-    "real_axis_mode", "eta", "density_policy", "noanom_policy", "phase_convention",
+    "real_axis_mode", "eta", "density_policy", "noanom_policy", "phase_convention", "phase_display",
     "qmax", "q_nodes", "omega_min", "omega_max", "omega_nodes",
     "gamma_zero_tol",
     "Phi", "Phibar", "m_u", "m_d", "m_s",
@@ -57,6 +57,7 @@ struct CombinedOptions
     tmax_MeV::Float64
     tstep_MeV::Float64
     muq_MeV::Float64
+    muq_values_MeV::Vector{Float64}
     xi::Float64
     flavor_profile::String
     meson_profile::String
@@ -72,6 +73,7 @@ struct CombinedOptions
     eta::Float64
     real_axis_mode::Symbol
     phase_convention::Symbol
+    phase_display::Symbol
     density_policy::Symbol
     noanom_policy::Symbol
     strict_bw_stage::Symbol
@@ -90,6 +92,8 @@ function print_usage()
     println("  --tmin/--tmax/--tstep <MeV> Temperature range")
     println("  --muq <MeV>                 Quark chemical potential (default 0)")
     println("  --mub <MeV>                 Baryon chemical potential; sets muq=mub/3")
+    println("  --muq-values <list>         Comma-separated fixed-muq paths")
+    println("  --mumin/--mumax/--mustep    Fixed-muq path grid")
     println("  --xi <value>                Anisotropy, phase-shift density currently requires 0")
     println("  --flavor-profile <name>     config/physics/flavor_chemical profile (default default)")
     println("  --meson-profile <name>      config/physics/meson_chemical profile (default default)")
@@ -103,6 +107,7 @@ function print_usage()
     println("  --omega-nodes <int>         BW/phase-shift omega nodes (default 6)")
     println("  --real-axis-mode <mode>     finite_eta or pv_b0_eta0 (default pv_b0_eta0)")
     println("  --phase-convention <mode>   arg_propagator or arg_inverse_propagator (default arg_inverse_propagator)")
+    println("  --phase-display <mode>      unwrapped or fold_0_pi (default unwrapped)")
     println("  --density-policy <policy>   strict_normal_domain/excitation_only_E_gt_mu/x_min_cut")
     println("  --noanom-policy <policy>    none or low_energy_branch_subtraction")
     println("  --eta <float>               finite_eta width parameter (ignored by pv_b0_eta0)")
@@ -119,6 +124,28 @@ function _split_symbols(raw::AbstractString)
         for part in split(raw, ','; keepempty=false)
         if !isempty(strip(part))
     ]
+end
+
+function _split_floats(raw::AbstractString)
+    values = Float64[
+        parse(Float64, strip(part))
+        for part in split(raw, ','; keepempty=false)
+        if !isempty(strip(part))
+    ]
+    isempty(values) && throw(ArgumentError("float list must contain at least one value"))
+    return values
+end
+
+function _range_values(lo::Float64, hi::Float64, step::Float64)
+    step > 0.0 || throw(ArgumentError("mustep must be positive"))
+    hi >= lo || throw(ArgumentError("mumax must be >= mumin"))
+    values = Float64[]
+    x = lo
+    while x <= hi + 1e-9
+        push!(values, x)
+        x += step
+    end
+    return values
 end
 
 function _path_strategy_symbol(value::Symbol)
@@ -150,6 +177,10 @@ function parse_args(args::Vector{String})
         :tmax => 220.0,
         :tstep => 20.0,
         :muq => 0.0,
+        :muq_values => nothing,
+        :mumin => nothing,
+        :mumax => nothing,
+        :mustep => nothing,
         :xi => 0.0,
         :flavor_profile => "default",
         :meson_profile => "default",
@@ -165,6 +196,7 @@ function parse_args(args::Vector{String})
         :eta => 1e-6,
         :real_axis_mode => :pv_b0_eta0,
         :phase_convention => :arg_inverse_propagator,
+        :phase_display => :unwrapped,
         :density_policy => :strict_normal_domain,
         :noanom_policy => :none,
         :strict_bw_stage => :stage1_reduced,
@@ -199,6 +231,14 @@ function parse_args(args::Vector{String})
             opts[:muq] = parse(Float64, require_value())
         elseif arg == "--mub"
             opts[:muq] = parse(Float64, require_value()) / 3.0
+        elseif arg == "--muq-values"
+            opts[:muq_values] = _split_floats(require_value())
+        elseif arg == "--mumin"
+            opts[:mumin] = parse(Float64, require_value())
+        elseif arg == "--mumax"
+            opts[:mumax] = parse(Float64, require_value())
+        elseif arg == "--mustep"
+            opts[:mustep] = parse(Float64, require_value())
         elseif arg == "--xi"
             opts[:xi] = parse(Float64, require_value())
         elseif arg == "--flavor-profile"
@@ -229,6 +269,8 @@ function parse_args(args::Vector{String})
             opts[:real_axis_mode] = Symbol(require_value())
         elseif arg == "--phase-convention"
             opts[:phase_convention] = Symbol(require_value())
+        elseif arg == "--phase-display"
+            opts[:phase_display] = Symbol(require_value())
         elseif arg == "--density-policy"
             opts[:density_policy] = Symbol(require_value())
         elseif arg == "--noanom-policy"
@@ -252,6 +294,19 @@ function parse_args(args::Vector{String})
 
     regimes = unique(_regime_symbol.(Vector{Symbol}(opts[:regimes])))
     isempty(regimes) && throw(ArgumentError("at least one regime must be selected"))
+    any_range_key = opts[:mumin] !== nothing || opts[:mumax] !== nothing || opts[:mustep] !== nothing
+    opts[:muq_values] !== nothing && any_range_key && throw(ArgumentError("use either --muq-values or --mumin/--mumax/--mustep, not both"))
+    muq_values = if opts[:muq_values] !== nothing
+        Float64.(opts[:muq_values])
+    elseif any_range_key
+        opts[:mumin] === nothing && throw(ArgumentError("--mumin is required with muq range"))
+        opts[:mumax] === nothing && throw(ArgumentError("--mumax is required with muq range"))
+        opts[:mustep] === nothing && throw(ArgumentError("--mustep is required with muq range"))
+        _range_values(Float64(opts[:mumin]), Float64(opts[:mumax]), Float64(opts[:mustep]))
+    else
+        [Float64(opts[:muq])]
+    end
+    all(isfinite, muq_values) || throw(ArgumentError("muq values must be finite"))
 
     tstep = Float64(opts[:tstep])
     tstep > 0.0 || throw(ArgumentError("tstep must be positive"))
@@ -274,6 +329,7 @@ function parse_args(args::Vector{String})
         Float64(opts[:tmax]),
         tstep,
         Float64(opts[:muq]),
+        muq_values,
         Float64(opts[:xi]),
         String(opts[:flavor_profile]),
         String(opts[:meson_profile]),
@@ -289,6 +345,7 @@ function parse_args(args::Vector{String})
         Float64(opts[:eta]),
         Symbol(opts[:real_axis_mode]),
         Symbol(opts[:phase_convention]),
+        Symbol(opts[:phase_display]),
         Symbol(opts[:density_policy]),
         Symbol(opts[:noanom_policy]),
         _strict_bw_stage_symbol(Symbol(opts[:strict_bw_stage])),
@@ -377,6 +434,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
             eta=opts.eta,
             real_axis_mode=opts.real_axis_mode,
             phase_convention=opts.phase_convention,
+            phase_display=opts.phase_display,
             density_policy=opts.density_policy,
             noanom_policy=opts.noanom_policy,
         )
@@ -394,6 +452,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
         eta=opts.eta,
         real_axis_mode=opts.real_axis_mode,
         phase_convention=opts.phase_convention,
+        phase_display=opts.phase_display,
         density_policy=opts.density_policy,
         noanom_policy=opts.noanom_policy,
     )
@@ -402,6 +461,7 @@ end
 function _base_row(
     opts::CombinedOptions,
     point_index::Int,
+    muq_MeV::Float64,
     T_MeV::Float64,
     flavor_profile,
     flavor_mev,
@@ -415,8 +475,8 @@ function _base_row(
         "path_strategy" => opts.path_strategy,
         "path_point_index" => point_index,
         "T_MeV" => T_MeV,
-        "muq_MeV" => opts.muq_MeV,
-        "muB_MeV" => 3.0 * opts.muq_MeV,
+        "muq_MeV" => muq_MeV,
+        "muB_MeV" => 3.0 * muq_MeV,
         "xi" => opts.xi,
         "flavor_profile" => flavor_profile.profile_name,
         "meson_profile" => meson_profile.profile_name,
@@ -448,6 +508,7 @@ function _density_row(base::Dict{String, Any}, regime::Symbol, density)
         "density_policy" => _getprop_or(density, :density_policy, :not_applicable),
         "noanom_policy" => _getprop_or(density, :noanom_policy, :none),
         "phase_convention" => _getprop_or(density, :phase_convention, ""),
+        "phase_display" => _getprop_or(density, :phase_display, ""),
         "qmax" => _getprop_or(density, :qmax, ""),
         "q_nodes" => _getprop_or(density, :q_nodes, _getprop_or(density, :num_q_nodes, "")),
         "omega_min" => _getprop_or(density, :omega_min, ""),
@@ -483,6 +544,7 @@ function _failure_row(base::Dict{String, Any}, regime::Symbol, err)
         "density_policy" => "",
         "noanom_policy" => "",
         "phase_convention" => "",
+        "phase_display" => "",
         "qmax" => "",
         "q_nodes" => "",
         "omega_min" => "",
@@ -517,7 +579,9 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
         println(io, "# bridge: path_strategy x density_regime")
         println(io, "# path_strategy: $(opts.path_strategy)")
         println(io, "# regimes: $(join(string.(opts.regimes), ','))")
+        println(io, "# muq_values_MeV: $(join(_fmt.(opts.muq_values_MeV), ','))")
         println(io, "# real_axis_mode: $(opts.real_axis_mode)")
+        println(io, "# phase_display: $(opts.phase_display)")
         println(io, "# density_policy: $(opts.density_policy)")
         println(io, "# noanom_policy: $(opts.noanom_policy)")
         println(io, "# gamma_zero_tol: $(opts.gamma_zero_tol)")
@@ -610,12 +674,160 @@ function _plot_panel(io, rows, field::String, title::String, x0::Float64, y0::Fl
     println(io, "</g>")
 end
 
+@inline function _try_float_value(x)
+    x isa Real && return Float64(x)
+    return tryparse(Float64, _fmt(x))
+end
+
+function _heatmap_rows(rows, regime::String, field::String)
+    out = Dict{String, Any}[]
+    for row in rows
+        string(get(row, "status", "")) == "ok" || continue
+        string(get(row, "regime", "")) == regime || continue
+        y = _try_float_value(get(row, field, ""))
+        T = _try_float_value(get(row, "T_MeV", ""))
+        μ = _try_float_value(get(row, "muq_MeV", ""))
+        if y !== nothing && T !== nothing && μ !== nothing && isfinite(y) && isfinite(T) && isfinite(μ)
+            push!(out, row)
+        end
+    end
+    return out
+end
+
+function _grid_edges(xs::Vector{Float64})
+    values = sort(unique(xs))
+    isempty(values) && return Float64[]
+    if length(values) == 1
+        return [values[1] - 0.5, values[1] + 0.5]
+    end
+    edges = Vector{Float64}(undef, length(values) + 1)
+    for i in 2:length(values)
+        edges[i] = 0.5 * (values[i - 1] + values[i])
+    end
+    edges[1] = values[1] - (edges[2] - values[1])
+    edges[end] = values[end] + (values[end] - edges[end - 1])
+    return edges
+end
+
+@inline function _svg_rgb(r::Real, g::Real, b::Real)
+    return "rgb($(round(Int, clamp(r, 0, 255))),$(round(Int, clamp(g, 0, 255))),$(round(Int, clamp(b, 0, 255))))"
+end
+
+function _heat_color(value::Float64, vmin::Float64, vmax::Float64)
+    isfinite(value) || return "#9ca3af"
+    value < vmin && return "#d1d5db"
+    vmax <= vmin && return "#2563eb"
+    t = clamp((value - vmin) / (vmax - vmin), 0.0, 1.0)
+    stops = (
+        (0.0, (37.0, 99.0, 235.0)),
+        (0.35, (16.0, 185.0, 129.0)),
+        (0.70, (250.0, 204.0, 21.0)),
+        (1.0, (220.0, 38.0, 38.0)),
+    )
+    for i in 1:(length(stops) - 1)
+        t0, c0 = stops[i]
+        t1, c1 = stops[i + 1]
+        if t <= t1
+            u = (t - t0) / (t1 - t0)
+            return _svg_rgb(
+                c0[1] + u * (c1[1] - c0[1]),
+                c0[2] + u * (c1[2] - c0[2]),
+                c0[3] + u * (c1[3] - c0[3]),
+            )
+        end
+    end
+    return _svg_rgb(stops[end][2]...)
+end
+
+function _plot_heatmap_panel(io, rows, regime::String, x0::Float64, y0::Float64, w::Float64, h::Float64, vmin::Float64, vmax::Float64)
+    panel_rows = _heatmap_rows(rows, regime, "kpi_ratio")
+    println(io, "<g>")
+    println(io, "<text x=\"$(x0)\" y=\"$(y0 - 14)\" font-size=\"14\" font-weight=\"600\">$(_xml_escape(regime))</text>")
+    println(io, "<rect x=\"$(x0)\" y=\"$(y0)\" width=\"$(w)\" height=\"$(h)\" fill=\"#f3f4f6\" stroke=\"#d1d5db\"/>")
+    if isempty(panel_rows)
+        println(io, "<text x=\"$(x0 + 16)\" y=\"$(y0 + 32)\" font-size=\"12\" fill=\"#6b7280\">no finite ok rows</text>")
+        println(io, "</g>")
+        return
+    end
+
+    μs = sort(unique(Float64(_try_float_value(row["muq_MeV"])) for row in panel_rows))
+    Ts = sort(unique(Float64(_try_float_value(row["T_MeV"])) for row in panel_rows))
+    μ_edges = _grid_edges(μs)
+    T_edges = _grid_edges(Ts)
+    μmin, μmax = first(μ_edges), last(μ_edges)
+    Tmin, Tmax = first(T_edges), last(T_edges)
+    sx(x) = x0 + (Float64(x) - μmin) / (μmax - μmin) * w
+    sy(y) = y0 + h - (Float64(y) - Tmin) / (Tmax - Tmin) * h
+
+    for row in panel_rows
+        μ = Float64(_try_float_value(row["muq_MeV"]))
+        T = Float64(_try_float_value(row["T_MeV"]))
+        value = Float64(_try_float_value(row["kpi_ratio"]))
+        μ_idx = findfirst(==(μ), μs)
+        T_idx = findfirst(==(T), Ts)
+        μ_idx === nothing && continue
+        T_idx === nothing && continue
+        x_left = sx(μ_edges[μ_idx])
+        x_right = sx(μ_edges[μ_idx + 1])
+        y_top = sy(T_edges[T_idx + 1])
+        y_bottom = sy(T_edges[T_idx])
+        println(io, "<rect x=\"$(x_left)\" y=\"$(y_top)\" width=\"$(x_right - x_left)\" height=\"$(y_bottom - y_top)\" fill=\"$(_heat_color(value, vmin, vmax))\" stroke=\"#ffffff\" stroke-width=\"0.25\"/>")
+    end
+
+    println(io, "<rect x=\"$(x0)\" y=\"$(y0)\" width=\"$(w)\" height=\"$(h)\" fill=\"none\" stroke=\"#6b7280\"/>")
+    println(io, "<text x=\"$(x0)\" y=\"$(y0 + h + 18)\" font-size=\"11\" fill=\"#4b5563\">mu_q: $(_fmt(first(μs)))..$(_fmt(last(μs))) MeV</text>")
+    println(io, "<text x=\"$(x0 - 54)\" y=\"$(y0 + h)\" font-size=\"11\" fill=\"#4b5563\">$(_fmt(first(Ts)))</text>")
+    println(io, "<text x=\"$(x0 - 54)\" y=\"$(y0 + 10)\" font-size=\"11\" fill=\"#4b5563\">$(_fmt(last(Ts)))</text>")
+    println(io, "</g>")
+end
+
+function _write_svg_heatmap_plot(path::String, rows)
+    regimes = sort(unique(string(row["regime"]) for row in rows))
+    values = Float64[]
+    for row in rows
+        string(get(row, "status", "")) == "ok" || continue
+        value = _try_float_value(get(row, "kpi_ratio", ""))
+        value !== nothing && isfinite(value) && value >= 0.0 && push!(values, value)
+    end
+    vmax = isempty(values) ? 1.0 : maximum(values)
+    vmax = max(vmax, 0.2)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        println(io, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1180\" height=\"860\" viewBox=\"0 0 1180 860\">")
+        println(io, "<rect width=\"1180\" height=\"860\" fill=\"#f8fafc\"/>")
+        println(io, "<text x=\"40\" y=\"38\" font-size=\"22\" font-weight=\"700\">Combined Meson Density Scan: FIG3-like T-mu heatmap</text>")
+        println(io, "<text x=\"40\" y=\"62\" font-size=\"12\" fill=\"#475569\">Field: K/pi ratio; gray cells are missing, failed, negative, or below the color floor.</text>")
+        panel_positions = ((72.0, 112.0), (650.0, 112.0), (72.0, 480.0), (650.0, 480.0))
+        for (idx, regime) in enumerate(regimes[1:min(end, length(panel_positions))])
+            x0, y0 = panel_positions[idx]
+            _plot_heatmap_panel(io, rows, regime, x0, y0, 480.0, 280.0, 0.0, vmax)
+        end
+        xbar = 1040.0
+        ybar = 112.0
+        hbar = 280.0
+        for i in 0:80
+            y = ybar + hbar - i / 80 * hbar
+            value = i / 80 * vmax
+            println(io, "<rect x=\"$(xbar)\" y=\"$(y)\" width=\"24\" height=\"$(hbar / 80 + 0.5)\" fill=\"$(_heat_color(value, 0.0, vmax))\"/>")
+        end
+        println(io, "<rect x=\"$(xbar)\" y=\"$(ybar)\" width=\"24\" height=\"$(hbar)\" fill=\"none\" stroke=\"#6b7280\"/>")
+        println(io, "<text x=\"$(xbar + 32)\" y=\"$(ybar + 10)\" font-size=\"11\" fill=\"#4b5563\">$(_fmt(vmax))</text>")
+        println(io, "<text x=\"$(xbar + 32)\" y=\"$(ybar + hbar)\" font-size=\"11\" fill=\"#4b5563\">0</text>")
+        println(io, "<text x=\"$(xbar)\" y=\"$(ybar - 14)\" font-size=\"12\" fill=\"#111827\">K/pi</text>")
+        println(io, "</svg>")
+    end
+end
+
 function _write_svg_plot(path::String, rows)
+    finite_mu = sort(unique(Float64(_try_float_value(row["muq_MeV"])) for row in rows if _try_float_value(get(row, "muq_MeV", "")) !== nothing))
+    if length(finite_mu) > 1
+        return _write_svg_heatmap_plot(path, rows)
+    end
     mkpath(dirname(path))
     open(path, "w") do io
         println(io, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1180\" height=\"760\" viewBox=\"0 0 1180 760\">")
         println(io, "<rect width=\"1180\" height=\"760\" fill=\"#f8fafc\"/>")
-        println(io, "<text x=\"40\" y=\"38\" font-size=\"22\" font-weight=\"700\">Combined Meson Density Scan: T sweep at mu=0</text>")
+        println(io, "<text x=\"40\" y=\"38\" font-size=\"22\" font-weight=\"700\">Combined Meson Density Scan: T sweep</text>")
         println(io, "<text x=\"40\" y=\"62\" font-size=\"12\" fill=\"#475569\">Rows with status=ok; density panels use logarithmic y scale.</text>")
         _plot_panel(io, rows, "n_pi", "n_pi vs T", 72.0, 110.0, 480.0, 230.0; logy=true)
         _plot_panel(io, rows, "n_K", "n_K vs T", 650.0, 110.0, 480.0, 230.0; logy=true)
@@ -650,7 +862,11 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io)
         println(io, "- path strategy: `$(opts.path_strategy)`")
         println(io, "- density regimes: `$(join(string.(opts.regimes), "`, `"))`")
-        println(io, "- fixed chemical potential: `mu_q=$(opts.muq_MeV) MeV`, `mu_B=$(3.0 * opts.muq_MeV) MeV`")
+        if length(opts.muq_values_MeV) == 1
+            println(io, "- fixed chemical potential: `mu_q=$(only(opts.muq_values_MeV)) MeV`, `mu_B=$(3.0 * only(opts.muq_values_MeV)) MeV`")
+        else
+            println(io, "- fixed-mu path values: `mu_q=$(join(_fmt.(opts.muq_values_MeV), ",")) MeV`")
+        end
         println(io, "- temperature range: `$(opts.tmin_MeV):$(opts.tstep_MeV):$(opts.tmax_MeV) MeV`")
         println(io, "- flavor profile: `$(opts.flavor_profile)`")
         println(io, "- meson profile: `$(opts.meson_profile)`")
@@ -673,6 +889,7 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io)
         println(io, "- `real_axis_mode=$(opts.real_axis_mode)`")
         println(io, "- `phase_convention=$(opts.phase_convention)`")
+        println(io, "- `phase_display=$(opts.phase_display)`")
         println(io, "- `density_policy=$(opts.density_policy)`")
         println(io, "- `noanom_policy=$(opts.noanom_policy)`")
         println(io, "- `gamma_zero_tol=$(opts.gamma_zero_tol)`")
@@ -692,65 +909,70 @@ function run_combined_scan(opts::CombinedOptions)
     rows = Dict{String, Any}[]
     flavor_profile = Models.FlavorChemicalProfiles.load_flavor_chemical_profile(profile=opts.flavor_profile)
     meson_profile = Models.MesonChemicalProfiles.load_meson_chemical_profile(profile=opts.meson_profile)
-    flavor_mev = Models.FlavorChemicalProfiles.flavor_mu_profile_MeV(flavor_profile, opts.muq_MeV)
-    chemical, common_density = _density_kwargs_for_profile(meson_profile, flavor_mev)
-    flavor_fm = Models.FlavorChemicalProfiles.flavor_mu_profile_fm(flavor_profile, opts.muq_MeV)
-    flavor_override = flavor_profile.apply_to_equilibrium ? (
-        flavor_fm.mu_u_fm,
-        flavor_fm.mu_d_fm,
-        flavor_fm.mu_s_fm,
-    ) : nothing
 
-    continuation_state = nothing
-    muq_fm = opts.muq_MeV / ħc_MeV_fm
-    for (point_index, T_MeV) in enumerate(_temperature_grid(opts))
-        T_fm = T_MeV / ħc_MeV_fm
-        meson_point = try
-            Models.solve_gap_and_meson_point(
-                T_fm,
-                muq_fm;
-                xi=opts.xi,
-                mesons=(chemical.pi_channel, chemical.k_channel),
-                continuation_state=continuation_state,
-                mixed_branch_align=:strict_sign_binding,
-                flavor_mu_override=flavor_override,
-                p_num=opts.p_num,
-                t_num=opts.t_num,
-                solver_kwargs=(; iterations=opts.max_iter),
-                mass_kwargs=(; iterations=opts.max_iter),
-            )
-        catch err
-            base = Dict{String, Any}(
-                "path_strategy" => opts.path_strategy,
-                "path_point_index" => point_index,
-                "T_MeV" => T_MeV,
-                "muq_MeV" => opts.muq_MeV,
-                "muB_MeV" => 3.0 * opts.muq_MeV,
-                "xi" => opts.xi,
-                "flavor_profile" => flavor_profile.profile_name,
-                "meson_profile" => meson_profile.profile_name,
-                "pi_channel" => chemical.pi_channel,
-                "k_channel" => chemical.k_channel,
-                "charge_resolved" => chemical.charge_resolved,
-                "mu_pi_MeV" => chemical.mu_pi_fm * ħc_MeV_fm,
-                "mu_K_MeV" => chemical.mu_K_fm * ħc_MeV_fm,
-                "d_pi" => chemical.d_pi,
-                "d_K" => chemical.d_K,
-            )
-            for regime in opts.regimes
-                push!(rows, _failure_row(base, regime, err))
-            end
-            continue
-        end
+    point_index = 0
+    for muq_MeV in opts.muq_values_MeV
+        flavor_mev = Models.FlavorChemicalProfiles.flavor_mu_profile_MeV(flavor_profile, muq_MeV)
+        chemical, common_density = _density_kwargs_for_profile(meson_profile, flavor_mev)
+        flavor_fm = Models.FlavorChemicalProfiles.flavor_mu_profile_fm(flavor_profile, muq_MeV)
+        flavor_override = flavor_profile.apply_to_equilibrium ? (
+            flavor_fm.mu_u_fm,
+            flavor_fm.mu_d_fm,
+            flavor_fm.mu_s_fm,
+        ) : nothing
 
-        continuation_state = meson_point.continuation_state
-        base = _base_row(opts, point_index, T_MeV, flavor_profile, flavor_mev, meson_profile, chemical, meson_point)
-        for regime in opts.regimes
-            try
-                density = _solve_density_for_regime(regime, meson_point, common_density, opts)
-                push!(rows, _density_row(base, regime, density))
+        continuation_state = nothing
+        muq_fm = muq_MeV / ħc_MeV_fm
+        for T_MeV in _temperature_grid(opts)
+            point_index += 1
+            T_fm = T_MeV / ħc_MeV_fm
+            meson_point = try
+                Models.solve_gap_and_meson_point(
+                    T_fm,
+                    muq_fm;
+                    xi=opts.xi,
+                    mesons=(chemical.pi_channel, chemical.k_channel),
+                    continuation_state=continuation_state,
+                    mixed_branch_align=:strict_sign_binding,
+                    flavor_mu_override=flavor_override,
+                    p_num=opts.p_num,
+                    t_num=opts.t_num,
+                    solver_kwargs=(; iterations=opts.max_iter),
+                    mass_kwargs=(; iterations=opts.max_iter),
+                )
             catch err
-                push!(rows, _failure_row(base, regime, err))
+                base = Dict{String, Any}(
+                    "path_strategy" => opts.path_strategy,
+                    "path_point_index" => point_index,
+                    "T_MeV" => T_MeV,
+                    "muq_MeV" => muq_MeV,
+                    "muB_MeV" => 3.0 * muq_MeV,
+                    "xi" => opts.xi,
+                    "flavor_profile" => flavor_profile.profile_name,
+                    "meson_profile" => meson_profile.profile_name,
+                    "pi_channel" => chemical.pi_channel,
+                    "k_channel" => chemical.k_channel,
+                    "charge_resolved" => chemical.charge_resolved,
+                    "mu_pi_MeV" => chemical.mu_pi_fm * ħc_MeV_fm,
+                    "mu_K_MeV" => chemical.mu_K_fm * ħc_MeV_fm,
+                    "d_pi" => chemical.d_pi,
+                    "d_K" => chemical.d_K,
+                )
+                for regime in opts.regimes
+                    push!(rows, _failure_row(base, regime, err))
+                end
+                continue
+            end
+
+            continuation_state = meson_point.continuation_state
+            base = _base_row(opts, point_index, muq_MeV, T_MeV, flavor_profile, flavor_mev, meson_profile, chemical, meson_point)
+            for regime in opts.regimes
+                try
+                    density = _solve_density_for_regime(regime, meson_point, common_density, opts)
+                    push!(rows, _density_row(base, regime, density))
+                catch err
+                    push!(rows, _failure_row(base, regime, err))
+                end
             end
         end
     end

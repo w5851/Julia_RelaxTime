@@ -78,6 +78,7 @@
 - `eta = 1e-6`
 - `real_axis_mode = :finite_eta`
 - `phase_convention = :arg_propagator`
+- `phase_display = :unwrapped`
 - `density_policy = :strict_normal_domain`
 - `noanom_policy = :none`
 
@@ -100,6 +101,8 @@ BU2020/temp7 审计相关参数：
   - 返回 `eta=0.0` 与 `polarization_backend=:pv_b0_real_axis`
 - `phase_convention=:arg_inverse_propagator`
   - 用于 BU2020 FIG2 审计的 inverse-propagator phase 口径
+- `phase_display=:fold_0_pi`
+  - 显式 FIG3-like / temp7 display 诊断口径；把相移映射到 `0..pi` 后再用于密度权重
 - `density_policy=:strict_normal_domain`
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain`，不静默 clamp/skip
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
@@ -178,7 +181,9 @@ BU2020/temp7 审计相关参数：
 
 - `scripts/relaxtime/run_combined_meson_density_scan.jl`
   - Bridge-style 组合：`scan path` × `density regime`
-  - 当前实现 `--path tmu`，默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
+- 当前实现 `--path tmu`，默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
+- 支持 `--muq-values` 或 `--mumin/--mumax/--mustep` 生成多个固定 `mu_q` 的 T 扫描；多 `mu_q` 输出会生成 FIG3-like heatmap SVG
+- `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从统一 CSV 渲染高 DPI PNG
   - 输出 CSV、README 与 SVG，适合把同一批状态点的多口径介子数密度结果放在同一份可审计产物中
 
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。

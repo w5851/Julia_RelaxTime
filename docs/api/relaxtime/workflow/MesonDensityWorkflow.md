@@ -144,6 +144,7 @@ solve_phase_shift_meson_density_from_meson_point(
     eta=1e-6,
     real_axis_mode=:finite_eta,
     phase_convention=:arg_propagator,
+    phase_display=:unwrapped,
     density_policy=:strict_normal_domain,
     bose_x_min=0.0,
     noanom_policy=:none,
@@ -184,6 +185,10 @@ solve_phase_shift_meson_density_from_meson_point(
   - legacy 默认相位口径
 - `phase_convention=:arg_inverse_propagator`
   - BU2020 诊断用 inverse-propagator phase 口径
+- `phase_display=:unwrapped`
+  - 默认保留 unwrap 后相移；不强制限制到 `0..pi`
+- `phase_display=:fold_0_pi`
+  - 显式 FIG3-like / temp7 display 诊断口径；先 fold 到 `0..pi` 再进入密度权重
 - `density_policy=:strict_normal_domain`
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
@@ -279,7 +284,7 @@ scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
 scripts/relaxtime/run_combined_meson_density_scan.jl
 ```
 
-该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。输出包含 CSV、README 与 SVG 图像，适合做正式数据产物和后续路径扩展的桥接入口。
+该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。输出包含 CSV、README 与 SVG 图像，适合做正式数据产物和后续路径扩展的桥接入口。
 
 ## 当前设计原则
 

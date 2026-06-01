@@ -11,7 +11,7 @@ const OUTREADME = joinpath(OUTDIR, "README.md")
     isdir(OUTDIR) && rm(OUTDIR; recursive=true, force=true)
     mkpath(OUTDIR)
 
-    cmd = `julia --project=. $SCRIPT --output-dir $OUTDIR --overwrite --tmin 150 --tmax 150 --tstep 10 --muq 0 --p-num 4 --t-num 2 --max-iter 6 --stable-q-nodes 6 --qmax 2 --q-nodes 3 --omega-max 2 --omega-nodes 3`
+    cmd = `julia --project=. $SCRIPT --output-dir $OUTDIR --overwrite --tmin 150 --tmax 150 --tstep 10 --muq 0 --p-num 4 --t-num 2 --max-iter 6 --stable-q-nodes 6 --qmax 2 --q-nodes 3 --omega-max 2 --omega-nodes 3 --phase-display fold_0_pi`
     run(cmd)
 
     @test isfile(OUTCSV)
@@ -21,6 +21,7 @@ const OUTREADME = joinpath(OUTDIR, "README.md")
     text = read(OUTCSV, String)
     @test occursin("# bridge: path_strategy x density_regime", text)
     @test occursin("path_strategy,path_point_index,T_MeV", text)
+    @test occursin("phase_display", text)
     @test occursin("stable", text)
     @test occursin("strict_bw_stage1", text)
     @test occursin("phase_shift_current", text)

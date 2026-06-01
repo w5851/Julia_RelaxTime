@@ -19,6 +19,8 @@ using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                                    _phase_shift_scheme_symbol,
                                    _real_axis_mode_symbol,
                                    _density_policy_symbol,
+                                   _phase_display_symbol,
+                                   _apply_phase_display,
                                    _noanom_policy_symbol,
                                    _apply_noanom_policy,
                                    _unwrap_phases,
@@ -86,12 +88,26 @@ end
     @test _real_axis_mode_symbol(:bu2020_pv_eta0) == :pv_b0_eta0
     @test _density_policy_symbol(:strict) == :strict_normal_domain
     @test _density_policy_symbol(:excitation_only) == :excitation_only_E_gt_mu
+    @test _phase_display_symbol(:unwrapped) == :unwrapped
+    @test _phase_display_symbol(:folded_0_pi) == :fold_0_pi
     @test _noanom_policy_symbol(:none) == :none
     @test _noanom_policy_symbol(:temp7_low_energy_branch_subtraction) == :low_energy_branch_subtraction
 
     qp = (m=(u=1.0, d=1.0, s=1.2), μ=(u=0.0, d=0.0, s=0.0), A=(u=0.1, d=0.1, s=0.1))
     tp_bad = (T=0.2, Φ=0.5, Φbar=0.5, ξ=0.1)
     @test_throws ArgumentError phase_shift_meson_density_summary(qp, tp_bad)
+end
+
+@testset "MesonDensity phase display policy" begin
+    phases = [-π, -0.1, 0.2, 4π + 0.1]
+    unwrapped = _apply_phase_display(phases, :unwrapped)
+    folded = _apply_phase_display(phases, :fold_0_pi)
+    @test unwrapped == Float64.(phases)
+    @test all(0.0 .<= folded .<= π)
+    @test folded[1] ≈ π
+    @test folded[2] ≈ 0.1
+    @test folded[4] ≈ 0.1
+    @test_throws ArgumentError _apply_phase_display(phases, :principal)
 end
 
 @testset "MesonDensity unwrap phases defaults to strict pi threshold" begin
