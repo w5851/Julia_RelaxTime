@@ -93,6 +93,10 @@ def default_asset_dir(out_dir: Path) -> Path:
     return out_dir / "figure_assets"
 
 
+def _manifest_path(path: Path) -> str:
+    return path.as_posix()
+
+
 def read_scan_csv(path: Path) -> list[dict[str, str]]:
     if not path.is_file():
         raise FileNotFoundError(path)
@@ -814,7 +818,7 @@ def plot_assets(
     for fmt_name in formats:
         target = figure_dir / f"p1_mott_phase_diagram.{fmt_name}"
         fig.savefig(target, dpi=300, bbox_inches="tight")
-        written.append(str(target))
+        written.append(_manifest_path(target))
     plt.close(fig)
 
     for xi in xi_values:
@@ -830,7 +834,7 @@ def plot_assets(
         for fmt_name in formats:
             target = figure_dir / f"p1_mott_phase_diagram_{tag}.{fmt_name}"
             fig.savefig(target, dpi=300, bbox_inches="tight")
-            written.append(str(target))
+            written.append(_manifest_path(target))
         plt.close(fig)
 
     if not trajectories:
@@ -892,7 +896,7 @@ def plot_assets(
     for fmt_name in formats:
         target = figure_dir / f"p1_isentropic_mott_paths.{fmt_name}"
         fig.savefig(target, dpi=300, bbox_inches="tight")
-        written.append(str(target))
+        written.append(_manifest_path(target))
     plt.close(fig)
 
     return written
@@ -970,10 +974,10 @@ def main() -> int:
     phase_fields = ["kind", "xi", "muB_MeV", "T_MeV", "variable", "curve_parameter", "plot_order_key", "source_csv"]
 
     assets = {
-        "mott_lines": str(asset_dir / "mott_lines.csv"),
-        "isentropic_trajectories": str(asset_dir / "isentropic_trajectories.csv"),
-        "isentropic_mott_crossings": str(asset_dir / "isentropic_mott_crossings.csv"),
-        "phase_overlay": str(asset_dir / "phase_overlay.csv"),
+        "mott_lines": _manifest_path(asset_dir / "mott_lines.csv"),
+        "isentropic_trajectories": _manifest_path(asset_dir / "isentropic_trajectories.csv"),
+        "isentropic_mott_crossings": _manifest_path(asset_dir / "isentropic_mott_crossings.csv"),
+        "phase_overlay": _manifest_path(asset_dir / "phase_overlay.csv"),
     }
     write_csv(Path(assets["mott_lines"]), mott_lines, mott_fields)
     write_csv(Path(assets["isentropic_trajectories"]), trajectories, trajectory_fields)
@@ -988,11 +992,11 @@ def main() -> int:
     manifest = {
         "schema_version": "paper_p1_assets_v1",
         "inputs": {
-            "mott_grid_csv": str(args.mott_grid_csv),
+            "mott_grid_csv": _manifest_path(args.mott_grid_csv),
             "mott_source": summarize_mott_source(args.mott_grid_csv),
-            "isentropic_csv": [str(path) for path in args.isentropic_csv],
-            "phase_dir": [str(path) for path in args.phase_dir],
-            "phase_reference_root": str(args.phase_reference_root) if args.phase_reference_root is not None else None,
+            "isentropic_csv": [_manifest_path(path) for path in args.isentropic_csv],
+            "phase_dir": [_manifest_path(path) for path in args.phase_dir],
+            "phase_reference_root": _manifest_path(args.phase_reference_root) if args.phase_reference_root is not None else None,
             "phase_reference_tag": args.phase_reference_tag,
             "phase_mu_scale": args.phase_mu_scale,
         },
@@ -1003,12 +1007,12 @@ def main() -> int:
             "phase_overlay_points": len(phase_overlay),
             "mott_line_quality": dict(Counter(fmt(row.get("bracket_kind", "unknown")) for row in mott_lines)),
         },
-        "asset_dir": str(asset_dir),
+        "asset_dir": _manifest_path(asset_dir),
         "assets": assets,
         "figures": figure_paths,
     }
-    manifest_path = args.out_dir / "plot_manifest.json"
-    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=True), encoding="utf-8")
+    manifest_file = args.out_dir / "plot_manifest.json"
+    manifest_file.write_text(json.dumps(manifest, indent=2, ensure_ascii=True), encoding="utf-8")
 
     print(f"Wrote P1 paper figure assets under: {args.out_dir}")
     print(f"  csv_asset_dir={asset_dir}")

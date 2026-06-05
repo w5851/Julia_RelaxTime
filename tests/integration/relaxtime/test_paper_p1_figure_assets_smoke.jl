@@ -140,6 +140,11 @@ end
     @test manifest["inputs"]["mott_source"]["equilibrium_selector_policy"] == "pressure_max_under_constraints"
     @test manifest["counts"]["mott_line_points"] == 4
     @test manifest["counts"]["isentropic_crossings"] == 2
+    @test !occursin("\\", string(manifest["asset_dir"]))
+    @test all(!occursin("\\", string(path)) for path in values(manifest["assets"]))
+    @test !occursin("\\", string(manifest["inputs"]["mott_grid_csv"]))
+    @test all(!occursin("\\", string(path)) for path in manifest["inputs"]["isentropic_csv"])
+    @test all(!occursin("\\", string(path)) for path in manifest["inputs"]["phase_dir"])
 
     has_matplotlib = success(`$python -c "import matplotlib"`)
     if has_matplotlib
