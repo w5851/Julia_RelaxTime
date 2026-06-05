@@ -128,6 +128,22 @@
 - 输出会保留 `path_source / path_case_id / path_line_style` 元数据
 - 可直接复用 stable / strict BW / current BU / generalized BU 同一套物理核
 
+### 选择 combined meson-density `--path trho_asymmetric`
+
+适用于：
+
+- 需要把现有 `FixedAsymmetricRho` equilibrium source 接到介子数密度后处理
+- 需要在同位旋不对称条件下检查 `mu_u != mu_d`、signed `mu_pi` / `mu_K`
+- 当前只做 smoke / diagnostic 小网格，不生产正式高精度产物
+
+关键特征：
+
+- CLI 入口为 `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`
+- 路径参数为 `--rho-values` 或 `--rhomin/--rhomax/--rhostep`
+- 约束参数为 `--asym-ud-ratio-target` 与 `--asym-s-target`
+- 内部先调用 `Models.solve(model, FixedAsymmetricRho(...), T_fm)`，再调用 `Models.solve_meson_point_from_equilibrium`
+- 输出会额外记录 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
+
 ### 选择 `Models.run_freezeout_meson_mass_scan` / `Models.run_isentropic_meson_mass_scan`
 
 适用于：

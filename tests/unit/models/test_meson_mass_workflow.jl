@@ -45,6 +45,35 @@ const _MW = Models.MesonMassWorkflow
         @test _MW.build_meson_continuation_state isa Function
     end
 
+    @testset "equilibrium adapter matches FixedMu meson postprocess" begin
+        T_fm = 160.0 / Main.Constants_PNJL.ħc_MeV_fm
+        muq_fm = 0.0
+        direct = _MW.solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            p_num=4,
+            t_num=2,
+            solver_kwargs=(iterations=16,),
+            mass_kwargs=(iterations=16,),
+        )
+        adapted = _MW.solve_meson_point_from_equilibrium(
+            direct.equilibrium,
+            T_fm;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mass_kwargs=(iterations=16,),
+        )
+
+        @test adapted.equilibrium === direct.equilibrium
+        @test adapted.quark_params.m.u ≈ direct.quark_params.m.u rtol=1e-12
+        @test adapted.quark_params.μ.u ≈ direct.quark_params.μ.u rtol=1e-12
+        @test adapted.thermo_params.T ≈ direct.thermo_params.T rtol=1e-12
+        @test adapted.meson_results[:pi].mass ≈ direct.meson_results[:pi].mass rtol=1e-8
+        @test adapted.meson_results[:K].mass ≈ direct.meson_results[:K].mass rtol=1e-8
+    end
+
     @testset "meson root diagnostics expose governance fields" begin
         T_fm = 240.0 / Main.Constants_PNJL.ħc_MeV_fm
         muq_fm = 0.0

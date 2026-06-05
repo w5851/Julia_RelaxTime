@@ -1,0 +1,17 @@
+profile_name = "asymmetric_kminus_over_piminus_signed"
+source_tag = "FixedAsymmetricRho_signed_flavor_mesons"
+pi_label = "pi_minus"
+k_label = "K_minus"
+charge_resolved = true
+
+[chemical_potential_rules]
+mu_pi_rule = "mu_u_minus_mu_d_signed"
+mu_K_rule = "mu_u_minus_mu_s_signed"
+
+[chemical_potentials]
+mu_pi_MeV = 0.0
+mu_K_MeV = 0.0
+
+[degeneracies]
+d_pi = 1
+d_K = 1

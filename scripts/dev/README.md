@@ -58,8 +58,12 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol solve_gap_and_transport \
 	--include-symbol solve_transport_from_equilibrium \
 	--include-symbol solve_gap_and_meson_point \
+	--include-symbol solve_meson_point_from_equilibrium \
+	--include-symbol solve_rotation_point \
+	--include-symbol solve_gas_liquid_point \
 	--include-symbol transport_workflow_module \
 	--include-symbol meson_workflow_module \
+	--include-symbol workflow_module_for \
 	--include-symbol workflow_param_adapters_module \
 	--include-symbol pnjl_module \
 	--output docs/api/models/workflows/generated/Exports.md \

@@ -4,32 +4,32 @@
 
 - Source module files: `src/models/Models.jl`, `src/models/entrypoints.jl`
 - Generated page: `docs/api/generated/models/EntryPointsExportIndex.md`
-- Exported symbol count: 56
-- Mentioned in non-generated docs/api pages: 46
+- Exported symbol count: 57
+- Mentioned in non-generated docs/api pages: 47
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
-| `analyze_pm_branch_competition` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 37 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
+| `analyze_pm_branch_competition` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 38 | 3 | docs/api/models/phase/Overview.md<br>docs/api/models/phase/PMPhaseDiagnostic.md<br>docs/api/models/phase/README.md |
 | `auto_phase_hint` | src/models/Models.jl<br>src/models/entrypoints.jl | 30, 21 | 0 | - |
 | `build_default_rho_grid` | src/models/Models.jl<br>src/models/entrypoints.jl | 21, 12 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
-| `build_meson_thermo_contract_row` | src/models/Models.jl<br>src/models/entrypoints.jl | 40, 30 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
-| `build_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 35 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `build_meson_thermo_contract_row` | src/models/Models.jl<br>src/models/entrypoints.jl | 40, 31 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
+| `build_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 36 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `default_scan_numeric_options` | src/models/Models.jl<br>src/models/entrypoints.jl | 29, 20 | 0 | - |
-| `derive_pm_seed_pair` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 37 | 0 | - |
-| `find_cep` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 35 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
-| `gas_liquid_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 43, 42 | 0 | - |
-| `magnetic_thermodynamics_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 46, 49 | 0 | - |
-| `meson_density_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 39 | 1 | docs/api/models/workflows/README.md |
-| `meson_thermo_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 40 | 2 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/README.md |
-| `meson_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 38 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `normalize_pm_seed_pair` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 37 | 0 | - |
-| `pm_next_seed_source` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 37 | 0 | - |
-| `pnjl_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 46, 48 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `promote_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 48, 36 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `resolve_phase_output_target` | src/models/Models.jl<br>src/models/entrypoints.jl | 48, 36 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `rotation_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 43, 41 | 0 | - |
+| `derive_pm_seed_pair` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 38 | 0 | - |
+| `find_cep` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 36 | 5 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/PhaseTransition.md |
+| `gas_liquid_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 43 | 0 | - |
+| `magnetic_thermodynamics_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 46, 50 | 0 | - |
+| `meson_density_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 40 | 1 | docs/api/models/workflows/README.md |
+| `meson_thermo_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 41 | 2 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/README.md |
+| `meson_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 39 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `normalize_pm_seed_pair` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 38 | 0 | - |
+| `pm_next_seed_source` | src/models/Models.jl<br>src/models/entrypoints.jl | 49, 38 | 0 | - |
+| `pnjl_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 46, 49 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `promote_phase_artifacts` | src/models/Models.jl<br>src/models/entrypoints.jl | 48, 37 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `resolve_phase_output_target` | src/models/Models.jl<br>src/models/entrypoints.jl | 48, 37 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `rotation_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 43, 42 | 0 | - |
 | `run_crossover_meson_density_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 27, 18 | 3 | docs/api/models/scans/CrossoverMesonDensityScan.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
 | `run_external_path_meson_density_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 28, 19 | 4 | docs/api/models/scans/CrossoverMesonDensityScan.md<br>docs/api/models/scans/ExternalPathMesonDensityScan.md<br>docs/api/models/scans/Overview.md |
 | `run_freezeout_fixedmu_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 22, 13 | 3 | docs/api/models/scans/FreezeoutScan.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
@@ -37,36 +37,37 @@
 | `run_freezeout_meson_mass_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 24, 15 | 3 | docs/api/models/scans/MesonMassPathScan.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
 | `run_isentropic_meson_mass_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 25, 16 | 3 | docs/api/models/scans/MesonMassPathScan.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
 | `run_meson_mass_path_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 23, 14 | 2 | docs/api/models/scans/MesonMassPathScan.md<br>docs/api/models/scans/README.md |
-| `run_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 35 | 8 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
-| `run_production_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 35 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `run_relaxtime_orchestrator_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45, 47 | 1 | docs/api/relaxtime/workflow/TransportWorkflow.md |
-| `run_scan_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45, 46 | 2 | docs/api/data_contracts.md<br>docs/api/models/workflows/Overview.md |
+| `run_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 36 | 8 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
+| `run_production_phase_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 47, 36 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
+| `run_relaxtime_orchestrator_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45, 48 | 1 | docs/api/relaxtime/workflow/TransportWorkflow.md |
+| `run_scan_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45, 47 | 2 | docs/api/data_contracts.md<br>docs/api/models/workflows/Overview.md |
 | `run_tmu_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 21, 12 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/FreezeoutScan.md |
 | `run_trho_scan` | src/models/Models.jl<br>src/models/entrypoints.jl | 21, 12 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
-| `run_workflow_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45 | 1 | docs/api/models/workflows/Overview.md |
-| `solve_gap_and_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 24 | 4 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md |
+| `run_workflow_pipeline` | src/models/Models.jl<br>src/models/entrypoints.jl | 45, 46 | 1 | docs/api/models/workflows/Overview.md |
+| `solve_gap_and_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 25 | 4 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md |
 | `solve_gap_and_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 23 | 11 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
-| `solve_gap_and_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 37, 27 | 3 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/Overview.md<br>docs/api/models/workflows/README.md |
-| `solve_gap_and_phase_shift_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 34, 26 | 3 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
-| `solve_gap_and_phase_shift_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 39, 29 | 3 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/Overview.md<br>docs/api/models/workflows/README.md |
-| `solve_gap_and_strict_bw_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 33, 25 | 3 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
-| `solve_gap_and_strict_bw_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 38, 28 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
+| `solve_gap_and_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 37, 28 | 3 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/Overview.md<br>docs/api/models/workflows/README.md |
+| `solve_gap_and_phase_shift_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 34, 27 | 3 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_gap_and_phase_shift_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 39, 30 | 3 | docs/api/models/workflows/MesonThermoWorkflow.md<br>docs/api/models/workflows/Overview.md<br>docs/api/models/workflows/README.md |
+| `solve_gap_and_strict_bw_meson_density_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 33, 26 | 3 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_gap_and_strict_bw_meson_thermo_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 38, 29 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
 | `solve_gap_and_transport` | src/models/Models.jl<br>src/models/entrypoints.jl | 31, 22 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `solve_gas_liquid_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 41, 33 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
-| `solve_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 24 | 3 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
-| `solve_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 37, 27 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
-| `solve_phase_shift_derivative_reference_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 36, 32 | 0 | - |
-| `solve_phase_shift_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 34, 26 | 2 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
-| `solve_phase_shift_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 39, 29 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
-| `solve_phase_shift_point_diagnostic_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 35, 31 | 0 | - |
+| `solve_gas_liquid_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 41, 34 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `solve_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 25 | 3 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_meson_point_from_equilibrium` | src/models/Models.jl<br>src/models/entrypoints.jl | 32, 24 | 8 | docs/api/models/scans/Overview.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
+| `solve_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 37, 28 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
+| `solve_phase_shift_derivative_reference_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 36, 33 | 0 | - |
+| `solve_phase_shift_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 34, 27 | 2 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_phase_shift_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 39, 30 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
+| `solve_phase_shift_point_diagnostic_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 35, 32 | 0 | - |
 | `solve_pnjl_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 29, 20 | 1 | docs/api/data_contracts.md |
-| `solve_rotation_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 41, 34 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
-| `solve_strict_bw_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 33, 25 | 2 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
-| `solve_strict_bw_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 38, 28 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
+| `solve_rotation_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 41, 35 | 3 | docs/api/models/variants/rotation/CoreConcepts.md<br>docs/api/models/variants/rotation/Overview.md<br>docs/api/models/variants/rotation/README.md |
+| `solve_strict_bw_meson_density_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 33, 26 | 2 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_strict_bw_meson_thermo_from_meson_point` | src/models/Models.jl<br>src/models/entrypoints.jl | 38, 29 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
 | `solve_transport_from_equilibrium` | src/models/Models.jl<br>src/models/entrypoints.jl | 31, 22 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/workflows/CoreConcepts.md |
-| `transport_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 38 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
-| `workflow_module_for` | src/models/Models.jl<br>src/models/entrypoints.jl | 44 | 2 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
-| `workflow_param_adapters_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 44, 43 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `transport_workflow_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 42, 39 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
+| `workflow_module_for` | src/models/Models.jl<br>src/models/entrypoints.jl | 44, 45 | 2 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
+| `workflow_param_adapters_module` | src/models/Models.jl<br>src/models/entrypoints.jl | 44 | 4 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/ModuleAccessors.md<br>docs/api/models/workflows/Overview.md |
 
 ## Undocumented Or Not Yet Mentioned
 

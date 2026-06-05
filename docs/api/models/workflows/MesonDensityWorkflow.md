@@ -14,6 +14,9 @@
 ## `solve_meson_density_from_meson_point`
 
 这是后处理入口。它只消费 `Models.solve_gap_and_meson_point` 的返回值，不重复求平衡态或介子极点。
+当上游平衡态来自 `Models.solve(model, FixedAsymmetricRho(...), T_fm)` 等非
+FixedMu source 时，应先用 `Models.solve_meson_point_from_equilibrium` 构造同构
+`meson_point`，再进入本入口。
 
 它适合：
 
@@ -183,8 +186,11 @@ BU2020/temp7 审计相关参数：
 
 - `scripts/relaxtime/run_combined_meson_density_scan.jl`
   - Bridge-style 组合：`scan path` × `density regime`
-- 当前实现 `--path tmu`，默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
+- 当前实现 `--path tmu` 与 smoke-only `--path trho_asymmetric`
+- `--path tmu` 默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
 - 支持 `--muq-values` 或 `--mumin/--mumax/--mustep` 生成多个固定 `mu_q` 的 T 扫描；多 `mu_q` 输出会生成 FIG3-like heatmap SVG
+- `--path trho_asymmetric` 使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，再通过 `Models.solve_meson_point_from_equilibrium` 后处理；当前只作为 smoke / diagnostic path，不作为正式高精度生产入口
+- `trho_asymmetric` 额外输出 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
 - 正式数据默认写入 `data/outputs/results/...`；图像和 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`，也可通过 `--figure-dir` 覆盖
 - `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py` 可从单 `mu_q` 统一 CSV 渲染温度扫描高 DPI PNG
 - `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从多 `mu_q` 统一 CSV 渲染 FIG3-like 高 DPI PNG

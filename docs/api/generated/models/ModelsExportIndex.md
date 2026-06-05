@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/generated/models/ModelsExportIndex.md`
-- Exported symbol count: 335
-- Mentioned in non-generated docs/api pages: 204
+- Exported symbol count: 336
+- Mentioned in non-generated docs/api pages: 205
 
 ## Exported Symbols
 
@@ -35,14 +35,14 @@
 | `HardRule` | src/models/exports_public.jl | 55 | 0 | - |
 | `HybridContinuitySeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `ImplicitProblem` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
-| `Integrals` | src/models/exports_public.jl | 107 | 13 | docs/api/integrals/CauchyPV.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/integrals/OneLoopIntegralsAniso.md |
+| `Integrals` | src/models/exports_public.jl | 107 | 14 | docs/api/integrals/CauchyPV.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/integrals/OneLoopIntegralsAniso.md |
 | `MagneticConfig` | src/models/exports_public.jl | 84 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `MagneticIMCParams` | src/models/exports_public.jl | 83 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/README.md |
 | `MeanFieldState` | src/models/exports_public.jl | 18 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `MesonChemicalProfile` | src/models/exports_public.jl | 116 | 0 | - |
 | `ModelCapabilities` | src/models/exports_public.jl | 2 | 0 | - |
 | `ModelStateSchema` | src/models/exports_public.jl | 49 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `MultiSeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `MultiSeed` | src/models/exports_public.jl | 69 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md<br>docs/api/models/workflows/MesonMassWorkflow.md |
 | `NJL2Model` | src/models/exports_public.jl | 7 | 0 | - |
 | `NJLModel` | src/models/exports_public.jl | 6 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `PHASE_PIPELINE_STAGE_IDS` | src/models/exports_public.jl | 103 | 0 | - |
@@ -87,7 +87,7 @@
 | `SolverDiagnosticCandidate` | src/models/exports_public.jl | 60 | 0 | - |
 | `SolverDiagnosticFull` | src/models/exports_public.jl | 60 | 0 | - |
 | `SolverDiagnosticSummary` | src/models/exports_public.jl | 60 | 1 | docs/api/models/solver/ResultDiagnosticErrorContracts.md |
-| `SolverResult` | src/models/exports_public.jl | 44 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/ResultDiagnosticErrorContracts.md |
+| `SolverResult` | src/models/exports_public.jl | 44 | 7 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/ResultDiagnosticErrorContracts.md |
 | `StageResult` | src/models/exports_public.jl | 96 | 0 | - |
 | `ThermoDiffContext` | src/models/exports_public.jl | 122 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `TmuScanConfig` | src/models/exports_public.jl | 109 | 1 | docs/api/PARAMETER_TYPES_API.md |
@@ -167,7 +167,7 @@
 | `constraint_name` | src/models/exports_public.jl | 54 | 0 | - |
 | `constraint_total_dim` | src/models/exports_public.jl | 54 | 0 | - |
 | `coupling_GB` | src/models/exports_public.jl | 83 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
-| `create_model` | src/models/exports_public.jl | 13 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
+| `create_model` | src/models/exports_public.jl | 13 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `cumulant_B` | src/models/exports_public.jl | 39 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
 | `cumulant_BQS` | src/models/exports_public.jl | 32 | 4 | docs/api/models/derived/susceptibility/CoreConcepts.md<br>docs/api/models/derived/susceptibility/Cumulants.md<br>docs/api/models/derived/susceptibility/Overview.md |
 | `dP_dT` | src/models/exports_public.jl | 30 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/Overview.md |
@@ -287,7 +287,7 @@
 | `select_pressure_max_candidate` | src/models/exports_public.jl | 42 | 1 | docs/api/models/solver/README.md |
 | `smooth_cutoff` | src/models/exports_public.jl | 81 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `solution_dim` | src/models/exports_public.jl | 51 | 0 | - |
-| `solve` | src/models/exports_public.jl | 44 | 56 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
+| `solve` | src/models/exports_public.jl | 44 | 57 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
 | `solve_constraint` | src/models/exports_public.jl | 43 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/exports_public.jl | 21 | 25 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/FreezeoutMesonDensityScan.md |
 | `solve_gap_and_meson_density_point` | src/models/Models.jl | 32 | 4 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md |
@@ -300,6 +300,7 @@
 | `solve_gap_and_transport` | src/models/Models.jl | 31 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
 | `solve_gas_liquid_point` | src/models/Models.jl | 41 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
 | `solve_meson_density_from_meson_point` | src/models/Models.jl | 32 | 3 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
+| `solve_meson_point_from_equilibrium` | src/models/Models.jl | 32 | 8 | docs/api/models/scans/Overview.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
 | `solve_meson_thermo_from_meson_point` | src/models/Models.jl | 37 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
 | `solve_multi` | src/models/exports_public.jl | 44 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_named` | src/models/exports_public.jl | 48 | 1 | docs/api/models/solver/Overview.md |

@@ -15,6 +15,7 @@
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 - `Models.solve_gap_and_meson_point`
+- `Models.solve_meson_point_from_equilibrium`
 - `Models.solve_meson_density_from_meson_point`
 - `Models.solve_gap_and_meson_density_point`
 - `Models.solve_gap_and_meson_thermo_point`

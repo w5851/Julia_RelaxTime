@@ -9,6 +9,7 @@
 - 先求平衡态，再计算输运系数
 - 基于已有平衡态结果，直接计算输运系数
 - 先求平衡态，再计算介子质量、宽度与 Mott 阈值
+- 基于已有平衡态结果，直接计算介子质量、宽度与 Mott 阈值
 - 先求平衡态，再计算介子 pressure / EOS 组合量
 
 ## 首选公开入口
@@ -20,6 +21,7 @@
 - `Models.solve_gap_and_transport`
 - `Models.solve_transport_from_equilibrium`
 - `Models.solve_gap_and_meson_point`
+- `Models.solve_meson_point_from_equilibrium`
 - `Models.solve_gap_and_meson_thermo_point`
 - `Models.run_workflow_pipeline`
 - `Models.run_scan_pipeline`
@@ -52,7 +54,14 @@
 
 更详细的通道与返回结构见 [docs/api/pnjl/MesonMassWorkflow.md](../../pnjl/MesonMassWorkflow.md)。
 
-### 4. 平衡态 + 介子热力学一体化
+### 4. 基于已知平衡态直接算介子点
+
+`Models.solve_meson_point_from_equilibrium` 适合你已经有 `Models.solve(...)` 的
+`SolverResult`，并且不希望再次运行 gap solver 的场景。当前 combined meson-density
+`--path trho_asymmetric` 就使用该 adapter 把 `FixedAsymmetricRho` 接到同一套
+meson mass / density 后处理。
+
+### 5. 平衡态 + 介子热力学一体化
 
 `Models.solve_gap_and_meson_thermo_point` 适合“给定一个点，直接得到 mesonic contribution 与最小 EOS 组合量”的场景。
 

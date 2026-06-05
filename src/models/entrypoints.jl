@@ -21,6 +21,7 @@ export default_scan_numeric_options, solve_pnjl_point
 export auto_phase_hint
 export solve_gap_and_transport, solve_transport_from_equilibrium
 export solve_gap_and_meson_point
+export solve_meson_point_from_equilibrium
 export solve_meson_density_from_meson_point, solve_gap_and_meson_density_point
 export solve_strict_bw_meson_density_from_meson_point, solve_gap_and_strict_bw_meson_density_point
 export solve_phase_shift_meson_density_from_meson_point, solve_gap_and_phase_shift_meson_density_point
@@ -270,6 +271,10 @@ end
 
 function solve_gap_and_meson_point(args...; kwargs...)
     return _meson_workflow_module().solve_gap_and_meson_point(args...; kwargs...)
+end
+
+function solve_meson_point_from_equilibrium(args...; kwargs...)
+    return _meson_workflow_module().solve_meson_point_from_equilibrium(args...; kwargs...)
 end
 
 function solve_meson_density_from_meson_point(args...; kwargs...)

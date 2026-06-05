@@ -16,6 +16,27 @@ const _MCP = Models.MesonChemicalProfiles
         @test profile.d_pi == 3
         @test profile.d_K == 4
         @test isapprox(profile.mu_pi_MeV, 0.0; atol=0, rtol=0)
+        @test profile.mu_pi_rule === :constant
+        @test profile.mu_K_rule === :constant
+    end
+
+    @testset "legacy positional constructor defaults pion rule" begin
+        profile = _MCP.MesonChemicalProfile(
+            "legacy",
+            "test",
+            "pi",
+            "K",
+            :pi,
+            :K,
+            false,
+            :constant,
+            0.0,
+            0.0,
+            3,
+            4,
+        )
+        @test profile.mu_pi_rule === :constant
+        @test profile.mu_K_rule === :constant
     end
 
     @testset "charged profile loads" begin
@@ -55,5 +76,20 @@ const _MCP = Models.MesonChemicalProfiles
         @test plus.mu_K_rule === :mu_u_minus_mu_s_signed
         @test plus_fm.mu_K_fm ≈ 280.0 / Main.Constants_PNJL.ħc_MeV_fm
         @test minus_fm.mu_K_fm ≈ -280.0 / Main.Constants_PNJL.ħc_MeV_fm
+    end
+
+    @testset "FixedAsymmetricRho signed pion/kaon profiles resolve flavor mu" begin
+        flavor = (mu_u_MeV=270.0, mu_d_MeV=310.0, mu_s_MeV=45.0)
+        plus = _MCP.load_meson_chemical_profile(profile="asymmetric_kplus_over_piplus_signed")
+        minus = _MCP.load_meson_chemical_profile(profile="asymmetric_kminus_over_piminus_signed")
+        plus_fm = _MCP.meson_chemical_profile_fm(plus; flavor_mev=flavor)
+        minus_fm = _MCP.meson_chemical_profile_fm(minus; flavor_mev=flavor)
+
+        @test plus.mu_pi_rule === :mu_u_minus_mu_d_signed
+        @test plus.mu_K_rule === :mu_u_minus_mu_s_signed
+        @test plus_fm.mu_pi_fm ≈ -40.0 / Main.Constants_PNJL.ħc_MeV_fm
+        @test minus_fm.mu_pi_fm ≈ 40.0 / Main.Constants_PNJL.ħc_MeV_fm
+        @test plus_fm.mu_K_fm ≈ 225.0 / Main.Constants_PNJL.ħc_MeV_fm
+        @test minus_fm.mu_K_fm ≈ -225.0 / Main.Constants_PNJL.ħc_MeV_fm
     end
 end
