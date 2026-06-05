@@ -93,6 +93,49 @@ g_M(\omega)\frac{\Gamma_M}{(\omega-E_M)^2+\Gamma_M^2/4}.
 
 - `Blaschke:2020bzh` Eq. (27)
 
+### 5.1 全实轴写法与 Bose pole 边界
+
+`Blaschke:2020bzh` Eq. (27) 对 BW 近似给出了
+
+```math
+\int_{-\infty}^{\infty} d\omega
+```
+
+的形式写法。这个文献事实需要保留：它来自把 BW 相移导数写成以
+`E_M` 为中心的 Lorentzian，并把该 Lorentzian 作为全实轴谱权使用。
+
+但这条公式不能被机械解释为当前生产实现必须直接在 `\omega<0` 到
+`\omega>0` 的全实轴上做普通数值积分。原因是数密度 integrand 还包含
+Bose 因子
+
+```math
+g_M(\omega)=\frac{1}{\exp((\omega-\mu_M)/T)-1}.
+```
+
+当当前 equal-flavor 路径给出 `\mu_M=0` 时，`\omega=0` 是 Bose pole。
+在 pole 附近有
+
+```math
+g_M(\omega)\sim \frac{T}{\omega},
+```
+
+而 BW Lorentzian 核在 `\omega=0` 附近通常为有限值。因此正侧
+`\int_{\epsilon}^{...}` 与负侧 `\int_{...}^{-\epsilon}` 分别呈现对数发散，
+不能组成普通意义下的收敛数密度积分。若人为采用
+`[-L,-\epsilon]\cup[\epsilon,\omega_{\max}]`、主值抵消、pole subtraction
+或 symmetric cutoff，则得到的是额外定义的诊断 prescription，而不是
+Eq. (27) 自动给出的唯一物理结果。
+
+因此，当前主线生产口径采用显式正能量安全窗口：
+
+```math
+\omega_{\min}>\mu_M,\qquad \omega_{\min}\ge 0.
+```
+
+负 `omega_min` 或跨越 `\omega=\mu_M` 的积分只应在单独标记的
+`principal_value` / `pole_subtraction` / `negative_energy_diagnostic`
+任务中使用，不能与 `positive_safe_window` 结果混合比较。
+
 ## 6. 与当前项目传播子口径的关系
 
 `z_M = E_M - i\Gamma_M/2` 不是一个与传播子完全无关的独立定义。
