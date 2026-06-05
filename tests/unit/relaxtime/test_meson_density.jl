@@ -12,6 +12,7 @@ if !isdefined(Main, :RelaxTime)
 end
 
 using Main.RelaxTime.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
+                                   DEFAULT_PHASE_SHIFT_OMEGA_MIN,
                                    DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                                    DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                                    DEFAULT_PHASE_SHIFT_Q_MAX,
@@ -80,6 +81,7 @@ end
 @testset "MesonDensity Phase-E3 参数校验" begin
     @test DEFAULT_PHASE_SHIFT_Q_MAX == 12.0
     @test DEFAULT_PHASE_SHIFT_Q_NODES == 48
+    @test DEFAULT_PHASE_SHIFT_OMEGA_MIN == 0.05
     @test DEFAULT_PHASE_SHIFT_OMEGA_MAX == 10.0
     @test DEFAULT_PHASE_SHIFT_OMEGA_NODES == 48
     @test _phase_shift_scheme_symbol(:current) == :phase_shift_current
@@ -148,11 +150,13 @@ end
         degeneracy=3,
         qmax=12.0,
         q_nodes=48,
+        omega_min=0.05,
         omega_max=10.0,
         omega_nodes=24,
     )
     @test bw_zero.mode == :stable_limit
     @test bw_zero.density ≈ stable rtol=1e-10
+    @test bw_zero.omega_min == 0.05
 
     bw_finite = strict_bw_meson_number_density(
         0.14,
@@ -161,13 +165,43 @@ end
         degeneracy=3,
         qmax=12.0,
         q_nodes=24,
+        omega_min=0.05,
         omega_max=10.0,
         omega_nodes=24,
     )
-    @test bw_finite.mode == :strict_bw_reduced
+    @test bw_finite.mode == :strict_bw_reduced_spectral_window
     @test isfinite(bw_finite.density)
     @test bw_finite.density > 0.0
+    @test bw_finite.density > stable
+    @test bw_finite.omega_min == 0.05
     @test isfinite(bw_finite.omega_shell_at_qmax)
+
+    bw_tiny = strict_bw_meson_number_density(
+        0.14,
+        1e-5,
+        T;
+        degeneracy=3,
+        qmax=12.0,
+        q_nodes=48,
+        omega_min=0.05,
+        omega_max=10.0,
+        omega_nodes=24,
+        gamma_zero_tol=0.0,
+    )
+    @test bw_tiny.density ≈ stable rtol=5e-4
+
+    @test_throws ArgumentError strict_bw_meson_number_density(
+        0.14,
+        0.08,
+        T;
+        μ=0.0,
+        degeneracy=3,
+        qmax=12.0,
+        q_nodes=24,
+        omega_min=0.0,
+        omega_max=10.0,
+        omega_nodes=24,
+    )
 
     summary = strict_bw_meson_density_summary(
         0.14, 0.08,
@@ -175,11 +209,13 @@ end
         T;
         qmax=12.0,
         q_nodes=24,
+        omega_min=0.05,
         omega_max=10.0,
         omega_nodes=24,
     )
     @test summary.n_pi > 0.0
     @test summary.n_K > 0.0
+    @test summary.omega_min == 0.05
     @test 0.0 < summary.kpi_ratio < 1.5
 end
 

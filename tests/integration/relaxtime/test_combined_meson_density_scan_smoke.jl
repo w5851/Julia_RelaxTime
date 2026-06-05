@@ -40,6 +40,7 @@ const OUTREADME = joinpath(OUTDIR, "README.md")
     summary = read(OUTREADME, String)
     @test occursin("Bridge-style composition", summary)
     @test occursin("figure directory", summary)
+    @test occursin("strict_bw_omega_min=0.05", summary)
     @test occursin("Status Counts", summary)
 
     svg = read(OUTSVG, String)

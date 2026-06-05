@@ -74,6 +74,7 @@ const _MDW = Models.MesonDensityWorkflow
             meson_point;
             qmax=12.0,
             q_nodes=16,
+            omega_min=0.06,
             omega_max=10.0,
             omega_nodes=16,
         )
@@ -88,7 +89,7 @@ const _MDW = Models.MesonDensityWorkflow
             t_num=4,
             solver_kwargs=(iterations=20,),
             mass_kwargs=(iterations=20,),
-            density_kwargs=(; qmax=12.0, q_nodes=16, omega_max=10.0, omega_nodes=16),
+            density_kwargs=(; qmax=12.0, q_nodes=16, omega_min=0.06, omega_max=10.0, omega_nodes=16),
         )
 
         @test density.m_pi ≈ meson_point.meson_results[:pi].mass
@@ -100,12 +101,14 @@ const _MDW = Models.MesonDensityWorkflow
         @test density.n_pi > 0.0
         @test density.n_K > 0.0
         @test 0.0 < density.kpi_ratio < 2.0
+        @test density.omega_min == 0.06
 
         @test hasproperty(full, :strict_bw_meson_density)
         @test full.strict_bw_meson_density.n_pi ≈ density.n_pi rtol=1e-10
         @test full.strict_bw_meson_density.n_K ≈ density.n_K rtol=1e-10
         @test full.strict_bw_meson_density.gamma_pi ≈ density.gamma_pi rtol=1e-10
         @test full.strict_bw_meson_density.gamma_K ≈ density.gamma_K rtol=1e-10
+        @test full.strict_bw_meson_density.omega_min == 0.06
     end
 
     @testset "strict BW Stage2 q-pole 入口可运行" begin

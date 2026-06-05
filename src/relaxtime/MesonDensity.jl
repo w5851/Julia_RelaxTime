@@ -23,7 +23,7 @@ using Main.Constants_PNJL: G_fm2, K_fm5
 
 export DEFAULT_MESON_DENSITY_Q_NODES
 export DEFAULT_PHASE_SHIFT_Q_MAX, DEFAULT_PHASE_SHIFT_Q_NODES
-export DEFAULT_PHASE_SHIFT_OMEGA_MAX, DEFAULT_PHASE_SHIFT_OMEGA_NODES
+export DEFAULT_PHASE_SHIFT_OMEGA_MIN, DEFAULT_PHASE_SHIFT_OMEGA_MAX, DEFAULT_PHASE_SHIFT_OMEGA_NODES
 export bose_distribution, meson_degeneracy
 export stable_meson_number_density, stable_kpi_ratio, stable_kpi_scan
 export strict_bw_meson_number_density, strict_bw_meson_density_summary
@@ -35,6 +35,7 @@ export phase_shift_point_diagnostic
 const DEFAULT_MESON_DENSITY_Q_NODES = 256
 const DEFAULT_PHASE_SHIFT_Q_MAX = 12.0
 const DEFAULT_PHASE_SHIFT_Q_NODES = 48
+const DEFAULT_PHASE_SHIFT_OMEGA_MIN = 0.05
 const DEFAULT_PHASE_SHIFT_OMEGA_MAX = 10.0
 const DEFAULT_PHASE_SHIFT_OMEGA_NODES = 48
 const DEFAULT_PHASE_SHIFT_ETA = 1e-6
@@ -191,10 +192,34 @@ end
     return half_gamma / ((ω - E)^2 + half_gamma^2)
 end
 
+function _strict_bw_spectral_window_average(
+    E::Float64,
+    gamma::Float64,
+    T::Float64,
+    μ::Float64,
+    omega_min::Float64,
+    omega_max::Float64,
+    omega_nodes::Int,
+)::Float64
+    half_gamma = gamma / 2.0
+    θ_min = atan((omega_min - E) / half_gamma)
+    θ_max = atan((omega_max - E) / half_gamma)
+    θ_max > θ_min || return 0.0
+
+    θ_grid, θ_w = gauleg(θ_min, θ_max, omega_nodes)
+    integral = 0.0
+    @inbounds for iθ in eachindex(θ_grid, θ_w)
+        ω = E + half_gamma * tan(θ_grid[iθ])
+        integral += θ_w[iθ] * bose_distribution(ω, μ, T)
+    end
+    return integral / π
+end
+
 raw"""
     strict_bw_meson_number_density(mass, gamma, T; μ=0.0, degeneracy=1,
                                    qmax=DEFAULT_PHASE_SHIFT_Q_MAX,
                                    q_nodes=DEFAULT_PHASE_SHIFT_Q_NODES,
+                                   omega_min=DEFAULT_PHASE_SHIFT_OMEGA_MIN,
                                    omega_max=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                                    omega_nodes=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                                    gamma_zero_tol=1e-12) -> NamedTuple
@@ -204,16 +229,20 @@ reduced strict BW 单通道介子数密度：
 ```math
 n_M^{BW,red}(T)
 = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
-\int_0^{\omega_{\max}} \frac{d\Delta\omega}{2\pi}
-g\!\left(\sqrt{q^2+m_M^2}+\Delta\omega\right)
-\frac{\Gamma_M/2}{\Delta\omega^2+\Gamma_M^2/4}.
+\int_{\omega_{\min}}^{\omega_{\max}} d\omega\,
+g(\omega)
+\frac{\Gamma_M}
+{2\pi\left[(\omega-\sqrt{q^2+m_M^2})^2+\Gamma_M^2/4\right]}.
 ```
 
 这里采用当前 Stage-1 reduced strict BW 口径：
 
 - `E_M(q)=sqrt(q^2+m_M^2)`
 - `Γ_M(q)=Γ_M`
-- `ω = E_M(q) + Δω`
+- 内层直接在 `ω` 上积分，而不是只保留 `ω >= E_M(q)` 的右半边变量
+- `omega_min` 必须位于 Bose pole 之上；生产扫描默认复用 phase-shift 的安全下界
+- 实现上使用 `θ = atan(2(ω-E_M(q))/Γ_M)` 的等价变量变换，避免小宽度下
+  固定 `ω` 节点欠采样 Lorentzian 峰；有限窗口谱权不做逐 `q` 归一化
 """
 function strict_bw_meson_number_density(
     mass::Float64,
@@ -223,6 +252,7 @@ function strict_bw_meson_number_density(
     degeneracy::Integer=1,
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MIN,
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     gamma_zero_tol::Float64=1e-12,
@@ -234,9 +264,11 @@ function strict_bw_meson_number_density(
     _require_positive_node_count("q_nodes", q_nodes)
     _require_positive_node_count("omega_nodes", omega_nodes)
     qmax > 0.0 || throw(ArgumentError("qmax must be positive, got $(qmax)"))
-    omega_max > 0.0 || throw(ArgumentError("omega_max must be positive, got $(omega_max)"))
+    omega_min >= 0.0 || throw(ArgumentError("omega_min must be nonnegative, got $(omega_min)"))
+    omega_max > omega_min || throw(ArgumentError("omega_max must exceed omega_min, got omega_min=$(omega_min), omega_max=$(omega_max)"))
     gamma_zero_tol >= 0.0 || throw(ArgumentError("gamma_zero_tol must be nonnegative, got $(gamma_zero_tol)"))
     mass > μ || throw(ArgumentError("strict BW helper requires mass > μ, got mass=$(mass), μ=$(μ)"))
+    omega_min > μ || throw(ArgumentError("strict BW omega_min must exceed μ to avoid Bose pole, got omega_min=$(omega_min), μ=$(μ)"))
 
     T == 0.0 && return (
         density=0.0,
@@ -244,12 +276,13 @@ function strict_bw_meson_number_density(
         omega_shell_at_qmax=0.0,
         qmax=qmax,
         q_nodes=q_nodes,
+        omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         gamma=gamma,
         mass=mass,
-        mode=:strict_bw_reduced,
+        mode=:strict_bw_reduced_spectral_window,
     )
 
     if gamma <= gamma_zero_tol
@@ -267,6 +300,7 @@ function strict_bw_meson_number_density(
             omega_shell_at_qmax=0.0,
             qmax=qmax,
             q_nodes=q_nodes,
+            omega_min=omega_min,
             omega_max=omega_max,
             omega_nodes=omega_nodes,
             degeneracy=Int(degeneracy),
@@ -277,20 +311,12 @@ function strict_bw_meson_number_density(
     end
 
     q_grid, q_w = gauleg(0.0, qmax, q_nodes)
-    dω_grid, dω_w = gauleg(0.0, omega_max, omega_nodes)
-
     q_shell_weighted_sum = 0.0
     q_shell_at_qmax = NaN
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
         E = hypot(q, mass)
-        omega_val = 0.0
-        for iω in eachindex(dω_grid, dω_w)
-            Δω = dω_grid[iω]
-            ω = E + Δω
-            omega_val += dω_w[iω] * bose_distribution(ω, μ, T) * _strict_bw_kernel(Δω, gamma)
-        end
-        omega_val /= (2.0 * π)
+        omega_val = _strict_bw_spectral_window_average(E, gamma, T, μ, omega_min, omega_max, omega_nodes)
         q_shell = (q^2 / (2.0 * π^2)) * omega_val
         q_shell_weighted_sum += q_w[iq] * q_shell
         if iq == length(q_grid)
@@ -304,12 +330,13 @@ function strict_bw_meson_number_density(
         omega_shell_at_qmax=q_shell_at_qmax,
         qmax=qmax,
         q_nodes=q_nodes,
+        omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         gamma=gamma,
         mass=mass,
-        mode=:strict_bw_reduced,
+        mode=:strict_bw_reduced_spectral_window,
     )
 end
 
@@ -330,6 +357,7 @@ function strict_bw_meson_density_summary(
     d_K::Integer=meson_degeneracy(:K),
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MIN,
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     gamma_zero_tol::Float64=1e-12,
@@ -342,6 +370,7 @@ function strict_bw_meson_density_summary(
         degeneracy=Int(d_pi),
         qmax=qmax,
         q_nodes=q_nodes,
+        omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         gamma_zero_tol=gamma_zero_tol,
@@ -354,6 +383,7 @@ function strict_bw_meson_density_summary(
         degeneracy=Int(d_K),
         qmax=qmax,
         q_nodes=q_nodes,
+        omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         gamma_zero_tol=gamma_zero_tol,
@@ -367,6 +397,7 @@ function strict_bw_meson_density_summary(
         k_density=k_density,
         qmax=qmax,
         q_nodes=q_nodes,
+        omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         gamma_zero_tol=gamma_zero_tol,

@@ -76,9 +76,7 @@ n_M = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
 ```math
 E_M(q)=\sqrt{q^2+m_M^2},
 \qquad
-\Gamma_M(q)=\Gamma_M,
-\qquad
-\omega=E_M(q)+\Delta\omega.
+\Gamma_M(q)=\Gamma_M.
 ```
 
 并计算：
@@ -86,17 +84,20 @@ E_M(q)=\sqrt{q^2+m_M^2},
 ```math
 n_M^{BW,red}(T)
 = d_M \int_0^\infty \frac{dq\,q^2}{2\pi^2}
-\int_0^{\omega_{\max}} \frac{d\Delta\omega}{2\pi}
-g(E_M(q)+\Delta\omega)
-\frac{\Gamma_M/2}{\Delta\omega^2+\Gamma_M^2/4}.
+\int_{\omega_{\min}}^{\omega_{\max}} d\omega\,
+g(\omega)
+\frac{\Gamma_M}
+{2\pi[(\omega-E_M(q))^2+\Gamma_M^2/4]}.
 ```
+
+实现上使用 `theta = atan(2(omega-E_M(q))/Gamma_M)` 的等价变量变换完成内层谱窗口积分，以避免小宽度下固定 `omega` 节点欠采样 Lorentzian 峰。有限窗口谱权不做逐 `q` 归一化；`omega_min` 必须高于介子化学势以避开 Bose pole。该口径只吸收有限宽度谱平滑思想，仍沿用本项目当前复极点约定，不直接照搬文献中的 pole 符号约定。
 
 当前返回除 `density` 外，还包含：
 
 - `q_integral_estimate`
 - `omega_shell_at_qmax`
 - `mode`
-- 当前积分配置回显
+- 当前积分配置回显，包括 `omega_min`
 
 ### `strict_bw_meson_density_summary(pi_mass, pi_gamma, k_mass, k_gamma, T; ...)`
 

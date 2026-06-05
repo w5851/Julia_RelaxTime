@@ -438,6 +438,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
             stage=stage,
             qmax=opts.qmax,
             q_nodes=opts.q_nodes,
+            omega_min=opts.omega_min,
             omega_max=opts.omega_max,
             omega_nodes=opts.omega_nodes,
             gamma_zero_tol=opts.gamma_zero_tol,
@@ -960,6 +961,7 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- `phase_display=$(opts.phase_display)`")
         println(io, "- `density_policy=$(opts.density_policy)`")
         println(io, "- `noanom_policy=$(opts.noanom_policy)`")
+        println(io, "- `strict_bw_omega_min=$(opts.omega_min)`")
         println(io, "- `gamma_zero_tol=$(opts.gamma_zero_tol)`")
         println(io, "- This entrypoint is a Bridge-style composition of scan path and density-regime strategy.")
         println(io)

@@ -9,7 +9,7 @@ const OUTFILE = joinpath(OUTDIR, "strict_bw_meson_density_scan_smoke.csv")
     mkpath(OUTDIR)
     isfile(OUTFILE) && rm(OUTFILE)
 
-    cmd = `julia --project=. $SCRIPT --output $OUTFILE --overwrite --tmin 210 --tmax 210 --tstep 2 --q-nodes 8 --omega-nodes 8 --qmax 12 --omega-max 10 --p-num 8 --t-num 4 --max-iter 20`
+    cmd = `julia --project=. $SCRIPT --output $OUTFILE --overwrite --tmin 210 --tmax 210 --tstep 2 --q-nodes 8 --omega-nodes 8 --qmax 12 --omega-min 0.05 --omega-max 10 --p-num 8 --t-num 4 --max-iter 20`
     run(cmd)
 
     @test isfile(OUTFILE)
@@ -18,6 +18,8 @@ const OUTFILE = joinpath(OUTDIR, "strict_bw_meson_density_scan_smoke.csv")
     @test occursin("T_MeV,muB_MeV,xi", text)
     @test occursin("gamma_pi", text)
     @test occursin("stage", text)
+    @test occursin("strict_bw_omega_min: 0.05", text)
+    @test occursin("omega_min", text)
     @test occursin("pi_q_integral_estimate", text)
 
     data_lines = [

@@ -68,6 +68,7 @@ solve_strict_bw_meson_density_from_meson_point(
     meson_point;
     qmax=12.0,
     q_nodes=48,
+    omega_min=0.05,
     omega_max=10.0,
     omega_nodes=48,
     gamma_zero_tol=1e-12,
@@ -90,6 +91,9 @@ solve_strict_bw_meson_density_from_meson_point(
 - 只消费 workflow 当前点给出的 `q=0` 质量与宽度
 - 采用 `E(q)=sqrt(q^2+m^2)`
 - 采用 `Gamma(q)=Gamma(q=0)`
+- Stage1 在有限 `omega_min..omega_max` 谱窗口上积分单位 Lorentzian 权重
+- `omega_min` 必须高于介子化学势；默认值 `0.05 fm^-1` 复用 phase-shift 扫描的安全下界
+- 内层实现使用 `theta = atan(2(omega-E(q))/Gamma)` 的等价变量变换，以保证小宽度极限连续回到 stable fallback
 - 尚未进入 `q` 依赖复极点求解
 
 当前同一入口也支持：
@@ -245,7 +249,7 @@ Models.solve_gap_and_strict_bw_meson_density_point
 - `kpi_ratio`
 - `gamma_pi`, `gamma_K`
 - `qmax`, `q_nodes`
-- `omega_max`, `omega_nodes`
+- `omega_min`, `omega_max`, `omega_nodes`
 - `pi/K` 两个通道的 `q_integral_estimate`
 - `pi/K` 两个通道的 `omega_shell_at_qmax`
 - `pi/K` 两个通道的 `mode`
@@ -284,7 +288,7 @@ scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
 scripts/relaxtime/run_combined_meson_density_scan.jl
 ```
 
-该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
+该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时，单 `mu_q` 温度扫描可用 `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py`，多 `mu_q` heatmap 可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
 
 ## 当前设计原则
 

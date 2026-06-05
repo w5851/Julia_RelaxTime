@@ -1,17 +1,31 @@
 {
   "format": "combined_meson_density_plot_manifest_v1",
-  "date": "2026-06-01",
+  "date": "2026-06-05",
+  "generated_by": "scripts/relaxtime/run_combined_meson_density_scan.jl",
   "source_csv": "data/outputs/results/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.csv",
+  "path_strategy": "tmu",
+  "density_regimes": [
+    "stable",
+    "strict_bw_stage1",
+    "phase_shift_current",
+    "phase_shift_gbu_reference"
+  ],
   "figures": [
     {
       "path": "data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.svg",
-      "kind": "quicklook_svg",
-      "generated_by": "scripts/relaxtime/run_combined_meson_density_scan.jl"
+      "kind": "quicklook_svg"
     },
     {
       "path": "data/outputs/figures/relaxtime/meson_density/combined_tmu_mu0_temperature_scan/combined_meson_density_scan.png",
       "kind": "temperature_scan_png",
-      "generated_by": "manual matplotlib renderer from combined_meson_density_scan.csv"
+      "fields": [
+        "n_pi",
+        "n_K",
+        "kpi_ratio"
+      ],
+      "dpi": 260,
+      "title": "Combined meson-density mu_q=0 temperature scan",
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py"
     }
   ]
 }
