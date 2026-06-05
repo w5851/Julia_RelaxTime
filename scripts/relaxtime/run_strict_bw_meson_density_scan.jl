@@ -33,6 +33,7 @@ struct ScanOptions
     max_iter::Int
     qmax::Float64
     q_nodes::Int
+    omega_min::Float64
     omega_max::Float64
     omega_nodes::Int
     gamma_zero_tol::Float64
@@ -57,6 +58,7 @@ function print_usage()
     println("  --max-iter <int>            平衡态 / 介子求解迭代上限 (default 40)")
     println("  --qmax <fm^-1>              外层 q 硬截断 (default 12)")
     println("  --q-nodes <int>             外层 q 积分节点数 (default 48)")
+    println("  --omega-min <fm^-1>         内层 omega 积分下限；必须高于介子化学势 (default 0.05)")
     println("  --omega-max <fm^-1>         内层 omega 积分上限 (default 10)")
     println("  --omega-nodes <int>         内层 omega 积分节点数 (default 48)")
     println("  --gamma-zero-tol <float>    退化回 stable 的宽度阈值 (default 1e-12)")
@@ -82,6 +84,7 @@ function parse_args(args::Vector{String})
         :max_iter => 40,
         :qmax => 12.0,
         :q_nodes => 48,
+        :omega_min => 0.05,
         :omega_max => 10.0,
         :omega_nodes => 48,
         :gamma_zero_tol => 1e-12,
@@ -137,6 +140,8 @@ function parse_args(args::Vector{String})
             opts[:qmax] = parse(Float64, require_value())
         elseif arg == "--q-nodes"
             opts[:q_nodes] = parse(Int, require_value())
+        elseif arg == "--omega-min"
+            opts[:omega_min] = parse(Float64, require_value())
         elseif arg == "--omega-max"
             opts[:omega_max] = parse(Float64, require_value())
         elseif arg == "--omega-nodes"
@@ -164,7 +169,8 @@ function parse_args(args::Vector{String})
     q_nodes = Int(opts[:q_nodes]); q_nodes > 1 || error("q-nodes must be > 1")
     omega_nodes = Int(opts[:omega_nodes]); omega_nodes > 1 || error("omega-nodes must be > 1")
     qmax = Float64(opts[:qmax]); qmax > 0.0 || error("qmax must be positive")
-    omega_max = Float64(opts[:omega_max]); omega_max > 0.0 || error("omega-max must be positive")
+    omega_min = Float64(opts[:omega_min]); omega_min >= 0.0 || error("omega-min must be nonnegative")
+    omega_max = Float64(opts[:omega_max]); omega_max > omega_min || error("omega-max must exceed omega-min")
     gamma_zero_tol = Float64(opts[:gamma_zero_tol]); gamma_zero_tol >= 0.0 || error("gamma-zero-tol must be nonnegative")
 
     return ScanOptions(
@@ -182,6 +188,7 @@ function parse_args(args::Vector{String})
         Int(opts[:max_iter]),
         qmax,
         q_nodes,
+        omega_min,
         omega_max,
         omega_nodes,
         gamma_zero_tol,
@@ -207,7 +214,7 @@ const OUTPUT_COLUMNS = [
     "d_pi", "d_K",
     "stage",
     "qmax", "q_nodes",
-    "omega_max", "omega_nodes",
+    "omega_min", "omega_max", "omega_nodes",
     "gamma_zero_tol",
     "solver_iterations", "pole_residual_norm_max", "pole_require_converged",
     "pi_q_integral_estimate", "pi_omega_shell_at_qmax", "pi_mode",
@@ -245,6 +252,7 @@ function main()
                 "mesons" => "pi,K",
                 "continuation" => "MesonMassWorkflow.continuation_state",
                 "strict_bw_stage" => string(opts.stage),
+                "strict_bw_omega_min" => string(opts.omega_min),
                 "note" => "mu_fm denotes quark chemical potential (muB/3)"
             ))
             ScanCSV.write_header(io, OUTPUT_COLUMNS)
@@ -280,6 +288,7 @@ function main()
                         stage=opts.stage,
                         qmax=opts.qmax,
                         q_nodes=opts.q_nodes,
+                        omega_min=opts.omega_min,
                         omega_max=opts.omega_max,
                         omega_nodes=opts.omega_nodes,
                         gamma_zero_tol=opts.gamma_zero_tol,
@@ -317,6 +326,7 @@ function main()
                     "stage" => md.stage,
                     "qmax" => md.qmax,
                     "q_nodes" => md.q_nodes,
+                    "omega_min" => get(md, :omega_min, ""),
                     "omega_max" => md.omega_max,
                     "omega_nodes" => md.omega_nodes,
                     "gamma_zero_tol" => md.gamma_zero_tol,

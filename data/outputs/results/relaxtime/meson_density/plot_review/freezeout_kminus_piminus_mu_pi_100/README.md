@@ -16,8 +16,10 @@ Outputs:
 - `workflow_scan.csv`
 - `comparison_vs_target.csv`
 - `plot_review_comparison.csv`
-- `overlay_kminus_piminus_mu_pi_100.png`
-- `residual_kminus_piminus_mu_pi_100.png`
+- figures: `data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100`
+- `data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/overlay_kminus_piminus_mu_pi_100.png`
+- `data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/residual_kminus_piminus_mu_pi_100.png`
+- plot manifest: `data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/plot_manifest.json`
 
 Manual review checklist:
 

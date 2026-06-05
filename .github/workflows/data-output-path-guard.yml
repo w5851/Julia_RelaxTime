@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "scripts/**"
+      - "data/outputs/results/**"
+      - "data/outputs/figures/**"
       - ".github/workflows/data-output-path-guard.yml"
       - "Project.toml"
       - "Manifest.toml"
@@ -11,6 +13,8 @@ on:
     branches: ["main"]
     paths:
       - "scripts/**"
+      - "data/outputs/results/**"
+      - "data/outputs/figures/**"
       - ".github/workflows/data-output-path-guard.yml"
       - "Project.toml"
       - "Manifest.toml"
@@ -22,6 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
@@ -37,4 +43,16 @@ jobs:
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
       - name: Check data output path guard
-        run: julia --project=. scripts/dev/check_data_output_path_guard.jl
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            julia --project=. scripts/dev/check_data_output_path_guard.jl \
+              --base "${{ github.event.pull_request.base.sha }}" \
+              --head "${{ github.event.pull_request.head.sha }}"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            julia --project=. scripts/dev/check_data_output_path_guard.jl \
+              --base "${{ github.event.before }}" \
+              --head "${{ github.sha }}"
+          else
+            julia --project=. scripts/dev/check_data_output_path_guard.jl
+          fi

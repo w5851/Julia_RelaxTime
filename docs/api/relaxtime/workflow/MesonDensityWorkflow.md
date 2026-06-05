@@ -4,7 +4,7 @@
 
 本页是 meson density workflow 的领域细节页，重点说明它如何与现有 meson workflow 对接，以及为什么它被约束为后处理层。
 
-如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 [docs/api/models/workflows/MesonDensityWorkflow.md](/C:/Users/Wmzx/.codex/worktrees/346c/Julia_RelaxTime/docs/api/models/workflows/MesonDensityWorkflow.md)。
+如果你只是想判断“应该从哪个 `Models` 入口开始”，优先阅读 `docs/api/models/workflows/MesonDensityWorkflow.md`。
 
 ## 入口
 
@@ -68,6 +68,7 @@ solve_strict_bw_meson_density_from_meson_point(
     meson_point;
     qmax=12.0,
     q_nodes=48,
+    omega_min=0.05,
     omega_max=10.0,
     omega_nodes=48,
     gamma_zero_tol=1e-12,
@@ -90,6 +91,9 @@ solve_strict_bw_meson_density_from_meson_point(
 - 只消费 workflow 当前点给出的 `q=0` 质量与宽度
 - 采用 `E(q)=sqrt(q^2+m^2)`
 - 采用 `Gamma(q)=Gamma(q=0)`
+- Stage1 在有限 `omega_min..omega_max` 谱窗口上积分单位 Lorentzian 权重
+- `omega_min` 必须高于介子化学势；默认值 `0.05 fm^-1` 复用 phase-shift 扫描的安全下界
+- 内层实现使用 `theta = atan(2(omega-E(q))/Gamma)` 的等价变量变换，以保证小宽度极限连续回到 stable fallback
 - 尚未进入 `q` 依赖复极点求解
 
 当前同一入口也支持：
@@ -142,6 +146,12 @@ solve_phase_shift_meson_density_from_meson_point(
     omega_max=10.0,
     omega_nodes=48,
     eta=1e-6,
+    real_axis_mode=:finite_eta,
+    phase_convention=:arg_propagator,
+    phase_display=:unwrapped,
+    density_policy=:strict_normal_domain,
+    bose_x_min=0.0,
+    noanom_policy=:none,
 )
 ```
 
@@ -156,7 +166,7 @@ solve_phase_shift_meson_density_from_meson_point(
 当前它是 **Phase E3 最小 BU 相移双积分** 的正式 workflow helper，物理上仍保持以下约束：
 
 - 仅支持 `xi = 0`
-- 仅支持 `π/K` 聚合通道
+- 支持 `π/K` 聚合通道以及 `pi_plus/pi_minus/K_plus/K_minus` 电荷分辨通道
 - 积分方案固定为 GL + 硬截断
 
 当前 `scheme` 治理口径：
@@ -167,6 +177,29 @@ solve_phase_shift_meson_density_from_meson_point(
 - `:gbu_reference`（兼容 `:gbu` / `:generalized_bu`）
   - `F(\delta)=\delta-\frac{1}{2}\sin 2\delta`
   - 可重复运行的 stricter reference 输出链
+
+当前 real-axis / Bose-domain 治理口径：
+
+- `real_axis_mode=:finite_eta`
+  - legacy 默认路径，使用有限虚部展宽；`eta` 必须大于 0
+- `real_axis_mode=:pv_b0_eta0`
+  - BU2020/temp7 FIG2 审计所需的独立 `eta=0 + PV B0` 实轴分支
+  - 返回 metadata 中 `eta=0.0` 与 `polarization_backend=:pv_b0_real_axis`
+- `phase_convention=:arg_propagator`
+  - legacy 默认相位口径
+- `phase_convention=:arg_inverse_propagator`
+  - BU2020 诊断用 inverse-propagator phase 口径
+- `phase_display=:unwrapped`
+  - 默认保留 unwrap 后相移；不强制限制到 `0..pi`
+- `phase_display=:fold_0_pi`
+  - 显式 FIG3-like / temp7 display 诊断口径；先 fold 到 `0..pi` 再进入密度权重
+- `density_policy=:strict_normal_domain`
+  - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
+- `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
+  - 只作为显式诊断延拓，不能视作文献明示公式
+- `noanom_policy=:low_energy_branch_subtraction`
+  - 按 temp7 reconstructed diagnostic 口径删除 `K_plus` low-energy anomalous branch
+  - 不改变上游 FixedMu 默认分支选择，也不作为 full phase-shift 默认值
 
 ### `solve_gap_and_phase_shift_meson_density_point`
 
@@ -216,7 +249,7 @@ Models.solve_gap_and_strict_bw_meson_density_point
 - `kpi_ratio`
 - `gamma_pi`, `gamma_K`
 - `qmax`, `q_nodes`
-- `omega_max`, `omega_nodes`
+- `omega_min`, `omega_max`, `omega_nodes`
 - `pi/K` 两个通道的 `q_integral_estimate`
 - `pi/K` 两个通道的 `omega_shell_at_qmax`
 - `pi/K` 两个通道的 `mode`
@@ -235,8 +268,27 @@ Models.solve_gap_and_phase_shift_meson_density_point
 - `scheme`
 - `qmax`, `q_nodes`
 - `omega_min`, `omega_max`, `omega_nodes`
+- `real_axis_mode`, `eta`, `phase_convention`
+- `density_policy`, `unsafe_bose_count`, `min_E_minus_mu`, `bose_x_min`, `status`
+- `noanom_policy`, `noanom_removed_component_count`, `noanom_landau_omega_min`, `noanom_landau_omega_max`
 - `pi/K` 两个通道的 `q_integral_estimate`
 - `pi/K` 两个通道的 `omega_shell_at_qmax`
+
+BU2020/temp7 主线审计脚本：
+
+```text
+scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl
+```
+
+该脚本不复制 temp7 代码，只通过 `Models` workflow 输出一个可审计 CSV/README，覆盖 stable、strict BW Stage1、`phase_shift_current`、`phase_shift_gbu_reference`，并显式记录 charged-channel 化学势、`pv_b0_eta0`、inverse-propagator phase、Bose-domain policy 和 `low_energy_branch_subtraction` no-anomalous 诊断状态。
+
+组合式扫描入口：
+
+```text
+scripts/relaxtime/run_combined_meson_density_scan.jl
+```
+
+该脚本把 scan path 与 density regime 分成两条显式组合轴；当前实现 `--path tmu`，可在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG；需要高 DPI PNG 时，单 `mu_q` 温度扫描可用 `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py`，多 `mu_q` heatmap 可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
 
 ## 当前设计原则
 

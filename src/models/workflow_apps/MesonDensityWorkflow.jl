@@ -20,6 +20,7 @@ using ..MesonMassWorkflow: solve_gap_and_meson_point
 using Main.MesonDensity: DEFAULT_MESON_DENSITY_Q_NODES,
                          DEFAULT_PHASE_SHIFT_Q_MAX,
                          DEFAULT_PHASE_SHIFT_Q_NODES,
+                         DEFAULT_PHASE_SHIFT_OMEGA_MIN,
                          DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                          DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                          meson_degeneracy,
@@ -182,6 +183,7 @@ function solve_strict_bw_meson_density_from_meson_point(
     d_K::Integer=meson_degeneracy(:K),
     qmax::Float64=DEFAULT_PHASE_SHIFT_Q_MAX,
     q_nodes::Int=DEFAULT_PHASE_SHIFT_Q_NODES,
+    omega_min::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MIN,
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     gamma_zero_tol::Float64=1e-12,
@@ -213,6 +215,7 @@ function solve_strict_bw_meson_density_from_meson_point(
             d_K=Int(d_K),
             qmax=qmax,
             q_nodes=q_nodes,
+            omega_min=omega_min,
             omega_max=omega_max,
             omega_nodes=omega_nodes,
             gamma_zero_tol=gamma_zero_tol,
@@ -301,6 +304,12 @@ function solve_phase_shift_meson_density_from_meson_point(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
+    phase_convention::Symbol=:arg_propagator,
+    phase_display::Symbol=:unwrapped,
+    density_policy::Symbol=:strict_normal_domain,
+    bose_x_min::Float64=0.0,
+    noanom_policy::Symbol=:none,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -327,6 +336,12 @@ function solve_phase_shift_meson_density_from_meson_point(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
+        phase_display=phase_display,
+        density_policy=density_policy,
+        bose_x_min=bose_x_min,
+        noanom_policy=noanom_policy,
     )
 
     return merge(density, (
@@ -361,6 +376,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
     quark_params_raw = _require_result_field(meson_point, :quark_params)
@@ -387,6 +403,7 @@ function solve_phase_shift_derivative_reference_from_meson_point(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
     )
 
     return merge(density, (
@@ -402,6 +419,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
     omega_values::AbstractVector{<:Real}=[0.2],
     scheme::Symbol=:current,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=:finite_eta,
+    phase_convention::Symbol=:arg_propagator,
     fd_step::Float64=1e-5,
 )
     thermo_params_raw = _require_result_field(meson_point, :thermo_params)
@@ -423,6 +442,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
             thermo_params;
             scheme=scheme,
             eta=eta,
+            real_axis_mode=real_axis_mode,
+            phase_convention=phase_convention,
             fd_step=fd_step,
         ))
     end
@@ -432,6 +453,8 @@ function solve_phase_shift_point_diagnostic_from_meson_point(
         xi=Float64(thermo_params.ξ),
         scheme=scheme,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
         fd_step=fd_step,
         rows=rows,
     )

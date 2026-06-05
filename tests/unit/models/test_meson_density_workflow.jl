@@ -74,6 +74,7 @@ const _MDW = Models.MesonDensityWorkflow
             meson_point;
             qmax=12.0,
             q_nodes=16,
+            omega_min=0.06,
             omega_max=10.0,
             omega_nodes=16,
         )
@@ -88,7 +89,7 @@ const _MDW = Models.MesonDensityWorkflow
             t_num=4,
             solver_kwargs=(iterations=20,),
             mass_kwargs=(iterations=20,),
-            density_kwargs=(; qmax=12.0, q_nodes=16, omega_max=10.0, omega_nodes=16),
+            density_kwargs=(; qmax=12.0, q_nodes=16, omega_min=0.06, omega_max=10.0, omega_nodes=16),
         )
 
         @test density.m_pi ≈ meson_point.meson_results[:pi].mass
@@ -100,12 +101,14 @@ const _MDW = Models.MesonDensityWorkflow
         @test density.n_pi > 0.0
         @test density.n_K > 0.0
         @test 0.0 < density.kpi_ratio < 2.0
+        @test density.omega_min == 0.06
 
         @test hasproperty(full, :strict_bw_meson_density)
         @test full.strict_bw_meson_density.n_pi ≈ density.n_pi rtol=1e-10
         @test full.strict_bw_meson_density.n_K ≈ density.n_K rtol=1e-10
         @test full.strict_bw_meson_density.gamma_pi ≈ density.gamma_pi rtol=1e-10
         @test full.strict_bw_meson_density.gamma_K ≈ density.gamma_K rtol=1e-10
+        @test full.strict_bw_meson_density.omega_min == 0.06
     end
 
     @testset "strict BW Stage2 q-pole 入口可运行" begin
@@ -425,11 +428,48 @@ const _MDW = Models.MesonDensityWorkflow
             μ_K=0.0,
             d_pi=1,
             d_K=1,
+            density_policy=:excitation_only_E_gt_mu,
         )
 
         @test isfinite(mu0.n_pi)
         @test isfinite(mu100.n_pi)
         @test mu100.n_pi > mu0.n_pi
         @test mu100.kpi_ratio < mu0.kpi_ratio
+        @test mu100.density_policy == :excitation_only_E_gt_mu
+        @test mu100.unsafe_bose_count > 0
+    end
+
+    @testset "Phase-shift workflow exposes BU2020 PV real-axis metadata" begin
+        T_fm = 210.0 / Main.Constants_PNJL.ħc_MeV_fm
+        meson_point = Models.solve_gap_and_meson_point(
+            T_fm,
+            0.0;
+            xi=0.0,
+            mesons=(:pi, :K),
+            mixed_branch_align=:strict_sign_binding,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=20,),
+            mass_kwargs=(iterations=20,),
+        )
+
+        density = Models.solve_phase_shift_meson_density_from_meson_point(
+            meson_point;
+            scheme=:gbu_reference,
+            qmax=4.0,
+            q_nodes=4,
+            omega_max=3.0,
+            omega_nodes=4,
+            real_axis_mode=:pv_b0_eta0,
+            phase_convention=:arg_inverse_propagator,
+            noanom_policy=:low_energy_branch_subtraction,
+        )
+
+        @test density.real_axis_mode == :pv_b0_eta0
+        @test density.polarization_backend == :pv_b0_real_axis
+        @test density.phase_convention == :arg_inverse_propagator
+        @test density.noanom_policy == :low_energy_branch_subtraction
+        @test density.eta == 0.0
+        @test density.status == :ok
     end
 end

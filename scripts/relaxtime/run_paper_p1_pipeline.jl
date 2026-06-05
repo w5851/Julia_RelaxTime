@@ -229,6 +229,10 @@ function _python_cmd(args::Vector{String})
     return Cmd(vcat([python], args))
 end
 
+function _figure_asset_dir(opts::PaperP1Options)
+    return joinpath(opts.result_dir, "figure_assets")
+end
+
 function _float_tag(x::Float64)
     isfinite(x) || throw(ArgumentError("muB value must be finite: $(x)"))
     if isapprox(x, round(x); atol=1e-9, rtol=0.0)
@@ -458,6 +462,7 @@ function run_assets_stage!(opts::PaperP1Options)
         joinpath(PROJECT_ROOT, "scripts", "relaxtime", "build_paper_p1_figure_assets.py"),
         "--mott-grid-csv", opts.mott_grid_csv,
         "--out-dir", opts.figure_dir,
+        "--asset-dir", _figure_asset_dir(opts),
         "--phase-mu-scale", string(opts.phase_mu_scale),
         "--formats", opts.formats,
     ]
