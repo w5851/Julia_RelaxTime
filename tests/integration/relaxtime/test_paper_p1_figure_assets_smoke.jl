@@ -133,6 +133,7 @@ end
     @test all(haskey(row, "plot_order_key") for row in phase_ref_rows)
     manifest_ref = JSON3.read(read(joinpath(out_dir_ref, "plot_manifest.json"), String))
     @test manifest_ref["inputs"]["phase_reference_tag"] == "demo"
+    @test !occursin("\\", string(manifest_ref["inputs"]["phase_reference_root"]))
 
     manifest = JSON3.read(read(joinpath(out_dir, "plot_manifest.json"), String))
     @test manifest["schema_version"] == "paper_p1_assets_v1"
@@ -140,6 +141,11 @@ end
     @test manifest["inputs"]["mott_source"]["equilibrium_selector_policy"] == "pressure_max_under_constraints"
     @test manifest["counts"]["mott_line_points"] == 4
     @test manifest["counts"]["isentropic_crossings"] == 2
+    @test !occursin("\\", string(manifest["asset_dir"]))
+    @test all(!occursin("\\", string(path)) for path in values(manifest["assets"]))
+    @test !occursin("\\", string(manifest["inputs"]["mott_grid_csv"]))
+    @test all(!occursin("\\", string(path)) for path in manifest["inputs"]["isentropic_csv"])
+    @test all(!occursin("\\", string(path)) for path in manifest["inputs"]["phase_dir"])
 
     has_matplotlib = success(`$python -c "import matplotlib"`)
     if has_matplotlib
@@ -149,5 +155,8 @@ end
         @test isfile(joinpath(out_dir_plot, "figures", "p1_mott_phase_diagram.png"))
         @test isfile(joinpath(out_dir_plot, "figures", "p1_mott_phase_diagram_xi_0.png"))
         @test isfile(joinpath(out_dir_plot, "figures", "p1_isentropic_mott_paths.png"))
+        manifest_plot = JSON3.read(read(joinpath(out_dir_plot, "plot_manifest.json"), String))
+        @test !isempty(manifest_plot["figures"])
+        @test all(!occursin("\\", string(path)) for path in manifest_plot["figures"])
     end
 end
