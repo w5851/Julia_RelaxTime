@@ -148,8 +148,8 @@ function _split_floats(raw::AbstractString)
 end
 
 function _range_values(lo::Float64, hi::Float64, step::Float64)
-    step > 0.0 || throw(ArgumentError("mustep must be positive"))
-    hi >= lo || throw(ArgumentError("mumax must be >= mumin"))
+    step > 0.0 || throw(ArgumentError("range step must be positive"))
+    hi >= lo || throw(ArgumentError("range maximum must be >= range minimum"))
     values = Float64[]
     x = lo
     while x <= hi + 1e-9
@@ -379,7 +379,8 @@ function parse_args(args::Vector{String})
     isfinite(Float64(opts[:asym_s_target])) || throw(ArgumentError("asym-s-target must be finite"))
 
     if path_strategy === :tmu
-        any_rho_range_key || opts[:rho_values] === nothing || throw(ArgumentError("--rho-values is only valid with --path trho_asymmetric"))
+        opts[:rho_values] === nothing || throw(ArgumentError("--rho-values is only valid with --path trho_asymmetric"))
+        any_rho_range_key && throw(ArgumentError("--rhomin/--rhomax/--rhostep are only valid with --path trho_asymmetric"))
     else
         opts[:muq_values] === nothing || throw(ArgumentError("--muq-values is only valid with --path tmu"))
         any_range_key && throw(ArgumentError("--mumin/--mumax/--mustep are only valid with --path tmu"))

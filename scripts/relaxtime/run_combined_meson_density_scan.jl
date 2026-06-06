@@ -311,12 +311,15 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
         println(io, "# regimes: $(join(string.(opts.regimes), ','))")
         if opts.path_strategy === :tmu
             println(io, "# muq_values_MeV: $(join(_fmt.(opts.muq_values_MeV), ','))")
+            println(io, "# rho_values: not_applicable")
+            println(io, "# asym_ud_ratio_target: not_applicable")
+            println(io, "# asym_s_target: not_applicable")
         else
             println(io, "# muq_values_MeV: not_applicable")
+            println(io, "# rho_values: $(join(_fmt.(opts.rho_values), ','))")
+            println(io, "# asym_ud_ratio_target: $(opts.asym_ud_ratio_target)")
+            println(io, "# asym_s_target: $(opts.asym_s_target)")
         end
-        println(io, "# rho_values: $(join(_fmt.(opts.rho_values), ','))")
-        println(io, "# asym_ud_ratio_target: $(opts.asym_ud_ratio_target)")
-        println(io, "# asym_s_target: $(opts.asym_s_target)")
         println(io, "# real_axis_mode: $(opts.real_axis_mode)")
         println(io, "# phase_display: $(opts.phase_display)")
         println(io, "# density_policy: $(opts.density_policy)")

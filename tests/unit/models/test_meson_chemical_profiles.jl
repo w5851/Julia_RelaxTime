@@ -92,4 +92,41 @@ const _MCP = Models.MesonChemicalProfiles
         @test plus_fm.mu_K_fm ≈ 225.0 / Main.Constants_PNJL.ħc_MeV_fm
         @test minus_fm.mu_K_fm ≈ -225.0 / Main.Constants_PNJL.ħc_MeV_fm
     end
+
+    @testset "signed flavor rules require charged channels" begin
+        flavor = (mu_u_MeV=270.0, mu_d_MeV=310.0, mu_s_MeV=45.0)
+        neutral_pi = _MCP.MesonChemicalProfile(
+            "bad_signed_pi",
+            "test",
+            "pi",
+            "K_plus",
+            :pi,
+            :K_plus,
+            true,
+            :mu_u_minus_mu_d_signed,
+            :mu_u_minus_mu_s_signed,
+            0.0,
+            0.0,
+            1,
+            1,
+        )
+        neutral_k = _MCP.MesonChemicalProfile(
+            "bad_signed_k",
+            "test",
+            "pi_plus",
+            "K",
+            :pi_plus,
+            :K,
+            true,
+            :mu_u_minus_mu_d_signed,
+            :mu_u_minus_mu_s_signed,
+            0.0,
+            0.0,
+            1,
+            1,
+        )
+
+        @test_throws ArgumentError _MCP.meson_chemical_profile_fm(neutral_pi; flavor_mev=flavor)
+        @test_throws ArgumentError _MCP.meson_chemical_profile_fm(neutral_k; flavor_mev=flavor)
+    end
 end

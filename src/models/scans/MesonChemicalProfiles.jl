@@ -158,8 +158,6 @@ end
         return Δ
     elseif pi_channel === :pi_minus
         return -Δ
-    elseif pi_channel === :pi
-        return Δ
     end
     throw(ArgumentError("mu_pi signed flavor rule requires pion channel, got $(pi_channel)"))
 end
@@ -170,8 +168,6 @@ end
         return Δ
     elseif k_channel === :K_minus
         return -Δ
-    elseif k_channel === :K
-        return Δ
     end
     throw(ArgumentError("mu_K signed flavor rule requires kaon channel, got $(k_channel)"))
 end

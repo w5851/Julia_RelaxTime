@@ -56,7 +56,10 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
     @test "phase_display" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test :phase_shift_gbu_reference in CMD_CONTRACT.DEFAULT_REGIMES
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "tmu", "--rho-values", "0.05"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "tmu", "--rhomin", "0", "--rhomax", "0.1", "--rhostep", "0.05"])
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--muq-values", "0,10"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--rhomin", "0.2", "--rhomax", "0.1", "--rhostep", "0.05"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--mumin", "0", "--mumax", "10", "--mustep", "0"])
 end
 
 if RUN_COMBINED_MESON_DENSITY_CLI
@@ -76,6 +79,9 @@ if RUN_COMBINED_MESON_DENSITY_CLI
         text = read(OUTCSV, String)
         @test occursin("# bridge: path_strategy x density_regime", text)
         @test occursin("path_strategy,path_point_index,T_MeV", text)
+        @test occursin("# rho_values: not_applicable", text)
+        @test occursin("# asym_ud_ratio_target: not_applicable", text)
+        @test occursin("# asym_s_target: not_applicable", text)
         @test occursin("phase_display", text)
         @test occursin("stable", text)
         @test occursin("strict_bw_stage1", text)
