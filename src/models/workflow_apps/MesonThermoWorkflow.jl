@@ -15,7 +15,9 @@ end
 
 using ..MesonMassWorkflow: solve_gap_and_meson_point
 using ..WorkflowParamAdapters: normalize_quark_params, normalize_thermo_params
-using Main.MesonDensity: meson_degeneracy,
+using Main.MesonDensity: DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
+                         DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+                         meson_degeneracy,
                          phase_shift_meson_density_summary,
                          strict_bw_meson_density_summary,
                          stable_meson_number_density
@@ -488,6 +490,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
     omega_max::Float64=10.0,
     omega_nodes::Int=48,
     eta::Float64=1e-6,
+    real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+    phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     ld_cutoff::Union{Nothing,Float64}=nothing,
     ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
@@ -517,6 +521,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
@@ -538,6 +544,8 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             omega_max=omega_max,
             omega_nodes=omega_nodes,
             eta=eta,
+            real_axis_mode=real_axis_mode,
+            phase_convention=phase_convention,
         ),
         (
             μ_pi=Float64(μ_pi),
@@ -594,7 +602,10 @@ function solve_phase_shift_meson_thermo_from_meson_point(
             omega_min=omega_min,
             omega_max=omega_max,
             omega_nodes=omega_nodes,
-            eta=eta,
+            eta=Float64(pressure_summary.eta),
+            real_axis_mode=pressure_summary.real_axis_mode,
+            polarization_backend=pressure_summary.polarization_backend,
+            phase_convention=pressure_summary.phase_convention,
             ld_cutoff=Float64(pressure_summary.ld_cutoff),
             ld_cutoff_mode=pressure_summary.ld_cutoff_mode,
             ld_threshold_mode=pressure_summary.ld_threshold_mode,
@@ -758,6 +769,8 @@ function solve_gap_and_phase_shift_meson_thermo_point(
         omega_max=Float64(result.omega_max),
         omega_nodes=Int(result.omega_nodes),
         eta=Float64(result.eta),
+        real_axis_mode=hasproperty(result, :real_axis_mode) ? Symbol(result.real_axis_mode) : DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+        phase_convention=hasproperty(result, :phase_convention) ? Symbol(result.phase_convention) : DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
         ld_cutoff=isnan(Float64(result.ld_cutoff)) ? nothing : Float64(result.ld_cutoff),
         ld_cutoff_mode=result.ld_cutoff_mode === nothing ? :match_model_lambda : Symbol(result.ld_cutoff_mode),
         ld_threshold_mode=result.ld_threshold_mode === nothing ? :omega_lt_q : Symbol(result.ld_threshold_mode),

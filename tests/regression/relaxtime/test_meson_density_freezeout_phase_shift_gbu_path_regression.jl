@@ -51,6 +51,7 @@ function _run_freezeout_phase_shift_gbu_scan(output_path::String, sqrt_s_values:
         phase_shift_omega_max=10.0,
         phase_shift_omega_nodes=48,
         phase_shift_eta=1e-6,
+        phase_shift_density_policy=:excitation_only_E_gt_mu,
         solver_kwargs=(; iterations=40),
         mass_kwargs=(; iterations=40),
     )

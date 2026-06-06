@@ -167,6 +167,7 @@ function _solve_density_point(
     phase_shift_omega_max::Float64,
     phase_shift_omega_nodes::Int,
     phase_shift_eta::Float64,
+    phase_shift_density_policy::Symbol,
 )
     flavor_chemical = FlavorChemicalProfiles.flavor_mu_profile_fm(flavor_profile, pt.muq_MeV)
     common_density = _density_kwargs_for_profile(chemical_profile, flavor_chemical)
@@ -236,6 +237,7 @@ function _solve_density_point(
                 omega_max=phase_shift_omega_max,
                 omega_nodes=phase_shift_omega_nodes,
                 eta=phase_shift_eta,
+                density_policy=phase_shift_density_policy,
             ),
         )
     end
@@ -253,6 +255,7 @@ function _solve_density_point(
             omega_max=phase_shift_omega_max,
             omega_nodes=phase_shift_omega_nodes,
             eta=phase_shift_eta,
+            density_policy=phase_shift_density_policy,
         ),
     )
 end
@@ -387,6 +390,7 @@ function run_freezeout_meson_density_scan(;
     phase_shift_omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     phase_shift_omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     phase_shift_eta::Float64=1e-6,
+    phase_shift_density_policy::Symbol=:strict_normal_domain,
     progress_cb::Union{Nothing, Function}=nothing,
     solver_kwargs::NamedTuple=(; iterations=40),
     mass_kwargs::NamedTuple=(; iterations=40),
@@ -452,6 +456,7 @@ function run_freezeout_meson_density_scan(;
                         phase_shift_omega_max=phase_shift_omega_max,
                         phase_shift_omega_nodes=phase_shift_omega_nodes,
                         phase_shift_eta=phase_shift_eta,
+                        phase_shift_density_policy=phase_shift_density_policy,
                     )
                     continuation_state = result.continuation_state
                     _write_success_row(io, pt, xi, freezeout_profile.profile_name, flavor_profile, flavor_chemical, chemical_profile, regime_sym, result)

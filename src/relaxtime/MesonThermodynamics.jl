@@ -14,17 +14,22 @@ module MesonThermodynamics
 using ..GaussLegendre: gauleg
 using ..AFieldBuilder: ensure_quark_params_has_A
 using ..MesonDensity: DEFAULT_PHASE_SHIFT_ETA,
+                      DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
+                      DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
                       DEFAULT_PHASE_SHIFT_OMEGA_MAX,
                       DEFAULT_PHASE_SHIFT_OMEGA_NODES,
                       DEFAULT_PHASE_SHIFT_Q_MAX,
                       DEFAULT_PHASE_SHIFT_Q_NODES,
                       _build_k_coeffs,
+                      _phase_convention_symbol,
                       _phase_shift_omega_lower_bound,
                       _phase_shift_scheme_symbol,
                       _phase_shift_weighted_phase,
                       _propagator_phase,
+                      _real_axis_mode_symbol,
                       _require_phase_shift_isotropic_xi,
                       _require_positive_node_count,
+                      _resolve_real_axis_config,
                       _strict_bw_kernel,
                       _unwrap_phases,
                       bose_distribution,
@@ -373,6 +378,8 @@ function phase_shift_meson_pressure(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+    real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+    phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
@@ -391,6 +398,8 @@ function phase_shift_meson_pressure(
     ld_cutoff_value <= qmax || throw(ArgumentError("ld_cutoff must not exceed qmax=$(qmax), got $(ld_cutoff_value)"))
     ld_cutoff_mode_sym = _normalize_ld_cutoff_mode(ld_cutoff_mode)
     ld_threshold_mode_sym = _normalize_ld_threshold_mode(ld_threshold_mode)
+    axis = _resolve_real_axis_config(_real_axis_mode_symbol(real_axis_mode), eta)
+    phase_convention_sym = _phase_convention_symbol(phase_convention)
 
     tp = _normalize_thermo_namedtuple(thermo_params)
     _require_nonnegative("temperature T", tp.T)
@@ -413,6 +422,10 @@ function phase_shift_meson_pressure(
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         scheme=scheme_sym,
+        eta=axis.eta,
+        real_axis_mode=axis.mode,
+        polarization_backend=axis.polarization_backend,
+        phase_convention=phase_convention_sym,
         ld_cutoff=ld_cutoff_value,
         ld_cutoff_mode=ld_cutoff_mode_sym,
         ld_threshold_mode=ld_threshold_mode_sym,
@@ -431,7 +444,14 @@ function phase_shift_meson_pressure(
     q_shell_at_qmax_ld = NaN
     @inbounds for iq in eachindex(q_grid, q_w)
         q = q_grid[iq]
-        phases = [_propagator_phase(meson, ω, q, qp, tp, K_coeffs; eta=eta) for ω in omega_grid]
+        phases = [
+            _propagator_phase(
+                meson, ω, q, qp, tp, K_coeffs;
+                eta=axis.eta,
+                real_axis_mode=axis.mode,
+                phase_convention=phase_convention_sym,
+            ) for ω in omega_grid
+        ]
         phase_unwrapped = _unwrap_phases(phases; branch_tol=phase_unwrap_branch_tol)
         omega_val = zero(tp.T)
         omega_val_qp = zero(tp.T)
@@ -487,6 +507,10 @@ function phase_shift_meson_pressure(
         omega_nodes=omega_nodes,
         degeneracy=Int(degeneracy),
         scheme=scheme_sym,
+        eta=axis.eta,
+        real_axis_mode=axis.mode,
+        polarization_backend=axis.polarization_backend,
+        phase_convention=phase_convention_sym,
         ld_cutoff=ld_cutoff_value,
         ld_cutoff_mode=ld_cutoff_mode_sym,
         ld_threshold_mode=ld_threshold_mode_sym,
@@ -509,6 +533,8 @@ function phase_shift_meson_pressure_summary(
     omega_max::Float64=DEFAULT_PHASE_SHIFT_OMEGA_MAX,
     omega_nodes::Int=DEFAULT_PHASE_SHIFT_OMEGA_NODES,
     eta::Float64=DEFAULT_PHASE_SHIFT_ETA,
+    real_axis_mode::Symbol=DEFAULT_PHASE_SHIFT_REAL_AXIS_MODE,
+    phase_convention::Symbol=DEFAULT_PHASE_SHIFT_PHASE_CONVENTION,
     ld_cutoff::Union{Nothing,Real}=nothing,
     ld_cutoff_mode::Symbol=:match_model_lambda,
     ld_threshold_mode::Symbol=:omega_lt_q,
@@ -529,6 +555,8 @@ function phase_shift_meson_pressure_summary(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
@@ -547,6 +575,8 @@ function phase_shift_meson_pressure_summary(
         omega_max=omega_max,
         omega_nodes=omega_nodes,
         eta=eta,
+        real_axis_mode=real_axis_mode,
+        phase_convention=phase_convention,
         ld_cutoff=ld_cutoff,
         ld_cutoff_mode=ld_cutoff_mode,
         ld_threshold_mode=ld_threshold_mode,
@@ -581,7 +611,10 @@ function phase_shift_meson_pressure_summary(
         omega_min=omega_min,
         omega_max=omega_max,
         omega_nodes=omega_nodes,
-        eta=eta,
+        eta=pi_pressure.eta,
+        real_axis_mode=pi_pressure.real_axis_mode,
+        polarization_backend=pi_pressure.polarization_backend,
+        phase_convention=pi_pressure.phase_convention,
         scheme=_phase_shift_scheme_symbol(scheme),
         ld_cutoff=pi_pressure.ld_cutoff,
         ld_cutoff_mode=pi_pressure.ld_cutoff_mode,

@@ -308,6 +308,24 @@ end
     @test pv.eta == 0.0
     @test pv.status == :ok
 
+    safe_strict = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        μ=0.0,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+        density_policy=:strict_normal_domain,
+    )
+    @test safe_strict.density_policy == :strict_normal_domain
+    @test safe_strict.status == :ok
+    @test safe_strict.unsafe_bose_count == 0
+    @test safe_strict.min_E_minus_mu > 0.0
+    @test isfinite(safe_strict.density)
+
     strict = phase_shift_meson_number_density(
         :pi_plus,
         qp,
