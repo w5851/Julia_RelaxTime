@@ -10,6 +10,26 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 
 本机资源策略：高精度 convergence / production 默认不在本机运行，改用手动 GitHub Actions 远程生成 artifact。本机只做 smoke、任务编排、artifact 下载后的审计、正式路径整理和提交。
 
+## 执行状态（2026-06-06）
+
+Verdict: `blocked`
+
+- PR #116 已合并，当前生产分支为 `codex/trho-asymmetric-meson-density-production`。
+- 已触发 GitHub Actions remote run `27064914082`，完成 `convergence_low`。
+- `convergence_low` 已复制到正式 convergence evidence 路径：
+  - `data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/`
+  - `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/`
+- `convergence_low` 统计显示 880 行中 `ok=245`、`failed=221`、`unsafe_bose_domain=414`；只有 13 个 `(T, rho_target)` 点四种 regime 全部 `ok`。
+- blocker 不是积分节点收敛不足，而是当前 `K+ / pi+` 非对称 charged profile 下正 `mu_K` 触发 Bose-domain guard：部分 stable 点已有 `mass <= mu_K`，strict BW 与 phase-shift 在默认 `strict_normal_domain` 下大量遇到 `omega <= mu_K`。
+- 因此未运行 `convergence_mid`、`convergence_high` 和 production；不得把本轮结果标成正式 production-grade。
+- 已在 result-side 写入 blocked audit：
+  - `README.md`
+  - `PRODUCTION_AUDIT.md`
+  - `manifest.json`
+  - `convergence/convergence_summary.json`
+
+后续如需继续正式生产，必须先做物理口径决策：切换到 `K- / pi-`、缩小到严格有效定义域，或显式改成 diagnostic-only density policy。
+
 ## Scope Lock
 
 - 物理口径：`FixedAsymmetricRho` density-constrained equilibrium source。

@@ -1,0 +1,63 @@
+{
+  "format": "meson_density_convergence_summary_v1",
+  "case_slug": "trho_asymmetric_kplus_piplus_scan_v1",
+  "date": "2026-06-06",
+  "verdict": "blocked",
+  "reason": "convergence_low already hit stable/BW/phase-shift Bose-domain guards under K+ / pi+ positive meson chemical potential",
+  "runs": {
+    "convergence_low": {
+      "remote_run_id": "27064914082",
+      "source_commit": "05d181730bff5d7498918e0c1dceddaf65b5448f",
+      "rows": 880,
+      "path_points": 220,
+      "all_regime_ok_points": 13,
+      "status_counts": {
+        "ok": 245,
+        "failed": 221,
+        "unsafe_bose_domain": 414
+      },
+      "by_regime_status": {
+        "stable": {
+          "ok": 206,
+          "failed": 14,
+          "unsafe_bose_domain": 0
+        },
+        "strict_bw_stage1": {
+          "ok": 13,
+          "failed": 207,
+          "unsafe_bose_domain": 0
+        },
+        "phase_shift_current": {
+          "ok": 13,
+          "failed": 0,
+          "unsafe_bose_domain": 207
+        },
+        "phase_shift_gbu_reference": {
+          "ok": 13,
+          "failed": 0,
+          "unsafe_bose_domain": 207
+        }
+      },
+      "constraint_diagnostics": {
+        "constraint_residual_norm_min": 0.0,
+        "constraint_residual_norm_max": 0.0,
+        "rho_u_over_rho_d_min": 0.876,
+        "rho_u_over_rho_d_max": 0.876,
+        "rho_s_fm3_min": 0.0,
+        "rho_s_fm3_max": 0.0
+      },
+      "stable_channel_mu_mass_summary": {
+        "mu_K_MeV_min": 2.272902,
+        "mu_K_MeV_max": 453.997879,
+        "m_K_MeV_min": 270.55591,
+        "m_K_MeV_max": 623.113948,
+        "stable_failed_count": 14
+      }
+    }
+  },
+  "skipped_runs": {
+    "convergence_mid": "skipped because convergence_low already failed the formal domain gate",
+    "convergence_high": "skipped because convergence_low already failed the formal domain gate",
+    "production": "skipped because verdict is blocked"
+  }
+}
