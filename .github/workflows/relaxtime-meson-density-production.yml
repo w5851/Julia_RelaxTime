@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       case_slug:
-        description: "Production case slug under data/outputs/{results,figures}/relaxtime/meson_density"
+        description: "Case slug under data/outputs/{results,figures}/relaxtime/meson_density"
         required: false
         default: "trho_asymmetric_kplus_piplus_scan_v1"
         type: string
@@ -20,168 +20,44 @@ on:
           - diagnostic
           - production
       regimes:
-        description: "Comma-separated meson density regimes"
+        description: "Comma-separated density regimes"
         required: false
         default: "stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference"
         type: string
-      T_min:
-        description: "Minimum T (MeV)"
+      grid_args:
+        description: "Whitespace-separated grid args; values must not contain spaces"
         required: false
-        default: "120"
+        default: "--tmin 120 --tmax 220 --tstep 10 --rhomin 0.05 --rhomax 1.00 --rhostep 0.05"
         type: string
-      T_max:
-        description: "Maximum T (MeV)"
+      physics_args:
+        description: "Whitespace-separated profile/constraint args; values must not contain spaces"
         required: false
-        default: "220"
+        default: "--asym-ud-ratio-target 0.876 --asym-s-target 0.0 --flavor-profile default --meson-profile asymmetric_kplus_over_piplus_signed"
         type: string
-      T_step:
-        description: "T step (MeV)"
+      resolution_profile:
+        description: "Node-count preset; custom uses custom_resolution_args"
         required: false
-        default: "10"
-        type: string
-      rho_values:
-        description: "Optional comma-separated rho/rho0 targets; overrides rho_min/max/step when non-empty"
+        default: "low"
+        type: choice
+        options:
+          - low
+          - mid
+          - high
+          - custom
+      custom_resolution_args:
+        description: "Whitespace-separated resolution args for resolution_profile=custom"
         required: false
         default: ""
         type: string
-      rho_min:
-        description: "Minimum rho/rho0 target"
+      phase_args:
+        description: "Whitespace-separated phase-shift/BW policy args; values must not contain spaces"
         required: false
-        default: "0.05"
+        default: "--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy strict_normal_domain --noanom-policy none --eta 1e-6 --strict-bw-stage stage1"
         type: string
-      rho_max:
-        description: "Maximum rho/rho0 target"
+      extra_args:
+        description: "Extra whitespace-separated CLI args appended last"
         required: false
-        default: "1.00"
-        type: string
-      rho_step:
-        description: "rho/rho0 target step"
-        required: false
-        default: "0.05"
-        type: string
-      asym_ud_ratio_target:
-        description: "FixedAsymmetricRho rho_u/rho_d target"
-        required: false
-        default: "0.876"
-        type: string
-      asym_s_target:
-        description: "FixedAsymmetricRho rho_s target in fm^-3"
-        required: false
-        default: "0.0"
-        type: string
-      flavor_profile:
-        description: "config/physics/flavor_chemical profile"
-        required: false
-        default: "default"
-        type: string
-      meson_profile:
-        description: "config/physics/meson_chemical profile"
-        required: false
-        default: "asymmetric_kplus_over_piplus_signed"
-        type: string
-      p_num:
-        description: "Equilibrium p nodes"
-        required: false
-        default: "8"
-        type: string
-      t_num:
-        description: "Equilibrium t nodes"
-        required: false
-        default: "4"
-        type: string
-      max_iter:
-        description: "Solver/mass iteration cap"
-        required: false
-        default: "20"
-        type: string
-      stable_q_nodes:
-        description: "Stable-particle q nodes"
-        required: false
-        default: "96"
-        type: string
-      qmax:
-        description: "BW/phase-shift q cutoff (fm^-1)"
-        required: false
-        default: "4.0"
-        type: string
-      q_nodes:
-        description: "BW/phase-shift q nodes"
-        required: false
-        default: "12"
-        type: string
-      omega_min:
-        description: "Phase-shift omega lower bound (fm^-1)"
-        required: false
-        default: "0.05"
-        type: string
-      omega_max:
-        description: "BW/phase-shift omega upper bound (fm^-1)"
-        required: false
-        default: "4.0"
-        type: string
-      omega_nodes:
-        description: "BW/phase-shift omega nodes"
-        required: false
-        default: "12"
-        type: string
-      real_axis_mode:
-        description: "Phase-shift real-axis mode"
-        required: false
-        default: "pv_b0_eta0"
-        type: choice
-        options:
-          - pv_b0_eta0
-          - finite_eta
-      phase_convention:
-        description: "Phase convention"
-        required: false
-        default: "arg_inverse_propagator"
-        type: choice
-        options:
-          - arg_inverse_propagator
-          - arg_propagator
-      phase_display:
-        description: "Phase display policy"
-        required: false
-        default: "fold_0_pi"
-        type: choice
-        options:
-          - fold_0_pi
-          - unwrapped
-      density_policy:
-        description: "Phase-shift density policy"
-        required: false
-        default: "strict_normal_domain"
-        type: choice
-        options:
-          - strict_normal_domain
-          - excitation_only_E_gt_mu
-          - x_min_cut
-      noanom_policy:
-        description: "No-anomalous diagnostic policy"
-        required: false
-        default: "none"
-        type: choice
-        options:
-          - none
-          - low_energy_branch_subtraction
-      eta:
-        description: "finite_eta width parameter"
-        required: false
-        default: "1e-6"
-        type: string
-      strict_bw_stage:
-        description: "Strict BW stage"
-        required: false
-        default: "stage1"
-        type: choice
-        options:
-          - stage1
-          - stage2
-      gamma_zero_tol:
-        description: "Strict BW stable fallback threshold"
-        required: false
-        default: "1e-12"
+        default: ""
         type: string
       overwrite:
         description: "Overwrite outputs inside the ephemeral runner"
@@ -221,34 +97,12 @@ jobs:
           CASE_SLUG: ${{ inputs.case_slug }}
           RUN_STAGE: ${{ inputs.run_stage }}
           REGIMES: ${{ inputs.regimes }}
-          T_MIN: ${{ inputs.T_min }}
-          T_MAX: ${{ inputs.T_max }}
-          T_STEP: ${{ inputs.T_step }}
-          RHO_VALUES: ${{ inputs.rho_values }}
-          RHO_MIN: ${{ inputs.rho_min }}
-          RHO_MAX: ${{ inputs.rho_max }}
-          RHO_STEP: ${{ inputs.rho_step }}
-          ASYM_UD_RATIO_TARGET: ${{ inputs.asym_ud_ratio_target }}
-          ASYM_S_TARGET: ${{ inputs.asym_s_target }}
-          FLAVOR_PROFILE: ${{ inputs.flavor_profile }}
-          MESON_PROFILE: ${{ inputs.meson_profile }}
-          P_NUM: ${{ inputs.p_num }}
-          T_NUM: ${{ inputs.t_num }}
-          MAX_ITER: ${{ inputs.max_iter }}
-          STABLE_Q_NODES: ${{ inputs.stable_q_nodes }}
-          QMAX: ${{ inputs.qmax }}
-          Q_NODES: ${{ inputs.q_nodes }}
-          OMEGA_MIN: ${{ inputs.omega_min }}
-          OMEGA_MAX: ${{ inputs.omega_max }}
-          OMEGA_NODES: ${{ inputs.omega_nodes }}
-          REAL_AXIS_MODE: ${{ inputs.real_axis_mode }}
-          PHASE_CONVENTION: ${{ inputs.phase_convention }}
-          PHASE_DISPLAY: ${{ inputs.phase_display }}
-          DENSITY_POLICY: ${{ inputs.density_policy }}
-          NOANOM_POLICY: ${{ inputs.noanom_policy }}
-          ETA: ${{ inputs.eta }}
-          STRICT_BW_STAGE: ${{ inputs.strict_bw_stage }}
-          GAMMA_ZERO_TOL: ${{ inputs.gamma_zero_tol }}
+          GRID_ARGS: ${{ inputs.grid_args }}
+          PHYSICS_ARGS: ${{ inputs.physics_args }}
+          RESOLUTION_PROFILE: ${{ inputs.resolution_profile }}
+          CUSTOM_RESOLUTION_ARGS: ${{ inputs.custom_resolution_args }}
+          PHASE_ARGS: ${{ inputs.phase_args }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
           OVERWRITE: ${{ inputs.overwrite }}
         shell: bash
         run: |
@@ -274,6 +128,35 @@ jobs:
               ;;
           esac
 
+          case "${RESOLUTION_PROFILE}" in
+            low)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 96 --qmax 4.0 --q-nodes 12 --omega-min 0.05 --omega-max 4.0 --omega-nodes 12 --gamma-zero-tol 1e-12"
+              ;;
+            mid)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 192 --qmax 4.0 --q-nodes 24 --omega-min 0.05 --omega-max 4.0 --omega-nodes 24 --gamma-zero-tol 1e-12"
+              ;;
+            high)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 256 --qmax 4.0 --q-nodes 36 --omega-min 0.05 --omega-max 4.0 --omega-nodes 36 --gamma-zero-tol 1e-12"
+              ;;
+            custom)
+              if [[ -z "${CUSTOM_RESOLUTION_ARGS}" ]]; then
+                echo "::error::custom_resolution_args is required when resolution_profile=custom"
+                exit 2
+              fi
+              RESOLUTION_ARGS="${CUSTOM_RESOLUTION_ARGS}"
+              ;;
+            *)
+              echo "::error::unsupported resolution_profile=${RESOLUTION_PROFILE}"
+              exit 2
+              ;;
+          esac
+
+          read -r -a GRID_ARGV <<< "${GRID_ARGS}"
+          read -r -a PHYSICS_ARGV <<< "${PHYSICS_ARGS}"
+          read -r -a RESOLUTION_ARGV <<< "${RESOLUTION_ARGS}"
+          read -r -a PHASE_ARGV <<< "${PHASE_ARGS}"
+          read -r -a EXTRA_ARGV <<< "${EXTRA_ARGS}"
+
           export RESULT_DIR FIGURE_DIR
           echo "RESULT_DIR=${RESULT_DIR}" >> "${GITHUB_ENV}"
           echo "FIGURE_DIR=${FIGURE_DIR}" >> "${GITHUB_ENV}"
@@ -285,37 +168,12 @@ jobs:
             --output-dir "${RESULT_DIR}"
             --figure-dir "${FIGURE_DIR}"
             --regimes "${REGIMES}"
-            --tmin "${T_MIN}"
-            --tmax "${T_MAX}"
-            --tstep "${T_STEP}"
-            --asym-ud-ratio-target "${ASYM_UD_RATIO_TARGET}"
-            --asym-s-target "${ASYM_S_TARGET}"
-            --flavor-profile "${FLAVOR_PROFILE}"
-            --meson-profile "${MESON_PROFILE}"
-            --p-num "${P_NUM}"
-            --t-num "${T_NUM}"
-            --max-iter "${MAX_ITER}"
-            --stable-q-nodes "${STABLE_Q_NODES}"
-            --qmax "${QMAX}"
-            --q-nodes "${Q_NODES}"
-            --omega-min "${OMEGA_MIN}"
-            --omega-max "${OMEGA_MAX}"
-            --omega-nodes "${OMEGA_NODES}"
-            --real-axis-mode "${REAL_AXIS_MODE}"
-            --phase-convention "${PHASE_CONVENTION}"
-            --phase-display "${PHASE_DISPLAY}"
-            --density-policy "${DENSITY_POLICY}"
-            --noanom-policy "${NOANOM_POLICY}"
-            --eta "${ETA}"
-            --strict-bw-stage "${STRICT_BW_STAGE}"
-            --gamma-zero-tol "${GAMMA_ZERO_TOL}"
+            "${GRID_ARGV[@]}"
+            "${PHYSICS_ARGV[@]}"
+            "${RESOLUTION_ARGV[@]}"
+            "${PHASE_ARGV[@]}"
+            "${EXTRA_ARGV[@]}"
           )
-
-          if [[ -n "${RHO_VALUES}" ]]; then
-            CMD+=(--rho-values "${RHO_VALUES}")
-          else
-            CMD+=(--rhomin "${RHO_MIN}" --rhomax "${RHO_MAX}" --rhostep "${RHO_STEP}")
-          fi
 
           if [[ "${OVERWRITE}" == "true" ]]; then
             CMD+=(--overwrite)
@@ -358,34 +216,12 @@ jobs:
               },
               "inputs": {
                   "regimes": os.environ["REGIMES"],
-                  "T_min": os.environ["T_MIN"],
-                  "T_max": os.environ["T_MAX"],
-                  "T_step": os.environ["T_STEP"],
-                  "rho_values": os.environ["RHO_VALUES"],
-                  "rho_min": os.environ["RHO_MIN"],
-                  "rho_max": os.environ["RHO_MAX"],
-                  "rho_step": os.environ["RHO_STEP"],
-                  "asym_ud_ratio_target": os.environ["ASYM_UD_RATIO_TARGET"],
-                  "asym_s_target": os.environ["ASYM_S_TARGET"],
-                  "flavor_profile": os.environ["FLAVOR_PROFILE"],
-                  "meson_profile": os.environ["MESON_PROFILE"],
-                  "p_num": os.environ["P_NUM"],
-                  "t_num": os.environ["T_NUM"],
-                  "max_iter": os.environ["MAX_ITER"],
-                  "stable_q_nodes": os.environ["STABLE_Q_NODES"],
-                  "qmax": os.environ["QMAX"],
-                  "q_nodes": os.environ["Q_NODES"],
-                  "omega_min": os.environ["OMEGA_MIN"],
-                  "omega_max": os.environ["OMEGA_MAX"],
-                  "omega_nodes": os.environ["OMEGA_NODES"],
-                  "real_axis_mode": os.environ["REAL_AXIS_MODE"],
-                  "phase_convention": os.environ["PHASE_CONVENTION"],
-                  "phase_display": os.environ["PHASE_DISPLAY"],
-                  "density_policy": os.environ["DENSITY_POLICY"],
-                  "noanom_policy": os.environ["NOANOM_POLICY"],
-                  "eta": os.environ["ETA"],
-                  "strict_bw_stage": os.environ["STRICT_BW_STAGE"],
-                  "gamma_zero_tol": os.environ["GAMMA_ZERO_TOL"],
+                  "grid_args": os.environ["GRID_ARGS"],
+                  "physics_args": os.environ["PHYSICS_ARGS"],
+                  "resolution_profile": os.environ["RESOLUTION_PROFILE"],
+                  "custom_resolution_args": os.environ["CUSTOM_RESOLUTION_ARGS"],
+                  "phase_args": os.environ["PHASE_ARGS"],
+                  "extra_args": os.environ["EXTRA_ARGS"],
               },
           }
           (result_dir / "remote_run_manifest.json").write_text(
@@ -400,7 +236,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}-results
+          name: meson-density-${{ inputs.run_stage }}-results
           path: |
             data/outputs/results/relaxtime/meson_density/${{ inputs.case_slug }}/**
           if-no-files-found: warn
@@ -410,7 +246,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}-figures
+          name: meson-density-${{ inputs.run_stage }}-figures
           path: |
             data/outputs/figures/relaxtime/meson_density/${{ inputs.case_slug }}/**
           if-no-files-found: warn
@@ -427,12 +263,8 @@ jobs:
           echo "- result dir: \`${RESULT_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
           echo "- figure dir: \`${FIGURE_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
           echo "- regimes: \`${{ inputs.regimes }}\`" >> "${GITHUB_STEP_SUMMARY}"
-          echo "- T range: ${{ inputs.T_min }}-${{ inputs.T_max }} MeV, step ${{ inputs.T_step }}" >> "${GITHUB_STEP_SUMMARY}"
-          if [[ -n "${{ inputs.rho_values }}" ]]; then
-            echo "- rho values: \`${{ inputs.rho_values }}\`" >> "${GITHUB_STEP_SUMMARY}"
-          else
-            echo "- rho range: ${{ inputs.rho_min }}-${{ inputs.rho_max }} rho/rho0, step ${{ inputs.rho_step }}" >> "${GITHUB_STEP_SUMMARY}"
-          fi
-          echo "- nodes: stable_q=${{ inputs.stable_q_nodes }}, q=${{ inputs.q_nodes }}, omega=${{ inputs.omega_nodes }}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- grid args: \`${{ inputs.grid_args }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- resolution profile: \`${{ inputs.resolution_profile }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- phase args: \`${{ inputs.phase_args }}\`" >> "${GITHUB_STEP_SUMMARY}"
           echo "" >> "${GITHUB_STEP_SUMMARY}"
           echo "Artifacts preserve project-relative paths. Download them into a review workspace, audit convergence, then commit only production-grade outputs." >> "${GITHUB_STEP_SUMMARY}"

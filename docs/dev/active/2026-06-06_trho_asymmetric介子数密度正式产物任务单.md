@@ -38,18 +38,27 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 ```sh
 gh workflow run relaxtime-meson-density-production.yml --ref main \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
-  -f run_stage=convergence_low
+  -f run_stage=convergence_low \
+  -f resolution_profile=low
 
 gh workflow run relaxtime-meson-density-production.yml --ref main \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=convergence_mid \
-  -f stable_q_nodes=192 -f q_nodes=24 -f omega_nodes=24
+  -f resolution_profile=mid
 
 gh workflow run relaxtime-meson-density-production.yml --ref main \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=convergence_high \
-  -f stable_q_nodes=256 -f q_nodes=36 -f omega_nodes=36
+  -f resolution_profile=high
 ```
+
+workflow 为避免 GitHub Actions `workflow_dispatch` 输入数量上限，使用组合式参数：
+
+- `grid_args`：扫描网格，例如 `--tmin 120 --tmax 220 --tstep 10 --rhomin 0.05 --rhomax 1.00 --rhostep 0.05`。
+- `physics_args`：约束与 profile，例如 `--asym-ud-ratio-target 0.876 --asym-s-target 0.0 --flavor-profile default --meson-profile asymmetric_kplus_over_piplus_signed`。
+- `resolution_profile`：`low` / `mid` / `high` / `custom`。若使用 `custom`，必须填写 `custom_resolution_args`。
+- `phase_args`：相移和 BW 相关 policy，例如 `--real-axis-mode pv_b0_eta0 --phase-display fold_0_pi --density-policy strict_normal_domain --noanom-policy none`。
+- `extra_args`：追加在命令末尾的少量补充参数；参数值不能包含空格。
 
 远程 result-side artifact 内部路径必须保留为：
 
@@ -110,9 +119,8 @@ gh run download <run-id> --dir data/outputs/remote_artifacts/trho_asymmetric_kpl
 gh workflow run relaxtime-meson-density-production.yml --ref main \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=production \
-  -f stable_q_nodes=<selected> \
-  -f q_nodes=<selected> \
-  -f omega_nodes=<selected>
+  -f resolution_profile=<selected-profile-or-custom> \
+  -f custom_resolution_args="<only-when-custom>"
 ```
 
 production artifact 下载后必须先审计，再整理到仓库正式路径：
