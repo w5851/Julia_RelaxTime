@@ -8,10 +8,13 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 
 本任务单用于在 PR #116 合并后，从最新 `main` 新开分支执行收敛性测试与正式产物生产。执行时必须遵守 `$formal-production-artifact` skill 的 hard gates：先完成 convergence gate，再按收敛证据生产正式数据和图像。
 
+本机资源策略：高精度 convergence / production 默认不在本机运行，改用手动 GitHub Actions 远程生成 artifact。本机只做 smoke、任务编排、artifact 下载后的审计、正式路径整理和提交。
+
 ## Scope Lock
 
 - 物理口径：`FixedAsymmetricRho` density-constrained equilibrium source。
 - 扫描入口：`scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`。
+- 远程入口：`.github/workflows/relaxtime-meson-density-production.yml`，只通过 `workflow_dispatch` 手动触发。
 - charged profile：先生产 `asymmetric_kplus_over_piplus_signed`，即 `pi+` / `K+`。
 - 约束目标：`rho_u/rho_d = 0.876`，`rho_s = 0 fm^-3`。
 - 观测量：`n_pi`、`n_K`、`kpi_ratio`、status counts、unsafe Bose diagnostics、constraint diagnostics。
@@ -24,13 +27,45 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 - [ ] PR #116 已合并到 `main`。
 - [ ] 从最新 `main` 新开生产分支，例如 `codex/trho-asymmetric-meson-density-production`。
 - [ ] 确认 `run_combined_meson_density_scan.jl --path trho_asymmetric`、`render_combined_meson_density_fig3_like.py` 和输出路径治理在 `main` 可用。
+- [ ] 确认 `.github/workflows/relaxtime-meson-density-production.yml` 已在默认分支可手动触发。
 - [ ] 明确最终网格范围：`T` 轴、`rho_target` 轴、density regimes。
+- [ ] 明确是否需要把大网格按 `rho_values` 分片运行；若单次 Action 接近 6 小时上限，必须分片而不是放宽收敛 gate。
 
 ## Phase 1: Convergence Gate
 
-在 result 目录下创建：
+优先用 GitHub Actions 远程运行，不在本机跑高精度网格。每个 convergence 档位触发一次 workflow：
 
-`data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/`
+```sh
+gh workflow run relaxtime-meson-density-production.yml --ref main \
+  -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
+  -f run_stage=convergence_low
+
+gh workflow run relaxtime-meson-density-production.yml --ref main \
+  -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
+  -f run_stage=convergence_mid \
+  -f stable_q_nodes=192 -f q_nodes=24 -f omega_nodes=24
+
+gh workflow run relaxtime-meson-density-production.yml --ref main \
+  -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
+  -f run_stage=convergence_high \
+  -f stable_q_nodes=256 -f q_nodes=36 -f omega_nodes=36
+```
+
+远程 result-side artifact 内部路径必须保留为：
+
+`data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/<run_stage>/`
+
+远程 figure-side artifact 内部路径必须保留为：
+
+`data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/<run_stage>/`
+
+下载时先落到临时审计目录，确认内容后再复制到仓库正式路径：
+
+```sh
+gh run download <run-id> --dir data/outputs/remote_artifacts/trho_asymmetric_kplus_piplus_scan_v1
+```
+
+下载后的 artifact 若包含完整 `data/outputs/...` 相对路径，可在审计通过后复制回仓库根目录；不得把 `remote_artifacts/` 本身作为正式产物提交。
 
 至少运行三档参数：
 
@@ -40,13 +75,14 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 | `mid` | 主判定候选 | `stable_q_nodes=192`, `q_nodes=24`, `omega_nodes=24` |
 | `high` | 参考档 | `stable_q_nodes=256`, `q_nodes=36` 或 `48`, `omega_nodes=36` 或 `48` |
 
-每档必须保存：
+每档远程 artifact 必须保存：
 
 - [ ] 完整命令。
 - [ ] stdout / stderr log。
 - [ ] `combined_meson_density_scan.csv`。
 - [ ] `README.md`。
-- [ ] 参数 manifest。
+- [ ] `remote_run_manifest.json`。
+- [ ] 参数 manifest 或等价机器可读记录。
 
 比较矩阵至少覆盖：
 
@@ -68,7 +104,23 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 
 ## Phase 2: 正式生产
 
-使用通过 convergence gate 的最高参数或有证据支持的足够收敛参数，重跑正式 production。
+使用通过 convergence gate 的最高参数或有证据支持的足够收敛参数，远程触发正式 production。示例：
+
+```sh
+gh workflow run relaxtime-meson-density-production.yml --ref main \
+  -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
+  -f run_stage=production \
+  -f stable_q_nodes=<selected> \
+  -f q_nodes=<selected> \
+  -f omega_nodes=<selected>
+```
+
+production artifact 下载后必须先审计，再整理到仓库正式路径：
+
+- result-side：`data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/`
+- figure-side：`data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/`
+
+GitHub Actions 只负责生成 artifact，不自动 commit 正式数据。正式入库由生产分支在本机下载、审计、整理后提交。
 
 正式 result-side 至少包含：
 
@@ -76,13 +128,14 @@ PR #116 接入 `FixedAsymmetricRho` 作为介子数密度后处理的 upstream e
 - [ ] `README.md`
 - [ ] `PRODUCTION_AUDIT.md`
 - [ ] `manifest.json`
+- [ ] `remote_run_manifest.json`
 - [ ] `run.stdout.log`
 - [ ] `run.stderr.log`
 - [ ] `convergence/` 原始证据和摘要
 
 正式 figure-side 至少包含：
 
-- [ ] SVG 或 PNG 主图。
+- [ ] SVG 或 PNG 主图。当前 `run_combined_meson_density_scan.jl` 内置 SVG 可作为首版正式主图；`render_combined_meson_density_fig3_like.py` 的 x 轴目前是 `mu_q`，未扩展前不得直接作为 `trho_asymmetric` rho 轴正式图。
 - [ ] `plot_manifest.json`。
 
 result README 必须反向链接 figure 目录和图像文件。
@@ -120,4 +173,3 @@ result README 必须反向链接 figure 目录和图像文件。
 - [ ] `git diff --check`
 
 若本任务实际修改数值路径、solver、density kernel 或扫描语义，需重新评估 regression / validation；否则只提交正式数据、正式图像、审计文档和必要脚本辅助改动。
-

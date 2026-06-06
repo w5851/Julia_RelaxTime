@@ -1,0 +1,438 @@
+name: Relaxtime Meson Density Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      case_slug:
+        description: "Production case slug under data/outputs/{results,figures}/relaxtime/meson_density"
+        required: false
+        default: "trho_asymmetric_kplus_piplus_scan_v1"
+        type: string
+      run_stage:
+        description: "Output placement stage"
+        required: false
+        default: "convergence_low"
+        type: choice
+        options:
+          - convergence_low
+          - convergence_mid
+          - convergence_high
+          - diagnostic
+          - production
+      regimes:
+        description: "Comma-separated meson density regimes"
+        required: false
+        default: "stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference"
+        type: string
+      T_min:
+        description: "Minimum T (MeV)"
+        required: false
+        default: "120"
+        type: string
+      T_max:
+        description: "Maximum T (MeV)"
+        required: false
+        default: "220"
+        type: string
+      T_step:
+        description: "T step (MeV)"
+        required: false
+        default: "10"
+        type: string
+      rho_values:
+        description: "Optional comma-separated rho/rho0 targets; overrides rho_min/max/step when non-empty"
+        required: false
+        default: ""
+        type: string
+      rho_min:
+        description: "Minimum rho/rho0 target"
+        required: false
+        default: "0.05"
+        type: string
+      rho_max:
+        description: "Maximum rho/rho0 target"
+        required: false
+        default: "1.00"
+        type: string
+      rho_step:
+        description: "rho/rho0 target step"
+        required: false
+        default: "0.05"
+        type: string
+      asym_ud_ratio_target:
+        description: "FixedAsymmetricRho rho_u/rho_d target"
+        required: false
+        default: "0.876"
+        type: string
+      asym_s_target:
+        description: "FixedAsymmetricRho rho_s target in fm^-3"
+        required: false
+        default: "0.0"
+        type: string
+      flavor_profile:
+        description: "config/physics/flavor_chemical profile"
+        required: false
+        default: "default"
+        type: string
+      meson_profile:
+        description: "config/physics/meson_chemical profile"
+        required: false
+        default: "asymmetric_kplus_over_piplus_signed"
+        type: string
+      p_num:
+        description: "Equilibrium p nodes"
+        required: false
+        default: "8"
+        type: string
+      t_num:
+        description: "Equilibrium t nodes"
+        required: false
+        default: "4"
+        type: string
+      max_iter:
+        description: "Solver/mass iteration cap"
+        required: false
+        default: "20"
+        type: string
+      stable_q_nodes:
+        description: "Stable-particle q nodes"
+        required: false
+        default: "96"
+        type: string
+      qmax:
+        description: "BW/phase-shift q cutoff (fm^-1)"
+        required: false
+        default: "4.0"
+        type: string
+      q_nodes:
+        description: "BW/phase-shift q nodes"
+        required: false
+        default: "12"
+        type: string
+      omega_min:
+        description: "Phase-shift omega lower bound (fm^-1)"
+        required: false
+        default: "0.05"
+        type: string
+      omega_max:
+        description: "BW/phase-shift omega upper bound (fm^-1)"
+        required: false
+        default: "4.0"
+        type: string
+      omega_nodes:
+        description: "BW/phase-shift omega nodes"
+        required: false
+        default: "12"
+        type: string
+      real_axis_mode:
+        description: "Phase-shift real-axis mode"
+        required: false
+        default: "pv_b0_eta0"
+        type: choice
+        options:
+          - pv_b0_eta0
+          - finite_eta
+      phase_convention:
+        description: "Phase convention"
+        required: false
+        default: "arg_inverse_propagator"
+        type: choice
+        options:
+          - arg_inverse_propagator
+          - arg_propagator
+      phase_display:
+        description: "Phase display policy"
+        required: false
+        default: "fold_0_pi"
+        type: choice
+        options:
+          - fold_0_pi
+          - unwrapped
+      density_policy:
+        description: "Phase-shift density policy"
+        required: false
+        default: "strict_normal_domain"
+        type: choice
+        options:
+          - strict_normal_domain
+          - excitation_only_E_gt_mu
+          - x_min_cut
+      noanom_policy:
+        description: "No-anomalous diagnostic policy"
+        required: false
+        default: "none"
+        type: choice
+        options:
+          - none
+          - low_energy_branch_subtraction
+      eta:
+        description: "finite_eta width parameter"
+        required: false
+        default: "1e-6"
+        type: string
+      strict_bw_stage:
+        description: "Strict BW stage"
+        required: false
+        default: "stage1"
+        type: choice
+        options:
+          - stage1
+          - stage2
+      gamma_zero_tol:
+        description: "Strict BW stable fallback threshold"
+        required: false
+        default: "1e-12"
+        type: string
+      overwrite:
+        description: "Overwrite outputs inside the ephemeral runner"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    concurrency:
+      group: relaxtime-meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-meson-density-production
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run trho_asymmetric meson density scan
+        env:
+          CASE_SLUG: ${{ inputs.case_slug }}
+          RUN_STAGE: ${{ inputs.run_stage }}
+          REGIMES: ${{ inputs.regimes }}
+          T_MIN: ${{ inputs.T_min }}
+          T_MAX: ${{ inputs.T_max }}
+          T_STEP: ${{ inputs.T_step }}
+          RHO_VALUES: ${{ inputs.rho_values }}
+          RHO_MIN: ${{ inputs.rho_min }}
+          RHO_MAX: ${{ inputs.rho_max }}
+          RHO_STEP: ${{ inputs.rho_step }}
+          ASYM_UD_RATIO_TARGET: ${{ inputs.asym_ud_ratio_target }}
+          ASYM_S_TARGET: ${{ inputs.asym_s_target }}
+          FLAVOR_PROFILE: ${{ inputs.flavor_profile }}
+          MESON_PROFILE: ${{ inputs.meson_profile }}
+          P_NUM: ${{ inputs.p_num }}
+          T_NUM: ${{ inputs.t_num }}
+          MAX_ITER: ${{ inputs.max_iter }}
+          STABLE_Q_NODES: ${{ inputs.stable_q_nodes }}
+          QMAX: ${{ inputs.qmax }}
+          Q_NODES: ${{ inputs.q_nodes }}
+          OMEGA_MIN: ${{ inputs.omega_min }}
+          OMEGA_MAX: ${{ inputs.omega_max }}
+          OMEGA_NODES: ${{ inputs.omega_nodes }}
+          REAL_AXIS_MODE: ${{ inputs.real_axis_mode }}
+          PHASE_CONVENTION: ${{ inputs.phase_convention }}
+          PHASE_DISPLAY: ${{ inputs.phase_display }}
+          DENSITY_POLICY: ${{ inputs.density_policy }}
+          NOANOM_POLICY: ${{ inputs.noanom_policy }}
+          ETA: ${{ inputs.eta }}
+          STRICT_BW_STAGE: ${{ inputs.strict_bw_stage }}
+          GAMMA_ZERO_TOL: ${{ inputs.gamma_zero_tol }}
+          OVERWRITE: ${{ inputs.overwrite }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${CASE_SLUG}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::case_slug must contain only letters, digits, '.', '_' or '-'"
+            exit 2
+          fi
+
+          case "${RUN_STAGE}" in
+            convergence_low|convergence_mid|convergence_high|diagnostic)
+              RESULT_DIR="data/outputs/results/relaxtime/meson_density/${CASE_SLUG}/convergence/${RUN_STAGE}"
+              FIGURE_DIR="data/outputs/figures/relaxtime/meson_density/${CASE_SLUG}/convergence/${RUN_STAGE}"
+              ;;
+            production)
+              RESULT_DIR="data/outputs/results/relaxtime/meson_density/${CASE_SLUG}"
+              FIGURE_DIR="data/outputs/figures/relaxtime/meson_density/${CASE_SLUG}"
+              ;;
+            *)
+              echo "::error::unsupported run_stage=${RUN_STAGE}"
+              exit 2
+              ;;
+          esac
+
+          export RESULT_DIR FIGURE_DIR
+          echo "RESULT_DIR=${RESULT_DIR}" >> "${GITHUB_ENV}"
+          echo "FIGURE_DIR=${FIGURE_DIR}" >> "${GITHUB_ENV}"
+          mkdir -p "${RESULT_DIR}" "${FIGURE_DIR}"
+
+          CMD=(
+            julia --project=. scripts/relaxtime/run_combined_meson_density_scan.jl
+            --path trho_asymmetric
+            --output-dir "${RESULT_DIR}"
+            --figure-dir "${FIGURE_DIR}"
+            --regimes "${REGIMES}"
+            --tmin "${T_MIN}"
+            --tmax "${T_MAX}"
+            --tstep "${T_STEP}"
+            --asym-ud-ratio-target "${ASYM_UD_RATIO_TARGET}"
+            --asym-s-target "${ASYM_S_TARGET}"
+            --flavor-profile "${FLAVOR_PROFILE}"
+            --meson-profile "${MESON_PROFILE}"
+            --p-num "${P_NUM}"
+            --t-num "${T_NUM}"
+            --max-iter "${MAX_ITER}"
+            --stable-q-nodes "${STABLE_Q_NODES}"
+            --qmax "${QMAX}"
+            --q-nodes "${Q_NODES}"
+            --omega-min "${OMEGA_MIN}"
+            --omega-max "${OMEGA_MAX}"
+            --omega-nodes "${OMEGA_NODES}"
+            --real-axis-mode "${REAL_AXIS_MODE}"
+            --phase-convention "${PHASE_CONVENTION}"
+            --phase-display "${PHASE_DISPLAY}"
+            --density-policy "${DENSITY_POLICY}"
+            --noanom-policy "${NOANOM_POLICY}"
+            --eta "${ETA}"
+            --strict-bw-stage "${STRICT_BW_STAGE}"
+            --gamma-zero-tol "${GAMMA_ZERO_TOL}"
+          )
+
+          if [[ -n "${RHO_VALUES}" ]]; then
+            CMD+=(--rho-values "${RHO_VALUES}")
+          else
+            CMD+=(--rhomin "${RHO_MIN}" --rhomax "${RHO_MAX}" --rhostep "${RHO_STEP}")
+          fi
+
+          if [[ "${OVERWRITE}" == "true" ]]; then
+            CMD+=(--overwrite)
+          fi
+
+          printf '%q ' "${CMD[@]}" > "${RESULT_DIR}/run.command.txt"
+          printf '\n' >> "${RESULT_DIR}/run.command.txt"
+
+          set +e
+          "${CMD[@]}" \
+            > >(tee "${RESULT_DIR}/run.stdout.log") \
+            2> >(tee "${RESULT_DIR}/run.stderr.log" >&2)
+          status=$?
+          set -e
+          echo "${status}" > "${RESULT_DIR}/run.exitcode"
+
+          RUN_STATUS="${status}" python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          result_dir = Path(os.environ["RESULT_DIR"])
+          figure_dir = Path(os.environ["FIGURE_DIR"])
+          command = (result_dir / "run.command.txt").read_text(encoding="utf-8").strip()
+          payload = {
+              "format": "relaxtime_meson_density_remote_run_manifest_v1",
+              "date_utc": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
+              "case_slug": os.environ["CASE_SLUG"],
+              "run_stage": os.environ["RUN_STAGE"],
+              "result_dir": result_dir.as_posix(),
+              "figure_dir": figure_dir.as_posix(),
+              "command": command,
+              "exit_code": int(os.environ["RUN_STATUS"]),
+              "github": {
+                  "sha": os.environ.get("GITHUB_SHA", ""),
+                  "ref": os.environ.get("GITHUB_REF_NAME", ""),
+                  "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+                  "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+              },
+              "inputs": {
+                  "regimes": os.environ["REGIMES"],
+                  "T_min": os.environ["T_MIN"],
+                  "T_max": os.environ["T_MAX"],
+                  "T_step": os.environ["T_STEP"],
+                  "rho_values": os.environ["RHO_VALUES"],
+                  "rho_min": os.environ["RHO_MIN"],
+                  "rho_max": os.environ["RHO_MAX"],
+                  "rho_step": os.environ["RHO_STEP"],
+                  "asym_ud_ratio_target": os.environ["ASYM_UD_RATIO_TARGET"],
+                  "asym_s_target": os.environ["ASYM_S_TARGET"],
+                  "flavor_profile": os.environ["FLAVOR_PROFILE"],
+                  "meson_profile": os.environ["MESON_PROFILE"],
+                  "p_num": os.environ["P_NUM"],
+                  "t_num": os.environ["T_NUM"],
+                  "max_iter": os.environ["MAX_ITER"],
+                  "stable_q_nodes": os.environ["STABLE_Q_NODES"],
+                  "qmax": os.environ["QMAX"],
+                  "q_nodes": os.environ["Q_NODES"],
+                  "omega_min": os.environ["OMEGA_MIN"],
+                  "omega_max": os.environ["OMEGA_MAX"],
+                  "omega_nodes": os.environ["OMEGA_NODES"],
+                  "real_axis_mode": os.environ["REAL_AXIS_MODE"],
+                  "phase_convention": os.environ["PHASE_CONVENTION"],
+                  "phase_display": os.environ["PHASE_DISPLAY"],
+                  "density_policy": os.environ["DENSITY_POLICY"],
+                  "noanom_policy": os.environ["NOANOM_POLICY"],
+                  "eta": os.environ["ETA"],
+                  "strict_bw_stage": os.environ["STRICT_BW_STAGE"],
+                  "gamma_zero_tol": os.environ["GAMMA_ZERO_TOL"],
+              },
+          }
+          (result_dir / "remote_run_manifest.json").write_text(
+              json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          exit "${status}"
+
+      - name: Upload result artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}-results
+          path: |
+            data/outputs/results/relaxtime/meson_density/${{ inputs.case_slug }}/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload figure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}-figures
+          path: |
+            data/outputs/figures/relaxtime/meson_density/${{ inputs.case_slug }}/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Write summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Relaxtime Meson Density Production" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- case slug: \`${{ inputs.case_slug }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- run stage: \`${{ inputs.run_stage }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- result dir: \`${RESULT_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- figure dir: \`${FIGURE_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- regimes: \`${{ inputs.regimes }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- T range: ${{ inputs.T_min }}-${{ inputs.T_max }} MeV, step ${{ inputs.T_step }}" >> "${GITHUB_STEP_SUMMARY}"
+          if [[ -n "${{ inputs.rho_values }}" ]]; then
+            echo "- rho values: \`${{ inputs.rho_values }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "- rho range: ${{ inputs.rho_min }}-${{ inputs.rho_max }} rho/rho0, step ${{ inputs.rho_step }}" >> "${GITHUB_STEP_SUMMARY}"
+          fi
+          echo "- nodes: stable_q=${{ inputs.stable_q_nodes }}, q=${{ inputs.q_nodes }}, omega=${{ inputs.omega_nodes }}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Artifacts preserve project-relative paths. Download them into a review workspace, audit convergence, then commit only production-grade outputs." >> "${GITHUB_STEP_SUMMARY}"
