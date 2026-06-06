@@ -61,6 +61,7 @@ using Main.MottTransition: mott_threshold_mass, mott_gap, mott_threshold_masses,
 
 export DEFAULT_MESONS
 export solve_gap_and_meson_point
+export solve_meson_point_from_equilibrium
 export build_equilibrium_params
 export build_meson_continuation_state
 
@@ -1731,6 +1732,22 @@ function build_equilibrium_params(base, T_fm::Real, mu_fm::Real; xi::Real=0.0, m
     return (quark_params=quark_params, thermo_params=thermo_params)
 end
 
+"""
+    solve_meson_point_from_equilibrium(equilibrium, T_fm; kwargs...) -> NamedTuple
+
+Adapter：消费已经求解完成的 equilibrium result，继续执行 meson mass / width
+后处理，不重新运行 gap solver。该入口用于把 `FixedMu`、`FixedAsymmetricRho`
+等不同上游 equilibrium source 接入同一套 meson point 后处理链。
+"""
+function solve_meson_point_from_equilibrium(equilibrium, T_fm::Real; kwargs...)
+    return solve_gap_and_meson_point(
+        T_fm,
+        0.0;
+        equilibrium_result=equilibrium,
+        kwargs...,
+    )
+end
+
 """一次性完成：平衡求解 → 介子质量/宽度 → Mott 阈值与 gap。
 
 返回 NamedTuple：
@@ -1771,6 +1788,7 @@ function solve_gap_and_meson_point(
     mixed_seed_tracking_state=nothing,
     force_global_fallback::Bool=false,
     flavor_mu_override=nothing,
+    equilibrium_result=nothing,
 )
     continuation = _normalize_meson_continuation_state(continuation_state)
     effective_seed_state = (continuation.equilibrium_seed_state !== nothing && _is_default_hadron_seed(seed_state)) ? continuation.equilibrium_seed_state : seed_state
@@ -1785,7 +1803,9 @@ function solve_gap_and_meson_point(
     end
 
     equilibrium_seed = equilibrium_seed_strategy === nothing ? seed_guess : nothing
-    base = if flavor_mu_override === nothing
+    base = if equilibrium_result !== nothing
+        equilibrium_result
+    elseif flavor_mu_override === nothing
         Main.EquilibriumFacade.solve_equilibrium_backend(
             T_fm,
             mu_fm;

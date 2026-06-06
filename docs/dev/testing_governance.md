@@ -142,6 +142,13 @@
   - 在 `docs/dev/active` 记录回归影响；
   - 补一条替代 smoke 维持覆盖。
 
+### 慢 CLI smoke 的替代策略
+
+- 会冷启动 Julia 子进程、加载 `Models`、并执行数值扫描的 CLI 测试，不应作为默认 smoke 路径运行。
+- 默认 smoke 应优先覆盖轻量 contract：参数解析、输出字段、配置入口、路径治理和错误拒绝语义。
+- 完整 CLI smoke 可保留为显式 opt-in 或 full/nightly 任务，并必须在测试文件中标明触发环境变量。
+- `run_combined_meson_density_scan.jl` 的默认 integration 覆盖使用 `scripts/relaxtime/combined_meson_density_scan_contract.jl`，完整 CLI 验证通过 `RUN_COMBINED_MESON_DENSITY_CLI_SMOKE=1` 显式启用。
+
 ## Benchmark 基础设施
 
 ```

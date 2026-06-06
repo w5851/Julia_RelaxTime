@@ -1,0 +1,270 @@
+name: Relaxtime Meson Density Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      case_slug:
+        description: "Case slug under data/outputs/{results,figures}/relaxtime/meson_density"
+        required: false
+        default: "trho_asymmetric_kplus_piplus_scan_v1"
+        type: string
+      run_stage:
+        description: "Output placement stage"
+        required: false
+        default: "convergence_low"
+        type: choice
+        options:
+          - convergence_low
+          - convergence_mid
+          - convergence_high
+          - diagnostic
+          - production
+      regimes:
+        description: "Comma-separated density regimes"
+        required: false
+        default: "stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference"
+        type: string
+      grid_args:
+        description: "Whitespace-separated grid args; values must not contain spaces"
+        required: false
+        default: "--tmin 120 --tmax 220 --tstep 10 --rhomin 0.05 --rhomax 1.00 --rhostep 0.05"
+        type: string
+      physics_args:
+        description: "Whitespace-separated profile/constraint args; values must not contain spaces"
+        required: false
+        default: "--asym-ud-ratio-target 0.876 --asym-s-target 0.0 --flavor-profile default --meson-profile asymmetric_kplus_over_piplus_signed"
+        type: string
+      resolution_profile:
+        description: "Node-count preset; custom uses custom_resolution_args"
+        required: false
+        default: "low"
+        type: choice
+        options:
+          - low
+          - mid
+          - high
+          - custom
+      custom_resolution_args:
+        description: "Whitespace-separated resolution args for resolution_profile=custom"
+        required: false
+        default: ""
+        type: string
+      phase_args:
+        description: "Whitespace-separated phase-shift/BW policy args; values must not contain spaces"
+        required: false
+        default: "--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy strict_normal_domain --noanom-policy none --eta 1e-6 --strict-bw-stage stage1"
+        type: string
+      extra_args:
+        description: "Extra whitespace-separated CLI args appended last"
+        required: false
+        default: ""
+        type: string
+      overwrite:
+        description: "Overwrite outputs inside the ephemeral runner"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    concurrency:
+      group: relaxtime-meson-density-${{ inputs.case_slug }}-${{ inputs.run_stage }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-meson-density-production
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run trho_asymmetric meson density scan
+        env:
+          CASE_SLUG: ${{ inputs.case_slug }}
+          RUN_STAGE: ${{ inputs.run_stage }}
+          REGIMES: ${{ inputs.regimes }}
+          GRID_ARGS: ${{ inputs.grid_args }}
+          PHYSICS_ARGS: ${{ inputs.physics_args }}
+          RESOLUTION_PROFILE: ${{ inputs.resolution_profile }}
+          CUSTOM_RESOLUTION_ARGS: ${{ inputs.custom_resolution_args }}
+          PHASE_ARGS: ${{ inputs.phase_args }}
+          EXTRA_ARGS: ${{ inputs.extra_args }}
+          OVERWRITE: ${{ inputs.overwrite }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "${CASE_SLUG}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::case_slug must contain only letters, digits, '.', '_' or '-'"
+            exit 2
+          fi
+
+          case "${RUN_STAGE}" in
+            convergence_low|convergence_mid|convergence_high|diagnostic)
+              RESULT_DIR="data/outputs/results/relaxtime/meson_density/${CASE_SLUG}/convergence/${RUN_STAGE}"
+              FIGURE_DIR="data/outputs/figures/relaxtime/meson_density/${CASE_SLUG}/convergence/${RUN_STAGE}"
+              ;;
+            production)
+              RESULT_DIR="data/outputs/results/relaxtime/meson_density/${CASE_SLUG}"
+              FIGURE_DIR="data/outputs/figures/relaxtime/meson_density/${CASE_SLUG}"
+              ;;
+            *)
+              echo "::error::unsupported run_stage=${RUN_STAGE}"
+              exit 2
+              ;;
+          esac
+
+          case "${RESOLUTION_PROFILE}" in
+            low)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 96 --qmax 4.0 --q-nodes 12 --omega-min 0.05 --omega-max 4.0 --omega-nodes 12 --gamma-zero-tol 1e-12"
+              ;;
+            mid)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 192 --qmax 4.0 --q-nodes 24 --omega-min 0.05 --omega-max 4.0 --omega-nodes 24 --gamma-zero-tol 1e-12"
+              ;;
+            high)
+              RESOLUTION_ARGS="--p-num 8 --t-num 4 --max-iter 20 --stable-q-nodes 256 --qmax 4.0 --q-nodes 36 --omega-min 0.05 --omega-max 4.0 --omega-nodes 36 --gamma-zero-tol 1e-12"
+              ;;
+            custom)
+              if [[ -z "${CUSTOM_RESOLUTION_ARGS}" ]]; then
+                echo "::error::custom_resolution_args is required when resolution_profile=custom"
+                exit 2
+              fi
+              RESOLUTION_ARGS="${CUSTOM_RESOLUTION_ARGS}"
+              ;;
+            *)
+              echo "::error::unsupported resolution_profile=${RESOLUTION_PROFILE}"
+              exit 2
+              ;;
+          esac
+
+          read -r -a GRID_ARGV <<< "${GRID_ARGS}"
+          read -r -a PHYSICS_ARGV <<< "${PHYSICS_ARGS}"
+          read -r -a RESOLUTION_ARGV <<< "${RESOLUTION_ARGS}"
+          read -r -a PHASE_ARGV <<< "${PHASE_ARGS}"
+          read -r -a EXTRA_ARGV <<< "${EXTRA_ARGS}"
+
+          export RESULT_DIR FIGURE_DIR
+          echo "RESULT_DIR=${RESULT_DIR}" >> "${GITHUB_ENV}"
+          echo "FIGURE_DIR=${FIGURE_DIR}" >> "${GITHUB_ENV}"
+          mkdir -p "${RESULT_DIR}" "${FIGURE_DIR}"
+
+          CMD=(
+            julia --project=. scripts/relaxtime/run_combined_meson_density_scan.jl
+            --path trho_asymmetric
+            --output-dir "${RESULT_DIR}"
+            --figure-dir "${FIGURE_DIR}"
+            --regimes "${REGIMES}"
+            "${GRID_ARGV[@]}"
+            "${PHYSICS_ARGV[@]}"
+            "${RESOLUTION_ARGV[@]}"
+            "${PHASE_ARGV[@]}"
+            "${EXTRA_ARGV[@]}"
+          )
+
+          if [[ "${OVERWRITE}" == "true" ]]; then
+            CMD+=(--overwrite)
+          fi
+
+          printf '%q ' "${CMD[@]}" > "${RESULT_DIR}/run.command.txt"
+          printf '\n' >> "${RESULT_DIR}/run.command.txt"
+
+          set +e
+          "${CMD[@]}" \
+            > >(tee "${RESULT_DIR}/run.stdout.log") \
+            2> >(tee "${RESULT_DIR}/run.stderr.log" >&2)
+          status=$?
+          set -e
+          echo "${status}" > "${RESULT_DIR}/run.exitcode"
+
+          RUN_STATUS="${status}" python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          result_dir = Path(os.environ["RESULT_DIR"])
+          figure_dir = Path(os.environ["FIGURE_DIR"])
+          command = (result_dir / "run.command.txt").read_text(encoding="utf-8").strip()
+          payload = {
+              "format": "relaxtime_meson_density_remote_run_manifest_v1",
+              "date_utc": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
+              "case_slug": os.environ["CASE_SLUG"],
+              "run_stage": os.environ["RUN_STAGE"],
+              "result_dir": result_dir.as_posix(),
+              "figure_dir": figure_dir.as_posix(),
+              "command": command,
+              "exit_code": int(os.environ["RUN_STATUS"]),
+              "github": {
+                  "sha": os.environ.get("GITHUB_SHA", ""),
+                  "ref": os.environ.get("GITHUB_REF_NAME", ""),
+                  "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+                  "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+              },
+              "inputs": {
+                  "regimes": os.environ["REGIMES"],
+                  "grid_args": os.environ["GRID_ARGS"],
+                  "physics_args": os.environ["PHYSICS_ARGS"],
+                  "resolution_profile": os.environ["RESOLUTION_PROFILE"],
+                  "custom_resolution_args": os.environ["CUSTOM_RESOLUTION_ARGS"],
+                  "phase_args": os.environ["PHASE_ARGS"],
+                  "extra_args": os.environ["EXTRA_ARGS"],
+              },
+          }
+          (result_dir / "remote_run_manifest.json").write_text(
+              json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+          exit "${status}"
+
+      - name: Upload result artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meson-density-${{ inputs.run_stage }}-results
+          path: |
+            data/outputs/results/relaxtime/meson_density/${{ inputs.case_slug }}/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload figure artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: meson-density-${{ inputs.run_stage }}-figures
+          path: |
+            data/outputs/figures/relaxtime/meson_density/${{ inputs.case_slug }}/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Write summary
+        if: always()
+        shell: bash
+        run: |
+          echo "## Relaxtime Meson Density Production" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- case slug: \`${{ inputs.case_slug }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- run stage: \`${{ inputs.run_stage }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- result dir: \`${RESULT_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- figure dir: \`${FIGURE_DIR:-not-created}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- regimes: \`${{ inputs.regimes }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- grid args: \`${{ inputs.grid_args }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- resolution profile: \`${{ inputs.resolution_profile }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "- phase args: \`${{ inputs.phase_args }}\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Artifacts preserve project-relative paths. Download them into a review workspace, audit convergence, then commit only production-grade outputs." >> "${GITHUB_STEP_SUMMARY}"

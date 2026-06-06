@@ -17,6 +17,7 @@
 - `solve_gap_and_transport`
 - `solve_transport_from_equilibrium`
 - `solve_gap_and_meson_point`
+- `solve_meson_point_from_equilibrium`
 
 它们的共同特征：
 
@@ -104,6 +105,12 @@ meson workflow 的实现位于 [src/models/workflows/MesonMassWorkflow.jl](src/m
 - 统一返回 `equilibrium`、`quark_params`、`thermo_params`
 - 在多个 meson 通道之间复用状态
 - 将“物理通道扫描”组织成可直接消费的结果字典
+
+`solve_meson_point_from_equilibrium` 是同一职责边界内的 adapter。它消费已经求解
+完成的 `SolverResult`，只执行 meson mass / width / Mott 后处理，不重新运行 gap
+solver。这样 `FixedMu`、`FixedAsymmetricRho` 等不同 equilibrium source 可以进入
+同一套 meson point 与 density 后处理，而不需要脚本层重组 `QuarkParams`、
+`ThermoParams` 或介子根求解。
 
 ## 为什么模块访问器必须写文档
 

@@ -73,6 +73,32 @@ sqrt(s_NN)
    - 同上
    - `\mu_\pi = 134.5~\mathrm{MeV}`
 
+此外，为接入 `FixedAsymmetricRho` 等 flavor 化学势不等的上游平衡态，当前
+meson profile 还支持显式 signed flavor rule：
+
+```text
+mu_pi_rule = "mu_u_minus_mu_d_signed"
+mu_K_rule  = "mu_u_minus_mu_s_signed"
+```
+
+其中：
+
+```math
+\mu_{\pi^+} = \mu_u - \mu_d,\qquad
+\mu_{\pi^-} = \mu_d - \mu_u,
+```
+
+```math
+\mu_{K^+} = \mu_u - \mu_s,\qquad
+\mu_{K^-} = \mu_s - \mu_u.
+```
+
+该规则只定义 **meson-level effective chemical potential**，不改变上游
+equilibrium 的 flavor `\mu_u,\mu_d,\mu_s` 求解语义。当前配置中的
+`asymmetric_kplus_over_piplus_signed` 与
+`asymmetric_kminus_over_piminus_signed` 是为非对称 T-ρ smoke / diagnostic
+路径准备的 signed profile。
+
 ## 4. 与 `\mu_s` 的边界
 
 当前还不能把 `\mu_s` 直接等同于 `\mu_K`，原因是：

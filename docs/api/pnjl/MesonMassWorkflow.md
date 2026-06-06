@@ -53,6 +53,16 @@ build_equilibrium_params(base, T_fm, mu_fm; xi=0.0)
 
 将 `PNJL.solve` 的结果 `base` 转成 `(quark_params, thermo_params)`，便于在外层脚本做“先求平衡、后多次复用参数”的组织。
 
+### `solve_meson_point_from_equilibrium`
+
+```julia
+solve_meson_point_from_equilibrium(equilibrium, T_fm; mesons=DEFAULT_MESONS, kwargs...)
+```
+
+消费已经求解完成的 `SolverResult`，继续执行介子质量、宽度、Mott 阈值与 gap
+后处理，不重新运行 gap solver。该 adapter 用于把 `FixedMu`、
+`FixedAsymmetricRho` 等不同上游 equilibrium source 接到同一套 meson workflow。
+
 ## 默认通道
 
 `DEFAULT_MESONS`：

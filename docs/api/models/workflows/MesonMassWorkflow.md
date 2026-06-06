@@ -5,6 +5,7 @@
 ## 首选入口
 
 - `Models.solve_gap_and_meson_point`
+- `Models.solve_meson_point_from_equilibrium`
 
 该入口通过 [src/models/entrypoints.jl](src/models/entrypoints.jl#L57) 转发到 workflow 模块。
 
@@ -54,12 +55,37 @@
 `equilibrium_seed_strategy=Models.MultiSeed()`。此时平衡态 FixedMu 求解会在每个点执行多初值压力选优；
 `continuation_state` 仍可用于介子根的连续性，但不会强制 equilibrium 沿上一点分支延拓。
 
+## `solve_meson_point_from_equilibrium`
+
+这是 equilibrium-to-meson adapter：调用方先通过 `Models.solve(...)` 或其他
+稳定 equilibrium source 得到 `SolverResult`，再把它交给该入口继续求介子质量、
+宽度、Mott 阈值与 gap。adapter 不重新运行 gap solver。
+
+典型用途：
+
+- `FixedMu` 路径的 parity / diagnostic 复用
+- `FixedAsymmetricRho` 这类 density-constrained equilibrium source 的介子后处理
+- 扫描脚本中把“上游路径策略”和“介子数密度口径”分开组合
+
+最小调用形态：
+
+```julia
+model = Models.create_model(:PNJL)
+eq = Models.solve(model, Models.FixedAsymmetricRho(0.05, 0.876, 0.0), T_fm)
+meson_point = Models.solve_meson_point_from_equilibrium(
+    eq,
+    T_fm;
+    mesons=(:pi_plus, :K_plus),
+)
+```
+
 ## 默认通道与复用接口
 
 workflow 模块同时导出：
 
 - `DEFAULT_MESONS`
 - `build_equilibrium_params`
+- `solve_meson_point_from_equilibrium`
 
 这意味着调用方既可以直接走 `solve_gap_and_meson_point`，也可以先求平衡态，再把参数转换为 meson 计算所需的稳定输入结构。
 
