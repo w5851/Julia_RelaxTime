@@ -3,7 +3,8 @@ Combined meson-density scan entrypoint.
 
 This script keeps the scan-path axis separate from the density-regime axis:
 
-- path strategy: currently `tmu`, a fixed-mu temperature scan in `(T, mu)` space;
+- path strategy: `tmu` for fixed-mu temperature scans in `(T, mu)` space, or
+  `trho_asymmetric` for FixedAsymmetricRho density-constrained scans;
 - density regime: stable, strict BW, current phase shift, generalized BU.
 
 It is intentionally a thin orchestrator over `Models` / `MesonDensityWorkflow`.
