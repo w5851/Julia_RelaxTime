@@ -2,6 +2,7 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_combined_meson_density_scan.jl")
+const CONTRACT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "combined_meson_density_scan_contract.jl")
 const OUTDIR = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "scan", "test_outputs", "combined_meson_density")
 const FIGDIR = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "scan", "test_outputs", "combined_meson_density")
 const OUTCSV = joinpath(OUTDIR, "combined_meson_density_scan.csv")
@@ -12,20 +13,50 @@ const ASYM_PLUS_PROFILE = joinpath(PROJECT_ROOT, "config", "physics", "meson_che
 const ASYM_MINUS_PROFILE = joinpath(PROJECT_ROOT, "config", "physics", "meson_chemical", "asymmetric_kminus_over_piminus_signed.toml")
 const RUN_COMBINED_MESON_DENSITY_CLI = lowercase(get(ENV, "RUN_COMBINED_MESON_DENSITY_CLI_SMOKE", "0")) in ("1", "true", "yes")
 
-@testset "combined meson density scan script contract" begin
-    source = read(SCRIPT, String)
-    @test occursin("const DEFAULT_REGIMES", source)
-    @test occursin(":stable", source)
-    @test occursin(":strict_bw_stage1", source)
-    @test occursin(":phase_shift_current", source)
-    @test occursin(":phase_shift_gbu_reference", source)
-    @test occursin("\"path_strategy\", \"path_point_index\"", source)
-    @test occursin("\"phase_display\"", source)
-    @test occursin("function _write_csv", source)
-    @test occursin("function _write_svg_plot", source)
-    @test occursin("function _write_plot_manifest", source)
-    @test occursin("Bridge-style composition", source)
-    @test occursin("--figure-dir", source)
+if !isdefined(Main, :CombinedMesonDensityScanContract)
+    include(CONTRACT)
+end
+const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
+
+@testset "combined meson density scan CLI contract" begin
+    @test isfile(CONTRACT)
+    tmu = CMD_CONTRACT.parse_args([
+        "--output-dir", OUTDIR,
+        "--figure-dir", FIGDIR,
+        "--regimes", "stable,phase_shift_current",
+        "--muq-values", "0,100",
+        "--no-plot",
+    ])
+    @test tmu.path_strategy === :tmu
+    @test tmu.output_dir == OUTDIR
+    @test tmu.figure_dir == FIGDIR
+    @test tmu.regimes == [:stable, :phase_shift_current]
+    @test tmu.muq_values_MeV == [0.0, 100.0]
+    @test tmu.plot == false
+
+    asym = CMD_CONTRACT.parse_args([
+        "--path", "trho_asymmetric",
+        "--regimes", "stable,phase_shift_current",
+        "--rho-values", "0.05,0.1",
+        "--asym-ud-ratio-target", "0.876",
+        "--asym-s-target", "0",
+        "--meson-profile", "asymmetric_kplus_over_piplus_signed",
+    ])
+    @test asym.path_strategy === :trho_asymmetric
+    @test asym.output_dir == CMD_CONTRACT.DEFAULT_TRHO_ASYMMETRIC_OUTPUT_DIR
+    @test endswith(asym.figure_dir, joinpath("relaxtime", "meson_density", "combined_trho_asymmetric_smoke_scan"))
+    @test asym.regimes == [:stable, :phase_shift_current]
+    @test asym.rho_values == [0.05, 0.1]
+    @test asym.asym_ud_ratio_target ≈ 0.876
+    @test asym.meson_profile == "asymmetric_kplus_over_piplus_signed"
+
+    @test "constraint_mode" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "rho_u_over_rho_d" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "mu_pi_MeV" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "phase_display" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test :phase_shift_gbu_reference in CMD_CONTRACT.DEFAULT_REGIMES
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "tmu", "--rho-values", "0.05"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--muq-values", "0,10"])
 end
 
 if RUN_COMBINED_MESON_DENSITY_CLI
@@ -77,15 +108,10 @@ end
 
 @testset "combined meson density FixedAsymmetricRho path contract" begin
     source = read(SCRIPT, String)
-    @test occursin("--path <tmu|trho_asymmetric>", source)
-    @test occursin("DEFAULT_TRHO_ASYMMETRIC_OUTPUT_DIR", source)
+    @test occursin("combined_meson_density_scan_contract.jl", source)
     @test occursin("function _run_trho_asymmetric_scan", source)
     @test occursin("Models.FixedAsymmetricRho", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
-    @test occursin("\"constraint_mode\"", source)
-    @test occursin("\"rho_u_over_rho_d\"", source)
-    @test occursin("\"mu_u_MeV\"", source)
-    @test occursin("\"mu_pi_MeV\"", source)
 
     @test isfile(ASYM_PLUS_PROFILE)
     @test isfile(ASYM_MINUS_PROFILE)
