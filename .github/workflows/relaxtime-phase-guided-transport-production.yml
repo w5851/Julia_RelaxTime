@@ -1,0 +1,286 @@
+name: Relaxtime Phase-Guided Transport Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "phase-guided mode: fixed-muB-phase-scaled, fixed-T-sparse-muB, or both"
+        required: false
+        default: "both"
+        type: choice
+        options:
+          - fixed-muB-phase-scaled
+          - fixed-T-sparse-muB
+          - both
+      case_name:
+        description: "case directory name under data/outputs/results/relaxtime/transport/phase_guided"
+        required: false
+        default: "first_canonical_v1_diagnostic"
+        type: string
+      run_tier:
+        description: "diagnostic run tier"
+        required: false
+        default: "dry-run"
+        type: choice
+        options:
+          - dry-run
+          - smoke
+          - production
+      propagator_xi_policy:
+        description: "sigma(s)/propagator xi policy"
+        required: false
+        default: "match_thermo"
+        type: choice
+        options:
+          - match_thermo
+          - isotropic
+      tau_p_nodes:
+        description: "Tau momentum nodes for production tier"
+        required: false
+        default: "20"
+        type: string
+      tau_angle_nodes:
+        description: "Tau cos(theta) nodes for production tier"
+        required: false
+        default: "4"
+        type: string
+      tau_phi_nodes:
+        description: "Tau phi nodes for production tier"
+        required: false
+        default: "8"
+        type: string
+      tau_n_sigma:
+        description: "Tau sigma integral points for production tier"
+        required: false
+        default: "6"
+        type: string
+      sigma_grid_n:
+        description: "Tau sigma cache grid size for production tier"
+        required: false
+        default: "60"
+        type: string
+      compute_bulk:
+        description: "Compute zeta-related outputs"
+        required: false
+        default: true
+        type: boolean
+      render_plots:
+        description: "Render phase-guided figures after a non-dry-run scan"
+        required: false
+        default: true
+        type: boolean
+      overwrite:
+        description: "Overwrite existing outputs in the runner workspace"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-relaxtime-phase-guided-transport
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Install Python plotting dependencies
+        if: ${{ inputs.render_plots == true && inputs.run_tier != 'dry-run' }}
+        run: python -m pip install numpy pandas matplotlib
+
+      - name: Run phase-guided transport artifact producer
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          run_tier="${{ inputs.run_tier || 'dry-run' }}"
+          policy="${{ inputs.propagator_xi_policy || 'match_thermo' }}"
+          render_plots="${{ inputs.render_plots }}"
+          mode_input="${{ inputs.mode || 'both' }}"
+
+          modes=()
+          if [ "$mode_input" = "both" ]; then
+            modes=("fixed-muB-phase-scaled" "fixed-T-sparse-muB")
+          else
+            modes=("$mode_input")
+          fi
+
+          common_args=(
+            --case-name "$case_name"
+            --propagator-xi-policy "$policy"
+            --channel-diagnostics
+          )
+
+          if [ "$run_tier" = "smoke" ]; then
+            common_args+=(
+              --tau-p-nodes 6
+              --tau-angle-nodes 2
+              --tau-phi-nodes 2
+              --tau-n-sigma 4
+              --sigma-grid-n 12
+            )
+          else
+            common_args+=(
+              --tau-p-nodes "${{ inputs.tau_p_nodes || '20' }}"
+              --tau-angle-nodes "${{ inputs.tau_angle_nodes || '4' }}"
+              --tau-phi-nodes "${{ inputs.tau_phi_nodes || '8' }}"
+              --tau-n-sigma "${{ inputs.tau_n_sigma || '6' }}"
+              --sigma-grid-n "${{ inputs.sigma_grid_n || '60' }}"
+            )
+          fi
+
+          if [ "${{ inputs.compute_bulk }}" != "true" ]; then
+            common_args+=(--no-compute-bulk)
+          fi
+          if [ "${{ inputs.overwrite }}" = "true" ]; then
+            common_args+=(--overwrite)
+          fi
+          if [ "$run_tier" = "dry-run" ]; then
+            common_args+=(--dry-run)
+          fi
+
+          for mode in "${modes[@]}"; do
+            if [ "$mode" = "fixed-muB-phase-scaled" ]; then
+              scan_args=(
+                --mode fixed-muB-phase-scaled
+                --muB-list 0,450,900
+                --alphaT-list 1.0,1.1,1.2
+              )
+              if [ "$run_tier" = "smoke" ]; then
+                scan_args=(
+                  --mode fixed-muB-phase-scaled
+                  --muB-list 0
+                  --alphaT-list 1.0
+                  --xi-list -0.3,0.0
+                )
+              fi
+            elif [ "$mode" = "fixed-T-sparse-muB" ]; then
+              scan_args=(
+                --mode fixed-T-sparse-muB
+                --muB-list 0,450,900
+                --T-list 120,160,200
+              )
+              if [ "$run_tier" = "smoke" ]; then
+                scan_args=(
+                  --mode fixed-T-sparse-muB
+                  --muB-list 0
+                  --T-list 200
+                  --xi-list -0.3,0.0
+                )
+              fi
+            else
+              echo "::error::Unknown mode: $mode"
+              exit 1
+            fi
+
+            printf 'Running phase-guided transport scan (%s):\n  ' "$mode"
+            printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
+            printf '\n'
+            julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
+
+            if [ "$run_tier" != "dry-run" ] && [ "$render_plots" = "true" ]; then
+              mode_dir="mode_a_fixed_muB_phase_scaled"
+              if [ "$mode" = "fixed-T-sparse-muB" ]; then
+                mode_dir="mode_b_fixed_T_sparse_muB"
+              fi
+              case_dir="data/outputs/results/relaxtime/transport/phase_guided/${mode_dir}/${case_name}"
+              printf 'Rendering phase-guided transport plots (%s):\n  ' "$mode"
+              printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
+              printf '\n'
+              julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
+            fi
+          done
+
+      - name: Write diagnostic audit note
+        shell: bash
+        run: |
+          set -euo pipefail
+          case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
+          mkdir -p "$audit_root"
+          cat > "$audit_root/DIAGNOSTIC_AUDIT.md" <<EOF
+          # Relaxtime Phase-Guided Transport Diagnostic Audit
+
+          This GitHub Actions workflow produces reviewable artifacts for phase-guided transport scans.
+          It does not commit, promote, or certify repository production data.
+
+          ## Inputs
+
+          - mode: `${{ inputs.mode || 'both' }}`
+          - case_name: `${case_name}`
+          - run_tier: `${{ inputs.run_tier || 'dry-run' }}`
+          - propagator_xi_policy: `${{ inputs.propagator_xi_policy || 'match_thermo' }}`
+          - compute_bulk: `${{ inputs.compute_bulk }}`
+          - render_plots: `${{ inputs.render_plots }}`
+          - overwrite: `${{ inputs.overwrite }}`
+          - tau_p_nodes: `${{ inputs.tau_p_nodes || '20' }}`
+          - tau_angle_nodes: `${{ inputs.tau_angle_nodes || '4' }}`
+          - tau_phi_nodes: `${{ inputs.tau_phi_nodes || '8' }}`
+          - tau_n_sigma: `${{ inputs.tau_n_sigma || '6' }}`
+          - sigma_grid_n: `${{ inputs.sigma_grid_n || '60' }}`
+
+          ## Verdict
+
+          diagnostic-only
+
+          Production-grade promotion still requires an explicit convergence gate, channel diagnostics review,
+          and a separate decision to import selected artifacts into the repository data tree.
+          EOF
+
+      - name: Upload phase-guided result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: relaxtime-phase-guided-transport-results-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}
+          path: |
+            data/outputs/results/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
+            data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}/DIAGNOSTIC_AUDIT.md
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
+
+      - name: Upload phase-guided figure artifacts
+        if: ${{ inputs.render_plots == true && inputs.run_tier != 'dry-run' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: relaxtime-phase-guided-transport-figures-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}
+          path: |
+            data/outputs/figures/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
+
+      - name: Write summary
+        shell: bash
+        run: |
+          {
+            echo "## Relaxtime Phase-Guided Transport Production"
+            echo ""
+            echo "- mode: \`${{ inputs.mode || 'both' }}\`"
+            echo "- case_name: \`${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}\`"
+            echo "- run_tier: \`${{ inputs.run_tier || 'dry-run' }}\`"
+            echo "- propagator_xi_policy: \`${{ inputs.propagator_xi_policy || 'match_thermo' }}\`"
+            echo "- compute_bulk: \`${{ inputs.compute_bulk }}\`"
+            echo "- render_plots: \`${{ inputs.render_plots }}\`"
+            echo "- artifact retention days: \`${ARTIFACT_RETENTION_DAYS}\`"
+            echo ""
+            echo "Verdict: \`diagnostic-only\` until convergence and channel diagnostics are reviewed."
+          } >> "$GITHUB_STEP_SUMMARY"

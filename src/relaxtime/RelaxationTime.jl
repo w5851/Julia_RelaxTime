@@ -223,6 +223,7 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
+- `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
 
 # Returns
 A NamedTuple containing average scattering rates for all required processes.
@@ -264,6 +265,8 @@ function compute_average_rates(
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
     require_cache_fingerprint::Bool=false,
+    propagator_xi_policy::Symbol=:match_thermo,
+    propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -292,6 +295,8 @@ function compute_average_rates(
         asym_extra_points=asym_extra_points,
         interpolation_mode=interpolation_mode,
         require_cache_fingerprint=require_cache_fingerprint,
+        propagator_xi_policy=propagator_xi_policy,
+        propagator_quark_params=propagator_quark_params,
     )
 end
 
@@ -318,6 +323,8 @@ function _compute_average_rates_core(
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
     require_cache_fingerprint::Bool=false,
+    propagator_xi_policy::Symbol=:match_thermo,
+    propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -375,6 +382,8 @@ function _compute_average_rates_core(
             asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
             require_cache_fingerprint=require_cache_fingerprint,
+            propagator_xi_policy=propagator_xi_policy,
+            propagator_quark_params=propagator_quark_params,
         )
     end
 
@@ -482,6 +491,7 @@ and the averaged rates for reuse.
 - `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
+- `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
 
 # Returns
 A NamedTuple with fields:
@@ -528,6 +538,8 @@ function relaxation_times(
     asym_extra_points::Int=10,
     interpolation_mode::Symbol=:pchip,
     require_cache_fingerprint::Bool=false,
+    propagator_xi_policy::Symbol=:match_thermo,
+    propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -560,6 +572,8 @@ function relaxation_times(
             asym_extra_points=asym_extra_points,
             interpolation_mode=interpolation_mode,
             require_cache_fingerprint=require_cache_fingerprint,
+            propagator_xi_policy=propagator_xi_policy,
+            propagator_quark_params=propagator_quark_params,
         )
     end
 

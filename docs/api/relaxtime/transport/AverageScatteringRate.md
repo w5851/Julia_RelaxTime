@@ -47,6 +47,14 @@ $$\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p
 - `average_scattering_rate(process, ...; sigma_cutoff=nothing)`: 计算平均散射率
 - `number_density(flavor, ...)`: 计算数密度（始终使用半无穷积分）
 
+## 诊断性传播子 ξ 策略
+
+`average_scattering_rate` 默认使用 `propagator_xi_policy=:match_thermo`，即 σ(s)/propagator 与外层分布、密度、平衡态使用同一个 `thermo_params.ξ` 口径。
+
+为排查各向异性进入传播子/截面层后对 τ 的影响，可以显式传入 `propagator_xi_policy=:isotropic`。该分支只把 σ(s)/propagator 计算上下文解析为 `ξ=0`，并在未显式给出 `propagator_quark_params` 时用各向同性 A 场补齐传播子所需的 `quark_params.A`；外层动量分布、数密度、平衡态输入仍使用真实 `ξ`。
+
+这一路径是诊断性反事实口径，不改变默认行为，也不应在完成同网格复算、channel diagnostics 与节点/σ-grid/interpolation 收敛检查前写成正式修复结论。
+
 ## 截面缓存指纹（fingerprint）
 
 `CrossSectionCache` 会在通过 `precompute_cross_section!` 或 `build_w0cdf_pchip_cache` 生成 σ(s) 表时写入 `fingerprint` 元数据。该元数据记录过程名、夸克质量/化学势/A、热力学参数、`K_coeffs`、σ 积分点数、阈值渐近正则化参数，以及 σ 网格摘要（长度、端点和哈希）。w0cdf 构建路径还记录 `N`、设计节点数、`p_cutoff` 与 `scale`，其中 `N` 与设计节点数用于溯源，不要求等于 `average_scattering_rate` 的当前默认值。

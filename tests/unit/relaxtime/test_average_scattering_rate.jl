@@ -12,6 +12,7 @@ using Main.ParameterTypes: QuarkParams, ThermoParams
 using Main.GaussLegendre: gauleg
 using Main.TotalCrossSection: total_cross_section
 using Main.OneLoopIntegrals: A
+using Main.AFieldBuilder: ensure_quark_params_has_A
 using Main.EffectiveCouplings: calculate_G_from_A, calculate_effective_couplings
 using Main.Constants_PNJL: G_fm2, K_fm5
 
@@ -294,6 +295,68 @@ end
         n_sigma_points=4,
         sigma_cutoff=nothing,
         scale=11.0,
+    )
+end
+
+@testset "propagator xi policy isolates sigma cache context" begin
+    process = :uu_to_uu
+    prop_q_iso = ensure_quark_params_has_A(
+        (m=QUARK_PARAMS.m, μ=QUARK_PARAMS.μ),
+        THERMO_ISO;
+        use_aniso=false,
+        warn_on_auto=false,
+    )
+    cache = CrossSectionCache(process)
+    precompute_cross_section!(
+        cache,
+        [10.0, 20.0, 500.0],
+        prop_q_iso,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        threshold_subtraction=false,
+    )
+
+    ω_policy = average_scattering_rate(
+        process,
+        QUARK_PARAMS,
+        THERMO_ANISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        propagator_xi_policy=:isotropic,
+    )
+    @test isfinite(ω_policy)
+    @test ω_policy >= 0.0
+
+    @test_throws ArgumentError average_scattering_rate(
+        process,
+        QUARK_PARAMS,
+        THERMO_ANISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+
+    @test_throws ArgumentError average_scattering_rate(
+        process,
+        QUARK_PARAMS,
+        THERMO_ANISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        propagator_xi_policy=:bad_policy,
     )
 end
 

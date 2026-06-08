@@ -350,6 +350,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
                 "tau_asym_fit_min_points" => string(opts.tau_asym_fit_min_points),
                 "tau_asym_extra_points" => string(opts.tau_asym_extra_points),
                 "tau_interpolation_mode" => string(opts.tau_interpolation_mode),
+                "propagator_xi_policy" => string(opts.propagator_xi_policy),
                 "note.tau_threshold_hint" => "for near-threshold sharp channels, linear+threshold_subtraction often more robust than pchip",
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),

@@ -8,6 +8,13 @@ struct PhaseGuidedScanOptions
     muB_values::Vector{Float64}
     alpha_T_values::Vector{Float64}
     T_values::Vector{Float64}
+    propagator_xi_policy::Symbol
+    tau_p_nodes::Union{Nothing,Int}
+    tau_angle_nodes::Union{Nothing,Int}
+    tau_phi_nodes::Union{Nothing,Int}
+    tau_n_sigma_points::Union{Nothing,Int}
+    sigma_grid_n::Union{Nothing,Int}
+    channel_diagnostics::Bool
     compute_bulk::Bool
     dry_run::Bool
     overwrite::Bool
@@ -24,6 +31,13 @@ function print_usage(io::IO=stdout)
     println(io, "  --muB-list v1,v2,...         mode a/b 使用的离散 muB 列表（required）")
     println(io, "  --alphaT-list v1,v2,...      mode a 的 T/T_phase 倍率列表（default 1.0,1.1,1.2)")
     println(io, "  --T-list v1,v2,...           mode b 的固定温度列表（required for mode b）")
+    println(io, "  --propagator-xi-policy <match_thermo|isotropic>  σ(s)/propagator 的 ξ 口径 (default match_thermo)")
+    println(io, "  --tau-p-nodes <int>          透传到底层 τ 平均散射率动量节点")
+    println(io, "  --tau-angle-nodes <int>      透传到底层 τ 平均散射率 cosθ 节点")
+    println(io, "  --tau-phi-nodes <int>        透传到底层 τ 平均散射率 φ 节点")
+    println(io, "  --tau-n-sigma <int>          透传到底层 σ(s) 的 t 积分点数")
+    println(io, "  --sigma-grid-n <int>         透传到底层 σ(s) 预计算网格点数")
+    println(io, "  --channel-diagnostics        输出每点每通道的 τ^-1 贡献明细 CSV")
     println(io, "  --compute-bulk               显式开启体粘滞 ζ 计算（默认开启）")
     println(io, "  --no-compute-bulk            显式关闭体粘滞 ζ 计算")
     println(io, "  --dry-run                    仅生成 sampling plan/README/provenance，不执行计算")
@@ -51,6 +65,13 @@ function parse_args(args::Vector{String})
         :muB_values => nothing,
         :alpha_T_values => Float64[1.0, 1.1, 1.2],
         :T_values => Float64[],
+        :propagator_xi_policy => :match_thermo,
+        :tau_p_nodes => nothing,
+        :tau_angle_nodes => nothing,
+        :tau_phi_nodes => nothing,
+        :tau_n_sigma_points => nothing,
+        :sigma_grid_n => nothing,
+        :channel_diagnostics => false,
         :compute_bulk => true,
         :dry_run => false,
         :overwrite => false,
@@ -87,6 +108,22 @@ function parse_args(args::Vector{String})
             opts[:alpha_T_values] = _parse_float_list(require_value())
         elseif arg == "--T-list"
             opts[:T_values] = _parse_float_list(require_value())
+        elseif arg == "--propagator-xi-policy"
+            policy = Symbol(strip(require_value()))
+            policy in (:match_thermo, :isotropic) || error("unknown propagator xi policy: $(policy) (expected: match_thermo|isotropic)")
+            opts[:propagator_xi_policy] = policy
+        elseif arg == "--tau-p-nodes"
+            opts[:tau_p_nodes] = parse(Int, require_value())
+        elseif arg == "--tau-angle-nodes"
+            opts[:tau_angle_nodes] = parse(Int, require_value())
+        elseif arg == "--tau-phi-nodes"
+            opts[:tau_phi_nodes] = parse(Int, require_value())
+        elseif arg == "--tau-n-sigma"
+            opts[:tau_n_sigma_points] = parse(Int, require_value())
+        elseif arg == "--sigma-grid-n"
+            opts[:sigma_grid_n] = parse(Int, require_value())
+        elseif arg == "--channel-diagnostics"
+            opts[:channel_diagnostics] = true
         elseif arg == "--compute-bulk"
             opts[:compute_bulk] = true
         elseif arg == "--no-compute-bulk"
@@ -131,6 +168,13 @@ function parse_args(args::Vector{String})
         Float64.(opts[:muB_values]),
         Float64.(opts[:alpha_T_values]),
         Float64.(opts[:T_values]),
+        Symbol(opts[:propagator_xi_policy]),
+        opts[:tau_p_nodes] === nothing ? nothing : Int(opts[:tau_p_nodes]),
+        opts[:tau_angle_nodes] === nothing ? nothing : Int(opts[:tau_angle_nodes]),
+        opts[:tau_phi_nodes] === nothing ? nothing : Int(opts[:tau_phi_nodes]),
+        opts[:tau_n_sigma_points] === nothing ? nothing : Int(opts[:tau_n_sigma_points]),
+        opts[:sigma_grid_n] === nothing ? nothing : Int(opts[:sigma_grid_n]),
+        Bool(opts[:channel_diagnostics]),
         Bool(opts[:compute_bulk]),
         Bool(opts[:dry_run]),
         Bool(opts[:overwrite]),

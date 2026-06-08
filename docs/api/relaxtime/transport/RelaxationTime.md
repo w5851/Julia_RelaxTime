@@ -70,6 +70,8 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - `densities`：数密度（**必须使用半无穷积分计算**）
 - `p_grid/p_w`：可选，自定义动量积分节点
 - `sigma_cutoff`：σ(s) 有效范围的动量截断（默认 Λ）
+- `propagator_xi_policy`：传播子/σ(s) 的 ξ 口径；默认 `:match_thermo` 保持当前行为，诊断分支 `:isotropic` 仅让传播子/σ(s) 使用 `ξ=0`
+- `propagator_quark_params`：可选的传播子/σ(s) 专用夸克参数；未提供且 `propagator_xi_policy=:isotropic` 时，会从 `(m, μ)` 与 `ξ=0` 热力学参数补齐各向同性 A 场
 
 ## 本次提交的变更（e9cb5fbd...，2026-01-29）
 
@@ -87,6 +89,12 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
     - 若调用方需要严格治理，可传 `require_cache_fingerprint=true`，此时无指纹缓存会被拒绝。
 
 - 关键影响：性能（避免重复构建）和语义（当启用阈值减法时，缓存保存的是 `raw - asym`，返回值会把解析项加回）。
+
+## 诊断性传播子 ξ 策略
+
+`compute_average_rates` 与 `relaxation_times` 会把 `propagator_xi_policy` 和 `propagator_quark_params` 透传给单过程 `average_scattering_rate`。默认 `:match_thermo` 下，传播子、σ(s)、外层分布、密度与平衡态使用同一 `ξ`；显式 `:isotropic` 下，只有传播子/σ(s) 上下文使用 `ξ=0`，外层分布与密度仍由真实 `thermo_params.ξ` 决定。
+
+该分支用于异常区域诊断和反事实复算。完成同网格复算、channel diagnostics 以及节点数/σ-grid/interpolation 收敛检查前，不应把它表述为正式物理解法或默认修复。
 
 
 ## 典型用法

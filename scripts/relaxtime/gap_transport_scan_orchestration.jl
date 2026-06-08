@@ -37,6 +37,7 @@ function build_scan_runtime(opts)
             asym_fit_min_points=opts.tau_asym_fit_min_points,
             asym_extra_points=opts.tau_asym_extra_points,
             interpolation_mode=opts.tau_interpolation_mode,
+            propagator_xi_policy=opts.propagator_xi_policy,
         ),
         transport_config=transport_config,
     )

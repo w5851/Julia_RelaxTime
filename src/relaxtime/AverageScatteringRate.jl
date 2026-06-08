@@ -53,6 +53,7 @@ using Base.Threads: ReentrantLock
 using Main.Constants_PNJL: Λ_inv_fm
 using ..GaussLegendre: gauleg
 using ..GaussLegendre: standard_nodes_weights
+using ..AFieldBuilder: ensure_quark_params_has_A
 import ..TotalCrossSection
 using ..TotalCrossSection: total_cross_section
 using ..TotalCrossSection: parse_particles_from_process
@@ -76,6 +77,8 @@ const DEFAULT_SIGMA_GRID_N = 60
 const DQ = 6.0 # 简并度d_q=2*N_c=6
 const TWO_PI = 2.0 * π
 
+const PROPAGATOR_XI_POLICIES = (:match_thermo, :isotropic)
+
 # --------------------------- 工具函数 ---------------------------
 
 @inline function distribution_with_anisotropy(flavor::Symbol, p::Float64, m::Float64, μ::Float64,
@@ -92,6 +95,43 @@ end
     return sqrt(p * p + m * m)
 end
 
+@inline function _normalize_propagator_xi_policy(policy::Symbol)::Symbol
+    policy in PROPAGATOR_XI_POLICIES ||
+        throw(ArgumentError("unknown propagator_xi_policy=$(policy); expected one of $(PROPAGATOR_XI_POLICIES)"))
+    return policy
+end
+
+@inline function _with_xi(thermo_params::NamedTuple, ξ::Float64)::NamedTuple
+    return merge(thermo_params, (ξ=ξ,))
+end
+
+@inline function _base_quark_params_without_A(quark_params::NamedTuple)::NamedTuple
+    return (m=quark_params.m, μ=quark_params.μ)
+end
+
+@inline function _resolve_propagator_thermo_params(thermo_params::NamedTuple, policy::Symbol)::NamedTuple
+    policy === :isotropic && return _with_xi(thermo_params, 0.0)
+    return thermo_params
+end
+
+function _resolve_propagator_quark_params(
+    quark_params::NamedTuple,
+    propagator_thermo_params::NamedTuple,
+    policy::Symbol,
+    propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams},
+)::NamedTuple
+    if propagator_quark_params !== nothing
+        return normalize_quark_input(propagator_quark_params)
+    elseif policy === :isotropic
+        return ensure_quark_params_has_A(
+            _base_quark_params_without_A(quark_params),
+            propagator_thermo_params;
+            use_aniso=false,
+            warn_on_auto=false,
+        )
+    end
+    return quark_params
+end
 
 
 @inline function get_mass(flavor::Symbol, quark_params::NamedTuple)
@@ -1070,6 +1110,63 @@ function build_w0cdf_pchip_cache(
     return cache
 end
 
+function _build_w0cdf_pchip_cache_for_average_rate(
+    process::Symbol,
+    design_quark_params::NamedTuple,
+    design_thermo_params::NamedTuple,
+    propagator_quark_params::NamedTuple,
+    propagator_thermo_params::NamedTuple,
+    K_coeffs::NamedTuple;
+    N::Int=DEFAULT_SIGMA_GRID_N,
+    design_p_nodes::Int=DEFAULT_W0CDF_P_NODES,
+    design_angle_nodes::Int=DEFAULT_W0CDF_ANGLE_NODES,
+    design_phi_nodes::Int=DEFAULT_W0CDF_PHI_NODES,
+    p_cutoff::Union{Nothing,Float64}=nothing,
+    scale::Float64=DEFAULT_SEMI_INF_SCALE,
+    n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    threshold_subtraction::Bool=false,
+    asym_window::Float64=0.6,
+    asym_fit_min_points::Int=8,
+    asym_extra_points::Int=10,
+)
+    pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
+    mi = get_mass(pi_sym, propagator_quark_params)
+    mj = get_mass(pj_sym, propagator_quark_params)
+    mc = get_mass(pc_sym, propagator_quark_params)
+    md = get_mass(pd_sym, propagator_quark_params)
+    thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
+
+    s_grid = _design_w0cdf_s_grid_core(
+        process,
+        design_quark_params,
+        design_thermo_params;
+        N=N,
+        p_nodes=design_p_nodes,
+        angle_nodes=design_angle_nodes,
+        phi_nodes=design_phi_nodes,
+        p_cutoff=p_cutoff,
+        scale=scale,
+    )
+    cache = CrossSectionCache(process)
+    _precompute_cross_section_core!(cache, s_grid, propagator_quark_params, propagator_thermo_params, K_coeffs;
+        n_points=n_sigma_points,
+        threshold_subtraction=thr_for_build,
+        asym_window=asym_window,
+        asym_fit_min_points=asym_fit_min_points,
+        asym_extra_points=asym_extra_points,
+        fingerprint_grid_metadata=_w0cdf_grid_metadata(
+            s_grid;
+            N=N,
+            design_p_nodes=design_p_nodes,
+            design_angle_nodes=design_angle_nodes,
+            design_phi_nodes=design_phi_nodes,
+            p_cutoff=p_cutoff,
+            scale=scale,
+        ))
+    _ensure_pchip_slopes!(cache)
+    return cache
+end
+
 # -------------------- ρ 计算（各向异性） --------------------
 # 半无穷积分的默认参数
 const DEFAULT_SEMI_INF_SCALE = 10.0  # 半无穷积分的尺度参数
@@ -1325,9 +1422,19 @@ function average_scattering_rate(
     band_edges::Union{Nothing,Vector{Float64}}=nothing,
     band_omega_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
     band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
+    propagator_xi_policy::Symbol=:match_thermo,
+    propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
 )::Float64
     quark_params = normalize_quark_input(quark_params)
     thermo_params = normalize_thermo_input(thermo_params)
+    propagator_xi_policy = _normalize_propagator_xi_policy(propagator_xi_policy)
+    propagator_thermo_params = _resolve_propagator_thermo_params(thermo_params, propagator_xi_policy)
+    propagator_quark_params = _resolve_propagator_quark_params(
+        quark_params,
+        propagator_thermo_params,
+        propagator_xi_policy,
+        propagator_quark_params,
+    )
     # 解析粒子、质量、化学势
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_params); mj = get_mass(pj_sym, quark_params)
@@ -1339,13 +1446,20 @@ function average_scattering_rate(
     ξ = hasproperty(thermo_params, :ξ) ? thermo_params.ξ : 0.0
 
     # Build the finalized σ-cache strategy by default.
-    # 如果指定了 sigma_cutoff，则使用有限截断的 w0cdf 设计
-    thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
+    prop_mi = get_mass(pi_sym, propagator_quark_params)
+    prop_mj = get_mass(pj_sym, propagator_quark_params)
+    prop_mc = get_mass(pc_sym, propagator_quark_params)
+    prop_md = get_mass(pd_sym, propagator_quark_params)
+
+    # σ(s) cache semantics follow the propagator context, not the outer distribution context.
+    thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, prop_mi, prop_mj, prop_mc, prop_md)
     if cs_cache === nothing
-        cs_cache = build_w0cdf_pchip_cache(
+        cs_cache = _build_w0cdf_pchip_cache_for_average_rate(
             process,
             quark_params,
             thermo_params,
+            propagator_quark_params,
+            propagator_thermo_params,
             K_coeffs;
             N=DEFAULT_SIGMA_GRID_N,
             design_p_nodes=DEFAULT_W0CDF_P_NODES,
@@ -1365,8 +1479,8 @@ function average_scattering_rate(
             _validate_cross_section_cache!(
                 cs_cache,
                 process,
-                quark_params,
-                thermo_params,
+                propagator_quark_params,
+                propagator_thermo_params,
                 K_coeffs;
                 n_points=n_sigma_points,
                 threshold_subtraction=thr_for_build,
@@ -1383,7 +1497,7 @@ function average_scattering_rate(
     # 使用半无穷积分 [0, ∞)
     return _average_scattering_rate_semi_infinite(
         process, pi_sym, pj_sym, mi, mj, μi, μj, T, Φ, Φbar, ξ,
-        quark_params, thermo_params, K_coeffs,
+        propagator_quark_params, propagator_thermo_params, K_coeffs,
         p_nodes, angle_nodes, phi_nodes, scale,
         p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
         cs_cache, n_sigma_points,
@@ -1396,7 +1510,7 @@ end
 # 半无穷积分版本（保留原有实现）
 function _average_scattering_rate_semi_infinite(
     process, pi_sym, pj_sym, mi, mj, μi, μj, T, Φ, Φbar, ξ,
-    quark_params, thermo_params, K_coeffs,
+    propagator_quark_params, propagator_thermo_params, K_coeffs,
     p_nodes, angle_nodes, phi_nodes, scale,
     p_grid, p_w, cos_grid, cos_w, phi_grid, phi_w,
     cs_cache, n_sigma_points,
@@ -1449,7 +1563,7 @@ function _average_scattering_rate_semi_infinite(
     ω = _omega_integral_5d(
         process, pi_sym, pj_sym,
         mi, mj, μi, μj, T, Φ, Φbar, ξ,
-        quark_params, thermo_params, K_coeffs,
+        propagator_quark_params, propagator_thermo_params, K_coeffs,
         p_vals, quadrature_wts,
         cos_grid, cos_w,
         phi_grid, phi_w,

@@ -31,6 +31,7 @@ struct ScanOptions
     tau_asym_fit_min_points::Int
     tau_asym_extra_points::Int
     tau_interpolation_mode::Symbol
+    propagator_xi_policy::Symbol
     sigma_grid_n::Int
     integration_mode::Symbol
     gc_every_n::Int
@@ -66,6 +67,7 @@ function print_usage()
     println("  --tau-asym-fit-min-points <int> 阈值减法最小拟合点数 (default 8)")
     println("  --tau-asym-extra-points <int> 阈值减法补点数量 (default 10)")
     println("  --tau-interpolation-mode <pchip|linear|direct|hybrid_threshold>  τ 中 σ(s) 取值模式 (default linear)")
+    println("  --propagator-xi-policy <match_thermo|isotropic>  σ(s)/propagator 的 ξ 口径；isotropic 表示传播子用 ξ=0，外层分布仍用真实 ξ (default match_thermo)")
     println("  --sigma-grid-n <int>        σ(s) 预计算网格点数 (default $(Main.MODULE_DEFAULT_SIGMA_GRID_N))")
     println("  --mode <mode>               τ 积分模式: semi_infinite | finite_15 | finite_lambda (default semi_infinite)")
     println("  --gc-every-n <int>          每 N 个点触发一次 GC (default 5; 0 表示关闭)")
@@ -102,6 +104,7 @@ function parse_args(args::Vector{String})
         :tau_asym_fit_min_points => 8,
         :tau_asym_extra_points => 10,
         :tau_interpolation_mode => :linear,
+        :propagator_xi_policy => :match_thermo,
         :sigma_grid_n => Main.MODULE_DEFAULT_SIGMA_GRID_N,
         :integration_mode => :semi_infinite,
         :gc_every_n => 5,
@@ -190,6 +193,10 @@ function parse_args(args::Vector{String})
             mode = Symbol(require_value())
             mode in (:pchip, :linear, :direct, :hybrid_threshold) || error("unknown tau interpolation mode: $(mode) (expected: pchip|linear|direct|hybrid_threshold)")
             opts[:tau_interpolation_mode] = mode
+        elseif arg == "--propagator-xi-policy"
+            policy = Symbol(require_value())
+            policy in (:match_thermo, :isotropic) || error("unknown propagator xi policy: $(policy) (expected: match_thermo|isotropic)")
+            opts[:propagator_xi_policy] = policy
         elseif arg == "--sigma-grid-n"
             opts[:sigma_grid_n] = parse(Int, require_value())
         elseif arg == "--mode"
@@ -248,6 +255,7 @@ function parse_args(args::Vector{String})
         Int(opts[:tau_asym_fit_min_points]),
         Int(opts[:tau_asym_extra_points]),
         Symbol(opts[:tau_interpolation_mode]),
+        Symbol(opts[:propagator_xi_policy]),
         Int(opts[:sigma_grid_n]),
         Symbol(opts[:integration_mode]),
         Int(opts[:gc_every_n]),
