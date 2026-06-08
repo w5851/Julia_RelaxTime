@@ -1,49 +1,69 @@
 {
-  "format": "meson_density_production_manifest_v1",
+  "format": "meson_density_production_manifest_v2",
   "case_slug": "trho_asymmetric_kplus_piplus_scan_v1",
   "date": "2026-06-08",
-  "verdict": "blocked",
-  "source_commit": "05d181730bff5d7498918e0c1dceddaf65b5448f",
+  "verdict": "production-grade",
+  "source_commit": "d2c5cba82702c18e55b2d398873145141a15a104",
   "remote_workflow": ".github/workflows/relaxtime-meson-density-production.yml",
-  "remote_runs": [
-    {
-      "run_stage": "convergence_low",
-      "run_id": "27064914082",
-      "result_dir": "data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low",
-      "figure_dir": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low",
-      "exit_code": 0
-    }
-  ],
-  "diagnostic_remote_runs": [
-    {
-      "policy": "density_policy=x_min_cut, bose_x_min=1e-6",
-      "run_ids": ["27112756019", "27112924358", "27112924343"],
-      "verdict": "blocked",
-      "reason": "mid-to-high K-related convergence differences remained order 50%"
-    },
-    {
-      "policy": "density_policy=x_min_cut, bose_x_min=1e-2",
-      "run_ids": ["27113471270", "27113471257", "27113471249", "27113589340"],
-      "verdict": "blocked",
-      "reason": "cutoff sensitivity improved but high/custom comparisons exposed FixedAsymmetricRho branch instability"
-    }
-  ],
-  "production_run": null,
+  "remote_runs": {
+    "convergence_low": "27114834622",
+    "convergence_mid": "27114834644",
+    "convergence_high36": "27114834615",
+    "diagnostic64": "27115127952",
+    "diagnostic96": "27115242352",
+    "diagnostic128": "27115372364",
+    "diagnostic192": "27115609958",
+    "production192": "27115936651"
+  },
+  "selected_production_parameters": {
+    "stable_q_nodes": 768,
+    "q_nodes": 192,
+    "omega_nodes": 192,
+    "qmax_fm_inv": 4.0,
+    "omega_min_fm_inv": 0.05,
+    "omega_max_fm_inv": 4.0,
+    "p_num": 8,
+    "t_num": 4,
+    "max_iter": 20
+  },
+  "policy": {
+    "path_strategy": "trho_asymmetric",
+    "trho_reverse_rho": true,
+    "trho_seed_policy": "temperature_grouped_rho_continuity",
+    "density_policy": "x_min_cut",
+    "density_policy_scope": [
+      "phase_shift_current",
+      "phase_shift_gbu_reference"
+    ],
+    "bose_x_min": 0.01,
+    "stable_and_bw_policy": "strict Bose-domain diagnostics; unsafe rows kept as NaN/status, no x_min_cut extension"
+  },
+  "convergence_summary": "convergence/convergence_summary.json",
+  "production_run": "27115936651",
   "result_files": [
     "README.md",
     "PRODUCTION_AUDIT.md",
     "manifest.json",
-    "convergence/convergence_summary.json",
-    "convergence/convergence_low/combined_meson_density_scan.csv",
-    "convergence/convergence_low/README.md",
-    "convergence/convergence_low/remote_run_manifest.json",
-    "convergence/convergence_low/run.command.txt",
-    "convergence/convergence_low/run.stdout.log",
-    "convergence/convergence_low/run.stderr.log"
+    "combined_meson_density_scan.csv",
+    "remote_run_manifest.json",
+    "run.command.txt",
+    "run.exitcode",
+    "run.stdout.log",
+    "run.stderr.log",
+    "convergence/convergence_summary.json"
   ],
   "figure_files": [
-    "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/combined_meson_density_scan.svg",
-    "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/plot_manifest.json"
+    "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg",
+    "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json"
   ],
-  "blocker": "phase-shift-only x_min_cut avoids the initial BU/GBU Bose-domain hard stop, but formal production is blocked by upstream FixedAsymmetricRho branch instability across convergence profiles"
+  "hashes": {
+    "combined_meson_density_scan.csv": "c9b9a0c62c5d9b804e3c0fce4c036419b8bfaedc0a44e2a7f70af3bcdc96a670",
+    "combined_meson_density_scan.svg": "a9261a81053eb9ad9094af88f814f52f421cc07030b9c7eac69761debc5fad33",
+    "plot_manifest.json": "12396bfbc3f50a83beb88114583cd7700dd809f15b4f3fe9d2a0d93c743a2057"
+  },
+  "known_limitations": [
+    "stable and strict BW retain unsafe_bose_domain rows under strict Bose-domain policy and are comparison/diagnostic regimes only for those points",
+    "production-grade verdict is based on BU/GBU/stable available rows plus explicit status accounting; unsafe rows are not interpreted as finite densities",
+    "formal policy is a project choice using phase-shift-only x_min_cut, not a unique literature prescription"
+  ]
 }

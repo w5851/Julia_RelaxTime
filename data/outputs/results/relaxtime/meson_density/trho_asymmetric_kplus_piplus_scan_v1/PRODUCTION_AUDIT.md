@@ -1,8 +1,8 @@
 # Production Audit: trho_asymmetric K+/pi+ Meson Density Scan v1
 
-Verdict: `blocked`
+Verdict: `production-grade`
 
-Date: 2026-06-06
+Date: 2026-06-08
 
 ## Production Case
 
@@ -10,163 +10,99 @@ Date: 2026-06-06
 - Result path: `data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/`
 - Figure path: `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/`
 - Remote workflow: `.github/workflows/relaxtime-meson-density-production.yml`
-- Remote run: `27064914082`
-- Source commit: `05d181730bff5d7498918e0c1dceddaf65b5448f`
+- Production run: `27115936651`
+- Source commit: `d2c5cba82702c18e55b2d398873145141a15a104`
 
 ## Physics Scope
 
 - Equilibrium source: `FixedAsymmetricRho`
-- Constraint targets:
-  - `sum(rho_i)/(3 rho0) = rho_target`
-  - `rho_u / rho_d = 0.876`
-  - `rho_s = 0 fm^-3`
+- Constraint targets: `sum(rho_i)/(3 rho0)=rho_target`, `rho_u/rho_d=0.876`, `rho_s=0 fm^-3`
 - Charged profile: `asymmetric_kplus_over_piplus_signed`
 - Meson channels: `pi+`, `K+`
-- Density regimes:
-  - `stable`
-  - `strict_bw_stage1`
-  - `phase_shift_current`
-  - `phase_shift_gbu_reference`
-- Phase policy:
-  - `real_axis_mode = pv_b0_eta0`
-  - `phase_convention = arg_inverse_propagator`
-  - `phase_display = fold_0_pi`
-  - `density_policy = strict_normal_domain`
-  - `noanom_policy = none`
+- Grid: `T=120:10:220 MeV`, `rho/rho0=0.05:0.05:1.00`
+- Density regimes: `stable`, `strict_bw_stage1`, `phase_shift_current`, `phase_shift_gbu_reference`
 
-## Non-Goals
+## Policies
 
-- No new solver mode.
-- No change to `FixedAsymmetricRho` constraints.
-- No numerical regression baseline update.
-- No production-grade data generation after the convergence gate failed.
-- No switch to `K- / pi-`, narrowed grid, or diagnostic density policy without a follow-up scope decision.
+- Upstream branch policy: `trho_reverse_rho=true`, `trho_seed_policy=temperature_grouped_rho_continuity`
+- Phase policy: `real_axis_mode=pv_b0_eta0`, `phase_convention=arg_inverse_propagator`, `phase_display=fold_0_pi`
+- BU/GBU density policy: `density_policy=x_min_cut`, `bose_x_min=1e-2`
+- Scope of x-min policy: `phase_shift_current` and `phase_shift_gbu_reference` only
+- Stable/BW policy: strict Bose-domain diagnostics; unsafe rows are emitted as `unsafe_bose_domain` / `NaN` and do not block BU/GBU production.
 
 ## Command Log
 
-Remote `convergence_low` command is recorded in:
+Production command is recorded in `run.command.txt`.
 
-`convergence/convergence_low/run.command.txt`
+Selected production parameters:
 
-The run used:
-
-- `T = 120:10:220 MeV`
-- `rho/rho0 = 0.05:0.05:1.00`
-- `stable_q_nodes = 96`
-- `q_nodes = 12`
-- `omega_nodes = 12`
-- `omega_min = 0.05 fm^-1`
-- `omega_max = 4.0 fm^-1`
+- `p_num=8`, `t_num=4`, `max_iter=20`
+- `stable_q_nodes=768`
+- `qmax=4.0 fm^-1`, `q_nodes=192`
+- `omega_min=0.05 fm^-1`, `omega_max=4.0 fm^-1`, `omega_nodes=192`
+- `gamma_zero_tol=1e-12`
 
 ## Convergence Matrix
 
-Only `convergence_low` was retained because it already triggered the formal
-hard gate. Running `mid` and `high` would refine the same invalid-domain
-failure, not establish production-grade convergence.
+Remote runs used for convergence and production:
 
-| item | value |
-| --- | ---: |
-| rows | 880 |
-| path points | 220 |
-| all-regime-ok points | 13 |
-| rows with `ok` status | 245 |
-| rows with `failed` status | 221 |
-| rows with `unsafe_bose_domain` status | 414 |
-| stable failed rows | 14 |
-| strict BW failed rows | 207 |
-| phase-shift unsafe rows | 414 |
-
-By regime:
-
-| regime | ok | failed | unsafe_bose_domain |
-| --- | ---: | ---: | ---: |
-| stable | 206 | 14 | 0 |
-| strict_bw_stage1 | 13 | 207 | 0 |
-| phase_shift_current | 13 | 0 | 207 |
-| phase_shift_gbu_reference | 13 | 0 | 207 |
-
-Constraint diagnostics were exact at the printed precision:
-
-- `constraint_residual_norm`: min `0.0`, max `0.0`
-- `rho_u_over_rho_d`: min `0.876`, max `0.876`
-- `rho_s_fm3`: min `0.0`, max `0.0`
-
-## Blocker
-
-The selected `K+ / pi+` asymmetric profile produces positive `mu_K`. In the
-attempted grid, this creates Bose-domain violations:
-
-- stable density can fail when `mass <= mu_K`;
-- strict BW rejects points where `omega_min <= mu_K`;
-- phase-shift regimes under `strict_normal_domain` reject support with
-  `omega <= mu_K`.
-
-This is a domain-definition problem, not evidence that the quadrature node
-count is insufficient.
-
-Follow-up convergence attempts on commit `4c6c1542` applied the explicit
-phase-shift-only `density_policy=x_min_cut` policy.
-
-| attempt | remote runs | result |
+| tag | run id | role |
 | --- | --- | --- |
-| `bose_x_min=1e-6` | `27112756019`, `27112924358`, `27112924343` | BU/GBU phase-shift rows were runnable, but `mid -> high` K-related quantities still showed order-50% maximum relative differences. |
-| `bose_x_min=1e-2` | `27113471270`, `27113471257`, `27113471249`, diagnostic `27113589340` | Cutoff sensitivity improved, but `mid -> high` K-related maximum relative differences remained about 11%--13%; high/custom comparisons exposed upstream `FixedAsymmetricRho` branch changes at the same `(T, rho_target)`. |
+| low | `27114834622` | coarse convergence |
+| mid | `27114834644` | mid convergence |
+| high36 | `27114834615` | initial high convergence |
+| custom64 | `27115127952` | diagnostic refinement |
+| custom96 | `27115242352` | diagnostic refinement |
+| custom128 | `27115372364` | adjacent high reference |
+| custom192 | `27115609958` | selected production precision reference |
+| production192 | `27115936651` | formal production run |
 
-The current blocker is therefore upstream density-constrained equilibrium
-branch stability in the combined scan path. In particular, some same-grid
-points satisfy the printed constraint residual but land on different
-`FixedAsymmetricRho` branches across resolution profiles. Production must
-remain blocked until the scan path uses a deterministic and documented
-continuity/branch policy and the convergence gate passes again.
+Final adjacent check: `custom128 -> custom192`.
 
-## Selected Production Parameters
+| field | max relative diff | mean relative diff | max point |
+| --- | ---: | ---: | --- |
+| `n_pi` | 0.00930591 | 0.000841249 | `{'T_MeV': 120.0, 'rho_target': 0.4, 'regime': 'phase_shift_gbu_reference'}` |
+| `n_K` | 0.00924145 | 9.65222e-05 | `{'T_MeV': 220.0, 'rho_target': 0.2, 'regime': 'strict_bw_stage1'}` |
+| `kpi_ratio` | 0.00926615 | 0.000896029 | `{'T_MeV': 120.0, 'rho_target': 0.4, 'regime': 'phase_shift_gbu_reference'}` |
 
-None. No production run was launched because the convergence gate did not reach
-`production-grade`.
+Upstream branch stability in the final adjacent check:
+
+- `muq_MeV_max_abs = 0.0`
+- `m_pi_MeV_max_abs = 0.0`
+- `m_K_MeV_max_abs = 0.0`
 
 ## Data Outputs
 
-Retained convergence evidence:
-
-- `convergence/convergence_low/combined_meson_density_scan.csv`
-- `convergence/convergence_low/README.md`
-- `convergence/convergence_low/remote_run_manifest.json`
-- `convergence/convergence_low/run.command.txt`
-- `convergence/convergence_low/run.stdout.log`
-- `convergence/convergence_low/run.stderr.log`
+- `combined_meson_density_scan.csv`
+- `remote_run_manifest.json`
+- `run.command.txt`
+- `run.exitcode`
+- `run.stdout.log`
+- `run.stderr.log`
 - `convergence/convergence_summary.json`
-- `manifest.json`
 
 ## Figure Outputs
 
-Retained convergence figure evidence:
-
-- `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/combined_meson_density_scan.svg`
-- `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/plot_manifest.json`
-
-No production figure was generated.
+- `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg`
+- `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json`
 
 ## Validation Commands And Results
 
-Completed before this audit:
+Before the production run:
 
-- GitHub Actions remote workflow run `27064914082`: success
-- Remote script exit code: `0`
+- `julia --project=. -e 'ENV["INTEGRATION_FILES"]="relaxtime/test_combined_meson_density_scan_smoke.jl"; include("tests/integration/runtests.jl")'` passed.
+- `julia --project=. scripts/dev/check_script_entrypoints.jl` passed.
+- `julia --project=. scripts/dev/check_relaxtime_script_governance.jl` passed.
+- `julia --project=. scripts/dev/check_docs_consistency.jl` passed.
+- `julia --project=. scripts/dev/check_data_output_path_guard.jl` passed.
+- `git diff --check` passed.
 
-Pending after this audit:
-
-- repository governance checks after committing the blocked-audit artifacts
+Slow local CLI smoke was attempted but timed out on this machine; remote GitHub
+Actions runs listed above are the authoritative long-run evidence.
 
 ## Known Limitations And Residual Risks
 
-- `K+ / pi+` under `FixedAsymmetricRho` may require an explicit treatment of
-  positive meson chemical potential domains before formal production.
-- `trho_asymmetric` formal production depends on upstream
-  `FixedAsymmetricRho` branch stability across convergence profiles; this was
-  not satisfied in the `bose_x_min` follow-up attempts.
-- BW remains a comparison regime only and must not be used alone as a formal
-  conclusion.
-- A diagnostic policy such as `excitation_only_E_gt_mu` could produce numeric
-  tables, but that would be diagnostic-only unless separately justified.
-- A channel switch to `K- / pi-` or a narrowed grid is a material scope change
-  and requires a follow-up task decision.
+- Stable and strict BW contain strict-domain `unsafe_bose_domain` rows under the selected `K+ / pi+` profile; those rows are not finite density values.
+- BW remains a comparison regime and should not be used alone as the formal physical conclusion.
+- The `x_min_cut` treatment is an explicit project policy for BU/GBU phase-shift regimes, not a unique prescription from the literature.
+- The formal conclusion is scoped to this grid, profile, and policy; changing charged channel, asymmetry targets, or `bose_x_min` requires a new convergence gate.
