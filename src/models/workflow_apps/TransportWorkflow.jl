@@ -490,6 +490,10 @@ end
     )
 end
 
+@inline function _isotropic_propagator_thermo_params(thermo_params)
+    return ThermoParams(merge(normalize_thermo_params(thermo_params), (ξ=0.0,)))
+end
+
 """一次性完成：平衡求解 →（可选）τ 计算 →（可选）ζ 导数 → 输运系数。
 
 返回值（NamedTuple）包含：
@@ -642,7 +646,7 @@ function solve_transport_from_equilibrium(
         if hasproperty(tau_kwargs_effective, :propagator_xi_policy) &&
            tau_kwargs_effective.propagator_xi_policy === :isotropic &&
            !hasproperty(tau_kwargs_effective, :propagator_quark_params)
-            propagator_thermo_params = merge(thermo_params, (ξ=0.0,))
+            propagator_thermo_params = _isotropic_propagator_thermo_params(thermo_params)
             propagator_A_vals = _A_from_equilibrium(
                 T_fm,
                 quark_params_basic,
