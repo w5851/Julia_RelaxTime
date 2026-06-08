@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
 
 
@@ -74,6 +75,24 @@ def finite_max(mats: list[np.ndarray]) -> float:
     return max(0.2, float(np.max(vals)))
 
 
+def finite_min(mats: list[np.ndarray]) -> float:
+    vals = np.concatenate([m[np.isfinite(m)] for m in mats if np.isfinite(m).any()])
+    if vals.size == 0:
+        return 0.0
+    return float(np.min(vals))
+
+
+def finite_positive_min(mats: list[np.ndarray]) -> float:
+    vals = np.concatenate([
+        m[np.isfinite(m) & (m > 0.0)]
+        for m in mats
+        if np.isfinite(m).any()
+    ])
+    if vals.size == 0:
+        raise SystemExit("log color scale requires positive finite rows")
+    return float(np.min(vals))
+
+
 def manifest_path(path: Path) -> str:
     root = Path.cwd().resolve()
     resolved = path.resolve()
@@ -95,6 +114,7 @@ def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argpar
 
     payload["format"] = "combined_meson_density_plot_manifest_v1"
     payload["date"] = dt.date.today().isoformat()
+    payload["generated_by"] = "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
     payload["source_csv"] = manifest_path(csv_path)
 
     figures = payload.get("figures")
@@ -112,6 +132,9 @@ def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argpar
         "field": args.field,
         "x_field": args.x_field,
         "y_field": "T_MeV",
+        "color_scale": args.color_scale,
+        "color_vmin": args.resolved_vmin,
+        "color_vmax": args.resolved_vmax,
         "format": fmt,
         "dpi": args.dpi,
         "title": args.title,
@@ -138,6 +161,8 @@ def main() -> None:
     parser.add_argument("--x-label", default=None)
     parser.add_argument("--x-unit", default="MeV")
     parser.add_argument("--kind", default=None)
+    parser.add_argument("--color-scale", choices=("linear", "log"), default="linear")
+    parser.add_argument("--vmin", type=float, default=None)
     parser.add_argument("--dpi", type=int, default=220)
     parser.add_argument("--vmax", type=float, default=None)
     parser.add_argument("--title", default="Combined meson-density FIG3-like scan")
@@ -155,7 +180,23 @@ def main() -> None:
     if not panels:
         raise SystemExit("no plottable rows")
 
-    vmax = args.vmax if args.vmax is not None else finite_max([panel[3] for panel in panels])
+    mats = [panel[3] for panel in panels]
+    if args.color_scale == "log":
+        vmin = args.vmin if args.vmin is not None else finite_positive_min(mats)
+        vmax = args.vmax if args.vmax is not None else finite_max(mats)
+        if not (math.isfinite(vmin) and math.isfinite(vmax) and vmin > 0.0 and vmax > vmin):
+            raise SystemExit("log color scale requires finite 0 < vmin < vmax")
+        norm = LogNorm(vmin=vmin, vmax=vmax)
+        value_label = f"{args.field} (log scale)"
+    else:
+        vmin = args.vmin if args.vmin is not None else min(0.0, finite_min(mats))
+        vmax = args.vmax if args.vmax is not None else finite_max(mats)
+        if not (math.isfinite(vmin) and math.isfinite(vmax) and vmax > vmin):
+            raise SystemExit("linear color scale requires finite vmin < vmax")
+        norm = None
+        value_label = args.field
+    args.resolved_vmin = vmin
+    args.resolved_vmax = vmax
     ncols = 2
     nrows = int(math.ceil(len(panels) / ncols))
     fig, axes = plt.subplots(nrows, ncols, figsize=(12.5, 4.8 * nrows), constrained_layout=True)
@@ -167,7 +208,11 @@ def main() -> None:
         xedges = centers_to_edges(xs)
         yedges = centers_to_edges(temps)
         masked = np.ma.masked_invalid(mat)
-        last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, vmin=0.0, vmax=vmax, shading="auto")
+        if args.color_scale == "log":
+            masked = np.ma.masked_where(masked <= 0.0, masked)
+            last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, norm=norm, shading="auto")
+        else:
+            last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, vmin=vmin, vmax=vmax, shading="auto")
         ax.set_title(regime)
         ax.set_xlabel(f"{x_label}{x_unit}")
         ax.set_ylabel("T [MeV]")
@@ -177,7 +222,7 @@ def main() -> None:
         ax.axis("off")
     fig.suptitle(args.title)
     if last_im is not None:
-        fig.colorbar(last_im, ax=axes_arr[:len(panels)], label=args.field)
+        fig.colorbar(last_im, ax=axes_arr[:len(panels)], label=value_label)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     if args.out.suffix.lower() == ".svg":
         fig.savefig(args.out, dpi=args.dpi, metadata={"Date": None})

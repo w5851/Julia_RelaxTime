@@ -43,12 +43,12 @@
   "plot_correction": {
     "date": "2026-06-08",
     "type": "plot-only",
-    "reason": "original trho_asymmetric SVG used muq_MeV as heatmap x-axis; corrected figures use rho_target as the scan axis",
+    "reason": "original trho_asymmetric SVG used muq_MeV as heatmap x-axis; corrected figures use rho_target as the scan axis and log color scale for the wide K/pi dynamic range",
     "renderer_source": "local plot-only rerender from this repository update",
     "data_recomputed": false,
     "commands": [
-      "python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label \"rho/rho0\" --x-unit \"\" --kind trho_asymmetric_t_rho_heatmap_svg --dpi 260 --title \"trho_asymmetric K+/pi+ T-rho heatmap\"",
-      "python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label \"rho/rho0\" --x-unit \"\" --kind trho_asymmetric_t_rho_heatmap_png --dpi 260 --title \"trho_asymmetric K+/pi+ T-rho heatmap\""
+      "python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label \"rho/rho0\" --x-unit \"\" --kind trho_asymmetric_t_rho_heatmap_log_svg --color-scale log --dpi 260 --title \"trho_asymmetric K+/pi+ T-rho heatmap (log color scale)\"",
+      "python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label \"rho/rho0\" --x-unit \"\" --kind trho_asymmetric_t_rho_heatmap_log_png --color-scale log --dpi 260 --title \"trho_asymmetric K+/pi+ T-rho heatmap (log color scale)\""
     ]
   },
   "result_files": [
@@ -70,9 +70,9 @@
   ],
   "hashes": {
     "combined_meson_density_scan.csv": "c9b9a0c62c5d9b804e3c0fce4c036419b8bfaedc0a44e2a7f70af3bcdc96a670",
-    "combined_meson_density_scan.svg": "63ee70e038a06f42206fb08057bcddcd02f5c3894d34e9e20782656365fd289b",
-    "combined_meson_density_scan.png": "1f41800b86f2fbfb6d4b68c5c1cb2798926fe83873bf80cd5eb989a8244bcf0d",
-    "plot_manifest.json": "f32e5e2f044e62081af0995adf125757665037abb9dd4d6d12189eeba64b5fc8"
+    "combined_meson_density_scan.svg": "ac8d361f07f0b51addf35cff140d380c2fa899bce7f2541a21f7fce9ec15931b",
+    "combined_meson_density_scan.png": "edc898eca62a05cc4693f4a9c5f979970b0fbc37365e97af0822d0fbf40a39fd",
+    "plot_manifest.json": "490eeee4f9035d78feebd8dc044a85677bc747324f64405e8b43513a80711e15"
   },
   "known_limitations": [
     "stable and strict BW retain unsafe_bose_domain rows under strict Bose-domain policy and are comparison/diagnostic regimes only for those points",

@@ -2,6 +2,7 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_combined_meson_density_scan.jl")
+const HEATMAP_RENDER_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "analysis", "relaxtime", "render_combined_meson_density_fig3_like.py")
 const CONTRACT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "combined_meson_density_scan_contract.jl")
 const OUTDIR = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "scan", "test_outputs", "combined_meson_density")
 const FIGDIR = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "scan", "test_outputs", "combined_meson_density")
@@ -134,6 +135,11 @@ end
     @test occursin("\"rho_target\", \"rho/rho0\", \"\"", source)
     @test occursin("Combined Meson Density Scan: T-rho heatmap", source)
     @test occursin("_write_svg_plot(plot_path, opts, rows)", source)
+
+    heatmap_source = read(HEATMAP_RENDER_SCRIPT, String)
+    @test occursin("--x-field", heatmap_source)
+    @test occursin("--color-scale", heatmap_source)
+    @test occursin("LogNorm", heatmap_source)
 
     @test isfile(ASYM_PLUS_PROFILE)
     @test isfile(ASYM_MINUS_PROFILE)
