@@ -163,6 +163,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
             phase_convention=opts.phase_convention,
             phase_display=opts.phase_display,
             density_policy=opts.density_policy,
+            bose_x_min=opts.bose_x_min,
             noanom_policy=opts.noanom_policy,
         )
     end
@@ -181,6 +182,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
         phase_convention=opts.phase_convention,
         phase_display=opts.phase_display,
         density_policy=opts.density_policy,
+        bose_x_min=opts.bose_x_min,
         noanom_policy=opts.noanom_policy,
     )
 end
@@ -263,8 +265,18 @@ function _density_row(base::Dict{String, Any}, regime::Symbol, density)
     ))
 end
 
+function _failure_status(regime::Symbol, msg::AbstractString)
+    if regime in (:stable, :strict_bw_stage1, :strict_bw_stage2)
+        if occursin("mass > μ", msg) || occursin("omega_min must exceed μ", msg) || occursin("Bose pole", msg)
+            return :unsafe_bose_domain
+        end
+    end
+    return :failed
+end
+
 function _failure_row(base::Dict{String, Any}, regime::Symbol, err)
     msg = Models.ScanCommon.clean_message(sprint(showerror, err))
+    status = _failure_status(regime, msg)
     return merge(copy(base), Dict{String, Any}(
         "regime" => regime,
         "phase_scheme" => "",
@@ -292,7 +304,7 @@ function _failure_row(base::Dict{String, Any}, regime::Symbol, err)
         "min_E_minus_mu" => "",
         "bose_x_min" => "",
         "noanom_removed_component_count" => "",
-        "status" => :failed,
+        "status" => status,
         "message" => msg,
     ))
 end
@@ -317,12 +329,16 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
         else
             println(io, "# muq_values_MeV: not_applicable")
             println(io, "# rho_values: $(join(_fmt.(opts.rho_values), ','))")
+            println(io, "# trho_reverse_rho: $(opts.trho_reverse_rho)")
+            println(io, "# trho_seed_policy: temperature_grouped_rho_continuity")
             println(io, "# asym_ud_ratio_target: $(opts.asym_ud_ratio_target)")
             println(io, "# asym_s_target: $(opts.asym_s_target)")
         end
         println(io, "# real_axis_mode: $(opts.real_axis_mode)")
         println(io, "# phase_display: $(opts.phase_display)")
         println(io, "# density_policy: $(opts.density_policy)")
+        println(io, "# bose_x_min: $(opts.bose_x_min)")
+        println(io, "# density_policy_scope: phase_shift_current,phase_shift_gbu_reference")
         println(io, "# noanom_policy: $(opts.noanom_policy)")
         println(io, "# gamma_zero_tol: $(opts.gamma_zero_tol)")
         println(io, join(OUTPUT_COLUMNS, ','))
@@ -419,15 +435,20 @@ end
     return tryparse(Float64, _fmt(x))
 end
 
-function _heatmap_rows(rows, regime::String, field::String)
+function _heatmap_axis_config(opts::CombinedOptions)
+    opts.path_strategy === :trho_asymmetric && return ("rho_target", "rho/rho0", "")
+    return ("muq_MeV", "mu_q", "MeV")
+end
+
+function _heatmap_rows(rows, regime::String, field::String, xfield::String)
     out = Dict{String, Any}[]
     for row in rows
         string(get(row, "status", "")) == "ok" || continue
         string(get(row, "regime", "")) == regime || continue
         y = _try_float_value(get(row, field, ""))
         T = _try_float_value(get(row, "T_MeV", ""))
-        μ = _try_float_value(get(row, "muq_MeV", ""))
-        if y !== nothing && T !== nothing && μ !== nothing && isfinite(y) && isfinite(T) && isfinite(μ)
+        x = _try_float_value(get(row, xfield, ""))
+        if y !== nothing && T !== nothing && x !== nothing && isfinite(y) && isfinite(T) && isfinite(x)
             push!(out, row)
         end
     end
@@ -479,8 +500,21 @@ function _heat_color(value::Float64, vmin::Float64, vmax::Float64)
     return _svg_rgb(stops[end][2]...)
 end
 
-function _plot_heatmap_panel(io, rows, regime::String, x0::Float64, y0::Float64, w::Float64, h::Float64, vmin::Float64, vmax::Float64)
-    panel_rows = _heatmap_rows(rows, regime, "kpi_ratio")
+function _plot_heatmap_panel(
+    io,
+    rows,
+    regime::String,
+    x0::Float64,
+    y0::Float64,
+    w::Float64,
+    h::Float64,
+    vmin::Float64,
+    vmax::Float64,
+    xfield::String,
+    xlabel::String,
+    xunit::String,
+)
+    panel_rows = _heatmap_rows(rows, regime, "kpi_ratio", xfield)
     println(io, "<g>")
     println(io, "<text x=\"$(x0)\" y=\"$(y0 - 14)\" font-size=\"14\" font-weight=\"600\">$(_xml_escape(regime))</text>")
     println(io, "<rect x=\"$(x0)\" y=\"$(y0)\" width=\"$(w)\" height=\"$(h)\" fill=\"#f3f4f6\" stroke=\"#d1d5db\"/>")
@@ -490,38 +524,40 @@ function _plot_heatmap_panel(io, rows, regime::String, x0::Float64, y0::Float64,
         return
     end
 
-    μs = sort(unique(Float64(_try_float_value(row["muq_MeV"])) for row in panel_rows))
+    xs = sort(unique(Float64(_try_float_value(row[xfield])) for row in panel_rows))
     Ts = sort(unique(Float64(_try_float_value(row["T_MeV"])) for row in panel_rows))
-    μ_edges = _grid_edges(μs)
+    x_edges = _grid_edges(xs)
     T_edges = _grid_edges(Ts)
-    μmin, μmax = first(μ_edges), last(μ_edges)
+    xmin, xmax = first(x_edges), last(x_edges)
     Tmin, Tmax = first(T_edges), last(T_edges)
-    sx(x) = x0 + (Float64(x) - μmin) / (μmax - μmin) * w
+    sx(x) = x0 + (Float64(x) - xmin) / (xmax - xmin) * w
     sy(y) = y0 + h - (Float64(y) - Tmin) / (Tmax - Tmin) * h
 
     for row in panel_rows
-        μ = Float64(_try_float_value(row["muq_MeV"]))
+        x = Float64(_try_float_value(row[xfield]))
         T = Float64(_try_float_value(row["T_MeV"]))
         value = Float64(_try_float_value(row["kpi_ratio"]))
-        μ_idx = findfirst(==(μ), μs)
+        x_idx = findfirst(==(x), xs)
         T_idx = findfirst(==(T), Ts)
-        μ_idx === nothing && continue
+        x_idx === nothing && continue
         T_idx === nothing && continue
-        x_left = sx(μ_edges[μ_idx])
-        x_right = sx(μ_edges[μ_idx + 1])
+        x_left = sx(x_edges[x_idx])
+        x_right = sx(x_edges[x_idx + 1])
         y_top = sy(T_edges[T_idx + 1])
         y_bottom = sy(T_edges[T_idx])
         println(io, "<rect x=\"$(x_left)\" y=\"$(y_top)\" width=\"$(x_right - x_left)\" height=\"$(y_bottom - y_top)\" fill=\"$(_heat_color(value, vmin, vmax))\" stroke=\"#ffffff\" stroke-width=\"0.25\"/>")
     end
 
     println(io, "<rect x=\"$(x0)\" y=\"$(y0)\" width=\"$(w)\" height=\"$(h)\" fill=\"none\" stroke=\"#6b7280\"/>")
-    println(io, "<text x=\"$(x0)\" y=\"$(y0 + h + 18)\" font-size=\"11\" fill=\"#4b5563\">mu_q: $(_fmt(first(μs)))..$(_fmt(last(μs))) MeV</text>")
+    xunit_suffix = isempty(xunit) ? "" : " $(xunit)"
+    println(io, "<text x=\"$(x0)\" y=\"$(y0 + h + 18)\" font-size=\"11\" fill=\"#4b5563\">$(_xml_escape(xlabel)): $(_fmt(first(xs)))..$(_fmt(last(xs)))$(_xml_escape(xunit_suffix))</text>")
     println(io, "<text x=\"$(x0 - 54)\" y=\"$(y0 + h)\" font-size=\"11\" fill=\"#4b5563\">$(_fmt(first(Ts)))</text>")
     println(io, "<text x=\"$(x0 - 54)\" y=\"$(y0 + 10)\" font-size=\"11\" fill=\"#4b5563\">$(_fmt(last(Ts)))</text>")
     println(io, "</g>")
 end
 
-function _write_svg_heatmap_plot(path::String, rows)
+function _write_svg_heatmap_plot(path::String, opts::CombinedOptions, rows)
+    xfield, xlabel, xunit = _heatmap_axis_config(opts)
     regimes = sort(unique(string(row["regime"]) for row in rows))
     values = Float64[]
     for row in rows
@@ -535,12 +571,13 @@ function _write_svg_heatmap_plot(path::String, rows)
     open(path, "w") do io
         println(io, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1180\" height=\"860\" viewBox=\"0 0 1180 860\">")
         println(io, "<rect width=\"1180\" height=\"860\" fill=\"#f8fafc\"/>")
-        println(io, "<text x=\"40\" y=\"38\" font-size=\"22\" font-weight=\"700\">Combined Meson Density Scan: FIG3-like T-mu heatmap</text>")
+        title = opts.path_strategy === :trho_asymmetric ? "Combined Meson Density Scan: T-rho heatmap" : "Combined Meson Density Scan: FIG3-like T-mu heatmap"
+        println(io, "<text x=\"40\" y=\"38\" font-size=\"22\" font-weight=\"700\">$(_xml_escape(title))</text>")
         println(io, "<text x=\"40\" y=\"62\" font-size=\"12\" fill=\"#475569\">Field: K/pi ratio; gray cells are missing, failed, negative, or below the color floor.</text>")
         panel_positions = ((72.0, 112.0), (650.0, 112.0), (72.0, 480.0), (650.0, 480.0))
         for (idx, regime) in enumerate(regimes[1:min(end, length(panel_positions))])
             x0, y0 = panel_positions[idx]
-            _plot_heatmap_panel(io, rows, regime, x0, y0, 480.0, 280.0, 0.0, vmax)
+            _plot_heatmap_panel(io, rows, regime, x0, y0, 480.0, 280.0, 0.0, vmax, xfield, xlabel, xunit)
         end
         xbar = 1040.0
         ybar = 112.0
@@ -558,10 +595,11 @@ function _write_svg_heatmap_plot(path::String, rows)
     end
 end
 
-function _write_svg_plot(path::String, rows)
-    finite_mu = sort(unique(Float64(_try_float_value(row["muq_MeV"])) for row in rows if _try_float_value(get(row, "muq_MeV", "")) !== nothing))
-    if length(finite_mu) > 1
-        return _write_svg_heatmap_plot(path, rows)
+function _write_svg_plot(path::String, opts::CombinedOptions, rows)
+    xfield, _, _ = _heatmap_axis_config(opts)
+    finite_x = sort(unique(Float64(_try_float_value(row[xfield])) for row in rows if _try_float_value(get(row, xfield, "")) !== nothing))
+    if length(finite_x) > 1
+        return _write_svg_heatmap_plot(path, opts, rows)
     end
     mkpath(dirname(path))
     open(path, "w") do io
@@ -584,6 +622,15 @@ function _write_svg_plot(path::String, rows)
         println(io, "</g>")
         println(io, "</svg>")
     end
+end
+
+function _manifest_svg_fields(opts::CombinedOptions)
+    if opts.path_strategy === :trho_asymmetric
+        return ("rho_target", "T_MeV", "kpi_ratio")
+    elseif length(opts.muq_values_MeV) > 1
+        return ("muq_MeV", "T_MeV", "kpi_ratio")
+    end
+    return ("T_MeV", "", "n_pi,n_K,kpi_ratio")
 end
 
 function _json_escape(value)
@@ -620,7 +667,11 @@ function _write_plot_manifest(path::String, opts::CombinedOptions, csv_path::Str
             suffix = idx == length(figure_paths) ? "" : ","
             println(io, "    {")
             _write_json_string(io, "path", _rel(figure_path); indent="      ")
-            _write_json_string(io, "kind", "quicklook_svg"; comma=false, indent="      ")
+            xfield, yfield, value_field = _manifest_svg_fields(opts)
+            _write_json_string(io, "kind", "quicklook_svg"; indent="      ")
+            _write_json_string(io, "x_field", xfield; indent="      ")
+            _write_json_string(io, "y_field", yfield; indent="      ")
+            _write_json_string(io, "value_field", value_field; comma=false, indent="      ")
             println(io, "    }$(suffix)")
         end
         println(io, "  ]")
@@ -646,8 +697,9 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- density regimes: `$(join(string.(opts.regimes), "`, `"))`")
         if opts.path_strategy === :trho_asymmetric
             println(io, "- FixedAsymmetricRho rho targets: `$(join(_fmt.(opts.rho_values), ","))`")
+            println(io, "- FixedAsymmetricRho scan order: temperature-grouped rho-continuity with `trho_reverse_rho=$(opts.trho_reverse_rho)`.")
             println(io, "- asymmetry targets: `rho_u/rho_d=$(opts.asym_ud_ratio_target)`, `rho_s=$(opts.asym_s_target) fm^-3`")
-            println(io, "- smoke-only status: this path is intended for diagnostic integration, not formal high-precision production.")
+            println(io, "- production status: `trho_asymmetric` may be used for formal artifacts only after an explicit convergence gate and production audit; ad hoc runs remain diagnostic evidence.")
         elseif length(opts.muq_values_MeV) == 1
             println(io, "- fixed chemical potential: `mu_q=$(only(opts.muq_values_MeV)) MeV`, `mu_B=$(3.0 * only(opts.muq_values_MeV)) MeV`")
         else
@@ -682,6 +734,8 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- `phase_convention=$(opts.phase_convention)`")
         println(io, "- `phase_display=$(opts.phase_display)`")
         println(io, "- `density_policy=$(opts.density_policy)`")
+        println(io, "- `bose_x_min=$(opts.bose_x_min)`")
+        println(io, "- `density_policy` and `bose_x_min` apply only to `phase_shift_current` and `phase_shift_gbu_reference`; `stable` and `strict_bw_stage*` keep strict Bose-domain diagnostics.")
         println(io, "- `noanom_policy=$(opts.noanom_policy)`")
         println(io, "- `strict_bw_omega_min=$(opts.omega_min)`")
         println(io, "- `gamma_zero_tol=$(opts.gamma_zero_tol)`")
@@ -777,14 +831,15 @@ end
 function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile, meson_profile)
     rows = Dict{String, Any}[]
     point_index = 0
+    rho_scan_order = opts.trho_reverse_rho ? reverse(copy(opts.rho_values)) : copy(opts.rho_values)
 
-    for rho_target in opts.rho_values
+    for T_MeV in _temperature_grid(opts)
         equilibrium_seed = nothing
         continuation_state = nothing
+        T_fm = T_MeV / ħc_MeV_fm
 
-        for T_MeV in _temperature_grid(opts)
+        for rho_target in rho_scan_order
             point_index += 1
-            T_fm = T_MeV / ħc_MeV_fm
             mode = Models.FixedAsymmetricRho(rho_target, opts.asym_ud_ratio_target, opts.asym_s_target)
 
             equilibrium = try
@@ -928,7 +983,7 @@ function main()
     rows = run_combined_scan(opts)
     _write_csv(csv_path, opts, rows)
     if plot_path !== nothing
-        _write_svg_plot(plot_path, rows)
+        _write_svg_plot(plot_path, opts, rows)
         _write_plot_manifest(plot_manifest_path, opts, csv_path, [plot_path])
     end
     _write_summary(summary_path, opts, csv_path, plot_path, plot_manifest_path, rows)

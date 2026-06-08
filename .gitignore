@@ -32,6 +32,7 @@ test/SuppositionDB/
 /test_smoke.txt
 /unit_full_latest.log
 /tmp_*.csv
+/data/outputs/remote_artifacts/
 
 # Git worktrees
 /.worktrees/

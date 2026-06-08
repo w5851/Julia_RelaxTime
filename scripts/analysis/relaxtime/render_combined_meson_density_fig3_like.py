@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Render FIG3-like heatmaps from combined meson-density scan CSV output."""
+"""Render heatmaps from combined meson-density scan CSV output."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import math
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
 
 
@@ -30,29 +31,29 @@ def as_float(row: dict[str, str], field: str) -> float:
         return math.nan
 
 
-def matrix(rows: list[dict[str, str]], regime: str, field: str):
+def matrix(rows: list[dict[str, str]], regime: str, field: str, x_field: str):
     selected = [
         row
         for row in rows
         if row.get("regime") == regime and row.get("status") == "ok"
     ]
-    mus = np.array(sorted({as_float(row, "muq_MeV") for row in selected}), dtype=float)
+    xs = np.array(sorted({as_float(row, x_field) for row in selected}), dtype=float)
     temps = np.array(sorted({as_float(row, "T_MeV") for row in selected}), dtype=float)
-    mus = mus[np.isfinite(mus)]
+    xs = xs[np.isfinite(xs)]
     temps = temps[np.isfinite(temps)]
-    values = np.full((temps.size, mus.size), np.nan, dtype=float)
-    mu_index = {v: i for i, v in enumerate(mus)}
+    values = np.full((temps.size, xs.size), np.nan, dtype=float)
+    x_index = {v: i for i, v in enumerate(xs)}
     temp_index = {v: i for i, v in enumerate(temps)}
     for row in selected:
-        mu = as_float(row, "muq_MeV")
+        x = as_float(row, x_field)
         temp = as_float(row, "T_MeV")
         val = as_float(row, field)
-        if not (math.isfinite(mu) and math.isfinite(temp) and math.isfinite(val)):
+        if not (math.isfinite(x) and math.isfinite(temp) and math.isfinite(val)):
             continue
         if val < 0.0:
             continue
-        values[temp_index[temp], mu_index[mu]] = val
-    return mus, temps, values
+        values[temp_index[temp], x_index[x]] = val
+    return xs, temps, values
 
 
 def centers_to_edges(xs: np.ndarray) -> np.ndarray:
@@ -72,6 +73,24 @@ def finite_max(mats: list[np.ndarray]) -> float:
     if vals.size == 0:
         return 1.0
     return max(0.2, float(np.max(vals)))
+
+
+def finite_min(mats: list[np.ndarray]) -> float:
+    vals = np.concatenate([m[np.isfinite(m)] for m in mats if np.isfinite(m).any()])
+    if vals.size == 0:
+        return 0.0
+    return float(np.min(vals))
+
+
+def finite_positive_min(mats: list[np.ndarray]) -> float:
+    vals = np.concatenate([
+        m[np.isfinite(m) & (m > 0.0)]
+        for m in mats
+        if np.isfinite(m).any()
+    ])
+    if vals.size == 0:
+        raise SystemExit("log color scale requires positive finite rows")
+    return float(np.min(vals))
 
 
 def manifest_path(path: Path) -> str:
@@ -95,6 +114,7 @@ def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argpar
 
     payload["format"] = "combined_meson_density_plot_manifest_v1"
     payload["date"] = dt.date.today().isoformat()
+    payload["generated_by"] = "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
     payload["source_csv"] = manifest_path(csv_path)
 
     figures = payload.get("figures")
@@ -105,10 +125,17 @@ def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argpar
         item for item in figures
         if not (isinstance(item, dict) and item.get("path") == out_rel)
     ]
+    fmt = out_path.suffix.lstrip(".").lower() or "unknown"
     figures.append({
         "path": out_rel,
-        "kind": "fig3_like_heatmap_png",
+        "kind": args.kind or f"combined_meson_density_heatmap_{fmt}",
         "field": args.field,
+        "x_field": args.x_field,
+        "y_field": "T_MeV",
+        "color_scale": args.color_scale,
+        "color_vmin": args.resolved_vmin,
+        "color_vmax": args.resolved_vmax,
+        "format": fmt,
         "dpi": args.dpi,
         "title": args.title,
         "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py",
@@ -117,28 +144,59 @@ def write_plot_manifest(path: Path, csv_path: Path, out_path: Path, args: argpar
     path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
 
 
+def strip_trailing_whitespace(path: Path) -> None:
+    if path.suffix.lower() != ".svg":
+        return
+    lines = path.read_text(encoding="utf-8").splitlines()
+    path.write_text("\n".join(line.rstrip() for line in lines) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--manifest", default=None, type=Path)
     parser.add_argument("--field", default="kpi_ratio")
+    parser.add_argument("--x-field", default="muq_MeV")
+    parser.add_argument("--x-label", default=None)
+    parser.add_argument("--x-unit", default="MeV")
+    parser.add_argument("--kind", default=None)
+    parser.add_argument("--color-scale", choices=("linear", "log"), default="linear")
+    parser.add_argument("--vmin", type=float, default=None)
     parser.add_argument("--dpi", type=int, default=220)
     parser.add_argument("--vmax", type=float, default=None)
     parser.add_argument("--title", default="Combined meson-density FIG3-like scan")
     args = parser.parse_args()
+    x_label = args.x_label if args.x_label is not None else args.x_field
+    x_unit = f" [{args.x_unit}]" if args.x_unit else ""
 
     rows = read_rows(args.csv)
     regimes = sorted({row.get("regime", "") for row in rows if row.get("regime")})
     panels = []
     for regime in regimes:
-        mus, temps, mat = matrix(rows, regime, args.field)
-        if mus.size and temps.size:
-            panels.append((regime, mus, temps, mat))
+        xs, temps, mat = matrix(rows, regime, args.field, args.x_field)
+        if xs.size and temps.size:
+            panels.append((regime, xs, temps, mat))
     if not panels:
         raise SystemExit("no plottable rows")
 
-    vmax = args.vmax if args.vmax is not None else finite_max([panel[3] for panel in panels])
+    mats = [panel[3] for panel in panels]
+    if args.color_scale == "log":
+        vmin = args.vmin if args.vmin is not None else finite_positive_min(mats)
+        vmax = args.vmax if args.vmax is not None else finite_max(mats)
+        if not (math.isfinite(vmin) and math.isfinite(vmax) and vmin > 0.0 and vmax > vmin):
+            raise SystemExit("log color scale requires finite 0 < vmin < vmax")
+        norm = LogNorm(vmin=vmin, vmax=vmax)
+        value_label = f"{args.field} (log scale)"
+    else:
+        vmin = args.vmin if args.vmin is not None else min(0.0, finite_min(mats))
+        vmax = args.vmax if args.vmax is not None else finite_max(mats)
+        if not (math.isfinite(vmin) and math.isfinite(vmax) and vmax > vmin):
+            raise SystemExit("linear color scale requires finite vmin < vmax")
+        norm = None
+        value_label = args.field
+    args.resolved_vmin = vmin
+    args.resolved_vmax = vmax
     ncols = 2
     nrows = int(math.ceil(len(panels) / ncols))
     fig, axes = plt.subplots(nrows, ncols, figsize=(12.5, 4.8 * nrows), constrained_layout=True)
@@ -146,13 +204,17 @@ def main() -> None:
     cmap = plt.get_cmap("viridis").copy()
     cmap.set_bad("0.7")
     last_im = None
-    for ax, (regime, mus, temps, mat) in zip(axes_arr, panels):
-        xedges = centers_to_edges(mus)
+    for ax, (regime, xs, temps, mat) in zip(axes_arr, panels):
+        xedges = centers_to_edges(xs)
         yedges = centers_to_edges(temps)
         masked = np.ma.masked_invalid(mat)
-        last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, vmin=0.0, vmax=vmax, shading="auto")
+        if args.color_scale == "log":
+            masked = np.ma.masked_where(masked <= 0.0, masked)
+            last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, norm=norm, shading="auto")
+        else:
+            last_im = ax.pcolormesh(xedges, yedges, masked, cmap=cmap, vmin=vmin, vmax=vmax, shading="auto")
         ax.set_title(regime)
-        ax.set_xlabel("mu_q [MeV]")
+        ax.set_xlabel(f"{x_label}{x_unit}")
         ax.set_ylabel("T [MeV]")
         ax.set_xlim(xedges[0], xedges[-1])
         ax.set_ylim(yedges[0], yedges[-1])
@@ -160,10 +222,14 @@ def main() -> None:
         ax.axis("off")
     fig.suptitle(args.title)
     if last_im is not None:
-        fig.colorbar(last_im, ax=axes_arr[:len(panels)], label=args.field)
+        fig.colorbar(last_im, ax=axes_arr[:len(panels)], label=value_label)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(args.out, dpi=args.dpi)
+    if args.out.suffix.lower() == ".svg":
+        fig.savefig(args.out, dpi=args.dpi, metadata={"Date": None})
+    else:
+        fig.savefig(args.out, dpi=args.dpi)
     plt.close(fig)
+    strip_trailing_whitespace(args.out)
     manifest = args.manifest if args.manifest is not None else args.out.parent / "plot_manifest.json"
     write_plot_manifest(manifest, args.csv, args.out, args)
     print(args.out)

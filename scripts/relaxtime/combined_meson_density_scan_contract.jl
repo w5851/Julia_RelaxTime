@@ -61,6 +61,7 @@ struct CombinedOptions
     muq_MeV::Float64
     muq_values_MeV::Vector{Float64}
     rho_values::Vector{Float64}
+    trho_reverse_rho::Bool
     asym_ud_ratio_target::Float64
     asym_s_target::Float64
     xi::Float64
@@ -80,6 +81,7 @@ struct CombinedOptions
     phase_convention::Symbol
     phase_display::Symbol
     density_policy::Symbol
+    bose_x_min::Float64
     noanom_policy::Symbol
     strict_bw_stage::Symbol
     gamma_zero_tol::Float64
@@ -103,6 +105,8 @@ function print_usage()
     println("  --mumin/--mumax/--mustep    Fixed-muq path grid")
     println("  --rho-values <list>         Comma-separated rho/rho0 targets for trho_asymmetric")
     println("  --rhomin/--rhomax/--rhostep FixedAsymmetricRho target grid")
+    println("  --trho-reverse-rho          Scan rho values in reverse input order for trho_asymmetric (default)")
+    println("  --no-trho-reverse-rho       Keep rho values in input order for trho_asymmetric")
     println("  --asym-ud-ratio-target <x>  FixedAsymmetricRho rho_u/rho_d target (default 0.876)")
     println("  --asym-s-target <x>         FixedAsymmetricRho rho_s target in fm^-3 (default 0)")
     println("  --xi <value>                Anisotropy, phase-shift density currently requires 0")
@@ -120,6 +124,7 @@ function print_usage()
     println("  --phase-convention <mode>   arg_propagator or arg_inverse_propagator (default arg_inverse_propagator)")
     println("  --phase-display <mode>      unwrapped or fold_0_pi (default unwrapped)")
     println("  --density-policy <policy>   strict_normal_domain/excitation_only_E_gt_mu/x_min_cut")
+    println("  --bose-x-min <float>        Bose x cutoff for phase-shift density_policy=x_min_cut (default 0)")
     println("  --noanom-policy <policy>    none or low_energy_branch_subtraction")
     println("  --eta <float>               finite_eta width parameter (ignored by pv_b0_eta0)")
     println("  --strict-bw-stage <stage>   stage1 or stage2 (default stage1)")
@@ -212,6 +217,7 @@ function parse_args(args::Vector{String})
         :rhomin => nothing,
         :rhomax => nothing,
         :rhostep => nothing,
+        :trho_reverse_rho => true,
         :asym_ud_ratio_target => 0.876,
         :asym_s_target => 0.0,
         :xi => 0.0,
@@ -231,6 +237,7 @@ function parse_args(args::Vector{String})
         :phase_convention => :arg_inverse_propagator,
         :phase_display => :unwrapped,
         :density_policy => :strict_normal_domain,
+        :bose_x_min => 0.0,
         :noanom_policy => :none,
         :strict_bw_stage => :stage1_reduced,
         :gamma_zero_tol => 1e-12,
@@ -283,6 +290,10 @@ function parse_args(args::Vector{String})
             opts[:rhomax] = parse(Float64, require_value())
         elseif arg == "--rhostep"
             opts[:rhostep] = parse(Float64, require_value())
+        elseif arg == "--trho-reverse-rho"
+            opts[:trho_reverse_rho] = true
+        elseif arg == "--no-trho-reverse-rho"
+            opts[:trho_reverse_rho] = false
         elseif arg == "--asym-ud-ratio-target"
             opts[:asym_ud_ratio_target] = parse(Float64, require_value())
         elseif arg == "--asym-s-target"
@@ -321,6 +332,8 @@ function parse_args(args::Vector{String})
             opts[:phase_display] = Symbol(require_value())
         elseif arg == "--density-policy"
             opts[:density_policy] = Symbol(require_value())
+        elseif arg == "--bose-x-min"
+            opts[:bose_x_min] = parse(Float64, require_value())
         elseif arg == "--noanom-policy"
             opts[:noanom_policy] = Symbol(require_value())
         elseif arg == "--strict-bw-stage"
@@ -397,6 +410,7 @@ function parse_args(args::Vector{String})
     Int(opts[:omega_nodes]) > 1 || throw(ArgumentError("omega-nodes must be > 1"))
     Float64(opts[:qmax]) > 0.0 || throw(ArgumentError("qmax must be positive"))
     Float64(opts[:omega_max]) > Float64(opts[:omega_min]) || throw(ArgumentError("omega-max must exceed omega-min"))
+    Float64(opts[:bose_x_min]) >= 0.0 || throw(ArgumentError("bose-x-min must be nonnegative"))
     Float64(opts[:gamma_zero_tol]) >= 0.0 || throw(ArgumentError("gamma-zero-tol must be nonnegative"))
 
     return CombinedOptions(
@@ -410,6 +424,7 @@ function parse_args(args::Vector{String})
         Float64(opts[:muq]),
         muq_values,
         rho_values,
+        Bool(opts[:trho_reverse_rho]),
         Float64(opts[:asym_ud_ratio_target]),
         Float64(opts[:asym_s_target]),
         Float64(opts[:xi]),
@@ -429,6 +444,7 @@ function parse_args(args::Vector{String})
         Symbol(opts[:phase_convention]),
         Symbol(opts[:phase_display]),
         Symbol(opts[:density_policy]),
+        Float64(opts[:bose_x_min]),
         Symbol(opts[:noanom_policy]),
         _strict_bw_stage_symbol(Symbol(opts[:strict_bw_stage])),
         Float64(opts[:gamma_zero_tol]),

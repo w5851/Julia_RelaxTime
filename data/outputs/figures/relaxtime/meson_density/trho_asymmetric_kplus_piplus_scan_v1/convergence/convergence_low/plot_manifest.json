@@ -1,0 +1,19 @@
+{
+  "format": "combined_meson_density_plot_manifest_v1",
+  "date": "2026-06-06",
+  "generated_by": "scripts/relaxtime/run_combined_meson_density_scan.jl",
+  "source_csv": "data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/combined_meson_density_scan.csv",
+  "path_strategy": "trho_asymmetric",
+  "density_regimes": [
+    "stable",
+    "strict_bw_stage1",
+    "phase_shift_current",
+    "phase_shift_gbu_reference"
+  ],
+  "figures": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/combined_meson_density_scan.svg",
+      "kind": "quicklook_svg"
+    }
+  ]
+}

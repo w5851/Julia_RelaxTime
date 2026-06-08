@@ -1,0 +1,43 @@
+{
+  "format": "combined_meson_density_plot_manifest_v1",
+  "date": "2026-06-08",
+  "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py",
+  "source_csv": "data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv",
+  "path_strategy": "trho_asymmetric",
+  "density_regimes": [
+    "stable",
+    "strict_bw_stage1",
+    "phase_shift_current",
+    "phase_shift_gbu_reference"
+  ],
+  "figures": [
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg",
+      "kind": "trho_asymmetric_t_rho_heatmap_log_svg",
+      "field": "kpi_ratio",
+      "x_field": "rho_target",
+      "y_field": "T_MeV",
+      "color_scale": "log",
+      "color_vmin": 0.310601,
+      "color_vmax": 11481.086618,
+      "format": "svg",
+      "dpi": 260,
+      "title": "trho_asymmetric K+/pi+ T-rho heatmap (log color scale)",
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png",
+      "kind": "trho_asymmetric_t_rho_heatmap_log_png",
+      "field": "kpi_ratio",
+      "x_field": "rho_target",
+      "y_field": "T_MeV",
+      "color_scale": "log",
+      "color_vmin": 0.310601,
+      "color_vmax": 11481.086618,
+      "format": "png",
+      "dpi": 260,
+      "title": "trho_asymmetric K+/pi+ T-rho heatmap (log color scale)",
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
+    }
+  ]
+}

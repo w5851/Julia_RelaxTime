@@ -2,6 +2,7 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "run_combined_meson_density_scan.jl")
+const HEATMAP_RENDER_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "analysis", "relaxtime", "render_combined_meson_density_fig3_like.py")
 const CONTRACT = joinpath(PROJECT_ROOT, "scripts", "relaxtime", "combined_meson_density_scan_contract.jl")
 const OUTDIR = joinpath(PROJECT_ROOT, "data", "outputs", "results", "relaxtime", "scan", "test_outputs", "combined_meson_density")
 const FIGDIR = joinpath(PROJECT_ROOT, "data", "outputs", "figures", "relaxtime", "scan", "test_outputs", "combined_meson_density")
@@ -40,15 +41,21 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
         "--rho-values", "0.05,0.1",
         "--asym-ud-ratio-target", "0.876",
         "--asym-s-target", "0",
+        "--no-trho-reverse-rho",
         "--meson-profile", "asymmetric_kplus_over_piplus_signed",
+        "--density-policy", "x_min_cut",
+        "--bose-x-min", "1e-6",
     ])
     @test asym.path_strategy === :trho_asymmetric
     @test asym.output_dir == CMD_CONTRACT.DEFAULT_TRHO_ASYMMETRIC_OUTPUT_DIR
     @test endswith(asym.figure_dir, joinpath("relaxtime", "meson_density", "combined_trho_asymmetric_smoke_scan"))
     @test asym.regimes == [:stable, :phase_shift_current]
     @test asym.rho_values == [0.05, 0.1]
+    @test asym.trho_reverse_rho == false
     @test asym.asym_ud_ratio_target ≈ 0.876
     @test asym.meson_profile == "asymmetric_kplus_over_piplus_signed"
+    @test asym.density_policy === :x_min_cut
+    @test asym.bose_x_min ≈ 1e-6
 
     @test "constraint_mode" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test "rho_u_over_rho_d" in CMD_CONTRACT.OUTPUT_COLUMNS
@@ -60,6 +67,7 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--muq-values", "0,10"])
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--rhomin", "0.2", "--rhomax", "0.1", "--rhostep", "0.05"])
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--mumin", "0", "--mumax", "10", "--mustep", "0"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--bose-x-min", "-1e-6"])
 end
 
 if RUN_COMBINED_MESON_DENSITY_CLI
@@ -82,6 +90,9 @@ if RUN_COMBINED_MESON_DENSITY_CLI
         @test occursin("# rho_values: not_applicable", text)
         @test occursin("# asym_ud_ratio_target: not_applicable", text)
         @test occursin("# asym_s_target: not_applicable", text)
+        @test !occursin("# trho_seed_policy:", text)
+        @test occursin("# bose_x_min: 0.0", text)
+        @test occursin("# density_policy_scope: phase_shift_current,phase_shift_gbu_reference", text)
         @test occursin("phase_display", text)
         @test occursin("stable", text)
         @test occursin("strict_bw_stage1", text)
@@ -116,8 +127,19 @@ end
     source = read(SCRIPT, String)
     @test occursin("combined_meson_density_scan_contract.jl", source)
     @test occursin("function _run_trho_asymmetric_scan", source)
+    @test occursin("trho_reverse_rho", source)
+    @test occursin("temperature_grouped_rho_continuity", source)
     @test occursin("Models.FixedAsymmetricRho", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
+    @test occursin("function _heatmap_axis_config", source)
+    @test occursin("\"rho_target\", \"rho/rho0\", \"\"", source)
+    @test occursin("Combined Meson Density Scan: T-rho heatmap", source)
+    @test occursin("_write_svg_plot(plot_path, opts, rows)", source)
+
+    heatmap_source = read(HEATMAP_RENDER_SCRIPT, String)
+    @test occursin("--x-field", heatmap_source)
+    @test occursin("--color-scale", heatmap_source)
+    @test occursin("LogNorm", heatmap_source)
 
     @test isfile(ASYM_PLUS_PROFILE)
     @test isfile(ASYM_MINUS_PROFILE)

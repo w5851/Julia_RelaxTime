@@ -1,0 +1,602 @@
+{
+  "format": "meson_density_convergence_summary_v2",
+  "case_slug": "trho_asymmetric_kplus_piplus_scan_v1",
+  "date": "2026-06-08",
+  "verdict": "production-grade",
+  "source_commit": "d2c5cba82702c18e55b2d398873145141a15a104",
+  "policy": {
+    "path_strategy": "trho_asymmetric",
+    "trho_reverse_rho": true,
+    "trho_seed_policy": "temperature_grouped_rho_continuity",
+    "density_policy": "x_min_cut",
+    "density_policy_scope": [
+      "phase_shift_current",
+      "phase_shift_gbu_reference"
+    ],
+    "bose_x_min": 0.01,
+    "stable_and_bw_policy": "strict Bose-domain diagnostics; unsafe rows kept as NaN/status, no x_min_cut extension"
+  },
+  "remote_runs": {
+    "convergence_low": "27114834622",
+    "convergence_mid": "27114834644",
+    "convergence_high36": "27114834615",
+    "diagnostic64": "27115127952",
+    "diagnostic96": "27115242352",
+    "diagnostic128": "27115372364",
+    "diagnostic192": "27115609958",
+    "production192": "27115936651"
+  },
+  "comparisons": {
+    "mid_to_high36": {
+      "common_rows": 880,
+      "fields": {
+        "n_pi": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.07841152896409334,
+          "mean_rel": 0.018549939219746802,
+          "max_abs": 0.0019369999999999978,
+          "max_point": {
+            "T_MeV": 140.0,
+            "rho_target": 1.0,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.02217906517445695,
+              "mean_rel": 0.010327826184330667
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.07841152896409334,
+              "mean_rel": 0.04456322628008083
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.026690979950479584,
+              "mean_rel": 0.012840641758643016
+            }
+          }
+        },
+        "n_K": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.12812904697769487,
+          "mean_rel": 0.04223143439052192,
+          "max_abs": 0.7716240000000001,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.05,
+            "regime": "phase_shift_current"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.12812904697769487,
+              "mean_rel": 0.07283252931347307
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.11513277744813297,
+              "mean_rel": 0.05207946710230103
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.08305556823889315,
+              "mean_rel": 0.030162114328781568
+            }
+          }
+        },
+        "kpi_ratio": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.11862882612988299,
+          "mean_rel": 0.030673992121722317,
+          "max_abs": 6.101891000000002,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.05,
+            "regime": "phase_shift_current"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.11862882612988299,
+              "mean_rel": 0.06497300400640571
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.11467277763972868,
+              "mean_rel": 0.026000693594275707
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.059458214303128955,
+              "mean_rel": 0.017740102168216813
+            }
+          }
+        }
+      },
+      "branch_stability": {
+        "muq_MeV_max_abs": 0.0,
+        "m_pi_MeV_max_abs": 0.0,
+        "m_K_MeV_max_abs": 0.0
+      }
+    },
+    "high36_to_custom64": {
+      "common_rows": 880,
+      "fields": {
+        "n_pi": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.056487232574189084,
+          "mean_rel": 0.010547259124986752,
+          "max_abs": 0.0016369999999999996,
+          "max_point": {
+            "T_MeV": 140.0,
+            "rho_target": 0.6,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.014471031756420782,
+              "mean_rel": 0.005776785177774369
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.056487232574189084,
+              "mean_rel": 0.025399103407634894
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.017470605342972317,
+              "mean_rel": 0.007884271823170651
+            }
+          }
+        },
+        "n_K": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.0885596570810271,
+          "mean_rel": 0.0076741842947504225,
+          "max_abs": 0.006384000000000001,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.029460700210763965,
+              "mean_rel": 0.011882903829105741
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.03893223191066244,
+              "mean_rel": 0.00966352009053047
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.0885596570810271,
+              "mean_rel": 0.024980644016562508
+            }
+          }
+        },
+        "kpi_ratio": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.07741506138290723,
+          "mean_rel": 0.01709656947087685,
+          "max_abs": 0.04990500000000009,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.039559048293773436,
+              "mean_rel": 0.01682283958786867
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.0722024580442012,
+              "mean_rel": 0.033442072018108934
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.07741506138290723,
+              "mean_rel": 0.017342715189511283
+            }
+          }
+        }
+      },
+      "branch_stability": {
+        "muq_MeV_max_abs": 0.0,
+        "m_pi_MeV_max_abs": 0.0,
+        "m_K_MeV_max_abs": 0.0
+      }
+    },
+    "custom64_to_custom96": {
+      "common_rows": 880,
+      "fields": {
+        "n_pi": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.034055180697354,
+          "mean_rel": 0.004124821477723056,
+          "max_abs": 0.0009639999999999996,
+          "max_point": {
+            "T_MeV": 140.0,
+            "rho_target": 0.6,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.007598526029688463,
+              "mean_rel": 0.002200767595581086
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.034055180697354,
+              "mean_rel": 0.010092721894400919
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.004467055465938721,
+              "mean_rel": 0.0013703451923981617
+            }
+          }
+        },
+        "n_K": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.03921150488477789,
+          "mean_rel": 0.00042808656937663893,
+          "max_abs": 0.002942,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.0008075310567594868,
+              "mean_rel": 0.00016424298681429292
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.006934058463630278,
+              "mean_rel": 0.0006545826388258234
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.03921150488477789,
+              "mean_rel": 0.007876576780596622
+            }
+          }
+        },
+        "kpi_ratio": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.03813201471803842,
+          "mean_rel": 0.004276237672844216,
+          "max_abs": 0.025555999999999912,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.007521537091623129,
+              "mean_rel": 0.0021753192897919216
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.03385593869579861,
+              "mean_rel": 0.010267919420779955
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.03813201471803842,
+              "mean_rel": 0.006523411365489974
+            }
+          }
+        }
+      },
+      "branch_stability": {
+        "muq_MeV_max_abs": 0.0,
+        "m_pi_MeV_max_abs": 0.0,
+        "m_K_MeV_max_abs": 0.0
+      }
+    },
+    "custom96_to_custom128": {
+      "common_rows": 880,
+      "fields": {
+        "n_pi": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.0184756457397068,
+          "mean_rel": 0.0019559491446211404,
+          "max_abs": 0.0004070000000000011,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.4,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.00352812042651046,
+              "mean_rel": 0.0009856070133356517
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.0184756457397068,
+              "mean_rel": 0.00486855542696833
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.0009504132231404429,
+              "mean_rel": 0.00023159219869821047
+            }
+          }
+        },
+        "n_K": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.015690390291899017,
+          "mean_rel": 0.00019080195940370716,
+          "max_abs": 0.0011960000000000026,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.000477494824266533,
+              "mean_rel": 5.674791436761947e-05
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.004508120792935228,
+              "mean_rel": 0.00036641243672884025
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.015690390291899017,
+              "mean_rel": 0.002525693535786584
+            }
+          }
+        },
+        "kpi_ratio": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.018483150850258652,
+          "mean_rel": 0.002055380484296985,
+          "max_abs": 2.7409509999999955,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.4,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.003522246309958431,
+              "mean_rel": 0.0009982005376474605
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.018483150850258652,
+              "mean_rel": 0.00503246698567849
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.015616233127212498,
+              "mean_rel": 0.0022926357311000805
+            }
+          }
+        }
+      },
+      "branch_stability": {
+        "muq_MeV_max_abs": 0.0,
+        "m_pi_MeV_max_abs": 0.0,
+        "m_K_MeV_max_abs": 0.0
+      }
+    },
+    "custom128_to_custom192": {
+      "common_rows": 880,
+      "fields": {
+        "n_pi": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.00930591493031914,
+          "mean_rel": 0.000841248867917963,
+          "max_abs": 0.00020500000000000032,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.4,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.0015867518811195555,
+              "mean_rel": 0.0004421390767128437
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.00930591493031914,
+              "mean_rel": 0.0020782891620360357
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.0002581977794990679,
+              "mean_rel": 5.615694623862741e-05
+            }
+          }
+        },
+        "n_K": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.009241447436830655,
+          "mean_rel": 9.652218571084611e-05,
+          "max_abs": 0.0007110000000000033,
+          "max_point": {
+            "T_MeV": 220.0,
+            "rho_target": 0.2,
+            "regime": "strict_bw_stage1"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.0001825725096166125,
+              "mean_rel": 2.5283890415365333e-05
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.002661934338952941,
+              "mean_rel": 0.0001883786795855869
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.009241447436830655,
+              "mean_rel": 0.0012845290129960723
+            }
+          }
+        },
+        "kpi_ratio": {
+          "comparable_ok_rows": 660,
+          "max_rel": 0.009266149614715849,
+          "mean_rel": 0.000896029044200656,
+          "max_abs": 1.3613359999999943,
+          "max_point": {
+            "T_MeV": 120.0,
+            "rho_target": 0.4,
+            "regime": "phase_shift_gbu_reference"
+          },
+          "by_regime": {
+            "phase_shift_current": {
+              "n": 220,
+              "max_rel": 0.0015973470106988403,
+              "mean_rel": 0.000448834646108989
+            },
+            "phase_shift_gbu_reference": {
+              "n": 220,
+              "max_rel": 0.009266149614715849,
+              "mean_rel": 0.0021664152817549996
+            },
+            "stable": {
+              "n": 207,
+              "max_rel": 0.0,
+              "mean_rel": 0.0
+            },
+            "strict_bw_stage1": {
+              "n": 13,
+              "max_rel": 0.009246431814477594,
+              "mean_rel": 0.0012326296186427283
+            }
+          }
+        }
+      },
+      "branch_stability": {
+        "muq_MeV_max_abs": 0.0,
+        "m_pi_MeV_max_abs": 0.0,
+        "m_K_MeV_max_abs": 0.0
+      }
+    }
+  },
+  "selected_production_parameters": {
+    "stable_q_nodes": 768,
+    "q_nodes": 192,
+    "omega_nodes": 192,
+    "qmax_fm_inv": 4.0,
+    "omega_min_fm_inv": 0.05,
+    "omega_max_fm_inv": 4.0,
+    "p_num": 8,
+    "t_num": 4,
+    "max_iter": 20
+  },
+  "production_files": {
+    "csv": "data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv",
+    "svg": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg",
+    "plot_manifest": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json"
+  },
+  "hashes": {
+    "combined_meson_density_scan.csv": "c9b9a0c62c5d9b804e3c0fce4c036419b8bfaedc0a44e2a7f70af3bcdc96a670",
+    "combined_meson_density_scan.svg": "a9261a81053eb9ad9094af88f814f52f421cc07030b9c7eac69761debc5fad33",
+    "plot_manifest.json": "12396bfbc3f50a83beb88114583cd7700dd809f15b4f3fe9d2a0d93c743a2057"
+  },
+  "known_limitations": [
+    "stable and strict BW retain unsafe_bose_domain rows under strict Bose-domain policy and are comparison/diagnostic regimes only for those points",
+    "production-grade verdict is based on BU/GBU/stable available rows plus explicit status accounting; unsafe rows are not interpreted as finite densities",
+    "formal policy is a project choice using phase-shift-only x_min_cut, not a unique literature prescription"
+  ]
+}

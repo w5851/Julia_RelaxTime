@@ -197,6 +197,7 @@ solve_phase_shift_meson_density_from_meson_point(
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain` 与 `density=NaN`
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
   - 只作为显式诊断延拓，不能视作文献明示公式
+  - 在 combined scan 中该 policy 只传给 `phase_shift_current` 与 `phase_shift_gbu_reference`；`stable` 与 `strict_bw_stage*` 保持 strict Bose-domain diagnostics，触发 `mass <= μ_M` 或 `omega_min <= μ_M` 时应作为 unsafe/NaN 行记录
 - `noanom_policy=:low_energy_branch_subtraction`
   - 按 temp7 reconstructed diagnostic 口径删除 `K_plus` low-energy anomalous branch
   - 不改变上游 FixedMu 默认分支选择，也不作为 full phase-shift 默认值
@@ -291,11 +292,11 @@ scripts/relaxtime/run_combined_meson_density_scan.jl
 该脚本把 scan path 与 density regime 分成两条显式组合轴。当前实现：
 
 - `--path tmu`：在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG。
-- `--path trho_asymmetric`：使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，通过 `Models.solve_meson_point_from_equilibrium` 接入同一套 meson density 后处理。该路径当前为 smoke / diagnostic 状态，不作为正式高精度生产入口。
+- `--path trho_asymmetric`：使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，通过 `Models.solve_meson_point_from_equilibrium` 接入同一套 meson density 后处理。该路径默认按温度分组并在每个温度内做 rho 连续扫描，`--trho-reverse-rho=true` 时从高 rho 到低 rho 传递 equilibrium seed；`--no-trho-reverse-rho` 仅用于顺序敏感诊断。正式高精度产物必须由 convergence gate、production audit 和正式 result/figure 布局共同支撑，普通小网格运行仍只作为 diagnostic evidence。
 
-`trho_asymmetric` 支持 `--rho-values` 或 `--rhomin/--rhomax/--rhostep`，并新增 `--asym-ud-ratio-target`、`--asym-s-target`。输出额外记录约束诊断字段：`constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`。
+`trho_asymmetric` 支持 `--rho-values` 或 `--rhomin/--rhomax/--rhostep`，并新增 `--asym-ud-ratio-target`、`--asym-s-target`。相移密度可通过 `--density-policy x_min_cut --bose-x-min <x>` 显式采用 Bose x 下界；该选项只作用于 BU/GBU phase-shift regimes，不改变 stable/BW 的 strict-domain 失效语义。输出额外记录约束诊断字段：`constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`。
 
-需要高 DPI PNG 时，单 `mu_q` 温度扫描可用 `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py`，多 `mu_q` heatmap 可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
+需要高 DPI PNG/SVG 时，单 `mu_q` 温度扫描可用 `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py`，heatmap 可用 `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 从 CSV 渲染。多 `mu_q` 的 `tmu` 图使用默认 `--x-field muq_MeV`；`trho_asymmetric` 图必须显式使用 `--x-field rho_target --x-label "rho/rho0" --x-unit ""`，避免把 equilibrium 输出的非规则 `muq_MeV` 误当成扫描轴。若 `K/pi` 等比值跨多个数量级，可加 `--color-scale log` 仅改变图像色标，不改变 CSV 数据。正式数据默认写入 `data/outputs/results/...`，图像与 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`；`--figure-dir` 可显式覆盖图像目录。输出包含 CSV、README、SVG 图像与图像 manifest，适合做正式数据产物和后续路径扩展的桥接入口。
 
 ## 当前设计原则
 
