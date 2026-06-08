@@ -232,35 +232,35 @@ jobs:
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
           audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
           mkdir -p "$audit_root"
-          cat > "$audit_root/DIAGNOSTIC_AUDIT.md" <<EOF
-          # Relaxtime Phase-Guided Transport Diagnostic Audit
-
-          This GitHub Actions workflow produces reviewable artifacts for phase-guided transport scans.
-          It does not commit, promote, or certify repository production data.
-
-          ## Inputs
-
-          - mode: `${{ inputs.mode || 'both' }}`
-          - case_name: `${case_name}`
-          - run_tier: `${{ inputs.run_tier || 'dry-run' }}`
-          - propagator_xi_policy: `${{ inputs.propagator_xi_policy || 'match_thermo' }}`
-          - sigma_cache_policy: `${{ inputs.sigma_cache_policy || 'default' }}`
-          - compute_bulk: `${{ inputs.compute_bulk }}`
-          - render_plots: `${{ inputs.render_plots }}`
-          - overwrite: `${{ inputs.overwrite }}`
-          - tau_p_nodes: `${{ inputs.tau_p_nodes || '20' }}`
-          - tau_angle_nodes: `${{ inputs.tau_angle_nodes || '4' }}`
-          - tau_phi_nodes: `${{ inputs.tau_phi_nodes || '8' }}`
-          - tau_n_sigma: `${{ inputs.tau_n_sigma || '6' }}`
-          - sigma_grid_n: `${{ inputs.sigma_grid_n || '60' }}`
-
-          ## Verdict
-
-          diagnostic-only
-
-          Production-grade promotion still requires an explicit convergence gate, channel diagnostics review,
-          and a separate decision to import selected artifacts into the repository data tree.
-          EOF
+          {
+            echo "# Relaxtime Phase-Guided Transport Diagnostic Audit"
+            echo ""
+            echo "This GitHub Actions workflow produces reviewable artifacts for phase-guided transport scans."
+            echo "It does not commit, promote, or certify repository production data."
+            echo ""
+            echo "## Inputs"
+            echo ""
+            printf -- '- mode: `%s`\n' "${{ inputs.mode || 'both' }}"
+            printf -- '- case_name: `%s`\n' "$case_name"
+            printf -- '- run_tier: `%s`\n' "${{ inputs.run_tier || 'dry-run' }}"
+            printf -- '- propagator_xi_policy: `%s`\n' "${{ inputs.propagator_xi_policy || 'match_thermo' }}"
+            printf -- '- sigma_cache_policy: `%s`\n' "${{ inputs.sigma_cache_policy || 'default' }}"
+            printf -- '- compute_bulk: `%s`\n' "${{ inputs.compute_bulk }}"
+            printf -- '- render_plots: `%s`\n' "${{ inputs.render_plots }}"
+            printf -- '- overwrite: `%s`\n' "${{ inputs.overwrite }}"
+            printf -- '- tau_p_nodes: `%s`\n' "${{ inputs.tau_p_nodes || '20' }}"
+            printf -- '- tau_angle_nodes: `%s`\n' "${{ inputs.tau_angle_nodes || '4' }}"
+            printf -- '- tau_phi_nodes: `%s`\n' "${{ inputs.tau_phi_nodes || '8' }}"
+            printf -- '- tau_n_sigma: `%s`\n' "${{ inputs.tau_n_sigma || '6' }}"
+            printf -- '- sigma_grid_n: `%s`\n' "${{ inputs.sigma_grid_n || '60' }}"
+            echo ""
+            echo "## Verdict"
+            echo ""
+            echo "diagnostic-only"
+            echo ""
+            echo "Production-grade promotion still requires an explicit convergence gate, channel diagnostics review,"
+            echo "and a separate decision to import selected artifacts into the repository data tree."
+          } > "$audit_root/DIAGNOSTIC_AUDIT.md"
 
       - name: Upload phase-guided result artifacts
         uses: actions/upload-artifact@v4
