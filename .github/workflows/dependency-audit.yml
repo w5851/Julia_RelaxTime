@@ -11,6 +11,7 @@ on:
       - "Manifest.toml"
       - "package.json"
       - "package-lock.json"
+      - ".github/workflows/dependency-audit.yml"
 
 jobs:
   deps-audit:
@@ -24,8 +25,23 @@ jobs:
         with:
           version: "1.12.5"
 
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-dependency-audit
+
       - name: Instantiate Julia project
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if julia --project=. -e 'using Pkg; Pkg.instantiate()'; then
+              exit 0
+            fi
+            if [[ "$attempt" == "3" ]]; then
+              exit 1
+            fi
+            sleep $((attempt * 30))
+          done
 
       - name: Generate dependency graph
         run: julia --project=. scripts/dev/gen_deps.jl
