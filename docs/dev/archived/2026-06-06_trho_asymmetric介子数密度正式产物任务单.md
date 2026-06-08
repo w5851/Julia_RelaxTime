@@ -1,3 +1,15 @@
+---
+title: trho_asymmetric 介子数密度正式产物任务单
+archived: true
+original: docs/dev/active/2026-06-06_trho_asymmetric介子数密度正式产物任务单.md
+archived_date: 2026-06-08
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # trho_asymmetric 介子数密度正式产物任务单
 
 更新时间：2026-06-08
