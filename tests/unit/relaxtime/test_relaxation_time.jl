@@ -7,6 +7,7 @@ if !isdefined(Main, :RelaxTime)
 end
 using Main.RelaxationTime
 using Main.AverageScatteringRate: CrossSectionCache
+using Main.AFieldBuilder: ensure_quark_params_has_A
 using Main.ParameterTypes: QuarkParams, ThermoParams
 
 const DENSITIES_SAMPLE = (u=1.0, d=1.0, s=2.0, ubar=3.0, dbar=3.0, sbar=4.0)
@@ -45,6 +46,7 @@ const EXPECTED_TAU = (
 # Minimal parameter sets (values unused when existing_rates covers all processes)
 const QUARK_PARAMS = (m=(u=0.1,d=0.1,s=0.2), μ=(u=0.0,d=0.0,s=0.0), A=(u=0.0,d=0.0,s=0.0))
 const THERMO_PARAMS = (T=0.15, Φ=0.5, Φbar=0.5, ξ=0.0)
+const THERMO_ANISO = (; THERMO_PARAMS..., ξ=0.2)
 const K_COEFFS = (K_σπ=1.0, K_σK=1.0, K_σ=1.0, K_δπ=1.0, K_δK=1.0)
 
 function rates_without(process::Symbol)
@@ -52,11 +54,15 @@ function rates_without(process::Symbol)
 end
 
 function fingerprinted_constant_cache(process::Symbol)
+    return fingerprinted_constant_cache(process, QUARK_PARAMS, THERMO_PARAMS)
+end
+
+function fingerprinted_constant_cache(process::Symbol, quark_params::NamedTuple, thermo_params::NamedTuple)
     cache = CrossSectionCache(process, [0.0, 500.0], [1.0, 1.0])
     cache.fingerprint = Main.AverageScatteringRate._cross_section_cache_fingerprint(
         process,
-        QUARK_PARAMS,
-        THERMO_PARAMS,
+        quark_params,
+        thermo_params,
         K_COEFFS;
         n_points=4,
         threshold_subtraction=false,
@@ -225,6 +231,46 @@ end
         K_COEFFS;
         existing_rates=rates_without(process),
         cs_caches=Dict(process => cache),
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+    )
+end
+
+@testset "compute_average_rates forwards propagator xi policy to cache validation" begin
+    process = :uu_to_uu
+    prop_q_iso = ensure_quark_params_has_A(
+        (m=QUARK_PARAMS.m, μ=QUARK_PARAMS.μ),
+        THERMO_PARAMS;
+        use_aniso=false,
+        warn_on_auto=false,
+    )
+    iso_cache = fingerprinted_constant_cache(process, prop_q_iso, THERMO_PARAMS)
+
+    rates = compute_average_rates(
+        QUARK_PARAMS,
+        THERMO_ANISO,
+        K_COEFFS;
+        existing_rates=rates_without(process),
+        cs_caches=Dict(process => iso_cache),
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        propagator_xi_policy=:isotropic,
+    )
+    @test hasproperty(rates, process)
+    @test isfinite(getproperty(rates, process))
+
+    @test_throws ArgumentError compute_average_rates(
+        QUARK_PARAMS,
+        THERMO_ANISO,
+        K_COEFFS;
+        existing_rates=rates_without(process),
+        cs_caches=Dict(process => iso_cache),
         p_nodes=2,
         angle_nodes=2,
         phi_nodes=2,

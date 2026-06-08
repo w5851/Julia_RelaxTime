@@ -1,6 +1,7 @@
 using Test
 
 const _PHASE_GUIDED_SCAN_SCRIPT = joinpath(@__DIR__, "..", "..", "..", "scripts", "relaxtime", "run_phase_guided_transport_scan.jl")
+const _PHASE_GUIDED_PRODUCTION_WORKFLOW = joinpath(@__DIR__, "..", "..", "..", ".github", "workflows", "relaxtime-phase-guided-transport-production.yml")
 if !isdefined(Main, :run_phase_guided_scan)
     include(_PHASE_GUIDED_SCAN_SCRIPT)
 end
@@ -14,6 +15,13 @@ end
         [0.0, 450.0, 900.0],
         [1.0, 1.1],
         Float64[],
+        :match_thermo,
+        nothing,
+        nothing,
+        nothing,
+        nothing,
+        nothing,
+        false,
         true,
         true,
         false,
@@ -44,6 +52,13 @@ end
         [0.0, 900.0],
         Float64[1.0],
         [120.0, 130.0, 138.0],
+        :match_thermo,
+        nothing,
+        nothing,
+        nothing,
+        nothing,
+        nothing,
+        false,
         true,
         true,
         false,
@@ -70,4 +85,15 @@ end
     @test isfinite(via_plan_T)
     @test direct_xi == via_plan_xi
     @test isapprox(via_plan_T, direct_T; atol=1e-12, rtol=0.0)
+end
+
+@testset "phase-guided production workflow forwards required CLI args" begin
+    workflow_text = read(_PHASE_GUIDED_PRODUCTION_WORKFLOW, String)
+
+    @test occursin("--case-name", workflow_text)
+    @test occursin("canonical_xi_list=\"-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5\"", workflow_text)
+    @test occursin("--xi-list \"\$canonical_xi_list\"", workflow_text)
+    @test occursin("--propagator-xi-policy", workflow_text)
+    @test occursin("--channel-diagnostics", workflow_text)
+    @test occursin("--sigma-grid-n", workflow_text)
 end

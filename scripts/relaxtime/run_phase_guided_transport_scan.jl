@@ -20,7 +20,8 @@ function _default_output_paths(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
     readme = joinpath(opts.outdir, "README.md")
     effective_config = joinpath(opts.outdir, "effective_config.json")
     failed_points = joinpath(opts.outdir, "failed_points.csv")
-    return (; result_csv, plan_csv, readme, effective_config, failed_points)
+    channel_diagnostics = joinpath(opts.outdir, "channel_diagnostics.csv")
+    return (; result_csv, plan_csv, readme, effective_config, failed_points, channel_diagnostics)
 end
 
 function _default_figure_dir(opts::PhaseGuidedCLI.PhaseGuidedScanOptions)
@@ -33,7 +34,14 @@ function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.Phase
         "--output", result_csv,
         "--provenance-dir", opts.outdir,
         "--failed-points-output", joinpath(opts.outdir, "failed_points.csv"),
+        "--propagator-xi-policy", String(opts.propagator_xi_policy),
     ]
+    opts.tau_p_nodes !== nothing && append!(base_args, ["--tau-p-nodes", string(opts.tau_p_nodes)])
+    opts.tau_angle_nodes !== nothing && append!(base_args, ["--tau-angle-nodes", string(opts.tau_angle_nodes)])
+    opts.tau_phi_nodes !== nothing && append!(base_args, ["--tau-phi-nodes", string(opts.tau_phi_nodes)])
+    opts.tau_n_sigma_points !== nothing && append!(base_args, ["--tau-n-sigma", string(opts.tau_n_sigma_points)])
+    opts.sigma_grid_n !== nothing && append!(base_args, ["--sigma-grid-n", string(opts.sigma_grid_n)])
+    opts.channel_diagnostics && append!(base_args, ["--channel-diagnostics-output", joinpath(opts.outdir, "channel_diagnostics.csv")])
     !opts.compute_bulk && push!(base_args, "--no-compute-bulk")
     opts.overwrite && push!(base_args, "--overwrite")
     opts.resume && push!(base_args, "--resume")
@@ -61,7 +69,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     mkpath(opts.outdir)
 
     if opts.overwrite
-        for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points)
+        for path in (paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics)
             isfile(path) && rm(path)
         end
     end
@@ -95,6 +103,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
 
     io = open(paths.result_csv, "a")
     failed_io = open(paths.failed_points, "a")
+    channel_io = opts.channel_diagnostics ? open(paths.channel_diagnostics, "a") : nothing
     try
         if filesize(paths.result_csv) == 0
             Main.ScanCSV.write_metadata(io, Dict(
@@ -108,12 +117,23 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
         if filesize(paths.failed_points) == 0
             Main.write_failed_points_header_if_needed(failed_io)
         end
+        if channel_io !== nothing && filesize(paths.channel_diagnostics) == 0
+            Main.ScanCSV.write_metadata(channel_io, Dict(
+                "schema" => "scan_csv_v1",
+                "title" => "phase_guided_transport_scan_channel_diagnostics",
+                "script" => "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+                "git_commit" => Main.current_git_commit(),
+                "source_csv" => paths.result_csv,
+                "propagator_xi_policy" => string(opts.propagator_xi_policy),
+            ))
+            Main.write_channel_diagnostics_header_if_needed(channel_io)
+        end
 
         stats = PhaseGuidedPlan.execute_plan!(
             (point, previous_solution, previous_phase) ->
                 Main.execute_gap_transport_scan_point!(
                     io,
-                    nothing,
+                    channel_io,
                     failed_io,
                     point.T_MeV,
                     point.muB_MeV,
@@ -134,7 +154,9 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
             opts.outdir;
             ctx=ctx,
             effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')),
-            artifacts=[paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
+            artifacts=opts.channel_diagnostics ?
+                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
+                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
             summary=Dict{String,Any}(
                 "points_total" => stats.total,
                 "success_count" => stats.success,
@@ -145,6 +167,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
     finally
         close(io)
         close(failed_io)
+        channel_io !== nothing && close(channel_io)
     end
 
     println("Phase-guided transport scan finished. Output: $(paths.result_csv)")

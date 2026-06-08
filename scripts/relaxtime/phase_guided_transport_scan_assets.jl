@@ -51,6 +51,17 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
             println(io, "- fixed T list (MeV): `$(join(opts.T_values, ", "))`")
         end
         println(io, "- compute bulk viscosity (`zeta`): `$(opts.compute_bulk)`")
+        println(io, "- propagator xi policy: `$(opts.propagator_xi_policy)`")
+        if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
+           opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
+            println(io, "- tau/sigma overrides:")
+            println(io, "  - tau_p_nodes: `$(opts.tau_p_nodes)`")
+            println(io, "  - tau_angle_nodes: `$(opts.tau_angle_nodes)`")
+            println(io, "  - tau_phi_nodes: `$(opts.tau_phi_nodes)`")
+            println(io, "  - tau_n_sigma_points: `$(opts.tau_n_sigma_points)`")
+            println(io, "  - sigma_grid_n: `$(opts.sigma_grid_n)`")
+        end
+        println(io, "- channel diagnostics: `$(opts.channel_diagnostics)`")
         println(io, "- total planned points: `$(plan.total)`")
         println(io)
         println(io, "## Key Files")
@@ -82,6 +93,13 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "muB_values" => opts.muB_values,
         "alpha_T_values" => opts.alpha_T_values,
         "T_values" => opts.T_values,
+        "propagator_xi_policy" => String(opts.propagator_xi_policy),
+        "tau_p_nodes" => opts.tau_p_nodes,
+        "tau_angle_nodes" => opts.tau_angle_nodes,
+        "tau_phi_nodes" => opts.tau_phi_nodes,
+        "tau_n_sigma_points" => opts.tau_n_sigma_points,
+        "sigma_grid_n" => opts.sigma_grid_n,
+        "channel_diagnostics" => opts.channel_diagnostics,
         "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,
         "overwrite" => opts.overwrite,

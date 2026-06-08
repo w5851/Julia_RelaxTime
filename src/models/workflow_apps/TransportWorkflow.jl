@@ -638,12 +638,28 @@ function solve_transport_from_equilibrium(
         )
         quark_params_full = (m=quark_params_basic.m, μ=quark_params_basic.μ, A=A_vals)
 
+        tau_kwargs_effective = tau_kwargs
+        if hasproperty(tau_kwargs_effective, :propagator_xi_policy) &&
+           tau_kwargs_effective.propagator_xi_policy === :isotropic &&
+           !hasproperty(tau_kwargs_effective, :propagator_quark_params)
+            propagator_thermo_params = merge(thermo_params, (ξ=0.0,))
+            propagator_A_vals = _A_from_equilibrium(
+                T_fm,
+                quark_params_basic,
+                propagator_thermo_params;
+                a_builder_config=a_builder_config,
+                workflow_cache=cache,
+            )
+            propagator_quark_params = (m=quark_params_basic.m, μ=quark_params_basic.μ, A=propagator_A_vals)
+            tau_kwargs_effective = merge(tau_kwargs_effective, (propagator_quark_params=propagator_quark_params,))
+        end
+
         tau_res = relaxation_times(
             quark_params_full,
             thermo_params,
             K_coeffs;
             densities=densities,
-            tau_kwargs...,
+            tau_kwargs_effective...,
         )
         tau = tau_res.tau
         tau_inv = tau_res.tau_inv

@@ -147,6 +147,8 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
+  - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；默认 `match_thermo` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
+  - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`
