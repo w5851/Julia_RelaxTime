@@ -142,6 +142,17 @@ end
         @test api.prepare_transport_provider !== nothing
     end
 
+    @testset "isotropic propagator thermo params normalize ThermoParams" begin
+        thermo_params = _TW.ThermoParams((T=0.15, Φ=0.41, Φbar=0.38, ξ=0.32))
+        propagator_thermo_params = _TW._isotropic_propagator_thermo_params(thermo_params)
+
+        @test propagator_thermo_params isa _TW.ThermoParams
+        @test propagator_thermo_params.T == thermo_params.T
+        @test propagator_thermo_params.Φ == thermo_params.Φ
+        @test propagator_thermo_params.Φbar == thermo_params.Φbar
+        @test propagator_thermo_params.ξ == 0.0
+    end
+
     @testset "workflow reproducibility metadata helper" begin
         @test isdefined(_TW, :_workflow_reproducibility_metadata)
         meta = _TW._workflow_reproducibility_metadata()
