@@ -63,6 +63,16 @@
     "run.stderr.log",
     "convergence/convergence_summary.json"
   ],
+  "convergence_files": [
+    "convergence/convergence_summary.json",
+    "convergence/convergence_low/README.md",
+    "convergence/convergence_low/combined_meson_density_scan.csv",
+    "convergence/convergence_low/remote_run_manifest.json",
+    "convergence/convergence_low/run.command.txt",
+    "convergence/convergence_low/run.exitcode",
+    "convergence/convergence_low/run.stdout.log",
+    "convergence/convergence_low/run.stderr.log"
+  ],
   "figure_files": [
     "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg",
     "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png",
