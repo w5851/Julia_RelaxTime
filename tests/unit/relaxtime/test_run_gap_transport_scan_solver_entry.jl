@@ -182,3 +182,22 @@ end
     @test occursin("ArgumentError", line)
     @test occursin("boom", line)
 end
+
+@testset "scan runtime forwards tau sigma grid size" begin
+    opts = Main.parse_args([
+        "--output", "tmp.csv",
+        "--tmin", "150",
+        "--tmax", "150",
+        "--tstep", "1",
+        "--mubmin", "0",
+        "--mubmax", "0",
+        "--mubstep", "1",
+        "--xi-list", "0.0",
+        "--sigma-grid-n", "17",
+        "--propagator-xi-policy", "isotropic",
+    ])
+
+    runtime = Main.build_scan_runtime(opts)
+    @test runtime.tau_kwargs.sigma_grid_n == 17
+    @test runtime.tau_kwargs.propagator_xi_policy == :isotropic
+end

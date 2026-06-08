@@ -44,7 +44,7 @@ $$\rho_i = \frac{d_q}{2\pi^2} \int_0^\infty dp\,p^2 \int_0^1 d\cos\theta\; f_i(p
   - `p_cutoff=nothing`: 半无穷积分权重设计
   - `p_cutoff=Λ_inv_fm`: 有限截断权重设计（**推荐**）
 - `build_w0cdf_pchip_cache(process, ...; p_cutoff=nothing)`: 构建 σ(s) 缓存
-- `average_scattering_rate(process, ...; sigma_cutoff=nothing)`: 计算平均散射率
+- `average_scattering_rate(process, ...; sigma_cutoff=nothing, sigma_grid_n=60)`: 计算平均散射率；未传入 `cs_cache` 时，`sigma_grid_n` 控制自动构建的 w0cdf σ(s) 缓存点数
 - `number_density(flavor, ...)`: 计算数密度（始终使用半无穷积分）
 
 ## 诊断性传播子 ξ 策略

@@ -70,6 +70,7 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - `densities`：数密度（**必须使用半无穷积分计算**）
 - `p_grid/p_w`：可选，自定义动量积分节点
 - `sigma_cutoff`：σ(s) 有效范围的动量截断（默认 Λ）
+- `sigma_grid_n`：自动构建 σ(s) 缓存时的 w0cdf 网格点数；phase-guided production workflow 的同名输入会透传到这里
 - `propagator_xi_policy`：传播子/σ(s) 的 ξ 口径；默认 `:match_thermo` 保持当前行为，诊断分支 `:isotropic` 仅让传播子/σ(s) 使用 `ξ=0`
 - `propagator_quark_params`：可选的传播子/σ(s) 专用夸克参数；未提供且 `propagator_xi_policy=:isotropic` 时，会从 `(m, μ)` 与 `ξ=0` 热力学参数补齐各向同性 A 场
 

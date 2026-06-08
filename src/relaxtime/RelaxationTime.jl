@@ -68,7 +68,7 @@ using Main.ValidationUtils: validate_grid_weight_pair
 
 using ..AverageScatteringRate: average_scattering_rate, CrossSectionCache,
     DEFAULT_P_NODES, DEFAULT_ANGLE_NODES, DEFAULT_PHI_NODES,
-    build_w0cdf_pchip_cache
+    DEFAULT_SIGMA_GRID_N, build_w0cdf_pchip_cache
 using ..TotalCrossSection: DEFAULT_T_INTEGRAL_POINTS
 using Main.Constants_PNJL: SCATTERING_PROCESS_KEYS, Λ_inv_fm
 using ..AFieldBuilder: ensure_quark_params_has_A as _ensure_A
@@ -219,6 +219,7 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
+- `sigma_grid_n`: Number of w0cdf sample points when building σ(s) caches automatically
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range (defaults to Λ)
 - `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
@@ -258,6 +259,7 @@ function compute_average_rates(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
     sigma_cutoff::Union{Nothing,Float64}=nothing,  # σ(s)有效范围的动量截断，默认使用 Λ
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
@@ -288,6 +290,7 @@ function compute_average_rates(
         phi_grid=phi_grid,
         phi_w=phi_w,
         n_sigma_points=n_sigma_points,
+        sigma_grid_n=sigma_grid_n,
         sigma_cutoff=sigma_cutoff,
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
@@ -316,6 +319,7 @@ function _compute_average_rates_core(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
     sigma_cutoff::Union{Nothing,Float64}=nothing,
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
@@ -375,6 +379,7 @@ function _compute_average_rates_core(
             phi_w=phi_w,
             cs_cache=cs_cache_arg,
             n_sigma_points=n_sigma_points,
+            sigma_grid_n=sigma_grid_n,
             sigma_cutoff=effective_sigma_cutoff,
             threshold_subtraction=threshold_subtraction,
             asym_window=asym_window,
@@ -487,6 +492,7 @@ and the averaged rates for reuse.
 - `p_nodes`, `angle_nodes`, `phi_nodes`: Integration node counts
 - `p_grid`, `p_w`, `cos_grid`, `cos_w`, `phi_grid`, `phi_w`: Custom integration grids and weights
 - `n_sigma_points`: Number of points for cross-section interpolation
+- `sigma_grid_n`: Number of w0cdf sample points when building σ(s) caches automatically
 - `sigma_cutoff`: Momentum cutoff for σ(s) effective range
 - `threshold_subtraction`, `asym_window`, `asym_fit_min_points`, `asym_extra_points`: Threshold-asymptotic cache controls forwarded to `average_scattering_rate`
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
@@ -531,6 +537,7 @@ function relaxation_times(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing,
     phi_w::Union{Nothing,Vector{Float64}}=nothing,
     n_sigma_points::Int=DEFAULT_T_INTEGRAL_POINTS,
+    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
     sigma_cutoff::Union{Nothing,Float64}=nothing,
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
@@ -565,6 +572,7 @@ function relaxation_times(
             phi_grid=phi_grid,
             phi_w=phi_w,
             n_sigma_points=n_sigma_points,
+            sigma_grid_n=sigma_grid_n,
             sigma_cutoff=sigma_cutoff,
             threshold_subtraction=threshold_subtraction,
             asym_window=asym_window,

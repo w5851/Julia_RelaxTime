@@ -1389,6 +1389,7 @@ end
 - `angle_nodes::Int`: 角度积分节点数 (默认2)
 - `phi_nodes::Int`: 方位角积分节点数 (默认4)
 - `n_sigma_points::Int`: σ(s) 计算时的 t 积分点数
+- `sigma_grid_n::Int`: 自动构建 σ(s) 缓存时的 w0cdf 采样点数
 - `require_cache_fingerprint::Bool`: 为 `true` 时拒绝无指纹的外部 σ(s) 缓存
 - `scale::Float64`: 半无穷积分尺度参数
 """
@@ -1405,6 +1406,7 @@ function average_scattering_rate(
     phi_grid::Union{Nothing,Vector{Float64}}=nothing, phi_w::Union{Nothing,Vector{Float64}}=nothing,
     cs_cache::Union{Nothing,CrossSectionCache}=nothing,
     n_sigma_points::Int=TotalCrossSection.DEFAULT_T_INTEGRAL_POINTS,
+    sigma_grid_n::Int=DEFAULT_SIGMA_GRID_N,
     scale::Float64=DEFAULT_SEMI_INF_SCALE,
     density_p_grid::Union{Nothing,Vector{Float64}}=nothing,
     density_p_w::Union{Nothing,Vector{Float64}}=nothing,
@@ -1461,7 +1463,7 @@ function average_scattering_rate(
             propagator_quark_params,
             propagator_thermo_params,
             K_coeffs;
-            N=DEFAULT_SIGMA_GRID_N,
+            N=sigma_grid_n,
             design_p_nodes=DEFAULT_W0CDF_P_NODES,
             design_angle_nodes=DEFAULT_W0CDF_ANGLE_NODES,
             design_phi_nodes=DEFAULT_W0CDF_PHI_NODES,
