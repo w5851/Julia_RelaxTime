@@ -196,7 +196,7 @@ BU2020/temp7 审计相关参数：
 - `trho_asymmetric` 额外输出 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
 - 正式数据默认写入 `data/outputs/results/...`；图像和 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`，也可通过 `--figure-dir` 覆盖
 - `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py` 可从单 `mu_q` 统一 CSV 渲染温度扫描高 DPI PNG
-- `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从多 `mu_q` 统一 CSV 渲染 FIG3-like 高 DPI PNG
+- `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从统一 CSV 渲染 heatmap 高 DPI PNG/SVG；多 `mu_q` 的 `tmu` 图使用默认 `--x-field muq_MeV`，`trho_asymmetric` 图应使用 `--x-field rho_target --x-label "rho/rho0" --x-unit ""`
   - 输出 CSV、README、SVG 与图像 manifest，适合把同一批状态点的多口径介子数密度结果放在同一份可审计产物中
 
 后续 full strict BW 与更完整的 BU 扩展仍应沿同一 workflow 链继续后接，而不是回到脚本层重组流程。

@@ -24,7 +24,25 @@ This directory contains the formal `FixedAsymmetricRho` density-constrained
 - Remote manifest: `data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/remote_run_manifest.json`
 - Figure directory: `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/`
 - SVG: `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg`
+- PNG: `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png`
 - Plot manifest: `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json`
+
+## Rendering
+
+The original figure-side SVG was a rendering-only issue: it used `muq_MeV`
+as the heatmap x-axis, while this production case is scanned on the regular
+`rho_target` axis. The CSV data were not recomputed.
+
+Corrected plot-only commands:
+
+```text
+python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label "rho/rho0" --x-unit "" --kind trho_asymmetric_t_rho_heatmap_svg --dpi 260 --title "trho_asymmetric K+/pi+ T-rho heatmap"
+python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --csv data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.csv --out data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png --manifest data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json --field kpi_ratio --x-field rho_target --x-label "rho/rho0" --x-unit "" --kind trho_asymmetric_t_rho_heatmap_png --dpi 260 --title "trho_asymmetric K+/pi+ T-rho heatmap"
+```
+
+The corrected heatmap uses `rho_target` for x, `T_MeV` for y, and
+`kpi_ratio` for color. A few bright cells are real large-ratio rows in the CSV,
+not residual coordinate artifacts.
 
 ## Convergence Gate
 

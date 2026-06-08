@@ -130,6 +130,10 @@ end
     @test occursin("temperature_grouped_rho_continuity", source)
     @test occursin("Models.FixedAsymmetricRho", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
+    @test occursin("function _heatmap_axis_config", source)
+    @test occursin("\"rho_target\", \"rho/rho0\", \"\"", source)
+    @test occursin("Combined Meson Density Scan: T-rho heatmap", source)
+    @test occursin("_write_svg_plot(plot_path, opts, rows)", source)
 
     @test isfile(ASYM_PLUS_PROFILE)
     @test isfile(ASYM_MINUS_PROFILE)

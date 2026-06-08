@@ -13,7 +13,25 @@
   "figures": [
     {
       "path": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg",
-      "kind": "quicklook_svg"
+      "kind": "trho_asymmetric_t_rho_heatmap_svg",
+      "field": "kpi_ratio",
+      "x_field": "rho_target",
+      "y_field": "T_MeV",
+      "format": "svg",
+      "dpi": 260,
+      "title": "trho_asymmetric K+/pi+ T-rho heatmap",
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
+    },
+    {
+      "path": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png",
+      "kind": "trho_asymmetric_t_rho_heatmap_png",
+      "field": "kpi_ratio",
+      "x_field": "rho_target",
+      "y_field": "T_MeV",
+      "format": "png",
+      "dpi": 260,
+      "title": "trho_asymmetric K+/pi+ T-rho heatmap",
+      "generated_by": "scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py"
     }
   ]
 }

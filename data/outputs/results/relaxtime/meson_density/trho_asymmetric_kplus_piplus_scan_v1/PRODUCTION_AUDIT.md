@@ -84,7 +84,22 @@ Upstream branch stability in the final adjacent check:
 ## Figure Outputs
 
 - `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.svg`
+- `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/combined_meson_density_scan.png`
 - `data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/plot_manifest.json`
+
+Figure-side correction note:
+
+- The first SVG quicklook used `muq_MeV` as the heatmap x-axis. For
+  `trho_asymmetric`, `muq_MeV` is an equilibrium diagnostic field and is not
+  the regular scan axis.
+- The corrected SVG and PNG were rendered locally from the existing production
+  CSV using `--x-field rho_target --x-label "rho/rho0" --x-unit ""`.
+- No density data, convergence evidence, or production CSV rows were recomputed
+  for this plot-only correction.
+- The largest bright cells are present in the source CSV: e.g.
+  `phase_shift_gbu_reference` has `kpi_ratio=11481.086618` at
+  `T=130 MeV, rho_target=0.8`, and `kpi_ratio=10833.443521` at
+  `T=120 MeV, rho_target=0.35`.
 
 ## Validation Commands And Results
 

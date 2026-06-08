@@ -182,7 +182,7 @@ GitHub Actions 只负责生成 artifact，不自动 commit 正式数据。正式
 
 正式 figure-side 至少包含：
 
-- [ ] SVG 或 PNG 主图。当前 `run_combined_meson_density_scan.jl` 内置 SVG 可作为首版正式主图；`render_combined_meson_density_fig3_like.py` 的 x 轴目前是 `mu_q`，未扩展前不得直接作为 `trho_asymmetric` rho 轴正式图。
+- [x] SVG 或 PNG 主图。`run_combined_meson_density_scan.jl` 的 `trho_asymmetric` 内置 SVG 已使用 `rho_target` 作为横轴；`render_combined_meson_density_fig3_like.py` 可通过 `--x-field rho_target --x-label "rho/rho0" --x-unit ""` 复用正式 CSV 渲染 `T-rho` PNG/SVG。
 - [ ] `plot_manifest.json`。
 
 result README 必须反向链接 figure 目录和图像文件。
