@@ -17,7 +17,7 @@ No production-grade formal data were generated.
 
 ## Evidence
 
-The remote `convergence_low` run completed successfully as a workflow run, but
+The initial remote `convergence_low` run completed successfully as a workflow run, but
 the physics/numerical domain guard failed for most non-stable regimes:
 
 - rows: `880`
@@ -33,6 +33,20 @@ positive charged-kaon chemical potential in the selected `K+ / pi+` asymmetric
 profile. Several stable rows already hit `mass <= mu_K`; the BW and phase-shift
 energy integrals also include `omega <= mu_K` under the default
 `strict_normal_domain` policy.
+
+Follow-up remote convergence attempts on commit `4c6c1542` used the explicit
+phase-shift-only policy `density_policy=x_min_cut`.
+
+- `bose_x_min=1e-6`: BU/GBU phase-shift rows became runnable, but `mid -> high`
+  K-related quantities still showed order-50% maximum relative differences.
+- `bose_x_min=1e-2`: cutoff sensitivity improved, but `mid -> high` K-related
+  maximum relative differences remained about 11%--13%, and high/custom
+  comparisons exposed different upstream `FixedAsymmetricRho` equilibrium
+  branches at the same `(T, rho_target)`.
+
+The current blocker is therefore upstream equilibrium branch stability in the
+combined scan path. Production remains blocked until the branch-selection /
+continuity policy is fixed and a fresh convergence gate passes.
 
 ## Files
 
@@ -55,8 +69,11 @@ Figure-side convergence evidence:
 To continue toward production-grade output, the physics scope must be changed
 or clarified. Candidate follow-ups are:
 
+- rerun convergence after aligning `trho_asymmetric` scan order with the
+  `TrhoScan` density-constrained continuity policy;
 - switch to the negative charged channel profile, where `mu_K` is not positive;
 - restrict the grid to a domain where all required Bose-domain constraints hold;
-- explicitly downgrade to a diagnostic policy such as `excitation_only_E_gt_mu`.
+- explicitly downgrade to a diagnostic-only policy if production-grade
+  convergence is not physically/numerically justified.
 
 Those are material scope changes and were not applied in this blocked run.

@@ -104,6 +104,21 @@ attempted grid, this creates Bose-domain violations:
 This is a domain-definition problem, not evidence that the quadrature node
 count is insufficient.
 
+Follow-up convergence attempts on commit `4c6c1542` applied the explicit
+phase-shift-only `density_policy=x_min_cut` policy.
+
+| attempt | remote runs | result |
+| --- | --- | --- |
+| `bose_x_min=1e-6` | `27112756019`, `27112924358`, `27112924343` | BU/GBU phase-shift rows were runnable, but `mid -> high` K-related quantities still showed order-50% maximum relative differences. |
+| `bose_x_min=1e-2` | `27113471270`, `27113471257`, `27113471249`, diagnostic `27113589340` | Cutoff sensitivity improved, but `mid -> high` K-related maximum relative differences remained about 11%--13%; high/custom comparisons exposed upstream `FixedAsymmetricRho` branch changes at the same `(T, rho_target)`. |
+
+The current blocker is therefore upstream density-constrained equilibrium
+branch stability in the combined scan path. In particular, some same-grid
+points satisfy the printed constraint residual but land on different
+`FixedAsymmetricRho` branches across resolution profiles. Production must
+remain blocked until the scan path uses a deterministic and documented
+continuity/branch policy and the convergence gate passes again.
+
 ## Selected Production Parameters
 
 None. No production run was launched because the convergence gate did not reach
@@ -146,6 +161,9 @@ Pending after this audit:
 
 - `K+ / pi+` under `FixedAsymmetricRho` may require an explicit treatment of
   positive meson chemical potential domains before formal production.
+- `trho_asymmetric` formal production depends on upstream
+  `FixedAsymmetricRho` branch stability across convergence profiles; this was
+  not satisfied in the `bose_x_min` follow-up attempts.
 - BW remains a comparison regime only and must not be used alone as a formal
   conclusion.
 - A diagnostic policy such as `excitation_only_E_gt_mu` could produce numeric

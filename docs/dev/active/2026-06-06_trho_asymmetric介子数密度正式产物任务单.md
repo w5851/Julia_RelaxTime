@@ -32,18 +32,23 @@ Verdict: `blocked`
 
 ## 续跑决策（2026-06-08）
 
-Verdict: `continue convergence with explicit phase-shift x_min policy`
+Verdict: `blocked pending upstream branch-stability convergence rerun`
 
 - 物理口径决策：复用项目已有 `density_policy=:x_min_cut` / `:bose_x_min_cut`，但只作用于 BU/GBU phase-shift regimes。
 - `x_min_cut` 定义为 `(omega - mu_M)/T >= bose_x_min`，等价于 phase-shift energy domain 下界 `omega_lower=max(omega_min, mu_M + bose_x_min*T)`。
 - `stable` 与 `strict_bw_stage*` 不采用 x-min 延拓；若触发 `mass <= mu_M` 或 `omega_min <= mu_M` 等 Bose-domain guard，则输出 `unsafe_bose_domain` / `NaN` 行并继续扫描。
 - 该策略是显式 policy choice，不是文献唯一处方；正式审计必须记录 `density_policy`、`bose_x_min` 和 policy 作用域，避免后续误认为 stable/BW 也被延拓。
 - 由于 combined scan CLI 需要新增 `--bose-x-min` 才能由 GitHub Actions 传递该参数，续跑必须先提交并推送生产分支，再以该分支触发 workflow。
+- 远端 `bose_x_min=1e-6` 的 `convergence_low/mid/high` 已在 commit `4c6c1542` 上完成：BU/GBU phase-shift rows 可运行，但 `mid -> high` 的 `n_K` / `kpi_ratio` 最大相对差约 50%，不得进入 production。
+- 远端 `bose_x_min=1e-2` 诊断明显降低 cutoff 敏感性，但 `mid -> high` 的 K 相关最大相对差仍约 11%--13%，且 `high36` 与 `custom64` 在相同 `(T, rho_target)` 上出现不同 `FixedAsymmetricRho` equilibrium branch。
+- 关键异常例：`T=140 MeV, rho_target=0.150`，`high36` 与 `custom64` 均满足约束残差打印为 0，但给出不同 `muq`、`m_u/m_s`、`m_pi/m_K`；这说明当前 blocker 是上游 density-constrained equilibrium branch instability，不是单纯 density quadrature 节点不足。
+- 本分支后续先修 combined scan 的上游遍历策略：`trho_asymmetric` 默认改为温度分组、rho 连续扫描，并采用与 `Models.run_trho_scan` 一致的 `trho_reverse_rho=true` 习惯；修复后仍必须重新跑 convergence gate，不得直接触发 production。
 
 ## Scope Lock
 
 - 物理口径：`FixedAsymmetricRho` density-constrained equilibrium source。
 - 扫描入口：`scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`。
+- 上游分支策略：`trho_asymmetric` 默认使用 `--trho-reverse-rho=true`，每个温度内从高 `rho_target` 到低 `rho_target` 连续传递 equilibrium seed；`--no-trho-reverse-rho` 仅作为顺序敏感诊断。
 - 远程入口：`.github/workflows/relaxtime-meson-density-production.yml`，只通过 `workflow_dispatch` 手动触发。
 - charged profile：先生产 `asymmetric_kplus_over_piplus_signed`，即 `pi+` / `K+`。
 - 约束目标：`rho_u/rho_d = 0.876`，`rho_s = 0 fm^-3`。

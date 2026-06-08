@@ -1,7 +1,7 @@
 {
   "format": "meson_density_production_manifest_v1",
   "case_slug": "trho_asymmetric_kplus_piplus_scan_v1",
-  "date": "2026-06-06",
+  "date": "2026-06-08",
   "verdict": "blocked",
   "source_commit": "05d181730bff5d7498918e0c1dceddaf65b5448f",
   "remote_workflow": ".github/workflows/relaxtime-meson-density-production.yml",
@@ -12,6 +12,20 @@
       "result_dir": "data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low",
       "figure_dir": "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low",
       "exit_code": 0
+    }
+  ],
+  "diagnostic_remote_runs": [
+    {
+      "policy": "density_policy=x_min_cut, bose_x_min=1e-6",
+      "run_ids": ["27112756019", "27112924358", "27112924343"],
+      "verdict": "blocked",
+      "reason": "mid-to-high K-related convergence differences remained order 50%"
+    },
+    {
+      "policy": "density_policy=x_min_cut, bose_x_min=1e-2",
+      "run_ids": ["27113471270", "27113471257", "27113471249", "27113589340"],
+      "verdict": "blocked",
+      "reason": "cutoff sensitivity improved but high/custom comparisons exposed FixedAsymmetricRho branch instability"
     }
   ],
   "production_run": null,
@@ -31,5 +45,5 @@
     "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/combined_meson_density_scan.svg",
     "data/outputs/figures/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/convergence/convergence_low/plot_manifest.json"
   ],
-  "blocker": "positive K+ meson chemical potential violates stable/BW/phase-shift Bose-domain guards on the attempted grid"
+  "blocker": "phase-shift-only x_min_cut avoids the initial BU/GBU Bose-domain hard stop, but formal production is blocked by upstream FixedAsymmetricRho branch instability across convergence profiles"
 }

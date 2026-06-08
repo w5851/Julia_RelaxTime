@@ -292,7 +292,7 @@ scripts/relaxtime/run_combined_meson_density_scan.jl
 该脚本把 scan path 与 density regime 分成两条显式组合轴。当前实现：
 
 - `--path tmu`：在一个或多个固定 `mu_q` 的 `(T, mu)` 路径上一次输出 stable、strict BW Stage1、`phase_shift_current` 和 `phase_shift_gbu_reference`。多 `mu_q` 输出会生成 FIG3-like heatmap SVG。
-- `--path trho_asymmetric`：使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，通过 `Models.solve_meson_point_from_equilibrium` 接入同一套 meson density 后处理。该路径当前为 smoke / diagnostic 状态，不作为正式高精度生产入口。
+- `--path trho_asymmetric`：使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，通过 `Models.solve_meson_point_from_equilibrium` 接入同一套 meson density 后处理。该路径默认按温度分组并在每个温度内做 rho 连续扫描，`--trho-reverse-rho=true` 时从高 rho 到低 rho 传递 equilibrium seed；`--no-trho-reverse-rho` 仅用于顺序敏感诊断。该路径当前为 smoke / diagnostic 状态，不作为正式高精度生产入口。
 
 `trho_asymmetric` 支持 `--rho-values` 或 `--rhomin/--rhomax/--rhostep`，并新增 `--asym-ud-ratio-target`、`--asym-s-target`。相移密度可通过 `--density-policy x_min_cut --bose-x-min <x>` 显式采用 Bose x 下界；该选项只作用于 BU/GBU phase-shift regimes，不改变 stable/BW 的 strict-domain 失效语义。输出额外记录约束诊断字段：`constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`。
 

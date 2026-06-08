@@ -40,6 +40,7 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
         "--rho-values", "0.05,0.1",
         "--asym-ud-ratio-target", "0.876",
         "--asym-s-target", "0",
+        "--no-trho-reverse-rho",
         "--meson-profile", "asymmetric_kplus_over_piplus_signed",
         "--density-policy", "x_min_cut",
         "--bose-x-min", "1e-6",
@@ -49,6 +50,7 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
     @test endswith(asym.figure_dir, joinpath("relaxtime", "meson_density", "combined_trho_asymmetric_smoke_scan"))
     @test asym.regimes == [:stable, :phase_shift_current]
     @test asym.rho_values == [0.05, 0.1]
+    @test asym.trho_reverse_rho == false
     @test asym.asym_ud_ratio_target ≈ 0.876
     @test asym.meson_profile == "asymmetric_kplus_over_piplus_signed"
     @test asym.density_policy === :x_min_cut
@@ -87,6 +89,7 @@ if RUN_COMBINED_MESON_DENSITY_CLI
         @test occursin("# rho_values: not_applicable", text)
         @test occursin("# asym_ud_ratio_target: not_applicable", text)
         @test occursin("# asym_s_target: not_applicable", text)
+        @test !occursin("# trho_seed_policy:", text)
         @test occursin("# bose_x_min: 0.0", text)
         @test occursin("# density_policy_scope: phase_shift_current,phase_shift_gbu_reference", text)
         @test occursin("phase_display", text)
@@ -123,6 +126,8 @@ end
     source = read(SCRIPT, String)
     @test occursin("combined_meson_density_scan_contract.jl", source)
     @test occursin("function _run_trho_asymmetric_scan", source)
+    @test occursin("trho_reverse_rho", source)
+    @test occursin("temperature_grouped_rho_continuity", source)
     @test occursin("Models.FixedAsymmetricRho", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
 

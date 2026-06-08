@@ -329,6 +329,8 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
         else
             println(io, "# muq_values_MeV: not_applicable")
             println(io, "# rho_values: $(join(_fmt.(opts.rho_values), ','))")
+            println(io, "# trho_reverse_rho: $(opts.trho_reverse_rho)")
+            println(io, "# trho_seed_policy: temperature_grouped_rho_continuity")
             println(io, "# asym_ud_ratio_target: $(opts.asym_ud_ratio_target)")
             println(io, "# asym_s_target: $(opts.asym_s_target)")
         end
@@ -660,6 +662,7 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- density regimes: `$(join(string.(opts.regimes), "`, `"))`")
         if opts.path_strategy === :trho_asymmetric
             println(io, "- FixedAsymmetricRho rho targets: `$(join(_fmt.(opts.rho_values), ","))`")
+            println(io, "- FixedAsymmetricRho scan order: temperature-grouped rho-continuity with `trho_reverse_rho=$(opts.trho_reverse_rho)`.")
             println(io, "- asymmetry targets: `rho_u/rho_d=$(opts.asym_ud_ratio_target)`, `rho_s=$(opts.asym_s_target) fm^-3`")
             println(io, "- smoke-only status: this path is intended for diagnostic integration, not formal high-precision production.")
         elseif length(opts.muq_values_MeV) == 1
@@ -793,14 +796,15 @@ end
 function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile, meson_profile)
     rows = Dict{String, Any}[]
     point_index = 0
+    rho_scan_order = opts.trho_reverse_rho ? reverse(copy(opts.rho_values)) : copy(opts.rho_values)
 
-    for rho_target in opts.rho_values
+    for T_MeV in _temperature_grid(opts)
         equilibrium_seed = nothing
         continuation_state = nothing
+        T_fm = T_MeV / ħc_MeV_fm
 
-        for T_MeV in _temperature_grid(opts)
+        for rho_target in rho_scan_order
             point_index += 1
-            T_fm = T_MeV / ħc_MeV_fm
             mode = Models.FixedAsymmetricRho(rho_target, opts.asym_ud_ratio_target, opts.asym_s_target)
 
             equilibrium = try

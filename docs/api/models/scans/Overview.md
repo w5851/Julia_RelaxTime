@@ -140,6 +140,7 @@
 
 - CLI 入口为 `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`
 - 路径参数为 `--rho-values` 或 `--rhomin/--rhomax/--rhostep`
+- 上游 equilibrium 默认采用与 `Models.run_trho_scan` 一致的温度分组、rho 连续跟踪策略：每个 `T` 内按 `--trho-reverse-rho=true` 从高 `rho_target` 到低 `rho_target` 扫描，并把上一 rho 点解作为下一点初值；如需诊断原始输入顺序，可显式传入 `--no-trho-reverse-rho`
 - 约束参数为 `--asym-ud-ratio-target` 与 `--asym-s-target`
 - 内部先调用 `Models.solve(model, FixedAsymmetricRho(...), T_fm)`，再调用 `Models.solve_meson_point_from_equilibrium`
 - 输出会额外记录 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
