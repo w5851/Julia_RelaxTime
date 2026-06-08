@@ -41,6 +41,8 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
         "--asym-ud-ratio-target", "0.876",
         "--asym-s-target", "0",
         "--meson-profile", "asymmetric_kplus_over_piplus_signed",
+        "--density-policy", "x_min_cut",
+        "--bose-x-min", "1e-6",
     ])
     @test asym.path_strategy === :trho_asymmetric
     @test asym.output_dir == CMD_CONTRACT.DEFAULT_TRHO_ASYMMETRIC_OUTPUT_DIR
@@ -49,6 +51,8 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
     @test asym.rho_values == [0.05, 0.1]
     @test asym.asym_ud_ratio_target ≈ 0.876
     @test asym.meson_profile == "asymmetric_kplus_over_piplus_signed"
+    @test asym.density_policy === :x_min_cut
+    @test asym.bose_x_min ≈ 1e-6
 
     @test "constraint_mode" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test "rho_u_over_rho_d" in CMD_CONTRACT.OUTPUT_COLUMNS
@@ -60,6 +64,7 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--muq-values", "0,10"])
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--path", "trho_asymmetric", "--rhomin", "0.2", "--rhomax", "0.1", "--rhostep", "0.05"])
     @test_throws ArgumentError CMD_CONTRACT.parse_args(["--mumin", "0", "--mumax", "10", "--mustep", "0"])
+    @test_throws ArgumentError CMD_CONTRACT.parse_args(["--bose-x-min", "-1e-6"])
 end
 
 if RUN_COMBINED_MESON_DENSITY_CLI
@@ -82,6 +87,8 @@ if RUN_COMBINED_MESON_DENSITY_CLI
         @test occursin("# rho_values: not_applicable", text)
         @test occursin("# asym_ud_ratio_target: not_applicable", text)
         @test occursin("# asym_s_target: not_applicable", text)
+        @test occursin("# bose_x_min: 0.0", text)
+        @test occursin("# density_policy_scope: phase_shift_current,phase_shift_gbu_reference", text)
         @test occursin("phase_display", text)
         @test occursin("stable", text)
         @test occursin("strict_bw_stage1", text)

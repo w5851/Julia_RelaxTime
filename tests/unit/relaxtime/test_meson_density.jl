@@ -90,6 +90,7 @@ end
     @test _real_axis_mode_symbol(:bu2020_pv_eta0) == :pv_b0_eta0
     @test _density_policy_symbol(:strict) == :strict_normal_domain
     @test _density_policy_symbol(:excitation_only) == :excitation_only_E_gt_mu
+    @test _density_policy_symbol(:bose_x_min_cut) == :x_min_cut
     @test _phase_display_symbol(:unwrapped) == :unwrapped
     @test _phase_display_symbol(:folded_0_pi) == :fold_0_pi
     @test _noanom_policy_symbol(:none) == :none
@@ -373,6 +374,25 @@ end
     @test excitation_only.status == :ok
     @test excitation_only.omega_min > 0.5
     @test isfinite(excitation_only.density)
+
+    x_min_cut = phase_shift_meson_number_density(
+        :pi_plus,
+        qp,
+        tp;
+        μ=0.5,
+        qmax=4.0,
+        q_nodes=4,
+        omega_min=0.05,
+        omega_max=3.0,
+        omega_nodes=4,
+        density_policy=:bose_x_min_cut,
+        bose_x_min=1e-6,
+    )
+    @test x_min_cut.status == :ok
+    @test x_min_cut.density_policy == :x_min_cut
+    @test x_min_cut.omega_min > 0.5
+    @test x_min_cut.bose_x_min ≈ 1e-6
+    @test isfinite(x_min_cut.density)
 
     noanom = phase_shift_meson_number_density(
         :K_plus,

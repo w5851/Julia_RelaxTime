@@ -112,6 +112,7 @@ BU2020/temp7 审计相关参数：
   - 默认遇到 `omega <= μ_M` 支持时返回 `status=:unsafe_bose_domain`，不静默 clamp/skip
 - `density_policy=:excitation_only_E_gt_mu` / `:x_min_cut`
   - 仅作为显式诊断延拓，不应解释为文献明示事实
+  - 在 combined scan 中只作用于 `phase_shift_current` 与 `phase_shift_gbu_reference`；`stable` 与 `strict_bw_stage*` 继续按 strict Bose-domain guard 输出 unsafe/NaN 行
 - `noanom_policy=:low_energy_branch_subtraction`
   - 按 temp7 审计通过的 reconstructed diagnostic 口径删除 `K_plus` 低能 anomalous 分支
   - 只影响相移 density kernel 的 no-anomalous 对照，不改变 FixedMu 默认分支选择
@@ -190,6 +191,7 @@ BU2020/temp7 审计相关参数：
 - `--path tmu` 默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
 - 支持 `--muq-values` 或 `--mumin/--mumax/--mustep` 生成多个固定 `mu_q` 的 T 扫描；多 `mu_q` 输出会生成 FIG3-like heatmap SVG
 - `--path trho_asymmetric` 使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，再通过 `Models.solve_meson_point_from_equilibrium` 后处理；当前只作为 smoke / diagnostic path，不作为正式高精度生产入口
+- `--density-policy x_min_cut --bose-x-min <x>` 可把 Bose x 下界传给 BU/GBU phase-shift regimes；该选项不延拓 stable/BW 口径
 - `trho_asymmetric` 额外输出 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
 - 正式数据默认写入 `data/outputs/results/...`；图像和 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`，也可通过 `--figure-dir` 覆盖
 - `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py` 可从单 `mu_q` 统一 CSV 渲染温度扫描高 DPI PNG

@@ -199,6 +199,7 @@ Bose-domain policy：
   - 显式诊断延拓，只在 `omega > μ_M` 区域积分
 - `density_policy=:x_min_cut`
   - 显式诊断延拓，按 `(omega-μ_M)/T >= bose_x_min` 设定下界
+  - 该策略只定义在带显式 `omega` 积分的 phase-shift density kernel 上；stable 理想气体和 strict BW helper 的 Bose-domain guard 不会因此自动延拓
 
 No-anomalous policy：
 

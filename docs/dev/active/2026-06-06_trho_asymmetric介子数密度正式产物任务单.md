@@ -1,6 +1,6 @@
 # trho_asymmetric 介子数密度正式产物任务单
 
-更新时间：2026-06-06
+更新时间：2026-06-08
 
 ## 背景
 
@@ -30,6 +30,16 @@ Verdict: `blocked`
 
 后续如需继续正式生产，必须先做物理口径决策：切换到 `K- / pi-`、缩小到严格有效定义域，或显式改成 diagnostic-only density policy。
 
+## 续跑决策（2026-06-08）
+
+Verdict: `continue convergence with explicit phase-shift x_min policy`
+
+- 物理口径决策：复用项目已有 `density_policy=:x_min_cut` / `:bose_x_min_cut`，但只作用于 BU/GBU phase-shift regimes。
+- `x_min_cut` 定义为 `(omega - mu_M)/T >= bose_x_min`，等价于 phase-shift energy domain 下界 `omega_lower=max(omega_min, mu_M + bose_x_min*T)`。
+- `stable` 与 `strict_bw_stage*` 不采用 x-min 延拓；若触发 `mass <= mu_M` 或 `omega_min <= mu_M` 等 Bose-domain guard，则输出 `unsafe_bose_domain` / `NaN` 行并继续扫描。
+- 该策略是显式 policy choice，不是文献唯一处方；正式审计必须记录 `density_policy`、`bose_x_min` 和 policy 作用域，避免后续误认为 stable/BW 也被延拓。
+- 由于 combined scan CLI 需要新增 `--bose-x-min` 才能由 GitHub Actions 传递该参数，续跑必须先提交并推送生产分支，再以该分支触发 workflow。
+
 ## Scope Lock
 
 - 物理口径：`FixedAsymmetricRho` density-constrained equilibrium source。
@@ -56,20 +66,23 @@ Verdict: `blocked`
 优先用 GitHub Actions 远程运行，不在本机跑高精度网格。每个 convergence 档位触发一次 workflow：
 
 ```sh
-gh workflow run relaxtime-meson-density-production.yml --ref main \
+gh workflow run relaxtime-meson-density-production.yml --ref codex/trho-asymmetric-meson-density-production \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=convergence_low \
-  -f resolution_profile=low
+  -f resolution_profile=low \
+  -f phase_args="--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy x_min_cut --bose-x-min 1e-6 --noanom-policy none --eta 1e-6 --strict-bw-stage stage1"
 
-gh workflow run relaxtime-meson-density-production.yml --ref main \
+gh workflow run relaxtime-meson-density-production.yml --ref codex/trho-asymmetric-meson-density-production \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=convergence_mid \
-  -f resolution_profile=mid
+  -f resolution_profile=mid \
+  -f phase_args="--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy x_min_cut --bose-x-min 1e-6 --noanom-policy none --eta 1e-6 --strict-bw-stage stage1"
 
-gh workflow run relaxtime-meson-density-production.yml --ref main \
+gh workflow run relaxtime-meson-density-production.yml --ref codex/trho-asymmetric-meson-density-production \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=convergence_high \
-  -f resolution_profile=high
+  -f resolution_profile=high \
+  -f phase_args="--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy x_min_cut --bose-x-min 1e-6 --noanom-policy none --eta 1e-6 --strict-bw-stage stage1"
 ```
 
 workflow 为避免 GitHub Actions `workflow_dispatch` 输入数量上限，使用组合式参数：
@@ -77,7 +90,7 @@ workflow 为避免 GitHub Actions `workflow_dispatch` 输入数量上限，使�
 - `grid_args`：扫描网格，例如 `--tmin 120 --tmax 220 --tstep 10 --rhomin 0.05 --rhomax 1.00 --rhostep 0.05`。
 - `physics_args`：约束与 profile，例如 `--asym-ud-ratio-target 0.876 --asym-s-target 0.0 --flavor-profile default --meson-profile asymmetric_kplus_over_piplus_signed`。
 - `resolution_profile`：`low` / `mid` / `high` / `custom`。若使用 `custom`，必须填写 `custom_resolution_args`。
-- `phase_args`：相移和 BW 相关 policy，例如 `--real-axis-mode pv_b0_eta0 --phase-display fold_0_pi --density-policy strict_normal_domain --noanom-policy none`。
+- `phase_args`：相移和 BW 相关 policy，例如 `--real-axis-mode pv_b0_eta0 --phase-display fold_0_pi --density-policy x_min_cut --bose-x-min 1e-6 --noanom-policy none`。`density_policy` / `bose_x_min` 在 combined scan 中只作用于 phase-shift current/GBU，stable/BW 继续记录 strict-domain unsafe 行。
 - `extra_args`：追加在命令末尾的少量补充参数；参数值不能包含空格。
 
 远程 result-side artifact 内部路径必须保留为：
@@ -136,10 +149,11 @@ gh run download <run-id> --dir data/outputs/remote_artifacts/trho_asymmetric_kpl
 使用通过 convergence gate 的最高参数或有证据支持的足够收敛参数，远程触发正式 production。示例：
 
 ```sh
-gh workflow run relaxtime-meson-density-production.yml --ref main \
+gh workflow run relaxtime-meson-density-production.yml --ref codex/trho-asymmetric-meson-density-production \
   -f case_slug=trho_asymmetric_kplus_piplus_scan_v1 \
   -f run_stage=production \
   -f resolution_profile=<selected-profile-or-custom> \
+  -f phase_args="--real-axis-mode pv_b0_eta0 --phase-convention arg_inverse_propagator --phase-display fold_0_pi --density-policy x_min_cut --bose-x-min 1e-6 --noanom-policy none --eta 1e-6 --strict-bw-stage stage1" \
   -f custom_resolution_args="<only-when-custom>"
 ```
 
@@ -187,7 +201,8 @@ result README 必须反向链接 figure 目录和图像文件。
 
 - BW 口径仍只作为对照，不能单独作为正式结论依据。
 - `trho_asymmetric` 当前是新 path strategy；正式结论依赖 convergence gate 证明。
-- 若 phase-shift regime 出现 unsafe Bose domain 或非 `ok` status，不得硬标 production-grade，必须降级为 diagnostic-only 或 blocked。
+- 若 phase-shift regime 在 `density_policy=x_min_cut` 下仍出现 unsafe/no-support/非 `ok` status，不得硬标 production-grade，必须降级为 diagnostic-only 或 blocked。
+- stable/BW 的 `unsafe_bose_domain` 行是 strict-domain 对照口径的定义域诊断，不单独阻塞 BU/GBU convergence gate；但必须在 audit 中单独统计，不能作为可用 stable/BW 数值解释。
 
 ## Phase 4: 验证与提交前清理
 

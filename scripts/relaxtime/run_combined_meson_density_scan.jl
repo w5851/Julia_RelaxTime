@@ -163,6 +163,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
             phase_convention=opts.phase_convention,
             phase_display=opts.phase_display,
             density_policy=opts.density_policy,
+            bose_x_min=opts.bose_x_min,
             noanom_policy=opts.noanom_policy,
         )
     end
@@ -181,6 +182,7 @@ function _solve_density_for_regime(regime::Symbol, meson_point, common_density, 
         phase_convention=opts.phase_convention,
         phase_display=opts.phase_display,
         density_policy=opts.density_policy,
+        bose_x_min=opts.bose_x_min,
         noanom_policy=opts.noanom_policy,
     )
 end
@@ -263,8 +265,18 @@ function _density_row(base::Dict{String, Any}, regime::Symbol, density)
     ))
 end
 
+function _failure_status(regime::Symbol, msg::AbstractString)
+    if regime in (:stable, :strict_bw_stage1, :strict_bw_stage2)
+        if occursin("mass > μ", msg) || occursin("omega_min must exceed μ", msg) || occursin("Bose pole", msg)
+            return :unsafe_bose_domain
+        end
+    end
+    return :failed
+end
+
 function _failure_row(base::Dict{String, Any}, regime::Symbol, err)
     msg = Models.ScanCommon.clean_message(sprint(showerror, err))
+    status = _failure_status(regime, msg)
     return merge(copy(base), Dict{String, Any}(
         "regime" => regime,
         "phase_scheme" => "",
@@ -292,7 +304,7 @@ function _failure_row(base::Dict{String, Any}, regime::Symbol, err)
         "min_E_minus_mu" => "",
         "bose_x_min" => "",
         "noanom_removed_component_count" => "",
-        "status" => :failed,
+        "status" => status,
         "message" => msg,
     ))
 end
@@ -323,6 +335,8 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
         println(io, "# real_axis_mode: $(opts.real_axis_mode)")
         println(io, "# phase_display: $(opts.phase_display)")
         println(io, "# density_policy: $(opts.density_policy)")
+        println(io, "# bose_x_min: $(opts.bose_x_min)")
+        println(io, "# density_policy_scope: phase_shift_current,phase_shift_gbu_reference")
         println(io, "# noanom_policy: $(opts.noanom_policy)")
         println(io, "# gamma_zero_tol: $(opts.gamma_zero_tol)")
         println(io, join(OUTPUT_COLUMNS, ','))
@@ -682,6 +696,8 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- `phase_convention=$(opts.phase_convention)`")
         println(io, "- `phase_display=$(opts.phase_display)`")
         println(io, "- `density_policy=$(opts.density_policy)`")
+        println(io, "- `bose_x_min=$(opts.bose_x_min)`")
+        println(io, "- `density_policy` and `bose_x_min` apply only to `phase_shift_current` and `phase_shift_gbu_reference`; `stable` and `strict_bw_stage*` keep strict Bose-domain diagnostics.")
         println(io, "- `noanom_policy=$(opts.noanom_policy)`")
         println(io, "- `strict_bw_omega_min=$(opts.omega_min)`")
         println(io, "- `gamma_zero_tol=$(opts.gamma_zero_tol)`")
