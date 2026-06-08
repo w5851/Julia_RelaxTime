@@ -8,7 +8,7 @@ date: 2026-06-06
 - density regimes: `stable`, `strict_bw_stage1`, `phase_shift_current`, `phase_shift_gbu_reference`
 - FixedAsymmetricRho rho targets: `0.050000,0.100000,0.150000,0.200000,0.250000,0.300000,0.350000,0.400000,0.450000,0.500000,0.550000,0.600000,0.650000,0.700000,0.750000,0.800000,0.850000,0.900000,0.950000,1.000000`
 - asymmetry targets: `rho_u/rho_d=0.876`, `rho_s=0.0 fm^-3`
-- smoke-only status: this path is intended for diagnostic integration, not formal high-precision production.
+- convergence status: retained as `convergence_low` gate evidence for the production-grade artifact; this directory is not the standalone production output.
 - temperature range: `120.0:10.0:220.0 MeV`
 - flavor profile: `default`
 - meson profile: `asymmetric_kplus_over_piplus_signed`

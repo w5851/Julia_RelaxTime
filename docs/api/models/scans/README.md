@@ -18,7 +18,7 @@
 6. [CrossoverMesonDensityScan.md](CrossoverMesonDensityScan.md)：crossover line 上的介子数密度 workflow
 7. [FreezeoutMesonDensityScan.md](FreezeoutMesonDensityScan.md)：freeze-out 路径上的介子数密度 workflow
 8. [ExternalPathMesonDensityScan.md](ExternalPathMesonDensityScan.md)：外部离散路径点列上的介子数密度 workflow
-9. `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`：`FixedAsymmetricRho` 上游 equilibrium source 的 smoke-only 介子数密度组合扫描，参数与输出字段见 [Overview.md](Overview.md)
+9. `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`：`FixedAsymmetricRho` 上游 equilibrium source 的介子数密度组合扫描；正式产物必须先通过 convergence gate 与 production audit，参数与输出字段见 [Overview.md](Overview.md)
 10. [MesonMassPathScan.md](MesonMassPathScan.md)：freeze-out / isentropic 路径上的介子质量 workflow
 11. [SamplingGrid.md](SamplingGrid.md)：默认密度网格与加密策略
 12. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查

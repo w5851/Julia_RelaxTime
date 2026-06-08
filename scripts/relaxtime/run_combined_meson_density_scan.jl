@@ -699,7 +699,7 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
             println(io, "- FixedAsymmetricRho rho targets: `$(join(_fmt.(opts.rho_values), ","))`")
             println(io, "- FixedAsymmetricRho scan order: temperature-grouped rho-continuity with `trho_reverse_rho=$(opts.trho_reverse_rho)`.")
             println(io, "- asymmetry targets: `rho_u/rho_d=$(opts.asym_ud_ratio_target)`, `rho_s=$(opts.asym_s_target) fm^-3`")
-            println(io, "- smoke-only status: this path is intended for diagnostic integration, not formal high-precision production.")
+            println(io, "- production status: `trho_asymmetric` may be used for formal artifacts only after an explicit convergence gate and production audit; ad hoc runs remain diagnostic evidence.")
         elseif length(opts.muq_values_MeV) == 1
             println(io, "- fixed chemical potential: `mu_q=$(only(opts.muq_values_MeV)) MeV`, `mu_B=$(3.0 * only(opts.muq_values_MeV)) MeV`")
         else

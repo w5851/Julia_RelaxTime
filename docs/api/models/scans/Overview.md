@@ -134,7 +134,7 @@
 
 - 需要把现有 `FixedAsymmetricRho` equilibrium source 接到介子数密度后处理
 - 需要在同位旋不对称条件下检查 `mu_u != mu_d`、signed `mu_pi` / `mu_K`
-- 当前只做 smoke / diagnostic 小网格，不生产正式高精度产物
+- 普通小网格运行作为 diagnostic evidence；正式高精度产物必须先通过 convergence gate 与 production audit
 
 关键特征：
 
