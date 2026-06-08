@@ -52,6 +52,7 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         end
         println(io, "- compute bulk viscosity (`zeta`): `$(opts.compute_bulk)`")
         println(io, "- propagator xi policy: `$(opts.propagator_xi_policy)`")
+        println(io, "- sigma cache policy: `$(opts.sigma_cache_policy)`")
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
            opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
             println(io, "- tau/sigma overrides:")
@@ -94,6 +95,7 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "alpha_T_values" => opts.alpha_T_values,
         "T_values" => opts.T_values,
         "propagator_xi_policy" => String(opts.propagator_xi_policy),
+        "sigma_cache_policy" => String(opts.sigma_cache_policy),
         "tau_p_nodes" => opts.tau_p_nodes,
         "tau_angle_nodes" => opts.tau_angle_nodes,
         "tau_phi_nodes" => opts.tau_phi_nodes,

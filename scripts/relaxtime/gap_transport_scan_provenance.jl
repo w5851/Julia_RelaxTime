@@ -33,6 +33,7 @@ function build_effective_config(opts)
         "tau_asym_extra_points" => opts.tau_asym_extra_points,
         "tau_interpolation_mode" => String(opts.tau_interpolation_mode),
         "propagator_xi_policy" => String(opts.propagator_xi_policy),
+        "sigma_cache_policy" => String(opts.sigma_cache_policy),
         "sigma_grid_n" => opts.sigma_grid_n,
         "integration_mode" => String(opts.integration_mode),
         "gc_every_n" => opts.gc_every_n,

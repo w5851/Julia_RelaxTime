@@ -244,6 +244,22 @@ end
     @test w0cdf_cache.fingerprint !== nothing
     @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :kind) === :w0cdf
     @test AverageScatteringRate._fingerprint_grid_value(w0cdf_cache.fingerprint.grid, :N) == 4
+    @test w0cdf_cache.fingerprint.sigma_cache_policy === :default
+
+    anchored_cache = build_w0cdf_pchip_cache(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        N=4,
+        n_sigma_points=4,
+        p_cutoff=nothing,
+        sigma_cache_policy=:validated_anchored,
+    )
+    @test anchored_cache.fingerprint.sigma_cache_policy === :validated_anchored
+    @test AverageScatteringRate._fingerprint_grid_value(anchored_cache.fingerprint.grid, :sigma_cache_policy) === :validated_anchored
+    @test length(anchored_cache.s_vals) > 4
+
     heavy_initial_cache = build_w0cdf_pchip_cache(
         :ssbar_to_uubar,
         QUARK_PARAMS,
@@ -254,6 +270,20 @@ end
         p_cutoff=nothing,
     )
     @test heavy_initial_cache.fingerprint.threshold_subtraction == true
+
+    @test_throws ArgumentError average_scattering_rate(
+        :uu_to_uu,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        cs_cache=w0cdf_cache,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        sigma_cache_policy=:unknown,
+    )
 
     ω_custom_w0cdf = average_scattering_rate(
         :uu_to_uu,
@@ -465,6 +495,49 @@ end
     )
 
     @test length(cache_not_triggered.s_vals) == length(dense_grid)
+end
+
+@testset "validated_anchored uses local threshold addback" begin
+    cache_default = CrossSectionCache(:uu_to_uu)
+    cache_default.asym_enabled = true
+    cache_default.asym_s0 = 1.0
+    cache_default.asym_A = 2.0
+    AverageScatteringRate._configure_asymptotic_taper!(cache_default, :default, 0.2)
+
+    cache_anchored = CrossSectionCache(:uu_to_uu)
+    cache_anchored.asym_enabled = true
+    cache_anchored.asym_s0 = 1.0
+    cache_anchored.asym_A = 2.0
+    AverageScatteringRate._configure_asymptotic_taper!(cache_anchored, :validated_anchored, 0.2)
+
+    @test isinf(cache_default.asym_taper_start)
+    @test cache_anchored.asym_taper_start ≈ 0.2
+    @test cache_anchored.asym_taper_end ≈ 0.4
+    @test AverageScatteringRate._asymptotic_addback(cache_default, 1.6) > 0.0
+    @test AverageScatteringRate._asymptotic_addback(cache_anchored, 1.1) > 0.0
+    @test AverageScatteringRate._asymptotic_addback(cache_anchored, 1.6) == 0.0
+
+    raw_sigma = 1.0
+    s_anchor = 1.1
+    @test AverageScatteringRate._regularized_sigma_value(cache_default, s_anchor, raw_sigma) == 0.0
+    residual = AverageScatteringRate._regularized_sigma_value(cache_anchored, s_anchor, raw_sigma)
+    @test residual < 0.0
+
+    cache_anchored.s_vals = [s_anchor, 1.3]
+    cache_anchored.sigma_vals = [
+        residual,
+        AverageScatteringRate._regularized_sigma_value(cache_anchored, 1.3, 1.5),
+    ]
+    recovered = AverageScatteringRate._get_sigma_core(
+        cache_anchored,
+        s_anchor,
+        QUARK_PARAMS,
+        THERMO_ISO,
+        K_COEFFS;
+        n_points=4,
+        interpolation_mode=:linear,
+    )
+    @test recovered ≈ raw_sigma
 end
 
 @testset "adaptive refinement improves under-resolved interpolation" begin

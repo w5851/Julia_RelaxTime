@@ -92,6 +92,7 @@ end
         Float64[1.0],
         [120.0, 138.0],
         :match_thermo,
+        :default,
         nothing,
         nothing,
         nothing,
