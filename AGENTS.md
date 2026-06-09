@@ -433,3 +433,18 @@ When creating any git commit in this repository, the agent MUST follow historica
 
 6) Non-compliance
 - If the message does not match repository style, the agent must revise it before committing.
+
+## Literature-To-Implementation Subagents
+
+This repository may use project subagents for literature-backed computational decisions. The goal is not to maintain a full bibliography here; the goal is to turn literature evidence into formulas, implementation choices, validation plans, regression targets, and paper handoff notes.
+
+Use these project agents when the user explicitly asks for subagents or parallel agents on literature/research-engineering tasks:
+
+- `relax-literature-search-strategist`: targeted searches for formulas, algorithms, parameterizations, validation points, and reproducibility signals.
+- `relax-method-reviewer`: equation assumptions, notation, units, reproducibility, implementation risk, and validation requirements.
+- `relax-evidence-synthesizer`: method comparison, project-fit synthesis, recommended path, test layer implications, and documentation impacts.
+- `relax-gap-analyst`: missing evidence, formula gaps, validation gaps, regression needs, docs tasks, and paper-workspace handoffs.
+
+Citation and BibTeX cleanup belongs in `D:\Desktop\paper`, especially under `D:\Desktop\paper\bib`. Do not edit that master bibliography from this repository. If citation metadata or duplicate cleanup is needed, return a handoff request for the `paper-citation-curator`.
+
+For protocol details, see `docs/analysis/literature_to_implementation_protocol.md`.
