@@ -17,6 +17,31 @@ on:
         required: false
         default: "first_canonical_v1_diagnostic"
         type: string
+      shard_label:
+        description: "short artifact label for a sharded run"
+        required: false
+        default: "full"
+        type: string
+      xi_list:
+        description: "comma-separated xi values for this shard"
+        required: false
+        default: "-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5"
+        type: string
+      muB_list:
+        description: "comma-separated muB values in MeV for this shard"
+        required: false
+        default: "0,450,900"
+        type: string
+      alpha_t_list:
+        description: "comma-separated alpha_T values for fixed-muB-phase-scaled shards"
+        required: false
+        default: "1.0,1.1,1.2"
+        type: string
+      t_list:
+        description: "comma-separated T values in MeV for fixed-T-sparse-muB shards"
+        required: false
+        default: "120,160,200"
+        type: string
       run_tier:
         description: "diagnostic run tier"
         required: false
@@ -122,11 +147,20 @@ jobs:
           set -euo pipefail
 
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          shard_label="${{ inputs.shard_label || 'full' }}"
           run_tier="${{ inputs.run_tier || 'dry-run' }}"
           policy="${{ inputs.propagator_xi_policy || 'match_thermo' }}"
           sigma_cache_policy="${{ inputs.sigma_cache_policy || 'default' }}"
           render_plots="${{ inputs.render_plots }}"
           mode_input="${{ inputs.mode || 'both' }}"
+          xi_list="${{ inputs.xi_list || '-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5' }}"
+          muB_list="${{ inputs.muB_list || '0,450,900' }}"
+          alpha_t_list="${{ inputs.alpha_t_list || '1.0,1.1,1.2' }}"
+          t_list="${{ inputs.t_list || '120,160,200' }}"
+          audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
+          log_root="$audit_root/logs"
+          safe_shard_label="$(printf '%s' "$shard_label" | sed 's/[^A-Za-z0-9_.=-]/_/g')"
+          mkdir -p "$log_root"
 
           modes=()
           if [ "$mode_input" = "both" ]; then
@@ -141,7 +175,6 @@ jobs:
             --sigma-cache-policy "$sigma_cache_policy"
             --channel-diagnostics
           )
-          canonical_xi_list="-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5"
 
           if [ "$run_tier" = "smoke" ]; then
             common_args+=(
@@ -175,9 +208,9 @@ jobs:
             if [ "$mode" = "fixed-muB-phase-scaled" ]; then
               scan_args=(
                 --mode fixed-muB-phase-scaled
-                --muB-list 0,450,900
-                --alphaT-list 1.0,1.1,1.2
-                --xi-list "$canonical_xi_list"
+                --muB-list "$muB_list"
+                --alphaT-list "$alpha_t_list"
+                --xi-list "$xi_list"
               )
               if [ "$run_tier" = "smoke" ]; then
                 scan_args=(
@@ -190,9 +223,9 @@ jobs:
             elif [ "$mode" = "fixed-T-sparse-muB" ]; then
               scan_args=(
                 --mode fixed-T-sparse-muB
-                --muB-list 0,450,900
-                --T-list 120,160,200
-                --xi-list "$canonical_xi_list"
+                --muB-list "$muB_list"
+                --T-list "$t_list"
+                --xi-list "$xi_list"
               )
               if [ "$run_tier" = "smoke" ]; then
                 scan_args=(
@@ -207,10 +240,13 @@ jobs:
               exit 1
             fi
 
-            printf 'Running phase-guided transport scan (%s):\n  ' "$mode"
-            printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
-            printf '\n'
-            julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
+            scan_log="$log_root/scan_${mode}_${safe_shard_label}.log"
+            {
+              printf 'Running phase-guided transport scan (%s, shard=%s):\n  ' "$mode" "$shard_label"
+              printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
+              printf '\n'
+              julia --project=. scripts/relaxtime/run_phase_guided_transport_scan.jl "${scan_args[@]}" "${common_args[@]}"
+            } 2>&1 | tee "$scan_log"
 
             if [ "$run_tier" != "dry-run" ] && [ "$render_plots" = "true" ]; then
               mode_dir="mode_a_fixed_muB_phase_scaled"
@@ -218,18 +254,23 @@ jobs:
                 mode_dir="mode_b_fixed_T_sparse_muB"
               fi
               case_dir="data/outputs/results/relaxtime/transport/phase_guided/${mode_dir}/${case_name}"
-              printf 'Rendering phase-guided transport plots (%s):\n  ' "$mode"
-              printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
-              printf '\n'
-              julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
+              plot_log="$log_root/plot_${mode}_${safe_shard_label}.log"
+              {
+                printf 'Rendering phase-guided transport plots (%s, shard=%s):\n  ' "$mode" "$shard_label"
+                printf '%q ' julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
+                printf '\n'
+                julia --project=. scripts/relaxtime/run_phase_guided_transport_plots.jl --case-dir "$case_dir" --overwrite
+              } 2>&1 | tee "$plot_log"
             fi
           done
 
       - name: Write diagnostic audit note
+        if: ${{ always() }}
         shell: bash
         run: |
           set -euo pipefail
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          shard_label="${{ inputs.shard_label || 'full' }}"
           audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
           mkdir -p "$audit_root"
           {
@@ -242,9 +283,14 @@ jobs:
             echo ""
             printf -- '- mode: `%s`\n' "${{ inputs.mode || 'both' }}"
             printf -- '- case_name: `%s`\n' "$case_name"
+            printf -- '- shard_label: `%s`\n' "$shard_label"
             printf -- '- run_tier: `%s`\n' "${{ inputs.run_tier || 'dry-run' }}"
             printf -- '- propagator_xi_policy: `%s`\n' "${{ inputs.propagator_xi_policy || 'match_thermo' }}"
             printf -- '- sigma_cache_policy: `%s`\n' "${{ inputs.sigma_cache_policy || 'default' }}"
+            printf -- '- xi_list: `%s`\n' "${{ inputs.xi_list || '-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5' }}"
+            printf -- '- muB_list: `%s`\n' "${{ inputs.muB_list || '0,450,900' }}"
+            printf -- '- alpha_t_list: `%s`\n' "${{ inputs.alpha_t_list || '1.0,1.1,1.2' }}"
+            printf -- '- t_list: `%s`\n' "${{ inputs.t_list || '120,160,200' }}"
             printf -- '- compute_bulk: `%s`\n' "${{ inputs.compute_bulk }}"
             printf -- '- render_plots: `%s`\n' "${{ inputs.render_plots }}"
             printf -- '- overwrite: `%s`\n' "${{ inputs.overwrite }}"
@@ -263,26 +309,28 @@ jobs:
           } > "$audit_root/DIAGNOSTIC_AUDIT.md"
 
       - name: Upload phase-guided result artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: relaxtime-phase-guided-transport-results-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}
+          name: relaxtime-phase-guided-transport-results-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}-${{ inputs.shard_label || 'full' }}
           path: |
             data/outputs/results/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
-            data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}/DIAGNOSTIC_AUDIT.md
+            data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}/**
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload phase-guided figure artifacts
-        if: ${{ inputs.render_plots == true && inputs.run_tier != 'dry-run' }}
+        if: ${{ always() && inputs.render_plots == true && inputs.run_tier != 'dry-run' }}
         uses: actions/upload-artifact@v4
         with:
-          name: relaxtime-phase-guided-transport-figures-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}
+          name: relaxtime-phase-guided-transport-figures-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}-${{ inputs.shard_label || 'full' }}
           path: |
             data/outputs/figures/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Write summary
+        if: ${{ always() }}
         shell: bash
         run: |
           {
@@ -290,6 +338,7 @@ jobs:
             echo ""
             echo "- mode: \`${{ inputs.mode || 'both' }}\`"
             echo "- case_name: \`${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}\`"
+            echo "- shard_label: \`${{ inputs.shard_label || 'full' }}\`"
             echo "- run_tier: \`${{ inputs.run_tier || 'dry-run' }}\`"
             echo "- propagator_xi_policy: \`${{ inputs.propagator_xi_policy || 'match_thermo' }}\`"
             echo "- sigma_cache_policy: \`${{ inputs.sigma_cache_policy || 'default' }}\`"

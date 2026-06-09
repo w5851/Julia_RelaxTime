@@ -149,6 +149,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
   - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；也可传 `--sigma-cache-policy validated_anchored` 诊断 threshold-subtraction 与 σ-cache 插值放大效应。默认 `match_thermo` / `default` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
   - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
+  - 高精度长任务应优先通过 action shard 触发：mode a 可用 `muB_list` + `alpha_t_list` 分片，mode b 可用 `t_list` + `muB_list` 分片，二者都可用 `xi_list` 缩小窗口，并用 `shard_label` 区分 artifact。workflow 会把扫描/绘图日志写入 result artifact；失败或取消时仍尽量上传 partial CSV、`failed_points.csv`、`channel_diagnostics.csv` 和日志，供本地合并与 convergence gate 使用。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`
