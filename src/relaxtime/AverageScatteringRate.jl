@@ -78,6 +78,11 @@ const DQ = 6.0 # 简并度d_q=2*N_c=6
 const TWO_PI = 2.0 * π
 
 const PROPAGATOR_XI_POLICIES = (:match_thermo, :isotropic)
+const SIGMA_CACHE_POLICIES = (:default, :validated_anchored)
+const VALIDATED_ANCHORED_DS_OFFSETS = (
+    1.0e-8, 0.02, 0.05, 0.10, 0.20, 0.40, 0.60, 0.80,
+    1.5, 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0,
+)
 
 # --------------------------- 工具函数 ---------------------------
 
@@ -98,6 +103,12 @@ end
 @inline function _normalize_propagator_xi_policy(policy::Symbol)::Symbol
     policy in PROPAGATOR_XI_POLICIES ||
         throw(ArgumentError("unknown propagator_xi_policy=$(policy); expected one of $(PROPAGATOR_XI_POLICIES)"))
+    return policy
+end
+
+@inline function _normalize_sigma_cache_policy(policy::Symbol)::Symbol
+    policy in SIGMA_CACHE_POLICIES ||
+        throw(ArgumentError("unknown sigma_cache_policy=$(policy); expected one of $(SIGMA_CACHE_POLICIES)"))
     return policy
 end
 
@@ -179,6 +190,8 @@ mutable struct AsymptoticConfig
     asym_s0::Float64
     asym_A::Float64
     asym_requested::Bool
+    asym_taper_start::Float64
+    asym_taper_end::Float64
 end
 
 mutable struct CrossSectionCache
@@ -191,7 +204,7 @@ end
 
 CrossSectionData() = CrossSectionData(Float64[], Float64[])
 CachedInterpolation() = CachedInterpolation(Float64[], true, 0.0, 0.0, true, Float64[], Float64[], true, 0, 0.0)
-AsymptoticConfig() = AsymptoticConfig(false, 0.0, 0.0, false)
+AsymptoticConfig() = AsymptoticConfig(false, 0.0, 0.0, false, Inf, Inf)
 CrossSectionCache(process::Symbol, data::CrossSectionData, interpolation::CachedInterpolation, asymptotic::AsymptoticConfig) =
     CrossSectionCache(process, data, interpolation, asymptotic, nothing)
 
@@ -200,7 +213,7 @@ function Base.propertynames(::CrossSectionCache, private::Bool=false)
         :s_vals, :sigma_vals, :pchip_slopes, :pchip_dirty,
         :peak_ratio, :peak_s, :peak_dirty,
         :local_s_vals, :local_sigma_vals, :local_dirty, :local_n_points, :local_upper_s,
-        :asym_enabled, :asym_s0, :asym_A, :asym_requested)
+        :asym_enabled, :asym_s0, :asym_A, :asym_requested, :asym_taper_start, :asym_taper_end)
     return private ? names : names
 end
 
@@ -215,7 +228,7 @@ function Base.getproperty(cache::CrossSectionCache, name::Symbol)
         return getfield(getfield(cache, :interpolation), name)
     elseif name === :local_s_vals || name === :local_sigma_vals || name === :local_dirty || name === :local_n_points || name === :local_upper_s
         return getfield(getfield(cache, :interpolation), name)
-    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
+    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested || name === :asym_taper_start || name === :asym_taper_end
         return getfield(getfield(cache, :asymptotic), name)
     end
     return getfield(cache, name)
@@ -230,7 +243,7 @@ function Base.setproperty!(cache::CrossSectionCache, name::Symbol, value)
         return setfield!(getfield(cache, :interpolation), name, value)
     elseif name === :local_s_vals || name === :local_sigma_vals || name === :local_dirty || name === :local_n_points || name === :local_upper_s
         return setfield!(getfield(cache, :interpolation), name, value)
-    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested
+    elseif name === :asym_enabled || name === :asym_s0 || name === :asym_A || name === :asym_requested || name === :asym_taper_start || name === :asym_taper_end
         return setfield!(getfield(cache, :asymptotic), name, value)
     end
     return setfield!(cache, name, value)
@@ -238,7 +251,7 @@ end
 
 CrossSectionCache(process::Symbol) = CrossSectionCache(process, CrossSectionData(), CachedInterpolation(), AsymptoticConfig())
 
-const _CACHE_FINGERPRINT_VERSION = 1
+const _CACHE_FINGERPRINT_VERSION = 2
 const _CACHE_FINGERPRINT_CONTEXT_FIELDS = (
     :version,
     :process,
@@ -247,6 +260,7 @@ const _CACHE_FINGERPRINT_CONTEXT_FIELDS = (
     :K_coeffs,
     :n_points,
     :threshold_subtraction,
+    :sigma_cache_policy,
     :asym_window,
     :asym_fit_min_points,
     :asym_extra_points,
@@ -315,6 +329,7 @@ function _cross_section_cache_fingerprint(
     K_coeffs::NamedTuple;
     n_points::Int,
     threshold_subtraction::Bool,
+    sigma_cache_policy::Symbol,
     asym_window::Float64,
     asym_fit_min_points::Int,
     asym_extra_points::Int,
@@ -329,6 +344,7 @@ function _cross_section_cache_fingerprint(
         K_coeffs=_fingerprint_value(K_coeffs),
         n_points=Int(n_points),
         threshold_subtraction=Bool(threshold_subtraction),
+        sigma_cache_policy=sigma_cache_policy,
         asym_window=Float64(asym_window),
         asym_fit_min_points=Int(asym_fit_min_points),
         asym_extra_points=Int(asym_extra_points),
@@ -352,6 +368,7 @@ function _w0cdf_grid_metadata(
     design_phi_nodes::Int,
     p_cutoff::Union{Nothing,Float64},
     scale::Float64,
+    sigma_cache_policy::Symbol=:default,
 )
     return (
         kind=:w0cdf,
@@ -361,8 +378,98 @@ function _w0cdf_grid_metadata(
         design_phi_nodes=Int(design_phi_nodes),
         p_cutoff=_fingerprint_value(p_cutoff),
         scale=Float64(scale),
+        sigma_cache_policy=sigma_cache_policy,
         input_s_grid=_s_grid_fingerprint(input_s_grid),
     )
+end
+
+@inline function _validated_asym_taper_bounds(asym_window::Float64)::Tuple{Float64,Float64}
+    start = max(Float64(asym_window), 1.0e-12)
+    return start, 2.0 * start
+end
+
+@inline function _configure_asymptotic_taper!(cache::CrossSectionCache, sigma_cache_policy::Symbol, asym_window::Float64)
+    if sigma_cache_policy === :validated_anchored
+        cache.asym_taper_start, cache.asym_taper_end = _validated_asym_taper_bounds(asym_window)
+    else
+        cache.asym_taper_start = Inf
+        cache.asym_taper_end = Inf
+    end
+    return cache
+end
+
+@inline function _asymptotic_weight(cache::CrossSectionCache, s::Float64)::Float64
+    (!cache.asym_enabled || s <= cache.asym_s0) && return 0.0
+    start = cache.asym_taper_start
+    stop = cache.asym_taper_end
+    isinf(start) && return 1.0
+    ds = s - cache.asym_s0
+    ds <= start && return 1.0
+    ds >= stop && return 0.0
+    t = (ds - start) / (stop - start)
+    return 1.0 - t * t * (3.0 - 2.0 * t)
+end
+
+@inline function _asymptotic_addback(cache::CrossSectionCache, s::Float64)::Float64
+    w = _asymptotic_weight(cache, s)
+    w == 0.0 && return 0.0
+    return w * cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0))
+end
+
+@inline function _allow_negative_regularized_residual(cache::CrossSectionCache)::Bool
+    return cache.asym_enabled && isfinite(cache.asym_taper_start)
+end
+
+@inline function _regularized_sigma_value(cache::CrossSectionCache, s::Float64, σ::Float64)::Float64
+    if !cache.asym_enabled
+        return σ
+    end
+    residual = σ - _asymptotic_addback(cache, s)
+    return _allow_negative_regularized_residual(cache) ? residual : max(0.0, residual)
+end
+
+@inline function _finalize_cached_sigma_value(cache::CrossSectionCache, s::Float64, val::Float64)::Float64
+    if cache.asym_enabled && s > cache.asym_s0
+        total = val + _asymptotic_addback(cache, s)
+        return _allow_negative_regularized_residual(cache) ? max(0.0, total) : total
+    end
+    return _allow_negative_regularized_residual(cache) ? max(0.0, val) : val
+end
+
+@inline function _exact_cached_sigma_value(cache::CrossSectionCache, s::Float64, val::Float64)::Float64
+    return _allow_negative_regularized_residual(cache) ? _finalize_cached_sigma_value(cache, s, val) : val
+end
+
+function _merge_validated_anchor_grid(
+    s_grid::Vector{Float64},
+    process::Symbol,
+    quark_params::NamedTuple,
+    p_cutoff::Union{Nothing,Float64},
+)::Vector{Float64}
+    pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
+    mi = get_mass(pi_sym, quark_params)
+    mj = get_mass(pj_sym, quark_params)
+    mc = get_mass(pc_sym, quark_params)
+    md = get_mass(pd_sym, quark_params)
+    s_bo = max((mi + mj)^2, (mc + md)^2)
+    s_up = if p_cutoff !== nothing
+        min((sqrt(mi^2 + p_cutoff^2) + sqrt(mj^2 + p_cutoff^2))^2,
+            (sqrt(mc^2 + p_cutoff^2) + sqrt(md^2 + p_cutoff^2))^2)
+    else
+        Inf
+    end
+
+    merged = copy(s_grid)
+    sizehint!(merged, length(s_grid) + length(VALIDATED_ANCHORED_DS_OFFSETS))
+    for ds in VALIDATED_ANCHORED_DS_OFFSETS
+        s = s_bo + ds
+        if s > s_bo && s < s_up
+            push!(merged, s)
+        end
+    end
+    sort!(merged)
+    unique!(merged)
+    return merged
 end
 
 @inline function _fingerprint_grid_kind(fingerprint::NamedTuple)
@@ -451,6 +558,7 @@ function _validate_cross_section_cache!(
     K_coeffs::NamedTuple;
     n_points::Int,
     threshold_subtraction::Bool,
+    sigma_cache_policy::Symbol,
     asym_window::Float64,
     asym_fit_min_points::Int,
     asym_extra_points::Int,
@@ -458,6 +566,7 @@ function _validate_cross_section_cache!(
     scale::Float64,
     require_cache_fingerprint::Bool,
 )
+    sigma_cache_policy = _normalize_sigma_cache_policy(sigma_cache_policy)
     _validate_cross_section_cache_process!(cache, process)
     isempty(cache.s_vals) && return cache
 
@@ -480,6 +589,7 @@ function _validate_cross_section_cache!(
         K_coeffs;
         n_points=n_points,
         threshold_subtraction=threshold_subtraction,
+        sigma_cache_policy=sigma_cache_policy,
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
         asym_extra_points=asym_extra_points,
@@ -489,7 +599,7 @@ function _validate_cross_section_cache!(
 
     mismatch = _fingerprint_context_mismatch(cache.fingerprint, expected)
     if mismatch !== nothing
-        throw(ArgumentError("CrossSectionCache fingerprint mismatch for $(process): $(mismatch) differs from current parameters; rebuild the cache for the current quark_params, thermo_params, K_coeffs, n_sigma_points, and threshold_subtraction settings"))
+        throw(ArgumentError("CrossSectionCache fingerprint mismatch for $(process): $(mismatch) differs from current parameters; rebuild the cache for the current quark_params, thermo_params, K_coeffs, n_sigma_points, threshold_subtraction, and sigma_cache_policy settings"))
     end
 
     grid_mismatch = _w0cdf_grid_mismatch(cache.fingerprint, sigma_cutoff, scale)
@@ -608,7 +718,8 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
     threshold_subtraction::Bool=false,
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
-    asym_extra_points::Int=10)
+    asym_extra_points::Int=10,
+    sigma_cache_policy::Symbol=:default)
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
     return _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
@@ -616,7 +727,8 @@ function precompute_cross_section!(cache::CrossSectionCache, s_grid::Vector{Floa
         threshold_subtraction=threshold_subtraction,
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
-        asym_extra_points=asym_extra_points)
+        asym_extra_points=asym_extra_points,
+        sigma_cache_policy=sigma_cache_policy)
 end
 
 function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vector{Float64},
@@ -626,7 +738,9 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
+    sigma_cache_policy::Symbol=:default,
     fingerprint_grid_metadata::Union{Nothing,NamedTuple}=nothing)
+    sigma_cache_policy = _normalize_sigma_cache_policy(sigma_cache_policy)
     # compute raw σ(s) for grid
     raw = Float64[]
     # prepare containers for potential extra samples (defined regardless of threshold_subtraction)
@@ -640,6 +754,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
     # optional threshold asymptotic subtraction
     cache.asym_enabled = false
     cache.asym_requested = threshold_subtraction
+    _configure_asymptotic_taper!(cache, sigma_cache_policy, asym_window)
     if threshold_subtraction
         # compute s_th from process masses
         pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(cache.process)
@@ -700,8 +815,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
         for s in s_used
             σ = raw_map[s]
             if cache.asym_enabled
-                σ_asym = (s > cache.asym_s0) ? cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0)) : 0.0
-                push!(sigma_list, max(0.0, σ - σ_asym))
+                push!(sigma_list, _regularized_sigma_value(cache, s, σ))
             else
                 push!(sigma_list, σ)
             end
@@ -712,8 +826,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
         if cache.asym_enabled
             reg = Float64[]
             for (s, σ) in zip(s_grid, raw)
-                σ_asym = (s > cache.asym_s0) ? cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0)) : 0.0
-                push!(reg, max(0.0, σ - σ_asym))
+                push!(reg, _regularized_sigma_value(cache, s, σ))
             end
             cache.sigma_vals = reg
         else
@@ -732,6 +845,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
         K_coeffs;
         n_points=n_points,
         threshold_subtraction=threshold_subtraction,
+        sigma_cache_policy=sigma_cache_policy,
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
         asym_extra_points=asym_extra_points,
@@ -741,7 +855,7 @@ function _precompute_cross_section_core!(cache::CrossSectionCache, s_grid::Vecto
     return cache
 end
 
-function interpolate_sigma(cache::CrossSectionCache, s::Float64)
+function interpolate_sigma(cache::CrossSectionCache, s::Float64; allow_negative::Bool=false)
     n = length(cache.s_vals)
     if n == 0
         return nothing
@@ -764,10 +878,10 @@ function interpolate_sigma(cache::CrossSectionCache, s::Float64)
     m1 = cache.pchip_slopes[idx-1]
     m2 = cache.pchip_slopes[idx]
     y = _pchip_eval(s1, s2, σ1, σ2, m1, m2, s)
-    return isfinite(y) ? max(0.0, y) : 0.0
+    return isfinite(y) ? (allow_negative ? y : max(0.0, y)) : 0.0
 end
 
-@inline function interpolate_sigma_linear(cache::CrossSectionCache, s::Float64)
+@inline function interpolate_sigma_linear(cache::CrossSectionCache, s::Float64; allow_negative::Bool=false)
     n = length(cache.s_vals)
     if n == 0
         return nothing
@@ -786,7 +900,7 @@ end
     y1, y2 = cache.sigma_vals[idx-1], cache.sigma_vals[idx]
     t = (s - s1) / (s2 - s1)
     y = y1 + t * (y2 - y1)
-    return isfinite(y) ? max(0.0, y) : 0.0
+    return isfinite(y) ? (allow_negative ? y : max(0.0, y)) : 0.0
 end
 
 function get_sigma(cache::CrossSectionCache, s::Float64,
@@ -808,18 +922,19 @@ function _get_sigma_core(cache::CrossSectionCache, s::Float64,
     # Only cached PCHIP interpolation is supported.
     n = length(cache.s_vals)
     n == 0 && error("CrossSectionCache has no points; precompute σ(s) first")
+    allow_negative_residual = _allow_negative_regularized_residual(cache)
     if n == 1
-        return cache.sigma_vals[1]
+        return _exact_cached_sigma_value(cache, s, cache.sigma_vals[1])
     elseif s < cache.s_vals[1] || s > cache.s_vals[end]
         # outside cached window: return only asymptotic part if available
         if cache.asym_enabled && s > cache.asym_s0
-            return cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0))
+            return _asymptotic_addback(cache, s)
         end
         return 0.0
     elseif s == cache.s_vals[1]
-        return cache.sigma_vals[1]
+        return _exact_cached_sigma_value(cache, s, cache.sigma_vals[1])
     elseif s == cache.s_vals[end]
-        return cache.sigma_vals[end]
+        return _exact_cached_sigma_value(cache, s, cache.sigma_vals[end])
     end
 
     if interpolation_mode == :hybrid_threshold
@@ -843,18 +958,14 @@ function _get_sigma_core(cache::CrossSectionCache, s::Float64,
     end
 
     val = if interpolation_mode == :linear
-        interpolate_sigma_linear(cache, s)
+        interpolate_sigma_linear(cache, s; allow_negative=allow_negative_residual)
     elseif interpolation_mode == :hybrid_threshold
-        interpolate_sigma_linear(cache, s)
+        interpolate_sigma_linear(cache, s; allow_negative=allow_negative_residual)
     else
-        interpolate_sigma(cache, s)
+        interpolate_sigma(cache, s; allow_negative=allow_negative_residual)
     end
     val === nothing && error("interpolation failed inside cache window")
-    # add back analytic asymptotic if enabled
-    if cache.asym_enabled && s > cache.asym_s0
-        return val + cache.asym_A / sqrt(max(1e-16, s - cache.asym_s0))
-    end
-    return val
+    return _finalize_cached_sigma_value(cache, s, val)
 end
 
 # -------------------- w0cdf σ-grid design (internal) --------------------
@@ -1053,6 +1164,7 @@ end
   - 指定值（如 `Λ_inv_fm`）：使用有限截断 [0, p_cutoff]，**推荐用于生产**
 - `scale::Float64`: 半无穷积分的尺度参数（默认 10.0，仅当 p_cutoff=nothing 时使用）
 - `n_sigma_points::Int`: σ(s) 计算时的 t 积分点数
+- `sigma_cache_policy::Symbol`: σ(s) cache 策略；`:default` 保持现有行为，`:validated_anchored` 启用诊断用锚点网格与局部阈值 addback
 """
 function build_w0cdf_pchip_cache(
     process::Symbol,
@@ -1070,16 +1182,18 @@ function build_w0cdf_pchip_cache(
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
+    sigma_cache_policy::Symbol=:default,
 )
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
+    sigma_cache_policy = _normalize_sigma_cache_policy(sigma_cache_policy)
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, quark_nt)
     mj = get_mass(pj_sym, quark_nt)
     mc = get_mass(pc_sym, quark_nt)
     md = get_mass(pd_sym, quark_nt)
     thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
-    s_grid = _design_w0cdf_s_grid_core(
+    base_s_grid = _design_w0cdf_s_grid_core(
         process,
         quark_nt,
         thermo_nt;
@@ -1090,6 +1204,9 @@ function build_w0cdf_pchip_cache(
         p_cutoff=p_cutoff,
         scale=scale,
     )
+    s_grid = sigma_cache_policy === :validated_anchored ?
+        _merge_validated_anchor_grid(base_s_grid, process, quark_nt, p_cutoff) :
+        base_s_grid
     cache = CrossSectionCache(process)
     _precompute_cross_section_core!(cache, s_grid, quark_nt, thermo_nt, K_coeffs;
         n_points=n_sigma_points,
@@ -1097,6 +1214,7 @@ function build_w0cdf_pchip_cache(
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
         asym_extra_points=asym_extra_points,
+        sigma_cache_policy=sigma_cache_policy,
         fingerprint_grid_metadata=_w0cdf_grid_metadata(
             s_grid;
             N=N,
@@ -1105,6 +1223,7 @@ function build_w0cdf_pchip_cache(
             design_phi_nodes=design_phi_nodes,
             p_cutoff=p_cutoff,
             scale=scale,
+            sigma_cache_policy=sigma_cache_policy,
         ))
     _ensure_pchip_slopes!(cache)
     return cache
@@ -1128,7 +1247,9 @@ function _build_w0cdf_pchip_cache_for_average_rate(
     asym_window::Float64=0.6,
     asym_fit_min_points::Int=8,
     asym_extra_points::Int=10,
+    sigma_cache_policy::Symbol=:default,
 )
+    sigma_cache_policy = _normalize_sigma_cache_policy(sigma_cache_policy)
     pi_sym, pj_sym, pc_sym, pd_sym = parse_particles_from_process(process)
     mi = get_mass(pi_sym, propagator_quark_params)
     mj = get_mass(pj_sym, propagator_quark_params)
@@ -1136,7 +1257,7 @@ function _build_w0cdf_pchip_cache_for_average_rate(
     md = get_mass(pd_sym, propagator_quark_params)
     thr_for_build = _resolve_auto_threshold_subtraction(threshold_subtraction, mi, mj, mc, md)
 
-    s_grid = _design_w0cdf_s_grid_core(
+    base_s_grid = _design_w0cdf_s_grid_core(
         process,
         design_quark_params,
         design_thermo_params;
@@ -1147,6 +1268,9 @@ function _build_w0cdf_pchip_cache_for_average_rate(
         p_cutoff=p_cutoff,
         scale=scale,
     )
+    s_grid = sigma_cache_policy === :validated_anchored ?
+        _merge_validated_anchor_grid(base_s_grid, process, propagator_quark_params, p_cutoff) :
+        base_s_grid
     cache = CrossSectionCache(process)
     _precompute_cross_section_core!(cache, s_grid, propagator_quark_params, propagator_thermo_params, K_coeffs;
         n_points=n_sigma_points,
@@ -1154,6 +1278,7 @@ function _build_w0cdf_pchip_cache_for_average_rate(
         asym_window=asym_window,
         asym_fit_min_points=asym_fit_min_points,
         asym_extra_points=asym_extra_points,
+        sigma_cache_policy=sigma_cache_policy,
         fingerprint_grid_metadata=_w0cdf_grid_metadata(
             s_grid;
             N=N,
@@ -1162,6 +1287,7 @@ function _build_w0cdf_pchip_cache_for_average_rate(
             design_phi_nodes=design_phi_nodes,
             p_cutoff=p_cutoff,
             scale=scale,
+            sigma_cache_policy=sigma_cache_policy,
         ))
     _ensure_pchip_slopes!(cache)
     return cache
@@ -1391,6 +1517,7 @@ end
 - `n_sigma_points::Int`: σ(s) 计算时的 t 积分点数
 - `sigma_grid_n::Int`: 自动构建 σ(s) 缓存时的 w0cdf 采样点数
 - `require_cache_fingerprint::Bool`: 为 `true` 时拒绝无指纹的外部 σ(s) 缓存
+- `sigma_cache_policy::Symbol`: σ(s) cache 策略；`:default` 保持现有行为，`:validated_anchored` 启用诊断用锚点网格与局部阈值 addback
 - `scale::Float64`: 半无穷积分尺度参数
 """
 function average_scattering_rate(
@@ -1426,10 +1553,12 @@ function average_scattering_rate(
     band_omega_sigma_out::Union{Nothing,Base.RefValue{Vector{Float64}}}=nothing,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
+    sigma_cache_policy::Symbol=:default,
 )::Float64
     quark_params = normalize_quark_input(quark_params)
     thermo_params = normalize_thermo_input(thermo_params)
     propagator_xi_policy = _normalize_propagator_xi_policy(propagator_xi_policy)
+    sigma_cache_policy = _normalize_sigma_cache_policy(sigma_cache_policy)
     propagator_thermo_params = _resolve_propagator_thermo_params(thermo_params, propagator_xi_policy)
     propagator_quark_params = _resolve_propagator_quark_params(
         quark_params,
@@ -1474,6 +1603,7 @@ function average_scattering_rate(
             asym_window=asym_window,
             asym_fit_min_points=asym_fit_min_points,
             asym_extra_points=asym_extra_points,
+            sigma_cache_policy=sigma_cache_policy,
         )
     else
         _validate_cross_section_cache_process!(cs_cache, process)
@@ -1486,6 +1616,7 @@ function average_scattering_rate(
                 K_coeffs;
                 n_points=n_sigma_points,
                 threshold_subtraction=thr_for_build,
+                sigma_cache_policy=sigma_cache_policy,
                 asym_window=asym_window,
                 asym_fit_min_points=asym_fit_min_points,
                 asym_extra_points=asym_extra_points,

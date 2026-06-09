@@ -58,6 +58,7 @@ end
         10,
         :linear,
         :match_thermo,
+        :default,
         128,
         :finite_15,
         5,
@@ -66,6 +67,7 @@ end
     ))
     @test effective["output"] == "tmp.csv"
     @test effective["tau_interpolation_mode"] == "linear"
+    @test effective["sigma_cache_policy"] == "default"
     @test effective["integration_mode"] == "finite_15"
 
     summary = Main.build_summary(3, 1, 2)
@@ -101,6 +103,7 @@ end
         10,
         :linear,
         :match_thermo,
+        :default,
         128,
         :finite_15,
         5,
@@ -139,6 +142,7 @@ end
         10,
         :linear,
         :match_thermo,
+        :default,
         128,
         :finite_15,
         5,
@@ -195,9 +199,11 @@ end
         "--xi-list", "0.0",
         "--sigma-grid-n", "17",
         "--propagator-xi-policy", "isotropic",
+        "--sigma-cache-policy", "validated_anchored",
     ])
 
     runtime = Main.build_scan_runtime(opts)
     @test runtime.tau_kwargs.sigma_grid_n == 17
     @test runtime.tau_kwargs.propagator_xi_policy == :isotropic
+    @test runtime.tau_kwargs.sigma_cache_policy == :validated_anchored
 end

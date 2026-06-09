@@ -66,6 +66,7 @@ function fingerprinted_constant_cache(process::Symbol, quark_params::NamedTuple,
         K_COEFFS;
         n_points=4,
         threshold_subtraction=false,
+        sigma_cache_policy=:default,
         asym_window=0.6,
         asym_fit_min_points=8,
         asym_extra_points=10,
@@ -223,6 +224,20 @@ end
     )
     @test hasproperty(rates, process)
     @test isfinite(getproperty(rates, process))
+
+    @test_throws ArgumentError compute_average_rates(
+        QUARK_PARAMS,
+        THERMO_PARAMS,
+        K_COEFFS;
+        existing_rates=rates_without(process),
+        cs_caches=Dict(process => cache),
+        p_nodes=2,
+        angle_nodes=2,
+        phi_nodes=2,
+        n_sigma_points=4,
+        sigma_cutoff=nothing,
+        sigma_cache_policy=:validated_anchored,
+    )
 
     thermo_changed = (; THERMO_PARAMS..., Φbar=THERMO_PARAMS.Φbar + 0.01)
     @test_throws ArgumentError compute_average_rates(

@@ -35,6 +35,7 @@ function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.Phase
         "--provenance-dir", opts.outdir,
         "--failed-points-output", joinpath(opts.outdir, "failed_points.csv"),
         "--propagator-xi-policy", String(opts.propagator_xi_policy),
+        "--sigma-cache-policy", String(opts.sigma_cache_policy),
     ]
     opts.tau_p_nodes !== nothing && append!(base_args, ["--tau-p-nodes", string(opts.tau_p_nodes)])
     opts.tau_angle_nodes !== nothing && append!(base_args, ["--tau-angle-nodes", string(opts.tau_angle_nodes)])
@@ -125,6 +126,7 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
                 "git_commit" => Main.current_git_commit(),
                 "source_csv" => paths.result_csv,
                 "propagator_xi_policy" => string(opts.propagator_xi_policy),
+                "sigma_cache_policy" => string(opts.sigma_cache_policy),
             ))
             Main.write_channel_diagnostics_header_if_needed(channel_io)
         end

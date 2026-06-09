@@ -39,6 +39,7 @@ function build_scan_runtime(opts)
             interpolation_mode=opts.tau_interpolation_mode,
             sigma_grid_n=opts.sigma_grid_n,
             propagator_xi_policy=opts.propagator_xi_policy,
+            sigma_cache_policy=opts.sigma_cache_policy,
         ),
         transport_config=transport_config,
     )

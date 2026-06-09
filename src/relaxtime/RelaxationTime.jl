@@ -225,6 +225,7 @@ Compute missing averaged scattering rates while reusing any existing results or 
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 - `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
+- `sigma_cache_policy`: σ(s) cache construction/evaluation policy; `:default` preserves the existing strategy, `:validated_anchored` enables a diagnostic anchored grid with local threshold addback
 
 # Returns
 A NamedTuple containing average scattering rates for all required processes.
@@ -269,6 +270,7 @@ function compute_average_rates(
     require_cache_fingerprint::Bool=false,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
+    sigma_cache_policy::Symbol=:default,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -300,6 +302,7 @@ function compute_average_rates(
         require_cache_fingerprint=require_cache_fingerprint,
         propagator_xi_policy=propagator_xi_policy,
         propagator_quark_params=propagator_quark_params,
+        sigma_cache_policy=sigma_cache_policy,
     )
 end
 
@@ -329,6 +332,7 @@ function _compute_average_rates_core(
     require_cache_fingerprint::Bool=false,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
+    sigma_cache_policy::Symbol=:default,
 )::NamedTuple
     rates = Dict{Symbol,Float64}()
     if existing_rates !== nothing
@@ -389,6 +393,7 @@ function _compute_average_rates_core(
             require_cache_fingerprint=require_cache_fingerprint,
             propagator_xi_policy=propagator_xi_policy,
             propagator_quark_params=propagator_quark_params,
+            sigma_cache_policy=sigma_cache_policy,
         )
     end
 
@@ -498,6 +503,7 @@ and the averaged rates for reuse.
 - `interpolation_mode`: σ(s) evaluation mode forwarded to `average_scattering_rate`
 - `require_cache_fingerprint`: Reject externally supplied σ(s) caches that do not carry fingerprint metadata
 - `propagator_xi_policy`: `:match_thermo` keeps the current behavior; `:isotropic` evaluates σ(s)/propagators at `ξ=0` while retaining external distribution/density `ξ`
+- `sigma_cache_policy`: σ(s) cache construction/evaluation policy; `:default` preserves the existing strategy, `:validated_anchored` enables a diagnostic anchored grid with local threshold addback
 
 # Returns
 A NamedTuple with fields:
@@ -547,6 +553,7 @@ function relaxation_times(
     require_cache_fingerprint::Bool=false,
     propagator_xi_policy::Symbol=:match_thermo,
     propagator_quark_params::Union{Nothing,NamedTuple,QuarkParams}=nothing,
+    sigma_cache_policy::Symbol=:default,
 )::NamedTuple
     quark_nt = normalize_quark_input(quark_params)
     thermo_nt = normalize_thermo_input(thermo_params)
@@ -582,6 +589,7 @@ function relaxation_times(
             require_cache_fingerprint=require_cache_fingerprint,
             propagator_xi_policy=propagator_xi_policy,
             propagator_quark_params=propagator_quark_params,
+            sigma_cache_policy=sigma_cache_policy,
         )
     end
 

@@ -71,6 +71,7 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - `p_grid/p_w`：可选，自定义动量积分节点
 - `sigma_cutoff`：σ(s) 有效范围的动量截断（默认 Λ）
 - `sigma_grid_n`：自动构建 σ(s) 缓存时的 w0cdf 网格点数；phase-guided production workflow 的同名输入会透传到这里
+- `sigma_cache_policy`：σ(s) 缓存策略；默认 `:default` 保持现有 w0cdf + threshold-subtraction 行为，诊断分支 `:validated_anchored` 会增加固定 `s-s_th` 锚点并把解析阈值加回限制到局部 taper 窗口
 - `propagator_xi_policy`：传播子/σ(s) 的 ξ 口径；默认 `:match_thermo` 保持当前行为，诊断分支 `:isotropic` 仅让传播子/σ(s) 使用 `ξ=0`
 - `propagator_quark_params`：可选的传播子/σ(s) 专用夸克参数；未提供且 `propagator_xi_policy=:isotropic` 时，会从 `(m, μ)` 与 `ξ=0` 热力学参数补齐各向同性 A 场
 
@@ -83,7 +84,7 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 - 推荐调用模式：
     1. 如果需复用截面，调用者应先用 `build_w0cdf_pchip_cache(...)` 或 `precompute_cross_section!` 构建带 `fingerprint` 的 `CrossSectionCache`，放入 `cs_caches[process]`，以避免重复构建开销。
     2. 对于一次性评估，可传 `cs_cache=nothing` 或不传该参数，让内部按需构建（会使用 `threshold_subtraction` 等参数）。
-    3. 多个参数点之间只允许在同一生成指纹下复用截面；`quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、有效 `threshold_subtraction`、w0cdf `p_cutoff` 或 `scale` 不一致时，已填充缓存会被拒绝并抛出 `ArgumentError`。自定义 `N` 或设计节点数生成的 w0cdf 缓存可以复用，但缓存自身的 s-grid 摘要必须与已存表一致。
+    3. 多个参数点之间只允许在同一生成指纹下复用截面；`quark_params`、`thermo_params`、`K_coeffs`、`n_sigma_points`、`sigma_cache_policy`、有效 `threshold_subtraction`、w0cdf `p_cutoff` 或 `scale` 不一致时，已填充缓存会被拒绝并抛出 `ArgumentError`。自定义 `N` 或设计节点数生成的 w0cdf 缓存可以复用，但缓存自身的 s-grid 摘要必须与已存表一致。
 
 - 兼容策略：
     - 旧的手工 `CrossSectionCache(process, s_vals, sigma_vals)` 和 `load_cross_section_caches_from_dir` 读取的两列 CSV 表没有 `fingerprint`；默认允许复用但会 warning。
@@ -96,6 +97,12 @@ $$\tau_i^{-1} = \sum_j \rho_j \; \bar{w}_{ij}$$
 `compute_average_rates` 与 `relaxation_times` 会把 `propagator_xi_policy` 和 `propagator_quark_params` 透传给单过程 `average_scattering_rate`。默认 `:match_thermo` 下，传播子、σ(s)、外层分布、密度与平衡态使用同一 `ξ`；显式 `:isotropic` 下，只有传播子/σ(s) 上下文使用 `ξ=0`，外层分布与密度仍由真实 `thermo_params.ξ` 决定。
 
 该分支用于异常区域诊断和反事实复算。完成同网格复算、channel diagnostics 以及节点数/σ-grid/interpolation 收敛检查前，不应把它表述为正式物理解法或默认修复。
+
+## 诊断性 σ-cache 策略
+
+`compute_average_rates` 与 `relaxation_times` 会把 `sigma_cache_policy` 透传给单过程 `average_scattering_rate`。默认 `:default` 不改变现有生产口径；显式 `:validated_anchored` 用于诊断 threshold-subtraction 与 σ-cache 插值在局部通道中的敏感放大效应。
+
+该策略会在自动构建的 σ(s) cache 中加入固定 `s-s_th` 锚点，并让解析阈值项只在 `asym_window..2*asym_window` 内平滑加回。为保留锚点 direct 信息，该策略允许内部 regularized residual 为负，但最终 σ(s) 返回值仍非负。它不改变外层数密度、分布函数或平衡态求解。通过 direct-vs-cache 和收敛性审查前，它只能作为诊断候选口径。
 
 
 ## 典型用法

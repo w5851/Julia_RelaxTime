@@ -776,3 +776,160 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 - 与本节数据一致的口径锚点：
   1. 本轮 `residual_formula` 维持在 `~1e-18` 量级；
   2. 该量级支持“控制方程闭合”结论，可将解释重心放在阈值穿越与符号切换，而非数值噪声。
+
+## 29) 2026-06-09 phase-guided `validated_anchored` 补充诊断：旧小分母机制与新数值误差层的分离
+
+- 日期：2026-06-09
+- 任务：补充记录 phase-guided transport 诊断对旧 T200 异常分析的新增信息，尤其区分
+  `threshold-subtraction + sigma-cache/interpolation` 数值层偏差与真实残留的小分母结构。
+- 触发入口：
+  1. GitHub Actions workflow：
+     `Relaxtime Phase-Guided Transport Production`
+  2. run URL：
+     `https://github.com/w5851/Julia_RelaxTime/actions/runs/27139021784`
+  3. run metadata：
+     `workflow_dispatch`, `headBranch=codex/validated-anchored-cache-policy`,
+     `headSha=8ba2ea0e9dc09365bf7bac51a464376c21eb89f0`, conclusion `success`
+  4. 本地下载目录：
+     `D:\Temp\jrt_action_27139021784_validated_anchored`
+
+- 输入配置（来自 `DIAGNOSTIC_AUDIT.md`）：
+  1. `mode=fixed-muB-phase-scaled`
+  2. `case_name=first_canonical_v1_validated_anchored`
+  3. `run_tier=production`
+  4. `propagator_xi_policy=isotropic`
+  5. `sigma_cache_policy=validated_anchored`
+  6. `compute_bulk=true`, `render_plots=true`, `overwrite=true`
+  7. `tau_p_nodes=20`, `tau_angle_nodes=4`, `tau_phi_nodes=8`, `tau_n_sigma=6`
+  8. `sigma_grid_n=60`
+  9. workflow 审计口径仍为 `diagnostic-only`：artifact 可审阅，但未自动晋升为仓库正式数据。
+
+- 主要输出：
+  1. 扫描表：
+     `D:\Temp\jrt_action_27139021784_validated_anchored\relaxtime-phase-guided-transport-results-first_canonical_v1_validated_anchored-isotropic-validated_anchored\results\relaxtime\transport\phase_guided\mode_a_fixed_muB_phase_scaled\first_canonical_v1_validated_anchored\phase_guided_transport_scan.csv`
+  2. 通道诊断表：
+     `D:\Temp\jrt_action_27139021784_validated_anchored\relaxtime-phase-guided-transport-results-first_canonical_v1_validated_anchored-isotropic-validated_anchored\results\relaxtime\transport\phase_guided\mode_a_fixed_muB_phase_scaled\first_canonical_v1_validated_anchored\channel_diagnostics.csv`
+  3. 审计说明：
+     `D:\Temp\jrt_action_27139021784_validated_anchored\relaxtime-phase-guided-transport-results-first_canonical_v1_validated_anchored-isotropic-validated_anchored\artifacts\relaxtime_phase_guided_transport\27139021784\DIAGNOSTIC_AUDIT.md`
+  4. 目标图：
+     `D:\Temp\jrt_action_27139021784_validated_anchored\relaxtime-phase-guided-transport-figures-first_canonical_v1_validated_anchored-isotropic-validated_anchored\mode_a_fixed_muB_phase_scaled\first_canonical_v1_validated_anchored\plot_panel=muB0.0\tau_u_vs_xi.png`
+
+- 本轮相对旧诊断的新增信息：
+  1. 旧诊断已把 T190/T200 的异常链路定位到
+     `denominator -> propagator -> sigma/rate -> tau`，并区分过
+     `simple 1-4KΠ` 与 `mixed detM` 两类小分母对象。
+  2. 旧诊断未完全拆开的部分是数值层：
+     在 `propagator_xi_policy=isotropic` 后，部分局部波动来自
+     `threshold-subtraction` 与稀疏 `sigma-cache/interpolation` 的组合误差。
+  3. `sigma_cache_policy=validated_anchored` 通过固定 `s-s_th` 锚点、局部
+     threshold addback taper、允许负 residual，使 cache/direct 偏差基本消失；
+     因此本轮把“cache 数值误差”与“传播子小分母真实残留”分离开了。
+  4. 该结论补充旧诊断，而不是推翻旧诊断：旧诊断解释的是残留物理/模型链路；
+     本轮新增解释的是先前混在图形异常里的 σ-cache 数值误差层。
+
+- `muB=0, alpha_T=1.0`（`T=200.1529177469735 MeV`）残留结构：
+  1. `tau_u` 在 `xi=-0.45,-0.40,-0.35,-0.30,-0.25` 处分别约为
+     `0.4884, 0.4421, 0.3466, 0.6155, 0.8298`；
+     对应 `tauinv_u` 为
+     `2.0474, 2.2619, 2.8848, 1.6247, 1.2051`。
+  2. `xi=-0.35` 是该局部结构的 rate 峰点，而不是失败点：
+     `failed_points.csv` 为空，扫描点收敛。
+  3. 同一温度下背景量随真实 `xi` 平滑变化：
+     `m_u` 从 `0.1663(-0.45)` 到 `0.3316(-0.25)` 单调上升，
+     `m_s` 从 `1.9602` 到 `2.0494` 单调上升，
+     `Phi` 从 `0.6469` 到 `0.6284` 平滑下降。
+     因此残留峰不是相变跳变，也不是背景量本身突跳。
+
+- 通道层定位（`species=u`, `T=200.1529177469735 MeV`, `muB=0`）：
+  1. `udbar_to_udbar` 在 `xi=-0.45,-0.40,-0.35,-0.30,-0.25` 的 rate 约为
+     `1.2846, 1.7264, 2.7549, 1.1528, 0.6519`，在 `xi=-0.35` 形成主峰。
+  2. `uubar_to_ddbar` 对应 rate 约为
+     `0.7067, 0.7885, 1.0181, 0.6158, 0.4790`，同点有次级抬升。
+  3. `uubar_to_uubar` 对应 rate 约为
+     `0.8952, 0.9759, 1.2037, 0.7940, 0.6668`，同点也有次级抬升。
+  4. 因此 `tauinv_u` 的局部峰主要由 `udbar_to_udbar` 放大驱动，
+     `uubar_to_ddbar/uubar_to_uubar` 共同补强。
+
+- 残留小分母证据（本轮局部分解）：
+  1. s-bin 分解显示 `xi=-0.35, udbar_to_udbar` 的 rate 中，
+     `[s_th+0.1, s_th+0.2]` 贡献约 `51%`，
+     `[s_th+0.05, s_th+0.1]` 贡献约 `19%`；
+     即峰集中在近阈值但不是单个端点。
+  2. raw `sigma(s)` 峰随 `xi` 在近阈值区移动：
+     `xi=-0.40` 时 `ds≈0.20, sigma≈65.9`；
+     `xi=-0.35` 时 `ds≈0.10, sigma≈161.4`；
+     `xi=-0.30` 时 `ds≈0.02, sigma≈163.7`。
+  3. `pi` simple 分母最小点同步移动：
+     `xi=-0.40` 时 `ds_min≈0.1675`, `delta_sqrt≈34.5 MeV`,
+     `min |den_pi|≈0.00466`；
+     `xi=-0.35` 时 `ds_min≈0.08725`, `delta_sqrt≈17.0 MeV`,
+     `min |den_pi|≈0.00319`；
+     `xi=-0.30` 时 `ds_min≈0.0001`, `delta_sqrt≈0.018 MeV`,
+     `min |den_pi|≈0.00111`。
+  4. 矩阵元分量显示 `xi=-0.35, ds=0.10` 处主导项为 s-channel P：
+     `udbar_to_udbar` 的 s-channel P fraction 约 `1.001`，
+     `uubar_to_ddbar` 约 `0.997`，
+     `uubar_to_uubar` 约 `0.995`。
+  5. t 积分节点数 `n_points=6,12,24,48` 的峰值 `sigma(s)` 一致到打印精度；
+     因而该残留峰不是 t 积分节点伪影。
+
+- 对 `propagator_xi_policy=isotropic` 的边界澄清：
+  1. 该策略只让 `sigma(s)/propagator` 的计算上下文使用 `thermo_params.xi=0`。
+  2. 它没有冻结外层平衡态背景；`m_u(xi), m_s(xi), Phi(xi)` 以及由平衡态解得到的
+     `K_coeffs(xi)` 仍随真实 `xi` 变化。
+  3. 因而“传播子显式不吃 xi”不等价于“传播子分母对 xi 完全不变”：
+     分母函数形式中的显式各向异性被关掉了，但分母的输入参数仍是
+     真实 `xi` 背景的函数。
+  4. 在 `alpha_T=1.0, xi≈-0.35`，这些背景输入把 s-channel pseudoscalar
+     `pi` simple 分母 `1-4KΠ_pi` 的近零位置推到与外层 s 权重窗口对齐，
+     从而造成 `sigma(s)` 近阈值尖峰、rate 放大和 `tau_u` 局部谷。
+
+- 当前判断：
+  1. 本轮诊断确实补上了旧诊断不足的一块：旧诊断没有完全排除
+     `threshold-subtraction + sigma-cache` 对异常图形的数值放大。
+  2. 在 `validated_anchored` 下，正 `xi` 区间中曾由 cache/direct 偏差造成的
+     局部结构大幅收敛；这部分应归入算法数值误差层。
+  3. `alpha_T=1.0, xi≈-0.35` 的残留峰不能再归因于该 cache 偏差，
+     更符合旧诊断已记录的“小分母近零 -> 传播子增强 -> sigma/rate 放大 -> tau 局部结构”链路。
+  4. 该残留属于 simple `pi` 分母主导，与旧 T200 文档中记录的
+     simple/mixed 小分母机制属于同一数学大类，但具体承载分支和
+     `xi` 窗口不同。
+
+- 下一步：
+  1. 若要把该残留峰进一步从“诊断支持”提升到“可发布结论”，需要补一个
+     phase-guided 专用的小分母扫描脚本，直接输出
+     `den_pi(ds,xi)`, `sigma(s)`, `s-bin rate contribution` 与通道分量表。
+  2. 若要验证该峰是否对 phase-guided 网格稳定，应在 `xi=-0.40:-0.01:-0.25`
+     或更窄窗口补点，并对 `sigma_grid_n/tau_n_sigma/tau_p_nodes` 做局部收敛检查。
+  3. 在完成上述 gate 前，本节仍作为 diagnostic-only 补充记录，不作为正式生产口径或修复声明。
+
+- 本地同节点 quick ablation 后的正式表述建议（2026-06-09 追加）：
+  1. 追加目的：回答 `match_thermo + validated_anchored` 与旧
+     `first_canonical_v1` 图形差异能否归因到旧数值误差。
+  2. 对照命令使用同一 quick 节点：
+     `tau_p_nodes=8`, `tau_angle_nodes=2`, `tau_phi_nodes=2`,
+     `tau_n_sigma=4`, `sigma_grid_n=24`, `compute_bulk=false`；
+     只改 `sigma_cache_policy=default` 与 `validated_anchored`。
+  3. 输出目录：
+     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/local_match_default_quick_20260609/`
+     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/local_match_validated_anchored_quick_20260609/`
+     - 对应图目录位于
+       `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/` 下同名 case。
+  4. 关键数值（`muB=0`, `alpha_T=1.0`, `T=200.1529177469735 MeV`）：
+     - `xi=-0.30`: 旧正式 `tau_u=0.242917`，quick default `0.360432`，
+       quick validated `0.816966`；
+     - `xi=-0.25`: 旧正式 `0.286046`，quick default `0.317505`，
+       quick validated `0.893634`；
+     - `xi=-0.20`: 旧正式 `0.498481`，quick default `0.525262`，
+       quick validated `0.952581`。
+  5. 诊断判断：同节点 quick 下，`default` 仍复现旧图的负 `xi` 深谷形状；
+     切到 `validated_anchored` 后深谷基本消失。因此可以写作：
+     “本地同节点 ablation 强烈支持：旧 `first_canonical_v1` 图中负
+     `xi` 异常主要来自 `sigma_cache_policy=default` 的
+     threshold-subtraction/cache 插值数值误差；`validated_anchored`
+     能显著消除该伪结构。”
+  6. 表述边界：不要写成“所有积分误差均已修复”或“正式结果已替换”。
+     更准确地说，`validated_anchored` 修正的是 σ-cache/threshold-subtraction/
+     interpolation 这一路数值偏差；该判断仍需 production-tier
+     `match_thermo + validated_anchored` artifact 和收敛审查确认后，
+     才能作为正式结果替代旧图。

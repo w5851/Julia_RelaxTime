@@ -9,6 +9,7 @@ struct PhaseGuidedScanOptions
     alpha_T_values::Vector{Float64}
     T_values::Vector{Float64}
     propagator_xi_policy::Symbol
+    sigma_cache_policy::Symbol
     tau_p_nodes::Union{Nothing,Int}
     tau_angle_nodes::Union{Nothing,Int}
     tau_phi_nodes::Union{Nothing,Int}
@@ -32,6 +33,7 @@ function print_usage(io::IO=stdout)
     println(io, "  --alphaT-list v1,v2,...      mode a 的 T/T_phase 倍率列表（default 1.0,1.1,1.2)")
     println(io, "  --T-list v1,v2,...           mode b 的固定温度列表（required for mode b）")
     println(io, "  --propagator-xi-policy <match_thermo|isotropic>  σ(s)/propagator 的 ξ 口径 (default match_thermo)")
+    println(io, "  --sigma-cache-policy <default|validated_anchored>  σ(s) 缓存策略；validated_anchored 为诊断用锚点+taper 口径 (default default)")
     println(io, "  --tau-p-nodes <int>          透传到底层 τ 平均散射率动量节点")
     println(io, "  --tau-angle-nodes <int>      透传到底层 τ 平均散射率 cosθ 节点")
     println(io, "  --tau-phi-nodes <int>        透传到底层 τ 平均散射率 φ 节点")
@@ -66,6 +68,7 @@ function parse_args(args::Vector{String})
         :alpha_T_values => Float64[1.0, 1.1, 1.2],
         :T_values => Float64[],
         :propagator_xi_policy => :match_thermo,
+        :sigma_cache_policy => :default,
         :tau_p_nodes => nothing,
         :tau_angle_nodes => nothing,
         :tau_phi_nodes => nothing,
@@ -112,6 +115,10 @@ function parse_args(args::Vector{String})
             policy = Symbol(strip(require_value()))
             policy in (:match_thermo, :isotropic) || error("unknown propagator xi policy: $(policy) (expected: match_thermo|isotropic)")
             opts[:propagator_xi_policy] = policy
+        elseif arg == "--sigma-cache-policy"
+            policy = Symbol(strip(require_value()))
+            policy in (:default, :validated_anchored) || error("unknown sigma cache policy: $(policy) (expected: default|validated_anchored)")
+            opts[:sigma_cache_policy] = policy
         elseif arg == "--tau-p-nodes"
             opts[:tau_p_nodes] = parse(Int, require_value())
         elseif arg == "--tau-angle-nodes"
@@ -169,6 +176,7 @@ function parse_args(args::Vector{String})
         Float64.(opts[:alpha_T_values]),
         Float64.(opts[:T_values]),
         Symbol(opts[:propagator_xi_policy]),
+        Symbol(opts[:sigma_cache_policy]),
         opts[:tau_p_nodes] === nothing ? nothing : Int(opts[:tau_p_nodes]),
         opts[:tau_angle_nodes] === nothing ? nothing : Int(opts[:tau_angle_nodes]),
         opts[:tau_phi_nodes] === nothing ? nothing : Int(opts[:tau_phi_nodes]),
