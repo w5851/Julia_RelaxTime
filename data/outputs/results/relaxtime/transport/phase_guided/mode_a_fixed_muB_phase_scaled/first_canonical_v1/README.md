@@ -2,6 +2,15 @@
 
 phase-guided transport canonical case for `mode_a_fixed_muB_phase_scaled`.
 
+## Superseded Production Note
+
+This historical result is superseded for production-grade interpretation by:
+
+- `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
+
+Reason: this older artifact does not record explicit high-precision tau/sigma integration parameters, does not use the later `validated_anchored` sigma-cache policy, does not include `channel_diagnostics.csv`, and has no full-grid convergence gate. It remains useful as a historical comparison artifact, but local non-monotonic `xi` structures and other precision-sensitive conclusions should use the p128 production-grade case above.
+
 ## Scope
 - mode: `mode_a_fixed_muB_phase_scaled`
 - case name: `first_canonical_v1`
