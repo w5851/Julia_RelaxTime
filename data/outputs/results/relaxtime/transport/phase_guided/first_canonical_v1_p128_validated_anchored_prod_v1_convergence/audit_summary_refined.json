@@ -1,0 +1,149 @@
+{
+  "counts": {
+    "scan_files": 18,
+    "channel_files": 18,
+    "failed_files": 18,
+    "config_files": 18,
+    "plot_manifest_files": 18,
+    "png_files": 144,
+    "scan_rows": 378,
+    "channel_rows": 15876
+  },
+  "failed_total": 0,
+  "failed_counts": {
+    "a_muB0_alpha1p0": 0,
+    "a_muB0_alpha1p1": 0,
+    "a_muB0_alpha1p2": 0,
+    "a_muB450_alpha1p0": 0,
+    "a_muB450_alpha1p1": 0,
+    "a_muB450_alpha1p2": 0,
+    "a_muB900_alpha1p0": 0,
+    "a_muB900_alpha1p1": 0,
+    "a_muB900_alpha1p2": 0,
+    "b_T120_muB0": 0,
+    "b_T120_muB450": 0,
+    "b_T120_muB900": 0,
+    "b_T160_muB0": 0,
+    "b_T160_muB450": 0,
+    "b_T160_muB900": 0,
+    "b_T200_muB0": 0,
+    "b_T200_muB450": 0,
+    "b_T200_muB900": 0
+  },
+  "config_issues": [],
+  "coverage_bad": {},
+  "duplicate_key_count": 0,
+  "duplicate_examples": [],
+  "scan_mode_counts": {
+    "mode_b_fixed_T_sparse_muB": 189,
+    "mode_a_fixed_muB_phase_scaled": 189
+  },
+  "scan_converged_counts": {
+    "true": 378
+  },
+  "scan_quality_counts": {
+    "('true', 'tau_u_ubar_ratio_high')": 98,
+    "('false', 'ok')": 280
+  },
+  "phase_counts": {
+    "('quark', 'no_transition')": 205,
+    "('crossover', 'no_transition')": 4,
+    "('crossover', 'crossover_possible')": 8,
+    "('hadron', 'crossover_possible')": 93,
+    "('quark', 'first_order_possible')": 25,
+    "('hadron', 'first_order_possible')": 43
+  },
+  "scan_nonfinite_count": 0,
+  "scan_nonfinite_examples": [],
+  "scan_negative_count": 0,
+  "scan_negative_examples": [],
+  "channel_nonfinite_count": 0,
+  "channel_nonfinite_examples": [],
+  "channel_negative_count": 0,
+  "channel_negative_examples": [],
+  "plot_manifest_bad": {},
+  "png_bad_counts": {
+    "small_png": 0,
+    "png_count_bad_shards": {}
+  },
+  "log_warning_counts": {
+    "plot_dpi_599": 144,
+    "cms_momentum_delta_threshold": 17
+  },
+  "log_error_like_count": 0,
+  "log_error_like_examples": [],
+  "ranges": {
+    "tau_u": {
+      "min": 0.5898799573575394,
+      "max": 3076.362566765773
+    },
+    "tau_d": {
+      "min": 0.5898799573575394,
+      "max": 3076.362566765773
+    },
+    "tau_s": {
+      "min": 0.6760182930743701,
+      "max": 3507.0310081086973
+    },
+    "tau_ubar": {
+      "min": 0.27856354367999064,
+      "max": 3076.362566766246
+    },
+    "tau_dbar": {
+      "min": 0.27856354367999064,
+      "max": 3076.362566766246
+    },
+    "tau_sbar": {
+      "min": 0.36186879596806226,
+      "max": 3507.0310081086973
+    },
+    "tauinv_u": {
+      "min": 0.00032505921467225344,
+      "max": 1.6952601754425733
+    },
+    "tauinv_d": {
+      "min": 0.00032505921467225344,
+      "max": 1.6952601754425733
+    },
+    "tauinv_s": {
+      "min": 0.00028514147656176237,
+      "max": 1.4792499112002402
+    },
+    "tauinv_ubar": {
+      "min": 0.00032505921467220345,
+      "max": 3.589845199373196
+    },
+    "tauinv_dbar": {
+      "min": 0.00032505921467220345,
+      "max": 3.589845199373196
+    },
+    "tauinv_sbar": {
+      "min": 0.00028514147656176237,
+      "max": 2.7634325234504544
+    },
+    "eta": {
+      "min": 1.1878612625119036,
+      "max": 18.122852663563936
+    },
+    "sigma": {
+      "min": 0.008528885088978599,
+      "max": 0.12415010183626794
+    },
+    "zeta": {
+      "min": 0.16958479643976848,
+      "max": 6.395376541464654
+    },
+    "eta_over_s": {
+      "min": 0.06278300281376117,
+      "max": 211.3884843189985
+    },
+    "zeta_over_s": {
+      "min": 0.0074137980700961625,
+      "max": 140.0061957678237
+    },
+    "sigma_over_T": {
+      "min": 0.007644060622753435,
+      "max": 0.20415137259752708
+    }
+  }
+}

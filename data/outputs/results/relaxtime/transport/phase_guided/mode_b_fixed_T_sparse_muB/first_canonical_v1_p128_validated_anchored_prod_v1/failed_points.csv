@@ -1,0 +1,4 @@
+# production_case: first_canonical_v1_p128_validated_anchored_prod_v1
+# source_candidate_case: first_canonical_v1_match_validated_anchored_plus5_candidate_p128_a20_phi36_ns24_g560
+# source_sharded_action_runs: see ../../first_canonical_v1_p128_validated_anchored_prod_v1_convergence/download_manifest.csv
+T_MeV,muB_MeV,xi,seed_source,phase_prev,phase_curr_hint,error_type,error_message,timestamp

@@ -1,0 +1,68 @@
+{
+  "options": {
+    "T_values": [
+      120.0,
+      160.0,
+      200.0
+    ],
+    "alpha_T_values": [],
+    "case_name": "first_canonical_v1_p128_validated_anchored_prod_v1",
+    "channel_diagnostics": true,
+    "compute_bulk": true,
+    "dry_run": false,
+    "figure_dir": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1",
+    "mode": "mode_b_fixed_T_sparse_muB",
+    "muB_values": [
+      0.0,
+      450.0,
+      900.0
+    ],
+    "outdir": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1",
+    "overwrite": true,
+    "plan_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/sampling_plan.csv",
+    "propagator_xi_policy": "match_thermo",
+    "result_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
+    "resume": false,
+    "sigma_cache_policy": "validated_anchored",
+    "sigma_grid_n": 560,
+    "tau_angle_nodes": 20,
+    "tau_n_sigma_points": 24,
+    "tau_p_nodes": 128,
+    "tau_phi_nodes": 36,
+    "xi_values": [
+      -0.5,
+      -0.45,
+      -0.4,
+      -0.35,
+      -0.3,
+      -0.25,
+      -0.2,
+      -0.15,
+      -0.1,
+      -0.05,
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5
+    ]
+  },
+  "run_id": "20260610T012141_6ab6a251",
+  "schema_version": "v1",
+  "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+  "production_import": {
+    "verdict": "production-grade",
+    "source_candidate_case": "first_canonical_v1_match_validated_anchored_plus5_candidate_p128_a20_phi36_ns24_g560",
+    "formal_case_name": "first_canonical_v1_p128_validated_anchored_prod_v1",
+    "source_commit": "c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f",
+    "path_fields_rewritten_for_repository_import": true,
+    "numerical_options_unchanged": true,
+    "convergence_gate": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json"
+  }
+}
