@@ -118,12 +118,12 @@ Channel diagnostics audit:
 
 ## Old Result Supersession
 
-This case supersedes:
+This case supersedes the former live artifact paths, now removed from the repository data tree:
 
 - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
 
-The old result is retained as a historical artifact. It lacks explicit high-precision tau/sigma integration parameters, `validated_anchored` sigma-cache treatment, channel diagnostics, and a full-grid convergence gate. It should not be used for production-grade interpretation of local `xi` structures.
+The old result lacked explicit high-precision tau/sigma integration parameters, `validated_anchored` sigma-cache treatment, channel diagnostics, and a full-grid convergence gate. It has since been removed from the live repository data tree and should not be used for production-grade interpretation of local `xi` structures. Historical comparison remains available through git history / PR #122.
 
 ## Validation Commands And Results
 
@@ -133,4 +133,4 @@ Repository import checks are recorded in the PR validation log. The production-g
 
 - The 1% gate is an adjacent high-precision convergence criterion, not a mathematical proof of exact convergence.
 - Local structures that remain after the `validated_anchored` correction should be interpreted through the physical `match_thermo` propagator and denominator-chain diagnostics, not as evidence of the old threshold-subtraction cache artifact.
-- The older `first_canonical_v1` result is not deleted in this update to preserve provenance and comparison ability.
+- The older `first_canonical_v1` result is no longer a live repository artifact; use git history / PR #122 for provenance or comparison.

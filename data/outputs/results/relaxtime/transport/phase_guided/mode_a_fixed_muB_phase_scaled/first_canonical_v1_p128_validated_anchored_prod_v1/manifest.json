@@ -76,6 +76,6 @@
   },
   "known_limitations": [
     "production-grade verdict is based on a 1% adjacent high-precision convergence gate, not exact convergence",
-    "old first_canonical_v1 is retained as historical comparison and should not be used for production-grade local xi-structure interpretation"
+    "old first_canonical_v1 has been removed from the live repository data tree; use git history or PR #122 for historical comparison"
   ]
 }

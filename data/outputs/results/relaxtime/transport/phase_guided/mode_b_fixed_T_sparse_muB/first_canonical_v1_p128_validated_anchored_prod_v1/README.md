@@ -61,6 +61,6 @@ Worst p104-to-p128 point: `mode_a`, `muB=450 MeV`, `alpha_T=1.1`, `xi=0.35`, `ta
 
 ## Supersession Note
 
-This case supersedes `first_canonical_v1` for production-grade interpretation of local `xi` structures. The old result is retained as a historical comparison artifact, but it lacks explicit high-precision tau/sigma integration parameters, `validated_anchored` sigma-cache treatment, channel diagnostics, and a full-grid convergence gate. Local non-monotonic structures or precision-sensitive claims should therefore use this p128 production case instead of the old `first_canonical_v1` case.
+This case supersedes `first_canonical_v1` for production-grade interpretation of local `xi` structures. The old result lacked explicit high-precision tau/sigma integration parameters, `validated_anchored` sigma-cache treatment, channel diagnostics, and a full-grid convergence gate. It has been removed from the live repository data tree; historical comparison remains available through git history / PR #122. Local non-monotonic structures or precision-sensitive claims should use this p128 production case.
 
-The old result is not removed in this repository update. Keeping it avoids losing provenance and makes the numerical improvement auditable.
+This cleanup keeps the p128 production case as the only live phase-guided `first_canonical` artifact family.
