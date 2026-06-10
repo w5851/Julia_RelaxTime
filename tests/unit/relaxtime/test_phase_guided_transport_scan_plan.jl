@@ -91,10 +91,11 @@ end
 
 @testset "phase-guided production workflow forwards required CLI args" begin
     workflow_text = read(_PHASE_GUIDED_PRODUCTION_WORKFLOW, String)
+    canonical_xi_values = "-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5"
 
     @test occursin("--case-name", workflow_text)
-    @test occursin("canonical_xi_list=\"-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5\"", workflow_text)
-    @test occursin("--xi-list \"\$canonical_xi_list\"", workflow_text)
+    @test occursin("xi_list=\"\${{ inputs.xi_list || '$canonical_xi_values' }}\"", workflow_text)
+    @test occursin("--xi-list \"\$xi_list\"", workflow_text)
     @test occursin("--propagator-xi-policy", workflow_text)
     @test occursin("--channel-diagnostics", workflow_text)
     @test occursin("--sigma-grid-n", workflow_text)
