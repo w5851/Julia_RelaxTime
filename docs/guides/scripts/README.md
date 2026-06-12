@@ -154,7 +154,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - mode a: `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
     - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
     - shared convergence evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/`
-  - 旧 `first_canonical_v1` 仍保留为历史比较产物，但缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；局部 `xi` 结构的 production-grade 解读应使用 p128 production-grade case。
+  - 旧 `first_canonical_v1` 已从仓库数据树移除。它缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；历史对照请通过 git history / PR #122 查看，局部 `xi` 结构的 production-grade 解读应使用 p128 production-grade case。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`

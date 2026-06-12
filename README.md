@@ -151,10 +151,10 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 - 各向异性输运 / Relaxtime 工作流
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
-  - phase-guided canonical asset 示例：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
-  - phase-guided canonical 图层示例：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1/`
-  - phase-guided production-grade asset：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
-  - phase-guided production-grade 图层：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
+  - phase-guided production-grade asset（mode a）：`data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
+  - phase-guided production-grade 图层（mode a）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
+  - phase-guided production-grade asset（mode b）：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
+  - phase-guided production-grade 图层（mode b）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
 - Web/API 服务入口：`scripts/server/server_full.jl`
   - 当前状态：`docs/guides/STATUS.md`
 
