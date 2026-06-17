@@ -1,4 +1,5 @@
 name: Relaxtime Phase-Guided Transport Production
+run-name: phase-guided transport ${{ inputs.case_name || 'first_canonical_v1_diagnostic' }} / ${{ inputs.shard_label || 'full' }} / ${{ inputs.mode || 'both' }}
 
 on:
   workflow_dispatch:
@@ -62,7 +63,7 @@ on:
       sigma_cache_policy:
         description: "sigma(s) cache policy"
         required: false
-        default: "default"
+        default: "validated_anchored"
         type: choice
         options:
           - default
@@ -70,27 +71,27 @@ on:
       tau_p_nodes:
         description: "Tau momentum nodes for production tier"
         required: false
-        default: "20"
+        default: "128"
         type: string
       tau_angle_nodes:
         description: "Tau cos(theta) nodes for production tier"
         required: false
-        default: "4"
+        default: "20"
         type: string
       tau_phi_nodes:
         description: "Tau phi nodes for production tier"
         required: false
-        default: "8"
+        default: "36"
         type: string
       tau_n_sigma:
         description: "Tau sigma integral points for production tier"
         required: false
-        default: "6"
+        default: "24"
         type: string
       sigma_grid_n:
         description: "Tau sigma cache grid size for production tier"
         required: false
-        default: "60"
+        default: "560"
         type: string
       compute_bulk:
         description: "Compute zeta-related outputs"
@@ -150,7 +151,7 @@ jobs:
           shard_label="${{ inputs.shard_label || 'full' }}"
           run_tier="${{ inputs.run_tier || 'dry-run' }}"
           policy="${{ inputs.propagator_xi_policy || 'match_thermo' }}"
-          sigma_cache_policy="${{ inputs.sigma_cache_policy || 'default' }}"
+          sigma_cache_policy="${{ inputs.sigma_cache_policy || 'validated_anchored' }}"
           render_plots="${{ inputs.render_plots }}"
           mode_input="${{ inputs.mode || 'both' }}"
           xi_list="${{ inputs.xi_list || '-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5' }}"
@@ -161,6 +162,15 @@ jobs:
           log_root="$audit_root/logs"
           safe_shard_label="$(printf '%s' "$shard_label" | sed 's/[^A-Za-z0-9_.=-]/_/g')"
           mkdir -p "$log_root"
+
+          if [[ ! "$case_name" =~ ^[A-Za-z0-9_.=-]+$ ]]; then
+            echo "::error::case_name contains unsupported characters: $case_name"
+            exit 2
+          fi
+          if [[ ! "$shard_label" =~ ^[A-Za-z0-9_.=-]+$ ]]; then
+            echo "::error::shard_label contains unsupported characters: $shard_label"
+            exit 2
+          fi
 
           modes=()
           if [ "$mode_input" = "both" ]; then
@@ -186,11 +196,11 @@ jobs:
             )
           else
             common_args+=(
-              --tau-p-nodes "${{ inputs.tau_p_nodes || '20' }}"
-              --tau-angle-nodes "${{ inputs.tau_angle_nodes || '4' }}"
-              --tau-phi-nodes "${{ inputs.tau_phi_nodes || '8' }}"
-              --tau-n-sigma "${{ inputs.tau_n_sigma || '6' }}"
-              --sigma-grid-n "${{ inputs.sigma_grid_n || '60' }}"
+              --tau-p-nodes "${{ inputs.tau_p_nodes || '128' }}"
+              --tau-angle-nodes "${{ inputs.tau_angle_nodes || '20' }}"
+              --tau-phi-nodes "${{ inputs.tau_phi_nodes || '36' }}"
+              --tau-n-sigma "${{ inputs.tau_n_sigma || '24' }}"
+              --sigma-grid-n "${{ inputs.sigma_grid_n || '560' }}"
             )
           fi
 
@@ -279,6 +289,14 @@ jobs:
             echo "This GitHub Actions workflow produces reviewable artifacts for phase-guided transport scans."
             echo "It does not commit, promote, or certify repository production data."
             echo ""
+            echo "## Run identity"
+            echo ""
+            printf -- '- workflow_run_id: `%s`\n' "${{ github.run_id }}"
+            printf -- '- workflow_run_attempt: `%s`\n' "${{ github.run_attempt }}"
+            printf -- '- git_ref: `%s`\n' "${{ github.ref }}"
+            printf -- '- git_sha: `%s`\n' "${{ github.sha }}"
+            printf -- '- workflow: `%s`\n' "${{ github.workflow }}"
+            echo ""
             echo "## Inputs"
             echo ""
             printf -- '- mode: `%s`\n' "${{ inputs.mode || 'both' }}"
@@ -286,7 +304,7 @@ jobs:
             printf -- '- shard_label: `%s`\n' "$shard_label"
             printf -- '- run_tier: `%s`\n' "${{ inputs.run_tier || 'dry-run' }}"
             printf -- '- propagator_xi_policy: `%s`\n' "${{ inputs.propagator_xi_policy || 'match_thermo' }}"
-            printf -- '- sigma_cache_policy: `%s`\n' "${{ inputs.sigma_cache_policy || 'default' }}"
+            printf -- '- sigma_cache_policy: `%s`\n' "${{ inputs.sigma_cache_policy || 'validated_anchored' }}"
             printf -- '- xi_list: `%s`\n' "${{ inputs.xi_list || '-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5' }}"
             printf -- '- muB_list: `%s`\n' "${{ inputs.muB_list || '0,450,900' }}"
             printf -- '- alpha_t_list: `%s`\n' "${{ inputs.alpha_t_list || '1.0,1.1,1.2' }}"
@@ -294,11 +312,11 @@ jobs:
             printf -- '- compute_bulk: `%s`\n' "${{ inputs.compute_bulk }}"
             printf -- '- render_plots: `%s`\n' "${{ inputs.render_plots }}"
             printf -- '- overwrite: `%s`\n' "${{ inputs.overwrite }}"
-            printf -- '- tau_p_nodes: `%s`\n' "${{ inputs.tau_p_nodes || '20' }}"
-            printf -- '- tau_angle_nodes: `%s`\n' "${{ inputs.tau_angle_nodes || '4' }}"
-            printf -- '- tau_phi_nodes: `%s`\n' "${{ inputs.tau_phi_nodes || '8' }}"
-            printf -- '- tau_n_sigma: `%s`\n' "${{ inputs.tau_n_sigma || '6' }}"
-            printf -- '- sigma_grid_n: `%s`\n' "${{ inputs.sigma_grid_n || '60' }}"
+            printf -- '- tau_p_nodes: `%s`\n' "${{ inputs.tau_p_nodes || '128' }}"
+            printf -- '- tau_angle_nodes: `%s`\n' "${{ inputs.tau_angle_nodes || '20' }}"
+            printf -- '- tau_phi_nodes: `%s`\n' "${{ inputs.tau_phi_nodes || '36' }}"
+            printf -- '- tau_n_sigma: `%s`\n' "${{ inputs.tau_n_sigma || '24' }}"
+            printf -- '- sigma_grid_n: `%s`\n' "${{ inputs.sigma_grid_n || '560' }}"
             echo ""
             echo "## Verdict"
             echo ""
@@ -312,7 +330,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: relaxtime-phase-guided-transport-results-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}-${{ inputs.shard_label || 'full' }}
+          name: relaxtime-phase-guided-transport-results-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'validated_anchored' }}-${{ inputs.shard_label || 'full' }}
           path: |
             data/outputs/results/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
             data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}/**
@@ -323,7 +341,7 @@ jobs:
         if: ${{ always() && inputs.render_plots == true && inputs.run_tier != 'dry-run' }}
         uses: actions/upload-artifact@v4
         with:
-          name: relaxtime-phase-guided-transport-figures-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'default' }}-${{ inputs.shard_label || 'full' }}
+          name: relaxtime-phase-guided-transport-figures-${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}-${{ inputs.propagator_xi_policy || 'match_thermo' }}-${{ inputs.sigma_cache_policy || 'validated_anchored' }}-${{ inputs.shard_label || 'full' }}
           path: |
             data/outputs/figures/relaxtime/transport/phase_guided/**/${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}/**
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
@@ -341,7 +359,7 @@ jobs:
             echo "- shard_label: \`${{ inputs.shard_label || 'full' }}\`"
             echo "- run_tier: \`${{ inputs.run_tier || 'dry-run' }}\`"
             echo "- propagator_xi_policy: \`${{ inputs.propagator_xi_policy || 'match_thermo' }}\`"
-            echo "- sigma_cache_policy: \`${{ inputs.sigma_cache_policy || 'default' }}\`"
+            echo "- sigma_cache_policy: \`${{ inputs.sigma_cache_policy || 'validated_anchored' }}\`"
             echo "- compute_bulk: \`${{ inputs.compute_bulk }}\`"
             echo "- render_plots: \`${{ inputs.render_plots }}\`"
             echo "- artifact retention days: \`${ARTIFACT_RETENTION_DAYS}\`"
