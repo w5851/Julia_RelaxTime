@@ -34,6 +34,7 @@ const OUTPUT_COLUMNS = [
     "constraint_mode", "rho_target", "rho_norm",
     "rho_u_fm3", "rho_d_fm3", "rho_s_fm3", "rho_u_over_rho_d",
     "asym_ud_ratio_target", "asym_s_target", "constraint_residual_norm",
+    "equilibrium_pressure_fm4", "trho_seed_candidate_count", "trho_branch_policy",
     "mu_u_MeV", "mu_d_MeV", "mu_s_MeV", "muQ_MeV", "muS_MeV",
     "flavor_profile", "meson_profile",
     "pi_channel", "k_channel", "charge_resolved",

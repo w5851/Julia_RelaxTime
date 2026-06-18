@@ -191,9 +191,9 @@ BU2020/temp7 审计相关参数：
 - `--path tmu` 默认四口径为 `stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference`
 - 支持 `--muq-values` 或 `--mumin/--mumax/--mustep` 生成多个固定 `mu_q` 的 T 扫描；多 `mu_q` 输出会生成 FIG3-like heatmap SVG
 - `--path trho_asymmetric` 使用 `FixedAsymmetricRho(rho_target, asym_ud_ratio_target, asym_s_target)` 作为 density-constrained equilibrium source，再通过 `Models.solve_meson_point_from_equilibrium` 后处理；正式高精度产物必须由 convergence gate、production audit 和正式 result/figure 布局共同支撑，普通小网格运行仍只作为 diagnostic evidence
-- `trho_asymmetric` 默认按温度分组并在每个温度内做 rho 连续扫描，`--trho-reverse-rho=true` 时从高 rho 到低 rho 传递 equilibrium seed；`--no-trho-reverse-rho` 仅用于顺序敏感诊断
+- `trho_asymmetric` 默认按温度分组扫描 rho；上一 rho 点的 equilibrium seed 只作为候选之一，与 `MultiSeed` catalog 一起进入 `solve_multi(...; evaluate_all_attempts=true)`，最终按约束下 pressure max 选择 equilibrium；`--trho-reverse-rho=true` 仍控制 rho 遍历顺序，`--no-trho-reverse-rho` 仅用于顺序敏感诊断
 - `--density-policy x_min_cut --bose-x-min <x>` 可把 Bose x 下界传给 BU/GBU phase-shift regimes；该选项不延拓 stable/BW 口径
-- `trho_asymmetric` 额外输出 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
+- `trho_asymmetric` 额外输出 `constraint_mode`、`rho_target`、`rho_norm`、`rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3`、`rho_u_over_rho_d`、`asym_ud_ratio_target`、`asym_s_target`、`constraint_residual_norm`、`equilibrium_pressure_fm4`、`trho_seed_candidate_count`、`trho_branch_policy`、`mu_u_MeV`、`mu_d_MeV`、`mu_s_MeV`、`muB_MeV`、`muQ_MeV`、`muS_MeV`
 - 正式数据默认写入 `data/outputs/results/...`；图像和 `plot_manifest.json` 默认写入对应 `data/outputs/figures/...`，也可通过 `--figure-dir` 覆盖
 - `scripts/analysis/relaxtime/render_combined_meson_density_temperature_scan.py` 可从单 `mu_q` 统一 CSV 渲染温度扫描高 DPI PNG
 - `scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py` 可从统一 CSV 渲染 heatmap 高 DPI PNG/SVG；多 `mu_q` 的 `tmu` 图使用默认 `--x-field muq_MeV`，`trho_asymmetric` 图应使用 `--x-field rho_target --x-label "rho/rho0" --x-unit ""`，跨数量级比值图可加 `--color-scale log`

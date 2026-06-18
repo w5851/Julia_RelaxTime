@@ -22,6 +22,9 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 using Dates
 using .Constants_PNJL: ħc_MeV_fm
 using .Models
+
+const TRHO_ASYMMETRIC_BRANCH_POLICY = :pressure_max_all_attempts_multiseed
+
 @inline _fmt(x::Real) = Models.ScanCommon.fmt(x)
 @inline _fmt(x::Integer) = string(x)
 @inline _fmt(x::Symbol) = String(x)
@@ -125,6 +128,32 @@ function _constraint_diagnostics(
         "muB_MeV" => mu_B,
         "muQ_MeV" => mu_Q,
         "muS_MeV" => mu_S,
+    )
+end
+
+function _trho_asymmetric_seed_candidates(T_fm::Float64, mode, equilibrium_seed)
+    multiseeds = Models.get_all_seeds(Models.MultiSeed(), [T_fm], mode)
+    seed_pool = if equilibrium_seed === nothing
+        Models.build_seed_pool(mode;
+            primary_seed=multiseeds[1],
+            extra_seed_pool=multiseeds[2:end],
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    else
+        Models.build_seed_pool(mode;
+            primary_seed=equilibrium_seed,
+            extra_seed_pool=multiseeds,
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+    end
+    return [entry.seed for entry in seed_pool]
+end
+
+function _trho_branch_diagnostics(equilibrium, seed_candidate_count::Int)
+    return Dict{String, Any}(
+        "equilibrium_pressure_fm4" => equilibrium === nothing ? "" : equilibrium.pressure,
+        "trho_seed_candidate_count" => seed_candidate_count,
+        "trho_branch_policy" => TRHO_ASYMMETRIC_BRANCH_POLICY,
     )
 end
 
@@ -330,7 +359,7 @@ function _write_csv(path::String, opts::CombinedOptions, rows)
             println(io, "# muq_values_MeV: not_applicable")
             println(io, "# rho_values: $(join(_fmt.(opts.rho_values), ','))")
             println(io, "# trho_reverse_rho: $(opts.trho_reverse_rho)")
-            println(io, "# trho_seed_policy: temperature_grouped_rho_continuity")
+            println(io, "# trho_branch_policy: $(TRHO_ASYMMETRIC_BRANCH_POLICY)")
             println(io, "# asym_ud_ratio_target: $(opts.asym_ud_ratio_target)")
             println(io, "# asym_s_target: $(opts.asym_s_target)")
         end
@@ -697,7 +726,8 @@ function _write_summary(path::String, opts::CombinedOptions, csv_path::String, p
         println(io, "- density regimes: `$(join(string.(opts.regimes), "`, `"))`")
         if opts.path_strategy === :trho_asymmetric
             println(io, "- FixedAsymmetricRho rho targets: `$(join(_fmt.(opts.rho_values), ","))`")
-            println(io, "- FixedAsymmetricRho scan order: temperature-grouped rho-continuity with `trho_reverse_rho=$(opts.trho_reverse_rho)`.")
+            println(io, "- FixedAsymmetricRho branch policy: temperature-grouped scan with continuation seed included in an all-attempt MultiSeed candidate pool; selected by pressure max under constraints.")
+            println(io, "- FixedAsymmetricRho scan order: `trho_reverse_rho=$(opts.trho_reverse_rho)`.")
             println(io, "- asymmetry targets: `rho_u/rho_d=$(opts.asym_ud_ratio_target)`, `rho_s=$(opts.asym_s_target) fm^-3`")
             println(io, "- production status: `trho_asymmetric` may be used for formal artifacts only after an explicit convergence gate and production audit; ad hoc runs remain diagnostic evidence.")
         elseif length(opts.muq_values_MeV) == 1
@@ -841,21 +871,22 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
         for rho_target in rho_scan_order
             point_index += 1
             mode = Models.FixedAsymmetricRho(rho_target, opts.asym_ud_ratio_target, opts.asym_s_target)
+            seed_candidates = _trho_asymmetric_seed_candidates(T_fm, mode, equilibrium_seed)
+            branch_diagnostics = _trho_branch_diagnostics(nothing, length(seed_candidates))
 
             equilibrium = try
-                solve_kwargs = equilibrium_seed === nothing ? (
+                Models.solve_multi(
+                    model,
+                    mode,
+                    T_fm;
+                    seeds=seed_candidates,
                     xi=opts.xi,
                     p_num=opts.p_num,
                     t_num=opts.t_num,
                     iterations=opts.max_iter,
-                ) : (
-                    xi=opts.xi,
-                    p_num=opts.p_num,
-                    t_num=opts.t_num,
-                    iterations=opts.max_iter,
-                    seed_guess=equilibrium_seed,
+                    semantic_mode=:ground_state,
+                    evaluate_all_attempts=true,
                 )
-                Models.solve(model, mode, T_fm; solve_kwargs...)
             catch err
                 base = Dict{String, Any}(
                     "path_strategy" => opts.path_strategy,
@@ -878,6 +909,7 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
                     "d_pi" => meson_profile.d_pi,
                     "d_K" => meson_profile.d_K,
                 )
+                merge!(base, branch_diagnostics)
                 for regime in opts.regimes
                     push!(rows, _failure_row(base, regime, err))
                 end
@@ -918,6 +950,7 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
                     "d_pi" => chemical.d_pi,
                     "d_K" => chemical.d_K,
                 )
+                merge!(base, _trho_branch_diagnostics(equilibrium, length(seed_candidates)))
                 for regime in opts.regimes
                     push!(rows, _failure_row(base, regime, err))
                 end
@@ -937,6 +970,7 @@ function _run_trho_asymmetric_scan(opts::CombinedOptions, model, flavor_profile,
                 constraint_mode=:FixedAsymmetricRho,
                 rho_target=rho_target,
             )
+            merge!(diagnostics, _trho_branch_diagnostics(equilibrium, length(seed_candidates)))
             base = _base_row(opts, point_index, muq_MeV, T_MeV, flavor_profile, flavor_mev, meson_profile, chemical, meson_point, diagnostics)
             for regime in opts.regimes
                 try
