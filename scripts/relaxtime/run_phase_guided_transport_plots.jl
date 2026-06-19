@@ -4,6 +4,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const PLOT_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "plot_scan_csv.py")
 
 using JSON3
+using SHA: sha256
 
 struct Options
     case_dir::String
@@ -176,6 +177,76 @@ function _write_plot_manifest(fig_dir::String)
     end
 end
 
+function _sha256_file(path::String)
+    open(path, "r") do io
+        return bytes2hex(sha256(io))
+    end
+end
+
+function _plot_output_summary(fig_dir::String)
+    png_files = String[]
+    sidecar_files = String[]
+    min_png_bytes = nothing
+    for path in sort(readdir(fig_dir; join=true))
+        isdir(path) || continue
+        for sub in sort(readdir(path; join=true))
+            isfile(sub) || continue
+            rel = replace(relpath(sub, fig_dir), '\\' => '/')
+            if endswith(lowercase(sub), ".png")
+                push!(png_files, rel)
+                size = filesize(sub)
+                min_png_bytes = min_png_bytes === nothing ? size : min(min_png_bytes, size)
+            elseif endswith(lowercase(sub), ".png.provenance.json")
+                push!(sidecar_files, rel)
+            end
+        end
+    end
+    return Dict(
+        "png_count" => length(png_files),
+        "provenance_sidecar_count" => length(sidecar_files),
+        "min_png_bytes" => min_png_bytes,
+    )
+end
+
+function _remove_plot_sidecars(fig_dir::String)
+    for path in sort(readdir(fig_dir; join=true))
+        isdir(path) || continue
+        for sub in sort(readdir(path; join=true))
+            isfile(sub) || continue
+            endswith(lowercase(sub), ".png.provenance.json") && rm(sub; force=true)
+        end
+    end
+end
+
+function _refresh_case_manifest(case_dir::String, fig_dir::String)
+    manifest_path = joinpath(case_dir, "manifest.json")
+    isfile(manifest_path) || return
+
+    manifest = JSON3.read(read(manifest_path, String), Dict{String,Any})
+    files = get(manifest, "result_files", Any[])
+    hashes = Dict{String,Any}(get(manifest, "hashes", Dict{String,Any}()))
+    for name in files
+        name_string = String(name)
+        name_string == "manifest.json" && continue
+        path = joinpath(case_dir, name_string)
+        isfile(path) && (hashes[name_string] = _sha256_file(path))
+    end
+
+    plot_manifest_path = joinpath(fig_dir, "plot_manifest.json")
+    manifest["hashes"] = hashes
+    manifest["figure_summary"] = _plot_output_summary(fig_dir)
+    if isfile(plot_manifest_path)
+        manifest["figure_hashes"] = Dict(
+            "plot_manifest.json" => _sha256_file(plot_manifest_path),
+        )
+    end
+
+    open(manifest_path, "w") do io
+        JSON3.pretty(io, manifest)
+        println(io)
+    end
+end
+
 function _append_readme(case_dir::String, fig_dir::String, layout)
     readme_path = joinpath(case_dir, "README.md")
     isfile(readme_path) || return
@@ -229,8 +300,10 @@ function run_phase_guided_plots(opts::Options)
         _run_plot(py, opts.csv_path, opts.fig_dir, y; split=layout.split, group=layout.group)
     end
 
+    _remove_plot_sidecars(opts.fig_dir)
     _write_plot_manifest(opts.fig_dir)
     _append_readme(opts.case_dir, opts.fig_dir, layout)
+    _refresh_case_manifest(opts.case_dir, opts.fig_dir)
     println("Phase-guided transport plotting finished. Output: $(opts.fig_dir)")
 end
 
