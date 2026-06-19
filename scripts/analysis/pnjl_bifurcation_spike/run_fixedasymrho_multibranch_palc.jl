@@ -48,6 +48,7 @@ Base.@kwdef struct MultiBranchConfig
     branch_jump_tol::Float64 = S.DEFAULT_BRANCH_JUMP_TOL
     root_distance_tol::Float64 = 0.25
     pressure_gap_tol::Float64 = S.DEFAULT_PRESSURE_GAP_TOL
+    run_phase3_review::Bool = true
 end
 
 function _usage()
@@ -73,6 +74,7 @@ function _usage()
       --max-steps=<int>                  PALC max continuation steps. Default: 80.
       --root-distance-tol=<value>        Natural-unit root dedup tolerance. Default: 0.25.
       --pressure-gap-tol=<value>         Pressure selection gap tolerance. Default: 1e-3.
+      --run-phase3-review=<bool>         Compare SeedContinuation, solve_multi scan, and multi-branch PALC. Default: true.
       --output-dir=<path>                Output directory.
     """
 end
@@ -89,6 +91,13 @@ function _parse_args(args::Vector{String}; repo_root::String)
 
     get_float(key, default) = haskey(raw, key) ? parse(Float64, raw[key]) : default
     get_int(key, default) = haskey(raw, key) ? parse(Int, raw[key]) : default
+    function get_bool(key, default)
+        haskey(raw, key) || return default
+        value = lowercase(strip(raw[key]))
+        value in ("1", "true", "yes", "y") && return true
+        value in ("0", "false", "no", "n") && return false
+        throw(ArgumentError("$(key) must be true or false, got $(raw[key])"))
+    end
 
     run_id = U._run_id()
     output_dir = get(raw, "output_dir", nothing)
@@ -118,6 +127,7 @@ function _parse_args(args::Vector{String}; repo_root::String)
         branch_jump_tol=get_float("branch_jump_tol", S.DEFAULT_BRANCH_JUMP_TOL),
         root_distance_tol=get_float("root_distance_tol", 0.25),
         pressure_gap_tol=get_float("pressure_gap_tol", S.DEFAULT_PRESSURE_GAP_TOL),
+        run_phase3_review=get_bool("run_phase3_review", true),
     )
     _validate_config(cfg)
     return cfg
@@ -532,6 +542,264 @@ function _write_groundstate_csv(path::String, branches, cfg::MultiBranchConfig)
     return U._write_csv(path, header, _groundstate_rows(branches, cfg))
 end
 
+function _path_contract_anchor_roots(roots, cfg::MultiBranchConfig)
+    anchors = Main.Models.AnchorRoot[]
+    for (idx, root) in enumerate(roots)
+        push!(anchors, Main.Models.AnchorRoot(
+            Symbol("branch_", idx, "_anchor"),
+            Symbol(root.source),
+            cfg.rho_anchor,
+            Float64.(root.solution),
+            Float64.(root.solution[1:5]),
+            Float64.(root.solution[6:8]),
+            Float64(root.pressure_fm4),
+            Float64(root.residual_norm),
+            Bool(root.converged),
+            length(roots),
+        ))
+    end
+    return anchors
+end
+
+function _path_contract_point(row, source::Symbol, step_index::Int)
+    mu_vec = Float64[
+        Float64(getproperty(row, :mu_u_MeV)) / HBARC_MEV_FM,
+        Float64(getproperty(row, :mu_d_MeV)) / HBARC_MEV_FM,
+        Float64(getproperty(row, :mu_s_MeV)) / HBARC_MEV_FM,
+    ]
+    x_state = Float64[
+        Float64(getproperty(row, :phi_u)),
+        Float64(getproperty(row, :phi_d)),
+        Float64(getproperty(row, :phi_s)),
+        Float64(getproperty(row, :Phi)),
+        Float64(getproperty(row, :PhiBar)),
+    ]
+    residual_norm = Float64(getproperty(row, :residual_norm))
+    pressure = Float64(getproperty(row, :pressure_fm4))
+    return Main.Models.BranchPoint(
+        Float64(getproperty(row, :rho_target)),
+        Float64[x_state..., mu_vec...],
+        x_state,
+        mu_vec,
+        pressure,
+        Float64(getproperty(row, :rho_norm)),
+        residual_norm,
+        isfinite(pressure) && isfinite(residual_norm),
+        source,
+        step_index,
+    )
+end
+
+function _path_contract_branches(branches)
+    out = Main.Models.ContinuationBranch[]
+    for branch in branches
+        branch_id = Symbol(branch.branch_id)
+        anchor_id = Symbol(branch.branch_id, "_anchor")
+        points = Main.Models.BranchPoint[
+            _path_contract_point(row, :bifurcationkit_palc, idx)
+            for (idx, row) in enumerate(branch.result.branch)
+        ]
+        failures = count(point -> !point.converged || !isfinite(point.residual_norm), points)
+        status = isempty(points) ? :empty : (failures == 0 ? :complete : :partial)
+        newton_total = sum(try Int(getproperty(row, :itnewton)) catch; 0 end for row in branch.result.branch)
+        linear_total = sum(try Int(getproperty(row, :itlinear)) catch; 0 end for row in branch.result.branch)
+        push!(out, Main.Models.ContinuationBranch(
+            branch_id,
+            anchor_id,
+            :bifurcationkit_palc,
+            points,
+            status,
+            (
+                anchor_source=Symbol(branch.root.source),
+                anchor_pressure_fm4=Float64(branch.root.pressure_fm4),
+                wall_time_s=Float64(branch.wall_time_s),
+                point_count=length(points),
+                failure_count=failures,
+                newton_iterations_total=newton_total,
+                linear_iterations_total=linear_total,
+            ),
+        ))
+    end
+    return out
+end
+
+function _path_contract_selections(groundstate_rows)
+    selections = Main.Models.BranchSelection[]
+    for row in groundstate_rows
+        selected_branch_id = Symbol(String(row[2]))
+        runner_up = isempty(String(row[6])) ? nothing : Symbol(String(row[6]))
+        push!(selections, Main.Models.BranchSelection(
+            Float64(row[1]),
+            selected_branch_id,
+            :pressure_max_under_constraints,
+            Int(row[13]),
+            Float64(row[5]),
+            runner_up,
+            Float64(row[8]),
+            Float64(row[9]),
+        ))
+    end
+    return selections
+end
+
+function _branch_point_jump_metrics(points::AbstractVector{Main.Models.BranchPoint}; tol::Float64)
+    length(points) < 2 && return (count=0, max_jump=0.0)
+    count = 0
+    max_jump = 0.0
+    for idx in 2:length(points)
+        jump = norm(points[idx].solution .- points[idx - 1].solution)
+        isfinite(jump) || continue
+        max_jump = max(max_jump, jump)
+        jump > tol && (count += 1)
+    end
+    return (count=count, max_jump=max_jump)
+end
+
+function _path_result_jump_metrics(branches::AbstractVector{Main.Models.ContinuationBranch}; tol::Float64)
+    count = 0
+    max_jump = 0.0
+    for branch in branches
+        jumps = _branch_point_jump_metrics(branch.points; tol=tol)
+        count += jumps.count
+        max_jump = max(max_jump, jumps.max_jump)
+    end
+    return (count=count, max_jump=max_jump)
+end
+
+function _path_contract_result(
+    cfg::MultiBranchConfig,
+    roots,
+    branches,
+    groundstate_rows;
+    anchor_wall_time_s::Real=0.0,
+)
+    path = Main.Models.FixedAsymmetricRhoPath(
+        cfg.T_MeV / HBARC_MEV_FM,
+        _rho_grid(cfg);
+        ud_ratio_target=cfg.asym_ud_ratio_target,
+        s_target=cfg.asym_s_target,
+        xi=cfg.xi,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+    )
+    anchors = _path_contract_anchor_roots(roots, cfg)
+    contract_branches = _path_contract_branches(branches)
+    selections = _path_contract_selections(groundstate_rows)
+    jumps = _path_result_jump_metrics(contract_branches; tol=cfg.branch_jump_tol)
+    branch_wall_time = sum(Float64(get(branch.diagnostics, :wall_time_s, 0.0)) for branch in contract_branches)
+    failures = sum(count(point -> !point.converged || !isfinite(point.residual_norm), branch.points) for branch in contract_branches)
+    steps = sum(length(branch.points) for branch in contract_branches)
+    diagnostics = Main.Models.PathDiagnostics(
+        :bifurcationkit,
+        :composite_anchor,
+        :ground_state,
+        Float64(anchor_wall_time_s) + branch_wall_time,
+        length(anchors),
+        steps,
+        failures,
+        jumps.count,
+        String["isolated BifurcationKit adapter; root Project.toml unchanged"],
+    )
+    return Main.Models.PathSolveResult(path, contract_branches, selections, anchors, diagnostics)
+end
+
+function _path_branch_catalog_rows(result::Main.Models.PathSolveResult)
+    rows = Vector{Vector}()
+    for branch in result.branches
+        rhos = [point.param_value for point in branch.points if isfinite(point.param_value)]
+        pressures = [point.pressure for point in branch.points if isfinite(point.pressure)]
+        residuals = [point.residual_norm for point in branch.points if isfinite(point.residual_norm)]
+        push!(rows, Any[
+            branch.branch_id,
+            branch.anchor_id,
+            branch.source,
+            branch.status,
+            length(branch.points),
+            isempty(rhos) ? NaN : minimum(rhos),
+            isempty(rhos) ? NaN : maximum(rhos),
+            isempty(pressures) ? NaN : minimum(pressures),
+            isempty(pressures) ? NaN : maximum(pressures),
+            isempty(residuals) ? NaN : maximum(residuals),
+            get(branch.diagnostics, :wall_time_s, NaN),
+            get(branch.diagnostics, :newton_iterations_total, 0),
+            get(branch.diagnostics, :linear_iterations_total, 0),
+        ])
+    end
+    return rows
+end
+
+function _write_path_branch_catalog_csv(path::String, result::Main.Models.PathSolveResult)
+    header = [
+        "branch_id", "anchor_id", "source", "status", "point_count",
+        "rho_min_seen", "rho_max_seen",
+        "pressure_min_fm4", "pressure_max_fm4", "residual_norm_max",
+        "wall_time_s", "newton_iterations_total", "linear_iterations_total",
+    ]
+    return U._write_csv(path, header, _path_branch_catalog_rows(result))
+end
+
+function _write_path_selection_csv(path::String, result::Main.Models.PathSolveResult)
+    header = [
+        "param_value", "selected_branch_id", "selection_reason",
+        "candidate_branch_count", "selected_pressure_fm4",
+        "runner_up_branch_id", "pressure_gap_fm4", "selected_residual_norm",
+    ]
+    rows = Vector{Vector}()
+    for selection in result.selections
+        push!(rows, Any[
+            selection.param_value,
+            selection.selected_branch_id === nothing ? "" : selection.selected_branch_id,
+            selection.selection_reason,
+            selection.candidate_branch_count,
+            selection.selected_pressure,
+            selection.runner_up_branch_id === nothing ? "" : selection.runner_up_branch_id,
+            selection.pressure_gap,
+            selection.selected_residual_norm,
+        ])
+    end
+    return U._write_csv(path, header, rows)
+end
+
+function _write_path_performance_csv(path::String, result::Main.Models.PathSolveResult)
+    header = [
+        "continuation_backend", "anchor_strategy", "branch_policy",
+        "wall_time_s", "anchor_solve_count", "continuation_step_count",
+        "failure_count", "branch_jump_count", "branch_count", "selection_count",
+    ]
+    d = result.diagnostics
+    rows = Vector{Vector}()
+    push!(rows, Any[
+        d.continuation_backend,
+        d.anchor_strategy,
+        d.branch_policy,
+        d.wall_time_s,
+        d.anchor_solve_count,
+        d.continuation_step_count,
+        d.failure_count,
+        d.branch_jump_count,
+        length(result.branches),
+        length(result.selections),
+    ])
+    return U._write_csv(path, header, rows)
+end
+
+function _write_path_contract_outputs(cfg::MultiBranchConfig, result::Main.Models.PathSolveResult)
+    result_path = joinpath(cfg.output_dir, "path_solve_result.json")
+    branch_catalog_path = joinpath(cfg.output_dir, "path_branch_catalog.csv")
+    selection_path = joinpath(cfg.output_dir, "path_groundstate_selection.csv")
+    performance_path = joinpath(cfg.output_dir, "path_performance_summary.csv")
+    U._write_json(result_path, Main.Models.to_namedtuple(result))
+    _write_path_branch_catalog_csv(branch_catalog_path, result)
+    _write_path_selection_csv(selection_path, result)
+    _write_path_performance_csv(performance_path, result)
+    return (
+        path_solve_result=result_path,
+        path_branch_catalog=branch_catalog_path,
+        path_groundstate_selection=selection_path,
+        path_performance_summary=performance_path,
+    )
+end
+
 function _branch_summary(branch, cfg::MultiBranchConfig)
     rows = _branch_rows((branch,))
     residuals = [Float64(row[20]) for row in rows if isfinite(Float64(row[20]))]
@@ -552,6 +820,264 @@ function _branch_summary(branch, cfg::MultiBranchConfig)
         max_state_jump=jumps.max_jump,
         wall_time_s=branch.wall_time_s,
     )
+end
+
+function _path_result_metrics(label::Symbol, result::Main.Models.PathSolveResult, cfg::MultiBranchConfig)
+    points = Main.Models.BranchPoint[]
+    for branch in result.branches
+        append!(points, branch.points)
+    end
+    residuals = [point.residual_norm for point in points if isfinite(point.residual_norm)]
+    jumps = _path_result_jump_metrics(result.branches; tol=cfg.branch_jump_tol)
+    failures = count(point -> !point.converged || !isfinite(point.residual_norm), points)
+    return (
+        backend=label,
+        branch_count=length(result.branches),
+        point_count=length(points),
+        selection_count=length(result.selections),
+        failure_count=failures,
+        branch_jump_count=jumps.count,
+        max_state_jump=jumps.max_jump,
+        finite_residual_count=length(residuals),
+        residual_norm_min=isempty(residuals) ? NaN : minimum(residuals),
+        residual_norm_max=isempty(residuals) ? NaN : maximum(residuals),
+        wall_time_s=Float64(result.diagnostics.wall_time_s),
+        continuation_step_count=result.diagnostics.continuation_step_count,
+    )
+end
+
+function _seed_path_reference(model, cfg::MultiBranchConfig)
+    path = Main.Models.FixedAsymmetricRhoPath(
+        cfg.T_MeV / HBARC_MEV_FM,
+        _rho_grid(cfg);
+        ud_ratio_target=cfg.asym_ud_ratio_target,
+        s_target=cfg.asym_s_target,
+        xi=cfg.xi,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+    )
+    result_ref = Ref{Any}(nothing)
+    elapsed = @elapsed begin
+        result_ref[] = Main.Models.solve_path(
+            model,
+            path;
+            continuation_strategy=Main.Models.SeedContinuation(true),
+            branch_policy=Main.Models.GroundStateBranchPolicy(cfg.pressure_gap_tol, 1e-3),
+            residual_norm_max=1e-3,
+            iterations=300,
+        )
+    end
+    result = result_ref[]
+    d = result.diagnostics
+    diagnostics = Main.Models.PathDiagnostics(
+        d.continuation_backend,
+        d.anchor_strategy,
+        d.branch_policy,
+        Float64(elapsed),
+        d.anchor_solve_count,
+        d.continuation_step_count,
+        d.failure_count,
+        _path_result_jump_metrics(result.branches; tol=cfg.branch_jump_tol).count,
+        d.messages,
+    )
+    return Main.Models.PathSolveResult(result.path, result.branches, result.selections, result.anchors, diagnostics)
+end
+
+function _solve_multi_scan_reference(model, cfg::MultiBranchConfig)
+    path = Main.Models.FixedAsymmetricRhoPath(
+        cfg.T_MeV / HBARC_MEV_FM,
+        _rho_grid(cfg);
+        ud_ratio_target=cfg.asym_ud_ratio_target,
+        s_target=cfg.asym_s_target,
+        xi=cfg.xi,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+    )
+    points = Main.Models.BranchPoint[]
+    T_fm = cfg.T_MeV / HBARC_MEV_FM
+    elapsed = @elapsed begin
+        for (idx, rho_value) in enumerate(path.rho_values)
+            mode = Main.Models.FixedAsymmetricRho(rho_value, cfg.asym_ud_ratio_target, cfg.asym_s_target)
+            seeds = Main.Models.get_all_seeds(Main.Models.MultiSeed(), [T_fm], mode)
+            result = Main.Models.solve_multi(
+                model,
+                mode,
+                T_fm;
+                seeds=seeds,
+                semantic_mode=:ground_state,
+                evaluate_all_attempts=true,
+                xi=cfg.xi,
+                p_num=cfg.p_num,
+                t_num=cfg.t_num,
+                residual_norm_max=1e-3,
+                iterations=300,
+            )
+            push!(points, Main.Models.BranchPoint(
+                rho_value,
+                Float64.(result.solution),
+                Float64.(result.x_state),
+                Float64.(result.mu_vec),
+                Float64(result.pressure),
+                Float64(result.rho_norm),
+                Float64(result.residual_norm),
+                Bool(result.converged),
+                :solve_multi_scan,
+                idx,
+            ))
+        end
+    end
+    failures = count(point -> !point.converged || !isfinite(point.residual_norm), points)
+    branch = Main.Models.ContinuationBranch(
+        :solve_multi_ground_state,
+        :solve_multi_anchor_1,
+        :solve_multi_scan,
+        points,
+        failures == 0 ? :complete : :partial,
+        (point_count=length(points), failure_count=failures, wall_time_s=Float64(elapsed)),
+    )
+    selected = Main.Models.apply_branch_policy(
+        Main.Models.ContinuationBranch[branch],
+        Main.Models.GroundStateBranchPolicy(cfg.pressure_gap_tol, 1e-3),
+    )
+    anchors = isempty(points) ? Main.Models.AnchorRoot[] :
+        Main.Models.AnchorRoot[Main.Models.AnchorRoot(
+            :solve_multi_anchor_1,
+            :solve_multi_scan,
+            first(points).param_value,
+            copy(first(points).solution),
+            copy(first(points).x_state),
+            copy(first(points).mu_vec),
+            first(points).pressure,
+            first(points).residual_norm,
+            first(points).converged,
+            length(points),
+        )]
+    jumps = _path_result_jump_metrics(selected.branches; tol=cfg.branch_jump_tol)
+    diagnostics = Main.Models.PathDiagnostics(
+        :solve_multi_scan,
+        :multi_seed_anchor,
+        :ground_state,
+        Float64(elapsed),
+        length(anchors),
+        length(points),
+        failures,
+        jumps.count,
+        String["independent solve_multi pressure-governed scan"],
+    )
+    return Main.Models.PathSolveResult(path, selected.branches, selected.selections, anchors, diagnostics)
+end
+
+function _phase3_decision(palc_metrics, seed_metrics, solve_multi_metrics)
+    palc_has_multibranch = palc_metrics.branch_count >= 2 && palc_metrics.selection_count > 0
+    palc_has_finite = palc_metrics.point_count > 0 && palc_metrics.finite_residual_count > 0
+    seed_ok = seed_metrics.failure_count == 0 && seed_metrics.point_count > 0
+    solve_multi_ok = solve_multi_metrics.failure_count == 0 && solve_multi_metrics.point_count > 0
+    recommendation = :keep_bifurcationkit_isolated
+    reason = if !palc_has_finite
+        "multi-branch PALC produced no finite branch catalog in this window"
+    elseif palc_has_multibranch && solve_multi_ok
+        "multi-branch PALC is valuable for diagnostics, but pressure-governed solve_multi already provides the single-point ground-state selector without adding BifurcationKit to the root environment"
+    elseif palc_has_multibranch
+        "multi-branch PALC exposes competing branches, but formal root integration still needs broader opt-in regression and precompile review"
+    elseif seed_ok || solve_multi_ok
+        "seed or solve_multi references are usable while PALC did not add enough branch evidence to justify root dependency"
+    else
+        "none of the path candidates is ready for production replacement"
+    end
+    return (
+        recommendation=recommendation,
+        add_bifurcationkit_to_root_project=false,
+        keep_palc_in_analysis=true,
+        reason=reason,
+    )
+end
+
+function _phase3_comparison_rows(metrics)
+    rows = Vector{Vector}()
+    for metric in metrics
+        push!(rows, Any[
+            metric.backend,
+            metric.branch_count,
+            metric.point_count,
+            metric.selection_count,
+            metric.failure_count,
+            metric.branch_jump_count,
+            metric.max_state_jump,
+            metric.finite_residual_count,
+            metric.residual_norm_min,
+            metric.residual_norm_max,
+            metric.wall_time_s,
+            metric.continuation_step_count,
+        ])
+    end
+    return rows
+end
+
+function _write_phase3_comparison_csv(path::String, metrics)
+    header = [
+        "backend", "branch_count", "point_count", "selection_count",
+        "failure_count", "branch_jump_count", "max_state_jump",
+        "finite_residual_count", "residual_norm_min", "residual_norm_max",
+        "wall_time_s", "continuation_step_count",
+    ]
+    return U._write_csv(path, header, _phase3_comparison_rows(metrics))
+end
+
+function _write_phase3_report(path::String, cfg::MultiBranchConfig, metrics, decision)
+    mkpath(dirname(path))
+    open(path, "w") do io
+        println(io, "# FixedAsymmetricRho PALC Formalization Review")
+        println(io)
+        println(io, "## Scope")
+        println(io, "- T_MeV: $(cfg.T_MeV)")
+        println(io, "- rho window: $(cfg.rho_min) to $(cfg.rho_max)")
+        println(io, "- rho_anchor: $(cfg.rho_anchor)")
+        println(io, "- root Project.toml changed: false")
+        println(io)
+        println(io, "## Backend Comparison")
+        println(io, "| backend | branches | points | failures | jumps | residual max | wall-time s |")
+        println(io, "|---|---:|---:|---:|---:|---:|---:|")
+        for metric in metrics
+            println(io, "| $(metric.backend) | $(metric.branch_count) | $(metric.point_count) | $(metric.failure_count) | $(metric.branch_jump_count) | $(U._fmt(metric.residual_norm_max)) | $(U._fmt(metric.wall_time_s)) |")
+        end
+        println(io)
+        println(io, "## Decision")
+        println(io, "- recommendation: $(decision.recommendation)")
+        println(io, "- add_bifurcationkit_to_root_project: $(decision.add_bifurcationkit_to_root_project)")
+        println(io, "- keep_palc_in_analysis: $(decision.keep_palc_in_analysis)")
+        println(io, "- reason: $(decision.reason)")
+    end
+    return path
+end
+
+function _run_phase3_review(
+    model,
+    cfg::MultiBranchConfig,
+    palc_path_result::Main.Models.PathSolveResult,
+)
+    seed_result = _seed_path_reference(model, cfg)
+    solve_multi_result = _solve_multi_scan_reference(model, cfg)
+    palc_metrics = _path_result_metrics(:multi_branch_palc, palc_path_result, cfg)
+    seed_metrics = _path_result_metrics(:seed_continuation, seed_result, cfg)
+    solve_multi_metrics = _path_result_metrics(:solve_multi_scan, solve_multi_result, cfg)
+    metrics = (palc_metrics, seed_metrics, solve_multi_metrics)
+    decision = _phase3_decision(palc_metrics, seed_metrics, solve_multi_metrics)
+
+    comparison_path = joinpath(cfg.output_dir, "phase3_backend_comparison.csv")
+    summary_path = joinpath(cfg.output_dir, "phase3_formalization_review.json")
+    report_path = joinpath(cfg.output_dir, "phase3_formalization_review.md")
+    _write_phase3_comparison_csv(comparison_path, metrics)
+    review = (
+        metrics=metrics,
+        decision=decision,
+        artifacts=(
+            comparison_csv=comparison_path,
+            report=report_path,
+        ),
+    )
+    U._write_json(summary_path, review)
+    _write_phase3_report(report_path, cfg, metrics, decision)
+    return (; review..., artifacts=(; review.artifacts..., summary=summary_path))
 end
 
 function _write_report(path::String, cfg::MultiBranchConfig, roots, branch_summaries, groundstate_rows)
@@ -619,6 +1145,7 @@ function _config_dict(cfg::MultiBranchConfig)
         "branch_jump_tol" => cfg.branch_jump_tol,
         "root_distance_tol" => cfg.root_distance_tol,
         "pressure_gap_tol" => cfg.pressure_gap_tol,
+        "run_phase3_review" => cfg.run_phase3_review,
     )
 end
 
@@ -627,7 +1154,13 @@ function run(args::Vector{String}; repo_root::String)
     model = Main.Models.create_model(:PNJL)
     mkpath(cfg.output_dir)
 
-    roots, attempts = _discover_anchor_roots(model, cfg)
+    roots_ref = Ref{Any}(nothing)
+    attempts_ref = Ref{Any}(nothing)
+    anchor_wall_time_s = @elapsed begin
+        roots_ref[], attempts_ref[] = _discover_anchor_roots(model, cfg)
+    end
+    roots = roots_ref[]
+    attempts = attempts_ref[]
     isempty(roots) && error("anchor discovery produced no converged distinct roots")
     branches = NamedTuple[]
     for (idx, root) in enumerate(roots)
@@ -646,6 +1179,15 @@ function run(args::Vector{String}; repo_root::String)
     _write_groundstate_csv(groundstate_path, branches, cfg)
     branch_summaries = [_branch_summary(branch, cfg) for branch in branches]
     ground_rows = _groundstate_rows(branches, cfg)
+    path_result = _path_contract_result(
+        cfg,
+        roots,
+        branches,
+        ground_rows;
+        anchor_wall_time_s=anchor_wall_time_s,
+    )
+    path_contract_artifacts = _write_path_contract_outputs(cfg, path_result)
+    phase3_review = cfg.run_phase3_review ? _run_phase3_review(model, cfg, path_result) : nothing
     _write_report(report_path, cfg, roots, branch_summaries, ground_rows)
 
     summary = (
@@ -655,8 +1197,11 @@ function run(args::Vector{String}; repo_root::String)
             multibranch=branch_path,
             groundstate_selection=groundstate_path,
             report=report_path,
+            path_contract=path_contract_artifacts,
+            phase3_review=phase3_review === nothing ? nothing : phase3_review.artifacts,
         ),
         anchor_attempts=attempts,
+        anchor_wall_time_s=anchor_wall_time_s,
         anchor_roots=[(
             branch_id="branch_$(idx)",
             source=root.source,
@@ -668,6 +1213,15 @@ function run(args::Vector{String}; repo_root::String)
         ) for (idx, root) in enumerate(roots)],
         branch_summaries=branch_summaries,
         groundstate_sample_count=length(ground_rows),
+        path_contract=(
+            branch_count=length(path_result.branches),
+            selection_count=length(path_result.selections),
+            continuation_step_count=path_result.diagnostics.continuation_step_count,
+            failure_count=path_result.diagnostics.failure_count,
+            branch_jump_count=path_result.diagnostics.branch_jump_count,
+            wall_time_s=path_result.diagnostics.wall_time_s,
+        ),
+        phase3_review=phase3_review,
         experimental_backend_candidate=(length(roots) >= 2 && !isempty(ground_rows)),
     )
     U._write_json(summary_path, summary)
@@ -694,4 +1248,6 @@ end # module
 
 using .FixedAsymRhoMultiBranchPALCSpike
 
-FixedAsymRhoMultiBranchPALCSpike.main_run(ARGS; repo_root=REPO_ROOT)
+if abspath(PROGRAM_FILE) == @__FILE__
+    FixedAsymRhoMultiBranchPALCSpike.main_run(ARGS; repo_root=REPO_ROOT)
+end

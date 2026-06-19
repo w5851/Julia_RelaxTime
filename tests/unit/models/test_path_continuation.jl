@@ -142,6 +142,8 @@ end
         @test haskey(nt, :selections)
         @test haskey(nt, :anchors)
         @test haskey(nt, :diagnostics)
+        @test nt.path.path_kind === :fixed_asymmetric_rho
+        @test nt.path.rho_values == [0.1]
         @test nt.branches[1].branch_id === :high
         @test nt.selections[1].selected_branch_id === :high
         @test nt.diagnostics.continuation_backend === :seed_continuation

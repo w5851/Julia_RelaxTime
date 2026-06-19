@@ -125,5 +125,30 @@ Each multi-branch run writes:
 - `palc_fixedasymrho_anchor_roots.csv`
 - `palc_fixedasymrho_multibranch.csv`
 - `palc_fixedasymrho_groundstate_selection.csv`
+- `path_solve_result.json`
+- `path_branch_catalog.csv`
+- `path_groundstate_selection.csv`
+- `path_performance_summary.csv`
+- `phase3_backend_comparison.csv`
+- `phase3_formalization_review.json`
+- `phase3_formalization_review.md`
 - `multibranch_summary.json`
 - `multibranch_report.md`
+
+Run the aggregate formalization review over the two known multiroot targets:
+
+```sh
+julia --project=scripts/analysis/pnjl_bifurcation_spike scripts/analysis/pnjl_bifurcation_spike/review_fixedasymrho_palc_formalization.jl
+```
+
+This review runs:
+
+- `T=120 MeV, rho_anchor=0.35`
+- `T=130 MeV, rho_anchor=0.80`
+
+and compares `SeedContinuation`, independent pressure-governed `solve_multi`
+scan, and multi-branch PALC. The current formalization criterion is diagnostic:
+PALC may advance as an opt-in analysis backend when both scenarios expose
+distinct branches and explicit ground-state selections, but BifurcationKit stays
+out of the root `Project.toml` until broader regression, precompile, and
+production opt-in evidence justify changing the stable environment.

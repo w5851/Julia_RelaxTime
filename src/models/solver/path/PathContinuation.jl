@@ -524,7 +524,7 @@ function _run_seed_continuation_branch(
         (failure_count=failures, point_count=length(points)),
     )
     anchors = isempty(points) ? AnchorRoot[] : AnchorRoot[_anchor_from_branch_point(:seed_anchor_1, first(points), length(points))]
-    return branches=ContinuationBranch[branch], anchors=anchors, failure_count=failures
+    return (branches=ContinuationBranch[branch], anchors=anchors, failure_count=failures)
 end
 
 function _unsupported_palc_error(model::AbstractQCDModel, continuation::PALCContinuation)
@@ -636,9 +636,22 @@ end
     )
 end
 
+@inline function to_namedtuple(path::FixedAsymmetricRhoPath)
+    return (
+        path_kind=:fixed_asymmetric_rho,
+        T_fm=path.T_fm,
+        rho_values=path.rho_values,
+        ud_ratio_target=path.ud_ratio_target,
+        s_target=path.s_target,
+        xi=path.xi,
+        p_num=path.p_num,
+        t_num=path.t_num,
+    )
+end
+
 @inline function to_namedtuple(result::PathSolveResult)
     return (
-        path=result.path,
+        path=to_namedtuple(result.path),
         branches=[to_namedtuple(branch) for branch in result.branches],
         selections=[to_namedtuple(selection) for selection in result.selections],
         anchors=[to_namedtuple(anchor) for anchor in result.anchors],
