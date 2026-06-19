@@ -1,0 +1,161 @@
+{
+  "schema": "phase_guided_highxi_merge_manifest_v1",
+  "new_case": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+  "source_candidate_case": "p128_xi001_localdispatch_20260618_223856",
+  "download_root": "D:\\Temp\\phase_guided_highxi_p128_xi001_20260619_actions",
+  "source_run_count": 30,
+  "mode_summaries": {
+    "mode_a_fixed_muB_phase_scaled": {
+      "source_run_count": 15,
+      "failed_rows": 0,
+      "scan_rows": 909,
+      "diagnostic_rows": 38178,
+      "overlap": {
+        "duplicate_groups": 6,
+        "duplicate_rows_removed": 6,
+        "worst": {
+          "max_abs": 1.795710119090188e-05,
+          "max_rel": 4.014249626836331e-06,
+          "column": "tau_ubar",
+          "base_source": "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled",
+          "other_source": "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled"
+        },
+        "threshold": 0.001,
+        "passed": true
+      },
+      "diagnostic_overlap": {
+        "duplicate_groups": 252,
+        "duplicate_rows_removed": 252,
+        "worst": {
+          "max_abs": 2.7541473783445486e-07,
+          "max_rel": 0.00010079106168473472,
+          "column": "contribution",
+          "base_source": "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled",
+          "other_source": "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled"
+        },
+        "threshold": 0.001,
+        "passed": true
+      },
+      "anchor_matched_rows": 189,
+      "anchor_worst_rel": 1.125,
+      "anchor_worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "0.0000000000|1.2000000000|-0.2500000000",
+        "column": "rho_baryon",
+        "old_value": "-3.700743415417188e-17",
+        "new_value": "2.9605947323337506e-16",
+        "abs_delta": 3.3306690738754696e-16,
+        "rel_delta": 1.125
+      },
+      "effective_anchor_worst_rel": 8.453069929263162e-05,
+      "effective_anchor_worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "450.0000000000|1.1000000000|0.2500000000",
+        "column": "tau_ubar",
+        "old_value": "0.42514300433144586",
+        "new_value": "0.42510706669599035",
+        "abs_delta": 3.593763545550743e-05,
+        "rel_delta": 8.453069929263162e-05
+      },
+      "effective_anchor_rows": 2398,
+      "scan_validity": {
+        "nonfinite": 0,
+        "negative": 0
+      },
+      "diag_validity": {
+        "nonfinite": 0,
+        "negative": 0
+      },
+      "grid": {
+        "muB_MeV": [
+          0.0,
+          450.0,
+          900.0
+        ],
+        "alpha_T": [
+          1.0,
+          1.1,
+          1.2
+        ],
+        "xi": "-0.50:0.01:0.50",
+        "points": 909
+      }
+    },
+    "mode_b_fixed_T_sparse_muB": {
+      "source_run_count": 15,
+      "failed_rows": 0,
+      "scan_rows": 909,
+      "diagnostic_rows": 38178,
+      "overlap": {
+        "duplicate_groups": 6,
+        "duplicate_rows_removed": 6,
+        "worst": {
+          "max_abs": 1.4624734441248677e-06,
+          "max_rel": 1.2592914889160358e-06,
+          "column": "tauinv_sbar",
+          "base_source": "modeB_T200_muB450_xi_neg / fixed-T-sparse-muB",
+          "other_source": "modeB_T200_muB450_xi_pos / fixed-T-sparse-muB"
+        },
+        "threshold": 0.001,
+        "passed": true
+      },
+      "diagnostic_overlap": {
+        "duplicate_groups": 252,
+        "duplicate_rows_removed": 252,
+        "worst": {
+          "max_abs": 1.284033599498885e-07,
+          "max_rel": 1.8505303701415938e-05,
+          "column": "contribution",
+          "base_source": "modeB_T200_muB450_xi_neg / fixed-T-sparse-muB",
+          "other_source": "modeB_T200_muB450_xi_pos / fixed-T-sparse-muB"
+        },
+        "threshold": 0.001,
+        "passed": true
+      },
+      "anchor_matched_rows": 189,
+      "anchor_worst_rel": 1.0,
+      "anchor_worst": {
+        "mode": "mode_b_fixed_T_sparse_muB",
+        "key": "120.0000000000|0.0000000000|-0.3000000000",
+        "column": "rho_baryon",
+        "old_value": "0.0",
+        "new_value": "-1.264902534566422e-19",
+        "abs_delta": 1.264902534566422e-19,
+        "rel_delta": 1.0
+      },
+      "effective_anchor_worst_rel": 4.3754226027877324e-05,
+      "effective_anchor_worst": {
+        "mode": "mode_b_fixed_T_sparse_muB",
+        "key": "200.0000000000|450.0000000000|0.1500000000",
+        "column": "tau_ubar",
+        "old_value": "0.4067684726642741",
+        "new_value": "0.40675067482458016",
+        "abs_delta": 1.7797839693967088e-05,
+        "rel_delta": 4.3754226027877324e-05
+      },
+      "effective_anchor_rows": 2260,
+      "scan_validity": {
+        "nonfinite": 0,
+        "negative": 0
+      },
+      "diag_validity": {
+        "nonfinite": 0,
+        "negative": 0
+      },
+      "grid": {
+        "T_MeV": [
+          120.0,
+          160.0,
+          200.0
+        ],
+        "muB_MeV": [
+          0.0,
+          450.0,
+          900.0
+        ],
+        "xi": "-0.50:0.01:0.50",
+        "points": 909
+      }
+    }
+  }
+}

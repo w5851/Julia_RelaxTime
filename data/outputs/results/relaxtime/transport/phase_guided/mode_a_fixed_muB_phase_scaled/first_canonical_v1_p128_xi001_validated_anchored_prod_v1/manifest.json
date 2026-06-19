@@ -1,0 +1,108 @@
+{
+    "figure_hashes": {
+        "plot_manifest.json": "3f9e8a856c0298a863d7aacd2953a11b6afb5c81b1b7074b9a60141ba7d26adc"
+    },
+    "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+    "mode": "mode_a_fixed_muB_phase_scaled",
+    "gates": {
+        "chunk_overlap": {
+            "passed": true,
+            "duplicate_rows_removed": 6,
+            "threshold": 0.001,
+            "worst": {
+                "column": "tau_ubar",
+                "base_source": "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled",
+                "max_abs": 1.795710119090188e-5,
+                "max_rel": 4.014249626836331e-6,
+                "other_source": "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled"
+            },
+            "duplicate_groups": 6
+        },
+        "effective_anchor_worst_rel": 8.453069929263162e-5,
+        "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
+        "raw_anchor_worst_rel": 1.125,
+        "highxi_import_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi001_validated_anchored_prod_v1_convergence/highxi_anchor_comparison_to_p128_plus5.summary.json"
+    },
+    "hashes": {
+        "phase_guided_transport_scan.csv": "d2379f7b44d22b632896690cb96c4d6e95f76d28c69f295248d0bea92b0b71ec",
+        "sampling_plan.csv": "e23c6a7034979d194920a7fe706256ac5c91d397f15a9fd49fe4eaf20c63be24",
+        "effective_config.json": "76fa2f38decc5e7622705e17db85f137a7748dd82f629feec7312fe2aa06add7",
+        "failed_points.csv": "a68d994c1a2da147164c57caefec263ace3210fb315390e3ecf6a9d3d20b7de2",
+        "channel_diagnostics.csv": "1261beca5da5305c2cd95a45fc38aa277d91ebe077f3fa91558d63c76c873d66",
+        "README.md": "b4c40b3edaa7f642bad4dbc6797d03388832cee5c601a7d0e6fed4a2cc26b788",
+        "PRODUCTION_AUDIT.md": "11b6cc7f1879fbb7a1ef66a44acd14e36dc80617af8749784a0133e0f0ccb0b2"
+    },
+    "figure_files": [
+        "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
+        "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/**/*.png"
+    ],
+    "format": "phase_guided_transport_production_manifest_v1",
+    "verdict": "production-grade",
+    "source_candidate_case": "p128_xi001_localdispatch_20260618_223856",
+    "remote_workflow": ".github/workflows/relaxtime-phase-guided-transport-production.yml",
+    "grid": {
+        "points": 909,
+        "muB_MeV": [
+            0,
+            450,
+            900
+        ],
+        "alpha_T": [
+            1,
+            1.1,
+            1.2
+        ],
+        "xi": "-0.50:0.01:0.50"
+    },
+    "date": "2026-06-19",
+    "production_parameters": {
+        "tau_n_sigma_points": 24,
+        "tau_p_nodes": 128,
+        "tau_phi_nodes": 36,
+        "tau_angle_nodes": 20,
+        "sigma_grid_n": 560
+    },
+    "remote_runs_p128_xi001": {
+        "modeA_muB450_alpha1.1_xi_neg / fixed-muB-phase-scaled": "27801049250",
+        "modeA_muB0_alpha1.2 / fixed-muB-phase-scaled": "27767290118",
+        "modeA_muB0_alpha1.0 / fixed-muB-phase-scaled": "27767269161",
+        "modeA_muB450_alpha1.0_xi_neg / fixed-muB-phase-scaled": "27801045917",
+        "modeA_muB900_alpha1.2_xi_pos / fixed-muB-phase-scaled": "27801063331",
+        "modeA_muB900_alpha1.1_xi_pos / fixed-muB-phase-scaled": "27801060054",
+        "modeA_muB900_alpha1.2_xi_neg / fixed-muB-phase-scaled": "27801061784",
+        "modeA_muB450_alpha1.1_xi_pos / fixed-muB-phase-scaled": "27801050713",
+        "modeA_muB450_alpha1.0_xi_pos / fixed-muB-phase-scaled": "27801047811",
+        "modeA_muB0_alpha1.1 / fixed-muB-phase-scaled": "27767279847",
+        "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled": "27801057260",
+        "modeA_muB900_alpha1.1_xi_neg / fixed-muB-phase-scaled": "27801058728",
+        "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled": "27801055915",
+        "modeA_muB450_alpha1.2_xi_neg / fixed-muB-phase-scaled": "27801052225",
+        "modeA_muB450_alpha1.2_xi_pos / fixed-muB-phase-scaled": "27801054503"
+    },
+    "policies": {
+        "compute_bulk": true,
+        "channel_diagnostics": true,
+        "propagator_xi_policy": "match_thermo",
+        "sigma_cache_policy": "validated_anchored"
+    },
+    "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
+    "figure_summary": {
+        "min_png_bytes": 183723,
+        "png_count": 24,
+        "provenance_sidecar_count": 0
+    },
+    "known_limitations": [
+        "xi=0.01 grid reuses the validated p128 integration policy rather than rerunning p104-to-p128 convergence at every new xi point",
+        "new intermediate xi structures require local neighbor and channel-diagnostics review before physics interpretation"
+    ],
+    "result_files": [
+        "phase_guided_transport_scan.csv",
+        "sampling_plan.csv",
+        "channel_diagnostics.csv",
+        "failed_points.csv",
+        "effective_config.json",
+        "README.md",
+        "PRODUCTION_AUDIT.md",
+        "manifest.json"
+    ]
+}

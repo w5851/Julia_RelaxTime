@@ -1,0 +1,27 @@
+{
+  "format": "phase_guided_transport_highxi_import_gate_manifest_v1",
+  "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+  "date": "2026-06-19",
+  "verdict": "production-grade",
+  "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
+  "source_candidate_case": "p128_xi001_localdispatch_20260618_223856",
+  "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
+  "anchor_worst_rel": 1.125,
+  "effective_anchor_worst_rel": 8.453069929263162e-05,
+  "source_run_count": 30,
+  "files": [
+    "README.md",
+    "manifest.json",
+    "download_manifest.csv",
+    "merged_manifest.json",
+    "highxi_anchor_comparison_to_p128_plus5.csv",
+    "highxi_anchor_comparison_to_p128_plus5.summary.json",
+    "highxi_anchor_comparison_to_p128_plus5.md"
+  ],
+  "hashes": {
+    "download_manifest.csv": "18497203d06f7e1818cb3e71f22a1e94be6f76686b5bfbc35d884d6ba3ce1eb1",
+    "merged_manifest.json": "e5fdd061efa01015f1050dee34c123dff5465a885984fea3a0530ec3a2166c8a",
+    "highxi_anchor_comparison_to_p128_plus5.csv": "f7f3f4ddf1984652a97d661b39699a36ba7f73462a579a26ffd9325c7707fac4",
+    "highxi_anchor_comparison_to_p128_plus5.summary.json": "83e256dfdbb1216a7487c4e242c96e6ef7fe515fd494620f5ac5a4711899165d"
+  }
+}
