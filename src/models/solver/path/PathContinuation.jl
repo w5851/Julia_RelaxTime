@@ -11,6 +11,8 @@ abstract type AbstractAnchorStrategy end
 abstract type AbstractContinuationStrategy end
 abstract type AbstractBranchPolicy end
 
+const DEFAULT_PATH_BRANCH_JUMP_TOL = 0.25
+
 @inline function _path_finite_real(value, name::Symbol)::Float64
     value isa Real || throw(ArgumentError("$(name) must be Real, got $(typeof(value))"))
     out = Float64(value)
@@ -136,6 +138,8 @@ function default_fixedasymrho_anchor_strategy()
         ProductionLikeAnchor(1.0, 0.05, 0.25),
     ], 0.25)
 end
+
+struct SeedPoolAnchor <: AbstractAnchorStrategy end
 
 struct SeedContinuation <: AbstractContinuationStrategy
     evaluate_all_attempts::Bool
@@ -263,6 +267,7 @@ end
 @inline _strategy_symbol(::MultiSeedAnchor) = :multi_seed_anchor
 @inline _strategy_symbol(::ProductionLikeAnchor) = :production_like_anchor
 @inline _strategy_symbol(::CompositeAnchor) = :composite_anchor
+@inline _strategy_symbol(::SeedPoolAnchor) = :seed_pool_anchor
 @inline _strategy_symbol(::SeedContinuation) = :seed_continuation
 @inline _strategy_symbol(c::PALCContinuation) = c.backend
 @inline _policy_symbol(::GroundStateBranchPolicy) = :ground_state
@@ -371,10 +376,18 @@ function _ground_state_selections(
                 selected = candidate
             end
         end
+        runner = _runner_up(eligible, selected[1])
+        reason = :pressure_max_under_constraints
+        if runner !== nothing
+            pressure_gap = selected[2].pressure - runner[2].pressure
+            if isfinite(pressure_gap) && pressure_gap <= policy.pressure_gap_tol
+                reason = :pressure_degenerate_under_constraints
+            end
+        end
         push!(selections, _selection_from_point(
             param_value,
             selected[1],
-            :pressure_max_under_constraints,
+            reason,
             all_candidates,
             eligible,
             selected[2],
@@ -457,6 +470,51 @@ end
     )
 end
 
+function _solution_distance(a::AbstractVector{<:Real}, b::AbstractVector{<:Real})::Float64
+    length(a) == length(b) || return Inf
+    acc = 0.0
+    for idx in eachindex(a, b)
+        delta = Float64(a[idx]) - Float64(b[idx])
+        acc += delta * delta
+    end
+    return sqrt(acc)
+end
+
+function _branch_jump_metrics(points::AbstractVector{<:BranchPoint}; tol::Float64)
+    length(points) < 2 && return (count=0, max_jump=0.0)
+    count = 0
+    max_jump = 0.0
+    for idx in 2:length(points)
+        jump = _solution_distance(points[idx].solution, points[idx - 1].solution)
+        isfinite(jump) || continue
+        max_jump = max(max_jump, jump)
+        jump > tol && (count += 1)
+    end
+    return (count=count, max_jump=max_jump)
+end
+
+function _path_branch_jump_metrics(branches::AbstractVector{<:ContinuationBranch}; tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL)
+    tol_value = _path_positive_real(tol, :branch_jump_tol)
+    count = 0
+    max_jump = 0.0
+    for branch in branches
+        jumps = _branch_jump_metrics(branch.points; tol=tol_value)
+        count += jumps.count
+        max_jump = max(max_jump, jumps.max_jump)
+    end
+    return (count=count, max_jump=max_jump)
+end
+
+function _seed_continuation_anchor_messages(anchor_strategy::AbstractAnchorStrategy)
+    if anchor_strategy isa SeedPoolAnchor
+        return String["SeedContinuation uses previous-solution plus MultiSeed seed pools; no distinct anchor-root discovery is performed."]
+    end
+    throw(ArgumentError(
+        "anchor_strategy $(typeof(anchor_strategy)) is not supported with SeedContinuation; " *
+        "use SeedPoolAnchor() for the built-in seed-pool path, or keep multi-anchor discovery in the isolated PALC adapter.",
+    ))
+end
+
 @inline function _path_seed_key(seed_vec::AbstractVector{<:Real})
     return join(round.(Float64.(seed_vec); digits=12), ",")
 end
@@ -535,10 +593,11 @@ end
 function solve_path(
     model::AbstractQCDModel,
     path::FixedAsymmetricRhoPath;
-    anchor_strategy::AbstractAnchorStrategy=default_fixedasymrho_anchor_strategy(),
+    anchor_strategy::AbstractAnchorStrategy=SeedPoolAnchor(),
     continuation_strategy::AbstractContinuationStrategy=SeedContinuation(),
     branch_policy::AbstractBranchPolicy=GroundStateBranchPolicy(),
     diagnostic_level::Symbol=:summary,
+    branch_jump_tol::Real=DEFAULT_PATH_BRANCH_JUMP_TOL,
     kwargs...,
 )
     diagnostic_level in (:summary, :full) ||
@@ -549,11 +608,14 @@ function solve_path(
     elseif !(continuation_strategy isa SeedContinuation)
         throw(ArgumentError("unsupported continuation_strategy type $(typeof(continuation_strategy))"))
     end
+    messages = _seed_continuation_anchor_messages(anchor_strategy)
+    jump_tol = _path_positive_real(branch_jump_tol, :branch_jump_tol)
 
     started = time()
     run = _run_seed_continuation_branch(model, path, continuation_strategy; kwargs...)
     selected = apply_branch_policy(run.branches, branch_policy)
     wall_time_s = time() - started
+    branch_jumps = _path_branch_jump_metrics(run.branches; tol=jump_tol)
     diagnostics = PathDiagnostics(
         _strategy_symbol(continuation_strategy),
         _strategy_symbol(anchor_strategy),
@@ -562,8 +624,8 @@ function solve_path(
         length(run.anchors),
         sum(length(branch.points) for branch in run.branches),
         Int(run.failure_count),
-        0,
-        String[],
+        branch_jumps.count,
+        messages,
     )
     return PathSolveResult(path, selected.branches, selected.selections, run.anchors, diagnostics)
 end

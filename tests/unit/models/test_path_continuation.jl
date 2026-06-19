@@ -42,6 +42,7 @@ end
 
 @testset "PathContinuation" begin
     @test isdefined(Models, :FixedAsymmetricRhoPath)
+    @test isdefined(Models, :SeedPoolAnchor)
     @test isdefined(Models, :SeedContinuation)
     @test isdefined(Models, :PALCContinuation)
     @test isdefined(Models, :GroundStateBranchPolicy)
@@ -81,6 +82,22 @@ end
         @test all(selection -> selection.candidate_branch_count == 3, result.selections)
         @test result.selections[1].runner_up_branch_id === :low
         @test result.selections[1].pressure_gap == 2.0
+    end
+
+    @testset "GroundStateBranchPolicy marks pressure-degenerate selections" begin
+        high = _toy_branch(:high, [10.0])
+        near = _toy_branch(:near, [9.9995])
+
+        result = Models.apply_branch_policy(
+            Models.ContinuationBranch[high, near],
+            Models.GroundStateBranchPolicy(1e-3, 1e-6),
+        )
+
+        @test length(result.selections) == 1
+        @test result.selections[1].selected_branch_id === :high
+        @test result.selections[1].runner_up_branch_id === :near
+        @test result.selections[1].selection_reason === :pressure_degenerate_under_constraints
+        @test result.selections[1].pressure_gap ≈ 5e-4 atol=1e-12
     end
 
     @testset "ContinuationBranchPolicy preserves requested branch" begin
@@ -125,6 +142,30 @@ end
             path;
             continuation_strategy=Models.PALCContinuation(),
         )
+    end
+
+    @testset "SeedContinuation diagnostics do not claim unused anchor discovery" begin
+        model = Main.PathContinuationDummyModel()
+        path = Models.FixedAsymmetricRhoPath(1.0, [0.1])
+        @test_throws ArgumentError Models.solve_path(
+            model,
+            path;
+            anchor_strategy=Models.MultiSeedAnchor(),
+        )
+    end
+
+    @testset "Path branch jump metrics count state discontinuities" begin
+        points = Models.BranchPoint[
+            Models.BranchPoint(0.1, [0.0, 0.0], [0.0], [0.0, 0.0, 0.0], 1.0, 0.1, 1e-8, true, :toy, 1),
+            Models.BranchPoint(0.2, [0.1, 0.1], [0.1], [0.0, 0.0, 0.0], 1.1, 0.2, 1e-8, true, :toy, 2),
+            Models.BranchPoint(0.3, [2.0, 2.0], [2.0], [0.0, 0.0, 0.0], 1.2, 0.3, 1e-8, true, :toy, 3),
+        ]
+        branch = Models.ContinuationBranch(:toy, :toy_anchor, :toy, points, :complete, NamedTuple())
+
+        jumps = Models._path_branch_jump_metrics(Models.ContinuationBranch[branch]; tol=0.5)
+
+        @test jumps.count == 1
+        @test jumps.max_jump ≈ sqrt(1.9^2 + 1.9^2)
     end
 
     @testset "PathSolveResult converts to stable named tuples" begin
