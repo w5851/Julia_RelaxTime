@@ -1,6 +1,6 @@
 {
     "figure_hashes": {
-        "plot_manifest.json": "3f9e8a856c0298a863d7aacd2953a11b6afb5c81b1b7074b9a60141ba7d26adc"
+        "plot_manifest.json": "2611e47fcf55617ab5e30c8806f452b337f09602560a9479104bce8e0673c1b5"
     },
     "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
     "mode": "mode_a_fixed_muB_phase_scaled",
@@ -26,11 +26,11 @@
     "hashes": {
         "phase_guided_transport_scan.csv": "d2379f7b44d22b632896690cb96c4d6e95f76d28c69f295248d0bea92b0b71ec",
         "sampling_plan.csv": "e23c6a7034979d194920a7fe706256ac5c91d397f15a9fd49fe4eaf20c63be24",
-        "effective_config.json": "76fa2f38decc5e7622705e17db85f137a7748dd82f629feec7312fe2aa06add7",
+        "effective_config.json": "34b5db79141ede0d11723b074ce5972e864e42d1dd0779794ca35bad55084671",
         "failed_points.csv": "a68d994c1a2da147164c57caefec263ace3210fb315390e3ecf6a9d3d20b7de2",
         "channel_diagnostics.csv": "1261beca5da5305c2cd95a45fc38aa277d91ebe077f3fa91558d63c76c873d66",
-        "README.md": "b4c40b3edaa7f642bad4dbc6797d03388832cee5c601a7d0e6fed4a2cc26b788",
-        "PRODUCTION_AUDIT.md": "11b6cc7f1879fbb7a1ef66a44acd14e36dc80617af8749784a0133e0f0ccb0b2"
+        "README.md": "fd723046af126b7fd66457e03ef74663bd21272b661c389698c8c48f3ec7209a",
+        "PRODUCTION_AUDIT.md": "02ce47cfd321f33706c5548d1e5aec9c63bac919e3a38c21daeaa1ee1fe09633"
     },
     "figure_files": [
         "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
@@ -72,8 +72,8 @@
         "modeA_muB900_alpha1.2_xi_neg / fixed-muB-phase-scaled": "27801061784",
         "modeA_muB450_alpha1.1_xi_pos / fixed-muB-phase-scaled": "27801050713",
         "modeA_muB450_alpha1.0_xi_pos / fixed-muB-phase-scaled": "27801047811",
-        "modeA_muB0_alpha1.1 / fixed-muB-phase-scaled": "27767279847",
         "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled": "27801057260",
+        "modeA_muB0_alpha1.1 / fixed-muB-phase-scaled": "27767279847",
         "modeA_muB900_alpha1.1_xi_neg / fixed-muB-phase-scaled": "27801058728",
         "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled": "27801055915",
         "modeA_muB450_alpha1.2_xi_neg / fixed-muB-phase-scaled": "27801052225",
@@ -87,8 +87,8 @@
     },
     "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
     "figure_summary": {
-        "min_png_bytes": 183723,
-        "png_count": 24,
+        "min_png_bytes": 182923,
+        "png_count": 36,
         "provenance_sidecar_count": 0
     },
     "known_limitations": [

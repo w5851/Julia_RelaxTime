@@ -6,6 +6,21 @@ const PLOT_SCRIPT = joinpath(PROJECT_ROOT, "scripts", "plot_scan_csv.py")
 using JSON3
 using SHA: sha256
 
+const PHASE_GUIDED_Y_COLUMNS = (
+    "tau_u",
+    "tau_d",
+    "tau_s",
+    "tau_ubar",
+    "tau_dbar",
+    "tau_sbar",
+    "eta",
+    "sigma",
+    "zeta",
+    "eta_over_s",
+    "zeta_over_s",
+    "sigma_over_T",
+)
+
 struct Options
     case_dir::String
     csv_path::String
@@ -273,7 +288,7 @@ function _append_readme(case_dir::String, fig_dir::String, layout)
     open(readme_path, "w") do io
         write(io, text)
         println(io, marker)
-        println(io, "- `tau_u`, `tau_d`, `tau_s`, `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` all plot against `xi`")
+        println(io, "- `", join(PHASE_GUIDED_Y_COLUMNS, "`, `"), "` all plot against `xi`")
         println(io, "- panel rule: `$(layout.panel_desc)`")
         println(io, "- line rule: `$(layout.series_desc)`")
         println(io, "- plot manifest: `$(replace(relpath(joinpath(fig_dir, "plot_manifest.json"), PROJECT_ROOT), '\\' => '/'))`")
@@ -296,7 +311,7 @@ function run_phase_guided_plots(opts::Options)
     end
     mkpath(opts.fig_dir)
 
-    for y in ("tau_u", "tau_d", "tau_s", "eta", "sigma", "zeta", "eta_over_s", "sigma_over_T")
+    for y in PHASE_GUIDED_Y_COLUMNS
         _run_plot(py, opts.csv_path, opts.fig_dir, y; split=layout.split, group=layout.group)
     end
 

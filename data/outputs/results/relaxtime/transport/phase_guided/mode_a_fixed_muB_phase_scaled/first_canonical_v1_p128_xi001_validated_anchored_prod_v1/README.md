@@ -62,7 +62,7 @@ Canonical figures are stored in:
 This case supersedes neither `first_canonical_v1_p128_validated_anchored_prod_v1` nor its convergence evidence. It is the same p128 validated-anchored numerical policy sampled on a denser `xi` grid. Claims that depend on newly resolved local structures should still check neighboring points and channel diagnostics.
 
 ## Generated Figures
-- `tau_u`, `tau_d`, `tau_s`, `eta`, `sigma`, `zeta`, `eta_over_s`, `sigma_over_T` all plot against `xi`
+- `tau_u`, `tau_d`, `tau_s`, `tau_ubar`, `tau_dbar`, `tau_sbar`, `eta`, `sigma`, `zeta`, `eta_over_s`, `zeta_over_s`, `sigma_over_T` all plot against `xi`
 - panel rule: `fixed mu_B panel`
 - line rule: `alpha_T lines with explicit T`
 - plot manifest: `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json`
@@ -73,22 +73,34 @@ Generated PNG files:
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/sigma_over_T_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/sigma_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_d_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_dbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_s_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_sbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_u_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/tau_ubar_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/zeta_over_s_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB0.0/zeta_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/eta_over_s_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/eta_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/sigma_over_T_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/sigma_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_d_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_dbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_s_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_sbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_u_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/tau_ubar_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/zeta_over_s_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB450.0/zeta_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/eta_over_s_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/eta_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/sigma_over_T_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/sigma_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_d_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_dbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_s_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_sbar_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_u_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/tau_ubar_vs_xi.png`
+- `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/zeta_over_s_vs_xi.png`
 - `data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_panel=muB900.0/zeta_vs_xi.png`
