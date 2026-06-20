@@ -13,6 +13,7 @@ const OUTREADME = joinpath(OUTDIR, "README.md")
 const ASYM_PLUS_PROFILE = joinpath(PROJECT_ROOT, "config", "physics", "meson_chemical", "asymmetric_kplus_over_piplus_signed.toml")
 const ASYM_MINUS_PROFILE = joinpath(PROJECT_ROOT, "config", "physics", "meson_chemical", "asymmetric_kminus_over_piminus_signed.toml")
 const RUN_COMBINED_MESON_DENSITY_CLI = lowercase(get(ENV, "RUN_COMBINED_MESON_DENSITY_CLI_SMOKE", "0")) in ("1", "true", "yes")
+const RUN_COMBINED_MESON_DENSITY_BRANCH_NUMERIC = lowercase(get(ENV, "RUN_COMBINED_MESON_DENSITY_BRANCH_NUMERIC", "0")) in ("1", "true", "yes")
 
 if !isdefined(Main, :CombinedMesonDensityScanContract)
     include(CONTRACT)
@@ -59,6 +60,9 @@ const CMD_CONTRACT = Main.CombinedMesonDensityScanContract
 
     @test "constraint_mode" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test "rho_u_over_rho_d" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "equilibrium_pressure_fm4" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "trho_seed_candidate_count" in CMD_CONTRACT.OUTPUT_COLUMNS
+    @test "trho_branch_policy" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test "mu_pi_MeV" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test "phase_display" in CMD_CONTRACT.OUTPUT_COLUMNS
     @test :phase_shift_gbu_reference in CMD_CONTRACT.DEFAULT_REGIMES
@@ -128,7 +132,12 @@ end
     @test occursin("combined_meson_density_scan_contract.jl", source)
     @test occursin("function _run_trho_asymmetric_scan", source)
     @test occursin("trho_reverse_rho", source)
-    @test occursin("temperature_grouped_rho_continuity", source)
+    @test occursin("TRHO_ASYMMETRIC_BRANCH_POLICY", source)
+    @test occursin("pressure_max_all_attempts_multiseed", source)
+    @test occursin("Models.get_all_seeds(Models.MultiSeed()", source)
+    @test occursin("Models.solve_multi", source)
+    @test occursin("evaluate_all_attempts=true", source)
+    @test !occursin("temperature_grouped_rho_continuity", source)
     @test occursin("Models.FixedAsymmetricRho", source)
     @test occursin("solve_meson_point_from_equilibrium", source)
     @test occursin("function _heatmap_axis_config", source)
@@ -153,4 +162,56 @@ end
     @test occursin("mu_K_rule = \"mu_u_minus_mu_s_signed\"", minus)
     @test occursin("pi_label = \"pi_minus\"", minus)
     @test occursin("k_label = \"K_minus\"", minus)
+end
+
+if RUN_COMBINED_MESON_DENSITY_BRANCH_NUMERIC
+    if !isdefined(Main, :Constants_PNJL)
+        include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
+    end
+    if !isdefined(Main, :Models)
+        include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
+    end
+
+    @testset "combined meson density FixedAsymmetricRho branch numeric guard" begin
+        M = Main.Models
+        C = Main.Constants_PNJL
+        model = M.create_model(:PNJL)
+        T_fm = 120.0 / C.ħc_MeV_fm
+        mode = M.FixedAsymmetricRho(0.35, 0.876, 0.0)
+        low_pressure_seed = Float64[
+            -5.256876612,
+            -5.248708963,
+            1.908006051,
+            0.096899284,
+            0.158964021,
+            520.069332664 / C.ħc_MeV_fm,
+            529.922361410 / C.ħc_MeV_fm,
+            26.774361556 / C.ħc_MeV_fm,
+        ]
+        multiseeds = M.get_all_seeds(M.MultiSeed(), [T_fm], mode)
+        seed_pool = M.build_seed_pool(mode;
+            primary_seed=low_pressure_seed,
+            extra_seed_pool=multiseeds,
+            seed_extend=(seed, _) -> Float64.(seed),
+        )
+        result = M.solve_multi(
+            model,
+            mode,
+            T_fm;
+            seeds=[entry.seed for entry in seed_pool],
+            xi=0.0,
+            p_num=8,
+            t_num=4,
+            iterations=20,
+            semantic_mode=:ground_state,
+            evaluate_all_attempts=true,
+        )
+
+        @test result.converged
+        @test result.residual_norm <= 1e-6
+        @test result.pressure > 21.0
+        @test result.mu_vec[1] * C.ħc_MeV_fm < 350.0
+    end
+else
+    @info "Skipping slow FixedAsymmetricRho branch numeric guard" env="RUN_COMBINED_MESON_DENSITY_BRANCH_NUMERIC"
 end
