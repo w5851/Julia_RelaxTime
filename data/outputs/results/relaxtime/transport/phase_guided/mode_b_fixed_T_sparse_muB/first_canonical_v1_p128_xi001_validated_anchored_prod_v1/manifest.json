@@ -1,6 +1,6 @@
 {
     "figure_hashes": {
-        "plot_manifest.json": "21f4984d7eadcd45f60b4b1898c3367dd50473d181daa2d39234fa4abda39b8d"
+        "plot_manifest.json": "2a742515ce3921f2e021ee8ae5dfe2d1d46165b6b5a226aa7d6226617f607424"
     },
     "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
     "mode": "mode_b_fixed_T_sparse_muB",
@@ -26,11 +26,11 @@
     "hashes": {
         "phase_guided_transport_scan.csv": "8d4813ff88c581b777063a219cbca002a21506e995033c4f1ea64f269ce358b0",
         "sampling_plan.csv": "4d6abe9e6f72c2aee6ed57a50ca2d78c2f3db31beb876754ec85e73d56e469d6",
-        "effective_config.json": "9bc73f0da4c860aba9b1a7925d51630ecdf65a73d5a5fb89a8ad200e9ad14983",
+        "effective_config.json": "be54765cfb13de1b3f79263d24f7f9857c1fb4858aa82a8f3c32dd038c2ea6ba",
         "failed_points.csv": "a68d994c1a2da147164c57caefec263ace3210fb315390e3ecf6a9d3d20b7de2",
         "channel_diagnostics.csv": "9ba789558cdec1b8175893a417ad3826f6c4f03a2ec679ec07bec10f7f24da42",
-        "README.md": "97f4b59d8bd87d76658ad9dfdec3498cea69836986489cc9eeba22874a65188f",
-        "PRODUCTION_AUDIT.md": "2376a5e11d5a7dac83be75d792d55fb9a98c7a00c3f93237827c2d89cbcffa51"
+        "README.md": "cc25d6019c40784afd10d43c732e48c95a21f631ef02a94315e0717c8f545506",
+        "PRODUCTION_AUDIT.md": "55fa30ee2552103f9a498a53a6d6411a1643c5f4a5097e9daa17cf9240f4144d"
     },
     "figure_files": [
         "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
@@ -88,7 +88,7 @@
     "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
     "figure_summary": {
         "min_png_bytes": 147205,
-        "png_count": 24,
+        "png_count": 36,
         "provenance_sidecar_count": 0
     },
     "known_limitations": [

@@ -1,0 +1,4 @@
+attempt_id,scope,channel_limit,coverage_threshold,high_p_nodes,high_angle_nodes,high_phi_nodes,high_n_sigma_points,high_sigma_grid_n,status,local_elapsed_limit_s,analysis_impact
+attempt_1,denominator_plus_convergence,4,0.70,160,24,40,28,720,aborted_local_budget,600,No convergence rows produced; denominator scan rerun separately without high gate.
+attempt_2,convergence_only,3,1.01,144,22,38,26,640,aborted_local_budget,660,No convergence rows produced; mode B mechanism remains candidate because rate reproduction mismatch is unresolved.
+attempt_3,convergence_only,2,1.01,132,21,37,25,600,aborted_local_budget,480,No convergence rows produced; mode A denominator mechanism remains supported by rate reproduction at production parameters, but not by an additional high gate.

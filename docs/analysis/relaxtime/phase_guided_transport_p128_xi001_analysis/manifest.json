@@ -1,0 +1,153 @@
+{
+  "schema": "phase_guided_transport_p128_xi001_tau_jump_analysis_manifest_v1",
+  "case": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+  "created_at": "2026-06-20T09:33:19.684762+00:00",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py",
+  "git_commit": "7c5ebf7196ab0d9169e792c588024768413025f9",
+  "scope": "repository-only tau-first jump analysis; downstream transport coefficients treated as responses",
+  "inputs": [
+    {
+      "mode_key": "mode_a",
+      "scan_rows": 909,
+      "channel_rows": 38178,
+      "failed_rows": 0,
+      "xi_count": 101,
+      "xi_min": -0.5,
+      "xi_max": 0.5,
+      "xi_step": 0.01,
+      "plot_count": 36,
+      "has_antiquark_tau_fields": true,
+      "has_zeta_over_s": true,
+      "scan_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
+      "channel_diagnostics_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/channel_diagnostics.csv",
+      "plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
+      "scan_sha256": "d2379f7b44d22b632896690cb96c4d6e95f76d28c69f295248d0bea92b0b71ec",
+      "diagnostics_sha256": "1261beca5da5305c2cd95a45fc38aa277d91ebe077f3fa91558d63c76c873d66"
+    },
+    {
+      "mode_key": "mode_b",
+      "scan_rows": 909,
+      "channel_rows": 38178,
+      "failed_rows": 0,
+      "xi_count": 101,
+      "xi_min": -0.5,
+      "xi_max": 0.5,
+      "xi_step": 0.01,
+      "plot_count": 36,
+      "has_antiquark_tau_fields": true,
+      "has_zeta_over_s": true,
+      "scan_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
+      "channel_diagnostics_csv": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/channel_diagnostics.csv",
+      "plot_manifest": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json",
+      "scan_sha256": "8d4813ff88c581b777063a219cbca002a21506e995033c4f1ea64f269ce358b0",
+      "diagnostics_sha256": "9ba789558cdec1b8175893a417ad3826f6c4f03a2ec679ec07bec10f7f24da42"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/README.md",
+      "sha256": "60f4ff5df0badd8e9690b77cb0035587481d6d14663dc664d7ef0655bc41b770",
+      "bytes": 10235
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/tau_jump_windows_overview.png",
+      "sha256": "d888d79e405c2e1c1b93099343425195bef67ddd7e703a3545b20d906d4d6f79",
+      "bytes": 458034
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/downstream_response_windows.png",
+      "sha256": "2329eefd221f18dfca04eba9a6a0f7e5b1f1b3fb57c0331f1fc5e8985dbf7db5",
+      "bytes": 497041
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/plot_manifest.json",
+      "sha256": "8de97d86bb1e4318e7baddc3f045cda1d0834c044ed3fefcadaf7d8a689a8966",
+      "bytes": 2557
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/input_inventory.csv",
+      "sha256": "48c9f19d000b2235bea6cf8af5cb576413ee5418da193fc445c60c87b5334bb9",
+      "bytes": 1549
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_step_candidates.csv",
+      "sha256": "3329deeae155e134ad1ecb92e85378ab44b2dc3e61573d241078a5f63e82aae1",
+      "bytes": 27606
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_window_summary.csv",
+      "sha256": "cc4275fb5587018237375dfc6b38ba40548af15de6d7d94a242d24a0e6438885",
+      "bytes": 8220
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_channel_attribution.csv",
+      "sha256": "f9e2fd1317fcf9e5239e220bc92953a8313c681d21d8f21bc4fa12f3871ffb1b",
+      "bytes": 57461
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/downstream_transport_response_summary.csv",
+      "sha256": "399700e9d31ae3d230a6ddfe1d25eca01fd1fa1101ecf0807b5dc079ee5369ad",
+      "bytes": 6823
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv",
+      "sha256": "0b47d5e5b174ad7f3ac1df395bf8de17b5e8fd78cb613e703ab6e8341036f8f9",
+      "bytes": 3645
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/claim_ledger.csv",
+      "sha256": "9fc68ba3649302303fcb8fa2ca006754247df7e7bdba3f78a449354d4a46ee03",
+      "bytes": 5512
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_summary.csv",
+      "sha256": "f0bca37aece6944b66ecd4c71fbf85b34a4f9316e9144486c46ef57c879fdb7b",
+      "bytes": 4003
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_summary.csv",
+      "sha256": "b9a044e35bf88f0e041e6d342f3947498a3167da7b06215c630ce593d5791a74",
+      "bytes": 15357
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_band_table.csv",
+      "sha256": "9193ff2ef7c8d79a08c1c11bd094c4bbfe85a1a2212ab4c4c26e30fbd1981888",
+      "bytes": 119814
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_ds_samples.csv",
+      "sha256": "539380000d346e969b6ad41d1cf5b3e55b70f30a6ceb62beefc8df34ddf8012c",
+      "bytes": 217951
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/upstream_branch_smoothness_summary.csv",
+      "sha256": "22f461321b18a00ccdc1b09332e0418e1e3b7d3daab865ee71c67d26c2288482",
+      "bytes": 810
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/global_nonmonotonic_mechanism_summary.csv",
+      "sha256": "dd8ce31beacf5fd0bed7530d064c30a0d3908abee3a07006300eb9c9614001dd",
+      "bytes": 98
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_reproduction_mismatch_root_cause.csv",
+      "sha256": "453a8f79fd2acbd8554ce071b5a1b37d1fcc3fbe06cf661cc5f80afc07d2ed5d",
+      "bytes": 665
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_gate.csv",
+      "sha256": "f23cfa51788a6c028956eb1c91622f7b887d82c5df03c0ed88ca4a060856fe10",
+      "bytes": 367
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_attempts.csv",
+      "sha256": "426f13d25e715084f9e06fba50c4385681ec0f24a3878f96ca95e0a7e2b90bf5",
+      "bytes": 776
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_manifest.json",
+      "sha256": "199293bbb9f02b491e8c2fd7b5f301b22fbda2ad6723b12648f7558ec28196f7",
+      "bytes": 1007
+    }
+  ]
+}

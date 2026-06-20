@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analysis Artifact"
+  short_description: "Traceable analysis packs from repo evidence."
+  default_prompt: "Use $analysis-artifact to generate a traceable analysis package from repository evidence."
