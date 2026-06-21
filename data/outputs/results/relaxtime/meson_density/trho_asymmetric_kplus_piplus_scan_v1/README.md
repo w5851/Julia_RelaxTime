@@ -15,7 +15,8 @@ This directory contains the formal `FixedAsymmetricRho` density-constrained
 - Regimes: `stable`, `strict_bw_stage1`, `phase_shift_current`, `phase_shift_gbu_reference`
 - Phase-shift policy: `density_policy=x_min_cut`, `bose_x_min=1e-2`
 - Policy scope: `x_min_cut` applies only to BU/GBU phase-shift regimes; stable/BW keep strict Bose-domain diagnostics.
-- Upstream branch policy: `trho_reverse_rho=true`, `trho_seed_policy=temperature_grouped_rho_continuity`
+- Original upstream branch policy: `trho_reverse_rho=true`, `trho_seed_policy=temperature_grouped_rho_continuity`
+- Targeted branch repair: three known branch-unstable points were recomputed on 2026-06-20 with `trho_branch_policy=pressure_max_all_attempts_multiseed`.
 
 ## Production Outputs
 
@@ -29,9 +30,10 @@ This directory contains the formal `FixedAsymmetricRho` density-constrained
 
 ## Rendering
 
-The original figure-side SVG was a rendering-only issue: it used `muq_MeV`
+The original figure-side SVG was a rendering issue: it used `muq_MeV`
 as the heatmap x-axis, while this production case is scanned on the regular
-`rho_target` axis. The CSV data were not recomputed.
+`rho_target` axis. After the 2026-06-20 branch repair described below, both
+CSV and figures were updated.
 
 Corrected plot-only commands:
 
@@ -41,9 +43,33 @@ python scripts/analysis/relaxtime/render_combined_meson_density_fig3_like.py --c
 ```
 
 The corrected heatmap uses `rho_target` for x, `T_MeV` for y, and
-`kpi_ratio` for color with a logarithmic color scale. A few bright cells are
-real large-ratio rows in the CSV, not residual coordinate artifacts; the log
-scale is used only for visualization and does not change the stored data.
+`kpi_ratio` for color with a logarithmic color scale. The log scale is used
+only for visualization and does not change the stored data.
+
+## Targeted Branch Repair
+
+On 2026-06-20, this artifact was updated after the upstream
+`FixedAsymmetricRho` multi-root handling was fixed. The original production
+scan selected a lower-pressure equilibrium branch at three isolated points.
+Those points were recomputed locally with the same v1 numerical parameters and
+the current upstream policy `pressure_max_all_attempts_multiseed`; only the
+corresponding 12 CSV rows were replaced.
+
+Repair evidence is stored under:
+
+- `data/outputs/results/relaxtime/meson_density/trho_asymmetric_kplus_piplus_scan_v1/branch_repair_20260620/`
+
+Repaired points:
+
+| point | old issue | repaired `mu_u,mu_d,mu_s` MeV | repaired `phase_shift_current K/pi` | repaired `GBU K/pi` |
+| --- | --- | ---: | ---: | ---: |
+| `T=120 MeV, rho=0.35` | lower-pressure branch, extreme ratio | `290.818, 299.261, 31.377` | `82.607025` | `129.863384` |
+| `T=130 MeV, rho=0.80` | lower-pressure branch, extreme ratio | `288.492, 298.823, 16.971` | `88.127569` | `137.065471` |
+| `T=210 MeV, rho=0.90` | weak branch/order-sensitive point in old artifact | `46.552, 53.019, 0.121` | `12.372666` | `1.144906` |
+
+The rest of the grid was not recomputed in this repair pass. New branch
+diagnostic fields are therefore populated for repaired rows and may be empty for
+original rows.
 
 ## Convergence Gate
 
@@ -63,11 +89,11 @@ Upstream branch stability in the same check: `muq_MeV`, `m_pi_MeV`, and
 
 ## Status Counts
 
-Production rows: `880` total, with `ok=660` and `unsafe_bose_domain=220`.
+Production rows: `880` total, with `ok=661` and `unsafe_bose_domain=219`.
 
 By regime:
 
-- `stable`: `ok=207`, `unsafe_bose_domain=13`
+- `stable`: `ok=208`, `unsafe_bose_domain=12`
 - `strict_bw_stage1`: `ok=13`, `unsafe_bose_domain=207`
 - `phase_shift_current`: `ok=220`
 - `phase_shift_gbu_reference`: `ok=220`
