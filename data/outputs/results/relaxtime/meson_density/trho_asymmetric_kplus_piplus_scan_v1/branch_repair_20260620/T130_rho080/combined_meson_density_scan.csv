@@ -1,0 +1,24 @@
+# format: combined_meson_density_scan_v1
+# script: scripts/relaxtime/run_combined_meson_density_scan.jl
+# date: 2026-06-20
+# bridge: path_strategy x density_regime
+# path_strategy: trho_asymmetric
+# regimes: stable,strict_bw_stage1,phase_shift_current,phase_shift_gbu_reference
+# muq_values_MeV: not_applicable
+# rho_values: 0.800000
+# trho_reverse_rho: true
+# trho_branch_policy: pressure_max_all_attempts_multiseed
+# asym_ud_ratio_target: 0.876
+# asym_s_target: 0.0
+# real_axis_mode: pv_b0_eta0
+# phase_display: fold_0_pi
+# density_policy: x_min_cut
+# bose_x_min: 0.01
+# density_policy_scope: phase_shift_current,phase_shift_gbu_reference
+# noanom_policy: none
+# gamma_zero_tol: 1.0e-12
+path_strategy,path_point_index,T_MeV,muq_MeV,muB_MeV,xi,constraint_mode,rho_target,rho_norm,rho_u_fm3,rho_d_fm3,rho_s_fm3,rho_u_over_rho_d,asym_ud_ratio_target,asym_s_target,constraint_residual_norm,equilibrium_pressure_fm4,trho_seed_candidate_count,trho_branch_policy,mu_u_MeV,mu_d_MeV,mu_s_MeV,muQ_MeV,muS_MeV,flavor_profile,meson_profile,pi_channel,k_channel,charge_resolved,mu_pi_MeV,mu_K_MeV,d_pi,d_K,regime,phase_scheme,strict_bw_stage,real_axis_mode,eta,density_policy,noanom_policy,phase_convention,phase_display,qmax,q_nodes,omega_min,omega_max,omega_nodes,gamma_zero_tol,Phi,Phibar,m_u,m_d,m_s,m_pi_MeV,m_K_MeV,gamma_pi_MeV,gamma_K_MeV,n_pi,n_K,kpi_ratio,unsafe_bose_count,min_E_minus_mu,bose_x_min,noanom_removed_component_count,status,message
+trho_asymmetric,1,130.000000,201.428860,886.139018,0.000000,FixedAsymmetricRho,0.800000,0.800000,0.179309,0.204691,-0.000000,0.876000,0.876000,0.000000,0.000000,21.669509,6,pressure_max_all_attempts_multiseed,288.492142,298.823438,16.971000,-10.331296,281.852437,default,asymmetric_kplus_over_piplus_signed,pi_plus,K_plus,true,-10.331296,271.521142,1,1,stable,,,,,not_applicable,none,,,,768,,,,,0.152474,0.199728,1.516843,1.500483,2.632722,140.419028,283.293627,NaN,NaN,0.022765,0.165437,7.267098,,,,,ok,
+trho_asymmetric,1,130.000000,201.428860,886.139018,0.000000,FixedAsymmetricRho,0.800000,0.800000,0.179309,0.204691,-0.000000,0.876000,0.876000,0.000000,0.000000,21.669509,6,pressure_max_all_attempts_multiseed,288.492142,298.823438,16.971000,-10.331296,281.852437,default,asymmetric_kplus_over_piplus_signed,pi_plus,K_plus,true,-10.331296,271.521142,1,1,strict_bw_stage1,,,,,,,,,,,,,,,0.152474,0.199728,1.516843,1.500483,2.632722,NaN,NaN,NaN,NaN,NaN,NaN,NaN,,,,,unsafe_bose_domain,"ArgumentError: strict BW omega_min must exceed μ to avoid Bose pole, got omega_min=0.05, μ=1.37599603118678"
+trho_asymmetric,1,130.000000,201.428860,886.139018,0.000000,FixedAsymmetricRho,0.800000,0.800000,0.179309,0.204691,-0.000000,0.876000,0.876000,0.000000,0.000000,21.669509,6,pressure_max_all_attempts_multiseed,288.492142,298.823438,16.971000,-10.331296,281.852437,default,asymmetric_kplus_over_piplus_signed,pi_plus,K_plus,true,-10.331296,271.521142,1,1,phase_shift_current,phase_shift_current,,pv_b0_eta0,0.000000,x_min_cut,none,arg_inverse_propagator,fold_0_pi,4.000000,192,0.050000,4.000000,192,,0.152474,0.199728,1.516843,1.500483,2.632722,140.419028,283.293627,NaN,NaN,0.102501,9.033185,88.127569,75,-1.325996,0.010000,0,ok,
+trho_asymmetric,1,130.000000,201.428860,886.139018,0.000000,FixedAsymmetricRho,0.800000,0.800000,0.179309,0.204691,-0.000000,0.876000,0.876000,0.000000,0.000000,21.669509,6,pressure_max_all_attempts_multiseed,288.492142,298.823438,16.971000,-10.331296,281.852437,default,asymmetric_kplus_over_piplus_signed,pi_plus,K_plus,true,-10.331296,271.521142,1,1,phase_shift_gbu_reference,phase_shift_gbu_reference,,pv_b0_eta0,0.000000,x_min_cut,none,arg_inverse_propagator,fold_0_pi,4.000000,192,0.050000,4.000000,192,,0.152474,0.199728,1.516843,1.500483,2.632722,140.419028,283.293627,NaN,NaN,0.022126,3.032668,137.065471,75,-1.325996,0.010000,0,ok,

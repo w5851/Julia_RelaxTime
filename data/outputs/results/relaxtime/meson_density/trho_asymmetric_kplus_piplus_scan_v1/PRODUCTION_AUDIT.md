@@ -24,7 +24,8 @@ Date: 2026-06-08
 
 ## Policies
 
-- Upstream branch policy: `trho_reverse_rho=true`, `trho_seed_policy=temperature_grouped_rho_continuity`
+- Original upstream branch policy: `trho_reverse_rho=true`, `trho_seed_policy=temperature_grouped_rho_continuity`
+- Targeted branch repair policy: `pressure_max_all_attempts_multiseed` for the three repaired rows listed below.
 - Phase policy: `real_axis_mode=pv_b0_eta0`, `phase_convention=arg_inverse_propagator`, `phase_display=fold_0_pi`
 - BU/GBU density policy: `density_policy=x_min_cut`, `bose_x_min=1e-2`
 - Scope of x-min policy: `phase_shift_current` and `phase_shift_gbu_reference` only
@@ -41,6 +42,33 @@ Selected production parameters:
 - `qmax=4.0 fm^-1`, `q_nodes=192`
 - `omega_min=0.05 fm^-1`, `omega_max=4.0 fm^-1`, `omega_nodes=192`
 - `gamma_zero_tol=1e-12`
+
+## 2026-06-20 Targeted Branch Repair
+
+After the upstream `FixedAsymmetricRho` multi-root handling was corrected on
+`origin/main` (`36ef39d5cc57313d147a06175f9272260ec4c1f5`), three known
+branch-unstable points were recomputed locally with the same production
+resolution parameters and `pressure_max_all_attempts_multiseed`.
+
+Only the following `(T_MeV, rho_target)` points were replaced in
+`combined_meson_density_scan.csv`; the rest of the grid remains from the
+original remote production run:
+
+| point | repaired pressure | repaired `mu_u,mu_d,mu_s` MeV | repaired `phase_shift_current K/pi` | repaired `GBU K/pi` |
+| --- | ---: | ---: | ---: | ---: |
+| `120, 0.35` | `21.637623` | `290.817904, 299.260782, 31.377466` | `82.607025` | `129.863384` |
+| `130, 0.80` | `21.669509` | `288.492142, 298.823438, 16.971000` | `88.127569` | `137.065471` |
+| `210, 0.90` | `23.366310` | `46.551793, 53.019408, 0.120852` | `12.372666` | `1.144906` |
+
+Repair evidence:
+
+- `branch_repair_20260620/T120_rho035/combined_meson_density_scan.csv`
+- `branch_repair_20260620/T130_rho080/combined_meson_density_scan.csv`
+- `branch_repair_20260620/T210_rho090/combined_meson_density_scan.csv`
+
+The repair changes row-level branch selection, not the density integration
+resolution. It does not constitute a full-grid rerun under the new branch
+policy.
 
 ## Convergence Matrix
 
@@ -95,19 +123,16 @@ Figure-side correction note:
 - The corrected SVG and PNG were rendered locally from the existing production
   CSV using `--x-field rho_target --x-label "rho/rho0" --x-unit ""` and
   `--color-scale log`.
-- No density data, convergence evidence, or production CSV rows were recomputed
-  for this plot-only correction.
-- The largest bright cells are present in the source CSV: e.g.
-  `phase_shift_gbu_reference` has `kpi_ratio=11481.086618` at
-  `T=130 MeV, rho_target=0.8`, and `kpi_ratio=10833.443521` at
-  `T=120 MeV, rho_target=0.35`.
-- Those extreme ratios come from the quotient itself: at the two GBU points
-  `n_pi=0.004475, n_K=51.382839` and `n_pi=0.004690, n_K=50.805504`,
-  respectively. The same coordinates also carry nonzero `unsafe_bose_count`
-  under the explicit BU/GBU `x_min_cut` policy, while strict stable/BW either
-  remain unsafe or are only comparison diagnostics.
+- The 2026-06-20 figure refresh uses the branch-repaired CSV. The previous
+  isolated bright cells at `T=120 MeV, rho_target=0.35` and
+  `T=130 MeV, rho_target=0.80` were traced to lower-pressure
+  `FixedAsymmetricRho` branch selection, not to rendering or density
+  quadrature.
+- After repair, the maximum finite `kpi_ratio` in the rendered heatmap is
+  `260.526881` at `T=120 MeV, rho_target=1.00` in
+  `phase_shift_gbu_reference`.
 - The logarithmic color scale is a figure-only display policy chosen to keep
-  the full finite range visible without clipping the extreme cells.
+  the full finite range visible.
 
 ## Validation Commands And Results
 
@@ -128,4 +153,5 @@ Actions runs listed above are the authoritative long-run evidence.
 - Stable and strict BW contain strict-domain `unsafe_bose_domain` rows under the selected `K+ / pi+` profile; those rows are not finite density values.
 - BW remains a comparison regime and should not be used alone as the formal physical conclusion.
 - The `x_min_cut` treatment is an explicit project policy for BU/GBU phase-shift regimes, not a unique prescription from the literature.
+- The 2026-06-20 repair was targeted to three known branch-unstable points and did not rerun the full grid under the new branch policy.
 - The formal conclusion is scoped to this grid, profile, and policy; changing charged channel, asymmetry targets, or `bose_x_min` requires a new convergence gate.
