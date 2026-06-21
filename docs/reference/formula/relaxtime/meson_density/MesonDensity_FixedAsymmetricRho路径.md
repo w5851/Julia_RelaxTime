@@ -44,6 +44,41 @@
 不得用介子数密度后处理中的 `number_densities(...).quark` 或任意 meson
 density 结果反推这些约束字段。
 
+### 2.1 `0.876` 默认值的来源
+
+项目内把 `asym_ud_ratio_target = 0.876` 解释为 `rho_Q/rho_B = 0.4`
+同位旋不对称口径在 flavor density 约束中的历史默认值，而不是新的拟合参数。
+
+在 quark density 记号下：
+
+```math
+\rho_B = \frac{\rho_u + \rho_d + \rho_s}{3},
+```
+
+```math
+\rho_Q = \frac{2}{3}\rho_u - \frac{1}{3}\rho_d - \frac{1}{3}\rho_s.
+```
+
+因此：
+
+```math
+\frac{\rho_Q}{\rho_B}
+= \frac{2\rho_u - \rho_d - \rho_s}{\rho_u+\rho_d+\rho_s}.
+```
+
+当默认同时取 `asym_s_target = 0` 时，令
+`r = rho_u/rho_d`，有：
+
+```math
+\frac{\rho_Q}{\rho_B} = \frac{2r - 1}{r + 1}.
+```
+
+若严格令 `rho_Q/rho_B = 0.4`，则 `r = 0.875`。当前默认值
+`0.876` 是沿用组内老 Fortran 路径的历史近似口径，对应
+`rho_Q/rho_B \approx 0.40085`。因此文档、脚本和产物中应把
+`0.876` 说明为 `rho_Q/rho_B = 0.4` 口径的默认实现，而不要把它
+误解为独立可调的物理拟合常数。
+
 ## 3. 接入介子数密度
 
 平衡态求解完成后，workflow adapter 将 `SolverResult` 转换为：
