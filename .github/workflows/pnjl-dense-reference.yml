@@ -11,7 +11,7 @@ on:
       xi_values:
         description: '显式 ξ 列表（逗号分隔；为空时使用区间参数）'
         required: false
-        default: "-0.5,-0.2,0.0,0.2"
+        default: ""
         type: string
       xi_min:
         description: "ξ 最小值（仅在 xi_values 为空时使用）"
@@ -58,6 +58,26 @@ on:
         required: false
         default: "0.05"
         type: string
+      p_num:
+        description: "gap/thermo 动量积分节点"
+        required: false
+        default: "24"
+        type: string
+      t_num:
+        description: "gap/thermo 角度积分节点"
+        required: false
+        default: "8"
+        type: string
+      iterations:
+        description: "求解迭代上限"
+        required: false
+        default: "80"
+        type: string
+      crossover_only:
+        description: "仅生成 crossover reference；false 时生成 boundary/CEP/spinodal/crossover 全 reference"
+        required: false
+        default: true
+        type: boolean
       crossover_mu0_only:
         description: "仅生成 mu_q = 0 的 crossover 点"
         required: false
@@ -131,10 +151,16 @@ jobs:
             --rho-min "${{ inputs.rho_min || '0.0' }}"
             --rho-max "${{ inputs.rho_max || '4.0' }}"
             --rho-step "${{ inputs.rho_step || '0.05' }}"
+            --p-num "${{ inputs.p_num || '24' }}"
+            --t-num "${{ inputs.t_num || '8' }}"
+            --iterations "${{ inputs.iterations || '80' }}"
             --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
             --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
-            --crossover-only
           )
+
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            cmd+=(--crossover-only)
+          fi
 
           if [ -n "${{ inputs.xi_values }}" ]; then
             cmd+=(--xi-list "${{ inputs.xi_values }}")
@@ -158,22 +184,32 @@ jobs:
           "${cmd[@]}"
 
       - name: Validate dense reference artifact
+        shell: bash
         run: |
-          python scripts/pnjl/validate_dense_reference_artifact.py \
-            --reference-root "${REFERENCE_ROOT}" \
-            --tag "${{ inputs.tag || 'dense' }}" \
-            --min-crossover-rows 1 \
-            --expect-crossover-only \
-            ${{ inputs.crossover_mu0_only == true && '--expect-mu0-only' || '' }} \
+          validate_cmd=(
+            python scripts/pnjl/validate_dense_reference_artifact.py
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag || 'dense' }}"
+            --min-crossover-rows 1
             --report-path "${REPORT_PATH}"
+          )
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            validate_cmd+=(--expect-crossover-only)
+          else
+            validate_cmd+=(--expect-full-reference)
+          fi
+          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
+            validate_cmd+=(--expect-mu0-only)
+          fi
+          "${validate_cmd[@]}"
 
       - name: Upload dense reference artifact
         uses: actions/upload-artifact@v4
         with:
           name: pnjl-dense-reference-${{ inputs.tag || 'dense' }}
           path: |
-            ${{ env.REFERENCE_ROOT }}/crossover_${{ inputs.tag || 'dense' }}.csv
-            ${{ env.REFERENCE_ROOT }}/crossover_${{ inputs.tag || 'dense' }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.csv
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.meta.json
             ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag || 'dense' }}_manifest.json
             ${{ env.REPORT_PATH }}
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
@@ -197,7 +233,8 @@ jobs:
               fh.write("- requested xi_values input: `${{ inputs.xi_values }}`\n")
               fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV (step `${{ inputs.T_step || '5' }}`)\n")
               fh.write(f"- rho range: `${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }}` rho0 (step `${{ inputs.rho_step || '0.05' }}`)\n")
-              fh.write("- crossover_only: `true` (fixed in workflow v1)\n")
+              fh.write(f"- p_num/t_num/iterations: `${{ inputs.p_num || '24' }}` / `${{ inputs.t_num || '8' }}` / `${{ inputs.iterations || '80' }}`\n")
+              fh.write("- crossover_only: `${{ inputs.crossover_only }}`\n")
               fh.write(f"- crossover_mu0_only: `{str(report['mu0_only']).lower()}`\n")
               fh.write(f"- crossover_n_mu: `${{ inputs.crossover_n_mu || '16' }}`\n")
               fh.write(f"- crossover_mu_max: `${{ inputs.crossover_mu_max || '450' }}` MeV\n\n")

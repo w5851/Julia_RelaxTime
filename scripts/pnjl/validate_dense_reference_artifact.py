@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument("--tag", required=True, help="Artifact tag suffix")
     parser.add_argument("--min-crossover-rows", type=int, default=1, help="Minimum expected data rows in crossover csv")
     parser.add_argument("--expect-crossover-only", action="store_true", help="Assert that only crossover artifacts are present")
+    parser.add_argument("--expect-full-reference", action="store_true", help="Assert that boundary, CEP, spinodal, and crossover artifacts are present")
     parser.add_argument("--expect-mu0-only", action="store_true", help="Assert that all mu_MeV values are zero")
     parser.add_argument("--report-path", help="Optional JSON report output path")
     return parser.parse_args()
@@ -35,6 +36,23 @@ def load_csv_rows(path: Path):
     return reader.fieldnames or [], rows
 
 
+def require_columns(fieldnames, required, artifact_name: str):
+    missing = [name for name in required if name not in fieldnames]
+    if missing:
+        fail(f"{artifact_name} missing required columns: {missing}; found {fieldnames}")
+
+
+def validate_manifest_artifact(artifacts, artifact_name: str, csv_path: Path, row_count: int, repo_root: Path):
+    info = artifacts.get(artifact_name, {})
+    if not info:
+        fail(f"manifest missing artifacts.{artifact_name}")
+    if info.get("row_count") != row_count:
+        fail(f"manifest artifacts.{artifact_name}.row_count does not match csv row count")
+    expected_relpath = normalize_relpath(csv_path, repo_root)
+    if info.get("path") != expected_relpath:
+        fail(f"manifest artifacts.{artifact_name}.path mismatch: expected {expected_relpath}, got {info.get('path')}")
+
+
 def normalize_relpath(path: Path, root: Path) -> str:
     try:
         return path.relative_to(root).as_posix()
@@ -50,8 +68,13 @@ def main():
     crossover_csv = reference_root / f"crossover_{args.tag}.csv"
     crossover_meta = reference_root / f"crossover_{args.tag}.meta.json"
     manifest_path = reference_root / f"phase_reference_{args.tag}_manifest.json"
+    boundary_csv = reference_root / f"boundary_{args.tag}.csv"
+    cep_csv = reference_root / f"cep_{args.tag}.csv"
+    spinodal_csv = reference_root / f"spinodals_{args.tag}.csv"
 
     required_paths = [crossover_csv, crossover_meta, manifest_path]
+    if args.expect_full_reference:
+        required_paths.extend([boundary_csv, cep_csv, spinodal_csv])
     for path in required_paths:
         if not path.is_file():
             fail(f"missing required artifact: {path}")
@@ -60,7 +83,7 @@ def main():
     if len(rows) < args.min_crossover_rows:
         fail(f"crossover row count {len(rows)} < required minimum {args.min_crossover_rows}")
 
-    expected_columns = [
+    required_crossover_columns = [
         "xi",
         "mu_MeV",
         "T_crossover_MeV",
@@ -70,8 +93,7 @@ def main():
         "derivative",
         "variable",
     ]
-    if fieldnames != expected_columns:
-        fail(f"unexpected crossover columns: {fieldnames}")
+    require_columns(fieldnames, required_crossover_columns, "crossover")
 
     meta = load_json(crossover_meta)
     manifest = load_json(manifest_path)
@@ -96,17 +118,40 @@ def main():
         fail("manifest crossover_mu0_only flag does not match workflow expectation")
 
     artifacts = manifest.get("artifacts", {})
-    crossover_artifact = artifacts.get("crossover", {})
-    if crossover_artifact.get("row_count") != len(rows):
-        fail("manifest artifacts.crossover.row_count does not match crossover csv row count")
-    expected_manifest_relpath = normalize_relpath(crossover_csv, repo_root)
-    if crossover_artifact.get("path") != expected_manifest_relpath:
-        fail("manifest artifacts.crossover.path does not match crossover csv path")
+    validate_manifest_artifact(artifacts, "crossover", crossover_csv, len(rows), repo_root)
 
     if args.expect_crossover_only:
         unexpected = [name for name in ("boundary", "cep", "spinodals") if name in artifacts]
         if unexpected:
             fail(f"unexpected non-crossover artifacts present: {unexpected}")
+
+    full_artifact_reports = {}
+    if args.expect_full_reference:
+        if args.expect_crossover_only:
+            fail("--expect-full-reference conflicts with --expect-crossover-only")
+        expected_non_crossover = {
+            "boundary": (
+                boundary_csv,
+                ["xi", "T_MeV", "mu_transition_MeV", "rho_hadron", "rho_quark"],
+            ),
+            "cep": (
+                cep_csv,
+                ["xi", "T_CEP_MeV", "muq_CEP_MeV", "muB_CEP_MeV"],
+            ),
+            "spinodals": (
+                spinodal_csv,
+                ["xi", "T_MeV", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark"],
+            ),
+        }
+        for artifact_name, (csv_path, required_columns) in expected_non_crossover.items():
+            artifact_fields, artifact_rows = load_csv_rows(csv_path)
+            require_columns(artifact_fields, required_columns, artifact_name)
+            validate_manifest_artifact(artifacts, artifact_name, csv_path, len(artifact_rows), repo_root)
+            full_artifact_reports[artifact_name] = {
+                "rows": len(artifact_rows),
+                "xi_values": sorted({float(row["xi"]) for row in artifact_rows}) if artifact_rows else [],
+                "columns": artifact_fields,
+            }
 
     xi_values = sorted({float(row["xi"]) for row in rows})
     mu_values = sorted({float(row["mu_MeV"]) for row in rows})
@@ -138,7 +183,15 @@ def main():
             "crossover_meta": normalize_relpath(crossover_meta, repo_root),
             "manifest": normalize_relpath(manifest_path, repo_root),
         },
+        "full_reference_artifacts": full_artifact_reports,
     }
+
+    if args.expect_full_reference:
+        report["files"].update({
+            "boundary_csv": normalize_relpath(boundary_csv, repo_root),
+            "cep_csv": normalize_relpath(cep_csv, repo_root),
+            "spinodal_csv": normalize_relpath(spinodal_csv, repo_root),
+        })
 
     if args.report_path:
         report_path = Path(args.report_path).resolve()
