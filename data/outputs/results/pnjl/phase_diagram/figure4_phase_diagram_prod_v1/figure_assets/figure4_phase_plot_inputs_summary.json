@@ -1,0 +1,87 @@
+{
+  "schema_version": "figure4_phase_plot_inputs_summary_v1",
+  "phase_reference_root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference",
+  "phase_reference_tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+  "source_xi_values": [
+    -0.5,
+    -0.45,
+    -0.4,
+    -0.35,
+    -0.3,
+    -0.25,
+    -0.2,
+    -0.15,
+    -0.1,
+    -0.05,
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5
+  ],
+  "plotted_xi_values": [
+    -0.5,
+    -0.25,
+    0.0,
+    0.25,
+    0.5
+  ],
+  "include_spinodal": false,
+  "axis_conversion": {
+    "boundary": "muB_MeV = 3 * mu_transition_MeV",
+    "crossover": "muB_MeV = 3 * mu_MeV",
+    "spinodals": "muB_MeV = 3 * mu_spinodal_*_MeV",
+    "cep": "muB_CEP_MeV is used directly when present; otherwise muB_MeV = 3 * muq_CEP_MeV"
+  },
+  "rho_units": "rho/rho0",
+  "visual_connector_policy": {
+    "Trho_CEP": "Plotting-only connector rows are added to the T-rho figure asset so that the coexistence branches and crossover curve visually pass through the CEP. The formal source data remain unchanged.",
+    "CEP_rho_coordinate": "mean boundary density at the nearest available boundary temperature for the same xi"
+  },
+  "counts": {
+    "source": {
+      "boundary_rows": 304,
+      "cep_rows": 21,
+      "crossover_rows": 336,
+      "spinodal_rows": 304
+    },
+    "TmuB_assets": {
+      "rows_by_kind": {
+        "cep": 21,
+        "crossover": 336,
+        "first_order": 304,
+        "spinodal": 608
+      },
+      "plotted_rows_by_kind": {
+        "cep": 5,
+        "crossover": 80,
+        "first_order": 72
+      }
+    },
+    "Trho_assets": {
+      "rows_by_kind": {
+        "cep": 21,
+        "coexistence": 650,
+        "crossover": 357,
+        "spinodal": 608
+      },
+      "plotted_rows_by_kind": {
+        "cep": 5,
+        "coexistence": 154,
+        "crossover": 85
+      }
+    }
+  },
+  "source_manifest_verdict": "production-grade",
+  "source_manifest_residual_risks": [
+    "C2 refined check covers anchor xi values rather than a full refined xi grid.",
+    "Crossover rho and derivative diagnostics have larger relative differences at some high-order points; core T-muB phase-line observables remain stable.",
+    "Spinodal layer is production data but should remain optional in default figure design."
+  ]
+}

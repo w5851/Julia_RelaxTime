@@ -1,0 +1,166 @@
+{
+  "schema_version": "figure4_phase_diagram_plot_manifest_v1",
+  "generated_at_utc": "2026-07-05T14:46:55.659373+00:00",
+  "script": "scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py",
+  "command": "D:\\Python313\\python.exe scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py",
+  "git_commit": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+  "phase_reference": {
+    "root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference",
+    "tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+    "source_manifest": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/phase_reference_source_manifest.json",
+    "source_verdict": "production-grade"
+  },
+  "source_xi_values": [
+    -0.5,
+    -0.45,
+    -0.4,
+    -0.35,
+    -0.3,
+    -0.25,
+    -0.2,
+    -0.15,
+    -0.1,
+    -0.05,
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4,
+    0.45,
+    0.5
+  ],
+  "plotted_xi_values": [
+    -0.5,
+    -0.25,
+    0.0,
+    0.25,
+    0.5
+  ],
+  "include_spinodal": false,
+  "formats": [
+    "png",
+    "pdf"
+  ],
+  "dpi": 300,
+  "figsize_inches": [
+    7.6,
+    3.8
+  ],
+  "axis_conversion": {
+    "boundary": "muB_MeV = 3 * mu_transition_MeV",
+    "crossover": "muB_MeV = 3 * mu_MeV",
+    "spinodals": "muB_MeV = 3 * mu_spinodal_*_MeV",
+    "cep": "muB_CEP_MeV is used directly when present; otherwise muB_MeV = 3 * muq_CEP_MeV"
+  },
+  "rho_units": "rho/rho0",
+  "visual_connector_policy": {
+    "Trho_CEP": "Plotting-only connector rows are added to the T-rho figure asset so that the coexistence branches and crossover curve visually pass through the CEP. The formal source data remain unchanged.",
+    "CEP_rho_coordinate": "mean boundary density at the nearest available boundary temperature for the same xi"
+  },
+  "inputs": [
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/boundary_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "sha256": "355c0912d625ea8306d93e33b9760b37f88b304bc405f52530e57ebf79156f0b",
+      "bytes": 23660
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/cep_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "sha256": "1fe32db5b456295c73db6a232958e21bd8d1c2250942042d48c043da95851324",
+      "bytes": 1221
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "sha256": "49c43490c082cc0cb8264bd6f430f9aadd6950879c7360b546c32e552b793f2e",
+      "bytes": 43316
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/spinodals_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "sha256": "754369d75a6a5ea7fddfd0d52c11904664f934205711a7da75b9804fb1b56d5d",
+      "bytes": 29167
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/phase_reference_source_manifest.json",
+      "sha256": "64f244e0a91266303582bb1a3dc69c390d9e68456800eb21b2924e4e142b91c4",
+      "bytes": 3038
+    }
+  ],
+  "result_side_assets": [
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_TmuB.csv",
+      "sha256": "a65addae0a348f50b4ad76b4c3eda391db5afa4044db8340dcbadfa51bdd253d",
+      "bytes": 302273
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_Trho.csv",
+      "sha256": "d6dce7fdfb39cc16aa0ed4ef95f7039fd49786685da60db406e466a2c25b0fc9",
+      "bytes": 424655
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_plot_inputs_summary.json",
+      "sha256": "e892d6580556c3999dd1ca6788bba6abfed7f0829ca359cb19f4c6bd6642e7e7",
+      "bytes": 2426
+    }
+  ],
+  "figures": [
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.png",
+      "sha256": "758b1bc6598017b9be71f0556e57d331b45327583b79d8ee5ec0e29a23386380",
+      "bytes": 259060
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf",
+      "sha256": "fbfbe7789530becccb700fb6f908a9b87ecf02cfd4640822b9e62ad2e0838da1",
+      "bytes": 27218
+    }
+  ],
+  "counts": {
+    "source": {
+      "boundary_rows": 304,
+      "cep_rows": 21,
+      "crossover_rows": 336,
+      "spinodal_rows": 304
+    },
+    "TmuB_assets": {
+      "rows_by_kind": {
+        "cep": 21,
+        "crossover": 336,
+        "first_order": 304,
+        "spinodal": 608
+      },
+      "plotted_rows_by_kind": {
+        "cep": 5,
+        "crossover": 80,
+        "first_order": 72
+      }
+    },
+    "Trho_assets": {
+      "rows_by_kind": {
+        "cep": 21,
+        "coexistence": 650,
+        "crossover": 357,
+        "spinodal": 608
+      },
+      "plotted_rows_by_kind": {
+        "cep": 5,
+        "coexistence": 154,
+        "crossover": 85
+      }
+    }
+  },
+  "style": {
+    "first_order": "solid colored line",
+    "crossover": "short dashed colored line",
+    "cep": "star marker",
+    "spinodal": "dotted low-alpha colored line when include_spinodal=true",
+    "default_spinodal_layer": "off"
+  },
+  "residual_risks": [
+    "C2 refined check covers anchor xi values rather than a full refined xi grid.",
+    "Crossover rho and derivative diagnostics have larger relative differences at some high-order points; core T-muB phase-line observables remain stable.",
+    "Spinodal layer is production data but should remain optional in default figure design."
+  ]
+}

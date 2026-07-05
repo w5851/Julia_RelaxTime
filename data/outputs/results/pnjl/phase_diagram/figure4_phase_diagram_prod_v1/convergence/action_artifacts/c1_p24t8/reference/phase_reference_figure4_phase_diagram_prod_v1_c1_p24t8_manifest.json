@@ -1,0 +1,270 @@
+{
+    "config": {
+        "crossover_mu_max_MeV": 450,
+        "crossover_only": false,
+        "mode": "production",
+        "crossover_mu0_only": false,
+        "xi_values": [
+            -0.5,
+            -0.45,
+            -0.4,
+            -0.35,
+            -0.3,
+            -0.25,
+            -0.2,
+            -0.15,
+            -0.1,
+            -0.05,
+            0.0,
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5
+        ],
+        "T_step_MeV": 5,
+        "crossover_method": "peak",
+        "rho_step": 0.05,
+        "t_num": 8,
+        "crossover_n_mu": 16,
+        "iterations": 80,
+        "compute_crossover": true,
+        "T_max_MeV": 240,
+        "tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+        "T_min_MeV": 60,
+        "crossover_variable": "phi_u",
+        "rho_max": 4,
+        "p_num": 24,
+        "rho_min": 0
+    },
+    "output_root": "data/processed/pnjl/ci_dense_reference/28736257287",
+    "generator": {
+        "git_commit": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+        "crossover_only": false,
+        "script": "scripts/pnjl/build_dense_phase_reference.jl",
+        "crossover_mu0_only": false,
+        "generated_at": "2026-07-05T09:36:09Z"
+    },
+    "runs": [
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p500",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_093621",
+            "spinodal_count": 18,
+            "boundary_count": 18,
+            "xi": -0.5,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p450",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_094139",
+            "spinodal_count": 18,
+            "boundary_count": 18,
+            "xi": -0.45,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p400",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_094637",
+            "spinodal_count": 17,
+            "boundary_count": 17,
+            "xi": -0.4,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p350",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_095119",
+            "spinodal_count": 17,
+            "boundary_count": 17,
+            "xi": -0.35,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p300",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_095625",
+            "spinodal_count": 17,
+            "boundary_count": 17,
+            "xi": -0.3,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p250",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_100219",
+            "spinodal_count": 16,
+            "boundary_count": 16,
+            "xi": -0.25,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p200",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_100825",
+            "spinodal_count": 16,
+            "boundary_count": 16,
+            "xi": -0.2,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p150",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_101421",
+            "spinodal_count": 16,
+            "boundary_count": 16,
+            "xi": -0.15,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p100",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_102020",
+            "spinodal_count": 15,
+            "boundary_count": 15,
+            "xi": -0.1,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_m0p050",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_102557",
+            "spinodal_count": 15,
+            "boundary_count": 15,
+            "xi": -0.05,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p000",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_103153",
+            "spinodal_count": 15,
+            "boundary_count": 15,
+            "xi": 0,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p050",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_103804",
+            "spinodal_count": 14,
+            "boundary_count": 14,
+            "xi": 0.05,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p100",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_104408",
+            "spinodal_count": 14,
+            "boundary_count": 14,
+            "xi": 0.1,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p150",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_104958",
+            "spinodal_count": 14,
+            "boundary_count": 14,
+            "xi": 0.15,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p200",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_105623",
+            "spinodal_count": 13,
+            "boundary_count": 13,
+            "xi": 0.2,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p250",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_110341",
+            "spinodal_count": 13,
+            "boundary_count": 13,
+            "xi": 0.25,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p300",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_111028",
+            "spinodal_count": 12,
+            "boundary_count": 12,
+            "xi": 0.3,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p350",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_111756",
+            "spinodal_count": 12,
+            "boundary_count": 12,
+            "xi": 0.35,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p400",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_112453",
+            "spinodal_count": 11,
+            "boundary_count": 11,
+            "xi": 0.4,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p450",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_113233",
+            "spinodal_count": 11,
+            "boundary_count": 11,
+            "xi": 0.45,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28736257287/xi_0p500",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_113907",
+            "spinodal_count": 10,
+            "boundary_count": 10,
+            "xi": 0.5,
+            "crossover_count": 16
+        }
+    ],
+    "schema_version": "v1",
+    "artifacts": {
+        "manifest": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/phase_reference_figure4_phase_diagram_prod_v1_c1_p24t8_manifest.json"
+        },
+        "crossover_meta": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.meta.json"
+        },
+        "cep": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/cep_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+            "row_count": 21
+        },
+        "crossover": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+            "row_count": 336
+        },
+        "spinodals": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/spinodals_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+            "row_count": 304
+        },
+        "boundary": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference/boundary_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+            "row_count": 304
+        }
+    },
+    "reference_root": "data/outputs/artifacts/pnjl_dense_reference/28736257287/reference"
+}

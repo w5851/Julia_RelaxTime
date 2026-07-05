@@ -1,0 +1,235 @@
+{
+  "schema_version": "figure4_phase_diagram_result_manifest_v1",
+  "generated_at_utc": "2026-07-05T15:33:44.2254682Z",
+  "case_slug": "figure4_phase_diagram_prod_v1",
+  "verdict": "production-grade",
+  "git_commit": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+  "result_root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1",
+  "figure_root": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1",
+  "phase_reference_tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+  "source_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/28736257287",
+  "convergence_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/28741709519",
+  "plotted_xi_values": [
+    -0.5,
+    -0.25,
+    0.0,
+    0.25,
+    0.5
+  ],
+  "source_xi_coverage": {
+    "min": -0.5,
+    "max": 0.5,
+    "step": 0.05,
+    "count": 21
+  },
+  "default_include_spinodal": false,
+  "trho_visual_connector_policy": "plotting-only CEP_visual_connector rows connect coexistence and crossover curves through CEP; formal reference CSV files are unchanged",
+  "result_files": [
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/boundary_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "convergence_evidence",
+      "bytes": 23660,
+      "sha256": "355c0912d625ea8306d93e33b9760b37f88b304bc405f52530e57ebf79156f0b"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/cep_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "convergence_evidence",
+      "bytes": 1221,
+      "sha256": "1fe32db5b456295c73db6a232958e21bd8d1c2250942042d48c043da95851324"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "convergence_evidence",
+      "bytes": 43316,
+      "sha256": "49c43490c082cc0cb8264bd6f430f9aadd6950879c7360b546c32e552b793f2e"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.meta.json",
+      "role": "convergence_evidence",
+      "bytes": 14507,
+      "sha256": "40205be444680614f3d8749cf3424eb59321c021ddeb2c39249ec53c03b03937"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/phase_reference_figure4_phase_diagram_prod_v1_c1_p24t8_manifest.json",
+      "role": "convergence_evidence",
+      "bytes": 9547,
+      "sha256": "8f2918d1bed7ce51aa75de4c2fe18fee89a4319e036bfaedfd17659407aefecb"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference/spinodals_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "convergence_evidence",
+      "bytes": 29167,
+      "sha256": "754369d75a6a5ea7fddfd0d52c11904664f934205711a7da75b9804fb1b56d5d"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/validation_report.json",
+      "role": "convergence_evidence",
+      "bytes": 10541,
+      "sha256": "628aea7c374bd442f73afe1d48ff91f0880c43e543626b468fd16e82aa1dfa64"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/boundary_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+      "role": "convergence_evidence",
+      "bytes": 5675,
+      "sha256": "b68d5c103487477982154707e21292835187477f9a0606f70729c5aaa53edd6d"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/cep_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+      "role": "convergence_evidence",
+      "bytes": 319,
+      "sha256": "49ae0e99290aec24741c397681b6ace91c6321891e9038d85d26f714f5cb0e01"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/crossover_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+      "role": "convergence_evidence",
+      "bytes": 10360,
+      "sha256": "a979b965c3a38f6c43dd21fde3cba00419923dd42dbc19bb8c7a16cd7d8e9ef6"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/crossover_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.meta.json",
+      "role": "convergence_evidence",
+      "bytes": 6298,
+      "sha256": "28fa98fe81a23a8f5f214e5d3aa391533681b9130ed01b9a99858657f4f85254"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/phase_reference_figure4_phase_diagram_prod_v1_c2_p32t12_anchors_manifest.json",
+      "role": "convergence_evidence",
+      "bytes": 4080,
+      "sha256": "1be98ef73ae6ae973c4b702a9ff60603c83fcad1fc5ce592d4a848192bb4cde9"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference/spinodals_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+      "role": "convergence_evidence",
+      "bytes": 7003,
+      "sha256": "2729a6e133e6a3902abe4ea3bb1feb80eca9bcabd3c3da7d00de1da5cfa4a687"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/validation_report.json",
+      "role": "convergence_evidence",
+      "bytes": 4128,
+      "sha256": "73b5efc651cd4eee1476141399ec004129b3b011aa8490fad307eded983c075e"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/c1_vs_c2_anchor_comparison/phase_reference_artifact_inventory.csv",
+      "role": "convergence_evidence",
+      "bytes": 596,
+      "sha256": "8daf6860034b8b7dbf3fad3ba09cedfe4c2d5b932ef048366366e712c283f9c2"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/c1_vs_c2_anchor_comparison/phase_reference_convergence_comparison.csv",
+      "role": "convergence_evidence",
+      "bytes": 104241,
+      "sha256": "d53e6835fc8a5c6b42aa66555831a6ba60224793800f6bd3527cf9fdaffed9dc"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/c1_vs_c2_anchor_comparison/phase_reference_convergence_summary.json",
+      "role": "convergence_evidence",
+      "bytes": 10487,
+      "sha256": "202e45e6ae46f8624fa09c69e484c48545a0deb9fffc54bc7f156b5d4dd71dc4"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/c1_vs_c2_anchor_comparison/phase_reference_convergence_summary.md",
+      "role": "convergence_evidence",
+      "bytes": 2137,
+      "sha256": "a93a0220e49e43789dbc73d5c4ad3de4d08ede7ac3434b80ecd46b6a2a67a1ee"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/P4-C_CONVERGENCE_SUMMARY.md",
+      "role": "convergence_evidence",
+      "bytes": 3386,
+      "sha256": "59be43473e54507e87bc763e16a16e6f81edd69775e40db3ce7402cdb839c620"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_TmuB.csv",
+      "role": "figure_asset",
+      "bytes": 302273,
+      "sha256": "a65addae0a348f50b4ad76b4c3eda391db5afa4044db8340dcbadfa51bdd253d"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_Trho.csv",
+      "role": "figure_asset",
+      "bytes": 424655,
+      "sha256": "d6dce7fdfb39cc16aa0ed4ef95f7039fd49786685da60db406e466a2c25b0fc9"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_plot_inputs_summary.json",
+      "role": "figure_asset",
+      "bytes": 2426,
+      "sha256": "e892d6580556c3999dd1ca6788bba6abfed7f0829ca359cb19f4c6bd6642e7e7"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/phase_reference_source_manifest.json",
+      "role": "source_manifest",
+      "bytes": 3038,
+      "sha256": "64f244e0a91266303582bb1a3dc69c390d9e68456800eb21b2924e4e142b91c4"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/PRODUCTION_AUDIT.md",
+      "role": "production_audit",
+      "bytes": 7418,
+      "sha256": "b8bf122ecd8a5dd8dbd9a69769b5dd7e0541a35347132888e4ba16c8d98edcf9"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/README.md",
+      "role": "readme",
+      "bytes": 3076,
+      "sha256": "dee16c77f203d57c464044963c762a5907bb97e4a6a1969abca4642f96e68a84"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/boundary_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "formal_reference",
+      "bytes": 23660,
+      "sha256": "355c0912d625ea8306d93e33b9760b37f88b304bc405f52530e57ebf79156f0b"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/cep_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "formal_reference",
+      "bytes": 1221,
+      "sha256": "1fe32db5b456295c73db6a232958e21bd8d1c2250942042d48c043da95851324"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "formal_reference",
+      "bytes": 43316,
+      "sha256": "49c43490c082cc0cb8264bd6f430f9aadd6950879c7360b546c32e552b793f2e"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/crossover_figure4_phase_diagram_prod_v1_c1_p24t8.meta.json",
+      "role": "formal_reference",
+      "bytes": 14507,
+      "sha256": "40205be444680614f3d8749cf3424eb59321c021ddeb2c39249ec53c03b03937"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/phase_reference_figure4_phase_diagram_prod_v1_c1_p24t8_manifest.json",
+      "role": "formal_reference",
+      "bytes": 9547,
+      "sha256": "8f2918d1bed7ce51aa75de4c2fe18fee89a4319e036bfaedfd17659407aefecb"
+    },
+    {
+      "path": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/spinodals_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "role": "formal_reference",
+      "bytes": 29167,
+      "sha256": "754369d75a6a5ea7fddfd0d52c11904664f934205711a7da75b9804fb1b56d5d"
+    }
+  ],
+  "figure_files": [
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf",
+      "role": "figure",
+      "bytes": 27218,
+      "sha256": "fbfbe7789530becccb700fb6f908a9b87ecf02cfd4640822b9e62ad2e0838da1"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.png",
+      "role": "figure",
+      "bytes": 259060,
+      "sha256": "758b1bc6598017b9be71f0556e57d331b45327583b79d8ee5ec0e29a23386380"
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/plot_manifest.json",
+      "role": "plot_manifest",
+      "bytes": 5863,
+      "sha256": "1bbbe9b4ff826664134500f7c5363b90b327f625faed2efb0e0f499d867f098e"
+    }
+  ]
+}

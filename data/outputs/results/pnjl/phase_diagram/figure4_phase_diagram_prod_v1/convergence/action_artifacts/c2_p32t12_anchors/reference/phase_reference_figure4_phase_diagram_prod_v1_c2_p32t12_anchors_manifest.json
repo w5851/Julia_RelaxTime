@@ -1,0 +1,110 @@
+{
+    "config": {
+        "crossover_mu_max_MeV": 450,
+        "crossover_only": false,
+        "mode": "production",
+        "crossover_mu0_only": false,
+        "xi_values": [
+            -0.5,
+            -0.25,
+            0.0,
+            0.25,
+            0.5
+        ],
+        "T_step_MeV": 5,
+        "crossover_method": "peak",
+        "rho_step": 0.05,
+        "t_num": 12,
+        "crossover_n_mu": 16,
+        "iterations": 100,
+        "compute_crossover": true,
+        "T_max_MeV": 240,
+        "tag": "figure4_phase_diagram_prod_v1_c2_p32t12_anchors",
+        "T_min_MeV": 60,
+        "crossover_variable": "phi_u",
+        "rho_max": 4,
+        "p_num": 32,
+        "rho_min": 0
+    },
+    "output_root": "data/processed/pnjl/ci_dense_reference/28741709519",
+    "generator": {
+        "git_commit": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+        "crossover_only": false,
+        "script": "scripts/pnjl/build_dense_phase_reference.jl",
+        "crossover_mu0_only": false,
+        "generated_at": "2026-07-05T13:09:36Z"
+    },
+    "runs": [
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28741709519/xi_m0p500",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_130946",
+            "spinodal_count": 18,
+            "boundary_count": 18,
+            "xi": -0.5,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28741709519/xi_m0p250",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_131524",
+            "spinodal_count": 16,
+            "boundary_count": 16,
+            "xi": -0.25,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28741709519/xi_0p000",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_132215",
+            "spinodal_count": 15,
+            "boundary_count": 15,
+            "xi": 0,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28741709519/xi_0p250",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_132853",
+            "spinodal_count": 13,
+            "boundary_count": 13,
+            "xi": 0.25,
+            "crossover_count": 16
+        },
+        {
+            "run_dir": "data/processed/pnjl/ci_dense_reference/28741709519/xi_0p500",
+            "cep_found": true,
+            "run_id": "phase_dense_reference_20260705_133612",
+            "spinodal_count": 10,
+            "boundary_count": 10,
+            "xi": 0.5,
+            "crossover_count": 16
+        }
+    ],
+    "schema_version": "v1",
+    "artifacts": {
+        "manifest": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/phase_reference_figure4_phase_diagram_prod_v1_c2_p32t12_anchors_manifest.json"
+        },
+        "crossover_meta": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/crossover_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.meta.json"
+        },
+        "cep": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/cep_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+            "row_count": 5
+        },
+        "crossover": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/crossover_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+            "row_count": 80
+        },
+        "spinodals": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/spinodals_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+            "row_count": 72
+        },
+        "boundary": {
+            "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/boundary_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+            "row_count": 72
+        }
+    },
+    "reference_root": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference"
+}

@@ -1,0 +1,213 @@
+{
+    "dense_meaning": {
+        "temperature_window_MeV": {
+            "max": 220,
+            "min": 60
+        },
+        "kind": "xi_mu_dense_reference",
+        "mu_q_sampling": {
+            "max_MeV": 450,
+            "values_MeV": [
+                0,
+                30,
+                60,
+                90,
+                120,
+                150,
+                180,
+                210,
+                240,
+                270,
+                300,
+                330,
+                360,
+                390,
+                420,
+                450
+            ],
+            "min_MeV": 0,
+            "strategy": "uniform_grid",
+            "count": 16
+        },
+        "description": "uniform xi grid combined with uniform mu_q sampling; each (xi, mu_q) slice runs crossover detection on a T window and stores the detected T_crossover",
+        "xi_sampling": {
+            "step": 0.25,
+            "values": [
+                -0.5,
+                -0.25,
+                0.0,
+                0.25,
+                0.5
+            ],
+            "strategy": "uniform_grid",
+            "count": 5
+        }
+    },
+    "xi_coverage": {
+        "max": 0.5,
+        "min": -0.5,
+        "values": [
+            -0.5,
+            -0.25,
+            0.0,
+            0.25,
+            0.5
+        ],
+        "count": 5
+    },
+    "column_definitions": [
+        {
+            "name": "xi",
+            "unit": "dimensionless",
+            "type": "Float64",
+            "description": "anisotropy control parameter"
+        },
+        {
+            "name": "mu_MeV",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "quark chemical potential sample (mu_q) on the crossover scan"
+        },
+        {
+            "name": "T_crossover_MeV",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "detected crossover temperature at the sampled xi and mu_q"
+        },
+        {
+            "name": "rho",
+            "unit": "rho0",
+            "type": "Float64",
+            "description": "density-like coordinate returned by the crossover builder for the sampled point"
+        },
+        {
+            "name": "method",
+            "unit": null,
+            "type": "String",
+            "description": "crossover detector method"
+        },
+        {
+            "name": "converged",
+            "unit": null,
+            "type": "Bool",
+            "description": "whether the crossover detector reported a valid point"
+        },
+        {
+            "name": "derivative",
+            "unit": null,
+            "type": "Float64",
+            "description": "peak/response diagnostic returned by the detector"
+        },
+        {
+            "name": "variable",
+            "unit": null,
+            "type": "String",
+            "description": "order-parameter-like variable used by the detector"
+        },
+        {
+            "name": "curve_parameter",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "physical parameter used to connect this curve in plots; for crossover this is mu_q"
+        },
+        {
+            "name": "plot_order_key",
+            "unit": "MeV",
+            "type": "Float64",
+            "description": "stable sort key for plotting this curve; for crossover this is mu_q"
+        }
+    ],
+    "mu_q_coverage": {
+        "max_MeV": 348.3415217846109,
+        "values_MeV": [
+            0,
+            13.481993463323903,
+            16.932465606360804,
+            19.41369989632233,
+            21.454992418604817,
+            23.22276811897406,
+            26.963986926647806,
+            33.86493121272161,
+            38.82739979264466,
+            40.44598038997171,
+            42.909984837209635,
+            46.44553623794812,
+            50.797396819082415,
+            53.92797385329561,
+            58.241099688967,
+            64.36497725581445,
+            67.40996731661951,
+            67.72986242544322,
+            69.66830435692218,
+            77.65479958528933,
+            80.89196077994342,
+            84.66232803180404,
+            85.81996967441927,
+            92.89107247589624,
+            94.37395424326733,
+            97.06849948161165,
+            101.59479363816483,
+            107.2749620930241,
+            107.85594770659122,
+            116.1138405948703,
+            116.482199377934,
+            118.52725924452565,
+            121.33794116991513,
+            128.7299545116289,
+            134.81993463323903,
+            135.45972485088643,
+            135.89589927425632,
+            139.33660871384436,
+            148.30192809656293,
+            150.18494693023374,
+            152.39219045724727,
+            155.30959917057865,
+            161.78392155988683,
+            162.5593768328184,
+            169.32465606360807,
+            171.63993934883854,
+            174.72329906690098,
+            175.26591502321074,
+            185.78214495179247,
+            186.25712166996885,
+            188.74790848653467,
+            193.09493176744334,
+            194.1369989632233,
+            202.22990194985857,
+            203.18958727632966,
+            209.00491307076655,
+            213.55069885954566,
+            214.5499241860482,
+            220.1220528826905,
+            232.2276811897406,
+            232.964398755868,
+            236.004916604653,
+            237.0545184890513,
+            252.37809865219032,
+            253.98698409541208,
+            255.45044930871467,
+            257.4599090232578,
+            271.79179854851265,
+            278.6732174276887,
+            278.91490144186264,
+            291.205498444835,
+            300.36989386046747,
+            301.89598554666276,
+            321.82488627907225,
+            325.1187536656368,
+            348.3415217846109
+        ],
+        "min_MeV": 0,
+        "count": 76
+    },
+    "generator": {
+        "git_commit": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+        "script": "scripts/pnjl/build_dense_phase_reference.jl",
+        "generated_at": "2026-07-05T13:44:08Z"
+    },
+    "schema_version": "v1",
+    "artifact": {
+        "path": "data/outputs/artifacts/pnjl_dense_reference/28741709519/reference/crossover_figure4_phase_diagram_prod_v1_c2_p32t12_anchors.csv",
+        "row_count": 80
+    }
+}

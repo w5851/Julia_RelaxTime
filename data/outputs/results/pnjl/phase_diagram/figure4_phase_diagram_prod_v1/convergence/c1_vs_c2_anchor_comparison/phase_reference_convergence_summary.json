@@ -1,0 +1,392 @@
+{
+  "candidate_label": "c1_p24t8_full_grid",
+  "reference_label": "c2_p32t12_anchors",
+  "candidate_root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/reference",
+  "reference_root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/reference",
+  "candidate_tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+  "reference_tag": "figure4_phase_diagram_prod_v1_c2_p32t12_anchors",
+  "xi_filter": [
+    -0.5,
+    -0.25,
+    0.0,
+    0.25,
+    0.5
+  ],
+  "verdict": "needs_manual_review",
+  "candidate_inventory": {
+    "boundary": {
+      "row_count": 72,
+      "columns": [
+        "xi",
+        "T_MeV",
+        "mu_transition_MeV",
+        "rho_hadron",
+        "rho_quark",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "cep": {
+      "row_count": 5,
+      "columns": [
+        "xi",
+        "T_CEP_MeV",
+        "muq_CEP_MeV",
+        "muB_CEP_MeV"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "spinodals": {
+      "row_count": 72,
+      "columns": [
+        "xi",
+        "T_MeV",
+        "mu_spinodal_hadron_MeV",
+        "mu_spinodal_quark_MeV",
+        "rho_spinodal_hadron",
+        "rho_spinodal_quark",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "crossover": {
+      "row_count": 80,
+      "columns": [
+        "xi",
+        "mu_MeV",
+        "T_crossover_MeV",
+        "rho",
+        "method",
+        "converged",
+        "derivative",
+        "variable",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": 0
+    }
+  },
+  "reference_inventory": {
+    "boundary": {
+      "row_count": 72,
+      "columns": [
+        "xi",
+        "T_MeV",
+        "mu_transition_MeV",
+        "rho_hadron",
+        "rho_quark",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "cep": {
+      "row_count": 5,
+      "columns": [
+        "xi",
+        "T_CEP_MeV",
+        "muq_CEP_MeV",
+        "muB_CEP_MeV"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "spinodals": {
+      "row_count": 72,
+      "columns": [
+        "xi",
+        "T_MeV",
+        "mu_spinodal_hadron_MeV",
+        "mu_spinodal_quark_MeV",
+        "rho_spinodal_hadron",
+        "rho_spinodal_quark",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": null
+    },
+    "crossover": {
+      "row_count": 80,
+      "columns": [
+        "xi",
+        "mu_MeV",
+        "T_crossover_MeV",
+        "rho",
+        "method",
+        "converged",
+        "derivative",
+        "variable",
+        "curve_parameter",
+        "plot_order_key"
+      ],
+      "xi_count": 5,
+      "xi_values": [
+        -0.5,
+        -0.25,
+        0.0,
+        0.25,
+        0.5
+      ],
+      "naninf_count": 0,
+      "negative_by_column": {},
+      "converged_false_count": 0
+    }
+  },
+  "comparison_summary": [
+    {
+      "artifact": "boundary",
+      "metric": "mu_transition_MeV",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.26135915901812723,
+      "max_rel_diff": 0.0007180345728965059,
+      "mean_abs_diff": 0.03365281205955976,
+      "mean_rel_diff": 9.549939695275853e-05,
+      "max_abs_match_key": "0.25|60.0",
+      "max_rel_match_key": "0.25|60.0"
+    },
+    {
+      "artifact": "boundary",
+      "metric": "rho_hadron",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.005763311651990066,
+      "max_rel_diff": 0.019988297936973612,
+      "mean_abs_diff": 0.0007278681812786596,
+      "mean_rel_diff": 0.0025246860697511232,
+      "max_abs_match_key": "0.5|60.0",
+      "max_rel_match_key": "0.25|60.0"
+    },
+    {
+      "artifact": "boundary",
+      "metric": "rho_quark",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.039975326268347544,
+      "max_rel_diff": 0.01601860207577932,
+      "mean_abs_diff": 0.003923332317775597,
+      "mean_rel_diff": 0.0016234562638616646,
+      "max_abs_match_key": "0.0|60.0",
+      "max_rel_match_key": "0.0|60.0"
+    },
+    {
+      "artifact": "cep",
+      "metric": "T_CEP_MeV",
+      "matched_count": 5,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.029296875,
+      "max_rel_diff": 0.0002737850787132101,
+      "mean_abs_diff": 0.0078125,
+      "mean_rel_diff": 7.09218975369439e-05,
+      "max_abs_match_key": "0.5",
+      "max_rel_match_key": "0.5"
+    },
+    {
+      "artifact": "cep",
+      "metric": "muB_CEP_MeV",
+      "matched_count": 5,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.07596633469188419,
+      "max_rel_diff": 7.26933482813994e-05,
+      "mean_abs_diff": 0.022912374820566583,
+      "mean_rel_diff": 2.25361045384465e-05,
+      "max_abs_match_key": "0.5",
+      "max_rel_match_key": "0.5"
+    },
+    {
+      "artifact": "cep",
+      "metric": "muq_CEP_MeV",
+      "matched_count": 5,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.025322111563980343,
+      "max_rel_diff": 7.269334828145378e-05,
+      "mean_abs_diff": 0.007637458273518405,
+      "mean_rel_diff": 2.253610453842248e-05,
+      "max_abs_match_key": "0.5",
+      "max_rel_match_key": "0.5"
+    },
+    {
+      "artifact": "crossover",
+      "metric": "T_crossover_MeV",
+      "matched_count": 80,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.030414466061785106,
+      "max_rel_diff": 0.00028423992503987113,
+      "mean_abs_diff": 0.0016840622003062578,
+      "mean_rel_diff": 1.2304516301679144e-05,
+      "max_abs_match_key": "0.5|16",
+      "max_rel_match_key": "0.5|16"
+    },
+    {
+      "artifact": "crossover",
+      "metric": "derivative",
+      "matched_count": 80,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 1213.8497260563827,
+      "max_rel_diff": 1.0691971821584236,
+      "mean_abs_diff": 17.15733498238624,
+      "mean_rel_diff": 0.014821286002838194,
+      "max_abs_match_key": "0.5|16",
+      "max_rel_match_key": "0.5|16"
+    },
+    {
+      "artifact": "crossover",
+      "metric": "mu_MeV",
+      "matched_count": 80,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.025322111563980343,
+      "max_rel_diff": 7.269334828169857e-05,
+      "mean_abs_diff": 0.003818729136763244,
+      "mean_rel_diff": 2.1127598004799118e-05,
+      "max_abs_match_key": "0.5|16",
+      "max_rel_match_key": "0.5|4"
+    },
+    {
+      "artifact": "crossover",
+      "metric": "rho",
+      "matched_count": 80,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.1691914700899224,
+      "max_rel_diff": 0.10131905834929714,
+      "mean_abs_diff": 0.0038019162560717135,
+      "mean_rel_diff": 0.002297339444845426,
+      "max_abs_match_key": "0.25|16",
+      "max_rel_match_key": "0.25|16"
+    },
+    {
+      "artifact": "spinodals",
+      "metric": "mu_spinodal_hadron_MeV",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.07164561553776139,
+      "max_rel_diff": 0.00019038760331705967,
+      "mean_abs_diff": 0.0051728098614225206,
+      "mean_rel_diff": 1.4061012943192663e-05,
+      "max_abs_match_key": "0.5|60.0",
+      "max_rel_match_key": "0.5|60.0"
+    },
+    {
+      "artifact": "spinodals",
+      "metric": "mu_spinodal_quark_MeV",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 1.4341450249249874,
+      "max_rel_diff": 0.004188879452428898,
+      "mean_abs_diff": 0.16752433541136982,
+      "mean_rel_diff": 0.00048636473112059677,
+      "max_abs_match_key": "0.0|60.0",
+      "max_rel_match_key": "0.0|60.0"
+    },
+    {
+      "artifact": "spinodals",
+      "metric": "rho_spinodal_hadron",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.005876862020160578,
+      "max_rel_diff": 0.010859701008807465,
+      "mean_abs_diff": 0.0005785289086552253,
+      "mean_rel_diff": 0.0008604003139623951,
+      "max_abs_match_key": "0.25|60.0",
+      "max_rel_match_key": "0.25|60.0"
+    },
+    {
+      "artifact": "spinodals",
+      "metric": "rho_spinodal_quark",
+      "matched_count": 72,
+      "missing_count": 0,
+      "non_numeric_count": 0,
+      "max_abs_diff": 0.04928972563382872,
+      "max_rel_diff": 0.027819350815090606,
+      "mean_abs_diff": 0.0040433640002013205,
+      "mean_rel_diff": 0.0022025061995404735,
+      "max_abs_match_key": "0.5|60.0",
+      "max_rel_match_key": "0.5|60.0"
+    }
+  ],
+  "missing_or_non_numeric": [],
+  "bad_inventory": []
+}

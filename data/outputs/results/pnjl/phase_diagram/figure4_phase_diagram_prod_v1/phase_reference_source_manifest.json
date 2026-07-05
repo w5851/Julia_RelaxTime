@@ -1,0 +1,65 @@
+{
+  "schema_version": "v1",
+  "case_slug": "figure4_phase_diagram_prod_v1",
+  "phase_reference_tag": "figure4_phase_diagram_prod_v1_c1_p24t8",
+  "verdict": "production-grade",
+  "source_kind": "github_actions_artifact_promoted_copy",
+  "source_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/28736257287",
+  "source_head_sha": "aca739f6bac4565dddef888abf9588b8c0fa583f",
+  "convergence_summary": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/P4-C_CONVERGENCE_SUMMARY.md",
+  "reference_root": "data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference",
+  "xi_coverage": {
+    "min": -0.5,
+    "max": 0.5,
+    "step": 0.05,
+    "count": 21
+  },
+  "numeric_policy": {
+    "p_num": 24,
+    "t_num": 8,
+    "iterations": 80,
+    "T_min_MeV": 60,
+    "T_max_MeV": 240,
+    "T_step_MeV": 5,
+    "rho_min": 0.0,
+    "rho_max": 4.0,
+    "rho_step": 0.05
+  },
+  "artifacts": [
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\boundary_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "bytes": 23660,
+      "sha256": "355c0912d625ea8306d93e33b9760b37f88b304bc405f52530e57ebf79156f0b"
+    },
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\cep_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "bytes": 1221,
+      "sha256": "1fe32db5b456295c73db6a232958e21bd8d1c2250942042d48c043da95851324"
+    },
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\crossover_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "bytes": 43316,
+      "sha256": "49c43490c082cc0cb8264bd6f430f9aadd6950879c7360b546c32e552b793f2e"
+    },
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\crossover_figure4_phase_diagram_prod_v1_c1_p24t8.meta.json",
+      "bytes": 14507,
+      "sha256": "40205be444680614f3d8749cf3424eb59321c021ddeb2c39249ec53c03b03937"
+    },
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\phase_reference_figure4_phase_diagram_prod_v1_c1_p24t8_manifest.json",
+      "bytes": 9547,
+      "sha256": "8f2918d1bed7ce51aa75de4c2fe18fee89a4319e036bfaedfd17659407aefecb"
+    },
+    {
+      "path": "data\\outputs\\results\\pnjl\\phase_diagram\\figure4_phase_diagram_prod_v1\\reference\\spinodals_figure4_phase_diagram_prod_v1_c1_p24t8.csv",
+      "bytes": 29167,
+      "sha256": "754369d75a6a5ea7fddfd0d52c11904664f934205711a7da75b9804fb1b56d5d"
+    }
+  ],
+  "residual_risks": [
+    "C2 refined check covers anchor xi values rather than a full refined xi grid.",
+    "Crossover rho and derivative diagnostics have larger relative differences at some high-order points; core T-muB phase-line observables remain stable.",
+    "Spinodal layer is production data but should remain optional in default figure design."
+  ]
+}

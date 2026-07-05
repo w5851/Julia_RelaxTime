@@ -1,13 +1,12 @@
 ---
-status: ready_for_execution
+status: ready_for_archive
 owner: both
 created: 2026-07-04
-updated: 2026-07-04
+updated: 2026-07-05
 target_project: D:\Desktop\Julia_RelaxTime
 source_project: D:\Desktop\paper\My_Paper\pnjl_aniso_transport
-source_prd: D:\Desktop\PRD_Julia_RelaxTime_figure4_phase_diagram.md
 production_case_slug: figure4_phase_diagram_prod_v1
-completion_scope: task_sheet_only
+completion_scope: completed_production_artifact
 ---
 
 # PRD: Production-Grade PNJL Phase Reference And Figure Assets
@@ -18,7 +17,7 @@ completion_scope: task_sheet_only
 - [x] 人工决策已固化：full-grid `xi=-0.5:0.05:0.5`、spinodal 必算、GitHub Actions 优先但非强制、本项目只交付正式产物。
 - [x] 生产边界、convergence gate、result-side / figure-side 输出和验收标准已写清。
 - [x] P4-A / P4-B 已完成：现有 reference 仅作 comparison input，执行面优先使用更新后的 `PNJL Dense Reference` workflow。
-- [ ] 正式 production 尚未执行；后续从 P4-C convergence gate 开始。
+- [x] P4-C 至 P4-H 已完成：正式数据、正式双联图、manifest、README、PRODUCTION_AUDIT 与外部消费索引已生成。
 
 ## 1. 背景与目标
 
@@ -64,14 +63,14 @@ figure-side 只放图像文件和 `plot_manifest.json`：
 
 ## 3. 范围
 
-- [ ] 生产 `xi=-0.5:0.05:0.5` 的正式 phase reference 数据。
-- [ ] 计算 first-order boundary、CEP、crossover、spinodal，并记录 row counts、失败点和异常点。
-- [ ] 生成 `T-mu_B` 面板，而不是 quark chemical potential `mu_q` 面板。
-- [ ] 生成 `T-rho` 面板，用于展示密度表示下的相结构或共存区。
-- [ ] 在图中保留 crossover 信息，但线型、透明度和图例形式可重新设计，不要求沿用 dotted style。
-- [ ] spinodal 数据必须生产；正式主图中是否显示 spinodal 由绘图参数控制。
-- [ ] 输出 PNG/PDF，优先满足正式文档消费的阅读清晰度。
-- [ ] 输出 manifest，记录脚本、源数据、参数、git commit、轴变换、row counts 和图形样式。
+- [x] 生产 `xi=-0.5:0.05:0.5` 的正式 phase reference 数据。
+- [x] 计算 first-order boundary、CEP、crossover、spinodal，并记录 row counts、失败点和异常点。
+- [x] 生成 `T-mu_B` 面板，而不是 quark chemical potential `mu_q` 面板。
+- [x] 生成 `T-rho` 面板，用于展示密度表示下的相结构或共存区。
+- [x] 在图中保留 crossover 信息，但线型、透明度和图例形式可重新设计，不要求沿用 dotted style。
+- [x] spinodal 数据必须生产；正式主图中是否显示 spinodal 由绘图参数控制。
+- [x] 输出 PNG/PDF，优先满足正式文档消费的阅读清晰度。
+- [x] 输出 manifest，记录脚本、源数据、参数、git commit、轴变换、row counts 和图形样式。
 
 ## 4. 非范围
 
@@ -107,27 +106,27 @@ writing package 中已生成 review candidate：
 - 现有 `data/reference/pnjl` 资产可作为 comparison input；是否作为正式 source 必须通过 schema、manifest、参数与 convergence 审计。
 - `paper_p1_mott_phase_isentropic_20260531` 具有较完整 manifest，但其 `xi` 为 `-0.3,0.0,0.3`，不满足本次正式产物要求的完整 `xi=-0.5:0.05:0.5` 覆盖。
 
-当前缺口：
+已关闭的缺口：
 
-- [ ] 旧相图横轴为 `mu` 或 `mu_q`，正式图资产需要使用 `mu_B`。
-- [ ] 当前旧 PNG 与当前 `plot_phase_diagram.py` + reference CSV 的直接复现存在 schema/source gap。
-- [ ] `plot_phase_diagram.py` 仍偏向旧字段与单图预览用途，不能直接作为 Figure 4 正式脚本。
-- [ ] 图形密度需要通过可选图层与 subset 参数控制。
-- [ ] 需要 convergence gate 才能把 reference 和图像标注为 production-grade。
+- [x] 旧相图横轴为 `mu` 或 `mu_q`，正式图资产已使用 `mu_B`。
+- [x] 当前旧 PNG 与当前 `plot_phase_diagram.py` + reference CSV 的直接复现存在 schema/source gap；本轮已新建正式后处理入口。
+- [x] `plot_phase_diagram.py` 仍偏向旧字段与单图预览用途，已保留为预览入口，不作为 Figure 4 正式脚本。
+- [x] 图形密度已通过默认 `xi` subset 与 spinodal 可选图层控制。
+- [x] 已完成 convergence gate，并将 reference 和图像标注为 production-grade。
 
 ## 6. 数据源与 schema 要求
 
-- [ ] 正式图必须基于正式 phase reference root/tag，而不是直接从旧 PNG 或 paper 侧 candidate 派生。
-- [ ] reference CSV 必须覆盖 `xi=-0.5:0.05:0.5` 的 first-order boundary、CEP、crossover、spinodal。
-- [ ] boundary 和 spinodal CSV 必须包含稳定排序字段，或在 figure asset 生成阶段显式生成：
+- [x] 正式图必须基于正式 phase reference root/tag，而不是直接从旧 PNG 或 paper 侧 candidate 派生。
+- [x] reference CSV 必须覆盖 `xi=-0.5:0.05:0.5` 的 first-order boundary、CEP、crossover、spinodal。
+- [x] boundary 和 spinodal CSV 必须包含稳定排序字段，或在 figure asset 生成阶段显式生成：
   - `curve_parameter`
   - `plot_order_key`
-- [ ] CEP schema 必须直接包含 `muB_CEP_MeV`，或 manifest 中明确记录 `muB_CEP_MeV = 3 * muq_CEP_MeV` 的生成过程。
-- [ ] crossover schema 必须明确 `mu_MeV` 是 `mu_q`，并在 figure asset 中生成 `muB_MeV = 3 * mu_MeV`。
-- [ ] `T-rho` 面板使用的 `rho` 字段必须记录单位为 `rho/rho_0`，并说明 missing-value 语义。
-- [ ] figure asset 中间表应统一输出到 result-side `figure_assets/`，避免只保留 PNG/PDF。
-- [ ] figure asset 应支持从完整 `xi` 数据中选择绘图 subset，不要求主图展示全部 `xi`。
-- [ ] spinodal 图层必须能通过绘图参数开启或关闭；关闭时仍应在 result-side 保存 spinodal 数据与审计统计。
+- [x] CEP schema 必须直接包含 `muB_CEP_MeV`，或 manifest 中明确记录 `muB_CEP_MeV = 3 * muq_CEP_MeV` 的生成过程。
+- [x] crossover schema 必须明确 `mu_MeV` 是 `mu_q`，并在 figure asset 中生成 `muB_MeV = 3 * mu_MeV`。
+- [x] `T-rho` 面板使用的 `rho` 字段必须记录单位为 `rho/rho_0`，并说明 missing-value 语义。
+- [x] figure asset 中间表应统一输出到 result-side `figure_assets/`，避免只保留 PNG/PDF。
+- [x] figure asset 应支持从完整 `xi` 数据中选择绘图 subset，不要求主图展示全部 `xi`。
+- [x] spinodal 图层必须能通过绘图参数开启或关闭；关闭时仍应在 result-side 保存 spinodal 数据与审计统计。
 
 ## 7. 执行面选择
 
@@ -188,34 +187,34 @@ verdict 只能是：
 
 ### 9.1 数据内容
 
-- [ ] 正式数据覆盖 `xi=-0.5:0.05:0.5`。
-- [ ] 正式数据包含 first-order boundary、CEP、crossover、spinodal。
-- [ ] 每类数据均记录 row counts、`xi` coverage、单位、失败点和异常点。
-- [ ] spinodal 数据即使不进入默认图，也必须随正式产物发布和审计。
+- [x] 正式数据覆盖 `xi=-0.5:0.05:0.5`。
+- [x] 正式数据包含 first-order boundary、CEP、crossover、spinodal。
+- [x] 每类数据均记录 row counts、`xi` coverage、单位、失败点和异常点。
+- [x] spinodal 数据即使不进入默认图，也必须随正式产物发布和审计。
 
 ### 9.2 图像内容
 
-- [ ] 默认图像资产采用双联布局：左图 `T-mu_B`，右图 `T-rho`。
-- [ ] 左图至少包含 first-order boundary、CEP、crossover。
-- [ ] 右图至少包含 coexistence region 或 phase-boundary density representation。
-- [ ] 图像脚本支持 `xi` subset 参数；默认展示 subset 可从完整数据中选择，不要求展示全部 `xi=-0.5:0.05:0.5`。
-- [ ] spinodal 图层支持参数化开关，默认是否开启由图形密度审核决定。
+- [x] 默认图像资产采用双联布局：左图 `T-mu_B`，右图 `T-rho`。
+- [x] 左图至少包含 first-order boundary、CEP、crossover。
+- [x] 右图至少包含 coexistence region 或 phase-boundary density representation。
+- [x] 图像脚本支持 `xi` subset 参数；默认展示 subset 可从完整数据中选择，不要求展示全部 `xi=-0.5:0.05:0.5`。
+- [x] spinodal 图层支持参数化开关，默认是否开启由图形密度审核决定。
 
 ### 9.3 视觉要求
 
-- [ ] 图中信息不能比当前 writing-package 单图 candidate 更密集。
-- [ ] crossover 必须保留，但可使用更轻的线型、颜色、透明度或独立图例策略。
-- [ ] first-order boundary、CEP、crossover 的图例必须清晰区分。
-- [ ] 若保留 spinodal，应使用低权重视觉编码，避免与 crossover/first-order boundary 混淆。
-- [ ] 坐标轴必须明确标注 `mu_B (MeV)`、`T (MeV)`、`rho/rho_0`。
+- [x] 图中信息不能比当前 writing-package 单图 candidate 更密集。
+- [x] crossover 必须保留，但可使用更轻的线型、颜色、透明度或独立图例策略。
+- [x] first-order boundary、CEP、crossover 的图例必须清晰区分。
+- [x] 若保留 spinodal，应使用低权重视觉编码，避免与 crossover/first-order boundary 混淆。
+- [x] 坐标轴必须明确标注 `mu_B (MeV)`、`T (MeV)`、`rho/rho_0`。
 
 ### 9.4 可追溯输出
 
-- [ ] 输出正式图：`figure4_phase_diagram_TmuB_Trho.{png,pdf}`。
-- [ ] 输出 `plot_manifest.json`：记录 source CSV、row counts、`xi` values、axis conversion、plot styles、生成脚本、git commit、dpi、figure size。
-- [ ] 输出用于绘图的中间 CSV 或 JSON 到 result-side `figure_assets/`。
-- [ ] manifest 明确 `mu_B=3*mu_q` 的转换来源和适用字段。
-- [ ] `PRODUCTION_AUDIT.md` 区分 written/configured、effective/usable、not run/skipped、residual risk。
+- [x] 输出正式图：`figure4_phase_diagram_TmuB_Trho.{png,pdf}`。
+- [x] 输出 `plot_manifest.json`：记录 source CSV、row counts、`xi` values、axis conversion、plot styles、生成脚本、git commit、dpi、figure size。
+- [x] 输出用于绘图的中间 CSV 或 JSON 到 result-side `figure_assets/`。
+- [x] manifest 明确 `mu_B=3*mu_q` 的转换来源和适用字段。
+- [x] `PRODUCTION_AUDIT.md` 区分 written/configured、effective/usable、not run/skipped、residual risk。
 
 ## 10. 实施任务
 
@@ -224,12 +223,12 @@ verdict 只能是：
 - [x] P4-TaskSheet：任务单编制完成，可进入生产执行阶段。
 - [x] P4-A：审计现有 phase reference 数据源，决定复用、规范化还是重跑。
 - [x] P4-B：审计 `.github/workflows/` 与本地脚本入口，决定 action-first 或本机 fallback。
-- [ ] P4-C：运行 convergence gate，生成机器可读比较表和人工摘要。
-- [ ] P4-D：用通过 convergence 的参数生成正式 full-grid phase reference 或锁定正式 reference root/tag。
-- [ ] P4-E：实现或更新正式绘图脚本，支持 `T-mu_B + T-rho` 双联输出、`xi` subset、spinodal 开关、figure assets 和 `plot_manifest.json`。
-- [ ] P4-F：生成正式 PNG/PDF/manifest，并写入 result-side README / PRODUCTION_AUDIT。
-- [ ] P4-G：运行 validation/governance checks，并人工目视审核图像可读性、图例、坐标轴、line-style 语义。
-- [ ] P4-H：输出正式产物索引与外部消费说明，不修改 paper 项目文件。
+- [x] P4-C：运行 convergence gate，生成机器可读比较表和人工摘要。
+- [x] P4-D：用通过 convergence 的参数生成正式 full-grid phase reference 或锁定正式 reference root/tag。
+- [x] P4-E：实现或更新正式绘图脚本，支持 `T-mu_B + T-rho` 双联输出、`xi` subset、spinodal 开关、figure assets 和 `plot_manifest.json`。
+- [x] P4-F：生成正式 PNG/PDF/manifest，并写入 result-side README / PRODUCTION_AUDIT。
+- [x] P4-G：运行 validation/governance checks，并人工目视审核图像可读性、图例、坐标轴、line-style 语义。
+- [x] P4-H：输出正式产物索引与外部消费说明，不修改 paper 项目文件。
 
 ## 11. 验收标准
 
@@ -238,22 +237,22 @@ verdict 只能是：
 - [x] PRD 已落位到 `docs/dev/active/`。
 - [x] production `xi` coverage 已锁定为 `-0.5:0.05:0.5`。
 - [x] spinodal 已锁定为必算数据、可选图层。
-- [ ] production case 目录、source 选择、执行命令、脚本入口、输出文件名已写清。
-- [ ] 绘图脚本或后处理入口已能生成双联 `T-mu_B + T-rho` 图。
-- [ ] result-side 与 figure-side manifest schema 已写出。
+- [x] production case 目录、source 选择、执行命令、脚本入口、输出文件名已写清。
+- [x] 绘图脚本或后处理入口已能生成双联 `T-mu_B + T-rho` 图。
+- [x] result-side 与 figure-side manifest schema 已写出。
 
 ### 11.2 effective/usable
 
-- [ ] convergence verdict 为 `production-grade`。
-- [ ] 正式数据覆盖 `xi=-0.5:0.05:0.5`，并包含 first-order boundary、CEP、crossover、spinodal。
-- [ ] `T-mu_B` 面板横轴为 `mu_B (MeV)`，不是 quark `mu_q`。
-- [ ] `T-rho` 面板与 `T-mu_B` 面板使用一致的 plotted `xi` subset，并且 subset 可追溯到完整正式数据。
-- [ ] CEP markers 来源可追溯到正式 `cep` artifact 或正式 phase summary。
-- [ ] Crossover line 来源可追溯到正式 crossover artifact。
-- [ ] Spinodal 数据来源可追溯；若图中关闭 spinodal，manifest 明确记录关闭原因或图形参数。
-- [ ] 图像能在目标阅读宽度下阅读，图例不遮挡核心曲线。
-- [ ] `plot_manifest.json` 能回答：图从哪些 CSV 生成、用了哪些 plotted `xi`、完整 source `xi` 覆盖是什么、是否做了 `mu_B=3mu_q` 转换、生成脚本和 commit 是什么。
-- [ ] `PRODUCTION_AUDIT.md` 记录 convergence matrix、selected production parameters、validation commands、known limitations。
+- [x] convergence verdict 为 `production-grade`。
+- [x] 正式数据覆盖 `xi=-0.5:0.05:0.5`，并包含 first-order boundary、CEP、crossover、spinodal。
+- [x] `T-mu_B` 面板横轴为 `mu_B (MeV)`，不是 quark `mu_q`。
+- [x] `T-rho` 面板与 `T-mu_B` 面板使用一致的 plotted `xi` subset，并且 subset 可追溯到完整正式数据。
+- [x] CEP markers 来源可追溯到正式 `cep` artifact 或正式 phase summary。
+- [x] Crossover line 来源可追溯到正式 crossover artifact。
+- [x] Spinodal 数据来源可追溯；若图中关闭 spinodal，manifest 明确记录关闭原因或图形参数。
+- [x] 图像能在目标阅读宽度下阅读，图例不遮挡核心曲线。
+- [x] `plot_manifest.json` 能回答：图从哪些 CSV 生成、用了哪些 plotted `xi`、完整 source `xi` 覆盖是什么、是否做了 `mu_B=3mu_q` 转换、生成脚本和 commit 是什么。
+- [x] `PRODUCTION_AUDIT.md` 记录 convergence matrix、selected production parameters、validation commands、known limitations。
 
 ## 12. 风险与回退
 
@@ -297,11 +296,11 @@ verdict 只能是：
 
 ## 15. 待人工判断点
 
-当前没有阻塞生产启动的人工决策。后续仅在具体产物出来后需要人工目视判断：
+当前没有阻塞正式产物完成的人工决策。仍建议用户后续人工判断：
 
-- 默认预览图展示哪些 `xi` subset。
-- spinodal 是否进入默认 PNG/PDF，还是只保留为可选图层和数据。
-- 若 GitHub Actions 无法支持 full-grid production，是否接受本机 fallback 的耗时安排。
+- 是否接受默认主图 subset：`xi=-0.5,-0.25,0.0,0.25,0.5`。
+- spinodal 是否需要另出 supplemental / appendix 版本；默认 PNG/PDF 已关闭 spinodal。
+- paper 项目侧是否采用本默认双联图，或基于同一正式数据再派生更适合正文版面的裁剪/子集版本。
 
 ## 16. P4-A/P4-B 审计记录
 
@@ -342,3 +341,113 @@ verdict 只能是：
 - P4-C 应先跑 convergence gate，不直接生成正式产物。
 - 首选 action 输入：`tag=figure4_phase_diagram_prod_v1`、`crossover_only=false`、`xi_values=""`、`xi_min=-0.5`、`xi_max=0.5`、`xi_step=0.05`、`p_num=24`、`t_num=8`、`iterations=80`、`T_min=60` 或按 convergence 档显式覆盖。
 - 若需要覆盖低温 first-order / spinodal 低温段，应在 convergence 档中显式比较 `T_min=30` 与 `T_min=60` 的影响。
+
+## 17. P4-C convergence gate 执行记录
+
+日期：2026-07-05。
+
+### C1 full-grid candidate
+
+- GitHub Actions run：`https://github.com/w5851/Julia_RelaxTime/actions/runs/28736257287`
+- head SHA：`aca739f6bac4565dddef888abf9588b8c0fa583f`
+- workflow：`PNJL Dense Reference`
+- 输入：`tag=figure4_phase_diagram_prod_v1_c1_p24t8`、`crossover_only=false`、`xi_values=""`、`xi_min=-0.5`、`xi_max=0.5`、`xi_step=0.05`、`T_min=60`、`T_max=240`、`T_step=5`、`rho_min=0.0`、`rho_max=4.0`、`rho_step=0.05`、`p_num=24`、`t_num=8`、`iterations=80`、`crossover_n_mu=16`、`crossover_mu_max=450`。
+- action 结果：成功；`Run dense reference builder`、`Validate dense reference artifact`、`Upload dense reference artifact` 均成功。
+- artifact 已下载到 result-side convergence staging：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c1_p24t8/`。
+- C1 行数摘要：boundary 304、CEP 21、spinodal 304、crossover 336；crossover converged 336/336。
+- C1 覆盖：`xi=-0.5:0.05:0.5` 共 21 个点；四类 CSV 均无 NaN/Inf，除 `xi` 外未发现负值。
+- 下载后直接运行旧 validator 会出现 manifest path mismatch，因为 manifest 记录的是 action runner staging path，下载位置不同；该现象属于 artifact relocation，不代表 action 内部校验失败。
+
+### C2 refined anchors
+
+- GitHub Actions run：`https://github.com/w5851/Julia_RelaxTime/actions/runs/28741709519`
+- head SHA：`aca739f6bac4565dddef888abf9588b8c0fa583f`
+- workflow：`PNJL Dense Reference`
+- 输入：`tag=figure4_phase_diagram_prod_v1_c2_p32t12_anchors`、`crossover_only=false`、`xi_values="-0.5,-0.25,0.0,0.25,0.5"`、`T_min=60`、`T_max=240`、`T_step=5`、`rho_min=0.0`、`rho_max=4.0`、`rho_step=0.05`、`p_num=32`、`t_num=12`、`iterations=100`、`crossover_n_mu=16`、`crossover_mu_max=450`。
+- action 结果：成功；`Run dense reference builder`、`Validate dense reference artifact`、`Upload dense reference artifact` 均成功。
+- artifact 已下载到 result-side convergence staging：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/action_artifacts/c2_p32t12_anchors/`。
+- C2 行数摘要：boundary 72、CEP 5、spinodal 72、crossover 80；crossover converged 80/80。
+- C2 覆盖：`xi=-0.5,-0.25,0.0,0.25,0.5`；四类 CSV 均无 NaN/Inf，除 `xi` 外未发现负值。
+
+### C1 vs C2 比较与 verdict
+
+- 机器可读比较产物：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/c1_vs_c2_anchor_comparison/`。
+- 人工摘要：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/convergence/P4-C_CONVERGENCE_SUMMARY.md`。
+- 核心差异：boundary `mu_transition_MeV` 最大差约 `0.2614 MeV`；CEP `T_CEP_MeV` 最大差约 `0.0293 MeV`，`muB_CEP_MeV` 最大差约 `0.0760 MeV`；crossover `T_crossover_MeV` 最大差约 `0.0304 MeV`；spinodal quark 分支 `mu` 最大差约 `1.4341 MeV`。
+- 较大相对差主要出现在 crossover `rho` / `derivative` 诊断量和部分 spinodal density；这些记录为 residual risk，但不改变核心 `T-mu_B` 相线和 CEP 收敛判断。
+- P4-C verdict：`production-grade`。C1 full-grid artifact 可作为 P4-D 正式 full-grid phase reference source，需在后续 result-side audit 中保留上述 residual risk。
+
+## 18. P4-D 正式 phase reference source lock
+
+日期：2026-07-05。
+
+- 正式 reference root：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/reference/`。
+- 正式 reference tag：`figure4_phase_diagram_prod_v1_c1_p24t8`。
+- source manifest：`data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/phase_reference_source_manifest.json`。
+- source kind：GitHub Actions artifact promoted copy。
+- source run：`https://github.com/w5851/Julia_RelaxTime/actions/runs/28736257287`。
+- source head SHA：`aca739f6bac4565dddef888abf9588b8c0fa583f`。
+- 数值参数：`p_num=24`、`t_num=8`、`iterations=80`、`T_min=60`、`T_max=240`、`T_step=5`、`rho_min=0.0`、`rho_max=4.0`、`rho_step=0.05`。
+- 覆盖：`xi=-0.5:0.05:0.5`，共 21 个点。
+- 文件：boundary、CEP、crossover、crossover meta、phase reference manifest、spinodals CSV 已复制到正式 reference root，并在 source manifest 中记录 SHA256。
+- P4-D 决策：后续 P4-E/P4-F 的图像与 audit 应以该 result-side reference root/tag 为正式输入；`convergence/action_artifacts/` 保留为原始证据，不作为默认消费入口。
+
+## 19. P4-E/P4-F/P4-G/P4-H 正式图与审计记录
+
+日期：2026-07-05。
+
+### P4-E 可复用绘图脚本审计与实现结论
+
+- 已审计 `scripts/pnjl/plot_phase_diagram.py`：可复用其 T-mu / T-rho 双联布局、按 `xi` 分组和图层开关思路，但该脚本仍以旧 `data/reference/pnjl` 和旧字段口径为主，CEP loader 期待 `mu_CEP_MeV`，crossover loader 期待旧 `T_crossover_chiral_MeV` / `rho_chiral`，且 T-mu 面板使用 quark `mu` 而非 `mu_B`，不适合作为正式 Figure 4 入口。
+- 已审计 `scripts/relaxtime/build_paper_p1_figure_assets.py`：其 result-side `figure_assets/`、figure-side `plot_manifest.json`、`phase_reference_root/tag` 与 `mu_B=3*mu_q` overlay 逻辑适合作为正式资产组织模板。
+- P4-E 决策：不 patch 旧预览脚本；新增正式后处理入口 `scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py`。
+- 新脚本默认读取 result-side formal reference root/tag，输出 `T-mu_B + T-rho` 双联 PNG/PDF，支持 `--xi-values` 和 `--include-spinodal`，并写出 result-side figure assets 与 figure-side `plot_manifest.json`。
+
+### P4-F 正式图与 manifest 输出
+
+- result-side figure assets：
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_TmuB.csv`
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_lines_Trho.csv`
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure_assets/figure4_phase_plot_inputs_summary.json`
+- figure-side outputs：
+  - `data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.png`
+  - `data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf`
+  - `data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/plot_manifest.json`
+- result-side audit/index：
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/README.md`
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/PRODUCTION_AUDIT.md`
+  - `data/outputs/results/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/manifest.json`
+- 默认绘图参数：`xi=-0.5,-0.25,0.0,0.25,0.5`，`include_spinodal=false`，`formats=png,pdf`，`dpi=300`，`figsize=7.6,3.8`。
+- `plot_manifest.json` 记录 source CSV hashes、axis conversion、row counts、plotted/source `xi`、style、script、git commit、dpi、figure size 和 residual risks。
+
+### P4-G 验证与目视审核
+
+- `python -m py_compile scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py scripts/analysis/pnjl/compare_phase_reference_convergence.py scripts/pnjl/validate_dense_reference_artifact.py`：通过。
+- `python scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py`：通过。
+- `--include-spinodal` 临时低 DPI smoke：通过；临时目录已清理。
+- `plot_manifest.json` hash 自检：通过，10 个 input/asset/figure 文件均匹配。
+- PNG 尺寸检查：`2244x1156`，`RGBA`。
+- 目视审核：默认 no-spinodal 双联图可读；坐标轴、图例、panel labels、line-style 语义无明显遮挡。
+- `julia --project=. scripts/dev/check_docs_consistency.jl`：通过。
+- `julia --project=. scripts/dev/check_script_entrypoints.jl`：通过。
+- `julia --project=. scripts/dev/check_data_output_path_guard.jl`：通过。
+- `git diff --check`：通过。
+- `julia --project=. scripts/dev/check_active_docs_governance.jl`：未通过，原因仍是两个既有 stale active doc（`2026-04-30_介子数密度与BU工作流任务单.md`、`2026-05-01_PNJL可选功能盘点与优先级任务单.md`），与本任务产物无直接关系。
+
+### P4-H 外部消费说明
+
+- 本项目正式消费入口为 result-side `README.md`、`manifest.json`、`PRODUCTION_AUDIT.md` 和 figure-side `plot_manifest.json`。
+- 本项目不修改 paper 项目文件；paper 侧如需采用默认图或派生裁剪版本，应从上述正式产物索引读取。
+- 仍需人工判断的是论文版面选择：默认 `xi` subset 是否合适、是否另出 spinodal variant、是否需要为正文宽度再派生更稀疏版本。
+
+## 20. P4-I T-rho CEP 视觉连接调整
+
+日期：2026-07-05。
+
+- 用户确认默认绘图 subset `xi=-0.5,-0.25,0.0,0.25,0.5` 合适。
+- 用户要求删除桌面 PRD 镜像；`D:\Desktop\PRD_Julia_RelaxTime_figure4_phase_diagram.md` 已删除，后续只保留本项目内 canonical active doc。
+- 用户指出 `T-rho` 面板中 CEP 两侧曲线因附近数据间隔而视觉上未连接；本轮按图像资产层处理，不改正式 reference CSV。
+- `scripts/analysis/pnjl/build_figure4_phase_diagram_assets.py` 已加入 `T-rho` plotting-only `CEP_visual_connector` 行：每个 `xi` 增加两条 coexistence connector 和一条 crossover connector，使共存区两支与 crossover 曲线视觉上穿过 CEP。
+- connector 的 `rho` 坐标沿用 CEP 在 `T-rho` 面板中的绘图坐标：同 `xi` 下最接近 CEP 温度的 boundary 两侧密度均值；该口径已写入 result-side README、PRODUCTION_AUDIT、figure asset summary 与 figure-side `plot_manifest.json`。
+- 已重新生成 `figure4_phase_diagram_TmuB_Trho.png`、`figure4_phase_diagram_TmuB_Trho.pdf`、`figure_assets/` 和 `plot_manifest.json`。
+- connector 检查：`figure4_phase_lines_Trho.csv` 中有 63 条 `CEP_visual_connector` 行；默认五个 plotted `xi` 对应 15 条 connector 被绘制。
