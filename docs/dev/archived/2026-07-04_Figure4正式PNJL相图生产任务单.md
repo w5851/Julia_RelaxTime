@@ -1,4 +1,16 @@
 ---
+title: PRD: Production-Grade PNJL Phase Reference And Figure Assets
+archived: true
+original: docs/dev/active/2026-07-04_Figure4正式PNJL相图生产任务单.md
+archived_date: 2026-07-05
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+---
 status: ready_for_archive
 owner: both
 created: 2026-07-04
