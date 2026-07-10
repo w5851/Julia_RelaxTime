@@ -1,87 +1,47 @@
 ---
 name: codex-task-harness
-description: 将宽泛的 Julia_RelaxTime 任务收束为可执行 harness：边界、风险、验证、交付物与推荐 skill。适用于跨后端、前端契约、文档、论文、研究分析的混合任务。关键词：task harness, scope, validation, skill routing, execution plan
+description: 将宽泛、跨模块的 Julia_RelaxTime 需求收束为可执行 harness：目标、边界、契约、风险、验证、交付物与最小 skill 路由。仅用于容易扩 scope 的混合任务；边界清楚的窄任务应直接执行。
 ---
 
-# codex-task-harness
+# Codex Task Harness
 
 ## Purpose
 
-把“大而散”的需求快速整理成一个可以直接执行的任务框架，减少中途漂移。
+把“大而散”的请求压缩成可以立即执行的边界与验证框架，避免计划本身成为交付物。
 
-本 Skill 不追求长计划，而是尽快给出范围、约束、风险、验证和推荐 skill，然后进入执行。
+## Hard rules
 
-## Apply When
+- 先写不允许改变的范围和契约，再写允许修改的内容。
+- 只保留会影响执行的风险和假设。
+- 给出最小必要验证，不以“以后补测试”代替验收。
+- 只路由最少但足够的 skill；边界清楚后立即执行。
 
-- 用户需求跨多个方向：后端实现、文档、前端契约、论文、实验分析。
-- 任务描述宽泛，容易在实施中扩边界。
-- 需要先判断该调用哪些 skill，再落地。
+## Harness contract
 
-## Do Not Use
+- 目标：本轮必须完成的结果
+- 允许修改：文件、模块、数据或文档范围
+- 不要修改：显式非目标和外部影响边界
+- 必须保持：稳定入口、求解语义、单位或数据契约
+- 风险：最可能失败的 1–3 点
+- 验证：测试层、治理检查、结果核对和文档义务
+- 路由：本轮实际需要的其他 skill
 
-- 任务已经非常窄且边界明确时；直接执行即可。
-- 用户明确只要 brainstorming，不要实现时；保留为轻量分析。
+## Repository routing
 
-## Hard Rules
+- 数值 baseline 制度：`baseline-regression-governance`
+- transport/relaxtime 漂移：`transport-regression-keeper`
+- API 文档：`api-doc-authoring`
+- 前端数据契约：`frontend-contract-author`
+- 论文证据写作：`paper-traceable-coauthor`
+- 技术文档：`doc-coauthoring`
+- 实验日志：`experiment-logbook-append`
+- 执行台账：`doc-exec-log-append`
+- Julia 实现：`julia-pro`
 
-- Harness 只保留执行真正需要的信息，避免大段泛化分析。
-- 先界定不该改什么，再界定要改什么。
-- 必须给验证方式，不能只给实现思路。
-- 如果已有合适 skill，优先路由而不是重复发明流程。
+## Workflow
 
-## Output Frame
-
-每次使用时，至少给出：
-
-- 目标：这次要完成什么
-- 边界：允许修改 / 不允许修改
-- 契约：必须保持不变的行为或入口
-- 风险：最可能出问题的 1 到 3 点
-- 验证：最小必要测试、文档更新或结果核对
-- 路由：建议同时使用的其他 skill
-
-## Repository Routing Heuristics
-
-- 数值回归与 baseline：`transport-regression-keeper` 或 `baseline-regression-governance`
-- API 文档与稳定入口：`api-doc-authoring`
-- 前端字段与 payload：`frontend-contract-author`
-- 论文与研究写作：`paper-traceable-coauthor` 或 `doc-coauthoring`
-- 实验日志：`experiment-logbook-append` 或 `doc-exec-log-append`
-- Julia 数值实现细节：`julia-pro`
-
-## Standard Workflow
-
-1. Collapse the request
-   - 用一句话写主目标。
-2. Freeze boundaries
-   - 文件边界、契约边界、非目标。
-3. Pick the verification floor
-   - 至少要跑什么、检查什么、更新什么。
-4. Route to skills
-   - 只选最少但足够的 skill。
-5. Execute
-   - 当边界足够清楚时，直接进入实现而不是停留在 plan。
-
-## Prompt Skeleton
-
-可将需求整理成：
-
-```text
-目标：
-- ...
-
-允许修改：
-- ...
-
-不要修改：
-- ...
-
-必须保持不变：
-- ...
-
-验证要求：
-- ...
-
-建议同时使用：
-- ...
-```
+1. 用一句话锁定主目标。
+2. 冻结文件、语义和外部影响边界。
+3. 选择验证下限和文档义务。
+4. 选择最小 skill 组合。
+5. 执行并在范围或风险实质变化时重新锁定边界。

@@ -1,4 +1,4 @@
 interface:
   display_name: "Frontend Contract Author"
   short_description: "Author frontend-facing data contracts."
-  default_prompt: "Use this skill to derive frontend-ready payloads, units, and error semantics from backend entrypoints."
+  default_prompt: "Use $frontend-contract-author to derive frontend-ready payloads, units, missing-value rules, and error semantics from the backend entrypoints."

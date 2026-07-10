@@ -79,6 +79,10 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 
 - If the same collaboration pattern or high-frequency task appears three or more times, prefer capturing it as a skill, script entrypoint, or reusable template instead of relying on repeated ad hoc prompting.
 - After substantial tasks, when a reusable process or governance rule becomes clear, prefer updating `docs/dev/` or the relevant skill instructions rather than leaving the workflow only in chat history.
+- Repository-specific skills under `.agents/skills/` are the canonical project copies. Do not install another skill with the same name in a user-level skill root; keep generic cross-project skills in one user-level root or vendor them here, but never both.
+- Keep positive trigger conditions in SKILL.md frontmatter `description`; keep the body focused on execution, boundaries, resources, and validation.
+- Claude Code adapters under `.claude/skills/` are generated wrappers; regenerate them with `scripts/dev/sync_claude_skills.jl` and do not edit their bodies manually.
+- Keep `.claude/commands/` for true parameterized action macros only. Do not duplicate SKILL workflows in slash-command files.
 
 ## Setup Commands
 
@@ -324,6 +328,8 @@ julia --project=. scripts/dev/check_model_profile_matrix.jl
 julia --project=. scripts/dev/check_data_output_path_guard.jl
 julia --project=. scripts/dev/check_precompile_profile_coverage.jl
 julia --project=. scripts/dev/check_precompile_trace_budget.jl
+julia --project=. scripts/dev/check_skill_governance.jl
+julia --project=. scripts/dev/sync_claude_skills.jl --check
 ```
 
 Build persistent sysimage for AD-heavy test/script workflows:

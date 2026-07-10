@@ -1,6 +1,6 @@
 ---
 name: formal-production-artifact
-description: 在 Julia_RelaxTime 中生产可入库的正式高精度数值产物。适用于 formal production, 正式产物, 高精度产物, 收敛性测试, convergence, production audit, README/manifest, plot_manifest, data/outputs/results, data/outputs/figures。必须先完成收敛性证据，再用证据支持的参数重跑正式产物。
+description: 在 Julia_RelaxTime 中通过收敛性 gate、正式重跑、审计 manifest 和图表追踪生产可入库的高精度数值产物。仅用于正式 production 晋升；baseline 治理、transport 漂移判断、实验日志或隔离文献复现应使用各自专用 skill。
 ---
 
 # formal-production-artifact
@@ -16,21 +16,6 @@ description: 在 Julia_RelaxTime 中生产可入库的正式高精度数值产�
 本 Skill 负责产物生产治理，不负责发明新物理口径、重写稳定入口或替代数值回归 Skill。若项目中已有稳定
 `workflow_dispatch` 生产入口，应优先使用 GitHub Actions 触发高精度生产，以便复用固定 runner、统一依赖、artifact
 留痕和手动触发入口。
-
-## Apply When
-
-- 用户要求生产、重跑、入库、归档或发布正式数值产物。
-- 结果需要写入 `data/outputs/results/<domain>/<topic>/<case_slug>/`。
-- 图像需要写入 `data/outputs/figures/<domain>/<topic>/<case_slug>/`。
-- 任务要求高精度、收敛性证据、`PRODUCTION_AUDIT`、manifest 或 `plot_manifest.json`。
-- 需要把临时诊断输出升级为正式产物前的 gate。
-
-## Prefer Another Skill When
-
-- 目标是建立或维护测试基线：先用 `baseline-regression-governance`。
-- 目标是判断 relaxtime/transport 数值漂移：配合 `transport-regression-keeper`。
-- 目标只是 append-only 记录实验批次：配合 `experiment-logbook-append`。
-- 目标是隔离复现文献：先用 `literature-reproduction-spike`，不要直接写正式产物。
 
 ## Hard Gates
 

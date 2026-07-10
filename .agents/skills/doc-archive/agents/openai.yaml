@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document Archive"
+  short_description: "Archive completed active task documents safely."
+  default_prompt: "Use $doc-archive to archive this completed active task document and validate its metadata."

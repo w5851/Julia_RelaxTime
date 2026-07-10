@@ -1,0 +1,4 @@
+interface:
+  display_name: "Development Document Design"
+  short_description: "Design executable development task documents."
+  default_prompt: "Use $doc-design-from-zero to create an executable Julia_RelaxTime task document with scope, milestones, validation, and DoD."

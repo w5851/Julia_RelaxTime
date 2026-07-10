@@ -1,127 +1,65 @@
 ---
 name: api-doc-authoring
-description: "为 Julia_RelaxTime 编写或更新 API 文档时使用。适用于按三层视图组织 API 文档：面向用户入口、职责核心、导出 API 全集；并要求导出 API 全集必须通过脚本自动生成而不是人工维护。关键词：API 文档、导出函数、公共接口、职责核心、导出 API 全集、docs/api。"
-license: MIT
-metadata:
-  author: local-adapted
-  version: "1.0.0"
+description: "Author or restructure Julia_RelaxTime public API documentation under docs/api using three views: user entrypoints, responsibility core, and an automatically generated complete export index. Use for stable public APIs and export coverage; do not use for general design documents, paper prose, or implementation-task execution."
 ---
 
-# API Doc Authoring
+# API Documentation Authoring
 
-## Hard Rules
-- API 文档必须按“面向用户入口 / 职责核心 / 导出 API 全集”三层视图组织，而不是源码顺序平铺。
-- `导出 API 全集` 必须通过脚本自动生成，不能作为人工主维护页面。
-- 人工维护页优先写稳定公开入口，不把纯内部 helper 当成主 API。
-- 当自动判断“用户入口”和“职责核心”不可靠时，先做最小必要澄清，再继续固化结构。
-- 若新文档正在替代旧 API 页面，应把仍有价值的说明直接吸收入新页，而不是长期依赖旧页承载主内容。
+## Core contract
 
-## When to apply
-- 新增或重写某个模块的 API 文档。
-- 需要核对“对外暴露接口是否已完整收录”。
-- 需要把文档组织为“面向用户入口 / 职责核心 / 导出 API 全集”三层视图。
-- 需要将“导出 API 全集”交给脚本自动生成，而不是手工维护。
+- Organize documentation by user need, not source-file order.
+- Put stable façades and complete workflows before internal numerical helpers.
+- Maintain user entrypoints and responsibility-core explanations manually.
+- Generate the complete export index with `scripts/dev/generate_api_export_index.jl`; never maintain it by hand.
+- Update `docs/api/` whenever a stable public entrypoint changes.
+- Preserve units, stability labels, compatibility notes, and repository terminology.
 
-## Repository-specific defaults
-- 默认文档落点为 `docs/api/`，按现有仓库目录继续组织，不擅自引入新文档站框架。
-- 公开稳定入口优先参考聚合模块与现有入口文档，例如 `src/models/Models.jl`、`src/models/entrypoints.jl`、`README.md`、`docs/api/README.md`。
-- 只把导出且面向外部调用的符号视为公开 API 候选；纯内部 helper 不写成主 API。
-- 若模块属于公开稳定入口，同时补充或更新对应 `docs/api/` 文档，而不是只改 README。
-- 复杂模块优先采用“主题目录 + 视图拆页”的方式，避免单页无限膨胀。
-- `导出 API 全集` 层已由仓库脚本 `scripts/dev/generate_api_export_index.jl` 支撑生成，不允许作为人工主维护页面。
-- 第二层视图的语义统一命名为“职责核心层”：若主题以算法判据为主，可命名文件为 `Algorithms.md`；若主题以职责边界、模块协作为主，可命名为 `CoreConcepts.md`。统一的是层级语义，不强制统一页面文件名。
-- 当新 `docs/api/models/*` 主题用来替代历史 `docs/api/pnjl/*`、`docs/api/relaxtime/*` 入口时，应优先把旧页中仍有价值的说明直接吸收入新主题，而不是让新主题长期依赖“旧路径详见另页”的架构。
-- 历史页面在完成吸收后，应尽量降级为迁移说明或跳转页，而不是继续作为新主题的细节承载主页面。
-- 对 `Models` 相关主题，目录设计优先反映“能力分组”而不是简单平铺：若某主题表示模型家族或模型变体，不建议直接落在 `docs/api/models/<theme>/`，而应额外套一层更明确的分类目录。
-- 外磁场 magnetic 相关能力应视为与 NJL、PNJL、RPNJL 等并列的模型变体族，而不是直接视为 `models` 下的普通单一主题；后续落点优先考虑带额外分类层的路径。
-- susceptibility、cumulant、导数等能力优先视为 `Models` 的“衍生量”主题簇，而不是与 phase/workflows/scans/solver 同层并列的流程主题。
-- transport 相关能力虽然可视为 `Models` 的衍生量之一，但当前与 `relaxtime` 领域页和 workflow 页耦合较深；在用户未明确目录方案前，不应过早固化为最终 `docs/api/models/...` 路径。
+## Evidence sources
 
-## Required workflow
-1. Build export inventory
-   - 扫描目标模块及其聚合入口的 `export` 列表。
-   - 合并重复导出，得到“应覆盖公共符号清单”。
-   - 若文档目标是单个子模块，同时检查上层聚合模块是否再次导出，避免漏掉真正面向外部的入口。
-2. Identify public entry surface
-   - 优先使用稳定入口而不是深层实现文件来组织文档。
-   - 若同一能力既有底层函数又有统一 façade，正文优先写 façade，底层函数移到“进阶/实现相关接口”。
-3. Build three documentation views
-   - `面向用户入口`：面向首次使用者，优先呈现统一入口、主工作流、最短可运行示例。
-   - `职责核心`：解释关键算法、判据、数据流、模块职责边界和维护者需要理解的内部逻辑。
-   - `导出 API 全集`：基于 `export` 列表自动生成，作为完整公开接口索引。
-4. Decide file layout
-   - 小模块可以把三层视图放在同一文档中。
-   - 中大型模块优先拆分为多页或主题子目录，例如 `overview.md`、`Algorithms.md`/`CoreConcepts.md`、`exports.md`。
-   - 文件拆分按“便于查找”优先，而不是机械要求一层一页或三层同页。
-5. Ask when confidence is low
-   - 若无法根据 README、现有 guides、聚合入口、测试命名、HTTP/脚本调用路径可靠判断“面向用户入口”与“职责核心”，必须先询问用户。
-   - 可让用户直接指定：哪些入口属于“面向用户入口”、哪些算法/职责边界应进入“职责核心”、是否隐藏实验性接口。
-   - 在未确认前，不把低置信度判断写死为最终层级。
-6. Draft the human-authored views
-   - `面向用户入口` 页先给出模块定位、单位/输入约定、稳定性说明和最短示例。
-   - `职责核心` 页按算法/判据/工作流/职责边界拆解，不按源码出现顺序机械铺开。
-   - 若存在 façade 与底层实现并存，用户入口页优先写 façade。
-   - 若正在替代旧 API 文档架构，应把旧页中仍有价值的参数口径、策略说明、契约与注意事项吸收入新页，而不是只放一个“更多说明见旧页”的链接。
-7. Generate the automated export view
-   - `导出 API 全集` 必须通过脚本生成，不依赖人工逐项抄录。
-   - 当前仓库已提供 `scripts/dev/generate_api_export_index.jl`，优先直接调用，而不是重新发明生成逻辑。
-   - 自动生成页至少应列出导出符号、来源模块、以及是否已被其他人工文档提及。
-   - 若脚本生成结果与人工文档分层不一致，以脚本导出的公开符号清单作为“完整性”基线。
-8. Coverage verification
-   - 检查人工维护页是否覆盖了应强调的用户入口与职责核心。
-   - 检查自动生成页是否完整覆盖所有导出符号。
-   - 若某些导出符号暂不建议公开使用，要显式标注为“已导出但不推荐作为首选入口”，不能直接遗漏。
+Inspect the target export surface and its authoritative callers before drafting:
 
-## Priority heuristics
-- 满足以下信号越多，越可能属于 `面向用户入口`：
-- 出现在顶层聚合模块的大块 `export` 入口中。
-- 被 README、Quickstart、脚本示例或 HTTP 接口直接调用。
-- 能完成完整任务闭环，而不是只做局部数值计算。
-- 已有专门 API 文档页或在开发文档中被称为“统一入口”“推荐入口”。
-- 反向信号：名字明显偏内部实现、缓存细节、导数细节、调试输出、实验性入口。
-- 满足以下信号越多，越可能属于 `职责核心`：
-- 被多个上层入口复用。
-- 直接实现关键物理/数值判据或算法分支。
-- 在测试中以“algorithm/core/maxwell/crossover/cep”等关键词被直接验证。
+- `src/models/Models.jl` and `src/models/entrypoints.jl`;
+- target module `export` lists and aggregation modules;
+- `README.md`, existing `docs/api/`, guides, scripts, HTTP routes, and tests.
 
-## Ask-user protocol
-- 当自动判断不可靠时，优先发起简短确认，问题数量控制在 1 到 3 个。
-- 建议询问：
-- 你希望哪些入口进入“面向用户入口”层？
-- 哪些算法或职责边界应被视为值得详细解释的“职责核心”？
-- 是否要把实验性/兼容层接口降级到附录或只保留在导出全集中？
-- 文档目标读者更偏“新使用者”还是“维护者”？
-- 若用户未回复但任务必须继续，采用保守策略：
-- 只把 README 和统一入口明确推荐的函数列为“面向用户入口”。
-- 把明显实现关键判据或职责边界的内容列入“职责核心”。
-- 其余公开符号全部交给自动生成的“导出 API 全集”。
+Treat an exported symbol as a public candidate, not automatically as a recommended user entrypoint.
 
-## Output structure template
-- 模块概述：一句话说明解决什么问题。
-- 使用前提：单位、输入格式、依赖模块、稳定性口径。
-- 面向用户入口：面向大多数用户的首选入口，放最前。
-- 职责核心：关键算法、判据与职责边界说明。
-- 导出 API 全集：自动生成的导出索引页或附录页。
-- Examples：最短可运行示例，优先覆盖“面向用户入口”。
-- Compatibility notes：兼容层、废弃入口、迁移提示。
+## Workflow
 
-## Quality checks
-- 人工维护页不负责手工列全所有导出符号；导出完整性由自动生成页保证。
-- “面向用户入口”必须集中出现在前部，且示例先服务该层。
-- “职责核心”应解释关键判据、数据流与职责边界，而不是变成源码抄录。
-- “导出 API 全集”必须可重复生成，且不能以人工编辑为主。
-- 输入/输出单位和关键参数命名与仓库约定一致，例如 `T_inv_fm`、`μ_inv_fm`。
-- 若存在 facade 与底层实现并存，优先强调 facade，避免新用户直接走热路径内部函数。
-- 若引用实验性接口，显式标注稳定性，避免误导为长期公开承诺。
-- 新 `models` 主题页不应长期依赖旧 `pnjl`/`relaxtime` 页面作为主说明载体；旧页可保留为过渡跳转，但不应继续成为新主题完成度的前提。
+1. Build a deduplicated export inventory from the target module and its aggregators.
+2. Identify stable user entrypoints from the unified façade, README, scripts, server routes, and existing API docs.
+3. Identify responsibility-core material: algorithms, criteria, data flow, and module boundaries needed by maintainers.
+4. Choose a single-page layout for small topics or a topic directory for larger surfaces.
+5. Draft the user view with positioning, units, input contract, stability, and the shortest runnable example.
+6. Draft the responsibility-core view without copying implementation files in source order.
+7. Run the export-index generator and treat its output as the completeness baseline.
+8. Mark exported-but-discouraged or experimental symbols explicitly instead of omitting them.
+9. Verify links, symbol coverage, terminology, units, and migration notes.
 
-## Automation stance
-- 当前仓库先采用“纯脚本版”路线处理 `导出 API 全集`。
-- `导出 API 全集` 的自动化优先级高于是否接入 Documenter.jl；工具可以后续升级，但自动化要求必须先建立。
-- 仓库内现有脚本位置：`scripts/dev/generate_api_export_index.jl`。
-- 推荐输出位置：`docs/api/` 对应主题目录下的 `generated/` 子目录。
-- 若未来启用 Documenter.jl，也只应作为自动化层的升级，不改变“用户入口/算法核心由人工主导、导出全集由自动化主导”的职责划分。
+## Classification heuristics
 
-## Boundary
-- 若任务是一般技术文档、方案设计、论文写作或结构化重写，而不是 API 文档体系建设，优先转 `doc-coauthoring` 或 `writing-skills`。
-- 若任务核心是“按现有开发文档推进实现”，优先转 `doc-implementation`。
+A symbol is likely a user entrypoint when it is re-exported by a top-level aggregator, documented in quickstarts, called by stable scripts or HTTP routes, and completes a workflow rather than a local calculation.
+
+A topic belongs in the responsibility core when it implements a key physical/numerical criterion, controls branching or data flow, or is reused by multiple public workflows.
+
+When confidence is low, use the conservative default: promote only entrypoints explicitly recommended by the unified façade or README; place the rest in the generated export index until evidence supports a stronger classification.
+
+## Output structure
+
+Include:
+
+- module purpose and stability;
+- units, inputs, outputs, and dependencies;
+- recommended user entrypoints and examples;
+- responsibility-core concepts and boundaries;
+- generated complete export index;
+- compatibility and migration notes.
+
+For `Models` topic reorganization, old PNJL/relaxtime page migration, magnetic variants, derived quantities, or transport placement, read [references/models-taxonomy.md](references/models-taxonomy.md).
+
+## Validation
+
+- Run `scripts/dev/generate_api_export_index.jl` for the target surface.
+- Run `scripts/dev/check_docs_consistency.jl` and relevant entry-contract checks.
+- Confirm the generated index contains every export and records whether human-authored docs mention it.
+- Confirm examples use current `Models` entrypoints rather than removed implementation paths.
