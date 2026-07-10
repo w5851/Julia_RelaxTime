@@ -12,6 +12,7 @@ const DEFAULT_REGISTRY_REL = joinpath("config", "governance", "docs_authority_ma
 const SOP_ROOT_REL = replace(joinpath("docs", "guides", "sop"), '\\' => '/') * "/"
 
 normalize_rel(path::AbstractString) = replace(normpath(String(path)), '\\' => '/')
+normalize_text_slashes(text::AbstractString) = replace(String(text), '\\' => '/')
 
 function _nonempty_string(value, field::AbstractString, violations::Vector{String})
     if !(value isa AbstractString) || isempty(strip(String(value)))
@@ -108,7 +109,7 @@ function validate_registry(
     if index_rel !== nothing
         index_path = _existing_repo_path!(violations, root, index_rel, "stable entrypoint index")
         if index_path !== nothing && isfile(index_path)
-            index_content = read(index_path, String)
+            index_content = normalize_text_slashes(read(index_path, String))
         end
     end
 
@@ -169,7 +170,7 @@ function validate_registry(
         end
         for rel in stable_entrypoints
             _existing_repo_path!(violations, root, rel, "$(item_label) stable entrypoint")
-            isempty(index_content) || occursin(normalize_rel(rel), normalize_rel(index_content)) ||
+            isempty(index_content) || occursin(normalize_rel(rel), index_content) ||
                 push!(violations, "$(item_label) stable entrypoint is absent from $(index_rel): $(normalize_rel(rel))")
         end
 

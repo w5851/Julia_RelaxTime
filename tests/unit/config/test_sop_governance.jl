@@ -95,12 +95,11 @@ $(second)
 """
 end
 
-function _make_fixture(; omit_section=nothing, last_verified="2026-07-10", duplicate_authority=false)
-    root = mktempdir()
+function _make_fixture(root::AbstractString; omit_section=nothing, last_verified="2026-07-10", duplicate_authority=false)
     _write_text(joinpath(root, "scripts", "run_fixture.jl"), "println(\"fixture\")\n")
     _write_text(
         joinpath(root, "docs", "guides", "scripts", "README.md"),
-        "scripts/run_fixture.jl\n",
+        "# Fixture scripts\n\n[上级说明](../README.md)\n\nscripts\\run_fixture.jl\n",
     )
     _write_text(
         joinpath(root, "docs", "guides", "sop", "fixture.md"),
@@ -121,33 +120,46 @@ end
 
 @testset "SOP governance registry" begin
     @test isfile(SOP_CHECKER_PATH)
+    @test Main.SopGovernance.normalize_text_slashes("docs\\guides\n[上级](../README.md)") ==
+        "docs/guides\n[上级](../README.md)"
 
-    valid_root = _make_fixture()
-    @test isempty(Main.SopGovernance.validate_registry(
-        valid_root;
-        current_date=Date(2026, 7, 10),
-    ))
+    mktempdir() do temp_root
+        valid_root = _make_fixture(joinpath(temp_root, "valid"))
+        @test isempty(Main.SopGovernance.validate_registry(
+            valid_root;
+            current_date=Date(2026, 7, 10),
+        ))
 
-    missing_section = "## 8. 收敛性验证"
-    incomplete_root = _make_fixture(; omit_section=missing_section)
-    incomplete = Main.SopGovernance.validate_registry(
-        incomplete_root;
-        current_date=Date(2026, 7, 10),
-    )
-    @test any(item -> occursin("missing required section", item), incomplete)
-    @test any(item -> occursin(missing_section, item), incomplete)
+        missing_section = "## 8. 收敛性验证"
+        incomplete_root = _make_fixture(
+            joinpath(temp_root, "incomplete");
+            omit_section=missing_section,
+        )
+        incomplete = Main.SopGovernance.validate_registry(
+            incomplete_root;
+            current_date=Date(2026, 7, 10),
+        )
+        @test any(item -> occursin("missing required section", item), incomplete)
+        @test any(item -> occursin(missing_section, item), incomplete)
 
-    overdue_root = _make_fixture(; last_verified="2026-01-01")
-    overdue = Main.SopGovernance.validate_registry(
-        overdue_root;
-        current_date=Date(2026, 7, 10),
-    )
-    @test any(item -> occursin("review is overdue", item), overdue)
+        overdue_root = _make_fixture(
+            joinpath(temp_root, "overdue");
+            last_verified="2026-01-01",
+        )
+        overdue = Main.SopGovernance.validate_registry(
+            overdue_root;
+            current_date=Date(2026, 7, 10),
+        )
+        @test any(item -> occursin("review is overdue", item), overdue)
 
-    duplicate_root = _make_fixture(; duplicate_authority=true)
-    duplicate = Main.SopGovernance.validate_registry(
-        duplicate_root;
-        current_date=Date(2026, 7, 10),
-    )
-    @test any(item -> occursin("is claimed by both", item), duplicate)
+        duplicate_root = _make_fixture(
+            joinpath(temp_root, "duplicate");
+            duplicate_authority=true,
+        )
+        duplicate = Main.SopGovernance.validate_registry(
+            duplicate_root;
+            current_date=Date(2026, 7, 10),
+        )
+        @test any(item -> occursin("is claimed by both", item), duplicate)
+    end
 end
