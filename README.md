@@ -138,6 +138,7 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 ### 从稳定入口到深层文档
 
 - 相图主产线：`scripts/pnjl/calculate_phase_structure.jl`
+  - 执行与复现 SOP：`docs/guides/sop/workflows/pnjl_phase_structure.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/models/phase/README.md`
 - T-μ / T-ρ 扫描：`scripts/models/run_unified_scan.jl`
@@ -149,12 +150,17 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
   - API 入口：`docs/api/models/derived/susceptibility/README.md`
   - 当前导数后端口径：单方向 `B/Q/S` 默认走 TaylorDiff fast path，mixed BQS 走内部 multivariate Taylor jet；旧 `:forwarddiff` susceptibility fallback 已下线。
 - 各向异性输运 / Relaxtime 工作流
+  - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
   - phase-guided production-grade asset（mode a）：`data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
   - phase-guided production-grade 图层（mode a）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
   - phase-guided production-grade asset（mode b）：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
   - phase-guided production-grade 图层（mode b）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
+- 介子热力学 / 介子数密度
+  - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
+  - 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`
+  - API 入口：`docs/api/models/workflows/MesonThermoWorkflow.md`、`docs/api/models/workflows/MesonDensityWorkflow.md`
 - Web/API 服务入口：`scripts/server/server_full.jl`
   - 当前状态：`docs/guides/STATUS.md`
 
@@ -177,6 +183,7 @@ julia --project=. -e 'println(isfile("data/outputs/results/phase_smoke/phase_sum
 
 ```powershell
 julia --project=. scripts/dev/check_docs_consistency.jl
+julia --project=. scripts/dev/check_sop_governance.jl
 julia --project=. scripts/dev/check_script_entrypoints.jl
 julia --project=. scripts/dev/check_models_entry_contract.jl
 julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.jl")'
@@ -190,6 +197,7 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 - `docs/guides/USER_GUIDE.md`
 - `docs/guides/STATUS.md`
 - `docs/guides/scripts/README.md`
+- `docs/guides/sop/README.md`
 
 ### 开发/治理
 
@@ -224,6 +232,6 @@ web/            前端框架与静态资源
 - 贡献指南：`.github/CONTRIBUTING.md`
 - 行为准则：`.github/CODE_OF_CONDUCT.md`
 - 安全策略：`.github/SECURITY.md`
-- 文档治理：`scripts/dev/check_docs_consistency.jl` 与 `scripts/dev/check_script_entrypoints.jl`
+- 文档治理：`scripts/dev/check_docs_consistency.jl`、`scripts/dev/check_sop_governance.jl` 与 `scripts/dev/check_script_entrypoints.jl`
 
 协作原则：README 保持“入口与边界”，深内容以 `docs/` 为准。

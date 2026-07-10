@@ -5,14 +5,20 @@ on:
     paths:
       - "README.md"
       - "docs/**"
+      - "config/governance/docs_authority_map.toml"
       - "scripts/dev/check_docs_consistency.jl"
+      - "scripts/dev/check_sop_governance.jl"
+      - "tests/unit/config/test_sop_governance.jl"
       - ".github/workflows/docs-consistency.yml"
   push:
     branches: ["main"]
     paths:
       - "README.md"
       - "docs/**"
+      - "config/governance/docs_authority_map.toml"
       - "scripts/dev/check_docs_consistency.jl"
+      - "scripts/dev/check_sop_governance.jl"
+      - "tests/unit/config/test_sop_governance.jl"
       - ".github/workflows/docs-consistency.yml"
   workflow_dispatch:
 
@@ -38,3 +44,9 @@ jobs:
 
       - name: Run docs consistency check
         run: julia --project=. scripts/dev/check_docs_consistency.jl
+
+      - name: Run scientific SOP governance check
+        run: julia --project=. scripts/dev/check_sop_governance.jl
+
+      - name: Run SOP governance unit test
+        run: julia --project=. tests/unit/config/test_sop_governance.jl

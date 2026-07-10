@@ -173,5 +173,6 @@
 - 兼容字段 `P_pi/P_K` 仍保留，但当第二通道切到 `sigma_pi` 时，更应使用 `primary/secondary` 字段解读合同
 - 当前三类 meson thermo workflow 的总热力学派生量都应标记为 `omega_total_ad`
 - canonical `mu_B = 0` 脚本与最小结果目录已落地，但图资产仍未在脚本内自动生成
-- 尚未沉淀 regression baseline
+- 已沉淀 point-level fixedpoint、canonical path 与 plot-review regression baseline
+- 尚未建立 external literature validation gate
 - 尚未做 channel 扩张决策

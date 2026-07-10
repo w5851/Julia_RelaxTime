@@ -13,6 +13,9 @@
 ## 2. 关键入口
 
 - 稳定脚本白名单：`docs/guides/scripts/README.md`
+- 科学计算 SOP：`docs/guides/sop/README.md`
+- 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
+- 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`
 - 相图主产线：`scripts/pnjl/calculate_phase_structure.jl`
 - 统一扫描入口：`scripts/models/run_unified_scan.jl`
 - 守恒荷 susceptibility 脚本：`scripts/pnjl/run_conserved_charge_susceptibilities.jl`
@@ -39,6 +42,7 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 # 文档与入口治理
 julia --project=. scripts/dev/check_docs_consistency.jl
+julia --project=. scripts/dev/check_sop_governance.jl
 julia --project=. scripts/dev/check_script_entrypoints.jl
 ```
 
