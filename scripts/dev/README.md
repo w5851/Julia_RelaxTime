@@ -21,6 +21,14 @@ julia --project=. scripts/dev/analyze_deps.jl
 julia --project=. scripts/dev/check_docs_consistency.jl
 ```
 
+科学计算 SOP 权威映射与结构检查：
+
+```powershell
+julia --project=. scripts/dev/check_sop_governance.jl
+```
+
+该门禁以 `config/governance/docs_authority_map.toml` 为机读单一来源，检查 active SOP 的路径、唯一权威范围、稳定入口白名单、必需章节、旧入口模式和复核周期。首期只约束 `docs/guides/sop/`，不一次性阻断全部历史文档。
+
 导出 API 全集索引生成：
 
 ```powershell

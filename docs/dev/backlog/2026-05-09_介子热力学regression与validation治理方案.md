@@ -1,8 +1,14 @@
 # 介子热力学 regression 与 validation 治理方案
 
-更新日期：2026-05-09
+更新日期：2026-07-10
 
-当前状态：首版 point-level fixedpoint baseline 与 regression 已落地；本页继续作为 meson thermo 主线的测试分层、path-level 候选资产与 validation 升格门槛说明。
+当前状态：backlog 治理路线。point-level、短路径和 plot-review regression 均已落地；当前剩余问题是 external validation 是否具备升格条件。本页不属于当前 active 执行批次。
+
+重分类说明：
+
+- 本页包含跨批次的长期 validation 升格门槛，按 `docs/dev/README.md` 规则从 active 移入 backlog；
+- 已落地事实继续保留作为下一次任务拉起时的输入；
+- 后续执行前必须重新核对文献映射、当前 baseline 和测试入口，不直接照搬 2026-05-09 的任务顺序。
 
 前序任务说明：
 
@@ -312,20 +318,19 @@ path-level regression 不需要复刻全部 CSV 列，只建议锁：
 
 ---
 
-## 8. 推荐执行顺序
+## 8. 下次拉起任务时的推荐执行顺序
 
-建议下一轮按以下顺序推进：
+1. 重新审计 external reference 的通道、路径、归一化和模型差异；
+2. 确认至少一组观测量具备可参数化重建、稳定 target 和明确容差来源；
+3. 先生成独立 plot-review / evidence package，再决定是否进入 `tests/validation/`；
+4. 若证据不足，保持 mechanism-aligned reference，不创建形式化 validation gate；
+5. 只有代码语义或正式默认值确实变化时，才进入 baseline 更新流程。
 
-1. 新增 `point-level fixedpoint regression` 文档化 baseline 设计对应的导出脚本或基线草案；
-2. 在不改现有 baseline 的前提下，先把 regression 测试文件骨架补齐；
-3. 再决定是否补 canonical plot-review 资产；
-4. 最后再讨论 external validation。
+当前不建议：
 
-当前不建议直接跳到：
-
-1. 大范围多通道 path regression；
-2. external validation gate；
-3. baseline 批量冻结。
+1. 因为已有 regression 就自动宣称 external validation 已成立；
+2. 为匹配文献图而临时放宽数值容差；
+3. 在缺少差异审计时批量重生 baseline。
 
 ---
 
@@ -333,7 +338,7 @@ path-level regression 不需要复刻全部 CSV 列，只建议锁：
 
 当前 meson thermo 主线的治理结论是：
 
-1. 先以 `phase_shift_current + pi/sigma_pi + mu_B=0` 作为 regression 主口径；
-2. 先补 point-level fixedpoint baseline，再补短路径 canonical regression；
-3. 当前 external literature 只适合作为 mechanism-aligned reference，不直接进 `tests/validation/`；
-4. baseline 更新必须等到下一轮明确导出、比较、审阅证据后再做。
+1. `phase_shift_current + pi/sigma_pi + mu_B=0` 的 point-level、短路径和 plot-review regression 已建立；
+2. 当前剩余治理缺口是 external validation 证据，不是继续重复建设内部 regression；
+3. external literature 在完成通道、路径和模型差异审计前，只能作为 mechanism-aligned reference；
+4. baseline 更新必须由实际语义变化和数值差异证据触发，不能作为 validation 工作的默认步骤。

@@ -1,0 +1,117 @@
+schema_version = "v1"
+allowed_statuses = ["draft", "active", "deprecated"]
+stable_entrypoint_index = "docs/guides/scripts/README.md"
+required_sections = [
+  "## 1. 目的与适用范围",
+  "## 2. 非适用范围",
+  "## 3. 权威入口",
+  "## 4. 物理口径、单位与参数约束",
+  "## 5. 输入配置及优先级",
+  "## 6. 环境与版本冻结",
+  "## 7. Smoke 预检",
+  "## 8. 收敛性验证",
+  "## 9. 正式计算命令",
+  "## 10. 输出目录与产物合同",
+  "## 11. Regression / Validation 验收",
+  "## 12. 失败点、断点续算与重跑",
+  "## 13. Diagnostic 与 Formal Production 的边界",
+  "## 14. 后处理与作图",
+  "## 15. 关联公式、API 和测试",
+  "## 16. 最后验证记录",
+]
+forbidden_patterns = [
+  "src/pnjl/",
+  "data/reference/pnjl/",
+]
+
+[[sop]]
+id = "common_scientific_run"
+path = "docs/guides/sop/common_scientific_run.md"
+status = "active"
+authoritative_for = ["scientific_computation_lifecycle"]
+entrypoints = []
+stable_entrypoints = []
+configs = []
+review_cycle_days = 120
+last_verified = "2026-07-10"
+verification_commands = [
+  "julia --project=. scripts/dev/check_sop_governance.jl",
+]
+
+[[sop]]
+id = "pnjl_phase_structure"
+path = "docs/guides/sop/workflows/pnjl_phase_structure.md"
+status = "active"
+authoritative_for = ["pnjl_phase_structure_production"]
+entrypoints = [
+  "scripts/pnjl/calculate_phase_structure.jl",
+]
+stable_entrypoints = [
+  "scripts/pnjl/calculate_phase_structure.jl",
+]
+configs = [
+  "config/models/pnjl/phase_pipeline_default.toml",
+]
+review_cycle_days = 120
+last_verified = "2026-07-10"
+verification_commands = [
+  "julia --project=. -e 'ENV[\"INTEGRATION_FILES\"]=\"models/test_phase_cli_smoke.jl\"; include(\"tests/integration/runtests.jl\")'",
+]
+
+[[sop]]
+id = "relaxtime_transport"
+path = "docs/guides/sop/workflows/relaxtime_transport.md"
+status = "active"
+authoritative_for = ["relaxtime_gap_transport_scan"]
+entrypoints = [
+  "scripts/relaxtime/run_gap_transport_scan.jl",
+]
+stable_entrypoints = [
+  "scripts/relaxtime/run_gap_transport_scan.jl",
+]
+configs = []
+review_cycle_days = 120
+last_verified = "2026-07-10"
+verification_commands = [
+  "julia --project=. -e 'ENV[\"UNIT_FILES\"]=\"relaxtime/test_run_gap_transport_scan_solver_entry.jl\"; include(\"tests/unit/runtests.jl\")'",
+]
+
+[[sop]]
+id = "meson_thermodynamics"
+path = "docs/guides/sop/workflows/meson_thermodynamics.md"
+status = "active"
+authoritative_for = ["meson_thermodynamics_workflow"]
+entrypoints = [
+  "scripts/relaxtime/run_phase_shift_meson_thermo_scan.jl",
+]
+stable_entrypoints = []
+configs = [
+  "config/models/pnjl/default.toml",
+  "config/physics/default.toml",
+]
+review_cycle_days = 120
+last_verified = "2026-07-10"
+verification_commands = [
+  "julia --project=. tests/integration/relaxtime/test_phase_shift_meson_thermo_scan_smoke.jl",
+]
+
+[[sop]]
+id = "meson_density"
+path = "docs/guides/sop/workflows/meson_density.md"
+status = "active"
+authoritative_for = ["meson_density_production_workflow"]
+entrypoints = [
+  "scripts/relaxtime/run_combined_meson_density_scan.jl",
+  ".github/workflows/relaxtime-meson-density-production.yml",
+]
+stable_entrypoints = []
+configs = [
+  "config/physics/flavor_chemical/default.toml",
+  "config/physics/meson_chemical/default.toml",
+  "config/physics/meson_chemical/asymmetric_kplus_over_piplus_signed.toml",
+]
+review_cycle_days = 120
+last_verified = "2026-07-10"
+verification_commands = [
+  "julia --project=. tests/integration/relaxtime/test_combined_meson_density_scan_smoke.jl",
+]

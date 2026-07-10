@@ -130,6 +130,7 @@ NNNN-title-in-kebab-case.md
 | 0002 | [采用 Models 求解接口契约（Problem-like + solve）](0002-models-solver-contract.md) | 已接受 | 2026-03-29 |
 | 0003 | [PNJL 求解器解耦治理与 AD/隐式微分契约](0003-pnjl-solver-decoupling-governance-and-ad-implicit-contract.md) | 提议 | 2026-03-31 |
 | 0004 | [Solver 三层契约与向量内核统一](0004-solver-three-layer-contract-and-vector-kernel.md) | 提议 | 2026-04-06 |
+| 0005 | [科学计算 SOP 与文档权威治理](0005-scientific-sop-and-document-authority.md) | 已接受 | 2026-07-10 |
 
 ## 创建新ADR的流程
 
