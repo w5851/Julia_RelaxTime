@@ -1,0 +1,4 @@
+interface:
+  display_name: "API Doc Authoring"
+  short_description: "Author layered public API documentation."
+  default_prompt: "Use $api-doc-authoring to document this public API with user entrypoints, responsibility core, and a generated export index."

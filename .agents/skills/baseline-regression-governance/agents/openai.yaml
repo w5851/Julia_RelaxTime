@@ -1,0 +1,4 @@
+interface:
+  display_name: "Baseline Regression Governance"
+  short_description: "Govern versioned numerical baseline contracts."
+  default_prompt: "Use $baseline-regression-governance to design or update this numerical baseline and its regression gate."

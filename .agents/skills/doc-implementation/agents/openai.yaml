@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document-driven Implementation"
+  short_description: "Implement tasks from active development documents."
+  default_prompt: "Use $doc-implementation to continue the selected active task document through implementation, validation, and truthful status updates."

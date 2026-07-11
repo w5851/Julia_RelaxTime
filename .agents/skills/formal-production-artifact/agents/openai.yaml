@@ -1,0 +1,4 @@
+interface:
+  display_name: "Formal Production Artifact"
+  short_description: "Produce audited high-precision numerical artifacts."
+  default_prompt: "Use $formal-production-artifact to run convergence gates and produce an audited production-grade numerical artifact."

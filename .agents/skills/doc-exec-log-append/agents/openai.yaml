@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execution Log Append"
+  short_description: "Append authorized execution ledger entries."
+  default_prompt: "Use $doc-exec-log-append to append one authorized, self-contained execution record to the explicit task log."

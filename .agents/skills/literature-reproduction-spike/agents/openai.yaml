@@ -1,0 +1,4 @@
+interface:
+  display_name: "Literature Reproduction Spike"
+  short_description: "Run isolated, auditable literature reproductions."
+  default_prompt: "Use $literature-reproduction-spike to reproduce this paper result in an isolated sandbox and evaluate the verdict gate."
