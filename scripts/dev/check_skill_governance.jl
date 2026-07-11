@@ -14,6 +14,7 @@ const SKILLS_ROOT = joinpath(ROOT, ".agents", "skills")
 const ALLOWED_FRONTMATTER_KEYS = Set(["name", "description"])
 const TRIGGER_HEADING_RE = r"(?im)^##\s+(?:when\s+to(?:\s+use|\s+apply)?|apply\s+when|何时使用|适用场景|触发与启动|[0-9]+\)\s*适用场景).*$"
 const MARKDOWN_LINK_RE = r"\[[^\]]+\]\(([^)]+)\)"
+const BLOCK_SCALAR_RE = r"^[|>][+-]?$"
 
 normalize_text(text::AbstractString) = replace(text, "\r\n" => "\n", "\r" => "\n")
 
@@ -63,28 +64,31 @@ function extract_frontmatter(content::String)
     return lines[2:closing-1], join(lines[closing+1:end], "\n")
 end
 
-function top_level_frontmatter(frontmatter_lines)
+function strict_frontmatter_fields(frontmatter_lines)
     fields = Dict{String,String}()
     keys = String[]
-    for line in frontmatter_lines
-        (!isempty(line) && isspace(first(line))) && continue
-        m = match(r"^([A-Za-z0-9_-]+):\s*(.*)$", line)
-        m === nothing && continue
-        key = m.captures[1]
+    for (line_number, line) in enumerate(frontmatter_lines)
+        isempty(strip(line)) && error("frontmatter line $(line_number) is blank")
+        isspace(first(line)) && error("frontmatter line $(line_number) is indented")
+        m = match(r"^([A-Za-z0-9_-]+):[ \t]+(.+)$", line)
+        m === nothing && error("frontmatter line $(line_number) must be a single-line key: scalar value")
+        key = String(m.captures[1])
         value = strip(m.captures[2])
+        occursin(BLOCK_SCALAR_RE, value) && error("frontmatter line $(line_number) uses an unsupported YAML block scalar")
+        haskey(fields, key) && error("frontmatter line $(line_number) duplicates key $(key)")
         push!(keys, key)
         fields[key] = value
     end
     return keys, fields
 end
 
-function unquote_yaml_scalar(value::String)
-    length(value) >= 2 || return value
+function unquote_yaml_scalar(value::AbstractString)
+    length(value) >= 2 || return String(value)
     if (startswith(value, '"') && endswith(value, '"')) ||
        (startswith(value, '\'') && endswith(value, '\''))
-        return value[2:end-1]
+        return String(value[2:end-1])
     end
-    return value
+    return String(value)
 end
 
 function local_link_target(raw_target::AbstractString)
@@ -109,14 +113,16 @@ function validate_skill(folder_name::String, skill_md::String)
 
     frontmatter_lines = String[]
     body = ""
+    keys = String[]
+    fields = Dict{String,String}()
     try
         frontmatter_lines, body = extract_frontmatter(content)
+        keys, fields = strict_frontmatter_fields(frontmatter_lines)
     catch err
         push!(violations, "$(folder_name): $(sprint(showerror, err))")
         return violations, warnings
     end
 
-    keys, fields = top_level_frontmatter(frontmatter_lines)
     key_set = Set(keys)
     key_set == ALLOWED_FRONTMATTER_KEYS || push!(violations,
         "$(folder_name): frontmatter keys must be exactly name, description; found $(join(sort(collect(key_set)), ", "))")
