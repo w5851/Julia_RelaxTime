@@ -22,7 +22,16 @@
 
 ## 物理公式
 
-详见 `docs/reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md`。
+权威公式、能量角色和外部文献映射见 [TransportCoefficients_FromRelaxationTime.md](../../../reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md)。
+
+本 API 页采用以下公式语义：
+
+- $E_{\mathrm{kin}}=\sqrt{p^2+m^2}$ 用于 $\eta$、$\sigma$、$\zeta$ 的运动学核及 $\zeta$ 的等熵导数组合；
+- $E_{\mathrm{dist}}=\sqrt{p^2+m^2+\xi(p\cos\theta)^2}$ 只作为 RS 分布 $f_\xi$ 的自变量；
+- $\zeta$ 的等熵平方核对应 Albright and Kapusta (2016) Eq. (138)，经典统计版本为 Eq. (111)；历史记号“A26”只是无法溯源到外部文献的 legacy Fortran/内部别名；
+- 方括号采用 $p^2+3v_n^2T^2E\,\partial_T[(E\mp\mu)/T]_\sigma$ 的加号形式。内部核对稿件中出现的减号已由作者确认为文稿错误。
+
+截至 `main@ea706548e9167db61e0cb7537bab2d2d4daf4cad`，上述 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 分离尚未在 $\xi\ne0$ 的默认 transport 实现中完全生效；当前实现状态与修复 gate 见 [Issue #130](https://github.com/w5851/Julia_RelaxTime/issues/130)。因此，本节公式描述的是已确认的目标物理约定，不表示旧 production 已按该约定计算。
 
 ### 剪切粘滞系数 η
 
@@ -50,7 +59,7 @@ $$
 
 ### 体粘滞系数 ζ
 
-按公式文档中的表达式实现，需要热力学导数组合 $(\partial P/\partial\varepsilon)_n$ 与 $(\partial P/\partial n)_\varepsilon$ 以及质量导数 $\partial M/\partial T, \partial M/\partial\mu$。
+采用等熵声速平方核，需要 $v_n^2$、$(\partial\mu_B/\partial T)_\sigma$、准粒子质量，以及 $\partial M/\partial T$、$\partial M/\partial\mu_B$。完整公式与外部方程映射见权威公式文档。
 
 ## 积分核说明
 
@@ -123,12 +132,13 @@ $$e = \sqrt{4\pi\alpha} \approx 0.303$$
 
 **额外参数**
 - `bulk_coeffs_isentropic::NamedTuple`：等熵体粘滞导数系数，需包含：
-  - `dP_depsilon_n`：$(\partial P/\partial\varepsilon)_n$
-  - `dP_dn_epsilon`：$(\partial P/\partial n)_\varepsilon$
+  - `v_n_sq`：$v_n^2$
+  - `dμB_dT_sigma`：$(\partial\mu_B/\partial T)_\sigma$
+  - `masses`：三个味的准粒子质量
   - `dM_dT`：质量对温度的导数（3元素数组）
-  - `dM_dmu`：质量对化学势的导数（3元素数组）
+  - `dM_dμB`：质量对重子化学势的导数（3元素数组）
 
-建议使用 `PNJL.ThermoDerivatives.bulk_viscosity_coefficients(T, mu; ...)` 的返回值。
+建议使用统一公开入口 `Models.bulk_viscosity_coefficients(T_fm, mu_fm; ...)` 的返回值。
 
 ### `bulk_viscosity(quark_params, thermo_params; formula=:isentropic, ...) -> Float64`
 
