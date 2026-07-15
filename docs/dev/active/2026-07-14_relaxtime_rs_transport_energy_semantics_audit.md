@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：等待作者确认公式—实现逐项映射（Issue #130 / PR 1 人工 gate）
+状态：作者已确认公式—实现逐项映射；等待 PR 1 源码实施
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -28,19 +28,19 @@ $$
 
 其中：
 
-- $E_{\mathrm{kin}}$ 是普通在壳准粒子能量，用于现有标量 $\eta$、$\sigma$、$\zeta$ 公式中的运动学分母、速度因子、色散响应和 $B$ 核；
-- $E_{\mathrm{dist}}$ 只作为 RS 分布 $f_\xi$ 的变形自变量，并由此进入 $f_\xi(1-f_\xi)$；
+- $E_{\mathrm{kin}}$ 是普通在壳准粒子能量，用于 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的运动学分母，并用于 $\zeta$ 的色散响应/$B$ 核和 $\kappa_{XY}$ 的 Landau-Lifshitz 投影；
+- $E_{\mathrm{dist}}$ 只作为 RS 分布 $f_\xi$ 的变形自变量，并由此进入各公式采用的分布占据核；
 - $M=M(T,\mu_B,\xi)$ 仍可来自当前各向异性热力学背景。这里排除的是在普通色散关系上额外加入 $\xi(p\cos\theta)^2$，不是把质量强制换成各向同性热力学解。
 
-本任务单的当前交付物是公式—实现审计，不实施代码修改。逐项映射经作者确认后，才允许修改 $\zeta$、刷新数值基线或运行新的正式 production。
+本任务单的当前交付物是公式—实现审计，不实施代码修改。作者已于 2026-07-15 确认 5.6 节的完整映射；下一阶段才允许开始源码实现。数值基线只能在实现和测试证据完成后刷新，新的正式 production 仍须等待代码 PR 合并。
 
 ## 2. 范围与非目标
 
 ### 2.1 范围
 
-- 审计 `TransportCoefficients.jl` 中 $\eta$、$\sigma$、等熵平方核 $\zeta$ 的每一个能量角色。
+- 审计 `TransportCoefficients.jl` 中 $\eta$、$\sigma$、等熵平方核 $\zeta$、守恒荷扩散矩阵 $\kappa_{XY}$ 及派生热导率 $\lambda$ 的能量角色。
 - 把当前 `E` 的实际含义、目标能量、仓库公式和外部文献逐项对应。
-- 设计 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 的最小拆分路径，并保护共享 helper 的非目标调用方。
+- 设计 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 的最小拆分路径，并让所有共享 helper 调用方显式选择正确能量角色。
 - 规定 unit、integration、regression、validation 各层验证责任。
 - 规定旧 production 的保留、外部 registry 标记和后续新 case 晋升顺序。
 - 在代码实施阶段修正 `docs/api/integrals/OneLoopIntegralsAniso.md` 中 `1/E_{\rm aniso}` 与实际普通能量分母不一致的问题。
@@ -50,10 +50,9 @@ $$
 - 不修改散射过程的 $s$、$v_{\rm rel}$、$t_\pm$ 或普通质量壳外线运动学。
 - 不改变初末态 RS 分布、Pauli blocking 或 `propagator_xi_policy = match_thermo`。
 - 不改变弛豫时间和截面的物理语义。
-- 不在本 issue 中引入纵向、横向或更完整的各向异性输运张量分解。本次只修正现有角积分后的标量有效 $\eta$、$\sigma$、$\zeta$，不得把修正结果表述为完整张量响应。
-- 不在未经单独公式审计时改变扩散矩阵 $\kappa_{XY}$、`diffusion_coefficient`、热导率 $\lambda$ 或关联 Lorenz ratio 的能量语义。
+- 不在本 issue 中引入纵向、横向或更完整的空间各向异性输运张量分解。本次修正现有角积分后的 $\eta$、$\sigma$、$\zeta$、守恒荷空间扩散矩阵 $\kappa_{XY}$ 及其派生 $\lambda$；守恒荷标签矩阵不等同于空间纵/横向张量响应。
 - 不通过 `prefer_energy_aniso=false` 伪装新的物理策略；该字段当前只是分布函数调用路由偏好。
-- 人工 gate 通过前不修改 `src/`、测试基线、production registry、正式 CSV 或图像。
+- 本次人工确认同步只更新文档与 Issue/PR 描述，不修改 `src/`、测试基线、production registry、正式 CSV 或图像。
 - 不修改 `D:\Desktop\paper` 下的主 bibliography；本仓库只记录已经核验的 citation key 和公式对应关系。
 
 ## 3. 当前能力与缺口
@@ -81,7 +80,7 @@ $$
 
 因此，只修改配置并重新运行不会把输运核运动学能量切换成 $E_{\mathrm{kin}}$。
 
-### 3.4 共享 helper 的额外风险
+### 3.4 共享 helper 延伸到 $\kappa_{XY}$ 与 $\lambda$
 
 `_integrate_species_sum` 不只服务 $\eta$ 和 $\sigma$。`TransportCoefficients.jl:1128-1133` 的 `diffusion_coefficient` 也消费当前单一 `E`，并把它用于：
 
@@ -89,7 +88,21 @@ $$
 - `_kappa_projection` 中的 $q_X-(n_X/h)E$；
 - 分布函数。
 
-本 issue 尚未为扩散矩阵和热导率建立同等强度的外部公式审计。后续重构必须让这些调用方显式保留变更前行为，不能因共享 helper 拆分而顺带改变；这项兼容保护不表示认可其长期物理语义，后续如需统一，应另开关联 issue。
+仓库公式文档 `KappaSeries_AndLambda_FromLegacyFortran.md` 已将扩散矩阵锚定到 Das et al. (2022) Eq. (55)，并明确使用普通
+
+$$
+E_f(p)=\sqrt{p^2+M_f^2}
+$$
+
+作为 $p^4/E_f^2$ 和 Landau-Lifshitz 投影 $q_X-n_XE_f/(\epsilon+P)$ 中的能量。因此，作者于 2026-07-15 确认把 `diffusion_coefficient` 和全部 $\kappa_{XY}$ 纳入本 issue：上述运动学与投影能量改用 $E_{\mathrm{kin}}$，分布继续使用 $E_{\mathrm{dist}}$。
+
+`lambda_from_kappa_BB` 不直接进行单粒子动量积分，而是计算
+
+$$
+\lambda=\kappa_{BB}\left(\frac{\epsilon+P}{n_BT}\right)^2.
+$$
+
+其中函数参数 `energy` 是热力学能量密度 $\epsilon$，不是单粒子 $E_{\mathrm{kin}}$ 或 $E_{\mathrm{dist}}$。$\lambda$ 无需新增单独的 energy policy，但必须由修正后的 $\kappa_{BB}$ 重新计算；Lorenz number、legacy Lorentz 和 Prandtl number 等下游量随之重新派生。
 
 ## 4. 公式证据与编号治理
 
@@ -102,6 +115,8 @@ $$
 | 等熵平方核 $\zeta$ | 同上 `:129-180` | Albright and Kapusta (2016), Eq. (138)；经典统计版本 Eq. (111) | Eq. (138) 是当前量子统计主公式；Eqs. (54)-(55)、(59)-(61) 给出等熵导数与准粒子色散响应所需定义。 |
 | $\mu_B=0$ 的 $\zeta$ 交叉核验 | 同上 `:129-180` | Mykhaylova and Sasaki (2021), Eq. (10) | 支持加号形式及其 $\mu_B=0$ 极限。 |
 | 备用体黏滞公式 | 同上备用公式小节 | Sasaki and Redlich (2009), Eq. (2.19) | 对应贺伟博博士论文 Eq. (5.5)，不是本次采用的等熵平方核；博士论文 Eq. (5.6) 是电导率。 |
+| $\kappa_{XY}$ 的分母与 Landau-Lifshitz 投影 | `docs/reference/formula/relaxtime/transport/KappaSeries_AndLambda_FromLegacyFortran.md` §3-§4 | Das et al. (2022), Eq. (55) | 外部公式给出普通准粒子能量结构；完整 RS 角积分是仓库采用的分布替换约定，不声称由 Das 2022 直接推导。 |
+| $\lambda$ | 同上热导率小节 | legacy Fortran + Landau-Lifshitz 框架关系 | $\lambda$ 由 $\kappa_{BB}$ 与热力学量派生，不含独立的单粒子能量积分。 |
 
 仓库公式文档的符号表明确规定
 
@@ -169,17 +184,29 @@ $$
 | `p*p / (E*E)`, `:1036-1038` | 运动学核 $p^2/E^2$ | $E_{\mathrm{dist}}$ | $E_{\mathrm{kin}}$ | $\zeta$ 主公式 `:151-173` | Albright-Kapusta Eq. (138) | 普通在壳能量。 |
 | `prefactor` 与各向异性 `/2`, `:980-983,1051-1062` | 径向/角积分归一化 | 不涉及能量选择 | 不变 | $\zeta$ 积分测度 | 仓库完整全角 RS 约定 | 本 issue 不调整归一化。 |
 
-### 5.5 待作者确认的审计结论
+### 5.5 守恒荷扩散矩阵 $\kappa_{XY}$ 与热导率 $\lambda$
 
-本审计建议确认以下完整映射：
+| 代码位置/表达式 | 数学角色 | 当前能量 | 目标能量 | 仓库公式位置 | 外部文献/方程号 | 结论与理由 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `_integrate_species_sum(...)`, `:1128` | 扩散矩阵积分状态 | 单一 `E` 为 $E_{\mathrm{dist}}$（$\xi\ne0$） | 同时提供 $E_{\mathrm{kin}}$、$E_{\mathrm{dist}}$ | $\kappa_{qq'}$ 一般公式 | Das et al. (2022) Eq. (55) | 与 $\eta$、$\sigma$ 共用拆分后的状态，不保留旧混用。 |
+| `p4 / (E * E)`, `:1132` | 运动学核 $p^4/E^2$ | $E_{\mathrm{dist}}$ | $E_{\mathrm{kin}}$ | `KappaSeries...` §3-§4 | Das et al. Eq. (55) | 普通在壳准粒子能量。 |
+| `_kappa_projection`, `:1087-1103` | $q_X-n_XE/(\epsilon+P)$ | $E_{\mathrm{dist}}$ | $E_{\mathrm{kin}}$ | `KappaSeries...` §3-§4 | Das et al. Eq. (55) | Landau-Lifshitz 投影中的 $E$ 是普通准粒子色散。 |
+| `f`, `:1128,1132` | 扩散占据核 | 由 $E_{\mathrm{dist}}$ 得到 | 由 $E_{\mathrm{dist}}$ 得到 | `KappaSeries...` §3.1 + 仓库 RS 约定 | Das et al. Eq. (55) 的 $f_a^{(0)}$；RS 扩展为项目约定 | 各向异性只进入分布。 |
+| `kappa_BB/BQ/BS/QQ/QS/SS`, `:1216-1360` | 守恒荷扩散矩阵元素 | 全部继承旧单一 $E$ | 全部继承上述 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 分工 | 扩散矩阵一般公式 | Das et al. Eq. (55) | 对角元和非对角元使用同一能量语义。 |
+| `lambda_from_kappa_BB`, `:1458-1481` | $\lambda=\kappa_{BB}[(\epsilon+P)/(n_BT)]^2$ | 间接继承旧 $\kappa_{BB}$ | 由修正后的 $\kappa_{BB}$ 重算 | `KappaSeries...` 热导率小节 | legacy Fortran / Landau-Lifshitz 关系 | `energy` 是热力学能量密度 $\epsilon$；不新增单粒子能量选择。 |
+| Lorenz / legacy Lorentz / Prandtl | 下游派生诊断 | 间接继承旧 $\sigma$、$\kappa_{BB}$、$\lambda$ | 由修正后的上游量重算 | `KappaSeries...` 派生量小节 | 定义式 | 不单独引入 energy policy。 |
+
+### 5.6 已由作者确认的审计结论
+
+作者确认的完整映射如下：
 
 1. $\eta$、$\sigma$ 的显式能量分母使用 $E_{\mathrm{kin}}$，而 $f_\xi(1-f_\xi)$ 使用 $E_{\mathrm{dist}}$。
 2. $\zeta$ 中除分布占据外的全部显式能量角色——$p^2/E^2$、$x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$、$E\partial_T[(E\mp\mu)/T]_\sigma$——都使用 $E_{\mathrm{kin}}$。
 3. $M$、$dM/dT$、$dM/d\mu_B$ 可来自当前固定 $\xi$ 的各向异性热力学解；这不等同于采用 $E_{\mathrm{dist}}$ 作为色散。
 4. $B$ 核第二项保持加号。
-5. 扩散矩阵/热导率共享调用方在本 issue 中保持变更前语义，等待单独公式审计。
+5. `diffusion_coefficient` 和全部 $\kappa_{XY}$ 的 $p^4/E^2$ 与 Landau-Lifshitz 投影使用 $E_{\mathrm{kin}}$，占据分布使用 $E_{\mathrm{dist}}$；$\lambda$ 不直接选择单粒子能量，但由修正后的 $\kappa_{BB}$ 及不变的热力学 $\epsilon,P,n_B,T$ 重新计算。
 
-只有以上五项获得作者明确确认后，才开始源码实现。
+作者已于 2026-07-15 明确确认以上五项。公式审计 gate 已通过；源码、测试、baseline 和 production 仍按后续里程碑依次推进。
 
 ## 6. 确认后的最小实现设计
 
@@ -195,7 +222,8 @@ $$
 - [ ] $\eta$ 的 `p6 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
 - [ ] $\sigma$ 的 `p4*q2 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
 - [ ] $\zeta$ 严格按 5.4 表逐项修改，不做全局文本替换。
-- [ ] 对 `diffusion_coefficient` 增加显式兼容路由或独立旧语义 helper，证明本次未顺带改变 $\kappa_{XY}$ / $\lambda$。
+- [ ] `diffusion_coefficient` 的 `p4/E^2` 和 `_kappa_projection` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$；全部 $\kappa_{XY}$ 继承该分工。
+- [ ] $\lambda$ 由修正后的 $\kappa_{BB}$ 重算，并同步重算依赖 $\lambda$ 或 $\sigma$ 的派生诊断量。
 - [ ] 保持 $\xi=0$ 路径在数值容差内完全退化到原实现。
 
 ### 6.3 文档与治理
@@ -213,20 +241,22 @@ $$
 - [ ] 在 `tests/unit/relaxtime/test_transport_coefficients.jl` 添加能区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 的 deterministic toy provider。
 - [ ] 验证 $\xi\ne0$ 时 $\eta$、$\sigma$ 的分母使用 $E_{\mathrm{kin}}$，而分布调用实际收到/构造 $E_{\mathrm{dist}}$。
 - [ ] 对 $\zeta$ 分别覆盖 $p^2/E^2$、$x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核，避免只测最终数值而遗漏局部混用。
+- [ ] 验证 $\kappa_{XY}$ 的 $p^4/E^2$ 与两个投影因子使用 $E_{\mathrm{kin}}$，分布使用 $E_{\mathrm{dist}}$。
+- [ ] 验证 $\lambda$ 严格由修正后的 $\kappa_{BB}$ 和热力学 $\epsilon,P,n_B,T$ 派生。
 - [ ] 验证 `prefer_energy_aniso=true/false` 在默认 provider 下只改变等价调用路由，不改变目标物理结果。
 - [ ] 验证 $\xi=0$ 与修改前固定点一致。
-- [ ] 增加 `diffusion_coefficient` 兼容保护，确认共享 helper 拆分没有改变本 issue 非目标结果。
 
 ### 7.2 Integration 层
 
 - [ ] 运行 `tests/integration/relaxtime/test_transport_workflow_smoke.jl` 与 TOML `prefer_energy_aniso` 路由 smoke。
 - [ ] 验证统一 transport workflow 能同时传递 $E_{\mathrm{kin}}$ 核和 $E_{\mathrm{dist}}$ 分布语义。
+- [ ] 验证扩散矩阵、$\lambda$、Lorenz number 和 Prandtl number 使用修正后的上游结果。
 - [ ] 验证 relaxation time、散射率和 `propagator_xi_policy = match_thermo` 在工作流层未改变。
 
 ### 7.3 Regression 层
 
 - [ ] 运行 `tests/regression/relaxtime/test_transport_fixedpoint_regression.jl`。
-- [ ] 将预期数值漂移限制在 $\xi\ne0$ 的 $\eta$、$\sigma$、$\zeta$ 及其派生比值；$\tau$、截面、散射率不得因本次修改漂移。
+- [ ] 将预期数值漂移限制在 $\xi\ne0$ 的 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$、$\lambda$ 及其派生比值；$\tau$、截面、散射率不得因本次修改漂移。
 - [ ] 不为通过测试而放宽容差；任何 baseline 更新必须记录旧值、新值、相对漂移和物理原因。
 - [ ] 在作者确认和代码 review 前不得刷新 baseline。
 
@@ -234,14 +264,15 @@ $$
 
 - [ ] 运行相关 legacy transport guardrail，确认 $\xi=0$ 外部/legacy 对照没有回归。
 - [ ] 对 $\mu_B=0$ 的 $\zeta$ 核进行 Mykhaylova-Sasaki Eq. (10) 形式交叉核验；该检查验证公式等价，不虚构未提供的文献数值基线。
+- [ ] 对 $\kappa_{XY}$ 核逐项核验 Das et al. Eq. (55)，并区分外部各向同性公式与仓库完整 RS 分布扩展约定。
 
 ### 7.5 验收标准
 
 - [ ] 所有目标调用方可从代码命名和测试证据区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
-- [ ] $\eta$、$\sigma$ 和审计确认后的 $\zeta$ 与表 5.2-5.4 逐项一致。
+- [ ] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 与表 5.2-5.5 逐项一致，$\lambda$ 使用修正后的 $\kappa_{BB}$。
 - [ ] `prefer_energy_aniso=false` 不再被描述成 kernel energy policy。
 - [ ] $s$、$v_{\rm rel}$、$t_\pm$、Pauli blocking、传播子策略、弛豫时间保持已确认语义。
-- [ ] 标量有效量适用范围在 API/公式文档中明确，不声称完成各向异性输运张量分解。
+- [ ] 角积分有效量和守恒荷矩阵的适用范围在 API/公式文档中明确，不声称完成空间各向异性输运张量分解。
 - [ ] unit、integration、regression、validation 的目标检查通过，且数值漂移记录可追溯。
 
 ## 8. Production 数据治理
@@ -282,7 +313,7 @@ $$
 - [ ] 代码 PR 合并后，从合并提交运行 GitHub Actions；Actions 产物不得直接视为仓库正式数据。
 - [ ] 使用新的、语义可辨识的 case slug，不覆盖任何现有正式目录。
 - [ ] 先通过参数收敛 gate，再生产全量 CSV 和图像。
-- [ ] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；同时证明弛豫时间未因 kernel energy 修复改变。
+- [ ] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；若 production workflow 输出 $\kappa_{XY}$、$\lambda$ 或其派生量，也必须纳入差异表。同时证明弛豫时间未因 kernel energy 修复改变。
 - [ ] 通过独立数据/图像 PR 导入、审计和晋升。
 
 ## 9. 里程碑
@@ -292,14 +323,13 @@ $$
 - [x] 确认目标物理约定为“各向异性只进入分布函数，不重新定义准粒子色散关系”。
 - [x] 记录 Albright-Kapusta、Mykhaylova-Sasaki、Thakur、Sasaki-Redlich 的精确方程映射。
 - [x] 将“A26”降级为 legacy 内部别名并记录加号勘误。
-- [x] 创建本逐项审计表，覆盖 $\eta$、$\sigma$、$\zeta$ 和共享 helper 风险。
-- [ ] 作者逐行确认 5.5 的五项结论。
+- [x] 创建本逐项审计表，覆盖 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$、$\lambda$ 和共享 helper 风险。
+- [x] 作者逐行确认 5.6 的五项结论（2026-07-15）。
 
 ### M1：代码、测试、稳定文档与 registry（代码 PR）
 
 - [ ] 拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
-- [ ] 按审计表修改 $\eta$、$\sigma$、$\zeta$。
-- [ ] 保护扩散矩阵/热导率非目标语义。
+- [ ] 按审计表修改 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$，并重算 $\lambda$ 及其派生量。
 - [ ] 完成 unit、integration、regression、validation 证据。
 - [ ] 修正 OneLoop API 矛盾和 transport docstring。
 - [ ] 创建外部 production registry 并标记旧 case 的论文资格。
@@ -314,10 +344,10 @@ $$
 
 ## 10. Definition of Done
 
-- [ ] 作者确认本审计表，确认记录可在 issue/PR 中追溯。
+- [x] 作者确认本审计表，确认记录可在 issue/PR 中追溯（2026-07-15）。
 - [ ] $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 在实现、测试和稳定文档中职责一致。
-- [ ] $\eta$、$\sigma$、$\zeta$ 的代码逐项映射到已记录的仓库公式和外部方程号。
-- [ ] 非目标的散射、传播子、弛豫时间、扩散/热导率语义有保护证据。
+- [ ] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的代码逐项映射到已记录的仓库公式和外部方程号，$\lambda$ 的派生链可追溯。
+- [ ] 非目标的散射、传播子和弛豫时间语义有保护证据。
 - [ ] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
 - [ ] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
@@ -328,7 +358,7 @@ $$
 | 风险 | 触发信号 | 缓解/回退 |
 | --- | --- | --- |
 | $\zeta$ 某个能量角色仍有公式歧义 | 作者无法确认表 5.4 的某一行 | $\eta$、$\sigma$ 可按独立证据推进；$\zeta$ 保持未修改，production 继续阻塞，不用推测补齐。 |
-| 共享 helper 导致扩散/热导率漂移 | compatibility unit/regression 失败 | 把非目标调用方迁到显式 legacy-energy 路由；不扩大本 issue 去改其公式。 |
+| 共享 helper 拆分后 $\kappa/\lambda$ 未按目标变化或发生额外漂移 | term-level unit/regression 失败 | 分别检查分母、两个投影因子、分布和 $\lambda$ 派生链；禁止用单一最终数值掩盖局部混用。 |
 | $\xi=0$ 发生数值漂移 | fixed-point 或 legacy guardrail 失败 | 停止 baseline 更新，检查 helper 分流和舍入路径；必要时回退实现提交。 |
 | provider 兼容性破坏 | toy/custom provider 测试失败 | 保持现有字段兼容，新增内部适配层；不把新策略强加为破坏性 public contract。 |
 | 新 production 与旧路径混淆 | 复用了旧 slug 或尝试 `--overwrite` | 立即停止运行；使用全新 slug，从代码合并提交重新生成并走独立数据 PR。 |

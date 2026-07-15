@@ -22,8 +22,8 @@ E_{\mathrm{kin}}=\sqrt{p^2+m^2},
 E_{\mathrm{dist}}=E_\xi=\sqrt{p^2+m^2+\xi(p\cos\theta)^2}.
 $$
 
-- $E_{\mathrm{kin}}$ 是普通在壳准粒子能量，用于 $\eta$、$\sigma$、$\zeta$ 的运动学能量分母，以及 $\zeta$ 的 $x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核。
-- $E_{\mathrm{dist}}$ 是 RS 分布的变形自变量，只通过 $f_\xi$ 及 $f_\xi(1-f_\xi)$ 进入本文档的输运积分。
+- $E_{\mathrm{kin}}$ 是普通在壳准粒子能量，用于 $\eta$、$\sigma$、$\zeta$ 的运动学能量分母，以及 $\zeta$ 的 $x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核；关联的 $\kappa_{XY}$ 文档将同一能量用于 $p^4/E^2$ 与 Landau-Lifshitz 投影。
+- $E_{\mathrm{dist}}$ 是 RS 分布的变形自变量，只通过各输运公式中的 $f_\xi$ 或 $f_\xi(1-f_\xi)$ 进入积分。
 - 质量 $m=m(T,\mu_B,\xi)$ 可以来自当前各向异性热力学背景；这里排除的是在普通色散上额外加入 $\xi(p\cos\theta)^2$，不是把质量强制改为各向同性解。
 
 这是经确认的公式约定和目标实现语义。截至 `main@ea706548e9167db61e0cb7537bab2d2d4daf4cad`，`TransportCoefficients.jl` 在 $\xi\ne0$ 时仍会把 $E_{\mathrm{dist}}$ 复用于部分输运核；该实现差异由 [Issue #130](https://github.com/w5851/Julia_RelaxTime/issues/130) 跟踪。因此，在 Issue #130 的代码 PR 合并前，应区分“本文档中的目标公式”与“当前生产路径已经生效的实现”。
@@ -37,6 +37,7 @@ $$
 | 等熵平方核 $\zeta$ | Albright and Kapusta (2016), Eqs. (111), (138) | Eq. (111) 是经典统计版本；Eq. (138) 是含 $f_a^{eq}(1+d_af_a^{eq})$ 的量子统计版本，与本文档主公式直接对应。该文的 Eqs. (54)-(55) 还给出 $\sigma=s/n_B$、$(\partial\mu_B/\partial T)_\sigma$ 与 $v_n^2$ 的同一套定义。 |
 | $\mu_B=0$ 时对 $\zeta$ 的交叉核验 | Mykhaylova and Sasaki (2021), Eq. (10) | 其 $[c_s^2(E^2-T^2\partial\Pi/\partial T^2)-p^2/3]^2$ 与本文档加号导数形式等价。 |
 | 备用热力学导数形式 $\zeta$ | Sasaki and Redlich (2009), Eq. (2.19) | 对应本文档“备用公式”，也对应贺伟博博士论文 Eq. (5.5)；它不是当前采用的等熵平方核。博士论文 Eq. (5.6) 是电导率。 |
+| 关联文档中的 $\kappa_{XY}$ | Das et al. (2022), Eq. (55) | 给出普通 $E_a$ 的运动学分母和 Landau-Lifshitz 投影结构。完整 RS 角积分是仓库采用的分布替换约定，详见 `KappaSeries_AndLambda_FromLegacyFortran.md`。 |
 
 历史文档和源码曾把等熵平方核称为“公式 A26”。在已核对的 Albright-Kapusta、Mykhaylova-Sasaki、Sasaki-Redlich、Thakur 等文献及贺伟博博士论文中均未找到可验证的 Eq. (A26) 对应关系。因此：
 

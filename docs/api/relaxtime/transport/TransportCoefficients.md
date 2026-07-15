@@ -22,12 +22,13 @@
 
 ## 物理公式
 
-权威公式、能量角色和外部文献映射见 [TransportCoefficients_FromRelaxationTime.md](../../../reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md)。
+权威公式、能量角色和外部文献映射见 [TransportCoefficients_FromRelaxationTime.md](../../../reference/formula/relaxtime/transport/TransportCoefficients_FromRelaxationTime.md)；守恒荷扩散矩阵与热导率见 [KappaSeries_AndLambda_FromLegacyFortran.md](../../../reference/formula/relaxtime/transport/KappaSeries_AndLambda_FromLegacyFortran.md)。
 
 本 API 页采用以下公式语义：
 
-- $E_{\mathrm{kin}}=\sqrt{p^2+m^2}$ 用于 $\eta$、$\sigma$、$\zeta$ 的运动学核及 $\zeta$ 的等熵导数组合；
+- $E_{\mathrm{kin}}=\sqrt{p^2+m^2}$ 用于 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的运动学核，用于 $\zeta$ 的等熵导数组合，并用于 $\kappa_{XY}$ 的 Landau-Lifshitz 投影；
 - $E_{\mathrm{dist}}=\sqrt{p^2+m^2+\xi(p\cos\theta)^2}$ 只作为 RS 分布 $f_\xi$ 的自变量；
+- $\lambda=\kappa_{BB}[(\epsilon+P)/(n_BT)]^2$ 不直接选择单粒子能量，但由采用上述能量分工的 $\kappa_{BB}$ 重新计算；
 - $\zeta$ 的等熵平方核对应 Albright and Kapusta (2016) Eq. (138)，经典统计版本为 Eq. (111)；历史记号“A26”只是无法溯源到外部文献的 legacy Fortran/内部别名；
 - 方括号采用 $p^2+3v_n^2T^2E\,\partial_T[(E\mp\mu)/T]_\sigma$ 的加号形式。内部核对稿件中出现的减号已由作者确认为文稿错误。
 
@@ -68,6 +69,9 @@ $$
 | η | $p^6/E^2$ |
 | σ | $p^4 q^2/E^2$ |
 | ζ | $p^2 \times (\text{复杂表达式})$ |
+| $\kappa_{XY}$ | $p^4/E^2$，并含 $q_X-n_XE/(\epsilon+P)$ 投影 |
+
+上述 $\kappa_{XY}$ 分母和投影中的 $E$ 均为 $E_{\mathrm{kin}}$；占据分布使用 $E_{\mathrm{dist}}$。$\lambda$ 是 $\kappa_{BB}$ 的派生量，不新增独立动量积分。
 
 ## 电荷约定（自然单位）
 
