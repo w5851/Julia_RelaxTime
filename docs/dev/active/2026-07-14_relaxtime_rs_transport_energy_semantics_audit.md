@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 源码、测试、稳定文档、registry 与所有受影响 regression baseline 已完成；等待更新 PR、转为 Ready 和 CI/review
+状态：PR 1 已转为 Ready；源码、测试、稳定文档、registry、所有受影响 regression baseline、功能性 CI 与 Copilot review 均已完成，两条 review thread 已解决；等待合并
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -279,7 +279,7 @@ $$
 
 - Unit：`tests/unit/relaxtime/test_transport_coefficients.jl` 全部通过；新增能量语义 testset 为 38/38。
 - Integration：workflow smoke 80/80；TOML `prefer_energy_aniso` smoke 22/22。
-- Validation：公式映射 3/3；legacy transport/tau guardrail 111/111。
+- Validation：公式映射 3/3；validation core 510/510；legacy transport/tau guardrail 111/111。
 - Registry：4 个 `case_slug × mode` 条目通过 required fields、枚举、唯一性、SHA、目录和 manifest 路径校验。
 - Regression：刷新前 116/117；没有修改 `rtol=8e-2`，唯一失败是 $\xi=-0.2$ 的 $\zeta$ 相对旧 baseline 漂移 $-10.46\%$。作者于 2026-07-15 确认该漂移是允许的预期物理语义修复，并批准只刷新三个 $\xi\ne0$ 固定点；刷新后 117/117。
 
@@ -395,7 +395,8 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 完成 unit、integration、regression、validation 证据。
 - [x] 修正 OneLoop API 矛盾和 transport docstring。
 - [x] 创建外部 production registry 并标记旧 case 的论文资格。
-- [ ] 代码 PR review、CI 和合并完成。
+- [x] 代码 PR review 与功能性 CI 完成；Copilot 两条 review thread 已解决。
+- [ ] 代码 PR 合并完成。
 
 ### M2：新数据与图像（独立 production PR）
 
