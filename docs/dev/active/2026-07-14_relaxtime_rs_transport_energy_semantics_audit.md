@@ -10,7 +10,7 @@
 
 ## 1. 背景与目标
 
-当前 `src/relaxtime/TransportCoefficients.jl` 在 $\xi\ne0$ 时通过 `_energy_for_kernel` 得到
+在审计基线提交 `main@ea706548...` 中，`src/relaxtime/TransportCoefficients.jl` 在 $\xi\ne0$ 时通过 `_energy_for_kernel` 得到
 
 $$
 E_{\mathrm{dist}}
