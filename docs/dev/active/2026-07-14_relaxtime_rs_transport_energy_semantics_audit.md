@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过收敛、全量导入、图像与旧目录不变性审计，等待独立 production PR review 和 `approved` 晋升决定
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过收敛、全量导入、图像与旧目录不变性审计，已提交 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)，等待作者 review 和 `approved` 晋升决定
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -424,6 +424,8 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 代码 PR 合并完成（PR #131，`main@05be2c05186f8e12baf3097b68f8619e53d19711`）。
 
 ### M2：新数据与图像（独立 production PR）
+
+产物 PR：[PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)
 
 - [x] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
 - [x] 使用新 case slug 导入结果与图像，不覆盖旧产物。
