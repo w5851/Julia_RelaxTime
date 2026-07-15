@@ -1,0 +1,98 @@
+{
+  "format": "phase_guided_transport_production_registry_v1",
+  "updated_at": "2026-07-15T13:15:59+08:00",
+  "schema": {
+    "required_entry_fields": [
+      "case_slug",
+      "mode",
+      "result_path",
+      "figure_path",
+      "source_commit",
+      "transport_kernel_energy_policy",
+      "distribution_energy_policy",
+      "propagator_xi_policy",
+      "status",
+      "superseded_by",
+      "manuscript_eligible",
+      "audit_manifest_path",
+      "updated_at"
+    ],
+    "allowed_statuses": [
+      "superseded_for_manuscript",
+      "current_candidate",
+      "approved"
+    ],
+    "manuscript_eligibility_rule": "Only status=approved may set manuscript_eligible=true."
+  },
+  "policy_definitions": {
+    "transport_kernel_energy_policy": {
+      "legacy_rs_deformed_shared_energy": "For xi != 0, the historical implementation reused E_dist in the transport kernel and distribution.",
+      "onshell_kinematic_energy": "Transport denominators, bulk-dispersion response, and diffusion projections use E_kin=sqrt(p^2+M^2)."
+    },
+    "distribution_energy_policy": {
+      "rs_deformed": "RS distributions use E_dist=sqrt(p^2+M^2+xi*(p*cos(theta))^2)."
+    }
+  },
+  "entries": [
+    {
+      "case_slug": "first_canonical_v1_p128_validated_anchored_prod_v1",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1",
+      "source_commit": "c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f",
+      "transport_kernel_energy_policy": "legacy_rs_deformed_shared_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "superseded_for_manuscript",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/manifest.json",
+      "updated_at": "2026-07-15T13:15:59+08:00"
+    },
+    {
+      "case_slug": "first_canonical_v1_p128_validated_anchored_prod_v1",
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1",
+      "source_commit": "c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f",
+      "transport_kernel_energy_policy": "legacy_rs_deformed_shared_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "superseded_for_manuscript",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/manifest.json",
+      "updated_at": "2026-07-15T13:15:59+08:00"
+    },
+    {
+      "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
+      "transport_kernel_energy_policy": "legacy_rs_deformed_shared_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "superseded_for_manuscript",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/manifest.json",
+      "updated_at": "2026-07-15T13:15:59+08:00"
+    },
+    {
+      "case_slug": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+      "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
+      "transport_kernel_energy_policy": "legacy_rs_deformed_shared_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "superseded_for_manuscript",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/manifest.json",
+      "updated_at": "2026-07-15T13:15:59+08:00"
+    }
+  ]
+}

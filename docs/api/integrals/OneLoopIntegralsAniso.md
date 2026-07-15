@@ -187,11 +187,12 @@ f^{\text{RS}}(p, \theta) = f^0\left( \sqrt{p^2 + m^2 + \xi (p\cos\theta)^2} \rig
 
 计算：
 ```math
-A_{\text{aniso}} = 2 \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, p^2 \frac{1}{E_{\text{aniso}}} \left[ f_q^{\text{RS}} + f_{\bar{q}}^{\text{RS}} \right] - A_{\text{const}}
+A_{\text{aniso}} = 2 \int_0^\infty dp \int_{-1}^{1} d(\cos\theta) \, p^2 \frac{1}{E_{\text{kin}}} \left[ f_q^{\text{RS}} + f_{\bar{q}}^{\text{RS}} \right] - A_{\text{const}}
 ```
 
 其中：
-- $E_{\text{aniso}} = \sqrt{p^2 + m^2 + \xi (p\cos\theta)^2}$
+- $E_{\text{kin}} = \sqrt{p^2 + m^2}$ 是传播子分母中的普通在壳能量
+- $f^{\text{RS}}$ 的变形自变量仍为 $E_{\text{dist}}=\sqrt{p^2 + m^2 + \xi (p\cos\theta)^2}$
 - $A_{\text{const}}$ 为常数项（与 `OneLoopIntegrals.A` 相同）
 - 因子 2 来自对 ϕ 角积分（各向异性仅沿 z 轴）
 

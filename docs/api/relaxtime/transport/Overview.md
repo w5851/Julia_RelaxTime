@@ -120,7 +120,7 @@ transport 主题建议按三层理解：
 - 温度、化学势、质量、动量统一使用 fm⁻¹
 - `tau` 使用 fm
 - `TransportIntegrationConfig` 只负责积分网格与权重，不负责平衡态求解
-- `prefer_energy_aniso` 决定 `xi != 0` 时更偏向“能量直通”还是 provider 自带的各向异性分布接口
+- `prefer_energy_aniso` 决定 `xi != 0` 时 RS 分布更偏向“$E_{\mathrm{dist}}$ 能量直通”还是 provider 自带的各向异性分布接口；它不改变使用 $E_{\mathrm{kin}}$ 的输运核
 
 ## 下一步
 

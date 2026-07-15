@@ -5,8 +5,9 @@
 - 来源类型：一手论文 + legacy Fortran 对照
 - 理论文献：Arpan Das, Hiranmaya Mishra, Ranjita K. Mohapatra, Phys. Rev. D 106, 014013 (2022)
 - 代码来源：`Relaxtime_fortran/codes/main/coefficients_tmu.f90`
-- 当前用途：为 Julia 补齐 `kappa_BB`、`kappa_QQ`、`kappa_SS`、`lambda` 提供正式公式锚点，并说明与 legacy 实现的对应关系
+- 当前用途：为 Julia 的 `kappa_BB`、`kappa_QQ`、`kappa_SS`、完整扩散矩阵和 `lambda` 提供正式公式锚点，并说明与 legacy 实现的对应关系
 - 限制：Das 2022 在强子 HRG 框架下推导扩散矩阵；本仓库落地时使用的是夸克侧 RTA 实现，因此应区分“理论结构一致”和“模型细节完全相同”
+- 各向异性能量约定：$E_{\mathrm{kin}}=\sqrt{p^2+M^2}$ 用于运动学分母与 Landau-Lifshitz 投影，$E_{\mathrm{dist}}$ 只作为 RS 分布自变量
 
 ---
 
@@ -57,7 +58,7 @@ $$
 - 对角元 `BB / QQ / SS` 描述各守恒荷对自身驱动力的扩散响应
 - 非对角元 `BQ / BS / QS` 描述不同守恒荷之间的交叉扩散耦合
 
-Julia 当前待补的是这套矩阵中的三个对角元；legacy Fortran 也只显式实现了这三个对角元。
+Julia 当前已公开完整的 $B/Q/S$ 对称扩散矩阵接口；legacy Fortran 只显式实现了三个对角元。
 
 ---
 
@@ -84,6 +85,34 @@ $$
 1. $\kappa$ 系列是输运系数，因为显式依赖 $\tau_a$
 2. 投影项 $q_a - n_q E_a / \omega$ 来自 Landau-Lifshitz 条件，不是静态 susceptibilities 的导数结构
 3. 理论上完整对象是一个扩散矩阵，而不是只有三个彼此无关的标量
+
+### 3.1 RS 各向异性下的能量职责
+
+本仓库采用“各向异性只进入分布函数，不重新定义准粒子色散关系”的统一约定：
+
+$$
+E_{\mathrm{kin},a}=\sqrt{p^2+M_a^2},
+\qquad
+E_{\mathrm{dist},a}=\sqrt{p^2+M_a^2+\xi(p\cos\theta)^2}.
+$$
+
+在完整 RS 角积分下，Das 2022 Eq. (55) 的项目实现目标写成
+
+$$
+\kappa_{qq'}^{(\xi)}
+= \sum_a \int \frac{d^3 p_a}{(2\pi)^3}
+\frac{p_a^2}{3E_{\mathrm{kin},a}^2}
+\left(q_a-\frac{n_qE_{\mathrm{kin},a}}{\omega}\right)
+\tau_a
+\left(q'_a-\frac{n_{q'}E_{\mathrm{kin},a}}{\omega}\right)
+f_{a,\xi}.
+$$
+
+其中 $f_{a,\xi}$ 以 $E_{\mathrm{dist},a}$ 为 RS 变形自变量。质量 $M_a=M_a(T,\mu_B,\xi)$ 可以来自当前各向异性热力学背景；这里不允许的是把 $\xi(p\cos\theta)^2$ 额外加入准粒子色散。
+
+这项 RS 扩展是本仓库的物理约定：Das 2022 Eq. (55) 提供扩散矩阵、普通 $E_a$ 分母和 Landau-Lifshitz 投影结构，但该文并未直接推导本仓库的完整全角 RS 形式，不应把两者表述为完全相同的公式。
+
+当前 `TransportCoefficients.jl` 已在共享扩散 kernel 中使用 $E_{\mathrm{kin}}$ 计算 $p^4/E^2$ 与 Landau-Lifshitz 投影，并只用 $E_{\mathrm{dist}}$ 生成 RS 占据分布。旧 production 不应被描述为已经采用本节的能量分工，其状态由外部 production registry 记录。
 
 ---
 
@@ -165,7 +194,7 @@ $$
 
 ---
 
-## 6. 当前未实现但理论上存在的非对角元
+## 6. 非对角元
 
 Das 2022 明确表明，理论上的扩散矩阵还包含：
 
@@ -184,10 +213,11 @@ $$
 
 这给出一个重要的实现边界：
 
-- legacy 与 Julia 当前都没有把这些非对角元作为正式输出暴露出来
-- 但从理论上，它们不是附会出来的新功能，而是与对角元同层级的扩散矩阵分量
+- legacy Fortran 只显式输出三个对角元
+- Julia 当前已经公开 `kappa_BQ`、`kappa_BS`、`kappa_QS` 及完整对称 `diffusion_matrix`
+- 从理论上，非对角元与对角元属于同一扩散矩阵，而不是附会出来的独立公式
 
-因此后续若需要做多守恒荷流体闭包，非对角元应被视为自然的二阶段扩展方向。
+因此，Issue #130 的能量职责修正必须同时覆盖对角元和非对角元，不能只修改 legacy 曾输出的三个对角通道。
 
 把一般公式具体写开，可得到当前最值得记录的三个交叉通道：
 
@@ -212,7 +242,7 @@ $$
 = \sum_{j,f} \frac{N_c\,\tau_{j f}}{3\pi^2} \int_0^{\infty} dp\, \frac{p^4}{E_f(p)^2} F_{j f}(p) \left(Q_{j f} - \frac{n_Q E_f(p)}{\epsilon + P}\right) \left(S_{j f} - \frac{n_S E_f(p)}{\epsilon + P}\right)
 $$
 
-在夸克侧，这些非对角元并不是形式上更复杂的新对象，而只是同一个 kernel 在不同守恒荷投影下的混合项。因此从工程角度看，若 Julia 先把对角元实现成参数化 kernel，二阶段扩展到 $BQ / BS / QS$ 的边际成本应明显低于重新立项做一套新输运公式。
+在夸克侧，这些非对角元不是形式上更复杂的新对象，而是同一个参数化 kernel 在不同守恒荷投影下的混合项。当前 Julia 实现已在共享层完成 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 拆分，并由全部 $BQ/BS/QS$ 通道继承。
 
 ---
 
@@ -245,6 +275,8 @@ Das 2022 本身聚焦扩散矩阵，没有直接把 $\lambda$ 作为主结果展
 - $\kappa_{BB}$ 有 Das 2022 提供的一手扩散矩阵公式支撑
 - $\lambda = \kappa_{BB} ((\epsilon+P)/(n_B T))^2$ 没有在 Das 2022 文中直接写出
 - 但它与 Landau-Lifshitz 框架下“热流可由重子扩散流和热力学关系导出”的物理图像相容，并与 legacy 实现一致
+
+需要区分两个名为 energy 的对象：$\lambda$ 公式中的 $\epsilon$ 是热力学能量密度，不是扩散积分中的单粒子能量。`lambda_from_kappa_BB` 不直接选择 $E_{\mathrm{kin}}$ 或 $E_{\mathrm{dist}}$，但会继承 $\kappa_{BB}$ 的能量语义；当前实现已由修正后的 $\kappa_{BB}$ 重新计算 $\lambda$。
 
 这也解释了为什么当前 Julia 路线应当是“先补 $\kappa_{BB}$，再补 $\lambda$”，而不是把二者当作两个完全独立的主方程对象。
 

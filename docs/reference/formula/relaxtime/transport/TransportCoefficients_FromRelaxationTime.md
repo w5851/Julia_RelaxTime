@@ -10,6 +10,41 @@
 - 流算符向量在夸克味空间的对应关系： [FlowOperatorVector_QuarkFlavorSpaceWavefunctionMapping.md](FlowOperatorVector_QuarkFlavorSpaceWavefunctionMapping.md)
 - 守恒荷扩散系数与热导率： [KappaSeries_AndLambda_FromLegacyFortran.md](KappaSeries_AndLambda_FromLegacyFortran.md)
 
+## 公式语义、外部依据与可追溯性
+
+### 能量角色约定
+
+本文档采用“各向异性只进入分布函数，不重新定义准粒子色散关系”的约定，并区分：
+
+$$
+E_{\mathrm{kin}}=\sqrt{p^2+m^2},
+\qquad
+E_{\mathrm{dist}}=E_\xi=\sqrt{p^2+m^2+\xi(p\cos\theta)^2}.
+$$
+
+- $E_{\mathrm{kin}}$ 是普通在壳准粒子能量，用于 $\eta$、$\sigma$、$\zeta$ 的运动学能量分母，以及 $\zeta$ 的 $x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核；关联的 $\kappa_{XY}$ 文档将同一能量用于 $p^4/E^2$ 与 Landau-Lifshitz 投影。
+- $E_{\mathrm{dist}}$ 是 RS 分布的变形自变量，只通过各输运公式中的 $f_\xi$ 或 $f_\xi(1-f_\xi)$ 进入积分。
+- 质量 $m=m(T,\mu_B,\xi)$ 可以来自当前各向异性热力学背景；这里排除的是在普通色散上额外加入 $\xi(p\cos\theta)^2$，不是把质量强制改为各向同性解。
+
+当前 `TransportCoefficients.jl` 已按这一约定拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$，并覆盖 $\eta$、$\sigma$、等熵平方核 $\zeta$ 和共享的 $\kappa_{XY}$ 积分状态。旧 production 不因源码修正而改变，其论文输入资格由外部 production registry 单独记录。
+
+### 外部公式与方程映射
+
+| 本文档内容 | 外部来源与方程号 | 映射范围 |
+|---|---|---|
+| 各向同性 $\eta$；各向异性下普通 $E_{\mathrm{kin}}$ 与 RS 分布的职责分离 | Thakur et al. (2017), Eqs. (18), (21), (25)-(26) | Eq. (18) 给出有限化学势 RTA 剪切黏度；Eqs. (21), (25)-(26) 给出 RS 分布及其小 $\xi$ 展开，并保持普通 $E_f^2=p^2+m_f^2$ 作为运动学分母。它支持本文档的能量职责分离，但其显式结果是小 $\xi$ 展开，不等同于本文档保留完整 RS 分布的全角积分写法。 |
+| 各向同性 $\sigma$；各向异性下普通 $E_{\mathrm{kin}}$ 与 RS 分布的职责分离 | Thakur et al. (2017), Eqs. (37)-(38) | Eq. (38) 是各向同性电导率，Eq. (37) 是小 $\xi$ 各向异性结果；二者的运动学分母均为普通 $E_f^2$。 |
+| 等熵平方核 $\zeta$ | Albright and Kapusta (2016), Eqs. (111), (138) | Eq. (111) 是经典统计版本；Eq. (138) 是含 $f_a^{eq}(1+d_af_a^{eq})$ 的量子统计版本，与本文档主公式直接对应。该文的 Eqs. (54)-(55) 还给出 $\sigma=s/n_B$、$(\partial\mu_B/\partial T)_\sigma$ 与 $v_n^2$ 的同一套定义。 |
+| $\mu_B=0$ 时对 $\zeta$ 的交叉核验 | Mykhaylova and Sasaki (2021), Eq. (10) | 其 $[c_s^2(E^2-T^2\partial\Pi/\partial T^2)-p^2/3]^2$ 与本文档加号导数形式等价。 |
+| 备用热力学导数形式 $\zeta$ | Sasaki and Redlich (2009), Eq. (2.19) | 对应本文档“备用公式”，也对应贺伟博博士论文 Eq. (5.5)；它不是当前采用的等熵平方核。博士论文 Eq. (5.6) 是电导率。 |
+| 关联文档中的 $\kappa_{XY}$ | Das et al. (2022), Eq. (55) | 给出普通 $E_a$ 的运动学分母和 Landau-Lifshitz 投影结构。完整 RS 角积分是仓库采用的分布替换约定，详见 `KappaSeries_AndLambda_FromLegacyFortran.md`。 |
+
+历史文档和源码曾把等熵平方核称为“公式 A26”。在已核对的 Albright-Kapusta、Mykhaylova-Sasaki、Sasaki-Redlich、Thakur 等文献及贺伟博博士论文中均未找到可验证的 Eq. (A26) 对应关系。因此：
+
+- “A26”只保留为 legacy Fortran/内部别名，不能作为外部引用；
+- 公式本身可追溯到 Albright and Kapusta (2016) Eq. (138)，经典统计版本为 Eq. (111)；
+- 代码、审计或论文引用应使用作者、年份和精确方程号，不得继续以“A26”代替文献来源。
+
 ## 各向同性与各向异性情况
 
 ### 各向同性 (ξ = 0)
@@ -92,13 +127,15 @@ $$
 
 ## 3. 体粘滞系数 (ζ)
 
-体粘滞系数采用等熵声速形式（公式 A26）：
+体粘滞系数采用等熵声速形式。量子统计主公式直接对应 Albright and Kapusta (2016) Eq. (138)；其经典统计版本见 Eq. (111)。“A26”仅是无法溯源到外部文献的 legacy Fortran/内部别名。
 
 ### 主公式
 
 $$
 \zeta = \frac{1}{9T} \sum_a \int d\Gamma_a \frac{\tau_a(E_a)}{E_a^2} \left[ p_a^2 + 3 v_n^2 T^2 E_a \frac{\partial}{\partial T} \left( \frac{E_a - \mu_a}{T} \right)_\sigma \right]^2 f_a^{eq} (1 + d_a f_a^{eq})
 $$
+
+方括号中第二项前的**加号**是本文档和实现应采用的正确符号。内部核对所用稿件 *Bulk viscosity of quark matter across the QCD phase transitions* 的 PDF 副本在 Eq. (1) 中曾印成减号；作者已于 2026-07-14 确认该处为文稿错误，正确形式为加号。加号形式同时与 Albright and Kapusta Eq. (138)、其 $\mu_B=0$ 极限下的 Mykhaylova and Sasaki Eq. (10)，以及 legacy Fortran 实现一致。
 
 其中：
 - $d\Gamma_a = (2s_a + 1) \frac{d^3p_a}{(2\pi)^3}$ 是相空间积分测度（包含自旋简并）
@@ -419,3 +456,12 @@ $$
 5. **体粘滞中的 n**：指净重子数密度 $n_B = (\rho_u + \rho_d + \rho_s)/3$。
 6. **等熵声速形式**：体粘滞系数公式采用固定熵每重子数 $\sigma = s/n_B$ 的形式，需要计算相关的热力学导数。
 7. **统计因子**：费米子 $d_a = -1$（泡利阻塞），玻色子 $d_a = +1$（玻色增强）。
+
+---
+
+## 11. 参考文献与 Zotero 映射
+
+1. M. Albright and J. I. Kapusta, “Quasiparticle Theory of Transport Coefficients for Hadronic Matter at Finite Temperature and Baryon Density,” *Phys. Rev. C* **93**, 014903 (2016). DOI: [10.1103/PhysRevC.93.014903](https://doi.org/10.1103/PhysRevC.93.014903), arXiv: [1508.02696](https://arxiv.org/abs/1508.02696). Zotero item `NKDVM97F`; BibTeX key `Albright:2015fpa`.
+2. V. Mykhaylova and C. Sasaki, “Impact of quark quasiparticles on transport coefficients in hot QCD,” *Phys. Rev. D* **103**, 014007 (2021). DOI: [10.1103/PhysRevD.103.014007](https://doi.org/10.1103/PhysRevD.103.014007), arXiv: [2007.06846](https://arxiv.org/abs/2007.06846). Zotero item `J6TSE7IA`; BibTeX key `Mykhaylova:2020pfk`.
+3. L. Thakur, P. K. Srivastava, G. P. Kadam, M. George, and H. Mishra, “Shear viscosity $\eta$ to electrical conductivity $\sigma_{el}$ ratio for an anisotropic QGP,” *Phys. Rev. D* **95**, 096009 (2017). DOI: [10.1103/PhysRevD.95.096009](https://doi.org/10.1103/PhysRevD.95.096009), arXiv: [1703.03142](https://arxiv.org/abs/1703.03142). Zotero item `PGUUMFXD`; BibTeX key `Thakur:2017hfc`.
+4. C. Sasaki and K. Redlich, “Bulk viscosity in quasi particle models,” *Phys. Rev. C* **79**, 055207 (2009). DOI: [10.1103/PhysRevC.79.055207](https://doi.org/10.1103/PhysRevC.79.055207), arXiv: [0806.4745](https://arxiv.org/abs/0806.4745). Zotero item `5QRS2YMA`; BibTeX key `Sasaki:2008fg`.
