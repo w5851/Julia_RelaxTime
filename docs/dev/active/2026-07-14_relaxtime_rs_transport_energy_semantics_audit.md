@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 源码、测试、稳定文档与 registry 已实现；等待作者 review 数值漂移后决定是否刷新 regression baseline
+状态：PR 1 源码、测试、稳定文档、registry 与经作者批准的 regression baseline 刷新已完成；等待 Draft PR CI/review
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -258,7 +258,7 @@ $$
 - [x] 运行 `tests/regression/relaxtime/test_transport_fixedpoint_regression.jl`。
 - [x] 将预期数值漂移限制在 $\xi\ne0$ 的 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$、$\lambda$ 及其派生比值；$\tau$、截面、散射率不得因本次修改漂移。
 - [x] 不为通过测试而放宽容差；任何 baseline 更新必须记录旧值、新值、相对漂移和物理原因。
-- [x] 在作者确认和代码 review 前不得刷新 baseline；当前保留旧 baseline，并把唯一超差点作为 review gate。
+- [x] 在作者确认和代码 review 前不得刷新 baseline；作者于 2026-07-15 确认漂移符合预期并批准刷新三个 $\xi\ne0$ 固定点。
 
 ### 7.4 Validation 层
 
@@ -273,7 +273,7 @@ $$
 - [x] `prefer_energy_aniso=false` 不再被描述成 kernel energy policy。
 - [x] $s$、$v_{\rm rel}$、$t_\pm$、Pauli blocking、传播子策略、弛豫时间保持已确认语义。
 - [x] 角积分有效量和守恒荷矩阵的适用范围在 API/公式文档中明确，不声称完成空间各向异性输运张量分解。
-- [ ] unit、integration、regression、validation 的目标检查通过，且数值漂移记录可追溯。
+- [x] unit、integration、regression、validation 的目标检查通过，且数值漂移记录可追溯。
 
 ### 7.6 PR 1 验证证据（2026-07-15）
 
@@ -281,13 +281,25 @@ $$
 - Integration：workflow smoke 80/80；TOML `prefer_energy_aniso` smoke 22/22。
 - Validation：公式映射 3/3；legacy transport/tau guardrail 111/111。
 - Registry：4 个 `case_slug × mode` 条目通过 required fields、枚举、唯一性、SHA、目录和 manifest 路径校验。
-- Regression：116/117；没有修改 `rtol=8e-2`，唯一失败是 $\xi=-0.2$ 的 $\zeta$ 相对旧 baseline 漂移 $-10.46\%$。该失败是预期物理语义修复超过旧容差，不是数值不稳定；等待作者 review 后才允许刷新 baseline。
+- Regression：刷新前 116/117；没有修改 `rtol=8e-2`，唯一失败是 $\xi=-0.2$ 的 $\zeta$ 相对旧 baseline 漂移 $-10.46\%$。作者于 2026-07-15 确认该漂移是允许的预期物理语义修复，并批准只刷新三个 $\xi\ne0$ 固定点；刷新后 117/117。
 
 | 点位 | $\eta$ 相对漂移 | $\sigma$ 相对漂移 | $\zeta$ 相对漂移 |
 | --- | ---: | ---: | ---: |
 | $(T,\mu,\xi)=(0.9,0.0,+0.2)$ | $+4.17\%$ | $+3.90\%$ | $+8.01\%$ |
 | $(0.9,0.15,+0.2)$ | $+4.19\%$ | $+3.91\%$ | $+8.14\%$ |
 | $(0.9,0.0,-0.2)$ | $-5.53\%$ | $-5.13\%$ | $-10.46\%$ |
+
+| 点位 | 字段 | 旧 baseline | 新 baseline | 相对漂移 |
+| --- | --- | ---: | ---: | ---: |
+| $(0.9,0.0,+0.2)$ | $\eta$ | $7.3798253967065408\times10^{-2}$ | $7.6878503989921562\times10^{-2}$ | $+4.17\%$ |
+| $(0.9,0.0,+0.2)$ | $\sigma$ | $1.4110024464777007\times10^{-3}$ | $1.4659685651953233\times10^{-3}$ | $+3.90\%$ |
+| $(0.9,0.0,+0.2)$ | $\zeta$ | $3.8817152229423980\times10^{-2}$ | $4.1928048068062808\times10^{-2}$ | $+8.01\%$ |
+| $(0.9,0.15,+0.2)$ | $\eta$ | $7.6421177176324587\times10^{-2}$ | $7.9619618296040098\times10^{-2}$ | $+4.19\%$ |
+| $(0.9,0.15,+0.2)$ | $\sigma$ | $1.4635989266414187\times10^{-3}$ | $1.5207884350976412\times10^{-3}$ | $+3.91\%$ |
+| $(0.9,0.15,+0.2)$ | $\zeta$ | $3.8540178736649888\times10^{-2}$ | $4.1677978356060852\times10^{-2}$ | $+8.14\%$ |
+| $(0.9,0.0,-0.2)$ | $\eta$ | $1.3013608965647167\times10^{-1}$ | $1.2293346713344948\times10^{-1}$ | $-5.53\%$ |
+| $(0.9,0.0,-0.2)$ | $\sigma$ | $2.4682134925219350\times10^{-3}$ | $2.3416435792456094\times10^{-3}$ | $-5.13\%$ |
+| $(0.9,0.0,-0.2)$ | $\zeta$ | $4.9729596683791580\times10^{-2}$ | $4.4530234053340556\times10^{-2}$ | $-10.46\%$ |
 
 全部 $\xi=0$ 固定点只出现浮点重算量级差异，最大相对差约 $4.3\times10^{-11}$。现有 baseline 未覆盖 $\kappa_{XY}$ 和 $\lambda$，因此本 PR 以 term-level unit、workflow 派生链 integration 和 Das Eq. (55) validation 约束其语义，不虚构旧数值基线。
 
@@ -346,7 +358,7 @@ $$
 
 - [x] 拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
 - [x] 按审计表修改 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$，并重算 $\lambda$ 及其派生量。
-- [ ] 完成 unit、integration、regression、validation 证据。
+- [x] 完成 unit、integration、regression、validation 证据。
 - [x] 修正 OneLoop API 矛盾和 transport docstring。
 - [x] 创建外部 production registry 并标记旧 case 的论文资格。
 - [ ] 代码 PR review、CI 和合并完成。
@@ -364,7 +376,7 @@ $$
 - [x] $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 在实现、测试和稳定文档中职责一致。
 - [x] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的代码逐项映射到已记录的仓库公式和外部方程号，$\lambda$ 的派生链可追溯。
 - [x] 非目标的散射、传播子和弛豫时间语义有保护证据。
-- [ ] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
+- [x] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
 - [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
 - [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
