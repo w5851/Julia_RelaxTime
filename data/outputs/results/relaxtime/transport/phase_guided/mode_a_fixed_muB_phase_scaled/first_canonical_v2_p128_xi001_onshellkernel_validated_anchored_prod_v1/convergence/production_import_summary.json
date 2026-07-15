@@ -1,0 +1,200 @@
+{
+  "convergence_verdict": "production-grade",
+  "source_runs": 15,
+  "source_failed_rows": 0,
+  "scan_rows": 909,
+  "diagnostic_rows": 38178,
+  "scan_overlap": {
+    "duplicate_groups": 6,
+    "duplicate_rows_removed": 6,
+    "worst": {
+      "max_abs": 8.545863476594473e-08,
+      "max_rel": 1.2375488548772775e-06,
+      "column": "tauinv_u",
+      "base_source": "modeA_muB900_alpha1.0_xi_neg / fixed-muB-phase-scaled",
+      "other_source": "modeA_muB900_alpha1.0_xi_pos / fixed-muB-phase-scaled"
+    },
+    "threshold": 0.001,
+    "passed": true
+  },
+  "diagnostic_overlap": {
+    "duplicate_groups": 252,
+    "duplicate_rows_removed": 252,
+    "worst": {
+      "max_abs": 1.0997090347728e-06,
+      "max_rel": 2.945361708373375e-05,
+      "column": "rate",
+      "base_source": "modeA_muB450_alpha1.1_xi_neg / fixed-muB-phase-scaled",
+      "other_source": "modeA_muB450_alpha1.1_xi_pos / fixed-muB-phase-scaled"
+    },
+    "threshold": 0.001,
+    "passed": true
+  },
+  "coverage": {
+    "old_rows": 909,
+    "new_rows": 909,
+    "matched_rows": 909,
+    "new_rows_missing_from_old": [],
+    "old_rows_missing_from_new": []
+  },
+  "unchanged_max_rel": 0.00016650388598370386,
+  "unchanged_worst": {
+    "mode": "mode_a_fixed_muB_phase_scaled",
+    "key": "0.0000000000|1.0000000000|-0.2200000000",
+    "xi": -0.22,
+    "field": "tau_ubar",
+    "role": "unchanged_contract",
+    "old": 0.7507572360272565,
+    "new": 0.7506322320300276,
+    "abs_delta": 0.00012500399722892297,
+    "rel_delta": 0.00016650388598370386,
+    "signed_rel_delta": -0.00016650388598370386
+  },
+  "tau_max_rel": 0.00016650388598370386,
+  "tau_worst": {
+    "mode": "mode_a_fixed_muB_phase_scaled",
+    "key": "0.0000000000|1.0000000000|-0.2200000000",
+    "xi": -0.22,
+    "field": "tau_ubar",
+    "role": "unchanged_contract",
+    "old": 0.7507572360272565,
+    "new": 0.7506322320300276,
+    "abs_delta": 0.00012500399722892297,
+    "rel_delta": 0.00016650388598370386,
+    "signed_rel_delta": -0.00016650388598370386
+  },
+  "xi0_transport_max_rel": 3.110133144541993e-07,
+  "xi0_transport_worst": {
+    "mode": "mode_a_fixed_muB_phase_scaled",
+    "key": "450.0000000000|1.1000000000|0.0000000000",
+    "xi": 0.0,
+    "field": "sigma_over_T",
+    "role": "xi0_invariance",
+    "old": 0.01628097318367994,
+    "new": 0.016280978247280947,
+    "abs_delta": 5.063601007243568e-09,
+    "rel_delta": 3.110133144541993e-07,
+    "signed_rel_delta": 3.1101341118351113e-07
+  },
+  "transport_drift_field_summary": {
+    "eta": {
+      "count": 900,
+      "max_rel": 0.2784955515842141,
+      "min_signed_rel": -0.2784955515842141,
+      "max_signed_rel": 0.11058293364040787,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "900.0000000000|1.0000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "eta",
+        "role": "transport_semantic_drift",
+        "old": 9.071248136738177,
+        "new": 6.544945883340004,
+        "abs_delta": 2.526302253398173,
+        "rel_delta": 0.2784955515842141,
+        "signed_rel_delta": -0.2784955515842141
+      }
+    },
+    "sigma": {
+      "count": 900,
+      "max_rel": 0.2474718768321259,
+      "min_signed_rel": -0.2474718768321259,
+      "max_signed_rel": 0.12114764552210493,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "900.0000000000|1.0000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "sigma",
+        "role": "transport_semantic_drift",
+        "old": 0.11793481051202734,
+        "new": 0.0887492616107748,
+        "abs_delta": 0.029185548901252537,
+        "rel_delta": 0.2474718768321259,
+        "signed_rel_delta": -0.2474718768321259
+      }
+    },
+    "zeta": {
+      "count": 900,
+      "max_rel": 0.7659902491037888,
+      "min_signed_rel": -0.7659902491037888,
+      "max_signed_rel": 0.2582178441788718,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "0.0000000000|1.2000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "zeta",
+        "role": "transport_semantic_drift",
+        "old": 1.1517511210204894,
+        "new": 0.26952099292443676,
+        "abs_delta": 0.8822301280960526,
+        "rel_delta": 0.7659902491037888,
+        "signed_rel_delta": -0.7659902491037888
+      }
+    },
+    "eta_over_s": {
+      "count": 900,
+      "max_rel": 0.27849555156284156,
+      "min_signed_rel": -0.27849555156284156,
+      "max_signed_rel": 0.11058293364040782,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "900.0000000000|1.0000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "eta_over_s",
+        "role": "transport_semantic_drift",
+        "old": 1.9385883075959376,
+        "new": 1.3987000876187314,
+        "abs_delta": 0.5398882199772062,
+        "rel_delta": 0.27849555156284156,
+        "signed_rel_delta": -0.27849555156284156
+      }
+    },
+    "zeta_over_s": {
+      "count": 900,
+      "max_rel": 0.7659902491037888,
+      "min_signed_rel": -0.7659902491037888,
+      "max_signed_rel": 0.2582178441788717,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "0.0000000000|1.2000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "zeta_over_s",
+        "role": "transport_semantic_drift",
+        "old": 0.03335662050268332,
+        "new": 0.007805774454572378,
+        "abs_delta": 0.025550846048110944,
+        "rel_delta": 0.7659902491037888,
+        "signed_rel_delta": -0.7659902491037888
+      }
+    },
+    "sigma_over_T": {
+      "count": 900,
+      "max_rel": 0.247471876832126,
+      "min_signed_rel": -0.247471876832126,
+      "max_signed_rel": 0.12114764552210482,
+      "worst": {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "key": "900.0000000000|1.0000000000|-0.5000000000",
+        "xi": -0.5,
+        "field": "sigma_over_T",
+        "role": "transport_semantic_drift",
+        "old": 0.18606968708246954,
+        "new": 0.14002267239860441,
+        "abs_delta": 0.04604701468386513,
+        "rel_delta": 0.247471876832126,
+        "signed_rel_delta": -0.247471876832126
+      }
+    }
+  },
+  "scan_nonfinite": 0,
+  "scan_negative": 0,
+  "diagnostic_nonfinite": 0,
+  "diagnostic_negative": 0,
+  "converged_counts": {
+    "true": 909
+  },
+  "quality_reason_counts": {
+    "ok": 682,
+    "tau_u_ubar_ratio_high": 227
+  }
+}
