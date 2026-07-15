@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：作者已确认公式—实现逐项映射；等待 PR 1 源码实施
+状态：PR 1 源码、测试、稳定文档与 registry 已实现；等待作者 review 数值漂移后决定是否刷新 regression baseline
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -32,7 +32,7 @@ $$
 - $E_{\mathrm{dist}}$ 只作为 RS 分布 $f_\xi$ 的变形自变量，并由此进入各公式采用的分布占据核；
 - $M=M(T,\mu_B,\xi)$ 仍可来自当前各向异性热力学背景。这里排除的是在普通色散关系上额外加入 $\xi(p\cos\theta)^2$，不是把质量强制换成各向同性热力学解。
 
-本任务单的当前交付物是公式—实现审计，不实施代码修改。作者已于 2026-07-15 确认 5.6 节的完整映射；下一阶段才允许开始源码实现。数值基线只能在实现和测试证据完成后刷新，新的正式 production 仍须等待代码 PR 合并。
+作者已于 2026-07-15 确认 5.6 节的完整映射，PR 1 已据此完成源码、测试、稳定文档和 registry 实施。当前 gate 是 review 已量化的 $\xi\ne0$ 数值漂移；在作者批准前不刷新 regression baseline。新的正式 production 仍须等待代码 PR 合并，并通过独立数据/图像 PR 导入。
 
 ## 2. 范围与非目标
 
@@ -212,68 +212,84 @@ $$
 
 ### 6.1 能量职责拆分
 
-- [ ] 引入语义明确的内部 helper，分别得到 $E_{\mathrm{kin}}$ 和 $E_{\mathrm{dist}}$。
-- [ ] 调整 `_species_transport_state`，让积分调用方显式获得两种能量；避免继续以无角色名称 `E` 传递。
-- [ ] 保留 provider 的 `prefer_energy_aniso` 作为分布路由兼容字段，并在文档中明确它不是 kernel energy policy。
-- [ ] 避免在热积分循环中引入不必要分配；优先沿用具体 `NTuple` 或其他类型稳定返回值，并用现有测试/必要时 `@code_warntype` 复核。
+- [x] 引入语义明确的内部 helper，分别得到 $E_{\mathrm{kin}}$ 和 $E_{\mathrm{dist}}$。
+- [x] 调整 `_species_transport_state`，让积分调用方显式获得两种能量；避免继续以无角色名称 `E` 传递。
+- [x] 保留 provider 的 `prefer_energy_aniso` 作为分布路由兼容字段，并在文档中明确它不是 kernel energy policy。
+- [x] 避免在热积分循环中引入不必要分配；使用 `NTuple{5,Float64}` 返回状态，并在 $\xi=0$ 或 provider 无 `energy_from_p_aniso` 时复用已计算的 $E_{\mathrm{kin}}$。
 
 ### 6.2 目标调用方
 
-- [ ] $\eta$ 的 `p6 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
-- [ ] $\sigma$ 的 `p4*q2 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
-- [ ] $\zeta$ 严格按 5.4 表逐项修改，不做全局文本替换。
-- [ ] `diffusion_coefficient` 的 `p4/E^2` 和 `_kappa_projection` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$；全部 $\kappa_{XY}$ 继承该分工。
-- [ ] $\lambda$ 由修正后的 $\kappa_{BB}$ 重算，并同步重算依赖 $\lambda$ 或 $\sigma$ 的派生诊断量。
-- [ ] 保持 $\xi=0$ 路径在数值容差内完全退化到原实现。
+- [x] $\eta$ 的 `p6 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
+- [x] $\sigma$ 的 `p4*q2 / E^2` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$。
+- [x] $\zeta$ 严格按 5.4 表逐项修改，不做全局文本替换。
+- [x] `diffusion_coefficient` 的 `p4/E^2` 和 `_kappa_projection` 改用 $E_{\mathrm{kin}}$，分布保持 $E_{\mathrm{dist}}$；全部 $\kappa_{XY}$ 继承该分工。
+- [x] $\lambda$ 由修正后的 $\kappa_{BB}$ 重算，并同步重算依赖 $\lambda$ 或 $\sigma$ 的派生诊断量。
+- [x] 保持 $\xi=0$ 路径在数值容差内完全退化到原实现。
 
 ### 6.3 文档与治理
 
 - [x] 在权威公式文档记录外部来源、方程号、Zotero/BibTeX 映射、“A26”状态和加号勘误。
 - [x] 在 transport API 文档链接权威公式，并明确“目标公式”与“当前代码已生效语义”的差异。
-- [ ] 修正 `docs/api/integrals/OneLoopIntegralsAniso.md` 的 `1/E_{\rm aniso}` 矛盾，使其与 `OneLoopIntegralsAniso.jl` 的普通能量分母一致；若后续证据指向代码应变更，则另开 issue。
-- [ ] 更新 `TransportCoefficients.jl` docstring，移除把“A26”当成外部公式号的表述。
-- [ ] 在实现完成后把稳定能量策略同步回 `docs/reference/formula/` 与 `docs/api/`，活动文档只保留过程 gate 和验证记录。
+- [x] 修正 `docs/api/integrals/OneLoopIntegralsAniso.md` 的 `1/E_{\rm aniso}` 矛盾，使其与 `OneLoopIntegralsAniso.jl` 的普通能量分母一致；若后续证据指向代码应变更，则另开 issue。
+- [x] 更新 `TransportCoefficients.jl` docstring，移除把“A26”当成外部公式号的表述。
+- [x] 在实现完成后把稳定能量策略同步回 `docs/reference/formula/` 与 `docs/api/`，活动文档只保留过程 gate 和验证记录。
 
 ## 7. 测试、回归与验收
 
 ### 7.1 Unit 层
 
-- [ ] 在 `tests/unit/relaxtime/test_transport_coefficients.jl` 添加能区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 的 deterministic toy provider。
-- [ ] 验证 $\xi\ne0$ 时 $\eta$、$\sigma$ 的分母使用 $E_{\mathrm{kin}}$，而分布调用实际收到/构造 $E_{\mathrm{dist}}$。
-- [ ] 对 $\zeta$ 分别覆盖 $p^2/E^2$、$x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核，避免只测最终数值而遗漏局部混用。
-- [ ] 验证 $\kappa_{XY}$ 的 $p^4/E^2$ 与两个投影因子使用 $E_{\mathrm{kin}}$，分布使用 $E_{\mathrm{dist}}$。
-- [ ] 验证 $\lambda$ 严格由修正后的 $\kappa_{BB}$ 和热力学 $\epsilon,P,n_B,T$ 派生。
-- [ ] 验证 `prefer_energy_aniso=true/false` 在默认 provider 下只改变等价调用路由，不改变目标物理结果。
-- [ ] 验证 $\xi=0$ 与修改前固定点一致。
+- [x] 在 `tests/unit/relaxtime/test_transport_coefficients.jl` 添加能区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 的 deterministic toy provider。
+- [x] 验证 $\xi\ne0$ 时 $\eta$、$\sigma$ 的分母使用 $E_{\mathrm{kin}}$，而分布调用实际收到/构造 $E_{\mathrm{dist}}$。
+- [x] 对 $\zeta$ 分别覆盖 $p^2/E^2$、$x=E\mp\mu$、$dE/dT$、$dE/d\mu_B$ 和 $B$ 核，避免只测最终数值而遗漏局部混用。
+- [x] 验证 $\kappa_{XY}$ 的 $p^4/E^2$ 与两个投影因子使用 $E_{\mathrm{kin}}$，分布使用 $E_{\mathrm{dist}}$。
+- [x] 验证 $\lambda$ 严格由修正后的 $\kappa_{BB}$ 和热力学 $\epsilon,P,n_B,T$ 派生。
+- [x] 验证 `prefer_energy_aniso=true/false` 在默认 provider 下只改变等价调用路由，不改变目标物理结果。
+- [x] 验证 $\xi=0$ 与修改前固定点一致。
 
 ### 7.2 Integration 层
 
-- [ ] 运行 `tests/integration/relaxtime/test_transport_workflow_smoke.jl` 与 TOML `prefer_energy_aniso` 路由 smoke。
-- [ ] 验证统一 transport workflow 能同时传递 $E_{\mathrm{kin}}$ 核和 $E_{\mathrm{dist}}$ 分布语义。
-- [ ] 验证扩散矩阵、$\lambda$、Lorenz number 和 Prandtl number 使用修正后的上游结果。
-- [ ] 验证 relaxation time、散射率和 `propagator_xi_policy = match_thermo` 在工作流层未改变。
+- [x] 运行 `tests/integration/relaxtime/test_transport_workflow_smoke.jl` 与 TOML `prefer_energy_aniso` 路由 smoke。
+- [x] 验证统一 transport workflow 能同时传递 $E_{\mathrm{kin}}$ 核和 $E_{\mathrm{dist}}$ 分布语义。
+- [x] 验证扩散矩阵、$\lambda$、Lorenz number 和 Prandtl number 使用修正后的上游结果。
+- [x] 验证 relaxation time、散射率和 `propagator_xi_policy = match_thermo` 在工作流层未改变；源码 diff 未触及这些模块，workflow integration 验证显式传入的 $\tau$ 原样返回，legacy tau guardrail 通过。
 
 ### 7.3 Regression 层
 
-- [ ] 运行 `tests/regression/relaxtime/test_transport_fixedpoint_regression.jl`。
-- [ ] 将预期数值漂移限制在 $\xi\ne0$ 的 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$、$\lambda$ 及其派生比值；$\tau$、截面、散射率不得因本次修改漂移。
-- [ ] 不为通过测试而放宽容差；任何 baseline 更新必须记录旧值、新值、相对漂移和物理原因。
-- [ ] 在作者确认和代码 review 前不得刷新 baseline。
+- [x] 运行 `tests/regression/relaxtime/test_transport_fixedpoint_regression.jl`。
+- [x] 将预期数值漂移限制在 $\xi\ne0$ 的 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$、$\lambda$ 及其派生比值；$\tau$、截面、散射率不得因本次修改漂移。
+- [x] 不为通过测试而放宽容差；任何 baseline 更新必须记录旧值、新值、相对漂移和物理原因。
+- [x] 在作者确认和代码 review 前不得刷新 baseline；当前保留旧 baseline，并把唯一超差点作为 review gate。
 
 ### 7.4 Validation 层
 
-- [ ] 运行相关 legacy transport guardrail，确认 $\xi=0$ 外部/legacy 对照没有回归。
-- [ ] 对 $\mu_B=0$ 的 $\zeta$ 核进行 Mykhaylova-Sasaki Eq. (10) 形式交叉核验；该检查验证公式等价，不虚构未提供的文献数值基线。
-- [ ] 对 $\kappa_{XY}$ 核逐项核验 Das et al. Eq. (55)，并区分外部各向同性公式与仓库完整 RS 分布扩展约定。
+- [x] 运行相关 legacy transport guardrail，确认 $\xi=0$ 外部/legacy 对照没有回归。
+- [x] 对 $\mu_B=0$ 的 $\zeta$ 核进行 Mykhaylova-Sasaki Eq. (10) 形式交叉核验；该检查验证公式等价，不虚构未提供的文献数值基线。
+- [x] 对 $\kappa_{XY}$ 核逐项核验 Das et al. Eq. (55)，并区分外部各向同性公式与仓库完整 RS 分布扩展约定。
 
 ### 7.5 验收标准
 
-- [ ] 所有目标调用方可从代码命名和测试证据区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
-- [ ] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 与表 5.2-5.5 逐项一致，$\lambda$ 使用修正后的 $\kappa_{BB}$。
-- [ ] `prefer_energy_aniso=false` 不再被描述成 kernel energy policy。
-- [ ] $s$、$v_{\rm rel}$、$t_\pm$、Pauli blocking、传播子策略、弛豫时间保持已确认语义。
-- [ ] 角积分有效量和守恒荷矩阵的适用范围在 API/公式文档中明确，不声称完成空间各向异性输运张量分解。
+- [x] 所有目标调用方可从代码命名和测试证据区分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
+- [x] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 与表 5.2-5.5 逐项一致，$\lambda$ 使用修正后的 $\kappa_{BB}$。
+- [x] `prefer_energy_aniso=false` 不再被描述成 kernel energy policy。
+- [x] $s$、$v_{\rm rel}$、$t_\pm$、Pauli blocking、传播子策略、弛豫时间保持已确认语义。
+- [x] 角积分有效量和守恒荷矩阵的适用范围在 API/公式文档中明确，不声称完成空间各向异性输运张量分解。
 - [ ] unit、integration、regression、validation 的目标检查通过，且数值漂移记录可追溯。
+
+### 7.6 PR 1 验证证据（2026-07-15）
+
+- Unit：`tests/unit/relaxtime/test_transport_coefficients.jl` 全部通过；新增能量语义 testset 为 38/38。
+- Integration：workflow smoke 80/80；TOML `prefer_energy_aniso` smoke 22/22。
+- Validation：公式映射 3/3；legacy transport/tau guardrail 111/111。
+- Registry：4 个 `case_slug × mode` 条目通过 required fields、枚举、唯一性、SHA、目录和 manifest 路径校验。
+- Regression：116/117；没有修改 `rtol=8e-2`，唯一失败是 $\xi=-0.2$ 的 $\zeta$ 相对旧 baseline 漂移 $-10.46\%$。该失败是预期物理语义修复超过旧容差，不是数值不稳定；等待作者 review 后才允许刷新 baseline。
+
+| 点位 | $\eta$ 相对漂移 | $\sigma$ 相对漂移 | $\zeta$ 相对漂移 |
+| --- | ---: | ---: | ---: |
+| $(T,\mu,\xi)=(0.9,0.0,+0.2)$ | $+4.17\%$ | $+3.90\%$ | $+8.01\%$ |
+| $(0.9,0.15,+0.2)$ | $+4.19\%$ | $+3.91\%$ | $+8.14\%$ |
+| $(0.9,0.0,-0.2)$ | $-5.53\%$ | $-5.13\%$ | $-10.46\%$ |
+
+全部 $\xi=0$ 固定点只出现浮点重算量级差异，最大相对差约 $4.3\times10^{-11}$。现有 baseline 未覆盖 $\kappa_{XY}$ 和 $\lambda$，因此本 PR 以 term-level unit、workflow 派生链 integration 和 Das Eq. (55) validation 约束其语义，不虚构旧数值基线。
 
 ## 8. Production 数据治理
 
@@ -302,9 +318,9 @@ $$
 
 `data/outputs/results/relaxtime/transport/phase_guided/production_registry.json`
 
-- [ ] 定义并校验 registry schema，至少包含 `case_slug`、`mode`、`result_path`、`figure_path`、`source_commit`、`transport_kernel_energy_policy`、`distribution_energy_policy`、`propagator_xi_policy`、`status`、`superseded_by`、`manuscript_eligible`、`audit_manifest_path`、更新时间。
-- [ ] 把上述旧 case 标记为 `superseded_for_manuscript`、`manuscript_eligible=false`，但不修改旧目录。
-- [ ] 新 case 尚未生成时允许 `superseded_by=null` 或明确的 pending 状态。
+- [x] 定义并校验 registry schema，至少包含 `case_slug`、`mode`、`result_path`、`figure_path`、`source_commit`、`transport_kernel_energy_policy`、`distribution_energy_policy`、`propagator_xi_policy`、`status`、`superseded_by`、`manuscript_eligible`、`audit_manifest_path`、更新时间。
+- [x] 把上述旧 case 标记为 `superseded_for_manuscript`、`manuscript_eligible=false`，但不修改旧目录。
+- [x] 新 case 尚未生成时允许 `superseded_by=null` 或明确的 pending 状态。
 - [ ] 后续新数据 PR 先登记 `current_candidate`；完成收敛、provenance、图像和新旧对比后才晋升为 `approved`、`manuscript_eligible=true`。
 - [ ] 回填旧 case 的 `superseded_by`，使 registry 成为论文输入资格的权威状态入口。
 
@@ -328,11 +344,11 @@ $$
 
 ### M1：代码、测试、稳定文档与 registry（代码 PR）
 
-- [ ] 拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
-- [ ] 按审计表修改 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$，并重算 $\lambda$ 及其派生量。
+- [x] 拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$。
+- [x] 按审计表修改 $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$，并重算 $\lambda$ 及其派生量。
 - [ ] 完成 unit、integration、regression、validation 证据。
-- [ ] 修正 OneLoop API 矛盾和 transport docstring。
-- [ ] 创建外部 production registry 并标记旧 case 的论文资格。
+- [x] 修正 OneLoop API 矛盾和 transport docstring。
+- [x] 创建外部 production registry 并标记旧 case 的论文资格。
 - [ ] 代码 PR review、CI 和合并完成。
 
 ### M2：新数据与图像（独立 production PR）
@@ -345,11 +361,11 @@ $$
 ## 10. Definition of Done
 
 - [x] 作者确认本审计表，确认记录可在 issue/PR 中追溯（2026-07-15）。
-- [ ] $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 在实现、测试和稳定文档中职责一致。
-- [ ] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的代码逐项映射到已记录的仓库公式和外部方程号，$\lambda$ 的派生链可追溯。
-- [ ] 非目标的散射、传播子和弛豫时间语义有保护证据。
+- [x] $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 在实现、测试和稳定文档中职责一致。
+- [x] $\eta$、$\sigma$、$\zeta$、$\kappa_{XY}$ 的代码逐项映射到已记录的仓库公式和外部方程号，$\lambda$ 的派生链可追溯。
+- [x] 非目标的散射、传播子和弛豫时间语义有保护证据。
 - [ ] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
-- [ ] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
+- [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
 - [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
 

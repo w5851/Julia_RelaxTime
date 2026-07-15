@@ -112,7 +112,7 @@ $$
 
 这项 RS 扩展是本仓库的物理约定：Das 2022 Eq. (55) 提供扩散矩阵、普通 $E_a$ 分母和 Landau-Lifshitz 投影结构，但该文并未直接推导本仓库的完整全角 RS 形式，不应把两者表述为完全相同的公式。
 
-截至 `main@ea706548e9167db61e0cb7537bab2d2d4daf4cad`，`TransportCoefficients.jl` 在 $\xi\ne0$ 时仍把 $E_{\mathrm{dist}}$ 同时用于 $p^4/E^2$、投影项和分布。目标实现由 [Issue #130](https://github.com/w5851/Julia_RelaxTime/issues/130) 跟踪；旧 production 不应被描述为已经采用本节的能量分工。
+当前 `TransportCoefficients.jl` 已在共享扩散 kernel 中使用 $E_{\mathrm{kin}}$ 计算 $p^4/E^2$ 与 Landau-Lifshitz 投影，并只用 $E_{\mathrm{dist}}$ 生成 RS 占据分布。旧 production 不应被描述为已经采用本节的能量分工，其状态由外部 production registry 记录。
 
 ---
 
@@ -242,7 +242,7 @@ $$
 = \sum_{j,f} \frac{N_c\,\tau_{j f}}{3\pi^2} \int_0^{\infty} dp\, \frac{p^4}{E_f(p)^2} F_{j f}(p) \left(Q_{j f} - \frac{n_Q E_f(p)}{\epsilon + P}\right) \left(S_{j f} - \frac{n_S E_f(p)}{\epsilon + P}\right)
 $$
 
-在夸克侧，这些非对角元不是形式上更复杂的新对象，而是同一个参数化 kernel 在不同守恒荷投影下的混合项。当前 Julia 实现已经复用该 kernel，因此 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 拆分应在共享层一次完成，并由全部 $BQ/BS/QS$ 通道继承。
+在夸克侧，这些非对角元不是形式上更复杂的新对象，而是同一个参数化 kernel 在不同守恒荷投影下的混合项。当前 Julia 实现已在共享层完成 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 拆分，并由全部 $BQ/BS/QS$ 通道继承。
 
 ---
 
@@ -276,7 +276,7 @@ Das 2022 本身聚焦扩散矩阵，没有直接把 $\lambda$ 作为主结果展
 - $\lambda = \kappa_{BB} ((\epsilon+P)/(n_B T))^2$ 没有在 Das 2022 文中直接写出
 - 但它与 Landau-Lifshitz 框架下“热流可由重子扩散流和热力学关系导出”的物理图像相容，并与 legacy 实现一致
 
-需要区分两个名为 energy 的对象：$\lambda$ 公式中的 $\epsilon$ 是热力学能量密度，不是扩散积分中的单粒子能量。`lambda_from_kappa_BB` 不直接选择 $E_{\mathrm{kin}}$ 或 $E_{\mathrm{dist}}$，但会继承 $\kappa_{BB}$ 的能量语义，因此 Issue #130 修正后必须由新的 $\kappa_{BB}$ 重新计算 $\lambda$。
+需要区分两个名为 energy 的对象：$\lambda$ 公式中的 $\epsilon$ 是热力学能量密度，不是扩散积分中的单粒子能量。`lambda_from_kappa_BB` 不直接选择 $E_{\mathrm{kin}}$ 或 $E_{\mathrm{dist}}$，但会继承 $\kappa_{BB}$ 的能量语义；当前实现已由修正后的 $\kappa_{BB}$ 重新计算 $\lambda$。
 
 这也解释了为什么当前 Julia 路线应当是“先补 $\kappa_{BB}$，再补 $\lambda$”，而不是把二者当作两个完全独立的主方程对象。
 

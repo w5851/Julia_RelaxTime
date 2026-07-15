@@ -463,8 +463,8 @@ end
     @test eta_bad > 0.0
 
     @testset "TransportCoefficients anisotropic energy hook" begin
-        # Minimal anisotropic smoke: ensure ξ≠0 path is finite and that overriding
-        # `energy_from_p_aniso` affects the result when `prefer_energy_aniso=true`.
+        # Minimal anisotropic smoke: `energy_from_p_aniso` affects the RS
+        # distribution argument, while the transport denominator remains on shell.
         thermo_params_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
 
         η0 = shear_viscosity(
@@ -527,6 +527,201 @@ end
         @test isfinite(η)
         @test η > 0
     end
+end
+
+@testset "TransportCoefficients: RS distribution energy is separate from kinematics" begin
+    thermo_aniso = merge(THERMO_PARAMS, (ξ=0.2,))
+    cfg = TransportIntegrationConfig(
+        p_nodes=1,
+        p_max=2.0,
+        p_grid=[1.2],
+        p_w=[0.7],
+        cos_nodes=1,
+        cos_grid=[0.25],
+        cos_w=[2.0],
+    )
+    bulk_coeffs = (
+        v_n_sq=0.27,
+        dμB_dT_sigma=0.4,
+        masses=[0.3, 0.3, 0.5],
+        dM_dT=[-0.1, -0.1, -0.08],
+        dM_dμB=[0.05, 0.05, 0.03],
+    )
+
+    function toy_provider(E_kin::Float64, E_dist::Float64; energy_dependent_distribution::Bool=false, prefer_energy_aniso::Bool=true)
+        distribution_from_E = energy_dependent_distribution ?
+            ((E::Float64) -> E / 10.0) :
+            ((E::Float64) -> 0.2)
+        distribution_aniso = energy_dependent_distribution ?
+            (() -> E_dist / 10.0) :
+            (() -> 0.2)
+
+        return (
+            energy_from_p=(p::Float64, m::Float64) -> E_kin,
+            energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> E_dist,
+            quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> distribution_from_E(E),
+            antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> distribution_from_E(E),
+            quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> distribution_aniso(),
+            antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> distribution_aniso(),
+            prefer_energy_aniso=prefer_energy_aniso,
+        )
+    end
+
+    function target_outputs(provider)
+        η = shear_viscosity(QUARK_PARAMS, thermo_aniso; tau=TAU_ONE, provider=provider, config=cfg)
+        σ = electric_conductivity(QUARK_PARAMS, thermo_aniso; tau=TAU_ONE, provider=provider, config=cfg)
+        ζ = bulk_viscosity_isentropic(
+            QUARK_PARAMS,
+            thermo_aniso;
+            tau=TAU_ONE,
+            bulk_coeffs_isentropic=bulk_coeffs,
+            provider=provider,
+            config=cfg,
+        )
+        κBQ = kappa_BQ(
+            QUARK_PARAMS,
+            thermo_aniso;
+            tau=TAU_ONE,
+            densities=DENSITIES_ONE,
+            pressure=PRESSURE_ONE,
+            energy=ENERGY_ONE,
+            provider=provider,
+            config=cfg,
+        )
+        κBB = kappa_BB(
+            QUARK_PARAMS,
+            thermo_aniso;
+            tau=TAU_ONE,
+            densities=DENSITIES_ONE,
+            pressure=PRESSURE_ONE,
+            energy=ENERGY_ONE,
+            provider=provider,
+            config=cfg,
+        )
+        λ = lambda_from_kappa_BB(κBB, PRESSURE_ONE, ENERGY_ONE, conserved_charge_densities(DENSITIES_ONE).B, thermo_aniso.T)
+        return (; η, σ, ζ, κBQ, κBB, λ)
+    end
+
+    provider_kin2_dist5 = toy_provider(2.0, 5.0)
+    caps = Main.TransportCoefficients._provider_caps(provider_kin2_dist5)
+    state = Main.TransportCoefficients._species_transport_state(
+        provider_kin2_dist5,
+        caps,
+        :u,
+        1.2,
+        0.25,
+        thermo_aniso.ξ,
+        QUARK_PARAMS,
+        thermo_aniso,
+        TAU_ONE,
+    )
+    @test state isa NTuple{5,Float64}
+    @test state[1] == 2.0
+    @test state[2] == 5.0
+
+    provider_dist_probe = toy_provider(2.0, 5.0; energy_dependent_distribution=true)
+    caps_dist_probe = Main.TransportCoefficients._provider_caps(provider_dist_probe)
+    state_dist_probe = Main.TransportCoefficients._species_transport_state(
+        provider_dist_probe,
+        caps_dist_probe,
+        :u,
+        1.2,
+        0.25,
+        thermo_aniso.ξ,
+        QUARK_PARAMS,
+        thermo_aniso,
+        TAU_ONE,
+    )
+    @test state_dist_probe[1] == 2.0
+    @test state_dist_probe[2] == 5.0
+    @test state_dist_probe[3] == 0.5
+
+    outputs_kin2_dist5 = target_outputs(provider_kin2_dist5)
+    outputs_kin2_dist7 = target_outputs(toy_provider(2.0, 7.0))
+    outputs_kin4_dist5 = target_outputs(toy_provider(4.0, 5.0))
+
+    for name in keys(outputs_kin2_dist5)
+        @test isapprox(getproperty(outputs_kin2_dist7, name), getproperty(outputs_kin2_dist5, name); rtol=1e-12, atol=0.0)
+    end
+    @test isapprox(outputs_kin4_dist5.η / outputs_kin2_dist5.η, 0.25; rtol=1e-12, atol=0.0)
+    @test isapprox(outputs_kin4_dist5.σ / outputs_kin2_dist5.σ, 0.25; rtol=1e-12, atol=0.0)
+    @test !isapprox(outputs_kin4_dist5.ζ, outputs_kin2_dist5.ζ; rtol=1e-10, atol=0.0)
+    @test !isapprox(outputs_kin4_dist5.κBB, outputs_kin2_dist5.κBB; rtol=1e-10, atol=0.0)
+
+    outputs_dist5_occupancy = target_outputs(toy_provider(2.0, 5.0; energy_dependent_distribution=true))
+    outputs_dist7_occupancy = target_outputs(toy_provider(2.0, 7.0; energy_dependent_distribution=true))
+    @test !isapprox(outputs_dist7_occupancy.η, outputs_dist5_occupancy.η; rtol=1e-10, atol=0.0)
+    @test !isapprox(outputs_dist7_occupancy.σ, outputs_dist5_occupancy.σ; rtol=1e-10, atol=0.0)
+    @test !isapprox(outputs_dist7_occupancy.ζ, outputs_dist5_occupancy.ζ; rtol=1e-10, atol=0.0)
+    @test !isapprox(outputs_dist7_occupancy.κBQ, outputs_dist5_occupancy.κBQ; rtol=1e-10, atol=0.0)
+
+    charge_densities = conserved_charge_densities(DENSITIES_ONE)
+    enthalpy = PRESSURE_ONE + ENERGY_ONE
+    projection_weight = Main.TransportCoefficients._kappa_integrand_weight(
+        :u,
+        :B,
+        :Q,
+        charge_densities,
+        enthalpy,
+        2.0,
+    )
+    expected_left = 1.0 / 3.0 - (charge_densities.B / enthalpy) * 2.0
+    expected_right = 2.0 / 3.0 - (charge_densities.Q / enthalpy) * 2.0
+    @test isapprox(projection_weight, expected_left * expected_right; rtol=1e-12, atol=0.0)
+    @test !isapprox(
+        projection_weight,
+        Main.TransportCoefficients._kappa_integrand_weight(:u, :B, :Q, charge_densities, enthalpy, 5.0);
+        rtol=1e-10,
+        atol=0.0,
+    )
+
+    p = 0.8
+    m = 0.3
+    μ = 0.2
+    T = 0.15
+    v_n_sq = 0.27
+    dμB_dT_sigma = 0.4
+    dM_dT = -0.1
+    dM_dμB = 0.05
+    E_kin = 2.0
+    dE_dT = (m / E_kin) * dM_dT
+    dE_dμB = (m / E_kin) * dM_dμB
+    expected_B_q = p^2 + 3.0 * v_n_sq * T^2 * E_kin * (
+        (dE_dT + (dE_dμB - 1.0 / 3.0) * dμB_dT_sigma) / T - (E_kin - μ) / T^2
+    )
+    expected_B_aq = p^2 + 3.0 * v_n_sq * T^2 * E_kin * (
+        (dE_dT + (dE_dμB + 1.0 / 3.0) * dμB_dT_sigma) / T - (E_kin + μ) / T^2
+    )
+    @test isapprox(
+        Main.TransportCoefficients._bulk_isentropic_B(p, m, μ, T, v_n_sq, dμB_dT_sigma, dM_dT, dM_dμB, false, E_kin),
+        expected_B_q;
+        rtol=1e-12,
+        atol=0.0,
+    )
+    @test isapprox(
+        Main.TransportCoefficients._bulk_isentropic_B(p, m, μ, T, v_n_sq, dμB_dT_sigma, dM_dT, dM_dμB, true, E_kin),
+        expected_B_aq;
+        rtol=1e-12,
+        atol=0.0,
+    )
+
+    expected_λ = outputs_kin2_dist5.κBB * ((PRESSURE_ONE + ENERGY_ONE) / (charge_densities.B * thermo_aniso.T))^2
+    @test isapprox(outputs_kin2_dist5.λ, expected_λ; rtol=1e-12, atol=0.0)
+
+    outputs_prefer_true = target_outputs(toy_provider(2.0, 5.0; energy_dependent_distribution=true, prefer_energy_aniso=true))
+    outputs_prefer_false = target_outputs(toy_provider(2.0, 5.0; energy_dependent_distribution=true, prefer_energy_aniso=false))
+    for name in keys(outputs_prefer_true)
+        @test isapprox(getproperty(outputs_prefer_false, name), getproperty(outputs_prefer_true, name); rtol=1e-12, atol=0.0)
+    end
+
+    default_provider = default_transport_provider()
+    default_prefer_true = target_outputs(merge(default_provider, (prefer_energy_aniso=true,)))
+    default_prefer_false = target_outputs(merge(default_provider, (prefer_energy_aniso=false,)))
+    for name in keys(default_prefer_true)
+        @test isapprox(getproperty(default_prefer_false, name), getproperty(default_prefer_true, name); rtol=1e-12, atol=0.0)
+    end
+
+    @test Main.TransportCoefficients._energy_for_distribution(provider_kin2_dist5, 1.2, 0.3, 0.0, 0.25) == 2.0
 end
 
 @testset "TransportCoefficients: transport_coefficients diffusion extension" begin

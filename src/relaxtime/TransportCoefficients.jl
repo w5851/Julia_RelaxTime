@@ -17,6 +17,11 @@ module TransportCoefficients
 - ξ≠0：分布函数采用 RS 形式，需要完整的角度积分
   - 相空间测度：2π/(2π)³ ∫ p² dp ∫ d(cosθ) = 1/(4π²) ∫ p² dp ∫ d(cosθ)
 
+能量约定：
+- E_kin = sqrt(p² + m²) 用于输运积分核、体粘滞色散响应和扩散投影
+- E_dist = sqrt(p² + m² + ξ(p cosθ)²) 只作为 RS 分布的变形自变量
+- `prefer_energy_aniso` 只选择等价的分布调用路径，不是积分核能量策略
+
 积分核（含相空间测度 p²）：
 - η: p⁶/E² (来自 p² × p⁴/E²)
 - σ: p⁴q²/E² (来自 p² × p²q²/E²)
@@ -576,20 +581,31 @@ end
     )
 end
 
-@inline function _energy_for_kernel(provider, caps::NamedTuple, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
-    raw_E = if ξ == 0.0 || !caps.has_energy_from_p_aniso
+@inline function _energy_for_kinematics(provider, p::Float64, m::Float64)::Float64
+    return max(provider.energy_from_p(p, m), ENERGY_FLOOR)
+end
+
+@inline function _energy_for_distribution(
+    provider,
+    caps::NamedTuple,
+    p::Float64,
+    m::Float64,
+    ξ::Float64,
+    cosθ::Float64,
+)::Float64
+    raw_E_dist = if ξ == 0.0 || !caps.has_energy_from_p_aniso
         provider.energy_from_p(p, m)
     else
         provider.energy_from_p_aniso(p, m, ξ, cosθ)
     end
-    return max(raw_E, ENERGY_FLOOR)
+    return max(raw_E_dist, ENERGY_FLOOR)
 end
 
 @inline function distribution_for_species_from_E(
     provider,
     caps::NamedTuple,
     species::Symbol,
-    E::Float64,
+    E_dist::Float64,
     p::Float64,
     m::Float64,
     μ::Float64,
@@ -601,9 +617,9 @@ end
 )
     if ξ == 0.0
         if _is_quark_species(species)
-            return provider.quark_distribution(E, μ, T, Φ, Φbar)
+            return provider.quark_distribution(E_dist, μ, T, Φ, Φbar)
         else
-            return provider.antiquark_distribution(E, μ, T, Φ, Φbar)
+            return provider.antiquark_distribution(E_dist, μ, T, Φ, Φbar)
         end
     else
         is_quark = _is_quark_species(species)
@@ -612,7 +628,7 @@ end
         has_aniso_distribution = is_quark ? caps.has_quark_distribution_aniso : caps.has_antiquark_distribution_aniso
 
         if has_energy_passthrough && (caps.prefer_energy_aniso || !has_aniso_distribution)
-            return is_quark ? provider.quark_distribution(E, μ, T, Φ, Φbar) : provider.antiquark_distribution(E, μ, T, Φ, Φbar)
+            return is_quark ? provider.quark_distribution(E_dist, μ, T, Φ, Φbar) : provider.antiquark_distribution(E_dist, μ, T, Φ, Φbar)
         end
 
         if has_aniso_distribution
@@ -628,7 +644,7 @@ end
 @inline function distribution_for_species_from_E(
     provider,
     species::Symbol,
-    E::Float64,
+    E_dist::Float64,
     p::Float64,
     m::Float64,
     μ::Float64,
@@ -639,7 +655,7 @@ end
     cosθ::Float64
 )
     caps = _provider_caps(provider)
-    return distribution_for_species_from_E(provider, caps, species, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+    return distribution_for_species_from_E(provider, caps, species, E_dist, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 end
 
 @inline function distribution_for_species(
@@ -655,13 +671,13 @@ end
     cosθ::Float64
 )
     caps = _provider_caps(provider)
-    E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
-    return distribution_for_species_from_E(provider, species, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+    E_dist = _energy_for_distribution(provider, caps, p, m, ξ, cosθ)
+    return distribution_for_species_from_E(provider, caps, species, E_dist, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 end
 
-@inline function _energy_for_kernel(provider, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
+@inline function _energy_for_distribution(provider, p::Float64, m::Float64, ξ::Float64, cosθ::Float64)::Float64
     caps = _provider_caps(provider)
-    return _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
+    return _energy_for_distribution(provider, caps, p, m, ξ, cosθ)
 end
 
 @inline function mass_for_species(species::Symbol, quark_params::Union{NamedTuple,QuarkParams})::Float64
@@ -730,18 +746,19 @@ end
     quark_params::NamedTuple,
     thermo_params::NamedTuple,
     tau::NamedTuple,
-)::NTuple{4,Float64}
+)::NTuple{5,Float64}
     T = thermo_params.T
     Φ = thermo_params.Φ
     Φbar = thermo_params.Φbar
 
     m = _mass_for_species(provider, caps, sp, quark_params, thermo_params)
     μ = _mu_for_species(provider, caps, sp, quark_params, thermo_params)
-    E = _energy_for_kernel(provider, caps, p, m, ξ, c)
-    f = distribution_for_species_from_E(provider, caps, sp, E, p, m, μ, T, Φ, Φbar, ξ, c)
+    E_kin = _energy_for_kinematics(provider, p, m)
+    E_dist = (ξ == 0.0 || !caps.has_energy_from_p_aniso) ? E_kin : _energy_for_distribution(provider, caps, p, m, ξ, c)
+    f = distribution_for_species_from_E(provider, caps, sp, E_dist, p, m, μ, T, Φ, Φbar, ξ, c)
     ff = fermi_factor(f)
     τ = tau_for_species(sp, tau)
-    return (E, f, ff, τ)
+    return (E_kin, E_dist, f, ff, τ)
 end
 
 @inline _p_nodes_weights(p_nodes::Int, p_max::Float64, p_grid, p_w) = p_nodes_weights(p_nodes, p_max, p_grid, p_w)
@@ -775,8 +792,8 @@ end
         acc = integrate_p(nodes_p, weights_p) do p
             inner = 0.0
             for sp in _SPECIES_ALL
-                E, f, ff, τ = _species_transport_state(provider, caps, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
-                inner += term_for_species(p, sp, E, f, ff, τ)
+                E_kin, E_dist, f, ff, τ = _species_transport_state(provider, caps, sp, p, 0.0, 0.0, quark_params, thermo_params, tau)
+                inner += term_for_species(p, sp, E_kin, E_dist, f, ff, τ)
             end
             return inner
         end
@@ -787,8 +804,8 @@ end
     acc = integrate_p_cos(nodes_p, weights_p, nodes_cos, weights_cos) do p, c
         inner = 0.0
         for sp in _SPECIES_ALL
-            E, f, ff, τ = _species_transport_state(provider, caps, sp, p, c, ξ, quark_params, thermo_params, tau)
-            inner += term_for_species(p, sp, E, f, ff, τ)
+            E_kin, E_dist, f, ff, τ = _species_transport_state(provider, caps, sp, p, c, ξ, quark_params, thermo_params, tau)
+            inner += term_for_species(p, sp, E_kin, E_dist, f, ff, τ)
         end
         return inner
     end
@@ -829,8 +846,8 @@ end
 剪切粘滞系数 η（RTA）。
 
 积分公式：
-- 各向同性 (ξ=0): η = (1/15T) × (1/2π²) × ∫ dp p⁶/E² × g × τ × f(1-f)
-- 各向异性 (ξ≠0): η = (1/15T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁶/E² × g × τ × f(1-f)
+- 各向同性 (ξ=0): η = (1/15T) × (1/2π²) × ∫ dp p⁶/E_kin² × g × τ × f(1-f)
+- 各向异性 (ξ≠0): η = (1/15T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁶/E_kin² × g × τ × f_ξ(1-f_ξ)
 """
 function shear_viscosity(
     quark_params::NamedTuple,
@@ -846,10 +863,10 @@ function shear_viscosity(
     effective_config = _effective_transport_config(config, kwargs)
     _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider)
 
-    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E_kin, E_dist, f, ff, τ
         p2 = p * p
         p6 = p2 * p2 * p2
-        return p6 / (E * E) * (degeneracy * τ * ff)
+        return p6 / (E_kin * E_kin) * (degeneracy * τ * ff)
     end
 
     return (1.0 / (15.0 * T)) * integral
@@ -882,8 +899,8 @@ end
 电导率 σ（RTA）。
 
 积分公式：
-- 各向同性 (ξ=0): σ = (1/3T) × (1/2π²) × ∫ dp p⁴q²/E² × g × τ × f(1-f)
-- 各向异性 (ξ≠0): σ = (1/3T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁴q²/E² × g × τ × f(1-f)
+- 各向同性 (ξ=0): σ = (1/3T) × (1/2π²) × ∫ dp p⁴q²/E_kin² × g × τ × f(1-f)
+- 各向异性 (ξ≠0): σ = (1/3T) × (1/4π²) × ∫ dp ∫ d(cosθ) p⁴q²/E_kin² × g × τ × f_ξ(1-f_ξ)
 """
 function electric_conductivity(
     quark_params::NamedTuple,
@@ -900,10 +917,10 @@ function electric_conductivity(
     effective_config = _effective_transport_config(config, kwargs)
     _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider, charges=charges)
 
-    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E_kin, E_dist, f, ff, τ
         p2 = p * p
         p4 = p2 * p2
-        return p4 * _q2_for_species(sp, charges) / (E * E) * (degeneracy * τ * ff)
+        return p4 * _q2_for_species(sp, charges) / (E_kin * E_kin) * (degeneracy * τ * ff)
     end
 
     return (1.0 / (3.0 * T)) * integral
@@ -932,17 +949,45 @@ function electric_conductivity(
     )
 end
 
+@inline function _bulk_isentropic_B(
+    p::Float64,
+    m::Float64,
+    μ::Float64,
+    T::Float64,
+    v_n_sq::Float64,
+    dμB_dT_sigma::Float64,
+    dM_dT::Float64,
+    dM_dμB::Float64,
+    is_antiquark::Bool,
+    E_kin::Float64,
+)::Float64
+    dE_dT = (m / E_kin) * dM_dT
+    dE_dμB = (m / E_kin) * dM_dμB
+    b_q = 1.0 / 3.0
+
+    if is_antiquark
+        x = E_kin + μ
+        dx_dT_sigma = dE_dT + (dE_dμB + b_q) * dμB_dT_sigma
+    else
+        x = E_kin - μ
+        dx_dT_sigma = dE_dT + (dE_dμB - b_q) * dμB_dT_sigma
+    end
+
+    dxt_dT_sigma = dx_dT_sigma / T - x / T^2
+    return p * p + 3.0 * v_n_sq * T^2 * E_kin * dxt_dT_sigma
+end
+
 """
     bulk_viscosity_isentropic(quark_params, thermo_params; tau, bulk_coeffs_isentropic, ...)
 
 体粘滞系数 ζ（RTA，等熵声速形式）。
 
-使用公式 A26（与 Fortran 代码一致）：
-    ζ = (N_c)/(9π²T) Σ_a ∫dp (p²/E²)·[τ_a·f_a·(1-f_a)·B_a² + τ_ā·f_ā·(1-f_ā)·B_ā²]
+使用 Albright and Kapusta (2016) Eq. (138) 的量子统计形式（经典统计版本为 Eq. (111)）：
+    ζ = (N_c)/(9π²T) Σ_a ∫dp (p²/E_kin²)·[τ_a·f_a·(1-f_a)·B_a² + τ_ā·f_ā·(1-f_ā)·B_ā²]
 
-其中 B = p² + 3·v_n²·T²·E·∂[(E∓μ)/T]/∂T|_σ
+其中 B = p² + 3·v_n²·T²·E_kin·∂[(E_kin∓μ)/T]/∂T|_σ，分布 f_a 使用 E_dist 作为 RS 自变量。
 
-输入 `bulk_coeffs_isentropic` 应使用 `PNJL.ThermoDerivatives.bulk_viscosity_coefficients` 的返回值。
+输入 `bulk_coeffs_isentropic` 应使用 `Models.bulk_viscosity_coefficients` 的返回值。
 """
 function bulk_viscosity_isentropic(
     quark_params::NamedTuple,
@@ -984,34 +1029,6 @@ function bulk_viscosity_isentropic(
 
     flavors = _FLAVORS
 
-    # 计算 B 项
-    function compute_B(p::Float64, m::Float64, μ::Float64, dM_dT_val::Float64, dM_dμB_val::Float64, is_antiquark::Bool, ξ::Float64, cosθ::Float64)
-        E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
-        
-        # 能量导数（对重子化学势）
-        dE_dT = (m / E) * dM_dT_val
-        dE_dμB = (m / E) * dM_dμB_val
-        
-        # 夸克重子数 b_q = 1/3
-        b_q = 1.0 / 3.0
-        
-        if is_antiquark
-            # 反夸克：x = E + μ_q
-            dx_dT_sigma = dE_dT + (dE_dμB + b_q) * dμB_dT_sigma
-            x = E + μ
-        else
-            # 夸克：x = E - μ_q
-            dx_dT_sigma = dE_dT + (dE_dμB - b_q) * dμB_dT_sigma
-            x = E - μ
-        end
-        
-        # ∂[x/T]/∂T|_σ
-        dxt_dT_sigma = dx_dT_sigma / T - x / T^2
-        
-        # B = p² + 3·v_n²·T²·E·∂[x/T]/∂T|_σ
-        return p * p + 3.0 * v_n_sq * T^2 * E * dxt_dT_sigma
-    end
-
     function one_flavor_pair_contrib(flavor::Symbol, p::Float64, cosθ::Float64)
         sp_q = flavor
         sp_aq = _anti_species(flavor)
@@ -1019,10 +1036,11 @@ function bulk_viscosity_isentropic(
         idx = _flavor_index(sp_q)
         m = masses[idx]
         μ = _mu_for_species(provider, caps, sp_q, quark_params, thermo_params)
-        E = _energy_for_kernel(provider, caps, p, m, ξ, cosθ)
+        E_kin = _energy_for_kinematics(provider, p, m)
+        E_dist = (ξ == 0.0 || !caps.has_energy_from_p_aniso) ? E_kin : _energy_for_distribution(provider, caps, p, m, ξ, cosθ)
 
-        f_q = distribution_for_species_from_E(provider, caps, sp_q, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
-        f_aq = distribution_for_species_from_E(provider, caps, sp_aq, E, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_q = distribution_for_species_from_E(provider, caps, sp_q, E_dist, p, m, μ, T, Φ, Φbar, ξ, cosθ)
+        f_aq = distribution_for_species_from_E(provider, caps, sp_aq, E_dist, p, m, μ, T, Φ, Φbar, ξ, cosθ)
 
         ff_q = fermi_factor(f_q)
         ff_aq = fermi_factor(f_aq)
@@ -1030,12 +1048,12 @@ function bulk_viscosity_isentropic(
         τ_q = tau_for_species(sp_q, tau)
         τ_aq = tau_for_species(sp_aq, tau)
 
-        B_q = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], false, ξ, cosθ)
-        B_aq = compute_B(p, m, μ, dM_dT[idx], dM_dμB[idx], true, ξ, cosθ)
+        B_q = _bulk_isentropic_B(p, m, μ, T, v_n_sq, dμB_dT_sigma, dM_dT[idx], dM_dμB[idx], false, E_kin)
+        B_aq = _bulk_isentropic_B(p, m, μ, T, v_n_sq, dμB_dT_sigma, dM_dT[idx], dM_dμB[idx], true, E_kin)
 
         # 积分核：(p²/E²) × τ × f(1-f) × B²
-        kernel_q = (p * p / (E * E)) * τ_q * ff_q * B_q^2
-        kernel_aq = (p * p / (E * E)) * τ_aq * ff_aq * B_aq^2
+        kernel_q = (p * p / (E_kin * E_kin)) * τ_q * ff_q * B_q^2
+        kernel_aq = (p * p / (E_kin * E_kin)) * τ_aq * ff_aq * B_aq^2
 
         return kernel_q + kernel_aq
     end
@@ -1125,11 +1143,11 @@ function diffusion_coefficient(
     _validate_transport_inputs(quark_params, thermo_params, tau, effective_config; provider=provider)
     charge_densities, h = _validate_diffusion_background(densities, pressure, energy)
 
-    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E, f, ff, τ
+    integral = _integrate_species_sum(quark_params, thermo_params, tau, provider, effective_config) do p, sp, E_kin, E_dist, f, ff, τ
         p2 = p * p
         p4 = p2 * p2
-        weight = _kappa_integrand_weight(sp, charge_left, charge_right, charge_densities, h, E)
-        return p4 / (E * E) * (degeneracy * τ * f * weight)
+        weight = _kappa_integrand_weight(sp, charge_left, charge_right, charge_densities, h, E_kin)
+        return p4 / (E_kin * E_kin) * (degeneracy * τ * f * weight)
     end
 
     return integral / (3.0 * T * T)

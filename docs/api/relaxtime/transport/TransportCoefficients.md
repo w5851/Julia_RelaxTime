@@ -32,7 +32,7 @@
 - $\zeta$ 的等熵平方核对应 Albright and Kapusta (2016) Eq. (138)，经典统计版本为 Eq. (111)；历史记号“A26”只是无法溯源到外部文献的 legacy Fortran/内部别名；
 - 方括号采用 $p^2+3v_n^2T^2E\,\partial_T[(E\mp\mu)/T]_\sigma$ 的加号形式。内部核对稿件中出现的减号已由作者确认为文稿错误。
 
-截至 `main@ea706548e9167db61e0cb7537bab2d2d4daf4cad`，上述 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 分离尚未在 $\xi\ne0$ 的默认 transport 实现中完全生效；当前实现状态与修复 gate 见 [Issue #130](https://github.com/w5851/Julia_RelaxTime/issues/130)。因此，本节公式描述的是已确认的目标物理约定，不表示旧 production 已按该约定计算。
+当前源码已经按上述 $E_{\mathrm{kin}}/E_{\mathrm{dist}}$ 分工实现 $\eta$、$\sigma$、$\zeta$ 和 $\kappa_{XY}$，$\lambda$ 则由修正后的 $\kappa_{BB}$ 派生。该修改不追溯覆盖旧 production；论文输入资格以 `data/outputs/results/relaxtime/transport/phase_guided/production_registry.json` 为准。
 
 ### 剪切粘滞系数 η
 
@@ -247,7 +247,7 @@ all = transport_coefficients(req; bulk_coeffs=nothing)
 - `TransportIntegrationConfig` 约束：`p_nodes>0`、`cos_nodes>0`、`p_max>0`，自定义网格/权重必须成对、长度一致且有限。
 - `electric_conductivity` 的 `charges.u/d/s` 必须为有限数。
 - 数值保护：
-  - 能量采用下限保护：`E = max(E_raw, sqrt(eps(Float64)))`
+  - $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$ 分别采用下限保护：`E = max(E_raw, sqrt(eps(Float64)))`
   - 费米因子采用物理区间截断：`f(1-f) -> clamp(f(1-f), 0.0, 0.25)`
 
 ## provider 摘要
@@ -255,7 +255,8 @@ all = transport_coefficients(req; bulk_coeffs=nothing)
 本页只保留 transport 计算直接相关的 provider 摘要；完整字段契约、`Models.TransportProvider`、`prepare_transport_provider` 与 `ctx` 语义见 `CoreConcepts.md`。
 
 - transport 计算至少依赖：`energy_from_p`、`quark_distribution`、`antiquark_distribution`
-- 当 `xi != 0` 时，若 provider 提供 `energy_from_p_aniso` 且 `prefer_energy_aniso=true`，实现会优先复用各向异性能量
+- `energy_from_p` 提供普通在壳 $E_{\mathrm{kin}}$；`energy_from_p_aniso` 若存在，只生成 RS 分布自变量 $E_{\mathrm{dist}}$
+- 当 `xi != 0` 时，`prefer_energy_aniso` 只决定优先把 $E_{\mathrm{dist}}$ 传给普通分布接口，还是调用 provider 自带的 `*_distribution_aniso`；它不改变输运核能量
 - 若你需要自定义 species 质量/化学势解析，或理解 `prepare_transport_provider(...)` 如何把平衡态结果注入 provider，应转到 `CoreConcepts.md`
 
 ## 注意事项
@@ -264,7 +265,7 @@ all = transport_coefficients(req; bulk_coeffs=nothing)
 
 2. **各向异性**：当 ξ≠0 时，使用 Romatschke-Strickland 形式的分布函数，需要完整的角度积分。
 
-3. **provider 路径**：当 `ξ≠0` 时，默认实现会优先复用 `energy_from_p_aniso` 与 `prefer_energy_aniso` 控制的能量直通路径；如果你需要完整字段表、回退顺序或 `prepare_transport_provider(...)` 的桥接细节，请阅读 `CoreConcepts.md`。
+3. **provider 路径**：当 `ξ≠0` 时，`energy_from_p_aniso` 与 `prefer_energy_aniso` 只控制 RS 分布的能量直通/各向异性分布接口路由；积分核始终使用 `energy_from_p` 提供的普通在壳能量。如果你需要完整字段表、回退顺序或 `prepare_transport_provider(...)` 的桥接细节，请阅读 `CoreConcepts.md`。
 
 4. **电荷单位**：默认使用自然单位制电荷（$e = \sqrt{4\pi\alpha}$）。
 

@@ -288,4 +288,95 @@ using .TransportWorkflow
         @test isapprox(res_pr.thermo_background.c_p, 1.8; rtol=1e-12, atol=0.0)
         @test res_pr.transport.prandtl_number isa Float64
     end
+
+    @testset "anisotropic diffusion and derived transport chain" begin
+        T_chain = 0.9
+        mu_chain = 0.15
+        xi_chain = 0.2
+        cfg_chain = TransportIntegrationConfig(p_nodes=8, p_max=3.5, cos_nodes=6)
+        res_chain = TransportWorkflow.solve_gap_and_transport(
+            T_chain,
+            mu_chain;
+            xi=xi_chain,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=false,
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(iterations=30,),
+            transport_config=cfg_chain,
+            c_p=1.8,
+        )
+
+        @test res_chain.tau == tau
+        @test res_chain.tau_inv === nothing
+        @test res_chain.rates === nothing
+        @test isfinite(res_chain.transport.kappa_BB)
+        @test isfinite(res_chain.transport.kappa_BQ)
+        @test isfinite(res_chain.transport.kappa_BS)
+        @test isfinite(res_chain.transport.kappa_QQ)
+        @test isfinite(res_chain.transport.kappa_QS)
+        @test isfinite(res_chain.transport.kappa_SS)
+        @test isfinite(res_chain.transport.lambda)
+        @test isfinite(res_chain.transport.lorenz_number)
+        @test isfinite(res_chain.transport.prandtl_number)
+
+        n_B = TransportWorkflow.TransportCoefficients.conserved_charge_densities(res_chain.densities).B
+        enthalpy = res_chain.thermo_background.energy + res_chain.thermo_background.pressure
+        expected_lambda = res_chain.transport.kappa_BB * (enthalpy / (n_B * T_chain))^2
+        @test isapprox(res_chain.transport.lambda, expected_lambda; rtol=1e-12, atol=0.0)
+        @test isapprox(
+            res_chain.transport.lorenz_number,
+            res_chain.transport.lambda / (res_chain.transport.sigma * T_chain);
+            rtol=1e-12,
+            atol=0.0,
+        )
+        @test isapprox(
+            res_chain.transport.prandtl_number,
+            res_chain.transport.eta * 1.8 / (res_chain.transport.lambda * res_chain.thermo_background.rho_mass);
+            rtol=1e-12,
+            atol=0.0,
+        )
+
+        provider_dist5 = (
+            energy_from_p=(p::Float64, m::Float64) -> 2.0,
+            energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> 5.0,
+            quark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.2,
+            antiquark_distribution=(E::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64) -> 0.2,
+            quark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.2,
+            antiquark_distribution_aniso=(p::Float64, m::Float64, μ::Float64, T::Float64, Φ::Float64, Φbar::Float64, ξ::Float64, c::Float64) -> 0.2,
+            prefer_energy_aniso=true,
+        )
+        provider_dist7 = merge(provider_dist5, (
+            energy_from_p_aniso=(p::Float64, m::Float64, ξ::Float64, c::Float64) -> 7.0,
+        ))
+
+        function solve_with_provider(provider)
+            return TransportWorkflow.solve_transport_from_equilibrium(
+                res_chain.equilibrium,
+                T_chain,
+                mu_chain;
+                xi=xi_chain,
+                tau=tau,
+                compute_tau=false,
+                compute_bulk=false,
+                p_num=8,
+                t_num=4,
+                transport_config=cfg_chain,
+                provider=provider,
+                c_p=1.8,
+            )
+        end
+
+        res_dist5 = solve_with_provider(provider_dist5)
+        res_dist7 = solve_with_provider(provider_dist7)
+        for field in (:eta, :sigma, :kappa_BB, :kappa_BQ, :kappa_BS, :kappa_QQ, :kappa_QS, :kappa_SS, :lambda, :lorenz_number, :prandtl_number)
+            @test isapprox(
+                getproperty(res_dist7.transport, field),
+                getproperty(res_dist5.transport, field);
+                rtol=1e-12,
+                atol=0.0,
+            )
+        end
+    end
 end

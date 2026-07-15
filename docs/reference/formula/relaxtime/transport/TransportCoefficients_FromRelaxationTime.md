@@ -26,7 +26,7 @@ $$
 - $E_{\mathrm{dist}}$ 是 RS 分布的变形自变量，只通过各输运公式中的 $f_\xi$ 或 $f_\xi(1-f_\xi)$ 进入积分。
 - 质量 $m=m(T,\mu_B,\xi)$ 可以来自当前各向异性热力学背景；这里排除的是在普通色散上额外加入 $\xi(p\cos\theta)^2$，不是把质量强制改为各向同性解。
 
-这是经确认的公式约定和目标实现语义。截至 `main@ea706548e9167db61e0cb7537bab2d2d4daf4cad`，`TransportCoefficients.jl` 在 $\xi\ne0$ 时仍会把 $E_{\mathrm{dist}}$ 复用于部分输运核；该实现差异由 [Issue #130](https://github.com/w5851/Julia_RelaxTime/issues/130) 跟踪。因此，在 Issue #130 的代码 PR 合并前，应区分“本文档中的目标公式”与“当前生产路径已经生效的实现”。
+当前 `TransportCoefficients.jl` 已按这一约定拆分 $E_{\mathrm{kin}}$ 与 $E_{\mathrm{dist}}$，并覆盖 $\eta$、$\sigma$、等熵平方核 $\zeta$ 和共享的 $\kappa_{XY}$ 积分状态。旧 production 不因源码修正而改变，其论文输入资格由外部 production registry 单独记录。
 
 ### 外部公式与方程映射
 
