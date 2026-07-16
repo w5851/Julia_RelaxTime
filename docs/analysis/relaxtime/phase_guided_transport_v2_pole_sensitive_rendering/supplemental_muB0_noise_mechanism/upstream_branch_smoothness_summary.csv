@@ -1,0 +1,3 @@
+window_id,n_points,max_rel_step,max_rel_curvature,dominant_background_driver,upstream_branch_flag
+mode_a_muB0p0_alpha1p0_xip0p37_supplement,3,0.005722182612577371,0.00011191299618973523,m_u,false
+mode_a_muB0p0_alpha1p2_xim0p47_supplement,3,0.015299471545627668,0.00020094489985900525,m_u,false

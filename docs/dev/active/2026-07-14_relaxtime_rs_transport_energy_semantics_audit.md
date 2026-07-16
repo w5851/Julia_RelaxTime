@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过收敛、全量导入、图像与旧目录不变性审计，已提交 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)，等待作者 review 和 `approved` 晋升决定
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已提交 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)；M3 派生显示与分支/相变锚点审计正在 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 收敛，后续代码修复与新 production 尚未执行
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -403,6 +403,16 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 最终验证通过：三个 Python 脚本 `py_compile`、importer `--validate-only`、`check_script_entrypoints.jl`、`check_relaxtime_script_governance.jl`、`check_docs_consistency.jl`、`check_data_output_path_guard.jl`。`active-docs-governance` 的既有无关失败不属于本任务 required gate，未混入本 PR。
 - 新产物文本在最终化阶段统一为 LF，并按 parameter-gate manifest、plot manifest、result manifest 的依赖顺序重算哈希；对 Git index 中 staged blob 的递归 SHA256 校验通过，避免 Windows CRLF 工作区哈希与仓库提交字节不一致。
 
+### 8.6 M3 极点敏感显示与 bulk 分支一致性审计（2026-07-16）
+
+- 派生显示 PR：[PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134)。该 PR 只写入 `docs/analysis/` 与只读分析脚本，不修改 production CSV、canonical figures 或 `production_registry.json`。
+- 旧分析的 8 个小分母窗口已通过 v1→v2 tau/rate 迁移门槛；作者复核发现的两个 `mu_B=0` 残留尖点也已在 v2 production 上完成定点机制扫描：`alpha_T=1.0, xi=0.37` 由 `mixed_detM` 支持，`alpha_T=1.2, xi=-0.47` 由 `simple_1m4KPi` 支持，且上游质量、Polyakov loop 与熵背景平滑。
+- 论文显示替换数由 13 增至 19；18 张论文候选图重新生成。内部审计图继续显示 raw 点和桥接语义，论文候选图不显示修正痕迹；一阶相变仍以星号标注并保留 raw 跳变。
+- 修正后的定点审计使用 production 主平衡态相同的 `p_num=12,t_num=6`。在 `xi=-0.01`，主 continuation 的 `m_u=0.73435 fm^-1` 是低质量夸克候选，bulk 的 `m_u=1.37470 fm^-1` 是高质量强子候选；`Omega_h-Omega_q=-1.2548e-3 fm^-4`，因此主 continuation 保留的是亚稳支，bulk 选择的是稳定支。此前 `1.37982 fm^-1` 来自审计脚本误用 bulk 默认 `64/8`，已更正。
+- 当前 workflow 在获得主 equilibrium 后，单独调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`，从而把两个不同分支混入同一个 `zeta` 结果。PR #134 不平滑该点，并在 paper figure manifest 中将 `mode_a/muB900/zeta_over_s` 标为已知排除项、`manuscript_eligible=false`。
+- `alpha_T=1.0` 的 `T=125.06992 MeV` 来自旧稀疏 `boundary.csv` 的线性插值；同一 `12/6` 口径下直接两分支等势得到 `T_c` bracket 中点 `125.76661 MeV`，偏移约 `+0.69669 MeV`。在 bracket 两端，`xi=-0.003` 均认证为稳定夸克相，`xi=+0.003` 均认证为稳定强子相。
+- 后续设计已确定：一阶区域按热力学势选择主稳定态；bulk 接收并复用主 `base_state`、共享 Jacobian/线性分解；严格共存点不输出唯一输运量，以经热力学节点收敛认证的负/正近零点表示两侧结果；旧 `boundary.csv` 只保留为相图与初始 bracket 证据，不再作为导数敏感 production 的唯一精确锚点。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）
@@ -432,6 +442,17 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
 - [ ] 新 case 经 review 后在 registry 晋升为 `approved`。
 
+### M3：极点敏感派生显示与 bulk 分支一致性
+
+- [x] 对 production 图中的小分母尖点建立非破坏性内部审计与论文显示候选。
+- [x] 补扫并修正作者发现的两个 `mu_B=0` 残留显示噪点。
+- [x] 定位 `mu_B=900, alpha_T=1.0, xi=-0.01` 的 `zeta/s` 回落为主 continuation 亚稳支与 bulk 稳定支混用，并用同口径双根热力学势完成归因。
+- [x] 审计旧插值 phase anchor，完成当前 `12/6` 口径的直接等势温度 bracket 与 `xi=±0.003` 双侧相别认证。
+- [ ] 通过独立代码 PR 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`。
+- [ ] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
+- [ ] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression/validation/benchmark 证据。
+- [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。
+
 ## 10. Definition of Done
 
 - [x] 作者确认本审计表，确认记录可在 issue/PR 中追溯（2026-07-15）。
@@ -441,6 +462,8 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
 - [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
+- [ ] bulk 导数与主 equilibrium 分支一致，受影响 `zeta/s` production 已重跑并通过审计。
+- [ ] 一阶区域主 equilibrium 由稳定性治理选取；严格共存点不输出唯一输运量，双侧近零点通过相别与收敛认证。
 - [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
 
 ## 11. 风险与回退方案

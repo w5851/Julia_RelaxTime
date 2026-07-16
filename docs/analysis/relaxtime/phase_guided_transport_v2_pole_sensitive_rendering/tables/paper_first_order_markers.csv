@@ -1,0 +1,7 @@
+window_id,mode_key,plot_panel,plot_series,observable,xi,raw_production_value,marker,marker_semantics
+mode_b_T120p0_muB900p0_xim0p09_1,mode_b,T120.0,muB900.0,eta_over_s,-0.09,2.9673201092765433,star,first-order/upstream branch transition point retained without smoothing
+mode_b_T120p0_muB900p0_xim0p09_1,mode_b,T120.0,muB900.0,zeta_over_s,-0.09,2.2679324110856416,star,first-order/upstream branch transition point retained without smoothing
+mode_b_T120p0_muB900p0_xim0p09_1,mode_b,T120.0,muB900.0,sigma_over_T,-0.09,0.07593174850764002,star,first-order/upstream branch transition point retained without smoothing
+mode_a_muB900p0_alpha1p0_xip0p00_1,mode_a,muB900.0,alpha1.0,eta_over_s,0.0,2.043764613817372,star,first-order/upstream branch transition point retained without smoothing
+mode_a_muB900p0_alpha1p0_xip0p00_1,mode_a,muB900.0,alpha1.0,zeta_over_s,0.0,1.5189756421733125,star,first-order/upstream branch transition point retained without smoothing
+mode_a_muB900p0_alpha1p0_xip0p00_1,mode_a,muB900.0,alpha1.0,sigma_over_T,0.0,0.07283449888090611,star,first-order/upstream branch transition point retained without smoothing

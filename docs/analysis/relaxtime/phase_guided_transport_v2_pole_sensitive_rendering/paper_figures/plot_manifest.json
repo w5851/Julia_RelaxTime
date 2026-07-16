@@ -1,0 +1,119 @@
+{
+  "schema": "phase_guided_v2_paper_candidate_plot_manifest_v1",
+  "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+  "generated_at": "2026-07-16T12:19:41.301231+00:00",
+  "base_git_commit": "96770552c16e02905c57829bebade4cac736e84c",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
+  "generator_sha256": "b426ee33a96c8ed2f34b2535e310c0e84548b68d0c12f3e58a90417754a9bc9d",
+  "observables": [
+    "eta_over_s",
+    "zeta_over_s",
+    "sigma_over_T"
+  ],
+  "paper_display_replacement_count": 19,
+  "first_order_marker_count": 6,
+  "manuscript_eligible": false,
+  "paper_readiness": "candidate_with_known_mixed_equilibrium_branch_exclusion",
+  "known_exclusions": [
+    {
+      "figure": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "plot_series": "alpha1.0",
+      "xi": -0.01,
+      "reason": "the production continuation retains a metastable low-mass quark candidate while bulk uses the stable high-mass hadron candidate",
+      "evidence": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/bulk_derivative_branch_audit.csv"
+    }
+  ],
+  "rendering_semantics": "clean continuous paper-candidate lines use audited derived replacements without visible correction marks; stars retain raw first-order transition values; no vertical transition lines",
+  "figures": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
+      "sha256": "1c28160e05c89045bf9be124257c517cea44664e492db7e9b55eda8c98a67785",
+      "bytes": 244785
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
+      "sha256": "a4f050e4aaa9d8c868bb6779f6c639a1f5655e3442cc97878e7752921dc60ef1",
+      "bytes": 211349
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
+      "sha256": "8f9cbce3258f9e226b893a2ef7b566c11f78558e2cf9b5022afa07746ce84dac",
+      "bytes": 317032
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/eta_over_s_vs_xi.png",
+      "sha256": "84b88830141d51ede434aa37671070a69342abe0595d870edbd4072c6bbf55c1",
+      "bytes": 246460
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/zeta_over_s_vs_xi.png",
+      "sha256": "d9a02ec0660697a2b0fcdf9a35f9479ae0a1db0dd301347f3e1e332f491b28d4",
+      "bytes": 225288
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/sigma_over_T_vs_xi.png",
+      "sha256": "7c3c31cf8e94530d727e0473d0bc5b9797005118c9ec11f37e442531c0202ec3",
+      "bytes": 328593
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/eta_over_s_vs_xi.png",
+      "sha256": "4f2f2d01cae6ada603f920aea34a984e04dd33fa9bd5e43abb9e4c9ab4a971c0",
+      "bytes": 228282
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "sha256": "2e9d3ec7eb7661e751b660db2389cd3d068bd81a2e253c9d661434b2de2ace95",
+      "bytes": 227204
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
+      "sha256": "c412287b3b204bc4fdd67f0363ebc6fd08bef2b17b1b52e34fbde3a519ceca8d",
+      "bytes": 316460
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/eta_over_s_vs_xi.png",
+      "sha256": "4f5584e41ca70ebccc485a3beb6168fe916dca34dad5decbc53d4238b62b2ebe",
+      "bytes": 189153
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/zeta_over_s_vs_xi.png",
+      "sha256": "7c277f7c3a6efa2595f042c148a4d494f5b6d3cc218de5dcee7324fdcf412383",
+      "bytes": 193893
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/sigma_over_T_vs_xi.png",
+      "sha256": "d234741a453d0d8a651359fce323975ceedac053a519479bd4fdebc950adc3c5",
+      "bytes": 198799
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/eta_over_s_vs_xi.png",
+      "sha256": "10557c3b2a6ab6299a7bc18ad1d848bbdaaa90ad7f6ce6757f692667eb8ede4d",
+      "bytes": 191705
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/zeta_over_s_vs_xi.png",
+      "sha256": "107af8e6bb49c497b238aa284625df645cb894a0021eb1cd5fef6f07e6d48430",
+      "bytes": 187981
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/sigma_over_T_vs_xi.png",
+      "sha256": "798924d840b2b4c1c41edb7909cc4701ee4eda03e4a80d07f43a24570ae948a6",
+      "bytes": 199776
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/eta_over_s_vs_xi.png",
+      "sha256": "213f281135e5ba04f93d32cfffa96271566505ec90e60033ea14ef9de101cc51",
+      "bytes": 229576
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/zeta_over_s_vs_xi.png",
+      "sha256": "1886a31174e1379c3cb2be3cfa4e80651992c4877f5128d20cb60a8e01d75b7a",
+      "bytes": 247011
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/sigma_over_T_vs_xi.png",
+      "sha256": "5b65ea580832709c8fd26b503345b62175990a02eb6da3485687c07cb16dc3c9",
+      "bytes": 202208
+    }
+  ]
+}
