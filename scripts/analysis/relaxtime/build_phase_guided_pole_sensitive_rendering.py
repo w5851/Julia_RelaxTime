@@ -50,6 +50,11 @@ OUT_DIR = (
 TABLE_DIR = OUT_DIR / "tables"
 DERIVED_FIGURE_DIR = OUT_DIR / "figures"
 PAPER_FIGURE_DIR = OUT_DIR / "paper_figures"
+SUPPLEMENTAL_MECHANISM_DIR = OUT_DIR / "supplemental_muB0_noise_mechanism"
+BULK_BRANCH_AUDIT_PATH = TABLE_DIR / "bulk_derivative_branch_audit.csv"
+BULK_BRANCH_AUDIT_GENERATOR = (
+    ROOT / "scripts" / "analysis" / "relaxtime" / "audit_phase_guided_bulk_branch_consistency.jl"
+)
 
 MODE_CONFIG = {
     "mode_a": {
@@ -79,6 +84,16 @@ DISPLAY_LABELS = {
 PAPER_COLORS = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE"]
 TRANSFER_TOL = 1.0e-3
 DISPLAY_LOG_THRESHOLD = 0.03
+SUPPLEMENTAL_AFFECTED_TAU_FIELDS = {
+    "mode_a_muB0p0_alpha1p0_xip0p37_supplement": [
+        "tau_u",
+        "tau_d",
+        "tau_ubar",
+        "tau_dbar",
+    ],
+    "mode_a_muB0p0_alpha1p2_xim0p47_supplement": ["tau_s", "tau_sbar"],
+}
+SUPPLEMENTAL_PAPER_DISPLAY_WINDOWS = set(SUPPLEMENTAL_AFFECTED_TAU_FIELDS)
 
 
 def relpath(path: Path) -> str:
@@ -289,7 +304,59 @@ def source_window_tables() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
         raise ValueError(f"expected 8 denominator windows, got {len(mechanism_rows)}")
     if any(row["mechanism_verdict"] != "small_denominator_supported" for row in mechanism_rows):
         raise ValueError("source mechanism table contains a non-supported denominator window")
-    return window_rows, mechanism_rows
+
+    candidate_path = SUPPLEMENTAL_MECHANISM_DIR / "candidates.csv"
+    supplemental_mechanism_path = SUPPLEMENTAL_MECHANISM_DIR / "mechanism_window_summary.csv"
+    upstream_path = SUPPLEMENTAL_MECHANISM_DIR / "upstream_branch_smoothness_summary.csv"
+    supplemental_candidates = read_csv_with_comments(candidate_path)
+    supplemental_mechanisms = read_csv_with_comments(supplemental_mechanism_path)
+    upstream_rows = read_csv_with_comments(upstream_path)
+    if len(supplemental_candidates) != 2 or len(supplemental_mechanisms) != 2:
+        raise ValueError("expected exactly 2 supplemental muB=0 mechanism windows")
+    if any(
+        row["mechanism_verdict"] != "small_denominator_supported"
+        or row["upstream_branch_flag"].lower() != "false"
+        for row in supplemental_mechanisms
+    ):
+        raise ValueError("supplemental muB=0 windows are not supported small-denominator windows")
+    upstream_by_id = {row["window_id"]: row for row in upstream_rows}
+    supplemental_windows: list[dict[str, str]] = []
+    for row in supplemental_candidates:
+        window_id = row["window_id"]
+        if window_id not in SUPPLEMENTAL_AFFECTED_TAU_FIELDS:
+            raise ValueError(f"unmapped supplemental mechanism window: {window_id}")
+        upstream = upstream_by_id[window_id]
+        supplemental_windows.append(
+            {
+                **row,
+                "target_xi": row["xi"],
+                "affected_tau_fields": ";".join(
+                    SUPPLEMENTAL_AFFECTED_TAU_FIELDS[window_id]
+                ),
+                "cause_verdict": "channel_rate_spike_supported",
+                "max_background_rel_step": upstream["max_rel_step"],
+            }
+        )
+    for row in supplemental_mechanisms:
+        row["evidence_source"] = relpath(supplemental_mechanism_path)
+    return [*window_rows, *supplemental_windows], [*mechanism_rows, *supplemental_mechanisms]
+
+
+def validate_bulk_branch_audit() -> list[dict[str, str]]:
+    rows = read_csv_with_comments(BULK_BRANCH_AUDIT_PATH)
+    if len(rows) != 3:
+        raise ValueError(f"expected 3 bulk branch audit rows, got {len(rows)}")
+    by_xi = {round(finite_float(row["xi"]), 2): row for row in rows}
+    if set(by_xi) != {-0.02, -0.01, 0.0}:
+        raise ValueError(f"unexpected bulk branch audit xi values: {sorted(by_xi)}")
+    if by_xi[-0.01]["verdict"] != "bulk_derivative_branch_mismatch":
+        raise ValueError("bulk branch audit did not flag xi=-0.01")
+    if any(
+        by_xi[xi]["verdict"] != "main_and_bulk_branch_aligned"
+        for xi in (-0.02, 0.0)
+    ):
+        raise ValueError("bulk branch audit alignment controls failed")
+    return rows
 
 
 def curve_row(
@@ -319,8 +386,8 @@ def build_window_and_point_audits(
         for row in source_windows
         if row["cause_verdict"] == "upstream_first_order_branch_jump_supported"
     ]
-    if len(ordered_ids) != 10 or len(set(ordered_ids)) != 10:
-        raise ValueError("window classification did not resolve to 8 pole + 2 first-order windows")
+    if len(ordered_ids) != 12 or len(set(ordered_ids)) != 12:
+        raise ValueError("window classification did not resolve to 10 pole + 2 first-order windows")
 
     for window_id in ordered_ids:
         source = source_by_id[window_id]
@@ -356,7 +423,9 @@ def build_window_and_point_audits(
                 "dominant_branch": dominant_branch,
                 "upstream_branch_flag": not is_pole,
                 "display_mask_eligible": is_pole,
-                "evidence_source": relpath(
+                "evidence_source": mechanism.get("evidence_source")
+                if is_pole and mechanism.get("evidence_source")
+                else relpath(
                     SOURCE_ANALYSIS / "tables" / (
                         "mechanism_window_summary.csv" if is_pole else "tau_jump_window_summary.csv"
                     )
@@ -388,8 +457,12 @@ def build_window_and_point_audits(
             guide_value = prev_value + interpolation_weight * (next_value - prev_value)
             log_delta = signed_log_delta(guide_value, target_value)
             tau_candidate = observable in affected_tau
-            transport_candidate = (
-                observable in TRANSPORT_FIELDS and abs(log_delta) >= DISPLAY_LOG_THRESHOLD
+            author_reviewed_residual = (
+                window_id in SUPPLEMENTAL_PAPER_DISPLAY_WINDOWS
+                and observable in DISPLAY_FIELDS
+            )
+            transport_candidate = observable in TRANSPORT_FIELDS and (
+                abs(log_delta) >= DISPLAY_LOG_THRESHOLD or author_reviewed_residual
             )
             mask_candidate = is_pole and (tau_candidate or transport_candidate)
             audit_row = {
@@ -412,6 +485,8 @@ def build_window_and_point_audits(
                 "mask_reason": (
                     "mechanism-supported pole-sensitive tau outlier"
                     if mask_candidate and observable in TAU_FIELDS
+                    else "mechanism-supported author-reviewed residual downstream point"
+                    if mask_candidate and author_reviewed_residual
                     else "mechanism-supported pole window with >=3% downstream log deviation"
                     if mask_candidate
                     else "first-order protected"
@@ -743,14 +818,17 @@ def render_paper_figures(
     return paths
 
 
-def build_claim_ledger() -> list[dict[str, Any]]:
+def build_claim_ledger(
+    paper_replacements: list[dict[str, Any]],
+    paper_markers: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     return [
         {
             "claim_id": "CLAIM-V2-POLE-001",
             "status": "supported_with_scope_limit",
-            "claim_zh": "v1 已定点深拆的 8 个小分母窗口可映射到 v2，因为 tau 与通道率均通过 1e-3 机制迁移门槛。",
-            "evidence": "tables/input_inventory.csv; tables/window_classification.csv",
-            "scope_limit": "迁移门槛不替代局部 high-rate convergence gate。",
+            "claim_zh": "v1 已定点深拆的 8 个小分母窗口可映射到 v2；作者复核发现的 2 个 muB=0 残留窗口也通过 v2 定点 denominator-chain 诊断。",
+            "evidence": "tables/input_inventory.csv; tables/window_classification.csv; supplemental_muB0_noise_mechanism/mechanism_window_summary.csv",
+            "scope_limit": "v1→v2 迁移门槛不替代局部 high-rate convergence gate；两个新增窗口使用当前 v2 production 直接诊断。",
         },
         {
             "claim_id": "CLAIM-V2-POLE-002",
@@ -778,7 +856,14 @@ def build_claim_ledger() -> list[dict[str, Any]]:
             "status": "author_directed_candidate",
             "claim_zh": "论文候选图以连续实线使用相邻真实点替换已确认的数值噪点，不显示修正标记；一阶相变点以星号标注并保留原始物理跳变。",
             "evidence": "tables/paper_display_replacements.csv; tables/paper_first_order_markers.csv; paper_figures/plot_manifest.json",
-            "scope_limit": "仅适用于本表列出的 13 个派生显示替换值与 6 个一阶标记点。",
+            "scope_limit": f"仅适用于本表列出的 {len(paper_replacements)} 个派生显示替换值与 {len(paper_markers)} 个一阶标记点。",
+        },
+        {
+            "claim_id": "CLAIM-V2-POLE-006",
+            "status": "implementation_issue_supported",
+            "claim_zh": "mode A 的 muB=900、alpha_T=1.0 曲线在 xi=-0.01 的 zeta/s 回落由 bulk 导数路径提前切换到相变后质量分支支持，不是旧分析已确认的物理非单调趋势。",
+            "evidence": "tables/bulk_derivative_branch_audit.csv; data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
+            "scope_limit": "本分析 PR 只记录分支不一致；在 workflow 复用主平衡态分支并重跑 production 前，不修正或平滑该 zeta/s 点。",
         },
     ]
 
@@ -794,6 +879,12 @@ def render_readme(
     paper_markers: list[dict[str, Any]],
 ) -> str:
     pole_windows = [row for row in classifications if row["classification"] == "pole_sensitive_supported"]
+    migrated_pole_windows = [
+        row for row in pole_windows if not row["window_id"].endswith("_supplement")
+    ]
+    supplemental_pole_windows = [
+        row for row in pole_windows if row["window_id"].endswith("_supplement")
+    ]
     mask_by_window: dict[str, list[str]] = defaultdict(list)
     for row in mask_rows:
         mask_by_window[row["window_id"]].append(row["observable"])
@@ -823,7 +914,7 @@ def render_readme(
 
 本分析包消费 `{V2_CASE}`，不修改 production CSV、canonical figure 或 `production_registry.json`。它把旧 xi001 denominator-chain 机制表迁移到 v2，并生成**仅供作者审阅**的非破坏性派生显示候选。
 
-当前结论：8 个窗口通过小分母机制迁移门槛；2 个一阶/上游分支窗口被硬保护。虚线桥接是视觉指南，不是新计算值，也不能静默替换正式图。
+当前结论：{len(migrated_pole_windows)} 个旧窗口通过小分母机制迁移门槛；作者复核发现的 {len(supplemental_pole_windows)} 个 `mu_B=0` 残留窗口通过当前 v2 production 的新定点机制诊断；2 个一阶/上游分支窗口被硬保护。虚线桥接是视觉指南，不是新计算值，也不能静默替换正式图。
 
 ## 输入与迁移门槛
 
@@ -832,6 +923,8 @@ def render_readme(
 {inventory_lines}
 
 迁移门槛为 `{TRANSFER_TOL}`。v2 的能量语义修改不改变弛豫时间定义；实际 tau 和 channel-rate 漂移均显著低于门槛，因此允许继承已有 denominator-chain 定点证据。该门槛不替代尚未完成的局部 high-rate convergence gate。
+
+新增的两个 `mu_B=0` 窗口不依赖 v1 迁移：`xi=0.37, alpha_T=1.0` 的轻味同步下探由 `mixed_detM` 小分母链支持，`xi=-0.47, alpha_T=1.2` 的奇异味下探由 `simple_1m4KPi` 小分母链支持；两者的上游质量、Polyakov loop 与熵背景均平滑。完整证据见 `supplemental_muB0_noise_mechanism/`。
 
 ## Pole-sensitive display mask 候选
 
@@ -842,7 +935,7 @@ def render_readme(
 规则：
 
 1. tau 只有在旧分析的 `affected_tau_fields` 中才进入 mask；
-2. transport 只有在目标点相对相邻两点均值的绝对 log 偏离不小于 `{DISPLAY_LOG_THRESHOLD}` 时才进入 mask；
+2. transport 默认只有在目标点相对相邻两点均值的绝对 log 偏离不小于 `{DISPLAY_LOG_THRESHOLD}` 时才进入 mask；作者在论文图中明确指出的两个新增残留窗口，经小分母机制确认后，对三个论文展示比值显式纳入 mask；
 3. raw 点始终以橙色叉号保留；solid guide 在 eligible 点断开，并以虚线连接两侧真实邻点；
 4. `linear_neighbor_guide_value` 只用于画图，不写回 production，也不声称是物理值。
 
@@ -853,6 +946,18 @@ def render_readme(
 {first_order_lines}
 
 这两个窗口保留 raw 曲线和跳变，不应用桥接或 mask。保护依据是背景质量、Polyakov loop 和熵密度的同步快速变化，而不是单纯依赖 phase 字符串标签。
+
+## `zeta/s` 相变前回落的分支一致性审计
+
+对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00` 重新调用 production workflow 当前使用的 `Models.bulk_viscosity_coefficients`。结果见 `tables/bulk_derivative_branch_audit.csv`：
+
+- `xi=-0.02` 与 `xi=0.00` 时，bulk 导数路径的轻味质量与主 production 平衡态处于同一分支；
+- `xi=-0.01` 时，主平衡态仍为 `m_u=0.73435 fm^-1`，而 bulk 导数路径内部已经得到 `m_u=1.37979 fm^-1`，相对差约 46.8%；同时 `dmuB/dT|sigma` 与质量导数发生显著换支；
+- `xi=-0.02 -> -0.01` 虽然 `tau_u` 上升且熵下降，`zeta` 本身却由 `1.85047` 降至 `1.49245`，因此回落来自 bulk `B^2` 核/热力学导数，而不是 tau 或除以熵造成。
+
+当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。因此该回落被判定为**导数路径提前切换分支所支持的实现一致性问题**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；需要后续代码修复使 bulk 导数复用或锁定主平衡态分支，并重跑受影响 production 后再决定论文曲线。
+
+旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有审计 `xi=-0.01` 的 bulk 导数内部质量，因此没有覆盖本次发现的提前换支。
 
 ## 派生图
 
@@ -871,18 +976,21 @@ def render_readme(
 3. `{len(paper_markers)}` 个 observable-level 一阶位置以星号标在对应曲线上，不使用竖直虚线；
 4. 星号处仍使用 raw production 值，一阶/上游分支跳变没有被平滑；
 5. 替换值与星号位置分别记录在 `tables/paper_display_replacements.csv` 和 `tables/paper_first_order_markers.csv`。图面不呈现内部修正痕迹，但仓库内保留完整可追溯记录。
+6. `mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png` 的 `alpha_T=1.0, xi=-0.01` 已知存在 bulk 导数分支不一致；该图保留用于作者审计，但在代码修复和 production 重跑前不具备论文输入资格。
 
 ## 证据边界与作者判断
 
 - `supported`：v2 输入完整、无 failed/NaN/负 rate，v1→v2 tau/rate 迁移门槛通过；一阶窗口保护规则明确。
-- `supported_with_scope_limit`：8 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
+- `supported_with_scope_limit`：10 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
 - `author_directed_candidate`：论文候选图按作者约定隐藏数值修正痕迹，并用星号标示一阶相变位置；仍需最终视觉审核后决定是否采用。
+- `implementation_issue_supported`：`xi=-0.01` 的 bulk 导数分支不一致已由质量和导数定点复算支持；它不应被包装为物理趋势或普通显示平滑。
 - `author_check`：是否需要计算层有限宽度/极点正则化和新 production slug。
 - 本包不把小分母结构直接定性为随机数值噪声，也不把虚线桥接升级为物理预测。
 
 ## 复现
 
 ```powershell
+julia --project=. scripts/analysis/relaxtime/audit_phase_guided_bulk_branch_consistency.jl
 python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 ```
 
@@ -895,6 +1003,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/first_order_protection.csv`
 - `tables/paper_display_replacements.csv`
 - `tables/paper_first_order_markers.csv`
+- `tables/bulk_derivative_branch_audit.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
 - `paper_figures/plot_manifest.json`
@@ -903,6 +1012,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 
 def main() -> None:
     loaded, inventory = load_and_validate_inputs()
+    bulk_branch_rows = validate_bulk_branch_audit()
     source_windows, mechanism_rows = source_window_tables()
     classifications, point_audit, mask_rows, first_order_rows = build_window_and_point_audits(
         loaded, source_windows, mechanism_rows
@@ -1029,7 +1139,7 @@ def main() -> None:
             "marker_semantics",
         ],
     )
-    claims = build_claim_ledger()
+    claims = build_claim_ledger(paper_replacements, paper_markers)
     write_csv(
         TABLE_DIR / "claim_ledger.csv",
         claims,
@@ -1074,6 +1184,22 @@ def main() -> None:
         "observables": DISPLAY_FIELDS,
         "paper_display_replacement_count": len(paper_replacements),
         "first_order_marker_count": len(paper_markers),
+        "manuscript_eligible": False,
+        "paper_readiness": "candidate_with_known_bulk_derivative_branch_exclusion",
+        "known_exclusions": [
+            {
+                "figure": relpath(
+                    PAPER_FIGURE_DIR
+                    / "mode_a"
+                    / "plot_panel=muB900.0"
+                    / "zeta_over_s_vs_xi.png"
+                ),
+                "plot_series": "alpha1.0",
+                "xi": -0.01,
+                "reason": "bulk derivative path switches to the high-mass branch before the production equilibrium branch",
+                "evidence": relpath(BULK_BRANCH_AUDIT_PATH),
+            }
+        ],
         "rendering_semantics": "clean continuous paper-candidate lines use audited derived replacements without visible correction marks; stars retain raw first-order transition values; no vertical transition lines",
         "figures": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
@@ -1099,6 +1225,8 @@ def main() -> None:
     output_paths = [
         readme_path,
         *sorted(TABLE_DIR.glob("*.csv")),
+        *sorted(SUPPLEMENTAL_MECHANISM_DIR.glob("*.csv")),
+        SUPPLEMENTAL_MECHANISM_DIR / "mechanism_manifest.json",
         DERIVED_FIGURE_DIR / "plot_manifest.json",
         *figure_paths,
         PAPER_FIGURE_DIR / "plot_manifest.json",
@@ -1136,6 +1264,29 @@ def main() -> None:
             }
             for row in inventory
         ],
+        "supplemental_mechanism_evidence": {
+            "window_count": 2,
+            "source": relpath(SUPPLEMENTAL_MECHANISM_DIR),
+            "files": [
+                {
+                    "path": relpath(path),
+                    "sha256": sha256_file(path),
+                    "bytes": path.stat().st_size,
+                }
+                for path in [
+                    *sorted(SUPPLEMENTAL_MECHANISM_DIR.glob("*.csv")),
+                    SUPPLEMENTAL_MECHANISM_DIR / "mechanism_manifest.json",
+                ]
+            ],
+        },
+        "bulk_branch_audit": {
+            "rows": len(bulk_branch_rows),
+            "path": relpath(BULK_BRANCH_AUDIT_PATH),
+            "sha256": sha256_file(BULK_BRANCH_AUDIT_PATH),
+            "generator": relpath(BULK_BRANCH_AUDIT_GENERATOR),
+            "generator_sha256": sha256_file(BULK_BRANCH_AUDIT_GENERATOR),
+            "verdict": "bulk_derivative_branch_mismatch_at_xi_minus_0p01",
+        },
         "outputs": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
             for path in output_paths

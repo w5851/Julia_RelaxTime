@@ -403,6 +403,15 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 最终验证通过：三个 Python 脚本 `py_compile`、importer `--validate-only`、`check_script_entrypoints.jl`、`check_relaxtime_script_governance.jl`、`check_docs_consistency.jl`、`check_data_output_path_guard.jl`。`active-docs-governance` 的既有无关失败不属于本任务 required gate，未混入本 PR。
 - 新产物文本在最终化阶段统一为 LF，并按 parameter-gate manifest、plot manifest、result manifest 的依赖顺序重算哈希；对 Git index 中 staged blob 的递归 SHA256 校验通过，避免 Windows CRLF 工作区哈希与仓库提交字节不一致。
 
+### 8.6 M3 极点敏感显示与 bulk 分支一致性审计（2026-07-16）
+
+- 派生显示 PR：[PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134)。该 PR 只写入 `docs/analysis/` 与只读分析脚本，不修改 production CSV、canonical figures 或 `production_registry.json`。
+- 旧分析的 8 个小分母窗口已通过 v1→v2 tau/rate 迁移门槛；作者复核发现的两个 `mu_B=0` 残留尖点也已在 v2 production 上完成定点机制扫描：`alpha_T=1.0, xi=0.37` 由 `mixed_detM` 支持，`alpha_T=1.2, xi=-0.47` 由 `simple_1m4KPi` 支持，且上游质量、Polyakov loop 与熵背景平滑。
+- 论文显示替换数由 13 增至 19；18 张论文候选图重新生成。内部审计图继续显示 raw 点和桥接语义，论文候选图不显示修正痕迹；一阶相变仍以星号标注并保留 raw 跳变。
+- 新发现：mode A 的 `(mu_B,alpha_T)=(900,1.0)` 在 `xi=-0.01` 的 `zeta/s` 回落不是旧分析已确认的物理趋势。主 production 平衡态为 `m_u=0.73435 fm^-1`，而 `bulk_viscosity_coefficients` 内部重新求解已得到 `m_u=1.37982 fm^-1`；`xi=-0.02` 与 `xi=0` 对照点同分支。该点由 bulk 导数路径提前换支支持。
+- 当前 workflow 在获得主 equilibrium 后，单独调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。因此 PR #134 不平滑该点，并在 paper figure manifest 中将 `mode_a/muB900/zeta_over_s` 标为已知排除项、`manuscript_eligible=false`。
+- 旧分析只记录 `xi=0` 主平衡态的一阶跳变及 tau/熵对输运比值的放大，没有审计 `xi=-0.01` 的 bulk 导数内部质量，故未覆盖这一提前换支问题。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）
@@ -432,6 +441,14 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
 - [ ] 新 case 经 review 后在 registry 晋升为 `approved`。
 
+### M3：极点敏感派生显示与 bulk 分支一致性
+
+- [x] 对 production 图中的小分母尖点建立非破坏性内部审计与论文显示候选。
+- [x] 补扫并修正作者发现的两个 `mu_B=0` 残留显示噪点。
+- [x] 定位 `mu_B=900, alpha_T=1.0, xi=-0.01` 的 `zeta/s` 回落为 bulk 导数路径与主 equilibrium 分支不一致。
+- [ ] 通过独立代码 PR 让 bulk 导数复用或锁定主 equilibrium 分支，并补充 unit/integration/regression 证据。
+- [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。
+
 ## 10. Definition of Done
 
 - [x] 作者确认本审计表，确认记录可在 issue/PR 中追溯（2026-07-15）。
@@ -441,6 +458,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 所选测试层通过，数值漂移有物理说明且未通过放宽容差掩盖。
 - [x] 旧正式产物未被修改，并由外部 registry 明确标为不再进入当前论文输入包。
 - [ ] 新数据和图像使用新 case slug，经独立 production PR 审计和批准。
+- [ ] bulk 导数与主 equilibrium 分支一致，受影响 `zeta/s` production 已重跑并通过审计。
 - [ ] 稳定公式/API 文档已更新；任务完成后本文件按仓库流程归档。
 
 ## 11. 风险与回退方案

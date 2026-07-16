@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_v2_pole_sensitive_plot_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-  "generated_at": "2026-07-16T06:56:57.310213+00:00",
-  "base_git_commit": "592f73d4916ae19e343996ff4fe9758469fb2f20",
+  "generated_at": "2026-07-16T08:29:25.110805+00:00",
+  "base_git_commit": "73b0c38d776e2791d472217cfffefdbc4e631a22",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
-  "generator_sha256": "69a40deae1cf676093423d8c833f4c01a2c819e9ca40376926433478bc0f18f9",
+  "generator_sha256": "681c31eb16b66592ab0ecec6af5e4960ee3269f63f5d41adffb7e02064387582",
   "rendering_semantics": "raw points retained; eligible points excluded only from solid display guide; dashed neighbor bridge is not recomputed physics",
   "figures": [
     {
@@ -46,6 +46,16 @@
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB0p0_xim0p21_1.png",
       "sha256": "b0060899babc754ad58de4a3445cac9afd2974b759efc5bf7cdc3db2f3bd29c3",
       "bytes": 321683
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p0_xip0p37_supplement.png",
+      "sha256": "daede663b840529d3f34c64af3ea2255300df55a852f66c00486cc854b491cdc",
+      "bytes": 313983
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p2_xim0p47_supplement.png",
+      "sha256": "cd868028b9da5116dc1fc81b9393b2b8613eead5e75b93fe5e2f9b040c1717be",
+      "bytes": 355432
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_b_T120p0_muB900p0_xim0p09_1.png",

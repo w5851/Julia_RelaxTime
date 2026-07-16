@@ -1,0 +1,27 @@
+{
+  "ds_grid_n": 60,
+  "convergence_gate_enabled": false,
+  "convergence_angle_nodes": 0,
+  "generator_sha256": "0e6f790d20ce7f86b3949d825e3e7128932fe59527a0f226957ea288dcf89177",
+  "only_convergence_gate": false,
+  "coverage_threshold": 0.7,
+  "convergence_phi_nodes": 0,
+  "generator": "scripts\\analysis\\relaxtime\\phase_guided_p128_mechanism_scan.jl",
+  "max_ds": 2.0,
+  "convergence_n_sigma_points": 0,
+  "window_count": 2,
+  "schema": "phase_guided_p128_mechanism_scan_manifest_v1",
+  "production_a_builder_config": {
+    "p_max": 20.0,
+    "cos_nodes": 4,
+    "use_aniso": true,
+    "p_nodes": 16
+  },
+  "channel_limit": 4,
+  "convergence_sigma_grid_n": 0,
+  "repository_head": "73b0c38d776e2791d472217cfffefdbc4e631a22",
+  "convergence_p_nodes": 0,
+  "integration_mode": "semi_infinite",
+  "candidate_csv": "docs\\analysis\\relaxtime\\phase_guided_transport_v2_pole_sensitive_rendering\\supplemental_muB0_noise_mechanism\\candidates.csv",
+  "case_name": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1"
+}

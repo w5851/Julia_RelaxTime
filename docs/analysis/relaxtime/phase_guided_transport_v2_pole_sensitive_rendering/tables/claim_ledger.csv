@@ -1,6 +1,7 @@
 claim_id,status,claim_zh,evidence,scope_limit
-CLAIM-V2-POLE-001,supported_with_scope_limit,v1 已定点深拆的 8 个小分母窗口可映射到 v2，因为 tau 与通道率均通过 1e-3 机制迁移门槛。,tables/input_inventory.csv; tables/window_classification.csv,迁移门槛不替代局部 high-rate convergence gate。
+CLAIM-V2-POLE-001,supported_with_scope_limit,v1 已定点深拆的 8 个小分母窗口可映射到 v2；作者复核发现的 2 个 muB=0 残留窗口也通过 v2 定点 denominator-chain 诊断。,tables/input_inventory.csv; tables/window_classification.csv; supplemental_muB0_noise_mechanism/mechanism_window_summary.csv,v1→v2 迁移门槛不替代局部 high-rate convergence gate；两个新增窗口使用当前 v2 production 直接诊断。
 CLAIM-V2-POLE-002,supported,两个一阶/上游分支窗口被硬保护，不进入 pole-sensitive display mask。,tables/first_order_protection.csv,仅覆盖现有标量输运产物。
 CLAIM-V2-POLE-003,supported,虚线邻点桥接仅用于项目内部审计，不进入论文候选图；它不是重算或物理正则化结果。,tables/pole_sensitive_mask.csv; figures/plot_manifest.json,内部审计图不得作为未注明处理的论文曲线。
 CLAIM-V2-POLE-004,author_check,若需要物理意义上的平滑曲线，应先定义有限宽度或极点正则化并用新 slug 重跑。,README.md,本分析 PR 不修改传播子模型。
-CLAIM-V2-POLE-005,author_directed_candidate,论文候选图以连续实线使用相邻真实点替换已确认的数值噪点，不显示修正标记；一阶相变点以星号标注并保留原始物理跳变。,tables/paper_display_replacements.csv; tables/paper_first_order_markers.csv; paper_figures/plot_manifest.json,仅适用于本表列出的 13 个派生显示替换值与 6 个一阶标记点。
+CLAIM-V2-POLE-005,author_directed_candidate,论文候选图以连续实线使用相邻真实点替换已确认的数值噪点，不显示修正标记；一阶相变点以星号标注并保留原始物理跳变。,tables/paper_display_replacements.csv; tables/paper_first_order_markers.csv; paper_figures/plot_manifest.json,仅适用于本表列出的 19 个派生显示替换值与 6 个一阶标记点。
+CLAIM-V2-POLE-006,implementation_issue_supported,mode A 的 muB=900、alpha_T=1.0 曲线在 xi=-0.01 的 zeta/s 回落由 bulk 导数路径提前切换到相变后质量分支支持，不是旧分析已确认的物理非单调趋势。,tables/bulk_derivative_branch_audit.csv; data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/phase_guided_transport_scan.csv,本分析 PR 只记录分支不一致；在 workflow 复用主平衡态分支并重跑 production 前，不修正或平滑该 zeta/s 点。

@@ -4,7 +4,7 @@
 
 本分析包消费 `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1`，不修改 production CSV、canonical figure 或 `production_registry.json`。它把旧 xi001 denominator-chain 机制表迁移到 v2，并生成**仅供作者审阅**的非破坏性派生显示候选。
 
-当前结论：8 个窗口通过小分母机制迁移门槛；2 个一阶/上游分支窗口被硬保护。虚线桥接是视觉指南，不是新计算值，也不能静默替换正式图。
+当前结论：8 个旧窗口通过小分母机制迁移门槛；作者复核发现的 2 个 `mu_B=0` 残留窗口通过当前 v2 production 的新定点机制诊断；2 个一阶/上游分支窗口被硬保护。虚线桥接是视觉指南，不是新计算值，也不能静默替换正式图。
 
 ## 输入与迁移门槛
 
@@ -14,6 +14,8 @@
 | mode_b | 909 | 38178 | 8.2279794e-06 | 0.00037216686 |
 
 迁移门槛为 `0.001`。v2 的能量语义修改不改变弛豫时间定义；实际 tau 和 channel-rate 漂移均显著低于门槛，因此允许继承已有 denominator-chain 定点证据。该门槛不替代尚未完成的局部 high-rate convergence gate。
+
+新增的两个 `mu_B=0` 窗口不依赖 v1 迁移：`xi=0.37, alpha_T=1.0` 的轻味同步下探由 `mixed_detM` 小分母链支持，`xi=-0.47, alpha_T=1.2` 的奇异味下探由 `simple_1m4KPi` 小分母链支持；两者的上游质量、Polyakov loop 与熵背景均平滑。完整证据见 `supplemental_muB0_noise_mechanism/`。
 
 ## Pole-sensitive display mask 候选
 
@@ -27,11 +29,13 @@
 | mode_a_muB900p0_alpha1p2_xip0p49_1 | muB900.0 | alpha1.2 | 0.49 | simple_1m4KPi | tau_ubar;tau_dbar |
 | mode_a_muB450p0_alpha1p0_xim0p20_1 | muB450.0 | alpha1.0 | -0.20 | simple_1m4KPi | tau_ubar;tau_dbar |
 | mode_b_T200p0_muB0p0_xim0p21_1 | T200.0 | muB0.0 | -0.21 | simple_1m4KPi | tau_u;tau_d;tau_ubar;tau_dbar;sigma;sigma_over_T |
+| mode_a_muB0p0_alpha1p0_xip0p37_supplement | muB0.0 | alpha1.0 | 0.37 | mixed_detM | tau_u;tau_d;tau_ubar;tau_dbar;eta;eta_over_s;zeta;zeta_over_s;sigma;sigma_over_T |
+| mode_a_muB0p0_alpha1p2_xim0p47_supplement | muB0.0 | alpha1.2 | -0.47 | simple_1m4KPi | tau_s;tau_sbar;eta_over_s;zeta_over_s;sigma_over_T |
 
 规则：
 
 1. tau 只有在旧分析的 `affected_tau_fields` 中才进入 mask；
-2. transport 只有在目标点相对相邻两点均值的绝对 log 偏离不小于 `0.03` 时才进入 mask；
+2. transport 默认只有在目标点相对相邻两点均值的绝对 log 偏离不小于 `0.03` 时才进入 mask；作者在论文图中明确指出的两个新增残留窗口，经小分母机制确认后，对三个论文展示比值显式纳入 mask；
 3. raw 点始终以橙色叉号保留；solid guide 在 eligible 点断开，并以虚线连接两侧真实邻点；
 4. `linear_neighbor_guide_value` 只用于画图，不写回 production，也不声称是物理值。
 
@@ -44,6 +48,18 @@
 
 这两个窗口保留 raw 曲线和跳变，不应用桥接或 mask。保护依据是背景质量、Polyakov loop 和熵密度的同步快速变化，而不是单纯依赖 phase 字符串标签。
 
+## `zeta/s` 相变前回落的分支一致性审计
+
+对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00` 重新调用 production workflow 当前使用的 `Models.bulk_viscosity_coefficients`。结果见 `tables/bulk_derivative_branch_audit.csv`：
+
+- `xi=-0.02` 与 `xi=0.00` 时，bulk 导数路径的轻味质量与主 production 平衡态处于同一分支；
+- `xi=-0.01` 时，主平衡态仍为 `m_u=0.73435 fm^-1`，而 bulk 导数路径内部已经得到 `m_u=1.37979 fm^-1`，相对差约 46.8%；同时 `dmuB/dT|sigma` 与质量导数发生显著换支；
+- `xi=-0.02 -> -0.01` 虽然 `tau_u` 上升且熵下降，`zeta` 本身却由 `1.85047` 降至 `1.49245`，因此回落来自 bulk `B^2` 核/热力学导数，而不是 tau 或除以熵造成。
+
+当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。因此该回落被判定为**导数路径提前切换分支所支持的实现一致性问题**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；需要后续代码修复使 bulk 导数复用或锁定主平衡态分支，并重跑受影响 production 后再决定论文曲线。
+
+旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有审计 `xi=-0.01` 的 bulk 导数内部质量，因此没有覆盖本次发现的提前换支。
+
 ## 派生图
 
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB450p0_xip0p31_1.png`
@@ -54,6 +70,8 @@
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB900p0_alpha1p2_xip0p49_1.png`
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p0_xim0p20_1.png`
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB0p0_xim0p21_1.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p0_xip0p37_supplement.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p2_xim0p47_supplement.png`
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_b_T120p0_muB900p0_xim0p09_1.png`
 - `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_a_muB900p0_alpha1p0_xip0p00_1.png`
 
@@ -83,22 +101,25 @@
 论文候选图沿用正式图的固定 panel、多曲线布局，只绘制 `eta_over_s`、`zeta_over_s` 和 `sigma_over_T`：
 
 1. 共生成 `18` 张 600 DPI 图；
-2. `13` 个已确认的小分母下游噪点在派生绘图值中由左右相邻真实样本线性插值替换，图面只显示正常连续实线，不显示叉号、空心点、虚线或修正标签；
+2. `19` 个已确认的小分母下游噪点在派生绘图值中由左右相邻真实样本线性插值替换，图面只显示正常连续实线，不显示叉号、空心点、虚线或修正标签；
 3. `6` 个 observable-level 一阶位置以星号标在对应曲线上，不使用竖直虚线；
 4. 星号处仍使用 raw production 值，一阶/上游分支跳变没有被平滑；
 5. 替换值与星号位置分别记录在 `tables/paper_display_replacements.csv` 和 `tables/paper_first_order_markers.csv`。图面不呈现内部修正痕迹，但仓库内保留完整可追溯记录。
+6. `mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png` 的 `alpha_T=1.0, xi=-0.01` 已知存在 bulk 导数分支不一致；该图保留用于作者审计，但在代码修复和 production 重跑前不具备论文输入资格。
 
 ## 证据边界与作者判断
 
 - `supported`：v2 输入完整、无 failed/NaN/负 rate，v1→v2 tau/rate 迁移门槛通过；一阶窗口保护规则明确。
-- `supported_with_scope_limit`：8 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
+- `supported_with_scope_limit`：10 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
 - `author_directed_candidate`：论文候选图按作者约定隐藏数值修正痕迹，并用星号标示一阶相变位置；仍需最终视觉审核后决定是否采用。
+- `implementation_issue_supported`：`xi=-0.01` 的 bulk 导数分支不一致已由质量和导数定点复算支持；它不应被包装为物理趋势或普通显示平滑。
 - `author_check`：是否需要计算层有限宽度/极点正则化和新 production slug。
 - 本包不把小分母结构直接定性为随机数值噪声，也不把虚线桥接升级为物理预测。
 
 ## 复现
 
 ```powershell
+julia --project=. scripts/analysis/relaxtime/audit_phase_guided_bulk_branch_consistency.jl
 python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 ```
 
@@ -111,6 +132,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/first_order_protection.csv`
 - `tables/paper_display_replacements.csv`
 - `tables/paper_first_order_markers.csv`
+- `tables/bulk_derivative_branch_audit.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
 - `paper_figures/plot_manifest.json`

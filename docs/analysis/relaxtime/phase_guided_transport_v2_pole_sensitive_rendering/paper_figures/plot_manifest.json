@@ -1,33 +1,44 @@
 {
   "schema": "phase_guided_v2_paper_candidate_plot_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-  "generated_at": "2026-07-16T06:56:57.710778+00:00",
-  "base_git_commit": "592f73d4916ae19e343996ff4fe9758469fb2f20",
+  "generated_at": "2026-07-16T08:29:25.431135+00:00",
+  "base_git_commit": "73b0c38d776e2791d472217cfffefdbc4e631a22",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
-  "generator_sha256": "69a40deae1cf676093423d8c833f4c01a2c819e9ca40376926433478bc0f18f9",
+  "generator_sha256": "681c31eb16b66592ab0ecec6af5e4960ee3269f63f5d41adffb7e02064387582",
   "observables": [
     "eta_over_s",
     "zeta_over_s",
     "sigma_over_T"
   ],
-  "paper_display_replacement_count": 13,
+  "paper_display_replacement_count": 19,
   "first_order_marker_count": 6,
+  "manuscript_eligible": false,
+  "paper_readiness": "candidate_with_known_bulk_derivative_branch_exclusion",
+  "known_exclusions": [
+    {
+      "figure": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
+      "plot_series": "alpha1.0",
+      "xi": -0.01,
+      "reason": "bulk derivative path switches to the high-mass branch before the production equilibrium branch",
+      "evidence": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/bulk_derivative_branch_audit.csv"
+    }
+  ],
   "rendering_semantics": "clean continuous paper-candidate lines use audited derived replacements without visible correction marks; stars retain raw first-order transition values; no vertical transition lines",
   "figures": [
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
-      "sha256": "d3b3004071f503f9474677fb93703bf7bf7f39a46370909ce30a74723c967ac7",
-      "bytes": 247321
+      "sha256": "1c28160e05c89045bf9be124257c517cea44664e492db7e9b55eda8c98a67785",
+      "bytes": 244785
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/zeta_over_s_vs_xi.png",
-      "sha256": "7efa3af7dbd24366c44ac5ef06586575865f922f62f22449ef72315e096118ca",
-      "bytes": 213303
+      "sha256": "a4f050e4aaa9d8c868bb6779f6c639a1f5655e3442cc97878e7752921dc60ef1",
+      "bytes": 211349
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/sigma_over_T_vs_xi.png",
-      "sha256": "c8732468e843d0da682f061751fb8ad6f19334026472c4a329774e2b3121cb58",
-      "bytes": 321093
+      "sha256": "8f9cbce3258f9e226b893a2ef7b566c11f78558e2cf9b5022afa07746ce84dac",
+      "bytes": 317032
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/eta_over_s_vs_xi.png",
