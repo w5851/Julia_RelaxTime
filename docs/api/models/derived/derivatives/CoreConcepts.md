@@ -17,11 +17,13 @@ derivatives 不是模型主流程，而是平衡态求解之后的派生分析�
 当前 derivatives 主实现位于 `src/models/derivatives/ThermoDerivatives.jl`，PNJL 默认核心路线是：
 
 - 先求 primal 平衡态 `x0`
+- 若上游 workflow 已提供 equilibrium，则把其 `x_state` 作为唯一零阶状态并锁定该分支
+- 为同一点建立一次 Jacobian 与分解上下文
 - 在单变量 Taylor 代数中构造 `T(δ)`、`mu(δ)` 与 `x(δ)`
 - 显式迭代求解 `F(x(δ), T(δ), mu(δ)) = 0`
 - 从压强、质量或状态量 series 中提取所需导数
 
-这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态求解 + 导数传播”的统一逻辑。ThermoDerivatives 生产路径不再提供 `ForwardDiff + ImplicitDifferentiation` fallback；迁移时使用默认 `:auto` 或显式 `:taylordiff`。
+这意味着 derivatives 主题的职责核心不是单个公式，而是“平衡态选择 + 导数传播”的统一逻辑。bulk 路径的 `T`、`mu`、`T+mu` 三个方向共享同一零阶状态与线性化；不得在导数内部重新做全局 multiseed 并切换相分支。ThermoDerivatives 生产路径不再提供 `ForwardDiff + ImplicitDifferentiation` fallback；迁移时使用默认 `:auto` 或显式 `:taylordiff`。
 
 ## 3. 热力学导数与质量导数是同一条链上的两个读出层
 

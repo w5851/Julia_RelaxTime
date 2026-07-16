@@ -6,6 +6,7 @@
 # 3. 返回类型检查（无 Dual 泄漏）
 
 using Test
+using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -161,6 +162,50 @@ end
     @test isfinite(bv.v_n_sq)
     @test isfinite(bv.dμB_dT_sigma)
     @test all(isfinite.(bv.masses))
+    @test bv.base_state_source === :internal_gap_solve
+    @test bv.primal_solve_count == 1
+    @test bv.jacobian_factorization_count == 1
+    @test bv.derivative_series_count == 3
+    @test bv.branch_locked
+end
+
+@testset "bulk_viscosity_coefficients reuses explicit equilibrium" begin
+    T_fm = 0.5
+    μ_fm = 1.5
+    model = Models.create_model(:PNJL)
+    eq = Models.solve(model, Models.FixedMu(), T_fm, μ_fm; xi=0.0, p_num=8, t_num=4)
+
+    bv = PNJL.bulk_viscosity_coefficients(
+        T_fm,
+        μ_fm;
+        xi=0.0,
+        p_num=8,
+        t_num=4,
+        model=model,
+        base_state=eq.x_state,
+        base_masses=eq.masses,
+        base_mu_vec=eq.mu_vec,
+        base_state_source=:workflow_equilibrium,
+    )
+
+    @test bv.base_state_source === :workflow_equilibrium
+    @test bv.primal_solve_count == 0
+    @test bv.jacobian_factorization_count == 1
+    @test bv.derivative_series_count == 3
+    @test bv.branch_locked
+    @test all(isapprox.(bv.masses, eq.masses; rtol=1e-4, atol=1e-8))
+
+    @test_throws ArgumentError PNJL.bulk_viscosity_coefficients(
+        T_fm,
+        μ_fm;
+        xi=0.0,
+        p_num=8,
+        t_num=4,
+        model=model,
+        base_state=eq.x_state,
+        base_masses=eq.masses,
+        base_mu_vec=SVector(μ_fm, μ_fm, μ_fm + 0.01),
+    )
 end
 
 @testset "bulk_viscosity_coefficients supports mu=0" begin

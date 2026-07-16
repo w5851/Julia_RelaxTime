@@ -267,6 +267,26 @@ using .TransportWorkflow
 
         @test isapprox(res2_prov.transport.eta, res2.transport.eta; rtol=1e-12, atol=0.0)
         @test isapprox(res2_prov.transport.sigma, res2.transport.sigma; rtol=1e-12, atol=0.0)
+
+        res2_bulk = TransportWorkflow.solve_transport_from_equilibrium(
+            eq,
+            T,
+            mu;
+            xi=xi,
+            tau=tau,
+            compute_tau=false,
+            compute_bulk=true,
+            p_num=8,
+            t_num=4,
+            transport_config=TransportIntegrationConfig(p_nodes=8, p_max=3.5),
+        )
+        @test res2_bulk.bulk_coeffs !== nothing
+        @test res2_bulk.bulk_coeffs.base_state_source === :workflow_equilibrium
+        @test res2_bulk.bulk_coeffs.primal_solve_count == 0
+        @test res2_bulk.bulk_coeffs.jacobian_factorization_count == 1
+        @test res2_bulk.bulk_coeffs.derivative_series_count == 3
+        @test res2_bulk.bulk_coeffs.branch_locked
+        @test all(isapprox.(res2_bulk.bulk_coeffs.masses, eq.masses; rtol=1e-4, atol=1e-8))
     end
 
     @testset "optional Pr background passthrough" begin

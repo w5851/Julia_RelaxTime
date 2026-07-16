@@ -20,13 +20,14 @@ using TaylorDiff
 using ..TaylorDiffForwardDiffCompat
 using ..MixedTaylorJets
 using ..Conditions: GapParams, gap_core_residual!
-using ..Models: AbstractPNJLModel, create_model, solve_gap, state_vector
+using ..Models: AbstractPNJLModel, calculate_mass_vec, create_model, solve_gap, state_vector
 using ..Models: cached_nodes, thermal_p_max_inv_fm, model_pressure
 
 export pressure_series_B, chi_B_taylordiff, chi_B_taylordiff_all
 export gap_series_parameter_direction, pressure_series_parameter_direction
 export pressure_jet_bqs, chi_BQS_mixed_taylorjet
 export taylor_constant, taylor_variable, nth_derivative_from_series
+export PNJLTaylorBaseContext, build_taylor_base_context
 
 const _MODEL_CACHE = Dict{Symbol, Any}()
 const _ALLOWED_LINEAR_SOLVES = (:auto, :refactor_each_order, :factorized_each_order, :factorized_batched)
@@ -35,6 +36,32 @@ const _BQS_TO_FLAVOR = @SMatrix [
     1.0 / 3.0  -1.0 / 3.0   0.0
     1.0 / 3.0  -1.0 / 3.0  -1.0
 ]
+
+"""
+    PNJLTaylorBaseContext
+
+Branch-locked zero-order state and reusable linearization for PNJL Taylor
+series derivatives. The context is tied to one model instance and one exact
+`(T, mu_vec, xi, p_num, t_num)` point.
+"""
+struct PNJLTaylorBaseContext{M, F}
+    model::M
+    T_fm::Float64
+    mu_vec::SVector{3, Float64}
+    xi::Float64
+    p_num::Int
+    t_num::Int
+    x0::SVector{5, Float64}
+    J0::Matrix{Float64}
+    factorization::F
+    base_state_source::Symbol
+    base_state_polished::Bool
+    branch_locked::Bool
+    base_residual_norm::Float64
+    primal_solve_count::Int
+    jacobian_factorization_count::Int
+    polish_iteration_count::Int
+end
 
 @inline function taylor_constant(x::Real, order::Int)
     order >= 1 || throw(ArgumentError("order must be >= 1, got $(order)"))
@@ -177,6 +204,97 @@ function _primal_state(
     return SVector{5, Float64}(Tuple(state_vector(st)))
 end
 
+@inline function _as_state5(x, name::AbstractString)
+    length(x) == 5 || throw(ArgumentError("$name must have length 5, got $(length(x))"))
+    state = SVector{5, Float64}(ntuple(i -> Float64(x[i]), Val(5)))
+    all(isfinite, state) || throw(ArgumentError("$name must contain only finite values"))
+    return state
+end
+
+@inline function _masses_from_state(model::AbstractPNJLModel, x_state::SVector{5, Float64})
+    phi = SVector{3, Float64}(x_state[1], x_state[2], x_state[3])
+    return SVector{3, Float64}(Tuple(calculate_mass_vec(model, phi)))
+end
+
+@inline function _primal_residual(
+    model::AbstractPNJLModel,
+    x_state::SVector{5, Float64},
+    T_fm::Real,
+    mu_vec::SVector{3, Float64},
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    residual = _gap_residual(model, x_state, mu_vec, Float64(T_fm), Float64(xi), p_num, t_num)
+    residual_norm = maximum(abs, residual)
+    isfinite(residual_norm) || throw(ArgumentError("PNJL TaylorDiff base-state residual is not finite"))
+    return residual, Float64(residual_norm)
+end
+
+function _assert_same_branch(
+    model::AbstractPNJLModel,
+    initial_state::SVector{5, Float64},
+    candidate_state::SVector{5, Float64};
+    expected_masses=nothing,
+    state_rtol::Real=0.20,
+    mass_rtol::Real=0.10,
+)
+    initial_masses = expected_masses === nothing ?
+        _masses_from_state(model, initial_state) :
+        _as_svector3(expected_masses, "base_masses")
+    candidate_masses = _masses_from_state(model, candidate_state)
+
+    state_drift = maximum(abs(candidate_state[i] - initial_state[i]) / max(abs(initial_state[i]), 1e-3) for i in 1:5)
+    mass_drift = maximum(abs(candidate_masses[i] - initial_masses[i]) / max(abs(initial_masses[i]), 1e-6) for i in 1:3)
+    if state_drift > Float64(state_rtol) || mass_drift > Float64(mass_rtol)
+        throw(ArgumentError("local PNJL base-state polish would leave the supplied branch: state_relative_drift=$(state_drift), mass_relative_drift=$(mass_drift)"))
+    end
+    return candidate_masses
+end
+
+function _polish_base_state(
+    model::AbstractPNJLModel,
+    initial_state::SVector{5, Float64},
+    T_fm::Float64,
+    mu_vec::SVector{3, Float64},
+    xi::Float64,
+    p_num::Int,
+    t_num::Int;
+    residual_tol::Float64,
+    max_iterations::Int,
+    expected_masses=nothing,
+)
+    x_state = initial_state
+    residual, residual_norm = _primal_residual(model, x_state, T_fm, mu_vec, xi, p_num, t_num)
+    residual_norm <= residual_tol && return x_state, residual_norm, 0
+
+    for iteration in 1:max_iterations
+        J = _jacobian_primal(model, x_state, T_fm, mu_vec, xi, p_num, t_num)
+        step = J \ Vector(residual)
+        all(isfinite, step) || throw(ArgumentError("local PNJL base-state polish produced a non-finite Newton step"))
+
+        accepted = false
+        alpha = 1.0
+        for _ in 1:12
+            candidate = x_state - alpha * SVector{5, Float64}(Tuple(step))
+            _assert_same_branch(model, initial_state, candidate; expected_masses=expected_masses)
+            candidate_residual, candidate_norm = _primal_residual(model, candidate, T_fm, mu_vec, xi, p_num, t_num)
+            if candidate_norm < residual_norm
+                x_state = candidate
+                residual = candidate_residual
+                residual_norm = candidate_norm
+                accepted = true
+                break
+            end
+            alpha *= 0.5
+        end
+        accepted || throw(ArgumentError("local PNJL base-state polish could not reduce the residual without leaving the supplied branch"))
+        residual_norm <= residual_tol && return x_state, residual_norm, iteration
+    end
+
+    throw(ArgumentError("local PNJL base-state polish did not reach tolerance: residual_norm=$(residual_norm), tolerance=$(residual_tol), iterations=$(max_iterations)"))
+end
+
 function _jacobian_primal(
     model::AbstractPNJLModel,
     x0::SVector{5, Float64},
@@ -190,6 +308,113 @@ function _jacobian_primal(
     J0 = ForwardDiff.jacobian(residual, x0)
     all(isfinite, J0) || throw(ArgumentError("PNJL TaylorDiff gap Jacobian contains non-finite entries"))
     return J0
+end
+
+"""
+    build_taylor_base_context(T_fm, mu_vec0; kwargs...) -> PNJLTaylorBaseContext
+
+Build one reusable PNJL zero-order state, Jacobian, and factorization. When
+`base_state` is supplied, no global gap solve is performed. A residual-only
+local Newton polish may refine that same branch; a large state or mass drift is
+rejected instead of silently selecting another phase branch.
+"""
+function build_taylor_base_context(
+    T_fm::Real,
+    mu_vec0;
+    xi::Real=0.0,
+    p_num::Int=8,
+    t_num::Int=4,
+    model=nothing,
+    base_state=nothing,
+    base_masses=nothing,
+    base_state_source::Symbol=base_state === nothing ? :internal_gap_solve : :explicit_base_state,
+    base_residual_tol::Real=1e-7,
+    allow_local_polish::Bool=true,
+    polish_max_iterations::Int=4,
+)
+    _validate_common_inputs(T_fm, 1, p_num, t_num)
+    base_residual_tol > 0 || throw(ArgumentError("base_residual_tol must be positive, got $(base_residual_tol)"))
+    polish_max_iterations >= 0 || throw(ArgumentError("polish_max_iterations must be non-negative, got $(polish_max_iterations)"))
+
+    m = model === nothing ? _get_model() : model
+    m isa AbstractPNJLModel || throw(ArgumentError("TaylorDiff base context requires an AbstractPNJLModel, got $(typeof(m))"))
+    T0 = Float64(T_fm)
+    mu0 = _as_svector3(mu_vec0, "mu_vec0")
+    xi0 = Float64(xi)
+    all(isfinite, mu0) || throw(ArgumentError("mu_vec0 must contain only finite values"))
+    isfinite(xi0) || throw(ArgumentError("xi must be finite, got $(xi)"))
+
+    primal_solve_count = base_state === nothing ? 1 : 0
+    initial_state = base_state === nothing ?
+        _primal_state(m, T0, mu0, xi0, p_num, t_num) :
+        _as_state5(base_state, "base_state")
+
+    if base_masses !== nothing
+        expected = _as_svector3(base_masses, "base_masses")
+        actual = _masses_from_state(m, initial_state)
+        all(isapprox(actual[i], expected[i]; rtol=1e-8, atol=1e-10) for i in 1:3) ||
+            throw(ArgumentError("base_masses are inconsistent with base_state for the resolved PNJL model"))
+    end
+
+    _, initial_residual_norm = _primal_residual(m, initial_state, T0, mu0, xi0, p_num, t_num)
+    x0, base_residual_norm, polish_iteration_count = if initial_residual_norm <= Float64(base_residual_tol)
+        initial_state, initial_residual_norm, 0
+    elseif allow_local_polish && polish_max_iterations > 0
+        _polish_base_state(
+            m,
+            initial_state,
+            T0,
+            mu0,
+            xi0,
+            p_num,
+            t_num;
+            residual_tol=Float64(base_residual_tol),
+            max_iterations=polish_max_iterations,
+            expected_masses=base_masses,
+        )
+    else
+        throw(ArgumentError("PNJL TaylorDiff base_state residual exceeds tolerance and local polish is disabled: residual_norm=$(initial_residual_norm), tolerance=$(base_residual_tol)"))
+    end
+
+    _assert_same_branch(m, initial_state, x0; expected_masses=base_masses)
+    J0 = _jacobian_primal(m, x0, T0, mu0, xi0, p_num, t_num)
+    Jfac = factorize(J0)
+    return PNJLTaylorBaseContext(
+        m,
+        T0,
+        mu0,
+        xi0,
+        p_num,
+        t_num,
+        x0,
+        J0,
+        Jfac,
+        base_state_source,
+        polish_iteration_count > 0,
+        true,
+        base_residual_norm,
+        primal_solve_count,
+        1,
+        polish_iteration_count,
+    )
+end
+
+@inline function _validate_base_context(
+    ctx::PNJLTaylorBaseContext,
+    model::AbstractPNJLModel,
+    T_fm::Real,
+    mu_vec::SVector{3, Float64},
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+)
+    ctx.model === model || throw(ArgumentError("PNJL TaylorDiff base context model does not match the requested model instance"))
+    ctx.T_fm == Float64(T_fm) || throw(ArgumentError("PNJL TaylorDiff base context T_fm does not match the requested point"))
+    ctx.mu_vec == mu_vec || throw(ArgumentError("PNJL TaylorDiff base context mu_vec does not match the requested point"))
+    ctx.xi == Float64(xi) || throw(ArgumentError("PNJL TaylorDiff base context xi does not match the requested point"))
+    ctx.p_num == p_num || throw(ArgumentError("PNJL TaylorDiff base context p_num does not match the requested numerics"))
+    ctx.t_num == t_num || throw(ArgumentError("PNJL TaylorDiff base context t_num does not match the requested numerics"))
+    return ctx
 end
 
 @inline function _coefficient(x::TaylorDiff.TaylorScalar, n::Int)
@@ -344,17 +569,37 @@ function _solve_gap_series_parameter_direction(
     iterations::Int=0,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
 )
     _validate_common_inputs(T_fm, order, p_num, t_num)
     iterations >= 0 || throw(ArgumentError("series_iterations must be non-negative, got $(iterations)"))
-    resolved_linear_solve = _resolve_linear_solve(linear_solve, order)
+    resolved_linear_solve = if base_context !== nothing && linear_solve === :auto
+        :factorized_each_order
+    else
+        _resolve_linear_solve(linear_solve, order)
+    end
 
     base_mu_vec = _as_svector3(mu_vec0, "mu_vec0")
     T_dir, direction_vec = _validate_parameter_direction(T_direction, mu_direction)
 
-    x0 = _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num)
-    J0 = _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num)
-    linear_operator = resolved_linear_solve === :refactor_each_order ? J0 : factorize(J0)
+    context = if base_context === nothing
+        nothing
+    else
+        _validate_base_context(base_context, model, T_fm, base_mu_vec, xi, p_num, t_num)
+    end
+    x0 = context === nothing ?
+        _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num) :
+        context.x0
+    J0 = context === nothing ?
+        _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num) :
+        context.J0
+    linear_operator = if resolved_linear_solve === :refactor_each_order
+        J0
+    elseif context === nothing
+        factorize(J0)
+    else
+        context.factorization
+    end
 
     delta = taylor_variable(0.0, order)
     T_series, mu_vec = _series_from_parameter_direction(
@@ -404,6 +649,7 @@ function _solve_gap_series_parameter_direction(
         residual_norm=residual_norm,
         iterations=iterations,
         linear_solve=resolved_linear_solve,
+        base_context=context,
     )
 end
 
@@ -506,6 +752,7 @@ function gap_series_parameter_direction(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
 )
     _validate_common_inputs(T_fm, order, p_num, t_num)
     m = model === nothing ? _get_model() : model
@@ -524,6 +771,7 @@ function gap_series_parameter_direction(
         iterations=iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
     )
 end
 
@@ -546,6 +794,7 @@ function pressure_series_parameter_direction(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
 )
     result = gap_series_parameter_direction(
         T_fm,
@@ -560,6 +809,7 @@ function pressure_series_parameter_direction(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_context=base_context,
     )
     m = model === nothing ? _get_model() : model
     pressure = model_pressure(m, result.x_state, result.mu_vec, result.T_series; p_num=p_num, t_num=t_num, xi=xi)

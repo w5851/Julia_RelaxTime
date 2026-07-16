@@ -60,6 +60,52 @@ end
 
     pressure = TD.pressure_series_B(0.55, 0.30; order=3, xi=0.0, p_num=4, t_num=2)
     @test isfinite(TD.nth_derivative_from_series(pressure, 3))
+
+    x0 = SVector{5, Float64}(ntuple(i -> TD.nth_derivative_from_series(result.x_state[i], 0), Val(5)))
+    mu0 = SVector{3, Float64}(ntuple(i -> TD.nth_derivative_from_series(result.mu_vec[i], 0), Val(3)))
+    masses0 = Models.calculate_mass_vec(model, SVector(x0[1], x0[2], x0[3]))
+    context = TD.build_taylor_base_context(
+        0.55,
+        mu0;
+        model=model,
+        xi=0.0,
+        p_num=4,
+        t_num=2,
+        base_state=x0,
+        base_masses=masses0,
+        base_state_source=:unit_test,
+    )
+    locked = TD.gap_series_parameter_direction(
+        0.55,
+        mu0,
+        1.0,
+        SVector(0.0, 0.0, 0.0);
+        order=2,
+        model=model,
+        xi=0.0,
+        p_num=4,
+        t_num=2,
+        base_context=context,
+    )
+
+    @test context.base_state_source === :unit_test
+    @test context.primal_solve_count == 0
+    @test context.jacobian_factorization_count == 1
+    @test context.branch_locked
+    @test locked.linear_solve === :factorized_each_order
+    @test all(isapprox(TD.nth_derivative_from_series(locked.x_state[i], 0), x0[i]; rtol=0.0, atol=1e-12) for i in 1:5)
+    @test_throws ArgumentError TD.gap_series_parameter_direction(
+        0.55,
+        mu0,
+        1.0,
+        SVector(0.0, 0.0, 0.0);
+        order=2,
+        model=model,
+        xi=0.0,
+        p_num=5,
+        t_num=2,
+        base_context=context,
+    )
 end
 
 @testset "chi_B backend routing and validation" begin
