@@ -93,6 +93,24 @@ on:
         required: false
         default: "560"
         type: string
+      thermo_p_num:
+        description: "PNJL equilibrium/bulk momentum nodes"
+        required: false
+        default: "12"
+        type: string
+      thermo_t_num:
+        description: "PNJL equilibrium/bulk angular nodes"
+        required: false
+        default: "6"
+        type: string
+      phase_anchor_policy:
+        description: "Mode-A first-order temperature anchor"
+        required: false
+        default: "direct_coexistence"
+        type: choice
+        options:
+          - direct_coexistence
+          - reference_interpolation
       compute_bulk:
         description: "Compute zeta-related outputs"
         required: false
@@ -183,6 +201,9 @@ jobs:
             --case-name "$case_name"
             --propagator-xi-policy "$policy"
             --sigma-cache-policy "$sigma_cache_policy"
+            --p-num "${{ inputs.thermo_p_num || '12' }}"
+            --t-num "${{ inputs.thermo_t_num || '6' }}"
+            --phase-anchor-policy "${{ inputs.phase_anchor_policy || 'direct_coexistence' }}"
             --channel-diagnostics
           )
 
@@ -317,6 +338,9 @@ jobs:
             printf -- '- tau_phi_nodes: `%s`\n' "${{ inputs.tau_phi_nodes || '36' }}"
             printf -- '- tau_n_sigma: `%s`\n' "${{ inputs.tau_n_sigma || '24' }}"
             printf -- '- sigma_grid_n: `%s`\n' "${{ inputs.sigma_grid_n || '560' }}"
+            printf -- '- thermo_p_num: `%s`\n' "${{ inputs.thermo_p_num || '12' }}"
+            printf -- '- thermo_t_num: `%s`\n' "${{ inputs.thermo_t_num || '6' }}"
+            printf -- '- phase_anchor_policy: `%s`\n' "${{ inputs.phase_anchor_policy || 'direct_coexistence' }}"
             echo ""
             echo "## Verdict"
             echo ""

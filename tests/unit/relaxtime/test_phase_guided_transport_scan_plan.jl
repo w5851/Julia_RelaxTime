@@ -42,6 +42,21 @@ end
     @test all(isfinite(p.T_phase_base_MeV) for p in plan.points)
     base_450 = unique(p.T_phase_base_MeV for p in plan.points if p.muB_MeV == 450.0)
     @test length(base_450) == 1
+
+    fake_anchor = (
+        phase_reference_kind=:first_order,
+        phase_anchor_method=:direct_two_branch_equal_omega_bisection,
+        certification=(
+            certified=true,
+            minus_xi=-0.003,
+            plus_xi=0.003,
+        ),
+    )
+    coexistence_xis = Main.PhaseGuidedTransportScanPlan._mode_a_xi_values(opts, fake_anchor, 1.0)
+    @test !any(isapprox(xi, 0.0; atol=1e-12, rtol=0.0) for xi in coexistence_xis)
+    @test -0.003 in coexistence_xis
+    @test 0.003 in coexistence_xis
+    @test Main.PhaseGuidedTransportScanPlan._mode_a_xi_values(opts, fake_anchor, 1.1) == opts.xi_values
 end
 
 @testset "phase-guided transport plan mode b" begin
@@ -99,4 +114,32 @@ end
     @test occursin("--propagator-xi-policy", workflow_text)
     @test occursin("--channel-diagnostics", workflow_text)
     @test occursin("--sigma-grid-n", workflow_text)
+    @test occursin("--p-num", workflow_text)
+    @test occursin("--t-num", workflow_text)
+    @test occursin("--phase-anchor-policy", workflow_text)
+end
+
+@testset "phase-guided CLI defaults to direct coexistence anchoring" begin
+    opts = Main.PhaseGuidedTransportScanCLI.parse_args([
+        "--mode", "fixed-muB-phase-scaled",
+        "--xi-list", "0.0",
+        "--muB-list", "900",
+        "--alphaT-list", "1.0",
+        "--dry-run",
+    ])
+    @test opts.p_num == 12
+    @test opts.t_num == 6
+    @test opts.phase_anchor_policy === :direct_coexistence
+
+    explicit = Main.PhaseGuidedTransportScanCLI.parse_args([
+        "--mode", "fixed-muB-phase-scaled",
+        "--xi-list", "0.0",
+        "--muB-list", "900",
+        "--p-num", "24",
+        "--t-num", "8",
+        "--phase-anchor-policy", "reference_interpolation",
+    ])
+    @test explicit.p_num == 24
+    @test explicit.t_num == 8
+    @test explicit.phase_anchor_policy === :reference_interpolation
 end

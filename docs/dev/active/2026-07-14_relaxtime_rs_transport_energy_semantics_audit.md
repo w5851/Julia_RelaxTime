@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已提交 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)；M3 派生显示与分支/相变锚点审计正在 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 收敛，后续代码修复与新 production 尚未执行
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点代码正在 `codex/issue-130-bulk-equilibrium-context` 分支收敛，修复后的新 production 尚未执行
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -412,6 +412,12 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 当前 workflow 在获得主 equilibrium 后，单独调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`，从而把两个不同分支混入同一个 `zeta` 结果。PR #134 不平滑该点，并在 paper figure manifest 中将 `mode_a/muB900/zeta_over_s` 标为已知排除项、`manuscript_eligible=false`。
 - `alpha_T=1.0` 的 `T=125.06992 MeV` 来自旧稀疏 `boundary.csv` 的线性插值；同一 `12/6` 口径下直接两分支等势得到 `T_c` bracket 中点 `125.76661 MeV`，偏移约 `+0.69669 MeV`。在 bracket 两端，`xi=-0.003` 均认证为稳定夸克相，`xi=+0.003` 均认证为稳定强子相。
 - 后续设计已确定：一阶区域按热力学势选择主稳定态；bulk 接收并复用主 `base_state`、共享 Jacobian/线性分解；严格共存点不输出唯一输运量，以经热力学节点收敛认证的负/正近零点表示两侧结果；旧 `boundary.csv` 只保留为相图与初始 bracket 证据，不再作为导数敏感 production 的唯一精确锚点。
+- bulk equilibrium/context 第一阶段已提交为 `e6e3e6b4`：workflow 把已经解析的 `x_state`、质量、化学势和 model 传入 bulk；bulk 不再重复全局 gap solve，三个 `T`、`mu`、`T+mu` Taylor 方向共享一次 Jacobian 分解，并对局部 Newton polish 执行同支锁定。聚焦 unit/integration 与 PNJL thermo regression 通过。
+- mode A 直接共存锚点实测：`12/6` 节点给出 `T_c=125.7666054361 MeV`，`24/8` 节点给出 `125.7372580387 MeV`，漂移 `-0.0293473974 MeV`，通过 `0.1 MeV` gate。两套节点在 `12/6` anchor bracket 两端都确认 `xi=-0.003` 为稳定夸克相、`xi=+0.003` 为稳定强子相。
+- 真实 mode A dry-run 的 `sampling_plan.csv` 含 `xi=-0.01,-0.003,0.003,0.01` 四点，严格 `xi=0` 缺失；`±0.003` 分别标为 `quark_side` / `hadron_side`，并记录直接等势方法、bracket、节点数和 anchor 收敛证据。mode B 的网格构造和 reference classification 保持原契约。
+- 性能探针 `julia --project=. scripts/perf/relaxtime/bulk_derivative_context_probe.jl --repeats=3` 在 `T=0.5 fm^-1, mu=1.5 fm^-1, xi=0, p_num/t_num=12/6` 的预热本机样本中，将额外 primal solve 从 `5` 降为 `0`、Jacobian 构建/分解从 `5` 降为 `1`、导数 series 收敛为 `3` 个方向；中位耗时 `0.0817666 s -> 0.0035349 s`（`23.13x`），中位分配 `347952 -> 37456 bytes`。该结果只作为实现收益证据，不设固定加速比 CI gate。
+- mode-B baseline 审计确认共享 bulk context 使 16/16 点的 `zeta`、`zeta/s` 预期下降约 `0.0683%-0.0764%`；另仅 `T=120 MeV, mu_B=0, xi=0.2` 因修正后的相分类 seed 治理产生不超过 `0.00237%` 的上游 transport 漂移。未放宽 `rtol=1e-6`，只刷新实际超限字段；core + full 回归随后通过 `223/223`。
+- 最终聚焦验证：Taylor/bulk/plan unit `144/144`；transport workflow、bulk derivatives、phase-guided dry-run/exec integration `144/144`；一阶分支/共存固定点 regression `22/22`；mode-B core + full regression `223/223`。`check_script_entrypoints`、`check_relaxtime_script_governance`、`check_models_entry_contract`、`check_solver_contract_leakage`、`check_docs_consistency`、`check_active_docs_governance`、`check_data_output_path_guard`、workflow YAML 解析和 `git diff --check` 全部通过。
 
 ## 9. 里程碑
 
@@ -448,9 +454,9 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 补扫并修正作者发现的两个 `mu_B=0` 残留显示噪点。
 - [x] 定位 `mu_B=900, alpha_T=1.0, xi=-0.01` 的 `zeta/s` 回落为主 continuation 亚稳支与 bulk 稳定支混用，并用同口径双根热力学势完成归因。
 - [x] 审计旧插值 phase anchor，完成当前 `12/6` 口径的直接等势温度 bracket 与 `xi=±0.003` 双侧相别认证。
-- [ ] 通过独立代码 PR 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`。
-- [ ] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
-- [ ] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression/validation/benchmark 证据。
+- [x] 通过独立代码分支在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；待 PR review/合并。
+- [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
+- [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
 - [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。
 
 ## 10. Definition of Done

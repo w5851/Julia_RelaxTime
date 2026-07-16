@@ -8,7 +8,7 @@ end
 
 function write_plan_csv(path::String, plan)
     open(path, "w") do io
-        println(io, "T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,plot_panel,plot_panel_label,plot_series,plot_series_label,T_phase_base_MeV,alpha_T")
+        println(io, "T_MeV,muB_MeV,xi,mode,phase_reference_kind,scan_group,group_label,plot_panel,plot_panel_label,plot_series,plot_series_label,T_phase_base_MeV,alpha_T,phase_anchor_method,coexistence_side,coexistence_certified,coexistence_delta_xi,coexistence_T_lower_MeV,coexistence_T_upper_MeV,anchor_p_num,anchor_t_num,anchor_convergence_delta_MeV,anchor_convergence_certified")
         for point in plan.points
             println(io, join([
                 string(point.T_MeV),
@@ -24,6 +24,16 @@ function write_plan_csv(path::String, plan)
                 _csv_quote(point.plot_series_label),
                 string(point.T_phase_base_MeV),
                 string(point.alpha_T),
+                string(point.phase_anchor_method),
+                string(point.coexistence_side),
+                string(point.coexistence_certified),
+                string(point.coexistence_delta_xi),
+                string(point.coexistence_T_lower_MeV),
+                string(point.coexistence_T_upper_MeV),
+                string(point.anchor_p_num),
+                string(point.anchor_t_num),
+                string(point.anchor_convergence_delta_MeV),
+                string(point.anchor_convergence_certified),
             ], ','))
         end
     end
@@ -53,6 +63,8 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "- compute bulk viscosity (`zeta`): `$(opts.compute_bulk)`")
         println(io, "- propagator xi policy: `$(opts.propagator_xi_policy)`")
         println(io, "- sigma cache policy: `$(opts.sigma_cache_policy)`")
+        println(io, "- thermodynamic nodes: `p_num=$(opts.p_num), t_num=$(opts.t_num)`")
+        println(io, "- phase anchor policy: `$(opts.phase_anchor_policy)`")
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
            opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
             println(io, "- tau/sigma overrides:")
@@ -79,6 +91,7 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "## Interpretation Boundary")
         println(io, "- This directory is a user-facing result asset, not an external validation truth set.")
         println(io, "- Numerical drift should be governed separately by regression coverage.")
+        println(io, "- For a directly anchored first-order alpha_T=1 slice, xi=0 is intentionally absent; certified negative/positive near-zero points represent the quark/hadron side limits.")
     end
 end
 
@@ -101,6 +114,9 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "tau_phi_nodes" => opts.tau_phi_nodes,
         "tau_n_sigma_points" => opts.tau_n_sigma_points,
         "sigma_grid_n" => opts.sigma_grid_n,
+        "p_num" => opts.p_num,
+        "t_num" => opts.t_num,
+        "phase_anchor_policy" => String(opts.phase_anchor_policy),
         "channel_diagnostics" => opts.channel_diagnostics,
         "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,

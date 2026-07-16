@@ -8,6 +8,8 @@
   - PNJL / `Models` 主链相关的性能探针与基线脚本
 - `scripts/perf/relaxtime/`
   - relaxtime / scattering / transport 相关的性能探针
+  - `bulk_derivative_context_probe.jl` 对比旧式五组独立 Taylor series 与 workflow equilibrium 锁支、三方向共享线性化路径；只报告测量结果，不设置 correctness 或固定加速比门槛
+  - 示例：`julia --project=. scripts/perf/relaxtime/bulk_derivative_context_probe.jl --repeats=3`
 
 ## 稳定入口性能基线
 
