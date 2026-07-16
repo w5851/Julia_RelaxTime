@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已转为 Ready；源码、测试、稳定文档、registry、所有受影响 regression baseline、功能性 CI 与 Copilot review 均已完成，两条 review thread 已解决；等待合并
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过收敛、全量导入、图像与旧目录不变性审计，已提交 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)，等待作者 review 和 `approved` 晋升决定
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -367,16 +367,41 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 定义并校验 registry schema，至少包含 `case_slug`、`mode`、`result_path`、`figure_path`、`source_commit`、`transport_kernel_energy_policy`、`distribution_energy_policy`、`propagator_xi_policy`、`status`、`superseded_by`、`manuscript_eligible`、`audit_manifest_path`、更新时间。
 - [x] 把上述旧 case 标记为 `superseded_for_manuscript`、`manuscript_eligible=false`，但不修改旧目录。
 - [x] 新 case 尚未生成时允许 `superseded_by=null` 或明确的 pending 状态。
-- [ ] 后续新数据 PR 先登记 `current_candidate`；完成收敛、provenance、图像和新旧对比后才晋升为 `approved`、`manuscript_eligible=true`。
-- [ ] 回填旧 case 的 `superseded_by`，使 registry 成为论文输入资格的权威状态入口。
+- [x] 后续新数据 PR 先登记 `current_candidate`；完成收敛、provenance、图像和新旧对比后才晋升为 `approved`、`manuscript_eligible=true`。
+- [x] 回填旧 case 的 `superseded_by`，使 registry 成为论文输入资格的权威状态入口。
 
 ### 8.3 新 production 门槛
 
-- [ ] 代码 PR 合并后，从合并提交运行 GitHub Actions；Actions 产物不得直接视为仓库正式数据。
-- [ ] 使用新的、语义可辨识的 case slug，不覆盖任何现有正式目录。
-- [ ] 先通过参数收敛 gate，再生产全量 CSV 和图像。
-- [ ] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；若 production workflow 输出 $\kappa_{XY}$、$\lambda$ 或其派生量，也必须纳入差异表。同时证明弛豫时间未因 kernel energy 修复改变。
+- [x] 代码 PR 合并后，从合并提交运行 GitHub Actions；Actions 产物不得直接视为仓库正式数据。
+- [x] 使用新的、语义可辨识的 case slug，不覆盖任何现有正式目录。
+- [x] 先通过参数收敛 gate，再生产全量 CSV 和图像。
+- [x] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；若 production workflow 输出 $\kappa_{XY}$、$\lambda$ 或其派生量，也必须纳入差异表。同时证明弛豫时间未因 kernel energy 修复改变。
 - [ ] 通过独立数据/图像 PR 导入、审计和晋升。
+
+### 8.4 M2 执行范围锁（2026-07-15）
+
+- 正式 case slug：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1`。
+- 物理范围保持与最新高分辨率旧 case 一致：mode A 使用 `mu_B=0,450,900 MeV`、`alpha_T=1.0,1.1,1.2`；mode B 使用 `T=120,160,200 MeV`、`mu_B=0,450,900 MeV`；两者均使用 `xi=-0.50:0.01:0.50`。
+- 生产参数候选保持 p128 validated-anchored：`tau_p_nodes=128`、`tau_angle_nodes=20`、`tau_phi_nodes=36`、`tau_n_sigma=24`、`sigma_grid_n=560`、`propagator_xi_policy=match_thermo`、`compute_bulk=true`。
+- 收敛 gate 先比较 p104（`104/18/30/20/440`）与 p128（`128/20/36/24/560`），覆盖旧审计最敏感 panel：mode A 的 `(mu_B,alpha_T)=(450,1.1)` 与 mode B 的 `(T,mu_B)=(200,900)`，并取 `xi=-0.5,-0.1,0.0,0.35,0.5`。
+- 收敛比较至少覆盖六种 `tau`、`eta/s`、`sigma/T`、`zeta/s`、状态计数、失败点、NaN/Inf、负值和边界点；p104 到 p128 的核心相对漂移必须不超过既有 1% production gate，且不得靠放宽测试容差通过。
+- 全量 source candidate 使用独立 Action case name `p128_xi001_onshellkernel_localdispatch_20260715`，从上述 merge SHA 对应的 `main` 触发；Action artifact 保持 `diagnostic-only`，下载和本地审计通过前不晋升。
+- 当前 phase-guided CSV 不输出 `kappa_XY` 或 `lambda`，因此本轮正式对比覆盖 workflow 实际输出的 `tau`、`eta/s`、`sigma/T`、`zeta/s`；`kappa/lambda` 的能量职责由 PR 1 的 unit/integration/validation 证据承担，不在产物审计中虚构缺失字段。
+- 新 case 的 result 目录包含 `convergence/` 证据，figure 目录只放图像与 `plot_manifest.json`；旧 case 目录保持逐字节不变。
+
+### 8.5 M2 production 证据（2026-07-15）
+
+- 收敛 watch runs 全部成功并绑定代码合并提交：p104 mode A `29397778614`、p104 mode B `29397778315`、p128 mode A `29397778458`、p128 mode B `29397778469`。p104 到 p128 的核心最大相对漂移为 `0.0092405457`（`0.9241%`），通过既有 `1%` production gate。
+- 全量 Action case `p128_xi001_onshellkernel_localdispatch_20260715` 共 `30/30` 个唯一 shard，全部 `success`，head SHA 均为 `05be2c05186f8e12baf3097b68f8619e53d19711`；每种 mode 各 15 个 source runs。
+- importer 的 `--validate-only` 在写入仓库前通过。mode A 与 mode B 均为 `909` 个扫描点、`38178` 行通道诊断、`0` failed rows、`0` NaN/Inf、`0` 负 rate/contribution，且 `909/909` 点 `converged=true`。
+- 旧新不变量 gate 通过：mode A 的六种弛豫时间最大相对漂移为 `1.6650389e-4`，mode B 为 `8.2279794e-6`；$\xi=0$ 输运量最大相对漂移分别为 `3.1101331e-7` 和 `7.9976584e-7`，均低于 `1e-3`。
+- 预期语义漂移已写入每个新 case 的 `convergence/old_vs_new_full_grid_comparison.csv`。mode A 的最大相对漂移为 $\eta/s=27.85\%$、$\sigma/T=24.75\%$、$\zeta/s=76.60\%$；mode B 分别为 `27.96%`、`24.77%`、`79.99%`。这些最大值均位于 $\xi\ne0$，不是不变量失败。
+- 两种 mode 各生成 `36` 张 PNG；`plot_manifest.json` 各含 `36` 个逐图 SHA256、source CSV SHA256 和 `dpi=600`。PNG `pHYs` 元数据为 `599.9988 dpi`，是 600 dpi 转换为整数 pixels-per-meter 后的量化结果；figure-side 均只保留 PNG 与 `plot_manifest.json`。
+- 抽查 mode A 的 `muB900/zeta_over_s` 和 mode B 的 `T200/zeta_over_s` 图，坐标、图例、曲线和文件渲染正常；图中局部尖锐结构保留为待论文解释时结合邻点与通道诊断审阅的数值特征，不在本次产物 PR 中做平滑或删点。
+- 旧高密度 case `first_canonical_v1_p128_xi001_validated_anchored_prod_v1` 的导入前后 tree SHA256 完全一致：mode A result `6941d4e8ee7ae16399679e863761906e74f39784f9e69fc764752da20d3166c9`，mode B result `d343dec6de88b8a8f107be893bc62c8c64337338494aca7aa64e1b1dfa5f2dc9`，mode A figure `f96c418fb316634fced730867ab09e7ea2a0cc0f5d8452a24dbcfd65ddc09c0d`，mode B figure `d5c0bd164a6ec814ecc06c9b7a04be3a6599ac166010bcd3482e32d47ba07d9d`。
+- registry 已登记新 slug 的两条 mode entry 为 `current_candidate`、`manuscript_eligible=false`；旧粗网格 v1 指向旧高密度 v1，旧高密度 v1 再指向本次 v2 candidate。只有作者 review 后才允许把 v2 晋升为 `approved`。
+- 最终验证通过：三个 Python 脚本 `py_compile`、importer `--validate-only`、`check_script_entrypoints.jl`、`check_relaxtime_script_governance.jl`、`check_docs_consistency.jl`、`check_data_output_path_guard.jl`。`active-docs-governance` 的既有无关失败不属于本任务 required gate，未混入本 PR。
+- 新产物文本在最终化阶段统一为 LF，并按 parameter-gate manifest、plot manifest、result manifest 的依赖顺序重算哈希；对 Git index 中 staged blob 的递归 SHA256 校验通过，避免 Windows CRLF 工作区哈希与仓库提交字节不一致。
 
 ## 9. 里程碑
 
@@ -396,13 +421,15 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 修正 OneLoop API 矛盾和 transport docstring。
 - [x] 创建外部 production registry 并标记旧 case 的论文资格。
 - [x] 代码 PR review 与功能性 CI 完成；Copilot 两条 review thread 已解决。
-- [ ] 代码 PR 合并完成。
+- [x] 代码 PR 合并完成（PR #131，`main@05be2c05186f8e12baf3097b68f8619e53d19711`）。
 
 ### M2：新数据与图像（独立 production PR）
 
-- [ ] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
-- [ ] 使用新 case slug 导入结果与图像，不覆盖旧产物。
-- [ ] 完成新旧差异、provenance、manifest 和论文输入资格审计。
+产物 PR：[PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132)
+
+- [x] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
+- [x] 使用新 case slug 导入结果与图像，不覆盖旧产物。
+- [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
 - [ ] 新 case 经 review 后在 registry 晋升为 `approved`。
 
 ## 10. Definition of Done
