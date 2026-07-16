@@ -1,0 +1,3 @@
+window_id,mode_key,plot_panel,plot_series,target_xi,protected_observables,phase_structure,phase_reference_kind,max_background_rel_step,render_policy,protection_reason
+mode_b_T120p0_muB900p0_xim0p09_1,mode_b,T120.0,muB900.0,-0.09,tau_u;tau_d;tau_s;tau_ubar;tau_dbar;tau_sbar;eta;eta_over_s;zeta;zeta_over_s;sigma;sigma_over_T,first_order_possible,crossover,0.5927497636657343,retain_raw_values_and_continuous_line_no_bridge,upstream first-order/background branch jump
+mode_a_muB900p0_alpha1p0_xip0p00_1,mode_a,muB900.0,alpha1.0,0.0,tau_u;tau_d;tau_s;tau_ubar;tau_dbar;tau_sbar;eta;eta_over_s;zeta;zeta_over_s;sigma;sigma_over_T,first_order_possible,first_order,0.47854900879512724,retain_raw_values_and_continuous_line_no_bridge,upstream first-order/background branch jump

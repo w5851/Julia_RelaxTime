@@ -1,0 +1,124 @@
+{
+  "schema": "phase_guided_v2_pole_sensitive_analysis_manifest_v1",
+  "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+  "generated_at": "2026-07-16T06:16:06.575287+00:00",
+  "base_git_commit": "fdee1b981ced6526041f5e28866a255e717d09a4",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
+  "generator_sha256": "15f8f35c7cd2c3702d53867b2242c444c562d8c9d13d4003d3aa5af3f3e7b9a0",
+  "scope": "read-only production audit and explicitly labeled derived display candidates",
+  "canonical_production_modified": false,
+  "registry_modified": false,
+  "window_counts": {
+    "pole_sensitive_supported": 8,
+    "first_order_protected": 2,
+    "mask_rows": 53
+  },
+  "inputs": [
+    {
+      "mode_key": "mode_a",
+      "scan_sha256": "ec5e330a6af39b1be3b12db1cfd53a07074600c15559b5360b3135e88941504c",
+      "diagnostics_sha256": "c4447fdc5e289c0e1f184db3f49b3575077e702bf687133b79a044d76f050a81",
+      "max_tau_v1_v2_rel_drift": 0.00016650388598370386,
+      "max_rate_v1_v2_rel_drift": 0.0005376562885010908
+    },
+    {
+      "mode_key": "mode_b",
+      "scan_sha256": "481cfc7596a8610fab623ae168d73044bc83cfae8319894064a69552ffe719e5",
+      "diagnostics_sha256": "5f252367555b5bbea7aaaa17b3ab8cf6b9ebfa6baf575c7bfbb888ef840d7857",
+      "max_tau_v1_v2_rel_drift": 8.227979408292409e-06,
+      "max_rate_v1_v2_rel_drift": 0.00037216685864895603
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/README.md",
+      "sha256": "b82400a34cb9a20f78bd4a5d3714778068e72661eab247f5e614fe9064e5f366",
+      "bytes": 5841
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/claim_ledger.csv",
+      "sha256": "6acec1f44a19c916aa7ff92131ecb392fdd3c26e925d37ef38eb3ac9ef6792d3",
+      "bytes": 989
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/first_order_protection.csv",
+      "sha256": "8fdd434ffad6b5d50defdd0c178e5cbe0ba2d5b20fb62db95ce35534744411fd",
+      "bytes": 772
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/input_inventory.csv",
+      "sha256": "cbc9269d381f1f6b760822e7445c2e645eb55359fc2ff131af17d7ad4df2a189",
+      "bytes": 951
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/pole_sensitive_mask.csv",
+      "sha256": "373ef68bd8121ba5feed760be3db3f2e622496e2c4c5dc13379de6970d74229d",
+      "bytes": 23686
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/rendered_point_audit.csv",
+      "sha256": "fa3f3489eeb816650e949d2c11e6ba821cddc30a9875feb7b193d9c6cf768a22",
+      "bytes": 39428
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/window_classification.csv",
+      "sha256": "5d72b7755d8d6a72bc5423049ef57d114a4c7392c072378c9140362311e61f98",
+      "bytes": 2865
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/plot_manifest.json",
+      "sha256": "880fa290ba1191309a595d8bff33c4cc0ba4bff44ced7ee3803aded59447fd2c",
+      "bytes": 3358
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB450p0_xip0p31_1.png",
+      "sha256": "7eb3def3c28971ae72de29b5e3fdcf639a579caa4ad131491cf94f6900a030c1",
+      "bytes": 349594
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p0_xip0p26_2.png",
+      "sha256": "60eb1aea4ec82f9a906e344568afe4f317d0b1836b50baec4a931a96b32753d9",
+      "bytes": 360531
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p1_xip0p48_1.png",
+      "sha256": "35dc06b4aa74cec3943a835df7ee7e19ea2e28071849d148230e2678eff837cd",
+      "bytes": 400778
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB900p0_alpha1p1_xip0p18_1.png",
+      "sha256": "f40e654b983e705e78e558e59f4bbd487491f96dec6fefc8b5d62665646dc616",
+      "bytes": 279318
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p1_xip0p35_1.png",
+      "sha256": "28b4abf4cdb960b85386858dc924182942507a3cacfb76f5a4730352aaf7bc69",
+      "bytes": 348052
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB900p0_alpha1p2_xip0p49_1.png",
+      "sha256": "cb7285140a0c6c80536ac13a825f404f3893ed7ef3cddee186578e76683d290f",
+      "bytes": 306705
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p0_xim0p20_1.png",
+      "sha256": "3553ce1b20d414aafa20a465f6e1b743e551cd426739725c6cd3881411f1e121",
+      "bytes": 317840
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB0p0_xim0p21_1.png",
+      "sha256": "b0060899babc754ad58de4a3445cac9afd2974b759efc5bf7cdc3db2f3bd29c3",
+      "bytes": 321683
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_b_T120p0_muB900p0_xim0p09_1.png",
+      "sha256": "06ed2b24e09c57c5073974dee45085ba10d873076afb4c50158352b0313c6d31",
+      "bytes": 283283
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_a_muB900p0_alpha1p0_xip0p00_1.png",
+      "sha256": "fae7bb95c056373df7ced2cde911625e084d2f75466942c3811014978e217ba3",
+      "bytes": 311999
+    }
+  ]
+}

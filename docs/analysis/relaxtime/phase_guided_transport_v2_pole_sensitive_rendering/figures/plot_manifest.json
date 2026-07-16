@@ -1,0 +1,61 @@
+{
+  "schema": "phase_guided_v2_pole_sensitive_plot_manifest_v1",
+  "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+  "generated_at": "2026-07-16T06:16:06.418006+00:00",
+  "base_git_commit": "fdee1b981ced6526041f5e28866a255e717d09a4",
+  "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
+  "generator_sha256": "15f8f35c7cd2c3702d53867b2242c444c562d8c9d13d4003d3aa5af3f3e7b9a0",
+  "rendering_semantics": "raw points retained; eligible points excluded only from solid display guide; dashed neighbor bridge is not recomputed physics",
+  "figures": [
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB450p0_xip0p31_1.png",
+      "sha256": "7eb3def3c28971ae72de29b5e3fdcf639a579caa4ad131491cf94f6900a030c1",
+      "bytes": 349594
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p0_xip0p26_2.png",
+      "sha256": "60eb1aea4ec82f9a906e344568afe4f317d0b1836b50baec4a931a96b32753d9",
+      "bytes": 360531
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB0p0_alpha1p1_xip0p48_1.png",
+      "sha256": "35dc06b4aa74cec3943a835df7ee7e19ea2e28071849d148230e2678eff837cd",
+      "bytes": 400778
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB900p0_alpha1p1_xip0p18_1.png",
+      "sha256": "f40e654b983e705e78e558e59f4bbd487491f96dec6fefc8b5d62665646dc616",
+      "bytes": 279318
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p1_xip0p35_1.png",
+      "sha256": "28b4abf4cdb960b85386858dc924182942507a3cacfb76f5a4730352aaf7bc69",
+      "bytes": 348052
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB900p0_alpha1p2_xip0p49_1.png",
+      "sha256": "cb7285140a0c6c80536ac13a825f404f3893ed7ef3cddee186578e76683d290f",
+      "bytes": 306705
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_a_muB450p0_alpha1p0_xim0p20_1.png",
+      "sha256": "3553ce1b20d414aafa20a465f6e1b743e551cd426739725c6cd3881411f1e121",
+      "bytes": 317840
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/pole_sensitive_mode_b_T200p0_muB0p0_xim0p21_1.png",
+      "sha256": "b0060899babc754ad58de4a3445cac9afd2974b759efc5bf7cdc3db2f3bd29c3",
+      "bytes": 321683
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_b_T120p0_muB900p0_xim0p09_1.png",
+      "sha256": "06ed2b24e09c57c5073974dee45085ba10d873076afb4c50158352b0313c6d31",
+      "bytes": 283283
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/first_order_protected_mode_a_muB900p0_alpha1p0_xip0p00_1.png",
+      "sha256": "fae7bb95c056373df7ced2cde911625e084d2f75466942c3811014978e217ba3",
+      "bytes": 311999
+    }
+  ]
+}
