@@ -1,5 +1,6 @@
 claim_id,status,claim_zh,evidence,scope_limit
 CLAIM-V2-POLE-001,supported_with_scope_limit,v1 已定点深拆的 8 个小分母窗口可映射到 v2，因为 tau 与通道率均通过 1e-3 机制迁移门槛。,tables/input_inventory.csv; tables/window_classification.csv,迁移门槛不替代局部 high-rate convergence gate。
 CLAIM-V2-POLE-002,supported,两个一阶/上游分支窗口被硬保护，不进入 pole-sensitive display mask。,tables/first_order_protection.csv,仅覆盖现有标量输运产物。
-CLAIM-V2-POLE-003,author_check,虚线邻点桥接仅是可审计的视觉指南，不是重算、插值数据产品或物理正则化结果。,tables/pole_sensitive_mask.csv; figures/plot_manifest.json,不得替换 canonical production 图或作为未注明处理的论文曲线。
+CLAIM-V2-POLE-003,supported,虚线邻点桥接仅用于项目内部审计，不进入论文候选图；它不是重算或物理正则化结果。,tables/pole_sensitive_mask.csv; figures/plot_manifest.json,内部审计图不得作为未注明处理的论文曲线。
 CLAIM-V2-POLE-004,author_check,若需要物理意义上的平滑曲线，应先定义有限宽度或极点正则化并用新 slug 重跑。,README.md,本分析 PR 不修改传播子模型。
+CLAIM-V2-POLE-005,author_directed_candidate,论文候选图以连续实线使用相邻真实点替换已确认的数值噪点，不显示修正标记；一阶相变点以星号标注并保留原始物理跳变。,tables/paper_display_replacements.csv; tables/paper_first_order_markers.csv; paper_figures/plot_manifest.json,仅适用于本表列出的 13 个派生显示替换值与 6 个一阶标记点。

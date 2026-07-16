@@ -15,6 +15,7 @@ import datetime as dt
 import hashlib
 import json
 import math
+import shutil
 import subprocess
 from collections import defaultdict
 from pathlib import Path
@@ -48,6 +49,7 @@ OUT_DIR = (
 )
 TABLE_DIR = OUT_DIR / "tables"
 DERIVED_FIGURE_DIR = OUT_DIR / "figures"
+PAPER_FIGURE_DIR = OUT_DIR / "paper_figures"
 
 MODE_CONFIG = {
     "mode_a": {
@@ -74,6 +76,7 @@ DISPLAY_LABELS = {
     "zeta_over_s": r"$\zeta/s$",
     "sigma_over_T": r"$\sigma/T$",
 }
+PAPER_COLORS = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE"]
 TRANSFER_TOL = 1.0e-3
 DISPLAY_LOG_THRESHOLD = 0.03
 
@@ -381,7 +384,8 @@ def build_window_and_point_audits(
             prev_value = f(prev, observable)
             target_value = f(target, observable)
             next_value = f(next_row, observable)
-            guide_value = 0.5 * (prev_value + next_value)
+            interpolation_weight = (target_xi - prev_xi) / (next_xi - prev_xi)
+            guide_value = prev_value + interpolation_weight * (next_value - prev_value)
             log_delta = signed_log_delta(guide_value, target_value)
             tau_candidate = observable in affected_tau
             transport_candidate = (
@@ -562,6 +566,183 @@ def render_first_order_window(
     return path
 
 
+def paper_replacement_rows(mask_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in mask_rows:
+        if row["observable"] not in DISPLAY_FIELDS:
+            continue
+        rows.append(
+            {
+                "window_id": row["window_id"],
+                "mode_key": row["mode_key"],
+                "plot_panel": row["plot_panel"],
+                "plot_series": row["plot_series"],
+                "observable": row["observable"],
+                "xi": row["target_xi"],
+                "raw_production_value": row["raw_target_value"],
+                "paper_display_value": row["linear_neighbor_guide_value"],
+                "left_xi": row["prev_xi"],
+                "left_value": row["prev_value"],
+                "right_xi": row["next_xi"],
+                "right_value": row["next_value"],
+                "replacement_method": "linear interpolation between adjacent unmasked production samples",
+                "figure_semantics": "clean continuous line; no correction marker in paper candidate",
+                "canonical_data_modified": False,
+            }
+        )
+    return rows
+
+
+def paper_marker_rows(
+    loaded: dict[str, dict[str, Any]], first_order_rows: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for window in first_order_rows:
+        target = curve_row(
+            loaded,
+            window["mode_key"],
+            window["plot_panel"],
+            window["plot_series"],
+            float(window["target_xi"]),
+        )
+        for observable in DISPLAY_FIELDS:
+            rows.append(
+                {
+                    "window_id": window["window_id"],
+                    "mode_key": window["mode_key"],
+                    "plot_panel": window["plot_panel"],
+                    "plot_series": window["plot_series"],
+                    "observable": observable,
+                    "xi": window["target_xi"],
+                    "raw_production_value": f(target, observable),
+                    "marker": "star",
+                    "marker_semantics": "first-order/upstream branch transition point retained without smoothing",
+                }
+            )
+    return rows
+
+
+def configure_paper_style() -> None:
+    matplotlib.rcParams.update(
+        {
+            "font.family": "serif",
+            "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
+            "font.size": 10,
+            "mathtext.fontset": "stix",
+            "axes.labelsize": 10,
+            "axes.linewidth": 0.6,
+            "legend.fontsize": 8,
+            "legend.frameon": False,
+            "xtick.labelsize": 8,
+            "ytick.labelsize": 8,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "pdf.fonttype": 42,
+            "ps.fonttype": 42,
+        }
+    )
+
+
+def render_paper_figures(
+    loaded: dict[str, dict[str, Any]],
+    replacements: list[dict[str, Any]],
+    markers: list[dict[str, Any]],
+) -> list[Path]:
+    configure_paper_style()
+    replacement_index = {
+        (
+            row["mode_key"],
+            row["plot_panel"],
+            row["plot_series"],
+            row["observable"],
+            f"{float(row['xi']):.10f}",
+        ): float(row["paper_display_value"])
+        for row in replacements
+    }
+    marker_index = {
+        (
+            row["mode_key"],
+            row["plot_panel"],
+            row["plot_series"],
+            row["observable"],
+        ): row
+        for row in markers
+    }
+    paths: list[Path] = []
+    for mode_key, payload in loaded.items():
+        panels = sorted({panel for panel, _ in payload["curves"]})
+        for panel in panels:
+            series_names = sorted(
+                series for current_panel, series in payload["curves"] if current_panel == panel
+            )
+            for observable in DISPLAY_FIELDS:
+                fig, ax = plt.subplots(figsize=(6.75, 4.6))
+                marker_present = False
+                for series_index, series in enumerate(series_names):
+                    curve = payload["curves"][(panel, series)]
+                    color = PAPER_COLORS[series_index % len(PAPER_COLORS)]
+                    xs = [f(row, "xi") for row in curve]
+                    ys: list[float] = []
+                    for row in curve:
+                        key = (
+                            mode_key,
+                            panel,
+                            series,
+                            observable,
+                            f"{f(row, 'xi'):.10f}",
+                        )
+                        ys.append(replacement_index.get(key, f(row, observable)))
+                    ax.plot(
+                        xs,
+                        ys,
+                        color=color,
+                        linewidth=1.5,
+                        label=curve[0]["plot_series_label"],
+                    )
+                    marker = marker_index.get((mode_key, panel, series, observable))
+                    if marker is not None:
+                        marker_present = True
+                        ax.scatter(
+                            [float(marker["xi"])],
+                            [float(marker["raw_production_value"])],
+                            marker="*",
+                            s=95,
+                            facecolor=color,
+                            edgecolor="black",
+                            linewidth=0.55,
+                            zorder=5,
+                        )
+                if marker_present:
+                    ax.scatter(
+                        [],
+                        [],
+                        marker="*",
+                        s=75,
+                        facecolor="white",
+                        edgecolor="black",
+                        linewidth=0.55,
+                        label="first-order transition",
+                    )
+                ax.set_xlabel(r"$\xi$")
+                ax.set_ylabel(DISPLAY_LABELS[observable])
+                ax.set_xlim(-0.52, 0.52)
+                ax.legend(loc="best")
+                fig.tight_layout()
+                path = (
+                    PAPER_FIGURE_DIR
+                    / mode_key
+                    / f"plot_panel={panel}"
+                    / f"{observable}_vs_xi.png"
+                )
+                path.parent.mkdir(parents=True, exist_ok=True)
+                fig.savefig(path, dpi=600, bbox_inches="tight", pad_inches=0.08)
+                plt.close(fig)
+                paths.append(path)
+    return paths
+
+
 def build_claim_ledger() -> list[dict[str, Any]]:
     return [
         {
@@ -580,10 +761,10 @@ def build_claim_ledger() -> list[dict[str, Any]]:
         },
         {
             "claim_id": "CLAIM-V2-POLE-003",
-            "status": "author_check",
-            "claim_zh": "虚线邻点桥接仅是可审计的视觉指南，不是重算、插值数据产品或物理正则化结果。",
+            "status": "supported",
+            "claim_zh": "虚线邻点桥接仅用于项目内部审计，不进入论文候选图；它不是重算或物理正则化结果。",
             "evidence": "tables/pole_sensitive_mask.csv; figures/plot_manifest.json",
-            "scope_limit": "不得替换 canonical production 图或作为未注明处理的论文曲线。",
+            "scope_limit": "内部审计图不得作为未注明处理的论文曲线。",
         },
         {
             "claim_id": "CLAIM-V2-POLE-004",
@@ -591,6 +772,13 @@ def build_claim_ledger() -> list[dict[str, Any]]:
             "claim_zh": "若需要物理意义上的平滑曲线，应先定义有限宽度或极点正则化并用新 slug 重跑。",
             "evidence": "README.md",
             "scope_limit": "本分析 PR 不修改传播子模型。",
+        },
+        {
+            "claim_id": "CLAIM-V2-POLE-005",
+            "status": "author_directed_candidate",
+            "claim_zh": "论文候选图以连续实线使用相邻真实点替换已确认的数值噪点，不显示修正标记；一阶相变点以星号标注并保留原始物理跳变。",
+            "evidence": "tables/paper_display_replacements.csv; tables/paper_first_order_markers.csv; paper_figures/plot_manifest.json",
+            "scope_limit": "仅适用于本表列出的 13 个派生显示替换值与 6 个一阶标记点。",
         },
     ]
 
@@ -601,6 +789,9 @@ def render_readme(
     mask_rows: list[dict[str, Any]],
     first_order_rows: list[dict[str, Any]],
     figure_paths: list[Path],
+    paper_figure_paths: list[Path],
+    paper_replacements: list[dict[str, Any]],
+    paper_markers: list[dict[str, Any]],
 ) -> str:
     pole_windows = [row for row in classifications if row["classification"] == "pole_sensitive_supported"]
     mask_by_window: dict[str, list[str]] = defaultdict(list)
@@ -623,6 +814,9 @@ def render_readme(
         for row in first_order_rows
     )
     figure_lines = "\n".join(f"- `{relpath(path)}`" for path in figure_paths)
+    paper_figure_lines = "\n".join(
+        f"- `{relpath(path)}`" for path in paper_figure_paths
+    )
     return f"""# Phase-guided transport v2 极点敏感派生显示审计
 
 ## 范围与结论
@@ -666,11 +860,24 @@ def render_readme(
 
 每个 pole-sensitive 图包含 primary tau 与 `eta_over_s/zeta_over_s/sigma_over_T` 四个局部面板。每个一阶图包含相同的下游比值与 `tau_u`，用于核对跳变未被删除。
 
+## 论文候选图
+
+{paper_figure_lines}
+
+论文候选图沿用正式图的固定 panel、多曲线布局，只绘制 `eta_over_s`、`zeta_over_s` 和 `sigma_over_T`：
+
+1. 共生成 `{len(paper_figure_paths)}` 张 600 DPI 图；
+2. `{len(paper_replacements)}` 个已确认的小分母下游噪点在派生绘图值中由左右相邻真实样本线性插值替换，图面只显示正常连续实线，不显示叉号、空心点、虚线或修正标签；
+3. `{len(paper_markers)}` 个 observable-level 一阶位置以星号标在对应曲线上，不使用竖直虚线；
+4. 星号处仍使用 raw production 值，一阶/上游分支跳变没有被平滑；
+5. 替换值与星号位置分别记录在 `tables/paper_display_replacements.csv` 和 `tables/paper_first_order_markers.csv`。图面不呈现内部修正痕迹，但仓库内保留完整可追溯记录。
+
 ## 证据边界与作者判断
 
 - `supported`：v2 输入完整、无 failed/NaN/负 rate，v1→v2 tau/rate 迁移门槛通过；一阶窗口保护规则明确。
 - `supported_with_scope_limit`：8 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
-- `author_check`：是否允许把带显式标注的派生图用于论文展示；是否需要计算层有限宽度/极点正则化和新 production slug。
+- `author_directed_candidate`：论文候选图按作者约定隐藏数值修正痕迹，并用星号标示一阶相变位置；仍需最终视觉审核后决定是否采用。
+- `author_check`：是否需要计算层有限宽度/极点正则化和新 production slug。
 - 本包不把小分母结构直接定性为随机数值噪声，也不把虚线桥接升级为物理预测。
 
 ## 复现
@@ -686,8 +893,11 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/rendered_point_audit.csv`
 - `tables/pole_sensitive_mask.csv`
 - `tables/first_order_protection.csv`
+- `tables/paper_display_replacements.csv`
+- `tables/paper_first_order_markers.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
+- `paper_figures/plot_manifest.json`
 """
 
 
@@ -781,6 +991,44 @@ def main() -> None:
             "protection_reason",
         ],
     )
+    paper_replacements = paper_replacement_rows(mask_rows)
+    paper_markers = paper_marker_rows(loaded, first_order_rows)
+    write_csv(
+        TABLE_DIR / "paper_display_replacements.csv",
+        paper_replacements,
+        [
+            "window_id",
+            "mode_key",
+            "plot_panel",
+            "plot_series",
+            "observable",
+            "xi",
+            "raw_production_value",
+            "paper_display_value",
+            "left_xi",
+            "left_value",
+            "right_xi",
+            "right_value",
+            "replacement_method",
+            "figure_semantics",
+            "canonical_data_modified",
+        ],
+    )
+    write_csv(
+        TABLE_DIR / "paper_first_order_markers.csv",
+        paper_markers,
+        [
+            "window_id",
+            "mode_key",
+            "plot_panel",
+            "plot_series",
+            "observable",
+            "xi",
+            "raw_production_value",
+            "marker",
+            "marker_semantics",
+        ],
+    )
     claims = build_claim_ledger()
     write_csv(
         TABLE_DIR / "claim_ledger.csv",
@@ -794,6 +1042,12 @@ def main() -> None:
             figure_paths.append(render_pole_window(loaded, window, point_audit))
         else:
             figure_paths.append(render_first_order_window(loaded, window))
+
+    if PAPER_FIGURE_DIR.exists():
+        shutil.rmtree(PAPER_FIGURE_DIR)
+    paper_figure_paths = render_paper_figures(
+        loaded, paper_replacements, paper_markers
+    )
 
     generator_path = Path(__file__).resolve()
     plot_manifest = {
@@ -810,12 +1064,36 @@ def main() -> None:
         ],
     }
     write_json(DERIVED_FIGURE_DIR / "plot_manifest.json", plot_manifest)
+    paper_plot_manifest = {
+        "schema": "phase_guided_v2_paper_candidate_plot_manifest_v1",
+        "case": V2_CASE,
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "base_git_commit": git_head(),
+        "generator": relpath(generator_path),
+        "generator_sha256": sha256_file(generator_path),
+        "observables": DISPLAY_FIELDS,
+        "paper_display_replacement_count": len(paper_replacements),
+        "first_order_marker_count": len(paper_markers),
+        "rendering_semantics": "clean continuous paper-candidate lines use audited derived replacements without visible correction marks; stars retain raw first-order transition values; no vertical transition lines",
+        "figures": [
+            {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
+            for path in paper_figure_paths
+        ],
+    }
+    write_json(PAPER_FIGURE_DIR / "plot_manifest.json", paper_plot_manifest)
 
     readme_path = OUT_DIR / "README.md"
     with readme_path.open("w", encoding="utf-8", newline="\n") as handle:
         handle.write(
             render_readme(
-                inventory, classifications, mask_rows, first_order_rows, figure_paths
+                inventory,
+                classifications,
+                mask_rows,
+                first_order_rows,
+                figure_paths,
+                paper_figure_paths,
+                paper_replacements,
+                paper_markers,
             )
         )
     output_paths = [
@@ -823,6 +1101,8 @@ def main() -> None:
         *sorted(TABLE_DIR.glob("*.csv")),
         DERIVED_FIGURE_DIR / "plot_manifest.json",
         *figure_paths,
+        PAPER_FIGURE_DIR / "plot_manifest.json",
+        *paper_figure_paths,
     ]
     manifest = {
         "schema": "phase_guided_v2_pole_sensitive_analysis_manifest_v1",
@@ -842,6 +1122,9 @@ def main() -> None:
                 row["classification"] == "first_order_protected" for row in classifications
             ),
             "mask_rows": len(mask_rows),
+            "paper_display_replacements": len(paper_replacements),
+            "paper_first_order_markers": len(paper_markers),
+            "paper_figures": len(paper_figure_paths),
         },
         "inputs": [
             {
@@ -861,7 +1144,8 @@ def main() -> None:
     write_json(OUT_DIR / "manifest.json", manifest)
     print(
         f"wrote {relpath(OUT_DIR)}: {len(classifications)} windows, "
-        f"{len(mask_rows)} mask rows, {len(figure_paths)} figures"
+        f"{len(mask_rows)} mask rows, {len(figure_paths)} audit figures, "
+        f"{len(paper_figure_paths)} paper figures"
     )
 
 

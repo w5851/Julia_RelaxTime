@@ -59,11 +59,41 @@
 
 每个 pole-sensitive 图包含 primary tau 与 `eta_over_s/zeta_over_s/sigma_over_T` 四个局部面板。每个一阶图包含相同的下游比值与 `tau_u`，用于核对跳变未被删除。
 
+## 论文候选图
+
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/sigma_over_T_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB450.0/sigma_over_T_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/sigma_over_T_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T120.0/sigma_over_T_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T160.0/sigma_over_T_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/eta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/zeta_over_s_vs_xi.png`
+- `docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_b/plot_panel=T200.0/sigma_over_T_vs_xi.png`
+
+论文候选图沿用正式图的固定 panel、多曲线布局，只绘制 `eta_over_s`、`zeta_over_s` 和 `sigma_over_T`：
+
+1. 共生成 `18` 张 600 DPI 图；
+2. `13` 个已确认的小分母下游噪点在派生绘图值中由左右相邻真实样本线性插值替换，图面只显示正常连续实线，不显示叉号、空心点、虚线或修正标签；
+3. `6` 个 observable-level 一阶位置以星号标在对应曲线上，不使用竖直虚线；
+4. 星号处仍使用 raw production 值，一阶/上游分支跳变没有被平滑；
+5. 替换值与星号位置分别记录在 `tables/paper_display_replacements.csv` 和 `tables/paper_first_order_markers.csv`。图面不呈现内部修正痕迹，但仓库内保留完整可追溯记录。
+
 ## 证据边界与作者判断
 
 - `supported`：v2 输入完整、无 failed/NaN/负 rate，v1→v2 tau/rate 迁移门槛通过；一阶窗口保护规则明确。
 - `supported_with_scope_limit`：8 个窗口已有 denominator-chain 与生产 rate 复现证据，但没有逐窗口新的 high-rate convergence gate。
-- `author_check`：是否允许把带显式标注的派生图用于论文展示；是否需要计算层有限宽度/极点正则化和新 production slug。
+- `author_directed_candidate`：论文候选图按作者约定隐藏数值修正痕迹，并用星号标示一阶相变位置；仍需最终视觉审核后决定是否采用。
+- `author_check`：是否需要计算层有限宽度/极点正则化和新 production slug。
 - 本包不把小分母结构直接定性为随机数值噪声，也不把虚线桥接升级为物理预测。
 
 ## 复现
@@ -79,5 +109,8 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/rendered_point_audit.csv`
 - `tables/pole_sensitive_mask.csv`
 - `tables/first_order_protection.csv`
+- `tables/paper_display_replacements.csv`
+- `tables/paper_first_order_markers.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
+- `paper_figures/plot_manifest.json`

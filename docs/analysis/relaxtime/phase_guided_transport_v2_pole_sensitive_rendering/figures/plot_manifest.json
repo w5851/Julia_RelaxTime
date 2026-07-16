@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_v2_pole_sensitive_plot_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-  "generated_at": "2026-07-16T06:16:06.418006+00:00",
-  "base_git_commit": "fdee1b981ced6526041f5e28866a255e717d09a4",
+  "generated_at": "2026-07-16T06:56:57.310213+00:00",
+  "base_git_commit": "592f73d4916ae19e343996ff4fe9758469fb2f20",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
-  "generator_sha256": "15f8f35c7cd2c3702d53867b2242c444c562d8c9d13d4003d3aa5af3f3e7b9a0",
+  "generator_sha256": "69a40deae1cf676093423d8c833f4c01a2c819e9ca40376926433478bc0f18f9",
   "rendering_semantics": "raw points retained; eligible points excluded only from solid display guide; dashed neighbor bridge is not recomputed physics",
   "figures": [
     {

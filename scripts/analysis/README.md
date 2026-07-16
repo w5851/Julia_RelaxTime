@@ -10,7 +10,7 @@
 - `relaxtime/audit_bu_meson_density_literature_alignment.jl`：面向 BU 介子数密度文献对齐审查的 fixed-point / phase normalization / charged `μ_K` 规则诊断脚本
 - `relaxtime/build_phase_guided_transport_xi001_jump_analysis.py`：基于 xi=0.01 p128 phase-guided transport 正式产物生成 tau-first 突变分析包，并把 `eta_over_s` / `zeta_over_s` 作为 tau 下游响应处理
 - `relaxtime/phase_guided_p128_mechanism_scan.jl`：消费 xi001 分析包生成的 mechanism window candidates，对 phase-guided transport 局部窗口执行 denominator-chain / rate-band 机制深拆并写回分析包表格
-- `relaxtime/build_phase_guided_pole_sensitive_rendering.py`：验证 v1→v2 tau/rate 机制迁移门槛，生成不改写正式产物的极点敏感 mask、虚线邻点桥接候选图和一阶窗口保护审计
+- `relaxtime/build_phase_guided_pole_sensitive_rendering.py`：验证 v1→v2 tau/rate 机制迁移门槛，生成不改写正式产物的内部极点敏感审计，以及隐藏数值修正痕迹、用星号标示一阶相变点的多曲线论文候选图
 
 ## 使用说明
 
