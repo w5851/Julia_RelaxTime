@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点代码正在 `codex/issue-130-bulk-equilibrium-context` 分支收敛，修复后的新 production 尚未执行
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点代码已提交 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 等待 review，修复后的新 production 尚未执行
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -454,7 +454,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 补扫并修正作者发现的两个 `mu_B=0` 残留显示噪点。
 - [x] 定位 `mu_B=900, alpha_T=1.0, xi=-0.01` 的 `zeta/s` 回落为主 continuation 亚稳支与 bulk 稳定支混用，并用同口径双根热力学势完成归因。
 - [x] 审计旧插值 phase anchor，完成当前 `12/6` 口径的直接等势温度 bracket 与 `xi=±0.003` 双侧相别认证。
-- [x] 通过独立代码分支在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；待 PR review/合并。
+- [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；待 review/合并。
 - [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
 - [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
 - [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。
