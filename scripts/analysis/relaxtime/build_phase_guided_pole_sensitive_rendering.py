@@ -52,6 +52,7 @@ DERIVED_FIGURE_DIR = OUT_DIR / "figures"
 PAPER_FIGURE_DIR = OUT_DIR / "paper_figures"
 SUPPLEMENTAL_MECHANISM_DIR = OUT_DIR / "supplemental_muB0_noise_mechanism"
 BULK_BRANCH_AUDIT_PATH = TABLE_DIR / "bulk_derivative_branch_audit.csv"
+PHASE_ANCHOR_AUDIT_PATH = TABLE_DIR / "phase_anchor_coexistence_audit.csv"
 BULK_BRANCH_AUDIT_GENERATOR = (
     ROOT / "scripts" / "analysis" / "relaxtime" / "audit_phase_guided_bulk_branch_consistency.jl"
 )
@@ -342,21 +343,45 @@ def source_window_tables() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     return [*window_rows, *supplemental_windows], [*mechanism_rows, *supplemental_mechanisms]
 
 
-def validate_bulk_branch_audit() -> list[dict[str, str]]:
+def validate_bulk_branch_audit() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     rows = read_csv_with_comments(BULK_BRANCH_AUDIT_PATH)
     if len(rows) != 3:
         raise ValueError(f"expected 3 bulk branch audit rows, got {len(rows)}")
     by_xi = {round(finite_float(row["xi"]), 2): row for row in rows}
     if set(by_xi) != {-0.02, -0.01, 0.0}:
         raise ValueError(f"unexpected bulk branch audit xi values: {sorted(by_xi)}")
-    if by_xi[-0.01]["verdict"] != "bulk_derivative_branch_mismatch":
-        raise ValueError("bulk branch audit did not flag xi=-0.01")
+    if (
+        by_xi[-0.01]["verdict"]
+        != "main_continuation_metastable_bulk_stable_branch_mismatch"
+    ):
+        raise ValueError("bulk branch audit did not resolve xi=-0.01 stability")
     if any(
         by_xi[xi]["verdict"] != "main_and_bulk_branch_aligned"
         for xi in (-0.02, 0.0)
     ):
         raise ValueError("bulk branch audit alignment controls failed")
-    return rows
+    if any(
+        (row["thermo_p_num"], row["thermo_t_num"]) != ("12", "6")
+        for row in rows
+    ):
+        raise ValueError("bulk branch audit does not reproduce production thermodynamic numerics")
+    if (
+        by_xi[-0.01]["main_is_stable"].lower() != "false"
+        or by_xi[-0.01]["bulk_is_stable"].lower() != "true"
+    ):
+        raise ValueError("xi=-0.01 stability attribution is inconsistent")
+
+    phase_anchor_rows = read_csv_with_comments(PHASE_ANCHOR_AUDIT_PATH)
+    if len(phase_anchor_rows) != 1:
+        raise ValueError(
+            f"expected one phase-anchor audit row, got {len(phase_anchor_rows)}"
+        )
+    phase_anchor = phase_anchor_rows[0]
+    if phase_anchor["two_sided_bracket_certified"].lower() != "true":
+        raise ValueError("near-coexistence xi points do not certify both stable sides")
+    if finite_float(phase_anchor["coexistence_minus_interpolated_T_MeV"]) <= 0.5:
+        raise ValueError("phase-anchor audit did not resolve the interpolation offset")
+    return rows, phase_anchor_rows
 
 
 def curve_row(
@@ -861,9 +886,16 @@ def build_claim_ledger(
         {
             "claim_id": "CLAIM-V2-POLE-006",
             "status": "implementation_issue_supported",
-            "claim_zh": "mode A 的 muB=900、alpha_T=1.0 曲线在 xi=-0.01 的 zeta/s 回落由 bulk 导数路径提前切换到相变后质量分支支持，不是旧分析已确认的物理非单调趋势。",
+            "claim_zh": "mode A 的 muB=900、alpha_T=1.0、xi=-0.01 主扫描 continuation 保留了亚稳低质量夸克候选，而 bulk 独立求解选择了热力学势更低的稳定高质量强子候选；当前 zeta/s 因而混用了两个分支。",
             "evidence": "tables/bulk_derivative_branch_audit.csv; data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
-            "scope_limit": "本分析 PR 只记录分支不一致；在 workflow 复用主平衡态分支并重跑 production 前，不修正或平滑该 zeta/s 点。",
+            "scope_limit": "本分析 PR 只修正稳定性归因；在主平衡态治理和 bulk base_state 复用完成并重跑 production 前，不修正或平滑该 zeta/s 点。",
+        },
+        {
+            "claim_id": "CLAIM-V2-POLE-007",
+            "status": "numerical_anchor_issue_supported",
+            "claim_zh": "当前 mode A 在 muB=900 MeV 的 alpha_T=1.0 温度来自旧稀疏 boundary.csv 插值，比同一 12/6 热力学口径下直接两分支等势温度低约 0.697 MeV；xi=-0.003 与 +0.003 可在暂定共存温度 bracket 两端分别认证为稳定夸克相和稳定强子相。",
+            "evidence": "tables/phase_anchor_coexistence_audit.csv; data/reference/pnjl/boundary.csv",
+            "scope_limit": "该表只完成当前 production 口径的定点审计；正式相变锚点仍需双分支追踪和热力学节点收敛 gate。",
         },
     ]
 
@@ -949,15 +981,21 @@ def render_readme(
 
 ## `zeta/s` 相变前回落的分支一致性审计
 
-对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00` 重新调用 production workflow 当前使用的 `Models.bulk_viscosity_coefficients`。结果见 `tables/bulk_derivative_branch_audit.csv`：
+对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00`，使用与 production 主平衡态一致的 `p_num=12,t_num=6` 重新调用 `Models.bulk_viscosity_coefficients`，并从强子/夸克种子分别求候选根、比较热力学势。结果见 `tables/bulk_derivative_branch_audit.csv`：
 
 - `xi=-0.02` 与 `xi=0.00` 时，bulk 导数路径的轻味质量与主 production 平衡态处于同一分支；
-- `xi=-0.01` 时，主平衡态仍为 `m_u=0.73435 fm^-1`，而 bulk 导数路径内部已经得到 `m_u=1.37979 fm^-1`，相对差约 46.8%；同时 `dmuB/dT|sigma` 与质量导数发生显著换支；
+- `xi=-0.01` 时，主 production continuation 保留 `m_u=0.73435 fm^-1` 的低质量夸克候选，而 bulk 得到 `m_u=1.37470 fm^-1` 的高质量强子候选；两根的 `Omega_h-Omega_q=-1.2548e-3 fm^-4`，因此强子候选才是该离散口径下的稳定平衡态；
 - `xi=-0.02 -> -0.01` 虽然 `tau_u` 上升且熵下降，`zeta` 本身却由 `1.85047` 降至 `1.49245`，因此回落来自 bulk `B^2` 核/热力学导数，而不是 tau 或除以熵造成。
 
-当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。因此该回落被判定为**导数路径提前切换分支所支持的实现一致性问题**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；需要后续代码修复使 bulk 导数复用或锁定主平衡态分支，并重跑受影响 production 后再决定论文曲线。
+当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。该回落因此被重新判定为**主 continuation 保留亚稳分支、bulk 选择稳定分支后造成的混合分支结果**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；后续代码必须先按热力学势选择主稳定态，再让 bulk 复用同一 `base_state`。
 
-旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有审计 `xi=-0.01` 的 bulk 导数内部质量，因此没有覆盖本次发现的提前换支。
+旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有在同一点比较两个候选根的热力学势，因此没有覆盖本次发现的亚稳 continuation。
+
+## `alpha_T=1.0` 相变锚点审计
+
+结果见 `tables/phase_anchor_coexistence_audit.csv`。当前 `mu_B=900 MeV` 的 `T=125.06992 MeV` 来自旧 `data/reference/pnjl/boundary.csv` 在 `T=110,130 MeV` 两点之间的线性插值；在相同 `p_num=12,t_num=6` 口径下直接求 `xi=0` 两分支等势，得到 bracket 中点 `T=125.76661 MeV`，比旧锚点高约 `0.69669 MeV`。
+
+在该共存温度 bracket 的上下端，`xi=-0.003` 均稳定为夸克候选，`xi=+0.003` 均稳定为强子候选，首轮双侧夹逼认证通过。该结果支持后续采用“共存点不输出唯一输运量、以认证后的两侧近邻表示单边结果”的设计，但正式 production 前仍需完成双分支连续追踪与热力学积分节点收敛审计。旧 `boundary.csv` 可保留为相图与初始 bracket 证据，不再作为导数敏感 production 的唯一精确锚点。
 
 ## 派生图
 
@@ -1004,6 +1042,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/paper_display_replacements.csv`
 - `tables/paper_first_order_markers.csv`
 - `tables/bulk_derivative_branch_audit.csv`
+- `tables/phase_anchor_coexistence_audit.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
 - `paper_figures/plot_manifest.json`
@@ -1012,7 +1051,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 
 def main() -> None:
     loaded, inventory = load_and_validate_inputs()
-    bulk_branch_rows = validate_bulk_branch_audit()
+    bulk_branch_rows, phase_anchor_rows = validate_bulk_branch_audit()
     source_windows, mechanism_rows = source_window_tables()
     classifications, point_audit, mask_rows, first_order_rows = build_window_and_point_audits(
         loaded, source_windows, mechanism_rows
@@ -1185,7 +1224,7 @@ def main() -> None:
         "paper_display_replacement_count": len(paper_replacements),
         "first_order_marker_count": len(paper_markers),
         "manuscript_eligible": False,
-        "paper_readiness": "candidate_with_known_bulk_derivative_branch_exclusion",
+        "paper_readiness": "candidate_with_known_mixed_equilibrium_branch_exclusion",
         "known_exclusions": [
             {
                 "figure": relpath(
@@ -1196,7 +1235,7 @@ def main() -> None:
                 ),
                 "plot_series": "alpha1.0",
                 "xi": -0.01,
-                "reason": "bulk derivative path switches to the high-mass branch before the production equilibrium branch",
+                "reason": "the production continuation retains a metastable low-mass quark candidate while bulk uses the stable high-mass hadron candidate",
                 "evidence": relpath(BULK_BRANCH_AUDIT_PATH),
             }
         ],
@@ -1285,7 +1324,15 @@ def main() -> None:
             "sha256": sha256_file(BULK_BRANCH_AUDIT_PATH),
             "generator": relpath(BULK_BRANCH_AUDIT_GENERATOR),
             "generator_sha256": sha256_file(BULK_BRANCH_AUDIT_GENERATOR),
-            "verdict": "bulk_derivative_branch_mismatch_at_xi_minus_0p01",
+            "verdict": "main_continuation_metastable_bulk_stable_branch_mismatch_at_xi_minus_0p01",
+        },
+        "phase_anchor_audit": {
+            "rows": len(phase_anchor_rows),
+            "path": relpath(PHASE_ANCHOR_AUDIT_PATH),
+            "sha256": sha256_file(PHASE_ANCHOR_AUDIT_PATH),
+            "generator": relpath(BULK_BRANCH_AUDIT_GENERATOR),
+            "generator_sha256": sha256_file(BULK_BRANCH_AUDIT_GENERATOR),
+            "verdict": "interpolated_boundary_anchor_is_not_the_direct_coexistence_temperature",
         },
         "outputs": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}

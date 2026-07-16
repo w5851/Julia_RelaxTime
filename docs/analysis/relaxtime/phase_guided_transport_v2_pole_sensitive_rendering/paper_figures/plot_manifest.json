@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_v2_paper_candidate_plot_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-  "generated_at": "2026-07-16T08:29:25.431135+00:00",
-  "base_git_commit": "73b0c38d776e2791d472217cfffefdbc4e631a22",
+  "generated_at": "2026-07-16T12:19:41.301231+00:00",
+  "base_git_commit": "96770552c16e02905c57829bebade4cac736e84c",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
-  "generator_sha256": "681c31eb16b66592ab0ecec6af5e4960ee3269f63f5d41adffb7e02064387582",
+  "generator_sha256": "b426ee33a96c8ed2f34b2535e310c0e84548b68d0c12f3e58a90417754a9bc9d",
   "observables": [
     "eta_over_s",
     "zeta_over_s",
@@ -13,13 +13,13 @@
   "paper_display_replacement_count": 19,
   "first_order_marker_count": 6,
   "manuscript_eligible": false,
-  "paper_readiness": "candidate_with_known_bulk_derivative_branch_exclusion",
+  "paper_readiness": "candidate_with_known_mixed_equilibrium_branch_exclusion",
   "known_exclusions": [
     {
       "figure": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
       "plot_series": "alpha1.0",
       "xi": -0.01,
-      "reason": "bulk derivative path switches to the high-mass branch before the production equilibrium branch",
+      "reason": "the production continuation retains a metastable low-mass quark candidate while bulk uses the stable high-mass hadron candidate",
       "evidence": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/bulk_derivative_branch_audit.csv"
     }
   ],

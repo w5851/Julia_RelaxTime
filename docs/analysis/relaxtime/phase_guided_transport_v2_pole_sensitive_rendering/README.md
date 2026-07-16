@@ -50,15 +50,21 @@
 
 ## `zeta/s` 相变前回落的分支一致性审计
 
-对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00` 重新调用 production workflow 当前使用的 `Models.bulk_viscosity_coefficients`。结果见 `tables/bulk_derivative_branch_audit.csv`：
+对 `mode_a, mu_B=900, alpha_T=1.0` 的 `xi=-0.02,-0.01,0.00`，使用与 production 主平衡态一致的 `p_num=12,t_num=6` 重新调用 `Models.bulk_viscosity_coefficients`，并从强子/夸克种子分别求候选根、比较热力学势。结果见 `tables/bulk_derivative_branch_audit.csv`：
 
 - `xi=-0.02` 与 `xi=0.00` 时，bulk 导数路径的轻味质量与主 production 平衡态处于同一分支；
-- `xi=-0.01` 时，主平衡态仍为 `m_u=0.73435 fm^-1`，而 bulk 导数路径内部已经得到 `m_u=1.37979 fm^-1`，相对差约 46.8%；同时 `dmuB/dT|sigma` 与质量导数发生显著换支；
+- `xi=-0.01` 时，主 production continuation 保留 `m_u=0.73435 fm^-1` 的低质量夸克候选，而 bulk 得到 `m_u=1.37470 fm^-1` 的高质量强子候选；两根的 `Omega_h-Omega_q=-1.2548e-3 fm^-4`，因此强子候选才是该离散口径下的稳定平衡态；
 - `xi=-0.02 -> -0.01` 虽然 `tau_u` 上升且熵下降，`zeta` 本身却由 `1.85047` 降至 `1.49245`，因此回落来自 bulk `B^2` 核/热力学导数，而不是 tau 或除以熵造成。
 
-当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。因此该回落被判定为**导数路径提前切换分支所支持的实现一致性问题**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；需要后续代码修复使 bulk 导数复用或锁定主平衡态分支，并重跑受影响 production 后再决定论文曲线。
+当前 workflow 在取得主 equilibrium 后，另行调用不接收该 equilibrium/seed/branch 的 `bulk_viscosity_coefficients`。该回落因此被重新判定为**主 continuation 保留亚稳分支、bulk 选择稳定分支后造成的混合分支结果**，不是已确认的物理非单调趋势，也不属于传播子小分母显示噪点。本 PR 不平滑这一点；后续代码必须先按热力学势选择主稳定态，再让 bulk 复用同一 `base_state`。
 
-旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有审计 `xi=-0.01` 的 bulk 导数内部质量，因此没有覆盖本次发现的提前换支。
+旧分析 `phase_guided_transport_p128_xi001_analysis` 只记录了 `xi=0` 主平衡态的一阶跳变，以及 tau 上升和熵下降对 `zeta/s` 跳升的放大；没有在同一点比较两个候选根的热力学势，因此没有覆盖本次发现的亚稳 continuation。
+
+## `alpha_T=1.0` 相变锚点审计
+
+结果见 `tables/phase_anchor_coexistence_audit.csv`。当前 `mu_B=900 MeV` 的 `T=125.06992 MeV` 来自旧 `data/reference/pnjl/boundary.csv` 在 `T=110,130 MeV` 两点之间的线性插值；在相同 `p_num=12,t_num=6` 口径下直接求 `xi=0` 两分支等势，得到 bracket 中点 `T=125.76661 MeV`，比旧锚点高约 `0.69669 MeV`。
+
+在该共存温度 bracket 的上下端，`xi=-0.003` 均稳定为夸克候选，`xi=+0.003` 均稳定为强子候选，首轮双侧夹逼认证通过。该结果支持后续采用“共存点不输出唯一输运量、以认证后的两侧近邻表示单边结果”的设计，但正式 production 前仍需完成双分支连续追踪与热力学积分节点收敛审计。旧 `boundary.csv` 可保留为相图与初始 bracket 证据，不再作为导数敏感 production 的唯一精确锚点。
 
 ## 派生图
 
@@ -133,6 +139,7 @@ python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 - `tables/paper_display_replacements.csv`
 - `tables/paper_first_order_markers.csv`
 - `tables/bulk_derivative_branch_audit.csv`
+- `tables/phase_anchor_coexistence_audit.csv`
 - `tables/claim_ledger.csv`
 - `figures/plot_manifest.json`
 - `paper_figures/plot_manifest.json`

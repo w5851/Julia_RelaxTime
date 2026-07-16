@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_v2_pole_sensitive_analysis_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-  "generated_at": "2026-07-16T08:29:25.969082+00:00",
-  "base_git_commit": "73b0c38d776e2791d472217cfffefdbc4e631a22",
+  "generated_at": "2026-07-16T12:19:41.946424+00:00",
+  "base_git_commit": "96770552c16e02905c57829bebade4cac736e84c",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py",
-  "generator_sha256": "681c31eb16b66592ab0ecec6af5e4960ee3269f63f5d41adffb7e02064387582",
+  "generator_sha256": "b426ee33a96c8ed2f34b2535e310c0e84548b68d0c12f3e58a90417754a9bc9d",
   "scope": "read-only production audit and explicitly labeled derived display candidates",
   "canonical_production_modified": false,
   "registry_modified": false,
@@ -86,26 +86,34 @@
   "bulk_branch_audit": {
     "rows": 3,
     "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/bulk_derivative_branch_audit.csv",
-    "sha256": "ce1270a27633751df83ac5a4e39710513ea658a5c8980665619c775cc8ba3e83",
+    "sha256": "8db819a09b19875b8cceef1524d43d9f686461670c4d391eb6f0f807ebf56b76",
     "generator": "scripts/analysis/relaxtime/audit_phase_guided_bulk_branch_consistency.jl",
-    "generator_sha256": "62915a053353818a8b9eb2ccb4dc11679208ed0773f62ed9b9dff03d0e07f618",
-    "verdict": "bulk_derivative_branch_mismatch_at_xi_minus_0p01"
+    "generator_sha256": "c17c0f33cea12faa909f7843ffbfff6b8bdda2909faae6ad058f1f1f3d5a8a4f",
+    "verdict": "main_continuation_metastable_bulk_stable_branch_mismatch_at_xi_minus_0p01"
+  },
+  "phase_anchor_audit": {
+    "rows": 1,
+    "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/phase_anchor_coexistence_audit.csv",
+    "sha256": "f00e5d5171f65d1f5b9ff13d654af310fc81bb7ecadda00c83911abad0be975a",
+    "generator": "scripts/analysis/relaxtime/audit_phase_guided_bulk_branch_consistency.jl",
+    "generator_sha256": "c17c0f33cea12faa909f7843ffbfff6b8bdda2909faae6ad058f1f1f3d5a8a4f",
+    "verdict": "interpolated_boundary_anchor_is_not_the_direct_coexistence_temperature"
   },
   "outputs": [
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/README.md",
-      "sha256": "d02623fba66427485ecc6ddaabf3e30cd4b53018b446a9c2c0c466a88c663b2f",
-      "bytes": 12650
+      "sha256": "bc0ff26d2cc325bfb3476360cf38aca1988a4908f7ce0661d7d5f57557b336da",
+      "bytes": 13757
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/bulk_derivative_branch_audit.csv",
-      "sha256": "ce1270a27633751df83ac5a4e39710513ea658a5c8980665619c775cc8ba3e83",
-      "bytes": 1826
+      "sha256": "8db819a09b19875b8cceef1524d43d9f686461670c4d391eb6f0f807ebf56b76",
+      "bytes": 2870
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/claim_ledger.csv",
-      "sha256": "225f22b9409fcf43e7e2d050ef07d5f1d46e8d0550266a29c8c2e7f81731f312",
-      "bytes": 2149
+      "sha256": "5d321f25203f42cd59680106ceaf972727be9418b5c0edc01418d13d3e7af8b2",
+      "bytes": 2747
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/first_order_protection.csv",
@@ -126,6 +134,11 @@
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/paper_first_order_markers.csv",
       "sha256": "67dcc0691e839d64c3f71ddd35f6bc820facf14087a765f0094b1bc7f12dcca7",
       "bytes": 1128
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/phase_anchor_coexistence_audit.csv",
+      "sha256": "f00e5d5171f65d1f5b9ff13d654af310fc81bb7ecadda00c83911abad0be975a",
+      "bytes": 1109
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/tables/pole_sensitive_mask.csv",
@@ -189,7 +202,7 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/figures/plot_manifest.json",
-      "sha256": "45f67e1293ace98b02624f41d8a7379e23067d40491b828437d309d6c5847dff",
+      "sha256": "e548713b98a146e0351b64753e550821f3830110e1a7b8642f83a36bea6db8c1",
       "bytes": 3918
     },
     {
@@ -254,8 +267,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/plot_manifest.json",
-      "sha256": "20d6350414f79388e2ae7f1b04f8461de159a0ebf8a82591733f19929ad4deba",
-      "bytes": 6353
+      "sha256": "3b022e6b60b238c7fe6a8303bb75c8ff2bbcda1c72075813a026b38f95373aef",
+      "bytes": 6388
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport_v2_pole_sensitive_rendering/paper_figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
