@@ -29,7 +29,7 @@
   - mode b：固定 `T`、离散 `mu_B`、连续扫描 `xi`。
   - mode a 的一阶区域默认使用 `--phase-anchor-policy direct_coexistence`：旧 phase reference 只提供初始 bracket，再以当前 `--p-num` / `--t-num`（默认 `12/6`）直接求两分支等热力学势温度；可显式传 `reference_interpolation` 复现旧计划口径。
   - 一阶可能区的每个主平衡态都由稳定多初值选优确定，温度/`xi` continuation 只作为候选 seed。bulk 复用同一点已经解析的热力学节点和主 equilibrium，不再独立重做全局 gap solve；若导数路径跨支则该点失败，而不是静默混合两支。
-  - 对直接锚定的 `alpha_T=1` 一阶共存切片，严格 `xi=0` 不定义唯一输运量，因此不进入计划；计划自适应加入经默认与 `24/8` 节点共同认证的负/正近零点，分别表示夸克侧和强子侧极限，并把 bracket、相别与收敛证据写入 `sampling_plan.csv`。
+  - 对直接锚定的 `alpha_T=1` 一阶共存切片，严格 `xi=0` 不定义唯一输运量，因此不进入计划；计划自适应加入经主热力学节点与独立更高节点共同认证的负/正近零点，分别表示夸克侧和强子侧极限，并把 bracket、相别与收敛证据写入 `sampling_plan.csv`。`12/6` 主节点使用 `24/8` 认证；`24/8` 主节点使用 `32/10` 认证，禁止同节点自比较。
   - 默认 canonical 输出根目录：
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/`
     - `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/`

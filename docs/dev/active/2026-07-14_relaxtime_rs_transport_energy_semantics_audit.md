@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点代码已提交 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 等待 review，修复后的新 production 尚未执行
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；高精度相变 reference 与修复后的新 production 尚未执行
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -418,6 +418,17 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 性能探针 `julia --project=. scripts/perf/relaxtime/bulk_derivative_context_probe.jl --repeats=3` 在 `T=0.5 fm^-1, mu=1.5 fm^-1, xi=0, p_num/t_num=12/6` 的预热本机样本中，将额外 primal solve 从 `5` 降为 `0`、Jacobian 构建/分解从 `5` 降为 `1`、导数 series 收敛为 `3` 个方向；中位耗时 `0.0817666 s -> 0.0035349 s`（`23.13x`），中位分配 `347952 -> 37456 bytes`。该结果只作为实现收益证据，不设固定加速比 CI gate。
 - mode-B baseline 审计确认共享 bulk context 使 16/16 点的 `zeta`、`zeta/s` 预期下降约 `0.0683%-0.0764%`；另仅 `T=120 MeV, mu_B=0, xi=0.2` 因修正后的相分类 seed 治理产生不超过 `0.00237%` 的上游 transport 漂移。未放宽 `rtol=1e-6`，只刷新实际超限字段；core + full 回归随后通过 `223/223`。
 - 最终聚焦验证：Taylor/bulk/plan unit `144/144`；transport workflow、bulk derivatives、phase-guided dry-run/exec integration `144/144`；一阶分支/共存固定点 regression `22/22`；mode-B core + full regression `223/223`。`check_script_entrypoints`、`check_relaxtime_script_governance`、`check_models_entry_contract`、`check_solver_contract_leakage`、`check_docs_consistency`、`check_active_docs_governance`、`check_data_output_path_guard`、workflow YAML 解析和 `git diff --check` 全部通过。
+- PR #135 已于 2026-07-17 squash 合并，merge commit 为 `697be19a919c1c3e8203adecd813c1ccf2928319`，12/12 CI 通过；旧 production 未改写，任务继续保留 active 直至新 reference 与 production 完成。
+
+### 8.7 高精度相变 reference 与重生产执行锁（2026-07-17）
+
+- 作者确认下一版正式 transport 的 phase reference、direct coexistence anchor、主 equilibrium 与 bulk derivative 统一采用 `p_num=24,t_num=8`。这是热力学精度升级；tau/截面侧继续保持上一版正式参数 `128/20/36/24/560` 与 `validated_anchored`，不得把本轮描述成全部参数逐项不变的重跑。
+- `24/8` 主节点必须由独立 `32/10` 节点复核；不得沿用 `max(p_num,24)` / `max(t_num,8)` 后去重成单节点的自比较。`12/6` 主节点仍使用 `24/8` 认证，更高主节点按 `p_num+8,t_num+2` 生成认证节点。
+- gate 修复后的隔离 dry-run 预检得到 `24/8` 共存温度 `T_c=125.7372580313 MeV`，独立 `32/10` 相对漂移为 `-7.0833e-5 MeV`；`xi=-0.003/+0.003` 分别通过夸克侧/强子侧认证。该结果只验证 anchor/相别 gate，不替代下述含 transport 与 bulk 的完整 pilot；外部诊断目录为 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\thermo_convergence_gate_20260717_p24_t8`。
+- 在晋升 `24/8` 口径前执行代表性 `12/6 -> 24/8 -> 32/10` pilot，至少审计共存温度与 bracket、`xi=±0.003` 相别、平衡态、热力学量、bulk derivatives、`zeta/s`、tau、`eta/s`、`sigma/T`、失败/非有限/负值和运行时间。
+- 一阶相变 reference 使用新 tag/manifest 生成并独立 PR 审核；旧 `boundary.csv`、`cep.csv`、`spinodals.csv` 不覆盖。审核通过后再晋升新的 canonical sibling，并让 runtime 明确消费新 reference。
+- 通用 production workflow 在新 canonical reference 合并前继续保留现有 `12/6` 默认值，避免形成“新热力学默认 + 旧 reference”的过渡组合；phase-reference PR 同步把正式默认改为 `24/8`。
+- reference 合并后使用新 source commit、Action case name、正式 slug、CSV 和图像目录重跑；旧 production、旧图像及 registry 历史记录保持逐字节不变。新 case 先保持 `current_candidate`，由作者审核后决定是否晋升 `approved`。
 
 ## 9. 里程碑
 
@@ -454,7 +465,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 补扫并修正作者发现的两个 `mu_B=0` 残留显示噪点。
 - [x] 定位 `mu_B=900, alpha_T=1.0, xi=-0.01` 的 `zeta/s` 回落为主 continuation 亚稳支与 bulk 稳定支混用，并用同口径双根热力学势完成归因。
 - [x] 审计旧插值 phase anchor，完成当前 `12/6` 口径的直接等势温度 bracket 与 `xi=±0.003` 双侧相别认证。
-- [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；待 review/合并。
+- [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；已合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`。
 - [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
 - [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
 - [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。

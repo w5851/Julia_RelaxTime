@@ -93,5 +93,8 @@ end
     @test certification.delta_xi == 0.003
     @test certification.anchor_convergence_certified
     @test abs(certification.anchor_convergence_delta_MeV) < 0.1
+    @test certification.node_configs == [(p_num=12, t_num=6), (p_num=24, t_num=8)]
+    @test certification.convergence_anchor.p_num == 24
+    @test certification.convergence_anchor.t_num == 8
     @test all(row.minus_certified && row.plus_certified for row in certification.evidence)
 end

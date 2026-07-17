@@ -562,19 +562,35 @@ function direct_coexistence_anchor(
     )
 end
 
+function _default_coexistence_convergence_numerics(opts)
+    p_num = Int(opts.p_num)
+    t_num = Int(opts.t_num)
+    return (
+        p_num=p_num < 24 ? 24 : p_num + 8,
+        t_num=t_num < 8 ? 8 : t_num + 2,
+    )
+end
+
 function certify_coexistence_side_points(
     anchor,
     muB_MeV::Real,
     opts;
     delta_xi_candidates=(0.003, 0.005, 0.007, 0.01, 0.015, 0.02),
-    convergence_p_num::Int=max(Int(opts.p_num), 24),
-    convergence_t_num::Int=max(Int(opts.t_num), 8),
+    convergence_p_num::Int=_default_coexistence_convergence_numerics(opts).p_num,
+    convergence_t_num::Int=_default_coexistence_convergence_numerics(opts).t_num,
     anchor_convergence_tol_MeV::Real=0.1,
 )
-    node_configs = unique([
-        (p_num=Int(opts.p_num), t_num=Int(opts.t_num)),
-        (p_num=convergence_p_num, t_num=convergence_t_num),
-    ])
+    base_config = (p_num=Int(opts.p_num), t_num=Int(opts.t_num))
+    convergence_config = (p_num=convergence_p_num, t_num=convergence_t_num)
+    if convergence_config.p_num < base_config.p_num ||
+       convergence_config.t_num < base_config.t_num ||
+       convergence_config == base_config
+        throw(ArgumentError("coexistence certification requires an independent, non-lower thermodynamic node configuration: base=$(base_config), convergence=$(convergence_config)"))
+    end
+    node_configs = [
+        base_config,
+        convergence_config,
+    ]
     muq_fm = (Float64(muB_MeV) / 3.0) / Main.ħc_MeV_fm
     convergence_cfg = last(node_configs)
     convergence_anchor = if convergence_cfg.p_num == anchor.p_num && convergence_cfg.t_num == anchor.t_num

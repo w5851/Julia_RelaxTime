@@ -149,7 +149,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   - `compute_bulk` 默认开启；如需更快的预览扫描，可显式传 `--no-compute-bulk`
   - mode a 的一阶区域默认使用 `--phase-anchor-policy direct_coexistence`：旧 phase reference 只作为初始 bracket，再按 `--p-num` / `--t-num`（默认 `12/6`）直接求两分支等热力学势温度；`reference_interpolation` 仅用于显式复现旧计划口径。
   - 一阶可能区每点都使用稳定多初值选优，continuation 只作为候选 seed。bulk 复用主扫描已解析的热力学节点和同一点 equilibrium；导数路径若跨支会显式失败。
-  - 直接锚定的 `alpha_T=1` 一阶共存切片不计算严格 `xi=0` 的唯一输运量，而是写入经默认节点和 `24/8` 节点共同认证的负/正近零点，分别表示夸克侧/强子侧极限；`sampling_plan.csv` 同步记录 anchor bracket、相别和节点收敛证据。
+  - 直接锚定的 `alpha_T=1` 一阶共存切片不计算严格 `xi=0` 的唯一输运量，而是写入经主热力学节点和独立更高节点共同认证的负/正近零点，分别表示夸克侧/强子侧极限；`sampling_plan.csv` 同步记录 anchor bracket、相别和节点收敛证据。`12/6` 主节点使用 `24/8` 认证；`24/8` 主节点自动使用 `32/10` 认证，禁止同节点自比较。
   - 异常区域诊断可显式传 `--propagator-xi-policy isotropic`，仅让 σ(s)/propagator 使用 `ξ=0`；也可传 `--sigma-cache-policy validated_anchored` 诊断 threshold-subtraction 与 σ-cache 插值放大效应。默认 `match_thermo` / `default` 不变，诊断分支完成复算与收敛检查前不作为正式修复口径
   - GitHub Actions 手动入口 `Relaxtime Phase-Guided Transport Production` 只生成可审阅 artifact；新增或修改该 workflow 后需先合入默认分支让 GitHub 注册，随后才能通过 `workflow_dispatch` 触发。该入口默认 verdict 为 `diagnostic-only`，不会自动把 artifact 晋升为仓库正式数据。
   - 高精度长任务应优先通过 action shard 触发：mode a 可用 `muB_list` + `alpha_t_list` 分片，mode b 可用 `t_list` + `muB_list` 分片，二者都可用 `xi_list` 缩小窗口，并用 `shard_label` 区分 artifact。workflow 会把扫描/绘图日志写入 result artifact；失败或取消时仍尽量上传 partial CSV、`failed_points.csv`、`channel_diagnostics.csv` 和日志，供本地合并与 convergence gate 使用。
