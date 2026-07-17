@@ -11,7 +11,7 @@
 
 接口形式：
 
-- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto)`
+- `bulk_viscosity_coefficients(T_fm, mu_fm; xi=0.0, p_num, t_num, model=nothing, derivative_backend=:auto, base_state=nothing, base_masses=nothing, base_mu_vec=nothing)`
 
 它返回体粘滞公式所需的一组派生量，包括：
 
@@ -24,10 +24,17 @@
 - `dn_dT`, `dn_dμB`
 - `c_p`
 - `s`, `n_B`
+- `base_state_source`, `base_state_polished`, `branch_locked`
+- `base_residual_norm`
+- `primal_solve_count`, `jacobian_factorization_count`, `derivative_series_count`
 
 这组结果面向下游 transport 或 bulk viscosity 公式装配，而不是新用户的最短入门接口。
 
 PNJL 默认后端同样是 TaylorDiff series gap：先从压强 Taylor series 解析得到 `ds/dT`、`ds/dμB`、`dn/dT`、`dn/dμB`，再装配 bulk viscosity 所需组合。旧 `ForwardDiff + ImplicitDifferentiation` 路线已不再作为本接口 fallback。
+
+未提供 `base_state` 时，接口保持独立调用兼容性并自行求一次零阶 gap 解。已经有主平衡态的 workflow 应同时传入 `base_state`、`base_masses` 和 `base_mu_vec`：该路径不会重新进行全局 gap 求解，而是锁定输入分支，最多执行不允许跨支的局部 Newton polish。三个二阶方向 `T`、`mu`、`T+mu` 复用同一个 Jacobian 与一次分解，并同时读出压力和质量 series。
+
+`solve_transport_from_equilibrium` 已采用上述复用路径，并要求 bulk 返回质量与主 equilibrium 质量一致；不匹配时该点的 bulk 计算失败，不会静默拼接两个相分支。
 
 ## `compute_B_bracket`
 

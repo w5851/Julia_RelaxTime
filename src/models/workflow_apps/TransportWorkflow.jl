@@ -678,13 +678,25 @@ function solve_transport_from_equilibrium(
     bulk_coeffs = nothing
     if compute_bulk
         bulk_coeffs = try
-            bulk_viscosity_coefficients(
+            coeffs = bulk_viscosity_coefficients(
                 T_fm,
                 mu_fm;
                 xi=xi,
                 p_num=p_num,
                 t_num=t_num,
+                model=_get_model(cache, :PNJL),
+                base_state=base.x_state,
+                base_masses=base.masses,
+                base_mu_vec=base.mu_vec,
+                base_state_source=:workflow_equilibrium,
             )
+            all(isapprox(coeffs.masses[i], masses[i]; rtol=1e-4, atol=1e-8) for i in 1:3) ||
+                throw(ArgumentError("bulk derivative masses do not match the supplied workflow equilibrium branch"))
+            coeffs.base_state_source === :workflow_equilibrium ||
+                throw(ArgumentError("bulk derivative context did not preserve workflow equilibrium provenance"))
+            coeffs.branch_locked ||
+                throw(ArgumentError("bulk derivative context is not branch locked"))
+            coeffs
         catch bc_err
             diag = _workflow_warning_diagnostics(
                 T_fm=T_fm,

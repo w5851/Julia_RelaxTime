@@ -20,6 +20,56 @@ struct PhaseGuidedScanOptions
     dry_run::Bool
     overwrite::Bool
     resume::Bool
+    p_num::Int
+    t_num::Int
+    phase_anchor_policy::Symbol
+end
+
+function PhaseGuidedScanOptions(
+    mode::Symbol,
+    outdir::String,
+    case_name::String,
+    xi_values::Vector{Float64},
+    muB_values::Vector{Float64},
+    alpha_T_values::Vector{Float64},
+    T_values::Vector{Float64},
+    propagator_xi_policy::Symbol,
+    sigma_cache_policy::Symbol,
+    tau_p_nodes::Union{Nothing,Int},
+    tau_angle_nodes::Union{Nothing,Int},
+    tau_phi_nodes::Union{Nothing,Int},
+    tau_n_sigma_points::Union{Nothing,Int},
+    sigma_grid_n::Union{Nothing,Int},
+    channel_diagnostics::Bool,
+    compute_bulk::Bool,
+    dry_run::Bool,
+    overwrite::Bool,
+    resume::Bool,
+)
+    return PhaseGuidedScanOptions(
+        mode,
+        outdir,
+        case_name,
+        xi_values,
+        muB_values,
+        alpha_T_values,
+        T_values,
+        propagator_xi_policy,
+        sigma_cache_policy,
+        tau_p_nodes,
+        tau_angle_nodes,
+        tau_phi_nodes,
+        tau_n_sigma_points,
+        sigma_grid_n,
+        channel_diagnostics,
+        compute_bulk,
+        dry_run,
+        overwrite,
+        resume,
+        12,
+        6,
+        :reference_interpolation,
+    )
 end
 
 function print_usage(io::IO=stdout)
@@ -39,6 +89,9 @@ function print_usage(io::IO=stdout)
     println(io, "  --tau-phi-nodes <int>        透传到底层 τ 平均散射率 φ 节点")
     println(io, "  --tau-n-sigma <int>          透传到底层 σ(s) 的 t 积分点数")
     println(io, "  --sigma-grid-n <int>         透传到底层 σ(s) 预计算网格点数")
+    println(io, "  --p-num <int>                主平衡态与 bulk 的热力学动量节点 (default 12)")
+    println(io, "  --t-num <int>                主平衡态与 bulk 的热力学角节点 (default 6)")
+    println(io, "  --phase-anchor-policy <direct_coexistence|reference_interpolation>  mode a 一阶相变温度锚点 (default direct_coexistence)")
     println(io, "  --channel-diagnostics        输出每点每通道的 τ^-1 贡献明细 CSV")
     println(io, "  --compute-bulk               显式开启体粘滞 ζ 计算（默认开启）")
     println(io, "  --no-compute-bulk            显式关闭体粘滞 ζ 计算")
@@ -74,6 +127,9 @@ function parse_args(args::Vector{String})
         :tau_phi_nodes => nothing,
         :tau_n_sigma_points => nothing,
         :sigma_grid_n => nothing,
+        :p_num => 12,
+        :t_num => 6,
+        :phase_anchor_policy => :direct_coexistence,
         :channel_diagnostics => false,
         :compute_bulk => true,
         :dry_run => false,
@@ -129,6 +185,15 @@ function parse_args(args::Vector{String})
             opts[:tau_n_sigma_points] = parse(Int, require_value())
         elseif arg == "--sigma-grid-n"
             opts[:sigma_grid_n] = parse(Int, require_value())
+        elseif arg == "--p-num"
+            opts[:p_num] = parse(Int, require_value())
+        elseif arg == "--t-num"
+            opts[:t_num] = parse(Int, require_value())
+        elseif arg == "--phase-anchor-policy"
+            policy = Symbol(strip(require_value()))
+            policy in (:direct_coexistence, :reference_interpolation) ||
+                error("unknown phase anchor policy: $(policy) (expected: direct_coexistence|reference_interpolation)")
+            opts[:phase_anchor_policy] = policy
         elseif arg == "--channel-diagnostics"
             opts[:channel_diagnostics] = true
         elseif arg == "--compute-bulk"
@@ -155,6 +220,8 @@ function parse_args(args::Vector{String})
     isnothing(opts[:muB_values]) && error("--muB-list is required")
 
     mode = opts[:mode]
+    Int(opts[:p_num]) > 0 || error("--p-num must be positive")
+    Int(opts[:t_num]) > 0 || error("--t-num must be positive")
     if mode == :mode_a_fixed_muB_phase_scaled
         isempty(opts[:alpha_T_values]) && error("mode a requires non-empty --alphaT-list")
     elseif mode == :mode_b_fixed_T_sparse_muB
@@ -187,6 +254,9 @@ function parse_args(args::Vector{String})
         Bool(opts[:dry_run]),
         Bool(opts[:overwrite]),
         Bool(opts[:resume]),
+        Int(opts[:p_num]),
+        Int(opts[:t_num]),
+        Symbol(opts[:phase_anchor_policy]),
     )
 end
 

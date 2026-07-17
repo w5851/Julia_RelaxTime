@@ -415,13 +415,22 @@ function solve_models_equilibrium(T_fm::Float64, muq_fm::Float64, xi::Float64, s
     end
 end
 
-function solve_with_multiseed_governance(T_fm::Float64, muq_fm::Float64, xi::Float64, opts)
+function solve_with_multiseed_governance(T_fm::Float64, muq_fm::Float64, xi::Float64, opts;
+    continuation_seed=nothing,
+)
+    seeds = Vector{Vector{Float64}}()
+    if continuation_seed !== nothing
+        push!(seeds, _seed_state_5(continuation_seed))
+    end
+    push!(seeds, Float64.(Main.Models.HADRON_SEED_5))
+    push!(seeds, Float64.(Main.Models.QUARK_SEED_5))
     result = try
         Main.Models.solve_multi(
             Main.PNJL_MODEL,
             Main.Models.FixedMu(),
             T_fm,
             muq_fm;
+            seeds=seeds,
             xi=xi,
             p_num=opts.p_num,
             t_num=opts.t_num,
@@ -437,12 +446,201 @@ end
 
 function classify_phase_from_solution(eq)
     m_u = eq.masses[1]
-    Phi = eq.x_state[4]
-    if m_u < 0.8 || Phi > 0.1
-        return :quark
-    else
-        return :hadron
+    return m_u < 0.8 ? :quark : :hadron
+end
+
+@inline function _relative_delta(a::Real, b::Real)
+    return abs(Float64(a) - Float64(b)) /
+        max(abs(Float64(a)), abs(Float64(b)), eps(Float64))
+end
+
+function solve_two_branch_candidates(
+    T_fm::Float64,
+    muq_fm::Float64,
+    xi::Float64,
+    opts;
+    branch_mass_rel_tol::Real=1e-3,
+    hadron_seed=Main.Models.HADRON_SEED_5,
+    quark_seed=Main.Models.QUARK_SEED_5,
+)
+    candidate_h = solve_models_equilibrium(T_fm, muq_fm, xi, hadron_seed, opts)
+    candidate_q = solve_models_equilibrium(T_fm, muq_fm, xi, quark_seed, opts)
+    (candidate_h === nothing || candidate_q === nothing) &&
+        throw(ArgumentError("failed to obtain both PNJL phase-branch candidates"))
+
+    high, low = candidate_h.masses[1] >= candidate_q.masses[1] ?
+        (candidate_h, candidate_q) :
+        (candidate_q, candidate_h)
+    distinct = _relative_delta(high.masses[1], low.masses[1]) > Float64(branch_mass_rel_tol)
+    delta_omega = Float64(high.omega) - Float64(low.omega)
+    stable = delta_omega <= 0.0 ? high : low
+    stable_phase = delta_omega <= 0.0 ? :hadron : :quark
+    return (
+        distinct=distinct,
+        high_mass_hadron=high,
+        low_mass_quark=low,
+        delta_omega_high_minus_low=delta_omega,
+        stable=stable,
+        stable_phase=stable_phase,
+    )
+end
+
+function direct_coexistence_anchor(
+    muB_MeV::Real,
+    reference_T_MeV::Real,
+    opts;
+    xi::Real=0.0,
+    scan_half_width_MeV::Real=6.0,
+    scan_step_MeV::Real=0.25,
+    bisection_steps::Int=24,
+)
+    scan_half_width_MeV > 0 || throw(ArgumentError("scan_half_width_MeV must be positive"))
+    scan_step_MeV > 0 || throw(ArgumentError("scan_step_MeV must be positive"))
+    bisection_steps > 0 || throw(ArgumentError("bisection_steps must be positive"))
+
+    muq_fm = (Float64(muB_MeV) / 3.0) / Main.ħc_MeV_fm
+    xi0 = Float64(xi)
+    previous = nothing
+    lower = nothing
+    upper = nothing
+    offsets = collect(-Float64(scan_half_width_MeV):Float64(scan_step_MeV):Float64(scan_half_width_MeV))
+    for offset in offsets
+        T_MeV = Float64(reference_T_MeV) + offset
+        candidates = solve_two_branch_candidates(
+            T_MeV / Main.ħc_MeV_fm,
+            muq_fm,
+            xi0,
+            opts,
+        )
+        candidates.distinct || continue
+        current = (
+            T_MeV=T_MeV,
+            delta_omega=candidates.delta_omega_high_minus_low,
+        )
+        if previous !== nothing && previous.delta_omega * current.delta_omega <= 0.0
+            lower = previous
+            upper = current
+            break
+        end
+        previous = current
     end
+    (lower === nothing || upper === nothing) &&
+        throw(ArgumentError("failed to bracket the direct PNJL two-branch coexistence temperature near $(reference_T_MeV) MeV"))
+
+    for _ in 1:bisection_steps
+        midpoint_T_MeV = 0.5 * (lower.T_MeV + upper.T_MeV)
+        candidates = solve_two_branch_candidates(
+            midpoint_T_MeV / Main.ħc_MeV_fm,
+            muq_fm,
+            xi0,
+            opts,
+        )
+        candidates.distinct || throw(ArgumentError("direct coexistence bisection lost the two-root branch bracket"))
+        midpoint = (
+            T_MeV=midpoint_T_MeV,
+            delta_omega=candidates.delta_omega_high_minus_low,
+        )
+        if lower.delta_omega * midpoint.delta_omega <= 0.0
+            upper = midpoint
+        else
+            lower = midpoint
+        end
+    end
+
+    return (
+        T_lower_MeV=lower.T_MeV,
+        T_upper_MeV=upper.T_MeV,
+        T_mid_MeV=0.5 * (lower.T_MeV + upper.T_MeV),
+        bracket_width_MeV=upper.T_MeV - lower.T_MeV,
+        delta_omega_lower=lower.delta_omega,
+        delta_omega_upper=upper.delta_omega,
+        reference_T_MeV=Float64(reference_T_MeV),
+        reference_xi=xi0,
+        p_num=Int(opts.p_num),
+        t_num=Int(opts.t_num),
+        method=:direct_two_branch_equal_omega_bisection,
+    )
+end
+
+function certify_coexistence_side_points(
+    anchor,
+    muB_MeV::Real,
+    opts;
+    delta_xi_candidates=(0.003, 0.005, 0.007, 0.01, 0.015, 0.02),
+    convergence_p_num::Int=max(Int(opts.p_num), 24),
+    convergence_t_num::Int=max(Int(opts.t_num), 8),
+    anchor_convergence_tol_MeV::Real=0.1,
+)
+    node_configs = unique([
+        (p_num=Int(opts.p_num), t_num=Int(opts.t_num)),
+        (p_num=convergence_p_num, t_num=convergence_t_num),
+    ])
+    muq_fm = (Float64(muB_MeV) / 3.0) / Main.ħc_MeV_fm
+    convergence_cfg = last(node_configs)
+    convergence_anchor = if convergence_cfg.p_num == anchor.p_num && convergence_cfg.t_num == anchor.t_num
+        anchor
+    else
+        direct_coexistence_anchor(
+            muB_MeV,
+            anchor.T_mid_MeV,
+            convergence_cfg;
+            xi=anchor.reference_xi,
+        )
+    end
+    anchor_convergence_delta_MeV = convergence_anchor.T_mid_MeV - anchor.T_mid_MeV
+    anchor_convergence_certified = abs(anchor_convergence_delta_MeV) <= Float64(anchor_convergence_tol_MeV)
+    anchor_convergence_certified || throw(ArgumentError("direct coexistence anchor did not converge across thermodynamic node configurations: delta_T_MeV=$(anchor_convergence_delta_MeV), tolerance=$(anchor_convergence_tol_MeV)"))
+
+    for delta_raw in delta_xi_candidates
+        delta = Float64(delta_raw)
+        delta > 0 || continue
+        evidence = NamedTuple[]
+        certified = true
+        for cfg in node_configs
+            numerics = (p_num=cfg.p_num, t_num=cfg.t_num)
+            for T_MeV in (anchor.T_lower_MeV, anchor.T_upper_MeV)
+                minus = solve_two_branch_candidates(
+                    T_MeV / Main.ħc_MeV_fm,
+                    muq_fm,
+                    -delta,
+                    numerics,
+                )
+                plus = solve_two_branch_candidates(
+                    T_MeV / Main.ħc_MeV_fm,
+                    muq_fm,
+                    delta,
+                    numerics,
+                )
+                minus_ok = minus.distinct && minus.delta_omega_high_minus_low > 0.0
+                plus_ok = plus.distinct && plus.delta_omega_high_minus_low < 0.0
+                certified &= minus_ok && plus_ok
+                push!(evidence, (
+                    p_num=cfg.p_num,
+                    t_num=cfg.t_num,
+                    T_MeV=T_MeV,
+                    delta_xi=delta,
+                    minus_delta_omega=minus.delta_omega_high_minus_low,
+                    plus_delta_omega=plus.delta_omega_high_minus_low,
+                    minus_certified=minus_ok,
+                    plus_certified=plus_ok,
+                ))
+            end
+        end
+        certified && return (
+            certified=true,
+            delta_xi=delta,
+            minus_xi=-delta,
+            plus_xi=delta,
+            node_configs=node_configs,
+            evidence=evidence,
+            convergence_anchor=convergence_anchor,
+            anchor_convergence_delta_MeV=anchor_convergence_delta_MeV,
+            anchor_convergence_tol_MeV=Float64(anchor_convergence_tol_MeV),
+            anchor_convergence_certified=anchor_convergence_certified,
+            method=:adaptive_two_sided_phase_certification,
+        )
+    end
+    throw(ArgumentError("failed to certify quark/hadron coexistence-side xi points across thermodynamic node configurations"))
 end
 
 function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi::Float64, opts;
@@ -464,16 +662,27 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     phase_curr = phase_curr_hint
     models_err = nothing
 
-    if tracker.previous_solution !== nothing && is_phase_transition(phase_prev, phase_curr_hint) && phase_curr_hint in (:hadron, :quark)
-        eq_multi = solve_with_multiseed_governance(T_fm, muq_fm, xi, opts)
+    stable_multiseed_required = structure === :first_order_possible
+    hinted_switch_multiseed = tracker.previous_solution !== nothing &&
+        is_phase_transition(phase_prev, phase_curr_hint) &&
+        phase_curr_hint in (:hadron, :quark)
+    selection_policy = :continuation_seed
+
+    if stable_multiseed_required || hinted_switch_multiseed
+        eq_multi = solve_with_multiseed_governance(
+            T_fm,
+            muq_fm,
+            xi,
+            opts;
+            continuation_seed=tracker.previous_solution,
+        )
         if eq_multi !== nothing
             eq = eq_multi
-            phase_curr = if phase_curr_hint in (:hadron, :quark)
-                phase_curr_hint
-            else
-                classify_phase_from_solution(eq)
-            end
-            seed_source = "phase_aware_multiseed_governance_$(String(phase_curr))"
+            phase_curr = classify_phase_from_solution(eq)
+            selection_policy = :pressure_max_under_constraints
+            seed_source = stable_multiseed_required ?
+                "first_order_stable_multiseed_$(String(phase_curr))" :
+                "phase_aware_multiseed_governance_$(String(phase_curr))"
         end
     end
 
@@ -493,13 +702,15 @@ function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi
     end
 
     next_solution = collect(Float64, eq.x_state)
-    next_phase = phase_curr
+    next_phase = phase_curr in (:hadron, :quark) ? phase_curr : classify_phase_from_solution(eq)
     return eq, next_solution, next_phase, (
         seed_source=seed_source,
         phase_prev=phase_prev,
         phase_curr=next_phase,
+        phase_curr_hint=phase_curr_hint,
         phase_structure=structure,
         phase_boundary_xi_used=boundary_xi_used,
+        equilibrium_selection_policy=selection_policy,
     )
 end
 
@@ -509,6 +720,9 @@ export tracker_phase
 export phase_structure
 export describe_seed_source
 export classify_phase_from_solution
+export solve_two_branch_candidates
+export direct_coexistence_anchor
+export certify_coexistence_side_points
 export solve_models_equilibrium
 export solve_equilibrium_with_diagnostics
 export is_phase_transition

@@ -36,6 +36,8 @@ function _build_runtime_scan_opts(result_csv::String, opts::PhaseGuidedCLI.Phase
         "--failed-points-output", joinpath(opts.outdir, "failed_points.csv"),
         "--propagator-xi-policy", String(opts.propagator_xi_policy),
         "--sigma-cache-policy", String(opts.sigma_cache_policy),
+        "--p-num", string(opts.p_num),
+        "--t-num", string(opts.t_num),
     ]
     opts.tau_p_nodes !== nothing && append!(base_args, ["--tau-p-nodes", string(opts.tau_p_nodes)])
     opts.tau_angle_nodes !== nothing && append!(base_args, ["--tau-angle-nodes", string(opts.tau_angle_nodes)])
@@ -61,6 +63,10 @@ function _point_meta(point)
         plot_series_label=point.plot_series_label,
         T_phase_base_MeV=point.T_phase_base_MeV,
         alpha_T=point.alpha_T,
+        phase_anchor_method=point.phase_anchor_method,
+        coexistence_side=point.coexistence_side,
+        coexistence_certified=point.coexistence_certified,
+        coexistence_delta_xi=point.coexistence_delta_xi,
     )
 end
 

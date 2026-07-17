@@ -33,6 +33,7 @@ module ThermoDerivatives
 
 using StaticArrays
 import ..Models
+using ..PNJLChiBTaylorDiff: build_taylor_base_context
 using ..PNJLChiBTaylorDiff: gap_series_parameter_direction, pressure_series_parameter_direction
 using ..PNJLChiBTaylorDiff: nth_derivative_from_series
 
@@ -422,6 +423,45 @@ function _mass_derivatives_taylordiff(
     )
 end
 
+function _bulk_direction_series_taylordiff(
+    context,
+    T_direction::Real,
+    mu_direction;
+    order::Int,
+    series_iterations::Union{Nothing, Int},
+    linear_solve::Symbol,
+    series_residual_tol::Real,
+)
+    iterations = series_iterations === nothing ? 0 : Int(series_iterations)
+    result = gap_series_parameter_direction(
+        context.T_fm,
+        context.mu_vec,
+        T_direction,
+        mu_direction;
+        order=order,
+        xi=context.xi,
+        p_num=context.p_num,
+        t_num=context.t_num,
+        model=context.model,
+        series_iterations=iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+        base_context=context,
+    )
+    pressure = Models.model_pressure(
+        context.model,
+        result.x_state,
+        result.mu_vec,
+        result.T_series;
+        p_num=context.p_num,
+        t_num=context.t_num,
+        xi=context.xi,
+    )
+    phi = SVector{3}(result.x_state[1], result.x_state[2], result.x_state[3])
+    masses = Models.calculate_mass_vec(context.model, phi)
+    return (gap=result, pressure=pressure, masses=masses)
+end
+
 function _thermo_derivatives_taylordiff(
     T_fm::Real,
     mu_fm::Real;
@@ -506,29 +546,85 @@ function _bulk_viscosity_coefficients_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    base_state,
+    base_masses,
+    base_mu_vec,
+    base_state_source::Symbol,
+    base_residual_tol::Real,
+    allow_local_polish::Bool,
+    polish_max_iterations::Int,
 )
-    pd = _pressure_derivatives_order2_taylordiff(
-        model,
+    symmetric_mu = _symmetric_mu_vec(mu_fm)
+    if base_mu_vec !== nothing
+        supplied_mu = SVector{3, Float64}(Float64(base_mu_vec[1]), Float64(base_mu_vec[2]), Float64(base_mu_vec[3]))
+        supplied_mu == symmetric_mu || throw(ArgumentError("base_mu_vec is inconsistent with the symmetric quark chemical potential mu_fm"))
+    end
+
+    context = build_taylor_base_context(
         T_fm,
-        mu_fm;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        series_iterations=series_iterations,
-        linear_solve=linear_solve,
-        series_residual_tol=series_residual_tol,
-    )
-    md = _mass_derivatives_taylordiff(
-        T_fm,
-        mu_fm;
-        order=1,
+        symmetric_mu;
         xi=xi,
         p_num=p_num,
         t_num=t_num,
         model=model,
+        base_state=base_state,
+        base_masses=base_masses,
+        base_state_source=base_state_source,
+        base_residual_tol=base_residual_tol,
+        allow_local_polish=allow_local_polish,
+        polish_max_iterations=polish_max_iterations,
+    )
+
+    zero_mu = _zero_mu_direction()
+    sym_mu = _symmetric_mu_direction()
+    series_T = _bulk_direction_series_taylordiff(
+        context,
+        1.0,
+        zero_mu;
+        order=2,
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+    )
+    series_mu = _bulk_direction_series_taylordiff(
+        context,
+        0.0,
+        sym_mu;
+        order=2,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+    series_Tmu = _bulk_direction_series_taylordiff(
+        context,
+        1.0,
+        sym_mu;
+        order=2,
+        series_iterations=series_iterations,
+        linear_solve=linear_solve,
+        series_residual_tol=series_residual_tol,
+    )
+
+    pressure = nth_derivative_from_series(series_T.pressure, 0)
+    P_T = nth_derivative_from_series(series_T.pressure, 1)
+    P_mu = nth_derivative_from_series(series_mu.pressure, 1)
+    P_TT = nth_derivative_from_series(series_T.pressure, 2)
+    P_mumu = nth_derivative_from_series(series_mu.pressure, 2)
+    P_Tmu = (
+        nth_derivative_from_series(series_Tmu.pressure, 2) - P_TT - P_mumu
+    ) / 2
+    pd = (
+        pressure=pressure,
+        P_T=P_T,
+        P_mu=P_mu,
+        P_TT=P_TT,
+        P_Tmu=P_Tmu,
+        P_mumu=P_mumu,
+    )
+    md = (
+        masses=_extract_series_vector(series_T.masses, 0),
+        dM_dT=_extract_series_vector(series_T.masses, 1),
+        dM_dmu=_extract_series_vector(series_mu.masses, 1),
     )
 
     T_val = Float64(T_fm)
@@ -566,6 +662,14 @@ function _bulk_viscosity_coefficients_taylordiff(
         c_p=c_p,
         s=s,
         n_B=n_B,
+        base_state_source=context.base_state_source,
+        base_state_polished=context.base_state_polished,
+        branch_locked=context.branch_locked,
+        base_residual_norm=context.base_residual_norm,
+        primal_solve_count=context.primal_solve_count,
+        jacobian_factorization_count=context.jacobian_factorization_count,
+        derivative_series_count=3,
+        polish_iteration_count=context.polish_iteration_count,
     )
 end
 
@@ -745,7 +849,14 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
                                      derivative_backend::Symbol=:auto,
                                      series_iterations::Union{Nothing, Int}=nothing,
                                      linear_solve::Symbol=:auto,
-                                     series_residual_tol::Real=1e-7)
+                                     series_residual_tol::Real=1e-7,
+                                     base_state=nothing,
+                                     base_masses=nothing,
+                                     base_mu_vec=nothing,
+                                     base_state_source::Symbol=base_state === nothing ? :internal_gap_solve : :explicit_base_state,
+                                     base_residual_tol::Real=series_residual_tol,
+                                     allow_local_polish::Bool=true,
+                                     polish_max_iterations::Int=4)
     set_config(xi=xi, p_num=p_num, t_num=t_num)
     resolved_model, backend = _resolve_thermo_backend(model, derivative_backend)
     backend === :taylordiff || error("unreachable derivative backend: $backend")
@@ -759,6 +870,13 @@ function bulk_viscosity_coefficients(T_fm::Real, mu_fm::Real;
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        base_state=base_state,
+        base_masses=base_masses,
+        base_mu_vec=base_mu_vec,
+        base_state_source=base_state_source,
+        base_residual_tol=base_residual_tol,
+        allow_local_polish=allow_local_polish,
+        polish_max_iterations=polish_max_iterations,
     )
 end
 
