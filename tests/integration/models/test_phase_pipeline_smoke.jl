@@ -21,6 +21,9 @@ using .Models
         solver_backend=:models,
         p_num=12,
         t_num=4,
+        thermo_quadrature_policy=:rs_reduced_adaptive,
+        thermo_quadrature_rtol=1e-6,
+        thermo_quadrature_atol=1e-8,
         iterations=80,
         promote_reference=false,
     )
@@ -39,6 +42,9 @@ using .Models
     @test isfile(result.artifact_paths["phase_report"])
     @test haskey(result.diagnostics, "scan_total")
     @test result.diagnostics["scan_total"] >= 1
+    @test result.config_snapshot["thermo_quadrature_policy"] == "rs_reduced_adaptive"
+    @test result.config_snapshot["thermo_quadrature_rtol"] == 1e-6
+    @test result.config_snapshot["thermo_quadrature_atol"] == 1e-8
 end
 
 @testset "Phase pipeline production smoke" begin

@@ -38,6 +38,29 @@ end
     @test params.T_fm == T_fm
     @test params.thermal_nodes === thermal_nodes
     @test params.xi == xi
+
+    adaptive = P.GapParams(
+        T_fm,
+        thermal_nodes,
+        xi;
+        thermo_quadrature_policy=:rs_reduced_adaptive,
+        thermo_quadrature_rtol=1e-7,
+        thermo_quadrature_atol=1e-9,
+        thermo_quadrature_maxevals=12345,
+    )
+    shifted = P.GapParams(0.4, adaptive)
+    @test shifted.T_fm == 0.4
+    @test shifted.thermo_quadrature_policy === :rs_reduced_adaptive
+    @test shifted.thermo_quadrature_rtol == 1e-7
+    @test shifted.thermo_quadrature_atol == 1e-9
+    @test shifted.thermo_quadrature_maxevals == 12345
+    @test_throws ArgumentError P.GapParams(
+        0.0,
+        thermal_nodes,
+        xi;
+        model_kind=:PNJL,
+        thermo_quadrature_policy=:rs_reduced_adaptive,
+    )
 end
 
 # ============================================================================

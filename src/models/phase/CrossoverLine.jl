@@ -18,7 +18,7 @@ const HBARC_MEV_FM = 197.327
 end
 
 function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num::Int,
-		model_kind::Symbol, solver_backend::Symbol)
+		model_kind::Symbol, solver_backend::Symbol, thermo_quadrature_kwargs::NamedTuple)
 	_validate_crossover_solver_backend(solver_backend)
 	model = create_model(model_kind)
 	mu_vec = normalize_mu_vec(μ_fm)
@@ -32,6 +32,7 @@ function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num:
 			xi=xi,
 			p_num=p_num,
 			t_num=t_num,
+			thermo_quadrature_kwargs...,
 			thermo_backend=:models,
 			derivative_backend=:taylordiff,
 		)
@@ -50,6 +51,7 @@ function _build_crossover_evaluator(μ_fm::Float64, xi::Real, p_num::Int, t_num:
 				xi=xi,
 				p_num=p_num,
 				t_num=t_num,
+				thermo_quadrature_kwargs...,
 			)
 			rho = Float64(rho_norm)
 		end
@@ -366,13 +368,29 @@ function detect_crossover(μ_fm::Real, T_range::Tuple{Real, Real};
 		max_iter::Int=20,
 		p_num::Int=24,
 		t_num::Int=12,
+		thermo_quadrature_policy::Symbol=:tensor_gauss,
+		thermo_quadrature_rtol::Float64=1e-8,
+		thermo_quadrature_atol::Float64=1e-10,
+		thermo_quadrature_maxevals::Int=10^7,
 		model_kind::Symbol=:PNJL,
 		solver_backend::Symbol=:models)
 	T_min, T_max = Float64.(T_range)
 	T_min < T_max || return CrossoverResult(method=method)
 
 	var_idx = variable == :phi_u ? 1 : (variable == :Phi ? 4 : 1)
-	evaluate_point = _build_crossover_evaluator(Float64(μ_fm), xi, p_num, t_num, model_kind, solver_backend)
+	thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
+		thermo_quadrature_policy,
+		thermo_quadrature_rtol,
+		thermo_quadrature_atol,
+		thermo_quadrature_maxevals,
+	)
+	model_kind === :PNJL && PNJLIntegrals.validate_rs_anisotropy(xi)
+	if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
+		throw(ArgumentError("rs_reduced_adaptive thermal quadrature is supported only for model_kind=:PNJL"))
+	end
+	evaluate_point = _build_crossover_evaluator(
+		Float64(μ_fm), xi, p_num, t_num, model_kind, solver_backend, thermo_quadrature_kwargs,
+	)
 
 	result = if method == :peak
 		_detect_crossover_peak(T_min, T_max, evaluate_point, n_scan, tol, max_iter, var_idx)
@@ -425,7 +443,11 @@ function build_crossover_line(; mu_max_MeV::Real,
 		method::Symbol=:peak,
 		variable::Symbol=:phi_u,
 		model_kind::Symbol=:PNJL,
-		solver_backend::Symbol=:models)
+		solver_backend::Symbol=:models,
+		thermo_quadrature_policy::Symbol=:tensor_gauss,
+		thermo_quadrature_rtol::Float64=1e-8,
+		thermo_quadrature_atol::Float64=1e-10,
+		thermo_quadrature_maxevals::Int=10^7)
 	mu_max_MeV <= 0 && return NamedTuple[]
 	T_min_MeV < T_max_MeV || return NamedTuple[]
 
@@ -438,7 +460,11 @@ function build_crossover_line(; mu_max_MeV::Real,
 		variable=variable,
 		xi=xi,
 		model_kind=model_kind,
-		solver_backend=solver_backend)
+		solver_backend=solver_backend,
+		thermo_quadrature_policy=thermo_quadrature_policy,
+		thermo_quadrature_rtol=thermo_quadrature_rtol,
+		thermo_quadrature_atol=thermo_quadrature_atol,
+		thermo_quadrature_maxevals=thermo_quadrature_maxevals)
 
 	rows = NamedTuple[]
 	for row in raw

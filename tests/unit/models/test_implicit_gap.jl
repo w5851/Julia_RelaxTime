@@ -74,6 +74,17 @@ Models.pnjl_module()
         old_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=24, t_num=6)
         auto_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:auto)
         td_result = Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:taylordiff)
+        adaptive_result = Models.solve_pnjl_with_derivatives(
+            theta_vec[1],
+            theta_vec[2];
+            order=1,
+            p_num=8,
+            t_num=4,
+            derivative_backend=:taylordiff,
+            thermo_quadrature_policy=:rs_reduced_adaptive,
+            thermo_quadrature_rtol=1e-6,
+            thermo_quadrature_atol=1e-8,
+        )
         vec_result = Models.derive_vec(model, theta_vec; order=1, p_num=24, t_num=6)
         named_result = Models.derive_named(model, theta_named; order=1, p_num=24, t_num=6)
 
@@ -83,6 +94,9 @@ Models.pnjl_module()
         @test all(isapprox.(td_result.x, auto_result.x; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(td_result.dx_dT, auto_result.dx_dT; rtol=1e-12, atol=1e-12))
         @test all(isapprox.(td_result.dx_dμ, auto_result.dx_dμ; rtol=1e-12, atol=1e-12))
+        @test all(isfinite, adaptive_result.x)
+        @test all(isfinite, adaptive_result.dx_dT)
+        @test all(isfinite, adaptive_result.dx_dμ)
         @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, derivative_backend=:forwarddiff)
         @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, thermo_backend=:legacy)
         @test_throws ArgumentError Models.solve_pnjl_with_derivatives(theta_vec[1], theta_vec[2]; order=1, p_num=8, t_num=4, solver_backend=:legacy)

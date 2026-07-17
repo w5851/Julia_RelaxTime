@@ -28,6 +28,8 @@ Windows 和 POSIX 均优先通过 `run_with_sysimage` wrapper 启动。
 - `T_min/T_max/T_step`：MeV。
 - `rho_min/rho_max/rho_step`：`rho/rho0`。
 - `xi`：无量纲各向异性参数。
+- PNJL phase 标量热项中，角度只通过 RS 分布自变量 `E_xi` 进入；chi、Polyakov 势、vacuum、Maxwell、spinodal 和 CEP 不额外引入角核。`E_xi` 不作为物理色散关系。
+- `thermo_quadrature_policy=tensor_gauss` 保留固定有限区间兼容路径；`rs_reduced_adaptive` 使用 RS 角约化和无穷径向自适应积分，仅适用于上述标量热核，不得外推到 magnetic 或 transport。
 - 输出中的化学势字段必须根据列名判断 `mu_q` 或 `mu_B`，两者满足 `mu_B = 3 mu_q` 的项目约定时才能转换。
 - 模型参数必须来自 `config/models/<model>/`；共享物理常数来自 `config/physics/`。
 - 默认 solver 主线为 `models`，不得把历史兼容实现重新写成当前入口。
@@ -88,7 +90,8 @@ julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_phase_cli_smoke.jl";
 
 正式计算前至少比较：
 
-- `p_num` 与 `t_num`；
+- 固定网格路径的 `p_num` 与 `t_num`，以及自适应路径的 `thermo_quadrature_rtol/atol/maxevals`；
+- 低温费米面邻域的固定网格 oracle 与 RS-reduced adaptive 结果；
 - `T_step`；
 - `rho_step`，尤其 CEP 和 spinodal 邻域；
 - solver `iterations` 与失败/unknown 比例；
@@ -96,6 +99,8 @@ julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_phase_cli_smoke.jl";
 - seed/continuation 与 reverse-rho 方向的分支稳定性。
 
 核心比较量包括 CEP 坐标、first-order boundary、spinodal、crossover、失败率、unknown rate 和 Maxwell area residual。只有这些量在证据支持的精度内稳定后，才能确定正式参数。
+
+严格 `T=0` 只在固定状态热核/数密度层定义；五变量 PNJL phase solve 要求 `T>0`。全温区 reference 的最低正温必须单独做积分、求解和相线三级收敛，不能把接近零温结果标成严格零温。
 
 ## 9. 正式计算命令
 

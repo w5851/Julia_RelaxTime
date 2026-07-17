@@ -45,11 +45,12 @@ function _run_single_temperature_production_scan(
         model_kind::Symbol,
         p_num::Int,
         t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
         iterations::Int,
         level::Int,
         pass::Int)
     out_csv = joinpath(eval_dir, _production_eval_filename(T_mid, level, pass))
-    stats = run_trho_scan(
+    stats = run_trho_scan(;
         T_values=[Float64(T_mid)],
         rho_values=rho_eval,
         xi_values=[Float64(xi)],
@@ -62,6 +63,7 @@ function _run_single_temperature_production_scan(
         model_kind=model_kind,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_kwargs...,
         iterations=iterations,
     )
     _append_scan_csv!(aggregate_csv, out_csv)
@@ -85,6 +87,7 @@ function _production_classify_temperature(
         model_kind::Symbol,
         p_num::Int,
         t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
         iterations::Int,
         cfg::ProductionPipelineConfig)
     adaptive_cfg = AdaptiveRhoRefinement.AdaptiveRhoConfig(
@@ -111,6 +114,7 @@ function _production_classify_temperature(
             model_kind,
             p_num,
             t_num,
+            thermo_quadrature_kwargs,
             iterations,
             level,
             pass,
@@ -245,6 +249,10 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         seed_policy::Symbol=:hybrid_continuity,
         p_num::Int=12,
         t_num::Int=4,
+        thermo_quadrature_policy::Symbol=:tensor_gauss,
+        thermo_quadrature_rtol::Float64=1e-8,
+        thermo_quadrature_atol::Float64=1e-10,
+        thermo_quadrature_maxevals::Int=10^7,
         iterations::Int=80,
         compute_crossover::Bool=false,
         crossover_method::Symbol=:peak,
@@ -263,6 +271,20 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         cep_adaptive_max_points::Int=32,
         cep_adaptive_digits::Int=6,
         cep_max_refine_level_rho::Int=2)
+
+    thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
+        thermo_quadrature_policy,
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    model_kind === :PNJL && PNJLIntegrals.validate_rs_anisotropy(xi)
+    if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
+        throw(ArgumentError("rs_reduced_adaptive thermal quadrature is supported only for model_kind=:PNJL"))
+    end
+    T_start > 0.0 || throw(ArgumentError(
+        "production phase pipeline requires T_start > 0 MeV; strict T=0 PNJL five-field solves are Polyakov-degenerate",
+    ))
 
     target = resolve_phase_output_target(model_kind; profile=profile, run_id=run_id, policy=policy)
     run_dir = isnothing(output_dir) ? target.run_dir : output_dir
@@ -310,6 +332,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             model_kind,
             p_num,
             t_num,
+            thermo_quadrature_kwargs,
             iterations,
             cfg,
         )
@@ -452,7 +475,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         T_min_mev = crossover_bounds.T_min_MeV
         T_max_mev = crossover_bounds.T_max_MeV
         if T_min_mev < T_max_mev
-            build_crossover_line(
+            build_crossover_line(;
                 mu_max_MeV=mu_max,
                 T_min_MeV=T_min_mev,
                 T_max_MeV=T_max_mev,
@@ -462,6 +485,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
                 variable=crossover_variable,
                 model_kind=model_kind,
                 solver_backend=solver_backend,
+                thermo_quadrature_kwargs...,
             )
         else
             NamedTuple[]
@@ -480,6 +504,10 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "dT_initial" => cfg.dT_initial,
         "rho_grid" => rho_base,
         "solver_backend" => String(solver_backend),
+        "thermo_quadrature_policy" => String(thermo_quadrature_policy),
+        "thermo_quadrature_rtol" => thermo_quadrature_rtol,
+        "thermo_quadrature_atol" => thermo_quadrature_atol,
+        "thermo_quadrature_maxevals" => thermo_quadrature_maxevals,
         "unknown_budget" => cfg.unknown_budget,
         "cep_tol_MeV" => cfg.cep_tol_MeV,
         "max_refine_level_rho" => cfg.max_refine_level_rho,
@@ -493,7 +521,11 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         T_end=cfg.T_end,
         dT=cfg.dT_initial,
         rho_grid=join(rho_base, ","),
-        solver_backend=solver_backend)
+        solver_backend=solver_backend,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals)
 
     diagnostics = Dict{String, Any}(
         "mode" => "production",

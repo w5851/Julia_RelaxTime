@@ -54,6 +54,10 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 - `max_iter`
 - `p_num`
 - `t_num`
+- `thermo_quadrature_policy`
+- `thermo_quadrature_rtol`
+- `thermo_quadrature_atol`
+- `thermo_quadrature_maxevals`
 - `solver_backend`
 
 支持的检测变量通常包括：
@@ -62,6 +66,8 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 - `:Phi`
 
 `solver_backend` 仅保留 `:models` 与 `:auto`。crossover 的序参量导数使用 TD 状态导数包装；旧 `:legacy` backend 已移除，传入时会抛出迁移错误。
+
+当选择 `:rs_reduced_adaptive` 时，基态求解、TaylorDiff gap series、序参量导数和密度后处理使用同一组热积分控制量，避免在 crossover 检测内部混用不同数值口径。
 
 ### 峰值法 `:peak`
 

@@ -208,6 +208,10 @@ end
         :xi,
         :p_num,
         :t_num,
+        :thermo_quadrature_policy,
+        :thermo_quadrature_rtol,
+        :thermo_quadrature_atol,
+        :thermo_quadrature_maxevals,
     )
         delete!(kwargs, key)
     end
@@ -223,6 +227,10 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     xi = Float64(get(kwargs, :xi, 0.0))
     p_num = Int(get(kwargs, :p_num, 24))
     t_num = Int(get(kwargs, :t_num, 8))
+    thermo_quadrature_policy = Symbol(get(kwargs, :thermo_quadrature_policy, :tensor_gauss))
+    thermo_quadrature_rtol = Float64(get(kwargs, :thermo_quadrature_rtol, 1e-8))
+    thermo_quadrature_atol = Float64(get(kwargs, :thermo_quadrature_atol, 1e-10))
+    thermo_quadrature_maxevals = Int(get(kwargs, :thermo_quadrature_maxevals, 10^7))
     residual_norm_max = Float64(get(kwargs, :residual_norm_max, 1e-6))
     nlsolve_method = get(kwargs, :nlsolve_method, :trust_region)
     trust_region_fallback = Bool(get(kwargs, :trust_region_fallback, true))
@@ -240,6 +248,10 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
         p_num=p_num,
         t_num=t_num,
         model_kind=_joint_model_kind(model),
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
     residual_fn! = build_residual!(mode, params)
 
@@ -258,6 +270,10 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
             rho0_scale=rho0,
             state_n=5,
             mu_n=3,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
         residual_norm = compute_residual_norm_from_solution(
             model,
@@ -269,6 +285,10 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
             state_n=5,
             mu_n=3,
             residual_fn=residual_fn!,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
         phys = physicality_check(thermo.x_state, thermo.masses) && _thermo_quantities_finite(thermo)
 

@@ -28,6 +28,8 @@
 - `hybrid_weighted_fallback`
 - `solver_backend`
 - `p_num`, `t_num`
+- `thermo_quadrature_policy`（`:tensor_gauss` 或 PNJL 标量热核的 `:rs_reduced_adaptive`）
+- `thermo_quadrature_rtol`, `thermo_quadrature_atol`, `thermo_quadrature_maxevals`
 
 返回值与 T-μ 扫描一致，也是 `(total, success, failure, skipped, output)` 风格的命名元组。
 
@@ -66,6 +68,9 @@ T_MeV,rho,xi,mu_u_MeV,mu_d_MeV,mu_s_MeV,mu_avg_MeV,mu_B_MeV,mu_Q_MeV,mu_S_MeV,pr
 - `mu_*_MeV` 来自 flavor 化学势分解，`mu_avg_MeV` 为三味平均
 - `rho_u_fm3`、`rho_d_fm3`、`rho_s_fm3` 是分味粒子数密度
 - 失败或近似接受的点仍保留在输出中，并由 `message` 区分原因
+
+同一个点的 joint solve、压力/密度/熵后处理、residual 复算和分味密度写出必须共享同一组热积分参数；入口不会把自适应策略只用于残差而在 CSV 后处理退回固定网格。
+当前 `:rs_reduced_adaptive` 在本入口明确限定为 `model_kind=:PNJL` 且 `constraint_mode=:fixed_rho`；其他模型或约束模式会提前报错，不会静默回退到 tensor。
 
 ## 推荐与禁用组合
 

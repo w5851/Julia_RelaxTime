@@ -28,6 +28,10 @@ Base.@kwdef mutable struct PhaseCliConfig
     reverse_rho::Bool = true
     p_num::Int = 12
     t_num::Int = 4
+    thermo_quadrature_policy::Symbol = :tensor_gauss
+    thermo_quadrature_rtol::Float64 = 1e-8
+    thermo_quadrature_atol::Float64 = 1e-10
+    thermo_quadrature_maxevals::Int = 10^7
     iterations::Int = 80
     compute_crossover::Bool = false
     crossover_method::Symbol = :peak
@@ -158,6 +162,10 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "reverse_rho") && (cfg.reverse_rho = _as_bool(table["reverse_rho"], "phase_pipeline.reverse_rho"))
     haskey(table, "p_num") && (cfg.p_num = Int(table["p_num"]))
     haskey(table, "t_num") && (cfg.t_num = Int(table["t_num"]))
+    haskey(table, "thermo_quadrature_policy") && (cfg.thermo_quadrature_policy = Symbol(lowercase(String(table["thermo_quadrature_policy"]))))
+    haskey(table, "thermo_quadrature_rtol") && (cfg.thermo_quadrature_rtol = Float64(table["thermo_quadrature_rtol"]))
+    haskey(table, "thermo_quadrature_atol") && (cfg.thermo_quadrature_atol = Float64(table["thermo_quadrature_atol"]))
+    haskey(table, "thermo_quadrature_maxevals") && (cfg.thermo_quadrature_maxevals = Int(table["thermo_quadrature_maxevals"]))
     haskey(table, "iterations") && (cfg.iterations = Int(table["iterations"]))
     haskey(table, "compute_crossover") && (cfg.compute_crossover = _as_bool(table["compute_crossover"], "phase_pipeline.compute_crossover"))
     haskey(table, "crossover_method") && (cfg.crossover_method = Symbol(lowercase(String(table["crossover_method"]))))
@@ -246,6 +254,10 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "reverse_rho" => cfg.reverse_rho,
         "p_num" => cfg.p_num,
         "t_num" => cfg.t_num,
+        "thermo_quadrature_policy" => String(cfg.thermo_quadrature_policy),
+        "thermo_quadrature_rtol" => cfg.thermo_quadrature_rtol,
+        "thermo_quadrature_atol" => cfg.thermo_quadrature_atol,
+        "thermo_quadrature_maxevals" => cfg.thermo_quadrature_maxevals,
         "iterations" => cfg.iterations,
         "compute_crossover" => cfg.compute_crossover,
         "promote_reference" => cfg.promote_reference,
@@ -299,6 +311,10 @@ function _usage()
     println("  --reverse_rho=true|false")
     println("  --p_num=12             动量积分点数")
     println("  --t_num=4              角度积分点数")
+    println("  --thermo_quadrature_policy=tensor_gauss|rs_reduced_adaptive")
+    println("  --thermo_quadrature_rtol=1e-8")
+    println("  --thermo_quadrature_atol=1e-10")
+    println("  --thermo_quadrature_maxevals=10000000")
     println("  --iterations=80        求解迭代上限")
     println("  --compute_crossover    计算并输出 crossover_line.csv")
     println("  --crossover_method=... crossover方法（inflection|peak）")
@@ -399,6 +415,14 @@ function parse_args(args, project_root::AbstractString)
             cfg.p_num = parse(Int, arg[9:end])
         elseif startswith(arg, "--t_num=")
             cfg.t_num = parse(Int, arg[9:end])
+        elseif startswith(arg, "--thermo_quadrature_policy=")
+            cfg.thermo_quadrature_policy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
+        elseif startswith(arg, "--thermo_quadrature_rtol=")
+            cfg.thermo_quadrature_rtol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--thermo_quadrature_atol=")
+            cfg.thermo_quadrature_atol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--thermo_quadrature_maxevals=")
+            cfg.thermo_quadrature_maxevals = parse(Int, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--iterations=")
             cfg.iterations = parse(Int, arg[14:end])
         elseif arg == "--compute_crossover"
@@ -455,6 +479,15 @@ function parse_args(args, project_root::AbstractString)
     end
     cfg.mode in (:production, :research) || throw(ArgumentError("invalid --mode=$(cfg.mode); accepted values: production, research"))
     cfg.solver_backend in (:models, :auto) || throw(ArgumentError("invalid --solver_backend=$(cfg.solver_backend); accepted values: models, auto"))
+    cfg.thermo_quadrature_policy in (:tensor_gauss, :rs_reduced_adaptive) || throw(ArgumentError(
+        "unsupported thermo_quadrature_policy=$(cfg.thermo_quadrature_policy)",
+    ))
+    if cfg.thermo_quadrature_policy === :rs_reduced_adaptive && cfg.model_kind !== :PNJL
+        throw(ArgumentError("rs_reduced_adaptive thermal quadrature is supported only for model_kind=PNJL"))
+    end
+    isfinite(cfg.thermo_quadrature_rtol) && cfg.thermo_quadrature_rtol > 0 || throw(ArgumentError("thermo_quadrature_rtol must be finite and positive"))
+    isfinite(cfg.thermo_quadrature_atol) && cfg.thermo_quadrature_atol >= 0 || throw(ArgumentError("thermo_quadrature_atol must be finite and nonnegative"))
+    cfg.thermo_quadrature_maxevals > 0 || throw(ArgumentError("thermo_quadrature_maxevals must be positive"))
     return cfg
 end
 
@@ -488,6 +521,10 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         reverse_rho=cfg.reverse_rho,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
+        thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+        thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+        thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
         iterations=cfg.iterations,
         compute_crossover=cfg.compute_crossover,
         crossover_method=cfg.crossover_method,

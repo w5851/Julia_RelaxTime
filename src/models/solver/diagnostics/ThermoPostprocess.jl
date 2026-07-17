@@ -20,16 +20,26 @@ function _compute_mode_thermo_quantities_impl(
     p_num::Int,
     t_num::Int,
     rho0_scale::Union{Nothing, Real}=rho0,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
-    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
-    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi)
+    quadrature_kwargs = (
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+    )
+    pressure = -omega(model, x_state, T_fm, mu_vec; p_num=p_num, t_num=t_num, xi=xi, quadrature_kwargs...)
+    pressure_mu = μtrial -> -omega(model, x_state, T_fm, μtrial; p_num=p_num, t_num=t_num, xi=xi, quadrature_kwargs...)
     rho_vec = ForwardDiff.gradient(pressure_mu, mu_vec)
     rho_norm = if rho0_scale === nothing
         sum(rho_vec) / 3.0
     else
         sum(rho_vec) / (3.0 * Float64(rho0_scale))
     end
-    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi)
+    pressure_T = τ -> -omega(model, x_state, τ, mu_vec; p_num=p_num, t_num=t_num, xi=xi, quadrature_kwargs...)
     entropy = ForwardDiff.derivative(pressure_T, T_fm)
     energy = -pressure + sum(mu_vec .* rho_vec) + T_fm * entropy
     masses = _mass_from_state(model, x_state)
@@ -64,8 +74,24 @@ function _compose_mode_residual_norm_impl(
     xi::Real,
     p_num::Int,
     t_num::Int,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
-    gap_norm = _gap_norm_from_state(model, x_state, mu_vec, T_fm; xi=xi, p_num=p_num, t_num=t_num)
+    gap_norm = _gap_norm_from_state(
+        model,
+        x_state,
+        mu_vec,
+        T_fm;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+    )
     residual_norm = gap_norm
     for component in components
         comp = _residual_component_value(component)
@@ -84,6 +110,10 @@ function compute_thermo_from_solution(
     rho0_scale::Union{Nothing, Real}=rho0,
     state_n::Int=5,
     mu_n::Int=3,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     x_state, mu_vec = _unpack_solution(solution; state_n=state_n, mu_n=mu_n)
     thermo = _compute_mode_thermo_quantities(
@@ -95,6 +125,10 @@ function compute_thermo_from_solution(
         p_num=p_num,
         t_num=t_num,
         rho0_scale=rho0_scale,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
     return (; x_state=x_state, mu_vec=mu_vec, thermo...)
 end
@@ -110,6 +144,10 @@ function compute_residual_norm_from_solution(
     state_n::Int=5,
     mu_n::Int=3,
     residual_fn::Union{Nothing, Function}=nothing,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     if residual_fn !== nothing
         residual_vec = zeros(Float64, length(solution))
@@ -127,6 +165,10 @@ function compute_residual_norm_from_solution(
         xi=xi,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
 end
 

@@ -22,6 +22,10 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     rho_step::Float64 = 0.05
     p_num::Int = 24
     t_num::Int = 8
+    thermo_quadrature_policy::Symbol = :tensor_gauss
+    thermo_quadrature_rtol::Float64 = 1e-8
+    thermo_quadrature_atol::Float64 = 1e-10
+    thermo_quadrature_maxevals::Int = 10^7
     iterations::Int = 80
     solver_backend::Symbol = :models
     seed_policy::Symbol = :hybrid_continuity
@@ -55,6 +59,10 @@ function usage()
     println("  --rho-step <value>       default 0.05")
     println("  --p-num <int>            gap/thermo momentum nodes (default 24)")
     println("  --t-num <int>            gap/thermo angle nodes (default 8)")
+    println("  --thermo-quadrature-policy <name> tensor_gauss or rs_reduced_adaptive")
+    println("  --thermo-quadrature-rtol <value>   adaptive relative tolerance (default 1e-8)")
+    println("  --thermo-quadrature-atol <value>   adaptive absolute tolerance (default 1e-10)")
+    println("  --thermo-quadrature-maxevals <int> adaptive evaluation cap (default 10000000)")
     println("  --iterations <int>       solver iteration cap (default 80)")
     println("  --tag <name>             output suffix, writes boundary_<tag>.csv etc. default dense")
     println("  --output-root <path>     processed run root")
@@ -125,6 +133,14 @@ function parse_args(args::Vector{String})
             cfg.p_num = parse(Int, require_value())
         elseif arg == "--t-num"
             cfg.t_num = parse(Int, require_value())
+        elseif arg == "--thermo-quadrature-policy"
+            cfg.thermo_quadrature_policy = Symbol(lowercase(require_value()))
+        elseif arg == "--thermo-quadrature-rtol"
+            cfg.thermo_quadrature_rtol = parse(Float64, require_value())
+        elseif arg == "--thermo-quadrature-atol"
+            cfg.thermo_quadrature_atol = parse(Float64, require_value())
+        elseif arg == "--thermo-quadrature-maxevals"
+            cfg.thermo_quadrature_maxevals = parse(Int, require_value())
         elseif arg == "--iterations"
             cfg.iterations = parse(Int, require_value())
         elseif arg == "--tag"
@@ -164,6 +180,12 @@ function parse_args(args::Vector{String})
     cfg.rho_step > 0 || error("rho-step must be positive")
     cfg.p_num > 0 || error("p-num must be positive")
     cfg.t_num > 0 || error("t-num must be positive")
+    Models.PNJLIntegrals.validate_thermal_quadrature_policy(cfg.thermo_quadrature_policy)
+    Models.PNJLIntegrals.validate_thermal_quadrature_controls(
+        cfg.thermo_quadrature_rtol,
+        cfg.thermo_quadrature_atol,
+        cfg.thermo_quadrature_maxevals,
+    )
     cfg.iterations > 0 || error("iterations must be positive")
     cfg.crossover_n_mu > 0 || error("crossover-n-mu must be positive")
     cfg.crossover_mu_max_MeV > 0 || error("crossover-mu-max must be positive")
@@ -369,6 +391,10 @@ function manifest_config_payload(cfg::DensePhaseReferenceConfig)
         "rho_step" => cfg.rho_step,
         "p_num" => cfg.p_num,
         "t_num" => cfg.t_num,
+        "thermo_quadrature_policy" => String(cfg.thermo_quadrature_policy),
+        "thermo_quadrature_rtol" => cfg.thermo_quadrature_rtol,
+        "thermo_quadrature_atol" => cfg.thermo_quadrature_atol,
+        "thermo_quadrature_maxevals" => cfg.thermo_quadrature_maxevals,
         "iterations" => cfg.iterations,
         "mode" => String(cfg.mode),
         "compute_crossover" => cfg.compute_crossover,
@@ -394,6 +420,12 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
             xi=xi,
             model_kind=cfg.model_kind,
             solver_backend=cfg.solver_backend,
+            p_num=cfg.p_num,
+            t_num=cfg.t_num,
+            thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+            thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+            thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+            thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
         )
         T_mev = result.T_crossover === nothing ? NaN : Float64(result.T_crossover) * 197.327
         rho = result.rho === nothing ? NaN : Float64(result.rho)
@@ -422,6 +454,12 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
         variable=cfg.crossover_variable,
         model_kind=cfg.model_kind,
         solver_backend=cfg.solver_backend,
+        p_num=cfg.p_num,
+        t_num=cfg.t_num,
+        thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+        thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+        thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
     )
     for row in local_rows
         push!(rows, merge((xi=xi,), row))
@@ -485,6 +523,10 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 seed_policy=cfg.seed_policy,
                 p_num=cfg.p_num,
                 t_num=cfg.t_num,
+                thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+                thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+                thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+                thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
                 iterations=cfg.iterations,
                 compute_crossover=cfg.compute_crossover,
                 crossover_method=cfg.crossover_method,

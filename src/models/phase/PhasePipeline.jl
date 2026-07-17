@@ -6,6 +6,21 @@ function _config_hash(model_kind::Symbol; kwargs...)
     return bytes2hex(sha1(payload))
 end
 
+@inline function _phase_thermo_quadrature_kwargs(
+        policy::Symbol,
+        rtol::Float64,
+        atol::Float64,
+        maxevals::Int)
+    PNJLIntegrals.validate_thermal_quadrature_policy(policy)
+    PNJLIntegrals.validate_thermal_quadrature_controls(rtol, atol, maxevals)
+    return (
+        thermo_quadrature_policy=policy,
+        thermo_quadrature_rtol=rtol,
+        thermo_quadrature_atol=atol,
+        thermo_quadrature_maxevals=maxevals,
+    )
+end
+
 function _refine_rho_grid(rho_grid::Vector{Float64}, level::Int)
     level <= 0 && return sort(unique(copy(rho_grid)))
     refined = sort(unique(copy(rho_grid)))
@@ -53,8 +68,9 @@ function _run_single_temperature_scan(
         model_kind::Symbol,
         p_num::Int,
         t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
         iterations::Int)
-    run_trho_scan(
+    run_trho_scan(;
         T_values=[Float64(T_mid)],
         rho_values=rho_eval,
         xi_values=[Float64(xi)],
@@ -67,6 +83,7 @@ function _run_single_temperature_scan(
         model_kind=model_kind,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_kwargs...,
         iterations=iterations,
     )
     local_curves = load_curves_from_trho_csv(out_csv; xi=Float64(xi), min_points=3)
@@ -133,6 +150,10 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         seed_policy::Symbol=:hybrid_continuity,
         p_num::Int=12,
         t_num::Int=4,
+        thermo_quadrature_policy::Symbol=:tensor_gauss,
+        thermo_quadrature_rtol::Float64=1e-8,
+        thermo_quadrature_atol::Float64=1e-10,
+        thermo_quadrature_maxevals::Int=10^7,
         iterations::Int=80,
         compute_crossover::Bool=false,
         crossover_method::Symbol=:peak,
@@ -163,6 +184,20 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         dT::Float64=NaN,
         unknown_budget::Int=5)
 
+    thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
+        thermo_quadrature_policy,
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    model_kind === :PNJL && PNJLIntegrals.validate_rs_anisotropy(xi)
+    if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
+        throw(ArgumentError("rs_reduced_adaptive thermal quadrature is supported only for model_kind=:PNJL"))
+    end
+    minimum(Float64.(T_grid)) > 0.0 || throw(ArgumentError(
+        "phase pipeline requires T_grid > 0 MeV; strict T=0 PNJL five-field solves are Polyakov-degenerate",
+    ))
+
     if mode == :production
         T_start_eff = isfinite(T_start) ? T_start : Float64(minimum(T_grid))
         T_end_eff = isfinite(T_end) ? T_end : Float64(maximum(T_grid))
@@ -182,6 +217,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             seed_policy=seed_policy,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_kwargs...,
             iterations=iterations,
             compute_crossover=compute_crossover,
             crossover_method=crossover_method,
@@ -207,7 +243,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
     mkpath(run_dir)
 
     scan_csv = joinpath(run_dir, "trho_scan.csv")
-    stats = run_trho_scan(
+    stats = run_trho_scan(;
         T_values=collect(Float64.(T_grid)),
         rho_values=collect(Float64.(rho_grid)),
         xi_values=[Float64(xi)],
@@ -220,6 +256,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         model_kind=model_kind,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_kwargs...,
         iterations=iterations,
     )
 
@@ -252,6 +289,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                 model_kind,
                 p_num,
                 t_num,
+                thermo_quadrature_kwargs,
                 iterations,
             )
             curve === nothing && return nothing
@@ -274,6 +312,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                         model_kind,
                         p_num,
                         t_num,
+                        thermo_quadrature_kwargs,
                         iterations,
                     )
                     curve === nothing && return nothing
@@ -300,6 +339,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
                 model_kind,
                 p_num,
                 t_num,
+                thermo_quadrature_kwargs,
                 iterations,
             )
         end
@@ -332,7 +372,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         end
         T_min_mev = minimum(Float64.(T_grid))
         T_max_mev = min(maximum(Float64.(T_grid)), 220.0)
-        build_crossover_line(
+        build_crossover_line(;
             mu_max_MeV=mu_max,
             T_min_MeV=T_min_mev,
             T_max_MeV=T_max_mev,
@@ -342,6 +382,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             variable=crossover_variable,
             model_kind=model_kind,
             solver_backend=solver_backend,
+            thermo_quadrature_kwargs...,
         )
     else
         NamedTuple[]
@@ -355,6 +396,10 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "T_grid" => collect(Float64.(T_grid)),
         "rho_grid" => collect(Float64.(rho_grid)),
         "solver_backend" => String(solver_backend),
+        "thermo_quadrature_policy" => String(thermo_quadrature_policy),
+        "thermo_quadrature_rtol" => thermo_quadrature_rtol,
+        "thermo_quadrature_atol" => thermo_quadrature_atol,
+        "thermo_quadrature_maxevals" => thermo_quadrature_maxevals,
         "cep_strategy" => String(cep_strategy),
         "cep_interpolate_use_direct_eval" => cep_interpolate_use_direct_eval,
         "cep_adaptive_rho" => cep_adaptive_rho,
@@ -365,7 +410,9 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "cep_direct_start" => String(cep_direct_start),
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
-        mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend)
+        mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend,
+        thermo_quadrature_policy=thermo_quadrature_policy, thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol, thermo_quadrature_maxevals=thermo_quadrature_maxevals)
 
     diagnostics = Dict{String, Any}(
         "scan_total" => getproperty(stats, :total),

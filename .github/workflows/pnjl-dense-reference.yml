@@ -68,6 +68,29 @@ on:
         required: false
         default: "8"
         type: string
+      thermo_quadrature_policy:
+        description: "phase 热积分策略（tensor_gauss 或 rs_reduced_adaptive）"
+        required: false
+        default: "tensor_gauss"
+        type: choice
+        options:
+          - tensor_gauss
+          - rs_reduced_adaptive
+      thermo_quadrature_rtol:
+        description: "自适应热积分相对误差"
+        required: false
+        default: "1e-8"
+        type: string
+      thermo_quadrature_atol:
+        description: "自适应热积分绝对误差"
+        required: false
+        default: "1e-10"
+        type: string
+      thermo_quadrature_maxevals:
+        description: "自适应热积分最大评估次数"
+        required: false
+        default: "10000000"
+        type: string
       iterations:
         description: "求解迭代上限"
         required: false
@@ -153,6 +176,10 @@ jobs:
             --rho-step "${{ inputs.rho_step || '0.05' }}"
             --p-num "${{ inputs.p_num || '24' }}"
             --t-num "${{ inputs.t_num || '8' }}"
+            --thermo-quadrature-policy "${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}"
+            --thermo-quadrature-rtol "${{ inputs.thermo_quadrature_rtol || '1e-8' }}"
+            --thermo-quadrature-atol "${{ inputs.thermo_quadrature_atol || '1e-10' }}"
+            --thermo-quadrature-maxevals "${{ inputs.thermo_quadrature_maxevals || '10000000' }}"
             --iterations "${{ inputs.iterations || '80' }}"
             --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
             --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
@@ -234,6 +261,7 @@ jobs:
               fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV (step `${{ inputs.T_step || '5' }}`)\n")
               fh.write(f"- rho range: `${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }}` rho0 (step `${{ inputs.rho_step || '0.05' }}`)\n")
               fh.write(f"- p_num/t_num/iterations: `${{ inputs.p_num || '24' }}` / `${{ inputs.t_num || '8' }}` / `${{ inputs.iterations || '80' }}`\n")
+              fh.write(f"- thermo quadrature: `${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}` (rtol `${{ inputs.thermo_quadrature_rtol || '1e-8' }}`, atol `${{ inputs.thermo_quadrature_atol || '1e-10' }}`, maxevals `${{ inputs.thermo_quadrature_maxevals || '10000000' }}`)\n")
               fh.write("- crossover_only: `${{ inputs.crossover_only }}`\n")
               fh.write(f"- crossover_mu0_only: `{str(report['mu0_only']).lower()}`\n")
               fh.write(f"- crossover_n_mu: `${{ inputs.crossover_n_mu || '16' }}`\n")

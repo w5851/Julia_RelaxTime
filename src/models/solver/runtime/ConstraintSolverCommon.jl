@@ -38,11 +38,19 @@ end
     xi::Real,
     p_num::Int,
     t_num::Int,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     params = GapParams(Float64(T_fm), cached_nodes(p_num, t_num; p_max_inv_fm=Models.thermal_p_max_inv_fm(model)), Float64(xi);
         p_num=p_num,
         t_num=t_num,
         model_kind=_model_kind_for_shared_core(model),
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
     Tout = promote_type(eltype(x_state), eltype(mu_vec), Float64)
     out = Vector{Tout}(undef, length(x_state))
@@ -416,6 +424,10 @@ function _compute_fixedmu_candidate(
     xi::Real,
     p_num::Int,
     t_num::Int,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     x_state = _to_state_svec(st)
     mu_vec = normalize_mu_vec(μ_fm)
@@ -429,6 +441,10 @@ function _compute_fixedmu_candidate(
         p_num=p_num,
         t_num=t_num,
         rho0_scale=nothing,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
     residual_norm = _compose_mode_residual_norm(
         model,
@@ -438,6 +454,10 @@ function _compute_fixedmu_candidate(
         xi=xi,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
 
     return (
@@ -465,6 +485,10 @@ end
     p_num::Int,
     t_num::Int,
     rho0_scale::Union{Nothing, Real}=rho0,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     return _compute_mode_thermo_quantities_impl(
         model,
@@ -475,6 +499,10 @@ end
         p_num=p_num,
         t_num=t_num,
         rho0_scale=rho0_scale,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
 end
 
@@ -487,6 +515,10 @@ function _compose_mode_residual_norm(
     xi::Real,
     p_num::Int,
     t_num::Int,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     return _compose_mode_residual_norm_impl(
         model,
@@ -497,6 +529,10 @@ function _compose_mode_residual_norm(
         xi=xi,
         p_num=p_num,
         t_num=t_num,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
 end
 
@@ -591,6 +627,10 @@ function _solve_gap_with_outer_fallback(
     xi,
     p_num::Int,
     t_num::Int,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     initial_guess = if st_prev === nothing
         Float64.(seed_guess)
@@ -610,6 +650,10 @@ function _solve_gap_with_outer_fallback(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
     catch err
         err isa InterruptException && rethrow()
@@ -626,6 +670,10 @@ function _solve_gap_with_outer_fallback(
                 xi=xi,
                 p_num=p_num,
                 t_num=t_num,
+                thermo_quadrature_policy=thermo_quadrature_policy,
+                thermo_quadrature_rtol=thermo_quadrature_rtol,
+                thermo_quadrature_atol=thermo_quadrature_atol,
+                thermo_quadrature_maxevals=thermo_quadrature_maxevals,
             )
         catch err2
             err2 isa InterruptException && rethrow()

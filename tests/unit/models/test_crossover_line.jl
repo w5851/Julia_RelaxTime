@@ -51,4 +51,12 @@ Models.pnjl_module()
             t_num=4,
         )
     end
+
+    @testset "热积分策略在求解前校验" begin
+        @test_throws ArgumentError Models.detect_crossover(
+            0.0,
+            (0.45, 0.55);
+            thermo_quadrature_policy=:unknown,
+        )
+    end
 end
