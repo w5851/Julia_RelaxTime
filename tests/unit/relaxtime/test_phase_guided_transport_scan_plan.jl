@@ -143,3 +143,20 @@ end
     @test explicit.t_num == 8
     @test explicit.phase_anchor_policy === :reference_interpolation
 end
+
+@testset "coexistence certification always uses an independent higher node configuration" begin
+    low = Main.GapTransportScanPhaseEquilibrium._default_coexistence_convergence_numerics((p_num=12, t_num=6))
+    production = Main.GapTransportScanPhaseEquilibrium._default_coexistence_convergence_numerics((p_num=24, t_num=8))
+    higher = Main.GapTransportScanPhaseEquilibrium._default_coexistence_convergence_numerics((p_num=32, t_num=10))
+
+    @test low == (p_num=24, t_num=8)
+    @test production == (p_num=32, t_num=10)
+    @test higher == (p_num=40, t_num=12)
+    @test_throws ArgumentError Main.GapTransportScanPhaseEquilibrium.certify_coexistence_side_points(
+        nothing,
+        0.0,
+        (p_num=24, t_num=8);
+        convergence_p_num=24,
+        convergence_t_num=8,
+    )
+end
