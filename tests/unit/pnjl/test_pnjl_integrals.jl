@@ -48,6 +48,49 @@ const calculate_log_sum_pi = Models.PNJLIntegrals.calculate_log_sum
         @test isfinite(result)
     end
 
+    @testset "仓库内自适应径向积分的误差和 AD 契约" begin
+        radial = Models.PNJLIntegrals.integrate_rs_reduced_radial(
+            q -> exp(-q),
+            0.3,
+            0.0;
+            rtol=1e-10,
+            atol=1e-12,
+            thermal_scale=0.2,
+        )
+        @test radial.value ≈ 1.0 rtol=1e-10 atol=1e-12
+        @test 0.0 <= radial.error <= 1e-9
+
+        vector_radial = Models.PNJLIntegrals.integrate_rs_reduced_radial(
+            q -> SVector(exp(-q), q * exp(-q)),
+            0.3,
+            0.0;
+            rtol=1e-10,
+            atol=1e-12,
+            thermal_scale=0.2,
+        )
+        @test vector_radial.value ≈ SVector(1.0, 1.0) rtol=1e-10 atol=1e-12
+        @test isfinite(vector_radial.error)
+
+        derivative = ForwardDiff.derivative(1.0) do rate
+            Models.PNJLIntegrals.integrate_rs_reduced_radial(
+                q -> exp(-rate * q),
+                0.3,
+                0.0;
+                rtol=1e-9,
+                atol=1e-11,
+                thermal_scale=0.2,
+            ).value
+        end
+        @test derivative ≈ -1.0 rtol=2e-8 atol=1e-10
+
+        @test_throws ArgumentError Models.PNJLIntegrals.integrate_rs_reduced_radial(
+            q -> exp(-q), 0.3, 0.0; maxevals=1,
+        )
+        @test_throws ArgumentError Models.PNJLIntegrals.integrate_rs_reduced_radial(
+            q -> exp(-q), 0.3, 0.0; thermal_scale=-1.0,
+        )
+    end
+
     @testset "RS 角约化只作用于分布自变量和测度" begin
         masses = SVector(0.3, 0.31, 0.5)
         mu_vec = SVector(0.4, 0.35, 0.2)

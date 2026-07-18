@@ -266,6 +266,7 @@ function _number_densities_rs_reduced_adaptive(
             rtol=rtol,
             atol=atol,
             maxevals=maxevals,
+            thermal_scale=T_val,
         )
         acc_q[i] = prefactor * value[1]
         acc_aq[i] = prefactor * value[2]
