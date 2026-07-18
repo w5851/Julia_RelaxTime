@@ -460,7 +460,10 @@ function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Fl
                 found=true,
                 T_cep_MeV=T_low,
                 mu_cep_MeV=last_mu,
-                uncertainty_T_MeV=T_high - T_low,
+                uncertainty_T_MeV=0.5 * (T_high - T_low),
+                T_bracket_low_MeV=T_low,
+                T_bracket_high_MeV=T_high,
+                bracket_width_T_MeV=T_high - T_low,
                 eval_count=eval_count,
                 unknown_count=unknown_count,
                 reason=eval_mid.reason,
@@ -476,7 +479,10 @@ function _find_cep_direct(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Fl
         found=true,
         T_cep_MeV=T_cep,
         mu_cep_MeV=last_mu,
-        uncertainty_T_MeV=T_high - T_low,
+        uncertainty_T_MeV=0.5 * (T_high - T_low),
+        T_bracket_low_MeV=T_low,
+        T_bracket_high_MeV=T_high,
+        bracket_width_T_MeV=T_high - T_low,
         eval_count=eval_count,
         unknown_count=unknown_count,
         method=:direct_bisect_last_valid_maxwell,
@@ -568,5 +574,14 @@ function find_cep(curves::Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}
 
     T_cep = 0.5 * (T_low + T_high)
     method = low_status == :weak_s_shape ? :bisect_weak_s_shape_disappearance : :bisect_last_valid_maxwell
-    return CEPResult(found=true, T_cep_MeV=T_cep, mu_cep_MeV=last_mu, method=method)
+    return CEPResult(
+        found=true,
+        T_cep_MeV=T_cep,
+        mu_cep_MeV=last_mu,
+        uncertainty_T_MeV=0.5 * (T_high - T_low),
+        T_bracket_low_MeV=T_low,
+        T_bracket_high_MeV=T_high,
+        bracket_width_T_MeV=T_high - T_low,
+        method=method,
+    )
 end

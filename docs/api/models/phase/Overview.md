@@ -65,6 +65,9 @@ result = Models.run_phase_pipeline(
     p_num=12,
     t_num=4,
     iterations=80,
+    rho_geometry_convergence=true,
+    adaptive_temperature=true,
+    crossover_T_max_MeV=240.0,
     promote_reference=false,
 )
 ```
@@ -121,8 +124,9 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
   - `trho_scan.csv`
   - `first_order_boundary.csv`
   - `spinodal.csv`
-  - `crossover_line.csv`
-  - `phase_summary.json`
+- `crossover_line.csv`
+- `phase_grid_convergence.csv`
+- `phase_summary.json`
   - `pm_branch_scan.csv`
   - `pm_phase_summary.json`
   - `pm_vs_maxwell.csv`
@@ -141,7 +145,7 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 - `artifact_paths`
 - `diagnostics`
 
-如果你要显式锁定 production 口径，则改用 `Models.run_production_phase_pipeline`；它仍返回 `PhasePipelineResult`，但 `config_snapshot` 与 `diagnostics` 会包含 production 专有字段，例如 `dT_initial`、`unknown_budget`、`first_point_fallback` 与 `forced_invalid_count`。
+如果你要显式锁定 production 口径，则改用 `Models.run_production_phase_pipeline`；它仍返回 `PhasePipelineResult`，但 `config_snapshot` 与 `diagnostics` 会包含 production 专有字段，例如 `dT_initial`、`unknown_budget`、`first_point_fallback`、`forced_invalid_count`、rho/T 网格误差门限与显式 crossover 温区上限。正式产物应同时消费 `phase_grid_convergence.csv`，不能只检查边界 CSV 是否存在。
 
 ### 2. 对已有曲线离线做 CEP 分析
 

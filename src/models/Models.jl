@@ -178,6 +178,7 @@ const ρ0 = Main.Constants_PNJL.ρ0_inv_fm3
 
 # Unified scan/workflow entrypoints (Stage C compatibility layer)
 include(joinpath(@__DIR__, "phase", "PhaseTypes.jl"))
+include(joinpath(@__DIR__, "phase", "PhaseGridConvergence.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseTypes.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseSeeds.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseDiagnostic.jl"))

@@ -1,7 +1,7 @@
 using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
-const PHASE_BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "phase", "baseline_phase_pipeline_v1.csv")
+const PHASE_BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "phase", "baseline_phase_pipeline_v2.csv")
 
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))

@@ -96,7 +96,7 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 在仓库根目录执行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --solver_backend=legacy --output_dir=<your_output_dir>
+powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --model_kind=PNJL --mode=research --T_min=150 --T_max=150 --T_step=10 --rho_min=0.1 --rho_max=0.3 --rho_step=0.1 --solver_backend=models --output_dir=<your_output_dir>
 ```
 
 说明：
@@ -105,6 +105,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - 可以使用 `--config=<path/to/phase_pipeline.toml>` 指定自定义模板。
 - 可以使用 `--preset=smoke` 快速切换到轻量可复现实验参数（随后仍可用 CLI 显式参数覆盖）。
 - CLI 显式参数优先级高于模板（同名键会覆盖）。
+- production 可显式设置 `crossover_T_max_MeV`、rho 粗细网格几何量门限和温度中点自适应门限；解析后的 `p_num/t_num/iterations` 与这些门限写入 manifest。
 
 最小产物结构（输出目录）：
 
@@ -112,6 +113,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - `first_order_boundary.csv`
 - `spinodal.csv`
 - `crossover_line.csv`
+- `phase_grid_convergence.csv`
 - `phase_summary.json`
 - `phase_report.md`
 - `run_manifest.json`（记录 argv、config_path、config_hash、git_commit、artifact_paths）

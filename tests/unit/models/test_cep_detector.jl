@@ -138,6 +138,9 @@ end
         @test cep.found
         @test cep.T_cep_MeV > 130.9
         @test cep.method == :bisect_weak_s_shape_disappearance
+        @test cep.T_bracket_low_MeV < cep.T_bracket_high_MeV
+        @test cep.bracket_width_T_MeV == cep.T_bracket_high_MeV - cep.T_bracket_low_MeV
+        @test cep.uncertainty_T_MeV == 0.5 * cep.bracket_width_T_MeV
     end
 
     @testset "interpolate CEP 可在临界二分点切换为 direct re-evaluate" begin
@@ -179,5 +182,6 @@ end
         @test cep_direct_mid.found
         @test cep_direct_mid.T_cep_MeV > cep_interp.T_cep_MeV
         @test cep_direct_mid.method == :bisect_last_valid_maxwell
+        @test cep_direct_mid.uncertainty_T_MeV == 0.5 * cep_direct_mid.bracket_width_T_MeV
     end
 end

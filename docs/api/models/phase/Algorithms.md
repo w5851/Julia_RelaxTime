@@ -75,6 +75,8 @@
 
 - `T_cep_MeV`
 - `mu_cep_MeV`：历史兼容字段，表示夸克化学势 `mu_q`，不是重子化学势 `mu_B`
+- `T_bracket_low_MeV` / `T_bracket_high_MeV`
+- `bracket_width_T_MeV`
 - `eval_count`
 - `unknown_count`
 - `uncertainty_T_MeV`
@@ -93,7 +95,31 @@
 4. 从最后一个 `valid` 与随后的 `invalid` 温度切片构造 production bracket
 5. 在 bracket 内继续二分，得到 production CEP
 
+`uncertainty_T_MeV` 表示最终 CEP 温度 bracket 的半宽，完整宽度由
+`bracket_width_T_MeV` 单独记录，不能把两者混作同一误差量。
+
 这条路径的重点不是更“通用”，而是更适合 production/baseline 口径的可解释性与稳定收口。
+
+## Phase 网格几何量收敛
+
+production 路径的 `rho` refinement 不再只在分类为 `unknown` 时触发。启用
+`rho_geometry_convergence=true` 后，每个温度切片至少比较一层嵌套粗细 `rho` 网格，并同时约束：
+
+- Maxwell 共存化学势与两侧 spinodal 化学势的位置误差（MeV）；
+- 共存密度与 spinodal 密度误差；
+- 粗细层的 Maxwell area residual。
+
+达到最大细化层仍未满足几何量门限的 `valid` 点会降为 `unknown`，不能仅凭粗网格上出现
+S-shape 就作为正式一阶相变点。温度自适应只处理两端均为 `valid` 的一阶相线区间：求解中点，
+比较中点结果与端点线性插值，并按同一组位置量、密度量和面积残差门限继续细化。
+`valid/invalid` 转换区由 CEP bracket 负责，不用相线插值代替 CEP 分类。
+
+跨 `xi` 的 dense reference 使用同样的中点插值误差定义；每个待审计区间必须先计算一次中点，
+因此即使相线近似线性，启用 adaptive xi 后也至少会把锚点间距减半一层。所有 rho/T/xi 诊断记录写入
+`phase_grid_convergence.csv`（dense reference 为带 tag 的同名 sibling），诊断未收敛本身不自动等价于物理异常。
+
+每个温度的全部粗细层原始扫描保留在 `production_eval/`；聚合 `trho_scan.csv` 只写该温度最终采用的
+一层，避免同一 `(T,rho)` 因审计层级不同而出现无标识重复行。
 
 ## Crossover 支路
 
@@ -110,6 +136,11 @@
 - `:inflection`
 
 它们的职责是从序参量导数结构中给出 crossover 温度，而不是替代一阶相变的 Maxwell 判据。细节见 [Crossover.md](docs/api/models/phase/Crossover.md)。
+
+crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继承主 phase 的 `T_end` 或
+`T_grid` 最大值。实现不再隐藏截断到 `220 MeV`。crossover 基态和导数路径使用调用方实际传入的
+`p_num` 与 `t_num` 口径。phase 主扫描的 `iterations` 连同实际 `p_num/t_num` 一起进入配置快照和 config hash；
+本次不新增 crossover 的独立 gap-iteration 参数。
 
 ## 自适应 rho 加密
 
@@ -148,6 +179,9 @@ production 入口同样复用这套工件治理，但会在 `diagnostics` 和 `c
 - `forced_invalid_count`
 - `sweep_temperatures_MeV`
 - `sweep_statuses`
+- `rho_geometry_convergence` 及其位置量、密度量、面积残差门限
+- `adaptive_temperature` 及其中点细化门限
+- `crossover_T_max_MeV`
 
 ## 当前边界
 

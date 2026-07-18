@@ -37,6 +37,7 @@ Base.@kwdef mutable struct PhaseCliConfig
     crossover_method::Symbol = :peak
     crossover_variable::Symbol = :phi_u
     crossover_n_mu::Int = 12
+    crossover_T_max_MeV::Float64 = NaN
     cep_strategy::Symbol = :interpolate
     cep_interpolate_use_direct_eval::Bool = false
     cep_tol::Float64 = 0.01
@@ -55,6 +56,16 @@ Base.@kwdef mutable struct PhaseCliConfig
     cep_direct_expand_factor::Float64 = 2.0
     cep_direct_max_expand_steps::Int = 8
     cep_direct_fallback_scan::Bool = true
+    unknown_budget::Int = 5
+    rho_geometry_convergence::Bool = true
+    rho_position_tol_MeV::Float64 = 0.05
+    rho_density_tol::Float64 = 0.005
+    rho_maxwell_area_tol::Float64 = 1e-4
+    adaptive_temperature::Bool = false
+    temperature_max_refine_level::Int = 2
+    temperature_position_tol_MeV::Float64 = 0.10
+    temperature_density_tol::Float64 = 0.01
+    temperature_maxwell_area_tol::Float64 = 1e-4
     promote_reference::Bool = false
     verbose::Bool = false
 end
@@ -171,6 +182,7 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "crossover_method") && (cfg.crossover_method = Symbol(lowercase(String(table["crossover_method"]))))
     haskey(table, "crossover_variable") && (cfg.crossover_variable = Symbol(String(table["crossover_variable"])))
     haskey(table, "crossover_n_mu") && (cfg.crossover_n_mu = Int(table["crossover_n_mu"]))
+    haskey(table, "crossover_T_max_MeV") && (cfg.crossover_T_max_MeV = Float64(table["crossover_T_max_MeV"]))
     haskey(table, "cep_strategy") && (cfg.cep_strategy = Symbol(lowercase(String(table["cep_strategy"]))))
     haskey(table, "cep_interpolate_use_direct_eval") && (cfg.cep_interpolate_use_direct_eval = _as_bool(table["cep_interpolate_use_direct_eval"], "phase_pipeline.cep_interpolate_use_direct_eval"))
     haskey(table, "cep_tol") && (cfg.cep_tol = Float64(table["cep_tol"]))
@@ -189,6 +201,16 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "cep_direct_expand_factor") && (cfg.cep_direct_expand_factor = Float64(table["cep_direct_expand_factor"]))
     haskey(table, "cep_direct_max_expand_steps") && (cfg.cep_direct_max_expand_steps = Int(table["cep_direct_max_expand_steps"]))
     haskey(table, "cep_direct_fallback_scan") && (cfg.cep_direct_fallback_scan = _as_bool(table["cep_direct_fallback_scan"], "phase_pipeline.cep_direct_fallback_scan"))
+    haskey(table, "unknown_budget") && (cfg.unknown_budget = Int(table["unknown_budget"]))
+    haskey(table, "rho_geometry_convergence") && (cfg.rho_geometry_convergence = _as_bool(table["rho_geometry_convergence"], "phase_pipeline.rho_geometry_convergence"))
+    haskey(table, "rho_position_tol_MeV") && (cfg.rho_position_tol_MeV = Float64(table["rho_position_tol_MeV"]))
+    haskey(table, "rho_density_tol") && (cfg.rho_density_tol = Float64(table["rho_density_tol"]))
+    haskey(table, "rho_maxwell_area_tol") && (cfg.rho_maxwell_area_tol = Float64(table["rho_maxwell_area_tol"]))
+    haskey(table, "adaptive_temperature") && (cfg.adaptive_temperature = _as_bool(table["adaptive_temperature"], "phase_pipeline.adaptive_temperature"))
+    haskey(table, "temperature_max_refine_level") && (cfg.temperature_max_refine_level = Int(table["temperature_max_refine_level"]))
+    haskey(table, "temperature_position_tol_MeV") && (cfg.temperature_position_tol_MeV = Float64(table["temperature_position_tol_MeV"]))
+    haskey(table, "temperature_density_tol") && (cfg.temperature_density_tol = Float64(table["temperature_density_tol"]))
+    haskey(table, "temperature_maxwell_area_tol") && (cfg.temperature_maxwell_area_tol = Float64(table["temperature_maxwell_area_tol"]))
     haskey(table, "promote_reference") && (cfg.promote_reference = _as_bool(table["promote_reference"], "phase_pipeline.promote_reference"))
     haskey(table, "verbose") && (cfg.verbose = _as_bool(table["verbose"], "phase_pipeline.verbose"))
     return cfg
@@ -260,6 +282,22 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "thermo_quadrature_maxevals" => cfg.thermo_quadrature_maxevals,
         "iterations" => cfg.iterations,
         "compute_crossover" => cfg.compute_crossover,
+        "crossover_T_max_MeV" => get(
+            result.config_snapshot,
+            "crossover_T_max_MeV",
+            isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_max,
+        ),
+        "cep_tol" => cfg.cep_tol,
+        "unknown_budget" => cfg.unknown_budget,
+        "rho_geometry_convergence" => cfg.rho_geometry_convergence,
+        "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
+        "rho_density_tol" => cfg.rho_density_tol,
+        "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "adaptive_temperature" => cfg.adaptive_temperature,
+        "temperature_max_refine_level" => cfg.temperature_max_refine_level,
+        "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
+        "temperature_density_tol" => cfg.temperature_density_tol,
+        "temperature_maxwell_area_tol" => cfg.temperature_maxwell_area_tol,
         "promote_reference" => cfg.promote_reference,
     )
 
@@ -320,6 +358,7 @@ function _usage()
     println("  --crossover_method=... crossover方法（inflection|peak）")
     println("  --crossover_variable=... crossover变量（phi_u|Phi）")
     println("  --crossover_n_mu=12    crossover扫描的mu点数")
+    println("  --crossover_T_max_MeV=NaN crossover温度上限（NaN继承T_max）")
     println("  --cep_strategy=...     CEP定位策略（interpolate|direct）")
     println("  --cep_interpolate_use_direct_eval=true|false interpolate策略下对临界二分点做direct重算")
     println("  --cep_tol=0.01         CEP二分温度容差 (MeV)")
@@ -338,6 +377,16 @@ function _usage()
     println("  --cep_direct_expand_factor=2.0 directional步长扩张倍数")
     println("  --cep_direct_max_expand_steps=8 directional最大扩张步数")
     println("  --cep_direct_fallback_scan=true directional失败后是否回退扫描")
+    println("  --unknown_budget=5     production温度扫描允许的unknown数量")
+    println("  --rho_geometry_convergence=true 对Maxwell/spinodal做rho粗细网格收敛")
+    println("  --rho_position_tol_MeV=0.05 rho网格位置量误差门限(MeV)")
+    println("  --rho_density_tol=0.005 rho网格密度量误差门限")
+    println("  --rho_maxwell_area_tol=1e-4 rho网格Maxwell面积残差门限")
+    println("  --adaptive_temperature=false 启用相线中点温度自适应")
+    println("  --temperature_max_refine_level=2 温度中点最大加密层数")
+    println("  --temperature_position_tol_MeV=0.10 温度中点位置误差门限(MeV)")
+    println("  --temperature_density_tol=0.01 温度中点密度误差门限")
+    println("  --temperature_maxwell_area_tol=1e-4 温度中点Maxwell面积残差门限")
     println("  --promote_reference    运行后尝试晋升到 data/reference")
     println("  --verbose              输出详细信息")
     println("  -h, --help             显示帮助")
@@ -433,6 +482,8 @@ function parse_args(args, project_root::AbstractString)
             cfg.crossover_variable = Symbol(arg[22:end])
         elseif startswith(arg, "--crossover_n_mu=")
             cfg.crossover_n_mu = parse(Int, arg[18:end])
+        elseif startswith(arg, "--crossover_T_max_MeV=")
+            cfg.crossover_T_max_MeV = parse(Float64, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_strategy=")
             cfg.cep_strategy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         elseif startswith(arg, "--cep_interpolate_use_direct_eval=")
@@ -469,6 +520,26 @@ function parse_args(args, project_root::AbstractString)
             cfg.cep_direct_max_expand_steps = parse(Int, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_direct_fallback_scan=")
             cfg.cep_direct_fallback_scan = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
+        elseif startswith(arg, "--unknown_budget=")
+            cfg.unknown_budget = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_geometry_convergence=")
+            cfg.rho_geometry_convergence = _as_bool(split(arg, "="; limit=2)[2], "--rho_geometry_convergence")
+        elseif startswith(arg, "--rho_position_tol_MeV=")
+            cfg.rho_position_tol_MeV = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_density_tol=")
+            cfg.rho_density_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_maxwell_area_tol=")
+            cfg.rho_maxwell_area_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--adaptive_temperature=")
+            cfg.adaptive_temperature = _as_bool(split(arg, "="; limit=2)[2], "--adaptive_temperature")
+        elseif startswith(arg, "--temperature_max_refine_level=")
+            cfg.temperature_max_refine_level = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--temperature_position_tol_MeV=")
+            cfg.temperature_position_tol_MeV = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--temperature_density_tol=")
+            cfg.temperature_density_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--temperature_maxwell_area_tol=")
+            cfg.temperature_maxwell_area_tol = parse(Float64, split(arg, "="; limit=2)[2])
         elseif arg == "--promote_reference"
             cfg.promote_reference = true
         elseif arg == "--verbose"
@@ -488,6 +559,31 @@ function parse_args(args, project_root::AbstractString)
     isfinite(cfg.thermo_quadrature_rtol) && cfg.thermo_quadrature_rtol > 0 || throw(ArgumentError("thermo_quadrature_rtol must be finite and positive"))
     isfinite(cfg.thermo_quadrature_atol) && cfg.thermo_quadrature_atol >= 0 || throw(ArgumentError("thermo_quadrature_atol must be finite and nonnegative"))
     cfg.thermo_quadrature_maxevals > 0 || throw(ArgumentError("thermo_quadrature_maxevals must be positive"))
+    cfg.p_num > 0 || throw(ArgumentError("p_num must be positive"))
+    cfg.t_num > 0 || throw(ArgumentError("t_num must be positive"))
+    cfg.iterations > 0 || throw(ArgumentError("iterations must be positive"))
+    cfg.cep_tol > 0 && isfinite(cfg.cep_tol) || throw(ArgumentError("cep_tol must be finite and positive"))
+    cfg.unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative"))
+    cfg.cep_max_refine_level >= 0 || throw(ArgumentError("cep_max_refine_level must be nonnegative"))
+    if cfg.rho_geometry_convergence && cfg.cep_max_refine_level < 1 && cfg.mode === :production
+        throw(ArgumentError("rho geometry convergence requires cep_max_refine_level >= 1 in production mode"))
+    end
+    cfg.temperature_max_refine_level >= 0 || throw(ArgumentError("temperature_max_refine_level must be nonnegative"))
+    for (name, value) in (
+        ("rho_position_tol_MeV", cfg.rho_position_tol_MeV),
+        ("rho_density_tol", cfg.rho_density_tol),
+        ("rho_maxwell_area_tol", cfg.rho_maxwell_area_tol),
+        ("temperature_position_tol_MeV", cfg.temperature_position_tol_MeV),
+        ("temperature_density_tol", cfg.temperature_density_tol),
+        ("temperature_maxwell_area_tol", cfg.temperature_maxwell_area_tol),
+    )
+        isfinite(value) && value > 0 || throw(ArgumentError("$(name) must be finite and positive"))
+    end
+    if isfinite(cfg.crossover_T_max_MeV)
+        cfg.crossover_T_max_MeV >= cfg.T_min || throw(ArgumentError("crossover_T_max_MeV must be >= T_min"))
+    elseif !isnan(cfg.crossover_T_max_MeV)
+        throw(ArgumentError("crossover_T_max_MeV must be finite or NaN"))
+    end
     return cfg
 end
 
@@ -530,6 +626,7 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         crossover_method=cfg.crossover_method,
         crossover_variable=cfg.crossover_variable,
         crossover_n_mu=cfg.crossover_n_mu,
+        crossover_T_max_MeV=cfg.crossover_T_max_MeV,
         cep_strategy=cfg.cep_strategy,
         cep_interpolate_use_direct_eval=cfg.cep_interpolate_use_direct_eval,
         cep_tol=cfg.cep_tol,
@@ -548,6 +645,16 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         cep_direct_expand_factor=cfg.cep_direct_expand_factor,
         cep_direct_max_expand_steps=cfg.cep_direct_max_expand_steps,
         cep_direct_fallback_scan=cfg.cep_direct_fallback_scan,
+        unknown_budget=cfg.unknown_budget,
+        rho_geometry_convergence=cfg.rho_geometry_convergence,
+        rho_position_tol_MeV=cfg.rho_position_tol_MeV,
+        rho_density_tol=cfg.rho_density_tol,
+        rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+        adaptive_temperature=cfg.adaptive_temperature,
+        temperature_max_refine_level=cfg.temperature_max_refine_level,
+        temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,
+        temperature_density_tol=cfg.temperature_density_tol,
+        temperature_maxwell_area_tol=cfg.temperature_maxwell_area_tol,
         promote_reference=cfg.promote_reference,
     )
 

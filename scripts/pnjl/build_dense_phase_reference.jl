@@ -7,8 +7,10 @@ using Dates
 using Printf
 using JSON3
 
-include(joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
-using .Models
+if !isdefined(Main, :Models)
+    Base.include(Main, joinpath(@__DIR__, "..", "..", "src", "models", "Models.jl"))
+end
+using Main.Models
 
 Base.@kwdef mutable struct DensePhaseReferenceConfig
     model_kind::Symbol = :PNJL
@@ -39,8 +41,25 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     crossover_variable::Symbol = :phi_u
     crossover_n_mu::Int = 16
     crossover_mu_max_MeV::Float64 = 450.0
+    crossover_T_max_MeV::Float64 = NaN
     crossover_only::Bool = false
     crossover_mu_only_zero::Bool = false
+    cep_tol_MeV::Float64 = 0.1
+    rho_geometry_convergence::Bool = true
+    rho_position_tol_MeV::Float64 = 0.05
+    rho_density_tol::Float64 = 0.005
+    rho_maxwell_area_tol::Float64 = 1e-4
+    adaptive_temperature::Bool = true
+    temperature_max_refine_level::Int = 2
+    temperature_position_tol_MeV::Float64 = 0.10
+    temperature_density_tol::Float64 = 0.01
+    temperature_maxwell_area_tol::Float64 = 1e-4
+    adaptive_xi::Bool = false
+    xi_max_refine_level::Int = 2
+    xi_position_tol_MeV::Float64 = 0.10
+    xi_density_tol::Float64 = 0.01
+    xi_maxwell_area_tol::Float64 = 1e-4
+    xi_response_rtol::Float64 = 0.05
 end
 
 function usage()
@@ -71,6 +90,23 @@ function usage()
     println("  --no-crossover           skip crossover generation")
     println("  --crossover-n-mu <int>   crossover mu sampling count (default 16)")
     println("  --crossover-mu-max <MeV> crossover mu_q upper bound (default 450)")
+    println("  --crossover-T-max <MeV>  explicit crossover search ceiling (default T-max)")
+    println("  --cep-tol <MeV>          CEP temperature bracket width gate (default 0.1)")
+    println("  --no-rho-geometry-convergence  disable coarse/fine Maxwell and spinodal gates")
+    println("  --rho-position-tol <MeV> coarse/fine phase-position tolerance (default 0.05)")
+    println("  --rho-density-tol <value> coarse/fine density tolerance (default 0.005)")
+    println("  --rho-maxwell-area-tol <value> Maxwell diagnostic gate (default 1e-4)")
+    println("  --no-adaptive-T          disable midpoint temperature refinement")
+    println("  --T-refine-levels <int>  maximum adaptive temperature levels (default 2)")
+    println("  --T-position-tol <MeV>   temperature interpolation position gate (default 0.10)")
+    println("  --T-density-tol <value>  temperature interpolation density gate (default 0.01)")
+    println("  --T-maxwell-area-tol <value> temperature Maxwell diagnostic gate (default 1e-4)")
+    println("  --adaptive-xi            enable midpoint xi refinement (full reference only)")
+    println("  --xi-refine-levels <int> maximum adaptive xi levels (default 2)")
+    println("  --xi-position-tol <MeV>  xi interpolation position gate (default 0.10)")
+    println("  --xi-density-tol <value> xi interpolation density gate (default 0.01)")
+    println("  --xi-maxwell-area-tol <value> xi midpoint Maxwell diagnostic gate (default 1e-4)")
+    println("  --xi-response-rtol <value> crossover response derivative gate (default 0.05)")
     println("  --crossover-only         skip phase pipeline; only generate crossover reference")
     println("  --crossover-mu0-only     with --crossover-only, compute only mu=0 crossover point")
     println("  -h, --help               show help")
@@ -157,6 +193,40 @@ function parse_args(args::Vector{String})
             cfg.crossover_n_mu = parse(Int, require_value())
         elseif arg == "--crossover-mu-max"
             cfg.crossover_mu_max_MeV = parse(Float64, require_value())
+        elseif arg == "--crossover-T-max"
+            cfg.crossover_T_max_MeV = parse(Float64, require_value())
+        elseif arg == "--cep-tol"
+            cfg.cep_tol_MeV = parse(Float64, require_value())
+        elseif arg == "--no-rho-geometry-convergence"
+            cfg.rho_geometry_convergence = false
+        elseif arg == "--rho-position-tol"
+            cfg.rho_position_tol_MeV = parse(Float64, require_value())
+        elseif arg == "--rho-density-tol"
+            cfg.rho_density_tol = parse(Float64, require_value())
+        elseif arg == "--rho-maxwell-area-tol"
+            cfg.rho_maxwell_area_tol = parse(Float64, require_value())
+        elseif arg == "--no-adaptive-T"
+            cfg.adaptive_temperature = false
+        elseif arg == "--T-refine-levels"
+            cfg.temperature_max_refine_level = parse(Int, require_value())
+        elseif arg == "--T-position-tol"
+            cfg.temperature_position_tol_MeV = parse(Float64, require_value())
+        elseif arg == "--T-density-tol"
+            cfg.temperature_density_tol = parse(Float64, require_value())
+        elseif arg == "--T-maxwell-area-tol"
+            cfg.temperature_maxwell_area_tol = parse(Float64, require_value())
+        elseif arg == "--adaptive-xi"
+            cfg.adaptive_xi = true
+        elseif arg == "--xi-refine-levels"
+            cfg.xi_max_refine_level = parse(Int, require_value())
+        elseif arg == "--xi-position-tol"
+            cfg.xi_position_tol_MeV = parse(Float64, require_value())
+        elseif arg == "--xi-density-tol"
+            cfg.xi_density_tol = parse(Float64, require_value())
+        elseif arg == "--xi-maxwell-area-tol"
+            cfg.xi_maxwell_area_tol = parse(Float64, require_value())
+        elseif arg == "--xi-response-rtol"
+            cfg.xi_response_rtol = parse(Float64, require_value())
         elseif arg == "--crossover-only"
             cfg.crossover_only = true
         elseif arg == "--crossover-mu0-only"
@@ -189,6 +259,24 @@ function parse_args(args::Vector{String})
     cfg.iterations > 0 || error("iterations must be positive")
     cfg.crossover_n_mu > 0 || error("crossover-n-mu must be positive")
     cfg.crossover_mu_max_MeV > 0 || error("crossover-mu-max must be positive")
+    cfg.cep_tol_MeV > 0 || error("cep-tol must be positive")
+    cfg.temperature_max_refine_level >= 0 || error("T-refine-levels must be nonnegative")
+    cfg.xi_max_refine_level >= 0 || error("xi-refine-levels must be nonnegative")
+    cfg.rho_position_tol_MeV > 0 || error("rho-position-tol must be positive")
+    cfg.rho_density_tol > 0 || error("rho-density-tol must be positive")
+    cfg.rho_maxwell_area_tol > 0 || error("rho-maxwell-area-tol must be positive")
+    cfg.temperature_position_tol_MeV > 0 || error("T-position-tol must be positive")
+    cfg.temperature_density_tol > 0 || error("T-density-tol must be positive")
+    cfg.temperature_maxwell_area_tol > 0 || error("T-maxwell-area-tol must be positive")
+    cfg.xi_position_tol_MeV > 0 || error("xi-position-tol must be positive")
+    cfg.xi_density_tol > 0 || error("xi-density-tol must be positive")
+    cfg.xi_maxwell_area_tol > 0 || error("xi-maxwell-area-tol must be positive")
+    cfg.xi_response_rtol > 0 || error("xi-response-rtol must be positive")
+    cfg.adaptive_xi && cfg.crossover_only && error("adaptive xi refinement requires full phase reference mode")
+    if !isnan(cfg.crossover_T_max_MeV)
+        isfinite(cfg.crossover_T_max_MeV) || error("crossover-T-max must be finite")
+        cfg.crossover_T_max_MeV >= cfg.T_min || error("crossover-T-max must be >= T-min")
+    end
     isempty(cfg.xi_values) && error("xi grid cannot be empty")
     return cfg
 end
@@ -226,8 +314,11 @@ function _repo_relpath(path::AbstractString)
 end
 
 function xi_token(xi::Float64)
-    return replace(@sprintf("%.3f", xi), "." => "p", "-" => "m")
+    return replace(@sprintf("%.6f", xi), "." => "p", "-" => "m")
 end
+
+@inline resolved_crossover_T_max_MeV(cfg::DensePhaseReferenceConfig) =
+    isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_max
 
 function ensure_writable(path::String, overwrite::Bool)
     if isfile(path) && !overwrite
@@ -246,9 +337,9 @@ end
 
 function write_cep_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV")
+        println(io, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV,uncertainty_T_MeV,T_bracket_low_MeV,T_bracket_high_MeV,bracket_width_T_MeV")
         for row in rows
-            println(io, "$(row.xi),$(row.T_CEP_MeV),$(row.muq_CEP_MeV),$(row.muB_CEP_MeV)")
+            println(io, "$(row.xi),$(row.T_CEP_MeV),$(row.muq_CEP_MeV),$(row.muB_CEP_MeV),$(row.uncertainty_T_MeV),$(row.T_bracket_low_MeV),$(row.T_bracket_high_MeV),$(row.bracket_width_T_MeV)")
         end
     end
 end
@@ -267,6 +358,35 @@ function write_crossover_csv(path::String, rows)
         println(io, "xi,mu_MeV,T_crossover_MeV,rho,method,converged,derivative,variable,curve_parameter,plot_order_key")
         for row in rows
             println(io, "$(row.xi),$(row.mu_MeV),$(row.T_crossover_MeV),$(row.rho),$(row.method),$(row.converged),$(row.derivative),$(row.variable),$(row.mu_MeV),$(row.mu_MeV)")
+        end
+    end
+end
+
+@inline _dense_record_value(row, key::Symbol, default=nothing) =
+    hasproperty(row, key) ? getproperty(row, key) : default
+
+@inline _dense_csv_value(value) = value === nothing ? "" : string(value)
+
+function write_grid_convergence_csv(path::String, rows)
+    open(path, "w") do io
+        println(io, "axis,xi,T_MeV,level,left,right,midpoint,position_error_MeV,density_error,maxwell_area,response_rtol,converged,reason")
+        for row in rows
+            values = (
+                _dense_record_value(row, :axis, ""),
+                _dense_record_value(row, :xi),
+                _dense_record_value(row, :T_MeV),
+                _dense_record_value(row, :level),
+                _dense_record_value(row, :left),
+                _dense_record_value(row, :right),
+                _dense_record_value(row, :midpoint),
+                _dense_record_value(row, :position_error_MeV),
+                _dense_record_value(row, :density_error),
+                _dense_record_value(row, :maxwell_area),
+                _dense_record_value(row, :response_rtol),
+                _dense_record_value(row, :converged, false),
+                _dense_record_value(row, :reason, ""),
+            )
+            println(io, join(_dense_csv_value.(values), ','))
         end
     end
 end
@@ -328,7 +448,7 @@ function _crossover_dense_meaning(cfg::DensePhaseReferenceConfig)
         ),
         "temperature_window_MeV" => Dict(
             "min" => cfg.T_min,
-            "max" => min(cfg.T_max, 220.0),
+            "max" => resolved_crossover_T_max_MeV(cfg),
         ),
     )
 end
@@ -402,8 +522,25 @@ function manifest_config_payload(cfg::DensePhaseReferenceConfig)
         "crossover_variable" => String(cfg.crossover_variable),
         "crossover_n_mu" => cfg.crossover_n_mu,
         "crossover_mu_max_MeV" => cfg.crossover_mu_max_MeV,
+        "crossover_T_max_MeV" => resolved_crossover_T_max_MeV(cfg),
         "crossover_only" => cfg.crossover_only,
         "crossover_mu0_only" => cfg.crossover_mu_only_zero,
+        "cep_tol_MeV" => cfg.cep_tol_MeV,
+        "rho_geometry_convergence" => cfg.rho_geometry_convergence,
+        "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
+        "rho_density_tol" => cfg.rho_density_tol,
+        "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "adaptive_temperature" => cfg.adaptive_temperature,
+        "temperature_max_refine_level" => cfg.temperature_max_refine_level,
+        "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
+        "temperature_density_tol" => cfg.temperature_density_tol,
+        "temperature_maxwell_area_tol" => cfg.temperature_maxwell_area_tol,
+        "adaptive_xi" => cfg.adaptive_xi,
+        "xi_max_refine_level" => cfg.xi_max_refine_level,
+        "xi_position_tol_MeV" => cfg.xi_position_tol_MeV,
+        "xi_density_tol" => cfg.xi_density_tol,
+        "xi_maxwell_area_tol" => cfg.xi_maxwell_area_tol,
+        "xi_response_rtol" => cfg.xi_response_rtol,
     )
 end
 
@@ -411,7 +548,7 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
     rows = NamedTuple[]
     if cfg.crossover_mu_only_zero
         T_min_fm = cfg.T_min / 197.327
-        T_max_fm = min(cfg.T_max, 220.0) / 197.327
+        T_max_fm = resolved_crossover_T_max_MeV(cfg) / 197.327
         result = Models.detect_crossover(
             0.0,
             (T_min_fm, T_max_fm);
@@ -447,7 +584,7 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
         ;
         mu_max_MeV=cfg.crossover_mu_max_MeV,
         T_min_MeV=cfg.T_min,
-        T_max_MeV=min(cfg.T_max, 220.0),
+        T_max_MeV=resolved_crossover_T_max_MeV(cfg),
         xi=xi,
         n_mu=cfg.crossover_n_mu,
         method=cfg.crossover_method,
@@ -467,6 +604,69 @@ function build_crossover_only_rows(cfg::DensePhaseReferenceConfig, xi::Float64)
     return rows
 end
 
+function _adaptive_xi_refinement!(
+        initial_xi::Vector{Float64},
+        evaluate_xi::Function,
+        cfg::DensePhaseReferenceConfig)
+    resolved = sort(unique(copy(initial_xi)))
+    cfg.adaptive_xi || return resolved, NamedTuple[]
+    cfg.xi_max_refine_level > 0 || return resolved, NamedTuple[]
+
+    tol = Models.PhaseGeometryTolerances(
+        position_MeV=cfg.xi_position_tol_MeV,
+        density=cfg.xi_density_tol,
+        maxwell_area=cfg.xi_maxwell_area_tol,
+        response_rtol=cfg.xi_response_rtol,
+    )
+    intervals = Tuple{Float64, Float64}[
+        (resolved[i], resolved[i + 1]) for i in 1:(length(resolved) - 1)
+    ]
+    records = NamedTuple[]
+
+    for level in 1:cfg.xi_max_refine_level
+        isempty(intervals) && break
+        midpoints = sort(unique(Float64[0.5 * (left + right) for (left, right) in intervals]))
+        for xi in midpoints
+            evaluate_xi(xi)
+        end
+
+        next_intervals = Tuple{Float64, Float64}[]
+        for (left_xi, right_xi) in intervals
+            midpoint_xi = 0.5 * (left_xi + right_xi)
+            error = Models._phase_result_midpoint_error(
+                evaluate_xi(left_xi),
+                evaluate_xi(midpoint_xi),
+                evaluate_xi(right_xi),
+                tol,
+            )
+            push!(records, (
+                axis="xi",
+                xi=midpoint_xi,
+                T_MeV=nothing,
+                level=level,
+                left=left_xi,
+                right=right_xi,
+                midpoint=midpoint_xi,
+                position_error_MeV=isfinite(error.position_MeV) ? error.position_MeV : nothing,
+                density_error=isfinite(error.density) ? error.density : nothing,
+                maxwell_area=isfinite(error.maxwell_area) ? error.maxwell_area : nothing,
+                response_rtol=isfinite(error.response_rtol) ? error.response_rtol : nothing,
+                converged=error.converged,
+                reason=error.reason,
+            ))
+            push!(resolved, midpoint_xi)
+            if !error.converged
+                push!(next_intervals, (left_xi, midpoint_xi))
+                push!(next_intervals, (midpoint_xi, right_xi))
+            end
+        end
+        sort!(resolved)
+        unique!(resolved)
+        intervals = next_intervals
+    end
+    return resolved, records
+end
+
 function build_outputs(cfg::DensePhaseReferenceConfig)
     root = project_root()
     timestamp = Dates.format(now(), "yyyymmdd_HHMMSS")
@@ -479,6 +679,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     cep_rows = NamedTuple[]
     spinodal_rows = NamedTuple[]
     crossover_rows = NamedTuple[]
+    grid_convergence_rows = NamedTuple[]
+    requested_xi_values = sort(unique(copy(cfg.xi_values)))
     manifest = Dict{String, Any}(
         "schema_version" => "v1",
         "generator" => manifest_generator_payload(cfg),
@@ -492,11 +694,11 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     T_grid = collect(cfg.T_min:cfg.T_step:cfg.T_max)
     rho_grid = collect(cfg.rho_min:cfg.rho_step:cfg.rho_max)
 
-    for xi in cfg.xi_values
-        println("phase reference xi=$(xi): start T=$(cfg.T_min):$(cfg.T_step):$(cfg.T_max), rho=$(cfg.rho_min):$(cfg.rho_step):$(cfg.rho_max)")
-        flush(stdout)
-        run_dir = joinpath(output_root, "xi_$(xi_token(xi))")
-        if cfg.crossover_only
+    if cfg.crossover_only
+        for xi in requested_xi_values
+            println("phase reference xi=$(xi): crossover-only T=$(cfg.T_min):$(resolved_crossover_T_max_MeV(cfg))")
+            flush(stdout)
+            run_dir = joinpath(output_root, "xi_$(xi_token(xi))")
             local_rows = cfg.compute_crossover ? build_crossover_only_rows(cfg, xi) : NamedTuple[]
             append!(crossover_rows, local_rows)
             println("phase reference xi=$(xi): crossover-only rows=$(length(local_rows))")
@@ -510,14 +712,23 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 "crossover_count" => length(local_rows),
                 "cep_found" => false,
             ))
-        else
+        end
+    else
+        result_cache = Dict{Float64, Models.PhasePipelineResult}()
+        function evaluate_xi(xi_value::Float64)
+            key = round(Float64(xi_value); digits=12)
+            haskey(result_cache, key) && return result_cache[key]
+            println("phase reference xi=$(key): start T=$(cfg.T_min):$(cfg.T_step):$(cfg.T_max), rho=$(cfg.rho_min):$(cfg.rho_step):$(cfg.rho_max)")
+            flush(stdout)
+            run_dir = joinpath(output_root, "xi_$(xi_token(key))")
             result = Models.run_phase_pipeline(
                 cfg.model_kind;
                 mode=cfg.mode,
                 T_grid=T_grid,
                 rho_grid=rho_grid,
-                xi=xi,
+                xi=key,
                 output_dir=run_dir,
+                run_id="dense_$(cfg.tag)_xi_$(xi_token(key))",
                 profile=cfg.profile,
                 solver_backend=cfg.solver_backend,
                 seed_policy=cfg.seed_policy,
@@ -532,36 +743,80 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 crossover_method=cfg.crossover_method,
                 crossover_variable=cfg.crossover_variable,
                 crossover_n_mu=cfg.crossover_n_mu,
+                crossover_T_max_MeV=resolved_crossover_T_max_MeV(cfg),
+                cep_tol=cfg.cep_tol_MeV,
+                rho_geometry_convergence=cfg.rho_geometry_convergence,
+                rho_position_tol_MeV=cfg.rho_position_tol_MeV,
+                rho_density_tol=cfg.rho_density_tol,
+                rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+                adaptive_temperature=cfg.adaptive_temperature,
+                temperature_max_refine_level=cfg.temperature_max_refine_level,
+                temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,
+                temperature_density_tol=cfg.temperature_density_tol,
+                temperature_maxwell_area_tol=cfg.temperature_maxwell_area_tol,
                 promote_reference=false,
             )
+            result_cache[key] = result
+            println("phase reference xi=$(key): boundary=$(length(result.first_order_boundary)) spinodal=$(length(result.spinodal)) crossover=$(length(result.crossover_line)) cep_found=$(result.cep.found)")
+            flush(stdout)
+            return result
+        end
 
+        for xi in requested_xi_values
+            evaluate_xi(xi)
+        end
+        resolved_xi_values, xi_convergence_records =
+            _adaptive_xi_refinement!(requested_xi_values, evaluate_xi, cfg)
+        append!(grid_convergence_rows, xi_convergence_records)
+        cfg.xi_values = resolved_xi_values
+
+        for xi in resolved_xi_values
+            key = round(Float64(xi); digits=12)
+            result = evaluate_xi(key)
+            run_dir = joinpath(output_root, "xi_$(xi_token(key))")
             for row in result.first_order_boundary
-                push!(boundary_rows, merge((xi=xi,), row))
+                push!(boundary_rows, merge((xi=key,), row))
             end
             if result.cep.found && isfinite(result.cep.T_cep_MeV) && isfinite(result.cep.mu_cep_MeV)
                 muq_CEP_MeV = result.cep.mu_cep_MeV
-                push!(cep_rows, (xi=xi, T_CEP_MeV=result.cep.T_cep_MeV, muq_CEP_MeV=muq_CEP_MeV, muB_CEP_MeV=3.0 * muq_CEP_MeV))
+                push!(cep_rows, (
+                    xi=key,
+                    T_CEP_MeV=result.cep.T_cep_MeV,
+                    muq_CEP_MeV=muq_CEP_MeV,
+                    muB_CEP_MeV=3.0 * muq_CEP_MeV,
+                    uncertainty_T_MeV=result.cep.uncertainty_T_MeV,
+                    T_bracket_low_MeV=result.cep.T_bracket_low_MeV,
+                    T_bracket_high_MeV=result.cep.T_bracket_high_MeV,
+                    bracket_width_T_MeV=result.cep.bracket_width_T_MeV,
+                ))
             end
             for row in result.spinodal
-                push!(spinodal_rows, merge((xi=xi,), row))
+                push!(spinodal_rows, merge((xi=key,), row))
             end
             for row in result.crossover_line
-                push!(crossover_rows, merge((xi=xi,), row))
+                push!(crossover_rows, merge((xi=key,), row))
             end
-
-            println("phase reference xi=$(xi): boundary=$(length(result.first_order_boundary)) spinodal=$(length(result.spinodal)) crossover=$(length(result.crossover_line)) cep_found=$(result.cep.found)")
-            flush(stdout)
+            append!(grid_convergence_rows, get(result.diagnostics, "grid_convergence_records", NamedTuple[]))
             push!(manifest["runs"], Dict(
-                "xi" => xi,
+                "xi" => key,
                 "run_id" => result.run_id,
                 "run_dir" => _repo_relpath(run_dir),
                 "boundary_count" => length(result.first_order_boundary),
                 "spinodal_count" => length(result.spinodal),
                 "crossover_count" => length(result.crossover_line),
                 "cep_found" => result.cep.found,
+                "cep_uncertainty_T_MeV" => (isfinite(result.cep.uncertainty_T_MeV) ? result.cep.uncertainty_T_MeV : nothing),
+                "grid_convergence_count" => length(get(result.diagnostics, "grid_convergence_records", NamedTuple[])),
             ))
         end
     end
+
+    manifest["config"]["requested_xi_values"] = requested_xi_values
+    manifest["config"]["xi_values"] = cfg.xi_values
+    manifest["grid_convergence"] = Dict(
+        "record_count" => length(grid_convergence_rows),
+        "unconverged_count" => count(row -> !_dense_record_value(row, :converged, false), grid_convergence_rows),
+    )
 
     sort!(boundary_rows, by=row -> (row.xi, row.T_MeV))
     sort!(cep_rows, by=row -> row.xi)
@@ -572,10 +827,13 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     cep_path = joinpath(reference_root, "cep_$(cfg.tag).csv")
     spinodal_path = joinpath(reference_root, "spinodals_$(cfg.tag).csv")
     crossover_path = joinpath(reference_root, "crossover_$(cfg.tag).csv")
+    grid_convergence_path = joinpath(reference_root, "phase_grid_convergence_$(cfg.tag).csv")
     crossover_meta_path = joinpath(reference_root, "crossover_$(cfg.tag).meta.json")
     manifest_path = joinpath(reference_root, "phase_reference_$(cfg.tag)_manifest.json")
 
-    output_paths = cfg.crossover_only ? (crossover_path, crossover_meta_path, manifest_path) : (boundary_path, cep_path, spinodal_path, crossover_path, crossover_meta_path, manifest_path)
+    output_paths = cfg.crossover_only ?
+        (crossover_path, grid_convergence_path, crossover_meta_path, manifest_path) :
+        (boundary_path, cep_path, spinodal_path, crossover_path, grid_convergence_path, crossover_meta_path, manifest_path)
     for path in output_paths
         ensure_writable(path, cfg.overwrite)
     end
@@ -586,6 +844,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         write_spinodal_csv(spinodal_path, spinodal_rows)
     end
     write_crossover_csv(crossover_path, crossover_rows)
+    write_grid_convergence_csv(grid_convergence_path, grid_convergence_rows)
     write_crossover_meta(crossover_meta_path, cfg, crossover_rows, crossover_path)
     manifest["artifacts"]["crossover"] = Dict(
         "path" => _repo_relpath(crossover_path),
@@ -593,6 +852,10 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
     )
     manifest["artifacts"]["crossover_meta"] = Dict(
         "path" => _repo_relpath(crossover_meta_path),
+    )
+    manifest["artifacts"]["grid_convergence"] = Dict(
+        "path" => _repo_relpath(grid_convergence_path),
+        "row_count" => length(grid_convergence_rows),
     )
     open(manifest_path, "w") do io
         if !cfg.crossover_only
@@ -622,6 +885,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         println("  spinodals  = $(spinodal_path)")
     end
     println("  crossover  = $(crossover_path)")
+    println("  grid-convergence = $(grid_convergence_path)")
     println("  crossover-meta = $(crossover_meta_path)")
     println("  manifest   = $(manifest_path)")
 end

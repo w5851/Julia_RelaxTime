@@ -66,7 +66,6 @@ function _run_single_temperature_production_scan(
         thermo_quadrature_kwargs...,
         iterations=iterations,
     )
-    _append_scan_csv!(aggregate_csv, out_csv)
     local_curves = load_curves_from_trho_csv(out_csv; xi=Float64(xi), min_points=3)
     if isempty(local_curves)
         return (curve=nothing, stats=stats, out_csv=out_csv)
@@ -99,7 +98,17 @@ function _production_classify_temperature(
 
     rho_eval = copy(base_rho_grid)
     last_result = nothing
+    previous_result = nothing
+    convergence_records = NamedTuple[]
     pass = 1
+    scan_total = 0
+    scan_success = 0
+    scan_failure = 0
+    geometry_tol = PhaseGeometryTolerances(
+        position_MeV=cfg.rho_position_tol_MeV,
+        density=cfg.rho_density_tol,
+        maxwell_area=cfg.rho_maxwell_area_tol,
+    )
 
     for level in 0:cfg.max_refine_level_rho
         scan = _run_single_temperature_production_scan(
@@ -120,6 +129,9 @@ function _production_classify_temperature(
             pass,
         )
         pass += 1
+        scan_total += scan.stats.total
+        scan_success += scan.stats.success
+        scan_failure += scan.stats.failure
         if scan.curve === nothing
             last_result = (
                 status=:invalid,
@@ -130,8 +142,12 @@ function _production_classify_temperature(
                 rho_quark=nothing,
                 reason="no_curve",
                 level=level,
-                stats=scan.stats,
                 curve=nothing,
+                geometry_converged=false,
+                position_error_MeV=Inf,
+                density_error=Inf,
+                maxwell_area_gate=Inf,
+                out_csv=scan.out_csv,
             )
             break
         end
@@ -144,7 +160,7 @@ function _production_classify_temperature(
             area_tol_bad=cfg.area_tol_bad,
         )
         maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
-        last_result = (
+        current_result = (
             status=cres.status,
             mu_transition=cres.mu_transition,
             area_residual=cres.area_residual,
@@ -153,9 +169,50 @@ function _production_classify_temperature(
             rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
             reason=String(cres.reason),
             level=level,
-            stats=scan.stats,
             curve=scan.curve,
+            out_csv=scan.out_csv,
         )
+
+        geometry_error = previous_result === nothing ? PhaseGeometryError(reason="coarse_level_only") :
+            _compare_phase_geometry(previous_result, current_result, geometry_tol)
+        if previous_result !== nothing
+            push!(convergence_records, (
+                axis="rho",
+                level=level,
+                left=Float64(level - 1),
+                right=Float64(level),
+                midpoint=Float64(level),
+                position_error_MeV=isfinite(geometry_error.position_MeV) ? geometry_error.position_MeV : nothing,
+                density_error=isfinite(geometry_error.density) ? geometry_error.density : nothing,
+                maxwell_area=isfinite(geometry_error.maxwell_area) ? geometry_error.maxwell_area : nothing,
+                response_rtol=isfinite(geometry_error.response_rtol) ? geometry_error.response_rtol : nothing,
+                converged=geometry_error.converged,
+                reason=geometry_error.reason,
+            ))
+        end
+
+        last_result = merge(current_result, (
+            geometry_converged=geometry_error.converged,
+            position_error_MeV=geometry_error.position_MeV,
+            density_error=geometry_error.density,
+            maxwell_area_gate=geometry_error.maxwell_area,
+        ))
+
+        if cfg.rho_geometry_convergence
+            geometry_error.converged && break
+            if level == cfg.max_refine_level_rho
+                if last_result.status == :valid
+                    last_result = merge(last_result, (
+                        status=:unknown,
+                        reason="rho_geometry_not_converged:$(geometry_error.reason)",
+                    ))
+                end
+                break
+            end
+            previous_result = current_result
+            rho_eval = _refine_rho_grid(base_rho_grid, level + 1)
+            continue
+        end
 
         if cres.status != :unknown || !cfg.adaptive_rho || level == cfg.max_refine_level_rho
             break
@@ -163,10 +220,16 @@ function _production_classify_temperature(
 
         additions = AdaptiveRhoRefinement.suggest_refinement_points(rho_vals, mu_vals; config=adaptive_cfg)
         isempty(additions) && break
+        previous_result = current_result
         rho_eval = AdaptiveRhoRefinement.merge_rho_values(rho_eval, additions; digits=adaptive_cfg.digits)
     end
 
-    return last_result
+    last_result === nothing && error("production rho refinement produced no classification at T=$(T_mid)")
+    _append_scan_csv!(aggregate_csv, last_result.out_csv)
+    return merge(last_result, (
+        stats=(total=scan_total, success=scan_success, failure=scan_failure),
+        rho_convergence_records=convergence_records,
+    ))
 end
 
 function _push_production_boundary!(rows::Vector{NamedTuple}, T::Float64, res)
@@ -217,11 +280,74 @@ function _find_production_bracket(records::AbstractVector{<:NamedTuple})
     return nothing
 end
 
+function _adaptive_production_temperature_refinement!(
+        temperatures::Vector{Float64},
+        evaluate_temperature::Function,
+        cfg::ProductionPipelineConfig)
+    cfg.adaptive_temperature || return sort(unique(copy(temperatures))), NamedTuple[]
+    cfg.temperature_max_refine_level > 0 || return sort(unique(copy(temperatures))), NamedTuple[]
+
+    tol = PhaseGeometryTolerances(
+        position_MeV=cfg.temperature_position_tol_MeV,
+        density=cfg.temperature_density_tol,
+        maxwell_area=cfg.temperature_maxwell_area_tol,
+    )
+    resolved = sort(unique(copy(temperatures)))
+    intervals = Tuple{Float64, Float64}[]
+    for i in 1:(length(resolved) - 1)
+        left = evaluate_temperature(resolved[i])
+        right = evaluate_temperature(resolved[i + 1])
+        if left.status == :valid && right.status == :valid
+            push!(intervals, (resolved[i], resolved[i + 1]))
+        end
+    end
+
+    records = NamedTuple[]
+    for level in 1:cfg.temperature_max_refine_level
+        isempty(intervals) && break
+        midpoints = sort(unique(Float64[0.5 * (left + right) for (left, right) in intervals]))
+        for midpoint in midpoints
+            evaluate_temperature(Float64(midpoint))
+        end
+
+        next_intervals = Tuple{Float64, Float64}[]
+        for (left_T, right_T) in intervals
+            midpoint_T = 0.5 * (left_T + right_T)
+            left = evaluate_temperature(left_T)
+            midpoint = evaluate_temperature(midpoint_T)
+            right = evaluate_temperature(right_T)
+            error = _phase_geometry_midpoint_error(left, midpoint, right, tol)
+            push!(records, (
+                axis="temperature",
+                level=level,
+                left=left_T,
+                right=right_T,
+                midpoint=midpoint_T,
+                position_error_MeV=isfinite(error.position_MeV) ? error.position_MeV : nothing,
+                density_error=isfinite(error.density) ? error.density : nothing,
+                maxwell_area=isfinite(error.maxwell_area) ? error.maxwell_area : nothing,
+                response_rtol=isfinite(error.response_rtol) ? error.response_rtol : nothing,
+                converged=error.converged,
+                reason=error.reason,
+            ))
+            push!(resolved, midpoint_T)
+            if !error.converged && midpoint.status == :valid
+                push!(next_intervals, (left_T, midpoint_T))
+                push!(next_intervals, (midpoint_T, right_T))
+            end
+        end
+        sort!(resolved)
+        unique!(resolved)
+        intervals = next_intervals
+    end
+    return resolved, records
+end
+
 function _production_crossover_temperature_bounds(
         cfg::ProductionPipelineConfig,
         cep::CEPResult,
         boundary::AbstractVector{<:NamedTuple})
-    T_max_mev = min(cfg.T_end, 220.0)
+    T_max_mev = isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end
     T_min_mev = cfg.T_start
 
     if !isempty(boundary)
@@ -258,7 +384,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         crossover_method::Symbol=:peak,
         crossover_variable::Symbol=:phi_u,
         crossover_n_mu::Int=12,
-        cep_tol::Float64=0.5,
+        crossover_T_max_MeV::Float64=NaN,
+        cep_tol::Float64=0.1,
         cep_max_bisect_iter::Int=20,
         area_tol_good::Float64=1e-4,
         area_tol_bad::Float64=5e-4,
@@ -270,7 +397,16 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         cep_adaptive_min_gap::Float64=0.002,
         cep_adaptive_max_points::Int=32,
         cep_adaptive_digits::Int=6,
-        cep_max_refine_level_rho::Int=2)
+        cep_max_refine_level_rho::Int=2,
+        rho_geometry_convergence::Bool=true,
+        rho_position_tol_MeV::Float64=0.05,
+        rho_density_tol::Float64=0.005,
+        rho_maxwell_area_tol::Float64=1e-4,
+        adaptive_temperature::Bool=false,
+        temperature_max_refine_level::Int=2,
+        temperature_position_tol_MeV::Float64=0.10,
+        temperature_density_tol::Float64=0.01,
+        temperature_maxwell_area_tol::Float64=1e-4)
 
     thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
         thermo_quadrature_policy,
@@ -285,6 +421,21 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     T_start > 0.0 || throw(ArgumentError(
         "production phase pipeline requires T_start > 0 MeV; strict T=0 PNJL five-field solves are Polyakov-degenerate",
     ))
+    T_end >= T_start || throw(ArgumentError("T_end must be >= T_start, got $(T_end) < $(T_start)"))
+    cep_tol > 0 || throw(ArgumentError("cep_tol must be positive, got $(cep_tol)"))
+    cep_max_bisect_iter > 0 || throw(ArgumentError("cep_max_bisect_iter must be positive"))
+    cep_max_refine_level_rho >= 0 || throw(ArgumentError("cep_max_refine_level_rho must be nonnegative"))
+    if rho_geometry_convergence && cep_max_refine_level_rho < 1
+        throw(ArgumentError("rho geometry convergence requires cep_max_refine_level_rho >= 1"))
+    end
+    temperature_max_refine_level >= 0 || throw(ArgumentError("temperature_max_refine_level must be nonnegative"))
+    if isfinite(crossover_T_max_MeV)
+        crossover_T_max_MeV >= T_start || throw(ArgumentError(
+            "crossover_T_max_MeV must be >= T_start, got $(crossover_T_max_MeV)",
+        ))
+    elseif !isnan(crossover_T_max_MeV)
+        throw(ArgumentError("crossover_T_max_MeV must be finite or NaN (use NaN to inherit T_end)"))
+    end
 
     target = resolve_phase_output_target(model_kind; profile=profile, run_id=run_id, policy=policy)
     run_dir = isnothing(output_dir) ? target.run_dir : output_dir
@@ -306,7 +457,27 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         adaptive_min_gap=Float64(cep_adaptive_min_gap),
         adaptive_max_points=Int(cep_adaptive_max_points),
         adaptive_digits=Int(cep_adaptive_digits),
+        rho_geometry_convergence=Bool(rho_geometry_convergence),
+        rho_position_tol_MeV=Float64(rho_position_tol_MeV),
+        rho_density_tol=Float64(rho_density_tol),
+        rho_maxwell_area_tol=Float64(rho_maxwell_area_tol),
+        adaptive_temperature=Bool(adaptive_temperature),
+        temperature_max_refine_level=Int(temperature_max_refine_level),
+        temperature_position_tol_MeV=Float64(temperature_position_tol_MeV),
+        temperature_density_tol=Float64(temperature_density_tol),
+        temperature_maxwell_area_tol=Float64(temperature_maxwell_area_tol),
+        crossover_T_max_MeV=Float64(crossover_T_max_MeV),
     )
+    _validate_phase_geometry_tolerances(PhaseGeometryTolerances(
+        position_MeV=cfg.rho_position_tol_MeV,
+        density=cfg.rho_density_tol,
+        maxwell_area=cfg.rho_maxwell_area_tol,
+    ))
+    _validate_phase_geometry_tolerances(PhaseGeometryTolerances(
+        position_MeV=cfg.temperature_position_tol_MeV,
+        density=cfg.temperature_density_tol,
+        maxwell_area=cfg.temperature_maxwell_area_tol,
+    ))
 
     temps = _production_temperature_grid(cfg.T_start, cfg.T_end, cfg.dT_initial)
     rho_base = collect(Float64.(rho_grid))
@@ -357,25 +528,20 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     end
 
     sweep_order = vcat(temps[start_idx:end], reverse(temps[1:(start_idx - 1)]))
-    seen_t = Set{Float64}()
+    for T in sweep_order
+        evaluate_temperature(Float64(T))
+    end
+    resolved_temps, temperature_convergence_records =
+        _adaptive_production_temperature_refinement!(temps, evaluate_temperature, cfg)
+
     sweep_records = NamedTuple[]
     boundary = NamedTuple[]
     spinodal = NamedTuple[]
     unknown_count = 0
     forced_invalid_count = 0
-    scan_total = 0
-    scan_success = 0
-    scan_failure = 0
 
-    for T in sweep_order
-        T_key = round(Float64(T); digits=8)
-        T_key in seen_t && continue
-        push!(seen_t, T_key)
-        res = evaluate_temperature(T)
-        scan_total += res.stats.total
-        scan_success += res.stats.success
-        scan_failure += res.stats.failure
-
+    for T in sort(resolved_temps)
+        res = evaluate_temperature(Float64(T))
         status = res.status
         reason = res.reason
         if status == :unknown
@@ -425,9 +591,6 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         while (T_high - T_low) > cfg.cep_tol_MeV && bisect_count < cfg.cep_max_bisect_iter
             T_mid = 0.5 * (T_low + T_high)
             res = evaluate_temperature(T_mid)
-            scan_total += res.stats.total
-            scan_success += res.stats.success
-            scan_failure += res.stats.failure
 
             status = res.status
             if status == :unknown
@@ -455,7 +618,10 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             found=true,
             T_cep_MeV=0.5 * (T_low + T_high),
             mu_cep_MeV=last_mu,
-            uncertainty_T_MeV=T_high - T_low,
+            uncertainty_T_MeV=0.5 * (T_high - T_low),
+            T_bracket_low_MeV=T_low,
+            T_bracket_high_MeV=T_high,
+            bracket_width_T_MeV=T_high - T_low,
             eval_count=length(eval_cache),
             unknown_count=unknown_count + refine_unknown_count,
             reason=forced_invalid_count > 0 ? "unknown_budget_forced_invalid_present" : nothing,
@@ -485,6 +651,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
                 variable=crossover_variable,
                 model_kind=model_kind,
                 solver_backend=solver_backend,
+                p_num=p_num,
+                t_num=t_num,
                 thermo_quadrature_kwargs...,
             )
         else
@@ -493,6 +661,22 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     else
         NamedTuple[]
     end
+
+    scan_total = sum((res.stats.total for res in values(eval_cache)); init=0)
+    scan_success = sum((res.stats.success for res in values(eval_cache)); init=0)
+    scan_failure = sum((res.stats.failure for res in values(eval_cache)); init=0)
+    grid_convergence_records = NamedTuple[]
+    for record in temperature_convergence_records
+        push!(grid_convergence_records, merge((T_MeV=Float64(record.midpoint), xi=Float64(xi)), record))
+    end
+    for T in sort(collect(keys(eval_cache)))
+        res = eval_cache[T]
+        for record in res.rho_convergence_records
+            push!(grid_convergence_records, merge((T_MeV=Float64(T), xi=Float64(xi)), record))
+        end
+    end
+    rho_unconverged_count = count(record -> record.axis == "rho" && !record.converged, grid_convergence_records)
+    temperature_unconverged_count = count(record -> record.axis == "temperature" && !record.converged, grid_convergence_records)
 
     config_snapshot = Dict(
         "model_kind" => String(model_kind),
@@ -504,6 +688,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "dT_initial" => cfg.dT_initial,
         "rho_grid" => rho_base,
         "solver_backend" => String(solver_backend),
+        "p_num" => p_num,
+        "t_num" => t_num,
+        "iterations" => iterations,
         "thermo_quadrature_policy" => String(thermo_quadrature_policy),
         "thermo_quadrature_rtol" => thermo_quadrature_rtol,
         "thermo_quadrature_atol" => thermo_quadrature_atol,
@@ -512,6 +699,16 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "cep_tol_MeV" => cfg.cep_tol_MeV,
         "max_refine_level_rho" => cfg.max_refine_level_rho,
         "adaptive_rho" => cfg.adaptive_rho,
+        "rho_geometry_convergence" => cfg.rho_geometry_convergence,
+        "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
+        "rho_density_tol" => cfg.rho_density_tol,
+        "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "adaptive_temperature" => cfg.adaptive_temperature,
+        "temperature_max_refine_level" => cfg.temperature_max_refine_level,
+        "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
+        "temperature_density_tol" => cfg.temperature_density_tol,
+        "temperature_maxwell_area_tol" => cfg.temperature_maxwell_area_tol,
+        "crossover_T_max_MeV" => (isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end),
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
         mode=:production,
@@ -522,10 +719,23 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         dT=cfg.dT_initial,
         rho_grid=join(rho_base, ","),
         solver_backend=solver_backend,
+        p_num=p_num,
+        t_num=t_num,
+        iterations=iterations,
         thermo_quadrature_policy=thermo_quadrature_policy,
         thermo_quadrature_rtol=thermo_quadrature_rtol,
         thermo_quadrature_atol=thermo_quadrature_atol,
-        thermo_quadrature_maxevals=thermo_quadrature_maxevals)
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        rho_geometry_convergence=cfg.rho_geometry_convergence,
+        rho_position_tol_MeV=cfg.rho_position_tol_MeV,
+        rho_density_tol=cfg.rho_density_tol,
+        rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+        adaptive_temperature=cfg.adaptive_temperature,
+        temperature_max_refine_level=cfg.temperature_max_refine_level,
+        temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,
+        temperature_density_tol=cfg.temperature_density_tol,
+        temperature_maxwell_area_tol=cfg.temperature_maxwell_area_tol,
+        crossover_T_max_MeV=(isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end))
 
     diagnostics = Dict{String, Any}(
         "mode" => "production",
@@ -542,10 +752,13 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "unknown_budget" => cfg.unknown_budget,
         "first_point_fallback" => sweep_result.first_point_fallback,
         "fallback_start_T_MeV" => (isfinite(sweep_result.fallback_start_T_MeV) ? sweep_result.fallback_start_T_MeV : nothing),
-        "forced_invalid_count" => sweep_result.forced_invalid_count,
+        "forced_invalid_count" => forced_invalid_count,
         "sweep_temperatures_MeV" => sweep_result.temperatures_MeV,
         "sweep_statuses" => String.(sweep_result.statuses),
         "sweep_reasons" => sweep_result.reasons,
+        "rho_unconverged_count" => rho_unconverged_count,
+        "temperature_unconverged_count" => temperature_unconverged_count,
+        "grid_convergence_records" => grid_convergence_records,
     )
 
     base_result = PhasePipelineResult(

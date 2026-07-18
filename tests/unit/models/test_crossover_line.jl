@@ -38,6 +38,13 @@ Models.pnjl_module()
     @testset "build_crossover_line 接口存在" begin
         @test isdefined(Models, :build_crossover_line)
         @test Models.build_crossover_line isa Function
+        @test isempty(Models.build_crossover_line(
+            mu_max_MeV=-1.0,
+            T_min_MeV=100.0,
+            T_max_MeV=240.0,
+            p_num=8,
+            t_num=4,
+        ))
     end
 
     @testset "legacy solver backend is rejected" begin

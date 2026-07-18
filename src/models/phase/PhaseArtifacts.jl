@@ -70,6 +70,37 @@ function _write_crossover_line(path::String, rows::Vector{NamedTuple})
     end
 end
 
+@inline function _phase_record_value(record, key::Symbol, default=nothing)
+    return hasproperty(record, key) ? getproperty(record, key) : default
+end
+
+@inline _phase_csv_value(value) = value === nothing ? "" : string(value)
+
+function _write_grid_convergence(path::String, result::PhasePipelineResult)
+    records = get(result.diagnostics, "grid_convergence_records", NamedTuple[])
+    open(path, "w") do io
+        println(io, "axis,xi,T_MeV,level,left,right,midpoint,position_error_MeV,density_error,maxwell_area,response_rtol,converged,reason")
+        for record in records
+            values = (
+                _phase_record_value(record, :axis, ""),
+                _phase_record_value(record, :xi, result.xi),
+                _phase_record_value(record, :T_MeV),
+                _phase_record_value(record, :level),
+                _phase_record_value(record, :left),
+                _phase_record_value(record, :right),
+                _phase_record_value(record, :midpoint),
+                _phase_record_value(record, :position_error_MeV),
+                _phase_record_value(record, :density_error),
+                _phase_record_value(record, :maxwell_area),
+                _phase_record_value(record, :response_rtol),
+                _phase_record_value(record, :converged, false),
+                _phase_record_value(record, :reason, ""),
+            )
+            println(io, join(_phase_csv_value.(values), ','))
+        end
+    end
+end
+
 function _build_conclusion(result::PhasePipelineResult)
     boundary_count = length(result.first_order_boundary)
     crossover_count = length(result.crossover_line)
@@ -106,6 +137,9 @@ function _write_phase_report(path::String, result::PhasePipelineResult)
         println(io, "- muB_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? 3.0 * result.cep.mu_cep_MeV : "null")")
         println(io, "- mu_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? result.cep.mu_cep_MeV : "null")  # compatibility alias for muq_cep_MeV")
         println(io, "- uncertainty_T_MeV: $(isfinite(result.cep.uncertainty_T_MeV) ? result.cep.uncertainty_T_MeV : "null")")
+        println(io, "- T_bracket_low_MeV: $(isfinite(result.cep.T_bracket_low_MeV) ? result.cep.T_bracket_low_MeV : "null")")
+        println(io, "- T_bracket_high_MeV: $(isfinite(result.cep.T_bracket_high_MeV) ? result.cep.T_bracket_high_MeV : "null")")
+        println(io, "- bracket_width_T_MeV: $(isfinite(result.cep.bracket_width_T_MeV) ? result.cep.bracket_width_T_MeV : "null")")
         println(io, "- eval_count: $(result.cep.eval_count)")
         println(io, "- unknown_count: $(result.cep.unknown_count)")
         println(io, "- reason: $(isnothing(result.cep.reason) ? "null" : result.cep.reason)")
@@ -158,6 +192,9 @@ function _build_summary(result::PhasePipelineResult)
             "unknown_count" => cep_unknown_count,
             "unknown_rate" => cep_unknown_rate,
             "uncertainty_T_MeV" => _json_number(result.cep.uncertainty_T_MeV),
+            "T_bracket_low_MeV" => _json_number(result.cep.T_bracket_low_MeV),
+            "T_bracket_high_MeV" => _json_number(result.cep.T_bracket_high_MeV),
+            "bracket_width_T_MeV" => _json_number(result.cep.bracket_width_T_MeV),
             "reason" => result.cep.reason,
         ),
     )
@@ -177,6 +214,9 @@ function _build_summary(result::PhasePipelineResult)
             "muB_cep_MeV" => _json_number(3.0 * result.cep.mu_cep_MeV),
             "mu_cep_MeV" => _json_number(result.cep.mu_cep_MeV),
             "uncertainty_T_MeV" => _json_number(result.cep.uncertainty_T_MeV),
+            "T_bracket_low_MeV" => _json_number(result.cep.T_bracket_low_MeV),
+            "T_bracket_high_MeV" => _json_number(result.cep.T_bracket_high_MeV),
+            "bracket_width_T_MeV" => _json_number(result.cep.bracket_width_T_MeV),
             "eval_count" => result.cep.eval_count,
             "unknown_count" => result.cep.unknown_count,
             "reason" => result.cep.reason,
@@ -194,12 +234,14 @@ function build_phase_artifacts(result::PhasePipelineResult; output_dir::String, 
     boundary_path = joinpath(output_dir, "first_order_boundary.csv")
     spinodal_path = joinpath(output_dir, "spinodal.csv")
     crossover_path = joinpath(output_dir, "crossover_line.csv")
+    grid_convergence_path = joinpath(output_dir, "phase_grid_convergence.csv")
     report_path = joinpath(output_dir, "phase_report.md")
     summary_path = joinpath(output_dir, "phase_summary.json")
 
     _write_first_order_boundary(boundary_path, result.first_order_boundary)
     _write_spinodal(spinodal_path, result.spinodal)
     _write_crossover_line(crossover_path, result.crossover_line)
+    _write_grid_convergence(grid_convergence_path, result)
     _write_phase_report(report_path, result)
 
     summary = _build_summary(result)
@@ -211,6 +253,7 @@ function build_phase_artifacts(result::PhasePipelineResult; output_dir::String, 
         "first_order_boundary" => boundary_path,
         "spinodal" => spinodal_path,
         "crossover_line" => crossover_path,
+        "phase_grid_convergence" => grid_convergence_path,
         "phase_report" => report_path,
         "phase_summary" => summary_path,
     )
@@ -243,7 +286,7 @@ end
 function promote_phase_artifacts(processed_run_dir::String; reference_root::Union{Nothing, String}=nothing,
         gate_options::NamedTuple=(;), write_reference::Bool=true)
     failed = String[]
-    required = ["phase_summary.json", "first_order_boundary.csv", "spinodal.csv", "crossover_line.csv", "phase_report.md"]
+    required = ["phase_summary.json", "first_order_boundary.csv", "spinodal.csv", "crossover_line.csv", "phase_grid_convergence.csv", "phase_report.md"]
 
     for file in required
         isfile(joinpath(processed_run_dir, file)) || push!(failed, "missing_file:$file")

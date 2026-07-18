@@ -71,8 +71,9 @@ def main():
     boundary_csv = reference_root / f"boundary_{args.tag}.csv"
     cep_csv = reference_root / f"cep_{args.tag}.csv"
     spinodal_csv = reference_root / f"spinodals_{args.tag}.csv"
+    grid_convergence_csv = reference_root / f"phase_grid_convergence_{args.tag}.csv"
 
-    required_paths = [crossover_csv, crossover_meta, manifest_path]
+    required_paths = [crossover_csv, crossover_meta, grid_convergence_csv, manifest_path]
     if args.expect_full_reference:
         required_paths.extend([boundary_csv, cep_csv, spinodal_csv])
     for path in required_paths:
@@ -119,6 +120,33 @@ def main():
 
     artifacts = manifest.get("artifacts", {})
     validate_manifest_artifact(artifacts, "crossover", crossover_csv, len(rows), repo_root)
+    grid_fields, grid_rows = load_csv_rows(grid_convergence_csv)
+    require_columns(
+        grid_fields,
+        [
+            "axis",
+            "xi",
+            "T_MeV",
+            "level",
+            "left",
+            "right",
+            "midpoint",
+            "position_error_MeV",
+            "density_error",
+            "maxwell_area",
+            "response_rtol",
+            "converged",
+            "reason",
+        ],
+        "grid_convergence",
+    )
+    validate_manifest_artifact(
+        artifacts,
+        "grid_convergence",
+        grid_convergence_csv,
+        len(grid_rows),
+        repo_root,
+    )
 
     if args.expect_crossover_only:
         unexpected = [name for name in ("boundary", "cep", "spinodals") if name in artifacts]
@@ -136,7 +164,16 @@ def main():
             ),
             "cep": (
                 cep_csv,
-                ["xi", "T_CEP_MeV", "muq_CEP_MeV", "muB_CEP_MeV"],
+                [
+                    "xi",
+                    "T_CEP_MeV",
+                    "muq_CEP_MeV",
+                    "muB_CEP_MeV",
+                    "uncertainty_T_MeV",
+                    "T_bracket_low_MeV",
+                    "T_bracket_high_MeV",
+                    "bracket_width_T_MeV",
+                ],
             ),
             "spinodals": (
                 spinodal_csv,
@@ -176,11 +213,16 @@ def main():
         "generated_at_utc": manifest_generator.get("generated_at"),
         "crossover_rows": len(rows),
         "converged_rows": converged_count,
+        "grid_convergence_rows": len(grid_rows),
+        "grid_unconverged_rows": sum(
+            1 for row in grid_rows if str(row["converged"]).lower() != "true"
+        ),
         "xi_values": xi_values,
         "mu_values_MeV": mu_values,
         "files": {
             "crossover_csv": normalize_relpath(crossover_csv, repo_root),
             "crossover_meta": normalize_relpath(crossover_meta, repo_root),
+            "grid_convergence_csv": normalize_relpath(grid_convergence_csv, repo_root),
             "manifest": normalize_relpath(manifest_path, repo_root),
         },
         "full_reference_artifacts": full_artifact_reports,
