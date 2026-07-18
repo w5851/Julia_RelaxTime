@@ -19,6 +19,10 @@ reverse_rho = true
 
 p_num = 12
 t_num = 4
+thermo_quadrature_policy = "tensor_gauss"
+thermo_quadrature_rtol = 1e-8
+thermo_quadrature_atol = 1e-10
+thermo_quadrature_maxevals = 10000000
 iterations = 80
 
 compute_crossover = true

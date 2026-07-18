@@ -26,6 +26,10 @@ Base.@kwdef struct TmuScanConfig
     selector::Union{Nothing, Function} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
+    thermo_quadrature_policy::Union{Nothing, Symbol} = nothing
+    thermo_quadrature_rtol::Union{Nothing, Float64} = nothing
+    thermo_quadrature_atol::Union{Nothing, Float64} = nothing
+    thermo_quadrature_maxevals::Union{Nothing, Int} = nothing
     progress_cb::Union{Nothing, Function} = nothing
     nlsolve_kwargs::NamedTuple = (;)
 end
@@ -52,6 +56,10 @@ Base.@kwdef struct TrhoScanConfig
     model_kind::Union{Nothing, Symbol} = nothing
     p_num::Union{Nothing, Int} = nothing
     t_num::Union{Nothing, Int} = nothing
+    thermo_quadrature_policy::Union{Nothing, Symbol} = nothing
+    thermo_quadrature_rtol::Union{Nothing, Float64} = nothing
+    thermo_quadrature_atol::Union{Nothing, Float64} = nothing
+    thermo_quadrature_maxevals::Union{Nothing, Int} = nothing
     progress_cb::Union{Nothing, Function} = nothing
     nlsolve_kwargs::NamedTuple = (;)
 end
@@ -98,6 +106,10 @@ function scan_kwargs(cfg::TmuScanConfig)::NamedTuple
         selector=cfg.selector,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
+        thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+        thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+        thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
         progress_cb=cfg.progress_cb,
     ))
 end
@@ -125,6 +137,10 @@ function scan_kwargs(cfg::TrhoScanConfig)::NamedTuple
         model_kind=cfg.model_kind,
         p_num=cfg.p_num,
         t_num=cfg.t_num,
+        thermo_quadrature_policy=cfg.thermo_quadrature_policy,
+        thermo_quadrature_rtol=cfg.thermo_quadrature_rtol,
+        thermo_quadrature_atol=cfg.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=cfg.thermo_quadrature_maxevals,
         progress_cb=cfg.progress_cb,
     ))
 end

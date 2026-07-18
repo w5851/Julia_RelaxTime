@@ -213,6 +213,10 @@ function polyakov_potential(p::PNJLParams, Φ, Φbar, T_fm)
     ΦT = convert(TT, Φ)
     ΦbarT = convert(TT, Φbar)
     TT_fm = convert(TT, T_fm)
+    T_value = PNJLIntegrals._primal_float(T_fm)
+    isfinite(T_value) || throw(ArgumentError("T_fm must be finite, got $(T_value)"))
+    T_value >= 0.0 || throw(ArgumentError("T_fm must be nonnegative, got $(T_value)"))
+    T_value == 0.0 && return zero(TT)
     return _polyakov_potential(_polyakov_tag(p.polyakov_scheme), p, ΦT, ΦbarT, TT_fm, TT)
 end
 

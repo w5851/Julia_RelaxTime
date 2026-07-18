@@ -7,6 +7,10 @@ function _solve_constraint_fixedmu(
     xi::Real=0.0,
     p_num::Int=24,
     t_num::Int=8,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
     residual_norm_max::Real=1e-6,
     physicality_check::Function=((_, _) -> true),
     seed_candidates::Union{Nothing, AbstractVector}=nothing,
@@ -53,6 +57,10 @@ function _solve_constraint_fixedmu(
                     xi=xi,
                     p_num=p_num,
                     t_num=t_num,
+                    thermo_quadrature_policy=thermo_quadrature_policy,
+                    thermo_quadrature_rtol=thermo_quadrature_rtol,
+                    thermo_quadrature_atol=thermo_quadrature_atol,
+                    thermo_quadrature_maxevals=thermo_quadrature_maxevals,
                 )
 
                 raw = _compute_fixedmu_candidate(
@@ -64,6 +72,10 @@ function _solve_constraint_fixedmu(
                     xi=xi,
                     p_num=p_num,
                     t_num=t_num,
+                    thermo_quadrature_policy=thermo_quadrature_policy,
+                    thermo_quadrature_rtol=thermo_quadrature_rtol,
+                    thermo_quadrature_atol=thermo_quadrature_atol,
+                    thermo_quadrature_maxevals=thermo_quadrature_maxevals,
                 )
                 ok, failed = evaluate_hard_constraints(raw, rules)
                 candidate = (; raw..., hard_constraint_ok=ok, failed_constraints=failed, converged=ok, seed_index=Int(seed_index))

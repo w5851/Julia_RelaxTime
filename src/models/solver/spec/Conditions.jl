@@ -69,6 +69,31 @@ struct GapParams{TT, TN, TX}
     p_num::Int
     t_num::Int
     model_kind::Symbol
+    thermo_quadrature_policy::Symbol
+    thermo_quadrature_rtol::Float64
+    thermo_quadrature_atol::Float64
+    thermo_quadrature_maxevals::Int
+end
+
+@inline function _thermo_quadrature_kwargs(params::GapParams)
+    return (
+        thermo_quadrature_policy=params.thermo_quadrature_policy,
+        thermo_quadrature_rtol=params.thermo_quadrature_rtol,
+        thermo_quadrature_atol=params.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=params.thermo_quadrature_maxevals,
+    )
+end
+
+@inline function GapParams(T_fm, params::GapParams)
+    return GapParams(
+        T_fm,
+        params.thermal_nodes,
+        params.xi;
+        p_num=params.p_num,
+        t_num=params.t_num,
+        model_kind=params.model_kind,
+        _thermo_quadrature_kwargs(params)...,
+    )
 end
 
 struct GapPressureFn{TMODEL, TMU, TPARAMS}
@@ -89,6 +114,7 @@ end
         p_num=params.p_num,
         t_num=params.t_num,
         xi=params.xi,
+        _thermo_quadrature_kwargs(params)...,
     )
 end
 
@@ -110,8 +136,40 @@ end
     p_num::Int=size(thermal_nodes[1], 1),
     t_num::Int=size(thermal_nodes[1], 2),
     model_kind::Symbol=:PNJL,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 ) where {TT, TN, TX}
-    return GapParams(T_fm, thermal_nodes, xi, p_num, t_num, model_kind)
+    if model_kind === :PNJL
+        T_value = Models.PNJLIntegrals._primal_float(T_fm)
+        isfinite(T_value) && T_value > 0.0 || throw(ArgumentError(
+            "PNJL five-field gap residual requires finite T_fm > 0; strict T=0 is supported only for fixed-state thermodynamic kernels",
+        ))
+    end
+    policy = Models.PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
+    if policy === :rs_reduced_adaptive && model_kind !== :PNJL
+        throw(ArgumentError(
+            "thermo_quadrature_policy=:rs_reduced_adaptive is supported only for the scalar PNJL phase thermodynamics path; got model_kind=$(model_kind)",
+        ))
+    end
+    Models.PNJLIntegrals.validate_thermal_quadrature_controls(
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    return GapParams(
+        T_fm,
+        thermal_nodes,
+        xi,
+        p_num,
+        t_num,
+        model_kind,
+        policy,
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
 end
 
 @inline function _rho_vec(x_state, mu_vec, T_fm, params::GapParams)
@@ -123,6 +181,7 @@ end
         p_num=params.p_num,
         t_num=params.t_num,
         xi=params.xi,
+        _thermo_quadrature_kwargs(params)...,
     )
 end
 
@@ -135,6 +194,7 @@ end
         p_num=params.p_num,
         t_num=params.t_num,
         xi=params.xi,
+        _thermo_quadrature_kwargs(params)...,
     )
 end
 
@@ -220,6 +280,7 @@ end
             p_num=params.p_num,
             t_num=params.t_num,
             xi=params.xi,
+            _thermo_quadrature_kwargs(params)...,
         )
         @inbounds for i in 1:nx
             F[i] = residual[i]
@@ -255,8 +316,7 @@ function build_conditions(::FixedMu, params::GapParams)
         length(x) == state_dim(schema) || throw(ArgumentError("FixedMu expects x length $(state_dim(schema)), got $(length(x))"))
         mu_vec = SVector{3}(μ_fm, μ_fm, μ_fm)
         x_state = SVector{5}(Tuple(state_view(schema, x)))
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+        local_params = GapParams(T_fm, params)
         return Vector(gap_conditions(x_state, mu_vec, local_params))
     end
 end
@@ -320,8 +380,7 @@ function build_conditions(mode::FixedRho, params::GapParams, schema::ModelStateS
     return (θ, x) -> begin
         T_fm = θ[1]
         x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+        local_params = GapParams(T_fm, params)
 
         gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
         mu_eq1 = mu_vec[1] - mu_vec[2]
@@ -351,8 +410,7 @@ function build_conditions(mode::FixedAsymmetricRho, params::GapParams, schema::M
     return (θ, x) -> begin
         T_fm = θ[1]
         x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+        local_params = GapParams(T_fm, params)
 
         gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
 
@@ -381,8 +439,7 @@ function build_conditions(mode::FixedEntropy, params::GapParams, schema::ModelSt
     return (θ, x) -> begin
         T_fm = θ[1]
         x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+        local_params = GapParams(T_fm, params)
 
         gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
         mu_eq1 = mu_vec[1] - mu_vec[2]
@@ -409,8 +466,7 @@ function build_conditions(mode::FixedSigma, params::GapParams, schema::ModelStat
     return (θ, x) -> begin
         T_fm = θ[1]
         x_state, mu_vec = _extract_state_mu(schema, x; mu_dim=mu_dim)
-        local_params = GapParams(T_fm, params.thermal_nodes, params.xi,
-            p_num=params.p_num, t_num=params.t_num, model_kind=params.model_kind)
+        local_params = GapParams(T_fm, params)
 
         gap = _gap_conditions_dynamic(mode, schema, x_state, mu_vec, local_params; mu_dim=mu_dim)
         mu_eq1 = mu_vec[1] - mu_vec[2]
@@ -576,11 +632,7 @@ function build_residual!(model::AbstractQCDModel, mode::Union{FixedRho, FixedAsy
 end
 
 @inline function _local_gap_params(T_fm, params::GapParams)
-    return GapParams(T_fm, params.thermal_nodes, params.xi;
-        p_num=params.p_num,
-        t_num=params.t_num,
-        model_kind=params.model_kind,
-    )
+    return GapParams(T_fm, params)
 end
 
 @inline function explicit_residual(mode::FixedMu, x::AbstractVector, θ::AbstractVector, params::GapParams)

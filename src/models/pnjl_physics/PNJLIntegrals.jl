@@ -11,6 +11,7 @@ models 侧当前所需的最小 API：`cached_nodes` 与 `calculate_log_sum`。
 module PNJLIntegrals
 
 using Base.MathConstants: π
+using ForwardDiff
 using StaticArrays
 
 # Gauss-Legendre nodes/weights
@@ -21,24 +22,77 @@ end
 
 using Main.GaussLegendre:
     gauleg,
+    standard_nodes_weights,
     DEFAULT_COSΘ_HALF_NODES,
     DEFAULT_COSΘ_HALF_WEIGHTS,
     DEFAULT_MOMENTUM_NODES,
     DEFAULT_MOMENTUM_WEIGHTS
 
 export cached_nodes, calculate_log_sum
+export calculate_log_sum_rs_reduced_adaptive
+export calculate_log_sum_rs_reduced_adaptive_with_error
+export integrate_rs_reduced_radial
+export rs_anisotropy_measure_factor
+export validate_rs_anisotropy
+export validate_thermal_quadrature_policy
+export validate_thermal_quadrature_controls
+export SUPPORTED_THERMAL_QUADRATURE_POLICIES
 export DEFAULT_THETA_COUNT, DEFAULT_MOMENTUM_COUNT, DEFAULT_THERMAL_P_MAX_INV_FM
 
 const DEFAULT_THETA_COUNT = length(DEFAULT_COSΘ_HALF_NODES)
 const DEFAULT_MOMENTUM_COUNT = length(DEFAULT_MOMENTUM_NODES)
 const DEFAULT_THERMAL_P_MAX_INV_FM = 10.0
+const SUPPORTED_THERMAL_QUADRATURE_POLICIES = (:tensor_gauss, :rs_reduced_adaptive)
 const THETA_DEFAULT_NODES = DEFAULT_COSΘ_HALF_NODES
 const THETA_DEFAULT_WEIGHTS = DEFAULT_COSΘ_HALF_WEIGHTS .* 2.0
 const THERMAL_DEFAULT_NODES = DEFAULT_MOMENTUM_NODES
 const THERMAL_DEFAULT_WEIGHTS = DEFAULT_MOMENTUM_WEIGHTS
+const _ADAPTIVE_LOW_NODES, _ADAPTIVE_LOW_WEIGHTS = standard_nodes_weights(16)
+const _ADAPTIVE_HIGH_NODES, _ADAPTIVE_HIGH_WEIGHTS = standard_nodes_weights(32)
+const _ADAPTIVE_PANEL_EVALS = length(_ADAPTIVE_LOW_NODES) + length(_ADAPTIVE_HIGH_NODES)
+const _ADAPTIVE_SPLIT_EVALS = 2 * _ADAPTIVE_PANEL_EVALS
+const _ADAPTIVE_ERROR_SAFETY = 2.0
 
 """积分节点缓存：(p_num, t_num, p_max_inv_fm) -> (p_mesh, cosθ_mesh, coefficients)"""
 const NODE_CACHE = Dict{Tuple{Int, Int, Float64}, NTuple{3, Matrix{Float64}}}()
+
+@inline function validate_thermal_quadrature_policy(policy::Symbol)
+    policy in SUPPORTED_THERMAL_QUADRATURE_POLICIES || throw(ArgumentError(
+        "unsupported thermo_quadrature_policy=$(policy); expected one of $(SUPPORTED_THERMAL_QUADRATURE_POLICIES)",
+    ))
+    return policy
+end
+
+@inline function validate_thermal_quadrature_controls(
+    rtol::Float64,
+    atol::Float64,
+    maxevals::Int,
+)
+    isfinite(rtol) && rtol > 0 || throw(ArgumentError("thermo quadrature rtol must be finite and positive, got $(rtol)"))
+    isfinite(atol) && atol >= 0 || throw(ArgumentError("thermo quadrature atol must be finite and nonnegative, got $(atol)"))
+    maxevals > 0 || throw(ArgumentError("thermo quadrature maxevals must be positive, got $(maxevals)"))
+    return nothing
+end
+
+@inline _primal_float(x) = Float64(x)
+@inline _primal_float(x::ForwardDiff.Dual) = _primal_float(ForwardDiff.value(x))
+
+@inline _error_norm(x::Number) = abs(_primal_float(x))
+@inline _error_norm(x) = maximum(_error_norm, x)
+@inline _all_primal_finite(x::Number) = isfinite(_primal_float(x))
+@inline _all_primal_finite(x) = all(_all_primal_finite, x)
+
+@inline function validate_rs_anisotropy(xi)
+    xi_value = _primal_float(xi)
+    isfinite(xi_value) || throw(ArgumentError("xi must be finite, got $(xi_value)"))
+    xi_value > -1.0 || throw(ArgumentError("RS thermodynamic angular reduction requires xi > -1, got $(xi_value)"))
+    return xi
+end
+
+@inline function rs_anisotropy_measure_factor(xi)
+    validate_rs_anisotropy(xi)
+    return inv(sqrt(one(xi) + xi))
+end
 
 @inline function theta_nodes(t_num::Int)
     if t_num == DEFAULT_THETA_COUNT
@@ -81,7 +135,7 @@ const POLYAKOV_EPS = 1e-16
     return x < min_val ? log(min_val) : log(x)
 end
 
-@inline function _calculate_energy_anisotropic(mass_i, p, xi, cosθ)
+@inline function _calculate_rs_distribution_energy(mass_i, p, xi, cosθ)
     return sqrt(p ^ 2 + mass_i ^ 2 + xi * (p * cosθ) ^ 2)
 end
 
@@ -134,6 +188,323 @@ end
     return log_f_plus + log_f_minus
 end
 
+@inline function _fermi_momentum_primal(mass, mu)
+    mass_value = abs(_primal_float(mass))
+    mu_value = abs(_primal_float(mu))
+    return mu_value > mass_value ? sqrt(max(mu_value * mu_value - mass_value * mass_value, 0.0)) : 0.0
+end
+
+struct _AdaptivePanel{T}
+    a::Float64
+    b::Float64
+    value::T
+    error::Float64
+end
+
+@inline function _gauss_legendre_rule(f, a::Float64, b::Float64, nodes, weights)
+    half = (b - a) / 2
+    center = (a + b) / 2
+    x = muladd(half, nodes[1], center)
+    acc = weights[1] * f(x)
+    @inbounds for i in 2:length(nodes)
+        x = muladd(half, nodes[i], center)
+        acc += weights[i] * f(x)
+    end
+    return half * acc
+end
+
+@inline function _estimate_adaptive_panel(f, a::Float64, b::Float64)
+    low = _gauss_legendre_rule(f, a, b, _ADAPTIVE_LOW_NODES, _ADAPTIVE_LOW_WEIGHTS)
+    high = _gauss_legendre_rule(f, a, b, _ADAPTIVE_HIGH_NODES, _ADAPTIVE_HIGH_WEIGHTS)
+    _all_primal_finite(high) || throw(DomainError(
+        (a, b),
+        "non-finite adaptive quadrature value on transformed interval",
+    ))
+    error = _ADAPTIVE_ERROR_SAFETY * _error_norm(high - low)
+    isfinite(error) || throw(DomainError(
+        (a, b),
+        "non-finite adaptive quadrature error estimate",
+    ))
+    return _AdaptivePanel(a, b, high, error)
+end
+
+function _adaptive_gauss_legendre_unit(
+    f;
+    rtol::Float64,
+    atol::Float64,
+    maxevals::Int,
+)
+    maxevals >= _ADAPTIVE_PANEL_EVALS || throw(ArgumentError(
+        "adaptive quadrature maxevals must be at least $(_ADAPTIVE_PANEL_EVALS), got $(maxevals)",
+    ))
+
+    first_panel = _estimate_adaptive_panel(f, 0.0, 1.0)
+    panels = [first_panel]
+    total_value = first_panel.value
+    total_error = first_panel.error
+    evaluations = _ADAPTIVE_PANEL_EVALS
+
+    while total_error > max(atol, rtol * _error_norm(total_value))
+        evaluations + _ADAPTIVE_SPLIT_EVALS <= maxevals || error(
+            "adaptive Gauss-Legendre quadrature did not converge within maxevals=$(maxevals); " *
+            "estimated_error=$(total_error), target=$(max(atol, rtol * _error_norm(total_value)))",
+        )
+
+        worst_index = 1
+        worst_error = panels[1].error
+        @inbounds for i in 2:length(panels)
+            if panels[i].error > worst_error
+                worst_index = i
+                worst_error = panels[i].error
+            end
+        end
+
+        parent = panels[worst_index]
+        midpoint = (parent.a + parent.b) / 2
+        (parent.a < midpoint < parent.b) || error(
+            "adaptive Gauss-Legendre quadrature reached floating-point subdivision limit " *
+            "on [$(parent.a), $(parent.b)]",
+        )
+
+        left = _estimate_adaptive_panel(f, parent.a, midpoint)
+        right = _estimate_adaptive_panel(f, midpoint, parent.b)
+        panels[worst_index] = left
+        push!(panels, right)
+
+        total_value += left.value + right.value - parent.value
+        total_error = max(0.0, total_error + left.error + right.error - parent.error)
+        evaluations += _ADAPTIVE_SPLIT_EVALS
+    end
+
+    return (value=total_value, error=total_error)
+end
+
+@inline function _adaptive_finite_interval(
+    f,
+    a::Float64,
+    b::Float64;
+    rtol::Float64,
+    atol::Float64,
+    maxevals::Int,
+)
+    scale = b - a
+    transformed = x -> scale * f(muladd(scale, x, a))
+    return _adaptive_gauss_legendre_unit(
+        transformed;
+        rtol=rtol,
+        atol=atol,
+        maxevals=maxevals,
+    )
+end
+
+@inline function _adaptive_infinite_tail(
+    f,
+    origin::Float64,
+    scale::Float64;
+    rtol::Float64,
+    atol::Float64,
+    maxevals::Int,
+)
+    transformed = x -> begin
+        one_minus_x = 1.0 - x
+        q = origin + scale * x / one_minus_x
+        jacobian = scale / (one_minus_x * one_minus_x)
+        return jacobian * f(q)
+    end
+    return _adaptive_gauss_legendre_unit(
+        transformed;
+        rtol=rtol,
+        atol=atol,
+        maxevals=maxevals,
+    )
+end
+
+@inline function _radial_tail_scale(mass, mu, thermal_scale::Float64)
+    mass_value = abs(_primal_float(mass))
+    mu_value = abs(_primal_float(mu))
+    return max(0.05, 0.25 * mass_value, 0.25 * mu_value, 4.0 * thermal_scale)
+end
+
+"""Integrate a radial RS-reduced kernel on `[0, Inf)` with a Fermi-surface breakpoint.
+
+The callback must already include the radial `q^2` measure. The implementation uses
+an in-repository adaptive 16/32-point Gauss-Legendre pair, with a compactified
+infinite tail. The returned local error estimate is the accumulated, safety-scaled
+difference between the paired rules. Breakpoint placement and refinement decisions
+use primal values only so ForwardDiff differentiates the physical integrand rather
+than the numerical node-selection rule.
+"""
+function integrate_rs_reduced_radial(
+    f,
+    mass,
+    mu;
+    rtol::Float64=1e-8,
+    atol::Float64=1e-10,
+    maxevals::Int=10^7,
+    thermal_scale::Float64=0.0,
+)
+    validate_thermal_quadrature_controls(rtol, atol, maxevals)
+    isfinite(thermal_scale) && thermal_scale >= 0 || throw(ArgumentError(
+        "thermal_scale must be finite and nonnegative, got $(thermal_scale)",
+    ))
+
+    q_fermi = _fermi_momentum_primal(mass, mu)
+    tail_scale = _radial_tail_scale(mass, mu, thermal_scale)
+    if q_fermi > 0.0
+        maxevals >= 2 * _ADAPTIVE_PANEL_EVALS || throw(ArgumentError(
+            "adaptive quadrature with a Fermi breakpoint requires maxevals >= $(2 * _ADAPTIVE_PANEL_EVALS), got $(maxevals)",
+        ))
+        finite_budget = maxevals ÷ 2
+        tail_budget = maxevals - finite_budget
+        finite = _adaptive_finite_interval(
+            f,
+            0.0,
+            q_fermi;
+            rtol=rtol,
+            atol=atol / 2,
+            maxevals=finite_budget,
+        )
+        tail = _adaptive_infinite_tail(
+            f,
+            q_fermi,
+            tail_scale;
+            rtol=rtol,
+            atol=atol / 2,
+            maxevals=tail_budget,
+        )
+        return (value=finite.value + tail.value, error=finite.error + tail.error)
+    end
+    return _adaptive_infinite_tail(
+        f,
+        0.0,
+        tail_scale;
+        rtol=rtol,
+        atol=atol,
+        maxevals=maxevals,
+    )
+end
+
+@inline function _zero_temperature_pressure_radial(mass, mu_abs)
+    mass_abs = abs(mass)
+    mass_value = abs(_primal_float(mass_abs))
+    mu_value = _primal_float(mu_abs)
+    mu_value > mass_value || return zero(promote_type(typeof(mass), typeof(mu_abs)))
+
+    q_fermi = sqrt(mu_abs * mu_abs - mass_abs * mass_abs)
+    if mass_value <= 1e-14
+        return mu_abs^4 / 12
+    end
+
+    energy_integral = (
+        q_fermi * mu_abs * (2 * q_fermi * q_fermi + mass_abs * mass_abs) -
+        mass_abs^4 * asinh(q_fermi / mass_abs)
+    ) / 8
+    return mu_abs * q_fermi^3 / 3 - energy_integral
+end
+
+function _calculate_log_sum_rs_reduced_zero_temperature(masses, mu_vec, xi)
+    TT = promote_type(eltype(masses), eltype(mu_vec), typeof(xi))
+    total = zero(TT)
+    @inbounds for i in 1:3
+        total += _zero_temperature_pressure_radial(
+            convert(TT, masses[i]),
+            abs(convert(TT, mu_vec[i])),
+        )
+    end
+    radial_measure = convert(TT, 2) * rs_anisotropy_measure_factor(convert(TT, xi)) /
+        convert(TT, (2 * π)^2)
+    return -convert(TT, 6) * radial_measure * total
+end
+
+"""RS-reduced adaptive PNJL thermal grand-potential contribution.
+
+This path applies only to scalar thermodynamic kernels whose angular dependence is
+entirely contained in `E_xi`.  It integrates the transformed radial momentum to
+infinity, avoiding the finite-spherical-cutoff mismatch of a naive angular
+prefactor replacement.
+"""
+function calculate_log_sum_rs_reduced_adaptive_with_error(
+    masses::SVector{3, TF},
+    Φ,
+    Φ̄,
+    mu_vec,
+    T_fm,
+    xi;
+    rtol::Float64=1e-8,
+    atol::Float64=1e-10,
+    maxevals::Int=10^7,
+) where {TF}
+    validate_thermal_quadrature_controls(rtol, atol, maxevals)
+    T_value = _primal_float(T_fm)
+    isfinite(T_value) || throw(ArgumentError("T_fm must be finite, got $(T_value)"))
+    T_value >= 0.0 || throw(ArgumentError("T_fm must be nonnegative, got $(T_value)"))
+    if T_value == 0.0
+        value = _calculate_log_sum_rs_reduced_zero_temperature(masses, mu_vec, xi)
+        return (value=value, error=0.0)
+    end
+
+    TT = promote_type(TF, typeof(Φ), typeof(Φ̄), typeof(T_fm), eltype(mu_vec), typeof(xi))
+    ΦT = convert(TT, Φ)
+    Φ̄T = convert(TT, Φ̄)
+    Tt = convert(TT, T_fm)
+    xit = convert(TT, xi)
+    radial_measure = convert(TT, 2) * rs_anisotropy_measure_factor(xit) /
+        convert(TT, (2 * π)^2)
+
+    total = zero(TT)
+    total_error = 0.0
+    @inbounds for i in 1:3
+        mass_i = convert(TT, masses[i])
+        mu_i = convert(TT, mu_vec[i])
+        integrand = q -> begin
+            qT = convert(TT, q)
+            E_dist = sqrt(qT * qT + mass_i * mass_i)
+            return qT * qT * (-convert(TT, 2) * Tt) *
+                calculate_log_term(E_dist, mu_i, Tt, ΦT, Φ̄T)
+        end
+        value, error = integrate_rs_reduced_radial(
+            integrand,
+            mass_i,
+            mu_i;
+            rtol=rtol,
+            atol=atol,
+            maxevals=maxevals,
+            thermal_scale=T_value,
+        )
+        total += value
+        total_error += _primal_float(error)
+    end
+    return (
+        value=radial_measure * total,
+        error=abs(_primal_float(radial_measure)) * total_error,
+    )
+end
+
+function calculate_log_sum_rs_reduced_adaptive(
+    masses::SVector{3, TF},
+    Φ,
+    Φ̄,
+    mu_vec,
+    T_fm,
+    xi;
+    rtol::Float64=1e-8,
+    atol::Float64=1e-10,
+    maxevals::Int=10^7,
+) where {TF}
+    result = calculate_log_sum_rs_reduced_adaptive_with_error(
+        masses,
+        Φ,
+        Φ̄,
+        mu_vec,
+        T_fm,
+        xi;
+        rtol=rtol,
+        atol=atol,
+        maxevals=maxevals,
+    )
+    return result.value
+end
+
 """calculate_log_sum(masses, p_mesh, cosθ_mesh, coefficients, Φ, Φ̄, mu_vec, T_fm, xi) -> Float64
 
 热项对数和（各向异性 RS 形式），保持与 legacy 版本一致：
@@ -169,8 +540,8 @@ function calculate_log_sum(
             p = convert(TT, p_mesh[idx])
             cosθ = convert(TT, cosθ_mesh[idx])
             w = convert(TT, coefficients[idx])
-            E_i = _calculate_energy_anisotropic(mass_i, p, xit, cosθ)
-            total += calculate_log_term(E_i, mu_i, Tt, ΦT, Φ̄T) * w
+            E_dist_i = _calculate_rs_distribution_energy(mass_i, p, xit, cosθ)
+            total += calculate_log_term(E_dist_i, mu_i, Tt, ΦT, Φ̄T) * w
         end
     end
 

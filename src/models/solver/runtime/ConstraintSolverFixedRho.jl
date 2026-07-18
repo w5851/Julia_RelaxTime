@@ -9,6 +9,10 @@ function _solve_constraint_fixedrho(
     xi::Real=0.0,
     p_num::Int=24,
     t_num::Int=8,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
     residual_norm_max::Real=1e-6,
     nlsolve_method::Symbol=:newton,
     physicality_check::Function=((_, _) -> true),
@@ -39,6 +43,10 @@ function _solve_constraint_fixedrho(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
 
         if st === nothing
@@ -56,6 +64,10 @@ function _solve_constraint_fixedrho(
             p_num=p_num,
             t_num=t_num,
             rho0_scale=rho0,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
 
         st_ref[] = st
@@ -98,6 +110,10 @@ function _solve_constraint_fixedrho(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
 
         omega_val = -pressure_ref[]
@@ -134,6 +150,10 @@ function _solve_constraint_fixedrho(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
         st === nothing && return nothing
 
@@ -147,6 +167,10 @@ function _solve_constraint_fixedrho(
             p_num=p_num,
             t_num=t_num,
             rho0_scale=rho0,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
 
         residual_norm = _compose_mode_residual_norm(
@@ -158,6 +182,10 @@ function _solve_constraint_fixedrho(
             xi=xi,
             p_num=p_num,
             t_num=t_num,
+            thermo_quadrature_policy=thermo_quadrature_policy,
+            thermo_quadrature_rtol=thermo_quadrature_rtol,
+            thermo_quadrature_atol=thermo_quadrature_atol,
+            thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
 
         thermo_finite = isfinite(thermo.omega) && isfinite(thermo.pressure) && isfinite(thermo.rho_norm) && isfinite(thermo.entropy) && isfinite(thermo.energy)

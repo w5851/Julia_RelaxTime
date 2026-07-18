@@ -17,6 +17,7 @@ P1-F 起，稳定 CLI 入口的最小基线脚本为：
 
 - `scripts/perf/pnjl/stable_entrypoint_baseline.jl`
 - `scripts/perf/pnjl/compile_time_breakdown.jl`
+- `scripts/perf/pnjl_phase_thermal_quadrature_probe.jl`
 
 用途：
 
@@ -33,6 +34,7 @@ P1-F 起，稳定 CLI 入口的最小基线脚本为：
 
 - `stable_entrypoint_baseline.jl` 记录冷启动端到端 wall-clock 基线
 - `compile_time_breakdown.jl` 对比冷启动 CLI、同进程热态调用、以及可选 sysimage CLI，用于判断编译/JIT 占比
+- `pnjl_phase_thermal_quadrature_probe.jl` 在多温度和 `xi` 固定态上比较 `24/8`、`32/10` tensor 与 RS-reduced adaptive 热势的耗时、分配和数值；它只提供性能证据，不替代 correctness/phase 收敛 gate
 
 示例：
 

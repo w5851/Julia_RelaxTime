@@ -8,6 +8,7 @@ derivatives. Coefficients are stored as Taylor coefficients, i.e.
 module MixedTaylorJets
 
 using ForwardDiff
+using ..PNJLCore: PNJLIntegrals
 
 import Base: +, -, *, /, ^, <, <=, >, >=, abs, convert, exp, float, getindex, inv, isfinite
 import Base: isless, log, max, min, one, promote_rule, show, sqrt, zero
@@ -132,6 +133,7 @@ end
 end
 
 @inline jet_value(x::MixedTaylorJet) = x.coeffs[1]
+@inline PNJLIntegrals._primal_float(x::MixedTaylorJet) = jet_value(x)
 @inline getindex(x::MixedTaylorJet, i::Int) = x.coeffs[i]
 
 @inline function jet_coefficient(x::MixedTaylorJet{D, N, L}, pos::Int) where {D, N, L}

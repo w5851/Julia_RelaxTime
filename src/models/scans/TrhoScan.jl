@@ -36,6 +36,7 @@ using ..Models: FixedRho, FixedAsymmetricRho, ConstraintMode, SolverResult
 using ..Models: build_seed_pool, solve_weighted_block_fallback
 using ..Models: coerce_solver_result, create_model, build_problem_spec, solve_constraint
 using ..Models: model_rho
+using ..Models: PNJLIntegrals
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
 using ..SeedStrategies: get_seed, update!, extend_seed
 using ..SeedStrategies: get_all_seeds
@@ -231,11 +232,37 @@ function run_trho_scan(;
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
     diagnostic_level::Symbol=:none,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    model_kind === :PNJL && foreach(PNJLIntegrals.validate_rs_anisotropy, xi_values)
+    PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
+    if thermo_quadrature_policy === :rs_reduced_adaptive
+        model_kind === :PNJL || throw(ArgumentError(
+            "rs_reduced_adaptive thermal quadrature is supported only for model_kind=:PNJL",
+        ))
+        constraint_mode === :fixed_rho || throw(ArgumentError(
+            "rs_reduced_adaptive thermal quadrature currently supports constraint_mode=:fixed_rho only",
+        ))
+    end
+    PNJLIntegrals.validate_thermal_quadrature_controls(
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    solver_kwargs = (
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        nlsolve_kwargs...,
+    )
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -298,7 +325,7 @@ function run_trho_scan(;
                     selector=selector,
                     model_kind=model_kind,
                     diagnostic_level=diagnostic_level,
-                    p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+                    p_num=p_num, t_num=t_num, solver_kwargs...)
             else
                 # 兼容旧链路
                 candidates = _build_seed_candidates(continuation_seeds, seed_key, T, rho)
@@ -312,7 +339,7 @@ function run_trho_scan(;
                     selector=selector,
                     model_kind=model_kind,
                     diagnostic_level=diagnostic_level,
-                    p_num=p_num, t_num=t_num, nlsolve_kwargs...)
+                    p_num=p_num, t_num=t_num, solver_kwargs...)
 
                 if result !== nothing && _is_success(result)
                     continuation_seeds[seed_key] = copy(result.solution)
@@ -324,6 +351,10 @@ function run_trho_scan(;
                 model_kind=model_kind,
                 p_num=p_num,
                 t_num=t_num,
+                thermo_quadrature_policy=thermo_quadrature_policy,
+                thermo_quadrature_rtol=thermo_quadrature_rtol,
+                thermo_quadrature_atol=thermo_quadrature_atol,
+                thermo_quadrature_maxevals=thermo_quadrature_maxevals,
             )
             flush(io)
             push!(completed, key)
@@ -819,6 +850,10 @@ function _write_row(io, T, rho, xi, result, message;
     model_kind::Symbol=:PNJL,
     p_num::Int=24,
     t_num::Int=8,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
 )
     if result === nothing
         values = (
@@ -852,6 +887,10 @@ function _write_row(io, T, rho, xi, result, message;
         p_num=p_num,
         t_num=t_num,
         xi=xi,
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
     )
     rho_u, rho_d, rho_s = rho_vec[1], rho_vec[2], rho_vec[3]
 

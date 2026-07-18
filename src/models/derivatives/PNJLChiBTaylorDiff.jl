@@ -148,7 +148,14 @@ end
     return cached_nodes(p_num, t_num; p_max_inv_fm=thermal_p_max_inv_fm(model))
 end
 
-@inline function _gap_params(model::AbstractPNJLModel, T_fm, xi, p_num::Int, t_num::Int)
+@inline function _gap_params(
+    model::AbstractPNJLModel,
+    T_fm,
+    xi,
+    p_num::Int,
+    t_num::Int;
+    thermo_quadrature_kwargs::NamedTuple=(;),
+)
     return GapParams(
         T_fm,
         _thermal_nodes(model, p_num, t_num),
@@ -156,6 +163,7 @@ end
         p_num=p_num,
         t_num=t_num,
         model_kind=:PNJL,
+        thermo_quadrature_kwargs...,
     )
 end
 
@@ -184,8 +192,12 @@ function _gap_residual(
     xi,
     p_num::Int,
     t_num::Int,
+    ;
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
-    params = _gap_params(model, T_fm, xi, p_num, t_num)
+    params = _gap_params(
+        model, T_fm, xi, p_num, t_num; thermo_quadrature_kwargs=thermo_quadrature_kwargs,
+    )
     Tout = promote_type(eltype(x_state), eltype(mu_vec), typeof(T_fm), typeof(xi))
     out = Vector{Tout}(undef, 5)
     gap_core_residual!(out, model, x_state, mu_vec, params)
@@ -199,8 +211,18 @@ function _primal_state(
     xi::Real,
     p_num::Int,
     t_num::Int,
+    ;
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
-    st = solve_gap(model, Float64(T_fm), mu_vec0; xi=Float64(xi), p_num=p_num, t_num=t_num)
+    st = solve_gap(
+        model,
+        Float64(T_fm),
+        mu_vec0;
+        xi=Float64(xi),
+        p_num=p_num,
+        t_num=t_num,
+        thermo_quadrature_kwargs...,
+    )
     return SVector{5, Float64}(Tuple(state_vector(st)))
 end
 
@@ -224,8 +246,19 @@ end
     xi::Real,
     p_num::Int,
     t_num::Int,
+    ;
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
-    residual = _gap_residual(model, x_state, mu_vec, Float64(T_fm), Float64(xi), p_num, t_num)
+    residual = _gap_residual(
+        model,
+        x_state,
+        mu_vec,
+        Float64(T_fm),
+        Float64(xi),
+        p_num,
+        t_num;
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
+    )
     residual_norm = maximum(abs, residual)
     isfinite(residual_norm) || throw(ArgumentError("PNJL TaylorDiff base-state residual is not finite"))
     return residual, Float64(residual_norm)
@@ -303,8 +336,19 @@ function _jacobian_primal(
     xi::Real,
     p_num::Int,
     t_num::Int,
+    ;
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
-    residual = x -> Vector(_gap_residual(model, _state_svector(x), mu_vec0, Float64(T_fm), Float64(xi), p_num, t_num))
+    residual = x -> Vector(_gap_residual(
+        model,
+        _state_svector(x),
+        mu_vec0,
+        Float64(T_fm),
+        Float64(xi),
+        p_num,
+        t_num;
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
+    ))
     J0 = ForwardDiff.jacobian(residual, x0)
     all(isfinite, J0) || throw(ArgumentError("PNJL TaylorDiff gap Jacobian contains non-finite entries"))
     return J0
@@ -570,6 +614,7 @@ function _solve_gap_series_parameter_direction(
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
     base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     _validate_common_inputs(T_fm, order, p_num, t_num)
     iterations >= 0 || throw(ArgumentError("series_iterations must be non-negative, got $(iterations)"))
@@ -585,13 +630,16 @@ function _solve_gap_series_parameter_direction(
     context = if base_context === nothing
         nothing
     else
+        isempty(thermo_quadrature_kwargs) || throw(ArgumentError(
+            "custom thermo quadrature is not supported with a prebuilt PNJLTaylorBaseContext",
+        ))
         _validate_base_context(base_context, model, T_fm, base_mu_vec, xi, p_num, t_num)
     end
     x0 = context === nothing ?
-        _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num) :
+        _primal_state(model, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=thermo_quadrature_kwargs) :
         context.x0
     J0 = context === nothing ?
-        _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num) :
+        _jacobian_primal(model, x0, T_fm, base_mu_vec, xi, p_num, t_num; thermo_quadrature_kwargs=thermo_quadrature_kwargs) :
         context.J0
     linear_operator = if resolved_linear_solve === :refactor_each_order
         J0
@@ -619,7 +667,8 @@ function _solve_gap_series_parameter_direction(
     rhs_n = Vector{Float64}(undef, 5)
     for n in 1:order
         x_series_n = _series_from_coeff_matrix(coeffs, Val(order))
-        residual_n = _gap_residual(model, x_series_n, mu_vec, T_series, Float64(xi), p_num, t_num)
+        residual_n = _gap_residual(model, x_series_n, mu_vec, T_series, Float64(xi), p_num, t_num;
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs)
         @inbounds for i in 1:5
             rhs_n[i] = _coefficient(residual_n[i], n)
         end
@@ -632,12 +681,14 @@ function _solve_gap_series_parameter_direction(
     x_series = _series_from_coeff_matrix(coeffs, Val(order))
 
     for _ in 1:iterations
-        residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num)
+        residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num;
+            thermo_quadrature_kwargs=thermo_quadrature_kwargs)
         step = _solve_series_linear(linear_operator, residual, Val(order), resolved_linear_solve)
         x_series = x_series - step
     end
 
-    residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num)
+    residual = _gap_residual(model, x_series, mu_vec, T_series, Float64(xi), p_num, t_num;
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs)
     residual_norm = _series_residual_norm(residual, order)
     _assert_series_residual!(residual, x_series, order, residual_norm, series_residual_tol)
 
@@ -753,6 +804,7 @@ function gap_series_parameter_direction(
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
     base_context::Union{Nothing, PNJLTaylorBaseContext}=nothing,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     _validate_common_inputs(T_fm, order, p_num, t_num)
     m = model === nothing ? _get_model() : model
@@ -772,6 +824,7 @@ function gap_series_parameter_direction(
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
         base_context=base_context,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 

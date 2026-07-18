@@ -26,7 +26,11 @@
 - `bootstrap_multiseed`
 - `solver_backend`
 - `p_num`, `t_num`
+- `thermo_quadrature_policy`（`:tensor_gauss` 或 PNJL 标量热核的 `:rs_reduced_adaptive`）
+- `thermo_quadrature_rtol`, `thermo_quadrature_atol`, `thermo_quadrature_maxevals`
 - `progress_cb`
+
+`:rs_reduced_adaptive` 当前明确限定为 `model_kind=:PNJL`；其他模型会提前报错，不会把配置写入 provenance 后仍静默使用固定网格。
 
 返回值为命名元组，包含：
 

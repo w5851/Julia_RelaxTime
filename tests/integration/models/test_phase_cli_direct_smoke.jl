@@ -122,6 +122,21 @@ end
     @test cfg.t_num == 4
 end
 
+@testset "Phase CLI parses thermal quadrature controls" begin
+    cfg = parse_args([
+        "--thermo_quadrature_policy=rs_reduced_adaptive",
+        "--thermo_quadrature_rtol=1e-7",
+        "--thermo_quadrature_atol=1e-9",
+        "--thermo_quadrature_maxevals=12345",
+    ])
+    @test cfg.thermo_quadrature_policy === :rs_reduced_adaptive
+    @test cfg.thermo_quadrature_rtol == 1e-7
+    @test cfg.thermo_quadrature_atol == 1e-9
+    @test cfg.thermo_quadrature_maxevals == 12345
+    @test_throws ArgumentError parse_args(["--thermo_quadrature_policy=unknown"])
+    @test_throws ArgumentError parse_args(["--thermo_quadrature_rtol=Inf"])
+end
+
 @testset "Phase CLI keeps explicit args over --preset=smoke" begin
     cfg = parse_args([
         "--preset=smoke",
@@ -196,6 +211,11 @@ end
         @test !occursin(r"^[A-Za-z]:", p_str)
     end
     @test haskey(manifest, "effective_config")
+    effective = manifest["effective_config"]
+    @test String(effective["thermo_quadrature_policy"]) == "tensor_gauss"
+    @test Float64(effective["thermo_quadrature_rtol"]) == 1e-8
+    @test Float64(effective["thermo_quadrature_atol"]) == 1e-10
+    @test Int(effective["thermo_quadrature_maxevals"]) == 10^7
 end
 
 @testset "Phase CLI manifest includes preset and effective config" begin
@@ -216,4 +236,5 @@ end
     @test Int(effective["iterations"]) == 77
     @test haskey(effective, "profile")
     @test String(effective["profile"]) == "smoke"
+    @test String(effective["thermo_quadrature_policy"]) == "tensor_gauss"
 end

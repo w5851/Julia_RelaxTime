@@ -34,6 +34,7 @@ using StaticArrays
 using Main.Constants_PNJL: ħc_MeV_fm
 using ..Models: FixedMu, ConstraintMode, solve, SolverResult, is_physical_solution
 using ..Models: build_seed_pool, coerce_solver_result, create_model, solve_constraint
+using ..Models: PNJLIntegrals
 using ..SeedStrategies: SeedStrategy, DefaultSeed, MultiSeed
 using ..SeedStrategies: get_seed, get_all_seeds, HADRON_SEED_5, QUARK_SEED_5, HT_GUESS_0p8_SEED_5, HT_GUESS_0p9_SEED_5, HT_GUESS_0p95_SEED_5, WEAK_CHIRAL_CONF_SEED_5
 using ..SeedStrategies: auto_phase_hint
@@ -184,11 +185,32 @@ function run_tmu_scan(;
     t_num::Int=8,
     progress_cb::Union{Nothing, Function}=nothing,
     diagnostic_level::Symbol=:none,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
     nlsolve_kwargs...
 )
     _validate_tmu_scan_inputs(T_values, mu_values, xi_values, solver_backend, model_kind)
     _validate_semantic_mode(semantic_mode, selector)
     _validate_auto_pnjl_backend(auto_pnjl_backend)
+    model_kind === :PNJL && foreach(PNJLIntegrals.validate_rs_anisotropy, xi_values)
+    PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
+    if thermo_quadrature_policy === :rs_reduced_adaptive && model_kind !== :PNJL
+        throw(ArgumentError("rs_reduced_adaptive thermal quadrature is supported only for model_kind=:PNJL"))
+    end
+    PNJLIntegrals.validate_thermal_quadrature_controls(
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    solver_kwargs = (
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        nlsolve_kwargs...,
+    )
 
     mkpath(dirname(output_path))
     completed = (resume && !overwrite && isfile(output_path)) ? ScanCommon.load_completed_keys3(output_path; digits=6) : Set{NTuple{3, Float64}}()
@@ -236,7 +258,7 @@ function run_tmu_scan(;
                         diagnostic_level=diagnostic_level,
                         p_num=p_num,
                         t_num=t_num,
-                        nlsolve_kwargs...)
+                        solver_kwargs...)
 
                     # 更新连续性缓存
                     if result !== nothing && _is_success(result)
@@ -525,7 +547,15 @@ function _solve_with_models(mode::ConstraintMode, T_fm, μ_fm;
     mapped_mode = _models_mode(mode)
     seed_guess = get_seed(seed_strategy, [T_fm, μ_fm], mode)
     _reject_legacy_solver_kwargs(nlsolve_kwargs)
-    models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (:solver, :residual_norm_max, :physicality_check))...)
+    models_kwargs = (; (k => v for (k, v) in nlsolve_kwargs if k in (
+        :solver,
+        :residual_norm_max,
+        :physicality_check,
+        :thermo_quadrature_policy,
+        :thermo_quadrature_rtol,
+        :thermo_quadrature_atol,
+        :thermo_quadrature_maxevals,
+    ))...)
     raw = solve_constraint(
         model,
         mapped_mode,

@@ -86,6 +86,7 @@ function _td_gap_state_series(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     return PNJLChiBTaylorDiff.gap_series_parameter_direction(
         T_fm,
@@ -100,6 +101,7 @@ function _td_gap_state_series(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 
@@ -114,6 +116,7 @@ function _solve_pnjl_with_derivatives_taylordiff(
     series_iterations::Union{Nothing, Int},
     linear_solve::Symbol,
     series_residual_tol::Real,
+    thermo_quadrature_kwargs::NamedTuple=(;),
 )
     order == 1 || order == 2 || throw(ArgumentError("order must be 1 or 2, got $order"))
     mu_vec0 = SVector{3, Float64}(Float64(μ_fm), Float64(μ_fm), Float64(μ_fm))
@@ -123,12 +126,14 @@ function _solve_pnjl_with_derivatives_taylordiff(
         order=order, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
     s_μ = _td_gap_state_series(
         model, T_fm, mu_vec0, 0.0, _td_symmetric_mu_direction();
         order=order, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     x = _td_series_derivative_vector(s_T.x_state, 0)
@@ -144,6 +149,7 @@ function _solve_pnjl_with_derivatives_taylordiff(
         order=2, xi=xi, p_num=p_num, t_num=t_num,
         series_iterations=series_iterations, linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 
     d2x_dT2 = _td_series_derivative_vector(s_T.x_state, 2)
@@ -303,6 +309,10 @@ function solve_pnjl_with_derivatives(
     series_iterations::Union{Nothing, Int}=nothing,
     linear_solve::Symbol=:auto,
     series_residual_tol::Real=1e-7,
+    thermo_quadrature_policy::Symbol=:tensor_gauss,
+    thermo_quadrature_rtol::Float64=1e-8,
+    thermo_quadrature_atol::Float64=1e-10,
+    thermo_quadrature_maxevals::Int=10^7,
     kwargs...
 )
     backend = _implicit_compat_backend(derivative_backend)
@@ -311,6 +321,18 @@ function solve_pnjl_with_derivatives(
     _validate_td_wrapper_backends(thermo_backend, solver_backend)
     kind = _pnjl_model_kind(thermo_backend)
     model = create_model(kind)
+    PNJLIntegrals.validate_thermal_quadrature_policy(thermo_quadrature_policy)
+    PNJLIntegrals.validate_thermal_quadrature_controls(
+        thermo_quadrature_rtol,
+        thermo_quadrature_atol,
+        thermo_quadrature_maxevals,
+    )
+    thermo_quadrature_kwargs = (
+        thermo_quadrature_policy=thermo_quadrature_policy,
+        thermo_quadrature_rtol=thermo_quadrature_rtol,
+        thermo_quadrature_atol=thermo_quadrature_atol,
+        thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+    )
     return _solve_pnjl_with_derivatives_taylordiff(
         model,
         T_fm,
@@ -322,6 +344,7 @@ function solve_pnjl_with_derivatives(
         series_iterations=series_iterations,
         linear_solve=linear_solve,
         series_residual_tol=series_residual_tol,
+        thermo_quadrature_kwargs=thermo_quadrature_kwargs,
     )
 end
 

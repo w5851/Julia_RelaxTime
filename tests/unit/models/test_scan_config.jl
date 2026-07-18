@@ -41,6 +41,23 @@ using Main.ScanConfig: TmuScanConfig, TrhoScanConfig, FreezeoutScanConfig, scan_
         @test kw isa NamedTuple
     end
 
+    @testset "scan config 保留显式热积分策略" begin
+        cfg = TrhoScanConfig(
+            T_values=[150.0],
+            rho_values=[0.1],
+            output_path=tempname(),
+            thermo_quadrature_policy=:rs_reduced_adaptive,
+            thermo_quadrature_rtol=1e-7,
+            thermo_quadrature_atol=1e-9,
+            thermo_quadrature_maxevals=12345,
+        )
+        kw = scan_kwargs(cfg)
+        @test kw.thermo_quadrature_policy === :rs_reduced_adaptive
+        @test kw.thermo_quadrature_rtol == 1e-7
+        @test kw.thermo_quadrature_atol == 1e-9
+        @test kw.thermo_quadrature_maxevals == 12345
+    end
+
     @testset "FreezeoutScanConfig 默认构建" begin
         cfg = FreezeoutScanConfig(
             sqrt_s_NN_values=[7.7, 11.5],
