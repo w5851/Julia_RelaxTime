@@ -10,7 +10,6 @@
 
 ## 依赖
 
-- `QuadGK.jl` —— 自适应一维积分器
 - `OneLoopIntegrals` —— 各向同性基础积分（内部依赖）
 - `PNJLQuarkDistributions_Aniso` —— 各向异性夸克分布函数
 - `GaussLegendre` —— 高斯-勒让德节点生成
@@ -557,24 +556,11 @@ end
 
 ---
 
-## 数值积分策略（v2.0 新增）
+## 数值积分策略
 
-### 背景
+### 当前固定策略
 
-在计算 `tilde_B0_correction_k_positive` 时，被积函数在 A±B=0 的根处存在对数奇异性，导致标准 QuadGK 积分器在某些参数组合下精度下降。为解决此问题，我们实现了多种数值积分策略。
-
-### 可用策略
-
-| 策略 | 枚举值 | 说明 | 推荐场景 |
-|------|--------|------|----------|
-| QuadGK | `STRATEGY_QUADGK` | 原始自适应积分 | 快速估算、调试 |
-| 区间分割 GL | `STRATEGY_INTERVAL_GL` | 在根处分割区间 + 标准 GL | 中等精度需求 |
-| 聚簇 GL | `STRATEGY_CLUSTER_GL` | 在根处分割区间 + tanh 映射聚簇 GL | 高精度需求 |
-| 混合策略 | `STRATEGY_HYBRID` | 根据奇点位置自适应选择变换 | **默认**，最优性能 |
-
-### 混合策略原理
-
-STRATEGY_HYBRID 根据奇点在区间中的位置选择最优变换：
+`tilde_B0_correction_k_positive` 当前不暴露 `strategy`、`cluster_n`、`rtol` 或 `atol` 关键字。实现先解析求出 A±B=0 的根并分段，再根据根在区间端点的位置选择固定的 hybrid 规则：
 
 1. **单侧奇点（左端）**：使用幂次变换 `t = u^(1/α)` 聚簇于左端
 2. **单侧奇点（右端）**：使用幂次变换 `t = 1 - (1-u)^(1/α)` 聚簇于右端
@@ -583,7 +569,7 @@ STRATEGY_HYBRID 根据奇点在区间中的位置选择最优变换：
 
 无根情况下使用 `power_left` 的原因：被积函数包含 `p = sqrt(E² - m²)`，在 E→m（低能端）时变化最剧烈，所有测试参数组合都验证了这一点。
 
-### 聚簇 GL 原理
+### 聚簇映射原理
 
 聚簇 GL 使用 tanh 映射将标准 GL 节点聚集到区间端点附近：
 
@@ -597,25 +583,13 @@ x = \frac{a+b}{2} + \frac{b-a}{2} \cdot \frac{\tanh(\beta u)}{\tanh(\beta)}, \qu
 - β=8: 强聚簇（推荐）
 - β>16: 过度聚簇，可能导致精度下降
 
-### 使用示例
+### 使用与诊断
 
 ```julia
-using .OneLoopIntegralsCorrection: tilde_B0_correction_k_positive,
-    STRATEGY_QUADGK, STRATEGY_INTERVAL_GL, STRATEGY_CLUSTER_GL
+using .OneLoopIntegralsCorrection: tilde_B0_correction_k_positive
 
-# 默认调用（使用 STRATEGY_CLUSTER_GL）
+# production 调用使用固定 hybrid 规则
 result = tilde_B0_correction_k_positive(:quark, λ, k, m, m_prime, μ, T, Φ, Φbar, ξ)
-
-# 指定策略
-result_quadgk = tilde_B0_correction_k_positive(:quark, λ, k, m, m_prime, μ, T, Φ, Φbar, ξ;
-    strategy=STRATEGY_QUADGK)
-
-# 自定义聚簇参数
-result_custom = tilde_B0_correction_k_positive(:quark, λ, k, m, m_prime, μ, T, Φ, Φbar, ξ;
-    strategy=STRATEGY_CLUSTER_GL,
-    cluster_beta=8.0,  # 聚簇强度
-    cluster_n=64       # 每区间节点数
-)
 
 # 获取诊断信息
 real_part, imag_part, diag = tilde_B0_correction_k_positive(:quark, λ, k, m, m_prime, μ, T, Φ, Φbar, ξ;
@@ -628,32 +602,20 @@ println("区间数: ", diag.n_intervals)
 println("耗时: ", diag.elapsed_ms, " ms")
 ```
 
-### 精度对比
+`diag.strategy` 当前始终记录 `STRATEGY_HYBRID`。其他历史枚举名不构成可选择的公共 API。
 
-典型参数下的相对误差（使用默认 n=32）：
+### 内部默认参数
 
-| 参数组合 | CLUSTER_GL | HYBRID |
-|----------|------------|--------|
-| λ=-1, k=0.01 (有根) | 9.8e-4 | 3.8e-6 |
-| λ=-1, k=0.1 (有根) | 5.8e-3 | 9.6e-6 |
-| λ=-0.5, k=0.05 (无根) | 4.5e-2 | 2.9e-14 |
-| λ=0.5, k=0.1 (无根) | 6.8e-2 | 1.6e-13 |
+| 角色 | 当前内部值 |
+|------|------------|
+| 无根/光滑区间节点数 | 16 |
+| 奇点敏感区间节点数 | 32 |
+| 幂次变换 `DEFAULT_POWER_ALPHA` | 0.35 |
+| DE 变换步长 `DEFAULT_DE_H` | 0.15 |
 
-**结论**：HYBRID 策略在所有情况下都能以 n=32 达到 1e-5 精度，是默认推荐选项。
+### 分段节点数分配
 
-### 默认参数
-
-```julia
-DEFAULT_STRATEGY = STRATEGY_HYBRID  # 混合策略（最优性能）
-DEFAULT_CLUSTER_BETA = 8.0          # tanh 聚簇参数
-DEFAULT_CLUSTER_N = 32              # 每区间节点数（实际使用自适应）
-DEFAULT_POWER_ALPHA = 0.35          # 幂次变换参数
-DEFAULT_DE_H = 0.15                 # DE 变换步长
-```
-
-### 自适应节点数分配
-
-HYBRID 策略根据区间类型自适应分配节点数：
+固定 hybrid 策略根据区间类型分配节点数：
 
 | 情况 | 区间类型 | 节点数 | 说明 |
 |------|----------|--------|------|
@@ -667,18 +629,7 @@ HYBRID 策略根据区间类型自适应分配节点数：
 - 1 根情况：32 + 16 = 48 节点
 - 2 根情况：32 + 32 + 16 = 80 节点
 
-### 性能对比
-
-| 策略 | 平均用时 | 精度达标率 | 最大误差 |
-|------|----------|------------|----------|
-| QuadGK (rtol=1e-3) | 4.3 μs | 低 | 2.9e-2 |
-| **HYBRID (自适应)** | **1.1 μs (无根) / 3.7 μs (有根)** | **高** | **1.6e-5** |
-
-**说明**：
-- 无根情况：HYBRID 使用 16 节点，约 1.1 μs，比 QuadGK 快 4 倍
-- 有根情况：HYBRID 使用 48 节点，约 3.7 μs，精度远高于 QuadGK
-- 对于典型物理参数（m ≥ 0.3 GeV），精度达标率 100%
-- 预计算的标准 GL 节点和变换系数避免了重复计算
+精度应通过代表点的独立高节点收敛或 `benchmark/` 隔离环境中的外部 oracle 审计；固定节点数本身不是误差估计。预计算的标准 GL 节点和变换系数用于避免热路径重复分配。
 
 ### 根的解析求解
 

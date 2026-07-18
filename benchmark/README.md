@@ -1,53 +1,39 @@
 # benchmark/
 
-性能基准测试目录，使用 `BenchmarkTools.jl` 体系。
+本目录保存性能基准与隔离的外部数值 oracle。正确性测试仍位于 `tests/`；`scripts/perf/` 用于聚焦 profiling，不承担回归门禁。
 
-## 设计原则
+## 环境边界
 
-- **关注点分离**：正确性测试在 `tests/`，性能基准在 `benchmark/`
-- **可比较**：使用 `@benchmark` 产出 `Trial` 对象，支持 `judge(new, old)` 做 PR 间回归检测
-- **依赖隔离**：独立 `Project.toml`，不污染主项目启动时间
+- 根 `Project.toml` 是 production、稳定 CLI 与常规测试环境。
+- `benchmark/Project.toml` 只保存 benchmark 专用依赖；QuadGK 仅在这里声明。
+- 首次使用先运行：
 
-## 目录结构
-
-```
-benchmark/
-├── Project.toml      # BenchmarkTools 依赖
-├── benchmarks.jl     # PkgBenchmark 统一入口
-├── pnjl/             # PNJL 求解器基准
-│   └── bench_*.jl
-└── relaxtime/        # 输运/散射基准
-    └── bench_*.jl
+```sh
+julia --project=benchmark -e 'using Pkg; Pkg.instantiate()'
 ```
 
-## 运行方式
+本仓库是 include-driven，部分基准同时需要根环境依赖。此时应显式叠加环境，而不是把 benchmark-only 包重新加入根项目。
 
-```bash
-# PkgBenchmark（推荐，支持 judge 比较）
-julia --project=benchmark -e 'using PkgBenchmark; benchmarkpkg(".")'
+Windows / PowerShell：
 
-# 手动运行单个基准
-julia --project=benchmark benchmark/relaxtime/bench_total_cross_section.jl
-
-# 比较两次运行
-julia --project=benchmark -e '
-    using PkgBenchmark
-    old = benchmarkpkg(".", BenchmarkConfig(id="main"))
-    new = benchmarkpkg(".", BenchmarkConfig(id="HEAD"))
-    judge(new, old)
-'
+```powershell
+$env:JULIA_LOAD_PATH = "@;benchmark;@stdlib"
+julia --project=. benchmark/relaxtime/benchmark_quadgk_oracle_smoke.jl
 ```
 
-## 命名约定
+Linux / macOS：
 
-- 基准文件：`bench_<feature>.jl`（前缀 `bench_` 以区分于 `test_`）
-- 每个文件向全局 `SUITE["<subsystem>"]` 注册 `@benchmarkable`
+```sh
+JULIA_LOAD_PATH='@:benchmark:@stdlib' julia --project=. benchmark/relaxtime/benchmark_quadgk_oracle_smoke.jl
+```
 
-## 与 perf 的区别
+环境变量只应作用于该 benchmark 进程/终端会话；普通开发、测试和 production 不叠加 `benchmark/`。
 
-| | benchmark/ | scripts/perf/ |
-|---|---|---|
-| 目的 | 监测性能退化 | 诊断性能瓶颈 |
-| 工具 | `BenchmarkTools.@benchmark` | `Profile.@profile` / flamegraph |
-| 结果 | 可序列化 `Trial` 对象 | SVG / allocation 报告 |
-| CI | 可选周期调度 | 手动执行 |
+## 目录与命名
+
+- `bench_<feature>.jl` / `benchmark_<feature>.jl`：可复现性能或 oracle 探针。
+- `benchmark/benchmarks.jl`：收集符合 `bench_*.jl` 命名的 BenchmarkTools suite；它不是当前仓库的 PkgBenchmark package entrypoint。
+- `benchmark/pnjl/`：PNJL 求解与热力学基准。
+- `benchmark/relaxtime/`：散射、传播子、数密度与输运基准。
+
+benchmark 输出不得自动晋升为 production 正确性证据。数值 claim 仍需独立节点/容差收敛、对应 validation/regression 和 provenance。

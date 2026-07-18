@@ -1,153 +1,87 @@
-# 详细性能对比：策略 × 节点数（误差与用时）
+# 当前 B0 hybrid 路径与独立高节点固定 GL oracle 的性能/精度探针。
 #
-# 对应系统流程步骤：
-# - `OneLoopIntegralsCorrection.tilde_B0_correction_k_positive`
-# - QuadGK (`quadgk`) 作为参考值
+# 本脚本只报告测量结果，不设置 correctness gate。高节点 oracle 必须同时查看
+# 1024 -> 2048 节点漂移，不能把单次固定节点值当成自带误差估计。
 #
-# 测试内容：
-# - 固定一组典型参数，对比不同策略在不同 `cluster_n` 下的误差与耗时
-#
-# 运行方式：
-# - `julia --project=. tests/perf/relaxtime/performance_comparison.jl`
+# 运行：
+#   julia --project=. scripts/perf/relaxtime/performance_comparison.jl
+
 using Printf
-include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegralsAniso.jl"))
-include(joinpath(@__DIR__, "../../../src/relaxtime/OneLoopIntegrals.jl"))
-using QuadGK: quadgk
+using Statistics
+using FastGaussQuadrature: gausslegendre
 
-println("=" ^ 70)
-println("Performance Comparison: Strategies × Node Counts")
-println("=" ^ 70)
+const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
+include(joinpath(PROJECT_ROOT, "src", "relaxtime", "RelaxTime.jl"))
 
-test_cases = [
+const OLI = Main.OneLoopIntegrals
+const OLIC = Main.OneLoopIntegralsCorrection
+
+function fixed_gl_reference(f, a::Float64, b::Float64, n::Int)
+    nodes, weights = gausslegendre(n)
+    half = (b - a) / 2
+    center = (a + b) / 2
+    total = 0.0
+    @inbounds for i in eachindex(nodes)
+        total += weights[i] * f(center + half * nodes[i])
+    end
+    return half * total
+end
+
+const TEST_CASES = [
     (name="有根(标准)", λ=-1.0, k=0.01, m=0.3, m_prime=0.3),
     (name="有根(大k)", λ=-1.0, k=0.1, m=0.3, m_prime=0.3),
     (name="无根", λ=-0.5, k=0.05, m=0.3, m_prime=0.3),
     (name="无根(正λ)", λ=0.5, k=0.1, m=0.3, m_prime=0.35),
 ]
 
-ξ = -0.2; T = 0.15; μ = 0.0; Φ = 0.0; Φbar = 0.0
+function main(; repeats::Int=100)
+    repeats > 0 || throw(ArgumentError("repeats must be positive, got $(repeats)"))
+    ξ = -0.2
+    T = 0.15
+    μ = 0.0
+    Φ = 0.0
+    Φbar = 0.0
 
-strategies = [
-    (OneLoopIntegralsCorrection.STRATEGY_QUADGK, "QUADGK"),
-    (OneLoopIntegralsCorrection.STRATEGY_INTERVAL_GL, "INTERVAL_GL"),
-    (OneLoopIntegralsCorrection.STRATEGY_CLUSTER_GL, "CLUSTER_GL"),
-    (OneLoopIntegralsCorrection.STRATEGY_HYBRID, "HYBRID"),
-]
+    println("B0 fixed-hybrid performance vs fixed-GL oracle")
+    println(@sprintf("%-14s %12s %12s %12s %12s", "case", "hybrid(ms)", "relerr", "oracle_delta", "roots"))
 
-ns = [16, 24, 32, 48, 64]
+    for tc in TEST_CASES
+        Emin = tc.m
+        Emax = OLI.energy_cutoff(tc.m)
+        integrand(E) = OLIC.real_integrand_k_positive(
+            :quark, tc.λ, tc.k, tc.m, tc.m_prime, E, ξ, T, μ, Φ, Φbar,
+        )
+        ref_1024 = fixed_gl_reference(integrand, Emin, Emax, 1024)
+        ref_2048 = fixed_gl_reference(integrand, Emin, Emax, 2048)
+        oracle_delta = abs(ref_2048 - ref_1024) / max(abs(ref_2048), eps(Float64))
 
-# 收集所有结果
-results = Dict()
-
-for tc in test_cases
-    Emin = tc.m
-    Emax = OneLoopIntegrals.energy_cutoff(tc.m)
-    integrand(E) = OneLoopIntegralsCorrection.real_integrand_k_positive(:quark, tc.λ, tc.k, tc.m, tc.m_prime, E, ξ, T, μ, Φ, Φbar)
-    ref, _ = quadgk(integrand, Emin, Emax; rtol=1e-12)
-    
-    results[tc.name] = Dict()
-    
-    for (strat, sname) in strategies
-        results[tc.name][sname] = Dict()
-        for n in ns
-            # 多次运行取平均时间
-            times = Float64[]
-            err = 0.0
-            for _ in 1:5
-                t0 = time()
-                result = OneLoopIntegralsCorrection.tilde_B0_correction_k_positive(
-                    :quark, tc.λ, tc.k, tc.m, tc.m_prime, μ, T, Φ, Φbar, ξ;
-                    strategy=strat, cluster_n=n
-                )
-                push!(times, (time() - t0) * 1000)
-                err = abs((result[1] - ref) / ref)
-            end
-            results[tc.name][sname][n] = (err=err, time_ms=sum(times)/length(times))
+        OLIC.tilde_B0_correction_k_positive(
+            :quark, tc.λ, tc.k, tc.m, tc.m_prime, μ, T, Φ, Φbar, ξ,
+        )
+        times_ms = Float64[]
+        result = (0.0, 0.0)
+        for _ in 1:repeats
+            start = time_ns()
+            result = OLIC.tilde_B0_correction_k_positive(
+                :quark, tc.λ, tc.k, tc.m, tc.m_prime, μ, T, Φ, Φbar, ξ,
+            )
+            push!(times_ms, (time_ns() - start) / 1.0e6)
         end
+
+        relative_error = abs(result[1] - ref_2048) / max(abs(ref_2048), eps(Float64))
+        roots = length(OLIC.find_roots_AB(tc.λ, tc.k, tc.m, tc.m_prime, Emin, Emax))
+        println(@sprintf(
+            "%-14s %12.5f %12.3e %12.3e %12d",
+            tc.name,
+            mean(times_ms),
+            relative_error,
+            oracle_delta,
+            roots,
+        ))
     end
 end
 
-# 打印结果表格
-println("\n相对误差 (relerr):")
-println("-" ^ 70)
-
-for tc in test_cases
-    println("\n$(tc.name):")
-    print(@sprintf("%-12s", "n"))
-    for n in ns
-        print(@sprintf("%10d", n))
-    end
-    println()
-    
-    for (_, sname) in strategies
-        print(@sprintf("%-12s", sname))
-        for n in ns
-            err = results[tc.name][sname][n].err
-            if err < 1e-4
-                print(@sprintf("%10.1e", err))
-            else
-                print(@sprintf("%9.1e*", err))  # 标记超过阈值
-            end
-        end
-        println()
-    end
-end
-
-# 找出 n=32 时各策略的表现
-println("\n" * "=" ^ 70)
-println("n=32 时各策略对比 (目标: relerr < 1e-4)")
-println("=" ^ 70)
-
-for tc in test_cases
-    println("\n$(tc.name):")
-    for (_, sname) in strategies
-        r = results[tc.name][sname][32]
-        status = r.err < 1e-4 ? "✓" : "✗"
-        println(@sprintf("  %s %-12s: relerr=%.2e", status, sname, r.err))
-    end
-end
-
-# 统计 n=32 时 HYBRID 的通过率
-println("\n" * "=" ^ 70)
-println("Summary for n=32:")
-println("=" ^ 70)
-
-for (_, sname) in strategies
-    pass_count = 0
-    max_err = 0.0
-    for tc in test_cases
-        err = results[tc.name][sname][32].err
-        if err < 1e-4
-            pass_count += 1
-        end
-        max_err = max(max_err, err)
-    end
-    println(@sprintf("%-12s: %d/4 pass, max_err=%.2e", sname, pass_count, max_err))
-end
-
-# 如果 n=32 不够，找最小满足的 n
-println("\n" * "=" ^ 70)
-println("Minimum n for all cases < 1e-4:")
-println("=" ^ 70)
-
-for (_, sname) in strategies
-    min_n = 0
-    for n in ns
-        all_pass = true
-        for tc in test_cases
-            if results[tc.name][sname][n].err >= 1e-4
-                all_pass = false
-                break
-            end
-        end
-        if all_pass
-            min_n = n
-            break
-        end
-    end
-    if min_n > 0
-        println(@sprintf("%-12s: n=%d", sname, min_n))
-    else
-        println(@sprintf("%-12s: n>64 needed", sname))
-    end
+if abspath(PROGRAM_FILE) == abspath(@__FILE__)
+    repeats = isempty(ARGS) ? 100 : parse(Int, ARGS[1])
+    main(; repeats=repeats)
 end

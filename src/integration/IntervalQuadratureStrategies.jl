@@ -22,7 +22,7 @@ IntervalQuadratureStrategies.jl
 
 """积分策略枚举"""
 @enum IntegrationStrategy begin
-    STRATEGY_QUADGK       # 原始 QuadGK 自适应积分
+    STRATEGY_QUADGK       # legacy 诊断标识；当前实现不导入或调用 QuadGK
     STRATEGY_INTERVAL_GL  # 区间分割 + 标准 GL
     STRATEGY_CLUSTER_GL   # 区间分割 + 聚簇 GL (tanh 对称)
     STRATEGY_HYBRID       # 混合策略：根据奇点位置自适应选择变换

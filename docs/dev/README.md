@@ -5,6 +5,7 @@
 ## 常用内部手册
 
 - [Codex高阶使用手册](D:\Desktop\Julia_RelaxTime\docs\dev\Codex高阶使用手册.md)：面向本仓库的 Codex 协作约束、skill 设计与提示模板。
+- [Agent command reference](agent_command_reference.md)：根 `AGENTS.md` 的详细环境、测试、治理、sysimage 与 benchmark 命令清单。
 
 ## active / backlog / archived 的区别
 
