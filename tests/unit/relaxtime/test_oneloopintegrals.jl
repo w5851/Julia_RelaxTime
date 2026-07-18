@@ -14,8 +14,20 @@ using Pkg
 Pkg.activate(joinpath(@__DIR__, "..", "..", ".."))
 using Test
 using Base: time_ns
-using QuadGK: quadgk
+using FastGaussQuadrature: gausslegendre
 
+const _CONSTANTS_PNJL_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "constants", "Constants_PNJL.jl"))
+if !isdefined(Main, :Constants_PNJL)
+    Base.include(Main, _CONSTANTS_PNJL_PATH)
+end
+const _GAUSS_LEGENDRE_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "integration", "GaussLegendre.jl"))
+if !isdefined(Main, :GaussLegendre)
+    Base.include(Main, _GAUSS_LEGENDRE_PATH)
+end
+const _QUARK_DISTRIBUTION_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "models", "pnjl_physics", "QuarkDistribution.jl"))
+if !isdefined(Main, :PNJLQuarkDistributions)
+    Base.include(Main, _QUARK_DISTRIBUTION_PATH)
+end
 const _ONE_LOOP_INTEGRALS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "src", "relaxtime", "OneLoopIntegrals.jl"))
 if !isdefined(Main, :OneLoopIntegrals)
     Base.include(Main, _ONE_LOOP_INTEGRALS_PATH)
@@ -26,6 +38,17 @@ const Λ_INV_FM = Main.OneLoopIntegrals.Λ_inv_fm
 
 const DEFAULT_P_MAX = 20.0
 const DEFAULT_GAUSS_POINTS = 128
+
+function fixed_gl_oracle(f, a::Float64, b::Float64; n::Int=512)
+    nodes, weights = gausslegendre(n)
+    half = (b - a) / 2
+    center = (a + b) / 2
+    total = 0.0
+    @inbounds for i in eachindex(nodes)
+        total += weights[i] * f(center + half * nodes[i])
+    end
+    return half * total
+end
 
 function build_gauss_legendre_nodes()
     return OneLoopIntegrals.gauleg(0.0, DEFAULT_P_MAX, DEFAULT_GAUSS_POINTS)
@@ -130,7 +153,7 @@ end
 @testset "OneLoopIntegrals.const_integral_term_A" begin
     m = TEST_PARAMS.m1
     integrand(p) = p^2 / sqrt(p^2 + m^2)
-    numeric, _ = quadgk(integrand, 0.0, Λ_INV_FM; rtol=1e-10, atol=1e-12)
+    numeric = fixed_gl_oracle(integrand, 0.0, Λ_INV_FM)
     analytic = OneLoopIntegrals.const_integral_term_A(m)
     @test isapprox(analytic, numeric; rtol=1e-9, atol=1e-11)
 end
@@ -153,7 +176,7 @@ end
         return p^2 / E * dist
     end
 
-    dist_integral, _ = quadgk(integrand, 0.0, DEFAULT_P_MAX; rtol=1e-8, atol=1e-10)
+    dist_integral = fixed_gl_oracle(integrand, 0.0, DEFAULT_P_MAX)
     expected = 4.0 * (-OneLoopIntegrals.const_integral_term_A(m) + dist_integral)
 
     @test isapprox(result, expected; rtol=5e-5, atol=1e-6)

@@ -1,4 +1,4 @@
-# Dependency graph generated: 2026-05-03T17:10:32.483
+# Dependency graph generated: 2026-07-18T17:51:22.111
 
 Run: julia --project=. scripts/dev/gen_deps.jl
 
@@ -180,6 +180,8 @@ flowchart LR
   subgraph models
     src_models_Models_jl[models/Models.jl]
     src_models_derivatives_ConservedChargeSusceptibilities_jl[models/derivatives/ConservedChargeSusceptibilities.jl]
+    src_models_derivatives_MixedTaylorJets_jl[models/derivatives/MixedTaylorJets.jl]
+    src_models_derivatives_PNJLChiBTaylorDiff_jl[models/derivatives/PNJLChiBTaylorDiff.jl]
     src_models_derivatives_ThermoDerivatives_jl[models/derivatives/ThermoDerivatives.jl]
     src_models_gas_liquid_core_EquationSet_jl[models/gas_liquid/core/EquationSet.jl]
     src_models_gas_liquid_core_Thermodynamics_jl[models/gas_liquid/core/Thermodynamics.jl]
@@ -199,6 +201,15 @@ flowchart LR
     src_models_pnjl_physics_core_ModelThermodynamics_jl[models/pnjl_physics/core/ModelThermodynamics.jl]
     src_models_precompile_registry_jl[models/precompile/registry.jl]
     src_models_rotation_core_RotationThermo_jl[models/rotation/core/RotationThermo.jl]
+    src_models_scans_CrossoverMesonDensityScan_jl[models/scans/CrossoverMesonDensityScan.jl]
+    src_models_scans_ExternalPathMesonDensityScan_jl[models/scans/ExternalPathMesonDensityScan.jl]
+    src_models_scans_FlavorChemicalProfiles_jl[models/scans/FlavorChemicalProfiles.jl]
+    src_models_scans_FreezeoutMesonDensityScan_jl[models/scans/FreezeoutMesonDensityScan.jl]
+    src_models_scans_FreezeoutPathProfiles_jl[models/scans/FreezeoutPathProfiles.jl]
+    src_models_scans_FreezeoutPathScan_jl[models/scans/FreezeoutPathScan.jl]
+    src_models_scans_FreezeoutProfiles_jl[models/scans/FreezeoutProfiles.jl]
+    src_models_scans_MesonChemicalProfiles_jl[models/scans/MesonChemicalProfiles.jl]
+    src_models_scans_MesonMassPathScan_jl[models/scans/MesonMassPathScan.jl]
     src_models_scans_ScanCommon_jl[models/scans/ScanCommon.jl]
     src_models_scans_ScanResultFinalize_jl[models/scans/ScanResultFinalize.jl]
     src_models_scans_TmuScan_jl[models/scans/TmuScan.jl]
@@ -212,7 +223,9 @@ flowchart LR
     src_models_variants_rotation_RotationModel_jl[models/variants/rotation/RotationModel.jl]
     src_models_variants_rotation_core_RotationThermo_jl[models/variants/rotation/core/RotationThermo.jl]
     src_models_variants_rotation_workflows_RotationWorkflow_jl[models/variants/rotation/workflows/RotationWorkflow.jl]
+    src_models_workflow_apps_MesonDensityWorkflow_jl[models/workflow_apps/MesonDensityWorkflow.jl]
     src_models_workflow_apps_MesonMassWorkflow_jl[models/workflow_apps/MesonMassWorkflow.jl]
+    src_models_workflow_apps_MesonThermoWorkflow_jl[models/workflow_apps/MesonThermoWorkflow.jl]
     src_models_workflow_apps_TransportWorkflow_jl[models/workflow_apps/TransportWorkflow.jl]
     src_models_workflow_engine_adapters_RelaxtimeOrchestratorAdapter_jl[models/workflow_engine/adapters/RelaxtimeOrchestratorAdapter.jl]
   end
@@ -222,8 +235,10 @@ flowchart LR
     src_relaxtime_DifferentialCrossSection_jl[relaxtime/DifferentialCrossSection.jl]
     src_relaxtime_EffectiveCouplings_jl[relaxtime/EffectiveCouplings.jl]
     src_relaxtime_KinematicChecks_jl[relaxtime/KinematicChecks.jl]
+    src_relaxtime_MesonDensity_jl[relaxtime/MesonDensity.jl]
     src_relaxtime_MesonMass_jl[relaxtime/MesonMass.jl]
     src_relaxtime_MesonPropagator_jl[relaxtime/MesonPropagator.jl]
+    src_relaxtime_MesonThermodynamics_jl[relaxtime/MesonThermodynamics.jl]
     src_relaxtime_MottTransition_jl[relaxtime/MottTransition.jl]
     src_relaxtime_OneLoopIntegrals_jl[relaxtime/OneLoopIntegrals.jl]
     src_relaxtime_OneLoopIntegralsAniso_jl[relaxtime/OneLoopIntegralsAniso.jl]
@@ -245,10 +260,15 @@ flowchart LR
     ConfigLoader[ConfigLoader]
     ConservedChargeSusceptibilities[ConservedChargeSusceptibilities]
     CrossSectionOrchestratedScan[CrossSectionOrchestratedScan]
+    CrossoverMesonDensityScan[CrossoverMesonDensityScan]
     DifferentialCrossSection[DifferentialCrossSection]
     EffectiveCouplings[EffectiveCouplings]
     EllipsoidCalculation[EllipsoidCalculation]
+    FlavorChemicalProfiles[FlavorChemicalProfiles]
     FrameTransformations[FrameTransformations]
+    FreezeoutPathProfiles[FreezeoutPathProfiles]
+    FreezeoutPathScan[FreezeoutPathScan]
+    FreezeoutProfiles[FreezeoutProfiles]
     FullServerApp[FullServerApp]
     GasLiquidEquationSet[GasLiquidEquationSet]
     GasLiquidThermodynamics[GasLiquidThermodynamics]
@@ -256,17 +276,25 @@ flowchart LR
     HigherOrderDerivatives[HigherOrderDerivatives]
     Integrals[Integrals]
     Integrals_jl[Integrals.jl]
+    IsentropicPathProfiles[IsentropicPathProfiles]
     KinematicChecks[KinematicChecks]
     MagneticIntegrals[MagneticIntegrals]
     MagneticIntegrals_jl[MagneticIntegrals.jl]
     MagneticThermodynamics[MagneticThermodynamics]
+    MesonChemicalProfiles[MesonChemicalProfiles]
+    MesonDensity[MesonDensity]
+    MesonDensityWorkflow[MesonDensityWorkflow]
     MesonMass[MesonMass]
+    MesonMassWorkflow[MesonMassWorkflow]
     MesonPropagator[MesonPropagator]
+    MesonThermodynamics[MesonThermodynamics]
+    MixedTaylorJets[MixedTaylorJets]
     Models[Models]
     MomentumMapping[MomentumMapping]
     MottTransition[MottTransition]
     OneLoopIntegrals[OneLoopIntegrals]
     OneLoopIntegralsCorrection[OneLoopIntegralsCorrection]
+    PNJLChiBTaylorDiff[PNJLChiBTaylorDiff]
     PNJLCore[PNJLCore]
     ParticleSymbols[ParticleSymbols]
     PhaseSpaceSampling[PhaseSpaceSampling]
@@ -280,6 +308,8 @@ flowchart LR
     ScanResultFinalize[ScanResultFinalize]
     ScatteringAmplitude[ScatteringAmplitude]
     SeedStrategies[SeedStrategies]
+    ServerWarmup[ServerWarmup]
+    TaylorDiffForwardDiffCompat[TaylorDiffForwardDiffCompat]
     ThermoDerivatives[ThermoDerivatives]
     TmuScan[TmuScan]
     TotalCrossSection[TotalCrossSection]
@@ -304,18 +334,30 @@ flowchart LR
   src_models_Models_jl --> AbstractSusceptibilityProvider
   src_models_Models_jl --> Conditions
   src_models_Models_jl --> ConservedChargeSusceptibilities
+  src_models_Models_jl --> FlavorChemicalProfiles
+  src_models_Models_jl --> FreezeoutPathProfiles
+  src_models_Models_jl --> FreezeoutPathScan
+  src_models_Models_jl --> FreezeoutProfiles
   src_models_Models_jl --> HigherOrderDerivatives
+  src_models_Models_jl --> IsentropicPathProfiles
   src_models_Models_jl --> MagneticIntegrals
   src_models_Models_jl --> MagneticThermodynamics
+  src_models_Models_jl --> MesonChemicalProfiles
   src_models_Models_jl --> PrecompileRegistry
   src_models_Models_jl --> SeedStrategies
   src_models_Models_jl --> ThermoDerivatives
   src_models_Models_jl --> TmuScan
   src_models_Models_jl --> TrhoScan
-  src_models_derivatives_ConservedChargeSusceptibilities_jl --> HigherOrderDerivatives
   src_models_derivatives_ConservedChargeSusceptibilities_jl --> Models
+  src_models_derivatives_ConservedChargeSusceptibilities_jl --> PNJLChiBTaylorDiff
   src_models_derivatives_ConservedChargeSusceptibilities_jl --> PNJLCore
+  src_models_derivatives_MixedTaylorJets_jl --> PNJLCore
+  src_models_derivatives_PNJLChiBTaylorDiff_jl --> Conditions
+  src_models_derivatives_PNJLChiBTaylorDiff_jl --> MixedTaylorJets
+  src_models_derivatives_PNJLChiBTaylorDiff_jl --> Models
+  src_models_derivatives_PNJLChiBTaylorDiff_jl --> TaylorDiffForwardDiffCompat
   src_models_derivatives_ThermoDerivatives_jl --> Models
+  src_models_derivatives_ThermoDerivatives_jl --> PNJLChiBTaylorDiff
   src_models_derivatives_ThermoDerivatives_jl --> PNJLCore
   src_models_gas_liquid_core_EquationSet_jl --> ConfigLoader
   src_models_gas_liquid_core_Thermodynamics_jl --> GasLiquidEquationSet
@@ -327,7 +369,6 @@ flowchart LR
   src_models_njl2_core_NJL2Core_jl --> ConfigLoader
   src_models_pnjl_workflows_MesonMassWorkflow_jl --> Models
   src_models_pnjl_workflows_MesonMassWorkflow_jl --> WorkflowParamAdapters
-  src_models_pnjl_workflows_TransportWorkflow_jl --> ConfigLoader
   src_models_pnjl_workflows_TransportWorkflow_jl --> Models
   src_models_pnjl_workflows_TransportWorkflow_jl --> TransportCoefficients
   src_models_pnjl_workflows_TransportWorkflow_jl --> WorkflowParamAdapters
@@ -343,6 +384,39 @@ flowchart LR
   src_models_pnjl_physics_core_ModelThermodynamics_jl --> Models
   src_models_precompile_registry_jl --> Models
   src_models_rotation_core_RotationThermo_jl --> ConfigLoader
+  src_models_scans_CrossoverMesonDensityScan_jl --> FlavorChemicalProfiles
+  src_models_scans_CrossoverMesonDensityScan_jl --> MesonChemicalProfiles
+  src_models_scans_CrossoverMesonDensityScan_jl --> MesonDensityWorkflow
+  src_models_scans_CrossoverMesonDensityScan_jl --> Models
+  src_models_scans_CrossoverMesonDensityScan_jl --> ScanCommon
+  src_models_scans_ExternalPathMesonDensityScan_jl --> CrossoverMesonDensityScan
+  src_models_scans_ExternalPathMesonDensityScan_jl --> FlavorChemicalProfiles
+  src_models_scans_ExternalPathMesonDensityScan_jl --> MesonChemicalProfiles
+  src_models_scans_ExternalPathMesonDensityScan_jl --> ScanCommon
+  src_models_scans_FlavorChemicalProfiles_jl --> ConfigLoader
+  src_models_scans_FreezeoutMesonDensityScan_jl --> FlavorChemicalProfiles
+  src_models_scans_FreezeoutMesonDensityScan_jl --> FreezeoutPathProfiles
+  src_models_scans_FreezeoutMesonDensityScan_jl --> FreezeoutProfiles
+  src_models_scans_FreezeoutMesonDensityScan_jl --> MesonChemicalProfiles
+  src_models_scans_FreezeoutMesonDensityScan_jl --> MesonDensityWorkflow
+  src_models_scans_FreezeoutMesonDensityScan_jl --> ScanCommon
+  src_models_scans_FreezeoutPathProfiles_jl --> ConfigLoader
+  src_models_scans_FreezeoutPathProfiles_jl --> FreezeoutProfiles
+  src_models_scans_FreezeoutPathScan_jl --> FreezeoutPathProfiles
+  src_models_scans_FreezeoutPathScan_jl --> FreezeoutProfiles
+  src_models_scans_FreezeoutPathScan_jl --> Models
+  src_models_scans_FreezeoutPathScan_jl --> ScanCommon
+  src_models_scans_FreezeoutPathScan_jl --> ScanConfig
+  src_models_scans_FreezeoutPathScan_jl --> SeedStrategies
+  src_models_scans_FreezeoutPathScan_jl --> TmuScan
+  src_models_scans_FreezeoutProfiles_jl --> ConfigLoader
+  src_models_scans_MesonChemicalProfiles_jl --> ConfigLoader
+  src_models_scans_MesonMassPathScan_jl --> FreezeoutPathProfiles
+  src_models_scans_MesonMassPathScan_jl --> FreezeoutProfiles
+  src_models_scans_MesonMassPathScan_jl --> IsentropicPathProfiles
+  src_models_scans_MesonMassPathScan_jl --> MesonMassWorkflow
+  src_models_scans_MesonMassPathScan_jl --> Models
+  src_models_scans_MesonMassPathScan_jl --> ScanCommon
   src_models_scans_ScanCommon_jl --> Models
   src_models_scans_ScanCommon_jl --> SeedStrategies
   src_models_scans_ScanResultFinalize_jl --> Models
@@ -367,9 +441,13 @@ flowchart LR
   src_models_variants_rotation_core_RotationThermo_jl --> ConfigLoader
   src_models_variants_rotation_workflows_RotationWorkflow_jl --> Models
   src_models_variants_rotation_workflows_RotationWorkflow_jl --> RotationThermo
+  src_models_workflow_apps_MesonDensityWorkflow_jl --> MesonMassWorkflow
+  src_models_workflow_apps_MesonDensityWorkflow_jl --> WorkflowParamAdapters
   src_models_workflow_apps_MesonMassWorkflow_jl --> Models
   src_models_workflow_apps_MesonMassWorkflow_jl --> WorkflowParamAdapters
-  src_models_workflow_apps_TransportWorkflow_jl --> ConfigLoader
+  src_models_workflow_apps_MesonThermoWorkflow_jl --> MesonMassWorkflow
+  src_models_workflow_apps_MesonThermoWorkflow_jl --> Models
+  src_models_workflow_apps_MesonThermoWorkflow_jl --> WorkflowParamAdapters
   src_models_workflow_apps_TransportWorkflow_jl --> Models
   src_models_workflow_apps_TransportWorkflow_jl --> TransportCoefficients
   src_models_workflow_apps_TransportWorkflow_jl --> WorkflowParamAdapters
@@ -379,18 +457,28 @@ flowchart LR
   src_relaxtime_AFieldBuilder_jl --> GaussLegendre
   src_relaxtime_AFieldBuilder_jl --> OneLoopIntegrals
   src_relaxtime_AFieldBuilder_jl --> OneLoopIntegralsCorrection
+  src_relaxtime_AverageScatteringRate_jl --> AFieldBuilder
   src_relaxtime_AverageScatteringRate_jl --> GaussLegendre
   src_relaxtime_AverageScatteringRate_jl --> ParticleSymbols
   src_relaxtime_AverageScatteringRate_jl --> TotalCrossSection
   src_relaxtime_DifferentialCrossSection_jl --> KinematicChecks
   src_relaxtime_EffectiveCouplings_jl --> OneLoopIntegrals
   src_relaxtime_EffectiveCouplings_jl --> OneLoopIntegralsCorrection
+  src_relaxtime_MesonDensity_jl --> AFieldBuilder
+  src_relaxtime_MesonDensity_jl --> EffectiveCouplings
+  src_relaxtime_MesonDensity_jl --> GaussLegendre
+  src_relaxtime_MesonDensity_jl --> MesonMass
+  src_relaxtime_MesonDensity_jl --> MesonPropagator
+  src_relaxtime_MesonDensity_jl --> PolarizationAniso
   src_relaxtime_MesonMass_jl --> AFieldBuilder
   src_relaxtime_MesonMass_jl --> EffectiveCouplings
   src_relaxtime_MesonMass_jl --> GaussLegendre
   src_relaxtime_MesonMass_jl --> PolarizationAniso
   src_relaxtime_MesonPropagator_jl --> EffectiveCouplings
   src_relaxtime_MesonPropagator_jl --> ParticleSymbols
+  src_relaxtime_MesonThermodynamics_jl --> AFieldBuilder
+  src_relaxtime_MesonThermodynamics_jl --> GaussLegendre
+  src_relaxtime_MesonThermodynamics_jl --> MesonDensity
   src_relaxtime_OneLoopIntegrals_jl --> GaussLegendre
   src_relaxtime_OneLoopIntegrals_jl --> src_integration_IntervalQuadratureStrategies_jl
   src_relaxtime_OneLoopIntegralsAniso_jl --> GaussLegendre
@@ -404,8 +492,10 @@ flowchart LR
   src_relaxtime_RelaxTime_jl --> DifferentialCrossSection
   src_relaxtime_RelaxTime_jl --> EffectiveCouplings
   src_relaxtime_RelaxTime_jl --> KinematicChecks
+  src_relaxtime_RelaxTime_jl --> MesonDensity
   src_relaxtime_RelaxTime_jl --> MesonMass
   src_relaxtime_RelaxTime_jl --> MesonPropagator
+  src_relaxtime_RelaxTime_jl --> MesonThermodynamics
   src_relaxtime_RelaxTime_jl --> MottTransition
   src_relaxtime_RelaxTime_jl --> OneLoopIntegrals
   src_relaxtime_RelaxTime_jl --> OneLoopIntegralsCorrection
@@ -421,8 +511,10 @@ flowchart LR
   src_relaxtime_RelaxTime_jl --> src_relaxtime_DifferentialCrossSection_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_EffectiveCouplings_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_KinematicChecks_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonDensity_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonMass_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonPropagator_jl
+  src_relaxtime_RelaxTime_jl --> src_relaxtime_MesonThermodynamics_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_MottTransition_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_OneLoopIntegrals_jl
   src_relaxtime_RelaxTime_jl --> src_relaxtime_OneLoopIntegralsAniso_jl
@@ -457,5 +549,6 @@ flowchart LR
   src_simulation_MomentumMapping_jl --> EllipsoidCalculation
   src_simulation_MomentumMapping_jl --> FrameTransformations
   src_simulation_ServerLauncher_jl --> FullServerApp
+  src_simulation_ServerLauncher_jl --> ServerWarmup
 ```
 

@@ -196,10 +196,10 @@ dsigma_dt = differential_cross_section(
 **注意**：实际上应使用 `TotalCrossSection` 模块的 `total_cross_section` 函数，该函数已包含完整实现（含末态统计因子）。
 
 ```julia
-using QuadGK
+using FastGaussQuadrature: gausslegendre
 using .TotalCrossSection: calculate_t_bounds  # 从 TotalCrossSection 导入
 
-function total_cross_section(s, process, quark_params, thermo_params, K_coeffs)
+function total_cross_section(s, process, quark_params, thermo_params, K_coeffs; t_nodes=128)
     # 获取质量和 t 边界
     m1, m2, m3, m4 = get_quark_masses_for_process(process, quark_params)
     t_bounds = calculate_t_bounds(s, m1, m2, m3, m4)
@@ -208,18 +208,23 @@ function total_cross_section(s, process, quark_params, thermo_params, K_coeffs)
     s_12_plus = s - (m1 + m2)^2
     s_12_minus = s - (m1 - m2)^2
     
-    # 对 t 积分
-    σ_total, err = quadgk(t_bounds.t_min, t_bounds.t_max) do t
+    # 对 t 做固定高斯-勒让德积分；正式计算请直接使用 TotalCrossSection
+    nodes, weights = gausslegendre(t_nodes)
+    half = (t_bounds.t_max - t_bounds.t_min) / 2
+    center = (t_bounds.t_max + t_bounds.t_min) / 2
+    σ_total = 0.0
+    for i in eachindex(nodes)
+        t = center + half * nodes[i]
         # 计算该 t 点的矩阵元
         M_squared = scattering_amplitude_squared(
             process, s, t, quark_params, thermo_params, K_coeffs
         )
         
         # 计算微分截面
-        differential_cross_section(s_12_plus, s_12_minus, M_squared)
+        σ_total += weights[i] * differential_cross_section(s_12_plus, s_12_minus, M_squared)
     end
-    
-    return σ_total
+
+    return half * σ_total
 end
 
 # 使用

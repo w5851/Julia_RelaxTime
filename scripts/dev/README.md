@@ -286,6 +286,16 @@ active 文档治理检查（命名 + 归档触发）：
 julia --project=. scripts/dev/check_active_docs_governance.jl
 ```
 
+根依赖与 agent 指令治理检查：
+
+```powershell
+julia --project=. scripts/dev/check_dependency_policy.jl
+julia --project=. scripts/dev/check_agent_instructions.jl
+```
+
+- `check_dependency_policy.jl` 强制可选数值 oracle 与根 runtime/test 环境隔离。
+- `check_agent_instructions.jl` 强制根 `AGENTS.md` 保持精简，并验证详细命令指南存在且结构完整。
+
 数据与图像输出路径门禁：
 
 ```powershell

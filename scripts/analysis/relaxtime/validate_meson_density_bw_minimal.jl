@@ -21,7 +21,7 @@ include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 using .Constants_PNJL: ħc_MeV_fm
 using .Models: solve_gap_and_meson_point
 using Main.MesonDensity: meson_degeneracy, stable_meson_number_density
-using QuadGK
+using FastGaussQuadrature: gausslegendre
 
 const DEFAULT_OUTPUT = joinpath(
     PROJECT_ROOT,
@@ -36,6 +36,43 @@ const DEFAULT_OUTPUT = joinpath(
 const DEFAULT_TS_MEV = collect(170.0:5.0:210.0)
 const DEFAULT_Q_NODES = 160
 const DEFAULT_RTOL = 1e-5
+const DEFAULT_MASS_GL_INITIAL_N = 64
+const DEFAULT_MASS_GL_MAX_N = 4096
+
+function _fixed_gl_integral(f, a::Float64, b::Float64, n::Int)
+    nodes, weights = gausslegendre(n)
+    half = (b - a) / 2
+    center = (a + b) / 2
+    total = 0.0
+    @inbounds for i in eachindex(nodes)
+        total += weights[i] * f(center + half * nodes[i])
+    end
+    return half * total
+end
+
+function _converged_gl_integral(
+    f,
+    a::Float64,
+    b::Float64;
+    rtol::Float64,
+    initial_n::Int=DEFAULT_MASS_GL_INITIAL_N,
+    max_n::Int=DEFAULT_MASS_GL_MAX_N,
+)
+    0.0 < rtol < 1.0 || throw(ArgumentError("rtol must be in (0, 1), got $(rtol)"))
+    initial_n >= 2 || throw(ArgumentError("initial_n must be at least 2, got $(initial_n)"))
+    max_n >= 2 * initial_n || throw(ArgumentError("max_n must be at least 2*initial_n, got $(max_n)"))
+
+    previous = _fixed_gl_integral(f, a, b, initial_n)
+    n = 2 * initial_n
+    while n <= max_n
+        current = _fixed_gl_integral(f, a, b, n)
+        error_estimate = abs(current - previous)
+        error_estimate <= rtol * max(abs(current), eps(Float64)) && return current, error_estimate, n
+        previous = current
+        n *= 2
+    end
+    error("mass integral did not converge by n=$(max_n) for rtol=$(rtol)")
+end
 
 @inline function _fmt(x)
     x isa Bool && return x ? "true" : "false"
@@ -77,7 +114,12 @@ function bw_meson_number_density(
     q_upper > 0.0 || throw(ArgumentError("qmax must be positive, got $(q_upper)"))
     m_upper > 0.0 || throw(ArgumentError("mmax must be positive, got $(m_upper)"))
 
-    norm_val, = quadgk(m -> _bw_mass_kernel(m, mass, gamma_eff), 0.0, m_upper; rtol=mass_rtol)
+    norm_val, _, _ = _converged_gl_integral(
+        m -> _bw_mass_kernel(m, mass, gamma_eff),
+        0.0,
+        m_upper;
+        rtol=mass_rtol,
+    )
     norm_val > 0.0 || throw(ArgumentError("BW mass kernel normalization must be positive, got $(norm_val)"))
 
     mass_integrand = function (m)
@@ -86,7 +128,7 @@ function bw_meson_number_density(
         return rho * n_m
     end
 
-    mass_val, = quadgk(mass_integrand, 0.0, m_upper; rtol=mass_rtol)
+    mass_val, _, _ = _converged_gl_integral(mass_integrand, 0.0, m_upper; rtol=mass_rtol)
     return degeneracy * mass_val
 end
 

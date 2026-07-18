@@ -41,6 +41,15 @@
 - 如需新增例外或调整矩阵，请在本文件记录理由与影响范围。
 - 依赖图更新后，请运行 `scripts/dev/analyze_deps.jl` 生成依赖审计报告。
 
+## 第三方数值 oracle 的环境边界
+
+- 根 `Project.toml` 只声明 production、稳定 CLI 和常规测试实际需要的依赖。
+- QuadGK 不属于根运行时/测试依赖；`src/`、`scripts/`、`tests/` 不得导入或调用它。
+- QuadGK 可在 `benchmark/Project.toml` 中作为隔离对照 oracle；必须先独立实例化，并在需要根源码依赖时通过显式 `LOAD_PATH` 叠加，仅对该 benchmark 进程可见。
+- 外部 oracle 只提供交叉验证证据，不能替代节点/容差自收敛和 production provenance。
+- 机读规则位于 `config/ci/dependency_policy.toml`，门禁为 `scripts/dev/check_dependency_policy.jl`。
+- 决策背景和重新评估条件见 [ADR-0006](../decisions/0006-isolate-optional-numerical-oracles.md)。
+
 ## Models 入口契约联动
 
 - `Models` 统一求解接口契约见：`docs/architecture/models_solver_contract.md`。
