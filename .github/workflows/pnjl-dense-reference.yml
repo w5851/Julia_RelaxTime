@@ -131,219 +131,188 @@ jobs:
   plan:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
-      expected_xi_csv: ${{ steps.plan.outputs.expected_xi_csv }}
-      shard_count: ${{ steps.plan.outputs.shard_count }}
-    steps:
-      - name: Resolve deterministic xi interval shards
-        id: plan
-        shell: bash
-        env:
-          XI_VALUES: ${{ inputs.xi_values }}
-          XI_MIN: ${{ inputs.xi_min || '-0.5' }}
-          XI_MAX: ${{ inputs.xi_max || '0.5' }}
-          XI_STEP: ${{ inputs.xi_step || '0.05' }}
-          ADAPTIVE_XI: ${{ inputs.adaptive_xi }}
-          CROSSOVER_ONLY: ${{ inputs.crossover_only }}
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          from decimal import Decimal
-
-          raw = os.environ.get("XI_VALUES", "").strip()
-          if raw:
-              values = sorted({Decimal(token.strip()) for token in raw.split(",") if token.strip()})
-          else:
-              start = Decimal(os.environ["XI_MIN"])
-              stop = Decimal(os.environ["XI_MAX"])
-              step = Decimal(os.environ["XI_STEP"])
-              if step <= 0 or stop < start:
-                  raise SystemExit("invalid xi range")
-              values = []
-              current = start
-              while current <= stop:
-                  values.append(current)
-                  current += step
-              if values[-1] != stop:
-                  values.append(stop)
-          if not values:
-              raise SystemExit("empty xi plan")
-          if os.environ.get("ADAPTIVE_XI", "false").lower() == "true" and os.environ.get("CROSSOVER_ONLY", "false").lower() == "true":
-              raise SystemExit("adaptive_xi requires crossover_only=false")
-
-          def text(value):
-              rendered = format(value, "f")
-              return rendered.rstrip("0").rstrip(".") if "." in rendered else rendered
-
-          include = []
-          if len(values) == 1:
-              include.append({"shard_id": "s000", "xi_list": text(values[0])})
-          else:
-              for index, (left, right) in enumerate(zip(values, values[1:])):
-                  include.append({
-                      "shard_id": f"s{index:03d}",
-                      "xi_list": f"{text(left)},{text(right)}",
-                  })
-          matrix = json.dumps({"include": include}, separators=(",", ":"))
-          expected = ",".join(text(value) for value in values)
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
-              handle.write(f"matrix={matrix}\n")
-              handle.write(f"expected_xi_csv={expected}\n")
-              handle.write(f"shard_count={len(include)}\n")
-          PY
-
-  generate-shards:
-    needs: plan
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    env:
-      ARTIFACT_RETENTION_DAYS: "30"
-      STAGING_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}
-      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}/reference
-      PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}/${{ matrix.shard_id }}
-      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}/validation_report.json
+      initial_matrix: ${{ steps.publish.outputs.initial_matrix }}
+      expected_xi_csv: ${{ steps.publish.outputs.expected_xi_csv }}
+      initial_intervals: ${{ steps.publish.outputs.initial_intervals }}
+      initial_shard_count: ${{ steps.publish.outputs.initial_shard_count }}
+      xi_refine_levels: ${{ steps.publish.outputs.xi_refine_levels }}
+      xi_position_tol: ${{ steps.publish.outputs.xi_position_tol }}
+      xi_density_tol: ${{ steps.publish.outputs.xi_density_tol }}
+      xi_maxwell_area_tol: ${{ steps.publish.outputs.xi_maxwell_area_tol }}
+      xi_response_rtol: ${{ steps.publish.outputs.xi_response_rtol }}
+      common_args_json: ${{ steps.publish.outputs.common_args_json }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Julia
-        uses: julia-actions/setup-julia@v2
-        with:
-          version: "1.12.5"
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Cache Julia artifacts
-        uses: julia-actions/cache@v2
-        with:
-          cache-name: julia-cache-dense-reference
-
-      - name: Install Julia dependencies
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
-
-      - name: Prepare shard directories
-        run: |
-          rm -rf "${STAGING_ROOT}" "${PROCESS_ROOT}"
-          mkdir -p "${REFERENCE_ROOT}" "${PROCESS_ROOT}"
-
-      - name: Run dense reference xi interval shard
+      - name: Resolve staged one-xi plan
         shell: bash
         env:
-          ADVANCED_CONFIG_JSON: ${{ inputs.advanced_config_json || '{}' }}
+          ACTION_INPUTS_JSON: ${{ toJSON(inputs) }}
         run: |
-          set -euo pipefail
-          advanced_args_path="${RUNNER_TEMP}/pnjl_dense_reference_advanced_args.txt"
-          python scripts/pnjl/resolve_dense_reference_action_config.py \
-            --config-json "${ADVANCED_CONFIG_JSON}" \
-            --output "${advanced_args_path}"
-          mapfile -t advanced_args < "${advanced_args_path}"
+          python scripts/pnjl/plan_dense_reference_action.py \
+            --inputs-json "${ACTION_INPUTS_JSON}" \
+            --output "${RUNNER_TEMP}/dense_reference_plan.json"
 
-          cmd=(
-            julia --project=. scripts/pnjl/build_dense_phase_reference.jl
-            --tag "${{ inputs.tag || 'dense' }}"
-            --output-root "${PROCESS_ROOT}"
-            --reference-root "${REFERENCE_ROOT}"
-            --xi-list "${{ matrix.xi_list }}"
-            --T-min "${{ inputs.T_min || '60' }}"
-            --T-max "${{ inputs.T_max || '240' }}"
-            --T-step "${{ inputs.T_step || '5' }}"
-            --T-refine-levels "2"
-            --T-position-tol "0.10"
-            --T-density-tol "0.01"
-            --T-maxwell-area-tol "1e-4"
-            --rho-min "${{ inputs.rho_min || '0.0' }}"
-            --rho-max "${{ inputs.rho_max || '4.0' }}"
-            --rho-step "${{ inputs.rho_step || '0.05' }}"
-            --rho-position-tol "0.05"
-            --rho-density-tol "0.005"
-            --rho-maxwell-area-tol "1e-4"
-            --cep-tol "0.1"
-            --p-num "${{ inputs.p_num || '24' }}"
-            --t-num "${{ inputs.t_num || '8' }}"
-            --thermo-quadrature-policy "${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}"
-            --thermo-quadrature-rtol "1e-8"
-            --thermo-quadrature-atol "1e-10"
-            --thermo-quadrature-maxevals "10000000"
-            --iterations "${{ inputs.iterations || '80' }}"
-            --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
-            --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
-          )
-
-          if [ "${{ inputs.adaptive_xi }}" = "true" ]; then
-            cmd+=(
-              --adaptive-xi
-              --xi-refine-levels "2"
-              --xi-position-tol "0.10"
-              --xi-density-tol "0.01"
-              --xi-maxwell-area-tol "1e-4"
-              --xi-response-rtol "0.05"
-            )
-          fi
-          if [ "${{ inputs.adaptive_T }}" != "true" ]; then
-            cmd+=(--no-adaptive-T)
-          fi
-          if [ "${{ inputs.rho_geometry_convergence }}" != "true" ]; then
-            cmd+=(--no-rho-geometry-convergence)
-          fi
-          if [ "${{ inputs.crossover_only }}" = "true" ]; then
-            cmd+=(--crossover-only)
-          fi
-          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
-            cmd+=(--crossover-mu0-only)
-          fi
-          if [ "${{ inputs.overwrite }}" = "true" ]; then
-            cmd+=(--overwrite)
-          fi
-          cmd+=("${advanced_args[@]}")
-
-          printf 'Running shard command:\n  %q' "${cmd[@]}"
-          printf '\n'
-          "${cmd[@]}"
-
-      - name: Validate shard artifact
+      - name: Publish staged plan
+        id: publish
         shell: bash
         run: |
-          validate_cmd=(
-            python scripts/pnjl/validate_dense_reference_artifact.py
-            --reference-root "${REFERENCE_ROOT}"
-            --tag "${{ inputs.tag || 'dense' }}"
-            --min-crossover-rows 1
-            --report-path "${REPORT_PATH}"
-          )
-          if [ "${{ inputs.crossover_only }}" = "true" ]; then
-            validate_cmd+=(--expect-crossover-only)
-          else
-            validate_cmd+=(--expect-full-reference)
-          fi
-          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
-            validate_cmd+=(--expect-mu0-only)
-          fi
-          "${validate_cmd[@]}"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
 
-      - name: Upload xi interval shard
-        uses: actions/upload-artifact@v4
-        with:
-          name: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-${{ matrix.shard_id }}
-          path: |
-            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.csv
-            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.meta.json
-            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag || 'dense' }}_manifest.json
-            ${{ env.REPORT_PATH }}
-          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
-          if-no-files-found: error
+          plan = json.loads(
+              Path(os.environ["RUNNER_TEMP"]).joinpath("dense_reference_plan.json").read_text(encoding="utf-8")
+          )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              for key in (
+                  "initial_matrix",
+                  "initial_intervals",
+                  "common_args",
+              ):
+                  output_key = "common_args_json" if key == "common_args" else key
+                  handle.write(f"{output_key}={json.dumps(plan[key], separators=(',', ':'))}\n")
+              for key in (
+                  "expected_xi_csv",
+                  "initial_shard_count",
+                  "xi_refine_levels",
+                  "xi_position_tol",
+                  "xi_density_tol",
+                  "xi_maxwell_area_tol",
+                  "xi_response_rtol",
+              ):
+                  handle.write(f"{key}={plan[key]}\n")
+          PY
+
+  generate_initial_shards:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.plan.outputs.initial_matrix) }}
+    uses: ./.github/workflows/pnjl-dense-reference-shard.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      stage: ${{ matrix.stage }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      enabled: true
+      common_args_json: ${{ needs.plan.outputs.common_args_json }}
+      crossover_only: ${{ inputs.crossover_only }}
+      crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+
+  assess_xi_level1:
+    needs: [plan, generate_initial_shards]
+    if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 1 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      level: 1
+      max_refine_level: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.plan.outputs.initial_intervals }}
+      expected_xi_csv: ${{ needs.plan.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.plan.outputs.xi_position_tol }}
+      density_tol: ${{ needs.plan.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
+
+  generate_xi_level2:
+    needs: [plan, assess_xi_level1]
+    if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 2 }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.assess_xi_level1.outputs.matrix) }}
+    uses: ./.github/workflows/pnjl-dense-reference-shard.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      stage: ${{ matrix.stage }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      enabled: ${{ matrix.enabled }}
+      common_args_json: ${{ needs.plan.outputs.common_args_json }}
+      crossover_only: ${{ inputs.crossover_only }}
+      crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+
+  assess_xi_level2:
+    needs: [plan, generate_initial_shards, assess_xi_level1, generate_xi_level2]
+    if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 2 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      level: 2
+      max_refine_level: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.assess_xi_level1.outputs.intervals }}
+      expected_xi_csv: ${{ needs.plan.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.plan.outputs.xi_position_tol }}
+      density_tol: ${{ needs.plan.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
+
+  generate_xi_level3:
+    needs: [plan, assess_xi_level2]
+    if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 3 }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.assess_xi_level2.outputs.matrix) }}
+    uses: ./.github/workflows/pnjl-dense-reference-shard.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      stage: ${{ matrix.stage }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      enabled: ${{ matrix.enabled }}
+      common_args_json: ${{ needs.plan.outputs.common_args_json }}
+      crossover_only: ${{ inputs.crossover_only }}
+      crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+
+  assess_xi_level3:
+    needs: [plan, generate_initial_shards, assess_xi_level2, generate_xi_level3]
+    if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 3 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag || 'dense' }}
+      level: 3
+      max_refine_level: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.assess_xi_level2.outputs.intervals }}
+      expected_xi_csv: ${{ needs.plan.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.plan.outputs.xi_position_tol }}
+      density_tol: ${{ needs.plan.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
 
   merge:
-    needs: [plan, generate-shards]
+    needs:
+      - plan
+      - generate_initial_shards
+      - assess_xi_level1
+      - generate_xi_level2
+      - assess_xi_level2
+      - generate_xi_level3
+      - assess_xi_level3
+    if: >-
+      ${{
+        always() &&
+        needs.generate_initial_shards.result == 'success' &&
+        (fromJSON(needs.plan.outputs.xi_refine_levels) < 1 || needs.assess_xi_level1.result == 'success') &&
+        (fromJSON(needs.plan.outputs.xi_refine_levels) < 2 ||
+          (needs.generate_xi_level2.result == 'success' && needs.assess_xi_level2.result == 'success')) &&
+        (fromJSON(needs.plan.outputs.xi_refine_levels) < 3 ||
+          (needs.generate_xi_level3.result == 'success' && needs.assess_xi_level3.result == 'success'))
+      }}
     runs-on: ubuntu-latest
     env:
       ARTIFACT_RETENTION_DAYS: "30"
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/downloaded_shards
+      XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/downloaded_xi_plans
       REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/reference
       REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/validation_report.json
     steps:
@@ -361,17 +330,30 @@ jobs:
           pattern: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-*
           path: ${{ env.SHARDS_ROOT }}
 
+      - name: Download staged xi convergence records
+        if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 1 }}
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag || 'dense' }}-level*
+          path: ${{ env.XI_PLAN_ROOT }}
+
       - name: Deterministically merge xi shards
         shell: bash
         run: |
           rm -rf "${REFERENCE_ROOT}"
           mkdir -p "${REFERENCE_ROOT}"
-          python scripts/pnjl/merge_dense_phase_reference_shards.py \
-            --shards-root "${SHARDS_ROOT}" \
-            --reference-root "${REFERENCE_ROOT}" \
-            --tag "${{ inputs.tag || 'dense' }}" \
-            --expected-xi-list "${{ needs.plan.outputs.expected_xi_csv }}" \
+          merge_cmd=(
+            python scripts/pnjl/merge_dense_phase_reference_shards.py
+            --shards-root "${SHARDS_ROOT}"
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag || 'dense' }}"
+            --expected-xi-list "${{ needs.plan.outputs.expected_xi_csv }}"
             --overwrite
+          )
+          if [ "${{ needs.plan.outputs.xi_refine_levels }}" -ge 1 ]; then
+            merge_cmd+=(--xi-convergence-root "${XI_PLAN_ROOT}")
+          fi
+          "${merge_cmd[@]}"
 
       - name: Validate merged dense reference artifact
         shell: bash
@@ -408,7 +390,8 @@ jobs:
       - name: Create step summary
         shell: bash
         env:
-          SHARD_COUNT: ${{ needs.plan.outputs.shard_count }}
+          INITIAL_SHARD_COUNT: ${{ needs.plan.outputs.initial_shard_count }}
+          XI_REFINE_LEVELS: ${{ needs.plan.outputs.xi_refine_levels }}
         run: |
           python - <<'PY'
           import json
@@ -424,7 +407,8 @@ jobs:
               fh.write("## PNJL Dense Reference Summary\n\n")
               fh.write(f"- artifact: `pnjl-dense-reference-${{ inputs.tag || 'dense' }}`\n")
               fh.write(f"- git commit: `{report['git_commit']}`\n")
-              fh.write(f"- recoverable xi interval shards: `{os.environ['SHARD_COUNT']}`\n")
+              fh.write(f"- initial one-xi shards: `{os.environ['INITIAL_SHARD_COUNT']}`\n")
+              fh.write(f"- staged xi refinement levels: `{os.environ['XI_REFINE_LEVELS']}`\n")
               fh.write(f"- resolved xi values: `{report['xi_values']}`\n")
               fh.write(f"- crossover rows / converged: `{report['crossover_rows']}` / `{report['converged_rows']}`\n")
               fh.write(f"- grid convergence rows / unconverged: `{report['grid_convergence_rows']}` / `{report['grid_unconverged_rows']}`\n")

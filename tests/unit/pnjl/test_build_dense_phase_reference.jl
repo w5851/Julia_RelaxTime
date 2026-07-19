@@ -90,6 +90,24 @@ end
         "--adaptive-xi",
         "--crossover-only",
     ])
+
+    mktempdir() do root
+        boundary_path = joinpath(root, "boundary.csv")
+        write_boundary_csv(boundary_path, [(
+            xi=0.0,
+            T_MeV=100.0,
+            mu_transition_MeV=300.0,
+            rho_hadron=1.0,
+            rho_quark=2.0,
+            area_residual=5e-5,
+            converged=true,
+        )])
+        header = first(readlines(boundary_path))
+        @test occursin("area_residual,converged", header)
+    end
+
+    qualified = _dense_record_with_xi((axis="temperature", xi=-99.0, level=1), 0.25)
+    @test qualified.xi == 0.25
 end
 
 end # module DensePhaseReferenceContractTests

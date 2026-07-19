@@ -118,6 +118,12 @@ S-shape 就作为正式一阶相变点。温度自适应只处理两端均为 `v
 因此即使相线近似线性，启用 adaptive xi 后也至少会把锚点间距减半一层。所有 rho/T/xi 诊断记录写入
 `phase_grid_convergence.csv`（dense reference 为带 tag 的同名 sibling），诊断未收敛本身不自动等价于物理异常。
 
+Action 生产面把该递归拆成分层的一 xi job：锚点与第一层中点并行，后续层只计算上一层未收敛区间的中点。
+层间评估仍调用同一个 `_phase_result_midpoint_error`，不是在 workflow 中另定义一套误差公式。为使层间重建保留
+Maxwell 面积门限，新的 dense boundary CSV 以附加列记录 `area_residual` 与 `converged`；旧 reference 不回填、
+也不因该附加合同被覆盖。各单 xi shard 导出的 rho/T convergence record 同时显式写入所属 `xi`，避免跨 shard
+确定性 merge 时把不同物理切片误判为同一诊断键。
+
 每个温度的全部粗细层原始扫描保留在 `production_eval/`；聚合 `trho_scan.csv` 只写该温度最终采用的
 一层，避免同一 `(T,rho)` 因审计层级不同而出现无标识重复行。
 

@@ -143,8 +143,15 @@ production 的 `production_eval/` 保存每个温度的全部 rho 粗细层；�
 需要审计网格演化时联合读取 `production_eval/` 与 `phase_grid_convergence.csv`，下游相线消费方使用聚合 CSV，
 不得把不同层的重复采样自行拼接成一条曲线。
 
-GitHub Actions 的 dense reference workflow 按相邻 xi 锚点区间分 shard，`fail-fast=false`；失败后只需重跑失败区间。
-最终 merge 要求所有 shard 绑定同一 commit 与同一非-xi 配置，按物理键确定性排序、去重，并对重复端点的数值一致性做硬校验。
+GitHub Actions 的 dense reference workflow 使用“一 xi 一 shard”，`fail-fast=false`。启用 adaptive xi 时，初始锚点和
+第一层必需中点并行计算；每层 merge 后复用 `Models._phase_result_midpoint_error` 审计区间，只为未收敛子区间创建
+下一层 midpoint shard。Action 入口当前最多支持三层 xi refinement；更深层级必须先扩展 workflow DAG，不能把多个
+xi 重新塞回同一 job。每层 matrix 显式限制 `max-parallel=20`，收敛档位按 C0、C1、C2 顺序触发，避免多个完整
+run 同时占满 runner 配额；失败后只重跑失败的单 xi shard。
+
+每个 shard 的正式计算 step 具有显式五小时上限，并以一分钟 heartbeat 报告 elapsed time 和已落盘文件数；job 失败时
+单独上传 diagnostic artifact。最终 merge 要求所有 shard 绑定同一 commit 与同一非-xi 配置，按物理键确定性排序、
+去重，并把各层 xi convergence record 合并进 `phase_grid_convergence_<tag>.csv`。
 merge 产物通过 validator 后仍只是候选 artifact，不自动写入或晋升 canonical reference。
 
 ## 11. Regression / Validation 验收

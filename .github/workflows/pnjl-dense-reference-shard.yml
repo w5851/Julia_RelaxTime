@@ -1,0 +1,176 @@
+name: PNJL Dense Reference Xi Shard
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      stage:
+        required: true
+        type: string
+      shard_id:
+        required: true
+        type: string
+      xi:
+        required: true
+        type: string
+      enabled:
+        required: false
+        default: true
+        type: boolean
+      common_args_json:
+        required: true
+        type: string
+      crossover_only:
+        required: true
+        type: boolean
+      crossover_mu0_only:
+        required: true
+        type: boolean
+
+jobs:
+  phase-shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      STAGING_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/reference
+      PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}/${{ inputs.stage }}-${{ inputs.shard_id }}
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/validation_report.json
+      LOG_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/dense_reference.log
+    steps:
+      - name: Record disabled refinement stage
+        if: ${{ inputs.enabled == false }}
+        run: echo "No xi refinement work remains for ${{ inputs.stage }}."
+
+      - name: Checkout
+        if: ${{ inputs.enabled }}
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        if: ${{ inputs.enabled }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        if: ${{ inputs.enabled }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        if: ${{ inputs.enabled }}
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-dense-reference
+
+      - name: Install Julia dependencies
+        if: ${{ inputs.enabled }}
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Prepare shard directories
+        if: ${{ inputs.enabled }}
+        shell: bash
+        run: |
+          rm -rf "${STAGING_ROOT}" "${PROCESS_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}" "${PROCESS_ROOT}" "$(dirname "${LOG_PATH}")"
+
+      - name: Run one-xi dense reference shard
+        if: ${{ inputs.enabled }}
+        timeout-minutes: 300
+        shell: bash
+        env:
+          COMMON_ARGS_JSON: ${{ inputs.common_args_json }}
+        run: |
+          set -euo pipefail
+          common_args_path="${RUNNER_TEMP}/pnjl_dense_reference_common_args.txt"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          args = json.loads(os.environ["COMMON_ARGS_JSON"])
+          if not isinstance(args, list) or not all(isinstance(token, str) and "\n" not in token for token in args):
+              raise SystemExit("common_args_json must be a newline-free string array")
+          Path(os.environ["RUNNER_TEMP"]).joinpath("pnjl_dense_reference_common_args.txt").write_text(
+              "".join(f"{token}\n" for token in args),
+              encoding="utf-8",
+          )
+          PY
+          mapfile -t common_args < "${common_args_path}"
+
+          cmd=(
+            julia --project=. scripts/pnjl/build_dense_phase_reference.jl
+            --tag "${{ inputs.tag }}"
+            --output-root "${PROCESS_ROOT}"
+            --reference-root "${REFERENCE_ROOT}"
+            --xi-list "${{ inputs.xi }}"
+          )
+          cmd+=("${common_args[@]}")
+
+          printf 'Running one-xi shard command:\n  %q' "${cmd[@]}"
+          printf '\n'
+          "${cmd[@]}" > >(tee "${LOG_PATH}") 2>&1 &
+          phase_pid=$!
+          started_at=$(date +%s)
+          while kill -0 "${phase_pid}" 2>/dev/null; do
+            sleep 60
+            elapsed=$(( $(date +%s) - started_at ))
+            file_count=$(find "${PROCESS_ROOT}" -type f 2>/dev/null | wc -l | tr -d ' ')
+            echo "[dense-reference-heartbeat] stage=${{ inputs.stage }} xi=${{ inputs.xi }} elapsed_s=${elapsed} process_files=${file_count}"
+          done
+          set +e
+          wait "${phase_pid}"
+          status=$?
+          set -e
+          exit "${status}"
+
+      - name: Validate shard artifact
+        if: ${{ inputs.enabled && success() }}
+        shell: bash
+        run: |
+          validate_cmd=(
+            python scripts/pnjl/validate_dense_reference_artifact.py
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag }}"
+            --min-crossover-rows 1
+            --report-path "${REPORT_PATH}"
+          )
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            validate_cmd+=(--expect-crossover-only)
+          else
+            validate_cmd+=(--expect-full-reference)
+          fi
+          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
+            validate_cmd+=(--expect-mu0-only)
+          fi
+          "${validate_cmd[@]}"
+
+      - name: Upload one-xi shard
+        if: ${{ inputs.enabled && success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-shard-${{ inputs.tag }}-${{ inputs.stage }}-${{ inputs.shard_id }}
+          path: |
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.csv
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag }}_manifest.json
+            ${{ env.REPORT_PATH }}
+            ${{ env.LOG_PATH }}
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
+
+      - name: Upload failed-shard diagnostics
+        if: ${{ inputs.enabled && failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-diagnostic-${{ inputs.tag }}-${{ inputs.stage }}-${{ inputs.shard_id }}
+          path: |
+            ${{ env.PROCESS_ROOT }}/**
+            ${{ env.REFERENCE_ROOT }}/**
+            ${{ env.LOG_PATH }}
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: warn

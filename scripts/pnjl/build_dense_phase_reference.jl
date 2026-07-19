@@ -349,9 +349,9 @@ end
 
 function write_boundary_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark,curve_parameter,plot_order_key")
+        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark,area_residual,converged,curve_parameter,plot_order_key")
         for row in rows
-            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.T_MeV),$(row.T_MeV)")
+            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.area_residual),$(row.converged),$(row.T_MeV),$(row.T_MeV)")
         end
     end
 end
@@ -387,6 +387,7 @@ end
     hasproperty(row, key) ? getproperty(row, key) : default
 
 @inline _dense_csv_value(value) = value === nothing ? "" : string(value)
+@inline _dense_record_with_xi(row::NamedTuple, xi::Real) = merge(row, (xi=Float64(xi),))
 
 function write_grid_convergence_csv(path::String, rows)
     open(path, "w") do io
@@ -817,7 +818,13 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
             for row in result.crossover_line
                 push!(crossover_rows, merge((xi=key,), row))
             end
-            append!(grid_convergence_rows, get(result.diagnostics, "grid_convergence_records", NamedTuple[]))
+            append!(
+                grid_convergence_rows,
+                _dense_record_with_xi.(
+                    get(result.diagnostics, "grid_convergence_records", NamedTuple[]),
+                    key,
+                ),
+            )
             push!(manifest["runs"], Dict(
                 "xi" => key,
                 "run_id" => result.run_id,

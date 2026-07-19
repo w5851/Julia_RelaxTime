@@ -2,6 +2,12 @@
 
 Status: `configured / diagnostic-only` until every gate below has been audited.
 
+Execution note (2026-07-19): the first C0/C1 interval-shard attempts exceeded the GitHub-hosted six-hour per-job limit
+because each interval serialized up to five complete xi solves. C0 retained 8/20 and C1 retained 1/20 successful shard
+artifacts as external `diagnostic-only` evidence; neither run is merge-complete. C2 was cancelled before repeating the
+same failure with up to nine xi solves per job. Convergence production remains blocked until the staged one-xi workflow
+is merged, registered on the default branch, and rerun from a new locked source SHA.
+
 ## Scope lock
 
 - Case slug: `fullrange_phase_reference_adaptive_prod_v1`.

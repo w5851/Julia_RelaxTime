@@ -1,0 +1,156 @@
+name: PNJL Dense Reference Xi Assessment
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      level:
+        required: true
+        type: number
+      max_refine_level:
+        required: true
+        type: number
+      intervals_json:
+        required: true
+        type: string
+      expected_xi_csv:
+        required: true
+        type: string
+      position_tol:
+        required: true
+        type: string
+      density_tol:
+        required: true
+        type: string
+      maxwell_area_tol:
+        required: true
+        type: string
+      response_rtol:
+        required: true
+        type: string
+    outputs:
+      matrix:
+        value: ${{ jobs.assess.outputs.matrix }}
+      intervals:
+        value: ${{ jobs.assess.outputs.intervals }}
+      record_count:
+        value: ${{ jobs.assess.outputs.record_count }}
+
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      matrix: ${{ steps.publish.outputs.matrix }}
+      intervals: ${{ steps.publish.outputs.intervals }}
+      record_count: ${{ steps.publish.outputs.record_count }}
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/downloaded_shards
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/reference
+      PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/plan
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download completed one-xi shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Merge currently resolved xi values
+        shell: bash
+        run: |
+          rm -rf "${REFERENCE_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}" "${PLAN_ROOT}"
+          python scripts/pnjl/merge_dense_phase_reference_shards.py \
+            --shards-root "${SHARDS_ROOT}" \
+            --reference-root "${REFERENCE_ROOT}" \
+            --tag "${{ inputs.tag }}" \
+            --expected-xi-list "${{ inputs.expected_xi_csv }}" \
+            --overwrite
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-dense-reference
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Materialize interval input
+        shell: bash
+        env:
+          INTERVALS_JSON: ${{ inputs.intervals_json }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          intervals = json.loads(os.environ["INTERVALS_JSON"])
+          if not isinstance(intervals, list):
+              raise SystemExit("intervals_json must be a JSON array")
+          path = Path(os.environ["PLAN_ROOT"]) / "intervals.json"
+          path.write_text(json.dumps(intervals, separators=(",", ":")), encoding="utf-8")
+          PY
+
+      - name: Evaluate xi midpoint convergence
+        shell: bash
+        run: |
+          julia --project=. scripts/pnjl/plan_dense_reference_xi_refinement.jl \
+            --reference-root "${REFERENCE_ROOT}" \
+            --tag "${{ inputs.tag }}" \
+            --intervals-path "${PLAN_ROOT}/intervals.json" \
+            --level "${{ inputs.level }}" \
+            --max-refine-level "${{ inputs.max_refine_level }}" \
+            --position-tol "${{ inputs.position_tol }}" \
+            --density-tol "${{ inputs.density_tol }}" \
+            --maxwell-area-tol "${{ inputs.maxwell_area_tol }}" \
+            --response-rtol "${{ inputs.response_rtol }}" \
+            --matrix-output "${PLAN_ROOT}/next_matrix.json" \
+            --intervals-output "${PLAN_ROOT}/next_intervals.json" \
+            --records-output "${PLAN_ROOT}/xi_grid_convergence_${{ inputs.tag }}_level${{ inputs.level }}.csv" \
+            --summary-output "${PLAN_ROOT}/summary.json"
+
+      - name: Publish refinement outputs
+        id: publish
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["PLAN_ROOT"])
+          matrix = json.loads((root / "next_matrix.json").read_text(encoding="utf-8"))
+          intervals = json.loads((root / "next_intervals.json").read_text(encoding="utf-8"))
+          summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
+              handle.write(f"matrix={json.dumps(matrix, separators=(',', ':'))}\n")
+              handle.write(f"intervals={json.dumps(intervals, separators=(',', ':'))}\n")
+              handle.write(f"record_count={summary['evaluated_interval_count']}\n")
+          PY
+
+      - name: Upload xi refinement assessment
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level${{ inputs.level }}
+          path: |
+            ${{ env.PLAN_ROOT }}/xi_grid_convergence_${{ inputs.tag }}_level${{ inputs.level }}.csv
+            ${{ env.PLAN_ROOT }}/summary.json
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
