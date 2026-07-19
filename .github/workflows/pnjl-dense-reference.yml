@@ -392,6 +392,7 @@ jobs:
         env:
           INITIAL_SHARD_COUNT: ${{ needs.plan.outputs.initial_shard_count }}
           XI_REFINE_LEVELS: ${{ needs.plan.outputs.xi_refine_levels }}
+          ADVANCED_CONFIG_JSON: ${{ inputs.advanced_config_json || '{}' }}
         run: |
           python - <<'PY'
           import json
@@ -416,5 +417,5 @@ jobs:
               fh.write(f"- explicit crossover T ceiling: `{config['crossover_T_max_MeV']}`\n")
               fh.write(f"- thermo quadrature: `{config['thermo_quadrature_policy']}` (rtol `{config['thermo_quadrature_rtol']}`, atol `{config['thermo_quadrature_atol']}`)\n")
               fh.write(f"- p_num/t_num: `{config['p_num']}` / `{config['t_num']}`\n")
-              fh.write(f"- advanced_config_json: `${{ inputs.advanced_config_json || '{}' }}`\n")
+              fh.write(f"- advanced_config_json: `{os.environ['ADVANCED_CONFIG_JSON']}`\n")
           PY

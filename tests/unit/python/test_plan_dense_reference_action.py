@@ -83,8 +83,11 @@ def test_rejects_unstageable_adaptive_plans(updates, message):
 
 
 def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
-    workflow = yaml.load(WORKFLOW_PATH.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+    workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
+    workflow = yaml.load(workflow_text, Loader=yaml.BaseLoader)
     jobs = workflow["jobs"]
     assert jobs["generate_initial_shards"]["uses"] == "./.github/workflows/pnjl-dense-reference-shard.yml"
     assert jobs["assess_xi_level1"]["uses"] == "./.github/workflows/pnjl-dense-reference-assess-xi.yml"
     assert "xi_list" not in jobs["generate_initial_shards"]["with"]
+    assert "os.environ['ADVANCED_CONFIG_JSON']" in workflow_text
+    assert "advanced_config_json: `${{ inputs" not in workflow_text
