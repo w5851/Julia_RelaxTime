@@ -58,6 +58,7 @@ end
             p_num=12,
             t_num=4,
             iterations=10,
+            crossover_mu0_only=true,
             cep_strategy=:interpolate,
             cep_interpolate_use_direct_eval=true,
             promote_reference=false,
@@ -65,6 +66,7 @@ end
 
         @test haskey(result.config_snapshot, "cep_interpolate_use_direct_eval")
         @test result.config_snapshot["cep_interpolate_use_direct_eval"] == true
+        @test result.config_snapshot["crossover_mu0_only"] == true
     end
 
     @testset "production run_phase_pipeline 保留高精度 CEP 容差" begin
@@ -81,12 +83,14 @@ end
             p_num=12,
             t_num=4,
             iterations=10,
+            crossover_mu0_only=true,
             cep_tol=0.01,
             promote_reference=false,
         )
 
         @test haskey(result.config_snapshot, "cep_tol_MeV")
         @test result.config_snapshot["cep_tol_MeV"] == 0.01
+        @test result.config_snapshot["crossover_mu0_only"] == true
     end
 
     @testset "run_phase_pipeline 暴露 research 与 production 模式" begin

@@ -146,7 +146,7 @@ Maxwell 面积门限，新的 dense boundary CSV 以附加列记录 `area_residu
 crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继承主 phase 的 `T_end` 或
 `T_grid` 最大值。实现不再隐藏截断到 `220 MeV`。crossover 基态和导数路径使用调用方实际传入的
 `p_num` 与 `t_num` 口径。phase 主扫描的 `iterations` 连同实际 `p_num/t_num` 一起进入配置快照和 config hash；
-本次不新增 crossover 的独立 gap-iteration 参数。
+`crossover_mu0_only=true` 时实际采样只包含 `mu_q=0`。本次不新增 crossover 的独立 gap-iteration 参数。
 
 ## 自适应 rho 加密
 
@@ -187,6 +187,7 @@ production 入口同样复用这套工件治理，但会在 `diagnostics` 和 `c
 - `sweep_statuses`
 - `rho_geometry_convergence` 及其位置量、密度量、面积残差门限
 - `adaptive_temperature` 及其中点细化门限
+- `crossover_mu0_only`
 - `crossover_T_max_MeV`
 
 ## 当前边界

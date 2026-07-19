@@ -119,6 +119,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 
 production CLI 可显式配置 `crossover_T_max_MeV`、rho 几何量收敛门限和温度中点自适应门限。
 `crossover_T_max_MeV=NaN` 表示继承 `T_max`；不得依赖历史隐藏的 `220 MeV` 截断。启用
+`crossover_mu0_only=true` 时，实际 crossover 求解与产物都只能包含 `mu_q=0`，不能只修改 manifest 标记。
 `rho_geometry_convergence=true` 时，`cep_max_refine_level` 至少为 1。正式 dense reference 默认启用
 rho 几何量与温度中点收敛；adaptive xi 为显式 opt-in，且每个 xi 区间至少求一次中点后才能估计误差。
 

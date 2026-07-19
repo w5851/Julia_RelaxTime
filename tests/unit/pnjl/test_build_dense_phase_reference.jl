@@ -43,6 +43,7 @@ end
         "--T-min", "10",
         "--T-max", "240",
         "--crossover-T-max", "235",
+        "--crossover-mu0-only",
         "--adaptive-xi",
         "--xi-refine-levels", "1",
         "--T-refine-levels", "1",
@@ -51,6 +52,7 @@ end
     @test cfg.xi_max_refine_level == 1
     @test cfg.temperature_max_refine_level == 1
     @test resolved_crossover_T_max_MeV(cfg) == 235.0
+    @test cfg.crossover_mu_only_zero
 
     inherited = DensePhaseReferenceConfig(T_min=10.0, T_max=240.0)
     @test resolved_crossover_T_max_MeV(inherited) == 240.0

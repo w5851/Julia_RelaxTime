@@ -47,6 +47,14 @@ Models.pnjl_module()
         ))
     end
 
+    @testset "mu0-only 只解析一个零化学势采样点" begin
+        @test Models._crossover_mu_scan_range(450.0, 16, true) == (0.0, 0.0, 1)
+        full_range = Models._crossover_mu_scan_range(450.0, 2, false)
+        @test full_range[1] == 0.0
+        @test full_range[2] > 0.0
+        @test full_range[3] == 3
+    end
+
     @testset "legacy solver backend is rejected" begin
         @test_throws ArgumentError Models.detect_crossover(
             0.0,

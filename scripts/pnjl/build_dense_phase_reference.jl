@@ -765,6 +765,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 crossover_method=cfg.crossover_method,
                 crossover_variable=cfg.crossover_variable,
                 crossover_n_mu=cfg.crossover_n_mu,
+                crossover_mu0_only=cfg.crossover_mu_only_zero,
                 crossover_T_max_MeV=resolved_crossover_T_max_MeV(cfg),
                 cep_tol=cfg.cep_tol_MeV,
                 rho_geometry_convergence=cfg.rho_geometry_convergence,

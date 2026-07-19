@@ -67,6 +67,7 @@ result = Models.run_phase_pipeline(
     iterations=80,
     rho_geometry_convergence=true,
     adaptive_temperature=true,
+    crossover_mu0_only=true,
     crossover_T_max_MeV=240.0,
     promote_reference=false,
 )
@@ -112,6 +113,9 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 `thermo_quadrature_maxevals`，最终值会写入 `config_snapshot` 和 config hash。这里的
 `E_xi` 只是分布函数自变量，不是新的物理色散关系；chi、Polyakov 势和 vacuum 项不增加角度依赖。该约化不适用于 magnetic、transport 或其他含独立角核的路径。
 固定态积分诊断可调用 `Models.PNJLIntegrals.calculate_log_sum_rs_reduced_adaptive_with_error` 同时取得数值和局部求积误差估计。该估计由仓库内 16/32 阶 Gauss--Legendre 双规则的差并经安全因子累加得到，不依赖外部自适应积分库，也不能替代求解级与相线级收敛审计。
+
+当只需要零化学势 crossover 时，设置 `crossover_mu0_only=true`。research 与 production 路径都会只求解
+`mu_q=0`，并把这一有效采样策略写入 `config_snapshot` 与 config hash；它不是仅供 manifest 使用的标签。
 
 固定状态热核和直接数密度定义了严格 `T=0` 极限；五变量 PNJL gap/phase solve 因 Polyakov 场在严格零温退化而显式要求 `T>0`。因此正式“全温区”reference 的下限必须是经收敛验证的严格正温，除非后续引入独立零温求解合同。
 
