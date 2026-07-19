@@ -347,7 +347,7 @@ jobs:
             --shards-root "${SHARDS_ROOT}"
             --reference-root "${REFERENCE_ROOT}"
             --tag "${{ inputs.tag || 'dense' }}"
-            --expected-xi-list "${{ needs.plan.outputs.expected_xi_csv }}"
+            "--expected-xi-list=${{ needs.plan.outputs.expected_xi_csv }}"
             --overwrite
           )
           if [ "${{ needs.plan.outputs.xi_refine_levels }}" -ge 1 ]; then

@@ -9,6 +9,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "pnjl" / "plan_dense_reference_action.py"
 WORKFLOW_PATH = PROJECT_ROOT / ".github" / "workflows" / "pnjl-dense-reference.yml"
+ASSESS_WORKFLOW_PATH = PROJECT_ROOT / ".github" / "workflows" / "pnjl-dense-reference-assess-xi.yml"
 
 
 def load_module():
@@ -84,6 +85,7 @@ def test_rejects_unstageable_adaptive_plans(updates, message):
 
 def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
+    assess_workflow_text = ASSESS_WORKFLOW_PATH.read_text(encoding="utf-8")
     workflow = yaml.load(workflow_text, Loader=yaml.BaseLoader)
     jobs = workflow["jobs"]
     assert jobs["generate_initial_shards"]["uses"] == "./.github/workflows/pnjl-dense-reference-shard.yml"
@@ -91,3 +93,5 @@ def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     assert "xi_list" not in jobs["generate_initial_shards"]["with"]
     assert "os.environ['ADVANCED_CONFIG_JSON']" in workflow_text
     assert "advanced_config_json: `${{ inputs" not in workflow_text
+    assert '"--expected-xi-list=${{ needs.plan.outputs.expected_xi_csv }}"' in workflow_text
+    assert '--expected-xi-list="${{ inputs.expected_xi_csv }}"' in assess_workflow_text

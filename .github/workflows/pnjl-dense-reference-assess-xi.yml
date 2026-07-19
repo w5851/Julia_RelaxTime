@@ -75,7 +75,7 @@ jobs:
             --shards-root "${SHARDS_ROOT}" \
             --reference-root "${REFERENCE_ROOT}" \
             --tag "${{ inputs.tag }}" \
-            --expected-xi-list "${{ inputs.expected_xi_csv }}" \
+            --expected-xi-list="${{ inputs.expected_xi_csv }}" \
             --overwrite
 
       - name: Setup Julia
