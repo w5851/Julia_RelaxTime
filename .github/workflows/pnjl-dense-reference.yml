@@ -33,31 +33,6 @@ on:
         required: false
         default: false
         type: boolean
-      xi_refine_levels:
-        description: "ξ 自适应最大层数"
-        required: false
-        default: "2"
-        type: string
-      xi_position_tol:
-        description: "ξ 插值位置量门限 (MeV)"
-        required: false
-        default: "0.10"
-        type: string
-      xi_density_tol:
-        description: "ξ 插值密度量门限"
-        required: false
-        default: "0.01"
-        type: string
-      xi_maxwell_area_tol:
-        description: "ξ 中点 Maxwell 残差门限"
-        required: false
-        default: "1e-4"
-        type: string
-      xi_response_rtol:
-        description: "ξ 插值 crossover 响应导数相对门限"
-        required: false
-        default: "0.05"
-        type: string
       T_min:
         description: "最低温度 T_min (MeV)"
         required: false
@@ -78,26 +53,6 @@ on:
         required: false
         default: true
         type: boolean
-      T_refine_levels:
-        description: "温度自适应最大层数"
-        required: false
-        default: "2"
-        type: string
-      T_position_tol:
-        description: "温度插值位置量门限 (MeV)"
-        required: false
-        default: "0.10"
-        type: string
-      T_density_tol:
-        description: "温度插值密度量门限"
-        required: false
-        default: "0.01"
-        type: string
-      T_maxwell_area_tol:
-        description: "温度中点 Maxwell 残差门限"
-        required: false
-        default: "1e-4"
-        type: string
       rho_min:
         description: "最低密度 ρ_min (ρ/ρ₀)"
         required: false
@@ -118,26 +73,6 @@ on:
         required: false
         default: true
         type: boolean
-      rho_position_tol:
-        description: "rho 粗细网格位置量门限 (MeV)"
-        required: false
-        default: "0.05"
-        type: string
-      rho_density_tol:
-        description: "rho 粗细网格密度量门限"
-        required: false
-        default: "0.005"
-        type: string
-      rho_maxwell_area_tol:
-        description: "rho 粗细网格 Maxwell 残差门限"
-        required: false
-        default: "1e-4"
-        type: string
-      cep_tol:
-        description: "CEP bracket 宽度门限 (MeV)"
-        required: false
-        default: "0.1"
-        type: string
       p_num:
         description: "gap/thermo 动量积分节点"
         required: false
@@ -156,21 +91,6 @@ on:
         options:
           - tensor_gauss
           - rs_reduced_adaptive
-      thermo_quadrature_rtol:
-        description: "自适应热积分相对误差"
-        required: false
-        default: "1e-8"
-        type: string
-      thermo_quadrature_atol:
-        description: "自适应热积分绝对误差"
-        required: false
-        default: "1e-10"
-        type: string
-      thermo_quadrature_maxevals:
-        description: "自适应热积分最大评估次数"
-        required: false
-        default: "10000000"
-        type: string
       iterations:
         description: "求解迭代上限"
         required: false
@@ -196,16 +116,16 @@ on:
         required: false
         default: "450"
         type: string
-      crossover_T_max:
-        description: "crossover 搜索温度上限；空值继承 T_max"
-        required: false
-        default: ""
-        type: string
       overwrite:
         description: "覆盖同一次作业暂存区中的同名输出"
         required: false
         default: true
         type: boolean
+      advanced_config_json:
+        description: "高级误差参数 JSON；键由 scripts/pnjl/resolve_dense_reference_action_config.py 白名单约束"
+        required: false
+        default: "{}"
+        type: string
 
 jobs:
   plan:
@@ -314,8 +234,16 @@ jobs:
 
       - name: Run dense reference xi interval shard
         shell: bash
+        env:
+          ADVANCED_CONFIG_JSON: ${{ inputs.advanced_config_json || '{}' }}
         run: |
           set -euo pipefail
+          advanced_args_path="${RUNNER_TEMP}/pnjl_dense_reference_advanced_args.txt"
+          python scripts/pnjl/resolve_dense_reference_action_config.py \
+            --config-json "${ADVANCED_CONFIG_JSON}" \
+            --output "${advanced_args_path}"
+          mapfile -t advanced_args < "${advanced_args_path}"
+
           cmd=(
             julia --project=. scripts/pnjl/build_dense_phase_reference.jl
             --tag "${{ inputs.tag || 'dense' }}"
@@ -325,23 +253,23 @@ jobs:
             --T-min "${{ inputs.T_min || '60' }}"
             --T-max "${{ inputs.T_max || '240' }}"
             --T-step "${{ inputs.T_step || '5' }}"
-            --T-refine-levels "${{ inputs.T_refine_levels || '2' }}"
-            --T-position-tol "${{ inputs.T_position_tol || '0.10' }}"
-            --T-density-tol "${{ inputs.T_density_tol || '0.01' }}"
-            --T-maxwell-area-tol "${{ inputs.T_maxwell_area_tol || '1e-4' }}"
+            --T-refine-levels "2"
+            --T-position-tol "0.10"
+            --T-density-tol "0.01"
+            --T-maxwell-area-tol "1e-4"
             --rho-min "${{ inputs.rho_min || '0.0' }}"
             --rho-max "${{ inputs.rho_max || '4.0' }}"
             --rho-step "${{ inputs.rho_step || '0.05' }}"
-            --rho-position-tol "${{ inputs.rho_position_tol || '0.05' }}"
-            --rho-density-tol "${{ inputs.rho_density_tol || '0.005' }}"
-            --rho-maxwell-area-tol "${{ inputs.rho_maxwell_area_tol || '1e-4' }}"
-            --cep-tol "${{ inputs.cep_tol || '0.1' }}"
+            --rho-position-tol "0.05"
+            --rho-density-tol "0.005"
+            --rho-maxwell-area-tol "1e-4"
+            --cep-tol "0.1"
             --p-num "${{ inputs.p_num || '24' }}"
             --t-num "${{ inputs.t_num || '8' }}"
             --thermo-quadrature-policy "${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}"
-            --thermo-quadrature-rtol "${{ inputs.thermo_quadrature_rtol || '1e-8' }}"
-            --thermo-quadrature-atol "${{ inputs.thermo_quadrature_atol || '1e-10' }}"
-            --thermo-quadrature-maxevals "${{ inputs.thermo_quadrature_maxevals || '10000000' }}"
+            --thermo-quadrature-rtol "1e-8"
+            --thermo-quadrature-atol "1e-10"
+            --thermo-quadrature-maxevals "10000000"
             --iterations "${{ inputs.iterations || '80' }}"
             --crossover-n-mu "${{ inputs.crossover_n_mu || '16' }}"
             --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
@@ -350,11 +278,11 @@ jobs:
           if [ "${{ inputs.adaptive_xi }}" = "true" ]; then
             cmd+=(
               --adaptive-xi
-              --xi-refine-levels "${{ inputs.xi_refine_levels || '2' }}"
-              --xi-position-tol "${{ inputs.xi_position_tol || '0.10' }}"
-              --xi-density-tol "${{ inputs.xi_density_tol || '0.01' }}"
-              --xi-maxwell-area-tol "${{ inputs.xi_maxwell_area_tol || '1e-4' }}"
-              --xi-response-rtol "${{ inputs.xi_response_rtol || '0.05' }}"
+              --xi-refine-levels "2"
+              --xi-position-tol "0.10"
+              --xi-density-tol "0.01"
+              --xi-maxwell-area-tol "1e-4"
+              --xi-response-rtol "0.05"
             )
           fi
           if [ "${{ inputs.adaptive_T }}" != "true" ]; then
@@ -362,9 +290,6 @@ jobs:
           fi
           if [ "${{ inputs.rho_geometry_convergence }}" != "true" ]; then
             cmd+=(--no-rho-geometry-convergence)
-          fi
-          if [ -n "${{ inputs.crossover_T_max }}" ]; then
-            cmd+=(--crossover-T-max "${{ inputs.crossover_T_max }}")
           fi
           if [ "${{ inputs.crossover_only }}" = "true" ]; then
             cmd+=(--crossover-only)
@@ -375,6 +300,7 @@ jobs:
           if [ "${{ inputs.overwrite }}" = "true" ]; then
             cmd+=(--overwrite)
           fi
+          cmd+=("${advanced_args[@]}")
 
           printf 'Running shard command:\n  %q' "${cmd[@]}"
           printf '\n'
@@ -490,6 +416,9 @@ jobs:
           from pathlib import Path
 
           report = json.loads(Path(os.environ["REPORT_PATH"]).read_text(encoding="utf-8"))
+          manifest_path = Path(os.environ["REFERENCE_ROOT"]) / "phase_reference_${{ inputs.tag || 'dense' }}_manifest.json"
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          config = manifest["config"]
           summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
           with summary_path.open("a", encoding="utf-8") as fh:
               fh.write("## PNJL Dense Reference Summary\n\n")
@@ -500,7 +429,8 @@ jobs:
               fh.write(f"- crossover rows / converged: `{report['crossover_rows']}` / `{report['converged_rows']}`\n")
               fh.write(f"- grid convergence rows / unconverged: `{report['grid_convergence_rows']}` / `{report['grid_unconverged_rows']}`\n")
               fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV\n")
-              fh.write(f"- explicit crossover T ceiling: `${{ inputs.crossover_T_max || 'inherits T_max' }}`\n")
-              fh.write(f"- thermo quadrature: `${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}`\n")
-              fh.write(f"- p_num/t_num: `${{ inputs.p_num || '24' }}` / `${{ inputs.t_num || '8' }}`\n")
+              fh.write(f"- explicit crossover T ceiling: `{config['crossover_T_max_MeV']}`\n")
+              fh.write(f"- thermo quadrature: `{config['thermo_quadrature_policy']}` (rtol `{config['thermo_quadrature_rtol']}`, atol `{config['thermo_quadrature_atol']}`)\n")
+              fh.write(f"- p_num/t_num: `{config['p_num']}` / `{config['t_num']}`\n")
+              fh.write(f"- advanced_config_json: `${{ inputs.advanced_config_json || '{}' }}`\n")
           PY
