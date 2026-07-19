@@ -25,6 +25,7 @@ compute_crossover = true
 crossover_method = "peak"
 crossover_variable = "phi_u"
 crossover_n_mu = 12
+crossover_T_max_MeV = nan
 
 cep_strategy = "interpolate"
 cep_interpolate_use_direct_eval = false
@@ -44,6 +45,19 @@ cep_direct_initial_step = nan
 cep_direct_expand_factor = 2.0
 cep_direct_max_expand_steps = 8
 cep_direct_fallback_scan = true
+
+unknown_budget = 5
+
+rho_geometry_convergence = true
+rho_position_tol_MeV = 0.05
+rho_density_tol = 0.005
+rho_maxwell_area_tol = 1.0e-4
+
+adaptive_temperature = false
+temperature_max_refine_level = 2
+temperature_position_tol_MeV = 0.10
+temperature_density_tol = 0.01
+temperature_maxwell_area_tol = 1.0e-4
 
 promote_reference = false
 verbose = false

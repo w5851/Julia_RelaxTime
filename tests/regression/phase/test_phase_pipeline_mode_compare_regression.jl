@@ -22,6 +22,9 @@ end
         crossover_method=:inflection,
         crossover_variable=:phi_u,
         crossover_n_mu=8,
+        # This regression isolates production/research orchestration parity.
+        # The production-only rho geometry gate has dedicated coverage.
+        rho_geometry_convergence=false,
         promote_reference=false,
     )
 
@@ -61,7 +64,12 @@ end
         @test isapprox(prod_row.mu_MeV, ref_row.mu_MeV; atol=0.3)
         if prod_row.converged && ref_row.converged
             @test isapprox(prod_row.T_crossover_MeV, ref_row.T_crossover_MeV; atol=2.0, nans=true)
-            @test isapprox(prod_row.rho, ref_row.rho; atol=0.01, nans=true)
+            # Production starts the crossover search above the first-order boundary,
+            # while research scans the complete requested T grid. The resulting
+            # crossover temperatures are nearby rather than coordinate-identical;
+            # compare the density scale relatively because rho(T, mu) is steep near
+            # the endpoint instead of imposing an absolute same-coordinate contract.
+            @test isapprox(prod_row.rho, ref_row.rho; rtol=1e-2, atol=1e-10, nans=true)
         end
     end
 end

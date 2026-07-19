@@ -9,7 +9,7 @@ on:
         default: "dense"
         type: string
       xi_values:
-        description: '显式 ξ 列表（逗号分隔；为空时使用区间参数）'
+        description: "显式 ξ 锚点（逗号分隔；为空时使用区间参数）"
         required: false
         default: ""
         type: string
@@ -24,7 +24,37 @@ on:
         default: "0.5"
         type: string
       xi_step:
-        description: "ξ 步长（仅在 xi_values 为空时使用）"
+        description: "ξ 锚点步长（仅在 xi_values 为空时使用）"
+        required: false
+        default: "0.05"
+        type: string
+      adaptive_xi:
+        description: "在每个 ξ 区间按相线中点插值误差递归补点（full reference only）"
+        required: false
+        default: false
+        type: boolean
+      xi_refine_levels:
+        description: "ξ 自适应最大层数"
+        required: false
+        default: "2"
+        type: string
+      xi_position_tol:
+        description: "ξ 插值位置量门限 (MeV)"
+        required: false
+        default: "0.10"
+        type: string
+      xi_density_tol:
+        description: "ξ 插值密度量门限"
+        required: false
+        default: "0.01"
+        type: string
+      xi_maxwell_area_tol:
+        description: "ξ 中点 Maxwell 残差门限"
+        required: false
+        default: "1e-4"
+        type: string
+      xi_response_rtol:
+        description: "ξ 插值 crossover 响应导数相对门限"
         required: false
         default: "0.05"
         type: string
@@ -39,9 +69,34 @@ on:
         default: "240"
         type: string
       T_step:
-        description: "温度步长 ΔT (MeV)"
+        description: "初始温度锚点步长 ΔT (MeV)"
         required: false
         default: "5"
+        type: string
+      adaptive_T:
+        description: "按一阶相线中点插值误差递归补温度点"
+        required: false
+        default: true
+        type: boolean
+      T_refine_levels:
+        description: "温度自适应最大层数"
+        required: false
+        default: "2"
+        type: string
+      T_position_tol:
+        description: "温度插值位置量门限 (MeV)"
+        required: false
+        default: "0.10"
+        type: string
+      T_density_tol:
+        description: "温度插值密度量门限"
+        required: false
+        default: "0.01"
+        type: string
+      T_maxwell_area_tol:
+        description: "温度中点 Maxwell 残差门限"
+        required: false
+        default: "1e-4"
         type: string
       rho_min:
         description: "最低密度 ρ_min (ρ/ρ₀)"
@@ -54,9 +109,34 @@ on:
         default: "4.0"
         type: string
       rho_step:
-        description: "密度步长 Δρ (ρ/ρ₀)"
+        description: "初始密度步长 Δρ (ρ/ρ₀)"
         required: false
         default: "0.05"
+        type: string
+      rho_geometry_convergence:
+        description: "要求粗细 rho 网格的 Maxwell/spinodal 几何量收敛"
+        required: false
+        default: true
+        type: boolean
+      rho_position_tol:
+        description: "rho 粗细网格位置量门限 (MeV)"
+        required: false
+        default: "0.05"
+        type: string
+      rho_density_tol:
+        description: "rho 粗细网格密度量门限"
+        required: false
+        default: "0.005"
+        type: string
+      rho_maxwell_area_tol:
+        description: "rho 粗细网格 Maxwell 残差门限"
+        required: false
+        default: "1e-4"
+        type: string
+      cep_tol:
+        description: "CEP bracket 宽度门限 (MeV)"
+        required: false
+        default: "0.1"
         type: string
       p_num:
         description: "gap/thermo 动量积分节点"
@@ -69,7 +149,7 @@ on:
         default: "8"
         type: string
       thermo_quadrature_policy:
-        description: "phase 热积分策略（tensor_gauss 或 rs_reduced_adaptive）"
+        description: "phase 热积分策略"
         required: false
         default: "tensor_gauss"
         type: choice
@@ -97,7 +177,7 @@ on:
         default: "80"
         type: string
       crossover_only:
-        description: "仅生成 crossover reference；false 时生成 boundary/CEP/spinodal/crossover 全 reference"
+        description: "仅生成 crossover reference"
         required: false
         default: true
         type: boolean
@@ -116,22 +196,95 @@ on:
         required: false
         default: "450"
         type: string
+      crossover_T_max:
+        description: "crossover 搜索温度上限；空值继承 T_max"
+        required: false
+        default: ""
+        type: string
       overwrite:
-        description: "覆盖已存在的同名输出"
+        description: "覆盖同一次作业暂存区中的同名输出"
         required: false
         default: true
         type: boolean
 
 jobs:
-  generate:
+  plan:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      expected_xi_csv: ${{ steps.plan.outputs.expected_xi_csv }}
+      shard_count: ${{ steps.plan.outputs.shard_count }}
+    steps:
+      - name: Resolve deterministic xi interval shards
+        id: plan
+        shell: bash
+        env:
+          XI_VALUES: ${{ inputs.xi_values }}
+          XI_MIN: ${{ inputs.xi_min || '-0.5' }}
+          XI_MAX: ${{ inputs.xi_max || '0.5' }}
+          XI_STEP: ${{ inputs.xi_step || '0.05' }}
+          ADAPTIVE_XI: ${{ inputs.adaptive_xi }}
+          CROSSOVER_ONLY: ${{ inputs.crossover_only }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from decimal import Decimal
+
+          raw = os.environ.get("XI_VALUES", "").strip()
+          if raw:
+              values = sorted({Decimal(token.strip()) for token in raw.split(",") if token.strip()})
+          else:
+              start = Decimal(os.environ["XI_MIN"])
+              stop = Decimal(os.environ["XI_MAX"])
+              step = Decimal(os.environ["XI_STEP"])
+              if step <= 0 or stop < start:
+                  raise SystemExit("invalid xi range")
+              values = []
+              current = start
+              while current <= stop:
+                  values.append(current)
+                  current += step
+              if values[-1] != stop:
+                  values.append(stop)
+          if not values:
+              raise SystemExit("empty xi plan")
+          if os.environ.get("ADAPTIVE_XI", "false").lower() == "true" and os.environ.get("CROSSOVER_ONLY", "false").lower() == "true":
+              raise SystemExit("adaptive_xi requires crossover_only=false")
+
+          def text(value):
+              rendered = format(value, "f")
+              return rendered.rstrip("0").rstrip(".") if "." in rendered else rendered
+
+          include = []
+          if len(values) == 1:
+              include.append({"shard_id": "s000", "xi_list": text(values[0])})
+          else:
+              for index, (left, right) in enumerate(zip(values, values[1:])):
+                  include.append({
+                      "shard_id": f"s{index:03d}",
+                      "xi_list": f"{text(left)},{text(right)}",
+                  })
+          matrix = json.dumps({"include": include}, separators=(",", ":"))
+          expected = ",".join(text(value) for value in values)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"matrix={matrix}\n")
+              handle.write(f"expected_xi_csv={expected}\n")
+              handle.write(f"shard_count={len(include)}\n")
+          PY
+
+  generate-shards:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     env:
       ARTIFACT_RETENTION_DAYS: "30"
-      STAGING_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}
-      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/reference
-      PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}
-      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/validation_report.json
-
+      STAGING_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}/reference
+      PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}/${{ matrix.shard_id }}
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ matrix.shard_id }}/validation_report.json
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -154,12 +307,12 @@ jobs:
       - name: Install Julia dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
-      - name: Prepare output directories
+      - name: Prepare shard directories
         run: |
           rm -rf "${STAGING_ROOT}" "${PROCESS_ROOT}"
           mkdir -p "${REFERENCE_ROOT}" "${PROCESS_ROOT}"
 
-      - name: Run dense reference builder
+      - name: Run dense reference xi interval shard
         shell: bash
         run: |
           set -euo pipefail
@@ -168,12 +321,21 @@ jobs:
             --tag "${{ inputs.tag || 'dense' }}"
             --output-root "${PROCESS_ROOT}"
             --reference-root "${REFERENCE_ROOT}"
+            --xi-list "${{ matrix.xi_list }}"
             --T-min "${{ inputs.T_min || '60' }}"
             --T-max "${{ inputs.T_max || '240' }}"
             --T-step "${{ inputs.T_step || '5' }}"
+            --T-refine-levels "${{ inputs.T_refine_levels || '2' }}"
+            --T-position-tol "${{ inputs.T_position_tol || '0.10' }}"
+            --T-density-tol "${{ inputs.T_density_tol || '0.01' }}"
+            --T-maxwell-area-tol "${{ inputs.T_maxwell_area_tol || '1e-4' }}"
             --rho-min "${{ inputs.rho_min || '0.0' }}"
             --rho-max "${{ inputs.rho_max || '4.0' }}"
             --rho-step "${{ inputs.rho_step || '0.05' }}"
+            --rho-position-tol "${{ inputs.rho_position_tol || '0.05' }}"
+            --rho-density-tol "${{ inputs.rho_density_tol || '0.005' }}"
+            --rho-maxwell-area-tol "${{ inputs.rho_maxwell_area_tol || '1e-4' }}"
+            --cep-tol "${{ inputs.cep_tol || '0.1' }}"
             --p-num "${{ inputs.p_num || '24' }}"
             --t-num "${{ inputs.t_num || '8' }}"
             --thermo-quadrature-policy "${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}"
@@ -185,20 +347,28 @@ jobs:
             --crossover-mu-max "${{ inputs.crossover_mu_max || '450' }}"
           )
 
+          if [ "${{ inputs.adaptive_xi }}" = "true" ]; then
+            cmd+=(
+              --adaptive-xi
+              --xi-refine-levels "${{ inputs.xi_refine_levels || '2' }}"
+              --xi-position-tol "${{ inputs.xi_position_tol || '0.10' }}"
+              --xi-density-tol "${{ inputs.xi_density_tol || '0.01' }}"
+              --xi-maxwell-area-tol "${{ inputs.xi_maxwell_area_tol || '1e-4' }}"
+              --xi-response-rtol "${{ inputs.xi_response_rtol || '0.05' }}"
+            )
+          fi
+          if [ "${{ inputs.adaptive_T }}" != "true" ]; then
+            cmd+=(--no-adaptive-T)
+          fi
+          if [ "${{ inputs.rho_geometry_convergence }}" != "true" ]; then
+            cmd+=(--no-rho-geometry-convergence)
+          fi
+          if [ -n "${{ inputs.crossover_T_max }}" ]; then
+            cmd+=(--crossover-T-max "${{ inputs.crossover_T_max }}")
+          fi
           if [ "${{ inputs.crossover_only }}" = "true" ]; then
             cmd+=(--crossover-only)
           fi
-
-          if [ -n "${{ inputs.xi_values }}" ]; then
-            cmd+=(--xi-list "${{ inputs.xi_values }}")
-          else
-            cmd+=(
-              --xi-min "${{ inputs.xi_min || '-0.5' }}"
-              --xi-max "${{ inputs.xi_max || '0.5' }}"
-              --xi-step "${{ inputs.xi_step || '0.05' }}"
-            )
-          fi
-
           if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
             cmd+=(--crossover-mu0-only)
           fi
@@ -206,11 +376,11 @@ jobs:
             cmd+=(--overwrite)
           fi
 
-          printf 'Running command:\n  %q' "${cmd[@]}"
+          printf 'Running shard command:\n  %q' "${cmd[@]}"
           printf '\n'
           "${cmd[@]}"
 
-      - name: Validate dense reference artifact
+      - name: Validate shard artifact
         shell: bash
         run: |
           validate_cmd=(
@@ -230,7 +400,74 @@ jobs:
           fi
           "${validate_cmd[@]}"
 
-      - name: Upload dense reference artifact
+      - name: Upload xi interval shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-${{ matrix.shard_id }}
+          path: |
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.csv
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag || 'dense' }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag || 'dense' }}_manifest.json
+            ${{ env.REPORT_PATH }}
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
+
+  merge:
+    needs: [plan, generate-shards]
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/downloaded_shards
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/reference
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/validation_report.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download all successful xi shards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Deterministically merge xi shards
+        shell: bash
+        run: |
+          rm -rf "${REFERENCE_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}"
+          python scripts/pnjl/merge_dense_phase_reference_shards.py \
+            --shards-root "${SHARDS_ROOT}" \
+            --reference-root "${REFERENCE_ROOT}" \
+            --tag "${{ inputs.tag || 'dense' }}" \
+            --expected-xi-list "${{ needs.plan.outputs.expected_xi_csv }}" \
+            --overwrite
+
+      - name: Validate merged dense reference artifact
+        shell: bash
+        run: |
+          validate_cmd=(
+            python scripts/pnjl/validate_dense_reference_artifact.py
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag || 'dense' }}"
+            --min-crossover-rows 1
+            --report-path "${REPORT_PATH}"
+          )
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            validate_cmd+=(--expect-crossover-only)
+          else
+            validate_cmd+=(--expect-full-reference)
+          fi
+          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
+            validate_cmd+=(--expect-mu0-only)
+          fi
+          "${validate_cmd[@]}"
+
+      - name: Upload merged dense reference artifact
         uses: actions/upload-artifact@v4
         with:
           name: pnjl-dense-reference-${{ inputs.tag || 'dense' }}
@@ -244,6 +481,8 @@ jobs:
 
       - name: Create step summary
         shell: bash
+        env:
+          SHARD_COUNT: ${{ needs.plan.outputs.shard_count }}
         run: |
           python - <<'PY'
           import json
@@ -252,31 +491,16 @@ jobs:
 
           report = json.loads(Path(os.environ["REPORT_PATH"]).read_text(encoding="utf-8"))
           summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
-          artifact_name = "pnjl-dense-reference-${{ inputs.tag || 'dense' }}"
           with summary_path.open("a", encoding="utf-8") as fh:
               fh.write("## PNJL Dense Reference Summary\n\n")
-              fh.write("### Workflow Inputs\n")
-              fh.write(f"- tag: `{report['tag']}`\n")
-              fh.write("- requested xi_values input: `${{ inputs.xi_values }}`\n")
-              fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV (step `${{ inputs.T_step || '5' }}`)\n")
-              fh.write(f"- rho range: `${{ inputs.rho_min || '0.0' }} - ${{ inputs.rho_max || '4.0' }}` rho0 (step `${{ inputs.rho_step || '0.05' }}`)\n")
-              fh.write(f"- p_num/t_num/iterations: `${{ inputs.p_num || '24' }}` / `${{ inputs.t_num || '8' }}` / `${{ inputs.iterations || '80' }}`\n")
-              fh.write(f"- thermo quadrature: `${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}` (rtol `${{ inputs.thermo_quadrature_rtol || '1e-8' }}`, atol `${{ inputs.thermo_quadrature_atol || '1e-10' }}`, maxevals `${{ inputs.thermo_quadrature_maxevals || '10000000' }}`)\n")
-              fh.write("- crossover_only: `${{ inputs.crossover_only }}`\n")
-              fh.write(f"- crossover_mu0_only: `{str(report['mu0_only']).lower()}`\n")
-              fh.write(f"- crossover_n_mu: `${{ inputs.crossover_n_mu || '16' }}`\n")
-              fh.write(f"- crossover_mu_max: `${{ inputs.crossover_mu_max || '450' }}` MeV\n\n")
-              fh.write("### Provenance\n")
+              fh.write(f"- artifact: `pnjl-dense-reference-${{ inputs.tag || 'dense' }}`\n")
               fh.write(f"- git commit: `{report['git_commit']}`\n")
-              fh.write(f"- generated_at_utc: `{report['generated_at_utc']}`\n")
-              fh.write(f"- artifact: `{artifact_name}`\n")
-              fh.write(f"- retention_days: `{os.environ['ARTIFACT_RETENTION_DAYS']}`\n\n")
-              fh.write("### Coverage\n")
+              fh.write(f"- recoverable xi interval shards: `{os.environ['SHARD_COUNT']}`\n")
               fh.write(f"- resolved xi values: `{report['xi_values']}`\n")
-              fh.write(f"- mu_q values (MeV): `{report['mu_values_MeV']}`\n")
-              fh.write(f"- crossover rows: `{report['crossover_rows']}`\n")
-              fh.write(f"- converged rows: `{report['converged_rows']}`\n\n")
-              fh.write("### Files\n")
-              for _, relpath in report["files"].items():
-                  fh.write(f"- `{relpath}`\n")
+              fh.write(f"- crossover rows / converged: `{report['crossover_rows']}` / `{report['converged_rows']}`\n")
+              fh.write(f"- grid convergence rows / unconverged: `{report['grid_convergence_rows']}` / `{report['grid_unconverged_rows']}`\n")
+              fh.write(f"- T range: `${{ inputs.T_min || '60' }} - ${{ inputs.T_max || '240' }}` MeV\n")
+              fh.write(f"- explicit crossover T ceiling: `${{ inputs.crossover_T_max || 'inherits T_max' }}`\n")
+              fh.write(f"- thermo quadrature: `${{ inputs.thermo_quadrature_policy || 'tensor_gauss' }}`\n")
+              fh.write(f"- p_num/t_num: `${{ inputs.p_num || '24' }}` / `${{ inputs.t_num || '8' }}`\n")
           PY

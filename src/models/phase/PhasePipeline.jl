@@ -159,6 +159,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         crossover_method::Symbol=:peak,
         crossover_variable::Symbol=:phi_u,
         crossover_n_mu::Int=12,
+        crossover_T_max_MeV::Float64=NaN,
         cep_strategy::Symbol=:interpolate,
         cep_interpolate_use_direct_eval::Bool=false,
         cep_tol::Float64=0.01,
@@ -182,7 +183,16 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         T_start::Float64=NaN,
         T_end::Float64=NaN,
         dT::Float64=NaN,
-        unknown_budget::Int=5)
+        unknown_budget::Int=5,
+        rho_geometry_convergence::Bool=true,
+        rho_position_tol_MeV::Float64=0.05,
+        rho_density_tol::Float64=0.005,
+        rho_maxwell_area_tol::Float64=1e-4,
+        adaptive_temperature::Bool=false,
+        temperature_max_refine_level::Int=2,
+        temperature_position_tol_MeV::Float64=0.10,
+        temperature_density_tol::Float64=0.01,
+        temperature_maxwell_area_tol::Float64=1e-4)
 
     thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
         thermo_quadrature_policy,
@@ -223,11 +233,27 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             crossover_method=crossover_method,
             crossover_variable=crossover_variable,
             crossover_n_mu=crossover_n_mu,
-            cep_tol=isfinite(cep_tol) && cep_tol > 0 ? cep_tol : 0.5,
+            crossover_T_max_MeV=crossover_T_max_MeV,
+            cep_tol=isfinite(cep_tol) && cep_tol > 0 ? cep_tol : 0.1,
             cep_max_bisect_iter=cep_max_bisect_iter,
             area_tol_good=cep_area_tol_good,
             area_tol_bad=cep_area_tol_bad,
             unknown_budget=unknown_budget,
+            cep_adaptive_rho=cep_adaptive_rho,
+            cep_adaptive_slope_tol=cep_adaptive_slope_tol,
+            cep_adaptive_min_gap=cep_adaptive_min_gap,
+            cep_adaptive_max_points=cep_adaptive_max_points,
+            cep_adaptive_digits=cep_adaptive_digits,
+            cep_max_refine_level_rho=cep_max_refine_level,
+            rho_geometry_convergence=rho_geometry_convergence,
+            rho_position_tol_MeV=rho_position_tol_MeV,
+            rho_density_tol=rho_density_tol,
+            rho_maxwell_area_tol=rho_maxwell_area_tol,
+            adaptive_temperature=adaptive_temperature,
+            temperature_max_refine_level=temperature_max_refine_level,
+            temperature_position_tol_MeV=temperature_position_tol_MeV,
+            temperature_density_tol=temperature_density_tol,
+            temperature_maxwell_area_tol=temperature_maxwell_area_tol,
             promote_reference=promote_reference,
             promotion_gate_options=promotion_gate_options,
         )
@@ -371,7 +397,13 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             300.0
         end
         T_min_mev = minimum(Float64.(T_grid))
-        T_max_mev = min(maximum(Float64.(T_grid)), 220.0)
+        T_max_mev = if isfinite(crossover_T_max_MeV)
+            crossover_T_max_MeV
+        elseif isnan(crossover_T_max_MeV)
+            maximum(Float64.(T_grid))
+        else
+            throw(ArgumentError("crossover_T_max_MeV must be finite or NaN"))
+        end
         build_crossover_line(;
             mu_max_MeV=mu_max,
             T_min_MeV=T_min_mev,
@@ -382,6 +414,8 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             variable=crossover_variable,
             model_kind=model_kind,
             solver_backend=solver_backend,
+            p_num=p_num,
+            t_num=t_num,
             thermo_quadrature_kwargs...,
         )
     else
@@ -396,6 +430,9 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "T_grid" => collect(Float64.(T_grid)),
         "rho_grid" => collect(Float64.(rho_grid)),
         "solver_backend" => String(solver_backend),
+        "p_num" => p_num,
+        "t_num" => t_num,
+        "iterations" => iterations,
         "thermo_quadrature_policy" => String(thermo_quadrature_policy),
         "thermo_quadrature_rtol" => thermo_quadrature_rtol,
         "thermo_quadrature_atol" => thermo_quadrature_atol,
@@ -406,13 +443,18 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "cep_adaptive_slope_tol" => cep_adaptive_slope_tol,
         "cep_adaptive_min_gap" => cep_adaptive_min_gap,
         "cep_adaptive_max_points" => cep_adaptive_max_points,
+        "crossover_T_max_MeV" => (isfinite(crossover_T_max_MeV) ? crossover_T_max_MeV : maximum(Float64.(T_grid))),
         "cep_direct_bracket_mode" => String(cep_direct_bracket_mode),
         "cep_direct_start" => String(cep_direct_start),
+        "compute_crossover" => compute_crossover,
+        "crossover_n_mu" => crossover_n_mu,
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
         mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend,
+        p_num=p_num, t_num=t_num, iterations=iterations,
         thermo_quadrature_policy=thermo_quadrature_policy, thermo_quadrature_rtol=thermo_quadrature_rtol,
-        thermo_quadrature_atol=thermo_quadrature_atol, thermo_quadrature_maxevals=thermo_quadrature_maxevals)
+        thermo_quadrature_atol=thermo_quadrature_atol, thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        crossover_T_max_MeV=(isfinite(crossover_T_max_MeV) ? crossover_T_max_MeV : maximum(Float64.(T_grid))))
 
     diagnostics = Dict{String, Any}(
         "scan_total" => getproperty(stats, :total),

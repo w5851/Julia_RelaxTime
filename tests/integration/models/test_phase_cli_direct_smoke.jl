@@ -91,12 +91,48 @@ end
     @test cfg_pnjl.config_path !== nothing
     @test occursin(joinpath("config", "models", "pnjl", "phase_pipeline_default.toml"), cfg_pnjl.config_path)
     @test cfg_pnjl.compute_crossover == true
+    @test isnan(cfg_pnjl.crossover_T_max_MeV)
+    @test cfg_pnjl.rho_geometry_convergence == true
+    @test cfg_pnjl.adaptive_temperature == false
 
     cfg_rpnjl = parse_args(["--model_kind=RPNJL"])
     @test cfg_rpnjl.model_kind == :RPNJL
     @test cfg_rpnjl.config_path !== nothing
     @test occursin(joinpath("config", "models", "rpnjl", "phase_pipeline_default.toml"), cfg_rpnjl.config_path)
     @test cfg_rpnjl.compute_crossover == true
+end
+
+@testset "Phase CLI parses phase-grid convergence controls" begin
+    cfg = parse_args([
+        "--mode=production",
+        "--crossover_T_max_MeV=260",
+        "--unknown_budget=7",
+        "--rho_geometry_convergence=true",
+        "--rho_position_tol_MeV=0.025",
+        "--rho_density_tol=0.0025",
+        "--rho_maxwell_area_tol=5e-5",
+        "--adaptive_temperature=true",
+        "--temperature_max_refine_level=3",
+        "--temperature_position_tol_MeV=0.05",
+        "--temperature_density_tol=0.005",
+        "--temperature_maxwell_area_tol=5e-5",
+    ])
+
+    @test cfg.crossover_T_max_MeV == 260.0
+    @test cfg.unknown_budget == 7
+    @test cfg.rho_geometry_convergence == true
+    @test cfg.rho_position_tol_MeV == 0.025
+    @test cfg.rho_density_tol == 0.0025
+    @test cfg.rho_maxwell_area_tol == 5e-5
+    @test cfg.adaptive_temperature == true
+    @test cfg.temperature_max_refine_level == 3
+    @test cfg.temperature_position_tol_MeV == 0.05
+    @test cfg.temperature_density_tol == 0.005
+    @test cfg.temperature_maxwell_area_tol == 5e-5
+
+    @test_throws ArgumentError parse_args(["--mode=production", "--cep_max_refine_level=0"])
+    @test_throws ArgumentError parse_args(["--rho_density_tol=0"])
+    @test_throws ArgumentError parse_args(["--crossover_T_max_MeV=20"])
 end
 
 @testset "Phase CLI run without --config uses default template" begin
@@ -216,6 +252,15 @@ end
     @test Float64(effective["thermo_quadrature_rtol"]) == 1e-8
     @test Float64(effective["thermo_quadrature_atol"]) == 1e-10
     @test Int(effective["thermo_quadrature_maxevals"]) == 10^7
+    @test Int(effective["p_num"]) == 12
+    @test Int(effective["t_num"]) == 4
+    @test Int(effective["iterations"]) == 10
+    @test Float64(effective["crossover_T_max_MeV"]) == 150.0
+    @test Float64(effective["cep_tol"]) == 0.01
+    @test Bool(effective["rho_geometry_convergence"]) == true
+    @test Bool(effective["adaptive_temperature"]) == false
+    @test Float64(effective["rho_position_tol_MeV"]) == 0.05
+    @test Float64(effective["temperature_position_tol_MeV"]) == 0.10
 end
 
 @testset "Phase CLI manifest includes preset and effective config" begin

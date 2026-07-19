@@ -3,7 +3,7 @@
 using Printf
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
-const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "phase", "baseline_phase_pipeline_v1.csv")
+const DEFAULT_OUTPUT = joinpath(PROJECT_ROOT, "tests", "baselines", "phase", "baseline_phase_pipeline_v2.csv")
 
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 

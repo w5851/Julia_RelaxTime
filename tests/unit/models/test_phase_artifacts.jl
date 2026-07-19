@@ -43,6 +43,9 @@ end
         @test occursin("- muq_cep_MeV: 292.0", report)
         @test occursin("- muB_cep_MeV: 876.0", report)
         @test occursin("compatibility alias for muq_cep_MeV", report)
+        @test haskey(paths, "phase_grid_convergence")
+        @test isfile(paths["phase_grid_convergence"])
+        @test startswith(read(paths["phase_grid_convergence"], String), "axis,xi,T_MeV")
     end
 
     @testset "promote_phase_artifacts 接口存在" begin

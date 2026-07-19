@@ -96,6 +96,9 @@ julia --project=. -e 'ENV["INTEGRATION_FILES"]="models/test_phase_cli_smoke.jl";
 - `rho_step`，尤其 CEP 和 spinodal 邻域；
 - solver `iterations` 与失败/unknown 比例；
 - CEP `cep_tol`、refine level 和 adaptive-rho 参数；
+- `rho_geometry_convergence` 下 Maxwell/spinodal 的位置量、密度量和面积残差粗细网格误差；
+- `adaptive_temperature` 下相线中点相对端点插值的误差与最大细化层；
+- dense reference 启用 adaptive xi 时的区间中点误差；
 - seed/continuation 与 reverse-rho 方向的分支稳定性。
 
 核心比较量包括 CEP 坐标、first-order boundary、spinodal、crossover、失败率、unknown rate 和 Maxwell area residual。只有这些量在证据支持的精度内稳定后，才能确定正式参数。
@@ -112,6 +115,11 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 
 命令中的默认配置只表示当前仓库模板。若收敛性证据要求不同节点或步长，应使用已审阅的命名配置或显式 CLI 覆盖，并以 manifest 的 effective config 为实际口径。
 
+production CLI 可显式配置 `crossover_T_max_MeV`、rho 几何量收敛门限和温度中点自适应门限。
+`crossover_T_max_MeV=NaN` 表示继承 `T_max`；不得依赖历史隐藏的 `220 MeV` 截断。启用
+`rho_geometry_convergence=true` 时，`cep_max_refine_level` 至少为 1。正式 dense reference 默认启用
+rho 几何量与温度中点收敛；adaptive xi 为显式 opt-in，且每个 xi 区间至少求一次中点后才能估计误差。
+
 默认不要传 `--promote_reference`。晋升 reference 必须在产物审计、regression/validation 和人工审阅后单独执行。
 
 ## 10. 输出目录与产物合同
@@ -122,11 +130,20 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - `first_order_boundary.csv`；
 - `spinodal.csv`；
 - 可选 `crossover_line.csv`；
+- `phase_grid_convergence.csv`；
 - `phase_summary.json`；
 - `phase_report.md`；
 - `run_manifest.json`。
 
 `run_manifest.json` 至少记录 preset、argv、config path/hash、git commit、effective config、run ID 和 artifact paths。产物路径必须使用仓库相对正斜杠表示，避免机器相关绝对路径泄漏。
+
+production 的 `production_eval/` 保存每个温度的全部 rho 粗细层；聚合 `trho_scan.csv` 只包含各温度最终采用层。
+需要审计网格演化时联合读取 `production_eval/` 与 `phase_grid_convergence.csv`，下游相线消费方使用聚合 CSV，
+不得把不同层的重复采样自行拼接成一条曲线。
+
+GitHub Actions 的 dense reference workflow 按相邻 xi 锚点区间分 shard，`fail-fast=false`；失败后只需重跑失败区间。
+最终 merge 要求所有 shard 绑定同一 commit 与同一非-xi 配置，按物理键确定性排序、去重，并对重复端点的数值一致性做硬校验。
+merge 产物通过 validator 后仍只是候选 artifact，不自动写入或晋升 canonical reference。
 
 ## 11. Regression / Validation 验收
 
@@ -174,8 +191,8 @@ Formal production 需要网格/积分/solver 收敛证据、完整 manifest、�
 
 ## 16. 最后验证记录
 
-- 验证日期：2026-07-10
-- 验证范围：当前 CLI preset、默认配置加载、manifest 和 integration smoke 合同
+- 验证日期：2026-07-18
+- 验证范围：CLI preset、默认配置加载、rho/T 网格误差参数、显式 crossover 温区、manifest 和 integration smoke 合同
 - 执行命令：见第 7 节及 authority map
-- 状态：通过；`tests/integration/models/test_phase_cli_smoke.jl` 7/7
+- 状态：本 PR 聚焦验证通过；完整 CI 结果以对应 PR checks 为准
 - 备注：冷启动验证耗时约 12 分钟；smoke 输出不得升格为正式相结构基线

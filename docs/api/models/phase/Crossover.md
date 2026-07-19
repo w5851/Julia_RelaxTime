@@ -69,6 +69,11 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 
 当选择 `:rs_reduced_adaptive` 时，基态求解、TaylorDiff gap series、序参量导数和密度后处理使用同一组热积分控制量，避免在 crossover 检测内部混用不同数值口径。
 
+`p_num` 与 `t_num` 会实际传递到 crossover 的基态和导数求解，不再只停留在上层配置字段；
+因此主 phase 与 crossover 可以使用同一套热力学节点口径。pipeline 的 crossover 温度上限由
+`crossover_T_max_MeV` 显式给出，`NaN` 表示继承主扫描上限，不存在隐藏的 `220 MeV` 截断。
+实际节点数、迭代数和解析后的温区上限会进入配置快照与 config hash。
+
 ### 峰值法 `:peak`
 
 实现内部会搜索 `|∂φ/∂T|` 的主要峰值，并在候选区间内继续细化，适合直接从导数强度定位 crossover 温度。

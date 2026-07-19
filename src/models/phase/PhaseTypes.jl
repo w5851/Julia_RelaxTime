@@ -6,6 +6,9 @@ Base.@kwdef struct CEPResult
     # expose explicit muq_cep_MeV and muB_cep_MeV names.
     mu_cep_MeV::Float64 = NaN
     uncertainty_T_MeV::Float64 = NaN
+    T_bracket_low_MeV::Float64 = NaN
+    T_bracket_high_MeV::Float64 = NaN
+    bracket_width_T_MeV::Float64 = NaN
     eval_count::Int = 0
     unknown_count::Int = 0
     reason::Union{Nothing, String} = nothing
@@ -28,7 +31,7 @@ Base.@kwdef struct ProductionPipelineConfig
     T_start::Float64 = NaN
     T_end::Float64 = NaN
     dT_initial::Float64 = 5.0
-    cep_tol_MeV::Float64 = 0.5
+    cep_tol_MeV::Float64 = 0.1
     cep_max_bisect_iter::Int = 20
     area_tol_good::Float64 = 1e-4
     area_tol_bad::Float64 = 5e-4
@@ -39,6 +42,16 @@ Base.@kwdef struct ProductionPipelineConfig
     adaptive_min_gap::Float64 = 0.002
     adaptive_max_points::Int = 32
     adaptive_digits::Int = 6
+    rho_geometry_convergence::Bool = true
+    rho_position_tol_MeV::Float64 = 0.05
+    rho_density_tol::Float64 = 0.005
+    rho_maxwell_area_tol::Float64 = 1e-4
+    adaptive_temperature::Bool = false
+    temperature_max_refine_level::Int = 2
+    temperature_position_tol_MeV::Float64 = 0.10
+    temperature_density_tol::Float64 = 0.01
+    temperature_maxwell_area_tol::Float64 = 1e-4
+    crossover_T_max_MeV::Float64 = NaN
 end
 
 Base.@kwdef struct PromotionResult
