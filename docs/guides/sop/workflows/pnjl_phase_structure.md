@@ -27,6 +27,7 @@ Windows 和 POSIX 均优先通过 `run_with_sysimage` wrapper 启动。
 
 - `T_min/T_max/T_step`：MeV。
 - `rho_min/rho_max/rho_step`：`rho/rho0`。
+- dense-reference builder 始终把声明的 `T_max`、`rho_max` 和 ranged `xi_max` 作为末端锚点；当步长不能整除区间时，最后一个间隔可以短于名义步长。
 - `xi`：无量纲各向异性参数。
 - PNJL phase 标量热项中，角度只通过 RS 分布自变量 `E_xi` 进入；chi、Polyakov 势、vacuum、Maxwell、spinodal 和 CEP 不额外引入角核。`E_xi` 不作为物理色散关系。
 - `thermo_quadrature_policy=tensor_gauss` 保留固定有限区间兼容路径；`rs_reduced_adaptive` 使用 RS 角约化和无穷径向自适应积分，仅适用于上述标量热核，不得外推到 magnetic 或 transport。

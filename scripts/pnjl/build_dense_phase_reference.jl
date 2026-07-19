@@ -123,6 +123,25 @@ function parse_float_list(raw::AbstractString)
     return vals
 end
 
+function inclusive_step_grid(start::Real, stop::Real, step::Real; axis::AbstractString="grid")
+    first_value = Float64(start)
+    last_value = Float64(stop)
+    spacing = Float64(step)
+    all(isfinite, (first_value, last_value, spacing)) ||
+        error("$axis bounds and step must be finite")
+    spacing > 0 || error("$axis step must be positive")
+    first_value <= last_value || error("$axis minimum must be <= maximum")
+
+    values = collect(first_value:spacing:last_value)
+    tolerance = 64 * eps(max(abs(first_value), abs(last_value), abs(spacing), 1.0))
+    if last(values) < last_value - tolerance
+        push!(values, last_value)
+    else
+        values[end] = last_value
+    end
+    return values
+end
+
 function parse_args(args::Vector{String})
     cfg = DensePhaseReferenceConfig()
     ranged = false
@@ -242,11 +261,13 @@ function parse_args(args::Vector{String})
     end
 
     if ranged
-        xi_step > 0 || error("xi-step must be positive")
-        cfg.xi_values = collect(range(xi_min; stop=xi_max, step=xi_step))
+        cfg.xi_values = inclusive_step_grid(xi_min, xi_max, xi_step; axis="xi")
     end
 
+    cfg.T_min > 0 || error("T-min must be positive for the five-variable phase solve")
+    cfg.T_min <= cfg.T_max || error("T-min must be <= T-max")
     cfg.T_step > 0 || error("T-step must be positive")
+    cfg.rho_min <= cfg.rho_max || error("rho-min must be <= rho-max")
     cfg.rho_step > 0 || error("rho-step must be positive")
     cfg.p_num > 0 || error("p-num must be positive")
     cfg.t_num > 0 || error("t-num must be positive")
@@ -691,8 +712,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         "runs" => Any[],
     )
 
-    T_grid = collect(cfg.T_min:cfg.T_step:cfg.T_max)
-    rho_grid = collect(cfg.rho_min:cfg.rho_step:cfg.rho_max)
+    T_grid = inclusive_step_grid(cfg.T_min, cfg.T_max, cfg.T_step; axis="temperature")
+    rho_grid = inclusive_step_grid(cfg.rho_min, cfg.rho_max, cfg.rho_step; axis="rho")
 
     if cfg.crossover_only
         for xi in requested_xi_values

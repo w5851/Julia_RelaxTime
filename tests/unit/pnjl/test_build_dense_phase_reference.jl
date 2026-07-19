@@ -55,6 +55,16 @@ end
     inherited = DensePhaseReferenceConfig(T_min=10.0, T_max=240.0)
     @test resolved_crossover_T_max_MeV(inherited) == 240.0
 
+    low_temperature_grid = inclusive_step_grid(1.0, 240.0, 5.0; axis="temperature")
+    @test first(low_temperature_grid) == 1.0
+    @test low_temperature_grid[end - 1] == 236.0
+    @test last(low_temperature_grid) == 240.0
+    @test length(low_temperature_grid) == 49
+    @test inclusive_step_grid(60.0, 240.0, 5.0; axis="temperature") == collect(60.0:5.0:240.0)
+    @test inclusive_step_grid(0.0, 1.0, 0.3; axis="rho") == [0.0, 0.3, 0.6, 0.9, 1.0]
+    @test_throws ErrorException parse_args(["--T-min", "0", "--T-max", "240"])
+    @test_throws ErrorException parse_args(["--T-min", "10", "--T-max", "5"])
+
     cache = Dict(
         -0.1 => _dense_synthetic_result(-0.1),
         0.1 => _dense_synthetic_result(0.1),
