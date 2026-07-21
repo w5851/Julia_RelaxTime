@@ -123,6 +123,25 @@ function parse_float_list(raw::AbstractString)
     return vals
 end
 
+function inclusive_step_grid(start::Real, stop::Real, step::Real; axis::AbstractString="grid")
+    first_value = Float64(start)
+    last_value = Float64(stop)
+    spacing = Float64(step)
+    all(isfinite, (first_value, last_value, spacing)) ||
+        error("$axis bounds and step must be finite")
+    spacing > 0 || error("$axis step must be positive")
+    first_value <= last_value || error("$axis minimum must be <= maximum")
+
+    values = collect(first_value:spacing:last_value)
+    tolerance = 64 * eps(max(abs(first_value), abs(last_value), abs(spacing), 1.0))
+    if last(values) < last_value - tolerance
+        push!(values, last_value)
+    else
+        values[end] = last_value
+    end
+    return values
+end
+
 function parse_args(args::Vector{String})
     cfg = DensePhaseReferenceConfig()
     ranged = false
@@ -242,11 +261,13 @@ function parse_args(args::Vector{String})
     end
 
     if ranged
-        xi_step > 0 || error("xi-step must be positive")
-        cfg.xi_values = collect(range(xi_min; stop=xi_max, step=xi_step))
+        cfg.xi_values = inclusive_step_grid(xi_min, xi_max, xi_step; axis="xi")
     end
 
+    cfg.T_min > 0 || error("T-min must be positive for the five-variable phase solve")
+    cfg.T_min <= cfg.T_max || error("T-min must be <= T-max")
     cfg.T_step > 0 || error("T-step must be positive")
+    cfg.rho_min <= cfg.rho_max || error("rho-min must be <= rho-max")
     cfg.rho_step > 0 || error("rho-step must be positive")
     cfg.p_num > 0 || error("p-num must be positive")
     cfg.t_num > 0 || error("t-num must be positive")
@@ -328,9 +349,9 @@ end
 
 function write_boundary_csv(path::String, rows)
     open(path, "w") do io
-        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark,curve_parameter,plot_order_key")
+        println(io, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark,area_residual,converged,curve_parameter,plot_order_key")
         for row in rows
-            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.T_MeV),$(row.T_MeV)")
+            println(io, "$(row.xi),$(row.T_MeV),$(row.mu_transition_MeV),$(row.rho_hadron),$(row.rho_quark),$(row.area_residual),$(row.converged),$(row.T_MeV),$(row.T_MeV)")
         end
     end
 end
@@ -366,6 +387,7 @@ end
     hasproperty(row, key) ? getproperty(row, key) : default
 
 @inline _dense_csv_value(value) = value === nothing ? "" : string(value)
+@inline _dense_record_with_xi(row::NamedTuple, xi::Real) = merge(row, (xi=Float64(xi),))
 
 function write_grid_convergence_csv(path::String, rows)
     open(path, "w") do io
@@ -691,8 +713,8 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
         "runs" => Any[],
     )
 
-    T_grid = collect(cfg.T_min:cfg.T_step:cfg.T_max)
-    rho_grid = collect(cfg.rho_min:cfg.rho_step:cfg.rho_max)
+    T_grid = inclusive_step_grid(cfg.T_min, cfg.T_max, cfg.T_step; axis="temperature")
+    rho_grid = inclusive_step_grid(cfg.rho_min, cfg.rho_max, cfg.rho_step; axis="rho")
 
     if cfg.crossover_only
         for xi in requested_xi_values
@@ -743,6 +765,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 crossover_method=cfg.crossover_method,
                 crossover_variable=cfg.crossover_variable,
                 crossover_n_mu=cfg.crossover_n_mu,
+                crossover_mu0_only=cfg.crossover_mu_only_zero,
                 crossover_T_max_MeV=resolved_crossover_T_max_MeV(cfg),
                 cep_tol=cfg.cep_tol_MeV,
                 rho_geometry_convergence=cfg.rho_geometry_convergence,
@@ -796,7 +819,13 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
             for row in result.crossover_line
                 push!(crossover_rows, merge((xi=key,), row))
             end
-            append!(grid_convergence_rows, get(result.diagnostics, "grid_convergence_records", NamedTuple[]))
+            append!(
+                grid_convergence_rows,
+                _dense_record_with_xi.(
+                    get(result.diagnostics, "grid_convergence_records", NamedTuple[]),
+                    key,
+                ),
+            )
             push!(manifest["runs"], Dict(
                 "xi" => key,
                 "run_id" => result.run_id,

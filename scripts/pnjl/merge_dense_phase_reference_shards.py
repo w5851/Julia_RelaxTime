@@ -29,6 +29,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Deterministically merge PNJL dense-reference xi shards.")
     parser.add_argument("--shards-root", type=Path, required=True)
     parser.add_argument("--reference-root", type=Path, required=True)
+    parser.add_argument(
+        "--xi-convergence-root",
+        type=Path,
+        help="optional root containing staged xi_grid_convergence_<tag>_level*.csv records",
+    )
     parser.add_argument("--tag", required=True)
     parser.add_argument("--expected-xi-list", required=True)
     parser.add_argument("--overwrite", action="store_true")
@@ -185,6 +190,20 @@ def main() -> None:
         _, rows = merge_csv_artifact(name, source_paths, output)
         rows_by_artifact[name] = rows
 
+    xi_convergence_paths: list[Path] = []
+    if args.xi_convergence_root is not None and args.xi_convergence_root.is_dir():
+        xi_convergence_paths = sorted(
+            args.xi_convergence_root.rglob(f"xi_grid_convergence_{tag}_level*.csv")
+        )
+    if xi_convergence_paths:
+        grid_output = outputs["grid_convergence"]
+        _, rows = merge_csv_artifact(
+            "grid_convergence",
+            [grid_output, *xi_convergence_paths],
+            grid_output,
+        )
+        rows_by_artifact["grid_convergence"] = rows
+
     xis = resolved_xi(rows_by_artifact)
     expected = parse_float_list(args.expected_xi_list)
     missing = [value for value in expected if not any(abs(value - actual) <= 1e-12 for actual in xis)]
@@ -269,6 +288,9 @@ def main() -> None:
         "runs": [{key: value for key, value in runs[xi].items() if key != "source_manifest"} for xi in sorted(runs)],
         "shards": [
             {"manifest": path.as_posix(), "sha256": sha256(path)} for path in manifests
+        ],
+        "xi_refinement_records": [
+            {"path": path.as_posix(), "sha256": sha256(path)} for path in xi_convergence_paths
         ],
         "grid_convergence": {
             "record_count": len(grid_rows),

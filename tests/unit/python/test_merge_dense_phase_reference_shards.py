@@ -15,7 +15,7 @@ TAG = "test"
 
 
 HEADERS = {
-    "boundary": ["xi", "T_MeV", "mu_transition_MeV", "rho_hadron", "rho_quark", "curve_parameter", "plot_order_key"],
+    "boundary": ["xi", "T_MeV", "mu_transition_MeV", "rho_hadron", "rho_quark", "area_residual", "converged", "curve_parameter", "plot_order_key"],
     "cep": ["xi", "T_CEP_MeV", "muq_CEP_MeV", "muB_CEP_MeV", "uncertainty_T_MeV", "T_bracket_low_MeV", "T_bracket_high_MeV", "bracket_width_T_MeV"],
     "spinodals": ["xi", "T_MeV", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "curve_parameter", "plot_order_key"],
     "crossover": ["xi", "mu_MeV", "T_crossover_MeV", "rho", "method", "converged", "derivative", "variable", "curve_parameter", "plot_order_key"],
@@ -41,7 +41,7 @@ def write_shard(root: Path, name: str, xis: list[float], conflict_at_zero: bool 
     runs = []
     for xi in xis:
         offset = 99.0 if conflict_at_zero and xi == 0.0 else 2.0 * xi
-        boundary_rows.append([str(xi), "100", str(300 + offset), "1", "2", "100", "100"])
+        boundary_rows.append([str(xi), "100", str(300 + offset), "1", "2", "0.00005", "true", "100", "100"])
         cep_rows.append([str(xi), str(130 + offset), str(295 + offset), str(3 * (295 + offset)), "0.05", "129.95", "130.05", "0.1"])
         spinodal_rows.append([str(xi), "100", str(310 + offset), str(290 + offset), "0.8", "2.2", "100", "100"])
         crossover_rows.append([str(xi), "0", str(180 + offset), "0.3", "peak", "true", "4", "phi_u", "0", "0"])
@@ -79,9 +79,8 @@ def write_shard(root: Path, name: str, xis: list[float], conflict_at_zero: bool 
     (shard / f"phase_reference_{TAG}_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
 
 
-def run_merge(shards: Path, output: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [
+def run_merge(shards: Path, output: Path, xi_convergence_root: Path | None = None) -> subprocess.CompletedProcess[str]:
+    command = [
             sys.executable,
             str(SCRIPT),
             "--shards-root",
@@ -92,7 +91,11 @@ def run_merge(shards: Path, output: Path) -> subprocess.CompletedProcess[str]:
             TAG,
             "--expected-xi-list=-0.1,0.0,0.1",
             "--overwrite",
-        ],
+        ]
+    if xi_convergence_root is not None:
+        command.extend(["--xi-convergence-root", str(xi_convergence_root)])
+    return subprocess.run(
+        command,
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
@@ -147,3 +150,25 @@ def test_merge_rejects_conflicting_duplicate_endpoint(tmp_path: Path) -> None:
     result = run_merge(shards, tmp_path / "merged")
     assert result.returncode != 0
     assert "conflicting duplicate boundary row" in (result.stdout + result.stderr)
+
+
+def test_merge_includes_staged_xi_convergence_records(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "left", [-0.1, 0.0])
+    write_shard(shards, "right", [0.1])
+    xi_plan = tmp_path / "xi_plan"
+    xi_plan.mkdir()
+    write_csv(
+        xi_plan / f"xi_grid_convergence_{TAG}_level1.csv",
+        HEADERS["phase_grid_convergence"],
+        [["xi", "0", "", "1", "-0.1", "0.1", "0", "0.02", "0.001", "0.00005", "0.01", "true", "converged"]],
+    )
+
+    output = tmp_path / "merged"
+    result = run_merge(shards, output, xi_plan)
+    assert result.returncode == 0, result.stderr
+    with (output / f"phase_grid_convergence_{TAG}.csv").open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert any(row["axis"] == "xi" and row["level"] == "1" for row in rows)
+    manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
+    assert len(manifest["xi_refinement_records"]) == 1

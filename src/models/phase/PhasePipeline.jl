@@ -159,6 +159,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         crossover_method::Symbol=:peak,
         crossover_variable::Symbol=:phi_u,
         crossover_n_mu::Int=12,
+        crossover_mu0_only::Bool=false,
         crossover_T_max_MeV::Float64=NaN,
         cep_strategy::Symbol=:interpolate,
         cep_interpolate_use_direct_eval::Bool=false,
@@ -233,6 +234,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             crossover_method=crossover_method,
             crossover_variable=crossover_variable,
             crossover_n_mu=crossover_n_mu,
+            crossover_mu0_only=crossover_mu0_only,
             crossover_T_max_MeV=crossover_T_max_MeV,
             cep_tol=isfinite(cep_tol) && cep_tol > 0 ? cep_tol : 0.1,
             cep_max_bisect_iter=cep_max_bisect_iter,
@@ -410,6 +412,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             T_max_MeV=T_max_mev,
             xi=Float64(xi),
             n_mu=crossover_n_mu,
+            mu0_only=crossover_mu0_only,
             method=crossover_method,
             variable=crossover_variable,
             model_kind=model_kind,
@@ -448,12 +451,14 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "cep_direct_start" => String(cep_direct_start),
         "compute_crossover" => compute_crossover,
         "crossover_n_mu" => crossover_n_mu,
+        "crossover_mu0_only" => crossover_mu0_only,
     )
     config_snapshot["config_hash"] = _config_hash(model_kind;
         mode=:research, profile=profile, xi=xi, T_grid=join(T_grid, ","), rho_grid=join(rho_grid, ","), solver_backend=solver_backend,
         p_num=p_num, t_num=t_num, iterations=iterations,
         thermo_quadrature_policy=thermo_quadrature_policy, thermo_quadrature_rtol=thermo_quadrature_rtol,
         thermo_quadrature_atol=thermo_quadrature_atol, thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        crossover_mu0_only=crossover_mu0_only,
         crossover_T_max_MeV=(isfinite(crossover_T_max_MeV) ? crossover_T_max_MeV : maximum(Float64.(T_grid))))
 
     diagnostics = Dict{String, Any}(

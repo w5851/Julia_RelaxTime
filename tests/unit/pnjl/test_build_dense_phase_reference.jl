@@ -43,6 +43,7 @@ end
         "--T-min", "10",
         "--T-max", "240",
         "--crossover-T-max", "235",
+        "--crossover-mu0-only",
         "--adaptive-xi",
         "--xi-refine-levels", "1",
         "--T-refine-levels", "1",
@@ -51,9 +52,20 @@ end
     @test cfg.xi_max_refine_level == 1
     @test cfg.temperature_max_refine_level == 1
     @test resolved_crossover_T_max_MeV(cfg) == 235.0
+    @test cfg.crossover_mu_only_zero
 
     inherited = DensePhaseReferenceConfig(T_min=10.0, T_max=240.0)
     @test resolved_crossover_T_max_MeV(inherited) == 240.0
+
+    low_temperature_grid = inclusive_step_grid(1.0, 240.0, 5.0; axis="temperature")
+    @test first(low_temperature_grid) == 1.0
+    @test low_temperature_grid[end - 1] == 236.0
+    @test last(low_temperature_grid) == 240.0
+    @test length(low_temperature_grid) == 49
+    @test inclusive_step_grid(60.0, 240.0, 5.0; axis="temperature") == collect(60.0:5.0:240.0)
+    @test inclusive_step_grid(0.0, 1.0, 0.3; axis="rho") == [0.0, 0.3, 0.6, 0.9, 1.0]
+    @test_throws ErrorException parse_args(["--T-min", "0", "--T-max", "240"])
+    @test_throws ErrorException parse_args(["--T-min", "10", "--T-max", "5"])
 
     cache = Dict(
         -0.1 => _dense_synthetic_result(-0.1),
@@ -80,6 +92,24 @@ end
         "--adaptive-xi",
         "--crossover-only",
     ])
+
+    mktempdir() do root
+        boundary_path = joinpath(root, "boundary.csv")
+        write_boundary_csv(boundary_path, [(
+            xi=0.0,
+            T_MeV=100.0,
+            mu_transition_MeV=300.0,
+            rho_hadron=1.0,
+            rho_quark=2.0,
+            area_residual=5e-5,
+            converged=true,
+        )])
+        header = first(readlines(boundary_path))
+        @test occursin("area_residual,converged", header)
+    end
+
+    qualified = _dense_record_with_xi((axis="temperature", xi=-99.0, level=1), 0.25)
+    @test qualified.xi == 0.25
 end
 
 end # module DensePhaseReferenceContractTests

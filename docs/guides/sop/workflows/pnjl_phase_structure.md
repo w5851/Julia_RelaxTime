@@ -27,6 +27,8 @@ Windows 和 POSIX 均优先通过 `run_with_sysimage` wrapper 启动。
 
 - `T_min/T_max/T_step`：MeV。
 - `rho_min/rho_max/rho_step`：`rho/rho0`。
+- dense-reference builder 始终把声明的 `T_max`、`rho_max` 和 ranged `xi_max` 作为末端锚点；当步长不能整除区间时，最后一个间隔可以短于名义步长。
+- GitHub `workflow_dispatch` 的顶层输入受 25-property 限制。dense-reference workflow 保留常用轴、节点和开关作为独立输入；积分容差、几何量门限、refine level、CEP width 与显式 crossover 温度上限通过 `advanced_config_json` 传入，并由 `resolve_dense_reference_action_config.py` 白名单校验后转换为 CLI 参数。
 - `xi`：无量纲各向异性参数。
 - PNJL phase 标量热项中，角度只通过 RS 分布自变量 `E_xi` 进入；chi、Polyakov 势、vacuum、Maxwell、spinodal 和 CEP 不额外引入角核。`E_xi` 不作为物理色散关系。
 - `thermo_quadrature_policy=tensor_gauss` 保留固定有限区间兼容路径；`rs_reduced_adaptive` 使用 RS 角约化和无穷径向自适应积分，仅适用于上述标量热核，不得外推到 magnetic 或 transport。
@@ -117,6 +119,7 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 
 production CLI 可显式配置 `crossover_T_max_MeV`、rho 几何量收敛门限和温度中点自适应门限。
 `crossover_T_max_MeV=NaN` 表示继承 `T_max`；不得依赖历史隐藏的 `220 MeV` 截断。启用
+`crossover_mu0_only=true` 时，实际 crossover 求解与产物都只能包含 `mu_q=0`，不能只修改 manifest 标记。
 `rho_geometry_convergence=true` 时，`cep_max_refine_level` 至少为 1。正式 dense reference 默认启用
 rho 几何量与温度中点收敛；adaptive xi 为显式 opt-in，且每个 xi 区间至少求一次中点后才能估计误差。
 
@@ -141,8 +144,15 @@ production 的 `production_eval/` 保存每个温度的全部 rho 粗细层；�
 需要审计网格演化时联合读取 `production_eval/` 与 `phase_grid_convergence.csv`，下游相线消费方使用聚合 CSV，
 不得把不同层的重复采样自行拼接成一条曲线。
 
-GitHub Actions 的 dense reference workflow 按相邻 xi 锚点区间分 shard，`fail-fast=false`；失败后只需重跑失败区间。
-最终 merge 要求所有 shard 绑定同一 commit 与同一非-xi 配置，按物理键确定性排序、去重，并对重复端点的数值一致性做硬校验。
+GitHub Actions 的 dense reference workflow 使用“一 xi 一 shard”，`fail-fast=false`。启用 adaptive xi 时，初始锚点和
+第一层必需中点并行计算；每层 merge 后复用 `Models._phase_result_midpoint_error` 审计区间，只为未收敛子区间创建
+下一层 midpoint shard。Action 入口当前最多支持三层 xi refinement；更深层级必须先扩展 workflow DAG，不能把多个
+xi 重新塞回同一 job。每层 matrix 显式限制 `max-parallel=20`，收敛档位按 C0、C1、C2 顺序触发，避免多个完整
+run 同时占满 runner 配额；失败后只重跑失败的单 xi shard。
+
+每个 shard 的正式计算 step 具有显式五小时上限，并以一分钟 heartbeat 报告 elapsed time 和已落盘文件数；job 失败时
+单独上传 diagnostic artifact。最终 merge 要求所有 shard 绑定同一 commit 与同一非-xi 配置，按物理键确定性排序、
+去重，并把各层 xi convergence record 合并进 `phase_grid_convergence_<tag>.csv`。
 merge 产物通过 validator 后仍只是候选 artifact，不自动写入或晋升 canonical reference。
 
 ## 11. Regression / Validation 验收

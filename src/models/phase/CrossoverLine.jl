@@ -435,11 +435,17 @@ function scan_crossover_line(mu_range::Tuple{Real, Real, Int}, T_range::Tuple{Re
 	return results
 end
 
+@inline function _crossover_mu_scan_range(mu_max_MeV::Real, n_mu::Int, mu0_only::Bool)
+	mu0_only && return (0.0, 0.0, 1)
+	return (0.0, Float64(mu_max_MeV) / HBARC_MEV_FM, max(3, n_mu))
+end
+
 function build_crossover_line(; mu_max_MeV::Real,
 		T_min_MeV::Real,
 		T_max_MeV::Real,
 		xi::Real=0.0,
 		n_mu::Int=12,
+		mu0_only::Bool=false,
 		method::Symbol=:peak,
 		variable::Symbol=:phi_u,
 		model_kind::Symbol=:PNJL,
@@ -453,11 +459,11 @@ function build_crossover_line(; mu_max_MeV::Real,
 	mu_max_MeV <= 0 && return NamedTuple[]
 	T_min_MeV < T_max_MeV || return NamedTuple[]
 
-	μ_max_fm = Float64(mu_max_MeV) / HBARC_MEV_FM
 	T_min_fm = Float64(T_min_MeV) / HBARC_MEV_FM
 	T_max_fm = Float64(T_max_MeV) / HBARC_MEV_FM
+	mu_range = _crossover_mu_scan_range(mu_max_MeV, n_mu, mu0_only)
 
-	raw = scan_crossover_line((0.0, μ_max_fm, max(3, n_mu)), (T_min_fm, T_max_fm);
+	raw = scan_crossover_line(mu_range, (T_min_fm, T_max_fm);
 		method=method,
 		variable=variable,
 		xi=xi,

@@ -72,6 +72,8 @@ detect_crossover(μ_fm, T_range; method=:peak, variable=:phi_u, kwargs...)
 `p_num` 与 `t_num` 会实际传递到 crossover 的基态和导数求解，不再只停留在上层配置字段；
 因此主 phase 与 crossover 可以使用同一套热力学节点口径。pipeline 的 crossover 温度上限由
 `crossover_T_max_MeV` 显式给出，`NaN` 表示继承主扫描上限，不存在隐藏的 `220 MeV` 截断。
+`crossover_mu0_only=true` 会把实际 crossover 采样解析为唯一的 `mu_q=0` 点；该语义同时适用于
+research、production 和 full dense-reference 路径，而不是只写入 manifest 后再过滤非零化学势结果。
 实际节点数、迭代数和解析后的温区上限会进入配置快照与 config hash。
 
 ### 峰值法 `:peak`
