@@ -17,6 +17,15 @@ end
 
 @testset "PhaseArtifacts" begin
 
+    @testset "CSV field escaping" begin
+        @test Models._phase_csv_value(nothing) == ""
+        @test Models._phase_csv_value("plain") == "plain"
+        @test Models._phase_csv_value("a,b") == "\"a,b\""
+        @test Models._phase_csv_value("a\"b") == "\"a\"\"b\""
+        @test Models._phase_csv_value("a\nb") == "\"a\nb\""
+        @test Models._phase_csv_value("a\rb") == "\"a\rb\""
+    end
+
     @testset "resolve_phase_output_target 接口" begin
         @test isdefined(Models, :resolve_phase_output_target)
         target = Models.resolve_phase_output_target(:PNJL; project_root=PROJECT_ROOT)
@@ -46,6 +55,37 @@ end
         @test haskey(paths, "phase_grid_convergence")
         @test isfile(paths["phase_grid_convergence"])
         @test startswith(read(paths["phase_grid_convergence"], String), "axis,xi,T_MeV")
+    end
+
+    @testset "grid convergence reasons are valid quoted CSV fields" begin
+        tmp = mktempdir()
+        reason = "midpoint_classification_changed_or_unresolved:valid,unknown,\"valid\"\nreview"
+        result = Models.PhasePipelineResult(
+            xi=0.3,
+            diagnostics=Dict{String, Any}(
+                "grid_convergence_records" => [(
+                    axis="temperature",
+                    xi=0.3,
+                    T_MeV=10.0,
+                    level=1,
+                    left=5.0,
+                    right=15.0,
+                    midpoint=10.0,
+                    position_error_MeV=0.1,
+                    density_error=0.01,
+                    maxwell_area=1e-4,
+                    response_rtol=0.05,
+                    converged=false,
+                    reason=reason,
+                )],
+            ),
+        )
+        paths = Models.build_phase_artifacts(result; output_dir=tmp)
+        grid_csv = read(paths["phase_grid_convergence"], String)
+        @test occursin(
+            "\"midpoint_classification_changed_or_unresolved:valid,unknown,\"\"valid\"\"\nreview\"",
+            grid_csv,
+        )
     end
 
     @testset "promote_phase_artifacts 接口存在" begin

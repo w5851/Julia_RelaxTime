@@ -386,7 +386,7 @@ end
 @inline _dense_record_value(row, key::Symbol, default=nothing) =
     hasproperty(row, key) ? getproperty(row, key) : default
 
-@inline _dense_csv_value(value) = value === nothing ? "" : string(value)
+@inline _dense_csv_value(value) = Models._phase_csv_value(value)
 @inline _dense_record_with_xi(row::NamedTuple, xi::Real) = merge(row, (xi=Float64(xi),))
 
 function write_grid_convergence_csv(path::String, rows)

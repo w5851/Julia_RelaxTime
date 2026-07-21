@@ -110,6 +110,26 @@ end
 
     qualified = _dense_record_with_xi((axis="temperature", xi=-99.0, level=1), 0.25)
     @test qualified.xi == 0.25
+
+    mktempdir() do root
+        path = joinpath(root, "grid.csv")
+        write_grid_convergence_csv(path, [(
+            axis="temperature",
+            xi=0.3,
+            T_MeV=10.0,
+            level=1,
+            left=5.0,
+            right=15.0,
+            midpoint=10.0,
+            position_error_MeV=0.1,
+            density_error=0.01,
+            maxwell_area=1e-4,
+            response_rtol=0.05,
+            converged=false,
+            reason="valid,unknown,\"valid\"\nreview",
+        )])
+        @test occursin("\"valid,unknown,\"\"valid\"\"\nreview\"", read(path, String))
+    end
 end
 
 end # module DensePhaseReferenceContractTests

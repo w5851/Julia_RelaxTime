@@ -30,7 +30,13 @@ def write_csv(path: Path, header: list[str], rows: list[list[str]]) -> None:
         writer.writerows(rows)
 
 
-def write_shard(root: Path, name: str, xis: list[float], conflict_at_zero: bool = False) -> None:
+def write_shard(
+    root: Path,
+    name: str,
+    xis: list[float],
+    conflict_at_zero: bool = False,
+    grid_reason: str = "converged",
+) -> None:
     shard = root / name
     shard.mkdir(parents=True)
     boundary_rows: list[list[str]] = []
@@ -45,7 +51,7 @@ def write_shard(root: Path, name: str, xis: list[float], conflict_at_zero: bool 
         cep_rows.append([str(xi), str(130 + offset), str(295 + offset), str(3 * (295 + offset)), "0.05", "129.95", "130.05", "0.1"])
         spinodal_rows.append([str(xi), "100", str(310 + offset), str(290 + offset), "0.8", "2.2", "100", "100"])
         crossover_rows.append([str(xi), "0", str(180 + offset), "0.3", "peak", "true", "4", "phi_u", "0", "0"])
-        grid_rows.append(["rho", str(xi), "100", "1", "0", "1", "1", "0.01", "0.001", "0.00005", "0", "true", "converged"])
+        grid_rows.append(["rho", str(xi), "100", "1", "0", "1", "1", "0.01", "0.001", "0.00005", "0", "true", grid_reason])
         runs.append({
             "xi": xi,
             "run_id": f"xi_{xi}",
@@ -79,7 +85,12 @@ def write_shard(root: Path, name: str, xis: list[float], conflict_at_zero: bool 
     (shard / f"phase_reference_{TAG}_manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
 
 
-def run_merge(shards: Path, output: Path, xi_convergence_root: Path | None = None) -> subprocess.CompletedProcess[str]:
+def run_merge(
+    shards: Path,
+    output: Path,
+    xi_convergence_root: Path | None = None,
+    extra_args: list[str] | None = None,
+) -> subprocess.CompletedProcess[str]:
     command = [
             sys.executable,
             str(SCRIPT),
@@ -94,6 +105,8 @@ def run_merge(shards: Path, output: Path, xi_convergence_root: Path | None = Non
         ]
     if xi_convergence_root is not None:
         command.extend(["--xi-convergence-root", str(xi_convergence_root)])
+    if extra_args is not None:
+        command.extend(extra_args)
     return subprocess.run(
         command,
         cwd=REPO_ROOT,
@@ -125,6 +138,11 @@ def test_merge_is_deterministic_and_deduplicates_interval_endpoints(tmp_path: Pa
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["config"]["xi_values"] == [-0.1, 0.0, 0.1]
     assert len(manifest["shards"]) == 2
+    assert manifest["provenance"] == {
+        "calculation_git_commit": "abc123",
+        "postprocess_git_commit": "abc123",
+        "source_workflow_run_id": None,
+    }
     validation = subprocess.run(
         [
             sys.executable,
@@ -141,6 +159,105 @@ def test_merge_is_deterministic_and_deduplicates_interval_endpoints(tmp_path: Pa
         check=False,
     )
     assert validation.returncode == 0, validation.stderr
+
+
+def test_merge_round_trips_quoted_grid_reason_and_records_dual_provenance(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    reason = 'valid,unknown,"valid"\nreview'
+    write_shard(shards, "left", [-0.1, 0.0], grid_reason=reason)
+    write_shard(shards, "right", [0.1], grid_reason=reason)
+    output = tmp_path / "merged"
+
+    result = run_merge(
+        shards,
+        output,
+        extra_args=[
+            "--expected-calculation-git-commit",
+            "abc123",
+            "--postprocess-git-commit",
+            "def456",
+            "--source-workflow-run-id",
+            "12345",
+        ],
+    )
+    assert result.returncode == 0, result.stderr
+    with (output / f"phase_grid_convergence_{TAG}.csv").open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert {row["reason"] for row in rows} == {reason}
+    manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["provenance"] == {
+        "calculation_git_commit": "abc123",
+        "postprocess_git_commit": "def456",
+        "source_workflow_run_id": "12345",
+    }
+
+
+def test_merge_rejects_malformed_unquoted_grid_reason_at_read_boundary(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "only", [-0.1, 0.0, 0.1])
+    grid_path = shards / "only" / f"phase_grid_convergence_{TAG}.csv"
+    grid_path.write_text(
+        ",".join(HEADERS["phase_grid_convergence"])
+        + "\n"
+        + "rho,0,100,1,0,1,1,0.01,0.001,0.00005,0,true,valid,unknown,valid\n",
+        encoding="utf-8",
+    )
+
+    result = run_merge(shards, tmp_path / "merged")
+    message = result.stdout + result.stderr
+    assert result.returncode != 0
+    assert f"phase_grid_convergence_{TAG}.csv" in message
+    assert "ending at physical line 2" in message
+    assert "expected 13 fields, parsed 15" in message
+    assert "extra_values=['unknown', 'valid']" in message
+
+
+def test_validator_rejects_malformed_csv_before_manifest_checks(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "only", [-0.1, 0.0, 0.1])
+    output = tmp_path / "merged"
+    result = run_merge(shards, output)
+    assert result.returncode == 0, result.stderr
+    grid_path = output / f"phase_grid_convergence_{TAG}.csv"
+    grid_path.write_text(
+        ",".join(HEADERS["phase_grid_convergence"])
+        + "\n"
+        + "rho,0,100,1,0,1,1,0.01,0.001,0.00005,0,true,valid,unknown,valid\n",
+        encoding="utf-8",
+    )
+
+    validation = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--reference-root",
+            str(output),
+            "--tag",
+            TAG,
+            "--expect-full-reference",
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    message = validation.stdout + validation.stderr
+    assert validation.returncode != 0
+    assert f"phase_grid_convergence_{TAG}.csv" in message
+    assert "ending at physical line 2" in message
+    assert "expected 13 fields, parsed 15" in message
+
+
+def test_merge_rejects_unexpected_calculation_commit(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "only", [-0.1, 0.0, 0.1])
+    result = run_merge(
+        shards,
+        tmp_path / "merged",
+        extra_args=["--expected-calculation-git-commit", "wrong"],
+    )
+    assert result.returncode != 0
+    assert "shard calculation commit mismatch: expected wrong, got abc123" in (result.stdout + result.stderr)
 
 
 def test_merge_rejects_conflicting_duplicate_endpoint(tmp_path: Path) -> None:

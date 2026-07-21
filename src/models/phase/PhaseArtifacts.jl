@@ -74,7 +74,13 @@ end
     return hasproperty(record, key) ? getproperty(record, key) : default
 end
 
-@inline _phase_csv_value(value) = value === nothing ? "" : string(value)
+@inline function _phase_csv_value(value)
+    text = value === nothing ? "" : string(value)
+    if occursin(',', text) || occursin('"', text) || occursin('\n', text) || occursin('\r', text)
+        return string('"', replace(text, '"' => "\"\""), '"')
+    end
+    return text
+end
 
 function _write_grid_convergence(path::String, result::PhasePipelineResult)
     records = get(result.diagnostics, "grid_convergence_records", NamedTuple[])

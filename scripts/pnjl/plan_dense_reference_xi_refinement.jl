@@ -195,7 +195,7 @@ function _load_reference_results(reference_root::String, tag::String)
 end
 
 
-@inline _csv_value(value) = value === nothing ? "" : string(value)
+@inline _csv_value(value) = Models._phase_csv_value(value)
 
 
 function _write_records(path::String, rows::Vector{NamedTuple})
