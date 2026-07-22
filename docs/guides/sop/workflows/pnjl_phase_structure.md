@@ -155,6 +155,17 @@ run 同时占满 runner 配额；失败后只重跑失败的单 xi shard。
 去重，并把各层 xi convergence record 合并进 `phase_grid_convergence_<tag>.csv`。
 merge 产物通过 validator 后仍只是候选 artifact，不自动写入或晋升 canonical reference。
 
+dense-reference CSV 必须遵循 RFC 4180 字段转义：字段含逗号、双引号或换行时必须加双引号，字段内双引号写成
+两个双引号。shard validator 在上传前逐行拒绝列数不匹配，并报告文件、物理行号、期望/实际列数；merge 在消费
+任何 shard 时执行同一结构检查，不能把 malformed row 推迟到最终 `DictWriter` 才失败。
+
+数值计算与后处理使用双 provenance。聚合 manifest 的 `provenance.calculation_git_commit` 绑定生成 shard 的计算
+提交，`provenance.postprocess_git_commit` 绑定 merge/validator 提交，并可记录 `source_workflow_run_id`。只有 solver、
+数值内核、grid/refinement 语义或 effective config 改变时才必须重算对应 C0/C1/C2 档位。完整 shard artifacts 仍在
+保留期内且变更只涉及 CSV、merge、validator 或 Action 后处理时，可通过
+`.github/workflows/pnjl-dense-reference-replay.yml` 重放该档位；replay 必须显式给出原 run ID、原 calculation SHA、
+tag 与必需 xi anchors，SHA 不匹配即失败。replay 产物始终是 diagnostic candidate，不自动晋升 reference。
+
 ## 11. Regression / Validation 验收
 
 最小层级：
@@ -171,6 +182,7 @@ merge 产物通过 validator 后仍只是候选 artifact，不自动写入或晋
 - smoke 失败时先检查配置路径、sysimage 和 CLI 参数；
 - solver unknown 或失败比例异常时保留 `phase_summary.json` 和 report，不直接删点；
 - 改变网格或求解策略时使用新 case 目录；
+- 后处理修复优先重放已完成且 SHA 已核验的 shard artifacts；不得用 replay 掩盖数值代码或 effective config 变化；
 - 不在已有正式目录上用不同 effective config 覆盖运行；
 - CEP 未找到不自动等价于“物理上不存在 CEP”，必须结合扫描覆盖和诊断字段判断。
 

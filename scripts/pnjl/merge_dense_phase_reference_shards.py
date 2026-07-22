@@ -36,6 +36,18 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--tag", required=True)
     parser.add_argument("--expected-xi-list", required=True)
+    parser.add_argument(
+        "--expected-calculation-git-commit",
+        help="reject shards whose numerical calculation commit differs from this SHA",
+    )
+    parser.add_argument(
+        "--postprocess-git-commit",
+        help="commit providing merge/validation code; defaults to the calculation commit",
+    )
+    parser.add_argument(
+        "--source-workflow-run-id",
+        help="workflow run that produced the shard artifacts",
+    )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
 
@@ -85,7 +97,20 @@ def load_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
         reader = csv.DictReader(handle)
         if reader.fieldnames is None:
             fail(f"missing CSV header: {path}")
-        return list(reader.fieldnames), [dict(row) for row in reader]
+        fieldnames = list(reader.fieldnames)
+        rows: list[dict[str, str]] = []
+        for row in reader:
+            extra = row.get(None) or []
+            missing = [name for name in fieldnames if row.get(name) is None]
+            if extra or missing:
+                actual_count = len(fieldnames) + len(extra) - len(missing)
+                fail(
+                    f"malformed CSV row in {path} ending at physical line {reader.line_num}: "
+                    f"expected {len(fieldnames)} fields, parsed {actual_count}; "
+                    f"missing={missing}, extra_values={extra}"
+                )
+            rows.append(dict(row))
+        return fieldnames, rows
 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, str]]) -> None:
@@ -161,6 +186,16 @@ def main() -> None:
     commits = {payload.get("generator", {}).get("git_commit") for payload in payloads}
     if len(commits) != 1 or None in commits:
         fail(f"shards do not share one git commit: {sorted(str(value) for value in commits)}")
+    calculation_git_commit = str(next(iter(commits)))
+    if (
+        args.expected_calculation_git_commit is not None
+        and calculation_git_commit != args.expected_calculation_git_commit
+    ):
+        fail(
+            "shard calculation commit mismatch: "
+            f"expected {args.expected_calculation_git_commit}, got {calculation_git_commit}"
+        )
+    postprocess_git_commit = args.postprocess_git_commit or calculation_git_commit
     configs = [payload.get("config", {}) for payload in payloads]
     normalized = [normalize_config(config) for config in configs]
     if any(config != normalized[0] for config in normalized[1:]):
@@ -227,10 +262,15 @@ def main() -> None:
         "artifact": {"path": normalized_path(outputs["crossover"]), "row_count": len(crossover_rows)},
         "generator": {
             "script": "scripts/pnjl/merge_dense_phase_reference_shards.py",
-            "git_commit": next(iter(commits)),
+            "git_commit": calculation_git_commit,
             "generated_at": generated_at,
             "crossover_only": bool(configs[0].get("crossover_only")),
             "crossover_mu0_only": bool(configs[0].get("crossover_mu0_only")),
+        },
+        "provenance": {
+            "calculation_git_commit": calculation_git_commit,
+            "postprocess_git_commit": postprocess_git_commit,
+            "source_workflow_run_id": args.source_workflow_run_id,
         },
         "xi_coverage": {
             "count": len(xis),
@@ -272,10 +312,15 @@ def main() -> None:
         "schema_version": payloads[0].get("schema_version", "v1"),
         "generator": {
             "script": "scripts/pnjl/merge_dense_phase_reference_shards.py",
-            "git_commit": next(iter(commits)),
+            "git_commit": calculation_git_commit,
             "generated_at": generated_at,
             "crossover_only": bool(configs[0].get("crossover_only")),
             "crossover_mu0_only": bool(configs[0].get("crossover_mu0_only")),
+        },
+        "provenance": {
+            "calculation_git_commit": calculation_git_commit,
+            "postprocess_git_commit": postprocess_git_commit,
+            "source_workflow_run_id": args.source_workflow_run_id,
         },
         "config": final_config,
         "output_root": payloads[0].get("output_root"),
@@ -301,7 +346,8 @@ def main() -> None:
     final_manifest["artifacts"]["manifest"] = {"path": normalized_path(manifest_path)}
     manifest_path.write_text(json.dumps(final_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    print(f"merged {len(manifests)} shards at commit {next(iter(commits))}")
+    print(f"merged {len(manifests)} shards calculated at commit {calculation_git_commit}")
+    print(f"postprocessed at commit {postprocess_git_commit}")
     print(f"resolved xi values: {xis}")
     print(f"manifest: {manifest_path}")
 

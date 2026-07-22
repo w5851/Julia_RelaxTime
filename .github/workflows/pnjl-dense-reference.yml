@@ -348,6 +348,9 @@ jobs:
             --reference-root "${REFERENCE_ROOT}"
             --tag "${{ inputs.tag || 'dense' }}"
             "--expected-xi-list=${{ needs.plan.outputs.expected_xi_csv }}"
+            --expected-calculation-git-commit "${GITHUB_SHA}"
+            --postprocess-git-commit "${GITHUB_SHA}"
+            --source-workflow-run-id "${GITHUB_RUN_ID}"
             --overwrite
           )
           if [ "${{ needs.plan.outputs.xi_refine_levels }}" -ge 1 ]; then

@@ -82,6 +82,23 @@ end
         records = read(cfg.records_output, String)
         @test occursin("xi,0.0,,1,-0.1,0.1,0.0", records)
         @test occursin("interpolation_tolerance_exceeded", records)
+
+        _write_records(cfg.records_output, NamedTuple[(
+            axis="xi",
+            xi=0.0,
+            T_MeV=nothing,
+            level=1,
+            left=-0.1,
+            right=0.1,
+            midpoint=0.0,
+            position_error_MeV=0.2,
+            density_error=0.01,
+            maxwell_area=1e-4,
+            response_rtol=0.05,
+            converged=false,
+            reason="valid,unknown,\"valid\"\nreview",
+        )])
+        @test occursin("\"valid,unknown,\"\"valid\"\"\nreview\"", read(cfg.records_output, String))
     end
 end
 

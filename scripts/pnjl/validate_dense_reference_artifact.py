@@ -32,8 +32,22 @@ def load_json(path: Path):
 def load_csv_rows(path: Path):
     with path.open("r", encoding="utf-8", newline="") as fh:
         reader = csv.DictReader(fh)
-        rows = list(reader)
-    return reader.fieldnames or [], rows
+        fieldnames = reader.fieldnames or []
+        if not fieldnames:
+            fail(f"missing CSV header: {path}")
+        rows = []
+        for row in reader:
+            extra = row.get(None) or []
+            missing = [name for name in fieldnames if row.get(name) is None]
+            if extra or missing:
+                actual_count = len(fieldnames) + len(extra) - len(missing)
+                fail(
+                    f"malformed CSV row in {path} ending at physical line {reader.line_num}: "
+                    f"expected {len(fieldnames)} fields, parsed {actual_count}; "
+                    f"missing={missing}, extra_values={extra}"
+                )
+            rows.append(dict(row))
+    return fieldnames, rows
 
 
 def require_columns(fieldnames, required, artifact_name: str):
@@ -112,6 +126,15 @@ def main():
     meta_generator = meta.get("generator", {})
     if manifest_generator.get("git_commit") != meta_generator.get("git_commit"):
         fail("manifest generator.git_commit does not match meta generator.git_commit")
+
+    provenance = manifest.get("provenance")
+    if provenance is not None:
+        if provenance.get("calculation_git_commit") != manifest_generator.get("git_commit"):
+            fail("manifest provenance.calculation_git_commit does not match generator.git_commit")
+        if not provenance.get("postprocess_git_commit"):
+            fail("manifest provenance.postprocess_git_commit is missing")
+        if meta.get("provenance") != provenance:
+            fail("manifest provenance does not match crossover metadata provenance")
 
     if manifest_generator.get("crossover_only") != args.expect_crossover_only:
         fail("manifest crossover_only flag does not match workflow expectation")
@@ -210,6 +233,13 @@ def main():
         "crossover_only": args.expect_crossover_only,
         "mu0_only": args.expect_mu0_only,
         "git_commit": manifest_generator.get("git_commit"),
+        "calculation_git_commit": (
+            provenance.get("calculation_git_commit") if provenance else manifest_generator.get("git_commit")
+        ),
+        "postprocess_git_commit": (
+            provenance.get("postprocess_git_commit") if provenance else manifest_generator.get("git_commit")
+        ),
+        "source_workflow_run_id": provenance.get("source_workflow_run_id") if provenance else None,
         "generated_at_utc": manifest_generator.get("generated_at"),
         "crossover_rows": len(rows),
         "converged_rows": converged_count,

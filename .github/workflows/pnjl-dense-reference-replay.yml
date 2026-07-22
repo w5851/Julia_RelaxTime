@@ -1,0 +1,149 @@
+name: PNJL Dense Reference Postprocess Replay
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "包含完整 shard artifacts 的原 workflow run ID"
+        required: true
+        type: string
+      source_calculation_sha:
+        description: "原 shard 数值计算提交 SHA（必须与 manifest 一致）"
+        required: true
+        type: string
+      tag:
+        description: "原 artifact 标签后缀"
+        required: true
+        type: string
+      expected_xi_list:
+        description: "必须存在的初始 ξ 锚点（逗号分隔）"
+        required: true
+        type: string
+      include_xi_convergence_records:
+        description: "下载并合并原 run 的 staged ξ convergence records"
+        required: false
+        default: true
+        type: boolean
+      crossover_only:
+        description: "原 run 是否仅生成 crossover reference"
+        required: false
+        default: false
+        type: boolean
+      crossover_mu0_only:
+        description: "原 run 是否仅生成 mu_q = 0 crossover"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/downloaded_shards
+      XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/downloaded_xi_plans
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/reference
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/validation_report.json
+    steps:
+      - name: Checkout postprocess code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download source xi shards
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Download source xi convergence records
+        if: ${{ inputs.include_xi_convergence_records }}
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*
+          path: ${{ env.XI_PLAN_ROOT }}
+
+      - name: Replay deterministic merge
+        shell: bash
+        run: |
+          rm -rf "${REFERENCE_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}"
+          merge_cmd=(
+            python scripts/pnjl/merge_dense_phase_reference_shards.py
+            --shards-root "${SHARDS_ROOT}"
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag }}"
+            "--expected-xi-list=${{ inputs.expected_xi_list }}"
+            --expected-calculation-git-commit "${{ inputs.source_calculation_sha }}"
+            --postprocess-git-commit "${GITHUB_SHA}"
+            --source-workflow-run-id "${{ inputs.source_run_id }}"
+            --overwrite
+          )
+          if [ "${{ inputs.include_xi_convergence_records }}" = "true" ]; then
+            merge_cmd+=(--xi-convergence-root "${XI_PLAN_ROOT}")
+          fi
+          "${merge_cmd[@]}"
+
+      - name: Validate replayed dense reference artifact
+        shell: bash
+        run: |
+          validate_cmd=(
+            python scripts/pnjl/validate_dense_reference_artifact.py
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag }}"
+            --min-crossover-rows 1
+            --report-path "${REPORT_PATH}"
+          )
+          if [ "${{ inputs.crossover_only }}" = "true" ]; then
+            validate_cmd+=(--expect-crossover-only)
+          else
+            validate_cmd+=(--expect-full-reference)
+          fi
+          if [ "${{ inputs.crossover_mu0_only }}" = "true" ]; then
+            validate_cmd+=(--expect-mu0-only)
+          fi
+          "${validate_cmd[@]}"
+
+      - name: Upload replayed dense reference artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-replay-${{ inputs.tag }}-source-${{ inputs.source_run_id }}
+          path: |
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.csv
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag }}_manifest.json
+            ${{ env.REPORT_PATH }}
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
+
+      - name: Create replay summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path(os.environ["REPORT_PATH"]).read_text(encoding="utf-8"))
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a", encoding="utf-8") as handle:
+              handle.write("## PNJL Dense Reference Postprocess Replay\n\n")
+              handle.write(f"- source workflow run: `{report['source_workflow_run_id']}`\n")
+              handle.write(f"- calculation SHA: `{report['calculation_git_commit']}`\n")
+              handle.write(f"- postprocess SHA: `{report['postprocess_git_commit']}`\n")
+              handle.write(f"- resolved xi values: `{report['xi_values']}`\n")
+              handle.write("- status: diagnostic replay only; no reference promotion\n")
+          PY
