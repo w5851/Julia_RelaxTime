@@ -42,7 +42,7 @@ jobs:
       crossover_mu0_only: ${{ steps.publish.outputs.crossover_mu0_only }}
     env:
       SOURCE_SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/source_shards
-      PLAN_PATH: ${{ runner.temp }}/dense_reference_resume_plan.json
+      PLAN_PATH: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/resume_plan.json
     steps:
       - name: Checkout resume workflow code
         uses: actions/checkout@v4

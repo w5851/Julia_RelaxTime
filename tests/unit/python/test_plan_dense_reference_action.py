@@ -119,6 +119,7 @@ def test_resume_workflow_reuses_source_shards_and_keeps_calculation_sha():
     assert "source and resumed shards" in workflow_text
     assert "diagnostic candidate only; no reference promotion" in workflow_text
     assert "include_current_run_shards: ${{ fromJSON(needs.assess_xi_level2.outputs.next_xi_count) > 0 }}" in workflow_text
+    assert "runner.temp" not in workflow_text
     assert "calculation_ref:" in shard_workflow_text
     assert "ref: ${{ inputs.calculation_ref || github.sha }}" in shard_workflow_text
 
