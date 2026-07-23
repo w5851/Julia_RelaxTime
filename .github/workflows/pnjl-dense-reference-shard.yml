@@ -28,6 +28,10 @@ on:
       crossover_mu0_only:
         required: true
         type: boolean
+      calculation_ref:
+        required: false
+        default: ""
+        type: string
 
 jobs:
   phase-shard:
@@ -48,6 +52,8 @@ jobs:
       - name: Checkout
         if: ${{ inputs.enabled }}
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref || github.sha }}
 
       - name: Setup Julia
         if: ${{ inputs.enabled }}

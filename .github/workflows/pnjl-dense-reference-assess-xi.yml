@@ -30,6 +30,18 @@ on:
       response_rtol:
         required: true
         type: string
+      source_run_id:
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        required: false
+        default: ""
+        type: string
+      include_current_run_shards:
+        required: false
+        default: true
+        type: boolean
     outputs:
       matrix:
         value: ${{ jobs.assess.outputs.matrix }}
@@ -37,6 +49,12 @@ on:
         value: ${{ jobs.assess.outputs.intervals }}
       record_count:
         value: ${{ jobs.assess.outputs.record_count }}
+      next_xi_count:
+        value: ${{ jobs.assess.outputs.next_xi_count }}
+
+permissions:
+  actions: read
+  contents: read
 
 jobs:
   assess:
@@ -46,6 +64,7 @@ jobs:
       matrix: ${{ steps.publish.outputs.matrix }}
       intervals: ${{ steps.publish.outputs.intervals }}
       record_count: ${{ steps.publish.outputs.record_count }}
+      next_xi_count: ${{ steps.publish.outputs.next_xi_count }}
     env:
       ARTIFACT_RETENTION_DAYS: "30"
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/downloaded_shards
@@ -60,9 +79,23 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Download completed one-xi shards
+      - name: Download source-run one-xi shards
+        if: ${{ inputs.source_run_id != '' }}
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Download current-run one-xi shards
+        if: ${{ inputs.include_current_run_shards }}
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
           pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
           path: ${{ env.SHARDS_ROOT }}
 
@@ -71,12 +104,22 @@ jobs:
         run: |
           rm -rf "${REFERENCE_ROOT}"
           mkdir -p "${REFERENCE_ROOT}" "${PLAN_ROOT}"
-          python scripts/pnjl/merge_dense_phase_reference_shards.py \
-            --shards-root "${SHARDS_ROOT}" \
-            --reference-root "${REFERENCE_ROOT}" \
-            --tag "${{ inputs.tag }}" \
-            --expected-xi-list="${{ inputs.expected_xi_csv }}" \
+          merge_cmd=(
+            python scripts/pnjl/merge_dense_phase_reference_shards.py
+            --shards-root "${SHARDS_ROOT}"
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag }}"
+            "--expected-xi-list=${{ inputs.expected_xi_csv }}"
+            --postprocess-git-commit "${GITHUB_SHA}"
             --overwrite
+          )
+          if [ -n "${{ inputs.source_calculation_sha }}" ]; then
+            merge_cmd+=(--expected-calculation-git-commit "${{ inputs.source_calculation_sha }}")
+          fi
+          if [ -n "${{ inputs.source_run_id }}" ]; then
+            merge_cmd+=(--source-workflow-run-id "${{ inputs.source_run_id }}")
+          fi
+          "${merge_cmd[@]}"
 
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
@@ -143,6 +186,7 @@ jobs:
               handle.write(f"matrix={json.dumps(matrix, separators=(',', ':'))}\n")
               handle.write(f"intervals={json.dumps(intervals, separators=(',', ':'))}\n")
               handle.write(f"record_count={summary['evaluated_interval_count']}\n")
+              handle.write(f"next_xi_count={summary['next_xi_count']}\n")
           PY
 
       - name: Upload xi refinement assessment
