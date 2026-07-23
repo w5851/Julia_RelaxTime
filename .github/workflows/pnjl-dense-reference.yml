@@ -127,6 +127,10 @@ on:
         default: "{}"
         type: string
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -327,6 +331,9 @@ jobs:
       - name: Download all successful xi shards
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
           pattern: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-*
           path: ${{ env.SHARDS_ROOT }}
 
@@ -334,6 +341,9 @@ jobs:
         if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 1 }}
         uses: actions/download-artifact@v4
         with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
           pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag || 'dense' }}-level*
           path: ${{ env.XI_PLAN_ROOT }}
 

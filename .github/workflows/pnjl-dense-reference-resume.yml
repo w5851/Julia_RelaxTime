@@ -1,0 +1,334 @@
+name: PNJL Dense Reference Source Resume
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "包含完整 initial staged shard artifacts 的源 run ID"
+        required: true
+        type: string
+      source_calculation_sha:
+        description: "源 shard 数值计算提交 SHA"
+        required: true
+        type: string
+      tag:
+        description: "源 artifact 标签后缀"
+        required: true
+        type: string
+      expected_xi_list:
+        description: "源 run 的初始 xi 锚点（逗号分隔，不含 level-1 midpoint）"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      expected_xi_csv: ${{ steps.publish.outputs.expected_xi_csv }}
+      initial_intervals: ${{ steps.publish.outputs.initial_intervals }}
+      source_shard_count: ${{ steps.publish.outputs.source_shard_count }}
+      source_config_sha256: ${{ steps.publish.outputs.source_config_sha256 }}
+      xi_refine_levels: ${{ steps.publish.outputs.xi_refine_levels }}
+      xi_position_tol: ${{ steps.publish.outputs.xi_position_tol }}
+      xi_density_tol: ${{ steps.publish.outputs.xi_density_tol }}
+      xi_maxwell_area_tol: ${{ steps.publish.outputs.xi_maxwell_area_tol }}
+      xi_response_rtol: ${{ steps.publish.outputs.xi_response_rtol }}
+      common_args_json: ${{ steps.publish.outputs.common_args_json }}
+      crossover_only: ${{ steps.publish.outputs.crossover_only }}
+      crossover_mu0_only: ${{ steps.publish.outputs.crossover_mu0_only }}
+    env:
+      SOURCE_SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/source_shards
+      PLAN_PATH: ${{ runner.temp }}/dense_reference_resume_plan.json
+    steps:
+      - name: Checkout resume workflow code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download source initial shards
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SOURCE_SHARDS_ROOT }}
+
+      - name: Validate source grid and reconstruct effective plan
+        shell: bash
+        run: |
+          python scripts/pnjl/plan_dense_reference_resume.py \
+            --shards-root "${SOURCE_SHARDS_ROOT}" \
+            --tag "${{ inputs.tag }}" \
+            --source-calculation-sha "${{ inputs.source_calculation_sha }}" \
+            --expected-xi-list="${{ inputs.expected_xi_list }}" \
+            --output "${PLAN_PATH}"
+
+      - name: Publish resume plan
+        id: publish
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          plan = json.loads(Path(os.environ["PLAN_PATH"]).read_text(encoding="utf-8"))
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
+              for key in (
+                  "expected_xi_csv",
+                  "source_shard_count",
+                  "source_config_sha256",
+                  "xi_refine_levels",
+                  "xi_position_tol",
+                  "xi_density_tol",
+                  "xi_maxwell_area_tol",
+                  "xi_response_rtol",
+              ):
+                  handle.write(f"{key}={plan[key]}\n")
+              handle.write(
+                  f"initial_intervals={json.dumps(plan['initial_intervals'], separators=(',', ':'))}\n"
+              )
+              handle.write(
+                  f"common_args_json={json.dumps(plan['common_args'], separators=(',', ':'))}\n"
+              )
+              handle.write(f"crossover_only={str(plan['crossover_only']).lower()}\n")
+              handle.write(
+                  f"crossover_mu0_only={str(plan['crossover_mu0_only']).lower()}\n"
+              )
+          PY
+
+  assess_xi_level1:
+    needs: prepare
+    if: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) >= 1 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag }}
+      level: 1
+      max_refine_level: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.prepare.outputs.initial_intervals }}
+      expected_xi_csv: ${{ needs.prepare.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.prepare.outputs.xi_position_tol }}
+      density_tol: ${{ needs.prepare.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.prepare.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.prepare.outputs.xi_response_rtol }}
+      source_run_id: ${{ inputs.source_run_id }}
+      source_calculation_sha: ${{ inputs.source_calculation_sha }}
+      include_current_run_shards: false
+
+  generate_xi_level2:
+    needs: [prepare, assess_xi_level1]
+    if: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) >= 2 }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.assess_xi_level1.outputs.matrix) }}
+    uses: ./.github/workflows/pnjl-dense-reference-shard.yml
+    with:
+      tag: ${{ inputs.tag }}
+      stage: ${{ matrix.stage }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      enabled: ${{ matrix.enabled }}
+      common_args_json: ${{ needs.prepare.outputs.common_args_json }}
+      crossover_only: ${{ fromJSON(needs.prepare.outputs.crossover_only) }}
+      crossover_mu0_only: ${{ fromJSON(needs.prepare.outputs.crossover_mu0_only) }}
+      calculation_ref: ${{ inputs.source_calculation_sha }}
+
+  assess_xi_level2:
+    needs: [prepare, assess_xi_level1, generate_xi_level2]
+    if: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) >= 2 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag }}
+      level: 2
+      max_refine_level: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.assess_xi_level1.outputs.intervals }}
+      expected_xi_csv: ${{ needs.prepare.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.prepare.outputs.xi_position_tol }}
+      density_tol: ${{ needs.prepare.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.prepare.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.prepare.outputs.xi_response_rtol }}
+      source_run_id: ${{ inputs.source_run_id }}
+      source_calculation_sha: ${{ inputs.source_calculation_sha }}
+      include_current_run_shards: ${{ fromJSON(needs.assess_xi_level1.outputs.next_xi_count) > 0 }}
+
+  generate_xi_level3:
+    needs: [prepare, assess_xi_level2]
+    if: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) >= 3 }}
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.assess_xi_level2.outputs.matrix) }}
+    uses: ./.github/workflows/pnjl-dense-reference-shard.yml
+    with:
+      tag: ${{ inputs.tag }}
+      stage: ${{ matrix.stage }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      enabled: ${{ matrix.enabled }}
+      common_args_json: ${{ needs.prepare.outputs.common_args_json }}
+      crossover_only: ${{ fromJSON(needs.prepare.outputs.crossover_only) }}
+      crossover_mu0_only: ${{ fromJSON(needs.prepare.outputs.crossover_mu0_only) }}
+      calculation_ref: ${{ inputs.source_calculation_sha }}
+
+  assess_xi_level3:
+    needs: [prepare, assess_xi_level1, assess_xi_level2, generate_xi_level3]
+    if: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) >= 3 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag }}
+      level: 3
+      max_refine_level: ${{ fromJSON(needs.prepare.outputs.xi_refine_levels) }}
+      intervals_json: ${{ needs.assess_xi_level2.outputs.intervals }}
+      expected_xi_csv: ${{ needs.prepare.outputs.expected_xi_csv }}
+      position_tol: ${{ needs.prepare.outputs.xi_position_tol }}
+      density_tol: ${{ needs.prepare.outputs.xi_density_tol }}
+      maxwell_area_tol: ${{ needs.prepare.outputs.xi_maxwell_area_tol }}
+      response_rtol: ${{ needs.prepare.outputs.xi_response_rtol }}
+      source_run_id: ${{ inputs.source_run_id }}
+      source_calculation_sha: ${{ inputs.source_calculation_sha }}
+      include_current_run_shards: ${{ fromJSON(needs.assess_xi_level2.outputs.next_xi_count) > 0 }}
+
+  merge:
+    needs:
+      - prepare
+      - assess_xi_level1
+      - generate_xi_level2
+      - assess_xi_level2
+      - generate_xi_level3
+      - assess_xi_level3
+    if: >-
+      ${{
+        always() &&
+        needs.prepare.result == 'success' &&
+        needs.assess_xi_level1.result == 'success' &&
+        (fromJSON(needs.prepare.outputs.xi_refine_levels) < 2 ||
+          (needs.generate_xi_level2.result == 'success' && needs.assess_xi_level2.result == 'success')) &&
+        (fromJSON(needs.prepare.outputs.xi_refine_levels) < 3 ||
+          (needs.generate_xi_level3.result == 'success' && needs.assess_xi_level3.result == 'success'))
+      }}
+    runs-on: ubuntu-latest
+    env:
+      ARTIFACT_RETENTION_DAYS: "30"
+      SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/downloaded_shards
+      XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/downloaded_xi_plans
+      REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/reference
+      REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/validation_report.json
+    steps:
+      - name: Checkout postprocess code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download source initial shards
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ inputs.source_run_id }}
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Download resumed refinement shards
+        if: ${{ fromJSON(needs.assess_xi_level1.outputs.next_xi_count) > 0 }}
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
+          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
+          path: ${{ env.SHARDS_ROOT }}
+
+      - name: Download resumed xi convergence records
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.run_id }}
+          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*
+          path: ${{ env.XI_PLAN_ROOT }}
+
+      - name: Deterministically merge source and resumed shards
+        shell: bash
+        run: |
+          rm -rf "${REFERENCE_ROOT}"
+          mkdir -p "${REFERENCE_ROOT}"
+          python scripts/pnjl/merge_dense_phase_reference_shards.py \
+            --shards-root "${SHARDS_ROOT}" \
+            --xi-convergence-root "${XI_PLAN_ROOT}" \
+            --reference-root "${REFERENCE_ROOT}" \
+            --tag "${{ inputs.tag }}" \
+            "--expected-xi-list=${{ needs.prepare.outputs.expected_xi_csv }}" \
+            --expected-calculation-git-commit "${{ inputs.source_calculation_sha }}" \
+            --postprocess-git-commit "${GITHUB_SHA}" \
+            --source-workflow-run-id "${{ inputs.source_run_id }}" \
+            --overwrite
+
+      - name: Validate resumed dense reference artifact
+        shell: bash
+        run: |
+          validate_cmd=(
+            python scripts/pnjl/validate_dense_reference_artifact.py
+            --reference-root "${REFERENCE_ROOT}"
+            --tag "${{ inputs.tag }}"
+            --min-crossover-rows 1
+            --report-path "${REPORT_PATH}"
+          )
+          if [ "${{ needs.prepare.outputs.crossover_only }}" = "true" ]; then
+            validate_cmd+=(--expect-crossover-only)
+          else
+            validate_cmd+=(--expect-full-reference)
+          fi
+          if [ "${{ needs.prepare.outputs.crossover_mu0_only }}" = "true" ]; then
+            validate_cmd+=(--expect-mu0-only)
+          fi
+          "${validate_cmd[@]}"
+
+      - name: Record resumed candidate status
+        shell: bash
+        run: |
+          cat > "${REFERENCE_ROOT}/resume_candidate_status.md" <<EOF
+          # Resumed dense-reference candidate
+
+          - status: diagnostic candidate only; no reference promotion
+          - source workflow run: ${{ inputs.source_run_id }}
+          - calculation SHA: ${{ inputs.source_calculation_sha }}
+          - postprocess SHA: ${GITHUB_SHA}
+          - source configuration SHA256: ${{ needs.prepare.outputs.source_config_sha256 }}
+          - source shard count: ${{ needs.prepare.outputs.source_shard_count }}
+          EOF
+
+          cat >> "${GITHUB_STEP_SUMMARY}" <<EOF
+          ## PNJL Dense Reference Source Resume
+
+          - status: diagnostic candidate only; no reference promotion
+          - source workflow run: ${{ inputs.source_run_id }}
+          - calculation SHA: ${{ inputs.source_calculation_sha }}
+          - postprocess SHA: ${GITHUB_SHA}
+          - source configuration SHA256: ${{ needs.prepare.outputs.source_config_sha256 }}
+          - source shard count: ${{ needs.prepare.outputs.source_shard_count }}
+          EOF
+
+      - name: Upload resumed dense reference candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-dense-reference-resume-${{ inputs.tag }}-source-${{ inputs.source_run_id }}
+          path: |
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.csv
+            ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.meta.json
+            ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag }}_manifest.json
+            ${{ env.REFERENCE_ROOT }}/resume_candidate_status.md
+            ${{ env.REPORT_PATH }}
+          retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
+          if-no-files-found: error
