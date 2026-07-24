@@ -166,6 +166,11 @@ dense-reference CSV 必须遵循 RFC 4180 字段转义：字段含逗号、双�
 `.github/workflows/pnjl-dense-reference-replay.yml` 重放该档位；replay 必须显式给出原 run ID、原 calculation SHA、
 tag 与必需 xi anchors，SHA 不匹配即失败。replay 产物始终是 diagnostic candidate，不自动晋升 reference。
 
+主 dense-reference workflow 的可选 `calculation_ref` 只接受不可变的小写 40 字符 Git SHA；留空时数值 shard 与
+workflow head 相同。设置该输入时，所有 initial/level-2/level-3 shard checkout 该计算提交，assessment 和 final merge
+显式验证同一 `calculation_git_commit`，而调度、merge 与 validator 继续记录当前 workflow head 为
+`postprocess_git_commit`。这允许 C0/C1/C2 在仅 CI 后处理修复后仍严格比较同一计算实现，禁止传入 branch、tag 或短 SHA。
+
 跨 GitHub Actions rerun attempt 下载 artifact 时，不能依赖仅对当前 attempt 有效的内部 runtime artifact token。
 所有跨 job 或跨 run 下载均显式授予 `actions: read`，并向 `actions/download-artifact` 传入 GitHub token、repository
 和目标 run ID。failed-only rerun 后若数值 shard 已完整、但 staged assessment 尚未完成，可使用

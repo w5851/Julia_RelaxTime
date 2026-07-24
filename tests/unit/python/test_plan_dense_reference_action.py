@@ -86,6 +86,24 @@ def test_rejects_unstageable_adaptive_plans(updates, message):
         module.build_action_plan(full_reference_inputs(**updates))
 
 
+@pytest.mark.parametrize(
+    "calculation_ref",
+    ["main", "fc5d50a5", "G" * 40, "FC5D50A5D22FE79F7CC52EF2ECBDB79376E256E1"],
+)
+def test_rejects_mutable_or_noncanonical_calculation_ref(calculation_ref):
+    module = load_module()
+    with pytest.raises(ValueError, match="immutable lowercase 40-character Git SHA"):
+        module.build_action_plan(full_reference_inputs(calculation_ref=calculation_ref))
+
+
+def test_accepts_full_calculation_sha():
+    module = load_module()
+    plan = module.build_action_plan(
+        full_reference_inputs(calculation_ref="fc5d50a5d22fe79f7cc52ef2ecbdb79376e256e1")
+    )
+    assert plan["initial_shard_count"] == 41
+
+
 def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
     assess_workflow_text = ASSESS_WORKFLOW_PATH.read_text(encoding="utf-8")
@@ -98,7 +116,16 @@ def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     assert "advanced_config_json: `${{ inputs" not in workflow_text
     assert '"--expected-xi-list=${{ needs.plan.outputs.expected_xi_csv }}"' in workflow_text
     assert '"--expected-xi-list=${{ inputs.expected_xi_csv }}"' in assess_workflow_text
-    assert '--expected-calculation-git-commit "${GITHUB_SHA}"' in workflow_text
+    for job_name in ("generate_initial_shards", "generate_xi_level2", "generate_xi_level3"):
+        assert jobs[job_name]["with"]["calculation_ref"] == "${{ inputs.calculation_ref }}"
+    for job_name in ("assess_xi_level1", "assess_xi_level2", "assess_xi_level3"):
+        assert jobs[job_name]["with"]["source_calculation_sha"] == (
+            "${{ inputs.calculation_ref || github.sha }}"
+        )
+    assert (
+        '--expected-calculation-git-commit "${{ inputs.calculation_ref || github.sha }}"'
+        in workflow_text
+    )
     assert '--postprocess-git-commit "${GITHUB_SHA}"' in workflow_text
     assert "actions: read" in workflow_text
     assert "github-token: ${{ github.token }}" in workflow_text

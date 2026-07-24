@@ -52,6 +52,7 @@ def test_rejects_invalid_or_unsupported_controls(payload):
 def test_workflow_dispatch_stays_within_github_property_limit():
     workflow = yaml.load(WORKFLOW_PATH.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
     inputs = workflow["on"]["workflow_dispatch"]["inputs"]
-    assert len(inputs) == 24
+    assert len(inputs) == 25
     assert len(inputs) <= 25
     assert "advanced_config_json" in inputs
+    assert "calculation_ref" in inputs

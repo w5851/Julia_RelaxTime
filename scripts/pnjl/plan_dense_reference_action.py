@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -18,6 +19,7 @@ from resolve_dense_reference_action_config import resolve_action_config  # noqa:
 
 
 MAX_ACTION_XI_REFINE_LEVEL = 3
+FULL_GIT_SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 
 def fail(message: str) -> None:
@@ -36,6 +38,12 @@ def _boolean(payload: dict[str, Any], key: str, default: bool) -> bool:
     if isinstance(value, str) and value.lower() in {"true", "false"}:
         return value.lower() == "true"
     fail(f"{key} must be boolean")
+
+
+def _validate_calculation_ref(payload: dict[str, Any]) -> None:
+    calculation_ref = str(payload.get("calculation_ref", "") or "").strip()
+    if calculation_ref and FULL_GIT_SHA_PATTERN.fullmatch(calculation_ref) is None:
+        fail("calculation_ref must be an immutable lowercase 40-character Git SHA")
 
 
 def _decimal_text(value: Decimal) -> str:
@@ -138,6 +146,7 @@ def _common_cli_args(
 
 
 def build_action_plan(payload: dict[str, Any]) -> dict[str, Any]:
+    _validate_calculation_ref(payload)
     anchors = _xi_anchors(payload)
     adaptive_xi = _boolean(payload, "adaptive_xi", False)
     crossover_only = _boolean(payload, "crossover_only", True)

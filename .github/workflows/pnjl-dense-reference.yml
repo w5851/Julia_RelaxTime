@@ -126,6 +126,11 @@ on:
         required: false
         default: "{}"
         type: string
+      calculation_ref:
+        description: "用于数值 shard checkout 的不可变 40 字符计算 SHA；留空使用 workflow head"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   actions: read
@@ -211,6 +216,7 @@ jobs:
       common_args_json: ${{ needs.plan.outputs.common_args_json }}
       crossover_only: ${{ inputs.crossover_only }}
       crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+      calculation_ref: ${{ inputs.calculation_ref }}
 
   assess_xi_level1:
     needs: [plan, generate_initial_shards]
@@ -226,6 +232,7 @@ jobs:
       density_tol: ${{ needs.plan.outputs.xi_density_tol }}
       maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
       response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
+      source_calculation_sha: ${{ inputs.calculation_ref || github.sha }}
 
   generate_xi_level2:
     needs: [plan, assess_xi_level1]
@@ -244,6 +251,7 @@ jobs:
       common_args_json: ${{ needs.plan.outputs.common_args_json }}
       crossover_only: ${{ inputs.crossover_only }}
       crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+      calculation_ref: ${{ inputs.calculation_ref }}
 
   assess_xi_level2:
     needs: [plan, generate_initial_shards, assess_xi_level1, generate_xi_level2]
@@ -259,6 +267,7 @@ jobs:
       density_tol: ${{ needs.plan.outputs.xi_density_tol }}
       maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
       response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
+      source_calculation_sha: ${{ inputs.calculation_ref || github.sha }}
 
   generate_xi_level3:
     needs: [plan, assess_xi_level2]
@@ -277,6 +286,7 @@ jobs:
       common_args_json: ${{ needs.plan.outputs.common_args_json }}
       crossover_only: ${{ inputs.crossover_only }}
       crossover_mu0_only: ${{ inputs.crossover_mu0_only }}
+      calculation_ref: ${{ inputs.calculation_ref }}
 
   assess_xi_level3:
     needs: [plan, generate_initial_shards, assess_xi_level2, generate_xi_level3]
@@ -292,6 +302,7 @@ jobs:
       density_tol: ${{ needs.plan.outputs.xi_density_tol }}
       maxwell_area_tol: ${{ needs.plan.outputs.xi_maxwell_area_tol }}
       response_rtol: ${{ needs.plan.outputs.xi_response_rtol }}
+      source_calculation_sha: ${{ inputs.calculation_ref || github.sha }}
 
   merge:
     needs:
@@ -358,7 +369,7 @@ jobs:
             --reference-root "${REFERENCE_ROOT}"
             --tag "${{ inputs.tag || 'dense' }}"
             "--expected-xi-list=${{ needs.plan.outputs.expected_xi_csv }}"
-            --expected-calculation-git-commit "${GITHUB_SHA}"
+            --expected-calculation-git-commit "${{ inputs.calculation_ref || github.sha }}"
             --postprocess-git-commit "${GITHUB_SHA}"
             --source-workflow-run-id "${GITHUB_RUN_ID}"
             --overwrite
