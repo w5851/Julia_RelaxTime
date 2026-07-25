@@ -172,8 +172,9 @@ workflow head 相同。设置该输入时，所有 initial/level-2/level-3 shard
 `postprocess_git_commit`。这允许 C0/C1/C2 在仅 CI 后处理修复后仍严格比较同一计算实现，禁止传入 branch、tag 或短 SHA。
 
 跨 GitHub Actions rerun attempt 下载 artifact 时，不能依赖仅对当前 attempt 有效的内部 runtime artifact token。
-所有跨 job 或跨 run 下载均显式授予 `actions: read`，并向 `actions/download-artifact` 传入 GitHub token、repository
-和目标 run ID。failed-only rerun 后若数值 shard 已完整、但 staged assessment 尚未完成，可使用
+所有跨 job 或跨 run 的 pattern 下载均显式授予 `actions: read`，设置 `GH_TOKEN`/`GH_REPO`，并通过
+`gh run download <run-id> --pattern <pattern>` 获取 artifact。该 CLI 路径会分页枚举整个 run，不能退回只覆盖前/后
+100 个 artifact 的单页下载实现。failed-only rerun 后若数值 shard 已完整、但 staged assessment 尚未完成，可使用
 `.github/workflows/pnjl-dense-reference-resume.yml` 从源 run 恢复后续 xi refinement；该入口只接受 source run ID、
 source calculation SHA、tag 和 initial xi anchors。resume planner 必须从 source manifest 重建 effective CLI config，
 验证源 grid 精确包含 anchors 与 level-1 midpoints，并拒绝 calculation SHA、tag、配置或 grid 不一致。
@@ -182,6 +183,11 @@ resume 新生成的 level-2/level-3 shard 必须 checkout 原 calculation SHA；
 最终 manifest 同时记录原 calculation SHA、新 postprocess SHA 和 source workflow run ID。resume 输出始终是
 diagnostic candidate，不自动晋升 reference；若 solver、数值内核、grid/refinement 语义或 effective config 已改变，
 禁止使用 resume，必须从受影响的最早档位重新计算。
+
+若完整 source run 已生成所有数值 shard、仅最后一级 assessment/merge/validator 未完成，优先使用 postprocess replay
+的可选 final-assessment 输入：显式给出 assessment level、intervals JSON 和原档位四项 xi 容差。replay 的 assessment
+只读取 source run shard，随后 final merge 同时读取 source run 已有 convergence records 与 replay run 新生成的最终
+record；不得在 replay 中生成新数值 shard。输出继续标记为 diagnostic candidate，并保留 calculation/postprocess 双 SHA。
 
 ## 11. Regression / Validation 验收
 
@@ -202,6 +208,8 @@ diagnostic candidate，不自动晋升 reference；若 solver、数值内核、g
 - 后处理修复优先重放已完成且 SHA 已核验的 shard artifacts；不得用 replay 掩盖数值代码或 effective config 变化；
 - failed-only rerun 后 assessment 因跨 attempt 下载失败时，先用 tokenized REST 路径核验 source artifacts，再按上述
   source-run resume 合同恢复 refinement；不得为纯下载故障机械重算完整 initial grid；
+- run 内 artifact 数量超过 100 时，检查下载日志中的实际 artifact 目录数；若与 GitHub run artifact 总数不符，先按
+  分页 `gh run download` 合同修复/重放后处理，不得把缺页误判为物理网格缺失；
 - 不在已有正式目录上用不同 effective config 覆盖运行；
 - CEP 未找到不自动等价于“物理上不存在 CEP”，必须结合扫描覆盖和诊断字段判断。
 

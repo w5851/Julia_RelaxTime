@@ -67,6 +67,8 @@ jobs:
       next_xi_count: ${{ steps.publish.outputs.next_xi_count }}
     env:
       ARTIFACT_RETENTION_DAYS: "30"
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/downloaded_shards
       REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/reference
       PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/assessment_level${{ inputs.level }}/plan
@@ -81,23 +83,21 @@ jobs:
 
       - name: Download source-run one-xi shards
         if: ${{ inputs.source_run_id != '' }}
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.source_run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ inputs.source_run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Download current-run one-xi shards
         if: ${{ inputs.include_current_run_shards }}
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Merge currently resolved xi values
         shell: bash

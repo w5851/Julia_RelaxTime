@@ -41,6 +41,8 @@ jobs:
       crossover_only: ${{ steps.publish.outputs.crossover_only }}
       crossover_mu0_only: ${{ steps.publish.outputs.crossover_mu0_only }}
     env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
       SOURCE_SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/source_shards
       PLAN_PATH: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/resume_plan.json
     steps:
@@ -53,13 +55,12 @@ jobs:
           python-version: "3.11"
 
       - name: Download source initial shards
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.source_run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SOURCE_SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SOURCE_SHARDS_ROOT}"
+          gh run download "${{ inputs.source_run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SOURCE_SHARDS_ROOT}"
 
       - name: Validate source grid and reconstruct effective plan
         shell: bash
@@ -218,6 +219,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ARTIFACT_RETENTION_DAYS: "30"
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/downloaded_shards
       XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/downloaded_xi_plans
       REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/resume_${{ github.run_id }}/reference
@@ -232,32 +235,29 @@ jobs:
           python-version: "3.11"
 
       - name: Download source initial shards
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.source_run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ inputs.source_run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Download resumed refinement shards
         if: ${{ fromJSON(needs.assess_xi_level1.outputs.next_xi_count) > 0 }}
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Download resumed xi convergence records
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.run_id }}
-          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*
-          path: ${{ env.XI_PLAN_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${XI_PLAN_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*" \
+            --dir "${XI_PLAN_ROOT}"
 
       - name: Deterministically merge source and resumed shards
         shell: bash
