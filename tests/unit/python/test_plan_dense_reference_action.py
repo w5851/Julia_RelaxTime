@@ -128,10 +128,10 @@ def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     )
     assert '--postprocess-git-commit "${GITHUB_SHA}"' in workflow_text
     assert "actions: read" in workflow_text
-    assert "github-token: ${{ github.token }}" in workflow_text
-    assert "run-id: ${{ github.run_id }}" in workflow_text
-    assert "github-token: ${{ github.token }}" in assess_workflow_text
-    assert "run-id: ${{ github.run_id }}" in assess_workflow_text
+    assert "GH_TOKEN: ${{ github.token }}" in workflow_text
+    assert 'gh run download "${{ github.run_id }}"' in workflow_text
+    assert "GH_TOKEN: ${{ github.token }}" in assess_workflow_text
+    assert 'gh run download "${{ github.run_id }}"' in assess_workflow_text
     assert "next_xi_count" in assess_workflow_text
 
 
@@ -141,7 +141,8 @@ def test_resume_workflow_reuses_source_shards_and_keeps_calculation_sha():
     workflow = yaml.load(workflow_text, Loader=yaml.BaseLoader)
     inputs = workflow["on"]["workflow_dispatch"]["inputs"]
     assert set(inputs) == {"source_run_id", "source_calculation_sha", "tag", "expected_xi_list"}
-    assert "run-id: ${{ inputs.source_run_id }}" in workflow_text
+    assert 'gh run download "${{ inputs.source_run_id }}"' in workflow_text
+    assert "actions/download-artifact@v4" not in workflow_text
     assert "calculation_ref: ${{ inputs.source_calculation_sha }}" in workflow_text
     assert "source and resumed shards" in workflow_text
     assert "diagnostic candidate only; no reference promotion" in workflow_text
@@ -156,8 +157,38 @@ def test_postprocess_replay_uses_cross_run_artifacts_and_dual_provenance():
     workflow = yaml.load(workflow_text, Loader=yaml.BaseLoader)
     inputs = workflow["on"]["workflow_dispatch"]["inputs"]
     assert {"source_run_id", "source_calculation_sha", "tag", "expected_xi_list"} <= set(inputs)
-    assert "run-id: ${{ inputs.source_run_id }}" in workflow_text
-    assert "github-token: ${{ github.token }}" in workflow_text
+    assert {
+        "final_assessment_level",
+        "final_assessment_intervals_json",
+        "final_assessment_position_tol",
+        "final_assessment_density_tol",
+        "final_assessment_maxwell_area_tol",
+        "final_assessment_response_rtol",
+    } <= set(inputs)
+    assert 'gh run download "${{ inputs.source_run_id }}"' in workflow_text
+    assert 'gh run download "${{ github.run_id }}"' in workflow_text
+    assert "GH_TOKEN: ${{ github.token }}" in workflow_text
+    assert "actions/download-artifact@v4" not in workflow_text
+    jobs = workflow["jobs"]
+    assert jobs["assess_final"]["uses"] == "./.github/workflows/pnjl-dense-reference-assess-xi.yml"
+    assert jobs["assess_final"]["with"]["source_calculation_sha"] == "${{ inputs.source_calculation_sha }}"
+    assert jobs["assess_final"]["with"]["include_current_run_shards"] == "false"
+    assert "needs.assess_final.result == 'success'" in workflow_text
+    assert "replayed final xi convergence record" in workflow_text
     assert '--expected-calculation-git-commit "${{ inputs.source_calculation_sha }}"' in workflow_text
     assert '--postprocess-git-commit "${GITHUB_SHA}"' in workflow_text
     assert "diagnostic replay only; no reference promotion" in workflow_text
+
+
+def test_dense_reference_cross_job_downloads_use_paginated_gh_cli():
+    for path in (
+        WORKFLOW_PATH,
+        ASSESS_WORKFLOW_PATH,
+        REPLAY_WORKFLOW_PATH,
+        RESUME_WORKFLOW_PATH,
+    ):
+        workflow_text = path.read_text(encoding="utf-8")
+        assert "actions/download-artifact@v4" not in workflow_text
+        assert "gh run download" in workflow_text
+        assert "GH_TOKEN: ${{ github.token }}" in workflow_text
+        assert "GH_REPO: ${{ github.repository }}" in workflow_text

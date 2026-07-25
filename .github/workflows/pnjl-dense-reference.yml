@@ -326,6 +326,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ARTIFACT_RETENTION_DAYS: "30"
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/downloaded_shards
       XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/downloaded_xi_plans
       REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/reference
@@ -340,23 +342,21 @@ jobs:
           python-version: "3.11"
 
       - name: Download all successful xi shards
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag || 'dense' }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Download staged xi convergence records
         if: ${{ fromJSON(needs.plan.outputs.xi_refine_levels) >= 1 }}
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.run_id }}
-          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag || 'dense' }}-level*
-          path: ${{ env.XI_PLAN_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${XI_PLAN_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-xi-plan-${{ inputs.tag || 'dense' }}-level*" \
+            --dir "${XI_PLAN_ROOT}"
 
       - name: Deterministically merge xi shards
         shell: bash

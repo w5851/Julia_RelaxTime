@@ -24,6 +24,36 @@ on:
         required: false
         default: true
         type: boolean
+      final_assessment_level:
+        description: "可选：补做最终 ξ assessment level；0 表示仅重放 merge"
+        required: false
+        default: "0"
+        type: string
+      final_assessment_intervals_json:
+        description: "最终 assessment 的 intervals JSON；level > 0 时必填"
+        required: false
+        default: "[]"
+        type: string
+      final_assessment_position_tol:
+        description: "最终 assessment 的 ξ 位置容差"
+        required: false
+        default: "0.1"
+        type: string
+      final_assessment_density_tol:
+        description: "最终 assessment 的密度跳变容差"
+        required: false
+        default: "0.01"
+        type: string
+      final_assessment_maxwell_area_tol:
+        description: "最终 assessment 的 Maxwell 面积容差"
+        required: false
+        default: "0.0001"
+        type: string
+      final_assessment_response_rtol:
+        description: "最终 assessment 的响应量相对容差"
+        required: false
+        default: "0.05"
+        type: string
       crossover_only:
         description: "原 run 是否仅生成 crossover reference"
         required: false
@@ -40,11 +70,36 @@ permissions:
   contents: read
 
 jobs:
+  assess_final:
+    if: ${{ fromJSON(inputs.final_assessment_level) > 0 }}
+    uses: ./.github/workflows/pnjl-dense-reference-assess-xi.yml
+    with:
+      tag: ${{ inputs.tag }}
+      level: ${{ fromJSON(inputs.final_assessment_level) }}
+      max_refine_level: ${{ fromJSON(inputs.final_assessment_level) }}
+      intervals_json: ${{ inputs.final_assessment_intervals_json }}
+      expected_xi_csv: ${{ inputs.expected_xi_list }}
+      position_tol: ${{ inputs.final_assessment_position_tol }}
+      density_tol: ${{ inputs.final_assessment_density_tol }}
+      maxwell_area_tol: ${{ inputs.final_assessment_maxwell_area_tol }}
+      response_rtol: ${{ inputs.final_assessment_response_rtol }}
+      source_run_id: ${{ inputs.source_run_id }}
+      source_calculation_sha: ${{ inputs.source_calculation_sha }}
+      include_current_run_shards: false
+
   replay:
+    needs: assess_final
+    if: >-
+      ${{
+        always() &&
+        (fromJSON(inputs.final_assessment_level) == 0 || needs.assess_final.result == 'success')
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       ARTIFACT_RETENTION_DAYS: "30"
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
       SHARDS_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/downloaded_shards
       XI_PLAN_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/downloaded_xi_plans
       REFERENCE_ROOT: data/outputs/artifacts/pnjl_dense_reference/replay_${{ github.run_id }}/reference
@@ -59,23 +114,30 @@ jobs:
           python-version: "3.11"
 
       - name: Download source xi shards
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.source_run_id }}
-          pattern: pnjl-dense-reference-shard-${{ inputs.tag }}-*
-          path: ${{ env.SHARDS_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${SHARDS_ROOT}"
+          gh run download "${{ inputs.source_run_id }}" \
+            --pattern "pnjl-dense-reference-shard-${{ inputs.tag }}-*" \
+            --dir "${SHARDS_ROOT}"
 
       - name: Download source xi convergence records
         if: ${{ inputs.include_xi_convergence_records }}
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ inputs.source_run_id }}
-          pattern: pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*
-          path: ${{ env.XI_PLAN_ROOT }}
+        shell: bash
+        run: |
+          mkdir -p "${XI_PLAN_ROOT}"
+          gh run download "${{ inputs.source_run_id }}" \
+            --pattern "pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level*" \
+            --dir "${XI_PLAN_ROOT}"
+
+      - name: Download replayed final xi convergence record
+        if: ${{ fromJSON(inputs.final_assessment_level) > 0 }}
+        shell: bash
+        run: |
+          mkdir -p "${XI_PLAN_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-dense-reference-xi-plan-${{ inputs.tag }}-level${{ inputs.final_assessment_level }}" \
+            --dir "${XI_PLAN_ROOT}"
 
       - name: Replay deterministic merge
         shell: bash
@@ -93,7 +155,8 @@ jobs:
             --source-workflow-run-id "${{ inputs.source_run_id }}"
             --overwrite
           )
-          if [ "${{ inputs.include_xi_convergence_records }}" = "true" ]; then
+          if [ "${{ inputs.include_xi_convergence_records }}" = "true" ] || \
+             [ "${{ inputs.final_assessment_level }}" != "0" ]; then
             merge_cmd+=(--xi-convergence-root "${XI_PLAN_ROOT}")
           fi
           "${merge_cmd[@]}"
@@ -145,5 +208,6 @@ jobs:
               handle.write(f"- calculation SHA: `{report['calculation_git_commit']}`\n")
               handle.write(f"- postprocess SHA: `{report['postprocess_git_commit']}`\n")
               handle.write(f"- resolved xi values: `{report['xi_values']}`\n")
+              handle.write(f"- replayed final assessment level: `${{ inputs.final_assessment_level }}`\n")
               handle.write("- status: diagnostic replay only; no reference promotion\n")
           PY
