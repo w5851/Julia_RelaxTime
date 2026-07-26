@@ -12,20 +12,6 @@ on:
         description: "immutable 40-character calculation SHA"
         required: true
         type: string
-  pull_request:
-    types: [opened, synchronize, reopened]
-    # Evidence/docs-only commits must not repeat the expensive numerical
-    # matrix. Workflow-only edits can be validated with workflow_dispatch.
-    paths:
-      - "scripts/analysis/pnjl_cep_narrow_pilot.jl"
-      - "scripts/analysis/collect_pnjl_cep_narrow_pilot.py"
-      - "scripts/analysis/plot_pnjl_cep_narrow_pilot.py"
-      - "scripts/analysis/pnjl_criticality_feasibility.jl"
-      - "src/models/**"
-      - "config/**"
-      - "Project.toml"
-      - "Manifest.toml"
-
 permissions:
   actions: read
   contents: read
