@@ -2,19 +2,19 @@
     "schema_version": 1,
     "artifact_kind": "diagnostic_feasibility",
     "production_authority": false,
-    "repo_head": "1824ff2b8f21d72ca806efa6f8f65d62e86b9d51",
+    "repo_head": "eb7404580a72c86456724c59e3b167728b67563f",
     "repo_head_role": "generation_base_head",
     "generation_worktree_dirty": true,
     "script_path": "scripts/analysis/pnjl_criticality_feasibility.jl",
-    "script_sha256": "57b746e7d09e6966d0d5db0f2d4247136ce1f774dd14edc828b578345964398e",
+    "script_sha256": "37a007df0e93c47edb887040feed781b8f820e999ea4c9765b1a0c2c8af9d705",
     "producer_scripts": [
         {
             "path": "scripts/analysis/pnjl_criticality_feasibility.jl",
-            "sha256": "57b746e7d09e6966d0d5db0f2d4247136ce1f774dd14edc828b578345964398e"
+            "sha256": "37a007df0e93c47edb887040feed781b8f820e999ea4c9765b1a0c2c8af9d705"
         },
         {
             "path": "scripts/perf/pnjl_criticality_feasibility_probe.jl",
-            "sha256": "cda29ca3e2b07da484fae79d14e3a621df2cd8a6298a9b69275f8d23c53e2396"
+            "sha256": "9955d9fdcebec56efa12ea29933e74661323145b933289f4c8bf7cfa4ba3fd91"
         }
     ],
     "source_evidence": [
@@ -41,32 +41,60 @@
         "minimum_validation_points": 33,
         "validation_gap_ratio": 0.5,
         "fit_window_trim_fraction": 0.1,
-        "minimum_negative_secant_run": 3
+        "minimum_negative_secant_run": 3,
+        "rho_support": {
+            "support_slope_tol": 0.04,
+            "positive_slope_margin": 0.01,
+            "negative_slope_margin": 0.01,
+            "minimum_negative_secant_run": 2,
+            "target_point_count": 9,
+            "max_extra_points": 12,
+            "support_expansion_gaps": 0.5,
+            "local_fit_rmse_tol": 0.02,
+            "near_critical_slope_tol": 0.01
+        }
     },
     "case_count": 7,
     "all_cases_match_expected": true,
+    "cascade_case_count": 7,
+    "all_cascade_cases_match_expected": true,
+    "temperature_sequence_count": 10,
+    "all_temperature_sequence_match_expected": true,
+    "cep_extrapolation_within_synthetic_gate": true,
     "files": [
         {
             "path": "tables/case_results.csv",
-            "sha256": "6c120e344a4c70ba7fb51dbb46d7ca8307173e9137f8a8bae6bf4eeb179912e2"
+            "sha256": "1609638815fb6a4653ba654143357b03ca358045b7f94ecd9997aa089d51df63"
+        },
+        {
+            "path": "tables/cascade_case_results.csv",
+            "sha256": "a5807d5740ce2aa9259320aa4f9ab42b34dc2a9f820e4b4c659aa80e20d0a09f"
+        },
+        {
+            "path": "tables/temperature_sequence_results.csv",
+            "sha256": "3d50586b7ac6723cdc7c110a6dfefd0bc956def857d230ef716513d677b5b876"
+        },
+        {
+            "path": "tables/cep_extrapolation_summary.csv",
+            "sha256": "1f7a170afc5ee24b9e56ab68c7966a78bbd9dd2619bc0e78164346cddaa4528d"
         },
         {
             "path": "tables/accuracy_performance_frontier.csv",
-            "sha256": "4e37e3afd76210456434a17c74dd50554e6e7bb5e28658fa629ac1db0fcf819e"
+            "sha256": "2bf5a8eeb3e43df0b359907bb2685f808ff66136f161d2ba6e5d578f343b2005"
         },
         {
             "path": "tables/claim_ledger.csv",
-            "sha256": "a83b5f6d2ef5ca67475e78f6685a1fcb84c7f219b635ef3ec28179443efa00e0"
+            "sha256": "3b7e356510443f94c3798add37ad63c21b679c09410d0b8c5136526126c4ac6c"
         },
         {
             "path": "tables/process_startup_timings.csv",
-            "sha256": "96a4543d55c7a885030c69e28a690c9bad8f594817285429a4240b3160d1ccfa"
+            "sha256": "c1550fba6d2ca3163574cf9cb9d2722ad8e94619207ace7cb226cb1a8ac08c02"
         }
     ],
     "documentation": [
         {
             "path": "README.md",
-            "sha256": "628b6037461a61ce28ec61ea086b77a2f7d038b2a711a27473e00293effa87bc"
+            "sha256": "7dd0fd74f32f98c3dbc4e48bf1f79685d2fe9b069f09bcf5765342743ffb082c"
         }
     ],
     "limitations": [

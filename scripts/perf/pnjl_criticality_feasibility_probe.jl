@@ -41,6 +41,7 @@ function main(args=ARGS)
     suite_runner = Base.invokelatest(() -> getfield(feasibility, :run_suite))
     case_factory = Base.invokelatest(() -> getfield(feasibility, :default_cases))
     case_evaluator = Base.invokelatest(() -> getfield(feasibility, :evaluate_case))
+    cascade_evaluator = Base.invokelatest(() -> getfield(feasibility, :evaluate_cascade_case))
 
     first_start = time_ns()
     first_suite = Base.invokelatest(suite_runner; repetitions=1)
@@ -48,6 +49,10 @@ function main(args=ARGS)
     first_case_count = length(first_suite.rows)
     first_fit_count = sum(row.fit_count for row in first_suite.rows)
     first_holdout_count = sum(row.fit_holdout_evaluation_count for row in first_suite.rows)
+    first_targeted_count = sum(
+        row.targeted_function_evaluations for row in first_suite.cascade_rows
+    )
+    first_cascade_fit_count = sum(row.polynomial_fits for row in first_suite.cascade_rows)
 
     cases = Base.invokelatest(case_factory)
     warm_start = time_ns()
@@ -57,6 +62,12 @@ function main(args=ARGS)
     warm_elapsed = time_ns() - warm_start
     case_count = length(cases)
 
+    cascade_start = time_ns()
+    for _ in 1:options.repetitions, case in cases
+        Base.invokelatest(cascade_evaluator, case)
+    end
+    cascade_elapsed = time_ns() - cascade_start
+
     rows = [
         (
             phase="analysis_module_include",
@@ -64,6 +75,7 @@ function main(args=ARGS)
             models_preloaded=models_preloaded,
             repetitions=1,
             case_evaluations=0,
+            targeted_function_evaluations=0,
             polynomial_fits=0,
             fit_holdout_evaluations=0,
             elapsed_ns=include_elapsed,
@@ -80,9 +92,10 @@ function main(args=ARGS)
             evidence_scope="synthetic_first_call",
             models_preloaded=models_preloaded,
             repetitions=1,
-            case_evaluations=3 * first_case_count,
-            polynomial_fits=3 * first_fit_count,
-            fit_holdout_evaluations=3 * first_holdout_count,
+            case_evaluations=missing,
+            targeted_function_evaluations=missing,
+            polynomial_fits=missing,
+            fit_holdout_evaluations=missing,
             elapsed_ns=first_elapsed,
             mean_time_ns=missing,
             pnjl_residual_evaluations=missing,
@@ -90,7 +103,7 @@ function main(args=ARGS)
             pnjl_newton_iterations=missing,
             pnjl_anchor_solves=missing,
             pnjl_branch_points=missing,
-            note="includes Models load and suite self-check loops when models_preloaded=false; no PNJL equilibrium solve",
+            note="aggregate suite orchestration; includes Models load and compilation when models_preloaded=false; no PNJL equilibrium solve",
         ),
         (
             phase="warm_suite",
@@ -98,6 +111,7 @@ function main(args=ARGS)
             models_preloaded=true,
             repetitions=options.repetitions,
             case_evaluations=options.repetitions * case_count,
+            targeted_function_evaluations=0,
             polynomial_fits=options.repetitions * first_fit_count,
             fit_holdout_evaluations=options.repetitions * first_holdout_count,
             elapsed_ns=warm_elapsed,
@@ -107,7 +121,25 @@ function main(args=ARGS)
             pnjl_newton_iterations=missing,
             pnjl_anchor_solves=missing,
             pnjl_branch_points=missing,
-            note="same-process analytic classification; not a PNJL or PALC benchmark",
+            note="same-process full-window analytic classification; not a PNJL or PALC benchmark",
+        ),
+        (
+            phase="warm_rho_support_cascade",
+            evidence_scope="synthetic_same_process",
+            models_preloaded=true,
+            repetitions=options.repetitions,
+            case_evaluations=options.repetitions * case_count,
+            targeted_function_evaluations=options.repetitions * first_targeted_count,
+            polynomial_fits=options.repetitions * first_cascade_fit_count,
+            fit_holdout_evaluations=0,
+            elapsed_ns=cascade_elapsed,
+            mean_time_ns=cascade_elapsed / (options.repetitions * case_count),
+            pnjl_residual_evaluations=missing,
+            pnjl_jacobian_evaluations=missing,
+            pnjl_newton_iterations=missing,
+            pnjl_anchor_solves=missing,
+            pnjl_branch_points=missing,
+            note="same-process rho-support cascade; targeted counts are fixed-rho analytic evaluations, not PNJL solve costs",
         ),
     ]
 

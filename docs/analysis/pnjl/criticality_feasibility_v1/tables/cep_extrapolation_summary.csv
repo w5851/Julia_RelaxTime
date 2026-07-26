@@ -1,0 +1,2 @@
+found,expected_T_cep,extrapolated_T_cep,absolute_error,within_synthetic_gate,slope,intercept,rmse,resolved_width_point_count,reason
+true,1.0,1.0268768256450262,0.026876825645026248,true,-0.11538821403874612,0.11848948294895648,0.004920755549327825,7,linear density-width-squared extrapolation has a finite decreasing branch
