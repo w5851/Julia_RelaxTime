@@ -34,4 +34,10 @@ end
 
     support = Main.Criticality.RhoSupportConfig(max_extra_points=12)
     @test support.max_extra_points <= cfg.targeted_max_points
+
+    # A diagnostic bracket may legitimately contain NaN values.  JSON output
+    # must encode those as null instead of failing the whole Actions job.
+    @test Main._json_safe(NaN) === nothing
+    @test Main._json_safe(Inf) === nothing
+    @test Main._json_safe((found=false, T_CEP=NaN))["T_CEP"] === nothing
 end

@@ -21,6 +21,23 @@ const HBARC_MEV_FM = 197.3269804
 const METHODS = (:c2_dense_baseline, :rho_support_cascade, :high_resolution_oracle)
 const CANONICAL_CEP_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "cep.csv")
 
+# JSON (unlike CSV) does not permit IEEE NaN/Inf literals.  A pilot job is
+# allowed to finish without finding a CEP bracket; those diagnostic fields are
+# represented as `null` in JSON rather than turning an otherwise valid solver
+# run into a failed Actions job.  Keep this conversion local to the artifact
+# boundary so the numerical and CSV paths continue to expose their values.
+_json_safe(x::Nothing) = nothing
+_json_safe(x::Bool) = x
+_json_safe(x::Integer) = x
+_json_safe(x::AbstractFloat) = isfinite(x) ? x : nothing
+_json_safe(x::AbstractString) = String(x)
+_json_safe(x::Symbol) = String(x)
+_json_safe(x::NamedTuple) = Dict(string(name) => _json_safe(getproperty(x, name)) for name in keys(x))
+_json_safe(x::AbstractDict) = Dict(string(key) => _json_safe(value) for (key, value) in x)
+_json_safe(x::AbstractArray) = [_json_safe(value) for value in x]
+_json_safe(x::Tuple) = [_json_safe(value) for value in x]
+_json_safe(x) = x
+
 if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
@@ -494,7 +511,7 @@ function _run_job(config::PilotConfig)
         bracket_high_MeV=Float64(cep.T_bracket_high_MeV),
         bracket_width_MeV=Float64(cep.bracket_width_T_MeV),
         found=Bool(cep.found),
-        oracle_refine=oracle_refine === nothing ? "" : JSON3.write(oracle_refine),
+        oracle_refine=oracle_refine === nothing ? "" : JSON3.write(_json_safe(oracle_refine)),
         oracle_refine_stable=oracle_refine === nothing ? false : Bool(oracle_refine.stable),
     )]
 
@@ -522,10 +539,10 @@ function _run_job(config::PilotConfig)
         "slice_count" => length(memo.slice_cache),
     )
     open(joinpath(config.output_dir, "job_summary.json"), "w") do io
-        write(io, JSON3.write(summary))
+        write(io, JSON3.write(_json_safe(summary)))
         write(io, '\n')
     end
-    println(JSON3.write(summary))
+    println(JSON3.write(_json_safe(summary)))
     return summary
 end
 
