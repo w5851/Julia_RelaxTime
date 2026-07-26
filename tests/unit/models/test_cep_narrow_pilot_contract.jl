@@ -40,4 +40,12 @@ end
     @test Main._json_safe(NaN) === nothing
     @test Main._json_safe(Inf) === nothing
     @test Main._json_safe((found=false, T_CEP=NaN))["T_CEP"] === nothing
+
+    # The first non-low slice must form the upper side of a bracket.  Do not
+    # use NaN as a reduction initializer: Julia propagates it through minimum.
+    status_cache = Dict(
+        129.0 => (status=:resolved_s_shape,),
+        130.0 => (status=:monotone,),
+    )
+    @test Main._status_bracket(status_cache) == (T_low=129.0, T_high=130.0)
 end

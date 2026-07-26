@@ -375,6 +375,21 @@ function _valid_low_side(curve)
     return curve.status == :resolved_s_shape || curve.status == :near_critical
 end
 
+function _status_bracket(slice_cache)
+    temps = sort(collect(keys(slice_cache)))
+    low = [T for T in temps if _valid_low_side(slice_cache[T])]
+    high = [
+        T for T in temps if !_valid_low_side(slice_cache[T]) &&
+            any(_valid_low_side(slice_cache[τ]) for τ in temps if τ < T)
+    ]
+    isempty(low) && return nothing
+    isempty(high) && return nothing
+    T_low = maximum(low)
+    higher = filter(>(T_low), high)
+    isempty(higher) && return nothing
+    return (T_low=T_low, T_high=minimum(higher))
+end
+
 function _find_bracket!(memo::PilotMemo, center::Float64)
     prior = nothing
     window = memo.config.initial_window_MeV
@@ -388,16 +403,8 @@ function _find_bracket!(memo::PilotMemo, center::Float64)
                 prior = Criticality.RhoSupportPrior(Float64(T), Float64(curve.spinodal_rho_center), Float64(curve.spinodal_rho_gap))
             end
         end
-        temps = sort(collect(keys(memo.slice_cache)))
-        low = [T for T in temps if _valid_low_side(memo.slice_cache[T])]
-        high = [T for T in temps if !_valid_low_side(memo.slice_cache[T]) && any(_valid_low_side(memo.slice_cache[τ]) for τ in temps if τ < T)]
-        if !isempty(low) && !isempty(high)
-            T_low = maximum(low)
-            T_high = minimum(filter(>(T_low), high); init=NaN)
-            if isfinite(T_high)
-                return (T_low=T_low, T_high=T_high)
-            end
-        end
+        bracket = _status_bracket(memo.slice_cache)
+        bracket !== nothing && return bracket
         window += 4.0
     end
     return nothing

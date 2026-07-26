@@ -101,11 +101,19 @@ def _validate_jobs(jobs: list[dict[str, Any]]) -> list[str]:
             errors.append(f"missing calculation SHA: {key}")
         if not bool(summary.get("finite_and_converged", False)):
             errors.append(f"non-finite or non-converged solve: {key}")
-        if int(summary.get("targeted_additions", 0)) > 12:
-            errors.append(f"targeted-point cap exceeded: {key}")
         for table in ("slice_metrics.csv", "method_costs.csv", "cep_accuracy.csv"):
             if not (job["dir"] / table).is_file():
                 errors.append(f"missing {table}: {key}")
+        slice_path = job["dir"] / "slice_metrics.csv"
+        if slice_path.is_file():
+            for row in _rows(slice_path):
+                try:
+                    targeted = int(float(row.get("targeted_additions", 0)))
+                except (TypeError, ValueError):
+                    errors.append(f"invalid targeted-point count: {key}")
+                    continue
+                if targeted > 12:
+                    errors.append(f"targeted-point cap exceeded for slice: {key}")
     missing = REQUIRED_JOB_KEYS - seen
     if missing:
         errors.append(f"missing matrix jobs: {sorted(missing)}")
