@@ -15,9 +15,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     # Evidence/docs-only commits must not repeat the expensive numerical
-    # matrix.  Changes to the runner, solver, inputs, or this workflow do.
+    # matrix. Workflow-only edits can be validated with workflow_dispatch.
     paths:
-      - ".github/workflows/pnjl-cep-narrow-pilot.yml"
       - "scripts/analysis/pnjl_cep_narrow_pilot.jl"
       - "scripts/analysis/collect_pnjl_cep_narrow_pilot.py"
       - "scripts/analysis/plot_pnjl_cep_narrow_pilot.py"
