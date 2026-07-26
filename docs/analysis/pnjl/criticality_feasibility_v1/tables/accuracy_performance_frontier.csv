@@ -1,0 +1,5 @@
+method,evidence_scope,comparable,repetitions,case_evaluations,coarse_function_evaluations,validation_function_evaluations,polynomial_fits,fit_holdout_evaluations,pnjl_residual_evaluations,pnjl_jacobian_evaluations,pnjl_newton_iterations,pnjl_anchor_solves,pnjl_branch_points,elapsed_ns,mean_time_ns,note
+current_secant_detector,synthetic_same_process,true,500,3500,53500,0,0,0,,,,,,30627600,8750.742857142857,in-process warm synthetic curve classification only
+multi_evidence_criticality,synthetic_same_process,true,500,3500,53500,1002500,25500,183000,,,,,,3817253500,1.090643857142857e6,includes polynomial fits and optional independent validation
+historical_multibranch_palc_cold,historical_noncomparable,false,1,1,,,,,,,,,16,125400000000,1.254e11,historical PNJL cold start; includes BifurcationKit compilation and is not comparable
+historical_multibranch_palc_warm,historical_noncomparable,false,1,1,,,,,,,,,16,1370000000,1.37e9,historical PNJL warm process; different scenario and not comparable

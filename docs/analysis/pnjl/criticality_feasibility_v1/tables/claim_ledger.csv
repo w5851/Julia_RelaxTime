@@ -1,0 +1,4 @@
+claim_id,status,claim,evidence_file,evidence_selector,boundary
+C1,supported_synthetic,Cross-window cubic/quintic fits can warn about a narrow S interval missed by the current secant detector.,tables/case_results.csv,case_name=hidden_s_warning,Synthetic cusp evidence only; not a PNJL production claim.
+C2,supported_by_contract,Positive coarse secants alone do not produce resolved_monotone.,tables/case_results.csv,case_name=monotone_without_certificate,Monotonicity certification requires independent denser validation.
+C3,author_check,The multi-evidence method improves PNJL CEP accuracy or total runtime.,tables/accuracy_performance_frontier.csv,evidence_scope=historical_noncomparable,Requires a same-physics Actions pilot with residual/Jacobian/runner cost counters.

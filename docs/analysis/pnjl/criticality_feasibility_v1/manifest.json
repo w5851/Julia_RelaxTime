@@ -1,0 +1,78 @@
+{
+    "schema_version": 1,
+    "artifact_kind": "diagnostic_feasibility",
+    "production_authority": false,
+    "repo_head": "1824ff2b8f21d72ca806efa6f8f65d62e86b9d51",
+    "repo_head_role": "generation_base_head",
+    "generation_worktree_dirty": true,
+    "script_path": "scripts/analysis/pnjl_criticality_feasibility.jl",
+    "script_sha256": "57b746e7d09e6966d0d5db0f2d4247136ce1f774dd14edc828b578345964398e",
+    "producer_scripts": [
+        {
+            "path": "scripts/analysis/pnjl_criticality_feasibility.jl",
+            "sha256": "57b746e7d09e6966d0d5db0f2d4247136ce1f774dd14edc828b578345964398e"
+        },
+        {
+            "path": "scripts/perf/pnjl_criticality_feasibility_probe.jl",
+            "sha256": "cda29ca3e2b07da484fae79d14e3a621df2cd8a6298a9b69275f8d23c53e2396"
+        }
+    ],
+    "source_evidence": [
+        {
+            "path": "src/models/phase/PhaseCore.jl",
+            "sha256": "78deedb77cc7e9713d2bcad550f5f3e7400d45a5aa71d8fbd1c4176303987ce2"
+        },
+        {
+            "path": "scripts/analysis/pnjl_bifurcation_spike/README.md",
+            "sha256": "3ddeab574d855b304d3675e5d7b7eb84d62c5105ab468e2a04d4b2264e3fcb96"
+        },
+        {
+            "path": "docs/dev/active/2026-06-18_PALC连续路径求解接口设计.md",
+            "sha256": "0fda4aad57c1c4f8b6b76ed4cb297fa56e4e76a80f06970dac7efd65b870240c"
+        }
+    ],
+    "config": {
+        "near_slope_tol": 0.005,
+        "resolved_slope_margin": 0.01,
+        "holdout_rmse_tol": 0.01,
+        "holdout_max_error_tol": 0.03,
+        "derivative_spread_tol": 0.02,
+        "derivative_grid_points": 801,
+        "minimum_validation_points": 33,
+        "validation_gap_ratio": 0.5,
+        "fit_window_trim_fraction": 0.1,
+        "minimum_negative_secant_run": 3
+    },
+    "case_count": 7,
+    "all_cases_match_expected": true,
+    "files": [
+        {
+            "path": "tables/case_results.csv",
+            "sha256": "6c120e344a4c70ba7fb51dbb46d7ca8307173e9137f8a8bae6bf4eeb179912e2"
+        },
+        {
+            "path": "tables/accuracy_performance_frontier.csv",
+            "sha256": "4e37e3afd76210456434a17c74dd50554e6e7bb5e28658fa629ac1db0fcf819e"
+        },
+        {
+            "path": "tables/claim_ledger.csv",
+            "sha256": "a83b5f6d2ef5ca67475e78f6685a1fcb84c7f219b635ef3ec28179443efa00e0"
+        },
+        {
+            "path": "tables/process_startup_timings.csv",
+            "sha256": "96a4543d55c7a885030c69e28a690c9bad8f594817285429a4240b3160d1ccfa"
+        }
+    ],
+    "documentation": [
+        {
+            "path": "README.md",
+            "sha256": "628b6037461a61ce28ec61ea086b77a2f7d038b2a711a27473e00293effa87bc"
+        }
+    ],
+    "limitations": [
+        "synthetic cusp family only",
+        "no PNJL residual, Jacobian, Newton, or runner-cost measurement",
+        "historical PALC timings are explicitly noncomparable",
+        "no production phase classifier or reference was modified"
+    ]
+}

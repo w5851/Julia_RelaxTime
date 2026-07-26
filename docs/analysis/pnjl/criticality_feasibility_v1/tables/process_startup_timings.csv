@@ -1,0 +1,4 @@
+phase,evidence_scope,models_preloaded,repetitions,case_evaluations,polynomial_fits,fit_holdout_evaluations,elapsed_ns,mean_time_ns,pnjl_residual_evaluations,pnjl_jacobian_evaluations,pnjl_newton_iterations,pnjl_anchor_solves,pnjl_branch_points,note
+analysis_module_include,local_process_startup,false,1,0,0,0,6456539800,6.4565398e9,,,,,,package/module loading only; no PNJL equilibrium solve
+first_suite_call,synthetic_first_call,false,1,21,153,1098,161696117400,,,,,,,includes Models load and suite self-check loops when models_preloaded=false; no PNJL equilibrium solve
+warm_suite,synthetic_same_process,true,100,700,5100,36600,3336064200,4.765806e6,,,,,,same-process analytic classification; not a PNJL or PALC benchmark
