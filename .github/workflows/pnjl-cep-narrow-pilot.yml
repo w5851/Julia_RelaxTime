@@ -14,6 +14,18 @@ on:
         type: string
   pull_request:
     types: [opened, synchronize, reopened]
+    # Evidence/docs-only commits must not repeat the expensive numerical
+    # matrix.  Changes to the runner, solver, inputs, or this workflow do.
+    paths:
+      - ".github/workflows/pnjl-cep-narrow-pilot.yml"
+      - "scripts/analysis/pnjl_cep_narrow_pilot.jl"
+      - "scripts/analysis/collect_pnjl_cep_narrow_pilot.py"
+      - "scripts/analysis/plot_pnjl_cep_narrow_pilot.py"
+      - "scripts/analysis/pnjl_criticality_feasibility.jl"
+      - "src/models/**"
+      - "config/**"
+      - "Project.toml"
+      - "Manifest.toml"
 
 permissions:
   actions: read
