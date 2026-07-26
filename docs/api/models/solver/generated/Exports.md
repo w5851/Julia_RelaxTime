@@ -4,43 +4,46 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/models/solver/generated/Exports.md`
-- Exported symbol count: 29
-- Mentioned in non-generated docs/api pages: 29
-- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`
+- Exported symbol count: 32
+- Mentioned in non-generated docs/api pages: 32
+- Topic filter: `create_model`, `MeanFieldState`, `meanfield_state`, `state_vector`, `normalize_mu_vec`, `solve_gap`, `ImplicitProblem`, `build_pnjl_fixedmu_problem`, `build_pnjl_flavor_mu_problem`, `build_njl_problem`, `solve`, `solve_multi`, `ConstraintModes`, `GapParams`, `build_conditions`, `build_residual!`, `gap_state_dim`, `gap_residual`, `SeedStrategy`, `DefaultSeed`, `MultiSeed`, `HybridContinuitySeed`, `get_seed`, `get_all_seeds`, `update!`, `solve_with_derivatives`, `solve_pnjl_with_derivatives`, `solve_pnjl_with_flavor_mu_derivatives`, `solve_constraint`, `SolverWorkTelemetry`, `solver_work_snapshot`, `reset_solver_work!`
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
 | `ConstraintModes` | src/models/exports_public.jl | 50 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `DefaultSeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `GapParams` | src/models/exports_public.jl | 72 | 1 | docs/api/models/solver/ConstraintModes.md |
-| `HybridContinuitySeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `DefaultSeed` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
+| `GapParams` | src/models/exports_public.jl | 75 | 1 | docs/api/models/solver/ConstraintModes.md |
+| `HybridContinuitySeed` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
 | `ImplicitProblem` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
 | `MeanFieldState` | src/models/exports_public.jl | 18 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `MultiSeed` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md |
-| `SeedStrategy` | src/models/exports_public.jl | 69 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
-| `build_conditions` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `MultiSeed` | src/models/exports_public.jl | 72 | 6 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/SeedStrategies.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
+| `SeedStrategy` | src/models/exports_public.jl | 72 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `SolverWorkTelemetry` | src/models/exports_public.jl | 65 | 1 | docs/api/models/solver/Overview.md |
+| `build_conditions` | src/models/exports_public.jl | 75 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
 | `build_njl_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `build_pnjl_fixedmu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `build_pnjl_flavor_mu_problem` | src/models/exports_public.jl | 24 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
-| `build_residual!` | src/models/exports_public.jl | 72 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
-| `create_model` | src/models/exports_public.jl | 13 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
+| `build_residual!` | src/models/exports_public.jl | 75 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
+| `create_model` | src/models/exports_public.jl | 13 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
 | `gap_residual` | src/models/exports_public.jl | 22 | 1 | docs/api/models/solver/ConstraintModes.md |
 | `gap_state_dim` | src/models/exports_public.jl | 22 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
-| `get_all_seeds` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |
-| `get_seed` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `get_all_seeds` | src/models/exports_public.jl | 73 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `get_seed` | src/models/exports_public.jl | 73 | 1 | docs/api/models/solver/SeedStrategies.md |
 | `meanfield_state` | src/models/exports_public.jl | 19 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/README.md<br>docs/api/models/solver/StateContract.md |
 | `normalize_mu_vec` | src/models/exports_public.jl | 20 | 3 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/StateContract.md |
-| `solve` | src/models/exports_public.jl | 44 | 56 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
+| `reset_solver_work!` | src/models/exports_public.jl | 65 | 1 | docs/api/models/solver/Overview.md |
+| `solve` | src/models/exports_public.jl | 44 | 58 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
 | `solve_constraint` | src/models/exports_public.jl | 43 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/exports_public.jl | 21 | 25 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/FreezeoutMesonDensityScan.md |
-| `solve_multi` | src/models/exports_public.jl | 44 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
+| `solve_multi` | src/models/exports_public.jl | 44 | 6 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_pnjl_with_derivatives` | src/models/exports_public.jl | 26 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
 | `solve_pnjl_with_flavor_mu_derivatives` | src/models/exports_public.jl | 27 | 4 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/Overview.md |
-| `solve_with_derivatives` | src/models/exports_public.jl | 75 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `solve_with_derivatives` | src/models/exports_public.jl | 78 | 3 | docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/ImplicitSolvers.md<br>docs/api/models/solver/README.md |
+| `solver_work_snapshot` | src/models/exports_public.jl | 65 | 1 | docs/api/models/solver/Overview.md |
 | `state_vector` | src/models/exports_public.jl | 19 | 5 | docs/api/data_contracts.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
-| `update!` | src/models/exports_public.jl | 70 | 1 | docs/api/models/solver/SeedStrategies.md |
+| `update!` | src/models/exports_public.jl | 73 | 1 | docs/api/models/solver/SeedStrategies.md |
 
 ## Undocumented Or Not Yet Mentioned
 

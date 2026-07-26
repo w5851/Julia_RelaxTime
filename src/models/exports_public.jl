@@ -62,6 +62,9 @@ export SOLVER_DIAGNOSTIC_VERSION_V1, SOLVER_DIAGNOSTIC_PUBLIC_FIELDS, SOLVER_DIA
 export solver_diagnostic_version, solver_diagnostic_public_fields, solver_diagnostic_internal_fields
 export to_public_namedtuple
 export coerce_solver_diagnostic_summary, coerce_solver_diagnostic_public_view
+export SolverWorkTelemetry, solver_work_snapshot, reset_solver_work!
+export record_solver_request!, record_governed_attempt!, record_nlsolve_work!
+export record_postprocess_residual!, record_attempt_outcome!, record_solver_exception!, record_scan_retry!
 export VarSchema, SchemaRegistry, register_schema!, schema_for, validate_schema
 export named_to_vec, vec_to_named
 export state_view, mu_view
