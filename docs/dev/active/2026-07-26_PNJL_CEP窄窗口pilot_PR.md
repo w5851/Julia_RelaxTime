@@ -18,8 +18,15 @@
 - [x] `SolverWorkTelemetry` 与 FixedRho joint solver instrumentation。
 - [x] 独立 runner、exact `(T,xi,rho)` memoization、9-job Actions matrix 与 failed-job 重跑契约。
 - [x] collector、schema/gate smoke、CSV/manifest/claim ledger/plot 脚本。
-- [ ] Actions 9 jobs 完成并下载到 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_narrow_pilot_20260726`。
-- [ ] 审计 NaN/Inf、重复键、失败点、SHA/provenance、oracle 双分辨率和 baseline/cascade 成本。
-- [ ] 根据自动 diagnostic verdict 更新 evidence package、Issue #130，并停在作者物理判断与后续算法决策处。
+- [x] Actions 9 jobs 完成并下载到 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_narrow_pilot_20260726`（最终 run `30199406478`）。
+- [x] 审计 NaN/Inf、重复键、失败点、SHA/provenance、oracle 双分辨率和 baseline/cascade 成本。
+- [x] 根据自动 diagnostic verdict 更新 evidence package、Issue #130，并停在作者物理判断与后续算法决策处。
+
+## 最终诊断状态（2026-07-26）
+
+- calculation SHA：`7e8b91adc0eaa2a01e1e50428870eb562febab70`；9/9 matrix job 与 aggregate success。
+- 自动 gate：`diagnostic_only`，`oracle_inconclusive`；`xi=0.5` 未形成 CEP bracket，`xi=0` oracle 的 `ΔT=+0.6875 MeV` 超过预声明 0.5 MeV 容差。
+- cascade 的 solver 工作量、residual/Jacobian 调用和 runner 秒数均低于 dense baseline；oracle 因双分辨率复核更贵。
+- 证据已导入 `docs/analysis/pnjl/cep_narrow_pilot_v1/`；不晋升 reference，不启动 transport，等待作者物理判断。
 
 自动 gate 只产生 `pass` 或 `diagnostic_only` 诊断，不替代作者对 CEP 物理正确性的判断，也不触发 reference promotion。
