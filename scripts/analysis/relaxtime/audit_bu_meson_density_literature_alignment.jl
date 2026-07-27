@@ -4,7 +4,8 @@ BU 介子数密度文献对齐审查脚本。
 目标：
 - 固定最小 fixed-point 集合，比较 stable / strict BW / current BU / generalized BU
 - 检查 current BU 与导数参考、尾部归一化诊断之间的关系
-- 检查 charged K/pi 在 `μ_K = 0` 与 `μ_K = μ_u - μ_s` 规则下的差异
+- 在同一点比较 `mu_s/mu_q=0.2, 0.55`，并检查 charged K/pi 在
+  `mu_K = 0` 与 signed flavor difference 规则下的差异
 
 说明：
 - 这是分析脚本，不修改正式 workflow 或 kernel
@@ -43,11 +44,15 @@ const NEUTRAL_POINTS = [
 ]
 
 const CHARGED_POINT = (
-    label="charged_diag_T170_muq80_muS0p2muq",
+    label="charged_diag_T170_muq80",
     T_MeV=170.0,
     muq_MeV=80.0,
-    mu_s_ratio=0.2,
     mu_pi_MeV=100.0,
+)
+
+const CHARGED_FLAVOR_PROFILES = (
+    "bu2020_mu_s_0p2",
+    "friesen2019_mu_s_0p55",
 )
 
 const STABLE_Q_NODES = 256
@@ -63,12 +68,28 @@ const PHASE_OMEGA_MIN = 0.05
 const PHASE_OMEGA_MAX = 10.0
 const PHASE_OMEGA_NODES = 48
 const PHASE_ETA = 1e-6
+const CHARGED_BOSE_X_MIN = 0.05
 
 @inline function _fmt(x)
     x isa Bool && return x ? "true" : "false"
     x isa Symbol && return String(x)
-    x isa AbstractString && return x
+    x isa AbstractString && return replace(replace(x, ',' => ';'), '\n' => ' ')
     return string(x)
+end
+
+@inline _env_float(name::AbstractString, default::Real) = parse(Float64, get(ENV, name, string(default)))
+@inline _env_int(name::AbstractString, default::Integer) = parse(Int, get(ENV, name, string(default)))
+
+function _charged_phase_settings()
+    return (
+        qmax=_env_float("BU_AUDIT_QMAX", PHASE_QMAX),
+        q_nodes=_env_int("BU_AUDIT_Q_NODES", PHASE_Q_NODES),
+        omega_min=_env_float("BU_AUDIT_OMEGA_MIN", PHASE_OMEGA_MIN),
+        omega_max=_env_float("BU_AUDIT_OMEGA_MAX", PHASE_OMEGA_MAX),
+        omega_nodes=_env_int("BU_AUDIT_OMEGA_NODES", PHASE_OMEGA_NODES),
+        eta=_env_float("BU_AUDIT_ETA", PHASE_ETA),
+        bose_x_min=_env_float("BU_AUDIT_BOSE_X_MIN", CHARGED_BOSE_X_MIN),
+    )
 end
 
 @inline function _complex_phase(z::ComplexF64)::Float64
@@ -303,91 +324,132 @@ end
 function _charged_muK_rows()
     T_fm = CHARGED_POINT.T_MeV / ħc_MeV_fm
     muq_fm = CHARGED_POINT.muq_MeV / ħc_MeV_fm
-    mu_u_fm = muq_fm
-    mu_d_fm = muq_fm
-    mu_s_fm = CHARGED_POINT.mu_s_ratio * muq_fm
     mu_pi_fm = CHARGED_POINT.mu_pi_MeV / ħc_MeV_fm
-    muK_signed_fm = mu_u_fm - mu_s_fm
+    settings = _charged_phase_settings()
+    rows = NamedTuple[]
 
-    meson_point = solve_gap_and_meson_point(
-        T_fm,
-        muq_fm;
-        xi=0.0,
-        mesons=(:pi_plus, :K_plus),
-        mixed_branch_align=:strict_sign_binding,
-        flavor_mu_override=(mu_u_fm, mu_d_fm, mu_s_fm),
-        p_num=8,
-        t_num=4,
-        solver_kwargs=(; iterations=20),
-        mass_kwargs=(; iterations=20),
-    )
+    for profile_name in CHARGED_FLAVOR_PROFILES
+        profile = Models.FlavorChemicalProfiles.load_flavor_chemical_profile(profile=profile_name)
+        flavor_mev = Models.FlavorChemicalProfiles.flavor_mu_profile_MeV(profile, CHARGED_POINT.muq_MeV)
+        flavor_fm = Models.FlavorChemicalProfiles.flavor_mu_profile_fm(profile, CHARGED_POINT.muq_MeV)
+        muK_plus_signed_fm = flavor_fm.mu_u_fm - flavor_fm.mu_s_fm
+        muK_minus_signed_fm = -muK_plus_signed_fm
+        equilibrium_group = "$(CHARGED_POINT.label)__$(profile.profile_name)"
 
-    function _charged_summary(pi_channel::Symbol, k_channel::Symbol, μ_K_fm::Float64)
-        return solve_phase_shift_meson_density_from_meson_point(
-            meson_point;
-            pi_channel=pi_channel,
-            k_channel=k_channel,
-            μ_pi=mu_pi_fm,
-            μ_K=μ_K_fm,
-            d_pi=1,
-            d_K=1,
-            scheme=:gbu_reference,
-            qmax=PHASE_QMAX,
-            q_nodes=PHASE_Q_NODES,
-            omega_min=PHASE_OMEGA_MIN,
-            omega_max=PHASE_OMEGA_MAX,
-            omega_nodes=PHASE_OMEGA_NODES,
-            eta=PHASE_ETA,
+        # One and only one upstream state solve per flavor profile. Both charge
+        # channels and both mu_K rules below are post-processing of this state.
+        meson_point = solve_gap_and_meson_point(
+            T_fm,
+            muq_fm;
+            xi=0.0,
+            mesons=(:pi_plus, :K_plus, :pi_minus, :K_minus),
+            mixed_branch_align=:strict_sign_binding,
+            flavor_mu_override=(flavor_fm.mu_u_fm, flavor_fm.mu_d_fm, flavor_fm.mu_s_fm),
+            p_num=8,
+            t_num=4,
+            solver_kwargs=(; iterations=20),
+            mass_kwargs=(; iterations=20),
         )
+
+        function _charged_summary(pi_channel::Symbol, k_channel::Symbol, mu_K_fm::Float64)
+            return solve_phase_shift_meson_density_from_meson_point(
+                meson_point;
+                pi_channel=pi_channel,
+                k_channel=k_channel,
+                μ_pi=mu_pi_fm,
+                μ_K=mu_K_fm,
+                d_pi=1,
+                d_K=1,
+                scheme=:gbu_reference,
+                qmax=settings.qmax,
+                q_nodes=settings.q_nodes,
+                omega_min=settings.omega_min,
+                omega_max=settings.omega_max,
+                omega_nodes=settings.omega_nodes,
+                eta=settings.eta,
+                density_policy=:x_min_cut,
+                bose_x_min=settings.bose_x_min,
+            )
+        end
+
+        plus_mu0 = _charged_summary(:pi_plus, :K_plus, 0.0)
+        minus_mu0 = _charged_summary(:pi_minus, :K_minus, 0.0)
+        plus_signed = _charged_summary(:pi_plus, :K_plus, muK_plus_signed_fm)
+        minus_signed = _charged_summary(:pi_minus, :K_minus, muK_minus_signed_fm)
+
+        function _row(channel::String, mu_rule::String, mu_formula::String,
+                      pi_channel::Symbol, k_channel::Symbol,
+                      mu_K_fm::Float64, density, peer_density)
+            pi_mass_fm = Float64(meson_point.meson_results[pi_channel].mass)
+            k_mass_fm = Float64(meson_point.meson_results[k_channel].mass)
+            is_plus = channel == "Kplus_over_piplus"
+            n_pi_plus = is_plus ? density.n_pi : peer_density.n_pi
+            n_K_plus = is_plus ? density.n_K : peer_density.n_K
+            n_pi_minus = is_plus ? peer_density.n_pi : density.n_pi
+            n_K_minus = is_plus ? peer_density.n_K : density.n_K
+            strict_status = settings.omega_min > max(mu_pi_fm, mu_K_fm) ? :strict_safe : :strict_unsafe_support
+            return (
+                point=CHARGED_POINT.label,
+                equilibrium_group=equilibrium_group,
+                upstream_state_id=equilibrium_group,
+                scenario_role="literature_sensitivity_not_conserved_charge_solution",
+                flavor_profile=profile.profile_name,
+                flavor_source_tag=profile.source_tag,
+                flavor_apply_to_equilibrium=profile.apply_to_equilibrium,
+                mu_s_over_muq=profile.mu_s_over_muq,
+                T_MeV=CHARGED_POINT.T_MeV,
+                muq_MeV=CHARGED_POINT.muq_MeV,
+                muB_MeV=3.0 * CHARGED_POINT.muq_MeV,
+                mu_u_MeV=flavor_mev.mu_u_MeV,
+                mu_d_MeV=flavor_mev.mu_d_MeV,
+                mu_s_MeV=flavor_mev.mu_s_MeV,
+                channel=channel,
+                pi_channel=String(pi_channel),
+                k_channel=String(k_channel),
+                mu_rule=mu_rule,
+                mu_formula=mu_formula,
+                mu_pi_MeV=CHARGED_POINT.mu_pi_MeV,
+                mu_K_MeV=mu_K_fm * ħc_MeV_fm,
+                m_pi_MeV=pi_mass_fm * ħc_MeV_fm,
+                m_K_MeV=k_mass_fm * ħc_MeV_fm,
+                m_pi_minus_mu_pi_MeV=(pi_mass_fm - mu_pi_fm) * ħc_MeV_fm,
+                m_K_minus_mu_K_MeV=(k_mass_fm - mu_K_fm) * ħc_MeV_fm,
+                n_pi=density.n_pi,
+                n_K=density.n_K,
+                kpi_ratio=density.kpi_ratio,
+                n_pi_plus=n_pi_plus,
+                n_K_plus=n_K_plus,
+                n_pi_minus=n_pi_minus,
+                n_K_minus=n_K_minus,
+                channel_status=density.status,
+                pi_status=density.pi_density.status,
+                k_status=density.k_density.status,
+                strict_requested_window_status=strict_status,
+                unsafe_bose_count=density.unsafe_bose_count,
+                min_E_minus_mu=density.min_E_minus_mu,
+                density_policy=density.density_policy,
+                bose_x_min=density.bose_x_min,
+                omega_min_effective_pi=density.pi_density.omega_min_effective,
+                omega_min_effective_K=density.k_density.omega_min_effective,
+                message=density.message,
+                qmax=settings.qmax,
+                q_nodes=settings.q_nodes,
+                omega_min=settings.omega_min,
+                omega_max=settings.omega_max,
+                omega_nodes=settings.omega_nodes,
+                eta=settings.eta,
+            )
+        end
+
+        append!(rows, (
+            _row("Kplus_over_piplus", "muK_zero", "zero", :pi_plus, :K_plus, 0.0, plus_mu0, minus_mu0),
+            _row("Kminus_over_piminus", "muK_zero", "zero", :pi_minus, :K_minus, 0.0, minus_mu0, plus_mu0),
+            _row("Kplus_over_piplus", "signed_flavor_difference", "mu_u_minus_mu_s", :pi_plus, :K_plus, muK_plus_signed_fm, plus_signed, minus_signed),
+            _row("Kminus_over_piminus", "signed_flavor_difference", "mu_s_minus_mu_u", :pi_minus, :K_minus, muK_minus_signed_fm, minus_signed, plus_signed),
+        ))
     end
 
-    plus_mu0 = _charged_summary(:pi_plus, :K_plus, 0.0)
-    plus_signed = _charged_summary(:pi_plus, :K_plus, muK_signed_fm)
-    minus_mu0 = _charged_summary(:pi_minus, :K_minus, 0.0)
-    minus_signed = _charged_summary(:pi_minus, :K_minus, -muK_signed_fm)
-
-    return [
-        (
-            point=CHARGED_POINT.label,
-            channel="Kplus_over_piplus",
-            mu_rule="muK_zero",
-            mu_pi_MeV=CHARGED_POINT.mu_pi_MeV,
-            mu_K_MeV=0.0,
-            n_pi=plus_mu0.n_pi,
-            n_K=plus_mu0.n_K,
-            kpi_ratio=plus_mu0.kpi_ratio,
-        ),
-        (
-            point=CHARGED_POINT.label,
-            channel="Kplus_over_piplus",
-            mu_rule="muK_u_minus_s",
-            mu_pi_MeV=CHARGED_POINT.mu_pi_MeV,
-            mu_K_MeV=muK_signed_fm * ħc_MeV_fm,
-            n_pi=plus_signed.n_pi,
-            n_K=plus_signed.n_K,
-            kpi_ratio=plus_signed.kpi_ratio,
-        ),
-        (
-            point=CHARGED_POINT.label,
-            channel="Kminus_over_piminus",
-            mu_rule="muK_zero",
-            mu_pi_MeV=CHARGED_POINT.mu_pi_MeV,
-            mu_K_MeV=0.0,
-            n_pi=minus_mu0.n_pi,
-            n_K=minus_mu0.n_K,
-            kpi_ratio=minus_mu0.kpi_ratio,
-        ),
-        (
-            point=CHARGED_POINT.label,
-            channel="Kminus_over_piminus",
-            mu_rule="muK_s_minus_u",
-            mu_pi_MeV=CHARGED_POINT.mu_pi_MeV,
-            mu_K_MeV=-muK_signed_fm * ħc_MeV_fm,
-            n_pi=minus_signed.n_pi,
-            n_K=minus_signed.n_K,
-            kpi_ratio=minus_signed.kpi_ratio,
-        ),
-    ]
+    return rows
 end
 
 function _write_csv(path::String, header::Vector{String}, rows)
@@ -407,11 +469,14 @@ function main()
     regime_rows = NamedTuple[]
     diag_rows = NamedTuple[]
     continuation_state = nothing
-    for pt in NEUTRAL_POINTS
-        result = _neutral_point_summary(pt, continuation_state)
-        append!(regime_rows, result.rows_regime)
-        append!(diag_rows, result.rows_diag)
-        continuation_state = result.next_continuation_state
+    run_neutral = lowercase(get(ENV, "BU_AUDIT_RUN_NEUTRAL", "true")) in ("1", "true", "yes")
+    if run_neutral
+        for pt in NEUTRAL_POINTS
+            result = _neutral_point_summary(pt, continuation_state)
+            append!(regime_rows, result.rows_regime)
+            append!(diag_rows, result.rows_diag)
+            continuation_state = result.next_continuation_state
+        end
     end
 
     charged_rows = _charged_muK_rows()
@@ -428,7 +493,18 @@ function main()
     )
     _write_csv(
         joinpath(outdir, "charged_muK_rule_sensitivity.csv"),
-        ["point", "channel", "mu_rule", "mu_pi_MeV", "mu_K_MeV", "n_pi", "n_K", "kpi_ratio"],
+        [
+            "point", "equilibrium_group", "upstream_state_id", "scenario_role",
+            "flavor_profile", "flavor_source_tag", "flavor_apply_to_equilibrium", "mu_s_over_muq",
+            "T_MeV", "muq_MeV", "muB_MeV", "mu_u_MeV", "mu_d_MeV", "mu_s_MeV",
+            "channel", "pi_channel", "k_channel", "mu_rule", "mu_formula", "mu_pi_MeV", "mu_K_MeV",
+            "m_pi_MeV", "m_K_MeV", "m_pi_minus_mu_pi_MeV", "m_K_minus_mu_K_MeV",
+            "n_pi", "n_K", "kpi_ratio", "n_pi_plus", "n_K_plus", "n_pi_minus", "n_K_minus",
+            "channel_status", "pi_status", "k_status", "strict_requested_window_status",
+            "unsafe_bose_count", "min_E_minus_mu", "density_policy", "bose_x_min",
+            "omega_min_effective_pi", "omega_min_effective_K", "message",
+            "qmax", "q_nodes", "omega_min", "omega_max", "omega_nodes", "eta",
+        ],
         charged_rows,
     )
 
