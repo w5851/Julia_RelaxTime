@@ -2,17 +2,20 @@
 
 创建日期：2026-07-27
 
-状态：三态合同已实现并完成本地 focused 验证，待提交为独立 ready PR；基于
+状态：三态合同已实现并完成本地 focused 验证，已提交为独立 ready PR #147，等待作者审核；基于
 `main@5071f6c80bb10c812358b855e8da2bde8a758f9d` 的分支
 `codex/issue-130-cep-three-state-contract`。PR #146 已 squash merge（merge SHA
 `5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run
 `30199406478`，9/9 matrix + aggregate success），v1 evidence 结论保持
 `diagnostic_only`，不晋升 reference。
 
+三态合同 PR：<https://github.com/w5851/Julia_RelaxTime/pull/147>，head
+`8f3b1110`。
+
 ## 顺序与边界
 
 1. [x] 合并并清理 PR #146，保留 v1 evidence 与 diagnostic-only 结论。
-2. [x] 完成三态 CEP 合同实现与 focused 验证；提交 ready PR 后等待作者审核再合并。
+2. [x] 完成三态 CEP 合同实现与 focused 验证；ready PR #147 已创建，等待作者审核再合并。
 3. [ ] 三态 PR 合并后，从 merge SHA 创建 `codex/issue-130-cep-narrow-pilot-v2`，只经
    GitHub Actions 运行 cascade discovery、dense baseline 和独立 oracle。
 4. [ ] pilot v2 停在作者对 CEP 区间、原始 rho–mu 曲线、准确度和性能证据的物理审核。
@@ -28,7 +31,7 @@
 - [x] phase summary/report/manifest/grid convergence 消费 `result_status`。
 - [x] research interpolate/direct 与 production 采用同一三态语义；不接入 cascade、不改变 equilibrium/mixed-meson/non-fixedmu 语义。
 - [x] focused regression/validation、CLI 和治理检查全部通过。
-- [ ] 提交、推送并创建 ready PR，更新 Issue #130，停在作者审核。
+- [x] 提交、推送并创建 ready PR #147，更新 Issue #130，停在作者审核。
 
 ## 三态合同本地证据
 
