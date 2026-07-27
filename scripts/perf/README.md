@@ -9,6 +9,7 @@
 - `scripts/perf/relaxtime/`
   - relaxtime / scattering / transport 相关的性能探针
   - `bulk_derivative_context_probe.jl` 对比旧式五组独立 Taylor series 与 workflow equilibrium 锁支、三方向共享线性化路径；只报告测量结果，不设置 correctness 或固定加速比门槛
+  - `bench_meson_conserved_charge_partial_feedback.jl` 在完成一次 warm-up 后，以新 evaluator/cache 重复测量 charged meson partial-feedback 单点，并输出 baseline、gap、BU、outer 与总耗时；不承担 correctness 或 production gate
   - 示例：`julia --project=. scripts/perf/relaxtime/bulk_derivative_context_probe.jl --repeats=3`
 
 ## 稳定入口性能基线

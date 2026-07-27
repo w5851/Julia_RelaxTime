@@ -12,12 +12,14 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 include(joinpath(@__DIR__, "meson_conserved_charge_feedback_utils.jl"))
+include(joinpath(@__DIR__, "meson_conserved_charge_feedback_runtime.jl"))
 
-using LinearAlgebra: norm
 using .Constants_PNJL: ħc_MeV_fm
 using .Models
 using .MesonConservedChargeFeedbackUtils
-using Main.MesonDensity: phase_shift_meson_number_density
+using .MesonConservedChargeFeedbackRuntime: FeedbackSettings,
+                                           build_candidate_evaluator,
+                                           solve_feedback_level
 
 const DEFAULT_OUTPUT = joinpath(
     PROJECT_ROOT,
@@ -39,7 +41,7 @@ function _settings(; refined::Bool=false)
     q_nodes = _env_int("MESON_FEEDBACK_Q_NODES", 4)
     omega_nodes = _env_int("MESON_FEEDBACK_OMEGA_NODES", 6)
     refinement = refined ? _env_int("MESON_FEEDBACK_REFINEMENT_FACTOR", 2) : 1
-    return (
+    return FeedbackSettings(
         label=refined ? "refined" : "coarse",
         qmax=_env_float("MESON_FEEDBACK_QMAX", 4.0),
         q_nodes=q_nodes * refinement,
@@ -49,25 +51,6 @@ function _settings(; refined::Bool=false)
         eta=_env_float("MESON_FEEDBACK_ETA", 1e-6),
         density_policy=:x_min_cut,
         bose_x_min=_env_float("MESON_FEEDBACK_BOSE_X_MIN", 0.05),
-    )
-end
-
-@inline function _phase_density(meson::Symbol, mu_M::Float64, qp, tp, settings)
-    return phase_shift_meson_number_density(
-        meson,
-        qp,
-        tp;
-        degeneracy=1,
-        μ=mu_M,
-        scheme=:current,
-        qmax=settings.qmax,
-        q_nodes=settings.q_nodes,
-        omega_min=settings.omega_min,
-        omega_max=settings.omega_max,
-        omega_nodes=settings.omega_nodes,
-        eta=settings.eta,
-        density_policy=settings.density_policy,
-        bose_x_min=settings.bose_x_min,
     )
 end
 
@@ -81,92 +64,16 @@ function _candidate_evaluator(
     t_num::Int,
     gap_residual_norm_max::Float64,
 )
-    cache = Dict{Tuple{Float64,Float64},NamedTuple}()
-
-    function evaluate(mu_Q::Real, mu_S::Real)
-        key = (round(Float64(mu_Q); digits=12), round(Float64(mu_S); digits=12))
-        return get!(cache, key) do
-            flavor = flavor_mu_from_bqs(muB_fm, key[1], key[2])
-            mu_vec = Float64[flavor.mu_u, flavor.mu_d, flavor.mu_s]
-            state = solve_gap(
-                model,
-                T_fm,
-                mu_vec;
-                solver_backend=:models,
-                initial_guess=branch_seed,
-                residual_norm_max=gap_residual_norm_max,
-                xi=0.0,
-                p_num=p_num,
-                t_num=t_num,
-            )
-            x_state = collect(state_vector(state))
-            gap_norm = norm(gap_residual(
-                model,
-                x_state,
-                T_fm,
-                mu_vec;
-                xi=0.0,
-                p_num=p_num,
-                t_num=t_num,
-            ))
-            isfinite(gap_norm) && gap_norm <= gap_residual_norm_max || throw(ArgumentError(
-                "candidate gap residual $(gap_norm) exceeds $(gap_residual_norm_max)",
-            ))
-
-            masses = calculate_mass_vec(model, meanfield_state(x_state).phi)
-            qp = (
-                m=(u=Float64(masses[1]), d=Float64(masses[2]), s=Float64(masses[3])),
-                μ=(u=mu_vec[1], d=mu_vec[2], s=mu_vec[3]),
-            )
-            tp = (
-                T=T_fm,
-                Φ=Float64(x_state[4]),
-                Φbar=Float64(x_state[5]),
-                ξ=0.0,
-            )
-
-            quark_rho = model_rho(
-                model,
-                x_state,
-                mu_vec,
-                T_fm;
-                xi=0.0,
-                p_num=p_num,
-                t_num=t_num,
-            )
-            quark_bqs = conserved_densities_from_flavor(quark_rho)
-            meson_mu = charged_meson_chemical_potentials(key[1], key[2])
-            pi_plus = _phase_density(:pi_plus, meson_mu.mu_pi_plus, qp, tp, settings)
-            pi_minus = _phase_density(:pi_minus, meson_mu.mu_pi_minus, qp, tp, settings)
-            K_plus = _phase_density(:K_plus, meson_mu.mu_K_plus, qp, tp, settings)
-            K_minus = _phase_density(:K_minus, meson_mu.mu_K_minus, qp, tp, settings)
-
-            return (
-                mu_u=mu_vec[1],
-                mu_d=mu_vec[2],
-                mu_s=mu_vec[3],
-                x_state=x_state,
-                gap_residual_norm=gap_norm,
-                rho_B_q=quark_bqs.rho_B,
-                rho_Q_q=quark_bqs.rho_Q,
-                rho_S_q=quark_bqs.rho_S,
-                n_pi_plus=Float64(pi_plus.density),
-                n_pi_minus=Float64(pi_minus.density),
-                n_K_plus=Float64(K_plus.density),
-                n_K_minus=Float64(K_minus.density),
-                pi_plus_status=pi_plus.status,
-                pi_minus_status=pi_minus.status,
-                K_plus_status=K_plus.status,
-                K_minus_status=K_minus.status,
-                pi_plus_min_E_minus_mu=pi_plus.min_E_minus_mu,
-                pi_minus_min_E_minus_mu=pi_minus.min_E_minus_mu,
-                K_plus_min_E_minus_mu=K_plus.min_E_minus_mu,
-                K_minus_min_E_minus_mu=K_minus.min_E_minus_mu,
-            )
-        end
-    end
-
-    return evaluate, cache
+    return build_candidate_evaluator(
+        model,
+        T_fm,
+        muB_fm,
+        branch_seed,
+        settings;
+        p_num=p_num,
+        t_num=t_num,
+        gap_residual_norm_max=gap_residual_norm_max,
+    )
 end
 
 function _solve_level(
@@ -185,39 +92,27 @@ function _solve_level(
     target_ratio::Float64,
     rho_S_target::Float64,
 )
-    evaluator, cache = _candidate_evaluator(
+    return solve_feedback_level(
         model,
+        baseline,
         T_fm,
         muB_fm,
-        collect(baseline.x_state),
+        initial_mu_Q,
+        initial_mu_S,
         settings;
+        baseline_mu_Q=baseline_mu_Q,
+        baseline_mu_S=baseline_mu_S,
         p_num=p_num,
         t_num=t_num,
-        gap_residual_norm_max=_env_float("MESON_FEEDBACK_GAP_RESIDUAL_MAX", 1e-5),
-    )
-    baseline_Q = baseline_mu_Q === nothing ? initial_mu_Q : baseline_mu_Q
-    baseline_S = baseline_mu_S === nothing ? initial_mu_S : baseline_mu_S
-    baseline_payload = evaluator(baseline_Q, baseline_S)
-    result = solve_outer_conserved_charge_feedback(
-        evaluator,
-        initial_mu_Q,
-        initial_mu_S;
         charge_to_baryon_ratio=target_ratio,
-        strangeness_density_target=rho_S_target,
         rho0=rho0,
+        rho_S_target=rho_S_target,
+        gap_residual_norm_max=_env_float("MESON_FEEDBACK_GAP_RESIDUAL_MAX", 1e-5),
         residual_tolerance=_env_float("MESON_FEEDBACK_OUTER_RESIDUAL_TOL", 2e-3),
         finite_difference_step=_env_float("MESON_FEEDBACK_FD_STEP", 5e-3),
         maximum_step=_env_float("MESON_FEEDBACK_MAXIMUM_STEP", 0.25),
         max_iterations=_env_int("MESON_FEEDBACK_MAX_ITERATIONS", 6),
         max_evaluations=_env_int("MESON_FEEDBACK_MAX_EVALUATIONS", 30),
-    )
-    return (
-        settings=settings,
-        initial_mu_Q=initial_mu_Q,
-        initial_mu_S=initial_mu_S,
-        baseline_payload=baseline_payload,
-        result=result,
-        unique_candidate_count=length(cache),
     )
 end
 

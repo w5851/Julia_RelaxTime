@@ -11,7 +11,9 @@
 - `relaxtime/compare_bu_derivative_vs_byparts_e5.jl`：在同一 smooth/unwrapped 相移分支上比较 derivative、by-parts bulk、有限窗口 boundary 与 total；旧 `density_*_byparts` 列只是 bulk-only 历史映射，`*_closure_*` 才是门禁量
 - `relaxtime/audit_bu_meson_density_literature_alignment.jl`：面向 BU 介子数密度文献对齐审查的 fixed-point / phase normalization / charged `μ_K` 规则诊断；charged 输出在同一点覆盖 `bu2020_mu_s_0p2`、`friesen2019_mu_s_0p55` 以及 `K^+/π^+`、`K^-/π^-`
 - `relaxtime/meson_conserved_charge_feedback_utils.jl`：外层介子守恒荷修正的纯数值 helper，包含 charged B/Q/S 映射、affine residual 与带 evaluation budget 的阻尼有限差分 Newton；不直接求 PNJL 或 BU
+- `relaxtime/meson_conserved_charge_feedback_runtime.jl`：partial-feedback analysis runtime；集中候选 evaluator、缓存与 gap/BU/outer 分项计时，不是稳定公共入口
 - `relaxtime/meson_conserved_charge_outer_feedback_spike.jl`：固定 `(T,mu_B)` 的 quark-only→partial-feedback 单点诊断；每个 `(mu_Q,mu_S)` 候选重求五平均场，并同时计算 `pi+/-`、`K+/-` current-BU 密度
+- `relaxtime/scan_meson_conserved_charge_feedback_freezeout.jl`：读取 hot-start benchmark 中位耗时，沿 `default/baseline_freezeout` 选择 7/5/3 点稀疏扫描 `K+/pi+`、`K-/pi-`；输出仅为 diagnostic
 - `relaxtime/build_phase_guided_transport_xi001_jump_analysis.py`：基于 xi=0.01 p128 phase-guided transport 正式产物生成 tau-first 突变分析包，并把 `eta_over_s` / `zeta_over_s` 作为 tau 下游响应处理
 - `relaxtime/phase_guided_p128_mechanism_scan.jl`：消费 xi001 分析包生成的 mechanism window candidates，对 phase-guided transport 局部窗口执行 denominator-chain / rate-band 机制深拆并写回分析包表格
 - `relaxtime/build_phase_guided_pole_sensitive_rendering.py`：验证 v1→v2 tau/rate 机制迁移门槛，生成不改写正式产物的内部极点敏感审计，以及隐藏数值修正痕迹、用星号标示一阶相变点的多曲线论文候选图
@@ -33,6 +35,7 @@ julia --project=. scripts/analysis/mott_reference_mapping.jl
 julia --project=. scripts/analysis/relaxtime/compare_bu_derivative_vs_byparts_e5.jl
 julia --project=. scripts/analysis/relaxtime/audit_bu_meson_density_literature_alignment.jl
 julia --project=. scripts/analysis/relaxtime/meson_conserved_charge_outer_feedback_spike.jl
+julia --project=. scripts/analysis/relaxtime/scan_meson_conserved_charge_feedback_freezeout.jl
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py
 julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl --case-name first_canonical_v1_p128_xi001_validated_anchored_prod_v1 --candidate-csv docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv --out-dir docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables --integration-mode semi_infinite
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py

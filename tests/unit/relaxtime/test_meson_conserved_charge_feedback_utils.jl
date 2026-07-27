@@ -98,4 +98,16 @@ using .MesonConservedChargeFeedbackUtils
         0.0;
         max_evaluations=2,
     )
+
+    @test choose_freezeout_sqrts_grid(10.0) == [3.0, 4.5, 7.7, 11.5, 20.0, 62.4, 200.0]
+    @test choose_freezeout_sqrts_grid(100.0) == [3.0, 7.7, 11.5, 39.0, 200.0]
+    @test choose_freezeout_sqrts_grid(250.0) == [3.0, 7.7, 200.0]
+    @test_throws ArgumentError choose_freezeout_sqrts_grid(0.0)
+
+    continued = feedback_initial_mu(0.1, 0.2, true, -0.3, -0.4)
+    @test continued.source === :previous_feedback
+    @test continued.mu_Q == 0.1
+    fallback = feedback_initial_mu(0.1, 0.2, false, -0.3, -0.4)
+    @test fallback.source === :quark_only_fallback
+    @test fallback.mu_S == -0.4
 end

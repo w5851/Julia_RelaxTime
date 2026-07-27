@@ -13,6 +13,8 @@ export charged_meson_chemical_potentials
 export charged_meson_conserved_densities
 export total_conserved_charge_residual
 export solve_outer_conserved_charge_feedback
+export choose_freezeout_sqrts_grid
+export feedback_initial_mu
 
 @inline function _finite(name::AbstractString, value::Real)::Float64
     x = Float64(value)
@@ -29,6 +31,51 @@ end
 @inline function _required_real(payload, name::Symbol)::Float64
     hasproperty(payload, name) || throw(ArgumentError("candidate payload missing $(name)"))
     return _finite(String(name), getproperty(payload, name))
+end
+
+"""
+Choose the largest diagnostic freeze-out grid that fits an approximate wall-time
+budget.  The returned values are always ascending in `sqrt(s_NN)` and are kept
+deliberately sparse because this helper is not a production scan planner.
+"""
+function choose_freezeout_sqrts_grid(
+    median_seconds::Real;
+    budget_seconds::Real=600.0,
+)
+    median_s = _finite("median_seconds", median_seconds)
+    median_s > 0.0 || throw(ArgumentError("median_seconds must be positive"))
+    budget_s = _finite("budget_seconds", budget_seconds)
+    budget_s > 0.0 || throw(ArgumentError("budget_seconds must be positive"))
+
+    grids = (
+        Float64[3.0, 4.5, 7.7, 11.5, 20.0, 62.4, 200.0],
+        Float64[3.0, 7.7, 11.5, 39.0, 200.0],
+        Float64[3.0, 7.7, 200.0],
+    )
+    for grid in grids
+        median_s * length(grid) <= budget_s && return copy(grid)
+    end
+    return copy(last(grids))
+end
+
+"""Select continuation `(mu_Q,mu_S)` or fall back to the current quark-only seed."""
+function feedback_initial_mu(
+    previous_mu_Q::Real,
+    previous_mu_S::Real,
+    previous_converged::Bool,
+    fallback_mu_Q::Real,
+    fallback_mu_S::Real,
+)
+    previous_converged && return (
+        mu_Q=_finite("previous_mu_Q", previous_mu_Q),
+        mu_S=_finite("previous_mu_S", previous_mu_S),
+        source=:previous_feedback,
+    )
+    return (
+        mu_Q=_finite("fallback_mu_Q", fallback_mu_Q),
+        mu_S=_finite("fallback_mu_S", fallback_mu_S),
+        source=:quark_only_fallback,
+    )
 end
 
 """Map `(mu_Q,mu_S)` to chemical-equilibrium charged-meson potentials."""
