@@ -226,7 +226,25 @@ function _production_classify_temperature(
 
     last_result === nothing && error("production rho refinement produced no classification at T=$(T_mid)")
     _append_scan_csv!(aggregate_csv, last_result.out_csv)
+    # `rho_geometry_convergence=false` is an explicit legacy/diagnostic
+    # opt-out.  In that mode a valid Maxwell slice may remain a confirmed
+    # first-order candidate for backwards-compatible boundary consumers, but
+    # a monotone certificate is never manufactured from the single rho layer.
+    # The default production path keeps the strict two-layer geometry gate.
+    geometry_gate_satisfied = !cfg.rho_geometry_convergence || last_result.geometry_converged
+    semantic_status = if last_result.status == :valid && geometry_gate_satisfied
+        :confirmed_first_order
+    elseif last_result.status == :invalid &&
+           last_result.reason == "no_s_shape" &&
+           last_result.geometry_converged &&
+           any(record -> record.reason == "stable_no_s_shape", convergence_records)
+        :confirmed_monotone
+    else
+        :ambiguous_near_critical
+    end
     return merge(last_result, (
+        raw_status=last_result.status,
+        slice_status=semantic_status,
         stats=(total=scan_total, success=scan_success, failure=scan_failure),
         rho_convergence_records=convergence_records,
     ))
@@ -269,21 +287,80 @@ function _materialize_sweep_result(records::AbstractVector{<:NamedTuple}, first_
 end
 
 function _find_production_bracket(records::AbstractVector{<:NamedTuple})
-    prev_valid = nothing
+    prev_first_order = nothing
     for record in records
-        if record.status == :valid
-            prev_valid = record
-        elseif record.status == :invalid && prev_valid !== nothing
-            return (T_low=prev_valid.T_MeV, mu_low=prev_valid.mu_transition_MeV, T_high=record.T_MeV)
+        status = if record.status == :valid
+            :confirmed_first_order
+        elseif record.status == :invalid
+            :confirmed_monotone
+        else
+            record.status
+        end
+        if status == :confirmed_first_order
+            prev_first_order = record
+        elseif status == :confirmed_monotone && prev_first_order !== nothing
+            return (T_low=prev_first_order.T_MeV, mu_low=prev_first_order.mu_transition_MeV, T_high=record.T_MeV)
         end
     end
     return nothing
 end
 
+function _refine_production_cep_frontiers(
+        bracket,
+        evaluate_temperature::Function,
+        cfg::ProductionPipelineConfig;
+        unknown_count_fn::Function=()->0)
+    bracket === nothing && return nothing
+    low = (T=Float64(bracket.T_low), mu=Float64(bracket.mu_low))
+    high = (T=Float64(bracket.T_high),)
+    low_search_hi = high
+    high_search_lo = low
+    budget_exhausted = false
+
+    for _ in 1:cfg.cep_max_bisect_iter
+        if unknown_count_fn() > cfg.unknown_budget
+            budget_exhausted = true
+            break
+        end
+        changed = false
+        if low_search_hi.T - low.T > cfg.temperature_resolution_target_MeV
+            T_mid = 0.5 * (low.T + low_search_hi.T)
+            res = evaluate_temperature(T_mid)
+            if res.slice_status == :confirmed_first_order
+                low = (T=T_mid, mu=Float64(something(res.mu_transition, low.mu)))
+            else
+                low_search_hi = (T=T_mid,)
+                res.slice_status == :confirmed_monotone && (high = (T=T_mid,))
+            end
+            changed = true
+        end
+        if unknown_count_fn() > cfg.unknown_budget
+            budget_exhausted = true
+            break
+        end
+        if high.T - high_search_lo.T > cfg.temperature_resolution_target_MeV
+            T_mid = 0.5 * (high_search_lo.T + high.T)
+            res = evaluate_temperature(T_mid)
+            if res.slice_status == :confirmed_monotone
+                high = (T=T_mid,)
+            else
+                high_search_lo = (T=T_mid,)
+                res.slice_status == :confirmed_first_order &&
+                    (low = (T=T_mid, mu=Float64(something(res.mu_transition, low.mu))))
+            end
+            changed = true
+        end
+        changed || break
+        low_search_hi.T - low.T <= cfg.temperature_resolution_target_MeV && high.T - high_search_lo.T <= cfg.temperature_resolution_target_MeV && break
+    end
+    return (low=low, high=high, budget_exhausted=budget_exhausted, unknown_count=unknown_count_fn())
+end
+
 function _adaptive_production_temperature_refinement!(
         temperatures::Vector{Float64},
         evaluate_temperature::Function,
-        cfg::ProductionPipelineConfig)
+        cfg::ProductionPipelineConfig;
+        stop_refinement::Function=()->false)
     cfg.adaptive_temperature || return sort(unique(copy(temperatures))), NamedTuple[]
     cfg.temperature_max_refine_level > 0 || return sort(unique(copy(temperatures))), NamedTuple[]
 
@@ -304,11 +381,13 @@ function _adaptive_production_temperature_refinement!(
 
     records = NamedTuple[]
     for level in 1:cfg.temperature_max_refine_level
+        stop_refinement() && break
         isempty(intervals) && break
         midpoints = sort(unique(Float64[0.5 * (left + right) for (left, right) in intervals]))
         for midpoint in midpoints
             evaluate_temperature(Float64(midpoint))
         end
+        stop_refinement() && break
 
         next_intervals = Tuple{Float64, Float64}[]
         for (left_T, right_T) in intervals
@@ -387,6 +466,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         crossover_mu0_only::Bool=false,
         crossover_T_max_MeV::Float64=NaN,
         cep_tol::Float64=0.1,
+        temperature_resolution_target_MeV::Float64=NaN,
         cep_max_bisect_iter::Int=20,
         area_tol_good::Float64=1e-4,
         area_tol_bad::Float64=5e-4,
@@ -423,8 +503,10 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "production phase pipeline requires T_start > 0 MeV; strict T=0 PNJL five-field solves are Polyakov-degenerate",
     ))
     T_end >= T_start || throw(ArgumentError("T_end must be >= T_start, got $(T_end) < $(T_start)"))
-    cep_tol > 0 || throw(ArgumentError("cep_tol must be positive, got $(cep_tol)"))
+    resolution_target = isfinite(temperature_resolution_target_MeV) ? temperature_resolution_target_MeV : cep_tol
+    resolution_target > 0 || throw(ArgumentError("temperature_resolution_target_MeV must be positive, got $(resolution_target)"))
     cep_max_bisect_iter > 0 || throw(ArgumentError("cep_max_bisect_iter must be positive"))
+    unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative, got $(unknown_budget)"))
     cep_max_refine_level_rho >= 0 || throw(ArgumentError("cep_max_refine_level_rho must be nonnegative"))
     if rho_geometry_convergence && cep_max_refine_level_rho < 1
         throw(ArgumentError("rho geometry convergence requires cep_max_refine_level_rho >= 1"))
@@ -447,7 +529,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         T_start=Float64(T_start),
         T_end=Float64(T_end),
         dT_initial=Float64(dT),
-        cep_tol_MeV=Float64(cep_tol),
+        temperature_resolution_target_MeV=Float64(resolution_target),
+        cep_tol_MeV=Float64(resolution_target),
         cep_max_bisect_iter=Int(cep_max_bisect_iter),
         area_tol_good=Float64(area_tol_good),
         area_tol_bad=Float64(area_tol_bad),
@@ -512,6 +595,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         return value
     end
 
+    unknown_count_fn() = count(res -> get(res, :status, :unknown) == :unknown, values(eval_cache))
+    unknown_budget_exhausted() = unknown_count_fn() > cfg.unknown_budget
+
     first_point_fallback = false
     fallback_start_T_MeV = NaN
     start_idx = 1
@@ -533,7 +619,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         evaluate_temperature(Float64(T))
     end
     resolved_temps, temperature_convergence_records =
-        _adaptive_production_temperature_refinement!(temps, evaluate_temperature, cfg)
+        _adaptive_production_temperature_refinement!(temps, evaluate_temperature, cfg;
+            stop_refinement=unknown_budget_exhausted)
 
     sweep_records = NamedTuple[]
     boundary = NamedTuple[]
@@ -543,18 +630,14 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
 
     for T in sort(resolved_temps)
         res = evaluate_temperature(Float64(T))
-        status = res.status
+        status = get(res, :slice_status, :ambiguous_near_critical)
+        raw_status = res.status
         reason = res.reason
-        if status == :unknown
+        if raw_status == :unknown
             unknown_count += 1
-            if unknown_count > cfg.unknown_budget
-                status = :invalid
-                reason = "unknown_budget_exceeded:$(res.reason)"
-                forced_invalid_count += 1
-            end
         end
 
-        if status == :valid
+        if status == :confirmed_first_order && raw_status == :valid
             _push_production_boundary!(boundary, T, res)
             _push_production_spinodal!(spinodal, T, res)
         end
@@ -562,6 +645,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         push!(sweep_records, (
             T_MeV=Float64(T),
             status=status,
+            raw_status=raw_status,
             mu_transition_MeV=Float64(something(res.mu_transition, NaN)),
             area_residual=Float64(something(res.area_residual, NaN)),
             reason=String(reason),
@@ -572,6 +656,15 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     sort!(sweep_records; by=r -> r.T_MeV)
     sort!(boundary; by=r -> r.T_MeV)
     sort!(spinodal; by=r -> r.T_MeV)
+    bracket = _find_production_bracket(sweep_records)
+    frontiers = _refine_production_cep_frontiers(
+        bracket,
+        evaluate_temperature,
+        cfg;
+        unknown_count_fn=unknown_count_fn,
+    )
+    frontier_budget_exhausted = frontiers !== nothing && frontiers.budget_exhausted
+    unknown_count = unknown_count_fn()
     sweep_result = _materialize_sweep_result(
         sweep_records,
         first_point_fallback,
@@ -579,54 +672,48 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         unknown_count,
         forced_invalid_count,
     )
-
-    bracket = _find_production_bracket(sweep_records)
-    cep = CEPResult(method=:production_no_valid_invalid_transition)
-    if bracket !== nothing
-        T_low = Float64(bracket.T_low)
-        T_high = Float64(bracket.T_high)
-        last_mu = Float64(bracket.mu_low)
-        bisect_count = 0
-        refine_unknown_count = 0
-
-        while (T_high - T_low) > cfg.cep_tol_MeV && bisect_count < cfg.cep_max_bisect_iter
-            T_mid = 0.5 * (T_low + T_high)
-            res = evaluate_temperature(T_mid)
-
-            status = res.status
-            if status == :unknown
-                refine_unknown_count += 1
-                if unknown_count + refine_unknown_count > cfg.unknown_budget
-                    status = :invalid
-                    forced_invalid_count += 1
-                else
-                    status = :invalid
-                end
-            end
-
-            if status == :valid
-                T_low = T_mid
-                if res.mu_transition !== nothing && isfinite(res.mu_transition)
-                    last_mu = Float64(res.mu_transition)
-                end
-            else
-                T_high = T_mid
-            end
-            bisect_count += 1
+    cep = if frontiers === nothing
+        has_first_order = any(row -> row.status == :confirmed_first_order, sweep_records)
+        has_monotone = any(row -> row.status == :confirmed_monotone, sweep_records)
+        last_first_order = findlast(row -> row.status == :confirmed_first_order, sweep_records)
+        low_T = last_first_order === nothing ? NaN : Float64(sweep_records[last_first_order].T_MeV)
+        low_mu = last_first_order === nothing ? NaN : Float64(sweep_records[last_first_order].mu_transition_MeV)
+        base_reason = if has_first_order
+            "confirmed_first_order_without_monotone_anchor"
+        elseif has_monotone
+            "no_confirmed_first_order"
+        else
+            "no_confirmed_phase_anchor"
         end
-
-        cep = CEPResult(
-            found=true,
-            T_cep_MeV=0.5 * (T_low + T_high),
-            mu_cep_MeV=last_mu,
-            uncertainty_T_MeV=0.5 * (T_high - T_low),
-            T_bracket_low_MeV=T_low,
-            T_bracket_high_MeV=T_high,
-            bracket_width_T_MeV=T_high - T_low,
+        CEPResult(
+            result_status=has_first_order ? :ambiguous : (has_monotone ? :not_found : :ambiguous),
+            T_last_first_order_MeV=low_T,
+            mu_last_first_order_MeV=low_mu,
             eval_count=length(eval_cache),
-            unknown_count=unknown_count + refine_unknown_count,
-            reason=forced_invalid_count > 0 ? "unknown_budget_forced_invalid_present" : nothing,
-            method=:production_bisect_last_valid_maxwell,
+            unknown_count=unknown_count,
+            reason=unknown_budget_exhausted() ? "unknown_budget_exceeded:$(base_reason)" : base_reason,
+            method=:production_three_state_frontier,
+            temperature_resolution_target_MeV=cfg.temperature_resolution_target_MeV,
+        )
+    else
+        low = frontiers.low
+        high = frontiers.high
+        CEPResult(
+            result_status=:ambiguous,
+            T_bracket_low_MeV=low.T,
+            T_bracket_high_MeV=high.T,
+            bracket_width_T_MeV=high.T - low.T,
+            T_last_first_order_MeV=low.T,
+            mu_last_first_order_MeV=low.mu,
+            T_first_monotone_MeV=high.T,
+            ambiguity_width_T_MeV=high.T - low.T,
+            eval_count=length(eval_cache),
+            unknown_count=unknown_count,
+            reason=(frontier_budget_exhausted || unknown_budget_exhausted()) ?
+                "unknown_budget_exceeded:ambiguous_interval_between_confirmed_first_order_and_monotone" :
+                "ambiguous_interval_between_confirmed_first_order_and_monotone",
+            method=:production_three_state_frontier,
+            temperature_resolution_target_MeV=cfg.temperature_resolution_target_MeV,
         )
     end
 
@@ -698,6 +785,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "thermo_quadrature_atol" => thermo_quadrature_atol,
         "thermo_quadrature_maxevals" => thermo_quadrature_maxevals,
         "unknown_budget" => cfg.unknown_budget,
+        "temperature_resolution_target_MeV" => cfg.temperature_resolution_target_MeV,
         "cep_tol_MeV" => cfg.cep_tol_MeV,
         "max_refine_level_rho" => cfg.max_refine_level_rho,
         "adaptive_rho" => cfg.adaptive_rho,
@@ -729,6 +817,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         thermo_quadrature_rtol=thermo_quadrature_rtol,
         thermo_quadrature_atol=thermo_quadrature_atol,
         thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        temperature_resolution_target_MeV=cfg.temperature_resolution_target_MeV,
+        unknown_budget=cfg.unknown_budget,
         rho_geometry_convergence=cfg.rho_geometry_convergence,
         rho_position_tol_MeV=cfg.rho_position_tol_MeV,
         rho_density_tol=cfg.rho_density_tol,
@@ -751,9 +841,15 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "spinodal_count" => length(spinodal),
         "crossover_count" => length(crossover),
         "cep_method" => String(cep.method),
+        "cep_result_status" => String(cep.result_status),
         "cep_eval_count" => cep.eval_count,
         "cep_unknown_count" => cep.unknown_count,
+        "cep_temperature_resolution_target_MeV" => (isfinite(cep.temperature_resolution_target_MeV) ? cep.temperature_resolution_target_MeV : nothing),
+        "cep_T_last_first_order_MeV" => (isfinite(cep.T_last_first_order_MeV) ? cep.T_last_first_order_MeV : nothing),
+        "cep_T_first_monotone_MeV" => (isfinite(cep.T_first_monotone_MeV) ? cep.T_first_monotone_MeV : nothing),
         "unknown_budget" => cfg.unknown_budget,
+        "unknown_budget_observed" => unknown_count,
+        "unknown_budget_exhausted" => unknown_budget_exhausted() || frontier_budget_exhausted,
         "first_point_fallback" => sweep_result.first_point_fallback,
         "fallback_start_T_MeV" => (isfinite(sweep_result.fallback_start_T_MeV) ? sweep_result.fallback_start_T_MeV : nothing),
         "forced_invalid_count" => forced_invalid_count,

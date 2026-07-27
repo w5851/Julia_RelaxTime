@@ -46,7 +46,7 @@ using .Models
     promoted = Models.promote_phase_artifacts(
         target.run_dir;
         reference_root=target.reference_root,
-        gate_options=(; profile="smoke", expected_model_kind="PNJL", expected_schema_version="phase-v1"),
+        gate_options=(; profile="smoke", expected_model_kind="PNJL", expected_schema_version="phase-v2"),
         write_reference=true,
     )
 
@@ -65,7 +65,7 @@ using .Models
     rejected = Models.promote_phase_artifacts(
         bad_dir;
         reference_root=target.reference_root,
-        gate_options=(; expected_model_kind="PNJL", expected_schema_version="phase-v1"),
+        gate_options=(; expected_model_kind="PNJL", expected_schema_version="phase-v2"),
         write_reference=false,
     )
 

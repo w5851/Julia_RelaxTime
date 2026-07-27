@@ -3,6 +3,7 @@
 import argparse
 import csv
 import json
+import math
 from pathlib import Path
 
 
@@ -54,6 +55,83 @@ def require_columns(fieldnames, required, artifact_name: str):
     missing = [name for name in required if name not in fieldnames]
     if missing:
         fail(f"{artifact_name} missing required columns: {missing}; found {fieldnames}")
+
+
+def validate_cep_rows(fieldnames, rows, path: Path):
+    modern_columns = {
+        "result_status",
+        "T_last_first_order_MeV",
+        "muq_last_first_order_MeV",
+        "muB_last_first_order_MeV",
+        "T_first_monotone_MeV",
+        "ambiguity_width_T_MeV",
+        "temperature_resolution_target_MeV",
+    }
+    present_modern = modern_columns.intersection(fieldnames)
+    if not present_modern:
+        # The eight-column historical contract remains readable.
+        return
+    if present_modern != modern_columns:
+        fail(
+            f"partial modern CEP schema at {path}: present={sorted(present_modern)}, "
+            f"required={sorted(modern_columns)}"
+        )
+    allowed = {"resolved", "ambiguous", "not_found"}
+    def finite_value(value: str, label: str, index: int, *, positive: bool = False) -> float | None:
+        text = value.strip()
+        if not text:
+            return None
+        try:
+            parsed = float(text)
+        except ValueError:
+            fail(f"non-numeric CEP {label} at {path}:{index}: {value!r}")
+        if not math.isfinite(parsed):
+            fail(f"non-finite CEP {label} at {path}:{index}: {value!r}")
+        if positive and parsed <= 0:
+            fail(f"non-positive CEP {label} at {path}:{index}: {value!r}")
+        return parsed
+
+    seen_xi: set[float] = set()
+    for index, row in enumerate(rows, start=2):
+        xi_text = row.get("xi", "").strip()
+        try:
+            xi_value = float(xi_text)
+        except ValueError:
+            fail(f"non-numeric CEP xi at {path}:{index}: {xi_text!r}")
+        if not math.isfinite(xi_value):
+            fail(f"non-finite CEP xi at {path}:{index}: {xi_text!r}")
+        if xi_value in seen_xi:
+            fail(f"duplicate CEP xi row at {path}:{index}: {xi_value}")
+        seen_xi.add(xi_value)
+        status = row.get("result_status", "").strip()
+        if status not in allowed:
+            fail(f"invalid CEP result_status at {path}:{index}: {status!r}")
+        if status != "resolved" and (row.get("T_CEP_MeV", "").strip() or row.get("muq_CEP_MeV", "").strip()):
+            fail(f"non-resolved CEP row publishes a single point at {path}:{index}")
+        if status == "resolved" and not (
+            row.get("T_CEP_MeV", "").strip() and row.get("muq_CEP_MeV", "").strip()
+        ):
+            fail(f"resolved CEP row lacks a finite single point at {path}:{index}")
+        finite_value(row.get("T_CEP_MeV", ""), "T_CEP_MeV", index)
+        finite_value(row.get("muq_CEP_MeV", ""), "muq_CEP_MeV", index)
+        finite_value(
+            row.get("temperature_resolution_target_MeV", ""),
+            "temperature_resolution_target_MeV",
+            index,
+            positive=True,
+        )
+        if status == "ambiguous":
+            low = row.get("T_last_first_order_MeV", "").strip()
+            high = row.get("T_first_monotone_MeV", "").strip()
+            if not low and not high:
+                fail(f"ambiguous CEP row lacks phase evidence at {path}:{index}")
+            low_value = finite_value(low, "T_last_first_order_MeV", index)
+            high_value = finite_value(high, "T_first_monotone_MeV", index)
+            if low_value is not None and high_value is not None and high_value < low_value:
+                fail(f"ambiguous CEP evidence interval is reversed at {path}:{index}")
+            width = finite_value(row.get("ambiguity_width_T_MeV", ""), "ambiguity_width_T_MeV", index)
+            if width is not None and width < 0:
+                fail(f"ambiguous CEP ambiguity width is negative at {path}:{index}")
 
 
 def validate_manifest_artifact(artifacts, artifact_name: str, csv_path: Path, row_count: int, repo_root: Path):
@@ -206,6 +284,8 @@ def main():
         for artifact_name, (csv_path, required_columns) in expected_non_crossover.items():
             artifact_fields, artifact_rows = load_csv_rows(csv_path)
             require_columns(artifact_fields, required_columns, artifact_name)
+            if artifact_name == "cep":
+                validate_cep_rows(artifact_fields, artifact_rows, csv_path)
             validate_manifest_artifact(artifacts, artifact_name, csv_path, len(artifact_rows), repo_root)
             full_artifact_reports[artifact_name] = {
                 "rows": len(artifact_rows),

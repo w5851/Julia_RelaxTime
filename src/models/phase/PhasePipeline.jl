@@ -164,6 +164,10 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         cep_strategy::Symbol=:interpolate,
         cep_interpolate_use_direct_eval::Bool=false,
         cep_tol::Float64=0.01,
+        # Compatibility alias: `cep_tol` remains accepted, while this name
+        # makes the endpoint-search (rather than physical-error) meaning
+        # explicit in new callers and manifests.
+        temperature_resolution_target_MeV::Float64=NaN,
         cep_max_bisect_iter::Int=20,
         cep_area_tol_good::Float64=1e-4,
         cep_area_tol_bad::Float64=5e-4,
@@ -208,6 +212,12 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
     minimum(Float64.(T_grid)) > 0.0 || throw(ArgumentError(
         "phase pipeline requires T_grid > 0 MeV; strict T=0 PNJL five-field solves are Polyakov-degenerate",
     ))
+    resolution_target = isfinite(temperature_resolution_target_MeV) ?
+        temperature_resolution_target_MeV : cep_tol
+    isfinite(resolution_target) && resolution_target > 0 || throw(ArgumentError(
+        "temperature_resolution_target_MeV must be finite and positive, got $(resolution_target)",
+    ))
+    unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative, got $(unknown_budget)"))
 
     if mode == :production
         T_start_eff = isfinite(T_start) ? T_start : Float64(minimum(T_grid))
@@ -237,6 +247,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
             crossover_mu0_only=crossover_mu0_only,
             crossover_T_max_MeV=crossover_T_max_MeV,
             cep_tol=isfinite(cep_tol) && cep_tol > 0 ? cep_tol : 0.1,
+            temperature_resolution_target_MeV=resolution_target,
             cep_max_bisect_iter=cep_max_bisect_iter,
             area_tol_good=cep_area_tol_good,
             area_tol_bad=cep_area_tol_bad,
@@ -378,7 +389,7 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
     cep = find_cep(curves;
         strategy=cep_strategy,
         evaluate_at_T=cep_evaluator,
-        tol=cep_tol,
+        tol=resolution_target,
         max_bisect_iter=cep_max_bisect_iter,
         area_tol_good=cep_area_tol_good,
         area_tol_bad=cep_area_tol_bad,
@@ -388,7 +399,8 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         direct_initial_step=cep_direct_initial_step,
         direct_expand_factor=cep_direct_expand_factor,
         direct_max_expand_steps=cep_direct_max_expand_steps,
-        direct_fallback_scan=cep_direct_fallback_scan)
+        direct_fallback_scan=cep_direct_fallback_scan,
+        unknown_budget=unknown_budget)
 
     crossover = if compute_crossover
         mu_max = if cep.found && isfinite(cep.mu_cep_MeV)
@@ -441,6 +453,9 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "thermo_quadrature_atol" => thermo_quadrature_atol,
         "thermo_quadrature_maxevals" => thermo_quadrature_maxevals,
         "cep_strategy" => String(cep_strategy),
+        "temperature_resolution_target_MeV" => resolution_target,
+        "cep_tol" => cep_tol,
+        "unknown_budget" => unknown_budget,
         "cep_interpolate_use_direct_eval" => cep_interpolate_use_direct_eval,
         "cep_adaptive_rho" => cep_adaptive_rho,
         "cep_adaptive_slope_tol" => cep_adaptive_slope_tol,
@@ -470,8 +485,14 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         "spinodal_count" => length(spinodal),
         "crossover_count" => length(crossover),
         "cep_method" => String(cep.method),
+        "cep_result_status" => String(cep.result_status),
         "cep_eval_count" => cep.eval_count,
         "cep_unknown_count" => cep.unknown_count,
+        "cep_temperature_resolution_target_MeV" => (isfinite(cep.temperature_resolution_target_MeV) ? cep.temperature_resolution_target_MeV : nothing),
+        "cep_T_last_first_order_MeV" => (isfinite(cep.T_last_first_order_MeV) ? cep.T_last_first_order_MeV : nothing),
+        "cep_T_first_monotone_MeV" => (isfinite(cep.T_first_monotone_MeV) ? cep.T_first_monotone_MeV : nothing),
+        "unknown_budget" => unknown_budget,
+        "unknown_budget_exhausted" => occursin("unknown_budget_exceeded", something(cep.reason, "")),
         "cep_adaptive_rho" => cep_adaptive_rho,
     )
 

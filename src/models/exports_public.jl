@@ -94,7 +94,7 @@ export TransportProvider
 export prepare_transport_provider
 export default_momentum_count, default_theta_count
 export default_momentum_nodes, default_momentum_weights
-export CEPResult, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
+export CEPResult, CEP_RESULT_STATUSES, FirstOrderSweepResult, ProductionPipelineConfig, PromotionResult, PhasePipelineResult
 export AbstractPipelineIOContract, PipelineIOContract
 export PipelineProvenance, PipelineSpec, PipelineStage, PipelineContext, PipelineArtifact, StageResult
 export persisted_symbol_to_string, persisted_string_to_symbol

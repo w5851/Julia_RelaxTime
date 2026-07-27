@@ -38,16 +38,17 @@ end
         160.0 => (mu_m, rho_m),
     )
     cep = Models.find_cep(curves; tol=0.5, max_bisect_iter=8)
-    @test cep.found
-    @test 140.0 <= cep.T_cep_MeV <= 160.0
+    @test !cep.found
+    @test cep.result_status == :ambiguous
+    @test cep.T_last_first_order_MeV == 140.0
 
     curves_nonuniform = Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}(
         140.0 => (mu_s, rho_s),
         160.0 => (mu_s[1:end-1], rho_s[1:end-1]),
     )
     cep2 = Models.find_cep(curves_nonuniform; tol=0.5, max_bisect_iter=8)
-    @test cep2.found
-    @test cep2.method == :fallback_last_valid_nonuniform_grid
+    @test !cep2.found
+    @test cep2.result_status == :ambiguous
 
     evaluator = function (T_mid::Float64, level::Int)
         if T_mid <= 150.0
@@ -74,7 +75,7 @@ end
         direct_max_expand_steps=6,
         direct_fallback_scan=false,
         max_refine_level=2)
-    @test cep3.found
-    @test cep3.method == :direct_bisect_last_valid_maxwell
+    @test !cep3.found
+    @test cep3.result_status == :ambiguous
     @test cep3.eval_count > 0
 end

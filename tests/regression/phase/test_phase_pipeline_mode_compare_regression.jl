@@ -42,9 +42,9 @@ end
         common...,
     )
 
-    @test production.cep.found == research.cep.found
-    @test isapprox(production.cep.T_cep_MeV, research.cep.T_cep_MeV; atol=0.3)
-    @test isapprox(production.cep.mu_cep_MeV, research.cep.mu_cep_MeV; atol=0.3)
+    @test production.cep.result_status == research.cep.result_status
+    @test production.cep.result_status == :ambiguous
+    @test isapprox(production.cep.T_last_first_order_MeV, research.cep.T_last_first_order_MeV; atol=0.3)
 
     @test length(production.first_order_boundary) == length(research.first_order_boundary)
     for (prod_row, ref_row) in zip(production.first_order_boundary, research.first_order_boundary)

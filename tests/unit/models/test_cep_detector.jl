@@ -64,6 +64,22 @@ end
         )
         @test res.found == false
         @test res.reason == "test"
+        legacy_not_found = Models.CEPResult(found=false, T_cep_MeV=130.0, mu_cep_MeV=295.0)
+        @test isnan(legacy_not_found.T_cep_MeV)
+        @test isnan(legacy_not_found.mu_cep_MeV)
+        ambiguous = Models.CEPResult(
+            result_status=:ambiguous,
+            T_last_first_order_MeV=130.0,
+            T_first_monotone_MeV=131.0,
+        )
+        @test ambiguous.result_status == :ambiguous
+        @test !ambiguous.found
+        @test isnan(ambiguous.T_cep_MeV)
+        @test ambiguous.ambiguity_width_T_MeV == 1.0
+        @test_throws ArgumentError Models.CEPResult(result_status=:resolved)
+        resolved = Models.CEPResult(result_status=:resolved, T_cep_MeV=130, mu_cep_MeV=295)
+        @test resolved.found
+        @test resolved.T_cep_MeV == 130.0
     end
 
     @testset "find_cep 空 curves dict → 未找到" begin
@@ -120,7 +136,7 @@ end
         @test cres.mu_transition === nothing
     end
 
-    @testset "interpolate CEP 可报告 weak_s_shape disappearance 口径" begin
+    @testset "interpolate CEP 将 weak_s_shape disappearance 保留为 ambiguous 区间" begin
         curves = _load_reference_curves()
         mu_strong, rho_strong = _interpolate_curve(curves, 130.625)
         mu_weak, rho_weak = _interpolate_curve(curves, 130.9375)
@@ -135,15 +151,15 @@ end
 
         cep = Models.find_cep(seeded_curves; tol=0.01, max_bisect_iter=12, strategy=:interpolate)
 
-        @test cep.found
-        @test cep.T_cep_MeV > 130.9
-        @test cep.method == :bisect_weak_s_shape_disappearance
-        @test cep.T_bracket_low_MeV < cep.T_bracket_high_MeV
-        @test cep.bracket_width_T_MeV == cep.T_bracket_high_MeV - cep.T_bracket_low_MeV
-        @test cep.uncertainty_T_MeV == 0.5 * cep.bracket_width_T_MeV
+        @test !cep.found
+        @test cep.result_status == :ambiguous
+        @test isnan(cep.T_cep_MeV)
+        @test cep.method == :three_state_interpolate
+        @test cep.T_last_first_order_MeV == 130.625
+        @test isnan(cep.T_first_monotone_MeV)
     end
 
-    @testset "interpolate CEP 可在临界二分点切换为 direct re-evaluate" begin
+    @testset "interpolate CEP 的 direct re-evaluate 不伪造单点" begin
         curves = _load_reference_curves()
         mu_strong, rho_strong = _interpolate_curve(curves, 130.625)
         mu_none, rho_none = _interpolate_curve(curves, 131.0)
@@ -177,11 +193,57 @@ end
             evaluate_at_T=evaluator,
         )
 
-        @test cep_interp.found
-        @test cep_interp.method == :bisect_weak_s_shape_disappearance
-        @test cep_direct_mid.found
-        @test cep_direct_mid.T_cep_MeV > cep_interp.T_cep_MeV
-        @test cep_direct_mid.method == :bisect_last_valid_maxwell
-        @test cep_direct_mid.uncertainty_T_MeV == 0.5 * cep_direct_mid.bracket_width_T_MeV
+        @test !cep_interp.found
+        @test cep_interp.result_status == :ambiguous
+        @test !cep_direct_mid.found
+        @test cep_direct_mid.result_status == :ambiguous
+        @test cep_direct_mid.T_last_first_order_MeV >= cep_interp.T_last_first_order_MeV
+        @test cep_direct_mid.method == :three_state_interpolate
+    end
+
+    @testset "显式 monotone certificate 才能形成高侧证据" begin
+        curves = _load_reference_curves()
+        mu_s, rho_s = _interpolate_curve(curves, 130.625)
+        rho_m = collect(0.0:0.05:1.2)
+        mu_m = collect(range(250.0, 310.0; length=length(rho_m)))
+        evidence = Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}(
+            130.625 => (mu_s, rho_s),
+            140.0 => (mu_m, rho_m),
+        )
+        certificate = (T, cres) -> T >= 140.0 && cres.reason == "no_s_shape"
+        cep = Models.find_cep(
+            evidence;
+            tol=0.5,
+            max_bisect_iter=8,
+            monotone_certificate=certificate,
+        )
+        @test cep.result_status == :ambiguous
+        @test cep.T_last_first_order_MeV >= 130.625
+        @test isfinite(cep.T_first_monotone_MeV)
+        @test cep.ambiguity_width_T_MeV >= 0.0
+    end
+
+    @testset "unknown_budget 只停止收缩而不改写 ambiguous" begin
+        curves = _load_reference_curves()
+        mu_s, rho_s = _interpolate_curve(curves, 130.625)
+        rho_m = collect(0.0:0.05:1.2)
+        mu_m = collect(range(250.0, 310.0; length=length(rho_m)))
+        evidence = Dict{Float64, Tuple{Vector{Float64}, Vector{Float64}}}(
+            130.625 => (mu_s, rho_s),
+            140.0 => (mu_m, rho_m),
+        )
+        cep = Models.find_cep(
+            evidence;
+            tol=0.5,
+            max_bisect_iter=8,
+            evaluate_at_T=(T, level) -> nothing,
+            monotone_certificate=(T, cres) -> T >= 140.0 && cres.reason == "no_s_shape",
+            strategy=:direct,
+            unknown_budget=0,
+        )
+        @test cep.result_status == :ambiguous
+        @test cep.unknown_count == 1
+        @test occursin("unknown_budget_exceeded", something(cep.reason, ""))
+        @test isnan(cep.T_cep_MeV)
     end
 end
