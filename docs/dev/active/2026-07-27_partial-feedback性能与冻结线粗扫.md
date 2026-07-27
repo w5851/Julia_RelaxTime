@@ -42,7 +42,7 @@
 
 ### 热启动 benchmark
 
-- warm-up：`138.379 s`，包含本进程首次 JIT/初始化，不计入统计；
+- warm-up：`138.787 s`，包含本进程首次 JIT/初始化，不计入统计；
 - 3 个 fresh-cache 样本：`min=0.196 s`、`median=0.248 s`、`mean=0.254 s`、`max=0.318 s`；
 - 每个样本均收敛，`outer residual_norm=1.9200e-3`，`outer_iterations=9`，`outer_evaluations=28`；
 - baseline 约 `0.057--0.098 s`；候选 evaluator 合计约 `0.135--0.209 s`，其中 gap 约 `0.026--0.048 s`、四通道 BU 约 `0.107--0.158 s`；
