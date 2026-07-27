@@ -218,6 +218,10 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol solve \
 	--include-symbol solve_multi \
 	--include-symbol ConstraintModes \
+	--include-symbol FixedMuBConservedCharges \
+	--include-symbol flavor_mu_from_bqs \
+	--include-symbol conserved_mu_from_flavor \
+	--include-symbol conserved_densities_from_flavor \
 	--include-symbol GapParams \
 	--include-symbol build_conditions \
 	--include-symbol build_residual! \

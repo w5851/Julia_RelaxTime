@@ -21,7 +21,8 @@ result = solve(FixedMu(), T, μ; xi=xi, seed_strategy=MultiSeed())
 module SeedStrategies
 
 # 从 Models 域导入约束模式定义
-using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedEntropy, FixedSigma, state_dim
+using ..Models: ConstraintMode, FixedMu, FixedRho, FixedAsymmetricRho, FixedMuBConservedCharges, FixedEntropy, FixedSigma, state_dim
+using ..Models: flavor_mu_from_bqs
 
 export SeedStrategy, DefaultSeed, MultiSeed, HybridContinuitySeed
 export get_seed, update!, extend_seed
@@ -155,6 +156,13 @@ function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedAsymmetricRho
     μ_u = μ_d * cbrt(ratio)
     μ_s = abs(mode.s_target) <= 1e-12 ? 0.05 : μ_d
     return Float64[seed_5..., μ_u, μ_d, μ_s]
+end
+
+function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedMuBConservedCharges)
+    seed_5 = base_seed[1:5]
+    # Neutral-strangeness leading seed: mu_Q=0 and mu_s=0, hence mu_S=mu_B/3.
+    flavor = flavor_mu_from_bqs(mode.muB_fm, 0.0, mode.muB_fm / 3)
+    return Float64[seed_5..., flavor.mu_u, flavor.mu_d, flavor.mu_s]
 end
 
 function extend_seed(base_seed::AbstractVector{<:Real}, mode::FixedEntropy)

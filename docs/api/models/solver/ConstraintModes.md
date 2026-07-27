@@ -9,6 +9,7 @@
 - `FixedMu()`
 - `FixedRho(rho_target)`
 - `FixedAsymmetricRho(rho_target, ud_ratio_target, s_target)`
+- `FixedMuBConservedCharges(muB_fm, charge_to_baryon_ratio=0.4, strangeness_density_target=0.0)`
 - `FixedEntropy(s_target)`
 - `FixedSigma(sigma_target)`
 
@@ -19,7 +20,7 @@
 当前约定：
 
 - `FixedMu()`：状态维度 5，参数维度 2
-- 其它固定密度/熵/比熵/非对称模式：状态维度 8，参数维度 1
+- 其它固定密度/熵/比熵/非对称/守恒荷模式：状态维度 8，参数维度 1
 
 这个维度合同会直接影响：
 
@@ -75,7 +76,7 @@
 
 当前默认行为：
 
-- `solve_constraint` 对 `FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` 默认走 `ProblemSpec` 主链
+- `solve_constraint` 对 `FixedRho` / `FixedEntropy` / `FixedSigma` / `FixedAsymmetricRho` / `FixedMuBConservedCharges` 默认走 `ProblemSpec` 主链
 - `use_problem_spec` / `allow_legacy_path` / `warn_on_legacy_path` 兼容参数已移除；调用时传入会抛 `ArgumentError`
 - `problem_spec` 仍作为可选覆盖项（`ProblemSpec` 或 `nothing`），用于显式契约注入
 
@@ -85,8 +86,56 @@
 - `EqualMuComponent`
 - `FixedBaryonDensityComponent`
 - `AsymmetricDensityComponent`
+- `FixedMuBComponent`
+- `ConservedChargeDensityComponent`
 - `FixedEntropyComponent`
 - `FixedSigmaComponent`
+
+## 固定 `mu_B` 的 B/Q/S 守恒荷模式
+
+`FixedMuBConservedCharges` 用于在固定 `(T,mu_B)` 下联立求解平均场和三味 chemical potentials。输入采用自然单位：
+
+- `muB_fm`：fm^-1；
+- `charge_to_baryon_ratio`：无量纲，重离子碰撞常用场景为 `0.4`；
+- `strangeness_density_target`：fm^-3，首个物理场景为 `0`。
+
+三味 chemical potentials 与守恒荷 chemical potentials 的约定为：
+
+```text
+mu_u = mu_B/3 + 2 mu_Q/3
+mu_d = mu_B/3 - mu_Q/3
+mu_s = mu_B/3 - mu_Q/3 - mu_S
+```
+
+反演关系为 `mu_B=mu_u+2mu_d`、`mu_Q=mu_u-mu_d`、`mu_S=mu_d-mu_s`。稳定 helper 为：
+
+- `flavor_mu_from_bqs`
+- `conserved_mu_from_flavor`
+- `conserved_densities_from_flavor`
+
+密度 helper 的输入必须是 flavor **净密度** `(rho_u,rho_d,rho_s)`，不是 `number_densities(...).quark` 的粒子密度。若从粒子/反粒子入口读取，先使用 `quark-antiquark`。
+
+该 mode 的三个非 gap residual 为：
+
+```text
+mu_u + 2mu_d - mu_B
+(rho_Q - charge_to_baryon_ratio*rho_B)/rho0
+(rho_S - strangeness_density_target)/rho0
+```
+
+其中 `rho_B=(rho_u+rho_d+rho_s)/3`、`rho_Q=(2rho_u-rho_d-rho_s)/3`、`rho_S=-rho_s`。charge residual 使用 affine form，不在 `rho_B≈0` 时除以密度。
+
+```julia
+model = Models.create_model(:PNJL)
+mode = Models.FixedMuBConservedCharges(240 / 197.3269804, 0.4, 0.0)
+result = Models.solve(model, mode, 170 / 197.3269804; p_num=8, t_num=4)
+
+mu_bqs = Models.conserved_mu_from_flavor(result.mu_vec...)
+rho_flavor = Models.model_rho(model, result.x_state, result.mu_vec, 170 / 197.3269804)
+rho_bqs = Models.conserved_densities_from_flavor(rho_flavor)
+```
+
+当前实现是 quark/mean-field-only 守恒荷平衡，不包含介子数密度对 `rho_Q`、`rho_S` 的反馈。介子守恒荷应在显式外层修正或完整热力学反馈阶段加入，不能把本 mode 的 `rho_S=0` 误写成“全体系奇异数严格为零”。
 
 ## 为什么这部分不应继续只放在旧 `pnjl` 页面
 
