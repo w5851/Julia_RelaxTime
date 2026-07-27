@@ -1,0 +1,77 @@
+{
+  "actions": {
+    "conclusion": "success",
+    "critical_path_seconds": 625.0,
+    "head_sha": "7e8b91adc0eaa2a01e1e50428870eb562febab70",
+    "job_count": 10,
+    "raw_total_seconds": 3440.0,
+    "run_id": "30199406478",
+    "runner_minutes": 64,
+    "source": "gh run view",
+    "status": "completed",
+    "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/30199406478"
+  },
+  "calculation_shas": [
+    "7e8b91adc0eaa2a01e1e50428870eb562febab70"
+  ],
+  "file_sha256": {
+    "README.md": "91b2b4a8b56f10cadb250783c9354c5288e210fca90e8f529cc10cbf814ffe0e",
+    "actions_costs.csv": "30945cb7ef0d5211b7bb78ea194a85516bf3bce440745919b016c608af2fb2bd",
+    "cep_accuracy.csv": "71950e4f7dc2d467141db16bef4d0e63b4be4e48d9d068fa30d681d341db9e76",
+    "claim_ledger.csv": "e1591624dd48358442df821d21c6a5a9dfaf52c8367bf6a4357506d3a2b32098",
+    "method_costs.csv": "29f1ec4b45f23497fea3b2d2f3ff92ab487aa572802ecff3357d94a3824fd07b",
+    "slice_metrics.csv": "cfee9961b8bed82e9ecea5a62cfb9e42df93c6698d089331b2bde940b4bcebc1"
+  },
+  "gate": {
+    "automatic_gate_is_not_promotion": true,
+    "cascade_status": "outside_oracle",
+    "errors": [
+      "oracle refinement evidence is missing",
+      "oracle 0.00625 -> 0.003125 classification is not stable",
+      "oracle does not satisfy the predeclared canonical CEP tolerance",
+      "cascade CEP is outside the oracle bracket/uncertainty"
+    ],
+    "oracle_status": "oracle_inconclusive",
+    "status": "diagnostic_only"
+  },
+  "generated_at_utc": "2026-07-26T11:16:49.385017Z",
+  "job_keys": [
+    [
+      -0.5,
+      "c2_dense_baseline"
+    ],
+    [
+      -0.5,
+      "high_resolution_oracle"
+    ],
+    [
+      -0.5,
+      "rho_support_cascade"
+    ],
+    [
+      0.0,
+      "c2_dense_baseline"
+    ],
+    [
+      0.0,
+      "high_resolution_oracle"
+    ],
+    [
+      0.0,
+      "rho_support_cascade"
+    ],
+    [
+      0.5,
+      "c2_dense_baseline"
+    ],
+    [
+      0.5,
+      "high_resolution_oracle"
+    ],
+    [
+      0.5,
+      "rho_support_cascade"
+    ]
+  ],
+  "schema_version": "cep_narrow_pilot_v1"
+}

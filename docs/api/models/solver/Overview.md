@@ -116,6 +116,19 @@ res = Models.solve(Models.FixedMu(), T_fm, mu_fm)
 - scan 结果适配层（`TmuScan` / `TrhoScan`）已按动态向量透传 `x_state` 与 `mu_vec`，为后续 schema-driven 主链路铺路。
 - 当需要显式状态布局时，优先使用 `ModelStateSchema` 系列 API（`schema_for_model`、`flatten_state`、`unflatten_state`）。
 - `SolverResult` 稳定契约版本字段为 `contract_version=:v1`；上层消费建议统一通过 `solver_result_view` 取公共视图。
+
+## 请求级 solver telemetry
+
+需要审计 `FixedRho` equilibrium 工作量时，可显式创建 `Models.SolverWorkTelemetry()`，并将其作为
+`work_telemetry=` 传给 `Models.solve` 或 `Models.solve_constraint`。计数器属于单次请求/扫描，
+不是全局状态；`SolverResult v1` 的字段和序列化契约不变。`Models.solver_work_snapshot`
+返回可写入 evidence 的 `NamedTuple`，包含 residual/Jacobian 调用、Newton/trust-region
+迭代、fallback/rescue、异常和 retry 计数；长循环复用对象前可调用
+`Models.reset_solver_work!`。未传入 telemetry 时保持原有路径。
+底层计数累加器 `record_solver_request!`、`record_governed_attempt!`、
+`record_nlsolve_work!`、`record_postprocess_residual!`、`record_attempt_outcome!`、
+`record_solver_exception!` 和 `record_scan_retry!` 主要供隔离 pilot/测试使用，
+不改变 `SolverResult` 字段。
 - 诊断契约稳定公共视图与内部调试视图已分层；上层默认应消费 `to_public_namedtuple` / `coerce_solver_diagnostic_public_view`。
 
 ## 导数契约骨架（Phase-1 / Issue #79）

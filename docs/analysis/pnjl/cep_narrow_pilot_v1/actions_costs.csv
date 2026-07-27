@@ -1,0 +1,11 @@
+job_name,job_id,status,conclusion,elapsed_seconds,runner_minutes_rounded
+cep-pilot xi=-0.5 method=c2_dense_baseline,89786637990,completed,success,625.0,11
+cep-pilot xi=0.0 method=high_resolution_oracle,89786638013,completed,success,508.0,9
+cep-pilot xi=0.0 method=rho_support_cascade,89786638016,completed,success,137.0,3
+cep-pilot xi=0.5 method=rho_support_cascade,89786638022,completed,success,401.0,7
+cep-pilot xi=-0.5 method=rho_support_cascade,89786638028,completed,success,137.0,3
+cep-pilot xi=0.0 method=c2_dense_baseline,89786638030,completed,success,365.0,7
+cep-pilot xi=0.5 method=high_resolution_oracle,89786638044,completed,success,427.0,8
+cep-pilot xi=-0.5 method=high_resolution_oracle,89786638051,completed,success,369.0,7
+cep-pilot xi=0.5 method=c2_dense_baseline,89786638058,completed,success,443.0,8
+aggregate CEP pilot diagnostics,89787500610,completed,success,28.0,1

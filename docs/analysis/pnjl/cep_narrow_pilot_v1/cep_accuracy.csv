@@ -1,0 +1,10 @@
+xi,method,canonical_T_CEP_MeV,canonical_muq_CEP_MeV,estimated_T_CEP_MeV,estimated_muq_CEP_MeV,delta_T_MeV,delta_muq_MeV,bracket_low_MeV,bracket_high_MeV,bracket_width_MeV,found,oracle_refine,oracle_refine_stable
+-0.5,c2_dense_baseline,147.0947265625,202.39421356350303,147.1572265625,202.24667989810612,0.0625,-0.1475336653969066,147.0947265625,147.2197265625,0.125,true,,false
+0.0,c2_dense_baseline,130.3369140625,292.3807955235169,131.0244140625,291.26170238625696,0.6875,-1.119093137259938,130.9619140625,131.0869140625,0.125,true,,false
+0.5,c2_dense_baseline,97.0849609375,355.4358732646064,NaN,NaN,NaN,NaN,NaN,NaN,NaN,false,,false
+-0.5,high_resolution_oracle,147.0947265625,202.39421356350303,147.1572265625,202.24667989805687,0.0625,-0.14753366544616142,147.0947265625,147.2197265625,0.125,true,"{""coarse_high_status"":""monotone"",""low_status"":""resolved_s_shape"",""high_status"":""monotone"",""coarse_low_status"":""resolved_s_shape"",""low_mu_transition"":202.24667893392797,""stable"":true,""high_mu_transition"":null}",true
+0.0,high_resolution_oracle,130.3369140625,292.3807955235169,131.0244140625,291.26170238625696,0.6875,-1.119093137259938,130.9619140625,131.0869140625,0.125,true,"{""coarse_high_status"":""monotone"",""low_status"":""resolved_s_shape"",""high_status"":""monotone"",""coarse_low_status"":""resolved_s_shape"",""low_mu_transition"":291.26170278079627,""stable"":true,""high_mu_transition"":null}",true
+0.5,high_resolution_oracle,97.0849609375,355.4358732646064,NaN,NaN,NaN,NaN,NaN,NaN,NaN,false,,false
+-0.5,rho_support_cascade,147.0947265625,202.39421356350303,147.1572265625,202.24669270248523,0.0625,-0.14752086101779582,147.0947265625,147.2197265625,0.125,true,,false
+0.0,rho_support_cascade,130.3369140625,292.3807955235169,131.1494140625,NaN,0.8125,NaN,131.0869140625,131.2119140625,0.125,true,,false
+0.5,rho_support_cascade,97.0849609375,355.4358732646064,NaN,NaN,NaN,NaN,NaN,NaN,NaN,false,,false

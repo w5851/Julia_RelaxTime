@@ -1,0 +1,5 @@
+claim_id,claim,status,evidence,boundary
+oracle_stability,oracle 0.00625 -> 0.003125 的 CEP bracket/分类稳定,oracle_inconclusive,"cep_accuracy.csv, slice_metrics.csv",仅为 diagnostic gate，不自动晋升 reference
+oracle_canonical_agreement,oracle 与旧 canonical 的 |ΔT|<=0.5 MeV 且 |Δmuq|<=2 MeV,oracle_inconclusive,cep_accuracy.csv,若失败则 verdict=oracle_inconclusive
+cascade_accuracy,cascade CEP 位于 oracle bracket/不确定度内,outside_oracle,cep_accuracy.csv,不作物理正确性或 production 晋升结论
+solver_cost,solver 工作量由 request-scoped telemetry 与 exact memoization 记录,observed,"method_costs.csv, actions_costs.csv",分类层微秒耗时不是性能 gate

@@ -72,6 +72,7 @@ function _execute_governed_attempt_plan(
             local_kwargs[:nlsolve_method] = attempt_cfg.method
             local_kwargs[:trust_region_fallback] = attempt_cfg.use_fallback
             local_kwargs[:fallback_method] = attempt_cfg.fallback_method
+            record_governed_attempt!(get(local_kwargs, :work_telemetry, nothing); origin=attempt_cfg.attempt_origin)
 
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
@@ -87,6 +88,7 @@ function _execute_governed_attempt_plan(
             return merged, success
         end,
         on_error=(attempt_cfg, attempt_index, err) -> begin
+            record_solver_exception!(get(kwargs, :work_telemetry, nothing))
             raw = failure_attempt(kwargs, attempt_cfg, attempt_index)
             err_kind = classify_attempt_error(err)
             err_msg = normalize_error_message(err)
@@ -158,6 +160,7 @@ function _fixedmu_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fixe
 
     local_kwargs = Dict{Symbol,Any}(kwargs)
     _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+    delete!(local_kwargs, :work_telemetry)
 
     solved = _solve_constraint_fixedmu(model, T_fm, μ_fm; pairs(local_kwargs)...)
     result = solved
@@ -212,6 +215,7 @@ end
         :thermo_quadrature_rtol,
         :thermo_quadrature_atol,
         :thermo_quadrature_maxevals,
+        :work_telemetry,
     )
         delete!(kwargs, key)
     end
@@ -236,6 +240,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
     trust_region_fallback = Bool(get(kwargs, :trust_region_fallback, true))
     fallback_method = get(kwargs, :fallback_method, :trust_region)
     physicality_check = get(kwargs, :physicality_check, ((_, _) -> true))
+    work_telemetry = get(kwargs, :work_telemetry, nothing)
 
     x0 = if length(seed_guess) >= 8
         Float64.(seed_guess[1:8])
@@ -290,6 +295,7 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
             thermo_quadrature_atol=thermo_quadrature_atol,
             thermo_quadrature_maxevals=thermo_quadrature_maxevals,
         )
+        record_postprocess_residual!(work_telemetry)
         phys = physicality_check(thermo.x_state, thermo.masses) && _thermo_quantities_finite(thermo)
 
         return (
@@ -308,19 +314,27 @@ function _fixedrho_joint_problem_spec_forward_solve(model::AbstractQCDModel, mod
 
     cache = Dict{Symbol,NamedTuple}()
     solve_once = function (method::Symbol, seed::Vector{Float64})
-        res = nlsolve(
-            residual_fn!,
-            seed;
-            autodiff=:forward,
-            method=method,
-            xtol=1e-9,
-            ftol=1e-9,
-            pairs(local_nls_kwargs)...,
-        )
+        local res
+        try
+            res = nlsolve(
+                residual_fn!,
+                seed;
+                autodiff=:forward,
+                method=method,
+                xtol=1e-9,
+                ftol=1e-9,
+                pairs(local_nls_kwargs)...,
+            )
+        catch
+            record_solver_exception!(work_telemetry)
+            rethrow()
+        end
+        record_nlsolve_work!(work_telemetry, res, method)
 
         solution = Float64.(res.zero)
         pp = postprocess_solution(solution)
         converged = Bool(res.f_converged) && pp.phys && isfinite(pp.residual_norm) && pp.residual_norm <= residual_norm_max
+        record_attempt_outcome!(work_telemetry; converged=converged)
 
         cache[method] = (
             res=res,
@@ -385,6 +399,7 @@ end
 
 function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::FixedRho, T_fm::Real; fwd_kwargs...)
     kwargs = Dict{Symbol,Any}(pairs(fwd_kwargs))
+    record_solver_request!(get(kwargs, :work_telemetry, nothing); fixedrho=true)
     cfg = _fixedrho_runtime_config_from_kwargs(mode, kwargs)
     diagnostic_level = _resolve_diagnostic_level(kwargs)
     extra_constraints = _resolve_extra_constraints(kwargs)
@@ -579,6 +594,7 @@ function _governed_nonrho_problem_spec_forward_solve(
         selector_fn,
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
+            delete!(local_kwargs, :work_telemetry)
             delete!(local_kwargs, :trust_region_fallback)
             delete!(local_kwargs, :fallback_method)
 
