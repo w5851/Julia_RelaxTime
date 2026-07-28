@@ -2,21 +2,23 @@
 
 创建日期：2026-07-27
 
-状态：三态合同已实现并完成本地 focused 验证，已提交为独立 ready PR #147，等待作者审核；基于
-`main@5071f6c80bb10c812358b855e8da2bde8a758f9d` 的分支
-`codex/issue-130-cep-three-state-contract`。PR #146 已 squash merge（merge SHA
-`5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run
-`30199406478`，9/9 matrix + aggregate success），v1 evidence 结论保持
-`diagnostic_only`，不晋升 reference。
+状态：三态合同 PR #147 已 squash merge；当前在其 merge SHA 上实现 pilot v2
+workflow/runner，尚未触发完整数值 Actions。PR #146 已 squash merge（merge SHA
+`5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run `30199406478`，
+9/9 matrix + aggregate success），v1 evidence 结论保持 `diagnostic_only`，不晋升
+reference。三态合同 merge SHA 为
+`0603e4df656ac610e12d51f9c810ec93be6e8f14`；pilot 分支为
+`codex/issue-130-cep-narrow-pilot-v2`。
 
-三态合同 PR：<https://github.com/w5851/Julia_RelaxTime/pull/147>，head
-`8f3b1110`。
+三态合同 PR：<https://github.com/w5851/Julia_RelaxTime/pull/147>，最终 head
+`c418e1af`，merge 后远程分支已删除。
 
 ## 顺序与边界
 
 1. [x] 合并并清理 PR #146，保留 v1 evidence 与 diagnostic-only 结论。
-2. [x] 完成三态 CEP 合同实现与 focused 验证；ready PR #147 已创建，等待作者审核再合并。
-3. [ ] 三态 PR 合并后，从 merge SHA 创建 `codex/issue-130-cep-narrow-pilot-v2`，只经
+2. [x] 完成三态 CEP 合同实现与 focused 验证，并 squash merge PR #147。
+3. [ ] 从 `0603e4df` 创建 `codex/issue-130-cep-narrow-pilot-v2`，完成 runner、collector、
+   plot、workflow 和 focused contract 验证；完整数值仍待锁定 calculation SHA 后由
    GitHub Actions 运行 cascade discovery、dense baseline 和独立 oracle。
 4. [ ] pilot v2 停在作者对 CEP 区间、原始 rho–mu 曲线、准确度和性能证据的物理审核。
 5. [ ] production integration 通过后，才重放全温区 phase-reference；reference 审核后再启动 transport。
@@ -57,3 +59,19 @@
   `0.125 MeV`，不把它当作实际 ambiguity 宽度。
 - `xi=0.5` 最多向高温侧扩展至 canonical `+32 MeV`；没有双端证据则为
   `oracle_inconclusive`，不扩成全相图。
+
+## Pilot v2 实现记录
+
+- [x] 新增两层 rho 证据 runner：cascade `0.05→0.025`、dense `0.0125→0.00625`、
+  oracle `0.00625→0.003125`；保留 exact `(T,xi,rho)` memoization 和 request-scoped
+  solver telemetry。
+- [x] 新增三态双端搜索、`validation_windows.json` 冻结脚本、v2 collector/plotter，
+  以及 v1/v2 workflow 分支和 aggregate replay 合同。
+- [x] 新增 Python v2 contract tests；`py_compile` 和 v1/v2 Python focused tests 通过。
+- [ ] 在 Actions 触发 v2 numerical run；待完成后导入
+  `docs/analysis/pnjl/cep_narrow_pilot_v2/` evidence、图像和 manifest。
+- [ ] 物理审核通过后才进入 production integration、phase-reference replay 和 transport。
+
+本机无法可靠加载完整 `src/models/Models.jl`（Julia 进程在预编译阶段被环境终止），
+因此本轮仅记录 parser/smoke/Python 治理结果；Julia runtime contract 需在 CI Actions
+中验证，不在本机执行完整 PNJL 数值。

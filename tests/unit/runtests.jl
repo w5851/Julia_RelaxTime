@@ -87,6 +87,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_meson_density_workflow.jl"),
     joinpath(UNIT_DIR, "models", "test_solver_work_telemetry.jl"),
     joinpath(UNIT_DIR, "models", "test_cep_narrow_pilot_contract.jl"),
+    joinpath(UNIT_DIR, "models", "test_cep_narrow_pilot_v2_contract.jl"),
 
     # [PNJL Solver] 求解器核心
     joinpath(UNIT_DIR, "pnjl", "test_solver_conditions.jl"),

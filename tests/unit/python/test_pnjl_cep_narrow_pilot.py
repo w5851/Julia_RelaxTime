@@ -23,7 +23,8 @@ def test_workflow_has_immutable_matrix_and_aggregate_contract():
     text = WORKFLOW.read_text(encoding="utf-8")
     workflow = yaml.load(text, Loader=yaml.BaseLoader)
     inputs = workflow["on"]["workflow_dispatch"]["inputs"]
-    assert set(inputs) == {"tag", "calculation_ref"}
+    assert {"tag", "calculation_ref"}.issubset(inputs)
+    assert inputs["pilot_version"]["default"] == "v1"
     assert "^\u005b0-9a-fA-F\u005d{40}$" in text
     matrix = workflow["jobs"]["pilot"]["strategy"]["matrix"]
     assert len(matrix["xi"]) == 3
@@ -31,6 +32,19 @@ def test_workflow_has_immutable_matrix_and_aggregate_contract():
     assert workflow["jobs"]["aggregate"]["needs"] == ["pilot"]
     assert "collect_pnjl_cep_narrow_pilot.py" in text
     assert "timeout-minutes: 330" in text
+
+
+def test_workflow_preserves_v1_and_exposes_v2_stages_and_replay():
+    text = WORKFLOW.read_text(encoding="utf-8")
+    workflow = yaml.load(text, Loader=yaml.BaseLoader)
+    inputs = workflow["on"]["workflow_dispatch"]["inputs"]
+    assert set(inputs["pilot_version"]["options"]) == {"v1", "v2"}
+    assert set(inputs["mode"]["options"]) == {"full", "aggregate_replay"}
+    assert "source_run_id" in inputs
+    assert {"v2_discovery", "v2_freeze_windows", "v2_validation", "v2_aggregate", "v2_aggregate_replay"}.issubset(workflow["jobs"])
+    assert "freeze_pnjl_cep_narrow_pilot_v2_windows.py" in text
+    assert "collect_pnjl_cep_narrow_pilot_v2.py" in text
+    assert "run-id: ${{ inputs.source_run_id }}" in text
 
 
 def test_collector_rejects_incomplete_matrix(tmp_path):
