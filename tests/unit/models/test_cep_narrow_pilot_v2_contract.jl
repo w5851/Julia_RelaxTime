@@ -35,4 +35,17 @@ end
     @test Main._v2_in_window(100.0, window)
     @test !Main._v2_in_window(91.999, window)
     @test !Main._v2_in_window(132.001, window)
+
+    frontier_records = [
+        (T_MeV=100.0, result_status="confirmed_first_order"),
+        (T_MeV=102.0, result_status="ambiguous_near_critical"),
+        (T_MeV=104.0, result_status="confirmed_monotone"),
+    ]
+    @test Main._v2_frontier_pair(Main.PilotV2Memo(local_cfg), :first_order) === nothing
+    memo = Main.PilotV2Memo(local_cfg)
+    for record in frontier_records
+        memo.slice_cache[record.T_MeV] = record
+    end
+    @test Main._v2_frontier_pair(memo, :first_order) == (100.0, 102.0)
+    @test Main._v2_frontier_pair(memo, :monotone) == (102.0, 104.0)
 end

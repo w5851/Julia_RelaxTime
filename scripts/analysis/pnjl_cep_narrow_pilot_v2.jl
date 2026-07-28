@@ -502,16 +502,16 @@ function _v2_frontier_pair(memo::PilotV2Memo, state::Symbol)
     if state == :first_order
         lows = [record for record in records if record.result_status == "confirmed_first_order"]
         isempty(lows) && return nothing
-        low = maximum(lows; by=record -> record.T_MeV)
+        low = argmax(record -> record.T_MeV, lows)
         higher = [record for record in records if record.T_MeV > low.T_MeV && record.result_status != "confirmed_first_order"]
-        high = isempty(higher) ? nothing : minimum(higher; by=record -> record.T_MeV)
+        high = isempty(higher) ? nothing : argmin(record -> record.T_MeV, higher)
         return low.T_MeV, high === nothing ? nothing : high.T_MeV
     end
     highs = [record for record in records if record.result_status == "confirmed_monotone"]
     isempty(highs) && return nothing
-    high = minimum(highs; by=record -> record.T_MeV)
+    high = argmin(record -> record.T_MeV, highs)
     lower = [record for record in records if record.T_MeV < high.T_MeV && record.result_status != "confirmed_monotone"]
-    low = isempty(lower) ? nothing : maximum(lower; by=record -> record.T_MeV)
+    low = isempty(lower) ? nothing : argmax(record -> record.T_MeV, lower)
     return low === nothing ? nothing : (low.T_MeV, high.T_MeV)
 end
 
@@ -554,12 +554,12 @@ function _v2_candidate_endpoints(memo::PilotV2Memo, level::Symbol)
     state_name = level == :coarse ? :coarse_candidate_status : :fine_candidate_status
     first_order = [record for record in records if getproperty(record, state_name) == "first_order_candidate"]
     monotone = [record for record in records if getproperty(record, state_name) == "monotone_candidate"]
-    last_first = isempty(first_order) ? nothing : maximum(first_order; by=record -> record.T_MeV)
+    last_first = isempty(first_order) ? nothing : argmax(record -> record.T_MeV, first_order)
     first_mono = if last_first === nothing
-        isempty(monotone) ? nothing : minimum(monotone; by=record -> record.T_MeV)
+        isempty(monotone) ? nothing : argmin(record -> record.T_MeV, monotone)
     else
         candidates = [record for record in monotone if record.T_MeV > last_first.T_MeV]
-        isempty(candidates) ? nothing : minimum(candidates; by=record -> record.T_MeV)
+        isempty(candidates) ? nothing : argmin(record -> record.T_MeV, candidates)
     end
     endpoint_level = level == :coarse ? :coarse_level : :fine_level
     return (
@@ -573,12 +573,12 @@ function _v2_endpoint_record(memo::PilotV2Memo)
     records = sort(collect(values(memo.slice_cache)); by=record -> record.T_MeV)
     first_order = [record for record in records if record.result_status == "confirmed_first_order"]
     monotone = [record for record in records if record.result_status == "confirmed_monotone"]
-    last_first = isempty(first_order) ? nothing : maximum(first_order; by=record -> record.T_MeV)
+    last_first = isempty(first_order) ? nothing : argmax(record -> record.T_MeV, first_order)
     first_mono = if last_first === nothing
-        isempty(monotone) ? nothing : minimum(monotone; by=record -> record.T_MeV)
+        isempty(monotone) ? nothing : argmin(record -> record.T_MeV, monotone)
     else
         candidates = [record for record in monotone if record.T_MeV > last_first.T_MeV]
-        isempty(candidates) ? nothing : minimum(candidates; by=record -> record.T_MeV)
+        isempty(candidates) ? nothing : argmin(record -> record.T_MeV, candidates)
     end
     result_status = if last_first !== nothing && first_mono !== nothing
         :ambiguous
