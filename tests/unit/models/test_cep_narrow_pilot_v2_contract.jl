@@ -32,4 +32,7 @@ end
     @test window.T_min == 92.0
     @test window.T_max == 132.0
     @test isempty(window.required_anchors)
+    @test Main._v2_in_window(100.0, window)
+    @test !Main._v2_in_window(91.999, window)
+    @test !Main._v2_in_window(132.001, window)
 end

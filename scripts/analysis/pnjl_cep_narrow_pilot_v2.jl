@@ -480,8 +480,14 @@ function _v2_initial_temperatures(config::PilotV2Config, canonical, window)
     return sort(unique(Float64[clamp(value, window.T_min, window.T_max) for value in values]))
 end
 
+@inline function _v2_in_window(T::Float64, window)
+    return !(T < window.T_min - 1e-8 || T > window.T_max + 1e-8)
+end
+
 function _v2_evaluate!(memo::PilotV2Memo, T::Float64, window)
-    T < window.T_min - 1e-8 || T > window.T_max + 1e-8 || return nothing
+    if !_v2_in_window(T, window)
+        return nothing
+    end
     return _v2_slice!(memo, T)
 end
 

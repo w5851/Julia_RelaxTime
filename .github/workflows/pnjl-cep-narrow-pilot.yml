@@ -421,8 +421,16 @@ jobs:
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,conclusion)"
-          test "$(echo "$payload" | jq -r .conclusion)" = success
+          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,status,conclusion)"
+          test "$(echo "$payload" | jq -r .status)" = completed
+          # A source run may be marked failure solely because its collector or
+          # plotter failed.  The replay collector below verifies that every
+          # numerical discovery/validation artifact is present and valid, so
+          # do not require the aggregate job itself to have succeeded here.
+          case "$(echo "$payload" | jq -r .conclusion)" in
+            success|failure) ;;
+            *) exit 1 ;;
+          esac
           test "$(echo "$payload" | jq -r .headSha)" = "$CALCULATION_REF"
 
       - name: Download source numerical artifacts
