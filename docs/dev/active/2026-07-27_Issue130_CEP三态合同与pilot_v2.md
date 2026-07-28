@@ -2,8 +2,8 @@
 
 创建日期：2026-07-27
 
-状态：三态合同 PR #147 已 squash merge；当前在其 merge SHA 上实现 pilot v2
-workflow/runner，尚未触发完整数值 Actions。PR #146 已 squash merge（merge SHA
+状态：三态合同 PR #147 已 squash merge；pilot v2 数值 Actions、aggregate replay 和
+evidence 导入已完成，当前停在作者物理审核。PR #146 已 squash merge（merge SHA
 `5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run `30199406478`，
 9/9 matrix + aggregate success），v1 evidence 结论保持 `diagnostic_only`，不晋升
 reference。三态合同 merge SHA 为
@@ -17,10 +17,12 @@ reference。三态合同 merge SHA 为
 
 1. [x] 合并并清理 PR #146，保留 v1 evidence 与 diagnostic-only 结论。
 2. [x] 完成三态 CEP 合同实现与 focused 验证，并 squash merge PR #147。
-3. [ ] 从 `0603e4df` 创建 `codex/issue-130-cep-narrow-pilot-v2`，完成 runner、collector、
-   plot、workflow 和 focused contract 验证；完整数值仍待锁定 calculation SHA 后由
-   GitHub Actions 运行 cascade discovery、dense baseline 和独立 oracle。
-4. [ ] pilot v2 停在作者对 CEP 区间、原始 rho–mu 曲线、准确度和性能证据的物理审核。
+3. [x] 从 `0603e4df` 创建 `codex/issue-130-cep-narrow-pilot-v2`，完成 runner、collector、
+   plot、workflow 和 focused contract 验证；完整数值由 GitHub Actions 运行 cascade
+   discovery、dense baseline 和独立 oracle。
+4. [x] pilot v2 数值 run 与 aggregate replay 完成，证据导入
+   `docs/analysis/pnjl/cep_narrow_pilot_v2/`；当前停在作者对 CEP 区间、原始 rho–mu
+   曲线、准确度和性能证据的物理审核。
 5. [ ] production integration 通过后，才重放全温区 phase-reference；reference 审核后再启动 transport。
 
 ## 三态合同验收
@@ -68,8 +70,15 @@ reference。三态合同 merge SHA 为
 - [x] 新增三态双端搜索、`validation_windows.json` 冻结脚本、v2 collector/plotter，
   以及 v1/v2 workflow 分支和 aggregate replay 合同。
 - [x] 新增 Python v2 contract tests；`py_compile` 和 v1/v2 Python focused tests 通过。
-- [ ] 在 Actions 触发 v2 numerical run；待完成后导入
-  `docs/analysis/pnjl/cep_narrow_pilot_v2/` evidence、图像和 manifest。
+- [x] Actions numerical run `30339094251` 完成（3 discovery、freeze、6 validation、
+  aggregate）；calculation SHA `9d325b62ef366f1de70cd3b2a3555e71bd12664a`。
+- [x] aggregate replay `30342409727` 使用 collector 修复 SHA
+  `d2f8b1d0c2fb7a6cec7d21a1076a1d24639c9ca5` 完成；`status=pass`、
+  `oracle_status=stable`、`cascade_status=within_oracle`，Actions critical path
+  `1247 s`、runner-minutes `91`。
+- [x] 导入 `docs/analysis/pnjl/cep_narrow_pilot_v2/` 的聚合表、图像、manifest、
+  plot manifest、curve index 和审计文档；原始 `curve_points.csv` 保留在 Actions/
+  本地 artifact，不复制进仓库。
 - [ ] 物理审核通过后才进入 production integration、phase-reference replay 和 transport。
 
 本机无法可靠加载完整 `src/models/Models.jl`（Julia 进程在预编译阶段被环境终止），

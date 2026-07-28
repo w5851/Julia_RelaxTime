@@ -1,0 +1,5 @@
+claim_id,claim,status,evidence,boundary
+oracle_interval,oracle 在两层 rho 分辨率下形成稳定双端证据,stable,"cep_accuracy.csv, slice_metrics.csv",诊断 gate，不自动晋升
+cascade_interval,cascade ambiguity interval 与 oracle 相交且端点偏差受控,within_oracle,"cep_accuracy.csv, slice_metrics.csv",不代表 production 正确性
+solver_cost,solver 工作量由 request-scoped telemetry 和 exact memoization 记录,observed,"method_costs.csv, actions_costs.csv",分类层微秒耗时不是 blocker
+performance,cascade 聚合 solver 工作量不高于 memoized dense baseline,pass,"method_costs.csv, actions_costs.csv",需要作者审核
