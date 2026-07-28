@@ -45,6 +45,8 @@ def test_workflow_preserves_v1_and_exposes_v2_stages_and_replay():
     assert "freeze_pnjl_cep_narrow_pilot_v2_windows.py" in text
     assert "collect_pnjl_cep_narrow_pilot_v2.py" in text
     assert "run-id: ${{ inputs.source_run_id }}" in text
+    assert "--expected-calculation-sha" in text
+    assert "SOURCE_CALCULATION_SHA" in text
 
 
 def test_collector_rejects_incomplete_matrix(tmp_path):

@@ -109,6 +109,17 @@ def test_collector_v2_reports_contract_failure_for_missing_validation(tmp_path):
     assert any("missing validation jobs" in error for error in gate["workflow_contract_errors"])
 
 
+def test_collector_v2_enforces_expected_calculation_sha(tmp_path):
+    module = load_module(COLLECTOR, "collector_v2_sha")
+    for xi in sorted(module.XIS):
+        write_job(tmp_path, xi, "rho_support_cascade", "discovery")
+        write_job(tmp_path, xi, "c2_dense_baseline", "validation")
+        write_job(tmp_path, xi, "high_resolution_oracle", "validation", oracle=True)
+    gate = module.collect(tmp_path, tmp_path / "aggregate", expected_calculation_sha="b" * 40)
+    assert gate["status"] == "workflow_failure"
+    assert any("calculation SHA mismatch" in error for error in gate["workflow_contract_errors"])
+
+
 def test_plotter_v2_smoke(tmp_path):
     collector = load_module(COLLECTOR, "collector_v2_plot")
     for xi in sorted(collector.XIS):

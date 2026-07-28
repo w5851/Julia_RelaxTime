@@ -375,7 +375,8 @@ jobs:
           python scripts/analysis/collect_pnjl_cep_narrow_pilot_v2.py \
             --input-dir job-artifacts \
             --output-dir aggregate \
-            --run-id "$RUN_ID"
+            --run-id "$RUN_ID" \
+            --expected-calculation-sha "${{ inputs.calculation_ref }}"
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             exit "$status"
@@ -431,7 +432,9 @@ jobs:
             success|failure) ;;
             *) exit 1 ;;
           esac
-          test "$(echo "$payload" | jq -r .headSha)" = "$CALCULATION_REF"
+          source_sha="$(echo "$payload" | jq -r .headSha)"
+          [[ "$source_sha" =~ ^[0-9a-fA-F]{40}$ ]]
+          echo "source_calculation_sha=$source_sha" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Download source numerical artifacts
         uses: actions/download-artifact@v4
@@ -457,10 +460,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
+          SOURCE_CALCULATION_SHA="$(gh run view "$RUN_ID" --json headSha --jq .headSha)"
           python scripts/analysis/collect_pnjl_cep_narrow_pilot_v2.py \
             --input-dir source-artifacts \
             --output-dir aggregate \
-            --run-id "$RUN_ID"
+            --run-id "$RUN_ID" \
+            --expected-calculation-sha "$SOURCE_CALCULATION_SHA"
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             exit "$status"

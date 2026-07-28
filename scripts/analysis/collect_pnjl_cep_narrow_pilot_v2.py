@@ -83,7 +83,9 @@ def _load_jobs(input_dir: Path) -> list[dict[str, Any]]:
     return jobs
 
 
-def _validate_jobs(jobs: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
+def _validate_jobs(
+    jobs: list[dict[str, Any]], expected_calculation_sha: str | None = None
+) -> tuple[list[str], list[str]]:
     contract_errors: list[str] = []
     diagnostic_errors: list[str] = []
     seen: set[tuple[float, str, str]] = set()
@@ -93,8 +95,13 @@ def _validate_jobs(jobs: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
             contract_errors.append(f"duplicate job key: {key}")
         seen.add(key)
         summary = job["summary"]
-        if not str(summary.get("calculation_sha", "")):
+        calculation_sha = str(summary.get("calculation_sha", ""))
+        if not calculation_sha:
             contract_errors.append(f"missing calculation SHA: {key}")
+        elif expected_calculation_sha and calculation_sha != expected_calculation_sha:
+            contract_errors.append(
+                f"calculation SHA mismatch: {key} expected {expected_calculation_sha}, got {calculation_sha}"
+            )
         if str(summary.get("schema_version", "")) != "cep_narrow_pilot_v2":
             contract_errors.append(f"unexpected job schema: {key}")
         for table in ("curve_points.csv", "slice_metrics.csv", "method_costs.csv", "cep_accuracy.csv"):
@@ -158,8 +165,6 @@ def _actions_costs(run_id: str | None, output_dir: Path) -> dict[str, Any]:
             }
             for job in payload.get("jobs", []):
                 name = str(job.get("name", ""))
-                if not ("cep" in name.lower() or "pilot" in name.lower()):
-                    continue
                 started = job.get("startedAt")
                 completed = job.get("completedAt")
                 if not started or not completed:
@@ -294,8 +299,10 @@ def _performance_gate(costs: list[dict[str, Any]]) -> tuple[list[str], dict[str,
     return errors, {"grouped": grouped, "cascade_fallback_retry_rate": cascade_rate, "dense_fallback_retry_rate": dense_rate, "fallback_retry_risk": risk}
 
 
-def _gate(jobs: list[dict[str, Any]], output_dir: Path) -> dict[str, Any]:
-    contract_errors, diagnostic_errors = _validate_jobs(jobs)
+def _gate(
+    jobs: list[dict[str, Any]], output_dir: Path, expected_calculation_sha: str | None = None
+) -> dict[str, Any]:
+    contract_errors, diagnostic_errors = _validate_jobs(jobs, expected_calculation_sha)
     slices = _rows(output_dir / "slice_metrics.csv")
     accuracy = _accuracy_rows(output_dir)
     costs = _cost_rows(output_dir)
@@ -324,7 +331,14 @@ def _gate(jobs: list[dict[str, Any]], output_dir: Path) -> dict[str, Any]:
     }
 
 
-def _write_manifest(output_dir: Path, jobs: list[dict[str, Any]], gate: dict[str, Any], actions: dict[str, Any], run_id: str | None) -> None:
+def _write_manifest(
+    output_dir: Path,
+    jobs: list[dict[str, Any]],
+    gate: dict[str, Any],
+    actions: dict[str, Any],
+    run_id: str | None,
+    expected_calculation_sha: str | None = None,
+) -> None:
     hashes: dict[str, str] = {}
     for path in sorted(output_dir.rglob("*")):
         if path.is_file() and path.name not in {"manifest.json"}:
@@ -334,6 +348,7 @@ def _write_manifest(output_dir: Path, jobs: list[dict[str, Any]], gate: dict[str
         "schema_version": "cep_narrow_pilot_v2",
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "run_id": run_id or "",
+        "expected_calculation_sha": expected_calculation_sha or "",
         "job_keys": sorted([[job["xi"], job["method"], job["stage"]] for job in jobs]),
         "calculation_shas": shas,
         "workflow_head_sha": actions.get("head_sha", ""),
@@ -382,15 +397,20 @@ equilibrium、residual/Jacobian、Newton、fallback/retry、cache 和 runner 工
     (output_dir / "README.md").write_text(text, encoding="utf-8")
 
 
-def collect(input_dir: Path, output_dir: Path, run_id: str | None = None) -> dict[str, Any]:
+def collect(
+    input_dir: Path,
+    output_dir: Path,
+    run_id: str | None = None,
+    expected_calculation_sha: str | None = None,
+) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _load_jobs(input_dir)
     _collect_tables(jobs, output_dir)
     actions = _actions_costs(run_id, output_dir)
-    gate = _gate(jobs, output_dir)
+    gate = _gate(jobs, output_dir, expected_calculation_sha)
     _write_claim_ledger(output_dir, gate)
     _write_readme(output_dir, gate, actions)
-    _write_manifest(output_dir, jobs, gate, actions, run_id)
+    _write_manifest(output_dir, jobs, gate, actions, run_id, expected_calculation_sha)
     return gate
 
 
@@ -399,8 +419,9 @@ def main() -> int:
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", default=None)
+    parser.add_argument("--expected-calculation-sha", default=None)
     args = parser.parse_args()
-    gate = collect(args.input_dir, args.output_dir, args.run_id)
+    gate = collect(args.input_dir, args.output_dir, args.run_id, args.expected_calculation_sha)
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["status"] == "workflow_failure" else 2 if gate["status"] in {"diagnostic_only", "oracle_inconclusive"} else 0
 
