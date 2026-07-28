@@ -48,4 +48,6 @@ end
     end
     @test Main._v2_frontier_pair(memo, :first_order) == (100.0, 102.0)
     @test Main._v2_frontier_pair(memo, :monotone) == (102.0, 104.0)
+    @test Main._v2_csv_value(:spinodal_rho_center, nothing) === missing
+    @test Main._v2_csv_value(:spinodal_rho_center, 1.25) == 1.25
 end

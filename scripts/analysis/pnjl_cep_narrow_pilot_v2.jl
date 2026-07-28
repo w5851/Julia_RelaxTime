@@ -614,6 +614,8 @@ function _v2_endpoint_record(memo::PilotV2Memo)
     )
 end
 
+@inline _v2_csv_value(_, value) = value === nothing ? missing : value
+
 function _v2_write_outputs(memo::PilotV2Memo, canonical, window, endpoints, started_ns::UInt64)
     config = memo.config
     mkpath(config.output_dir)
@@ -671,10 +673,10 @@ function _v2_write_outputs(memo::PilotV2Memo, canonical, window, endpoints, star
         fine_muq_last_first_order_MeV=endpoints.fine_muq_last_first_order_MeV,
         fine_T_first_monotone_MeV=endpoints.fine_T_first_monotone_MeV,
     )]
-    CSV.write(joinpath(config.output_dir, "curve_points.csv"), point_rows)
-    CSV.write(joinpath(config.output_dir, "slice_metrics.csv"), slice_rows)
-    CSV.write(joinpath(config.output_dir, "method_costs.csv"), costs)
-    CSV.write(joinpath(config.output_dir, "cep_accuracy.csv"), accuracy)
+    CSV.write(joinpath(config.output_dir, "curve_points.csv"), point_rows; transform=_v2_csv_value)
+    CSV.write(joinpath(config.output_dir, "slice_metrics.csv"), slice_rows; transform=_v2_csv_value)
+    CSV.write(joinpath(config.output_dir, "method_costs.csv"), costs; transform=_v2_csv_value)
+    CSV.write(joinpath(config.output_dir, "cep_accuracy.csv"), accuracy; transform=_v2_csv_value)
     summary = Dict(
         "schema_version" => "cep_narrow_pilot_v2",
         "xi" => config.xi,
