@@ -57,6 +57,22 @@ end
         @test startswith(read(paths["phase_grid_convergence"], String), "axis,xi,T_MeV")
     end
 
+    @testset "ambiguous CEP is visible in the phase conclusion" begin
+        tmp = mktempdir()
+        result = Models.PhasePipelineResult(
+            cep=Models.CEPResult(
+                result_status=:ambiguous,
+                T_last_first_order_MeV=130.0,
+                T_first_monotone_MeV=131.0,
+            ),
+        )
+        paths = Models.build_phase_artifacts(result; output_dir=tmp)
+        summary = read(paths["phase_summary"], String)
+        report = read(paths["phase_report"], String)
+        @test occursin("\"phase_structure\":\"ambiguous_near_critical\"", summary)
+        @test occursin("- result_status: ambiguous", report)
+    end
+
     @testset "grid convergence reasons are valid quoted CSV fields" begin
         tmp = mktempdir()
         reason = "midpoint_classification_changed_or_unresolved:valid,unknown,\"valid\"\nreview"

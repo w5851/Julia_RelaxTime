@@ -99,7 +99,7 @@ result = Models.run_production_phase_pipeline(
 )
 ```
 
-当你希望显式采用 production 的高精度温度扫描、unknown budget 与非插值 CEP 收口逻辑时，优先使用 `Models.run_production_phase_pipeline`。
+当你希望显式采用 production 的高精度温度扫描、unknown budget 与非插值 CEP 收口逻辑时，优先使用 `Models.run_production_phase_pipeline`。CEP 返回值采用三态合同：`resolved`、`ambiguous`、`not_found`；ambiguous 结果保留最后确认 Maxwell 与首个确认单调温度，不发布温度中点或借用的 Maxwell 化学势。
 
 ## Phase 热积分策略
 
@@ -149,7 +149,7 @@ PNJL 标量 phase thermodynamics 入口支持两种显式策略：
 - `artifact_paths`
 - `diagnostics`
 
-如果你要显式锁定 production 口径，则改用 `Models.run_production_phase_pipeline`；它仍返回 `PhasePipelineResult`，但 `config_snapshot` 与 `diagnostics` 会包含 production 专有字段，例如 `dT_initial`、`unknown_budget`、`first_point_fallback`、`forced_invalid_count`、rho/T 网格误差门限与显式 crossover 温区上限。正式产物应同时消费 `phase_grid_convergence.csv`，不能只检查边界 CSV 是否存在。
+如果你要显式锁定 production 口径，则改用 `Models.run_production_phase_pipeline`；它仍返回 `PhasePipelineResult`，但 `config_snapshot` 与 `diagnostics` 会包含 production 专有字段，例如 `dT_initial`、`unknown_budget`、`unknown_budget_exhausted`、`first_point_fallback`、兼容保留的 `forced_invalid_count`（三态路径为 `0`）、rho/T 网格误差门限与显式 crossover 温区上限。正式产物应同时消费 `phase_grid_convergence.csv`，不能只检查边界 CSV 是否存在。
 
 ### 2. 对已有曲线离线做 CEP 分析
 

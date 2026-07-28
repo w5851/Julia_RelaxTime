@@ -8,6 +8,7 @@ end
 
 @testset "Production phase pipeline helpers" begin
     @test Models.ProductionPipelineConfig().cep_tol_MeV == 0.1
+    @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
 
     temps = Models._production_temperature_grid(150.0, 160.0, 5.0)
     @test temps == [150.0, 155.0, 160.0]
@@ -31,6 +32,28 @@ end
     @test bracket !== nothing
     @test bracket.T_low == 150.0
     @test bracket.T_high == 160.0
+
+    @testset "unknown budget stops frontier refinement without relabelling" begin
+        cfg_budget = Models.ProductionPipelineConfig(
+            temperature_resolution_target_MeV=0.5,
+            cep_max_bisect_iter=8,
+            unknown_budget=0,
+        )
+        calls = Ref(0)
+        frontiers = Models._refine_production_cep_frontiers(
+            (T_low=130.0, mu_low=295.0, T_high=140.0),
+            T -> begin
+                calls[] += 1
+                (slice_status=:ambiguous, mu_transition=nothing)
+            end,
+            cfg_budget;
+            unknown_count_fn=() -> 1,
+        )
+        @test frontiers.budget_exhausted
+        @test frontiers.low.T == 130.0
+        @test frontiers.high.T == 140.0
+        @test calls[] == 0
+    end
 
     cfg = Models.ProductionPipelineConfig(T_start=120.0, T_end=150.0, dT_initial=5.0)
     cep = Models.CEPResult(found=true, T_cep_MeV=126.09375, uncertainty_T_MeV=0.3125)

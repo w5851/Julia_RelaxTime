@@ -112,12 +112,14 @@ function _build_conclusion(result::PhasePipelineResult)
     crossover_count = length(result.crossover_line)
     phase_structure = if boundary_count > 0
         "first_order_detected"
+    elseif result.cep.result_status == :ambiguous
+        "ambiguous_near_critical"
     elseif crossover_count > 0
         "crossover_only"
     else
         "no_transition_signal"
     end
-    cep_result = result.cep.found ? "found" : "not_found"
+    cep_result = String(result.cep.result_status)
     return Dict(
         "phase_structure" => phase_structure,
         "cep_result" => cep_result,
@@ -137,6 +139,7 @@ function _write_phase_report(path::String, result::PhasePipelineResult)
         println(io, "- generated_at: $(now())")
         println(io)
         println(io, "## CEP")
+        println(io, "- result_status: $(result.cep.result_status)")
         println(io, "- found: $(result.cep.found)")
         println(io, "- T_cep_MeV: $(isfinite(result.cep.T_cep_MeV) ? result.cep.T_cep_MeV : "null")")
         println(io, "- muq_cep_MeV: $(isfinite(result.cep.mu_cep_MeV) ? result.cep.mu_cep_MeV : "null")")
@@ -146,6 +149,11 @@ function _write_phase_report(path::String, result::PhasePipelineResult)
         println(io, "- T_bracket_low_MeV: $(isfinite(result.cep.T_bracket_low_MeV) ? result.cep.T_bracket_low_MeV : "null")")
         println(io, "- T_bracket_high_MeV: $(isfinite(result.cep.T_bracket_high_MeV) ? result.cep.T_bracket_high_MeV : "null")")
         println(io, "- bracket_width_T_MeV: $(isfinite(result.cep.bracket_width_T_MeV) ? result.cep.bracket_width_T_MeV : "null")")
+        println(io, "- T_last_first_order_MeV: $(isfinite(result.cep.T_last_first_order_MeV) ? result.cep.T_last_first_order_MeV : "null")")
+        println(io, "- mu_last_first_order_MeV: $(isfinite(result.cep.mu_last_first_order_MeV) ? result.cep.mu_last_first_order_MeV : "null")")
+        println(io, "- T_first_monotone_MeV: $(isfinite(result.cep.T_first_monotone_MeV) ? result.cep.T_first_monotone_MeV : "null")")
+        println(io, "- ambiguity_width_T_MeV: $(isfinite(result.cep.ambiguity_width_T_MeV) ? result.cep.ambiguity_width_T_MeV : "null")")
+        println(io, "- temperature_resolution_target_MeV: $(isfinite(result.cep.temperature_resolution_target_MeV) ? result.cep.temperature_resolution_target_MeV : "null")")
         println(io, "- eval_count: $(result.cep.eval_count)")
         println(io, "- unknown_count: $(result.cep.unknown_count)")
         println(io, "- reason: $(isnothing(result.cep.reason) ? "null" : result.cep.reason)")
@@ -193,6 +201,7 @@ function _build_summary(result::PhasePipelineResult)
         ),
         "cep" => Dict(
             "method" => String(result.cep.method),
+            "result_status" => String(result.cep.result_status),
             "found" => result.cep.found,
             "eval_count" => cep_eval_count,
             "unknown_count" => cep_unknown_count,
@@ -201,6 +210,11 @@ function _build_summary(result::PhasePipelineResult)
             "T_bracket_low_MeV" => _json_number(result.cep.T_bracket_low_MeV),
             "T_bracket_high_MeV" => _json_number(result.cep.T_bracket_high_MeV),
             "bracket_width_T_MeV" => _json_number(result.cep.bracket_width_T_MeV),
+            "T_last_first_order_MeV" => _json_number(result.cep.T_last_first_order_MeV),
+            "mu_last_first_order_MeV" => _json_number(result.cep.mu_last_first_order_MeV),
+            "T_first_monotone_MeV" => _json_number(result.cep.T_first_monotone_MeV),
+            "ambiguity_width_T_MeV" => _json_number(result.cep.ambiguity_width_T_MeV),
+            "temperature_resolution_target_MeV" => _json_number(result.cep.temperature_resolution_target_MeV),
             "reason" => result.cep.reason,
         ),
     )
@@ -208,12 +222,13 @@ function _build_summary(result::PhasePipelineResult)
     return Dict(
         "model_kind" => String(result.model_kind),
         "model_variant" => result.model_variant,
-        "schema_version" => "phase-v1",
+        "schema_version" => "phase-v2",
         "config_hash" => get(result.config_snapshot, "config_hash", ""),
         "run_id" => result.run_id,
         "xi" => result.xi,
         "generated_at" => string(now()),
         "cep" => Dict(
+            "result_status" => String(result.cep.result_status),
             "found" => result.cep.found,
             "T_cep_MeV" => _json_number(result.cep.T_cep_MeV),
             "muq_cep_MeV" => _json_number(result.cep.mu_cep_MeV),
@@ -223,6 +238,11 @@ function _build_summary(result::PhasePipelineResult)
             "T_bracket_low_MeV" => _json_number(result.cep.T_bracket_low_MeV),
             "T_bracket_high_MeV" => _json_number(result.cep.T_bracket_high_MeV),
             "bracket_width_T_MeV" => _json_number(result.cep.bracket_width_T_MeV),
+            "T_last_first_order_MeV" => _json_number(result.cep.T_last_first_order_MeV),
+            "mu_last_first_order_MeV" => _json_number(result.cep.mu_last_first_order_MeV),
+            "T_first_monotone_MeV" => _json_number(result.cep.T_first_monotone_MeV),
+            "ambiguity_width_T_MeV" => _json_number(result.cep.ambiguity_width_T_MeV),
+            "temperature_resolution_target_MeV" => _json_number(result.cep.temperature_resolution_target_MeV),
             "eval_count" => result.cep.eval_count,
             "unknown_count" => result.cep.unknown_count,
             "reason" => result.cep.reason,

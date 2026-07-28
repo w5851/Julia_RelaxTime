@@ -20,6 +20,26 @@ ARTIFACTS: dict[str, tuple[str, ...]] = {
     "grid_convergence": ("axis", "xi", "T_MeV", "level", "left", "right", "midpoint"),
 }
 
+CEP_LEGACY_COLUMNS = (
+    "xi",
+    "T_CEP_MeV",
+    "muq_CEP_MeV",
+    "muB_CEP_MeV",
+    "uncertainty_T_MeV",
+    "T_bracket_low_MeV",
+    "T_bracket_high_MeV",
+    "bracket_width_T_MeV",
+)
+CEP_COLUMNS = CEP_LEGACY_COLUMNS + (
+    "result_status",
+    "T_last_first_order_MeV",
+    "muq_last_first_order_MeV",
+    "muB_last_first_order_MeV",
+    "T_first_monotone_MeV",
+    "ambiguity_width_T_MeV",
+    "temperature_resolution_target_MeV",
+)
+
 
 def fail(message: str) -> None:
     raise SystemExit(f"[dense-reference-merge] {message}")
@@ -135,6 +155,25 @@ def merge_csv_artifact(
     merged: dict[tuple[tuple[int, float | str], ...], dict[str, str]] = {}
     for path in sorted(paths, key=lambda item: item.as_posix()):
         current_header, rows = load_csv(path)
+        if name == "cep":
+            if tuple(current_header) == CEP_LEGACY_COLUMNS:
+                converted: list[dict[str, str]] = []
+                for row in rows:
+                    has_point = bool(row.get("T_CEP_MeV", "").strip() and row.get("muq_CEP_MeV", "").strip())
+                    converted.append({
+                        **row,
+                        "result_status": "resolved" if has_point else "not_found",
+                        "T_last_first_order_MeV": row.get("T_bracket_low_MeV", ""),
+                        "muq_last_first_order_MeV": row.get("muq_CEP_MeV", ""),
+                        "muB_last_first_order_MeV": row.get("muB_CEP_MeV", ""),
+                        "T_first_monotone_MeV": row.get("T_bracket_high_MeV", ""),
+                        "ambiguity_width_T_MeV": row.get("bracket_width_T_MeV", ""),
+                        "temperature_resolution_target_MeV": "",
+                    })
+                current_header = list(CEP_COLUMNS)
+                rows = converted
+            elif tuple(current_header) != CEP_COLUMNS:
+                fail(f"unsupported CEP CSV schema in {path}: {current_header}")
         if header is None:
             header = current_header
         elif current_header != header:

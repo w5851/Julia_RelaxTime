@@ -169,14 +169,37 @@ function _load_reference_results(reference_root::String, tag::String)
     if isfile(cep_path)
         for row in CSV.File(cep_path)
             xi = _xi_key(row.xi)
+            optional_float = name -> begin
+                hasproperty(row, name) || return NaN
+                value = getproperty(row, name)
+                text = strip(string(value))
+                isempty(text) && return NaN
+                parsed = tryparse(Float64, text)
+                isnothing(parsed) ? NaN : Float64(parsed)
+            end
+            raw_status = hasproperty(row, :result_status) ? getproperty(row, :result_status) : nothing
+            status_text = (raw_status === nothing || ismissing(raw_status)) ? "" : strip(string(raw_status))
+            status = if !isempty(status_text)
+                Symbol(status_text)
+            elseif isfinite(optional_float(:T_CEP_MeV)) && isfinite(optional_float(:muq_CEP_MeV))
+                :resolved
+            else
+                :not_found
+            end
             cep_by_xi[xi] = Models.CEPResult(
-                found=true,
-                T_cep_MeV=Float64(row.T_CEP_MeV),
-                mu_cep_MeV=Float64(row.muq_CEP_MeV),
-                uncertainty_T_MeV=Float64(row.uncertainty_T_MeV),
-                T_bracket_low_MeV=Float64(row.T_bracket_low_MeV),
-                T_bracket_high_MeV=Float64(row.T_bracket_high_MeV),
-                bracket_width_T_MeV=Float64(row.bracket_width_T_MeV),
+                found=status == :resolved,
+                result_status=status,
+                T_cep_MeV=optional_float(:T_CEP_MeV),
+                mu_cep_MeV=optional_float(:muq_CEP_MeV),
+                uncertainty_T_MeV=optional_float(:uncertainty_T_MeV),
+                T_bracket_low_MeV=optional_float(:T_bracket_low_MeV),
+                T_bracket_high_MeV=optional_float(:T_bracket_high_MeV),
+                bracket_width_T_MeV=optional_float(:bracket_width_T_MeV),
+                T_last_first_order_MeV=optional_float(:T_last_first_order_MeV),
+                mu_last_first_order_MeV=optional_float(:muq_last_first_order_MeV),
+                T_first_monotone_MeV=optional_float(:T_first_monotone_MeV),
+                ambiguity_width_T_MeV=optional_float(:ambiguity_width_T_MeV),
+                temperature_resolution_target_MeV=optional_float(:temperature_resolution_target_MeV),
             )
         end
     end

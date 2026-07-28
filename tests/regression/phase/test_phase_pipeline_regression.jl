@@ -54,9 +54,10 @@ _actual_crossover_key(row) = (row.mu_MeV, row.T_crossover_MeV)
     )
 
     cep_row = only(filter(r -> r.kind == "cep", rows))
-    @test result.cep.found == cep_row.flag
-    @test isapprox(result.cep.T_cep_MeV, cep_row.T_MeV; rtol=1e-6, atol=1e-10)
-    @test isapprox(result.cep.mu_cep_MeV, cep_row.mu_MeV; rtol=1e-6, atol=1e-10)
+    @test result.cep.result_status == :ambiguous
+    @test !result.cep.found
+    @test isfinite(result.cep.T_last_first_order_MeV)
+    @test isnan(result.cep.T_cep_MeV)
 
     boundary_rows = sort(filter(r -> r.kind == "boundary", rows); by=_baseline_boundary_key)
     actual_boundary = sort!(collect(result.first_order_boundary); by=_actual_boundary_key)
@@ -73,11 +74,25 @@ _actual_crossover_key(row) = (row.mu_MeV, row.T_crossover_MeV)
     crossover_rows = sort(filter(r -> r.kind == "crossover", rows); by=_baseline_crossover_key)
     actual_crossover = sort!(collect(result.crossover_line); by=_actual_crossover_key)
     @test length(actual_crossover) == length(crossover_rows)
-    for (row, actual) in zip(crossover_rows, actual_crossover)
-        @test actual.converged == row.flag
-        @test isapprox(actual.T_crossover_MeV, row.T_MeV; rtol=1e-6, atol=1e-10, nans=true)
-        @test isapprox(actual.mu_MeV, row.mu_MeV; rtol=1e-6, atol=1e-10)
-        @test isapprox(actual.rho, row.rho_a; rtol=1e-6, atol=1e-10, nans=true)
-        @test isapprox(actual.derivative, row.rho_b; rtol=1e-6, atol=1e-10, nans=true)
+
+    # The three-state contract deliberately removes the old CEP midpoint and
+    # its borrowed low-side Maxwell chemical potential.  Research crossover
+    # therefore uses the largest confirmed boundary μ as its search ceiling;
+    # the historical v2 fixture remains useful for boundary regression but is
+    # not a valid point-by-point crossover oracle anymore.
+    boundary_mu_max = maximum(row.mu_transition_MeV for row in result.first_order_boundary)
+    @test isapprox(first(actual_crossover).mu_MeV, 0.0; atol=1e-12)
+    @test isapprox(last(actual_crossover).mu_MeV, boundary_mu_max; rtol=1e-12, atol=1e-12)
+    @test issorted([row.mu_MeV for row in actual_crossover])
+    for actual in actual_crossover
+        @test 0.0 <= actual.mu_MeV <= boundary_mu_max
+        @test actual.converged isa Bool
+        if actual.converged
+            @test isfinite(actual.T_crossover_MeV)
+            @test isfinite(actual.rho)
+            @test isfinite(actual.derivative)
+        else
+            @test isnan(actual.T_crossover_MeV) || !isfinite(actual.T_crossover_MeV)
+        end
     end
 end

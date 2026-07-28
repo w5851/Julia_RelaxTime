@@ -1,18 +1,134 @@
-Base.@kwdef struct CEPResult
-    found::Bool = false
-    T_cep_MeV::Float64 = NaN
+struct CEPResult
+    found::Bool
     # Phase solvers work in the quark chemical potential mu_q. Keep the
     # historical field name for API compatibility; public artifacts should also
     # expose explicit muq_cep_MeV and muB_cep_MeV names.
-    mu_cep_MeV::Float64 = NaN
-    uncertainty_T_MeV::Float64 = NaN
-    T_bracket_low_MeV::Float64 = NaN
-    T_bracket_high_MeV::Float64 = NaN
-    bracket_width_T_MeV::Float64 = NaN
-    eval_count::Int = 0
-    unknown_count::Int = 0
-    reason::Union{Nothing, String} = nothing
-    method::Symbol = :none
+    T_cep_MeV::Float64
+    mu_cep_MeV::Float64
+    uncertainty_T_MeV::Float64
+    T_bracket_low_MeV::Float64
+    T_bracket_high_MeV::Float64
+    bracket_width_T_MeV::Float64
+    result_status::Symbol
+    T_last_first_order_MeV::Float64
+    mu_last_first_order_MeV::Float64
+    T_first_monotone_MeV::Float64
+    ambiguity_width_T_MeV::Float64
+    temperature_resolution_target_MeV::Float64
+    eval_count::Int
+    unknown_count::Int
+    reason::Union{Nothing, String}
+    method::Symbol
+end
+
+const CEP_RESULT_STATUSES = (:resolved, :ambiguous, :not_found)
+
+"""Construct a CEP result while preserving the historical keyword contract.
+
+When `result_status` is omitted, the old `found` flag is used to infer a
+legacy resolved/not-found result. New callers should pass the explicit status;
+ambiguous and not-found results never expose a midpoint CEP or a borrowed
+Maxwell chemical potential.
+"""
+function CEPResult(;
+        found::Bool=false,
+        T_cep_MeV::Real=NaN,
+        mu_cep_MeV::Real=NaN,
+        uncertainty_T_MeV::Real=NaN,
+        T_bracket_low_MeV::Real=NaN,
+        T_bracket_high_MeV::Real=NaN,
+        bracket_width_T_MeV::Real=NaN,
+        result_status::Union{Nothing, Symbol}=nothing,
+        T_last_first_order_MeV::Real=NaN,
+        mu_last_first_order_MeV::Real=NaN,
+        T_first_monotone_MeV::Real=NaN,
+        ambiguity_width_T_MeV::Real=NaN,
+        temperature_resolution_target_MeV::Real=NaN,
+        eval_count::Int=0,
+        unknown_count::Int=0,
+        reason::Union{Nothing, String}=nothing,
+        method::Symbol=:none)
+    T_cep_MeV = Float64(T_cep_MeV)
+    mu_cep_MeV = Float64(mu_cep_MeV)
+    uncertainty_T_MeV = Float64(uncertainty_T_MeV)
+    T_bracket_low_MeV = Float64(T_bracket_low_MeV)
+    T_bracket_high_MeV = Float64(T_bracket_high_MeV)
+    bracket_width_T_MeV = Float64(bracket_width_T_MeV)
+    T_last_first_order_MeV = Float64(T_last_first_order_MeV)
+    mu_last_first_order_MeV = Float64(mu_last_first_order_MeV)
+    T_first_monotone_MeV = Float64(T_first_monotone_MeV)
+    ambiguity_width_T_MeV = Float64(ambiguity_width_T_MeV)
+    temperature_resolution_target_MeV = Float64(temperature_resolution_target_MeV)
+
+    status = isnothing(result_status) ? (found ? :resolved : :not_found) : result_status
+    status in CEP_RESULT_STATUSES || throw(ArgumentError(
+        "result_status must be one of $(CEP_RESULT_STATUSES), got $(status)",
+    ))
+    eval_count >= 0 || throw(ArgumentError("eval_count must be nonnegative, got $(eval_count)"))
+    unknown_count >= 0 || throw(ArgumentError("unknown_count must be nonnegative, got $(unknown_count)"))
+    (isnan(temperature_resolution_target_MeV) ||
+        (isfinite(temperature_resolution_target_MeV) && temperature_resolution_target_MeV > 0)) ||
+        throw(ArgumentError(
+            "temperature_resolution_target_MeV must be NaN or finite and positive, got $(temperature_resolution_target_MeV)",
+        ))
+
+    # Preserve old `CEPResult(found=true, ...)` construction verbatim. Any
+    # explicit modern non-resolved status (and a legacy `found=false` result)
+    # is canonicalized so downstream artifacts cannot publish a midpoint as
+    # an ambiguous/not-found CEP.
+    if status != :resolved && (!isnothing(result_status) || !found)
+        found = false
+        T_cep_MeV = NaN
+        mu_cep_MeV = NaN
+        uncertainty_T_MeV = NaN
+    else
+        if !isnothing(result_status) && status == :resolved
+            (isfinite(T_cep_MeV) && isfinite(mu_cep_MeV)) || throw(ArgumentError(
+                "resolved CEP results require finite T_cep_MeV and mu_cep_MeV",
+            ))
+            found = true
+        else
+            found = status == :resolved ? true : found
+        end
+    end
+
+    if !isfinite(T_bracket_low_MeV) && isfinite(T_last_first_order_MeV)
+        T_bracket_low_MeV = T_last_first_order_MeV
+    end
+    if !isfinite(T_bracket_high_MeV) && isfinite(T_first_monotone_MeV)
+        T_bracket_high_MeV = T_first_monotone_MeV
+    end
+    if !isfinite(ambiguity_width_T_MeV) &&
+       isfinite(T_bracket_low_MeV) && isfinite(T_bracket_high_MeV)
+        ambiguity_width_T_MeV = T_bracket_high_MeV - T_bracket_low_MeV
+    end
+    if status == :ambiguous && isfinite(T_last_first_order_MeV) && isfinite(T_first_monotone_MeV) &&
+       T_first_monotone_MeV < T_last_first_order_MeV
+        throw(ArgumentError(
+            "ambiguous CEP evidence interval must be ordered: " *
+            "T_first_monotone_MeV >= T_last_first_order_MeV",
+        ))
+    end
+
+    return CEPResult(
+        found,
+        T_cep_MeV,
+        mu_cep_MeV,
+        uncertainty_T_MeV,
+        T_bracket_low_MeV,
+        T_bracket_high_MeV,
+        bracket_width_T_MeV,
+        status,
+        T_last_first_order_MeV,
+        mu_last_first_order_MeV,
+        T_first_monotone_MeV,
+        ambiguity_width_T_MeV,
+        temperature_resolution_target_MeV,
+        eval_count,
+        unknown_count,
+        reason,
+        method,
+    )
 end
 
 Base.@kwdef struct FirstOrderSweepResult
@@ -31,6 +147,8 @@ Base.@kwdef struct ProductionPipelineConfig
     T_start::Float64 = NaN
     T_end::Float64 = NaN
     dT_initial::Float64 = 5.0
+    temperature_resolution_target_MeV::Float64 = 0.1
+    # Deprecated compatibility alias; use temperature_resolution_target_MeV.
     cep_tol_MeV::Float64 = 0.1
     cep_max_bisect_iter::Int = 20
     area_tol_good::Float64 = 1e-4

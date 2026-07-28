@@ -104,9 +104,8 @@ end
     @test old_result.model_variant == new_result.model_variant
     _assert_scalar_close(old_result.xi, new_result.xi)
 
-    @test old_result.cep.found == new_result.cep.found
-    _assert_scalar_close(old_result.cep.T_cep_MeV, new_result.cep.T_cep_MeV)
-    _assert_scalar_close(old_result.cep.mu_cep_MeV, new_result.cep.mu_cep_MeV)
+    @test old_result.cep.result_status == new_result.cep.result_status
+    _assert_scalar_close(old_result.cep.T_last_first_order_MeV, new_result.cep.T_last_first_order_MeV)
 
     old_boundary = collect(old_result.first_order_boundary)
     new_boundary = collect(new_result.first_order_boundary)

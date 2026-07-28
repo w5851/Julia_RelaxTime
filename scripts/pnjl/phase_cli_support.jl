@@ -41,6 +41,7 @@ Base.@kwdef mutable struct PhaseCliConfig
     cep_strategy::Symbol = :interpolate
     cep_interpolate_use_direct_eval::Bool = false
     cep_tol::Float64 = 0.01
+    temperature_resolution_target_MeV::Float64 = NaN
     cep_max_bisect_iter::Int = 20
     cep_area_tol_good::Float64 = 1e-4
     cep_area_tol_bad::Float64 = 5e-4
@@ -186,6 +187,8 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "cep_strategy") && (cfg.cep_strategy = Symbol(lowercase(String(table["cep_strategy"]))))
     haskey(table, "cep_interpolate_use_direct_eval") && (cfg.cep_interpolate_use_direct_eval = _as_bool(table["cep_interpolate_use_direct_eval"], "phase_pipeline.cep_interpolate_use_direct_eval"))
     haskey(table, "cep_tol") && (cfg.cep_tol = Float64(table["cep_tol"]))
+    haskey(table, "temperature_resolution_target_MeV") &&
+        (cfg.temperature_resolution_target_MeV = Float64(table["temperature_resolution_target_MeV"]))
     haskey(table, "cep_max_bisect_iter") && (cfg.cep_max_bisect_iter = Int(table["cep_max_bisect_iter"]))
     haskey(table, "cep_area_tol_good") && (cfg.cep_area_tol_good = Float64(table["cep_area_tol_good"]))
     haskey(table, "cep_area_tol_bad") && (cfg.cep_area_tol_bad = Float64(table["cep_area_tol_bad"]))
@@ -287,6 +290,7 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
             "crossover_T_max_MeV",
             isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_max,
         ),
+        "temperature_resolution_target_MeV" => (isfinite(cfg.temperature_resolution_target_MeV) ? cfg.temperature_resolution_target_MeV : cfg.cep_tol),
         "cep_tol" => cfg.cep_tol,
         "unknown_budget" => cfg.unknown_budget,
         "rho_geometry_convergence" => cfg.rho_geometry_convergence,
@@ -362,6 +366,7 @@ function _usage()
     println("  --cep_strategy=...     CEP定位策略（interpolate|direct）")
     println("  --cep_interpolate_use_direct_eval=true|false interpolate策略下对临界二分点做direct重算")
     println("  --cep_tol=0.01         CEP二分温度容差 (MeV)")
+    println("  --temperature_resolution_target_MeV=0.01  cep_tol 的明确别名；仅控制端点搜索分辨率")
     println("  --cep_max_bisect_iter=20 CEP二分迭代上限")
     println("  --cep_area_tol_good=1e-4 CEP判定valid阈值")
     println("  --cep_area_tol_bad=5e-4  CEP判定invalid阈值")
@@ -490,6 +495,8 @@ function parse_args(args, project_root::AbstractString)
             cfg.cep_interpolate_use_direct_eval = lowercase(split(arg, "="; limit=2)[2]) in ("1", "true", "yes")
         elseif startswith(arg, "--cep_tol=")
             cfg.cep_tol = parse(Float64, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--temperature_resolution_target_MeV=")
+            cfg.temperature_resolution_target_MeV = parse(Float64, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_max_bisect_iter=")
             cfg.cep_max_bisect_iter = parse(Int, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--cep_area_tol_good=")
@@ -562,7 +569,10 @@ function parse_args(args, project_root::AbstractString)
     cfg.p_num > 0 || throw(ArgumentError("p_num must be positive"))
     cfg.t_num > 0 || throw(ArgumentError("t_num must be positive"))
     cfg.iterations > 0 || throw(ArgumentError("iterations must be positive"))
-    cfg.cep_tol > 0 && isfinite(cfg.cep_tol) || throw(ArgumentError("cep_tol must be finite and positive"))
+    effective_resolution_target = isfinite(cfg.temperature_resolution_target_MeV) ?
+        cfg.temperature_resolution_target_MeV : cfg.cep_tol
+    effective_resolution_target > 0 && isfinite(effective_resolution_target) ||
+        throw(ArgumentError("temperature_resolution_target_MeV must be finite and positive"))
     cfg.unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative"))
     cfg.cep_max_refine_level >= 0 || throw(ArgumentError("cep_max_refine_level must be nonnegative"))
     if cfg.rho_geometry_convergence && cfg.cep_max_refine_level < 1 && cfg.mode === :production
@@ -630,6 +640,7 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         cep_strategy=cfg.cep_strategy,
         cep_interpolate_use_direct_eval=cfg.cep_interpolate_use_direct_eval,
         cep_tol=cfg.cep_tol,
+        temperature_resolution_target_MeV=cfg.temperature_resolution_target_MeV,
         cep_max_bisect_iter=cfg.cep_max_bisect_iter,
         cep_area_tol_good=cfg.cep_area_tol_good,
         cep_area_tol_bad=cfg.cep_area_tol_bad,

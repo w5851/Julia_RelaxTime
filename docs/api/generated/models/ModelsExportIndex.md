@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/generated/models/ModelsExportIndex.md`
-- Exported symbol count: 346
-- Mentioned in non-generated docs/api pages: 207
+- Exported symbol count: 347
+- Mentioned in non-generated docs/api pages: 216
 
 ## Exported Symbols
 
@@ -18,6 +18,7 @@
 | `AbstractPipelineIOContract` | src/models/exports_public.jl | 98 | 0 | - |
 | `AbstractQCDModel` | src/models/exports_public.jl | 1 | 1 | docs/api/data_contracts.md |
 | `CEPResult` | src/models/exports_public.jl | 97 | 2 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md |
+| `CEP_RESULT_STATUSES` | src/models/exports_public.jl | 97 | 1 | docs/api/models/phase/Algorithms.md |
 | `CandidateSelector` | src/models/exports_public.jl | 55 | 0 | - |
 | `Constants_PNJL` | src/models/exports_public.jl | 111 | 13 | docs/api/integrals/GaussLegendre.md<br>docs/api/integrals/OneLoopIntegrals.md<br>docs/api/models/derived/derivatives/Overview.md |
 | `ConstraintModes` | src/models/exports_public.jl | 50 | 4 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
@@ -254,19 +255,19 @@
 | `polyakov_potential` | src/models/exports_public.jl | 4 | 1 | docs/api/data_contracts.md |
 | `prepare_transport_provider` | src/models/exports_public.jl | 94 | 6 | docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/TransportWorkflow.md<br>docs/api/relaxtime/transport/CoreConcepts.md |
 | `promote_phase_artifacts` | src/models/Models.jl | 48 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
-| `record_attempt_outcome!` | src/models/exports_public.jl | 67 | 0 | - |
-| `record_governed_attempt!` | src/models/exports_public.jl | 66 | 0 | - |
-| `record_nlsolve_work!` | src/models/exports_public.jl | 66 | 0 | - |
-| `record_postprocess_residual!` | src/models/exports_public.jl | 67 | 0 | - |
-| `record_scan_retry!` | src/models/exports_public.jl | 67 | 0 | - |
-| `record_solver_exception!` | src/models/exports_public.jl | 67 | 0 | - |
-| `record_solver_request!` | src/models/exports_public.jl | 66 | 0 | - |
+| `record_attempt_outcome!` | src/models/exports_public.jl | 67 | 1 | docs/api/models/solver/Overview.md |
+| `record_governed_attempt!` | src/models/exports_public.jl | 66 | 1 | docs/api/models/solver/Overview.md |
+| `record_nlsolve_work!` | src/models/exports_public.jl | 66 | 1 | docs/api/models/solver/Overview.md |
+| `record_postprocess_residual!` | src/models/exports_public.jl | 67 | 1 | docs/api/models/solver/Overview.md |
+| `record_scan_retry!` | src/models/exports_public.jl | 67 | 1 | docs/api/models/solver/Overview.md |
+| `record_solver_exception!` | src/models/exports_public.jl | 67 | 1 | docs/api/models/solver/Overview.md |
+| `record_solver_request!` | src/models/exports_public.jl | 66 | 1 | docs/api/models/solver/Overview.md |
 | `register_model!` | src/models/exports_public.jl | 15 | 0 | - |
 | `register_schema!` | src/models/exports_public.jl | 68 | 0 | - |
 | `registered_model_kinds` | src/models/exports_public.jl | 15 | 0 | - |
 | `relaxtime_orchestrator_stage_ids` | src/models/exports_public.jl | 107 | 0 | - |
 | `require_capability` | src/models/exports_public.jl | 2 | 0 | - |
-| `reset_solver_work!` | src/models/exports_public.jl | 65 | 0 | - |
+| `reset_solver_work!` | src/models/exports_public.jl | 65 | 1 | docs/api/models/solver/Overview.md |
 | `resolve_adapter_output_dir` | src/models/exports_public.jl | 105 | 0 | - |
 | `resolve_nmax_from_cutoff` | src/models/exports_public.jl | 84 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md |
 | `resolve_phase_output_target` | src/models/Models.jl | 48 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
@@ -463,19 +464,11 @@ The following exported symbols were not found in non-generated docs/api Markdown
 - `persisted_string_to_symbol`
 - `persisted_symbol_to_string`
 - `pm_next_seed_source`
-- `record_attempt_outcome!`
-- `record_governed_attempt!`
-- `record_nlsolve_work!`
-- `record_postprocess_residual!`
-- `record_scan_retry!`
-- `record_solver_exception!`
-- `record_solver_request!`
 - `register_model!`
 - `register_schema!`
 - `registered_model_kinds`
 - `relaxtime_orchestrator_stage_ids`
 - `require_capability`
-- `reset_solver_work!`
 - `resolve_adapter_output_dir`
 - `rotation_workflow_module`
 - `run_precompile_capability`
