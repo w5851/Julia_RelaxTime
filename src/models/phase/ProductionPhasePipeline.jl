@@ -1110,7 +1110,6 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             stats_failure=Int(get(res.stats, :failure, 0)),
             cache_stats=get(res, :cache_stats, (point_requests=0, cache_hits=0, unique_solves=0, targeted_additions=0)),
             mu_transition_MeV=Float64(something(res.mu_transition, NaN)),
-            area_residual=Float64(something(res.area_residual, NaN)),
             reason=String(reason),
             level=Int(res.level),
         ))
