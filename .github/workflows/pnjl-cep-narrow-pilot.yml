@@ -3,6 +3,22 @@ name: PNJL CEP Narrow Window Pilot
 on:
   workflow_dispatch:
     inputs:
+      pilot_version:
+        description: "diagnostic contract version"
+        required: false
+        default: "v1"
+        type: choice
+        options:
+          - v1
+          - v2
+      mode:
+        description: "full numerical pilot or aggregate-only replay"
+        required: false
+        default: "full"
+        type: choice
+        options:
+          - full
+          - aggregate_replay
       tag:
         description: "diagnostic artifact tag"
         required: true
@@ -12,12 +28,18 @@ on:
         description: "immutable 40-character calculation SHA"
         required: true
         type: string
+      source_run_id:
+        description: "source run id for v2 aggregate replay"
+        required: false
+        default: ""
+        type: string
 permissions:
   actions: read
   contents: read
 
 jobs:
   pilot:
+    if: ${{ inputs.pilot_version == 'v1' && inputs.mode == 'full' }}
     name: "cep-pilot xi=${{ matrix.xi }} method=${{ matrix.method }}"
     runs-on: ubuntu-latest
     timeout-minutes: 330
@@ -34,7 +56,7 @@ jobs:
       - name: Validate immutable calculation ref
         shell: bash
         env:
-          CALCULATION_REF: ${{ inputs.calculation_ref || github.event.pull_request.head.sha }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
         run: |
           [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || {
             echo "calculation_ref must be a 40-character immutable SHA" >&2
@@ -44,15 +66,14 @@ jobs:
       - name: Checkout calculation SHA
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.calculation_ref || github.event.pull_request.head.sha }}
+          ref: ${{ inputs.calculation_ref }}
           fetch-depth: 1
 
       - name: Verify checkout SHA
         shell: bash
         env:
-          CALCULATION_REF: ${{ inputs.calculation_ref || github.event.pull_request.head.sha }}
-        run: |
-          test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
 
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
@@ -62,7 +83,7 @@ jobs:
       - name: Cache Julia artifacts
         uses: julia-actions/cache@v2
         with:
-          cache-name: julia-cache-cep-narrow-pilot
+          cache-name: julia-cache-cep-narrow-pilot-v1
 
       - name: Install Julia dependencies
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
@@ -72,8 +93,8 @@ jobs:
         env:
           XI: ${{ matrix.xi }}
           METHOD: ${{ matrix.method }}
-          TAG: ${{ inputs.tag || 'cep_narrow_pilot_v1' }}
-          CALCULATION_REF: ${{ inputs.calculation_ref || github.event.pull_request.head.sha }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
         run: |
           mkdir -p "artifacts/${METHOD}/xi_${XI}"
           julia --project=. scripts/analysis/pnjl_cep_narrow_pilot.jl \
@@ -93,14 +114,14 @@ jobs:
 
   aggregate:
     name: aggregate CEP pilot diagnostics
-    if: ${{ always() }}
+    if: ${{ always() && inputs.pilot_version == 'v1' && inputs.mode == 'full' }}
     needs: [pilot]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout calculation SHA
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.calculation_ref || github.event.pull_request.head.sha }}
+          ref: ${{ inputs.calculation_ref }}
           fetch-depth: 1
 
       - name: Setup Python
@@ -142,7 +163,321 @@ jobs:
       - name: Upload aggregate diagnostic artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cep-narrow-pilot-${{ inputs.tag || 'cep_narrow_pilot_v1' }}-aggregate
+          name: cep-narrow-pilot-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  v2_discovery:
+    if: ${{ inputs.pilot_version == 'v2' && inputs.mode == 'full' }}
+    name: "v2 discovery xi=${{ matrix.xi }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        xi: ["-0.5", "0.0", "0.5"]
+    steps:
+      - name: Validate immutable calculation ref
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Verify checkout SHA
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-cep-narrow-pilot-v2
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run cascade discovery
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          mkdir -p "artifacts/discovery/xi_${XI}"
+          julia --project=. scripts/analysis/pnjl_cep_narrow_pilot_v2.jl \
+            --xi "$XI" \
+            --method rho_support_cascade \
+            --stage discovery \
+            --tag "${{ inputs.tag }}" \
+            --calculation-sha "$CALCULATION_REF" \
+            --output-dir "artifacts/discovery/xi_${XI}"
+
+      - name: Upload discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-discovery-xi-${{ matrix.xi }}
+          path: artifacts/discovery/xi_${{ matrix.xi }}
+          if-no-files-found: error
+          retention-days: 30
+
+  v2_freeze_windows:
+    name: freeze v2 validation windows
+    if: ${{ always() && inputs.pilot_version == 'v2' && inputs.mode == 'full' }}
+    needs: [v2_discovery]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Download discovery artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-narrow-pilot-v2-discovery-*
+          path: discovery-artifacts
+          merge-multiple: false
+
+      - name: Freeze immutable validation windows
+        run: |
+          python scripts/analysis/freeze_pnjl_cep_narrow_pilot_v2_windows.py \
+            --input-dir discovery-artifacts \
+            --output windows/validation_windows.json
+
+      - name: Upload frozen validation windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-validation-windows
+          path: windows/validation_windows.json
+          if-no-files-found: error
+          retention-days: 90
+
+  v2_validation:
+    if: ${{ inputs.pilot_version == 'v2' && inputs.mode == 'full' }}
+    name: "v2 validation xi=${{ matrix.xi }} method=${{ matrix.method }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    needs: [v2_freeze_windows]
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        xi: ["-0.5", "0.0", "0.5"]
+        method:
+          - c2_dense_baseline
+          - high_resolution_oracle
+    steps:
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Verify checkout SHA
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-cep-narrow-pilot-v2
+
+      - name: Install Julia dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Download frozen validation windows
+        uses: actions/download-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-validation-windows
+          path: windows
+
+      - name: Run independent validation search
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          METHOD: ${{ matrix.method }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        run: |
+          mkdir -p "artifacts/validation/${METHOD}/xi_${XI}"
+          julia --project=. scripts/analysis/pnjl_cep_narrow_pilot_v2.jl \
+            --xi "$XI" \
+            --method "$METHOD" \
+            --stage validation \
+            --tag "${{ inputs.tag }}" \
+            --calculation-sha "$CALCULATION_REF" \
+            --window-file windows/validation_windows.json \
+            --output-dir "artifacts/validation/${METHOD}/xi_${XI}"
+
+      - name: Upload validation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-validation-${{ matrix.method }}-xi-${{ matrix.xi }}
+          path: artifacts/validation/${{ matrix.method }}/xi_${{ matrix.xi }}
+          if-no-files-found: error
+          retention-days: 30
+
+  v2_aggregate:
+    name: aggregate CEP pilot v2 diagnostics
+    if: ${{ always() && inputs.pilot_version == 'v2' && inputs.mode == 'full' }}
+    needs: [v2_discovery, v2_freeze_windows, v2_validation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install plotting dependency
+        run: python -m pip install matplotlib
+
+      - name: Download v2 job artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-narrow-pilot-v2-*
+          path: job-artifacts
+          merge-multiple: false
+
+      - name: Collect and validate v2 evidence
+        shell: bash
+        env:
+          RUN_ID: ${{ github.run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python scripts/analysis/collect_pnjl_cep_narrow_pilot_v2.py \
+            --input-dir job-artifacts \
+            --output-dir aggregate \
+            --run-id "$RUN_ID" \
+            --expected-calculation-sha "${{ inputs.calculation_ref }}"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
+          python scripts/analysis/plot_pnjl_cep_narrow_pilot_v2.py \
+            --input-dir aggregate \
+            --output-dir aggregate/figures
+          echo "collector_gate_status=$status" >> "$GITHUB_STEP_SUMMARY"
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload v2 aggregate diagnostic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  v2_aggregate_replay:
+    name: replay CEP pilot v2 aggregate diagnostics
+    if: ${{ inputs.pilot_version == 'v2' && inputs.mode == 'aggregate_replay' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+
+      - name: Checkout calculation SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_ref }}
+          fetch-depth: 1
+
+      - name: Verify source run provenance
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,status,conclusion)"
+          test "$(echo "$payload" | jq -r .status)" = completed
+          # A source run may be marked failure solely because its collector or
+          # plotter failed.  The replay collector below verifies that every
+          # numerical discovery/validation artifact is present and valid, so
+          # do not require the aggregate job itself to have succeeded here.
+          case "$(echo "$payload" | jq -r .conclusion)" in
+            success|failure) ;;
+            *) exit 1 ;;
+          esac
+          source_sha="$(echo "$payload" | jq -r .headSha)"
+          [[ "$source_sha" =~ ^[0-9a-fA-F]{40}$ ]]
+          echo "source_calculation_sha=$source_sha" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download source numerical artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-narrow-pilot-v2-*-xi-*
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          path: source-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install plotting dependency
+        run: python -m pip install matplotlib
+
+      - name: Replay collector and plots
+        shell: bash
+        env:
+          RUN_ID: ${{ inputs.source_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          SOURCE_CALCULATION_SHA="$(gh run view "$RUN_ID" --json headSha --jq .headSha)"
+          python scripts/analysis/collect_pnjl_cep_narrow_pilot_v2.py \
+            --input-dir source-artifacts \
+            --output-dir aggregate \
+            --run-id "$RUN_ID" \
+            --expected-calculation-sha "$SOURCE_CALCULATION_SHA"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
+          python scripts/analysis/plot_pnjl_cep_narrow_pilot_v2.py \
+            --input-dir aggregate \
+            --output-dir aggregate/figures
+
+      - name: Upload replay aggregate diagnostic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-narrow-pilot-v2-${{ inputs.tag }}-aggregate-replay
           path: aggregate
           if-no-files-found: error
           retention-days: 90

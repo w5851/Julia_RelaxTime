@@ -1,0 +1,18 @@
+{
+  "figures": {
+    "cep_intervals.png": "f05f9aefca3281fc29050b50dcb9ab22ca2f470ff3635d05a0b3dc028761b5f7",
+    "cost_frontier.png": "92cae080bcfdc251a2b17d308cb5aa77b966af7fc484b0e8d80da6464c968a3f",
+    "rho_mu_xi_-0.5.png": "e9e163a623c4b73456c1a4020b1d4a12e3b9321faf85a404852a7de1f0201b1e",
+    "rho_mu_xi_0.5.png": "c7143ea7700c42dc98e1786e21b02ad7d3fe1ece13b31831e25c08ddefea1552",
+    "rho_mu_xi_0.png": "c11d0a24561ef33eb3b6bcc12e304c0fb339e847516818a3e82bef06c4fcc758",
+    "slice_states.png": "c710afd0b1317940516994d549bd83c083b0473c2337ff399b77d6a9240f9de4"
+  },
+  "generated_at_utc": "2026-07-28T08:27:22.248239Z",
+  "input_sha256": {
+    "cep_accuracy.csv": "4edbf6d226e2d66294f6783577aee403ae770eb27ec897350b40780623a2b42e",
+    "curve_points.csv": "3294e66227e4a1b36ffad8abaf254035dcae613805a3e0939ea6ab0c0191852f",
+    "method_costs.csv": "e35402c305227096b971746bf7ffc6569faeaff79005963b2ea3e9ec840aff23",
+    "slice_metrics.csv": "338be516ee2ced98cfb364be9b51505b981c0d15955d06cd210f1bb1f8265046"
+  },
+  "schema_version": "cep_narrow_pilot_v2"
+}

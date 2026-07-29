@@ -1,0 +1,126 @@
+{
+  "actions": {
+    "conclusion": "success",
+    "critical_path_seconds": 1247.0,
+    "head_sha": "9d325b62ef366f1de70cd3b2a3555e71bd12664a",
+    "job_count": 14,
+    "raw_total_seconds": 5173.0,
+    "run_id": "30339094251",
+    "runner_minutes": 91,
+    "source": "gh run view",
+    "status": "completed",
+    "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/30339094251"
+  },
+  "calculation_shas": [
+    "9d325b62ef366f1de70cd3b2a3555e71bd12664a"
+  ],
+  "expected_calculation_sha": "9d325b62ef366f1de70cd3b2a3555e71bd12664a",
+  "file_sha256": {
+    "README.md": "0c0b867ac82330a95b41be370d5b5c9e6c1f7d38a121621bbded03d6c010c8b3",
+    "actions_costs.csv": "e0bf5b8dcb6bedcb51bdbdc85ab3853434605bb563c57c6a14dee948ceb79e7a",
+    "cep_accuracy.csv": "4edbf6d226e2d66294f6783577aee403ae770eb27ec897350b40780623a2b42e",
+    "claim_ledger.csv": "12907c2bb141ecd78153d63782969c5aba9df65a6e2a422bb730fffde06a78d9",
+    "curve_points.csv": "3294e66227e4a1b36ffad8abaf254035dcae613805a3e0939ea6ab0c0191852f",
+    "method_costs.csv": "e35402c305227096b971746bf7ffc6569faeaff79005963b2ea3e9ec840aff23",
+    "slice_metrics.csv": "338be516ee2ced98cfb364be9b51505b981c0d15955d06cd210f1bb1f8265046"
+  },
+  "gate": {
+    "automatic_gate_is_not_promotion": true,
+    "cascade_errors": [],
+    "cascade_status": "within_oracle",
+    "diagnostic_errors": [],
+    "oracle_errors": [],
+    "oracle_status": "stable",
+    "performance": {
+      "cascade_fallback_retry_rate": 0.00125567468366657,
+      "dense_fallback_retry_rate": 0.001616791944405049,
+      "fallback_retry_risk": false,
+      "grouped": {
+        "c2_dense_baseline": {
+          "equilibrium_requests": 35255.0,
+          "fallback_count": 57.0,
+          "jacobian_calls": 302222.0,
+          "newton_iterations": 120429.0,
+          "residual_calls": 377225.0,
+          "retry_count": 0.0,
+          "runner_seconds": 1008.9041433020001,
+          "unique_solves": 35255.0
+        },
+        "high_resolution_oracle": {
+          "equilibrium_requests": 70455.0,
+          "fallback_count": 110.0,
+          "jacobian_calls": 604150.0,
+          "newton_iterations": 240728.0,
+          "residual_calls": 754168.0,
+          "retry_count": 0.0,
+          "runner_seconds": 1681.358711934,
+          "unique_solves": 70455.0
+        },
+        "rho_support_cascade": {
+          "equilibrium_requests": 10353.0,
+          "fallback_count": 13.0,
+          "jacobian_calls": 90632.0,
+          "newton_iterations": 36156.0,
+          "residual_calls": 112439.0,
+          "retry_count": 0.0,
+          "runner_seconds": 343.525609291,
+          "unique_solves": 10353.0
+        }
+      }
+    },
+    "performance_errors": [],
+    "status": "pass",
+    "workflow_contract_errors": []
+  },
+  "generated_at_utc": "2026-07-28T08:27:17.560462Z",
+  "job_keys": [
+    [
+      -0.5,
+      "c2_dense_baseline",
+      "validation"
+    ],
+    [
+      -0.5,
+      "high_resolution_oracle",
+      "validation"
+    ],
+    [
+      -0.5,
+      "rho_support_cascade",
+      "discovery"
+    ],
+    [
+      0.0,
+      "c2_dense_baseline",
+      "validation"
+    ],
+    [
+      0.0,
+      "high_resolution_oracle",
+      "validation"
+    ],
+    [
+      0.0,
+      "rho_support_cascade",
+      "discovery"
+    ],
+    [
+      0.5,
+      "c2_dense_baseline",
+      "validation"
+    ],
+    [
+      0.5,
+      "high_resolution_oracle",
+      "validation"
+    ],
+    [
+      0.5,
+      "rho_support_cascade",
+      "discovery"
+    ]
+  ],
+  "run_id": "30339094251",
+  "schema_version": "cep_narrow_pilot_v2",
+  "workflow_head_sha": "9d325b62ef366f1de70cd3b2a3555e71bd12664a"
+}
