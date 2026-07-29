@@ -80,6 +80,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "models", "test_njl_model_factory.jl"),
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
     joinpath(UNIT_DIR, "models", "test_adaptive_rho_refinement.jl"),
+    joinpath(UNIT_DIR, "models", "test_rho_support_refinement.jl"),
     joinpath(UNIT_DIR, "models", "test_phase_grid_convergence.jl"),
     joinpath(UNIT_DIR, "models", "test_workflow_param_adapters.jl"),
     joinpath(UNIT_DIR, "models", "test_model_structure_homomorphism.jl"),
