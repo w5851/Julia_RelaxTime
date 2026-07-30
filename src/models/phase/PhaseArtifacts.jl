@@ -3,6 +3,26 @@ using JSON3
 
 @inline _json_number(x::Real) = isfinite(x) ? Float64(x) : nothing
 
+# JSON does not have IEEE-754 NaN/Inf literals.  Phase diagnostics deliberately
+# retain non-finite sentinels internally (for example when a Maxwell or
+# geometry estimate is unavailable), so normalize nested diagnostic payloads
+# at the artifact boundary instead of allowing one unavailable value to abort
+# the complete production/shadow job.
+_json_safe(::Nothing) = nothing
+_json_safe(::Missing) = nothing
+_json_safe(x::Bool) = x
+_json_safe(x::Integer) = x
+_json_safe(x::AbstractFloat) = isfinite(x) ? Float64(x) : nothing
+_json_safe(x::Real) = Float64(x)
+_json_safe(x::AbstractString) = String(x)
+_json_safe(x::Symbol) = String(x)
+_json_safe(x::NamedTuple) = Dict(string(name) => _json_safe(getproperty(x, name)) for name in keys(x))
+_json_safe(x::AbstractDict) = Dict(string(key) => _json_safe(value) for (key, value) in x)
+_json_safe(x::AbstractArray) = [_json_safe(value) for value in x]
+_json_safe(x::Tuple) = [_json_safe(value) for value in x]
+_json_safe(x::Complex) = Dict("real" => _json_safe(real(x)), "imag" => _json_safe(imag(x)))
+_json_safe(x) = x
+
 function _project_root()
     return normpath(joinpath(@__DIR__, "..", "..", ".."))
 end
@@ -270,7 +290,7 @@ function build_phase_artifacts(result::PhasePipelineResult; output_dir::String, 
     _write_grid_convergence(grid_convergence_path, result)
     _write_phase_report(report_path, result)
 
-    summary = _build_summary(result)
+    summary = _json_safe(_build_summary(result))
     open(summary_path, "w") do io
         write(io, JSON3.write(summary))
     end
