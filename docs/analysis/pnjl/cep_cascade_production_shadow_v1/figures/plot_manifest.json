@@ -1,0 +1,122 @@
+{
+  "schema_version": "cep_cascade_production_shadow_v1",
+  "source_sha256": {
+    "curve_points.csv": "a07eeed34c09d4874a3e42f0ef49dc974bd7a57c457fbce006d5f59050c22751",
+    "slice_metrics.csv": "4c29c846d598544c96a217f46becb181191d4f341bf6fa527b2d1038403525e1",
+    "geometry_accuracy.csv": "ee75388d47c2cce4eb87c6dfc642fbdb03617e5bf651b558285883ef4ffc4c78"
+  },
+  "figures": [
+    {
+      "file": "rho_mu_xi_m0p5_T_5_low_temperature.png",
+      "xi": "-0.5",
+      "T_MeV": 5.0,
+      "reason": "low_temperature",
+      "sha256": "dbee54de7605f4807321aed75435a0f3252400e30248b1b465f9d86fa56f6a64"
+    },
+    {
+      "file": "rho_mu_xi_m0p5_T_60_oracle_first_order_cascade_ambiguous.png",
+      "xi": "-0.5",
+      "T_MeV": 60.0,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "0786e2242784ea52e7dfb0ca7bedb9eb7d6732c9df26017121dee2f399d58538"
+    },
+    {
+      "file": "rho_mu_xi_m0p5_T_100_ambiguous_near_critical.png",
+      "xi": "-0.5",
+      "T_MeV": 100.0,
+      "reason": "ambiguous_near_critical",
+      "sha256": "91c7b56f20c9652318f5247087a89136ab6db15f9561246bb7ade79f686ef183"
+    },
+    {
+      "file": "rho_mu_xi_m0p5_T_130_oracle_first_order_cascade_ambiguous.png",
+      "xi": "-0.5",
+      "T_MeV": 130.0,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "4524806f7eea14c6ece1c2356e485e9e0f552a2a80ac9485299b00ce2ca7cef9"
+    },
+    {
+      "file": "rho_mu_xi_m0p5_T_147.095_oracle_first_order_cascade_ambiguous.png",
+      "xi": "-0.5",
+      "T_MeV": 147.0947265625,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "29e6879de8837e2564bad5dce786131a940ce35dace8f0d078d41f20763a2820"
+    },
+    {
+      "file": "rho_mu_xi_m0p5_T_147.22_first_monotone.png",
+      "xi": "-0.5",
+      "T_MeV": 147.2197265625,
+      "reason": "first_monotone",
+      "sha256": "c50550935d34baaab6b8381c63071e6c8f142db1f5b9e9313915eb3b61e97a52"
+    },
+    {
+      "file": "rho_mu_xi_0p0_T_5_low_temperature.png",
+      "xi": "0.0",
+      "T_MeV": 5.0,
+      "reason": "low_temperature",
+      "sha256": "629fb3d1cec49341df79ae19bbbcc789232693366ccb41ea4ba930078de5d65e"
+    },
+    {
+      "file": "rho_mu_xi_0p0_T_100_first_order.png",
+      "xi": "0.0",
+      "T_MeV": 100.0,
+      "reason": "first_order",
+      "sha256": "db07fca4cdcce571e192e345c483e5f5ad07308e00e8d2add461dacae6cd491c"
+    },
+    {
+      "file": "rho_mu_xi_0p0_T_120_oracle_first_order_cascade_ambiguous.png",
+      "xi": "0.0",
+      "T_MeV": 120.0,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "d665a3bc8f875be3f80cb561fb1d2efaab0954eec2fd31db296f0ad101b4df18"
+    },
+    {
+      "file": "rho_mu_xi_0p0_T_130.962_ambiguous_near_critical.png",
+      "xi": "0.0",
+      "T_MeV": 130.9619140625,
+      "reason": "ambiguous_near_critical",
+      "sha256": "17b048d34c78d46b37a15ee0ddf544a487fbc79339892230ab0a9eda90ee5ca9"
+    },
+    {
+      "file": "rho_mu_xi_0p0_T_131.087_first_monotone.png",
+      "xi": "0.0",
+      "T_MeV": 131.0869140625,
+      "reason": "first_monotone",
+      "sha256": "6f68f98154c1db582b7b51cad22780bf67e235ed13b98c0e595b786d506ef925"
+    },
+    {
+      "file": "rho_mu_xi_0p5_T_5_unsupported_cascade_confirmation.png",
+      "xi": "0.5",
+      "T_MeV": 5.0,
+      "reason": "unsupported_cascade_confirmation",
+      "sha256": "c6627fc5972f15ecb34150fe2f10322e985d58abf5992ccf724fd19065d70ad4"
+    },
+    {
+      "file": "rho_mu_xi_0p5_T_20_ambiguous_near_critical.png",
+      "xi": "0.5",
+      "T_MeV": 20.0,
+      "reason": "ambiguous_near_critical",
+      "sha256": "00944c986848290bb73bfa8f80ce45fb91c3cd1858ec1068f8c86c9ffb1b704e"
+    },
+    {
+      "file": "rho_mu_xi_0p5_T_60_oracle_first_order_cascade_ambiguous.png",
+      "xi": "0.5",
+      "T_MeV": 60.0,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "8599efca1f86f91ebb726b03934c16b25737ca580f3ffc7f0aca435f673210d1"
+    },
+    {
+      "file": "rho_mu_xi_0p5_T_106.96_oracle_first_order_cascade_ambiguous.png",
+      "xi": "0.5",
+      "T_MeV": 106.9599609375,
+      "reason": "oracle_first_order_cascade_ambiguous",
+      "sha256": "0721ddcde5ca69b3429aa5240912ed481c2f5f4188f922f3c0a053d83291682f"
+    },
+    {
+      "file": "rho_mu_xi_0p5_T_107.085_first_monotone.png",
+      "xi": "0.5",
+      "T_MeV": 107.0849609375,
+      "reason": "first_monotone",
+      "sha256": "1c86d4daed52e83a15ea767cc0bafbc3bd7855a994ec6dae59f895175df700cb"
+    }
+  ]
+}
