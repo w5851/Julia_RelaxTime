@@ -6,6 +6,7 @@
 # 3. PhasePipelineResult 结构
 
 using Test
+using JSON3
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 
@@ -71,6 +72,28 @@ end
         report = read(paths["phase_report"], String)
         @test occursin("\"phase_structure\":\"ambiguous_near_critical\"", summary)
         @test occursin("- result_status: ambiguous", report)
+    end
+
+    @testset "nested non-finite diagnostics are emitted as JSON null" begin
+        tmp = mktempdir()
+        result = Models.PhasePipelineResult(
+            diagnostics=Dict{String, Any}(
+                "nested" => (
+                    finite=1.5,
+                    nan=NaN,
+                    inf=Inf,
+                    values=[-Inf, nothing],
+                    status=:ambiguous,
+                ),
+            ),
+        )
+        paths = Models.build_phase_artifacts(result; output_dir=tmp)
+        summary = JSON3.read(read(paths["phase_summary"], String))
+        @test summary.stats.nested.finite == 1.5
+        @test summary.stats.nested.nan === nothing
+        @test summary.stats.nested.inf === nothing
+        @test summary.stats.nested.values[1] === nothing
+        @test String(summary.stats.nested.status) == "ambiguous"
     end
 
     @testset "grid convergence reasons are valid quoted CSV fields" begin
