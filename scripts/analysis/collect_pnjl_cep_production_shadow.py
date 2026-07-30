@@ -156,11 +156,67 @@ def _validate_jobs(jobs: list[tuple[Path, dict[str, Any]]], expected_sha: str) -
     return errors
 
 
-def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -> None:
+def _normalized_cost_row(directory: Path, summary: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Normalize per-job cache counters without rewriting source artifacts.
+
+    Historical runners wrote cache counters from the first anchor only.  The
+    slice table contains all anchor-level counters; fixed-rho telemetry closes
+    the possible one-off probe gap.  The derived row is written only to the
+    aggregate output and the raw job hash remains validated separately.
+    """
+    raw_rows = _rows(directory / "method_costs.csv")
+    raw = dict(raw_rows[0])
+    slice_rows = _rows(directory / "slice_metrics.csv")
+    summed_unique = sum(_float(row.get("unique_solves"), 0.0) for row in slice_rows)
+    summed_requests = sum(_float(row.get("point_requests"), 0.0) for row in slice_rows)
+    summed_cache = sum(_float(row.get("cache_hits"), 0.0) for row in slice_rows)
+    summed_targeted = sum(_float(row.get("targeted_additions"), 0.0) for row in slice_rows)
+    fixedrho = _float(raw.get("fixedrho_requests"), 0.0)
+    retries = _float(raw.get("retry_count"), 0.0)
+    fallbacks = _float(raw.get("fallback_count"), 0.0)
+    unattributed = max(fixedrho - summed_unique, 0.0) if retries == 0.0 and fallbacks == 0.0 else 0.0
+    total_unique = summed_unique + unattributed
+    total_requests = summed_requests + unattributed
+    normalized = dict(raw)
+    normalized.update({
+        "unique_solves": int(round(total_unique)),
+        "requested_point_calls": int(round(total_requests)),
+        "uncached_equivalent_requests": int(round(total_requests)),
+        "cache_hits": int(round(summed_cache)),
+        "targeted_additions": int(round(summed_targeted)),
+        "unattributed_unique_solves": int(round(unattributed)),
+        "unattributed_point_requests": int(round(unattributed)),
+        "aggregation_scope": "all_anchors",
+        "point_request_reconciliation": str(
+            math.isclose(total_requests, total_unique + summed_cache, rel_tol=0.0, abs_tol=1e-9)
+        ).lower(),
+    })
+    corrections = {
+        "xi": summary.get("xi", ""),
+        "method": summary.get("method", ""),
+        "raw_unique_solves": raw.get("unique_solves", ""),
+        "normalized_unique_solves": normalized["unique_solves"],
+        "raw_requested_point_calls": raw.get("requested_point_calls", ""),
+        "normalized_requested_point_calls": normalized["requested_point_calls"],
+        "raw_cache_hits": raw.get("cache_hits", ""),
+        "normalized_cache_hits": normalized["cache_hits"],
+        "raw_targeted_additions": raw.get("targeted_additions", ""),
+        "normalized_targeted_additions": normalized["targeted_additions"],
+        "unattributed_unique_solves": normalized["unattributed_unique_solves"],
+    }
+    return normalized, corrections
+
+
+def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -> list[dict[str, Any]]:
+    corrections: list[dict[str, Any]] = []
     for name in ("curve_points.csv", "slice_metrics.csv", "method_costs.csv", "cep_accuracy.csv"):
         rows: list[dict[str, Any]] = []
         for directory, summary in jobs:
-            for row in _rows(directory / name):
+            source_rows = _rows(directory / name)
+            if name == "method_costs.csv":
+                source_rows = [_normalized_cost_row(directory, summary)[0]]
+                corrections.append(_normalized_cost_row(directory, summary)[1])
+            for row in source_rows:
                 row["xi"] = summary.get("xi", "")
                 row["method"] = summary.get("method", "")
                 row["calculation_sha"] = summary.get("calculation_sha", "")
@@ -202,6 +258,7 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
         }
         for directory, summary in jobs
     ])
+    return corrections
 
 
 def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
@@ -284,7 +341,7 @@ def _gate(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path, contract_er
         by_anchor.setdefault((row.get("xi", ""), row.get("T_MeV", "")), {})[row.get("method", "")] = row.get("result_status", "")
     for key, methods in by_anchor.items():
         if "production_cascade" in methods and "independent_oracle" in methods:
-            if methods["production_cascade"] != "ambiguous_near_critical" and methods["independent_oracle"] != "ambiguous_near_critical" and methods["production_cascade"] != methods["independent_oracle"]:
+            if methods["production_cascade"] != "ambiguous_near_critical" and methods["production_cascade"] != methods["independent_oracle"]:
                 cascade_errors.append(f"classification mismatch at xi={key[0]}, T={key[1]}")
                 if _float(key[1]) < 60.0:
                     cascade_low_temperature_failure = True
@@ -323,6 +380,13 @@ def _gate(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path, contract_er
         oracle_area = _float(oracle.get("area_residual"))
         if math.isfinite(cascade_area) and math.isfinite(oracle_area) and max(cascade_area, oracle_area) > 5e-5:
             cascade_errors.append(f"Maxwell area exceeds 5e-5 at xi={row.get('xi')} T={row.get('T_MeV')}")
+    cascade_coverage_errors = []
+    for xi in sorted(XIS):
+        rows = [row for row in slice_rows if row.get("method") == "production_cascade" and math.isclose(_float(row.get("xi")), xi, rel_tol=0.0, abs_tol=1e-9)]
+        statuses = {row.get("result_status", "") for row in rows}
+        if "confirmed_first_order" not in statuses or "confirmed_monotone" not in statuses:
+            cascade_coverage_errors.append(f"cascade xi={xi} lacks confirmed first-order/monotone two-sided evidence")
+    cascade_errors.extend(cascade_coverage_errors)
     performance_errors, performance = _performance(costs)
     all_errors = contract_errors + oracle_errors + cascade_errors + performance_errors
     if contract_errors:
@@ -331,7 +395,7 @@ def _gate(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path, contract_er
         verdict = "oracle_inconclusive"
     elif performance_errors or cascade_non_low_temperature_failure:
         verdict = "integration_failed"
-    elif cascade_low_temperature_failure:
+    elif cascade_low_temperature_failure or cascade_coverage_errors:
         verdict = "hybrid_required"
     elif not all_errors:
         verdict = "full_cascade_candidate"
@@ -374,11 +438,19 @@ def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any])
     )
 
 
-def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha: str) -> dict[str, Any]:
+def collect(
+    input_dir: Path,
+    output_dir: Path,
+    run_id: str | None,
+    expected_sha: str,
+    *,
+    postprocess_sha: str | None = None,
+    source_run_id: str | None = None,
+) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _find_jobs(input_dir)
     contract_errors = _validate_jobs(jobs, expected_sha)
-    _collect_tables(jobs, output_dir)
+    corrections = _collect_tables(jobs, output_dir)
     actions = _actions(run_id, output_dir)
     gate = _gate(jobs, output_dir, contract_errors)
     _write_docs(output_dir, gate, actions)
@@ -386,7 +458,19 @@ def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha:
     for path in sorted(output_dir.rglob("*")):
         if path.is_file() and path.name != "manifest.json":
             hashes[str(path.relative_to(output_dir)).replace(os.sep, "/")] = hashlib.sha256(path.read_bytes()).hexdigest()
-    manifest = {"schema_version": "cep_cascade_production_shadow_v1", "run_id": run_id or "", "expected_calculation_sha": expected_sha, "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]), "gate": gate, "actions": actions, "file_sha256": hashes, "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
+    manifest = {
+        "schema_version": "cep_cascade_production_shadow_v1",
+        "run_id": run_id or "",
+        "source_run_id": source_run_id or run_id or "",
+        "expected_calculation_sha": expected_sha,
+        "postprocess_sha": postprocess_sha or "",
+        "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
+        "gate": gate,
+        "actions": actions,
+        "aggregation_corrections": corrections,
+        "file_sha256": hashes,
+        "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
     (output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return gate
 
@@ -397,8 +481,17 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--expected-calculation-sha", required=True)
+    parser.add_argument("--postprocess-sha", default=None)
+    parser.add_argument("--source-run-id", default=None)
     args = parser.parse_args()
-    gate = collect(args.input_dir, args.output_dir, args.run_id, args.expected_calculation_sha)
+    gate = collect(
+        args.input_dir,
+        args.output_dir,
+        args.run_id,
+        args.expected_calculation_sha,
+        postprocess_sha=args.postprocess_sha,
+        source_run_id=args.source_run_id,
+    )
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["verdict"] == "workflow_failure" else 2 if gate["verdict"] != "full_cascade_candidate" else 0
 

@@ -118,6 +118,50 @@ function _write_csv(path, rows)
     isempty(rows) ? write(path, "\n") : CSV.write(path, rows)
 end
 
+function _aggregate_cache(results, slice_rows, snapshot)
+    """Aggregate request-scoped cache counters across every anchor in a job.
+
+    Each anchor owns a separate point session, so reading the first result's
+    diagnostic cache under-counts all later anchors.  The telemetry snapshot
+    remains authoritative for solver work; cache counters are summed from all
+    anchor diagnostics and reconciled against the fixed-rho request count.
+    """
+    cache_dicts = Dict{String, Any}[]
+    for result in results
+        cache = get(result.diagnostics, "rho_support_cache", nothing)
+        cache isa AbstractDict || continue
+        push!(cache_dicts, Dict{String, Any}(String(key) => value for (key, value) in pairs(cache)))
+    end
+    fallback = Dict(
+        "unique_solves" => sum(Int(row.unique_solves) for row in slice_rows),
+        "point_requests" => sum(Int(row.point_requests) for row in slice_rows),
+        "cache_hits" => sum(Int(row.cache_hits) for row in slice_rows),
+        "targeted_additions" => sum(Int(row.targeted_additions) for row in slice_rows),
+        "failed_points" => sum(Int(row.solver_failure_count) for row in slice_rows),
+    )
+    aggregate = Dict{String, Any}()
+    for field in ("unique_solves", "point_requests", "cache_hits", "targeted_additions", "failed_points")
+        aggregate[field] = isempty(cache_dicts) ? fallback[field] :
+            sum(Int(get(cache, field, 0)) for cache in cache_dicts)
+    end
+
+    # A production pipeline may perform a one-off probe outside its sweep
+    # record.  When there are no retries/fallbacks, fixed-rho telemetry gives
+    # an exact reconciliation for that otherwise unattributed unique point.
+    unattributed = 0
+    if snapshot.scan_retries == 0 && snapshot.root_fallbacks == 0
+        unattributed = max(Int(snapshot.fixedrho_requests) - Int(aggregate["unique_solves"]), 0)
+        aggregate["unique_solves"] += unattributed
+        aggregate["point_requests"] += unattributed
+    end
+    aggregate["unattributed_unique_solves"] = unattributed
+    aggregate["unattributed_point_requests"] = unattributed
+    aggregate["aggregation_scope"] = "all_anchors"
+    aggregate["point_request_reconciliation"] =
+        Int(aggregate["point_requests"]) == Int(aggregate["unique_solves"]) + Int(aggregate["cache_hits"])
+    return aggregate
+end
+
 function _run_anchor(cfg, T::Float64, anchor_dir::String, steps, telemetry)
     mkpath(anchor_dir)
     memoize_uniform = cfg.method !== :production_cascade
@@ -260,19 +304,18 @@ function _write_job(cfg)
 
     snapshot = Models.solver_work_snapshot(telemetry)
     elapsed = (time_ns() - started) / 1e9
-    cache = get(first(results).diagnostics, "rho_support_cache", nothing)
-    cache_dict = cache === nothing ? Dict{String, Any}() : cache
+    cache_dict = _aggregate_cache(results, slice_rows, snapshot)
     costs = [(
         xi=cfg.xi,
         method=String(cfg.method),
         calculation_sha=cfg.calculation_sha,
         equilibrium_requests=snapshot.equilibrium_requests,
         fixedrho_requests=snapshot.fixedrho_requests,
-        unique_solves=Int(get(cache_dict, "unique_solves", sum(row.unique_solves for row in slice_rows))),
-        requested_point_calls=Int(get(cache_dict, "point_requests", sum(row.point_requests for row in slice_rows))),
-        uncached_equivalent_requests=Int(get(cache_dict, "point_requests", sum(row.point_requests for row in slice_rows))),
-        cache_hits=Int(get(cache_dict, "cache_hits", sum(row.cache_hits for row in slice_rows))),
-        targeted_additions=Int(get(cache_dict, "targeted_additions", sum(row.targeted_additions for row in slice_rows))),
+        unique_solves=Int(cache_dict["unique_solves"]),
+        requested_point_calls=Int(cache_dict["point_requests"]),
+        uncached_equivalent_requests=Int(cache_dict["point_requests"]),
+        cache_hits=Int(cache_dict["cache_hits"]),
+        targeted_additions=Int(cache_dict["targeted_additions"]),
         residual_calls=snapshot.nlsolve_f_calls + snapshot.postprocess_residual_calls,
         jacobian_calls=snapshot.nlsolve_g_calls,
         newton_iterations=snapshot.newton_iterations,

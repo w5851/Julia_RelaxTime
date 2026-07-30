@@ -3,9 +3,25 @@ name: PNJL CEP Cascade Production Shadow
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "full numerical shadow or aggregate-only replay"
+        required: false
+        default: "full"
+        type: choice
+        options: [full, aggregate_replay]
       calculation_ref:
         description: "Immutable 40-character calculation SHA"
         required: true
+        type: string
+      source_run_id:
+        description: "Completed numerical source run id for aggregate replay"
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        description: "Calculation SHA recorded by the source run for replay"
+        required: false
+        default: ""
         type: string
       tag:
         description: "Diagnostic artifact tag"
@@ -19,6 +35,7 @@ permissions:
 
 jobs:
   shadow:
+    if: ${{ inputs.mode != 'aggregate_replay' }}
     name: "shadow xi=${{ matrix.xi }} method=${{ matrix.method }}"
     runs-on: ubuntu-latest
     timeout-minutes: 180
@@ -90,7 +107,7 @@ jobs:
 
   aggregate:
     name: aggregate production shadow evidence
-    if: ${{ always() }}
+    if: ${{ always() && inputs.mode != 'aggregate_replay' }}
     needs: [shadow]
     runs-on: ubuntu-latest
     steps:
@@ -112,6 +129,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install plotting dependency
+        run: python -m pip install matplotlib
+
       - name: Collect and gate shadow evidence
         shell: bash
         env:
@@ -124,7 +144,9 @@ jobs:
             --input-dir job-artifacts \
             --output-dir aggregate \
             --run-id "$RUN_ID" \
-            --expected-calculation-sha "$CALCULATION_REF"
+            --expected-calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "${GITHUB_SHA}" \
+            --source-run-id "$RUN_ID"
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             exit "$status"
@@ -139,6 +161,103 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cep-cascade-production-shadow-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate_replay:
+    name: replay production shadow aggregate evidence
+    if: ${{ inputs.mode == 'aggregate_replay' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs
+        shell: bash
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ "$SOURCE_CALCULATION_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ "$CALCULATION_REF" = "$SOURCE_CALCULATION_SHA" ]] || exit 1
+          [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+
+      - name: Checkout postprocess code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify postprocess checkout SHA
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+
+      - name: Verify source run provenance
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,status,conclusion)"
+          test "$(echo "$payload" | jq -r .status)" = completed
+          case "$(echo "$payload" | jq -r .conclusion)" in
+            success|failure) ;;
+            *) exit 1 ;;
+          esac
+          test "$(echo "$payload" | jq -r .headSha)" = "$SOURCE_CALCULATION_SHA"
+          {
+            echo "source_run_id=$SOURCE_RUN_ID"
+            echo "calculation_sha=$SOURCE_CALCULATION_SHA"
+            echo "postprocess_sha=$GITHUB_SHA"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Download source numerical artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cep-cascade-production-shadow-*-xi-*
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+          path: source-artifacts
+          merge-multiple: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install plotting dependency
+        run: python -m pip install matplotlib
+
+      - name: Replay collector and plots
+        shell: bash
+        env:
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          python scripts/analysis/collect_pnjl_cep_production_shadow.py \
+            --input-dir source-artifacts \
+            --output-dir aggregate \
+            --run-id "$SOURCE_RUN_ID" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --postprocess-sha "$GITHUB_SHA" \
+            --expected-calculation-sha "$SOURCE_CALCULATION_SHA"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+            exit "$status"
+          fi
+          python scripts/analysis/plot_pnjl_cep_production_shadow.py \
+            --input-dir aggregate \
+            --output-dir aggregate/figures
+          echo "collector_verdict_status=$status" >> "$GITHUB_STEP_SUMMARY"
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload replay aggregate evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cep-cascade-production-shadow-${{ inputs.tag }}-aggregate-replay
           path: aggregate
           if-no-files-found: error
           retention-days: 90
