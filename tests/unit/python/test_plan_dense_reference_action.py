@@ -104,6 +104,32 @@ def test_accepts_full_calculation_sha():
     assert plan["initial_shard_count"] == 41
 
 
+def test_hybrid_policy_is_planned_with_four_rho_levels():
+    module = load_module()
+    plan = module.build_action_plan(
+        full_reference_inputs(
+            advanced_config_json=json.dumps({
+                "rho_refinement_policy": "rho_support_hybrid",
+                "rho_refine_levels": 4,
+                "rho_support_fine_step": 0.025,
+                "rho_support_targeted_cap": 12,
+            })
+        )
+    )
+    assert "rho_support_hybrid" in plan["common_args"]
+    assert plan["common_args"][plan["common_args"].index("--rho-refine-levels") + 1] == "4"
+
+
+def test_hybrid_policy_rejects_wrong_refinement_level():
+    module = load_module()
+    with pytest.raises(ValueError, match="rho_support_hybrid requires rho_refine_levels=4"):
+        module.build_action_plan(
+            full_reference_inputs(
+                advanced_config_json='{"rho_refinement_policy":"rho_support_hybrid","rho_refine_levels":3}'
+            )
+        )
+
+
 def test_workflow_uses_reusable_one_xi_and_assessment_jobs():
     workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
     assess_workflow_text = ASSESS_WORKFLOW_PATH.read_text(encoding="utf-8")

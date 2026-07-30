@@ -96,7 +96,14 @@ def _common_cli_args(
     advanced_args: list[str],
     *,
     adaptive_xi: bool,
+    advanced: dict[str, Any] | None = None,
 ) -> list[str]:
+    advanced = advanced or {}
+    rho_policy = str(advanced.get("rho_refinement_policy", "uniform_nested"))
+    rho_levels = int(advanced.get("rho_refine_levels", 2))
+    rho_fine_step = _numeric_text(advanced.get("rho_support_fine_step", 0.025))
+    rho_target_count = _numeric_text(advanced.get("rho_support_target_point_count", 9))
+    rho_target_cap = _numeric_text(advanced.get("rho_support_targeted_cap", 12))
     args = [
         "--T-min", _numeric_text(_value(payload, "T_min", "60")),
         "--T-max", _numeric_text(_value(payload, "T_max", "240")),
@@ -111,11 +118,11 @@ def _common_cli_args(
         "--rho-position-tol", "0.05",
         "--rho-density-tol", "0.005",
         "--rho-maxwell-area-tol", "1e-4",
-        "--rho-refinement-policy", "uniform_nested",
-        "--rho-refine-levels", "2",
-        "--rho-support-fine-step", "0.025",
-        "--rho-support-target-point-count", "9",
-        "--rho-support-targeted-cap", "12",
+        "--rho-refinement-policy", rho_policy,
+        "--rho-refine-levels", str(rho_levels),
+        "--rho-support-fine-step", rho_fine_step,
+        "--rho-support-target-point-count", rho_target_count,
+        "--rho-support-targeted-cap", rho_target_cap,
         "--cep-tol", "0.1",
         "--p-num", _numeric_text(_value(payload, "p_num", "24")),
         "--t-num", _numeric_text(_value(payload, "t_num", "8")),
@@ -166,6 +173,13 @@ def build_action_plan(payload: dict[str, Any]) -> dict[str, Any]:
             f"{MAX_ACTION_XI_REFINE_LEVEL} levels, got {xi_refine_levels}"
         )
 
+    rho_policy = str(advanced.get("rho_refinement_policy", "uniform_nested"))
+    rho_levels = int(advanced.get("rho_refine_levels", 2))
+    if rho_policy == "rho_support_cascade" and rho_levels != 1:
+        fail("rho_support_cascade requires rho_refine_levels=1")
+    if rho_policy == "rho_support_hybrid" and rho_levels != 4:
+        fail("rho_support_hybrid requires rho_refine_levels=4")
+
     intervals = list(zip(anchors, anchors[1:]))
     initial_entries = [
         {"stage": "anchor", "shard_id": f"a{index:03d}", "xi": _decimal_text(value)}
@@ -180,7 +194,7 @@ def build_action_plan(payload: dict[str, Any]) -> dict[str, Any]:
 
     advanced_raw = str(_value(payload, "advanced_config_json", "{}"))
     advanced_args = resolve_action_config(advanced_raw)
-    common_args = _common_cli_args(payload, advanced_args, adaptive_xi=adaptive_xi)
+    common_args = _common_cli_args(payload, advanced_args, adaptive_xi=adaptive_xi, advanced=advanced)
 
     def effective(name: str, default: Any) -> str:
         return _numeric_text(advanced.get(name, default))

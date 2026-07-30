@@ -110,6 +110,9 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   shadow/诊断请求：必须启用 `rho_geometry_convergence`、使用均匀嵌套 coarse rho 网格、
   `rho_refine_levels=1`，并通过 `rho_support_fine_step` 与
   `rho_support_targeted_cap` 记录两层 support/补点合同；它不会自动覆盖旧 reference。
+- `rho_support_hybrid` 是更高成本的显式 shadow/候选策略，要求 `rho_refine_levels=4`。
+  它按 cascade → memoized dense → 有限 support 内局部 oracle 的顺序升级，Stage-A
+  targeted 总上限仍为 `12`；没有可靠 support 时保持 ambiguous，不启动全域 oracle。
 
 最小产物结构（输出目录）：
 
