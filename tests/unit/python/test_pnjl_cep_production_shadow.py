@@ -82,6 +82,25 @@ def test_shadow_collector_accepts_complete_matrix(tmp_path):
     assert (tmp_path / "aggregate" / "geometry_accuracy.csv").is_file()
 
 
+def test_shadow_collector_aggregates_cache_and_targeted_counters(tmp_path):
+    module = load_module(COLLECTOR, "collector_aggregate_counters")
+    for xi in sorted(module.XIS):
+        write_job(tmp_path, xi, "production_cascade", cost=90)
+        write_job(tmp_path, xi, "memoized_dense", cost=100)
+        write_job(tmp_path, xi, "independent_oracle", cost=110)
+    module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40, postprocess_sha="b" * 40)
+    rows = list(csv.DictReader((tmp_path / "aggregate" / "method_costs.csv").open(encoding="utf-8")))
+    cascade = next(row for row in rows if row["method"] == "production_cascade" and row["xi"] == "-0.5")
+    assert cascade["unique_solves"] == "90"
+    assert cascade["targeted_additions"] == "72"
+    assert cascade["aggregation_scope"] == "all_anchors"
+    assert cascade["point_request_reconciliation"] == "true"
+    manifest = json.loads((tmp_path / "aggregate" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["postprocess_sha"] == "b" * 40
+    assert manifest["source_run_id"] == ""
+    assert manifest["aggregation_corrections"]
+
+
 def test_shadow_collector_rejects_duplicate_curve_key(tmp_path):
     module = load_module(COLLECTOR, "collector_duplicate")
     write_job(tmp_path, -0.5, "production_cascade")
@@ -116,10 +135,35 @@ def test_shadow_collector_marks_low_temperature_cascade_failure_hybrid(tmp_path)
     assert gate["verdict"] == "hybrid_required"
 
 
+def test_shadow_collector_rejects_cascade_confirmation_on_oracle_ambiguous(tmp_path):
+    module = load_module(COLLECTOR, "collector_unsupported_confirmation")
+    for xi in sorted(module.XIS):
+        write_job(tmp_path, xi, "production_cascade", cost=90)
+        write_job(tmp_path, xi, "memoized_dense", cost=100)
+        write_job(tmp_path, xi, "independent_oracle", cost=110)
+    oracle = tmp_path / "job-independent_oracle-0.5" / "slice_metrics.csv"
+    text = oracle.read_text(encoding="utf-8").replace(
+        "0.5,independent_oracle,5.0,valid,valid,ok,ok,confirmed_first_order,true",
+        "0.5,independent_oracle,5.0,valid,valid,ok,ok,ambiguous_near_critical,true",
+    )
+    oracle.write_text(text, encoding="utf-8")
+    summary_path = oracle.parent / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(oracle.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40)
+    assert gate["verdict"] == "hybrid_required"
+    assert any("classification mismatch" in error for error in gate["cascade_errors"])
+
+
 def test_shadow_workflow_has_immutable_ref_and_nine_jobs():
     module = load_module(COLLECTOR, "collector_workflow_contract")
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "calculation_ref" in text
     assert "actions: read" in text
     assert "timeout-minutes: 180" in text
+    assert "aggregate_replay" in text
+    assert "source_run_id" in text
+    assert "source_calculation_sha" in text
+    assert "pip install matplotlib" in text
     assert len(module.XIS) * len(module.METHODS) == 9

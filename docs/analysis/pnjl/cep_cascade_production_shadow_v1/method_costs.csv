@@ -1,0 +1,10 @@
+xi,method,calculation_sha,equilibrium_requests,fixedrho_requests,unique_solves,requested_point_calls,uncached_equivalent_requests,cache_hits,targeted_additions,residual_calls,jacobian_calls,newton_iterations,trust_region_iterations,nonconverged_attempts,fallback_count,governed_rescue_count,retry_count,exception_count,runner_seconds,unattributed_unique_solves,unattributed_point_requests,aggregation_scope,point_request_reconciliation
+-0.5,independent_oracle,d1e386deb950169b6d5db9cc3dd0617845ee60e8,10248,10248,10248,15376,15376,5128,0,83690,63170,0,42712,0,0,0,0,0,149.486838772,0,0,all_anchors,true
+0.0,independent_oracle,d1e386deb950169b6d5db9cc3dd0617845ee60e8,10248,10248,10248,15376,15376,5128,0,83614,63070,0,42658,0,0,0,0,0,158.969720369,0,0,all_anchors,true
+0.5,independent_oracle,d1e386deb950169b6d5db9cc3dd0617845ee60e8,10248,10248,10248,15376,15376,5128,0,83684,63118,0,42726,0,0,0,0,0,160.91865435,0,0,all_anchors,true
+-0.5,memoized_dense,d1e386deb950169b6d5db9cc3dd0617845ee60e8,5128,5128,5128,7696,7696,2568,0,43832,33560,0,23332,0,0,0,0,0,57.701724163,0,0,all_anchors,true
+0.0,memoized_dense,d1e386deb950169b6d5db9cc3dd0617845ee60e8,5128,5128,5128,7696,7696,2568,0,43520,33228,0,23034,0,0,0,0,0,86.438877983,0,0,all_anchors,true
+0.5,memoized_dense,d1e386deb950169b6d5db9cc3dd0617845ee60e8,5128,5128,5128,7696,7696,2568,0,43308,33008,0,22814,0,0,0,0,0,87.986724043,0,0,all_anchors,true
+-0.5,production_cascade,d1e386deb950169b6d5db9cc3dd0617845ee60e8,1307,1307,1307,1957,1957,650,20,13384,10664,0,8174,4,0,0,0,0,46.496933328,1,1,all_anchors,true
+0.0,production_cascade,d1e386deb950169b6d5db9cc3dd0617845ee60e8,1302,1302,1302,1952,1952,650,16,13028,10412,0,7836,0,0,0,0,0,45.903560039,0,0,all_anchors,true
+0.5,production_cascade,d1e386deb950169b6d5db9cc3dd0617845ee60e8,1318,1318,1318,1972,1972,654,36,13180,10506,0,7926,0,0,0,0,0,46.956099864,0,0,all_anchors,true

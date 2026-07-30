@@ -1,0 +1,4 @@
+claim_id,claim,status,boundary
+oracle,independent oracle anchors are stable,pass,diagnostic only
+cascade,production cascade classifications agree on non-ambiguous anchors,hybrid_required,author physical review required
+performance,cascade solver work is no higher than memoized dense,pass,runner noise allowance applies

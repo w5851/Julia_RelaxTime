@@ -1,0 +1,242 @@
+{
+  "actions": {
+    "conclusion": "success",
+    "critical_path_seconds": 608.0,
+    "headSha": "d1e386deb950169b6d5db9cc3dd0617845ee60e8",
+    "job_count": 10,
+    "raw_total_seconds": 4789.0,
+    "run_id": "30527097410",
+    "runner_minutes": 87,
+    "source": "gh run view",
+    "status": "completed",
+    "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/30527097410"
+  },
+  "aggregation_corrections": [
+    {
+      "method": "independent_oracle",
+      "normalized_cache_hits": 5128,
+      "normalized_requested_point_calls": 15376,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 10248,
+      "raw_cache_hits": "641",
+      "raw_requested_point_calls": "1922",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "1281",
+      "unattributed_unique_solves": 0,
+      "xi": -0.5
+    },
+    {
+      "method": "independent_oracle",
+      "normalized_cache_hits": 5128,
+      "normalized_requested_point_calls": 15376,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 10248,
+      "raw_cache_hits": "641",
+      "raw_requested_point_calls": "1922",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "1281",
+      "unattributed_unique_solves": 0,
+      "xi": 0.0
+    },
+    {
+      "method": "independent_oracle",
+      "normalized_cache_hits": 5128,
+      "normalized_requested_point_calls": 15376,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 10248,
+      "raw_cache_hits": "641",
+      "raw_requested_point_calls": "1922",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "1281",
+      "unattributed_unique_solves": 0,
+      "xi": 0.5
+    },
+    {
+      "method": "memoized_dense",
+      "normalized_cache_hits": 2568,
+      "normalized_requested_point_calls": 7696,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 5128,
+      "raw_cache_hits": "321",
+      "raw_requested_point_calls": "962",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "641",
+      "unattributed_unique_solves": 0,
+      "xi": -0.5
+    },
+    {
+      "method": "memoized_dense",
+      "normalized_cache_hits": 2568,
+      "normalized_requested_point_calls": 7696,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 5128,
+      "raw_cache_hits": "321",
+      "raw_requested_point_calls": "962",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "641",
+      "unattributed_unique_solves": 0,
+      "xi": 0.0
+    },
+    {
+      "method": "memoized_dense",
+      "normalized_cache_hits": 2568,
+      "normalized_requested_point_calls": 7696,
+      "normalized_targeted_additions": 0,
+      "normalized_unique_solves": 5128,
+      "raw_cache_hits": "321",
+      "raw_requested_point_calls": "962",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "641",
+      "unattributed_unique_solves": 0,
+      "xi": 0.5
+    },
+    {
+      "method": "production_cascade",
+      "normalized_cache_hits": 650,
+      "normalized_requested_point_calls": 1957,
+      "normalized_targeted_additions": 20,
+      "normalized_unique_solves": 1307,
+      "raw_cache_hits": "81",
+      "raw_requested_point_calls": "242",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "161",
+      "unattributed_unique_solves": 1,
+      "xi": -0.5
+    },
+    {
+      "method": "production_cascade",
+      "normalized_cache_hits": 650,
+      "normalized_requested_point_calls": 1952,
+      "normalized_targeted_additions": 16,
+      "normalized_unique_solves": 1302,
+      "raw_cache_hits": "81",
+      "raw_requested_point_calls": "242",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "161",
+      "unattributed_unique_solves": 0,
+      "xi": 0.0
+    },
+    {
+      "method": "production_cascade",
+      "normalized_cache_hits": 654,
+      "normalized_requested_point_calls": 1972,
+      "normalized_targeted_additions": 36,
+      "normalized_unique_solves": 1318,
+      "raw_cache_hits": "81",
+      "raw_requested_point_calls": "242",
+      "raw_targeted_additions": "0",
+      "raw_unique_solves": "161",
+      "unattributed_unique_solves": 0,
+      "xi": 0.5
+    }
+  ],
+  "expected_calculation_sha": "d1e386deb950169b6d5db9cc3dd0617845ee60e8",
+  "file_sha256": {
+    "AUDIT.md": "53522e8f051cf9588d3c6b8ff3f988822c0ea9f5bbd5bdc1fe55411ca128b6e8",
+    "README.md": "da263dbd18410c745e5f79035596382b2faba13f8b335d41b31835cef650a13c",
+    "actions_costs.csv": "4e4fa064cac03f7faa098edece9c3434dba29b5d7f7b5018ca7b252c615760c5",
+    "cep_accuracy.csv": "ad0a69637097d143acf45a57a71bd816eacb8cabee02e928aa160b378a206af9",
+    "claim_ledger.csv": "ba5fab13da9f4e0c1bc5d318a5c0d3fcb68332702744cceabcceaaacb94eee4b",
+    "curve_index.csv": "b435b3eed1dac62e678babdee270078fd1fa6e9e4cd6812f959b384654731f8a",
+    "curve_points.csv": "a07eeed34c09d4874a3e42f0ef49dc974bd7a57c457fbce006d5f59050c22751",
+    "geometry_accuracy.csv": "ee75388d47c2cce4eb87c6dfc642fbdb03617e5bf651b558285883ef4ffc4c78",
+    "method_costs.csv": "5e16bab255c1fe8264bde09137ed7ef457976382071e5745563d4abb2cff52f7",
+    "figures/plot_manifest.json": "1a2cc090b3c1a9346424e14d6946eab53d79e5c1c7e8af580cea46989a2e9cf3",
+    "slice_metrics.csv": "4c29c846d598544c96a217f46becb181191d4f341bf6fa527b2d1038403525e1"
+  },
+  "gate": {
+    "automatic_gate_is_not_promotion": true,
+    "cascade_errors": [
+      "classification mismatch at xi=0.5, T=5.0",
+      "cascade xi=-0.5 lacks confirmed first-order/monotone two-sided evidence"
+    ],
+    "cascade_low_temperature_failure": true,
+    "cascade_non_low_temperature_failure": false,
+    "oracle_errors": [],
+    "performance": {
+      "cascade_fallback_retry_rate": 0.0,
+      "dense_fallback_retry_rate": 0.0,
+      "grouped": {
+        "independent_oracle": {
+          "equilibrium_requests": 30744.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 30744.0,
+          "jacobian_calls": 189358.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 250988.0,
+          "retry_count": 0.0,
+          "runner_seconds": 469.37521349099995,
+          "unique_solves": 30744.0
+        },
+        "memoized_dense": {
+          "equilibrium_requests": 15384.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 15384.0,
+          "jacobian_calls": 99796.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 130660.0,
+          "retry_count": 0.0,
+          "runner_seconds": 232.12732618899997,
+          "unique_solves": 15384.0
+        },
+        "production_cascade": {
+          "equilibrium_requests": 3927.0,
+          "fallback_count": 0.0,
+          "fixedrho_requests": 3927.0,
+          "jacobian_calls": 31582.0,
+          "newton_iterations": 0.0,
+          "residual_calls": 39592.0,
+          "retry_count": 0.0,
+          "runner_seconds": 139.356593231,
+          "unique_solves": 3927.0
+        }
+      }
+    },
+    "performance_errors": [],
+    "verdict": "hybrid_required",
+    "workflow_contract_errors": []
+  },
+  "generated_at_utc": "2026-07-30T11:27:10.188653Z",
+  "job_keys": [
+    [
+      -0.5,
+      "independent_oracle"
+    ],
+    [
+      -0.5,
+      "memoized_dense"
+    ],
+    [
+      -0.5,
+      "production_cascade"
+    ],
+    [
+      0.0,
+      "independent_oracle"
+    ],
+    [
+      0.0,
+      "memoized_dense"
+    ],
+    [
+      0.0,
+      "production_cascade"
+    ],
+    [
+      0.5,
+      "independent_oracle"
+    ],
+    [
+      0.5,
+      "memoized_dense"
+    ],
+    [
+      0.5,
+      "production_cascade"
+    ]
+  ],
+  "postprocess_sha": "d6ffa6b172d022157bea1ebb5118d5c500528dfc",
+  "run_id": "30527097410",
+  "schema_version": "cep_cascade_production_shadow_v1",
+  "source_run_id": "30527097410"
+}

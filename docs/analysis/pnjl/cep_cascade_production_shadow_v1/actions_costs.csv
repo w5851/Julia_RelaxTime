@@ -1,0 +1,11 @@
+job_name,job_id,status,conclusion,elapsed_seconds,runner_minutes_rounded
+shadow xi=0.5 method=production_cascade,90820469691,completed,success,495.0,9
+shadow xi=0.0 method=production_cascade,90820469709,completed,success,493.0,9
+shadow xi=-0.5 method=independent_oracle,90820469717,completed,success,604.0,11
+shadow xi=-0.5 method=memoized_dense,90820469747,completed,success,380.0,7
+shadow xi=-0.5 method=production_cascade,90820469764,completed,success,510.0,9
+shadow xi=0.0 method=memoized_dense,90820469769,completed,success,543.0,10
+shadow xi=0.5 method=memoized_dense,90820469802,completed,success,538.0,9
+shadow xi=0.0 method=independent_oracle,90820469853,completed,success,608.0,11
+shadow xi=0.5 method=independent_oracle,90820469921,completed,success,602.0,11
+aggregate production shadow evidence,90822587197,completed,success,16.0,1
