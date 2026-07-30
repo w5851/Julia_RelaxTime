@@ -29,10 +29,12 @@ module TrhoScan
 
 using Printf
 using StaticArrays
+using Statistics
 
 # 导入新架构模块
 using Main.Constants_PNJL: ħc_MeV_fm
 using ..Models: FixedRho, FixedAsymmetricRho, ConstraintMode, SolverResult
+using ..Models: SolverWorkTelemetry
 using ..Models: build_seed_pool, solve_weighted_block_fallback
 using ..Models: coerce_solver_result, create_model, build_problem_spec, solve_constraint
 using ..Models: model_rho
@@ -236,6 +238,7 @@ function run_trho_scan(;
     thermo_quadrature_rtol::Float64=1e-8,
     thermo_quadrature_atol::Float64=1e-10,
     thermo_quadrature_maxevals::Int=10^7,
+    work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing,
     nlsolve_kwargs...
 )
     _validate_trho_scan_inputs(T_values, rho_values, xi_values, seed_policy, constraint_mode, solver_backend, model_kind)
@@ -261,6 +264,7 @@ function run_trho_scan(;
         thermo_quadrature_rtol=thermo_quadrature_rtol,
         thermo_quadrature_atol=thermo_quadrature_atol,
         thermo_quadrature_maxevals=thermo_quadrature_maxevals,
+        work_telemetry=work_telemetry,
         nlsolve_kwargs...,
     )
 
@@ -941,5 +945,170 @@ const _clean_message = ScanCommon.clean_message
 const _quote = ScanCommon.quote_csv
 const _join_messages = ScanCommon.join_messages
 const _format_candidate_failure = ScanCommon.format_candidate_failure
+
+# -----------------------------------------------------------------------------
+# Request-scoped point session for opt-in phase refinement
+# -----------------------------------------------------------------------------
+
+"""A request-scoped cache used by the production rho-support shadow path.
+
+The ordinary `run_trho_scan` path intentionally does not use this type.  It
+exists so a refinement pass can reuse exact `(T, xi, rho)` points without
+changing the historical scan ordering or resume contract.
+"""
+mutable struct RhoPointSession
+    model_kind::Symbol
+    reverse_rho::Bool
+    seed_policy::Symbol
+    solver_backend::Symbol
+    p_num::Int
+    t_num::Int
+    iterations::Int
+    thermo_quadrature_policy::Symbol
+    thermo_quadrature_rtol::Float64
+    thermo_quadrature_atol::Float64
+    thermo_quadrature_maxevals::Int
+    telemetry::Union{Nothing, SolverWorkTelemetry}
+    cache::Dict{Tuple{Float64, Float64, Float64}, NamedTuple}
+    point_requests::Int
+    cache_hits::Int
+    unique_solves::Int
+    targeted_additions::Int
+    failed_points::Int
+end
+
+function new_rho_point_session(; model_kind::Symbol=:PNJL,
+        reverse_rho::Bool=true,
+        seed_policy::Symbol=:hybrid_continuity,
+        solver_backend::Symbol=:models,
+        p_num::Int=24,
+        t_num::Int=8,
+        iterations::Int=80,
+        thermo_quadrature_policy::Symbol=:tensor_gauss,
+        thermo_quadrature_rtol::Float64=1e-8,
+        thermo_quadrature_atol::Float64=1e-10,
+        thermo_quadrature_maxevals::Int=10^7,
+        telemetry::Union{Nothing, SolverWorkTelemetry}=nothing)
+    model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
+        throw(ArgumentError("rho point session model_kind is unsupported: $(model_kind)"))
+    seed_policy in (:hybrid_continuity, :candidates) ||
+        throw(ArgumentError("rho point session seed_policy must be :hybrid_continuity or :candidates"))
+    solver_backend in (:models, :auto) ||
+        throw(ArgumentError("rho point session solver_backend must be :models or :auto"))
+    p_num > 0 || throw(ArgumentError("rho point session p_num must be positive"))
+    t_num > 0 || throw(ArgumentError("rho point session t_num must be positive"))
+    iterations > 0 || throw(ArgumentError("rho point session iterations must be positive"))
+    all(isfinite, (thermo_quadrature_rtol, thermo_quadrature_atol)) ||
+        throw(ArgumentError("rho point session quadrature tolerances must be finite"))
+    thermo_quadrature_rtol > 0 && thermo_quadrature_atol >= 0 ||
+        throw(ArgumentError("rho point session quadrature tolerances are invalid"))
+    thermo_quadrature_maxevals > 0 || throw(ArgumentError("rho point session maxevals must be positive"))
+    return RhoPointSession(
+        model_kind, reverse_rho, seed_policy, solver_backend,
+        p_num, t_num, iterations, thermo_quadrature_policy, thermo_quadrature_rtol,
+        thermo_quadrature_atol, thermo_quadrature_maxevals, telemetry,
+        Dict{Tuple{Float64, Float64, Float64}, NamedTuple}(), 0, 0, 0, 0, 0,
+    )
+end
+
+function _session_default_seed_pool(rho::Float64)
+    defaults = Vector{Vector{Float64}}()
+    primary = _select_seed_for_rho(rho)
+    push!(defaults, copy(primary))
+    rho >= 0.5 && push!(defaults, copy(HADRON_SEED_8))
+    rho < 2.0 && push!(defaults, copy(HIGH_DENSITY_SEED_8))
+    return defaults
+end
+
+function _session_candidates(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
+    cached = NamedTuple[]
+    for ((cached_T, cached_xi, cached_rho), row) in session.cache
+        cached_T == T && cached_xi == xi && row.converged || continue
+        row.solution === nothing && continue
+        push!(cached, (distance=abs(cached_rho - rho), rho=cached_rho, solution=row.solution))
+    end
+    sort!(cached; by=entry -> (entry.distance, session.reverse_rho ? -entry.rho : entry.rho))
+    defaults = _session_default_seed_pool(rho)
+    primary = isempty(cached) ? first(defaults) : Float64.(first(cached).solution)
+    if isempty(cached)
+        defaults = defaults[2:end]
+    else
+        defaults = [seed for seed in defaults if seed != primary]
+    end
+    pool = build_seed_pool(FixedRho(rho);
+        primary_seed=primary,
+        default_seed_pool=defaults,
+        seed_extend=(seed, _) -> Float64.(seed),
+    )
+    return [(label=_seed_pool_source_to_label(entry.source, index), state=entry.seed)
+        for (index, entry) in enumerate(pool)]
+end
+
+function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targeted::Bool=false)
+    T_value = Float64(T)
+    xi_value = Float64(xi)
+    rho_value = Float64(rho)
+    all(isfinite, (T_value, xi_value, rho_value)) ||
+        throw(ArgumentError("rho point session coordinates must be finite"))
+    key = (T_value, xi_value, rho_value)
+    session.point_requests += 1
+    if haskey(session.cache, key)
+        session.cache_hits += 1
+        return session.cache[key]
+    end
+
+    candidates = _session_candidates(session, T_value, xi_value, rho_value)
+    solver_kwargs = (
+        thermo_quadrature_policy=session.thermo_quadrature_policy,
+        thermo_quadrature_rtol=session.thermo_quadrature_rtol,
+        thermo_quadrature_atol=session.thermo_quadrature_atol,
+        thermo_quadrature_maxevals=session.thermo_quadrature_maxevals,
+        iterations=session.iterations,
+        work_telemetry=session.telemetry,
+    )
+    result, message = _attempt_with_candidates(
+        T_value / ħc_MeV_fm, rho_value, xi_value, candidates;
+        constraint_mode=:fixed_rho,
+        solver_backend=session.solver_backend,
+        auto_pnjl_backend=:models,
+        semantic_mode=:ground_state,
+        model_kind=session.model_kind,
+        p_num=session.p_num,
+        t_num=session.t_num,
+        solver_kwargs...,
+    )
+    converged = result !== nothing && _is_success(result)
+    finite = converged && all(isfinite, result.solution) && all(isfinite, result.mu_vec) &&
+        isfinite(result.pressure) && isfinite(result.residual_norm)
+    row = (
+        T_MeV=T_value,
+        xi=xi_value,
+        rho=rho_value,
+        result=result,
+        message=String(message),
+        converged=Bool(converged && finite),
+        finite=Bool(finite),
+        solution=finite ? Float64.(result.solution) : nothing,
+        muq_MeV=finite ? ħc_MeV_fm * mean(result.mu_vec) : NaN,
+        pressure_fm4=finite ? Float64(result.pressure) : NaN,
+        residual_norm=finite ? Float64(result.residual_norm) : Inf,
+        targeted=Bool(targeted),
+    )
+    session.cache[key] = row
+    session.unique_solves += 1
+    targeted && (session.targeted_additions += 1)
+    !row.converged && (session.failed_points += 1)
+    return row
+end
+
+function rho_session_snapshot(session::RhoPointSession)
+    return (
+        point_requests=session.point_requests,
+        cache_hits=session.cache_hits,
+        unique_solves=session.unique_solves,
+        targeted_additions=session.targeted_additions,
+        failed_points=session.failed_points,
+    )
+end
 
 end # module TrhoScan

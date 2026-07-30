@@ -101,6 +101,20 @@ result = Models.run_production_phase_pipeline(
 
 当你希望显式采用 production 的高精度温度扫描、unknown budget 与非插值 CEP 收口逻辑时，优先使用 `Models.run_production_phase_pipeline`。CEP 返回值采用三态合同：`resolved`、`ambiguous`、`not_found`；ambiguous 结果保留最后确认 Maxwell 与首个确认单调温度，不发布温度中点或借用的 Maxwell 化学势。
 
+### 可选 rho-support cascade
+
+production 默认 `rho_refinement_policy=:uniform_nested`，因此历史数值语义和默认
+产物不变。PNJL 的 shadow/诊断调用可以显式选择
+`rho_refinement_policy=:rho_support_cascade`，并设置
+`rho_support_fine_step=0.025`、`rho_support_targeted_cap=12` 与
+`rho_support_config=Models.RhoSupportConfig()`。该路径要求均匀嵌套 rho 网格、
+`rho_geometry_convergence=true` 和一层 rho refinement；每个温度先跑 coarse/fine
+全域层，再在 support window 中补点，并重新执行 S-shape、Maxwell 与 geometry。
+两层均通过才可确认一阶，两层均稳定 `no_s_shape` 才可确认单调，其余保持
+`ambiguous_near_critical`。补点路由使用请求作用域 exact `(T,xi,rho)` cache，
+不写入全局状态；`SolverWorkTelemetry` 可作为可选请求参数收集 solver 成本。
+该 opt-in 路径只用于 shadow/候选验证，不能自动晋升 reference。
+
 ## Phase 热积分策略
 
 PNJL 标量 phase thermodynamics 入口支持两种显式策略：

@@ -27,6 +27,11 @@ FIELD_SPECS: dict[str, tuple[str, str, bool]] = {
     "thermo_quadrature_atol": ("--thermo-quadrature-atol", "float", False),
     "thermo_quadrature_maxevals": ("--thermo-quadrature-maxevals", "int", False),
     "crossover_T_max": ("--crossover-T-max", "float", False),
+    "rho_refinement_policy": ("--rho-refinement-policy", "enum", False),
+    "rho_refine_levels": ("--rho-refine-levels", "int", True),
+    "rho_support_fine_step": ("--rho-support-fine-step", "float", False),
+    "rho_support_target_point_count": ("--rho-support-target-point-count", "int", False),
+    "rho_support_targeted_cap": ("--rho-support-targeted-cap", "int", False),
 }
 
 
@@ -35,6 +40,10 @@ def fail(message: str) -> None:
 
 
 def _normalized_value(key: str, value: Any, kind: str, allow_zero: bool) -> str:
+    if kind == "enum":
+        if not isinstance(value, str) or value not in {"uniform_nested", "rho_support_cascade"}:
+            fail(f"{key} must be uniform_nested or rho_support_cascade")
+        return value
     if isinstance(value, bool):
         fail(f"{key} must be a numeric value, not boolean")
     if kind == "int":

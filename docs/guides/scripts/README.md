@@ -106,6 +106,10 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
 - 可以使用 `--preset=smoke` 快速切换到轻量可复现实验参数（随后仍可用 CLI 显式参数覆盖）。
 - CLI 显式参数优先级高于模板（同名键会覆盖）。
 - production 可显式设置 `crossover_T_max_MeV`、rho 粗细网格几何量门限和温度中点自适应门限；解析后的 `p_num/t_num/iterations` 与这些门限写入 manifest。
+- production 默认保持 `rho_refinement_policy=uniform_nested`。`rho_support_cascade` 仅用于显式
+  shadow/诊断请求：必须启用 `rho_geometry_convergence`、使用均匀嵌套 coarse rho 网格、
+  `rho_refine_levels=1`，并通过 `rho_support_fine_step` 与
+  `rho_support_targeted_cap` 记录两层 support/补点合同；它不会自动覆盖旧 reference。
 
 最小产物结构（输出目录）：
 

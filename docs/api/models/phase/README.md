@@ -18,6 +18,7 @@
 - `Models.build_phase_artifacts`、`Models.resolve_phase_output_target`、`Models.promote_phase_artifacts` 的工件治理
 - `Models.analyze_pm_branch_competition` 的 compare-only `P-mu` 诊断入口
 - `src/models/phase/` 下的关键算法关系，例如 S-shape、Maxwell、crossover 与自适应 `rho` 加密
+- `Models.RhoSupportConfig` 与 opt-in `rho_support_cascade` 的两层几何证书和缓存诊断
 
 ## 目录职责
 
@@ -39,6 +40,10 @@
   - 显式承载温度扫掠、unknown budget、fallback 与高精度 CEP 收口逻辑
 
 两者都返回 `PhasePipelineResult`，但 production 入口会额外依赖 `FirstOrderSweepResult` 与 `ProductionPipelineConfig` 这两个稳定类型来表达扫掠合同。
+
+`ProductionPipelineConfig.rho_refinement_policy` 默认是 `:uniform_nested`。只有显式
+选择 `:rho_support_cascade` 才启用 PNJL rho-support 路由；它不改变默认 uniform
+production，也不允许绕过 geometry gate 或将单层 no-S-shape 提升为 monotone 证书。
 
 ## 入口约束
 

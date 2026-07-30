@@ -190,6 +190,22 @@ crossover 温区上限由 `crossover_T_max_MeV` 显式控制；`NaN` 表示继�
 
 更详细的使用背景见 [AdaptiveRhoRefinement.md](docs/api/models/phase/AdaptiveRhoRefinement.md)。
 
+### rho-support cascade（显式 opt-in）
+
+`Models.RhoSupportConfig`、`Models.RhoSupportPrior`、`Models.RhoSupportAssessment` 和
+`Models.analyze_rho_support_cascade` 是补点路由层；
+local cubic 只用于定位 support window，最终 S-shape 仍必须由真实采样点形成
+稳定的 `+ -> - -> +` topology。production cascade 使用两个嵌套 rho 层：
+`rho_support_cascade` 默认 `0.05 -> 0.025`，每个温度累计 targeted 点上限为 `12`。
+两层均通过 Maxwell 与 C2 geometry gate 才输出 `confirmed_first_order`，两层均
+稳定 `no_s_shape` 才输出 `confirmed_monotone`，solver failure、Maxwell/area/geometry
+不收敛统一保留 `ambiguous_near_critical`。
+
+补点 session 是请求作用域的 exact `(T,xi,rho)` Float64 cache。已有成功点按同一
+`(T,xi)` 下最近 rho 作为首选 seed；等距时遵循扫描方向。失败点也缓存，后续层级
+不会静默重复求解。`SolverWorkTelemetry` 只在调用方显式提供时累加，不改变
+`SolverResult v1` 或默认 uniform path。
+
 ## 工件治理层
 
 相图主题不止是算法判据，还包括工件与基线治理：

@@ -84,3 +84,28 @@ reference。三态合同 merge SHA 为
 本机无法可靠加载完整 `src/models/Models.jl`（Julia 进程在预编译阶段被环境终止），
 因此本轮仅记录 parser/smoke/Python 治理结果；Julia runtime contract 需在 CI Actions
 中验证，不在本机执行完整 PNJL 数值。
+
+## 后续 production integration（当前分支）
+
+当前从 `main@a8dc06ec077bb4f38c34dd162467be140631613e` 开发
+`codex/issue-130-cep-cascade-production-integration`。本阶段只加入显式
+`rho_support_cascade` 与 request-scoped point cache/telemetry，以及独立 9-job
+production shadow workflow；`uniform_nested` 默认路径、旧 evidence、旧 reference、
+C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍需 Actions
+证据与作者审核；未得到 `full_cascade_candidate` 前不转 ready、不晋升 reference，
+低温失败默认停在 `hybrid_required` 等待判断。
+
+### Production integration shadow（当前 Draft 阶段）
+
+- [x] 从 `main@a8dc06ec077bb4f38c34dd162467be140631613e` 提取 opt-in
+  `rho_support_cascade`、request-scoped exact `(T,xi,rho)` cache 和 solver telemetry；
+  默认 `uniform_nested` 保持原路径。
+- [x] 新增 9-job workflow
+  `.github/workflows/pnjl-cep-production-shadow.yml`，固定 calculation SHA、
+  `p_num=24/t_num=8`、`rs_reduced_adaptive` 和三种 rho 分辨率口径；不写 reference。
+- [x] 新增 collector/plotter、curve index、provenance/hash/重复键/finite 合同与
+  Python contract tests；完整 PNJL 数值尚未在本机运行。
+- [ ] 提交并创建 Draft PR；锁定当前 branch calculation SHA 后触发 shadow Actions。
+- [ ] 仅当 verdict 为 `full_cascade_candidate` 才转 ready；
+  `hybrid_required`、`oracle_inconclusive` 或 `integration_failed` 均停在诊断状态，
+  不自动落地 hybrid、不重放 C0/C1/C2、不启动 transport。

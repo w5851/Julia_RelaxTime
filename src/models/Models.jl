@@ -177,6 +177,8 @@ include(joinpath(@__DIR__, "transport_provider.jl"))
 const ρ0 = Main.Constants_PNJL.ρ0_inv_fm3
 
 # Unified scan/workflow entrypoints (Stage C compatibility layer)
+include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
+include(joinpath(@__DIR__, "phase", "RhoSupportRefinement.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseTypes.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseGridConvergence.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseTypes.jl"))
@@ -184,7 +186,6 @@ include(joinpath(@__DIR__, "phase", "PMPhaseSeeds.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseDiagnostic.jl"))
 include(joinpath(@__DIR__, "phase", "PMPhaseArtifacts.jl"))
 include(joinpath(@__DIR__, "phase", "AdaptiveRhoRefinement.jl"))
-include(joinpath(@__DIR__, "phase", "PhaseCore.jl"))
 include(joinpath(@__DIR__, "phase", "PhaseIO.jl"))
 include(joinpath(@__DIR__, "phase", "CEPDetector.jl"))
 include(joinpath(@__DIR__, "phase", "CrossoverLine.jl"))
@@ -224,6 +225,10 @@ const Constants_PNJL = Main.Constants_PNJL
 const TmuScanConfig = ScanConfig.TmuScanConfig
 const TrhoScanConfig = ScanConfig.TrhoScanConfig
 const FreezeoutScanConfig = ScanConfig.FreezeoutScanConfig
+const RhoSupportConfig = RhoSupportRefinement.RhoSupportConfig
+const RhoSupportPrior = RhoSupportRefinement.RhoSupportPrior
+const RhoSupportAssessment = RhoSupportRefinement.RhoSupportAssessment
+const analyze_rho_support_cascade = RhoSupportRefinement.analyze_rho_support_cascade
 const MesonChemicalProfile = MesonChemicalProfiles.MesonChemicalProfile
 const update! = SeedStrategies.update!
 

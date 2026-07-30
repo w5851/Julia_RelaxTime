@@ -152,6 +152,43 @@ function _detect_s_shape(mu::Vector{Float64}, rho::Vector{Float64})
     return Base.invokelatest(detector, mu, rho)
 end
 
+function _models_rho_support_config(config::RhoSupportConfig)
+    models = _ensure_models_loaded!()
+    return getfield(models, :RhoSupportConfig)(;
+        support_slope_tol=config.support_slope_tol,
+        positive_slope_margin=config.positive_slope_margin,
+        negative_slope_margin=config.negative_slope_margin,
+        minimum_negative_secant_run=config.minimum_negative_secant_run,
+        target_point_count=config.target_point_count,
+        max_extra_points=config.max_extra_points,
+        support_expansion_gaps=config.support_expansion_gaps,
+        local_fit_rmse_tol=config.local_fit_rmse_tol,
+        near_critical_slope_tol=config.near_critical_slope_tol,
+    )
+end
+
+function _delegate_rho_support_assessment(result)
+    return CascadeAssessment(
+        result.status,
+        result.stage,
+        result.reason,
+        result.baseline_has_s_shape,
+        result.support_origin,
+        result.support_low,
+        result.support_high,
+        result.extra_point_count,
+        result.polynomial_fit_count,
+        result.targeted_min_secant_slope,
+        result.fit_min_derivative,
+        result.fit_rmse,
+        result.fit_has_s_topology,
+        result.spinodal_rho_center,
+        result.spinodal_rho_gap,
+        result.coarse_point_count,
+        result.total_point_count,
+    )
+end
+
 function _validate_config(config::CriticalityConfig)
     config.near_slope_tol > 0 || throw(ArgumentError("near_slope_tol must be positive"))
     config.resolved_slope_margin > config.near_slope_tol || throw(ArgumentError(
@@ -524,6 +561,18 @@ function analyze_curve_cascade(
         sample_mu::Union{Nothing, Function}=nothing,
         prior::Union{Nothing, RhoSupportPrior}=nothing,
         config::RhoSupportConfig=RhoSupportConfig())
+    models = _ensure_models_loaded!()
+    if isdefined(models, :analyze_rho_support_cascade)
+        modern_prior = prior === nothing ? nothing : getfield(models, :RhoSupportPrior)(prior.T, prior.center, prior.width)
+        modern_result = Base.invokelatest(
+            getfield(models, :analyze_rho_support_cascade),
+            rho_values, mu_values;
+            sample_mu=sample_mu,
+            prior=modern_prior,
+            config=_models_rho_support_config(config),
+        )
+        return _delegate_rho_support_assessment(modern_result)
+    end
     _validate_rho_support_config(config)
     rho, mu = _sorted_finite_curve(rho_values, mu_values; minimum_points=5)
     if prior !== nothing

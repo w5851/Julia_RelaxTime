@@ -164,6 +164,10 @@ Base.@kwdef struct ProductionPipelineConfig
     rho_position_tol_MeV::Float64 = 0.05
     rho_density_tol::Float64 = 0.005
     rho_maxwell_area_tol::Float64 = 1e-4
+    rho_refinement_policy::Symbol = :uniform_nested
+    rho_support_fine_step::Float64 = 0.025
+    rho_support_targeted_cap::Int = 12
+    rho_support_config::RhoSupportRefinement.RhoSupportConfig = RhoSupportRefinement.RhoSupportConfig()
     adaptive_temperature::Bool = false
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10
