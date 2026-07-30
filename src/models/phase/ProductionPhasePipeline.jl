@@ -196,7 +196,7 @@ function _production_classify_temperature_cascade(
         rho_levels = (copy(base_rho_grid), _rho_support_fine_grid(base_rho_grid, cfg.rho_support_fine_step))
         before = TrhoScan.rho_session_snapshot(session)
 
-        for (level, rho_grid) in enumerate(rho_levels, 0)
+        for (level, rho_grid) in zip(0:1, rho_levels)
             targeted_values = Float64[]
             remaining = max(cfg.rho_support_targeted_cap - targeted_total, 0)
             target_count = min(cfg.rho_support_config.target_point_count, remaining)

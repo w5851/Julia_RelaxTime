@@ -80,7 +80,7 @@ end
 function _curve_rows(path::String, cfg, steps)
     isfile(path) || return NamedTuple[]
     rows = NamedTuple[]
-    seen = Set{Tuple{Float64, Float64, Float64} }
+    seen = Set{Tuple{Float64, Float64, Float64}}()
     for row in CSV.File(path)
         T = _safe_float(getproperty(row, :T_MeV))
         rho = _safe_float(getproperty(row, :rho))
