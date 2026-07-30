@@ -219,6 +219,8 @@ jobs:
 
       - name: Replay collector and plots
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set +e
           python scripts/analysis/collect_pnjl_cep_hybrid_production_shadow.py \
