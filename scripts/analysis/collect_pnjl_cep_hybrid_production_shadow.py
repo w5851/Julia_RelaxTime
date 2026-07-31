@@ -28,6 +28,26 @@ ANCHORS = {
     0.5: (5.0, 20.0, 60.0, 90.0, 100.0, 106.9599609375, 107.0849609375, 120.0),
 }
 
+# These anchors are deliberately stricter than the generic "each xi has both
+# sides" check.  They are the strong first-order/high-temperature controls
+# declared by the production-shadow contract.  Only the two CEP-neighbour
+# anchors per xi may remain ambiguous.
+REQUIRED_FIRST_ORDER = {
+    -0.5: (5.0, 20.0, 60.0, 100.0, 130.0),
+    0.0: (5.0, 20.0, 60.0, 100.0, 120.0),
+    0.5: (5.0, 20.0, 60.0, 90.0, 100.0),
+}
+REQUIRED_MONOTONE = {
+    -0.5: (160.0,),
+    0.0: (145.0,),
+    0.5: (120.0,),
+}
+CEP_NEIGHBOURS = {
+    -0.5: (147.0947265625, 147.2197265625),
+    0.0: (130.9619140625, 131.0869140625),
+    0.5: (106.9599609375, 107.0849609375),
+}
+
 
 def _json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -125,24 +145,27 @@ def _validate_jobs(jobs: list[tuple[Path, dict[str, Any]]], expected_sha: str) -
             for row in _rows(directory / "slice_metrics.csv") if (directory / "slice_metrics.csv").is_file() else []:
                 if _float(row.get("targeted_additions"), 0.0) > 12:
                     errors.append(f"Stage-A targeted cap exceeded at {directory}, T={row.get('T_MeV')}")
-        if row.get("stage_c_status") not in (None, "", "not_run"):
+        for row in _rows(directory / "slice_metrics.csv") if (directory / "slice_metrics.csv").is_file() else []:
+            if row.get("stage_c_status") in (None, "", "not_run"):
+                continue
             low, high = _float(row.get("support_low")), _float(row.get("support_high"))
             if not (math.isfinite(low) and math.isfinite(high) and low < high):
                 errors.append(f"Stage-C support is missing at {directory}, T={row.get('T_MeV')}")
-            else:
-                for curve in _rows(directory / "curve_points.csv") if (directory / "curve_points.csv").is_file() else []:
-                    if curve.get("sampling_role") != "stage_c_support" or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=1e-8, rel_tol=0.0):
-                        continue
-                    rho = _float(curve.get("rho"))
-                    if not (low - 1e-9 <= rho <= high + 1e-9):
-                        errors.append(f"Stage-C point lies outside declared support at {directory}, rho={curve.get('rho')}")
+                continue
+            for curve in _rows(directory / "curve_points.csv") if (directory / "curve_points.csv").is_file() else []:
+                if curve.get("sampling_role") != "stage_c_support" or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=1e-8, rel_tol=0.0):
+                    continue
+                rho = _float(curve.get("rho"))
+                if not (low - 1e-9 <= rho <= high + 1e-9):
+                    errors.append(f"Stage-C point lies outside declared support at {directory}, rho={curve.get('rho')}")
     expected_keys = {(xi, method) for xi in XIS for method in METHODS}
     if seen != expected_keys:
         errors.append(f"matrix incomplete: missing={sorted(expected_keys - seen)} extra={sorted(seen - expected_keys)}")
     return errors
 
 
-def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -> None:
+def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -> list[str]:
+    tables: dict[str, list[dict[str, Any]]] = {}
     for name in ("curve_points.csv", "slice_metrics.csv", "method_costs.csv", "cep_accuracy.csv"):
         rows: list[dict[str, Any]] = []
         for directory, summary in jobs:
@@ -151,8 +174,32 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
                 row.setdefault("method", summary.get("method", ""))
                 row.setdefault("calculation_sha", summary.get("calculation_sha", ""))
                 rows.append(row)
+        tables[name] = rows
+
+    corrections: list[str] = []
+    accuracy_by_key = {
+        (_float(row.get("xi")), row.get("method", ""), _float(row.get("anchor_T_MeV"))): row
+        for row in tables["cep_accuracy.csv"]
+    }
+    # The first shadow runner wrote the resolved Maxwell chemical potential
+    # under mu_transition_MeV in sweep_records, while its CSV adapter looked
+    # only for the legacy mu_transition field.  Rebuild the historical field
+    # from the per-anchor CEP row during replay; future jobs are fixed in the
+    # Julia adapter as well.
+    for row in tables["slice_metrics.csv"]:
+        if row.get("result_status") != "confirmed_first_order" or math.isfinite(_float(row.get("mu_transition_MeV"))):
+            continue
+        key = (_float(row.get("xi")), row.get("method", ""), _float(row.get("T_MeV")))
+        accuracy = accuracy_by_key.get(key)
+        repaired = _float(accuracy.get("muq_last_first_order_MeV")) if accuracy else math.nan
+        if math.isfinite(repaired):
+            row["mu_transition_MeV"] = f"{repaired:.17g}"
+            row["mu_transition_source"] = "cep_accuracy_replay"
+            corrections.append(f"reconstructed mu_transition_MeV for {key}")
+
+    for name, rows in tables.items():
         _write_csv(output_dir / name, rows)
-    slice_rows = _rows(output_dir / "slice_metrics.csv")
+    slice_rows = tables["slice_metrics.csv"]
     _write_csv(output_dir / "geometry_accuracy.csv", [
         {key: row.get(key, "") for key in (
             "xi", "method", "T_MeV", "stage_a_status", "stage_b_status", "stage_c_status",
@@ -172,6 +219,7 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
             "raw_curve_copy_in_repository": False,
         } for directory, summary in jobs
     ])
+    return corrections
 
 
 def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
@@ -181,6 +229,8 @@ def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
         try:
             payload = json.loads(subprocess.check_output(["gh", "run", "view", run_id, "--json", "jobs,headSha,url,status,conclusion"], text=True))
             metadata = {"run_id": run_id, "source": "gh run view", **{key: payload.get(key, "") for key in ("headSha", "url", "status", "conclusion")}}
+            metadata["snapshot_phase"] = "final" if payload.get("status") == "completed" else "provisional"
+            metadata["source_run_completed_success"] = payload.get("status") == "completed" and payload.get("conclusion") == "success"
             for job in payload.get("jobs", []):
                 if not job.get("startedAt") or not job.get("completedAt"):
                     continue
@@ -193,6 +243,8 @@ def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
     _write_csv(output_dir / "actions_costs.csv", rows)
     elapsed = [float(row["elapsed_seconds"]) for row in rows]
     metadata.update({"job_count": len(rows), "critical_path_seconds": max(elapsed, default=0.0), "raw_total_seconds": sum(elapsed), "runner_minutes": sum(int(row["runner_minutes_rounded"]) for row in rows)})
+    metadata.setdefault("snapshot_phase", "unknown")
+    metadata.setdefault("source_run_completed_success", False)
     return metadata
 
 
@@ -234,6 +286,28 @@ def _gate(output_dir: Path, contract_errors: list[str]) -> dict[str, Any]:
         if "confirmed_first_order" not in statuses or "confirmed_monotone" not in statuses:
             oracle_errors.append(f"oracle xi={xi} lacks two-sided evidence")
 
+    by_oracle_anchor = {
+        (round(_float(row.get("xi")), 9), round(_float(row.get("T_MeV")), 9)): row
+        for row in oracle
+    }
+    for xi, temperatures in REQUIRED_FIRST_ORDER.items():
+        for temperature in temperatures:
+            row = by_oracle_anchor.get((round(xi, 9), round(temperature, 9)))
+            if row is None or row.get("result_status") != "confirmed_first_order":
+                oracle_errors.append(f"oracle required first-order anchor is not confirmed xi={xi} T={temperature}")
+    for xi, temperatures in REQUIRED_MONOTONE.items():
+        for temperature in temperatures:
+            row = by_oracle_anchor.get((round(xi, 9), round(temperature, 9)))
+            if row is None or row.get("result_status") != "confirmed_monotone":
+                oracle_errors.append(f"oracle required monotone anchor is not confirmed xi={xi} T={temperature}")
+    for xi, (low_temperature, high_temperature) in CEP_NEIGHBOURS.items():
+        low = by_oracle_anchor.get((round(xi, 9), round(low_temperature, 9)))
+        high = by_oracle_anchor.get((round(xi, 9), round(high_temperature, 9)))
+        if low is not None and low.get("result_status") == "confirmed_monotone":
+            oracle_errors.append(f"oracle CEP low anchor cannot be confirmed monotone xi={xi} T={low_temperature}")
+        if high is not None and high.get("result_status") == "confirmed_first_order":
+            oracle_errors.append(f"oracle CEP high anchor cannot be confirmed first-order xi={xi} T={high_temperature}")
+
     by_anchor = {(row.get("xi"), row.get("T_MeV")): row for row in oracle}
     classification_errors: list[str] = []
     for row in hybrid:
@@ -273,12 +347,12 @@ def _gate(output_dir: Path, contract_errors: list[str]) -> dict[str, Any]:
         verdict = "workflow_failure"
     elif oracle_errors:
         verdict = "oracle_inconclusive"
-    elif performance_errors:
-        verdict = "hybrid_performance_risk"
     elif classification_errors:
         verdict = "hybrid_integration_failed"
     elif coverage_errors:
         verdict = "hybrid_integration_failed"
+    elif performance_errors:
+        verdict = "hybrid_performance_risk"
     else:
         verdict = "full_hybrid_candidate"
     return {"verdict": verdict, "workflow_contract_errors": contract_errors, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
@@ -287,7 +361,7 @@ def _gate(output_dir: Path, contract_errors: list[str]) -> dict[str, Any]:
 def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any]) -> None:
     errors = gate["workflow_contract_errors"] + gate["oracle_errors"] + gate["classification_errors"] + gate["coverage_errors"] + gate["performance_errors"]
     (output_dir / "README.md").write_text(
-        f"# PNJL CEP hybrid production shadow v1\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
+        f"# PNJL CEP hybrid production shadow v2\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
         "不覆盖 reference，不启动 C0/C1/C2、C3/O1、formal production 或 transport。\n\n"
         f"- Actions critical path: {actions.get('critical_path_seconds', 0.0)} s\n"
         f"- runner-minutes: {actions.get('runner_minutes', 0)}\n"
@@ -315,7 +389,7 @@ def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha:
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _find_jobs(input_dir)
     contract_errors = _validate_jobs(jobs, expected_sha)
-    _collect_tables(jobs, output_dir)
+    corrections = _collect_tables(jobs, output_dir)
     actions = _actions(run_id, output_dir)
     gate = _gate(output_dir, contract_errors)
     _write_docs(output_dir, gate, actions)
@@ -328,6 +402,8 @@ def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha:
         "run_id": run_id or "", "source_run_id": source_run_id or run_id or "",
         "expected_calculation_sha": expected_sha, "postprocess_sha": postprocess_sha or "",
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
+        "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
+        "aggregation_corrections": corrections,
         "gate": gate, "actions": actions, "file_sha256": hashes,
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }

@@ -631,6 +631,7 @@ function _production_classify_temperature_hybrid(
         return merge(stage_b, (
             slice_status=:confirmed_first_order,
             geometry_converged=true,
+            stage_a_status=stage_a.slice_status,
             position_error_MeV=cross_ab.position_MeV,
             density_error=cross_ab.density,
             maxwell_area_gate=cross_ab.maxwell_area,

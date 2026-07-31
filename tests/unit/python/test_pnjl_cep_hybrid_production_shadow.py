@@ -18,12 +18,22 @@ def load_module(path: Path, name: str):
     return module
 
 
-def _status(t: float):
-    if t in (5.0, 20.0):
+def _status(xi: float, t: float):
+    first_order = {
+        -0.5: {5.0, 20.0, 60.0, 100.0, 130.0, 147.0947265625},
+        0.0: {5.0, 20.0, 60.0, 100.0, 120.0, 130.9619140625},
+        0.5: {5.0, 20.0, 60.0, 90.0, 100.0, 106.9599609375},
+    }
+    monotone = {
+        -0.5: {147.2197265625, 160.0},
+        0.0: {131.0869140625, 145.0},
+        0.5: {107.0849609375, 120.0},
+    }
+    if t in first_order[xi]:
         return "confirmed_first_order"
-    if t in (60.0, 100.0):
-        return "ambiguous_near_critical"
-    return "confirmed_monotone"
+    if t in monotone[xi]:
+        return "confirmed_monotone"
+    return "ambiguous_near_critical"
 
 
 def write_job(root: Path, xi: float, method: str, *, cost: int = 100):
@@ -42,7 +52,7 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100):
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for t in anchors:
-            status = _status(t)
+            status = _status(xi, t)
             first = status == "confirmed_first_order"
             writer.writerow({
                 "xi": xi, "method": method, "T_MeV": t,
@@ -62,7 +72,7 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100):
         f"{xi},{method},{cost},{cost},{cost},100,50,120,10,0,0\n", encoding="utf-8")
     (job / "cep_accuracy.csv").write_text(
         "xi,method,anchor_T_MeV,result_status,T_last_first_order_MeV,muq_last_first_order_MeV,T_first_monotone_MeV,ambiguity_width_T_MeV,temperature_resolution_target_MeV\n"
-        + "".join(f"{xi},{method},{t},{_status(t)},20,300,120,100,0.125\n" for t in anchors), encoding="utf-8")
+        + "".join(f"{xi},{method},{t},{_status(xi, t)},20,300,120,100,0.125\n" for t in anchors), encoding="utf-8")
     hashes = {name: hashlib.sha256((job / name).read_bytes()).hexdigest() for name in ("curve_points.csv", "slice_metrics.csv", "method_costs.csv", "cep_accuracy.csv")}
     (job / "job_summary.json").write_text(json.dumps({
         "schema_version": "cep_cascade_production_shadow_v2", "xi": xi, "method": method,
@@ -103,8 +113,52 @@ def test_hybrid_collector_rejects_confirmation_on_oracle_ambiguous(tmp_path):
     summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(oracle.read_bytes()).hexdigest()
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
     gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40)
-    assert gate["verdict"] == "hybrid_integration_failed"
+    assert gate["verdict"] == "oracle_inconclusive"
     assert gate["classification_errors"]
+
+
+def test_replay_repairs_legacy_mu_transition_field_and_records_correction(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_repair")
+    _matrix(tmp_path)
+    slice_path = tmp_path / "job-production_hybrid--0.5" / "slice_metrics.csv"
+    rows = list(csv.DictReader(slice_path.open(newline="", encoding="utf-8")))
+    rows[0]["mu_transition_MeV"] = ""
+    with slice_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+    summary_path = slice_path.parent / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(slice_path.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+
+    output = tmp_path / "aggregate"
+    gate = module.collect(tmp_path, output, None, "a" * 40)
+    assert gate["verdict"] == "full_hybrid_candidate"
+    repaired = list(csv.DictReader((output / "slice_metrics.csv").open(newline="", encoding="utf-8")))
+    row = next(row for row in repaired if row["method"] == "production_hybrid" and row["xi"] == "-0.5" and row["T_MeV"] == "5.0")
+    assert float(row["mu_transition_MeV"]) == 300.0
+    manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["aggregation_corrections"]
+
+
+def test_required_oracle_anchor_is_explicitly_gated(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_required_anchor")
+    _matrix(tmp_path)
+    oracle_path = tmp_path / "job-independent_oracle--0.5" / "slice_metrics.csv"
+    rows = list(csv.DictReader(oracle_path.open(newline="", encoding="utf-8")))
+    next(row for row in rows if row["T_MeV"] == "60.0")["result_status"] = "ambiguous_near_critical"
+    with oracle_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=rows[0].keys())
+        writer.writeheader()
+        writer.writerows(rows)
+    summary_path = oracle_path.parent / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(oracle_path.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40)
+    assert gate["verdict"] == "oracle_inconclusive"
+    assert any("required first-order anchor" in error for error in gate["oracle_errors"])
 
 
 def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
