@@ -140,6 +140,8 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] PR2 离线 Stage-C feasibility 已用 replay CSV 完成 deterministic replay：完整
   Stage-B 0.00625 global reference 与局部 0.003125 点合并，枚举稳定 `+→−→+`
   候选，并测试 caps `48/96/160/224`；solver_called=false。
+- [x] PR #157（merge SHA `ded56b776557528c8bdfa5bf9f41ff30f73a7dda`）收紧跨分辨率
+  candidate overlap 与 position/density/area geometry gate；重放结论保持不变。
 - [x] 当前 PR2 预期 verdict 为 `maxwell_candidate_inconclusive`：所有 cap 的成本
   估计均低于 dense 的 15384 unique solves，但有两个弱 S/CEP 邻域 first-order
   oracle anchors（`xi=-0.5,T=147.0947265625` 与 `xi=0.5,T=106.9599609375`）
