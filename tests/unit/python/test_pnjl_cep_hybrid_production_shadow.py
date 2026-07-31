@@ -161,6 +161,45 @@ def test_required_oracle_anchor_is_explicitly_gated(tmp_path):
     assert any("required first-order anchor" in error for error in gate["oracle_errors"])
 
 
+def test_legacy_replay_keeps_stage_c_support_mismatch_as_warning(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_legacy_replay")
+    _matrix(tmp_path)
+    job = tmp_path / "job-production_hybrid--0.5"
+
+    curve_path = job / "curve_points.csv"
+    curve_rows = list(csv.DictReader(curve_path.open(newline="", encoding="utf-8")))
+    for row in curve_rows:
+        row["sampling_role"] = "stage_c_support"
+    with curve_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(curve_rows[0]))
+        writer.writeheader()
+        writer.writerows(curve_rows)
+
+    slice_path = job / "slice_metrics.csv"
+    slice_rows = list(csv.DictReader(slice_path.open(newline="", encoding="utf-8")))
+    slice_rows[0]["stage_c_status"] = "invalid"
+    slice_rows[0]["support_low"] = "0.0"
+    slice_rows[0]["support_high"] = "0.5"
+    with slice_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(slice_rows[0]))
+        writer.writeheader()
+        writer.writerows(slice_rows)
+
+    summary_path = job / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["curve_file_sha256"]["curve_points.csv"] = hashlib.sha256(curve_path.read_bytes()).hexdigest()
+    summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(slice_path.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+
+    strict = module.collect(tmp_path, tmp_path / "strict", None, "a" * 40)
+    assert strict["verdict"] == "workflow_failure"
+    replay = module.collect(tmp_path, tmp_path / "replay", None, "a" * 40, legacy_replay=True)
+    assert replay["verdict"] == "full_hybrid_candidate"
+    assert replay["compatibility_warnings"]
+    manifest = json.loads((tmp_path / "replay" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["compatibility_warnings"]
+
+
 def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
     module = load_module(COLLECTOR, "hybrid_collector_workflow")
     text = WORKFLOW.read_text(encoding="utf-8")

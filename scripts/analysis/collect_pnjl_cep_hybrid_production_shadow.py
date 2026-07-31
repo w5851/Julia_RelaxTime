@@ -86,8 +86,15 @@ def _find_jobs(input_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return [(path.parent, _json(path)) for path in sorted(input_dir.rglob("job_summary.json"))]
 
 
-def _validate_jobs(jobs: list[tuple[Path, dict[str, Any]]], expected_sha: str) -> list[str]:
+def _validate_jobs(
+    jobs: list[tuple[Path, dict[str, Any]]],
+    expected_sha: str,
+    *,
+    allow_legacy_stage_c_support: bool = False,
+) -> tuple[list[str], list[str]]:
     errors: list[str] = []
+    compatibility_warnings: list[str] = []
+    legacy_support_violations: dict[tuple[str, str], int] = {}
     seen: set[tuple[float, str]] = set()
     for directory, summary in jobs:
         key = (_float(summary.get("xi")), str(summary.get("method", "")))
@@ -157,11 +164,21 @@ def _validate_jobs(jobs: list[tuple[Path, dict[str, Any]]], expected_sha: str) -
                     continue
                 rho = _float(curve.get("rho"))
                 if not (low - 1e-9 <= rho <= high + 1e-9):
-                    errors.append(f"Stage-C point lies outside declared support at {directory}, rho={curve.get('rho')}")
+                    message = f"Stage-C point lies outside declared support at {directory}, T={row.get('T_MeV')}, rho={curve.get('rho')}"
+                    if allow_legacy_stage_c_support:
+                        key_warning = (str(directory), str(row.get("T_MeV")))
+                        legacy_support_violations[key_warning] = legacy_support_violations.get(key_warning, 0) + 1
+                    else:
+                        errors.append(message)
+    if allow_legacy_stage_c_support:
+        compatibility_warnings.extend(
+            f"legacy Stage-C support label mismatch at {directory}, T={temperature}: {count} point(s) outside declared support; retained for replay diagnostics"
+            for (directory, temperature), count in sorted(legacy_support_violations.items())
+        )
     expected_keys = {(xi, method) for xi in XIS for method in METHODS}
     if seen != expected_keys:
         errors.append(f"matrix incomplete: missing={sorted(expected_keys - seen)} extra={sorted(seen - expected_keys)}")
-    return errors
+    return errors, compatibility_warnings
 
 
 def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -> list[str]:
@@ -267,7 +284,12 @@ def _performance(cost_rows: list[dict[str, str]]) -> tuple[list[str], dict[str, 
     return errors, {"grouped": grouped, "hybrid_fallback_retry_rate": hybrid_rate, "dense_fallback_retry_rate": dense_rate}
 
 
-def _gate(output_dir: Path, contract_errors: list[str]) -> dict[str, Any]:
+def _gate(
+    output_dir: Path,
+    contract_errors: list[str],
+    compatibility_warnings: list[str] | None = None,
+) -> dict[str, Any]:
+    compatibility_warnings = compatibility_warnings or []
     rows = _rows(output_dir / "slice_metrics.csv")
     costs = _rows(output_dir / "method_costs.csv")
     oracle = [row for row in rows if row.get("method") == "independent_oracle"]
@@ -355,17 +377,19 @@ def _gate(output_dir: Path, contract_errors: list[str]) -> dict[str, Any]:
         verdict = "hybrid_performance_risk"
     else:
         verdict = "full_hybrid_candidate"
-    return {"verdict": verdict, "workflow_contract_errors": contract_errors, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
+    return {"verdict": verdict, "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
 
 
 def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any]) -> None:
     errors = gate["workflow_contract_errors"] + gate["oracle_errors"] + gate["classification_errors"] + gate["coverage_errors"] + gate["performance_errors"]
+    warnings = gate.get("compatibility_warnings", [])
     (output_dir / "README.md").write_text(
         f"# PNJL CEP hybrid production shadow v2\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
         "不覆盖 reference，不启动 C0/C1/C2、C3/O1、formal production 或 transport。\n\n"
         f"- Actions critical path: {actions.get('critical_path_seconds', 0.0)} s\n"
         f"- runner-minutes: {actions.get('runner_minutes', 0)}\n"
         f"- errors: {'；'.join(errors) if errors else '无'}\n\n"
+        f"- replay compatibility warnings: {'；'.join(warnings) if warnings else '无'}\n\n"
         "Stage A 为 rho-support cascade，Stage B 为 memoized dense，Stage C 仅在声明的有限 support 内使用局部 oracle 分辨率；"
         "完整 rho–mu 原始曲线保留在 Actions/local artifact。\n",
         encoding="utf-8",
@@ -385,13 +409,24 @@ def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any])
     (output_dir / "plot_manifest.json").write_text(json.dumps({"schema_version": "cep_cascade_production_shadow_v2", "figures": [], "reason": "plots are generated by the versioned hybrid plotter"}, indent=2) + "\n", encoding="utf-8")
 
 
-def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha: str, *, postprocess_sha: str | None = None, source_run_id: str | None = None) -> dict[str, Any]:
+def collect(
+    input_dir: Path,
+    output_dir: Path,
+    run_id: str | None,
+    expected_sha: str,
+    *,
+    postprocess_sha: str | None = None,
+    source_run_id: str | None = None,
+    legacy_replay: bool = False,
+) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _find_jobs(input_dir)
-    contract_errors = _validate_jobs(jobs, expected_sha)
+    contract_errors, compatibility_warnings = _validate_jobs(
+        jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay
+    )
     corrections = _collect_tables(jobs, output_dir)
     actions = _actions(run_id, output_dir)
-    gate = _gate(output_dir, contract_errors)
+    gate = _gate(output_dir, contract_errors, compatibility_warnings)
     _write_docs(output_dir, gate, actions)
     hashes: dict[str, str] = {}
     for path in sorted(output_dir.rglob("*")):
@@ -404,6 +439,7 @@ def collect(input_dir: Path, output_dir: Path, run_id: str | None, expected_sha:
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
+        "compatibility_warnings": compatibility_warnings,
         "gate": gate, "actions": actions, "file_sha256": hashes,
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
@@ -419,8 +455,17 @@ def main() -> int:
     parser.add_argument("--expected-calculation-sha", required=True)
     parser.add_argument("--postprocess-sha", default=None)
     parser.add_argument("--source-run-id", default=None)
+    parser.add_argument("--legacy-replay", action="store_true", help="allow known pre-v2 Stage-C support labels while retaining warnings")
     args = parser.parse_args()
-    gate = collect(args.input_dir, args.output_dir, args.run_id, args.expected_calculation_sha, postprocess_sha=args.postprocess_sha, source_run_id=args.source_run_id)
+    gate = collect(
+        args.input_dir,
+        args.output_dir,
+        args.run_id,
+        args.expected_calculation_sha,
+        postprocess_sha=args.postprocess_sha,
+        source_run_id=args.source_run_id,
+        legacy_replay=args.legacy_replay,
+    )
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["verdict"] == "workflow_failure" else 2 if gate["verdict"] != "full_hybrid_candidate" else 0
 
