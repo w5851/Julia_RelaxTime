@@ -1,0 +1,29 @@
+{
+  "schema_version": "cep_hybrid_stagec_certificate_feasibility_v2",
+  "figures": [
+    {
+      "path": "figures/rho_mu_xi_m0p5_T_147p0947265625.png",
+      "xi": "-0.5",
+      "T_MeV": "147.0947265625",
+      "role": "author_first_order"
+    },
+    {
+      "path": "figures/rho_mu_xi_0p5_T_106p9599609375.png",
+      "xi": "0.5",
+      "T_MeV": "106.9599609375",
+      "role": "author_first_order"
+    },
+    {
+      "path": "figures/rho_mu_xi_m0p5_T_147p2197265625.png",
+      "xi": "-0.5",
+      "T_MeV": "147.2197265625",
+      "role": "consensus_monotone"
+    },
+    {
+      "path": "figures/rho_mu_xi_0p5_T_107p0849609375.png",
+      "xi": "0.5",
+      "T_MeV": "107.0849609375",
+      "role": "consensus_monotone"
+    }
+  ]
+}
