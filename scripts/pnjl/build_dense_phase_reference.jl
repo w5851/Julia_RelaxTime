@@ -103,11 +103,11 @@ function usage()
     println("  --rho-position-tol <MeV> coarse/fine phase-position tolerance (default 0.05)")
     println("  --rho-density-tol <value> coarse/fine density tolerance (default 0.005)")
     println("  --rho-maxwell-area-tol <value> Maxwell diagnostic gate (default 1e-4)")
-    println("  --rho-refinement-policy <name> uniform_nested or rho_support_cascade (default uniform_nested)")
-    println("  --rho-refine-levels <int> rho refinement levels; cascade requires 1")
-    println("  --rho-support-fine-step <value> cascade fine rho step (default 0.025)")
-    println("  --rho-support-target-point-count <int> cascade target count (default 9)")
-    println("  --rho-support-targeted-cap <int> cascade per-temperature cap (default 12)")
+    println("  --rho-refinement-policy <name> uniform_nested, rho_support_cascade, or rho_support_hybrid (default uniform_nested)")
+    println("  --rho-refine-levels <int> rho refinement levels; cascade requires 1, hybrid requires 4")
+    println("  --rho-support-fine-step <value> cascade/hybrid Stage-A fine rho step (default 0.025)")
+    println("  --rho-support-target-point-count <int> cascade/hybrid target count (default 9)")
+    println("  --rho-support-targeted-cap <int> cascade/hybrid Stage-A per-temperature cap (default 12)")
     println("  --no-adaptive-T          disable midpoint temperature refinement")
     println("  --T-refine-levels <int>  maximum adaptive temperature levels (default 2)")
     println("  --T-position-tol <MeV>   temperature interpolation position gate (default 0.10)")
@@ -312,18 +312,21 @@ function parse_args(args::Vector{String})
     cfg.rho_position_tol_MeV > 0 || error("rho-position-tol must be positive")
     cfg.rho_density_tol > 0 || error("rho-density-tol must be positive")
     cfg.rho_maxwell_area_tol > 0 || error("rho-maxwell-area-tol must be positive")
-    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade) ||
-        error("rho-refinement-policy must be uniform_nested or rho_support_cascade")
+    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) ||
+        error("rho-refinement-policy must be uniform_nested, rho_support_cascade, or rho_support_hybrid")
     cfg.rho_refine_levels >= 0 || error("rho-refine-levels must be nonnegative")
     cfg.rho_support_fine_step > 0 || error("rho-support-fine-step must be positive")
     cfg.rho_support_target_point_count >= 5 && isodd(cfg.rho_support_target_point_count) ||
         error("rho-support-target-point-count must be an odd integer >= 5")
     cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
         error("rho-support-targeted-cap must cover rho-support-target-point-count")
-    if cfg.rho_refinement_policy === :rho_support_cascade
-        cfg.model_kind === :PNJL || error("rho_support_cascade is supported only for model_kind=PNJL")
-        cfg.rho_geometry_convergence || error("rho_support_cascade requires rho geometry convergence")
-        cfg.rho_refine_levels == 1 || error("rho_support_cascade requires rho-refine-levels=1")
+    if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
+        cfg.model_kind === :PNJL || error("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL")
+        cfg.rho_geometry_convergence || error("$(cfg.rho_refinement_policy) requires rho geometry convergence")
+        required_levels = cfg.rho_refinement_policy === :rho_support_hybrid ? 4 : 1
+        cfg.rho_refine_levels == required_levels || error("$(cfg.rho_refinement_policy) requires rho-refine-levels=$(required_levels)")
+        cfg.rho_refinement_policy !== :rho_support_hybrid || cfg.rho_support_targeted_cap <= 12 ||
+            error("rho_support_hybrid Stage-A targeted cap must be <= 12")
     end
     cfg.temperature_position_tol_MeV > 0 || error("T-position-tol must be positive")
     cfg.temperature_density_tol > 0 || error("T-density-tol must be positive")
@@ -845,7 +848,7 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                     target_point_count=cfg.rho_support_target_point_count,
                     max_extra_points=max(cfg.rho_support_targeted_cap, cfg.rho_support_target_point_count),
                 ),
-                cep_max_refine_level=(cfg.rho_refinement_policy === :rho_support_cascade ? cfg.rho_refine_levels : 2),
+                cep_max_refine_level=(cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? cfg.rho_refine_levels : 2),
                 adaptive_temperature=cfg.adaptive_temperature,
                 temperature_max_refine_level=cfg.temperature_max_refine_level,
                 temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,

@@ -33,6 +33,21 @@ def test_resolves_whitelisted_controls_in_deterministic_order():
     ]
 
 
+def test_accepts_hybrid_rho_policy_controls():
+    module = load_module()
+    resolved = module.resolve_action_config(
+        '{"rho_refinement_policy":"rho_support_hybrid","rho_refine_levels":4,"rho_support_targeted_cap":12}'
+    )
+    assert resolved == [
+        "--rho-refinement-policy",
+        "rho_support_hybrid",
+        "--rho-refine-levels",
+        "4",
+        "--rho-support-targeted-cap",
+        "12",
+    ]
+
+
 @pytest.mark.parametrize(
     "payload",
     [

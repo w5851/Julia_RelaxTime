@@ -41,8 +41,12 @@ def fail(message: str) -> None:
 
 def _normalized_value(key: str, value: Any, kind: str, allow_zero: bool) -> str:
     if kind == "enum":
-        if not isinstance(value, str) or value not in {"uniform_nested", "rho_support_cascade"}:
-            fail(f"{key} must be uniform_nested or rho_support_cascade")
+        if not isinstance(value, str) or value not in {
+            "uniform_nested",
+            "rho_support_cascade",
+            "rho_support_hybrid",
+        }:
+            fail(f"{key} must be uniform_nested, rho_support_cascade, or rho_support_hybrid")
         return value
     if isinstance(value, bool):
         fail(f"{key} must be a numeric value, not boolean")

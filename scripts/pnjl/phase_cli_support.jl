@@ -402,7 +402,7 @@ function _usage()
     println("  --rho_position_tol_MeV=0.05 rho网格位置量误差门限(MeV)")
     println("  --rho_density_tol=0.005 rho网格密度量误差门限")
     println("  --rho_maxwell_area_tol=1e-4 rho网格Maxwell面积残差门限")
-    println("  --rho_refinement_policy=uniform_nested|rho_support_cascade 可选rho支持级联（默认保持uniform）")
+    println("  --rho_refinement_policy=uniform_nested|rho_support_cascade|rho_support_hybrid 可选rho支持级联/三级hybrid（默认保持uniform）")
     println("  --rho_refine_levels=2 rho细化层数；cascade要求为1")
     println("  --rho_support_fine_step=0.025 cascade细网格步长")
     println("  --rho_support_target_point_count=9 cascade目标补点数")
@@ -605,7 +605,7 @@ function parse_args(args, project_root::AbstractString)
         throw(ArgumentError("temperature_resolution_target_MeV must be finite and positive"))
     cfg.unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative"))
     cfg.cep_max_refine_level >= 0 || throw(ArgumentError("cep_max_refine_level must be nonnegative"))
-    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade) ||
+    cfg.rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) ||
         throw(ArgumentError("invalid --rho_refinement_policy=$(cfg.rho_refinement_policy)"))
     cfg.rho_refine_levels >= 0 || throw(ArgumentError("rho_refine_levels must be nonnegative"))
     cfg.rho_support_fine_step > 0 || throw(ArgumentError("rho_support_fine_step must be positive"))
@@ -613,10 +613,13 @@ function parse_args(args, project_root::AbstractString)
         throw(ArgumentError("rho_support_target_point_count must be an odd integer >= 5"))
     cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
         throw(ArgumentError("rho_support_targeted_cap must cover rho_support_target_point_count"))
-    if cfg.rho_refinement_policy === :rho_support_cascade
-        cfg.model_kind === :PNJL || throw(ArgumentError("rho_support_cascade is supported only for model_kind=PNJL"))
-        cfg.rho_geometry_convergence || throw(ArgumentError("rho_support_cascade requires rho_geometry_convergence=true"))
-        cfg.rho_refine_levels == 1 || throw(ArgumentError("rho_support_cascade requires rho_refine_levels=1"))
+    if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
+        cfg.model_kind === :PNJL || throw(ArgumentError("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL"))
+        cfg.rho_geometry_convergence || throw(ArgumentError("$(cfg.rho_refinement_policy) requires rho_geometry_convergence=true"))
+        required_levels = cfg.rho_refinement_policy === :rho_support_hybrid ? 4 : 1
+        cfg.rho_refine_levels == required_levels || throw(ArgumentError("$(cfg.rho_refinement_policy) requires rho_refine_levels=$(required_levels)"))
+        cfg.rho_refinement_policy !== :rho_support_hybrid || cfg.rho_support_targeted_cap <= 12 ||
+            throw(ArgumentError("rho_support_hybrid Stage-A targeted cap must be <= 12"))
     end
     if cfg.rho_geometry_convergence && cfg.cep_max_refine_level < 1 && cfg.mode === :production
         throw(ArgumentError("rho geometry convergence requires cep_max_refine_level >= 1 in production mode"))
@@ -656,7 +659,7 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
     println("T-grid: $(first(T_grid)) -> $(last(T_grid)) (n=$(length(T_grid)))")
     println("rho-grid: $(first(rho_grid)) -> $(last(rho_grid)) (n=$(length(rho_grid)))")
 
-    effective_rho_levels = cfg.rho_refinement_policy === :rho_support_cascade ? cfg.rho_refine_levels : cfg.cep_max_refine_level
+    effective_rho_levels = cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? cfg.rho_refine_levels : cfg.cep_max_refine_level
     result = models_module.run_phase_pipeline(
         cfg.model_kind;
         mode=cfg.mode,

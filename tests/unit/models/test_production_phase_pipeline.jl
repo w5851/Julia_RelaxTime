@@ -10,6 +10,45 @@ end
     @test Models.ProductionPipelineConfig().cep_tol_MeV == 0.1
     @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
 
+    @testset "hybrid support grid is padded, aligned, and bounded" begin
+        sres = Models.SShapeResult(true, 310.0, 290.0, 1.10, 1.90, 2)
+        stage_a = (
+            cascade_support_low=1.15,
+            cascade_support_high=1.85,
+            rho_hadron=1.10,
+            rho_quark=1.90,
+            sres=sres,
+        )
+        stage_b = (rho_hadron=1.12, rho_quark=1.88, sres=sres)
+        support = Models._hybrid_support_grid(collect(0.0:0.05:4.0), stage_a, stage_b)
+        @test support !== nothing
+        @test 0.0 <= support.low < support.high <= 4.0
+        @test all(isapprox(value / 0.003125, round(value / 0.003125); atol=1e-8, rtol=0.0) for value in support.grid)
+        @test :cascade_support in support.source
+        @test Models._hybrid_support_grid(collect(0.0:0.05:4.0),
+            (cascade_support_low=nothing, cascade_support_high=nothing, rho_hadron=nothing, rho_quark=nothing, sres=Models.SShapeResult()),
+            (rho_hadron=nothing, rho_quark=nothing, sres=Models.SShapeResult())) === nothing
+    end
+
+    @testset "hybrid policy validation is explicit and opt-in" begin
+        @test_throws ArgumentError Models.run_production_phase_pipeline(
+            :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
+            rho_refinement_policy=:rho_support_hybrid, cep_max_refine_level_rho=1,
+            rho_geometry_convergence=true, promote_reference=false,
+        )
+        @test_throws ArgumentError Models.run_production_phase_pipeline(
+            :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
+            rho_refinement_policy=:rho_support_hybrid, cep_max_refine_level_rho=4,
+            rho_geometry_convergence=false, promote_reference=false,
+        )
+        @test_throws ArgumentError Models.run_production_phase_pipeline(
+            :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
+            rho_refinement_policy=:rho_support_hybrid, cep_max_refine_level_rho=4,
+            rho_geometry_convergence=true, rho_support_targeted_cap=13,
+            promote_reference=false,
+        )
+    end
+
     temps = Models._production_temperature_grid(150.0, 160.0, 5.0)
     @test temps == [150.0, 155.0, 160.0]
 

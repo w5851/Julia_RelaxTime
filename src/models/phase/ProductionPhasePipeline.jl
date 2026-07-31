@@ -273,6 +273,9 @@ function _production_classify_temperature_cascade(
                 cascade_status=assessment === nothing ? :not_run : assessment.status,
                 cascade_support_center=assessment === nothing ? nothing : assessment.spinodal_rho_center,
                 cascade_support_gap=assessment === nothing ? nothing : assessment.spinodal_rho_gap,
+                cascade_support_low=assessment === nothing ? nothing : assessment.support_low,
+                cascade_support_high=assessment === nothing ? nothing : assessment.support_high,
+                cascade_support_origin=assessment === nothing ? :none : assessment.support_origin,
                 targeted_count=targeted_total,
             )))
         end
@@ -331,6 +334,9 @@ function _production_classify_temperature_cascade(
             cascade_targeted_count=targeted_total,
             cascade_coarse_point_count=length(base_rho_grid),
             cascade_fine_point_count=length(rho_levels[2]),
+            cascade_support_low=get(fine, :cascade_support_low, nothing),
+            cascade_support_high=get(fine, :cascade_support_high, nothing),
+            cascade_support_origin=get(fine, :cascade_support_origin, :none),
         ))
     end
 end
@@ -346,9 +352,15 @@ function _production_classify_temperature_memoized_uniform(
         t_num::Int,
         thermo_quadrature_kwargs::NamedTuple,
         cfg::ProductionPipelineConfig,
-        session)
+        session;
+        level_start::Int=0,
+        level_stop::Int=cfg.max_refine_level_rho,
+        output_suffix::AbstractString="memoized")
+    0 <= level_start <= level_stop || throw(ArgumentError(
+        "memoized rho refinement level range is invalid: $(level_start):$(level_stop)",
+    ))
     token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
-    out_csv = joinpath(eval_dir, "prod_eval_T$(token)_memoized.csv")
+    out_csv = joinpath(eval_dir, "prod_eval_T$(token)_$(output_suffix).csv")
     io_mode = isfile(out_csv) ? "a" : "w"
     written = Set{Tuple{Float64, Float64, Float64}}()
     if io_mode == "a"
@@ -360,7 +372,7 @@ function _production_classify_temperature_memoized_uniform(
         before = TrhoScan.rho_session_snapshot(session)
         level_results = NamedTuple[]
         previous = nothing
-        for level in 0:cfg.max_refine_level_rho
+        for level in level_start:level_stop
             rho_grid = level == 0 ? copy(base_rho_grid) : _refine_rho_grid(base_rho_grid, level)
             _production_session_scan!(session, io, written, T_mid, xi, rho_grid, reverse_rho,
                 p_num, t_num, thermo_quadrature_kwargs)
@@ -393,7 +405,7 @@ function _production_classify_temperature_memoized_uniform(
             ))
             push!(level_results, result)
             previous = current
-            geometry.converged && level > 0 && break
+            geometry.converged && level > level_start && break
         end
         coarse = first(level_results)
         fine = last(level_results)
@@ -425,7 +437,10 @@ function _production_classify_temperature_memoized_uniform(
                 targeted_additions=after.targeted_additions - before.targeted_additions,
             ),
             rho_convergence_records=[(
-                axis="rho", level=1, left=0.0, right=1.0, midpoint=1.0,
+                axis="rho", level=level_start == 0 ? 1 : Int(fine.level),
+                left=level_start == 0 ? 0.0 : Float64(max(level_start, fine.level - 1)),
+                right=level_start == 0 ? 1.0 : Float64(fine.level),
+                midpoint=level_start == 0 ? 1.0 : Float64(fine.level),
                 position_error_MeV=isfinite(fine.position_error_MeV) ? fine.position_error_MeV : nothing,
                 density_error=isfinite(fine.density_error) ? fine.density_error : nothing,
                 maxwell_area=isfinite(fine.maxwell_area_gate) ? fine.maxwell_area_gate : nothing,
@@ -434,6 +449,287 @@ function _production_classify_temperature_memoized_uniform(
             )],
         ))
     end
+end
+
+function _production_session_curve_for_grid(
+        session,
+        T::Float64,
+        xi::Float64,
+        rho_grid::AbstractVector)
+    rows = NamedTuple[]
+    for rho in sort(unique(Float64.(rho_grid)))
+        key = (T, xi, rho)
+        haskey(session.cache, key) || return nothing, rows
+        push!(rows, session.cache[key])
+    end
+    isempty(rows) && return nothing, rows
+    all(row -> row.converged && row.finite, rows) || return nothing, rows
+    return ([row.muq_MeV for row in rows], [row.rho for row in rows]), rows
+end
+
+function _classify_production_curve(curve, cfg::ProductionPipelineConfig,
+        level::Int, out_csv::String)
+    curve === nothing && return (
+        status=:invalid,
+        mu_transition=nothing,
+        area_residual=nothing,
+        sres=SShapeResult(),
+        rho_hadron=nothing,
+        rho_quark=nothing,
+        reason="solver_or_curve_failure",
+        level=level,
+        curve=nothing,
+        out_csv=out_csv,
+    )
+    mu_vals, rho_vals = curve
+    cres = _classify_s_curve(mu_vals, rho_vals;
+        area_tol_good=cfg.area_tol_good, area_tol_bad=cfg.area_tol_bad)
+    maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
+    return (
+        status=cres.status,
+        mu_transition=cres.mu_transition,
+        area_residual=cres.area_residual,
+        sres=cres.sres,
+        rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
+        rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
+        reason=String(cres.reason),
+        level=level,
+        curve=curve,
+        out_csv=out_csv,
+    )
+end
+
+function _hybrid_support_grid(
+        base_rho_grid::Vector{Float64},
+        stage_a,
+        stage_b;
+        local_step::Float64=0.003125,
+        padding::Float64=0.025)
+    local_step > 0 || throw(ArgumentError("hybrid local rho step must be positive"))
+    padding >= 0 || throw(ArgumentError("hybrid rho support padding must be nonnegative"))
+    first_rho, last_rho = first(base_rho_grid), last(base_rho_grid)
+    support_values = Float64[]
+    support_sources = Symbol[]
+    for (label, result) in ((:cascade, stage_a), (:dense, stage_b))
+        for (field, source) in ((:cascade_support_low, :cascade_support),
+                (:cascade_support_high, :cascade_support),
+                (:rho_hadron, :coexistence_density),
+                (:rho_quark, :coexistence_density))
+            value = get(result, field, nothing)
+            value === nothing && continue
+            value = Float64(value)
+            isfinite(value) && first_rho <= value <= last_rho || continue
+            push!(support_values, value)
+            push!(support_sources, source)
+        end
+        sres = get(result, :sres, SShapeResult())
+        for (field, source) in ((:rho_spinodal_hadron, :spinodal_density),
+                (:rho_spinodal_quark, :spinodal_density))
+            value = getproperty(sres, field)
+            value === nothing && continue
+            value = Float64(value)
+            isfinite(value) && first_rho <= value <= last_rho || continue
+            push!(support_values, value)
+            push!(support_sources, source)
+        end
+    end
+    isempty(support_values) && return nothing
+    low_raw = max(first_rho, minimum(support_values) - padding)
+    high_raw = min(last_rho, maximum(support_values) + padding)
+    high_raw > low_raw || return nothing
+
+    # Align both edges to the local oracle grid.  Rounding outwards is
+    # deliberate: no Stage-C point may lie outside the declared support.
+    origin = first_rho
+    low_index = floor(Int, (low_raw - origin) / local_step + 1e-10)
+    high_index = ceil(Int, (high_raw - origin) / local_step - 1e-10)
+    low = max(first_rho, origin + low_index * local_step)
+    high = min(last_rho, origin + high_index * local_step)
+    high > low || return nothing
+    grid = Float64.(collect(low:local_step:high))
+    isempty(grid) && return nothing
+    return (
+        low=low,
+        high=high,
+        grid=grid,
+        local_step=local_step,
+        padding=padding,
+        source=sort!(unique(support_sources)),
+    )
+end
+
+function _hybrid_stats(before, after)
+    unique_delta = after.unique_solves - before.unique_solves
+    failure_delta = after.failed_points - before.failed_points
+    return (
+        stats=(total=unique_delta, success=unique_delta - failure_delta, failure=failure_delta),
+        cache_stats=(
+            point_requests=after.point_requests - before.point_requests,
+            cache_hits=after.cache_hits - before.cache_hits,
+            unique_solves=unique_delta,
+            targeted_additions=after.targeted_additions - before.targeted_additions,
+        ),
+    )
+end
+
+function _production_classify_temperature_hybrid(
+        aggregate_csv::String,
+        eval_dir::String,
+        T_mid::Float64,
+        base_rho_grid::Vector{Float64},
+        xi::Float64,
+        reverse_rho::Bool,
+        p_num::Int,
+        t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
+        cfg::ProductionPipelineConfig,
+        session;
+        prior::Union{Nothing, RhoSupportRefinement.RhoSupportPrior}=nothing)
+    before = TrhoScan.rho_session_snapshot(session)
+    stage_a = _production_classify_temperature_cascade(
+        aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+        p_num, t_num, thermo_quadrature_kwargs, cfg, session; prior=prior)
+
+    common = (
+        stage_a_status=stage_a.slice_status,
+        stage_b_status=:not_run,
+        stage_c_status=:not_run,
+        stage_used=:stage_a,
+        hybrid_upgrade_reason="stage_a_certificate",
+        hybrid_support_low=nothing,
+        hybrid_support_high=nothing,
+        hybrid_support_source=Symbol[],
+        hybrid_verification_point_count=0,
+    )
+
+    # Stage A is allowed to certify monotonicity because it already contains
+    # both cascade rho layers.  A first-order result always continues to
+    # Stage B; this prevents the cheaper support heuristic from publishing a
+    # first-order certificate on its own.
+    if stage_a.slice_status == :confirmed_monotone
+        after = TrhoScan.rho_session_snapshot(session)
+        return merge(stage_a, common, _hybrid_stats(before, after))
+    end
+
+    stage_b = _production_classify_temperature_memoized_uniform(
+        aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+        p_num, t_num, thermo_quadrature_kwargs, cfg, session;
+        level_start=2, level_stop=3, output_suffix="hybrid_stage_b")
+    stage_a_first = stage_a.slice_status == :confirmed_first_order && stage_a.raw_status == :valid
+    # Stage C is specifically allowed to repair a Stage-B geometry mismatch;
+    # it therefore needs a valid Maxwell curve, not a pre-existing Stage-B
+    # semantic certificate.
+    stage_b_first = stage_b.raw_status == :valid
+    cross_ab = _compare_phase_geometry(stage_a, stage_b, PhaseGeometryTolerances(
+        position_MeV=cfg.rho_position_tol_MeV,
+        density=cfg.rho_density_tol,
+        maxwell_area=cfg.rho_maxwell_area_tol,
+    ))
+
+    if stage_a_first && stage_b_first && cross_ab.converged
+        after = TrhoScan.rho_session_snapshot(session)
+        return merge(stage_b, (
+            slice_status=:confirmed_first_order,
+            geometry_converged=true,
+            position_error_MeV=cross_ab.position_MeV,
+            density_error=cross_ab.density,
+            maxwell_area_gate=cross_ab.maxwell_area,
+            stage_b_status=stage_b.slice_status,
+            stage_c_status=:not_run,
+            stage_used=:stage_b,
+            hybrid_upgrade_reason="stage_a_stage_b_first_order_geometry_pass",
+            hybrid_support_low=nothing,
+            hybrid_support_high=nothing,
+            hybrid_support_source=Symbol[],
+            hybrid_verification_point_count=0,
+        ), _hybrid_stats(before, after))
+    end
+
+    support = _hybrid_support_grid(base_rho_grid, stage_a, stage_b)
+    if support === nothing
+        after = TrhoScan.rho_session_snapshot(session)
+        return merge(stage_b, (
+            slice_status=:ambiguous_near_critical,
+            geometry_converged=false,
+            stage_a_status=stage_a.slice_status,
+            stage_b_status=stage_b.slice_status,
+            stage_c_status=:not_run,
+            stage_used=:stage_b,
+            hybrid_upgrade_reason="no_reliable_support_for_local_oracle",
+            hybrid_support_low=nothing,
+            hybrid_support_high=nothing,
+            hybrid_support_source=Symbol[],
+            hybrid_verification_point_count=0,
+        ), _hybrid_stats(before, after))
+    end
+
+    token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
+    out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_stage_c.csv")
+    io_mode = isfile(out_csv) ? "a" : "w"
+    written = Set{Tuple{Float64, Float64, Float64}}()
+    io_mode == "a" && union!(written, _existing_session_keys(out_csv))
+    # Stage C reuses all Stage-B points inside the declared support and adds
+    # only the local 0.003125 grid.  Build the union before scanning so
+    # floating-point representations of shared nested points are materialized
+    # under the exact keys used by the verification curve.
+    stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
+    verification_grid = sort!(unique(vcat(
+        [rho for rho in stage_b_grid if support.low <= rho <= support.high],
+        support.grid,
+    )))
+    open(out_csv, io_mode) do io
+        io_mode == "w" && println(io, TrhoScan.HEADER)
+        _production_session_scan!(session, io, written, T_mid, xi, verification_grid,
+            reverse_rho, p_num, t_num, thermo_quadrature_kwargs)
+    end
+    # It never falls back to a global oracle: every verification point is
+    # either a Stage-B point within support or part of support.grid.
+    curve_c, _ = _production_session_curve_for_grid(session, T_mid, xi, verification_grid)
+    stage_c = _classify_production_curve(curve_c, cfg, 4, out_csv)
+    geometry_bc = _compare_phase_geometry(stage_b, stage_c, PhaseGeometryTolerances(
+        position_MeV=cfg.rho_position_tol_MeV,
+        density=cfg.rho_density_tol,
+        maxwell_area=cfg.rho_maxwell_area_tol,
+    ))
+    stage_c_valid = stage_c.status == :valid && stage_b_first && geometry_bc.converged
+    _append_scan_csv!(aggregate_csv, out_csv)
+    after = TrhoScan.rho_session_snapshot(session)
+    stats = _hybrid_stats(before, after)
+    return merge(stage_c, stats, (
+        raw_status=stage_c.status,
+        slice_status=stage_c_valid ? :confirmed_first_order : :ambiguous_near_critical,
+        coarse_status=stage_a.raw_status,
+        fine_status=stage_c.status,
+        coarse_reason=stage_a.reason,
+        fine_reason=stage_c.reason,
+        geometry_converged=geometry_bc.converged && stage_c_valid,
+        position_error_MeV=geometry_bc.position_MeV,
+        density_error=geometry_bc.density,
+        maxwell_area_gate=geometry_bc.maxwell_area,
+        stage_a_status=stage_a.slice_status,
+        stage_b_status=stage_b.slice_status,
+        stage_c_status=stage_c_valid ? :confirmed_first_order : stage_c.status,
+        stage_used=:stage_c,
+        hybrid_upgrade_reason=stage_c_valid ?
+            "local_stage_c_first_order_geometry_pass" :
+            "stage_c_local_oracle_did_not_close_geometry",
+        hybrid_support_low=support.low,
+        hybrid_support_high=support.high,
+        hybrid_support_source=support.source,
+        hybrid_verification_point_count=length(verification_grid),
+        rho_convergence_records=vcat(
+            collect(get(stage_a, :rho_convergence_records, NamedTuple[])),
+            collect(get(stage_b, :rho_convergence_records, NamedTuple[])),
+            [(
+                axis="rho", level=4, left=3.0, right=4.0, midpoint=4.0,
+                position_error_MeV=isfinite(geometry_bc.position_MeV) ? geometry_bc.position_MeV : nothing,
+                density_error=isfinite(geometry_bc.density) ? geometry_bc.density : nothing,
+                maxwell_area=isfinite(geometry_bc.maxwell_area) ? geometry_bc.maxwell_area : nothing,
+                response_rtol=nothing, converged=stage_c_valid,
+                reason=stage_c_valid ? "ok" : "hybrid_stage_c_not_converged",
+            )],
+        ),
+    ))
 end
 
 function _production_classify_temperature(
@@ -454,7 +750,13 @@ function _production_classify_temperature(
         rho_session=nothing,
         rho_prior::Union{Nothing, RhoSupportRefinement.RhoSupportPrior}=nothing,
         work_telemetry::Union{Nothing, SolverWorkTelemetry}=nothing)
-    if cfg.rho_refinement_policy === :rho_support_cascade
+    if cfg.rho_refinement_policy === :rho_support_hybrid
+        return _production_classify_temperature_hybrid(
+            aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+            p_num, t_num, thermo_quadrature_kwargs, cfg, rho_session;
+            prior=rho_prior,
+        )
+    elseif cfg.rho_refinement_policy === :rho_support_cascade
         return _production_classify_temperature_cascade(
             aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
             p_num, t_num, thermo_quadrature_kwargs, cfg, rho_session;
@@ -892,21 +1194,27 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     cep_max_bisect_iter > 0 || throw(ArgumentError("cep_max_bisect_iter must be positive"))
     unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative, got $(unknown_budget)"))
     cep_max_refine_level_rho >= 0 || throw(ArgumentError("cep_max_refine_level_rho must be nonnegative"))
-    rho_refinement_policy in (:uniform_nested, :rho_support_cascade) || throw(ArgumentError(
-        "rho_refinement_policy must be :uniform_nested or :rho_support_cascade, got $(rho_refinement_policy)",
+    rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) || throw(ArgumentError(
+        "rho_refinement_policy must be :uniform_nested, :rho_support_cascade, or :rho_support_hybrid, got $(rho_refinement_policy)",
     ))
-    if rho_refinement_policy === :rho_support_cascade
+    if rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
         rho_support_targeted_cap >= rho_support_config.target_point_count || throw(ArgumentError(
             "rho_support_targeted_cap must cover rho_support_config.target_point_count",
         ))
     end
     rho_support_fine_step > 0 || throw(ArgumentError("rho_support_fine_step must be positive"))
-    if rho_refinement_policy === :rho_support_cascade
-        model_kind === :PNJL || throw(ArgumentError("rho_support_cascade is currently supported only for model_kind=:PNJL"))
-        rho_geometry_convergence || throw(ArgumentError("rho_support_cascade requires rho_geometry_convergence=true"))
-        cep_max_refine_level_rho == 1 || throw(ArgumentError(
-            "rho_support_cascade requires cep_max_refine_level_rho=1 for its two-layer certificate",
+    if rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
+        model_kind === :PNJL || throw(ArgumentError("$(rho_refinement_policy) is currently supported only for model_kind=:PNJL"))
+        rho_geometry_convergence || throw(ArgumentError("$(rho_refinement_policy) requires rho_geometry_convergence=true"))
+        required_level = rho_refinement_policy === :rho_support_hybrid ? 4 : 1
+        cep_max_refine_level_rho == required_level || throw(ArgumentError(
+            "$(rho_refinement_policy) requires cep_max_refine_level_rho=$(required_level)",
         ))
+        if rho_refinement_policy === :rho_support_hybrid
+            rho_support_targeted_cap <= 12 || throw(ArgumentError(
+                "rho_support_hybrid Stage A targeted cap must be <= 12",
+            ))
+        end
     end
     if rho_geometry_convergence && cep_max_refine_level_rho < 1
         throw(ArgumentError("rho geometry convergence requires cep_max_refine_level_rho >= 1"))
@@ -969,7 +1277,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
 
     temps = _production_temperature_grid(cfg.T_start, cfg.T_end, cfg.dT_initial)
     rho_base = collect(Float64.(rho_grid))
-    if cfg.rho_refinement_policy === :rho_support_cascade
+    if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
         sort!(rho_base)
         unique!(rho_base)
         length(rho_base) >= 2 || throw(ArgumentError("rho_grid must contain at least two unique values"))
@@ -979,7 +1287,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     aggregate_csv = joinpath(run_dir, "trho_scan.csv")
     mkpath(eval_dir)
 
-    rho_session = (cfg.rho_refinement_policy === :rho_support_cascade || memoize_uniform) ?
+    rho_session = (cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) || memoize_uniform) ?
         TrhoScan.new_rho_point_session(
             model_kind=model_kind,
             reverse_rho=reverse_rho,
@@ -1030,7 +1338,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             iterations,
             cfg,
             rho_session=rho_session,
-            rho_prior=cfg.rho_refinement_policy === :rho_support_cascade ? rho_support_prior(Float64(T)) : nothing,
+            rho_prior=cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? rho_support_prior(Float64(T)) : nothing,
             work_telemetry=work_telemetry,
         )
         eval_cache[key] = value
@@ -1094,6 +1402,15 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             fine_reason=String(get(res, :fine_reason, reason)),
             cascade_status=Symbol(get(res, :cascade_status, :not_run)),
             cascade_targeted_count=Int(get(res, :cascade_targeted_count, 0)),
+            stage_used=Symbol(get(res, :stage_used, :uniform_nested)),
+            hybrid_upgrade_reason=String(get(res, :hybrid_upgrade_reason, "not_applicable")),
+            hybrid_stage_a_status=Symbol(get(res, :stage_a_status, :not_run)),
+            hybrid_stage_b_status=Symbol(get(res, :stage_b_status, :not_run)),
+            hybrid_stage_c_status=Symbol(get(res, :stage_c_status, :not_run)),
+            hybrid_support_low=Float64(something(get(res, :hybrid_support_low, nothing), NaN)),
+            hybrid_support_high=Float64(something(get(res, :hybrid_support_high, nothing), NaN)),
+            hybrid_support_source=String.(get(res, :hybrid_support_source, Symbol[])),
+            hybrid_verification_point_count=Int(get(res, :hybrid_verification_point_count, 0)),
             geometry_converged=Bool(get(res, :geometry_converged, false)),
             position_error_MeV=Float64(get(res, :position_error_MeV, Inf)),
             density_error=Float64(get(res, :density_error, Inf)),
@@ -1277,7 +1594,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "crossover_mu0_only" => crossover_mu0_only,
         "crossover_T_max_MeV" => (isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end),
     )
-    config_snapshot["config_hash"] = _config_hash(model_kind;
+    hash_options = (
         mode=:production,
         profile=profile,
         xi=xi,
@@ -1309,7 +1626,15 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         temperature_density_tol=cfg.temperature_density_tol,
         temperature_maxwell_area_tol=cfg.temperature_maxwell_area_tol,
         crossover_mu0_only=crossover_mu0_only,
-        crossover_T_max_MeV=(isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end))
+        crossover_T_max_MeV=(isfinite(cfg.crossover_T_max_MeV) ? cfg.crossover_T_max_MeV : cfg.T_end),
+    )
+    if cfg.rho_refinement_policy === :rho_support_hybrid
+        config_snapshot["rho_hybrid_local_step"] = 0.003125
+        config_snapshot["rho_hybrid_support_padding"] = 0.025
+        config_snapshot["rho_hybrid_stage_chain"] = ["stage_a_cascade", "stage_b_dense", "stage_c_local_oracle"]
+        hash_options = merge(hash_options, (rho_hybrid_local_step=0.003125, rho_hybrid_support_padding=0.025))
+    end
+    config_snapshot["config_hash"] = _config_hash(model_kind; hash_options...)
 
     session_snapshot = rho_session === nothing ? nothing : TrhoScan.rho_session_snapshot(rho_session)
     diagnostics = Dict{String, Any}(
@@ -1352,6 +1677,14 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             "failed_points" => session_snapshot.failed_points,
         ),
     )
+    if cfg.rho_refinement_policy === :rho_support_hybrid
+        diagnostics["rho_hybrid_local_step"] = 0.003125
+        diagnostics["rho_hybrid_support_padding"] = 0.025
+        diagnostics["rho_hybrid_stage_counts"] = Dict(
+            String(stage) => count(row -> row.stage_used == stage, sweep_records)
+            for stage in unique(row.stage_used for row in sweep_records)
+        )
+    end
 
     base_result = PhasePipelineResult(
         model_kind=model_kind,

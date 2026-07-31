@@ -115,6 +115,17 @@ production 默认 `rho_refinement_policy=:uniform_nested`，因此历史数值�
 不写入全局状态；`SolverWorkTelemetry` 可作为可选请求参数收集 solver 成本。
 该 opt-in 路径只用于 shadow/候选验证，不能自动晋升 reference。
 
+### 三级 hybrid production（显式 opt-in）
+
+当两层 cascade 证据冲突或无法闭合 geometry 时，可选择
+`rho_refinement_policy=:rho_support_hybrid` 并固定 `rho_refine_levels=4`。Stage A
+沿用 `0.05 -> 0.025` cascade（每温度 targeted 总上限 `12`），Stage B 复用 cache
+执行 `0.0125 -> 0.00625` memoized dense；只有 unresolved/冲突切片才在 cascade
+support、coexistence/spinodal densities 的并集及两端 `0.025` padding 内执行
+`0.003125` 局部 Stage C。无可靠 support 时保持 `ambiguous_near_critical`，不会退化为
+全域 oracle，也不会产生新的 monotone 证书。该策略仅用于独立 shadow/candidate
+验证，审核通过前不得重放全温区 reference。
+
 ## Phase 热积分策略
 
 PNJL 标量 phase thermodynamics 入口支持两种显式策略：
