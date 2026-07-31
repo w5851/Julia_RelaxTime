@@ -193,7 +193,7 @@ function _slice_row(cfg, T, result)
         area_residual=_safe_float(_field(record, :area_residual, NaN)),
         rho_hadron=_safe_float(_field(record, :rho_hadron, NaN)),
         rho_quark=_safe_float(_field(record, :rho_quark, NaN)),
-        mu_transition_MeV=_safe_float(_field(record, :mu_transition, NaN)),
+        mu_transition_MeV=_safe_float(_field(record, :mu_transition_MeV, _field(record, :mu_transition, NaN))),
         mu_spinodal_hadron_MeV=_safe_float(_field(record, :mu_spinodal_hadron_MeV, NaN)),
         mu_spinodal_quark_MeV=_safe_float(_field(record, :mu_spinodal_quark_MeV, NaN)),
         rho_spinodal_hadron=_safe_float(_field(record, :rho_spinodal_hadron, NaN)),

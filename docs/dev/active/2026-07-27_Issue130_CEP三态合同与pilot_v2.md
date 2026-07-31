@@ -109,3 +109,20 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 仅当 verdict 为 `full_cascade_candidate` 才转 ready；
   `hybrid_required`、`oracle_inconclusive` 或 `integration_failed` 均停在诊断状态，
   不自动落地 hybrid、不重放 C0/C1/C2、不启动 transport。
+
+## Hybrid shadow v2 诊断收口（2026-07-31）
+
+- [x] PR #153 已合并为 `main@fde2b929b60575f1daacb84a1b9b8ff6e3b0a0cc`，并触发
+  hybrid shadow run `30601857594`；9 个数值 job、aggregate 和 provenance 均成功。
+- [x] 已下载并审计 source artifact：58,875 个曲线点 finite/converged，重复键为 0，
+  solver failure/fallback/retry 为 0；当前仍为 diagnostic-only。
+- [x] 当前 run 暴露三类问题：oracle 低温必需 anchors 不稳定、Stage C 分类与 oracle
+  存在差异、hybrid solver work 高于 dense；另有 `mu_transition_MeV` 和 Actions
+  provisional/final snapshot 合同缺陷。
+- [ ] PR1 `codex/issue-130-hybrid-shadow-evidence-replay`：修正字段、provenance、
+  strict oracle gate 和 replay；检查通过后自动合并，并从 source run `30601857594`
+  生成 final aggregate evidence。
+- [ ] PR2：利用现有完整曲线做 Stage C 全局曲线合并、多 Maxwell 候选和 adaptive-cap
+  离线 feasibility；未得到 `feasible_candidate` 前不修改 production。
+- [ ] PR3：仅在 feasibility 通过后实现自适应 Stage C，自动合并后从新的 main SHA
+  运行 targeted/full shadow；通过并经作者审核前不启动 C0/C1/C2。
