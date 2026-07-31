@@ -1,0 +1,5 @@
+cap,anchors,state_matches,state_match_fraction,classification_mismatches,geometry_gate_pass,multiple_candidate_anchors,unique_solves,targeted_points,dense_unique_solves,cost_gate,state_gate,maxwell_candidate_gate
+48,24,22,0.9166666666666666,2,True,0,4356,884,15384.0,True,False,True
+96,24,22,0.9166666666666666,2,True,0,5220,1748,15384.0,True,False,True
+160,24,22,0.9166666666666666,2,True,0,6372,2900,15384.0,True,False,True
+224,24,22,0.9166666666666666,2,True,0,7524,4052,15384.0,True,False,True
