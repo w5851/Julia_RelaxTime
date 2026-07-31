@@ -3,7 +3,8 @@
 创建日期：2026-07-27
 
 状态：三态合同 PR #147 已 squash merge；pilot v2 数值 Actions、aggregate replay 和
-evidence 导入已完成，当前停在作者物理审核。PR #146 已 squash merge（merge SHA
+evidence 导入已完成。hybrid shadow replay 与 Stage-C offline feasibility 已完成，
+当前因 `maxwell_candidate_inconclusive` 停在作者物理审核。PR #146 已 squash merge（merge SHA
 `5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run `30199406478`，
 9/9 matrix + aggregate success），v1 evidence 结论保持 `diagnostic_only`，不晋升
 reference。三态合同 merge SHA 为
@@ -105,10 +106,10 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `p_num=24/t_num=8`、`rs_reduced_adaptive` 和三种 rho 分辨率口径；不写 reference。
 - [x] 新增 collector/plotter、curve index、provenance/hash/重复键/finite 合同与
   Python contract tests；完整 PNJL 数值尚未在本机运行。
-- [ ] 提交并创建 Draft PR；锁定当前 branch calculation SHA 后触发 shadow Actions。
-- [ ] 仅当 verdict 为 `full_cascade_candidate` 才转 ready；
-  `hybrid_required`、`oracle_inconclusive` 或 `integration_failed` 均停在诊断状态，
-  不自动落地 hybrid、不重放 C0/C1/C2、不启动 transport。
+- [x] PR #149 已合并并从 main 触发 shadow；source run 与 replay 均保留 immutable
+  calculation SHA、provenance 和 raw curve index。
+- [x] shadow 主 verdict 为 `oracle_inconclusive`；不自动落地 hybrid、不重放 C0/C1/C2、
+  不启动 transport。
 
 ## Hybrid shadow v2 诊断收口（2026-07-31）
 
@@ -119,10 +120,30 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 当前 run 暴露三类问题：oracle 低温必需 anchors 不稳定、Stage C 分类与 oracle
   存在差异、hybrid solver work 高于 dense；另有 `mu_transition_MeV` 和 Actions
   provisional/final snapshot 合同缺陷。
-- [ ] PR1 `codex/issue-130-hybrid-shadow-evidence-replay`：修正字段、provenance、
+- [x] PR1 `codex/issue-130-hybrid-shadow-evidence-replay`：修正字段、provenance、
   strict oracle gate 和 replay；检查通过后自动合并，并从 source run `30601857594`
   生成 final aggregate evidence。
-- [ ] PR2：利用现有完整曲线做 Stage C 全局曲线合并、多 Maxwell 候选和 adaptive-cap
+- [x] PR2：利用现有完整曲线做 Stage C 全局曲线合并、多 Maxwell 候选和 adaptive-cap
   离线 feasibility；未得到 `feasible_candidate` 前不修改 production。
 - [ ] PR3：仅在 feasibility 通过后实现自适应 Stage C，自动合并后从新的 main SHA
   运行 targeted/full shadow；通过并经作者审核前不启动 C0/C1/C2。
+
+## Hybrid shadow replay 与 Stage-C offline feasibility（2026-07-31）
+
+- [x] PR1 evidence/replay 修正已 squash merge：PR #154 merge SHA
+  `04a84ed4b98f990248cadb8b4a474d6b83a2813c`；历史 Stage-C support 标签兼容修正
+  PR #155 merge SHA `982fed04783c64c431b1a4745e88ab43e2040dc3`。
+- [x] source run `30601857594` 已用 aggregate replay `30609095886` 收口；postprocess
+  SHA 为 `982fed04783c64c431b1a4745e88ab43e2040dc3`，evidence state 为 `final`，主
+  verdict 为 `oracle_inconclusive`。保留 5 个分类差异、6 个性能超限项和 11 组旧
+  Stage-C 标签 compatibility warnings；未重算 PNJL。
+- [x] PR2 离线 Stage-C feasibility 已用 replay CSV 完成 deterministic replay：完整
+  Stage-B 0.00625 global reference 与局部 0.003125 点合并，枚举稳定 `+→−→+`
+  候选，并测试 caps `48/96/160/224`；solver_called=false。
+- [x] 当前 PR2 预期 verdict 为 `maxwell_candidate_inconclusive`：所有 cap 的成本
+  估计均低于 dense 的 15384 unique solves，但有两个弱 S/CEP 邻域 first-order
+  oracle anchors（`xi=-0.5,T=147.0947265625` 与 `xi=0.5,T=106.9599609375`）
+  无法形成唯一稳定 topology；没有选出 `selected_policy`。
+- [ ] 因 feasibility 未通过，不创建 production adaptive Stage-C PR，不启动
+  targeted/full shadow、C0/C1/C2、reference replay 或 transport；等待作者判断弱 S
+  与 Maxwell 候选的后续物理/数值方案。
