@@ -31,6 +31,8 @@ def test_multiple_candidates_are_not_silently_collapsed():
     second = {"rho_low": 2.0, "rho_high": 2.5, "negative_secants": 3, "slope_before": 1.0, "slope_after": 1.0}
     merged = module._merge_candidates([first], [second])
     assert len(merged) == 2
+    near = {"rho_low": 1.01, "rho_high": 1.5, "negative_secants": 2, "slope_before": 1.0, "slope_after": 1.0}
+    assert len(module._merge_candidates([first], [near])) == 2
 
 
 def test_local_selection_is_deterministic_and_capped():

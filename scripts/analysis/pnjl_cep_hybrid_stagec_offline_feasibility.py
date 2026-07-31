@@ -181,9 +181,15 @@ def _oracle_row(slice_rows: list[dict[str, str]], xi: float, temperature: float)
 def _geometry_gate(row: dict[str, str] | None) -> bool:
     if row is None or not _bool(row.get("geometry_converged")):
         return False
-    if not all(_finite(row.get(field)) for field in ("mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "area_residual")):
+    if not all(_finite(row.get(field)) for field in ("position_error_MeV", "density_error", "maxwell_area_gate", "mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "area_residual")):
         return False
-    return _float(row.get("area_residual")) <= AREA_TOL and abs(_float(row.get("rho_hadron")) - _float(row.get("rho_quark"))) > DENSITY_TOL
+    return (
+        _float(row.get("position_error_MeV")) <= MU_TOL
+        and _float(row.get("density_error")) <= DENSITY_TOL
+        and _float(row.get("maxwell_area_gate")) <= AREA_TOL
+        and _float(row.get("area_residual")) <= AREA_TOL
+        and abs(_float(row.get("rho_hadron")) - _float(row.get("rho_quark"))) > DENSITY_TOL
+    )
 
 
 def _feature_targets(global_points: list[tuple[float, float]], local_points: list[tuple[float, float]], oracle_row: dict[str, str] | None) -> list[float]:
@@ -228,7 +234,10 @@ def _merge_candidates(*candidate_sets: list[dict[str, float]]) -> list[dict[str,
     flattened = sorted((candidate for candidates in candidate_sets for candidate in candidates), key=lambda item: item["rho_low"])
     merged: list[dict[str, float]] = []
     for candidate in flattened:
-        if merged and candidate["rho_low"] <= merged[-1]["rho_high"] + 0.025:
+        # Only overlapping intervals are the same candidate seen at two
+        # resolutions. A small gap is not a license to collapse two distinct
+        # Maxwell candidates; those must remain ambiguous.
+        if merged and candidate["rho_low"] <= merged[-1]["rho_high"] and candidate["rho_high"] >= merged[-1]["rho_low"]:
             merged[-1]["rho_high"] = max(merged[-1]["rho_high"], candidate["rho_high"])
             merged[-1]["negative_secants"] = max(merged[-1]["negative_secants"], candidate["negative_secants"])
             merged[-1]["slope_before"] = max(merged[-1]["slope_before"], candidate["slope_before"])
@@ -261,6 +270,7 @@ def _frontier(curves: list[dict[str, str]], slices: list[dict[str, str]], costs:
     anchors = sorted({(float(row["xi"]), float(row["T_MeV"])) for row in slices if row.get("method") == "independent_oracle"})
     dense_unique = sum(_float(row.get("unique_solves"), 0.0) for row in costs if row.get("method") == "memoized_dense")
     global_cache = {(xi, T): _group_points(curves, method="independent_oracle", xi=xi, temperature=T, levels={"0"}) for xi, T in anchors}
+    oracle_fine_cache = {(xi, T): _group_points(curves, method="independent_oracle", xi=xi, temperature=T, levels={"0", "1"}) for xi, T in anchors}
     local_cache = {(xi, T): _group_points(curves, method="production_hybrid", xi=xi, temperature=T, levels={"4"}) for xi, T in anchors}
     base_cache = {(xi, T): _group_points(curves, method="production_hybrid", xi=xi, temperature=T, levels={"0", "1"}) for xi, T in anchors}
 
@@ -278,6 +288,7 @@ def _frontier(curves: list[dict[str, str]], slices: list[dict[str, str]], costs:
         for xi, T in anchors:
             oracle_row = _oracle_row(slices, xi, T)
             global_points = global_cache[(xi, T)]
+            oracle_fine_points = oracle_fine_cache[(xi, T)]
             local_points = local_cache[(xi, T)]
             targets = _feature_targets(global_points, local_points, oracle_row)
             selected = _select_local_points(local_points, targets, cap)
@@ -290,12 +301,15 @@ def _frontier(curves: list[dict[str, str]], slices: list[dict[str, str]], costs:
                 merged_map.setdefault(rho, mu)
             merged = sorted(merged_map.items())
             simulated_status, reason, candidates = _classify(merged, oracle_row, global_points)
+            global_candidates = _candidate_runs(global_points)
+            fine_candidates = _candidate_runs(oracle_fine_points)
+            cross_resolution_multiple = max(len(global_candidates), len(fine_candidates)) > 1
             oracle_status = oracle_row.get("result_status", "missing") if oracle_row else "missing"
             total_unique += len(base_cache[(xi, T)]) + len(selected)
             total_selected += len(selected)
             matches += int(simulated_status == oracle_status)
             geometry_pass += int(simulated_status != "confirmed_first_order" or _geometry_gate(oracle_row))
-            multiple += int(reason == "multiple_maxwell_candidates")
+            multiple += int(cross_resolution_multiple)
             mismatches += int(simulated_status != oracle_status)
             replay_rows.append({
                 "xi": xi, "T_MeV": T, "cap": cap, "oracle_status": oracle_status,
@@ -303,6 +317,8 @@ def _frontier(curves: list[dict[str, str]], slices: list[dict[str, str]], costs:
                 "candidate_count": len(candidates), "selected_targeted_points": len(selected),
                 "base_unique_points": len(base_cache[(xi, T)]), "global_reference_points": len(global_points),
                 "local_pool_points": len(local_points), "geometry_gate": _geometry_gate(oracle_row),
+                "global_candidate_count": len(global_candidates), "fine_candidate_count": len(fine_candidates),
+                "cross_resolution_multiple_candidates": cross_resolution_multiple,
             })
             if cap == caps[0] and (simulated_status != oracle_status or reason in {"unique_candidate_geometry_gate", "stable_no_s_shape"}):
                 stride = max(1, len(global_points) // 64)
