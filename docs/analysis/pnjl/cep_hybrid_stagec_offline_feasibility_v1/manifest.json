@@ -2,7 +2,7 @@
   "file_sha256": {
     "AUDIT.md": "4024105d400120ef57e3f439f0c1a4767b7c384ad78a1fb5aa066260ab5a58a8",
     "README.md": "e95c7cfd81957ac5fdac4d659c52299653f20d18ce2a74196bfe4cb503c812aa",
-    "anchor_replay.csv": "add40cfa4fb6925dc55823e2d2b3e123912accef041fb2fe2138eceab44df2ce",
+    "anchor_replay.csv": "32fdbb9e7793c87290000843ec093b8fa32a595d422fc8e4340608b820eb1099",
     "claim_ledger.csv": "67c5860761080ea196e8df87f527975c2aa693d6edeca464985f53344ef880d5",
     "curve_index.csv": "fb253decda3d4d73192ce82ccaa713338a4f9e6f1ce5b26d5a816a0130ef4d97",
     "maxwell_candidates.csv": "602fb0dde1f909484a3ad1989a20078ce882770fb4812d769cfa05b88f5db065",
@@ -11,7 +11,7 @@
     "selected_policy.json": "bcb61cc2f48a5e79dbf0aa1c064e0602f8c64df3b68c8273ece2dc765bb7cf15",
     "stage_c_cost_frontier.csv": "0bae41fe2afdccc50c8852fb6b51fdbbc1b84b845c49d1526f1d88be572ad6f5"
   },
-  "generated_at_utc": "2026-07-31T06:33:29.934429Z",
+  "generated_at_utc": "2026-07-31T06:41:18.701139Z",
   "schema_version": "cep_hybrid_stagec_offline_feasibility_v1",
   "selected_policy": {
     "caps": [
