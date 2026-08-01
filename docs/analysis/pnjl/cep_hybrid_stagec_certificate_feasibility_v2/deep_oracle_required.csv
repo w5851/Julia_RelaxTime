@@ -1,0 +1,6 @@
+xi,T_MeV,oracle_status,hybrid_status,reason
+-0.5,20.0,ambiguous_near_critical,confirmed_first_order,deep_oracle_required
+0.0,5.0,ambiguous_near_critical,confirmed_first_order,deep_oracle_required
+0.0,20.0,ambiguous_near_critical,confirmed_first_order,deep_oracle_required
+0.5,5.0,ambiguous_near_critical,confirmed_first_order,deep_oracle_required
+0.5,20.0,ambiguous_near_critical,confirmed_first_order,deep_oracle_required

@@ -1,0 +1,5 @@
+claim_id,claim,status,boundary
+classification,v2 replay matches author anchors and oracle non-ambiguous anchors,inconclusive,offline semantic replay only
+geometry,Maxwell and rho geometry are recomputed with Julia core,inconclusive,no new equilibrium solves
+cost,Stage-A/B/C union unique solves do not exceed dense,pass,residual/Jacobian and runner costs require Actions
+promotion,v2 authorizes production/reference promotion,not_claimed,requires targeted/full shadow and author review

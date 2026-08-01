@@ -149,3 +149,42 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 因 feasibility 未通过，不创建 production adaptive Stage-C PR，不启动
   targeted/full shadow、C0/C1/C2、reference replay 或 transport；等待作者判断弱 S
   与 Maxwell 候选的后续物理/数值方案。
+
+## Stage-C certificate feasibility v2（2026-07-31）
+
+- [x] 从 `main@b02336802fdb6e15a0592cd152049e82941afcd6` 创建
+  `codex/issue-130-stagec-certificate-feasibility-v2`。
+- [x] 新增 solver-free Julia replay
+  `scripts/analysis/pnjl_cep_hybrid_stagec_certificate_feasibility_v2.jl`：直接复用
+  `PhaseCore`、Maxwell construction 和 phase geometry comparison；Stage-B semantic
+  grid 不再免费计入成本，oracle row 不参与选点。
+- [x] 新增 density-support/drawdown 特征路由和 `12/24/48/96/160` cap frontier；
+  v2 不修改 equilibrium solver、`detect_s_shape`、默认 uniform/cascade 或历史 evidence。
+- [x] 两个作者确认的一阶点重算为 `confirmed_first_order`，两个高温 control 重算为
+  `confirmed_monotone`；说明此前弱 S 假阴性来自 v1 离线候选规则，而非 production
+  detector 在这四个点上的结果。
+- [x] v2 成本 frontier 为 `6588–6901` unique solves，dense reference 为 `15384`；
+  Maxwell/geometry 和候选唯一性 gate 均通过。
+- [x] v2 verdict 为 `oracle_inconclusive`：5 个低温 oracle-ambiguous 点被离线
+  Stage-C 证书确认，已写入 `deep_oracle_required.csv`，不自动晋升为物理结论。
+- [x] 新 evidence 写入
+  `docs/analysis/pnjl/cep_hybrid_stagec_certificate_feasibility_v2/`，保留 v1
+  evidence 原样；代表性曲线图、作者裁决 provenance、manifest 和 claim ledger 已生成。
+- [x] focused Julia helper `13/13`、Julia parser、Python `py_compile` 和
+  `git diff --check` 通过；完整 PNJL solver 未在本机调用。
+- [ ] 因当前 verdict 为 `oracle_inconclusive`，暂不创建或合并 adaptive production PR，
+  不运行 targeted/full shadow，也不启动 C0/C1/C2、reference replay 或 transport；下一步
+  仅在作者允许后，对 `deep_oracle_required.csv` 中 5 个点运行 `0.003125→0.0015625`
+  deep oracle。
+
+## Deep oracle（作者已批准，2026-08-01）
+
+- [x] 固定范围为 `(-0.5,20)`、`(0,5)`、`(0,20)`、`(0.5,5)`、`(0.5,20)` 五个低温
+  anchor；不扩展到全相图。
+- [x] 新增独立 workflow `.github/workflows/pnjl-cep-deep-oracle.yml`，每个 anchor
+  一个独立 job，使用 `0.003125→0.0015625` 的 independent-oracle rho 分辨率。
+- [x] workflow 使用独立的 workflow-head SHA 与 calculation SHA provenance；不写 reference。
+- [ ] 触发并完成 GitHub Actions deep-oracle run，随后审计五个 job 的曲线、两层状态、
+  Maxwell/geometry、finite/converged、哈希和成本。
+- [ ] deep-oracle 完成前不创建 adaptive production PR，不启动 targeted/full shadow、
+  C0/C1/C2、reference replay 或 transport。
