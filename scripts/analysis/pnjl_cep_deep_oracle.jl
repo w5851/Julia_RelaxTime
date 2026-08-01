@@ -71,9 +71,14 @@ end
 
 function _deep_finite(value)
     try
-        return isfinite(Float64(value)) ? Float64(value) : nothing
+        # CSV.write uses `missing` for an intentionally unavailable numeric
+        # field.  `nothing` is a Julia object value and is not printable by
+        # CSV.jl, which would abort an otherwise valid deep-oracle job when a
+        # three-state CEP field is absent (for example, the first monotone
+        # endpoint on a first-order anchor).
+        return isfinite(Float64(value)) ? Float64(value) : missing
     catch
-        return nothing
+        return missing
     end
 end
 

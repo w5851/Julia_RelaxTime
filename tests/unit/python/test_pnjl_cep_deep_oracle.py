@@ -80,3 +80,11 @@ def test_deep_oracle_workflow_is_fixed_scope_and_provenance_bound():
     assert "reference_write" not in text
     assert "cep.mu_last_first_order_MeV" in runner
     assert "cep.muq_last_first_order_MeV" not in runner
+
+
+def test_deep_oracle_csv_uses_missing_for_unavailable_cep_fields():
+    runner = (ROOT / "scripts" / "analysis" / "pnjl_cep_deep_oracle.jl").read_text(encoding="utf-8")
+    block = runner.split("function _deep_finite(value)", 1)[1].split("function _deep_write_job", 1)[0]
+    assert "? Float64(value) : missing" in block
+    assert "return missing" in block
+    assert "return isfinite(Float64(value)) ? Float64(value) : nothing" not in block
