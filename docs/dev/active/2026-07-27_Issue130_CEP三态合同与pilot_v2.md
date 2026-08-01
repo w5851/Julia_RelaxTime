@@ -176,3 +176,15 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不运行 targeted/full shadow，也不启动 C0/C1/C2、reference replay 或 transport；下一步
   仅在作者允许后，对 `deep_oracle_required.csv` 中 5 个点运行 `0.003125→0.0015625`
   deep oracle。
+
+## Deep oracle（作者已批准，2026-08-01）
+
+- [x] 固定范围为 `(-0.5,20)`、`(0,5)`、`(0,20)`、`(0.5,5)`、`(0.5,20)` 五个低温
+  anchor；不扩展到全相图。
+- [x] 新增独立 workflow `.github/workflows/pnjl-cep-deep-oracle.yml`，每个 anchor
+  一个独立 job，使用 `0.003125→0.0015625` 的 independent-oracle rho 分辨率。
+- [x] workflow 使用独立的 workflow-head SHA 与 calculation SHA provenance；不写 reference。
+- [ ] 触发并完成 GitHub Actions deep-oracle run，随后审计五个 job 的曲线、两层状态、
+  Maxwell/geometry、finite/converged、哈希和成本。
+- [ ] deep-oracle 完成前不创建 adaptive production PR，不启动 targeted/full shadow、
+  C0/C1/C2、reference replay 或 transport。
