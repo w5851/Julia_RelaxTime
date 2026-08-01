@@ -174,7 +174,7 @@ function _deep_write_job(cfg)
         result_status=String(cep.result_status),
         found=cep.found,
         T_last_first_order_MeV=_deep_finite(cep.T_last_first_order_MeV),
-        muq_last_first_order_MeV=_deep_finite(cep.muq_last_first_order_MeV),
+        muq_last_first_order_MeV=_deep_finite(cep.mu_last_first_order_MeV),
         T_first_monotone_MeV=_deep_finite(cep.T_first_monotone_MeV),
         ambiguity_width_T_MeV=_deep_finite(cep.ambiguity_width_T_MeV),
         temperature_resolution_target_MeV=cep.temperature_resolution_target_MeV,

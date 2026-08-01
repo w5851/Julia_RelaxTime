@@ -78,3 +78,5 @@ def test_deep_oracle_workflow_is_fixed_scope_and_provenance_bound():
     assert text.count("temperature:") == 5
     assert "pnjl_cep_deep_oracle.jl" in text
     assert "reference_write" not in text
+    assert "cep.mu_last_first_order_MeV" in runner
+    assert "cep.muq_last_first_order_MeV" not in runner
