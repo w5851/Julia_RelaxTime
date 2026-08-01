@@ -184,7 +184,19 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 新增独立 workflow `.github/workflows/pnjl-cep-deep-oracle.yml`，每个 anchor
   一个独立 job，使用 `0.003125→0.0015625` 的 independent-oracle rho 分辨率。
 - [x] workflow 使用独立的 workflow-head SHA 与 calculation SHA provenance；不写 reference。
-- [ ] 触发并完成 GitHub Actions deep-oracle run，随后审计五个 job 的曲线、两层状态、
-  Maxwell/geometry、finite/converged、哈希和成本。
-- [ ] deep-oracle 完成前不创建 adaptive production PR，不启动 targeted/full shadow、
-  C0/C1/C2、reference replay 或 transport。
+- [x] 修复 `nothing` 无法由 CSV.jl 输出的问题（PR #160，merge
+  `592374ff23c101575587d1164e6aeca9a7231fc1`），保留 JSON `null` 语义并通过 focused CI。
+- [x] 从新 main SHA 触发并完成 GitHub Actions deep-oracle run `30676440627`；workflow-head
+  SHA 为 `592374ff23c101575587d1164e6aeca9a7231fc1`，calculation SHA 仍为
+  `fde2b929b60575f1daacb84a1b9b8ff6e3b0a0cc`。
+- [x] 下载并审计五个 job 与 aggregate artifact 至
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_deep_oracle_20260801`：12,462 条
+  curve rows、曲线 key 唯一、所有最终 equilibrium 解 finite/converged、solver failures=0；
+  每点 `unique_solves=2561`、`point_requests=3842`、`cache_hits=1281`，哈希和双 SHA
+  provenance 全部一致，`reference_write=false`。
+- [x] 结果保持 diagnostic-only：5 个点的 `cep_accuracy.csv` 均为 `ambiguous`/`found=false`，
+  aggregate physical verdict=`author_review_required`；`xi=0,T=5` 的局部 slice 虽为
+  `confirmed_first_order` 且 geometry 通过，但单点不构成 CEP resolved 证书。
+- [ ] deep-oracle 结果不自动创建 adaptive production PR，不启动 targeted/full shadow、
+  C0/C1/C2、reference replay 或 transport；等待作者对 ambiguous/geometry 证据和后续
+  Stage-C 方案作物理判断。
