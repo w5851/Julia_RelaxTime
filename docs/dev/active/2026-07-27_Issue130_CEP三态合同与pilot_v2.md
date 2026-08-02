@@ -219,3 +219,20 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   实现 production tolerance contract（内部 solver tol 派生自 active acceptance tol，
   不新增独立用户参数），再只对这五点通过 Actions 重验。此前不启动全相图、C0/C1/C2、
   reference replay 或 transport。
+
+## Production Maxwell tolerance contract（后继本地分支，2026-08-02）
+
+- [x] 在 feasibility 通过后创建 `codex/issue-130-maxwell-tolerance-contract`，没有改写
+  feasibility 分支或历史 evidence。
+- [x] 新增内部派生合同：`tol_solver = 0.1 × minimum(active acceptance tolerances)`；
+  `area_tol_good` 始终 active，rho/temperature geometry gate 按启用状态加入。
+- [x] production 的 cascade、memoized uniform、hybrid 和默认 rho refinement 均显式传递
+  派生 `tol_area`；classification 与密度提取复用同一个 `MaxwellResult`，solver tolerance
+  未满足时不发布 valid 结果；默认 `maxwell_construction` API 和 uniform 路径保持兼容。
+- [x] `maxwell_solver_tol`、派生因子及 active gates 写入 config snapshot、config hash
+  和 diagnostics；API 文档补充 inner solver / outer geometry gate 的职责边界。
+- [x] focused contract 11/11、CEP detector 42/42、PhaseCore 12/12、production helpers
+  33/33、phase geometry 20/20、Python contract 2/2；完整 PNJL 未在本机运行。
+- [ ] GitHub keyring token 当前失效，尚未 push/创建/合并远程 PR；恢复认证后先推送 feasibility
+  PR 并合并，再按本分支内容创建 production contract PR。PR 通过后才触发五点 Actions
+  tolerance revalidation；不启动全相图/C0/C1/C2/reference/transport。
