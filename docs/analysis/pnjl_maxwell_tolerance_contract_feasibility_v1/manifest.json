@@ -708,7 +708,7 @@
         "maxwell_area": 5.0e-5,
         "position_MeV": 0.025
     },
-    "producer_head_sha": "b91158795c0b7d65e319c9c09a67915f3eef28a1",
+    "producer_head_sha": "e8af535d0d2231d70279b07dc20fd775f057eef7",
     "files": {
         "plot_manifest.json": "5e7b1142771bb123a80d3c7fbb5d84d95f7125f1f31a02be5b64efbbe2b94141",
         "tolerance_frontier.csv": "634334d7d0a8139cb2166e83c99facc10f4f44ed454f81e84367842ddc6341ed",
