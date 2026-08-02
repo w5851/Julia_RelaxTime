@@ -57,6 +57,20 @@
 
 在 pipeline 中，这一步直接决定 `first_order_boundary` 与 `spinodal` 两类工件的内容质量。
 
+#### Production 容差合同
+
+`run_production_phase_pipeline` 不把 Maxwell 二分的停止条件与跨层几何证书分开硬编码。
+它从当前生效的 acceptance tolerances 派生内部 solver tolerance：
+
+`tol_solver = 0.1 × minimum(active acceptance tolerances)`。
+
+`area_tol_good` 始终生效；启用 rho geometry 或 temperature geometry 时，分别加入
+`rho_maxwell_area_tol` 或 `temperature_maxwell_area_tol`。派生值写入
+`config_snapshot`、`config_hash` 和 diagnostics，便于复现。`maxwell_construction` 的公共
+默认值仍保持兼容；production 调用显式传递派生值，并复用同一次 Maxwell 结果填充分类和
+共存密度，避免同一曲线的二次求根。外层 `PhaseGeometryTolerances.maxwell_area` 仍然保留，
+它负责 coarse/fine 网格之间的离散收敛证书，而不是重复替代内部求根停止条件。
+
 ## CEP 搜索
 
 `find_cep` 基于温度切片上的 Maxwell 有效性变化来定位 CEP 证据边界，并输出 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。它不再把 ambiguous midpoint 当作 CEP 单点。

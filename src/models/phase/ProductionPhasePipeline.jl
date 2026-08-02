@@ -8,6 +8,33 @@ function _production_temperature_grid(T_start::Float64, T_end::Float64, dT::Floa
     return unique(Float64.(temps))
 end
 
+"""Return the request-scoped Maxwell solver tolerance for production.
+
+`area_tol_good` is always active.  Rho and temperature area gates enter only
+when their corresponding geometry certificate is enabled.  Keeping the
+derived value in one helper prevents the internal bisection and outer gate
+from silently drifting apart while preserving the public solver default.
+"""
+function _production_maxwell_solver_tol(cfg::ProductionPipelineConfig)
+    active = Float64[cfg.area_tol_good]
+    cfg.rho_geometry_convergence && push!(active, cfg.rho_maxwell_area_tol)
+    cfg.adaptive_temperature && push!(active, cfg.temperature_maxwell_area_tol)
+    return _derive_maxwell_solver_tol(active)
+end
+
+function _production_maxwell_options(cfg::ProductionPipelineConfig)
+    return (; tol_area=_production_maxwell_solver_tol(cfg))
+end
+
+function _production_maxwell_or_empty(cres, cfg::ProductionPipelineConfig)
+    maxwell = get(cres, :maxwell, MaxwellResult())
+    !cres.sres.has_s_shape && return MaxwellResult(
+        true, nothing, nothing, nothing, 0.0, 0, Dict{Symbol, Any}(:reason => "no_s_shape"),
+    )
+    _maxwell_result_satisfies_tol(maxwell, _production_maxwell_solver_tol(cfg)) && return maxwell
+    return MaxwellResult()
+end
+
 function _production_eval_filename(T::Float64, level::Int, pass::Int)
     t_token = replace(@sprintf("%.6f", T), "." => "p", "-" => "m")
     return "prod_eval_T$(t_token)_L$(level)_P$(pass).csv"
@@ -256,16 +283,18 @@ function _production_classify_temperature_cascade(
             else
                 mu_vals, rho_vals = final_curve
                 cres = _classify_s_curve(mu_vals, rho_vals;
+                    maxwell_options=_production_maxwell_options(cfg),
                     area_tol_good=cfg.area_tol_good, area_tol_bad=cfg.area_tol_bad)
-                maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
+                maxwell = _production_maxwell_or_empty(cres, cfg)
                 (
-                    status=cres.status,
+                    status=maxwell.converged ? cres.status : :unknown,
                     mu_transition=cres.mu_transition,
-                    area_residual=cres.area_residual,
+                    area_residual=maxwell.converged ? cres.area_residual : maxwell.area_residual,
                     sres=cres.sres,
                     rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
                     rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
-                    reason=String(cres.reason), level=level, curve=final_curve,
+                    reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
+                    level=level, curve=final_curve,
                     out_csv=out_csv,
                 )
             end
@@ -384,13 +413,17 @@ function _production_classify_temperature_memoized_uniform(
             else
                 mu_vals, rho_vals = curve
                 cres = _classify_s_curve(mu_vals, rho_vals;
+                    maxwell_options=_production_maxwell_options(cfg),
                     area_tol_good=cfg.area_tol_good, area_tol_bad=cfg.area_tol_bad)
-                maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
-                (status=cres.status, mu_transition=cres.mu_transition,
-                 area_residual=cres.area_residual, sres=cres.sres,
+                maxwell = _production_maxwell_or_empty(cres, cfg)
+                (status=maxwell.converged ? cres.status : :unknown,
+                 mu_transition=cres.mu_transition,
+                 area_residual=maxwell.converged ? cres.area_residual : maxwell.area_residual,
+                 sres=cres.sres,
                  rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
                  rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
-                 reason=String(cres.reason), level=level, curve=curve, out_csv=out_csv)
+                 reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
+                 level=level, curve=curve, out_csv=out_csv)
             end
             geometry = previous === nothing ? PhaseGeometryError(reason="coarse_level_only") :
                 _compare_phase_geometry(previous, current, PhaseGeometryTolerances(
@@ -483,16 +516,17 @@ function _classify_production_curve(curve, cfg::ProductionPipelineConfig,
     )
     mu_vals, rho_vals = curve
     cres = _classify_s_curve(mu_vals, rho_vals;
+        maxwell_options=_production_maxwell_options(cfg),
         area_tol_good=cfg.area_tol_good, area_tol_bad=cfg.area_tol_bad)
-    maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
+    maxwell = _production_maxwell_or_empty(cres, cfg)
     return (
-        status=cres.status,
+        status=maxwell.converged ? cres.status : :unknown,
         mu_transition=cres.mu_transition,
-        area_residual=cres.area_residual,
+        area_residual=maxwell.converged ? cres.area_residual : maxwell.area_residual,
         sres=cres.sres,
         rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
         rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
-        reason=String(cres.reason),
+        reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
         level=level,
         curve=curve,
         out_csv=out_csv,
@@ -837,18 +871,19 @@ function _production_classify_temperature(
         cres = _classify_s_curve(
             mu_vals,
             rho_vals;
+            maxwell_options=_production_maxwell_options(cfg),
             area_tol_good=cfg.area_tol_good,
             area_tol_bad=cfg.area_tol_bad,
         )
-        maxwell = maxwell_construction(mu_vals, rho_vals; spinodal_hint=cres.sres)
+        maxwell = _production_maxwell_or_empty(cres, cfg)
         current_result = (
-            status=cres.status,
+            status=maxwell.converged ? cres.status : :unknown,
             mu_transition=cres.mu_transition,
-            area_residual=cres.area_residual,
+            area_residual=maxwell.converged ? cres.area_residual : maxwell.area_residual,
             sres=cres.sres,
             rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
             rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
-            reason=String(cres.reason),
+            reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
             level=level,
             curve=scan.curve,
             out_csv=scan.out_csv,
@@ -1193,6 +1228,12 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
     resolution_target = isfinite(temperature_resolution_target_MeV) ? temperature_resolution_target_MeV : cep_tol
     resolution_target > 0 || throw(ArgumentError("temperature_resolution_target_MeV must be positive, got $(resolution_target)"))
     cep_max_bisect_iter > 0 || throw(ArgumentError("cep_max_bisect_iter must be positive"))
+    isfinite(area_tol_good) && area_tol_good > 0 || throw(ArgumentError(
+        "area_tol_good must be finite and positive, got $(area_tol_good)",
+    ))
+    isfinite(area_tol_bad) && area_tol_bad > 0 || throw(ArgumentError(
+        "area_tol_bad must be finite and positive, got $(area_tol_bad)",
+    ))
     unknown_budget >= 0 || throw(ArgumentError("unknown_budget must be nonnegative, got $(unknown_budget)"))
     cep_max_refine_level_rho >= 0 || throw(ArgumentError("cep_max_refine_level_rho must be nonnegative"))
     rho_refinement_policy in (:uniform_nested, :rho_support_cascade, :rho_support_hybrid) || throw(ArgumentError(
@@ -1275,6 +1316,10 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         density=cfg.temperature_density_tol,
         maxwell_area=cfg.temperature_maxwell_area_tol,
     ))
+    maxwell_solver_tol = _production_maxwell_solver_tol(cfg)
+    active_maxwell_acceptance_tolerances = Float64[cfg.area_tol_good]
+    cfg.rho_geometry_convergence && push!(active_maxwell_acceptance_tolerances, cfg.rho_maxwell_area_tol)
+    cfg.adaptive_temperature && push!(active_maxwell_acceptance_tolerances, cfg.temperature_maxwell_area_tol)
 
     temps = _production_temperature_grid(cfg.T_start, cfg.T_end, cfg.dT_initial)
     rho_base = collect(Float64.(rho_grid))
@@ -1573,6 +1618,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "rho_position_tol_MeV" => cfg.rho_position_tol_MeV,
         "rho_density_tol" => cfg.rho_density_tol,
         "rho_maxwell_area_tol" => cfg.rho_maxwell_area_tol,
+        "maxwell_solver_tol" => maxwell_solver_tol,
+        "maxwell_solver_tol_factor" => DEFAULT_MAXWELL_SOLVER_TOL_FACTOR,
+        "active_maxwell_acceptance_tolerances" => active_maxwell_acceptance_tolerances,
         "rho_refinement_policy" => String(cfg.rho_refinement_policy),
         "rho_support_fine_step" => cfg.rho_support_fine_step,
         "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
@@ -1617,6 +1665,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         rho_position_tol_MeV=cfg.rho_position_tol_MeV,
         rho_density_tol=cfg.rho_density_tol,
         rho_maxwell_area_tol=cfg.rho_maxwell_area_tol,
+        maxwell_solver_tol=maxwell_solver_tol,
+        maxwell_solver_tol_factor=DEFAULT_MAXWELL_SOLVER_TOL_FACTOR,
+        active_maxwell_acceptance_tolerances=join(active_maxwell_acceptance_tolerances, ","),
         rho_refinement_policy=cfg.rho_refinement_policy,
         rho_support_fine_step=cfg.rho_support_fine_step,
         rho_support_targeted_cap=cfg.rho_support_targeted_cap,
@@ -1670,6 +1721,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         "rho_refinement_policy" => String(cfg.rho_refinement_policy),
         "rho_support_fine_step" => cfg.rho_support_fine_step,
         "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
+        "maxwell_solver_tol" => maxwell_solver_tol,
+        "maxwell_solver_tol_factor" => DEFAULT_MAXWELL_SOLVER_TOL_FACTOR,
+        "active_maxwell_acceptance_tolerances" => active_maxwell_acceptance_tolerances,
         "rho_support_cache" => session_snapshot === nothing ? nothing : Dict(
             "point_requests" => session_snapshot.point_requests,
             "cache_hits" => session_snapshot.cache_hits,

@@ -1,10 +1,45 @@
 const EPS_SLOPE = 0.0
 const DEFAULT_AREA_TOL = 1e-4
+const DEFAULT_MAXWELL_SOLVER_TOL_FACTOR = 0.1
 const DEFAULT_MAX_ITER = 60
 const DEFAULT_CANDIDATE_STEPS = 64
 const MAX_CANDIDATE_STEPS = 1024
 const BRACKET_SHRINK_REL = 1e-3
 const BRACKET_SHRINK_ABS = 1e-3
+
+"""Derive an internal Maxwell stopping tolerance from active acceptance gates.
+
+The public `maxwell_construction` default remains `DEFAULT_AREA_TOL` for
+backward compatibility.  Production callers use this helper so the internal
+bisection is strictly tighter than every active area acceptance tolerance;
+the outer rho/temperature geometry gate remains a separate certificate.
+"""
+function _derive_maxwell_solver_tol(active_tolerances::AbstractVector{<:Real};
+        factor::Real=DEFAULT_MAXWELL_SOLVER_TOL_FACTOR)
+    isempty(active_tolerances) && throw(ArgumentError("at least one active Maxwell tolerance is required"))
+    isfinite(factor) && factor > 0 || throw(ArgumentError(
+        "Maxwell solver tolerance factor must be finite and positive, got $(factor)",
+    ))
+    values = Float64[]
+    for tolerance in active_tolerances
+        value = Float64(tolerance)
+        isfinite(value) && value > 0 || throw(ArgumentError(
+            "active Maxwell acceptance tolerances must be finite and positive, got $(tolerance)",
+        ))
+        push!(values, value)
+    end
+    derived = Float64(factor) * minimum(values)
+    isfinite(derived) && derived > 0 || throw(ArgumentError(
+        "derived Maxwell solver tolerance is invalid: $(derived)",
+    ))
+    return derived
+end
+
+@inline function _maxwell_result_satisfies_tol(result, tolerance::Real)
+    result.converged && result.area_residual !== nothing &&
+        isfinite(Float64(result.area_residual)) &&
+        Float64(result.area_residual) <= Float64(tolerance)
+end
 
 struct SShapeResult
     has_s_shape::Bool

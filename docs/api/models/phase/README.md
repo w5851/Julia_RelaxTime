@@ -47,6 +47,11 @@ production，也不允许绕过 geometry gate 或将单层 no-S-shape 提升为 
 `rho_support_hybrid` 是五级链的显式 shadow/候选策略：Stage A cascade、Stage B
 memoized dense，冲突时才在有限 support 内执行 Stage C `Δrho=0.003125` 局部验证。
 
+production 的 Maxwell 容差由统一合同派生：内部二分 tolerance 为所有 active area
+acceptance gates 最小值的 `0.1` 倍；rho/temperature geometry gate 仍独立记录 coarse/fine
+离散收敛误差。有效 solver tolerance 会写入 config snapshot/hash 和 diagnostics，默认
+`maxwell_construction` 调用口径保持兼容。
+
 ## 入口约束
 
 - 相图主题的唯一主入口为本页与 [Overview.md](docs/api/models/phase/Overview.md)
