@@ -42,6 +42,10 @@ const CAPS = (12, 24, 48, 96, 160)
 const POSITION_TOL = 0.025
 const DENSITY_TOL = 0.0025
 const AREA_TOL = 5e-5
+const CEP_AREA_TOL_GOOD = 1e-4
+const CEP_AREA_TOL_BAD = 5e-4
+const MAXWELL_SOLVER_TOL_FACTOR = 0.1
+const MAXWELL_SOLVER_TOL = MAXWELL_SOLVER_TOL_FACTOR * min(CEP_AREA_TOL_GOOD, AREA_TOL)
 const STAGE_A_COARSE = 0.05
 const STAGE_A_FINE = 0.025
 const STAGE_B_COARSE = 0.0125
@@ -203,11 +207,14 @@ function _evaluate(curve)
         sres=MODELS.SShapeResult(), curve=nothing, maxwell=nothing,
     )
     classify = MODELS._classify_s_curve(
-        curve.mu, curve.rho; area_tol_good=AREA_TOL, area_tol_bad=AREA_TOL,
+        curve.mu, curve.rho;
+        maxwell_options=(; tol_area=MAXWELL_SOLVER_TOL),
+        area_tol_good=CEP_AREA_TOL_GOOD,
+        area_tol_bad=CEP_AREA_TOL_BAD,
     )
     maxwell = if classify.sres.has_s_shape
         MODELS.maxwell_construction(
-            curve.mu, curve.rho; spinodal_hint=classify.sres, tol_area=AREA_TOL,
+            curve.mu, curve.rho; spinodal_hint=classify.sres, tol_area=MAXWELL_SOLVER_TOL,
         )
     else
         MODELS.MaxwellResult()

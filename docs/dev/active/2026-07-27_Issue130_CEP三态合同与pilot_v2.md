@@ -271,3 +271,34 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] revalidation 结论为 candidate/diagnostic-only：保持不启动 C0/C1/C2、C3/O1、
   formal production、phase-reference replay/promotion 或 transport。下一步由作者决定是否
   进行更大范围或温度两端验证。
+
+## Stage-C tolerance-contract solver-free replay（2026-08-02）
+
+- [x] 新增版本化 replay 脚本
+  `scripts/analysis/pnjl_cep_hybrid_stagec_tolerance_replay.jl`，并将 v2 replay 的
+  Maxwell 语义拆为：CEP acceptance `area_tol_good=1e-4/area_tol_bad=5e-4`、内部
+  `maxwell_solver_tol=5e-6`、外层 rho geometry area gate `5e-5`。已有 v2 evidence 不改写。
+- [x] 输入严格锁定 base final aggregate `30601857594`（calculation
+  `fde2b929…`）与五点 tolerance revalidation aggregate `30730990835`（calculation
+  `467be1fc…`）；两套 manifest/hash、曲线键、finite/converged 和 provenance 均验证通过，
+  `solver_called=false`，`reference_write=false`。
+- [x] 五点重验局部证书全部通过：`(-0.5,20)`、`(0,5)`、`(0,20)`、`(0.5,5)`、
+  `(0.5,20)` 均为两层 `confirmed_first_order`，geometry 通过，最大 area gate
+  `4.6916e-6`，低于外层 `5e-5`。
+- [x] replay 不能把两个 calculation SHA 的所有 curve row 静默视为同一数据集：共同
+  positive-rho 键 5,978 个，`muq` 最大差 `1e-6 MeV`；rho=0 的 5 个端点存在最大
+  `4.54764 MeV` 的非唯一根差异，已作为 provenance warning 单独记录并由 tolerance
+  artifact 覆盖。旧/新共同点还有 127 个 solver iteration-count 差异，但 finite/converged、
+  pressure 和 residual 均一致。
+- [x] 24-anchor Stage-C frontier 在 caps `12/24/48/96/160` 下的模拟 unique solves
+  为 `6588/6797/6972/6972/6972`，均低于 dense `15384`；但仍有 3 个 oracle-ambiguous
+  anchor 被 hybrid 证书确认，以及 5 个旧 oracle/hybrid 分类 mismatch，因此主 verdict
+  保持 `oracle_inconclusive`，没有 `selected_policy`。
+- [x] 新 evidence 写入
+  `docs/analysis/pnjl/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
+  cost frontier、五点 tolerance certificate、curve identity audit、双 run provenance、
+  manifest 和 claim ledger；不复制原始曲线。
+- [ ] 因 replay 未得到 `feasible_candidate`，不创建 adaptive Stage-C production PR，
+  不运行 targeted/full shadow，不启动 C0/C1/C2、phase-reference replay、reference
+  promotion 或 transport；当前需要作者判断是否接受新的 calculation SHA 下重新做 24-anchor
+  shadow，或继续只审计五点 tolerance 证据。
