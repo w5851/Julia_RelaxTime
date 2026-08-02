@@ -1,0 +1,6 @@
+xi,T_MeV,strict_solver_tol,strict_gate,topology_stable,geometry_gate,area_residual_gate,iteration_budget_gate,fine_tol_pair_stable,strict_coarse_area_residual,strict_fine_area_residual,strict_maxwell_area_gate,strict_position_error_MeV,strict_density_error,strict_geometry_reason,verdict
+-0.5,20.0,5.0e-6,true,true,true,true,true,true,3.9784517463739187e-7,4.628709048102499e-6,4.628709048102499e-6,1.0424460697322502e-5,1.6491138059571142e-6,converged,pass
+0.0,5.0,5.0e-6,true,true,true,true,true,true,2.8228957859267023e-6,2.684471584943269e-6,2.8228957859267023e-6,8.008373185930395e-6,7.476151225149774e-6,converged,pass
+0.0,20.0,5.0e-6,true,true,true,true,true,true,3.163654306537238e-6,3.146413703851863e-6,3.163654306537238e-6,8.265915312222205e-6,8.780385340190211e-6,converged,pass
+0.5,5.0,5.0e-6,true,true,true,true,true,true,1.1005906740121227e-7,4.691607971607492e-6,4.691607971607492e-6,2.6360029892202874e-6,8.221748183934174e-6,converged,pass
+0.5,20.0,5.0e-6,true,true,true,true,true,true,3.862669154406325e-6,4.095567159433801e-6,4.095567159433801e-6,5.2446470135691925e-6,4.589507719698904e-6,converged,pass
