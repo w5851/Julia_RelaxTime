@@ -302,3 +302,14 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不运行 targeted/full shadow，不启动 C0/C1/C2、phase-reference replay、reference
   promotion 或 transport；当前需要作者判断是否接受新的 calculation SHA 下重新做 24-anchor
   shadow，或继续只审计五点 tolerance 证据。
+
+## Full 24-anchor shadow revalidation（2026-08-02）
+
+- [x] 作者批准接受新的 calculation SHA 后重做完整 24-anchor shadow；从 `main` 触发
+  workflow run `30736597984`：<https://github.com/w5851/Julia_RelaxTime/actions/runs/30736597984>。
+- [x] workflow head SHA 为 `1cd84f02363ce0346b984dd524575579d8ad5d55`；数值 checkout
+  calculation SHA 固定为 `467be1fce847a9c991ec362c3335be07fccbe604`，tag 为
+  `cep_hybrid_stagec_tolerance_full_20260802`。矩阵为 3 个 xi ×
+  `production_hybrid`/`memoized_dense`/`independent_oracle`，每个 xi 包含 8 个 anchors。
+- [ ] 运行期间只监控 9 个 numerical jobs 与 aggregate；失败只重跑 failed jobs。不得启动
+  adaptive production、C0/C1/C2、phase-reference replay 或 transport。
