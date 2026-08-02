@@ -1,0 +1,19 @@
+{
+    "schema_version": "cep_hybrid_stagec_tolerance_replay_v1",
+    "verdict": "oracle_inconclusive",
+    "selected_cap": null,
+    "caps": [
+        12,
+        24,
+        48,
+        96,
+        160
+    ],
+    "dense_unique_solves": 15384,
+    "stage_b_grid_step": 0.00625,
+    "stage_c_local_step": 0.003125,
+    "maxwell_solver_tol": 5.0e-6,
+    "outer_maxwell_area_tol": 5.0e-5,
+    "solver_called": false,
+    "reason": "revalidation gate not complete"
+}

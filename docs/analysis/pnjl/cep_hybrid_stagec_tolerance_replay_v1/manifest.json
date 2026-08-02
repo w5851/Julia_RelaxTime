@@ -1,0 +1,48 @@
+{
+    "tolerance_calculation_sha": "467be1fce847a9c991ec362c3335be07fccbe604",
+    "producer_head_sha": "3acde4815f034b7955697fe95ae219c507f71be6",
+    "reference_write": false,
+    "merged_curve_count": 65354,
+    "verdict": "oracle_inconclusive",
+    "files": {
+        "selected_policy.json": "447837cb64530cb3a4f6223e0fe23c2d2d2c4909fce55e58249e887407849e9f",
+        "selected_points.csv": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+        "plot_manifest.json": "313df44052d40e382d54170efbf66f19730d3f798049ad855ab8272710ab480e",
+        "claim_ledger.csv": "58c599fd88b46fc0564f6f7d56f33e470bf72aee874275798047d09c938ff723",
+        "provenance.json": "c7abe338a5249f67fa3fd4413534f061570a89e0b474ddf870c04f5cb7b1f92a",
+        "curve_identity_audit.csv": "e862edc7281da39de41a5145d7154431a78d1f5ff39faef026ab7ad8deb5d6d2",
+        "AUDIT.md": "ae81d3b151ed4cc23c27bdf48b96707d68d93b519aed1b20560cc1fd6de6f62a",
+        "anchor_replay.csv": "6ed88c40b63d5162fe626ff5312e86ada91105c14d4bc2e9c2fb6b5d5ef970f9",
+        "cost_frontier.csv": "05a8c800167e7d9c033a4b37151823e832f7bf51a94b34c631c284993c0023a5",
+        "README.md": "8c07882504a6abdaa87395b6bb3c89faf5b0c43c74af0e4a2c2786d53a21ba4a",
+        "candidate_runs.csv": "d4370d9f1dfb445f1dbfc3a699f783b080e862dd435f449a9c8223ef51823d67",
+        "curve_index.csv": "c7cbb57c0f868c7241eedc65d9fc9f0258ff01a91c40ab37b1af9c080493b5ee",
+        "tolerance_anchor_certificates.csv": "d385d16b0dd151459e710302c206e8eda981aa32487a89e014aa4bf28524332b"
+    },
+    "base_calculation_sha": "fde2b929b60575f1daacb84a1b9b8ff6e3b0a0cc",
+    "tolerance_run_id": "30730990835",
+    "selected_policy": {
+        "schema_version": "cep_hybrid_stagec_tolerance_replay_v1",
+        "verdict": "oracle_inconclusive",
+        "selected_cap": null,
+        "caps": [
+            12,
+            24,
+            48,
+            96,
+            160
+        ],
+        "dense_unique_solves": 15384,
+        "stage_b_grid_step": 0.00625,
+        "stage_c_local_step": 0.003125,
+        "maxwell_solver_tol": 5.0e-6,
+        "outer_maxwell_area_tol": 5.0e-5,
+        "solver_called": false,
+        "reason": "revalidation gate not complete"
+    },
+    "base_run_id": "30601857594",
+    "solver_called": false,
+    "tolerance_manifest_sha256": "577cce55607efdf8f05b8e4afb43bd65470188b72a3fd25ee2273d742ee7dc35",
+    "schema_version": "cep_hybrid_stagec_tolerance_replay_v1",
+    "base_manifest_sha256": "58cb0c3ba32e924505d1e74afac60df58938a04b4a0f59870bdec93478228e27"
+}

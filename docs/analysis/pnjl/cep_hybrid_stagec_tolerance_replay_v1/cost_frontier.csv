@@ -1,0 +1,6 @@
+cap,anchors,classification_mismatches,unsupported_confirmations,geometry_failures,multiple_candidate_anchors,unique_solves,dense_unique_solves,cost_gate,state_gate,geometry_gate,candidate_gate,feasible
+12,24,5,3,0,0,6588,15384.0,true,false,true,true,false
+24,24,5,3,0,0,6797,15384.0,true,false,true,true,false
+48,24,5,3,0,0,6972,15384.0,true,false,true,true,false
+96,24,5,3,0,0,6972,15384.0,true,false,true,true,false
+160,24,5,3,0,0,6972,15384.0,true,false,true,true,false
