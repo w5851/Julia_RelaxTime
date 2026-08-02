@@ -27,6 +27,7 @@ function _classify_s_curve(mu_vals, rho_vals;
         status=:invalid,
         mu_transition=nothing,
         sres=sres,
+        maxwell=MaxwellResult(),
         area_residual=nothing,
         reason="no_s_shape",
     )
@@ -46,6 +47,7 @@ function _classify_s_curve(mu_vals, rho_vals;
                     status=:weak_s_shape,
                     mu_transition=weak_mu,
                     sres=sres,
+                    maxwell=mres,
                     area_residual=nothing,
                     reason="weak_s_shape_no_sign_change",
                 )
@@ -55,6 +57,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:invalid,
             mu_transition=nothing,
             sres=sres,
+            maxwell=mres,
             area_residual=nothing,
             reason=String(reason),
         )
@@ -66,6 +69,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:valid,
             mu_transition=Float64(mres.mu_transition),
             sres=sres,
+            maxwell=mres,
             area_residual=Float64(area),
             reason="ok",
         )
@@ -74,6 +78,7 @@ function _classify_s_curve(mu_vals, rho_vals;
             status=:invalid,
             mu_transition=Float64(mres.mu_transition),
             sres=sres,
+            maxwell=mres,
             area_residual=Float64(area),
             reason="area_residual_too_large",
         )
@@ -83,6 +88,7 @@ function _classify_s_curve(mu_vals, rho_vals;
         status=:unknown,
         mu_transition=Float64(mres.mu_transition),
         sres=sres,
+        maxwell=mres,
         area_residual=Float64(area),
         reason="area_residual_gray_zone",
     )
