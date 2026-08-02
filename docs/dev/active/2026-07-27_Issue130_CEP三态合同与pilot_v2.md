@@ -3,8 +3,9 @@
 创建日期：2026-07-27
 
 状态：三态合同 PR #147 已 squash merge；pilot v2 数值 Actions、aggregate replay 和
-evidence 导入已完成。hybrid shadow replay 与 Stage-C offline feasibility 已完成，
-当前因 `maxwell_candidate_inconclusive` 停在作者物理审核。PR #146 已 squash merge（merge SHA
+evidence 导入已完成。hybrid shadow replay 与 Stage-C offline feasibility 已完成；随后
+Maxwell tolerance contract 已合并并完成五点 Actions revalidation。当前停在作者对扩大验证
+范围的决定，不启动全温区 phase-reference 或 transport。PR #146 已 squash merge（merge SHA
 `5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run `30199406478`，
 9/9 matrix + aggregate success），v1 evidence 结论保持 `diagnostic_only`，不晋升
 reference。三态合同 merge SHA 为
@@ -233,6 +234,40 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   和 diagnostics；API 文档补充 inner solver / outer geometry gate 的职责边界。
 - [x] focused contract 11/11、CEP detector 42/42、PhaseCore 12/12、production helpers
   33/33、phase geometry 20/20、Python contract 2/2；完整 PNJL 未在本机运行。
-- [ ] GitHub keyring token 当前失效，尚未 push/创建/合并远程 PR；恢复认证后先推送 feasibility
-  PR 并合并，再按本分支内容创建 production contract PR。PR 通过后才触发五点 Actions
-  tolerance revalidation；不启动全相图/C0/C1/C2/reference/transport。
+- [x] production contract PR #162 已 squash merge，merge SHA 为
+  `467be1fce847a9c991ec362c3335be07fccbe604`；默认 API、uniform 路径、equilibrium
+  solver 与历史 evidence/reference 均未改写。内部 solver tolerance 由 active acceptance
+  gates 派生，不新增用户可调独立容差。
+
+## Maxwell tolerance-contract 五点 Actions revalidation（2026-08-02）
+
+- [x] 从 `main@467be1fce847a9c991ec362c3335be07fccbe604` 触发固定五点 run
+  `30730990835`：<https://github.com/w5851/Julia_RelaxTime/actions/runs/30730990835>。
+  tag 为 `cep_maxwell_tolerance_contract_v1_20260802`；workflow head SHA 与
+  calculation SHA 均为 `467be1fce847a9c991ec362c3335be07fccbe604`。范围严格为
+  `(-0.5,20)`、`(0,5)`、`(0,20)`、`(0.5,5)`、`(0.5,20)`，rho 为
+  `0.003125→0.0015625`；未启动全相图或其他 production。
+- [x] 5 个数值 job 与 aggregate 全部 success，无需 failed-job rerun。artifact 已下载至
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_maxwell_tolerance_revalidation_20260802`。
+  aggregate 与 job manifest 的文件 SHA 全部匹配；`curve_points.csv` 共 12,462 行，
+  `(xi,method,T,rho_level,rho)` 重复键为 0，曲线无 NaN/Inf。
+- [x] 五个切片最终 equilibrium 解全部 finite/converged；solver failure、fallback、
+  governed rescue、retry、exception 和 nonconverged attempt 均为 0。每点成本守恒为
+  `unique_solves=2561`、`point_requests=3842`、`cache_hits=1281`；总计
+  `unique_solves=12805`、`point_requests=19210`、`cache_hits=6405`。
+- [x] config/diagnostics 实际记录 `maxwell_solver_tol=5e-6`，其来源为
+  `0.1 × min(1e-4,5e-5)`；外层 position/density/Maxwell-area gate 仍为
+  `0.025 MeV/0.0025/5e-5`。五个切片均为 `confirmed_first_order`，geometry 均通过；
+  `maxwell_area_gate` 最大为 `4.8444e-6`，position error 最大为 `0.009704 MeV`，
+  density error 最大为 `0.001414`，均在 gate 内。
+- [x] 与此前 deep-oracle artifact 对齐后，12,462 个共同曲线键的 `muq`、pressure、
+  residual、iterations、converged/finite 状态和 sampling role 均未发生数值漂移；本次
+  变化来自 Maxwell tolerance contract 的后处理/证书判定与 provenance，不是 equilibrium
+  solver 重算漂移。
+- [x] `cep_accuracy.csv` 中五个单点仍为 `result_status=ambiguous`、`found=false`，
+  原因是每个 job 只有一个温度，缺少高温 confirmed-monotone 端点；aggregate physical
+  verdict 为 `author_review_required`。因此本 run 只证明五个固定切片的 Maxwell/geometry
+  证书改进，不构成 CEP resolved，也不晋升 reference。
+- [x] revalidation 结论为 candidate/diagnostic-only：保持不启动 C0/C1/C2、C3/O1、
+  formal production、phase-reference replay/promotion 或 transport。下一步由作者决定是否
+  进行更大范围或温度两端验证。
