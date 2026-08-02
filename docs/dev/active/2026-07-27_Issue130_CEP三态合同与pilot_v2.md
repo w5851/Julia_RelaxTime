@@ -311,5 +311,30 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   calculation SHA 固定为 `467be1fce847a9c991ec362c3335be07fccbe604`，tag 为
   `cep_hybrid_stagec_tolerance_full_20260802`。矩阵为 3 个 xi ×
   `production_hybrid`/`memoized_dense`/`independent_oracle`，每个 xi 包含 8 个 anchors。
-- [ ] 运行期间只监控 9 个 numerical jobs 与 aggregate；失败只重跑 failed jobs。不得启动
+- [x] 运行期间只监控 9 个 numerical jobs 与 aggregate；失败只重跑 failed jobs。不得启动
   adaptive production、C0/C1/C2、phase-reference replay 或 transport。
+
+- [x] 9 个 numerical jobs 全部 success；aggregate 首次因 Stage-C legacy label contract、
+  oracle 低温必需锚点和 hybrid 成本 gate 失败。按约定仅执行
+  `gh run rerun 30736597984 --failed`，没有重算数值 jobs；aggregate 重跑仍为 deterministic
+  failure。
+- [x] 本地下载并审计全部 9 格 artifacts：calculation SHA、finite/converged、curve keys 和
+  telemetry 文件完整。`--legacy-replay` solver-free collector 将同一数据收口为
+  `oracle_inconclusive`，并保留 6 个 Stage-C 标签 compatibility warnings；性能仍为
+  hybrid `15954` requests / `15953` unique solves / `303.11 s`，dense `15384` / `15384` /
+  `270.26 s`，classification mismatch 为 `(xi=0,T=60)`，oracle 低温必需 anchors 为
+  `(-0.5,5)`, `(-0.5,20)`, `(0,5)`。
+
+- [x] 为满足严格双 SHA provenance，另从临时 ref
+  `codex/issue-130-shadow-calculation-467`（指向 calculation SHA）触发 run
+  `30737739707`：<https://github.com/w5851/Julia_RelaxTime/actions/runs/30737739707>；
+  workflow head 与 calculation SHA 均为 `467be1fce847a9c991ec362c3335be07fccbe604`。
+  9 个 numerical jobs 全部 success，aggregate 及 failed-only rerun 均 deterministic failure。
+- [x] 严格 run 的 solver-free `--legacy-replay` 收口仍为 `oracle_inconclusive`：同一
+  3 个 oracle 低温锚点、`(xi=0,T=60)` 分类 mismatch 和 hybrid 成本超 dense gate；
+  hybrid `15954` requests / `15953` unique solves，dense `15384` / `15384`，无 fallback/retry
+  恶化。严格 run artifacts 已下载至
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_hybrid_stagec_tolerance_full_calcsha_20260802`。
+- [ ] 因 oracle、classification 和 performance gates 未通过，保持 diagnostic-only；不创建
+  adaptive production PR，不启动 C0/C1/C2、phase-reference replay 或 transport，等待作者
+  决定是否先做低温/`(xi=0,T=60)` 曲线物理审计及针对性算法修正。
