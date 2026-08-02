@@ -1,0 +1,5 @@
+claim_id,claim,status,boundary
+solver_free_replay,No equilibrium/Newton solver was called,pass,postprocess-only
+strict_tolerance_contract,Both rho layers satisfy the strict solver tolerance and outer geometry gate,pass,five deep-oracle anchors only
+cross_tolerance_stability,The 1e-5 to 5e-6 transition does not switch the Maxwell candidate,pass,"candidate identity, not physics promotion"
+production_promotion,Tolerance contract is ready for production integration,not_claimed,requires production CI and Actions revalidation

@@ -200,3 +200,22 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] deep-oracle 结果不自动创建 adaptive production PR，不启动 targeted/full shadow、
   C0/C1/C2、reference replay 或 transport；等待作者对 ambiguous/geometry 证据和后续
   Stage-C 方案作物理判断。
+
+## Maxwell tolerance-contract feasibility（2026-08-02）
+
+- [x] 从 `main@b91158795c0b7d65e319c9c09a67915f3eef28a1` 创建
+  `codex/issue-130-maxwell-tolerance-feasibility`；本阶段只做 solver-free replay。
+- [x] 新增 `scripts/analysis/pnjl_maxwell_tolerance_feasibility.jl`，读取 deep-oracle
+  aggregate `30676440627`，按实际 `(xi,T,rho)` 曲线重建 coarse/fine 层，显式传递
+  `tol_area` 到 Maxwell bisection，并独立记录 outer geometry gate。
+- [x] 扫描内部 area tolerance `1e-4/5e-5/1e-5/5e-6`。五个低温 anchor 在严格
+  `5e-6` 下均保持两层 `+→−→+` topology、Maxwell residual、position/density geometry
+  和迭代预算通过；`1e-5→5e-6` 未发生候选切换。
+- [x] 输出 `docs/analysis/pnjl_maxwell_tolerance_contract_feasibility_v1/`，含逐层
+  frontier、逐点 summary、输入曲线索引、manifest、claim ledger 和 audit；
+  `solver_called=false`，不复制原始曲线、不修改 production/reference/history。
+- [x] focused Julia `14/14`、Python `2 passed`、parser 和 `git diff --check` 通过。
+- [ ] 当前 feasibility verdict 为 `feasible_candidate`；下一步从新的 main merge SHA
+  实现 production tolerance contract（内部 solver tol 派生自 active acceptance tol，
+  不新增独立用户参数），再只对这五点通过 Actions 重验。此前不启动全相图、C0/C1/C2、
+  reference replay 或 transport。
