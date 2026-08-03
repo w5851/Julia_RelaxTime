@@ -261,5 +261,6 @@ def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
     assert "timeout-minutes: 180" in text
     assert "aggregate_replay" in text and "source_run_id" in text
     assert "scope" in text and "targeted" in text and "full" in text
+    assert "numeric_jobs" in text and "numeric_failures" in text
     assert "matplotlib==3.9.2" in text
     assert len(module.XIS) * len(module.METHODS) == 9
