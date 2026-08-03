@@ -358,7 +358,26 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   Python `7/7`，相关 Python shadow 合计 `18/18`，parser、docs consistency、active-docs、
   script entrypoints、Models entry contract、solver leakage、relaxtime governance、
   data-output-path 和 unit-skip 全部通过；未在本机运行 PNJL 完整数值。
-- [ ] focused CI 通过后提交并合并 production PR；从新的 production merge SHA 仅通过
-  Actions 运行 targeted shadow，必要时运行冻结 deep oracle，targeted gate 通过后再运行
-  完整 24-anchor shadow。此前不启动 C0/C1/C2、phase-reference replay、reference
-  promotion 或 transport。
+- [x] production PR #166 已 squash merge，merge SHA 为
+  `3217bed3635574f00c04cbee75e843b4c49451db`。随后 collector 温度序列化修正 PR #167
+  merge SHA 为 `8c49742f6f17061041405384c02a334ec54f7be6`，replay provenance 修正 PR #168
+  merge SHA 为 `782e08fdf1a5d7e041811d6ec947866ff70fbd47`；这些 PR 均未改变 calculation
+  SHA 或数值输入。
+- [x] 从 calculation SHA `3217bed3635574f00c04cbee75e843b4c49451db` 运行 targeted shadow
+  `30805637032`，9 个 numerical jobs 全部 success；aggregate replay
+  `30808473818` 仅下载并重建 evidence，postprocess SHA 为
+  `782e08fdf1a5d7e041811d6ec947866ff70fbd47`。双 SHA、source run、曲线哈希、唯一键和
+  finite/converged 审计通过；targeted 主 verdict 为 `oracle_inconclusive`。
+- [x] targeted oracle 仅在 `(-0.5,5)`、`(-0.5,20)`、`(0,5)` 未形成必需一阶证书；hybrid
+  fixed-rho `9407`、dense `11538`、oracle `23058`，fallback/retry 均为 `0`。
+- [x] 为严格冻结这 3 个点，deep-oracle scope PR #169 已 merge，workflow head SHA 为
+  `3777810c2a58683277882fe6178683ba28558779`；required-three deep run
+  `30809754119` 使用 `0.003125→0.0015625` 独立 oracle，3 个 jobs 全部 success。
+  `(-0.5,20)` 与 `(0,5)` 两层均为 `confirmed_first_order` 且 geometry 通过；
+  `(-0.5,5)` 两层均为 `maxwell_solver_tolerance_not_met`，保持
+  `ambiguous_near_critical`。deep aggregate 为 `author_review_required`，不构成自动
+  晋升。
+- [ ] 因 `(-0.5,5)` deep oracle 仍未闭合，当前 verdict 保持 `oracle_inconclusive`；不运行
+  完整 24-anchor shadow，不创建 evidence promotion PR，不启动 C0/C1/C2、phase-reference
+  replay、reference promotion 或 transport。下一步需作者决定是否对该低温点进行物理/数值
+  审计（尤其 Maxwell tolerance 与候选区间），或接受其 ambiguous 语义后再调整 gate 计划。
