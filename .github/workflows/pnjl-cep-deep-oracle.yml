@@ -12,6 +12,12 @@ on:
         required: false
         default: "cep_deep_oracle_v1"
         type: string
+      anchor_set:
+        description: "Approved deep-oracle anchor set"
+        required: false
+        default: "legacy_five"
+        type: choice
+        options: [legacy_five, required_three]
 
 permissions:
   contents: read
@@ -26,17 +32,7 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        include:
-          - xi: "-0.5"
-            temperature: "20.0"
-          - xi: "0.0"
-            temperature: "5.0"
-          - xi: "0.0"
-            temperature: "20.0"
-          - xi: "0.5"
-            temperature: "5.0"
-          - xi: "0.5"
-            temperature: "20.0"
+        include: ${{ fromJSON(inputs.anchor_set == 'required_three' && '[{"xi":"-0.5","temperature":"5.0"},{"xi":"-0.5","temperature":"20.0"},{"xi":"0.0","temperature":"5.0"}]' || '[{"xi":"-0.5","temperature":"20.0"},{"xi":"0.0","temperature":"5.0"},{"xi":"0.0","temperature":"20.0"},{"xi":"0.5","temperature":"5.0"},{"xi":"0.5","temperature":"20.0"}]') }}
     steps:
       - name: Validate immutable calculation ref
         shell: bash
@@ -90,6 +86,7 @@ jobs:
           XI: ${{ matrix.xi }}
           TEMPERATURE: ${{ matrix.temperature }}
           TAG: ${{ inputs.tag }}
+          ANCHOR_SET: ${{ inputs.anchor_set }}
           CALCULATION_REF: ${{ inputs.calculation_ref }}
           WORKFLOW_HEAD_SHA: ${{ github.sha }}
         run: |
@@ -146,13 +143,15 @@ jobs:
           CALCULATION_REF: ${{ inputs.calculation_ref }}
           WORKFLOW_HEAD_SHA: ${{ github.sha }}
           TAG: ${{ inputs.tag }}
+          ANCHOR_SET: ${{ inputs.anchor_set }}
         run: |
           python scripts/analysis/collect_pnjl_cep_deep_oracle.py \
             --input-dir job-artifacts \
             --output-dir aggregate \
             --calculation-sha "$CALCULATION_REF" \
             --workflow-head-sha "$WORKFLOW_HEAD_SHA" \
-            --tag "$TAG"
+            --tag "$TAG" \
+            --anchor-set "$ANCHOR_SET"
           cat aggregate/deep_oracle_summary.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload aggregate deep-oracle evidence
