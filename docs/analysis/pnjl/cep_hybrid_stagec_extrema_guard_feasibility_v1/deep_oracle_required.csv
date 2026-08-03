@@ -1,0 +1,2 @@
+xi,T_MeV,oracle_status,hybrid_status,reason
+-0.5,5.0,ambiguous_near_critical,ambiguous_near_critical,oracle_ambiguous_or_guard_inconclusive
