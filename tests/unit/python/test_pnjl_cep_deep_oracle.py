@@ -11,6 +11,7 @@ WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-deep-oracle.yml"
 SHA = "a" * 40
 WORKFLOW_SHA = "b" * 40
 POINTS = [(-0.5, 20.0), (0.0, 5.0), (0.0, 20.0), (0.5, 5.0), (0.5, 20.0)]
+REQUIRED_THREE = [(-0.5, 5.0), (-0.5, 20.0), (0.0, 5.0)]
 
 
 def load_module(path: Path):
@@ -68,14 +69,32 @@ def test_deep_oracle_collector_requires_five_points(tmp_path):
     assert (tmp_path / "aggregate" / "claim_ledger.csv").is_file()
 
 
+def test_deep_oracle_collector_supports_required_three_points(tmp_path):
+    module = load_module(COLLECTOR)
+    for xi, temperature in REQUIRED_THREE:
+        write_job(tmp_path, xi, temperature)
+    result = module.collect(
+        tmp_path,
+        tmp_path / "aggregate",
+        SHA,
+        WORKFLOW_SHA,
+        "test-required-three",
+        "required_three",
+    )
+    assert result["status"] == "complete"
+    assert result["anchor_set"] == "required_three"
+    assert result["job_count"] == 3
+
+
 def test_deep_oracle_workflow_is_fixed_scope_and_provenance_bound():
     text = WORKFLOW.read_text(encoding="utf-8")
     runner = (ROOT / "scripts" / "analysis" / "pnjl_cep_deep_oracle.jl").read_text(encoding="utf-8")
     assert "calculation_ref" in text
+    assert "anchor_set" in text
+    assert "required_three" in text
     assert "workflow-head-sha" in text
     assert "0.003125" in runner
     assert "0.0015625" in runner
-    assert text.count("temperature:") == 5
     assert "pnjl_cep_deep_oracle.jl" in text
     assert "reference_write" not in text
     assert "cep.mu_last_first_order_MeV" in runner

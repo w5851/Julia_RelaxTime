@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect and contract-check the five-point PNJL deep-oracle run."""
+"""Collect and contract-check an approved PNJL deep-oracle anchor set."""
 
 from __future__ import annotations
 
@@ -13,12 +13,19 @@ from pathlib import Path
 from typing import Any
 
 
-EXPECTED_POINTS = {
-    (-0.5, 20.0),
-    (0.0, 5.0),
-    (0.0, 20.0),
-    (0.5, 5.0),
-    (0.5, 20.0),
+EXPECTED_POINTS_BY_SET = {
+    "legacy_five": {
+        (-0.5, 20.0),
+        (0.0, 5.0),
+        (0.0, 20.0),
+        (0.5, 5.0),
+        (0.5, 20.0),
+    },
+    "required_three": {
+        (-0.5, 5.0),
+        (-0.5, 20.0),
+        (0.0, 5.0),
+    },
 }
 SCHEMA = "cep_deep_oracle_v1"
 
@@ -67,7 +74,11 @@ def collect(
     calculation_sha: str,
     workflow_head_sha: str,
     tag: str,
+    anchor_set: str = "legacy_five",
 ) -> dict[str, Any]:
+    if anchor_set not in EXPECTED_POINTS_BY_SET:
+        raise ValueError(f"unsupported anchor set: {anchor_set}")
+    expected_points = EXPECTED_POINTS_BY_SET[anchor_set]
     output_dir.mkdir(parents=True, exist_ok=True)
     errors: list[str] = []
     jobs: list[dict[str, Any]] = []
@@ -129,15 +140,15 @@ def collect(
             if str(row.get("converged", "")).lower() not in {"true", "1"}:
                 errors.append(f"non-converged curve point xi={xi} T={temperature} rho={rho}")
 
-    if set(seen_points) != EXPECTED_POINTS:
-        missing = sorted(EXPECTED_POINTS - seen_points)
-        extra = sorted(seen_points - EXPECTED_POINTS)
+    if set(seen_points) != expected_points:
+        missing = sorted(expected_points - seen_points)
+        extra = sorted(seen_points - expected_points)
         if missing:
             errors.append(f"missing deep-oracle points: {missing}")
         if extra:
             errors.append(f"unexpected deep-oracle points: {extra}")
-    if len(jobs) != len(EXPECTED_POINTS):
-        errors.append(f"expected {len(EXPECTED_POINTS)} jobs, found {len(jobs)}")
+    if len(jobs) != len(expected_points):
+        errors.append(f"expected {len(expected_points)} jobs, found {len(jobs)}")
 
     _write_csv(output_dir / "curve_points.csv", curve_rows)
     _write_csv(output_dir / "slice_metrics.csv", slice_rows)
@@ -146,7 +157,7 @@ def collect(
     claims = [
         {
             "claim_id": "coverage",
-            "claim": "five approved low-temperature anchors were independently recomputed",
+            "claim": f"{len(expected_points)} approved deep-oracle anchors were independently recomputed",
             "status": "pass" if not errors else "workflow_failure",
             "boundary": "diagnostic only",
         },
@@ -178,9 +189,10 @@ def collect(
     result = {
         "schema_version": SCHEMA,
         "tag": tag,
+        "anchor_set": anchor_set,
         "calculation_sha": calculation_sha,
         "workflow_head_sha": workflow_head_sha,
-        "expected_points": [list(point) for point in sorted(EXPECTED_POINTS)],
+        "expected_points": [list(point) for point in sorted(expected_points)],
         "observed_points": [list(point) for point in sorted(seen_points)],
         "job_count": len(jobs),
         "curve_point_count": len(curve_rows),
@@ -192,7 +204,7 @@ def collect(
             "calculation_sha": calculation_sha,
             "workflow_head_sha": workflow_head_sha,
             "reference_write": False,
-            "solver_scope": "five_fixed_anchors_only",
+            "solver_scope": f"{anchor_set}_only",
         },
     }
     (output_dir / "deep_oracle_summary.json").write_text(
@@ -202,6 +214,7 @@ def collect(
     manifest = {
         "schema_version": SCHEMA,
         "tag": tag,
+        "anchor_set": anchor_set,
         "calculation_sha": calculation_sha,
         "workflow_head_sha": workflow_head_sha,
         "source_jobs": [
@@ -230,6 +243,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--calculation-sha", required=True)
     parser.add_argument("--workflow-head-sha", required=True)
     parser.add_argument("--tag", required=True)
+    parser.add_argument("--anchor-set", choices=tuple(EXPECTED_POINTS_BY_SET), default="legacy_five")
     args = parser.parse_args(argv)
     result = collect(
         args.input_dir,
@@ -237,6 +251,7 @@ def main(argv: list[str] | None = None) -> int:
         args.calculation_sha,
         args.workflow_head_sha,
         args.tag,
+        args.anchor_set,
     )
     print(json.dumps(result, sort_keys=True))
     return 0 if result["status"] == "complete" else 1
