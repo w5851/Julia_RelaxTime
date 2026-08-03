@@ -223,12 +223,14 @@ local cubic 只用于定位 support window，最终 S-shape 仍必须由真实�
 ### rho-support hybrid（五级验证链）
 
 `rho_support_hybrid` 在 Stage A 的 cascade 结果之外复用同一请求作用域 cache，执行
-Stage B `0.0125 -> 0.00625` dense 层。若 Stage A/B 的状态或 geometry 未闭合，才
-从 cascade support、coexistence densities 与 spinodal densities 的有限并集构造 Stage C
-局部 `0.003125` 网格；边界向外 padding `0.025` 并对齐网格，始终裁剪在 `rho=0:4`。
-Stage C 只能确认跨层 first-order geometry，不产生 monotone 证书；没有可靠 support
-则保留 `ambiguous_near_critical`。manifest/diagnostics 会记录采用阶段、升级原因、
-support 边界、verification 点数和每阶段状态。
+完整 Stage B `0.0125 -> 0.00625` dense 层。若 Stage A/B 的状态或 geometry 未闭合，
+则从 Stage-B 曲线的两个 μ 极值向外扫描，取首个满足 `mu < mu_low` 与 `mu > mu_high`
+的已有采样点作为离散 guard；相等点跳过，不插值、不二分、不使用固定 padding。
+Stage C 的分类曲线是完整 Stage-B 全域曲线与 guard 内按 Stage-B 曲率、面积贡献和
+Maxwell 特征排序选出的 `0.003125` 点的并集。缺少任一 guard、多 S topology 或
+局部点不足时保留 `ambiguous_near_critical`；Stage C 不产生新的 monotone 证书。
+`RhoHybridVerificationConfig`、manifest 和 diagnostics 会记录 guard rule、比较 epsilon、
+local step、target cap、support μ 极值、采用阶段和 verification 点数。
 
 ## 工件治理层
 

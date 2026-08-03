@@ -19,6 +19,7 @@
 - `Models.analyze_pm_branch_competition` 的 compare-only `P-mu` 诊断入口
 - `src/models/phase/` 下的关键算法关系，例如 S-shape、Maxwell、crossover 与自适应 `rho` 加密
 - `Models.RhoSupportConfig` 与 opt-in `rho_support_cascade` / `rho_support_hybrid` 的分层几何证书和缓存诊断
+- `Models.RhoHybridVerificationConfig` 的离散极值外侧 guard 与 Stage-C 局部验证合同
 
 ## 目录职责
 
@@ -45,7 +46,10 @@
 选择 `:rho_support_cascade` 或 `:rho_support_hybrid` 才启用 PNJL rho-support 路由；它们不改变默认 uniform
 production，也不允许绕过 geometry gate 或将单层 no-S-shape 提升为 monotone 证书。
 `rho_support_hybrid` 是五级链的显式 shadow/候选策略：Stage A cascade、Stage B
-memoized dense，冲突时才在有限 support 内执行 Stage C `Δrho=0.003125` 局部验证。
+memoized dense，冲突时才在离散极值外侧 guard 内执行 Stage C `Δrho=0.003125`
+局部验证。guard 是两个 μ 极值外侧的首个严格 Stage-B 采样点；不插值、不二分、
+不使用固定 padding。Stage-C 始终保留完整 Stage-B 全域曲线，并只追加 guard 内按
+Stage-B 特征排序选出的点。
 
 production 的 Maxwell 容差由统一合同派生：内部二分 tolerance 为所有 active area
 acceptance gates 最小值的 `0.1` 倍；rho/temperature geometry gate 仍独立记录 coarse/fine

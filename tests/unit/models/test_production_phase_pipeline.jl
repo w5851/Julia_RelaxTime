@@ -9,25 +9,40 @@ end
 @testset "Production phase pipeline helpers" begin
     @test Models.ProductionPipelineConfig().cep_tol_MeV == 0.1
     @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
+    @test Models.RhoHybridVerificationConfig().guard_rule == :extrema_outer_samples_v1
+    @test Models.RhoHybridVerificationConfig().targeted_cap == 12
 
-    @testset "hybrid support grid is padded, aligned, and bounded" begin
-        sres = Models.SShapeResult(true, 310.0, 290.0, 1.10, 1.90, 2)
-        stage_a = (
-            cascade_support_low=1.15,
-            cascade_support_high=1.85,
-            rho_hadron=1.10,
-            rho_quark=1.90,
-            sres=sres,
-        )
-        stage_b = (rho_hadron=1.12, rho_quark=1.88, sres=sres)
+    @testset "hybrid support uses strict outer extrema samples" begin
+        sres = Models.SShapeResult(true, 4.0, 2.0, 1.5, 3.5, 2)
+        curve = ([0.0, 4.0, 3.0, 2.0, 5.0, 6.0], collect(0.0:1.0:5.0))
+        stage_a = (sres=sres,)
+        stage_b = (sres=sres, curve=curve, mu_transition=3.0,
+            rho_hadron=0.5, rho_quark=4.5)
         support = Models._hybrid_support_grid(collect(0.0:0.05:4.0), stage_a, stage_b)
-        @test support !== nothing
-        @test 0.0 <= support.low < support.high <= 4.0
+        @test support.status == :ok
+        @test support.low == 0.0
+        @test support.high == 4.0
+        @test support.mu_low == 2.0
+        @test support.mu_high == 4.0
+        @test support.guard_rule == :extrema_outer_samples_v1
+        @test length(support.grid) <= 12
+        @test all(value -> !(value in Set(collect(0.0:0.00625:4.0))), support.grid)
+        @test all(0.0 <= value <= 4.0 for value in support.grid)
         @test all(isapprox(value / 0.003125, round(value / 0.003125); atol=1e-8, rtol=0.0) for value in support.grid)
-        @test :cascade_support in support.source
-        @test Models._hybrid_support_grid(collect(0.0:0.05:4.0),
-            (cascade_support_low=nothing, cascade_support_high=nothing, rho_hadron=nothing, rho_quark=nothing, sres=Models.SShapeResult()),
-            (rho_hadron=nothing, rho_quark=nothing, sres=Models.SShapeResult())) === nothing
+        equal_outer_curve = ([1.0, 1.9, 2.0, 4.0, 3.0, 2.0, 4.1, 4.2],
+            [0.0, 0.05, 1.0, 1.5, 2.5, 3.5, 3.55, 4.0])
+        equal_outer = Models._hybrid_support_grid(collect(0.0:0.05:4.0), stage_a,
+            (sres=sres, curve=equal_outer_curve, mu_transition=3.0))
+        @test equal_outer.status == :ok
+        @test equal_outer.low == 0.05
+        @test equal_outer.high == 3.55
+        missing_right = Models._hybrid_support_grid(collect(0.0:0.05:4.0), stage_a,
+            (sres=sres, curve=([0.0, 4.0, 3.0, 2.0, 3.5], [0.0, 1.5, 2.5, 3.5, 4.0])))
+        @test missing_right.status == :ambiguous_near_critical
+        missing_support = Models._hybrid_support_grid(collect(0.0:0.05:4.0),
+            (sres=Models.SShapeResult(),),
+            (sres=Models.SShapeResult(), curve=nothing))
+        @test missing_support.status == :ambiguous_near_critical
     end
 
     @testset "hybrid policy validation is explicit and opt-in" begin
@@ -45,6 +60,13 @@ end
             :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
             rho_refinement_policy=:rho_support_hybrid, cep_max_refine_level_rho=4,
             rho_geometry_convergence=true, rho_support_targeted_cap=13,
+            promote_reference=false,
+        )
+        @test_throws ArgumentError Models.run_production_phase_pipeline(
+            :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
+            rho_refinement_policy=:rho_support_hybrid, cep_max_refine_level_rho=4,
+            rho_geometry_convergence=true,
+            rho_hybrid_verification=Models.RhoHybridVerificationConfig(point_ranking_version=:other),
             promote_reference=false,
         )
     end

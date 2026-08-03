@@ -36,11 +36,11 @@ def _status(xi: float, t: float):
     return "ambiguous_near_critical"
 
 
-def write_job(root: Path, xi: float, method: str, *, cost: int = 100):
+def write_job(root: Path, xi: float, method: str, *, cost: int = 100, scope: str = "full"):
     collector = load_module(COLLECTOR, f"hybrid_collector_constants_{xi}_{method}")
     job = root / f"job-{method}-{xi}"
     job.mkdir()
-    anchors = collector.ANCHORS[xi]
+    anchors = collector.TARGETED_ANCHORS[xi] if scope == "targeted" else collector.ANCHORS[xi]
     sha = "a" * 40
     with (job / "curve_points.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=["xi", "method", "T_MeV", "rho_level", "rho", "muq_MeV", "converged", "finite"])
@@ -77,6 +77,7 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100):
     (job / "job_summary.json").write_text(json.dumps({
         "schema_version": "cep_cascade_production_shadow_v2", "xi": xi, "method": method,
         "calculation_sha": sha, "workflow_head_sha": sha, "anchors": list(anchors),
+        "scope": scope,
         "finite_and_converged_final": True, "curve_file_sha256": hashes,
         "provenance": {"calculation_sha": sha, "reference_write": False, "anchor_run_count": len(anchors)},
     }), encoding="utf-8")
@@ -89,6 +90,13 @@ def _matrix(tmp_path: Path):
         write_job(tmp_path, xi, "independent_oracle", cost=110)
 
 
+def _targeted_matrix(tmp_path: Path):
+    for xi in (-0.5, 0.0, 0.5):
+        write_job(tmp_path, xi, "production_hybrid", cost=90, scope="targeted")
+        write_job(tmp_path, xi, "memoized_dense", cost=100, scope="targeted")
+        write_job(tmp_path, xi, "independent_oracle", cost=110, scope="targeted")
+
+
 def test_hybrid_collector_accepts_complete_matrix(tmp_path):
     module = load_module(COLLECTOR, "hybrid_collector_complete")
     _matrix(tmp_path)
@@ -96,6 +104,15 @@ def test_hybrid_collector_accepts_complete_matrix(tmp_path):
     assert gate["verdict"] == "full_hybrid_candidate"
     assert (tmp_path / "aggregate" / "geometry_accuracy.csv").is_file()
     assert (tmp_path / "aggregate" / "manifest.json").is_file()
+
+
+def test_hybrid_collector_accepts_targeted_matrix_and_uses_targeted_verdict(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_targeted")
+    _targeted_matrix(tmp_path)
+    gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40, scope="targeted")
+    assert gate["verdict"] == "targeted_hybrid_candidate"
+    assert gate["scope"] == "targeted"
+    assert gate["expected_anchor_count"] == 18
 
 
 def test_hybrid_collector_rejects_confirmation_on_oracle_ambiguous(tmp_path):
@@ -207,5 +224,6 @@ def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
     assert "production_hybrid" in text and "independent_oracle" in text
     assert "timeout-minutes: 180" in text
     assert "aggregate_replay" in text and "source_run_id" in text
+    assert "scope" in text and "targeted" in text and "full" in text
     assert "matplotlib==3.9.2" in text
     assert len(module.XIS) * len(module.METHODS) == 9

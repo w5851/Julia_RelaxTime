@@ -39,6 +39,7 @@
 - `PhasePipelineResult`
 - `CEPResult`
 - `FirstOrderSweepResult`
+- `RhoHybridVerificationConfig`
 - `ProductionPipelineConfig`
 - `PromotionResult`
 

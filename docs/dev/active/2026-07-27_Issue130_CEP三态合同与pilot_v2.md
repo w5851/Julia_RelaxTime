@@ -338,3 +338,27 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 因 oracle、classification 和 performance gates 未通过，保持 diagnostic-only；不创建
   adaptive production PR，不启动 C0/C1/C2、phase-reference replay 或 transport，等待作者
   决定是否先做低温/`(xi=0,T=60)` 曲线物理审计及针对性算法修正。
+
+## Stage-C 离散极值 guard production revalidation（2026-08-03）
+
+- [x] 在现有 `main@dce7936888e57ddf2b3d6231ca4ad159fb552728` 上完成 solver-free
+  extrema-guard feasibility PR #165；selected cap 为 `12`，模拟 unique solves 为
+  `12148`，低于 memoized dense `15384`。`(-0.5,5)` 缺少左侧严格外点，按合同保持
+  `ambiguous_near_critical`，不硬插入 `(0,0)`。
+- [x] production 分支
+  `codex/issue-130-stagec-extrema-guard-production` 实现 opt-in
+  `rho_support_hybrid` 的 `extrema_outer_samples_v1`：Stage-C 始终保留完整 Stage-B
+  全域曲线，只在两个 μ 极值外侧首个严格 Stage-B 采样点形成的 guard 内按 Stage-B
+  特征排序补 `0.003125` 点；默认 uniform/cascade、equilibrium solver、旧 evidence
+  和 reference 不变。
+- [x] 新增 `RhoHybridVerificationConfig`、guard μ/状态/来源诊断、scope-aware shadow
+  runner/collector/workflow 合同；targeted 结果使用 `targeted_hybrid_candidate`，完整
+  24-anchor 结果使用 `full_hybrid_candidate`。
+- [x] 本地 deterministic/focused 验证：production helper `45/45`，hybrid collector
+  Python `7/7`，相关 Python shadow 合计 `18/18`，parser、docs consistency、active-docs、
+  script entrypoints、Models entry contract、solver leakage、relaxtime governance、
+  data-output-path 和 unit-skip 全部通过；未在本机运行 PNJL 完整数值。
+- [ ] focused CI 通过后提交并合并 production PR；从新的 production merge SHA 仅通过
+  Actions 运行 targeted shadow，必要时运行冻结 deep oracle，targeted gate 通过后再运行
+  完整 24-anchor shadow。此前不启动 C0/C1/C2、phase-reference replay、reference
+  promotion 或 transport。

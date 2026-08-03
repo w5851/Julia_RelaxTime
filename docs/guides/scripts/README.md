@@ -111,8 +111,10 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   `rho_refine_levels=1`，并通过 `rho_support_fine_step` 与
   `rho_support_targeted_cap` 记录两层 support/补点合同；它不会自动覆盖旧 reference。
 - `rho_support_hybrid` 是更高成本的显式 shadow/候选策略，要求 `rho_refine_levels=4`。
-  它按 cascade → memoized dense → 有限 support 内局部 oracle 的顺序升级，Stage-A
-  targeted 总上限仍为 `12`；没有可靠 support 时保持 ambiguous，不启动全域 oracle。
+  它按 cascade → 完整 memoized dense → 离散极值 guard 内局部验证的顺序升级；
+  guard 取两个 μ 极值外侧首个严格 Stage-B 采样点，不插值、不二分、不使用固定
+  padding。Stage-A targeted 总上限仍为 `12`，Stage-C 始终保留完整 Stage-B 曲线；
+  没有可靠 guard 时保持 ambiguous，不启动全域 oracle。
 
 最小产物结构（输出目录）：
 
