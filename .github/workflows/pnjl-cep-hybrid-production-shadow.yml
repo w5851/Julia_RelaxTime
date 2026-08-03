@@ -209,10 +209,13 @@ jobs:
           SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,status,conclusion)"
+          payload="$(gh run view "$SOURCE_RUN_ID" --json headSha,status,conclusion,jobs)"
           test "$(echo "$payload" | jq -r .status)" = completed
-          test "$(echo "$payload" | jq -r .conclusion)" = success
           test "$(echo "$payload" | jq -r .headSha)" = "$SOURCE_CALCULATION_SHA"
+          numeric_jobs="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("hybrid shadow xi="))] | length')"
+          test "$numeric_jobs" = 9
+          numeric_failures="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("hybrid shadow xi=")) | select(.conclusion != "success")] | length')"
+          test "$numeric_failures" = 0
 
       - name: Download source numerical artifacts
         env:
