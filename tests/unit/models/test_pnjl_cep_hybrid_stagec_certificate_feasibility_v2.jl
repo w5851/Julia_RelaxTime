@@ -48,4 +48,7 @@ const V2 = Main.StageCCertificateFeasibilityV2
     @test V2.AUTHOR_FIRST_ORDER == Set([(-0.5, 147.0947265625), (0.5, 106.9599609375)])
     @test V2.CONSENSUS_MONOTONE == Set([(-0.5, 147.2197265625), (0.5, 107.0849609375)])
     @test V2.STAGE_C_FINE == 0.003125
+    @test V2.CEP_AREA_TOL_GOOD == 1e-4
+    @test V2.CEP_AREA_TOL_BAD == 5e-4
+    @test V2.MAXWELL_SOLVER_TOL == 5e-6
 end

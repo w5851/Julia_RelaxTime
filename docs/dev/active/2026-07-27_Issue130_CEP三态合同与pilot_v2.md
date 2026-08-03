@@ -271,3 +271,70 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] revalidation 结论为 candidate/diagnostic-only：保持不启动 C0/C1/C2、C3/O1、
   formal production、phase-reference replay/promotion 或 transport。下一步由作者决定是否
   进行更大范围或温度两端验证。
+
+## Stage-C tolerance-contract solver-free replay（2026-08-02）
+
+- [x] 新增版本化 replay 脚本
+  `scripts/analysis/pnjl_cep_hybrid_stagec_tolerance_replay.jl`，并将 v2 replay 的
+  Maxwell 语义拆为：CEP acceptance `area_tol_good=1e-4/area_tol_bad=5e-4`、内部
+  `maxwell_solver_tol=5e-6`、外层 rho geometry area gate `5e-5`。已有 v2 evidence 不改写。
+- [x] 输入严格锁定 base final aggregate `30601857594`（calculation
+  `fde2b929…`）与五点 tolerance revalidation aggregate `30730990835`（calculation
+  `467be1fc…`）；两套 manifest/hash、曲线键、finite/converged 和 provenance 均验证通过，
+  `solver_called=false`，`reference_write=false`。
+- [x] 五点重验局部证书全部通过：`(-0.5,20)`、`(0,5)`、`(0,20)`、`(0.5,5)`、
+  `(0.5,20)` 均为两层 `confirmed_first_order`，geometry 通过，最大 area gate
+  `4.6916e-6`，低于外层 `5e-5`。
+- [x] replay 不能把两个 calculation SHA 的所有 curve row 静默视为同一数据集：共同
+  positive-rho 键 5,978 个，`muq` 最大差 `1e-6 MeV`；rho=0 的 5 个端点存在最大
+  `4.54764 MeV` 的非唯一根差异，已作为 provenance warning 单独记录并由 tolerance
+  artifact 覆盖。旧/新共同点还有 127 个 solver iteration-count 差异，但 finite/converged、
+  pressure 和 residual 均一致。
+- [x] 24-anchor Stage-C frontier 在 caps `12/24/48/96/160` 下的模拟 unique solves
+  为 `6588/6797/6972/6972/6972`，均低于 dense `15384`；但仍有 3 个 oracle-ambiguous
+  anchor 被 hybrid 证书确认，以及 5 个旧 oracle/hybrid 分类 mismatch，因此主 verdict
+  保持 `oracle_inconclusive`，没有 `selected_policy`。
+- [x] 新 evidence 写入
+  `docs/analysis/pnjl/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
+  cost frontier、五点 tolerance certificate、curve identity audit、双 run provenance、
+  manifest 和 claim ledger；不复制原始曲线。
+- [ ] 因 replay 未得到 `feasible_candidate`，不创建 adaptive Stage-C production PR，
+  不运行 targeted/full shadow，不启动 C0/C1/C2、phase-reference replay、reference
+  promotion 或 transport；当前需要作者判断是否接受新的 calculation SHA 下重新做 24-anchor
+  shadow，或继续只审计五点 tolerance 证据。
+
+## Full 24-anchor shadow revalidation（2026-08-02）
+
+- [x] 作者批准接受新的 calculation SHA 后重做完整 24-anchor shadow；从 `main` 触发
+  workflow run `30736597984`：<https://github.com/w5851/Julia_RelaxTime/actions/runs/30736597984>。
+- [x] workflow head SHA 为 `1cd84f02363ce0346b984dd524575579d8ad5d55`；数值 checkout
+  calculation SHA 固定为 `467be1fce847a9c991ec362c3335be07fccbe604`，tag 为
+  `cep_hybrid_stagec_tolerance_full_20260802`。矩阵为 3 个 xi ×
+  `production_hybrid`/`memoized_dense`/`independent_oracle`，每个 xi 包含 8 个 anchors。
+- [x] 运行期间只监控 9 个 numerical jobs 与 aggregate；失败只重跑 failed jobs。不得启动
+  adaptive production、C0/C1/C2、phase-reference replay 或 transport。
+
+- [x] 9 个 numerical jobs 全部 success；aggregate 首次因 Stage-C legacy label contract、
+  oracle 低温必需锚点和 hybrid 成本 gate 失败。按约定仅执行
+  `gh run rerun 30736597984 --failed`，没有重算数值 jobs；aggregate 重跑仍为 deterministic
+  failure。
+- [x] 本地下载并审计全部 9 格 artifacts：calculation SHA、finite/converged、curve keys 和
+  telemetry 文件完整。`--legacy-replay` solver-free collector 将同一数据收口为
+  `oracle_inconclusive`，并保留 6 个 Stage-C 标签 compatibility warnings；性能仍为
+  hybrid `15954` requests / `15953` unique solves / `303.11 s`，dense `15384` / `15384` /
+  `270.26 s`，classification mismatch 为 `(xi=0,T=60)`，oracle 低温必需 anchors 为
+  `(-0.5,5)`, `(-0.5,20)`, `(0,5)`。
+
+- [x] 为满足严格双 SHA provenance，另从临时 ref
+  `codex/issue-130-shadow-calculation-467`（指向 calculation SHA）触发 run
+  `30737739707`：<https://github.com/w5851/Julia_RelaxTime/actions/runs/30737739707>；
+  workflow head 与 calculation SHA 均为 `467be1fce847a9c991ec362c3335be07fccbe604`。
+  9 个 numerical jobs 全部 success，aggregate 及 failed-only rerun 均 deterministic failure。
+- [x] 严格 run 的 solver-free `--legacy-replay` 收口仍为 `oracle_inconclusive`：同一
+  3 个 oracle 低温锚点、`(xi=0,T=60)` 分类 mismatch 和 hybrid 成本超 dense gate；
+  hybrid `15954` requests / `15953` unique solves，dense `15384` / `15384`，无 fallback/retry
+  恶化。严格 run artifacts 已下载至
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_hybrid_stagec_tolerance_full_calcsha_20260802`。
+- [ ] 因 oracle、classification 和 performance gates 未通过，保持 diagnostic-only；不创建
+  adaptive production PR，不启动 C0/C1/C2、phase-reference replay 或 transport，等待作者
+  决定是否先做低温/`(xi=0,T=60)` 曲线物理审计及针对性算法修正。
