@@ -143,6 +143,20 @@ Base.@kwdef struct FirstOrderSweepResult
     forced_invalid_count::Int = 0
 end
 
+"""Request-scoped verification contract for the opt-in hybrid rho policy.
+
+The fields are deliberately versioned and diagnostic: they make the Stage-C
+guard reproducible without exposing a new numerical tolerance knob.  The
+default production path does not consume this contract.
+"""
+Base.@kwdef struct RhoHybridVerificationConfig
+    local_step::Float64 = 0.003125
+    targeted_cap::Int = 12
+    guard_rule::Symbol = :extrema_outer_samples_v1
+    comparison_epsilon::Float64 = 32eps(Float64)
+    point_ranking_version::Symbol = :stage_b_features_v1
+end
+
 Base.@kwdef struct ProductionPipelineConfig
     T_start::Float64 = NaN
     T_end::Float64 = NaN
@@ -168,6 +182,7 @@ Base.@kwdef struct ProductionPipelineConfig
     rho_support_fine_step::Float64 = 0.025
     rho_support_targeted_cap::Int = 12
     rho_support_config::RhoSupportRefinement.RhoSupportConfig = RhoSupportRefinement.RhoSupportConfig()
+    rho_hybrid_verification::RhoHybridVerificationConfig = RhoHybridVerificationConfig()
     adaptive_temperature::Bool = false
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10

@@ -25,6 +25,11 @@ const HYBRID_ANCHORS = Dict(
     0.0 => [5.0, 20.0, 60.0, 100.0, 120.0, 130.9619140625, 131.0869140625, 145.0],
     0.5 => [5.0, 20.0, 60.0, 90.0, 100.0, 106.9599609375, 107.0849609375, 120.0],
 )
+const HYBRID_TARGETED_ANCHORS = Dict(
+    -0.5 => [5.0, 20.0, 60.0, 130.0, 147.0947265625, 147.2197265625],
+    0.0 => [5.0, 20.0, 60.0, 120.0, 131.0869140625, 145.0],
+    0.5 => [5.0, 60.0, 90.0, 106.9599609375, 107.0849609375, 120.0],
+)
 const HYBRID_METHODS = (:production_hybrid, :memoized_dense, :independent_oracle)
 
 @inline function _arg(values, name, default=nothing)
@@ -45,8 +50,12 @@ function _config(args)
         throw(ArgumentError("calculation-sha must be an immutable 40-character SHA"))
     output_dir = abspath(String(_arg(args, "--output-dir", joinpath(pwd(), "hybrid_shadow_artifact"))))
     tag = String(_arg(args, "--tag", "cep_cascade_production_shadow_v2"))
-    return (; method, xi, calculation_sha, output_dir, tag)
+    scope = Symbol(_arg(args, "--scope", "full"))
+    scope in (:targeted, :full) || throw(ArgumentError("shadow scope must be targeted or full"))
+    return (; method, xi, calculation_sha, output_dir, tag, scope)
 end
+
+@inline _anchors(cfg) = cfg.scope === :targeted ? HYBRID_TARGETED_ANCHORS[cfg.xi] : HYBRID_ANCHORS[cfg.xi]
 
 @inline function _method_steps(method::Symbol)
     method === :production_hybrid && return (coarse=0.05, fine=0.025, policy=:rho_support_hybrid, levels=4)
@@ -88,9 +97,31 @@ function _curve_rows(path::String, cfg, steps)
         push!(seen, key)
         on_coarse = isapprox(rho / steps.coarse, round(rho / steps.coarse); atol=1e-8, rtol=0.0)
         on_fine = isapprox(rho / steps.fine, round(rho / steps.fine); atol=1e-8, rtol=0.0)
-        role = on_coarse ? "coarse_grid" : on_fine ? "fine_grid" :
-            cfg.method === :production_hybrid ? "stage_c_support" : "targeted"
-        level = on_coarse ? 0 : on_fine ? 1 : cfg.method === :production_hybrid ? 4 : 2
+        role, level = if cfg.method === :production_hybrid
+            # Nested points already sampled by Stage A retain their original
+            # level.  Only the newly introduced Stage-B points are labelled
+            # as Stage-B; this keeps the provenance of every unique solve
+            # visible while avoiding duplicate keys for shared grid points.
+            on_stage_b_coarse = isapprox(rho / 0.0125, round(rho / 0.0125); atol=1e-8, rtol=0.0)
+            on_stage_b_fine = isapprox(rho / 0.00625, round(rho / 0.00625); atol=1e-8, rtol=0.0)
+            if on_coarse
+                ("coarse_grid", 0)
+            elseif on_fine
+                ("fine_grid", 1)
+            elseif on_stage_b_coarse
+                ("stage_b_grid", 2)
+            elseif on_stage_b_fine
+                ("stage_b_grid", 3)
+            else
+                ("stage_c_guard", 4)
+            end
+        elseif on_coarse
+            ("coarse_grid", 0)
+        elseif on_fine
+            ("fine_grid", 1)
+        else
+            ("targeted", 2)
+        end
         converged = _bool(getproperty(row, :converged))
         residual = _safe_float(getproperty(row, :residual_norm))
         push!(rows, (
@@ -200,8 +231,14 @@ function _slice_row(cfg, T, result)
         rho_spinodal_quark=_safe_float(_field(record, :rho_spinodal_quark, NaN)),
         support_low=_safe_float(_field(record, :hybrid_support_low, NaN)),
         support_high=_safe_float(_field(record, :hybrid_support_high, NaN)),
+        support_mu_low=_safe_float(_field(record, :hybrid_support_mu_low, NaN)),
+        support_mu_high=_safe_float(_field(record, :hybrid_support_mu_high, NaN)),
+        guard_status=String(_field(record, :hybrid_guard_status, :not_run)),
+        guard_reason=String(_field(record, :hybrid_guard_reason, "not_applicable")),
+        guard_source=join(String.(_field(record, :hybrid_guard_source, String[])), ";"),
         support_point_count=Int(_field(record, :hybrid_verification_point_count, 0)),
         targeted_additions=Int(_field(record, :cascade_targeted_count, get(cache_dict, "targeted_additions", 0))),
+        stage_c_targeted_additions=Int(_field(record, :hybrid_targeted_point_count, 0)),
         unique_solves=Int(_field(_field(record, :cache_stats, nothing), :unique_solves, get(cache_dict, "unique_solves", 0))),
         point_requests=Int(_field(_field(record, :cache_stats, nothing), :point_requests, get(cache_dict, "point_requests", 0))),
         cache_hits=Int(_field(_field(record, :cache_stats, nothing), :cache_hits, get(cache_dict, "cache_hits", 0))),
@@ -219,7 +256,7 @@ function _run_job(cfg)
     accuracy_rows = NamedTuple[]
     results = Models.PhasePipelineResult[]
 
-    for T in HYBRID_ANCHORS[cfg.xi]
+    for T in _anchors(cfg)
         anchor_dir = joinpath(cfg.output_dir, "anchors", "T_$(replace(string(T), "." => "p"))")
         result = _run_anchor(cfg, T, anchor_dir, steps, telemetry)
         push!(results, result)
@@ -246,7 +283,7 @@ function _run_job(cfg)
         "unique_solves" => sum(Int(row.unique_solves) for row in slice_rows),
         "targeted_additions" => sum(Int(row.targeted_additions) for row in slice_rows),
         "failed_points" => sum(Int(row.solver_failure_count) for row in slice_rows),
-        "aggregation_scope" => "all_anchors",
+        "aggregation_scope" => String(cfg.scope),
     )
     cache["point_request_reconciliation"] = cache["point_requests"] == cache["unique_solves"] + cache["cache_hits"]
     cost = [(
@@ -281,7 +318,8 @@ function _run_job(cfg)
         "xi" => cfg.xi, "method" => String(cfg.method), "tag" => cfg.tag,
         "calculation_sha" => cfg.calculation_sha,
         "workflow_head_sha" => cfg.calculation_sha,
-        "anchors" => HYBRID_ANCHORS[cfg.xi],
+        "anchors" => _anchors(cfg),
+        "scope" => String(cfg.scope),
         "parameters" => Dict(
             "p_num" => 24, "t_num" => 8,
             "thermo_quadrature_policy" => "rs_reduced_adaptive",
@@ -291,7 +329,9 @@ function _run_job(cfg)
             "rho_coarse_step" => steps.coarse, "rho_fine_step" => steps.fine,
             "rho_refine_levels" => steps.levels,
             "rho_hybrid_local_step" => 0.003125,
-            "rho_hybrid_support_padding" => 0.025,
+            "rho_hybrid_guard_rule" => "extrema_outer_samples_v1",
+            "rho_hybrid_comparison_epsilon" => 32eps(Float64),
+            "rho_hybrid_point_ranking_version" => "stage_b_features_v1",
             "rho_support_targeted_cap" => steps.policy === :rho_support_hybrid ? 12 : 0,
         ),
         "telemetry" => Dict(string(field) => getproperty(snapshot, field) for field in propertynames(snapshot)),
@@ -300,7 +340,8 @@ function _run_job(cfg)
         "finite_and_converged_final" => all(row -> row.finite_and_converged, slice_rows),
         "curve_file_sha256" => hashes,
         "provenance" => Dict("calculation_sha" => cfg.calculation_sha,
-            "reference_write" => false, "anchor_run_count" => length(HYBRID_ANCHORS[cfg.xi])),
+            "reference_write" => false, "anchor_run_count" => length(_anchors(cfg)),
+            "scope" => String(cfg.scope)),
     )
     open(joinpath(cfg.output_dir, "job_summary.json"), "w") do io
         JSON3.write(io, summary)
@@ -309,7 +350,8 @@ function _run_job(cfg)
     open(joinpath(cfg.output_dir, "manifest.json"), "w") do io
         JSON3.pretty(io, Dict("schema_version" => "cep_cascade_production_shadow_v2",
             "calculation_sha" => cfg.calculation_sha, "files" => hashes,
-            "anchors" => HYBRID_ANCHORS[cfg.xi], "method" => String(cfg.method)))
+            "anchors" => _anchors(cfg), "method" => String(cfg.method),
+            "scope" => String(cfg.scope)))
         write(io, '\n')
     end
     println(JSON3.write(summary))

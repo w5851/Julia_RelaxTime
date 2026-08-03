@@ -27,6 +27,11 @@ ANCHORS = {
     0.0: (5.0, 20.0, 60.0, 100.0, 120.0, 130.9619140625, 131.0869140625, 145.0),
     0.5: (5.0, 20.0, 60.0, 90.0, 100.0, 106.9599609375, 107.0849609375, 120.0),
 }
+TARGETED_ANCHORS = {
+    -0.5: (5.0, 20.0, 60.0, 130.0, 147.0947265625, 147.2197265625),
+    0.0: (5.0, 20.0, 60.0, 120.0, 131.0869140625, 145.0),
+    0.5: (5.0, 60.0, 90.0, 106.9599609375, 107.0849609375, 120.0),
+}
 
 # These anchors are deliberately stricter than the generic "each xi has both
 # sides" check.  They are the strong first-order/high-temperature controls
@@ -86,11 +91,18 @@ def _find_jobs(input_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return [(path.parent, _json(path)) for path in sorted(input_dir.rglob("job_summary.json"))]
 
 
+def _anchors(scope: str, xi: float) -> tuple[float, ...]:
+    if scope not in {"targeted", "full"}:
+        raise ValueError(f"unsupported shadow scope: {scope}")
+    return (TARGETED_ANCHORS if scope == "targeted" else ANCHORS)[xi]
+
+
 def _validate_jobs(
     jobs: list[tuple[Path, dict[str, Any]]],
     expected_sha: str,
     *,
     allow_legacy_stage_c_support: bool = False,
+    scope: str = "full",
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     compatibility_warnings: list[str] = []
@@ -105,6 +117,9 @@ def _validate_jobs(
             errors.append(f"unexpected matrix key {key}")
         if summary.get("schema_version") != "cep_cascade_production_shadow_v2":
             errors.append(f"unexpected schema at {directory}")
+        declared_scope = summary.get("scope", "full")
+        if declared_scope != scope:
+            errors.append(f"shadow scope mismatch at {directory}: expected {scope}, got {declared_scope}")
         for name in REQUIRED:
             if not (directory / name).is_file():
                 errors.append(f"missing {name} at {directory}")
@@ -113,7 +128,7 @@ def _validate_jobs(
         provenance = summary.get("provenance", {})
         if provenance.get("calculation_sha") != expected_sha or provenance.get("reference_write") is not False:
             errors.append(f"invalid provenance at {directory}")
-        expected = ANCHORS.get(key[0], ())
+        expected = _anchors(scope, key[0]) if key[0] in XIS else ()
         declared = tuple(_float(value) for value in summary.get("anchors", ()))
         if len(declared) != len(expected) or any(not math.isclose(a, b, abs_tol=1e-9, rel_tol=0.0) for a, b in zip(declared, expected)):
             errors.append(f"anchor declaration mismatch at {directory}")
@@ -152,6 +167,11 @@ def _validate_jobs(
             for row in _rows(directory / "slice_metrics.csv") if (directory / "slice_metrics.csv").is_file() else []:
                 if _float(row.get("targeted_additions"), 0.0) > 12:
                     errors.append(f"Stage-A targeted cap exceeded at {directory}, T={row.get('T_MeV')}")
+                if _float(row.get("stage_c_targeted_additions"), 0.0) > 12:
+                    errors.append(f"Stage-C targeted cap exceeded at {directory}, T={row.get('T_MeV')}")
+            legacy_rows = [row for row in curves if row.get("sampling_role") == "stage_c_support"]
+            if legacy_rows and not allow_legacy_stage_c_support:
+                errors.append(f"legacy Stage-C support label at {directory}; expected stage_c_guard")
         for row in _rows(directory / "slice_metrics.csv") if (directory / "slice_metrics.csv").is_file() else []:
             if row.get("stage_c_status") in (None, "", "not_run"):
                 continue
@@ -159,9 +179,11 @@ def _validate_jobs(
             if not (math.isfinite(low) and math.isfinite(high) and low < high):
                 errors.append(f"Stage-C support is missing at {directory}, T={row.get('T_MeV')}")
                 continue
+            guard_points = 0
             for curve in _rows(directory / "curve_points.csv") if (directory / "curve_points.csv").is_file() else []:
-                if curve.get("sampling_role") != "stage_c_support" or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=1e-8, rel_tol=0.0):
+                if curve.get("sampling_role") not in (("stage_c_support", "stage_c_guard") if allow_legacy_stage_c_support else ("stage_c_guard",)) or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=1e-8, rel_tol=0.0):
                     continue
+                guard_points += 1
                 rho = _float(curve.get("rho"))
                 if not (low - 1e-9 <= rho <= high + 1e-9):
                     message = f"Stage-C point lies outside declared support at {directory}, T={row.get('T_MeV')}, rho={curve.get('rho')}"
@@ -170,6 +192,8 @@ def _validate_jobs(
                         legacy_support_violations[key_warning] = legacy_support_violations.get(key_warning, 0) + 1
                     else:
                         errors.append(message)
+            if guard_points == 0:
+                errors.append(f"Stage-C guard has no sampled points at {directory}, T={row.get('T_MeV')}")
     if allow_legacy_stage_c_support:
         compatibility_warnings.extend(
             f"legacy Stage-C support label mismatch at {directory}, T={temperature}: {count} point(s) outside declared support; retained for replay diagnostics"
@@ -224,7 +248,9 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
             "position_error_MeV", "density_error", "maxwell_area_gate", "area_residual",
             "mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV",
             "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark",
-            "support_low", "support_high", "support_point_count",
+            "support_low", "support_high", "support_mu_low", "support_mu_high",
+            "guard_status", "guard_reason", "guard_source", "support_point_count",
+            "targeted_additions", "stage_c_targeted_additions",
         )} for row in slice_rows
     ])
     _write_csv(output_dir / "curve_index.csv", [
@@ -288,6 +314,8 @@ def _gate(
     output_dir: Path,
     contract_errors: list[str],
     compatibility_warnings: list[str] | None = None,
+    *,
+    scope: str = "full",
 ) -> dict[str, Any]:
     compatibility_warnings = compatibility_warnings or []
     rows = _rows(output_dir / "slice_metrics.csv")
@@ -312,17 +340,24 @@ def _gate(
         (round(_float(row.get("xi")), 9), round(_float(row.get("T_MeV")), 9)): row
         for row in oracle
     }
+    expected_by_xi = {xi: set(_anchors(scope, xi)) for xi in sorted(XIS)}
     for xi, temperatures in REQUIRED_FIRST_ORDER.items():
         for temperature in temperatures:
+            if temperature not in expected_by_xi[xi]:
+                continue
             row = by_oracle_anchor.get((round(xi, 9), round(temperature, 9)))
             if row is None or row.get("result_status") != "confirmed_first_order":
                 oracle_errors.append(f"oracle required first-order anchor is not confirmed xi={xi} T={temperature}")
     for xi, temperatures in REQUIRED_MONOTONE.items():
         for temperature in temperatures:
+            if temperature not in expected_by_xi[xi]:
+                continue
             row = by_oracle_anchor.get((round(xi, 9), round(temperature, 9)))
             if row is None or row.get("result_status") != "confirmed_monotone":
                 oracle_errors.append(f"oracle required monotone anchor is not confirmed xi={xi} T={temperature}")
     for xi, (low_temperature, high_temperature) in CEP_NEIGHBOURS.items():
+        if low_temperature not in expected_by_xi[xi] and high_temperature not in expected_by_xi[xi]:
+            continue
         low = by_oracle_anchor.get((round(xi, 9), round(low_temperature, 9)))
         high = by_oracle_anchor.get((round(xi, 9), round(high_temperature, 9)))
         if low is not None and low.get("result_status") == "confirmed_monotone":
@@ -376,15 +411,15 @@ def _gate(
     elif performance_errors:
         verdict = "hybrid_performance_risk"
     else:
-        verdict = "full_hybrid_candidate"
-    return {"verdict": verdict, "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
+        verdict = "targeted_hybrid_candidate" if scope == "targeted" else "full_hybrid_candidate"
+    return {"verdict": verdict, "scope": scope, "expected_anchor_count": sum(len(values) for values in expected_by_xi.values()), "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
 
 
 def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any]) -> None:
     errors = gate["workflow_contract_errors"] + gate["oracle_errors"] + gate["classification_errors"] + gate["coverage_errors"] + gate["performance_errors"]
     warnings = gate.get("compatibility_warnings", [])
     (output_dir / "README.md").write_text(
-        f"# PNJL CEP hybrid production shadow v2\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
+        f"# PNJL CEP hybrid production shadow v2\n\nscope: `{gate.get('scope', 'full')}`\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
         "不覆盖 reference，不启动 C0/C1/C2、C3/O1、formal production 或 transport。\n\n"
         f"- Actions critical path: {actions.get('critical_path_seconds', 0.0)} s\n"
         f"- runner-minutes: {actions.get('runner_minutes', 0)}\n"
@@ -418,15 +453,17 @@ def collect(
     postprocess_sha: str | None = None,
     source_run_id: str | None = None,
     legacy_replay: bool = False,
+    scope: str = "full",
 ) -> dict[str, Any]:
+    _anchors(scope, -0.5)  # validate scope before creating a partial aggregate
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _find_jobs(input_dir)
     contract_errors, compatibility_warnings = _validate_jobs(
-        jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay
+        jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay, scope=scope
     )
     corrections = _collect_tables(jobs, output_dir)
     actions = _actions(run_id, output_dir)
-    gate = _gate(output_dir, contract_errors, compatibility_warnings)
+    gate = _gate(output_dir, contract_errors, compatibility_warnings, scope=scope)
     _write_docs(output_dir, gate, actions)
     hashes: dict[str, str] = {}
     for path in sorted(output_dir.rglob("*")):
@@ -436,6 +473,7 @@ def collect(
         "schema_version": "cep_cascade_production_shadow_v2",
         "run_id": run_id or "", "source_run_id": source_run_id or run_id or "",
         "expected_calculation_sha": expected_sha, "postprocess_sha": postprocess_sha or "",
+        "scope": scope,
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
@@ -456,6 +494,7 @@ def main() -> int:
     parser.add_argument("--postprocess-sha", default=None)
     parser.add_argument("--source-run-id", default=None)
     parser.add_argument("--legacy-replay", action="store_true", help="allow known pre-v2 Stage-C support labels while retaining warnings")
+    parser.add_argument("--scope", choices=("targeted", "full"), default="full")
     args = parser.parse_args()
     gate = collect(
         args.input_dir,
@@ -465,6 +504,7 @@ def main() -> int:
         postprocess_sha=args.postprocess_sha,
         source_run_id=args.source_run_id,
         legacy_replay=args.legacy_replay,
+        scope=args.scope,
     )
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["verdict"] == "workflow_failure" else 2 if gate["verdict"] != "full_hybrid_candidate" else 0

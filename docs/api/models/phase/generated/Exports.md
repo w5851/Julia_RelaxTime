@@ -4,9 +4,9 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`, `src/models/entrypoints.jl`
 - Generated page: `docs/api/models/phase/generated/Exports.md`
-- Exported symbol count: 16
-- Mentioned in non-generated docs/api pages: 16
-- Topic filter: `run_phase_pipeline`, `run_production_phase_pipeline`, `find_cep`, `build_phase_artifacts`, `resolve_phase_output_target`, `promote_phase_artifacts`, `PhasePipelineResult`, `CEPResult`, `CEP_RESULT_STATUSES`, `FirstOrderSweepResult`, `ProductionPipelineConfig`, `PromotionResult`, `RhoSupportConfig`, `RhoSupportPrior`, `RhoSupportAssessment`, `analyze_rho_support_cascade`
+- Exported symbol count: 17
+- Mentioned in non-generated docs/api pages: 17
+- Topic filter: `run_phase_pipeline`, `run_production_phase_pipeline`, `find_cep`, `build_phase_artifacts`, `resolve_phase_output_target`, `promote_phase_artifacts`, `PhasePipelineResult`, `CEPResult`, `CEP_RESULT_STATUSES`, `FirstOrderSweepResult`, `RhoHybridVerificationConfig`, `ProductionPipelineConfig`, `PromotionResult`, `RhoSupportConfig`, `RhoSupportPrior`, `RhoSupportAssessment`, `analyze_rho_support_cascade`
 
 ## Exported Symbols
 
@@ -18,6 +18,7 @@
 | `PhasePipelineResult` | src/models/exports_public.jl | 97 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `ProductionPipelineConfig` | src/models/exports_public.jl | 97 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `PromotionResult` | src/models/exports_public.jl | 97 | 1 | docs/api/models/phase/Overview.md |
+| `RhoHybridVerificationConfig` | src/models/exports_public.jl | 97 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `RhoSupportAssessment` | src/models/exports_public.jl | 98 | 1 | docs/api/models/phase/Algorithms.md |
 | `RhoSupportConfig` | src/models/exports_public.jl | 98 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `RhoSupportPrior` | src/models/exports_public.jl | 98 | 1 | docs/api/models/phase/Algorithms.md |

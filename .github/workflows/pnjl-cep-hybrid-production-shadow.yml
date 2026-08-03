@@ -28,6 +28,12 @@ on:
         required: false
         default: "cep_cascade_production_shadow_v2"
         type: string
+      scope:
+        description: "Targeted 18-anchor validation or full 24-anchor shadow"
+        required: false
+        default: "full"
+        type: choice
+        options: [targeted, full]
 
 permissions:
   contents: read
@@ -88,6 +94,7 @@ jobs:
           METHOD: ${{ matrix.method }}
           TAG: ${{ inputs.tag }}
           CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SCOPE: ${{ inputs.scope }}
         run: |
           mkdir -p "artifacts/${METHOD}/xi_${XI}"
           julia --project=. scripts/analysis/pnjl_cep_hybrid_production_shadow.jl \
@@ -95,6 +102,7 @@ jobs:
             --method "$METHOD" \
             --tag "$TAG" \
             --calculation-sha "$CALCULATION_REF" \
+            --scope "$SCOPE" \
             --output-dir "artifacts/${METHOD}/xi_${XI}"
 
       - name: Upload hybrid shadow job artifact
@@ -137,6 +145,7 @@ jobs:
         env:
           RUN_ID: ${{ github.run_id }}
           CALCULATION_REF: ${{ inputs.calculation_ref }}
+          SCOPE: ${{ inputs.scope }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
@@ -145,6 +154,7 @@ jobs:
             --output-dir aggregate \
             --run-id "$RUN_ID" \
             --expected-calculation-sha "$CALCULATION_REF" \
+            --scope "$SCOPE" \
             --postprocess-sha "${GITHUB_SHA}" \
             --source-run-id "$RUN_ID"
           status=$?
@@ -220,6 +230,7 @@ jobs:
       - name: Replay collector and plots
         shell: bash
         env:
+          SCOPE: ${{ inputs.scope }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
@@ -230,6 +241,7 @@ jobs:
             --source-run-id "${{ inputs.source_run_id }}" \
             --postprocess-sha "${GITHUB_SHA}" \
             --expected-calculation-sha "${{ inputs.source_calculation_sha }}" \
+            --scope "$SCOPE" \
             --legacy-replay
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
