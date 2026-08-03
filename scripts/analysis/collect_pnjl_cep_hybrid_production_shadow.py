@@ -52,6 +52,7 @@ CEP_NEIGHBOURS = {
     0.0: (130.9619140625, 131.0869140625),
     0.5: (106.9599609375, 107.0849609375),
 }
+CURVE_T_MATCH_TOL = 1e-6  # trho CSV serializes T to six decimal places
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -181,7 +182,7 @@ def _validate_jobs(
                 continue
             guard_points = 0
             for curve in _rows(directory / "curve_points.csv") if (directory / "curve_points.csv").is_file() else []:
-                if curve.get("sampling_role") not in (("stage_c_support", "stage_c_guard") if allow_legacy_stage_c_support else ("stage_c_guard",)) or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=1e-8, rel_tol=0.0):
+                if curve.get("sampling_role") not in (("stage_c_support", "stage_c_guard") if allow_legacy_stage_c_support else ("stage_c_guard",)) or not math.isclose(_float(curve.get("T_MeV")), _float(row.get("T_MeV")), abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0):
                     continue
                 guard_points += 1
                 rho = _float(curve.get("rho"))
