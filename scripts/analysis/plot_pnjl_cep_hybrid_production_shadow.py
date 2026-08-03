@@ -12,6 +12,7 @@ from pathlib import Path
 
 METHODS = ("production_hybrid", "memoized_dense", "independent_oracle")
 XIS = ("-0.5", "0.0", "0.5")
+CURVE_T_MATCH_TOL = 1e-6  # trho CSV serializes T to six decimal places
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -28,7 +29,7 @@ def _float(value: str | None) -> float:
 
 def _status(rows: list[dict[str, str]], xi: str, temperature: float, method: str) -> str:
     for row in rows:
-        if row.get("method") == method and row.get("xi") == xi and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=1e-8, rel_tol=0.0):
+        if row.get("method") == method and row.get("xi") == xi and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0):
             return row.get("result_status", "")
     return "missing"
 
@@ -63,7 +64,7 @@ def _select_anchors(rows: list[dict[str, str]]) -> list[tuple[str, float, str]]:
 def _bounds(curve_rows: list[dict[str, str]], slice_rows: list[dict[str, str]], xi: str, temperature: float) -> tuple[float, float]:
     values: list[float] = []
     for row in slice_rows:
-        if row.get("xi") == xi and row.get("method") == "production_hybrid" and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=1e-8, rel_tol=0.0):
+        if row.get("xi") == xi and row.get("method") == "production_hybrid" and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0):
             for field in ("rho_hadron", "rho_quark", "rho_spinodal_hadron", "rho_spinodal_quark", "support_low", "support_high"):
                 value = _float(row.get(field))
                 if math.isfinite(value):
@@ -80,7 +81,7 @@ def _bounds(curve_rows: list[dict[str, str]], slice_rows: list[dict[str, str]], 
 def _plot_anchor(output: Path, curve_rows: list[dict[str, str]], slice_rows: list[dict[str, str]], xi: str, temperature: float, reason: str) -> str:
     import matplotlib.pyplot as plt
 
-    subset = [row for row in curve_rows if row.get("xi") == xi and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=1e-8, rel_tol=0.0)]
+    subset = [row for row in curve_rows if row.get("xi") == xi and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0)]
     low, high = _bounds(subset, slice_rows, xi, temperature)
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
     colors = {"production_hybrid": "tab:orange", "memoized_dense": "tab:blue", "independent_oracle": "tab:green"}

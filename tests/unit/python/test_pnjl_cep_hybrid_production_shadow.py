@@ -188,7 +188,9 @@ def test_legacy_replay_keeps_stage_c_support_mismatch_as_warning(tmp_path):
     for row in curve_rows:
         row["sampling_role"] = "stage_c_support"
     with curve_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(curve_rows[0]))
+        fieldnames = list(curve_rows[0])
+        "sampling_role" not in fieldnames and fieldnames.append("sampling_role")
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(curve_rows)
 
@@ -215,6 +217,40 @@ def test_legacy_replay_keeps_stage_c_support_mismatch_as_warning(tmp_path):
     assert replay["compatibility_warnings"]
     manifest = json.loads((tmp_path / "replay" / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["compatibility_warnings"]
+
+
+def test_stage_c_guard_matches_six_decimal_curve_temperature(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_curve_temperature_rounding")
+    _matrix(tmp_path)
+    job = tmp_path / "job-production_hybrid--0.5"
+    curve_path = job / "curve_points.csv"
+    curve_rows = list(csv.DictReader(curve_path.open(newline="", encoding="utf-8")))
+    for row in curve_rows:
+        if row["T_MeV"] == "147.0947265625":
+            row["T_MeV"] = "147.094727"
+            row["sampling_role"] = "stage_c_guard"
+    with curve_path.open("w", newline="", encoding="utf-8") as handle:
+        fieldnames = list(curve_rows[0])
+        "sampling_role" not in fieldnames and fieldnames.append("sampling_role")
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(curve_rows)
+    slice_path = job / "slice_metrics.csv"
+    slice_rows = list(csv.DictReader(slice_path.open(newline="", encoding="utf-8")))
+    target = next(row for row in slice_rows if row["T_MeV"] == "147.0947265625")
+    target["stage_c_status"] = "invalid"
+    target["support_low"], target["support_high"] = "0.0", "1.5"
+    with slice_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(slice_rows[0]))
+        writer.writeheader()
+        writer.writerows(slice_rows)
+    summary_path = job / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["curve_file_sha256"]["curve_points.csv"] = hashlib.sha256(curve_path.read_bytes()).hexdigest()
+    summary["curve_file_sha256"]["slice_metrics.csv"] = hashlib.sha256(slice_path.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(tmp_path, tmp_path / "aggregate", None, "a" * 40)
+    assert not gate["workflow_contract_errors"]
 
 
 def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
