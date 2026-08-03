@@ -1,0 +1,6 @@
+cap,anchors,classification_mismatches,unsupported_confirmations,multiple_candidate_anchors,guard_failures,unique_solves,dense_unique_solves,state_gate,candidate_gate,cost_gate,feasible
+12,24,0,0,0,1,12148,15384.0,true,true,true,true
+24,24,0,0,0,1,12184,15384.0,true,true,true,true
+48,24,0,0,0,1,12256,15384.0,true,true,true,true
+96,24,0,0,0,1,12400,15384.0,true,true,true,true
+160,24,0,0,0,1,12592,15384.0,true,true,true,true

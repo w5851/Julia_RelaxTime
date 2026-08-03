@@ -1,0 +1,6 @@
+claim_id,claim,status,boundary
+guard,guard uses first strict Stage-B samples outside both μ extrema,observed,solver-free replay
+classification,hybrid classification matches oracle non-ambiguous anchors and explicit author adjudications,pass,requires targeted/full shadow
+geometry,Maxwell and rho geometry are recomputed with Julia PhaseCore,observed,discrete curve evidence only
+cost,Stage-A/B/C union unique solves do not exceed dense,pass,runner telemetry requires Actions
+promotion,feasibility authorizes reference or production promotion,not_claimed,not part of this replay

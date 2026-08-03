@@ -1,0 +1,156 @@
+{
+    "source_manifest_sha256": "31199b5eb19e88fa8415cf8919f536956537db441edf715458ff718170411ce8",
+    "input_files": {
+        "slice_metrics.csv": "be4ea37ddeb6f52a921ee3c479fb06fe87a1a3065812bcadc84e5412f5c35a0c",
+        "manifest.json": "31199b5eb19e88fa8415cf8919f536956537db441edf715458ff718170411ce8",
+        "curve_points.csv": "97798912df1a8cc64143dff1cef971dbd0d75fb179a75f39575db0971bb16da6",
+        "method_costs.csv": "5fe10f91469cfe2d2165290b5025e17cf441e7a00e8d1692721fa4b4ee9fc052"
+    },
+    "producer_head_sha": "62b783541a7a107c4117ed8be29da186c9ee0697",
+    "revalidation_artifact_supplied": true,
+    "source_actions_conclusion": "failure",
+    "files": {
+        "author_adjudications.csv": "f2a77d84a7a46e36ef3a13e3d3144c82204f8f194ba53337ace8c09d03da0ea7",
+        "selected_policy.json": "023d9e63b621ca4c27c665ce2533a7d16ee711578c10554a88ea9dee116591f8",
+        "selected_points.csv": "4150d677236422f120afc8224939e159cd198e3280a3a7237693195f2eb0f963",
+        "deep_oracle_required.csv": "a4395f847f44961b38839f194a173c1d1f3f78daf64f3a83263629e1b9b12d89",
+        "plot_manifest.json": "46d15f011b0b0727a77bc6642614600bf566a1ad7ad815e4fe29925c9e17b7c6",
+        "claim_ledger.csv": "8e4d8d1c6771b0361ff3882b7e0b9584e34ddb78a20fe51ff73bcee25309e760",
+        "provenance.json": "41e39650766506dbbab4e7d2d9f70f1f2e463583f32983ab1b7c0fc13b996114",
+        "AUDIT.md": "2ce52122b6e651693452ad536c463401b1e5854ff21fba369b66b36cb9207a8c",
+        "anchor_replay.csv": "13718643a67b8e827e5f988c291830cd55380adea2f086e390f297dbe6bd2254",
+        "cost_frontier.csv": "a30a9d30176909755fa59150da75fed0880e72af4023cf64d623a2e76678c53b",
+        "guard_table.csv": "58b05b38f39e704815829275f2c9e40d41f26987089b5aae727dfc8623bfcf87",
+        "README.md": "07c1d0b68e71f74eca1512531a8084f0f038176f2886e10b1bcf01076caab1cb",
+        "candidate_runs.csv": "43d4d3b05652792f5085d447bd4062510ba4a9dba96ac1f1ba29cbc3d0b3bdca",
+        "curve_index.csv": "ca95120906b475dbe81a01da94764f84fa75c68ec092d1c6feee12f3163f713a"
+    },
+    "verdict": "feasible_candidate",
+    "source_calculation_sha": "467be1fce847a9c991ec362c3335be07fccbe604",
+    "selected_policy": {
+        "schema_version": "cep_hybrid_stagec_extrema_guard_feasibility_v1",
+        "verdict": "feasible_candidate",
+        "selected_cap": 12,
+        "guard_rule": "extrema_outer_samples_v1",
+        "comparison_epsilon": 7.105427357601002e-15,
+        "stage_b_grid_step": 0.00625,
+        "stage_c_local_step": 0.003125,
+        "caps": [
+            12,
+            24,
+            48,
+            96,
+            160
+        ],
+        "dense_unique_solves": 15384,
+        "reason": "minimum feasible cap"
+    },
+    "cost_frontier": [
+        {
+            "cap": 12,
+            "anchors": 24,
+            "classification_mismatches": 0,
+            "unsupported_confirmations": 0,
+            "multiple_candidate_anchors": 0,
+            "guard_failures": 1,
+            "unique_solves": 12148,
+            "dense_unique_solves": 15384,
+            "state_gate": true,
+            "candidate_gate": true,
+            "cost_gate": true,
+            "feasible": true
+        },
+        {
+            "cap": 24,
+            "anchors": 24,
+            "classification_mismatches": 0,
+            "unsupported_confirmations": 0,
+            "multiple_candidate_anchors": 0,
+            "guard_failures": 1,
+            "unique_solves": 12184,
+            "dense_unique_solves": 15384,
+            "state_gate": true,
+            "candidate_gate": true,
+            "cost_gate": true,
+            "feasible": true
+        },
+        {
+            "cap": 48,
+            "anchors": 24,
+            "classification_mismatches": 0,
+            "unsupported_confirmations": 0,
+            "multiple_candidate_anchors": 0,
+            "guard_failures": 1,
+            "unique_solves": 12256,
+            "dense_unique_solves": 15384,
+            "state_gate": true,
+            "candidate_gate": true,
+            "cost_gate": true,
+            "feasible": true
+        },
+        {
+            "cap": 96,
+            "anchors": 24,
+            "classification_mismatches": 0,
+            "unsupported_confirmations": 0,
+            "multiple_candidate_anchors": 0,
+            "guard_failures": 1,
+            "unique_solves": 12400,
+            "dense_unique_solves": 15384,
+            "state_gate": true,
+            "candidate_gate": true,
+            "cost_gate": true,
+            "feasible": true
+        },
+        {
+            "cap": 160,
+            "anchors": 24,
+            "classification_mismatches": 0,
+            "unsupported_confirmations": 0,
+            "multiple_candidate_anchors": 0,
+            "guard_failures": 1,
+            "unique_solves": 12592,
+            "dense_unique_solves": 15384,
+            "state_gate": true,
+            "candidate_gate": true,
+            "cost_gate": true,
+            "feasible": true
+        }
+    ],
+    "producer_script_sha256": "eefb9d3f6a21cfc983ee3b2db7fa40af5ab0e299d9deed2b759e50b605b35c01",
+    "revalidation_run_id": "30730990835",
+    "gate": {
+        "author_first_order": [
+            {
+                "T_MeV": 106.9599609375,
+                "xi": 0.5
+            },
+            {
+                "T_MeV": 5,
+                "xi": 0
+            },
+            {
+                "T_MeV": 20,
+                "xi": -0.5
+            },
+            {
+                "T_MeV": 147.0947265625,
+                "xi": -0.5
+            }
+        ],
+        "consensus_monotone": [
+            {
+                "T_MeV": 107.0849609375,
+                "xi": 0.5
+            },
+            {
+                "T_MeV": 147.2197265625,
+                "xi": -0.5
+            }
+        ],
+        "automatic_gate_is_not_promotion": true
+    },
+    "source_run_id": "30737739707",
+    "solver_called": false,
+    "schema_version": "cep_hybrid_stagec_extrema_guard_feasibility_v1"
+}
