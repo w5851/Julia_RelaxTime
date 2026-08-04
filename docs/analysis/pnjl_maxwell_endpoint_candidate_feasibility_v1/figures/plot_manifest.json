@@ -1,0 +1,25 @@
+{
+  "schema_version": "pnjl_maxwell_endpoint_candidate_feasibility_v1",
+  "source_curve_file": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_hybrid_extrema_guard_20260803\\required_three_deep_run_30809754119\\cep-deep-oracle-cep_hybrid_extrema_guard_required_three_deep_20260803-aggregate\\curve_points.csv",
+  "source_curve_sha256": "2bf96a5c820c8b55c0ce0124e29d5a2c1904b1571beab2c7ce56cf7807a2b3c3",
+  "summary_file": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl_maxwell_endpoint_candidate_feasibility_v1\\candidate_summary.csv",
+  "summary_sha256": "9287daf33fef294098854ee8be4edbcef41c14378110bf59dea0c460e8d6b59a",
+  "figures": [
+    {
+      "path": "minus05_T5_full_near_zero.png",
+      "sha256": "3c8f811cac951148b79927564227abcc4cee63b97d40d1051e450341260ee514",
+      "scope": "full_curve_plus_rho_le_0.02_zoom"
+    },
+    {
+      "path": "minus05_T20_full_near_zero.png",
+      "sha256": "9aaf4d536381a4c969d694b56a7cf5dfa039a42d86d8cce2fed1b471c96e6fc6",
+      "scope": "full_curve_plus_rho_le_0.02_zoom"
+    },
+    {
+      "path": "zero_T5_full_near_zero.png",
+      "sha256": "6defb9f842474b09134d3db87f98fc18d16f4f13a147f3fbd0d00bb6a8a4c69f",
+      "scope": "full_curve_plus_rho_le_0.02_zoom"
+    }
+  ],
+  "command": "python scripts/analysis/plot_pnjl_maxwell_endpoint_candidate.py"
+}
