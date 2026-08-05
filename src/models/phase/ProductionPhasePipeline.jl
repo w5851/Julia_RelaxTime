@@ -1209,6 +1209,7 @@ function _hybrid_endpoint_local_route(
         (endpoint_limit_success || internal_success)
     certificate = endpoint_limit_success ? :endpoint_limited_first_order :
         internal_success ? :endpoint_local_geometry_first_order : :none
+    rho_convergence_records = _endpoint_local_convergence_records(stage_a, stage_b, trace)
     if success
         return merge(current, stats, (
             raw_status=:valid, slice_status=:confirmed_first_order,
@@ -1241,6 +1242,7 @@ function _hybrid_endpoint_local_route(
             hybrid_endpoint_left_bracket=(low=endpoint.left_bracket.low, high=endpoint.left_bracket.high),
             hybrid_endpoint_right_bracket=(low=endpoint.right_bracket.low, high=endpoint.right_bracket.high),
             rho_hadron=positive_lower ? current.rho_hadron : 0.0,
+            rho_convergence_records=rho_convergence_records,
         ))
     end
     return merge(current === nothing ? stage_b : current, stats, (
@@ -1271,6 +1273,7 @@ function _hybrid_endpoint_local_route(
         hybrid_endpoint_route_kind=:three_crossing_endpoint_local_v2,
         hybrid_endpoint_left_bracket=(low=endpoint.left_bracket.low, high=endpoint.left_bracket.high),
         hybrid_endpoint_right_bracket=(low=endpoint.right_bracket.low, high=endpoint.right_bracket.high),
+        rho_convergence_records=rho_convergence_records,
     ))
 end
 
@@ -1286,6 +1289,39 @@ function _hybrid_stats(before, after)
             targeted_additions=after.targeted_additions - before.targeted_additions,
         ),
     )
+end
+
+"""Normalize endpoint-local trace rows to the pipeline convergence schema.
+
+The endpoint-local route is entered only after the cascade/Stage-B records
+have been produced, but its diagnostic result must still expose the same
+``rho_convergence_records`` field as every other temperature classifier.  A
+missing field here used to make the production sweep fail while materializing
+the grid diagnostics, before any physical gate could be evaluated.
+"""
+function _endpoint_local_convergence_records(stage_a, stage_b, trace)
+    records = NamedTuple[]
+    append!(records, collect(get(stage_a, :rho_convergence_records, NamedTuple[])))
+    append!(records, collect(get(stage_b, :rho_convergence_records, NamedTuple[])))
+    for row in trace
+        low = Float64(row.bracket_low)
+        high = Float64(row.bracket_high)
+        midpoint = row.rho_midpoint === missing ? 0.5 * (low + high) : Float64(row.rho_midpoint)
+        push!(records, (
+            axis="rho",
+            level=Int(row.level),
+            left=low,
+            right=high,
+            midpoint=midpoint,
+            position_error_MeV=isfinite(row.position_error_MeV) ? row.position_error_MeV : nothing,
+            density_error=isfinite(row.density_error) ? row.density_error : nothing,
+            maxwell_area=isfinite(row.maxwell_area) ? row.maxwell_area : nothing,
+            response_rtol=nothing,
+            converged=Bool(row.geometry_converged),
+            reason=String(row.reason),
+        ))
+    end
+    return records
 end
 
 function _production_classify_temperature_hybrid(

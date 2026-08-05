@@ -90,6 +90,37 @@ end
         @test positive_endpoint.left_bracket.high == 1.0
     end
 
+    @testset "endpoint-local route preserves convergence diagnostics" begin
+        base_record = (
+            axis="rho", level=2, left=1.0, right=2.0, midpoint=2.0,
+            position_error_MeV=0.01, density_error=0.001,
+            maxwell_area=1e-6, response_rtol=nothing,
+            converged=true, reason="ok",
+        )
+        trace = [
+            (
+                level=0, rho_midpoint=missing, bracket_low=0.0, bracket_high=0.003125,
+                position_error_MeV=0.02, density_error=0.002,
+                maxwell_area=2e-6, geometry_converged=true, reason=:anchor,
+            ),
+            (
+                level=1, rho_midpoint=0.0015625, bracket_low=0.0, bracket_high=0.003125,
+                position_error_MeV=0.01, density_error=0.001,
+                maxwell_area=1e-6, geometry_converged=true, reason="ok",
+            ),
+        ]
+        records = Models._endpoint_local_convergence_records(
+            (rho_convergence_records=[base_record],),
+            (rho_convergence_records=NamedTuple[],),
+            trace,
+        )
+        @test length(records) == 3
+        @test records[end - 1].midpoint == 0.0015625
+        @test records[end].midpoint == 0.0015625
+        @test records[end].axis == "rho"
+        @test records[end].converged
+    end
+
     @testset "hybrid policy validation is explicit and opt-in" begin
         @test_throws ArgumentError Models.run_production_phase_pipeline(
             :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
