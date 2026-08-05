@@ -237,7 +237,14 @@ Maxwell 特征排序选出的 `0.003125` 点的并集。缺少任一 guard、多
 local step、target cap、support μ 极值、采用阶段和 verification 点数。它还固定记录
 `candidate_policy=:unique_three_crossing_topology_v1` 与
 `endpoint_policy=:bounded_zero_density_v1`；后者只在唯一 endpoint-dependent 候选且右外点
-存在时启用零密度端点证书。
+存在时启用历史零密度端点证书。新的显式
+`endpoint_policy=:three_crossing_endpoint_local_v2` 不再要求右支越过两个 μ 极值：它要求
+右 Maxwell 交点被两个实际 Stage-B 外支采样点 bracket，并始终保留完整 Stage-B 曲线；
+Stage-C 只在左 Maxwell 交点的 active bracket 内加入 midpoint。左 bracket 下界保持为零并
+收缩到端点预算时，内部诊断证书为 `endpoint_limited_first_order`；下界变为正值且最后两级
+geometry 均通过时为 `endpoint_local_geometry_first_order`。这两个名称只描述内部证书，
+对外仍映射到既有三态 `confirmed_first_order` / `confirmed_monotone` /
+`ambiguous_near_critical`，不新增用户可调容差。
 
 ## 工件治理层
 

@@ -765,21 +765,70 @@ endpoint-dependent and the right outer branch must already be observed.  It
 never uses an oracle label to decide whether to add a point.
 """
 function _hybrid_endpoint_candidate(stage_b, verification::RhoHybridVerificationConfig)
-    verification.endpoint_policy === :bounded_zero_density_v1 || return nothing
+    verification.endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) || return nothing
     maxwell = get(stage_b, :maxwell, MaxwellResult())
     maxwell.converged || return nothing
     details = maxwell.details
     get(details, :candidate_count, 0) == 1 || return nothing
     get(details, :endpoint_dependent, false) || return nothing
-    guard = _hybrid_extrema_guard(stage_b, verification.comparison_epsilon)
-    guard.reason == "missing_left_strict_outer_sample" || return nothing
-    _hybrid_right_guard_available(stage_b, verification.comparison_epsilon) || return nothing
-    crossings = get(details, :crossings, Float64[])
-    isempty(crossings) && return nothing
+    sres = get(stage_b, :sres, SShapeResult())
+    sres.has_s_shape || return nothing
+    crossings = try
+        sort!(Float64.(collect(get(details, :crossings, Float64[]))))
+    catch
+        return nothing
+    end
+    length(crossings) == 3 || return nothing
+    all(isfinite, crossings) || return nothing
+    all(diff(crossings) .> verification.comparison_epsilon) || return nothing
+    if verification.endpoint_policy === :bounded_zero_density_v1
+        guard = _hybrid_extrema_guard(stage_b, verification.comparison_epsilon)
+        guard.reason == "missing_left_strict_outer_sample" || return nothing
+        _hybrid_right_guard_available(stage_b, verification.comparison_epsilon) || return nothing
+        anchor = _HYBRID_ENDPOINT_ANCHOR_RHO
+        left_crossing = Float64(first(crossings))
+        left_crossing <= anchor + verification.comparison_epsilon || return nothing
+        return (policy=:bounded_zero_density_v1, guard=guard, anchor=anchor,
+            left_crossing=left_crossing)
+    end
     left_crossing = Float64(first(crossings))
-    anchor = _HYBRID_ENDPOINT_ANCHOR_RHO
-    left_crossing <= anchor + verification.comparison_epsilon || return nothing
-    return (guard=guard, anchor=anchor, left_crossing=left_crossing)
+    points = _hybrid_curve_points(get(stage_b, :curve, nothing))
+    isempty(points) && return nothing
+    left_brackets = sort([
+        (low=points[index].rho, high=points[index + 1].rho)
+        for index in 1:(length(points) - 1)
+        if points[index].rho <= left_crossing + verification.comparison_epsilon &&
+           left_crossing <= points[index + 1].rho + verification.comparison_epsilon
+    ]; by=item -> item.low)
+    isempty(left_brackets) && return nothing
+    rho_spinodal = sort(Float64[
+        something(sres.rho_spinodal_hadron, NaN),
+        something(sres.rho_spinodal_quark, NaN),
+    ])
+    all(isfinite, rho_spinodal) || return nothing
+    mu_transition = something(get(stage_b, :mu_transition, nothing), NaN)
+    isfinite(mu_transition) || return nothing
+    right_brackets = [
+        (low=points[index].rho, high=points[index + 1].rho,
+         mu_low=points[index].mu, mu_high=points[index + 1].mu)
+        for index in 1:(length(points) - 1)
+        if points[index].rho >= rho_spinodal[2] - verification.comparison_epsilon &&
+           points[index + 1].rho > points[index].rho &&
+           (points[index].mu - mu_transition) * (points[index + 1].mu - mu_transition) <= 0.0
+    ]
+    isempty(right_brackets) && return nothing
+    first_left_bracket = first(left_brackets)
+    right_bracket = last(right_brackets)
+    first_left_bracket.high > first_left_bracket.low + verification.comparison_epsilon || return nothing
+    return (policy=:three_crossing_endpoint_local_v2,
+        guard=(status=:endpoint_local, reason="right_maxwell_crossing_bracketed",
+            mu_low=min(something(sres.mu_spinodal_hadron, NaN),
+                something(sres.mu_spinodal_quark, NaN)),
+            mu_high=max(something(sres.mu_spinodal_hadron, NaN),
+                something(sres.mu_spinodal_quark, NaN))),
+        anchor=_HYBRID_ENDPOINT_ANCHOR_RHO,
+        left_crossing=left_crossing, left_bracket=first_left_bracket,
+        right_bracket=right_bracket)
 end
 
 function _hybrid_endpoint_route(
@@ -806,7 +855,7 @@ function _hybrid_endpoint_route(
     written = Set{Tuple{Float64, Float64, Float64}}()
     io_mode == "a" && union!(written, _existing_session_keys(out_csv))
     stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
-    selected = Set{Float64}()
+    selected = Set{Float64}([Float64(endpoint.anchor)])
     additions = Float64[]
     trace = NamedTuple[]
     current = nothing
@@ -935,6 +984,9 @@ function _hybrid_endpoint_route(
             hybrid_endpoint_anchor_rho=endpoint.anchor,
             hybrid_endpoint_refinement_count=length(additions),
             hybrid_endpoint_refinement_trace=trace,
+            hybrid_endpoint_route_kind=:bounded_zero_density_v1,
+            hybrid_endpoint_left_bracket=nothing,
+            hybrid_endpoint_right_bracket=nothing,
             rho_hadron=0.0,
             rho_convergence_records=[(
                 axis="rho", level=4, left=3.0, right=4.0, midpoint=4.0,
@@ -975,6 +1027,250 @@ function _hybrid_endpoint_route(
         hybrid_endpoint_anchor_rho=endpoint.anchor,
         hybrid_endpoint_refinement_count=length(additions),
         hybrid_endpoint_refinement_trace=trace,
+        hybrid_endpoint_route_kind=:bounded_zero_density_v1,
+        hybrid_endpoint_left_bracket=nothing,
+        hybrid_endpoint_right_bracket=nothing,
+    ))
+end
+
+"""Run the v2 endpoint-local route on the active left Maxwell bracket.
+
+The complete Stage-B grid remains part of every classification.  The right
+coexistence crossing is only required to be bracketed by actual outer-branch
+Stage-B points; no spinodal-height overshoot is required.  The physical state
+space remains the existing three-state contract; endpoint certificate kinds
+are diagnostic details only.
+"""
+function _hybrid_endpoint_local_route(
+        aggregate_csv::String,
+        eval_dir::String,
+        T_mid::Float64,
+        base_rho_grid::Vector{Float64},
+        xi::Float64,
+        reverse_rho::Bool,
+        p_num::Int,
+        t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
+        cfg::ProductionPipelineConfig,
+        session,
+        stage_a,
+        stage_b,
+        endpoint;
+        stats_before=TrhoScan.rho_session_snapshot(session))
+    verification = cfg.rho_hybrid_verification
+    before = stats_before
+    token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
+    out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_endpoint_local_v2.csv")
+    io_mode = isfile(out_csv) ? "a" : "w"
+    written = Set{Tuple{Float64, Float64, Float64}}()
+    io_mode == "a" && union!(written, _existing_session_keys(out_csv))
+    stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
+    selected = Set{Float64}([Float64(endpoint.anchor)])
+    additions = Float64[]
+    trace = NamedTuple[]
+    current = nothing
+    previous = stage_b
+    failure_reason = nothing
+    low = Float64(endpoint.left_bracket.low)
+    high = Float64(endpoint.left_bracket.high)
+    anchor = Float64(endpoint.anchor)
+    # The anchor is evidence-only and is counted separately from the midpoint
+    # cap.  It is never used to widen the Stage-B curve or the right support.
+    open(out_csv, io_mode) do io
+        io_mode == "w" && println(io, TrhoScan.HEADER)
+        _production_session_scan_hybrid!(session, io, written, T_mid, xi,
+            [anchor], selected, reverse_rho, p_num, t_num, thermo_quadrature_kwargs)
+        verification_grid = sort!(unique(vcat(stage_b_grid, [anchor])))
+        curve, _ = _production_session_curve_for_grid(session, T_mid, xi, verification_grid)
+        current = _classify_production_curve(curve, cfg, 4, out_csv)
+        details = current.maxwell.details
+        crossings = try
+            sort!(Float64.(collect(get(details, :crossings, Float64[]))))
+        catch
+            Float64[]
+        end
+        anchor_ok = current.status == :valid &&
+            get(details, :candidate_count, 0) == 1 &&
+            length(crossings) == 3 &&
+            first(crossings) >= low - verification.comparison_epsilon &&
+            first(crossings) <= high + verification.comparison_epsilon &&
+            last(crossings) >= endpoint.right_bracket.low - verification.comparison_epsilon &&
+            last(crossings) <= endpoint.right_bracket.high + verification.comparison_epsilon
+        geometry = _compare_phase_geometry(previous, current, PhaseGeometryTolerances(
+            position_MeV=cfg.rho_position_tol_MeV,
+            density=cfg.rho_density_tol,
+            maxwell_area=cfg.rho_maxwell_area_tol))
+        push!(trace, (
+            level=0, rho_midpoint=missing, bracket_low=low, bracket_high=high,
+            bracket_width=high - low, status=current.status, reason=current.reason,
+            candidate_count=get(details, :candidate_count, 0), crossing_count=length(crossings),
+            rho_hadron=current.rho_hadron, rho_quark=current.rho_quark,
+            area_residual=current.area_residual,
+            position_error_MeV=geometry.position_MeV, density_error=geometry.density,
+            maxwell_area=geometry.maxwell_area, geometry_converged=geometry.converged,
+            route_kind="anchor", sample_role="endpoint_anchor"))
+        if !anchor_ok
+            failure_reason = current.status != :valid ?
+                "endpoint_anchor_candidate_not_valid" : "endpoint_anchor_left_bracket_not_closed"
+        else
+            previous = current
+            # When the crossing is already on the endpoint side of the
+            # fixed positive-density anchor, the active endpoint-limit
+            # bracket is [0, anchor].  If it lies beyond the anchor, keep the
+            # original Stage-B cell so the binary route can establish a
+            # positive lower bound instead of silently truncating it.
+            if low <= verification.comparison_epsilon &&
+                    first(crossings) <= anchor + verification.comparison_epsilon
+                high = min(high, anchor)
+            end
+        end
+
+        for level in 1:verification.targeted_cap
+            failure_reason === nothing || break
+            midpoint = 0.5 * (low + high)
+            if abs(midpoint - anchor) <= verification.comparison_epsilon
+                # The fixed anchor can itself be the first midpoint when the
+                # crossing lies beyond it.  It was already sampled above;
+                # advance the bracket without charging a duplicate solve or
+                # counting the anchor as a refinement point.
+                if first(crossings) <= midpoint + verification.comparison_epsilon
+                    high = midpoint
+                else
+                    low = midpoint
+                end
+                previous = current
+                continue
+            end
+            push!(additions, midpoint)
+            push!(selected, midpoint)
+            _production_session_scan_hybrid!(session, io, written, T_mid, xi,
+                [midpoint], selected, reverse_rho, p_num, t_num, thermo_quadrature_kwargs)
+            verification_grid = sort!(unique(vcat(stage_b_grid, [anchor], additions)))
+            curve, _ = _production_session_curve_for_grid(session, T_mid, xi, verification_grid)
+            current = _classify_production_curve(curve, cfg, 4, out_csv)
+            details = current.maxwell.details
+            crossings = try
+                sort!(Float64.(collect(get(details, :crossings, Float64[]))))
+            catch
+                Float64[]
+            end
+            candidate_ok = current.status == :valid &&
+                get(details, :candidate_count, 0) == 1 && length(crossings) == 3 &&
+                first(crossings) >= low - verification.comparison_epsilon &&
+                first(crossings) <= high + verification.comparison_epsilon &&
+                last(crossings) >= endpoint.right_bracket.low - verification.comparison_epsilon &&
+                last(crossings) <= endpoint.right_bracket.high + verification.comparison_epsilon
+            geometry = _compare_phase_geometry(previous, current, PhaseGeometryTolerances(
+                position_MeV=cfg.rho_position_tol_MeV,
+                density=cfg.rho_density_tol,
+                maxwell_area=cfg.rho_maxwell_area_tol))
+            push!(trace, (
+                level=level, rho_midpoint=midpoint, bracket_low=low, bracket_high=high,
+                bracket_width=high - low, status=current.status, reason=current.reason,
+                candidate_count=get(details, :candidate_count, 0), crossing_count=length(crossings),
+                rho_hadron=current.rho_hadron, rho_quark=current.rho_quark,
+                area_residual=current.area_residual,
+                position_error_MeV=geometry.position_MeV, density_error=geometry.density,
+                maxwell_area=geometry.maxwell_area, geometry_converged=geometry.converged,
+                route_kind="midpoint", sample_role="endpoint_local_midpoint"))
+            if !candidate_ok
+                failure_reason = current.status != :valid ?
+                    "endpoint_local_candidate_not_valid" : "endpoint_local_right_crossing_not_bracketed"
+            elseif first(crossings) <= midpoint + verification.comparison_epsilon
+                high = midpoint
+                previous = current
+            else
+                low = midpoint
+                previous = current
+            end
+            # A positive-density certificate needs two consecutive successful
+            # geometry comparisons; it does not need to spend the full
+            # endpoint-limit budget once the active bracket is interior.
+            if low > verification.comparison_epsilon && level >= 2 &&
+                    length(trace) >= 3 &&
+                    all(row -> row.geometry_converged, trace[end - 1:end])
+                break
+            end
+        end
+    end
+
+    _append_scan_csv!(aggregate_csv, out_csv)
+    after = TrhoScan.rho_session_snapshot(session)
+    stats = _hybrid_stats(before, after)
+    details = current === nothing ? Dict{Symbol, Any}() : current.maxwell.details
+    final_trace = isempty(trace) ? nothing : last(trace)
+    positive_lower = low > verification.comparison_epsilon
+    endpoint_limit_width = _HYBRID_ENDPOINT_ANCHOR_RHO / 2.0^verification.targeted_cap
+    tail_geometry = length(trace) >= 2 && all(row -> row.geometry_converged, trace[max(1, end - 1):end])
+    endpoint_limit_success = !positive_lower && high <= endpoint_limit_width + verification.comparison_epsilon
+    internal_success = positive_lower && tail_geometry
+    success = failure_reason === nothing && current !== nothing &&
+        !isempty(additions) && current.status == :valid && tail_geometry &&
+        (endpoint_limit_success || internal_success)
+    certificate = endpoint_limit_success ? :endpoint_limited_first_order :
+        internal_success ? :endpoint_local_geometry_first_order : :none
+    if success
+        return merge(current, stats, (
+            raw_status=:valid, slice_status=:confirmed_first_order,
+            coarse_status=stage_a.raw_status, fine_status=:valid,
+            coarse_reason=stage_a.reason, fine_reason=current.reason,
+            geometry_converged=tail_geometry,
+            position_error_MeV=final_trace.position_error_MeV,
+            density_error=final_trace.density_error,
+            maxwell_area_gate=final_trace.maxwell_area,
+            stage_a_status=stage_a.slice_status, stage_b_status=stage_b.slice_status,
+            stage_c_status=:confirmed_first_order, stage_used=:stage_c_endpoint_local_v2,
+            hybrid_upgrade_reason="endpoint_local_v2_certificate",
+            hybrid_support_low=low, hybrid_support_high=high,
+            hybrid_support_mu_low=endpoint.guard.mu_low,
+            hybrid_support_mu_high=endpoint.guard.mu_high,
+            hybrid_guard_status=:endpoint_local,
+            hybrid_guard_reason="three_crossing_endpoint_local_v2",
+            hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
+            hybrid_targeted_point_count=length(additions),
+            hybrid_support_source=[:stage_b_full_curve, :endpoint_local_midpoint],
+            hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
+            hybrid_certificate_type=certificate,
+            hybrid_endpoint_lower_bound=positive_lower ? low : 0.0,
+            hybrid_endpoint_upper_bound=high,
+            hybrid_endpoint_interpolated_rho_hadron=current.rho_hadron,
+            hybrid_endpoint_anchor_rho=anchor,
+            hybrid_endpoint_refinement_count=length(additions),
+            hybrid_endpoint_refinement_trace=trace,
+            hybrid_endpoint_route_kind=:three_crossing_endpoint_local_v2,
+            hybrid_endpoint_left_bracket=(low=endpoint.left_bracket.low, high=endpoint.left_bracket.high),
+            hybrid_endpoint_right_bracket=(low=endpoint.right_bracket.low, high=endpoint.right_bracket.high),
+            rho_hadron=positive_lower ? current.rho_hadron : 0.0,
+        ))
+    end
+    return merge(current === nothing ? stage_b : current, stats, (
+        raw_status=current === nothing ? :unknown : current.status,
+        slice_status=:ambiguous_near_critical,
+        coarse_status=stage_a.raw_status, fine_status=current === nothing ? :unknown : current.status,
+        coarse_reason=stage_a.reason,
+        fine_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
+        geometry_converged=false, stage_a_status=stage_a.slice_status,
+        stage_b_status=stage_b.slice_status, stage_c_status=:ambiguous_near_critical,
+        stage_used=:stage_c_endpoint_local_v2,
+        hybrid_upgrade_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
+        hybrid_support_low=low, hybrid_support_high=high,
+        hybrid_support_mu_low=endpoint.guard.mu_low, hybrid_support_mu_high=endpoint.guard.mu_high,
+        hybrid_guard_status=:endpoint_local,
+        hybrid_guard_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
+        hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
+        hybrid_targeted_point_count=length(additions),
+        hybrid_support_source=[:stage_b_full_curve, :endpoint_local_midpoint],
+        hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
+        hybrid_certificate_type=:none,
+        hybrid_endpoint_lower_bound=positive_lower ? low : 0.0,
+        hybrid_endpoint_upper_bound=high,
+        hybrid_endpoint_interpolated_rho_hadron=current === nothing ? nothing : current.rho_hadron,
+        hybrid_endpoint_anchor_rho=anchor,
+        hybrid_endpoint_refinement_count=length(additions),
+        hybrid_endpoint_refinement_trace=trace,
+        hybrid_endpoint_route_kind=:three_crossing_endpoint_local_v2,
+        hybrid_endpoint_left_bracket=(low=endpoint.left_bracket.low, high=endpoint.left_bracket.high),
+        hybrid_endpoint_right_bracket=(low=endpoint.right_bracket.low, high=endpoint.right_bracket.high),
     ))
 end
 
@@ -1033,6 +1329,9 @@ function _production_classify_temperature_hybrid(
         hybrid_endpoint_anchor_rho=nothing,
         hybrid_endpoint_refinement_count=0,
         hybrid_endpoint_refinement_trace=NamedTuple[],
+        hybrid_endpoint_route_kind=:none,
+        hybrid_endpoint_left_bracket=nothing,
+        hybrid_endpoint_right_bracket=nothing,
     )
 
     # Stage A is allowed to certify monotonicity because it already contains
@@ -1062,10 +1361,15 @@ function _production_classify_temperature_hybrid(
 
     endpoint = _hybrid_endpoint_candidate(stage_b, cfg.rho_hybrid_verification)
     if endpoint !== nothing
-        endpoint_result = _hybrid_endpoint_route(
-            aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
-            p_num, t_num, thermo_quadrature_kwargs, cfg, session,
-            stage_a, stage_b, endpoint; stats_before=before)
+        endpoint_result = endpoint.policy === :three_crossing_endpoint_local_v2 ?
+            _hybrid_endpoint_local_route(
+                aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+                p_num, t_num, thermo_quadrature_kwargs, cfg, session,
+                stage_a, stage_b, endpoint; stats_before=before) :
+            _hybrid_endpoint_route(
+                aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+                p_num, t_num, thermo_quadrature_kwargs, cfg, session,
+                stage_a, stage_b, endpoint; stats_before=before)
         after = TrhoScan.rho_session_snapshot(session)
         return endpoint_result
     end
@@ -1699,8 +2003,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             rho_hybrid_verification.candidate_policy === :unique_three_crossing_topology_v1 || throw(ArgumentError(
                 "rho_support_hybrid requires candidate_policy=:unique_three_crossing_topology_v1",
             ))
-            rho_hybrid_verification.endpoint_policy === :bounded_zero_density_v1 || throw(ArgumentError(
-                "rho_support_hybrid requires endpoint_policy=:bounded_zero_density_v1",
+            rho_hybrid_verification.endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) || throw(ArgumentError(
+                "rho_support_hybrid requires endpoint_policy=:bounded_zero_density_v1 or :three_crossing_endpoint_local_v2",
             ))
             rho_hybrid_verification.targeted_cap == rho_support_targeted_cap || throw(ArgumentError(
                 "rho_hybrid_verification.targeted_cap must equal rho_support_targeted_cap",
@@ -1927,6 +2231,9 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             hybrid_endpoint_anchor_rho=Float64(something(get(res, :hybrid_endpoint_anchor_rho, nothing), NaN)),
             hybrid_endpoint_refinement_count=Int(get(res, :hybrid_endpoint_refinement_count, 0)),
             hybrid_endpoint_refinement_trace=get(res, :hybrid_endpoint_refinement_trace, NamedTuple[]),
+            hybrid_endpoint_route_kind=Symbol(get(res, :hybrid_endpoint_route_kind, :none)),
+            hybrid_endpoint_left_bracket=get(res, :hybrid_endpoint_left_bracket, nothing),
+            hybrid_endpoint_right_bracket=get(res, :hybrid_endpoint_right_bracket, nothing),
             maxwell_candidate_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :candidate_count, 0)),
             maxwell_crossing_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :crossing_count, 0)),
             maxwell_endpoint_dependent=Bool(get(get(res, :maxwell, MaxwellResult()).details, :endpoint_dependent, false)),

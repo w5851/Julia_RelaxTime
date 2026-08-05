@@ -440,6 +440,11 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   既有 position `0.025 MeV`、density `0.0025`、area `5e-5` 门禁均未放宽。derived verdict 为
   `feasible_candidate`，覆盖 targeted 18 + approved deep required-three；完整 24-anchor shadow
   仍是后续硬要求。
-- [ ] 从该 feasibility 合并 SHA 创建 `codex/issue-130-endpoint-local-production-v2`，将
-  `three_crossing_endpoint_local_v2` 作为显式 hybrid policy 落地；focused CI、targeted 和
-  full shadow 完成并经作者审核前，不启动 C0/C1/C2、phase-reference 或 transport。
+- [x] 从 feasibility merge SHA `650816e9…` 创建
+  `codex/issue-130-endpoint-local-production-v2`，将
+  `three_crossing_endpoint_local_v2` 作为显式 hybrid policy 落地；保留旧
+  `bounded_zero_density_v1`、完整 Stage-B 曲线与默认 uniform/cascade 语义，并将 endpoint
+  route/bracket、证书类型、补点 trace 与成本字段写入 shadow schema v4。
+- [ ] PR2 focused CI 全绿后 squash merge；随后以新的 production merge SHA 串行运行 focused →
+  必要 deep overlay → targeted 18-anchor → full 24-anchor shadow。full evidence 经作者审核前，
+  不启动 C0/C1/C2、phase-reference 或 transport。

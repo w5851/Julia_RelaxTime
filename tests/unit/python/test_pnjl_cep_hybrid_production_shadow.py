@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_cep_hybrid_production_shadow.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-cep-hybrid-production-shadow.yml"
+ENDPOINT_LOCAL_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-maxwell-endpoint-local-production-shadow-v4.yml"
 
 
 def load_module(path: Path, name: str):
@@ -40,7 +41,13 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100, scope: str
     collector = load_module(COLLECTOR, f"hybrid_collector_constants_{xi}_{method}")
     job = root / f"job-{method}-{xi}"
     job.mkdir()
-    anchors = collector.TARGETED_ANCHORS[xi] if scope == "targeted" else collector.ANCHORS[xi]
+    anchors = (
+        collector.FOCUSED_ANCHORS[xi]
+        if scope == "focused"
+        else collector.TARGETED_ANCHORS[xi]
+        if scope == "targeted"
+        else collector.ANCHORS[xi]
+    )
     sha = "a" * 40
     with (job / "curve_points.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=["xi", "method", "T_MeV", "rho_level", "rho", "muq_MeV", "converged", "finite"])
@@ -95,6 +102,13 @@ def _targeted_matrix(tmp_path: Path):
         write_job(tmp_path, xi, "production_hybrid", cost=90, scope="targeted")
         write_job(tmp_path, xi, "memoized_dense", cost=100, scope="targeted")
         write_job(tmp_path, xi, "independent_oracle", cost=110, scope="targeted")
+
+
+def _focused_matrix(tmp_path: Path):
+    for xi in (-0.5, 0.0, 0.5):
+        write_job(tmp_path, xi, "production_hybrid", cost=90, scope="focused")
+        write_job(tmp_path, xi, "memoized_dense", cost=100, scope="focused")
+        write_job(tmp_path, xi, "independent_oracle", cost=110, scope="focused")
 
 
 def test_hybrid_collector_accepts_complete_matrix(tmp_path):
@@ -282,6 +296,42 @@ def test_endpoint_v3_schema_and_policy_gate_are_supported(tmp_path):
     )
     assert gate["verdict"] == "full_hybrid_candidate"
     assert not gate["endpoint_errors"]
+
+
+def test_endpoint_local_v4_focused_schema_and_policy_gate_are_supported(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_endpoint_local_v4")
+    _focused_matrix(tmp_path)
+    for summary_path in tmp_path.glob("job-*/job_summary.json"):
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        summary["schema_version"] = "cep_maxwell_endpoint_local_production_shadow_v4"
+        summary.setdefault("parameters", {})["rho_hybrid_candidate_policy"] = "unique_three_crossing_topology_v1"
+        summary.setdefault("parameters", {})["rho_hybrid_endpoint_policy"] = "three_crossing_endpoint_local_v2"
+        summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(
+        tmp_path,
+        tmp_path / "aggregate",
+        None,
+        "a" * 40,
+        scope="focused",
+        schema_version="cep_maxwell_endpoint_local_production_shadow_v4",
+        endpoint_mode=True,
+        endpoint_policy="three_crossing_endpoint_local_v2",
+    )
+    assert gate["verdict"] == "focused_hybrid_candidate"
+    assert gate["scope"] == "focused"
+    assert gate["expected_anchor_count"] == 9
+    assert not gate["endpoint_errors"]
+
+
+def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
+    text = ENDPOINT_LOCAL_WORKFLOW.read_text(encoding="utf-8")
+    assert "cep_maxwell_endpoint_local_production_shadow_v4" in text
+    assert "three_crossing_endpoint_local_v2" in text
+    assert "options: [focused, targeted, full]" in text
+    assert "aggregate_replay" in text
+    assert "rerun_failed_only" in text
+    assert "timeout-minutes: 180" in text
+    assert "GH_TOKEN: ${{ github.token }}" in text
 
 
 def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_path, monkeypatch):
