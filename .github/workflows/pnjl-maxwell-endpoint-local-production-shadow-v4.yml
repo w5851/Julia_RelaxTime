@@ -55,7 +55,7 @@ env:
 
 jobs:
   shadow:
-    if: ${{ inputs.mode == 'numerical' && (inputs.rerun_failed_only != true || contains(inputs.failed_job_keys, format('{0}/{1}', matrix.method, matrix.xi))) }}
+    if: ${{ inputs.mode == 'numerical' }}
     name: "endpoint-local v4 xi=${{ matrix.xi }} method=${{ matrix.method }}"
     runs-on: ubuntu-latest
     timeout-minutes: 180
@@ -66,7 +66,23 @@ jobs:
         xi: ["-0.5", "0.0", "0.5"]
         method: [production_hybrid, memoized_dense, independent_oracle]
     steps:
+      - name: Select matrix job for failed-only rerun
+        id: select_job
+        shell: bash
+        env:
+          JOB_KEY: ${{ matrix.method }}/${{ matrix.xi }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$JOB_KEY,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping $JOB_KEY; its artifact will be restored from source_run_id."
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Validate immutable calculation ref
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         shell: bash
         env:
           CALCULATION_REF: ${{ inputs.calculation_ref }}
@@ -77,31 +93,37 @@ jobs:
           }
 
       - name: Checkout calculation SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.calculation_ref }}
           fetch-depth: 1
 
       - name: Verify checkout SHA
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         shell: bash
         env:
           CALCULATION_REF: ${{ inputs.calculation_ref }}
         run: test "$(git rev-parse HEAD)" = "$CALCULATION_REF"
 
       - name: Setup Julia
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         uses: julia-actions/setup-julia@v2
         with:
           version: "1.12.5"
 
       - name: Cache Julia artifacts
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         uses: julia-actions/cache@v2
         with:
           cache-name: julia-cache-maxwell-endpoint-local-production-shadow-v4
 
       - name: Install Julia dependencies
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
 
       - name: Run endpoint-local shadow job
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         shell: bash
         env:
           XI: ${{ matrix.xi }}
@@ -119,6 +141,7 @@ jobs:
             --output-dir "artifacts/${METHOD}/xi_${XI}"
 
       - name: Upload endpoint-local job artifact
+        if: ${{ steps.select_job.outputs.run_job == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: cep-maxwell-endpoint-local-production-shadow-${{ matrix.method }}-xi-${{ matrix.xi }}
