@@ -98,6 +98,11 @@ def _float(value: Any, default: float = math.nan) -> float:
         return default
 
 
+def _finite(value: Any) -> bool:
+    """Return whether a serialized numeric field is finite."""
+    return math.isfinite(_float(value))
+
+
 def _find_jobs(input_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return [(path.parent, _json(path)) for path in sorted(input_dir.rglob("job_summary.json"))]
 
