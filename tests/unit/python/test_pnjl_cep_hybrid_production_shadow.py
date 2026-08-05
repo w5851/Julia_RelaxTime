@@ -323,6 +323,13 @@ def test_endpoint_local_v4_focused_schema_and_policy_gate_are_supported(tmp_path
     assert not gate["endpoint_errors"]
 
 
+def test_endpoint_gate_finite_helper_accepts_serialized_values():
+    module = load_module(COLLECTOR, "hybrid_collector_finite_helper")
+    assert module._finite("0.125")
+    assert not module._finite("NaN")
+    assert not module._finite(None)
+
+
 def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
     text = ENDPOINT_LOCAL_WORKFLOW.read_text(encoding="utf-8")
     assert "cep_maxwell_endpoint_local_production_shadow_v4" in text
