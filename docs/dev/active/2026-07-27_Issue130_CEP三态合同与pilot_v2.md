@@ -4,8 +4,10 @@
 
 状态：三态合同 PR #147 已 squash merge；pilot v2 数值 Actions、aggregate replay 和
 evidence 导入已完成。hybrid shadow replay 与 Stage-C offline feasibility 已完成；随后
-Maxwell tolerance contract 已合并并完成五点 Actions revalidation。当前停在作者对扩大验证
-范围的决定，不启动全温区 phase-reference 或 transport。PR #146 已 squash merge（merge SHA
+Maxwell tolerance contract、三交点候选 feasibility 与单点 endpoint refinement 已完成。
+作者已接受有界零密度端点极限作为一阶证书；当前先沉淀 endpoint-limit evidence，再进入
+公共 Maxwell/hybrid production integration，不启动全温区 phase-reference 或 transport。
+PR #146 已 squash merge（merge SHA
 `5071f6c80bb10c812358b855e8da2bde8a758f9d`；最终 Actions run `30199406478`，
 9/9 matrix + aggregate success），v1 evidence 结论保持 `diagnostic_only`，不晋升
 reference。三态合同 merge SHA 为
@@ -381,3 +383,31 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   完整 24-anchor shadow，不创建 evidence promotion PR，不启动 C0/C1/C2、phase-reference
   replay、reference promotion 或 transport。下一步需作者决定是否对该低温点进行物理/数值
   审计（尤其 Maxwell tolerance 与候选区间），或接受其 ambiguous 语义后再调整 gate 计划。
+
+## Maxwell 三交点候选与 endpoint-limit 证书（2026-08-05）
+
+- [x] PR #171 已 squash merge，merge SHA 为
+  `df1fcdece7bc0888dd57c465c0015828743596c5`。该 PR 加入 solver-free 三交点 Maxwell
+  candidate feasibility、单点 endpoint refinement runner/collector/workflow 和 focused tests；
+  没有修改 equilibrium solver、reference 或 transport。
+- [x] 从 workflow head `df1fcdec…`、固定 calculation SHA
+  `3217bed3635574f00c04cbee75e843b4c49451db` 运行单点 Actions run
+  `30980094983`，范围严格为 `(xi,T)=(-0.5,5 MeV)`。1281 个基础点加 12 个近零 targeted
+  点全部 finite/converged，solver failure、fallback、retry 和 exception 均为 0。
+- [x] 13 个 refinement levels 始终保持唯一三交点 Maxwell candidate；最终
+  `mu_M=331.5739309844038 MeV`、`rho_q=2.8043699741472983`、面积残差
+  `-2.9237516382062305e-7`，左共存密度被约束为
+  `0 <= rho_h < 7.62939453125e-7`。source verdict 保持
+  `candidate_only_endpoint_inconclusive`，不改写历史 artifact。
+- [x] 作者明确接受上述有界零密度端点极限作为一阶相变证据，不要求严格正密度下界。
+  三态分类因此仍为 `confirmed_first_order`，内部证书类型定义为
+  `endpoint_limited_first_order`；兼容 scalar `rho_hadron` 使用 `0.0`，并同时保存真实上界，
+  不新增第四种物理状态，也不硬编码特定 `(xi,T)` 例外。
+- [x] 当前分支 `codex/issue-130-maxwell-endpoint-limit-contract` 以 solver-free 方式生成
+  `docs/analysis/pnjl_maxwell_endpoint_limit_contract_v1/`，固定校验 source run、双 SHA、两个
+  manifest SHA、三交点唯一性、逐级 bracket 二分、Maxwell/geometry、finite/key uniqueness
+  和成本守恒；derived verdict 为 `endpoint_limited_first_order_candidate`。
+- [ ] endpoint-limit evidence PR 合并后，另开公共 Maxwell/hybrid production PR，将该证书
+  作为通用诊断合同落地，再按 targeted → 必要 deep oracle → full 24-anchor shadow 顺序重验。
+  在 `full_hybrid_candidate` 与作者曲线/成本审核前，仍不启动 C0/C1/C2、phase-reference、
+  reference promotion 或 transport。

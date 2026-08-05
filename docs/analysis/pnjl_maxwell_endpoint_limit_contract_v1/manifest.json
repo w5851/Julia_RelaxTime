@@ -1,0 +1,28 @@
+{
+  "schema_version": "pnjl_maxwell_endpoint_limit_contract_v1",
+  "verdict": "endpoint_limited_first_order_candidate",
+  "physical_classification": "confirmed_first_order",
+  "certificate_kind": "endpoint_limited_first_order",
+  "source_run_id": "30980094983",
+  "source_calculation_sha": "3217bed3635574f00c04cbee75e843b4c49451db",
+  "source_workflow_head_sha": "df1fcdece7bc0888dd57c465c0015828743596c5",
+  "source_verdict": "candidate_only_endpoint_inconclusive",
+  "solver_called": false,
+  "reference_write": false,
+  "raw_curves_external": true,
+  "contract_errors": [],
+  "author_decision_status": "accepted",
+  "files": {
+    "AUDIT.md": "25420e740f43f3620d1d35ce0c809f69d6fbae1f3bc100da141f78f6b8be7a35",
+    "figures/endpoint_limit_convergence.png": "a7876aafea3eda85b5378e8b613e0249cc70ac5df7b5be32b49711aff888272c",
+    "figures/plot_manifest.json": "91bba45d484646ea9c00b5f1cfe52c093a83bdd7366ee93999b85cc3c643304e",
+    "provenance.json": "245250c85751082ba39b45959740cf42e139e27a2507451b4c1a926cd185b884",
+    "README.md": "184589a170082433a710a00f8c635628fe5d2b09d3a611a027043cec1822564f",
+    "selected_policy.json": "e766a2ee72ec44066d5ab215a477795546e89268d0ab4ec4473cfbc9ca08061c",
+    "tables/claim_ledger.csv": "016f1824da3494e50a5e901ed317798a5abe628203aa29b5b77c6d30d8685fd6",
+    "tables/cost_summary.csv": "f9b9e84c35673b80987610099b8f639ef72b686a3745e7aee150e021a8e40eaf",
+    "tables/endpoint_limit_certificate.csv": "698db75eea135cfcdf21e8bdba1bb897d040cbb624d36a849f776646a12fba14",
+    "tables/refinement_trace.csv": "99739868fd16777d70d0d10ceb67d01ff97335969818d69c40a655e8c0301b05",
+    "tables/source_inventory.csv": "71fd873403420b80d372de4cbdf7be2a72e2fd057123d3b910e92ae240afaaa5"
+  }
+}

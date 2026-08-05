@@ -1,0 +1,7 @@
+claim_id,claim,status,evidence,fields,boundary
+source_integrity,"The endpoint artifact is hash-complete, finite, converged, and key-unique.",pass,provenance.json; tables/cost_summary.csv,source_*_manifest_sha256; unique_solves; failure counters,run 30980094983 only
+unique_candidate,All refinement levels retain one stable three-crossing Maxwell candidate.,pass,tables/refinement_trace.csv,level; status; reason; candidate_count,"single xi=-0.5, T=5 MeV anchor"
+endpoint_limit,The hadronic coexistence density is bounded by 0 <= rho_h < 7.63e-7.,pass,tables/endpoint_limit_certificate.csv,rho_hadron_lower_bound; rho_hadron_upper_bound; bracket_halving_gate,endpoint-limit certificate; strict positive rho_h is not claimed
+physical_classification,The author-approved endpoint-limit contract supports confirmed first order.,author_confirmed,selected_policy.json; provenance.json,final_physical_classification; author_decision,policy decision dated 2026-08-05
+production_integration,The endpoint-limit certificate is implemented in production.,not_claimed,README.md,evidence boundary,requires a separate public-core/hybrid production PR and shadow validation
+cep_or_reference,This single anchor resolves the CEP or promotes a phase reference.,not_claimed,README.md,evidence boundary,single-temperature diagnostic only
