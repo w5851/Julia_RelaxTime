@@ -425,3 +425,21 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   默认 uniform/cascade、equilibrium solver、reference 和 transport 均未改变。
 - [ ] focused CI 全绿后 squash merge production PR；随后用该 merge SHA 运行 endpoint-limit targeted
   shadow，必要 deep oracle 仅限已批准集合，targeted 通过后再运行 full 24-anchor shadow。
+
+## Endpoint-Local Geometry 合同 v2（2026-08-05）
+
+- [x] 保持 v3 数值 artifact、`ceec2295…` calculation SHA 和历史 evidence 不变；collector 增加
+  `run_mode=numerical|aggregate_replay`，数值 aggregate 明确为 provisional，只有带认证的
+  source-run replay 才生成 final Actions 成本快照。
+- [x] deep overlay 只在 standard oracle 为 ambiguous 的 approved required-three 点生效；输出
+  `standard_oracle_status`、`deep_oracle_status`、`final_oracle_status` 和 `oracle_source`，不把
+  deep 标签用于 support/route 选择。
+- [x] solver-free feasibility 输出到
+  `docs/analysis/pnjl_cep_endpoint_local_contract_feasibility_v2/`。三个低温点均有唯一三交点
+  与实际右外支 bracket，保留完整 Stage-B 曲线，左侧只做 active-bracket midpoint replay；
+  既有 position `0.025 MeV`、density `0.0025`、area `5e-5` 门禁均未放宽。derived verdict 为
+  `feasible_candidate`，覆盖 targeted 18 + approved deep required-three；完整 24-anchor shadow
+  仍是后续硬要求。
+- [ ] 从该 feasibility 合并 SHA 创建 `codex/issue-130-endpoint-local-production-v2`，将
+  `three_crossing_endpoint_local_v2` 作为显式 hybrid policy 落地；focused CI、targeted 和
+  full shadow 完成并经作者审核前，不启动 C0/C1/C2、phase-reference 或 transport。

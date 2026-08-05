@@ -1,0 +1,69 @@
+{
+  "classification_failures": [],
+  "deep_labels_used_for_route": false,
+  "deep_manifest_sha256": "9098c0c47b59ccd4b65b8d6d49ce0e136334ace340d8190a275c7c499eec851c",
+  "deep_run_id": "31002704845",
+  "figures": [
+    {
+      "inputs": [
+        "route_traces.csv"
+      ],
+      "path": "figures/endpoint_local_brackets.png",
+      "sha256": "2419719e0b9cc624fda8b98fa06bd3325aeab8129b836add1ed1fa0ea92bb2d3"
+    },
+    {
+      "inputs": [
+        "curve_index.csv"
+      ],
+      "path": "figures/representative_stage_b_curves.png",
+      "sha256": "72836d92f70e6ecc3df088525115dd8f347ee739238e999b4cc1c494defc3fb4"
+    }
+  ],
+  "file_sha256": {
+    "AUDIT.md": "b8d2cd540f4030ddc9ef87979c5aef906574f89f2856f04b4271a76051420fae",
+    "README.md": "28f5a670d82747e685964cc978f0a1183c760e293f6e6dde1e1584619409a4d4",
+    "anchor_replay.csv": "0da63f6822b2600799e2bbdd9674626b527fffe9240cf325f1a399a8f45b8f37",
+    "claim_ledger.csv": "ea7e20d68a731a72cf8791cf5d7d3bfc6351a88effb9253057eeb660dfac0c3d",
+    "cost_frontier.csv": "cb2f591c8d4540d92e357babd042b73b42e8c97282d3cfb55164431085260841",
+    "crossing_brackets.csv": "f56d15b447e9489c7dd030ea1533b3584a720ff7278c739f7299ce8768e3de03",
+    "curve_index.csv": "a681f7ab9332ff1d18cf82b46156e84478458ead61a55bf7da16d33430d01d3e",
+    "figures/endpoint_local_brackets.png": "2419719e0b9cc624fda8b98fa06bd3325aeab8129b836add1ed1fa0ea92bb2d3",
+    "figures/plot_manifest.json": "a0463b0174e0c33d835819ddf1e19ad9256ac82ba1e5d42abfbbb8f5ee8eb6aa",
+    "figures/representative_stage_b_curves.png": "72836d92f70e6ecc3df088525115dd8f347ee739238e999b4cc1c494defc3fb4",
+    "geometry_convergence.csv": "b0c04b6f37264b167748d695a120092254ca290b95672827bbbdaf32d727149b",
+    "route_traces.csv": "fdfa5f7aa08ec3c8ba0f1aae7a662e5388ad94812277405c956e144ef80903a3",
+    "selected_policy.json": "e13e05f4c8434a3e159fe5965d31cbee01cbc156142ae5c0c3082afaeeea5148"
+  },
+  "generated_at_utc": "2026-08-05T13:45:18.523982Z",
+  "input_errors": [],
+  "route_failures": [],
+  "schema_version": "cep_maxwell_endpoint_local_contract_feasibility_v2",
+  "selected_policy": {
+    "area_gate": 5e-05,
+    "calculation_sha": "ceec2295c5c9250a3fcd45c0eceae9a6c35f4335",
+    "candidate_policy": "unique_three_crossing_topology_v1",
+    "certificate_kinds": [
+      "endpoint_limited_first_order",
+      "endpoint_local_geometry_first_order"
+    ],
+    "coverage_scope": "targeted_18_plus_approved_required_three_deep",
+    "deep_labels_used_for_route": false,
+    "deep_run_id": "31002704845",
+    "density_tol": 0.0025,
+    "endpoint_policy": "three_crossing_endpoint_local_v2",
+    "full_24_anchor_shadow_still_required": true,
+    "left_refinement_rule": "active_left_crossing_midpoint_only",
+    "local_step": 0.0015625,
+    "position_tol_MeV": 0.025,
+    "route_rule": "right_maxwell_crossing_bracketed_by_actual_stage_b_outer_points",
+    "schema_version": "cep_maxwell_endpoint_local_contract_feasibility_v2",
+    "source_run_id": "30999377195",
+    "targeted_cap": 12,
+    "verdict": "feasible_candidate"
+  },
+  "solver_called": false,
+  "source_calculation_sha": "ceec2295c5c9250a3fcd45c0eceae9a6c35f4335",
+  "source_manifest_sha256": "42403f4992779ea13074c338a099ac9ba0f21e26c4f7bac058924070a3b3ba2b",
+  "source_run_id": "30999377195",
+  "verdict": "feasible_candidate"
+}

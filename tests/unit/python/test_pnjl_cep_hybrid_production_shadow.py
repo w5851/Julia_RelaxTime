@@ -282,3 +282,29 @@ def test_endpoint_v3_schema_and_policy_gate_are_supported(tmp_path):
     )
     assert gate["verdict"] == "full_hybrid_candidate"
     assert not gate["endpoint_errors"]
+
+
+def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_path, monkeypatch):
+    module = load_module(COLLECTOR, "hybrid_collector_actions_modes")
+    payload = {
+        "headSha": "a" * 40,
+        "url": "https://example.invalid/run/1",
+        "status": "completed",
+        "conclusion": "success",
+        "jobs": [{
+            "name": "job",
+            "databaseId": 1,
+            "status": "completed",
+            "conclusion": "success",
+            "startedAt": "2026-08-05T00:00:00Z",
+            "completedAt": "2026-08-05T00:01:00Z",
+        }],
+    }
+    monkeypatch.setenv("GH_TOKEN", "token")
+    monkeypatch.setattr(module.subprocess, "check_output", lambda *args, **kwargs: json.dumps(payload))
+    provisional = module._actions("1", tmp_path / "provisional", run_mode="numerical")
+    replay = module._actions("1", tmp_path / "replay", run_mode="aggregate_replay", source_run_id="1")
+    assert provisional["snapshot_phase"] == "provisional"
+    assert provisional["cost_snapshot_is_final"] is False
+    assert replay["snapshot_phase"] == "final"
+    assert replay["cost_snapshot_is_final"] is True
