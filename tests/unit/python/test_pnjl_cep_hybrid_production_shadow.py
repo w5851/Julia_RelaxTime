@@ -264,3 +264,21 @@ def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
     assert "numeric_jobs" in text and "numeric_failures" in text
     assert "matplotlib==3.9.2" in text
     assert len(module.XIS) * len(module.METHODS) == 9
+
+
+def test_endpoint_v3_schema_and_policy_gate_are_supported(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_endpoint_v3")
+    _matrix(tmp_path)
+    for summary_path in tmp_path.glob("job-*/job_summary.json"):
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        summary["schema_version"] = "cep_maxwell_endpoint_production_shadow_v3"
+        summary.setdefault("parameters", {})["rho_hybrid_candidate_policy"] = "unique_three_crossing_topology_v1"
+        summary.setdefault("parameters", {})["rho_hybrid_endpoint_policy"] = "bounded_zero_density_v1"
+        summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(
+        tmp_path, tmp_path / "aggregate", None, "a" * 40,
+        schema_version="cep_maxwell_endpoint_production_shadow_v3",
+        endpoint_mode=True,
+    )
+    assert gate["verdict"] == "full_hybrid_candidate"
+    assert not gate["endpoint_errors"]

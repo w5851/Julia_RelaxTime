@@ -71,6 +71,10 @@
 共存密度，避免同一曲线的二次求根。外层 `PhaseGeometryTolerances.maxwell_area` 仍然保留，
 它负责 coarse/fine 网格之间的离散收敛证书，而不是重复替代内部求根停止条件。
 
+公共核心还要求等面积候选具有唯一的三交点拓扑。endpoint-limit hybrid 只在该候选唯一、
+右外支已采样且左外交点落在首个正密度单元时补 `rho=0.003125` anchor 和最多 12 个
+局部二分点；失败时保留 `ambiguous_near_critical`，不会把 endpoint 诊断降级成 monotone。
+
 ## CEP 搜索
 
 `find_cep` 基于温度切片上的 Maxwell 有效性变化来定位 CEP 证据边界，并输出 [src/models/phase/PhaseTypes.jl](src/models/phase/PhaseTypes.jl#L1) 中的 `CEPResult`。它不再把 ambiguous midpoint 当作 CEP 单点。
@@ -230,7 +234,10 @@ Stage C 的分类曲线是完整 Stage-B 全域曲线与 guard 内按 Stage-B �
 Maxwell 特征排序选出的 `0.003125` 点的并集。缺少任一 guard、多 S topology 或
 局部点不足时保留 `ambiguous_near_critical`；Stage C 不产生新的 monotone 证书。
 `RhoHybridVerificationConfig`、manifest 和 diagnostics 会记录 guard rule、比较 epsilon、
-local step、target cap、support μ 极值、采用阶段和 verification 点数。
+local step、target cap、support μ 极值、采用阶段和 verification 点数。它还固定记录
+`candidate_policy=:unique_three_crossing_topology_v1` 与
+`endpoint_policy=:bounded_zero_density_v1`；后者只在唯一 endpoint-dependent 候选且右外点
+存在时启用零密度端点证书。
 
 ## 工件治理层
 

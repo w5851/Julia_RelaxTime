@@ -115,6 +115,10 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   guard 取两个 μ 极值外侧首个严格 Stage-B 采样点，不插值、不二分、不使用固定
   padding。Stage-A targeted 总上限仍为 `12`，Stage-C 始终保留完整 Stage-B 曲线；
   没有可靠 guard 时保持 ambiguous，不启动全域 oracle。
+  若完整 Stage-B 的公共 Maxwell 是唯一三交点且仅左外交点依赖零密度首单元，hybrid 会使用
+  固定 `bounded_zero_density_v1` endpoint route：加入 `rho=0.003125` anchor，最多 12 次
+  局部二分；成功证书仍是 `confirmed_first_order`，scalar `rho_hadron=0.0`，上界和插值值
+  写入 diagnostics/manifest，失败则保持 `ambiguous_near_critical`。
 
 最小产物结构（输出目录）：
 

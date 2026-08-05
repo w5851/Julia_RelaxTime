@@ -49,6 +49,26 @@ end
         @test res isa Models.MaxwellResult
     end
 
+    @testset "Maxwell 严格三交点与候选诊断" begin
+        rho = Float64[0.0, 1.0, 2.0, 3.0]
+        mu = Float64[0.0, 2.0, 1.0, 1.0]
+        @test length(Models._find_intersections(1.5, rho, mu)) == 2
+        @test Models._area_difference(1.5, rho, mu) === nothing
+
+        mu_s = Float64[250.0, 255.0, 260.0, 265.0, 268.0, 266.0, 262.0,
+            258.0, 260.0, 265.0, 272.0, 280.0, 288.0, 296.0, 305.0]
+        rho_s = collect(0.1:0.1:1.5)
+        good = Models.maxwell_construction(mu_s, rho_s; min_samples=8)
+        @test good.converged
+        @test get(good.details, :candidate_count, 0) == 1
+        @test get(good.details, :crossing_count, 0) == 3
+        strict = Models.maxwell_construction(mu_s, rho_s; min_samples=8,
+            tol_area=1e-14, max_iter=1)
+        @test !strict.converged
+        @test get(strict.details, :reason, "") == "bisection_failed"
+        @test get(strict.details, :failure_reason, "") == "solver_tolerance_not_met"
+    end
+
     # --- SShapeResult 结构 ---
     @testset "SShapeResult 零参构造" begin
         res = Models.SShapeResult()

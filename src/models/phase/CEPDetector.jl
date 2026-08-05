@@ -35,6 +35,22 @@ function _classify_s_curve(mu_vals, rho_vals;
     mres = maxwell_construction(mu_vals, rho_vals; spinodal_hint=sres, maxwell_options...)
     if !(mres.converged && mres.mu_transition !== nothing)
         reason = get(mres.details, :reason, "maxwell_failed")
+        # An observed S-shape with an unresolved crossing topology or strict
+        # bisection failure is numerical ambiguity, never a monotone result.
+        # Keep the historical `no_sign_change` reason for legacy weak-S
+        # discrimination, while exposing the newer failure class explicitly.
+        if reason in ("multiple_maxwell_candidates", "bisection_failed",
+                      "crossing_count_not_three", "topology_changed_inside_bisection",
+                      "solver_tolerance_not_met")
+            return (
+                status=:unknown,
+                mu_transition=nothing,
+                sres=sres,
+                maxwell=mres,
+                area_residual=nothing,
+                reason="maxwell_numerical_ambiguous:$(reason)",
+            )
+        end
         if reason == "no_sign_change"
             weak = _weak_s_shape_metrics(mu_vals, rho_vals, sres)
             if _is_weak_s_shape(weak)

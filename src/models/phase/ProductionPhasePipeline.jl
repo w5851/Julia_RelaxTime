@@ -23,7 +23,9 @@ function _production_maxwell_solver_tol(cfg::ProductionPipelineConfig)
 end
 
 function _production_maxwell_options(cfg::ProductionPipelineConfig)
-    return (; tol_area=_production_maxwell_solver_tol(cfg))
+    # Production uses the endpoint-feasibility validated dense candidate
+    # scan; the public default remains the historical 64-point scan.
+    return (; tol_area=_production_maxwell_solver_tol(cfg), candidate_steps=MAX_CANDIDATE_STEPS)
 end
 
 function _production_maxwell_or_empty(cres, cfg::ProductionPipelineConfig)
@@ -32,7 +34,11 @@ function _production_maxwell_or_empty(cres, cfg::ProductionPipelineConfig)
         true, nothing, nothing, nothing, 0.0, 0, Dict{Symbol, Any}(:reason => "no_s_shape"),
     )
     _maxwell_result_satisfies_tol(maxwell, _production_maxwell_solver_tol(cfg)) && return maxwell
-    return MaxwellResult()
+    # Preserve the public-core failure diagnostics (candidate/crossing counts,
+    # endpoint dependence and strict bisection reason) while withholding any
+    # non-converged scalar geometry from production consumers.
+    return MaxwellResult(false, nothing, nothing, nothing, maxwell.area_residual,
+        maxwell.iterations, copy(maxwell.details))
 end
 
 function _production_eval_filename(T::Float64, level::Int, pass::Int)
@@ -288,6 +294,7 @@ function _production_classify_temperature_cascade(
                 (
                     status=:invalid, mu_transition=nothing, area_residual=nothing,
                     sres=SShapeResult(), rho_hadron=nothing, rho_quark=nothing,
+                    maxwell=MaxwellResult(),
                     reason="solver_or_curve_failure", level=level, curve=nothing,
                     out_csv=out_csv,
                 )
@@ -304,6 +311,7 @@ function _production_classify_temperature_cascade(
                     sres=cres.sres,
                     rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
                     rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
+                    maxwell=maxwell,
                     reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
                     level=level, curve=final_curve,
                     out_csv=out_csv,
@@ -421,6 +429,7 @@ function _production_classify_temperature_memoized_uniform(
             current = if curve === nothing
                 (status=:invalid, mu_transition=nothing, area_residual=nothing,
                  sres=SShapeResult(), rho_hadron=nothing, rho_quark=nothing,
+                 maxwell=MaxwellResult(),
                  reason="solver_or_curve_failure", level=level, curve=nothing, out_csv=out_csv)
             else
                 mu_vals, rho_vals = curve
@@ -434,6 +443,7 @@ function _production_classify_temperature_memoized_uniform(
                  sres=cres.sres,
                  rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
                  rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
+                 maxwell=maxwell,
                  reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
                  level=level, curve=curve, out_csv=out_csv)
             end
@@ -521,6 +531,7 @@ function _classify_production_curve(curve, cfg::ProductionPipelineConfig,
         sres=SShapeResult(),
         rho_hadron=nothing,
         rho_quark=nothing,
+        maxwell=MaxwellResult(),
         reason="solver_or_curve_failure",
         level=level,
         curve=nothing,
@@ -538,6 +549,7 @@ function _classify_production_curve(curve, cfg::ProductionPipelineConfig,
         sres=cres.sres,
         rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
         rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
+        maxwell=maxwell,
         reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
         level=level,
         curve=curve,
@@ -726,6 +738,246 @@ function _hybrid_support_grid(
     ))
 end
 
+const _HYBRID_ENDPOINT_ANCHOR_RHO = 0.003125
+
+function _hybrid_right_guard_available(stage_b, comparison_epsilon::Float64)
+    points = _hybrid_curve_points(get(stage_b, :curve, nothing))
+    sres = get(stage_b, :sres, SShapeResult())
+    sres.has_s_shape || return false
+    rho_spinodal = sort(Float64[
+        something(sres.rho_spinodal_hadron, NaN),
+        something(sres.rho_spinodal_quark, NaN),
+    ])
+    mu_spinodal = Float64[
+        something(sres.mu_spinodal_hadron, NaN),
+        something(sres.mu_spinodal_quark, NaN),
+    ]
+    all(isfinite, rho_spinodal) && all(isfinite, mu_spinodal) || return false
+    mu_high = maximum(mu_spinodal)
+    any(point -> point.rho > rho_spinodal[2] &&
+        point.mu > mu_high + comparison_epsilon, points)
+end
+
+"""Return endpoint-limit eligibility from the complete Stage-B evidence.
+
+The route is intentionally narrow: a unique public Maxwell candidate must be
+endpoint-dependent and the right outer branch must already be observed.  It
+never uses an oracle label to decide whether to add a point.
+"""
+function _hybrid_endpoint_candidate(stage_b, verification::RhoHybridVerificationConfig)
+    verification.endpoint_policy === :bounded_zero_density_v1 || return nothing
+    maxwell = get(stage_b, :maxwell, MaxwellResult())
+    maxwell.converged || return nothing
+    details = maxwell.details
+    get(details, :candidate_count, 0) == 1 || return nothing
+    get(details, :endpoint_dependent, false) || return nothing
+    guard = _hybrid_extrema_guard(stage_b, verification.comparison_epsilon)
+    guard.reason == "missing_left_strict_outer_sample" || return nothing
+    _hybrid_right_guard_available(stage_b, verification.comparison_epsilon) || return nothing
+    crossings = get(details, :crossings, Float64[])
+    isempty(crossings) && return nothing
+    left_crossing = Float64(first(crossings))
+    anchor = _HYBRID_ENDPOINT_ANCHOR_RHO
+    left_crossing <= anchor + verification.comparison_epsilon || return nothing
+    return (guard=guard, anchor=anchor, left_crossing=left_crossing)
+end
+
+function _hybrid_endpoint_route(
+        aggregate_csv::String,
+        eval_dir::String,
+        T_mid::Float64,
+        base_rho_grid::Vector{Float64},
+        xi::Float64,
+        reverse_rho::Bool,
+        p_num::Int,
+        t_num::Int,
+        thermo_quadrature_kwargs::NamedTuple,
+        cfg::ProductionPipelineConfig,
+        session,
+        stage_a,
+        stage_b,
+        endpoint;
+        stats_before=TrhoScan.rho_session_snapshot(session))
+    verification = cfg.rho_hybrid_verification
+    before = stats_before
+    token = replace(@sprintf("%.6f", T_mid), "." => "p", "-" => "m")
+    out_csv = joinpath(eval_dir, "prod_eval_T$(token)_hybrid_endpoint_limit.csv")
+    io_mode = isfile(out_csv) ? "a" : "w"
+    written = Set{Tuple{Float64, Float64, Float64}}()
+    io_mode == "a" && union!(written, _existing_session_keys(out_csv))
+    stage_b_grid = _refine_rho_grid(base_rho_grid, 3)
+    selected = Set{Float64}()
+    additions = Float64[]
+    trace = NamedTuple[]
+    current = nothing
+    failure_reason = nothing
+    upper = endpoint.anchor
+
+    open(out_csv, io_mode) do io
+        io_mode == "w" && println(io, TrhoScan.HEADER)
+        # The anchor is a required evidence point, even when a prior Stage-B
+        # cache already contains the surrounding coarse/fine samples.
+        _production_session_scan_hybrid!(session, io, written, T_mid, xi,
+            [endpoint.anchor], selected, reverse_rho, p_num, t_num,
+            thermo_quadrature_kwargs)
+        verification_grid = sort!(unique(vcat(stage_b_grid, [endpoint.anchor])))
+        curve, _ = _production_session_curve_for_grid(session, T_mid, xi, verification_grid)
+        current = _classify_production_curve(curve, cfg, 4, out_csv)
+        previous = stage_b
+        geometry = _compare_phase_geometry(stage_b, current, PhaseGeometryTolerances(
+            position_MeV=cfg.rho_position_tol_MeV,
+            density=cfg.rho_density_tol,
+            maxwell_area=cfg.rho_maxwell_area_tol))
+        push!(trace, (
+            level=0, rho_upper=upper, rho_midpoint=missing,
+            status=current.status, reason=current.reason,
+            candidate_count=get(current.maxwell.details, :candidate_count, 0),
+            crossing_count=get(current.maxwell.details, :crossing_count, 0),
+            rho_hadron=current.rho_hadron, rho_quark=current.rho_quark,
+            area_residual=current.area_residual,
+            position_error_MeV=geometry.position_MeV,
+            density_error=geometry.density,
+            maxwell_area=geometry.maxwell_area,
+            geometry_converged=geometry.converged,
+        ))
+        if current.status != :valid || !geometry.converged
+            failure_reason = current.status != :valid ?
+                "endpoint_anchor_candidate_not_valid" : "endpoint_anchor_geometry_not_converged"
+        end
+
+        for level in 1:verification.targeted_cap
+            failure_reason === nothing || break
+            midpoint = upper / 2.0
+            push!(additions, midpoint)
+            push!(selected, midpoint)
+            _production_session_scan_hybrid!(session, io, written, T_mid, xi,
+                [midpoint], selected, reverse_rho, p_num, t_num,
+                thermo_quadrature_kwargs)
+            verification_grid = sort!(unique(vcat(stage_b_grid, [endpoint.anchor], additions)))
+            curve, _ = _production_session_curve_for_grid(session, T_mid, xi, verification_grid)
+            current = _classify_production_curve(curve, cfg, 4, out_csv)
+            details = current.maxwell.details
+            crossings = get(details, :crossings, Float64[])
+            candidate_ok = current.status == :valid &&
+                get(details, :candidate_count, 0) == 1 &&
+                get(details, :endpoint_dependent, false) &&
+                length(crossings) == 3 &&
+                first(crossings) <= midpoint + verification.comparison_epsilon
+            geometry = _compare_phase_geometry(previous, current, PhaseGeometryTolerances(
+                position_MeV=cfg.rho_position_tol_MeV,
+                density=cfg.rho_density_tol,
+                maxwell_area=cfg.rho_maxwell_area_tol))
+            push!(trace, (
+                level=level, rho_upper=midpoint, rho_midpoint=midpoint,
+                status=current.status, reason=current.reason,
+                candidate_count=get(details, :candidate_count, 0),
+                crossing_count=get(details, :crossing_count, 0),
+                rho_hadron=current.rho_hadron, rho_quark=current.rho_quark,
+                area_residual=current.area_residual,
+                position_error_MeV=geometry.position_MeV,
+                density_error=geometry.density,
+                maxwell_area=geometry.maxwell_area,
+                geometry_converged=geometry.converged,
+            ))
+            if !candidate_ok
+                failure_reason = current.status != :valid ?
+                    "endpoint_refinement_candidate_not_valid" :
+                    (isempty(crossings) ? "endpoint_candidate_not_unique" :
+                    first(crossings) > midpoint + verification.comparison_epsilon ?
+                        "endpoint_bracket_not_halved" : "endpoint_candidate_not_unique")
+            elseif !geometry.converged
+                failure_reason = "endpoint_refinement_geometry_not_converged"
+            else
+                upper = midpoint
+                previous = current
+            end
+        end
+    end
+
+    _append_scan_csv!(aggregate_csv, out_csv)
+    after = TrhoScan.rho_session_snapshot(session)
+    stats = _hybrid_stats(before, after)
+    details = current === nothing ? Dict{Symbol, Any}() : current.maxwell.details
+    success = failure_reason === nothing && current !== nothing &&
+        length(additions) == verification.targeted_cap &&
+        current.status == :valid && get(details, :endpoint_dependent, false)
+    if success
+        return merge(current, stats, (
+            raw_status=:valid,
+            slice_status=:confirmed_first_order,
+            coarse_status=stage_a.raw_status,
+            fine_status=:valid,
+            coarse_reason=stage_a.reason,
+            fine_reason=current.reason,
+            geometry_converged=true,
+            position_error_MeV=last(trace).position_error_MeV,
+            density_error=last(trace).density_error,
+            maxwell_area_gate=last(trace).maxwell_area,
+            stage_a_status=stage_a.slice_status,
+            stage_b_status=stage_b.slice_status,
+            stage_c_status=:confirmed_first_order,
+            stage_used=:stage_c_endpoint_limit,
+            hybrid_upgrade_reason="endpoint_limit_certificate",
+            hybrid_support_low=0.0,
+            hybrid_support_high=endpoint.anchor,
+            hybrid_support_mu_low=endpoint.guard.mu_low,
+            hybrid_support_mu_high=endpoint.guard.mu_high,
+            hybrid_guard_status=:endpoint_limit,
+            hybrid_guard_reason="bounded_zero_density_v1",
+            hybrid_guard_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
+            hybrid_targeted_point_count=length(additions),
+            hybrid_support_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
+            hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
+            hybrid_certificate_type=:endpoint_limited_first_order,
+            hybrid_endpoint_lower_bound=0.0,
+            hybrid_endpoint_upper_bound=upper,
+            hybrid_endpoint_interpolated_rho_hadron=current.rho_hadron,
+            hybrid_endpoint_anchor_rho=endpoint.anchor,
+            hybrid_endpoint_refinement_count=length(additions),
+            hybrid_endpoint_refinement_trace=trace,
+            rho_hadron=0.0,
+            rho_convergence_records=[(
+                axis="rho", level=4, left=3.0, right=4.0, midpoint=4.0,
+                position_error_MeV=last(trace).position_error_MeV,
+                density_error=last(trace).density_error,
+                maxwell_area=last(trace).maxwell_area,
+                response_rtol=nothing, converged=true, reason="endpoint_limit_certificate",
+            )],
+        ))
+    end
+    return merge(current === nothing ? stage_b : current, stats, (
+        raw_status=current === nothing ? :unknown : current.status,
+        slice_status=:ambiguous_near_critical,
+        coarse_status=stage_a.raw_status,
+        fine_status=current === nothing ? :unknown : current.status,
+        coarse_reason=stage_a.reason,
+        fine_reason=failure_reason === nothing ? "endpoint_limit_inconclusive" : failure_reason,
+        geometry_converged=false,
+        stage_a_status=stage_a.slice_status,
+        stage_b_status=stage_b.slice_status,
+        stage_c_status=:ambiguous_near_critical,
+        stage_used=:stage_c_endpoint_limit,
+        hybrid_upgrade_reason=failure_reason === nothing ? "endpoint_limit_inconclusive" : failure_reason,
+        hybrid_support_low=0.0,
+        hybrid_support_high=upper,
+        hybrid_support_mu_low=endpoint.guard.mu_low,
+        hybrid_support_mu_high=endpoint.guard.mu_high,
+        hybrid_guard_status=:endpoint_limit,
+        hybrid_guard_reason=failure_reason === nothing ? "endpoint_limit_inconclusive" : failure_reason,
+        hybrid_guard_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
+        hybrid_targeted_point_count=length(additions),
+        hybrid_support_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
+        hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
+        hybrid_certificate_type=:none,
+        hybrid_endpoint_lower_bound=0.0,
+        hybrid_endpoint_upper_bound=upper,
+        hybrid_endpoint_interpolated_rho_hadron=current === nothing ? nothing : current.rho_hadron,
+        hybrid_endpoint_anchor_rho=endpoint.anchor,
+        hybrid_endpoint_refinement_count=length(additions),
+        hybrid_endpoint_refinement_trace=trace,
+    ))
+end
+
 function _hybrid_stats(before, after)
     unique_delta = after.unique_solves - before.unique_solves
     failure_delta = after.failed_points - before.failed_points
@@ -774,6 +1026,13 @@ function _production_classify_temperature_hybrid(
         hybrid_targeted_point_count=0,
         hybrid_support_source=Symbol[],
         hybrid_verification_point_count=0,
+        hybrid_certificate_type=:none,
+        hybrid_endpoint_lower_bound=nothing,
+        hybrid_endpoint_upper_bound=nothing,
+        hybrid_endpoint_interpolated_rho_hadron=nothing,
+        hybrid_endpoint_anchor_rho=nothing,
+        hybrid_endpoint_refinement_count=0,
+        hybrid_endpoint_refinement_trace=NamedTuple[],
     )
 
     # Stage A is allowed to certify monotonicity because it already contains
@@ -800,6 +1059,16 @@ function _production_classify_temperature_hybrid(
         density=cfg.rho_density_tol,
         maxwell_area=cfg.rho_maxwell_area_tol,
     ))
+
+    endpoint = _hybrid_endpoint_candidate(stage_b, cfg.rho_hybrid_verification)
+    if endpoint !== nothing
+        endpoint_result = _hybrid_endpoint_route(
+            aggregate_csv, eval_dir, T_mid, base_rho_grid, xi, reverse_rho,
+            p_num, t_num, thermo_quadrature_kwargs, cfg, session,
+            stage_a, stage_b, endpoint; stats_before=before)
+        after = TrhoScan.rho_session_snapshot(session)
+        return endpoint_result
+    end
 
     if stage_a_first && stage_b_first && cross_ab.converged
         after = TrhoScan.rho_session_snapshot(session)
@@ -1017,6 +1286,7 @@ function _production_classify_temperature(
                 sres=SShapeResult(),
                 rho_hadron=nothing,
                 rho_quark=nothing,
+                maxwell=MaxwellResult(),
                 reason="no_curve",
                 level=level,
                 curve=nothing,
@@ -1045,6 +1315,7 @@ function _production_classify_temperature(
             sres=cres.sres,
             rho_hadron=maxwell.converged ? maxwell.rho_hadron : nothing,
             rho_quark=maxwell.converged ? maxwell.rho_quark : nothing,
+            maxwell=maxwell,
             reason=maxwell.converged ? String(cres.reason) : "maxwell_solver_tolerance_not_met",
             level=level,
             curve=scan.curve,
@@ -1425,6 +1696,12 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             rho_hybrid_verification.point_ranking_version === :stage_b_features_v1 || throw(ArgumentError(
                 "rho_support_hybrid requires point_ranking_version=:stage_b_features_v1",
             ))
+            rho_hybrid_verification.candidate_policy === :unique_three_crossing_topology_v1 || throw(ArgumentError(
+                "rho_support_hybrid requires candidate_policy=:unique_three_crossing_topology_v1",
+            ))
+            rho_hybrid_verification.endpoint_policy === :bounded_zero_density_v1 || throw(ArgumentError(
+                "rho_support_hybrid requires endpoint_policy=:bounded_zero_density_v1",
+            ))
             rho_hybrid_verification.targeted_cap == rho_support_targeted_cap || throw(ArgumentError(
                 "rho_hybrid_verification.targeted_cap must equal rho_support_targeted_cap",
             ))
@@ -1643,6 +1920,16 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             hybrid_targeted_point_count=Int(get(res, :hybrid_targeted_point_count, 0)),
             hybrid_support_source=String.(get(res, :hybrid_support_source, Symbol[])),
             hybrid_verification_point_count=Int(get(res, :hybrid_verification_point_count, 0)),
+            hybrid_certificate_type=Symbol(get(res, :hybrid_certificate_type, :none)),
+            hybrid_endpoint_lower_bound=Float64(something(get(res, :hybrid_endpoint_lower_bound, nothing), NaN)),
+            hybrid_endpoint_upper_bound=Float64(something(get(res, :hybrid_endpoint_upper_bound, nothing), NaN)),
+            hybrid_endpoint_interpolated_rho_hadron=Float64(something(get(res, :hybrid_endpoint_interpolated_rho_hadron, nothing), NaN)),
+            hybrid_endpoint_anchor_rho=Float64(something(get(res, :hybrid_endpoint_anchor_rho, nothing), NaN)),
+            hybrid_endpoint_refinement_count=Int(get(res, :hybrid_endpoint_refinement_count, 0)),
+            hybrid_endpoint_refinement_trace=get(res, :hybrid_endpoint_refinement_trace, NamedTuple[]),
+            maxwell_candidate_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :candidate_count, 0)),
+            maxwell_crossing_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :crossing_count, 0)),
+            maxwell_endpoint_dependent=Bool(get(get(res, :maxwell, MaxwellResult()).details, :endpoint_dependent, false)),
             geometry_converged=Bool(get(res, :geometry_converged, false)),
             position_error_MeV=Float64(get(res, :position_error_MeV, Inf)),
             density_error=Float64(get(res, :density_error, Inf)),
@@ -1816,6 +2103,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             "guard_rule" => String(cfg.rho_hybrid_verification.guard_rule),
             "comparison_epsilon" => cfg.rho_hybrid_verification.comparison_epsilon,
             "point_ranking_version" => String(cfg.rho_hybrid_verification.point_ranking_version),
+            "candidate_policy" => String(cfg.rho_hybrid_verification.candidate_policy),
+            "endpoint_policy" => String(cfg.rho_hybrid_verification.endpoint_policy),
         ),
         "rho_support_config" => Dict(
             "support_slope_tol" => cfg.rho_support_config.support_slope_tol,
@@ -1869,6 +2158,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         rho_hybrid_verification_guard_rule=cfg.rho_hybrid_verification.guard_rule,
         rho_hybrid_verification_comparison_epsilon=cfg.rho_hybrid_verification.comparison_epsilon,
         rho_hybrid_verification_point_ranking_version=cfg.rho_hybrid_verification.point_ranking_version,
+        rho_hybrid_verification_candidate_policy=cfg.rho_hybrid_verification.candidate_policy,
+        rho_hybrid_verification_endpoint_policy=cfg.rho_hybrid_verification.endpoint_policy,
         rho_support_config=join(string(getproperty(cfg.rho_support_config, field)) for field in fieldnames(typeof(cfg.rho_support_config))),
         adaptive_temperature=cfg.adaptive_temperature,
         temperature_max_refine_level=cfg.temperature_max_refine_level,
@@ -1891,6 +2182,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             rho_hybrid_guard_rule=cfg.rho_hybrid_verification.guard_rule,
             rho_hybrid_comparison_epsilon=cfg.rho_hybrid_verification.comparison_epsilon,
             rho_hybrid_point_ranking_version=cfg.rho_hybrid_verification.point_ranking_version,
+            rho_hybrid_candidate_policy=cfg.rho_hybrid_verification.candidate_policy,
+            rho_hybrid_endpoint_policy=cfg.rho_hybrid_verification.endpoint_policy,
         ))
     end
     config_snapshot["config_hash"] = _config_hash(model_kind; hash_options...)
@@ -1934,6 +2227,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             "guard_rule" => String(cfg.rho_hybrid_verification.guard_rule),
             "comparison_epsilon" => cfg.rho_hybrid_verification.comparison_epsilon,
             "point_ranking_version" => String(cfg.rho_hybrid_verification.point_ranking_version),
+            "candidate_policy" => String(cfg.rho_hybrid_verification.candidate_policy),
+            "endpoint_policy" => String(cfg.rho_hybrid_verification.endpoint_policy),
         ),
         "maxwell_solver_tol" => maxwell_solver_tol,
         "maxwell_solver_tol_factor" => DEFAULT_MAXWELL_SOLVER_TOL_FACTOR,
@@ -1952,6 +2247,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         diagnostics["rho_hybrid_guard_rule"] = String(cfg.rho_hybrid_verification.guard_rule)
         diagnostics["rho_hybrid_comparison_epsilon"] = cfg.rho_hybrid_verification.comparison_epsilon
         diagnostics["rho_hybrid_point_ranking_version"] = String(cfg.rho_hybrid_verification.point_ranking_version)
+        diagnostics["rho_hybrid_candidate_policy"] = String(cfg.rho_hybrid_verification.candidate_policy)
+        diagnostics["rho_hybrid_endpoint_policy"] = String(cfg.rho_hybrid_verification.endpoint_policy)
         diagnostics["rho_hybrid_stage_counts"] = Dict(
             String(stage) => count(row -> row.stage_used == stage, sweep_records)
             for stage in unique(row.stage_used for row in sweep_records)

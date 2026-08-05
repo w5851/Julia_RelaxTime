@@ -73,7 +73,7 @@ end
 
 ### `maxwell_construction(mu_vals, rho_vals; kwargs...)`
 
-实现位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L274)。
+实现位于 [src/models/phase/PhaseCore.jl](src/models/phase/PhaseCore.jl#L300)。
 
 该函数在检测到 S-shape 后，搜索满足等面积条件的相变化学势与两侧相共存点。
 
@@ -91,8 +91,13 @@ end
 
 1. 先做 S-shape 检测或复用传入的 `spinodal_hint`
 2. 依据 spinodal 位置估计化学势搜索区间
-3. 搜索面积差符号变化
-4. 用二分法逼近等面积点
+3. 在每个化学势上枚举全部去重交点；只有恰有三个交点时面积才有效，拓扑间隙会重置前一段面积变号
+4. 枚举所有有效面积根；多根或拓扑不唯一返回失败诊断，唯一根才进入结果
+5. 用严格二分逼近等面积点；达到 `max_iter` 仍未满足 `tol_area` 时 `converged=false`
+
+`details` 记录 `candidate_count`、`crossing_count`、`candidate_policy`、
+`endpoint_dependent`、交点 bracket 和失败原因。因而存在 S 形但三交点/二分证书未闭合时，
+上层应保持 numerical ambiguous/unknown，不能据此生成单调证书。
 
 典型用法：
 

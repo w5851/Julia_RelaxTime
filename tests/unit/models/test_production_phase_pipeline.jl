@@ -11,6 +11,8 @@ end
     @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
     @test Models.RhoHybridVerificationConfig().guard_rule == :extrema_outer_samples_v1
     @test Models.RhoHybridVerificationConfig().targeted_cap == 12
+    @test Models.RhoHybridVerificationConfig().candidate_policy == :unique_three_crossing_topology_v1
+    @test Models.RhoHybridVerificationConfig().endpoint_policy == :bounded_zero_density_v1
 
     @testset "hybrid support uses strict outer extrema samples" begin
         sres = Models.SShapeResult(true, 4.0, 2.0, 1.5, 3.5, 2)
@@ -43,6 +45,21 @@ end
             (sres=Models.SShapeResult(),),
             (sres=Models.SShapeResult(), curve=nothing))
         @test missing_support.status == :ambiguous_near_critical
+    end
+
+    @testset "endpoint-limit route is opt-in and requires a unique public candidate" begin
+        sres = Models.SShapeResult(true, 4.0, 2.0, 1.5, 3.5, 2)
+        curve = ([2.0, 4.0, 3.0, 2.0, 5.0, 6.0], collect(0.0:1.0:5.0))
+        maxwell = Models.MaxwellResult(true, 3.0, 0.001, 4.0, 1e-7, 4,
+            Dict{Symbol, Any}(:candidate_count => 1, :crossing_count => 3,
+                :endpoint_dependent => true, :crossings => [0.001, 2.0, 4.0]))
+        stage_b = (sres=sres, curve=curve, maxwell=maxwell)
+        endpoint = Models._hybrid_endpoint_candidate(stage_b, Models.RhoHybridVerificationConfig())
+        @test endpoint !== nothing
+        @test endpoint.anchor == 0.003125
+        no_endpoint = Models._hybrid_endpoint_candidate(stage_b,
+            Models.RhoHybridVerificationConfig(endpoint_policy=:other))
+        @test no_endpoint === nothing
     end
 
     @testset "hybrid policy validation is explicit and opt-in" begin

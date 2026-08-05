@@ -411,3 +411,17 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   作为通用诊断合同落地，再按 targeted → 必要 deep oracle → full 24-anchor shadow 顺序重验。
   在 `full_hybrid_candidate` 与作者曲线/成本审核前，仍不启动 C0/C1/C2、phase-reference、
   reference promotion 或 transport。
+
+## Maxwell Endpoint-Limit Production Integration（2026-08-05）
+
+- [x] PR #173 已 squash merge；当前 production 分支从 `main@a80cf5573adec9a6061cc433dd1d1083d7b82b24`
+  创建，endpoint-limit evidence 与历史 pilot 保持不可变。
+- [x] 公共 `PhaseCore.maxwell_construction` 已改为唯一三交点候选合同：枚举全部去重交点，
+  拓扑间隙重置面积变号，支持多 candidate 诊断，并在 `max_iter` 耗尽时保持未收敛。
+- [x] hybrid 增加 opt-in `bounded_zero_density_v1` endpoint route：Stage-B 唯一 endpoint-dependent
+  candidate 且右外点存在时加入 `rho=0.003125` anchor，最多 12 次 `[0, anchor]` 二分；成功时
+  发布 `endpoint_limited_first_order`、`rho_hadron=0` 和真实上界/插值诊断，否则保留 ambiguous。
+- [x] config snapshot/hash、production sweep diagnostics、shadow v3 schema 与 endpoint gate 已同步；
+  默认 uniform/cascade、equilibrium solver、reference 和 transport 均未改变。
+- [ ] focused CI 全绿后 squash merge production PR；随后用该 merge SHA 运行 endpoint-limit targeted
+  shadow，必要 deep oracle 仅限已批准集合，targeted 通过后再运行 full 24-anchor shadow。
