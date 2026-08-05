@@ -30,6 +30,11 @@ const HYBRID_TARGETED_ANCHORS = Dict(
     0.0 => [5.0, 20.0, 60.0, 120.0, 131.0869140625, 145.0],
     0.5 => [5.0, 60.0, 90.0, 106.9599609375, 107.0849609375, 120.0],
 )
+const HYBRID_FOCUSED_ANCHORS = Dict(
+    -0.5 => [5.0, 20.0, 60.0, 147.2197265625],
+    0.0 => [5.0, 60.0, 145.0],
+    0.5 => [60.0, 120.0],
+)
 const HYBRID_METHODS = (:production_hybrid, :memoized_dense, :independent_oracle)
 
 @inline function _arg(values, name, default=nothing)
@@ -51,11 +56,15 @@ function _config(args)
     output_dir = abspath(String(_arg(args, "--output-dir", joinpath(pwd(), "hybrid_shadow_artifact"))))
     tag = String(_arg(args, "--tag", "cep_maxwell_endpoint_production_shadow_v3"))
     scope = Symbol(_arg(args, "--scope", "full"))
-    scope in (:targeted, :full) || throw(ArgumentError("shadow scope must be targeted or full"))
-    return (; method, xi, calculation_sha, output_dir, tag, scope)
+    scope in (:focused, :targeted, :full) || throw(ArgumentError("shadow scope must be focused, targeted, or full"))
+    endpoint_policy = Symbol(_arg(args, "--endpoint-policy", "bounded_zero_density_v1"))
+    endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
+        throw(ArgumentError("unsupported endpoint policy $(endpoint_policy)"))
+    return (; method, xi, calculation_sha, output_dir, tag, scope, endpoint_policy)
 end
 
-@inline _anchors(cfg) = cfg.scope === :targeted ? HYBRID_TARGETED_ANCHORS[cfg.xi] : HYBRID_ANCHORS[cfg.xi]
+@inline _anchors(cfg) = cfg.scope === :focused ? HYBRID_FOCUSED_ANCHORS[cfg.xi] :
+    cfg.scope === :targeted ? HYBRID_TARGETED_ANCHORS[cfg.xi] : HYBRID_ANCHORS[cfg.xi]
 
 @inline function _method_steps(method::Symbol)
     method === :production_hybrid && return (coarse=0.05, fine=0.025, policy=:rho_support_hybrid, levels=4)
@@ -193,6 +202,7 @@ function _run_anchor(cfg, T::Float64, anchor_dir::String, steps, telemetry)
         rho_support_fine_step=steps.fine,
         rho_support_targeted_cap=12,
         rho_support_config=Models.RhoSupportConfig(),
+        rho_hybrid_verification=Models.RhoHybridVerificationConfig(endpoint_policy=cfg.endpoint_policy),
         work_telemetry=telemetry,
         memoize_uniform=steps.policy === :uniform_nested,
         promote_reference=false,
@@ -207,6 +217,12 @@ function _slice_row(cfg, T, result)
     cache = get(diag, "rho_support_cache", nothing)
     cache_dict = cache isa AbstractDict ? cache : Dict{String, Any}()
     solver_failure_count = Int(_field(record, :stats_failure, get(diag, "scan_failure", 0)))
+    endpoint_left = _field(record, :hybrid_endpoint_left_bracket, nothing)
+    endpoint_right = _field(record, :hybrid_endpoint_right_bracket, nothing)
+    endpoint_low = endpoint_left === nothing ? NaN : _safe_float(_field(endpoint_left, :low, NaN))
+    endpoint_high = endpoint_left === nothing ? NaN : _safe_float(_field(endpoint_left, :high, NaN))
+    endpoint_right_low = endpoint_right === nothing ? NaN : _safe_float(_field(endpoint_right, :low, NaN))
+    endpoint_right_high = endpoint_right === nothing ? NaN : _safe_float(_field(endpoint_right, :high, NaN))
     return (
         xi=cfg.xi, method=String(cfg.method), calculation_sha=cfg.calculation_sha,
         T_MeV=T,
@@ -243,6 +259,11 @@ function _slice_row(cfg, T, result)
         endpoint_anchor_rho=_safe_float(_field(record, :hybrid_endpoint_anchor_rho, NaN)),
         endpoint_refinement_count=Int(_field(record, :hybrid_endpoint_refinement_count, 0)),
         endpoint_failure_reason=String(_field(record, :hybrid_guard_reason, "not_applicable")),
+        endpoint_route_kind=String(_field(record, :hybrid_endpoint_route_kind, :none)),
+        endpoint_left_bracket_low=endpoint_low,
+        endpoint_left_bracket_high=endpoint_high,
+        endpoint_right_bracket_low=endpoint_right_low,
+        endpoint_right_bracket_high=endpoint_right_high,
         maxwell_candidate_count=Int(_field(record, :maxwell_candidate_count, 0)),
         maxwell_crossing_count=Int(_field(record, :maxwell_crossing_count, 0)),
         maxwell_endpoint_dependent=_bool(_field(record, :maxwell_endpoint_dependent, false)),
@@ -259,6 +280,9 @@ end
 
 function _run_job(cfg)
     steps = _method_steps(cfg.method)
+    schema_version = cfg.endpoint_policy === :three_crossing_endpoint_local_v2 ?
+        "cep_maxwell_endpoint_local_production_shadow_v4" :
+        "cep_maxwell_endpoint_production_shadow_v3"
     started = time_ns()
     telemetry = Models.SolverWorkTelemetry()
     curve_rows = NamedTuple[]
@@ -324,7 +348,7 @@ function _run_job(cfg)
         hashes[name] = bytes2hex(sha256(read(path)))
     end
     summary = Dict(
-        "schema_version" => "cep_maxwell_endpoint_production_shadow_v3",
+        "schema_version" => schema_version,
         "xi" => cfg.xi, "method" => String(cfg.method), "tag" => cfg.tag,
         "calculation_sha" => cfg.calculation_sha,
         "workflow_head_sha" => cfg.calculation_sha,
@@ -343,7 +367,7 @@ function _run_job(cfg)
             "rho_hybrid_comparison_epsilon" => 32eps(Float64),
             "rho_hybrid_point_ranking_version" => "stage_b_features_v1",
             "rho_hybrid_candidate_policy" => "unique_three_crossing_topology_v1",
-            "rho_hybrid_endpoint_policy" => "bounded_zero_density_v1",
+            "rho_hybrid_endpoint_policy" => String(cfg.endpoint_policy),
             "rho_support_targeted_cap" => steps.policy === :rho_support_hybrid ? 12 : 0,
         ),
         "telemetry" => Dict(string(field) => getproperty(snapshot, field) for field in propertynames(snapshot)),
@@ -360,7 +384,7 @@ function _run_job(cfg)
         write(io, '\n')
     end
     open(joinpath(cfg.output_dir, "manifest.json"), "w") do io
-        JSON3.pretty(io, Dict("schema_version" => "cep_maxwell_endpoint_production_shadow_v3",
+        JSON3.pretty(io, Dict("schema_version" => schema_version,
             "calculation_sha" => cfg.calculation_sha, "files" => hashes,
             "anchors" => _anchors(cfg), "method" => String(cfg.method),
             "scope" => String(cfg.scope)))

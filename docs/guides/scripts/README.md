@@ -115,10 +115,14 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   guard 取两个 μ 极值外侧首个严格 Stage-B 采样点，不插值、不二分、不使用固定
   padding。Stage-A targeted 总上限仍为 `12`，Stage-C 始终保留完整 Stage-B 曲线；
   没有可靠 guard 时保持 ambiguous，不启动全域 oracle。
-  若完整 Stage-B 的公共 Maxwell 是唯一三交点且仅左外交点依赖零密度首单元，hybrid 会使用
-  固定 `bounded_zero_density_v1` endpoint route：加入 `rho=0.003125` anchor，最多 12 次
-  局部二分；成功证书仍是 `confirmed_first_order`，scalar `rho_hadron=0.0`，上界和插值值
-  写入 diagnostics/manifest，失败则保持 `ambiguous_near_critical`。
+  v2 shadow 显式使用
+  `RhoHybridVerificationConfig(endpoint_policy=:three_crossing_endpoint_local_v2)`：完整
+  Stage-B 曲线保留不截断，右 Maxwell crossing 只需被两个实际外支采样点 bracket，Stage-C
+  只在左 crossing active bracket 内补 midpoint。下界为零并达到预算时记录
+  `endpoint_limited_first_order`；下界为正且末两级 geometry 通过时记录
+  `endpoint_local_geometry_first_order`。这两种内部证书仍映射到既有三态，anchor 与最多
+  12 个 refinement 点分别计费；失败保持 `ambiguous_near_critical`。旧的
+  `bounded_zero_density_v1` 继续用于历史复现。
 
 - endpoint-local geometry contract v2 的离线 feasibility 使用
   `scripts/analysis/pnjl_endpoint_local_feasibility_v2.py`。它读取 targeted

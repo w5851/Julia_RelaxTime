@@ -19,7 +19,7 @@
 - `Models.analyze_pm_branch_competition` 的 compare-only `P-mu` 诊断入口
 - `src/models/phase/` 下的关键算法关系，例如 S-shape、Maxwell、crossover 与自适应 `rho` 加密
 - `Models.RhoSupportConfig` 与 opt-in `rho_support_cascade` / `rho_support_hybrid` 的分层几何证书和缓存诊断
-- `Models.RhoHybridVerificationConfig` 的离散极值外侧 guard 与 Stage-C 局部验证合同
+- `Models.RhoHybridVerificationConfig` 的离散极值外侧 guard、端点局部几何证书与 Stage-C 局部验证合同
 
 ## 目录职责
 
@@ -51,12 +51,18 @@ memoized dense，冲突时才在离散极值外侧 guard 内执行 Stage C `Δrh
 不使用固定 padding。Stage-C 始终保留完整 Stage-B 全域曲线，并只追加 guard 内按
 Stage-B 特征排序选出的点。
 
-当 Stage-B 的公共 Maxwell 结果是唯一三交点但左外交点依赖 `rho=0` 首个单元，且右外点
-已经被观察到时，hybrid 会启用固定的 `bounded_zero_density_v1` endpoint route：先加入
-`rho=0.003125` anchor，再在 `[0, 0.003125]` 内最多二分 12 次。成功证书类型为
-`endpoint_limited_first_order`，兼容标量 `rho_hadron=0.0`，同时诊断中保存正密度插值值和
-`[0, rho_hadron_upper_bound]`。缺少右外点、候选不唯一或预算耗尽仍为
-`ambiguous_near_critical`；该 route 不改变默认 uniform/cascade 语义。
+当 Stage-B 的公共 Maxwell 结果是唯一三交点且 endpoint-dependent 时，可显式设置
+`RhoHybridVerificationConfig(endpoint_policy=:three_crossing_endpoint_local_v2)`。该 v2
+策略用两个实际 Stage-B 外支点 bracket 右 Maxwell crossing，不把右支越过 μ 极值作为
+额外条件；完整 Stage-B 曲线始终保留，Stage-C 只在左 crossing 的 active bracket 内加入
+midpoint，并把 anchor 与最多 12 个 refinement 点分别写入诊断。左 bracket 下界保持为零并
+达到预算时证书类型为 `endpoint_limited_first_order`（对外 `rho_hadron=0.0`，另存上界）；
+下界变为正值且连续两级 geometry 通过时为
+`endpoint_local_geometry_first_order`（保留正的 `rho_hadron`）。两者都只属于内部诊断，
+物理输出仍使用三态合同；候选不唯一、右 crossing 无实际 bracket、solver/geometry 失败或
+预算耗尽均保持 `ambiguous_near_critical`。旧的
+`endpoint_policy=:bounded_zero_density_v1` 继续保留以复现历史产物，默认 uniform/cascade
+语义不变。
 
 production 的 Maxwell 容差由统一合同派生：内部二分 tolerance 为所有 active area
 acceptance gates 最小值的 `0.1` 倍；rho/temperature geometry gate 仍独立记录 coarse/fine

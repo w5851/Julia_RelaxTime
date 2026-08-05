@@ -60,6 +60,34 @@ end
         no_endpoint = Models._hybrid_endpoint_candidate(stage_b,
             Models.RhoHybridVerificationConfig(endpoint_policy=:other))
         @test no_endpoint === nothing
+
+        v2_curve = ([2.0, 4.0, 3.0, 2.0, 2.5, 4.0], collect(0.0:1.0:5.0))
+        v2_sres = Models.SShapeResult(true, 4.0, 2.0, 1.5, 3.5, 2)
+        v2_maxwell = Models.MaxwellResult(true, 3.0, 0.001, 4.0, 1e-7, 4,
+            Dict{Symbol, Any}(:candidate_count => 1, :crossing_count => 3,
+                :endpoint_dependent => true, :crossings => [0.5, 2.0, 4.5]))
+        v2_stage_b = (sres=v2_sres, curve=v2_curve, mu_transition=3.0, maxwell=v2_maxwell)
+        v2_endpoint = Models._hybrid_endpoint_candidate(v2_stage_b,
+            Models.RhoHybridVerificationConfig(endpoint_policy=:three_crossing_endpoint_local_v2))
+        @test v2_endpoint !== nothing
+        @test v2_endpoint.policy == :three_crossing_endpoint_local_v2
+        @test v2_endpoint.anchor == 0.003125
+        @test v2_endpoint.left_bracket.low == 0.0
+        @test v2_endpoint.left_bracket.high == 1.0
+        @test v2_endpoint.right_bracket.low == 4.0
+        @test v2_endpoint.right_bracket.high == 5.0
+
+        positive_curve = ([2.0, 4.0, 3.0, 2.0, 2.5, 4.0], collect(0.0:1.0:5.0))
+        positive_maxwell = Models.MaxwellResult(true, 3.0, 0.001, 4.0, 1e-7, 4,
+            Dict{Symbol, Any}(:candidate_count => 1, :crossing_count => 3,
+                :endpoint_dependent => true, :crossings => [0.5, 2.0, 4.5]))
+        positive_stage_b = (sres=v2_sres, curve=positive_curve,
+            mu_transition=3.0, maxwell=positive_maxwell)
+        positive_endpoint = Models._hybrid_endpoint_candidate(positive_stage_b,
+            Models.RhoHybridVerificationConfig(endpoint_policy=:three_crossing_endpoint_local_v2))
+        @test positive_endpoint !== nothing
+        @test positive_endpoint.left_bracket.low == 0.0
+        @test positive_endpoint.left_bracket.high == 1.0
     end
 
     @testset "hybrid policy validation is explicit and opt-in" begin

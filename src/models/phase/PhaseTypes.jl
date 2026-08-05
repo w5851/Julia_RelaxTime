@@ -146,8 +146,10 @@ end
 """Request-scoped verification contract for the opt-in hybrid rho policy.
 
 The fields are deliberately versioned and diagnostic: they make the Stage-C
-guard and the bounded zero-density endpoint route reproducible without
-exposing a new numerical tolerance knob.  The default production path does
+guard and the endpoint routes reproducible without exposing a new numerical
+tolerance knob.  `:bounded_zero_density_v1` remains the legacy explicit route;
+`:three_crossing_endpoint_local_v2` uses the actual right Maxwell crossing
+bracket and active left-bracket midpoints.  The default production path does
 not consume this contract.
 """
 Base.@kwdef struct RhoHybridVerificationConfig

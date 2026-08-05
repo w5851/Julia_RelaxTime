@@ -27,6 +27,11 @@ ANCHORS = {
     0.0: (5.0, 20.0, 60.0, 100.0, 120.0, 130.9619140625, 131.0869140625, 145.0),
     0.5: (5.0, 20.0, 60.0, 90.0, 100.0, 106.9599609375, 107.0849609375, 120.0),
 }
+FOCUSED_ANCHORS = {
+    -0.5: (5.0, 20.0, 60.0, 147.2197265625),
+    0.0: (5.0, 60.0, 145.0),
+    0.5: (60.0, 120.0),
+}
 TARGETED_ANCHORS = {
     -0.5: (5.0, 20.0, 60.0, 130.0, 147.0947265625, 147.2197265625),
     0.0: (5.0, 20.0, 60.0, 120.0, 131.0869140625, 145.0),
@@ -98,9 +103,9 @@ def _find_jobs(input_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
 
 
 def _anchors(scope: str, xi: float) -> tuple[float, ...]:
-    if scope not in {"targeted", "full"}:
+    if scope not in {"focused", "targeted", "full"}:
         raise ValueError(f"unsupported shadow scope: {scope}")
-    return (TARGETED_ANCHORS if scope == "targeted" else ANCHORS)[xi]
+    return (FOCUSED_ANCHORS if scope == "focused" else TARGETED_ANCHORS if scope == "targeted" else ANCHORS)[xi]
 
 
 def _validate_jobs(
@@ -111,6 +116,7 @@ def _validate_jobs(
     scope: str = "full",
     schema_version: str = "cep_cascade_production_shadow_v2",
     endpoint_mode: bool = False,
+    endpoint_policy: str = "bounded_zero_density_v1",
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     compatibility_warnings: list[str] = []
@@ -146,8 +152,8 @@ def _validate_jobs(
             parameters = summary.get("parameters", {})
             if parameters.get("rho_hybrid_candidate_policy") != "unique_three_crossing_topology_v1":
                 errors.append(f"endpoint candidate policy mismatch at {directory}")
-            if parameters.get("rho_hybrid_endpoint_policy") != "bounded_zero_density_v1":
-                errors.append(f"endpoint policy mismatch at {directory}")
+            if parameters.get("rho_hybrid_endpoint_policy") != endpoint_policy:
+                errors.append(f"endpoint policy mismatch at {directory}: expected {endpoint_policy}")
         for name in ("slice_metrics.csv", "cep_accuracy.csv", "method_costs.csv"):
             rows = _rows(directory / name) if (directory / name).is_file() else []
             if name == "slice_metrics.csv" and len(rows) != len(expected):
@@ -268,6 +274,8 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
             "certificate_type", "endpoint_lower_bound", "endpoint_upper_bound",
             "endpoint_interpolated_rho_hadron", "endpoint_anchor_rho",
             "endpoint_refinement_count", "endpoint_failure_reason",
+            "endpoint_route_kind", "endpoint_left_bracket_low", "endpoint_left_bracket_high",
+            "endpoint_right_bracket_low", "endpoint_right_bracket_high",
             "maxwell_candidate_count", "maxwell_crossing_count",
         )} for row in slice_rows
     ])
@@ -300,7 +308,11 @@ def _deep_rows(input_dir: Path) -> tuple[list[dict[str, str]], dict[str, Any], l
         candidates = [path for path in candidates if "aggregate" in path.parent.name]
         manifest_path = candidates[0] if candidates else manifest_path
     manifest = _json(manifest_path) if manifest_path.is_file() else {}
-    if manifest and manifest.get("schema_version") not in {"cep_deep_oracle_v1", "cep_maxwell_endpoint_production_shadow_v3"}:
+    if manifest and manifest.get("schema_version") not in {
+        "cep_deep_oracle_v1",
+        "cep_maxwell_endpoint_production_shadow_v3",
+        "cep_maxwell_endpoint_local_production_shadow_v4",
+    }:
         errors.append(f"unsupported deep oracle schema: {manifest.get('schema_version')}")
     rows = _rows(metrics_path)
     for row in rows:
@@ -329,6 +341,8 @@ def _refresh_geometry_accuracy(output_dir: Path) -> None:
             "targeted_additions", "stage_c_targeted_additions", "certificate_type",
             "endpoint_lower_bound", "endpoint_upper_bound", "endpoint_interpolated_rho_hadron",
             "endpoint_anchor_rho", "endpoint_refinement_count", "endpoint_failure_reason",
+            "endpoint_route_kind", "endpoint_left_bracket_low", "endpoint_left_bracket_high",
+            "endpoint_right_bracket_low", "endpoint_right_bracket_high",
             "maxwell_candidate_count", "maxwell_crossing_count",
         )} for row in rows
     ])
@@ -349,7 +363,8 @@ def _overlay_deep_oracle(
 
     deep_rows, deep_manifest, errors = _deep_rows(deep_input_dir)
     if deep_manifest.get("calculation_sha") not in (None, "", expected_sha) and \
-       deep_manifest.get("source_calculation_sha") not in (None, "", expected_sha):
+       deep_manifest.get("source_calculation_sha") not in (None, "", expected_sha) and \
+       deep_manifest.get("expected_calculation_sha") not in (None, "", expected_sha):
         errors.append("deep oracle calculation SHA does not match aggregate SHA")
     deep_by_key = {
         (_float(row.get("xi")), _float(row.get("T_MeV"))): row
@@ -517,6 +532,7 @@ def _gate(
     *,
     scope: str = "full",
     endpoint_mode: bool = False,
+    endpoint_policy: str = "bounded_zero_density_v1",
 ) -> dict[str, Any]:
     compatibility_warnings = compatibility_warnings or []
     rows = _rows(output_dir / "slice_metrics.csv")
@@ -604,6 +620,19 @@ def _gate(
     if endpoint_mode:
         for row in hybrid:
             certificate = row.get("certificate_type", "none")
+            if certificate == "endpoint_local_geometry_first_order":
+                if row.get("result_status") != "confirmed_first_order":
+                    endpoint_errors.append(f"endpoint-local certificate without first-order status xi={row.get('xi')} T={row.get('T_MeV')}")
+                if not (_finite(row.get("rho_hadron")) and _float(row.get("rho_hadron")) > 0.0):
+                    endpoint_errors.append(f"endpoint-local certificate must retain positive rho_hadron xi={row.get('xi')} T={row.get('T_MeV')}")
+                for field in ("endpoint_left_bracket_low", "endpoint_left_bracket_high", "endpoint_right_bracket_low", "endpoint_right_bracket_high"):
+                    if not _finite(row.get(field)):
+                        endpoint_errors.append(f"endpoint-local certificate missing {field} xi={row.get('xi')} T={row.get('T_MeV')}")
+                if row.get("endpoint_route_kind") != "three_crossing_endpoint_local_v2":
+                    endpoint_errors.append(f"endpoint-local route kind mismatch xi={row.get('xi')} T={row.get('T_MeV')}")
+                if _float(row.get("endpoint_refinement_count"), 0.0) > 12:
+                    endpoint_errors.append(f"endpoint-local refinement cap exceeded xi={row.get('xi')} T={row.get('T_MeV')}")
+                continue
             if certificate != "endpoint_limited_first_order":
                 continue
             if row.get("result_status") != "confirmed_first_order":
@@ -631,7 +660,7 @@ def _gate(
     elif performance_errors:
         verdict = "hybrid_performance_risk"
     else:
-        verdict = "targeted_hybrid_candidate" if scope == "targeted" else "full_hybrid_candidate"
+        verdict = "focused_hybrid_candidate" if scope == "focused" else "targeted_hybrid_candidate" if scope == "targeted" else "full_hybrid_candidate"
     return {"verdict": verdict, "scope": scope, "expected_anchor_count": sum(len(values) for values in expected_by_xi.values()), "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "endpoint_errors": endpoint_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
 
 
@@ -676,6 +705,7 @@ def collect(
     scope: str = "full",
     schema_version: str = "cep_cascade_production_shadow_v2",
     endpoint_mode: bool = False,
+    endpoint_policy: str = "bounded_zero_density_v1",
     run_mode: str = "numerical",
     deep_input_dir: Path | None = None,
     deep_run_id: str | None = None,
@@ -686,6 +716,7 @@ def collect(
     contract_errors, compatibility_warnings = _validate_jobs(
         jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay, scope=scope,
         schema_version=schema_version, endpoint_mode=endpoint_mode,
+        endpoint_policy=endpoint_policy,
     )
     corrections = _collect_tables(jobs, output_dir)
     deep_overlay_errors: list[str] = []
@@ -700,7 +731,14 @@ def collect(
     actions = _actions(run_id, output_dir, run_mode=run_mode, source_run_id=source_run_id)
     if run_mode == "aggregate_replay" and not actions.get("cost_snapshot_is_final", False):
         contract_errors.append("aggregate replay did not produce a final Actions cost snapshot")
-    gate = _gate(output_dir, contract_errors, compatibility_warnings, scope=scope, endpoint_mode=endpoint_mode)
+    gate = _gate(
+        output_dir,
+        contract_errors,
+        compatibility_warnings,
+        scope=scope,
+        endpoint_mode=endpoint_mode,
+        endpoint_policy=endpoint_policy,
+    )
     _write_docs(output_dir, gate, actions, schema_version=schema_version)
     hashes: dict[str, str] = {}
     for path in sorted(output_dir.rglob("*")):
@@ -713,6 +751,7 @@ def collect(
         "scope": scope,
         "run_mode": run_mode,
         "endpoint_mode": endpoint_mode,
+        "endpoint_policy": endpoint_policy,
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
@@ -734,9 +773,10 @@ def main() -> int:
     parser.add_argument("--postprocess-sha", default=None)
     parser.add_argument("--source-run-id", default=None)
     parser.add_argument("--legacy-replay", action="store_true", help="allow known pre-v2 Stage-C support labels while retaining warnings")
-    parser.add_argument("--scope", choices=("targeted", "full"), default="full")
+    parser.add_argument("--scope", choices=("focused", "targeted", "full"), default="full")
     parser.add_argument("--schema-version", default="cep_cascade_production_shadow_v2")
     parser.add_argument("--endpoint-mode", action="store_true")
+    parser.add_argument("--endpoint-policy", choices=("bounded_zero_density_v1", "three_crossing_endpoint_local_v2"), default="bounded_zero_density_v1")
     parser.add_argument("--run-mode", choices=("numerical", "aggregate_replay"), default="numerical")
     parser.add_argument("--deep-input-dir", type=Path, default=None)
     parser.add_argument("--deep-run-id", default=None)
@@ -752,6 +792,7 @@ def main() -> int:
         scope=args.scope,
         schema_version=args.schema_version,
         endpoint_mode=args.endpoint_mode,
+        endpoint_policy=args.endpoint_policy,
         run_mode=args.run_mode,
         deep_input_dir=args.deep_input_dir,
         deep_run_id=args.deep_run_id,
