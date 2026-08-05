@@ -1,0 +1,24 @@
+{
+    "source_deep_run_id": "30809754119",
+    "reference_write": false,
+    "input_dirs": [
+        "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_hybrid_extrema_guard_20260803\\required_three_deep_run_30809754119\\cep-deep-oracle-cep_hybrid_extrema_guard_required_three_deep_20260803-aggregate",
+        "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_hybrid_extrema_guard_20260803\\targeted_replay_run_30808473818\\cep-hybrid-production-shadow-cep_hybrid_extrema_guard_targeted_replay_20260803-aggregate-replay"
+    ],
+    "files": {
+        "candidate_summary.csv": "9287daf33fef294098854ee8be4edbcef41c14378110bf59dea0c460e8d6b59a",
+        "selected_policy.json": "378cbcc94cad21c930d76a281b80b36fc7030e4e3a2fa0cad82653acf231e59a",
+        "figures/minus05_T5_full_near_zero.png": "3c8f811cac951148b79927564227abcc4cee63b97d40d1051e450341260ee514",
+        "figures/zero_T5_full_near_zero.png": "6defb9f842474b09134d3db87f98fc18d16f4f13a147f3fbd0d00bb6a8a4c69f",
+        "claim_ledger.csv": "7c81a529fa190728222b841eb6b6d5770a506abb36b59dc9dbdb90c0171c68cd",
+        "provenance.json": "128150fad95569c6087d7a54558a3b5bbd9d68b08d3668889cdfeeb807702fda",
+        "figures/plot_manifest.json": "b05834f9b3c16d9ff3b05cfb2225f21576dd6c1968e5273aa35cdc547e567f18",
+        "AUDIT.md": "2714f429063d1b874ff54ef7e0e9abc3d293dd29474153338d2ffe298595f4e8",
+        "figures/minus05_T20_full_near_zero.png": "9aaf4d536381a4c969d694b56a7cf5dfa039a42d86d8cce2fed1b471c96e6fc6",
+        "README.md": "4d789dcdb944db72d690ca1ecc0cd5d1c9059342d335fdf565438cf75f8ee317",
+        "curve_index.csv": "32d24ca2498c93fecb849c45b503fa61a6c6fee4c269a2dc617537fff19513e9"
+    },
+    "solver_called": false,
+    "source_calculation_sha": "3217bed3635574f00c04cbee75e843b4c49451db",
+    "source_targeted_run_id": "30805637032"
+}
