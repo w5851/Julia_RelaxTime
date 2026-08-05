@@ -1,0 +1,22 @@
+{
+  "schema_version": "pnjl_maxwell_endpoint_limit_contract_v1",
+  "source_run_id": "30980094983",
+  "source_run_url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/30980094983",
+  "source_calculation_sha": "3217bed3635574f00c04cbee75e843b4c49451db",
+  "source_workflow_head_sha": "df1fcdece7bc0888dd57c465c0015828743596c5",
+  "source_verdict": "candidate_only_endpoint_inconclusive",
+  "source_job_manifest_sha256": "ee2c74821d11d4b79cde932ccffc247e4602b7246697ebd6fe8ab4f937ffced5",
+  "source_aggregate_manifest_sha256": "e91e3cd3fb783213f7d6e5ec179e8c25f90763c20a292aa88326c2dbdc661af1",
+  "producer_head_sha": "0a3f5a371153f1db01c084a8cec4d8a7ed394764",
+  "producer_script": "scripts/analysis/build_pnjl_maxwell_endpoint_limit_contract.py",
+  "producer_script_sha256": "0d05fd26ec80fddeda68362ffe64bde9ee0776451a211b3971f65ac2c392105e",
+  "solver_called": false,
+  "reference_write": false,
+  "raw_curves_external": true,
+  "author_decision": {
+    "status": "accepted",
+    "date": "2026-08-05",
+    "statement": "The bounded endpoint interval 0 <= rho_h < 7.63e-7 is sufficient first-order evidence; a strictly positive lower bound is not required.",
+    "scope": "endpoint_limited_first_order_v1"
+  }
+}

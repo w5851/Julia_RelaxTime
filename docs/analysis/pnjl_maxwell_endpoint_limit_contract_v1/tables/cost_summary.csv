@@ -1,0 +1,2 @@
+xi,T_MeV,calculation_sha,workflow_head_sha,equilibrium_requests,fixedrho_requests,unique_solves,point_requests,cache_hits,targeted_additions,residual_calls,jacobian_calls,newton_iterations,trust_region_iterations,nonconverged_attempts,fallback_count,governed_rescue_count,retry_count,exception_count
+-0.5,5.0,3217bed3635574f00c04cbee75e843b4c49451db,df1fcdece7bc0888dd57c465c0015828743596c5,1293,1293,1293,1293,0,12,10496,7910,0,5324,0,0,0,0,0
