@@ -49,7 +49,7 @@ function _config(args)
     occursin(r"^[0-9a-fA-F]{40}$", calculation_sha) ||
         throw(ArgumentError("calculation-sha must be an immutable 40-character SHA"))
     output_dir = abspath(String(_arg(args, "--output-dir", joinpath(pwd(), "hybrid_shadow_artifact"))))
-    tag = String(_arg(args, "--tag", "cep_cascade_production_shadow_v2"))
+    tag = String(_arg(args, "--tag", "cep_maxwell_endpoint_production_shadow_v3"))
     scope = Symbol(_arg(args, "--scope", "full"))
     scope in (:targeted, :full) || throw(ArgumentError("shadow scope must be targeted or full"))
     return (; method, xi, calculation_sha, output_dir, tag, scope)
@@ -236,6 +236,16 @@ function _slice_row(cfg, T, result)
         guard_status=String(_field(record, :hybrid_guard_status, :not_run)),
         guard_reason=String(_field(record, :hybrid_guard_reason, "not_applicable")),
         guard_source=join(String.(_field(record, :hybrid_guard_source, String[])), ";"),
+        certificate_type=String(_field(record, :hybrid_certificate_type, "none")),
+        endpoint_lower_bound=_safe_float(_field(record, :hybrid_endpoint_lower_bound, NaN)),
+        endpoint_upper_bound=_safe_float(_field(record, :hybrid_endpoint_upper_bound, NaN)),
+        endpoint_interpolated_rho_hadron=_safe_float(_field(record, :hybrid_endpoint_interpolated_rho_hadron, NaN)),
+        endpoint_anchor_rho=_safe_float(_field(record, :hybrid_endpoint_anchor_rho, NaN)),
+        endpoint_refinement_count=Int(_field(record, :hybrid_endpoint_refinement_count, 0)),
+        endpoint_failure_reason=String(_field(record, :hybrid_guard_reason, "not_applicable")),
+        maxwell_candidate_count=Int(_field(record, :maxwell_candidate_count, 0)),
+        maxwell_crossing_count=Int(_field(record, :maxwell_crossing_count, 0)),
+        maxwell_endpoint_dependent=_bool(_field(record, :maxwell_endpoint_dependent, false)),
         support_point_count=Int(_field(record, :hybrid_verification_point_count, 0)),
         targeted_additions=Int(_field(record, :cascade_targeted_count, get(cache_dict, "targeted_additions", 0))),
         stage_c_targeted_additions=Int(_field(record, :hybrid_targeted_point_count, 0)),
@@ -314,7 +324,7 @@ function _run_job(cfg)
         hashes[name] = bytes2hex(sha256(read(path)))
     end
     summary = Dict(
-        "schema_version" => "cep_cascade_production_shadow_v2",
+        "schema_version" => "cep_maxwell_endpoint_production_shadow_v3",
         "xi" => cfg.xi, "method" => String(cfg.method), "tag" => cfg.tag,
         "calculation_sha" => cfg.calculation_sha,
         "workflow_head_sha" => cfg.calculation_sha,
@@ -332,6 +342,8 @@ function _run_job(cfg)
             "rho_hybrid_guard_rule" => "extrema_outer_samples_v1",
             "rho_hybrid_comparison_epsilon" => 32eps(Float64),
             "rho_hybrid_point_ranking_version" => "stage_b_features_v1",
+            "rho_hybrid_candidate_policy" => "unique_three_crossing_topology_v1",
+            "rho_hybrid_endpoint_policy" => "bounded_zero_density_v1",
             "rho_support_targeted_cap" => steps.policy === :rho_support_hybrid ? 12 : 0,
         ),
         "telemetry" => Dict(string(field) => getproperty(snapshot, field) for field in propertynames(snapshot)),
@@ -348,7 +360,7 @@ function _run_job(cfg)
         write(io, '\n')
     end
     open(joinpath(cfg.output_dir, "manifest.json"), "w") do io
-        JSON3.pretty(io, Dict("schema_version" => "cep_cascade_production_shadow_v2",
+        JSON3.pretty(io, Dict("schema_version" => "cep_maxwell_endpoint_production_shadow_v3",
             "calculation_sha" => cfg.calculation_sha, "files" => hashes,
             "anchors" => _anchors(cfg), "method" => String(cfg.method),
             "scope" => String(cfg.scope)))

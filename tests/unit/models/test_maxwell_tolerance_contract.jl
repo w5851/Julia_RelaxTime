@@ -22,6 +22,7 @@ end
         )
         @test Models._production_maxwell_solver_tol(cfg) == 5e-6
         @test Models._production_maxwell_options(cfg).tol_area == 5e-6
+        @test Models._production_maxwell_options(cfg).candidate_steps == 1024
 
         no_rho = Models.ProductionPipelineConfig(
             area_tol_good=1e-4,

@@ -104,6 +104,8 @@ def _validate_jobs(
     *,
     allow_legacy_stage_c_support: bool = False,
     scope: str = "full",
+    schema_version: str = "cep_cascade_production_shadow_v2",
+    endpoint_mode: bool = False,
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     compatibility_warnings: list[str] = []
@@ -116,7 +118,7 @@ def _validate_jobs(
         seen.add(key)
         if key[0] not in XIS or key[1] not in METHODS:
             errors.append(f"unexpected matrix key {key}")
-        if summary.get("schema_version") != "cep_cascade_production_shadow_v2":
+        if summary.get("schema_version") != schema_version:
             errors.append(f"unexpected schema at {directory}")
         declared_scope = summary.get("scope", "full")
         if declared_scope != scope:
@@ -135,6 +137,12 @@ def _validate_jobs(
             errors.append(f"anchor declaration mismatch at {directory}")
         if not bool(summary.get("finite_and_converged_final", False)):
             errors.append(f"non-finite/non-converged final points at {directory}")
+        if endpoint_mode:
+            parameters = summary.get("parameters", {})
+            if parameters.get("rho_hybrid_candidate_policy") != "unique_three_crossing_topology_v1":
+                errors.append(f"endpoint candidate policy mismatch at {directory}")
+            if parameters.get("rho_hybrid_endpoint_policy") != "bounded_zero_density_v1":
+                errors.append(f"endpoint policy mismatch at {directory}")
         for name in ("slice_metrics.csv", "cep_accuracy.csv", "method_costs.csv"):
             rows = _rows(directory / name) if (directory / name).is_file() else []
             if name == "slice_metrics.csv" and len(rows) != len(expected):
@@ -252,6 +260,10 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
             "support_low", "support_high", "support_mu_low", "support_mu_high",
             "guard_status", "guard_reason", "guard_source", "support_point_count",
             "targeted_additions", "stage_c_targeted_additions",
+            "certificate_type", "endpoint_lower_bound", "endpoint_upper_bound",
+            "endpoint_interpolated_rho_hadron", "endpoint_anchor_rho",
+            "endpoint_refinement_count", "endpoint_failure_reason",
+            "maxwell_candidate_count", "maxwell_crossing_count",
         )} for row in slice_rows
     ])
     _write_csv(output_dir / "curve_index.csv", [
@@ -317,6 +329,7 @@ def _gate(
     compatibility_warnings: list[str] | None = None,
     *,
     scope: str = "full",
+    endpoint_mode: bool = False,
 ) -> dict[str, Any]:
     compatibility_warnings = compatibility_warnings or []
     rows = _rows(output_dir / "slice_metrics.csv")
@@ -400,6 +413,23 @@ def _gate(
         statuses = {row.get("result_status") for row in hybrid if math.isclose(_float(row.get("xi")), xi, abs_tol=1e-9, rel_tol=0.0)}
         if "confirmed_first_order" not in statuses or "confirmed_monotone" not in statuses:
             coverage_errors.append(f"hybrid xi={xi} lacks confirmed first-order/monotone evidence")
+    endpoint_errors: list[str] = []
+    if endpoint_mode:
+        for row in hybrid:
+            certificate = row.get("certificate_type", "none")
+            if certificate != "endpoint_limited_first_order":
+                continue
+            if row.get("result_status") != "confirmed_first_order":
+                endpoint_errors.append(f"endpoint certificate without first-order status xi={row.get('xi')} T={row.get('T_MeV')}")
+            if not math.isclose(_float(row.get("rho_hadron")), 0.0, abs_tol=1e-15, rel_tol=0.0):
+                endpoint_errors.append(f"endpoint certificate must publish rho_hadron=0 xi={row.get('xi')} T={row.get('T_MeV')}")
+            upper = _float(row.get("endpoint_upper_bound"))
+            if not (math.isfinite(upper) and upper > 0.0 and upper <= 0.003125 + 1e-12):
+                endpoint_errors.append(f"invalid endpoint upper bound xi={row.get('xi')} T={row.get('T_MeV')}")
+            if _float(row.get("endpoint_refinement_count"), 0.0) > 12:
+                endpoint_errors.append(f"endpoint refinement cap exceeded xi={row.get('xi')} T={row.get('T_MeV')}")
+            if _float(row.get("maxwell_candidate_count"), 0.0) != 1 or _float(row.get("maxwell_crossing_count"), 0.0) != 3:
+                endpoint_errors.append(f"endpoint certificate lacks unique three-crossing evidence xi={row.get('xi')} T={row.get('T_MeV')}")
     performance_errors, performance = _performance(costs)
     if contract_errors:
         verdict = "workflow_failure"
@@ -407,20 +437,22 @@ def _gate(
         verdict = "oracle_inconclusive"
     elif classification_errors:
         verdict = "hybrid_integration_failed"
+    elif endpoint_errors:
+        verdict = "hybrid_integration_failed"
     elif coverage_errors:
         verdict = "hybrid_integration_failed"
     elif performance_errors:
         verdict = "hybrid_performance_risk"
     else:
         verdict = "targeted_hybrid_candidate" if scope == "targeted" else "full_hybrid_candidate"
-    return {"verdict": verdict, "scope": scope, "expected_anchor_count": sum(len(values) for values in expected_by_xi.values()), "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
+    return {"verdict": verdict, "scope": scope, "expected_anchor_count": sum(len(values) for values in expected_by_xi.values()), "workflow_contract_errors": contract_errors, "compatibility_warnings": compatibility_warnings, "oracle_errors": oracle_errors, "classification_errors": classification_errors, "endpoint_errors": endpoint_errors, "coverage_errors": coverage_errors, "performance_errors": performance_errors, "performance": performance, "automatic_gate_is_not_promotion": True}
 
 
-def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any]) -> None:
-    errors = gate["workflow_contract_errors"] + gate["oracle_errors"] + gate["classification_errors"] + gate["coverage_errors"] + gate["performance_errors"]
+def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any], schema_version: str = "cep_cascade_production_shadow_v2") -> None:
+    errors = gate["workflow_contract_errors"] + gate["oracle_errors"] + gate["classification_errors"] + gate.get("endpoint_errors", []) + gate["coverage_errors"] + gate["performance_errors"]
     warnings = gate.get("compatibility_warnings", [])
     (output_dir / "README.md").write_text(
-        f"# PNJL CEP hybrid production shadow v2\n\nscope: `{gate.get('scope', 'full')}`\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
+        f"# PNJL CEP hybrid production shadow ({schema_version})\n\nscope: `{gate.get('scope', 'full')}`\n\nverdict: `{gate['verdict']}`。这是显式 opt-in 的诊断产物，"
         "不覆盖 reference，不启动 C0/C1/C2、C3/O1、formal production 或 transport。\n\n"
         f"- Actions critical path: {actions.get('critical_path_seconds', 0.0)} s\n"
         f"- runner-minutes: {actions.get('runner_minutes', 0)}\n"
@@ -442,7 +474,7 @@ def _write_docs(output_dir: Path, gate: dict[str, Any], actions: dict[str, Any])
         "任何 verdict 都不自动晋升 reference。\n",
         encoding="utf-8",
     )
-    (output_dir / "plot_manifest.json").write_text(json.dumps({"schema_version": "cep_cascade_production_shadow_v2", "figures": [], "reason": "plots are generated by the versioned hybrid plotter"}, indent=2) + "\n", encoding="utf-8")
+    (output_dir / "plot_manifest.json").write_text(json.dumps({"schema_version": schema_version, "figures": [], "reason": "plots are generated by the versioned hybrid plotter"}, indent=2) + "\n", encoding="utf-8")
 
 
 def collect(
@@ -455,26 +487,30 @@ def collect(
     source_run_id: str | None = None,
     legacy_replay: bool = False,
     scope: str = "full",
+    schema_version: str = "cep_cascade_production_shadow_v2",
+    endpoint_mode: bool = False,
 ) -> dict[str, Any]:
     _anchors(scope, -0.5)  # validate scope before creating a partial aggregate
     output_dir.mkdir(parents=True, exist_ok=True)
     jobs = _find_jobs(input_dir)
     contract_errors, compatibility_warnings = _validate_jobs(
-        jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay, scope=scope
+        jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay, scope=scope,
+        schema_version=schema_version, endpoint_mode=endpoint_mode,
     )
     corrections = _collect_tables(jobs, output_dir)
     actions = _actions(run_id, output_dir)
-    gate = _gate(output_dir, contract_errors, compatibility_warnings, scope=scope)
-    _write_docs(output_dir, gate, actions)
+    gate = _gate(output_dir, contract_errors, compatibility_warnings, scope=scope, endpoint_mode=endpoint_mode)
+    _write_docs(output_dir, gate, actions, schema_version=schema_version)
     hashes: dict[str, str] = {}
     for path in sorted(output_dir.rglob("*")):
         if path.is_file() and path.name != "manifest.json":
             hashes[str(path.relative_to(output_dir)).replace(os.sep, "/")] = hashlib.sha256(path.read_bytes()).hexdigest()
     manifest = {
-        "schema_version": "cep_cascade_production_shadow_v2",
+        "schema_version": schema_version,
         "run_id": run_id or "", "source_run_id": source_run_id or run_id or "",
         "expected_calculation_sha": expected_sha, "postprocess_sha": postprocess_sha or "",
         "scope": scope,
+        "endpoint_mode": endpoint_mode,
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
@@ -496,6 +532,8 @@ def main() -> int:
     parser.add_argument("--source-run-id", default=None)
     parser.add_argument("--legacy-replay", action="store_true", help="allow known pre-v2 Stage-C support labels while retaining warnings")
     parser.add_argument("--scope", choices=("targeted", "full"), default="full")
+    parser.add_argument("--schema-version", default="cep_cascade_production_shadow_v2")
+    parser.add_argument("--endpoint-mode", action="store_true")
     args = parser.parse_args()
     gate = collect(
         args.input_dir,
@@ -506,6 +544,8 @@ def main() -> int:
         source_run_id=args.source_run_id,
         legacy_replay=args.legacy_replay,
         scope=args.scope,
+        schema_version=args.schema_version,
+        endpoint_mode=args.endpoint_mode,
     )
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["verdict"] == "workflow_failure" else 2 if gate["verdict"] != "full_hybrid_candidate" else 0

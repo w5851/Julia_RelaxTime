@@ -127,7 +127,14 @@ def main() -> int:
 
         matplotlib.use("Agg")
     except ImportError:
-        (args.output_dir / "plot_manifest.json").write_text(json.dumps({"schema_version": "cep_cascade_production_shadow_v2", "figures": [], "reason": "matplotlib unavailable"}, indent=2) + "\n", encoding="utf-8")
+        schema = "cep_cascade_production_shadow_v2"
+        manifest_path = args.input_dir / "manifest.json"
+        if manifest_path.is_file():
+            try:
+                schema = json.loads(manifest_path.read_text(encoding="utf-8")).get("schema_version", schema)
+            except (OSError, json.JSONDecodeError):
+                pass
+        (args.output_dir / "plot_manifest.json").write_text(json.dumps({"schema_version": schema, "figures": [], "reason": "matplotlib unavailable"}, indent=2) + "\n", encoding="utf-8")
         return 0
     curve_path = args.input_dir / "curve_points.csv"
     slice_path = args.input_dir / "slice_metrics.csv"
@@ -136,8 +143,15 @@ def main() -> int:
     for xi, temperature, reason in _select_anchors(slice_rows):
         filename = _plot_anchor(args.output_dir, curve_rows, slice_rows, xi, temperature, reason)
         figures.append({"file": filename, "xi": xi, "T_MeV": temperature, "reason": reason})
+    schema = "cep_cascade_production_shadow_v2"
+    aggregate_manifest = args.input_dir / "manifest.json"
+    if aggregate_manifest.is_file():
+        try:
+            schema = json.loads(aggregate_manifest.read_text(encoding="utf-8")).get("schema_version", schema)
+        except (OSError, json.JSONDecodeError):
+            pass
     manifest = {
-        "schema_version": "cep_cascade_production_shadow_v2",
+        "schema_version": schema,
         "source_sha256": {"curve_points.csv": hashlib.sha256(curve_path.read_bytes()).hexdigest(), "slice_metrics.csv": hashlib.sha256(slice_path.read_bytes()).hexdigest()},
         "figures": figures,
     }

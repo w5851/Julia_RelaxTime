@@ -51,6 +51,13 @@ memoized dense，冲突时才在离散极值外侧 guard 内执行 Stage C `Δrh
 不使用固定 padding。Stage-C 始终保留完整 Stage-B 全域曲线，并只追加 guard 内按
 Stage-B 特征排序选出的点。
 
+当 Stage-B 的公共 Maxwell 结果是唯一三交点但左外交点依赖 `rho=0` 首个单元，且右外点
+已经被观察到时，hybrid 会启用固定的 `bounded_zero_density_v1` endpoint route：先加入
+`rho=0.003125` anchor，再在 `[0, 0.003125]` 内最多二分 12 次。成功证书类型为
+`endpoint_limited_first_order`，兼容标量 `rho_hadron=0.0`，同时诊断中保存正密度插值值和
+`[0, rho_hadron_upper_bound]`。缺少右外点、候选不唯一或预算耗尽仍为
+`ambiguous_near_critical`；该 route 不改变默认 uniform/cascade 语义。
+
 production 的 Maxwell 容差由统一合同派生：内部二分 tolerance 为所有 active area
 acceptance gates 最小值的 `0.1` 倍；rho/temperature geometry gate 仍独立记录 coarse/fine
 离散收敛误差。有效 solver tolerance 会写入 config snapshot/hash 和 diagnostics，默认
