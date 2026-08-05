@@ -103,6 +103,25 @@ def _finite(value: Any) -> bool:
     return math.isfinite(_float(value))
 
 
+def _source_run_completed_success(payload: dict[str, Any]) -> bool:
+    """Accept a replay source with successful numeric jobs but failed postprocess.
+
+    A numerical shadow run can have all nine matrix jobs successful while its
+    in-run collector fails.  That source is still valid input for an
+    authenticated aggregate replay; the replay itself is responsible for the
+    collector verdict.
+    """
+    if payload.get("status") != "completed":
+        return False
+    if payload.get("conclusion") == "success":
+        return True
+    numeric_jobs = [
+        job for job in payload.get("jobs", [])
+        if str(job.get("name", "")).startswith("endpoint-local v4 xi=")
+    ]
+    return len(numeric_jobs) == 9 and all(job.get("conclusion") == "success" for job in numeric_jobs)
+
+
 def _find_jobs(input_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return [(path.parent, _json(path)) for path in sorted(input_dir.rglob("job_summary.json"))]
 
@@ -487,9 +506,14 @@ def _actions(
             metadata["snapshot_phase"] = (
                 "final" if run_mode == "aggregate_replay" and payload.get("status") == "completed" else "provisional"
             )
-            metadata["source_run_completed_success"] = payload.get("status") == "completed" and payload.get("conclusion") == "success"
+            metadata["source_run_overall_success"] = payload.get("status") == "completed" and payload.get("conclusion") == "success"
+            metadata["source_run_numeric_jobs"] = sum(
+                1 for job in payload.get("jobs", [])
+                if str(job.get("name", "")).startswith("endpoint-local v4 xi=")
+            )
+            metadata["source_run_completed_success"] = _source_run_completed_success(payload)
             if run_mode == "aggregate_replay" and not metadata["source_run_completed_success"]:
-                metadata["error"] = "aggregate replay source run is not a completed successful Actions run"
+                metadata["error"] = "aggregate replay source run has incomplete numeric jobs"
             for job in payload.get("jobs", []):
                 if not job.get("startedAt") or not job.get("completedAt"):
                     continue

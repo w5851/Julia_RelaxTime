@@ -365,3 +365,35 @@ def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_pat
     assert provisional["cost_snapshot_is_final"] is False
     assert replay["snapshot_phase"] == "final"
     assert replay["cost_snapshot_is_final"] is True
+
+
+def test_replay_accepts_source_with_successful_numeric_jobs_and_failed_aggregate(tmp_path, monkeypatch):
+    module = load_module(COLLECTOR, "hybrid_collector_numeric_source_replay")
+    xis = ("-0.5", "0.0", "0.5")
+    methods = ("production_hybrid", "memoized_dense", "independent_oracle")
+    payload = {
+        "headSha": "a" * 40,
+        "url": "https://example.invalid/run/2",
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+            {
+                "name": f"endpoint-local v4 xi={xi} method={method}",
+                "databaseId": index,
+                "status": "completed",
+                "conclusion": "success",
+                "startedAt": "2026-08-05T00:00:00Z",
+                "completedAt": "2026-08-05T00:01:00Z",
+            }
+            for index, (xi, method) in enumerate((
+                (xi, method) for xi in xis for method in methods
+            ), start=1)
+        ],
+    }
+    monkeypatch.setenv("GH_TOKEN", "token")
+    monkeypatch.setattr(module.subprocess, "check_output", lambda *args, **kwargs: json.dumps(payload))
+    replay = module._actions("2", tmp_path / "replay", run_mode="aggregate_replay", source_run_id="2")
+    assert replay["source_run_overall_success"] is False
+    assert replay["source_run_numeric_jobs"] == 9
+    assert replay["source_run_completed_success"] is True
+    assert replay["cost_snapshot_is_final"] is True

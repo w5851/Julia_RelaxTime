@@ -260,8 +260,11 @@ jobs:
           set -euo pipefail
           source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha,jobs)"
           test "$(echo "$source_json" | jq -r .status)" = completed
-          test "$(echo "$source_json" | jq -r .conclusion)" = success
           test "$(echo "$source_json" | jq -r .headSha)" = "$CALCULATION_REF"
+          numeric_jobs="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi="))] | length')"
+          numeric_failures="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi=")) | select(.conclusion != "success")] | length')"
+          test "$numeric_jobs" = 9
+          test "$numeric_failures" = 0
           mkdir -p job-artifacts
           gh run download "$SOURCE_RUN_ID" \
             --pattern 'cep-maxwell-endpoint-local-production-shadow-*' \
