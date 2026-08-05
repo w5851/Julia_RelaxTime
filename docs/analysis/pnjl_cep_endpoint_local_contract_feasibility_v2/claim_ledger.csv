@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+deep_overlay,approved deep oracle closes the three standard ambiguous anchors,pass,anchor_replay.csv; deep source manifest,required-three points only
+endpoint_route,endpoint-local route has one candidate and an actual right crossing bracket,pass,crossing_brackets.csv; route_traces.csv,solver-free feasibility; production not yet changed
+geometry,deep geometry satisfies existing position/density/area gates,pass,geometry_convergence.csv,"deep oracle evidence, not a production certificate"
+cost,simulated endpoint-local hybrid cost does not exceed dense,pass,cost_frontier.csv,offline cost estimate
+production,endpoint-local v2 is production integrated,not_claimed,README.md,requires a separate production PR and Actions shadow

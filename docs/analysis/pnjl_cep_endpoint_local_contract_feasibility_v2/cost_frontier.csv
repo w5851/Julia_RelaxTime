@@ -1,0 +1,6 @@
+cap,route_count,targeted_midpoints,simulated_hybrid_unique_solves,dense_unique_solves,cost_gate
+4,3,12,9382.0,11538.0,True
+6,3,18,9388.0,11538.0,True
+8,3,24,9394.0,11538.0,True
+10,3,30,9400.0,11538.0,True
+12,3,36,9406.0,11538.0,True

@@ -120,6 +120,13 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   局部二分；成功证书仍是 `confirmed_first_order`，scalar `rho_hadron=0.0`，上界和插值值
   写入 diagnostics/manifest，失败则保持 `ambiguous_near_critical`。
 
+- endpoint-local geometry contract v2 的离线 feasibility 使用
+  `scripts/analysis/pnjl_endpoint_local_feasibility_v2.py`。它读取 targeted
+  aggregate 与已批准的 required-three deep artifact，只用完整 Stage-B 曲线决定
+  左侧 active bracket 的 midpoint；deep 曲线只在点位选定后用于 solver-free gate。
+  右侧只要求两个实际 Stage-B 外支点 bracket Maxwell crossing，不再要求采样点越过
+  最大 spinodal 化学势。该脚本不调用 PNJL solver，也不产生 production/reference 工件。
+
 最小产物结构（输出目录）：
 
 - `trho_scan.csv`

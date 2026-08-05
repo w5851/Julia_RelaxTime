@@ -53,6 +53,11 @@ CEP_NEIGHBOURS = {
     0.5: (106.9599609375, 107.0849609375),
 }
 CURVE_T_MATCH_TOL = 1e-6  # trho CSV serializes T to six decimal places
+APPROVED_DEEP_ORACLE = {
+    (-0.5, 5.0),
+    (-0.5, 20.0),
+    (0.0, 5.0),
+}
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -278,15 +283,193 @@ def _collect_tables(jobs: list[tuple[Path, dict[str, Any]]], output_dir: Path) -
     return corrections
 
 
-def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
+def _deep_rows(input_dir: Path) -> tuple[list[dict[str, str]], dict[str, Any], list[str]]:
+    """Load the approved deep-oracle aggregate without importing its labels silently."""
+
+    errors: list[str] = []
+    manifest_path = input_dir / "manifest.json"
+    metrics_path = input_dir / "slice_metrics.csv"
+    if not metrics_path.is_file():
+        candidates = sorted(input_dir.rglob("slice_metrics.csv"))
+        candidates = [path for path in candidates if "aggregate" in path.parent.name]
+        metrics_path = candidates[0] if candidates else metrics_path
+    if not metrics_path.is_file():
+        return [], {}, [f"deep oracle slice_metrics.csv is missing under {input_dir}"]
+    if not manifest_path.is_file():
+        candidates = sorted(input_dir.rglob("manifest.json"))
+        candidates = [path for path in candidates if "aggregate" in path.parent.name]
+        manifest_path = candidates[0] if candidates else manifest_path
+    manifest = _json(manifest_path) if manifest_path.is_file() else {}
+    if manifest and manifest.get("schema_version") not in {"cep_deep_oracle_v1", "cep_maxwell_endpoint_production_shadow_v3"}:
+        errors.append(f"unsupported deep oracle schema: {manifest.get('schema_version')}")
+    rows = _rows(metrics_path)
+    for row in rows:
+        if row.get("method") != "independent_oracle":
+            continue
+        key = (_float(row.get("xi")), _float(row.get("T_MeV")))
+        if key not in APPROVED_DEEP_ORACLE:
+            continue
+        if row.get("result_status") not in {"confirmed_first_order", "confirmed_monotone", "ambiguous_near_critical"}:
+            errors.append(f"invalid deep oracle status at {key}: {row.get('result_status')}")
+    return rows, manifest, errors
+
+
+def _refresh_geometry_accuracy(output_dir: Path) -> None:
+    rows = _rows(output_dir / "slice_metrics.csv")
+    _write_csv(output_dir / "geometry_accuracy.csv", [
+        {key: row.get(key, "") for key in (
+            "xi", "method", "T_MeV", "stage_a_status", "stage_b_status", "stage_c_status",
+            "stage_used", "upgrade_reason", "result_status", "standard_oracle_status",
+            "deep_oracle_status", "final_oracle_status", "oracle_source", "geometry_converged",
+            "position_error_MeV", "density_error", "maxwell_area_gate", "area_residual",
+            "mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV",
+            "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark",
+            "support_low", "support_high", "support_mu_low", "support_mu_high",
+            "guard_status", "guard_reason", "guard_source", "support_point_count",
+            "targeted_additions", "stage_c_targeted_additions", "certificate_type",
+            "endpoint_lower_bound", "endpoint_upper_bound", "endpoint_interpolated_rho_hadron",
+            "endpoint_anchor_rho", "endpoint_refinement_count", "endpoint_failure_reason",
+            "maxwell_candidate_count", "maxwell_crossing_count",
+        )} for row in rows
+    ])
+
+
+def _overlay_deep_oracle(
+    output_dir: Path,
+    deep_input_dir: Path,
+    expected_sha: str,
+    deep_run_id: str | None,
+) -> tuple[list[str], dict[str, Any]]:
+    """Overlay only approved standard-ambiguous oracle rows.
+
+    The standard rows and their statuses remain in the aggregate as
+    ``standard_oracle_status``.  A deep row is used only as a final gate input;
+    it never participates in route selection or support construction.
+    """
+
+    deep_rows, deep_manifest, errors = _deep_rows(deep_input_dir)
+    if deep_manifest.get("calculation_sha") not in (None, "", expected_sha) and \
+       deep_manifest.get("source_calculation_sha") not in (None, "", expected_sha):
+        errors.append("deep oracle calculation SHA does not match aggregate SHA")
+    deep_by_key = {
+        (_float(row.get("xi")), _float(row.get("T_MeV"))): row
+        for row in deep_rows
+        if row.get("method") == "independent_oracle"
+    }
+    rows = _rows(output_dir / "slice_metrics.csv")
+    overlay_rows: list[dict[str, Any]] = []
+    applied: list[dict[str, Any]] = []
+    for row in rows:
+        if row.get("method") != "independent_oracle":
+            overlay_rows.append(row)
+            continue
+        key = (_float(row.get("xi")), _float(row.get("T_MeV")))
+        standard_status = row.get("result_status", "")
+        row["standard_oracle_status"] = standard_status
+        row["deep_oracle_status"] = ""
+        row["final_oracle_status"] = standard_status
+        row["oracle_source"] = "standard"
+        deep = deep_by_key.get(key) if key in APPROVED_DEEP_ORACLE else None
+        if deep is not None:
+            deep_status = deep.get("result_status", "")
+            row["deep_oracle_status"] = deep_status
+            if standard_status == "ambiguous_near_critical":
+                # Copy physical evidence fields from the approved deep row;
+                # preserve the standard status and provenance columns above.
+                for field in (
+                    "result_status", "raw_status", "geometry_converged",
+                    "position_error_MeV", "density_error", "maxwell_area_gate",
+                    "area_residual", "rho_hadron", "rho_quark", "mu_transition_MeV",
+                    "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV",
+                    "rho_spinodal_hadron", "rho_spinodal_quark", "maxwell_candidate_count",
+                    "maxwell_crossing_count", "solver_failure_count", "finite_and_converged",
+                ):
+                    if field in deep:
+                        row[field] = deep[field]
+                row["final_oracle_status"] = deep_status
+                row["oracle_source"] = "deep_oracle"
+                applied.append({"xi": key[0], "T_MeV": key[1], "standard_status": standard_status, "deep_status": deep_status})
+        overlay_rows.append(row)
+    _write_csv(output_dir / "slice_metrics.csv", overlay_rows)
+
+    accuracy = _rows(output_dir / "cep_accuracy.csv")
+    for row in accuracy:
+        if row.get("method") != "independent_oracle":
+            continue
+        key = (_float(row.get("xi")), _float(row.get("anchor_T_MeV")))
+        standard = row.get("result_status", "")
+        row["standard_oracle_status"] = standard
+        row["deep_oracle_status"] = ""
+        row["final_oracle_status"] = standard
+        row["oracle_source"] = "standard"
+        deep = deep_by_key.get(key) if key in APPROVED_DEEP_ORACLE else None
+        if deep is not None:
+            row["deep_oracle_status"] = deep.get("result_status", "")
+            if standard == "ambiguous_near_critical":
+                row["result_status"] = deep.get("result_status", "")
+                row["final_oracle_status"] = deep.get("result_status", "")
+                row["oracle_source"] = "deep_oracle"
+    _write_csv(output_dir / "cep_accuracy.csv", accuracy)
+    _refresh_geometry_accuracy(output_dir)
+    overlay = {
+        "schema_version": "cep_maxwell_endpoint_local_overlay_v1",
+        "deep_run_id": deep_run_id or "",
+        "deep_manifest_schema": deep_manifest.get("schema_version", ""),
+        "expected_calculation_sha": expected_sha,
+        "approved_points": [list(key) for key in sorted(APPROVED_DEEP_ORACLE)],
+        "applied": applied,
+        "errors": errors,
+        "oracle_labels_used_for_route": False,
+    }
+    (output_dir / "oracle_overlay.json").write_text(json.dumps(overlay, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return errors, overlay
+
+
+def _actions(
+    run_id: str | None,
+    output_dir: Path,
+    *,
+    run_mode: str = "numerical",
+    source_run_id: str | None = None,
+) -> dict[str, Any]:
+    if run_mode not in {"numerical", "aggregate_replay"}:
+        raise ValueError(f"unsupported run mode: {run_mode}")
     rows: list[dict[str, Any]] = []
-    metadata: dict[str, Any] = {"run_id": run_id or "", "source": "unavailable"}
+    metadata: dict[str, Any] = {
+        "run_id": run_id or "",
+        "source_run_id": source_run_id or run_id or "",
+        "source": "unavailable",
+        "run_mode": run_mode,
+    }
     if run_id:
         try:
-            payload = json.loads(subprocess.check_output(["gh", "run", "view", run_id, "--json", "jobs,headSha,url,status,conclusion"], text=True))
-            metadata = {"run_id": run_id, "source": "gh run view", **{key: payload.get(key, "") for key in ("headSha", "url", "status", "conclusion")}}
-            metadata["snapshot_phase"] = "final" if payload.get("status") == "completed" else "provisional"
+            # gh honours GH_TOKEN from the workflow environment.  Replays must
+            # use the same authenticated path as numerical runs; an anonymous
+            # `gh run view` silently returned no jobs in the historical v3 run.
+            env = dict(os.environ)
+            if not env.get("GH_TOKEN"):
+                metadata["error"] = "GH_TOKEN is required for Actions cost aggregation"
+            payload = json.loads(subprocess.check_output(
+                ["gh", "run", "view", run_id, "--json", "jobs,headSha,url,status,conclusion"],
+                text=True,
+                env=env,
+            ))
+            metadata = {
+                "run_id": run_id,
+                "source_run_id": source_run_id or run_id,
+                "source": "gh run view",
+                "run_mode": run_mode,
+                **{key: payload.get(key, "") for key in ("headSha", "url", "status", "conclusion")},
+            }
+            # A numerical run is always provisional, even if the workflow has
+            # completed: the final Actions accounting is intentionally emitted
+            # only by an explicit aggregate replay.
+            metadata["snapshot_phase"] = (
+                "final" if run_mode == "aggregate_replay" and payload.get("status") == "completed" else "provisional"
+            )
             metadata["source_run_completed_success"] = payload.get("status") == "completed" and payload.get("conclusion") == "success"
+            if run_mode == "aggregate_replay" and not metadata["source_run_completed_success"]:
+                metadata["error"] = "aggregate replay source run is not a completed successful Actions run"
             for job in payload.get("jobs", []):
                 if not job.get("startedAt") or not job.get("completedAt"):
                     continue
@@ -301,6 +484,10 @@ def _actions(run_id: str | None, output_dir: Path) -> dict[str, Any]:
     metadata.update({"job_count": len(rows), "critical_path_seconds": max(elapsed, default=0.0), "raw_total_seconds": sum(elapsed), "runner_minutes": sum(int(row["runner_minutes_rounded"]) for row in rows)})
     metadata.setdefault("snapshot_phase", "unknown")
     metadata.setdefault("source_run_completed_success", False)
+    metadata["job_count"] = len(rows)
+    metadata["cost_snapshot_is_final"] = bool(
+        metadata.get("snapshot_phase") == "final" and metadata.get("source_run_completed_success")
+    )
     return metadata
 
 
@@ -489,6 +676,9 @@ def collect(
     scope: str = "full",
     schema_version: str = "cep_cascade_production_shadow_v2",
     endpoint_mode: bool = False,
+    run_mode: str = "numerical",
+    deep_input_dir: Path | None = None,
+    deep_run_id: str | None = None,
 ) -> dict[str, Any]:
     _anchors(scope, -0.5)  # validate scope before creating a partial aggregate
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -498,7 +688,18 @@ def collect(
         schema_version=schema_version, endpoint_mode=endpoint_mode,
     )
     corrections = _collect_tables(jobs, output_dir)
-    actions = _actions(run_id, output_dir)
+    deep_overlay_errors: list[str] = []
+    deep_overlay: dict[str, Any] = {}
+    if deep_input_dir is not None:
+        deep_overlay_errors, deep_overlay = _overlay_deep_oracle(
+            output_dir, deep_input_dir, expected_sha, deep_run_id,
+        )
+        corrections.extend(deep_overlay_errors)
+        if deep_overlay_errors:
+            contract_errors.extend(deep_overlay_errors)
+    actions = _actions(run_id, output_dir, run_mode=run_mode, source_run_id=source_run_id)
+    if run_mode == "aggregate_replay" and not actions.get("cost_snapshot_is_final", False):
+        contract_errors.append("aggregate replay did not produce a final Actions cost snapshot")
     gate = _gate(output_dir, contract_errors, compatibility_warnings, scope=scope, endpoint_mode=endpoint_mode)
     _write_docs(output_dir, gate, actions, schema_version=schema_version)
     hashes: dict[str, str] = {}
@@ -510,10 +711,12 @@ def collect(
         "run_id": run_id or "", "source_run_id": source_run_id or run_id or "",
         "expected_calculation_sha": expected_sha, "postprocess_sha": postprocess_sha or "",
         "scope": scope,
+        "run_mode": run_mode,
         "endpoint_mode": endpoint_mode,
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
+        "oracle_overlay": deep_overlay,
         "compatibility_warnings": compatibility_warnings,
         "gate": gate, "actions": actions, "file_sha256": hashes,
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -534,6 +737,9 @@ def main() -> int:
     parser.add_argument("--scope", choices=("targeted", "full"), default="full")
     parser.add_argument("--schema-version", default="cep_cascade_production_shadow_v2")
     parser.add_argument("--endpoint-mode", action="store_true")
+    parser.add_argument("--run-mode", choices=("numerical", "aggregate_replay"), default="numerical")
+    parser.add_argument("--deep-input-dir", type=Path, default=None)
+    parser.add_argument("--deep-run-id", default=None)
     args = parser.parse_args()
     gate = collect(
         args.input_dir,
@@ -546,6 +752,9 @@ def main() -> int:
         scope=args.scope,
         schema_version=args.schema_version,
         endpoint_mode=args.endpoint_mode,
+        run_mode=args.run_mode,
+        deep_input_dir=args.deep_input_dir,
+        deep_run_id=args.deep_run_id,
     )
     print(json.dumps(gate, indent=2, sort_keys=True))
     return 1 if gate["verdict"] == "workflow_failure" else 2 if gate["verdict"] != "full_hybrid_candidate" else 0
