@@ -424,7 +424,7 @@ Actions shadow 验证，再由作者审核物理曲线和成本。
     return policy
 end
 
-function _parse_args(args)
+function _parse_tolerance_replay_args(args)
     base_dir = nothing
     tolerance_dir = nothing
     output_dir = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl",
@@ -441,7 +441,7 @@ function _parse_args(args)
 end
 
 function main(args=ARGS)
-    options = _parse_args(args)
+    options = _parse_tolerance_replay_args(args)
     options === nothing && (println("Usage: julia --project=. scripts/analysis/pnjl_cep_hybrid_stagec_tolerance_replay.jl --base-input-dir=PATH --tolerance-input-dir=PATH [--output-dir=PATH]"); return 0)
     base = merge(_load_bundle(options.base_dir), (dir=options.base_dir,))
     tolerance = merge(_load_bundle(options.tolerance_dir), (dir=options.tolerance_dir,))

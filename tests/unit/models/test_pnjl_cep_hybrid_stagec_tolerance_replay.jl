@@ -10,6 +10,9 @@ end
 const R = Main
 
 @testset "Stage-C tolerance replay helpers" begin
+    @test isdefined(R, :_parse_tolerance_replay_args)
+    @test R._parse_tolerance_replay_args(["--help"]) === nothing
+
     row(; rho, muq, xi=-0.5, T_MeV=20.0, method="independent_oracle") = (
         xi=xi, method=method, T_MeV=T_MeV, rho=rho, muq_MeV=muq,
         pressure_fm4=21.0, residual_norm=0.0, iterations=3,
