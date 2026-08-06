@@ -391,6 +391,7 @@ def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
     assert "rerun_failed_only" in text
     assert "timeout-minutes: 180" in text
     assert "GH_TOKEN: ${{ github.token }}" in text
+    assert "--pattern '*required_three*'" in text
 
 
 def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_path, monkeypatch):
