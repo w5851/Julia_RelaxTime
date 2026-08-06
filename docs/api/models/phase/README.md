@@ -64,6 +64,12 @@ midpoint，并把 anchor 与最多 12 个 refinement 点分别写入诊断。左
 `endpoint_policy=:bounded_zero_density_v1` 继续保留以复现历史产物，默认 uniform/cascade
 语义不变。
 
+脚本/配置入口对应键为 `rho_hybrid_endpoint_policy`（稳定 phase CLI 使用
+`--rho_hybrid_endpoint_policy=...`，Dense Reference builder 使用
+`--rho-hybrid-endpoint-policy ...`）；Dense Reference Actions 对 hybrid 请求默认显式选择
+`three_crossing_endpoint_local_v2`，而直接 CLI 未指定时仍使用历史兼容的
+`bounded_zero_density_v1`。
+
 production 的 Maxwell 容差由统一合同派生：内部二分 tolerance 为所有 active area
 acceptance gates 最小值的 `0.1` 倍；rho/temperature geometry gate 仍独立记录 coarse/fine
 离散收敛误差。有效 solver tolerance 会写入 config snapshot/hash 和 diagnostics，默认

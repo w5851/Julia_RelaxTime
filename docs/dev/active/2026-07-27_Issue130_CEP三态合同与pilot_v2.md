@@ -503,3 +503,16 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 当前 evidence PR 仅作为诊断候选提交，停在作者审核代表性曲线、三个 endpoint
   证书、三态一致性和成本；`full_hybrid_candidate` 不自动晋升 production/reference。
   作者审核完成前不启动 C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。
+
+## C0 端点失败与修复分支（2026-08-06）
+
+- [x] 新 C0 run `31078338748` 绑定 calculation SHA
+  `8fb86255c7894004cb1c52bbb03f9f53a4828411`，41 个数值 shard 均在固定-ρ零密度端点
+  的 `solve_points` 阶段失败；错误为 `Float64(::Nothing)`，未形成 C0 数值 verdict。
+- [x] 诊断确认该错误属于 solver-output orchestration contract：某些 endpoint candidate
+  返回不完整 thermodynamic payload，外层无条件转换触发异常；本地直接 solver smoke 未证明
+  equilibrium 数学必然失败，因此不修改 equilibrium solver 或任何数值容差。
+- [ ] 当前分支 `codex/issue-130-c0-zero-density-endpoint-repair` 增加结构化
+  `:solver_incomplete_output` governed failure、固定-ρ focused regression，以及 Dense
+  Reference hybrid C0 的显式 `three_crossing_endpoint_local_v2` policy 透传。focused CI
+  通过并合并后，以新的 calculation SHA 重跑 C0；C1/C2、reference 和 transport 继续暂停。

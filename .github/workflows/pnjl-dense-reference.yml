@@ -122,7 +122,7 @@ on:
         default: true
         type: boolean
       advanced_config_json:
-        description: "高级误差参数 JSON；键由 scripts/pnjl/resolve_dense_reference_action_config.py 白名单约束"
+        description: "高级误差参数 JSON；键由 scripts/pnjl/resolve_dense_reference_action_config.py 白名单约束；hybrid 默认由 planner 注入 three_crossing_endpoint_local_v2"
         required: false
         default: "{}"
         type: string

@@ -92,6 +92,32 @@ def test_builds_plan_for_anchors_and_level1_midpoints(tmp_path: Path):
     assert "--thermo-quadrature-policy" in plan["common_args"]
 
 
+def test_resume_preserves_hybrid_endpoint_policy_from_source_manifest(tmp_path: Path):
+    module = load_module()
+    config = base_config()
+    config.update(
+        {
+            "rho_refinement_policy": "rho_support_hybrid",
+            "rho_refine_levels": 4,
+            "rho_support_fine_step": 0.025,
+            "rho_support_target_point_count": 9,
+            "rho_support_targeted_cap": 12,
+            "rho_hybrid_endpoint_policy": "three_crossing_endpoint_local_v2",
+        }
+    )
+    write_source_manifests(
+        tmp_path,
+        [-0.5, -0.25, 0.0, 0.25, 0.5],
+        config=config,
+    )
+
+    plan = module.build_resume_plan(tmp_path, TAG, SHA, "-0.5,0,0.5")
+    args = plan["common_args"]
+    assert args[args.index("--rho-refinement-policy") + 1] == "rho_support_hybrid"
+    endpoint_index = args.index("--rho-hybrid-endpoint-policy")
+    assert args[endpoint_index + 1] == "three_crossing_endpoint_local_v2"
+
+
 @pytest.mark.parametrize(
     "kwargs, message",
     [

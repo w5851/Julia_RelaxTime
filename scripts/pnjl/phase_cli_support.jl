@@ -67,6 +67,7 @@ Base.@kwdef mutable struct PhaseCliConfig
     rho_support_fine_step::Float64 = 0.025
     rho_support_target_point_count::Int = 9
     rho_support_targeted_cap::Int = 12
+    rho_hybrid_endpoint_policy::Symbol = :bounded_zero_density_v1
     adaptive_temperature::Bool = false
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10
@@ -219,6 +220,7 @@ function _apply_phase_config!(cfg::PhaseCliConfig, table::AbstractDict)
     haskey(table, "rho_support_fine_step") && (cfg.rho_support_fine_step = Float64(table["rho_support_fine_step"]))
     haskey(table, "rho_support_target_point_count") && (cfg.rho_support_target_point_count = Int(table["rho_support_target_point_count"]))
     haskey(table, "rho_support_targeted_cap") && (cfg.rho_support_targeted_cap = Int(table["rho_support_targeted_cap"]))
+    haskey(table, "rho_hybrid_endpoint_policy") && (cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(String(table["rho_hybrid_endpoint_policy"]))))
     haskey(table, "adaptive_temperature") && (cfg.adaptive_temperature = _as_bool(table["adaptive_temperature"], "phase_pipeline.adaptive_temperature"))
     haskey(table, "temperature_max_refine_level") && (cfg.temperature_max_refine_level = Int(table["temperature_max_refine_level"]))
     haskey(table, "temperature_position_tol_MeV") && (cfg.temperature_position_tol_MeV = Float64(table["temperature_position_tol_MeV"]))
@@ -312,6 +314,7 @@ function _write_run_manifest(output_dir::String, cfg::PhaseCliConfig, args::Vect
         "rho_support_fine_step" => cfg.rho_support_fine_step,
         "rho_support_target_point_count" => cfg.rho_support_target_point_count,
         "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
+        "rho_hybrid_endpoint_policy" => String(cfg.rho_hybrid_endpoint_policy),
         "adaptive_temperature" => cfg.adaptive_temperature,
         "temperature_max_refine_level" => cfg.temperature_max_refine_level,
         "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
@@ -407,6 +410,7 @@ function _usage()
     println("  --rho_support_fine_step=0.025 cascade细网格步长")
     println("  --rho_support_target_point_count=9 cascade目标补点数")
     println("  --rho_support_targeted_cap=12 cascade每温度补点上限")
+    println("  --rho_hybrid_endpoint_policy=bounded_zero_density_v1|three_crossing_endpoint_local_v2 hybrid端点证书策略")
     println("  --adaptive_temperature=false 启用相线中点温度自适应")
     println("  --temperature_max_refine_level=2 温度中点最大加密层数")
     println("  --temperature_position_tol_MeV=0.10 温度中点位置误差门限(MeV)")
@@ -567,6 +571,8 @@ function parse_args(args, project_root::AbstractString)
             cfg.rho_support_target_point_count = parse(Int, split(arg, "="; limit=2)[2])
         elseif startswith(arg, "--rho_support_targeted_cap=")
             cfg.rho_support_targeted_cap = parse(Int, split(arg, "="; limit=2)[2])
+        elseif startswith(arg, "--rho_hybrid_endpoint_policy=")
+            cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(split(arg, "="; limit=2)[2]))
         elseif startswith(arg, "--adaptive_temperature=")
             cfg.adaptive_temperature = _as_bool(split(arg, "="; limit=2)[2], "--adaptive_temperature")
         elseif startswith(arg, "--temperature_max_refine_level=")
@@ -613,6 +619,8 @@ function parse_args(args, project_root::AbstractString)
         throw(ArgumentError("rho_support_target_point_count must be an odd integer >= 5"))
     cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
         throw(ArgumentError("rho_support_targeted_cap must cover rho_support_target_point_count"))
+    cfg.rho_hybrid_endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
+        throw(ArgumentError("rho_hybrid_endpoint_policy must be bounded_zero_density_v1 or three_crossing_endpoint_local_v2"))
     if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
         cfg.model_kind === :PNJL || throw(ArgumentError("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL"))
         cfg.rho_geometry_convergence || throw(ArgumentError("$(cfg.rho_refinement_policy) requires rho_geometry_convergence=true"))
@@ -713,6 +721,10 @@ function main(models_module, project_root::AbstractString, args::Vector{String}=
         rho_support_targeted_cap=cfg.rho_support_targeted_cap,
         rho_support_config=models_module.RhoSupportConfig(target_point_count=cfg.rho_support_target_point_count,
             max_extra_points=max(cfg.rho_support_targeted_cap, cfg.rho_support_target_point_count)),
+        rho_hybrid_verification=models_module.RhoHybridVerificationConfig(
+            endpoint_policy=cfg.rho_hybrid_endpoint_policy,
+            targeted_cap=cfg.rho_support_targeted_cap,
+        ),
         adaptive_temperature=cfg.adaptive_temperature,
         temperature_max_refine_level=cfg.temperature_max_refine_level,
         temperature_position_tol_MeV=cfg.temperature_position_tol_MeV,
