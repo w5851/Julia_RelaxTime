@@ -260,7 +260,13 @@ jobs:
           set -euo pipefail
           source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha,jobs)"
           test "$(echo "$source_json" | jq -r .status)" = completed
-          test "$(echo "$source_json" | jq -r .headSha)" = "$CALCULATION_REF"
+          # The source run's head is the workflow/postprocess checkout.  It
+          # may differ from the immutable calculation SHA when collector or
+          # plotting code is repaired after a numeric run.  The downloaded
+          # job summaries remain the authoritative calculation-SHA check.
+          source_head_sha="$(echo "$source_json" | jq -r .headSha)"
+          [[ "$source_head_sha" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          echo "source_workflow_head_sha=$source_head_sha"
           numeric_jobs="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi="))] | length')"
           numeric_failures="$(echo "$source_json" | jq '[.jobs[] | select(.name | startswith("endpoint-local v4 xi=")) | select(.conclusion != "success")] | length')"
           test "$numeric_jobs" = 9

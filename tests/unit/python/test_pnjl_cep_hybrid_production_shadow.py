@@ -392,6 +392,8 @@ def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
     assert "timeout-minutes: 180" in text
     assert "GH_TOKEN: ${{ github.token }}" in text
     assert "--pattern '*required_three*'" in text
+    assert "source_workflow_head_sha" in text
+    assert "job summaries remain the authoritative calculation-SHA check" in text
 
 
 def test_actions_cost_snapshot_is_provisional_until_authenticated_replay(tmp_path, monkeypatch):
