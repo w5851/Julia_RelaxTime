@@ -654,6 +654,17 @@ def _gate(
                     endpoint_errors.append(f"endpoint-local certificate without first-order status xi={row.get('xi')} T={row.get('T_MeV')}")
                 if not (_finite(row.get("rho_hadron")) and _float(row.get("rho_hadron")) > 0.0):
                     endpoint_errors.append(f"endpoint-local certificate must retain positive rho_hadron xi={row.get('xi')} T={row.get('T_MeV')}")
+                support_low, support_high = _float(row.get("support_low")), _float(row.get("support_high"))
+                anchor = _float(row.get("endpoint_anchor_rho"))
+                left_low = _float(row.get("endpoint_left_bracket_low"))
+                left_high = _float(row.get("endpoint_left_bracket_high"))
+                if not (math.isfinite(support_low) and math.isfinite(support_high) and
+                        math.isfinite(anchor) and support_low <= anchor <= support_high):
+                    endpoint_errors.append(f"endpoint-local support envelope does not contain anchor xi={row.get('xi')} T={row.get('T_MeV')}")
+                if math.isfinite(left_low) and math.isfinite(left_high) and (
+                    support_low > left_low + 1e-12 or support_high < left_high - 1e-12
+                ):
+                    endpoint_errors.append(f"endpoint-local support envelope excludes initial left bracket xi={row.get('xi')} T={row.get('T_MeV')}")
                 for field in ("endpoint_left_bracket_low", "endpoint_left_bracket_high", "endpoint_right_bracket_low", "endpoint_right_bracket_high"):
                     if not _finite(row.get(field)):
                         endpoint_errors.append(f"endpoint-local certificate missing {field} xi={row.get('xi')} T={row.get('T_MeV')}")

@@ -323,6 +323,58 @@ def test_endpoint_local_v4_focused_schema_and_policy_gate_are_supported(tmp_path
     assert not gate["endpoint_errors"]
 
 
+def test_endpoint_local_support_envelope_covers_initial_bracket(tmp_path):
+    module = load_module(COLLECTOR, "hybrid_collector_endpoint_support_envelope")
+    _focused_matrix(tmp_path)
+    job = tmp_path / "job-production_hybrid--0.5"
+    slice_path = job / "slice_metrics.csv"
+    slice_rows = list(csv.DictReader(slice_path.open(newline="", encoding="utf-8")))
+    row = next(row for row in slice_rows if row["T_MeV"] == "5.0")
+    row.update({
+        "stage_c_status": "confirmed_first_order",
+        "certificate_type": "endpoint_local_geometry_first_order",
+        "result_status": "confirmed_first_order",
+        "support_low": "0.0", "support_high": "0.00625",
+        "endpoint_anchor_rho": "0.003125",
+        "endpoint_left_bracket_low": "0.0", "endpoint_left_bracket_high": "0.00625",
+        "endpoint_right_bracket_low": "2.8", "endpoint_right_bracket_high": "2.80625",
+        "rho_hadron": "0.001", "rho_quark": "2.8",
+        "maxwell_candidate_count": "1", "maxwell_crossing_count": "3",
+    })
+    with slice_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(slice_rows[0]))
+        writer.writeheader()
+        writer.writerows(slice_rows)
+    curve_path = job / "curve_points.csv"
+    curve_rows = list(csv.DictReader(curve_path.open(newline="", encoding="utf-8")))
+    guard = next(row for row in curve_rows if row["T_MeV"] == "5.0")
+    guard["rho"] = "0.003125"
+    guard["sampling_role"] = "stage_c_guard"
+    with curve_path.open("w", newline="", encoding="utf-8") as handle:
+        fieldnames = list(curve_rows[0])
+        if "sampling_role" not in fieldnames:
+            fieldnames.append("sampling_role")
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(curve_rows)
+    summary_path = job / "job_summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    for name, path in (("slice_metrics.csv", slice_path), ("curve_points.csv", curve_path)):
+        summary["curve_file_sha256"][name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    for summary_path in tmp_path.glob("job-*/job_summary.json"):
+        summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        summary["schema_version"] = "cep_maxwell_endpoint_local_production_shadow_v4"
+        summary.setdefault("parameters", {})["rho_hybrid_endpoint_policy"] = "three_crossing_endpoint_local_v2"
+        summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    gate = module.collect(
+        tmp_path, tmp_path / "aggregate", None, "a" * 40,
+        scope="focused", schema_version="cep_maxwell_endpoint_local_production_shadow_v4",
+        endpoint_mode=True, endpoint_policy="three_crossing_endpoint_local_v2",
+    )
+    assert not any("support envelope" in error for error in gate["endpoint_errors"])
+
+
 def test_endpoint_gate_finite_helper_accepts_serialized_values():
     module = load_module(COLLECTOR, "hybrid_collector_finite_helper")
     assert module._finite("0.125")
