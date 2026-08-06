@@ -497,6 +497,9 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   Maxwell `mu_M`、共存密度和 spinodal 标记，并用线型/marker 区分三种方法；输入曲线、
   numerical source run、calculation SHA 和数值 gate 均未改变。plot policy 为
   `independent_rho_mu_zoom_with_phase_markers_v2`。
+- [x] 对没有 Maxwell/spinodal/support 的 `confirmed_monotone` 切片，右侧改用原始
+  production 曲线最长低斜率区间作为 display-only smooth window，并独立收紧 μ 轴；
+  不参与三态分类或 gate。对弱 S 形一阶图同步减小显示 padding，以避免局部起伏被纵轴压扁。
 - [ ] 当前 evidence PR 仅作为诊断候选提交，停在作者审核代表性曲线、三个 endpoint
   证书、三态一致性和成本；`full_hybrid_candidate` 不自动晋升 production/reference。
   作者审核完成前不启动 C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。

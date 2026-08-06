@@ -13,6 +13,9 @@ from pathlib import Path
 METHODS = ("production_hybrid", "memoized_dense", "independent_oracle")
 XIS = ("-0.5", "0.0", "0.5")
 CURVE_T_MATCH_TOL = 1e-6  # trho CSV serializes T to six decimal places
+SMOOTH_SLOPE_QUANTILE = 0.05
+LOCAL_Y_RELATIVE_PADDING = 0.08
+LOCAL_Y_MIN_PADDING_MEV = 0.002
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -78,6 +81,83 @@ def _bounds(curve_rows: list[dict[str, str]], slice_rows: list[dict[str, str]], 
     return max(0.0, low - padding), min(4.0, high + padding)
 
 
+def _phase_bound_values(slice_rows: list[dict[str, str]], xi: str, temperature: float) -> list[float]:
+    values: list[float] = []
+    for row in slice_rows:
+        if row.get("xi") == xi and row.get("method") == "production_hybrid" and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0):
+            for field in ("rho_hadron", "rho_quark", "rho_spinodal_hadron", "rho_spinodal_quark", "support_low", "support_high"):
+                value = _float(row.get(field))
+                if math.isfinite(value):
+                    values.append(value)
+    return values
+
+
+def _quantile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    if not ordered:
+        return math.nan
+    position = (len(ordered) - 1) * fraction
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = position - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+
+def _smooth_window(curve_rows: list[dict[str, str]], xi: str, temperature: float) -> tuple[float, float, dict[str, object]]:
+    """Find a display-only smooth window when no physical support exists.
+
+    This route is used for monotone slices only as a visualization aid.  It
+    reads the production curve, never an oracle label, and does not certify a
+    physical state.  The longest contiguous run of the lowest-slope secants is
+    selected so the right panel exposes a representative smooth region.
+    """
+
+    points = sorted(
+        [
+            (_float(row.get("rho")), _float(row.get("muq_MeV")))
+            for row in curve_rows
+            if row.get("method") == "production_hybrid"
+            and row.get("xi") == xi
+            and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0)
+        ],
+        key=lambda point: point[0],
+    )
+    points = [(x, y) for x, y in points if math.isfinite(x) and math.isfinite(y)]
+    if len(points) < 4:
+        return 0.0, 4.0, {"smooth_window_status": "insufficient_points"}
+    slopes: list[float] = []
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        if x1 <= x0:
+            slopes.append(math.inf)
+        else:
+            slopes.append(abs((y1 - y0) / (x1 - x0)))
+    finite_slopes = [slope for slope in slopes if math.isfinite(slope)]
+    threshold = _quantile(finite_slopes, SMOOTH_SLOPE_QUANTILE)
+    qualifying = [math.isfinite(slope) and slope <= threshold for slope in slopes]
+    runs: list[tuple[int, int]] = []
+    index = 0
+    while index < len(qualifying):
+        if not qualifying[index]:
+            index += 1
+            continue
+        end = index
+        while end + 1 < len(qualifying) and qualifying[end + 1]:
+            end += 1
+        runs.append((index, end))
+        index = end + 1
+    if not runs:
+        return 0.0, 4.0, {"smooth_window_status": "no_low_slope_run", "smooth_slope_threshold": threshold}
+    start, end = max(runs, key=lambda run: (run[1] - run[0], -run[0]))
+    low, high = points[start][0], points[end + 1][0]
+    return low, high, {
+        "smooth_window_status": "selected",
+        "smooth_window_method": "longest_low_slope_run",
+        "smooth_slope_threshold_MeV_per_rho": threshold,
+        "smooth_slope_quantile": SMOOTH_SLOPE_QUANTILE,
+        "smooth_window_rho": [low, high],
+    }
+
+
 def _local_y_bounds(points: list[tuple[float, float]]) -> tuple[float, float]:
     """Return an independently padded y range for the rho-local panel.
 
@@ -92,7 +172,7 @@ def _local_y_bounds(points: list[tuple[float, float]]) -> tuple[float, float]:
     if len(values) < 2:
         return 0.0, 1.0
     low, high = min(values), max(values)
-    padding = max((high - low) * 0.15, 0.01)
+    padding = max((high - low) * LOCAL_Y_RELATIVE_PADDING, LOCAL_Y_MIN_PADDING_MEV)
     return low - padding, high + padding
 
 
@@ -118,7 +198,14 @@ def _plot_anchor(
     import matplotlib.pyplot as plt
 
     subset = [row for row in curve_rows if row.get("xi") == xi and math.isclose(_float(row.get("T_MeV")), temperature, abs_tol=CURVE_T_MATCH_TOL, rel_tol=0.0)]
-    low, high = _bounds(subset, slice_rows, xi, temperature)
+    phase_values = _phase_bound_values(slice_rows, xi, temperature)
+    if len(phase_values) >= 2:
+        low, high = _bounds(subset, slice_rows, xi, temperature)
+        local_policy = "independent_rho_mu_zoom_with_phase_markers_v2"
+        local_metadata: dict[str, object] = {"smooth_window_status": "not_used"}
+    else:
+        low, high, local_metadata = _smooth_window(subset, xi, temperature)
+        local_policy = "smooth_window_rho_mu_zoom_v1"
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=False)
     styles = {
         "production_hybrid": {"color": "tab:orange", "linestyle": "-", "marker": "o"},
@@ -184,7 +271,8 @@ def _plot_anchor(
         "local_ylim": [local_y_low, local_y_high],
         "local_curve_mu_span_MeV": max((y for _, y in local_points), default=math.nan)
         - min((y for _, y in local_points), default=math.nan),
-        "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+        "right_panel_policy": local_policy,
+        **local_metadata,
     }
 
 
@@ -228,6 +316,7 @@ def main() -> int:
             "full_panel": "rho_0_to_4_with_shared_method_styles",
             "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
             "local_y_axis_is_independent": True,
+            "no_support_panel": "smooth_window_rho_mu_zoom_v1",
         },
         "figures": figures,
     }

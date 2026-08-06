@@ -9,6 +9,8 @@
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
 - 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
   位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
+- 没有有限 Maxwell/spinodal/support 的 monotone 切片使用原始 production 曲线最长低斜率
+  区间作为显示窗口；该窗口不参与物理分类或 gate；
 - gate verdict: `full_hybrid_candidate`；所有 oracle/classification/
   endpoint/coverage/performance errors 为空；
 - 完整 raw curve 不提交仓库，外部 SHA: `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。

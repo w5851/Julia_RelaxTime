@@ -13,12 +13,13 @@
         3.225019602369173
       ],
       "local_ylim": [
-        290.25209930000005,
-        383.5218447
+        295.27431636000006,
+        378.49962763999997
       ],
       "reason": "low_temperature",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "d1bab7e7b2c30a5d65538e268e4c771dbac7df8386e9e5dab9476898563b1bb2",
+      "sha256": "abd2ee148e3a002482466d400c349d4d045cb74663d8667c36fcfa4c06071431",
+      "smooth_window_status": "not_used",
       "xi": "-0.5"
     },
     {
@@ -34,12 +35,13 @@
         2.3187499999999996
       ],
       "local_ylim": [
-        202.23094700000001,
-        202.2642
+        202.238947,
+        202.2562
       ],
       "reason": "first_order",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "0e9a27e8fa8797ed5d7892d013e470ff61898fc8178203acb70cf89437ae0898",
+      "sha256": "afd79de4d98241cbaa5ca30baae8e7d8c7d99a8e600cb7dd836affcc036b5fe9",
+      "smooth_window_status": "not_used",
       "xi": "-0.5"
     },
     {
@@ -49,18 +51,26 @@
         0.0,
         4.0
       ],
-      "local_curve_mu_span_MeV": 238.746675,
+      "local_curve_mu_span_MeV": 0.024309000000016567,
       "local_xlim": [
-        0.0,
-        4.0
+        2.15,
+        2.3
       ],
       "local_ylim": [
-        -35.81200125,
-        274.55867625
+        201.87353199999998,
+        201.90184100000002
       ],
       "reason": "first_monotone",
-      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "5940ca75f8fb3357660db2947bfb28235203ea1ec96173d1d9b7d3a8ded02632",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "e82142ea7fdb7eb186446e84cd94c6ef619724cd2781a9a78003e5ae2182c2b7",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.4321479999997865,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        2.15,
+        2.3
+      ],
+      "smooth_window_status": "selected",
       "xi": "-0.5"
     },
     {
@@ -76,12 +86,13 @@
         2.880175957244326
       ],
       "local_ylim": [
-        309.2226628,
-        387.5624152
+        313.44095716,
+        383.34412084
       ],
       "reason": "low_temperature",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "d2b3d565e0fc2f1904e2c67644d95cfa453d44fcd63e1bd7fbb12d3c5e055f09",
+      "sha256": "b9b15fefa647e3b8fb5a13f526101d9d62959f3e2cf3e16949c881ff6f3a4fa5",
+      "smooth_window_status": "not_used",
       "xi": "0.0"
     },
     {
@@ -97,12 +108,13 @@
         2.0874999999999995
       ],
       "local_ylim": [
-        291.241609,
-        291.28346899999997
+        291.24960899999996,
+        291.275469
       ],
       "reason": "first_order",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "e8b970a4e1c9dc1423438454716622a1f966756e85a925c0f01915563f8b7311",
+      "sha256": "a195bd78c7071a6d1667fdcb4081b485993e5520acf0a879daa5819300940556",
+      "smooth_window_status": "not_used",
       "xi": "0.0"
     },
     {
@@ -112,18 +124,26 @@
         0.0,
         4.0
       ],
-      "local_curve_mu_span_MeV": 329.110731,
+      "local_curve_mu_span_MeV": 0.016994000000011056,
       "local_xlim": [
-        0.0,
-        4.0
+        1.85,
+        2.05
       ],
       "local_ylim": [
-        -49.366609649999994,
-        378.47734065
+        291.03227699999997,
+        291.053271
       ],
       "reason": "first_monotone",
-      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "123b3dbf4f98fff4010f02a508b330004b55da2c8bef7e045eb43724c07e7049",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "643714949a06cda389d72060b62ea8c2c999e382230dab823399a1aad24d7ac6",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.2904109999989275,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        1.85,
+        2.05
+      ],
+      "smooth_window_status": "selected",
       "xi": "0.0"
     },
     {
@@ -139,12 +159,13 @@
         2.5257178921007046
       ],
       "local_ylim": [
-        308.90098015,
-        399.32383085
+        313.76990288,
+        394.45490811999997
       ],
       "reason": "low_temperature",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "b32ffbccf5164fd28fab730d20a05fd71e044f5e2dbc16b188bcdcd5354216c2",
+      "sha256": "51d16e119cc52c42a579b4413689398a0434e544b7e0ebc5dfd41b1ca84001a1",
+      "smooth_window_status": "not_used",
       "xi": "0.5"
     },
     {
@@ -160,12 +181,13 @@
         1.66875
       ],
       "local_ylim": [
-        348.35911500000003,
-        348.39847
+        348.367115,
+        348.39047
       ],
       "reason": "first_order",
       "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "52c09aee691e5974a2dbb776fc30ed8ddc60eabc112f52e9f3f9ffc8852ae231",
+      "sha256": "602b67da8bb83301a5e37e732de599b446c6b8816c9af47161f9262c51988a98",
+      "smooth_window_status": "not_used",
       "xi": "0.5"
     },
     {
@@ -175,29 +197,38 @@
         0.0,
         4.0
       ],
-      "local_curve_mu_span_MeV": 399.575821,
+      "local_curve_mu_span_MeV": 0.026460999999983414,
       "local_xlim": [
-        0.0,
-        4.0
+        1.40625,
+        1.65
       ],
       "local_ylim": [
-        -59.93637315,
-        459.51219415
+        348.24613912,
+        348.27683388
       ],
       "reason": "first_monotone",
-      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
-      "sha256": "9f6a774d7d4d9125e2bd674e8204f1838350ce55ea02363428bcda89e33b26ec",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "b3199a83e558ba88c921d97cc88b89ece3e761ae9cb8e1067ec781a9bec2ff2f",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.3152948571420363,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        1.40625,
+        1.65
+      ],
+      "smooth_window_status": "selected",
       "xi": "0.5"
     }
   ],
   "plot_policy": {
     "full_panel": "rho_0_to_4_with_shared_method_styles",
     "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
-    "local_y_axis_is_independent": true
+    "local_y_axis_is_independent": true,
+    "no_support_panel": "smooth_window_rho_mu_zoom_v1"
   },
   "raw_curve_copy_in_repository": false,
   "schema_version": "pnjl_cep_endpoint_local_shadow_plot_manifest_v1",
   "source_curve_sha256": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8",
-  "source_plot_manifest_sha256": "5ca397f50161867d42b2db11f0461a85c6d33b2a3dba179086593e851998b7db",
+  "source_plot_manifest_sha256": "3edae0086088f4a25a6fad869db2f27420375014f637e54fc7ec4e682c7beeb4",
   "source_schema_version": "cep_maxwell_endpoint_local_production_shadow_v4"
 }

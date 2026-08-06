@@ -297,6 +297,8 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - verdict: `{source_manifest.get('gate', {}).get('verdict')}`
 - evidence state: `{source_manifest.get('evidence_state')}`
 - figure policy: `{source_plot_manifest.get('plot_policy', {}).get('local_panel', 'source artifact policy')}`
+- no-support controls use the display-only smooth-window policy
+  `{source_plot_manifest.get('plot_policy', {}).get('no_support_panel', 'not recorded')}`
 
 仓库只导入聚合表和代表性 PNG；完整 `curve_points.csv` 保留在 Actions/local artifact，
 通过 `tables/curve_index.csv`、source manifest 和 SHA 追溯。三态物理语义、Maxwell
@@ -314,6 +316,8 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
 - 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
   位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
+- 没有有限 Maxwell/spinodal/support 的 monotone 切片使用原始 production 曲线最长低斜率
+  区间作为显示窗口；该窗口不参与物理分类或 gate；
 - gate verdict: `{source_manifest.get('gate', {}).get('verdict')}`；所有 oracle/classification/
   endpoint/coverage/performance errors 为空；
 - 完整 raw curve 不提交仓库，外部 SHA: `{audit['curve_sha256']}`。
