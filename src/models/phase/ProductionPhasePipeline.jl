@@ -740,6 +740,28 @@ end
 
 const _HYBRID_ENDPOINT_ANCHOR_RHO = 0.003125
 
+"""Return the declared support envelope for endpoint-local samples.
+
+`hybrid_support_low/high` describe the support on which Stage C was allowed
+to request endpoint-local samples.  They must therefore contain the initial
+left-crossing cell and every anchor/midpoint that was actually sampled.  The
+active convergence bracket is intentionally reported separately through
+`hybrid_endpoint_lower/upper_bound`; those values are allowed to shrink
+inside the declared support and must not be reused as its bounds.
+"""
+function _hybrid_endpoint_support_envelope(endpoint, anchor::Float64, additions)
+    samples = Float64[anchor]
+    append!(samples, Float64.(additions))
+    left_bracket = get(endpoint, :left_bracket, (low=0.0, high=anchor))
+    low = Float64(left_bracket.low)
+    high = Float64(left_bracket.high)
+    all(isfinite, samples) || throw(ArgumentError("endpoint-local samples must be finite"))
+    isfinite(low) && isfinite(high) && low <= high || throw(ArgumentError(
+        "endpoint-local initial bracket must be finite and ordered",
+    ))
+    return (low=min(low, minimum(samples)), high=max(high, maximum(samples)))
+end
+
 function _hybrid_right_guard_available(stage_b, comparison_epsilon::Float64)
     points = _hybrid_curve_points(get(stage_b, :curve, nothing))
     sres = get(stage_b, :sres, SShapeResult())
@@ -1199,6 +1221,7 @@ function _hybrid_endpoint_local_route(
     stats = _hybrid_stats(before, after)
     details = current === nothing ? Dict{Symbol, Any}() : current.maxwell.details
     final_trace = isempty(trace) ? nothing : last(trace)
+    support_envelope = _hybrid_endpoint_support_envelope(endpoint, anchor, additions)
     positive_lower = low > verification.comparison_epsilon
     endpoint_limit_width = _HYBRID_ENDPOINT_ANCHOR_RHO / 2.0^verification.targeted_cap
     tail_geometry = length(trace) >= 2 && all(row -> row.geometry_converged, trace[max(1, end - 1):end])
@@ -1222,14 +1245,14 @@ function _hybrid_endpoint_local_route(
             stage_a_status=stage_a.slice_status, stage_b_status=stage_b.slice_status,
             stage_c_status=:confirmed_first_order, stage_used=:stage_c_endpoint_local_v2,
             hybrid_upgrade_reason="endpoint_local_v2_certificate",
-            hybrid_support_low=low, hybrid_support_high=high,
+            hybrid_support_low=support_envelope.low, hybrid_support_high=support_envelope.high,
             hybrid_support_mu_low=endpoint.guard.mu_low,
             hybrid_support_mu_high=endpoint.guard.mu_high,
             hybrid_guard_status=:endpoint_local,
             hybrid_guard_reason="three_crossing_endpoint_local_v2",
             hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
             hybrid_targeted_point_count=length(additions),
-            hybrid_support_source=[:stage_b_full_curve, :endpoint_local_midpoint],
+            hybrid_support_source=[:stage_b_full_curve, :endpoint_local_support_envelope],
             hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
             hybrid_certificate_type=certificate,
             hybrid_endpoint_lower_bound=positive_lower ? low : 0.0,
@@ -1255,13 +1278,13 @@ function _hybrid_endpoint_local_route(
         stage_b_status=stage_b.slice_status, stage_c_status=:ambiguous_near_critical,
         stage_used=:stage_c_endpoint_local_v2,
         hybrid_upgrade_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
-        hybrid_support_low=low, hybrid_support_high=high,
+        hybrid_support_low=support_envelope.low, hybrid_support_high=support_envelope.high,
         hybrid_support_mu_low=endpoint.guard.mu_low, hybrid_support_mu_high=endpoint.guard.mu_high,
         hybrid_guard_status=:endpoint_local,
         hybrid_guard_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
         hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
         hybrid_targeted_point_count=length(additions),
-        hybrid_support_source=[:stage_b_full_curve, :endpoint_local_midpoint],
+        hybrid_support_source=[:stage_b_full_curve, :endpoint_local_support_envelope],
         hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
         hybrid_certificate_type=:none,
         hybrid_endpoint_lower_bound=positive_lower ? low : 0.0,

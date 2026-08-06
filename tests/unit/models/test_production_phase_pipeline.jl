@@ -88,6 +88,19 @@ end
         @test positive_endpoint !== nothing
         @test positive_endpoint.left_bracket.low == 0.0
         @test positive_endpoint.left_bracket.high == 1.0
+
+        @testset "endpoint support envelope is distinct from active bracket" begin
+            envelope = Models._hybrid_endpoint_support_envelope(
+                (left_bracket=(low=0.0, high=0.00625),),
+                0.003125,
+                [0.0015625, 0.00078125, 0.00009765625],
+            )
+            @test envelope.low == 0.0
+            @test envelope.high == 0.00625
+            active_bracket = (low=0.00009765625, high=0.0001953125)
+            @test active_bracket.low > envelope.low
+            @test active_bracket.high < envelope.high
+        end
     end
 
     @testset "endpoint-local route preserves convergence diagnostics" begin

@@ -448,3 +448,17 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] PR2 focused CI 全绿后 squash merge；随后以新的 production merge SHA 串行运行 focused →
   必要 deep overlay → targeted 18-anchor → full 24-anchor shadow。full evidence 经作者审核前，
   不启动 C0/C1/C2、phase-reference 或 transport。
+
+## Endpoint-local v4 focused replay 合同修正（2026-08-05）
+
+- [x] PR #175–#180 已合并；当前 `main` 为
+  `a93d6de19cd0a76c44eb488515c4596adcc74e4d`，focused calculation SHA 为
+  `aded4a51d25fec6b6c121ce78ed3f0cf7f327b5a`，numeric run 为 `31027329971`。
+- [x] focused numeric 的三个问题点均产生预期 endpoint 证书：`(-0.5,5)` 为
+  `endpoint_limited_first_order`，`(-0.5,20)` 与 `(0,5)` 为
+  `endpoint_local_geometry_first_order`；hybrid/dense/oracle 的 solver 与成本数据均已生成。
+- [x] replay `31031162303` 已进入物理/合同 gate；失败原因为 endpoint-local
+  `support_low/high` 错把最终收缩 bracket 当作声明 support，导致 anchor/midpoint 被判定为越界，
+  不是 solver、Maxwell 或容差失败。
+- [ ] 修正 support 字段为初始左 bracket 与全部 endpoint anchor/midpoint 的 envelope；最终收缩值
+  继续只写入 `endpoint_lower_bound/endpoint_upper_bound`。focused CI/replay 通过前不运行 targeted/full。
