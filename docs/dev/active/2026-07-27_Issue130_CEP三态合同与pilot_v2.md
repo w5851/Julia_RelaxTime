@@ -460,5 +460,39 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] replay `31031162303` 已进入物理/合同 gate；失败原因为 endpoint-local
   `support_low/high` 错把最终收缩 bracket 当作声明 support，导致 anchor/midpoint 被判定为越界，
   不是 solver、Maxwell 或容差失败。
-- [ ] 修正 support 字段为初始左 bracket 与全部 endpoint anchor/midpoint 的 envelope；最终收缩值
-  继续只写入 `endpoint_lower_bound/endpoint_upper_bound`。focused CI/replay 通过前不运行 targeted/full。
+- [x] 修正 support 字段为初始左 bracket 与全部 endpoint anchor/midpoint 的 envelope；最终收缩值
+  继续只写入 `endpoint_lower_bound/endpoint_upper_bound`（PR #181）。修正后才继续 targeted/full。
+
+## Endpoint-local v4 full shadow 与 evidence 收口（2026-08-06）
+
+- [x] PR #181 修正 endpoint-local `support_low/high` 为初始 bracket 与实际 anchor/midpoint
+  的 envelope；PR #182 修正 deep artifact pattern；PR #183 区分 workflow head SHA 与
+  calculation SHA。当前 workflow head 为 `6ceaa1ea…`，固定 calculation SHA 为
+  `8fb86255c7894004cb1c52bbb03f9f53a4828411`，旧 endpoint-limit evidence 保持不可变。
+- [x] focused numeric `31064585632` 与 required-three deep oracle `31065343978` 完成；
+  focused final replay `31066464218` 的 verdict 为 `focused_hybrid_candidate`。
+- [x] targeted numeric `31066589411` / replay `31067875491` 通过，verdict 为
+  `targeted_hybrid_candidate`；随后 full numeric `31067984700` 与 final replay
+  `31068641378` 通过，verdict 为 `full_hybrid_candidate`。本次 full replay 是同一
+  calculation SHA 的 final aggregate，不调用本机 solver。
+- [x] full matrix 共 72 条 slice rows：hybrid 与 oracle 均为 18 个
+  `confirmed_first_order`、6 个 `confirmed_monotone`；oracle/classification/endpoint/
+  coverage/performance errors 均为空。54659 条 raw rho–mu 曲线 finite/converged 且 key
+  唯一；fallback/retry 均为 0。
+- [x] 三个 endpoint 证书均通过：`(-0.5,5)` 为
+  `endpoint_limited_first_order`，support `[0,0.00625]`、活动上界
+  `[0,7.62939453125e-7]`；`(-0.5,20)` 为
+  `endpoint_local_geometry_first_order`，上界 `[9.765625e-5,1.953125e-4]`；
+  `(0,5)` 为同类证书，上界 `[4.8828125e-5,9.765625e-5]`。
+- [x] 成本 gate 通过：hybrid unique solves `12845`（聚合按 xi 为 `4291/4287/4267`），
+  dense `15384`，oracle `30744`；residual/Jacobian、fixed-rho requests 和 runner cost
+  均不高于 dense，Actions wall-time 处于允许噪声范围。
+- [x] evidence 已生成至
+  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4/`，包含聚合表、source/
+  evidence manifest、curve index、claim ledger、plot manifest 和 9 张代表性 PNG；完整
+  `curve_points.csv` 仅保留在 Actions/local artifact，外部 SHA 为
+  `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。派生表允许的
+  `NaN` 仅表示 schema 中“不适用”，未声明 NaN/Inf 均被 importer 拒绝。
+- [ ] 当前 evidence PR 仅作为诊断候选提交，停在作者审核代表性曲线、三个 endpoint
+  证书、三态一致性和成本；`full_hybrid_candidate` 不自动晋升 production/reference。
+  作者审核完成前不启动 C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。

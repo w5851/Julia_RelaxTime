@@ -1,0 +1,77 @@
+{
+  "aggregate_replay_run_id": "31068641378",
+  "calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
+  "deep_oracle_run_id": "31065343978",
+  "evidence_state": "final",
+  "generated_at_utc": "2026-08-06T03:56:17.917310Z",
+  "oracle_overlay": {
+    "applied": [
+      {
+        "T_MeV": 20.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": -0.5
+      },
+      {
+        "T_MeV": 5.0,
+        "deep_status": "confirmed_first_order",
+        "standard_status": "ambiguous_near_critical",
+        "xi": 0.0
+      }
+    ],
+    "approved_points": [
+      [
+        -0.5,
+        5.0
+      ],
+      [
+        -0.5,
+        20.0
+      ],
+      [
+        0.0,
+        5.0
+      ]
+    ],
+    "deep_manifest_schema": "cep_deep_oracle_v1",
+    "deep_run_id": "31065343978",
+    "errors": [],
+    "expected_calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
+    "oracle_labels_used_for_route": false,
+    "schema_version": "cep_maxwell_endpoint_local_overlay_v1"
+  },
+  "postprocess_sha": "6ceaa1ea73ca684f7333556c5d9e0492bc567899",
+  "raw_curve_points": {
+    "file": "Actions/local artifact curve_points.csv",
+    "raw_curve_copy_in_repository": false,
+    "rows": 54659,
+    "sha256": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8"
+  },
+  "repository_files_sha256": {
+    "AUDIT.md": "66500a6e78668ab803d566d4c6809d9366b3faf4d51a671852cb91709f929c39",
+    "README.md": "055e0483fbd9d33238797b8b80817b1b7b47fea9a1a5a94d886f804885765c2f",
+    "figures/plot_manifest.json": "bf968f57d1977195477d99b6396da20c757c47509b945660cd130d308309b790",
+    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "7a2236aa4ae5e84bc81a6b282800fca9c4533b334d29ebbe55bfe4c9a424fa9e",
+    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "edaceddf375e864c8c6a3f2a37c72a3359ef070c8be3708c57cbc1fe11ec5cf6",
+    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "df564c39b9d8ff0d8360680acb487dbe93c0e5c507192b00607730aadf330bbf",
+    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "887faa2422e50ab9cdc18bc304932130b39cbedb668bef6261c086c03cf5f1df",
+    "figures/rho_mu_xi_0p5_T_107.085_first_monotone.png": "5fd1634b1995bb3be1c2eb48e060b0c7a1f4f031a8d1748ccf1334c0edbf0fd3",
+    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "82e32e4237a91f67a29d0e0b91e495a654a5ae0c65640b682a46db0e7d660376",
+    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "31fb99c7bcf81af32a84e396d85ff8a09132392a38a43fca1e7d7e714f8c665e",
+    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "cb3c8ec7a9fa111a7475e5d70767d0afae01c7383d99365a7c6a6fec756d8ea6",
+    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "a060af9bd6eb3ea80fcabe86d1ad60854a1ef8c5ca72f73904d24dcc110df264",
+    "source_manifest.json": "b2f4699ce32074cc8adbeb88ea1d05dfdf20cf2d8c91a89ad4ee12c342c7dff1",
+    "tables/actions_costs.csv": "6cdb8a512b2b808284dbd8daf67f8dd6531205d1646c5312183c7d540d6f22c8",
+    "tables/cep_accuracy.csv": "91c9c1b5d0e02de4417f4e0465431d102a78141e73e44cf68ae568e5fb78637e",
+    "tables/claim_ledger.csv": "4dd79408b97d4662c69e75be95600173c65bcebe4623a4708ada4a4819159622",
+    "tables/curve_index.csv": "82dc73edd884b66cf23d35e9bcc323af1e62ecb958cd5fa013005173b69103d6",
+    "tables/geometry_accuracy.csv": "3f2229121cb31ac0b70d8b96f1846afc0afb05c409db3b29687a182d87421398",
+    "tables/method_costs.csv": "5c0e7c2093ee9f8ed94d0543394b864fcdd5dd2ec2147799afbc7dd47756261b",
+    "tables/slice_metrics.csv": "7bf8f53f984f25b4906926c2e655744f69b851770dc499e9480684ae2c519d1a"
+  },
+  "schema_version": "pnjl_cep_endpoint_local_production_shadow_v4_evidence_v1",
+  "scope": "full",
+  "source_run_id": "31067984700",
+  "source_schema_version": "cep_maxwell_endpoint_local_production_shadow_v4",
+  "verdict": "full_hybrid_candidate"
+}
