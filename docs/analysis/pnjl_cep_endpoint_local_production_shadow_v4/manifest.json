@@ -3,7 +3,7 @@
   "calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
   "deep_oracle_run_id": "31065343978",
   "evidence_state": "final",
-  "generated_at_utc": "2026-08-06T04:58:25.990404Z",
+  "generated_at_utc": "2026-08-06T05:57:23.116296Z",
   "oracle_overlay": {
     "applied": [
       {
@@ -42,12 +42,14 @@
   },
   "plot_policy": {
     "full_panel": "rho_0_to_4_with_shared_method_styles",
-    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
+    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+    "local_x_padding_rule": "max(4% of phase/support envelope, 0.01 rho)",
     "local_y_axis_is_independent": true,
+    "local_y_padding_rule": "max(8% of local mu span, 0.0002 MeV)",
     "no_support_panel": "smooth_window_rho_mu_zoom_v1"
   },
-  "plot_source_manifest_sha256": "3edae0086088f4a25a6fad869db2f27420375014f637e54fc7ec4e682c7beeb4",
-  "plotter_script_sha256": "3d8c1449b5aa534b9e377fba87a5d300a494e44b39417dc0e57976df10a6dfd0",
+  "plot_source_manifest_sha256": "7b3f3ea5bd007de87abdd22bb44c361923d8ae70d8617173089fa06e218474f9",
+  "plotter_script_sha256": "a46cd59cf08e8a50c239584edc52a4a98f3e275091bae63e96a5abd3e74a0517",
   "postprocess_sha": "6ceaa1ea73ca684f7333556c5d9e0492bc567899",
   "raw_curve_points": {
     "file": "Actions/local artifact curve_points.csv",
@@ -56,18 +58,18 @@
     "sha256": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8"
   },
   "repository_files_sha256": {
-    "AUDIT.md": "7c47e6cef3c994cc33b94f449cd578885c201d571fc3b51a6010df2c4a8cfba9",
-    "README.md": "afc548de971283dfec2ed792b47fed8c2db72b3923cbb347722446983287e4d3",
-    "figures/plot_manifest.json": "00576cf0a24470e3f467f66a8b793fd2b185a9a66ea9672f8fb1a785dfb91022",
-    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "a195bd78c7071a6d1667fdcb4081b485993e5520acf0a879daa5819300940556",
-    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "643714949a06cda389d72060b62ea8c2c999e382230dab823399a1aad24d7ac6",
-    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "b9b15fefa647e3b8fb5a13f526101d9d62959f3e2cf3e16949c881ff6f3a4fa5",
-    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "602b67da8bb83301a5e37e732de599b446c6b8816c9af47161f9262c51988a98",
+    "AUDIT.md": "d454a93417cdab4077e15c8627e2e69ade78d343b2c51c08027a0fed33727639",
+    "README.md": "86b912d4ee3564a2c90f18520aa25c1d15303b83ef17287095decfa7efe2bbb4",
+    "figures/plot_manifest.json": "8db2f239ddb3749f513034371536cd878d920a0774c937f24d13bf2af0113c40",
+    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "8a4af5252418f439e62a8c3691fa61b4aadc2204e1c3eecfdfbdde2f5c199116",
+    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "3d03090a78147e8a2a9e63d56973bc3f3157417bb713265193011fd9ab887593",
+    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "2dc688f498b58b95df7561c8ed2de872e69266d67e0eed391b3b8451dfde2a36",
+    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "c245e0d0bc3ba5c69c612a980a5b00f090a75202d3a03944e085f86f40424717",
     "figures/rho_mu_xi_0p5_T_107.085_first_monotone.png": "b3199a83e558ba88c921d97cc88b89ece3e761ae9cb8e1067ec781a9bec2ff2f",
-    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "51d16e119cc52c42a579b4413689398a0434e544b7e0ebc5dfd41b1ca84001a1",
-    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "afd79de4d98241cbaa5ca30baae8e7d8c7d99a8e600cb7dd836affcc036b5fe9",
-    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "e82142ea7fdb7eb186446e84cd94c6ef619724cd2781a9a78003e5ae2182c2b7",
-    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "abd2ee148e3a002482466d400c349d4d045cb74663d8667c36fcfa4c06071431",
+    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "3769b45fc73b75fe9bfacb9fa8c10d87fb3c16d59c9b001c6cadb75bb3b9f2ab",
+    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "80ee7dfb88badc64c5478509f8871ce2ed2077235075a076034c85d4ce099be5",
+    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "691b6d7ae9d7cee474be650a41427343c0456c60aa42de4f8f54d22fb93e47a5",
+    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "7adc2de05b195b856610f3f84200eae784eb448280f3283a0f006986e2521cf2",
     "source_manifest.json": "b2f4699ce32074cc8adbeb88ea1d05dfdf20cf2d8c91a89ad4ee12c342c7dff1",
     "tables/actions_costs.csv": "6cdb8a512b2b808284dbd8daf67f8dd6531205d1646c5312183c7d540d6f22c8",
     "tables/cep_accuracy.csv": "91c9c1b5d0e02de4417f4e0465431d102a78141e73e44cf68ae568e5fb78637e",

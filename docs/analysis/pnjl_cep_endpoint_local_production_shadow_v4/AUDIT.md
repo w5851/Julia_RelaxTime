@@ -8,7 +8,9 @@
   Maxwell 端点）；所有 `Inf` 及未声明的 NaN 均拒绝；
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
 - 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
-  位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
+  位置；一阶图的 rho 窗口遵循 `max(4% of phase/support envelope, 0.01 rho)`，
+  mu 轴留白遵循 `max(8% of local mu span, 0.0002 MeV)`；这些图层规则只改变
+  后处理，不改变原始曲线或数值 gate；
 - 没有有限 Maxwell/spinodal/support 的 monotone 切片使用原始 production 曲线最长低斜率
   区间作为显示窗口；该窗口不参与物理分类或 gate；
 - gate verdict: `full_hybrid_candidate`；所有 oracle/classification/

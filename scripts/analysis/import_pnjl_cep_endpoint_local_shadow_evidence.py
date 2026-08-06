@@ -252,6 +252,7 @@ def import_evidence(
     if not source_plot_manifest_path.is_file():
         raise ValueError(f"plot manifest is missing: {source_plot_manifest_path}")
     source_plot_manifest = json.loads(source_plot_manifest_path.read_text(encoding="utf-8"))
+    plot_policy = source_plot_manifest.get("plot_policy", {})
     plot_curve_sha = source_plot_manifest.get("source_curve_sha256")
     if plot_curve_sha is None:
         plot_curve_sha = source_plot_manifest.get("source_sha256", {}).get("curve_points.csv")
@@ -296,9 +297,11 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - approved deep run: `{overlay.get('deep_run_id', '')}`
 - verdict: `{source_manifest.get('gate', {}).get('verdict')}`
 - evidence state: `{source_manifest.get('evidence_state')}`
-- figure policy: `{source_plot_manifest.get('plot_policy', {}).get('local_panel', 'source artifact policy')}`
+- figure policy: `{plot_policy.get('local_panel', 'source artifact policy')}`
+- first-order local rho padding: `{plot_policy.get('local_x_padding_rule', 'not recorded')}`
+- local mu-axis display padding: `{plot_policy.get('local_y_padding_rule', 'not recorded')}`
 - no-support controls use the display-only smooth-window policy
-  `{source_plot_manifest.get('plot_policy', {}).get('no_support_panel', 'not recorded')}`
+  `{plot_policy.get('no_support_panel', 'not recorded')}`
 
 仓库只导入聚合表和代表性 PNG；完整 `curve_points.csv` 保留在 Actions/local artifact，
 通过 `tables/curve_index.csv`、source manifest 和 SHA 追溯。三态物理语义、Maxwell
@@ -315,7 +318,9 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
   Maxwell 端点）；所有 `Inf` 及未声明的 NaN 均拒绝；
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
 - 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
-  位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
+  位置；一阶图的 rho 窗口遵循 `{plot_policy.get('local_x_padding_rule', '未记录')}`，
+  mu 轴留白遵循 `{plot_policy.get('local_y_padding_rule', '未记录')}`；这些图层规则只改变
+  后处理，不改变原始曲线或数值 gate；
 - 没有有限 Maxwell/spinodal/support 的 monotone 切片使用原始 production 曲线最长低斜率
   区间作为显示窗口；该窗口不参与物理分类或 gate；
 - gate verdict: `{source_manifest.get('gate', {}).get('verdict')}`；所有 oracle/classification/

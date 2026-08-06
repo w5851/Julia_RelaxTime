@@ -1,4 +1,5 @@
 import importlib.util
+import math
 from pathlib import Path
 
 
@@ -24,6 +25,26 @@ def test_local_y_bounds_preserve_weak_s_shape_scale():
 def test_local_y_bounds_has_finite_fallback_for_missing_points():
     module = _module()
     assert module._local_y_bounds([]) == (0.0, 1.0)
+
+
+def test_phase_bounds_use_tight_display_envelope():
+    module = _module()
+    slice_rows = [
+        {
+            "xi": "-0.5",
+            "method": "production_hybrid",
+            "T_MeV": "147.0947265625",
+            "support_low": "2.19375",
+            "support_high": "2.26875",
+            "rho_hadron": "2.201214",
+            "rho_quark": "2.258657",
+            "rho_spinodal_hadron": "2.213478",
+            "rho_spinodal_quark": "2.246599",
+        }
+    ]
+    low, high = module._bounds([], slice_rows, "-0.5", 147.0947265625)
+    assert math.isclose(low, 2.18375)
+    assert math.isclose(high, 2.27875)
 
 
 def test_smooth_window_uses_longest_low_slope_run_without_phase_labels():

@@ -11,7 +11,9 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - approved deep run: `31065343978`
 - verdict: `full_hybrid_candidate`
 - evidence state: `final`
-- figure policy: `independent_rho_mu_zoom_with_phase_markers_v2`
+- figure policy: `independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope`
+- first-order local rho padding: `max(4% of phase/support envelope, 0.01 rho)`
+- local mu-axis display padding: `max(8% of local mu span, 0.0002 MeV)`
 - no-support controls use the display-only smooth-window policy
   `smooth_window_rho_mu_zoom_v1`
 

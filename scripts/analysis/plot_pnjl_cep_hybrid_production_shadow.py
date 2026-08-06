@@ -14,8 +14,10 @@ METHODS = ("production_hybrid", "memoized_dense", "independent_oracle")
 XIS = ("-0.5", "0.0", "0.5")
 CURVE_T_MATCH_TOL = 1e-6  # trho CSV serializes T to six decimal places
 SMOOTH_SLOPE_QUANTILE = 0.05
+LOCAL_X_RELATIVE_PADDING = 0.04
+LOCAL_X_MIN_PADDING_RHO = 0.01
 LOCAL_Y_RELATIVE_PADDING = 0.08
-LOCAL_Y_MIN_PADDING_MEV = 0.002
+LOCAL_Y_MIN_PADDING_MEV = 0.0002
 
 
 def _rows(path: Path) -> list[dict[str, str]]:
@@ -77,7 +79,10 @@ def _bounds(curve_rows: list[dict[str, str]], slice_rows: list[dict[str, str]], 
     if len(values) < 2:
         return 0.0, 4.0
     low, high = min(values), max(values)
-    padding = max((high - low) * 0.15, 0.05)
+    # Keep the phase/support envelope visible while removing the large
+    # display-only margin that previously hid most of a weak S-shape.  This
+    # is a plotting rule only; it does not change support selection or gates.
+    padding = max((high - low) * LOCAL_X_RELATIVE_PADDING, LOCAL_X_MIN_PADDING_RHO)
     return max(0.0, low - padding), min(4.0, high + padding)
 
 
@@ -201,7 +206,7 @@ def _plot_anchor(
     phase_values = _phase_bound_values(slice_rows, xi, temperature)
     if len(phase_values) >= 2:
         low, high = _bounds(subset, slice_rows, xi, temperature)
-        local_policy = "independent_rho_mu_zoom_with_phase_markers_v2"
+        local_policy = "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope"
         local_metadata: dict[str, object] = {"smooth_window_status": "not_used"}
     else:
         low, high, local_metadata = _smooth_window(subset, xi, temperature)
@@ -314,7 +319,9 @@ def main() -> int:
         "source_sha256": {"curve_points.csv": hashlib.sha256(curve_path.read_bytes()).hexdigest(), "slice_metrics.csv": hashlib.sha256(slice_path.read_bytes()).hexdigest()},
         "plot_policy": {
             "full_panel": "rho_0_to_4_with_shared_method_styles",
-            "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
+            "local_panel": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+            "local_x_padding_rule": "max(4% of phase/support envelope, 0.01 rho)",
+            "local_y_padding_rule": "max(8% of local mu span, 0.0002 MeV)",
             "local_y_axis_is_independent": True,
             "no_support_panel": "smooth_window_rho_mu_zoom_v1",
         },
