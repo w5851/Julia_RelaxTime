@@ -493,6 +493,10 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `curve_points.csv` 仅保留在 Actions/local artifact，外部 SHA 为
   `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。派生表允许的
   `NaN` 仅表示 schema 中“不适用”，未声明 NaN/Inf 均被 importer 拒绝。
+- [x] 根据作者审核反馈，重新生成全部代表图：右侧面板改为独立 `rho–mu` 纵轴，增加
+  Maxwell `mu_M`、共存密度和 spinodal 标记，并用线型/marker 区分三种方法；输入曲线、
+  numerical source run、calculation SHA 和数值 gate 均未改变。plot policy 为
+  `independent_rho_mu_zoom_with_phase_markers_v2`。
 - [ ] 当前 evidence PR 仅作为诊断候选提交，停在作者审核代表性曲线、三个 endpoint
   证书、三态一致性和成本；`full_hybrid_candidate` 不自动晋升 production/reference。
   作者审核完成前不启动 C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。

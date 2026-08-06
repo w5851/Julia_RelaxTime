@@ -11,6 +11,7 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - approved deep run: `31065343978`
 - verdict: `full_hybrid_candidate`
 - evidence state: `final`
+- figure policy: `independent_rho_mu_zoom_with_phase_markers_v2`
 
 仓库只导入聚合表和代表性 PNG；完整 `curve_points.csv` 保留在 Actions/local artifact，
 通过 `tables/curve_index.csv`、source manifest 和 SHA 追溯。三态物理语义、Maxwell

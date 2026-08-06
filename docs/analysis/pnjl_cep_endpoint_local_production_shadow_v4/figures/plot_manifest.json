@@ -3,69 +3,201 @@
     {
       "T_MeV": 5.0,
       "file": "rho_mu_xi_m0p5_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 71.74595799999997,
+      "local_xlim": [
+        0.0,
+        3.225019602369173
+      ],
+      "local_ylim": [
+        290.25209930000005,
+        383.5218447
+      ],
       "reason": "low_temperature",
-      "sha256": "a060af9bd6eb3ea80fcabe86d1ad60854a1ef8c5ca72f73904d24dcc110df264",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "d1bab7e7b2c30a5d65538e268e4c771dbac7df8386e9e5dab9476898563b1bb2",
       "xi": "-0.5"
     },
     {
       "T_MeV": 147.0947265625,
       "file": "rho_mu_xi_m0p5_T_147.095_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.013252999999991744,
+      "local_xlim": [
+        2.1437500000000003,
+        2.3187499999999996
+      ],
+      "local_ylim": [
+        202.23094700000001,
+        202.2642
+      ],
       "reason": "first_order",
-      "sha256": "31fb99c7bcf81af32a84e396d85ff8a09132392a38a43fca1e7d7e714f8c665e",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "0e9a27e8fa8797ed5d7892d013e470ff61898fc8178203acb70cf89437ae0898",
       "xi": "-0.5"
     },
     {
       "T_MeV": 147.2197265625,
       "file": "rho_mu_xi_m0p5_T_147.22_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 238.746675,
+      "local_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_ylim": [
+        -35.81200125,
+        274.55867625
+      ],
       "reason": "first_monotone",
-      "sha256": "cb3c8ec7a9fa111a7475e5d70767d0afae01c7383d99365a7c6a6fec756d8ea6",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "5940ca75f8fb3357660db2947bfb28235203ea1ec96173d1d9b7d3a8ded02632",
       "xi": "-0.5"
     },
     {
       "T_MeV": 5.0,
       "file": "rho_mu_xi_0p0_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 60.261348,
+      "local_xlim": [
+        0.0,
+        2.880175957244326
+      ],
+      "local_ylim": [
+        309.2226628,
+        387.5624152
+      ],
       "reason": "low_temperature",
-      "sha256": "df564c39b9d8ff0d8360680acb487dbe93c0e5c507192b00607730aadf330bbf",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "d2b3d565e0fc2f1904e2c67644d95cfa453d44fcd63e1bd7fbb12d3c5e055f09",
       "xi": "0.0"
     },
     {
       "T_MeV": 130.9619140625,
       "file": "rho_mu_xi_0p0_T_130.962_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.021860000000003765,
+      "local_xlim": [
+        1.8125,
+        2.0874999999999995
+      ],
+      "local_ylim": [
+        291.241609,
+        291.28346899999997
+      ],
       "reason": "first_order",
-      "sha256": "7a2236aa4ae5e84bc81a6b282800fca9c4533b334d29ebbe55bfe4c9a424fa9e",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "e8b970a4e1c9dc1423438454716622a1f966756e85a925c0f01915563f8b7311",
       "xi": "0.0"
     },
     {
       "T_MeV": 131.0869140625,
       "file": "rho_mu_xi_0p0_T_131.087_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 329.110731,
+      "local_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_ylim": [
+        -49.366609649999994,
+        378.47734065
+      ],
       "reason": "first_monotone",
-      "sha256": "edaceddf375e864c8c6a3f2a37c72a3359ef070c8be3708c57cbc1fe11ec5cf6",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "123b3dbf4f98fff4010f02a508b330004b55da2c8bef7e045eb43724c07e7049",
       "xi": "0.0"
     },
     {
       "T_MeV": 5.0,
       "file": "rho_mu_xi_0p5_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 69.556039,
+      "local_xlim": [
+        0.0,
+        2.5257178921007046
+      ],
+      "local_ylim": [
+        308.90098015,
+        399.32383085
+      ],
       "reason": "low_temperature",
-      "sha256": "82e32e4237a91f67a29d0e0b91e495a654a5ae0c65640b682a46db0e7d660376",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "b32ffbccf5164fd28fab730d20a05fd71e044f5e2dbc16b188bcdcd5354216c2",
       "xi": "0.5"
     },
     {
       "T_MeV": 106.9599609375,
       "file": "rho_mu_xi_0p5_T_106.96_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.01935499999996182,
+      "local_xlim": [
+        1.41875,
+        1.66875
+      ],
+      "local_ylim": [
+        348.35911500000003,
+        348.39847
+      ],
       "reason": "first_order",
-      "sha256": "887faa2422e50ab9cdc18bc304932130b39cbedb668bef6261c086c03cf5f1df",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "52c09aee691e5974a2dbb776fc30ed8ddc60eabc112f52e9f3f9ffc8852ae231",
       "xi": "0.5"
     },
     {
       "T_MeV": 107.0849609375,
       "file": "rho_mu_xi_0p5_T_107.085_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 399.575821,
+      "local_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_ylim": [
+        -59.93637315,
+        459.51219415
+      ],
       "reason": "first_monotone",
-      "sha256": "5fd1634b1995bb3be1c2eb48e060b0c7a1f4f031a8d1748ccf1334c0edbf0fd3",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v2",
+      "sha256": "9f6a774d7d4d9125e2bd674e8204f1838350ce55ea02363428bcda89e33b26ec",
       "xi": "0.5"
     }
   ],
+  "plot_policy": {
+    "full_panel": "rho_0_to_4_with_shared_method_styles",
+    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
+    "local_y_axis_is_independent": true
+  },
   "raw_curve_copy_in_repository": false,
   "schema_version": "pnjl_cep_endpoint_local_shadow_plot_manifest_v1",
   "source_curve_sha256": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8",
+  "source_plot_manifest_sha256": "5ca397f50161867d42b2db11f0461a85c6d33b2a3dba179086593e851998b7db",
   "source_schema_version": "cep_maxwell_endpoint_local_production_shadow_v4"
 }

@@ -3,7 +3,7 @@
   "calculation_sha": "8fb86255c7894004cb1c52bbb03f9f53a4828411",
   "deep_oracle_run_id": "31065343978",
   "evidence_state": "final",
-  "generated_at_utc": "2026-08-06T03:56:17.917310Z",
+  "generated_at_utc": "2026-08-06T04:38:45.957304Z",
   "oracle_overlay": {
     "applied": [
       {
@@ -40,6 +40,13 @@
     "oracle_labels_used_for_route": false,
     "schema_version": "cep_maxwell_endpoint_local_overlay_v1"
   },
+  "plot_policy": {
+    "full_panel": "rho_0_to_4_with_shared_method_styles",
+    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v2",
+    "local_y_axis_is_independent": true
+  },
+  "plot_source_manifest_sha256": "5ca397f50161867d42b2db11f0461a85c6d33b2a3dba179086593e851998b7db",
+  "plotter_script_sha256": "5955d4826fa0fa9877ad12597c431f17de85730d3d2769733734b97a01949cb5",
   "postprocess_sha": "6ceaa1ea73ca684f7333556c5d9e0492bc567899",
   "raw_curve_points": {
     "file": "Actions/local artifact curve_points.csv",
@@ -48,18 +55,18 @@
     "sha256": "176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8"
   },
   "repository_files_sha256": {
-    "AUDIT.md": "66500a6e78668ab803d566d4c6809d9366b3faf4d51a671852cb91709f929c39",
-    "README.md": "055e0483fbd9d33238797b8b80817b1b7b47fea9a1a5a94d886f804885765c2f",
-    "figures/plot_manifest.json": "bf968f57d1977195477d99b6396da20c757c47509b945660cd130d308309b790",
-    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "7a2236aa4ae5e84bc81a6b282800fca9c4533b334d29ebbe55bfe4c9a424fa9e",
-    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "edaceddf375e864c8c6a3f2a37c72a3359ef070c8be3708c57cbc1fe11ec5cf6",
-    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "df564c39b9d8ff0d8360680acb487dbe93c0e5c507192b00607730aadf330bbf",
-    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "887faa2422e50ab9cdc18bc304932130b39cbedb668bef6261c086c03cf5f1df",
-    "figures/rho_mu_xi_0p5_T_107.085_first_monotone.png": "5fd1634b1995bb3be1c2eb48e060b0c7a1f4f031a8d1748ccf1334c0edbf0fd3",
-    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "82e32e4237a91f67a29d0e0b91e495a654a5ae0c65640b682a46db0e7d660376",
-    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "31fb99c7bcf81af32a84e396d85ff8a09132392a38a43fca1e7d7e714f8c665e",
-    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "cb3c8ec7a9fa111a7475e5d70767d0afae01c7383d99365a7c6a6fec756d8ea6",
-    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "a060af9bd6eb3ea80fcabe86d1ad60854a1ef8c5ca72f73904d24dcc110df264",
+    "AUDIT.md": "4099710f589f77748fc9a191f54e7b471e33ce107623687d4f89e85f4167965d",
+    "README.md": "b05d6dba3b5481ad5f24855050790664567b8edf17b9d4c8991bd37438ae8146",
+    "figures/plot_manifest.json": "9eafdba31eb13a074b0721b821053336a4e23f45b1b134ca9dcd9444c53b27a8",
+    "figures/rho_mu_xi_0p0_T_130.962_first_order.png": "e8b970a4e1c9dc1423438454716622a1f966756e85a925c0f01915563f8b7311",
+    "figures/rho_mu_xi_0p0_T_131.087_first_monotone.png": "123b3dbf4f98fff4010f02a508b330004b55da2c8bef7e045eb43724c07e7049",
+    "figures/rho_mu_xi_0p0_T_5_low_temperature.png": "d2b3d565e0fc2f1904e2c67644d95cfa453d44fcd63e1bd7fbb12d3c5e055f09",
+    "figures/rho_mu_xi_0p5_T_106.96_first_order.png": "52c09aee691e5974a2dbb776fc30ed8ddc60eabc112f52e9f3f9ffc8852ae231",
+    "figures/rho_mu_xi_0p5_T_107.085_first_monotone.png": "9f6a774d7d4d9125e2bd674e8204f1838350ce55ea02363428bcda89e33b26ec",
+    "figures/rho_mu_xi_0p5_T_5_low_temperature.png": "b32ffbccf5164fd28fab730d20a05fd71e044f5e2dbc16b188bcdcd5354216c2",
+    "figures/rho_mu_xi_m0p5_T_147.095_first_order.png": "0e9a27e8fa8797ed5d7892d013e470ff61898fc8178203acb70cf89437ae0898",
+    "figures/rho_mu_xi_m0p5_T_147.22_first_monotone.png": "5940ca75f8fb3357660db2947bfb28235203ea1ec96173d1d9b7d3a8ded02632",
+    "figures/rho_mu_xi_m0p5_T_5_low_temperature.png": "d1bab7e7b2c30a5d65538e268e4c771dbac7df8386e9e5dab9476898563b1bb2",
     "source_manifest.json": "b2f4699ce32074cc8adbeb88ea1d05dfdf20cf2d8c91a89ad4ee12c342c7dff1",
     "tables/actions_costs.csv": "6cdb8a512b2b808284dbd8daf67f8dd6531205d1646c5312183c7d540d6f22c8",
     "tables/cep_accuracy.csv": "91c9c1b5d0e02de4417f4e0465431d102a78141e73e44cf68ae568e5fb78637e",

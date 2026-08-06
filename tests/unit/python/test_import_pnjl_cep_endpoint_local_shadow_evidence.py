@@ -2,6 +2,7 @@ import csv
 import hashlib
 import importlib.util
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -120,3 +121,24 @@ def test_import_rejects_unexpected_nan_sentinel(tmp_path):
     (source / "method_costs.csv").write_text("name,value\nmethod_costs.csv,NaN\n", encoding="utf-8")
     with pytest.raises(ValueError, match="unexpected NaN sentinel"):
         module._validate_derived_tables(source)
+
+
+def test_import_accepts_solver_free_replot_directory(tmp_path):
+    module = _module()
+    source = _source(tmp_path)
+    replot = tmp_path / "replot"
+    replot.mkdir()
+    shutil.copy2(source / "figures" / "example.png", replot / "example.png")
+    curve_sha = hashlib.sha256((source / "curve_points.csv").read_bytes()).hexdigest()
+    figure_sha = hashlib.sha256((replot / "example.png").read_bytes()).hexdigest()
+    (replot / "plot_manifest.json").write_text(json.dumps({
+        "schema_version": "cep_maxwell_endpoint_local_production_shadow_v4",
+        "source_sha256": {"curve_points.csv": curve_sha},
+        "plot_policy": {"local_panel": "independent_rho_mu_zoom_with_phase_markers_v2"},
+        "figures": [{"file": "example.png", "xi": "0.0", "T_MeV": 5.0, "reason": "test", "sha256": figure_sha}],
+    }), encoding="utf-8")
+    output = tmp_path / "evidence"
+    manifest = module.import_evidence(source, output, "789", figure_input_dir=replot)
+    assert manifest["plot_policy"]["local_panel"] == "independent_rho_mu_zoom_with_phase_markers_v2"
+    plot_manifest = json.loads((output / "figures" / "plot_manifest.json").read_text(encoding="utf-8"))
+    assert plot_manifest["source_curve_sha256"] == curve_sha

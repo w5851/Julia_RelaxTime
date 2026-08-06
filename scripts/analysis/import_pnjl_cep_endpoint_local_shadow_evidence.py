@@ -229,7 +229,12 @@ def _write_claims(path: Path) -> None:
         writer.writerows(rows)
 
 
-def import_evidence(input_dir: Path, output_dir: Path, aggregate_replay_run_id: str) -> dict[str, Any]:
+def import_evidence(
+    input_dir: Path,
+    output_dir: Path,
+    aggregate_replay_run_id: str,
+    figure_input_dir: Path | None = None,
+) -> dict[str, Any]:
     source = _find_aggregate(input_dir)
     source_manifest = json.loads((source / "manifest.json").read_text(encoding="utf-8"))
     audit = _validate(source, source_manifest)
@@ -242,18 +247,32 @@ def import_evidence(input_dir: Path, output_dir: Path, aggregate_replay_run_id: 
     for name in TABLES:
         shutil.copy2(source / name, tables_dir / name)
     shutil.copy2(source / "manifest.json", output_dir / "source_manifest.json")
-    source_plot_manifest = json.loads((source / "figures" / "plot_manifest.json").read_text(encoding="utf-8"))
+    figure_source = figure_input_dir or (source / "figures")
+    source_plot_manifest_path = figure_source / "plot_manifest.json"
+    if not source_plot_manifest_path.is_file():
+        raise ValueError(f"plot manifest is missing: {source_plot_manifest_path}")
+    source_plot_manifest = json.loads(source_plot_manifest_path.read_text(encoding="utf-8"))
+    plot_curve_sha = source_plot_manifest.get("source_curve_sha256")
+    if plot_curve_sha is None:
+        plot_curve_sha = source_plot_manifest.get("source_sha256", {}).get("curve_points.csv")
+    if plot_curve_sha and plot_curve_sha != audit["curve_sha256"]:
+        raise ValueError("plot manifest does not reference the aggregate curve_points.csv")
     figure_rows = []
     for figure in source_plot_manifest.get("figures", []):
-        src = source / "figures" / figure["file"]
+        src = figure_source / figure["file"]
         if not src.is_file() or src.stat().st_size == 0:
             raise ValueError(f"missing representative figure: {src}")
+        expected_sha = figure.get("sha256")
+        if expected_sha and _sha256(src) != expected_sha:
+            raise ValueError(f"plot figure hash mismatch: {src.name}")
         shutil.copy2(src, figures_dir / src.name)
         figure_rows.append({**figure, "sha256": _sha256(figures_dir / src.name)})
     (figures_dir / "plot_manifest.json").write_text(json.dumps({
         "schema_version": "pnjl_cep_endpoint_local_shadow_plot_manifest_v1",
         "source_schema_version": source_plot_manifest.get("schema_version"),
         "source_curve_sha256": audit["curve_sha256"],
+        "source_plot_manifest_sha256": _sha256(source_plot_manifest_path),
+        "plot_policy": source_plot_manifest.get("plot_policy", {}),
         "figures": figure_rows,
         "raw_curve_copy_in_repository": False,
     }, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -277,6 +296,7 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - approved deep run: `{overlay.get('deep_run_id', '')}`
 - verdict: `{source_manifest.get('gate', {}).get('verdict')}`
 - evidence state: `{source_manifest.get('evidence_state')}`
+- figure policy: `{source_plot_manifest.get('plot_policy', {}).get('local_panel', 'source artifact policy')}`
 
 仓库只导入聚合表和代表性 PNG；完整 `curve_points.csv` 保留在 Actions/local artifact，
 通过 `tables/curve_index.csv`、source manifest 和 SHA 追溯。三态物理语义、Maxwell
@@ -292,6 +312,8 @@ reference promotion。`full_hybrid_candidate` 只表示当前 gate 通过，仍�
 - 派生表中的 `NaN` 仅出现在 schema 明确允许的“不适用字段”（例如单调切片没有
   Maxwell 端点）；所有 `Inf` 及未声明的 NaN 均拒绝；
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
+- 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
+  位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
 - gate verdict: `{source_manifest.get('gate', {}).get('verdict')}`；所有 oracle/classification/
   endpoint/coverage/performance errors 为空；
 - 完整 raw curve 不提交仓库，外部 SHA: `{audit['curve_sha256']}`。
@@ -323,6 +345,9 @@ phase-reference 或 transport。作者需审阅 figures/ 和 tables/claim_ledger
             "raw_curve_copy_in_repository": False,
         },
         "oracle_overlay": overlay,
+        "plot_source_manifest_sha256": _sha256(source_plot_manifest_path),
+        "plot_policy": source_plot_manifest.get("plot_policy", {}),
+        "plotter_script_sha256": _sha256(Path(__file__).resolve()),
         "repository_files_sha256": repository_files,
         "generated_at_utc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
@@ -335,8 +360,18 @@ def main() -> int:
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--aggregate-replay-run-id", required=True)
+    parser.add_argument(
+        "--figure-input-dir",
+        type=Path,
+        help="optional solver-free replot directory containing plot_manifest.json and PNGs",
+    )
     args = parser.parse_args()
-    import_evidence(args.input_dir, args.output_dir, args.aggregate_replay_run_id)
+    import_evidence(
+        args.input_dir,
+        args.output_dir,
+        args.aggregate_replay_run_id,
+        figure_input_dir=args.figure_input_dir,
+    )
     return 0
 
 

@@ -7,6 +7,8 @@
 - 派生表中的 `NaN` 仅出现在 schema 明确允许的“不适用字段”（例如单调切片没有
   Maxwell 端点）；所有 `Inf` 及未声明的 NaN 均拒绝；
 - 三个 endpoint certificates 的 support envelope 均覆盖初始 left bracket 与 anchor；
+- 代表图的右侧面板使用独立的 `rho–mu` 局部纵轴，并标出 Maxwell/spinodal/coexistence
+  位置；该图层修正只改变后处理，不改变原始曲线或数值 gate；
 - gate verdict: `full_hybrid_candidate`；所有 oracle/classification/
   endpoint/coverage/performance errors 为空；
 - 完整 raw curve 不提交仓库，外部 SHA: `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。
