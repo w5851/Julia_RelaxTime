@@ -271,7 +271,9 @@ jobs:
             --dir job-artifacts
           if [[ -n "$DEEP_RUN_ID" ]]; then
             mkdir -p deep-artifacts
-            gh run download "$DEEP_RUN_ID" --pattern '*required_three_deep*' --dir deep-artifacts
+            # Match both the historical ``required_three_deep`` tag and the
+            # versioned ``required_three_<calculation-sha>`` deep artifacts.
+            gh run download "$DEEP_RUN_ID" --pattern '*required_three*' --dir deep-artifacts
           fi
 
       - name: Setup Python
