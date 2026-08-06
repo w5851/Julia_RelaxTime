@@ -123,6 +123,9 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
   `endpoint_local_geometry_first_order`。这两种内部证书仍映射到既有三态，anchor 与最多
   12 个 refinement 点分别计费；失败保持 `ambiguous_near_critical`。旧的
   `bounded_zero_density_v1` 继续用于历史复现。
+  Dense Reference 的 Actions planner 在选择 `rho_support_hybrid` 时会显式传入
+  `--rho-hybrid-endpoint-policy=three_crossing_endpoint_local_v2`；直接 CLI 若未指定仍保持
+  `bounded_zero_density_v1`，以免改写历史命令语义。
 
 - endpoint-local geometry contract v2 的离线 feasibility 使用
   `scripts/analysis/pnjl_endpoint_local_feasibility_v2.py`。它读取 targeted

@@ -111,6 +111,7 @@ end
         "--rho_position_tol_MeV=0.025",
         "--rho_density_tol=0.0025",
         "--rho_maxwell_area_tol=5e-5",
+        "--rho_hybrid_endpoint_policy=three_crossing_endpoint_local_v2",
         "--adaptive_temperature=true",
         "--temperature_max_refine_level=3",
         "--temperature_position_tol_MeV=0.05",
@@ -124,6 +125,7 @@ end
     @test cfg.rho_position_tol_MeV == 0.025
     @test cfg.rho_density_tol == 0.0025
     @test cfg.rho_maxwell_area_tol == 5e-5
+    @test cfg.rho_hybrid_endpoint_policy === :three_crossing_endpoint_local_v2
     @test cfg.adaptive_temperature == true
     @test cfg.temperature_max_refine_level == 3
     @test cfg.temperature_position_tol_MeV == 0.05
@@ -133,6 +135,7 @@ end
     @test_throws ArgumentError parse_args(["--mode=production", "--cep_max_refine_level=0"])
     @test_throws ArgumentError parse_args(["--rho_density_tol=0"])
     @test_throws ArgumentError parse_args(["--crossover_T_max_MeV=20"])
+    @test_throws ArgumentError parse_args(["--rho_hybrid_endpoint_policy=unknown"])
 end
 
 @testset "Phase CLI run without --config uses default template" begin

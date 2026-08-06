@@ -134,6 +134,14 @@ def _common_cli_args(
         "--crossover-n-mu", _numeric_text(_value(payload, "crossover_n_mu", "16")),
         "--crossover-mu-max", _numeric_text(_value(payload, "crossover_mu_max", "450")),
     ]
+    # Hybrid dense-reference jobs must use the endpoint-local v2 contract so
+    # C0 is comparable to the approved endpoint-local shadow.  Keep the
+    # direct CLI default legacy-compatible when no hybrid policy is selected.
+    if rho_policy == "rho_support_hybrid" and "rho_hybrid_endpoint_policy" not in advanced:
+        args.extend([
+            "--rho-hybrid-endpoint-policy",
+            "three_crossing_endpoint_local_v2",
+        ])
     if adaptive_xi:
         args.extend([
             "--adaptive-xi",

@@ -118,6 +118,24 @@ def test_hybrid_policy_is_planned_with_four_rho_levels():
     )
     assert "rho_support_hybrid" in plan["common_args"]
     assert plan["common_args"][plan["common_args"].index("--rho-refine-levels") + 1] == "4"
+    assert "--rho-hybrid-endpoint-policy" in plan["common_args"]
+    endpoint_index = plan["common_args"].index("--rho-hybrid-endpoint-policy")
+    assert plan["common_args"][endpoint_index + 1] == "three_crossing_endpoint_local_v2"
+
+
+def test_hybrid_endpoint_policy_can_be_explicitly_overridden_for_replay():
+    module = load_module()
+    plan = module.build_action_plan(
+        full_reference_inputs(
+            advanced_config_json=json.dumps({
+                "rho_refinement_policy": "rho_support_hybrid",
+                "rho_refine_levels": 4,
+                "rho_hybrid_endpoint_policy": "bounded_zero_density_v1",
+            })
+        )
+    )
+    endpoint_index = plan["common_args"].index("--rho-hybrid-endpoint-policy")
+    assert plan["common_args"][endpoint_index + 1] == "bounded_zero_density_v1"
 
 
 def test_hybrid_policy_rejects_wrong_refinement_level():

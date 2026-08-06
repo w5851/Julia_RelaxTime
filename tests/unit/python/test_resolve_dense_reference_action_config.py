@@ -48,6 +48,17 @@ def test_accepts_hybrid_rho_policy_controls():
     ]
 
 
+def test_accepts_endpoint_policy_control():
+    module = load_module()
+    resolved = module.resolve_action_config(
+        '{"rho_hybrid_endpoint_policy":"three_crossing_endpoint_local_v2"}'
+    )
+    assert resolved == [
+        "--rho-hybrid-endpoint-policy",
+        "three_crossing_endpoint_local_v2",
+    ]
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -56,6 +67,7 @@ def test_accepts_hybrid_rho_policy_controls():
         '{"T_refine_levels":1.5}',
         '{"thermo_quadrature_rtol":0}',
         '{"thermo_quadrature_maxevals":true}',
+        '{"rho_hybrid_endpoint_policy":"unknown"}',
     ],
 )
 def test_rejects_invalid_or_unsupported_controls(payload):

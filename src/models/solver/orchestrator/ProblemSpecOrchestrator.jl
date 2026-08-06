@@ -76,11 +76,27 @@ function _execute_governed_attempt_plan(
 
             raw = solve_attempt(local_kwargs, attempt_cfg, attempt_index)
             ok, failed = evaluate_hard_constraints(raw, hard_constraints)
+            # A governed attempt may deliberately return a structured
+            # incomplete-output candidate (for example when a backend
+            # produces `nothing` for one thermodynamic field).  Preserve
+            # that diagnostic reason alongside the ordinary hard-rule
+            # failures instead of allowing it to be overwritten here.
+            raw_failed_value = hasproperty(raw, :failed_constraints) ?
+                getproperty(raw, :failed_constraints) : Symbol[]
+            raw_failed = raw_failed_value === nothing ? Symbol[] : Symbol.(raw_failed_value)
+            failed = unique(vcat(raw_failed, failed))
+            ok = ok && isempty(raw_failed)
+            raw_error_kind_value = hasproperty(raw, :error_kind) ? getproperty(raw, :error_kind) : :none
+            raw_error_kind = raw_error_kind_value === nothing ? :none : Symbol(raw_error_kind_value)
+            raw_error_msg_value = hasproperty(raw, :error_msg) ? getproperty(raw, :error_msg) : ""
+            raw_error_msg = raw_error_msg_value === nothing ? "" : String(raw_error_msg_value)
             merged = build_governance_candidate(raw;
                 hard_constraint_ok=ok,
                 failed_constraints=failed,
                 seed_index=Int(attempt_index),
                 residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
+                error_kind=raw_error_kind,
+                error_msg=raw_error_msg,
             )
             success = evaluate_candidate_success(merged;
                 residual_norm_max=Float64(get(local_kwargs, :residual_norm_max, 1e-6)),
@@ -114,6 +130,90 @@ function _execute_governed_attempt_plan(
         require_converged=true,
     )
     return selected, selected.normalized_candidates
+end
+
+const _FIXEDRHO_JOINT_REQUIRED_SCALARS = (
+    :omega,
+    :pressure,
+    :rho_norm,
+    :entropy,
+    :energy,
+    :residual_norm,
+)
+const _FIXEDRHO_JOINT_REQUIRED_VECTORS = (
+    (:solution, 8),
+    (:x_state, 5),
+    (:mu_vec, 3),
+    (:masses, 3),
+)
+
+"""Return explicit reasons for a malformed FixedRho joint-solve payload.
+
+The solver callback is allowed to report a failed attempt, but it must not
+leak a partial payload into the outer orchestration layer.  In particular,
+`Float64(nothing)` is an orchestration error, not a physical solver result.
+"""
+function _fixedrho_joint_output_issues(solved)
+    solved === nothing && return Symbol[:solver_returned_nothing]
+    issues = Symbol[]
+    if !hasproperty(solved, :converged) || !(getproperty(solved, :converged) isa Bool)
+        push!(issues, :invalid_converged)
+    end
+    if !hasproperty(solved, :iterations) || !(getproperty(solved, :iterations) isa Integer)
+        push!(issues, :invalid_iterations)
+    end
+    for field in _FIXEDRHO_JOINT_REQUIRED_SCALARS
+        if !hasproperty(solved, field)
+            push!(issues, Symbol("missing_$(field)"))
+        elseif getproperty(solved, field) === nothing || !(getproperty(solved, field) isa Real)
+            push!(issues, Symbol("invalid_$(field)"))
+        end
+    end
+    for (field, expected_length) in _FIXEDRHO_JOINT_REQUIRED_VECTORS
+        if !hasproperty(solved, field)
+            push!(issues, Symbol("missing_$(field)"))
+            continue
+        end
+        value = getproperty(solved, field)
+        if value === nothing || !(value isa AbstractVector) || length(value) != expected_length ||
+                any(entry -> !(entry isa Real), value)
+            push!(issues, Symbol("invalid_$(field)"))
+        end
+    end
+    return issues
+end
+
+function _fixedrho_incomplete_output_candidate(
+    attempt_cfg,
+    residual_norm_max::Real,
+    issues::AbstractVector{<:Symbol},
+)
+    issue_text = isempty(issues) ? "unknown incomplete solver output" : join(string.(issues), ", ")
+    return (
+        converged=false,
+        solution=Float64[],
+        x_state=zeros(5),
+        mu_vec=zeros(3),
+        omega=NaN,
+        pressure=NaN,
+        rho_norm=NaN,
+        entropy=NaN,
+        energy=NaN,
+        masses=zeros(3),
+        iterations=0,
+        residual_norm=Inf,
+        residual_norm_max=Float64(residual_norm_max),
+        fixedrho_joint_solve_requested=true,
+        fixedrho_joint_solve_active=false,
+        fixedrho_joint_fallback=false,
+        fixedrho_joint_selected_method=:none,
+        fixedrho_joint_selected_quality=:bad,
+        fixedrho_joint_fallback_used=false,
+        fixedrho_joint_attempt_origin=attempt_cfg.attempt_origin,
+        failed_constraints=vcat(Symbol[:solver_incomplete_output], collect(issues)),
+        error_kind=:solver_incomplete_output,
+        error_msg="FixedRho joint solver returned incomplete output ($(issue_text))",
+    )
 end
 
 @inline function _resolve_candidate_selector(kwargs::Dict{Symbol,Any})::Function
@@ -450,6 +550,14 @@ function _fixedrho_problem_spec_forward_solve(model::AbstractQCDModel, mode::Fix
         function (local_kwargs, attempt_cfg, _)
             _strip_problemspec_forwardsolve_kwargs!(local_kwargs)
             solved = _fixedrho_joint_problem_spec_forward_solve(model, mode, T_fm; pairs(local_kwargs)...)
+            output_issues = _fixedrho_joint_output_issues(solved)
+            if !isempty(output_issues)
+                return _fixedrho_incomplete_output_candidate(
+                    attempt_cfg,
+                    get(local_kwargs, :residual_norm_max, 1e-6),
+                    output_issues,
+                )
+            end
             return (
                 converged=Bool(solved.converged),
                 solution=Float64.(solved.solution),

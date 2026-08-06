@@ -113,6 +113,83 @@ end
         @test haskey(solved, :fixedrho_joint_solve_active)
     end
 
+    @testset "fixedrho incomplete joint output is a governed failure" begin
+        malformed = (
+            solution=zeros(8),
+            x_state=zeros(5),
+            mu_vec=zeros(3),
+            omega=0.0,
+            pressure=0.0,
+            rho_norm=nothing,
+            entropy=0.0,
+            energy=0.0,
+            masses=zeros(3),
+            residual_norm=0.0,
+        )
+        issues = Models._fixedrho_joint_output_issues(malformed)
+        @test :invalid_rho_norm in issues
+        @test !(:solver_returned_nothing in issues)
+
+        failure = Models._fixedrho_incomplete_output_candidate(
+            (attempt_origin=:primary,),
+            1e-6,
+            issues,
+        )
+        @test !failure.converged
+        @test failure.rho_norm isa Float64
+        @test isnan(failure.rho_norm)
+        @test :solver_incomplete_output in failure.failed_constraints
+        @test failure.error_kind == :solver_incomplete_output
+
+        nothing_issues = Models._fixedrho_joint_output_issues(nothing)
+        @test nothing_issues == [:solver_returned_nothing]
+
+        plan = [(seed=[0.0], method=:trust_region, use_fallback=false,
+            fallback_method=:trust_region, attempt_origin=:primary)]
+        selected, candidates = Models._execute_governed_attempt_plan(
+            plan,
+            Dict{Symbol, Any}(:residual_norm_max => 1e-6),
+            Models.HardConstraintRule[],
+            Models.select_pressure_max_candidate,
+            (kwargs, attempt_cfg, index) -> failure,
+            (kwargs, attempt_cfg, index) -> failure,
+        )
+        @test length(candidates) == 1
+        @test selected.selected_candidate.error_kind == :solver_incomplete_output
+        @test :solver_incomplete_output in selected.selected_candidate.failed_constraints
+    end
+
+    @testset "fixedrho zero-density endpoint remains structured at low T" begin
+        model = Models.create_model(:PNJL)
+        mode = Models.FixedRho(0.0)
+        spec = Models.build_problem_spec(mode)
+        seed = copy(Models.pnjl_module().HADRON_SEED_8)
+        for xi in (-0.5, 0.0, 0.5)
+            result = try
+                spec.forward_solve(
+                    model,
+                    1.0 / 197.327;
+                    seed_guess=seed,
+                    p_num=4,
+                    t_num=2,
+                    xi=xi,
+                    thermo_quadrature_policy=:rs_reduced_adaptive,
+                    iterations=80,
+                )
+            catch err
+                @test false
+                @info "low-temperature FixedRho endpoint unexpectedly threw" xi exception=(err, catch_backtrace())
+                nothing
+            end
+            result === nothing && continue
+            @test result isa NamedTuple
+            @test result.rho_norm isa Float64
+            @test hasproperty(result, :converged)
+            @test hasproperty(result, :failed_constraints)
+            @test result.converged || !isempty(result.failed_constraints)
+        end
+    end
+
     @testset "fixedrho forward_solve accepts extra_constraints hook" begin
         model = Models.create_model(:PNJL)
         mode = Models.FixedRho(0.2)

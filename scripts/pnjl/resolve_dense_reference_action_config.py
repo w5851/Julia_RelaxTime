@@ -32,6 +32,7 @@ FIELD_SPECS: dict[str, tuple[str, str, bool]] = {
     "rho_support_fine_step": ("--rho-support-fine-step", "float", False),
     "rho_support_target_point_count": ("--rho-support-target-point-count", "int", False),
     "rho_support_targeted_cap": ("--rho-support-targeted-cap", "int", False),
+    "rho_hybrid_endpoint_policy": ("--rho-hybrid-endpoint-policy", "endpoint_enum", False),
 }
 
 
@@ -47,6 +48,16 @@ def _normalized_value(key: str, value: Any, kind: str, allow_zero: bool) -> str:
             "rho_support_hybrid",
         }:
             fail(f"{key} must be uniform_nested, rho_support_cascade, or rho_support_hybrid")
+        return value
+    if kind == "endpoint_enum":
+        if not isinstance(value, str) or value not in {
+            "bounded_zero_density_v1",
+            "three_crossing_endpoint_local_v2",
+        }:
+            fail(
+                f"{key} must be bounded_zero_density_v1 or "
+                "three_crossing_endpoint_local_v2"
+            )
         return value
     if isinstance(value, bool):
         fail(f"{key} must be a numeric value, not boolean")

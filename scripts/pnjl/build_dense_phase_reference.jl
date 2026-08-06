@@ -55,6 +55,10 @@ Base.@kwdef mutable struct DensePhaseReferenceConfig
     rho_support_fine_step::Float64 = 0.025
     rho_support_target_point_count::Int = 9
     rho_support_targeted_cap::Int = 12
+    # The legacy bounded-zero-density route remains the CLI default for
+    # reproducibility.  Dense-reference hybrid runs select the endpoint-local
+    # v2 contract explicitly through the workflow planner.
+    rho_hybrid_endpoint_policy::Symbol = :bounded_zero_density_v1
     adaptive_temperature::Bool = true
     temperature_max_refine_level::Int = 2
     temperature_position_tol_MeV::Float64 = 0.10
@@ -108,6 +112,7 @@ function usage()
     println("  --rho-support-fine-step <value> cascade/hybrid Stage-A fine rho step (default 0.025)")
     println("  --rho-support-target-point-count <int> cascade/hybrid target count (default 9)")
     println("  --rho-support-targeted-cap <int> cascade/hybrid Stage-A per-temperature cap (default 12)")
+    println("  --rho-hybrid-endpoint-policy <name> bounded_zero_density_v1 or three_crossing_endpoint_local_v2")
     println("  --no-adaptive-T          disable midpoint temperature refinement")
     println("  --T-refine-levels <int>  maximum adaptive temperature levels (default 2)")
     println("  --T-position-tol <MeV>   temperature interpolation position gate (default 0.10)")
@@ -248,6 +253,8 @@ function parse_args(args::Vector{String})
             cfg.rho_support_target_point_count = parse(Int, require_value())
         elseif arg == "--rho-support-targeted-cap"
             cfg.rho_support_targeted_cap = parse(Int, require_value())
+        elseif arg == "--rho-hybrid-endpoint-policy"
+            cfg.rho_hybrid_endpoint_policy = Symbol(lowercase(require_value()))
         elseif arg == "--no-adaptive-T"
             cfg.adaptive_temperature = false
         elseif arg == "--T-refine-levels"
@@ -320,6 +327,8 @@ function parse_args(args::Vector{String})
         error("rho-support-target-point-count must be an odd integer >= 5")
     cfg.rho_support_targeted_cap >= cfg.rho_support_target_point_count ||
         error("rho-support-targeted-cap must cover rho-support-target-point-count")
+    cfg.rho_hybrid_endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
+        error("rho-hybrid-endpoint-policy must be bounded_zero_density_v1 or three_crossing_endpoint_local_v2")
     if cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid)
         cfg.model_kind === :PNJL || error("$(cfg.rho_refinement_policy) is supported only for model_kind=PNJL")
         cfg.rho_geometry_convergence || error("$(cfg.rho_refinement_policy) requires rho geometry convergence")
@@ -621,6 +630,7 @@ function manifest_config_payload(cfg::DensePhaseReferenceConfig)
         "rho_support_fine_step" => cfg.rho_support_fine_step,
         "rho_support_target_point_count" => cfg.rho_support_target_point_count,
         "rho_support_targeted_cap" => cfg.rho_support_targeted_cap,
+        "rho_hybrid_endpoint_policy" => String(cfg.rho_hybrid_endpoint_policy),
         "adaptive_temperature" => cfg.adaptive_temperature,
         "temperature_max_refine_level" => cfg.temperature_max_refine_level,
         "temperature_position_tol_MeV" => cfg.temperature_position_tol_MeV,
@@ -847,6 +857,10 @@ function build_outputs(cfg::DensePhaseReferenceConfig)
                 rho_support_config=Models.RhoSupportConfig(
                     target_point_count=cfg.rho_support_target_point_count,
                     max_extra_points=max(cfg.rho_support_targeted_cap, cfg.rho_support_target_point_count),
+                ),
+                rho_hybrid_verification=Models.RhoHybridVerificationConfig(
+                    endpoint_policy=cfg.rho_hybrid_endpoint_policy,
+                    targeted_cap=cfg.rho_support_targeted_cap,
                 ),
                 cep_max_refine_level=(cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? cfg.rho_refine_levels : 2),
                 adaptive_temperature=cfg.adaptive_temperature,
