@@ -1989,6 +1989,41 @@ function _production_crossover_temperature_bounds(
     return (T_min_MeV=T_min_mev, T_max_MeV=T_max_mev)
 end
 
+"""Select the deterministic previous-temperature rho-support prior.
+
+Support metadata is optional because an unresolved or solver-failed slice may
+not produce a usable cascade window.  Such records are skipped without
+materializing nullable values.  The nearest cached temperature wins; the
+temperature itself is the stable lower-temperature tie-break.
+"""
+function _select_rho_support_prior(eval_cache, T::Real)
+    target_T = Float64(T)
+    isfinite(target_T) || return nothing
+    candidates = NamedTuple[]
+    for (cached_T, record) in eval_cache
+        center = get(record, :cascade_support_center, nothing)
+        gap = get(record, :cascade_support_gap, nothing)
+        (center isa Real && gap isa Real) || continue
+        center_value = Float64(center)
+        gap_value = Float64(gap)
+        cached_value = Float64(cached_T)
+        isfinite(center_value) && isfinite(gap_value) && gap_value > 0 || continue
+        isfinite(cached_value) || continue
+        push!(candidates, (
+            distance=abs(cached_value - target_T),
+            T=cached_value,
+            center=center_value,
+            gap=gap_value,
+        ))
+    end
+    isempty(candidates) && return nothing
+    sort!(candidates; by=item -> (item.distance, item.T))
+    selected = first(candidates)
+    return RhoSupportRefinement.RhoSupportPrior(
+        selected.T, selected.center, selected.gap,
+    )
+end
+
 function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         T_start::Float64,
         T_end::Float64,
@@ -2207,20 +2242,6 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             telemetry=work_telemetry,
         ) : nothing
     eval_cache = Dict{Float64, NamedTuple}()
-    function rho_support_prior(T::Float64)
-        candidates = NamedTuple[]
-        for (cached_T, record) in eval_cache
-            center = get(record, :cascade_support_center, nothing)
-            gap = get(record, :cascade_support_gap, nothing)
-            center === nothing || gap === nothing || continue
-            isfinite(Float64(center)) && isfinite(Float64(gap)) && Float64(gap) > 0 || continue
-            push!(candidates, (distance=abs(cached_T - T), T=cached_T, center=Float64(center), gap=Float64(gap)))
-        end
-        isempty(candidates) && return nothing
-        sort!(candidates; by=item -> (item.distance, item.T))
-        selected = first(candidates)
-        return RhoSupportRefinement.RhoSupportPrior(selected.T, selected.center, selected.gap)
-    end
     function evaluate_temperature(T::Float64)
         key = round(Float64(T); digits=8)
         if haskey(eval_cache, key)
@@ -2242,7 +2263,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             iterations,
             cfg,
             rho_session=rho_session,
-            rho_prior=cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ? rho_support_prior(Float64(T)) : nothing,
+            rho_prior=cfg.rho_refinement_policy in (:rho_support_cascade, :rho_support_hybrid) ?
+                _select_rho_support_prior(eval_cache, Float64(T)) : nothing,
             work_telemetry=work_telemetry,
         )
         eval_cache[key] = value

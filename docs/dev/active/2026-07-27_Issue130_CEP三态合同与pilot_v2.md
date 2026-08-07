@@ -504,7 +504,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   证书、三态一致性和成本；`full_hybrid_candidate` 不自动晋升 production/reference。
   作者审核完成前不启动 C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。
 
-## C0 production 输出物化失败与修复分支（2026-08-07）
+## C0 production 输出物化失败与历史初步诊断（2026-08-07）
 
 - [x] 新 C0 run `31103188845` 绑定 calculation SHA
   `fa390d89c836598e37b9fb75e7f8e7368283df1e`，41 个数值 shard 均在 `solve_points` 阶段
@@ -513,7 +513,16 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 诊断边界收窄为 phase-result materialization contract：三个可空 geometry summary
   字段被当作必填数值转换。该修复不修改 equilibrium solver、Maxwell、geometry 容差、
   hybrid policy、旧 reference 或历史 evidence。
-- [ ] 当前分支 `codex/issue-130-c0-diagnostic-materialization-repair-v2` 增加统一
+- [x] PR #186 已以 `main@d6cfa33edeace5aab2eb69f401ff543611a573c9` 合并，完成
   `nothing_to_inf_v1` summary 归一化、缺失字段 provenance 和 focused regression；嵌套
-  convergence records 保留 `null`。focused CI 通过并 squash merge 后，以新的 calculation
-  SHA 重跑 C0；C1/C2、reference 和 transport 继续暂停。
+  convergence records 保留 `null`。
+- [x] 随后 C0 run `31139870481` 仍以同一 `Float64(::Nothing)` 失败；此前将失败归因于
+  sweep summary 的初步诊断不完整，不能作为当前失败位置的最终结论。
+- [ ] 当前 repair 分支修复 previous-T rho-support prior 的可空过滤和 deterministic
+  nearest-temperature 选择；focused CI 通过并合并后，以新的 calculation SHA 重跑 C0；
+  C1/C2、reference 和 transport 继续暂停。
+
+根因是 previous-T prior 过滤条件把缺失字段时的 `continue` 逻辑写反：缺失
+`cascade_support_center/gap` 时继续对 `nothing` 执行 `Float64`，而两个字段有效时反而
+丢弃了有效 prior。当前 `codex/issue-130-c0-rho-prior-contract-repair` 只修复该内部
+路由并补 deterministic regression；新 calculation SHA 前不得复用上述失败 run。

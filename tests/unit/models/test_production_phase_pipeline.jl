@@ -14,6 +14,50 @@ end
     @test Models.RhoHybridVerificationConfig().candidate_policy == :unique_three_crossing_topology_v1
     @test Models.RhoHybridVerificationConfig().endpoint_policy == :bounded_zero_density_v1
 
+    @testset "previous-temperature rho-support prior is nullable and deterministic" begin
+        stage_b_only = Dict{Float64, NamedTuple}(
+            1.0 => (slice_status=:ambiguous_near_critical, status=:unknown),
+        )
+        @test Models._select_rho_support_prior(stage_b_only, 6.0) === nothing
+
+        missing_center = Dict{Float64, NamedTuple}(
+            1.0 => (cascade_support_center=nothing, cascade_support_gap=0.5),
+        )
+        missing_gap = Dict{Float64, NamedTuple}(
+            1.0 => (cascade_support_center=1.0, cascade_support_gap=nothing),
+        )
+        @test Models._select_rho_support_prior(missing_center, 6.0) === nothing
+        @test Models._select_rho_support_prior(missing_gap, 6.0) === nothing
+
+        invalid = Dict{Float64, NamedTuple}(
+            1.0 => (cascade_support_center="unresolved", cascade_support_gap=0.5),
+            2.0 => (cascade_support_center=1.0, cascade_support_gap=NaN),
+            3.0 => (cascade_support_center=1.0, cascade_support_gap=0.0),
+            4.0 => (cascade_support_center=Inf, cascade_support_gap=0.5),
+        )
+        @test Models._select_rho_support_prior(invalid, 6.0) === nothing
+
+        cache = Dict{Float64, NamedTuple}(
+            90.0 => (cascade_support_center=0.9, cascade_support_gap=0.3),
+            100.0 => (cascade_support_center=1.0, cascade_support_gap=0.4),
+            110.0 => (cascade_support_center=1.1, cascade_support_gap=0.5),
+            120.0 => (cascade_support_center=nothing, cascade_support_gap=nothing),
+        )
+        nearest = Models._select_rho_support_prior(cache, 104.0)
+        @test nearest isa Models.RhoSupportRefinement.RhoSupportPrior
+        @test nearest.T == 100.0
+        @test nearest.center == 1.0
+        @test nearest.width == 0.4
+
+        tie = Models._select_rho_support_prior(cache, 105.0)
+        @test tie.T == 100.0
+        @test tie.center == 1.0
+        @test tie.width == 0.4
+
+        @test cache[120.0].cascade_support_center === nothing
+        @test cache[120.0].cascade_support_gap === nothing
+    end
+
     @testset "nullable geometry scalars remain diagnostic" begin
         unresolved = (
             position_error_MeV=nothing,
