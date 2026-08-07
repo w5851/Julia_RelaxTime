@@ -14,6 +14,61 @@ end
     @test Models.RhoHybridVerificationConfig().candidate_policy == :unique_three_crossing_topology_v1
     @test Models.RhoHybridVerificationConfig().endpoint_policy == :bounded_zero_density_v1
 
+    @testset "nullable geometry scalars remain diagnostic" begin
+        unresolved = (
+            position_error_MeV=nothing,
+            density_error=nothing,
+            maxwell_area_gate=nothing,
+        )
+        normalized = Models._normalize_production_geometry_scalars(unresolved)
+        @test normalized.position_error_MeV == Inf
+        @test normalized.density_error == Inf
+        @test normalized.maxwell_area_gate == Inf
+        @test normalized.missing_fields == [
+            :position_error_MeV, :density_error, :maxwell_area_gate,
+        ]
+        @test normalized.normalization_version == :nothing_to_inf_v1
+
+        absent = (
+            position_error_MeV=0.01,
+            density_error=0.001,
+        )
+        absent_normalized = Models._normalize_production_geometry_scalars(absent)
+        @test absent_normalized.position_error_MeV == 0.01
+        @test absent_normalized.density_error == 0.001
+        @test absent_normalized.maxwell_area_gate == Inf
+        @test absent_normalized.missing_fields == [:maxwell_area_gate]
+
+        finite = (
+            position_error_MeV=0.0,
+            density_error=0.0025,
+            maxwell_area_gate=5e-5,
+        )
+        finite_normalized = Models._normalize_production_geometry_scalars(finite)
+        @test finite_normalized.position_error_MeV == 0.0
+        @test finite_normalized.density_error == 0.0025
+        @test finite_normalized.maxwell_area_gate == 5e-5
+        @test isempty(finite_normalized.missing_fields)
+
+        endpoint = (
+            position_error_MeV=0.01,
+            density_error=0.001,
+            maxwell_area_gate=1e-6,
+            rho_hadron=0.0,
+            slice_status=:confirmed_first_order,
+        )
+        endpoint_normalized = Models._normalize_production_geometry_scalars(endpoint)
+        @test endpoint_normalized.position_error_MeV == 0.01
+        @test endpoint.rho_hadron == 0.0
+        @test endpoint.slice_status == :confirmed_first_order
+
+        @test_throws ArgumentError Models._normalize_production_geometry_scalars((
+            position_error_MeV="unresolved",
+            density_error=0.0,
+            maxwell_area_gate=0.0,
+        ))
+    end
+
     @testset "hybrid support uses strict outer extrema samples" begin
         sres = Models.SShapeResult(true, 4.0, 2.0, 1.5, 3.5, 2)
         curve = ([0.0, 4.0, 3.0, 2.0, 5.0, 6.0], collect(0.0:1.0:5.0))

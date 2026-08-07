@@ -1783,6 +1783,44 @@ function _push_production_spinodal!(rows::Vector{NamedTuple}, T::Float64, res)
     ))
 end
 
+const _PRODUCTION_GEOMETRY_SCALAR_FIELDS = (
+    :position_error_MeV,
+    :density_error,
+    :maxwell_area_gate,
+)
+
+"""Normalize optional geometry scalars for the production sweep summary.
+
+Classification and convergence records deliberately use `nothing`/`null` when
+two rho layers are not comparable.  The sweep summary, however, is a stable
+numeric record consumed by CSV/JSON writers.  Keep the unresolved state
+diagnostic (via `missing_fields`) while using the existing `Inf` sentinel for
+the numeric summary; never turn it into a geometry pass.
+"""
+function _normalize_production_geometry_scalars(result)
+    values = Dict{Symbol, Float64}()
+    missing_fields = Symbol[]
+    for field in _PRODUCTION_GEOMETRY_SCALAR_FIELDS
+        if !hasproperty(result, field) || getproperty(result, field) === nothing
+            values[field] = Inf
+            push!(missing_fields, field)
+            continue
+        end
+        value = getproperty(result, field)
+        value isa Real || throw(ArgumentError(
+            "production geometry scalar $(field) must be Real or nothing, got $(typeof(value))",
+        ))
+        values[field] = Float64(value)
+    end
+    return (
+        position_error_MeV=values[:position_error_MeV],
+        density_error=values[:density_error],
+        maxwell_area_gate=values[:maxwell_area_gate],
+        missing_fields=missing_fields,
+        normalization_version=:nothing_to_inf_v1,
+    )
+end
+
 function _materialize_sweep_result(records::AbstractVector{<:NamedTuple}, first_point_fallback::Bool, fallback_start_T_MeV::Float64,
         unknown_count::Int, forced_invalid_count::Int)
     return FirstOrderSweepResult(
@@ -2258,6 +2296,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             _push_production_spinodal!(spinodal, T, res)
         end
 
+        geometry_scalars = _normalize_production_geometry_scalars(res)
+
         push!(sweep_records, (
             T_MeV=Float64(T),
             status=status,
@@ -2297,9 +2337,11 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             maxwell_crossing_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :crossing_count, 0)),
             maxwell_endpoint_dependent=Bool(get(get(res, :maxwell, MaxwellResult()).details, :endpoint_dependent, false)),
             geometry_converged=Bool(get(res, :geometry_converged, false)),
-            position_error_MeV=Float64(get(res, :position_error_MeV, Inf)),
-            density_error=Float64(get(res, :density_error, Inf)),
-            maxwell_area_gate=Float64(get(res, :maxwell_area_gate, Inf)),
+            position_error_MeV=geometry_scalars.position_error_MeV,
+            density_error=geometry_scalars.density_error,
+            maxwell_area_gate=geometry_scalars.maxwell_area_gate,
+            geometry_missing_fields=String.(geometry_scalars.missing_fields),
+            geometry_normalization_version=String(geometry_scalars.normalization_version),
             area_residual=Float64(something(res.area_residual, NaN)),
             rho_hadron=Float64(something(res.rho_hadron, NaN)),
             rho_quark=Float64(something(res.rho_quark, NaN)),
