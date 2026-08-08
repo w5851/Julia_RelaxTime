@@ -356,3 +356,90 @@ def test_merge_includes_staged_xi_convergence_records(tmp_path: Path) -> None:
     assert any(row["axis"] == "xi" and row["level"] == "1" for row in rows)
     manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
     assert len(manifest["xi_refinement_records"]) == 1
+
+
+def test_merge_aggregates_available_phase_telemetry_and_costs(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "left", [-0.1, 0.0])
+    write_shard(shards, "right", [0.1])
+    diagnostic = {
+        "schema_version": "pnjl_phase_shard_diagnostics_v1",
+        "normalization_version": "phase_summary_projection_v1",
+        "tag": TAG,
+        "stage": "initial",
+        "shard_id": "left",
+        "xi": -0.1,
+        "calculation_sha": "abc123",
+        "postprocess_sha": "def456",
+        "availability": "available",
+        "missing_fields": [],
+        "config_hash": "cfg-left",
+        "diagnostics": {
+            "counters": {
+                "scan_total": 10,
+                "scan_success": 9,
+                "scan_failure": 1,
+                "point_requests": 20,
+                "cache_hits": 5,
+                "unique_solves": 15,
+                "targeted_additions": 2,
+                "failed_points": 1,
+            },
+            "status_counts": {"confirmed_first_order": 1},
+            "stage_counts": {"stage_b_dense": 1},
+            "certificate_counts": {"endpoint_limited_first_order": 1},
+            "geometry_missing_record_count": 0,
+        },
+    }
+    (shards / "left" / f"phase_diagnostics_{TAG}_initial_left.json").write_text(
+        json.dumps(diagnostic), encoding="utf-8"
+    )
+    diagnostic["xi"] = 0.1
+    diagnostic["shard_id"] = "right"
+    (shards / "right" / f"phase_diagnostics_{TAG}_initial_right.json").write_text(
+        json.dumps(diagnostic), encoding="utf-8"
+    )
+    output = tmp_path / "merged"
+    result = run_merge(
+        shards,
+        output,
+        extra_args=["--expected-calculation-git-commit", "abc123", "--postprocess-git-commit", "def456"],
+    )
+    assert result.returncode == 0, result.stderr
+    telemetry = json.loads((output / f"phase_diagnostics_{TAG}.json").read_text(encoding="utf-8"))
+    assert telemetry["telemetry_status"] == "available"
+    assert telemetry["counter_totals"]["unique_solves"] == 30
+    assert telemetry["status_counts"] == {"confirmed_first_order": 2}
+    manifest = json.loads((output / f"phase_reference_{TAG}_manifest.json").read_text(encoding="utf-8"))
+    assert manifest["telemetry"]["status"] == "available"
+    assert manifest["artifacts"]["phase_diagnostics"]["record_count"] == 2
+    validation = subprocess.run(
+        [
+            sys.executable,
+            str(VALIDATOR),
+            "--reference-root",
+            str(output),
+            "--tag",
+            TAG,
+            "--expect-full-reference",
+            "--diagnostics-path",
+            str(output / f"phase_diagnostics_{TAG}.json"),
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert validation.returncode == 0, validation.stderr
+
+
+def test_merge_marks_legacy_shards_telemetry_unavailable(tmp_path: Path) -> None:
+    shards = tmp_path / "shards"
+    write_shard(shards, "only", [-0.1, 0.0, 0.1])
+    output = tmp_path / "merged"
+    result = run_merge(shards, output)
+    assert result.returncode == 0, result.stderr
+    telemetry = json.loads((output / f"phase_diagnostics_{TAG}.json").read_text(encoding="utf-8"))
+    assert telemetry["telemetry_status"] == "telemetry_unavailable"
+    assert telemetry["counter_totals"]["unique_solves"] is None
+    assert telemetry["missing_shard_diagnostics"] == 1

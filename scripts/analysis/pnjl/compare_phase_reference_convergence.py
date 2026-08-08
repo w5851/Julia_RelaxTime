@@ -26,6 +26,21 @@ COMPARE_COLUMNS = {
     "crossover": ["mu_MeV", "T_crossover_MeV", "rho", "derivative"],
 }
 
+CEP_NUMERIC_COLUMNS = [
+    "T_CEP_MeV",
+    "muq_CEP_MeV",
+    "muB_CEP_MeV",
+    "T_bracket_low_MeV",
+    "T_bracket_high_MeV",
+    "bracket_width_T_MeV",
+    "T_last_first_order_MeV",
+    "muq_last_first_order_MeV",
+    "muB_last_first_order_MeV",
+    "T_first_monotone_MeV",
+    "ambiguity_width_T_MeV",
+    "temperature_resolution_target_MeV",
+]
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -181,12 +196,12 @@ def rel_diff(candidate, reference):
     return abs(candidate - reference) / denom
 
 
-def append_missing_rows(comparison_rows, artifact, keys, side):
+def append_missing_rows(comparison_rows, artifact, keys, side, *, adaptive_xi=False):
     for key in sorted(keys):
         comparison_rows.append(
             {
                 "artifact": artifact,
-                "match_status": f"missing_in_{side}",
+                "match_status": "adaptive_xi_added" if adaptive_xi else f"missing_in_{side}",
                 "xi": key[0] if key else "",
                 "match_key": "|".join(str(part) for part in key),
                 "metric": "",
@@ -198,7 +213,97 @@ def append_missing_rows(comparison_rows, artifact, keys, side):
         )
 
 
+def _append_key_gaps(comparison_rows, artifact, candidate_keys, reference_keys):
+    # A denser C1/C2 grid legitimately adds xi midpoints.  Keep these rows in
+    # the audit output without treating them as a failed one-to-one match.
+    append_missing_rows(
+        comparison_rows,
+        artifact,
+        candidate_keys - reference_keys,
+        "reference",
+        adaptive_xi=True,
+    )
+    append_missing_rows(comparison_rows, artifact, reference_keys - candidate_keys, "candidate")
+
+
+def _value_text(row, column):
+    value = row.get(column, "")
+    return "" if value is None else str(value).strip()
+
+
+def compare_cep_artifact(candidate_rows, reference_rows):
+    candidate_keyed = keyed_rows("cep", candidate_rows)
+    reference_keyed = keyed_rows("cep", reference_rows)
+    candidate_keys = set(candidate_keyed)
+    reference_keys = set(reference_keyed)
+    comparison_rows = []
+    _append_key_gaps(comparison_rows, "cep", candidate_keys, reference_keys)
+
+    for key in sorted(candidate_keys & reference_keys):
+        candidate = candidate_keyed[key]
+        reference = reference_keyed[key]
+        candidate_status = _value_text(candidate, "result_status")
+        reference_status = _value_text(reference, "result_status")
+        comparison_rows.append(
+            {
+                "artifact": "cep",
+                "match_status": "matched" if candidate_status == reference_status else "status_changed",
+                "xi": key[0],
+                "match_key": "|".join(str(part) for part in key),
+                "metric": "result_status",
+                "candidate_value": candidate_status,
+                "reference_value": reference_status,
+                "abs_diff": "",
+                "rel_diff": "",
+            }
+        )
+        for column in CEP_NUMERIC_COLUMNS:
+            candidate_text = _value_text(candidate, column)
+            reference_text = _value_text(reference, column)
+            if not candidate_text and not reference_text:
+                comparison_rows.append(
+                    {
+                        "artifact": "cep",
+                        "match_status": "not_applicable",
+                        "xi": key[0],
+                        "match_key": "|".join(str(part) for part in key),
+                        "metric": column,
+                        "candidate_value": "",
+                        "reference_value": "",
+                        "abs_diff": "",
+                        "rel_diff": "",
+                    }
+                )
+                continue
+            candidate_value = try_float(candidate_text)
+            reference_value = try_float(reference_text)
+            if candidate_value is None or reference_value is None or not math.isfinite(candidate_value) or not math.isfinite(reference_value):
+                status = "non_numeric"
+                abs_diff = ""
+                rel_value = ""
+            else:
+                status = "matched"
+                abs_diff = abs(candidate_value - reference_value)
+                rel_value = rel_diff(candidate_value, reference_value)
+            comparison_rows.append(
+                {
+                    "artifact": "cep",
+                    "match_status": status,
+                    "xi": key[0],
+                    "match_key": "|".join(str(part) for part in key),
+                    "metric": column,
+                    "candidate_value": candidate_text,
+                    "reference_value": reference_text,
+                    "abs_diff": abs_diff,
+                    "rel_diff": rel_value,
+                }
+            )
+    return comparison_rows
+
+
 def compare_artifact(artifact, candidate_rows, reference_rows):
+    if artifact == "cep":
+        return compare_cep_artifact(candidate_rows, reference_rows)
     candidate_keyed = keyed_rows(artifact, candidate_rows)
     reference_keyed = keyed_rows(artifact, reference_rows)
     candidate_keys = set(candidate_keyed)
@@ -206,8 +311,7 @@ def compare_artifact(artifact, candidate_rows, reference_rows):
     shared_keys = sorted(candidate_keys & reference_keys)
     comparison_rows = []
 
-    append_missing_rows(comparison_rows, artifact, candidate_keys - reference_keys, "reference")
-    append_missing_rows(comparison_rows, artifact, reference_keys - candidate_keys, "candidate")
+    _append_key_gaps(comparison_rows, artifact, candidate_keys, reference_keys)
 
     for key in shared_keys:
         candidate = candidate_keyed[key]
@@ -265,16 +369,31 @@ def summarize_comparison(rows):
                 "mean_rel_diff": None,
                 "max_abs_match_key": None,
                 "max_rel_match_key": None,
+                "status_changed_count": 0,
+                "not_applicable_count": 0,
+                "adaptive_xi_count": 0,
             },
         )
         status = row["match_status"]
+        if status == "adaptive_xi_added":
+            entry["adaptive_xi_count"] += 1
+            continue
         if status.startswith("missing"):
             entry["missing_count"] += 1
+            continue
+        if status == "status_changed":
+            entry["status_changed_count"] += 1
+            continue
+        if status == "not_applicable":
+            entry["not_applicable_count"] += 1
             continue
         if status == "non_numeric":
             entry["non_numeric_count"] += 1
             continue
         entry["matched_count"] += 1
+        if row["abs_diff"] in ("", None):
+            # String/status matches have no numeric difference to aggregate.
+            continue
         abs_value = float(row["abs_diff"])
         rel_value = float(row["rel_diff"])
         entry.setdefault("_abs_values", []).append(abs_value)
@@ -345,6 +464,14 @@ def write_markdown(path, payload):
                 f"non_numeric={row['non_numeric_count']}"
             )
 
+    if payload.get("adaptive_xi_rows"):
+        lines.extend(["", "## Adaptive Xi Additions", ""])
+        for row in payload["adaptive_xi_rows"]:
+            lines.append(
+                f"- {row['artifact']}: {row['adaptive_xi_count']} candidate-only xi rows; "
+                "reported separately from missing matches"
+            )
+
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -375,6 +502,11 @@ def main():
         for row in comparison_summary
         if row["missing_count"] > 0 or row["non_numeric_count"] > 0
     ]
+    adaptive_xi_rows = [
+        row
+        for row in comparison_summary
+        if row.get("adaptive_xi_count", 0) > 0
+    ]
     bad_inventory = []
     for side, inventory in (("candidate", candidate_inventory), ("reference", reference_inventory)):
         for artifact, info in inventory.items():
@@ -400,6 +532,7 @@ def main():
         "reference_inventory": reference_inventory,
         "comparison_summary": comparison_summary,
         "missing_or_non_numeric": missing_or_non_numeric,
+        "adaptive_xi_rows": adaptive_xi_rows,
         "bad_inventory": bad_inventory,
     }
 
