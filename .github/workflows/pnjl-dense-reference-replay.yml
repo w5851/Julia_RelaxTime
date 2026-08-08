@@ -189,6 +189,7 @@ jobs:
             ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.csv
             ${{ env.REFERENCE_ROOT }}/*_${{ inputs.tag }}.meta.json
             ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag }}_manifest.json
+            ${{ env.REFERENCE_ROOT }}/phase_diagnostics_${{ inputs.tag }}.json
             ${{ env.REPORT_PATH }}
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
           if-no-files-found: error

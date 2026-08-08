@@ -44,6 +44,9 @@ jobs:
       PROCESS_ROOT: data/processed/pnjl/ci_dense_reference/${{ github.run_id }}/${{ inputs.stage }}-${{ inputs.shard_id }}
       REPORT_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/validation_report.json
       LOG_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/dense_reference.log
+      DIAGNOSTICS_PATH: data/outputs/artifacts/pnjl_dense_reference/${{ github.run_id }}/shards/${{ inputs.stage }}-${{ inputs.shard_id }}/phase_diagnostics_${{ inputs.tag }}_${{ inputs.stage }}_${{ inputs.shard_id }}.json
+      CALCULATION_SHA: ${{ inputs.calculation_ref || github.sha }}
+      POSTPROCESS_SHA: ${{ github.sha }}
     steps:
       - name: Record disabled refinement stage
         if: ${{ inputs.enabled == false }}
@@ -134,6 +137,28 @@ jobs:
           set -e
           exit "${status}"
 
+      - name: Checkout postprocess helpers after solve
+        if: ${{ inputs.enabled && success() }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          clean: false
+
+      - name: Materialize phase telemetry
+        if: ${{ inputs.enabled && success() }}
+        shell: bash
+        run: |
+          python scripts/pnjl/extract_phase_diagnostics.py \
+            --process-root "${PROCESS_ROOT}" \
+            --output "${DIAGNOSTICS_PATH}" \
+            --tag "${{ inputs.tag }}" \
+            --stage "${{ inputs.stage }}" \
+            --shard-id "${{ inputs.shard_id }}" \
+            --xi "${{ inputs.xi }}" \
+            --calculation-sha "${CALCULATION_SHA}" \
+            --postprocess-sha "${POSTPROCESS_SHA}" \
+            --source-workflow-run-id "${GITHUB_RUN_ID}"
+
       - name: Validate shard artifact
         if: ${{ inputs.enabled && success() }}
         shell: bash
@@ -166,6 +191,7 @@ jobs:
             ${{ env.REFERENCE_ROOT }}/phase_reference_${{ inputs.tag }}_manifest.json
             ${{ env.REPORT_PATH }}
             ${{ env.LOG_PATH }}
+            ${{ env.DIAGNOSTICS_PATH }}
           retention-days: ${{ fromJson(env.ARTIFACT_RETENTION_DAYS) }}
           if-no-files-found: error
 

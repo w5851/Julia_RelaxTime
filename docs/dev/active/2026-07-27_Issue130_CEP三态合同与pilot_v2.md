@@ -526,3 +526,22 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 `cascade_support_center/gap` 时继续对 `nothing` 执行 `Float64`，而两个字段有效时反而
 丢弃了有效 prior。当前 `codex/issue-130-c0-rho-prior-contract-repair` 只修复该内部
 路由并补 deterministic regression；新 calculation SHA 前不得复用上述失败 run。
+
+## C0 accepted; cross-stage convergence route (2026-08-08)
+
+- C0 `31149826740` is accepted as a diagnostic-only candidate at calculation
+  `ffa816df0a145f73d7490db1ed9ff10c92e017a4`; it is not promoted or recomputed.
+- The accepted audit distinguishes successful finite/converged final curves from internal
+  geometry/interpolation records that remain unresolved. C1/C2 therefore compare stable
+  physical outputs across stages rather than requiring the historical 1,650 records to be
+  zero. The allowed residual class is geometry/interpolation only; solver failure, payload
+  incompleteness, NaN/Inf or non-finite final curves still fail the gate.
+- The telemetry repair branch adds `pnjl_phase_shard_diagnostics_v1` and
+  `pnjl_phase_telemetry_aggregate_v1`. A missing historical `phase_summary.json` is recorded
+  as `telemetry_unavailable` with null counters. It does not change any phase classification,
+  Maxwell/geometry tolerance or rho-support policy.
+- C1 (`issue130_endpoint_hybrid_c1_20260808_integral_tight`) changes only thermal quadrature
+  to `rtol=1e-10, atol=1e-12`. C2 (`issue130_endpoint_hybrid_c2_20260808_grid_tight`) restores
+  C0 quadrature and tightens rho/T/xi geometry/refinement contracts. C2 must also close the
+  CEP bracket to 0.1 MeV and keep public anchors/first-order geometry stable before a new
+  convergence evidence package is opened.
