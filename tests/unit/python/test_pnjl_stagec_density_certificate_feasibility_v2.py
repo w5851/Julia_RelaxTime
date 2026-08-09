@@ -13,8 +13,12 @@ WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-stagec-density-certificate-fea
 def test_v2_evaluator_is_solver_free_and_versioned():
     text = EVALUATOR.read_text(encoding="utf-8")
     assert 'SCHEMA_VERSION = "cep_hybrid_stagec_density_certificate_feasibility_v2"' in text
-    assert 'const SOURCE_RUN_ID = "31296511813"' in text
-    assert 'const SOURCE_CALCULATION_SHA = "ffa816df0a145f73d7490db1ed9ff10c92e017a4"' in text
+    assert 'const SOURCE_RUN_ID' not in text
+    assert 'const SOURCE_CALCULATION_SHA' not in text
+    assert '"--source-run-id is required"' in text
+    assert 'source_run_id" => source_run_id' in text
+    assert '"--expected-calculation-sha is required"' in text
+    assert '"--expected-source-postprocess-sha is required"' in text
     assert "solver_called" in text
     assert "run_production_phase_pipeline" not in text
     assert "candidate_point_index.csv" in text
@@ -34,6 +38,7 @@ def test_v2_workflow_is_aggregate_only_and_uses_dual_sha():
     assert "numeric_failures" in text and "test \"$numeric_failures\" = 0" in text
     assert "git worktree add --detach calculation" in text
     assert "--expected-calculation-sha" in text
+    assert '--source-run-id "$SOURCE_RUN_ID"' in text
     assert "--producer-head-sha" in text
     assert "solver_called" in text
     assert "matplotlib==3.9.2" in text

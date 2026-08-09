@@ -118,6 +118,7 @@ jobs:
           set +e
           julia --project=calculation calculation/scripts/analysis/pnjl_stagec_density_certificate_feasibility_v2.jl \
             --input-dir source-artifacts \
+            --source-run-id "$SOURCE_RUN_ID" \
             --output-dir aggregate \
             --expected-calculation-sha "$CALCULATION_REF" \
             --expected-source-postprocess-sha "$SOURCE_POSTPROCESS_SHA" \
