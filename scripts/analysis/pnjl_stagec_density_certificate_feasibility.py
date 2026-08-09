@@ -576,8 +576,8 @@ def _write_plots(output_dir: Path, bundle: dict[str, Any], selected_rows: list[d
         ax.plot([rho for rho, _mu in points], [mu for _rho, mu in points], color="#264653", linewidth=1.1)
         if selected:
             ax.scatter([_float(row.get("rho")) for row in selected], [_float(row.get("muq_MeV")) for row in selected], color="#e76f51", s=14)
-        ax.set_xlabel(r"$\\rho$")
-        ax.set_ylabel(r"$\\mu_q$ [MeV]")
+        ax.set_xlabel(r"$\rho$")
+        ax.set_ylabel(r"$\mu_q$ [MeV]")
         ax.set_title(f"Stage-B density certificate xi={xi:g}, T={temperature:g} MeV")
         ax.grid(alpha=0.2)
         name = f"rho_mu_xi_{str(xi).replace('-', 'm').replace('.', 'p')}_T_{str(temperature).replace('.', 'p')}.png"
