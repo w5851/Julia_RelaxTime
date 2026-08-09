@@ -64,6 +64,12 @@ midpoint，并把 anchor 与最多 12 个 refinement 点分别写入诊断。左
 `endpoint_policy=:bounded_zero_density_v1` 继续保留以复现历史产物，默认 uniform/cascade
 语义不变。
 
+启用 hybrid 时，`phase_summary.json` 与 shadow `slice_metrics.csv` 还会保留
+`point_ranking_version`、`stage_c_selected_points_json`（`feature/rank/batch/rho`）、
+`stage_c_component_geometry_json`（四个 density component 的
+`pass/fail/unresolved`）以及 `stage_c_stop_reason`/`stage_c_actual_cap`。这些字段只描述
+当前请求的路由和证书诊断，不参与三态标签，也不会把缺失 geometry 当作通过。
+
 脚本/配置入口对应键为 `rho_hybrid_endpoint_policy`（稳定 phase CLI 使用
 `--rho_hybrid_endpoint_policy=...`，Dense Reference builder 使用
 `--rho-hybrid-endpoint-policy ...`）；Dense Reference Actions 对 hybrid 请求默认显式选择

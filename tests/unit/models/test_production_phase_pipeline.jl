@@ -127,6 +127,11 @@ end
         @test support.mu_high == 4.0
         @test support.guard_rule == :extrema_outer_samples_v1
         @test length(support.grid) <= 12
+        @test length(support.selected_points) == length(support.grid)
+        @test support.actual_cap == length(support.grid)
+        @test all(row -> row.feature == "stage_b_features_v1" && row.batch == 1,
+            support.selected_points)
+        @test [row.rho for row in support.selected_points] == support.grid
         @test all(value -> !(value in Set(collect(0.0:0.00625:4.0))), support.grid)
         @test all(0.0 <= value <= 4.0 for value in support.grid)
         @test all(isapprox(value / 0.003125, round(value / 0.003125); atol=1e-8, rtol=0.0) for value in support.grid)
@@ -144,6 +149,22 @@ end
             (sres=Models.SShapeResult(),),
             (sres=Models.SShapeResult(), curve=nothing))
         @test missing_support.status == :ambiguous_near_critical
+        @test missing_support.selected_points == NamedTuple[]
+    end
+
+    @testset "hybrid density component diagnostics distinguish unresolved values" begin
+        reference = (rho_hadron=0.5, rho_quark=3.5,
+            rho_spinodal_hadron=1.5, rho_spinodal_quark=3.5)
+        current = (rho_hadron=0.501, rho_quark=3.501,
+            rho_spinodal_hadron=1.5, rho_spinodal_quark=nothing)
+        components = Models._hybrid_density_component_geometry(reference, current, 0.0025)
+        @test length(components) == 4
+        @test components[1].status == "pass"
+        @test components[1].pass
+        @test components[2].status == "pass"
+        @test components[3].status == "pass"
+        @test components[4].status == "unresolved"
+        @test !components[4].pass
     end
 
     @testset "endpoint-limit route is opt-in and requires a unique public candidate" begin

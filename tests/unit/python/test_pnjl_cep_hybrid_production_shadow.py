@@ -55,7 +55,7 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100, scope: str
         for index, t in enumerate(anchors):
             writer.writerow({"xi": xi, "method": method, "T_MeV": t, "rho_level": 0, "rho": 1.0, "muq_MeV": 300.0 + index, "converged": "true", "finite": "true"})
     with (job / "slice_metrics.csv").open("w", newline="", encoding="utf-8") as handle:
-        fields = ["xi", "method", "T_MeV", "stage_a_status", "stage_b_status", "stage_c_status", "stage_used", "upgrade_reason", "result_status", "geometry_converged", "position_error_MeV", "density_error", "maxwell_area_gate", "area_residual", "mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "support_low", "support_high", "support_point_count", "targeted_additions", "solver_failure_count"]
+        fields = ["xi", "method", "T_MeV", "stage_a_status", "stage_b_status", "stage_c_status", "stage_used", "upgrade_reason", "result_status", "geometry_converged", "position_error_MeV", "density_error", "maxwell_area_gate", "area_residual", "mu_transition_MeV", "rho_hadron", "rho_quark", "mu_spinodal_hadron_MeV", "mu_spinodal_quark_MeV", "rho_spinodal_hadron", "rho_spinodal_quark", "support_low", "support_high", "support_point_count", "point_ranking_version", "stage_c_stop_reason", "stage_c_actual_cap", "stage_c_selected_points_json", "stage_c_component_geometry_json", "stage_c_refinement_trace_json", "targeted_additions", "solver_failure_count"]
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for t in anchors:
@@ -71,7 +71,14 @@ def write_job(root: Path, xi: float, method: str, *, cost: int = 100, scope: str
                 "rho_quark": 2.0 if first else "", "mu_spinodal_hadron_MeV": 301.0 if first else "",
                 "mu_spinodal_quark_MeV": 299.0 if first else "", "rho_spinodal_hadron": 0.9 if first else "",
                 "rho_spinodal_quark": 2.1 if first else "", "support_low": "", "support_high": "",
-                "support_point_count": 0, "targeted_additions": 9 if method == "production_hybrid" else 0,
+                "support_point_count": 0,
+                "point_ranking_version": "stage_b_features_v1" if method == "production_hybrid" else "",
+                "stage_c_stop_reason": "geometry_certificate_closed" if method == "production_hybrid" else "",
+                "stage_c_actual_cap": 9 if method == "production_hybrid" else 0,
+                "stage_c_selected_points_json": '[{"feature":"stage_b_features_v1","rank":1,"batch":1,"rho":0.1}]' if method == "production_hybrid" else "[]",
+                "stage_c_component_geometry_json": '[{"component":"rho_hadron","status":"pass","pass":true}]' if method == "production_hybrid" else "[]",
+                "stage_c_refinement_trace_json": "[]",
+                "targeted_additions": 9 if method == "production_hybrid" else 0,
                 "solver_failure_count": 0,
             })
     (job / "method_costs.csv").write_text(
@@ -118,6 +125,11 @@ def test_hybrid_collector_accepts_complete_matrix(tmp_path):
     assert gate["verdict"] == "full_hybrid_candidate"
     assert (tmp_path / "aggregate" / "geometry_accuracy.csv").is_file()
     assert (tmp_path / "aggregate" / "manifest.json").is_file()
+    rows = list(csv.DictReader((tmp_path / "aggregate" / "geometry_accuracy.csv").open(newline="", encoding="utf-8")))
+    production_row = next(row for row in rows if row["method"] == "production_hybrid")
+    assert production_row["point_ranking_version"] == "stage_b_features_v1"
+    assert production_row["stage_c_stop_reason"] == "geometry_certificate_closed"
+    assert production_row["stage_c_actual_cap"] == "9"
 
 
 def test_hybrid_collector_accepts_targeted_matrix_and_uses_targeted_verdict(tmp_path):

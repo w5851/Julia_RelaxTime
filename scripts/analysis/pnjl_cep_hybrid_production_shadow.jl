@@ -193,6 +193,14 @@ end
     end
 end
 
+function _json_value(value)
+    try
+        return String(JSON3.write(value))
+    catch
+        return "[]"
+    end
+end
+
 function _run_anchor(cfg, T::Float64, anchor_dir::String, steps, telemetry)
     mkpath(anchor_dir)
     result = Models.run_production_phase_pipeline(
@@ -218,7 +226,9 @@ function _run_anchor(cfg, T::Float64, anchor_dir::String, steps, telemetry)
         rho_support_fine_step=steps.fine,
         rho_support_targeted_cap=12,
         rho_support_config=Models.RhoSupportConfig(),
-        rho_hybrid_verification=Models.RhoHybridVerificationConfig(endpoint_policy=cfg.endpoint_policy),
+        rho_hybrid_verification=Models.RhoHybridVerificationConfig(
+            point_ranking_version=:stage_b_features_v1,
+            endpoint_policy=cfg.endpoint_policy),
         work_telemetry=telemetry,
         memoize_uniform=steps.policy === :uniform_nested,
         promote_reference=false,
@@ -268,6 +278,12 @@ function _slice_row(cfg, T, result)
         guard_status=String(_field(record, :hybrid_guard_status, :not_run)),
         guard_reason=String(_field(record, :hybrid_guard_reason, "not_applicable")),
         guard_source=join(String.(_field(record, :hybrid_guard_source, String[])), ";"),
+        point_ranking_version=String(_field(record, :hybrid_point_ranking_version, "stage_b_features_v1")),
+        stage_c_stop_reason=String(_field(record, :hybrid_stop_reason, "not_applicable")),
+        stage_c_actual_cap=Int(_field(record, :hybrid_actual_cap, 0)),
+        stage_c_selected_points_json=_json_value(_field(record, :hybrid_selected_points, NamedTuple[])),
+        stage_c_component_geometry_json=_json_value(_field(record, :hybrid_component_geometry, NamedTuple[])),
+        stage_c_refinement_trace_json=_json_value(_field(record, :hybrid_stage_c_refinement_trace, NamedTuple[])),
         certificate_type=String(_field(record, :hybrid_certificate_type, "none")),
         endpoint_lower_bound=_safe_float(_field(record, :hybrid_endpoint_lower_bound, NaN)),
         endpoint_upper_bound=_safe_float(_field(record, :hybrid_endpoint_upper_bound, NaN)),
@@ -384,6 +400,12 @@ function _run_job(cfg)
             "rho_hybrid_point_ranking_version" => "stage_b_features_v1",
             "rho_hybrid_candidate_policy" => "unique_three_crossing_topology_v1",
             "rho_hybrid_endpoint_policy" => String(cfg.endpoint_policy),
+            "rho_hybrid_selected_policy" => Dict(
+                "point_ranking_version" => "stage_b_features_v1",
+                "local_step" => 0.003125,
+                "target_cap" => 12,
+                "source" => "stagec_density_certificate_feasibility_v2",
+            ),
             "rho_support_targeted_cap" => steps.policy === :rho_support_hybrid ? 12 : 0,
         ),
         "telemetry" => Dict(string(field) => getproperty(snapshot, field) for field in propertynames(snapshot)),
