@@ -621,3 +621,32 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 因未得到 `feasible_candidate`，保留 replay evidence 为 diagnostic-only；不创建 Stage-C
   production PR，不启动新的 C0/C1/C2、reference promotion、C3/O1 或 transport。后续需先由作者
   判断 classification/CEP/crossover 阻塞的处理路线。
+
+## Stage-C feasibility contract v2（2026-08-09）
+
+- [x] 从本地 `main@88336a46` 创建分支
+  `codex/issue-130-stagec-feasibility-contract-v2`；保留 v1 runner/workflow/evidence 不变，
+  不向本地 `main` 推送。
+- [x] 新增 solver-free production-parity evaluator
+  `scripts/analysis/pnjl_stagec_density_certificate_feasibility_v2.jl`：固定 source run
+  `31296511813`、calculation SHA `ffa816df…`，直接调用 `Models` 的 S-shape/Maxwell/geometry
+  合同，路由不读取 oracle 标签，且明确 `solver_called=false`。
+- [x] evaluator 按 numerical job 的 `rho_level` 分离 Stage A（production hybrid
+  `0.05→0.025`）和同一 independent-oracle session 的 Stage B（全域
+  `0.0125→0.00625`, `level=0`）与不重合的 `0.003125` Stage-C pool（`level=1`）；
+  memoized dense 仅作为成本基线。完整 Stage-B 曲线与实际补点逐点合并重算。这修正了
+  v1 replay 将 oracle fine 点提前消费、把 Stage-C additions 误记为零的风险。
+- [x] 三条 route 的候选序列、逐项 geometry component、完整 Stage-A/B/实际 Stage-C key 并集
+  成本和 cap frontier 均写入 versioned 输出；manifest 最后写入，覆盖 README/AUDIT/plot
+  metadata 和所有输入/派生文件 hash。
+- [x] 本地外部 artifact replay 已完成：`feasible_candidate`、cap `12`、route
+  `stage_b_features_v1`，hybrid unique solves `7985`，dense baseline `9615`，15 个锚点
+  classification/geometry/finite/cost gates 通过，`solver_called=false`。该结果只用于开发
+  自检，不是 Actions evidence 或 production 授权。
+- [x] 新增固定 matplotlib plotter、aggregate-only workflow
+  `.github/workflows/pnjl-stagec-density-certificate-feasibility-v2.yml` 和 focused
+  Julia/Python contract tests；workflow 从固定 calculation worktree 运行 evaluator，并校验
+  source run 的 30 个 numerical jobs、双 SHA 与 artifact hashes。
+- [ ] PR focused CI 通过后，运行 v2 aggregate replay；无论 verdict 如何导入独立不可变 v2
+  evidence。只有 Actions replay 再次得到 `feasible_candidate` 才创建 production PR；此前
+  不运行新的 C0/C1/C2、CEP/crossover numerical workflow、reference、C3/O1 或 transport。
