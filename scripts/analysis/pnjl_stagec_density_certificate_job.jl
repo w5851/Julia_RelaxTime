@@ -34,6 +34,7 @@ const DENSITY_ANCHORS = Dict(
     0.5 => [60.0, 120.0],
 )
 const METHODS = (:production_hybrid, :memoized_dense, :independent_oracle)
+const STAGE_C_STEP = 0.003125
 const ENDPOINT_POLICY = :three_crossing_endpoint_local_v2
 
 @inline function _arg(args, name, default=nothing)

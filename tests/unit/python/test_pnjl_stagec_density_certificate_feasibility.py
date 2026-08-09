@@ -24,6 +24,7 @@ def test_anchor_matrix_and_caps_are_fixed():
     assert len(module.METHODS) == 3
     assert module.EXPECTED_JOB_COUNT == 30
     assert module.CAPS == (12, 16, 24)
+    assert "STAGE_C_STEP = 0.003125" in (ROOT / "scripts" / "analysis" / "pnjl_stagec_density_certificate_job.jl").read_text(encoding="utf-8")
     assert module.DENSITY_ANCHORS + module.FIRST_ORDER_CONTROLS + module.MONOTONE_CONTROLS == module.ALL_ANCHORS
 
 
