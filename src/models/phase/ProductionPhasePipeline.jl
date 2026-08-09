@@ -705,6 +705,24 @@ function _hybrid_select_points(base_rho_grid, stage_b, guard, verification)
     candidates[1:min(verification.targeted_cap, length(candidates))]
 end
 
+"""Attach deterministic provenance to the selected Stage-C density points.
+
+The selected policy is intentionally still the existing
+``stage_b_features_v1`` ordering.  This wrapper only makes the ordering
+observable in production diagnostics; it must not choose a different point
+set or consume oracle labels.
+"""
+function _hybrid_selected_points(base_rho_grid, stage_b, guard, verification)
+    values = _hybrid_select_points(base_rho_grid, stage_b, guard, verification)
+    feature = String(verification.point_ranking_version)
+    [(
+        rho=Float64(rho),
+        feature=feature,
+        rank=index,
+        batch=1,
+    ) for (index, rho) in enumerate(values)]
+end
+
 function _hybrid_support_grid(
         base_rho_grid::Vector{Float64},
         _stage_a,
@@ -720,21 +738,27 @@ function _hybrid_support_grid(
         low=nothing, high=nothing,
         grid=Float64[], local_step=verification.local_step,
         targeted_cap=verification.targeted_cap, guard_rule=verification.guard_rule,
-        source=Symbol[],
+        source=Symbol[], selected_points=NamedTuple[], actual_cap=0,
+        stop_reason=guard.reason,
     ))
-    grid = _hybrid_select_points(base_rho_grid, stage_b, guard, verification)
+    selected_points = _hybrid_selected_points(base_rho_grid, stage_b, guard, verification)
+    grid = Float64[item.rho for item in selected_points]
     isempty(grid) && return merge(guard, (
         status=:ambiguous_near_critical, reason="no_stage_c_points_in_guard",
         low=nothing, high=nothing,
         grid=Float64[], local_step=verification.local_step,
         targeted_cap=verification.targeted_cap, guard_rule=verification.guard_rule,
-        source=Symbol[],
+        source=Symbol[], selected_points=NamedTuple[], actual_cap=0,
+        stop_reason="no_stage_c_points_in_guard",
     ))
     merge(guard, (
         low=guard.guard_low, high=guard.guard_high,
         grid=grid, local_step=verification.local_step,
         targeted_cap=verification.targeted_cap, guard_rule=verification.guard_rule,
-        source=[:extrema_outer_samples_v1],
+        source=[:extrema_outer_samples_v1], selected_points=selected_points,
+        actual_cap=length(selected_points),
+        stop_reason=length(selected_points) >= verification.targeted_cap ?
+            "selected_cap_reached" : "feature_pool_exhausted",
     ))
 end
 
@@ -760,6 +784,22 @@ function _hybrid_endpoint_support_envelope(endpoint, anchor::Float64, additions)
         "endpoint-local initial bracket must be finite and ordered",
     ))
     return (low=min(low, minimum(samples)), high=max(high, maximum(samples)))
+end
+
+function _hybrid_endpoint_selected_points(anchor::Float64, additions)
+    points = [(
+        rho=anchor,
+        feature="endpoint_anchor",
+        rank=1,
+        batch=0,
+    )]
+    append!(points, [(
+        rho=Float64(rho),
+        feature="endpoint_local_midpoint",
+        rank=index + 1,
+        batch=index,
+    ) for (index, rho) in enumerate(additions)])
+    points
 end
 
 function _hybrid_right_guard_available(stage_b, comparison_epsilon::Float64)
@@ -997,6 +1037,12 @@ function _hybrid_endpoint_route(
             hybrid_guard_reason="bounded_zero_density_v1",
             hybrid_guard_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
             hybrid_targeted_point_count=length(additions),
+            hybrid_actual_cap=length(additions),
+            hybrid_point_ranking_version=String(verification.point_ranking_version),
+            hybrid_selected_points=_hybrid_endpoint_selected_points(endpoint.anchor, additions),
+            hybrid_stage_c_refinement_trace=trace,
+            hybrid_component_geometry=_hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol),
+            hybrid_stop_reason="geometry_certificate_closed",
             hybrid_support_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
             hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
             hybrid_certificate_type=:endpoint_limited_first_order,
@@ -1040,6 +1086,13 @@ function _hybrid_endpoint_route(
         hybrid_guard_reason=failure_reason === nothing ? "endpoint_limit_inconclusive" : failure_reason,
         hybrid_guard_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
         hybrid_targeted_point_count=length(additions),
+        hybrid_actual_cap=length(additions),
+        hybrid_point_ranking_version=String(verification.point_ranking_version),
+        hybrid_selected_points=_hybrid_endpoint_selected_points(endpoint.anchor, additions),
+        hybrid_stage_c_refinement_trace=trace,
+        hybrid_component_geometry=_hybrid_density_component_geometry(
+            stage_b, current === nothing ? stage_b : current, cfg.rho_density_tol),
+        hybrid_stop_reason=failure_reason === nothing ? "cap_exhausted" : failure_reason,
         hybrid_support_source=[:extrema_outer_samples_v1, :bounded_zero_density_v1],
         hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
         hybrid_certificate_type=:none,
@@ -1252,6 +1305,12 @@ function _hybrid_endpoint_local_route(
             hybrid_guard_reason="three_crossing_endpoint_local_v2",
             hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
             hybrid_targeted_point_count=length(additions),
+            hybrid_actual_cap=length(additions),
+            hybrid_point_ranking_version=String(verification.point_ranking_version),
+            hybrid_selected_points=_hybrid_endpoint_selected_points(anchor, additions),
+            hybrid_stage_c_refinement_trace=trace,
+            hybrid_component_geometry=_hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol),
+            hybrid_stop_reason="geometry_certificate_closed",
             hybrid_support_source=[:stage_b_full_curve, :endpoint_local_support_envelope],
             hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
             hybrid_certificate_type=certificate,
@@ -1284,6 +1343,13 @@ function _hybrid_endpoint_local_route(
         hybrid_guard_reason=failure_reason === nothing ? "endpoint_local_v2_inconclusive" : failure_reason,
         hybrid_guard_source=[:stage_b_right_crossing_bracket, :endpoint_local_midpoint],
         hybrid_targeted_point_count=length(additions),
+        hybrid_actual_cap=length(additions),
+        hybrid_point_ranking_version=String(verification.point_ranking_version),
+        hybrid_selected_points=_hybrid_endpoint_selected_points(anchor, additions),
+        hybrid_stage_c_refinement_trace=trace,
+        hybrid_component_geometry=_hybrid_density_component_geometry(
+            stage_b, current === nothing ? stage_b : current, cfg.rho_density_tol),
+        hybrid_stop_reason=failure_reason === nothing ? "cap_exhausted" : failure_reason,
         hybrid_support_source=[:stage_b_full_curve, :endpoint_local_support_envelope],
         hybrid_verification_point_count=length(stage_b_grid) + 1 + length(additions),
         hybrid_certificate_type=:none,
@@ -1312,6 +1378,75 @@ function _hybrid_stats(before, after)
             targeted_additions=after.targeted_additions - before.targeted_additions,
         ),
     )
+end
+
+"""Compare the four density components used by the hybrid certificate.
+
+Each component is explicitly ``pass``/``fail``/``unresolved`` so a missing
+spinodal or coexistence density cannot be serialized as a passing zero.
+"""
+function _hybrid_density_component_geometry(reference, current, density_tol::Float64)
+    density_tol > 0.0 || throw(ArgumentError("hybrid density tolerance must be positive"))
+    components = (
+        (:rho_hadron, "rho_hadron"),
+        (:rho_quark, "rho_quark"),
+        (:rho_spinodal_hadron, "rho_spinodal_hadron"),
+        (:rho_spinodal_quark, "rho_spinodal_quark"),
+    )
+    rows = NamedTuple[]
+    for (field, label) in components
+        reference_value = try Float64(something(get(reference, field, nothing), NaN)) catch; NaN end
+        current_value = try Float64(something(get(current, field, nothing), NaN)) catch; NaN end
+        comparable = isfinite(reference_value) && isfinite(current_value)
+        error = comparable ? abs(current_value - reference_value) : NaN
+        normalized = comparable ? error / density_tol : Inf
+        push!(rows, (
+            component=label,
+            reference=reference_value,
+            current=current_value,
+            error=error,
+            normalized_error=normalized,
+            comparable=comparable,
+            status=comparable ? (error <= density_tol ? "pass" : "fail") : "unresolved",
+            pass=comparable && error <= density_tol,
+        ))
+    end
+    rows
+end
+
+"""Recompute the hybrid certificate after each selected Stage-C point.
+
+This uses already cached Stage-B/Stage-C rows and therefore adds no solver
+work.  It makes the fact that every selected point participates in the
+geometry certificate auditable in the sweep record.
+"""
+function _hybrid_stage_c_refinement_trace(
+        session, T::Float64, xi::Float64, stage_b_grid, selected_points,
+        stage_b, cfg::ProductionPipelineConfig, out_csv::String)
+    trace = NamedTuple[]
+    selected_rho = Float64[]
+    for item in selected_points
+        push!(selected_rho, Float64(item.rho))
+        verification_grid = sort!(unique(vcat(Float64.(stage_b_grid), selected_rho)))
+        curve, _ = _production_session_curve_for_grid(session, T, xi, verification_grid)
+        current = _classify_production_curve(curve, cfg, 4, out_csv)
+        geometry = _compare_phase_geometry(stage_b, current, PhaseGeometryTolerances(
+            position_MeV=cfg.rho_position_tol_MeV,
+            density=cfg.rho_density_tol,
+            maxwell_area=cfg.rho_maxwell_area_tol,
+        ))
+        push!(trace, (
+            rank=Int(item.rank), batch=Int(item.batch), rho=Float64(item.rho),
+            feature=String(item.feature), status=current.status,
+            geometry_converged=geometry.converged,
+            position_error_MeV=geometry.position_MeV,
+            density_error=geometry.density,
+            maxwell_area=geometry.maxwell_area,
+            component_geometry=_hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol),
+            reason=String(geometry.reason),
+        ))
+    end
+    trace
 end
 
 """Normalize endpoint-local trace rows to the pipeline convergence schema.
@@ -1379,6 +1514,12 @@ function _production_classify_temperature_hybrid(
         hybrid_guard_reason="stage_a_certificate",
         hybrid_guard_source=Symbol[],
         hybrid_targeted_point_count=0,
+        hybrid_actual_cap=0,
+        hybrid_point_ranking_version=String(cfg.rho_hybrid_verification.point_ranking_version),
+        hybrid_selected_points=NamedTuple[],
+        hybrid_stage_c_refinement_trace=NamedTuple[],
+        hybrid_component_geometry=NamedTuple[],
+        hybrid_stop_reason="stage_a_certificate",
         hybrid_support_source=Symbol[],
         hybrid_verification_point_count=0,
         hybrid_certificate_type=:none,
@@ -1454,6 +1595,12 @@ function _production_classify_temperature_hybrid(
             hybrid_guard_reason="stage_b_certificate",
             hybrid_guard_source=Symbol[],
             hybrid_targeted_point_count=0,
+            hybrid_actual_cap=0,
+            hybrid_point_ranking_version=String(cfg.rho_hybrid_verification.point_ranking_version),
+            hybrid_selected_points=NamedTuple[],
+            hybrid_stage_c_refinement_trace=NamedTuple[],
+            hybrid_component_geometry=NamedTuple[],
+            hybrid_stop_reason="stage_b_certificate",
             hybrid_support_source=Symbol[],
             hybrid_verification_point_count=0,
         ), _hybrid_stats(before, after))
@@ -1479,6 +1626,12 @@ function _production_classify_temperature_hybrid(
             hybrid_guard_reason=support.reason,
             hybrid_guard_source=Symbol[],
             hybrid_targeted_point_count=0,
+            hybrid_actual_cap=0,
+            hybrid_point_ranking_version=String(cfg.rho_hybrid_verification.point_ranking_version),
+            hybrid_selected_points=NamedTuple[],
+            hybrid_stage_c_refinement_trace=NamedTuple[],
+            hybrid_component_geometry=NamedTuple[],
+            hybrid_stop_reason=support.reason,
             hybrid_support_source=Symbol[],
             hybrid_verification_point_count=0,
         ), _hybrid_stats(before, after))
@@ -1514,6 +1667,10 @@ function _production_classify_temperature_hybrid(
         density=cfg.rho_density_tol,
         maxwell_area=cfg.rho_maxwell_area_tol,
     ))
+    selected_points = get(support, :selected_points, NamedTuple[])
+    refinement_trace = _hybrid_stage_c_refinement_trace(
+        session, T_mid, xi, stage_b_grid, selected_points, stage_b, cfg, out_csv)
+    component_geometry = _hybrid_density_component_geometry(stage_b, stage_c, cfg.rho_density_tol)
     stage_c_valid = stage_c.status == :valid && stage_b_first && geometry_bc.converged
     _append_scan_csv!(aggregate_csv, out_csv)
     after = TrhoScan.rho_session_snapshot(session)
@@ -1544,6 +1701,13 @@ function _production_classify_temperature_hybrid(
         hybrid_guard_reason=support.reason,
         hybrid_guard_source=support.source,
         hybrid_targeted_point_count=length(support.grid),
+        hybrid_actual_cap=get(support, :actual_cap, length(support.grid)),
+        hybrid_point_ranking_version=String(cfg.rho_hybrid_verification.point_ranking_version),
+        hybrid_selected_points=selected_points,
+        hybrid_stage_c_refinement_trace=refinement_trace,
+        hybrid_component_geometry=component_geometry,
+        hybrid_stop_reason=stage_c_valid ? "geometry_certificate_closed" :
+            get(support, :stop_reason, "stage_c_geometry_did_not_close"),
         hybrid_support_source=support.source,
         hybrid_verification_point_count=length(verification_grid),
         rho_convergence_records=vcat(
@@ -2343,6 +2507,14 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             hybrid_guard_reason=String(get(res, :hybrid_guard_reason, "not_applicable")),
             hybrid_guard_source=String.(get(res, :hybrid_guard_source, Symbol[])),
             hybrid_targeted_point_count=Int(get(res, :hybrid_targeted_point_count, 0)),
+            hybrid_actual_cap=Int(get(res, :hybrid_actual_cap, get(res, :hybrid_targeted_point_count, 0))),
+            hybrid_point_ranking_version=String(get(res, :hybrid_point_ranking_version,
+                cfg.rho_hybrid_verification.point_ranking_version)),
+            hybrid_selected_points=get(res, :hybrid_selected_points, NamedTuple[]),
+            hybrid_stage_c_refinement_trace=get(res, :hybrid_stage_c_refinement_trace, NamedTuple[]),
+            hybrid_component_geometry=get(res, :hybrid_component_geometry, NamedTuple[]),
+            hybrid_stop_reason=String(get(res, :hybrid_stop_reason,
+                get(res, :hybrid_upgrade_reason, "not_applicable"))),
             hybrid_support_source=String.(get(res, :hybrid_support_source, Symbol[])),
             hybrid_verification_point_count=Int(get(res, :hybrid_verification_point_count, 0)),
             hybrid_certificate_type=Symbol(get(res, :hybrid_certificate_type, :none)),

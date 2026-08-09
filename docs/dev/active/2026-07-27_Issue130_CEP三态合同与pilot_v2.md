@@ -650,3 +650,21 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] PR focused CI 通过后，运行 v2 aggregate replay；无论 verdict 如何导入独立不可变 v2
   evidence。只有 Actions replay 再次得到 `feasible_candidate` 才创建 production PR；此前
   不运行新的 C0/C1/C2、CEP/crossover numerical workflow、reference、C3/O1 或 transport。
+
+## Stage-C feasibility contract v2 Actions 收口与 production integration（2026-08-09）
+
+- [x] PR #194 已 squash merge，workflow head 为
+  `72c49c26a061cac7b71e66543ebdfd2c91ec3fca`；aggregate replay run `31308813742`
+  成功完成 30 个 source artifact 校验、Julia evaluator、绘图和 evidence contract。
+- [x] 正式 verdict 为 `feasible_candidate`：selected policy 为
+  `stage_b_features_v1`、cap `12`，hybrid unique solves `7985`，dense baseline `9615`；
+  15 个 anchors 无 classification/geometry/finite/candidate/cost failure，且
+  `solver_called=false`。source run `31296511813` 的原始 `failure` 结论只作为 provenance，
+  不改变 replay 的 solver-free 证据。
+- [x] aggregate evidence 已下载并保存在仓库外
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\stagec_feasibility_v2_actions_31308813742`，
+  保持 v1 evidence 不变。
+- [ ] 从 merge SHA 创建 `codex/issue-130-stagec-density-production-v2`，原样落地
+  selected policy；production focused CI、ready PR、targeted/CEP/crossover/full shadow
+  仍未运行，且在 `full_hybrid_candidate` 与作者审核前不启动新的 C0/C1/C2、reference、
+  C3/O1 或 transport。
