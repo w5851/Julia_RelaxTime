@@ -186,6 +186,9 @@ def test_workflow_has_dual_sha_matrix_and_replay_contract():
     assert "matrix.xi" in text and "matrix.method" in text
     assert "max-parallel: 10" in text
     assert "test \"$numeric_jobs\" = 30" in text
+    assert "source_conclusion=\"$(echo \"$payload\" | jq -r .conclusion)\"" in text
+    assert "numeric matrix complete; aggregate replay allowed" in text
+    assert "source_run_conclusion=$SOURCE_RUN_CONCLUSION" in text
     assert "aggregate_replay" in text
     assert "gh run download" in text
     assert "matplotlib==3.9.2" in text

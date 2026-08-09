@@ -231,12 +231,14 @@ jobs:
           fi
           payload="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,jobs,headSha)"
           test "$(echo "$payload" | jq -r .status)" = completed
-          test "$(echo "$payload" | jq -r .conclusion)" = success
+          source_conclusion="$(echo "$payload" | jq -r .conclusion)"
           numeric_jobs="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("density certificate xi="))] | length')"
           test "$numeric_jobs" = 30
           numeric_failures="$(echo "$payload" | jq '[.jobs[] | select(.name | startswith("density certificate xi=")) | select(.conclusion != "success")] | length')"
           test "$numeric_failures" = 0
           echo "SOURCE_POSTPROCESS_SHA=$(echo "$payload" | jq -r .headSha)" >> "$GITHUB_ENV"
+          echo "SOURCE_RUN_CONCLUSION=$source_conclusion" >> "$GITHUB_ENV"
+          echo "Source run conclusion: $source_conclusion (numeric matrix complete; aggregate replay allowed)."
 
       - name: Checkout postprocess head
         uses: actions/checkout@v4
@@ -278,6 +280,7 @@ jobs:
             exit "$status"
           fi
           echo "source_run_id=$SOURCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "source_run_conclusion=$SOURCE_RUN_CONCLUSION" >> "$GITHUB_STEP_SUMMARY"
           echo "feasibility_exit_status=$status" >> "$GITHUB_STEP_SUMMARY"
           cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
 
