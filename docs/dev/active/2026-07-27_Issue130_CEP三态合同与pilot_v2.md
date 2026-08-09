@@ -580,12 +580,12 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] workflow `.github/workflows/pnjl-stagec-density-certificate-feasibility.yml` 已加入
   10 个 xi × 3 个 method 的 30-job matrix，以及 `aggregate_replay`；数值 job 从 immutable
   calculation worktree 运行，collector 从 workflow head 运行。
-- [x] focused Python/replay/governance checks 已通过：新合同 `6 passed`，相关 shadow/
+- [x] focused Python/replay/governance checks 已通过：新合同 `7 passed`，相关 shadow/
   endpoint/Maxwell replay `31 passed`，Python/Julia syntax、script/model/solver/data-path/
   PNJL migration、docs 和 active-docs governance 均通过。Actions 仍只消费固定 calculation
   SHA。
-- [ ] 创建 ready PR；非 `feasible_candidate` 时保留诊断 evidence 并停止，不实现 production
-  ranking policy，不启动新的 C0/C1/C2、reference 或 transport。
+- [x] PR #190 已创建并合并为 `main@2edfd8c8760f1c03d65c82c520a356b8d6c5c3ba`；
+  feasibility 未通过前不实现 production ranking policy，不启动新的 C0/C1/C2、reference 或 transport。
 
 ## Stage-C density feasibility numerical run 31295557583（2026-08-09）
 
@@ -595,11 +595,58 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] run 在首批 independent-oracle job 的 runner 输出阶段暴露统一合同错误：摘要使用了
   未定义的 `STAGE_C_STEP`，不是 equilibrium solver、Maxwell 或曲线数值失败。已取消该
   必然继续失败的 run，原始失败日志保留在 Actions。
-- [ ] 窄范围 runner-contract repair 合并前不重跑矩阵；修复后只用新的 postprocess SHA
-  重跑 failed jobs，确认 artifact schema 后再决定是否恢复完整 30-job matrix。
+- [x] 窄范围 runner-contract repair 已完成；只用新的 postprocess SHA 重跑 failed jobs，
+  未重算 calculation SHA。
 - [x] PR #191 已合并为 `main@bdc580b78916b4428c980caf76cc74f101573854`；run `31295557583`
   的失败 job keys 已保留为 failed-only rerun 输入，workflow 现在支持显式
   `rerun_failed_only=true` 与 `failed_job_keys`，并在该模式跳过 aggregate，避免用不完整
   artifact 伪造全矩阵 verdict。
-- [ ] failed-only workflow contract PR 通过后，以新的 postprocess SHA 重跑原 9 个失败 job；
-  只有这 9 个 artifact schema/双 SHA/finite 检查通过后，才恢复完整 30-job numerical matrix。
+- [x] PR #192 已合并为 `main@4db46e1ef1694b28171ff79d6c00700a507b35ce`；run `31296088809`
+  的 10 个 failed-only artifact 全部成功，双 SHA、CSV hash、finite/converged、重复键、成本
+  守恒和 cap=12 审计通过。随后完整 run `31296511813` 的 30/30 numerical jobs 成功。
+
+## Stage-C density feasibility replay 收口（2026-08-09）
+
+- [x] 完整 run `31296511813` 的第一次 aggregate 只因 plotter 使用非法 MathText 标签失败；数值
+  artifact 未失败。PR #193 修复标签、增加 plot smoke test，并允许“source 数值矩阵完成但 aggregate
+  总结论为 failure”的 artifact-only replay；focused CI 7 项全绿后 squash merge 为
+  `main@11fbf9a71575ea207ed3233608c2bc2ade1ee346`。
+- [x] main head 的 aggregate replay `31300285869` 成功，固定 calculation SHA
+  `ffa816df0a145f73d7490db1ed9ff10c92e017a4`，source postprocess SHA 为 `4db46e1e…`，
+  replay/producer SHA 为 `11fbf9a7…`，`source_job_count=30`、`solver_called=false`，图像和
+  150 个输入文件 hash 均已记录。
+- [x] 最终 verdict 为 `integration_failed`：三条路由在 cap `12/16/24` 都有 12 个
+  classification mismatch；geometry、finite/converged、candidate uniqueness 和 cost gate
+  通过，但 7 个 CEP bracket（均超过 `0.1 MeV`）与 `xi=0.2875` 的 3 个 crossover risk 未通过。
+- [ ] 因未得到 `feasible_candidate`，保留 replay evidence 为 diagnostic-only；不创建 Stage-C
+  production PR，不启动新的 C0/C1/C2、reference promotion、C3/O1 或 transport。后续需先由作者
+  判断 classification/CEP/crossover 阻塞的处理路线。
+
+## Stage-C feasibility contract v2（2026-08-09）
+
+- [x] 从本地 `main@88336a46` 创建分支
+  `codex/issue-130-stagec-feasibility-contract-v2`；保留 v1 runner/workflow/evidence 不变，
+  不向本地 `main` 推送。
+- [x] 新增 solver-free production-parity evaluator
+  `scripts/analysis/pnjl_stagec_density_certificate_feasibility_v2.jl`：固定 source run
+  `31296511813`、calculation SHA `ffa816df…`，直接调用 `Models` 的 S-shape/Maxwell/geometry
+  合同，路由不读取 oracle 标签，且明确 `solver_called=false`。
+- [x] evaluator 按 numerical job 的 `rho_level` 分离 Stage A（production hybrid
+  `0.05→0.025`）和同一 independent-oracle session 的 Stage B（全域
+  `0.0125→0.00625`, `level=0`）与不重合的 `0.003125` Stage-C pool（`level=1`）；
+  memoized dense 仅作为成本基线。完整 Stage-B 曲线与实际补点逐点合并重算。这修正了
+  v1 replay 将 oracle fine 点提前消费、把 Stage-C additions 误记为零的风险。
+- [x] 三条 route 的候选序列、逐项 geometry component、完整 Stage-A/B/实际 Stage-C key 并集
+  成本和 cap frontier 均写入 versioned 输出；manifest 最后写入，覆盖 README/AUDIT/plot
+  metadata 和所有输入/派生文件 hash。
+- [x] 本地外部 artifact replay 已完成：`feasible_candidate`、cap `12`、route
+  `stage_b_features_v1`，hybrid unique solves `7985`，dense baseline `9615`，15 个锚点
+  classification/geometry/finite/cost gates 通过，`solver_called=false`。该结果只用于开发
+  自检，不是 Actions evidence 或 production 授权。
+- [x] 新增固定 matplotlib plotter、aggregate-only workflow
+  `.github/workflows/pnjl-stagec-density-certificate-feasibility-v2.yml` 和 focused
+  Julia/Python contract tests；workflow 从固定 calculation worktree 运行 evaluator，并校验
+  source run 的 30 个 numerical jobs、双 SHA 与 artifact hashes。
+- [ ] PR focused CI 通过后，运行 v2 aggregate replay；无论 verdict 如何导入独立不可变 v2
+  evidence。只有 Actions replay 再次得到 `feasible_candidate` 才创建 production PR；此前
+  不运行新的 C0/C1/C2、CEP/crossover numerical workflow、reference、C3/O1 或 transport。
