@@ -1,0 +1,143 @@
+{
+  "schema_version": "pnjl_c2_convergence_audit_v1",
+  "calculation_sha": "ffa816df0a145f73d7490db1ed9ff10c92e017a4",
+  "postprocess_sha": "f02bd7124d949566a200a5ea896236cffcd01a08",
+  "source_runs": {
+    "c0": "31149826740",
+    "c1": "31235607046",
+    "c2": "31258823755"
+  },
+  "source_tags": {
+    "c0": "issue130_endpoint_hybrid_c0_20260807_prior_contract_repair",
+    "c1": "issue130_endpoint_hybrid_c1_20260808_integral_tight",
+    "c2": "issue130_endpoint_hybrid_c2_20260808_grid_tight"
+  },
+  "input_files": [
+    {
+      "stage": "c0",
+      "run": "31149826740",
+      "artifact": "boundary",
+      "path": "D:/Temp/issue130_c0_acceptance_31149826740/reference/boundary_issue130_endpoint_hybrid_c0_20260807_prior_contract_repair.csv",
+      "sha256": "008b5181e804664343534389afa8193c6242e6fe15683b83080484e7ce5a56b6"
+    },
+    {
+      "stage": "c0",
+      "run": "31149826740",
+      "artifact": "cep",
+      "path": "D:/Temp/issue130_c0_acceptance_31149826740/reference/cep_issue130_endpoint_hybrid_c0_20260807_prior_contract_repair.csv",
+      "sha256": "9096034fa992a3f7de1dd23e20385f95db8558530e98c90688ebc8bde811adff"
+    },
+    {
+      "stage": "c0",
+      "run": "31149826740",
+      "artifact": "spinodals",
+      "path": "D:/Temp/issue130_c0_acceptance_31149826740/reference/spinodals_issue130_endpoint_hybrid_c0_20260807_prior_contract_repair.csv",
+      "sha256": "c8ad49ab6713a30f1dc564db69cff43357f13fd6cf117887dae9e77d5ae527cb"
+    },
+    {
+      "stage": "c0",
+      "run": "31149826740",
+      "artifact": "crossover",
+      "path": "D:/Temp/issue130_c0_acceptance_31149826740/reference/crossover_issue130_endpoint_hybrid_c0_20260807_prior_contract_repair.csv",
+      "sha256": "516918db1478544998d9b02cf3bd0cda7ab75eb5f46790a6d5fc30961e99b7d9"
+    },
+    {
+      "stage": "c0",
+      "run": "31149826740",
+      "artifact": "grid_convergence",
+      "path": "D:/Temp/issue130_c0_acceptance_31149826740/reference/phase_grid_convergence_issue130_endpoint_hybrid_c0_20260807_prior_contract_repair.csv",
+      "sha256": "6f67831a7c0b379c4afbfd5a47b12305e60f101436832c37da4575f7dc859016"
+    },
+    {
+      "stage": "c1",
+      "run": "31235607046",
+      "artifact": "boundary",
+      "path": "D:/Temp/issue130_c1_acceptance_31235607046/reference/boundary_issue130_endpoint_hybrid_c1_20260808_integral_tight.csv",
+      "sha256": "77b6dff9b824b2a040b1a61d7bda148544f6c95f2d2bd0ecc804160786826087"
+    },
+    {
+      "stage": "c1",
+      "run": "31235607046",
+      "artifact": "cep",
+      "path": "D:/Temp/issue130_c1_acceptance_31235607046/reference/cep_issue130_endpoint_hybrid_c1_20260808_integral_tight.csv",
+      "sha256": "d66c12bd960555a3d1d6761b8f64f2e777c8affd727c800d08848f99e3f4826b"
+    },
+    {
+      "stage": "c1",
+      "run": "31235607046",
+      "artifact": "spinodals",
+      "path": "D:/Temp/issue130_c1_acceptance_31235607046/reference/spinodals_issue130_endpoint_hybrid_c1_20260808_integral_tight.csv",
+      "sha256": "f399879295794ebe3af306d58785fb571a4fe48e16d9d95af553b2f2d4bb74b9"
+    },
+    {
+      "stage": "c1",
+      "run": "31235607046",
+      "artifact": "crossover",
+      "path": "D:/Temp/issue130_c1_acceptance_31235607046/reference/crossover_issue130_endpoint_hybrid_c1_20260808_integral_tight.csv",
+      "sha256": "42e3d4fa30362abb9c30032306ca1b821f924956076898278262a081c35b510b"
+    },
+    {
+      "stage": "c1",
+      "run": "31235607046",
+      "artifact": "grid_convergence",
+      "path": "D:/Temp/issue130_c1_acceptance_31235607046/reference/phase_grid_convergence_issue130_endpoint_hybrid_c1_20260808_integral_tight.csv",
+      "sha256": "24399cb452831d020cb367e93b7571b6863ce65b17421754836126f118bc7d47"
+    },
+    {
+      "stage": "c2",
+      "run": "31258823755",
+      "artifact": "boundary",
+      "path": "D:/Temp/issue130_c2_acceptance_31258823755/reference/boundary_issue130_endpoint_hybrid_c2_20260808_grid_tight.csv",
+      "sha256": "4cbdede64ea68c8874b81079312393e41ccdc47cbae2bba3e959e57cd1113b64"
+    },
+    {
+      "stage": "c2",
+      "run": "31258823755",
+      "artifact": "cep",
+      "path": "D:/Temp/issue130_c2_acceptance_31258823755/reference/cep_issue130_endpoint_hybrid_c2_20260808_grid_tight.csv",
+      "sha256": "2c1da1a952cf3480d71cbe59173a87fb0e6a81b534e454dbf8c25e09a442b8b7"
+    },
+    {
+      "stage": "c2",
+      "run": "31258823755",
+      "artifact": "spinodals",
+      "path": "D:/Temp/issue130_c2_acceptance_31258823755/reference/spinodals_issue130_endpoint_hybrid_c2_20260808_grid_tight.csv",
+      "sha256": "5cd6749428bc4c65274cdd9e0804a5a17a7ccc220f6ac8a3bfa879edc02abe44"
+    },
+    {
+      "stage": "c2",
+      "run": "31258823755",
+      "artifact": "crossover",
+      "path": "D:/Temp/issue130_c2_acceptance_31258823755/reference/crossover_issue130_endpoint_hybrid_c2_20260808_grid_tight.csv",
+      "sha256": "839b0c58f29c6f5e566ef4b54e6a6c81e298b811e0bd5b64ed67c3597ced573e"
+    },
+    {
+      "stage": "c2",
+      "run": "31258823755",
+      "artifact": "grid_convergence",
+      "path": "D:/Temp/issue130_c2_acceptance_31258823755/reference/phase_grid_convergence_issue130_endpoint_hybrid_c2_20260808_grid_tight.csv",
+      "sha256": "30edc80e0366744bd59f1ea260eb7338ece1cd21fe9e34b366c10aec8bb5d3ee"
+    }
+  ],
+  "replay": {
+    "c1_vs_c2_verdict": "classification_regression",
+    "c1_vs_c2_secondary_failures": [
+      "classification_regression",
+      "cep_bracket_unresolved",
+      "crossover_unstable"
+    ],
+    "c1_vs_c2_classification_regressions": 9,
+    "c1_vs_c2_cep_bracket_failures": 16,
+    "c1_vs_c2_crossover_failure_count": 3,
+    "c0_vs_c2_verdict": "classification_regression",
+    "comparison_table_policy": "summary_exceptions_and_xi_0p2875_plot_subset"
+  },
+  "solver_called": false,
+  "generated_at_utc": "2026-08-09T04:13:17.766956+00:00",
+  "generator": {
+    "script": "D:/Desktop/Julia_RelaxTime/scripts/analysis/pnjl/build_c2_convergence_audit.py",
+    "script_sha256": "971c7b132e491fccfd3afb59e74a7600e4aca45c49f5629fb4d3226b8ae0ce12",
+    "comparator": "D:/Desktop/Julia_RelaxTime/scripts/analysis/pnjl/compare_phase_reference_convergence.py",
+    "comparator_sha256": "57769220770e3a46bb3415c07cdd39445fe104323d0f4ec00478bf3c7ea9e161"
+  }
+}

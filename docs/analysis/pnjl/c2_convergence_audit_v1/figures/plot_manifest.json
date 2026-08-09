@@ -1,0 +1,20 @@
+{
+  "schema_version": "pnjl_c2_convergence_plot_manifest_v1",
+  "figures": [
+    {
+      "path": "public_first_order_regressions.png",
+      "sha256": "8782d46839f72245e647921007268442855e229fd87057067d80998b9525db70",
+      "source": "docs/analysis/pnjl/c2_convergence_audit_v1/tables/c1_vs_c2_anchor_states.csv"
+    },
+    {
+      "path": "cep_bracket_widths.png",
+      "sha256": "357f9b34b077241e953f0656f9e11cf7d3e94312ecc78315396a3d5952158e84",
+      "source": "docs/analysis/pnjl/c2_convergence_audit_v1/tables/c1_vs_c2_cep_gates.csv"
+    },
+    {
+      "path": "crossover_xi_0p2875_physical_mu.png",
+      "sha256": "56a9b777631b31869d9356cd67fa0a7092e87c5cd069a39a80fdd1d03fbbccf9",
+      "source": "docs/analysis/pnjl/c2_convergence_audit_v1/tables/c1_vs_c2_crossover_xi_0p2875.csv"
+    }
+  ]
+}
