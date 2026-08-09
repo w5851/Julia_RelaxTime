@@ -560,5 +560,29 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `docs/analysis/pnjl/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
   public classification regressions、16 个 CEP bracket failures、`xi=0.2875` crossover
   局部风险、代表图、manifest 和 claim ledger 均已保留；原始全量曲线不入仓库。
-- [ ] 当前 PR1 通过 focused CI 并合并后，创建限定范围 Stage-C density-certificate
-  feasibility workflow；固定 cap=12 失败时只能作为诊断记录，不能自动升 cap 或放宽容差。
+- [x] PR1 已通过 focused CI 并合并为 `main@a3dc55a9672bedba5716b18be371374515109ec1`；
+  C2 comparator/evidence replay 保持 `classification_regression`，固定 calculation SHA
+  `ffa816df0a145f73d7490db1ed9ff10c92e017a4`，不重算 C0/C1/C2。
+- [ ] PR2 `codex/issue-130-stagec-density-certificate-feasibility` 正在实现限定范围
+  Stage-C density-certificate feasibility workflow；固定 cap=12 失败时只能作为诊断记录，
+  不能自动升 cap 或放宽容差。只有 Actions replay 得到 `feasible_candidate` 才能创建
+  production PR。
+
+## Stage-C density-certificate feasibility v1（2026-08-09）
+
+- [x] solver-free postprocessor `scripts/analysis/pnjl_stagec_density_certificate_feasibility.py`
+  已加入三种确定性路由：`stage_b_features_v1`、`balanced_density_features_v2` 和
+  `geometry_feedback_v2`；路由只读取完整 Stage-B 曲线及当前请求内诊断，oracle 标签只在
+  事后 gate 使用。
+- [x] Actions numerical runner `scripts/analysis/pnjl_stagec_density_certificate_job.jl`
+  已固定 9 个密度锚点和 6 个 first-order/monotone controls，并显式记录 calculation SHA、
+  postprocess SHA、曲线哈希、cache/solver telemetry 和 `reference_write=false`。
+- [x] workflow `.github/workflows/pnjl-stagec-density-certificate-feasibility.yml` 已加入
+  10 个 xi × 3 个 method 的 30-job matrix，以及 `aggregate_replay`；数值 job 从 immutable
+  calculation worktree 运行，collector 从 workflow head 运行。
+- [x] focused Python/replay/governance checks 已通过：新合同 `6 passed`，相关 shadow/
+  endpoint/Maxwell replay `31 passed`，Python/Julia syntax、script/model/solver/data-path/
+  PNJL migration、docs 和 active-docs governance 均通过。Actions 仍只消费固定 calculation
+  SHA。
+- [ ] 创建 ready PR；非 `feasible_candidate` 时保留诊断 evidence 并停止，不实现 production
+  ranking policy，不启动新的 C0/C1/C2、reference 或 transport。

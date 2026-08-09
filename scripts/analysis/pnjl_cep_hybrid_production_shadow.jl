@@ -35,6 +35,18 @@ const HYBRID_FOCUSED_ANCHORS = Dict(
     0.0 => [5.0, 60.0, 145.0],
     0.5 => [60.0, 120.0],
 )
+const HYBRID_DENSITY_FEASIBILITY_ANCHORS = Dict(
+    -0.5 => [60.0, 160.0],
+    -0.35 => [51.0],
+    -0.25 => [41.0],
+    -0.2 => [41.0],
+    -0.15 => [41.0],
+    -0.1 => [41.0],
+    0.0 => [51.0, 60.0, 145.0],
+    0.3 => [21.0],
+    0.35 => [51.0, 101.0],
+    0.5 => [60.0, 120.0],
+)
 const HYBRID_METHODS = (:production_hybrid, :memoized_dense, :independent_oracle)
 
 @inline function _arg(values, name, default=nothing)
@@ -48,15 +60,17 @@ function _config(args)
     method = Symbol(_arg(args, "--method", "production_hybrid"))
     method in HYBRID_METHODS || throw(ArgumentError("unsupported hybrid shadow method $(method)"))
     xi = parse(Float64, _arg(args, "--xi", "0.0"))
-    any(isapprox(xi, value; atol=1e-9, rtol=0.0) for value in HYBRID_XI) ||
-        throw(ArgumentError("shadow xi must be one of -0.5, 0.0, 0.5"))
     calculation_sha = String(_arg(args, "--calculation-sha", ""))
     occursin(r"^[0-9a-fA-F]{40}$", calculation_sha) ||
         throw(ArgumentError("calculation-sha must be an immutable 40-character SHA"))
     output_dir = abspath(String(_arg(args, "--output-dir", joinpath(pwd(), "hybrid_shadow_artifact"))))
     tag = String(_arg(args, "--tag", "cep_maxwell_endpoint_production_shadow_v3"))
     scope = Symbol(_arg(args, "--scope", "full"))
-    scope in (:focused, :targeted, :full) || throw(ArgumentError("shadow scope must be focused, targeted, or full"))
+    scope in (:focused, :targeted, :full, :density_feasibility) ||
+        throw(ArgumentError("shadow scope must be focused, targeted, full, or density_feasibility"))
+    allowed_xi = scope === :density_feasibility ? keys(HYBRID_DENSITY_FEASIBILITY_ANCHORS) : HYBRID_XI
+    any(isapprox(xi, value; atol=1e-9, rtol=0.0) for value in allowed_xi) ||
+        throw(ArgumentError("shadow xi is not available for scope $(scope): $(xi)"))
     endpoint_policy = Symbol(_arg(args, "--endpoint-policy", "bounded_zero_density_v1"))
     endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
         throw(ArgumentError("unsupported endpoint policy $(endpoint_policy)"))
@@ -64,7 +78,9 @@ function _config(args)
 end
 
 @inline _anchors(cfg) = cfg.scope === :focused ? HYBRID_FOCUSED_ANCHORS[cfg.xi] :
-    cfg.scope === :targeted ? HYBRID_TARGETED_ANCHORS[cfg.xi] : HYBRID_ANCHORS[cfg.xi]
+    cfg.scope === :targeted ? HYBRID_TARGETED_ANCHORS[cfg.xi] :
+    cfg.scope === :density_feasibility ? HYBRID_DENSITY_FEASIBILITY_ANCHORS[cfg.xi] :
+    HYBRID_ANCHORS[cfg.xi]
 
 @inline function _method_steps(method::Symbol)
     method === :production_hybrid && return (coarse=0.05, fine=0.025, policy=:rho_support_hybrid, levels=4)
