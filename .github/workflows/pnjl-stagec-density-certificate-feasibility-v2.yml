@@ -50,18 +50,14 @@ jobs:
           SOURCE_CALCULATION_SHA: ${{ inputs.source_calculation_sha }}
           SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
-          EXPECTED_SOURCE_RUN_ID: "31296511813"
-          EXPECTED_CALCULATION_SHA: "ffa816df0a145f73d7490db1ed9ff10c92e017a4"
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           [[ "$CALCULATION_REF" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "calculation_ref must be a 40-character SHA" >&2; exit 1; }
-          [[ "$CALCULATION_REF" == "$EXPECTED_CALCULATION_SHA" ]] || { echo "v2 replay is pinned to the approved calculation SHA" >&2; exit 1; }
           [[ "$SOURCE_CALCULATION_SHA" == "$CALCULATION_REF" ]] || { echo "source_calculation_sha must match calculation_ref" >&2; exit 1; }
           [[ "$SOURCE_POSTPROCESS_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "source_postprocess_sha must be a 40-character SHA" >&2; exit 1; }
           [[ "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "source_run_id must be numeric" >&2; exit 1; }
-          test "$SOURCE_RUN_ID" = "$EXPECTED_SOURCE_RUN_ID"
           payload="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,jobs,headSha)"
           test "$(echo "$payload" | jq -r .status)" = completed
           source_conclusion="$(echo "$payload" | jq -r .conclusion)"

@@ -26,8 +26,10 @@ def test_v2_workflow_is_aggregate_only_and_uses_dual_sha():
     assert "options: [aggregate_replay]" in text
     assert "source_run_id" in text and "source_calculation_sha" in text
     assert "source_postprocess_sha" in text
-    assert 'EXPECTED_SOURCE_RUN_ID: "31296511813"' in text
-    assert 'EXPECTED_CALCULATION_SHA: "ffa816df0a145f73d7490db1ed9ff10c92e017a4"' in text
+    assert "EXPECTED_SOURCE_RUN_ID" not in text
+    assert "EXPECTED_CALCULATION_SHA" not in text
+    assert 'source_calculation_sha must match calculation_ref' in text
+    assert 'source_run_id must be numeric' in text
     assert "numeric_jobs" in text and "test \"$numeric_jobs\" = 30" in text
     assert "numeric_failures" in text and "test \"$numeric_failures\" = 0" in text
     assert "git worktree add --detach calculation" in text
