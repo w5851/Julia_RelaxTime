@@ -1,0 +1,7 @@
+claim_id,claim,status,evidence
+c2_primary_verdict,C2 comparator primary verdict is classification_regression,supported,manifest.json; tables/c1_vs_c2_anchor_states.csv
+public_regression_count,Nine public first-order anchors regress from C1 first-order to C2 ambiguous,supported,tables/c1_vs_c2_anchor_states.csv
+cep_bracket_risk,Sixteen CEP brackets exceed the 0.1 MeV hard gate,supported,tables/c1_vs_c2_cep_gates.csv
+crossover_local_risk,Crossover residual risk is localized at xi=0.2875 high physical-mu points,supported,tables/c1_vs_c2_comparison_exceptions.csv; tables/c1_vs_c2_crossover_xi_0p2875.csv; figures/crossover_xi_0p2875_physical_mu.png
+solver_free,Replay does not call the PNJL solver,supported,manifest.json
+production_ready,C2 is production-ready,not_supported,manifest.json

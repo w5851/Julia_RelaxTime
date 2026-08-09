@@ -545,3 +545,20 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   C0 quadrature and tightens rho/T/xi geometry/refinement contracts. C2 must also close the
   CEP bracket to 0.1 MeV and keep public anchors/first-order geometry stable before a new
   convergence evidence package is opened.
+
+## C2 convergence comparator replay v1 (2026-08-09)
+
+- [x] 固定 C0/C1/C2 证据：runs `31149826740`、`31235607046`、`31258823755`，calculation
+  SHA `ffa816df0a145f73d7490db1ed9ff10c92e017a4`；C2 仍为 `diagnostic-only`，不重算。
+- [x] comparator 改为显式区分新 xi、共享 xi 的新增/缺失 T 网格和已实际求值的
+  first-order→ambiguous 分类回归；boundary 比较加入 `area_residual`，并输出 public
+  anchor 三态表、geometry gate 表和 CEP endpoint-resolution/ambiguity 双宽度表。
+- [x] crossover 改在双方共同 monotone/crossover 温区的物理 `mu` 并集上双向线性插值，
+  不再按行号配对；物理区间由各自 CEP 的 `T_first_monotone_MeV` 约束，避免把一阶区间
+  的平台误报为 crossover 风险。
+- [x] solver-free evidence package 已生成到
+  `docs/analysis/pnjl/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
+  public classification regressions、16 个 CEP bracket failures、`xi=0.2875` crossover
+  局部风险、代表图、manifest 和 claim ledger 均已保留；原始全量曲线不入仓库。
+- [ ] 当前 PR1 通过 focused CI 并合并后，创建限定范围 Stage-C density-certificate
+  feasibility workflow；固定 cap=12 失败时只能作为诊断记录，不能自动升 cap 或放宽容差。
