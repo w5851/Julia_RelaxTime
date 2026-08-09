@@ -621,7 +621,6 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 因未得到 `feasible_candidate`，保留 replay evidence 为 diagnostic-only；不创建 Stage-C
   production PR，不启动新的 C0/C1/C2、reference promotion、C3/O1 或 transport。后续需先由作者
   判断 classification/CEP/crossover 阻塞的处理路线。
-
 ## Stage-C feasibility contract v2（2026-08-09）
 
 - [x] 从本地 `main@88336a46` 创建分支
