@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_stagec_density_certificate_feasibility.py"
@@ -145,6 +147,32 @@ def test_bundle_loader_checks_declared_file_hashes(tmp_path):
         raise AssertionError("tampered artifact was accepted")
 
 
+def test_plotter_emits_mathtext_labels_without_parse_errors(tmp_path):
+    module = load_module()
+    pytest.importorskip("matplotlib")
+    curves = []
+    for xi, temperature in module.DENSITY_ANCHORS[:2] + module.MONOTONE_CONTROLS[:1]:
+        curves.append({
+            "method": "independent_oracle",
+            "xi": str(xi),
+            "T_MeV": str(temperature),
+            "rho_level": "0",
+            "rho": "0.0",
+            "muq_MeV": "300.0",
+        })
+        curves.append({
+            "method": "independent_oracle",
+            "xi": str(xi),
+            "T_MeV": str(temperature),
+            "rho_level": "0",
+            "rho": "1.0",
+            "muq_MeV": "301.0",
+        })
+    entries = module._write_plots(tmp_path, {"curves": curves}, [])
+    assert len(entries) == 3
+    assert all((tmp_path / entry["path"]).is_file() for entry in entries)
+
+
 def test_workflow_has_dual_sha_matrix_and_replay_contract():
     module = load_module()
     text = WORKFLOW.read_text(encoding="utf-8")
@@ -158,6 +186,10 @@ def test_workflow_has_dual_sha_matrix_and_replay_contract():
     assert "matrix.xi" in text and "matrix.method" in text
     assert "max-parallel: 10" in text
     assert "test \"$numeric_jobs\" = 30" in text
+    assert "source_conclusion=\"$(echo \"$payload\" | jq -r .conclusion)\"" in text
+    assert "numeric matrix complete; aggregate replay allowed" in text
+    assert "source_run_conclusion=$SOURCE_RUN_CONCLUSION" in text
+    assert "GH_REPO: w5851/Julia_RelaxTime" in text
     assert "aggregate_replay" in text
     assert "gh run download" in text
     assert "matplotlib==3.9.2" in text
