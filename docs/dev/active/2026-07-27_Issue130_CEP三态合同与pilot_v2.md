@@ -586,3 +586,14 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   SHA。
 - [ ] 创建 ready PR；非 `feasible_candidate` 时保留诊断 evidence 并停止，不实现 production
   ranking policy，不启动新的 C0/C1/C2、reference 或 transport。
+
+## Stage-C density feasibility numerical run 31295557583（2026-08-09）
+
+- [x] 以 production merge SHA `2edfd8c8760f1c03d65c82c520a356b8d6c5c3ba` 作为 workflow
+  head、以固定 calculation SHA `ffa816df0a145f73d7490db1ed9ff10c92e017a4` 启动 30-job
+  numerical matrix；前置 checkout、双 SHA provenance 和依赖安装均通过。
+- [x] run 在首批 independent-oracle job 的 runner 输出阶段暴露统一合同错误：摘要使用了
+  未定义的 `STAGE_C_STEP`，不是 equilibrium solver、Maxwell 或曲线数值失败。已取消该
+  必然继续失败的 run，原始失败日志保留在 Actions。
+- [ ] 窄范围 runner-contract repair 合并前不重跑矩阵；修复后只用新的 postprocess SHA
+  重跑 failed jobs，确认 artifact schema 后再决定是否恢复完整 30-job matrix。
