@@ -37,9 +37,6 @@ using Printf
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const MODELS = Main.Models
 const SCHEMA_VERSION = "cep_hybrid_stagec_density_certificate_feasibility_v2"
-const SOURCE_RUN_ID = "31296511813"
-const SOURCE_CALCULATION_SHA = "ffa816df0a145f73d7490db1ed9ff10c92e017a4"
-const SOURCE_POSTPROCESS_SHA = "4db46e1ef1694b28171ff79d6c00700a507b35ce"
 
 const DENSITY_ANCHORS = [
     (-0.35, 51.0), (-0.25, 41.0), (-0.2, 41.0), (-0.15, 41.0),
@@ -784,7 +781,8 @@ function _write_csv(path::String, rows)
 end
 
 function _write_outputs(output_dir::String, data::SourceData, frontier, verdict, policy,
-        expected_calculation_sha::String, expected_postprocess_sha::String, producer_sha::String)
+        expected_calculation_sha::String, expected_postprocess_sha::String,
+        producer_sha::String, source_run_id::String)
     mkpath(output_dir)
     _write_csv(joinpath(output_dir, "route_comparison.csv"), frontier.all_rows)
     _write_csv(joinpath(output_dir, "component_geometry.csv"), frontier.component_rows)
@@ -806,7 +804,7 @@ function _write_outputs(output_dir::String, data::SourceData, frontier, verdict,
     ])
     open(joinpath(output_dir, "README.md"), "w") do io
         write(io, "# Stage-C density certificate feasibility v2\n\n")
-        write(io, "verdict: `$(verdict)`。固定 source run `$(SOURCE_RUN_ID)` 的 solver-free replay；\n")
+        write(io, "verdict: `$(verdict)`。固定 source run `$(source_run_id)` 的 solver-free replay；\n")
         write(io, "不调用 equilibrium solver，不修改 v1 evidence、production、reference 或 transport。\n\n")
         write(io, "三条 route 在合并 Stage-B 全域曲线和实际 Stage-C 点后重新执行 Julia Maxwell/geometry；\n")
         write(io, "Stage A 使用 production_hybrid；Stage B 与 Stage-C pool 均来自\n")
@@ -836,7 +834,7 @@ function _write_outputs(output_dir::String, data::SourceData, frontier, verdict,
     manifest = Dict{String, Any}(
         "schema_version" => SCHEMA_VERSION,
         "verdict" => verdict,
-        "source_run_id" => SOURCE_RUN_ID,
+        "source_run_id" => source_run_id,
         "source_run_conclusion" => data.source_run_conclusion,
         "source_calculation_sha" => expected_calculation_sha,
         "source_postprocess_sha" => expected_postprocess_sha,
@@ -894,8 +892,13 @@ end
 
 function main(args=ARGS)
     options = _parse_args(args)
-    expected_calculation_sha = get(options, "expected-calculation-sha", SOURCE_CALCULATION_SHA)
-    expected_postprocess_sha = get(options, "expected-source-postprocess-sha", SOURCE_POSTPROCESS_SHA)
+    haskey(options, "expected-calculation-sha") || error("--expected-calculation-sha is required")
+    haskey(options, "expected-source-postprocess-sha") || error("--expected-source-postprocess-sha is required")
+    haskey(options, "source-run-id") || error("--source-run-id is required")
+    expected_calculation_sha = options["expected-calculation-sha"]
+    expected_postprocess_sha = options["expected-source-postprocess-sha"]
+    source_run_id = options["source-run-id"]
+    occursin(r"^\d+$", source_run_id) || error("--source-run-id must be numeric")
     source_run_conclusion = get(options, "source-run-conclusion", "failure")
     producer_sha = get(options, "producer-head-sha", _git_head())
     output_dir = get(options, "output-dir", joinpath(PROJECT_ROOT, "aggregate"))
@@ -905,7 +908,7 @@ function main(args=ARGS)
     verdict = _verdict(frontier)
     policy = _selected_policy(frontier, verdict)
     manifest = _write_outputs(abspath(output_dir), data, frontier, verdict, policy,
-        expected_calculation_sha, expected_postprocess_sha, String(producer_sha))
+        expected_calculation_sha, expected_postprocess_sha, String(producer_sha), source_run_id)
     println(JSON3.write(Dict("verdict" => verdict, "selected_policy" => policy,
         "source_job_count" => data.job_count, "solver_called" => false,
         "manifest_sha256" => _sha256_file(joinpath(output_dir, "manifest.json")))))
