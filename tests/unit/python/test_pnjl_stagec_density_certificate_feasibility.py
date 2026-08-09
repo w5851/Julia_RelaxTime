@@ -150,6 +150,9 @@ def test_workflow_has_dual_sha_matrix_and_replay_contract():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert "calculation_ref" in text
     assert "source_run_id" in text and "source_calculation_sha" in text
+    assert "rerun_failed_only" in text and "failed_job_keys" in text
+    assert "Select matrix job for failed-only rerun" in text
+    assert "inputs.rerun_failed_only != true" in text
     assert "expected-source-postprocess-sha" in text
     assert "git worktree add --detach calculation" in text
     assert "matrix.xi" in text and "matrix.method" in text

@@ -597,3 +597,9 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   必然继续失败的 run，原始失败日志保留在 Actions。
 - [ ] 窄范围 runner-contract repair 合并前不重跑矩阵；修复后只用新的 postprocess SHA
   重跑 failed jobs，确认 artifact schema 后再决定是否恢复完整 30-job matrix。
+- [x] PR #191 已合并为 `main@bdc580b78916b4428c980caf76cc74f101573854`；run `31295557583`
+  的失败 job keys 已保留为 failed-only rerun 输入，workflow 现在支持显式
+  `rerun_failed_only=true` 与 `failed_job_keys`，并在该模式跳过 aggregate，避免用不完整
+  artifact 伪造全矩阵 verdict。
+- [ ] failed-only workflow contract PR 通过后，以新的 postprocess SHA 重跑原 9 个失败 job；
+  只有这 9 个 artifact schema/双 SHA/finite 检查通过后，才恢复完整 30-job numerical matrix。
