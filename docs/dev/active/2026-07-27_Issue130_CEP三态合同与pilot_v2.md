@@ -621,6 +621,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 因未得到 `feasible_candidate`，保留 replay evidence 为 diagnostic-only；不创建 Stage-C
   production PR，不启动新的 C0/C1/C2、reference promotion、C3/O1 或 transport。后续需先由作者
   判断 classification/CEP/crossover 阻塞的处理路线。
+
 ## Stage-C feasibility contract v2（2026-08-09）
 
 - [x] 从本地 `main@88336a46` 创建分支
@@ -667,3 +668,22 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   selected policy；production focused CI、ready PR、targeted/CEP/crossover/full shadow
   仍未运行，且在 `full_hybrid_candidate` 与作者审核前不启动新的 C0/C1/C2、reference、
   C3/O1 或 transport。
+
+## Endpoint-local v2 full shadow evidence (2026-08-10)
+
+- [x] Stage-C feasibility v2 已以 cap `12` 得到 `feasible_candidate`；随后 production merge
+  SHA 固定为 `4c9703c3be45b76608ab57d375082e29418bfd05`，不再重新选择 selected policy。
+- [x] 第二次 targeted numerical run `31350859850` 的 9/9 jobs 成功；批准的 required-three
+  deep oracle run `31350127588` 成功，deep overlay replay `31351459964` 得到
+  `targeted_hybrid_candidate`。
+- [x] full numerical shadow `31351527152` 的 9/9 jobs 成功；aggregate replay
+  `31352083775` 为 `final`，24 anchors 全覆盖并得到 `full_hybrid_candidate`。计算 SHA、
+  workflow/postprocess SHA、source/deep run 和 artifact hashes 记录在
+  `docs/analysis/pnjl/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`。
+- [x] full gate 的 classification、geometry、endpoint、oracle、coverage、performance 和
+  workflow contract errors 均为空；hybrid 为 `12,845` unique solves、dense 为 `15,384`，
+  runner time `289.68 s` 对 `287.70 s`，比值约 `1.007`，在 `1.10` 允许噪声内，fallback/retry
+  均为零。
+- [ ] 当前只提交不可变 full evidence PR，停在作者审核代表性 rho-mu 曲线、三项 endpoint
+  证书、Maxwell candidate 和成本；`full_hybrid_candidate` 不自动晋升 reference，也不启动
+  C0/C1/C2、phase-reference、C3/O1 或 transport。
