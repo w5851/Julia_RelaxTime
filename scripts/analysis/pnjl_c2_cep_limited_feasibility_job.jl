@@ -27,6 +27,9 @@ const CALCULATION_SHA_RE = r"^[0-9a-fA-F]{40}$"
 const RHO_FINE_STEP = 0.003125
 const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2
 const RHO_MAX = 4.0
+# CSV production-eval files use fixed decimal formatting for coordinates.  This
+# tolerance covers representation round-off only; it is not a physical gate.
+const CSV_COORD_ATOL = 1e-6
 const TARGET_XI = (-0.45, -0.34375, -0.275, -0.21875, 0.025, 0.125,
     0.15, 0.2, 0.225, 0.35, 0.3625, 0.38125, 0.39375, 0.4, 0.4375, 0.45, 0.5)
 const BRACKET_FILE = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl",
@@ -116,16 +119,18 @@ function _materialization_row(row, xi, T, calculation_sha, source_path)
     converged = _bool(_field(row, :converged, false))
     all(isfinite, (xi_value, T_value, rho, mu, residual, iterations)) && converged ||
         error("invalid production-eval row in $(source_path)")
-    isapprox(xi_value, xi; atol=1e-8, rtol=0.0) ||
+    isapprox(xi_value, xi; atol=CSV_COORD_ATOL, rtol=0.0) ||
         error("production-eval xi mismatch in $(source_path): $(xi_value) != $(xi)")
-    isapprox(T_value, T; atol=1e-8, rtol=0.0) ||
+    isapprox(T_value, T; atol=CSV_COORD_ATOL, rtol=0.0) ||
         error("production-eval temperature mismatch in $(source_path): $(T_value) != $(T)")
     rho_index = round(Int, rho / RHO_FINE_STEP)
     0 <= rho_index <= round(Int, RHO_MAX / RHO_FINE_STEP) &&
         isapprox(rho, rho_index * RHO_FINE_STEP; atol=3e-7, rtol=0.0) ||
         error("production-eval rho is off the frozen grid in $(source_path): $(rho)")
     (
-        xi=xi_value, T_MeV=T_value, rho=rho, muq_MeV=mu,
+        # Normalize accepted CSV coordinates before writing the materialized
+        # file, so a second parser cannot reintroduce decimal truncation.
+        xi=xi, T_MeV=T, rho=rho, muq_MeV=mu,
         residual_norm=residual, iterations=Int(round(iterations)),
         converged=true, finite=true,
         sampling_role="production_eval_materialization_v1", rho_level=0,
@@ -228,9 +233,9 @@ function _curve_rows(path, xi, T, calculation_sha)
         converged = _bool(_field(row, :converged, false))
         finite = converged && all(isfinite, (xi_row, T_row, rho, mu, residual))
         finite || error("non-finite or non-converged point at ξ=$(xi), T=$(T), rho=$(rho)")
-        isapprox(xi_row, xi; atol=1e-8, rtol=0.0) ||
+        isapprox(xi_row, xi; atol=CSV_COORD_ATOL, rtol=0.0) ||
             error("trho scan xi mismatch at ξ=$(xi), T=$(T): $(xi_row)")
-        isapprox(T_row, T; atol=1e-8, rtol=0.0) ||
+        isapprox(T_row, T; atol=CSV_COORD_ATOL, rtol=0.0) ||
             error("trho scan temperature mismatch at ξ=$(xi), T=$(T): $(T_row)")
         rho_index = round(Int, rho / RHO_FINE_STEP)
         0 <= rho_index <= round(Int, RHO_MAX / RHO_FINE_STEP) &&

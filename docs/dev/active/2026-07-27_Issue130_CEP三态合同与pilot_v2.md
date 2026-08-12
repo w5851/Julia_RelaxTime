@@ -765,3 +765,10 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] focused CI 全绿并按授权合并后，使用同一 `4c9703c3...` calculation SHA 重跑
   17-job CEP numerical matrix，再做同 SHA aggregate replay；此前不运行 crossover、
   C0/C1/C2、reference promotion、C3/O1 或 transport。
+- [x] 合并后的 numerical run `31618990978` 已证明 materialization 主路径可运行；
+  `xi=0.4` 单 shard 暴露第二个后处理边界：生产 CSV 将 `113.1328125` 序列化为
+  `113.132812`，严格 `1e-8` 比较误报 temperature mismatch。该失败不是 solver、Maxwell
+  或物理 gate；其余 shard 继续使用原 run provenance。
+- [ ] coordinate-tolerance repair 仅引入 `CSV_COORD_ATOL=1e-6` 的表示层容差并将通过
+  校验的 `(xi,T)` 规范化写入 materialized 文件；focused CI 全绿后合并，再以新
+  postprocess SHA 重跑完整 17 个 CEP shard，避免混用不同 provenance 的成功结果。
