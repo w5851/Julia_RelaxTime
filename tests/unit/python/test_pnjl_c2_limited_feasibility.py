@@ -81,6 +81,12 @@ def test_density_aggregate_pins_plotting_dependency():
     assert install["run"] == "python -m pip install matplotlib==3.9.2"
 
 
+def test_aggregate_replay_uses_explicit_repository_for_gh_calls():
+    text = WORKFLOW.read_text(encoding="utf-8")
+    assert 'gh run view "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY"' in text
+    assert 'gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY"' in text
+
+
 def test_aggregate_validator_rejects_solver_called(tmp_path):
     module = load_module()
     aggregate = tmp_path / "aggregate"
