@@ -29,6 +29,16 @@ def test_v2_schema_and_workflow_contract():
     assert "solver_called=false" not in text.lower()
 
 
+def test_numerical_job_materializes_hashed_frozen_brackets():
+    text = WORKFLOW.read_text(encoding="utf-8")
+    relative_path = "docs/analysis/pnjl/c2_limited_feasibility_v1/cep_failures.csv"
+    assert f"bracket_rel='{relative_path}'" in text
+    assert "bracket_sha='f8775f3cb7e0457722a523b30eb89485239bdd1730e88f372eeae4e2bc21f3d2'" in text
+    assert 'test -f "$bracket_rel"' in text
+    assert 'cp "$bracket_rel" "calculation/$bracket_rel"' in text
+    assert 'sha256sum "calculation/$bracket_rel"' in text
+
+
 def _write_costs(module, path: Path, *, valid: bool = True):
     path.write_text(
         "xi,method,unique_solves,point_requests,cache_hits,failed_points,runner_seconds\n"
