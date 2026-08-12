@@ -203,12 +203,23 @@ jobs:
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
         run: gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --pattern 'c2-limited-density-xi-*' --dir source-artifacts
 
+      - name: Recover complete fine-pool materialization
+        shell: bash
+        run: |
+          python scripts/analysis/pnjl_c2_limited_feasibility.py \
+            --scope density --mode recover_source \
+            --input-dir source-artifacts --output-dir recovered-source-artifacts \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
+            --recovery-postprocess-sha "${{ github.sha }}" \
+            --source-run-id "${{ inputs.source_run_id }}"
+
       - name: Validate source artifacts and cost stop
         shell: bash
         run: |
           echo "runner_cost_stop_minutes=$RUNNER_COST_STOP_MINUTES" >> "$GITHUB_STEP_SUMMARY"
           python scripts/analysis/pnjl_c2_limited_feasibility.py \
-            --scope density --mode source_validate --input-dir source-artifacts \
+            --scope density --mode source_validate --input-dir recovered-source-artifacts \
             --expected-calculation-sha "$CALCULATION_SHA" \
             --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
             --source-run-id "${{ inputs.source_run_id }}"
@@ -239,7 +250,7 @@ jobs:
           mkdir -p aggregate
           set +e
           julia --project=calculation calculation/scripts/analysis/pnjl_c2_limited_feasibility.jl \
-            --scope density --input-dir source-artifacts --output-dir aggregate \
+            --scope density --input-dir recovered-source-artifacts --output-dir aggregate \
             --expected-calculation-sha "$CALCULATION_SHA" \
             --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
             --source-run-id "${{ inputs.source_run_id }}"

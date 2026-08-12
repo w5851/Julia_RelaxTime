@@ -711,3 +711,21 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   下载到仓库外 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_limited_feasibility_20260812\density`。
   density 结果出来前不运行 CEP/crossover；即使三项 feasibility 通过也不直接重跑 C2、晋升
   reference 或启动 C3/O1/transport。
+
+## Density artifact materialization recovery（2026-08-12）
+
+- [x] Run `31580725648` 的十个 numerical shard 均成功；但 aggregate replay `31581516914`
+  在 source validation 发现 fine-pool 派生文件少了近零端 88 个 key。完整 production-eval
+  文件仍在同一 artifact 中，且每个 shard telemetry 都记录 1281 次请求、0 failed points。
+- [x] `31581803978` 复现了该问题并确认不是 solver failure；根因是 pipeline 在关闭
+  `prod_eval` 文件前读取缓冲内容。PR #200（显式 `GITHUB_REPOSITORY`）和 PR #201（关闭
+  文件后再 materialize）已合并，历史数值 artifact 保持不可变。
+- [x] 当前窄范围 recovery PR 只做 solver-free overlay：从完整 production-eval 恢复缺失
+  fine-pool 行，保留 source manifest/fine-pool/eval hashes、recovery head SHA、行数和
+  `solver_called=false`。十个 shard 已恢复为 19,215 个唯一 finite/converged keys，
+  `failed_points=0`，并完成本地 production-parity density replay。
+- [x] 本地 replay verdict 为 `density_feasible_candidate`：15/15 anchors 分类、唯一
+  Maxwell candidate、geometry gate 和 cap-12 成本均通过；选定 `stage_b_features_v1`，
+  8,175 unique solves（dense 9,615）。正式 Actions aggregate replay 合并后只复用
+  numerical run `31580725648`，不重跑 solver；CEP/crossover、C2、reference 和 transport
+  继续暂停。

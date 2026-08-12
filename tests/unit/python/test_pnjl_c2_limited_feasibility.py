@@ -1,5 +1,7 @@
 import importlib.util
+import csv
 import json
+import shutil
 from pathlib import Path
 
 import yaml
@@ -61,6 +63,8 @@ def test_workflow_is_density_first_and_cost_stopped():
     assert "C2 limited density xi=" in text
     assert "150" in text
     assert "scope_plan" in text and "crossover" in text
+    assert "recover_source" in text
+    assert "recovered-source-artifacts" in text
 
 
 def test_workflow_yaml_has_density_and_deferred_scope_contracts():
@@ -85,6 +89,62 @@ def test_aggregate_replay_uses_explicit_repository_for_gh_calls():
     text = WORKFLOW.read_text(encoding="utf-8")
     assert 'gh run view "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY"' in text
     assert 'gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY"' in text
+
+
+def test_recovery_overlay_restores_rows_from_production_eval(tmp_path):
+    module = load_module()
+    source = tmp_path / "source"
+    artifact = source / "c2-limited-density-xi--0.35"
+    eval_dir = artifact / "anchors" / "T_51p0" / "production_eval"
+    eval_dir.mkdir(parents=True)
+    pool = artifact / "fine_pool.csv"
+    fieldnames = ["xi", "T_MeV", "rho", "muq_MeV", "residual_norm", "iterations",
+                  "converged", "finite", "sampling_role", "rho_level", "calculation_sha"]
+    with pool.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for rho_index in range(100, module.RHO_COUNT):
+            rho = rho_index * module.RHO_FINE_STEP
+            writer.writerow({"xi": "-0.35", "T_MeV": "51.0", "rho": str(rho),
+                             "muq_MeV": "300.0", "residual_norm": "0.0", "iterations": "2",
+                             "converged": "true", "finite": "true",
+                             "sampling_role": "uniform_nested_fine_pool", "rho_level": "0",
+                             "calculation_sha": module.CALCULATION_SHA})
+    eval_path = eval_dir / "prod_eval_T51p000000_memoized.csv"
+    eval_fields = ["T_MeV", "rho", "xi", "mu_avg_MeV", "residual_norm", "iterations", "converged"]
+    with eval_path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=eval_fields)
+        writer.writeheader()
+        for rho_index in range(module.RHO_COUNT):
+                writer.writerow({"T_MeV": "51.0", "rho": str(rho_index * module.RHO_FINE_STEP),
+                             "xi": "-0.35", "mu_avg_MeV": "300.0", "residual_norm": "0.0",
+                             "iterations": "2", "converged": "true"})
+    slices = artifact / "slice_metrics.csv"
+    slices.write_text("failed_points\n0\n", encoding="utf-8")
+    costs = artifact / "method_costs.csv"
+    costs.write_text("runner_seconds\n1\n", encoding="utf-8")
+    manifest = {
+        "schema_version": module.JOB_SCHEMA, "scope": "density", "xi": -0.35,
+        "source_run_id": "123", "calculation_sha": module.CALCULATION_SHA,
+        "postprocess_sha": "postprocess", "solver_called": True,
+        "files": {name: module.sha256(artifact / name)
+                  for name in ("fine_pool.csv", "slice_metrics.csv", "method_costs.csv")},
+    }
+    (artifact / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    output = tmp_path / "recovered"
+    # Build a one-shard copy to test the actual helper without requiring ten
+    # full fixtures in this focused unit test.
+    shutil.copytree(source, output)
+    recovered = module._recover_manifest(
+        output / artifact.name / "manifest.json", module.CALCULATION_SHA,
+        "postprocess", "123", "recovery-head",
+    )
+    assert recovered["recovered_rows"] == 100
+    assert recovered["final_rows"] == module.RHO_COUNT
+    overlay_manifest = json.loads((output / artifact.name / "manifest.json").read_text(encoding="utf-8"))
+    assert overlay_manifest["recovery"]["method"] == module.RECOVERY_METHOD
+    assert overlay_manifest["recovery"]["solver_called"] is False
+    assert overlay_manifest["recovery"]["recovery_postprocess_sha"] == "recovery-head"
 
 
 def test_aggregate_validator_rejects_solver_called(tmp_path):
