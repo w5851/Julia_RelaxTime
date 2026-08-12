@@ -687,3 +687,27 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 当前只提交不可变 full evidence PR，停在作者审核代表性 rho-mu 曲线、三项 endpoint
   证书、Maxwell candidate 和成本；`full_hybrid_candidate` 不自动晋升 reference，也不启动
   C0/C1/C2、phase-reference、C3/O1 或 transport。
+
+## C2 三项限定 feasibility 与成本止损（2026-08-12）
+
+- [x] 固定 calculation SHA 为 `4c9703c3be45b76608ab57d375082e29418bfd05`，保留 C0/C1/C2
+  与 full-shadow artifacts 不变；workflow head 只承载诊断 runner/collector。
+- [x] 新增 `scripts/analysis/pnjl_c2_limited_feasibility_job.jl`、
+  `scripts/analysis/pnjl_c2_limited_feasibility.jl`、Python validator，以及
+  `.github/workflows/pnjl-c2-limited-feasibility.yml`。density 数值阶段按十个 xi shard
+  顺序生成完整 `0.003125` fine pool；随后才从该 pool 重建 Stage A/B/C 并逐点重算
+  production-parity classification、Maxwell 与 geometry。旧 v1/v2 runner/evidence 不变。
+- [x] density 固定九个 regression anchors、三个 first-order controls 和三个 monotone
+  controls；三条路由与 `12/16/24` cap 的选择、唯一候选、`0.025/0.0025/5e-5` geometry
+  门禁和 dense 成本上界均写入 versioned schema。cap `16/24` 仅用于解释，不能授权生产。
+- [x] CEP scope 仅冻结审计包中的 17 个 bracket（最多 18 个新 slice、每个 midpoint，
+  `xi=0.225` 最多一次额外二分）；crossover scope 固定 `xi=0.2875` 的五个 mu，比较
+  C1/C2 quadrature 与 `n_scan=20/40/80`。两项只生成 scope plan，尚未 dispatch。
+- [x] workflow 支持 `scope=density|cep|crossover`、`run_mode=numerical|aggregate_replay`、
+  source run/SHA、failed-only job keys 与 versioned tag；数值矩阵超过 150 runner-min、
+  failed-only 重跑仍失败或 verdict 非 `density_feasible_candidate` 时停止。
+- [ ] focused CI 通过后自动 squash merge 并删除分支；合并后只触发
+  `issue130_c2_density_feasibility_20260812` 的 density numerical scope，将 evidence
+  下载到仓库外 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_limited_feasibility_20260812\density`。
+  density 结果出来前不运行 CEP/crossover；即使三项 feasibility 通过也不直接重跑 C2、晋升
+  reference 或启动 C3/O1/transport。
