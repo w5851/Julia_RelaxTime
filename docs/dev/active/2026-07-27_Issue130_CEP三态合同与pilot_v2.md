@@ -735,3 +735,17 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   8,175 unique solves（dense 9,615）。正式 Actions aggregate replay 合并后只复用
   numerical run `31580725648`，不重跑 solver；正式 run 独立复现该 verdict。CEP/crossover、
   C2、reference 和 transport继续暂停，等待下一步授权。
+
+### C2 CEP limited feasibility v2（2026-08-12）
+
+- [x] 用户已授权仅运行 CEP limited feasibility；当前分支为
+  `codex/issue-130-c2-cep-limited-feasibility`，固定 calculation SHA
+  `4c9703c3be45b76608ab57d375082e29418bfd05`，不扩大到 crossover 或全相图。
+- [x] CEP numerical job 分开记录 hybrid/oracle cache telemetry；aggregate evaluator 使用
+  production-parity Maxwell options，以 hybrid 状态重放冻结 midpoint，oracle 只用于事后
+  mismatch/gate。endpoint 宽度门禁仍为 `0.1 MeV`，不放宽物理容差。
+- [x] v2 schema/hash/provenance、`solver_called`、oracle-routing leakage、重复键、
+  finite/converged、成本守恒和 plot manifest 均有 focused coverage；本地未调用 solver。
+- [ ] focused CI 通过后创建 ready PR 并等待合并；合并后先运行 17 个 CEP numerical jobs，
+  再运行同 SHA aggregate replay。结果仍为 diagnostic-only；即使通过，也不自动启动
+  crossover、C0/C1/C2、reference promotion 或 transport。
