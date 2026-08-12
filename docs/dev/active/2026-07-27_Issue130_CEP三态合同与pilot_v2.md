@@ -746,6 +746,10 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   mismatch/gate。endpoint 宽度门禁仍为 `0.1 MeV`，不放宽物理容差。
 - [x] v2 schema/hash/provenance、`solver_called`、oracle-routing leakage、重复键、
   finite/converged、成本守恒和 plot manifest 均有 focused coverage；本地未调用 solver。
-- [ ] focused CI 通过后创建 ready PR 并等待合并；合并后先运行 17 个 CEP numerical jobs，
-  再运行同 SHA aggregate replay。结果仍为 diagnostic-only；即使通过，也不自动启动
-  crossover、C0/C1/C2、reference promotion 或 transport。
+- [x] PR #204 已 squash merge（`3f951480ea3084bae0eb8fd37c8c6445c861103f`），但首次
+  numerical run `31602423465` 的 17 个 shard 均在读取冻结 bracket 前失败；这是 workflow
+  输入物化合同问题，不是 solver/CEP 结果。修复分支只复制并 hash 校验该输入，保持 calculation
+  SHA 和数值范围不变。
+- [ ] 修复 CI 全绿后重新运行 17-job numerical matrix，再做同 SHA aggregate replay；结果仍为
+  diagnostic-only，之后暂停等待 crossover 授权。此前不运行 crossover、C0/C1/C2、reference
+  promotion 或 transport。
