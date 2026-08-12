@@ -753,3 +753,8 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] 修复 CI 全绿后重新运行 17-job numerical matrix，再做同 SHA aggregate replay；结果仍为
   diagnostic-only，之后暂停等待 crossover 授权。此前不运行 crossover、C0/C1/C2、reference
   promotion 或 transport。
+- [x] PR #205 修复输入物化后，重跑 `31604976519` 暴露第二个统一配置合同错误：
+  `rho_hybrid_verification.local_step` 未严格小于 `rho_support_fine_step`，17/17 shard
+  在 solver 前失败；无物理结果可解读。
+- [ ] 新 repair 只将 CEP hybrid local step 固定为 `0.003125/2=0.0015625`，并写入
+  manifest/provenance；focused CI 全绿后按授权 squash merge，再重跑同一 17-job matrix。

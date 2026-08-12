@@ -25,6 +25,7 @@ using Main.Models
 const SCHEMA_VERSION = "pnjl_c2_cep_limited_feasibility_job_v2"
 const CALCULATION_SHA_RE = r"^[0-9a-fA-F]{40}$"
 const RHO_FINE_STEP = 0.003125
+const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2
 const RHO_MAX = 4.0
 const TARGET_XI = (-0.45, -0.34375, -0.275, -0.21875, 0.025, 0.125,
     0.15, 0.2, 0.225, 0.35, 0.3625, 0.38125, 0.39375, 0.4, 0.4375, 0.45, 0.5)
@@ -191,6 +192,7 @@ function _run_slice(cfg, T, slice_dir)
         rho_support_fine_step=RHO_FINE_STEP, rho_support_targeted_cap=12,
         rho_support_config=Models.RhoSupportConfig(),
         rho_hybrid_verification=Models.RhoHybridVerificationConfig(
+            local_step=HYBRID_LOCAL_STEP,
             point_ranking_version=:stage_b_features_v1,
             endpoint_policy=:three_crossing_endpoint_local_v2),
         work_telemetry=hybrid_telemetry, memoize_uniform=false, promote_reference=false,
@@ -312,6 +314,7 @@ function _run_job(cfg)
         "source_run_id" => cfg.source_run_id, "calculation_sha" => cfg.calculation_sha,
         "postprocess_sha" => cfg.postprocess_sha, "workflow_head_sha" => cfg.postprocess_sha,
         "rho_fine_step" => RHO_FINE_STEP, "rho_max" => RHO_MAX,
+        "hybrid_local_step" => HYBRID_LOCAL_STEP,
         "frozen_bracket" => Dict("low_MeV" => bracket.low, "high_MeV" => bracket.high,
             "midpoint_MeV" => bracket.midpoint),
         "temperatures" => [row.T_MeV for row in slice_rows],
@@ -332,7 +335,9 @@ function _run_job(cfg)
         JSON3.pretty(io, merge(summary, Dict("provenance" => Dict(
             "calculation_sha" => cfg.calculation_sha, "postprocess_sha" => cfg.postprocess_sha,
             "reference_write" => false, "route_before_oracle_gate" => true,
-            "oracle_labels_used_for_routing" => false))))
+            "oracle_labels_used_for_routing" => false,
+            "hybrid_local_step" => HYBRID_LOCAL_STEP,
+            "hybrid_local_step_contract" => "rho_support_fine_step/2"))))
         write(io, '\n')
     end
     println(JSON3.write(summary))

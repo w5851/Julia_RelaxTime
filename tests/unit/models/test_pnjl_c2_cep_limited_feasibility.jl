@@ -16,6 +16,9 @@ const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-cep-limited-fea
     @test occursin("hybrid_states=endpoints.hybrid_states", evaluator)
     @test occursin("point_request_reconciliation", evaluator)
     @test occursin("oracle_labels_used_for_routing=false", job)
+    @test occursin("const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2", job)
+    @test occursin("local_step=HYBRID_LOCAL_STEP", job)
+    @test occursin("hybrid_local_step_contract", job)
     @test occursin("point_requests=item.cache.unique_solves + item.cache.cache_hits", job) ||
         occursin("point_requests == unique_solves + cache_hits", job)
     @test occursin("method=\"hybrid\"", job)
