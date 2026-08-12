@@ -174,7 +174,7 @@ jobs:
           [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
           [[ -n "$SOURCE_RUN_ID" && "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
           [[ -z "$SOURCE_SHA" || "$SOURCE_SHA" == "$INPUT_SHA" ]] || exit 1
-          payload="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,jobs,headSha)"
+          payload="$(gh run view "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --json status,conclusion,jobs,headSha)"
           test "$(jq -r .status <<<"$payload")" = completed
           jobs="$(jq '[.jobs[] | select(.name | startswith("C2 limited density xi="))]' <<<"$payload")"
           test "$(jq length <<<"$jobs")" = 10
@@ -201,7 +201,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
-        run: gh run download "$SOURCE_RUN_ID" --pattern 'c2-limited-density-xi-*' --dir source-artifacts
+        run: gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --pattern 'c2-limited-density-xi-*' --dir source-artifacts
 
       - name: Validate source artifacts and cost stop
         shell: bash
