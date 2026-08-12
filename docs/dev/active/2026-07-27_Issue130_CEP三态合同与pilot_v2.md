@@ -706,11 +706,17 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] workflow 支持 `scope=density|cep|crossover`、`run_mode=numerical|aggregate_replay`、
   source run/SHA、failed-only job keys 与 versioned tag；数值矩阵超过 150 runner-min、
   failed-only 重跑仍失败或 verdict 非 `density_feasible_candidate` 时停止。
-- [ ] focused CI 通过后自动 squash merge 并删除分支；合并后只触发
-  `issue130_c2_density_feasibility_20260812` 的 density numerical scope，将 evidence
-  下载到仓库外 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_limited_feasibility_20260812\density`。
-  density 结果出来前不运行 CEP/crossover；即使三项 feasibility 通过也不直接重跑 C2、晋升
-  reference 或启动 C3/O1/transport。
+- [x] PR #202 已通过全部 focused CI 并 squash merge，workflow head 为
+  `524cc91d1efc3b3bc967911bf829359490688ccb`；合并后没有重跑 numerical source。
+- [x] density aggregate replay `31585973884` 复用 source run `31580725648` 和 calculation SHA
+  `4c9703c3be45b76608ab57d375082e29418bfd05`，正式 evidence 位于仓库外
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_limited_feasibility_20260812\density_recovery_31585973884`。
+  Recovery/source validation/evaluator/validator/plot/upload 全部成功，verdict 为
+  `density_feasible_candidate`；15/15 anchors、三路 cap-12、唯一 Maxwell candidate、
+  geometry/cost gates 均通过，选定 `stage_b_features_v1`，8175 unique solves 对比 dense 9615，
+  aggregate `solver_called=false`。
+- [ ] density 结果仍是限定 feasibility，不直接重跑 C2；继续暂停 CEP/crossover、reference、
+  C3/O1 和 transport，等待作者对 CEP scope 的明确授权。
 
 ## Density artifact materialization recovery（2026-08-12）
 
@@ -727,5 +733,5 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 本地 replay verdict 为 `density_feasible_candidate`：15/15 anchors 分类、唯一
   Maxwell candidate、geometry gate 和 cap-12 成本均通过；选定 `stage_b_features_v1`，
   8,175 unique solves（dense 9,615）。正式 Actions aggregate replay 合并后只复用
-  numerical run `31580725648`，不重跑 solver；CEP/crossover、C2、reference 和 transport
-  继续暂停。
+  numerical run `31580725648`，不重跑 solver；正式 run 独立复现该 verdict。CEP/crossover、
+  C2、reference 和 transport继续暂停，等待下一步授权。
