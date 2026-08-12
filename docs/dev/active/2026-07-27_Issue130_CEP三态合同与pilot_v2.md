@@ -756,5 +756,12 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] PR #205 修复输入物化后，重跑 `31604976519` 暴露第二个统一配置合同错误：
   `rho_hybrid_verification.local_step` 未严格小于 `rho_support_fine_step`，17/17 shard
   在 solver 前失败；无物理结果可解读。
-- [ ] 新 repair 只将 CEP hybrid local step 固定为 `0.003125/2=0.0015625`，并写入
-  manifest/provenance；focused CI 全绿后按授权 squash merge，再重跑同一 17-job matrix。
+- [x] CEP materialization repair 分支 `codex/issue-130-cep-materialization-contract-repair`
+  只在 numerical job 后处理层恢复 fine pool：从同一 oracle slice 的完整
+  `production_eval/*memoized*.csv` 结构化合并 `trho_scan_materialized.csv`，严格验证
+  ξ/T、`rho=0:0.003125:4` 的 1281 个 key、finite/converged 和重复键。原始
+  `trho_scan.csv` 保持不变，恢复文件及 `solver_called=false` provenance 单独记录，
+  不修改 calculation SHA、solver、Maxwell、容差或 17 点矩阵。
+- [ ] focused CI 全绿并按授权合并后，使用同一 `4c9703c3...` calculation SHA 重跑
+  17-job CEP numerical matrix，再做同 SHA aggregate replay；此前不运行 crossover、
+  C0/C1/C2、reference promotion、C3/O1 或 transport。

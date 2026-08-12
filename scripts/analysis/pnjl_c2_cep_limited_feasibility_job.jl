@@ -106,6 +106,116 @@ end
     Float64.(collect(range(0.0, RHO_MAX; length=count + 1)))
 end
 
+function _materialization_row(row, xi, T, calculation_sha, source_path)
+    xi_value = _safe_float(_field(row, :xi))
+    T_value = _safe_float(_field(row, :T_MeV))
+    rho = _safe_float(_field(row, :rho))
+    mu = _safe_float(_field(row, :mu_avg_MeV, _field(row, :muq_MeV)))
+    residual = _safe_float(_field(row, :residual_norm))
+    iterations = _safe_float(_field(row, :iterations))
+    converged = _bool(_field(row, :converged, false))
+    all(isfinite, (xi_value, T_value, rho, mu, residual, iterations)) && converged ||
+        error("invalid production-eval row in $(source_path)")
+    isapprox(xi_value, xi; atol=1e-8, rtol=0.0) ||
+        error("production-eval xi mismatch in $(source_path): $(xi_value) != $(xi)")
+    isapprox(T_value, T; atol=1e-8, rtol=0.0) ||
+        error("production-eval temperature mismatch in $(source_path): $(T_value) != $(T)")
+    rho_index = round(Int, rho / RHO_FINE_STEP)
+    0 <= rho_index <= round(Int, RHO_MAX / RHO_FINE_STEP) &&
+        isapprox(rho, rho_index * RHO_FINE_STEP; atol=3e-7, rtol=0.0) ||
+        error("production-eval rho is off the frozen grid in $(source_path): $(rho)")
+    (
+        xi=xi_value, T_MeV=T_value, rho=rho, muq_MeV=mu,
+        residual_norm=residual, iterations=Int(round(iterations)),
+        converged=true, finite=true,
+        sampling_role="production_eval_materialization_v1", rho_level=0,
+        calculation_sha=calculation_sha, rho_index=rho_index,
+    )
+end
+
+function _materialization_source_files(oracle_dir)
+    eval_dir = joinpath(oracle_dir, "production_eval")
+    isdir(eval_dir) || error("missing production_eval directory $(eval_dir)")
+    paths = filter(path -> isfile(path) && endswith(lowercase(path), ".csv") &&
+        occursin("memoized", lowercase(basename(path))), readdir(eval_dir; join=true))
+    sort!(paths)
+    isempty(paths) && error("missing memoized production-eval files in $(eval_dir)")
+    paths
+end
+
+function _aggregate_row_count(path)
+    isfile(path) || return (rows=0, parse_error="missing aggregate")
+    try
+        return (rows=length(collect(CSV.File(path))), parse_error=nothing)
+    catch error_value
+        # The aggregate is not used for reconstruction; retain its state for audit.
+        return (rows=max(countlines(path) - 1, 0),
+            parse_error=sprint(showerror, error_value))
+    end
+end
+
+function _materialize_fine_pool(oracle_dir, xi, T, calculation_sha)
+    aggregate_path = joinpath(oracle_dir, "trho_scan.csv")
+    aggregate = _aggregate_row_count(aggregate_path)
+    source_paths = _materialization_source_files(oracle_dir)
+    by_key = Dict{Tuple{Float64, Float64, Int}, NamedTuple}()
+    source_metadata = Any[]
+    for source_path in source_paths
+        source_rows = 0
+        for row in CSV.File(source_path)
+            source_rows += 1
+            item = _materialization_row(row, xi, T, calculation_sha, source_path)
+            key = (round(item.xi; digits=8), round(item.T_MeV; digits=8), item.rho_index)
+            haskey(by_key, key) && error("duplicate production-eval key $(key)")
+            by_key[key] = item
+        end
+        push!(source_metadata, Dict(
+            "path" => replace(relpath(source_path, oracle_dir), '\\' => '/'),
+            "sha256" => _sha(source_path), "rows" => source_rows,
+        ))
+    end
+    expected_count = length(_rho_grid())
+    length(by_key) == expected_count || error(
+        "incomplete materialized fine pool at ξ=$(xi), T=$(T): " *
+        "$(length(by_key)) != $(expected_count)",
+    )
+    expected_keys = Set((round(xi; digits=8), round(T; digits=8), index)
+        for index in 0:round(Int, RHO_MAX / RHO_FINE_STEP))
+    Set(keys(by_key)) == expected_keys || error("materialized fine-pool keys do not match frozen grid")
+    rows = collect(values(by_key))
+    sort!(rows; by=row -> row.rho)
+    output_rows = [NamedTuple{(:xi, :T_MeV, :rho, :muq_MeV, :residual_norm,
+        :iterations, :converged, :finite, :sampling_role, :rho_level, :calculation_sha)}(
+            (row.xi, row.T_MeV, row.rho, row.muq_MeV, row.residual_norm,
+             row.iterations, row.converged, row.finite, row.sampling_role,
+             row.rho_level, row.calculation_sha)) for row in rows]
+    materialized_path = joinpath(oracle_dir, "trho_scan_materialized.csv")
+    CSV.write(materialized_path, output_rows)
+    provenance_path = joinpath(oracle_dir, "trho_scan_materialization.json")
+    provenance = Dict(
+        "schema_version" => "pnjl_c2_cep_fine_pool_materialization_v1",
+        "method" => "production_eval_materialization_v1", "solver_called" => false,
+        "calculation_sha" => calculation_sha, "xi" => xi, "T_MeV" => T,
+        "rho_fine_step" => RHO_FINE_STEP, "rho_max" => RHO_MAX,
+        "expected_rows" => expected_count, "materialized_rows" => length(output_rows),
+        "recovered_rows" => length(output_rows), "source_aggregate_path" => "trho_scan.csv",
+        "source_aggregate_rows" => aggregate.rows,
+        "source_aggregate_parse_error" => aggregate.parse_error,
+        "source_production_eval_files" => source_metadata,
+        "materialized_sha256" => _sha(materialized_path),
+    )
+    open(provenance_path, "w") do io
+        JSON3.pretty(io, provenance)
+        write(io, '\n')
+    end
+    (
+        path=materialized_path, provenance_path=provenance_path,
+        sha256=_sha(materialized_path), rows=length(output_rows),
+        recovered_rows=length(output_rows), aggregate_rows=aggregate.rows,
+        aggregate_parse_error=aggregate.parse_error, source_files=source_metadata,
+    )
+end
+
 function _curve_rows(path, xi, T, calculation_sha)
     isfile(path) || error("missing trho scan $(path)")
     by_rho = Dict{Float64, NamedTuple}()
@@ -118,6 +228,14 @@ function _curve_rows(path, xi, T, calculation_sha)
         converged = _bool(_field(row, :converged, false))
         finite = converged && all(isfinite, (xi_row, T_row, rho, mu, residual))
         finite || error("non-finite or non-converged point at ξ=$(xi), T=$(T), rho=$(rho)")
+        isapprox(xi_row, xi; atol=1e-8, rtol=0.0) ||
+            error("trho scan xi mismatch at ξ=$(xi), T=$(T): $(xi_row)")
+        isapprox(T_row, T; atol=1e-8, rtol=0.0) ||
+            error("trho scan temperature mismatch at ξ=$(xi), T=$(T): $(T_row)")
+        rho_index = round(Int, rho / RHO_FINE_STEP)
+        0 <= rho_index <= round(Int, RHO_MAX / RHO_FINE_STEP) &&
+            isapprox(rho, rho_index * RHO_FINE_STEP; atol=3e-7, rtol=0.0) ||
+            error("trho scan rho is off the frozen grid at ξ=$(xi), T=$(T): $(rho)")
         item = (
             xi=xi_row, T_MeV=T_row, rho=rho, muq_MeV=mu,
             residual_norm=residual,
@@ -131,6 +249,9 @@ function _curve_rows(path, xi, T, calculation_sha)
     end
     rows = collect(values(by_rho))
     length(rows) == length(_rho_grid()) || error("incomplete fine pool at ξ=$(xi), T=$(T)")
+    expected = Set(round(Int, rho / RHO_FINE_STEP) for rho in _rho_grid())
+    actual = Set(round(Int, row.rho / RHO_FINE_STEP) for row in rows)
+    actual == expected || error("fine pool keys do not match frozen grid at ξ=$(xi), T=$(T)")
     sort!(rows; by=row -> row.rho)
     rows
 end
@@ -223,7 +344,8 @@ function _run_slice(cfg, T, slice_dir)
         work_telemetry=oracle_telemetry, memoize_uniform=true, promote_reference=false,
     )
     oracle_elapsed = (time_ns() - oracle_started) / 1e9
-    oracle_rows = _curve_rows(joinpath(oracle_dir, "trho_scan.csv"), cfg.xi, T, cfg.calculation_sha)
+    materialization = _materialize_fine_pool(oracle_dir, cfg.xi, T, cfg.calculation_sha)
+    oracle_rows = _curve_rows(materialization.path, cfg.xi, T, cfg.calculation_sha)
     oracle_cache = _cache_stats(oracle_result)
     costs = [
         (method="hybrid", cache=hybrid_cache, telemetry=Models.solver_work_snapshot(hybrid_telemetry),
@@ -232,7 +354,7 @@ function _run_slice(cfg, T, slice_dir)
             runner_seconds=oracle_elapsed),
     ]
     all(item -> item.cache.failed_points == 0, costs) || error("solver failure recorded in CEP slice")
-    oracle_rows, _hybrid_status(hybrid_result), costs
+    oracle_rows, _hybrid_status(hybrid_result), costs, materialization
 end
 
 function _sha(path)
@@ -253,11 +375,22 @@ function _run_job(cfg)
     curve_rows = NamedTuple[]
     slice_rows = NamedTuple[]
     cost_rows = NamedTuple[]
+    materialization_rows = Any[]
     index = 1
     while index <= length(plan)
         item = plan[index]
-        rows, hybrid, costs = _run_slice(cfg, item.T,
+        rows, hybrid, costs, materialization = _run_slice(cfg, item.T,
             joinpath(cfg.output_dir, "slices", "T_$(replace(string(item.T), "." => "p"))"))
+        push!(materialization_rows, Dict(
+            "xi" => cfg.xi, "T_MeV" => item.T,
+            "path" => replace(relpath(materialization.path, cfg.output_dir), '\\' => '/'),
+            "provenance_path" => replace(relpath(materialization.provenance_path, cfg.output_dir), '\\' => '/'),
+            "sha256" => materialization.sha256, "rows" => materialization.rows,
+            "recovered_rows" => materialization.recovered_rows,
+            "aggregate_rows" => materialization.aggregate_rows,
+            "aggregate_parse_error" => materialization.aggregate_parse_error,
+            "source_files" => materialization.source_files,
+        ))
         status = hybrid.status
         push!(curve_rows, rows...)
         for item_cost in costs
@@ -285,6 +418,13 @@ function _run_job(cfg)
             hybrid_status=status, hybrid_reason=hybrid.reason,
             selected_by="hybrid_production_status", selection_reason=item.selection_reason,
             oracle_labels_used_for_routing=false,
+            oracle_materialization_method="production_eval_materialization_v1",
+            oracle_materialized_rows=materialization.rows,
+            oracle_recovered_rows=materialization.recovered_rows,
+            oracle_aggregate_rows=materialization.aggregate_rows,
+            oracle_materialized_sha256=materialization.sha256,
+            oracle_materialization_provenance=replace(
+                relpath(materialization.provenance_path, cfg.output_dir), '\\' => '/'),
             rho_rows=length(rows),
             finite_and_converged=true, slice_index=index))
         if cfg.xi == 0.225 && index == 1 &&
@@ -318,6 +458,7 @@ function _run_job(cfg)
         "frozen_bracket" => Dict("low_MeV" => bracket.low, "high_MeV" => bracket.high,
             "midpoint_MeV" => bracket.midpoint),
         "temperatures" => [row.T_MeV for row in slice_rows],
+        "oracle_materialization" => materialization_rows,
         "solver_called" => true, "finite_and_converged_final" => true,
         "cache" => Dict("methods" => Dict(
             item.method => Dict("unique_solves" => item.unique_solves,
