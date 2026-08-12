@@ -39,6 +39,16 @@ def test_numerical_job_materializes_hashed_frozen_brackets():
     assert 'sha256sum "calculation/$bracket_rel"' in text
 
 
+def test_hybrid_local_step_is_nested_below_fine_step():
+    job = (ROOT / "scripts" / "analysis" / "pnjl_c2_cep_limited_feasibility_job.jl").read_text(
+        encoding="utf-8"
+    )
+    assert "const RHO_FINE_STEP = 0.003125" in job
+    assert "const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2" in job
+    assert "local_step=HYBRID_LOCAL_STEP" in job
+    assert "hybrid_local_step_contract" in job
+
+
 def _write_costs(module, path: Path, *, valid: bool = True):
     path.write_text(
         "xi,method,unique_solves,point_requests,cache_hits,failed_points,runner_seconds\n"
