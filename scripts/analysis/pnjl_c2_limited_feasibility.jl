@@ -79,6 +79,22 @@ end
     end
 end
 
+# JSON3.Object exposes manifest fields through symbol-like properties, while
+# callers that consume declared file names naturally provide strings. Keep the
+# lookup semantics identical for both forms instead of relying on JSON3's
+# internal fallback behavior.
+@inline _field(row, name::AbstractString, default=nothing) =
+    _field(row, Symbol(name), default)
+
+@inline function _bool(value, default=false)
+    if value === nothing || value === missing
+        return default
+    end
+    value isa Bool && return value
+    value isa Number && return value != 0
+    lowercase(strip(String(value))) in ("true", "1", "yes")
+end
+
 function _sha256_file(path::String)
     bytes2hex(open(sha256, path))
 end
@@ -128,8 +144,8 @@ function _read_job(path, expected_sha, expected_postprocess, input_root)
         T = _float(_field(row, :T_MeV))
         mu = _float(_field(row, :muq_MeV))
         residual = _float(_field(row, :residual_norm), Inf)
-        finite = lowercase(String(_field(row, :finite, false))) in ("true", "1")
-        converged = lowercase(String(_field(row, :converged, false))) in ("true", "1")
+        finite = _bool(_field(row, :finite, false))
+        converged = _bool(_field(row, :converged, false))
         finite && converged && all(isfinite, (rho, T, mu, residual)) ||
             error("invalid fine-pool point in $(path)")
         level = _on_grid(rho, STAGE_B_FINE) ? 0 : 1

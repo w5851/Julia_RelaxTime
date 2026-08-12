@@ -22,4 +22,7 @@ const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-limited-feasibi
     @test occursin("solver_called\" => true", job)
     @test occursin("reference_write\" => false", job)
     @test occursin("fine_pool.csv", job)
+    @test occursin("_field(row, :finite, false)", script)
+    @test occursin("@inline function _bool", script)
+    @test occursin("value isa Bool && return value", script)
 end

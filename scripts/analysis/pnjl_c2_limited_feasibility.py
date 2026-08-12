@@ -13,6 +13,7 @@ import csv
 import hashlib
 import json
 import math
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -51,6 +52,8 @@ CEP_XIS = (0.05, 0.15, 0.225, 0.35, 0.4, 0.45, 0.5)
 CROSSOVER_XI = 0.2875
 CROSSOVER_MU = (0.0, 148.7809455570, 272.7650668545, 297.7487748943, 322.3587153735)
 RUNNER_COST_STOP_MINUTES = 150.0
+RECOVERY_SCHEMA_VERSION = "pnjl_c2_limited_feasibility_recovery_v1"
+RECOVERY_METHOD = "production_eval_materialization_v1"
 
 
 def sha256(path: Path) -> str:
@@ -94,6 +97,180 @@ def _declared_file(manifest: dict[str, Any], manifest_path: Path, name: str) -> 
     if str(declared) != sha256(path):
         raise ValueError(f"hash mismatch for {name}: {manifest_path}")
     return path
+
+
+def _row_key(row: dict[str, str]) -> tuple[float, float, int]:
+    xi = float(row["xi"])
+    temperature = float(row["T_MeV"])
+    rho = float(row["rho"])
+    rho_index = round(rho / RHO_FINE_STEP)
+    if not math.isclose(rho, rho_index * RHO_FINE_STEP, abs_tol=3e-7, rel_tol=0.0):
+        raise ValueError(f"rho is off the frozen grid: {row}")
+    return round(xi, 8), round(temperature, 8), rho_index
+
+
+def _production_eval_files(artifact_dir: Path) -> list[Path]:
+    return sorted(artifact_dir.rglob("production_eval/*memoized*.csv"))
+
+
+def _recovered_row(row: dict[str, str], expected_sha: str) -> dict[str, str]:
+    required = ("xi", "T_MeV", "rho", "mu_avg_MeV", "residual_norm", "iterations", "converged")
+    missing = [field for field in required if field not in row]
+    if missing:
+        raise ValueError(f"production eval missing fields {missing}")
+    if not all(finite(row[field]) for field in required[:-1]):
+        raise ValueError(f"non-finite production eval row: {row}")
+    if row["converged"].lower() not in {"true", "1"}:
+        raise ValueError(f"non-converged production eval row: {row}")
+    return {
+        "xi": row["xi"],
+        "T_MeV": row["T_MeV"],
+        "rho": row["rho"],
+        "muq_MeV": row["mu_avg_MeV"],
+        "residual_norm": row["residual_norm"],
+        "iterations": row["iterations"],
+        "converged": "true",
+        "finite": "true",
+        "sampling_role": RECOVERY_METHOD,
+        "rho_level": "0",
+        "calculation_sha": expected_sha,
+    }
+
+
+def _recover_manifest(manifest_path: Path, expected_sha: str,
+                      expected_postprocess_sha: str, source_run_id: str,
+                      recovery_postprocess_sha: str = "") -> dict[str, Any]:
+    artifact_dir = manifest_path.parent
+    original_manifest_bytes = manifest_path.read_bytes()
+    manifest = read_json(manifest_path)
+    if manifest.get("schema_version") != JOB_SCHEMA:
+        raise ValueError(f"unexpected job schema: {manifest_path}")
+    if manifest.get("scope") != "density":
+        raise ValueError(f"unexpected job scope: {manifest_path}")
+    if str(manifest.get("calculation_sha", "")).lower() != expected_sha.lower():
+        raise ValueError(f"calculation SHA mismatch: {manifest_path}")
+    if expected_postprocess_sha and manifest.get("postprocess_sha") != expected_postprocess_sha:
+        raise ValueError(f"postprocess SHA mismatch: {manifest_path}")
+    if str(manifest.get("source_run_id", source_run_id)) != str(source_run_id):
+        raise ValueError(f"source run mismatch: {manifest_path}")
+    if manifest.get("solver_called") is not True:
+        raise ValueError(f"source artifact must record solver_called=true: {manifest_path}")
+    xi = float(manifest["xi"])
+    if xi not in XI_GRID:
+        raise ValueError(f"unexpected xi in manifest: {manifest_path}")
+    pool = _declared_file(manifest, manifest_path, "fine_pool.csv")
+    rows = read_csv(pool)
+    existing: dict[tuple[float, float, int], dict[str, str]] = {}
+    for row in rows:
+        key = _row_key(row)
+        if key in existing:
+            raise ValueError(f"duplicate source fine-pool key: {key}")
+        existing[key] = row
+
+    eval_files = _production_eval_files(artifact_dir)
+    if not eval_files:
+        raise ValueError(f"missing complete production eval source: {manifest_path}")
+    production: dict[tuple[float, float, int], dict[str, str]] = {}
+    eval_hashes: list[dict[str, str]] = []
+    for eval_path in eval_files:
+        eval_hashes.append({
+            "path": eval_path.relative_to(artifact_dir).as_posix(),
+            "sha256": sha256(eval_path),
+        })
+        for row in read_csv(eval_path):
+            recovered = _recovered_row(row, expected_sha)
+            key = _row_key(recovered)
+            if key[0] != round(xi, 8):
+                raise ValueError(f"production eval xi mismatch: {eval_path}")
+            if key in production:
+                raise ValueError(f"duplicate production eval key: {key}")
+            production[key] = recovered
+
+    expected_keys = {
+        (round(xi, 8), round(temperature, 8), rho_index)
+        for temperature in DENSITY_ANCHORS_BY_XI[xi]
+        for rho_index in range(RHO_COUNT)
+    }
+    missing = sorted(expected_keys - set(existing))
+    if not set(production).issubset(expected_keys):
+        extra = sorted(set(production) - expected_keys)
+        raise ValueError(f"production eval has unexpected keys: {extra[:3]}")
+    unrecoverable = [key for key in missing if key not in production]
+    if unrecoverable:
+        raise ValueError(f"production eval cannot recover fine-pool keys: {unrecoverable[:3]}")
+    recovered_rows = [production[key] for key in missing]
+    merged_rows = list(existing.values()) + recovered_rows
+    merged_rows.sort(key=lambda row: (float(row["T_MeV"]), -float(row["rho"])))
+    fieldnames = (
+        "xi", "T_MeV", "rho", "muq_MeV", "residual_norm", "iterations",
+        "converged", "finite", "sampling_role", "rho_level", "calculation_sha",
+    )
+    with pool.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows({field: row[field] for field in fieldnames} for row in merged_rows)
+
+    source_pool_sha = str(manifest["files"]["fine_pool.csv"])
+    recovery = {
+        "schema_version": RECOVERY_SCHEMA_VERSION,
+        "method": RECOVERY_METHOD,
+        "solver_called": False,
+        "source_manifest_sha256": hashlib.sha256(original_manifest_bytes).hexdigest(),
+        "source_fine_pool_sha256": source_pool_sha,
+        "source_fine_pool_rows": len(rows),
+        "recovered_fine_pool_rows": len(recovered_rows),
+        "recovery_postprocess_sha": recovery_postprocess_sha,
+        "production_eval_files": eval_hashes,
+    }
+    manifest["recovery"] = recovery
+    manifest["files"]["fine_pool.csv"] = sha256(pool)
+    manifest["recovery_overlay_sha256"] = sha256(pool)
+    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    return {
+        "manifest": manifest_path.relative_to(manifest_path.parents[1]).as_posix(),
+        "xi": xi,
+        "source_rows": len(rows),
+        "recovered_rows": len(recovered_rows),
+        "final_rows": len(merged_rows),
+        "source_manifest_sha256": recovery["source_manifest_sha256"],
+        "recovered_fine_pool_sha256": sha256(pool),
+    }
+
+
+def recover_source(input_dir: Path, output_dir: Path, expected_sha: str,
+                   expected_postprocess_sha: str, source_run_id: str,
+                   recovery_postprocess_sha: str = "") -> dict[str, Any]:
+    if not input_dir.is_dir():
+        raise ValueError(f"missing source artifact directory: {input_dir}")
+    if output_dir.exists():
+        raise ValueError(f"recovery output already exists: {output_dir}")
+    shutil.copytree(input_dir, output_dir)
+    manifests = _manifest_paths(output_dir)
+    if len(manifests) != len(XI_GRID):
+        raise ValueError(f"expected {len(XI_GRID)} xi manifests, got {len(manifests)}")
+    results = [
+        _recover_manifest(
+            path, expected_sha, expected_postprocess_sha, source_run_id,
+            recovery_postprocess_sha,
+        )
+        for path in manifests
+    ]
+    if {float(result["xi"]) for result in results} != set(XI_GRID):
+        raise ValueError("incomplete xi matrix after recovery")
+    overlay = {
+        "schema_version": RECOVERY_SCHEMA_VERSION,
+        "method": RECOVERY_METHOD,
+        "source_run_id": source_run_id,
+        "source_calculation_sha": expected_sha,
+        "source_postprocess_sha": expected_postprocess_sha,
+        "recovery_postprocess_sha": recovery_postprocess_sha,
+        "solver_called": False,
+        "shards": results,
+    }
+    (output_dir / "recovery_manifest.json").write_text(
+        json.dumps(overlay, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return overlay
 
 
 def validate_source(input_dir: Path, expected_sha: str, expected_postprocess_sha: str,
@@ -361,13 +538,14 @@ def write_manifest_patch(aggregate_dir: Path, figures: list[dict[str, Any]]) -> 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope", choices=("density", "cep", "crossover"), required=True)
-    parser.add_argument("--mode", choices=("source_validate", "aggregate_validate", "scope_plan"), required=True)
+    parser.add_argument("--mode", choices=("source_validate", "recover_source", "aggregate_validate", "scope_plan"), required=True)
     parser.add_argument("--input-dir", type=Path)
     parser.add_argument("--aggregate-dir", type=Path)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--audit-dir", type=Path)
     parser.add_argument("--expected-calculation-sha", default=CALCULATION_SHA)
     parser.add_argument("--expected-source-postprocess-sha", default="")
+    parser.add_argument("--recovery-postprocess-sha", default="")
     parser.add_argument("--source-run-id", required=True)
     args = parser.parse_args(argv)
     expected = args.expected_calculation_sha.lower()
@@ -379,6 +557,16 @@ def main(argv: list[str] | None = None) -> int:
         result = validate_source(args.input_dir, expected, args.expected_source_postprocess_sha, args.source_run_id)
         print(json.dumps(result, sort_keys=True))
         return 0 if result["failed_points"] == 0 and result["runner_minutes"] <= RUNNER_COST_STOP_MINUTES else 2
+    if args.mode == "recover_source":
+        if args.scope != "density" or args.input_dir is None or args.output_dir is None:
+            raise SystemExit("recover_source requires density, --input-dir and --output-dir")
+        result = recover_source(
+            args.input_dir, args.output_dir, expected,
+            args.expected_source_postprocess_sha, args.source_run_id,
+            args.recovery_postprocess_sha,
+        )
+        print(json.dumps(result, sort_keys=True))
+        return 0
     if args.mode == "scope_plan":
         if args.scope == "density":
             raise SystemExit("density scope requires numerical/source artifacts")
