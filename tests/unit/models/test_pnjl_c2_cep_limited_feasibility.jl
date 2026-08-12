@@ -34,6 +34,7 @@ include(JOB)
     @test occursin("production_eval_materialization_v1", job)
     @test occursin("trho_scan_materialized.csv", job)
     @test occursin("solver_called\" => false", job)
+    @test occursin("CSV_COORD_ATOL = 1e-6", job)
 
     @testset "CEP fine-pool materialization is solver-free and complete" begin
         xi = -0.45
@@ -63,6 +64,21 @@ include(JOB)
             @test provenance.method == "production_eval_materialization_v1"
             @test length(Main._curve_rows(materialized.path, xi, temperature, sha)) ==
                 length(Main._rho_grid())
+        end
+
+        @testset "CSV coordinate round-off is normalized" begin
+            rounded_rows = [(xi=xi, T_MeV=(i == 0 ? temperature - 5e-7 : temperature),
+                rho=i * Main.RHO_FINE_STEP, mu_avg_MeV=300.0 + i,
+                residual_norm=0.0, iterations=2, converged=true)
+                for i in 0:round(Int, Main.RHO_MAX / Main.RHO_FINE_STEP)]
+            mktempdir() do tmp
+                oracle = write_fixture(tmp, rounded_rows)
+                materialized = Main._materialize_fine_pool(oracle, xi, temperature, sha)
+                first_row = first(collect(CSV.File(materialized.path)))
+                @test Float64(first_row.T_MeV) == temperature
+                @test length(Main._curve_rows(materialized.path, xi, temperature, sha)) ==
+                    length(Main._rho_grid())
+            end
         end
 
         @testset "missing and duplicate keys are rejected" begin
