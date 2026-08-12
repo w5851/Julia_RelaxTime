@@ -1,0 +1,299 @@
+name: PNJL C2 Limited Feasibility
+run-name: C2 limited feasibility / ${{ inputs.scope || 'density' }} / ${{ inputs.run_mode || 'numerical' }} / ${{ inputs.tag || '20260812' }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Diagnostic scope (density is the first authorized scope)"
+        required: true
+        default: density
+        type: choice
+        options: [density, cep, crossover]
+      run_mode:
+        description: "Numerical fine-pool run or aggregate replay"
+        required: true
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      calculation_ref:
+        description: "Immutable calculation SHA"
+        required: true
+        type: string
+      source_run_id:
+        description: "Completed source run for aggregate replay"
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        description: "Source calculation SHA; must match calculation_ref"
+        required: false
+        default: ""
+        type: string
+      source_postprocess_sha:
+        description: "Source numerical runner/postprocess SHA"
+        required: false
+        default: ""
+        type: string
+      rerun_failed_only:
+        description: "Run only failed xi keys"
+        required: false
+        default: false
+        type: boolean
+      failed_job_keys:
+        description: "Comma-separated xi keys, e.g. -0.5,0.35"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Immutable diagnostic tag"
+        required: true
+        default: issue130_c2_density_feasibility_20260812
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CALCULATION_SHA: 4c9703c3be45b76608ab57d375082e29418bfd05
+  WORKFLOW_SCHEMA: pnjl_c2_limited_feasibility_v1
+  RUNNER_COST_STOP_MINUTES: 150
+
+jobs:
+  density_numerical:
+    if: ${{ inputs.scope == 'density' && inputs.run_mode == 'numerical' }}
+    name: "C2 limited density xi=${{ matrix.xi }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        xi: ["-0.5", "-0.35", "-0.25", "-0.2", "-0.15", "-0.1", "0.0", "0.3", "0.35", "0.5"]
+    steps:
+      - name: Select failed-only shard
+        id: select
+        shell: bash
+        env:
+          XI: ${{ matrix.xi }}
+          FAILED_JOB_KEYS: ${{ inputs.failed_job_keys }}
+          RERUN_FAILED_ONLY: ${{ inputs.rerun_failed_only }}
+        run: |
+          if [[ "$RERUN_FAILED_ONLY" == "true" && ",$FAILED_JOB_KEYS," != *",$XI,"* ]]; then
+            echo "run_job=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_job=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate immutable calculation SHA
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || { echo "calculation_ref differs from frozen calculation SHA" >&2; exit 1; }
+
+      - name: Checkout workflow head
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow head
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        shell: bash
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+
+      - name: Materialize calculation checkout and inject runner
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_c2_limited_feasibility_job.jl calculation/scripts/analysis/
+
+      - name: Setup Julia
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Install calculation dependencies
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run fine-pool shard
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        env:
+          XI: ${{ matrix.xi }}
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          mkdir -p "artifacts/xi_${XI}"
+          cd calculation
+          julia --project=. scripts/analysis/pnjl_c2_limited_feasibility_job.jl \
+            --scope density --xi "$XI" --tag "$TAG" \
+            --calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --output-dir "../artifacts/xi_${XI}"
+
+      - name: Upload fine-pool shard
+        if: ${{ steps.select.outputs.run_job == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-limited-density-xi-${{ matrix.xi }}
+          path: artifacts/xi_${{ matrix.xi }}
+          if-no-files-found: error
+          retention-days: 30
+
+  density_aggregate:
+    if: ${{ inputs.scope == 'density' && inputs.run_mode == 'aggregate_replay' }}
+    name: C2 limited density aggregate replay
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source run and frozen inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+          SOURCE_SHA: ${{ inputs.source_calculation_sha }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          [[ "$INPUT_SHA" == "$CALCULATION_SHA" ]] || exit 1
+          [[ -n "$SOURCE_RUN_ID" && "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || exit 1
+          [[ -z "$SOURCE_SHA" || "$SOURCE_SHA" == "$INPUT_SHA" ]] || exit 1
+          payload="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,jobs,headSha)"
+          test "$(jq -r .status <<<"$payload")" = completed
+          jobs="$(jq '[.jobs[] | select(.name | startswith("C2 limited density xi="))]' <<<"$payload")"
+          test "$(jq length <<<"$jobs")" = 10
+          test "$(jq '[.[] | select(.conclusion != "success")] | length' <<<"$jobs")" = 0
+          source_head="$(jq -r .headSha <<<"$payload")"
+          [[ -z "${{ inputs.source_postprocess_sha }}" || "${{ inputs.source_postprocess_sha }}" == "$source_head" ]] || exit 1
+          echo "SOURCE_HEAD_SHA=$source_head" >> "$GITHUB_ENV"
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Setup Python plotting environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install fixed plotting dependency
+        run: python -m pip install matplotlib==3.9.2
+
+      - name: Download source fine-pool artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: gh run download "$SOURCE_RUN_ID" --pattern 'c2-limited-density-xi-*' --dir source-artifacts
+
+      - name: Validate source artifacts and cost stop
+        shell: bash
+        run: |
+          echo "runner_cost_stop_minutes=$RUNNER_COST_STOP_MINUTES" >> "$GITHUB_STEP_SUMMARY"
+          python scripts/analysis/pnjl_c2_limited_feasibility.py \
+            --scope density --mode source_validate --input-dir source-artifacts \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
+            --source-run-id "${{ inputs.source_run_id }}"
+
+      - name: Materialize calculation checkout and evaluator
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_c2_limited_feasibility.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_stagec_density_certificate_feasibility_v2.jl calculation/scripts/analysis/
+
+      - name: Setup Julia and dependencies
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Install calculation dependencies
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run solver-free aggregate evaluator
+        shell: bash
+        run: |
+          mkdir -p aggregate
+          set +e
+          julia --project=calculation calculation/scripts/analysis/pnjl_c2_limited_feasibility.jl \
+            --scope density --input-dir source-artifacts --output-dir aggregate \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --expected-source-postprocess-sha "$SOURCE_HEAD_SHA" \
+            --source-run-id "${{ inputs.source_run_id }}"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+          echo "evaluator_exit_status=$status" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate aggregate and render representative figure
+        shell: bash
+        run: |
+          set +e
+          python scripts/analysis/pnjl_c2_limited_feasibility.py \
+            --scope density --mode aggregate_validate --aggregate-dir aggregate \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --source-run-id "${{ inputs.source_run_id }}"
+          status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then exit "$status"; fi
+          cat aggregate/manifest.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload density feasibility evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-limited-feasibility-${{ inputs.tag }}-density
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
+
+  scope_plan:
+    if: ${{ inputs.run_mode == 'aggregate_replay' && (inputs.scope == 'cep' || inputs.scope == 'crossover') }}
+    name: C2 limited ${{ inputs.scope }} scope plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Materialize scope plan only
+        shell: bash
+        run: |
+          python scripts/analysis/pnjl_c2_limited_feasibility.py \
+            --scope "${{ inputs.scope }}" --mode scope_plan \
+            --output-dir "scope_plan/${{ inputs.scope }}" \
+            --audit-dir docs/analysis/pnjl/c2_convergence_audit_v1 \
+            --expected-calculation-sha "$CALCULATION_SHA" \
+            --source-run-id "${{ inputs.source_run_id }}"
+      - name: Upload scope plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-limited-feasibility-${{ inputs.tag }}-${{ inputs.scope }}-plan
+          path: scope_plan/${{ inputs.scope }}
+          if-no-files-found: error
+          retention-days: 90
