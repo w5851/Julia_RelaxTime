@@ -688,6 +688,17 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   证书、Maxwell candidate 和成本；`full_hybrid_candidate` 不自动晋升 reference，也不启动
   C0/C1/C2、phase-reference、C3/O1 或 transport。
 
+## C2 CEP replay round-contract repair（2026-08-13）
+
+- [x] Numerical run `31621214117` completed all 17 CEP shards with calculation SHA
+  `4c9703c3be45b76608ab57d375082e29418bfd05`; aggregate replay `31622347487` failed only
+  in solver-free `_endpoint_replay` because Julia 1.12 rejects positional `round(x, digits)`.
+  No solver, Maxwell, fine-pool or physical gate was reached.
+- [ ] Repair branch `codex/issue-130-cep-replay-round-contract-repair` centralizes temperature
+  keys through `round(Float64(value); digits=8)` and adds a Julia 1.12 focused regression. It
+  preserves immutable numerical artifacts and reruns aggregate replay only after merge; CEP
+  remains diagnostic-only, with crossover, C0/C1/C2, reference and transport paused.
+
 ## C2 三项限定 feasibility 与成本止损（2026-08-12）
 
 - [x] 固定 calculation SHA 为 `4c9703c3be45b76608ab57d375082e29418bfd05`，保留 C0/C1/C2
