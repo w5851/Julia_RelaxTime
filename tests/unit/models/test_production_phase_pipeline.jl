@@ -7,6 +7,23 @@ if !isdefined(Main, :Models)
 end
 
 @testset "Production phase pipeline helpers" begin
+    @testset "materialization appends only after evaluation file closes" begin
+        source = read(joinpath(PROJECT_ROOT, "src", "models", "phase", "ProductionPhasePipeline.jl"), String)
+        cascade_start = findfirst("function _production_classify_temperature_cascade", source)
+        memoized_start = findfirst("function _production_classify_temperature_memoized_uniform", source)
+        @test cascade_start !== nothing
+        @test memoized_start !== nothing
+        cascade_end = memoized_start === nothing ? lastindex(source) : first(memoized_start)
+        memoized_end = findfirst("function _production_session_curve_for_grid", source)
+        memoized_end = memoized_end === nothing ? lastindex(source) : first(memoized_end)
+        cascade_body = source[first(cascade_start):cascade_end - 1]
+        memoized_body = source[first(memoized_start):memoized_end - 1]
+        @test occursin("result = open(out_csv, io_mode) do io", cascade_body)
+        @test occursin("_append_scan_csv!(aggregate_csv, out_csv)\n    return result", cascade_body)
+        @test occursin("result = open(out_csv, io_mode) do io", memoized_body)
+        @test occursin("_append_scan_csv!(aggregate_csv, out_csv)\n    return result", memoized_body)
+    end
+
     @test Models.ProductionPipelineConfig().cep_tol_MeV == 0.1
     @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
     @test Models.RhoHybridVerificationConfig().guard_rule == :extrema_outer_samples_v1

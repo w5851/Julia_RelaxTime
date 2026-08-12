@@ -232,7 +232,7 @@ function _production_classify_temperature_cascade(
         end
     end
 
-    open(out_csv, io_mode) do io
+    result = open(out_csv, io_mode) do io
         io_mode == "w" && println(io, TrhoScan.HEADER)
         level_results = NamedTuple[]
         targeted_total = 0
@@ -356,8 +356,7 @@ function _production_classify_temperature_cascade(
         after = TrhoScan.rho_session_snapshot(session)
         unique_delta = after.unique_solves - before.unique_solves
         failure_delta = after.failed_points - before.failed_points
-        _append_scan_csv!(aggregate_csv, out_csv)
-        return merge(final, (
+        merge(final, (
             raw_status=final.status,
             slice_status=semantic_status,
             coarse_status=coarse.status,
@@ -387,6 +386,8 @@ function _production_classify_temperature_cascade(
             cascade_support_origin=get(fine, :cascade_support_origin, :none),
         ))
     end
+    _append_scan_csv!(aggregate_csv, out_csv)
+    return result
 end
 
 function _production_classify_temperature_memoized_uniform(
@@ -416,7 +417,7 @@ function _production_classify_temperature_memoized_uniform(
         union!(written, _existing_session_keys(out_csv))
         foreach(row -> push!(written, (T_mid, xi, row.rho)), _production_session_rows(session, T_mid, xi))
     end
-    open(out_csv, io_mode) do io
+    result = open(out_csv, io_mode) do io
         io_mode == "w" && println(io, TrhoScan.HEADER)
         before = TrhoScan.rho_session_snapshot(session)
         level_results = NamedTuple[]
@@ -474,8 +475,7 @@ function _production_classify_temperature_memoized_uniform(
             :ambiguous_near_critical
         end
         after = TrhoScan.rho_session_snapshot(session)
-        _append_scan_csv!(aggregate_csv, out_csv)
-        return merge(fine, (
+        merge(fine, (
             raw_status=fine.status,
             slice_status=semantic_status,
             coarse_status=coarse.status,
@@ -504,6 +504,8 @@ function _production_classify_temperature_memoized_uniform(
             )],
         ))
     end
+    _append_scan_csv!(aggregate_csv, out_csv)
+    return result
 end
 
 function _production_session_curve_for_grid(
