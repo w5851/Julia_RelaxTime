@@ -8,6 +8,9 @@ const JOB = joinpath(ROOT, "scripts", "analysis", "pnjl_c2_cep_limited_feasibili
 const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-cep-limited-feasibility.yml")
 
 include(JOB)
+module CEPReplayEvaluatorContract
+include(Main.EVALUATOR)
+end
 
 @testset "C2 CEP limited feasibility contracts" begin
     evaluator = read(EVALUATOR, String)
@@ -35,6 +38,14 @@ include(JOB)
     @test occursin("trho_scan_materialized.csv", job)
     @test occursin("solver_called\" => false", job)
     @test occursin("CSV_COORD_ATOL = 1e-6", job)
+    @test occursin("_temperature_key(value) = round(Float64(value); digits=8)", evaluator)
+    @test !occursin("round(row.T_MeV, 8)", evaluator)
+    @test !occursin("round(T, 8)", evaluator)
+
+    @testset "temperature keys use Julia 1.12-compatible rounding" begin
+        @test CEPReplayEvaluatorContract._temperature_key(113.1328125) == 113.1328125
+        @test CEPReplayEvaluatorContract._temperature_key(113.1328125004) == 113.1328125
+    end
 
     @testset "CEP fine-pool materialization is solver-free and complete" begin
         xi = -0.45

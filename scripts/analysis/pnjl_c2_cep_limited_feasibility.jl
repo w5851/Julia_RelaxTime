@@ -73,6 +73,10 @@ end
     end
 end
 
+# Keep temperature lookup keys stable across CSV round-off while remaining
+# compatible with Julia 1.12, where `round(x, digits)` is not a valid call.
+@inline _temperature_key(value) = round(Float64(value); digits=8)
+
 @inline function _bool(value)
     value === nothing || value === missing ? false : value isa Bool ? value :
         lowercase(strip(String(value))) in ("true", "1", "yes")
@@ -216,8 +220,8 @@ end
 function _endpoint_replay(job, rows)
     bracket = _frozen_bracket(job)
     ordered = sort(job.slices; by=row -> _float(_field(row, :T_MeV)))
-    oracle = Dict(round(row.T_MeV, 8) => String(row.eval.status) for row in rows)
-    hybrid = Dict(round(_float(_field(row, :T_MeV)), 8) => _status(_field(row, :hybrid_status,
+    oracle = Dict(_temperature_key(row.T_MeV) => String(row.eval.status) for row in rows)
+    hybrid = Dict(_temperature_key(_float(_field(row, :T_MeV))) => _status(_field(row, :hybrid_status,
         "ambiguous_near_critical")) for row in ordered)
     low = bracket.low
     high = bracket.high
@@ -238,7 +242,7 @@ function _endpoint_replay(job, rows)
         end
         # Temperature routing is a property of the hybrid run.  Oracle labels
         # are compared only after the route has been reconstructed.
-        status = get(hybrid, round(T, 8), "ambiguous_near_critical")
+        status = get(hybrid, _temperature_key(T), "ambiguous_near_critical")
         if status == "confirmed_first_order"
             T > low + 1e-8 || (invalid_selection = true; invalid_reason = "first_order_midpoint_not_above_low")
             low = T; low_status = status; low_source = "oracle_midpoint"
@@ -344,7 +348,7 @@ function _write_outputs(output_dir::String, jobs, results, verdict, expected_sha
         telemetry_complete=result.telemetry_complete) for result in results])
     _write_csv(joinpath(output_dir, "temperature_states.csv"), [(
         xi=result.xi, T_MeV=row.T_MeV, status=String(row.eval.status), reason=row.eval.reason,
-        point_count=length(row.points), hybrid_status=get(result.hybrid_states, round(row.T_MeV, 8), "missing"))
+        point_count=length(row.points), hybrid_status=get(result.hybrid_states, _temperature_key(row.T_MeV), "missing"))
         for result in results for row in result.rows])
     _write_csv(joinpath(output_dir, "method_costs.csv"), [(
         xi=result.xi, method="aggregate", unique_solves=result.unique_solves,
