@@ -6,6 +6,10 @@ const DEFAULT_CANDIDATE_STEPS = 64
 const MAX_CANDIDATE_STEPS = 1024
 const BRACKET_SHRINK_REL = 1e-3
 const BRACKET_SHRINK_ABS = 1e-3
+const MAXWELL_CANDIDATE_POLICIES = (
+    :unique_three_crossing_topology_v1,
+    :unique_three_crossing_sign_change_v2,
+)
 
 """Derive an internal Maxwell stopping tolerance from active acceptance gates.
 
@@ -304,12 +308,11 @@ function _bisection_solve(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
         mu=nothing, area=nothing, iterations=0, crossings=Float64[], endpoint_dependent=false)
     if mu_a == mu_b
         probe = _area_probe(mu_a, rho_vals, mu_vals)
-        return probe.valid && abs(probe.area) <= tol_area ?
-            (converged=true, reason="grid_hit", mu=mu_a, area=probe.area,
-             iterations=0, crossings=probe.crossings, endpoint_dependent=probe.endpoint_dependent) :
-            (converged=false, reason="grid_hit_not_converged", mu=mu_a,
-             area=probe.area, iterations=0, crossings=probe.crossings,
-             endpoint_dependent=probe.endpoint_dependent)
+        # A zero-width bracket is a diagnostic probe only.  It is not a
+        # Maxwell root because no area sign change was established.
+        return (converged=false, reason="grid_hit_not_candidate", mu=mu_a,
+            area=probe.area, iterations=0, crossings=probe.crossings,
+            endpoint_dependent=probe.endpoint_dependent)
     end
     a, b, fa, fb = mu_a, mu_b, Float64(area_a), Float64(area_b)
     fa * fb <= 0.0 || return (converged=false, reason="invalid_area_bracket",
@@ -344,11 +347,17 @@ function _bisection_solve(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
 end
 
 function _candidate_roots(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
-        mu_lo::Float64, mu_hi::Float64, steps::Int, tol_area::Real, max_iter::Int)
+        mu_lo::Float64, mu_hi::Float64, steps::Int, tol_area::Real, max_iter::Int;
+        candidate_policy::Symbol=:unique_three_crossing_sign_change_v2)
+    candidate_policy in MAXWELL_CANDIDATE_POLICIES || throw(ArgumentError(
+        "unsupported Maxwell candidate policy $(candidate_policy); expected one of $(MAXWELL_CANDIDATE_POLICIES)",
+    ))
+    include_grid_hit_candidates = candidate_policy === :unique_three_crossing_topology_v1
     attempt = max(steps, 3)
     valid_intervals = NamedTuple[]
     roots = NamedTuple[]
     failed_candidates = NamedTuple[]
+    near_zero_grid_hits = NamedTuple[]
     while attempt <= MAX_CANDIDATE_STEPS
         previous = nothing
         interval_start = nothing
@@ -361,7 +370,7 @@ function _candidate_roots(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
                 if interval_start !== nothing
                     push!(valid_intervals, (mu_low=interval_start, mu_high=interval_last,
                         status="three_crossing_interval"))
-                    !interval_has_root && best_near_zero !== nothing &&
+                    include_grid_hit_candidates && !interval_has_root && best_near_zero !== nothing &&
                         push!(roots, merge(best_near_zero,
                             (bracket=(best_near_zero.mu, best_near_zero.mu),)))
                 end
@@ -374,10 +383,16 @@ function _candidate_roots(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
             end
             interval_start === nothing && (interval_start = Float64(mu0))
             interval_last = Float64(mu0)
-            if abs(probe.area) <= tol_area &&
-               (best_near_zero === nothing || abs(probe.area) < abs(best_near_zero.area))
-                best_near_zero = merge(probe, (converged=true, reason="grid_hit",
-                    mu=Float64(mu0), iterations=0))
+            if abs(probe.area) <= tol_area
+                hit = (mu=Float64(mu0), area=probe.area, crossings=probe.crossings,
+                    endpoint_dependent=probe.endpoint_dependent, reason="near_zero_grid_probe",
+                    bracket=(Float64(mu0), Float64(mu0)))
+                push!(near_zero_grid_hits, hit)
+                if include_grid_hit_candidates &&
+                   (best_near_zero === nothing || abs(probe.area) < abs(best_near_zero.area))
+                    best_near_zero = merge(probe, (converged=true, reason="grid_hit",
+                        mu=Float64(mu0), iterations=0))
+                end
             end
             if previous !== nothing && previous.area * probe.area < 0.0
                 solved = _bisection_solve(rho_vals, mu_vals,
@@ -395,7 +410,7 @@ function _candidate_roots(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
         if interval_start !== nothing
             push!(valid_intervals,
                 (mu_low=interval_start, mu_high=interval_last, status="three_crossing_interval"))
-            !interval_has_root && best_near_zero !== nothing &&
+            include_grid_hit_candidates && !interval_has_root && best_near_zero !== nothing &&
                 push!(roots, merge(best_near_zero,
                     (bracket=(best_near_zero.mu, best_near_zero.mu),)))
         end
@@ -419,8 +434,15 @@ function _candidate_roots(rho_vals::Vector{Float64}, mu_vals::Vector{Float64},
         end
         duplicate || push!(unique_roots, root)
     end
+    # The same grid probe can be seen at multiple scan resolutions.  Keep one
+    # deterministic diagnostic record per zero-width bracket.
+    unique_grid_hits = NamedTuple[]
+    for hit in sort(near_zero_grid_hits; by=item -> (item.mu, abs(item.area)))
+        duplicate = any(existing -> existing.mu == hit.mu, unique_grid_hits)
+        duplicate || push!(unique_grid_hits, hit)
+    end
     return (roots=unique_roots, failed_candidates=failed_candidates,
-        valid_intervals=valid_intervals)
+        valid_intervals=valid_intervals, near_zero_grid_hits=unique_grid_hits)
 end
 
 function _failure(reason::AbstractString; kwargs...)
@@ -435,7 +457,12 @@ function maxwell_construction(mu_vals::AbstractVector, rho_vals::AbstractVector;
         min_samples::Int=12, detect_min_points::Int=6, detect_eps::Real=1e-6,
         candidate_steps::Int=DEFAULT_CANDIDATE_STEPS,
         max_iter::Int=DEFAULT_MAX_ITER, tol_area::Real=DEFAULT_AREA_TOL,
-        spinodal_hint::Union{Nothing, SShapeResult}=nothing)
+        spinodal_hint::Union{Nothing, SShapeResult}=nothing,
+        candidate_policy::Symbol=:unique_three_crossing_sign_change_v2)
+
+    candidate_policy in MAXWELL_CANDIDATE_POLICIES || throw(ArgumentError(
+        "unsupported Maxwell candidate policy $(candidate_policy); expected one of $(MAXWELL_CANDIDATE_POLICIES)",
+    ))
 
     rho_sorted, mu_sorted = _prepare_curve(mu_vals, rho_vals)
     length(rho_sorted) < min_samples && return _failure("insufficient_points"; count=length(rho_sorted))
@@ -453,12 +480,14 @@ function maxwell_construction(mu_vals::AbstractVector, rho_vals::AbstractVector;
     mu_lo, mu_hi = tightened
 
     candidates = _candidate_roots(rho_sorted, mu_sorted, mu_lo, mu_hi,
-        candidate_steps, tol_area, max_iter)
+        candidate_steps, tol_area, max_iter; candidate_policy=candidate_policy)
     roots = candidates.roots
     observed_crossing_count = if !isempty(roots)
         length(first(roots).crossings)
     elseif !isempty(candidates.failed_candidates)
         length(first(candidates.failed_candidates).crossings)
+    elseif !isempty(candidates.near_zero_grid_hits)
+        length(first(candidates.near_zero_grid_hits).crossings)
     else
         0
     end
@@ -468,7 +497,9 @@ function maxwell_construction(mu_vals::AbstractVector, rho_vals::AbstractVector;
         :candidate_count => length(roots),
         :crossing_count => observed_crossing_count,
         :valid_intervals => candidates.valid_intervals,
-        :candidate_policy => :unique_three_crossing_topology_v1,
+        :candidate_policy => candidate_policy,
+        :near_zero_grid_hits => candidates.near_zero_grid_hits,
+        :near_zero_grid_probe_count => length(candidates.near_zero_grid_hits),
     )
     if isempty(roots)
         if !isempty(candidates.failed_candidates)

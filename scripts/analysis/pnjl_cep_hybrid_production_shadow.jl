@@ -74,7 +74,12 @@ function _config(args)
     endpoint_policy = Symbol(_arg(args, "--endpoint-policy", "bounded_zero_density_v1"))
     endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) ||
         throw(ArgumentError("unsupported endpoint policy $(endpoint_policy)"))
-    return (; method, xi, calculation_sha, output_dir, tag, scope, endpoint_policy)
+    # Historical v3 jobs remain reproducible; the v4 workflow passes v2
+    # explicitly so the policy change is visible in the artifact contract.
+    candidate_policy = Symbol(_arg(args, "--candidate-policy", "unique_three_crossing_topology_v1"))
+    candidate_policy in (:unique_three_crossing_topology_v1, :unique_three_crossing_sign_change_v2) ||
+        throw(ArgumentError("unsupported candidate policy $(candidate_policy)"))
+    return (; method, xi, calculation_sha, output_dir, tag, scope, endpoint_policy, candidate_policy)
 end
 
 @inline _anchors(cfg) = cfg.scope === :focused ? HYBRID_FOCUSED_ANCHORS[cfg.xi] :
@@ -228,7 +233,8 @@ function _run_anchor(cfg, T::Float64, anchor_dir::String, steps, telemetry)
         rho_support_config=Models.RhoSupportConfig(),
         rho_hybrid_verification=Models.RhoHybridVerificationConfig(
             point_ranking_version=:stage_b_features_v1,
-            endpoint_policy=cfg.endpoint_policy),
+            endpoint_policy=cfg.endpoint_policy,
+            candidate_policy=cfg.candidate_policy),
         work_telemetry=telemetry,
         memoize_uniform=steps.policy === :uniform_nested,
         promote_reference=false,
@@ -298,6 +304,7 @@ function _slice_row(cfg, T, result)
         endpoint_right_bracket_high=endpoint_right_high,
         maxwell_candidate_count=Int(_field(record, :maxwell_candidate_count, 0)),
         maxwell_crossing_count=Int(_field(record, :maxwell_crossing_count, 0)),
+        maxwell_near_zero_grid_probe_count=Int(_field(record, :maxwell_near_zero_grid_probe_count, 0)),
         maxwell_endpoint_dependent=_bool(_field(record, :maxwell_endpoint_dependent, false)),
         support_point_count=Int(_field(record, :hybrid_verification_point_count, 0)),
         targeted_additions=Int(_field(record, :cascade_targeted_count, get(cache_dict, "targeted_additions", 0))),
@@ -398,7 +405,7 @@ function _run_job(cfg)
             "rho_hybrid_guard_rule" => "extrema_outer_samples_v1",
             "rho_hybrid_comparison_epsilon" => 32eps(Float64),
             "rho_hybrid_point_ranking_version" => "stage_b_features_v1",
-            "rho_hybrid_candidate_policy" => "unique_three_crossing_topology_v1",
+            "rho_hybrid_candidate_policy" => String(cfg.candidate_policy),
             "rho_hybrid_endpoint_policy" => String(cfg.endpoint_policy),
             "rho_hybrid_selected_policy" => Dict(
                 "point_ranking_version" => "stage_b_features_v1",

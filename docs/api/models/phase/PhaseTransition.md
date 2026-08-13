@@ -92,11 +92,16 @@ end
 1. 先做 S-shape 检测或复用传入的 `spinodal_hint`
 2. 依据 spinodal 位置估计化学势搜索区间
 3. 在每个化学势上枚举全部去重交点；只有恰有三个交点时面积才有效，拓扑间隙会重置前一段面积变号
-4. 枚举所有有效面积根；多根或拓扑不唯一返回失败诊断，唯一根才进入结果
+4. 枚举所有有效面积根；默认 `candidate_policy=:unique_three_crossing_sign_change_v2`
+   只接受具有非零宽度面积变号 bracket 的候选。旧的
+   `:unique_three_crossing_topology_v1` 仅用于历史 artifact 重放。单个采样点落入绝对
+   面积容差但没有变号 bracket 时，只写入 `near_zero_grid_hits` 诊断，不计入 candidate。
+   多根或拓扑不唯一返回失败诊断，唯一根才进入结果
 5. 用严格二分逼近等面积点；达到 `max_iter` 仍未满足 `tol_area` 时 `converged=false`
 
 `details` 记录 `candidate_count`、`crossing_count`、`candidate_policy`、
-`endpoint_dependent`、交点 bracket 和失败原因。因而存在 S 形但三交点/二分证书未闭合时，
+`near_zero_grid_hits`、`endpoint_dependent`、交点 bracket 和失败原因。因而存在 S 形但
+三交点/二分证书未闭合时，
 上层应保持 numerical ambiguous/unknown，不能据此生成单调证书。
 
 典型用法：
