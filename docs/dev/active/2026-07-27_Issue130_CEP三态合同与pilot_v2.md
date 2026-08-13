@@ -892,3 +892,40 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   calculation SHA、endpoint policy、Maxwell、三态或容差。
 - [ ] replay 通过后，只有最终 verdict 为 `targeted_hybrid_candidate` 才运行 full
   24-anchor shadow；此前不启动 C0/C1/C2、reference promotion、C3/O1 或 transport。
+
+### Endpoint-local v4 full shadow 重验收（2026-08-13）
+
+- [x] PR #214 已合并为 calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`；修复只减少 Stage-C 对已缓存 rho
+  点的重复请求并复用最终 classification/geometry 结果，不改变 solver、Maxwell、endpoint
+  policy、三态或容差。
+- [x] required-three deep oracle run `31710995191` 完成，
+  `(-0.5,5)`、`(-0.5,20)`、`(0,5)` 均为 `confirmed_first_order`，曲线
+  finite/converged、Maxwell candidate 唯一、geometry gate 通过；aggregate verdict
+  `author_review_required` 仅表示治理状态。
+- [x] targeted numerical `31712021367` 与 final replay `31713290292` 完成，verdict
+  为 `targeted_hybrid_candidate`。18 个 targeted anchors 的 hybrid/oracle 最终分类一致；
+  deep overlay 只覆盖两个 standard `ambiguous_near_critical` 点，且
+  `oracle_labels_used_for_route=false`。
+- [x] full numerical `31713534102` 与 final aggregate replay `31714535418` 完成，
+  verdict 为 `full_hybrid_candidate`。72 条 slice rows 中 hybrid 与 independent oracle
+  均为 18 个 `confirmed_first_order`、6 个 `confirmed_monotone`；classification、
+  oracle、endpoint、coverage、performance 和 workflow-contract errors 均为空。
+  58760 条 raw rho-mu 曲线 key 唯一且 finite/converged，fallback/retry 为 0。
+- [x] 三个 endpoint certificate 均通过：`(-0.5,5)` 为
+  `endpoint_limited_first_order`，活动上界 `[0,7.62939453125e-7]`；
+  `(-0.5,20)` 为 `endpoint_local_geometry_first_order`，上界
+  `[9.765625e-5,1.953125e-4]`；`(0,5)` 为同类证书，上界
+  `[4.8828125e-5,9.765625e-5]`。三点均使用 Stage-C cap `12` 以内的实际补点，
+  且既有 `0.025 MeV / 0.0025 / 5e-5` geometry 门禁未放宽。
+- [x] 成本 gate 通过：hybrid unique solves `12845`，memoized dense `15384`，
+  independent oracle `30744`；hybrid fixed-rho、residual/Jacobian 和 fallback/retry
+  不高于 dense。hybrid runner time `289.74 s` 对 dense `269.50 s`，约高 `7.5%`，在
+  允许的 `10%` Actions wall-time 噪声范围内。
+- [x] 新证据已导入
+  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/`；旧 v4
+  evidence 保持不可变，完整 `curve_points.csv` 只保留在 Actions/local artifact，外部
+  SHA 为 `326974ee24932a3ecccce6d3d961c67835f1477250236e01286529a3384e2038`。
+- [ ] `full_hybrid_candidate` 仍不是 reference promotion 或 formal production 许可。
+  作者需审核新 evidence 的代表曲线、三个 endpoint 区间和成本；审核完成前不启动新的
+  C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。

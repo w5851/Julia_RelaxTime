@@ -1,0 +1,12 @@
+job_name,job_id,status,conclusion,elapsed_seconds,runner_minutes_rounded
+endpoint-local v4 xi=-0.5 method=memoized_dense,94492338415,completed,success,179.0,3
+endpoint-local v4 xi=0.5 method=independent_oracle,94492338482,completed,success,497.0,9
+endpoint-local v4 xi=-0.5 method=production_hybrid,94492338504,completed,success,196.0,4
+endpoint-local v4 xi=0.0 method=memoized_dense,94492338573,completed,success,283.0,5
+endpoint-local v4 xi=0.0 method=independent_oracle,94492338652,completed,success,249.0,5
+endpoint-local v4 xi=-0.5 method=independent_oracle,94492338666,completed,success,321.0,6
+endpoint-local v4 xi=0.0 method=production_hybrid,94492338673,completed,success,568.0,10
+endpoint-local v4 xi=0.5 method=production_hybrid,94492338676,completed,success,183.0,4
+endpoint-local v4 xi=0.5 method=memoized_dense,94492338715,completed,success,552.0,10
+replay endpoint-local shadow evidence,94492339127,completed,skipped,0.0,0
+aggregate endpoint-local shadow evidence,94495257702,completed,success,32.0,1
