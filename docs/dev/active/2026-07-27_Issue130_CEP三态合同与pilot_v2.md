@@ -810,3 +810,23 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   six-point artifacts remain immutable; no old C0/C1/C2 rerun, reference
   promotion, C3/O1 or transport is authorized before targeted shadow on the new
   calculation SHA.
+
+### Targeted shadow performance repair（2026-08-13）
+
+- [x] Targeted run `31686385522`、required-three deep oracle `31687530808` 和最终
+  aggregate replay `31688274618` 的分类、Maxwell 唯一性、endpoint、geometry、
+  finite/converged、fallback/retry 均通过；当前唯一 gate 为 hybrid runner time
+  `245.60 s` 对 dense `199.25 s`（约 `1.233`），超过既定 `1.10` wall-time allowance。
+  Hybrid unique solves 为 `9408`，低于 dense `11538`，因此阻塞属于执行/后处理开销，
+  不是 solver 或物理合同失败。
+- [x] 从 `origin/main` 创建 repair 分支
+  `codex/issue-130-targeted-performance-repair`。只优化 request-scoped rho session
+  的切片索引：按 `(T, xi)` 维护 cache rho keys，nearest continuation seed 和 production
+  curve rows 不再扫描整个 session cache；seed tie-break、失败点跳过、输出排序和数值
+  语义保持不变。没有修改 equilibrium solver、Maxwell、endpoint v2、三态规则或容差。
+- [x] 新增 TrhoScan cache/index focused regression；TrhoScan `34/34`、Production
+  pipeline `118/118`、Python shadow collector `21/21`、`git diff --check` 均通过。
+- [ ] 运行 repository governance checks 后创建 ready PR。合并后必须产生新的 immutable
+  calculation SHA，按顺序重跑 required-three deep oracle、targeted numerical 和
+  deep-overlay aggregate replay；只有 `targeted_hybrid_candidate` 才允许 full 24-anchor
+  shadow。此前不启动 C0/C1/C2、reference promotion、C3/O1 或 transport。
