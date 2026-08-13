@@ -115,9 +115,10 @@ def _source_run_completed_success(payload: dict[str, Any]) -> bool:
         return False
     if payload.get("conclusion") == "success":
         return True
+    numeric_prefixes = ("endpoint-local v4 xi=", "hybrid shadow xi=")
     numeric_jobs = [
         job for job in payload.get("jobs", [])
-        if str(job.get("name", "")).startswith("endpoint-local v4 xi=")
+        if str(job.get("name", "")).startswith(numeric_prefixes)
     ]
     return len(numeric_jobs) == 9 and all(job.get("conclusion") == "success" for job in numeric_jobs)
 
@@ -514,9 +515,10 @@ def _actions(
                 "final" if run_mode == "aggregate_replay" and payload.get("status") == "completed" else "provisional"
             )
             metadata["source_run_overall_success"] = payload.get("status") == "completed" and payload.get("conclusion") == "success"
+            numeric_prefixes = ("endpoint-local v4 xi=", "hybrid shadow xi=")
             metadata["source_run_numeric_jobs"] = sum(
                 1 for job in payload.get("jobs", [])
-                if str(job.get("name", "")).startswith("endpoint-local v4 xi=")
+                if str(job.get("name", "")).startswith(numeric_prefixes)
             )
             metadata["source_run_completed_success"] = _source_run_completed_success(payload)
             if run_mode == "aggregate_replay" and not metadata["source_run_completed_success"]:

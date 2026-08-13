@@ -830,3 +830,20 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   calculation SHA，按顺序重跑 required-three deep oracle、targeted numerical 和
   deep-overlay aggregate replay；只有 `targeted_hybrid_candidate` 才允许 full 24-anchor
   shadow。此前不启动 C0/C1/C2、reference promotion、C3/O1 或 transport。
+
+### Targeted aggregate schema/replay repair（2026-08-13）
+
+- [x] 新 calculation SHA `2ef61592a2c766d8e61772ae0aa536eb187af8aa` 的 required-three
+  deep oracle `31691735058` 已完成，3/3 数值 job 和 aggregate 成功；三点曲线
+  finite/converged、solver failure=0，deep 结果仍只作为 approved overlay evidence。
+- [x] Targeted numerical run `31696642139` 的 9/9 数值 job 成功，所有 job artifact
+  使用真实 schema `cep_maxwell_endpoint_production_shadow_v3` 和旧 endpoint-limit
+  policy；但 workflow aggregate 因未传入 schema/policy 参数，将有效 v3 artifact 按旧
+  v2 合同校验，最终以 `unexpected schema` 失败。该失败不是 solver 或 Maxwell 失败。
+- [ ] 创建窄范围 aggregate/replay repair：补齐 v3 schema、`bounded_zero_density_v1`
+  endpoint policy 和 `unique_three_crossing_topology_v1` candidate policy；source run
+  允许“数值 9/9 成功、aggregate 后处理失败”并通过同 SHA replay；批准的 deep
+  aggregate 按 manifest/hash 显式 overlay。不得重跑已成功数值 job，不改变物理合同。
+- [ ] repair 合并并 replay `31696642139` 后，只有最终 verdict 为
+  `targeted_hybrid_candidate` 才运行 full 24-anchor shadow；在此之前不启动 C0/C1/C2、
+  reference promotion、C3/O1 或 transport。

@@ -286,10 +286,41 @@ def test_hybrid_workflow_contract_has_immutable_matrix_and_replay():
     assert "production_hybrid" in text and "independent_oracle" in text
     assert "timeout-minutes: 180" in text
     assert "aggregate_replay" in text and "source_run_id" in text
+    assert "deep_oracle_run_id" in text
     assert "scope" in text and "targeted" in text and "full" in text
     assert "numeric_jobs" in text and "numeric_failures" in text
     assert "matplotlib==3.9.2" in text
+    assert "--schema-version cep_maxwell_endpoint_production_shadow_v3" in text
+    assert "--endpoint-mode" in text
+    assert "--endpoint-policy bounded_zero_density_v1" in text
+    assert "--candidate-policy unique_three_crossing_topology_v1" in text
+    assert "--deep-input-dir deep-artifacts" in text
+    assert "--deep-run-id \"$DEEP_RUN_ID\"" in text
+    assert "--pattern '*aggregate'" in text
+    assert "--run-mode aggregate_replay" in text
     assert len(module.XIS) * len(module.METHODS) == 9
+
+
+def test_replay_accepts_numeric_success_when_source_aggregate_failed():
+    text = WORKFLOW.read_text(encoding="utf-8")
+    provenance_block = text.split("- name: Verify source run provenance", 1)[1].split("- name: Download source numerical artifacts", 1)[0]
+    assert 'test "$(echo "$payload" | jq -r .status)" = completed' in provenance_block
+    assert 'numeric_failures="$(echo "$payload"' in provenance_block
+    assert 'test "$(echo "$payload" | jq -r .conclusion)" = success' not in provenance_block
+
+
+def test_replay_source_accepts_legacy_hybrid_numeric_job_prefix():
+    module = load_module(COLLECTOR, "hybrid_collector_source_replay_prefix")
+    payload = {
+        "status": "completed",
+        "conclusion": "failure",
+        "jobs": [
+            {"name": f"hybrid shadow xi={xi} method={method}", "conclusion": "success"}
+            for xi in ("-0.5", "0.0", "0.5")
+            for method in ("production_hybrid", "memoized_dense", "independent_oracle")
+        ],
+    }
+    assert module._source_run_completed_success(payload)
 
 
 def test_endpoint_v3_schema_and_policy_gate_are_supported(tmp_path):
