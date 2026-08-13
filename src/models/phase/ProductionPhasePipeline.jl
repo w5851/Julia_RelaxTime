@@ -144,8 +144,9 @@ end
 
 function _production_session_rows(session, T::Float64, xi::Float64)
     rows = NamedTuple[]
-    for ((row_T, row_xi, _), row) in session.cache
-        row_T == T && row_xi == xi && push!(rows, row)
+    for rho in TrhoScan.rho_session_slice_rhos(session, T, xi)
+        row = get(session.cache, (T, xi, rho), nothing)
+        row === nothing || push!(rows, row)
     end
     sort!(rows; by=row -> row.rho)
     return rows

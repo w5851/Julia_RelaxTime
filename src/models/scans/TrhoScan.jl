@@ -970,6 +970,9 @@ mutable struct RhoPointSession
     thermo_quadrature_maxevals::Int
     telemetry::Union{Nothing, SolverWorkTelemetry}
     cache::Dict{Tuple{Float64, Float64, Float64}, NamedTuple}
+    # Per-slice rho keys avoid scanning every temperature/xi slice when finding
+    # the nearest cached continuation seed.
+    cache_by_slice::Dict{Tuple{Float64, Float64}, Vector{Float64}}
     point_requests::Int
     cache_hits::Int
     unique_solves::Int
@@ -1007,7 +1010,8 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         model_kind, reverse_rho, seed_policy, solver_backend,
         p_num, t_num, iterations, thermo_quadrature_policy, thermo_quadrature_rtol,
         thermo_quadrature_atol, thermo_quadrature_maxevals, telemetry,
-        Dict{Tuple{Float64, Float64, Float64}, NamedTuple}(), 0, 0, 0, 0, 0,
+        Dict{Tuple{Float64, Float64, Float64}, NamedTuple}(),
+        Dict{Tuple{Float64, Float64}, Vector{Float64}}(), 0, 0, 0, 0, 0,
     )
 end
 
@@ -1020,17 +1024,32 @@ function _session_default_seed_pool(rho::Float64)
     return defaults
 end
 
-function _session_candidates(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
-    cached = NamedTuple[]
-    for ((cached_T, cached_xi, cached_rho), row) in session.cache
-        cached_T == T && cached_xi == xi && row.converged || continue
+function _nearest_session_solution(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
+    best = nothing
+    best_distance = Inf
+    for cached_rho in get(session.cache_by_slice, (T, xi), Float64[])
+        row = get(session.cache, (T, xi, cached_rho), nothing)
+        row === nothing && continue
+        row.converged || continue
         row.solution === nothing && continue
-        push!(cached, (distance=abs(cached_rho - rho), rho=cached_rho, solution=row.solution))
+        distance = abs(cached_rho - rho)
+        better = distance < best_distance
+        if !better && distance == best_distance && best !== nothing
+            better = session.reverse_rho ? cached_rho > best.rho : cached_rho < best.rho
+        end
+        if better
+            best = (distance=distance, rho=cached_rho, solution=row.solution)
+            best_distance = distance
+        end
     end
-    sort!(cached; by=entry -> (entry.distance, session.reverse_rho ? -entry.rho : entry.rho))
+    return best
+end
+
+function _session_candidates(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
+    cached = _nearest_session_solution(session, T, xi, rho)
     defaults = _session_default_seed_pool(rho)
-    primary = isempty(cached) ? first(defaults) : Float64.(first(cached).solution)
-    if isempty(cached)
+    primary = cached === nothing ? first(defaults) : Float64.(cached.solution)
+    if cached === nothing
         defaults = defaults[2:end]
     else
         defaults = [seed for seed in defaults if seed != primary]
@@ -1095,10 +1114,16 @@ function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targ
         targeted=Bool(targeted),
     )
     session.cache[key] = row
+    push!(get!(session.cache_by_slice, (T_value, xi_value), Float64[]), rho_value)
     session.unique_solves += 1
     targeted && (session.targeted_additions += 1)
     !row.converged && (session.failed_points += 1)
     return row
+end
+
+"""Return rho keys materialized for one request-scoped slice."""
+function rho_session_slice_rhos(session::RhoPointSession, T::Real, xi::Real)
+    get(session.cache_by_slice, (Float64(T), Float64(xi)), Float64[])
 end
 
 function rho_session_snapshot(session::RhoPointSession)
