@@ -158,7 +158,7 @@ Base.@kwdef struct RhoHybridVerificationConfig
     guard_rule::Symbol = :extrema_outer_samples_v1
     comparison_epsilon::Float64 = 32eps(Float64)
     point_ranking_version::Symbol = :stage_b_features_v1
-    candidate_policy::Symbol = :unique_three_crossing_topology_v1
+    candidate_policy::Symbol = :unique_three_crossing_sign_change_v2
     endpoint_policy::Symbol = :bounded_zero_density_v1
 end
 

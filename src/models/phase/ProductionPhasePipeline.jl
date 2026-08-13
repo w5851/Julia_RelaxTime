@@ -25,7 +25,9 @@ end
 function _production_maxwell_options(cfg::ProductionPipelineConfig)
     # Production uses the endpoint-feasibility validated dense candidate
     # scan; the public default remains the historical 64-point scan.
-    return (; tol_area=_production_maxwell_solver_tol(cfg), candidate_steps=MAX_CANDIDATE_STEPS)
+    return (; tol_area=_production_maxwell_solver_tol(cfg),
+        candidate_steps=MAX_CANDIDATE_STEPS,
+        candidate_policy=cfg.rho_hybrid_verification.candidate_policy)
 end
 
 function _production_maxwell_or_empty(cres, cfg::ProductionPipelineConfig)
@@ -2298,8 +2300,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             rho_hybrid_verification.point_ranking_version === :stage_b_features_v1 || throw(ArgumentError(
                 "rho_support_hybrid requires point_ranking_version=:stage_b_features_v1",
             ))
-            rho_hybrid_verification.candidate_policy === :unique_three_crossing_topology_v1 || throw(ArgumentError(
-                "rho_support_hybrid requires candidate_policy=:unique_three_crossing_topology_v1",
+            rho_hybrid_verification.candidate_policy in MAXWELL_CANDIDATE_POLICIES || throw(ArgumentError(
+                "rho_support_hybrid requires a supported Maxwell candidate policy; got $(rho_hybrid_verification.candidate_policy)",
             ))
             rho_hybrid_verification.endpoint_policy in (:bounded_zero_density_v1, :three_crossing_endpoint_local_v2) || throw(ArgumentError(
                 "rho_support_hybrid requires endpoint_policy=:bounded_zero_density_v1 or :three_crossing_endpoint_local_v2",
@@ -2531,6 +2533,7 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
             hybrid_endpoint_right_bracket=get(res, :hybrid_endpoint_right_bracket, nothing),
             maxwell_candidate_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :candidate_count, 0)),
             maxwell_crossing_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :crossing_count, 0)),
+            maxwell_near_zero_grid_probe_count=Int(get(get(res, :maxwell, MaxwellResult()).details, :near_zero_grid_probe_count, 0)),
             maxwell_endpoint_dependent=Bool(get(get(res, :maxwell, MaxwellResult()).details, :endpoint_dependent, false)),
             geometry_converged=Bool(get(res, :geometry_converged, false)),
             position_error_MeV=geometry_scalars.position_error_MeV,

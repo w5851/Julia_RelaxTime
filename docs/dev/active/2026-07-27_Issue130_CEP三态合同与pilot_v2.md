@@ -783,3 +783,30 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] coordinate-tolerance repair 仅引入 `CSV_COORD_ATOL=1e-6` 的表示层容差并将通过
   校验的 `(xi,T)` 规范化写入 materialized 文件；focused CI 全绿后合并，再以新
   postprocess SHA 重跑完整 17 个 CEP shard，避免混用不同 provenance 的成功结果。
+
+### Maxwell candidate contract v2 and six-point route audit（2026-08-13）
+
+- [x] Solver-free audit of numerical source run `31621214117` (calculation
+  `4c9703c3be45b76608ab57d375082e29418bfd05`) confirmed that the conflict at
+  `xi=-0.34375, T=142.1875 MeV` was caused by a true sign-change candidate plus a
+  zero-width `grid_hit` inside the absolute area tolerance. Candidate 1 has a
+  non-degenerate bracket and area `3.25e-9`; candidate 2 has no area-sign-change
+  bracket and is diagnostic only. A similar degenerate probe occurs at
+  `xi=0.38125, T=114.1875 MeV`.
+- [x] Public Maxwell candidate policy v2 now requires a non-zero-width area
+  sign-change bracket. `near_zero_grid_hits` are retained in `MaxwellResult.details`
+  for audit but cannot increase `candidate_count`; existing absolute area and
+  geometry tolerances are unchanged. `:unique_three_crossing_topology_v1` remains
+  an explicit historical replay policy.
+- [x] Focused PhaseCore/production/replay checks passed (28/28, 118/118 and
+  Python shadow 15/15); `git diff --check` and Python syntax also pass. The
+  solver-free v2 replay of source run `31621214117` is `route_audit_complete`;
+  `candidate_index.csv` has one non-degenerate sign-change candidate per source
+  and `near_zero_grid_probe_index.csv` records 9,561 zero-width probes that are
+  diagnostics only. Evidence is outside the repository at
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_six_point_route_audit_20260813\audit_v2`.
+- [ ] Run repository governance checks, create the ready PR, and wait for its
+  merge before assigning a new calculation SHA. Old C0/C1/C2, full-shadow and
+  six-point artifacts remain immutable; no old C0/C1/C2 rerun, reference
+  promotion, C3/O1 or transport is authorized before targeted shadow on the new
+  calculation SHA.

@@ -141,6 +141,7 @@ def _validate_jobs(
     schema_version: str = "cep_cascade_production_shadow_v2",
     endpoint_mode: bool = False,
     endpoint_policy: str = "bounded_zero_density_v1",
+    candidate_policy: str = "unique_three_crossing_topology_v1",
 ) -> tuple[list[str], list[str]]:
     errors: list[str] = []
     compatibility_warnings: list[str] = []
@@ -174,8 +175,8 @@ def _validate_jobs(
             errors.append(f"non-finite/non-converged final points at {directory}")
         if endpoint_mode:
             parameters = summary.get("parameters", {})
-            if parameters.get("rho_hybrid_candidate_policy") != "unique_three_crossing_topology_v1":
-                errors.append(f"endpoint candidate policy mismatch at {directory}")
+            if parameters.get("rho_hybrid_candidate_policy") != candidate_policy:
+                errors.append(f"endpoint candidate policy mismatch at {directory}: expected {candidate_policy}")
             if parameters.get("rho_hybrid_endpoint_policy") != endpoint_policy:
                 errors.append(f"endpoint policy mismatch at {directory}: expected {endpoint_policy}")
         for name in ("slice_metrics.csv", "cep_accuracy.csv", "method_costs.csv"):
@@ -568,6 +569,7 @@ def _gate(
     scope: str = "full",
     endpoint_mode: bool = False,
     endpoint_policy: str = "bounded_zero_density_v1",
+    candidate_policy: str = "unique_three_crossing_topology_v1",
 ) -> dict[str, Any]:
     compatibility_warnings = compatibility_warnings or []
     rows = _rows(output_dir / "slice_metrics.csv")
@@ -752,6 +754,7 @@ def collect(
     schema_version: str = "cep_cascade_production_shadow_v2",
     endpoint_mode: bool = False,
     endpoint_policy: str = "bounded_zero_density_v1",
+    candidate_policy: str = "unique_three_crossing_topology_v1",
     run_mode: str = "numerical",
     deep_input_dir: Path | None = None,
     deep_run_id: str | None = None,
@@ -762,7 +765,7 @@ def collect(
     contract_errors, compatibility_warnings = _validate_jobs(
         jobs, expected_sha, allow_legacy_stage_c_support=legacy_replay, scope=scope,
         schema_version=schema_version, endpoint_mode=endpoint_mode,
-        endpoint_policy=endpoint_policy,
+        endpoint_policy=endpoint_policy, candidate_policy=candidate_policy,
     )
     corrections = _collect_tables(jobs, output_dir)
     deep_overlay_errors: list[str] = []
@@ -784,6 +787,7 @@ def collect(
         scope=scope,
         endpoint_mode=endpoint_mode,
         endpoint_policy=endpoint_policy,
+        candidate_policy=candidate_policy,
     )
     _write_docs(output_dir, gate, actions, schema_version=schema_version)
     hashes: dict[str, str] = {}
@@ -798,6 +802,7 @@ def collect(
         "run_mode": run_mode,
         "endpoint_mode": endpoint_mode,
         "endpoint_policy": endpoint_policy,
+        "candidate_policy": candidate_policy,
         "job_keys": sorted([[summary.get("xi"), summary.get("method")] for _, summary in jobs]),
         "evidence_state": "final" if actions.get("snapshot_phase") == "final" else "provisional",
         "aggregation_corrections": corrections,
@@ -823,6 +828,7 @@ def main() -> int:
     parser.add_argument("--schema-version", default="cep_cascade_production_shadow_v2")
     parser.add_argument("--endpoint-mode", action="store_true")
     parser.add_argument("--endpoint-policy", choices=("bounded_zero_density_v1", "three_crossing_endpoint_local_v2"), default="bounded_zero_density_v1")
+    parser.add_argument("--candidate-policy", choices=("unique_three_crossing_topology_v1", "unique_three_crossing_sign_change_v2"), default="unique_three_crossing_topology_v1")
     parser.add_argument("--run-mode", choices=("numerical", "aggregate_replay"), default="numerical")
     parser.add_argument("--deep-input-dir", type=Path, default=None)
     parser.add_argument("--deep-run-id", default=None)
@@ -839,6 +845,7 @@ def main() -> int:
         schema_version=args.schema_version,
         endpoint_mode=args.endpoint_mode,
         endpoint_policy=args.endpoint_policy,
+        candidate_policy=args.candidate_policy,
         run_mode=args.run_mode,
         deep_input_dir=args.deep_input_dir,
         deep_run_id=args.deep_run_id,

@@ -28,7 +28,7 @@ end
     @test Models.ProductionPipelineConfig().temperature_resolution_target_MeV == 0.1
     @test Models.RhoHybridVerificationConfig().guard_rule == :extrema_outer_samples_v1
     @test Models.RhoHybridVerificationConfig().targeted_cap == 12
-    @test Models.RhoHybridVerificationConfig().candidate_policy == :unique_three_crossing_topology_v1
+    @test Models.RhoHybridVerificationConfig().candidate_policy == :unique_three_crossing_sign_change_v2
     @test Models.RhoHybridVerificationConfig().endpoint_policy == :bounded_zero_density_v1
 
     @testset "previous-temperature rho-support prior is nullable and deterministic" begin

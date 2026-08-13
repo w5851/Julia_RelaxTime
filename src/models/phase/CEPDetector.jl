@@ -51,6 +51,17 @@ function _classify_s_curve(mu_vals, rho_vals;
                 reason="maxwell_numerical_ambiguous:$(reason)",
             )
         end
+        if reason == "no_sign_change" &&
+           Int(get(mres.details, :near_zero_grid_probe_count, 0)) > 0
+            return (
+                status=:unknown,
+                mu_transition=nothing,
+                sres=sres,
+                maxwell=mres,
+                area_residual=nothing,
+                reason="maxwell_numerical_ambiguous:near_zero_grid_hit",
+            )
+        end
         if reason == "no_sign_change"
             weak = _weak_s_shape_metrics(mu_vals, rho_vals, sres)
             if _is_weak_s_shape(weak)

@@ -316,7 +316,7 @@ def test_endpoint_local_v4_focused_schema_and_policy_gate_are_supported(tmp_path
     for summary_path in tmp_path.glob("job-*/job_summary.json"):
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
         summary["schema_version"] = "cep_maxwell_endpoint_local_production_shadow_v4"
-        summary.setdefault("parameters", {})["rho_hybrid_candidate_policy"] = "unique_three_crossing_topology_v1"
+        summary.setdefault("parameters", {})["rho_hybrid_candidate_policy"] = "unique_three_crossing_sign_change_v2"
         summary.setdefault("parameters", {})["rho_hybrid_endpoint_policy"] = "three_crossing_endpoint_local_v2"
         summary_path.write_text(json.dumps(summary), encoding="utf-8")
     gate = module.collect(
@@ -328,6 +328,7 @@ def test_endpoint_local_v4_focused_schema_and_policy_gate_are_supported(tmp_path
         schema_version="cep_maxwell_endpoint_local_production_shadow_v4",
         endpoint_mode=True,
         endpoint_policy="three_crossing_endpoint_local_v2",
+        candidate_policy="unique_three_crossing_sign_change_v2",
     )
     assert gate["verdict"] == "focused_hybrid_candidate"
     assert gate["scope"] == "focused"

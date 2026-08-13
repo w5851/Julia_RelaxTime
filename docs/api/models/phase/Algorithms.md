@@ -234,8 +234,8 @@ Stage C 的分类曲线是完整 Stage-B 全域曲线与 guard 内按 Stage-B �
 Maxwell 特征排序选出的 `0.003125` 点的并集。缺少任一 guard、多 S topology 或
 局部点不足时保留 `ambiguous_near_critical`；Stage C 不产生新的 monotone 证书。
 `RhoHybridVerificationConfig`、manifest 和 diagnostics 会记录 guard rule、比较 epsilon、
-local step、target cap、support μ 极值、采用阶段和 verification 点数。它还固定记录
-`candidate_policy=:unique_three_crossing_topology_v1` 与
+local step、target cap、support μ 极值、采用阶段和 verification 点数。它默认记录
+`candidate_policy=:unique_three_crossing_sign_change_v2` 与
 `endpoint_policy=:bounded_zero_density_v1`；后者只在唯一 endpoint-dependent 候选且右外点
 存在时启用历史零密度端点证书。新的显式
 `endpoint_policy=:three_crossing_endpoint_local_v2` 不再要求右支越过两个 μ 极值：它要求
@@ -245,6 +245,12 @@ Stage-C 只在左 Maxwell 交点的 active bracket 内加入 midpoint。左 brac
 geometry 均通过时为 `endpoint_local_geometry_first_order`。这两个名称只描述内部证书，
 对外仍映射到既有三态 `confirmed_first_order` / `confirmed_monotone` /
 `ambiguous_near_critical`，不新增用户可调容差。
+
+Maxwell v2 的 candidate 合同与 Stage-C 路由分开版本化：只有面积函数在两个不同化学势
+采样点上形成严格变号 bracket，才可进入候选列表。弱 S 形中常见的单点 `abs(area) <= tol`
+只作为 `near_zero_grid_hits` 记录，不会制造第二个 candidate；因此它不会因为总面积较小
+而被误判成多根。历史 v1 artifact 可显式指定旧 policy 重放，但不作为新的 production
+证书策略。
 
 ## 工件治理层
 
