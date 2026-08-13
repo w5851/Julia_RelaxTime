@@ -276,14 +276,30 @@ jobs:
           test "$numeric_jobs" = 9
           test "$numeric_failures" = 0
           mkdir -p job-artifacts
-          gh run download "$SOURCE_RUN_ID" \
-            --pattern 'cep-maxwell-endpoint-local-production-shadow-*' \
-            --dir job-artifacts
+          artifact_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}/artifacts?per_page=100")"
+          job_prefix='cep-maxwell-endpoint-local-production-shadow-'
+          for xi in '-0.5' '0.0' '0.5'; do
+            for method in 'production_hybrid' 'memoized_dense' 'independent_oracle'; do
+              artifact_name="${job_prefix}${method}-xi-${xi}"
+              artifact_exists="$(echo "$artifact_json" | jq -r --arg name "$artifact_name" '[.artifacts[] | select(.name == $name and .expired == false)] | length')"
+              test "$artifact_exists" = 1 || {
+                echo "missing or expired source artifact: $artifact_name" >&2
+                exit 1
+              }
+              artifact_dir="job-artifacts/${method}-xi-${xi}"
+              mkdir -p "$artifact_dir"
+              gh run download "$SOURCE_RUN_ID" --name "$artifact_name" --dir "$artifact_dir"
+            done
+          done
           if [[ -n "$DEEP_RUN_ID" ]]; then
             mkdir -p deep-artifacts
-            # Match both the historical ``required_three_deep`` tag and the
-            # versioned ``required_three_<calculation-sha>`` deep artifacts.
-            gh run download "$DEEP_RUN_ID" --pattern '*required_three*' --dir deep-artifacts
+            deep_artifacts="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${DEEP_RUN_ID}/artifacts?per_page=100")"
+            deep_name="$(echo "$deep_artifacts" | jq -r '[.artifacts[] | select(.name | startswith("cep-deep-oracle-")) | select(.name | endswith("-aggregate")) | select(.expired == false) | .name] | if length == 1 then .[0] else empty end')"
+            test -n "$deep_name" || {
+              echo "expected exactly one non-expired deep-oracle aggregate artifact" >&2
+              exit 1
+            }
+            gh run download "$DEEP_RUN_ID" --name "$deep_name" --dir deep-artifacts
           fi
 
       - name: Setup Python

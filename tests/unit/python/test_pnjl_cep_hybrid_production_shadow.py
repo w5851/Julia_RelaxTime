@@ -435,7 +435,11 @@ def test_endpoint_local_v4_workflow_contract_is_versioned_and_scoped():
     assert "rerun_failed_only" in text
     assert "timeout-minutes: 180" in text
     assert "GH_TOKEN: ${{ github.token }}" in text
-    assert "--pattern '*required_three*'" in text
+    assert 'actions/runs/${SOURCE_RUN_ID}/artifacts?per_page=100' in text
+    assert 'actions/runs/${DEEP_RUN_ID}/artifacts?per_page=100' in text
+    assert 'gh run download "$SOURCE_RUN_ID" --name "$artifact_name"' in text
+    assert 'gh run download "$DEEP_RUN_ID" --name "$deep_name"' in text
+    assert 'expected exactly one non-expired deep-oracle aggregate artifact' in text
     assert "source_workflow_head_sha" in text
     assert "job summaries remain the authoritative calculation-SHA check" in text
 

@@ -840,10 +840,30 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   使用真实 schema `cep_maxwell_endpoint_production_shadow_v3` 和旧 endpoint-limit
   policy；但 workflow aggregate 因未传入 schema/policy 参数，将有效 v3 artifact 按旧
   v2 合同校验，最终以 `unexpected schema` 失败。该失败不是 solver 或 Maxwell 失败。
-- [ ] 创建窄范围 aggregate/replay repair：补齐 v3 schema、`bounded_zero_density_v1`
+- [x] 创建并合并窄范围 aggregate/replay repair（PR #212）：补齐 v3 schema、`bounded_zero_density_v1`
   endpoint policy 和 `unique_three_crossing_topology_v1` candidate policy；source run
   允许“数值 9/9 成功、aggregate 后处理失败”并通过同 SHA replay；批准的 deep
   aggregate 按 manifest/hash 显式 overlay。不得重跑已成功数值 job，不改变物理合同。
-- [ ] repair 合并并 replay `31696642139` 后，只有最终 verdict 为
-  `targeted_hybrid_candidate` 才运行 full 24-anchor shadow；在此之前不启动 C0/C1/C2、
-  reference promotion、C3/O1 或 transport。
+- [x] repair 合并后 replay `31699449984` 已复用 source `31696642139` 并叠加
+  deep run `31691735058`；最终 verdict 为历史 v3 `hybrid_integration_failed`，因此
+  没有运行 full 24-anchor shadow，也没有启动 C0/C1/C2、reference promotion、C3/O1
+  或 transport。
+
+### Endpoint-local v4 targeted replay artifact repair（2026-08-13）
+
+- [x] Endpoint-local v4 numerical run `31699715759` 使用 workflow head
+  `e6d9c55d1fbb1b9f0bd3fe911729716c200eeb56` 和 calculation SHA
+  `2ef61592a2c766d8e61772ae0aa536eb187af8aa` 完成 9/9 jobs；production hybrid、
+  memoized dense 和 independent oracle 均成功，未发现 solver、finite/converged 或
+  artifact 生成失败。
+- [x] 首次 aggregate replay `31700595520` 与不改代码重试 `31700895351` 均在
+  source artifact 下载阶段失败。失败原因是 Actions replay 中 wildcard
+  `gh run download --pattern` 未匹配实际存在的 9 个 job artifacts；不是数值、Maxwell、
+  endpoint 或 deep-oracle 失败。源 run 的 artifact API 已核实 9 个 job artifact 和
+  aggregate 均未过期。
+- [ ] 创建窄范围 replay repair：按固定的 9 个 `(xi, method)` 名称从 source-run
+  artifact API 枚举并逐个下载，deep run 选择唯一未过期 aggregate；只重放
+  `31699715759` 并叠加 approved deep run `31691735058`，不重跑 solver、不改变
+  calculation SHA、endpoint policy、Maxwell、三态或容差。
+- [ ] replay 通过后，只有最终 verdict 为 `targeted_hybrid_candidate` 才运行 full
+  24-anchor shadow；此前不启动 C0/C1/C2、reference promotion、C3/O1 或 transport。
