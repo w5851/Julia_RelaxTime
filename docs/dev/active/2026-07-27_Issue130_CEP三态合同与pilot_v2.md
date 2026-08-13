@@ -831,6 +831,30 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   deep-overlay aggregate replay；只有 `targeted_hybrid_candidate` 才允许 full 24-anchor
   shadow。此前不启动 C0/C1/C2、reference promotion、C3/O1 或 transport。
 
+### Targeted shadow performance repair v2（2026-08-13）
+
+- [x] 在现有 replay `31704400622` 上完成 solver-free 归因：hybrid unique solves
+  为 `9408`，低于 memoized dense 的 `11538`；hybrid `runner_seconds=253.8535 s`
+  对 dense `226.9094 s`，比值约 `1.119`，唯一失败为
+  `hybrid_performance_risk`。因此不修改 solver、Maxwell、endpoint policy、物理容差或
+  默认 uniform/cascade。
+- [x] 归因定位到两类 request-scoped 后处理开销：Stage-C 曾对已经在 Stage-B
+  cache 中的完整 641 点网格再次发起 cache-hit 请求并写入 CSV；随后最后一个累计
+  Stage-C 点又被 trace 和最终分类各做一次完整 Maxwell/geometry 计算。该开销不增加
+  unique solve，但会增加 point requests、CSV 物化和候选扫描时间。
+- [x] 修复分支 `codex/issue-130-targeted-performance-repair-v2`：Stage-C 只请求
+  尚未缓存的 selected rho 点，最终曲线仍从完整 Stage-B cache 与新增点并集重建；
+  Stage-C trace 最后一行复用已经完成的最终 classification/geometry/component 结果，
+  仍保留每个补点的逐级诊断。默认路径、Maxwell、endpoint-local v2、三态和容差不变。
+- [x] focused Julia 验证：Production pipeline `120/120`、TrhoScan `34/34`；
+  `git diff --check` 通过；新增测试覆盖只请求未缓存 Stage-C 点。尚未调用 PNJL
+  equilibrium solver，也未把旧 replay 结果标记为修复后性能通过。
+- [ ] 完成 Python shadow collector、workflow/schema、API/docs/data-path governance
+  后创建 ready PR。合并后以新的 calculation SHA 串行重跑 approved-three deep oracle、
+  targeted numerical 和 deep-overlay aggregate replay；只有新的 verdict 为
+  `targeted_hybrid_candidate` 才运行 full 24-anchor shadow。此前不启动 C0/C1/C2、
+  reference promotion、C3/O1 或 transport。
+
 ### Targeted aggregate schema/replay repair（2026-08-13）
 
 - [x] 新 calculation SHA `2ef61592a2c766d8e61772ae0aa536eb187af8aa` 的 required-three
