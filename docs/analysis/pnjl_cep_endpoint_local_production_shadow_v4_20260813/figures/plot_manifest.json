@@ -1,0 +1,236 @@
+{
+  "figures": [
+    {
+      "T_MeV": 5.0,
+      "file": "rho_mu_xi_m0p5_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 71.74595799999997,
+      "local_xlim": [
+        0.0,
+        2.916539466490382
+      ],
+      "local_ylim": [
+        295.27431636000006,
+        378.49962763999997
+      ],
+      "reason": "low_temperature",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "9ce077757dd59e76ff09cd94fd23f071c9e0216b92b1070a8cf29e75a63509eb",
+      "smooth_window_status": "not_used",
+      "xi": "-0.5"
+    },
+    {
+      "T_MeV": 147.0947265625,
+      "file": "rho_mu_xi_m0p5_T_147.095_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.0016019999999912216,
+      "local_xlim": [
+        2.1837500000000003,
+        2.2787499999999996
+      ],
+      "local_ylim": [
+        202.245862,
+        202.247864
+      ],
+      "reason": "first_order",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "8efae35351ab9c3ed7cf724762e138cff217068001164703342618a7e1377e14",
+      "smooth_window_status": "not_used",
+      "xi": "-0.5"
+    },
+    {
+      "T_MeV": 147.2197265625,
+      "file": "rho_mu_xi_m0p5_T_147.22_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.03354899999999361,
+      "local_xlim": [
+        2.15,
+        2.325
+      ],
+      "local_ylim": [
+        201.87284807999998,
+        201.91176492
+      ],
+      "reason": "first_monotone",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "b62df3a76299c86dd7c37c75b300cd30307b14141fdd364cd44318e76261b456",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.37478399999917844,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        2.15,
+        2.325
+      ],
+      "smooth_window_status": "selected",
+      "xi": "-0.5"
+    },
+    {
+      "T_MeV": 5.0,
+      "file": "rho_mu_xi_0p0_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 60.261348,
+      "local_xlim": [
+        0.0,
+        2.604680865681825
+      ],
+      "local_ylim": [
+        313.44095716,
+        383.34412084
+      ],
+      "reason": "low_temperature",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "042f52f7459198a2ebf0039fd59ebdf24b85ea518e1c9ce427fa030ee83d3fc4",
+      "smooth_window_status": "not_used",
+      "xi": "0.0"
+    },
+    {
+      "T_MeV": 130.9619140625,
+      "file": "rho_mu_xi_0p0_T_130.962_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.004730999999992491,
+      "local_xlim": [
+        1.8525,
+        2.0474999999999994
+      ],
+      "local_ylim": [
+        291.25968352,
+        291.26517148
+      ],
+      "reason": "first_order",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "e85079857bd0d064622b2e4a0420585a15202d06709e3235028ed4fbb0c9c9d5",
+      "smooth_window_status": "not_used",
+      "xi": "0.0"
+    },
+    {
+      "T_MeV": 131.0869140625,
+      "file": "rho_mu_xi_0p0_T_131.087_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.016994000000011056,
+      "local_xlim": [
+        1.85,
+        2.05
+      ],
+      "local_ylim": [
+        291.03291748,
+        291.05263052
+      ],
+      "reason": "first_monotone",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "c0e756c45536cfd943c33ab61f7c8e4cd7f0626053e3f7384b28b2de367a245a",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.21203999999898673,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        1.85,
+        2.05
+      ],
+      "smooth_window_status": "selected",
+      "xi": "0.0"
+    },
+    {
+      "T_MeV": 5.0,
+      "file": "rho_mu_xi_0p5_T_5_low_temperature.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 65.51172700000001,
+      "local_xlim": [
+        0.0,
+        2.29204309072351
+      ],
+      "local_ylim": [
+        314.09344784,
+        390.08705116
+      ],
+      "reason": "low_temperature",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "dcecd967a8a65c4aca3641f11264f2c3bc99abb58fbac07fcb9009b1ad05fb59",
+      "smooth_window_status": "not_used",
+      "xi": "0.5"
+    },
+    {
+      "T_MeV": 106.9599609375,
+      "file": "rho_mu_xi_0p5_T_106.96_first_order.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.0035619999999880747,
+      "local_xlim": [
+        1.45875,
+        1.62875
+      ],
+      "local_ylim": [
+        348.37687104,
+        348.38100296
+      ],
+      "reason": "first_order",
+      "right_panel_policy": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+      "sha256": "28bf836b6b39e8988953b206854045007ca0ab87f5cb577460abd0f53253e42d",
+      "smooth_window_status": "not_used",
+      "xi": "0.5"
+    },
+    {
+      "T_MeV": 107.0849609375,
+      "file": "rho_mu_xi_0p5_T_107.085_first_monotone.png",
+      "full_xlim": [
+        0.0,
+        4.0
+      ],
+      "local_curve_mu_span_MeV": 0.020030000000019754,
+      "local_xlim": [
+        1.425,
+        1.65
+      ],
+      "local_ylim": [
+        348.25308459999997,
+        348.27631940000003
+      ],
+      "reason": "first_monotone",
+      "right_panel_policy": "smooth_window_rho_mu_zoom_v1",
+      "sha256": "22c3997d5ead130522f1c02e89c46cfaa820c93fa56a6a3a74c037d1501e1aef",
+      "smooth_slope_quantile": 0.05,
+      "smooth_slope_threshold_MeV_per_rho": 0.24752999999975628,
+      "smooth_window_method": "longest_low_slope_run",
+      "smooth_window_rho": [
+        1.425,
+        1.65
+      ],
+      "smooth_window_status": "selected",
+      "xi": "0.5"
+    }
+  ],
+  "plot_policy": {
+    "full_panel": "rho_0_to_4_with_shared_method_styles",
+    "local_panel": "independent_rho_mu_zoom_with_phase_markers_v3_tight_envelope",
+    "local_x_padding_rule": "max(4% of phase/support envelope, 0.01 rho)",
+    "local_y_axis_is_independent": true,
+    "local_y_padding_rule": "max(8% of local mu span, 0.0002 MeV)",
+    "no_support_panel": "smooth_window_rho_mu_zoom_v1"
+  },
+  "raw_curve_copy_in_repository": false,
+  "schema_version": "pnjl_cep_endpoint_local_shadow_plot_manifest_v1",
+  "source_curve_sha256": "326974ee24932a3ecccce6d3d961c67835f1477250236e01286529a3384e2038",
+  "source_plot_manifest_sha256": "606ad481d4a38bccb96cab6cc185dbd89ada3b72f63f76d287b22fa7c561a63f",
+  "source_schema_version": "cep_maxwell_endpoint_local_production_shadow_v4"
+}
