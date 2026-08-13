@@ -527,6 +527,14 @@ function _production_session_curve_for_grid(
     return ([row.muq_MeV for row in rows], [row.rho for row in rows]), rows
 end
 
+"""Return only the rho keys not already materialized in a session slice."""
+function _production_session_missing_grid(session, T::Real, xi::Real, rho_grid::AbstractVector)
+    T_value = Float64(T)
+    xi_value = Float64(xi)
+    sort!(unique(Float64[rho for rho in rho_grid if
+        !haskey(session.cache, (T_value, xi_value, Float64(rho)))]))
+end
+
 function _classify_production_curve(curve, cfg::ProductionPipelineConfig,
         level::Int, out_csv::String)
     curve === nothing && return (
@@ -1427,19 +1435,34 @@ geometry certificate auditable in the sweep record.
 """
 function _hybrid_stage_c_refinement_trace(
         session, T::Float64, xi::Float64, stage_b_grid, selected_points,
-        stage_b, cfg::ProductionPipelineConfig, out_csv::String)
+        stage_b, cfg::ProductionPipelineConfig, out_csv::String;
+        final_result=nothing, final_geometry=nothing, final_component_geometry=nothing)
     trace = NamedTuple[]
     selected_rho = Float64[]
-    for item in selected_points
+    for (item_index, item) in enumerate(selected_points)
         push!(selected_rho, Float64(item.rho))
-        verification_grid = sort!(unique(vcat(Float64.(stage_b_grid), selected_rho)))
-        curve, _ = _production_session_curve_for_grid(session, T, xi, verification_grid)
-        current = _classify_production_curve(curve, cfg, 4, out_csv)
-        geometry = _compare_phase_geometry(stage_b, current, PhaseGeometryTolerances(
-            position_MeV=cfg.rho_position_tol_MeV,
-            density=cfg.rho_density_tol,
-            maxwell_area=cfg.rho_maxwell_area_tol,
-        ))
+        is_final = item_index == length(selected_points) &&
+            final_result !== nothing && final_geometry !== nothing
+        if is_final
+            # The final cumulative grid is exactly the grid already classified
+            # by the caller. Reuse that result for the last trace row instead
+            # of repeating the 1024-point Maxwell candidate scan.
+            current = final_result
+            geometry = final_geometry
+            component_geometry = final_component_geometry === nothing ?
+                _hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol) :
+                final_component_geometry
+        else
+            verification_grid = sort!(unique(vcat(Float64.(stage_b_grid), selected_rho)))
+            curve, _ = _production_session_curve_for_grid(session, T, xi, verification_grid)
+            current = _classify_production_curve(curve, cfg, 4, out_csv)
+            geometry = _compare_phase_geometry(stage_b, current, PhaseGeometryTolerances(
+                position_MeV=cfg.rho_position_tol_MeV,
+                density=cfg.rho_density_tol,
+                maxwell_area=cfg.rho_maxwell_area_tol,
+            ))
+            component_geometry = _hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol)
+        end
         push!(trace, (
             rank=Int(item.rank), batch=Int(item.batch), rho=Float64(item.rho),
             feature=String(item.feature), status=current.status,
@@ -1447,7 +1470,7 @@ function _hybrid_stage_c_refinement_trace(
             position_error_MeV=geometry.position_MeV,
             density_error=geometry.density,
             maxwell_area=geometry.maxwell_area,
-            component_geometry=_hybrid_density_component_geometry(stage_b, current, cfg.rho_density_tol),
+            component_geometry=component_geometry,
             reason=String(geometry.reason),
         ))
     end
@@ -1660,7 +1683,11 @@ function _production_classify_temperature_hybrid(
     )))
     open(out_csv, io_mode) do io
         io_mode == "w" && println(io, TrhoScan.HEADER)
-        _production_session_scan_hybrid!(session, io, written, T_mid, xi, verification_grid,
+        # Stage B is already present in the request-scoped cache. Only the
+        # selected Stage-C keys need a rho-point request; the full union is
+        # reconstructed from cache below without repeating cache-hit writes.
+        stage_c_new_grid = _production_session_missing_grid(session, T_mid, xi, support.grid)
+        _production_session_scan_hybrid!(session, io, written, T_mid, xi, stage_c_new_grid,
             Set(support.grid), reverse_rho, p_num, t_num, thermo_quadrature_kwargs)
     end
     # It never falls back to a global oracle: every point is either from the
@@ -1672,10 +1699,13 @@ function _production_classify_temperature_hybrid(
         density=cfg.rho_density_tol,
         maxwell_area=cfg.rho_maxwell_area_tol,
     ))
+    component_geometry = _hybrid_density_component_geometry(stage_b, stage_c, cfg.rho_density_tol)
     selected_points = get(support, :selected_points, NamedTuple[])
     refinement_trace = _hybrid_stage_c_refinement_trace(
-        session, T_mid, xi, stage_b_grid, selected_points, stage_b, cfg, out_csv)
-    component_geometry = _hybrid_density_component_geometry(stage_b, stage_c, cfg.rho_density_tol)
+        session, T_mid, xi, stage_b_grid, selected_points, stage_b, cfg, out_csv;
+        final_result=stage_c,
+        final_geometry=geometry_bc,
+        final_component_geometry=component_geometry)
     stage_c_valid = stage_c.status == :valid && stage_b_first && geometry_bc.converged
     _append_scan_csv!(aggregate_csv, out_csv)
     after = TrhoScan.rho_session_snapshot(session)

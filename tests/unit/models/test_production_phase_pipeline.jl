@@ -271,6 +271,19 @@ end
         @test records[end].converged
     end
 
+    @testset "Stage-C scan requests only uncached selected points" begin
+        cache = Dict{Tuple{Float64, Float64, Float64}, Any}(
+            (150.0, 0.0, 0.0) => :cached,
+            (150.0, 0.0, 0.05) => :cached,
+        )
+        session = (cache=cache,)
+        missing = Models._production_session_missing_grid(
+            session, 150.0, 0.0, [0.0, 0.025, 0.05, 0.075, 0.025],
+        )
+        @test missing == [0.025, 0.075]
+        @test Models._production_session_missing_grid(session, 150.0, 0.0, [0.0, 0.05]) == Float64[]
+    end
+
     @testset "hybrid policy validation is explicit and opt-in" begin
         @test_throws ArgumentError Models.run_production_phase_pipeline(
             :PNJL; T_start=150.0, T_end=150.0, dT=1.0, rho_grid=[0.0, 0.05],
