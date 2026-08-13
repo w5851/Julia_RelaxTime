@@ -849,8 +849,9 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] focused Julia 验证：Production pipeline `120/120`、TrhoScan `34/34`；
   `git diff --check` 通过；新增测试覆盖只请求未缓存 Stage-C 点。尚未调用 PNJL
   equilibrium solver，也未把旧 replay 结果标记为修复后性能通过。
-- [ ] 完成 Python shadow collector、workflow/schema、API/docs/data-path governance
-  后创建 ready PR。合并后以新的 calculation SHA 串行重跑 approved-three deep oracle、
+- [x] Python shadow collector、workflow/schema、API/docs/data-path governance 全部通过；
+  PR #214 `fix(pnjl): reduce hybrid Stage-C postprocess overhead` 已创建为 ready PR，
+  当前等待合并授权。合并后以新的 calculation SHA 串行重跑 approved-three deep oracle、
   targeted numerical 和 deep-overlay aggregate replay；只有新的 verdict 为
   `targeted_hybrid_candidate` 才运行 full 24-anchor shadow。此前不启动 C0/C1/C2、
   reference promotion、C3/O1 或 transport。
