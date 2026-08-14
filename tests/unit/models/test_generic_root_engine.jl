@@ -70,6 +70,27 @@ end
         @test isapprox(result.x[1], 2.0; atol=1e-12)
     end
 
+    @testset "callback solver does not repeat identical fallback method" begin
+        calls = Ref(0)
+        solve_once = function (method::Symbol, seed::Vector{Float64})
+            calls[] += 1
+            return (mass=seed[1], gamma=seed[2], converged=false, residual_norm=1.0)
+        end
+
+        result = Models.solve_root_with_policy(
+            solve_once,
+            [1.0, 0.0];
+            policy=Models.RootPolicy(
+                primary_method=:trust_region,
+                fallback_method=:trust_region,
+                use_fallback=true,
+            ),
+        )
+        @test calls[] == 1
+        @test length(result.diagnostics.attempts) == 1
+        @test !result.converged
+    end
+
     @testset "callback solver prefers lower score over lower residual" begin
         solve_once = function (method::Symbol, seed::Vector{Float64})
             if method === :newton
