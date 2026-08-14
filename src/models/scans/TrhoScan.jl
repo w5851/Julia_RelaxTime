@@ -973,6 +973,9 @@ mutable struct RhoPointSession
     # Per-slice rho keys avoid scanning every temperature/xi slice when finding
     # the nearest cached continuation seed.
     cache_by_slice::Dict{Tuple{Float64, Float64}, Vector{Float64}}
+    # Sorted successful rho keys make nearest-seed lookup logarithmic while the
+    # materialization-order index above remains unchanged for provenance.
+    converged_rhos_by_slice::Dict{Tuple{Float64, Float64}, Vector{Float64}}
     point_requests::Int
     cache_hits::Int
     unique_solves::Int
@@ -1011,6 +1014,7 @@ function new_rho_point_session(; model_kind::Symbol=:PNJL,
         p_num, t_num, iterations, thermo_quadrature_policy, thermo_quadrature_rtol,
         thermo_quadrature_atol, thermo_quadrature_maxevals, telemetry,
         Dict{Tuple{Float64, Float64, Float64}, NamedTuple}(),
+        Dict{Tuple{Float64, Float64}, Vector{Float64}}(),
         Dict{Tuple{Float64, Float64}, Vector{Float64}}(), 0, 0, 0, 0, 0,
     )
 end
@@ -1025,9 +1029,17 @@ function _session_default_seed_pool(rho::Float64)
 end
 
 function _nearest_session_solution(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
+    slice_key = (T, xi)
+    converged_rhos = get(session.converged_rhos_by_slice, slice_key, Float64[])
+    isempty(converged_rhos) && return nothing
+
     best = nothing
     best_distance = Inf
-    for cached_rho in get(session.cache_by_slice, (T, xi), Float64[])
+    insertion_point = searchsortedfirst(converged_rhos, rho)
+    # Only the two bracketing entries can be nearest.  The row checks preserve
+    # the old behavior if a caller mutates the cache directly.
+    for index in max(1, insertion_point - 1):min(length(converged_rhos), insertion_point)
+        cached_rho = @inbounds converged_rhos[index]
         row = get(session.cache, (T, xi, cached_rho), nothing)
         row === nothing && continue
         row.converged || continue
@@ -1043,6 +1055,16 @@ function _nearest_session_solution(session::RhoPointSession, T::Float64, xi::Flo
         end
     end
     return best
+end
+
+function _index_converged_rho!(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
+    slice_key = (T, xi)
+    converged_rhos = get!(session.converged_rhos_by_slice, slice_key, Float64[])
+    insertion_point = searchsortedfirst(converged_rhos, rho)
+    if insertion_point > length(converged_rhos) || @inbounds(converged_rhos[insertion_point] != rho)
+        insert!(converged_rhos, insertion_point, rho)
+    end
+    return nothing
 end
 
 function _session_candidates(session::RhoPointSession, T::Float64, xi::Float64, rho::Float64)
@@ -1115,6 +1137,7 @@ function rho_point!(session::RhoPointSession, T::Real, xi::Real, rho::Real; targ
     )
     session.cache[key] = row
     push!(get!(session.cache_by_slice, (T_value, xi_value), Float64[]), rho_value)
+    row.converged && _index_converged_rho!(session, T_value, xi_value, rho_value)
     session.unique_solves += 1
     targeted && (session.targeted_additions += 1)
     !row.converged && (session.failed_points += 1)

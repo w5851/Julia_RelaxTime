@@ -60,6 +60,7 @@ const _TS = Models.TrhoScan
             converged=false, solution=nothing,
         )
         session.cache_by_slice[(100.0, 0.0)] = [0.0, 0.2, 0.1]
+        session.converged_rhos_by_slice[(100.0, 0.0)] = [0.0, 0.2]
 
         nearest = _TS._nearest_session_solution(session, 100.0, 0.0, 0.1)
         @test nearest !== nothing
@@ -69,6 +70,29 @@ const _TS = Models.TrhoScan
         candidates = _TS._session_candidates(session, 100.0, 0.0, 0.1)
         @test candidates[1].state == seed .+ 1.0
         @test _TS.rho_session_slice_rhos(session, 100.0, 0.0) == [0.0, 0.2, 0.1]
+        @test session.converged_rhos_by_slice[(100.0, 0.0)] == [0.0, 0.2]
+    end
+
+    @testset "sorted converged index preserves forward tie-break" begin
+        session = _TS.new_rho_point_session(reverse_rho=false)
+        seed = Float64.(Models.HADRON_SEED_8)
+        session.cache[(100.0, 0.0, 0.0)] = (converged=true, solution=seed)
+        session.cache[(100.0, 0.0, 0.2)] = (converged=true, solution=seed .+ 1.0)
+        session.converged_rhos_by_slice[(100.0, 0.0)] = [0.0, 0.2]
+
+        nearest = _TS._nearest_session_solution(session, 100.0, 0.0, 0.1)
+        @test nearest !== nothing
+        @test nearest.rho == 0.0
+    end
+
+    @testset "failed points are excluded from converged index" begin
+        session = _TS.new_rho_point_session()
+        _TS._index_converged_rho!(session, 100.0, 0.0, 0.2)
+        _TS._index_converged_rho!(session, 100.0, 0.0, 0.0)
+        _TS._index_converged_rho!(session, 100.0, 0.0, 0.2)
+
+        @test session.converged_rhos_by_slice[(100.0, 0.0)] == [0.0, 0.2]
+        @test _TS._nearest_session_solution(session, 100.0, 0.0, 0.1) === nothing
     end
 
     @testset "seed pool builder uses continuation as primary" begin
