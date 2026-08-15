@@ -115,3 +115,29 @@ last_verified = "2026-07-10"
 verification_commands = [
   "julia --project=. tests/integration/relaxtime/test_combined_meson_density_scan_smoke.jl",
 ]
+
+[[sop]]
+id = "figure_production"
+path = "docs/guides/sop/workflows/figure_production.md"
+status = "active"
+authoritative_for = ["paper_figure_production_contract", "figure_mode_style_profile_governance"]
+entrypoints = [
+  "scripts/plotting/validate_plot_artifact.py",
+  "scripts/plotting/render_plotting_pilot.py",
+]
+stable_entrypoints = [
+  "scripts/plotting/validate_plot_artifact.py",
+]
+configs = [
+  "config/plotting/audit_v1.toml",
+  "config/plotting/candidate_origin_like_v1.toml",
+  "config/plotting/strict_origin_like_v1.toml",
+]
+review_cycle_days = 120
+last_verified = "2026-08-15"
+verification_commands = [
+  "python -m pytest -q tests/unit/python/test_plotting_contract.py",
+  "python scripts/plotting/validate_plot_artifact.py <path-to-plot_manifest.json>",
+  "julia --project=. scripts/dev/check_docs_consistency.jl",
+  "julia --project=. scripts/dev/check_script_entrypoints.jl",
+]

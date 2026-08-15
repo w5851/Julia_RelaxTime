@@ -1,0 +1,74 @@
+schema_version = "plot_style_profile_v1"
+profile_id = "strict_origin_like_v1"
+status = "active"
+default_column = "single_column"
+font_family = "serif"
+font_candidates = ["Times New Roman", "Times"]
+mathtext_fontset = "stix"
+font_size_pt = 9.0
+axes_linewidth_pt = 0.6
+line_width_pt = 1.0
+marker_size_pt = 4.0
+
+[figure_size_in]
+single_column = [3.375, 2.5]
+double_column = [6.75, 4.6]
+
+[output]
+formats = ["png", "svg"]
+optional_formats = ["pdf"]
+dpi = 600
+
+[support]
+draw_points = false
+visual_policy = "line_first_landmark_only"
+
+[layout]
+legend_policy = "dense_aware_best_then_external"
+max_in_axes_entries = 4
+allow_external_legend = true
+
+[semantics]
+publication_scope = "main_text_candidate"
+allow_unresolved = false
+allow_estimated_midpoint = false
+allow_connector = false
+interpolation_default = "none"
+
+[palette]
+colors = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"]
+
+[phase_styles.first_order]
+linestyle = "-"
+marker = ""
+alpha = 1.0
+
+[phase_styles.crossover]
+linestyle = "--"
+marker = ""
+alpha = 1.0
+
+[phase_styles.spinodal]
+linestyle = ":"
+marker = ""
+alpha = 0.45
+
+[phase_styles.cep_confirmed]
+linestyle = "None"
+marker = "o"
+alpha = 1.0
+
+[phase_styles.cep_bracket]
+linestyle = "--"
+marker = "D"
+alpha = 0.9
+
+[phase_styles.estimated_midpoint]
+linestyle = "--"
+marker = "D"
+alpha = 0.9
+
+[phase_styles.unresolved]
+linestyle = "None"
+marker = "x"
+alpha = 1.0
