@@ -1,0 +1,70 @@
+name: task-ledger-governance
+
+on:
+  pull_request:
+    paths:
+      - "config/governance/task_tracks.toml"
+      - "scripts/dev/check_task_ledger.jl"
+      - "tests/unit/config/test_task_ledger.jl"
+      - "tests/unit/runtests.jl"
+      - ".agents/skills/codex-task-harness/**"
+      - ".claude/skills/codex-task-harness/**"
+      - "AGENTS.md"
+      - "docs/dev/task_tracking_governance.md"
+      - "docs/dev/active/**"
+      - "docs/dev/backlog/**"
+      - "docs/dev/agent_command_reference.md"
+      - "scripts/dev/README.md"
+      - ".github/workflows/task-ledger-governance.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "config/governance/task_tracks.toml"
+      - "scripts/dev/check_task_ledger.jl"
+      - "tests/unit/config/test_task_ledger.jl"
+      - "tests/unit/runtests.jl"
+      - ".agents/skills/codex-task-harness/**"
+      - ".claude/skills/codex-task-harness/**"
+      - "AGENTS.md"
+      - "docs/dev/task_tracking_governance.md"
+      - "docs/dev/active/**"
+      - "docs/dev/backlog/**"
+      - "docs/dev/agent_command_reference.md"
+      - "scripts/dev/README.md"
+      - ".github/workflows/task-ledger-governance.yml"
+  workflow_dispatch:
+
+jobs:
+  advisory:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Validate task ledger
+        id: ledger
+        continue-on-error: true
+        run: julia --project=. scripts/dev/check_task_ledger.jl
+
+      - name: Run task ledger unit test
+        id: test
+        continue-on-error: true
+        run: julia --project=. tests/unit/config/test_task_ledger.jl
+
+      - name: Publish advisory result
+        if: always()
+        run: |
+          {
+            echo "## Task ledger advisory"
+            echo "- validator outcome: ${{ steps.ledger.outcome }}"
+            echo "- unit test outcome: ${{ steps.test.outcome }}"
+            if [ "${{ steps.ledger.outcome }}" != "success" ] || [ "${{ steps.test.outcome }}" != "success" ]; then
+              echo "::warning::Task ledger advisory reported a failure; this workflow is intentionally non-blocking in M1."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,99 @@
+schema_version = 1
+primary_track = "issue130-phase"
+updated_at = "2026-08-15"
+
+[[tracks]]
+id = "issue130-phase"
+title = "Issue #130 phase reference and CEP evidence"
+status = "review"
+current_task = "issue130-full-hybrid-author-review"
+blocked_by = []
+unlocks = ["track:rs-transport"]
+next_action = "作者审核 full_hybrid_candidate 的代表曲线、endpoint certificates、coverage 和 cost；审核前不得启动 reference promotion。"
+required_author_review = true
+author_review_status = "pending"
+promotion_required = true
+current_branch = ""
+current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418"]
+evidence = [
+  "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
+  "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
+  "run:31714535418",
+]
+updated_at = "2026-08-15"
+
+[[tracks]]
+id = "rs-transport"
+title = "RS transport production"
+status = "blocked"
+current_task = "rs-production-after-phase-reference"
+blocked_by = ["track:issue130-phase"]
+unlocks = []
+next_action = "等待 phase reference 通过作者审核并完成 promotion gate；在此之前不重跑 M4 transport production。"
+required_author_review = true
+author_review_status = "pending"
+promotion_required = true
+current_branch = "main"
+current_sha = "697be19a919c1c3e8203adecd813c1ccf2928319"
+run_ids = []
+evidence = [
+  "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
+]
+updated_at = "2026-08-15"
+
+[[tracks]]
+id = "plot-sop"
+title = "Paper-grade plotting SOP and migration"
+status = "triaged"
+current_task = "plot-sop-independent-land"
+blocked_by = []
+unlocks = []
+next_action = "将当前 plotting 文档、脚本、配置和产物放入独立 branch/PR 后，再把该 item 转为 active 并绑定 task_file。"
+required_author_review = true
+author_review_status = "pending"
+promotion_required = true
+current_branch = ""
+current_sha = ""
+run_ids = []
+evidence = []
+updated_at = "2026-08-15"
+
+[[items]]
+id = "issue130-full-hybrid-author-review"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "review"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md"
+reason = "自动 gate 只产生 full_hybrid_candidate，不能替代作者审核或 reference promotion。"
+next_action = "审核代表曲线、三个 endpoint 区间、coverage 和成本，并决定是否进入 reference promotion。"
+blocked_by = []
+backlog_file = ""
+evidence = ["run:31714535418", "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
+
+[[items]]
+id = "rs-production-after-phase-reference"
+track_id = "rs-transport"
+classification = "required_follow_up"
+status = "blocked"
+parent = "track:rs-transport"
+task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
+reason = "RS production 依赖新的高精度 phase reference；旧 production 和 registry 历史保持不可变。"
+next_action = "phase track promoted 后，按独立 production PR 重新运行并审计 RS transport。"
+blocked_by = ["track:issue130-phase"]
+backlog_file = ""
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"]
+
+[[items]]
+id = "plot-sop-independent-land"
+track_id = "plot-sop"
+classification = "independent"
+status = "triaged"
+parent = "track:plot-sop"
+task_file = ""
+reason = "当前 plotting 文档、脚本、配置和输出是 dirty main 中的未跟踪本地工作，本 ledger 不吸收或提交它们。"
+next_action = "先在独立 branch/PR 落盘 plotting 工作，再绑定稳定 task_file 和 evidence。"
+blocked_by = []
+backlog_file = ""
+evidence = []

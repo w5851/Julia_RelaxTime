@@ -34,6 +34,9 @@ Repository guidance for coding agents working in `Julia_RelaxTime`.
 - For unified solver or workflow changes, preserve mixed-meson governance and non-fixedmu unified joint-solve semantics unless explicitly in scope.
 - For cross-module refactors, prefer the smallest convergent change and introduce shared abstractions only when required.
 - For stable CLI workflows, prefer `scripts/dev/run_with_sysimage.ps1` or `scripts/dev/run_with_sysimage.sh` as documented in `docs/guides/scripts/README.md`.
+- For ambiguous continuation requests, multiple active tracks, or newly discovered follow-ups, read and validate `config/governance/task_tracks.toml` before choosing the next task.
+- Use `scripts/dev/check_task_ledger.jl --preflight` to report branch, HEAD, and dirty paths; preserve user changes and do not infer a clean worktree.
+- Classify new work as `blocker`, `required_follow_up`, `independent`, or `research`; do not silently replace the current primary track.
 - Unless the user asks for analysis only, implement, validate, and report rather than stopping at a proposal.
 
 ### Scope, Verification, And Knowledge Governance
