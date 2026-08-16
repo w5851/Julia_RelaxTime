@@ -49,8 +49,9 @@ function _target_config(args)
         throw(ArgumentError("numerical targeted jobs support regression_curves or cep_brackets"))
     target_id = String(_target_arg(args, "--target-id", ""))
     targets = scope === :regression_curves ? REGRESSION_TARGETS : CEP_TARGETS
-    target = findfirst(item -> item.id == target_id, targets)
-    target === nothing && throw(ArgumentError("unknown target-id $(target_id) for $(scope)"))
+    target_index = findfirst(item -> item.id == target_id, targets)
+    target_index === nothing && throw(ArgumentError("unknown target-id $(target_id) for $(scope)"))
+    target = targets[target_index]
     calculation_sha = lowercase(String(_target_arg(args, "--calculation-sha", "")))
     occursin(r"^[0-9a-f]{40}$", calculation_sha) ||
         throw(ArgumentError("calculation-sha must be a lowercase 40-character SHA"))
