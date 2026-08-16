@@ -71,6 +71,7 @@ const CORE_SMOKE_FILES = [
     joinpath(UNIT_DIR, "config", "test_sop_governance.jl"),
     joinpath(UNIT_DIR, "config", "test_dependency_policy.jl"),
     joinpath(UNIT_DIR, "config", "test_agent_instruction_governance.jl"),
+    joinpath(UNIT_DIR, "config", "test_task_ledger.jl"),
 
     # [NJL Core] NJL 模型核心
     joinpath(UNIT_DIR, "njl", "test_njl_core.jl"),

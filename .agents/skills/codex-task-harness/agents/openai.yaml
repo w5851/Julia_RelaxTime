@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Task Harness"
-  short_description: "Turn broad tasks into bounded execution harnesses."
-  default_prompt: "Use $codex-task-harness to turn this broad Julia_RelaxTime request into bounded scope, risks, validation, and minimal skill routing."
+  short_description: "Restore multi-track scope and triage state."
+  default_prompt: "Use $codex-task-harness to recover the task ledger, classify new work, and bound a multi-track request."
