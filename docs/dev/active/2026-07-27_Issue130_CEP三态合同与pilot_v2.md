@@ -954,3 +954,11 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   target record，触发 `FieldError: type Int64 has no field xi`；该 run 已取消，未生成
   可用于物理判断的数值 artifact。repair 仅修正 target 解引用并增加契约测试，固定
   calculation SHA、solver、Maxwell、endpoint policy 和物理门禁均不变。
+- [x] PR #224 已合并为 `aa9f3a70a821df863dd9f4fbbc8a89b053cdbf8`；以该 SHA 为
+  numerical workflow head、固定 calculation SHA 重跑的 `31941614867` 已完成 9/9
+  regression shards，全部 success，solver artifacts 已上传。该 run 是当前唯一可用的
+  targeted numerical source；首轮 aggregate `31942783270` 只在下载前失败。
+- [x] PR #225 已合并为 `adbab50a1009d27c43fed9e44defe0b27c2744c8`，补齐 aggregate
+  download step 的 `GH_TOKEN`。重试 `31943413345` 已确认 token 可用，但发现 Python
+  下载器把 API Authorization 头带入 GitHub 签名存储 URL，导致 HTTP 401；当前 repair
+  仅处理 30x redirect 的无认证下载，不改变 source artifact 或数值语义。

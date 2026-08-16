@@ -119,6 +119,40 @@ def _api_json(url: str, token: str) -> Any:
         return json.loads(response.read().decode("utf-8"))
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Keep API authorization headers off signed artifact-storage URLs."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _download_artifact_zip(url: str, token: str) -> bytes:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    opener = urllib.request.build_opener(_NoRedirectHandler)
+    try:
+        with opener.open(request, timeout=120) as response:
+            return response.read()
+    except urllib.error.HTTPError as error:
+        if error.code not in {301, 302, 303, 307, 308}:
+            raise
+        redirect_url = error.headers.get("Location")
+        if not redirect_url:
+            raise
+        redirect_request = urllib.request.Request(
+            redirect_url,
+            headers={"Accept": "application/octet-stream"},
+        )
+        with urllib.request.urlopen(redirect_request, timeout=120) as response:
+            return response.read()
+
+
 def download_artifacts(repo: str, run_id: str, token: str, scope: str, output_dir: Path) -> dict[str, Any]:
     if not re.fullmatch(r"\d+", str(run_id)):
         raise ValueError("source run id must be numeric")
@@ -139,16 +173,7 @@ def download_artifacts(repo: str, run_id: str, token: str, scope: str, output_di
         item = available[name]
         artifact_id = int(item["id"])
         url = f"https://api.github.com/repos/{repo}/actions/artifacts/{artifact_id}/zip"
-        request = urllib.request.Request(
-            url,
-            headers={
-                "Accept": "application/vnd.github+json",
-                "Authorization": f"Bearer {token}",
-                "X-GitHub-Api-Version": "2022-11-28",
-            },
-        )
-        with urllib.request.urlopen(request, timeout=120) as response:
-            archive_bytes = response.read()
+        archive_bytes = _download_artifact_zip(url, token)
         archive_path = output_dir / f".{name}.zip"
         archive_path.write_bytes(archive_bytes)
         artifact_dir = output_dir / name

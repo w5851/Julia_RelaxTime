@@ -1,8 +1,11 @@
 import csv
 import hashlib
 import importlib.util
+import io
 import json
 from pathlib import Path
+from email.message import Message
+from urllib.error import HTTPError
 
 import pytest
 
@@ -129,3 +132,36 @@ def test_safe_extract_rejects_path_traversal(tmp_path):
         handle.writestr("../escape.txt", "bad")
     with pytest.raises(ValueError, match="unsafe artifact path"):
         module._safe_extract(archive, tmp_path / "out")
+
+
+def test_artifact_zip_redirect_drops_api_authorization(monkeypatch):
+    module = load_module()
+    api_url = "https://api.github.com/repos/example/repo/actions/artifacts/1/zip"
+    signed_url = "https://artifact-storage.example/signed.zip"
+    headers = Message()
+    headers["Location"] = signed_url
+
+    class FakeOpener:
+        def open(self, request, timeout):
+            assert request.headers["Authorization"] == "Bearer secret"
+            raise HTTPError(api_url, 302, "Found", headers, io.BytesIO())
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def read(self):
+            return b"zip-bytes"
+
+    monkeypatch.setattr(module.urllib.request, "build_opener", lambda *_: FakeOpener())
+
+    def fake_urlopen(request, timeout):
+        assert request.full_url == signed_url
+        assert "Authorization" not in request.headers
+        return FakeResponse()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+    assert module._download_artifact_zip(api_url, "secret") == b"zip-bytes"
