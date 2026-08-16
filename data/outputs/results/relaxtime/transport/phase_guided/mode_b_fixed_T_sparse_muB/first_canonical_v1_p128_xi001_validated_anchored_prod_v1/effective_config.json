@@ -146,7 +146,7 @@
     "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
     "path_fields_rewritten_for_repository_import": true,
     "numerical_options_unchanged_from_p128_validated_anchored": true,
-    "parameter_convergence_gate": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
+    "parameter_convergence_gate": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
     "highxi_import_gate": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi001_validated_anchored_prod_v1_convergence/highxi_anchor_comparison_to_p128_plus5.summary.json"
   }
 }

@@ -343,7 +343,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 
 当前仓库内以下两个 slug 各含 mode A、mode B 的结果和图像：
 
-- `first_canonical_v1_p128_validated_anchored_prod_v1`，source commit `c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f`；
+- `first_canonical_v1_p128_xi005_validated_anchored_prod_v1`，source commit `c3f25dde5c9e62e7a3ebcd8ed50aef2b53377c0f`；
 - `first_canonical_v1_p128_xi001_validated_anchored_prod_v1`，source commit `700a0845abd09013eb39ff8f8d2993d5574476d3`。
 
 结果根路径为：

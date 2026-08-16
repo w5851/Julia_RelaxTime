@@ -19,7 +19,7 @@
             "duplicate_groups": 6
         },
         "effective_anchor_worst_rel": 4.3754226027877324e-5,
-        "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
+        "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
         "raw_anchor_worst_rel": 1,
         "highxi_import_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi001_validated_anchored_prod_v1_convergence/highxi_anchor_comparison_to_p128_plus5.summary.json"
     },

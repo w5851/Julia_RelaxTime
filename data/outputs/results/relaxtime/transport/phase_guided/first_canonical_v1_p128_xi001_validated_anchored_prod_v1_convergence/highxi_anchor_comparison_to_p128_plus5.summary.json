@@ -1,7 +1,7 @@
 {
   "schema": "phase_guided_highxi_anchor_gate_v1",
   "new_case": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
-  "old_case": "first_canonical_v1_p128_validated_anchored_prod_v1",
+  "old_case": "first_canonical_v1_p128_xi005_validated_anchored_prod_v1",
   "anchor_rel_threshold": 0.01,
   "anchor_abs_threshold": 1e-10,
   "anchor_worst_rel": 1.125,
@@ -29,7 +29,7 @@
   "mode_summaries": {
     "mode_a_fixed_muB_phase_scaled": {
       "mode": "mode_a_fixed_muB_phase_scaled",
-      "old_case": "first_canonical_v1_p128_validated_anchored_prod_v1",
+      "old_case": "first_canonical_v1_p128_xi005_validated_anchored_prod_v1",
       "new_case": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
       "matched_anchor_rows": 189,
       "comparison_cells": 6426,
@@ -46,7 +46,7 @@
     },
     "mode_b_fixed_T_sparse_muB": {
       "mode": "mode_b_fixed_T_sparse_muB",
-      "old_case": "first_canonical_v1_p128_validated_anchored_prod_v1",
+      "old_case": "first_canonical_v1_p128_xi005_validated_anchored_prod_v1",
       "new_case": "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
       "matched_anchor_rows": 189,
       "comparison_cells": 6237,

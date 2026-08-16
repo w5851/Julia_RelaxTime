@@ -6,7 +6,7 @@ Phase-guided transport production-grade case for `mode_b_fixed_T_sparse_muB`.
 
 `production-grade`
 
-This result imports the p128 high-xi-resolution GitHub Actions artifacts after local merge gates passed. The numerical integration policy is unchanged from `first_canonical_v1_p128_validated_anchored_prod_v1`; the new contribution is denser `xi = -0.50:0.01:0.50` sampling.
+This result imports the p128 high-xi-resolution GitHub Actions artifacts after local merge gates passed. The numerical integration policy is unchanged from `first_canonical_v1_p128_xi005_validated_anchored_prod_v1`; the new contribution is denser `xi = -0.50:0.01:0.50` sampling.
 
 ## Scope
 
@@ -53,13 +53,13 @@ Canonical figures are stored in:
 - failed point rows across source artifacts: `0`
 - chunk overlap duplicate groups: `6`
 - chunk overlap worst relative difference: `1.2592914889160358e-06`
-- anchor comparison to `first_canonical_v1_p128_validated_anchored_prod_v1` effective worst relative difference: `4.3754226027877324e-05`
+- anchor comparison to `first_canonical_v1_p128_xi005_validated_anchored_prod_v1` effective worst relative difference: `4.3754226027877324e-05`
 - anchor comparison raw near-zero worst relative difference: `1.0`
-- inherited adjacent integration convergence: `first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json`
+- inherited adjacent integration convergence: `first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json`
 
 ## Interpretation Boundary
 
-This case supersedes neither `first_canonical_v1_p128_validated_anchored_prod_v1` nor its convergence evidence. It is the same p128 validated-anchored numerical policy sampled on a denser `xi` grid. Claims that depend on newly resolved local structures should still check neighboring points and channel diagnostics.
+This case supersedes neither `first_canonical_v1_p128_xi005_validated_anchored_prod_v1` nor its convergence evidence. It is the same p128 validated-anchored numerical policy sampled on a denser `xi` grid. Claims that depend on newly resolved local structures should still check neighboring points and channel diagnostics.
 
 ## Generated Figures
 - `tau_u`, `tau_d`, `tau_s`, `tau_ubar`, `tau_dbar`, `tau_sbar`, `eta`, `sigma`, `zeta`, `eta_over_s`, `zeta_over_s`, `sigma_over_T` all plot against `xi`

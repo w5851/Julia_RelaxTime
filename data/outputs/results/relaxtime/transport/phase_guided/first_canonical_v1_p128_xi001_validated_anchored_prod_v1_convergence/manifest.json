@@ -5,7 +5,7 @@
   "verdict": "production-grade",
   "source_commit": "700a0845abd09013eb39ff8f8d2993d5574476d3",
   "source_candidate_case": "p128_xi001_localdispatch_20260618_223856",
-  "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
+  "inherited_parameter_convergence": "data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json",
   "anchor_worst_rel": 1.125,
   "effective_anchor_worst_rel": 8.453069929263162e-05,
   "source_run_count": 30,

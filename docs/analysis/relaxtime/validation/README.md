@@ -2,7 +2,7 @@
 
 ## 角色
 
-本目录用于保存计划从 `data/outputs/figures/relaxtime/validation` 迁入的历史诊断图。它归入 `analysis/legacy`，用于保留过去的 Julia/Fortran 对照证据，不是当前 `strict` 图，也不是已经建立的 external validation gate。
+本目录保存已从 `data/outputs/figures/relaxtime/validation` 迁入的历史诊断图。它归入 `analysis/legacy`，用于保留过去的 Julia/Fortran 对照证据，不是当前 `strict` 图，也不是已经建立的 external validation gate。
 
 ## 图像
 

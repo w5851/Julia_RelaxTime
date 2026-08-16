@@ -1,7 +1,7 @@
 {
   "schema_version": "figure_cleanup_preflight_v1",
-  "generated_at_utc": "2026-08-16T07:42:39.591790+00:00",
-  "base_git_commit": "f3e3d1a4372d935172d10bdbede99b3986f289f3",
+  "generated_at_utc": "2026-08-16T09:22:41.196238+00:00",
+  "base_git_commit": "d1bff5754e8b4b28694d377a9ddffb84d7c9ce14",
   "source_registry": {
     "path": "docs/analysis/figure_asset_registry_v1/asset_registry.json",
     "sha256": "b8c33851cec2e44a372067fa8f29d368e9ca55fcdc2300ea1e72857b46dda80d",
