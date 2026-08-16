@@ -35,10 +35,10 @@
     "phase_overlay": "data\\outputs\\results\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figure_assets\\phase_overlay.csv"
   },
   "figures": [
-    "data\\outputs\\figures\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram.png",
-    "data\\outputs\\figures\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_m0p3.png",
-    "data\\outputs\\figures\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_0.png",
-    "data\\outputs\\figures\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_0p3.png",
-    "data\\outputs\\figures\\relaxtime\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_isentropic_mott_paths.png"
+    "data\\outputs\\figures\\relaxtime\\mott_phase\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram.png",
+    "data\\outputs\\figures\\relaxtime\\mott_phase\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_m0p3.png",
+    "data\\outputs\\figures\\relaxtime\\mott_phase\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_0.png",
+    "data\\outputs\\figures\\relaxtime\\mott_phase\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_mott_phase_diagram_xi_0p3.png",
+    "data\\outputs\\figures\\relaxtime\\mott_phase\\paper_p1_mott_phase_isentropic\\production_20260531\\figures\\p1_isentropic_mott_paths.png"
   ]
 }

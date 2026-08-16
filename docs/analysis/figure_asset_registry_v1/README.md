@@ -8,6 +8,20 @@
 - `cleanup_candidates.csv`：按 case/variant 聚合的人工审核项。
 - `cleanup_preflight_v1.json`：作者审核后的执行前快照，仍保留 `delete_performed=false`、`move_performed=false` 和 `rename_performed=false`。
 - `retirement_execution_v1.json`：PR B 实际 allowlist 执行结果，记录删除前 hash、迁移/改名前后路径与 hash，以及引用更新验证。
+- `relocation_execution_v1.json`：PR B 后续 namespace 整理记录，记录 P1 Mott production case 的源/目标路径、manifest 路径更新和字节级 hash 保持。
+
+## Namespace follow-up
+
+P1 Mott/isentropic production case 的正式图像已从
+`data/outputs/figures/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/`
+迁移到
+`data/outputs/figures/relaxtime/mott_phase/paper_p1_mott_phase_isentropic/production_20260531/`。
+这是图像 namespace 整理，不是数值迁移：`data/outputs/results/relaxtime/paper_p1_mott_phase_isentropic/production_20260531/`
+和 `data/reference/pnjl/paper_p1_mott_phase_isentropic_20260531/` 保持原路径和内容不变。
+
+`asset_registry.json`、`cleanup_candidates.csv`、`cleanup_preflight_v1.json`、`author_review_decisions.md`
+和 `retirement_execution_v1.json` 是清理流程的历史快照，保留迁移前的源路径；当前 canonical 路径及迁移 hash 以
+`relocation_execution_v1.json` 和目标目录下的 `plot_manifest.json` 为准。
 
 ## 语义
 
