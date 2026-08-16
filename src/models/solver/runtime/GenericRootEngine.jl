@@ -339,7 +339,11 @@ function solve_root_with_policy(
     selected_tag = tag_primary
     selected_score = score_primary
 
-    should_try_fallback = policy.use_fallback && (tag_primary in (:degraded, :bad) || isfinite(score_primary))
+    # A fallback using the same method and seed would repeat the exact solve.
+    # Keep fallback rescue when the configured methods differ.
+    should_try_fallback = policy.use_fallback &&
+        policy.fallback_method != policy.primary_method &&
+        (tag_primary in (:degraded, :bad) || isfinite(score_primary))
     if should_try_fallback
         x_fb, conv_fb, resn_fb, score_fb = run_callback(policy.fallback_method, seed)
         tag_fb = register_attempt(policy.fallback_method, seed_source, x_fb, conv_fb, resn_fb; is_fallback=true, score=score_fb)
