@@ -948,3 +948,9 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] focused CI 通过后创建 ready PR；合并前不 dispatch 数值。合并后第一轮只运行
   `scope=regression_curves`，再根据 9 个原始曲线/候选/geometry overlay 决定是否授权
   `cep_brackets`；不重跑 C0/C1/C2，不晋升 reference，不启动 C3/O1 或 transport。
+- [x] PR #223 已 squash merge，merge SHA 为
+  `d5114cbe8079665f6ab0388fcea7bd7eb10c76a8`。首轮 numerical run
+  `31940646569` 在求解前因 targeted wrapper 将 `findfirst` 返回的整数索引误当作
+  target record，触发 `FieldError: type Int64 has no field xi`；该 run 已取消，未生成
+  可用于物理判断的数值 artifact。repair 仅修正 target 解引用并增加契约测试，固定
+  calculation SHA、solver、Maxwell、endpoint policy 和物理门禁均不变。
