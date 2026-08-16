@@ -962,3 +962,28 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   download step 的 `GH_TOKEN`。重试 `31943413345` 已确认 token 可用，但发现 Python
   下载器把 API Authorization 头带入 GitHub 签名存储 URL，导致 HTTP 401；当前 repair
   仅处理 30x redirect 的无认证下载，不改变 source artifact 或数值语义。
+
+### C2 targeted closure regression replay 收口（2026-08-16）
+
+- [x] PR #226 已 squash merge，merge SHA 为
+  `72a4aee7946f5d840cf7ae0c0773ae7cd5bf3953`；远端 repair branch 已删除。修复只处理
+  GitHub API 到签名 artifact URL 的 redirect 认证边界，并加入回归测试。
+- [x] 使用 `main@72a4aee7` 重新运行 aggregate replay `31944988128`，固定 source
+  numerical run `31941614867`、calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 和 source postprocess SHA
+  `aa9f3a70a821df863dd9f4fbbc8a89b053cdbf8c`。9/9 source artifacts 下载、输入 hash/
+  schema/重复键/finite 校验全部通过；replay `solver_called=false`，artifact digest 为
+  `sha256:903c5b17b190b5b08527e53ad899201c3125f6df0ce2752540ca98256051e403`。
+- [x] 9 个 regression 点的 independent oracle 均为 `confirmed_first_order`；hybrid 均
+  保持 `ambiguous_near_critical`。每点均有唯一三交点候选（`candidate_count=1`、
+  `crossing_count=3`），position 和绝对 area gate 通过，但 Stage-C 的两个 spinodal
+  density component 均为 `unresolved`，density error 为 `0.00282--0.00497`，超过既有
+  `0.0025` 门禁；9/9 均在 cap `12` 后以 `stage_c_geometry_did_not_close` 停止。
+- [x] 成本与数值完整性没有阻塞：hybrid 每点 `664` unique solves，oracle 每点 `1281`，
+  source 总计 `17,505` unique solves、runner 约 `7.865` min，failed points 为 `0`。
+  代表图、classification overlay、cost frontier、claim ledger 和 manifest 保存在外部
+  artifact 目录 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\c2_targeted_closure_replay_31944988128`。
+- [ ] replay verdict 为 `targeted_classification_inconclusive`，因此不自动授权或运行
+  `cep_brackets`，也不重跑 C0/C1/C2、不晋升 reference、不启动 C3/O1 或 RS transport。
+  下一步需要作者决定是否对这 9 点开窄范围 Stage-C geometry/point-ranking audit；当前证据
+  不支持把 hybrid ambiguous 改写成生产 first-order 证书。
