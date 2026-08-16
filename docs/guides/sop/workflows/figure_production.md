@@ -183,3 +183,18 @@ strict 不把 single-column 尺寸和 legend 位置视为不可变硬编码。�
 - strict pilot 输出为 SVG + 600 dpi PNG；
 - 未修改 solver、Maxwell、C2、reference、transport、正式 CSV/JSON 或历史 PNG/PDF/SVG；
 - strict 的后续密集图族仍必须执行本节 14 的 layout gate，不能仅因 profile 默认值而跳过人工审核。
+
+## 17. 历史图资产退役与清理
+
+历史 PNG/PDF/SVG 的清理采用 `asset inventory + dry-run + allowlist cleanup`，不是按扩展名、文件名或时间批量删除。
+
+PR A 只运行 `scripts/plotting/inventory_figure_assets.py`，默认扫描 Git 已跟踪的 `data/outputs/figures` 资产，生成：
+
+- `docs/analysis/figure_asset_registry_v1/asset_registry.json`；
+- `docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv`。
+
+未跟踪的 C1/C2/pilot 文件默认排除且不修改。`docs/analysis` 诊断证据与正式图像根目录分开治理，不因图形格式相同而自动合并。
+
+registry 只提出 `owner_review_only` 或 `keep_contract_case`，不包含删除、移动和覆盖操作。人工审核必须确认仓库外部引用、canonical case/variant 和历史证据保留策略；未确认项默认保留。
+
+实际退役属于后续 PR B，必须以作者批准的 `path + sha256 + action` allowlist 执行，并再次检查引用、manifest 输出和文档链接。strict 新默认 SVG + 600 dpi PNG 不追溯改变历史 PDF/SVG/PNG 的保留资格。
