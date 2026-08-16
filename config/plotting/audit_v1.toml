@@ -1,0 +1,74 @@
+schema_version = "plot_style_profile_v1"
+profile_id = "audit_v1"
+status = "active"
+default_column = "double_column"
+font_family = "serif"
+font_candidates = ["Times New Roman", "Times"]
+mathtext_fontset = "stix"
+font_size_pt = 9.0
+axes_linewidth_pt = 0.6
+line_width_pt = 1.0
+marker_size_pt = 4.0
+
+[figure_size_in]
+single_column = [3.375, 2.5]
+double_column = [6.75, 4.6]
+
+[output]
+formats = ["png"]
+optional_formats = ["svg", "pdf"]
+dpi = 300
+
+[support]
+draw_points = true
+visual_policy = "audit_support_points"
+
+[layout]
+legend_policy = "audit_two_legend_or_external"
+max_in_axes_entries = 8
+allow_external_legend = true
+
+[semantics]
+publication_scope = "internal_review"
+allow_unresolved = true
+allow_estimated_midpoint = true
+allow_connector = true
+interpolation_default = "none"
+
+[palette]
+colors = ["#4477AA", "#EE6677", "#228833", "#CCBB44", "#66CCEE", "#AA3377", "#BBBBBB"]
+
+[phase_styles.first_order]
+linestyle = "-"
+marker = ""
+alpha = 1.0
+
+[phase_styles.crossover]
+linestyle = "--"
+marker = "o"
+alpha = 1.0
+
+[phase_styles.spinodal]
+linestyle = ":"
+marker = ""
+alpha = 0.45
+
+[phase_styles.cep_confirmed]
+linestyle = "None"
+marker = "o"
+alpha = 1.0
+
+[phase_styles.cep_bracket]
+linestyle = "--"
+marker = "D"
+alpha = 0.9
+
+[phase_styles.estimated_midpoint]
+linestyle = "--"
+marker = "D"
+alpha = 0.9
+
+[phase_styles.unresolved]
+linestyle = "None"
+marker = "x"
+alpha = 1.0

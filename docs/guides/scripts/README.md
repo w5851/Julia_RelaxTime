@@ -82,6 +82,14 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 | 输运扫描 | `scripts/relaxtime/run_gap_transport_scan.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
 | 服务器入口 | `scripts/server/server_full.jl` | `run_with_sysimage.ps1` | `run_with_sysimage.sh` |
 
+### 论文级绘图合同工具
+
+- [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
+  - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位字段、support/mask、strict gate、DPI 和 SVG vector 标志
+- `scripts/plotting/render_plotting_pilot.py`
+  - 代表性 pilot 生成器，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case
+- 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
+
 ### PNJL
 
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
