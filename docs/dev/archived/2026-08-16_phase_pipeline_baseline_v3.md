@@ -1,3 +1,15 @@
+---
+title: Phase pipeline baseline v3：严格三交点 Maxwell 语义
+archived: true
+original: docs/dev/active/2026-08-16_phase_pipeline_baseline_v3.md
+archived_date: 2026-08-16
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Phase pipeline baseline v3：严格三交点 Maxwell 语义
 
 创建日期：2026-08-16
