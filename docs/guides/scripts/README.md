@@ -86,6 +86,8 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 
 - [scripts/plotting/validate_plot_artifact.py](../../../scripts/plotting/validate_plot_artifact.py)
   - 新 figure manifest 的稳定验证入口；检查输入/输出 hash、单位字段、support/mask、strict gate、DPI 和 SVG vector 标志
+- `scripts/plotting/inventory_figure_assets.py`
+  - 只读盘点 Git 已跟踪 PNG/PDF/SVG，生成 registry 和人工审核候选；默认不包含未跟踪 C1/C2/pilot，也不提供删除/移动操作
 - `scripts/plotting/render_plotting_pilot.py`
   - 代表性 pilot 生成器，只读取冻结 CSV/JSON；不是数值计算入口，也不覆盖既有 figure case
 - 详细规则见 [论文级绘图资产与生产 SOP](../sop/workflows/figure_production.md)
