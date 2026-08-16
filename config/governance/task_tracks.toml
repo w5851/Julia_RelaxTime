@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-15"
+updated_at = "2026-08-16"
 
 [[tracks]]
 id = "issue130-phase"
@@ -84,6 +84,19 @@ next_action = "phase track promoted 后，按独立 production PR 重新运行�
 blocked_by = ["track:issue130-phase"]
 backlog_file = ""
 evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"]
+
+[[items]]
+id = "issue130-targeted-closure-diagnostic"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md"
+reason = "C2 full-hybrid evidence remains under author review; targeted raw-curve closure is an independent diagnostic overlay and cannot silently promote the phase reference."
+next_action = "Merge the focused workflow PR, then dispatch regression_curves first; inspect raw rho-mu/Maxwell/geometry evidence before authorizing CEP brackets."
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md"]
 
 [[items]]
 id = "plot-sop-independent-land"

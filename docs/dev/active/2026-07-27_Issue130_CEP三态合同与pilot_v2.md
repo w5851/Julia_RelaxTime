@@ -929,3 +929,22 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [ ] `full_hybrid_candidate` 仍不是 reference promotion 或 formal production 许可。
   作者需审核新 evidence 的代表曲线、三个 endpoint 区间和成本；审核完成前不启动新的
   C0/C1/C2、phase-reference replay/promotion、C3/O1 或 transport。
+
+### C2 targeted closure diagnostic（2026-08-16）
+
+- [x] 在不改变 `full_hybrid_candidate`、历史 C0/C1/C2 或 reference 的前提下，新增
+  versioned workflow `pnjl-c2-targeted-closure-v1.yml`，固定 calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。该 workflow 的数值 scope 只覆盖
+  C2 的 9 个分类回归点或 3 个 CEP bracket midpoint；另有明确的 solver-free
+  `cross_axis_audit` scope。
+- [x] 数值 runner 输出两个方法的原始 `rho-mu` 曲线、slice diagnostics、Maxwell/
+  geometry 字段、cache/solver telemetry 和输入 hash。`production_hybrid` 与
+  `independent_oracle` 均从同一 immutable calculation checkout 执行；oracle 标签
+  只用于事后 overlay gate，不能进入 route selection；任何 reference 写入均被禁止。
+- [x] aggregate 使用 exact artifact API 下载，避免历史 wildcard replay 问题；输出
+  `classification_overlay.csv`、`cost_frontier.csv`、代表曲线、manifest 和 claim
+  ledger。`cross_axis_audit` 在缺少完整原始几何表时返回 `cross_axis_input_missing`，
+  不把缺失输入解释成零失败。
+- [ ] focused CI 通过后创建 ready PR；合并前不 dispatch 数值。合并后第一轮只运行
+  `scope=regression_curves`，再根据 9 个原始曲线/候选/geometry overlay 决定是否授权
+  `cep_brackets`；不重跑 C0/C1/C2，不晋升 reference，不启动 C3/O1 或 transport。
