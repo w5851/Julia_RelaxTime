@@ -20,6 +20,7 @@ const WORKFLOW = joinpath(ROOT, ".github", "workflows", "pnjl-c2-targeted-closur
     @test occursin("rerun_failed_only", workflow)
     @test occursin("source_artifact_name", workflow)
     @test occursin("cross_axis_audit", workflow)
+    @test count(line -> occursin("GH_TOKEN: \${{ github.token }}", line), split(workflow, '\n')) >= 2
     @test occursin("c2-targeted-regression-", workflow)
     @test occursin("c2-targeted-cep-", workflow)
 end

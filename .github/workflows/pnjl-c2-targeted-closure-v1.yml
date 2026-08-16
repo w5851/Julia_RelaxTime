@@ -321,6 +321,7 @@ jobs:
 
       - name: Download exact source artifacts
         env:
+          GH_TOKEN: ${{ github.token }}
           SCOPE: ${{ inputs.scope }}
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
         shell: bash
