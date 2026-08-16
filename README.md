@@ -153,10 +153,10 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
   - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
-  - phase-guided production-grade asset（mode a）：`data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
-  - phase-guided production-grade 图层（mode a）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_validated_anchored_prod_v1/`
-  - phase-guided production-grade asset（mode b）：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
-  - phase-guided production-grade 图层（mode b）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_validated_anchored_prod_v1/`
+  - phase-guided production-grade asset（mode a）：`data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+  - phase-guided production-grade 图层（mode a）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+  - phase-guided production-grade asset（mode b）：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+  - phase-guided production-grade 图层（mode b）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
   - 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`

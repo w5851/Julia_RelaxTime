@@ -7,7 +7,7 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 Base.@kwdef mutable struct PaperP1Options
     stages::Vector{Symbol} = Symbol[:assets]
     result_dir::String = joinpath("data", "outputs", "results", "relaxtime", "paper_p1_mott_phase_isentropic", "orchestrated")
-    figure_dir::String = joinpath("data", "outputs", "figures", "relaxtime", "paper_p1_mott_phase_isentropic", "orchestrated")
+    figure_dir::String = joinpath("data", "outputs", "figures", "relaxtime", "mott_phase", "paper_p1_mott_phase_isentropic", "orchestrated")
     xi_values::Vector{Float64} = [-0.3, 0.0, 0.3]
     mott_mub_values::Vector{Float64} = [0.0, 200.0, 400.0, 600.0, 800.0]
     mott_tmin::Float64 = 100.0

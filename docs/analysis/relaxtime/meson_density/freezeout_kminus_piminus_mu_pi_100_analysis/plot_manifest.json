@@ -1,0 +1,14 @@
+{
+  "format": "meson_density_plot_review_manifest_v1",
+  "source_comparison_csv": "data/outputs/results/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/comparison_vs_target.csv",
+  "figures": [
+    {
+      "path": "docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/overlay_kminus_piminus_mu_pi_100.png",
+      "kind": "overlay_png"
+    },
+    {
+      "path": "docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/residual_kminus_piminus_mu_pi_100.png",
+      "kind": "residual_png"
+    }
+  ]
+}

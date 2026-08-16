@@ -63,9 +63,9 @@ Mode source runs:
 
 ## Convergence And Import Gates
 
-Parameter convergence is inherited from the existing adjacent p104-to-p128 gate for `first_canonical_v1_p128_validated_anchored_prod_v1` because the integration policy is unchanged:
+Parameter convergence is inherited from the existing adjacent p104-to-p128 gate for `first_canonical_v1_p128_xi005_validated_anchored_prod_v1` because the integration policy is unchanged:
 
-- `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json`
+- `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/p104_vs_p128_convergence_gate.summary.json`
 
 High-xi import-specific gates:
 
