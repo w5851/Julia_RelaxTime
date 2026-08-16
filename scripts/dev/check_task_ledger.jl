@@ -440,7 +440,13 @@ function _git_output(root::String, args...)
     end
 end
 
-function preflight_report(root::AbstractString=ROOT; ledger_rel::AbstractString=DEFAULT_LEDGER_REL, track_id=nothing, io::IO=stdout)
+function preflight_report(
+    root::AbstractString=ROOT;
+    ledger_rel::AbstractString=DEFAULT_LEDGER_REL,
+    track_id=nothing,
+    io::IO=stdout,
+    git_output=_git_output,
+)
     root = normpath(abspath(String(root)))
     violations = validate_ledger(root; ledger_rel=ledger_rel)
     isempty(violations) || return violations
@@ -451,9 +457,9 @@ function preflight_report(root::AbstractString=ROOT; ledger_rel::AbstractString=
     selected_index = findfirst(table -> String(get(table, "id", "")) == selected, tracks)
     selected_index === nothing && return ["preflight track not found: $(selected)"]
     selected_table = tracks[selected_index]
-    branch = _git_output(root, "branch", "--show-current")
-    head = _git_output(root, "rev-parse", "HEAD")
-    porcelain = _git_output(root, "status", "--porcelain=v1")
+    branch = git_output(root, "branch", "--show-current")
+    head = git_output(root, "rev-parse", "HEAD")
+    porcelain = git_output(root, "status", "--porcelain=v1")
     summary = summarize_porcelain(porcelain)
     selected_status = String(get(selected_table, "status", ""))
     selected_task = String(get(selected_table, "current_task", ""))

@@ -308,15 +308,33 @@ end
     @test !clean.dirty
     @test isempty(clean.paths)
 
+    dirty_git = (root, args...) -> begin
+        args == ("branch", "--show-current") && return "codex/fixture"
+        args == ("rev-parse", "HEAD") && return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        args == ("status", "--porcelain=v1") && return " M tracked.md\n?? new.md\n"
+        error("unexpected git fixture command: $(args)")
+    end
     output = IOBuffer()
-    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=output))
+    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=output, git_output=dirty_git))
     report = String(take!(output))
     @test occursin("primary_track=issue130-phase", report)
     @test occursin("selected_track=rs-transport", report)
-    @test occursin("branch=", report)
-    @test occursin("head=", report)
+    @test occursin("branch=codex/fixture", report)
+    @test occursin("head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", report)
     @test occursin("dirty=true", report)
     @test occursin("ATTENTION: preserve", report)
+
+    clean_git = (root, args...) -> begin
+        args == ("branch", "--show-current") && return ""
+        args == ("rev-parse", "HEAD") && return "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        args == ("status", "--porcelain=v1") && return ""
+        error("unexpected git fixture command: $(args)")
+    end
+    clean_output = IOBuffer()
+    @test isempty(TL.preflight_report(PROJECT_ROOT; track_id="rs-transport", io=clean_output, git_output=clean_git))
+    clean_report = String(take!(clean_output))
+    @test occursin("dirty=false tracked=0 untracked=0", clean_report)
+    @test !occursin("ATTENTION: preserve", clean_report)
 end
 
 @testset "task ledger harness routing contract" begin
