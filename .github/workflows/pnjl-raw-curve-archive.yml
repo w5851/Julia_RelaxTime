@@ -1,0 +1,208 @@
+name: PNJL Raw Curve Archive
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "raw archive artifact tag"
+        required: false
+        default: "issue130-c2-oracle-raw-v1"
+        type: string
+      source_grid_run_id:
+        description: "C2 run containing the authoritative phase_grid_convergence grid"
+        required: true
+        default: "31862752226"
+        type: string
+      source_grid_artifact_name:
+        description: "C2 aggregate artifact name"
+        required: true
+        default: "pnjl-dense-reference-issue130_stagec_density_v2_c2_grid_tight_20260813"
+        type: string
+      audit_run_id:
+        description: "registered audit run for this independent track"
+        required: true
+        default: "31941614867"
+        type: string
+      calculation_sha:
+        description: "immutable calculation checkout"
+        required: true
+        default: "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+        type: string
+      source_postprocess_sha:
+        description: "postprocess provenance SHA from the audited C2 context"
+        required: true
+        default: "67d73f871578e35759c08b3c75200c51646cf6cd"
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.publish.outputs.matrix }}
+      source_grid_manifest_path: ${{ steps.publish.outputs.source_grid_manifest_path }}
+      source_grid_manifest_sha256: ${{ steps.publish.outputs.source_grid_manifest_sha256 }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      SOURCE_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/source_grid
+      PLAN_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/plan
+    steps:
+      - name: Checkout workflow code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download authoritative C2 grid artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${SOURCE_ROOT}"
+          gh run download "${{ inputs.source_grid_run_id }}" \
+            --name "${{ inputs.source_grid_artifact_name }}" \
+            --dir "${SOURCE_ROOT}"
+
+      - name: Build exact irregular C2 coverage and xi matrix
+        id: publish
+        shell: bash
+        env:
+          CALCULATION_SHA: ${{ inputs.calculation_sha }}
+          SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha }}
+        run: |
+          set -euo pipefail
+          grid_csv=$(find "${SOURCE_ROOT}" -type f -name 'phase_grid_convergence_*.csv' -print -quit)
+          grid_manifest=$(find "${SOURCE_ROOT}" -type f -name 'phase_reference_*_manifest.json' -print -quit)
+          test -n "${grid_csv}" || { echo "phase_grid_convergence CSV not found"; exit 1; }
+          test -n "${grid_manifest}" || { echo "C2 phase reference manifest not found"; exit 1; }
+          manifest_sha=$(python -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "${grid_manifest}")
+          manifest_rel=$(python -c 'from pathlib import Path; print(Path(sys.argv[1]).relative_to(sys.argv[2]).as_posix())' "${grid_manifest}" "${SOURCE_ROOT}")
+          mkdir -p "${PLAN_ROOT}"
+          python scripts/analysis/pnjl_raw_curve_archive.py build-coverage \
+            --grid-csv "${grid_csv}" \
+            --output "${PLAN_ROOT}/expected_coverage.json" \
+            --matrix-output "${PLAN_ROOT}/matrix.json" \
+            --source-grid-run-id "${{ inputs.source_grid_run_id }}" \
+            --source-grid-artifact-name "${{ inputs.source_grid_artifact_name }}" \
+            --source-grid-manifest-path "${manifest_rel}" \
+            --source-grid-manifest-sha256 "${manifest_sha}" \
+            --calculation-sha "${CALCULATION_SHA}" \
+            --source-postprocess-sha "${SOURCE_POSTPROCESS_SHA}" \
+            --audit-run-id "${{ inputs.audit_run_id }}"
+          matrix=$(python -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1],encoding="utf-8"))["include"],separators=(",",":")))' "${PLAN_ROOT}/matrix.json")
+          echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
+          echo "source_grid_manifest_path=${manifest_rel}" >> "${GITHUB_OUTPUT}"
+          echo "source_grid_manifest_sha256=${manifest_sha}" >> "${GITHUB_OUTPUT}"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          payload = json.loads(Path(os.environ["PLAN_ROOT"], "expected_coverage.json").read_text(encoding="utf-8"))
+          print(f"planned exact coordinates: {payload['expected_curve_count']}")
+          print(f"planned xi shards: {len(payload['xi_values'])}")
+          PY
+
+      - name: Upload raw-only plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-raw-curve-plan-${{ inputs.tag }}
+          path: ${{ env.PLAN_ROOT }}/*
+          retention-days: 90
+          if-no-files-found: error
+
+  raw_shards:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    uses: ./.github/workflows/pnjl-raw-curve-archive-shard.yml
+    with:
+      tag: ${{ inputs.tag }}
+      shard_id: ${{ matrix.shard_id }}
+      xi: ${{ matrix.xi }}
+      temperatures_json: ${{ matrix.temperatures_json }}
+      calculation_sha: ${{ inputs.calculation_sha }}
+      source_postprocess_sha: ${{ inputs.source_postprocess_sha }}
+      source_workflow_sha: ${{ github.sha }}
+      source_grid_run_id: ${{ inputs.source_grid_run_id }}
+      source_grid_artifact_name: ${{ inputs.source_grid_artifact_name }}
+      source_grid_manifest_path: ${{ needs.prepare.outputs.source_grid_manifest_path }}
+      source_grid_manifest_sha256: ${{ needs.prepare.outputs.source_grid_manifest_sha256 }}
+      audit_run_id: ${{ inputs.audit_run_id }}
+
+  merge:
+    needs: [prepare, raw_shards]
+    if: ${{ always() && needs.prepare.result == 'success' && needs.raw_shards.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PLAN_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/plan
+      RAW_SOURCE_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/raw_sources
+      ARCHIVE_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/archive
+    steps:
+      - name: Checkout workflow code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download raw-only plan
+        shell: bash
+        run: |
+          mkdir -p "${PLAN_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-raw-curve-plan-${{ inputs.tag }}" \
+            --dir "${PLAN_ROOT}"
+
+      - name: Download all raw-only source shards
+        shell: bash
+        run: |
+          mkdir -p "${RAW_SOURCE_ROOT}"
+          gh run download "${{ github.run_id }}" \
+            --pattern "pnjl-raw-curve-source-${{ inputs.tag }}-*" \
+            --dir "${RAW_SOURCE_ROOT}"
+
+      - name: Build strict full raw archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          coverage=$(find "${PLAN_ROOT}" -type f -name expected_coverage.json -print -quit)
+          test -n "${coverage}" || { echo "expected coverage not found"; exit 1; }
+          rm -rf "${ARCHIVE_ROOT}"
+          python scripts/analysis/pnjl_raw_curve_archive.py build-archive \
+            --source-root "${RAW_SOURCE_ROOT}" \
+            --output-dir "${ARCHIVE_ROOT}" \
+            --expected-coverage "${coverage}" \
+            --require-full-domain \
+            --calculation-sha "${{ inputs.calculation_sha }}" \
+            --source-postprocess-sha "${{ inputs.source_postprocess_sha }}" \
+            --audit-workflow-sha "${{ github.sha }}" \
+            --expected-source-run-id "${{ github.run_id }}" \
+            --audit-run-id "${{ inputs.audit_run_id }}"
+          python scripts/analysis/pnjl_raw_curve_archive.py validate-archive \
+            --archive-dir "${ARCHIVE_ROOT}" \
+            --expected-coverage "${coverage}" \
+            --require-full-domain \
+            --calculation-sha "${{ inputs.calculation_sha }}" \
+            --source-postprocess-sha "${{ inputs.source_postprocess_sha }}" \
+            --audit-workflow-sha "${{ github.sha }}"
+
+      - name: Upload full raw archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnjl-raw-curve-archive-${{ inputs.tag }}
+          path: |
+            ${{ env.ARCHIVE_ROOT }}/**
+            ${{ env.PLAN_ROOT }}/**/expected_coverage.json
+          retention-days: 90
+          if-no-files-found: error
