@@ -123,10 +123,7 @@ function _run_manual(cfg, plan_path)
         ))
     end
     sort!(curve_rows; by=row -> (row.T_MeV, row.rho))
-    all(item -> item.failed_points == 0 for item in cost_rows) ||
-        error("manual CEP shard has failed solver points")
-    all(item -> item.point_requests == item.unique_solves + item.cache_hits for item in cost_rows) ||
-        error("manual CEP shard cache cost does not reconcile")
+    _validate_manual_cost_rows(cost_rows)
     _write_manual_csv(joinpath(cfg.output_dir, "fine_pool.csv"), curve_rows)
     _write_manual_csv(joinpath(cfg.output_dir, "manual_bisection_trace.csv"), slice_rows)
     _write_manual_csv(joinpath(cfg.output_dir, "method_costs.csv"), cost_rows)
@@ -163,6 +160,14 @@ function _run_manual(cfg, plan_path)
         write(io, '\n')
     end
     println(JSON3.write(summary))
+end
+
+function _validate_manual_cost_rows(cost_rows)
+    all(item -> item.failed_points == 0, cost_rows) ||
+        error("manual CEP shard has failed solver points")
+    all(item -> item.point_requests == item.unique_solves + item.cache_hits, cost_rows) ||
+        error("manual CEP shard cache cost does not reconcile")
+    true
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
