@@ -1,0 +1,197 @@
+name: PNJL C2 CEP xi=0.5 High-Side Extension
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_mode:
+        description: "Numerical equal-step extension or aggregate replay"
+        required: true
+        default: numerical
+        type: choice
+        options: [numerical, aggregate_replay]
+      calculation_ref:
+        description: "Immutable calculation SHA"
+        required: true
+        default: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+        type: string
+      source_run_id:
+        description: "Completed numerical source run for replay"
+        required: false
+        default: ""
+        type: string
+      source_calculation_sha:
+        description: "Source calculation SHA; must match calculation_ref"
+        required: false
+        default: ""
+        type: string
+      source_postprocess_sha:
+        description: "Source numerical workflow-head SHA"
+        required: false
+        default: ""
+        type: string
+      tag:
+        description: "Immutable diagnostic tag"
+        required: true
+        default: issue130_c2_cep_xi05_high_side_extension_v1_20260817
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CALCULATION_SHA: 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48
+  PLAN_SHA256: 0bcbeb5633b0f9db77a73463c258162b1f4e5d40cb456971c06139e3167d9356
+  WORKFLOW_SCHEMA: pnjl_c2_cep_xi05_high_side_extension_v1
+  PLAN_PATH: docs/analysis/pnjl/c2_cep_xi05_high_side_extension_v1/temperature_plan.csv
+  ARTIFACT_NAME: c2-cep-xi05-high-side-extension
+
+jobs:
+  numerical:
+    if: ${{ inputs.run_mode == 'numerical' }}
+    name: "C2 CEP xi=0.5 high-side extension"
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - name: Validate immutable calculation SHA
+        env:
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "calculation_ref must be a 40-character SHA" >&2; exit 1; }
+          [[ "${INPUT_SHA,,}" == "$CALCULATION_SHA" ]] || { echo "calculation_ref does not match frozen calculation SHA" >&2; exit 1; }
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify workflow head and equal-step plan
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -f "$PLAN_PATH"
+          test "$(sha256sum "$PLAN_PATH" | awk '{print $1}')" = "$PLAN_SHA256"
+          test "$(awk -F, 'NR > 1 {print $1}' "$PLAN_PATH" | sort -u)" = "0.5"
+          test "$(awk -F, 'NR > 1 {print $4}' "$PLAN_PATH" | paste -sd, -)" = "107.125,107.1875,107.25"
+
+      - name: Materialize frozen calculation checkout and diagnostic runner
+        env:
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+        shell: bash
+        run: |
+          git fetch --no-tags origin "$CALCULATION_REF" --depth=1
+          git worktree add --detach calculation "$CALCULATION_REF"
+          test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
+          cp scripts/analysis/pnjl_c2_cep_limited_feasibility_job.jl calculation/scripts/analysis/
+          cp scripts/analysis/pnjl_c2_cep_xi05_high_side_extension_job.jl calculation/scripts/analysis/
+          mkdir -p "calculation/$(dirname "$PLAN_PATH")"
+          cp "$PLAN_PATH" "calculation/$PLAN_PATH"
+          test "$(sha256sum "calculation/$PLAN_PATH" | awk '{print $1}')" = "$PLAN_SHA256"
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-c2-cep-xi05-high-side-extension-v1
+
+      - name: Install calculation dependencies
+        working-directory: calculation
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run fixed equal-step high-side numerical slices
+        env:
+          TAG: ${{ inputs.tag }}
+          CALCULATION_REF: ${{ inputs.calculation_ref }}
+          POSTPROCESS_SHA: ${{ github.sha }}
+          SOURCE_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          mkdir -p artifacts/high_side
+          cd calculation
+          julia --project=. scripts/analysis/pnjl_c2_cep_xi05_high_side_extension_job.jl \
+            --scope cep --xi 0.5 --tag "$TAG" \
+            --calculation-sha "$CALCULATION_REF" \
+            --postprocess-sha "$POSTPROCESS_SHA" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --plan-file "$PLAN_PATH" \
+            --output-dir "../artifacts/high_side"
+
+      - name: Upload high-side numerical artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-cep-xi05-high-side-extension
+          path: artifacts/high_side
+          if-no-files-found: error
+          retention-days: 90
+
+  aggregate_replay:
+    if: ${{ inputs.run_mode == 'aggregate_replay' }}
+    name: C2 CEP xi=0.5 high-side aggregate replay
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate replay inputs and source numerical job
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+          INPUT_SHA: ${{ inputs.calculation_ref }}
+          SOURCE_SHA: ${{ inputs.source_calculation_sha }}
+          SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha }}
+        shell: bash
+        run: |
+          [[ "$INPUT_SHA" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "calculation_ref must be a 40-character SHA" >&2; exit 1; }
+          [[ "${INPUT_SHA,,}" == "$CALCULATION_SHA" ]] || { echo "calculation_ref does not match frozen calculation SHA" >&2; exit 1; }
+          [[ -n "$SOURCE_RUN_ID" && "$SOURCE_RUN_ID" =~ ^[0-9]+$ ]] || { echo "source_run_id must be numeric" >&2; exit 1; }
+          [[ -z "$SOURCE_SHA" || "${SOURCE_SHA,,}" == "$CALCULATION_SHA" ]] || { echo "source_calculation_sha mismatch" >&2; exit 1; }
+          payload="$(gh run view "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --json status,conclusion,jobs,headSha)"
+          test "$(jq -r .status <<<"$payload")" = completed
+          jobs="$(jq '[.jobs[] | select(.name == "C2 CEP xi=0.5 high-side extension")]' <<<"$payload")"
+          test "$(jq length <<<"$jobs")" = 1
+          test "$(jq '[.[] | select(.conclusion != "success")] | length' <<<"$jobs")" = 0
+          source_head="$(jq -r .headSha <<<"$payload")"
+          [[ -z "$SOURCE_POSTPROCESS_SHA" || "$SOURCE_POSTPROCESS_SHA" == "$source_head" ]] || { echo "source_postprocess_sha mismatch" >&2; exit 1; }
+          echo "SOURCE_HEAD_SHA=$source_head" >> "$GITHUB_ENV"
+
+      - name: Checkout workflow head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify equal-step plan
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "$(sha256sum "$PLAN_PATH" | awk '{print $1}')" = "$PLAN_SHA256"
+
+      - name: Download exactly one source artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        shell: bash
+        run: |
+          mkdir -p source-artifacts
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --name "$ARTIFACT_NAME" --dir source-artifacts
+
+      - name: Validate and render solver-free high-side audit package
+        shell: bash
+        run: |
+          python -m pip install matplotlib==3.9.2
+          python scripts/analysis/pnjl_c2_cep_xi05_high_side_extension.py \
+            --input-dir source-artifacts --output-dir aggregate \
+            --source-run-id "${{ inputs.source_run_id }}" \
+            --expected-workflow-head "$SOURCE_HEAD_SHA"
+
+      - name: Upload high-side aggregate audit package
+        uses: actions/upload-artifact@v4
+        with:
+          name: c2-cep-xi05-high-side-extension-${{ inputs.tag }}-aggregate
+          path: aggregate
+          if-no-files-found: error
+          retention-days: 90
