@@ -29,6 +29,21 @@ COST_STOP_MINUTES = 200.0
 PLOT_SCHEMA_VERSION = "pnjl_c2_cep_limited_feasibility_plot_v2"
 
 
+def parse_target_xi(value: str | None) -> tuple[float, ...]:
+    """Resolve an explicit CEP subset without changing the default 17-point contract."""
+    if value is None or not value.strip():
+        return TARGET_XI
+    try:
+        requested = tuple(float(item.strip()) for item in value.split(",") if item.strip())
+    except ValueError as error:
+        raise ValueError(f"invalid --target-xi value: {value!r}") from error
+    if not requested or len(set(requested)) != len(requested):
+        raise ValueError("--target-xi must contain unique xi values")
+    if any(xi not in TARGET_XI for xi in requested):
+        raise ValueError(f"--target-xi contains an xi outside the frozen matrix: {requested}")
+    return tuple(sorted(requested))
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -145,10 +160,11 @@ def _validate_route_provenance(manifest: dict[str, Any]) -> None:
 
 
 def validate_source(input_dir: Path, expected_sha: str, expected_postprocess_sha: str,
-                    source_run_id: str) -> dict[str, Any]:
+                    source_run_id: str,
+                    target_xi: tuple[float, ...] = TARGET_XI) -> dict[str, Any]:
     manifests = _manifest_paths(input_dir)
-    if len(manifests) != len(TARGET_XI):
-        raise ValueError(f"expected {len(TARGET_XI)} CEP manifests, got {len(manifests)}")
+    if len(manifests) != len(target_xi):
+        raise ValueError(f"expected {len(target_xi)} CEP manifests, got {len(manifests)}")
     seen: set[float] = set()
     input_files: list[dict[str, str]] = []
     total_rows = 0
@@ -160,7 +176,7 @@ def validate_source(input_dir: Path, expected_sha: str, expected_postprocess_sha
         if manifest.get("scope") != "cep":
             raise ValueError(f"unexpected job scope: {manifest_path}")
         xi = float(manifest.get("xi"))
-        if xi not in TARGET_XI or xi in seen:
+        if xi not in target_xi or xi in seen:
             raise ValueError(f"duplicate/unexpected xi: {manifest_path}")
         seen.add(xi)
         if str(manifest.get("calculation_sha", "")).lower() != expected_sha.lower():
@@ -191,12 +207,13 @@ def validate_source(input_dir: Path, expected_sha: str, expected_postprocess_sha
         total_rows += rows
         for path in (pool, slices, costs, manifest_path):
             input_files.append({"path": path.relative_to(input_dir).as_posix(), "sha256": sha256(path)})
-    if seen != set(TARGET_XI):
+    if seen != set(target_xi):
         raise ValueError(f"incomplete xi matrix: {sorted(seen)}")
     return {
         "schema_version": SCHEMA_VERSION,
         "source_run_id": str(source_run_id),
         "source_job_count": len(manifests),
+        "target_xi": list(target_xi),
         "source_calculation_sha": expected_sha,
         "source_postprocess_sha": expected_postprocess_sha,
         "solver_called": True,
@@ -231,7 +248,9 @@ def render_plot(aggregate_dir: Path) -> list[dict[str, str]]:
     return [{"path": "figures/cep_bracket_widths.png", "sha256": sha256(path)}]
 
 
-def validate_aggregate(aggregate_dir: Path, expected_sha: str, source_run_id: str) -> dict[str, Any]:
+def validate_aggregate(aggregate_dir: Path, expected_sha: str, source_run_id: str,
+                       target_xi: tuple[float, ...] = TARGET_XI,
+                       expected_workflow_schema: str = "") -> dict[str, Any]:
     manifest_path = aggregate_dir / "manifest.json"
     manifest = read_json(manifest_path)
     if manifest.get("schema_version") != SCHEMA_VERSION:
@@ -240,6 +259,8 @@ def validate_aggregate(aggregate_dir: Path, expected_sha: str, source_run_id: st
         raise ValueError("aggregate calculation SHA mismatch")
     if str(manifest.get("source_run_id")) != str(source_run_id):
         raise ValueError("aggregate source run mismatch")
+    if expected_workflow_schema and manifest.get("workflow_schema") != expected_workflow_schema:
+        raise ValueError("aggregate workflow schema mismatch")
     if manifest.get("solver_called") is not False:
         raise ValueError("aggregate must record solver_called=false")
     if manifest.get("oracle_labels_used_for_routing") is not False:
@@ -258,7 +279,7 @@ def validate_aggregate(aggregate_dir: Path, expected_sha: str, source_run_id: st
         if not (aggregate_dir / name).is_file():
             raise ValueError(f"aggregate missing {name}")
     rows = read_csv(aggregate_dir / "cep_bracket_results.csv")
-    if len(rows) != 17 or {float(row["xi"]) for row in rows} != set(TARGET_XI):
+    if len(rows) != len(target_xi) or {float(row["xi"]) for row in rows} != set(target_xi):
         raise ValueError("aggregate CEP bracket matrix mismatch")
     cost_rows = read_csv(aggregate_dir / "cost_frontier.csv")
     if not cost_rows or not finite(cost_rows[0].get("runner_minutes")):
@@ -271,7 +292,7 @@ def validate_aggregate(aggregate_dir: Path, expected_sha: str, source_run_id: st
     if int(float(cost["point_requests"])) != int(float(cost["unique_solves"])) + int(float(cost["cache_hits"])):
         raise ValueError("aggregate cost counters do not reconcile")
     method_rows = read_csv(aggregate_dir / "method_costs.csv")
-    if len(method_rows) != len(TARGET_XI):
+    if len(method_rows) != len(target_xi):
         raise ValueError("aggregate method-cost matrix mismatch")
     if not all(row.get("method") == "aggregate" for row in method_rows):
         raise ValueError("aggregate method-cost rows have unexpected method")
@@ -298,22 +319,45 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-calculation-sha", default=CALCULATION_SHA)
     parser.add_argument("--expected-source-postprocess-sha", default="")
     parser.add_argument("--source-run-id", required=True)
+    parser.add_argument(
+        "--target-xi",
+        default="",
+        help="comma-separated subset of the frozen CEP xi matrix; default is all 17 points",
+    )
+    parser.add_argument("--expected-workflow-schema", default="")
     args = parser.parse_args(argv)
     expected = args.expected_calculation_sha.lower()
     if len(expected) != 40 or any(ch not in "0123456789abcdef" for ch in expected):
         raise SystemExit("expected-calculation-sha must be lowercase 40-hex")
+    try:
+        target_xi = parse_target_xi(args.target_xi)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     if args.mode == "source_validate":
         if args.input_dir is None:
             raise SystemExit("source_validate requires --input-dir")
-        result = validate_source(args.input_dir, expected, args.expected_source_postprocess_sha, args.source_run_id)
+        result = validate_source(
+            args.input_dir,
+            expected,
+            args.expected_source_postprocess_sha,
+            args.source_run_id,
+            target_xi,
+        )
         print(json.dumps(result, sort_keys=True))
         return 0 if result["runner_minutes"] <= COST_STOP_MINUTES else 2
     if args.aggregate_dir is None:
         raise SystemExit("aggregate_validate requires --aggregate-dir")
-    manifest = validate_aggregate(args.aggregate_dir, expected, args.source_run_id)
+    manifest = validate_aggregate(
+        args.aggregate_dir,
+        expected,
+        args.source_run_id,
+        target_xi,
+        args.expected_workflow_schema,
+    )
     figures = render_plot(args.aggregate_dir)
     (args.aggregate_dir / "plot_manifest.json").write_text(json.dumps({
         "schema_version": PLOT_SCHEMA_VERSION, "aggregate_schema_version": SCHEMA_VERSION,
+        "workflow_schema": manifest.get("workflow_schema", ""),
         "source_calculation_sha": expected, "source_run_id": str(args.source_run_id),
         "figures": figures,
     }, indent=2) + "\n", encoding="utf-8")

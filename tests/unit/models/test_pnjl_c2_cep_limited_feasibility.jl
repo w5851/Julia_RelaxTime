@@ -42,6 +42,14 @@ end
     @test !occursin("round(row.T_MeV, 8)", evaluator)
     @test !occursin("round(T, 8)", evaluator)
 
+    @testset "target xi subset remains explicit" begin
+        @test CEPReplayEvaluatorContract._parse_target_xi("0.125,0.39375,0.5") ==
+            (0.125, 0.39375, 0.5)
+        @test CEPReplayEvaluatorContract._parse_target_xi("") == Main.TARGET_XI
+        @test_throws ErrorException CEPReplayEvaluatorContract._parse_target_xi("0.126")
+        @test_throws ErrorException CEPReplayEvaluatorContract._parse_target_xi("0.125,0.125")
+    end
+
     @testset "temperature keys use Julia 1.12-compatible rounding" begin
         @test CEPReplayEvaluatorContract._temperature_key(113.1328125) == 113.1328125
         @test CEPReplayEvaluatorContract._temperature_key(113.1328125004) == 113.1328125

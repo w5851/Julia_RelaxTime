@@ -9,6 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[3]
 SCRIPT = ROOT / "scripts" / "analysis" / "pnjl_c2_cep_limited_feasibility.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-c2-cep-limited-feasibility.yml"
+MIDPOINT_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-c2-cep-three-midpoint.yml"
 
 
 def load_module():
@@ -29,6 +30,16 @@ def test_v2_schema_and_workflow_contract():
     assert "solver_called=false" not in text.lower()
 
 
+def test_three_midpoint_workflow_is_narrow_and_versioned():
+    text = MIDPOINT_WORKFLOW.read_text(encoding="utf-8")
+    assert "pnjl_c2_cep_three_midpoint_refinement_v1" in text
+    assert "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48" in text
+    assert 'xi: ["0.125", "0.39375", "0.5"]' in text
+    assert "max-parallel: 3" in text
+    assert "--target-xi \"$TARGET_XI\"" in text
+    assert "run_mode == 'aggregate_replay'" in text
+
+
 def test_numerical_job_materializes_hashed_frozen_brackets():
     text = WORKFLOW.read_text(encoding="utf-8")
     relative_path = "docs/analysis/pnjl/c2_limited_feasibility_v1/cep_failures.csv"
@@ -47,6 +58,16 @@ def test_hybrid_local_step_is_nested_below_fine_step():
     assert "const HYBRID_LOCAL_STEP = RHO_FINE_STEP / 2" in job
     assert "local_step=HYBRID_LOCAL_STEP" in job
     assert "hybrid_local_step_contract" in job
+
+
+def test_target_xi_parser_keeps_default_and_rejects_unknown_values():
+    module = load_module()
+    assert module.parse_target_xi("") == module.TARGET_XI
+    assert module.parse_target_xi("0.125,0.39375,0.5") == (0.125, 0.39375, 0.5)
+    with pytest.raises(ValueError, match="outside the frozen matrix"):
+        module.parse_target_xi("0.126")
+    with pytest.raises(ValueError, match="unique"):
+        module.parse_target_xi("0.125,0.125")
 
 
 def _write_costs(module, path: Path, *, valid: bool = True):
