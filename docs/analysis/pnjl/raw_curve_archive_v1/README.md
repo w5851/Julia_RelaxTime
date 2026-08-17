@@ -58,6 +58,31 @@ C2 coordinate set. A partial archive is marked `partial_only` and cannot be
 uploaded by the production workflow. `restore_curve_bytes` rechecks the
 indexed SHA-256 before returning the original bytes.
 
+## Canonical external archive
+
+The published, immutable raw-data copy is the Zenodo record
+[10.5281/zenodo.21980679](https://doi.org/10.5281/zenodo.21980679), record
+[21980679](https://zenodo.org/records/21980679), version
+`raw_curve_archive_v1`. The repository intentionally keeps the contract and
+the machine-readable [external archive pointer](external_archive_pointer.json)
+instead of committing the 1.88 GB ZIP.
+
+The exact archive is
+`pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip`, 1,879,467,478 bytes,
+with SHA-256
+`467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc`. Zenodo
+also stores the matching `.sha256` sidecar. The pointer records the source
+run/artifact, calculation SHA, audited postprocess SHA, raw-production
+workflow SHA, manifest requirements, and retention policy.
+
+To restore the archive, download both Zenodo files, verify the outer ZIP with
+the sidecar, extract it without reserialization, and run the `validate-archive`
+command recorded in `external_archive_pointer.json`. That validation checks the
+inner archive manifest, all curve and source-manifest hashes, exact C2 coverage,
+and representative-index references. A manual GitHub Actions check is available
+as `PNJL raw curve archive - Zenodo restore verification`; it performs the same
+full validation and one byte-preserving sample restore.
+
 ## Recovery audit
 
 The Python tool can audit an existing artifact without invoking Julia:

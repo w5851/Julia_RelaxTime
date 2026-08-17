@@ -1,0 +1,146 @@
+name: PNJL raw curve archive - Zenodo restore verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      record_id:
+        description: "Published Zenodo record ID"
+        required: true
+        default: "21980679"
+        type: string
+      archive_filename:
+        description: "Exact published archive filename"
+        required: true
+        default: "pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip"
+        type: string
+      expected_size_bytes:
+        description: "Expected outer ZIP size"
+        required: true
+        default: "1879467478"
+        type: string
+      expected_sha256:
+        description: "Expected outer ZIP SHA-256"
+        required: true
+        default: "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc"
+        type: string
+      calculation_sha:
+        description: "Expected calculation checkout SHA"
+        required: true
+        default: "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+        type: string
+      source_postprocess_sha:
+        description: "Expected audited postprocess/workflow SHA"
+        required: true
+        default: "67d73f871578e35759c08b3c75200c51646cf6cd"
+        type: string
+      audit_workflow_sha:
+        description: "Expected raw archive production workflow SHA"
+        required: true
+        default: "1aeda93fa86c39eb0734954d04f80679a9c50c33"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  restore-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      RECORD_ID: ${{ inputs.record_id || '21980679' }}
+      ARCHIVE_FILENAME: ${{ inputs.archive_filename || 'pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip' }}
+      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes || '1879467478' }}
+      EXPECTED_SHA256: ${{ inputs.expected_sha256 || '467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc' }}
+      CALCULATION_SHA: ${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}
+      SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}
+      AUDIT_WORKFLOW_SHA: ${{ inputs.audit_workflow_sha || '1aeda93fa86c39eb0734954d04f80679a9c50c33' }}
+      DOWNLOAD_ROOT: ${{ runner.temp }}/pnjl_raw_curve_archive_zenodo
+      RESTORE_ROOT: ${{ runner.temp }}/pnjl_raw_curve_archive_zenodo/extracted
+
+    steps:
+      - name: Checkout validation tooling
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download and verify published ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${ARCHIVE_FILENAME}" in
+            ""|*/*|*\\*) echo "archive filename must be a plain filename" >&2; exit 1 ;;
+          esac
+          mkdir -p "${DOWNLOAD_ROOT}"
+          archive_url="https://zenodo.org/records/${RECORD_ID}/files/${ARCHIVE_FILENAME}?download=1"
+          sidecar_name="${ARCHIVE_FILENAME}.sha256"
+          sidecar_url="https://zenodo.org/records/${RECORD_ID}/files/${sidecar_name}?download=1"
+          curl --fail --location --retry 5 --retry-delay 5 \
+            --output "${DOWNLOAD_ROOT}/${ARCHIVE_FILENAME}" "${archive_url}"
+          curl --fail --location --retry 5 --retry-delay 5 \
+            --output "${DOWNLOAD_ROOT}/${sidecar_name}" "${sidecar_url}"
+          actual_size="$(stat -c '%s' "${DOWNLOAD_ROOT}/${ARCHIVE_FILENAME}")"
+          test "${actual_size}" = "${EXPECTED_SIZE_BYTES}" || {
+            echo "outer ZIP size mismatch: ${actual_size}/${EXPECTED_SIZE_BYTES}" >&2
+            exit 1
+          }
+          actual_sha256="$(sha256sum "${DOWNLOAD_ROOT}/${ARCHIVE_FILENAME}" | cut -d ' ' -f 1)"
+          test "${actual_sha256}" = "${EXPECTED_SHA256}" || {
+            echo "outer ZIP SHA-256 mismatch: ${actual_sha256}/${EXPECTED_SHA256}" >&2
+            exit 1
+          }
+          cd "${DOWNLOAD_ROOT}"
+          sha256sum --strict --check "${sidecar_name}"
+          echo "Verified Zenodo record=${RECORD_ID} size=${actual_size} sha256=${actual_sha256}"
+
+      - name: Extract exact ZIP and locate archive contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RESTORE_ROOT}"
+          unzip -q "${DOWNLOAD_ROOT}/${ARCHIVE_FILENAME}" -d "${RESTORE_ROOT}"
+          archive_manifest="$(find "${RESTORE_ROOT}" -type f -name archive_manifest.json -print -quit)"
+          coverage="$(find "${RESTORE_ROOT}" -type f -name expected_coverage.json -print -quit)"
+          test -n "${archive_manifest}" || { echo "archive_manifest.json not found" >&2; exit 1; }
+          test -n "${coverage}" || { echo "expected_coverage.json not found" >&2; exit 1; }
+          echo "ARCHIVE_DIR=$(dirname "${archive_manifest}")" >> "${GITHUB_ENV}"
+          echo "COVERAGE_PATH=${coverage}" >> "${GITHUB_ENV}"
+
+      - name: Validate full archive and representative restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/analysis/pnjl_raw_curve_archive.py validate-archive \
+            --archive-dir "${ARCHIVE_DIR}" \
+            --expected-coverage "${COVERAGE_PATH}" \
+            --require-full-domain \
+            --calculation-sha "${CALCULATION_SHA}" \
+            --source-postprocess-sha "${SOURCE_POSTPROCESS_SHA}" \
+            --audit-workflow-sha "${AUDIT_WORKFLOW_SHA}"
+          python - "${ARCHIVE_DIR}/curve_index.csv" "${RUNNER_TEMP}/sample_curve.json" <<'PY'
+          import csv
+          import json
+          import sys
+
+          with open(sys.argv[1], newline="", encoding="utf-8") as handle:
+              row = next(csv.DictReader(handle))
+          with open(sys.argv[2], "w", encoding="utf-8") as handle:
+              json.dump({key: row[key] for key in ("xi", "T_MeV", "method", "raw_curve_sha256")}, handle)
+          PY
+          sample_xi="$(jq -r '.xi' "${RUNNER_TEMP}/sample_curve.json")"
+          sample_temperature="$(jq -r '.T_MeV' "${RUNNER_TEMP}/sample_curve.json")"
+          expected_curve_sha="$(jq -r '.raw_curve_sha256' "${RUNNER_TEMP}/sample_curve.json")"
+          python scripts/analysis/pnjl_raw_curve_archive.py restore-curve \
+            --archive-dir "${ARCHIVE_DIR}" \
+            --xi "${sample_xi}" \
+            --temperature-MeV "${sample_temperature}" \
+            --method independent_oracle \
+            --output "${RUNNER_TEMP}/restored_curve.csv"
+          restored_sha="$(sha256sum "${RUNNER_TEMP}/restored_curve.csv" | cut -d ' ' -f 1)"
+          test "${restored_sha}" = "${expected_curve_sha}" || {
+            echo "sample restore SHA-256 mismatch: ${restored_sha}/${expected_curve_sha}" >&2
+            exit 1
+          }
+          echo "Full archive validation and byte-preserving sample restore passed."
