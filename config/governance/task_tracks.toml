@@ -59,6 +59,23 @@ run_ids = []
 evidence = []
 updated_at = "2026-08-15"
 
+[[tracks]]
+id = "diagnostic-workflow-lifecycle"
+title = "Diagnostic workflow lifecycle maintenance"
+status = "triaged"
+current_task = "retire-stale-one-shot-actions"
+blocked_by = []
+unlocks = []
+next_action = "盘点一次性 diagnostic workflows、其已完成的 run/artifact、后续引用和复现价值；提交非破坏性 retirement proposal，待作者批准后才归档或删除。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = ""
+current_sha = "36a0cda12b77e68cd1a5c135466bd3547ffb9f4d"
+run_ids = ["32011954899"]
+evidence = ["pr:232", "run:32011954899"]
+updated_at = "2026-08-17"
+
 [[items]]
 id = "issue130-full-hybrid-author-review"
 track_id = "issue130-phase"
@@ -110,3 +127,16 @@ next_action = "先在独立 branch/PR 落盘 plotting 工作，再绑定稳定 t
 blocked_by = []
 backlog_file = ""
 evidence = []
+
+[[items]]
+id = "retire-stale-one-shot-actions"
+track_id = "diagnostic-workflow-lifecycle"
+classification = "independent"
+status = "triaged"
+parent = "track:diagnostic-workflow-lifecycle"
+task_file = ""
+reason = "Issue #130 的版本化一次性诊断 workflow 持续累积；完成后保留的 Actions 定义会增加维护面和误触发风险，但历史 run/artifact 仍需可追溯。"
+next_action = "建立 workflow inventory 和引用图，按仍在使用、保留复现、可归档、可删除分类；先提出保留期、artifact/provenance 迁移和删除清单，再请求作者批准。"
+blocked_by = []
+backlog_file = ""
+evidence = ["pr:232", "run:32011954899"]
