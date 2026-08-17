@@ -89,7 +89,7 @@ jobs:
           test -n "${grid_csv}" || { echo "phase_grid_convergence CSV not found"; exit 1; }
           test -n "${grid_manifest}" || { echo "C2 phase reference manifest not found"; exit 1; }
           manifest_sha=$(python -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest())' "${grid_manifest}")
-          manifest_rel=$(python -c 'from pathlib import Path; print(Path(sys.argv[1]).relative_to(sys.argv[2]).as_posix())' "${grid_manifest}" "${SOURCE_ROOT}")
+          manifest_rel=$(python -c 'import sys; from pathlib import Path; print(Path(sys.argv[1]).relative_to(sys.argv[2]).as_posix())' "${grid_manifest}" "${SOURCE_ROOT}")
           mkdir -p "${PLAN_ROOT}"
           python scripts/analysis/pnjl_raw_curve_archive.py build-coverage \
             --grid-csv "${grid_csv}" \
