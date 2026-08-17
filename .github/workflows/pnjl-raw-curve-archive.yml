@@ -1,6 +1,14 @@
 name: PNJL Raw Curve Archive
 
 on:
+  push:
+    branches:
+      - codex/phase-evidence-retention
+    paths:
+      - .github/workflows/pnjl-raw-curve-archive.yml
+      - .github/workflows/pnjl-raw-curve-archive-shard.yml
+      - scripts/analysis/pnjl_raw_curve_archive.py
+      - scripts/analysis/pnjl_raw_curve_archive_oracle_job.jl
   workflow_dispatch:
     inputs:
       tag:
@@ -64,16 +72,16 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "${SOURCE_ROOT}"
-          gh run download "${{ inputs.source_grid_run_id }}" \
-            --name "${{ inputs.source_grid_artifact_name }}" \
+          gh run download "${{ inputs.source_grid_run_id || '31862752226' }}" \
+            --name "${{ inputs.source_grid_artifact_name || 'pnjl-dense-reference-issue130_stagec_density_v2_c2_grid_tight_20260813' }}" \
             --dir "${SOURCE_ROOT}"
 
       - name: Build exact irregular C2 coverage and xi matrix
         id: publish
         shell: bash
         env:
-          CALCULATION_SHA: ${{ inputs.calculation_sha }}
-          SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha }}
+          CALCULATION_SHA: ${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}
+          SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}
         run: |
           set -euo pipefail
           grid_csv=$(find "${SOURCE_ROOT}" -type f -name 'phase_grid_convergence_*.csv' -print -quit)
@@ -87,13 +95,13 @@ jobs:
             --grid-csv "${grid_csv}" \
             --output "${PLAN_ROOT}/expected_coverage.json" \
             --matrix-output "${PLAN_ROOT}/matrix.json" \
-            --source-grid-run-id "${{ inputs.source_grid_run_id }}" \
-            --source-grid-artifact-name "${{ inputs.source_grid_artifact_name }}" \
+            --source-grid-run-id "${{ inputs.source_grid_run_id || '31862752226' }}" \
+            --source-grid-artifact-name "${{ inputs.source_grid_artifact_name || 'pnjl-dense-reference-issue130_stagec_density_v2_c2_grid_tight_20260813' }}" \
             --source-grid-manifest-path "${manifest_rel}" \
             --source-grid-manifest-sha256 "${manifest_sha}" \
             --calculation-sha "${CALCULATION_SHA}" \
             --source-postprocess-sha "${SOURCE_POSTPROCESS_SHA}" \
-            --audit-run-id "${{ inputs.audit_run_id }}"
+            --audit-run-id "${{ inputs.audit_run_id || '31941614867' }}"
           matrix=$(python -c 'import json,sys; print(json.dumps(json.load(open(sys.argv[1],encoding="utf-8"))["include"],separators=(",",":")))' "${PLAN_ROOT}/matrix.json")
           echo "matrix=${matrix}" >> "${GITHUB_OUTPUT}"
           echo "source_grid_manifest_path=${manifest_rel}" >> "${GITHUB_OUTPUT}"
@@ -110,7 +118,7 @@ jobs:
       - name: Upload raw-only plan
         uses: actions/upload-artifact@v4
         with:
-          name: pnjl-raw-curve-plan-${{ inputs.tag }}
+          name: pnjl-raw-curve-plan-${{ inputs.tag || 'issue130-c2-oracle-raw-v1' }}
           path: ${{ env.PLAN_ROOT }}/*
           retention-days: 90
           if-no-files-found: error
@@ -124,18 +132,18 @@ jobs:
         include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     uses: ./.github/workflows/pnjl-raw-curve-archive-shard.yml
     with:
-      tag: ${{ inputs.tag }}
+      tag: ${{ inputs.tag || 'issue130-c2-oracle-raw-v1' }}
       shard_id: ${{ matrix.shard_id }}
       xi: ${{ matrix.xi }}
       temperatures_json: ${{ matrix.temperatures_json }}
-      calculation_sha: ${{ inputs.calculation_sha }}
-      source_postprocess_sha: ${{ inputs.source_postprocess_sha }}
+      calculation_sha: ${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}
+      source_postprocess_sha: ${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}
       source_workflow_sha: ${{ github.sha }}
-      source_grid_run_id: ${{ inputs.source_grid_run_id }}
-      source_grid_artifact_name: ${{ inputs.source_grid_artifact_name }}
+      source_grid_run_id: ${{ inputs.source_grid_run_id || '31862752226' }}
+      source_grid_artifact_name: ${{ inputs.source_grid_artifact_name || 'pnjl-dense-reference-issue130_stagec_density_v2_c2_grid_tight_20260813' }}
       source_grid_manifest_path: ${{ needs.prepare.outputs.source_grid_manifest_path }}
       source_grid_manifest_sha256: ${{ needs.prepare.outputs.source_grid_manifest_sha256 }}
-      audit_run_id: ${{ inputs.audit_run_id }}
+      audit_run_id: ${{ inputs.audit_run_id || '31941614867' }}
 
   merge:
     needs: [prepare, raw_shards]
@@ -161,7 +169,7 @@ jobs:
         run: |
           mkdir -p "${PLAN_ROOT}"
           gh run download "${{ github.run_id }}" \
-            --pattern "pnjl-raw-curve-plan-${{ inputs.tag }}" \
+            --pattern "pnjl-raw-curve-plan-${{ inputs.tag || 'issue130-c2-oracle-raw-v1' }}" \
             --dir "${PLAN_ROOT}"
 
       - name: Download all raw-only source shards
@@ -169,7 +177,7 @@ jobs:
         run: |
           mkdir -p "${RAW_SOURCE_ROOT}"
           gh run download "${{ github.run_id }}" \
-            --pattern "pnjl-raw-curve-source-${{ inputs.tag }}-*" \
+            --pattern "pnjl-raw-curve-source-${{ inputs.tag || 'issue130-c2-oracle-raw-v1' }}-*" \
             --dir "${RAW_SOURCE_ROOT}"
 
       - name: Build strict full raw archive
@@ -184,23 +192,23 @@ jobs:
             --output-dir "${ARCHIVE_ROOT}" \
             --expected-coverage "${coverage}" \
             --require-full-domain \
-            --calculation-sha "${{ inputs.calculation_sha }}" \
-            --source-postprocess-sha "${{ inputs.source_postprocess_sha }}" \
+            --calculation-sha "${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}" \
+            --source-postprocess-sha "${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}" \
             --audit-workflow-sha "${{ github.sha }}" \
             --expected-source-run-id "${{ github.run_id }}" \
-            --audit-run-id "${{ inputs.audit_run_id }}"
+            --audit-run-id "${{ inputs.audit_run_id || '31941614867' }}"
           python scripts/analysis/pnjl_raw_curve_archive.py validate-archive \
             --archive-dir "${ARCHIVE_ROOT}" \
             --expected-coverage "${coverage}" \
             --require-full-domain \
-            --calculation-sha "${{ inputs.calculation_sha }}" \
-            --source-postprocess-sha "${{ inputs.source_postprocess_sha }}" \
+            --calculation-sha "${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}" \
+            --source-postprocess-sha "${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}" \
             --audit-workflow-sha "${{ github.sha }}"
 
       - name: Upload full raw archive
         uses: actions/upload-artifact@v4
         with:
-          name: pnjl-raw-curve-archive-${{ inputs.tag }}
+          name: pnjl-raw-curve-archive-${{ inputs.tag || 'issue130-c2-oracle-raw-v1' }}
           path: |
             ${{ env.ARCHIVE_ROOT }}/**
             ${{ env.PLAN_ROOT }}/**/expected_coverage.json
