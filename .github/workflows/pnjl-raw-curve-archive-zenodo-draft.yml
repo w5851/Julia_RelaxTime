@@ -1,11 +1,6 @@
 name: PNJL raw curve archive - Zenodo draft
 
 on:
-  push:
-    branches:
-      - codex/phase-evidence-retention
-    paths:
-      - .github/workflows/pnjl-raw-curve-archive-zenodo-draft.yml
   workflow_dispatch:
     inputs:
       source_run_id:
