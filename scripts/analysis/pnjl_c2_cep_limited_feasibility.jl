@@ -47,6 +47,21 @@ const PRODUCTION_MAXWELL_OPTIONS = MODELS._production_maxwell_options(PRODUCTION
     args[index + 1]
 end
 
+function _parse_target_xi(value::AbstractString)
+    isempty(strip(value)) && return TARGET_XI
+    values = try
+        [parse(Float64, strip(item)) for item in split(value, ',') if !isempty(strip(item))]
+    catch
+        error("invalid --target-xi value: $(value)")
+    end
+    isempty(values) && error("--target-xi must contain at least one xi")
+    length(unique(values)) == length(values) || error("--target-xi must contain unique xi values")
+    all(xi -> xi in TARGET_XI, values) ||
+        error("--target-xi contains an xi outside the frozen matrix")
+    sort!(values)
+    Tuple(values)
+end
+
 @inline function _field(row, name::Symbol, default=nothing)
     row === nothing && return default
     try
@@ -104,9 +119,11 @@ function _required_file(manifest, manifest_path::String, name::String)
     path
 end
 
-function _read_jobs(input_dir::String, expected_sha::String, expected_postprocess::String)
+function _read_jobs(input_dir::String, expected_sha::String, expected_postprocess::String,
+        target_xi=TARGET_XI)
     paths = _manifest_paths(input_dir)
-    length(paths) == length(TARGET_XI) || error("expected 17 CEP shards, got $(length(paths))")
+    length(paths) == length(target_xi) ||
+        error("expected $(length(target_xi)) CEP shards, got $(length(paths))")
     jobs = Any[]
     seen = Set{Float64}()
     for path in paths
@@ -118,7 +135,7 @@ function _read_jobs(input_dir::String, expected_sha::String, expected_postproces
         post = String(_field(manifest, :postprocess_sha, ""))
         isempty(expected_postprocess) || post == expected_postprocess || error("postprocess SHA mismatch $(path)")
         xi = _float(_field(manifest, :xi))
-        xi in TARGET_XI && !(xi in seen) || error("duplicate/unexpected xi $(xi)")
+        xi in target_xi && !(xi in seen) || error("duplicate/unexpected xi $(xi)")
         push!(seen, xi)
         pool_path = _required_file(manifest, path, "fine_pool.csv")
         slices_path = _required_file(manifest, path, "slice_metrics.csv")
@@ -150,7 +167,7 @@ function _read_jobs(input_dir::String, expected_sha::String, expected_postproces
             files=[(path=replace(relpath(p, input_dir), '\\' => '/'), sha256=_sha(p))
                 for p in (pool_path, slices_path, costs_path, path)]))
     end
-    Set(job.xi for job in jobs) == Set(TARGET_XI) || error("incomplete CEP xi matrix")
+    Set(job.xi for job in jobs) == Set(target_xi) || error("incomplete CEP xi matrix")
     jobs
 end
 
@@ -334,7 +351,7 @@ function _write_csv(path, rows)
 end
 
 function _write_outputs(output_dir::String, jobs, results, verdict, expected_sha,
-        expected_postprocess, source_run_id)
+        expected_postprocess, source_run_id, target_xi, workflow_schema)
     mkpath(output_dir)
     _write_csv(joinpath(output_dir, "cep_bracket_results.csv"), [(
         xi=result.xi, T_last_first_order_MeV=result.T_last_first_order_MeV,
@@ -389,11 +406,14 @@ function _write_outputs(output_dir::String, jobs, results, verdict, expected_sha
         end
     end
     manifest = Dict(
-        "schema_version" => SCHEMA_VERSION, "scope" => "cep", "verdict" => verdict,
+        "schema_version" => SCHEMA_VERSION, "workflow_schema" => workflow_schema,
+        "scope" => "cep", "verdict" => verdict,
         "source_run_id" => source_run_id, "source_job_count" => length(jobs),
         "source_calculation_sha" => expected_sha, "source_postprocess_sha" => expected_postprocess,
         "solver_called" => false, "oracle_labels_used_for_routing" => false,
-        "frozen_bracket_count" => 17, "max_new_temperature_slices" => 18,
+        "frozen_bracket_count" => length(target_xi),
+        "max_new_temperature_slices" => 2 * length(target_xi),
+        "target_xi" => collect(target_xi),
         "node_step_MeV" => 0.0625, "window_extension_MeV" => 0.25,
         "width_gate_MeV" => WIDTH_GATE, "cost_stop_runner_minutes" => COST_STOP_MINUTES,
         "input_files" => reduce(vcat, [job.files for job in jobs]; init=Any[]), "files" => files)
@@ -424,12 +444,16 @@ function main(args=ARGS)
     occursin(CALCULATION_SHA_RE, expected_sha) || error("expected calculation SHA must be lowercase 40-hex")
     source_run_id = get(options, "source-run-id", "")
     occursin(r"^\d+$", source_run_id) || error("source-run-id must be numeric")
-    jobs = _read_jobs(abspath(input_dir), expected_sha, get(options, "expected-source-postprocess-sha", ""))
+    target_xi = _parse_target_xi(get(options, "target-xi", ""))
+    workflow_schema = get(options, "workflow-schema", SCHEMA_VERSION)
+    jobs = _read_jobs(abspath(input_dir), expected_sha,
+        get(options, "expected-source-postprocess-sha", ""), target_xi)
     results = [_job_result(job) for job in jobs]
     verdict = _verdict(results)
     output_dir = abspath(get(options, "output-dir", joinpath(PROJECT_ROOT, "c2_cep_limited_aggregate")))
     manifest = _write_outputs(output_dir, jobs, results, verdict, expected_sha,
-        get(options, "expected-source-postprocess-sha", ""), source_run_id)
+        get(options, "expected-source-postprocess-sha", ""), source_run_id, target_xi,
+        workflow_schema)
     println(JSON3.write(Dict("verdict" => verdict, "source_job_count" => length(jobs),
         "solver_called" => false, "manifest_sha256" => _sha(joinpath(output_dir, "manifest.json")))))
     verdict == "cep_feasible_candidate" ? 0 : 2
