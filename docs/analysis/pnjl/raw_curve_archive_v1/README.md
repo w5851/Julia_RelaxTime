@@ -74,6 +74,9 @@ with SHA-256
 also stores the matching `.sha256` sidecar. The pointer records the source
 run/artifact, calculation SHA, audited postprocess SHA, raw-production
 workflow SHA, manifest requirements, and retention policy.
+The published ZIP's inner `archive_manifest.json` was independently recovered
+and verified with SHA-256
+`514d9a7dd4cf537e8b209ed7df1cb996f52da48ab0b3672f27c3437d0cba4e52`.
 
 To restore the archive, download both Zenodo files, verify the outer ZIP with
 the sidecar, extract it without reserialization, and run the `validate-archive`

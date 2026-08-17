@@ -21,6 +21,8 @@ def test_external_pointer_is_published_and_matches_archive_contract():
     assert archive["sha256"] == "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc"
     assert archive["sha256_sidecar"]["size_bytes"] == 119
     assert archive["sha256_sidecar"]["content"].startswith(archive["sha256"] + "  ")
+    assert archive["inner_manifest"]["archive_manifest_sha256"] == "514d9a7dd4cf537e8b209ed7df1cb996f52da48ab0b3672f27c3437d0cba4e52"
+    assert archive["inner_manifest"]["representative_count"] == 279
     assert provenance["method"] == "independent_oracle"
     assert provenance["validation_status"] == "full_domain_verified"
     assert provenance["curve_count"] == 10_458

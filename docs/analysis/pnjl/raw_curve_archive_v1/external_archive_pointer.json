@@ -25,6 +25,8 @@
       "content": "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc  pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip\n"
     },
     "inner_manifest": {
+      "archive_manifest_sha256": "514d9a7dd4cf537e8b209ed7df1cb996f52da48ab0b3672f27c3437d0cba4e52",
+      "representative_count": 279,
       "required_files": [
         "archive_manifest.json",
         "archive_manifest.sha256",
