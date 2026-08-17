@@ -1,0 +1,223 @@
+name: PNJL raw curve archive - Zenodo draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "GitHub Actions run containing the verified artifact"
+        required: true
+        default: "32013771445"
+      artifact_id:
+        description: "GitHub Actions artifact ID for the full archive"
+        required: true
+        default: "9288198084"
+      artifact_name:
+        description: "Zenodo filename for the exact artifact bytes"
+        required: true
+        default: "pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip"
+      expected_size_bytes:
+        description: "Expected exact artifact size"
+        required: true
+        default: "1879467478"
+      expected_sha256:
+        description: "Expected exact artifact SHA-256"
+        required: true
+        default: "467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc"
+      creator_name:
+        description: "Creator name to place in the Zenodo draft"
+        required: true
+        default: "Mingzhengxuan Wu"
+      creator_affiliation:
+        description: "Optional creator affiliation"
+        required: false
+        default: ""
+      title:
+        description: "Zenodo draft title"
+        required: true
+        default: "PNJL raw rho-mu curves for the C2 phase-grid coverage"
+      version:
+        description: "Dataset version"
+        required: true
+        default: "raw_curve_archive_v1"
+      zenodo_base_url:
+        description: "Production Zenodo or Zenodo Sandbox base URL"
+        required: true
+        default: "https://zenodo.org"
+
+permissions:
+  actions: read
+
+jobs:
+  upload-draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+      ARTIFACT_ID: ${{ inputs.artifact_id }}
+      ARTIFACT_NAME: ${{ inputs.artifact_name }}
+      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
+      EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+      CREATOR_NAME: ${{ inputs.creator_name }}
+      CREATOR_AFFILIATION: ${{ inputs.creator_affiliation }}
+      RECORD_TITLE: ${{ inputs.title }}
+      RECORD_VERSION: ${{ inputs.version }}
+      ZENODO_BASE_URL: ${{ inputs.zenodo_base_url }}
+      GITHUB_TOKEN: ${{ github.token }}
+      ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+    steps:
+      - name: Check required secret
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ZENODO_TOKEN:-}" || {
+            echo "ZENODO_TOKEN repository secret is required" >&2
+            exit 1
+          }
+
+      - name: Download and verify exact GitHub artifact bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${ZENODO_BASE_URL}" in
+            https://zenodo.org|https://sandbox.zenodo.org) ;;
+            *) echo "unsupported Zenodo base URL: ${ZENODO_BASE_URL}" >&2; exit 1 ;;
+          esac
+          case "${ARTIFACT_NAME}" in
+            ""|*/*|*\\*) echo "artifact name must be a plain filename" >&2; exit 1 ;;
+          esac
+          artifact_meta="${RUNNER_TEMP}/github_artifact.json"
+          curl --fail --silent --show-error --retry 3 \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --output "${artifact_meta}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}"
+          jq -e \
+            --arg artifact_id "${ARTIFACT_ID}" \
+            --arg artifact_name "${ARTIFACT_NAME}" \
+            --arg source_run_id "${SOURCE_RUN_ID}" \
+            --arg expected_size "${EXPECTED_SIZE_BYTES}" \
+            --arg expected_sha256 "sha256:${EXPECTED_SHA256}" \
+            '(.id|tostring) == $artifact_id and
+             .name == $artifact_name and
+             (.workflow_run.id|tostring) == $source_run_id and
+             (.size_in_bytes|tostring) == $expected_size and
+             .digest == $expected_sha256 and
+             (.expired == false)' \
+            "${artifact_meta}" > /dev/null
+          archive="${RUNNER_TEMP}/${ARTIFACT_NAME}"
+          api_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/artifacts/${ARTIFACT_ID}/zip"
+          curl --fail --location --retry 5 --retry-delay 5 \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --output "${archive}" "${api_url}"
+          actual_size="$(stat -c '%s' "${archive}")"
+          actual_sha256="$(sha256sum "${archive}" | cut -d ' ' -f 1)"
+          test "${actual_size}" = "${EXPECTED_SIZE_BYTES}" || {
+            echo "artifact size mismatch: ${actual_size}/${EXPECTED_SIZE_BYTES}" >&2
+            exit 1
+          }
+          test "${actual_sha256}" = "${EXPECTED_SHA256}" || {
+            echo "artifact SHA-256 mismatch: ${actual_sha256}/${EXPECTED_SHA256}" >&2
+            exit 1
+          }
+          printf '%s  %s\n' "${actual_sha256}" "${ARTIFACT_NAME}" > "${archive}.sha256"
+          echo "ARCHIVE_PATH=${archive}" >> "${GITHUB_ENV}"
+          echo "SIDECAR_PATH=${archive}.sha256" >> "${GITHUB_ENV}"
+          echo "Verified run=${SOURCE_RUN_ID} artifact=${ARTIFACT_ID} size=${actual_size} sha256=${actual_sha256}"
+
+      - name: Build Zenodo draft metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+
+          creator = {"name": os.environ["CREATOR_NAME"]}
+          if os.environ.get("CREATOR_AFFILIATION"):
+              creator["affiliation"] = os.environ["CREATOR_AFFILIATION"]
+
+          description = (
+              "This dataset contains the complete raw rho-mu curves generated for every exact (xi, T_MeV) coordinate present in the C2 phase_grid_convergence artifact with axis=rho. The producer is independent_oracle at the highest-precision raw-only settings.\n\n"
+              "Scope and schema: 10,458 curves over 93 xi values; each curve is a byte-preserved UTF-8 CSV with 28 source columns and the complete rho=0:0.003125:4 set, for 1,281 rho points. rho is reported in rho/rho0 with rho0=0.16 fm^-3. T and chemical potentials are in MeV; pressure and energy are in fm^-4; entropy and quark densities are in fm^-3. Solver status fields are retained.\n\n"
+              f"Provenance: calculation SHA 3c5f6b3c9bd535cff7657364dadb2efc31f2ea48; audited postprocess context SHA 67d73f871578e35759c08b3c75200c51646cf6cd; audit run 31941614867; C2 grid source run 31862752226; raw production run {os.environ['SOURCE_RUN_ID']}; source artifact ID {os.environ['ARTIFACT_ID']}. The archive artifact SHA-256 is {os.environ['EXPECTED_SHA256']}.\n\n"
+              "Validation: status full_domain_verified. The archive includes archive and source manifests, SHA-256 sidecars, a full curve index, and a representative index that references the full set. No C0/C1/C2 rerun, Maxwell, CEP or boundary analysis, hybrid policy, reference promotion, or transport postprocessing was performed for this dataset.\n\n"
+              "The repository-side contract and recovery tooling are maintained at https://github.com/w5851/Julia_RelaxTime."
+          )
+
+          metadata = {
+              "metadata": {
+                  "title": os.environ["RECORD_TITLE"],
+                  "upload_type": "dataset",
+                  "publication_date": "2026-08-17",
+                  "description": description,
+                  "creators": [creator],
+                  "keywords": [
+                      "PNJL",
+                      "rho-mu curve",
+                      "phase grid",
+                      "raw data",
+                      "independent oracle",
+                  ],
+                  "license": "cc-by-4.0",
+                  "version": os.environ["RECORD_VERSION"],
+                  "access_right": "open",
+                  "related_identifiers": [
+                      {
+                          "identifier": "https://github.com/w5851/Julia_RelaxTime",
+                          "relation": "isSupplementTo",
+                          "scheme": "url",
+                      }
+                  ],
+              }
+          }
+          with open(os.environ["RUNNER_TEMP"] + "/zenodo_metadata.json", "w", encoding="utf-8") as handle:
+              json.dump(metadata, handle, ensure_ascii=True, indent=2)
+          PY
+          echo "METADATA_PATH=${RUNNER_TEMP}/zenodo_metadata.json" >> "${GITHUB_ENV}"
+
+      - name: Create Zenodo draft deposition
+        id: deposition
+        shell: bash
+        run: |
+          set -euo pipefail
+          api_root="${ZENODO_BASE_URL%/}/api"
+          response="$(curl --fail-with-body --silent --show-error --retry 3 \
+            -X POST "${api_root}/deposit/depositions" \
+            -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data-binary "@${METADATA_PATH}")"
+          printf '%s' "${response}" > "${RUNNER_TEMP}/zenodo_deposition.json"
+          deposition_id="$(jq -r '.id' "${RUNNER_TEMP}/zenodo_deposition.json")"
+          bucket_url="$(jq -r '.links.bucket' "${RUNNER_TEMP}/zenodo_deposition.json")"
+          html_url="$(jq -r '.links.html' "${RUNNER_TEMP}/zenodo_deposition.json")"
+          test "${deposition_id}" != "null" -a -n "${deposition_id}"
+          test "${bucket_url}" != "null" -a -n "${bucket_url}"
+          echo "DEPOSITION_ID=${deposition_id}" >> "${GITHUB_ENV}"
+          echo "BUCKET_URL=${bucket_url}" >> "${GITHUB_ENV}"
+          echo "DRAFT_URL=${html_url}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload exact archive and checksum sidecar to draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --retry 3 \
+            -X PUT --upload-file "${ARCHIVE_PATH}" \
+            -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            "${BUCKET_URL}/${ARTIFACT_NAME}"
+          curl --fail-with-body --silent --show-error --retry 3 \
+            -X PUT --upload-file "${SIDECAR_PATH}" \
+            -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            "${BUCKET_URL}/${ARTIFACT_NAME}.sha256"
+          echo "Uploaded exact archive and SHA-256 sidecar to deposition ${DEPOSITION_ID}."
+
+      - name: Publish draft URL as workflow output
+        shell: bash
+        run: |
+          set -euo pipefail
+          html_url="$(jq -r '.links.html' "${RUNNER_TEMP}/zenodo_deposition.json")"
+          echo "Zenodo draft: ${html_url}"
+          echo "Deposition ID: ${DEPOSITION_ID}"
+          echo "The deposition is intentionally not published by this workflow."
