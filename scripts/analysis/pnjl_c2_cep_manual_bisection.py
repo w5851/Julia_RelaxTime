@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 CALCULATION_SHA = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 SCHEMA_VERSION = "pnjl_c2_cep_manual_bisection_job_v1"
-AUDIT_SCHEMA_VERSION = "pnjl_c2_cep_manual_bisection_audit_v1"
+AUDIT_SCHEMA_VERSION = "pnjl_c2_cep_manual_bisection_audit_v2"
 XIS = (0.125, 0.39375, 0.5)
 RHO_STEP = 0.003125
 RHO_COUNT = 1281
@@ -97,11 +97,15 @@ def _candidate_fields(summary: dict[str, Any]) -> dict[str, Any]:
         "density_error": record.get("density_error"),
         "geometry_converged": record.get("geometry_converged"),
         "phase_status": summary.get("conclusion", {}).get("phase_structure"),
+        "phase_reason": record.get("reason"),
         "scan_failure": summary.get("stats", {}).get("scan_failure"),
         "scan_success": summary.get("stats", {}).get("scan_success"),
         "hybrid_stage_b_status": record.get("hybrid_stage_b_status"),
         "hybrid_stage_c_status": record.get("hybrid_stage_c_status"),
         "hybrid_detailed_reason": record.get("hybrid_upgrade_reason"),
+        "hybrid_certificate_type": record.get("hybrid_certificate_type"),
+        "hybrid_actual_cap": record.get("hybrid_actual_cap"),
+        "hybrid_stop_reason": record.get("hybrid_stop_reason"),
     }
 
 
@@ -169,7 +173,9 @@ def plot_slice(root: Path, row: dict[str, str], output_dir: Path) -> dict[str, A
     temperature = float(row["T_MeV"])
     slice_dir = root / "slices" / f"T_{str(temperature).replace('.', 'p')}"
     oracle = _phase_summary(slice_dir, "oracle")
+    hybrid = _phase_summary(slice_dir, "hybrid")
     candidate = _candidate_fields(oracle)
+    hybrid_state = _candidate_fields(hybrid)
     oracle_rows = [r for r in read_csv(root / "fine_pool.csv")
                    if abs(float(r["T_MeV"]) - temperature) < 1e-8]
     oracle_rows.sort(key=lambda item: float(item["rho"]))
@@ -200,7 +206,7 @@ def plot_slice(root: Path, row: dict[str, str], output_dir: Path) -> dict[str, A
     ax.plot(x, y_float, color="#1f4e79", linewidth=1.0, label="full-fine oracle")
     if hx:
         ax.plot(hx, hy, "o", color="#c44e52", markersize=2.5, alpha=0.7,
-                label="hybrid Stage-A/B points")
+                label="hybrid evaluated points")
     if mu_m is not None:
         ax.axhline(mu_m, color="#333333", linestyle="--", linewidth=0.8,
                    label="oracle Maxwell μ")
@@ -237,9 +243,19 @@ def plot_slice(root: Path, row: dict[str, str], output_dir: Path) -> dict[str, A
         "candidate_count": candidate["candidate_count"],
         "mu_transition_MeV": candidate["mu_transition_MeV"],
         "rho_hadron": candidate["rho_hadron"], "rho_quark": candidate["rho_quark"],
-        "hybrid_stage_b_status": candidate["hybrid_stage_b_status"],
-        "hybrid_stage_c_status": candidate["hybrid_stage_c_status"],
-        "hybrid_detailed_reason": candidate["hybrid_detailed_reason"],
+        "oracle_phase_status": candidate["phase_status"],
+        "oracle_phase_reason": candidate["phase_reason"],
+        "oracle_area_residual": candidate["area_residual"],
+        "oracle_geometry_converged": candidate["geometry_converged"],
+        "hybrid_phase_status": hybrid_state["phase_status"],
+        "hybrid_phase_reason": hybrid_state["phase_reason"],
+        "hybrid_stage_b_status": hybrid_state["hybrid_stage_b_status"],
+        "hybrid_stage_c_status": hybrid_state["hybrid_stage_c_status"],
+        "hybrid_detailed_reason": hybrid_state["hybrid_detailed_reason"],
+        "hybrid_certificate_type": hybrid_state["hybrid_certificate_type"],
+        "hybrid_actual_cap": hybrid_state["hybrid_actual_cap"],
+        "hybrid_stop_reason": hybrid_state["hybrid_stop_reason"],
+        "hybrid_support_rows": len(hybrid_rows),
         "plot": str(out.name),
     }
 
@@ -304,7 +320,7 @@ def main() -> int:
         manifest["files"][path.name] = sha256(path)
     (args.output_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     (args.output_dir / "claim_ledger.md").write_text(
-        "# C2 CEP manual bisection audit v1\n\n"
+        "# C2 CEP manual bisection audit v2\n\n"
         "- This package is solver-free after the numerical source run.\n"
         "- The nine slices are fixed low/midpoint/high observations of the C2 brackets.\n"
         "- `manual_pending` is intentional; no oracle label selected a temperature.\n"
@@ -313,7 +329,7 @@ def main() -> int:
         encoding="utf-8",
     )
     (args.output_dir / "README.md").write_text(
-        "# C2 CEP manual bisection audit v1\n\n"
+        "# C2 CEP manual bisection audit v2\n\n"
         "This package contains full-fine oracle curves and hybrid overlays for the low, midpoint, "
         "and high temperatures of the three C2 CEP brackets. Review the local panels and update "
         "the bracket trace only after author classification.\n",
