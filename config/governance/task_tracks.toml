@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-16"
+updated_at = "2026-08-17"
 
 [[tracks]]
 id = "issue130-phase"
@@ -76,6 +76,23 @@ run_ids = ["32011954899"]
 evidence = ["pr:232", "run:32011954899"]
 updated_at = "2026-08-17"
 
+[[tracks]]
+id = "phase-evidence-retention"
+title = "PNJL raw rho-mu curve evidence retention"
+status = "triaged"
+current_task = "issue130-rho-mu-curve-retention"
+blocked_by = []
+unlocks = []
+next_action = "设计 raw_curve_archive_v1 的数据 schema、归档位置、hash/provenance、全量与代表性曲线的分层保留策略。"
+required_author_review = true
+author_review_status = "pending"
+promotion_required = false
+current_branch = ""
+current_sha = ""
+run_ids = ["31941614867"]
+evidence = ["run:31941614867"]
+updated_at = "2026-08-17"
+
 [[items]]
 id = "issue130-full-hybrid-author-review"
 track_id = "issue130-phase"
@@ -140,3 +157,18 @@ next_action = "建立 workflow inventory 和引用图，按仍在使用、保留
 blocked_by = []
 backlog_file = ""
 evidence = ["pr:232", "run:32011954899"]
+
+[[items]]
+id = "issue130-rho-mu-curve-retention"
+track_id = "phase-evidence-retention"
+classification = "independent"
+status = "triaged"
+parent = "track:phase-evidence-retention"
+task_file = ""
+reason = "当前 C0/C1/C2 aggregate 主要保留标量诊断，原始 rho-mu 曲线尚未形成长期可恢复的统一归档合同；未来导师审核、复现和代表性图像均可能需要这些曲线。"
+next_action = "在独立对话中设计并实现 raw_curve_archive_v1，明确 source artifact、字段单位、method、xi/T/rho key、calculation SHA、manifest/hash 和恢复测试。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "run:31941614867",
+]
