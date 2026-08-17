@@ -1,6 +1,11 @@
 name: PNJL raw curve archive - Zenodo draft
 
 on:
+  push:
+    branches:
+      - codex/phase-evidence-retention
+    paths:
+      - .github/workflows/pnjl-raw-curve-archive-zenodo-draft.yml
   workflow_dispatch:
     inputs:
       source_run_id:
@@ -52,16 +57,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
-      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
-      ARTIFACT_ID: ${{ inputs.artifact_id }}
-      ARTIFACT_NAME: ${{ inputs.artifact_name }}
-      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes }}
-      EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
-      CREATOR_NAME: ${{ inputs.creator_name }}
-      CREATOR_AFFILIATION: ${{ inputs.creator_affiliation }}
-      RECORD_TITLE: ${{ inputs.title }}
-      RECORD_VERSION: ${{ inputs.version }}
-      ZENODO_BASE_URL: ${{ inputs.zenodo_base_url }}
+      SOURCE_RUN_ID: ${{ inputs.source_run_id || '32013771445' }}
+      ARTIFACT_ID: ${{ inputs.artifact_id || '9288198084' }}
+      ARTIFACT_NAME: ${{ inputs.artifact_name || 'pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip' }}
+      EXPECTED_SIZE_BYTES: ${{ inputs.expected_size_bytes || '1879467478' }}
+      EXPECTED_SHA256: ${{ inputs.expected_sha256 || '467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc' }}
+      CREATOR_NAME: ${{ inputs.creator_name || 'Mingzhengxuan Wu' }}
+      CREATOR_AFFILIATION: ${{ inputs.creator_affiliation || '' }}
+      RECORD_TITLE: ${{ inputs.title || 'PNJL raw rho-mu curves for the C2 phase-grid coverage' }}
+      RECORD_VERSION: ${{ inputs.version || 'raw_curve_archive_v1' }}
+      ZENODO_BASE_URL: ${{ inputs.zenodo_base_url || 'https://zenodo.org' }}
       GITHUB_TOKEN: ${{ github.token }}
       ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
     steps:
