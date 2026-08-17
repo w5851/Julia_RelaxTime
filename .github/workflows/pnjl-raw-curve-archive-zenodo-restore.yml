@@ -54,8 +54,6 @@ jobs:
       CALCULATION_SHA: ${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}
       SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha || '67d73f871578e35759c08b3c75200c51646cf6cd' }}
       AUDIT_WORKFLOW_SHA: ${{ inputs.audit_workflow_sha || '1aeda93fa86c39eb0734954d04f80679a9c50c33' }}
-      DOWNLOAD_ROOT: ${{ runner.temp }}/pnjl_raw_curve_archive_zenodo
-      RESTORE_ROOT: ${{ runner.temp }}/pnjl_raw_curve_archive_zenodo/extracted
 
     steps:
       - name: Checkout validation tooling
@@ -73,6 +71,7 @@ jobs:
           case "${ARCHIVE_FILENAME}" in
             ""|*/*|*\\*) echo "archive filename must be a plain filename" >&2; exit 1 ;;
           esac
+          DOWNLOAD_ROOT="${RUNNER_TEMP}/pnjl_raw_curve_archive_zenodo"
           mkdir -p "${DOWNLOAD_ROOT}"
           archive_url="https://zenodo.org/records/${RECORD_ID}/files/${ARCHIVE_FILENAME}?download=1"
           sidecar_name="${ARCHIVE_FILENAME}.sha256"
@@ -93,18 +92,21 @@ jobs:
           }
           cd "${DOWNLOAD_ROOT}"
           sha256sum --strict --check "${sidecar_name}"
+          echo "DOWNLOAD_ROOT=${DOWNLOAD_ROOT}" >> "${GITHUB_ENV}"
           echo "Verified Zenodo record=${RECORD_ID} size=${actual_size} sha256=${actual_sha256}"
 
       - name: Extract exact ZIP and locate archive contract
         shell: bash
         run: |
           set -euo pipefail
+          RESTORE_ROOT="${DOWNLOAD_ROOT}/extracted"
           mkdir -p "${RESTORE_ROOT}"
           unzip -q "${DOWNLOAD_ROOT}/${ARCHIVE_FILENAME}" -d "${RESTORE_ROOT}"
           archive_manifest="$(find "${RESTORE_ROOT}" -type f -name archive_manifest.json -print -quit)"
           coverage="$(find "${RESTORE_ROOT}" -type f -name expected_coverage.json -print -quit)"
           test -n "${archive_manifest}" || { echo "archive_manifest.json not found" >&2; exit 1; }
           test -n "${coverage}" || { echo "expected_coverage.json not found" >&2; exit 1; }
+          echo "RESTORE_ROOT=${RESTORE_ROOT}" >> "${GITHUB_ENV}"
           echo "ARCHIVE_DIR=$(dirname "${archive_manifest}")" >> "${GITHUB_ENV}"
           echo "COVERAGE_PATH=${coverage}" >> "${GITHUB_ENV}"
 
