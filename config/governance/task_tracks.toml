@@ -9,7 +9,7 @@ status = "review"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；继续审核 full_hybrid_candidate/v5 coverage，并先为 μ endpoint refinement 做 solver-free target-list/cost preflight，审核前不得启动 reference promotion。"
+next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；先完成已授权的 8-target crossover μ pilot，再决定是否扩展全部 xi；审核前不得启动 reference promotion。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
@@ -156,14 +156,14 @@ evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2
 id = "issue130-mu-endpoint-refinement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md"
 reason = "C2 v5 显示 crossover 在 CEP 附近存在原生 mu sampling gap；本任务只补 crossover 物理侧，Maxwell geometry/unresolved gap 由独立 companion task 处理。"
-next_action = "审核 crossover μ target-list/cost preflight；明确授权后才运行四个代表 xi 的 numerical pilot，再决定是否扩展全部 xi。"
+next_action = "已授权并实现 8-target crossover μ numerical pilot；先完成 workflow focused checks 和 Actions 结果审计，再决定是否扩展全部 xi。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047"]
 
 [[items]]
 id = "issue130-maxwell-cep-local-refinement"
