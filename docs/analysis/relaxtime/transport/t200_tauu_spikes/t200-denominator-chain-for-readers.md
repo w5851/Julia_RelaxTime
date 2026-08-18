@@ -4,8 +4,8 @@
 
 - 我们要解释：为什么在 `T=200` 的正窗口里，`tau_u` 会出现“先变小、再变大”。
 - 用到两张同结构图：
-  1. `docs/analysis/relaxtime/tauu_pos_uubarddbar_uubar_to_ddbar_denominator_chain.png`
-  2. `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_denominator_chain.png`
+  1. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubarddbar_uubar_to_ddbar_denominator_chain.png`
+  2. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_denominator_chain.png`
 - 读图目标：把“分母变化”如何一路传导到 `tau` 讲成一条连续链路。
 
 ## 2) 先记住一条最短因果链

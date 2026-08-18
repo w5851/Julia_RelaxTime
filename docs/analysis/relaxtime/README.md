@@ -15,13 +15,13 @@ v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_
 
 ### T200 tau-u spike package
 
-以下根目录文件共同属于一个 T200 双窗口机制包：
+以下文件共同属于 `transport/t200_tauu_spikes/` T200 双窗口机制包：
 
-- `t200-dual-window-tauu-spikes-analysis.md`：主分析和证据链。
-- `t200-denominator-chain-for-readers.md`：读者导览和最小复现入口。
-- `tauu_pos_*.png`：通道、传播子分母、`s/t` 敏感性和零交叉图。
+- `transport/t200_tauu_spikes/t200-dual-window-tauu-spikes-analysis.md`：主分析和证据链。
+- `transport/t200_tauu_spikes/t200-denominator-chain-for-readers.md`：读者导览和最小复现入口。
+- `transport/t200_tauu_spikes/tauu_pos_*.png`：通道、传播子分母、`s/t` 敏感性和零交叉图。
 
-建议目标逻辑路径为 `transport/t200_tauu_spikes/`。当前先保留物理路径，因为多份 T200 分析脚本、文档和图 registry 仍直接指向这些文件。
+该目录的物理迁移已完成；历史 figure registry 仍作为迁移前快照保留，不作为当前路径索引。
 
 ## Historical Evidence
 

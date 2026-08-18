@@ -1,0 +1,83 @@
+{
+  "schema_version": "t200_tauu_spikes_analysis_v1",
+  "artifact_case": "t200_tauu_spikes",
+  "status": "diagnostic_only",
+  "logical_line": "relaxtime.transport.phase_guided_mechanism",
+  "migration_date": "2026-08-18",
+  "created_from_commit": "023970beea1bd278e47fcd0b454238583c67735b",
+  "physical_migration": {
+    "source_directory": "docs/analysis/relaxtime/",
+    "destination_directory": "docs/analysis/relaxtime/transport/t200_tauu_spikes/",
+    "scope": "two Markdown analysis notes and nine PNG diagnostic figures",
+    "data_recomputed": false,
+    "figures_redrawn": false
+  },
+  "generator_scripts": [
+    "scripts/analysis/relaxtime/t200_dual_window_full_chain_decomposition.jl",
+    "scripts/analysis/relaxtime/t200_imag_path_evidence.jl",
+    "scripts/analysis/relaxtime/plot_t200_denominator_chain.py",
+    "scripts/analysis/relaxtime/plot_t200_detm_im_s_vs_t_channel_tscan.py",
+    "scripts/analysis/relaxtime/plot_t200_detm_im_t_sensitivity.py",
+    "scripts/analysis/relaxtime/plot_t200_detm_im_vs_t_scan.py",
+    "scripts/analysis/relaxtime/plot_t200_detm_im_upstream_mechanism.py",
+    "scripts/analysis/relaxtime/plot_t200_detm_im_upstream_term_switch.py",
+    "scripts/analysis/relaxtime/plot_t200_m08_re_zero_cross.py"
+  ],
+  "files": [
+    {
+      "path": "t200-dual-window-tauu-spikes-analysis.md",
+      "role": "primary_analysis",
+      "sha256": "4F6F3070D8FD91D68DD689CAC5C2B8464495414BB8575B25CE90F92B8FFAB87D"
+    },
+    {
+      "path": "t200-denominator-chain-for-readers.md",
+      "role": "reader_guide",
+      "sha256": "65C1C9EA4E921D56E70B2CA4AAA3147D48685CF7A33F8B5B68C85413B204A5A2"
+    },
+    {
+      "path": "tauu_pos_uubarddbar_uubar_to_ddbar_denominator_chain.png",
+      "role": "denominator_chain_figure",
+      "sha256": "B18211024261274D95C53BAE5626C4422E13AC4C410A2456233524C6BFEC1344"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_detM_im_s_vs_t_channel_tscan.png",
+      "role": "s_t_channel_comparison_figure",
+      "sha256": "B8E18479837B09E06A0A8086671BA4A03D8E6C98B87F1F4BBA8E6AD35C43D3D8"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_denominator_chain.png",
+      "role": "denominator_chain_figure",
+      "sha256": "ED7EAEF53BF51D4879E224A4FFC11EEB765C75FB2EF566F1B89F7B96E0E2CBDE"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_detM_im_t_sensitivity.png",
+      "role": "t_sensitivity_figure",
+      "sha256": "65DD61713AFCE3D9685AEF220266443E525167D4DE77547F3F55A30E3C386EBD"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_detM_im_term_switch.png",
+      "role": "term_switch_figure",
+      "sha256": "E2E3474C7A9AD81CA5B8EE584DA5DB77A02242801F092C65FFF6690425EB2DDF"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_detM_im_upstream_mechanism.png",
+      "role": "upstream_mechanism_figure",
+      "sha256": "177617339055EB2427F19349C6DC57ABC201B4B3B284CE6E8C4A39349C00AEC0"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_detM_im_vs_t_scan.png",
+      "role": "t_scan_figure",
+      "sha256": "58C7DD7DE9AC628AF8D166D6246C4133ACE2AEC132D368CBEB438F449800537C"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png",
+      "role": "zero_cross_figure",
+      "sha256": "E96BDDBD482C83288C1C992DF8F80C8F48FDEB47BA5BEC3827BC569CCDB5A335"
+    },
+    {
+      "path": "tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross_linear_x.png",
+      "role": "zero_cross_linear_figure",
+      "sha256": "C12BEDB08FAB76B241B1A840DAA8F2FBB907A76629B344F50E12BCE1734302AB"
+    }
+  ]
+}

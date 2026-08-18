@@ -426,8 +426,8 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 ## 17) 两张图的读图结论（审核意见）
 
 - 图文件：
-  1. `docs/analysis/relaxtime/tauu_pos_uubarddbar_uubar_to_ddbar_denominator_chain.png`
-  2. `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_denominator_chain.png`
+  1. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubarddbar_uubar_to_ddbar_denominator_chain.png`
+  2. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_denominator_chain.png`
 - 审核结论：**同意你的判断**。这两张图已经能够把异常链路讲清楚：
   1. 在“分母层”（前两幅子图），`detM_re(Δs)` 与 `detM_im(Δs)` 的轨迹变化直接决定 `|detM|` 的收缩/放大节奏；
   2. 在“传播子层”（第三幅子图），该轨迹映射为 `inv|detM|^2` 与 `|D_total|^2` 的数量级变化；
@@ -439,7 +439,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
   1. 在 `xi=0.36/0.38` 的采样中，`detM_im(Δs)` 明显出现“先更负、后回升并转正”的段落；
   2. 该“先减后增”对应图中高 `Δs` 端的拐点，是下一步值得单独建模的对象（例如拆 `Π` 的实虚部来源与耦合系数项）。
 - 为便于面向非专业读者串联叙事，新增了一份“零基础读图版”说明：
-  - `docs/analysis/relaxtime/t200-denominator-chain-for-readers.md`
+  - `docs/analysis/relaxtime/transport/t200_tauu_spikes/t200-denominator-chain-for-readers.md`
 
 ## 18) 按你指定口径复核：正窗口关键是小 `Δs` 区 `detM_re` 的“接近 0 程度”
 
@@ -501,7 +501,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 ## 20) 上游机制图（按你要求：只看 `detM_im` 上游量）
 
 - 图文件：
-  - `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_upstream_mechanism.png`
+  - `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_upstream_mechanism.png`
 - 生成链路：
   1. 上游追踪脚本：`scripts/analysis/relaxtime/t200_detm_im_upstream_trace.jl`
   2. 追踪数据：`D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_upstream_trace.csv`
@@ -565,7 +565,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 - 你要求的附录已按同路径补齐：
   1. 数据脚本：`scripts/analysis/relaxtime/t200_detm_im_t_sensitivity_trace.jl`
   2. 图脚本：`scripts/analysis/relaxtime/plot_t200_detm_im_t_sensitivity.py`
-  3. 输出图：`docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_t_sensitivity.png`
+  3. 输出图：`docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_t_sensitivity.png`
   4. 汇总表：`D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_t_sensitivity_summary.csv`
 
 - 结果（本对象：`uubar_to_uubar`，`s` 道 mixed 上游）非常明确：
@@ -607,7 +607,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 - 你要求的“随 `t` 出图（与 `Δs` 图同构）”已完成：
   1. 数据脚本：`scripts/analysis/relaxtime/t200_detm_im_vs_t_scan.jl`
   2. 绘图脚本：`scripts/analysis/relaxtime/plot_t200_detm_im_vs_t_scan.py`
-  3. 输出图：`docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_vs_t_scan.png`
+  3. 输出图：`docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_vs_t_scan.png`
   4. 汇总表：`D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_vs_t_scan_summary.csv`
 
 - 该图与汇总表给出的数值结果：
@@ -631,7 +631,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 - 你要的对照产物已生成：
   1. 数据脚本：`scripts/analysis/relaxtime/t200_detm_im_s_vs_t_channel_tscan.jl`
   2. 绘图脚本：`scripts/analysis/relaxtime/plot_t200_detm_im_s_vs_t_channel_tscan.py`
-  3. 对照图：`docs/analysis/relaxtime/tauu_pos_uubaruubar_detM_im_s_vs_t_channel_tscan.png`
+  3. 对照图：`docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_detM_im_s_vs_t_channel_tscan.png`
   4. 汇总表：`D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_s_vs_t_channel_tscan_summary.csv`
 
 - 对照图读数（核心结论）：
@@ -659,7 +659,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
   1. 数据脚本：`scripts/analysis/relaxtime/t200_detm_im_upstream_term_switch_trace.jl`
   2. 符号翻转表脚本：`scripts/analysis/relaxtime/t200_detm_im_upstream_signflip_table.py`
   3. 绘图脚本：`scripts/analysis/relaxtime/plot_t200_detm_im_upstream_term_switch.py`
-  4. 图：`docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_term_switch.png`
+  4. 图：`docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_detM_im_term_switch.png`
   5. 表：
      - `D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_upstream_term_switch_trace.csv`
      - `D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_upstream_term_switch_summary.csv`
@@ -691,7 +691,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 - 新增产物：
   1. 数据脚本：`scripts/analysis/relaxtime/t200_m08_re_zero_cross_trace.jl`
   2. 绘图脚本：`scripts/analysis/relaxtime/plot_t200_m08_re_zero_cross.py`
-  3. 图：`docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
+  3. 图：`docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
   4. 汇总：`D:\Desktop\Temp\relaxtime_t200_window\t200_m08_re_zero_cross_summary.csv`
   5. 细表：`D:\Desktop\Temp\relaxtime_t200_window\t200_m08_re_zero_cross_trace.csv`
 
@@ -711,7 +711,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 
 - 你提到“横坐标改线性是否更好”这个建议成立：
   1. 已补充线性横轴版本图：
-     `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross_linear_x.png`；
+     `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross_linear_x.png`；
   2. 同时保留原对数横轴图用于全尺度可见性；
   3. 在线性图中加入 `Δs∈[8,16]` 的局部线性拟合（每条 `xi` 单独拟合），
      用于直观看 `Re(M08)` 在过零邻域的近线性段与交点位置。
@@ -719,7 +719,7 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
 ## 27) 图像“损坏”问题复盘与线性聚焦图修复说明
 
 - 现象：
-  1. `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
+  1. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
      在部分查看器中无法打开，表现为“疑似损坏”；
   2. 线性图 `..._linear_x.png` 可正常打开。
 
@@ -742,9 +742,9 @@ julia --project=. scripts/analysis/relaxtime/t200_imag_path_evidence.jl
   4. 线性模式下改为 x/y 轴均线性，并自动聚焦 `Re(M08)` 过零邻域。
 
 - 修复后产物：
-  1. `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross_linear_x.png`
+  1. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross_linear_x.png`
      （x/y 线性 + 过零邻域聚焦）；
-  2. `docs/analysis/relaxtime/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
+  2. `docs/analysis/relaxtime/transport/t200_tauu_spikes/tauu_pos_uubaruubar_uubar_to_uubar_reM08_zero_cross.png`
      （log 版同步修复后可正常打开）。
 
 - 对图中 `M08 formula residual` 的定义与意义：
