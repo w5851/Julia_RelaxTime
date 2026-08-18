@@ -1,0 +1,9 @@
+claim_id,claim,status,evidence,boundary
+global_surface_topology,Current C2 finite boundary and crossover outputs form a globally inspectable diagnostic surface,supported,figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png,line-only native support view; no surface fill or gap connector
+unresolved_status_visible,C2 grid unresolved records are visible as status markers rather than silently discarded,not_plotted_but_retained_in_table,tables/maxwell_surface_point_status.csv,display mode does not close certificates
+cep_bracket_semantics,"CEP information is represented as bracket projections and midpoints, not a certified single-valued CEP line",supported,figures/plot_manifest.json,mu_q projection uses last first-order point
+response_peak_physical_filter,Response peaks above the per-xi CEP chemical-potential proxy are not plotted as physical crossover,supported,tables/crossover_physical_filter.csv,CEP proxy remains bracket-derived and is not a certified CEP line
+crossover_sampling_gap,Near-CEP crossover gaps are retained as native sampling gaps and are not implicitly connected,supported,tables/crossover_cep_sampling_gap.csv,gap size reflects discrete response-peak sampling and CEP proxy filtering
+crossover_endpoint_separation,"In every shared xi slice, the lowest retained crossover temperature is above the highest retained Maxwell temperature",supported,tables/crossover_maxwell_endpoint_separation.csv,discrete endpoint separation only; not a proof of CEP closure
+phase_reference_promotion,The global figure alone authorizes phase-reference promotion,blocked,tables/maxwell_grid_status_counts.csv,local Maxwell/geometry gates remain unresolved
+unresolved_maxwell_diagnostic_semantics,Unresolved grid rows may retain partial Maxwell diagnostics but are not boundary points,supported,tables/grid_unresolved_diagnostics.csv,only finite converged boundary rows are plotted as Maxwell support

@@ -1,0 +1,10 @@
+gate,automatic_status,manual_overlay_status,evidence
+boundary_finite_converged_unique,pass,not_applicable,C2 boundary CSV
+crossover_finite_converged_unique,pass,not_applicable,C2 crossover CSV
+solver_scan_failed_points_zero,pass,not_applicable,C2 phase diagnostics and validation
+automatic_grid_unresolved_zero,fail,not_overridden,C2 phase_grid_convergence CSV
+automatic_classification_regressions_zero,fail,manual_oracle_acceptance_only,C1/C2 regression table plus nine-point overlay
+automatic_cep_width_leq_0.1_MeV,fail,closed_by_author_review,C2 CEP CSV plus manual CEP overlay
+nine_oracle_curve_review_complete,not_applicable,accepted,nine-point manual review package
+matched_C1_C2_physical_stability,pass,not_applicable,C1/C2 geometry drift summary
+unresolved_rows_all_geometry_only,fail,not_overridden,derived unresolved reason classification

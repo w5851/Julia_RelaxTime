@@ -1,0 +1,9 @@
+artifact,metric,matched_count,max_abs_diff,max_rel_diff,gate,status
+boundary,area_residual,1322,9.896816103054135e-06,55.19489367886512,5e-05,pass
+boundary,mu_transition_MeV,1322,7.970216006469855e-05,2.489750611882131e-07,0.025,pass
+boundary,rho_hadron,1322,9.169642611928097e-05,0.0019666624956901414,0.0025,pass
+boundary,rho_quark,1322,6.106408778228101e-05,3.329564328743276e-05,0.0025,pass
+spinodals,mu_spinodal_hadron_MeV,1322,5.885292438279066e-05,1.750667225524304e-07,not_applicable,pass
+spinodals,mu_spinodal_quark_MeV,1322,0.0006550704771370874,1.9416854855716335e-06,not_applicable,pass
+spinodals,rho_spinodal_hadron,1322,0.0021902413068088933,0.0015336481798224196,not_applicable,pass
+spinodals,rho_spinodal_quark,1322,0.002410370989309518,0.0012501113720892153,not_applicable,pass

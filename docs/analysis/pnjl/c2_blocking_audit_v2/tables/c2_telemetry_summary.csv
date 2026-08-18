@@ -1,0 +1,12 @@
+metric,value
+cache_hits,4397841
+failed_points,0
+point_requests,9811635
+scan_failure,0
+scan_success,5413794
+scan_total,5413794
+targeted_additions,36939
+unique_solves,5413794
+telemetry_shards,93
+telemetry_unavailable_shards,0
+geometry_missing_records,55

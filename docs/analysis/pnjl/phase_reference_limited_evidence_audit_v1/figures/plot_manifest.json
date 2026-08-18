@@ -1,0 +1,33 @@
+{
+  "schema_version": "pnjl_phase_reference_limited_evidence_audit_plots_v1",
+  "figures": [
+    {
+      "path": "figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png",
+      "xi": -0.4375,
+      "T_MeV": 145.0625,
+      "input_sha256": "9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590",
+      "sha256": "52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87"
+    },
+    {
+      "path": "figures/rho_mu_xi_m0p4875_T_55_raw_audit.png",
+      "xi": -0.4875,
+      "T_MeV": 55.0,
+      "input_sha256": "9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590",
+      "sha256": "c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2"
+    },
+    {
+      "path": "figures/rho_mu_xi_0p5_T_107_raw_audit.png",
+      "xi": 0.5,
+      "T_MeV": 107.0,
+      "input_sha256": "9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590",
+      "sha256": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c"
+    },
+    {
+      "path": "figures/rho_mu_xi_m0p5_T_5_raw_audit.png",
+      "xi": -0.5,
+      "T_MeV": 5.0,
+      "input_sha256": "9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590",
+      "sha256": "89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7"
+    }
+  ]
+}

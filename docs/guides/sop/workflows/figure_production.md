@@ -45,6 +45,18 @@
 - 缺失 support、失败点和 unresolved 区域必须断线、mask 或排除；不得隐式插值跨越 gap。
 - strict 只接受输入侧已经确认、有限、无重复键且 support 合格的 series。
 
+### 4.1 PNJL 三维相图的物理筛选
+
+PNJL 的三维相图必须先做物理状态筛选，再做三角化和视觉排版：
+
+- 原始序参量偏导峰（response peak）只是数值候选，不自动等于 crossover；只有位于同一 `xi` 切片的 CEP 化学势侧、且不落入 Maxwell 一阶区的峰，才可绘制为物理 crossover 面。
+- 同一 `(xi, mu_q)` 不能同时标记为 crossover 和 Maxwell。若 `mu_q > mu_CEP`，该处即使仍有偏导峰，也只保留在筛选表/诊断数据中，不绘制为 crossover；该区域的物理面只保留 Maxwell。
+- CEP 只有在 strict gate 通过后才能作为 confirmed endpoint。只有温度 bracket 时，图上使用 bracket 或 `estimated_midpoint` 语义，不能把中点写成单值 CEP。
+- 高于 CEP 的响应峰不得用灰色叉号混入物理 crossover 面。若为 audit 需要展示，必须置于独立 diagnostic overlay；论文候选图直接排除。
+- 端点附近若相邻原生采样点跨过 CEP 筛选边界，保留采样 gap 并在 manifest/派生表记录；不得跨 gap 隐式补线或把两侧面误连为一个面。
+- 仅用于作者视觉判断的 `visualization-only closed` 模式可以把 finite/converged 但 geometry/interpolation 未闭合的 Maxwell 行统一绘成同一颜色，并在 manifest 明确声明 display-only 三角化上限；这只是显示连接，不生成缺失数据、不放宽门禁，也不能进入 strict 或 phase-reference promotion。
+- 若需要判断空洞是否由三角网格造成，应使用 `diagnostic_no_triangulation` v5：Maxwell/crossover 只绘制原生有序 support 的相邻线段，超过采样门限的 gap 保持断开；该模式不填面、不生成合成点，也不把 unresolved 诊断升级为 Maxwell boundary。
+
 ## 5. 输入配置及优先级
 
 绘图输入优先级为：
@@ -81,6 +93,7 @@
 - `audit` 可以展示失败、unresolved、support gap、residual 和 mask。
 - `estimated_midpoint` 只能在输入提供明确 bracket/上下界时生成，并记录 midpoint 计算规则。
 - `strict` 拒绝 unresolved、nonconverged、未确认 CEP、bracket-only endpoint、隐式 interpolation、外推和 connector。
+- `visualization-only closed` 只允许用于诊断全局拓扑：finite/converged 的 Maxwell 行可统一着色，但原始 unresolved 状态必须保留在表格和 manifest 中，且不得被解释为证书通过。
 - literature comparison 的模型插值只允许留在 `audit`/`legacy`；strict 只画原始模型 support 点。
 
 ## 9. 正式计算命令
@@ -113,6 +126,8 @@ data/outputs/figures/<domain>/<figure_family>/<case_slug>__plotv1__strict/
 | `estimated_midpoint` | supplement/内部 review；可以显示 bracket 和 midpoint，但不能称为 confirmed CEP。 |
 | `strict` | 正文定稿候选；只含已确认、有限、support 合格的物理 series，默认 SVG + 600 dpi PNG。 |
 | `legacy` | 历史兼容；保持原图、原脚本、原单位、原 connector 和原输出语义，不自动迁移。 |
+
+`visualization-only closed` 不是第五种物理状态，而是 `audit` 的一个显示子模式；它只统一 Maxwell 的视觉颜色，不能改变四层语义或晋升资格。
 
 所有新图必须有 `plot_manifest.json`，至少包含：`figure_mode`、`style_profile`、输入 hash、generator/hash、Git commit、calculation/postprocess/source provenance、axes 单位和 transform、series state、support/mask 规则、interpolation/connector policy、输出 hash、DPI/vector 和 layout 记录。
 

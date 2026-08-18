@@ -1,0 +1,10 @@
+xi,T_MeV,status,reason
+-0.35,51,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+-0.25,41,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+-0.2,41,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+-0.15,41,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+-0.1,41,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+0,51,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+0.3,21,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+0.35,51,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points
+0.35,101,not_available,current aggregate artifact retains reference CSVs but no raw rho-mu curve points

@@ -946,8 +946,10 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   ledger。`cross_axis_audit` 在缺少完整原始几何表时返回 `cross_axis_input_missing`，
   不把缺失输入解释成零失败。
 - [ ] focused CI 通过后创建 ready PR；合并前不 dispatch 数值。合并后第一轮只运行
-  `scope=regression_curves`，再根据 9 个原始曲线/候选/geometry overlay 决定是否授权
-  `cep_brackets`；不重跑 C0/C1/C2，不晋升 reference，不启动 C3/O1 或 transport。
+  `scope=regression_curves` 并审核 9 个原始曲线/候选/geometry overlay；T 方向
+  `cep_brackets` 已由独立人工 overlay 完成，不再重复 dispatch。后续 μ endpoint
+  refinement 另按独立 task 先做 solver-free preflight；不重跑 C0/C1/C2，不晋升
+  reference，不启动 C3/O1 或 transport。
 - [x] PR #223 已 squash merge，merge SHA 为
   `d5114cbe8079665f6ab0388fcea7bd7eb10c76a8`。首轮 numerical run
   `31940646569` 在求解前因 targeted wrapper 将 `findfirst` 返回的整数索引误当作
@@ -987,3 +989,16 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `cep_brackets`，也不重跑 C0/C1/C2、不晋升 reference、不启动 C3/O1 或 RS transport。
   下一步需要作者决定是否对这 9 点开窄范围 Stage-C geometry/point-ranking audit；当前证据
   不支持把 hybrid ambiguous 改写成生产 first-order 证书。
+
+### CEP T-direction manual closure (2026-08-17)
+
+- [x] C2 失败的三个固定 CEP 切片已通过不可变人工审核 overlay 收口；证据目录为
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\cep_manual_bisection_audit_v2_31999149922`。
+  `author_decision_overlay_v2.json` 记录 `author_review_complete_for_fixed_slices=true`，
+  三个 bracket 均为 `0.0625 MeV`，`remaining_manual_decisions=0`。
+- [x] `xi=0.5` 的高侧温度扩展由 run `32011954899` / aggregate `32014476047`
+  提供；`107.125/107.1875/107.25 MeV` 均接受为 crossover 侧，最终 bracket 为
+  `[107.0625,107.125] MeV`。
+- [x] 该 overlay 只关闭固定切片的诊断 bracket，不修改历史 C2、reference 或
+  transport，也不把 bracket 中点升级为单值 CEP；原 `cep_brackets` numerical scope
+  不再重复运行。

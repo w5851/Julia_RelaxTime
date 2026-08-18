@@ -1,0 +1,128 @@
+{
+  "schema_version": "pnjl_c2_blocking_audit_v2",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "postprocess_sha": "fd359e792a89beb5ab12349bba761dc58ee16761",
+  "source_runs": {
+    "c1": "31762201725",
+    "c2": "31862752226"
+  },
+  "source_tags": {
+    "c1": "issue130_stagec_density_v2_c1_integral_tight_20260813",
+    "c2": "issue130_stagec_density_v2_c2_grid_tight_20260813"
+  },
+  "source_urls": {
+    "c1": "https://github.com/w5851/Julia_RelaxTime/actions/runs/31762201725",
+    "c2": "https://github.com/w5851/Julia_RelaxTime/actions/runs/31862752226"
+  },
+  "excluded_runs": [
+    {
+      "run": "31862709047",
+      "reason": "plan stage failed before numerical jobs; no C2 evidence used"
+    }
+  ],
+  "input_files": [
+    {
+      "stage": "c1",
+      "run": "31762201725",
+      "artifact": "boundary",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/c1_complete_acceptance_31762201725_attempt2/reference/boundary_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "ddeb68d5f95fecb4206fc75ab835335f42a20202b41d85cea16aad0f89545723"
+    },
+    {
+      "stage": "c1",
+      "run": "31762201725",
+      "artifact": "cep",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/c1_complete_acceptance_31762201725_attempt2/reference/cep_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "75de4c75652ebb11b72dbb32b2b93e60a58755425abfbd85d5672d86971aa74d"
+    },
+    {
+      "stage": "c1",
+      "run": "31762201725",
+      "artifact": "spinodals",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/c1_complete_acceptance_31762201725_attempt2/reference/spinodals_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "b1e3e01aee4bf9fdbd7279951e7473e5dd4033a3811610c0b0424fb973572833"
+    },
+    {
+      "stage": "c1",
+      "run": "31762201725",
+      "artifact": "crossover",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/c1_complete_acceptance_31762201725_attempt2/reference/crossover_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "727680dced000a15f20aa6b469d76473d76a7c6a67f2a499a6bc3ecce15e89dc"
+    },
+    {
+      "stage": "c1",
+      "run": "31762201725",
+      "artifact": "grid_convergence",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/c1_complete_acceptance_31762201725_attempt2/reference/phase_grid_convergence_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "70d5f75436569ecf1531ca9deee063ffd99d9bcdb8694b8424b933705a38ae31"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "boundary",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "cep",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "spinodals",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "crossover",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "grid_convergence",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "validation_report",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/validation_report.json",
+      "sha256": "741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a"
+    },
+    {
+      "stage": "c2",
+      "run": "31862752226",
+      "artifact": "phase_diagnostics",
+      "path": "D:/Desktop/Julia_RelaxTime_issue130_artifacts/stagec_density_v2_c2_20260813_run31862752226/reference/phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json",
+      "sha256": "adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe"
+    }
+  ],
+  "comparator": {
+    "script": "D:/Desktop/Julia_RelaxTime/scripts/analysis/pnjl/compare_phase_reference_convergence.py",
+    "script_sha256": "57769220770e3a46bb3415c07cdd39445fe104323d0f4ec00478bf3c7ea9e161",
+    "summary": "tables are derived from public xi/T key matching; no solver call",
+    "verdict": "classification_regression"
+  },
+  "solver_called": false,
+  "raw_curve_evidence": "not_retained_in_current_aggregate",
+  "generated_at_utc": "2026-08-16T02:44:30.677886+00:00",
+  "generator": {
+    "script": "D:/Desktop/Julia_RelaxTime/scripts/analysis/pnjl/build_c2_blocking_audit_v2.py",
+    "script_sha256": "01a96e68b2264942f6e11ad408e78ae9cdc7c98b39eea65c972a86d1bbaac5b8"
+  },
+  "derived_counts": {
+    "classification_regressions": 9,
+    "cep_bracket_failures": 3,
+    "grid_unconverged": 5424,
+    "grid_failure_reason_kinds": 10
+  }
+}

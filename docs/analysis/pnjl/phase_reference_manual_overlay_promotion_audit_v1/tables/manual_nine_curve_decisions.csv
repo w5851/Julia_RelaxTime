@@ -1,0 +1,10 @@
+target_id,xi,T_MeV,oracle_status,oracle_candidate_count,oracle_crossing_count,oracle_geometry_converged,finite_and_converged,author_decision,production_override
+xi_0p00_T51,0.0,51.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_0p30_T21,0.3,21.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_0p35_T101,0.35,101.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_0p35_T51,0.35,51.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_m0p10_T41,-0.1,41.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_m0p15_T41,-0.15,41.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_m0p20_T41,-0.2,41.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_m0p25_T41,-0.25,41.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false
+xi_m0p35_T51,-0.35,51.0,confirmed_first_order,1,3,true,True,accepted_oracle_observation,false

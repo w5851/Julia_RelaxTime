@@ -1,0 +1,11 @@
+reason,category,row_count,rho_count,temperature_count,xi_count,safe_for_limited_overlay,note
+classification_changed_or_unresolved:invalid->unknown,classification_transition,2,2,0,0,False,requires separate evidence or remains a promotion blocker
+classification_changed_or_unresolved:invalid->valid,classification_transition,10,10,0,0,False,requires separate evidence or remains a promotion blocker
+classification_changed_or_unresolved:unknown->unknown,classification_transition,2,2,0,0,False,requires separate evidence or remains a promotion blocker
+classification_changed_or_unresolved:unknown->valid,classification_transition,19,19,0,0,False,requires separate evidence or remains a promotion blocker
+classification_changed_or_unresolved:valid->unknown,classification_transition,6,6,0,0,False,requires separate evidence or remains a promotion blocker
+geometry_tolerance_exceeded,geometry_interpolation_diagnostic,2395,2395,0,0,True,geometry/interpolation-only diagnostic; does not prove full-grid convergence
+hybrid_stage_c_not_converged,hybrid_stage_c_unresolved,272,272,0,0,False,requires separate evidence or remains a promotion blocker
+interpolation_tolerance_exceeded,geometry_interpolation_diagnostic,708,0,680,28,True,geometry/interpolation-only diagnostic; does not prove full-grid convergence
+ok,unresolved_unclassified,452,452,0,0,False,requires separate evidence or remains a promotion blocker
+rho_geometry_not_converged,geometry_interpolation_diagnostic,1558,1558,0,0,True,geometry/interpolation-only diagnostic; does not prove full-grid convergence

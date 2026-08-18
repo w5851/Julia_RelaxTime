@@ -1,0 +1,25 @@
+{
+  "schema_version": "pnjl_phase_reference_limited_evidence_audit_v1",
+  "generated_at_utc": "2026-08-18T02:48:10.263191+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "production_override": false,
+  "verdict": "raw_curve_coverage_complete_diagnostic_only",
+  "promotion_effect": "none",
+  "scope": {
+    "c2_unresolved_rows": 763,
+    "unique_coordinates": 761,
+    "raw_curve_rows_per_coordinate": 1281,
+    "reason_classes": [
+      "classification_transition",
+      "hybrid_stage_c_unresolved",
+      "mixed_reasons",
+      "unresolved_unclassified"
+    ]
+  },
+  "shape_counts": {
+    "s_shape_present": 761
+  },
+  "interpretation_boundary": "A raw S-shape is evidence that a first-order topology is present in the independent curve; it is not a Maxwell/geometry certificate and cannot replace the hybrid result."
+}

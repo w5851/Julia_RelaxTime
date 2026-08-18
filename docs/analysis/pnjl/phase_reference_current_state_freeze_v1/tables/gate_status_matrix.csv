@@ -1,0 +1,11 @@
+gate,status,evidence,meaning,blocking
+primary_curve_finite_converged,pass,C2 boundary/spinodals/crossover,主曲线可用于诊断绘图,no
+full_hybrid_24_anchor,pass_candidate,full_hybrid_shadow_v4 manifest/AUDIT,自动 shadow 候选通过,promotion still blocked
+grid_refinement_certificate,unresolved,phase_grid_convergence: 5424 unresolved,不能把所有 unresolved 行当作 Maxwell boundary,yes for strict reference
+raw_unresolved_curve_coverage,diagnostic_complete,phase_reference_limited_evidence_audit_v1,761 条 raw curves finite/converged; topology only,does not close certificate
+targeted_nine_automatic_overlay,inconclusive,classification_overlay.csv: 9/9 match=false,hybrid/oracle 自动分类仍不一致,yes for automatic promotion
+targeted_nine_author_visual_review,accepted_diagnostic,author review of temporary rho-mu plots,可作为人工诊断事实,not a replacement gate
+cep_fixed_t_manual_overlay,pass_diagnostic,author_decision_overlay_v2.json,3 brackets closed at 0.0625 MeV,does not create a single CEP
+mu_endpoint_refinement,not_run,2026-08-18 CEP mu task,等待 solver-free target-list/cost preflight,next planned diagnostic
+phase_reference_write,blocked,task_tracks.toml + claim ledger,当前没有 strict production reference,yes
+rs_transport,blocked,task_tracks.toml,依赖 phase reference promotion,yes

@@ -1,0 +1,19 @@
+grid_status,row_count,interpretation
+automatic_grid_pass,2815,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded,742,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged,289,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded,123,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged,356,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded,2,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded,2,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded,137,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded,14,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded,4,C2 diagnostic status overlay; no production override
+rho:geometry_tolerance_exceeded|xi:interpolation_tolerance_exceeded,344,C2 diagnostic status overlay; no production override
+rho:rho_geometry_not_converged,146,C2 diagnostic status overlay; no production override
+rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded,23,C2 diagnostic status overlay; no production override
+rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded,14,C2 diagnostic status overlay; no production override
+rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded,71,C2 diagnostic status overlay; no production override
+temperature:interpolation_tolerance_exceeded,427,C2 diagnostic status overlay; no production override
+temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded,179,C2 diagnostic status overlay; no production override
+xi:interpolation_tolerance_exceeded,1198,C2 diagnostic status overlay; no production override

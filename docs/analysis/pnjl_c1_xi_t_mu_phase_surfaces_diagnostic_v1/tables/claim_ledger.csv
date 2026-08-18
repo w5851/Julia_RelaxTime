@@ -1,0 +1,4 @@
+claim_id,claim_type,status,claim,evidence_file,evidence_field
+OBS-MAXWELL-SURFACE,observation,candidate,"C1 converged boundary rows define a diagnostic Maxwell coexistence surface in (xi,T,mu).",boundary_issue130_stagec_density_v2_c1_integral_tight_20260813.csv,"xi,T_MeV,mu_transition_MeV,converged"
+OBS-CROSSOVER-SURFACE,observation,candidate,"C1 converged peak-crossover rows define a diagnostic pseudocritical surface in (xi,T,mu).",crossover_issue130_stagec_density_v2_c1_integral_tight_20260813.csv,"xi,mu_MeV,T_crossover_MeV,converged"
+LIMIT-C1-CONVERGENCE,boundary,author_check,The surfaces are not a formal phase-reference claim because the C1 grid convergence artifact contains unresolved records and CEP is ambiguous.,phase_grid_convergence_issue130_stagec_density_v2_c1_integral_tight_20260813.csv,"axis,converged,reason"
