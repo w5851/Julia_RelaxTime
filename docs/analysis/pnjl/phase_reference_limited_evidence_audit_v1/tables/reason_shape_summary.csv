@@ -1,0 +1,4 @@
+reason_class,oracle_shape_observation,coordinate_count,row_count,attribution_status,note
+classification_transition,s_shape_present,39,39,candidate_stage_c_or_certificate_issue,diagnostic attribution only; hybrid/C2 labels are unchanged
+hybrid_stage_c_unresolved,s_shape_present,272,272,candidate_stage_c_or_certificate_issue,diagnostic attribution only; hybrid/C2 labels are unchanged
+unresolved_unclassified,s_shape_present,452,452,candidate_stage_c_or_certificate_issue,diagnostic attribution only; hybrid/C2 labels are unchanged

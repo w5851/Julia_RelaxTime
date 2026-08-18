@@ -1,0 +1,6 @@
+negative_slope_threshold,coordinates_with_min_smoothed_slope_below_threshold,coordinate_total,note
+-1e-05,761,761,sensitivity of the raw topology observation; production tolerances are not changed
+-0.0001,761,761,sensitivity of the raw topology observation; production tolerances are not changed
+-0.001,761,761,sensitivity of the raw topology observation; production tolerances are not changed
+-0.01,755,761,sensitivity of the raw topology observation; production tolerances are not changed
+-0.1,721,761,sensitivity of the raw topology observation; production tolerances are not changed
