@@ -156,14 +156,27 @@ evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2
 id = "issue130-mu-endpoint-refinement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "triaged"
+status = "review"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md"
-reason = "C2 v5 显示 crossover 与 Maxwell 在 CEP 附近存在由原生 mu 采样和端点物理筛选共同造成的系统性 gap；普通全局插值不能跨越 CEP。"
-next_action = "先生成 solver-free μ target-list/cost preflight；经作者授权后运行四个代表 xi 的 numerical pilot，再决定是否扩展全部 xi。"
+reason = "C2 v5 显示 crossover 在 CEP 附近存在原生 mu sampling gap；本任务只补 crossover 物理侧，Maxwell geometry/unresolved gap 由独立 companion task 处理。"
+next_action = "审核 crossover μ target-list/cost preflight；明确授权后才运行四个代表 xi 的 numerical pilot，再决定是否扩展全部 xi。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
+
+[[items]]
+id = "issue130-maxwell-cep-local-refinement"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "review"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md"
+reason = "C2 v5 Maxwell boundary 仍有 CEP 近端 support/geometry unresolved 行；crossover μ endpoint 补点不改变固定 (xi,T) Maxwell rho geometry。"
+next_action = "审核 Maxwell target-list/cost preflight；明确授权后才运行 11 个代表性 pilot 目标，276 个 input_incomplete 行不得自动补算。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md"]
 
 [[items]]
 id = "plot-sop-independent-land"
