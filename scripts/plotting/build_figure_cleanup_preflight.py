@@ -38,7 +38,7 @@ DELETE_ROOTS = [
 
 MOVE_FILES = {
     **{
-        Path("data/outputs/figures/relaxtime/literature") / name: Path("docs/analysis/relaxtime/literature_comparison") / name
+        Path("data/outputs/figures/relaxtime/literature") / name: Path("docs/analysis/relaxtime/historical/literature_comparison") / name
         for name in (
             "k_mass_literature_julia_fortranmott_comparison.png",
             "meson_mass_julia_vs_literature_comparison.png",
@@ -48,13 +48,13 @@ MOVE_FILES = {
         )
     },
     Path("data/outputs/figures/relaxtime/validation/mixed_identity_track_fortran_swap_compare_muB600.png"):
-    Path("docs/analysis/relaxtime/validation/mixed_identity_track_fortran_swap_compare_muB600.png"),
+    Path("docs/analysis/relaxtime/historical/validation/mixed_identity_track_fortran_swap_compare_muB600.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/overlay_kminus_piminus_mu_pi_100.png"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/overlay_kminus_piminus_mu_pi_100.png"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/overlay_kminus_piminus_mu_pi_100.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/residual_kminus_piminus_mu_pi_100.png"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/residual_kminus_piminus_mu_pi_100.png"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/residual_kminus_piminus_mu_pi_100.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/plot_manifest.json"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/plot_manifest.json"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/plot_manifest.json"),
 }
 
 RENAME_ROOTS = {

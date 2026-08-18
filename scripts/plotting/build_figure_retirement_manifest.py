@@ -32,7 +32,7 @@ FREEZEOUT_MANIFEST_SOURCE_PREFIX = (
     "freezeout_kminus_piminus_mu_pi_100/"
 )
 FREEZEOUT_MANIFEST_DEST_PREFIX = (
-    "docs/analysis/relaxtime/meson_density/"
+    "docs/analysis/relaxtime/historical/meson_density/"
     "freezeout_kminus_piminus_mu_pi_100_analysis/"
 )
 

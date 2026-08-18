@@ -27,9 +27,9 @@ v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_
 
 | 逻辑类别 | 当前路径 | 语义 |
 | --- | --- | --- |
-| literature comparison | `literature_comparison/` | 文献 target 对照和历史插值比较，不是 strict validation gate |
-| meson-density plot review | `meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/` | freeze-out workflow 与 digitized target 的人工 plot review |
-| Julia/Fortran validation history | `validation/` | 历史 swap-validated 对照图，不是当前 regression truth |
+| literature comparison | `historical/literature_comparison/` | 文献 target 对照和历史插值比较，不是 strict validation gate |
+| meson-density plot review | `historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/` | freeze-out workflow 与 digitized target 的人工 plot review |
+| Julia/Fortran validation history | `historical/validation/` | 历史 swap-validated 对照图，不是当前 regression truth |
 
 这些目录有保存价值，但应在总索引中标为 `historical`，不应和当前 phase-guided transport 机制包混合。
 
