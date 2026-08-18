@@ -1,0 +1,47 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "files": {
+    "README.md": "94523150d07e19f60cf2b0ee5209562816545ab9f28d2f7d96854c7465aac944",
+    "tables/claim_ledger.csv": "0e9b2dd1008cf3f339edb5164e2fbea2c35ffab5514f0ba7ca83457dae1103a6",
+    "tables/cost_envelope.csv": "a72de49b56b48e035349a83d57e48b4500626f62159dd9b3e4b86f433e52bdde",
+    "tables/preflight_summary.json": "f596eba5559b5a1aec2545d01cc96d84cb0997c1cb569ceb0bfb91c7a5af1cf4",
+    "tables/target_list.csv": "5409649cd6f2a4acfe27a81ce58ba153052dc66334faff65f19d0409c894e9ea"
+  },
+  "generated_at_utc": "2026-08-18T11:55:29.211754+00:00",
+  "policy": {
+    "base_rho_keys_per_target": 641,
+    "representative_xi": [
+      -0.5,
+      0.0,
+      0.2875,
+      0.5
+    ],
+    "rho_base_step": 0.00625,
+    "rho_max": 4.0
+  },
+  "reference_write": false,
+  "route": "crossover_mu",
+  "run_mode": "solver_free_preflight",
+  "schema_version": "pnjl_issue130_endpoint_refinement_preflight_v1",
+  "solver_called": false,
+  "source_hashes": {
+    "tables/crossover_cep_sampling_gap.csv": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+    "tables/crossover_maxwell_endpoint_separation.csv": "9811c473dccf3c5a6a1fae461e3afa04954ad1a4fd462695703b340bce037fe8",
+    "tables/grid_unresolved_diagnostics.csv": "ab0640f7ee7d7cd503095d66e7a5c061371af82ad7c0be559f874940c49497fc",
+    "tables/maxwell_surface_point_status.csv": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+    "v5_manifest.json": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6"
+  },
+  "source_run_id": "31862752226",
+  "summary": {
+    "fractions": [
+      0.5,
+      0.75
+    ],
+    "invalid_interval_rows": 0,
+    "representative_pilot_target_count": 8,
+    "source_rows": 93,
+    "target_count": 186,
+    "valid_xi_rows": 93
+  },
+  "verdict": "crossover_mu_target_list_ready_cost_unmeasured"
+}

@@ -1,0 +1,67 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "files": {
+    "README.md": "43d2cb5505f9fea840adff7f78d733423953979082d56822ab08d70b40e3bff6",
+    "crossover_mu/README.md": "94523150d07e19f60cf2b0ee5209562816545ab9f28d2f7d96854c7465aac944",
+    "crossover_mu/manifest.json": "db6d2732f34d9236338c32d28a7b8cf1422524aabaad3de80ac8627e5aec308a",
+    "crossover_mu/tables/claim_ledger.csv": "0e9b2dd1008cf3f339edb5164e2fbea2c35ffab5514f0ba7ca83457dae1103a6",
+    "crossover_mu/tables/cost_envelope.csv": "a72de49b56b48e035349a83d57e48b4500626f62159dd9b3e4b86f433e52bdde",
+    "crossover_mu/tables/preflight_summary.json": "f596eba5559b5a1aec2545d01cc96d84cb0997c1cb569ceb0bfb91c7a5af1cf4",
+    "crossover_mu/tables/target_list.csv": "5409649cd6f2a4acfe27a81ce58ba153052dc66334faff65f19d0409c894e9ea",
+    "maxwell_local/README.md": "757561eb7cf604a110c8bc582345594096790d24992501752a8f49c1bc8e548f",
+    "maxwell_local/manifest.json": "680b4fb484ee33ed02bbe41ea72965a5fec39ecf5c94d53408cf36d5897f905b",
+    "maxwell_local/tables/claim_ledger.csv": "eddbc0395b3180123c0f10043a5edf8e3f3672761e0a7811c9327f0c6fdf0ba4",
+    "maxwell_local/tables/cost_envelope.csv": "f58b174b48c65666f59b2aac66cfb55acab6e54784d52ea46f654e5cdd247c75",
+    "maxwell_local/tables/preflight_summary.json": "86bf53abcfe8092a5a14a7240c10a122d125af39ea8cf440015b907323744385",
+    "maxwell_local/tables/target_list.csv": "9815c773b1bd0c0091db915e72c11908f5a518faae7982d646333a4e2cead863"
+  },
+  "generated_at_utc": "2026-08-18T11:55:29.398080+00:00",
+  "pilot_authorization": "pending",
+  "reference_write": false,
+  "repo_head": "ccc13a837c38443b92203f0c4973842c4823f54e",
+  "routes": {
+    "crossover_mu": {
+      "fractions": [
+        0.5,
+        0.75
+      ],
+      "invalid_interval_rows": 0,
+      "representative_pilot_target_count": 8,
+      "source_rows": 93,
+      "target_count": 186,
+      "valid_xi_rows": 93
+    },
+    "maxwell_local": {
+      "candidate_count": 760,
+      "cep_window_below_bracket_low_MeV": 8.0,
+      "eligible_existing_boundary_targets": 484,
+      "input_incomplete_targets": 276,
+      "non_unresolved_maxwell_rows": 2815,
+      "outside_window_unresolved_rows": 3587,
+      "reason_counts": {
+        "input_incomplete": 276,
+        "mixed_geometry_interpolation": 69,
+        "rho_geometry": 57,
+        "temperature_interpolation": 221,
+        "xi_interpolation": 137
+      },
+      "representative_pilot_target_count": 11,
+      "source_grid_rows": 5424,
+      "source_maxwell_rows": 6886,
+      "unkeyable_grid_rows": 28
+    }
+  },
+  "run_mode": "solver_free_preflight",
+  "schema_version": "pnjl_issue130_endpoint_refinement_preflight_v1",
+  "solver_called": false,
+  "source_hashes": {
+    "tables/crossover_cep_sampling_gap.csv": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+    "tables/crossover_maxwell_endpoint_separation.csv": "9811c473dccf3c5a6a1fae461e3afa04954ad1a4fd462695703b340bce037fe8",
+    "tables/grid_unresolved_diagnostics.csv": "ab0640f7ee7d7cd503095d66e7a5c061371af82ad7c0be559f874940c49497fc",
+    "tables/maxwell_surface_point_status.csv": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+    "v5_manifest.json": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6"
+  },
+  "source_run_id": "31862752226",
+  "verdict": "two_route_target_lists_ready_cost_unmeasured",
+  "workflow_head_sha": null
+}

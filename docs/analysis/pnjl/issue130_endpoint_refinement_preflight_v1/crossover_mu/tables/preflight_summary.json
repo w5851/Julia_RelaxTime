@@ -1,0 +1,11 @@
+{
+  "fractions": [
+    0.5,
+    0.75
+  ],
+  "invalid_interval_rows": 0,
+  "representative_pilot_target_count": 8,
+  "source_rows": 93,
+  "target_count": 186,
+  "valid_xi_rows": 93
+}
