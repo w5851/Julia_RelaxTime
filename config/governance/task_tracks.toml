@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-17"
+updated_at = "2026-08-18"
 
 [[tracks]]
 id = "issue130-phase"
@@ -9,7 +9,7 @@ status = "review"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "作者审核 full_hybrid_candidate 的代表曲线、endpoint certificates、coverage 和 cost；审核前不得启动 reference promotion。"
+next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；继续审核 full_hybrid_candidate/v5 coverage，并先为 μ endpoint refinement 做 solver-free target-list/cost preflight，审核前不得启动 reference promotion。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
@@ -127,10 +127,23 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md"
 reason = "C2 full-hybrid evidence remains under author review; targeted raw-curve closure is an independent diagnostic overlay and cannot silently promote the phase reference."
-next_action = "Merge the focused workflow PR, then dispatch regression_curves first; inspect raw rho-mu/Maxwell/geometry evidence before authorizing CEP brackets."
+next_action = "保留已完成的 T 方向 CEP overlay，不再 dispatch cep_brackets；完成 regression_curves 状态审核后，转入 μ endpoint refinement 的 solver-free target-list/cost preflight。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md"]
+evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "run:31999149922", "run:32014476047"]
+
+[[items]]
+id = "issue130-mu-endpoint-refinement"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "triaged"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md"
+reason = "C2 v5 显示 crossover 与 Maxwell 在 CEP 附近存在由原生 mu 采样和端点物理筛选共同造成的系统性 gap；普通全局插值不能跨越 CEP。"
+next_action = "先生成 solver-free μ target-list/cost preflight；经作者授权后运行四个代表 xi 的 numerical pilot，再决定是否扩展全部 xi。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
 
 [[items]]
 id = "plot-sop-independent-land"
