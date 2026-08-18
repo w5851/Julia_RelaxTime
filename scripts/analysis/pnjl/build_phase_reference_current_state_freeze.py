@@ -283,7 +283,7 @@ def main() -> int:
         source_hashes.append({"id": name, "path": str(path), "sha256": sha256_file(path), "bytes": path.stat().st_size})
     repository_sources = [
         "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
-        "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
+        "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
         "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
         "docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json",
         "config/governance/task_tracks.toml",
@@ -294,7 +294,7 @@ def main() -> int:
             source_hashes.append({"id": relative, "path": str(path), "sha256": sha256_file(path), "bytes": path.stat().st_size})
 
     plot_entries = [
-        {"path": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png", "role": "C2 global native-support diagnostic", "source_manifest": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json"},
+        {"path": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png", "role": "C2 global native-support diagnostic", "source_manifest": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json"},
         {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png", "role": "full-shadow representative first-order curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
         {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png", "role": "full-shadow representative monotone curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
         {"path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/figures/rho_mu_xi_0p5_T_107_raw_audit.png", "role": "unresolved raw-curve diagnostic", "source_manifest": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json"},

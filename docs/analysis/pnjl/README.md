@@ -11,14 +11,14 @@
 | `mu_xi_T` view | [`c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/`](c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/) | C1 诊断相面，包含 CEP temperature bracket view |
 | `xi_T_mu` view | [`c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/`](c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/) | 同一 source run 的替代坐标投影 |
 
-两者共享 C1 source run 和部分 summary/claim 表，但坐标语义和图 manifest 不同。未来可以合并为一个 C1 case 的两个 view；当前保留原路径以维护 registry 和历史引用。
+两者共享 C1 source run 和部分 summary/claim 表，但坐标语义和图 manifest 不同；当前保留为两个独立 view 以维护各自的 provenance。
 
 ### C2 phase surfaces and audits
 
 | 逻辑子线 | 当前路径 | 状态/用途 |
 | --- | --- | --- |
-| surface versions | `c2_phase_surfaces_diagnostic_v1/` 到 `c2_phase_surfaces_diagnostic_v5_no_triangulation/` | 同一 C2 surface 线的版本化诊断；v5 是当前 native-support/no-triangulation 视图 |
-| visual variant | `c2_phase_surfaces_diagnostic_v4_visual_closed/`、`c2_phase_surfaces_diagnostic_v4_visual_closed_display16/` | v4 的视觉闭合和 display16 变体；不是 reference promotion |
+| surface versions | `c2_surface_views/c2_phase_surfaces_diagnostic_v1/` 到 `c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/` | 同一 C2 surface 线的版本化诊断；v5 是当前 native-support/no-triangulation 视图 |
+| visual variant | `c2_surface_views/c2_phase_surfaces_diagnostic_v4_visual_closed/`、`c2_surface_views/c2_phase_surfaces_diagnostic_v4_visual_closed_display16/` | v4 的视觉闭合和 display16 变体；不是 reference promotion |
 | convergence/blocking | `c2_convergence_audit_v1/`、`c2_blocking_audit_v2/` | C0/C1/C2 比较、阻塞原因和 unresolved 状态审计 |
 | review/follow-up | `c2_targeted_manual_review_v1/`、`c2_limited_feasibility_v1/`、`c2_cep_xi05_high_side_extension_v1/`、`c2_manual_bisection_v1/` | 人工复核、输入合同和后续补点，不是同一 surface case 的重复结果 |
 
@@ -44,7 +44,7 @@
 | manual overlay | `phase_reference_manual_overlay_promotion_audit_v1/` | manual CEP/curve overlay 的晋升阻塞审计 |
 | raw archive pointer | `raw_curve_archive_v1/` | 完整 raw curve 外部归档的 provenance 入口 |
 
-`phase_reference_*` 是汇总/决策层。它们可以引用下游 case，但不能取代下游 manifest、hash、失败点或 unresolved 语义。
+`phase_reference_*` 是汇总/决策层。它们可以引用下游 case，但不能取代下游 manifest、hash、失败点或 unresolved 语义。冻结包记录生成时的路径和 hash；本次 namespace 整理不重写这些历史快照。
 
 ## Reading Order
 

@@ -163,7 +163,7 @@ reason = "C2 v5 显示 crossover 与 Maxwell 在 CEP 附近存在由原生 mu �
 next_action = "先生成 solver-free μ target-list/cost preflight；经作者授权后运行四个代表 xi 的 numerical pilot，再决定是否扩展全部 xi。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "run:31999149922", "run:32014476047"]
 
 [[items]]
 id = "plot-sop-independent-land"
