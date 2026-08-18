@@ -1,0 +1,57 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v4",
+  "figure_mode": "visualization_only_closed_surface",
+  "orientation": "x=mu_q, y=xi, z=T",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "generator": {
+    "script": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\scripts\\analysis\\pnjl\\plot_c2_phase_surfaces_diagnostic.py",
+    "script_sha256": "00404da902af8f5db0995df02e1189cea697ebf1eb8eadad69b1979e2bfe3566"
+  },
+  "surface_policy": {
+    "maxwell": "all finite converged boundary rows; unresolved grid statuses rendered with the same blue surface color",
+    "crossover": "finite converged response peaks with mu_q <= the per-xi CEP chemical-potential proxy",
+    "excluded_response_peaks": "source crossover rows with mu_q above the per-xi last-first-order CEP proxy; retained in tables but not drawn",
+    "cep_mu_source": "prefer muq_CEP_MeV when finite; otherwise muq_last_first_order_MeV",
+    "cep": "explicit T bracket projected at muq_last_first_order; midpoint is not a CEP",
+    "interpolation": "triangulation only within explicit max gaps; no gap filling",
+    "closure_visualization_only": true,
+    "unresolved_rendering": "same blue Maxwell surface color; no status markers; no synthetic rows"
+  },
+  "triangle_limits": {
+    "max_dxi": 0.07,
+    "max_dT": 8.0,
+    "max_dmuq": 55.0
+  },
+  "inputs": {
+    "boundary": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748"
+    },
+    "spinodals": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8"
+    },
+    "crossover": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c"
+    },
+    "cep": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef"
+    },
+    "grid_convergence": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673"
+    },
+    "source_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json",
+      "sha256": "51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67"
+    }
+  },
+  "output": {
+    "path": "D:\\Temp\\julia_relaxtime_phase_reference_limited_evidence_audit\\docs\\analysis\\pnjl\\c2_phase_surfaces_diagnostic_v4_visual_closed\\figures\\c2_phase_surfaces_mu_xi_T_visual_closed.png",
+    "sha256": "c78de43cd8f4f0ea48e1d4d92acfc8d162eec475c420ff3c58ef937b36edeaab"
+  }
+}
