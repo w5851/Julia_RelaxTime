@@ -18,7 +18,7 @@ current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
-  "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
+  "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
   "run:31714535418",
 ]
 updated_at = "2026-08-15"
@@ -124,7 +124,7 @@ reason = "自动 gate 只产生 full_hybrid_candidate，不能替代作者审核
 next_action = "审核代表曲线、三个 endpoint 区间、coverage 和成本，并决定是否进入 reference promotion。"
 blocked_by = []
 backlog_file = ""
-evidence = ["run:31714535418", "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
+evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
 
 [[items]]
 id = "rs-production-after-phase-reference"

@@ -29,7 +29,7 @@
 | local CEP pilot | `cep_narrow_pilot_v1/`、`cep_narrow_pilot_v2/` |
 | Stage-C feasibility/replay | `cep_hybrid_stagec_offline_feasibility_v1/`、`cep_hybrid_stagec_certificate_feasibility_v2/`、`cep_hybrid_stagec_extrema_guard_feasibility_v1/`、`cep_hybrid_stagec_tolerance_replay_v1/` |
 | cascade/shadow | `cep_cascade_production_shadow_v1/`、`cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/` |
-| endpoint-local contract/shadow | `../pnjl_cep_endpoint_local_contract_feasibility_v2/`、`../pnjl_cep_endpoint_local_production_shadow_v4/`、`../pnjl_cep_endpoint_local_production_shadow_v4_20260813/` |
+| endpoint-local contract/shadow | `cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_contract_feasibility_v2/`、`cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4/`、`cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/` |
 | Maxwell contracts | `../pnjl_maxwell_endpoint_candidate_feasibility_v1/`、`../pnjl_maxwell_endpoint_limit_contract_v1/`、`../pnjl_maxwell_tolerance_contract_feasibility_v1/` |
 | algorithmic feasibility | `criticality_feasibility_v1/` |
 

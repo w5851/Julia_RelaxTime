@@ -435,7 +435,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `standard_oracle_status`、`deep_oracle_status`、`final_oracle_status` 和 `oracle_source`，不把
   deep 标签用于 support/route 选择。
 - [x] solver-free feasibility 输出到
-  `docs/analysis/pnjl_cep_endpoint_local_contract_feasibility_v2/`。三个低温点均有唯一三交点
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_contract_feasibility_v2/`。三个低温点均有唯一三交点
   与实际右外支 bracket，保留完整 Stage-B 曲线，左侧只做 active-bracket midpoint replay；
   既有 position `0.025 MeV`、density `0.0025`、area `5e-5` 门禁均未放宽。derived verdict 为
   `feasible_candidate`，覆盖 targeted 18 + approved deep required-three；完整 24-anchor shadow
@@ -488,7 +488,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   dense `15384`，oracle `30744`；residual/Jacobian、fixed-rho requests 和 runner cost
   均不高于 dense，Actions wall-time 处于允许噪声范围。
 - [x] evidence 已生成至
-  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4/`，包含聚合表、source/
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4/`，包含聚合表、source/
   evidence manifest、curve index、claim ledger、plot manifest 和 9 张代表性 PNG；完整
   `curve_points.csv` 仅保留在 Actions/local artifact，外部 SHA 为
   `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。派生表允许的
@@ -923,7 +923,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不高于 dense。hybrid runner time `289.74 s` 对 dense `269.50 s`，约高 `7.5%`，在
   允许的 `10%` Actions wall-time 噪声范围内。
 - [x] 新证据已导入
-  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/`；旧 v4
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/`；旧 v4
   evidence 保持不可变，完整 `curve_points.csv` 只保留在 Actions/local artifact，外部
   SHA 为 `326974ee24932a3ecccce6d3d961c67835f1477250236e01286529a3384e2038`。
 - [ ] `full_hybrid_candidate` 仍不是 reference promotion 或 formal production 许可。

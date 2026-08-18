@@ -183,7 +183,7 @@ def main() -> int:
         },
         {
             "layer": "full_hybrid_shadow",
-            "source": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
+            "source": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
             "runs": "31713534102;31714535418;31710995191",
             "calculation_sha": CALCULATION_SHA,
             "verdict": "full_hybrid_candidate",
@@ -282,7 +282,7 @@ def main() -> int:
     for name, path in paths.items():
         source_hashes.append({"id": name, "path": str(path), "sha256": sha256_file(path), "bytes": path.stat().st_size})
     repository_sources = [
-        "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
+        "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
         "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
         "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
         "docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json",
@@ -295,8 +295,8 @@ def main() -> int:
 
     plot_entries = [
         {"path": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png", "role": "C2 global native-support diagnostic", "source_manifest": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json"},
-        {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png", "role": "full-shadow representative first-order curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
-        {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png", "role": "full-shadow representative monotone curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
+        {"path": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png", "role": "full-shadow representative first-order curve", "source_manifest": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
+        {"path": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png", "role": "full-shadow representative monotone curve", "source_manifest": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
         {"path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/figures/rho_mu_xi_0p5_T_107_raw_audit.png", "role": "unresolved raw-curve diagnostic", "source_manifest": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json"},
     ]
     for entry in plot_entries:
@@ -330,7 +330,7 @@ def main() -> int:
     write_csv(tables_dir / "input_validation.csv", quality_rows, list(quality_rows[0]))
     claim_ledger = [
         {"claim_id": "c2_primary_curves", "status": "supported", "claim": "C2 primary boundary, spinodal and crossover rows are finite/converged and key-unique under their declared schemas.", "evidence": "tables/input_validation.csv; external C2 validation_report.json", "boundary": "does not close grid/refinement certificates"},
-        {"claim_id": "full_hybrid_candidate", "status": "candidate", "claim": "The 24-anchor endpoint-local shadow is a full_hybrid_candidate.", "evidence": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json", "boundary": "diagnostic candidate, not reference promotion"},
+        {"claim_id": "full_hybrid_candidate", "status": "candidate", "claim": "The 24-anchor endpoint-local shadow is a full_hybrid_candidate.", "evidence": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json", "boundary": "diagnostic candidate, not reference promotion"},
         {"claim_id": "grid_unresolved", "status": "inconclusive", "claim": "5424 C2 grid records remain unresolved at the refinement/geometry layer.", "evidence": "tables/c2_summary.csv; v5/tables/grid_unresolved_diagnostics.csv", "boundary": "unresolved records are not valid Maxwell boundary rows"},
         {"claim_id": "raw_curve_audit", "status": "supported_diagnostic", "claim": "All 761 deduplicated unresolved coordinates have finite/converged 1281-point raw curves.", "evidence": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json", "boundary": "raw +→−→+ topology is not a Maxwell/geometry certificate"},
         {"claim_id": "nine_point_overlay", "status": "inconclusive", "claim": "The nine targeted points have hybrid ambiguous versus oracle first-order and classification_match=false.", "evidence": "tables/targeted_regression_status.csv", "boundary": "author visual acceptance is diagnostic only and does not overwrite automated status"},
