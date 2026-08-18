@@ -67,7 +67,7 @@
   "figure": {
     "boundary_triangle_count": 6130,
     "crossover_triangle_count": 348,
-    "path": "docs\\analysis\\pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1\\figures\\c1_xi_T_mu_phase_surfaces.png",
+    "path": "docs\\analysis\\pnjl\\c1_surface_views\\pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1\\figures\\c1_xi_T_mu_phase_surfaces.png",
     "sha256": "63b05bd73f820fee2fdac0ef85c28150b9cd795ec21169286eaa8904206d37de",
     "generator": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c1_xi_t_mu_phase_surfaces.py",
     "generator_sha256": "215930262d02acc054b9480be7989c881752a8406d75584ceba3ba4486caeab0"

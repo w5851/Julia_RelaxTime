@@ -934,15 +934,15 @@
   "figure": {
     "boundary_triangle_count": 6130,
     "crossover_triangle_count": 348,
-    "path": "docs\\analysis\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_mu_xi_T_phase_surfaces.png",
+    "path": "docs\\analysis\\pnjl\\c1_surface_views\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_mu_xi_T_phase_surfaces.png",
     "orientation": "mu_xi_T",
     "sha256": "5f97ee3139a7d88ba6c2f7a28865ec17533524323f4833095012d029b05bcad0",
     "generator": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c1_xi_t_mu_phase_surfaces.py",
     "generator_sha256": "4ecbc662a5e7b9fcb5871a815176a45bd36b0619d16cb7fb4259624e057e3065"
   },
   "cep_bracket_figure": {
-    "path": "docs\\analysis\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.png",
-    "metadata": "docs\\analysis\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.json",
+    "path": "docs\\analysis\\pnjl\\c1_surface_views\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.png",
+    "metadata": "docs\\analysis\\pnjl\\c1_surface_views\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.json",
     "orientation": "xi_T",
     "semantic_status": "diagnostic_only_bracket; midpoint_not_physical_CEP"
   },

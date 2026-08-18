@@ -2,7 +2,7 @@
 
 `docs/analysis` 保存可追溯的诊断分析、历史比较、研究过程和证据包。这里的文件不是统一的 production result root；每个带 `manifest.json`、`decision.json` 或 `AUDIT.md` 的目录都应按自身 provenance 和 verdict 解读。
 
-本索引先建立逻辑分组，不移动现有目录。现有脚本、任务单、manifest 和 figure registry 仍使用原路径；物理移动必须作为单独迁移任务处理。
+本索引先建立逻辑分组；已完成迁移的条目使用当前 canonical path，尚未迁移的条目仍保留原路径。脚本、任务单、manifest 和 figure registry 的路径更新必须与对应的物理迁移在同一批次完成。
 
 ## Status Vocabulary
 
@@ -17,7 +17,7 @@
 | 逻辑域 | 当前物理路径 | 角色 | 关系与入口 |
 | --- | --- | --- | --- |
 | PNJL / Issue #130 | [`pnjl/`](pnjl/README.md) | C1/C2、CEP、Maxwell、phase-reference 证据线 | 按 C1、C2、CEP/Maxwell、phase-reference 分组；各版本目录保持独立 |
-| PNJL / C1 surface views | `pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/`、`pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/` | 同一 C1 source run 的两个坐标投影 | 共享部分输入和表格，但图轴语义不同；暂不合并文件 |
+| PNJL / C1 surface views | `pnjl/c1_surface_views/` | 同一 C1 source run 的两个坐标投影 | 共享输入但图轴语义不同；保留为两个独立 view |
 | PNJL / Mott | [`pnjl_mott/`](pnjl_mott/) | 独立的 Mott/复极点和文献解释链 | 不属于 Issue #130 phase-reference 线 |
 | Relaxation-time / transport | [`relaxtime/`](relaxtime/README.md) | phase-guided transport、T200 tau spike、传播子机制诊断 | v2 明确继承 v1；T200 根目录文件是一套待补 package metadata 的分析包 |
 | Historical comparison | `relaxtime/literature_comparison/`、`relaxtime/meson_density/`、`relaxtime/validation/`、`legacy/` | 历史图、文献比较和复用审计 | 保留上下文；不能自动升级为 strict、regression truth 或 external validation gate |
@@ -62,6 +62,6 @@
 
 ## Safe Follow-up Order
 
-1. 给 T200 根目录分析包补 README/manifest，并在 `relaxtime/README.md` 中登记。
-2. 将 C1 双 projection、C2 v1-v5、phase-guided transport v1/v2 的关系继续维护在域索引中。
-3. 只有在更新脚本、任务单、manifest、figure registry 并通过 docs consistency 后，才进行物理目录迁移。
+1. 维护 `pnjl/c1_surface_views/` 两个 projection view 的路径、manifest 和轴语义边界。
+2. 将 C2 v1-v5、CEP/Maxwell 阶段和 phase-guided transport v1/v2 按逻辑线继续分批迁移。
+3. 每批物理迁移都必须同步脚本、任务单、manifest、figure registry 的当前引用，并通过 docs consistency。

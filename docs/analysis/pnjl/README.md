@@ -8,8 +8,8 @@
 
 | 逻辑角色 | 当前路径 | 说明 |
 | --- | --- | --- |
-| `mu_xi_T` view | [`../pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/`](../pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/) | C1 诊断相面，包含 CEP temperature bracket view |
-| `xi_T_mu` view | [`../pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/`](../pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/) | 同一 source run 的替代坐标投影 |
+| `mu_xi_T` view | [`c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/`](c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2/) | C1 诊断相面，包含 CEP temperature bracket view |
+| `xi_T_mu` view | [`c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/`](c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1/) | 同一 source run 的替代坐标投影 |
 
 两者共享 C1 source run 和部分 summary/claim 表，但坐标语义和图 manifest 不同。未来可以合并为一个 C1 case 的两个 view；当前保留原路径以维护 registry 和历史引用。
 
