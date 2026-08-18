@@ -1552,7 +1552,8 @@ function _write_manifest(
     ] : NamedTuple[]
     phase_core_path = joinpath(PROJECT_ROOT, "src", "models", "phase", "PhaseCore.jl")
     palc_readme_path = joinpath(PROJECT_ROOT, "scripts", "analysis", "pnjl_bifurcation_spike", "README.md")
-    palc_design_path = joinpath(PROJECT_ROOT, "docs", "dev", "active", "2026-06-18_PALC连续路径求解接口设计.md")
+    palc_design_path = joinpath(PROJECT_ROOT, "docs", "dev", "archived", "2026-06-18_PALC连续路径求解接口设计.md")
+    palc_design_rel_path = "docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md"
     manifest = (
         schema_version=1,
         artifact_kind="diagnostic_feasibility",
@@ -1575,7 +1576,7 @@ function _write_manifest(
         source_evidence=[
             (path="src/models/phase/PhaseCore.jl", sha256=_sha256_file(phase_core_path)),
             (path="scripts/analysis/pnjl_bifurcation_spike/README.md", sha256=_sha256_file(palc_readme_path)),
-            (path="docs/dev/active/2026-06-18_PALC连续路径求解接口设计.md", sha256=_sha256_file(palc_design_path)),
+            (path=palc_design_rel_path, sha256=_sha256_file(palc_design_path)),
         ],
         config=(;
             near_slope_tol=config.near_slope_tol,

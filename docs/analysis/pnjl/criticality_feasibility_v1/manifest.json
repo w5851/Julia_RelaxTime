@@ -2,15 +2,15 @@
     "schema_version": 1,
     "artifact_kind": "diagnostic_feasibility",
     "production_authority": false,
-    "repo_head": "eb7404580a72c86456724c59e3b167728b67563f",
+    "repo_head": "a564d3288ba35913172894c3ccc47db6f90d68d7",
     "repo_head_role": "generation_base_head",
     "generation_worktree_dirty": true,
     "script_path": "scripts/analysis/pnjl_criticality_feasibility.jl",
-    "script_sha256": "37a007df0e93c47edb887040feed781b8f820e999ea4c9765b1a0c2c8af9d705",
+    "script_sha256": "13bd9ca95c57ab8cf1cb73f6e9904decc18e51e19e3d1fc4f8af4dd9741432cd",
     "producer_scripts": [
         {
             "path": "scripts/analysis/pnjl_criticality_feasibility.jl",
-            "sha256": "37a007df0e93c47edb887040feed781b8f820e999ea4c9765b1a0c2c8af9d705"
+            "sha256": "13bd9ca95c57ab8cf1cb73f6e9904decc18e51e19e3d1fc4f8af4dd9741432cd"
         },
         {
             "path": "scripts/perf/pnjl_criticality_feasibility_probe.jl",
@@ -20,15 +20,15 @@
     "source_evidence": [
         {
             "path": "src/models/phase/PhaseCore.jl",
-            "sha256": "78deedb77cc7e9713d2bcad550f5f3e7400d45a5aa71d8fbd1c4176303987ce2"
+            "sha256": "0cd4eb007d1c85149fd0d5a97593f0385803b6c29d88db29411a13df61054417"
         },
         {
             "path": "scripts/analysis/pnjl_bifurcation_spike/README.md",
             "sha256": "3ddeab574d855b304d3675e5d7b7eb84d62c5105ab468e2a04d4b2264e3fcb96"
         },
         {
-            "path": "docs/dev/active/2026-06-18_PALC连续路径求解接口设计.md",
-            "sha256": "0fda4aad57c1c4f8b6b76ed4cb297fa56e4e76a80f06970dac7efd65b870240c"
+            "path": "docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
+            "sha256": "26b8655ce6cf23fcc6b59c34303105f610cb1353c2893de82ddacca4ba26f1ef"
         }
     ],
     "config": {

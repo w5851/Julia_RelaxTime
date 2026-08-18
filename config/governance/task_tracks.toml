@@ -93,6 +93,26 @@ run_ids = ["31941614867"]
 evidence = ["run:31941614867"]
 updated_at = "2026-08-17"
 
+[[tracks]]
+id = "palc-performance-research"
+title = "PALC matched performance and continuation parity research"
+status = "triaged"
+current_task = "palc-matched-performance-diagnostic"
+blocked_by = []
+unlocks = []
+next_action = "仅在明确授权后设计同口径 GitHub Actions pilot；在此之前保持 PALC 为 isolated diagnostic backend。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = ""
+current_sha = ""
+run_ids = []
+evidence = [
+  "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
+  "file:docs/analysis/pnjl/criticality_feasibility_v1/README.md",
+]
+updated_at = "2026-08-18"
+
 [[items]]
 id = "issue130-full-hybrid-author-review"
 track_id = "issue130-phase"
@@ -184,4 +204,20 @@ blocked_by = []
 backlog_file = ""
 evidence = [
   "run:31941614867",
+]
+
+[[items]]
+id = "palc-matched-performance-diagnostic"
+track_id = "palc-performance-research"
+classification = "research"
+status = "triaged"
+parent = "track:palc-performance-research"
+task_file = ""
+reason = "PALC 已验证分支诊断能力，但历史计时非同口径；剩余 parity 与 PNJL telemetry 研究不应阻塞当前 Issue #130 production review。"
+next_action = "保留 backlog 任务；仅在单独授权后创建 active pilot，固定 workload、cold/warm、solver telemetry 和停止条件。"
+blocked_by = []
+backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
+evidence = [
+  "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
+  "file:docs/analysis/pnjl/criticality_feasibility_v1/README.md",
 ]
