@@ -20,7 +20,9 @@
 - 隔离区来源：`D:\Desktop\_cleanup_quarantine\2026-05-27\PNJL_Simulation_new\PNJL_Simulation`
 - 远端来源：`https://github.com/w5851/PNJL_Simulation.git`
 - 相关本地提交：`origin/main..main` 有 13 个 ahead commit，主题集中在 `Advanced_KappaforS.jl`、`create_kappa_objective_from_s`、Python `scikit-optimize` demo、`s_scan_kappa` 与冻结线扫描输出。
-- 安全导出：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\PNJL_Simulation_new`
+- 审计期间安全导出（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\PNJL_Simulation_new`
+- 完整工作树归档（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\PNJL_Simulation_new_working_tree_full.zip`
+- 完整归档 SHA-256：`344BFA5BA569811BBD46B4D7516C79EB98CB9ED60F09A585B50D4C71F49AA4F1`
 
 该 dirty 工作区包含一次未完成的脚本整理：部分脚本从 `scripts/Gas_Liquid` 复制到 `examples/Gas_Liquid`，旧位置改成 moved notice；输出路径从 `output/` 迁向 `results/output/`。但整理没有完成，不能直接作为主线迁移素材。
 
@@ -139,7 +141,7 @@ dirty 工作区包含：
 - 旧 workflow 的 `kappa` 是静态涨落比值语境，当前主项目还同时存在 transport `kappa_*`，命名必须避免混淆。
 - 旧输出缺少主项目要求的 provenance、参数指纹、测试分层和可复现入口。
 - 旧参数反演逻辑与当前 `GasLiquidCoreParams` 配置层没有建立清晰映射契约。
-- `PNJL_Simulation_new` 的 13 个 ahead commit 未同步到远端；虽然已有 bundle 安全导出，但语义上仍是本地实验历史，不应当作远端归档仓库的稳定状态。
+- `PNJL_Simulation_new` 的 13 个 ahead commit 未同步到远端；它们已在本轮完整工作树归档中核验，但语义上仍是本地实验历史，不应当作远端归档仓库的稳定状态。
 - `PNJL_Simulation_new` 的 dirty 状态还混有 `.vscode`、`__pycache__`、结果 CSV/PNG/JSON 与当前代码改动，需要先区分“实验结果刷新”和“可复用 API 变化”。
 
 ## `PNJL_Simulation_new` dirty 项判定
@@ -197,16 +199,15 @@ Rotation 相关 dirty 改动应单独立项审计：
 
 ## 处理建议
 
-对当前隔离区 `Julia`：
+对已清理隔离区 `Julia`：
 
-- 不建议迁移 dirty 脚本到主项目。
-- 不建议把旧结果作为主项目 baseline。
-- 可以保留隔离区与 `_safety_exports` 作为短期追溯材料。
-- 若以后磁盘清理需要删除该目录，应先确认是否还需要保留 untracked `examples/` 和 `results/` 的原始内容，因为当前 `_safety_exports` 只记录 untracked 文件列表，不包含 untracked 文件内容。
+- 不迁移 dirty 脚本到主项目。
+- 不把旧结果作为主项目 baseline。
+- 原隔离区和对应 `_safety_exports` 已按此前审计结论清理；本文件仅保留 workflow 方法层记录。
 
 对当前隔离区 `PNJL_Simulation_new`：
 
-- 不建议直接迁移 dirty 工作区。
-- 13 个 ahead commit 本身应视为已通过 bundle 保留的本地实验历史；在删除前应确认是否还需要长期保留 `repo_all_refs.bundle`。
-- 如未来要重做，优先吸收 `create_kappa_objective_from_s` 这一“冻结线 objective”思想，而不是导入旧 include 驱动脚本。
-- 当前目录建议暂缓删除：先把它标记为“高保留价值隔离参考”，等确认 untracked 结果文件是否还需要原样留存后，再决定只留 `_safety_exports` 还是继续保留完整目录。
+- 不迁移 dirty 工作区、13 个 ahead commit 或实验输出。
+- `create_kappa_objective_from_s` 的冻结线 objective 思想已沉淀在本文件；未来若重做，应按当前 `Models` 合同重新设计。
+- 完整工作树归档已包含 tracked dirty 内容和 untracked 文件，SHA-256 为上文所列值；审计没有发现需要长期保留的代码、结果或未完成主线依赖。
+- 本轮已完成彻底清理：删除 `PNJL_Simulation_new` 原目录、轻量 safety export、完整工作树归档和审计解包目录；主项目只保留本 legacy 审计记录。

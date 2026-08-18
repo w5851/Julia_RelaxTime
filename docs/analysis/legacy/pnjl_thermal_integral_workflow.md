@@ -4,9 +4,13 @@
 
 ## 来源与状态
 
-- 隔离区来源：`D:\Desktop\_cleanup_quarantine\2026-05-27\Julia_test`
+- 隔离区来源（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\Julia_test`
 - 远端来源：`https://github.com/w5851/Julia_test.git`
 - 当前状态：`main...origin/main` 无 ahead，但工作区 dirty。
+- 本次审计使用的完整归档（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\full_archives\Julia_test_worktree_2026-08-16.tar.gz`
+- 完整归档 SHA-256：`8CA458C13D9BD58CBB09166C02D35A08BE68DE0B4F37A05FA5991B3B84EE7EFE`
+- 本次复核日期：`2026-08-16`
+- 审计解包目录（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\_archive_review_2026-08-16\Julia_test`
 - tracked dirty 文件：
   - `Manifest.toml`
   - `Project.toml`
@@ -23,9 +27,9 @@
   - `tests/test_*`
   - `outputs/data/*.csv`
   - `outputs/figures/*.png`
-- 安全导出：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\Julia_test`
+- 安全导出（已删除）：`D:\Desktop\_cleanup_quarantine\2026-05-27\_safety_exports\Julia_test`
 
-注意：当前 `_safety_exports` 中有 git bundle、tracked diff、status 和 untracked 文件列表，但不包含 untracked 文件正文。因此在决定删除完整目录前，必须先确认是否还需要保留 `integral_test/`、`scripts/`、`tests/` 和 `outputs/` 下的 untracked 内容。
+清理前的轻量 `_safety_exports` 只保存 git bundle、tracked diff、status 和 untracked 文件列表；本次完整归档曾包含 `integral_test/`、`scripts/`、`tests/` 和 `outputs/` 下的 untracked 正文。完整归档和轻量安全导出均已在审计完成后删除。
 
 ## Workflow 意图
 
@@ -128,16 +132,44 @@ tracked dirty diff 的核心是对这些动态节点和权重追加 `ForwardDiff
 
 这些结果适合做历史实验参考，但不应直接进入当前主项目 baseline。原因是它们缺少当前 `Julia_RelaxTime` 的 commit provenance、模型 profile、参数指纹、脚本合约和回归准入说明。
 
+## 2026-08-16 复核结果
+
+本次从完整归档重新读取了旧实现、dirty diff、CSV 摘要，并用当前主项目实现做了 focused verification。
+
+旧归档结果的可复核摘要：
+
+- `compare_minimal_vs_pure.csv` 有 50 个常规样本；`rel_cut_qg` 最大约 `4.33e-4`，但 `dmuB_rel_min_qg` 最大约 `3.71e-2`。
+- `extreme_params_omega_compare.csv` 有 110 个极端样本；`rel_min_qg` 最大约 `0.263`，异常样本的 `dPhi1` 相对误差最高约 `54.8` 倍，集中在 `T=1e-8 MeV` 一带。
+- `benchmark_performance.csv` 有 100 个样本；记录的 `speedup_omega` 范围约为 `0.697--4.284`，`speedup_grad` 范围约为 `0.327--1.925`，因此不能据此声称冻结策略对梯度有稳定性能收益。
+
+旧方案的边界问题：
+
+- `analytic_p_max` 在 `T <= 0` 或 `mu <= 0` 时直接返回 `0.0`；这不是一般有限温度热尾部的通用处理。
+- 低温快捷路径只取 `1.3 * pF`，且离散边界策略、阈值和经验参数没有当前主线所需的 profile、误差预算与 solver 级 gate。
+- Bayesian 脚本固定粗扫描和随机样本，并在脚本开头尝试 `Pkg.add`；其输出只能是离线探索，不能成为生产配置或 baseline。
+- `ForwardDiff.value` 冻结节点选择确实是有价值的数值方法提示，但旧实现只证明了旧最小模型上的有限样本行为，不能直接推导当前各向异性、磁场和介子 workflow 的结论。
+
+当前主项目复核通过：
+
+- `src/models/pnjl_physics/PNJLIntegrals.jl` 的 `NODE_CACHE` 键已经包含 `(p_num, t_num, p_max_inv_fm)`；不同热项上限不会复用同一组节点。
+- `PNJLModel` 已有 `:tensor_gauss` 与 `:rs_reduced_adaptive` 两条策略；后者使用仓库内自适应 Gauss-Legendre、费米动量断点和 compactified infinite tail，并让节点选择使用 primal 值而不污染 AD。
+- 当前 unit 测试 `PNJLIntegrals`：`31/31` 通过；当前 PNJL integral ForwardDiff/integration smoke：`2/2` 与 `3/3` 通过；phase thermal quadrature validation：`66/66` 通过。
+- 额外检查 `(p_num, t_num, p_max_inv_fm)` 的不同键、节点对象区分和热项 AD 导数：通过。
+
+结论：旧归档没有需要立即移植的生产代码、参数或数值结果。可迁移内容已经沉淀为本文件中的方法边界；当前主项目已有更完整的实现和验证，不再启动独立的 `pmax`/节点冻结移植任务。
+
 ## 当前主项目对应能力
 
-`Julia_RelaxTime` 当前已经有若干相关能力，但没有完整吸收这套旧 workflow：
+`Julia_RelaxTime` 当前已经吸收了其中的通用方法要求，但没有复制旧 workflow 的脚本和经验参数：
 
-- `src/models/pnjl/core/PNJLIntegrals.jl`：提供 `cached_nodes` 与 `calculate_log_sum`，用于 models 侧 PNJL 热项积分；当前仍是固定节点和固定热项区间口径。
+- `src/models/pnjl_physics/PNJLIntegrals.jl` / `src/models/pnjl_physics/PNJLCore.jl`：提供当前 models 侧 PNJL 热项积分；`src/models/pnjl/core/` 仅保留兼容性路径，不能作为当前生产入口。
 - `src/Constants_PNJL.jl`：已有 `thermal_p_max_inv_fm` 配置项，支持把热项上限从常量层下沉到 profile/config。
+- `src/models/pnjl_physics/PNJLModel.jl`：已提供 `:tensor_gauss` 和 `:rs_reduced_adaptive`，包含零温固定态、费米断点和无限尾部处理。
+- `tests/unit/pnjl/test_pnjl_integrals.jl`、`tests/integration/models/test_pnjl_integrals_forwarddiff_smoke.jl` 与 `tests/validation/pnjl/test_phase_thermal_quadrature_validation.jl`：覆盖缓存、AD、误差和极端温度/化学势场景。
 - `docs/dev/archived/2026-01-20_MesonMass_A_Integral_Cutoff20_Node16.md`：记录过 A 热项从 `pmax=10` 到 `pmax=20` 的收敛治理。
 - `docs/dev/archived/2026-05-04_Friesen2019曲线验证口径说明.md`：记录过 Friesen 2019 公式层的 `∫_0^∞ dp` 热项口径，以及当前用有限上限近似时的稳定性限制。
 
-因此，旧 workflow 不应按文件迁入。若以后要恢复，应围绕当前 `Models` / `src/models/pnjl/core/PNJLIntegrals.jl` 的稳定入口重做，而不是导入 `Julia_test` 的 include 驱动实验脚本。
+因此，旧 workflow 不应按文件迁入。若以后需要研究动态热项截断，应围绕当前 `Models` / `src/models/pnjl_physics/PNJLIntegrals.jl` 的稳定入口另立 analysis 任务，而不是导入 `Julia_test` 的 include 驱动实验脚本。
 
 ## 不建议直接迁移的原因
 
@@ -187,8 +219,7 @@ tracked dirty diff 的核心是对这些动态节点和权重追加 `ForwardDiff
 
 对当前隔离区 `Julia_test`：
 
-- 不建议现在删除完整目录。
-- 建议标记为“中高保留价值实验参考”，直到确认 untracked 文件已经以文档、归档包或其他方式保留。
-- 当前最值得后续吸收的是设计思路：AD 节点冻结、离散 `pmax` cache、费米面聚焦、`pmax` 参数离线调参 harness。
-- 当前不值得直接吸收的是脚本组织、自动安装依赖、旧 README、实验输出和 include 驱动入口。
-- 若以后磁盘清理需要删除，应先额外打包或复制 untracked 内容；仅依赖 `_safety_exports\Julia_test` 不足以恢复这些脚本和结果。
+- 不迁移旧代码、旧配置或旧输出；本次没有新增主项目生产文件。
+- 保留本文件作为主项目侧的长期方法审计记录；完整归档仅作为本次清理前的短期可追溯证据。
+- 完整归档清理前已验证可读，共 621 个 tar 条目；已核对 SHA-256 与审计解包内容。
+- 本项已完成彻底清理：删除 `Julia_test` 原目录、完整归档、文件清单、review 解包目录和轻量 `_safety_exports\Julia_test`，不清空 Windows 回收站，也不影响其他隔离项目或主项目现有 dirty 文件。
