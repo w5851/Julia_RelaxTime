@@ -1,0 +1,10 @@
+target_id,xi,T_MeV,hybrid_status,oracle_status,classification_match,hybrid_crossing_count,oracle_crossing_count,hybrid_geometry_converged,oracle_geometry_converged,finite_and_converged,author_visual_review,automatic_gate_state
+xi_0p00_T51,0.0,51.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_0p30_T21,0.3,21.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_0p35_T101,0.35,101.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_0p35_T51,0.35,51.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_m0p10_T41,-0.1,41.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_m0p15_T41,-0.15,41.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_m0p20_T41,-0.2,41.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_m0p25_T41,-0.25,41.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive
+xi_m0p35_T51,-0.35,51.0,ambiguous_near_critical,confirmed_first_order,False,3,3,false,true,True,accepted_diagnostic_only,inconclusive

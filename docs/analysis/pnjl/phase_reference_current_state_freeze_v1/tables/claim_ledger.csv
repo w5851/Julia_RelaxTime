@@ -1,0 +1,9 @@
+claim_id,status,claim,evidence,boundary
+c2_primary_curves,supported,"C2 primary boundary, spinodal and crossover rows are finite/converged and key-unique under their declared schemas.",tables/input_validation.csv; external C2 validation_report.json,does not close grid/refinement certificates
+full_hybrid_candidate,candidate,The 24-anchor endpoint-local shadow is a full_hybrid_candidate.,docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json,"diagnostic candidate, not reference promotion"
+grid_unresolved,inconclusive,5424 C2 grid records remain unresolved at the refinement/geometry layer.,tables/c2_summary.csv; v5/tables/grid_unresolved_diagnostics.csv,unresolved records are not valid Maxwell boundary rows
+raw_curve_audit,supported_diagnostic,All 761 deduplicated unresolved coordinates have finite/converged 1281-point raw curves.,docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json,raw +→−→+ topology is not a Maxwell/geometry certificate
+nine_point_overlay,inconclusive,The nine targeted points have hybrid ambiguous versus oracle first-order and classification_match=false.,tables/targeted_regression_status.csv,author visual acceptance is diagnostic only and does not overwrite automated status
+cep_manual_overlay,accepted_diagnostic,The three fixed T-direction CEP slices have author-reviewed 0.0625 MeV brackets.,tables/cep_manual_overlay.csv; external author_decision_overlay_v2.json,bracket midpoint is not a confirmed single CEP
+mu_refinement,not_run,The planned CEP mu-direction endpoint refinement has not run.,docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md,no new solver or derived completion exists
+phase_reference_promotion,blocked,No current evidence authorizes phase-reference write or RS transport production.,tables/gate_status_matrix.csv; config/governance/task_tracks.toml,full_hybrid_candidate and manual overlays are not promotion

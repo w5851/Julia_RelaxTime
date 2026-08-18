@@ -1,0 +1,4 @@
+xi,first_order_temperatures_MeV,crossover_side_temperatures_MeV,bracket_low_MeV,bracket_high_MeV,bracket_width_MeV,author_decision,status,source_evidence
+0.125,126.1875;126.25,126.3125,126.25,126.3125,0.0625,accepted,closed_by_author_review,manual_bisection_audit_v2_31999149922;figures/rho_mu_xi_0p125_T_126p3125_high.png
+0.39375,113.4375;113.5,113.5625,113.5,113.5625,0.0625,accepted,closed_by_author_review,manual_bisection_audit_v2_31999149922;figures/rho_mu_xi_0p39375_T_113p5625_high.png
+0.5,106.9375;107.0;107.0625,107.125,107.0625,107.125,0.0625,accepted,closed_by_author_review,manual_bisection_audit_v2_31999149922;aggregate_local_zoom_v1_32014476047;figures/rho_mu_xi_0p5_T_107p125_high_extension_1_local_zoom.png;figures/rho_mu_xi_0p5_T_107p1875_high_extension_2_local_zoom.png;figures/rho_mu_xi_0p5_T_107p25_high_extension_3_local_zoom.png
