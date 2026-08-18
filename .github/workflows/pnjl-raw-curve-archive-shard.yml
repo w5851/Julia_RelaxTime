@@ -1,0 +1,156 @@
+name: PNJL Raw Curve Archive Xi Shard
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      shard_id:
+        required: true
+        type: string
+      xi:
+        required: true
+        type: string
+      temperatures_json:
+        required: true
+        type: string
+      calculation_sha:
+        required: true
+        type: string
+      source_postprocess_sha:
+        required: true
+        type: string
+      source_workflow_sha:
+        required: true
+        type: string
+      source_grid_run_id:
+        required: true
+        type: string
+      source_grid_artifact_name:
+        required: true
+        type: string
+      source_grid_manifest_path:
+        required: true
+        type: string
+      source_grid_manifest_sha256:
+        required: true
+        type: string
+      audit_run_id:
+        required: true
+        type: string
+
+jobs:
+  raw-curve-shard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      PROCESS_ROOT: data/processed/pnjl/raw_only/${{ github.run_id }}/${{ inputs.shard_id }}
+      RAW_SOURCE_ROOT: data/outputs/artifacts/pnjl_raw_curve_archive/${{ github.run_id }}/${{ inputs.shard_id }}
+      RAW_ARTIFACT_NAME: pnjl-raw-curve-source-${{ inputs.tag }}-${{ inputs.shard_id }}
+      CALCULATION_SHA: ${{ inputs.calculation_sha }}
+      SOURCE_POSTPROCESS_SHA: ${{ inputs.source_postprocess_sha }}
+      SOURCE_WORKFLOW_SHA: ${{ inputs.source_workflow_sha }}
+      SOURCE_GRID_RUN_ID: ${{ inputs.source_grid_run_id }}
+      SOURCE_GRID_ARTIFACT_NAME: ${{ inputs.source_grid_artifact_name }}
+      SOURCE_GRID_MANIFEST_PATH: ${{ inputs.source_grid_manifest_path }}
+      SOURCE_GRID_MANIFEST_SHA256: ${{ inputs.source_grid_manifest_sha256 }}
+    steps:
+      - name: Checkout immutable calculation
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.calculation_sha }}
+
+      - name: Checkout raw-only runner source
+        uses: actions/checkout@v4
+        with:
+          path: postprocess
+          ref: ${{ inputs.source_workflow_sha }}
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.12.5"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+        with:
+          cache-name: julia-cache-pnjl-raw-only
+
+      - name: Install calculation dependencies
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Write exact temperature list
+        shell: bash
+        env:
+          TEMPERATURES_JSON: ${{ inputs.temperatures_json }}
+        run: |
+          set -euo pipefail
+          mkdir -p "${PROCESS_ROOT}" "${RAW_SOURCE_ROOT}"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import json
+          values = json.loads(os.environ["TEMPERATURES_JSON"])
+          if not isinstance(values, list) or not values:
+              raise SystemExit("temperatures_json must be a non-empty JSON list")
+          Path(os.environ["RUNNER_TEMP"], "pnjl_raw_temperatures.json").write_text(
+              json.dumps(values, separators=(",", ":")) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Run fixed-rho Oracle raw-only producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          julia --project=. postprocess/scripts/analysis/pnjl_raw_curve_archive_oracle_job.jl \
+            --project-root "${GITHUB_WORKSPACE}" \
+            --output-dir "${PROCESS_ROOT}" \
+            --xi "${{ inputs.xi }}" \
+            --temperatures-file "${RUNNER_TEMP}/pnjl_raw_temperatures.json" \
+            --calculation-sha "${CALCULATION_SHA}" \
+            --source-postprocess-sha "${SOURCE_POSTPROCESS_SHA}" \
+            --source-workflow-sha "${SOURCE_WORKFLOW_SHA}" \
+            --source-run-id "${GITHUB_RUN_ID}" \
+            --source-grid-run-id "${SOURCE_GRID_RUN_ID}" \
+            --source-grid-artifact-name "${SOURCE_GRID_ARTIFACT_NAME}" \
+            --source-grid-manifest-path "${SOURCE_GRID_MANIFEST_PATH}" \
+            --source-grid-manifest-sha256 "${SOURCE_GRID_MANIFEST_SHA256}"
+
+      - name: Build and validate source manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python postprocess/scripts/analysis/pnjl_raw_curve_archive.py build-source-manifest \
+            --process-root "${PROCESS_ROOT}" \
+            --output "${RAW_SOURCE_ROOT}/raw_curve_source_manifest.json" \
+            --source-run-id "${GITHUB_RUN_ID}" \
+            --source-artifact-name "${RAW_ARTIFACT_NAME}" \
+            --shard-id "${{ inputs.shard_id }}" \
+            --xi "${{ inputs.xi }}" \
+            --calculation-sha "${CALCULATION_SHA}" \
+            --source-postprocess-sha "${SOURCE_POSTPROCESS_SHA}" \
+            --source-workflow-sha "${SOURCE_WORKFLOW_SHA}" \
+            --audit-workflow-sha "${SOURCE_WORKFLOW_SHA}" \
+            --expected-temperatures-json "${RUNNER_TEMP}/pnjl_raw_temperatures.json" \
+            --source-grid-run-id "${SOURCE_GRID_RUN_ID}" \
+            --source-grid-artifact-name "${SOURCE_GRID_ARTIFACT_NAME}" \
+            --source-grid-manifest-path "${SOURCE_GRID_MANIFEST_PATH}" \
+            --source-grid-manifest-sha256 "${SOURCE_GRID_MANIFEST_SHA256}" \
+            --audit-run-id "${{ inputs.audit_run_id }}"
+          cp -R "${PROCESS_ROOT}/production_eval" "${RAW_SOURCE_ROOT}/"
+          cp "${PROCESS_ROOT}/raw_only_job_summary.json" "${RAW_SOURCE_ROOT}/"
+
+      - name: Upload raw-only source shard
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.RAW_ARTIFACT_NAME }}
+          path: ${{ env.RAW_SOURCE_ROOT }}/*
+          retention-days: 90
+          if-no-files-found: error
