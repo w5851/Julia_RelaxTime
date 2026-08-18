@@ -1,0 +1,79 @@
+{
+  "schema_version": "pnjl_phase_reference_manual_overlay_promotion_audit_v1",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "generated_at_utc": "2026-08-17T13:25:23.209198+00:00",
+  "solver_called": false,
+  "reference_write": false,
+  "promotion_verdict": "blocked_manual_overlay_inconclusive",
+  "blocker_reason": "unresolved grid rows include non-geometry categories; nine oracle acceptances and CEP overlay do not rewrite C2 hybrid labels",
+  "counts": {
+    "c2_grid_rows": 22791,
+    "c2_grid_unresolved_rows": 5424,
+    "geometry_only_unresolved_rows": 4661,
+    "unsafe_unresolved_rows": 763,
+    "classification_regressions": 9,
+    "manual_nine_curve_rows": 9,
+    "manual_cep_brackets": 3
+  },
+  "automatic_gate_summary": [
+    {
+      "gate": "boundary_finite_converged_unique",
+      "automatic_status": "pass",
+      "manual_overlay_status": "not_applicable",
+      "evidence": "C2 boundary CSV"
+    },
+    {
+      "gate": "crossover_finite_converged_unique",
+      "automatic_status": "pass",
+      "manual_overlay_status": "not_applicable",
+      "evidence": "C2 crossover CSV"
+    },
+    {
+      "gate": "solver_scan_failed_points_zero",
+      "automatic_status": "pass",
+      "manual_overlay_status": "not_applicable",
+      "evidence": "C2 phase diagnostics and validation"
+    },
+    {
+      "gate": "automatic_grid_unresolved_zero",
+      "automatic_status": "fail",
+      "manual_overlay_status": "not_overridden",
+      "evidence": "C2 phase_grid_convergence CSV"
+    },
+    {
+      "gate": "automatic_classification_regressions_zero",
+      "automatic_status": "fail",
+      "manual_overlay_status": "manual_oracle_acceptance_only",
+      "evidence": "C1/C2 regression table plus nine-point overlay"
+    },
+    {
+      "gate": "automatic_cep_width_leq_0.1_MeV",
+      "automatic_status": "fail",
+      "manual_overlay_status": "closed_by_author_review",
+      "evidence": "C2 CEP CSV plus manual CEP overlay"
+    },
+    {
+      "gate": "nine_oracle_curve_review_complete",
+      "automatic_status": "not_applicable",
+      "manual_overlay_status": "accepted",
+      "evidence": "nine-point manual review package"
+    },
+    {
+      "gate": "matched_C1_C2_physical_stability",
+      "automatic_status": "pass",
+      "manual_overlay_status": "not_applicable",
+      "evidence": "C1/C2 geometry drift summary"
+    },
+    {
+      "gate": "unresolved_rows_all_geometry_only",
+      "automatic_status": "fail",
+      "manual_overlay_status": "not_overridden",
+      "evidence": "derived unresolved reason classification"
+    }
+  ],
+  "manual_overlay_contract": {
+    "nine_curves_are_observations_not_hybrid_overrides": true,
+    "cep_brackets_are_intervals_not_single_point_values": true,
+    "historical_c2_artifacts_unchanged": true
+  }
+}

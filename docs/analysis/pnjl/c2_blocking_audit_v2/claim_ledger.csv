@@ -1,0 +1,10 @@
+claim_id,claim,status,evidence
+workflow_complete,C2 Actions and retained artifacts are complete,supported,manifest.json; tables/c2_status_summary.csv
+single_maxwell_complete,All retained C2 boundary Maxwell rows are finite and converged,supported,tables/c2_status_summary.csv
+classification_regression,Nine public C1 first-order anchors are C2 ambiguous,supported,tables/c1_c2_classification_regressions.csv; figures/classification_regressions.png
+cep_not_closed,C2 has CEP brackets above the 0.1 MeV gate,supported,tables/c2_cep_bracket_failures.csv; figures/cep_bracket_widths.png
+cross_axis_risk,C2 cross-layer grid convergence remains incomplete,supported,tables/c2_grid_failure_by_axis.csv; tables/c2_grid_failure_reasons.csv
+crossover_stable,C1/C2 crossover comparison passes the stored gate,supported,tables/c1_c2_crossover_gate_summary.csv
+mechanism_solver_failure,The blocking records are proven equilibrium-solver failures,not_supported,tables/c2_status_summary.csv
+raw_s_curve_available,Current C2 aggregate retains raw rho-mu curves for the nine regression anchors,not_supported,tables/representative_curve_evidence.csv
+phase_reference_ready,C2 is ready for phase-reference promotion,not_supported,manifest.json; README.md

@@ -1,0 +1,91 @@
+{
+  "schema_version": "pnjl_phase_reference_manual_overlay_promotion_audit_v1",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "generated_at_utc": "2026-08-17T13:25:23.209198+00:00",
+  "solver_called": false,
+  "reference_write": false,
+  "promotion_verdict": "blocked_manual_overlay_inconclusive",
+  "input_files": [
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "70d5f75436569ecf1531ca9deee063ffd99d9bcdb8694b8424b933705a38ae31"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\boundary_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "ddeb68d5f95fecb4206fc75ab835335f42a20202b41d85cea16aad0f89545723"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json",
+      "sha256": "adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\validation_report.json",
+      "sha256": "741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_blocking_audit_v2\\manifest.json",
+      "sha256": "6a33a689744d0761191b472e37e5bbf23042828c5561f2d05d92908e908467c0"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_blocking_audit_v2\\tables\\c1_c2_classification_regressions.csv",
+      "sha256": "70fa23b7ee943bc8aae94110d0fd61cf10f9cc67c6b050df9b35e8abe7f11286"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_blocking_audit_v2\\tables\\c1_c2_geometry_drift_summary.csv",
+      "sha256": "0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_targeted_manual_review_v1\\manifest.json",
+      "sha256": "58b10d649f55a32ca164a317962bf8b904602dcfcd92b2a8f44de27cd317d554"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_targeted_manual_review_v1\\tables\\point_summary.csv",
+      "sha256": "f06185844012c36089abb44ab9bd4662be858245818baf0edc83cdc7af812faa"
+    },
+    {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\cep_manual_bisection_audit_v2_31999149922\\author_decision_overlay_v2.json",
+      "sha256": "f2a58c9c2db63c21b40f4e0bbc1f8858ab861149ce24942ae2b4046e17ab508d"
+    }
+  ],
+  "source_counts": {
+    "c2_grid_rows": 22791,
+    "c2_grid_unresolved_rows": 5424,
+    "geometry_only_unresolved_rows": 4661,
+    "unsafe_unresolved_rows": 763,
+    "classification_regressions": 9,
+    "manual_nine_curve_rows": 9,
+    "manual_cep_brackets": 3
+  },
+  "output_files": {
+    "decision.json": "bb9df8d9ccf321d45de3f10481907f3c1a0325ed17ada9f275b5aab92259d1e0",
+    "execution_log.md": "07927463a928e5d60377c9427e2adde5aa5085669a5a138ec5586f995b956ece",
+    "README.md": "d7805657e1fbf46e010d097a89f9cde631977e49d16dabf12438a149cc328ad0",
+    "tables/auto_gate_summary.csv": "833840d4aed8de3a7af7d89214bb0fe00dcd1f2a1dc361a3729fd64262c36eab",
+    "tables/claim_ledger.csv": "d48f4842793781f3ac9a88f7a9797b0e34639ec9d1b3d7cefc4d66411e8a9f1a",
+    "tables/grid_unresolved_by_reason.csv": "e336beeaadf7aaecf840ed927ed6f67ad17fbea9145649d5d53d461bb2b7271c",
+    "tables/manual_cep_decisions.csv": "e0064ba3e3e54a29687292c7ed13ab9094a571c679331c9e3ea0dabe32669d1d",
+    "tables/manual_nine_curve_decisions.csv": "873778765c7bcf1c37c1d59cff7d9826ccfd1ce3ff92fdb7b6f9e6c1f05334fc",
+    "tables/physical_stability_summary.csv": "0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a",
+    "tables/promotion_decision.csv": "8a0d3d9c4f4766c71e60dc1f59d7bdcdc447fa514273d1ab8f3941b7ea96c722"
+  },
+  "generator": {
+    "path": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\build_phase_reference_manual_overlay_promotion_audit.py",
+    "sha256": "840ab8b94d28c8b78a73080c87aab9c3de4f5f642975446f896ea11b29531786"
+  }
+}

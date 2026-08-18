@@ -1,0 +1,2 @@
+verdict,blocker_reason,unresolved_grid_rows,geometry_only_rows,unsafe_unresolved_rows,classification_regressions,automatic_cep_failures,manual_cep_closed,manual_nine_curve_review,reference_write
+blocked_manual_overlay_inconclusive,unresolved grid rows include non-geometry categories; nine oracle acceptances and CEP overlay do not rewrite C2 hybrid labels,5424,4661,763,9,3,True,True,False

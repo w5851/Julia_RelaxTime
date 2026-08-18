@@ -1,0 +1,30 @@
+{
+  "schema_version": "pnjl_c2_blocking_audit_plot_v2",
+  "figures": [
+    {
+      "path": "classification_regressions.png",
+      "sha256": "de100cd746e631c753782a514884acd3f1e4837bf0f4938acb0131d3371feed0",
+      "source": "tables/c1_c2_classification_regressions.csv"
+    },
+    {
+      "path": "cep_bracket_widths.png",
+      "sha256": "0eead503e5e091c918a611f6e9ec63fb08d9a1aa4392c21346bcbf4caa357a59",
+      "source": "tables/c2_cep_all.csv; tables/c2_cep_bracket_failures.csv"
+    },
+    {
+      "path": "grid_failure_reasons.png",
+      "sha256": "ad96c59daffddec8d5682b0c55de45e87df8ba43c42207082feb647eac609330",
+      "source": "tables/c2_grid_failure_reasons.csv"
+    },
+    {
+      "path": "regression_geometry_availability.png",
+      "sha256": "0163ebb7a69e5a3691a304114fbab663e43c793bf001dd93b5cdb7b6d39d6184",
+      "source": "tables/c1_c2_regression_geometry.csv"
+    },
+    {
+      "path": "grid_failure_by_axis.png",
+      "sha256": "4a49f7479fbea619635367732ee8484fbe6843394ec0b2a5c83acd8b86b144a4",
+      "source": "tables/c2_grid_failure_by_axis.csv"
+    }
+  ]
+}

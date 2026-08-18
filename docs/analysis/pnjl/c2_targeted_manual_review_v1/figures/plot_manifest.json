@@ -1,0 +1,131 @@
+{
+  "schema_version": "pnjl_c2_targeted_manual_review_figures_v1",
+  "source_run_id": "31941614867",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "postprocess_sha": "aa9f3a70a821df863dd9f4fbbc8a89b053cdbf8c",
+  "solver_called": false,
+  "oracle_labels_used_for_routing": false,
+  "figures": [
+    {
+      "target_id": "xi_0p00_T51",
+      "xi": 0.0,
+      "T_MeV": 51.0,
+      "file": "rho_mu_xi_0p00_T51_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 2.917718251146477,
+      "local_mu_low": 340.14857373732815,
+      "local_mu_high": 373.1224249029734,
+      "hybrid_crossings": "[0.08149576188828467, 1.1951815360568425, 2.485070924323857]",
+      "oracle_crossings": "[0.0814964816620811, 1.1951765528382743, 2.4850741328831223]",
+      "sha256": "c3c5f8b0b969c993a5fb2e6ef5b6a375c2ae6600c1276e9fdb793a3f5fec4c50"
+    },
+    {
+      "target_id": "xi_0p30_T21",
+      "xi": 0.3,
+      "T_MeV": 21.0,
+      "file": "rho_mu_xi_0p30_T21_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 2.746703164243347,
+      "local_mu_low": 361.48269512615093,
+      "local_mu_high": 383.7179293267485,
+      "hybrid_crossings": "[0.04904623224157492, 1.1050258050886796, 2.335192967379739]",
+      "oracle_crossings": "[0.04904696252410014, 1.1050198055686316, 2.335196165343632]",
+      "sha256": "547d238761a7c434998c3ed4102b1f46e86bd064dab92dd707cbb8c096fefed0"
+    },
+    {
+      "target_id": "xi_0p35_T101",
+      "xi": 0.35,
+      "T_MeV": 101.0,
+      "file": "rho_mu_xi_0p35_T101_local_audit.png",
+      "local_rho_low": 0.5369615288976676,
+      "local_rho_high": 2.448033630569216,
+      "local_mu_low": 345.85667627388176,
+      "local_mu_high": 348.76908381759296,
+      "hybrid_crossings": "[0.7898975476331643, 1.4900264850519078, 2.1950975857677886]",
+      "oracle_crossings": "[0.7898975423541961, 1.4900264971824713, 2.195097580086357]",
+      "sha256": "ce9b2f2222d11fd4c13e1001ebeeb412f0709f7cf39c8721f3f508872a674a8a"
+    },
+    {
+      "target_id": "xi_0p35_T51",
+      "xi": 0.35,
+      "T_MeV": 51.0,
+      "file": "rho_mu_xi_0p35_T51_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 2.660254869303438,
+      "local_mu_low": 362.3906420114202,
+      "local_mu_high": 377.95530658919233,
+      "hybrid_crossings": "[0.18349282477480292, 1.1754241452188408, 2.282442371191881]",
+      "oracle_crossings": "[0.18349341568417546, 1.1754215098701528, 2.2824437093222354]",
+      "sha256": "03346c1d269cb37c1681199e380c48a8f0df9ea4bc9517a25a8054c94e682c17"
+    },
+    {
+      "target_id": "xi_m0p10_T41",
+      "xi": -0.1,
+      "T_MeV": 41.0,
+      "file": "rho_mu_xi_m0p10_T41_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 2.9919040366037963,
+      "local_mu_low": 333.12956750575574,
+      "local_mu_high": 375.7519285766873,
+      "hybrid_crossings": "[0.036443934224463875, 1.1705243397864327, 2.5410643618987705]",
+      "oracle_crossings": "[0.0364447052498069, 1.1705151638631015, 2.5410711372421977]",
+      "sha256": "7a2925cc0a71e258db202057f70c3af62462ac53a21c3ffe0df96d70a61b4672"
+    },
+    {
+      "target_id": "xi_m0p15_T41",
+      "xi": -0.15,
+      "T_MeV": 41.0,
+      "file": "rho_mu_xi_m0p15_T41_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 3.024330900786818,
+      "local_mu_low": 328.86811345051376,
+      "local_mu_high": 375.22493833068654,
+      "hybrid_crossings": "[0.030832264932826474, 1.1732647613609792, 2.56768898627663]",
+      "oracle_crossings": "[0.030832872869555047, 1.17325645686987, 2.5676955115361144]",
+      "sha256": "d0bd7d6f1cc4c61426c98a544e5f71297960ed4bba285730bc2e5aff7fdf519d"
+    },
+    {
+      "target_id": "xi_m0p20_T41",
+      "xi": -0.2,
+      "T_MeV": 41.0,
+      "file": "rho_mu_xi_m0p20_T41_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 3.0573360784907697,
+      "local_mu_low": 324.3645799802891,
+      "local_mu_high": 374.69812227046566,
+      "hybrid_crossings": "[0.025933375607517423, 1.1759928693989548, 2.5949123728931385]",
+      "oracle_crossings": "[0.02593390132182808, 1.1759853126566744, 2.5949187122824338]",
+      "sha256": "f7cb3c76af04414f22f4a3085f42115b1370d3fe9e7c9c00649bdff3cfc84c35"
+    },
+    {
+      "target_id": "xi_m0p25_T41",
+      "xi": -0.25,
+      "T_MeV": 41.0,
+      "file": "rho_mu_xi_m0p25_T41_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 3.091246549357524,
+      "local_mu_low": 319.59334145403045,
+      "local_mu_high": 374.1695153495925,
+      "hybrid_crossings": "[0.02160627287805303, 1.1787155982333777, 2.6229900504485353]",
+      "oracle_crossings": "[0.02160666494320257, 1.1787086128858029, 2.622996332870921]",
+      "sha256": "494beeb4d637f223774ef1a6200b3f36b478ac3b22844f93c1a8d0d4a8faba45"
+    },
+    {
+      "target_id": "xi_m0p35_T51",
+      "xi": -0.35,
+      "T_MeV": 51.0,
+      "file": "rho_mu_xi_m0p35_T51_local_audit.png",
+      "local_rho_low": 0.0,
+      "local_rho_high": 3.156694201777954,
+      "local_mu_low": 308.3248246770862,
+      "local_mu_high": 368.04726414962136,
+      "hybrid_crossings": "[0.030427126503055273, 1.2125424630317347, 2.6797978390496504]",
+      "oracle_crossings": "[0.030427730919052647, 1.212534429465618, 2.679806003837475]",
+      "sha256": "ce5f5da41a32dfc425e11198a4e69942620f721e2d1d1d138ce5d509e55df47f"
+    },
+    {
+      "file": "nine_point_local_overview.png",
+      "sha256": "20b0835021665cd762f7226d3a465f049cdf15025487ce39a65133f8713d4583"
+    }
+  ]
+}

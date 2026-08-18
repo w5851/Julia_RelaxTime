@@ -1,0 +1,50 @@
+{
+  "schema_version": "pnjl_plot_manifest_v2",
+  "generator": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c1_xi_t_mu_phase_surfaces.py",
+  "generator_sha256": "4ecbc662a5e7b9fcb5871a815176a45bd36b0619d16cb7fb4259624e057e3065",
+  "input_files": {
+    "boundary": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\boundary_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "ddeb68d5f95fecb4206fc75ab835335f42a20202b41d85cea16aad0f89545723"
+    },
+    "spinodals": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\spinodals_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "b1e3e01aee4bf9fdbd7279951e7473e5dd4033a3811610c0b0424fb973572833"
+    },
+    "crossover": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\crossover_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "727680dced000a15f20aa6b469d76473d76a7c6a67f2a499a6bc3ecce15e89dc"
+    },
+    "grid_convergence": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "70d5f75436569ecf1531ca9deee063ffd99d9bcdb8694b8424b933705a38ae31"
+    },
+    "source_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\phase_reference_issue130_stagec_density_v2_c1_integral_tight_20260813_manifest.json",
+      "sha256": "2ae1aa28d21b37750bc47ced50d5de03eef7b089a4cfc14e40e00f9ade687096"
+    },
+    "cep": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\c1_complete_acceptance_31762201725_attempt2\\reference\\cep_issue130_stagec_density_v2_c1_integral_tight_20260813.csv",
+      "sha256": "75de4c75652ebb11b72dbb32b2b93e60a58755425abfbd85d5672d86971aa74d"
+    }
+  },
+  "figures": [
+    {
+      "boundary_triangle_count": 6130,
+      "crossover_triangle_count": 348,
+      "path": "docs\\analysis\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_mu_xi_T_phase_surfaces.png",
+      "orientation": "mu_xi_T",
+      "sha256": "5f97ee3139a7d88ba6c2f7a28865ec17533524323f4833095012d029b05bcad0",
+      "generator": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c1_xi_t_mu_phase_surfaces.py",
+      "generator_sha256": "4ecbc662a5e7b9fcb5871a815176a45bd36b0619d16cb7fb4259624e057e3065"
+    },
+    {
+      "path": "docs\\analysis\\pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2\\figures\\c1_cep_temperature_brackets_vs_xi.png",
+      "orientation": "xi_T",
+      "sha256": "f830948aaac4348c14477c4a7450da6755b19683e7c69e7b28f0917d0d33f94c",
+      "generator": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c1_cep_bracket.py",
+      "generator_sha256": "98d07faf8a2f203ef08bac33211d88313b97649f8f0a0fc9a6b72f09574fc624",
+      "semantic_status": "diagnostic_only_bracket; midpoint_not_physical_CEP"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+reason,count,fraction_of_unconverged
+geometry_tolerance_exceeded,2395,0.441556047198
+rho_geometry_not_converged,1558,0.287241887906
+interpolation_tolerance_exceeded,708,0.130530973451
+ok,452,0.0833333333333
+hybrid_stage_c_not_converged,272,0.0501474926254
+classification_changed_or_unresolved:unknown->valid,19,0.00350294985251
+classification_changed_or_unresolved:invalid->valid,10,0.00184365781711
+classification_changed_or_unresolved:valid->unknown,6,0.00110619469027
+classification_changed_or_unresolved:invalid->unknown,2,0.000368731563422
+classification_changed_or_unresolved:unknown->unknown,2,0.000368731563422

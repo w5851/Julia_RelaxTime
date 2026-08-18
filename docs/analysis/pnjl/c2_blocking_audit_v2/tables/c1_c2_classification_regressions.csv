@@ -1,0 +1,10 @@
+xi,T_MeV,candidate_state,reference_state,classification_regression
+-0.35,51,ambiguous_near_critical,confirmed_first_order,true
+-0.25,41,ambiguous_near_critical,confirmed_first_order,true
+-0.2,41,ambiguous_near_critical,confirmed_first_order,true
+-0.15,41,ambiguous_near_critical,confirmed_first_order,true
+-0.1,41,ambiguous_near_critical,confirmed_first_order,true
+0.0,51,ambiguous_near_critical,confirmed_first_order,true
+0.3,21,ambiguous_near_critical,confirmed_first_order,true
+0.35,51,ambiguous_near_critical,confirmed_first_order,true
+0.35,101,ambiguous_near_critical,confirmed_first_order,true
