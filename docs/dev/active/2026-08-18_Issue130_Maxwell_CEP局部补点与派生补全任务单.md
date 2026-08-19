@@ -1,7 +1,7 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
-状态：active；11-target numerical pilot 已完成数值计算；PR #239 已合并，但首次正式
-aggregate replay 暴露 source/postprocess SHA 混用，当前进行 solver-free replay provenance repair。
+状态：active；11-target numerical pilot 与同源 aggregate replay 均已完成并通过
+`pilot_candidate`；证据仍为 diagnostic-only，不晋升 phase-reference。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -48,25 +48,32 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
   曲线、唯一三交点和 geometry convergence；总 unique solves 为 7183，targeted
   additions 为 132，solver failure/nonfinite/retry/fallback 均为 0。数值 artifact
   已下载到 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\maxwell_cep_local_pilot_32222254605`。
-- numerical run 后的初始 aggregate verdict 为 `pilot_inconclusive`，唯一错误是所有
+- numerical run 后的初始 aggregate verdict 为 `pilot_inconclusive`，历史原因是
   `target_summary.json` 缺少 calculation/workflow SHA；对应 `provenance.json` 与
-  `manifest.json` 的 SHA 均正确。因此当前 repair 只更新 aggregate collector：
-  两个身份源一致且符合输入时允许 summary 缺失字段，并记录
--  `aggregate_identity_fallback_v1` 与缺失字段；summary 存在但错误、或两个身份源不一致时仍失败。
-- PR #239 merge SHA 为 `ebf8e9199ff81bbb31df7f38cf0368a0040c103a`。其正式 replay
-  run `32225731719` 保持 11/11 artifact 完整，但 verdict 为 `pilot_inconclusive`：
-  collector 将 source numerical workflow SHA `51c93cf0111415b35bb199376c358782c0f5a2f4`
-  错误地与新的 postprocess SHA `ebf8e919...` 比较。该失败不涉及 solver、曲线、Maxwell
-  或 geometry。
-- 当前 repair 将 source workflow SHA 与 postprocess SHA 分离：source run 的
-  `headSha` 用于校验 numerical artifact，当前 merge SHA 单独写入 aggregate
-  `postprocess_sha`；replay aggregate 明确记录 `solver_called=false`。修复后仍复用
-  run `32222254605`，不重跑 solver；replay 完成前不启动 crossover 全 xi expansion。
+  `manifest.json` 的 SHA 正确。该历史失败已由后续 provenance repair 收口；summary
+  缺失字段只在两个身份源一致且符合输入时允许 fallback，summary 存在但错误、或
+  两个身份源不一致时仍失败。
+- PR #239 merge SHA 为 `ebf8e9199ff81bbb31df7f38cf0368a0040c103a`；其首次 replay
+  run `32225731719` 的 `pilot_inconclusive` 仅由 source/postprocess SHA 角色混用造成，
+  不涉及 solver、曲线、Maxwell 或 geometry。
+- PR #240 merge SHA 为 `869e1f0f1ae5bd490cacfb6066fd27205f054100`。正式 replay
+  run `32237794907` 复用数值源 run `32222254605`，以 source workflow SHA
+  `51c93cf0111415b35bb199376c358782c0f5a2f4` 校验 numerical artifacts，并单独记录
+  `postprocess_sha=869e1f0f...`；`solver_called=false`、`reference_write=false`、
+  `oracle_labels_consumed=false`。11/11 target materialized，verdict=`pilot_candidate`，
+  aggregate errors=0。该 replay 不重跑 solver，Maxwell 证据仍保持 diagnostic-only。
 
 ## Derived completion 边界
 
 `certified_layer` 保留原始 C2 证书；`completed_layer` 只能在同一 Maxwell 物理区、
 相邻已证实行之间做显式 `interpolated_noncertified` 派生，不能伪造 candidate、
 `maxwell_area` 或 strict geometry certificate，也不能自动晋升 phase-reference。
+
+## 与 crossover 全 ξ expansion 的边界
+
+Maxwell pilot/replay 已满足其自身的 11-target diagnostic gate，但不授权自动补算
+276 个 `input_incomplete` 行，也不改变 crossover μ endpoint refinement 的目标表。
+作者已另行授权 crossover 全 ξ expansion；该任务使用相同 calculation SHA、独立
+versioned workflow 和独立 aggregate，两个 route 的 target、成本和 verdict 分开记录。
 
 不修改 equilibrium solver、Maxwell、三态规则、endpoint policy 或容差；不重跑 C0/C1/C2。

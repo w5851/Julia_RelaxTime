@@ -175,6 +175,9 @@ function _run(values)
     output_dir = abspath(_required(values, "output-dir"))
     tag = get(values, "tag", "issue130_crossover_mu_endpoint_pilot_v1")
     workflow_head_sha = get(values, "workflow-head-sha", "unknown")
+    schema_version = get(values, "schema-version", SCHEMA_VERSION)
+    target_selection = get(values, "target-selection", "pilot")
+    target_selection in ("pilot", "full") || throw(ArgumentError("target-selection must be pilot or full"))
 
     row = _target_row(target_list, target_id)
     xi = _target_float(row, :xi)
@@ -240,8 +243,9 @@ function _run(values)
     derivative_peak = result.derivative_value === nothing ? NaN : Float64(result.derivative_value)
     supplemental_finite = all(row -> row.finite, response_rows)
     output = Dict(
-        "schema_version" => SCHEMA_VERSION,
+        "schema_version" => schema_version,
         "target_schema" => TARGET_SCHEMA,
+        "target_selection" => target_selection,
         "tag" => tag,
         "target_id" => target_id,
         "calculation_sha" => lowercase(calculation_sha),
@@ -295,7 +299,8 @@ function _run(values)
     _write_response_csv(joinpath(output_dir, "temperature_response.csv"), response_rows)
     _write_json(joinpath(output_dir, "target_summary.json"), output)
     _write_json(joinpath(output_dir, "provenance.json"), Dict(
-        "schema_version" => SCHEMA_VERSION,
+        "schema_version" => schema_version,
+        "target_selection" => target_selection,
         "calculation_sha" => lowercase(calculation_sha),
         "workflow_head_sha" => workflow_head_sha,
         "runner_git_commit" => _git_commit(PROJECT_ROOT),
