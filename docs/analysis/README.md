@@ -41,11 +41,13 @@
 2. `pnjl/cep_maxwell/stagec/`：四个独立的 Stage-C feasibility/certificate/tolerance replay 包。
 3. `pnjl/cep_maxwell/cascade_shadow/`：cascade production shadow 和较早的 endpoint-local full shadow；`pnjl/cep_maxwell/endpoint_local/` 保留后续 endpoint-local contract/shadow 版本。
 4. `pnjl_maxwell_*`：Maxwell endpoint、limit contract 和 tolerance feasibility。
-5. `pnjl/phase_reference_*`：对上述证据的冻结、limited-evidence 和 manual-overlay 汇总；它们是 decision/audit 层，不替代输入证据包。
+5. `pnjl/phase_reference/`：对上述证据的冻结、limited-evidence 和 manual-overlay 汇总；它们是 decision/audit 层，不替代输入证据包。
 
 ### Supporting and follow-up artifacts
 
 `pnjl/c2_followups/` 收纳 `c2_limited_feasibility_v1`、`c2_cep_xi05_high_side_extension_v1`、`c2_manual_bisection_v1` 和 `c2_targeted_manual_review_v1`；它们分别是输入合同、补点计划和人工复核包，不应与完整 phase-surface case 混成一个结果目录。`raw_curve_archive_v1` 仍是独立的外部归档指针。
+
+`pnjl/algorithmic_feasibility/` 收纳独立的解析算法可行性审计；它不替代 PNJL 数值验证，也不进入 phase-reference promotion。
 
 ## Relaxation-Time Timeline
 

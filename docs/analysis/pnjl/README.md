@@ -31,7 +31,7 @@
 | cascade/shadow | `cep_maxwell/cascade_shadow/cep_cascade_production_shadow_v1/`、`cep_maxwell/cascade_shadow/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/` |
 | endpoint-local contract/shadow | `cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_contract_feasibility_v2/`、`cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4/`、`cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/` |
 | Maxwell contracts | `cep_maxwell/maxwell_contracts/pnjl_maxwell_endpoint_candidate_feasibility_v1/`、`cep_maxwell/maxwell_contracts/pnjl_maxwell_endpoint_limit_contract_v1/`、`cep_maxwell/maxwell_contracts/pnjl_maxwell_tolerance_contract_feasibility_v1/` |
-| algorithmic feasibility | `criticality_feasibility_v1/` |
+| algorithmic feasibility | [`algorithmic_feasibility/`](algorithmic_feasibility/README.md)；当前 case：`algorithmic_feasibility/criticality_feasibility_v1/` |
 
 这些目录应按阶段串联，而不是把不同 run、不同 contract 和不同 verdict 的 CSV 合并到一个大目录。
 
