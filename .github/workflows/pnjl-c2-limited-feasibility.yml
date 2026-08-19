@@ -298,7 +298,7 @@ jobs:
           python scripts/analysis/pnjl_c2_limited_feasibility.py \
             --scope "${{ inputs.scope }}" --mode scope_plan \
             --output-dir "scope_plan/${{ inputs.scope }}" \
-            --audit-dir docs/analysis/pnjl/c2_convergence_audit_v1 \
+            --audit-dir docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1 \
             --expected-calculation-sha "$CALCULATION_SHA" \
             --source-run-id "${{ inputs.source_run_id }}"
       - name: Upload scope plan

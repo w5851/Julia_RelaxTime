@@ -3,7 +3,7 @@
   "scope": "c2_limited_feasibility",
   "cep_failure_bracket_count": 17,
   "cep_failures_file": "cep_failures.csv",
-  "source_audit": "docs/analysis/pnjl/c2_convergence_audit_v1",
+  "source_audit": "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1",
   "solver_called": false,
   "production_write": false,
   "historical_evidence_immutable": true,

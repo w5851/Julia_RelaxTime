@@ -4,7 +4,7 @@ const HIGH_SIDE_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const HIGH_SIDE_JOB = joinpath(HIGH_SIDE_ROOT, "scripts", "analysis",
     "pnjl_c2_cep_xi05_high_side_extension_job.jl")
 const HIGH_SIDE_PLAN = joinpath(HIGH_SIDE_ROOT, "docs", "analysis", "pnjl",
-    "c2_cep_xi05_high_side_extension_v1", "temperature_plan.csv")
+    "c2_followups", "c2_cep_xi05_high_side_extension_v1", "temperature_plan.csv")
 
 @testset "C2 xi=0.5 high-side extension contract" begin
     source = read(HIGH_SIDE_JOB, String)

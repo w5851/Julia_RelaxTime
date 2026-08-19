@@ -248,7 +248,7 @@
     "curves/xi_m0p35_T51__independent_oracle__curve_points.csv": "33d67083513935d3aa71e2ee4ac190e796c8c0b9375b6e656862c6f52b486291",
     "curves/xi_m0p35_T51__production_hybrid__curve_points.csv": "8e776b8039474a1b34520c20d7cf3c2a83d65827cc0ac6b907cf7f134167ec4b",
     "figures/nine_point_local_overview.png": "20b0835021665cd762f7226d3a465f049cdf15025487ce39a65133f8713d4583",
-    "figures/plot_manifest.json": "780e9dc6a40090ea7b6c6d9db29f98e5eb2889c3feafcdfde67ebaf442069bb1",
+    "figures/plot_manifest.json": "3faba2b4fe2dc809827b269cdae777123c95e45fab3ba0d42844337880027ca2",
     "figures/rho_mu_xi_0p00_T51_local_audit.png": "c3c5f8b0b969c993a5fb2e6ef5b6a375c2ae6600c1276e9fdb793a3f5fec4c50",
     "figures/rho_mu_xi_0p30_T21_local_audit.png": "547d238761a7c434998c3ed4102b1f46e86bd064dab92dd707cbb8c096fefed0",
     "figures/rho_mu_xi_0p35_T101_local_audit.png": "ce9b2f2222d11fd4c13e1001ebeeb412f0709f7cf39c8721f3f508872a674a8a",
@@ -258,11 +258,11 @@
     "figures/rho_mu_xi_m0p20_T41_local_audit.png": "f7cb3c76af04414f22f4a3085f42115b1370d3fe9e7c9c00649bdff3cfc84c35",
     "figures/rho_mu_xi_m0p25_T41_local_audit.png": "494beeb4d637f223774ef1a6200b3f36b478ac3b22844f93c1a8d0d4a8faba45",
     "figures/rho_mu_xi_m0p35_T51_local_audit.png": "ce5f5da41a32dfc425e11198a4e69942620f721e2d1d1d138ce5d509e55df47f",
-    "README.md": "f2faeaab7f2f087447c830d6cb8b085f417735ecf95aed2ebd42b2cdc4072927",
-    "tables/cep_current_failures.csv": "7015047c9cb8379b1c30e166b48849f2f8dd6d5056f73df26445adcc4b265e1f",
-    "tables/cep_refinement_plan.csv": "fa3c46c8e585c8c66ad9808991462b81321631688f9fc9c6f43cf58f0debfc45",
-    "tables/claim_ledger.csv": "be9d0d355f580346ea5e6d7295a09686ee4f033192c6d66dd50df12277e50945",
-    "tables/curve_points.csv": "9b986bdc1ae2dc80606664e70efe5d544c9b491a880ff1e0e1fc77f47b5446b4",
-    "tables/point_summary.csv": "f06185844012c36089abb44ab9bd4662be858245818baf0edc83cdc7af812faa"
+    "README.md": "2704194688cdf2e30aeaaa22479972481fe75256ae904011e8cbe289a3f1bd4e",
+    "tables/cep_current_failures.csv": "bcbc08d907b763361ece8a6589425f2a3a6cc3ebbd99b7de79b6128461729ca7",
+    "tables/cep_refinement_plan.csv": "8df2a6bcdcd7f6346116f45db9cd42c80c2728a0e45708d260b6d2b616499ff3",
+    "tables/claim_ledger.csv": "52c664fdd57b3324a2021060eb6ce399a83cbb0c35909bb8e745737b32169105",
+    "tables/curve_points.csv": "751656fa95003204601d1ff710eb4864ddc7e8ba255604bdab4d8f921f40dac6",
+    "tables/point_summary.csv": "21b1119e0a5ef2328639a6b8339afece8ef04052e94cf1408aab6971a11edca7"
   }
 }

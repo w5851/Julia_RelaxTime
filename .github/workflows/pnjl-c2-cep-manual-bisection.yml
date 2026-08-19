@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-          test "$(sha256sum docs/analysis/pnjl/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
+          test "$(sha256sum docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
 
       - name: Materialize calculation checkout and runner
         env:
@@ -86,9 +86,9 @@ jobs:
           test "$(git -C calculation rev-parse HEAD)" = "$CALCULATION_REF"
           cp scripts/analysis/pnjl_c2_cep_manual_bisection_job.jl calculation/scripts/analysis/
           cp scripts/analysis/pnjl_c2_cep_limited_feasibility_job.jl calculation/scripts/analysis/
-          mkdir -p calculation/docs/analysis/pnjl/c2_manual_bisection_v1
-          cp docs/analysis/pnjl/c2_manual_bisection_v1/temperature_plan.csv calculation/docs/analysis/pnjl/c2_manual_bisection_v1/
-          test "$(sha256sum calculation/docs/analysis/pnjl/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
+          mkdir -p calculation/docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1
+          cp docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/temperature_plan.csv calculation/docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/
+          test "$(sha256sum calculation/docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
 
       - name: Setup Julia
         uses: julia-actions/setup-julia@v2
@@ -120,7 +120,7 @@ jobs:
             --calculation-sha "$CALCULATION_REF" \
             --postprocess-sha "$POSTPROCESS_SHA" \
             --source-run-id "$SOURCE_RUN_ID" \
-            --plan-file "docs/analysis/pnjl/c2_manual_bisection_v1/temperature_plan.csv" \
+            --plan-file "docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/temperature_plan.csv" \
             --output-dir "../artifacts/xi_${XI}"
 
       - name: Upload manual bisection numerical artifact
@@ -166,7 +166,7 @@ jobs:
 
       - name: Verify plan hash
         shell: bash
-        run: test "$(sha256sum docs/analysis/pnjl/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
+        run: test "$(sha256sum docs/analysis/pnjl/c2_followups/c2_manual_bisection_v1/temperature_plan.csv | awk '{print $1}')" = "$PLAN_SHA256"
 
       - name: Download exactly three source artifacts
         env:

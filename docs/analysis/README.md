@@ -45,7 +45,7 @@
 
 ### Supporting and follow-up artifacts
 
-`c2_limited_feasibility_v1`、`c2_cep_xi05_high_side_extension_v1`、`c2_manual_bisection_v1`、`c2_targeted_manual_review_v1` 和 `raw_curve_archive_v1` 分别是输入合同、补点计划、人工复核或外部归档指针。它们有使用价值，但不应与完整 phase-surface case 混成一个结果目录。
+`pnjl/c2_followups/` 收纳 `c2_limited_feasibility_v1`、`c2_cep_xi05_high_side_extension_v1`、`c2_manual_bisection_v1` 和 `c2_targeted_manual_review_v1`；它们分别是输入合同、补点计划和人工复核包，不应与完整 phase-surface case 混成一个结果目录。`raw_curve_archive_v1` 仍是独立的外部归档指针。
 
 ## Relaxation-Time Timeline
 
