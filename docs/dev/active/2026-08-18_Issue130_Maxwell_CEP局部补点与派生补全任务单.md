@@ -1,6 +1,6 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
-状态：active；solver-free preflight 已完成，作者已授权 11-target numerical pilot；workflow/collector 正在独立分支 focused 验证。
+状态：active；11-target numerical pilot 已完成数值计算，aggregate 因 summary 身份字段兼容问题暂未通过；当前进行 solver-free materialization repair。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -27,9 +27,9 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
   目标只保留为 `input_incomplete`，不得自动进入 numerical。
 - 每个数值目标必须重新取得完整 `rho-mu` 曲线，执行公共 Maxwell、三态和 geometry；
   candidate 必须唯一，三个交点 finite/有序，且不放宽 position/density/area 门禁。
-- 成本只报告 `rho=0:0.00625:4` 的 641 点单位；wall time 未测量。当前 pilot 为
-  `authorized_pending_workflow_merge`，预检通过不等于 Maxwell certificate 或
-  production feasibility。pilot 额外记录最多 12 个当前 crossing bracket midpoint，
+- 成本只报告 `rho=0:0.00625:4` 的 641 点单位；wall time 未测量。预检通过不等于
+  Maxwell certificate 或 production feasibility。pilot 额外记录最多 12 个当前
+  crossing bracket midpoint，
   并按每级 strict candidate 结果计费。
 
 ## Numerical pilot implementation
@@ -40,10 +40,20 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
 - 固定 11 个 `pilot_candidate` target；每个目标先完整计算
   `rho=0:0.00625:4`，随后最多补 12 个当前三交点 bracket midpoint；不读取 oracle
   标签，不写 phase-reference。
-- focused CI 通过并合并后，使用 calculation SHA
-  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 触发 numerical pilot；若有 solver、
-  finite、重复 key、provenance 或 candidate/geometry failure，停止并保留
-  `pilot_inconclusive` evidence。
+- focused CI 已通过并合并；使用 calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 的 numerical pilot run 为
+  `32222254605`，workflow/postprocess SHA 为
+  `51c93cf0111415b35bb199376c358782c0f5a2f4`。11/11 target 均生成 653 点完整
+  曲线、唯一三交点和 geometry convergence；总 unique solves 为 7183，targeted
+  additions 为 132，solver failure/nonfinite/retry/fallback 均为 0。数值 artifact
+  已下载到 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\maxwell_cep_local_pilot_32222254605`。
+- 初始 aggregate verdict 为 `pilot_inconclusive`，唯一错误是所有
+  `target_summary.json` 缺少 calculation/workflow SHA；对应 `provenance.json` 与
+  `manifest.json` 的 SHA 均正确。因此当前 repair 只更新 aggregate collector：
+  两个身份源一致且符合输入时允许 summary 缺失字段，并记录
+  `aggregate_identity_fallback_v1` 与缺失字段；summary 存在但错误、或两个身份源不一致时仍失败。
+  修复后使用同一 numerical run 做 aggregate replay，不重跑 solver；replay 完成前
+  不启动 crossover 全 xi expansion。
 
 ## Derived completion 边界
 
