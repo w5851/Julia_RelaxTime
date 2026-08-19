@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-18"
+updated_at = "2026-08-19"
 
 [[tracks]]
 id = "issue130-phase"
@@ -9,19 +9,22 @@ status = "review"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；先完成已授权的 8-target crossover μ pilot，再决定是否扩展全部 xi；审核前不得启动 reference promotion。"
+next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；8-target crossover μ pilot 已通过并获授权扩展全部 xi，先完成 crossover 全 xi numerical expansion；Maxwell pilot、reference promotion 和 RS transport 仍保持独立且暂停。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
 current_branch = ""
 current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
-run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418"]
+run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
   "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
   "run:31714535418",
+  "run:32139943632",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49",
 ]
-updated_at = "2026-08-15"
+updated_at = "2026-08-19"
 
 [[tracks]]
 id = "rs-transport"
@@ -147,10 +150,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md"
 reason = "C2 full-hybrid evidence remains under author review; targeted raw-curve closure is an independent diagnostic overlay and cannot silently promote the phase reference."
-next_action = "保留已完成的 T 方向 CEP overlay，不再 dispatch cep_brackets；完成 regression_curves 状态审核后，转入 μ endpoint refinement 的 solver-free target-list/cost preflight。"
+next_action = "保留已完成的 T 方向 CEP overlay，不再 dispatch cep_brackets；8-target crossover μ pilot 已通过并获授权扩展全部 xi，先完成该 numerical expansion，再审核 completed/derived 输出；Maxwell route 保持独立。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "run:31999149922", "run:32014476047"]
+evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "run:31999149922", "run:32014476047", "run:32139943632"]
 
 [[items]]
 id = "issue130-mu-endpoint-refinement"
@@ -160,10 +163,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md"
 reason = "C2 v5 显示 crossover 在 CEP 附近存在原生 mu sampling gap；本任务只补 crossover 物理侧，Maxwell geometry/unresolved gap 由独立 companion task 处理。"
-next_action = "已授权并实现 8-target crossover μ numerical pilot；先完成 workflow focused checks 和 Actions 结果审计，再决定是否扩展全部 xi。"
+next_action = "8-target crossover μ pilot 已完成并通过 solver-free/Actions 审计；作者已授权扩展全部 xi，下一步运行同一 calculation SHA 的 crossover 全 xi numerical expansion，完成前不生成 completed/derived artifact。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047"]
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19"]
 
 [[items]]
 id = "issue130-maxwell-cep-local-refinement"
