@@ -39,12 +39,14 @@
 
 | 层级 | 当前路径 | 作用 |
 | --- | --- | --- |
-| current freeze | `phase_reference_current_state_freeze_v1/` | 汇总当前 C1/C2/endpoint evidence 的状态冻结 |
-| limited evidence | `phase_reference_limited_evidence_audit_v1/` | raw-curve coverage 和 shape audit |
-| manual overlay | `phase_reference_manual_overlay_promotion_audit_v1/` | manual CEP/curve overlay 的晋升阻塞审计 |
+| current freeze | [`phase_reference/phase_reference_current_state_freeze_v1/`](phase_reference/phase_reference_current_state_freeze_v1/) | 汇总当前 C1/C2/endpoint evidence 的状态冻结 |
+| limited evidence | [`phase_reference/phase_reference_limited_evidence_audit_v1/`](phase_reference/phase_reference_limited_evidence_audit_v1/) | raw-curve coverage 和 shape audit |
+| manual overlay | [`phase_reference/phase_reference_manual_overlay_promotion_audit_v1/`](phase_reference/phase_reference_manual_overlay_promotion_audit_v1/) | manual CEP/curve overlay 的晋升阻塞审计 |
 | raw archive pointer | `raw_curve_archive_v1/` | 完整 raw curve 外部归档的 provenance 入口 |
 
 `phase_reference_*` 是汇总/决策层。它们可以引用下游 case，但不能取代下游 manifest、hash、失败点或 unresolved 语义。冻结包记录生成时的路径和 hash；本次 namespace 整理不重写这些历史快照。
+
+详细入口见 [`phase_reference/README.md`](phase_reference/README.md)。
 
 ## Reading Order
 

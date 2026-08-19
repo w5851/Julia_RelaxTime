@@ -57,7 +57,7 @@
 
 - 先用本索引表达 `line`, `role`, `status`, `depends_on` 和 `supersedes`，再考虑目录迁移。
 - 版本化 evidence package 保持自包含；同 hash 只说明部分派生表或图相同，不自动说明整个 case 可以删除。
-- 汇总包和输入包分开：`phase_reference_current_state_freeze_v1` 等可以指向下游证据，但不能吞并或改写其 manifest/hash。
+- 汇总包和输入包分开：`pnjl/phase_reference/` 下的 phase-reference 包可以指向下游证据，但不能吞并或改写其 manifest/hash。
 - 历史图和治理快照只做逻辑归类，不批量重命名或重绘。
 - 新增分析包优先使用 `<domain>/<case>_analysis/README.md + manifest.json + figures/ + tables/` 结构，并在本索引登记。
 
