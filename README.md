@@ -1,8 +1,10 @@
 # Julia RelaxTime
 
-Julia PNJL/NJL 计算平台：相图与扫描、Mott 相变/介子质量、各向异性输运/弛豫时间、介子热力学、`Models` 统一入口与可复现工作流。
+Julia PNJL/NJL 计算平台：相图与扫描、Mott 相变/介子质量、各向异性输运/弛豫时间与守恒荷扩散系数、介子热力学、`Models` 统一入口与可复现工作流。
 
 [![Latest Release](https://img.shields.io/github/v/release/w5851/Julia_RelaxTime?label=release)](https://github.com/w5851/Julia_RelaxTime/releases/latest)
+
+> **当前实现总览（建议先读）**：按完整计算流程查看已实现路线、公式信源、代码入口、测试层级与验证边界，请先阅读 [已实现计算能力与方法追踪清单](docs/reference/implemented_capabilities.md)。
 
 [中文](#中文) | [面向-llm--agent](#面向-llm--agent)
 
@@ -110,8 +112,8 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
 | PNJL 相结构 / 相图产线 | 生成 boundary/spinodal/crossover/CEP 与报告 | `scripts/pnjl/calculate_phase_structure.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/calculate_phase_structure.jl --preset=smoke --output_dir=data/outputs/results/phase_smoke` |
 | PNJL T-μ / T-ρ 扫描 | `Models` 主链统一网格扫描、单点/批量求解 | `scripts/models/run_unified_scan.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/models/run_unified_scan.jl scan tmu --model_kind=PNJL --T_values=150 --mu_values=0,100 --xi_values=0.0 --output_path=data/outputs/results/tmu_smoke.csv --overwrite=true` |
 | 守恒荷易感性与累积量 | `chi_BQS` / cumulant / `Ssigma` / `kappa_sigma2` | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/pnjl/run_conserved_charge_susceptibilities.jl --help` |
-| 各向异性 PNJL 输运系数扫描（PNJL_aniso） | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl --help` |
-| RelxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
+| 各向异性 PNJL 输运系数扫描 | 平衡求解 + 弛豫时间 + RTA 输运系数批量计算 | `scripts/relaxtime/run_gap_transport_scan.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_gap_transport_scan.jl --help` |
+| RelaxTime 工作流编排 | 统一触发 `transport` / `cross-section` 产线 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/relaxtime/run_relaxtime_orchestrator.jl transport --help` |
 | 模型服务/API 调用 | 通过 HTTP 服务调用模型求解能力 | `scripts/server/server_full.jl` | `powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scripts/server/server_full.jl` |
 
 #### B. 专题能力入口（研究/后处理常用）
@@ -153,10 +155,9 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
   - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
-  - phase-guided production-grade asset（mode a）：`data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
-  - phase-guided production-grade 图层（mode a）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
-  - phase-guided production-grade asset（mode b）：`data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
-  - phase-guided production-grade 图层（mode b）：`data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
+  - phase-guided 当前 formal case（mode a/b，高 `xi` 分辨率）：`first_canonical_v1_p128_xi001_validated_anchored_prod_v1`
+  - phase-guided 低 `xi` 分辨率 anchor / p104-vs-p128 收敛依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
+  - 两个 case 的完整结果、图层和 convergence evidence 路径以 `docs/guides/scripts/README.md` 的当前登记为准。
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
   - 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`
@@ -211,7 +212,8 @@ julia --project=. -e 'ENV["UNIT_PROFILE"]="smoke"; include("tests/unit/runtests.
 
 - `docs/api/README.md`
 - `docs/architecture/`
-- `docs/reference/`
+- [参考资料总入口](docs/reference/README.md)
+- [已实现计算能力与方法追踪清单](docs/reference/implemented_capabilities.md)
 
 ## 6) 仓库结构（极简图）
 
