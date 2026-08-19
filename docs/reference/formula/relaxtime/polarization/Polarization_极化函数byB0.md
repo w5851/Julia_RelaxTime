@@ -12,7 +12,7 @@
 ## 3. 数学表达式
 ### 3.1 原始公式
 ```math
-\Pi_{ff'}^{P,S}(k_0,\vec{k}) = -\frac{N_c}{8\pi^2} \left\{ A(m_f,\mu_f,T) + A(m_f',\mu_f',T) + [(m_f \mp m_f')^2 - (k_0 + \mu_f - \mu_f')^2 + k^2] \times B_0(|\vec{k}|, m_f,\mu_f,m_f',\mu_f',k_0,T) \right\}
+\Pi_{f f^{\prime}}^{P,S}(k_0,\vec{k}) = -\frac{N_c}{8\pi^2} \left\{ A(m_f,\mu_f,T) + A(m_{f^{\prime}},\mu_{f^{\prime}},T) + [(m_f \mp m_{f^{\prime}})^2 - (k_0 + \mu_f - \mu_{f^{\prime}})^2 + k^2] \times B_0(|\vec{k}|, m_f,\mu_f,m_{f^{\prime}},\mu_{f^{\prime}},k_0,T) \right\}
 ```
 
 ### 3.2 程序实现形式

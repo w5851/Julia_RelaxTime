@@ -313,7 +313,7 @@ J = \begin{pmatrix}
 
 ### 3.4 极化函数
 ```math
-\Pi_{f}^{P,S}(p_0,k) = -\frac{N_c}{8\pi^2}\left\{A(m_f,\mu_f,T) + A(m_{f'},\mu_{f'},T) + [(m_f \mp m_{f'})^2 - (p_0 + \mu_f - \mu_{f'})^2 + p^2] \times B_0(|\vec{p}|, m_f,\mu_f,m_{f'},\mu_{f'},p_0,T)\right\}
+\Pi_{f f^{\prime}}^{P,S}(p_0,k) = -\frac{N_c}{8\pi^2}\left\{A(m_f,\mu_f,T) + A(m_{f^{\prime}},\mu_{f^{\prime}},T) + [(m_f \mp m_{f^{\prime}})^2 - (p_0 + \mu_f - \mu_{f^{\prime}})^2 + p^2] \times B_0(|\vec{p}|, m_f,\mu_f,m_{f^{\prime}},\mu_{f^{\prime}},p_0,T)\right\}
 ```
 
 ## 4. 参数说明表
