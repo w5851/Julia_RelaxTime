@@ -4,7 +4,7 @@
 
 本目录保存已从 `data/outputs/figures/relaxtime/literature` 迁入的五张历史比较图。它们保留为 `analysis/legacy` evidence，不是当前 `strict` 或 `current_candidate` 正式图，也不构成 external validation gate。
 
-本次迁移只涉及图像文件和本说明；原始结果 CSV、文献 target、绘图脚本和数值语义不变。源文件的 SHA-256 记录在 `docs/analysis/figure_asset_registry_v1/asset_registry.json`、`cleanup_preflight_v1.json` 和 `retirement_execution_v1.json`。
+本次迁移只涉及图像文件和本说明；原始结果 CSV、文献 target、绘图脚本和数值语义不变。源文件的 SHA-256 记录在 `docs/analysis/governance/figure_asset_registry_v1/asset_registry.json`、`cleanup_preflight_v1.json` 和 `retirement_execution_v1.json`。
 
 ## 图像
 

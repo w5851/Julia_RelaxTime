@@ -18,8 +18,8 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_PREFLIGHT = Path("docs/analysis/figure_asset_registry_v1/cleanup_preflight_v1.json")
-DEFAULT_OUTPUT = Path("docs/analysis/figure_asset_registry_v1/retirement_execution_v1.json")
+DEFAULT_PREFLIGHT = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_preflight_v1.json")
+DEFAULT_OUTPUT = Path("docs/analysis/governance/figure_asset_registry_v1/retirement_execution_v1.json")
 OLD_TOKEN = "first_canonical_v1_p128_validated_anchored_prod_v1"
 NEW_TOKEN = "first_canonical_v1_p128_xi005_validated_anchored_prod_v1"
 

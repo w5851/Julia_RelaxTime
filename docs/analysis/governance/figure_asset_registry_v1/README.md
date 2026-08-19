@@ -41,8 +41,8 @@ PR B 的执行 manifest 由 `scripts/plotting/build_figure_retirement_manifest.p
 ```powershell
 python scripts/plotting/inventory_figure_assets.py `
   --root data/outputs/figures `
-  --registry docs/analysis/figure_asset_registry_v1/asset_registry.json `
-  --candidates docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv `
+  --registry docs/analysis/governance/figure_asset_registry_v1/asset_registry.json `
+  --candidates docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv `
   --overwrite
 ```
 

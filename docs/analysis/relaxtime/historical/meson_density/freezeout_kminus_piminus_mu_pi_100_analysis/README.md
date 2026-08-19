@@ -24,4 +24,4 @@
 
 ## Manifest 处理
 
-`plot_manifest.json` 只更新了两个图像路径字段，使其指向本 analysis 目录；source comparison CSV、图像像素和数值语义均未改动。迁移前后 manifest hash、路径和验证结果记录在 `docs/analysis/figure_asset_registry_v1/retirement_execution_v1.json`。
+`plot_manifest.json` 只更新了两个图像路径字段，使其指向本 analysis 目录；source comparison CSV、图像像素和数值语义均未改动。迁移前后 manifest hash、路径和验证结果记录在 `docs/analysis/governance/figure_asset_registry_v1/retirement_execution_v1.json`。

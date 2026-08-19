@@ -120,17 +120,17 @@ status = "active"
 current_task = "docs-analysis-logical-group-migration"
 blocked_by = []
 unlocks = []
-next_action = "完成 PNJL/Mott 独立证据线归入 pnjl/mott 并验证；随后审阅仍有明确 namespace 收益的顶层目录，metadata repair follow-up 保持独立。"
+next_action = "完成 figure asset registry 治理包归入 governance/figure_asset_registry_v1 并验证；随后审阅 literature protocol 入口，metadata repair follow-up 保持独立。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "codex/analysis-clean-up"
-current_sha = "8d91bd4ef7b6a6a76dada26988a68fa3e2df4487"
+current_sha = "ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a"
 run_ids = []
 evidence = [
   "file:docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
-  "sha:8d91bd4ef7b6a6a76dada26988a68fa3e2df4487",
-  "file:docs/analysis/pnjl/mott/README.md",
+  "sha:ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a",
+  "file:docs/analysis/governance/README.md",
 ]
 updated_at = "2026-08-19"
 
@@ -235,13 +235,13 @@ status = "active"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
 reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
-next_action = "完成 PNJL/Mott 独立证据线归入 pnjl/mott 并验证；随后审阅仍有明确 namespace 收益的顶层目录，保留 metadata repair follow-up。"
+next_action = "完成 figure asset registry 治理包归入 governance/figure_asset_registry_v1 并验证；随后审阅 literature protocol 入口，保留 metadata repair follow-up。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "sha:8d91bd4ef7b6a6a76dada26988a68fa3e2df4487",
+  "sha:ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a",
   "file:docs/analysis/README.md",
-  "file:docs/analysis/pnjl/mott/README.md",
+  "file:docs/analysis/governance/README.md",
 ]
 
 [[items]]

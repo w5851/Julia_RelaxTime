@@ -26,6 +26,7 @@
 - [x] 将独立算法可行性审计迁入 `docs/analysis/pnjl/algorithmic_feasibility/`。
 - [x] 将 phase-guided transport v1/v2 连续证据线迁入 `docs/analysis/relaxtime/phase_guided_transport/`，新增分组入口并同步 live 脚本路径。
 - [x] 将独立 PNJL/Mott 证据线从 `docs/analysis/pnjl_mott/` 迁入 `docs/analysis/pnjl/mott/`，新增分组入口并同步当前索引。
+- [x] 将 figure asset registry 治理包从 `docs/analysis/figure_asset_registry_v1/` 迁入 `docs/analysis/governance/figure_asset_registry_v1/`，同步 live plotting 入口和当前文档引用。
 
 每批迁移均使用显式路径、单独审阅、`R100`/hash 核对和独立提交；`raw_curve_archive_v1/` 继续作为独立外部归档指针保留在 PNJL 根目录。
 
@@ -42,7 +43,16 @@
 - logical boundary：`xi` 依赖、Mott 温度、介子谱、复极点机制和文献定位；与 Issue #130 phase-reference 决策线分离；
 - migration boundary：既有 13 个分析/图像/CSV 文件整体迁移；新增 `pnjl/mott/README.md` 作为分组入口；仅修正 supporting note 中两个指向旧 namespace 的路径文字；不重算、不重绘、不改 CSV/PNG 科学内容；
 - post-migration verification：destination payload 仍为 13 files、1,157,738 bytes；12 个既有文件为 `R100`，supporting note 为 `R097` 且仅有 namespace 文字差异；destination-root inventory SHA-256：`1787eac6aa611765d77fb05f0e7138c2b1dab12b868e379d652b5c858d84c2dd`；
-- historical boundary：`docs/dev/archived/**` 审批记录和 `figure_asset_registry_v1/` 生成/清理快照中的旧路径不改写；
+- historical boundary：`docs/dev/archived/**` 审批记录和 `docs/analysis/governance/figure_asset_registry_v1/` 生成/清理快照中的旧路径不改写；
+- metadata boundary：本批不处理任何 manifest/checksum mismatch；metadata repair 继续作为独立 follow-up。
+
+### Batch review: figure asset registry governance
+
+- source root：`docs/analysis/figure_asset_registry_v1/`；destination root：`docs/analysis/governance/figure_asset_registry_v1/`；既有 payload 为 7 files、1,432,945 bytes；迁移前 source-root inventory SHA-256：`83ec8a59933e3e4cf8877d1080f366e8650f1306a954fa9349ecb73525cfe51f`；
+- logical boundary：历史 figure inventory、作者审核、cleanup preflight、retirement 和 relocation provenance；这是治理材料，不与科学分析包合并；
+- migration boundary：7 个既有治理文件整体迁移；新增 `docs/analysis/governance/README.md`；README 只更新当前重建命令的 canonical path；三个 plotting live 入口、SOP、authority map、当前历史分析 README 和活动清理任务单同步路径；
+- historical boundary：`asset_registry.json`、`cleanup_preflight_v1.json`、`retirement_execution_v1.json`、`relocation_execution_v1.json` 和作者审核记录的生成时路径、hash、状态均不重写；
+- post-migration verification：destination payload 仍为 7 files、1,432,967 bytes；6 个既有文件为 `R100`，README 为 `R94` 且仅有 canonical path 文字变化；destination-root inventory SHA-256：`4ff83974b7c709b404f624f62bb8925fbc5e21849cea338a2d0db3287b527df3`；不执行删除、重绘或数值重算；
 - metadata boundary：本批不处理任何 manifest/checksum mismatch；metadata repair 继续作为独立 follow-up。
 
 ## 3. Required Follow-up: Analysis Metadata Repair

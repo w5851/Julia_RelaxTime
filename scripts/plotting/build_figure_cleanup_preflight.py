@@ -18,9 +18,9 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = Path("docs/analysis/figure_asset_registry_v1/asset_registry.json")
-DECISION_PATH = Path("docs/analysis/figure_asset_registry_v1/author_review_decisions.md")
-OUTPUT_PATH = Path("docs/analysis/figure_asset_registry_v1/cleanup_preflight_v1.json")
+REGISTRY_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/asset_registry.json")
+DECISION_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/author_review_decisions.md")
+OUTPUT_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_preflight_v1.json")
 
 DELETE_FILES = [
     Path("data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf"),
@@ -92,7 +92,7 @@ UNTRACKED_EXCLUSION_ROOTS = [
 
 HISTORICAL_REFERENCE_PATHS = {
     REGISTRY_PATH,
-    Path("docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv"),
+    Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv"),
     DECISION_PATH,
     OUTPUT_PATH,
     Path("scripts/plotting/build_figure_cleanup_preflight.py"),
