@@ -427,7 +427,7 @@ end
 function _parse_tolerance_replay_args(args)
     base_dir = nothing
     tolerance_dir = nothing
-    output_dir = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl",
+    output_dir = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "cep_maxwell", "stagec",
         "cep_hybrid_stagec_tolerance_replay_v1")
     for arg in args
         startswith(arg, "--base-input-dir=") && (base_dir = abspath(split(arg, "="; limit=2)[2]))

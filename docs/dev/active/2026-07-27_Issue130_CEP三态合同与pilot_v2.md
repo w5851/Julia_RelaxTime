@@ -171,7 +171,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] v2 verdict 为 `oracle_inconclusive`：5 个低温 oracle-ambiguous 点被离线
   Stage-C 证书确认，已写入 `deep_oracle_required.csv`，不自动晋升为物理结论。
 - [x] 新 evidence 写入
-  `docs/analysis/pnjl/cep_hybrid_stagec_certificate_feasibility_v2/`，保留 v1
+  `docs/analysis/pnjl/cep_maxwell/stagec/cep_hybrid_stagec_certificate_feasibility_v2/`，保留 v1
   evidence 原样；代表性曲线图、作者裁决 provenance、manifest 和 claim ledger 已生成。
 - [x] focused Julia helper `13/13`、Julia parser、Python `py_compile` 和
   `git diff --check` 通过；完整 PNJL solver 未在本机调用。
@@ -297,7 +297,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   anchor 被 hybrid 证书确认，以及 5 个旧 oracle/hybrid 分类 mismatch，因此主 verdict
   保持 `oracle_inconclusive`，没有 `selected_policy`。
 - [x] 新 evidence 写入
-  `docs/analysis/pnjl/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
+  `docs/analysis/pnjl/cep_maxwell/stagec/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
   cost frontier、五点 tolerance certificate、curve identity audit、双 run provenance、
   manifest 和 claim ledger；不复制原始曲线。
 - [ ] 因 replay 未得到 `feasible_candidate`，不创建 adaptive Stage-C production PR，

@@ -37,7 +37,7 @@
 这些目录形成一条证据链，但每个阶段回答的问题不同：
 
 1. `pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v1/`、`pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v2/`：局部 CEP 三态合同和 pilot 演进。
-2. `cep_hybrid_stagec_*`、`cep_cascade_production_shadow_v1`：Stage-C、cascade 和 certificate feasibility/replay。
+2. `pnjl/cep_maxwell/stagec/`：四个独立的 Stage-C feasibility/certificate/tolerance replay 包；`cep_cascade_production_shadow_v1` 另属 shadow 阶段。
 3. `pnjl_cep_endpoint_local_*`、`pnjl/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`：endpoint-local shadow 和 full hybrid candidate。
 4. `pnjl_maxwell_*`：Maxwell endpoint、limit contract 和 tolerance feasibility。
 5. `pnjl/phase_reference_*`：对上述证据的冻结、limited-evidence 和 manual-overlay 汇总；它们是 decision/audit 层，不替代输入证据包。
