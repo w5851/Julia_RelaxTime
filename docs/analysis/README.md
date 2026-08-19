@@ -18,7 +18,7 @@
 | --- | --- | --- | --- |
 | PNJL / Issue #130 | [`pnjl/`](pnjl/README.md) | C1/C2、CEP、Maxwell、phase-reference 证据线 | 按 C1、C2、CEP/Maxwell、phase-reference 分组；各版本目录保持独立 |
 | PNJL / C1 surface views | `pnjl/c1_surface_views/` | 同一 C1 source run 的两个坐标投影 | 共享输入但图轴语义不同；保留为两个独立 view |
-| PNJL / Mott | [`pnjl_mott/`](pnjl_mott/) | 独立的 Mott/复极点和文献解释链 | 不属于 Issue #130 phase-reference 线 |
+| PNJL / Mott | [`pnjl/mott/`](pnjl/mott/) | 独立的 Mott/复极点和文献解释链 | 归入 PNJL 域，但不属于 Issue #130 phase-reference 线 |
 | Relaxation-time / transport | [`relaxtime/`](relaxtime/README.md) | phase-guided transport、T200 tau spike、传播子机制诊断 | v2 明确继承 v1；T200 已收纳为独立 diagnostic package |
 | Historical comparison | `relaxtime/historical/`、`historical/legacy/` | 历史图、文献比较和复用审计 | 保留上下文；不能自动升级为 strict、regression truth 或 external validation gate |
 | Figure governance | `figure_asset_registry_v1/` | 资产清理、迁移和 provenance 快照 | 这是治理材料，不与科学分析包合并 |
@@ -49,6 +49,10 @@
 
 `pnjl/algorithmic_feasibility/` 收纳独立的解析算法可行性审计；它不替代 PNJL 数值验证，也不进入 phase-reference promotion。
 
+### Mott and complex-pole evidence
+
+`pnjl/mott/` 收纳各向异性参数 `xi`、Mott 温度、介子质量/宽度、复极点机制和文献定位的独立分析线。该逻辑组与 Issue #130 的 phase-reference 决策层保持分离；其 `figures/` 和说明文档用于诊断与论文讨论准备，不是新的 production result root。
+
 ## Relaxation-Time Timeline
 
 1. `relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/` 是 v1 tau-first 突变和 denominator-chain 分析主包。
@@ -66,5 +70,5 @@
 ## Safe Follow-up Order
 
 1. 维护 `pnjl/c1_surface_views/` 两个 projection view 的路径、manifest 和轴语义边界。
-2. 将 C2 v1-v5、CEP/Maxwell 阶段和 phase-guided transport v1/v2 按逻辑线继续分批迁移。
-3. 每批物理迁移都必须同步脚本、任务单、manifest、figure registry 的当前引用，并通过 docs consistency。
+2. 继续维护 C2、CEP/Maxwell、phase-reference、Mott 和 phase-guided transport 各自的逻辑线边界，不合并不同 verdict 或 provenance 的证据包。
+3. 每批物理迁移都必须同步当前索引、任务单和必要的 live 入口，并通过 docs consistency；历史快照和 metadata repair 保持独立。

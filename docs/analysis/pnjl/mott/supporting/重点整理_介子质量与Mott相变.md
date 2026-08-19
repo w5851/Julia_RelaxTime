@@ -16,7 +16,7 @@
 
 ## 二、核心物理解释：四层因果链（对应核心说明第6点）
 
-**核心说明第6点的要求**：物理解释的完整讨论放在`docs\analysis\pnjl_mott`中，论文里只保留核心结论的简要描述。
+**核心说明第6点的要求**：物理解释的完整讨论放在`docs\analysis\pnjl\mott`中，论文里只保留核心结论的简要描述。
 
 **论文现状（main.tex）**：Section 4（Physical Mechanism）已构建了四层因果链框架，Section 5（Results）用数据和图像支撑。
 
@@ -114,4 +114,4 @@
 
 ---
 
-**建议**：以上内容可作为`docs\analysis\pnjl_mott`分析笔记的核心框架，论文Discussion部分按四层因果链展开，每个层次配相应的数值证据和物理直觉描述。
+**建议**：以上内容可作为`docs\analysis\pnjl\mott`分析笔记的核心框架，论文Discussion部分按四层因果链展开，每个层次配相应的数值证据和物理直觉描述。

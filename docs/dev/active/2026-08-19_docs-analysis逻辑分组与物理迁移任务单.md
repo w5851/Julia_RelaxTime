@@ -25,6 +25,7 @@
 - [x] 将 phase-reference 决策证据迁入 `docs/analysis/pnjl/phase_reference/`，提交 `8c41919a`。
 - [x] 将独立算法可行性审计迁入 `docs/analysis/pnjl/algorithmic_feasibility/`。
 - [x] 将 phase-guided transport v1/v2 连续证据线迁入 `docs/analysis/relaxtime/phase_guided_transport/`，新增分组入口并同步 live 脚本路径。
+- [x] 将独立 PNJL/Mott 证据线从 `docs/analysis/pnjl_mott/` 迁入 `docs/analysis/pnjl/mott/`，新增分组入口并同步当前索引。
 
 每批迁移均使用显式路径、单独审阅、`R100`/hash 核对和独立提交；`raw_curve_archive_v1/` 继续作为独立外部归档指针保留在 PNJL 根目录。
 
@@ -34,6 +35,15 @@
 - pre-migration inventory SHA-256：`caac52b4cd9a7c503dce218298bf1389b90d756bd0aadcb0670e9829a7231fc4`、`f34b9b095af6ee35bb142913626f72ca9f731749e4d7a3b70eb7f9fc9b4c6c67`；
 - migration boundary：仅改变物理 namespace 和 live 入口，包内生成时 manifest、图 manifest、旧路径快照、CSV/JSON/PNG 和 provenance 不重写；
 - pre-existing metadata note：v1 root `manifest.json` 已有 `outputs` 2/21 hash mismatch；本批不修复，已登记到 metadata repair follow-up。
+
+### Batch review: PNJL/Mott evidence line
+
+- source root：`docs/analysis/pnjl_mott/`；destination root：`docs/analysis/pnjl/mott/`；既有 payload 为 13 files、1,157,737 bytes；迁移前 source-root inventory SHA-256：`cefabf25274504eaaa0608f2a2b94eb2d91c1c8e29d913ce75980c52302bbe0e`；
+- logical boundary：`xi` 依赖、Mott 温度、介子谱、复极点机制和文献定位；与 Issue #130 phase-reference 决策线分离；
+- migration boundary：既有 13 个分析/图像/CSV 文件整体迁移；新增 `pnjl/mott/README.md` 作为分组入口；仅修正 supporting note 中两个指向旧 namespace 的路径文字；不重算、不重绘、不改 CSV/PNG 科学内容；
+- post-migration verification：destination payload 仍为 13 files、1,157,738 bytes；12 个既有文件为 `R100`，supporting note 为 `R097` 且仅有 namespace 文字差异；destination-root inventory SHA-256：`1787eac6aa611765d77fb05f0e7138c2b1dab12b868e379d652b5c858d84c2dd`；
+- historical boundary：`docs/dev/archived/**` 审批记录和 `figure_asset_registry_v1/` 生成/清理快照中的旧路径不改写；
+- metadata boundary：本批不处理任何 manifest/checksum mismatch；metadata repair 继续作为独立 follow-up。
 
 ## 3. Required Follow-up: Analysis Metadata Repair
 

@@ -1,6 +1,14 @@
 # PNJL Analysis Index
 
-本目录是 PNJL，尤其是 Issue #130 phase-reference 相关的诊断证据集合。各 case 的 `manifest.json`、`decision.json` 和 `AUDIT.md` 是本 case 的边界；本索引只建立研究线和时间线，不把 diagnostic candidate 晋升为 production/reference。
+本目录是 PNJL 诊断证据集合，包含 Issue #130 phase-reference 证据线和独立的 Mott/复极点分析线。各 case 的 `manifest.json`、`decision.json` 和 `AUDIT.md` 是本 case 的边界；本索引只建立研究线和时间线，不把 diagnostic candidate 晋升为 production/reference。
+
+## Independent Mott evidence line
+
+| 逻辑角色 | 当前路径 | 说明 |
+| --- | --- | --- |
+| Mott / complex-pole analysis | [`mott/`](mott/README.md) | `xi` 依赖、Mott 温度、介子谱、复极点机制和文献定位；独立于 Issue #130 phase-reference promotion |
+
+该目录只是把已有的 PNJL/Mott namespace 收入 PNJL 域，不合并其分析结论、图像或输入到 C1/C2/CEP/Maxwell evidence package。
 
 ## Issue #130 Logical Groups
 
