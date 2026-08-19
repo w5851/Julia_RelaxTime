@@ -1,0 +1,3 @@
+claim_id,claim,status,evidence,boundary
+maxwell_local_solver_free,target selection is solver-free,supported,manifest.json; tables/target_list.csv,not a physical certificate
+maxwell_local_pilot_pending,numerical pilot is not authorized,supported,README.md; tables/cost_envelope.csv,requires separate author authorization

@@ -1,0 +1,55 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "files": {
+    "README.md": "757561eb7cf604a110c8bc582345594096790d24992501752a8f49c1bc8e548f",
+    "tables/claim_ledger.csv": "eddbc0395b3180123c0f10043a5edf8e3f3672761e0a7811c9327f0c6fdf0ba4",
+    "tables/cost_envelope.csv": "f58b174b48c65666f59b2aac66cfb55acab6e54784d52ea46f654e5cdd247c75",
+    "tables/preflight_summary.json": "86bf53abcfe8092a5a14a7240c10a122d125af39ea8cf440015b907323744385",
+    "tables/target_list.csv": "9815c773b1bd0c0091db915e72c11908f5a518faae7982d646333a4e2cead863"
+  },
+  "generated_at_utc": "2026-08-18T11:55:29.318250+00:00",
+  "policy": {
+    "base_rho_keys_per_target": 641,
+    "representative_xi": [
+      -0.5,
+      0.0,
+      0.2875,
+      0.5
+    ],
+    "rho_base_step": 0.00625,
+    "rho_max": 4.0
+  },
+  "reference_write": false,
+  "route": "maxwell_local",
+  "run_mode": "solver_free_preflight",
+  "schema_version": "pnjl_issue130_endpoint_refinement_preflight_v1",
+  "solver_called": false,
+  "source_hashes": {
+    "tables/crossover_cep_sampling_gap.csv": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+    "tables/crossover_maxwell_endpoint_separation.csv": "9811c473dccf3c5a6a1fae461e3afa04954ad1a4fd462695703b340bce037fe8",
+    "tables/grid_unresolved_diagnostics.csv": "ab0640f7ee7d7cd503095d66e7a5c061371af82ad7c0be559f874940c49497fc",
+    "tables/maxwell_surface_point_status.csv": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+    "v5_manifest.json": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6"
+  },
+  "source_run_id": "31862752226",
+  "summary": {
+    "candidate_count": 760,
+    "cep_window_below_bracket_low_MeV": 8.0,
+    "eligible_existing_boundary_targets": 484,
+    "input_incomplete_targets": 276,
+    "non_unresolved_maxwell_rows": 2815,
+    "outside_window_unresolved_rows": 3587,
+    "reason_counts": {
+      "input_incomplete": 276,
+      "mixed_geometry_interpolation": 69,
+      "rho_geometry": 57,
+      "temperature_interpolation": 221,
+      "xi_interpolation": 137
+    },
+    "representative_pilot_target_count": 11,
+    "source_grid_rows": 5424,
+    "source_maxwell_rows": 6886,
+    "unkeyable_grid_rows": 28
+  },
+  "verdict": "maxwell_local_target_list_ready_cost_unmeasured"
+}
