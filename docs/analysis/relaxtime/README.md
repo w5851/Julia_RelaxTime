@@ -8,10 +8,12 @@
 
 | 阶段 | 当前路径 | 作用 |
 | --- | --- | --- |
-| v1 tau-first analysis | `phase_guided_transport_p128_xi001_analysis/` | 识别 tau/channel-rate 突变、下游输运响应和 denominator-chain 候选 |
-| v2 pole-sensitive rendering | `phase_guided_transport_v2_pole_sensitive_rendering/` | 在 v2 on-shell-kernel production 上迁移机制证据，加入 v2 定点诊断、pole mask 和一阶分支保护 |
+| v1 tau-first analysis | `phase_guided_transport/phase_guided_transport_p128_xi001_analysis/` | 识别 tau/channel-rate 突变、下游输运响应和 denominator-chain 候选 |
+| v2 pole-sensitive rendering | `phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/` | 在 v2 on-shell-kernel production 上迁移机制证据，加入 v2 定点诊断、pole mask 和一阶分支保护 |
 
 v2 的 `tables/window_classification.csv` 明确引用 v1 的 `mechanism_window_summary.csv`，所以两者属于同一逻辑线的连续阶段；v2 不应覆盖或重写 v1。
+
+该逻辑线的物理分组入口见 [`phase_guided_transport/`](phase_guided_transport/README.md)。目录迁移只改变 namespace；包内生成时 manifest、图 manifest、旧路径快照和 provenance 保持原样。
 
 ### T200 tau-u spike package
 

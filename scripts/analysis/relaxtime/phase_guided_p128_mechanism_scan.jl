@@ -8,7 +8,14 @@ const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(@__DIR__, "t190_sigma_chain_decomposition_lib.jl"))
 
 const CASE = "first_canonical_v1_p128_xi001_validated_anchored_prod_v1"
-const DEFAULT_ANALYSIS_DIR = joinpath(PROJECT_ROOT, "docs", "analysis", "relaxtime", "phase_guided_transport_p128_xi001_analysis")
+const DEFAULT_ANALYSIS_DIR = joinpath(
+    PROJECT_ROOT,
+    "docs",
+    "analysis",
+    "relaxtime",
+    "phase_guided_transport",
+    "phase_guided_transport_p128_xi001_analysis",
+)
 const DEFAULT_CANDIDATE_CSV = joinpath(DEFAULT_ANALYSIS_DIR, "tables", "mechanism_window_candidates.csv")
 const DEFAULT_OUT_DIR = joinpath(DEFAULT_ANALYSIS_DIR, "tables")
 

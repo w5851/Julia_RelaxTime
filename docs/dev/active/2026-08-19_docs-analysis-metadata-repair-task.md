@@ -6,7 +6,7 @@
 
 ## 目标
 
-审阅并修复 phase-reference 诊断包中 `manifest.json` / `checksums.sha256` 与当前文件字节不一致的问题，恢复可验证的输出 metadata 合同。
+审阅并修复 phase-reference 与 phase-guided transport 诊断包中 `manifest.json` / `checksums.sha256` 与当前文件字节不一致的问题，恢复可验证的输出 metadata 合同。
 
 ## 已知范围
 
@@ -18,11 +18,16 @@
 
 目录已迁移到 `docs/analysis/pnjl/phase_reference/`；上述计数是包内输出文件相对其自身 manifest 的 mismatch，不是路径迁移引入的变化。
 
+本批迁移前追加审阅：
+
+- `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/manifest.json` 的 `outputs` 有 2/21 个条目与当前文件字节不一致（`README.md`、`figures/plot_manifest.json`）；该 mismatch 在目录迁移前已存在；
+- v2 包 `manifest.json` 的 `outputs` 为 0/52 mismatch；不新增修复范围。
+
 ## Scope Lock
 
 允许修改：
 
-- 三个 phase-reference 包内的 `manifest.json`、`checksums.sha256` 或明确属于 hash registry 的元数据；
+- phase-reference 包和 phase-guided transport v1 包内的 `manifest.json`、`checksums.sha256` 或明确属于 hash registry 的元数据；
 - 为验证修复所需的只读脚本或审计记录。
 
 明确不修改：

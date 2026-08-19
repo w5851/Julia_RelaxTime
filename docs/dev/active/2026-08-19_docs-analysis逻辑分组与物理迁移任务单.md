@@ -24,12 +24,20 @@
 - [x] 将 C1/C2 surface views、C2 audits/follow-ups 和 CEP/Maxwell evidence 按逻辑线分组。
 - [x] 将 phase-reference 决策证据迁入 `docs/analysis/pnjl/phase_reference/`，提交 `8c41919a`。
 - [x] 将独立算法可行性审计迁入 `docs/analysis/pnjl/algorithmic_feasibility/`。
+- [x] 将 phase-guided transport v1/v2 连续证据线迁入 `docs/analysis/relaxtime/phase_guided_transport/`，新增分组入口并同步 live 脚本路径。
 
 每批迁移均使用显式路径、单独审阅、`R100`/hash 核对和独立提交；`raw_curve_archive_v1/` 继续作为独立外部归档指针保留在 PNJL 根目录。
 
+### Batch review: phase-guided transport
+
+- source roots：`phase_guided_transport_p128_xi001_analysis/`（22 files，1,447,033 bytes）和 `phase_guided_transport_v2_pole_sensitive_rendering/`（53 files，8,352,342 bytes）；
+- pre-migration inventory SHA-256：`caac52b4cd9a7c503dce218298bf1389b90d756bd0aadcb0670e9829a7231fc4`、`f34b9b095af6ee35bb142913626f72ca9f731749e4d7a3b70eb7f9fc9b4c6c67`；
+- migration boundary：仅改变物理 namespace 和 live 入口，包内生成时 manifest、图 manifest、旧路径快照、CSV/JSON/PNG 和 provenance 不重写；
+- pre-existing metadata note：v1 root `manifest.json` 已有 `outputs` 2/21 hash mismatch；本批不修复，已登记到 metadata repair follow-up。
+
 ## 3. Required Follow-up: Analysis Metadata Repair
 
-- [ ] 单独建立 metadata 修复批次，处理 phase-reference 包中既有的 `manifest.json` / `checksums.sha256` 与当前文件字节不一致问题。
+- [ ] 单独建立 metadata 修复批次，处理 phase-reference 包及 phase-guided transport v1 包中既有的 `manifest.json` / `checksums.sha256` 与当前文件字节不一致问题。
 
 当前已知范围（2026-08-18 迁移前审阅）：
 

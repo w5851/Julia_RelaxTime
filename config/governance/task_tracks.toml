@@ -120,16 +120,17 @@ status = "active"
 current_task = "docs-analysis-logical-group-migration"
 blocked_by = []
 unlocks = []
-next_action = "完成 algorithmic-feasibility 批次；随后按独立 follow-up 审阅 phase-reference manifest/checksum metadata，不修改数值证据。"
+next_action = "完成 phase-guided transport v1/v2 逻辑组迁移并验证；随后审阅 remaining relaxtime roots，metadata repair follow-up 保持独立。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "codex/analysis-clean-up"
-current_sha = "8c41919a2b2f50fc9745d6aa6b53cd83232a8dac"
+current_sha = "07ab8e6dcab98afb109b841d239b9e967cbaa417"
 run_ids = []
 evidence = [
   "file:docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
-  "sha:8c41919a2b2f50fc9745d6aa6b53cd83232a8dac",
+  "sha:07ab8e6dcab98afb109b841d239b9e967cbaa417",
+  "file:docs/analysis/relaxtime/phase_guided_transport/README.md",
 ]
 updated_at = "2026-08-19"
 
@@ -234,13 +235,13 @@ status = "active"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
 reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
-next_action = "完成 algorithmic feasibility 批次并单独提交；保留 metadata repair follow-up。"
+next_action = "完成 phase-guided transport v1/v2 逻辑组迁移并验证；随后审阅 remaining relaxtime roots，保留 metadata repair follow-up。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "sha:8c41919a2b2f50fc9745d6aa6b53cd83232a8dac",
+  "sha:07ab8e6dcab98afb109b841d239b9e967cbaa417",
   "file:docs/analysis/README.md",
-  "file:docs/analysis/pnjl/README.md",
+  "file:docs/analysis/relaxtime/phase_guided_transport/README.md",
 ]
 
 [[items]]
@@ -250,7 +251,7 @@ classification = "required_follow_up"
 status = "triaged"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/active/2026-08-19_docs-analysis-metadata-repair-task.md"
-reason = "phase-reference evidence packages contain pre-existing manifest/checksum hashes that do not match current file bytes; the repair must remain separate from namespace migration."
+reason = "phase-reference and phase-guided transport v1 evidence packages contain pre-existing manifest/checksum hashes that do not match current file bytes; the repair must remain separate from namespace migration."
 next_action = "冻结当前文件字节和旧 hash，逐包决定并重算 metadata；不重生成 CSV/JSON/PNG，不改变 verdict，并单独提交。"
 blocked_by = []
 backlog_file = ""
@@ -258,6 +259,7 @@ evidence = [
   "file:docs/analysis/pnjl/phase_reference/phase_reference_current_state_freeze_v1/manifest.json",
   "file:docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json",
   "file:docs/analysis/pnjl/phase_reference/phase_reference_manual_overlay_promotion_audit_v1/manifest.json",
+  "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/manifest.json",
 ]
 
 [[items]]

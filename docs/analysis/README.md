@@ -51,8 +51,8 @@
 
 ## Relaxation-Time Timeline
 
-1. `phase_guided_transport_p128_xi001_analysis/` 是 v1 tau-first 突变和 denominator-chain 分析主包。
-2. `phase_guided_transport_v2_pole_sensitive_rendering/` 是基于 v2 on-shell-kernel production 的迁移和派生显示审计；其表格直接引用 v1 机制摘要，同时新增 v2 定点诊断和一阶分支保护。
+1. `relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/` 是 v1 tau-first 突变和 denominator-chain 分析主包。
+2. `relaxtime/phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/` 是基于 v2 on-shell-kernel production 的迁移和派生显示审计；其表格直接引用 v1 机制摘要，同时新增 v2 定点诊断和一阶分支保护。
 3. `relaxtime/transport/t200_tauu_spikes/` 现在收纳 T200 tau-u 双窗口机制包，包括两份 Markdown 说明和 `tauu_pos_*.png` 机制图；其默认绘图输出已同步指向该目录。
 
 ## Organization Rules
