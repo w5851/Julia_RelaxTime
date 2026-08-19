@@ -9,20 +9,24 @@ status = "review"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；Maxwell 11-target numerical pilot 已完成但 aggregate 被 summary 身份字段兼容问题阻塞，先完成 solver-free materialization repair/replay；通过后再运行 crossover 全 xi expansion；reference promotion 和 RS transport 仍暂停。"
+next_action = "T 方向 CEP bracket 已由不可变 author overlay 收口；Maxwell numerical pilot 已完成，PR #239 后的 replay 因 source/postprocess SHA 混用未通过，先完成 replay provenance repair 并复用同一 numerical run；通过后再运行 crossover 全 xi expansion；reference promotion 和 RS transport 仍暂停。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
 current_branch = ""
 current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
-run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632"]
+run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
   "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
   "run:31714535418",
   "run:32139943632",
+  "run:32222254605",
+  "run:32225731719",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49",
+  "sha:51c93cf0111415b35bb199376c358782c0f5a2f4",
+  "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a",
 ]
 updated_at = "2026-08-19"
 
@@ -176,10 +180,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md"
 reason = "C2 v5 Maxwell boundary 仍有 CEP 近端 support/geometry unresolved 行；crossover μ endpoint 补点不改变固定 (xi,T) Maxwell rho geometry。"
-next_action = "11-target Maxwell numerical pilot run 32222254605 已完成且数值/geometry 通过；先合并 aggregate identity fallback repair 并用同一 run replay，276 个 input_incomplete 行不得自动补算；replay 通过后才决定 crossover 全 xi。"
+next_action = "11-target Maxwell numerical pilot run 32222254605 已完成且数值/geometry 通过；PR #239 已合并但 replay 32225731719 暴露 source/postprocess SHA 混用，先完成 replay provenance repair 并用同一 run 重放；276 个 input_incomplete 行不得自动补算，replay 通过后才决定 crossover 全 xi。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "note:numerical 11/11 succeeded; aggregate identity fallback repair pending"]
+evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32225731719", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a", "note:numerical 11/11 succeeded; replay blocked only by source/postprocess SHA role mix-up; provenance repair pending"]
 
 [[items]]
 id = "plot-sop-independent-land"

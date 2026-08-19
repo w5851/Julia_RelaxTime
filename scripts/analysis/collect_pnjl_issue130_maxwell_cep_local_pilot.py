@@ -14,7 +14,7 @@ from pathlib import Path
 SCHEMA_VERSION = "pnjl_issue130_maxwell_cep_local_pilot_v1"
 RUNNER_SCHEMA = SCHEMA_VERSION
 MAX_TARGETED = 12
-MATERIALIZATION_CONTRACT_VERSION = "aggregate_identity_fallback_v1"
+MATERIALIZATION_CONTRACT_VERSION = "aggregate_replay_provenance_v2"
 IDENTITY_FIELDS = ("calculation_sha", "workflow_head_sha")
 
 
@@ -248,10 +248,16 @@ def main() -> int:
     parser.add_argument("--target-list", type=Path, required=True)
     parser.add_argument("--calculation-sha", required=True)
     parser.add_argument("--postprocess-sha", required=True)
+    parser.add_argument(
+        "--source-workflow-sha",
+        default="",
+        help="workflow head that produced source numerical artifacts; defaults to postprocess SHA",
+    )
     parser.add_argument("--run-mode", choices=("numerical", "aggregate_replay"), default="numerical")
     parser.add_argument("--source-run-id", default="")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    source_workflow_sha = args.source_workflow_sha or args.postprocess_sha
     expected = target_rows(args.target_list)
     directories = artifact_dirs(args.input_dir)
     errors: list[str] = []
@@ -265,7 +271,7 @@ def main() -> int:
             errors.append(f"{target_id}: numerical artifact missing")
             continue
         summary, curve_index, target_errors, target_hashes, fallback_fields = validate_target(
-            target_id, expected_row, directory, args.calculation_sha, args.postprocess_sha
+            target_id, expected_row, directory, args.calculation_sha, source_workflow_sha
         )
         errors.extend(target_errors)
         if summary:
@@ -311,6 +317,7 @@ def main() -> int:
         "source_run_id": args.source_run_id or None,
         "calculation_sha": args.calculation_sha,
         "postprocess_sha": args.postprocess_sha,
+        "source_workflow_sha": source_workflow_sha,
         "materialization_contract_version": MATERIALIZATION_CONTRACT_VERSION,
         "expected_target_count": len(expected),
         "materialized_target_count": len(summaries),
@@ -318,8 +325,8 @@ def main() -> int:
         "unexpected_target_ids": unexpected,
         "errors": errors,
         "identity_fallbacks": identity_fallbacks,
-        "identity_fallback_rule": "missing_summary_identity_uses_verified_provenance_and_manifest_v1",
-        "solver_called": True,
+        "identity_fallback_rule": "missing_summary_identity_uses_verified_source_provenance_and_manifest_v2",
+        "solver_called": args.run_mode == "numerical",
         "reference_write": False,
         "oracle_labels_consumed": False,
         "target_list_sha256": sha256(args.target_list),
@@ -330,7 +337,10 @@ def main() -> int:
         json.dumps(
             {
                 "materialization_contract_version": MATERIALIZATION_CONTRACT_VERSION,
-                "identity_fallback_rule": "missing_summary_identity_uses_verified_provenance_and_manifest_v1",
+                "identity_fallback_rule": "missing_summary_identity_uses_verified_source_provenance_and_manifest_v2",
+                "postprocess_sha": args.postprocess_sha,
+                "source_workflow_sha": source_workflow_sha,
+                "solver_called": args.run_mode == "numerical",
                 "target_identity_fallbacks": identity_fallbacks,
             },
             indent=2,
@@ -351,7 +361,7 @@ def main() -> int:
     (args.output_dir / "README.md").write_text(
         f"# Issue #130 Maxwell CEP-local pilot\n\nverdict: `{verdict}`\n\n"
         "This artifact is diagnostic-only. It reruns the complete rho curve and the public strict candidate contract for the 11 authorized targets. It does not write phase-reference, read oracle labels, or alter C0/C1/C2 evidence.\n\n"
-        f"Aggregate materialization contract: `{MATERIALIZATION_CONTRACT_VERSION}`. Missing identity fields in target summaries are accepted only when provenance and manifest agree with the requested immutable inputs; the fallback is recorded in manifest.json and materialization_diagnostics.json.\n",
+        f"Aggregate materialization contract: `{MATERIALIZATION_CONTRACT_VERSION}`. Missing identity fields in target summaries are accepted only when provenance and manifest agree with the source workflow SHA; the aggregate postprocess SHA is recorded separately. Replay sets `solver_called=false`; the fallback is recorded in manifest.json and materialization_diagnostics.json.\n",
         encoding="utf-8",
     )
     return 0 if verdict == "pilot_candidate" else 2

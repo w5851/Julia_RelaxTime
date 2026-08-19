@@ -46,6 +46,12 @@ def test_runner_and_collector_preserve_diagnostic_boundaries():
     assert "pilot_candidate" in collector
     assert "solver_or_curve_failure" in collector
     assert "MAX_TARGETED = 12" in runner
+    assert "--source-workflow-sha" in collector
+    assert "source_workflow_sha" in collector
+    assert '"solver_called": args.run_mode == "numerical"' in collector
+    assert "args.run_mode == \"numerical\"" in collector
+    assert "headSha" in WORKFLOW.read_text(encoding="utf-8")
+    assert "SOURCE_WORKFLOW_SHA" in WORKFLOW.read_text(encoding="utf-8")
 
 
 def _write_target_artifact(

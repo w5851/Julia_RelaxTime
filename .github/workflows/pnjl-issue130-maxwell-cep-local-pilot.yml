@@ -203,9 +203,15 @@ jobs:
           SOURCE_RUN_ID: ${{ inputs.source_run_id }}
         run: |
           set -euo pipefail
-          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion)"
+          source_json="$(gh run view "$SOURCE_RUN_ID" --json status,conclusion,headSha)"
           test "$(echo "$source_json" | jq -r .status)" = completed
           test "$(echo "$source_json" | jq -r .conclusion)" = success
+          source_workflow_sha="$(echo "$source_json" | jq -r .headSha)"
+          [[ "$source_workflow_sha" =~ ^[0-9a-fA-F]{40}$ ]] || {
+            echo "source run headSha is not an immutable SHA" >&2
+            exit 1
+          }
+          echo "SOURCE_WORKFLOW_SHA=$source_workflow_sha" >> "$GITHUB_ENV"
           mkdir -p target-artifacts
           gh run download "$SOURCE_RUN_ID" \
             --pattern 'issue130-maxwell-cep-local-*' \
@@ -229,6 +235,7 @@ jobs:
             --target-list "$TARGET_LIST" \
             --calculation-sha "$CALCULATION_SHA" \
             --postprocess-sha "$POSTPROCESS_SHA" \
+            --source-workflow-sha "$SOURCE_WORKFLOW_SHA" \
             --run-mode aggregate_replay \
             --source-run-id "${{ inputs.source_run_id }}"
           status=$?
