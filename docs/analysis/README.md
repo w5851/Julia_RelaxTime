@@ -22,7 +22,7 @@
 | Relaxation-time / transport | [`relaxtime/`](relaxtime/README.md) | phase-guided transport、T200 tau spike、传播子机制诊断 | v2 明确继承 v1；T200 已收纳为独立 diagnostic package |
 | Historical comparison | `relaxtime/historical/`、`historical/legacy/` | 历史图、文献比较和复用审计 | 保留上下文；不能自动升级为 strict、regression truth 或 external validation gate |
 | Figure governance | `governance/figure_asset_registry_v1/` | 资产清理、迁移和 provenance 快照 | 这是治理材料，不与科学分析包合并 |
-| Analysis protocol | `literature_to_implementation_protocol.md` | 文献到实现的工作协议 | 流程文档，不是具体 case 的结果包 |
+| Analysis protocol | `governance/literature_to_implementation_protocol.md` | 文献到实现的工作协议 | 流程文档，不是具体 case 的结果包 |
 
 ## PNJL Timeline
 

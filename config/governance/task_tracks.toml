@@ -116,21 +116,21 @@ updated_at = "2026-08-18"
 [[tracks]]
 id = "analysis-docs-cleanup"
 title = "docs/analysis logical grouping and namespace migration"
-status = "active"
+status = "accepted"
 current_task = "docs-analysis-logical-group-migration"
 blocked_by = []
 unlocks = []
-next_action = "完成 figure asset registry 治理包归入 governance/figure_asset_registry_v1 并验证；随后审阅 literature protocol 入口，metadata repair follow-up 保持独立。"
+next_action = "物理 namespace 迁移已完成；保留 docs-analysis-metadata-repair 为独立 required follow-up，不在本任务中修改 metadata。"
 required_author_review = false
 author_review_status = "not_required"
 promotion_required = false
 current_branch = "codex/analysis-clean-up"
-current_sha = "ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a"
+current_sha = "24ea4222e589e40f6f10fb3e91aaa683581c6130"
 run_ids = []
 evidence = [
   "file:docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
-  "sha:ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a",
-  "file:docs/analysis/governance/README.md",
+  "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
+  "file:docs/analysis/governance/literature_to_implementation_protocol.md",
 ]
 updated_at = "2026-08-19"
 
@@ -231,17 +231,17 @@ evidence = [
 id = "docs-analysis-logical-group-migration"
 track_id = "analysis-docs-cleanup"
 classification = "independent"
-status = "active"
+status = "accepted"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
 reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
-next_action = "完成 figure asset registry 治理包归入 governance/figure_asset_registry_v1 并验证；随后审阅 literature protocol 入口，保留 metadata repair follow-up。"
+next_action = "物理 namespace 迁移已完成；保留 metadata repair follow-up，单独冻结并修复 hash metadata。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "sha:ca95dc6374dbf0cd2f5c6bfb920b791cca4b2c6a",
+  "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
   "file:docs/analysis/README.md",
-  "file:docs/analysis/governance/README.md",
+  "file:docs/analysis/governance/literature_to_implementation_protocol.md",
 ]
 
 [[items]]

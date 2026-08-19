@@ -2,7 +2,7 @@
 
 创建日期：2026-08-19
 
-状态：`active_batch_migration`。本任务只整理诊断分析树的 namespace 和入口，不改变数值语义、正式产物或 production promotion 状态。
+状态：`namespace_migration_complete`；metadata repair 保持独立 deferred follow-up。本任务只整理诊断分析树的 namespace 和入口，不改变数值语义、正式产物或 production promotion 状态。
 
 ## 1. Scope Lock
 
@@ -27,6 +27,7 @@
 - [x] 将 phase-guided transport v1/v2 连续证据线迁入 `docs/analysis/relaxtime/phase_guided_transport/`，新增分组入口并同步 live 脚本路径。
 - [x] 将独立 PNJL/Mott 证据线从 `docs/analysis/pnjl_mott/` 迁入 `docs/analysis/pnjl/mott/`，新增分组入口并同步当前索引。
 - [x] 将 figure asset registry 治理包从 `docs/analysis/figure_asset_registry_v1/` 迁入 `docs/analysis/governance/figure_asset_registry_v1/`，同步 live plotting 入口和当前文档引用。
+- [x] 将 literature-to-implementation protocol 从 `docs/analysis/literature_to_implementation_protocol.md` 迁入 `docs/analysis/governance/literature_to_implementation_protocol.md`，同步仓库指导、当前索引和治理入口。
 
 每批迁移均使用显式路径、单独审阅、`R100`/hash 核对和独立提交；`raw_curve_archive_v1/` 继续作为独立外部归档指针保留在 PNJL 根目录。
 
@@ -45,6 +46,14 @@
 - post-migration verification：destination payload 仍为 13 files、1,157,738 bytes；12 个既有文件为 `R100`，supporting note 为 `R097` 且仅有 namespace 文字差异；destination-root inventory SHA-256：`1787eac6aa611765d77fb05f0e7138c2b1dab12b868e379d652b5c858d84c2dd`；
 - historical boundary：`docs/dev/archived/**` 审批记录和 `docs/analysis/governance/figure_asset_registry_v1/` 生成/清理快照中的旧路径不改写；
 - metadata boundary：本批不处理任何 manifest/checksum mismatch；metadata repair 继续作为独立 follow-up。
+
+### Batch review: literature-to-implementation protocol
+
+- source file：`docs/analysis/literature_to_implementation_protocol.md`；destination file：`docs/analysis/governance/literature_to_implementation_protocol.md`；既有 payload 为 1 file、2,296 bytes；迁移前 SHA-256：`5061a0bee31d9aad23cac476d0945926022e8736a71b13564414d50922c800d6`；
+- logical boundary：项目级文献到实现路由、证据到代码规则和与 `D:\Desktop\paper\bib` 的交接边界；属于流程治理，不属于 PNJL、transport 或 historical 科学结果包；
+- migration boundary：只移动协议文件；同步 `AGENTS.md`、`docs/analysis/README.md`、`docs/analysis/governance/README.md` 和本任务单/ledger 的入口引用；协议正文、分析产物、manifest/checksum 和外部 bibliography 不改动；
+- post-migration verification：目标文件仍为 1 file、2,296 bytes，迁移识别为 `R100`，目标 SHA-256 保持 `5061a0bee31d9aad23cac476d0945926022e8736a71b13564414d50922c800d6`；根目录不再保留独立 protocol 文件；
+- closure boundary：本批完成 `docs/analysis` 的物理 namespace 迁移；剩余 `docs-analysis-metadata-repair` 只处理既有 metadata mismatch，不属于目录迁移。
 
 ### Batch review: figure asset registry governance
 
@@ -73,3 +82,9 @@
 - JSON 解析、脚本 AST/入口 smoke 和 `git diff --check`；
 - `check_task_ledger.jl`、`check_docs_consistency.jl`、`check_active_docs_governance.jl` 和 `check_script_entrypoints.jl`；
 - 每批只暂存本批路径、索引、脚本和 task evidence，并使用符合近期历史的 `docs:` commit。
+
+## 5. Namespace Migration Closure
+
+- [x] `docs/analysis` 顶层的独立 protocol 文件已归入 `governance/`；其余顶层内容为总索引 `README.md`。
+- [x] `pnjl/`、`relaxtime/`、`historical/` 和 `governance/` 已按逻辑域建立入口；没有发现需要继续物理迁移的同等级未分组目录。
+- [ ] `docs-analysis-metadata-repair`：继续作为独立 required follow-up，不能因 namespace migration 完成而关闭。
