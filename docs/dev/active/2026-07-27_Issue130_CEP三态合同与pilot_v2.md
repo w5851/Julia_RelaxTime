@@ -214,7 +214,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 扫描内部 area tolerance `1e-4/5e-5/1e-5/5e-6`。五个低温 anchor 在严格
   `5e-6` 下均保持两层 `+→−→+` topology、Maxwell residual、position/density geometry
   和迭代预算通过；`1e-5→5e-6` 未发生候选切换。
-- [x] 输出 `docs/analysis/pnjl_maxwell_tolerance_contract_feasibility_v1/`，含逐层
+- [x] 输出 `docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_tolerance_contract_feasibility_v1/`，含逐层
   frontier、逐点 summary、输入曲线索引、manifest、claim ledger 和 audit；
   `solver_called=false`，不复制原始曲线、不修改 production/reference/history。
 - [x] focused Julia `14/14`、Python `2 passed`、parser 和 `git diff --check` 通过。
@@ -404,7 +404,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `endpoint_limited_first_order`；兼容 scalar `rho_hadron` 使用 `0.0`，并同时保存真实上界，
   不新增第四种物理状态，也不硬编码特定 `(xi,T)` 例外。
 - [x] 当前分支 `codex/issue-130-maxwell-endpoint-limit-contract` 以 solver-free 方式生成
-  `docs/analysis/pnjl_maxwell_endpoint_limit_contract_v1/`，固定校验 source run、双 SHA、两个
+  `docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_endpoint_limit_contract_v1/`，固定校验 source run、双 SHA、两个
   manifest SHA、三交点唯一性、逐级 bracket 二分、Maxwell/geometry、finite/key uniqueness
   和成本守恒；derived verdict 为 `endpoint_limited_first_order_candidate`。
 - [ ] endpoint-limit evidence PR 合并后，另开公共 Maxwell/hybrid production PR，将该证书

@@ -529,7 +529,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     targeted_arg = _arg(ARGS, "--targeted-input", nothing)
     targeted = targeted_arg === nothing ? nothing : abspath(String(targeted_arg))
     output = abspath(String(_arg(ARGS, "--output-dir",
-        joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl_maxwell_endpoint_candidate_feasibility_v1"))))
+        joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "cep_maxwell", "maxwell_contracts", "pnjl_maxwell_endpoint_candidate_feasibility_v1"))))
     manifest = replay_input(deep, output; targeted_input_dir=targeted)
     println(JSON3.write(manifest))
 end

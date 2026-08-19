@@ -423,7 +423,7 @@ end
 
 function _parse_args(args)
     input_dir = nothing
-    output_dir = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl_maxwell_tolerance_contract_feasibility_v1")
+    output_dir = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "cep_maxwell", "maxwell_contracts", "pnjl_maxwell_tolerance_contract_feasibility_v1")
     for arg in args
         startswith(arg, "--input-dir=") && (input_dir = abspath(split(arg, "="; limit=2)[2]))
         startswith(arg, "--output-dir=") && (output_dir = abspath(split(arg, "="; limit=2)[2]))
