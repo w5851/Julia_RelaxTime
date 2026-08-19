@@ -1,6 +1,7 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
-状态：active；11-target numerical pilot 已完成数值计算，aggregate 因 summary 身份字段兼容问题暂未通过；当前进行 solver-free materialization repair。
+状态：active；11-target numerical pilot 已完成数值计算；PR #239 已合并，但首次正式
+aggregate replay 暴露 source/postprocess SHA 混用，当前进行 solver-free replay provenance repair。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -47,13 +48,20 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
   曲线、唯一三交点和 geometry convergence；总 unique solves 为 7183，targeted
   additions 为 132，solver failure/nonfinite/retry/fallback 均为 0。数值 artifact
   已下载到 `D:\Desktop\Julia_RelaxTime_issue130_artifacts\maxwell_cep_local_pilot_32222254605`。
-- 初始 aggregate verdict 为 `pilot_inconclusive`，唯一错误是所有
+- numerical run 后的初始 aggregate verdict 为 `pilot_inconclusive`，唯一错误是所有
   `target_summary.json` 缺少 calculation/workflow SHA；对应 `provenance.json` 与
   `manifest.json` 的 SHA 均正确。因此当前 repair 只更新 aggregate collector：
   两个身份源一致且符合输入时允许 summary 缺失字段，并记录
-  `aggregate_identity_fallback_v1` 与缺失字段；summary 存在但错误、或两个身份源不一致时仍失败。
-  修复后使用同一 numerical run 做 aggregate replay，不重跑 solver；replay 完成前
-  不启动 crossover 全 xi expansion。
+-  `aggregate_identity_fallback_v1` 与缺失字段；summary 存在但错误、或两个身份源不一致时仍失败。
+- PR #239 merge SHA 为 `ebf8e9199ff81bbb31df7f38cf0368a0040c103a`。其正式 replay
+  run `32225731719` 保持 11/11 artifact 完整，但 verdict 为 `pilot_inconclusive`：
+  collector 将 source numerical workflow SHA `51c93cf0111415b35bb199376c358782c0f5a2f4`
+  错误地与新的 postprocess SHA `ebf8e919...` 比较。该失败不涉及 solver、曲线、Maxwell
+  或 geometry。
+- 当前 repair 将 source workflow SHA 与 postprocess SHA 分离：source run 的
+  `headSha` 用于校验 numerical artifact，当前 merge SHA 单独写入 aggregate
+  `postprocess_sha`；replay aggregate 明确记录 `solver_called=false`。修复后仍复用
+  run `32222254605`，不重跑 solver；replay 完成前不启动 crossover 全 xi expansion。
 
 ## Derived completion 边界
 
