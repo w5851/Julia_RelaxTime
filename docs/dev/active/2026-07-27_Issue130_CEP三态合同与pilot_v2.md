@@ -679,7 +679,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] full numerical shadow `31351527152` 的 9/9 jobs 成功；aggregate replay
   `31352083775` 为 `final`，24 anchors 全覆盖并得到 `full_hybrid_candidate`。计算 SHA、
   workflow/postprocess SHA、source/deep run 和 artifact hashes 记录在
-  `docs/analysis/pnjl/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`。
+  `docs/analysis/pnjl/cep_maxwell/cascade_shadow/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`。
 - [x] full gate 的 classification、geometry、endpoint、oracle、coverage、performance 和
   workflow contract errors 均为空；hybrid 为 `12,845` unique solves、dense 为 `15,384`，
   runner time `289.68 s` 对 `287.70 s`，比值约 `1.007`，在 `1.10` 允许噪声内，fallback/retry
