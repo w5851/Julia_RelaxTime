@@ -25,7 +25,7 @@ reference。三态合同 merge SHA 为
    plot、workflow 和 focused contract 验证；完整数值由 GitHub Actions 运行 cascade
    discovery、dense baseline 和独立 oracle。
 4. [x] pilot v2 数值 run 与 aggregate replay 完成，证据导入
-   `docs/analysis/pnjl/cep_narrow_pilot_v2/`；当前停在作者对 CEP 区间、原始 rho–mu
+   `docs/analysis/pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v2/`；当前停在作者对 CEP 区间、原始 rho–mu
    曲线、准确度和性能证据的物理审核。
 5. [ ] production integration 通过后，才重放全温区 phase-reference；reference 审核后再启动 transport。
 
@@ -80,7 +80,7 @@ reference。三态合同 merge SHA 为
   `d2f8b1d0c2fb7a6cec7d21a1076a1d24639c9ca5` 完成；`status=pass`、
   `oracle_status=stable`、`cascade_status=within_oracle`，Actions critical path
   `1247 s`、runner-minutes `91`。
-- [x] 导入 `docs/analysis/pnjl/cep_narrow_pilot_v2/` 的聚合表、图像、manifest、
+- [x] 导入 `docs/analysis/pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v2/` 的聚合表、图像、manifest、
   plot manifest、curve index 和审计文档；原始 `curve_points.csv` 保留在 Actions/
   本地 artifact，不复制进仓库。
 - [ ] 物理审核通过后才进入 production integration、phase-reference replay 和 transport。

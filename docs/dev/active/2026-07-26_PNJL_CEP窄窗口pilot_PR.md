@@ -27,6 +27,6 @@
 - calculation SHA：`7e8b91adc0eaa2a01e1e50428870eb562febab70`；9/9 matrix job 与 aggregate success。
 - 自动 gate：`diagnostic_only`，`oracle_inconclusive`；`xi=0.5` 未形成 CEP bracket，`xi=0` oracle 的 `ΔT=+0.6875 MeV` 超过预声明 0.5 MeV 容差。
 - cascade 的 solver 工作量、residual/Jacobian 调用和 runner 秒数均低于 dense baseline；oracle 因双分辨率复核更贵。
-- 证据已导入 `docs/analysis/pnjl/cep_narrow_pilot_v1/`；不晋升 reference，不启动 transport，等待作者物理判断。
+- 证据已导入 `docs/analysis/pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v1/`；不晋升 reference，不启动 transport，等待作者物理判断。
 
 自动 gate 只产生 `pass` 或 `diagnostic_only` 诊断，不替代作者对 CEP 物理正确性的判断，也不触发 reference promotion。
