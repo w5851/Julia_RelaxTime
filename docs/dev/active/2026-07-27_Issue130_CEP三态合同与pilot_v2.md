@@ -557,7 +557,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不再按行号配对；物理区间由各自 CEP 的 `T_first_monotone_MeV` 约束，避免把一阶区间
   的平台误报为 crossover 风险。
 - [x] solver-free evidence package 已生成到
-  `docs/analysis/pnjl/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
+  `docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
   public classification regressions、16 个 CEP bracket failures、`xi=0.2875` crossover
   局部风险、代表图、manifest 和 claim ledger 均已保留；原始全量曲线不入仓库。
 - [x] PR1 已通过 focused CI 并合并为 `main@a3dc55a9672bedba5716b18be371374515109ec1`；

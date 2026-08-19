@@ -173,7 +173,7 @@ def main() -> int:
     c2_summary = [
         {
             "layer": "historical_c0_c1_c2",
-            "source": "docs/analysis/pnjl/c2_convergence_audit_v1/",
+            "source": "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/",
             "runs": "31149826740;31235607046;31258823755",
             "calculation_sha": HISTORICAL_C0_C1_C2_SHA,
             "verdict": "classification_regression",
@@ -285,7 +285,7 @@ def main() -> int:
         "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
         "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
         "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
-        "docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json",
+        "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/manifest.json",
         "config/governance/task_tracks.toml",
     ]
     for relative in repository_sources:

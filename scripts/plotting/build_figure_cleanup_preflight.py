@@ -81,7 +81,7 @@ UNTRACKED_EXCLUSION_ROOTS = [
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__line_first_v1"),
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__line_first_v2"),
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__pilot_v2"),
-    Path("docs/analysis/pnjl/c2_blocking_audit_v2"),
+    Path("docs/analysis/pnjl/c2_audits/c2_blocking_audit_v2"),
     Path("docs/analysis/pnjl/c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2"),
     Path("docs/analysis/pnjl/c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1"),
     Path("scripts/analysis/pnjl/build_c2_blocking_audit_v2.py"),
