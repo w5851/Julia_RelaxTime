@@ -19,15 +19,24 @@ def module():
     return loaded
 
 
-def write_target_artifact(root: Path, target_id: str, target_hash: str, *, found: bool = True):
+def write_target_artifact(
+    root: Path,
+    target_id: str,
+    target_hash: str,
+    *,
+    found: bool = True,
+    schema_version: str = "pnjl_issue130_crossover_mu_endpoint_pilot_v1",
+    target_selection: str | None = None,
+    workflow_sha: str = "f" * 40,
+):
     target_dir = root / target_id
     target_dir.mkdir(parents=True)
     summary = {
-        "schema_version": "pnjl_issue130_crossover_mu_endpoint_pilot_v1",
+        "schema_version": schema_version,
         "target_schema": "pnjl_issue130_endpoint_refinement_preflight_v1",
         "target_id": target_id,
         "calculation_sha": CALCULATION_SHA,
-        "workflow_head_sha": "f" * 40,
+        "workflow_head_sha": workflow_sha,
         "target_list_sha256": target_hash,
         "target": {
             "xi": 0.0,
@@ -46,9 +55,12 @@ def write_target_artifact(root: Path, target_id: str, target_hash: str, *, found
         "runner_seconds": 1.0,
         "solver": {"solver_called": True, "estimated_detector_calls": 24},
     }
+    if target_selection is not None:
+        summary["target_selection"] = target_selection
     (target_dir / "target_summary.json").write_text(json.dumps(summary), encoding="utf-8")
     (target_dir / "provenance.json").write_text(json.dumps({
         "calculation_sha": CALCULATION_SHA,
+        "workflow_head_sha": workflow_sha,
         "reference_write": False,
     }), encoding="utf-8")
     with (target_dir / "temperature_response.csv").open("w", newline="", encoding="utf-8") as handle:
@@ -96,3 +108,37 @@ def test_aggregate_stops_on_missing_target(tmp_path):
     ))
     assert status == 2
     assert json.loads((output_dir / "verdict.json").read_text(encoding="utf-8"))["verdict"] == "pilot_artifact_invalid"
+
+
+def test_full_expansion_selection_and_replay_provenance(tmp_path):
+    collector = module()
+    expected, target_hash = collector.target_index(TARGET_LIST, "full")
+    assert len(expected) == 186
+    input_dir = tmp_path / "inputs"
+    for target_id in expected:
+        write_target_artifact(
+            input_dir,
+            target_id,
+            target_hash,
+            schema_version="pnjl_issue130_crossover_mu_endpoint_expansion_v1",
+            target_selection="full",
+        )
+    output_dir = tmp_path / "aggregate"
+    status = collector.aggregate(Namespace(
+        input_dir=str(input_dir),
+        output_dir=str(output_dir),
+        target_list=str(TARGET_LIST),
+        calculation_sha=CALCULATION_SHA,
+        postprocess_sha="e" * 40,
+        source_workflow_sha="f" * 40,
+        schema_version="pnjl_issue130_crossover_mu_endpoint_expansion_v1",
+        selection="full",
+        run_mode="aggregate_replay",
+        source_run_id="12345",
+    ))
+    assert status == 0
+    manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["target_selection"] == "full"
+    assert manifest["solver_called"] is False
+    assert json.loads((output_dir / "verdict.json").read_text(encoding="utf-8"))["verdict"] == "expansion_candidate"
+    assert len(list(csv.DictReader((output_dir / "expansion_summary.csv").open(encoding="utf-8")))) == 186
