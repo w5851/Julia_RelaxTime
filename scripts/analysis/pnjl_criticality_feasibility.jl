@@ -1735,6 +1735,7 @@ function _parse_cli(args)
         "docs",
         "analysis",
         "pnjl",
+        "algorithmic_feasibility",
         "criticality_feasibility_v1",
     )
     repetitions = 100

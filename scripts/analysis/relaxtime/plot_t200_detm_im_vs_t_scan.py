@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path(r"D:\Desktop\Temp\relaxtime_t200_window\t200_detm_im_vs_t_scan_summary.csv"),
     )
-    parser.add_argument("--out-dir", type=Path, default=Path("docs/analysis/relaxtime"))
+    parser.add_argument("--out-dir", type=Path, default=Path("docs/analysis/relaxtime/transport/t200_tauu_spikes"))
     parser.add_argument("--dpi", type=int, default=600)
     return parser.parse_args()
 

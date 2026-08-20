@@ -613,7 +613,7 @@ def build_evidence(
         "command": (
             "python scripts/analysis/build_pnjl_maxwell_endpoint_limit_contract.py "
             "--input-dir <job-artifact> --aggregate-dir <aggregate-artifact> "
-            "--output-dir docs/analysis/pnjl_maxwell_endpoint_limit_contract_v1"
+            "--output-dir docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_endpoint_limit_contract_v1"
         ),
     }
     write_json(output_dir / "figures" / "plot_manifest.json", plot_manifest)

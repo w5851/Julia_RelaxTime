@@ -32,7 +32,7 @@ const RHO_MAX = 4.0
 const CSV_COORD_ATOL = 1e-6
 const TARGET_XI = (-0.45, -0.34375, -0.275, -0.21875, 0.025, 0.125,
     0.15, 0.2, 0.225, 0.35, 0.3625, 0.38125, 0.39375, 0.4, 0.4375, 0.45, 0.5)
-const BRACKET_FILE = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl",
+const BRACKET_FILE = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "c2_followups",
     "c2_limited_feasibility_v1", "cep_failures.csv")
 
 @inline function _arg(args, name, default=nothing)

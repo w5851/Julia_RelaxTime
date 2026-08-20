@@ -194,7 +194,7 @@ jobs:
             --expected-calculation-sha "$CALCULATION_REF" \
             --expected-source-postprocess-sha "$POSTPROCESS_SHA" \
             --postprocess-sha "$POSTPROCESS_SHA" \
-            --audit-dir docs/analysis/pnjl/c2_convergence_audit_v1
+            --audit-dir docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             exit "$status"
@@ -275,7 +275,7 @@ jobs:
             --expected-calculation-sha "$CALCULATION_REF" \
             --expected-source-postprocess-sha "$SOURCE_POSTPROCESS_SHA" \
             --postprocess-sha "$POSTPROCESS_SHA" \
-            --audit-dir docs/analysis/pnjl/c2_convergence_audit_v1
+            --audit-dir docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1
           status=$?
           if [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
             exit "$status"

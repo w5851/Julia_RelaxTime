@@ -18,9 +18,9 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = Path("docs/analysis/figure_asset_registry_v1/asset_registry.json")
-DECISION_PATH = Path("docs/analysis/figure_asset_registry_v1/author_review_decisions.md")
-OUTPUT_PATH = Path("docs/analysis/figure_asset_registry_v1/cleanup_preflight_v1.json")
+REGISTRY_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/asset_registry.json")
+DECISION_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/author_review_decisions.md")
+OUTPUT_PATH = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_preflight_v1.json")
 
 DELETE_FILES = [
     Path("data/outputs/figures/pnjl/phase_diagram/figure4_phase_diagram_prod_v1/figure4_phase_diagram_TmuB_Trho.pdf"),
@@ -38,7 +38,7 @@ DELETE_ROOTS = [
 
 MOVE_FILES = {
     **{
-        Path("data/outputs/figures/relaxtime/literature") / name: Path("docs/analysis/relaxtime/literature_comparison") / name
+        Path("data/outputs/figures/relaxtime/literature") / name: Path("docs/analysis/relaxtime/historical/literature_comparison") / name
         for name in (
             "k_mass_literature_julia_fortranmott_comparison.png",
             "meson_mass_julia_vs_literature_comparison.png",
@@ -48,13 +48,13 @@ MOVE_FILES = {
         )
     },
     Path("data/outputs/figures/relaxtime/validation/mixed_identity_track_fortran_swap_compare_muB600.png"):
-    Path("docs/analysis/relaxtime/validation/mixed_identity_track_fortran_swap_compare_muB600.png"),
+    Path("docs/analysis/relaxtime/historical/validation/mixed_identity_track_fortran_swap_compare_muB600.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/overlay_kminus_piminus_mu_pi_100.png"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/overlay_kminus_piminus_mu_pi_100.png"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/overlay_kminus_piminus_mu_pi_100.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/residual_kminus_piminus_mu_pi_100.png"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/residual_kminus_piminus_mu_pi_100.png"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/residual_kminus_piminus_mu_pi_100.png"),
     Path("data/outputs/figures/relaxtime/meson_density/plot_review/freezeout_kminus_piminus_mu_pi_100/plot_manifest.json"):
-    Path("docs/analysis/relaxtime/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/plot_manifest.json"),
+    Path("docs/analysis/relaxtime/historical/meson_density/freezeout_kminus_piminus_mu_pi_100_analysis/plot_manifest.json"),
 }
 
 RENAME_ROOTS = {
@@ -81,9 +81,9 @@ UNTRACKED_EXCLUSION_ROOTS = [
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__line_first_v1"),
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__line_first_v2"),
     Path("docs/analysis/plotting_pilot_c1_phase_surface__plotv1__estimated_midpoint__pilot_v2"),
-    Path("docs/analysis/pnjl/c2_blocking_audit_v2"),
-    Path("docs/analysis/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2"),
-    Path("docs/analysis/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1"),
+    Path("docs/analysis/pnjl/c2_audits/c2_blocking_audit_v2"),
+    Path("docs/analysis/pnjl/c1_surface_views/pnjl_c1_mu_xi_T_phase_surfaces_diagnostic_v2"),
+    Path("docs/analysis/pnjl/c1_surface_views/pnjl_c1_xi_t_mu_phase_surfaces_diagnostic_v1"),
     Path("scripts/analysis/pnjl/build_c2_blocking_audit_v2.py"),
     Path("scripts/analysis/pnjl/plot_c1_cep_bracket.py"),
     Path("scripts/analysis/pnjl/plot_c1_xi_t_mu_phase_surfaces.py"),
@@ -92,7 +92,7 @@ UNTRACKED_EXCLUSION_ROOTS = [
 
 HISTORICAL_REFERENCE_PATHS = {
     REGISTRY_PATH,
-    Path("docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv"),
+    Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv"),
     DECISION_PATH,
     OUTPUT_PATH,
     Path("scripts/plotting/build_figure_cleanup_preflight.py"),

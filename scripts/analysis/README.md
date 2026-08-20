@@ -23,7 +23,7 @@
 julia --project=. scripts/analysis/scan_mott_meson_vs_xi_mu0.jl
 julia --project=. scripts/analysis/mott_reference_mapping.jl
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py
-julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl --case-name first_canonical_v1_p128_xi001_validated_anchored_prod_v1 --candidate-csv docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv --out-dir docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables --integration-mode semi_infinite
+julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl --case-name first_canonical_v1_p128_xi001_validated_anchored_prod_v1 --candidate-csv docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv --out-dir docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/tables --integration-mode semi_infinite
 python scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py
 python scripts/analysis/relaxtime/build_phase_guided_pole_sensitive_rendering.py
 ```

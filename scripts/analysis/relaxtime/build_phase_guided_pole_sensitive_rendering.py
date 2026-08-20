@@ -38,13 +38,19 @@ FIGURE_ROOT = (
     ROOT / "data" / "outputs" / "figures" / "relaxtime" / "transport" / "phase_guided"
 )
 SOURCE_ANALYSIS = (
-    ROOT / "docs" / "analysis" / "relaxtime" / "phase_guided_transport_p128_xi001_analysis"
+    ROOT
+    / "docs"
+    / "analysis"
+    / "relaxtime"
+    / "phase_guided_transport"
+    / "phase_guided_transport_p128_xi001_analysis"
 )
 OUT_DIR = (
     ROOT
     / "docs"
     / "analysis"
     / "relaxtime"
+    / "phase_guided_transport"
     / "phase_guided_transport_v2_pole_sensitive_rendering"
 )
 TABLE_DIR = OUT_DIR / "tables"

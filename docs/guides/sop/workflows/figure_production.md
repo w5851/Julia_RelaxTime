@@ -205,8 +205,8 @@ strict 不把 single-column 尺寸和 legend 位置视为不可变硬编码。�
 
 PR A 只运行 `scripts/plotting/inventory_figure_assets.py`，默认扫描 Git 已跟踪的 `data/outputs/figures` 资产，生成：
 
-- `docs/analysis/figure_asset_registry_v1/asset_registry.json`；
-- `docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv`。
+- `docs/analysis/governance/figure_asset_registry_v1/asset_registry.json`；
+- `docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv`。
 
 未跟踪的 C1/C2/pilot 文件默认排除且不修改。`docs/analysis` 诊断证据与正式图像根目录分开治理，不因图形格式相同而自动合并。
 

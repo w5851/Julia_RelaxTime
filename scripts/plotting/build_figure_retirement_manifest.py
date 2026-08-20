@@ -18,8 +18,8 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_PREFLIGHT = Path("docs/analysis/figure_asset_registry_v1/cleanup_preflight_v1.json")
-DEFAULT_OUTPUT = Path("docs/analysis/figure_asset_registry_v1/retirement_execution_v1.json")
+DEFAULT_PREFLIGHT = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_preflight_v1.json")
+DEFAULT_OUTPUT = Path("docs/analysis/governance/figure_asset_registry_v1/retirement_execution_v1.json")
 OLD_TOKEN = "first_canonical_v1_p128_validated_anchored_prod_v1"
 NEW_TOKEN = "first_canonical_v1_p128_xi005_validated_anchored_prod_v1"
 
@@ -32,7 +32,7 @@ FREEZEOUT_MANIFEST_SOURCE_PREFIX = (
     "freezeout_kminus_piminus_mu_pi_100/"
 )
 FREEZEOUT_MANIFEST_DEST_PREFIX = (
-    "docs/analysis/relaxtime/meson_density/"
+    "docs/analysis/relaxtime/historical/meson_density/"
     "freezeout_kminus_piminus_mu_pi_100_analysis/"
 )
 

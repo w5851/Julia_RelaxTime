@@ -636,7 +636,7 @@ def run(
     else:
         verdict = "integration_failed"
         reason = "one or more cap-12 route gates failed"
-    audit_dir = audit_dir or Path(__file__).resolve().parents[2] / "docs" / "analysis" / "pnjl" / "c2_convergence_audit_v1"
+    audit_dir = audit_dir or Path(__file__).resolve().parents[2] / "docs" / "analysis" / "pnjl" / "c2_audits" / "c2_convergence_audit_v1"
     cep_gates, crossover_gates = _load_c2_audit(audit_dir)
     if verdict == "feasible_candidate" and (not all(row["pass"] for row in cep_gates) or not all(row["pass"] for row in crossover_gates)):
         verdict = "cep_ambiguity_inconclusive" if not all(row["pass"] for row in cep_gates) else "crossover_refinement_required"

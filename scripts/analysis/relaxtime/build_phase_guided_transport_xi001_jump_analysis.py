@@ -35,6 +35,7 @@ ANALYSIS_DIR = (
     / "docs"
     / "analysis"
     / "relaxtime"
+    / "phase_guided_transport"
     / "phase_guided_transport_p128_xi001_analysis"
 )
 

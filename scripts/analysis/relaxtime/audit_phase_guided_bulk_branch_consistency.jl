@@ -13,6 +13,7 @@ const ANALYSIS_TABLE_DIR = joinpath(
     "docs",
     "analysis",
     "relaxtime",
+    "phase_guided_transport",
     "phase_guided_transport_v2_pole_sensitive_rendering",
     "tables",
 )

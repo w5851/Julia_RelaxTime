@@ -18,7 +18,7 @@ current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
-  "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
+  "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
   "run:31714535418",
   "run:32139943632",
   "run:32222254605",
@@ -116,9 +116,30 @@ current_sha = ""
 run_ids = []
 evidence = [
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
-  "file:docs/analysis/pnjl/criticality_feasibility_v1/README.md",
+  "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]
 updated_at = "2026-08-18"
+
+[[tracks]]
+id = "analysis-docs-cleanup"
+title = "docs/analysis logical grouping and namespace migration"
+status = "accepted"
+current_task = "docs-analysis-logical-group-migration"
+blocked_by = []
+unlocks = []
+next_action = "物理 namespace 迁移已完成；保留 docs-analysis-metadata-repair 为独立 required follow-up，不在本任务中修改 metadata。"
+required_author_review = false
+author_review_status = "not_required"
+promotion_required = false
+current_branch = "codex/analysis-clean-up"
+current_sha = "24ea4222e589e40f6f10fb3e91aaa683581c6130"
+run_ids = []
+evidence = [
+  "file:docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md",
+  "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
+  "file:docs/analysis/governance/literature_to_implementation_protocol.md",
+]
+updated_at = "2026-08-19"
 
 [[items]]
 id = "issue130-full-hybrid-author-review"
@@ -131,7 +152,7 @@ reason = "自动 gate 只产生 full_hybrid_candidate，不能替代作者审核
 next_action = "审核代表曲线、三个 endpoint 区间、coverage 和成本，并决定是否进入 reference promotion。"
 blocked_by = []
 backlog_file = ""
-evidence = ["run:31714535418", "file:docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
+evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/"]
 
 [[items]]
 id = "rs-production-after-phase-reference"
@@ -170,7 +191,7 @@ reason = "C2 v5 显示 crossover 在 CEP 附近存在原生 mu sampling gap；�
 next_action = "8-target crossover μ pilot 已完成并通过 solver-free/Actions 审计；全 xi expansion workflow 已按同一 calculation SHA 准备，待 focused CI/合并后 dispatch 186 targets；完成前不生成 completed/derived artifact。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19"]
 
 [[items]]
 id = "issue130-maxwell-cep-local-refinement"
@@ -183,7 +204,7 @@ reason = "C2 v5 Maxwell boundary 仍有 CEP 近端 support/geometry unresolved �
 next_action = "11-target Maxwell numerical pilot run 32222254605 与正式 aggregate replay 32237794907 均为 pilot_candidate；保留 diagnostic-only，不自动补算 276 个 input_incomplete 行；Maxwell route 与 crossover 全 xi expansion 分开审核。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32225731719", "run:32237794907", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a", "sha:869e1f0f1ae5bd490cacfb6066fd27205f054100", "note:numerical 11/11 succeeded; replay 32237794907 separates source workflow SHA from postprocess SHA, solver_called=false, and is pilot_candidate; evidence remains diagnostic-only"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32225731719", "run:32237794907", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a", "sha:869e1f0f1ae5bd490cacfb6066fd27205f054100", "note:numerical 11/11 succeeded; replay 32237794907 separates source workflow SHA from postprocess SHA, solver_called=false, and is pilot_candidate; evidence remains diagnostic-only"]
 
 [[items]]
 id = "plot-sop-independent-land"
@@ -227,6 +248,41 @@ evidence = [
 ]
 
 [[items]]
+id = "docs-analysis-logical-group-migration"
+track_id = "analysis-docs-cleanup"
+classification = "independent"
+status = "accepted"
+parent = "track:analysis-docs-cleanup"
+task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
+reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
+next_action = "物理 namespace 迁移已完成；保留 metadata repair follow-up，单独冻结并修复 hash metadata。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
+  "file:docs/analysis/README.md",
+  "file:docs/analysis/governance/literature_to_implementation_protocol.md",
+]
+
+[[items]]
+id = "docs-analysis-metadata-repair"
+track_id = "analysis-docs-cleanup"
+classification = "required_follow_up"
+status = "triaged"
+parent = "track:analysis-docs-cleanup"
+task_file = "docs/dev/active/2026-08-19_docs-analysis-metadata-repair-task.md"
+reason = "phase-reference and phase-guided transport v1 evidence packages contain pre-existing manifest/checksum hashes that do not match current file bytes; the repair must remain separate from namespace migration."
+next_action = "冻结当前文件字节和旧 hash，逐包决定并重算 metadata；不重生成 CSV/JSON/PNG，不改变 verdict，并单独提交。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/analysis/pnjl/phase_reference/phase_reference_current_state_freeze_v1/manifest.json",
+  "file:docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json",
+  "file:docs/analysis/pnjl/phase_reference/phase_reference_manual_overlay_promotion_audit_v1/manifest.json",
+  "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/manifest.json",
+]
+
+[[items]]
 id = "palc-matched-performance-diagnostic"
 track_id = "palc-performance-research"
 classification = "research"
@@ -239,5 +295,5 @@ blocked_by = []
 backlog_file = "docs/dev/backlog/2026-08-18_PALC同口径性能与SeedContinuation一致性诊断.md"
 evidence = [
   "file:docs/dev/archived/2026-06-18_PALC连续路径求解接口设计.md",
-  "file:docs/analysis/pnjl/criticality_feasibility_v1/README.md",
+  "file:docs/analysis/pnjl/algorithmic_feasibility/criticality_feasibility_v1/README.md",
 ]

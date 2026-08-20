@@ -370,7 +370,7 @@ def validate_source(input_dir: Path, expected_sha: str, expected_postprocess_sha
 def _audit_rows(audit_dir: Path, name: str) -> list[dict[str, str]]:
     path = audit_dir / "tables" / name
     if name == "c1_vs_c2_cep_gates.csv":
-        frozen = audit_dir.parent / "c2_limited_feasibility_v1" / "cep_failures.csv"
+        frozen = audit_dir.parent.parent / "c2_followups" / "c2_limited_feasibility_v1" / "cep_failures.csv"
         if frozen.is_file():
             path = frozen
     if not path.is_file():

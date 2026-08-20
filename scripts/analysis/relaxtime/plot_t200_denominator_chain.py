@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=Path("docs/analysis/relaxtime"),
+        default=Path("docs/analysis/relaxtime/transport/t200_tauu_spikes"),
     )
     parser.add_argument("--scenario", action="append", default=[])
     parser.add_argument("--formats", type=str, default="png")

@@ -106,7 +106,7 @@ jobs:
           CALCULATION_REF: ${{ inputs.calculation_ref }}
         shell: bash
         run: |
-          bracket_rel='docs/analysis/pnjl/c2_limited_feasibility_v1/cep_failures.csv'
+          bracket_rel='docs/analysis/pnjl/c2_followups/c2_limited_feasibility_v1/cep_failures.csv'
           bracket_sha='f8775f3cb7e0457722a523b30eb89485239bdd1730e88f372eeae4e2bc21f3d2'
           git fetch --no-tags origin "$CALCULATION_REF" --depth=1
           git worktree add --detach calculation "$CALCULATION_REF"

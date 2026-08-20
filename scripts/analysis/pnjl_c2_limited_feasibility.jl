@@ -274,7 +274,7 @@ function _write_outputs(output_dir, data, frontier, verdict, expected_sha,
         (claim_id="production_promotion", status="not_claimed", evidence="requires subsequent production/shadow review"),
     ]
     _write_csv(joinpath(output_dir, "claim_ledger.csv"), claim_rows)
-    audit = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "c2_convergence_audit_v1")
+    audit = joinpath(PROJECT_ROOT, "docs", "analysis", "pnjl", "c2_audits", "c2_convergence_audit_v1")
     cep = isfile(joinpath(audit, "tables", "c1_vs_c2_cep_gates.csv"))
     crossover = isfile(joinpath(audit, "tables", "c1_vs_c2_crossover_xi_0p2875.csv"))
     write(joinpath(output_dir, "README.md"), "# C2 limited feasibility\n\n" *

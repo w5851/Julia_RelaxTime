@@ -29,8 +29,8 @@ from scripts.plotting.plot_manifest import PROJECT_ROOT, git_commit, sha256_file
 REGISTRY_SCHEMA = "figure_asset_registry_v1"
 ASSET_SUFFIXES = frozenset({".png", ".pdf", ".svg"})
 REFERENCE_TEXT_SUFFIXES = frozenset({".csv", ".jl", ".json", ".md", ".py", ".toml", ".txt", ".yaml", ".yml"})
-DEFAULT_REGISTRY = Path("docs/analysis/figure_asset_registry_v1/asset_registry.json")
-DEFAULT_CANDIDATES = Path("docs/analysis/figure_asset_registry_v1/cleanup_candidates.csv")
+DEFAULT_REGISTRY = Path("docs/analysis/governance/figure_asset_registry_v1/asset_registry.json")
+DEFAULT_CANDIDATES = Path("docs/analysis/governance/figure_asset_registry_v1/cleanup_candidates.csv")
 VARIANT_SUFFIX_RE = re.compile(r"(?:__line_first_v\d+|__pilot_v\d+|__new_review.*)$")
 
 
@@ -276,7 +276,7 @@ def _repository_reference_scan(
         source_relative = _relative_path(source_path, repo_root)
         if source_relative.startswith("data/outputs/figures/"):
             continue
-        if source_relative.startswith("docs/analysis/figure_asset_registry_v1/"):
+        if source_relative.startswith("docs/analysis/governance/figure_asset_registry_v1/"):
             continue
         try:
             content = source_path.read_text(encoding="utf-8", errors="replace")

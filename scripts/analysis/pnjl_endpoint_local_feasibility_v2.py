@@ -452,7 +452,7 @@ def run(standard_dir: Path, deep_dir: Path, output_dir: Path, expected_sha: str 
         json.dumps({
             "schema_version": SCHEMA_VERSION,
             "figures": figures,
-            "command": "python scripts/analysis/pnjl_endpoint_local_feasibility_v2.py --standard-dir <aggregate> --deep-dir <deep-aggregate> --output-dir docs/analysis/pnjl_cep_endpoint_local_contract_feasibility_v2",
+            "command": "python scripts/analysis/pnjl_endpoint_local_feasibility_v2.py --standard-dir <aggregate> --deep-dir <deep-aggregate> --output-dir docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_contract_feasibility_v2",
             "raw_curves_external": True,
         }, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

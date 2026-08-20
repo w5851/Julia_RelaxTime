@@ -25,7 +25,7 @@ reference。三态合同 merge SHA 为
    plot、workflow 和 focused contract 验证；完整数值由 GitHub Actions 运行 cascade
    discovery、dense baseline 和独立 oracle。
 4. [x] pilot v2 数值 run 与 aggregate replay 完成，证据导入
-   `docs/analysis/pnjl/cep_narrow_pilot_v2/`；当前停在作者对 CEP 区间、原始 rho–mu
+   `docs/analysis/pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v2/`；当前停在作者对 CEP 区间、原始 rho–mu
    曲线、准确度和性能证据的物理审核。
 5. [ ] production integration 通过后，才重放全温区 phase-reference；reference 审核后再启动 transport。
 
@@ -80,7 +80,7 @@ reference。三态合同 merge SHA 为
   `d2f8b1d0c2fb7a6cec7d21a1076a1d24639c9ca5` 完成；`status=pass`、
   `oracle_status=stable`、`cascade_status=within_oracle`，Actions critical path
   `1247 s`、runner-minutes `91`。
-- [x] 导入 `docs/analysis/pnjl/cep_narrow_pilot_v2/` 的聚合表、图像、manifest、
+- [x] 导入 `docs/analysis/pnjl/cep_maxwell/narrow_pilot/cep_narrow_pilot_v2/` 的聚合表、图像、manifest、
   plot manifest、curve index 和审计文档；原始 `curve_points.csv` 保留在 Actions/
   本地 artifact，不复制进仓库。
 - [ ] 物理审核通过后才进入 production integration、phase-reference replay 和 transport。
@@ -171,7 +171,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] v2 verdict 为 `oracle_inconclusive`：5 个低温 oracle-ambiguous 点被离线
   Stage-C 证书确认，已写入 `deep_oracle_required.csv`，不自动晋升为物理结论。
 - [x] 新 evidence 写入
-  `docs/analysis/pnjl/cep_hybrid_stagec_certificate_feasibility_v2/`，保留 v1
+  `docs/analysis/pnjl/cep_maxwell/stagec/cep_hybrid_stagec_certificate_feasibility_v2/`，保留 v1
   evidence 原样；代表性曲线图、作者裁决 provenance、manifest 和 claim ledger 已生成。
 - [x] focused Julia helper `13/13`、Julia parser、Python `py_compile` 和
   `git diff --check` 通过；完整 PNJL solver 未在本机调用。
@@ -214,7 +214,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] 扫描内部 area tolerance `1e-4/5e-5/1e-5/5e-6`。五个低温 anchor 在严格
   `5e-6` 下均保持两层 `+→−→+` topology、Maxwell residual、position/density geometry
   和迭代预算通过；`1e-5→5e-6` 未发生候选切换。
-- [x] 输出 `docs/analysis/pnjl_maxwell_tolerance_contract_feasibility_v1/`，含逐层
+- [x] 输出 `docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_tolerance_contract_feasibility_v1/`，含逐层
   frontier、逐点 summary、输入曲线索引、manifest、claim ledger 和 audit；
   `solver_called=false`，不复制原始曲线、不修改 production/reference/history。
 - [x] focused Julia `14/14`、Python `2 passed`、parser 和 `git diff --check` 通过。
@@ -297,7 +297,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   anchor 被 hybrid 证书确认，以及 5 个旧 oracle/hybrid 分类 mismatch，因此主 verdict
   保持 `oracle_inconclusive`，没有 `selected_policy`。
 - [x] 新 evidence 写入
-  `docs/analysis/pnjl/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
+  `docs/analysis/pnjl/cep_maxwell/stagec/cep_hybrid_stagec_tolerance_replay_v1/`，包含 replay、candidate、
   cost frontier、五点 tolerance certificate、curve identity audit、双 run provenance、
   manifest 和 claim ledger；不复制原始曲线。
 - [ ] 因 replay 未得到 `feasible_candidate`，不创建 adaptive Stage-C production PR，
@@ -404,7 +404,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `endpoint_limited_first_order`；兼容 scalar `rho_hadron` 使用 `0.0`，并同时保存真实上界，
   不新增第四种物理状态，也不硬编码特定 `(xi,T)` 例外。
 - [x] 当前分支 `codex/issue-130-maxwell-endpoint-limit-contract` 以 solver-free 方式生成
-  `docs/analysis/pnjl_maxwell_endpoint_limit_contract_v1/`，固定校验 source run、双 SHA、两个
+  `docs/analysis/pnjl/cep_maxwell/maxwell_contracts/pnjl_maxwell_endpoint_limit_contract_v1/`，固定校验 source run、双 SHA、两个
   manifest SHA、三交点唯一性、逐级 bracket 二分、Maxwell/geometry、finite/key uniqueness
   和成本守恒；derived verdict 为 `endpoint_limited_first_order_candidate`。
 - [ ] endpoint-limit evidence PR 合并后，另开公共 Maxwell/hybrid production PR，将该证书
@@ -435,7 +435,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   `standard_oracle_status`、`deep_oracle_status`、`final_oracle_status` 和 `oracle_source`，不把
   deep 标签用于 support/route 选择。
 - [x] solver-free feasibility 输出到
-  `docs/analysis/pnjl_cep_endpoint_local_contract_feasibility_v2/`。三个低温点均有唯一三交点
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_contract_feasibility_v2/`。三个低温点均有唯一三交点
   与实际右外支 bracket，保留完整 Stage-B 曲线，左侧只做 active-bracket midpoint replay；
   既有 position `0.025 MeV`、density `0.0025`、area `5e-5` 门禁均未放宽。derived verdict 为
   `feasible_candidate`，覆盖 targeted 18 + approved deep required-three；完整 24-anchor shadow
@@ -488,7 +488,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   dense `15384`，oracle `30744`；residual/Jacobian、fixed-rho requests 和 runner cost
   均不高于 dense，Actions wall-time 处于允许噪声范围。
 - [x] evidence 已生成至
-  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4/`，包含聚合表、source/
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4/`，包含聚合表、source/
   evidence manifest、curve index、claim ledger、plot manifest 和 9 张代表性 PNG；完整
   `curve_points.csv` 仅保留在 Actions/local artifact，外部 SHA 为
   `176f530b8f09b345ddd6d6ece40b55f1442f7c589c873885c6e924eeb7190dc8`。派生表允许的
@@ -557,7 +557,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不再按行号配对；物理区间由各自 CEP 的 `T_first_monotone_MeV` 约束，避免把一阶区间
   的平台误报为 crossover 风险。
 - [x] solver-free evidence package 已生成到
-  `docs/analysis/pnjl/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
+  `docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/`：输入 SHA、C0/C1/C2 replay、9 个
   public classification regressions、16 个 CEP bracket failures、`xi=0.2875` crossover
   局部风险、代表图、manifest 和 claim ledger 均已保留；原始全量曲线不入仓库。
 - [x] PR1 已通过 focused CI 并合并为 `main@a3dc55a9672bedba5716b18be371374515109ec1`；
@@ -679,7 +679,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
 - [x] full numerical shadow `31351527152` 的 9/9 jobs 成功；aggregate replay
   `31352083775` 为 `final`，24 anchors 全覆盖并得到 `full_hybrid_candidate`。计算 SHA、
   workflow/postprocess SHA、source/deep run 和 artifact hashes 记录在
-  `docs/analysis/pnjl/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`。
+  `docs/analysis/pnjl/cep_maxwell/cascade_shadow/cep_maxwell_endpoint_local_production_shadow_v4_full_31352083775/`。
 - [x] full gate 的 classification、geometry、endpoint、oracle、coverage、performance 和
   workflow contract errors 均为空；hybrid 为 `12,845` unique solves、dense 为 `15,384`，
   runner time `289.68 s` 对 `287.70 s`，比值约 `1.007`，在 `1.10` 允许噪声内，fallback/retry
@@ -923,7 +923,7 @@ C0/C1/C2 artifacts 和 transport 均保持不变。shadow 的物理 verdict 仍�
   不高于 dense。hybrid runner time `289.74 s` 对 dense `269.50 s`，约高 `7.5%`，在
   允许的 `10%` Actions wall-time 噪声范围内。
 - [x] 新证据已导入
-  `docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/`；旧 v4
+  `docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/`；旧 v4
   evidence 保持不可变，完整 `curve_points.csv` 只保留在 Actions/local artifact，外部
   SHA 为 `326974ee24932a3ecccce6d3d961c67835f1477250236e01286529a3384e2038`。
 - [ ] `full_hybrid_candidate` 仍不是 reference promotion 或 formal production 许可。

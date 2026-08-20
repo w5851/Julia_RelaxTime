@@ -124,7 +124,7 @@ def main() -> int:
     args = parser.parse_args()
 
     root = Path(__file__).resolve().parents[3]
-    output = args.output or root / "docs" / "analysis" / "pnjl" / "phase_reference_current_state_freeze_v1"
+    output = args.output or root / "docs" / "analysis" / "pnjl" / "phase_reference" / "phase_reference_current_state_freeze_v1"
     if output.exists() and any(output.iterdir()) and not args.force:
         raise SystemExit(f"refusing to overwrite non-empty output: {output}")
     output.mkdir(parents=True, exist_ok=True)
@@ -173,7 +173,7 @@ def main() -> int:
     c2_summary = [
         {
             "layer": "historical_c0_c1_c2",
-            "source": "docs/analysis/pnjl/c2_convergence_audit_v1/",
+            "source": "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/",
             "runs": "31149826740;31235607046;31258823755",
             "calculation_sha": HISTORICAL_C0_C1_C2_SHA,
             "verdict": "classification_regression",
@@ -183,7 +183,7 @@ def main() -> int:
         },
         {
             "layer": "full_hybrid_shadow",
-            "source": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
+            "source": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
             "runs": "31713534102;31714535418;31710995191",
             "calculation_sha": CALCULATION_SHA,
             "verdict": "full_hybrid_candidate",
@@ -203,7 +203,7 @@ def main() -> int:
         },
         {
             "layer": "raw_unresolved_curve_audit",
-            "source": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/",
+            "source": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/",
             "runs": "32013771445;21980679",
             "calculation_sha": CALCULATION_SHA,
             "verdict": "raw_curve_coverage_complete_diagnostic_only",
@@ -237,7 +237,7 @@ def main() -> int:
         {"gate": "primary_curve_finite_converged", "status": "pass", "evidence": "C2 boundary/spinodals/crossover", "meaning": "主曲线可用于诊断绘图", "blocking": "no"},
         {"gate": "full_hybrid_24_anchor", "status": "pass_candidate", "evidence": "full_hybrid_shadow_v4 manifest/AUDIT", "meaning": "自动 shadow 候选通过", "blocking": "promotion still blocked"},
         {"gate": "grid_refinement_certificate", "status": "unresolved", "evidence": "phase_grid_convergence: 5424 unresolved", "meaning": "不能把所有 unresolved 行当作 Maxwell boundary", "blocking": "yes for strict reference"},
-        {"gate": "raw_unresolved_curve_coverage", "status": "diagnostic_complete", "evidence": "phase_reference_limited_evidence_audit_v1", "meaning": "761 条 raw curves finite/converged; topology only", "blocking": "does not close certificate"},
+        {"gate": "raw_unresolved_curve_coverage", "status": "diagnostic_complete", "evidence": "phase_reference/phase_reference_limited_evidence_audit_v1", "meaning": "761 条 raw curves finite/converged; topology only", "blocking": "does not close certificate"},
         {"gate": "targeted_nine_automatic_overlay", "status": "inconclusive", "evidence": "classification_overlay.csv: 9/9 match=false", "meaning": "hybrid/oracle 自动分类仍不一致", "blocking": "yes for automatic promotion"},
         {"gate": "targeted_nine_author_visual_review", "status": "accepted_diagnostic", "evidence": "author review of temporary rho-mu plots", "meaning": "可作为人工诊断事实", "blocking": "not a replacement gate"},
         {"gate": "cep_fixed_t_manual_overlay", "status": "pass_diagnostic", "evidence": "author_decision_overlay_v2.json", "meaning": "3 brackets closed at 0.0625 MeV", "blocking": "does not create a single CEP"},
@@ -282,10 +282,10 @@ def main() -> int:
     for name, path in paths.items():
         source_hashes.append({"id": name, "path": str(path), "sha256": sha256_file(path), "bytes": path.stat().st_size})
     repository_sources = [
-        "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
-        "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
-        "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json",
-        "docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json",
+        "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json",
+        "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json",
+        "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json",
+        "docs/analysis/pnjl/c2_audits/c2_convergence_audit_v1/manifest.json",
         "config/governance/task_tracks.toml",
     ]
     for relative in repository_sources:
@@ -294,10 +294,10 @@ def main() -> int:
             source_hashes.append({"id": relative, "path": str(path), "sha256": sha256_file(path), "bytes": path.stat().st_size})
 
     plot_entries = [
-        {"path": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png", "role": "C2 global native-support diagnostic", "source_manifest": "docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json"},
-        {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png", "role": "full-shadow representative first-order curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
-        {"path": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png", "role": "full-shadow representative monotone curve", "source_manifest": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
-        {"path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/figures/rho_mu_xi_0p5_T_107_raw_audit.png", "role": "unresolved raw-curve diagnostic", "source_manifest": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json"},
+        {"path": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/figures/c2_phase_surfaces_mu_xi_T_no_triangulation.png", "role": "C2 global native-support diagnostic", "source_manifest": "docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json"},
+        {"path": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_130.962_first_order.png", "role": "full-shadow representative first-order curve", "source_manifest": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
+        {"path": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/figures/rho_mu_xi_0p0_T_131.087_first_monotone.png", "role": "full-shadow representative monotone curve", "source_manifest": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json"},
+        {"path": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/figures/rho_mu_xi_0p5_T_107_raw_audit.png", "role": "unresolved raw-curve diagnostic", "source_manifest": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json"},
     ]
     for entry in plot_entries:
         plot_path = root / entry["path"]
@@ -330,9 +330,9 @@ def main() -> int:
     write_csv(tables_dir / "input_validation.csv", quality_rows, list(quality_rows[0]))
     claim_ledger = [
         {"claim_id": "c2_primary_curves", "status": "supported", "claim": "C2 primary boundary, spinodal and crossover rows are finite/converged and key-unique under their declared schemas.", "evidence": "tables/input_validation.csv; external C2 validation_report.json", "boundary": "does not close grid/refinement certificates"},
-        {"claim_id": "full_hybrid_candidate", "status": "candidate", "claim": "The 24-anchor endpoint-local shadow is a full_hybrid_candidate.", "evidence": "docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json", "boundary": "diagnostic candidate, not reference promotion"},
+        {"claim_id": "full_hybrid_candidate", "status": "candidate", "claim": "The 24-anchor endpoint-local shadow is a full_hybrid_candidate.", "evidence": "docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json", "boundary": "diagnostic candidate, not reference promotion"},
         {"claim_id": "grid_unresolved", "status": "inconclusive", "claim": "5424 C2 grid records remain unresolved at the refinement/geometry layer.", "evidence": "tables/c2_summary.csv; v5/tables/grid_unresolved_diagnostics.csv", "boundary": "unresolved records are not valid Maxwell boundary rows"},
-        {"claim_id": "raw_curve_audit", "status": "supported_diagnostic", "claim": "All 761 deduplicated unresolved coordinates have finite/converged 1281-point raw curves.", "evidence": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json", "boundary": "raw +→−→+ topology is not a Maxwell/geometry certificate"},
+        {"claim_id": "raw_curve_audit", "status": "supported_diagnostic", "claim": "All 761 deduplicated unresolved coordinates have finite/converged 1281-point raw curves.", "evidence": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json", "boundary": "raw +→−→+ topology is not a Maxwell/geometry certificate"},
         {"claim_id": "nine_point_overlay", "status": "inconclusive", "claim": "The nine targeted points have hybrid ambiguous versus oracle first-order and classification_match=false.", "evidence": "tables/targeted_regression_status.csv", "boundary": "author visual acceptance is diagnostic only and does not overwrite automated status"},
         {"claim_id": "cep_manual_overlay", "status": "accepted_diagnostic", "claim": "The three fixed T-direction CEP slices have author-reviewed 0.0625 MeV brackets.", "evidence": "tables/cep_manual_overlay.csv; external author_decision_overlay_v2.json", "boundary": "bracket midpoint is not a confirmed single CEP"},
         {"claim_id": "mu_refinement", "status": "not_run", "claim": "The planned CEP mu-direction endpoint refinement has not run.", "evidence": "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "boundary": "no new solver or derived completion exists"},

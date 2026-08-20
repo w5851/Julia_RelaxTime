@@ -155,4 +155,4 @@ Use these project agents only when the user explicitly requests subagents or par
 
 Citation and BibTeX cleanup belongs in `D:\Desktop\paper`, especially `D:\Desktop\paper\bib`; do not edit that master bibliography here. Return citation cleanup to the `paper-citation-curator`.
 
-Protocol: `docs/analysis/literature_to_implementation_protocol.md`.
+Protocol: `docs/analysis/governance/literature_to_implementation_protocol.md`.
