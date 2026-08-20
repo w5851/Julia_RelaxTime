@@ -62,6 +62,19 @@ versioned workflow 合并前不触发数值扩展。
   `{ "target_id": [ ... ] }` matrix object，并增加 regression assertion；不改变
   target list、calculation SHA、runner、Maxwell、geometry、容差或 pilot artifact。
 
+## 第二次 expansion dispatch 诊断（2026-08-20）
+
+- run `32352228986` 使用 repair merge SHA
+  `f6832544ef1e7bedfd66ddb66829d486a37984cc` 触发；prepare 已成功验证 276 个
+  target，但 numerical matrix 仍未展开。
+- 根因为 GitHub Actions 单个 matrix 的组合上限为 256，而本 expansion 有 276
+  个 target；aggregate 只下载到 0 个 numerical artifact，run 失败。该 run 同样
+  没有调用 PNJL solver，不能解释为 solver/Maxwell 失败，也不能作为 partial
+  numerical artifact 复用。
+- 后续 repair 将同一 target list 按稳定顺序拆为两个各 138 项的 matrix job，
+  aggregate 同时等待两个 job；target、artifact 名称、failed-only 语义、calculation
+  SHA、runner、Maxwell/geometry 合同和容差均保持不变。
+
 ## 预检与 numerical pilot 合同
 
 - 预检按固定 `(xi,T)` 识别 CEP 下方 unresolved Maxwell 行；缺少 boundary 行的
