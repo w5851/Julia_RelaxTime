@@ -1,7 +1,8 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
 状态：active；11-target numerical pilot 与同源 aggregate replay 均已完成并通过
-`pilot_candidate`；证据仍为 diagnostic-only，不晋升 phase-reference。
+`pilot_candidate`；当前作为 v7 冻结后的下一步 Maxwell 输入 route，证据仍为
+diagnostic-only，不晋升 phase-reference。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -68,6 +69,12 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
 `certified_layer` 保留原始 C2 证书；`completed_layer` 只能在同一 Maxwell 物理区、
 相邻已证实行之间做显式 `interpolated_noncertified` 派生，不能伪造 candidate、
 `maxwell_area` 或 strict geometry certificate，也不能自动晋升 phase-reference。
+
+本 companion route 是 Issue #130 三层验收目标中 `strict_reference_v1` 的 Maxwell
+输入来源，也是后续 `derived_reference_v1` 和 `phase_surface_render_v1` 的前置依赖。
+Maxwell 真实补点完成前，不得用 crossover 派生层的视觉连续性填充 Maxwell；最终
+render 只能由统一 ξ 的 derived reference 生成，且必须保留 Maxwell unresolved
+mask 和 cell coverage。
 
 ## 与 crossover 全 ξ expansion 的边界
 

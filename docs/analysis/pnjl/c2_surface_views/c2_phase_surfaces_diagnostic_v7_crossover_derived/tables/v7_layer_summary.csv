@@ -1,0 +1,5 @@
+layer,surface,rows,xi_count,interpretation
+certified_layer,crossover,1343,93,v6 native finite/converged support; not phase-reference promotion
+interpolated_noncertified,crossover,13266,185,piecewise-linear derived values with source provenance
+boundary_constrained_endpoint_interpolated_noncertified,crossover,93,93,terminates at the selected CEP boundary estimate; not a strict CEP solve
+certified_layer,maxwell,6886,93,v6 Maxwell rows copied unchanged; unresolved geometry status retained

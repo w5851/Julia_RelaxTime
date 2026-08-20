@@ -1,0 +1,83 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v7_crossover_derived",
+  "generated_at_utc": "2026-08-20T03:16:45.630170+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "v6_manifest_hash": "8f19f73f7654663504dfa27a9a7e338df13e090bfc7501b8c201742defe4cb0b",
+  "solver_called": false,
+  "reference_write": false,
+  "verdict": "v7_crossover_derived_candidate",
+  "generator": {
+    "script": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c2_phase_surfaces_v7_crossover_derived.py",
+    "script_sha256": "3a92b23e6ee2e951f3e81fc7e9d3dc6b75c76c33798ec274ea440d16ebdbc3c1"
+  },
+  "input_records": {
+    "v6_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\manifest.json",
+      "sha256": "8f19f73f7654663504dfa27a9a7e338df13e090bfc7501b8c201742defe4cb0b",
+      "bytes": 3585
+    },
+    "v6_crossover": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\tables\\crossover_overlay.csv",
+      "sha256": "297c755e787bd93bb176e0c052fd92e7b6ca50eb68924acc4b4ddf3e009f6ff0",
+      "bytes": 215254
+    },
+    "v6_gap": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\tables\\crossover_overlay_gap.csv",
+      "sha256": "c325855fb424fa94e2ba0ab2cd88fe51bd45e611a0e8301a1dc9aaedd91990b5",
+      "bytes": 20888
+    },
+    "v6_maxwell": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\tables\\v5_maxwell_surface_point_status.csv",
+      "sha256": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+      "bytes": 928630
+    },
+    "v6_spinodals": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\tables\\v5_spinodals.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8",
+      "bytes": 670175
+    },
+    "v5_cep_gap": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\tables\\v5_crossover_cep_sampling_gap.csv",
+      "sha256": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+      "bytes": 19244
+    }
+  },
+  "parameters": {
+    "mu_subdivisions": 4,
+    "max_xi_gap": 0.025
+  },
+  "counts": {
+    "native_crossover_rows": 1343,
+    "same_xi_derived_rows": 3750,
+    "xi_derived_rows": 9516,
+    "boundary_rows": 93,
+    "maxwell_rows": 6886,
+    "spinodal_rows": 6886,
+    "cep_slices": 93
+  },
+  "output_files": {
+    "AUDIT.md": "d514f4b99ad6e0a8bb4d85b21d88b77d735c33e67d93a39db0203cbc147ca96b",
+    "decision.json": "748373e9a24a3e617937d49769b6b59db90369befd75383a6de966e4b702796c",
+    "figures/c2_phase_surfaces_mu_xi_T_v7_complete_display.png": "f23b0c93889cc6ded4afcdfc860ba8d87c089be280a1c9072f072d4a7830df88",
+    "figures/c2_phase_surfaces_mu_xi_T_v7_layer_audit.png": "fbac43eeb25cdd56cc06eb84b5de694c8e066e6cc1ff5b2ed0ef1d33c1141942",
+    "figures/plot_manifest.json": "29a90acb2dc01a26070ff2edf6b97bc17e6ff229c4ecad3b0c3a74c43e4681cb",
+    "README.md": "c1c69c35ab29d1bc3e0398ba7098e48b4fad422b6bf3e7fb5172599868d605e3",
+    "tables/cep_boundary_estimates.csv": "7b5adb9021616137be3bb8b448a1ab6da96beacc5f8dc5fc0b5c46fcd3776051",
+    "tables/claim_ledger.csv": "4cabaabf0c246bad8622e04a05cc829d79ca37af3872189df4a23090e384b747",
+    "tables/crossover_certified_v6.csv": "6ed5cabf4982f45cfa5c4aac0bc378a6db468b50308db2dce081107628334e7b",
+    "tables/crossover_coverage_mask.csv": "b1d3baccdf2d327f7ec041938253bd260632b3828ddf37c8a518e6d2a9545c32",
+    "tables/crossover_derived_boundary.csv": "a9c6d9e8a903235188da04c9b3d818f6757f7d1fea084175e21b93cdbdd093bb",
+    "tables/crossover_derived_same_xi.csv": "88a58c6829698e9d3da451b1819160fe5b508bfb62591b21767fee3d5f49827b",
+    "tables/crossover_derived_xi.csv": "7e0a14c1dd615dba1b344899c68a30e821d8375643c1c641c6ef9c8710bbd7c5",
+    "tables/crossover_surface_v7.csv": "58a9e1de58e4418823cdee01bd112517c9d26e66fafe7761750d3f67e37e9fb9",
+    "tables/maxwell_surface_v7.csv": "55259c25e1a4998d5191c4ebecb04f107927c40d1094f27b32d070e2c93e74ed",
+    "tables/spinodal_surface_v7.csv": "508a215ac73206d597e34d1a8b01d51e0f46bfe05da7a82b276bc8d409d77b66",
+    "tables/v6_crossover_cep_sampling_gap.csv": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+    "tables/v6_crossover_overlay.csv": "297c755e787bd93bb176e0c052fd92e7b6ca50eb68924acc4b4ddf3e009f6ff0",
+    "tables/v6_crossover_overlay_gap.csv": "c325855fb424fa94e2ba0ab2cd88fe51bd45e611a0e8301a1dc9aaedd91990b5",
+    "tables/v6_manifest.json": "8f19f73f7654663504dfa27a9a7e338df13e090bfc7501b8c201742defe4cb0b",
+    "tables/v6_maxwell_surface_point_status.csv": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+    "tables/v6_spinodals.csv": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8",
+    "tables/v7_layer_summary.csv": "3523a1817dbffc3bcde5f3ef9eac782f145710b7e64c3ccaf6c135e4c57b215b"
+  }
+}
