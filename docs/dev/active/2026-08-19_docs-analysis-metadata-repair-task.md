@@ -2,7 +2,7 @@
 
 创建日期：2026-08-19
 
-状态：`triaged`。这是 `docs/analysis` namespace 迁移任务的独立 `required_follow_up`，不因目录迁移完成而自动关闭。
+状态：`accepted`。这是已完成的 `docs/analysis` namespace 迁移后独立 `required_follow_up`；后续新增 mismatch 需另立任务。
 
 ## 目标
 
@@ -44,8 +44,19 @@
 - JSON 可解析，verdict、source provenance、输入 hash 和 claim ledger 语义未改变；
 - 单独审阅、单独 `docs:` commit，不与后续目录迁移合并。
 
-## 下一步
+## 执行结果
 
-1. 生成不可变 pre-repair snapshot 和逐文件 mismatch report。
-2. 只对可证明为 metadata stale 的条目重算 hash；无法解释的差异保持 `author_check`，不强行修复。
-3. 运行 docs consistency、task ledger、JSON/hash audit 和 diff 检查后提交。
+- [x] 生成不可变 pre-repair snapshot，保存四个包的文件集合、当前字节 SHA-256、旧 manifest/checksum 原文、历史基线和逐文件 mismatch 分类。
+- [x] 四个包共 40 个 mismatch 均判定为 `stale_metadata`；没有 `newline_or_serialization_drift`、`content_change` 或 `author_check` 项。
+- [x] 只更新 manifest/checksum hash registry，以及 transport v1 中因 namespace 迁移而过时的路径 metadata；未重生成 CSV/JSON/PNG/README 科学内容。
+- [x] 修复后四个目标包均通过严格审计：声明文件全部存在，`0 mismatch / 0 missing / 0 extra`。
+- [x] 验证 verdict、source provenance、输入文件 hash、claim ledger 和非 metadata payload 未改变。
+
+## 证据与验证
+
+- `docs/analysis/governance/metadata_repair_v1/pre_repair_snapshot.json`
+- `docs/analysis/governance/metadata_repair_v1/post_repair_audit.json`
+- `docs/analysis/governance/metadata_repair_v1/repair_report.md`
+- `scripts/dev/audit_analysis_metadata.py`
+
+transport v2 的 `0/52` mismatch 不属于本任务，保持未修改。solver、Maxwell、reference promotion、RS transport production 和外部 raw archive 均未触碰。

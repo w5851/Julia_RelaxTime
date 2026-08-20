@@ -1,0 +1,1682 @@
+{
+  "schema": "docs_analysis_metadata_audit_v1",
+  "generated_at_utc": "2026-08-20T02:17:49.343930+00:00",
+  "repo": {
+    "head": "8f9833fab40d60173234e9d5a6ac135eabdbe416",
+    "branch": "codex/analysis-metadata-repair",
+    "status_porcelain": "?? docs/analysis/governance/metadata_repair_v1/\n?? scripts/dev/audit_analysis_metadata.py"
+  },
+  "packages": [
+    {
+      "name": "phase_reference_current_state_freeze_v1",
+      "root": "docs/analysis/pnjl/phase_reference/phase_reference_current_state_freeze_v1",
+      "metadata_before": {
+        "manifest": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_current_state_freeze_v1/manifest.json",
+          "exists": true,
+          "bytes": 12845,
+          "sha256": "9ad4f651adc5b3dac5e1d62cf05b942ced74a54f03f589b5b7dc81ce06fa2511",
+          "content_utf8": "{\n  \"schema_version\": \"pnjl_phase_reference_current_state_freeze_v1\",\n  \"generated_at_utc\": \"2026-08-18T06:19:13Z\",\n  \"solver_called_by_freeze\": false,\n  \"reference_write\": false,\n  \"transport_started\": false,\n  \"calculation\": {\n    \"current_sha\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n    \"historical_c0_c1_c2_sha\": \"ffa816df0a145f73d7490db1ed9ff10c92e017a4\",\n    \"current_c2_source_run\": \"31862752226\",\n    \"current_c2_postprocess_sha\": \"fd359e792a89beb5ab12349bba761dc58ee16761\",\n    \"full_shadow_aggregate_run\": \"31714535418\",\n    \"cep_manual_overlay_run\": \"31999149922\",\n    \"targeted_regression_replay_run\": \"31944988128\"\n  },\n  \"repo\": {\n    \"worktree\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\",\n    \"branch\": \"codex/issue130-phase-reference-limited-evidence-audit\",\n    \"head\": \"e25047e871cca730e14a9783aee63fbff42a76dc\",\n    \"dirty\": true,\n    \"status_lines\": [\n      \"M config/governance/task_tracks.toml\",\n      \" M docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md\",\n      \" M docs/dev/active/2026-08-15_论文级绘图SOP与分层迁移任务单.md\",\n      \" M docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md\",\n      \" M docs/guides/sop/workflows/figure_production.md\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v1/\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v2/\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v3/\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v4_visual_closed/\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v4_visual_closed_display16/\",\n      \"?? docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/\",\n      \"?? docs/analysis/pnjl/phase_reference_current_state_freeze_v1/\",\n      \"?? docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md\",\n      \"?? scripts/analysis/pnjl/build_phase_reference_current_state_freeze.py\",\n      \"?? scripts/analysis/pnjl/plot_c2_phase_surfaces_diagnostic.py\"\n    ]\n  },\n  \"source_validation\": {\n    \"c2_artifact_summary\": {\n      \"artifacts\": {\n        \"boundary\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n          \"row_count\": 6886\n        },\n        \"cep\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n          \"row_count\": 93\n        },\n        \"crossover\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n          \"row_count\": 1488\n        },\n        \"crossover_meta\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.meta.json\"\n        },\n        \"grid_convergence\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n          \"row_count\": 22791\n        },\n        \"manifest\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json\"\n        },\n        \"phase_diagnostics\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json\",\n          \"record_count\": 93,\n          \"sha256\": \"adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe\"\n        },\n        \"spinodals\": {\n          \"path\": \"data/outputs/artifacts/pnjl_dense_reference/31862752226/reference/spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n          \"row_count\": 6886\n        }\n      },\n      \"config\": {\n        \"tag\": \"issue130_stagec_density_v2_c2_grid_tight_20260813\",\n        \"rho_refinement_policy\": \"rho_support_hybrid\",\n        \"rho_hybrid_endpoint_policy\": \"three_crossing_endpoint_local_v2\",\n        \"rho_support_targeted_cap\": 12,\n        \"rho_support_fine_step\": 0.025,\n        \"rho_position_tol_MeV\": 0.025,\n        \"rho_density_tol\": 0.0025,\n        \"rho_maxwell_area_tol\": 5e-05,\n        \"temperature_max_refine_level\": 3,\n        \"xi_max_refine_level\": 3,\n        \"temperature_resolution_target_MeV\": 0.1,\n        \"cep_tol_MeV\": 0.1\n      },\n      \"provenance\": {\n        \"calculation_git_commit\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n        \"postprocess_git_commit\": \"fd359e792a89beb5ab12349bba761dc58ee16761\",\n        \"source_workflow_run_id\": \"31862752226\"\n      },\n      \"grid_convergence\": {\n        \"record_count\": 22791,\n        \"unconverged_count\": 5424\n      },\n      \"status_counts\": {\n        \"ambiguous_near_critical\": 359,\n        \"confirmed_first_order\": 6886,\n        \"confirmed_monotone\": 2636\n      },\n      \"stage_counts\": {\n        \"stage_a\": 2636,\n        \"stage_b\": 4915,\n        \"stage_c\": 1645,\n        \"stage_c_endpoint_local_v2\": 685\n      },\n      \"telemetry_status\": \"available\",\n      \"unavailable_record_count\": 0\n    },\n    \"c2_validation_summary\": {\n      \"tag\": \"issue130_stagec_density_v2_c2_grid_tight_20260813\",\n      \"git_commit\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n      \"calculation_git_commit\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n      \"postprocess_git_commit\": \"fd359e792a89beb5ab12349bba761dc58ee16761\",\n      \"source_workflow_run_id\": \"31862752226\",\n      \"generated_at_utc\": \"2026-08-15T03:49:24Z\",\n      \"crossover_rows\": 1488,\n      \"converged_rows\": 1488,\n      \"grid_convergence_rows\": 22791,\n      \"grid_unconverged_rows\": 5424\n    },\n    \"phase_diagnostics_status_counts\": {\n      \"ambiguous_near_critical\": 359,\n      \"confirmed_first_order\": 6886,\n      \"confirmed_monotone\": 2636\n    },\n    \"phase_diagnostics_stage_counts\": {\n      \"stage_a\": 2636,\n      \"stage_b\": 4915,\n      \"stage_c\": 1645,\n      \"stage_c_endpoint_local_v2\": 685\n    },\n    \"cep_overlay_complete\": true,\n    \"targeted_classification_match\": false,\n    \"targeted_finite_and_converged\": true\n  },\n  \"sources\": [\n    {\n      \"id\": \"boundary\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748\",\n      \"bytes\": 727970\n    },\n    {\n      \"id\": \"crossover\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c\",\n      \"bytes\": 194321\n    },\n    {\n      \"id\": \"cep\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef\",\n      \"bytes\": 10364\n    },\n    {\n      \"id\": \"grid_convergence\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673\",\n      \"bytes\": 2539751\n    },\n    {\n      \"id\": \"spinodals\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8\",\n      \"bytes\": 670175\n    },\n    {\n      \"id\": \"phase_diagnostics\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json\",\n      \"sha256\": \"adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe\",\n      \"bytes\": 231945\n    },\n    {\n      \"id\": \"c2_manifest\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json\",\n      \"sha256\": \"51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67\",\n      \"bytes\": 91093\n    },\n    {\n      \"id\": \"c2_validation\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\validation_report.json\",\n      \"sha256\": \"741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a\",\n      \"bytes\": 42143\n    },\n    {\n      \"id\": \"cep_overlay\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\cep_manual_bisection_audit_v2_31999149922\\\\author_decision_overlay_v2.json\",\n      \"sha256\": \"f2a58c9c2db63c21b40f4e0bbc1f8858ab861149ce24942ae2b4046e17ab508d\",\n      \"bytes\": 2381\n    },\n    {\n      \"id\": \"cep_acceptance\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\cep_manual_bisection_audit_v2_31999149922\\\\cep_bracket_acceptance_v2.csv\",\n      \"sha256\": \"4343c323b85fc6f165ec53766c873451503507fd00c3720e542bbde24652ab50\",\n      \"bytes\": 1036\n    },\n    {\n      \"id\": \"targeted_manifest\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\c2_targeted_closure_replay_31944988128\\\\c2-targeted-closure-issue130_c2_targeted_closure_v1_20260816_r2_replay4-regression_curves\\\\manifest.json\",\n      \"sha256\": \"2d67a435391b68f362fab647e9ed6689c428a68602ce6203def7fe40bd171f4a\",\n      \"bytes\": 20026\n    },\n    {\n      \"id\": \"targeted_overlay\",\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\c2_targeted_closure_replay_31944988128\\\\c2-targeted-closure-issue130_c2_targeted_closure_v1_20260816_r2_replay4-regression_curves\\\\classification_overlay.csv\",\n      \"sha256\": \"9331ad665984d3770b53a04422c850391b479d599442b09605baef9badfa80b2\",\n      \"bytes\": 2438\n    },\n    {\n      \"id\": \"docs/analysis/pnjl_cep_endpoint_local_production_shadow_v4_20260813/manifest.json\",\n      \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\docs\\\\analysis\\\\pnjl_cep_endpoint_local_production_shadow_v4_20260813\\\\manifest.json\",\n      \"sha256\": \"9ca83fadd56d8cccbe95716b84353b1552811fbb1d8562016a8a770a9017c090\",\n      \"bytes\": 4399\n    },\n    {\n      \"id\": \"docs/analysis/pnjl/c2_phase_surfaces_diagnostic_v5_no_triangulation/manifest.json\",\n      \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\docs\\\\analysis\\\\pnjl\\\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\\\manifest.json\",\n      \"sha256\": \"d37ba8dea91c4387bb8d7eeacf4b1ed6f092d995f35b1f119c6fe46d9c266fed\",\n      \"bytes\": 5946\n    },\n    {\n      \"id\": \"docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/manifest.json\",\n      \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\docs\\\\analysis\\\\pnjl\\\\phase_reference_limited_evidence_audit_v1\\\\manifest.json\",\n      \"sha256\": \"5bb2de14f132fbc8926eb2b9ec326f1709967a94f55a01a5401ab8f4e4fe2b54\",\n      \"bytes\": 4217\n    },\n    {\n      \"id\": \"docs/analysis/pnjl/c2_convergence_audit_v1/manifest.json\",\n      \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\docs\\\\analysis\\\\pnjl\\\\c2_convergence_audit_v1\\\\manifest.json\",\n      \"sha256\": \"a1b8ae705a0810453bdf42f8f328e7b4dd4bf36da4449930f79cac84d3b5b051\",\n      \"bytes\": 6203\n    },\n    {\n      \"id\": \"config/governance/task_tracks.toml\",\n      \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\config\\\\governance\\\\task_tracks.toml\",\n      \"sha256\": \"15224ab94f87b5c9c859486c44cc7a474496547a38c8f5c158012d1f8555b47a\",\n      \"bytes\": 6833\n    }\n  ],\n  \"output_files\": {\n    \"figures/plot_manifest.json\": \"d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc\",\n    \"README.md\": \"8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d\",\n    \"tables/c2_summary.csv\": \"792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0\",\n    \"tables/cep_manual_overlay.csv\": \"47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f\",\n    \"tables/claim_ledger.csv\": \"4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d\",\n    \"tables/gate_status_matrix.csv\": \"eb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007\",\n    \"tables/input_validation.csv\": \"3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a\",\n    \"tables/targeted_regression_status.csv\": \"032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778\"\n  },\n  \"verdict\": \"diagnostic_state_frozen_promotion_blocked\",\n  \"next_action\": \"solver-free CEP mu-direction target-list/cost preflight\"\n}\n"
+        },
+        "checksums": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_current_state_freeze_v1/checksums.sha256",
+          "exists": true,
+          "bytes": 817,
+          "sha256": "08c4152857713e9ce37472ff5ebb02f035dea4b4a1d914c0453a50e4ebb4d60b",
+          "content_utf8": "d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc  figures/plot_manifest.json\na43cc8b25c0dfee29351ec7e0d3dd6b78d83b9dc041495f88e163e3d223e6ec3  manifest.json\n8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d  README.md\n792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0  tables/c2_summary.csv\n47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f  tables/cep_manual_overlay.csv\n4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d  tables/claim_ledger.csv\neb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007  tables/gate_status_matrix.csv\n3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a  tables/input_validation.csv\n032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778  tables/targeted_regression_status.csv\n"
+        }
+      },
+      "historical_baseline": {
+        "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+        "root": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1"
+      },
+      "file_inventory": [
+        {
+          "path": "README.md",
+          "exists": true,
+          "bytes": 3671,
+          "sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6"
+        },
+        {
+          "path": "checksums.sha256",
+          "exists": true,
+          "bytes": 817,
+          "sha256": "08c4152857713e9ce37472ff5ebb02f035dea4b4a1d914c0453a50e4ebb4d60b"
+        },
+        {
+          "path": "figures/plot_manifest.json",
+          "exists": true,
+          "bytes": 1951,
+          "sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619"
+        },
+        {
+          "path": "manifest.json",
+          "exists": true,
+          "bytes": 12845,
+          "sha256": "9ad4f651adc5b3dac5e1d62cf05b942ced74a54f03f589b5b7dc81ce06fa2511"
+        },
+        {
+          "path": "tables/c2_summary.csv",
+          "exists": true,
+          "bytes": 2181,
+          "sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f"
+        },
+        {
+          "path": "tables/cep_manual_overlay.csv",
+          "exists": true,
+          "bytes": 853,
+          "sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f"
+        },
+        {
+          "path": "tables/claim_ledger.csv",
+          "exists": true,
+          "bytes": 1953,
+          "sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff"
+        },
+        {
+          "path": "tables/gate_status_matrix.csv",
+          "exists": true,
+          "bytes": 1337,
+          "sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818"
+        },
+        {
+          "path": "tables/input_validation.csv",
+          "exists": true,
+          "bytes": 2400,
+          "sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6"
+        },
+        {
+          "path": "tables/targeted_regression_status.csv",
+          "exists": true,
+          "bytes": 1423,
+          "sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3"
+        }
+      ],
+      "manifest_output_audit": [
+        {
+          "raw_path": "figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc",
+          "exists": true,
+          "actual_bytes": 1951,
+          "actual_sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d",
+          "exists": true,
+          "actual_bytes": 3671,
+          "actual_sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/c2_summary.csv",
+          "path": "tables/c2_summary.csv",
+          "declared_sha256": "792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0",
+          "exists": true,
+          "actual_bytes": 2181,
+          "actual_sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/cep_manual_overlay.csv",
+          "path": "tables/cep_manual_overlay.csv",
+          "declared_sha256": "47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f",
+          "exists": true,
+          "actual_bytes": 853,
+          "actual_sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d",
+          "exists": true,
+          "actual_bytes": 1953,
+          "actual_sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/gate_status_matrix.csv",
+          "path": "tables/gate_status_matrix.csv",
+          "declared_sha256": "eb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007",
+          "exists": true,
+          "actual_bytes": 1337,
+          "actual_sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/input_validation.csv",
+          "path": "tables/input_validation.csv",
+          "declared_sha256": "3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a",
+          "exists": true,
+          "actual_bytes": 2400,
+          "actual_sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/targeted_regression_status.csv",
+          "path": "tables/targeted_regression_status.csv",
+          "declared_sha256": "032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778",
+          "exists": true,
+          "actual_bytes": 1423,
+          "actual_sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3",
+          "status": "mismatch"
+        }
+      ],
+      "checksums_audit": [
+        {
+          "line": 1,
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc",
+          "exists": true,
+          "actual_bytes": 1951,
+          "actual_sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619",
+          "status": "mismatch"
+        },
+        {
+          "line": 2,
+          "path": "manifest.json",
+          "declared_sha256": "a43cc8b25c0dfee29351ec7e0d3dd6b78d83b9dc041495f88e163e3d223e6ec3",
+          "exists": true,
+          "actual_bytes": 12845,
+          "actual_sha256": "9ad4f651adc5b3dac5e1d62cf05b942ced74a54f03f589b5b7dc81ce06fa2511",
+          "status": "mismatch"
+        },
+        {
+          "line": 3,
+          "path": "README.md",
+          "declared_sha256": "8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d",
+          "exists": true,
+          "actual_bytes": 3671,
+          "actual_sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6",
+          "status": "mismatch"
+        },
+        {
+          "line": 4,
+          "path": "tables/c2_summary.csv",
+          "declared_sha256": "792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0",
+          "exists": true,
+          "actual_bytes": 2181,
+          "actual_sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f",
+          "status": "mismatch"
+        },
+        {
+          "line": 5,
+          "path": "tables/cep_manual_overlay.csv",
+          "declared_sha256": "47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f",
+          "exists": true,
+          "actual_bytes": 853,
+          "actual_sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f",
+          "status": "mismatch"
+        },
+        {
+          "line": 6,
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d",
+          "exists": true,
+          "actual_bytes": 1953,
+          "actual_sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff",
+          "status": "mismatch"
+        },
+        {
+          "line": 7,
+          "path": "tables/gate_status_matrix.csv",
+          "declared_sha256": "eb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007",
+          "exists": true,
+          "actual_bytes": 1337,
+          "actual_sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818",
+          "status": "mismatch"
+        },
+        {
+          "line": 8,
+          "path": "tables/input_validation.csv",
+          "declared_sha256": "3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a",
+          "exists": true,
+          "actual_bytes": 2400,
+          "actual_sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6",
+          "status": "mismatch"
+        },
+        {
+          "line": 9,
+          "path": "tables/targeted_regression_status.csv",
+          "declared_sha256": "032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778",
+          "exists": true,
+          "actual_bytes": 1423,
+          "actual_sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3",
+          "status": "mismatch"
+        }
+      ],
+      "declared_output_count": 8,
+      "manifest_mismatch_count": 8,
+      "manifest_missing_count": 0,
+      "checksum_entry_count": 9,
+      "checksum_mismatch_count": 9,
+      "checksum_missing_count": 0,
+      "extra_output_files": [],
+      "missing_output_files": [],
+      "mismatch_classifications": [
+        {
+          "raw_path": "figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc",
+          "actual_sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/figures/plot_manifest.json",
+            "bytes": 1951,
+            "sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d",
+          "actual_sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/README.md",
+            "bytes": 3671,
+            "sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/c2_summary.csv",
+          "path": "tables/c2_summary.csv",
+          "declared_sha256": "792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0",
+          "actual_sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/c2_summary.csv",
+            "bytes": 2181,
+            "sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/cep_manual_overlay.csv",
+          "path": "tables/cep_manual_overlay.csv",
+          "declared_sha256": "47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f",
+          "actual_sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/cep_manual_overlay.csv",
+            "bytes": 853,
+            "sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d",
+          "actual_sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/claim_ledger.csv",
+            "bytes": 1953,
+            "sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/gate_status_matrix.csv",
+          "path": "tables/gate_status_matrix.csv",
+          "declared_sha256": "eb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007",
+          "actual_sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/gate_status_matrix.csv",
+            "bytes": 1337,
+            "sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/input_validation.csv",
+          "path": "tables/input_validation.csv",
+          "declared_sha256": "3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a",
+          "actual_sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/input_validation.csv",
+            "bytes": 2400,
+            "sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/targeted_regression_status.csv",
+          "path": "tables/targeted_regression_status.csv",
+          "declared_sha256": "032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778",
+          "actual_sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/targeted_regression_status.csv",
+            "bytes": 1423,
+            "sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "d921eeffdd875ee984aea36f8eb5037b3cb288f2d5fc03f0198052a86f6f99cc",
+          "actual_sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/figures/plot_manifest.json",
+            "bytes": 1951,
+            "sha256": "c275813db53a8cc8548735d3a05f7a73be75e08ae12160d9207ee4a41964b619"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "manifest.json",
+          "declared_sha256": "a43cc8b25c0dfee29351ec7e0d3dd6b78d83b9dc041495f88e163e3d223e6ec3",
+          "actual_sha256": "9ad4f651adc5b3dac5e1d62cf05b942ced74a54f03f589b5b7dc81ce06fa2511",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/manifest.json",
+            "bytes": 12845,
+            "sha256": "9ad4f651adc5b3dac5e1d62cf05b942ced74a54f03f589b5b7dc81ce06fa2511"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "README.md",
+          "declared_sha256": "8a8abadbd4e44b86fb53d45dd62c424a3abf3b0015d6b18fd5a854aff4cdd19d",
+          "actual_sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/README.md",
+            "bytes": 3671,
+            "sha256": "55eeef7d4389a1e18f3a7ab260c4ed106e8914cd99e2c17e169244dc8dfe30c6"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/c2_summary.csv",
+          "declared_sha256": "792f7b416be3df0f3c0bb70b6a6a4798e68bc641270c17f440346a56076030c0",
+          "actual_sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/c2_summary.csv",
+            "bytes": 2181,
+            "sha256": "cc48e568d06be75d418056e7367bce1727d8360a63bd69c5f1b3a161ddf8c18f"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/cep_manual_overlay.csv",
+          "declared_sha256": "47b743ff13fe43b92eda8fa5011c46b8bbffe1fcdceb8369f9eb1a7a696e7c7f",
+          "actual_sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/cep_manual_overlay.csv",
+            "bytes": 853,
+            "sha256": "940b8ecce7df48ebfb93edb9bf9cca2a542a18bc5a028ffd957f1486cb93d13f"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "4011a333ea5912a8a157b2e1c00df9d958e09feebd1e0dd35fda024cd3a1c97d",
+          "actual_sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/claim_ledger.csv",
+            "bytes": 1953,
+            "sha256": "c6b319bff8e3f2f46bbfe6d89aaac805a7d803498cc209659456e1a8891364ff"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/gate_status_matrix.csv",
+          "declared_sha256": "eb048b59301e33a779bb2ef1f1e1cd4315d4a5ce56fcbdfa715306e49bef6007",
+          "actual_sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/gate_status_matrix.csv",
+            "bytes": 1337,
+            "sha256": "3aba0665918eec57eaefc2744fb4799838ee3412070961eeb943dd314842a818"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/input_validation.csv",
+          "declared_sha256": "3709ffe617f1a127e910d8d5852798c517dd25bf33c9cb7c245e0567aac8294a",
+          "actual_sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/input_validation.csv",
+            "bytes": 2400,
+            "sha256": "c04768c7370a80d21c73398fb7db5809a99026d160750839a87a923e98458ef6"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": null,
+          "path": "tables/targeted_regression_status.csv",
+          "declared_sha256": "032f2b6eb31b7936e55c8da29ef3dcd290b43d1ed9abe1e4271bde1153b33778",
+          "actual_sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_current_state_freeze_v1/tables/targeted_regression_status.csv",
+            "bytes": 1423,
+            "sha256": "879d7dd8378baf175220c1a5aad4119267d034075fa8d8d39995950e5c1c65e3"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        }
+      ]
+    },
+    {
+      "name": "phase_reference_limited_evidence_audit_v1",
+      "root": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1",
+      "metadata_before": {
+        "manifest": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/manifest.json",
+          "exists": true,
+          "bytes": 4159,
+          "sha256": "ef571aca4b322ef8ef973d0ae2c817557eb812de286ee6693865753f8dc1fb82",
+          "content_utf8": "{\n  \"schema_version\": \"pnjl_phase_reference_limited_evidence_audit_v1\",\n  \"generated_at_utc\": \"2026-08-18T02:48:10.263191+00:00\",\n  \"calculation_sha\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n  \"solver_called\": false,\n  \"reference_write\": false,\n  \"production_override\": false,\n  \"verdict\": \"raw_curve_coverage_complete_diagnostic_only\",\n  \"source\": {\n    \"zenodo_record\": \"21980679\",\n    \"archive_url\": \"https://zenodo.org/api/records/21980679/files/pnjl-raw-curve-archive-issue130-c2-oracle-raw-v1.zip/content\",\n    \"declared_zip_sha256\": \"467be7fb1075d1a5f0de3dd0d8afe29d9206a156c0ca7135a1e50967a4f18ccc\",\n    \"curve_index_path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\phase_reference_limited_evidence_audit_v1\\\\external_archive\\\\curve_index.csv\",\n    \"curve_index_sha256\": \"9f084fef1333baacbd270bda4b2d288c5bbe9ae33155bb37f2300b01a58d0590\",\n    \"central_directory_path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\phase_reference_limited_evidence_audit_v1\\\\external_archive\\\\central_directory.bin\",\n    \"central_directory_sha256\": \"3f5bf45723da9678385e53771051067715240fffc31f96d56096403ba0c5dab1\",\n    \"c2_grid_path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n    \"c2_grid_sha256\": \"59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673\",\n    \"c2_manifest_path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json\",\n    \"c2_manifest_sha256\": \"51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67\",\n    \"c2_validation_path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\validation_report.json\",\n    \"c2_validation_sha256\": \"741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a\"\n  },\n  \"counts\": {\n    \"c2_unresolved_rows\": 763,\n    \"unique_coordinates\": 761,\n    \"raw_curve_rows_per_coordinate\": 1281,\n    \"reason_classes\": [\n      \"classification_transition\",\n      \"hybrid_stage_c_unresolved\",\n      \"mixed_reasons\",\n      \"unresolved_unclassified\"\n    ],\n    \"valid_curves\": 761,\n    \"figure_count\": 4\n  },\n  \"output_files\": {\n    \"decision.json\": \"a491967904ef570599a0c3b94f93caff05c27f6f9114b2bdc5a7ede25a031d42\",\n    \"execution_log.md\": \"f08c5b3897a13e3aa7f0a4fff89cd86876b5132b96635e276c827bd162cd3af1\",\n    \"figures/plot_manifest.json\": \"6445c987641ce170e0cda4f81ac7ec8c1480cfed53abfda065cfe3caaad2e431\",\n    \"figures/rho_mu_xi_0p5_T_107_raw_audit.png\": \"c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c\",\n    \"figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png\": \"52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87\",\n    \"figures/rho_mu_xi_m0p4875_T_55_raw_audit.png\": \"c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2\",\n    \"figures/rho_mu_xi_m0p5_T_5_raw_audit.png\": \"89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7\",\n    \"README.md\": \"4e78d77a3ce569d1441cda4e258564616fb7a0d328c1c64c416ba541d5c202b8\",\n    \"tables/claim_ledger.csv\": \"6720ec178f2664bbf286e30889cec5f62797f514a7b8775960e0d30ed8522be1\",\n    \"tables/coverage_summary.csv\": \"b571f0faf5f4a44152fec5df0c00390e5863bd18ea1f23dbe7d464e45c12ff7b\",\n    \"tables/raw_curve_audit.csv\": \"e71a649059871ddbe43103006017c1a3eb444e873302a26851e543f80a986bf9\",\n    \"tables/reason_shape_summary.csv\": \"d9b5499e9f6faf9d783e0766f48855822f3a37f44d962fc75d39ac4d8e2ea6b3\",\n    \"tables/shape_summary.csv\": \"c58249b3e7797f137c4520c97b6a3d14b693e8abe8f4f5cf463aa3e388778f1f\",\n    \"tables/shape_threshold_sensitivity.csv\": \"864ad7b3982fde4702c4b8ea150698c7d862765798f78d2c8f75512d126d294f\",\n    \"tables/target_coordinates.csv\": \"0a09266a7798c88d40bc07d0aa08d1064fe0a1ade22bb38762c14c39755dde9a\"\n  },\n  \"generator\": {\n    \"path\": \"D:\\\\Temp\\\\julia_relaxtime_phase_reference_limited_evidence_audit\\\\scripts\\\\analysis\\\\pnjl\\\\build_phase_reference_limited_evidence_audit.py\",\n    \"sha256\": \"a12c786d4651f40a8dd7f1d3c71e346ce4df9d1fff61674a9a830ffe90efc281\"\n  }\n}\n"
+        },
+        "checksums": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_limited_evidence_audit_v1/checksums.sha256",
+          "exists": false
+        }
+      },
+      "historical_baseline": {
+        "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+        "root": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1"
+      },
+      "file_inventory": [
+        {
+          "path": "README.md",
+          "exists": true,
+          "bytes": 984,
+          "sha256": "831f3d168d5f220d7c747453d5142b84b40ff8992bacd400dbff4af46d1d6665"
+        },
+        {
+          "path": "decision.json",
+          "exists": true,
+          "bytes": 904,
+          "sha256": "9c426108c361306d454e4a885f9001d024d0f709bd3a028676f0d24a7d74eed3"
+        },
+        {
+          "path": "execution_log.md",
+          "exists": true,
+          "bytes": 475,
+          "sha256": "ba41fdc881b282edfc008f5246296b7d44bb6952348cde471cda20dcfc29fab3"
+        },
+        {
+          "path": "figures/plot_manifest.json",
+          "exists": true,
+          "bytes": 1253,
+          "sha256": "b95816a68a090b4392cb05c2d895def49b5ddd10811214bd12dae25a93770e40"
+        },
+        {
+          "path": "figures/rho_mu_xi_0p5_T_107_raw_audit.png",
+          "exists": true,
+          "bytes": 68789,
+          "sha256": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c"
+        },
+        {
+          "path": "figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png",
+          "exists": true,
+          "bytes": 75089,
+          "sha256": "52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87"
+        },
+        {
+          "path": "figures/rho_mu_xi_m0p4875_T_55_raw_audit.png",
+          "exists": true,
+          "bytes": 76639,
+          "sha256": "c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2"
+        },
+        {
+          "path": "figures/rho_mu_xi_m0p5_T_5_raw_audit.png",
+          "exists": true,
+          "bytes": 90722,
+          "sha256": "89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7"
+        },
+        {
+          "path": "manifest.json",
+          "exists": true,
+          "bytes": 4159,
+          "sha256": "ef571aca4b322ef8ef973d0ae2c817557eb812de286ee6693865753f8dc1fb82"
+        },
+        {
+          "path": "tables/claim_ledger.csv",
+          "exists": true,
+          "bytes": 699,
+          "sha256": "899ce29df457a06f346beb4b83e0f79da8c32955cd57892f9272269574589f1d"
+        },
+        {
+          "path": "tables/coverage_summary.csv",
+          "exists": true,
+          "bytes": 499,
+          "sha256": "481e8c99575d939d1df36fb850593527b23db3d43eddb57601939e7f44c0769a"
+        },
+        {
+          "path": "tables/raw_curve_audit.csv",
+          "exists": true,
+          "bytes": 420100,
+          "sha256": "ceae80b058c791fd266b16b3a939f27622013c282fd3fb552bf6039fcc596eb0"
+        },
+        {
+          "path": "tables/reason_shape_summary.csv",
+          "exists": true,
+          "bytes": 532,
+          "sha256": "6d52795dfd7b6336ee908aac1c54c842cef66b02e91b2c7f43ec8e8816ae6259"
+        },
+        {
+          "path": "tables/shape_summary.csv",
+          "exists": true,
+          "bytes": 110,
+          "sha256": "0af5f53764a974fea1a8afd32c024f1fe5404146769941f4d9b41a86e8a87f5a"
+        },
+        {
+          "path": "tables/shape_threshold_sensitivity.csv",
+          "exists": true,
+          "bytes": 587,
+          "sha256": "de56463e47f31c0dd7afc5261536c4e1935c42d246f344cef0e9bb18b2d9cbd6"
+        },
+        {
+          "path": "tables/target_coordinates.csv",
+          "exists": true,
+          "bytes": 42545,
+          "sha256": "b5254bcaffcccc3d23b4eb2cc81ccc48d943b7430afee2f410d1ce1ea74c2009"
+        }
+      ],
+      "manifest_output_audit": [
+        {
+          "raw_path": "decision.json",
+          "path": "decision.json",
+          "declared_sha256": "a491967904ef570599a0c3b94f93caff05c27f6f9114b2bdc5a7ede25a031d42",
+          "exists": true,
+          "actual_bytes": 904,
+          "actual_sha256": "9c426108c361306d454e4a885f9001d024d0f709bd3a028676f0d24a7d74eed3",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "execution_log.md",
+          "path": "execution_log.md",
+          "declared_sha256": "f08c5b3897a13e3aa7f0a4fff89cd86876b5132b96635e276c827bd162cd3af1",
+          "exists": true,
+          "actual_bytes": 475,
+          "actual_sha256": "ba41fdc881b282edfc008f5246296b7d44bb6952348cde471cda20dcfc29fab3",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "6445c987641ce170e0cda4f81ac7ec8c1480cfed53abfda065cfe3caaad2e431",
+          "exists": true,
+          "actual_bytes": 1253,
+          "actual_sha256": "b95816a68a090b4392cb05c2d895def49b5ddd10811214bd12dae25a93770e40",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "figures/rho_mu_xi_0p5_T_107_raw_audit.png",
+          "path": "figures/rho_mu_xi_0p5_T_107_raw_audit.png",
+          "declared_sha256": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c",
+          "exists": true,
+          "actual_bytes": 68789,
+          "actual_sha256": "c4971f1df05ce64d2a303c21d44cdf5a9efd7f7e6f936f3df2a5260a68c74b0c",
+          "status": "match"
+        },
+        {
+          "raw_path": "figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png",
+          "path": "figures/rho_mu_xi_m0p4375_T_145p062_raw_audit.png",
+          "declared_sha256": "52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87",
+          "exists": true,
+          "actual_bytes": 75089,
+          "actual_sha256": "52684ec71c6b7cf9131a3522fb0f14502804ff6de35f8476756a9bb0193cec87",
+          "status": "match"
+        },
+        {
+          "raw_path": "figures/rho_mu_xi_m0p4875_T_55_raw_audit.png",
+          "path": "figures/rho_mu_xi_m0p4875_T_55_raw_audit.png",
+          "declared_sha256": "c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2",
+          "exists": true,
+          "actual_bytes": 76639,
+          "actual_sha256": "c1f5cc5139b223cf72a2113937ff269301bc9f65b7492c87714e91b44b8dc3c2",
+          "status": "match"
+        },
+        {
+          "raw_path": "figures/rho_mu_xi_m0p5_T_5_raw_audit.png",
+          "path": "figures/rho_mu_xi_m0p5_T_5_raw_audit.png",
+          "declared_sha256": "89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7",
+          "exists": true,
+          "actual_bytes": 90722,
+          "actual_sha256": "89fe543c6e6844aae8a67256e371797e65c5579175b40cf590cf8a7b79b0c3c7",
+          "status": "match"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "4e78d77a3ce569d1441cda4e258564616fb7a0d328c1c64c416ba541d5c202b8",
+          "exists": true,
+          "actual_bytes": 984,
+          "actual_sha256": "831f3d168d5f220d7c747453d5142b84b40ff8992bacd400dbff4af46d1d6665",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "6720ec178f2664bbf286e30889cec5f62797f514a7b8775960e0d30ed8522be1",
+          "exists": true,
+          "actual_bytes": 699,
+          "actual_sha256": "899ce29df457a06f346beb4b83e0f79da8c32955cd57892f9272269574589f1d",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/coverage_summary.csv",
+          "path": "tables/coverage_summary.csv",
+          "declared_sha256": "b571f0faf5f4a44152fec5df0c00390e5863bd18ea1f23dbe7d464e45c12ff7b",
+          "exists": true,
+          "actual_bytes": 499,
+          "actual_sha256": "481e8c99575d939d1df36fb850593527b23db3d43eddb57601939e7f44c0769a",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/raw_curve_audit.csv",
+          "path": "tables/raw_curve_audit.csv",
+          "declared_sha256": "e71a649059871ddbe43103006017c1a3eb444e873302a26851e543f80a986bf9",
+          "exists": true,
+          "actual_bytes": 420100,
+          "actual_sha256": "ceae80b058c791fd266b16b3a939f27622013c282fd3fb552bf6039fcc596eb0",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/reason_shape_summary.csv",
+          "path": "tables/reason_shape_summary.csv",
+          "declared_sha256": "d9b5499e9f6faf9d783e0766f48855822f3a37f44d962fc75d39ac4d8e2ea6b3",
+          "exists": true,
+          "actual_bytes": 532,
+          "actual_sha256": "6d52795dfd7b6336ee908aac1c54c842cef66b02e91b2c7f43ec8e8816ae6259",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/shape_summary.csv",
+          "path": "tables/shape_summary.csv",
+          "declared_sha256": "c58249b3e7797f137c4520c97b6a3d14b693e8abe8f4f5cf463aa3e388778f1f",
+          "exists": true,
+          "actual_bytes": 110,
+          "actual_sha256": "0af5f53764a974fea1a8afd32c024f1fe5404146769941f4d9b41a86e8a87f5a",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/shape_threshold_sensitivity.csv",
+          "path": "tables/shape_threshold_sensitivity.csv",
+          "declared_sha256": "864ad7b3982fde4702c4b8ea150698c7d862765798f78d2c8f75512d126d294f",
+          "exists": true,
+          "actual_bytes": 587,
+          "actual_sha256": "de56463e47f31c0dd7afc5261536c4e1935c42d246f344cef0e9bb18b2d9cbd6",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/target_coordinates.csv",
+          "path": "tables/target_coordinates.csv",
+          "declared_sha256": "0a09266a7798c88d40bc07d0aa08d1064fe0a1ade22bb38762c14c39755dde9a",
+          "exists": true,
+          "actual_bytes": 42545,
+          "actual_sha256": "b5254bcaffcccc3d23b4eb2cc81ccc48d943b7430afee2f410d1ce1ea74c2009",
+          "status": "mismatch"
+        }
+      ],
+      "checksums_audit": [],
+      "declared_output_count": 15,
+      "manifest_mismatch_count": 11,
+      "manifest_missing_count": 0,
+      "checksum_entry_count": 0,
+      "checksum_mismatch_count": 0,
+      "checksum_missing_count": 0,
+      "extra_output_files": [],
+      "missing_output_files": [],
+      "mismatch_classifications": [
+        {
+          "raw_path": "decision.json",
+          "path": "decision.json",
+          "declared_sha256": "a491967904ef570599a0c3b94f93caff05c27f6f9114b2bdc5a7ede25a031d42",
+          "actual_sha256": "9c426108c361306d454e4a885f9001d024d0f709bd3a028676f0d24a7d74eed3",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/decision.json",
+            "bytes": 904,
+            "sha256": "9c426108c361306d454e4a885f9001d024d0f709bd3a028676f0d24a7d74eed3"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "execution_log.md",
+          "path": "execution_log.md",
+          "declared_sha256": "f08c5b3897a13e3aa7f0a4fff89cd86876b5132b96635e276c827bd162cd3af1",
+          "actual_sha256": "ba41fdc881b282edfc008f5246296b7d44bb6952348cde471cda20dcfc29fab3",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/execution_log.md",
+            "bytes": 475,
+            "sha256": "ba41fdc881b282edfc008f5246296b7d44bb6952348cde471cda20dcfc29fab3"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "6445c987641ce170e0cda4f81ac7ec8c1480cfed53abfda065cfe3caaad2e431",
+          "actual_sha256": "b95816a68a090b4392cb05c2d895def49b5ddd10811214bd12dae25a93770e40",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/figures/plot_manifest.json",
+            "bytes": 1253,
+            "sha256": "b95816a68a090b4392cb05c2d895def49b5ddd10811214bd12dae25a93770e40"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "4e78d77a3ce569d1441cda4e258564616fb7a0d328c1c64c416ba541d5c202b8",
+          "actual_sha256": "831f3d168d5f220d7c747453d5142b84b40ff8992bacd400dbff4af46d1d6665",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/README.md",
+            "bytes": 984,
+            "sha256": "831f3d168d5f220d7c747453d5142b84b40ff8992bacd400dbff4af46d1d6665"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "6720ec178f2664bbf286e30889cec5f62797f514a7b8775960e0d30ed8522be1",
+          "actual_sha256": "899ce29df457a06f346beb4b83e0f79da8c32955cd57892f9272269574589f1d",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/claim_ledger.csv",
+            "bytes": 699,
+            "sha256": "899ce29df457a06f346beb4b83e0f79da8c32955cd57892f9272269574589f1d"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/coverage_summary.csv",
+          "path": "tables/coverage_summary.csv",
+          "declared_sha256": "b571f0faf5f4a44152fec5df0c00390e5863bd18ea1f23dbe7d464e45c12ff7b",
+          "actual_sha256": "481e8c99575d939d1df36fb850593527b23db3d43eddb57601939e7f44c0769a",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/coverage_summary.csv",
+            "bytes": 499,
+            "sha256": "481e8c99575d939d1df36fb850593527b23db3d43eddb57601939e7f44c0769a"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/raw_curve_audit.csv",
+          "path": "tables/raw_curve_audit.csv",
+          "declared_sha256": "e71a649059871ddbe43103006017c1a3eb444e873302a26851e543f80a986bf9",
+          "actual_sha256": "ceae80b058c791fd266b16b3a939f27622013c282fd3fb552bf6039fcc596eb0",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/raw_curve_audit.csv",
+            "bytes": 420100,
+            "sha256": "ceae80b058c791fd266b16b3a939f27622013c282fd3fb552bf6039fcc596eb0"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/reason_shape_summary.csv",
+          "path": "tables/reason_shape_summary.csv",
+          "declared_sha256": "d9b5499e9f6faf9d783e0766f48855822f3a37f44d962fc75d39ac4d8e2ea6b3",
+          "actual_sha256": "6d52795dfd7b6336ee908aac1c54c842cef66b02e91b2c7f43ec8e8816ae6259",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/reason_shape_summary.csv",
+            "bytes": 532,
+            "sha256": "6d52795dfd7b6336ee908aac1c54c842cef66b02e91b2c7f43ec8e8816ae6259"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/shape_summary.csv",
+          "path": "tables/shape_summary.csv",
+          "declared_sha256": "c58249b3e7797f137c4520c97b6a3d14b693e8abe8f4f5cf463aa3e388778f1f",
+          "actual_sha256": "0af5f53764a974fea1a8afd32c024f1fe5404146769941f4d9b41a86e8a87f5a",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/shape_summary.csv",
+            "bytes": 110,
+            "sha256": "0af5f53764a974fea1a8afd32c024f1fe5404146769941f4d9b41a86e8a87f5a"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/shape_threshold_sensitivity.csv",
+          "path": "tables/shape_threshold_sensitivity.csv",
+          "declared_sha256": "864ad7b3982fde4702c4b8ea150698c7d862765798f78d2c8f75512d126d294f",
+          "actual_sha256": "de56463e47f31c0dd7afc5261536c4e1935c42d246f344cef0e9bb18b2d9cbd6",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/shape_threshold_sensitivity.csv",
+            "bytes": 587,
+            "sha256": "de56463e47f31c0dd7afc5261536c4e1935c42d246f344cef0e9bb18b2d9cbd6"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/target_coordinates.csv",
+          "path": "tables/target_coordinates.csv",
+          "declared_sha256": "0a09266a7798c88d40bc07d0aa08d1064fe0a1ade22bb38762c14c39755dde9a",
+          "actual_sha256": "b5254bcaffcccc3d23b4eb2cc81ccc48d943b7430afee2f410d1ce1ea74c2009",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_limited_evidence_audit_v1/tables/target_coordinates.csv",
+            "bytes": 42545,
+            "sha256": "b5254bcaffcccc3d23b4eb2cc81ccc48d943b7430afee2f410d1ce1ea74c2009"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        }
+      ]
+    },
+    {
+      "name": "phase_reference_manual_overlay_promotion_audit_v1",
+      "root": "docs/analysis/pnjl/phase_reference/phase_reference_manual_overlay_promotion_audit_v1",
+      "metadata_before": {
+        "manifest": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_manual_overlay_promotion_audit_v1/manifest.json",
+          "exists": true,
+          "bytes": 5456,
+          "sha256": "21f77c63983365ff8137a3f4ecf6a253cd28d08e81a58029701343c0ed2f89e3",
+          "content_utf8": "{\n  \"schema_version\": \"pnjl_phase_reference_manual_overlay_promotion_audit_v1\",\n  \"calculation_sha\": \"3c5f6b3c9bd535cff7657364dadb2efc31f2ea48\",\n  \"generated_at_utc\": \"2026-08-17T13:25:23.209198+00:00\",\n  \"solver_called\": false,\n  \"reference_write\": false,\n  \"promotion_verdict\": \"blocked_manual_overlay_inconclusive\",\n  \"input_files\": [\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\c1_complete_acceptance_31762201725_attempt2\\\\reference\\\\phase_grid_convergence_issue130_stagec_density_v2_c1_integral_tight_20260813.csv\",\n      \"sha256\": \"70d5f75436569ecf1531ca9deee063ffd99d9bcdb8694b8424b933705a38ae31\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\c1_complete_acceptance_31762201725_attempt2\\\\reference\\\\boundary_issue130_stagec_density_v2_c1_integral_tight_20260813.csv\",\n      \"sha256\": \"ddeb68d5f95fecb4206fc75ab835335f42a20202b41d85cea16aad0f89545723\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv\",\n      \"sha256\": \"f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\reference\\\\phase_diagnostics_issue130_stagec_density_v2_c2_grid_tight_20260813.json\",\n      \"sha256\": \"adac201865403767c77d4a772beb3783c52b6030d13a2cefe1eda0c0db44d9fe\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\stagec_density_v2_c2_20260813_run31862752226\\\\validation_report.json\",\n      \"sha256\": \"741bd02b6527858ed5114e2e6659f871de115f194b9064c75469c5b1a9e5d71a\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\docs\\\\analysis\\\\pnjl\\\\c2_blocking_audit_v2\\\\manifest.json\",\n      \"sha256\": \"6a33a689744d0761191b472e37e5bbf23042828c5561f2d05d92908e908467c0\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\docs\\\\analysis\\\\pnjl\\\\c2_blocking_audit_v2\\\\tables\\\\c1_c2_classification_regressions.csv\",\n      \"sha256\": \"70fa23b7ee943bc8aae94110d0fd61cf10f9cc67c6b050df9b35e8abe7f11286\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\docs\\\\analysis\\\\pnjl\\\\c2_blocking_audit_v2\\\\tables\\\\c1_c2_geometry_drift_summary.csv\",\n      \"sha256\": \"0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\docs\\\\analysis\\\\pnjl\\\\c2_targeted_manual_review_v1\\\\manifest.json\",\n      \"sha256\": \"58b10d649f55a32ca164a317962bf8b904602dcfcd92b2a8f44de27cd317d554\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\docs\\\\analysis\\\\pnjl\\\\c2_targeted_manual_review_v1\\\\tables\\\\point_summary.csv\",\n      \"sha256\": \"f06185844012c36089abb44ab9bd4662be858245818baf0edc83cdc7af812faa\"\n    },\n    {\n      \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime_issue130_artifacts\\\\cep_manual_bisection_audit_v2_31999149922\\\\author_decision_overlay_v2.json\",\n      \"sha256\": \"f2a58c9c2db63c21b40f4e0bbc1f8858ab861149ce24942ae2b4046e17ab508d\"\n    }\n  ],\n  \"source_counts\": {\n    \"c2_grid_rows\": 22791,\n    \"c2_grid_unresolved_rows\": 5424,\n    \"geometry_only_unresolved_rows\": 4661,\n    \"unsafe_unresolved_rows\": 763,\n    \"classification_regressions\": 9,\n    \"manual_nine_curve_rows\": 9,\n    \"manual_cep_brackets\": 3\n  },\n  \"output_files\": {\n    \"decision.json\": \"bb9df8d9ccf321d45de3f10481907f3c1a0325ed17ada9f275b5aab92259d1e0\",\n    \"execution_log.md\": \"07927463a928e5d60377c9427e2adde5aa5085669a5a138ec5586f995b956ece\",\n    \"README.md\": \"d7805657e1fbf46e010d097a89f9cde631977e49d16dabf12438a149cc328ad0\",\n    \"tables/auto_gate_summary.csv\": \"833840d4aed8de3a7af7d89214bb0fe00dcd1f2a1dc361a3729fd64262c36eab\",\n    \"tables/claim_ledger.csv\": \"d48f4842793781f3ac9a88f7a9797b0e34639ec9d1b3d7cefc4d66411e8a9f1a\",\n    \"tables/grid_unresolved_by_reason.csv\": \"e336beeaadf7aaecf840ed927ed6f67ad17fbea9145649d5d53d461bb2b7271c\",\n    \"tables/manual_cep_decisions.csv\": \"e0064ba3e3e54a29687292c7ed13ab9094a571c679331c9e3ea0dabe32669d1d\",\n    \"tables/manual_nine_curve_decisions.csv\": \"873778765c7bcf1c37c1d59cff7d9826ccfd1ce3ff92fdb7b6f9e6c1f05334fc\",\n    \"tables/physical_stability_summary.csv\": \"0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a\",\n    \"tables/promotion_decision.csv\": \"8a0d3d9c4f4766c71e60dc1f59d7bdcdc447fa514273d1ab8f3941b7ea96c722\"\n  },\n  \"generator\": {\n    \"path\": \"D:\\\\Desktop\\\\Julia_RelaxTime\\\\scripts\\\\analysis\\\\pnjl\\\\build_phase_reference_manual_overlay_promotion_audit.py\",\n    \"sha256\": \"840ab8b94d28c8b78a73080c87aab9c3de4f5f642975446f896ea11b29531786\"\n  }\n}\n"
+        },
+        "checksums": {
+          "path": "docs/analysis/pnjl/phase_reference/phase_reference_manual_overlay_promotion_audit_v1/checksums.sha256",
+          "exists": false
+        }
+      },
+      "historical_baseline": {
+        "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+        "root": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1"
+      },
+      "file_inventory": [
+        {
+          "path": "README.md",
+          "exists": true,
+          "bytes": 885,
+          "sha256": "9aa5a97e4f0e7596642d524cfecffa4b0b6dc8849a866b13abb80cc3f5ff70b0"
+        },
+        {
+          "path": "decision.json",
+          "exists": true,
+          "bytes": 2785,
+          "sha256": "49c7f294da0caaf9f92f217bd08adbbd652dee88323da4fc7a27d0294300d0c1"
+        },
+        {
+          "path": "execution_log.md",
+          "exists": true,
+          "bytes": 1226,
+          "sha256": "dd2e1d08a6f1542417cd3273c088d03805281204092b20b30e1f0a7339f9f823"
+        },
+        {
+          "path": "manifest.json",
+          "exists": true,
+          "bytes": 5456,
+          "sha256": "21f77c63983365ff8137a3f4ecf6a253cd28d08e81a58029701343c0ed2f89e3"
+        },
+        {
+          "path": "tables/auto_gate_summary.csv",
+          "exists": true,
+          "bytes": 849,
+          "sha256": "e88bdc160a7a1fe084b556f39256f120905bc956587c9de241b220e87b96dc1c"
+        },
+        {
+          "path": "tables/claim_ledger.csv",
+          "exists": true,
+          "bytes": 816,
+          "sha256": "206b79943bce27afae414002b612d11ae1c8a233d4b348dbceb206151991d11c"
+        },
+        {
+          "path": "tables/grid_unresolved_by_reason.csv",
+          "exists": true,
+          "bytes": 1562,
+          "sha256": "7b278ae10d03323290c4067ec903d3b0026f924b9b6148d93b161431d5617329"
+        },
+        {
+          "path": "tables/manual_cep_decisions.csv",
+          "exists": true,
+          "bytes": 250,
+          "sha256": "33f2b193d1c93efb947bc560250e11a797765ad83f22537526380d07defad0f0"
+        },
+        {
+          "path": "tables/manual_nine_curve_decisions.csv",
+          "exists": true,
+          "bytes": 997,
+          "sha256": "0ed020b5fd948f763aa503940c1156ce4b0e6febf9fc1c851029bcbb6954d494"
+        },
+        {
+          "path": "tables/physical_stability_summary.csv",
+          "exists": true,
+          "bytes": 795,
+          "sha256": "120edfd64cf0263dff7a6aa4210926d70486073468c312ac8e5799f85d505848"
+        },
+        {
+          "path": "tables/promotion_decision.csv",
+          "exists": true,
+          "bytes": 391,
+          "sha256": "1c0344ce0133dc655f74545a55970725d58e78f173615bee9df803220d467c10"
+        }
+      ],
+      "manifest_output_audit": [
+        {
+          "raw_path": "decision.json",
+          "path": "decision.json",
+          "declared_sha256": "bb9df8d9ccf321d45de3f10481907f3c1a0325ed17ada9f275b5aab92259d1e0",
+          "exists": true,
+          "actual_bytes": 2785,
+          "actual_sha256": "49c7f294da0caaf9f92f217bd08adbbd652dee88323da4fc7a27d0294300d0c1",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "execution_log.md",
+          "path": "execution_log.md",
+          "declared_sha256": "07927463a928e5d60377c9427e2adde5aa5085669a5a138ec5586f995b956ece",
+          "exists": true,
+          "actual_bytes": 1226,
+          "actual_sha256": "dd2e1d08a6f1542417cd3273c088d03805281204092b20b30e1f0a7339f9f823",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "d7805657e1fbf46e010d097a89f9cde631977e49d16dabf12438a149cc328ad0",
+          "exists": true,
+          "actual_bytes": 885,
+          "actual_sha256": "9aa5a97e4f0e7596642d524cfecffa4b0b6dc8849a866b13abb80cc3f5ff70b0",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/auto_gate_summary.csv",
+          "path": "tables/auto_gate_summary.csv",
+          "declared_sha256": "833840d4aed8de3a7af7d89214bb0fe00dcd1f2a1dc361a3729fd64262c36eab",
+          "exists": true,
+          "actual_bytes": 849,
+          "actual_sha256": "e88bdc160a7a1fe084b556f39256f120905bc956587c9de241b220e87b96dc1c",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "d48f4842793781f3ac9a88f7a9797b0e34639ec9d1b3d7cefc4d66411e8a9f1a",
+          "exists": true,
+          "actual_bytes": 816,
+          "actual_sha256": "206b79943bce27afae414002b612d11ae1c8a233d4b348dbceb206151991d11c",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/grid_unresolved_by_reason.csv",
+          "path": "tables/grid_unresolved_by_reason.csv",
+          "declared_sha256": "e336beeaadf7aaecf840ed927ed6f67ad17fbea9145649d5d53d461bb2b7271c",
+          "exists": true,
+          "actual_bytes": 1562,
+          "actual_sha256": "7b278ae10d03323290c4067ec903d3b0026f924b9b6148d93b161431d5617329",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/manual_cep_decisions.csv",
+          "path": "tables/manual_cep_decisions.csv",
+          "declared_sha256": "e0064ba3e3e54a29687292c7ed13ab9094a571c679331c9e3ea0dabe32669d1d",
+          "exists": true,
+          "actual_bytes": 250,
+          "actual_sha256": "33f2b193d1c93efb947bc560250e11a797765ad83f22537526380d07defad0f0",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/manual_nine_curve_decisions.csv",
+          "path": "tables/manual_nine_curve_decisions.csv",
+          "declared_sha256": "873778765c7bcf1c37c1d59cff7d9826ccfd1ce3ff92fdb7b6f9e6c1f05334fc",
+          "exists": true,
+          "actual_bytes": 997,
+          "actual_sha256": "0ed020b5fd948f763aa503940c1156ce4b0e6febf9fc1c851029bcbb6954d494",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/physical_stability_summary.csv",
+          "path": "tables/physical_stability_summary.csv",
+          "declared_sha256": "0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a",
+          "exists": true,
+          "actual_bytes": 795,
+          "actual_sha256": "120edfd64cf0263dff7a6aa4210926d70486073468c312ac8e5799f85d505848",
+          "status": "mismatch"
+        },
+        {
+          "raw_path": "tables/promotion_decision.csv",
+          "path": "tables/promotion_decision.csv",
+          "declared_sha256": "8a0d3d9c4f4766c71e60dc1f59d7bdcdc447fa514273d1ab8f3941b7ea96c722",
+          "exists": true,
+          "actual_bytes": 391,
+          "actual_sha256": "1c0344ce0133dc655f74545a55970725d58e78f173615bee9df803220d467c10",
+          "status": "mismatch"
+        }
+      ],
+      "checksums_audit": [],
+      "declared_output_count": 10,
+      "manifest_mismatch_count": 10,
+      "manifest_missing_count": 0,
+      "checksum_entry_count": 0,
+      "checksum_mismatch_count": 0,
+      "checksum_missing_count": 0,
+      "extra_output_files": [],
+      "missing_output_files": [],
+      "mismatch_classifications": [
+        {
+          "raw_path": "decision.json",
+          "path": "decision.json",
+          "declared_sha256": "bb9df8d9ccf321d45de3f10481907f3c1a0325ed17ada9f275b5aab92259d1e0",
+          "actual_sha256": "49c7f294da0caaf9f92f217bd08adbbd652dee88323da4fc7a27d0294300d0c1",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/decision.json",
+            "bytes": 2785,
+            "sha256": "49c7f294da0caaf9f92f217bd08adbbd652dee88323da4fc7a27d0294300d0c1"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "execution_log.md",
+          "path": "execution_log.md",
+          "declared_sha256": "07927463a928e5d60377c9427e2adde5aa5085669a5a138ec5586f995b956ece",
+          "actual_sha256": "dd2e1d08a6f1542417cd3273c088d03805281204092b20b30e1f0a7339f9f823",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/execution_log.md",
+            "bytes": 1226,
+            "sha256": "dd2e1d08a6f1542417cd3273c088d03805281204092b20b30e1f0a7339f9f823"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "README.md",
+          "path": "README.md",
+          "declared_sha256": "d7805657e1fbf46e010d097a89f9cde631977e49d16dabf12438a149cc328ad0",
+          "actual_sha256": "9aa5a97e4f0e7596642d524cfecffa4b0b6dc8849a866b13abb80cc3f5ff70b0",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/README.md",
+            "bytes": 885,
+            "sha256": "9aa5a97e4f0e7596642d524cfecffa4b0b6dc8849a866b13abb80cc3f5ff70b0"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/auto_gate_summary.csv",
+          "path": "tables/auto_gate_summary.csv",
+          "declared_sha256": "833840d4aed8de3a7af7d89214bb0fe00dcd1f2a1dc361a3729fd64262c36eab",
+          "actual_sha256": "e88bdc160a7a1fe084b556f39256f120905bc956587c9de241b220e87b96dc1c",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/auto_gate_summary.csv",
+            "bytes": 849,
+            "sha256": "e88bdc160a7a1fe084b556f39256f120905bc956587c9de241b220e87b96dc1c"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "d48f4842793781f3ac9a88f7a9797b0e34639ec9d1b3d7cefc4d66411e8a9f1a",
+          "actual_sha256": "206b79943bce27afae414002b612d11ae1c8a233d4b348dbceb206151991d11c",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/claim_ledger.csv",
+            "bytes": 816,
+            "sha256": "206b79943bce27afae414002b612d11ae1c8a233d4b348dbceb206151991d11c"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/grid_unresolved_by_reason.csv",
+          "path": "tables/grid_unresolved_by_reason.csv",
+          "declared_sha256": "e336beeaadf7aaecf840ed927ed6f67ad17fbea9145649d5d53d461bb2b7271c",
+          "actual_sha256": "7b278ae10d03323290c4067ec903d3b0026f924b9b6148d93b161431d5617329",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/grid_unresolved_by_reason.csv",
+            "bytes": 1562,
+            "sha256": "7b278ae10d03323290c4067ec903d3b0026f924b9b6148d93b161431d5617329"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/manual_cep_decisions.csv",
+          "path": "tables/manual_cep_decisions.csv",
+          "declared_sha256": "e0064ba3e3e54a29687292c7ed13ab9094a571c679331c9e3ea0dabe32669d1d",
+          "actual_sha256": "33f2b193d1c93efb947bc560250e11a797765ad83f22537526380d07defad0f0",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/manual_cep_decisions.csv",
+            "bytes": 250,
+            "sha256": "33f2b193d1c93efb947bc560250e11a797765ad83f22537526380d07defad0f0"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/manual_nine_curve_decisions.csv",
+          "path": "tables/manual_nine_curve_decisions.csv",
+          "declared_sha256": "873778765c7bcf1c37c1d59cff7d9826ccfd1ce3ff92fdb7b6f9e6c1f05334fc",
+          "actual_sha256": "0ed020b5fd948f763aa503940c1156ce4b0e6febf9fc1c851029bcbb6954d494",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/manual_nine_curve_decisions.csv",
+            "bytes": 997,
+            "sha256": "0ed020b5fd948f763aa503940c1156ce4b0e6febf9fc1c851029bcbb6954d494"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/physical_stability_summary.csv",
+          "path": "tables/physical_stability_summary.csv",
+          "declared_sha256": "0a19e0134fd87bfb1b82fd00d06cef7806dc4a9db9e571634bed558af495d07a",
+          "actual_sha256": "120edfd64cf0263dff7a6aa4210926d70486073468c312ac8e5799f85d505848",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/physical_stability_summary.csv",
+            "bytes": 795,
+            "sha256": "120edfd64cf0263dff7a6aa4210926d70486073468c312ac8e5799f85d505848"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "tables/promotion_decision.csv",
+          "path": "tables/promotion_decision.csv",
+          "declared_sha256": "8a0d3d9c4f4766c71e60dc1f59d7bdcdc447fa514273d1ab8f3941b7ea96c722",
+          "actual_sha256": "1c0344ce0133dc655f74545a55970725d58e78f173615bee9df803220d467c10",
+          "baseline": {
+            "commit": "a564d3288ba35913172894c3ccc47db6f90d68d7",
+            "path": "docs/analysis/pnjl/phase_reference_manual_overlay_promotion_audit_v1/tables/promotion_decision.csv",
+            "bytes": 391,
+            "sha256": "1c0344ce0133dc655f74545a55970725d58e78f173615bee9df803220d467c10"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        }
+      ]
+    },
+    {
+      "name": "phase_guided_transport_p128_xi001_analysis",
+      "root": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis",
+      "metadata_before": {
+        "manifest": {
+          "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/manifest.json",
+          "exists": true,
+          "bytes": 7632,
+          "sha256": "af1c2bb0603520dc4bba86180a1a5f87cb389ccf984309fe39be1b04663f07ea",
+          "content_utf8": "{\n  \"schema\": \"phase_guided_transport_p128_xi001_tau_jump_analysis_manifest_v1\",\n  \"case\": \"first_canonical_v1_p128_xi001_validated_anchored_prod_v1\",\n  \"created_at\": \"2026-06-20T09:33:19.684762+00:00\",\n  \"generator\": \"scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py\",\n  \"git_commit\": \"7c5ebf7196ab0d9169e792c588024768413025f9\",\n  \"scope\": \"repository-only tau-first jump analysis; downstream transport coefficients treated as responses\",\n  \"inputs\": [\n    {\n      \"mode_key\": \"mode_a\",\n      \"scan_rows\": 909,\n      \"channel_rows\": 38178,\n      \"failed_rows\": 0,\n      \"xi_count\": 101,\n      \"xi_min\": -0.5,\n      \"xi_max\": 0.5,\n      \"xi_step\": 0.01,\n      \"plot_count\": 36,\n      \"has_antiquark_tau_fields\": true,\n      \"has_zeta_over_s\": true,\n      \"scan_csv\": \"data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/phase_guided_transport_scan.csv\",\n      \"channel_diagnostics_csv\": \"data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/channel_diagnostics.csv\",\n      \"plot_manifest\": \"data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json\",\n      \"scan_sha256\": \"d2379f7b44d22b632896690cb96c4d6e95f76d28c69f295248d0bea92b0b71ec\",\n      \"diagnostics_sha256\": \"1261beca5da5305c2cd95a45fc38aa277d91ebe077f3fa91558d63c76c873d66\"\n    },\n    {\n      \"mode_key\": \"mode_b\",\n      \"scan_rows\": 909,\n      \"channel_rows\": 38178,\n      \"failed_rows\": 0,\n      \"xi_count\": 101,\n      \"xi_min\": -0.5,\n      \"xi_max\": 0.5,\n      \"xi_step\": 0.01,\n      \"plot_count\": 36,\n      \"has_antiquark_tau_fields\": true,\n      \"has_zeta_over_s\": true,\n      \"scan_csv\": \"data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/phase_guided_transport_scan.csv\",\n      \"channel_diagnostics_csv\": \"data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/channel_diagnostics.csv\",\n      \"plot_manifest\": \"data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi001_validated_anchored_prod_v1/plot_manifest.json\",\n      \"scan_sha256\": \"8d4813ff88c581b777063a219cbca002a21506e995033c4f1ea64f269ce358b0\",\n      \"diagnostics_sha256\": \"9ba789558cdec1b8175893a417ad3826f6c4f03a2ec679ec07bec10f7f24da42\"\n    }\n  ],\n  \"outputs\": [\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/README.md\",\n      \"sha256\": \"60f4ff5df0badd8e9690b77cb0035587481d6d14663dc664d7ef0655bc41b770\",\n      \"bytes\": 10235\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/tau_jump_windows_overview.png\",\n      \"sha256\": \"d888d79e405c2e1c1b93099343425195bef67ddd7e703a3545b20d906d4d6f79\",\n      \"bytes\": 458034\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/downstream_response_windows.png\",\n      \"sha256\": \"2329eefd221f18dfca04eba9a6a0f7e5b1f1b3fb57c0331f1fc5e8985dbf7db5\",\n      \"bytes\": 497041\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/plot_manifest.json\",\n      \"sha256\": \"8de97d86bb1e4318e7baddc3f045cda1d0834c044ed3fefcadaf7d8a689a8966\",\n      \"bytes\": 2557\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/input_inventory.csv\",\n      \"sha256\": \"48c9f19d000b2235bea6cf8af5cb576413ee5418da193fc445c60c87b5334bb9\",\n      \"bytes\": 1549\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_step_candidates.csv\",\n      \"sha256\": \"3329deeae155e134ad1ecb92e85378ab44b2dc3e61573d241078a5f63e82aae1\",\n      \"bytes\": 27606\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_window_summary.csv\",\n      \"sha256\": \"cc4275fb5587018237375dfc6b38ba40548af15de6d7d94a242d24a0e6438885\",\n      \"bytes\": 8220\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_channel_attribution.csv\",\n      \"sha256\": \"f9e2fd1317fcf9e5239e220bc92953a8313c681d21d8f21bc4fa12f3871ffb1b\",\n      \"bytes\": 57461\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/downstream_transport_response_summary.csv\",\n      \"sha256\": \"399700e9d31ae3d230a6ddfe1d25eca01fd1fa1101ecf0807b5dc079ee5369ad\",\n      \"bytes\": 6823\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv\",\n      \"sha256\": \"0b47d5e5b174ad7f3ac1df395bf8de17b5e8fd78cb613e703ab6e8341036f8f9\",\n      \"bytes\": 3645\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/claim_ledger.csv\",\n      \"sha256\": \"9fc68ba3649302303fcb8fa2ca006754247df7e7bdba3f78a449354d4a46ee03\",\n      \"bytes\": 5512\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_summary.csv\",\n      \"sha256\": \"f0bca37aece6944b66ecd4c71fbf85b34a4f9316e9144486c46ef57c879fdb7b\",\n      \"bytes\": 4003\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_summary.csv\",\n      \"sha256\": \"b9a044e35bf88f0e041e6d342f3947498a3167da7b06215c630ce593d5791a74\",\n      \"bytes\": 15357\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_band_table.csv\",\n      \"sha256\": \"9193ff2ef7c8d79a08c1c11bd094c4bbfe85a1a2212ab4c4c26e30fbd1981888\",\n      \"bytes\": 119814\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_ds_samples.csv\",\n      \"sha256\": \"539380000d346e969b6ad41d1cf5b3e55b70f30a6ceb62beefc8df34ddf8012c\",\n      \"bytes\": 217951\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/upstream_branch_smoothness_summary.csv\",\n      \"sha256\": \"22f461321b18a00ccdc1b09332e0418e1e3b7d3daab865ee71c67d26c2288482\",\n      \"bytes\": 810\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/global_nonmonotonic_mechanism_summary.csv\",\n      \"sha256\": \"dd8ce31beacf5fd0bed7530d064c30a0d3908abee3a07006300eb9c9614001dd\",\n      \"bytes\": 98\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_reproduction_mismatch_root_cause.csv\",\n      \"sha256\": \"453a8f79fd2acbd8554ce071b5a1b37d1fcc3fbe06cf661cc5f80afc07d2ed5d\",\n      \"bytes\": 665\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_gate.csv\",\n      \"sha256\": \"f23cfa51788a6c028956eb1c91622f7b887d82c5df03c0ed88ca4a060856fe10\",\n      \"bytes\": 367\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_attempts.csv\",\n      \"sha256\": \"426f13d25e715084f9e06fba50c4385681ec0f24a3878f96ca95e0a7e2b90bf5\",\n      \"bytes\": 776\n    },\n    {\n      \"path\": \"docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_manifest.json\",\n      \"sha256\": \"199293bbb9f02b491e8c2fd7b5f301b22fbda2ad6723b12648f7558ec28196f7\",\n      \"bytes\": 1007\n    }\n  ]\n}\n"
+        },
+        "checksums": {
+          "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/checksums.sha256",
+          "exists": false
+        }
+      },
+      "historical_baseline": {
+        "commit": "5f75efab086bccac95eb07e84b7c5c15c8f011ba",
+        "root": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis"
+      },
+      "file_inventory": [
+        {
+          "path": "README.md",
+          "exists": true,
+          "bytes": 10139,
+          "sha256": "6d9719806fa2ec2b2e89576ca32f2d505334de4ecb6c3d327ecaf87e989895e9"
+        },
+        {
+          "path": "figures/downstream_response_windows.png",
+          "exists": true,
+          "bytes": 497041,
+          "sha256": "2329eefd221f18dfca04eba9a6a0f7e5b1f1b3fb57c0331f1fc5e8985dbf7db5"
+        },
+        {
+          "path": "figures/plot_manifest.json",
+          "exists": true,
+          "bytes": 2523,
+          "sha256": "0f5ad8e3cce41800b29e26223fb9d81db0103cce80516e3875f703d6b4ce8465"
+        },
+        {
+          "path": "figures/tau_jump_windows_overview.png",
+          "exists": true,
+          "bytes": 458034,
+          "sha256": "d888d79e405c2e1c1b93099343425195bef67ddd7e703a3545b20d906d4d6f79"
+        },
+        {
+          "path": "manifest.json",
+          "exists": true,
+          "bytes": 7632,
+          "sha256": "af1c2bb0603520dc4bba86180a1a5f87cb389ccf984309fe39be1b04663f07ea"
+        },
+        {
+          "path": "tables/claim_ledger.csv",
+          "exists": true,
+          "bytes": 5512,
+          "sha256": "9fc68ba3649302303fcb8fa2ca006754247df7e7bdba3f78a449354d4a46ee03"
+        },
+        {
+          "path": "tables/denominator_chain_band_table.csv",
+          "exists": true,
+          "bytes": 119814,
+          "sha256": "9193ff2ef7c8d79a08c1c11bd094c4bbfe85a1a2212ab4c4c26e30fbd1981888"
+        },
+        {
+          "path": "tables/denominator_chain_summary.csv",
+          "exists": true,
+          "bytes": 15357,
+          "sha256": "b9a044e35bf88f0e041e6d342f3947498a3167da7b06215c630ce593d5791a74"
+        },
+        {
+          "path": "tables/denominator_ds_samples.csv",
+          "exists": true,
+          "bytes": 217951,
+          "sha256": "539380000d346e969b6ad41d1cf5b3e55b70f30a6ceb62beefc8df34ddf8012c"
+        },
+        {
+          "path": "tables/downstream_transport_response_summary.csv",
+          "exists": true,
+          "bytes": 6823,
+          "sha256": "399700e9d31ae3d230a6ddfe1d25eca01fd1fa1101ecf0807b5dc079ee5369ad"
+        },
+        {
+          "path": "tables/global_nonmonotonic_mechanism_summary.csv",
+          "exists": true,
+          "bytes": 98,
+          "sha256": "dd8ce31beacf5fd0bed7530d064c30a0d3908abee3a07006300eb9c9614001dd"
+        },
+        {
+          "path": "tables/input_inventory.csv",
+          "exists": true,
+          "bytes": 1549,
+          "sha256": "48c9f19d000b2235bea6cf8af5cb576413ee5418da193fc445c60c87b5334bb9"
+        },
+        {
+          "path": "tables/local_rate_convergence_attempts.csv",
+          "exists": true,
+          "bytes": 776,
+          "sha256": "426f13d25e715084f9e06fba50c4385681ec0f24a3878f96ca95e0a7e2b90bf5"
+        },
+        {
+          "path": "tables/local_rate_convergence_gate.csv",
+          "exists": true,
+          "bytes": 367,
+          "sha256": "f23cfa51788a6c028956eb1c91622f7b887d82c5df03c0ed88ca4a060856fe10"
+        },
+        {
+          "path": "tables/local_rate_reproduction_mismatch_root_cause.csv",
+          "exists": true,
+          "bytes": 665,
+          "sha256": "453a8f79fd2acbd8554ce071b5a1b37d1fcc3fbe06cf661cc5f80afc07d2ed5d"
+        },
+        {
+          "path": "tables/mechanism_manifest.json",
+          "exists": true,
+          "bytes": 1007,
+          "sha256": "199293bbb9f02b491e8c2fd7b5f301b22fbda2ad6723b12648f7558ec28196f7"
+        },
+        {
+          "path": "tables/mechanism_window_candidates.csv",
+          "exists": true,
+          "bytes": 3645,
+          "sha256": "0b47d5e5b174ad7f3ac1df395bf8de17b5e8fd78cb613e703ab6e8341036f8f9"
+        },
+        {
+          "path": "tables/mechanism_window_summary.csv",
+          "exists": true,
+          "bytes": 4003,
+          "sha256": "f0bca37aece6944b66ecd4c71fbf85b34a4f9316e9144486c46ef57c879fdb7b"
+        },
+        {
+          "path": "tables/tau_jump_channel_attribution.csv",
+          "exists": true,
+          "bytes": 57461,
+          "sha256": "f9e2fd1317fcf9e5239e220bc92953a8313c681d21d8f21bc4fa12f3871ffb1b"
+        },
+        {
+          "path": "tables/tau_jump_step_candidates.csv",
+          "exists": true,
+          "bytes": 27606,
+          "sha256": "3329deeae155e134ad1ecb92e85378ab44b2dc3e61573d241078a5f63e82aae1"
+        },
+        {
+          "path": "tables/tau_jump_window_summary.csv",
+          "exists": true,
+          "bytes": 8220,
+          "sha256": "cc4275fb5587018237375dfc6b38ba40548af15de6d7d94a242d24a0e6438885"
+        },
+        {
+          "path": "tables/upstream_branch_smoothness_summary.csv",
+          "exists": true,
+          "bytes": 810,
+          "sha256": "22f461321b18a00ccdc1b09332e0418e1e3b7d3daab865ee71c67d26c2288482"
+        }
+      ],
+      "manifest_output_audit": [
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/README.md",
+          "path": "README.md",
+          "declared_sha256": "60f4ff5df0badd8e9690b77cb0035587481d6d14663dc664d7ef0655bc41b770",
+          "declared_bytes": 10235,
+          "exists": true,
+          "actual_bytes": 10139,
+          "actual_sha256": "6d9719806fa2ec2b2e89576ca32f2d505334de4ecb6c3d327ecaf87e989895e9",
+          "status": "mismatch",
+          "byte_count_status": "mismatch"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/tau_jump_windows_overview.png",
+          "path": "figures/tau_jump_windows_overview.png",
+          "declared_sha256": "d888d79e405c2e1c1b93099343425195bef67ddd7e703a3545b20d906d4d6f79",
+          "declared_bytes": 458034,
+          "exists": true,
+          "actual_bytes": 458034,
+          "actual_sha256": "d888d79e405c2e1c1b93099343425195bef67ddd7e703a3545b20d906d4d6f79",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/downstream_response_windows.png",
+          "path": "figures/downstream_response_windows.png",
+          "declared_sha256": "2329eefd221f18dfca04eba9a6a0f7e5b1f1b3fb57c0331f1fc5e8985dbf7db5",
+          "declared_bytes": 497041,
+          "exists": true,
+          "actual_bytes": 497041,
+          "actual_sha256": "2329eefd221f18dfca04eba9a6a0f7e5b1f1b3fb57c0331f1fc5e8985dbf7db5",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "8de97d86bb1e4318e7baddc3f045cda1d0834c044ed3fefcadaf7d8a689a8966",
+          "declared_bytes": 2557,
+          "exists": true,
+          "actual_bytes": 2523,
+          "actual_sha256": "0f5ad8e3cce41800b29e26223fb9d81db0103cce80516e3875f703d6b4ce8465",
+          "status": "mismatch",
+          "byte_count_status": "mismatch"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/input_inventory.csv",
+          "path": "tables/input_inventory.csv",
+          "declared_sha256": "48c9f19d000b2235bea6cf8af5cb576413ee5418da193fc445c60c87b5334bb9",
+          "declared_bytes": 1549,
+          "exists": true,
+          "actual_bytes": 1549,
+          "actual_sha256": "48c9f19d000b2235bea6cf8af5cb576413ee5418da193fc445c60c87b5334bb9",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_step_candidates.csv",
+          "path": "tables/tau_jump_step_candidates.csv",
+          "declared_sha256": "3329deeae155e134ad1ecb92e85378ab44b2dc3e61573d241078a5f63e82aae1",
+          "declared_bytes": 27606,
+          "exists": true,
+          "actual_bytes": 27606,
+          "actual_sha256": "3329deeae155e134ad1ecb92e85378ab44b2dc3e61573d241078a5f63e82aae1",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_window_summary.csv",
+          "path": "tables/tau_jump_window_summary.csv",
+          "declared_sha256": "cc4275fb5587018237375dfc6b38ba40548af15de6d7d94a242d24a0e6438885",
+          "declared_bytes": 8220,
+          "exists": true,
+          "actual_bytes": 8220,
+          "actual_sha256": "cc4275fb5587018237375dfc6b38ba40548af15de6d7d94a242d24a0e6438885",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/tau_jump_channel_attribution.csv",
+          "path": "tables/tau_jump_channel_attribution.csv",
+          "declared_sha256": "f9e2fd1317fcf9e5239e220bc92953a8313c681d21d8f21bc4fa12f3871ffb1b",
+          "declared_bytes": 57461,
+          "exists": true,
+          "actual_bytes": 57461,
+          "actual_sha256": "f9e2fd1317fcf9e5239e220bc92953a8313c681d21d8f21bc4fa12f3871ffb1b",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/downstream_transport_response_summary.csv",
+          "path": "tables/downstream_transport_response_summary.csv",
+          "declared_sha256": "399700e9d31ae3d230a6ddfe1d25eca01fd1fa1101ecf0807b5dc079ee5369ad",
+          "declared_bytes": 6823,
+          "exists": true,
+          "actual_bytes": 6823,
+          "actual_sha256": "399700e9d31ae3d230a6ddfe1d25eca01fd1fa1101ecf0807b5dc079ee5369ad",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_candidates.csv",
+          "path": "tables/mechanism_window_candidates.csv",
+          "declared_sha256": "0b47d5e5b174ad7f3ac1df395bf8de17b5e8fd78cb613e703ab6e8341036f8f9",
+          "declared_bytes": 3645,
+          "exists": true,
+          "actual_bytes": 3645,
+          "actual_sha256": "0b47d5e5b174ad7f3ac1df395bf8de17b5e8fd78cb613e703ab6e8341036f8f9",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/claim_ledger.csv",
+          "path": "tables/claim_ledger.csv",
+          "declared_sha256": "9fc68ba3649302303fcb8fa2ca006754247df7e7bdba3f78a449354d4a46ee03",
+          "declared_bytes": 5512,
+          "exists": true,
+          "actual_bytes": 5512,
+          "actual_sha256": "9fc68ba3649302303fcb8fa2ca006754247df7e7bdba3f78a449354d4a46ee03",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_summary.csv",
+          "path": "tables/mechanism_window_summary.csv",
+          "declared_sha256": "f0bca37aece6944b66ecd4c71fbf85b34a4f9316e9144486c46ef57c879fdb7b",
+          "declared_bytes": 4003,
+          "exists": true,
+          "actual_bytes": 4003,
+          "actual_sha256": "f0bca37aece6944b66ecd4c71fbf85b34a4f9316e9144486c46ef57c879fdb7b",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_summary.csv",
+          "path": "tables/denominator_chain_summary.csv",
+          "declared_sha256": "b9a044e35bf88f0e041e6d342f3947498a3167da7b06215c630ce593d5791a74",
+          "declared_bytes": 15357,
+          "exists": true,
+          "actual_bytes": 15357,
+          "actual_sha256": "b9a044e35bf88f0e041e6d342f3947498a3167da7b06215c630ce593d5791a74",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_chain_band_table.csv",
+          "path": "tables/denominator_chain_band_table.csv",
+          "declared_sha256": "9193ff2ef7c8d79a08c1c11bd094c4bbfe85a1a2212ab4c4c26e30fbd1981888",
+          "declared_bytes": 119814,
+          "exists": true,
+          "actual_bytes": 119814,
+          "actual_sha256": "9193ff2ef7c8d79a08c1c11bd094c4bbfe85a1a2212ab4c4c26e30fbd1981888",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/denominator_ds_samples.csv",
+          "path": "tables/denominator_ds_samples.csv",
+          "declared_sha256": "539380000d346e969b6ad41d1cf5b3e55b70f30a6ceb62beefc8df34ddf8012c",
+          "declared_bytes": 217951,
+          "exists": true,
+          "actual_bytes": 217951,
+          "actual_sha256": "539380000d346e969b6ad41d1cf5b3e55b70f30a6ceb62beefc8df34ddf8012c",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/upstream_branch_smoothness_summary.csv",
+          "path": "tables/upstream_branch_smoothness_summary.csv",
+          "declared_sha256": "22f461321b18a00ccdc1b09332e0418e1e3b7d3daab865ee71c67d26c2288482",
+          "declared_bytes": 810,
+          "exists": true,
+          "actual_bytes": 810,
+          "actual_sha256": "22f461321b18a00ccdc1b09332e0418e1e3b7d3daab865ee71c67d26c2288482",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/global_nonmonotonic_mechanism_summary.csv",
+          "path": "tables/global_nonmonotonic_mechanism_summary.csv",
+          "declared_sha256": "dd8ce31beacf5fd0bed7530d064c30a0d3908abee3a07006300eb9c9614001dd",
+          "declared_bytes": 98,
+          "exists": true,
+          "actual_bytes": 98,
+          "actual_sha256": "dd8ce31beacf5fd0bed7530d064c30a0d3908abee3a07006300eb9c9614001dd",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_reproduction_mismatch_root_cause.csv",
+          "path": "tables/local_rate_reproduction_mismatch_root_cause.csv",
+          "declared_sha256": "453a8f79fd2acbd8554ce071b5a1b37d1fcc3fbe06cf661cc5f80afc07d2ed5d",
+          "declared_bytes": 665,
+          "exists": true,
+          "actual_bytes": 665,
+          "actual_sha256": "453a8f79fd2acbd8554ce071b5a1b37d1fcc3fbe06cf661cc5f80afc07d2ed5d",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_gate.csv",
+          "path": "tables/local_rate_convergence_gate.csv",
+          "declared_sha256": "f23cfa51788a6c028956eb1c91622f7b887d82c5df03c0ed88ca4a060856fe10",
+          "declared_bytes": 367,
+          "exists": true,
+          "actual_bytes": 367,
+          "actual_sha256": "f23cfa51788a6c028956eb1c91622f7b887d82c5df03c0ed88ca4a060856fe10",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/local_rate_convergence_attempts.csv",
+          "path": "tables/local_rate_convergence_attempts.csv",
+          "declared_sha256": "426f13d25e715084f9e06fba50c4385681ec0f24a3878f96ca95e0a7e2b90bf5",
+          "declared_bytes": 776,
+          "exists": true,
+          "actual_bytes": 776,
+          "actual_sha256": "426f13d25e715084f9e06fba50c4385681ec0f24a3878f96ca95e0a7e2b90bf5",
+          "status": "match",
+          "byte_count_status": "match"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/tables/mechanism_manifest.json",
+          "path": "tables/mechanism_manifest.json",
+          "declared_sha256": "199293bbb9f02b491e8c2fd7b5f301b22fbda2ad6723b12648f7558ec28196f7",
+          "declared_bytes": 1007,
+          "exists": true,
+          "actual_bytes": 1007,
+          "actual_sha256": "199293bbb9f02b491e8c2fd7b5f301b22fbda2ad6723b12648f7558ec28196f7",
+          "status": "match",
+          "byte_count_status": "match"
+        }
+      ],
+      "checksums_audit": [],
+      "declared_output_count": 21,
+      "manifest_mismatch_count": 2,
+      "manifest_missing_count": 0,
+      "checksum_entry_count": 0,
+      "checksum_mismatch_count": 0,
+      "checksum_missing_count": 0,
+      "extra_output_files": [],
+      "missing_output_files": [],
+      "mismatch_classifications": [
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/README.md",
+          "path": "README.md",
+          "declared_sha256": "60f4ff5df0badd8e9690b77cb0035587481d6d14663dc664d7ef0655bc41b770",
+          "actual_sha256": "6d9719806fa2ec2b2e89576ca32f2d505334de4ecb6c3d327ecaf87e989895e9",
+          "baseline": {
+            "commit": "5f75efab086bccac95eb07e84b7c5c15c8f011ba",
+            "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/README.md",
+            "bytes": 10139,
+            "sha256": "6d9719806fa2ec2b2e89576ca32f2d505334de4ecb6c3d327ecaf87e989895e9"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        },
+        {
+          "raw_path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/plot_manifest.json",
+          "path": "figures/plot_manifest.json",
+          "declared_sha256": "8de97d86bb1e4318e7baddc3f045cda1d0834c044ed3fefcadaf7d8a689a8966",
+          "actual_sha256": "0f5ad8e3cce41800b29e26223fb9d81db0103cce80516e3875f703d6b4ce8465",
+          "baseline": {
+            "commit": "5f75efab086bccac95eb07e84b7c5c15c8f011ba",
+            "path": "docs/analysis/relaxtime/phase_guided_transport_p128_xi001_analysis/figures/plot_manifest.json",
+            "bytes": 2523,
+            "sha256": "0f5ad8e3cce41800b29e26223fb9d81db0103cce80516e3875f703d6b4ce8465"
+          },
+          "classification": "stale_metadata",
+          "reason": "the current file is byte-identical to the first committed artifact, while the declared hash was already stale at that baseline"
+        }
+      ]
+    }
+  ]
+}
