@@ -46,6 +46,8 @@ def test_expansion_selection_is_explicit_and_disjoint_from_pilot():
     assert "pnjl_issue130_maxwell_cep_local_expansion_v1" in text
     assert "TARGET_SELECTION: input_incomplete" in text
     assert "EXPECTED_TARGET_COUNT: \"276\"" in text
+    assert 'echo "matrix={\\"target_id\\":$values}"' in text
+    assert "matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}" in text
     runner = RUNNER.read_text(encoding="utf-8")
     assert "reference_write" in runner
     assert "oracle_labels_consumed" in runner

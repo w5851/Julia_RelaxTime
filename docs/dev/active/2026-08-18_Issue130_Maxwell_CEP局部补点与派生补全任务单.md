@@ -48,6 +48,20 @@ versioned workflow 合并前不触发数值扩展。
 - expansion 未 dispatch；focused CI 全绿并合并后，才可使用 calculation SHA
   `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 触发 numerical，随后再做同源 replay。
 
+## 首次 expansion dispatch 诊断（2026-08-20）
+
+- run `32349984548` 使用 merge SHA `64c9b337d9bcbd0a995199e935a336509e227d11`
+  触发，prepare 正确验证了 276 个唯一 `input_incomplete` target 和 `176,916`
+  个基础 rho keys。
+- numerical matrix 没有生成：workflow 将 JSON array 直接传给
+  `strategy.matrix`，Actions 要求 object，因而 numerical job 未启动；aggregate
+  只得到 0 个 target artifact，`materialized_target_count=0`，verdict 为
+  `pilot_inconclusive`。该 run 没有调用 PNJL solver，不能作为数值失败或 partial
+  artifact，也不得在 failed-only 恢复中复用。
+- repair 边界仅把 prepare 输出改为
+  `{ "target_id": [ ... ] }` matrix object，并增加 regression assertion；不改变
+  target list、calculation SHA、runner、Maxwell、geometry、容差或 pilot artifact。
+
 ## 预检与 numerical pilot 合同
 
 - 预检按固定 `(xi,T)` 识别 CEP 下方 unresolved Maxwell 行；缺少 boundary 行的

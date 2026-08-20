@@ -51,6 +51,7 @@ jobs:
     name: prepare immutable Maxwell expansion matrix
     runs-on: ubuntu-latest
     outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
       target_ids: ${{ steps.matrix.outputs.target_ids }}
       target_count: ${{ steps.matrix.outputs.target_count }}
       target_list_sha256: ${{ steps.matrix.outputs.target_list_sha256 }}
@@ -109,6 +110,7 @@ jobs:
             exit 1
           }
           {
+            echo "matrix={\"target_id\":$values}"
             echo "target_ids=$values"
             echo "target_count=$count"
             echo "target_list_sha256=$sha"
@@ -124,8 +126,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 12
-      matrix:
-        target_id: ${{ fromJSON(needs.prepare.outputs.target_ids) }}
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     steps:
       - name: Select target for failed-only rerun
         id: select_target
