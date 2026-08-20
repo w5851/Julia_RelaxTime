@@ -24,7 +24,7 @@ const MODELS = Main.Models
 include(joinpath(@__DIR__, "pnjl_maxwell_endpoint_candidate_feasibility.jl"))
 const REPLAY = Main.MaxwellEndpointCandidateFeasibility
 
-const SCHEMA_VERSION = "pnjl_issue130_maxwell_cep_local_pilot_v1"
+const DEFAULT_SCHEMA_VERSION = "pnjl_issue130_maxwell_cep_local_pilot_v1"
 const BASE_STEP = 0.00625
 const RHO_MAX = 4.0
 const MAX_TARGETED = 12
@@ -47,13 +47,17 @@ function _config(args)
     target_list = abspath(String(_arg(args, "--target-list", "")))
     output_dir = abspath(String(_arg(args, "--output-dir", joinpath(pwd(), "maxwell_cep_local_artifact"))))
     tag = String(_arg(args, "--tag", "issue130_maxwell_cep_local_pilot_v1"))
+    selection = String(_arg(args, "--selection", "pilot_candidate"))
+    schema_version = String(_arg(args, "--schema-version", DEFAULT_SCHEMA_VERSION))
     occursin(r"^[0-9a-fA-F]{40}$", calculation_sha) ||
         throw(ArgumentError("calculation-sha must be an immutable 40-character SHA"))
     occursin(r"^[0-9a-fA-F]{40}$", workflow_head_sha) ||
         throw(ArgumentError("workflow-head-sha must be an immutable 40-character SHA"))
     isempty(target_id) && throw(ArgumentError("target-id is required"))
     isfile(target_list) || throw(ArgumentError("target-list does not exist: $target_list"))
-    return (; calculation_sha, workflow_head_sha, target_id, target_list, output_dir, tag)
+    isempty(selection) && throw(ArgumentError("selection must not be empty"))
+    isempty(schema_version) && throw(ArgumentError("schema-version must not be empty"))
+    return (; calculation_sha, workflow_head_sha, target_id, target_list, output_dir, tag, selection, schema_version)
 end
 
 function _field(row, name::Symbol, default=nothing)
@@ -69,15 +73,15 @@ function _float(value, label)
     result
 end
 
-function _target_row(path::String, target_id::String)
+function _target_row(path::String, target_id::String, selection::String)
     rows = collect(CSV.File(path))
     matches = filter(row -> String(_field(row, :target_id, "")) == target_id, rows)
     length(matches) == 1 || throw(ArgumentError("target-id must select exactly one row: $target_id"))
     row = first(matches)
     String(_field(row, :target_kind, "")) == "maxwell_fixed_xi_T" ||
         throw(ArgumentError("target is not a fixed-(xi,T) Maxwell target: $target_id"))
-    String(_field(row, :pilot_selection, "")) == "pilot_candidate" ||
-        throw(ArgumentError("target is not authorized for the 11-target pilot: $target_id"))
+    String(_field(row, :pilot_selection, "")) == selection ||
+        throw(ArgumentError("target does not match requested selection '$selection': $target_id"))
     (; target_id,
         xi=_float(_field(row, :xi), :xi),
         T_MeV=_float(_field(row, :T_MeV), :T_MeV),
@@ -175,7 +179,7 @@ function _write_json(path, value)
 end
 
 function _write_job(cfg)
-    target = _target_row(cfg.target_list, cfg.target_id)
+    target = _target_row(cfg.target_list, cfg.target_id, cfg.selection)
     mkpath(cfg.output_dir)
     telemetry = MODELS.SolverWorkTelemetry()
     session = MODELS.TrhoScan.new_rho_point_session(
@@ -261,7 +265,8 @@ function _write_job(cfg)
         "candidate_or_geometry_inconclusive"
     end
     summary = Dict(
-        "schema_version" => SCHEMA_VERSION, "target_id" => target.target_id,
+        "schema_version" => cfg.schema_version, "target_id" => target.target_id,
+        "selection" => cfg.selection,
         "xi" => target.xi, "T_MeV" => target.T_MeV,
         "grid_status" => target.grid_status, "preflight_reason" => target.reason,
         "verdict" => verdict, "final_status" => final_metric.status,
@@ -278,7 +283,8 @@ function _write_job(cfg)
     )
     _write_json(joinpath(cfg.output_dir, "target_summary.json"), summary)
     _write_json(joinpath(cfg.output_dir, "provenance.json"), Dict(
-        "schema_version" => SCHEMA_VERSION, "target_id" => target.target_id,
+        "schema_version" => cfg.schema_version, "target_id" => target.target_id,
+        "selection" => cfg.selection,
         "calculation_sha" => cfg.calculation_sha,
         "workflow_head_sha" => cfg.workflow_head_sha,
         "target_list" => cfg.target_list, "tag" => cfg.tag,
@@ -296,10 +302,11 @@ function _write_job(cfg)
         end
     end
     manifest = Dict(
-        "schema_version" => SCHEMA_VERSION, "verdict" => verdict,
+        "schema_version" => cfg.schema_version, "verdict" => verdict,
         "target_id" => target.target_id, "xi" => target.xi,
         "T_MeV" => target.T_MeV, "calculation_sha" => cfg.calculation_sha,
         "workflow_head_sha" => cfg.workflow_head_sha, "tag" => cfg.tag,
+        "selection" => cfg.selection,
         "reference_write" => false, "oracle_labels_consumed" => false,
         "solver_called" => true, "targeted_cap" => MAX_TARGETED,
         "files" => files, "telemetry" => Dict(string(field) => getproperty(snapshot, field)

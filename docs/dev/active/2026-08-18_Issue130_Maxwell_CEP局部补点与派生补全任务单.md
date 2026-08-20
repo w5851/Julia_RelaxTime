@@ -1,7 +1,8 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
 状态：active；11-target numerical pilot 与同源 aggregate replay 均已完成并通过
-`pilot_candidate`；证据仍为 diagnostic-only，不晋升 phase-reference。
+`pilot_candidate`；当前作为 v7 冻结后的下一步 Maxwell 输入 route，证据仍为
+diagnostic-only，不晋升 phase-reference。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -21,6 +22,31 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
 - preflight 输出：`docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/`。
   窗口为 `T <= T_CEP_bracket_low` 且距离不超过 `8 MeV`；共 760 个候选，484 个
   已有 boundary 行，276 个为 `input_incomplete`，代表性 xi 共 11 个 pilot 目标。
+
+## v7 冻结后的扩展边界
+
+v7 crossover 派生包已在 commit `46f10270` 冻结；它只复制 Maxwell native rows，不能
+替代本 route 的真实补点。现有
+`.github/workflows/pnjl-issue130-maxwell-cep-local-pilot.yml` 的矩阵和 collector
+严格限定 11 个 `pilot_candidate`，不能直接承载 276 个 `input_incomplete` 目标。
+因此完整 Maxwell 补点必须新增独立的 versioned expansion workflow/runner/collector，
+并保持 pilot artifact 不可变、使用同一 calculation SHA。按 preflight 的 641 个基础
+rho key 计，276 个缺失 boundary 目标至少需要 `176,916` 个基础 rho keys；局部
+midpoint/refinement 还需按 cap 另计，wall time 尚未测量。扩展 action 必须先通过
+solver-free matrix/hash/provenance 检查，并设置 failed-only 重跑和成本止损；在该
+versioned workflow 合并前不触发数值扩展。
+
+当前 expansion contract 已落在：
+
+- workflow：`.github/workflows/pnjl-issue130-maxwell-cep-local-expansion.yml`；
+- runner：复用 `pnjl_issue130_maxwell_cep_local_pilot.jl`，默认 pilot 仍严格为 11 个
+  `pilot_candidate`，expansion 显式使用 `input_incomplete`；
+- collector：复用 `collect_pnjl_issue130_maxwell_cep_local_pilot.py`，通过
+  `--selection`、`--schema-version`、`--expected-count` 和 `--candidate-verdict`
+  隔离两种 artifact；expansion schema 为
+  `pnjl_issue130_maxwell_cep_local_expansion_v1`，目标数固定为 276；
+- expansion 未 dispatch；focused CI 全绿并合并后，才可使用 calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 触发 numerical，随后再做同源 replay。
 
 ## 预检与 numerical pilot 合同
 
@@ -69,6 +95,12 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
 相邻已证实行之间做显式 `interpolated_noncertified` 派生，不能伪造 candidate、
 `maxwell_area` 或 strict geometry certificate，也不能自动晋升 phase-reference。
 
+本 companion route 是 Issue #130 三层验收目标中 `strict_reference_v1` 的 Maxwell
+输入来源，也是后续 `derived_reference_v1` 和 `phase_surface_render_v1` 的前置依赖。
+Maxwell 真实补点完成前，不得用 crossover 派生层的视觉连续性填充 Maxwell；最终
+render 只能由统一 ξ 的 derived reference 生成，且必须保留 Maxwell unresolved
+mask 和 cell coverage。
+
 ## 与 crossover 全 ξ expansion 的边界
 
 Maxwell pilot/replay 已满足其自身的 11-target diagnostic gate，但不授权自动补算
@@ -77,3 +109,11 @@ Maxwell pilot/replay 已满足其自身的 11-target diagnostic gate，但不授
 versioned workflow 和独立 aggregate，两个 route 的 target、成本和 verdict 分开记录。
 
 不修改 equilibrium solver、Maxwell、三态规则、endpoint policy 或容差；不重跑 C0/C1/C2。
+
+## v6 派生相图（2026-08-20）
+
+- v6 不直接读取 C2 原始结果重建 surface，而是以 `c2_phase_surfaces_diagnostic_v5_no_triangulation` 的后处理表为唯一 baseline。
+- Maxwell boundary、spinodal、CEP bracket、v5 crossover 物理筛选、unresolved 状态和 no-triangulation/native-gap 规则均原样保留。
+- 仅叠加 crossover endpoint expansion numerical run `32240898122` 的 solver-free aggregate replay `32255786553`；固定 calculation SHA 为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。
+- v6 物化 186 个 endpoint candidate，覆盖 93 个非均匀 ξ 切片；所有点 finite/converged 且 `mu_q <=` 同一 v5 CEP proxy，但仍只表示 diagnostic overlay，不等于 CEP 已闭合或 phase-reference 已晋升。
+- v6 产物：`docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v6_crossover_overlay/`。Maxwell 276 个 `input_incomplete` 候选仍未补算，本次不扩大 Maxwell 数值范围。

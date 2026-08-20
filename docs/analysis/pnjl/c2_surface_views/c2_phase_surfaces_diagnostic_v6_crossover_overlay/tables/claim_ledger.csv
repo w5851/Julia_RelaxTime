@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+v5_baseline_preserved,"Maxwell, spinodal, CEP and retained crossover evidence are inherited from the v5 postprocessed package",supported,tables/v5_source_manifest.json; tables/v5_maxwell_surface_point_status.csv; tables/v5_spinodals.csv; tables/v5_crossover_cep_sampling_gap.csv,no raw C2 recomputation
+endpoint_overlay_materialized,The 186 endpoint expansion candidates are appended as a separate crossover source layer,supported,tables/crossover_endpoint_expansion_summary.csv; tables/crossover_overlay.csv,diagnostic-only aggregate replay provenance
+physical_crossover_filter_preserved,No response peak with mu_q above the per-xi CEP proxy is plotted as crossover,supported,tables/v5_crossover_physical_filter.csv; tables/crossover_endpoint_excluded.csv,CEP proxy remains bracket-derived
+native_gaps_preserved,v5 and endpoint support are connected only across native gaps within the explicit plotting limit,supported,tables/crossover_overlay_gap.csv; figures/plot_manifest.json,no interpolation or triangulation
+phase_reference_promotion,The v6 figure authorizes phase-reference promotion,blocked,decision.json,"this is a diagnostic overlay, not a production/reference artifact"

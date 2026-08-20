@@ -11,6 +11,7 @@ from scripts.analysis.collect_pnjl_issue130_maxwell_cep_local_pilot import (
 ROOT = Path(__file__).resolve().parents[3]
 TARGET_LIST = ROOT / "docs" / "analysis" / "pnjl" / "issue130_endpoint_refinement_preflight_v1" / "maxwell_local" / "tables" / "target_list.csv"
 WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-issue130-maxwell-cep-local-pilot.yml"
+EXPANSION_WORKFLOW = ROOT / ".github" / "workflows" / "pnjl-issue130-maxwell-cep-local-expansion.yml"
 RUNNER = ROOT / "scripts" / "analysis" / "pnjl_issue130_maxwell_cep_local_pilot.jl"
 COLLECTOR = ROOT / "scripts" / "analysis" / "collect_pnjl_issue130_maxwell_cep_local_pilot.py"
 
@@ -35,6 +36,35 @@ def test_workflow_matrix_matches_authorized_target_list():
     assert "pnjl_issue130_maxwell_cep_local_pilot_v1" in text
     assert "reference_write" in text or "reference_write" in RUNNER.read_text(encoding="utf-8")
     assert "promote_reference" not in text
+
+
+def test_expansion_selection_is_explicit_and_disjoint_from_pilot():
+    rows = target_rows(TARGET_LIST, "input_incomplete", expected_count=276)
+    assert len(rows) == 276
+    assert all(row["pilot_selection"] == "input_incomplete" for row in rows.values())
+    text = EXPANSION_WORKFLOW.read_text(encoding="utf-8")
+    assert "pnjl_issue130_maxwell_cep_local_expansion_v1" in text
+    assert "TARGET_SELECTION: input_incomplete" in text
+    assert "EXPECTED_TARGET_COUNT: \"276\"" in text
+    runner = RUNNER.read_text(encoding="utf-8")
+    assert "reference_write" in runner
+    assert "oracle_labels_consumed" in runner
+
+
+def test_target_selection_rejects_duplicate_ids(tmp_path):
+    path = tmp_path / "targets.csv"
+    path.write_text(
+        "target_id,pilot_selection,target_kind\n"
+        "duplicate,input_incomplete,maxwell_fixed_xi_T\n"
+        "duplicate,input_incomplete,maxwell_fixed_xi_T\n",
+        encoding="utf-8",
+    )
+    try:
+        target_rows(path, "input_incomplete")
+    except ValueError as error:
+        assert "duplicate target_id" in str(error)
+    else:
+        raise AssertionError("duplicate target IDs must be rejected")
 
 
 def test_runner_and_collector_preserve_diagnostic_boundaries():
