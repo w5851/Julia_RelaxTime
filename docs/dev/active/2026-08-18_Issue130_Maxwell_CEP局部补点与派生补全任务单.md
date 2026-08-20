@@ -23,6 +23,19 @@ numerical pilot。目标是判断缺失来自 rho geometry/refinement 还是端�
   窗口为 `T <= T_CEP_bracket_low` 且距离不超过 `8 MeV`；共 760 个候选，484 个
   已有 boundary 行，276 个为 `input_incomplete`，代表性 xi 共 11 个 pilot 目标。
 
+## v7 冻结后的扩展边界
+
+v7 crossover 派生包已在 commit `46f10270` 冻结；它只复制 Maxwell native rows，不能
+替代本 route 的真实补点。现有
+`.github/workflows/pnjl-issue130-maxwell-cep-local-pilot.yml` 的矩阵和 collector
+严格限定 11 个 `pilot_candidate`，不能直接承载 276 个 `input_incomplete` 目标。
+因此完整 Maxwell 补点必须新增独立的 versioned expansion workflow/runner/collector，
+并保持 pilot artifact 不可变、使用同一 calculation SHA。按 preflight 的 641 个基础
+rho key 计，276 个缺失 boundary 目标至少需要 `176,916` 个基础 rho keys；局部
+midpoint/refinement 还需按 cap 另计，wall time 尚未测量。扩展 action 必须先通过
+solver-free matrix/hash/provenance 检查，并设置 failed-only 重跑和成本止损；在该
+versioned workflow 合并前不触发数值扩展。
+
 ## 预检与 numerical pilot 合同
 
 - 预检按固定 `(xi,T)` 识别 CEP 下方 unresolved Maxwell 行；缺少 boundary 行的
