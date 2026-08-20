@@ -77,3 +77,11 @@ Maxwell pilot/replay 已满足其自身的 11-target diagnostic gate，但不授
 versioned workflow 和独立 aggregate，两个 route 的 target、成本和 verdict 分开记录。
 
 不修改 equilibrium solver、Maxwell、三态规则、endpoint policy 或容差；不重跑 C0/C1/C2。
+
+## v6 派生相图（2026-08-20）
+
+- v6 不直接读取 C2 原始结果重建 surface，而是以 `c2_phase_surfaces_diagnostic_v5_no_triangulation` 的后处理表为唯一 baseline。
+- Maxwell boundary、spinodal、CEP bracket、v5 crossover 物理筛选、unresolved 状态和 no-triangulation/native-gap 规则均原样保留。
+- 仅叠加 crossover endpoint expansion numerical run `32240898122` 的 solver-free aggregate replay `32255786553`；固定 calculation SHA 为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。
+- v6 物化 186 个 endpoint candidate，覆盖 93 个非均匀 ξ 切片；所有点 finite/converged 且 `mu_q <=` 同一 v5 CEP proxy，但仍只表示 diagnostic overlay，不等于 CEP 已闭合或 phase-reference 已晋升。
+- v6 产物：`docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v6_crossover_overlay/`。Maxwell 276 个 `input_incomplete` 候选仍未补算，本次不扩大 Maxwell 数值范围。
