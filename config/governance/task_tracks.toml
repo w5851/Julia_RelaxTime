@@ -9,7 +9,7 @@ status = "review"
 current_task = "issue130-full-hybrid-author-review"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "三层验收目标已固化；v7 crossover 派生包冻结为不可变基线。先完成 Maxwell 近 CEP input_incomplete expansion 的 focused CI 与 solver-free contract，随后按授权运行并审计 numerical/replay；Maxwell 通过后才生成统一 xi 的 derived_reference_v1 和 phase_surface_render_v1，作者审核前不晋升 phase-reference，RS transport 继续暂停。"
+next_action = "三层验收目标已固化；v7 crossover 派生包冻结为不可变基线。Maxwell expansion 首次 dispatch 在 matrix contract 阶段失败，未调用 solver；完成窄范围 repair PR 并通过 focused CI 后，以同一 calculation SHA 重跑 numerical/replay，再决定是否生成统一 xi 的 derived_reference_v1 和 phase_surface_render_v1。作者审核前不晋升 phase-reference，RS transport 继续暂停。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
@@ -201,10 +201,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md"
 reason = "C2 v5 Maxwell boundary 仍有 CEP 近端 support/geometry unresolved 行；crossover μ endpoint 补点不改变固定 (xi,T) Maxwell rho geometry。"
-next_action = "11-target pilot/replay 仍保持 diagnostic-only；276 个 input_incomplete 目标的 versioned expansion workflow 已实现但尚未 dispatch。先通过 focused CI、矩阵/hash/cost 检查，再按作者授权运行 numerical expansion 与同源 aggregate replay；失败或成本超限即停止。"
+next_action = "11-target pilot/replay 仍保持 diagnostic-only；expansion 首次 run 32349984548 在 numerical matrix 生成前失败，276 个 target 均未运行。修复 matrix object contract 后先通过 focused CI，再以同一 tag/calculation SHA 重跑 numerical 与同源 aggregate replay；失败或成本超限即停止。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32225731719", "run:32237794907", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a", "sha:869e1f0f1ae5bd490cacfb6066fd27205f054100", "note:numerical 11/11 succeeded; replay 32237794907 separates source workflow SHA from postprocess SHA, solver_called=false, and is pilot_candidate; evidence remains diagnostic-only"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32225731719", "run:32237794907", "run:32349984548", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:51c93cf0111415b35bb199376c358782c0f5a2f4", "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a", "sha:869e1f0f1ae5bd490cacfb6066fd27205f054100", "sha:64c9b337d9bcbd0a995199e935a336509e227d11", "note:numerical 11/11 succeeded; replay 32237794907 separates source workflow SHA from postprocess SHA, solver_called=false, and is pilot_candidate; expansion run 32349984548 failed before matrix numerical jobs because strategy.matrix received an array instead of an object; materialized_target_count=0; evidence remains diagnostic-only"]
 
 [[items]]
 id = "plot-sop-independent-land"
