@@ -268,11 +268,11 @@ evidence = [
 id = "docs-analysis-metadata-repair"
 track_id = "analysis-docs-cleanup"
 classification = "required_follow_up"
-status = "accepted"
+status = "archived"
 parent = "track:analysis-docs-cleanup"
-task_file = "docs/dev/active/2026-08-19_docs-analysis-metadata-repair-task.md"
+task_file = "docs/dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md"
 reason = "phase-reference and phase-guided transport v1 evidence packages contain pre-existing manifest/checksum hashes that do not match current file bytes; the repair must remain separate from namespace migration."
-next_action = "metadata repair v1 已完成并通过严格审计；后续新增 mismatch 另立 required follow-up。"
+next_action = "metadata repair v1 已完成、验收并归档；后续新增 mismatch 需另立 required follow-up。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -283,6 +283,7 @@ evidence = [
   "file:docs/analysis/governance/metadata_repair_v1/pre_repair_snapshot.json",
   "file:docs/analysis/governance/metadata_repair_v1/post_repair_audit.json",
   "file:docs/analysis/governance/metadata_repair_v1/repair_report.md",
+  "file:docs/dev/archived/2026-08-19_docs-analysis-metadata-repair-task.md",
 ]
 
 [[items]]

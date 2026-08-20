@@ -1,3 +1,15 @@
+---
+title: `docs/analysis` metadata 修复任务单
+archived: true
+original: docs/dev/active/2026-08-19_docs-analysis-metadata-repair-task.md
+archived_date: 2026-08-20
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # `docs/analysis` metadata 修复任务单
 
 创建日期：2026-08-19
