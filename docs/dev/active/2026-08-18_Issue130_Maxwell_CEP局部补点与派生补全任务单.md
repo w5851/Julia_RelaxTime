@@ -36,6 +36,18 @@ midpoint/refinement 还需按 cap 另计，wall time 尚未测量。扩展 actio
 solver-free matrix/hash/provenance 检查，并设置 failed-only 重跑和成本止损；在该
 versioned workflow 合并前不触发数值扩展。
 
+当前 expansion contract 已落在：
+
+- workflow：`.github/workflows/pnjl-issue130-maxwell-cep-local-expansion.yml`；
+- runner：复用 `pnjl_issue130_maxwell_cep_local_pilot.jl`，默认 pilot 仍严格为 11 个
+  `pilot_candidate`，expansion 显式使用 `input_incomplete`；
+- collector：复用 `collect_pnjl_issue130_maxwell_cep_local_pilot.py`，通过
+  `--selection`、`--schema-version`、`--expected-count` 和 `--candidate-verdict`
+  隔离两种 artifact；expansion schema 为
+  `pnjl_issue130_maxwell_cep_local_expansion_v1`，目标数固定为 276；
+- expansion 未 dispatch；focused CI 全绿并合并后，才可使用 calculation SHA
+  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 触发 numerical，随后再做同源 replay。
+
 ## 预检与 numerical pilot 合同
 
 - 预检按固定 `(xi,T)` 识别 CEP 下方 unresolved Maxwell 行；缺少 boundary 行的

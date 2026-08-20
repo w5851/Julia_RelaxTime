@@ -11,8 +11,7 @@ import math
 from pathlib import Path
 
 
-SCHEMA_VERSION = "pnjl_issue130_maxwell_cep_local_pilot_v1"
-RUNNER_SCHEMA = SCHEMA_VERSION
+DEFAULT_SCHEMA_VERSION = "pnjl_issue130_maxwell_cep_local_pilot_v1"
 MAX_TARGETED = 12
 MATERIALIZATION_CONTRACT_VERSION = "aggregate_replay_provenance_v2"
 IDENTITY_FIELDS = ("calculation_sha", "workflow_head_sha")
@@ -46,15 +45,22 @@ def text_value(value: object) -> str:
     return "" if value is None else str(value).strip()
 
 
-def target_rows(path: Path) -> dict[str, dict[str, str]]:
+def target_rows(
+    path: Path, selection: str = "pilot_candidate", expected_count: int | None = None
+) -> dict[str, dict[str, str]]:
     rows = read_rows(path)
-    selected = {
-        row["target_id"]: row
-        for row in rows
-        if row.get("pilot_selection") == "pilot_candidate"
-    }
-    if len(selected) != 11:
-        raise ValueError(f"expected exactly 11 pilot targets, found {len(selected)}")
+    selected_rows = [row for row in rows if row.get("pilot_selection") == selection]
+    ids = [row.get("target_id", "") for row in selected_rows]
+    if any(not target_id for target_id in ids):
+        raise ValueError(f"selection {selection} contains an empty target_id")
+    if len(set(ids)) != len(ids):
+        raise ValueError(f"selection {selection} contains duplicate target_id values")
+    selected = dict(zip(ids, selected_rows))
+    required_count = expected_count
+    if required_count is None and selection == "pilot_candidate":
+        required_count = 11
+    if required_count is not None and len(selected) != required_count:
+        raise ValueError(f"expected exactly {required_count} targets for selection {selection}, found {len(selected)}")
     if any(row.get("target_kind") != "maxwell_fixed_xi_T" for row in selected.values()):
         raise ValueError("pilot list contains a non-fixed-(xi,T) target")
     return selected
@@ -129,6 +135,7 @@ def validate_target(
     directory: Path,
     calculation_sha: str,
     workflow_head_sha: str,
+    runner_schema: str = DEFAULT_SCHEMA_VERSION,
 ) -> tuple[dict[str, object], dict[str, str], list[str], dict[str, str], list[str]]:
     errors: list[str] = []
     required = ["target_summary.json", "provenance.json", "manifest.json", "curve_points.csv", "slice_metrics.csv", "policy_frontier.csv", "method_costs.csv"]
@@ -141,12 +148,14 @@ def validate_target(
     summary = read_json(directory / "target_summary.json")
     provenance = read_json(directory / "provenance.json")
     manifest = read_json(directory / "manifest.json")
-    if summary.get("schema_version") != RUNNER_SCHEMA:
+    if summary.get("schema_version") != runner_schema:
         errors.append(f"{target_id}: summary schema mismatch")
-    if manifest.get("schema_version") != RUNNER_SCHEMA:
+    if manifest.get("schema_version") != runner_schema:
         errors.append(f"{target_id}: manifest schema mismatch")
     if summary.get("target_id") != target_id or provenance.get("target_id") != target_id:
         errors.append(f"{target_id}: target id mismatch")
+    if text_value(summary.get("selection", "")) not in ("", expected.get("pilot_selection", "")):
+        errors.append(f"{target_id}: summary selection mismatch")
     identity_errors, identity_fallback_fields = validate_identity(
         target_id, summary, provenance, manifest, calculation_sha, workflow_head_sha
     )
@@ -255,10 +264,14 @@ def main() -> int:
     )
     parser.add_argument("--run-mode", choices=("numerical", "aggregate_replay"), default="numerical")
     parser.add_argument("--source-run-id", default="")
+    parser.add_argument("--selection", default="pilot_candidate")
+    parser.add_argument("--schema-version", default=DEFAULT_SCHEMA_VERSION)
+    parser.add_argument("--expected-count", type=int, default=None)
+    parser.add_argument("--candidate-verdict", default="pilot_candidate")
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     source_workflow_sha = args.source_workflow_sha or args.postprocess_sha
-    expected = target_rows(args.target_list)
+    expected = target_rows(args.target_list, args.selection, args.expected_count)
     directories = artifact_dirs(args.input_dir)
     errors: list[str] = []
     summaries: list[dict[str, object]] = []
@@ -271,7 +284,7 @@ def main() -> int:
             errors.append(f"{target_id}: numerical artifact missing")
             continue
         summary, curve_index, target_errors, target_hashes, fallback_fields = validate_target(
-            target_id, expected_row, directory, args.calculation_sha, source_workflow_sha
+            target_id, expected_row, directory, args.calculation_sha, source_workflow_sha, args.schema_version
         )
         errors.extend(target_errors)
         if summary:
@@ -303,7 +316,7 @@ def main() -> int:
         for row in summaries
     )
     if all_valid and all_feasible:
-        verdict = "pilot_candidate"
+        verdict = args.candidate_verdict
     elif any("non-finite" in error or "solver" in error for error in errors) or any(
         row.get("finite_and_converged") is False for row in summaries
     ):
@@ -311,7 +324,7 @@ def main() -> int:
     else:
         verdict = "pilot_inconclusive"
     manifest = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": args.schema_version,
         "verdict": verdict,
         "run_mode": args.run_mode,
         "source_run_id": args.source_run_id or None,
@@ -349,22 +362,22 @@ def main() -> int:
         encoding="utf-8",
     )
     (args.output_dir / "verdict.json").write_text(
-        json.dumps({"verdict": verdict, "errors": errors, "stop_expansion": verdict != "pilot_candidate"}, indent=2) + "\n",
+        json.dumps({"verdict": verdict, "errors": errors, "stop_expansion": verdict != args.candidate_verdict}, indent=2) + "\n",
         encoding="utf-8",
     )
     write_csv(args.output_dir / "claim_ledger.csv", [
-        {"claim_id": "target_matrix", "claim": "Exactly the 11 authorized Maxwell fixed-(xi,T) targets were materialized.", "status": "supported" if all_valid else "inconclusive", "evidence": "manifest.json; pilot_summary.csv", "boundary": "preflight pilot list only"},
+        {"claim_id": "target_matrix", "claim": f"Exactly the authorized Maxwell fixed-(xi,T) targets for selection `{args.selection}` were materialized.", "status": "supported" if all_valid else "inconclusive", "evidence": "manifest.json; pilot_summary.csv", "boundary": f"selection={args.selection}"},
         {"claim_id": "candidate_geometry", "claim": "Every target has a unique candidate and cross-level geometry convergence.", "status": "supported" if all_feasible else "inconclusive", "evidence": "pilot_summary.csv; curve_index.csv", "boundary": "diagnostic candidate, not production certificate"},
         {"claim_id": "identity_materialization", "claim": "Missing summary identities use only mutually verified provenance and manifest identities.", "status": "supported" if all_valid else "inconclusive", "evidence": "materialization_diagnostics.json; manifest.json", "boundary": "compatibility rule for v1 target artifacts"},
-        {"claim_id": "reference_boundary", "claim": "The pilot does not write phase-reference and does not consume oracle labels.", "status": "supported", "evidence": "manifest.json; target provenance.json", "boundary": "phase-reference promotion remains separate"},
+        {"claim_id": "reference_boundary", "claim": "The diagnostic run does not write phase-reference and does not consume oracle labels.", "status": "supported", "evidence": "manifest.json; target provenance.json", "boundary": "phase-reference promotion remains separate"},
     ], ["claim_id", "claim", "status", "evidence", "boundary"])
     (args.output_dir / "README.md").write_text(
-        f"# Issue #130 Maxwell CEP-local pilot\n\nverdict: `{verdict}`\n\n"
-        "This artifact is diagnostic-only. It reruns the complete rho curve and the public strict candidate contract for the 11 authorized targets. It does not write phase-reference, read oracle labels, or alter C0/C1/C2 evidence.\n\n"
+        f"# Issue #130 Maxwell CEP-local diagnostic\n\nverdict: `{verdict}`\nselection: `{args.selection}`\n\n"
+        "This artifact is diagnostic-only. It reruns the complete rho curve and the public strict candidate contract for the authorized target selection. It does not write phase-reference, read oracle labels, or alter C0/C1/C2 evidence.\n\n"
         f"Aggregate materialization contract: `{MATERIALIZATION_CONTRACT_VERSION}`. Missing identity fields in target summaries are accepted only when provenance and manifest agree with the source workflow SHA; the aggregate postprocess SHA is recorded separately. Replay sets `solver_called=false`; the fallback is recorded in manifest.json and materialization_diagnostics.json.\n",
         encoding="utf-8",
     )
-    return 0 if verdict == "pilot_candidate" else 2
+    return 0 if verdict == args.candidate_verdict else 2
 
 
 if __name__ == "__main__":
