@@ -89,6 +89,7 @@ def test_runner_and_collector_preserve_diagnostic_boundaries():
     assert "args.run_mode == \"numerical\"" in collector
     assert "headSha" in WORKFLOW.read_text(encoding="utf-8")
     assert "SOURCE_WORKFLOW_SHA" in WORKFLOW.read_text(encoding="utf-8")
+    assert 'echo "SOURCE_RUN_ID=$SOURCE_RUN_ID" >> "$GITHUB_ENV"' in EXPANSION_WORKFLOW.read_text(encoding="utf-8")
 
 
 def _write_target_artifact(
