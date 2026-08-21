@@ -68,7 +68,7 @@ $$
 | I. 介子热力学 | `P_M`、QP/LD、`P_total,s,epsilon,I` | `Models.solve_*_meson_thermo_*` | 公共 API + domain-candidate；当前无 external validation gate。 |
 | J. 完整输运 | `sigma(s)`、rate、`tau`、`eta/zeta/sigma` | `solve_gap_and_transport`；transport CLI | 公共 API + 稳定 CLI + 回归/部分外部对照。 |
 | K. phase-guided transport | 相线附近两种采样路线的输运产物 | `run_phase_guided_transport_scan.jl` | 专题生产流程；formal case 仅覆盖命名参数集。 |
-| L. 外磁场 PNJL | Landau 能级热力学、`eB` 扫描 | magnetic API/专题脚本 | 公共 API + domain-candidate + 固定点回归。 |
+| L. 外磁场 PNJL | Landau 能级热力学、完整五维 FixedMu 的 `(T,mu,eB)` 扫描 | `Models.run_magnetic_scan` / `scan magnetic` | 公共 API + 稳定 CLI；保留 selected/candidates；FixedRho/phase 明确非目标。数值资格仍按代表点收敛审计。 |
 | M. Rotation-PNJL | `(T,mu,omega)` 单点热力学 | `Models.solve_rotation_point` | 可运行最小核 + unit/integration smoke。 |
 | N. GasLiquid/RMF | 兼容 `(T,mu)` 单点；diagnostic RMF `T-mu/T-rho` EOS rows | `Models.solve_gas_liquid_point`、`solve_gas_liquid_rmf_point`、`run_gas_liquid_tmu_scan`、`run_gas_liquid_trho_scan` | 核心四场/热力学/契约已实现并有分层 smoke；完整外部 validation/refinement/formal production 仍未完成。 |
 | O. 工作流、manifest、HTTP | 声明式 pipeline、后台 job、API JSON | `run_*_pipeline`、`server_full.jl` | 稳定服务入口；适合联调，不代表全部物理域验收。 |
@@ -723,7 +723,8 @@ eB + magnetic config
 -> Omega_vac(B) + Omega_T(B)
 -> 5D magnetic stationarity (required by the source model)
 -> pressure/densities + n_max convergence report
--> point/eB/stability scan
+-> selected state + all converged candidate branches
+-> (T,mu,eB) FixedMu production scan
 ```
 
 Landau 能谱为
@@ -783,10 +784,12 @@ $$
 
 来源核验范围：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》第 2.2 节印刷页 21--24、第五章第 5.1 节印刷页 65--68。原文有符号/排版不一致（式(2-63)重复 `phi_u`，式(5-10)导数符号与式(2-65)冲突，式(5-11)使用带符号 `q_f B`），所以本页不把这些冲突字符升级为无条件代码合同。
 
-- **公共 API**：`PNJLMagneticModel`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。模型适配器在 `eB≈0` 时报告普通独立 `quark/antiquark` capability；非零 `eB` 时仅报告磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
-- **domain-candidate CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl`；这些脚本当前仍是固定 `x_state` 的内核/收敛诊断入口，不应解释为已经运行完整五维 equilibrium。
+- **公共 API**：`PNJLMagneticModel`、`solve_magnetic_gap`、`Models.run_magnetic_scan`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。模型适配器在 `eB≈0` 时报告普通独立 `quark/antiquark` capability；非零 `eB` 时仅报告磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
+- **稳定 CLI**：`scripts/models/run_unified_scan.jl scan magnetic` 是 `(T,mu,eB)` 完整五维 FixedMu equilibrium 产线，写出 selected CSV 和 candidates CSV；`mu` 表示共同的 `mu_u=mu_d=mu_s`，外部单位为 MeV/MeV^2。
+- **固定态诊断 CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl` 仍使用固定 `x_state`，只负责内核、`n_max` 或稳定性诊断，不应解释为 equilibrium 扫描。
 - **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。
 - **当前实现边界**：非零 `eB` 的 `PNJLMagneticModel.solve_gap` 通过 `solve_magnetic_gap` 对磁场 `Omega` 的五维驻点做多 seed 求解，并以候选集合保留分支、残差、`n_max` 和可选 Hessian 稳定性标签；普通 `solve_gap` 在未启用稳定性分类时按已找到候选中的最低 `Omega` 选择一个 convenience state，但 branch-aware API 仍保留全部可行候选。`classify_stability=true` 只启用有限差分 Hessian 诊断/显式研究策略，不是 PNJL 系列模型的默认生产过滤条件；`saddle_or_maximum` 标签不能单独否定一个已收敛驻点。`T_fm` 必须为正，磁场模型只接受 `xi=0`；`eB -> 0` 继续走零场兼容路径。非零 `eB` 的 `calculate_magnetic_rho` 与 `calculate_magnetic_number_densities` 共用含 `Phi/PhiBar` 的净密度语义，后者的 `net` 和历史 `quark` 字段均表示 `q-qbar`，`antiquark` 明确为 `nothing`；该结果不是普通 PNJL 的独立夸克/反夸克输运输入，且模型 capability 会将通用 `number_densities` 标为不支持；需要磁场密度时应调用专用 API，不再把低温近似冒充一般温度密度。模型适配器在 `eB≈0` 时恢复普通 PNJL 的独立 `quark/antiquark` 数密度与 capability。共享 `solve_constraint`/ProblemSpec 约束链目前显式拒绝 `PNJLMagneticModel`，避免把普通 PNJL residual 误用于磁场；磁场完整平衡态入口是 `solve_magnetic_gap`。
+- **统一入口拒绝边界**：普通 `run_tmu_scan`、`run_trho_scan` 以及 phase/Maxwell/CEP pipeline 遇到 `model_kind=:PNJLMagnetic` 会显式报错；当前只承诺磁场 `FixedMu`，不把普通 PNJL 的 `FixedRho` 或 phase pipeline 伪装成磁场实现。
 - **数值边界**：生产路径使用预先验证的保守 `n_max`、`p_z_max`、平滑截断和 `eB` 分辨率配置；收敛报告用于代表性极端点和发布前数值审计，不要求每个生产点重复验证。论文的低温占据 `n_max` 估计不等同于真空项的 cutoff-based 求和上限；`p_num/pz_max/rtol` 等为实现参数，不能从论文公式推断。不能套用 RS 标量热核的 quadrature 结论。
 - **外场能量边界**：当前 `omega/pressure` 是固定外部磁场背景下的物质巨势/压力，只组装式(5-2)中的夸克 Landau 项、手征项和 Polyakov 势；拉格朗日量中的外部 Maxwell 项不作为独立的 `B^2/2` 能量加入输出。因此这些量不能直接解释为包含电磁场自能的总 EOS，若未来需要该口径必须新增显式、版本化的 Maxwell 选项并重新验证压力、能量和相平衡。
 - **压力方向边界**：`calculate_magnetic_pressure=-Omega` 当前只定义固定外部 `B` 背景下的标量物质压力；代码没有磁化强度导数、横向/纵向压力拆分或磁场介质自洽 EOS。不能把该标量直接解释为包含磁化各向异性的完整压力张量。

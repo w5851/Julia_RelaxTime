@@ -252,6 +252,24 @@ probe 已完成。当前仍不进入磁场性能优化 PR，原因是共享 Prob
   [`PNJL_magnetic_core.md`](../../reference/formula/models/pnjl_magnetic/PNJL_magnetic_core.md#开发者审核表公式到实现的对应关系)。
   表中同时区分当前 `main` 的固定态内核和未合并的五维候选分支，供后续 PR review 使用。
 
+### 7B. 磁场 production adapter（当前隔离分支）
+
+在作者确认的限定范围内，已新增专用 `Models.run_magnetic_scan`：
+
+- 只接受 `model_kind=:PNJLMagnetic`、`solver_mode=:fixed_mu`、`T>0` 和 `xi=0`；
+  外部输入为 `T_MeV`、共同 `mu_MeV` 和 `eB_MeV2`，内部显式转换到自然单位；
+- 每个 `(T,mu,eB)` 点调用完整五维 `solve_magnetic_gap`，沿 `(T,eB)` 的 `mu` 顺序
+  传递 continuation seed，同时保留多 seed 去重后的全部候选；
+- selected CSV 写入 convenience state、热力学和净密度；candidates CSV 写入每个候选的
+  seed、Omega、残差、方法、迭代数、分支/稳定性标签与 `n_max`；
+- `run_unified_scan.jl scan magnetic` 转发该入口。普通 `TmuScan`、`TrhoScan` 和
+  phase pipeline 对 `PNJLMagnetic` 显式报错，拒绝错误的 FixedRho/phase 语义；
+- README、能力总账、API 细账和公式审核表已互相链接；旧 `run_magnetic_*` 脚本明确标为
+  固定 `x_state` 诊断，不再描述为 equilibrium 扫描。
+
+该实现阶段尚未声称默认高节点全域分支完备、外部 validation 或磁化介质 EOS；生产运行前
+仍需代表点 `n_max/p_z/quadrature` 收敛审计和候选覆盖检查。
+
 ## 8. Definition of Done
 
 - [x] About、公式来源、API、实现、脚本、测试和 baseline 已建立交叉索引；
@@ -263,6 +281,8 @@ probe 已完成。当前仍不进入磁场性能优化 PR，原因是共享 Prob
 - [x] 明确共享 `solve_constraint` 不接管 magnetic route，并对其返回显式边界错误；
 - [x] 明确非零 `eB` 的通用独立密度 capability 边界，并同步能力清单/API 文档；
 - [x] 建立论文公式、代码入口、主线现状、候选实现状态和证据边界的开发者审核表；
+- [x] 在限定范围内接入 `(T,mu,eB)` 完整五维 FixedMu production adapter，并保留 selected/candidates 双输出；
+- [x] 对普通 Tmu/Trho/phase magnetic 路径增加显式拒绝，并补充 adapter contract unit test；
 - [x] 语义闭合后决定 magnetic 性能 A/B；已完成 A/B-M1 的低节点 diagnostic-only 部分测量，
   不改变生产 solver 语义；
 - [ ] 任务完成后归档本文件。

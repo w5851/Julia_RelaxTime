@@ -10,6 +10,7 @@
 - 使用 magnetic 配置对象计算磁场下的 `omega`、压力与数密度
 - 检查 `n_max` 截断是否足够收敛
 - 对固定点或固定 `eB` 扫描脚本建立文档化入口
+- 运行完整五维 `FixedMu` 的 `(T,mu,eB)` 生产扫描
 
 ## 首选公开入口
 
@@ -26,6 +27,7 @@
 - `calculate_magnetic_pressure`
 - `calculate_magnetic_number_densities`
 - `magnetic_nmax_convergence_report`
+- `Models.run_magnetic_scan`
 
 完整导出基线见 [generated/Exports.md](generated/Exports.md)。
 
@@ -65,6 +67,9 @@ all_branches = result.candidates
 - 共享 `solve_constraint`/ProblemSpec 约束入口暂不承载磁场专用 Omega，会显式拒绝 `PNJLMagneticModel`；FixedMu 磁场平衡态请使用上面的 `solve_magnetic_gap`。
 
 参数与配置细节见 [ModelAndConfig.md](ModelAndConfig.md)。
+
+生产扫描的外部单位、selected/candidates 双 CSV 合同和 CLI 用法见
+[MagneticScan.md](../../scans/MagneticScan.md)。
 
 ## 非首页首选入口
 
