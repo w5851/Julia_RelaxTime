@@ -150,6 +150,59 @@ function _parse_trho_args(args::Vector{String})
     return kwargs
 end
 
+function _parse_magnetic_args(args::Vector{String})
+    kwargs = Dict{Symbol, Any}()
+    for arg in args
+        startswith(arg, "--") || throw(ArgumentError("unknown argument: $(arg)"))
+        parts = split(arg[3:end], '='; limit=2)
+        length(parts) == 2 || throw(ArgumentError("invalid argument format: $(arg), expected --key=value"))
+        key = parts[1]
+        value = parts[2]
+        if key == "model_kind"
+            kwargs[:model_kind] = _parse_model_kind(value)
+        elseif key == "solver_mode"
+            kwargs[:solver_mode] = Symbol(lowercase(value))
+        elseif key == "T_values"
+            kwargs[:T_values] = _parse_real_list(value, key)
+        elseif key == "mu_values"
+            kwargs[:mu_values] = _parse_real_list(value, key)
+        elseif key == "eB_values"
+            kwargs[:eB_values] = _parse_real_list(value, key)
+        elseif key == "xi_values"
+            kwargs[:xi_values] = _parse_real_list(value, key)
+        elseif key == "output_path"
+            kwargs[:output_path] = value
+        elseif key == "candidates_output_path"
+            kwargs[:candidates_output_path] = value
+        elseif key == "overwrite"
+            kwargs[:overwrite] = _parse_bool(value, key)
+        elseif key == "resume"
+            kwargs[:resume] = _parse_bool(value, key)
+        elseif key == "p_num"
+            kwargs[:p_num] = parse(Int, value)
+        elseif key == "t_num"
+            kwargs[:t_num] = parse(Int, value)
+        elseif key == "pz_max"
+            kwargs[:pz_max] = parse(Float64, value)
+        elseif key == "n_max"
+            kwargs[:n_max] = parse(Int, value)
+        elseif key == "cutoff_N"
+            kwargs[:cutoff_N] = parse(Int, value)
+        elseif key == "method"
+            kwargs[:method] = Symbol(lowercase(value))
+        elseif key == "fallback_method"
+            kwargs[:fallback_method] = lowercase(value) == "none" ? nothing : Symbol(lowercase(value))
+        elseif key == "iterations"
+            kwargs[:iterations] = parse(Int, value)
+        elseif key == "classify_stability"
+            kwargs[:classify_stability] = _parse_bool(value, key)
+        else
+            throw(ArgumentError("unknown scan magnetic option: --$(key)"))
+        end
+    end
+    return kwargs
+end
+
 function _run_scan_tmu(args::Vector{String})
     kwargs = _parse_tmu_args(args)
     _assert_required_keys(kwargs, (:model_kind, :T_values, :mu_values, :xi_values, :output_path), "scan tmu")
@@ -168,6 +221,16 @@ function _run_scan_trho(args::Vector{String})
     return nothing
 end
 
+function _run_scan_magnetic(args::Vector{String})
+    kwargs = _parse_magnetic_args(args)
+    _assert_required_keys(kwargs, (:model_kind, :T_values, :mu_values, :eB_values, :xi_values, :output_path), "scan magnetic")
+    stats = Models.run_scan_pipeline(:magnetic; kwargs...)
+    println("[scan magnetic] total=$(stats.total) success=$(stats.success) failure=$(stats.failure) skipped=$(stats.skipped)")
+    println("[scan magnetic] selected_output=$(stats.selected_output)")
+    println("[scan magnetic] candidates_output=$(stats.candidates_output)")
+    return nothing
+end
+
 function _run_workflow_phase(args::Vector{String})
     isfile(PHASE_SCRIPT) || throw(ArgumentError("phase workflow script not found: $(PHASE_SCRIPT)"))
     cmd = `$(Base.julia_cmd()) --project=$(PROJECT_ROOT) $(PHASE_SCRIPT) $(args)`
@@ -179,6 +242,7 @@ function _usage()
     println("Usage:")
     println("  julia --project=. scripts/models/run_unified_scan.jl scan tmu [--key=value ...]")
     println("  julia --project=. scripts/models/run_unified_scan.jl scan trho [--key=value ...]")
+    println("  julia --project=. scripts/models/run_unified_scan.jl scan magnetic [--key=value ...]")
     println("  julia --project=. scripts/models/run_unified_scan.jl workflow phase [--key=value ...]")
 end
 
@@ -195,8 +259,10 @@ function main(args=ARGS)
             return _run_scan_tmu(args[3:end])
         elseif args[2] == "trho"
             return _run_scan_trho(args[3:end])
+        elseif args[2] == "magnetic"
+            return _run_scan_magnetic(args[3:end])
         end
-        throw(ArgumentError("unknown scan subcommand: $(args[2]); expected: tmu|trho"))
+        throw(ArgumentError("unknown scan subcommand: $(args[2]); expected: tmu|trho|magnetic"))
     elseif args[1] == "workflow"
         if args[2] == "phase"
             return _run_workflow_phase(args[3:end])

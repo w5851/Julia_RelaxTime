@@ -1,7 +1,7 @@
 """entrypoints.jl
 
 Models 统一流程入口（阶段 C）：
-- 扫描：run_tmu_scan / run_trho_scan
+- 扫描：run_tmu_scan / run_trho_scan / run_magnetic_scan
 - 工作流：solve_gap_and_transport / solve_gap_and_meson_point
 
 当前采用统一入口策略：
@@ -9,7 +9,7 @@ Models 统一流程入口（阶段 C）：
 - 调用方应通过 `Models` 模块显式访问工作流能力。
 """
 
-export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
 export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan
@@ -102,6 +102,10 @@ end
 
 function run_trho_scan(args...; kwargs...)
     return TrhoScan.run_trho_scan(args...; kwargs...)
+end
+
+function run_magnetic_scan(args...; kwargs...)
+    return MagneticScan.run_magnetic_scan(args...; kwargs...)
 end
 
 function run_freezeout_fixedmu_scan(args...; kwargs...)

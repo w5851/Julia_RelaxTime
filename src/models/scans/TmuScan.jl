@@ -97,6 +97,10 @@ end
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
     end
 
+    model_kind === :PNJLMagnetic && throw(ArgumentError(
+        "TmuScan does not implement magnetic equilibrium; use Models.run_magnetic_scan for the (T, mu, eB) FixedMu route",
+    ))
+
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 

@@ -18,7 +18,7 @@ module Models
 include(joinpath(@__DIR__, "exports_public.jl"))
 
 # Keep key entrypoint exports explicitly in this file for governance checks.
-export run_tmu_scan, run_trho_scan, build_default_rho_grid
+export run_tmu_scan, run_trho_scan, run_magnetic_scan, build_default_rho_grid
 export run_freezeout_fixedmu_scan
 export run_meson_mass_path_scan
 export run_freezeout_meson_mass_scan
@@ -62,6 +62,10 @@ include(joinpath(@__DIR__, "njl", "NJL2Model.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLDistributions.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLCore.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLModel.jl"))
+# Magnetic core must be defined inside Models before its adapter is loaded;
+# this avoids injecting a second copy into Main during module initialization.
+include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
+include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "pnjl_physics", "PNJLMagneticModel.jl"))
 include(joinpath(@__DIR__, "rpnjl", "RPNJLModel.jl"))
 include(joinpath(@__DIR__, "variants", "gas_liquid", "GasLiquidModel.jl"))
@@ -142,8 +146,6 @@ include(joinpath(@__DIR__, "derivatives", "ThermoDerivatives.jl"))
 include(joinpath(@__DIR__, "derivatives", "HigherOrderDerivatives.jl"))
 include(joinpath(@__DIR__, "derivatives", "AbstractSusceptibilityProvider.jl"))
 include(joinpath(@__DIR__, "derivatives", "ConservedChargeSusceptibilities.jl"))
-include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticIntegrals.jl"))
-include(joinpath(@__DIR__, "pnjl_physics", "core", "MagneticThermodynamics.jl"))
 include(joinpath(@__DIR__, "scans", "ScanCommon.jl"))
 include(joinpath(@__DIR__, "scans", "ScanConfig.jl"))
 include(joinpath(@__DIR__, "scans", "ScanResultFinalize.jl"))
@@ -155,6 +157,7 @@ include(joinpath(@__DIR__, "scans", "MesonChemicalProfiles.jl"))
 include(joinpath(@__DIR__, "scans", "TmuScan.jl"))
 include(joinpath(@__DIR__, "scans", "FreezeoutPathScan.jl"))
 include(joinpath(@__DIR__, "scans", "TrhoScan.jl"))
+include(joinpath(@__DIR__, "scans", "MagneticScan.jl"))
 
 using .SeedStrategies
 using .Conditions
@@ -173,6 +176,7 @@ using .MesonChemicalProfiles
 using .TmuScan
 using .FreezeoutPathScan
 using .TrhoScan
+using .MagneticScan
 
 # Transport provider (distribution/dispersion) for Stage-4 workflow decoupling
 include(joinpath(@__DIR__, "transport_provider.jl"))

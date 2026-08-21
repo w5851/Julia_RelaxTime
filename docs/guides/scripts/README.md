@@ -97,7 +97,8 @@ sh scripts/dev/run_with_sysimage.sh scripts/models/run_unified_scan.jl scan tmu 
 - [scripts/pnjl/run_conserved_charge_susceptibilities.jl](../../../scripts/pnjl/run_conserved_charge_susceptibilities.jl)
   - 守恒荷广义磁化率、累积量、`Ssigma`、`kappa_sigma2` 的统一单点/小范围扫描入口
 - [scripts/models/run_unified_scan.jl](../../../scripts/models/run_unified_scan.jl)
-  - 统一扫描入口（`scan tmu|trho`），覆盖 T-μ / T-ρ 网格扫描与 `Models` 主链扫描治理
+  - 统一扫描入口（`scan tmu|trho|magnetic`）；其中 `scan magnetic` 是完整五维 FixedMu 的 `(T,mu,eB)` equilibrium 产线，`run_magnetic_*` 旧脚本仍是固定 `x_state` 诊断
+  - 磁场最小调用：`scan magnetic --model_kind=PNJLMagnetic --solver_mode=fixed_mu --T_values=150 --mu_values=0 --eB_values=20000 --xi_values=0 --output_path=data/outputs/results/pnjl/scan/magnetic/selected.csv`
 - [scripts/pnjl/calculate_phase_structure.jl](../../../scripts/pnjl/calculate_phase_structure.jl)
   - 相图自动化产线入口（扫描 -> 判据 -> 报告），支持模板配置 + CLI 覆盖
 
