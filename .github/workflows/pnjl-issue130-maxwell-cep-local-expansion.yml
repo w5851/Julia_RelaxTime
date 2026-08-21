@@ -465,6 +465,7 @@ jobs:
           test "$(echo "$source_json" | jq -r .conclusion)" = success
           source_workflow_sha="$(echo "$source_json" | jq -r .headSha)"
           [[ "$source_workflow_sha" =~ ^[0-9a-fA-F]{40}$ ]] || exit 1
+          echo "SOURCE_RUN_ID=$SOURCE_RUN_ID" >> "$GITHUB_ENV"
           echo "SOURCE_WORKFLOW_SHA=$source_workflow_sha" >> "$GITHUB_ENV"
           mkdir -p job-artifacts
           gh run download "$SOURCE_RUN_ID" --pattern "issue130-maxwell-cep-local-expansion-*-$TAG" --dir job-artifacts

@@ -51,6 +51,7 @@
 | limited evidence | [`phase_reference/phase_reference_limited_evidence_audit_v1/`](phase_reference/phase_reference_limited_evidence_audit_v1/) | raw-curve coverage 和 shape audit |
 | manual overlay | [`phase_reference/phase_reference_manual_overlay_promotion_audit_v1/`](phase_reference/phase_reference_manual_overlay_promotion_audit_v1/) | manual CEP/curve overlay 的晋升阻塞审计 |
 | raw archive pointer | `raw_curve_archive_v1/` | 完整 raw curve 外部归档的 provenance 入口 |
+| Issue #130 derived layers | [`phase_reference/issue130_phase_reference_layers_v1/`](phase_reference/issue130_phase_reference_layers_v1/) | `strict_reference_v1`、`derived_reference_v1` 和 `phase_surface_render_v1`；Maxwell expansion 已接入，当前等待作者审核 |
 
 `phase_reference_*` 是汇总/决策层。它们可以引用下游 case，但不能取代下游 manifest、hash、失败点或 unresolved 语义。冻结包记录生成时的路径和 hash；本次 namespace 整理不重写这些历史快照。
 

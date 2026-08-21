@@ -1,8 +1,8 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
-状态：active；11-target numerical pilot 与同源 aggregate replay 均已完成并通过
-`pilot_candidate`；当前作为 v7 冻结后的下一步 Maxwell 输入 route，证据仍为
-diagnostic-only，不晋升 phase-reference。
+状态：review；276-target numerical expansion 与同源 solver-free aggregate replay 均已完成并通过
+`expansion_candidate`；strict/derived/render 三层已生成，当前仍为 diagnostic-only，等待作者审核，
+不晋升 phase-reference。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -45,8 +45,11 @@ versioned workflow 合并前不触发数值扩展。
   `--selection`、`--schema-version`、`--expected-count` 和 `--candidate-verdict`
   隔离两种 artifact；expansion schema 为
   `pnjl_issue130_maxwell_cep_local_expansion_v1`，目标数固定为 276；
-- expansion 未 dispatch；focused CI 全绿并合并后，才可使用 calculation SHA
-  `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48` 触发 numerical，随后再做同源 replay。
+- expansion 已完成：numerical run `32354095831`、同源 aggregate replay run
+  `32450188629`。旧 replay manifest 曾因 workflow 未持久化 `SOURCE_RUN_ID` 而显示
+  `null`；该 provenance 合同已在本分支修复，新的 solver-free replay `32451053476`
+  复用同一 source run，完成后以带 `source_run_id` 的 manifest 为准。历史 replay
+  不覆盖 numerical evidence。
 
 ## 首次 expansion dispatch 诊断（2026-08-20）
 
@@ -144,3 +147,23 @@ versioned workflow 和独立 aggregate，两个 route 的 target、成本和 ver
 - 仅叠加 crossover endpoint expansion numerical run `32240898122` 的 solver-free aggregate replay `32255786553`；固定 calculation SHA 为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。
 - v6 物化 186 个 endpoint candidate，覆盖 93 个非均匀 ξ 切片；所有点 finite/converged 且 `mu_q <=` 同一 v5 CEP proxy，但仍只表示 diagnostic overlay，不等于 CEP 已闭合或 phase-reference 已晋升。
 - v6 产物：`docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v6_crossover_overlay/`。Maxwell 276 个 `input_incomplete` 候选仍未补算，本次不扩大 Maxwell 数值范围。
+
+## 2026-08-21：Maxwell expansion 与三层派生包收口
+
+- numerical expansion run：`32354095831`；276/276 target 成功，所有最终 rho-mu
+  曲线 finite/converged、candidate 唯一且 geometry certificate 通过。冻结证据目录为
+  `D:\Desktop\Julia_RelaxTime_issue130_artifacts\maxwell_cep_local_expansion_32354095831_frozen_v1_final`，
+  其 `freeze_manifest.json` 保存完整文件 hash inventory；`reference_write=false`、
+  `oracle_labels_consumed=false`，数值源的 `solver_called=true`。
+- 同源 aggregate replay：旧 run `32450188629` 已 materialize 276/276，但 manifest 的
+  `source_run_id` 因 workflow 环境变量未持久化而为 `null`，只作为历史 replay 诊断保留；
+  provenance repair 后的 replay run 为 `32451053476`，应验证 `source_run_id=32354095831`、
+  `run_mode=aggregate_replay`、`solver_called=false`、无 missing/unexpected/error。
+- 三层输出：
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/`。
+  `strict_reference_v1` 保留 C2/v6 unresolved 并追加 276 个真实 Maxwell 行；
+  `derived_reference_v1` 使用 `xi=-0.5:0.00625:0.5`，仅在共同 support 内插值，派生行
+  标记 `interpolated_noncertified`；`phase_surface_render_v1` 从结构化表生成 no-triangulation
+  render 和 coverage mask。三层均保持 `reference_write=false`。
+- 当前 verdict：`awaiting_author_review`。作者审核 strict/derived/render 数据、coverage、
+  代表图和 provenance 后，才另行执行 phase-reference promotion gate；RS transport 继续暂停。

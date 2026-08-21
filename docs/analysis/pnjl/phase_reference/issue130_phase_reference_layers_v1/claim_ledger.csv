@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+maxwell_expansion_appended,276 real Maxwell expansion targets are appended to the strict input layer,supported,strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv; freeze_manifest.json,diagnostic candidate; no phase-reference promotion
+unresolved_preserved,Pre-existing C2 Maxwell unresolved geometry rows remain explicitly marked,supported,strict_reference_v1/tables/maxwell_surface_strict_reference_v1.csv,unresolved rows are not silently certified
+uniform_xi_derived,Derived surfaces use a uniform xi grid and common-support interpolation,supported,derived_reference_v1/tables/surface_coverage_mask.csv,interpolated_noncertified; no extrapolation
+phase_surface_render,The render is reproducible from structured derived tables and coverage metadata,supported,phase_surface_render_v1/manifest.json; phase_surface_render_v1/tables/mesh_coverage.csv,visualization does not authorize promotion
+promotion,These layers authorize phase-reference promotion,blocked,manifest.json,awaiting author review and formal promotion gate
