@@ -1,6 +1,13 @@
 using SHA
 using Printf
 
+@inline function _reject_magnetic_phase_route(model_kind::Symbol)
+    model_kind === :PNJLMagnetic && throw(ArgumentError(
+        "phase pipeline does not implement PNJLMagnetic FixedRho/phase equilibrium; use Models.run_magnetic_scan for (T, mu, eB)",
+    ))
+    return nothing
+end
+
 function _config_hash(model_kind::Symbol; kwargs...)
     payload = string(model_kind, "|", join(sort(collect(string(k) * "=" * string(v) for (k, v) in kwargs)), ";"))
     return bytes2hex(sha1(payload))
@@ -205,6 +212,8 @@ function _run_phase_pipeline_core(model_kind::Symbol=:PNJL;
         temperature_position_tol_MeV::Float64=0.10,
         temperature_density_tol::Float64=0.01,
         temperature_maxwell_area_tol::Float64=1e-4)
+
+    _reject_magnetic_phase_route(model_kind)
 
     thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
         thermo_quadrature_policy,

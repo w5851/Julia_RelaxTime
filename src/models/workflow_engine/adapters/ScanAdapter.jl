@@ -6,6 +6,8 @@ function _run_scan(kind::Symbol, scan_kwargs::NamedTuple)
         return run_tmu_scan(; scan_kwargs...)
     elseif kind === :trho
         return run_trho_scan(; scan_kwargs...)
+    elseif kind === :magnetic
+        return run_magnetic_scan(; scan_kwargs...)
     end
     throw(ArgumentError("unsupported scan kind: $(kind)"))
 end
@@ -67,6 +69,14 @@ function _build_scan_pipeline_stages()
                 if !isempty(scan_output)
                     artifact_paths["scan_output"] = scan_output
                 end
+                if hasproperty(ctx.state[:scan_summary], :selected_output)
+                    selected_output = String(ctx.state[:scan_summary].selected_output)
+                    artifact_paths["scan_selected_output"] = selected_output
+                end
+                if hasproperty(ctx.state[:scan_summary], :candidates_output)
+                    candidates_output = String(ctx.state[:scan_summary].candidates_output)
+                    artifact_paths["scan_candidates_output"] = candidates_output
+                end
                 StageResult(
                     Dict{Symbol, Any}(:scan_artifact_paths => artifact_paths),
                     PipelineArtifact[],
@@ -97,6 +107,11 @@ function _build_scan_pipeline_stages()
                 extensions = ctx.state[:manifest_extensions]
                 extensions["diagnostics_mode"] = String(diagnostics.mode)
                 extensions["diagnostics_status"] = String(diagnostics.status)
+                summary = ctx.state[:scan_summary]
+                hasproperty(summary, :selected_output) &&
+                    (extensions["scan_output_path"] = String(summary.selected_output))
+                hasproperty(summary, :candidates_output) &&
+                    (extensions["scan_candidates_output_path"] = String(summary.candidates_output))
 
                 StageResult(
                     Dict{Symbol, Any}(:scan_diagnostics => diagnostics),
@@ -134,7 +149,7 @@ function _build_scan_pipeline_stages()
 end
 
 function run_scan_pipeline_adapter(kind::Symbol; kwargs...)
-    (kind === :tmu || kind === :trho) || throw(ArgumentError("unsupported scan kind: $(kind)"))
+    (kind === :tmu || kind === :trho || kind === :magnetic) || throw(ArgumentError("unsupported scan kind: $(kind)"))
     scan_kwargs = (; kwargs...)
     output_dir = resolve_adapter_output_dir(scan_kwargs, (:output_dir, :output_path); path_keys=(:output_path,))
     manifest_path = joinpath(output_dir, "run_manifest.json")
