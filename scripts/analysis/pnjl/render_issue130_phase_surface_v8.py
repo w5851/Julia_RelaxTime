@@ -676,6 +676,8 @@ def main() -> int:
             "\n- public figure alias: v8 display render; the v1 source figure remains immutable "
             "under docs/analysis and strict/derived CSV bytes are unchanged\n"
         )
+    imported_manifest["audit"] = file_record(audit_path, root)
+    _write_json(imported_manifest_path, imported_manifest)
     root_manifest["import_audit"] = file_record(audit_path, root)
     _write_json(output_root / "manifest.json", root_manifest)
 

@@ -1,9 +1,9 @@
 {
   "schema_version": "plot_manifest_v1",
-  "generated_at_utc": "2026-08-21T09:03:40.421878+00:00",
+  "generated_at_utc": "2026-08-21T09:03:40.545787+00:00",
   "asset_id": "pnjl_issue130_phase_surface_v8",
   "figure_family": "pnjl_phase_reference",
-  "case_slug": "issue130_phase_reference_v1_public_v8_alias",
+  "case_slug": "issue130_phase_surface_render_v8",
   "asset_kind": "figure",
   "figure_mode": "audit",
   "semantic_status": "visualization_only_closed_candidate",
@@ -102,7 +102,7 @@
   "missing_value_policy": "masked",
   "outputs": [
     {
-      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/figures/phase_surface_render_mu_xi_T.png",
       "path_kind": "repository_relative",
       "bytes": 5266623,
       "sha256": "5b8152b2ccef4107c51393370b82ff77f48287132e8206a37ee6cfb2ab793b14",
@@ -111,7 +111,7 @@
       "vector": false
     },
     {
-      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.svg",
+      "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/figures/phase_surface_render_mu_xi_T.svg",
       "path_kind": "repository_relative",
       "bytes": 9972972,
       "sha256": "45f2479eb3b143c74c6df5bb480d7a4eec14cc60ece45f65f4da4dc0ee0835e3",

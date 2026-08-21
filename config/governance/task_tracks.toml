@@ -227,10 +227,10 @@ status = "review"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-import.md"
 reason = "promotion gate v1 已通过并合并；作者已接受 strict/derived/render 三层，下一步需将 candidate 以独立 versioned sibling 导入，同时保持旧 reference 与 runtime 不变。"
-next_action = "审阅新的 data/reference/pnjl/issue130_phase_reference_v1 与 phase-reference figure package；通过后再做只读 runtime consumer compatibility audit。"
+next_action = "审阅 strict/derived 数据及 v8 对外 figure alias；通过后再做只读 runtime consumer compatibility audit。v8 只改变显示层，不切换 runtime consumer，RS transport 继续暂停。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "file:data/reference/pnjl/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/", "file:docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "pr:250", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "sha:0dac7c77d7dfda12fdf167fb91435afb2235517b", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:import writes only a new versioned sibling; runtime_consumption=false"]
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "file:data/reference/pnjl/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/", "file:docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "pr:250", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "sha:0dac7c77d7dfda12fdf167fb91435afb2235517b", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:import writes only a new versioned sibling; v8 replaces the stable public figure alias only; runtime_consumption=false"]
 
 [[items]]
 id = "plot-sop-independent-land"

@@ -1,0 +1,10 @@
+{
+  "verdict": "display_candidate",
+  "figure_version": "v8",
+  "reference_write": false,
+  "runtime_consumption": false,
+  "solver_called": false,
+  "strict_or_derived_csv_modified": false,
+  "public_alias_replaced": true,
+  "previous_public_png_sha256": "50d09fefca853d532059c6133d70ca040b33b5c125ade18d7227ef71a1a0ea39"
+}

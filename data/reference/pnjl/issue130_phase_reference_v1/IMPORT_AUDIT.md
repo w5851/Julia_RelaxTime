@@ -10,3 +10,5 @@
 - derived layer: uniform-xi local interpolation; non-native rows remain non-certified
 - render layer: structured tables and no-triangulation projection
 - this import does not run PNJL, alter tolerances, or change the default reference consumer
+
+- public figure alias: v8 display render; the v1 source figure remains immutable under docs/analysis and strict/derived CSV bytes are unchanged

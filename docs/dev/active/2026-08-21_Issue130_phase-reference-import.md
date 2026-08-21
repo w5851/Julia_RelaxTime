@@ -40,3 +40,19 @@
 1. 审核并合并本 import PR。
 2. 在新 sibling 上做只读 runtime consumer compatibility audit；确认是否需要显式配置选择。
 3. runtime audit 通过并经作者授权后，单独评估 RS transport；不得因 import 成功自动启动 transport。
+
+## 2026-08-21：公开图像 v8 alias
+
+- strict/derived/render CSV 保持逐字节不变；v1 源图仍保留在
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/`。
+- 新增 solver-free renderer：
+  `scripts/analysis/pnjl/render_issue130_phase_surface_v8.py`，输出包为
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/`。
+- v8 只改变显示层：crossover 允许显式连接至 estimated-midpoint CEP boundary；
+  first-order 标签写为 `first-order coexistence (Maxwell)`；Maxwell 低温边界只使用
+  相邻 xi 的共同温度支持并保持 mask，不做 `T=0` 外推或三角化。
+- 为保持对外展示入口稳定，v8 PNG 覆盖到原有
+  `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png`，
+  同目录新增 SVG 和 v8 `plot_manifest.json`；旧 v1 图 hash 与替换关系记录在 v8 manifest。
+- v8 是 `visualization_only_closed_candidate`，不生成 strict 证书、不写入新的数值行、
+  不切换 runtime consumer；需作者审核图像后再决定是否进入正式 phase-reference promotion。
