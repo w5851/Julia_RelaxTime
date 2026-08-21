@@ -270,6 +270,21 @@ probe 已完成。当前仍不进入磁场性能优化 PR，原因是共享 Prob
 该实现阶段尚未声称默认高节点全域分支完备、外部 validation 或磁化介质 EOS；生产运行前
 仍需代表点 `n_max/p_z/quadrature` 收敛审计和候选覆盖检查。
 
+### 7C. adapter 低节点贯通验证（2026-08-21）
+
+- 命令：仅在隔离临时目录调用一次 `Models.run_magnetic_scan`，参数为
+  `T=150 MeV`、`mu=0 MeV`、`eB=20000 MeV^2`、`xi=0`、`p_num=4`、`t_num=4`、
+  `pz_max=5`、`n_max=1`、`cutoff_N=2`、`iterations=8`、`residual_norm_max=1e-3`；
+  未写入仓库产物，未运行扫描网格。
+- 结果：`total=1`、`success=1`、`failure=0`；selected CSV 有表头加 1 行，candidates
+  CSV 有表头加 1 行；选中候选 `trust_region`、`attempt_count=7`、`failed_attempts=2`、
+  `residual_norm=2.9374e-11`、`n_max=1`。
+- 失败语义复核：显式关闭 `include_default_seeds` 且首点没有外部 seed 时，adapter 返回
+  `magnetic solver received no finite seed`；默认生产配置保留 default seed catalog，
+  因而通过上述贯通验证。该参数组合不应作为首点生产配置。
+- 证据边界：这是低节点 adapter/CSV/分支字段贯通证据，不是高节点收敛、外部物理验证或
+  全域候选分支完备性证明。
+
 ## 8. Definition of Done
 
 - [x] About、公式来源、API、实现、脚本、测试和 baseline 已建立交叉索引；
