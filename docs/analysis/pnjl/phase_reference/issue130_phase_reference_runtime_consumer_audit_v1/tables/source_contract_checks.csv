@@ -1,0 +1,6 @@
+entrypoint,candidate_literal_present,status,details
+scripts/relaxtime/run_gap_transport_scan.jl,False,pass,no implicit candidate path literal
+scripts/relaxtime/gap_transport_scan_phase_equilibrium.jl,False,pass,no implicit candidate path literal
+scripts/relaxtime/phase_guided_transport_scan_plan.jl,False,pass,no implicit candidate path literal
+scripts/relaxtime/run_paper_p1_pipeline.jl,False,pass,no implicit candidate path literal
+scripts/pnjl/plot_phase_diagram.py,False,pass,no implicit candidate path literal
