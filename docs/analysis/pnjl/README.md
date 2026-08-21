@@ -1,6 +1,6 @@
 # PNJL Analysis Index
 
-本目录是 PNJL 诊断证据集合，包含 Issue #130 phase-reference 证据线和独立的 Mott/复极点分析线。各 case 的 `manifest.json`、`decision.json` 和 `AUDIT.md` 是本 case 的边界；本索引只建立研究线和时间线，不把 diagnostic candidate 晋升为 production/reference。
+本目录是 PNJL 诊断证据集合，包含 Issue #130 phase-reference 证据线和独立的 Mott/复极点分析线。各 case 的 `manifest.json`、`decision.json` 和 `AUDIT.md` 是本 case 的边界；本索引只建立研究线和时间线，不把 diagnostic candidate 自动晋升为 production/reference。Issue #130 的 versioned import candidate 仍需独立 runtime compatibility audit。
 
 ## Independent Mott evidence line
 

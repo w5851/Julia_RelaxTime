@@ -1,6 +1,6 @@
 # Issue #130：phase-reference promotion gate v1 任务单
 
-状态：review；作者已接受 Issue #130 的 `strict_reference_v1`、
+状态：accepted；作者已接受 Issue #130 的 `strict_reference_v1`、
 `derived_reference_v1` 和 `phase_surface_render_v1` 三层证据包。
 promotion gate v1 为 `promotion_candidate`，但本任务单不执行 reference 写入、runtime
 consumer 切换或 RS transport。
@@ -24,10 +24,11 @@ versioned phase-reference import PR，不表示已经完成晋升。
 数值 CSV、PNG 和既有 `data/reference/pnjl` 保持不变。gate 明确记录
 `reference_write=false`、`runtime_consumption=false` 和 `solver_called=false`（replay）。
 
-## 下一步
+## 收口与后续
 
-1. 将 promotion-gate 代码、审计包和本任务单以独立 PR 合并。
-2. 在新的 merge SHA 上准备独立、版本化的 reference import PR；该 PR 仅导入新的
+1. promotion-gate 代码、审计包和本任务单已在 PR #250 合并，merge SHA 为
+   `10231d83f8ed56b684f6acbd74a71ce85fdb47cf`。
+2. 已转入独立的 versioned reference import task；该 PR 仅导入新的
    canonical sibling，并单独审计旧 reference 不变。
 3. import PR 合并并完成 runtime consumer 评估后，才重新评估 RS transport。
 

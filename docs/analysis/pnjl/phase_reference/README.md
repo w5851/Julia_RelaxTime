@@ -11,6 +11,7 @@
 | manual overlay promotion audit | [`phase_reference_manual_overlay_promotion_audit_v1/`](phase_reference_manual_overlay_promotion_audit_v1/) | `blocked_manual_overlay_inconclusive`；记录人工 overlay 不能覆盖自动 gate 的边界 |
 | Issue #130 derived layers | [`issue130_phase_reference_layers_v1/`](issue130_phase_reference_layers_v1/) | `awaiting_author_review`；strict Maxwell expansion、uniform-xi derived tables 和 no-triangulation render |
 | Issue #130 promotion gate | [`issue130_phase_reference_promotion_gate_v1/`](issue130_phase_reference_promotion_gate_v1/) | `promotion_candidate`；solver-free gate，允许准备独立 versioned import PR，但不写入 reference |
+| Issue #130 versioned import candidate | `data/reference/pnjl/issue130_phase_reference_v1/` | 新 sibling candidate；`runtime_consumption=false`，不替换旧 reference |
 
 ## Reading Order
 
@@ -24,4 +25,5 @@
 - `raw_curve_archive_v1/` 是独立的外部归档指针，不属于本分组的汇总包。
 - `issue130_phase_reference_layers_v1/` 仍是诊断/作者审核候选；其中 derived/render 层不能替代 strict 证书，也未写入 `data/reference/**`。
 - `issue130_phase_reference_promotion_gate_v1/` 只记录作者审核、manifest/hash、coverage 和 promotion gate；它不写入 `data/reference/**`，也不切换 runtime consumer。
+- `data/reference/pnjl/issue130_phase_reference_v1/` 是独立 import candidate；它保留三层语义和 source/imported hash，但在 runtime compatibility audit 与显式授权前不作为默认 consumer。
 - 本次 namespace 迁移只改变物理目录位置；包内 manifest、checksum、执行日志和生成时路径保持原样，以保留历史 provenance。

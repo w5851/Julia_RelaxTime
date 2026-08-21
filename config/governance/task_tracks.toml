@@ -6,14 +6,14 @@ updated_at = "2026-08-21"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "review"
-current_task = "issue130-phase-reference-promotion-gate"
+current_task = "issue130-phase-reference-import"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "作者已审核并接受 PR #248 的 strict/derived/render 三层；solver-free promotion gate v1 为 promotion_candidate。下一步仅准备独立、版本化 phase-reference import PR；本 gate 不写 data/reference、不切换 runtime，RS transport 继续暂停。"
+next_action = "PR #250 已合并，promotion gate v1 已完成；当前准备独立 versioned import PR。import 只写新的 phase-reference sibling，不切换 runtime consumer，RS transport 继续暂停。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-phase-reference-promotion-gate"
+current_branch = "codex/issue130-phase-reference-import"
 current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
@@ -210,14 +210,27 @@ evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnost
 id = "issue130-phase-reference-promotion-gate"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-promotion-gate.md"
 reason = "作者已接受 Issue #130 strict/derived/render 三层；promotion gate 必须在独立 versioned import PR 前完成，并保持旧 reference 与 runtime 不变。"
-next_action = "promotion gate v1 已为 promotion_candidate；准备独立 versioned phase-reference import PR，先导入新 canonical sibling，再做 runtime consumer 接线与 RS transport 评估。"
+next_action = "PR #250 已合并，promotion gate v1 验收完成；versioned import 已转入独立 item，旧 evidence 与 runtime 边界保持不变。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "pr:248", "sha:09d1a6895100cef208c9108034d9f45b631158eb"]
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "pr:248", "pr:250", "sha:09d1a6895100cef208c9108034d9f45b631158eb", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "gate:promotion_candidate"]
+
+[[items]]
+id = "issue130-phase-reference-import"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "review"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-import.md"
+reason = "promotion gate v1 已通过并合并；作者已接受 strict/derived/render 三层，下一步需将 candidate 以独立 versioned sibling 导入，同时保持旧 reference 与 runtime 不变。"
+next_action = "审阅新的 data/reference/pnjl/issue130_phase_reference_v1 与 phase-reference figure package；通过后再做只读 runtime consumer compatibility audit。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "file:data/reference/pnjl/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/", "file:docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "pr:250", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "sha:0dac7c77d7dfda12fdf167fb91435afb2235517b", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:import writes only a new versioned sibling; runtime_consumption=false"]
 
 [[items]]
 id = "plot-sop-independent-land"
