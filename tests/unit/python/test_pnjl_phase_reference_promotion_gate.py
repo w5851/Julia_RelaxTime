@@ -31,6 +31,18 @@ def test_real_reviewed_package_is_promotion_candidate(tmp_path):
     assert decision["summary"]["maxwell_unresolved_rows"] > 0
 
 
+def test_render_manifest_hashes_are_consistent_on_main_checkout():
+    import hashlib
+    import json
+
+    render = PACKAGE / "phase_surface_render_v1"
+    render_manifest = json.loads((render / "manifest.json").read_text(encoding="utf-8"))
+    root_manifest = json.loads((PACKAGE / "manifest.json").read_text(encoding="utf-8"))
+    digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+    assert render_manifest["figures"]["plot_manifest.json"] == digest(render / "figures" / "plot_manifest.json")
+    assert root_manifest["children"]["phase_surface_render_v1"] == digest(render / "manifest.json")
+
+
 def test_pending_author_review_blocks_gate(tmp_path):
     decision = audit_package(PACKAGE, tmp_path / "gate", author_review_status="pending")
     assert decision["verdict"] == "promotion_blocked"
