@@ -1,3 +1,15 @@
+---
+title: PNJL Magnetic 语义与稳定性审计任务单
+archived: true
+original: docs/dev/active/2026-08-19_PNJLMagnetic语义与稳定性审计任务单.md
+archived_date: 2026-08-21
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # PNJL Magnetic 语义与稳定性审计任务单
 
 ## 1. 背景与审计边界
