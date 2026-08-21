@@ -6,14 +6,14 @@ updated_at = "2026-08-21"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "review"
-current_task = "issue130-maxwell-cep-local-refinement"
+current_task = "issue130-phase-reference-promotion-gate"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "v7 crossover 基线、276-target Maxwell numerical expansion、同源 aggregate replay 及 strict/derived/render 三层均已冻结；当前等待作者审核 strict/derived/render 数据、coverage、代表图和 provenance。作者审核前不晋升 phase-reference，RS transport 继续暂停。"
+next_action = "作者已审核并接受 PR #248 的 strict/derived/render 三层；solver-free promotion gate v1 为 promotion_candidate。下一步仅准备独立、版本化 phase-reference import PR；本 gate 不写 data/reference、不切换 runtime，RS transport 继续暂停。"
 required_author_review = true
-author_review_status = "pending"
+author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-phase-reference-derived-v1"
+current_branch = "codex/issue130-phase-reference-promotion-gate"
 current_sha = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
@@ -28,7 +28,7 @@ evidence = [
   "sha:51c93cf0111415b35bb199376c358782c0f5a2f4",
   "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a",
 ]
-updated_at = "2026-08-19"
+updated_at = "2026-08-21"
 
 [[tracks]]
 id = "rs-transport"
@@ -171,11 +171,11 @@ evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_seman
 id = "issue130-targeted-closure-diagnostic"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-16_Issue130_针对性收口诊断任务单.md"
 reason = "C2 full-hybrid evidence remains under author review; targeted raw-curve closure is an independent diagnostic overlay and cannot silently promote the phase reference."
-next_action = "保留已完成的 T 方向 CEP overlay，不再 dispatch cep_brackets；8-target pilot 与 186-target expansion/replay 已完成，v7 crossover 派生基线已冻结。等待 Maxwell route 完成后合并进入 derived_reference_v1。"
+next_action = "T 方向 CEP overlay、8-target pilot、186-target expansion/replay、v7 crossover 派生基线和 Maxwell route 均已并入三层包；保留原始 evidence，不再 dispatch cep_brackets。"
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md", "run:31999149922", "run:32014476047", "run:32139943632"]
@@ -184,11 +184,11 @@ evidence = ["file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2
 id = "issue130-mu-endpoint-refinement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md"
 reason = "C2 v5 显示 crossover 在 CEP 附近存在原生 mu sampling gap；本任务只补 crossover 物理侧，Maxwell geometry/unresolved gap 由独立 companion task 处理。"
-next_action = "全 xi crossover expansion/replay 与 v7 派生包已冻结；Maxwell expansion/replay 及统一 xi 三层包已完成。作者审核后统一执行 phase-reference promotion gate。"
+next_action = "全 xi crossover expansion/replay、v7 派生包及统一 xi 三层包已通过作者审核；promotion gate v1 已完成并为 candidate，等待独立 versioned import PR。"
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/crossover_mu/", "file:docs/dev/active/2026-08-18_Issue130_CEP_mu端点补点与派生补全任务单.md", "file:.github/workflows/pnjl-issue130-crossover-mu-endpoint-pilot.yml", "run:31999149922", "run:32014476047", "run:32139943632", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49", "note:pilot_candidate passed; author authorized all-xi crossover expansion on 2026-08-19"]
@@ -197,14 +197,27 @@ evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnost
 id = "issue130-maxwell-cep-local-refinement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "review"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md"
 reason = "C2 v5 Maxwell boundary 仍有 CEP 近端 support/geometry unresolved 行；crossover μ endpoint 补点不改变固定 (xi,T) Maxwell rho geometry。"
-next_action = "276-target expansion run 32354095831 与同源 replay 32451053476 已完成；strict_reference_v1、derived_reference_v1、phase_surface_render_v1 已生成并保持 diagnostic-only，等待作者审核。旧 dispatch 失败仅作历史诊断。"
+next_action = "276-target expansion run 32354095831 与同源 replay 32451053476 已完成并经作者审核；strict_reference_v1、derived_reference_v1、phase_surface_render_v1 及 promotion gate v1 均为可追溯 candidate，等待独立 versioned import PR。旧 dispatch 失败仅作历史诊断。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32237794907", "run:32354095831", "run:32450188629", "run:32451053476", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:85ceccad19fb361fd2ba5f69afd8f509fd3ab9f3", "sha:d9a52e6232d09695a83997cda2c11f6b00204587", "note:276/276 numerical targets finite/converged with unique geometry candidates; replay 32451053476 is solver-free and must carry source_run_id=32354095831; strict/derived/render remain author-review candidates"]
+evidence = ["file:docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v5_no_triangulation/", "file:docs/analysis/pnjl/issue130_endpoint_refinement_preflight_v1/maxwell_local/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "file:docs/dev/active/2026-08-18_Issue130_Maxwell_CEP局部补点与派生补全任务单.md", "run:32222254605", "run:32237794907", "run:32354095831", "run:32450188629", "run:32451053476", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:85ceccad19fb361fd2ba5f69afd8f509fd3ab9f3", "sha:d9a52e6232d09695a83997cda2c11f6b00204587", "note:276/276 numerical targets finite/converged with unique geometry candidates; replay 32451053476 is solver-free and carries source_run_id=32354095831; author accepted strict/derived/render and promotion gate v1 is promotion_candidate; no data/reference write"]
+
+[[items]]
+id = "issue130-phase-reference-promotion-gate"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "review"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-promotion-gate.md"
+reason = "作者已接受 Issue #130 strict/derived/render 三层；promotion gate 必须在独立 versioned import PR 前完成，并保持旧 reference 与 runtime 不变。"
+next_action = "promotion gate v1 已为 promotion_candidate；准备独立 versioned phase-reference import PR，先导入新 canonical sibling，再做 runtime consumer 接线与 RS transport 评估。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "pr:248", "sha:09d1a6895100cef208c9108034d9f45b631158eb"]
 
 [[items]]
 id = "plot-sop-independent-land"

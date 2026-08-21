@@ -1,0 +1,16 @@
+{
+  "package_manifest_sha256": "ebbd580728caaf87839487442318fee90f137ff22568742e0553eba1b630d97c",
+  "reference_write_authorized": false,
+  "review_merge_sha": "09d1a6895100cef208c9108034d9f45b631158eb",
+  "review_pr": "248",
+  "runtime_consumption_authorized": false,
+  "schema_version": "pnjl_issue130_phase_reference_author_review_v1",
+  "scope": [
+    "strict_reference_v1",
+    "derived_reference_v1",
+    "phase_surface_render_v1",
+    "coverage",
+    "provenance"
+  ],
+  "status": "accepted"
+}

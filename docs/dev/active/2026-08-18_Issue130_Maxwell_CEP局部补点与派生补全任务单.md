@@ -1,8 +1,8 @@
 # Issue #130：Maxwell CEP 近端局部补点与派生补全任务单
 
 状态：review；276-target numerical expansion 与同源 solver-free aggregate replay 均已完成并通过
-`expansion_candidate`；strict/derived/render 三层已生成，当前仍为 diagnostic-only，等待作者审核，
-不晋升 phase-reference。
+`expansion_candidate`；作者已审核并接受 strict/derived/render 三层，solver-free promotion gate v1
+为 `promotion_candidate`。当前仍不写入 `data/reference`，等待独立 versioned import PR。
 父任务为 `issue130-phase`。这是与 crossover μ endpoint refinement 分开的
 required follow-up，只处理 Maxwell 侧在 CEP 附近的 support/geometry 缺口。
 
@@ -167,3 +167,20 @@ versioned workflow 和独立 aggregate，两个 route 的 target、成本和 ver
   render 和 coverage mask。三层均保持 `reference_write=false`。
 - 当前 verdict：`awaiting_author_review`。作者审核 strict/derived/render 数据、coverage、
   代表图和 provenance 后，才另行执行 phase-reference promotion gate；RS transport 继续暂停。
+
+## 2026-08-21：作者审核与 promotion gate v1
+
+- 作者已接受 PR #248 的三层 evidence/provenance 包；PR merge SHA 为
+  `09d1a6895100cef208c9108034d9f45b631158eb`。
+- solver-free gate 脚本：
+  `scripts/analysis/pnjl/audit_issue130_phase_reference_promotion.py`；输出包：
+  `docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/`。
+- gate 固定核验 calculation SHA `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`、数值 run
+  `32354095831`、replay `32451053476`、276 条 expansion provenance、4071 条 strict
+  unresolved geometry 行、统一 161 个 xi、483 条 coverage 和 no-triangulation render。
+- gate verdict 为 `promotion_candidate`；含义是允许准备独立、版本化的 reference import PR，
+  不是已经写入或切换 runtime。当前 `reference_write=false`、`runtime_consumption=false`，
+  旧 `data/reference/pnjl` 文件保持不变，RS transport 继续暂停。
+- 同步修复三层 package manifest 的文本换行 hash：只重算 metadata/plot manifest hash，
+  数值 CSV 和 PNG 字节不变；`metadata_hash_normalization` 记录了原因和
+  `numeric_tables_unchanged=true`。

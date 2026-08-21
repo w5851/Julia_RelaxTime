@@ -41,15 +41,22 @@
   "layer": "issue130_phase_reference_layers_v1",
   "promotion_status": "awaiting_author_review",
   "children": {
-    "strict_reference_v1": "02db3b0d5c664bfa7b4cbfceff4adfa32a5c198dc0d1097d82b7dbc756611477",
-    "derived_reference_v1": "07bdfb207694762516b54081bdd1d3a2df22c955d39685e960a7e39f32b86250",
-    "phase_surface_render_v1": "d13f461692adf3abb9e43d0f9451de604100765c21abbf09dd9830656169212b"
+    "strict_reference_v1": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+    "derived_reference_v1": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
+    "phase_surface_render_v1": "14aee7055b260ed3a0cec9f32408cdd84750c6164b28923c3c07409681bfb29c"
   },
   "package_files": {
-    "README.md": "afbdd01744ef5b172c94ddd850b440e14ee697adcf3ae1641dc12c9d119fe56b",
-    "AUDIT.md": "8b973e974729e80e650ca7934de9bf6f7fd81fd4df3350887ba7178c01c64f3e",
-    "decision.json": "bdfd699076437c6d6f73fe9b52fb463540a619bc9d3bc49afdfb11f9563ef232",
-    "claim_ledger.csv": "4bd0d82e09df0755140f020c4acc6f2ded9bb1e5aec248a2cb57cb3a57c9a223",
-    "replay_provenance.json": "bb99edad2b2a5b51260203eadf48a62cd21efbf274e09e71821c8796e1a6f4ea"
+    "README.md": "2fefce4f8d2af81358df73c6e5c81408b55470a8bfe7e24502f9bc2c2f47f85d",
+    "AUDIT.md": "dcd6d50bfa240941c16887cdad3919be743b4034beccee8350d47d7434f608d3",
+    "decision.json": "11ea87f30e31e9096cc1e38ac170faacb4d02cb5c11b9205b1754f4ed71f15d3",
+    "claim_ledger.csv": "caeebabaa498a90ec30fef969d3a9a211ba8592be2b4bd1f27293cd8abc0e4d0",
+    "replay_provenance.json": "e33178e443133e3f8c6a38f4590f4d1fbd253a4db96899600d49f0ca27a90cfa"
+  },
+  "metadata_hash_normalization": {
+    "schema_version": "pnjl_issue130_phase_reference_metadata_normalization_v1",
+    "normalized_at_utc": "2026-08-21T06:27:52.693303+00:00",
+    "reason": "Git checkout normalized text files to LF after the reviewed package was generated on Windows",
+    "numeric_tables_unchanged": true,
+    "solver_called": false
   }
 }

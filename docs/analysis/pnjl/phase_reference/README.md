@@ -10,6 +10,7 @@
 | limited evidence audit | [`phase_reference_limited_evidence_audit_v1/`](phase_reference_limited_evidence_audit_v1/) | `raw_curve_coverage_complete_diagnostic_only`；审计 unresolved raw curves |
 | manual overlay promotion audit | [`phase_reference_manual_overlay_promotion_audit_v1/`](phase_reference_manual_overlay_promotion_audit_v1/) | `blocked_manual_overlay_inconclusive`；记录人工 overlay 不能覆盖自动 gate 的边界 |
 | Issue #130 derived layers | [`issue130_phase_reference_layers_v1/`](issue130_phase_reference_layers_v1/) | `awaiting_author_review`；strict Maxwell expansion、uniform-xi derived tables 和 no-triangulation render |
+| Issue #130 promotion gate | [`issue130_phase_reference_promotion_gate_v1/`](issue130_phase_reference_promotion_gate_v1/) | `promotion_candidate`；solver-free gate，允许准备独立 versioned import PR，但不写入 reference |
 
 ## Reading Order
 
@@ -22,4 +23,5 @@
 - 这些目录只保存诊断/决策证据，不写入 `data/reference/**`，不启动 RS transport production。
 - `raw_curve_archive_v1/` 是独立的外部归档指针，不属于本分组的汇总包。
 - `issue130_phase_reference_layers_v1/` 仍是诊断/作者审核候选；其中 derived/render 层不能替代 strict 证书，也未写入 `data/reference/**`。
+- `issue130_phase_reference_promotion_gate_v1/` 只记录作者审核、manifest/hash、coverage 和 promotion gate；它不写入 `data/reference/**`，也不切换 runtime consumer。
 - 本次 namespace 迁移只改变物理目录位置；包内 manifest、checksum、执行日志和生成时路径保持原样，以保留历史 provenance。
