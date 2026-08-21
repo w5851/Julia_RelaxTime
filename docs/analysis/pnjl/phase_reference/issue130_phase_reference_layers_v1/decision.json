@@ -1,0 +1,21 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_layers_decision_v1",
+  "verdict": "awaiting_author_review",
+  "promotion_status": "blocked",
+  "reference_write": false,
+  "solver_called": false,
+  "oracle_labels_consumed": false,
+  "accepted_inputs": {
+    "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+    "maxwell_source_run_id": "32354095831",
+    "aggregate_replay_run_id": "32451053476"
+  },
+  "checks": {
+    "maxwell_expansion_materialized": true,
+    "replay_complete": true,
+    "strict_unresolved_preserved": true,
+    "derived_no_extrapolation": true,
+    "render_no_triangulation": true
+  },
+  "next_action": "作者审核 strict/derived/render 数据、coverage、代表图和 provenance；通过后另行执行 phase-reference promotion gate。"
+}
