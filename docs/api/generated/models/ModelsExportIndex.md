@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/generated/models/ModelsExportIndex.md`
-- Exported symbol count: 361
-- Mentioned in non-generated docs/api pages: 230
+- Exported symbol count: 362
+- Mentioned in non-generated docs/api pages: 231
 
 ## Exported Symbols
 
@@ -54,7 +54,7 @@
 | `PM_COMPARISON_STATUSES` | src/models/exports_public.jl | 110 | 0 | - |
 | `PM_ENDPOINT_CAUSES` | src/models/exports_public.jl | 110 | 0 | - |
 | `PM_SEED_SOURCES` | src/models/exports_public.jl | 110 | 0 | - |
-| `PNJLMagneticModel` | src/models/exports_public.jl | 9 | 5 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `PNJLMagneticModel` | src/models/exports_public.jl | 9 | 6 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `PNJLModel` | src/models/exports_public.jl | 8 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `ParamSpec` | src/models/exports_public.jl | 127 | 2 | docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `PhasePipelineResult` | src/models/exports_public.jl | 98 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
@@ -67,7 +67,7 @@
 | `PipelineStage` | src/models/exports_public.jl | 101 | 1 | docs/api/models/workflows/PhasePipeline.md |
 | `PipelineStageRecord` | src/models/exports_public.jl | 103 | 0 | - |
 | `PrimaryStrategy` | src/models/exports_public.jl | 72 | 0 | - |
-| `ProblemSpec` | src/models/exports_public.jl | 53 | 6 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md<br>docs/api/models/solver/Overview.md |
+| `ProblemSpec` | src/models/exports_public.jl | 53 | 7 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/CoreConcepts.md |
 | `ProductionPipelineConfig` | src/models/exports_public.jl | 98 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `PromotionResult` | src/models/exports_public.jl | 98 | 1 | docs/api/models/phase/Overview.md |
 | `QUARK_CHARGE_ABS` | src/models/exports_public.jl | 84 | 1 | docs/api/models/variants/magnetic/LandauIntegrals.md |
@@ -254,7 +254,7 @@
 | `normalize_selector_candidates` | src/models/exports_public.jl | 59 | 0 | - |
 | `nth_derivative` | src/models/exports_public.jl | 34 | 0 | - |
 | `number_densities` | src/models/exports_public.jl | 5 | 8 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md |
-| `omega` | src/models/exports_public.jl | 17 | 22 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/CrossoverMesonDensityScan.md |
+| `omega` | src/models/exports_public.jl | 17 | 23 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/CrossoverMesonDensityScan.md |
 | `omega0_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `omega_components` | src/models/exports_public.jl | 17 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md |
 | `omegat_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
@@ -290,6 +290,7 @@
 | `run_gas_liquid_tmu_scan` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
 | `run_gas_liquid_trho_scan` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
 | `run_isentropic_meson_mass_scan` | src/models/Models.jl | 25 | 3 | docs/api/models/scans/MesonMassPathScan.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
+| `run_magnetic_scan` | src/models/Models.jl | 21 | 4 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/scans/README.md<br>docs/api/models/variants/magnetic/Overview.md |
 | `run_meson_mass_path_scan` | src/models/Models.jl | 23 | 2 | docs/api/models/scans/MesonMassPathScan.md<br>docs/api/models/scans/README.md |
 | `run_phase_pipeline` | src/models/Models.jl | 50 | 8 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Crossover.md<br>docs/api/models/phase/Overview.md |
 | `run_phase_pipeline_via_runner` | src/models/exports_public.jl | 108 | 1 | docs/api/models/workflows/PhasePipeline.md |
@@ -300,8 +301,8 @@
 | `run_production_phase_pipeline` | src/models/Models.jl | 50 | 3 | docs/api/models/phase/Algorithms.md<br>docs/api/models/phase/Overview.md<br>docs/api/models/phase/README.md |
 | `run_relaxtime_orchestrator_pipeline` | src/models/Models.jl | 48 | 1 | docs/api/relaxtime/workflow/TransportWorkflow.md |
 | `run_scan_pipeline` | src/models/Models.jl | 48 | 2 | docs/api/data_contracts.md<br>docs/api/models/workflows/Overview.md |
-| `run_tmu_scan` | src/models/Models.jl | 21 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/FreezeoutScan.md |
-| `run_trho_scan` | src/models/Models.jl | 21 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
+| `run_tmu_scan` | src/models/Models.jl | 21 | 9 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/FreezeoutScan.md |
+| `run_trho_scan` | src/models/Models.jl | 21 | 9 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
 | `run_workflow_pipeline` | src/models/Models.jl | 48 | 1 | docs/api/models/workflows/Overview.md |
 | `scan_pipeline_stage_ids` | src/models/exports_public.jl | 109 | 0 | - |
 | `schema_for` | src/models/exports_public.jl | 69 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md |
@@ -309,7 +310,7 @@
 | `select_pressure_max_candidate` | src/models/exports_public.jl | 43 | 1 | docs/api/models/solver/README.md |
 | `smooth_cutoff` | src/models/exports_public.jl | 85 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `solution_dim` | src/models/exports_public.jl | 52 | 0 | - |
-| `solve` | src/models/exports_public.jl | 45 | 59 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
+| `solve` | src/models/exports_public.jl | 45 | 60 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/README.md<br>docs/api/data_contracts.md |
 | `solve_constraint` | src/models/exports_public.jl | 44 | 5 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/solver/README.md |
 | `solve_gap` | src/models/exports_public.jl | 22 | 27 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/FreezeoutMesonDensityScan.md |
 | `solve_gap_and_meson_density_point` | src/models/Models.jl | 32 | 4 | docs/api/models/scans/FreezeoutMesonDensityScan.md<br>docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md |
@@ -322,7 +323,7 @@
 | `solve_gap_and_transport` | src/models/Models.jl | 31 | 10 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/Overview.md |
 | `solve_gas_liquid_point` | src/models/Models.jl | 41 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
 | `solve_gas_liquid_rmf_point` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
-| `solve_magnetic_gap` | src/models/exports_public.jl | 11 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `solve_magnetic_gap` | src/models/exports_public.jl | 11 | 4 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `solve_meson_density_from_meson_point` | src/models/Models.jl | 32 | 3 | docs/api/models/workflows/MesonDensityWorkflow.md<br>docs/api/models/workflows/README.md<br>docs/api/relaxtime/workflow/MesonDensityWorkflow.md |
 | `solve_meson_point_from_equilibrium` | src/models/Models.jl | 32 | 8 | docs/api/models/scans/Overview.md<br>docs/api/models/workflows/CoreConcepts.md<br>docs/api/models/workflows/MesonDensityWorkflow.md |
 | `solve_meson_thermo_from_meson_point` | src/models/Models.jl | 37 | 1 | docs/api/models/workflows/MesonThermoWorkflow.md |
