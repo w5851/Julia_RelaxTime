@@ -7,6 +7,8 @@ export NJLModel
 export NJL2Model
 export PNJLModel
 export PNJLMagneticModel
+export MagneticGapCandidate, MagneticGapResult
+export magnetic_gap_residual, solve_magnetic_gap
 export RPNJLModel
 export RotationModel
 export create_model

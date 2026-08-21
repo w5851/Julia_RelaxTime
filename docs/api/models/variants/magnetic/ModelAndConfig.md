@@ -11,9 +11,10 @@
 - `base::PNJLModel`
 - `magnetic::MagneticConfig`
 
-它的职责不是重写整套求解链，而是：
+它的职责是：
 
-- 复用零磁场 PNJL 的稳定 gap 解路径
+- 零场极限复用 PNJL 兼容路径
+- 非零磁场把磁场 `Omega` 接入五维、多 seed 的 branch-aware gap solver
 - 把 magnetic 配置与磁场热力学能力接入 `Models` 聚合表面
 
 ## `MagneticIMCParams`
@@ -55,6 +56,13 @@
 - `mu_vec`：3 维，`(mu_u, mu_d, mu_s)`
 - `T_fm`、`mu_vec`、质量、动量：`fm^-1`
 - `eB_fm2`：`fm^-2`
+
+`solve_magnetic_gap` 要求有限且 `T_fm > 0`，当前只允许 `xi=0`。`MagneticGapResult.candidates` 保存去重后的多分支候选；未启用稳定性分类时标准 `solve_gap` 按已找到候选中的最低 `Omega` 返回 `MeanFieldState`，但不提供局部稳定性证明。启用 `classify_stability=true` 只增加有限差分 Hessian 诊断标签；该标签不是 PNJL 默认生产过滤条件，所有可行候选仍应保留供分支策略使用。
+
+非零 `eB` 时，`model_capabilities(model).supports_number_densities` 为 `false`：通用
+模型接口要求独立的 `quark`/`antiquark` 密度，而磁场适配器只提供
+`calculate_magnetic_number_densities(...).net` 净密度。`eB≈0` 时恢复普通 PNJL 的
+独立密度 capability；这不影响磁场专用密度 API 的可调用性。
 
 ## 配置模板
 

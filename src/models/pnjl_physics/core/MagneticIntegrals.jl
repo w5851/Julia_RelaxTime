@@ -33,6 +33,7 @@ export density_flavor_landau
 const QUARK_CHARGE_ABS = SVector{3, Float64}(2 / 3, 1 / 3, 1 / 3)
 const _PZ_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
 const _LOG_EPS = 1e-16
+const _EXP_LIMIT = 745.0
 
 @inline alpha_n(n::Integer) = n == 0 ? 1.0 : 2.0
 
@@ -58,18 +59,31 @@ end
     return log(max(float(x), _LOG_EPS))
 end
 
-@inline function _log_polyakov_pair(E::Real, mu::Real, T::Real, Φ::Real, Φbar::Real)
+@inline function _scaled_polyakov_terms(x::Real, Φ::Real, Φbar::Real)
+    # Scale the four polynomial terms before exponentiating. This avoids
+    # overflow at low T while preserving both the log and its mu derivative.
+    m = max(0.0, x, 2 * x, 3 * x)
+    e1 = exp(clamp(x - m, -_EXP_LIMIT, 0.0))
+    e2 = exp(clamp(2 * x - m, -_EXP_LIMIT, 0.0))
+    e3 = exp(clamp(3 * x - m, -_EXP_LIMIT, 0.0))
+    terms = (exp(-m), 3 * Φ * e1, 3 * Φbar * e2, e3)
+    return m, terms
+end
+
+@inline function _polyakov_log_and_net_density(E::Real, mu::Real, T::Real, Φ::Real, Φbar::Real)
     a = -(E - mu) / T
     b = -(E + mu) / T
-    e1a = exp(a)
-    e2a = e1a * e1a
-    e3a = e2a * e1a
-    e1b = exp(b)
-    e2b = e1b * e1b
-    e3b = e2b * e1b
-    f_plus = 1 + 3 * Φ * e1a + 3 * Φbar * e2a + e3a
-    f_minus = 1 + 3 * Φbar * e1b + 3 * Φ * e2b + e3b
-    return _safe_log(f_plus) + _safe_log(f_minus)
+    ma, plus = _scaled_polyakov_terms(a, Φ, Φbar)
+    mb, minus = _scaled_polyakov_terms(b, Φbar, Φ)
+    f_plus = max(sum(plus), _LOG_EPS)
+    f_minus = max(sum(minus), _LOG_EPS)
+    plus_mu = (plus[2] + 2 * plus[3] + 3 * plus[4]) / f_plus
+    minus_mu = (minus[2] + 2 * minus[3] + 3 * minus[4]) / f_minus
+    return ma + log(f_plus) + mb + log(f_minus), plus_mu - minus_mu
+end
+
+@inline function _log_polyakov_pair(E::Real, mu::Real, T::Real, Φ::Real, Φbar::Real)
+    return first(_polyakov_log_and_net_density(E, mu, T, Φ, Φbar))
 end
 
 function resolve_nmax_from_cutoff(mass::Real, mu::Real, q_abs::Real, eB::Real; Λ::Real=Λ_inv_fm)
@@ -158,17 +172,17 @@ function density_flavor_landau(
     T <= 1e-12 && return 0.0
     abs(q_abs * eB) <= 1e-14 && return 0.0
 
-    pref = 3.0 * abs(q_abs * eB) / (2 * π)
+    # The Polyakov polynomial already contains the color trace. Its mu
+    # derivative therefore carries the color factor and the prefactor is the
+    # Landau phase-space measure only.
+    pref = abs(q_abs * eB) / (2 * π)
     total = 0.0
     @inbounds for n in 0:n_max
         an = alpha_n(n)
         int_val = _integrate_pz_even(p_num, pz_max) do pz
             E = energy_landau(mass, pz, n, q_abs, eB)
-            x = (E - mu) / T
-            y = (E + mu) / T
-            fq = inv(1 + exp(3 * x))
-            fa = inv(1 + exp(3 * y))
-            fq - fa
+            _, net = _polyakov_log_and_net_density(E, mu, T, Φ, Φbar)
+            net
         end
         total += an * int_val / (2 * π)
     end
@@ -176,4 +190,3 @@ function density_flavor_landau(
 end
 
 end # module MagneticIntegrals
-

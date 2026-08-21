@@ -48,7 +48,24 @@ const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
 
         nd = calculate_magnetic_number_densities(x_state, mu_vec, T_fm, conf)
         @test all(isfinite.(nd.quark))
+        @test nd.net === nd.quark
+        @test nd.antiquark === nothing
         @test isfinite(nd.baryon)
+        @test nd.quark ≈ rho rtol=5e-8 atol=1e-10
+
+        rho_minus = calculate_magnetic_rho(x_state, -mu_vec, T_fm, conf)
+        @test rho_minus ≈ -rho rtol=5e-8 atol=1e-10
+    end
+
+    @testset "magnetic control contract" begin
+        x_state = SVector{5, Float64}(-0.03, -0.03, -0.04, 0.2, 0.2)
+        mu_vec = SVector{3, Float64}(0.4, 0.4, 0.4)
+        conf = MagneticConfig(eB_fm2=0.08, p_num=24, pz_max=10.0)
+        @test_throws ArgumentError calculate_magnetic_omega_components(x_state, mu_vec, 0.0, conf)
+        @test_throws ArgumentError calculate_magnetic_omega_components(x_state, mu_vec, 0.7, conf; xi=0.2)
+        comp_low = calculate_magnetic_omega_components(x_state, mu_vec, 0.7, conf;
+            p_num=4, t_num=4, pz_max=5.0, n_max=1)
+        @test isfinite(comp_low.omega)
     end
 
     @testset "magnetic omega components" begin

@@ -40,6 +40,9 @@
 
 若你只需要最终热力学量，优先使用它们，而不是直接调用 Landau 低层函数。
 
+`calculate_magnetic_pressure=-Omega` 只表示固定外部磁场背景下的标量物质压力；当前
+没有 Maxwell 自能、磁化强度或横向/纵向压力张量输出。
+
 ## `calculate_magnetic_rho`
 
 通过数值导数路径计算 flavor 相关密度。它更偏进阶入口，使用时应注意步长与数值敏感区的影响。
@@ -49,9 +52,20 @@
 返回：
 
 - `quark`
+- `net`
+- `antiquark = nothing`（磁场路线不单独输出夸克/反夸克两支）
 - `baryon`
 
-适合固定点、扫描脚本或回归基线中直接消费。
+其中 `quark` 是为兼容历史脚本保留的字段名，正式语义与 `net` 相同，表示
+`q - qbar` 净密度；`baryon` 由三味净密度求和得到。该返回值不满足普通 PNJL
+`(quark, antiquark)` 的独立分量合同，不应直接传入需要独立反夸克占据数的输运路径。
+这是非零 `eB` 的 magnetic core 语义；模型适配器在 `eB≈0` 时转回普通 PNJL 的
+独立 `quark/antiquark` 结果。
+
+因此非零 `eB` 的 `PNJLMagneticModel` 会将通用
+`supports_number_densities` capability 标为 `false`，避免该结果被普通输运路径误接；
+这不撤销专用 `calculate_magnetic_number_densities` API。
+适合磁场固定点、扫描脚本或回归基线中直接消费。
 
 ## `magnetic_nmax_convergence_report`
 

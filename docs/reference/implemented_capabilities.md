@@ -1,7 +1,7 @@
 # 已实现计算能力与方法追踪清单
 
-> 快照日期：2026-08-18
-> 审计基线：`origin/main@ccc13a837c38443b92203f0c4973842c4823f54e`
+> 快照日期：2026-08-20
+> 审计基线：`origin/main@eb9414b855ef495ff84f694f1b071a52696992ef`；本次 magnetic 语义候选在隔离工作树 `codex/core-algorithm-perf-ab@6697feddd1c6382955727b93881b68569c165779` 上复核，尚未进入主工作树。
 > 权威聚合入口：[`src/models/Models.jl`](../../src/models/Models.jl) 与 [`src/models/entrypoints.jl`](../../src/models/entrypoints.jl)
 > 用途：论文/毕业答辩的方法索引、开发者路线图、数值产物审计入口
 > 边界：本页记录“仓库已经实现什么、如何计算、证据到哪一层”，不把 smoke、内部回归或已有产物自动解释为外部物理验证。
@@ -139,7 +139,7 @@ $$
 | NJL2 | 2 | 同上 | 两味模型；第三味 `mu_s` 仅兼容占位，不应作三味物理解读 | `test_njl2_core.jl`、`test_njl2_omega.jl` |
 | PNJL | 5 | 完整公共主链 | 当前相图、导数、介子、输运的 canonical 背景 | unit + integration + regression + validation |
 | RPNJL | 5 | 同构 gap/Omega/热力学 | 八夸克项 + Vandermonde 项；有 fixed-point regression | `test_rpnjl_model.jl`、`test_rpnjl_gap_fixedpoint_regression.jl` |
-| PNJLMagnetic | 5 | 同构模型 + magnetic API | Landau 能级、`eB`、`n_max` 收敛；不等于普通 PNJL 的 RS 路线 | magnetic unit/regression；见第 14 节 |
+| PNJLMagnetic | 5 | 五维 magnetic equilibrium + magnetic API | Landau 能级、`eB`、`n_max` 收敛；非零 `eB` 的密度为专用净密度，不满足普通独立 `quark/antiquark` 输运合同；不等于普通 PNJL 的 RS 路线 | magnetic unit/regression；见第 14 节 |
 | Rotation | 3 | 单点 gap/热力学 workflow | 最小旋转 PNJL 核；见第 15 节 | unit + integration smoke |
 | GasLiquid | 4 | 单点 workflow、同构接口、diagnostic RMF core | `f_i`/四场/统一 EOS/T-mu/T-rho 已实现；尚未达到 formal production；见第 16 节 | GasLiquid unit/integration + RMF unit/integration/regression/validation |
 
@@ -721,7 +721,7 @@ phase reference / direct coexistence anchor
 eB + magnetic config
 -> Landau levels and smooth cutoff
 -> Omega_vac(B) + Omega_T(B)
--> 5D gap solve
+-> 5D magnetic stationarity (required by the source model)
 -> pressure/densities + n_max convergence report
 -> point/eB/stability scan
 ```
@@ -737,7 +737,7 @@ $$
 
 $$
 \Omega_f^0=-N_c\frac{|q_f|eB}{2\pi}\sum_n\alpha_n
-\int\frac{dp_z}{2\pi}f_\Lambda^2E_{f,n},
+\int\frac{dp_z}{2\pi}f_\Lambda^2(p_{f,n})E_{f,n},
 $$
 
 $$
@@ -752,12 +752,44 @@ G(B)=G_0\frac{1+a\zeta^2+b\zeta^3}{1+c\zeta^2+d\zeta^4},
 \qquad \zeta=eB/\Lambda_{QCD}^2.
 $$
 
-来源：高雪艳博士论文第 5.1 节，仓库映射见 [`PNJL_magnetic_core.md`](formula/models/pnjl_magnetic/PNJL_magnetic_core.md)。
+磁场巨势还包含
 
-- **公共 API**：`PNJLMagneticModel`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。
-- **domain-candidate CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl`。
-- **证据**：magnetic unit、thermodynamics unit、fixed-point regression。
-- **边界**：Landau `n_max`、平滑截断与 `eB` 分辨率必须单独收敛；不能套用 RS 标量热核的 quadrature 结论。
+$$
+\Omega=\sum_{f=u,d,s}(\Omega_f^0+\Omega_f^T)
++2G(eB)\sum_f\phi_f^2-4K\phi_u\phi_d\phi_s+U(\Phi,\bar\Phi,T),
+$$
+
+磁场路线沿用第 2 章的对数 Polyakov 势和动力学质量关系：
+
+$$
+\frac{U(\Phi,\bar\Phi;T)}{T^4}
+=-\frac{a(T)}{2}\bar\Phi\Phi
++b(T)\ln\left[1-6\bar\Phi\Phi+4(\bar\Phi^3+\Phi^3)-3(\bar\Phi\Phi)^2\right],
+$$
+
+$$
+a(T)=a_0+a_1\frac{T_0}{T}+a_2\left(\frac{T_0}{T}\right)^2,
+\qquad b(T)=b_3\left(\frac{T_0}{T}\right)^3,
+\qquad M_i=m_i-4G(eB)\phi_i+2K\phi_j\phi_k.
+$$
+
+一般温度的逐味密度按式(5-10)--(5-12)由 Landau level 上的夸克/反夸克 Polyakov 分布积分得到；当 `Phi≈PhiBar≈0` 且温度足够低时，才可使用式(5-13)的三夸克近似。五个平均场变量的候选平衡条件是
+
+$$
+\partial_{(\phi_u,\phi_d,\phi_s,\Phi,\bar\Phi)}\Omega=0.
+$$
+
+完整密度路线来自论文式(5-10)--(5-12)，低温禁闭近似来自式(5-13)；五变量平衡条件和对数 Polyakov 势来自第 2 章式(2-50)--(2-63)。固定化学势约定为 `mu_u=mu_d=mu_s`。完整公式和逐式来源见 [`PNJL_magnetic_core.md`](formula/models/pnjl_magnetic/PNJL_magnetic_core.md)；开发者逐项审核表见该文档的“开发者审核表：公式到实现的对应关系”一节。
+
+来源核验范围：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》第 2.2 节印刷页 21--24、第五章第 5.1 节印刷页 65--68。原文有符号/排版不一致（式(2-63)重复 `phi_u`，式(5-10)导数符号与式(2-65)冲突，式(5-11)使用带符号 `q_f B`），所以本页不把这些冲突字符升级为无条件代码合同。
+
+- **公共 API**：`PNJLMagneticModel`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。模型适配器在 `eB≈0` 时报告普通独立 `quark/antiquark` capability；非零 `eB` 时仅报告磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
+- **domain-candidate CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl`；这些脚本当前仍是固定 `x_state` 的内核/收敛诊断入口，不应解释为已经运行完整五维 equilibrium。
+- **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。
+- **当前实现边界**：非零 `eB` 的 `PNJLMagneticModel.solve_gap` 通过 `solve_magnetic_gap` 对磁场 `Omega` 的五维驻点做多 seed 求解，并以候选集合保留分支、残差、`n_max` 和可选 Hessian 稳定性标签；普通 `solve_gap` 在未启用稳定性分类时按已找到候选中的最低 `Omega` 选择一个 convenience state，但 branch-aware API 仍保留全部可行候选。`classify_stability=true` 只启用有限差分 Hessian 诊断/显式研究策略，不是 PNJL 系列模型的默认生产过滤条件；`saddle_or_maximum` 标签不能单独否定一个已收敛驻点。`T_fm` 必须为正，磁场模型只接受 `xi=0`；`eB -> 0` 继续走零场兼容路径。非零 `eB` 的 `calculate_magnetic_rho` 与 `calculate_magnetic_number_densities` 共用含 `Phi/PhiBar` 的净密度语义，后者的 `net` 和历史 `quark` 字段均表示 `q-qbar`，`antiquark` 明确为 `nothing`；该结果不是普通 PNJL 的独立夸克/反夸克输运输入，且模型 capability 会将通用 `number_densities` 标为不支持；需要磁场密度时应调用专用 API，不再把低温近似冒充一般温度密度。模型适配器在 `eB≈0` 时恢复普通 PNJL 的独立 `quark/antiquark` 数密度与 capability。共享 `solve_constraint`/ProblemSpec 约束链目前显式拒绝 `PNJLMagneticModel`，避免把普通 PNJL residual 误用于磁场；磁场完整平衡态入口是 `solve_magnetic_gap`。
+- **数值边界**：生产路径使用预先验证的保守 `n_max`、`p_z_max`、平滑截断和 `eB` 分辨率配置；收敛报告用于代表性极端点和发布前数值审计，不要求每个生产点重复验证。论文的低温占据 `n_max` 估计不等同于真空项的 cutoff-based 求和上限；`p_num/pz_max/rtol` 等为实现参数，不能从论文公式推断。不能套用 RS 标量热核的 quadrature 结论。
+- **外场能量边界**：当前 `omega/pressure` 是固定外部磁场背景下的物质巨势/压力，只组装式(5-2)中的夸克 Landau 项、手征项和 Polyakov 势；拉格朗日量中的外部 Maxwell 项不作为独立的 `B^2/2` 能量加入输出。因此这些量不能直接解释为包含电磁场自能的总 EOS，若未来需要该口径必须新增显式、版本化的 Maxwell 选项并重新验证压力、能量和相平衡。
+- **压力方向边界**：`calculate_magnetic_pressure=-Omega` 当前只定义固定外部 `B` 背景下的标量物质压力；代码没有磁化强度导数、横向/纵向压力拆分或磁场介质自洽 EOS。不能把该标量直接解释为包含磁化各向异性的完整压力张量。
 
 ## 15. 路线 M：Rotation-PNJL
 
