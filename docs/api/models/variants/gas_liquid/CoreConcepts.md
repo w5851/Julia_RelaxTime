@@ -21,9 +21,17 @@ gas_liquid 代表 RMF/Walecka 路径下的一条模型变体分支：
   - 承载平衡求解、有效质量与热力学量计算
   - 供适配层和 workflow 复用
 
+RMF 核心状态保存 `(S,D,mu_p_star,mu_n_star)`，其中 `S/D` 是场贡献；
+`W/R` 由 `f_omega*rho_B` 和 `f_rho*rho_3` 生成。`f_i` 始终表示
+`g_i^2/m_i^2`，旧 `g_i=f_i*m_i` 解释只在历史文档中保留，不是当前 API 语义。
+
 ## 3. workflow 的语义边界
 
 `solve_gas_liquid_point` 是对外稳定入口，负责把模型求解和可观测量组织成统一结果结构。
+
+`solve_gas_liquid_rmf_point`、`run_gas_liquid_tmu_scan` 和
+`run_gas_liquid_trho_scan` 是 RMF diagnostic workflow；每行包含 solver
+status、失败原因、场贡献、核子密度和 quadrature 设置。
 
 新调用方优先使用该入口，而不是直接耦合 core 层函数。
 

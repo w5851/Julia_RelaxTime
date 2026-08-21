@@ -25,6 +25,7 @@ const VALIDATION_SMOKE_FILES = [
     joinpath(VALIDATION_DIR, "relaxtime", "test_mott_reference_mapping.jl"),
     joinpath(VALIDATION_DIR, "relaxtime", "test_legacy_meson_solver_status_layered.jl"),
     joinpath(VALIDATION_DIR, "relaxtime", "test_meson_density_literature_targets_smoke.jl"),
+    joinpath(VALIDATION_DIR, "models", "test_gas_liquid_rmf_formula_mapping.jl"),
 ]
 
 const VALIDATION_CORE_FILES = [

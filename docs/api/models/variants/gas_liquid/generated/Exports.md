@@ -4,16 +4,21 @@
 
 - Source module files: `src/models/Models.jl`
 - Generated page: `docs/api/models/variants/gas_liquid/generated/Exports.md`
-- Exported symbol count: 2
-- Mentioned in non-generated docs/api pages: 2
-- Topic filter: `GasLiquidModel`, `solve_gas_liquid_point`
+- Exported symbol count: 7
+- Mentioned in non-generated docs/api pages: 7
+- Topic filter: `GasLiquidModel`, `solve_gas_liquid_point`, `solve_gas_liquid_rmf_point`, `run_gas_liquid_tmu_scan`, `run_gas_liquid_trho_scan`, `build_gas_liquid_result_row`, `build_gas_liquid_manifest`
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
-| `GasLiquidModel` | src/models/Models.jl | 28 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
-| `solve_gas_liquid_point` | src/models/Models.jl | 92 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `GasLiquidModel` | src/models/Models.jl | 42 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `build_gas_liquid_manifest` | src/models/Models.jl | 44 | 1 | docs/api/models/variants/gas_liquid/README.md |
+| `build_gas_liquid_result_row` | src/models/Models.jl | 44 | 1 | docs/api/models/variants/gas_liquid/README.md |
+| `run_gas_liquid_tmu_scan` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
+| `run_gas_liquid_trho_scan` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
+| `solve_gas_liquid_point` | src/models/Models.jl | 41 | 3 | docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md<br>docs/api/models/variants/gas_liquid/README.md |
+| `solve_gas_liquid_rmf_point` | src/models/Models.jl | 43 | 4 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/gas_liquid/Overview.md |
 
 ## Undocumented Or Not Yet Mentioned
 

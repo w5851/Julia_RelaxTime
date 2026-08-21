@@ -4,7 +4,7 @@
 
 推荐阅读顺序：
 
-1. [Overview.md](Overview.md)：先看 `GasLiquidModel`、`solve_gas_liquid_point` 与最短调用路径
+1. [Overview.md](Overview.md)：先看 `GasLiquidModel`、`solve_gas_liquid_point`、RMF 单点和扫描入口
 2. [CoreConcepts.md](CoreConcepts.md)：理解模型适配层与气液核心方程层职责边界
 3. [generated/Exports.md](generated/Exports.md)：自动生成的公开导出全集
 
@@ -12,6 +12,9 @@
 
 - `GasLiquidModel`
 - `solve_gas_liquid_point`
+- `solve_gas_liquid_rmf_point`
+- `run_gas_liquid_tmu_scan` / `run_gas_liquid_trho_scan`
+- `build_gas_liquid_result_row` / `build_gas_liquid_manifest`
 
 说明：
 

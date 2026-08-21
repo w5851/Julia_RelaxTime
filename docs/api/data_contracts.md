@@ -1079,3 +1079,19 @@ result = calculate_thermodynamics(model, quark_params, thermo_params)
 - 参数类型API文档：`docs/api/PARAMETER_TYPES_API.md`
 - 错误处理指南：`docs/guides/error_handling.md`
 - 迁移指南：`docs/guides/PARAMETER_STRUCT_MIGRATION.md`
+## GasLiquid RMF row contract
+
+`Models.solve_gas_liquid_rmf_point`, `Models.run_gas_liquid_tmu_scan` and
+`Models.run_gas_liquid_trho_scan` return rows with schema
+`gas_liquid_rmf_row_v1`. The row exposes physical/effective `mu_p/n`,
+proton/neutron and baryon/isovector density fields, `S/D/W/R` field contributions, effective masses, full
+`Omega/pressure/entropy/energy`, quadrature settings and explicit solver
+failure status. Energies and chemical potentials in `*_MeV` fields are MeV;
+densities are `fm^-3`; field contributions and thermodynamic densities use
+natural-unit `fm^-1`/`fm^-4` as named. `formal_status` defaults to
+`diagnostic_only` and is not a production authorization.
+
+The accompanying `gas_liquid_rmf_manifest_v1` records profile, effective
+configuration hash, source matrix IDs, scan grid, solver/quadrature settings,
+row counts and failed point IDs. Missing values are represented by explicit
+failure rows rather than silently dropped points.
