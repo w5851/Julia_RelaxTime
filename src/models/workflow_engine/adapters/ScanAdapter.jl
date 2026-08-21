@@ -154,7 +154,9 @@ function run_scan_pipeline_adapter(kind::Symbol; kwargs...)
     output_dir = resolve_adapter_output_dir(scan_kwargs, (:output_dir, :output_path); path_keys=(:output_path,))
     manifest_path = joinpath(output_dir, "run_manifest.json")
     run_id = basename(normpath(output_dir))
-    model_kind = hasproperty(scan_kwargs, :model_kind) ? Symbol(getproperty(scan_kwargs, :model_kind)) : :PNJL
+    model_kind = hasproperty(scan_kwargs, :model_kind) ?
+        Symbol(getproperty(scan_kwargs, :model_kind)) :
+        (kind === :magnetic ? :PNJLMagnetic : :PNJL)
 
     ctx = PipelineContext(
         Dict{Symbol, Any}(

@@ -1,7 +1,7 @@
 # 已实现计算能力与方法追踪清单
 
-> 快照日期：2026-08-20
-> 审计基线：`origin/main@eb9414b855ef495ff84f694f1b071a52696992ef`；本次 magnetic 语义候选在隔离工作树 `codex/core-algorithm-perf-ab@6697feddd1c6382955727b93881b68569c165779` 上复核，尚未进入主工作树。
+> 快照日期：2026-08-21
+> 审计基线：`origin/main@85ceccad19fb361fd2ba5f69afd8f509fd3ab9f3`；本次 magnetic 语义、production adapter 和文档收尾位于隔离工作树 `codex/core-algorithm-perf-ab`，当前 HEAD 见 Git provenance，尚未进入主工作树。
 > 权威聚合入口：[`src/models/Models.jl`](../../src/models/Models.jl) 与 [`src/models/entrypoints.jl`](../../src/models/entrypoints.jl)
 > 用途：论文/毕业答辩的方法索引、开发者路线图、数值产物审计入口
 > 边界：本页记录“仓库已经实现什么、如何计算、证据到哪一层”，不把 smoke、内部回归或已有产物自动解释为外部物理验证。
