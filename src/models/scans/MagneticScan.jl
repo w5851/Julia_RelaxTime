@@ -266,7 +266,6 @@ function run_magnetic_scan(
     finite_difference_step::Real=1e-5,
     root_merge_tol::Real=1e-5,
     classify_stability::Bool=false,
-    include_default_seeds::Bool=true,
     progress_cb::Union{Nothing, Function}=nothing,
 )
     _validate_magnetic_scan_inputs(
@@ -343,7 +342,7 @@ function run_magnetic_scan(
                                     finite_difference_step=finite_difference_step,
                                     root_merge_tol=root_merge_tol,
                                     classify_stability=classify_stability,
-                                    include_default_seeds=include_default_seeds,
+                                    include_default_seeds=true,
                                 )
                                 candidate = result.candidates[result.selected_index]
                                 thermo = model_thermo(

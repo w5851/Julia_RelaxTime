@@ -196,8 +196,6 @@ function _parse_magnetic_args(args::Vector{String})
             kwargs[:iterations] = parse(Int, value)
         elseif key == "classify_stability"
             kwargs[:classify_stability] = _parse_bool(value, key)
-        elseif key == "include_default_seeds"
-            kwargs[:include_default_seeds] = _parse_bool(value, key)
         else
             throw(ArgumentError("unknown scan magnetic option: --$(key)"))
         end
