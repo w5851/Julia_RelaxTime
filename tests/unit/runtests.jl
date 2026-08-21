@@ -79,6 +79,7 @@ const CORE_SMOKE_FILES = [
 
     # [Models] 模型子系统（工厂/配置/工具）
     joinpath(UNIT_DIR, "models", "test_njl_model_factory.jl"),
+    joinpath(UNIT_DIR, "models", "test_gas_liquid_rmf_core.jl"),
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
     joinpath(UNIT_DIR, "models", "test_adaptive_rho_refinement.jl"),
     joinpath(UNIT_DIR, "models", "test_rho_support_refinement.jl"),

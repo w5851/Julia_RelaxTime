@@ -50,6 +50,7 @@ const CORE_SMOKE_FILES = [
     # Models: one fixed-point + one contract semantic guard
     joinpath(REGRESSION_DIR, "models", "test_dimension_agnostic_solver_regression.jl"),
     joinpath(REGRESSION_DIR, "models", "test_solver_contract_regression.jl"),
+    joinpath(REGRESSION_DIR, "models", "test_gas_liquid_rmf_symmetric_regression.jl"),
 
     # RelaxTime: transport fixed-point + workflow consistency
     joinpath(REGRESSION_DIR, "relaxtime", "test_transport_fixedpoint_regression.jl"),

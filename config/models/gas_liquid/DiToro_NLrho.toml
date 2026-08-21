@@ -1,0 +1,15 @@
+[model]
+# Diagnostic NLrho profile aligned with Di Toro et al. NPA 775 (2006).
+# Coupling ratios are f_i = g_i^2 / m_i^2 in fm^2.
+m_nucleon_MeV = 939.0
+m_sigma_MeV = 500.0
+m_omega_MeV = 783.0
+m_rho_MeV = 770.0
+m_delta_MeV = 983.0
+f_sigma = 10.329
+f_omega = 5.423
+f_rho = 0.95
+f_delta = 0.0
+b = 0.00692
+c = -0.0048
+hbarc_MeV_fm = 197.3269804

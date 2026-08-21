@@ -9,7 +9,6 @@ export PNJLModel
 export PNJLMagneticModel
 export RPNJLModel
 export RotationModel
-export GasLiquidModel
 export create_model
 export get_cached_model, clear_model_cache!
 export register_model!, unregister_model!, registered_model_kinds

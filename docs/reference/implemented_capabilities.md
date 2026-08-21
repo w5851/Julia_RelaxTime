@@ -70,7 +70,7 @@ $$
 | K. phase-guided transport | 相线附近两种采样路线的输运产物 | `run_phase_guided_transport_scan.jl` | 专题生产流程；formal case 仅覆盖命名参数集。 |
 | L. 外磁场 PNJL | Landau 能级热力学、`eB` 扫描 | magnetic API/专题脚本 | 公共 API + domain-candidate + 固定点回归。 |
 | M. Rotation-PNJL | `(T,mu,omega)` 单点热力学 | `Models.solve_rotation_point` | 可运行最小核 + unit/integration smoke。 |
-| N. GasLiquid/RMF | `(T,mu)` 单点壳与热力学读出 | `Models.solve_gas_liquid_point` | 可运行接口壳；核心 RMF 参数化/自洽方程仍未完成。 |
+| N. GasLiquid/RMF | 兼容 `(T,mu)` 单点；diagnostic RMF `T-mu/T-rho` EOS rows | `Models.solve_gas_liquid_point`、`solve_gas_liquid_rmf_point`、`run_gas_liquid_tmu_scan`、`run_gas_liquid_trho_scan` | 核心四场/热力学/契约已实现并有分层 smoke；完整外部 validation/refinement/formal production 仍未完成。 |
 | O. 工作流、manifest、HTTP | 声明式 pipeline、后台 job、API JSON | `run_*_pipeline`、`server_full.jl` | 稳定服务入口；适合联调，不代表全部物理域验收。 |
 
 ## 3. 路线 A：公共模型与平衡态底座
@@ -141,7 +141,7 @@ $$
 | RPNJL | 5 | 同构 gap/Omega/热力学 | 八夸克项 + Vandermonde 项；有 fixed-point regression | `test_rpnjl_model.jl`、`test_rpnjl_gap_fixedpoint_regression.jl` |
 | PNJLMagnetic | 5 | 同构模型 + magnetic API | Landau 能级、`eB`、`n_max` 收敛；不等于普通 PNJL 的 RS 路线 | magnetic unit/regression；见第 14 节 |
 | Rotation | 3 | 单点 gap/热力学 workflow | 最小旋转 PNJL 核；见第 15 节 | unit + integration smoke |
-| GasLiquid | 4 | 单点 workflow 与同构接口 | 当前是可运行壳，非完整 RMF 自洽实现；见第 16 节 | unit + integration smoke，仅接口级 |
+| GasLiquid | 4 | 单点 workflow、同构接口、diagnostic RMF core | `f_i`/四场/统一 EOS/T-mu/T-rho 已实现；尚未达到 formal production；见第 16 节 | GasLiquid unit/integration + RMF unit/integration/regression/validation |
 
 代码事实源：[`factory.jl`](../../src/models/factory.jl)、[`test_model_interface_homomorphism.jl`](../../tests/unit/models/test_model_interface_homomorphism.jl)。稳定全功能路线仍以 PNJL 为主；“工厂可构造”不能外推成“所有下游 workflow 对所有模型均物理完备”。
 
@@ -799,20 +799,29 @@ $$
 
 ### 16.2 当前真实实现边界
 
-当前仅应声称：
+文档声明（历史状态）曾将本路线标为接口壳；当前源码和测试证据已增加一个
+独立的 diagnostic RMF 核心，但这不等价于 formal production：
 
 - `GasLiquidModel` 可构造；
 - `solve_gas_liquid_point` 可运行并返回结构化 `pressure/rho/entropy/energy`；
-- 有 unit 与 integration smoke 保持接口同构。
+- `GasLiquidCoreParams` 明确 `f_i=g_i^2/m_i^2`，并提供 `DiToro_NLrho`、
+  `DiToro_NLrhoDelta`、`Thesis_NLrho` 三个 diagnostic profile；
+- `GasLiquidEquationSet` 已实现稳定粒子/反粒子积分、sigma/omega/rho/delta
+  场闭环、固定 `T-mu` 与固定 `T-rho` 求解诊断；
+- `GasLiquidThermodynamics` 已从统一 Omega 读出 `P/s/epsilon`，熵含粒子和反粒子项；
+- `solve_gas_liquid_rmf_point`、`run_gas_liquid_tmu_scan`、
+  `run_gas_liquid_trho_scan` 已返回版本化 row/manifest，默认 `diagnostic_only`；
+- unit/integration/regression/validation 文件覆盖耦合比、对称基线、最小非对称 delta
+  闭环和公式映射。
 
-当前不能声称完整 RMF 物理实现，因为：
+尚未验证、因此不能声称 formal RMF 生产结果的部分：
 
-- 缺少完整 `g_omega/g_rho/m_sigma/m_omega/m_rho/m_delta` 参数集；
-- `sigma` 仍由人工 `tanh` target 驱动，不是完整场方程自洽解；
-- 热力学读出是代数近似，不是从 `Omega_RMF` 积分统一导出；
-- `mu_p/mu_n` 默认未实现同位旋分裂。
+- 外部文献数值点的独立复现、完整网格收敛与 refinement 仍未完成；
+- `rho_i=partial P/partial mu_i`、`s=partial P/partial T` 的偏导检查尚未形成生产 gate；
+- profile 物理范围、饱和性质和 compression 尚未人工审阅并晋升 baseline；
+- Fortran 输出没有被转成 regression truth，也不能替代上述验证。
 
-因此本路线状态为 **可运行接口壳 / research placeholder**，不可用于论文数值结论或答辩中的“已完成 RMF 计算”陈述。
+因此本路线当前状态为 **可运行、可审计的 diagnostic RMF core**；所有新结果仍不可用于论文正式数值结论。
 
 ## 17. 路线 O：声明式工作流、manifest 与 HTTP/API
 
@@ -903,7 +912,7 @@ pipeline 层负责参数适配、统计、manifest 和工件定位；物理公�
 2. PNJL/NJL/磁场的学位论文信源缺完整书目信息；论文写作前需要补齐。
 3. `MesonPropagator` 的旧 API 页对质量/宽度提取的描述落后于独立 `MesonMass` workflow；本页按当前 workflow 事实登记。
 4. meson thermo 尚无 external validation gate。
-5. GasLiquid 仍是接口壳，不能与 Rotation/magnetic 的最小物理核放在同一成熟度上。
+5. GasLiquid 已超出接口壳并具备可审计 diagnostic RMF core，但尚未与 Rotation/magnetic 的成熟度等同；外部数值 validation、refinement 和 formal gate 仍缺失。
 6. phase/transport 的 formal 资格与具体 case、SHA、配置和收敛证据绑定，不能从目录名或一次成功运行推断。
 
 ## 21. 后续维护规则
