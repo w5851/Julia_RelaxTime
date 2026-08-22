@@ -50,6 +50,49 @@ Models.pnjl_module()
             xi=0.1, p_num=4, t_num=4, n_max=1, pz_max=5.0)
     end
 
+    @testset "磁场 AD residual 诊断路径" begin
+        m = Models.PNJLMagneticModel(; eB_fm2=0.1)
+        x5 = SVector{5}(-0.03, -0.03, -0.04, 0.2, 0.2)
+        μ = SVector{3}(0.4, 0.4, 0.4)
+        controls = (p_num=4, t_num=4, pz_max=5.0, n_max=1, xi=0.0)
+
+        finite = Models.magnetic_gap_residual(m, x5, 0.7, μ; controls...)
+        autodiff = Models.magnetic_gap_residual_autodiff(m, x5, 0.7, μ; controls...)
+        @test autodiff ≈ finite rtol=1e-6 atol=1e-8
+        @test all(isfinite, autodiff)
+
+        jac = ForwardDiff.jacobian(
+            v -> Models.magnetic_gap_residual_autodiff(m, v, 0.7, μ; controls...),
+            collect(x5),
+        )
+        @test size(jac) == (5, 5)
+        @test all(isfinite, jac)
+
+        @test_throws ArgumentError Models.magnetic_gap_residual_autodiff(
+            m, x5, 0.7, μ; p_num=4, t_num=4, pz_max=5.0, xi=0.0,
+        )
+
+        result = Models.solve_magnetic_gap(
+            m,
+            0.7,
+            μ;
+            p_num=4,
+            t_num=4,
+            pz_max=5.0,
+            n_max=1,
+            initial_guess=x5,
+            include_default_seeds=false,
+            fallback_method=nothing,
+            iterations=8,
+            residual_norm_max=1e-3,
+            residual_method=:forward,
+        )
+        @test result.converged
+        @test result.attempt_count == 1
+        @test result.state !== nothing
+        @test result.candidates[1].residual_norm <= 1e-3
+    end
+
     @testset "Hessian 只提供诊断，不拒绝驻点" begin
         m = Models.PNJLMagneticModel(; eB_fm2=0.1)
         x5 = SVector{5}(-0.03, -0.03, -0.04, 0.2, 0.2)
