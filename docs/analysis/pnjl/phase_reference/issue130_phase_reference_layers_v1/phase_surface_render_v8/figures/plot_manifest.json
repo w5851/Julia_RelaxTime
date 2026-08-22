@@ -2,6 +2,8 @@
   "schema_version": "plot_manifest_v1",
   "generated_at_utc": "2026-08-21T09:03:40.545787+00:00",
   "asset_id": "pnjl_issue130_phase_surface_v8",
+  "figure_version": "v8",
+  "semantic_role": "pre_refinement_public_snapshot",
   "figure_family": "pnjl_phase_reference",
   "case_slug": "issue130_phase_surface_render_v8",
   "asset_kind": "figure",

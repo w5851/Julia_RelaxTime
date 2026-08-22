@@ -11,4 +11,8 @@
 - render layer: structured tables and no-triangulation projection
 - this import does not run PNJL, alter tolerances, or change the default reference consumer
 
-- public figure alias: v8 display render; the v1 source figure remains immutable under docs/analysis and strict/derived CSV bytes are unchanged
+- historical public figure snapshot: the pre-refinement public render is semantically v8; its bytes remain immutable under the historical v1 source layer
+
+- current public figure alias: v9 display render; the pre-refinement public figure is defined as v8 and remains byte-preserved at `phase_surface_render_v8`; Maxwell low-temperature continuation is display-only and strict/derived CSV bytes are unchanged
+
+- public figure alias: v9 display render; the pre-refinement public figure is defined as v8 and remains byte-preserved under the historical v1 source layer; strict/derived CSV bytes are unchanged

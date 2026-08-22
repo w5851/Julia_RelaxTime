@@ -1,4 +1,4 @@
 claim_id,status,claim,evidence,boundary
-V8-RENDER-001,supported,The public figure is reproducible from the immutable derived tables with explicit display policies.,manifest.json; figures/plot_manifest.json; tables/render_surface_summary.csv,display candidate; not a numerical certificate or runtime reference
-V8-RENDER-002,supported,The plotted first-order surface is labelled as Maxwell coexistence and preserves low-temperature support masking.,tables/source_coverage_mask.csv; figures/plot_manifest.json,no T=0 extrapolation
+V8-RENDER-001,supported,The pre-refinement public figure is reproducible from immutable derived tables with explicit display policies.,manifest.json; figures/plot_manifest.json; tables/render_surface_summary.csv,pre-refinement display candidate; not a numerical certificate or runtime reference
+V8-RENDER-002,supported,The v8 first-order surface is labelled as Maxwell coexistence and preserves low-temperature support masking.,tables/source_coverage_mask.csv; figures/plot_manifest.json,v8 display only; no T=0 extrapolation
 V8-RENDER-003,display_only,Crossover lines can reach the estimated CEP midpoint through explicit boundary-constrained display endpoints.,tables/crossover_endpoint_closure.csv,synthetic display endpoint; absent from strict/derived reference tables
