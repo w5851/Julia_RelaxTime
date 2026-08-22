@@ -116,6 +116,9 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol omega0_flavor_landau \
 	--include-symbol omegat_flavor_landau \
 	--include-symbol density_flavor_landau \
+	--include-symbol MAGNETIC_EB_MIN_MEV2 \
+	--include-symbol MAGNETIC_EB_MIN_FM2 \
+	--include-symbol validate_magnetic_eB \
 	--include-symbol MagneticIMCParams \
 	--include-symbol default_imc_params \
 	--include-symbol coupling_GB \

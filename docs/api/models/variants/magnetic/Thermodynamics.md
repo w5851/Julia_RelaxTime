@@ -59,10 +59,10 @@
 其中 `quark` 是为兼容历史脚本保留的字段名，正式语义与 `net` 相同，表示
 `q - qbar` 净密度；`baryon` 由三味净密度求和得到。该返回值不满足普通 PNJL
 `(quark, antiquark)` 的独立分量合同，不应直接传入需要独立反夸克占据数的输运路径。
-这是非零 `eB` 的 magnetic core 语义；模型适配器在 `eB≈0` 时转回普通 PNJL 的
-独立 `quark/antiquark` 结果。
+这是受支持正 `eB` 的 magnetic core 语义；输入低于
+`MAGNETIC_EB_MIN_FM2` 会明确拒绝，不会转回普通 PNJL。
 
-因此非零 `eB` 的 `PNJLMagneticModel` 会将通用
+因此 `PNJLMagneticModel` 会将通用
 `supports_number_densities` capability 标为 `false`，避免该结果被普通输运路径误接；
 这不撤销专用 `calculate_magnetic_number_densities` API。
 适合磁场固定点、扫描脚本或回归基线中直接消费。

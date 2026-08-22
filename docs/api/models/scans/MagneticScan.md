@@ -12,7 +12,7 @@ using .Models
 result = Models.run_magnetic_scan(
     T_values=[50.0, 150.0],
     mu_values=[0.0, 60.0],
-    eB_values=[0.0, 2.0e4],
+    eB_values=[1.0e4, 2.0e4],
     xi_values=[0.0],
     output_path="data/outputs/results/pnjl/scan/magnetic/selected.csv",
     candidates_output_path="data/outputs/results/pnjl/scan/magnetic/candidates.csv",
@@ -25,7 +25,7 @@ result = Models.run_magnetic_scan(
 powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 `
   scripts/models/run_unified_scan.jl scan magnetic `
   --model_kind=PNJLMagnetic --solver_mode=fixed_mu `
-  --T_values=50,150 --mu_values=0,60 --eB_values=0,20000 --xi_values=0 `
+  --T_values=50,150 --mu_values=0,60 --eB_values=10000,20000 --xi_values=0 `
   --output_path=data/outputs/results/pnjl/scan/magnetic/selected.csv `
   --overwrite=true --resume=false
 ```
@@ -36,6 +36,8 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 `
 - `mu_values`：MeV 的共同夸克化学势；adapter 将其转换为 `mu_u=mu_d=mu_s`。
   这里不是 `mu_B` 字段。
 - `eB_values`：MeV^2；内部转换为 `eB_fm2=eB_MeV2/hbarc^2`。
+  必须满足 `eB_values >= MAGNETIC_EB_MIN_MEV2 = 100`；低于门槛的值会抛出
+  `ArgumentError`，不会转发到普通 PNJL 路径。
 - `xi_values`：目前只能为 `[0.0]`。
 - `model_kind`：只能是 `:PNJLMagnetic`。
 - `solver_mode`：只能是 `:fixed_mu`。
