@@ -1,5 +1,6 @@
 from scripts.analysis.pnjl.render_issue130_phase_surface_v5 import (
     DEFAULT_OUTPUT_ROOT,
+    DISPLAY_EVIDENCE_ROOT,
     render_style_metadata,
 )
 
@@ -21,4 +22,5 @@ def test_v5_equal_aspect_and_depth_contract():
 
 def test_v5_uses_the_uniform_phase_surface_basename():
     assert DEFAULT_OUTPUT_ROOT.as_posix().endswith("phase_reference/issue130_phase_reference_v5")
+    assert DISPLAY_EVIDENCE_ROOT.as_posix().endswith("issue130_display_candidates_v1/v5")
     assert "phase_surface_render_mu_xi_T" in "phase_surface_render_mu_xi_T.svg"

@@ -72,5 +72,8 @@
 - Figure 4 v5 位于 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/`，
   是作者已接受的暂定最终 display-only 版本：等比例笛卡尔显示、正交投影、几何方向性阴影、
   低透明度边缘线、品红 CEP 线和 CEP 端点标注；仅输出 PNG/SVG。
+- Figure 4 v3/v4/v5 的 README/decision provenance 位于
+  `docs/analysis/pnjl/phase_reference/issue130_display_candidates_v1/v3|v4|v5/`；
+  `data/outputs/figures/**` 仅保留 PNG/SVG 与 `plot_manifest.json`，符合 data-output path guard。
 - v2/v3/v4/v5 均不覆盖 v1/v8/v9，不替换稳定 phase-reference alias，也不修改
   strict/derived 表；v2/v3 的当前保留包均为 PNG-only。

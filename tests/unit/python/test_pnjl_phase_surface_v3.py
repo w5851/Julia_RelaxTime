@@ -1,5 +1,6 @@
 from scripts.analysis.pnjl.render_issue130_phase_surface_v3 import (
     DEFAULT_OUTPUT_ROOT,
+    DISPLAY_EVIDENCE_ROOT,
     render_style_metadata,
 )
 
@@ -20,6 +21,10 @@ def test_v3_uses_explicit_physical_axes_and_no_panes():
 
 def test_v3_is_a_sibling_of_v2():
     assert DEFAULT_OUTPUT_ROOT.as_posix().endswith("phase_reference/issue130_phase_reference_v3")
+
+
+def test_v3_provenance_is_kept_in_analysis_not_figure_output():
+    assert DISPLAY_EVIDENCE_ROOT.as_posix().endswith("issue130_display_candidates_v1/v3")
 
 
 def test_v3_uses_the_phase_surface_render_basename_and_no_pdf_contract():

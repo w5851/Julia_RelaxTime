@@ -42,6 +42,9 @@ from scripts.analysis.pnjl.render_issue130_phase_surface_v4 import (
 
 
 DEFAULT_OUTPUT_ROOT = Path("data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5")
+DISPLAY_EVIDENCE_ROOT = Path(
+    "docs/analysis/pnjl/phase_reference/issue130_display_candidates_v1/v5"
+)
 STYLE_PROFILE = "balanced_cartesian_equal_aspect_lit_v5"
 CEP_LINE_COLOR = "#c2185b"
 CEP_LINE_WIDTH = 4.0
@@ -415,8 +418,10 @@ def main() -> int:
         else None
     )
     _write_json(output_root / "plot_manifest.json", manifest)
+    evidence_root = root / DISPLAY_EVIDENCE_ROOT
+    evidence_root.mkdir(parents=True, exist_ok=True)
     _write_json(
-        output_root / "decision.json",
+        evidence_root / "decision.json",
         {
             "verdict": "display_candidate",
             "figure_version": "v5",
@@ -429,7 +434,7 @@ def main() -> int:
             "supersedes": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v4/",
         },
     )
-    (output_root / "README.md").write_text(
+    (evidence_root / "README.md").write_text(
         "# Issue #130 phase-reference surface figure v5\n\n"
         "Display-only style candidate from the immutable derived tables. The three axes are "
         "mu_q [MeV], xi (dimensionless), and T [MeV] and meet at the inner physical origin. "

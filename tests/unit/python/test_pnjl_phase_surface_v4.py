@@ -1,5 +1,6 @@
 from scripts.analysis.pnjl.render_issue130_phase_surface_v4 import (
     DEFAULT_OUTPUT_ROOT,
+    DISPLAY_EVIDENCE_ROOT,
     render_style_metadata,
 )
 
@@ -20,4 +21,5 @@ def test_v4_preserves_cartesian_semantics_and_display_boundaries():
 
 def test_v4_emits_a_sibling_figure_layer_root_without_pdf_contract():
     assert DEFAULT_OUTPUT_ROOT.as_posix().endswith("phase_reference/issue130_phase_reference_v4")
+    assert DISPLAY_EVIDENCE_ROOT.as_posix().endswith("issue130_display_candidates_v1/v4")
     assert "phase_surface_render_mu_xi_T" in "phase_surface_render_mu_xi_T.png"
