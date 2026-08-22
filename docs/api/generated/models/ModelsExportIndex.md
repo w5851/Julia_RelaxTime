@@ -4,8 +4,8 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/generated/models/ModelsExportIndex.md`
-- Exported symbol count: 362
-- Mentioned in non-generated docs/api pages: 231
+- Exported symbol count: 363
+- Mentioned in non-generated docs/api pages: 232
 
 ## Exported Symbols
 
@@ -138,8 +138,8 @@
 | `calculate_chiral` | src/models/exports_public.jl | 3 | 1 | docs/api/data_contracts.md |
 | `calculate_energy_sum` | src/models/exports_public.jl | 112 | 0 | - |
 | `calculate_magnetic_number_densities` | src/models/exports_public.jl | 91 | 5 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
-| `calculate_magnetic_omega` | src/models/exports_public.jl | 89 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `calculate_magnetic_omega_components` | src/models/exports_public.jl | 89 | 3 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `calculate_magnetic_omega` | src/models/exports_public.jl | 89 | 3 | docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
+| `calculate_magnetic_omega_components` | src/models/exports_public.jl | 89 | 2 | docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
 | `calculate_magnetic_pressure` | src/models/exports_public.jl | 90 | 3 | docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
 | `calculate_magnetic_rho` | src/models/exports_public.jl | 90 | 2 | docs/api/models/variants/magnetic/README.md<br>docs/api/models/variants/magnetic/Thermodynamics.md |
 | `calculate_mass_vec` | src/models/exports_public.jl | 3 | 1 | docs/api/data_contracts.md |
@@ -214,7 +214,7 @@
 | `freezeout_profile_dir` | src/models/exports_public.jl | 117 | 0 | - |
 | `freezeout_temperature_GeV` | src/models/exports_public.jl | 118 | 0 | - |
 | `gap_core_residual!` | src/models/exports_public.jl | 76 | 1 | docs/api/models/solver/ConstraintModes.md |
-| `gap_residual` | src/models/exports_public.jl | 23 | 2 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `gap_residual` | src/models/exports_public.jl | 23 | 3 | docs/api/models/solver/ConstraintModes.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
 | `gap_state_dim` | src/models/exports_public.jl | 23 | 2 | docs/api/data_contracts.md<br>docs/api/models/solver/ConstraintModes.md |
 | `gas_liquid_workflow_module` | src/models/Models.jl | 46 | 0 | - |
 | `get_all_seeds` | src/models/exports_public.jl | 74 | 1 | docs/api/models/solver/SeedStrategies.md |
@@ -228,7 +228,8 @@
 | `list_precompile_profile` | src/models/exports_public.jl | 126 | 0 | - |
 | `load_freezeout_profile` | src/models/exports_public.jl | 117 | 0 | - |
 | `load_meson_chemical_profile` | src/models/exports_public.jl | 122 | 0 | - |
-| `magnetic_gap_residual` | src/models/exports_public.jl | 11 | 1 | docs/api/models/variants/magnetic/Overview.md |
+| `magnetic_gap_residual` | src/models/exports_public.jl | 11 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `magnetic_gap_residual_autodiff` | src/models/exports_public.jl | 11 | 1 | docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `magnetic_nmax_convergence_report` | src/models/exports_public.jl | 92 | 6 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `magnetic_thermodynamics_module` | src/models/Models.jl | 49 | 0 | - |
 | `mass_derivatives` | src/models/exports_public.jl | 29 | 7 | docs/api/models/derived/README.md<br>docs/api/models/derived/derivatives/CoreConcepts.md<br>docs/api/models/derived/derivatives/MassDerivatives.md |
@@ -256,7 +257,7 @@
 | `number_densities` | src/models/exports_public.jl | 5 | 8 | docs/api/data_contracts.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md |
 | `omega` | src/models/exports_public.jl | 17 | 23 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/data_contracts.md<br>docs/api/models/scans/CrossoverMesonDensityScan.md |
 | `omega0_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
-| `omega_components` | src/models/exports_public.jl | 17 | 7 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md |
+| `omega_components` | src/models/exports_public.jl | 17 | 6 | docs/api/data_contracts.md<br>docs/api/models/solver/Overview.md<br>docs/api/models/variants/gas_liquid/CoreConcepts.md |
 | `omegat_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `persisted_string_to_symbol` | src/models/exports_public.jl | 102 | 0 | - |
 | `persisted_symbol_to_string` | src/models/exports_public.jl | 102 | 0 | - |
