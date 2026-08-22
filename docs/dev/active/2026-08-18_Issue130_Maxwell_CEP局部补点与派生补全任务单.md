@@ -147,6 +147,7 @@ versioned workflow 和独立 aggregate，两个 route 的 target、成本和 ver
 - 仅叠加 crossover endpoint expansion numerical run `32240898122` 的 solver-free aggregate replay `32255786553`；固定 calculation SHA 为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。
 - v6 物化 186 个 endpoint candidate，覆盖 93 个非均匀 ξ 切片；所有点 finite/converged 且 `mu_q <=` 同一 v5 CEP proxy，但仍只表示 diagnostic overlay，不等于 CEP 已闭合或 phase-reference 已晋升。
 - v6 产物：`docs/analysis/pnjl/c2_surface_views/c2_phase_surfaces_diagnostic_v6_crossover_overlay/`。Maxwell 276 个 `input_incomplete` 候选仍未补算，本次不扩大 Maxwell 数值范围。
+- 版本系列统一索引：`docs/analysis/pnjl/phase_surface_series/`；C2 v1-v7 仅在新 namespace 下建立 byte-preserving snapshot，不改变原始 Maxwell/derived evidence 的路径或内容。
 
 ## 2026-08-21：Maxwell expansion 与三层派生包收口
 

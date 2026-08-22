@@ -23,6 +23,8 @@
 
 ### C2 phase surfaces and audits
 
+`phase_surface_series/` 是本系列的统一只读 namespace 索引，包含 `analysis/v1` 到 `analysis/v7`、独立的 `analysis/v4_display16`，以及 `figure_layer/phase_surface_render_v1` 到 `v3`。原始 `c2_surface_views/` 和 `phase_reference/issue130_phase_reference_layers_v1/` 保持原位，作为稳定 source package；迁移映射、文件数、字节数和 inventory SHA-256 见 [`phase_surface_series/series_manifest.json`](phase_surface_series/series_manifest.json)。
+
 | 逻辑子线 | 当前路径 | 状态/用途 |
 | --- | --- | --- |
 | surface versions | `c2_surface_views/c2_phase_surfaces_diagnostic_v1/` 到 `c2_surface_views/c2_phase_surfaces_diagnostic_v7_crossover_derived/` | 同一 C2 surface 线的版本化诊断；v5 是原生 support 基线，v6 在 v5 后处理结果上叠加 crossover endpoint expansion，v7 在 v6 上生成带 provenance 的 crossover 派生层 |

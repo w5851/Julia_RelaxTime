@@ -1,5 +1,7 @@
 # C2 Surface Views
 
+本系列的统一只读 namespace 索引为 [`../phase_surface_series/`](../phase_surface_series/)。本目录仍是历史 source package；其 manifest、checksum、execution log、生成时 provenance 和原始路径均保持不变。namespace snapshot 的逐文件 SHA-256 对照见 [`../phase_surface_series/series_manifest.json`](../phase_surface_series/series_manifest.json)。
+
 This group contains the versioned diagnostic surface line for C2:
 
 - `c2_phase_surfaces_diagnostic_v1/` and `c2_phase_surfaces_diagnostic_v2/`: chemical-potential convention corrections.
