@@ -26,3 +26,10 @@ def test_v2_formal_output_is_a_versioned_figure_layer_sibling():
 
 def test_v2_uses_the_phase_surface_render_basename():
     assert "phase_surface_render_mu_xi_T" in "phase_surface_render_mu_xi_T.png"
+
+
+def test_v2_is_png_only_and_never_emits_pdf():
+    style = render_style_metadata()
+
+    assert style["formats"] == ["png"]
+    assert style["pdf_emitted"] is False

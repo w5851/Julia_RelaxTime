@@ -89,6 +89,8 @@ def render_style_metadata() -> dict[str, Any]:
             "halo_linewidth": CEP_HALO_WIDTH,
             "label": "CEP boundary (estimated midpoint)",
         },
+        "formats": ["png"],
+        "pdf_emitted": False,
     }
 
 
@@ -155,7 +157,6 @@ def _draw_inner_cartesian_axes(axis: Any) -> None:
 
 def render_figure(
     output_png: Path,
-    output_pdf: Path,
     crossover_quads: list[list[tuple[float, float, float]]],
     maxwell_quads: list[list[tuple[float, float, float]]],
     cep_rows: list[dict[str, str]],
@@ -263,7 +264,6 @@ def render_figure(
     fig.tight_layout()
     output_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_png, dpi=600, bbox_inches="tight")
-    fig.savefig(output_pdf, format="pdf", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -271,7 +271,6 @@ def build_plot_manifest(
     *,
     root: Path,
     output_png: Path,
-    output_pdf: Path,
     generator: Path,
     inputs: list[dict[str, Any]],
 ) -> dict[str, Any]:
@@ -326,7 +325,6 @@ def build_plot_manifest(
         },
         "outputs": [
             {**file_record(output_png, root), "format": "png", "dpi": 600, "vector": False},
-            {**file_record(output_pdf, root), "format": "pdf", "dpi": None, "vector": True},
         ],
     }
 
@@ -389,10 +387,8 @@ def main() -> int:
 
     figure_root = output_root
     output_png = figure_root / "phase_surface_render_mu_xi_T.png"
-    output_pdf = figure_root / "phase_surface_render_mu_xi_T.pdf"
     render_figure(
         output_png,
-        output_pdf,
         crossover_quads,
         maxwell_quads,
         cep_rows,
@@ -427,7 +423,6 @@ def main() -> int:
     plot_manifest = build_plot_manifest(
         root=root,
         output_png=output_png,
-        output_pdf=output_pdf,
         generator=Path(__file__).resolve(),
         inputs=source_inputs,
     )
