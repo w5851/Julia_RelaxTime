@@ -1,0 +1,31 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v7_crossover_derived",
+  "generated_at_utc": "2026-08-20T03:16:45.630170+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "v6_manifest_hash": "8f19f73f7654663504dfa27a9a7e338df13e090bfc7501b8c201742defe4cb0b",
+  "solver_called": false,
+  "reference_write": false,
+  "verdict": "v7_crossover_derived_candidate",
+  "promotion_effect": "none",
+  "policy": {
+    "base": "v6_postprocessed_package",
+    "mu_interpolation": "piecewise_linear_same_xi",
+    "xi_interpolation": "piecewise_linear_common_support_midpoint_xi",
+    "cep_boundary": "estimated_midpoint boundary estimate; bracket retained",
+    "maxwell": "native v6 only; no derived values",
+    "outside_support": "unresolved; no ordinary extrapolation"
+  },
+  "parameters": {
+    "mu_subdivisions": 4,
+    "max_xi_gap": 0.025
+  },
+  "counts": {
+    "native_crossover_rows": 1343,
+    "same_xi_derived_rows": 3750,
+    "xi_derived_rows": 9516,
+    "boundary_rows": 93,
+    "maxwell_rows": 6886,
+    "spinodal_rows": 6886,
+    "cep_slices": 93
+  }
+}

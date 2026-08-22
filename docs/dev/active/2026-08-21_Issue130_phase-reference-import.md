@@ -72,6 +72,14 @@
 - Figure 4 v5 位于 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/`，
   是作者已接受的暂定最终 display-only 版本：等比例笛卡尔显示、正交投影、几何方向性阴影、
   低透明度边缘线、品红 CEP 线和 CEP 端点标注；仅输出 PNG/SVG。
+
+## 2026-08-22：phase-surface series namespace
+
+- 新增统一只读索引：`docs/analysis/pnjl/phase_surface_series/`。
+- `analysis/v1` 至 `analysis/v7` 对应 C2 surface 诊断线；`analysis/v4_display16` 保留 v4 的独立 display16 变体。
+- `figure_layer/phase_surface_render_v1`、`v2`、`v3` 分别对应历史 render v1、语义 v8、语义 v9；v5 Figure 4 display candidate 仍独立位于 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/`。
+- 本批为 byte-preserving snapshot：原始 `c2_surface_views/` 和 `phase_reference/issue130_phase_reference_layers_v1/` 不移动；包内历史 manifest、checksum、execution log 和生成时路径不改写。详细 source/destination/hash 对照见 `series_manifest.json`。
+- 该 namespace 不改变 strict/derived/render 的数值语义，不写入新的 `data/reference/**`，不切换 runtime consumer，不启动 solver 或 RS transport。
 - Figure 4 v3/v4/v5 的 README/decision provenance 位于
   `docs/analysis/pnjl/phase_reference/issue130_display_candidates_v1/v3|v4|v5/`；
   `data/outputs/figures/**` 仅保留 PNG/SVG 与 `plot_manifest.json`，符合 data-output path guard。
