@@ -51,7 +51,7 @@
 | limited evidence | [`phase_reference/phase_reference_limited_evidence_audit_v1/`](phase_reference/phase_reference_limited_evidence_audit_v1/) | raw-curve coverage 和 shape audit |
 | manual overlay | [`phase_reference/phase_reference_manual_overlay_promotion_audit_v1/`](phase_reference/phase_reference_manual_overlay_promotion_audit_v1/) | manual CEP/curve overlay 的晋升阻塞审计 |
 | raw archive pointer | `raw_curve_archive_v1/` | 完整 raw curve 外部归档的 provenance 入口 |
-| Issue #130 derived layers | [`phase_reference/issue130_phase_reference_layers_v1/`](phase_reference/issue130_phase_reference_layers_v1/) | `strict_reference_v1`、`derived_reference_v1` 和 `phase_surface_render_v1`；Maxwell expansion 已接入，当前等待作者审核 |
+| Issue #130 derived layers | [`phase_reference/issue130_phase_reference_layers_v1/`](phase_reference/issue130_phase_reference_layers_v1/) | `strict_reference_v1`、`derived_reference_v1`；精修前公开图为语义 v8，当前 display alias 为 v9；Figure 4 v2/v3/v4/v5 style candidates 位于 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v2/` 至 `..._v5/`，其 README/decision provenance 位于 [`phase_reference/issue130_display_candidates_v1/`](phase_reference/issue130_display_candidates_v1/)，v5 为作者接受的暂定最终 display-only 版本，Maxwell 低温 continuation 仅存在于 v9 render 层 |
 | Issue #130 promotion gate | [`phase_reference/issue130_phase_reference_promotion_gate_v1/`](phase_reference/issue130_phase_reference_promotion_gate_v1/) | solver-free 作者审核与 promotion gate；`promotion_candidate` 不等于 reference write |
 
 `phase_reference_*` 是汇总/决策层。它们可以引用下游 case，但不能取代下游 manifest、hash、失败点或 unresolved 语义。冻结包记录生成时的路径和 hash；本次 namespace 整理不重写这些历史快照。

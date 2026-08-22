@@ -1,0 +1,210 @@
+{
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-08-22T08:39:35.049444+00:00",
+  "asset_id": "pnjl_issue130_phase_reference_v5",
+  "figure_family": "pnjl_phase_reference",
+  "case_slug": "issue130_phase_reference_v5",
+  "figure_version": "v5",
+  "asset_kind": "figure",
+  "figure_mode": "style_only_display_variant",
+  "semantic_status": "visualization_only_style_variant",
+  "style_profile": "balanced_cartesian_equal_aspect_lit_v5",
+  "publication_scope": "external_display_candidate",
+  "generator": {
+    "path": "scripts/analysis/pnjl/render_issue130_phase_surface_v5.py",
+    "path_kind": "repository_relative",
+    "bytes": 18246,
+    "sha256": "1ca9d09f63f69157417c52de4ff9113e3a2639325a669310cb9138d66522e39f",
+    "role": "render_generator",
+    "command": "render_issue130_phase_surface_v5.py",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "executable": "D:\\Python313\\python.exe"
+    }
+  },
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "postprocess_sha": "d9a52e6232d09695a83997cda2c11f6b00204587",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "source_render_layer": "phase_surface_render_v9",
+  "inputs": [
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/crossover_surface_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 785310,
+      "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+      "role": "derived_crossover_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/maxwell_surface_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 3042004,
+      "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+      "role": "derived_maxwell_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/cep_boundary_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 27047,
+      "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+      "role": "derived_cep_boundary_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/surface_coverage_mask.csv",
+      "path_kind": "repository_relative",
+      "bytes": 40523,
+      "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+      "role": "derived_coverage_mask"
+    }
+  ],
+  "axes": [
+    {
+      "field": "mu_q",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "transform": "identity"
+    },
+    {
+      "field": "xi",
+      "source_unit": "dimensionless",
+      "display_unit": "dimensionless",
+      "transform": "identity"
+    },
+    {
+      "field": "T",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "transform": "identity"
+    }
+  ],
+  "rendering": {
+    "style_profile": "balanced_cartesian_equal_aspect_lit_v5",
+    "coordinate_grid": "no_pane_or_grid_inner_axis_triad",
+    "coordinate_axes": "inner_origin_cartesian_axes_with_explicit_mu_xi_T_labels",
+    "projection": "orthographic",
+    "view": {
+      "elevation_deg": 30.0,
+      "azimuth_deg": -45.0
+    },
+    "box_aspect": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "surface_shading": "neutral_directional_light_and_fine_edge_contrast_v5",
+    "surface_projection_walls": false,
+    "mu_zero_marker": {
+      "enabled": true,
+      "legend": false,
+      "style": "white_halo_black_dashed_crossover_plane_intersection",
+      "color": "#161616",
+      "linewidth": 2.4,
+      "annotation": "$\\mu_q=0$ crossover trace"
+    },
+    "cartesian_scaffold": {
+      "origin": {
+        "mu_q": 0.0,
+        "xi": 0.0,
+        "T": 0.0
+      },
+      "planes": [],
+      "pane_grid": false,
+      "axis_color": "#242424",
+      "axis_linewidth": 1.6
+    },
+    "axis_labels": {
+      "mu_q": "$\\mu_q$ [MeV]",
+      "xi": "$\\xi$ (dimensionless)",
+      "T": "T [MeV]"
+    },
+    "tick_labels": {
+      "mu_q": "manual_ticks_50_MeV",
+      "xi": "manual_ticks_0.25_dimensionless",
+      "T": "manual_ticks_25_MeV",
+      "grid": false
+    },
+    "legend": {
+      "placement": "compact_figure_top_center_outside_data",
+      "columns": 3
+    },
+    "cep_boundary": {
+      "color": "#c2185b",
+      "linewidth": 4.0,
+      "halo_linewidth": 7.0,
+      "label": "CEP boundary (estimated midpoint)"
+    },
+    "formats": [
+      "png",
+      "svg"
+    ],
+    "pdf_emitted": false,
+    "triangulation": false,
+    "filled_surface": true,
+    "figure_size_inches": [
+      11.8,
+      9.0
+    ],
+    "boundary_display": "CEP estimated midpoint with endpoint-constrained crossover closure",
+    "low_temperature_display": "Maxwell display-only linear continuation to T=0 from first two native T rows"
+  },
+  "data_contract": {
+    "strict_and_derived_tables_unchanged": true,
+    "numeric_source_rows_unchanged": true,
+    "solver_called": false,
+    "public_alias_replaced": false,
+    "mu_zero_marker_added": true,
+    "mu_zero_marker_semantics": "crossover_surface_intersection_with_mu_q_zero_plane",
+    "surface_projection_walls": false
+  },
+  "outputs": [
+    {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/phase_surface_render_mu_xi_T.png",
+      "path_kind": "repository_relative",
+      "bytes": 6252404,
+      "sha256": "d88607818c7fd1930334288e6f32d30c8ab8da8ae6fd2a81b9ef8ffac0e329d7",
+      "format": "png",
+      "dpi": 600,
+      "vector": false
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/phase_surface_render_mu_xi_T.svg",
+      "path_kind": "repository_relative",
+      "bytes": 13006769,
+      "sha256": "74a032394f765c1ceb5c82aaaed0bf87fa4bddcad97a14967c6b045497519089",
+      "format": "svg",
+      "dpi": null,
+      "vector": true
+    }
+  ],
+  "surface_summary": [
+    {
+      "surface": "crossover",
+      "xi_slice_count": 161,
+      "xi_pair_count_with_common_support": 160,
+      "quad_count": 25440,
+      "grid_points_per_xi_pair": 160,
+      "max_local_axis_gap": 26.0,
+      "common_support_low_min": 0.0,
+      "common_support_high_max": 347.7534052491582,
+      "display_policy": "cep_boundary_constrained_common_support"
+    },
+    {
+      "surface": "first_order_maxwell",
+      "xi_slice_count": 161,
+      "xi_pair_count_with_common_support": 160,
+      "quad_count": 25440,
+      "grid_points_per_xi_pair": 160,
+      "max_local_axis_gap": 18.0,
+      "common_support_low_min": 0.0,
+      "common_support_high_max": 146.6875,
+      "display_policy": "bounded_display_extrapolation_to_T0"
+    }
+  ],
+  "source_render_manifest": {
+    "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v9/manifest.json",
+    "path_kind": "repository_relative",
+    "bytes": 3827,
+    "sha256": "49201a7fb9c71fd6143a6f55c68e56aa3db8c02686c3e5e42b0ad1b2eab4db18"
+  }
+}

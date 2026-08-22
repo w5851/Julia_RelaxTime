@@ -1,0 +1,3 @@
+# Issue #130 phase-reference surface figure v5
+
+Display-only style candidate from the immutable derived tables. The three axes are mu_q [MeV], xi (dimensionless), and T [MeV] and meet at the inner physical origin. v5 uses an equal display aspect, orthographic projection, neutral directional shading, and very fine low-opacity surface edges for depth. These are visual effects only; no observable is encoded by color or edge tone. The CEP line is magenta and the crossover intersection with the mu_q=0 plane is a black dashed trace outside the legend. Only PNG and SVG are emitted; strict/derived data and the public alias are unchanged.

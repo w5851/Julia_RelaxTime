@@ -45,6 +45,20 @@
     "derived_reference_v1": "2db211f55c8f44e21927a4faae5e58e9bed12754191e63a0fc1f19fcd19ab405",
     "phase_surface_render_v1": "4b091f9d97a1edf5046b872799928c8e742fe780f401e87e7ba17edd6220c605"
   },
+  "render_lineage": {
+    "v8": {
+      "semantic_role": "pre_refinement_public_snapshot",
+      "manifest": "phase_surface_render_v8/manifest.json",
+      "manifest_sha256": "f7575d9df747c02aad5d28b392cf0aa339e4bb9750f760a6e0bf04b989f0234a",
+      "png_sha256": "5b8152b2ccef4107c51393370b82ff77f48287132e8206a37ee6cfb2ab793b14"
+    },
+    "v9": {
+      "semantic_role": "current_public_display_candidate",
+      "manifest": "phase_surface_render_v9/manifest.json",
+      "manifest_sha256": "49201a7fb9c71fd6143a6f55c68e56aa3db8c02686c3e5e42b0ad1b2eab4db18",
+      "png_sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65"
+    }
+  },
   "package_files": {
     "README.md": "2fefce4f8d2af81358df73c6e5c81408b55470a8bfe7e24502f9bc2c2f47f85d",
     "AUDIT.md": "dcd6d50bfa240941c16887cdad3919be743b4034beccee8350d47d7434f608d3",
