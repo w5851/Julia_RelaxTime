@@ -193,12 +193,15 @@ function main()
             T_fm = T_MeV / ħc_MeV_fm
             mu_vec = SVector{3, Float64}(fill(μ_MeV / ħc_MeV_fm, 3))
             println("point T=$(T_MeV) MeV mu=$(μ_MeV) MeV")
+            finite_fn = _residual_function(MODEL, Variant(:finite, :finite), T_fm, mu_vec)
+            forward_fn = _residual_function(MODEL, Variant(:forward, :forward), T_fm, mu_vec)
+            parity = maximum(abs.(finite_fn(X_STATE) .- forward_fn(X_STATE)))
 
             for variant in VARIANTS
                 measured = _measure_variant(MODEL, variant, T_fm, mu_vec, repeats)
                 first = measured.first
                 @printf(
-                    "  residual=%s jacobian=%s | first_ms=%.3f first_f=%d first_g=%d first_iter=%d first_status=%s | steady_median_ms=%.3f steady_f=%.1f steady_g=%.1f steady_iter=%.1f steady_residual=%.3e steady_status=%s\n",
+                    "  residual=%s jacobian=%s | first_ms=%.3f first_f=%d first_g=%d first_iter=%d first_status=%s | steady_median_ms=%.3f steady_f=%.1f steady_g=%.1f steady_iter=%.1f steady_residual=%.3e steady_status=%s | initial_residual_max_diff=%.3e\n",
                     variant.residual,
                     variant.jacobian,
                     first.wall_ms,
@@ -212,6 +215,7 @@ function main()
                     measured.steady_iterations,
                     measured.steady_residual_norm,
                     measured.steady_status,
+                    parity,
                 )
             end
         end
