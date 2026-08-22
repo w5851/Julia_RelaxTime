@@ -1,0 +1,7 @@
+claim_id,claim,status,evidence,boundary
+v6_native_preserved,"v6 native crossover, Maxwell and spinodal rows are preserved as separate native support layers",supported,tables/crossover_certified_v6.csv; tables/maxwell_surface_v7.csv; tables/spinodal_surface_v7.csv,native support is diagnostic and not phase-reference promotion
+same_xi_interpolation,Internal crossover gaps are filled only by piecewise-linear interpolation within an existing xi slice,supported,tables/crossover_derived_same_xi.csv; tables/crossover_surface_v7.csv,error estimate is not independently calibrated
+xi_common_support_interpolation,Midpoint xi rows are generated only over the common native crossover support of adjacent xi slices,supported,tables/crossover_derived_xi.csv; tables/crossover_coverage_mask.csv,tails not shared by both slices remain unresolved
+cep_boundary_semantics,The selected CEP boundary estimate can terminate the derived crossover layer without reassigning any mu_q above it to crossover,supported,tables/cep_boundary_estimates.csv; tables/crossover_derived_boundary.csv,bracket remains the strict evidence; midpoint is an estimated boundary
+maxwell_not_filled,v7 does not interpolate or repair the Maxwell coexistence surface,supported,tables/maxwell_surface_v7.csv; README.md,Maxwell near-CEP completion remains a separate task
+reference_promotion,v7 authorizes phase-reference promotion,blocked,decision.json,derived values are non-certified and no reference write occurred
