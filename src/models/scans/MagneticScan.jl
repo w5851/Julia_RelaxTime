@@ -17,13 +17,15 @@ using StaticArrays
 using Main.Constants_PNJL: ħc_MeV_fm
 using ..Models: MagneticGapCandidate, PNJLMagneticModel, create_model
 using ..Models: calculate_mass_vec, model_thermo, number_densities, solve_magnetic_gap
+using ..Models: MagneticThermodynamics
 
 export run_magnetic_scan, DEFAULT_T_VALUES, DEFAULT_MU_VALUES, DEFAULT_EB_VALUES
 export DEFAULT_OUTPUT_PATH, DEFAULT_CANDIDATES_OUTPUT_PATH
 
 const DEFAULT_T_VALUES = collect(50.0:10.0:200.0)
 const DEFAULT_MU_VALUES = collect(0.0:10.0:400.0)
-const DEFAULT_EB_VALUES = [0.0, 1.0e4, 2.0e4]
+const DEFAULT_EB_VALUES = [1.0e4, 2.0e4]
+const MAGNETIC_EB_MIN_MEV2 = MagneticThermodynamics.MAGNETIC_EB_MIN_MEV2
 const DEFAULT_OUTPUT_PATH = normpath(joinpath(
     @__DIR__, "..", "..", "..", "data", "outputs", "results", "pnjl", "scan", "magnetic", "magnetic_scan.csv",
 ))
@@ -135,6 +137,9 @@ end
     ))
     all(abs(Float64(xi)) <= 1e-14 for xi in xi_values) || throw(ArgumentError(
         "PNJLMagneticModel currently supports only xi=0",
+    ))
+    all(Float64(eB) >= MAGNETIC_EB_MIN_MEV2 for eB in eB_values) || throw(ArgumentError(
+        "magnetic scan eB_values must be >= $(MAGNETIC_EB_MIN_MEV2) MeV^2",
     ))
     p_num >= 4 || throw(ArgumentError("p_num must be >= 4, got $(p_num)"))
     t_num >= 1 || throw(ArgumentError("t_num must be >= 1, got $(t_num)"))

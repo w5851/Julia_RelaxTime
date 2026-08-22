@@ -22,7 +22,7 @@ const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PATH)
 end
-using Main.Constants_PNJL: Λ_inv_fm
+using Main.Constants_PNJL: Λ_inv_fm, ħc_MeV_fm
 
 export QUARK_CHARGE_ABS
 export alpha_n, energy_landau, smooth_cutoff
@@ -31,14 +31,31 @@ export omega0_flavor_landau, omegat_flavor_landau
 export density_flavor_landau
 
 const QUARK_CHARGE_ABS = SVector{3, Float64}(2 / 3, 1 / 3, 1 / 3)
+const MAGNETIC_EB_MIN_MEV2 = 100.0
+const MAGNETIC_EB_MIN_FM2 = MAGNETIC_EB_MIN_MEV2 / ħc_MeV_fm^2
 const _PZ_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
 const _LOG_EPS = 1e-16
 const _EXP_LIMIT = 745.0
 
 @inline alpha_n(n::Integer) = n == 0 ? 1.0 : 2.0
 
+"""Validate the positive magnetic-field contract in internal `fm^-2` units."""
+@inline function validate_magnetic_eB(eB_fm2::Real)
+    value = Float64(eB_fm2)
+    isfinite(value) || throw(ArgumentError("magnetic eB_fm2 must be finite, got $(eB_fm2)"))
+    value >= MAGNETIC_EB_MIN_FM2 || throw(ArgumentError(
+        "magnetic eB_fm2 must be >= $(MAGNETIC_EB_MIN_FM2) " *
+        "(equivalent to eB >= $(MAGNETIC_EB_MIN_MEV2) MeV^2), got $(eB_fm2)",
+    ))
+    return value
+end
+
+@inline function _energy_landau_unchecked(mass::Real, pz::Real, n::Integer, q_abs::Real, eB::Real)
+    return sqrt(2 * n * q_abs * eB + pz^2 + mass^2)
+end
+
 @inline function energy_landau(mass::Real, pz::Real, n::Integer, q_abs::Real, eB::Real)
-    return sqrt(2 * n * abs(q_abs * eB) + pz^2 + mass^2)
+    return _energy_landau_unchecked(mass, pz, n, q_abs, validate_magnetic_eB(eB))
 end
 
 @inline function smooth_cutoff(p::Real; Λ::Real=Λ_inv_fm, N::Int=10)
@@ -87,9 +104,9 @@ end
 end
 
 function resolve_nmax_from_cutoff(mass::Real, mu::Real, q_abs::Real, eB::Real; Λ::Real=Λ_inv_fm)
-    abs(q_abs * eB) <= 1e-14 && return 0
+    eB_value = validate_magnetic_eB(eB)
     p2_eff = max(Λ^2, mu^2) + mass^2
-    nmax = floor(Int, p2_eff / (2 * abs(q_abs * eB)))
+    nmax = floor(Int, p2_eff / (2 * q_abs * eB_value))
     return max(nmax, 0)
 end
 
@@ -113,14 +130,14 @@ function omega0_flavor_landau(
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
     cutoff_N::Int=10,
 )
-    abs(q_abs * eB) <= 1e-14 && return 0.0
-    pref = -3.0 * abs(q_abs * eB) / (2 * π)
+    eB_value = validate_magnetic_eB(eB)
+    pref = -3.0 * q_abs * eB_value / (2 * π)
     total = 0.0
     @inbounds for n in 0:n_max
         an = alpha_n(n)
         int_val = _integrate_pz_even(p_num, pz_max) do pz
-            E = energy_landau(mass, pz, n, q_abs, eB)
-            p3 = sqrt(pz^2 + 2 * n * abs(q_abs * eB))
+            E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
+            p3 = sqrt(pz^2 + 2 * n * q_abs * eB_value)
             fc = smooth_cutoff(p3; N=cutoff_N)
             fc^2 * E
         end
@@ -141,15 +158,15 @@ function omegat_flavor_landau(
     p_num::Int=96,
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
 )
-    abs(q_abs * eB) <= 1e-14 && return 0.0
+    eB_value = validate_magnetic_eB(eB)
     T <= 1e-12 && return 0.0
 
-    pref = -T * abs(q_abs * eB) / (2 * π)
+    pref = -T * q_abs * eB_value / (2 * π)
     total = 0.0
     @inbounds for n in 0:n_max
         an = alpha_n(n)
         int_val = _integrate_pz_even(p_num, pz_max) do pz
-            E = energy_landau(mass, pz, n, q_abs, eB)
+            E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
             _log_polyakov_pair(E, mu, T, Φ, Φbar)
         end
         total += an * int_val / (2 * π)
@@ -169,18 +186,18 @@ function density_flavor_landau(
     p_num::Int=96,
     pz_max::Real=max(8 * Λ_inv_fm, 25.0),
 )
+    eB_value = validate_magnetic_eB(eB)
     T <= 1e-12 && return 0.0
-    abs(q_abs * eB) <= 1e-14 && return 0.0
 
     # The Polyakov polynomial already contains the color trace. Its mu
     # derivative therefore carries the color factor and the prefactor is the
     # Landau phase-space measure only.
-    pref = abs(q_abs * eB) / (2 * π)
+    pref = q_abs * eB_value / (2 * π)
     total = 0.0
     @inbounds for n in 0:n_max
         an = alpha_n(n)
         int_val = _integrate_pz_even(p_num, pz_max) do pz
-            E = energy_landau(mass, pz, n, q_abs, eB)
+            E = _energy_landau_unchecked(mass, pz, n, q_abs, eB_value)
             _, net = _polyakov_log_and_net_density(E, mu, T, Φ, Φbar)
             net
         end

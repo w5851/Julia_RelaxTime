@@ -75,7 +75,8 @@ Models.pnjl_module()
     end
 
     @testset ":PNJLMagnetic" begin
-        m = Models.create_model(:PNJLMagnetic; eB_fm2=0.0)
+        @test_throws ArgumentError Models.create_model(:PNJLMagnetic; eB_fm2=0.0)
+        m = Models.create_model(:PNJLMagnetic; eB_fm2=0.1)
         @test m isa Models.AbstractPNJLModel
     end
 

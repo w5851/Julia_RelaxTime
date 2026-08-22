@@ -51,7 +51,7 @@ end
     ))
     μ = normalize_mu_vec(mu_vec)
     all(isfinite, μ) || throw(ArgumentError("magnetic mu_vec must be finite, got $(mu_vec)"))
-    isfinite(model.magnetic.eB_fm2) || throw(ArgumentError("magnetic eB_fm2 must be finite"))
+    _magnetic_thermodynamics_module().validate_magnetic_eB(model.magnetic.eB_fm2)
     return μ
 end
 
@@ -325,22 +325,6 @@ function solve_magnetic_gap(
     method_eff = solver === nothing ? method : Symbol(getproperty(solver, :method))
     xtol_eff = solver === nothing ? xtol : Float64(getproperty(solver, :xtol))
     ftol_eff = solver === nothing ? ftol : Float64(getproperty(solver, :ftol))
-
-    # The zero-field limit remains compatible with the established PNJL solver;
-    # nonzero eB always uses the magnetic Omega below.
-    if abs(model.magnetic.eB_fm2) <= 1e-14
-        st = solve_gap(model.base, T_fm, μ;
-            xi=xi, p_num=p_num_eff, t_num=t_num, residual_norm_max=residual_norm_max)
-        x = SVector{5, Float64}(Tuple(state_vector(st)))
-        comp = _magnetic_thermodynamics_module().calculate_magnetic_omega_components(
-            x, μ, T_fm, model.magnetic; xi=xi, p_num=p_num_eff, t_num=t_num,
-        )
-        candidate = MagneticGapCandidate(
-            1, x, x, Float64(comp.omega), SVector{5, Float64}(fill(NaN, 5)), NaN,
-            true, true, :pnjl_zero_field, 0, Int(comp.n_max), :not_evaluated, :equilibrium,
-        )
-        return MagneticGapResult(st, 1, [candidate], true, 1, 0, false)
-    end
 
     seeds = _magnetic_seed_pool(T_fm, μ;
         initial_guess=initial_guess,
