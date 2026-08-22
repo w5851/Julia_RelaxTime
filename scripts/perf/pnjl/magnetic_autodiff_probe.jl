@@ -11,12 +11,14 @@ ForwardDiff and lets NLsolve differentiate that residual. This script uses one
 explicit seed, low quadrature controls, and never calls `solve_magnetic_gap`,
 production scans, or writes numerical artifacts.
 
-Set `MAGNETIC_AD_PROBE_MAX_POINTS=1` for the shortest smoke probe.
+Set `MAGNETIC_AD_PROBE_MAX_POINTS=1` for the shortest smoke probe. Set
+`MAGNETIC_AD_PROBE_REPEATS` to control the number of steady-state repetitions.
 """
 
 using LinearAlgebra: norm
 using NLsolve
 using Printf
+using Statistics: median
 using StaticArrays
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
@@ -46,6 +48,17 @@ function _max_points()
         throw(ArgumentError("MAGNETIC_AD_PROBE_MAX_POINTS must be an integer, got $(raw)"))
     end
     value >= 0 || throw(ArgumentError("MAGNETIC_AD_PROBE_MAX_POINTS must be >= 0, got $(value)"))
+    return value
+end
+
+function _repeats()
+    raw = get(ENV, "MAGNETIC_AD_PROBE_REPEATS", "5")
+    value = try
+        parse(Int, raw)
+    catch
+        throw(ArgumentError("MAGNETIC_AD_PROBE_REPEATS must be an integer, got $(raw)"))
+    end
+    value >= 1 || throw(ArgumentError("MAGNETIC_AD_PROBE_REPEATS must be >= 1, got $(value)"))
     return value
 end
 
@@ -105,11 +118,30 @@ function _solve_once(model, T_fm, mu_vec, residual_method::Symbol)
     end
 end
 
+function _measure_variant(model, T_fm, mu_vec, residual_method::Symbol, repeats::Int)
+    # The first invocation is intentionally retained as a separate JIT-inclusive
+    # observation. Only repeated calls in this same process form the steady-state
+    # algorithm comparison.
+    first = _solve_once(model, T_fm, mu_vec, residual_method)
+    steady = [_solve_once(model, T_fm, mu_vec, residual_method) for _ in 1:repeats]
+    return (
+        first=first,
+        steady_wall_median=median(getfield.(steady, :wall_ms)),
+        steady_f_calls=median(getfield.(steady, :f_calls)),
+        steady_g_calls=median(getfield.(steady, :g_calls)),
+        steady_iterations=median(getfield.(steady, :iterations)),
+        steady_residual_norm=median(getfield.(steady, :residual_norm)),
+        steady_status=join(unique(getfield.(steady, :status)), ","),
+    )
+end
+
 function main()
     max_points = _max_points()
+    repeats = _repeats()
     point_count = 0
     println("magnetic AD residual A/B probe (diagnostic-only)")
     println("controls: p_num=$(P_NUM), t_num=$(T_NUM), pz_max=$(PZ_MAX), n_max=$(N_MAX), iterations=$(ITERATIONS)")
+    println("process_startup_excluded=true first_call_includes_variant_jit=true repeats=$(repeats)")
 
     for T_MeV in TEMPERATURES_MEV
         for μ_MeV in CHEMICAL_POTENTIALS_MEV
@@ -128,15 +160,19 @@ function main()
                 finite_fn = _residual_function(model, :finite, T_fm, mu_vec)
                 forward_fn = _residual_function(model, :forward, T_fm, mu_vec)
                 parity = maximum(abs.(finite_fn(X_STATE) .- forward_fn(X_STATE)))
-                finite = _solve_once(model, T_fm, mu_vec, :finite)
-                forward = _solve_once(model, T_fm, mu_vec, :forward)
+                finite = _measure_variant(model, T_fm, mu_vec, :finite, repeats)
+                forward = _measure_variant(model, T_fm, mu_vec, :forward, repeats)
                 @printf(
-                    "point T=%g MeV mu=%g MeV eB=%g fm^-2 | finite wall=%.3fms f=%d g=%d iter=%d residual=%.3e status=%s | forward wall=%.3fms f=%d g=%d iter=%d residual=%.3e status=%s | initial_residual_max_diff=%.3e\n",
+                    "point T=%g MeV mu=%g MeV eB=%g fm^-2 | finite first_ms=%.3f first_f=%d first_g=%d first_iter=%d first_status=%s steady_median_ms=%.3f steady_f=%.1f steady_g=%.1f steady_iter=%.1f steady_residual=%.3e steady_status=%s | forward first_ms=%.3f first_f=%d first_g=%d first_iter=%d first_status=%s steady_median_ms=%.3f steady_f=%.1f steady_g=%.1f steady_iter=%.1f steady_residual=%.3e steady_status=%s | initial_residual_max_diff=%.3e\n",
                     T_MeV, μ_MeV, eB_fm2,
-                    finite.wall_ms, finite.f_calls, finite.g_calls, finite.iterations,
-                    finite.residual_norm, finite.status,
-                    forward.wall_ms, forward.f_calls, forward.g_calls, forward.iterations,
-                    forward.residual_norm, forward.status,
+                    finite.first.wall_ms, finite.first.f_calls, finite.first.g_calls, finite.first.iterations,
+                    finite.first.status, finite.steady_wall_median, finite.steady_f_calls,
+                    finite.steady_g_calls, finite.steady_iterations, finite.steady_residual_norm,
+                    finite.steady_status,
+                    forward.first.wall_ms, forward.first.f_calls, forward.first.g_calls, forward.first.iterations,
+                    forward.first.status, forward.steady_wall_median, forward.steady_f_calls,
+                    forward.steady_g_calls, forward.steady_iterations, forward.steady_residual_norm,
+                    forward.steady_status,
                     parity,
                 )
             end
