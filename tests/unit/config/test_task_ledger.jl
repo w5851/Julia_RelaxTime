@@ -67,12 +67,12 @@ end
     tracks = Dict(String(t["id"]) => t for t in parsed["tracks"])
     @test parsed["primary_track"] == "issue130-phase"
     @test tracks["issue130-phase"]["status"] == "active"
-    @test tracks["rs-transport"]["status"] == "blocked"
+    @test tracks["rs-transport"]["status"] == "active"
     @test tracks["plot-sop"]["status"] == "triaged"
     items = Dict(String(item["id"]) => item for item in parsed["items"])
     @test items["issue130-phase-reference-retirement"]["status"] == "triaged"
     @test items["issue130-phase-reference-retirement"]["classification"] == "required_follow_up"
-    @test "item:issue130-phase-reference-runtime-switch" in items["issue130-phase-reference-retirement"]["blocked_by"]
+    @test "item:issue130-rs-phase-reference-parity" in items["issue130-phase-reference-retirement"]["blocked_by"]
     @test occursin("full_hybrid_candidate", read(joinpath(PROJECT_ROOT, "docs", "dev", "task_tracking_governance.md"), String))
     @test !occursin("status = \"full_hybrid_candidate\"", read(joinpath(PROJECT_ROOT, "config", "governance", "task_tracks.toml"), String))
 end
