@@ -18,7 +18,8 @@ end
     )
 
     for (kind, dim) in expected_dims
-        model = Models.create_model(kind)
+        model = kind === :PNJLMagnetic ?
+            Models.create_model(kind; eB_fm2=0.1) : Models.create_model(kind)
         @test Models.gap_state_dim(model) == dim
 
         schema = Models.schema_for_model(kind)

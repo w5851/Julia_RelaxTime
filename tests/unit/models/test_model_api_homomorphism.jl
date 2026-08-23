@@ -7,7 +7,8 @@ end
 
 @testset "models API homomorphism" begin
     for kind in (:NJL, :NJL2, :PNJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
-        model = Models.create_model(kind)
+        model = kind === :PNJLMagnetic ?
+            Models.create_model(kind; eB_fm2=0.1) : Models.create_model(kind)
         caps = Models.model_capabilities(model)
         @test hasproperty(caps, :supports_solve_gap)
         @test hasproperty(caps, :supports_model_thermo)
