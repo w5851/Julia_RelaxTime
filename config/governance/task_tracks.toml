@@ -274,10 +274,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md"
 reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unresolved rows，必须以 certified-only view、逐键 legacy fallback 和显式 rollback 形成独立 runtime switch，不能整体放宽 candidate gate。"
-next_action = "完成 focused Julia/Python fixtures、provenance/hash 记录、CLI/dry-run 和治理检查后创建独立 runtime-switch PR；合并前不称为默认 reference 晋升，不启动 RS transport。"
+next_action = "PR #260 已创建，等待 focused CI 和作者审核；合并前不称为默认 reference 晋升，不启动 RS transport。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:259", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
+evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"
