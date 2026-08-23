@@ -49,13 +49,21 @@ function _interp(x::Float64, xs::Vector{Float64}, ys::Vector{Float64})
     return NaN
 end
 
-function _load_first_order_line(xi::Float64)
-    data = Main.GapTransportScanPhaseEquilibrium.load_phase_boundary_data(xi)
+function _load_first_order_line(xi::Float64; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    data = Main.GapTransportScanPhaseEquilibrium.load_phase_boundary_data(xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     return data, data.xi
 end
 
-function _interpolate_first_order_temperature(muB_MeV::Float64, xi::Float64)
-    data, xi_used = _load_first_order_line(xi)
+function _interpolate_first_order_temperature(muB_MeV::Float64, xi::Float64;
+    phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    data, xi_used = _load_first_order_line(
+        xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     isempty(data.mu_values) && return NaN, xi_used
 
     muq_MeV = muB_MeV / 3.0
@@ -67,20 +75,43 @@ function _interpolate_first_order_temperature(muB_MeV::Float64, xi::Float64)
     return _interp(muq_MeV, mus, Ts), xi_used
 end
 
-function _interpolate_crossover_temperature(muB_MeV::Float64, xi::Float64)
-    Tc_MeV, xi_used = Main.GapTransportScanPhaseEquilibrium.interpolate_crossover_temperature(xi, muB_MeV / 3.0)
+function _interpolate_crossover_temperature(muB_MeV::Float64, xi::Float64;
+    phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    Tc_MeV, xi_used = Main.GapTransportScanPhaseEquilibrium.interpolate_crossover_temperature(
+        xi,
+        muB_MeV / 3.0;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     return Tc_MeV, xi_used
 end
 
-function _cep_muB(xi::Float64)
-    data, _ = _load_first_order_line(xi)
+function _cep_muB(xi::Float64; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    data, _ = _load_first_order_line(
+        xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     return data.muB_CEP
 end
 
-function _phase_reference_for_mode_a(muB_MeV::Float64, xi::Float64)
-    T_cross, _ = _interpolate_crossover_temperature(muB_MeV, MODE_A_REFERENCE_XI)
-    T_first, _ = _interpolate_first_order_temperature(muB_MeV, MODE_A_REFERENCE_XI)
-    mu_CEP = _cep_muB(MODE_A_REFERENCE_XI)
+function _phase_reference_for_mode_a(muB_MeV::Float64, xi::Float64;
+    phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    T_cross, _ = _interpolate_crossover_temperature(
+        muB_MeV,
+        MODE_A_REFERENCE_XI;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
+    T_first, _ = _interpolate_first_order_temperature(
+        muB_MeV,
+        MODE_A_REFERENCE_XI;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
+    mu_CEP = _cep_muB(MODE_A_REFERENCE_XI;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode)
 
     if isfinite(mu_CEP) && muB_MeV > mu_CEP + 1e-6 && isfinite(T_first)
         return (:first_order, T_first)
@@ -93,11 +124,19 @@ function _phase_reference_for_mode_a(muB_MeV::Float64, xi::Float64)
     end
 end
 
-function _phase_reference_for_mode_b(T_MeV::Float64, muB_MeV::Float64, xi::Float64)
-    data, _ = _load_first_order_line(xi)
+function _phase_reference_for_mode_b(T_MeV::Float64, muB_MeV::Float64, xi::Float64;
+    phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    data, _ = _load_first_order_line(
+        xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     mu_CEP = data.muB_CEP
     T_CEP = data.T_CEP
-    T_first, _ = _interpolate_first_order_temperature(muB_MeV, xi)
+    T_first, _ = _interpolate_first_order_temperature(muB_MeV, xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     if isfinite(T_CEP) && isfinite(mu_CEP) && abs(T_MeV - T_CEP) <= 8.0 && abs(muB_MeV - mu_CEP) <= 40.0
         return :cep_neighbor
     elseif isfinite(T_first) && T_MeV <= T_first && isfinite(mu_CEP) && muB_MeV >= mu_CEP
@@ -107,8 +146,14 @@ function _phase_reference_for_mode_b(T_MeV::Float64, muB_MeV::Float64, xi::Float
     end
 end
 
-function _mode_a_anchor(opts, muB_MeV::Float64)
-    phase_reference_kind, interpolated_T_MeV = _phase_reference_for_mode_a(muB_MeV, MODE_A_REFERENCE_XI)
+function _mode_a_anchor(opts, muB_MeV::Float64;
+    phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    phase_reference_kind, interpolated_T_MeV = _phase_reference_for_mode_a(
+        muB_MeV,
+        MODE_A_REFERENCE_XI;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     isfinite(interpolated_T_MeV) || error("no phase reference temperature for mode a point: muB=$(muB_MeV)")
 
     if phase_reference_kind === :first_order && opts.phase_anchor_policy === :direct_coexistence
@@ -160,12 +205,15 @@ function _mode_a_xi_values(opts, anchor_info, alpha_T::Float64)
     return unique(sort(Float64.(values)))
 end
 
-function build_plan(opts)
+function build_plan(opts; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
     points = PhaseGuidedPoint[]
 
     if opts.mode == :mode_a_fixed_muB_phase_scaled
         for muB_MeV in opts.muB_values
-            anchor_info = _mode_a_anchor(opts, muB_MeV)
+            anchor_info = _mode_a_anchor(opts, muB_MeV;
+                phase_reference=phase_reference,
+                phase_reference_mode=phase_reference_mode,
+            )
             for alpha_T in opts.alpha_T_values
                 scan_group = "muB$(round(muB_MeV; digits=3))_alpha$(round(alpha_T; digits=3))"
                 group_label = "muB=$(muB_MeV) MeV, alpha_T=$(alpha_T)"
@@ -223,7 +271,13 @@ function build_plan(opts)
                 plot_series = "muB$(round(muB_MeV; digits=3))"
                 plot_series_label = "muB=$(muB_MeV) MeV"
                 for xi in opts.xi_values
-                    phase_reference_kind = _phase_reference_for_mode_b(T_MeV, muB_MeV, xi)
+                    phase_reference_kind = _phase_reference_for_mode_b(
+                        T_MeV,
+                        muB_MeV,
+                        xi;
+                        phase_reference=phase_reference,
+                        phase_reference_mode=phase_reference_mode,
+                    )
                     push!(points, PhaseGuidedPoint(
                         T_MeV,
                         muB_MeV,

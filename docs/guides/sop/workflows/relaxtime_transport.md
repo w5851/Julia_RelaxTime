@@ -46,6 +46,13 @@ equilibrium -> A/B0 -> polarization -> propagator -> |M|^2
 
 与单点 workflow 相关的物理默认值仍可能来自 `config/physics/<profile>.toml`。正式 case 必须同时记录 physics profile、CLI argv 和 effective config，不能只依赖默认值的文字描述。
 
+Issue #130 phase-reference candidate 只能通过显式参数加载：`--phase-reference-root <dir>` 配合
+`--phase-reference-layer strict|derived|render`。transport runtime 默认继续读取 legacy
+reference；只有 candidate 通过 `--phase-reference-mode runtime` 的 certified gate 后才可作为
+显式 runtime 输入，`--phase-reference-mode diagnostic` 仅用于审计，`render` layer 始终不可作
+runtime 输入。candidate 的 root/layer/mode 会写入 `effective_config.json` 和
+`run_manifest.json`，因此切换与回滚都必须通过新 case 留痕，不能覆盖旧 legacy 文件。
+
 ## 6. 环境与版本冻结
 
 在仓库根目录记录：

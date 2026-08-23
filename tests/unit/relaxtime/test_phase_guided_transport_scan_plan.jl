@@ -104,6 +104,29 @@ end
     @test isapprox(via_plan_T, direct_T; atol=1e-12, rtol=0.0)
 end
 
+@testset "phase-guided plan accepts an explicitly gated candidate source" begin
+    root = mktempdir()
+    mkpath(joinpath(root, "strict", "tables"))
+    write(joinpath(root, "manifest.json"), "{\"schema_version\":\"pnjl_issue130_phase_reference_import_v1\",\"reference_status\":\"candidate\",\"runtime_consumption\":false}")
+    write(joinpath(root, "strict", "manifest.json"), "{\"layer\":\"strict_reference_v1\"}")
+    write(joinpath(root, "strict", "tables", "maxwell_surface_strict_reference_v1.csv"), "surface,xi,T_MeV,mu_MeV,rho_hadron,rho_quark,area_residual,grid_unresolved,layer,status,geometry_converged,finite_and_converged\nmaxwell,0.0,100.0,300.0,1.0,2.0,1e-6,false,strict_reference_v1,native,true,true\n")
+    write(joinpath(root, "strict", "tables", "crossover_surface_strict_reference_v1.csv"), "surface,xi,mu_MeV,T_MeV,rho,mu_CEP_proxy_MeV,layer,status,physical_region\ncrossover,0.0,100.0,160.0,1.0,300.0,strict_reference_v1,native,crossover_below_cep\n")
+    write(joinpath(root, "strict", "tables", "cep_boundary_strict_reference_v1.csv"), "surface,xi,mu_CEP_proxy_MeV,T_low_MeV,T_high_MeV,T_midpoint_MeV,layer,status,boundary_mode\ncep_boundary,0.0,300.0,120.0,120.0625,120.03125,strict_reference_v1,bracket_preserved,estimated_midpoint\n")
+    write(joinpath(root, "strict", "tables", "spinodal_surface_strict_reference_v1.csv"), "surface,xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV,layer,status\nspinodal,0.0,100.0,320.0,280.0,strict_reference_v1,native\n")
+
+    source = Main.PhaseReferenceAdapter.load_phase_reference_runtime(root)
+    opts = Main.PhaseGuidedTransportScanCLI.parse_args([
+        "--mode", "fixed-T-sparse-muB",
+        "--xi-list", "0.0",
+        "--muB-list", "900",
+        "--T-list", "100",
+        "--dry-run",
+    ])
+    plan = Main.PhaseGuidedTransportScanPlan.build_plan(opts; phase_reference=source)
+    @test plan.total == 1
+    @test plan.points[1].phase_reference_kind === :first_order
+end
+
 @testset "phase-guided production workflow forwards required CLI args" begin
     workflow_text = read(_PHASE_GUIDED_PRODUCTION_WORKFLOW, String)
     canonical_xi_values = "-0.5,-0.45,-0.4,-0.35,-0.3,-0.25,-0.2,-0.15,-0.1,-0.05,0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5"

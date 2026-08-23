@@ -11,6 +11,7 @@ from scripts.pnjl.phase_reference_adapter import (
     to_legacy_views,
 )
 from scripts.pnjl.plot_phase_diagram import DEFAULT_BOUNDARY_PATH, load_candidate_phase_data
+from scripts.relaxtime.build_paper_p1_figure_assets import load_phase_candidate_overlay
 
 
 ROOT = Path(__file__).parents[3]
@@ -130,3 +131,17 @@ def test_plot_consumer_requires_explicit_candidate_root(tmp_path: Path) -> None:
     assert crossovers[0].T_deconf_MeV is None
     assert diagnostics["runtime_consumption"] is False
     assert DEFAULT_BOUNDARY_PATH == ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
+
+
+def test_paper_p1_candidate_overlay_preserves_mu_scale_and_status(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_candidate(root)
+    rows = load_phase_candidate_overlay(root, "strict", 3.0)
+    first_order = next(row for row in rows if row["kind"] == "first_order")
+    crossover = next(row for row in rows if row["kind"] == "crossover")
+    cep = next(row for row in rows if row["kind"] == "cep")
+    assert first_order["muB_MeV"] == 900.0
+    assert crossover["muB_MeV"] == 300.0
+    assert cep["muB_MeV"] == 900.0
+    assert first_order["candidate_certified"] is True
+    assert cep["candidate_status"] == "bracket_preserved"

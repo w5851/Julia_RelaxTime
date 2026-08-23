@@ -175,6 +175,8 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
     T_mev::Float64, muB_mev::Float64, xi::Float64, opts, ctx, runtime;
     previous_solution=nothing,
     previous_phase::Symbol=:unknown,
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
     point_meta=(; mode=:grid, phase_reference_kind=:regular_grid, scan_group="", group_label="", plot_panel="", plot_panel_label="", plot_series="", plot_series_label="", T_phase_base_MeV=NaN, alpha_T=NaN),
 )
     next_solution = previous_solution
@@ -189,6 +191,8 @@ function execute_gap_transport_scan_point!(io, channel_io, failed_io,
             opts;
             previous_solution=previous_solution,
             previous_phase=previous_phase,
+            phase_reference=phase_reference,
+            phase_reference_mode=phase_reference_mode,
         )
         diag_hint = diag
 

@@ -62,6 +62,7 @@ include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_cli.j
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_io.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_orchestration.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_plan.jl"))
+include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "phase_reference_adapter.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_phase_equilibrium.jl"))
 include(joinpath(PROJECT_ROOT, "scripts", "relaxtime", "gap_transport_scan_provenance.jl"))
 
@@ -292,7 +293,10 @@ function build_sigma_caches(processes::Tuple, quark_params::NamedTuple, thermo_p
     return caches
 end
 
-function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
+function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=opts.phase_reference_mode,
+)
     ensure_parent_dir(opts.output)
     if opts.channel_diagnostics_output !== nothing
         ensure_parent_dir(opts.channel_diagnostics_output)
@@ -405,6 +409,8 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext)
                     runtime;
                     previous_solution=previous_solution,
                     previous_phase=previous_phase,
+                    phase_reference=phase_reference,
+                    phase_reference_mode=phase_reference_mode,
                 ),
             opts,
             plan,
@@ -431,7 +437,16 @@ end
 function main()
     opts = parse_args(copy(ARGS))
     ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/run_gap_transport_scan.jl", copy(ARGS))
-    run_scan(opts, ctx)
+    phase_reference = opts.phase_reference_root === nothing ? nothing :
+        PhaseReferenceAdapter.load_phase_reference(
+            opts.phase_reference_root;
+            layer=opts.phase_reference_layer,
+            allow_runtime=opts.phase_reference_mode === :runtime,
+        )
+    run_scan(opts, ctx;
+        phase_reference=phase_reference,
+        phase_reference_mode=opts.phase_reference_mode,
+    )
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

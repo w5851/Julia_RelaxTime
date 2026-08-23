@@ -26,16 +26,20 @@ versioned candidate 的 schema 语义收束为显式 adapter 合同。默认 leg
 - [x] 增加 fixture 单元测试，覆盖三态、CEP 双模式、单位换算、重复键、NaN/Inf 和 runtime gate。
 - [x] 将 plotting consumer 改为显式 candidate root/layer 入口，默认保持 legacy；candidate
   入口只生成诊断图，不改变 runtime 语义。
-- [ ] 为 `run_gap_transport_scan.jl` / phase-guided plan 定义 Julia 侧等价 adapter，并完成
+- [x] 为 `run_gap_transport_scan.jl` / phase-guided plan 定义 Julia 侧等价 adapter，并完成
   legacy-vs-candidate parity fixtures；这一步完成前不改变 transport 默认路径。
-- [ ] 审核 Paper P1 pipeline 的 tagged-file contract，决定是否在独立迁移 PR 中接入 candidate。
-- [ ] 完成 transport、phase-guided、paper 和 legacy plot 的引用迁移及回归后，另立 runtime switch
-  PR；在作者审核和 switch 合并前不得删除旧 `boundary.csv`、`cep.csv`、`spinodals.csv`、
-  `crossover_dense.csv` 或 `phase_reference_dense_manifest.json`。
+- [x] 审核 Paper P1 的 tagged-file contract，并提供显式 candidate overlay 与 parity fixture；
+  candidate 仍只用于显式诊断/图层输入，不改变 P1 默认 legacy 路径。
+- [x] 完成 transport、phase-guided、paper 和 legacy plot 的显式引用入口迁移及 solver-free
+  回归；默认 runtime 仍为 legacy，candidate 必须显式加载并通过 certified gate。
+- [ ] 另立 versioned runtime-switch PR，默认使用 `strict` candidate，保留 legacy
+  fallback/rollback；在作者审核和 switch 合并前不得删除旧 `boundary.csv`、`cep.csv`、
+  `spinodals.csv`、`crossover_dense.csv` 或 `phase_reference_dense_manifest.json`。
 
 ## 验收与非目标
 
-本阶段验收是 adapter contract 可读、可拒绝不安全输入、可追溯且默认不改变 runtime；不是
-phase-reference promotion，也不是 RS transport production。验证只运行 Python fixture、
-candidate schema replay、`git diff --check`、task-ledger/docs governance；本机不调用
-equilibrium solver。
+本阶段验收是 adapter contract 可读、可拒绝不安全输入、消费者 parity 可追溯且默认不改变
+runtime；不是 phase-reference promotion，也不是 RS transport production。验证只运行 Julia/Python
+fixture、candidate schema replay、CLI/dry-run、`git diff --check`、task-ledger/docs governance；
+本机不调用新的 equilibrium solver 扫描。下一步必须先创建独立 runtime-switch PR，经过 CI 和
+作者审核后才能标记 candidate 为默认 runtime reference；旧 reference retirement 仍需另立 PR。
