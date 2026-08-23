@@ -48,6 +48,13 @@ Matching target/provenance directories should preserve the same semantic split:
 - `targets/relaxtime/legacy/transport/`: lightweight acceptance targets for legacy transport quantities such as `tau`, `eta_over_s`, `sigma_t`, `kappa_*`, `lambda`, and stable ratio diagnostics.
 - `provenance/.../evidence/`: source file paths, column semantics, and comparison notes that justify how targets were extracted.
 
+The current Mott integral external replay is evidence-only:
+`data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`.
+It records source hashes and error statistics but is not read by the default
+acceptance suite. The magnetic external-source ledger is kept under
+`docs/analysis/historical/legacy/legacy_extraction_v1/` until model, unit,
+cutoff, and branch gates are closed.
+
 Practical rule:
 
 - tests read `targets/`
