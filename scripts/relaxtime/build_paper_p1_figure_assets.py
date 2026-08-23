@@ -21,11 +21,18 @@ import argparse
 import csv
 import json
 import math
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
 FM_TO_MEV = 197.327
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from scripts.pnjl.phase_reference_adapter import load_phase_reference
 
 CHANNELS = {
     "pi": {
@@ -71,6 +78,18 @@ def parse_args() -> argparse.Namespace:
         "--phase-reference-tag",
         default=None,
         help="Tag suffix for reusable phase reference CSV files.",
+    )
+    parser.add_argument(
+        "--phase-reference-candidate-root",
+        type=Path,
+        default=None,
+        help="Explicit Issue #130 candidate root for a diagnostic phase overlay.",
+    )
+    parser.add_argument(
+        "--phase-reference-candidate-layer",
+        choices=["strict", "derived", "render"],
+        default="strict",
+        help="Candidate layer for --phase-reference-candidate-root.",
     )
     parser.add_argument(
         "--phase-mu-scale",
@@ -665,6 +684,89 @@ def load_phase_reference_overlay(
     return rows
 
 
+def load_phase_candidate_overlay(
+    phase_reference_root: Path | None,
+    phase_reference_layer: str,
+    phase_mu_scale: float,
+) -> list[dict[str, Any]]:
+    """Load an explicit Issue #130 candidate for diagnostic plotting only."""
+    if phase_reference_root is None:
+        return []
+    bundle = load_phase_reference(phase_reference_root, layer=phase_reference_layer)
+    layer_dir = bundle.root / phase_reference_layer / "tables"
+    source_paths = {
+        "boundary": layer_dir / ("maxwell_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
+        "spinodals": layer_dir / ("spinodal_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv")),
+        "crossover": layer_dir / ("crossover_surface_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
+        "cep": layer_dir / ("cep_boundary_" + ("strict_reference_v1.csv" if phase_reference_layer == "strict" else "derived_reference_v1.csv" if phase_reference_layer == "derived" else "render.csv")),
+    }
+    rows: list[dict[str, Any]] = []
+    for row in bundle.tables.get("boundary", ()):
+        rows.append(
+            {
+                "kind": "first_order",
+                "xi": row["xi"],
+                "muB_MeV": row["muq_MeV"] * phase_mu_scale,
+                "T_MeV": row["T_MeV"],
+                "variable": "mu_transition_MeV",
+                "curve_parameter": row["T_MeV"],
+                "plot_order_key": row["T_MeV"],
+                "source_csv": str(source_paths["boundary"]),
+                "candidate_status": row.get("status", ""),
+                "candidate_certified": row.get("certified", False),
+            }
+        )
+    for row in bundle.tables.get("spinodals", ()):
+        for kind, key in (("spinodal_hadron", "muq_spinodal_hadron_MeV"), ("spinodal_quark", "muq_spinodal_quark_MeV")):
+            rows.append(
+                {
+                    "kind": kind,
+                    "xi": row["xi"],
+                    "muB_MeV": row[key] * phase_mu_scale,
+                    "T_MeV": row["T_MeV"],
+                    "variable": key,
+                    "curve_parameter": row["T_MeV"],
+                    "plot_order_key": row["T_MeV"],
+                    "source_csv": str(source_paths["spinodals"]),
+                    "candidate_status": row.get("status", ""),
+                    "candidate_certified": row.get("certified", False),
+                }
+            )
+    for row in bundle.tables.get("crossover", ()):
+        if row.get("physical_region", "").lower() not in ("", "crossover_below_cep"):
+            continue
+        rows.append(
+            {
+                "kind": "crossover",
+                "xi": row["xi"],
+                "muB_MeV": row["muq_MeV"] * phase_mu_scale,
+                "T_MeV": row["T_MeV"],
+                "variable": "mu_MeV",
+                "curve_parameter": row["muq_MeV"],
+                "plot_order_key": row["muq_MeV"],
+                "source_csv": str(source_paths["crossover"]),
+                "candidate_status": row.get("status", ""),
+                "candidate_certified": row.get("certified", False),
+            }
+        )
+    for row in bundle.tables.get("cep", ()):
+        rows.append(
+            {
+                "kind": "cep",
+                "xi": row["xi"],
+                "muB_MeV": row["muq_CEP_proxy_MeV"] * phase_mu_scale,
+                "T_MeV": row["T_midpoint_MeV"],
+                "variable": "CEP",
+                "curve_parameter": row["T_midpoint_MeV"],
+                "plot_order_key": row["T_midpoint_MeV"],
+                "source_csv": str(source_paths["cep"]),
+                "candidate_status": row.get("status", ""),
+                "candidate_certified": row.get("certified", False),
+            }
+        )
+    return rows
+
+
 def dedupe_phase_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     deduped: list[dict[str, Any]] = []
     seen: set[tuple[Any, ...]] = set()
@@ -911,9 +1013,24 @@ def main() -> int:
     mott_rows = read_scan_csv(args.mott_grid_csv)
     mott_lines = build_mott_lines(mott_rows, args.mott_grid_csv)
     trajectories, isentropic_crossings = build_isentropic_assets(args.isentropic_csv)
+    if args.phase_reference_root is not None and args.phase_reference_candidate_root is not None:
+        raise ValueError("choose either --phase-reference-root or --phase-reference-candidate-root")
+    candidate_diagnostics = None
+    if args.phase_reference_candidate_root is not None:
+        candidate_diagnostics = dict(
+            load_phase_reference(
+                args.phase_reference_candidate_root,
+                layer=args.phase_reference_candidate_layer,
+            ).diagnostics
+        )
     phase_overlay = dedupe_phase_rows(
         load_phase_overlay(args.phase_dir, args.phase_mu_scale)
         + load_phase_reference_overlay(args.phase_reference_root, args.phase_reference_tag, args.phase_mu_scale)
+        + load_phase_candidate_overlay(
+            args.phase_reference_candidate_root,
+            args.phase_reference_candidate_layer,
+            args.phase_mu_scale,
+        )
     )
 
     mott_fields = [
@@ -971,7 +1088,10 @@ def main() -> int:
         "gap_low_inv_fm",
         "gap_high_inv_fm",
     ]
-    phase_fields = ["kind", "xi", "muB_MeV", "T_MeV", "variable", "curve_parameter", "plot_order_key", "source_csv"]
+    phase_fields = [
+        "kind", "xi", "muB_MeV", "T_MeV", "variable", "curve_parameter", "plot_order_key",
+        "source_csv", "candidate_status", "candidate_certified",
+    ]
 
     assets = {
         "mott_lines": _manifest_path(asset_dir / "mott_lines.csv"),
@@ -998,6 +1118,9 @@ def main() -> int:
             "phase_dir": [_manifest_path(path) for path in args.phase_dir],
             "phase_reference_root": _manifest_path(args.phase_reference_root) if args.phase_reference_root is not None else None,
             "phase_reference_tag": args.phase_reference_tag,
+            "phase_reference_candidate_root": _manifest_path(args.phase_reference_candidate_root) if args.phase_reference_candidate_root is not None else None,
+            "phase_reference_candidate_layer": args.phase_reference_candidate_layer,
+            "phase_reference_candidate_diagnostics": candidate_diagnostics,
             "phase_mu_scale": args.phase_mu_scale,
         },
         "counts": {

@@ -39,6 +39,9 @@ function build_effective_config(opts)
         "gc_every_n" => opts.gc_every_n,
         "tr_p_nodes" => opts.tr_p_nodes,
         "tr_p_max_fm" => opts.tr_p_max_fm,
+        "phase_reference_root" => opts.phase_reference_root,
+        "phase_reference_layer" => String(opts.phase_reference_layer),
+        "phase_reference_mode" => String(opts.phase_reference_mode),
     )
 end
 

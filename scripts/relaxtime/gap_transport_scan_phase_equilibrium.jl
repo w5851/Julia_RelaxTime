@@ -18,7 +18,21 @@ function _column_index(header::AbstractVector{<:AbstractString}, names::Tuple{Va
     return nothing
 end
 
-function load_phase_boundary_data(xi::Float64; boundary_path::String=Main.DEFAULT_PHASE_BOUNDARY_PATH, cep_path::String=Main.DEFAULT_PHASE_CEP_PATH)
+function load_phase_boundary_data(xi::Float64;
+    boundary_path::String=Main.DEFAULT_PHASE_BOUNDARY_PATH,
+    cep_path::String=Main.DEFAULT_PHASE_CEP_PATH,
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
+    if phase_reference !== nothing
+        phase_reference_mode in (:runtime, :diagnostic) ||
+            throw(ArgumentError("phase_reference_mode must be :runtime or :diagnostic"))
+        return Main.PhaseReferenceAdapter.boundary_data(
+            phase_reference,
+            xi;
+            require_certified=phase_reference_mode === :runtime,
+        )
+    end
     T_CEP = NaN
     muq_CEP = NaN
     muB_CEP = NaN
@@ -141,7 +155,8 @@ function tracker_seed(tracker::LocalPhaseTracker, T_fm::Float64, muq_fm::Float64
     return Main.Models.extend_seed(base, mode)
 end
 
-function available_phase_boundary_xis()
+function available_phase_boundary_xis(; phase_reference=nothing)
+    phase_reference !== nothing && return Main.PhaseReferenceAdapter.available_xi(phase_reference, :boundary)
     if Main.PHASE_BOUNDARY_XI_CACHE[] !== nothing
         return Main.PHASE_BOUNDARY_XI_CACHE[]
     end
@@ -160,14 +175,15 @@ function available_phase_boundary_xis()
     return Main.PHASE_BOUNDARY_XI_CACHE[]
 end
 
-function nearest_phase_boundary_xi(xi::Float64)
-    xis = available_phase_boundary_xis()
+function nearest_phase_boundary_xi(xi::Float64; phase_reference=nothing)
+    xis = available_phase_boundary_xis(; phase_reference=phase_reference)
     isempty(xis) && return nothing
     distances = abs.(xis .- xi)
     return xis[argmin(distances)]
 end
 
-function available_phase_crossover_xis()
+function available_phase_crossover_xis(; phase_reference=nothing)
+    phase_reference !== nothing && return Main.PhaseReferenceAdapter.available_xi(phase_reference, :crossover)
     if Main.PHASE_CROSSOVER_XI_CACHE[] !== nothing
         return Main.PHASE_CROSSOVER_XI_CACHE[]
     end
@@ -186,16 +202,23 @@ function available_phase_crossover_xis()
     return Main.PHASE_CROSSOVER_XI_CACHE[]
 end
 
-function nearest_phase_crossover_xi(xi::Float64)
-    xis = available_phase_crossover_xis()
+function nearest_phase_crossover_xi(xi::Float64; phase_reference=nothing)
+    xis = available_phase_crossover_xis(; phase_reference=phase_reference)
     isempty(xis) && return nothing
     distances = abs.(xis .- xi)
     return xis[argmin(distances)]
 end
 
-function build_phase_tracker(xi::Float64, previous_solution=nothing, previous_phase::Symbol=:unknown)
-    boundary_xi = nearest_phase_boundary_xi(xi)
-    boundary_data = boundary_xi === nothing ? nothing : load_phase_boundary_data(boundary_xi)
+function build_phase_tracker(xi::Float64, previous_solution=nothing, previous_phase::Symbol=:unknown;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
+    boundary_xi = nearest_phase_boundary_xi(xi; phase_reference=phase_reference)
+    boundary_data = boundary_xi === nothing ? nothing : load_phase_boundary_data(
+        boundary_xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
 
     hadron_seed = Float64.(Main.Models.HADRON_SEED_5)
     quark_seed = Float64.(Main.Models.QUARK_SEED_5)
@@ -220,7 +243,19 @@ function build_phase_tracker(xi::Float64, previous_solution=nothing, previous_ph
     return tracker, boundary_xi
 end
 
-function load_crossover_reference(xi::Float64)
+function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
+    if phase_reference !== nothing
+        phase_reference_mode in (:runtime, :diagnostic) ||
+            throw(ArgumentError("phase_reference_mode must be :runtime or :diagnostic"))
+        rows = Main.PhaseReferenceAdapter.crossover_rows(
+            phase_reference,
+            xi;
+            require_certified=phase_reference_mode === :runtime,
+        )
+        isempty(rows) && return nothing, nothing
+        return [(mu_MeV=row.muq_MeV, T_crossover_MeV=row.T_MeV) for row in rows],
+            first(rows).xi
+    end
     isfile(Main.DEFAULT_PHASE_CROSSOVER_PATH) || return nothing, nothing
 
     header = nothing
@@ -270,8 +305,15 @@ function load_crossover_reference(xi::Float64)
     return filtered, xi_used
 end
 
-function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64)
-    data, xi_used = load_crossover_reference(xi)
+function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
+    data, xi_used = load_crossover_reference(
+        xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     data === nothing && return NaN, xi_used
     length(data) == 1 && return data[1].T_crossover_MeV, xi_used
 
@@ -293,13 +335,21 @@ function interpolate_crossover_temperature(xi::Float64, muq_mev::Float64)
     return NaN, xi_used
 end
 
-function tracker_phase(tracker::LocalPhaseTracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
+function tracker_phase(tracker::LocalPhaseTracker, T_mev::Float64, muq_mev::Float64, xi::Float64;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
     boundary_phase = current_phase_hint(tracker, T_mev, muq_mev)
     if boundary_phase in (:hadron, :quark)
         return boundary_phase
     end
 
-    Tc_mev, _ = interpolate_crossover_temperature(xi, muq_mev)
+    Tc_mev, _ = interpolate_crossover_temperature(
+        xi,
+        muq_mev;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     if isfinite(Tc_mev)
         if abs(T_mev - Tc_mev) <= 2.0
             return :crossover
@@ -330,13 +380,21 @@ function describe_seed_source(tracker, current_phase::Symbol)
     end
 end
 
-function phase_structure(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64)
+function phase_structure(tracker, T_mev::Float64, muq_mev::Float64, xi::Float64;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
     data = tracker.boundary_data
     if data !== nothing && !isempty(data.T_values) && !isnan(data.T_CEP) && T_mev <= data.T_CEP
         return :first_order_possible
     end
 
-    Tc_mev, _ = interpolate_crossover_temperature(xi, muq_mev)
+    Tc_mev, _ = interpolate_crossover_temperature(
+        xi,
+        muq_mev;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     if isfinite(Tc_mev)
         return T_mev <= Tc_mev ? :crossover_possible : :no_transition
     end
@@ -662,15 +720,26 @@ end
 function solve_equilibrium_with_diagnostics(T_mev::Float64, muB_mev::Float64, xi::Float64, opts;
     previous_solution=nothing,
     previous_phase::Symbol=:unknown,
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
 )
     T_fm = T_mev / Main.ħc_MeV_fm
     muq_mev = muB_mev / 3.0
     muq_fm = muq_mev / Main.ħc_MeV_fm
 
-    tracker, boundary_xi_used = build_phase_tracker(xi, previous_solution, previous_phase)
+    tracker, boundary_xi_used = build_phase_tracker(xi, previous_solution, previous_phase;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     phase_prev = tracker.previous_phase
-    phase_curr_hint = tracker_phase(tracker, T_mev, muq_mev, xi)
-    structure = phase_structure(tracker, T_mev, muq_mev, xi)
+    phase_curr_hint = tracker_phase(tracker, T_mev, muq_mev, xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
+    structure = phase_structure(tracker, T_mev, muq_mev, xi;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     seed_source = describe_seed_source(tracker, phase_curr_hint)
     seed_state = tracker_seed(tracker, T_fm, muq_fm)
 

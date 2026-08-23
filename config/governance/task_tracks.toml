@@ -9,12 +9,12 @@ status = "active"
 current_task = "issue130-phase-reference-adapter-contract"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "adapter contract fixture 已完成；继续完成 plotting、phase-guided、transport 和 Paper P1 的显式引用迁移与 parity，默认 legacy 不变，RS transport 继续暂停。"
+next_action = "consumer migration 已完成并待 PR 合并；先运行 CI/作者审核，随后另立 runtime-switch PR，默认 strict candidate 并保留 legacy fallback/rollback，RS transport 继续暂停。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-phase-reference-adapter-contract"
-current_sha = "85419453b918c83ba5a0335b45a0c43154f480e6"
+current_branch = "codex/issue130-phase-reference-consumer-migration"
+current_sha = "0e234afd005951ae33cec3787b711c0607a611e9"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -261,10 +261,10 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md"
 reason = "PR253 已确认 candidate 与 legacy schema 不兼容；必须先完成显式 adapter、语义 parity 和引用迁移，才能评估 runtime switch 或移除旧 reference。"
-next_action = "完成 plotting、phase-guided、transport 和 Paper P1 的显式 adapter wiring 与 parity fixtures；默认 legacy 保持不变。"
+next_action = "consumer migration 已在 shared worktree 完成；等待本分支 CI/作者审核后另立 versioned runtime-switch PR，默认 legacy 仍不变。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:scripts/pnjl/phase_reference_adapter.py", "note:runtime_consumption=false; solver_called=false; legacy default unchanged"]
+evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:scripts/pnjl/phase_reference_adapter.py", "file:scripts/relaxtime/phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_mu_contract.jl", "file:tests/unit/relaxtime/test_phase_guided_transport_scan_plan.jl", "file:tests/unit/python/test_pnjl_phase_reference_adapter.py", "pr:258", "sha:0e234afd005951ae33cec3787b711c0607a611e9", "note:Julia/Python adapter and solver-free consumer parity implemented; runtime_consumption=false; solver_called=false; legacy default unchanged; runtime switch not yet merged"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"

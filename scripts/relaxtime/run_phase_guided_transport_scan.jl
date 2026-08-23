@@ -70,7 +70,10 @@ function _point_meta(point)
     )
 end
 
-function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
+function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
+    phase_reference=nothing,
+    phase_reference_mode::Symbol=:runtime,
+)
     paths = _default_output_paths(opts)
     figure_dir = _default_figure_dir(opts)
     mkpath(opts.outdir)
@@ -81,7 +84,11 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
         end
     end
 
-    plan = PhaseGuidedPlan.build_plan(opts)
+    plan = PhaseGuidedPlan.build_plan(
+        opts;
+        phase_reference=phase_reference,
+        phase_reference_mode=phase_reference_mode,
+    )
     PhaseGuidedAssets.write_plan_csv(paths.plan_csv, plan)
     PhaseGuidedAssets.write_readme(paths.readme, opts, plan; result_csv_name=basename(paths.result_csv), figure_dir=replace(figure_dir, '\\' => '/'))
     PhaseGuidedAssets.write_effective_config(paths.effective_config, PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/')))
@@ -151,6 +158,8 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx)
                     runtime;
                     previous_solution=previous_solution,
                     previous_phase=previous_phase,
+                    phase_reference=phase_reference,
+                    phase_reference_mode=phase_reference_mode,
                     point_meta=_point_meta(point),
                 ),
             opts,
@@ -185,7 +194,16 @@ end
 function main()
     opts = PhaseGuidedCLI.parse_args(copy(ARGS))
     ctx = Main.ProvenanceMetadata.new_run_context("scripts/relaxtime/run_phase_guided_transport_scan.jl", copy(ARGS))
-    run_phase_guided_scan(opts, ctx)
+    phase_reference = opts.phase_reference_root === nothing ? nothing :
+        Main.PhaseReferenceAdapter.load_phase_reference(
+            opts.phase_reference_root;
+            layer=opts.phase_reference_layer,
+            allow_runtime=opts.phase_reference_mode === :runtime,
+        )
+    run_phase_guided_scan(opts, ctx;
+        phase_reference=phase_reference,
+        phase_reference_mode=opts.phase_reference_mode,
+    )
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

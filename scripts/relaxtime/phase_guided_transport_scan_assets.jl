@@ -65,6 +65,9 @@ function write_readme(path::String, opts, plan; result_csv_name::String="phase_g
         println(io, "- sigma cache policy: `$(opts.sigma_cache_policy)`")
         println(io, "- thermodynamic nodes: `p_num=$(opts.p_num), t_num=$(opts.t_num)`")
         println(io, "- phase anchor policy: `$(opts.phase_anchor_policy)`")
+        println(io, "- phase reference root: `$(opts.phase_reference_root)`")
+        println(io, "- phase reference layer: `$(opts.phase_reference_layer)`")
+        println(io, "- phase reference mode: `$(opts.phase_reference_mode)`")
         if opts.tau_p_nodes !== nothing || opts.tau_angle_nodes !== nothing || opts.tau_phi_nodes !== nothing ||
            opts.tau_n_sigma_points !== nothing || opts.sigma_grid_n !== nothing
             println(io, "- tau/sigma overrides:")
@@ -117,6 +120,9 @@ function build_effective_config(opts, result_csv::String, plan_csv::String; figu
         "p_num" => opts.p_num,
         "t_num" => opts.t_num,
         "phase_anchor_policy" => String(opts.phase_anchor_policy),
+        "phase_reference_root" => opts.phase_reference_root,
+        "phase_reference_layer" => String(opts.phase_reference_layer),
+        "phase_reference_mode" => String(opts.phase_reference_mode),
         "channel_diagnostics" => opts.channel_diagnostics,
         "compute_bulk" => opts.compute_bulk,
         "dry_run" => opts.dry_run,
