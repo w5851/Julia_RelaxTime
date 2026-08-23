@@ -98,9 +98,9 @@ function print_usage(io::IO=stdout)
     println(io, "  --p-num <int>                主平衡态与 bulk 的热力学动量节点 (default 12)")
     println(io, "  --t-num <int>                主平衡态与 bulk 的热力学角节点 (default 6)")
     println(io, "  --phase-anchor-policy <direct_coexistence|reference_interpolation>  mode a 一阶相变温度锚点 (default direct_coexistence)")
-    println(io, "  --phase-reference-root <dir>  显式 Issue #130 candidate root；默认仍使用 legacy")
+    println(io, "  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
     println(io, "  --phase-reference-layer <strict|derived|render>  candidate layer (default strict)")
-    println(io, "  --phase-reference-mode <runtime|diagnostic>  candidate gate (default runtime)")
+    println(io, "  --phase-reference-mode <runtime|diagnostic|legacy>  candidate gate or explicit legacy rollback (default runtime)")
     println(io, "  --channel-diagnostics        输出每点每通道的 τ^-1 贡献明细 CSV")
     println(io, "  --compute-bulk               显式开启体粘滞 ζ 计算（默认开启）")
     println(io, "  --no-compute-bulk            显式关闭体粘滞 ζ 计算")
@@ -214,7 +214,7 @@ function parse_args(args::Vector{String})
             opts[:phase_reference_layer] = layer
         elseif arg == "--phase-reference-mode"
             mode = Symbol(strip(require_value()))
-            mode in (:runtime, :diagnostic) || error("unknown phase reference mode: $(mode)")
+            mode in (:runtime, :diagnostic, :legacy) || error("unknown phase reference mode: $(mode)")
             opts[:phase_reference_mode] = mode
         elseif arg == "--channel-diagnostics"
             opts[:channel_diagnostics] = true

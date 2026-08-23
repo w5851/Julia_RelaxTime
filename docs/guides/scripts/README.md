@@ -180,10 +180,12 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
     - `fixed-T-sparse-muB`（兼容短别名 `b`）
   - `fixed-muB-phase-scaled`：固定 `mu_B`，沿 `T/T_phase` 倍率带扫描 `xi`
   - `fixed-T-sparse-muB`：固定 `T`、离散 `mu_B`、连续扫描 `xi`
-  - 可显式传入 Issue #130 candidate phase reference：`--phase-reference-root <dir>`、
-    `--phase-reference-layer strict|derived|render`、`--phase-reference-mode runtime|diagnostic`；
-    默认仍使用 legacy，`runtime` 会拒绝 unresolved/non-certified candidate，`diagnostic` 仅用于
-    solver-free/审计路径，`render` 不可作为 runtime 输入
+  - 默认使用仓库内 Issue #130 `strict` candidate 的 certified-only runtime view；candidate 缺失键
+    使用 legacy fallback。可用 `--phase-reference-root <dir>` 指定 candidate、
+    `--phase-reference-layer strict|derived|render` 选择层，或用
+    `--phase-reference-mode legacy` 显式回滚 legacy。`diagnostic` 仍只用于显式 candidate 的
+    solver-free/审计路径，`render` 不可作为 runtime 输入；source、fallback 原因和 manifest hash
+    写入 effective config/run manifest。
   - 当前 canonical 口径：
     - mode a 固定 `mu_B = 0, 450, 900 MeV`
     - mode b 固定 `T = 120, 160, 200 MeV`

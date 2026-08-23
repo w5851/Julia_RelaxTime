@@ -2,19 +2,23 @@
 
 The Issue #130 candidate uses versioned tables whose schema is intentionally
 different from the historical CSV files.  This module is the only boundary
-between those contracts.  A candidate is never selected implicitly: callers
-must load it explicitly and opt in to the runtime gate.  The default consumer
-path remains the legacy source used by the transport scripts.
+between those contracts.  Runtime selection is explicit and auditable: the
+candidate strict layer is the preferred source, only certified candidate rows
+are exposed, and missing keys may fall back to the legacy source.  The legacy
+source remains an explicit rollback path and is never deleted by this module.
 """
 module PhaseReferenceAdapter
 
 using CSV
 using JSON3
+using SHA: sha256
 
 export PhaseReferenceAdapterError
 export PhaseReferenceSource
 export load_phase_reference
 export load_phase_reference_runtime
+export load_phase_reference_runtime_with_fallback
+export load_default_phase_reference_runtime
 export load_legacy_phase_reference
 export source_kind
 export source_layer
@@ -67,6 +71,7 @@ const _REQUIRED_COLUMNS = Dict{Symbol, Tuple}(
     :cep => (:xi, :mu_CEP_proxy_MeV, :T_low_MeV, :T_high_MeV, :T_midpoint_MeV),
     :spinodals => (:xi, :T_MeV, :mu_spinodal_hadron_MeV, :mu_spinodal_quark_MeV),
 )
+const _TABLE_ORDER = (:boundary, :crossover, :cep, :spinodals)
 
 @inline function _error(message)
     throw(PhaseReferenceAdapterError(String(message)))
@@ -156,6 +161,7 @@ function _normalize_row(table::Symbol, row, layer::Symbol, row_number::Int)
     certified = _status_certified(table, row, layer, row_number)
     status = _string(_row_value(row, :status))
     source_layer = _string(_row_value(row, :source_layer))
+    isempty(source_layer) && (source_layer = String(layer))
     if table === :boundary
         muq = _float(_row_value(row, :mu_MeV), table, row_number, :mu_MeV)
         return (
@@ -243,6 +249,72 @@ function _normalize_tables(paths::Dict{Symbol,String}, layer::Symbol; require_ce
     return tables, row_counts, uncertified
 end
 
+function _certified_runtime_source(source::PhaseReferenceSource)
+    source.runtime_enabled && return source
+    tables = Dict{Symbol,Vector{NamedTuple}}()
+    row_counts = Dict{String,Int}()
+    certified_counts = Dict{String,Int}()
+    for (table, rows) in source.tables
+        certified = filter(row -> row.certified, rows)
+        tables[table] = certified
+        row_counts[String(table)] = length(rows)
+        certified_counts[String(table)] = length(certified)
+    end
+    diagnostics = merge(source.diagnostics, (
+        runtime_view="certified_only",
+        certified_row_counts=certified_counts,
+        fallback_enabled=false,
+    ))
+    return PhaseReferenceSource(source.kind, source.layer, source.root, true, tables, diagnostics)
+end
+
+function _table_key(table::Symbol, row)
+    if table === :boundary || table === :spinodals
+        return (row.xi, row.T_MeV)
+    elseif table === :crossover
+        return (row.xi, row.muq_MeV)
+    else
+        return (row.xi,)
+    end
+end
+
+function _merge_certified_candidate_with_legacy(candidate::PhaseReferenceSource, legacy::PhaseReferenceSource)
+    candidate_runtime = _certified_runtime_source(candidate)
+    tables = Dict{Symbol,Vector{NamedTuple}}()
+    candidate_counts = Dict{String,Int}()
+    fallback_counts = Dict{String,Int}()
+    for table in _TABLE_ORDER
+        rows = NamedTuple[]
+        seen = Set{Any}()
+        for row in get(candidate_runtime.tables, table, NamedTuple[])
+            push!(rows, row)
+            push!(seen, _table_key(table, row))
+        end
+        candidate_counts[String(table)] = length(rows)
+        n_fallback = 0
+        for row in get(legacy.tables, table, NamedTuple[])
+            key = _table_key(table, row)
+            key in seen && continue
+            fallback_row = merge(row, (source_layer="legacy_fallback", status="legacy_fallback", certified=true))
+            push!(rows, fallback_row)
+            push!(seen, key)
+            n_fallback += 1
+        end
+        fallback_counts[String(table)] = n_fallback
+        tables[table] = rows
+    end
+    diagnostics = merge(candidate_runtime.diagnostics, (
+        runtime_view="certified_candidate_with_legacy_fallback",
+        fallback_enabled=true,
+        fallback_reason="candidate_key_absent_or_uncertified",
+        candidate_row_counts=candidate_counts,
+        fallback_row_counts=fallback_counts,
+        legacy_row_counts=legacy.diagnostics.row_counts,
+        legacy_manifest_reference_status="legacy",
+    ))
+    return PhaseReferenceSource(:candidate, candidate.layer, candidate.root, true, tables, diagnostics)
+end
+
 function _manifest(path::AbstractString)
     isfile(path) || _error("missing phase-reference manifest: $(path)")
     try
@@ -250,6 +322,11 @@ function _manifest(path::AbstractString)
     catch err
         _error("invalid phase-reference manifest $(path): $(sprint(showerror, err))")
     end
+end
+
+function _file_sha256(path::AbstractString)
+    isfile(path) || return ""
+    return bytes2hex(sha256(read(path)))
 end
 
 function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow_runtime::Bool=false)
@@ -280,12 +357,61 @@ function load_phase_reference(root::AbstractString; layer::Symbol=:strict, allow
         allow_runtime,
         tables,
         (schema_version="pnjl_issue130_phase_reference_adapter_v1", row_counts=counts,
-         uncertified_rows=uncertified, manifest_reference_status=String(get(manifest, "reference_status", ""))),
+         uncertified_rows=uncertified,
+         manifest_reference_status=String(get(manifest, "reference_status", "")),
+         candidate_manifest_sha256=_file_sha256(joinpath(root_abs, "manifest.json")),
+         candidate_layer_manifest_sha256=_file_sha256(joinpath(layer_root, "manifest.json")),
+         source_root=root_abs,
+         runtime_view=allow_runtime ? "strict_all_rows" : "diagnostic_all_rows",
+         fallback_enabled=false),
     )
 end
 
 function load_phase_reference_runtime(root::AbstractString; layer::Symbol=:strict)
     return load_phase_reference(root; layer=layer, allow_runtime=true)
+end
+
+function load_phase_reference_runtime_with_fallback(candidate_root::AbstractString;
+    layer::Symbol=:strict,
+    boundary_path::AbstractString,
+    cep_path::AbstractString,
+    crossover_path::AbstractString,
+    spinodals_path::AbstractString,
+)
+    legacy = load_legacy_phase_reference(
+        boundary_path=boundary_path,
+        cep_path=cep_path,
+        crossover_path=crossover_path,
+        spinodals_path=spinodals_path,
+    )
+    candidate = try
+        load_phase_reference(candidate_root; layer=layer)
+    catch err
+        diagnostics = merge(legacy.diagnostics, (
+            runtime_view="legacy_fallback",
+            fallback_enabled=true,
+            fallback_reason="candidate_load_failed: " * sprint(showerror, err),
+        ))
+        return PhaseReferenceSource(:legacy, :legacy, "", true, legacy.tables, diagnostics)
+    end
+    return _merge_certified_candidate_with_legacy(candidate, legacy)
+end
+
+function load_default_phase_reference_runtime(; project_root::AbstractString,
+    layer::Symbol=:strict,
+    source::Symbol=:candidate,
+)
+    source in (:candidate, :legacy) || _error("phase-reference source must be candidate or legacy")
+    reference_root = joinpath(project_root, "data", "reference", "pnjl")
+    legacy_paths = (
+        boundary_path=joinpath(reference_root, "boundary.csv"),
+        cep_path=joinpath(reference_root, "cep.csv"),
+        crossover_path=joinpath(reference_root, "crossover_dense.csv"),
+        spinodals_path=joinpath(reference_root, "spinodals.csv"),
+    )
+    source === :legacy && return load_legacy_phase_reference(; legacy_paths...)
+    candidate_root = joinpath(reference_root, "issue130_phase_reference_v1")
+    return load_phase_reference_runtime_with_fallback(candidate_root; layer=layer, legacy_paths...)
 end
 
 function _legacy_rows(path::AbstractString, table::Symbol)
@@ -360,7 +486,9 @@ function load_legacy_phase_reference(; boundary_path::AbstractString, cep_path::
         row_counts[String(table)] = length(normalized)
     end
     return PhaseReferenceSource(:legacy, :legacy, "", true, tables,
-        (schema_version="legacy", row_counts=row_counts, uncertified_rows=0, manifest_reference_status="legacy"))
+        (schema_version="legacy", row_counts=row_counts, uncertified_rows=0,
+         manifest_reference_status="legacy", candidate_manifest_sha256="",
+         candidate_layer_manifest_sha256="", source_root="", runtime_view="legacy", fallback_enabled=false))
 end
 
 source_kind(source::PhaseReferenceSource) = source.kind

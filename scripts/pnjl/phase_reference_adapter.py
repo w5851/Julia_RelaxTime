@@ -78,6 +78,16 @@ class PhaseReferenceBundle:
         return bool(self.manifest.get("runtime_consumption", False))
 
 
+@dataclass(frozen=True)
+class PhaseReferenceRuntimeView:
+    """Certified candidate rows merged with an explicit legacy fallback view."""
+
+    layer: str
+    source: str
+    tables: Mapping[str, tuple[Mapping[str, Any], ...]]
+    diagnostics: Mapping[str, Any]
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -430,11 +440,68 @@ def to_legacy_views(
     }
 
 
+def build_runtime_view(
+    candidate: PhaseReferenceBundle,
+    *,
+    legacy_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
+) -> PhaseReferenceRuntimeView:
+    """Build a solver-free certified-only view with per-key legacy fallback.
+
+    This mirrors the Julia runtime switch without writing either source.  The
+    candidate remains the preferred source; unresolved/interpolated rows are
+    omitted and only keys absent from that certified view are filled from the
+    caller-provided legacy tables.
+    """
+
+    legacy_tables = legacy_tables or {}
+    merged: dict[str, tuple[Mapping[str, Any], ...]] = {}
+    candidate_counts: dict[str, int] = {}
+    fallback_counts: dict[str, int] = {}
+
+    def key(table: str, row: Mapping[str, Any]) -> tuple[Any, ...]:
+        spec = _TABLES[table]
+        return tuple(row.get(field) for field in spec["keys"])
+
+    for table in _TABLES:
+        certified = [row for row in candidate.tables.get(table, ()) if row.get("certified", False)]
+        rows = list(certified)
+        seen = {key(table, row) for row in rows}
+        n_fallback = 0
+        for row in legacy_tables.get(table, ()):
+            row_key = key(table, row)
+            if row_key in seen:
+                continue
+            fallback = dict(row)
+            fallback.update({"source_layer": "legacy_fallback", "status": "legacy_fallback", "certified": True})
+            rows.append(fallback)
+            seen.add(row_key)
+            n_fallback += 1
+        merged[table] = tuple(rows)
+        candidate_counts[table] = len(certified)
+        fallback_counts[table] = n_fallback
+
+    return PhaseReferenceRuntimeView(
+        layer=candidate.layer,
+        source="candidate",
+        tables=merged,
+        diagnostics={
+            "runtime_view": "certified_candidate_with_legacy_fallback",
+            "candidate_manifest_sha256": candidate.diagnostics.get("manifest_sha256", ""),
+            "candidate_row_counts": candidate_counts,
+            "fallback_row_counts": fallback_counts,
+            "fallback_enabled": True,
+            "fallback_reason": "candidate_key_absent_or_uncertified",
+        },
+    )
+
+
 __all__ = [
     "LAYERS",
     "PhaseReferenceBundle",
     "PhaseReferenceContractError",
+    "PhaseReferenceRuntimeView",
     "SCHEMA_VERSION",
+    "build_runtime_view",
     "load_phase_reference",
     "sha256",
     "to_legacy_views",

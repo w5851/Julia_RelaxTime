@@ -5,8 +5,20 @@ export build_summary
 export collect_artifacts
 export write_scan_sidecars
 
-function build_effective_config(opts)
-    return Dict{String,Any}(
+function _phase_reference_summary_dict(source)
+    summary = Main.PhaseReferenceAdapter.source_summary(source)
+    return Dict{String,Any}(String(key) => value for (key, value) in pairs(summary))
+end
+
+function build_effective_config(opts; phase_reference=nothing)
+    resolved_root = if phase_reference !== nothing
+        get(Main.PhaseReferenceAdapter.source_summary(phase_reference), :source_root, opts.phase_reference_root)
+    elseif opts.phase_reference_mode === :runtime && isdefined(Main, :DEFAULT_PHASE_REFERENCE_ROOT)
+        Main.DEFAULT_PHASE_REFERENCE_ROOT
+    else
+        opts.phase_reference_root
+    end
+    cfg = Dict{String,Any}(
         "output" => opts.output,
         "channel_diagnostics_output" => opts.channel_diagnostics_output,
         "failed_points_output" => opts.failed_points_output,
@@ -39,10 +51,13 @@ function build_effective_config(opts)
         "gc_every_n" => opts.gc_every_n,
         "tr_p_nodes" => opts.tr_p_nodes,
         "tr_p_max_fm" => opts.tr_p_max_fm,
-        "phase_reference_root" => opts.phase_reference_root,
+        "phase_reference_root" => resolved_root,
         "phase_reference_layer" => String(opts.phase_reference_layer),
         "phase_reference_mode" => String(opts.phase_reference_mode),
+        "phase_reference_source" => phase_reference === nothing ? "none" : String(Main.PhaseReferenceAdapter.source_kind(phase_reference)),
     )
+    phase_reference !== nothing && (cfg["phase_reference_summary"] = _phase_reference_summary_dict(phase_reference))
+    return cfg
 end
 
 function build_summary(stats_success::Integer, stats_error::Integer, stats_skipped::Integer)
@@ -65,8 +80,8 @@ function collect_artifacts(opts)
     return artifacts
 end
 
-function write_scan_sidecars(provenance_dir::AbstractString, ctx, opts, stats_success::Integer, stats_error::Integer, stats_skipped::Integer)
-    effective_config = build_effective_config(opts)
+function write_scan_sidecars(provenance_dir::AbstractString, ctx, opts, stats_success::Integer, stats_error::Integer, stats_skipped::Integer; phase_reference=nothing)
+    effective_config = build_effective_config(opts; phase_reference=phase_reference)
     summary = build_summary(stats_success, stats_error, stats_skipped)
     artifacts = collect_artifacts(opts)
     Main.ProvenanceMetadata.write_run_sidecars(
