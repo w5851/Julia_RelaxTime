@@ -7,7 +7,7 @@
 magnetic 不是一个单纯流程主题，而是对现有 PNJL 模型族的一条物理变体支路：
 
 - 零磁场基线仍由 `PNJLModel` 提供
-- magnetic 在模型对象层通过 `PNJLMagneticModel` 复用稳定 gap 路径
+- 非零磁场通过 `solve_magnetic_gap` 对磁场 `Omega` 做完整五维驻点求解；普通 `solve_gap` 可返回已找到候选中按 `Omega` 选出的 convenience state，但不替代 branch-aware 候选输出。Hessian 分类是可选诊断，不是 PNJL 默认生产过滤条件；分支 API 始终保留全部候选
 - 在热力学层切换到 Landau 能级离散化与磁场相关公式
 
 因此，它更接近“模型变体”而不是又一个与 `phase`、`scans` 平级的流程目录。
@@ -20,6 +20,8 @@ magnetic 不是一个单纯流程主题，而是对现有 PNJL 模型族的一�
 - 变体核心层：`MagneticIntegrals.jl` 与 `MagneticThermodynamics.jl`
 
 前者负责把 magnetic 变体纳入 `Models` 聚合语义；后者负责 Landau 积分、IMC 耦合和磁场热力学计算。
+
+磁场 solver 的正式边界是 `T_fm > 0`、`xi=0`。每个候选包含 seed、五维 residual、`Omega`、物理性、求解方法、迭代数和 `n_max`；`classify_stability=true` 时额外用局部 Hessian 标记 `local_minimum` 或 `saddle_or_maximum`。这些标签用于诊断和显式研究策略，不构成默认生产拒绝条件；即使候选被标为 `saddle_or_maximum`，也必须保留在 branch-aware 结果中。Hessian 诊断不是默认求解成本的一部分。
 
 ## 3. `eB -> 0` 退化是主题级合同
 

@@ -1,5 +1,7 @@
 # Phase-reference 决策证据层
 
+Issue #130 的 phase-surface 版本系列另有统一只读索引 [`../phase_surface_series/`](../phase_surface_series/)。该索引的 figure layer 是显示层快照，不改变本目录下的 phase-reference package contract；source package、manifest 和历史 provenance 保持原位。
+
 本目录收纳 Issue #130 phase-reference 线的汇总、限定证据和人工 overlay 决策审计。三个包回答的问题不同，保留各自的 `manifest.json`、表格、图和 verdict；本目录只提供逻辑入口，不合并或改写下游 C1/C2/CEP/Maxwell evidence。
 
 ## Evidence Packages

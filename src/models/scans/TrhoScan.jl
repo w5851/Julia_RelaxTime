@@ -149,6 +149,10 @@ end
         throw(ArgumentError("model_kind=:pnjl_aniso is not supported; use model_kind=:PNJL with profile/xi parameterization"))
     end
 
+    model_kind === :PNJLMagnetic && throw(ArgumentError(
+        "TrhoScan does not implement magnetic FixedRho equilibrium; magnetic FixedRho and phase routes are intentionally unsupported",
+    ))
+
     model_kind in ScanCommon.SUPPORTED_SCAN_MODEL_KINDS ||
         throw(ArgumentError("model_kind must be one of $(ScanCommon.SUPPORTED_SCAN_MODEL_KINDS), got $(model_kind)"))
 

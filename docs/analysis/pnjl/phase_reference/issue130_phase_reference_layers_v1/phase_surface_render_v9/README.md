@@ -1,0 +1,3 @@
+# Issue #130 phase-surface render v9
+
+This is a display-only successor to the v8 public figure. The strict and derived tables are immutable inputs. Crossover endpoints may be connected to the estimated CEP midpoint for display, while the first-order (Maxwell) surface receives a bounded display-only linear continuation to T=0 from each slice's first two native temperature rows. The continuation is explicitly non-certified, does not modify strict or derived tables, and is never consumed by runtime reference code. No triangulation is used. The stable public PNG alias is intentionally written to the existing phase-reference figure path; the v8 source figure remains preserved under the historical v1 analysis package.

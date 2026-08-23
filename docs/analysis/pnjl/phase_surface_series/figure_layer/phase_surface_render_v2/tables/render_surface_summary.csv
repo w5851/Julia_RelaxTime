@@ -1,0 +1,3 @@
+surface,xi_slice_count,xi_pair_count_with_common_support,quad_count,grid_points_per_xi_pair,max_local_axis_gap,common_support_low_min,common_support_high_max,display_policy
+crossover,161,160,25440,160,26.0,0.0,347.7534052491582,cep_boundary_constrained_common_support
+first_order_coexistence_maxwell,161,160,25440,160,18.0,1.0,146.6875,masked_common_temperature_support

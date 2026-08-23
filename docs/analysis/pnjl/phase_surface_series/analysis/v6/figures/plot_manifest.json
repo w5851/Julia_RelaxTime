@@ -1,0 +1,104 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v6_crossover_overlay",
+  "figure_mode": "diagnostic_no_interpolation_no_triangulation",
+  "orientation": "x=mu_q, y=xi, z=T",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "generator": {
+    "script": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c2_phase_surfaces_v6_crossover_overlay.py",
+    "script_sha256": "75c42deb90aa197f0eaf9f9573dd430560ed04f0fa01932255eee7d07b762f4b"
+  },
+  "source_layers": {
+    "v5_baseline": "all Maxwell, spinodal, CEP and retained crossover processing is copied from v5 evidence",
+    "endpoint_expansion": "186 aggregate-replay-validated candidates appended only to crossover support"
+  },
+  "endpoint_expansion_provenance": {
+    "source_run_id": "32240898122",
+    "replay_run_id": "32255786553",
+    "postprocess_sha": "78affa1e6439f02ca7f09fcd4180b3b71605d1fd"
+  },
+  "surface_policy": {
+    "maxwell": "v5 maxwell_surface_point_status copied unchanged; no C2 raw recomputation",
+    "spinodal": "v5 spinodal input copied unchanged and drawn as native dotted support",
+    "crossover_baseline": "v5 retained crossover rows copied unchanged",
+    "crossover_overlay": "finite/converged endpoint candidates with target_mu <= the same v5 CEP proxy",
+    "cep": "v5 bracket projections and midpoint markers retained; midpoint is not a certified CEP",
+    "interpolation": "disabled; native ordered segments only",
+    "triangulation": "disabled",
+    "gap_policy": "segments are not connected when their native coordinate gap exceeds the explicit limit"
+  },
+  "limits": {
+    "max_mu_gap_MeV": 55.0,
+    "max_temperature_gap_MeV": 8.0
+  },
+  "inputs": {
+    "v5_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\manifest.json",
+      "sha256": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6",
+      "bytes": 5861
+    },
+    "v5_maxwell": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\maxwell_surface_point_status.csv",
+      "sha256": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+      "bytes": 928630
+    },
+    "v5_maxwell_status": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\maxwell_grid_status_counts.csv",
+      "sha256": "4f99cd6ccd093a04cf28332210d716462b9fdfe62069714e2b14348bce89b3c8",
+      "bytes": 2403
+    },
+    "v5_grid_unresolved": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\grid_unresolved_diagnostics.csv",
+      "sha256": "ab0640f7ee7d7cd503095d66e7a5c061371af82ad7c0be559f874940c49497fc",
+      "bytes": 1355496
+    },
+    "v5_crossover_filter": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\crossover_physical_filter.csv",
+      "sha256": "e3d3d9918237c92d4b19c38674120b765865203663455796dfda18ddecd55fec",
+      "bytes": 226602
+    },
+    "v5_crossover_gap": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\crossover_cep_sampling_gap.csv",
+      "sha256": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+      "bytes": 19244
+    },
+    "v5_claim_ledger": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\tables\\claim_ledger.csv",
+      "sha256": "9e4301ab3cd99acc3218cc35dea5855b1895c766958056db2e4a2f88c6abae11",
+      "bytes": 1907
+    },
+    "v5_spinodals": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8",
+      "bytes": 670175
+    },
+    "endpoint_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\crossover_mu_endpoint_expansion_20260819_32255786553_replay\\manifest.json",
+      "sha256": "954c1cee4df83e1f06e8a3bcc466adc9f9bdb6071896405705020e87b8cf0396",
+      "bytes": 71429
+    },
+    "endpoint_summary": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\crossover_mu_endpoint_expansion_20260819_32255786553_replay\\expansion_summary.csv",
+      "sha256": "c18ff52ef8a0a5181b3fcedec375a641c643faf5ed51bebad3c89dd6cc04ee9a",
+      "bytes": 33147
+    },
+    "endpoint_verdict": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\crossover_mu_endpoint_expansion_20260819_32255786553_replay\\verdict.json",
+      "sha256": "f3e4a2b2e97b2e57ccd2cade90234afde78e2d7df776673bb3f669b11778231b",
+      "bytes": 82
+    }
+  },
+  "counts": {
+    "maxwell_rows": 6886,
+    "spinodal_rows": 6886,
+    "v5_crossover_rows": 1157,
+    "endpoint_rows": 186,
+    "endpoint_excluded_rows": 0,
+    "cep_brackets": 93
+  },
+  "output": {
+    "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v6_crossover_overlay\\figures\\c2_phase_surfaces_mu_xi_T_v6_crossover_overlay.png",
+    "sha256": "ed1549aca80f752531004e6ca7ec8e660124d268609c3d843d7ef0f7dc7fe262"
+  }
+}

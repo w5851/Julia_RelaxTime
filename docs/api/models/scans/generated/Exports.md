@@ -4,17 +4,18 @@
 
 - Source module files: `src/models/entrypoints.jl`
 - Generated page: `docs/api/models/scans/generated/Exports.md`
-- Exported symbol count: 3
-- Mentioned in non-generated docs/api pages: 3
-- Topic filter: `run_tmu_scan`, `run_trho_scan`, `build_default_rho_grid`
+- Exported symbol count: 4
+- Mentioned in non-generated docs/api pages: 4
+- Topic filter: `run_tmu_scan`, `run_trho_scan`, `run_magnetic_scan`, `build_default_rho_grid`
 
 ## Exported Symbols
 
 | Symbol | Source files | Export lines | Mentioned in docs | Example docs |
 | --- | --- | ---: | ---: | --- |
 | `build_default_rho_grid` | src/models/entrypoints.jl | 12 | 5 | docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md<br>docs/api/models/scans/README.md |
-| `run_tmu_scan` | src/models/entrypoints.jl | 12 | 7 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/Overview.md |
-| `run_trho_scan` | src/models/entrypoints.jl | 12 | 8 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
+| `run_magnetic_scan` | src/models/entrypoints.jl | 12 | 4 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/scans/README.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `run_tmu_scan` | src/models/entrypoints.jl | 12 | 9 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/scans/Algorithms.md<br>docs/api/models/scans/FreezeoutScan.md |
+| `run_trho_scan` | src/models/entrypoints.jl | 12 | 9 | docs/api/PARAMETER_TYPES_API.md<br>docs/api/models/phase/Algorithms.md<br>docs/api/models/scans/Algorithms.md |
 
 ## Undocumented Or Not Yet Mentioned
 

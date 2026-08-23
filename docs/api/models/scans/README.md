@@ -14,19 +14,21 @@
 2. [Algorithms.md](Algorithms.md)：理解采样策略、扫描顺序与契约边界
 3. [TmuScan.md](TmuScan.md)：T-μ 扫描入口与参数口径
 4. [TrhoScan.md](TrhoScan.md)：T-ρ 扫描入口与参数口径
-5. [FreezeoutScan.md](FreezeoutScan.md)：freeze-out 路径扫描入口与路径契约
-6. [CrossoverMesonDensityScan.md](CrossoverMesonDensityScan.md)：crossover line 上的介子数密度 workflow
-7. [FreezeoutMesonDensityScan.md](FreezeoutMesonDensityScan.md)：freeze-out 路径上的介子数密度 workflow
-8. [ExternalPathMesonDensityScan.md](ExternalPathMesonDensityScan.md)：外部离散路径点列上的介子数密度 workflow
-9. `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`：`FixedAsymmetricRho` 上游 equilibrium source 的介子数密度组合扫描；正式产物必须先通过 convergence gate 与 production audit，参数与输出字段见 [Overview.md](Overview.md)
-10. [MesonMassPathScan.md](MesonMassPathScan.md)：freeze-out / isentropic 路径上的介子质量 workflow
-11. [SamplingGrid.md](SamplingGrid.md)：默认密度网格与加密策略
-12. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
+5. [MagneticScan.md](MagneticScan.md)：外磁场 `(T,mu,eB)` 五维 `FixedMu` 扫描
+6. [FreezeoutScan.md](FreezeoutScan.md)：freeze-out 路径扫描入口与路径契约
+7. [CrossoverMesonDensityScan.md](CrossoverMesonDensityScan.md)：crossover line 上的介子数密度 workflow
+8. [FreezeoutMesonDensityScan.md](FreezeoutMesonDensityScan.md)：freeze-out 路径上的介子数密度 workflow
+9. [ExternalPathMesonDensityScan.md](ExternalPathMesonDensityScan.md)：外部离散路径点列上的介子数密度 workflow
+10. `scripts/relaxtime/run_combined_meson_density_scan.jl --path trho_asymmetric`：`FixedAsymmetricRho` 上游 equilibrium source 的介子数密度组合扫描；正式产物必须先通过 convergence gate 与 production audit，参数与输出字段见 [Overview.md](Overview.md)
+11. [MesonMassPathScan.md](MesonMassPathScan.md)：freeze-out / isentropic 路径上的介子质量 workflow
+12. [SamplingGrid.md](SamplingGrid.md)：默认密度网格与加密策略
+13. [generated/Exports.md](generated/Exports.md)：公开导出全集与覆盖检查
 
 本主题覆盖的 `Models` 公开导出为：
 
 - `Models.run_tmu_scan`
 - `Models.run_trho_scan`
+- `Models.run_magnetic_scan`
 - `Models.run_freezeout_fixedmu_scan`
 - `Models.run_meson_mass_path_scan`
 - `Models.run_freezeout_meson_mass_scan`

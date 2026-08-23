@@ -52,6 +52,7 @@ const SMOKE_FILES = [
     joinpath(UNIT_DIR, "types", "test_parameter_types.jl"),
     joinpath(UNIT_DIR, "config", "test_config_loader.jl"),
     joinpath(UNIT_DIR, "models", "test_scan_config.jl"),
+    joinpath(UNIT_DIR, "models", "test_magnetic_scan.jl"),
     joinpath(UNIT_DIR, "relaxtime", "test_particle_symbols.jl"),
 ]
 

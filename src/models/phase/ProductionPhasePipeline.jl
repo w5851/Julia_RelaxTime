@@ -2280,6 +2280,8 @@ function run_production_phase_pipeline(model_kind::Symbol=:PNJL;
         temperature_density_tol::Float64=0.01,
         temperature_maxwell_area_tol::Float64=1e-4)
 
+    _reject_magnetic_phase_route(model_kind)
+
     thermo_quadrature_kwargs = _phase_thermo_quadrature_kwargs(
         thermo_quadrature_policy,
         thermo_quadrature_rtol,

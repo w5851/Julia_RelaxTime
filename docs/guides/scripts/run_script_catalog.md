@@ -22,7 +22,7 @@
 
 | Script | Function | Status | Suggested Replacement / Notes |
 | --- | --- | --- | --- |
-| `scripts/models/run_unified_scan.jl` | `Models` 主链统一扫描/工作流入口（`scan tmu|trho`, `workflow phase`） | `core-candidate` | 当前 authoritative 的 PNJL 扫描 CLI 入口 |
+| `scripts/models/run_unified_scan.jl` | `Models` 主链统一扫描/工作流入口（`scan tmu|trho|magnetic`, `workflow phase`） | `core-candidate` | 当前 authoritative 的 PNJL 与磁场 FixedMu 扫描 CLI 入口 |
 | `scripts/relaxtime/run_gap_transport_scan.jl` | 平衡求解 + tau + RTA 输运主扫描 | `core-candidate` | 参数最全，适合作为工作流后端能力 |
 | `scripts/relaxtime/run_gap_meson_mass_scan.jl` | 平衡求解 + 介子质量/宽度 + Mott 阈值扫描 | `core-candidate` | 支撑 Mott 相关产线 |
 | `scripts/relaxtime/run_relaxtime_orchestrator.jl` | relaxtime 工作流编排入口 | `core-candidate` | 更适合 CI 手动触发入口 |
@@ -33,9 +33,9 @@
 | `scripts/relaxtime/run_bu2020_meson_density_audit_scan.jl` | BU2020/temp7 介子数密度主线审计扫描，输出 stable / strict BW / phase-shift / no-anomalous 多口径 CSV 与 README | `domain-candidate` | 研究审计入口；不进入稳定白名单，默认通过 `Models` workflow 而非复制 temp7 |
 | `scripts/pnjl/run_conserved_charge_susceptibilities.jl` | 守恒荷广义磁化率与累积量入口 | `domain-candidate` | 已在脚本指南稳定入口中出现 |
 | `scripts/pnjl/run_aniso_phase_template.jl` | 各向异性相图实验模板（扫描 + 相结构 + 绘图） | `domain-candidate` | 偏实验模板 |
-| `scripts/pnjl/run_magnetic_point.jl` | 磁场单点计算 | `domain-candidate` | 磁场专题 |
-| `scripts/pnjl/run_magnetic_eb_scan.jl` | 磁场 eB 轴扫描 | `domain-candidate` | 磁场专题 |
-| `scripts/pnjl/run_magnetic_stability_scan.jl` | 磁场稳定性批量检查 | `domain-candidate` | 磁场专题 |
+| `scripts/pnjl/run_magnetic_point.jl` | 固定 `x_state` 的磁场单点内核诊断 | `domain-candidate` | 不是 equilibrium 入口；生产扫描请使用 `scan magnetic` |
+| `scripts/pnjl/run_magnetic_eb_scan.jl` | 固定 `x_state` 的磁场 eB 轴诊断 | `domain-candidate` | 不是 equilibrium 入口；生产扫描请使用 `scan magnetic` |
+| `scripts/pnjl/run_magnetic_stability_scan.jl` | 固定 `x_state` 的磁场稳定性/截断诊断 | `domain-candidate` | 不是 equilibrium 入口；生产扫描请使用 `scan magnetic` |
 | `scripts/relaxtime/run_mott_phase_derived_csv.jl` | Mott 扫描派生字段 CSV 生成 | `domain-candidate` | 后处理脚本 |
 | `scripts/relaxtime/run_mott_phase_plot_modes.jl` | Mott 图像模式产出（mode A/B） | `domain-candidate` | 绘图包装脚本 |
 | `scripts/relaxtime/run_offline_transport_patch.jl` | 对质量异常点离线补算并输出 patch | `domain-candidate` | 维护/后处理工具 |

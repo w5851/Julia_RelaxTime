@@ -9,7 +9,7 @@ status = "review"
 current_task = "issue130-phase-reference-runtime-consumer-audit"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "PR #252 已合并并导入 versioned candidate；当前执行 solver-free runtime consumer compatibility audit，确认显式 adapter 边界后再评估 runtime consumer，RS transport 继续暂停。"
+next_action = "PR #252 已合并并导入 versioned candidate，PR #257 phase_surface_series namespace 已合并；当前执行 solver-free runtime consumer compatibility audit，确认显式 adapter 边界后再评估 runtime consumer，RS transport 继续暂停。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
@@ -214,7 +214,7 @@ status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-promotion-gate.md"
 reason = "作者已接受 Issue #130 strict/derived/render 三层；promotion gate 必须在独立 versioned import PR 前完成，并保持旧 reference 与 runtime 不变。"
-next_action = "PR #250 已合并，promotion gate v1 验收完成；versioned import 已转入独立 item，旧 evidence 与 runtime 边界保持不变。"
+next_action = "PR #250 promotion gate 和 PR #257 phase_surface_series namespace 均已合并；versioned import 继续保持旧 evidence 与 runtime 边界不变。"
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "pr:248", "pr:250", "sha:09d1a6895100cef208c9108034d9f45b631158eb", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "gate:promotion_candidate"]
@@ -227,10 +227,10 @@ status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-21_Issue130_phase-reference-import.md"
 reason = "promotion gate v1 已通过并合并；作者已接受 strict/derived/render 三层，下一步需将 candidate 以独立 versioned sibling 导入，同时保持旧 reference 与 runtime 不变。"
-next_action = "PR #252 已 squash merge；candidate sibling 已导入且旧 reference hash 保持不变，转入独立 runtime consumer compatibility audit。"
+next_action = "PR #252 已 squash merge；candidate sibling 已导入且旧 reference hash 保持不变，PR #257 已建立 phase_surface_series namespace，现转入独立 runtime consumer compatibility audit。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_promotion_gate_v1/", "file:data/reference/pnjl/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/", "file:docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "pr:250", "pr:252", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "sha:0dac7c77d7dfda12fdf167fb91435afb2235517b", "sha:85172be24e5d5ea94239a76fcdd405fdf8e83ab3", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:import writes only a new versioned sibling; runtime_consumption=false"]
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/", "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v9/", "file:docs/analysis/pnjl/phase_surface_series/", "file:data/reference/pnjl/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v2/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v3/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v4/", "file:data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/", "file:docs/dev/active/2026-08-21_Issue130_phase-reference-import.md", "pr:250", "pr:252", "pr:257", "sha:10231d83f8ed56b684f6acbd74a71ce85fdb47cf", "sha:0dac7c77d7dfda12fdf167fb91435afb2235517b", "sha:85172be24e5d5ea94239a76fcdd405fdf8e83ab3", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:ac3ce42f06870f4e1eda8ea67922b96ce0f51501", "note:import writes only a new versioned sibling; runtime_consumption=false; phase_surface_series is a byte-preserving namespace snapshot"]
 
 [[items]]
 id = "issue130-phase-reference-runtime-consumer-audit"
@@ -294,13 +294,15 @@ status = "accepted"
 parent = "track:analysis-docs-cleanup"
 task_file = "docs/dev/active/2026-08-19_docs-analysis逻辑分组与物理迁移任务单.md"
 reason = "按逻辑组分批整理 docs/analysis，保持诊断证据、正式产物和数值语义边界不变。"
-next_action = "物理 namespace 迁移已完成；保留 metadata repair follow-up，单独冻结并修复 hash metadata。"
+next_action = "物理 namespace 迁移已完成；Issue #130 phase_surface_series/ 已建立 byte-preserving series index；保留 metadata repair follow-up，单独冻结并修复 hash metadata。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "sha:24ea4222e589e40f6f10fb3e91aaa683581c6130",
   "file:docs/analysis/README.md",
   "file:docs/analysis/governance/literature_to_implementation_protocol.md",
+  "file:docs/analysis/pnjl/phase_surface_series/",
+  "file:docs/analysis/pnjl/phase_surface_series/series_manifest.json",
 ]
 
 [[items]]
