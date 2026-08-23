@@ -44,6 +44,16 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   candidate runtime `198.2066818967471 MeV`，legacy `198.12550509377107 MeV`，差异
   `0.08117680297604579 MeV`。这是 reference 输入差异，不是 RS transport 数值 parity 结论。
 
+## CI 留痕
+
+PR #261 最新提交 `31ab0490a68be02d2f8cde7739a79128b3d3fd23` 的 CI 已于 2026-08-23
+全部通过（12 项，无失败或跳过）：unit-smoke、integration-core、Julia/Python script smoke、
+PNJL benchmark，以及 task-ledger、active-docs、docs consistency、data-output-path、
+legacy-switch、dependency audit 和 advisory governance。
+
+这只证明代码、证据 schema 与 solver-free consumer smoke 合同通过；不改变 numerical pilot
+仍需作者审核和单独授权的边界。
+
 ## 非目标与回退
 
 - 不删除或重写 `boundary.csv`、`cep.csv`、`crossover_dense.csv`、`spinodals.csv`。
