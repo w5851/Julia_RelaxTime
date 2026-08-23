@@ -4,9 +4,9 @@
 
 - Source module files: `src/models/exports_public.jl`, `src/models/Models.jl`
 - Generated page: `docs/api/models/variants/magnetic/generated/Exports.md`
-- Exported symbol count: 19
-- Mentioned in non-generated docs/api pages: 19
-- Topic filter: `PNJLMagneticModel`, `alpha_n`, `energy_landau`, `smooth_cutoff`, `resolve_nmax_from_cutoff`, `omega0_flavor_landau`, `omegat_flavor_landau`, `density_flavor_landau`, `MagneticIMCParams`, `default_imc_params`, `coupling_GB`, `MagneticConfig`, `default_magnetic_config`, `MAGNETIC_EB_MIN_MEV2`, `MAGNETIC_EB_MIN_FM2`, `validate_magnetic_eB`, `calculate_magnetic_omega_components`, `calculate_magnetic_omega`, `calculate_magnetic_pressure`, `calculate_magnetic_rho`, `calculate_magnetic_number_densities`, `magnetic_nmax_convergence_report`
+- Exported symbol count: 22
+- Mentioned in non-generated docs/api pages: 22
+- Topic filter: `PNJLMagneticModel`, `magnetic_gap_residual`, `magnetic_gap_residual_autodiff`, `solve_magnetic_gap`, `alpha_n`, `energy_landau`, `smooth_cutoff`, `resolve_nmax_from_cutoff`, `omega0_flavor_landau`, `omegat_flavor_landau`, `density_flavor_landau`, `MAGNETIC_EB_MIN_MEV2`, `MAGNETIC_EB_MIN_FM2`, `validate_magnetic_eB`, `MagneticIMCParams`, `default_imc_params`, `coupling_GB`, `MagneticConfig`, `default_magnetic_config`, `calculate_magnetic_omega_components`, `calculate_magnetic_omega`, `calculate_magnetic_pressure`, `calculate_magnetic_rho`, `calculate_magnetic_number_densities`, `magnetic_nmax_convergence_report`
 
 ## Exported Symbols
 
@@ -26,11 +26,14 @@
 | `default_magnetic_config` | src/models/exports_public.jl | 88 | 3 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `density_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `energy_landau` | src/models/exports_public.jl | 85 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `magnetic_gap_residual` | src/models/exports_public.jl | 11 | 2 | docs/api/models/variants/magnetic/ModelAndConfig.md<br>docs/api/models/variants/magnetic/Overview.md |
+| `magnetic_gap_residual_autodiff` | src/models/exports_public.jl | 11 | 1 | docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `magnetic_nmax_convergence_report` | src/models/exports_public.jl | 92 | 6 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 | `omega0_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `omegat_flavor_landau` | src/models/exports_public.jl | 86 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
 | `resolve_nmax_from_cutoff` | src/models/exports_public.jl | 85 | 4 | docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md |
 | `smooth_cutoff` | src/models/exports_public.jl | 85 | 3 | docs/api/models/variants/magnetic/LandauIntegrals.md<br>docs/api/models/variants/magnetic/Overview.md<br>docs/api/models/variants/magnetic/README.md |
+| `solve_magnetic_gap` | src/models/exports_public.jl | 11 | 4 | docs/api/models/scans/MagneticScan.md<br>docs/api/models/variants/magnetic/CoreConcepts.md<br>docs/api/models/variants/magnetic/ModelAndConfig.md |
 
 ## Undocumented Or Not Yet Mentioned
 

@@ -109,6 +109,9 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--module-file src/models/exports_public.jl \
 	--module-file src/models/Models.jl \
 	--include-symbol PNJLMagneticModel \
+	--include-symbol magnetic_gap_residual \
+	--include-symbol magnetic_gap_residual_autodiff \
+	--include-symbol solve_magnetic_gap \
 	--include-symbol alpha_n \
 	--include-symbol energy_landau \
 	--include-symbol smooth_cutoff \

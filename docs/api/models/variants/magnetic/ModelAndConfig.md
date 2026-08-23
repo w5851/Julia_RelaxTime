@@ -66,6 +66,23 @@
 有限差分 Hessian 诊断标签；该标签不是 PNJL 默认生产过滤条件，所有可行候选仍应保留供
 分支策略使用。
 
+## AD residual 生产路径
+
+`magnetic_gap_residual(model, x_state, T_fm, mu_vec; ...)` 使用
+`ForwardDiff.gradient` 对固定 `n_max` 的 Landau `Omega` 构造五维 stationarity
+residual；`magnetic_gap_residual_autodiff` 仅保留为同一实现的兼容别名。
+`solve_magnetic_gap` 对 primary/fallback 都固定使用 `NLsolve(autodiff=:forward)`。
+
+离散 Landau 截断不能在 ForwardDiff 内动态改变：如果调用方没有显式给出
+`n_max`，solver 会在每个 seed 进入 attempt 前用该 seed 的普通实数状态解析一次
+`n_max`，并在该 seed 的全部 residual、Jacobian、收敛后复核和分支候选中复用它。
+直接调用 residual 时则必须显式给出 `n_max`，以避免把 `floor` 截断混入导数。
+
+`finite_difference_step` 只属于可选 Hessian 稳定性诊断的外层差分，不再参与
+stationarity residual 或 NLsolve Jacobian。五维状态、branch candidate 和
+“Hessian 不是默认生产筛选条件”的合同保持不变。稳态诊断入口见
+[`scripts/perf/pnjl/magnetic_autodiff_probe.jl`](../../../../scripts/perf/pnjl/magnetic_autodiff_probe.jl)。
+
 磁场模型的 `model_capabilities(model).supports_number_densities` 恒为 `false`：通用
 模型接口要求独立的 `quark`/`antiquark` 密度，而磁场适配器只提供
 `calculate_magnetic_number_densities(...).net` 净密度；这不影响磁场专用密度 API 的可调用性。

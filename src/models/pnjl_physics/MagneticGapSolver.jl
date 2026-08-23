@@ -1,5 +1,6 @@
 using LinearAlgebra: eigvals, norm, Symmetric
 using NLsolve
+using ForwardDiff
 
 """One distinct stationary-point candidate found by the magnetic solver."""
 struct MagneticGapCandidate
@@ -35,7 +36,13 @@ struct MagneticGapResult
     stability_classified::Bool
 end
 
-"""Finite-difference stationarity residual for the magnetic five-field Omega."""
+"""ForwardDiff stationarity residual for the magnetic five-field Omega.
+
+The Landau cutoff is discrete, so callers must provide a fixed `n_max` for
+the differentiable kernel. `solve_magnetic_gap` resolves that cutoff once per
+seed before entering NLsolve and reuses it for both the primary and fallback
+attempts.
+"""
 function gap_residual(model::PNJLMagneticModel, x, T_fm, mu_vec; kwargs...)
     return magnetic_gap_residual(model, x, T_fm, mu_vec; kwargs...)
 end
@@ -100,6 +107,18 @@ function _magnetic_seed_pool(T_fm, mu_vec; initial_guess=nothing, seed_candidate
     return unique_pool
 end
 
+@inline function _magnetic_state_vec(x)
+    if x isa MeanFieldState
+        return state_vector(x)
+    elseif x isa AbstractVector
+        length(x) >= 5 || throw(ArgumentError("magnetic state must have length >= 5, got $(length(x))"))
+        Tx = promote_type(typeof(x[1]), typeof(x[2]), typeof(x[3]), typeof(x[4]), typeof(x[5]))
+        return SVector{5, Tx}(Tx(x[1]), Tx(x[2]), Tx(x[3]), Tx(x[4]), Tx(x[5]))
+    end
+    throw(ArgumentError("unsupported magnetic state type $(typeof(x))"))
+end
+
+"""Construct the magnetic five-field stationarity residual with ForwardDiff."""
 function magnetic_gap_residual(
     model::PNJLMagneticModel,
     x,
@@ -111,16 +130,17 @@ function magnetic_gap_residual(
     pz_max::Union{Nothing, Real}=nothing,
     n_max::Union{Nothing, Int}=nothing,
     cutoff_N::Union{Nothing, Int}=nothing,
-    finite_difference_step::Real=1e-5,
 )
+    n_max_value = n_max === nothing ? model.magnetic.n_max : n_max
+    n_max_value !== nothing || throw(ArgumentError(
+        "magnetic AD residual requires a fixed n_max; solve_magnetic_gap resolves it per seed",
+    ))
+    n_max_value >= 0 || throw(ArgumentError("magnetic AD residual requires n_max >= 0, got $(n_max_value)"))
     μ = _magnetic_solver_validate(model, T_fm, mu_vec, xi)
-    x0 = _magnetic_seed_vec(x)
-    h0 = Float64(finite_difference_step)
-    isfinite(h0) && h0 > 0.0 || throw(ArgumentError("finite_difference_step must be positive"))
-
+    x0 = _magnetic_state_vec(x)
     thermo = _magnetic_thermodynamics_module()
-    center = thermo.calculate_magnetic_omega_components(
-        x0,
+    omega_fn = y -> thermo.calculate_magnetic_omega_components(
+        y,
         μ,
         T_fm,
         model.magnetic;
@@ -128,28 +148,51 @@ function magnetic_gap_residual(
         p_num=p_num,
         t_num=t_num,
         pz_max=pz_max,
-        n_max=n_max,
+        n_max=n_max_value,
+        cutoff_N=cutoff_N,
+    ).omega
+    gradient = ForwardDiff.gradient(omega_fn, x0)
+    return SVector{5, eltype(gradient)}(Tuple(gradient))
+end
+
+"""Compatibility alias for the historical explicit AD residual name."""
+@inline magnetic_gap_residual_autodiff(args...; kwargs...) = magnetic_gap_residual(args...; kwargs...)
+
+function _resolve_magnetic_attempt_nmax(
+    model::PNJLMagneticModel,
+    seed::SVector{5, Float64},
+    T_fm,
+    μ;
+    xi::Real,
+    p_num::Int,
+    t_num::Int,
+    pz_max,
+    n_max,
+    cutoff_N,
+)
+    explicit = n_max === nothing ? model.magnetic.n_max : n_max
+    if explicit !== nothing
+        resolved = Int(explicit)
+        resolved >= 0 || throw(ArgumentError("magnetic n_max must be >= 0, got $(explicit)"))
+        return resolved
+    end
+
+    thermo = _magnetic_thermodynamics_module()
+    components = thermo.calculate_magnetic_omega_components(
+        seed,
+        μ,
+        T_fm,
+        model.magnetic;
+        xi=xi,
+        p_num=p_num,
+        t_num=t_num,
+        pz_max=pz_max,
+        n_max=nothing,
         cutoff_N=cutoff_N,
     )
-    local_n_max = n_max === nothing ? center.n_max : n_max
-    gradient = MVector{5, Float64}(0.0, 0.0, 0.0, 0.0, 0.0)
-    @inbounds for i in 1:5
-        h = h0 * max(1.0, abs(x0[i]))
-        xp = MVector{5, Float64}(x0)
-        xm = MVector{5, Float64}(x0)
-        xp[i] += h
-        xm[i] -= h
-        ωp = thermo.calculate_magnetic_omega_components(
-            SVector{5, Float64}(xp), μ, T_fm, model.magnetic;
-            xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=local_n_max, cutoff_N=cutoff_N,
-        ).omega
-        ωm = thermo.calculate_magnetic_omega_components(
-            SVector{5, Float64}(xm), μ, T_fm, model.magnetic;
-            xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=local_n_max, cutoff_N=cutoff_N,
-        ).omega
-        gradient[i] = (ωp - ωm) / (2 * h)
-    end
-    return SVector{5, Float64}(gradient)
+    resolved = Int(components.n_max)
+    resolved >= 0 || throw(ArgumentError("resolved magnetic n_max must be >= 0, got $(resolved)"))
+    return resolved
 end
 
 function _magnetic_attempt(
@@ -162,7 +205,6 @@ function _magnetic_attempt(
     ftol::Real,
     iterations::Int,
     residual_norm_max::Real,
-    finite_difference_step::Real,
     xi::Real,
     p_num::Int,
     t_num::Int,
@@ -173,7 +215,7 @@ function _magnetic_attempt(
     residual! = (F, x) -> begin
         r = magnetic_gap_residual(model, x, T_fm, μ;
             xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=n_max,
-            cutoff_N=cutoff_N, finite_difference_step=finite_difference_step)
+            cutoff_N=cutoff_N)
         @inbounds for i in 1:5
             F[i] = r[i]
         end
@@ -183,7 +225,7 @@ function _magnetic_attempt(
         result = nlsolve(
             residual!,
             collect(seed);
-            autodiff=:finite,
+            autodiff=:forward,
             method=method,
             xtol=Float64(xtol),
             ftol=Float64(ftol),
@@ -192,7 +234,7 @@ function _magnetic_attempt(
         x_state = SVector{5, Float64}(Tuple(Float64.(result.zero)))
         residual = magnetic_gap_residual(model, x_state, T_fm, μ;
             xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=n_max,
-            cutoff_N=cutoff_N, finite_difference_step=finite_difference_step)
+            cutoff_N=cutoff_N)
         residual_norm = norm(residual)
         comp = _magnetic_thermodynamics_module().calculate_magnetic_omega_components(
             x_state, μ, T_fm, model.magnetic;
@@ -256,10 +298,10 @@ function _magnetic_hessian(
         xm[j] -= h
         rp = magnetic_gap_residual(model, xp, T_fm, μ;
             xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=n_max,
-            cutoff_N=cutoff_N, finite_difference_step=finite_difference_step)
+            cutoff_N=cutoff_N)
         rm = magnetic_gap_residual(model, xm, T_fm, μ;
             xi=xi, p_num=p_num, t_num=t_num, pz_max=pz_max, n_max=n_max,
-            cutoff_N=cutoff_N, finite_difference_step=finite_difference_step)
+            cutoff_N=cutoff_N)
         H[:, j] = (rp - rm) / (2 * h)
     end
     return 0.5 .* (H + H')
@@ -333,16 +375,18 @@ function solve_magnetic_gap(
     )
     attempts = NamedTuple[]
     for seed in seeds
+        n_max_seed = _resolve_magnetic_attempt_nmax(model, seed, T_fm, μ;
+            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
         primary = _magnetic_attempt(model, seed, T_fm, μ, method_eff;
             xtol=xtol_eff, ftol=ftol_eff, iterations=iterations,
-            residual_norm_max=residual_norm_max, finite_difference_step=finite_difference_step,
-            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
+            residual_norm_max=residual_norm_max,
+            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_seed, cutoff_N=cutoff_N)
         push!(attempts, primary)
         if !primary.converged && fallback_method !== nothing && fallback_method != method_eff
             fallback = _magnetic_attempt(model, seed, T_fm, μ, fallback_method;
                 xtol=xtol_eff, ftol=ftol_eff, iterations=iterations,
-                residual_norm_max=residual_norm_max, finite_difference_step=finite_difference_step,
-                xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
+                residual_norm_max=residual_norm_max,
+                xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_seed, cutoff_N=cutoff_N)
             push!(attempts, fallback)
         end
     end
@@ -367,7 +411,7 @@ function solve_magnetic_gap(
     for (idx, root) in enumerate(roots)
         stability = _magnetic_stability(model, root, T_fm, μ;
             classify_stability=classify_stability, finite_difference_step=finite_difference_step,
-            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
+            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=root.n_max, cutoff_N=cutoff_N)
         if stability == :local_minimum && stable_idx == 0
             stable_idx = idx
         end
