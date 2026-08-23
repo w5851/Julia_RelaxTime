@@ -267,6 +267,19 @@ backlog_file = ""
 evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:scripts/pnjl/phase_reference_adapter.py", "note:runtime_consumption=false; solver_called=false; legacy default unchanged"]
 
 [[items]]
+id = "issue130-phase-reference-retirement"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "triaged"
+parent = "track:issue130-phase"
+task_file = ""
+reason = "旧 reference 只能在全部 phase/transport/paper consumer 完成 adapter migration 与 parity、显式 runtime switch PR 合并并经作者审核后移除；在此之前必须保持旧文件和默认 runtime 不变。"
+next_action = "等待 item:issue130-phase-reference-adapter-contract 完成；随后另立 versioned runtime switch/retirement PR，先验证 consumer parity 和回滚路径，再请求作者批准移除旧 reference。"
+blocked_by = ["item:issue130-phase-reference-adapter-contract"]
+backlog_file = ""
+evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "note:legacy reference retirement is gated by adapter migration, parity, runtime switch, and author review"]
+
+[[items]]
 id = "plot-sop-independent-land"
 track_id = "plot-sop"
 classification = "independent"
