@@ -1,0 +1,10 @@
+{
+  "verdict": "display_candidate",
+  "figure_version": "v3",
+  "reference_write": false,
+  "runtime_consumption": false,
+  "solver_called": false,
+  "strict_or_derived_csv_modified": false,
+  "public_alias_replaced": false,
+  "supersedes": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v2/"
+}

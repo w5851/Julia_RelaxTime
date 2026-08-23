@@ -1,0 +1,3 @@
+# Issue #130 phase-reference Figure 4 v4
+
+Display-only style candidate generated from immutable derived tables. The physical axes are mu_q [MeV], xi (dimensionless), and T [MeV], meeting at the inner origin. The xi display aspect is deliberately reduced for a balanced Cartesian view. Pane/grid artists and surface projection walls are disabled. Directional shading is neutral and does not encode a physical observable. The CEP boundary is magenta; the crossover intersection with mu_q=0 is a black dashed trace with a white halo and stays out of the legend. Only PNG and SVG are emitted; no strict/derived data or public alias is modified.

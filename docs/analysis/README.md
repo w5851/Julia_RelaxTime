@@ -30,6 +30,7 @@
 
 - C1 的两个顶层目录是同一 source run 的不同 projection view；`mu_xi_T` 和 `xi_T_mu` 的图轴、CEP 展示和 manifest schema 不同。
 - C2 `pnjl/c2_surface_views/` 下的 `c2_phase_surfaces_diagnostic_v1` 到 `v5_no_triangulation` 是连续的语义/显示演进，不是五份可任意去重的副本：v1/v2 修正化学势口径，v3 增加 crossover 物理筛选，v4 处理视觉闭合，v5 保留 native-support/no-triangulation 语义。
+- Issue #130 C2 surface 与 phase-reference figure layer 的统一只读系列索引为 `pnjl/phase_surface_series/`；该 namespace 只保存逐字节相等的 snapshot，不移动或改写原始 evidence package。
 - `v4_visual_closed_display16` 是 v4 的展示变体。它与 v4 共享主图和多张表，但拥有独立的 `README.md`、`AUDIT.md`、`decision.json` 和 manifest，因此暂保留为独立 provenance 节点。
 - `pnjl/c2_audits/` 收纳 C0/C1/C2 convergence audit 与当前 C1/C2 blocking audit；两者保留独立的 run、verdict 和证据表。
 

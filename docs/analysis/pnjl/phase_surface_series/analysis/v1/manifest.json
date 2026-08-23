@@ -1,0 +1,70 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v1",
+  "generated_at_utc": "2026-08-18T03:06:43.060506+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "verdict": "global_diagnostic_surface_ready_for_author_review",
+  "inputs": {
+    "boundary": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\boundary_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "a7a64ce63c323d358b18389aa44295a6387d5980c3d674272de7efba58754748"
+    },
+    "spinodals": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\spinodals_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8"
+    },
+    "crossover": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\crossover_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "8fb5d3dcb444a1633683e5b2a321b097079e9f2e5051dfbcfe69bf7bd188153c"
+    },
+    "cep": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\cep_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "f28cccf0afecdc5ea48fd5d49fff72e5ecf1d81e36d0f798c347de8c1430adef"
+    },
+    "grid_convergence": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_grid_convergence_issue130_stagec_density_v2_c2_grid_tight_20260813.csv",
+      "sha256": "59eebf20e2714f4cdcd7c4157fbd6812bfaa5386fd8ece9f6ab665ed123b5673"
+    },
+    "source_manifest": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\stagec_density_v2_c2_20260813_run31862752226\\reference\\phase_reference_issue130_stagec_density_v2_c2_grid_tight_20260813_manifest.json",
+      "sha256": "51d6b10f6da3e8c52b10ef305db3a3d54ffaa59b7f39f286c531f85d58f80a67"
+    }
+  },
+  "counts": {
+    "boundary_rows_plotted": 6886,
+    "crossover_rows_plotted": 1488,
+    "cep_brackets_projected": 93,
+    "unresolved_grid_rows": 5424,
+    "maxwell_grid_status_counts": {
+      "rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged": 289,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged": 356,
+      "rho:geometry_tolerance_exceeded": 742,
+      "automatic_grid_pass": 2815,
+      "temperature:interpolation_tolerance_exceeded": 427,
+      "rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded": 23,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 137,
+      "rho:geometry_tolerance_exceeded|rho:ok|rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 123,
+      "rho:geometry_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 344,
+      "xi:interpolation_tolerance_exceeded": 1198,
+      "temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 179,
+      "rho:rho_geometry_not_converged|xi:interpolation_tolerance_exceeded": 71,
+      "rho:rho_geometry_not_converged": 146,
+      "rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 14,
+      "rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded": 14,
+      "rho:geometry_tolerance_exceeded|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 4,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded|xi:interpolation_tolerance_exceeded": 2,
+      "rho:geometry_tolerance_exceeded|rho:rho_geometry_not_converged|temperature:interpolation_tolerance_exceeded": 2
+    }
+  },
+  "output_files": {
+    "decision.json": "443b6a401a590003d7e374ca2601b02b62ec263a4c5864b7058e68538a531e4a",
+    "figures/c2_phase_surfaces_muB_xi_T_diagnostic.png": "063e5ab17106f1b31938514626f0bbb4d59bdefc86fa6e8bb0fb436dbd00c547",
+    "figures/plot_manifest.json": "b62124f1d1307df395965bc106109fb607dcd290d1ff472aed1564fe4acef4df",
+    "README.md": "b535312300bbfe68e17feef1c5967f14b479396a45e21ac5da43b5e41d03d466",
+    "tables/claim_ledger.csv": "4015c80f1559cc60d5df4493c1c0808b6075b2f06d3f3e0bce7ea2030ad70341",
+    "tables/maxwell_grid_status_counts.csv": "9f31077bf0422a9815b362a25ec4f055e1b92b008cacc0f42af45040ced71efe",
+    "tables/maxwell_surface_point_status.csv": "8555528c180f9bf98904ddd16ee9f543ca7c20eaa8112ce2a297ff5f4695f1bc",
+    "tables/surface_summary.csv": "6f65b7a8acb0d9aa83913c741accddc1fcf2f7358b307e51bf0cedddd959c18d"
+  }
+}

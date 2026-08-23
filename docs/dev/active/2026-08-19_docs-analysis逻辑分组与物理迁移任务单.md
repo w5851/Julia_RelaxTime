@@ -88,3 +88,11 @@
 - [x] `docs/analysis` 顶层的独立 protocol 文件已归入 `governance/`；其余顶层内容为总索引 `README.md`。
 - [x] `pnjl/`、`relaxtime/`、`historical/` 和 `governance/` 已按逻辑域建立入口；没有发现需要继续物理迁移的同等级未分组目录。
 - [ ] `docs-analysis-metadata-repair`：继续作为独立 required follow-up，不能因 namespace migration 完成而关闭。
+
+### Batch review: Issue #130 phase surface series namespace
+
+- source roots：`docs/analysis/pnjl/c2_surface_views/` 下 C2 v1-v7（含独立 `v4_visual_closed_display16`）以及 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/` 下 render v1/v8/v9；destination root：`docs/analysis/pnjl/phase_surface_series/`。
+- migration boundary：新增 `analysis/v1..v7`、`analysis/v4_display16` 和 `figure_layer/phase_surface_render_v1..v3` 的逐字节 snapshot；不删除 source，不重写包内 manifest/checksum/execution log/生成时 provenance，不改变 solver、Maxwell、strict/derived/reference 或 RS transport。
+- pre-migration/post-migration inventory：147 files、82,211,563 bytes；每个 source/destination package 的 file count、byte count 和 inventory SHA-256 相等，完整映射见 `docs/analysis/pnjl/phase_surface_series/series_manifest.json`。
+- semantic boundary：figure layer 的新 `v2`/`v3` 分别保留历史 render 语义 v8/v9；作者接受的 Figure 4 v5 仍在 `data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v5/`，不混入 phase-surface series。
+- validation boundary：本批只做文档 namespace、JSON manifest、hash 对照和治理检查；不调用 PNJL solver，不触发 Actions，不执行 reference promotion。

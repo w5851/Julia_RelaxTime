@@ -1,29 +1,149 @@
 {
-  "schema_version": "pnjl_issue130_phase_reference_plot_manifest_v1",
-  "generated_at_utc": "2026-08-21T07:23:39.506278+00:00",
+  "schema_version": "plot_manifest_v1",
+  "generated_at_utc": "2026-08-21T10:10:49.607184+00:00",
+  "asset_id": "pnjl_issue130_phase_surface_v9",
+  "figure_family": "pnjl_phase_reference",
+  "case_slug": "issue130_phase_reference_v1_public_v9_alias",
+  "figure_version": "v9",
+  "asset_kind": "figure",
+  "figure_mode": "audit",
+  "semantic_status": "visualization_only_closed_candidate",
+  "style_profile": "candidate_origin_like_v1",
+  "publication_scope": "external_display_candidate",
+  "generator": {
+    "path": "scripts/analysis/pnjl/render_issue130_phase_surface_v9.py",
+    "path_kind": "repository_relative",
+    "bytes": 35180,
+    "sha256": "a0f46a7947602fdc21522f9bb606ab9cce5ad7c76d312728f5810a116032e448",
+    "role": "render_generator",
+    "command": "render_issue130_phase_surface_v9.py",
+    "runtime": {
+      "python": "3.13.2",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "executable": "D:\\Python313\\python.exe"
+    }
+  },
+  "git_commit": "a388ba53518c2bfc79f91966fbc96cae6905f03e",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "postprocess_sha": "d9a52e6232d09695a83997cda2c11f6b00204587",
   "source_run_id": "32354095831",
-  "replay_run_id": "32451053476",
-  "reference_status": "candidate",
-  "runtime_consumption": false,
-  "source_plot_manifest": {
-    "path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v1/figures/plot_manifest.json",
-    "sha256": "d395d5201e1a5502545871fcb6e3b1711fea240bec55a987d5fb59fe73bf05d9",
-    "bytes": 3122
-  },
-  "source_render_semantics": {
-    "projection": "ordered_xi_slice_lines",
+  "previous_public_version": "v8",
+  "previous_public_png_sha256": "5b8152b2ccef4107c51393370b82ff77f48287132e8206a37ee6cfb2ab793b14",
+  "previous_public_source_path": "docs/analysis/pnjl/phase_reference/issue130_phase_reference_layers_v1/phase_surface_render_v8/figures/phase_surface_render_mu_xi_T.png",
+  "inputs": [
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/crossover_surface_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 785310,
+      "sha256": "fdf43b2229bddbb706dec2fec9c84abda021b618e1e740b3ca5800585b13276e",
+      "role": "derived_crossover_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/maxwell_surface_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 3042004,
+      "sha256": "f8bb9593d75e9e0382e63c375a86abcfe16a2e11f769827c05834a639adc310c",
+      "role": "derived_maxwell_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/cep_boundary_derived_reference_v1.csv",
+      "path_kind": "repository_relative",
+      "bytes": 27047,
+      "sha256": "252b31ccf680867c335ad9fa2992b8045305a189167f37e07202edfbc3278853",
+      "role": "derived_cep_boundary_table"
+    },
+    {
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/derived/tables/surface_coverage_mask.csv",
+      "path_kind": "repository_relative",
+      "bytes": 40523,
+      "sha256": "f14ffc4b9d7c7bed4387023e335fa1401d4f7ccf3f2f486b6c89b020180085b2",
+      "role": "derived_coverage_mask"
+    }
+  ],
+  "axes": [
+    {
+      "field": "mu_q",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "transform": "identity"
+    },
+    {
+      "field": "xi",
+      "source_unit": "dimensionless",
+      "display_unit": "dimensionless",
+      "transform": "identity"
+    },
+    {
+      "field": "T",
+      "source_unit": "MeV",
+      "display_unit": "MeV",
+      "transform": "identity"
+    }
+  ],
+  "series": [
+    {
+      "series_id": "crossover",
+      "state": "crossover_with_boundary_constrained_cep_display_endpoint",
+      "support_rule": "derived rows and local common-support mesh; endpoint may reach estimated CEP midpoint",
+      "mask_rule": "mask cells without adjacent xi common mu support"
+    },
+    {
+      "series_id": "first_order_coexistence",
+      "state": "first_order_coexistence_maxwell_display",
+      "support_rule": "derived Maxwell rows plus bounded display-only continuation to T=0 within adjacent xi common T support",
+      "mask_rule": "mask cells without adjacent xi common T support or local axis gap > 18 MeV"
+    },
+    {
+      "series_id": "cep_boundary",
+      "state": "estimated_midpoint",
+      "support_rule": "CEP bracket midpoint from derived boundary table",
+      "mask_rule": "none"
+    }
+  ],
+  "selection_rule": "render finite derived rows, add explicit CEP display endpoint, and add bounded non-certified Maxwell T continuation",
+  "interpolation_policy": "local_common_support_mesh_plus_boundary_constrained_endpoint_plus_bounded_T_extrapolation",
+  "connector_policy": "explicit_display_only",
+  "missing_value_policy": "masked",
+  "outputs": [
+    {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
+      "path_kind": "repository_relative",
+      "bytes": 5287855,
+      "sha256": "bc4bfd26512f2d8c9942e7fdcab2e3e191c6e49c3c46fd41ef6989ca23c47b65",
+      "format": "png",
+      "dpi": 600,
+      "vector": false
+    },
+    {
+      "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.svg",
+      "path_kind": "repository_relative",
+      "bytes": 9768073,
+      "sha256": "0b78422bb75218d5ff65ec1ea0f53e5ff4f77b7ae2d6d129b448171407972bde",
+      "format": "svg",
+      "dpi": null,
+      "vector": true
+    }
+  ],
+  "rendering": {
+    "projection": "masked_local_quad_surface",
     "triangulation": false,
-    "masked_cells_connected": false,
-    "derived_rows_are_certified": false
+    "filled_surface": true,
+    "figure_size_inches": [
+      11.0,
+      8.0
+    ],
+    "legend_policy": "explicit_semantic_labels",
+    "boundary_display": "CEP estimated midpoint with endpoint-constrained crossover closure",
+    "low_temperature_display": "Maxwell display-only linear continuation to T=0 from first two native T rows",
+    "low_temperature_source_tables_unchanged": true,
+    "maxwell_display_extrapolation_max_gap_MeV": 13.0
   },
-  "inputs": {
-    "reference_root_manifest": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
-    "render_tables": "data/reference/pnjl/issue130_phase_reference_v1/render/tables"
-  },
-  "figure": {
-    "path": "data/outputs/figures/pnjl/phase_reference/issue130_phase_reference_v1/phase_surface_render_mu_xi_T.png",
-    "sha256": "50d09fefca853d532059c6133d70ca040b33b5c125ade18d7227ef71a1a0ea39",
-    "bytes": 999505
+  "validation": {
+    "finite": true,
+    "duplicate_keys": true,
+    "support": true,
+    "strict_gate": false,
+    "solver_called": false,
+    "source_tables_unchanged": true
   }
 }

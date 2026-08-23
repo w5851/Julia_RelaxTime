@@ -1,0 +1,55 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v6_crossover_overlay",
+  "generated_at_utc": "2026-08-20T02:41:15.584893+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "generator": {
+    "script": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c2_phase_surfaces_v6_crossover_overlay.py",
+    "script_sha256": "75c42deb90aa197f0eaf9f9573dd430560ed04f0fa01932255eee7d07b762f4b"
+  },
+  "verdict": "diagnostic_v6_overlay_ready_for_author_review",
+  "source_manifests": {
+    "v5": {
+      "path": "D:\\Desktop\\Julia_RelaxTime\\docs\\analysis\\pnjl\\c2_surface_views\\c2_phase_surfaces_diagnostic_v5_no_triangulation\\manifest.json",
+      "sha256": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6",
+      "bytes": 5861
+    },
+    "endpoint_replay": {
+      "path": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\crossover_mu_endpoint_expansion_20260819_32255786553_replay\\manifest.json",
+      "sha256": "954c1cee4df83e1f06e8a3bcc466adc9f9bdb6071896405705020e87b8cf0396",
+      "bytes": 71429
+    }
+  },
+  "counts": {
+    "source": "v5_postprocessed_package",
+    "maxwell_rows": 6886,
+    "spinodal_rows": 6886,
+    "crossover_rows": 1157,
+    "cep_brackets": 93,
+    "endpoint_rows": 186,
+    "endpoint_excluded_rows": 0
+  },
+  "output_files": {
+    "AUDIT.md": "cfe6d9614e363bbdce222b7adfd74359991c449c37567f77aab95fffb72ac9a5",
+    "decision.json": "ed29ded6d5cb604284d58b03a243aa6dec08c7208260871dd56fc56a4a5cdcdf",
+    "figures/c2_phase_surfaces_mu_xi_T_v6_crossover_overlay.png": "ed1549aca80f752531004e6ca7ec8e660124d268609c3d843d7ef0f7dc7fe262",
+    "figures/plot_manifest.json": "77bc13ac02e363a45b0c55320bd3c38159329c99ce835aef81d47154ca3ce8fc",
+    "README.md": "c509e3ba7b880cdb24af2de0382ce3c84f91f4fbf2fa858cf5b6749f6dd5e395",
+    "tables/claim_ledger.csv": "fcb8b29d08b997c6ef757e8517361bb2adafbca3f775456d68c75297f626701c",
+    "tables/crossover_endpoint_excluded.csv": "11879c733ca221376bbdbb291658ebebabcde2f6324bd76e33c5cd289fe50e89",
+    "tables/crossover_endpoint_expansion_summary.csv": "c18ff52ef8a0a5181b3fcedec375a641c643faf5ed51bebad3c89dd6cc04ee9a",
+    "tables/crossover_overlay.csv": "297c755e787bd93bb176e0c052fd92e7b6ca50eb68924acc4b4ddf3e009f6ff0",
+    "tables/crossover_overlay_gap.csv": "c325855fb424fa94e2ba0ab2cd88fe51bd45e611a0e8301a1dc9aaedd91990b5",
+    "tables/crossover_source_counts.csv": "e8b64030e828aa5d699508e2532c56499581f799e9810f2f273e4c2a17df64a0",
+    "tables/endpoint_replay_manifest.json": "954c1cee4df83e1f06e8a3bcc466adc9f9bdb6071896405705020e87b8cf0396",
+    "tables/v5_claim_ledger.csv": "9e4301ab3cd99acc3218cc35dea5855b1895c766958056db2e4a2f88c6abae11",
+    "tables/v5_crossover_cep_sampling_gap.csv": "d231e898f39abf4ca29660ac8598c4a3084c092f4fdac5df60b314c1ac309eea",
+    "tables/v5_crossover_physical_filter.csv": "e3d3d9918237c92d4b19c38674120b765865203663455796dfda18ddecd55fec",
+    "tables/v5_grid_unresolved_diagnostics.csv": "ab0640f7ee7d7cd503095d66e7a5c061371af82ad7c0be559f874940c49497fc",
+    "tables/v5_maxwell_grid_status_counts.csv": "4f99cd6ccd093a04cf28332210d716462b9fdfe62069714e2b14348bce89b3c8",
+    "tables/v5_maxwell_surface_point_status.csv": "58d10cec77ecd5e61297593ae985b1813c98014d6dc480d1c0f6cf54c4377d4e",
+    "tables/v5_source_manifest.json": "df1cccd3cdc9e55b846fdc08cda1e01440062432f329e7e30dfd54fcb9cef0f6",
+    "tables/v5_spinodals.csv": "5c248f425dc929f6edac060e2a2abac8c2dc09720964d743e569e959888149e8"
+  }
+}

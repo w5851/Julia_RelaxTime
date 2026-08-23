@@ -1,0 +1,30 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v7_crossover_derived",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "v6_manifest_hash": "8f19f73f7654663504dfa27a9a7e338df13e090bfc7501b8c201742defe4cb0b",
+  "solver_called": false,
+  "reference_write": false,
+  "triangulation": false,
+  "orientation": "x=mu_q, y=xi, z=T",
+  "generator": {
+    "script": "D:\\Desktop\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\plot_c2_phase_surfaces_v7_crossover_derived.py",
+    "script_sha256": "3a92b23e6ee2e951f3e81fc7e9d3dc6b75c76c33798ec274ea440d16ebdbc3c1"
+  },
+  "figures": {
+    "c2_phase_surfaces_mu_xi_T_v7_complete_display.png": {
+      "sha256": "f23b0c93889cc6ded4afcdfc860ba8d87c089be280a1c9072f072d4a7830df88",
+      "bytes": 1864718,
+      "mode": "complete_display"
+    },
+    "c2_phase_surfaces_mu_xi_T_v7_layer_audit.png": {
+      "sha256": "fbac43eeb25cdd56cc06eb84b5de694c8e066e6cc1ff5b2ed0ef1d33c1141942",
+      "bytes": 1965470,
+      "mode": "layer_audit"
+    }
+  },
+  "visual_policy": {
+    "complete_display": "same orange hue for native and derived crossover, with derived support translucent/dashed; Maxwell remains one uniform blue layer",
+    "layer_audit": "native, same-xi derived and xi-derived support use distinct line styles/alpha",
+    "maxwell": "copied native v6 rows only; no interpolation or geometry closure"
+  }
+}

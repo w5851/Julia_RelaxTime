@@ -1,0 +1,26 @@
+{
+  "schema_version": "pnjl_c2_phase_surfaces_diagnostic_v6_crossover_overlay",
+  "generated_at_utc": "2026-08-20T02:41:15.584893+00:00",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "solver_called": false,
+  "reference_write": false,
+  "verdict": "diagnostic_v6_overlay_ready_for_author_review",
+  "promotion_effect": "none",
+  "baseline": {
+    "source": "v5_postprocessed_package",
+    "maxwell_rows": 6886,
+    "spinodal_rows": 6886,
+    "crossover_rows": 1157,
+    "cep_brackets": 93
+  },
+  "endpoint_expansion": {
+    "source_run_id": "32240898122",
+    "replay_run_id": "32255786553",
+    "replay_artifact_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\crossover_mu_endpoint_expansion_20260819_32255786553_replay",
+    "postprocess_sha": "78affa1e6439f02ca7f09fcd4180b3b71605d1fd",
+    "rows": 186,
+    "excluded_rows": 0,
+    "target_xi_count": 93
+  },
+  "policy": "v5 baseline plus endpoint crossover overlay; no Maxwell extension in this artifact"
+}

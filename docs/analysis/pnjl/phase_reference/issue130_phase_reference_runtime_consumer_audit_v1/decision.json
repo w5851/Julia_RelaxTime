@@ -1,0 +1,18 @@
+{
+  "schema_version": "pnjl_issue130_phase_reference_runtime_consumer_audit_v1",
+  "verdict": "candidate_isolation_confirmed_requires_explicit_adapter",
+  "candidate_auto_selected": false,
+  "runtime_consumption": false,
+  "solver_called": false,
+  "legacy_defaults_unchanged": true,
+  "explicit_adapter_required": true,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_run_id": "32354095831",
+  "replay_run_id": "32451053476",
+  "non_goals": [
+    "do not rewrite legacy reference files",
+    "do not add a runtime adapter in this audit",
+    "do not run PNJL or transport production"
+  ],
+  "next_action": "design a separate explicit candidate adapter/consumer contract and author-review it before any runtime switch"
+}

@@ -1,0 +1,3 @@
+common_support_high_max,common_support_low_min,display_T_floor_MeV,display_policy,extrapolated_xi_count,grid_points_per_xi_pair,max_extrapolation_gap_MeV,max_local_axis_gap,quad_count,surface,xi_pair_count_with_common_support,xi_slice_count
+347.7534052491582,0.0,,cep_boundary_constrained_common_support,,160,,26.0,25440,crossover,160,161
+146.6875,0.0,0.0,bounded_display_extrapolation_to_T0,161,160,13.0,18.0,25440,first_order_coexistence_maxwell,160,161
