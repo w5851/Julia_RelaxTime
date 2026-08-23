@@ -59,13 +59,19 @@ specific legacy artifact or to a current-project path:
 The magnetic external-source comparison is recorded separately in
 [`magnetic_external_crosscheck_v1.md`](magnetic_external_crosscheck_v1.md) and
 [`tables/legacy_magnetic_external_crosscheck_v1.csv`](tables/legacy_magnetic_external_crosscheck_v1.csv).
+The short FixedMu replay and same-route Julia/Fortran comparison are recorded in
+[`magnetic_external_crosscheck_v2.md`](magnetic_external_crosscheck_v2.md) and
+[`tables/magnetic_external_fixedmu_replay_v2.csv`](tables/magnetic_external_fixedmu_replay_v2.csv).
+The aligned state deltas are in
+[`tables/magnetic_julia_fortran_same_route_v2.csv`](tables/magnetic_julia_fortran_same_route_v2.csv).
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
 Neither record promotes the external source to acceptance: the magnetic
 parameter/unit/ensemble/cutoff/branch gates and the Mott convention gate remain
-open. The next magnetic step is a small dual-source FixedMu replay using the
-Fortran root/state path and `pnjl_mag`; the point list is recorded in
+open. The v2 replay supplies candidate Fortran smooth-Landau states and
+diagnostic `pnjl_mag` MFIR roots, but the profile and regularization gates remain
+open. The original point list is recorded in
 [`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
 ## Current-project relationship

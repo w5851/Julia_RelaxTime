@@ -759,6 +759,10 @@ $$
 `eB_fm2` 与 `Lambda_QCD/hbarc` 在 `zeta` 中使用同一单位，转换因子会抵消。
 在 profile 决策冻结前，磁场外部数值验证保持 `diagnostic_only`，不生成
 acceptance target，也不把两个参数值静默混用。
+当前已完成的短 FixedMu replay（Fortran smooth-Landau 候选状态与 `pnjl_mag` MFIR
+诊断根）见 [`magnetic_external_crosscheck_v2.md`](analysis/historical/legacy/legacy_extraction_v1/magnetic_external_crosscheck_v2.md)。
+该 replay 仍不是 acceptance：Fortran 熵/密度后处理被排除，`pnjl_mag` 与当前路线的
+正则化不同，且运行时构造器尚未接入 `magnetic_default.toml`。
 
 磁场巨势还包含
 

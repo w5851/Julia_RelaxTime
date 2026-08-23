@@ -36,6 +36,10 @@
 
 ## 当前可复用的比较合同
 
+v1 的计划已由短 replay v2 部分执行；实际结果和新的 gate 状态见
+[`magnetic_external_crosscheck_v2.md`](magnetic_external_crosscheck_v2.md)。本页保留
+原始来源审计和未闭合合同，不再把“双源 replay”描述成尚未开始的工作。
+
 未来若要把外部点升级为可信测试集，顺序应固定为：
 
 1. 先冻结模型版本和参数，特别是 `G(eB)` 的 `a` 参数。当前 Julia 的

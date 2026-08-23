@@ -60,8 +60,12 @@ and `pnjl_mag` to establish source consistency at a small set of FixedMu points,
 then compare those points with the current Julia five-dimensional solver. The
 Fortran entropy/density postprocessing rows with the documented flavor-charge
 bug and NaN exports are excluded from acceptance; state, stationarity residual,
-and a convention-matched `Omega` remain the initial observables. The plan is
-recorded in `magnetic_external_validation_point_plan_v1.csv`; until the IMC
+and a convention-matched `Omega` remain the initial observables. The short v2
+replay is recorded in
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_external_fixedmu_replay_v2.csv`;
+the same-route Julia/Fortran state deltas are in
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`;
+the original point plan is recorded in `magnetic_external_validation_point_plan_v1.csv`. Until the IMC
 profile (`a=0.108805` versus `a=0.0108805`), units, ensemble, cutoffs, and branch
 policy are frozen, all rows remain evidence/diagnostic rather than targets. The
 point-list file is maintained with the historical extraction package at
