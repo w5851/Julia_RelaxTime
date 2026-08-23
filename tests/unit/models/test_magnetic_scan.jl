@@ -11,19 +11,24 @@ const _MS = Models.MagneticScan
     @test !isempty(_MS.DEFAULT_T_VALUES)
     @test all(>(0.0), _MS.DEFAULT_T_VALUES)
     @test !isempty(_MS.DEFAULT_EB_VALUES)
+    @test all(>=( _MS.MAGNETIC_EB_MIN_MEV2), _MS.DEFAULT_EB_VALUES)
     @test isdefined(Models, :run_magnetic_scan)
     @test Models.run_magnetic_scan isa Function
 
     @test _MS._validate_magnetic_scan_inputs(
-        [150.0], [0.0], [0.0, 2.0e4], [0.0],
+        [150.0], [0.0], [_MS.MAGNETIC_EB_MIN_MEV2, 2.0e4], [0.0],
         :PNJLMagnetic, :fixed_mu, 4, 1, 1,
     ) === nothing
     @test_throws ArgumentError _MS._validate_magnetic_scan_inputs(
-        [0.0], [0.0], [0.0], [0.0],
+        [0.0], [0.0], [_MS.MAGNETIC_EB_MIN_MEV2], [0.0],
         :PNJLMagnetic, :fixed_mu, 4, 1, 1,
     )
     @test_throws ArgumentError _MS._validate_magnetic_scan_inputs(
-        [150.0], [0.0], [0.0], [0.1],
+        [150.0], [0.0], [_MS.MAGNETIC_EB_MIN_MEV2], [0.1],
+        :PNJLMagnetic, :fixed_mu, 4, 1, 1,
+    )
+    @test_throws ArgumentError _MS._validate_magnetic_scan_inputs(
+        [150.0], [0.0], [_MS.MAGNETIC_EB_MIN_MEV2 - 1.0], [0.0],
         :PNJLMagnetic, :fixed_mu, 4, 1, 1,
     )
     @test_throws ArgumentError _MS._validate_magnetic_scan_inputs(

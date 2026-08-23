@@ -1,5 +1,5 @@
 [magnetic]
-# eB (fm^-2), where electric charge e is included.
+# eB (fm^-2), where electric charge e is included. Must be >= 100/hbarc^2.
 eB_fm2 = 0.10
 
 # Landau truncation; set to -1 to enable auto estimation.

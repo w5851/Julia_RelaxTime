@@ -13,8 +13,7 @@
 
 它的职责是：
 
-- 零场极限复用 PNJL 兼容路径
-- 非零磁场把磁场 `Omega` 接入五维、多 seed 的 branch-aware gap solver
+- 验证正磁场配置并把磁场 `Omega` 接入五维、多 seed 的 branch-aware gap solver
 - 把 magnetic 配置与磁场热力学能力接入 `Models` 聚合表面
 
 ## `MagneticIMCParams`
@@ -48,7 +47,7 @@
 
 默认构造器：
 
-- `default_magnetic_config(; eB_fm2=0.0)`
+- `default_magnetic_config(; eB_fm2=...)`；必须显式提供不低于门槛的 `eB_fm2`
 
 ## 单位与向量合同
 
@@ -56,13 +55,20 @@
 - `mu_vec`：3 维，`(mu_u, mu_d, mu_s)`
 - `T_fm`、`mu_vec`、质量、动量：`fm^-1`
 - `eB_fm2`：`fm^-2`
+- 外部生产扫描的 `eB` 使用 `MeV^2`；当前最小值为 `MAGNETIC_EB_MIN_MEV2 = 100`
+- 内部最小值为 `MAGNETIC_EB_MIN_FM2 = 100 / hbarc^2`
 
-`solve_magnetic_gap` 要求有限且 `T_fm > 0`，当前只允许 `xi=0`。`MagneticGapResult.candidates` 保存去重后的多分支候选；未启用稳定性分类时标准 `solve_gap` 按已找到候选中的最低 `Omega` 返回 `MeanFieldState`，但不提供局部稳定性证明。启用 `classify_stability=true` 只增加有限差分 Hessian 诊断标签；该标签不是 PNJL 默认生产过滤条件，所有可行候选仍应保留供分支策略使用。
+`PNJLMagneticModel` 与 `MagneticConfig` 对 `eB_fm2 < MAGNETIC_EB_MIN_FM2` 抛出
+`ArgumentError`；通过验证后始终使用 Landau magnetic route。`solve_magnetic_gap`
+要求有限且 `T_fm > 0`，当前只允许 `xi=0`。`MagneticGapResult.candidates` 保存去重后的
+多分支候选；未启用稳定性分类时标准 `solve_gap` 按已找到候选中的最低 `Omega`
+返回 `MeanFieldState`，但不提供局部稳定性证明。启用 `classify_stability=true` 只增加
+有限差分 Hessian 诊断标签；该标签不是 PNJL 默认生产过滤条件，所有可行候选仍应保留供
+分支策略使用。
 
-非零 `eB` 时，`model_capabilities(model).supports_number_densities` 为 `false`：通用
+磁场模型的 `model_capabilities(model).supports_number_densities` 恒为 `false`：通用
 模型接口要求独立的 `quark`/`antiquark` 密度，而磁场适配器只提供
-`calculate_magnetic_number_densities(...).net` 净密度。`eB≈0` 时恢复普通 PNJL 的
-独立密度 capability；这不影响磁场专用密度 API 的可调用性。
+`calculate_magnetic_number_densities(...).net` 净密度；这不影响磁场专用密度 API 的可调用性。
 
 ## 配置模板
 

@@ -12,29 +12,34 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-const PNJL_MODEL = Models.create_model(:PNJL)
 const PNJL = Models.pnjl_module()
 const MagneticConfig = getproperty(PNJL, :MagneticConfig)
 const coupling_GB = getproperty(PNJL, :coupling_GB)
-const PNJLConstants = getproperty(PNJL, :Constants_PNJL)
-const G_fm2 = getproperty(PNJLConstants, :G_fm2)
+const MAGNETIC_EB_MIN_FM2 = getproperty(PNJL, :MAGNETIC_EB_MIN_FM2)
+const energy_landau = getproperty(PNJL, :energy_landau)
 const calculate_magnetic_rho = getproperty(PNJL, :calculate_magnetic_rho)
 const calculate_magnetic_number_densities = getproperty(PNJL, :calculate_magnetic_number_densities)
-const cached_nodes = getproperty(PNJL, :cached_nodes)
 const calculate_magnetic_omega_components = getproperty(PNJL, :calculate_magnetic_omega_components)
-const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
 
 @testset "MagneticThermodynamics" begin
     @testset "magnetic coupling G(B)" begin
-        g0 = coupling_GB(0.0)
-        @test isapprox(g0, G_fm2; rtol=1e-12)
+        @test_throws ArgumentError coupling_GB(0.0)
+        @test_throws ArgumentError coupling_GB(-MAGNETIC_EB_MIN_FM2)
 
-        g1 = coupling_GB(0.05)
+        g1 = coupling_GB(MAGNETIC_EB_MIN_FM2)
         g2 = coupling_GB(0.10)
         @test isfinite(g1)
         @test isfinite(g2)
         @test g1 > 0
         @test g2 > 0
+    end
+
+    @testset "positive magnetic-field contract" begin
+        @test_throws ArgumentError MagneticConfig(eB_fm2=0.0)
+        @test_throws ArgumentError MagneticConfig(eB_fm2=0.5 * MAGNETIC_EB_MIN_FM2)
+        @test_throws ArgumentError energy_landau(1.0, 0.0, 0, 1 / 3, 0.0)
+        conf = MagneticConfig(eB_fm2=MAGNETIC_EB_MIN_FM2)
+        @test conf.eB_fm2 == MAGNETIC_EB_MIN_FM2
     end
 
     @testset "magnetic densities" begin
@@ -81,21 +86,6 @@ const calculate_magnetic_omega = getproperty(PNJL, :calculate_magnetic_omega)
         @test isfinite(comp.therm)
         @test comp.n_max >= 0
         @test comp.G_B > 0
-
-        thermal_nodes = cached_nodes(24, 8)
-        omega_legacy = Models.omega(PNJL_MODEL, x_state, T_fm, mu_vec; thermal_nodes=thermal_nodes, xi=0.0)
-        omega_b0 = calculate_magnetic_omega(x_state, mu_vec, T_fm, MagneticConfig(eB_fm2=0.0, p_num=24, pz_max=10.0))
-        @test isapprox(omega_b0, omega_legacy; rtol=1e-7, atol=1e-8)
-
-        comp_b0 = calculate_magnetic_omega_components(x_state, mu_vec, T_fm, MagneticConfig(eB_fm2=0.0, p_num=24, pz_max=10.0))
-        masses_ref = Models.calculate_mass_vec(PNJL_MODEL, SVector{3, Float64}(x_state[1], x_state[2], x_state[3]))
-        vac_ref = Models.vacuum_contribution(PNJL_MODEL, masses_ref)
-        therm_ref = Models.thermal_contribution(PNJL_MODEL, masses_ref, x_state[4], x_state[5], mu_vec, T_fm; p_num=24, t_num=8, xi=0.0)
-
-        @test isfinite(comp_b0.vac)
-        @test isfinite(comp_b0.therm)
-        @test isapprox(comp_b0.vac, vac_ref; rtol=1e-8, atol=1e-10)
-        @test isapprox(comp_b0.therm, therm_ref; rtol=1e-8, atol=1e-10)
-        @test isapprox(comp_b0.omega, comp_b0.chi + comp_b0.poly + comp_b0.vac + comp_b0.therm; rtol=1e-10, atol=1e-12)
+        @test isapprox(comp.omega, comp.chi + comp.poly + comp.vac + comp.therm; rtol=1e-10, atol=1e-12)
     end
 end

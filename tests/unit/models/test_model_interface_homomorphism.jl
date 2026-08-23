@@ -19,7 +19,8 @@ end
 
     for (kind, expected_dim) in expected_dims
         @testset "model=$(kind)" begin
-            model = Models.create_model(kind)
+            model = kind === :PNJLMagnetic ?
+                Models.create_model(kind; eB_fm2=0.1) : Models.create_model(kind)
 
             @test hasmethod(Models.solve_gap, Tuple{typeof(model), Any, Any})
             @test hasmethod(Models.number_densities, Tuple{typeof(model), Any, Any, Any})

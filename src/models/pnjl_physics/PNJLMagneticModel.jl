@@ -26,14 +26,11 @@ include(joinpath(@__DIR__, "MagneticGapSolver.jl"))
 
 @inline function model_capabilities(model::PNJLMagneticModel)
     # The generic density contract requires independent quark and antiquark
-    # vectors.  Nonzero magnetic fields currently expose only the dedicated
-    # net-density route; keep the generic capability true only for the exact
-    # zero-field compatibility path.
-    supports_independent_densities = abs(model.magnetic.eB_fm2) <= 1e-14
+    # vectors.  The magnetic route exposes only the dedicated net-density API.
     return ModelCapabilities(
         supports_solve_gap=true,
         supports_model_thermo=true,
-        supports_number_densities=supports_independent_densities,
+        supports_number_densities=false,
     )
 end
 
@@ -65,9 +62,6 @@ function PNJLMagneticModel(
 end
 
 @inline function calculate_mass_vec(model::PNJLMagneticModel, φ; kwargs...)
-    if abs(model.magnetic.eB_fm2) <= 1e-14
-        return calculate_mass_vec(model.base, φ; kwargs...)
-    end
     thermo = _magnetic_thermodynamics_module()
     # Preserve Dual/other Real element types for generic derivative callers.
     φ3 = SVector(φ[1], φ[2], φ[3])
@@ -76,9 +70,6 @@ end
 end
 
 @inline function calculate_chiral(model::PNJLMagneticModel, φ; kwargs...)
-    if abs(model.magnetic.eB_fm2) <= 1e-14
-        return calculate_chiral(model.base, φ; kwargs...)
-    end
     thermo = _magnetic_thermodynamics_module()
     φ3 = SVector(φ[1], φ[2], φ[3])
     G_B = thermo.coupling_GB(model.magnetic.eB_fm2; imc=model.magnetic.imc)
@@ -98,16 +89,6 @@ end
 end
 
 @inline function number_densities(model::PNJLMagneticModel, x_state, T, mu_vec; thermal_nodes=nothing, kwargs...)
-    if abs(model.magnetic.eB_fm2) <= 1e-14
-        return number_densities(
-            model.base,
-            x_state,
-            T,
-            mu_vec;
-            thermal_nodes=thermal_nodes,
-            kwargs...,
-        )
-    end
     _ = thermal_nodes
     return _magnetic_thermodynamics_module().calculate_magnetic_number_densities(
         x_state,
