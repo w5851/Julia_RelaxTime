@@ -14,7 +14,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-phase-reference-runtime-switch"
-current_sha = "960dc751f5efaface38b0d56db56ba577f67fd2d"
+current_sha = "1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -277,7 +277,7 @@ reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unre
 next_action = "完成 focused Julia/Python fixtures、provenance/hash 记录、CLI/dry-run 和治理检查后创建独立 runtime-switch PR；合并前不称为默认 reference 晋升，不启动 RS transport。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:259", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
+evidence = ["pr:259", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"
