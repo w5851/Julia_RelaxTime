@@ -1,8 +1,21 @@
+---
+title: Issue #130：phase-reference runtime consumer compatibility audit 任务单
+archived: true
+original: docs/dev/active/2026-08-21_Issue130_phase-reference-runtime-consumer-audit.md
+archived_date: 2026-08-23
+---
+
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
 # Issue #130：phase-reference runtime consumer compatibility audit 任务单
 
-状态：review。versioned candidate import PR #252 已合并，但 candidate 仍是
-`runtime_consumption=false`；本任务只做 solver-free consumer/schema 审计，不切换默认
-reference，不启动 RS transport。
+状态：accepted（PR253 已合并）。versioned candidate import PR #252 已合并，但 candidate
+仍是 `runtime_consumption=false`；本任务完成 solver-free consumer/schema 审计，不切换
+默认 reference，不启动 RS transport。后续适配合同由独立任务
+`2026-08-23_Issue130_phase-reference-adapter-contract.md` 承接。
 
 ## 固定输入
 
@@ -19,8 +32,8 @@ reference，不启动 RS transport。
 - [x] verdict：`candidate_isolation_confirmed_requires_explicit_adapter`。
 - [x] 结论：candidate 不会被现有 consumer 隐式选择，但不能直接喂给旧 consumer；必须另立显式 adapter/consumer contract。
 
-非目标：不写 legacy reference，不实现 adapter，不修改 Models/solver/Maxwell/transport，
-不运行 PNJL、C0/C1/C2 或 RS production。
+非目标：不写 legacy reference，不在本任务中实现 adapter，不修改 Models/solver/Maxwell/transport，
+不运行 PNJL、C0/C1/C2 或 RS production。adapter contract 和引用迁移不回写本审计包。
 
 ## 验收标准
 
@@ -33,5 +46,5 @@ reference，不启动 RS transport。
 
 ## 后续
 
-只有作者另行授权并审核 adapter contract 后，才评估 candidate runtime consumer；RS transport
-继续由 `track:rs-transport` 阻塞，不因 import 或本 audit 自动解锁。
+作者已授权另立 adapter contract；在 adapter parity、显式 runtime switch 和审核完成前，
+RS transport 继续由 `track:rs-transport` 阻塞，不因 import 或本 audit 自动解锁。
