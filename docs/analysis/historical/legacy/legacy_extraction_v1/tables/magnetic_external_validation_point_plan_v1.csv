@@ -1,0 +1,6 @@
+point_id,T_MeV,muB_MeV,eB_MeV2,eB_GeV2,ensemble,source_scope,priority,required_observables,cutoff_gate,status
+magnetic_ext_p01,50.0,0.0,10000.0,0.01,FixedMu,pnjl_mag+Fortran+Julia,high,state_5;residual_5;Omega,independent n_max/pz convergence,planned
+magnetic_ext_p02,150.0,0.0,20000.0,0.02,FixedMu,pnjl_mag+Fortran+Julia,high,state_5;residual_5;Omega,independent n_max/pz convergence,planned
+magnetic_ext_p03,250.0,0.0,40000.0,0.04,FixedMu,pnjl_mag+Fortran+Julia,high,state_5;residual_5;Omega,independent n_max/pz convergence,planned
+magnetic_ext_p04,150.0,300.0,20000.0,0.02,FixedMu,pnjl_mag+Fortran+Julia,medium,state_5;residual_5;Omega,independent n_max/pz convergence,planned
+magnetic_ext_p05,150.0,600.0,40000.0,0.04,FixedMu,pnjl_mag+Fortran+Julia,medium,state_5;residual_5;Omega,independent n_max/pz convergence,planned

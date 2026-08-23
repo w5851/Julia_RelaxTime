@@ -1,7 +1,8 @@
 # 已实现计算能力与方法追踪清单
 
-> 快照日期：2026-08-21
-> 审计基线：`origin/main@85ceccad19fb361fd2ba5f69afd8f509fd3ab9f3`；本次 magnetic 语义、production adapter 和文档收尾位于隔离工作树 `codex/core-algorithm-perf-ab`，当前 HEAD 见 Git provenance，尚未进入主工作树。
+> 快照日期：2026-08-23
+> 审计基线：`origin/main@1ccf29310fb20c30bcd154f0b4966e25a7565225`；磁场五维 FixedMu
+> solver/production adapter 已在该主线，外部参数与数值验证仍按下文的 diagnostic gate 管理。
 > 权威聚合入口：[`src/models/Models.jl`](../../src/models/Models.jl) 与 [`src/models/entrypoints.jl`](../../src/models/entrypoints.jl)
 > 用途：论文/毕业答辩的方法索引、开发者路线图、数值产物审计入口
 > 边界：本页记录“仓库已经实现什么、如何计算、证据到哪一层”，不把 smoke、内部回归或已有产物自动解释为外部物理验证。
@@ -753,6 +754,12 @@ G(B)=G_0\frac{1+a\zeta^2+b\zeta^3}{1+c\zeta^2+d\zeta^4},
 \qquad \zeta=eB/\Lambda_{QCD}^2.
 $$
 
+当前配置的 `a=0.108805` 来自高雪艳博士论文表 5-1；Ferreira 2014/2018 以及
+旧 Fortran、`pnjl_mag` 使用 `a=0.0108805`。这不是单位转换差异：内部
+`eB_fm2` 与 `Lambda_QCD/hbarc` 在 `zeta` 中使用同一单位，转换因子会抵消。
+在 profile 决策冻结前，磁场外部数值验证保持 `diagnostic_only`，不生成
+acceptance target，也不把两个参数值静默混用。
+
 磁场巨势还包含
 
 $$
@@ -782,12 +789,12 @@ $$
 
 完整密度路线来自论文式(5-10)--(5-12)，低温禁闭近似来自式(5-13)；五变量平衡条件和对数 Polyakov 势来自第 2 章式(2-50)--(2-63)。固定化学势约定为 `mu_u=mu_d=mu_s`。完整公式和逐式来源见 [`PNJL_magnetic_core.md`](formula/models/pnjl_magnetic/PNJL_magnetic_core.md)；开发者逐项审核表见该文档的“开发者审核表：公式到实现的对应关系”一节。
 
-来源核验范围：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》第 2.2 节印刷页 21--24、第五章第 5.1 节印刷页 65--68。原文有符号/排版不一致（式(2-63)重复 `phi_u`，式(5-10)导数符号与式(2-65)冲突，式(5-11)使用带符号 `q_f B`），所以本页不把这些冲突字符升级为无条件代码合同。
+来源核验范围：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》第 2.2 节印刷页 21--24、第五章第 5.1 节印刷页 65--68。原文有符号/排版不一致（式(2-63)重复 `phi_u`，式(5-10)导数符号与式(2-65)冲突，式(5-11)使用带符号 `q_f B`），所以本页不把这些冲突字符升级为无条件代码合同。IMC 参数还存在来源分歧：当前 Julia 配置为 `a=0.108805`，而 Ferreira 2014/2018、旧 Fortran 和 `pnjl_mag` 为 `a=0.0108805`；Julia 的 `MeV^2 -> fm^-2` 转换在 `zeta=eB/Lambda_QCD^2` 中抵消，未发现隐藏十倍补偿。该 profile 决策尚未冻结，详见 [`magnetic_imc_parameter_provenance_v1.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
 
 - **公共 API**：`PNJLMagneticModel`、`solve_magnetic_gap`、`Models.run_magnetic_scan`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。磁场 API 只接受正标量 `eB`：外部生产单位为 `MeV^2`，要求 `eB >= MAGNETIC_EB_MIN_MEV2 = 100`；核心内部单位为 `fm^-2`，要求 `eB_fm2 >= MAGNETIC_EB_MIN_FM2 = 100/hbarc^2`。低于门槛、零值和负值统一抛出 `ArgumentError`，不会路由到普通 PNJL；模型 capability 恒定只承诺磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
 - **稳定 CLI**：`scripts/models/run_unified_scan.jl scan magnetic` 是 `(T,mu,eB)` 完整五维 FixedMu equilibrium 产线，写出 selected CSV 和 candidates CSV；`mu` 表示共同的 `mu_u=mu_d=mu_s`，外部单位为 MeV/MeV^2。
 - **固定态诊断 CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl` 仍使用固定 `x_state`，只负责内核、`n_max` 或稳定性诊断，不应解释为 equilibrium 扫描。
-- **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。
+- **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。Fortran 与 `pnjl_mag` 的外部交叉核对台账和代表点计划见 [`magnetic_external_crosscheck_v1.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_external_crosscheck_v1.md) 与同目录 CSV；当前仍等待参数 profile、ensemble、截断和 branch gate。
 - **当前实现边界**：受支持正 `eB` 的 `PNJLMagneticModel.solve_gap` 通过 `solve_magnetic_gap` 对磁场 `Omega` 的五维驻点做多 seed 求解，并以候选集合保留分支、残差、`n_max` 和可选 Hessian 稳定性标签；普通 `solve_gap` 在未启用稳定性分类时按已找到候选中的最低 `Omega` 选择一个 convenience state，但 branch-aware API 仍保留全部可行候选。`classify_stability=true` 只启用有限差分 Hessian 诊断/显式研究策略，不是 PNJL 系列模型的默认生产过滤条件；`saddle_or_maximum` 标签不能单独否定一个已收敛驻点。`T_fm` 必须为正，磁场模型只接受 `xi=0`。磁场 `calculate_magnetic_rho` 与 `calculate_magnetic_number_densities` 共用含 `Phi/PhiBar` 的净密度语义，后者的 `net` 和历史 `quark` 字段均表示 `q-qbar`，`antiquark` 明确为 `nothing`；该结果不是普通 PNJL 的独立夸克/反夸克输运输入，且模型 capability 会将通用 `number_densities` 标为不支持；需要磁场密度时应调用专用 API。共享 `solve_constraint`/ProblemSpec 约束链目前显式拒绝 `PNJLMagneticModel`，避免把普通 PNJL residual 误用于磁场；磁场完整平衡态入口是 `solve_magnetic_gap`。
 - **统一入口拒绝边界**：普通 `run_tmu_scan`、`run_trho_scan` 以及 phase/Maxwell/CEP pipeline 遇到 `model_kind=:PNJLMagnetic` 会显式报错；当前只承诺磁场 `FixedMu`，不把普通 PNJL 的 `FixedRho` 或 phase pipeline 伪装成磁场实现。
 - **数值边界**：生产路径使用预先验证的保守 `n_max`、`p_z_max`、平滑截断和 `eB` 分辨率配置；收敛报告用于代表性极端点和发布前数值审计，不要求每个生产点重复验证。论文的低温占据 `n_max` 估计不等同于真空项的 cutoff-based 求和上限；`p_num/pz_max/rtol` 等为实现参数，不能从论文公式推断。不能套用 RS 标量热核的 quadrature 结论。

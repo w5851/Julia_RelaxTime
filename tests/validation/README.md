@@ -55,6 +55,18 @@ acceptance suite. The magnetic external-source ledger is kept under
 `docs/analysis/historical/legacy/legacy_extraction_v1/` until model, unit,
 cutoff, and branch gates are closed.
 
+The magnetic plan is intentionally dual-source: use the legacy Fortran route
+and `pnjl_mag` to establish source consistency at a small set of FixedMu points,
+then compare those points with the current Julia five-dimensional solver. The
+Fortran entropy/density postprocessing rows with the documented flavor-charge
+bug and NaN exports are excluded from acceptance; state, stationarity residual,
+and a convention-matched `Omega` remain the initial observables. The plan is
+recorded in `magnetic_external_validation_point_plan_v1.csv`; until the IMC
+profile (`a=0.108805` versus `a=0.0108805`), units, ensemble, cutoffs, and branch
+policy are frozen, all rows remain evidence/diagnostic rather than targets. The
+point-list file is maintained with the historical extraction package at
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.
+
 Practical rule:
 
 - tests read `targets/`

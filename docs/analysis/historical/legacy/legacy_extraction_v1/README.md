@@ -63,7 +63,10 @@ The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
 Neither record promotes the external source to acceptance: the magnetic
-parameter/unit/branch gates and the Mott convention gate remain open.
+parameter/unit/ensemble/cutoff/branch gates and the Mott convention gate remain
+open. The next magnetic step is a small dual-source FixedMu replay using the
+Fortran root/state path and `pnjl_mag`; the point list is recorded in
+[`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
 ## Current-project relationship
 

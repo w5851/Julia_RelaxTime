@@ -5,6 +5,16 @@
 - **位置**：第五章“磁场对QCD一阶相变的影响”，第5.1节“外磁场下的PNJL模型”
 - **提取时间**：2026-2-20
 
+> **IMC 参数来源警告（2026-08-23）**：当前 Julia 默认使用
+> `a=0.108805`，来自本项目引用的高雪艳博士论文表 5-1；Ferreira 2014
+>（DOI `10.1103/PhysRevD.89.116011`）、Ferreira 2018
+>（DOI `10.1103/PhysRevD.97.014014`）、旧 Fortran 与 `pnjl_mag` 均使用
+> `a=0.0108805`。源码审计没有发现可补回的隐藏十倍单位转换：Julia 只把
+> `eB` 从 `MeV^2` 转成内部 `fm^-2`，而 `zeta=eB/Lambda_QCD^2` 使用同一
+> 内部单位，转换因子在比值中抵消。因此这是真实的模型 profile/版本冲突；在
+> 作者确认前保留当前默认值，不把两者当作同一参数化，也不生成外部 acceptance
+> baseline。可复核记录见 [`magnetic_imc_parameter_provenance_v1.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
+
 ---
 
 ## 🔢 核心公式组
@@ -142,10 +152,12 @@ $$
 
 审核对象分为两层：
 
-1. **主线现状**：`main`/当前主工作树仍只有固定 `x_state` 的磁场内核与专题脚本；它没有
-   `MagneticGapSolver.jl`，专题脚本也没有调用完整五维 equilibrium solver。
-2. **隔离候选**：以下候选状态对应 `codex/core-algorithm-perf-ab@6697feddd1c6382955727b93881b68569c165779`
-   及其未提交工作树改动；它们尚未进入 `main`，不构成当前生产能力。
+1. **当前主线**：截至 `origin/main@1ccf29310fb20c30bcd154f0b4966e25a7565225`，
+   `MagneticGapSolver.jl`、`solve_magnetic_gap` 和 `run_magnetic_scan` 已进入主线；
+   固定 `x_state` 专题脚本仍只承担内核/截断/稳定性诊断，不能替代完整生产审计。
+2. **历史候选**：早期隔离分支 `codex/core-algorithm-perf-ab@6697fed...` 的
+   solver 实现已被主线吸收；本表的“隔离候选状态”列现在只表示诊断或外部验证
+   状态，不代表尚未合并的代码。
 
 | 物理/数值对象 | 论文或公式来源 | 候选实现入口 | 主线现状 | 隔离候选状态 | 开发者审核要点 |
 |---|---|---|---|---|---|
@@ -160,9 +172,9 @@ $$
 | 对数 Polyakov 势 | 式(2-50)--(2-51) | `PNJLCore.polyakov_potential` | 固定态内核已接入 | **已接入（诊断）** | 由 PNJL core 复用；未单独证明磁场全域参数适用性 |
 | 一般温度密度 | 式(5-10)--(5-12) | `density_flavor_landau`、`calculate_magnetic_rho` | **已接入（内核）** | **已接入（内核）** | 按用户确认采用 `q-qbar` 净密度和 `|q_f eB|` 相空间；独立差分交叉检查最大误差约 `6.1e-13` |
 | 低温三夸克近似 | 式(5-13) | 无独立默认实现 | **仅源公式/未实现** | **仅源公式/未实现** | 不能把论文近似当作默认密度；磁场 equilibrium 明确要求 `T_fm>0` |
-| 五维驻点条件 | 式(2-63) | `magnetic_gap_residual`、`solve_magnetic_gap` | **未接入主线** | **已接入（诊断）** | 候选 solver 用五维有限差分 residual；有低节点 stationarity probe，未完成生产精度验证 |
-| 多分支候选 | 论文低温/高场多解讨论；五变量驻点条件 | `MagneticGapCandidate`、`MagneticGapResult` | **未接入主线** | **已接入（诊断）** | 多 seed、去重、Omega 排序可用；不能证明 seed 覆盖全部分支 |
-| 局部稳定性分类 | 由 `Omega` Hessian 判定局部极小 | `_magnetic_hessian`、`classify_stability=true` | **未接入主线** | **已接入（诊断）** | 当前为有限差分 Hessian；低节点出现小 residual 但 `saddle_or_maximum`；该标签不作为 PNJL 默认生产过滤条件 |
+| 五维驻点条件 | 式(2-63) | `magnetic_gap_residual`、`solve_magnetic_gap` | **已接入（诊断）** | **外部验证未闭合** | 主线 solver 用五维 residual；有低节点 stationarity probe，尚未完成默认精度的外部验证 |
+| 多分支候选 | 论文低温/高场多解讨论；五变量驻点条件 | `MagneticGapCandidate`、`MagneticGapResult` | **已接入（诊断）** | **分支覆盖未证明** | 多 seed、去重、Omega 排序可用；不能证明 seed 覆盖全部分支 |
+| 局部稳定性分类 | 由 `Omega` Hessian 判定局部极小 | `_magnetic_hessian`、`classify_stability=true` | **已接入（诊断）** | **研究诊断；不作默认过滤** | 当前为有限差分 Hessian；`saddle_or_maximum` 不能单独否定已收敛驻点 |
 | `G(eB)` IMC 参数化 | 式(5-9) | `coupling_GB` | **已接入（内核）** | **已接入（内核）** | 参数和单位已固定；不等于磁场 EOS 或磁化响应完整实现 |
 | `n_max` 数值起点 | 论文低温占据估计 + 实现 cutoff 约定 | `resolve_nmax_from_cutoff` | **已接入（诊断）** | **已接入（诊断）** | 当前是 cutoff-based 求和起点，不是低温物理占据上限 |
 | Landau 截断收敛 | 数值治理，不是论文单一公式 | `magnetic_nmax_convergence_report` | **已接入（诊断）** | **已接入（诊断）** | 只比较 `n_base` 与增量截断；不能替代全域收敛研究 |
@@ -173,12 +185,12 @@ $$
 
 ### 表格结论
 
-从公式覆盖看，隔离候选已经覆盖“固定外部磁场背景下的物质巨势、一般温度净密度和五维驻点接口”；从生产资格看，仍不能称为完整磁场计算链路，原因是：
+从公式覆盖看，当前主线已经覆盖“固定外部磁场背景下的物质巨势、一般温度净密度和五维驻点接口”；从外部验证资格看，仍不能把它称为已完成的全域物理合同，原因是：
 
-1. 主线尚未接入五维 solver；
-2. 候选 solver 的多 seed 不是全分支证明；
-3. Hessian 分类只是可选诊断，尚无高节点全域稳定性证据；
-4. 专题脚本仍使用固定 `x_state`；
+1. 外部参数 profile 尚未在 `a=0.108805` 与 `a=0.0108805` 之间冻结；
+2. solver 的多 seed 不是全分支证明；
+3. Hessian 分类只是可选诊断，且不应提升为默认生产筛选条件；
+4. Fortran 与 `pnjl_mag` 尚未在同一参数、单位、ensemble、截断和 branch 口径下完成代表点 replay；
 5. Maxwell、磁化响应、方向性压力、`T=0` 近似和 RS 联合路线均不在当前合同内。
 
 因此“公式已实现”只能用于描述内核覆盖，不能替代“已完成生产验证”。Hessian 标签应作为分支审计和显式研究信息保留，不应在没有额外物理约定时升级为默认生产资格门槛。
@@ -217,7 +229,8 @@ $$
 **表5-1：磁场依赖耦合常数G的相关参数**
 | 参数 | 数值 | 单位 | 说明 |
 |------|------|------|------|
-| a | 0.108805 | 无量纲 | 式(5-9)参数 |
+| a（当前 Julia profile） | 0.108805 | 无量纲 | 高雪艳博士论文表5-1；与 Ferreira/外部实现存在十倍冲突 |
+| a（Ferreira/外部 profile） | 0.0108805 | 无量纲 | Ferreira 2014 式(12)、Ferreira 2018 参数段；Fortran 与 `pnjl_mag` 同值 |
 | b | -1.0133 × 10⁻⁴ | 无量纲 | 式(5-9)参数 |
 | c | 0.02228 | 无量纲 | 式(5-9)参数 |
 | d | 1.84558 × 10⁻⁴ | 无量纲 | 式(5-9)参数 |

@@ -24,6 +24,8 @@
     "tables/legacy_route_audit_v1.csv",
     "tables/legacy_current_project_absorption_v1.csv",
     "tables/legacy_magnetic_external_crosscheck_v1.csv",
+    "magnetic_imc_parameter_provenance_v1.md",
+    "tables/magnetic_external_validation_point_plan_v1.csv",
     "../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv"
   ],
   "source_evidence": [
@@ -43,7 +45,8 @@
     "production_code_import": false,
     "full_scan_import": false,
     "diagnostic_only_legacy_evidence": true,
-    "magnetic_external_acceptance": "blocked_parameter_unit_branch_gate",
+    "magnetic_external_acceptance": "blocked_parameter_unit_ensemble_cutoff_branch_gate",
+    "magnetic_external_validation_plan": "dual_source_fortran_pnjl_mag_fixedmu_representative_points",
     "mott_integral_external_acceptance": "diagnostic_only_convention_not_promoted",
     "cleanup_status": "deferred_until_review"
   }
