@@ -293,7 +293,7 @@ reason = "runtime-switch 已合并；RS transport 必须在保留 strict candida
 next_action = "solver-free adapter parity/consumer smoke 已通过；先请求作者审核证据，再触发限定 numerical RS pilot。pilot 失败时保留 diagnostic-only、legacy fallback 和旧 production。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32354095831", "run:32451053476", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "note:solver_free_pass; numerical_pilot_pending"]
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32354095831", "run:32451053476", "pr:261", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "sha:31ab0490a68be02d2f8cde7739a79128b3d3fd23", "sha:1c15d6bbc8ec4f1a4857286d1ef1f4a50158b69f", "note:pr261_ci_green_12_checks; solver_free_pass; numerical_pilot_pending"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"
