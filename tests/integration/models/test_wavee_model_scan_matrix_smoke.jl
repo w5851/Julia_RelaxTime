@@ -6,7 +6,7 @@ if !isdefined(Main, :Models)
     include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 end
 
-const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :GasLiquid)
+const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :Rotation, :GasLiquid)
 
 @testset "Wave-E model_kind x scan_mode matrix smoke" begin
     @testset "supported model kinds run in both scan modes" begin
@@ -53,6 +53,20 @@ const SUPPORTED_MODEL_KINDS = (:PNJL, :NJL, :RPNJL, :PNJLMagnetic, :Rotation, :G
             @test trho_stats.success + trho_stats.failure == 1
             @test isfile(trho_output)
         end
+    end
+
+    @testset "magnetic scan mode is explicit" begin
+        @test_throws ArgumentError Models.run_tmu_scan(
+            T_values=[150.0], mu_values=[0.0], xi_values=[0.0],
+            output_path=joinpath(mktempdir(), "magnetic_tmu.csv"),
+            model_kind=:PNJLMagnetic,
+        )
+        @test_throws ArgumentError Models.run_trho_scan(
+            T_values=[150.0], rho_values=[0.2], xi_values=[0.0],
+            output_path=joinpath(mktempdir(), "magnetic_trho.csv"),
+            model_kind=:PNJLMagnetic,
+        )
+        @test isdefined(Models, :run_magnetic_scan)
     end
 
     @testset "pnjl_aniso stays parameterized mode" begin
