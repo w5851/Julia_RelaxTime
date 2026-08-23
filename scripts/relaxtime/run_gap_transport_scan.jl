@@ -51,6 +51,25 @@ end
 const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_dense.csv", "boundary.csv")
 const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
 const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
+const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v1")
+
+function _load_runtime_phase_reference(opts)
+    mode = opts.phase_reference_mode
+    mode === :diagnostic && opts.phase_reference_root === nothing &&
+        error("--phase-reference-mode diagnostic requires --phase-reference-root")
+    legacy = (
+        boundary_path=DEFAULT_PHASE_BOUNDARY_PATH,
+        cep_path=DEFAULT_PHASE_CEP_PATH,
+        crossover_path=DEFAULT_PHASE_CROSSOVER_PATH,
+        spinodals_path=joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "spinodals.csv"),
+    )
+    mode === :legacy && return PhaseReferenceAdapter.load_legacy_phase_reference(; legacy...)
+    root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root
+    mode === :diagnostic && return PhaseReferenceAdapter.load_phase_reference(root; layer=opts.phase_reference_layer)
+    return PhaseReferenceAdapter.load_phase_reference_runtime_with_fallback(
+        root; layer=opts.phase_reference_layer, legacy...
+    )
+end
 
 const MODULE_DEFAULT_P_NODES = RT_ASR.DEFAULT_P_NODES           # 20
 const MODULE_DEFAULT_ANGLE_NODES = RT_ASR.DEFAULT_ANGLE_NODES   # 4
@@ -359,6 +378,10 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
                 "note.tau_threshold_hint" => "for near-threshold sharp channels, linear+threshold_subtraction often more robust than pchip",
                 "tr_p_nodes" => string(opts.tr_p_nodes),
                 "tr_p_max_fm" => string(opts.tr_p_max_fm),
+                "phase_reference_source" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_kind(phase_reference)),
+                "phase_reference_runtime_view" => phase_reference === nothing ? "none" : string(PhaseReferenceAdapter.source_summary(phase_reference).runtime_view),
+                "phase_reference_fallback_reason" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :fallback_reason, "")),
+                "phase_reference_candidate_manifest_sha256" => phase_reference === nothing ? "" : string(get(PhaseReferenceAdapter.source_summary(phase_reference), :candidate_manifest_sha256, "")),
 
                 # labels for plotting convenience
                 "y_label.sigma_over_T" => "σ/T",
@@ -429,7 +452,7 @@ function run_scan(opts::ScanOptions, ctx::ProvenanceMetadata.RunContext;
         end
     end
 
-    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped)
+    write_scan_sidecars(provenance_dir, ctx, opts, stats_success, stats_error, stats_skipped; phase_reference=phase_reference)
 
     println("Scan finished. Output: $(opts.output)")
 end
@@ -437,15 +460,10 @@ end
 function main()
     opts = parse_args(copy(ARGS))
     ctx = ProvenanceMetadata.new_run_context("scripts/relaxtime/run_gap_transport_scan.jl", copy(ARGS))
-    phase_reference = opts.phase_reference_root === nothing ? nothing :
-        PhaseReferenceAdapter.load_phase_reference(
-            opts.phase_reference_root;
-            layer=opts.phase_reference_layer,
-            allow_runtime=opts.phase_reference_mode === :runtime,
-        )
+    phase_reference = _load_runtime_phase_reference(opts)
     run_scan(opts, ctx;
         phase_reference=phase_reference,
-        phase_reference_mode=opts.phase_reference_mode,
+        phase_reference_mode=opts.phase_reference_mode === :diagnostic ? :diagnostic : :runtime,
     )
 end
 

@@ -6,15 +6,15 @@ updated_at = "2026-08-23"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "active"
-current_task = "issue130-phase-reference-adapter-contract"
+current_task = "issue130-phase-reference-runtime-switch"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "consumer migration 已完成并待 PR 合并；先运行 CI/作者审核，随后另立 runtime-switch PR，默认 strict candidate 并保留 legacy fallback/rollback，RS transport 继续暂停。"
+next_action = "在 shared 隔离 worktree 完成独立 runtime-switch PR：默认 strict candidate certified-only，逐键 legacy fallback，显式 legacy rollback；CI/作者审核通过前不移除旧 reference，RS transport 继续暂停。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-phase-reference-consumer-migration"
-current_sha = "48d71305d25aa0762cb3438d741a188aadbfd35e"
+current_branch = "codex/issue130-phase-reference-runtime-switch"
+current_sha = "960dc751f5efaface38b0d56db56ba577f67fd2d"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -257,14 +257,27 @@ evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_ru
 id = "issue130-phase-reference-adapter-contract"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md"
 reason = "PR253 已确认 candidate 与 legacy schema 不兼容；必须先完成显式 adapter、语义 parity 和引用迁移，才能评估 runtime switch 或移除旧 reference。"
-next_action = "consumer migration 已在 shared worktree 完成；等待本分支 CI/作者审核后另立 versioned runtime-switch PR，默认 legacy 仍不变。"
+next_action = "PR #259 已 squash merge；runtime-switch 由 item:issue130-phase-reference-runtime-switch 独立承接。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:scripts/pnjl/phase_reference_adapter.py", "file:scripts/relaxtime/phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_mu_contract.jl", "file:tests/unit/relaxtime/test_phase_guided_transport_scan_plan.jl", "file:tests/unit/python/test_pnjl_phase_reference_adapter.py", "pr:258", "pr:259", "sha:0e234afd005951ae33cec3787b711c0607a611e9", "sha:48d71305d25aa0762cb3438d741a188aadbfd35e", "note:Julia/Python adapter and solver-free consumer parity implemented; runtime_consumption=false; solver_called=false; legacy default unchanged; runtime switch not yet merged"]
+evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:scripts/pnjl/phase_reference_adapter.py", "file:scripts/relaxtime/phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_adapter.jl", "file:tests/unit/relaxtime/test_phase_reference_mu_contract.jl", "file:tests/unit/relaxtime/test_phase_guided_transport_scan_plan.jl", "file:tests/unit/python/test_pnjl_phase_reference_adapter.py", "pr:258", "pr:259", "sha:0e234afd005951ae33cec3787b711c0607a611e9", "sha:48d71305d25aa0762cb3438d741a188aadbfd35e", "note:Julia/Python adapter and solver-free consumer parity implemented; runtime_consumption=false; solver_called=false; runtime switch is a separate follow-up"]
+
+[[items]]
+id = "issue130-phase-reference-runtime-switch"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md"
+reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unresolved rows，必须以 certified-only view、逐键 legacy fallback 和显式 rollback 形成独立 runtime switch，不能整体放宽 candidate gate。"
+next_action = "完成 focused Julia/Python fixtures、provenance/hash 记录、CLI/dry-run 和治理检查后创建独立 runtime-switch PR；合并前不称为默认 reference 晋升，不启动 RS transport。"
+blocked_by = []
+backlog_file = ""
+evidence = ["pr:259", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"
@@ -274,8 +287,8 @@ status = "triaged"
 parent = "track:issue130-phase"
 task_file = ""
 reason = "旧 reference 只能在全部 phase/transport/paper consumer 完成 adapter migration 与 parity、显式 runtime switch PR 合并并经作者审核后移除；在此之前必须保持旧文件和默认 runtime 不变。"
-next_action = "等待 item:issue130-phase-reference-adapter-contract 完成；随后另立 versioned runtime switch/retirement PR，先验证 consumer parity 和回滚路径，再请求作者批准移除旧 reference。"
-blocked_by = ["item:issue130-phase-reference-adapter-contract"]
+next_action = "等待 item:issue130-phase-reference-runtime-switch 完成；随后另立 retirement PR，先验证 consumer parity 和回滚路径，再请求作者批准移除旧 reference。"
+blocked_by = ["item:issue130-phase-reference-runtime-switch"]
 backlog_file = ""
 evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "note:legacy reference retirement is gated by adapter migration, parity, runtime switch, and author review"]
 

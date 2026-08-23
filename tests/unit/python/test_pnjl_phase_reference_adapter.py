@@ -7,6 +7,7 @@ import pytest
 
 from scripts.pnjl.phase_reference_adapter import (
     PhaseReferenceContractError,
+    build_runtime_view,
     load_phase_reference,
     to_legacy_views,
 )
@@ -145,3 +146,21 @@ def test_paper_p1_candidate_overlay_preserves_mu_scale_and_status(tmp_path: Path
     assert cep["muB_MeV"] == 900.0
     assert first_order["candidate_certified"] is True
     assert cep["candidate_status"] == "bracket_preserved"
+
+
+def test_runtime_view_uses_certified_candidate_then_legacy_fallback(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_candidate(root)
+    boundary = root / "strict" / "tables" / TABLES["boundary"]
+    boundary.write_text(
+        boundary.read_text(encoding="utf-8").replace("native,true,true", "rho_geometry_not_converged,false,true"),
+        encoding="utf-8",
+    )
+    candidate = load_phase_reference(root, layer="strict")
+    legacy_row = dict(candidate.tables["boundary"][0])
+    legacy_row["muq_MeV"] = 301.0
+    runtime = build_runtime_view(candidate, legacy_tables={"boundary": [legacy_row]})
+    assert runtime.source == "candidate"
+    assert runtime.diagnostics["runtime_view"] == "certified_candidate_with_legacy_fallback"
+    assert runtime.diagnostics["fallback_row_counts"]["boundary"] == 1
+    assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"

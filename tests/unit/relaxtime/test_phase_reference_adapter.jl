@@ -43,6 +43,7 @@ end
     @test source.diagnostics.row_counts["boundary"] == 1
     @test source.diagnostics.uncertified_rows == 0
     @test PRA.available_xi(source, :boundary) == [0.0]
+    @test length(source.diagnostics.candidate_manifest_sha256) == 64
 
     @test_throws PRA.PhaseReferenceAdapterError PRA.boundary_data(source, 0.0)
     # A fully certified fixture can be explicitly gated for a solver-free
@@ -85,4 +86,39 @@ end
     @test legacy_boundary.T_values == candidate_boundary.T_values
     @test legacy_boundary.mu_values == candidate_boundary.mu_values
     @test legacy_boundary.muB_CEP == candidate_boundary.muB_CEP
+end
+
+@testset "certified candidate runtime view falls back by missing key and supports rollback" begin
+    candidate_root = _write_candidate_fixture(mktempdir(); unresolved=true)
+    legacy_root = mktempdir()
+    boundary = joinpath(legacy_root, "boundary.csv")
+    cep = joinpath(legacy_root, "cep.csv")
+    crossover = joinpath(legacy_root, "crossover.csv")
+    spinodals = joinpath(legacy_root, "spinodals.csv")
+    write(boundary, "xi,T_MeV,mu_transition_MeV,rho_hadron,rho_quark\n0.0,90.0,301.0,1.0,2.0\n")
+    write(cep, "xi,T_CEP_MeV,muq_CEP_MeV,muB_CEP_MeV\n0.0,121.0,299.0,897.0\n")
+    write(crossover, "xi,mu_MeV,T_crossover_MeV,rho\n0.0,100.0,160.0,1.0\n")
+    write(spinodals, "xi,T_MeV,mu_spinodal_hadron_MeV,mu_spinodal_quark_MeV\n0.0,100.0,320.0,280.0\n")
+
+    runtime = PRA.load_phase_reference_runtime_with_fallback(
+        candidate_root;
+        boundary_path=boundary,
+        cep_path=cep,
+        crossover_path=crossover,
+        spinodals_path=spinodals,
+    )
+    @test PRA.source_kind(runtime) === :candidate
+    @test runtime.diagnostics.runtime_view == "certified_candidate_with_legacy_fallback"
+    @test runtime.diagnostics.fallback_enabled
+    @test runtime.diagnostics.fallback_reason == "candidate_key_absent_or_uncertified"
+    @test runtime.diagnostics.fallback_row_counts["boundary"] == 1
+    @test PRA.boundary_data(runtime, 0.0).mu_values == [301.0]
+    @test PRA.boundary_data(runtime, 0.0).muB_CEP == 900.0
+
+    rollback = PRA.load_legacy_phase_reference(
+        boundary_path=boundary, cep_path=cep, crossover_path=crossover, spinodals_path=spinodals,
+    )
+    @test PRA.source_kind(rollback) === :legacy
+    @test PRA.source_summary(rollback).runtime_view == "legacy"
+    @test PRA.boundary_data(rollback, 0.0).mu_values == [301.0]
 end
