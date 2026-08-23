@@ -9,12 +9,12 @@ status = "active"
 current_task = "issue130-phase-reference-runtime-switch"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "在 shared 隔离 worktree 完成独立 runtime-switch PR：默认 strict candidate certified-only，逐键 legacy fallback，显式 legacy rollback；CI/作者审核通过前不移除旧 reference，RS transport 继续暂停。"
+next_action = "phase runtime-switch 已接受并完成 solver-free smoke；工作流已交由 track:rs-transport 的 adapter parity 与限定 numerical pilot 继续，之后再评估旧 reference retirement。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-phase-reference-runtime-switch"
-current_sha = "1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1"
+current_branch = "codex/issue130-rs-phase-reference-parity"
+current_sha = "1ccf29310fb20c30bcd154f0b4966e25a7565225"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -27,27 +27,30 @@ evidence = [
   "sha:dfecdd4c9139c856cfe3eb6659f492aabf8dea49",
   "sha:51c93cf0111415b35bb199376c358782c0f5a2f4",
   "sha:ebf8e9199ff81bbb31df7f38cf0368a0040c103a",
+  "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/",
+  "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225",
 ]
 updated_at = "2026-08-23"
 
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "blocked"
-current_task = "rs-production-after-phase-reference"
-blocked_by = ["track:issue130-phase"]
+status = "active"
+current_task = "issue130-rs-phase-reference-parity"
+blocked_by = []
 unlocks = []
-next_action = "等待 phase reference 通过作者审核并完成 promotion gate；在此之前不重跑 M4 transport production。"
+next_action = "先完成 solver-free adapter parity/consumer smoke；通过作者审核后再触发限定 numerical RS pilot，未通过前不重跑 M4 production。"
 required_author_review = true
 author_review_status = "pending"
 promotion_required = true
-current_branch = "main"
-current_sha = "697be19a919c1c3e8203adecd813c1ccf2928319"
-run_ids = []
+current_branch = "codex/issue130-rs-phase-reference-parity"
+current_sha = "1ccf29310fb20c30bcd154f0b4966e25a7565225"
+run_ids = ["32354095831", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
+  "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/",
 ]
-updated_at = "2026-08-15"
+updated_at = "2026-08-23"
 
 [[tracks]]
 id = "plot-sop"
@@ -274,10 +277,23 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md"
 reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unresolved rows，必须以 certified-only view、逐键 legacy fallback 和显式 rollback 形成独立 runtime switch，不能整体放宽 candidate gate。"
-next_action = "PR #260 已创建，等待 focused CI 和作者审核；合并前不称为默认 reference 晋升，不启动 RS transport。"
+next_action = "PR #260 已合并；合并 SHA 上的 runtime promotion/consumer smoke 已通过，交由 item:issue130-rs-phase-reference-parity 继续 RS 限定重验。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback"]
+evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback; promotion_smoke_solver_free_pass"]
+
+[[items]]
+id = "issue130-rs-phase-reference-parity"
+track_id = "rs-transport"
+classification = "required_follow_up"
+status = "active"
+parent = "track:rs-transport"
+task_file = "docs/dev/active/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md"
+reason = "runtime-switch 已合并；RS transport 必须在保留 strict candidate certified-only、逐键 legacy fallback 和显式 rollback 的前提下完成 consumer parity 与限定重验，不能把 solver-free smoke 误写成 production parity。"
+next_action = "solver-free adapter parity/consumer smoke 已通过；先请求作者审核证据，再触发限定 numerical RS pilot。pilot 失败时保留 diagnostic-only、legacy fallback 和旧 production。"
+blocked_by = []
+backlog_file = ""
+evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32354095831", "run:32451053476", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "note:solver_free_pass; numerical_pilot_pending"]
 
 [[items]]
 id = "issue130-phase-reference-retirement"
@@ -287,10 +303,10 @@ status = "triaged"
 parent = "track:issue130-phase"
 task_file = ""
 reason = "旧 reference 只能在全部 phase/transport/paper consumer 完成 adapter migration 与 parity、显式 runtime switch PR 合并并经作者审核后移除；在此之前必须保持旧文件和默认 runtime 不变。"
-next_action = "等待 item:issue130-phase-reference-runtime-switch 完成；随后另立 retirement PR，先验证 consumer parity 和回滚路径，再请求作者批准移除旧 reference。"
-blocked_by = ["item:issue130-phase-reference-runtime-switch"]
+next_action = "等待 item:issue130-rs-phase-reference-parity 完成并经作者审核；随后另立 retirement PR，先验证所有 consumer 不再直接依赖旧文件和回滚路径，再请求作者批准移除旧 reference。"
+blocked_by = ["item:issue130-rs-phase-reference-parity"]
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "note:legacy reference retirement is gated by adapter migration, parity, runtime switch, and author review"]
+evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:legacy reference retirement is gated by adapter migration, parity, numerical RS revalidation, rollback, and author review"]
 
 [[items]]
 id = "plot-sop-independent-land"

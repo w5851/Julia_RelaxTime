@@ -1,0 +1,140 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "files": {
+    "README.md": "eb09b560964e79cdf44f24f4eab07eb5dfe7df85e5c1139497c4b943c5b1723b",
+    "claim_ledger.csv": "b3ae276124da921bb7fda1392102a72020b4ece4e46a7c48fbf747856fbea5c2",
+    "consumer_smoke.csv": "0b12c2ff82b7e8903381fd45f507f372646e0b851622a0e29e3affad6b0a9843",
+    "consumer_source_smoke.json": "69231979148b3d6d38d4d12c8a2ade66ed4cebfeb8a6fd0b29582ca34377aac9",
+    "decision.json": "1c1cb482500edfc0a5067bc685a08f99c1fd44b5da181f78ccd467a285804b33",
+    "input_inventory.csv": "ed520d9c0bb7db0d891dad7adf37950b793a100059dc659bf1d6ed364ee43198",
+    "legacy/README.md": "7ab8129360106ac55e65d044bca9adfe0f22530fcfc9fd4cb87f55370935b56c",
+    "legacy/effective_config.json": "9f973d5ae9015f132f23c3237267aedf9140104b96f55c675402d58abe5dc4fd",
+    "legacy/run_manifest.json": "0ef638667ca069bd951e7c4529fe9ba32c63b2273bf46b2f0a028608fdf11771",
+    "legacy/sampling_plan.csv": "fbe1e1507c3745fd8b88ca0572f425c5cefd7433345c719464cea1840778603e",
+    "parity_comparison.csv": "286fc5932b5bbff0eac334445bc5d8e26ba56f9e307d9414afcb5d0c73ccd053",
+    "portable_config_snapshot.json": "4c4e0e24f5564fde4f6c8ec70fce4fe7be18e31d50c87abb7a0ebf8c675c7be2",
+    "runtime/README.md": "22a062d2b9e968342e9621fda96d3466ea3b0e0d11777e8554b3e95756be1f01",
+    "runtime/effective_config.json": "77e262ef1e8cdc9cdcf435f3ba360f390d5b68599ee51ae9efd2daffe8fd058d",
+    "runtime/run_manifest.json": "b616dad80127e60328a47e25e9b861f042c34e05e83bb3a64fab6f78a8007638",
+    "runtime/sampling_plan.csv": "08b698b0d97639d0e800732bf38a9e6dcb5ae60d17a4eea0bab7fc4e3167ef63"
+  },
+  "generated_at_utc": "2026-08-23T12:59:52.565938+00:00",
+  "input_inventory": [
+    {
+      "bytes": 16420,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+      "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519"
+    },
+    {
+      "bytes": 2130,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
+      "sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73"
+    },
+    {
+      "bytes": 11994,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv",
+      "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7"
+    },
+    {
+      "bytes": 244934,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/crossover_surface_strict_reference_v1.csv",
+      "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23"
+    },
+    {
+      "bytes": 2674236,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/maxwell_surface_strict_reference_v1.csv",
+      "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c"
+    },
+    {
+      "bytes": 668050,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/spinodal_surface_strict_reference_v1.csv",
+      "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182"
+    },
+    {
+      "bytes": 3221,
+      "path": "data/reference/pnjl/boundary.csv",
+      "sha256": "5480a3048177be5ff4a2e7314c56d228dacaa5899ff7fe07f3417e1139cf5890"
+    },
+    {
+      "bytes": 651,
+      "path": "data/reference/pnjl/cep.csv",
+      "sha256": "8bdda456f2495ff322f80a802ee1efab56567bbfce18f26617544d505be4d65c"
+    },
+    {
+      "bytes": 27507,
+      "path": "data/reference/pnjl/crossover_dense.csv",
+      "sha256": "0f811c3648a18a26d7a1a6383e08466638d7484a0c7b984c7ceb9c84661aa4df"
+    },
+    {
+      "bytes": 4916,
+      "path": "data/reference/pnjl/spinodals.csv",
+      "sha256": "96accaa2a1d863406e8d9bb961c3c39532e0372d8e0550a463749f220b1de33f"
+    }
+  ],
+  "raw_run_artifacts": [
+    {
+      "bytes": 2376,
+      "path": "runtime/effective_config.json",
+      "sha256": "77e262ef1e8cdc9cdcf435f3ba360f390d5b68599ee51ae9efd2daffe8fd058d"
+    },
+    {
+      "bytes": 2181,
+      "path": "runtime/run_manifest.json",
+      "sha256": "b616dad80127e60328a47e25e9b861f042c34e05e83bb3a64fab6f78a8007638"
+    },
+    {
+      "bytes": 623,
+      "path": "runtime/sampling_plan.csv",
+      "sha256": "08b698b0d97639d0e800732bf38a9e6dcb5ae60d17a4eea0bab7fc4e3167ef63"
+    },
+    {
+      "bytes": 1807,
+      "path": "runtime/README.md",
+      "sha256": "22a062d2b9e968342e9621fda96d3466ea3b0e0d11777e8554b3e95756be1f01"
+    },
+    {
+      "bytes": 1556,
+      "path": "legacy/effective_config.json",
+      "sha256": "9f973d5ae9015f132f23c3237267aedf9140104b96f55c675402d58abe5dc4fd"
+    },
+    {
+      "bytes": 2131,
+      "path": "legacy/run_manifest.json",
+      "sha256": "0ef638667ca069bd951e7c4529fe9ba32c63b2273bf46b2f0a028608fdf11771"
+    },
+    {
+      "bytes": 625,
+      "path": "legacy/sampling_plan.csv",
+      "sha256": "fbe1e1507c3745fd8b88ca0572f425c5cefd7433345c719464cea1840778603e"
+    },
+    {
+      "bytes": 1681,
+      "path": "legacy/README.md",
+      "sha256": "7ab8129360106ac55e65d044bca9adfe0f22530fcfc9fd4cb87f55370935b56c"
+    },
+    {
+      "bytes": 6750,
+      "path": "consumer_source_smoke.json",
+      "sha256": "69231979148b3d6d38d4d12c8a2ade66ed4cebfeb8a6fd0b29582ca34377aac9"
+    }
+  ],
+  "replay_run_id": "32451053476",
+  "repo_head": "1ccf29310fb20c30bcd154f0b4966e25a7565225",
+  "runtime_view": "certified_candidate_with_legacy_fallback",
+  "schema_version": "pnjl_issue130_rs_transport_runtime_parity_v1",
+  "scripts": [
+    {
+      "path": "scripts/analysis/pnjl/build_issue130_rs_runtime_parity_evidence.py",
+      "sha256": "0c4eecd794186520693d02b82acc4f890c1b04a19ca6a3d0235bb88e5ad2f11a"
+    },
+    {
+      "path": "scripts/analysis/pnjl/audit_issue130_rs_runtime_parity.jl",
+      "sha256": "76045b97c14837472dfccae40d0351299d1ab0ba84cbc5f03ad9ade6e73bd35a"
+    }
+  ],
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "transport_coefficients_computed": false
+}
