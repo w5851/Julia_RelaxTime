@@ -171,7 +171,11 @@ function _resolve_magnetic_attempt_nmax(
     cutoff_N,
 )
     explicit = n_max === nothing ? model.magnetic.n_max : n_max
-    explicit !== nothing && return Int(explicit)
+    if explicit !== nothing
+        resolved = Int(explicit)
+        resolved >= 0 || throw(ArgumentError("magnetic n_max must be >= 0, got $(explicit)"))
+        return resolved
+    end
 
     thermo = _magnetic_thermodynamics_module()
     components = thermo.calculate_magnetic_omega_components(
