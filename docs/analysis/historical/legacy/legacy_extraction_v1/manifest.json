@@ -2,7 +2,13 @@
   "schema_version": "legacy_extraction_v1",
   "artifact_kind": "historical_cross_check",
   "audit_date": "2026-08-23",
-  "main_project_commit": "f6146a8415c7e93ef0a023e1cf6550790791eded",
+  "extraction_baseline_commit": "f6146a8415c7e93ef0a023e1cf6550790791eded",
+  "current_main_checked_commit": "960dc751f5efaface38b0d56db56ba577f67fd2d",
+  "current_main_check": {
+    "checked_at": "2026-08-23",
+    "relevant_diff": "phase-reference consumer adapters only; no changes to magnetic, Mott, RMFT, RelaxTime legacy target, or legacy inventory surfaces",
+    "verdict": "observations_remain_current"
+  },
   "source_root": "D:\\Desktop\\legacy",
   "source_tree_hash": {
     "algorithm": "sha256",

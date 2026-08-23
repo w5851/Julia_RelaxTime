@@ -18,7 +18,13 @@ trees are removed:
 
 ## Audit provenance
 
-- Main-project commit: `f6146a8415c7e93ef0a023e1cf6550790791eded`
+- Extraction baseline commit: `f6146a8415c7e93ef0a023e1cf6550790791eded`
+- Current main checked commit: `960dc751f5efaface38b0d56db56ba577f67fd2d`
+- Drift check: the current-main changes after the extraction baseline are
+  phase-reference consumer adapters only; they do not change the magnetic,
+  Mott, RMFT, RelaxTime legacy target, or legacy inventory surfaces audited
+  here. The observations below therefore remain current as of the checked
+  commit.
 - External source root: `D:\Desktop\legacy`
 - Inventory: `3,184` files, `717,610,994` bytes across eight directories.
 - Directory hashes and the hash construction rule are in

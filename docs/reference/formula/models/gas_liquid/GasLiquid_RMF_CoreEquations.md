@@ -23,8 +23,9 @@ Visual Fortran 工程、未审计 `.dat`、高阶有限差分涨落和 freeze-ou
 | 不可采用 | 旧 Fortran 文件/变量名/固定宽度输出、Visual Fortran 工程、未审计 `.dat`、高阶有限差分涨落、重复 freeze-out | 不进入 `src`、不生成 regression truth |
 | 仅历史参考 | `.obj/.exe/.vs`、旧 mixed/quark phase 脚本、overflow/NaN/停滞输出 | 只保留外部目录与审计记录指针 |
 
-外部证据指针：`D:\w\fortran-archive-validation\gas-liquid`；历史审计记录：
-`D:\Desktop\Julia_RelaxTime-record\fortran_gas_liquid_zip_analysis_2026-08-19.md`。
+外部 legacy 源码曾位于 `D:\Desktop\legacy\fortran-gas-liquid-validation`，现已由主项目内的
+[legacy 提取审计记录](../../../../analysis/historical/legacy/legacy_extraction_v1/README.md)
+替代。原始源码、编译物和未审计输出不是当前公式或 regression truth。
 
 ## 2. 耦合比和场贡献
 
