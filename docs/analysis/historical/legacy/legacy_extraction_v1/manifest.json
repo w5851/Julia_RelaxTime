@@ -49,8 +49,8 @@
     "production_code_import": false,
     "full_scan_import": false,
     "diagnostic_only_legacy_evidence": true,
-    "magnetic_external_acceptance": "blocked_reference_route_source_branch_gate",
-    "magnetic_external_validation_plan": "pnjl_cep_pending_source_audit; legacy_fortran_and_pnjl_mag_diagnostic_only",
+    "magnetic_external_acceptance": "pending_pnjl_mag_target_gate",
+    "magnetic_external_validation_plan": "pnjl_mag_source_available_pending_target_gate; legacy_fortran_diagnostic_only",
     "mott_integral_external_acceptance": "diagnostic_only_convention_not_promoted",
     "cleanup_status": "deferred_until_review"
   }

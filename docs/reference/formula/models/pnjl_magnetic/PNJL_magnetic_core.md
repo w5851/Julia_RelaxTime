@@ -1,11 +1,13 @@
 ## 【提取报告：外磁场下的PNJL模型相关公式】
 
 > **路线审计更新（2026-08-24）**：贺伟博硕士论文第 4 章（PDF 页 33--39）给出的
-> 默认磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”。`pnjl_cep`
+> 默认磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”。`pnjl_mag`
 > 作者补充说明其实现使用磁场无关正规化，并指出平滑截断路线存在问题；因此本项目
 > 将 MFIR 设为默认生产路线。旧的完整 Landau 真空项 + `smooth_cutoff(N=10)` 仅以
-> `route=:landau_legacy` 保留，不能作为物理 acceptance 参考。外部测试集待转向
-> `pnjl_cep`，见
+> `route=:landau_legacy` 保留，不能作为物理 acceptance 参考。外部 MFIR 参考已固定为
+> [`pnjl_mag`](https://github.com/ZhouRui-xzit/pnjl_mag) commit
+> `e1fc81d3c3c9d220c49972e54307b66a604cb9db`；其 acceptance target 尚待 source-gate
+> 审计和轻量数据提取，见
 > [`magnetic_reference_route_audit_v3.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md)。
 
 ### 📍 源信息
@@ -60,7 +62,7 @@ $$
 ---
 
 ### **公式3：MFIR 真空项 $\Omega_{f}^{\mathrm{vac}}$（默认生产路线）**
-**【标签】** 贺伟博硕士论文第 4 章式(4-3)--(4-8)；与 `pnjl_cep` 的磁场无关正规化约定一致
+**【标签】** 贺伟博硕士论文第 4 章式(4-3)--(4-8)；与 `pnjl_mag` 的磁场无关正规化实现一致
 **【类型】** 零场三动量截断 + 有限磁场 Hurwitz-zeta 修正
 **【内容】**
 $$
@@ -191,8 +193,8 @@ $$
 | Landau 能谱 | 式(5-6) | `MagneticIntegrals.energy_landau` | **已接入（内核）** | **已接入（内核）** | `sqrt(pz^2 + M^2 + 2n|q|eB)`；有能谱单测 |
 | Landau 简并度 | `alpha_n=2-delta_{n0}` | `MagneticIntegrals.alpha_n` | **已接入（内核）** | **已接入（内核）** | `n=0` 为 1，其余为 2；有单测 |
 | 真空 Landau 项 | 历史诊断路线；与贺伟博论文 MFIR 式(4-3)--(4-8)不一致 | `omega0_flavor_landau` | **已接入（显式 legacy）** | **非 acceptance** | 仅在 `route=:landau_legacy` 使用；有限 `n_max`、pz Gauss 节点和平滑截断不代表生产正则化 |
-| 平滑截断 | 当前代码 `smooth_cutoff`; `pnjl_cep` 作者指出该路线存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（legacy diagnostic）** | **非 acceptance** | 不作为默认路由，不生成新外部 target |
-| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8)；磁场无关正规化约定 | `omega_magnetic_mfir` + `PNJLCore.vacuum_integral_with_cutoff` | **已接入（默认生产内核）** | **外部 acceptance 待 `pnjl_cep`** | 需冻结 `zeta_num`、单位、参数 profile，并用 `pnjl_cep` 典型点验证 |
+| 平滑截断 | 当前代码 `smooth_cutoff`; `pnjl_mag` 作者指出该路线存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（legacy diagnostic）** | **非 acceptance** | 不作为默认路由，不生成新外部 target |
+| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8)；磁场无关正规化约定 | `omega_magnetic_mfir` + `PNJLCore.vacuum_integral_with_cutoff` | **已接入（默认生产内核）** | **`pnjl_mag` source-gate 进行中** | 外部源码/SHA 已固定；仍需审计 `zeta_num`、单位、参数 profile、积分和分支合同，并提取典型点 target |
 | Polyakov 热项 | 式(5-4) 及 `Z_f^+ + Z_f^-` | `omegat_flavor_landau`、`_log_polyakov_pair` | **已接入（内核）** | **已接入（内核）** | 使用一般温度双对数；低温指数稳定缩放已有短测试 |
 | 动力学质量与手征项 | 式(2-55)、式(5-2)中的 `G(eB)` | `_calculate_mass_vec_with_GB`、`_chiral_with_GB` | 固定态内核已接入 | **已接入（诊断）** | 质量核支持泛型实数；完整 Omega 仍以 Float64 finite-difference solver 为主 |
 | 对数 Polyakov 势 | 式(2-50)--(2-51) | `PNJLCore.polyakov_potential` | 固定态内核已接入 | **已接入（诊断）** | 由 PNJL core 复用；未单独证明磁场全域参数适用性 |
@@ -216,7 +218,7 @@ $$
 1. 正式 profile 已决定为 `a=0.0108805`，并已接入 `magnetic_default.toml`；
 2. solver 的多 seed 不是全分支证明；
 3. Hessian 分类只是可选诊断，且不应提升为默认生产筛选条件；
-4. Fortran smooth-Landau 与 `pnjl_mag` MFIR 不是同一正则化；旧 Fortran 仅保留 legacy，新的外部 target 应来自 `pnjl_cep` 源码/输出合同；
+4. Fortran smooth-Landau 与当前 MFIR 不是同一正则化；旧 Fortran 仅保留 legacy，新的外部 target 应从固定 SHA 的 `pnjl_mag` 源码/输出合同提取；
 5. Maxwell、磁化响应、方向性压力、`T=0` 近似和 RS 联合路线均不在当前合同内。
 
 因此“公式已实现”只能用于描述内核覆盖，不能替代“已完成生产验证”。Hessian 标签应作为分支审计和显式研究信息保留，不应在没有额外物理约定时升级为默认生产资格门槛。

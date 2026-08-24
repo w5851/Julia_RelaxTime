@@ -110,10 +110,11 @@ Fortran 行保持为空。
 这与本记录的完整 Landau 真空 smooth cutoff 不是同一正则化。
 
 因此，上述 Fortran/Julia 数值一致性只能保留为 **same-kernel diagnostic**，不能作为
-当前磁场物理实现或外部 acceptance 的证明；`pnjl_mag` 仍是独立 MFIR diagnostic，
-也不直接替代新的测试源。后续外部测试集改为优先接入 `pnjl_cep`，但在获得其仓库
-URL、固定 commit、公式/单位/分支说明和机器可读输出前，状态为
-`blocked_pending_pnjl_cep_source`。本修订不触发 solver、磁场扫描或 C0/C1/C2。
+当前磁场物理实现或外部 acceptance 的证明。后续外部测试集使用
+`pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db`；仓库和 commit 已固定，当前状态为
+`pnjl_mag_source_available_pending_target_gate`。在其公式、参数、单位、积分、分支说明和
+机器可读输出合同完成审计前，历史 replay 不直接升级为 acceptance。本修订不触发
+solver、磁场扫描或 C0/C1/C2。
 
 ## Replay provenance
 

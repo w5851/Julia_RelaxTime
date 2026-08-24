@@ -56,18 +56,21 @@ acceptance suite. The magnetic external-source ledger is kept under
 cutoff, and branch gates are closed.
 
 The magnetic external plan is now source-gated rather than dual-source. The
-legacy Fortran route and `pnjl_mag` replay remain diagnostic evidence only: the
-former follows the disputed smooth-Landau kernel and the latter follows an
-independent MFIR/Hurwitz-zeta kernel. The Fortran entropy/density postprocessing
+legacy Fortran route remains diagnostic evidence only because it follows the
+disputed smooth-Landau kernel. The selected external MFIR source is
+`pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db`; its existing replay rows
+remain evidence until the source contract is audited and lightweight targets are
+extracted. The Fortran entropy/density postprocessing
 rows with the documented flavor-charge bug and NaN exports are excluded from
 acceptance. The short v2 replay is recorded in
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_external_fixedmu_replay_v2.csv`;
 the same-route Julia/Fortran state deltas are in
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`.
-The paper-route audit and handoff to the pending `pnjl_cep` source are in
+The paper-route audit and `pnjl_mag` source-gate are in
 `docs/analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md`.
-Until the external source, regularization, IMC profile (`a=0.0108805`), units,
-ensemble, and branch policy are frozen, all rows remain evidence/diagnostic
+The repository and commit are fixed; until regularization details, the IMC
+profile (`a=0.0108805`), units, numerical integration, ensemble, branch policy,
+and output schema are audited, all existing rows remain evidence/diagnostic
 rather than targets. The point-list file is maintained with the historical
 extraction package at
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.

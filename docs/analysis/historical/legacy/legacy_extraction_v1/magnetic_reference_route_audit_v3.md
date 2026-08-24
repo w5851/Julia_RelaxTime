@@ -1,10 +1,10 @@
-# 磁场参考路线审计 v3：贺伟博论文与 `pnjl_cep` 转向
+# 磁场参考路线审计 v3：贺伟博论文与 `pnjl_mag` 外部参考
 
 ## 状态
 
-`blocked_pending_pnjl_cep_source`。本页完成了参考论文的公式审计，但尚未拿到
-`pnjl_cep` 的仓库 URL、commit/SHA、生成脚本或机器可读输出，因此还不能生成
-外部 acceptance target，也没有运行任何 equilibrium solver。
+`pnjl_mag_source_available_pending_target_gate`。本页已完成参考论文的公式审计，并已
+固定 `pnjl_mag` 的仓库与 commit；尚未完成参数、单位、积分、分支和输出合同审计，
+也未提取外部 acceptance target。本轮没有运行任何 equilibrium solver。
 
 ## 参考文献与可复核来源
 
@@ -53,34 +53,43 @@ replay 当成磁场物理正确性的外部证明。
 该正则化与论文或生产物理路线一致。Fortran 的 `quantity.f90` 派生量仍因味电荷
 复用和 `NaN` 排除。
 
-`pnjl_mag` 的 MFIR/Hurwitz-zeta 实现是有价值的独立路线诊断，但不是当前 Julia
-smooth-Landau 路径的直接数值 target；除非主项目实现并冻结同一 MFIR 合同，否则不
-把它提升为 acceptance。
+`pnjl_mag` 的 MFIR/Hurwitz-zeta 实现与当前 Julia 默认 MFIR 路线属于同一公式家族，
+因此是首选外部 source candidate。但历史 replay 使用的求解设置和输出合同尚未完成
+同口径审计，不能把既有 replay 行直接提升为 acceptance。
 
-## `pnjl_cep` 测试集转向
+## `pnjl_mag` 测试集接入
 
-后续外部测试集优先采用作者指定的 `pnjl_cep`，流程如下：
+外部源码已经固定：
 
-1. 获取仓库 URL/路径、commit/SHA、运行依赖和输出文件或生成脚本；
-2. solver-free 审计其磁场公式、真空正则化、`a` profile、单位、`n_max`/特殊函数
+- remote：`https://github.com/ZhouRui-xzit/pnjl_mag.git`
+- commit：`e1fc81d3c3c9d220c49972e54307b66a604cb9db`
+- 本机只读审计副本：`D:\Temp\pnjl_mag_audit_20260823`
+- 已确认的高层结构：五维 FixedMu、JAX 自动微分、Optimistix 求根、
+  MFIR/Hurwitz-zeta 真空项和 Landau 热项
+
+后续接入流程如下：
+
+1. solver-free 审计其磁场公式、真空正则化、`a` profile、单位、`n_max`/特殊函数
    约定、五维变量顺序、分支选择和 residual/status 字段；
-3. 先抽取少量代表点，覆盖低温/高温、低/中/高 `eB`、Landau onset 与相结构变化，
+2. 固定可重放的依赖、生成脚本、参数清单和机器可读输出 schema；
+3. 再抽取少量代表点，覆盖低温/高温、低/中/高 `eB`、Landau onset 与相结构变化，
    同时保留所有候选分支而不是只保留最低 `Omega`；
 4. 只有在 source consistency、branch clarity、有限性和收敛门槛通过后，才把轻量
    fixed-point CSV 放入 `tests/validation/data/targets/`；原始输出只留在外部 provenance
    或分析目录；
-5. 若 `pnjl_cep` 与论文 MFIR 路线不一致，建立独立 validation family，不把不同
+5. 若 `pnjl_mag` 的具体公式或参数合同与当前 Julia MFIR 路线不一致，建立独立
+   validation family，不把不同
    正则化的数值混成一个 target。
 
-在第 1 步完成前，`pnjl_cep` 只能标记为 `pending_external_source`。不重跑 C0/C1/C2，
-不扩展 Fortran 的 `n_max` 收敛扫描，也不修改当前 solver 或生产扫描路径。
+源码可用性已不再阻塞；当前阻塞点是 source contract 和 target admission。不重跑
+C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay 直接复制成 target。
 
 ## 主项目待办边界
 
 - **已完成的主项目路线决策**：正式 profile `a=0.0108805` 已接入
   `magnetic_default.toml`；MFIR/Hurwitz-zeta 为默认生产真空路线，完整
   smooth-Landau 只通过 `route=:landau_legacy` 保留为历史/诊断路线。
-- **必须后续处理**：获取 `pnjl_cep` 的仓库 URL/路径、固定 commit、运行依赖和机器可读
-  输出，完成 source-gate 后再生成轻量外部 acceptance targets。
+- **必须后续处理**：完成 `pnjl_mag` 的 source-gate，固定运行依赖、参数、单位、积分、
+  分支与机器可读输出合同，再生成轻量外部 acceptance targets。
 - **不在本轮**：Maxwell 自能、磁化率、各向异性压力、FixedRho/phase magnetic
   workflow、全域磁场扫描和 C0/C1/C2 重跑。
