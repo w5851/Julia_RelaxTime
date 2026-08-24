@@ -1,6 +1,7 @@
 # Issue #130：legacy phase-reference canonical 路径退役
 
-状态：active。runtime switch、consumer adapter、solver-free parity 和限定 numerical pilot 已完成，
+状态：accepted。runtime switch、consumer adapter、solver-free parity、限定 numerical pilot 和
+canonical-path retirement 已完成，
 作者已接受新 reference 的限定结果并授权旧 reference retirement 与后续 RS transport 重验。
 
 ## 范围与语义
@@ -27,7 +28,8 @@
 - [x] 增加 snapshot hash、canonical-root absence、fallback/rollback 与消费者路径测试。
 - [x] 运行 focused Julia/Python、workflow schema、task ledger、active docs、docs consistency、
   script/data-path governance 和 `git diff --check`。
-- [ ] PR 通过 CI 后合并；从合并 SHA 准备新的 candidate-runtime RS transport production，
+- [x] PR #264 通过 CI 后合并到 `main@b4b4d20720c081d39a8f9f8886b027ce22b0d8e7`；从合并 SHA
+  准备新的 candidate-runtime RS transport production，
   不覆盖旧 production。
 
 ## 已有放行证据
@@ -40,6 +42,9 @@
 - quality audit 修复：PR #263，merge SHA
   `d4193bcf77bb23d740787a103782e3e6fc96dbba`。
 - 作者结论：新 reference 效果符合预期，授权 retirement 和 RS transport 后续运行。
+- retirement merge：PR #264，`main@b4b4d20720c081d39a8f9f8886b027ce22b0d8e7`。
+- RS mode-A candidate-runtime production：run `32709280462`，使用全新 case
+  `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1`；运行结果尚未验收。
 
 ## 非目标与停止条件
 
