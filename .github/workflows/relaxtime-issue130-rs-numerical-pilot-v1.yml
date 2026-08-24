@@ -89,7 +89,9 @@ jobs:
           done
           mkdir -p calculation/data/reference/pnjl
           cp -R data/reference/pnjl/issue130_phase_reference_v1 calculation/data/reference/pnjl/
+          cp -R data/reference/pnjl/legacy_phase_reference_v1 calculation/data/reference/pnjl/
           test -f calculation/data/reference/pnjl/issue130_phase_reference_v1/manifest.json
+          test -f calculation/data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json
           test -f calculation/scripts/relaxtime/phase_reference_adapter.jl
 
       - name: Write immutable input provenance
@@ -101,10 +103,11 @@ jobs:
           sha256sum \
             data/reference/pnjl/issue130_phase_reference_v1/manifest.json \
             data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json \
-            data/reference/pnjl/boundary.csv \
-            data/reference/pnjl/cep.csv \
-            data/reference/pnjl/crossover_dense.csv \
-            data/reference/pnjl/spinodals.csv > "$root/provenance/input_hashes.sha256"
+            data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json \
+            data/reference/pnjl/legacy_phase_reference_v1/boundary.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/cep.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.csv \
+            data/reference/pnjl/legacy_phase_reference_v1/spinodals.csv > "$root/provenance/input_hashes.sha256"
           cat > "$root/provenance/pilot_inputs.json" <<EOF
           {
             "schema_version": "${WORKFLOW_SCHEMA}",

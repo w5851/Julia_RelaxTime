@@ -37,8 +37,9 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
-DEFAULT_BOUNDARY_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
-DEFAULT_SPINODAL_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "spinodals.csv"
+LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
+DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
+DEFAULT_SPINODAL_PATH = LEGACY_PHASE_REFERENCE_ROOT / "spinodals.csv"
 DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
 
 

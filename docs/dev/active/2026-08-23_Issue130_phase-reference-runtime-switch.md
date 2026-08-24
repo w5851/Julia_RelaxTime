@@ -43,4 +43,6 @@ reference 文件。
 
 - Base merge：PR #259，`960dc751f5efaface38b0d56db56ba577f67fd2d`。
 - Candidate root：`data/reference/pnjl/issue130_phase_reference_v1/`。
-- Legacy rollback files：`boundary.csv`、`cep.csv`、`crossover_dense.csv`、`spinodals.csv`。
+- Legacy rollback files：retirement 前位于 reference 根路径；现由
+  `legacy_phase_reference_v1/{boundary.csv,cep.csv,crossover_dense.csv,spinodals.csv}`
+  versioned snapshot 保留同一数值与显式 rollback 语义。

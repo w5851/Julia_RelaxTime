@@ -10,8 +10,8 @@ PNJL 相图绘制脚本
     python scripts/pnjl/plot_phase_diagram.py [options]
 
 选项：
-    --boundary PATH   相变线数据文件 (默认 data/reference/pnjl/boundary.csv)
-    --cep PATH        CEP 数据文件 (默认 data/reference/pnjl/cep.csv)
+    --boundary PATH   相变线数据文件（默认 legacy_phase_reference_v1 snapshot）
+    --cep PATH        CEP 数据文件（默认 legacy_phase_reference_v1 snapshot）
     --xi VALUE        要绘制的 ξ 值，可多次指定 (默认绘制所有)
     --output-dir DIR  输出目录 (默认 data/outputs/figures/pnjl)
     --format FMT      输出格式 png/pdf/svg (默认 png)
@@ -57,9 +57,10 @@ if str(PROJECT_ROOT) not in sys.path:
 from scripts.pnjl.phase_reference_adapter import load_phase_reference
 
 
-DEFAULT_BOUNDARY_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "boundary.csv"
-DEFAULT_CEP_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "cep.csv"
-DEFAULT_SPINODAL_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "spinodals.csv"
+LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
+DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
+DEFAULT_CEP_PATH = LEGACY_PHASE_REFERENCE_ROOT / "cep.csv"
+DEFAULT_SPINODAL_PATH = LEGACY_PHASE_REFERENCE_ROOT / "spinodals.csv"
 DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "outputs" / "figures" / "pnjl"
 
@@ -655,7 +656,7 @@ def main() -> None:
         "--phase-reference-root",
         type=Path,
         default=None,
-        help="显式 Issue #130 candidate root；指定后使用 adapter，默认仍使用 legacy CSV",
+        help="显式 Issue #130 candidate root；指定后使用 adapter，默认使用 retired legacy snapshot",
     )
     parser.add_argument(
         "--phase-reference-layer",
@@ -681,7 +682,7 @@ def main() -> None:
     
     args = parser.parse_args()
     
-    # 加载数据。Candidate 只能通过显式 root/layer 进入；旧路径保持默认。
+    # 加载数据。Candidate 只能通过显式 root/layer 进入；snapshot 只作旧 schema 回放。
     candidate_diagnostics = None
     if args.phase_reference_root is not None:
         (

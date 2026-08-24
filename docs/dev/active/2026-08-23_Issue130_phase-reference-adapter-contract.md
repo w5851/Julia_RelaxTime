@@ -1,8 +1,9 @@
 # Issue #130：phase-reference adapter contract 与引用迁移
 
-状态：active。PR253 的 solver-free compatibility audit 与 PR259 consumer migration 已完成并接受；
+状态：accepted。PR253 的 solver-free compatibility audit、PR259 consumer migration 与 PR260
+runtime switch 已完成并接受；legacy 数值现以 byte-preserving versioned snapshot 保留，未被删除。
 本任务把 versioned candidate 的 schema 语义收束为显式 adapter 合同，并在独立 runtime-switch PR
-中验证默认切换与回滚。旧 reference 文件保持不变，不启动 RS transport、不运行 PNJL。
+中验证默认切换与回滚。本任务不改 phase 数值、solver 或容差；RS numerical production 由独立任务单承接。
 
 ## 已知边界
 
@@ -33,9 +34,9 @@
   candidate 仍只用于显式诊断/图层输入，不改变 P1 默认 legacy 路径。
 - [x] 完成 transport、phase-guided、paper 和 legacy plot 的显式引用入口迁移及 solver-free
   回归；runtime resolver 已支持 certified-only candidate、逐键 legacy fallback 和显式 rollback。
-- [ ] 另立 versioned runtime-switch PR，默认使用 `strict` candidate 的 certified-only view，
-  对缺失键保留 legacy fallback/rollback；在作者审核和 switch 合并前不得删除旧 `boundary.csv`、`cep.csv`、
-  `spinodals.csv`、`crossover_dense.csv` 或 `phase_reference_dense_manifest.json`。
+- [x] versioned runtime-switch PR #260 默认使用 `strict` candidate 的 certified-only view，
+  对缺失键保留 legacy fallback/rollback；作者随后接受限定 numerical pilot 并授权 canonical-path
+  retirement。legacy 数值迁入 versioned snapshot，不在本任务中物理删除。
 
 ## 验收与非目标
 

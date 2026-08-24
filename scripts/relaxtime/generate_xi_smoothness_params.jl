@@ -37,7 +37,7 @@ function _parse_args(args::Vector{String})
         :tmax => 270.0,
         :muqmin => 0.0,
         :muqmax => 360.0,
-        :boundary_csv => joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "boundary.csv"),
+        :boundary_csv => joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1", "boundary.csv"),
         :crossover_csv => joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "crossover.csv"),
     )
 

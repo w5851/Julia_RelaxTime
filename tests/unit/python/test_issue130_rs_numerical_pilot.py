@@ -216,6 +216,7 @@ def test_workflow_freezes_paired_scope_and_solver_provenance() -> None:
     assert "run_reference candidate_runtime runtime" in text
     assert "run_reference legacy legacy" in text
     assert "--phase-reference-mode \"$phase_mode\"" in text
+    assert "legacy_phase_reference_v1/RETIREMENT_MANIFEST.json" in text
     assert "--fail-on-hard-failure" in text
     assert '"solver_called": true' in text
     assert '"production_write": false' in text

@@ -4,7 +4,7 @@ const SCRIPT_START = time()
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const MODELS_PATH = joinpath(PROJECT_ROOT, "src", "models", "Models.jl")
 const CONSTANTS_PNJL_PATH = joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl")
-const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "cep.csv")
+const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv")
 
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, CONSTANTS_PNJL_PATH)
