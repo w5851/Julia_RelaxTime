@@ -1,7 +1,7 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active。runtime-switch PR #260 已合并到 `main@1ccf29310fb20c30bcd154f0b4966e25a7565225`；
-solver-free parity PR #261 已 squash merge 到 `main@359d614289e42fe79d208b7ad2a2abe5f7f3dd96`。
+状态：active。runtime-switch PR #260 与 solver-free parity PR #261 已合并；
+paired numerical pilot workflow PR #262 已合并到 `main@27e9642d431ba7afd845f2b187f77c0fbbe3be4d`。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
 production，也不把 solver-free smoke 当作数值 production 通过。
 
@@ -31,9 +31,16 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   numerical scope 固定为 `xi=-0.5,0,0.5`、`muB=150,450,900 MeV`、`alpha_T=1.0,1.2`，
   两套 reference 使用相同 transport 配置并在同一 job 内顺序运行；名义 18 个请求点因
   现有 `direct_coexistence` 锚点的共存侧替换形成 19 个有效计划点，已在 manifest 中显式记录。
-- [ ] 经作者授权后触发限定 numerical RS pilot；至少比较 candidate runtime 与显式 legacy
-  rollback 的 phase anchor、失败/非有限点、transport 输出字段和运行成本。pilot 失败时停止，
-  保留 diagnostic-only、fallback、rollback 和旧 production。
+- [x] 经作者授权后触发限定 numerical RS pilot `32684074876`；candidate runtime 与显式
+  legacy rollback 均完成 19/19 点，solver、非有限、重复键、failed point 和 convergence
+  检查通过，实际耗时分别为 315 s / 314 s。
+- [x] 对 pilot source artifact 做 solver-free quality audit。原始 in-run verdict
+  `pilot_solver_or_curve_failure` 的唯一原因是两套 reference 共同的 5 个
+  `tau_u_ubar_ratio_high` 标记；collector replay 将其分类为
+  `pilot_pair_complete_with_common_quality_warnings_diagnostic_only`。该分类不放宽
+  `scan_quality` 阈值，也不把质量警告升级为正式 RS parity。
+- [ ] 作者审核限定 numerical evidence 与共同质量警告；在审核前保持 diagnostic-only、
+  fallback、rollback 和旧 production。
 - [ ] phase-guided/Paper P1 等消费者完成不再直接依赖旧文件的引用审计后，才创建独立
   `old-reference retirement` PR。
 
@@ -49,6 +56,19 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - `xi=0, muB=150 MeV, alpha_T=1` 的 phase-guided crossover anchor：
   candidate runtime `198.2066818967471 MeV`，legacy `198.12550509377107 MeV`，差异
   `0.08117680297604579 MeV`。这是 reference 输入差异，不是 RS transport 数值 parity 结论。
+
+## Numerical pilot 结果审计
+
+source run `32684074876` 的 artifact 保留在 Actions；本地派生审计包为
+`docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2_quality_audit/`。
+
+- 5 个 warning key 在 candidate/legacy 中完全相同，原因均为 `tau_u_ubar_ratio_high`。
+- 5 个点均 `converged=true`，输运字段 finite 且非负；两套结果的 phase kind/structure 一致。
+- 参考输入差异通过 `mode_a_fixed_muB_phase_scaled` 的连续路径传播：先从 reference
+  取 `T_phase_base_MeV`，再使用 `T=alpha_T*T_phase_base_MeV` 求 equilibrium 和 transport；
+  因此 reference 不仅承担离散标签，也影响连续温度锚点与其后的平衡态/输运量。
+- 该包支持“本限定 pilot 未见 candidate-specific 明显 transport regression”，不支持
+  全域 numerical parity、旧 reference retirement 或 production promotion。
 
 ## CI 留痕
 

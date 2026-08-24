@@ -1,0 +1,3 @@
+reference_mode,status,row_count,expected_points,plan_row_count,failed_point_count,duplicate_key_count,plan_duplicate_key_count,nonfinite_count,negative_transport_count,nonconverged_count,invalid_quality_count,phase_reference_mode,phase_reference_source,solver_called
+candidate_runtime,0,19,19,19,0,0,0,0,0,0,5,runtime,candidate,True
+legacy,0,19,19,19,0,0,0,0,0,0,5,legacy,legacy,True

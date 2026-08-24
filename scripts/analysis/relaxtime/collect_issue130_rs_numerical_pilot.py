@@ -20,6 +20,7 @@ from typing import Any, Iterable
 
 
 REFERENCE_MODES = ("candidate_runtime", "legacy")
+NONBLOCKING_QUALITY_REASONS = {"tau_u_ubar_ratio_high"}
 # The phase-reference choice can move the anchor temperature.  Pair rows by
 # the requested point identity and report T/phase changes separately.
 KEY_FIELDS = ("muB_MeV", "xi", "mode", "alpha_T")
@@ -150,6 +151,7 @@ def mode_summary(root: Path, reference_mode: str, expected_points: int) -> dict[
     negative: list[tuple[str, ...]] = []
     nonconverged: list[tuple[str, ...]] = []
     invalid_quality: list[tuple[str, ...]] = []
+    quality_warning_reasons: dict[tuple[str, ...], str] = {}
     for row in rows:
         if any(not finite_number(row.get(field)) for field in COMPARE_FIELDS):
             nonfinite.append(key(row))
@@ -160,7 +162,9 @@ def mode_summary(root: Path, reference_mode: str, expected_points: int) -> dict[
         # scan_quality's flag is an issue marker: false means the point passed
         # the transport quality checks.
         if bool_value(row.get("quality_flag")) is not False:
-            invalid_quality.append(key(row))
+            item = key(row)
+            invalid_quality.append(item)
+            quality_warning_reasons[item] = row.get("quality_reason", "")
     _, failed_rows = read_data_rows(failed)
     status = status_path.read_text(encoding="utf-8").strip() if status_path.is_file() else "missing"
     config = read_effective_config(effective)
@@ -168,7 +172,7 @@ def mode_summary(root: Path, reference_mode: str, expected_points: int) -> dict[
     metadata = read_json(pilot_metadata)
     return {
         "reference_mode": reference_mode,
-        "result_path": str(result).replace("\\", "/"),
+        "result_path": str(result.relative_to(root)).replace("\\", "/"),
         "result_sha256": sha256(result) if result.is_file() else "",
         "effective_config_sha256": sha256(effective) if effective.is_file() else "",
         "run_manifest_sha256": sha256(manifest) if manifest.is_file() else "",
@@ -194,6 +198,7 @@ def mode_summary(root: Path, reference_mode: str, expected_points: int) -> dict[
         "nonconverged_keys": [list(item) for item in nonconverged[:10]],
         "invalid_quality_count": len(invalid_quality),
         "invalid_quality_keys": [list(item) for item in invalid_quality[:10]],
+        "quality_warning_reasons": {"|".join(item): reason for item, reason in quality_warning_reasons.items()},
         "solver_called": metadata.get("solver_called") is True,
         "pilot_metadata": metadata,
         "phase_reference_mode": config.get("phase_reference_mode", ""),
@@ -266,8 +271,13 @@ def main() -> int:
             hard_failures.append(f"{label}:negative_transport_{summary['negative_transport_count']}")
         if summary["nonconverged_count"]:
             hard_failures.append(f"{label}:nonconverged_{summary['nonconverged_count']}")
-        if summary["invalid_quality_count"]:
-            hard_failures.append(f"{label}:invalid_quality_{summary['invalid_quality_count']}")
+        hard_quality = [
+            item
+            for item, reason in summary["quality_warning_reasons"].items()
+            if reason not in NONBLOCKING_QUALITY_REASONS
+        ]
+        if hard_quality:
+            hard_failures.append(f"{label}:invalid_quality_hard_{len(hard_quality)}")
         metadata = summary["pilot_metadata"]
         if metadata.get("reference_mode") != label:
             hard_failures.append(f"{label}:pilot_metadata_reference_mode")
@@ -287,7 +297,24 @@ def main() -> int:
         hard_failures.append("candidate_legacy_result_key_mismatch")
     if not comparison:
         hard_failures.append("no_common_transport_rows")
-    verdict = "pilot_pair_complete_diagnostic_only" if not hard_failures else "pilot_solver_or_curve_failure"
+    runtime_quality = runtime["quality_warning_reasons"]
+    legacy_quality = legacy["quality_warning_reasons"]
+    runtime_soft = {item: reason for item, reason in runtime_quality.items() if reason in NONBLOCKING_QUALITY_REASONS}
+    legacy_soft = {item: reason for item, reason in legacy_quality.items() if reason in NONBLOCKING_QUALITY_REASONS}
+    if set(runtime_soft) != set(legacy_soft):
+        hard_failures.append("candidate_legacy_quality_warning_key_mismatch")
+    else:
+        for item in set(runtime_soft) & set(legacy_soft):
+            if runtime_soft[item] != legacy_soft[item]:
+                hard_failures.append("candidate_legacy_quality_warning_reason_mismatch")
+                break
+    common_quality_warnings = [item.split("|") for item in sorted(set(runtime_soft) & set(legacy_soft))]
+    if hard_failures:
+        verdict = "pilot_solver_or_curve_failure"
+    elif common_quality_warnings:
+        verdict = "pilot_pair_complete_with_common_quality_warnings_diagnostic_only"
+    else:
+        verdict = "pilot_pair_complete_diagnostic_only"
     output.mkdir(parents=True, exist_ok=True)
     write_csv(output / "transport_comparison.csv", list(comparison[0].keys()) if comparison else list(KEY_FIELDS), comparison)
     write_csv(
@@ -302,12 +329,15 @@ def main() -> int:
         "repo_sha": args.repo_sha,
         "calculation_sha": args.calculation_sha,
         "run_id": args.run_id,
-        "solver_called": True,
+        "solver_called": runtime["solver_called"] and legacy["solver_called"],
         "nominal_requested_points": 18,
         "effective_planned_points": args.expected_points,
         "plan_expansion_reason": "direct_coexistence replaces xi=0 with certified +/- coexistence-side points for one first-order anchor" if args.expected_points != 18 else "none",
         "reference_modes": {summary["reference_mode"]: {key: value for key, value in summary.items() if key not in {"rows", "plan_rows"}} for summary in (runtime, legacy)},
         "common_row_count": len(comparison),
+        "common_quality_warning_count": len(common_quality_warnings),
+        "common_quality_warning_keys": common_quality_warnings,
+        "nonblocking_quality_reasons": sorted(NONBLOCKING_QUALITY_REASONS),
         "hard_failures": hard_failures,
         "non_goals": ["no production/reference write", "no legacy deletion", "no automatic numerical drift acceptance"],
     }

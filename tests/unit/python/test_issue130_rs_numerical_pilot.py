@@ -122,9 +122,53 @@ def test_paired_success_pairs_by_request_not_anchor_temperature(tmp_path: Path) 
     manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["verdict"] == "pilot_pair_complete_diagnostic_only"
     assert manifest["common_row_count"] == 1
+    assert manifest["reference_modes"]["candidate_runtime"]["result_path"] == "results/candidate_runtime/phase_guided_transport_scan.csv"
     comparison = (output / "transport_comparison.csv").read_text(encoding="utf-8")
     assert "T_MeV_candidate" in comparison
     assert "T_MeV_legacy" in comparison
+
+
+def test_common_tau_ratio_warning_is_diagnostic_not_solver_failure(tmp_path: Path) -> None:
+    candidate = _row()
+    legacy = _row(temperature="179.9")
+    for row in (candidate, legacy):
+        row.update(
+            {
+                "quality_flag": "true",
+                "quality_reason": "tau_u_ubar_ratio_high",
+                "tau_u": "7.0",
+                "tau_ubar": "1.0",
+            }
+        )
+    root = _prepare_pair(tmp_path, candidate_rows=[candidate], legacy_rows=[legacy])
+    result = _run(root, tmp_path / "aggregate", fail=True)
+    assert result.returncode == 0, result.stderr
+    manifest = json.loads((tmp_path / "aggregate" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["verdict"] == "pilot_pair_complete_with_common_quality_warnings_diagnostic_only"
+    assert manifest["common_quality_warning_count"] == 1
+
+
+def test_quality_warning_only_on_one_reference_is_hard_failure(tmp_path: Path) -> None:
+    candidate = _row()
+    candidate.update({"quality_flag": "true", "quality_reason": "tau_u_ubar_ratio_high"})
+    root = _prepare_pair(tmp_path, candidate_rows=[candidate])
+    result = _run(root, tmp_path / "aggregate", fail=True)
+    assert result.returncode == 2
+    verdict = json.loads((tmp_path / "aggregate" / "verdict.json").read_text(encoding="utf-8"))
+    assert "candidate_legacy_quality_warning_key_mismatch" in verdict["hard_failures"]
+
+
+def test_unknown_quality_reason_remains_hard_failure(tmp_path: Path) -> None:
+    candidate = _row()
+    legacy = _row(temperature="179.9")
+    for row in (candidate, legacy):
+        row.update({"quality_flag": "true", "quality_reason": "unexpected_quality_reason"})
+    root = _prepare_pair(tmp_path, candidate_rows=[candidate], legacy_rows=[legacy])
+    result = _run(root, tmp_path / "aggregate", fail=True)
+    assert result.returncode == 2
+    verdict = json.loads((tmp_path / "aggregate" / "verdict.json").read_text(encoding="utf-8"))
+    assert "candidate_runtime:invalid_quality_hard_1" in verdict["hard_failures"]
+    assert "legacy:invalid_quality_hard_1" in verdict["hard_failures"]
 
 
 def test_missing_failed_point_is_hard_failure(tmp_path: Path) -> None:
