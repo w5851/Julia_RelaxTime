@@ -5,17 +5,17 @@ updated_at = "2026-08-24"
 [[tracks]]
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
-status = "active"
-current_task = "issue130-phase-reference-retirement"
+status = "promoted"
+current_task = "issue130-phase-reference-runtime-switch"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "作者已接受 run 32684074876 与共同 quality-warning audit；迁移 legacy canonical 根路径到 byte-preserving snapshot，验证 fallback/rollback 后推进 candidate-runtime RS production。"
+next_action = "retirement 已合并到 main@b4b4d207；验收 mode-A candidate-runtime RS production run 32709280462 后，若硬门禁通过再串行放行 mode-B。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-old-reference-retirement"
-current_sha = "d4193bcf77bb23d740787a103782e3e6fc96dbba"
-run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876"]
+current_branch = "main"
+current_sha = "b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"
+run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
   "file:docs/analysis/pnjl/cep_maxwell/endpoint_local/pnjl_cep_endpoint_local_production_shadow_v4_20260813/",
@@ -36,23 +36,24 @@ evidence = [
   "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
   "review:author_accepted_numerical_pilot_and_authorized_retirement",
+  "promotion:runtime_default_strict_candidate_with_certified_only_fallback",
 ]
 updated_at = "2026-08-24"
 
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "blocked"
+status = "active"
 current_task = "rs-production-after-phase-reference"
-blocked_by = ["item:issue130-phase-reference-retirement"]
+blocked_by = []
 unlocks = []
-next_action = "作者已接受限定 pilot；完成 versioned legacy retirement 后，从合并 SHA 创建新 case 并运行 candidate-runtime RS production，不覆盖旧 production。"
+next_action = "mode-A run 32709280462 运行中；验收 hard gates、完整性、telemetry、成本和 reference provenance，通过后才运行 mode-B。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-old-reference-retirement"
-current_sha = "d4193bcf77bb23d740787a103782e3e6fc96dbba"
-run_ids = ["32354095831", "32451053476", "32684074876"]
+current_branch = "codex/issue130-rs-candidate-production"
+current_sha = "b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"
+run_ids = ["32354095831", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
   "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/",
@@ -62,7 +63,10 @@ evidence = [
   "pr:261",
   "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96",
   "review:author_accepted_solver_free_parity",
-  "review:author_accepted_numerical_pilot_and_authorized_production",
+"review:author_accepted_numerical_pilot_and_authorized_production",
+"pr:264",
+"sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7",
+"run:32709280462",
   "pr:263",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
 ]
@@ -185,14 +189,14 @@ evidence = ["run:31714535418", "file:docs/analysis/pnjl/cep_maxwell/endpoint_loc
 id = "rs-production-after-phase-reference"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "blocked"
+status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
 reason = "RS production 依赖新的高精度 phase reference；旧 production 和 registry 历史保持不可变。"
-next_action = "完成 legacy canonical-path retirement 后，以新 case、candidate runtime、不可变 provenance 和 legacy rollback 运行 RS production。"
-blocked_by = ["item:issue130-phase-reference-retirement"]
+next_action = "验收 mode-A run 32709280462；若 hard gates 通过，再以同一 merge SHA 和新 case 串行运行 mode-B，随后生成 candidate evidence package。"
+blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"]
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"]
 
 [[items]]
 id = "issue130-targeted-closure-diagnostic"
@@ -289,14 +293,14 @@ evidence = ["file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-co
 id = "issue130-phase-reference-runtime-switch"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "accepted"
+status = "promoted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-23_Issue130_phase-reference-runtime-switch.md"
 reason = "PR #259 已完成 consumer migration；candidate strict layer 含 unresolved rows，必须以 certified-only view、逐键 legacy fallback 和显式 rollback 形成独立 runtime switch，不能整体放宽 candidate gate。"
 next_action = "PR #260 与合并 SHA smoke 已接受；runtime 默认 candidate、逐键 fallback 和显式 rollback 合同保持有效。"
 blocked_by = []
 backlog_file = ""
-evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback; promotion_smoke_solver_free_pass"]
+evidence = ["pr:259", "pr:260", "sha:960dc751f5efaface38b0d56db56ba577f67fd2d", "sha:1a713490f6c9bc7e6f725c2e3bbbb25c22f468a1", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "note:candidate_strict_has_uncertified_rows; runtime_view_certified_only_with_legacy_fallback; promotion_smoke_solver_free_pass", "promotion:runtime_default_strict_candidate_with_certified_only_fallback"]
 
 [[items]]
 id = "issue130-rs-phase-reference-parity"
@@ -315,14 +319,14 @@ evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runti
 id = "issue130-phase-reference-retirement"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md"
 reason = "作者已接受限定 numerical pilot；legacy 文件可退出 canonical 根路径，但 candidate strict 仍有未覆盖键，因此必须迁入 byte-preserving versioned snapshot 继续提供逐键 fallback 与显式 rollback，不能物理删除。"
-next_action = "验证 snapshot hash、consumer paths、candidate default、fallback/rollback 与 workflow schema；CI 通过后合并 retirement PR，再推进新 case 的 RS production。"
+next_action = "PR #264 已合并；保留 versioned snapshot 作为逐键 fallback、显式 legacy rollback 和历史复现输入，不再占用 canonical 根路径。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md", "file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32684074876", "pr:263", "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba", "review:author_authorized_versioned_retirement", "note:canonical root retirement preserves byte-identical fallback and rollback snapshot"]
+evidence = ["file:docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md", "file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32684074876", "pr:263", "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba", "pr:264", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "review:author_authorized_versioned_retirement", "note:canonical root retirement preserves byte-identical fallback and rollback snapshot"]
 
 [[items]]
 id = "plot-sop-independent-land"
