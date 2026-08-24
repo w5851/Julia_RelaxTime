@@ -39,24 +39,35 @@ function PNJLMagneticModel(
     eB_fm2::Real=0.0,
     profile::String=get(ENV, "PNJL_PARAM_PROFILE", "default"),
     physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"),
+    magnetic_profile::String=get(ENV, "PNJL_MAGNETIC_PROFILE", "magnetic_default"),
     n_max::Union{Nothing, Int}=nothing,
-    p_num::Int=96,
-    pz_max::Real=0.0,
-    cutoff_N::Int=10,
+    p_num::Union{Nothing, Int}=nothing,
+    pz_max::Union{Nothing, Real}=nothing,
+    cutoff_N::Union{Nothing, Int}=nothing,
+    route::Union{Nothing, Symbol}=nothing,
+    zeta_num::Union{Nothing, Int}=nothing,
     imc=nothing,
     kwargs...,
 )
     isempty(kwargs) || throw(ArgumentError("unsupported PNJLMagneticModel keyword(s): $(collect(keys(kwargs)))"))
     base = PNJLModel(; profile=profile, physics_profile=physics_profile)
     thermo = _magnetic_thermodynamics_module()
-    imc_params = imc === nothing ? thermo.default_imc_params() : imc
+    config_defaults = thermo.default_magnetic_config(
+        eB_fm2=float(eB_fm2),
+        profile=magnetic_profile,
+        params=base.params,
+    )
+    imc_params = imc === nothing ? config_defaults.imc : imc
     conf = thermo.MagneticConfig(
         eB_fm2=float(eB_fm2),
-        n_max=n_max,
-        p_num=p_num,
-        pz_max=float(pz_max),
-        cutoff_N=cutoff_N,
+        n_max=n_max === nothing ? config_defaults.n_max : n_max,
+        p_num=p_num === nothing ? config_defaults.p_num : p_num,
+        pz_max=pz_max === nothing ? config_defaults.pz_max : float(pz_max),
+        cutoff_N=cutoff_N === nothing ? config_defaults.cutoff_N : cutoff_N,
         imc=imc_params,
+        route=route === nothing ? config_defaults.route : route,
+        zeta_num=zeta_num === nothing ? config_defaults.zeta_num : zeta_num,
+        params=base.params,
     )
     return PNJLMagneticModel(base, conf)
 end
@@ -65,15 +76,15 @@ end
     thermo = _magnetic_thermodynamics_module()
     # Preserve Dual/other Real element types for generic derivative callers.
     φ3 = SVector(φ[1], φ[2], φ[3])
-    G_B = thermo.coupling_GB(model.magnetic.eB_fm2; imc=model.magnetic.imc)
-    return thermo._calculate_mass_vec_with_GB(φ3, G_B)
+    G_B = thermo.coupling_GB(model.magnetic.eB_fm2; G0=model.base.params.G_fm2, imc=model.magnetic.imc)
+    return thermo._calculate_mass_vec_with_GB(φ3, G_B; params=model.base.params)
 end
 
 @inline function calculate_chiral(model::PNJLMagneticModel, φ; kwargs...)
     thermo = _magnetic_thermodynamics_module()
     φ3 = SVector(φ[1], φ[2], φ[3])
-    G_B = thermo.coupling_GB(model.magnetic.eB_fm2; imc=model.magnetic.imc)
-    return thermo._chiral_with_GB(φ3, G_B)
+    G_B = thermo.coupling_GB(model.magnetic.eB_fm2; G0=model.base.params.G_fm2, imc=model.magnetic.imc)
+    return thermo._chiral_with_GB(φ3, G_B; params=model.base.params)
 end
 
 @inline function vacuum_contribution(model::PNJLMagneticModel, masses; kwargs...)
@@ -169,6 +180,8 @@ function omega_components(model::PNJLMagneticModel, x_state, T, mu_vec; kwargs..
         omega=comp.omega,
         n_max=comp.n_max,
         G_B=comp.G_B,
+        route=model.magnetic.route,
+        zeta_num=model.magnetic.zeta_num,
     )
 end
 
