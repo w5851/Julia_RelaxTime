@@ -1,6 +1,7 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active。runtime-switch PR #260 已合并到 `main@1ccf29310fb20c30bcd154f0b4966e25a7565225`。
+状态：active。runtime-switch PR #260 已合并到 `main@1ccf29310fb20c30bcd154f0b4966e25a7565225`；
+solver-free parity PR #261 已 squash merge 到 `main@359d614289e42fe79d208b7ad2a2abe5f7f3dd96`。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
 production，也不把 solver-free smoke 当作数值 production 通过。
 
@@ -24,7 +25,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   fallback 语义和 plan anchor。
 - [x] 固化 portable evidence：输入哈希、raw dry-run provenance、source summary、parity table、
   claim ledger 和停止边界。
-- [ ] 作者审核 solver-free parity evidence。
+- [x] 作者审核 solver-free parity evidence；作者已授权合并 PR #261。
 - [ ] 经作者授权后触发限定 numerical RS pilot；至少比较 candidate runtime 与显式 legacy
   rollback 的 phase anchor、失败/非有限点、transport 输出字段和运行成本。pilot 失败时停止，
   保留 diagnostic-only、fallback、rollback 和旧 production。
@@ -46,13 +47,13 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 
 ## CI 留痕
 
-PR #261 最新提交 `31ab0490a68be02d2f8cde7739a79128b3d3fd23` 的 CI 已于 2026-08-23
+PR #261 合并前最新提交 `eba889feea0d422f20cb33e92ad62d9c8cf377fa` 的 CI 已于 2026-08-23
 全部通过（12 项，无失败或跳过）：unit-smoke、integration-core、Julia/Python script smoke、
 PNJL benchmark，以及 task-ledger、active-docs、docs consistency、data-output-path、
 legacy-switch、dependency audit 和 advisory governance。
 
 这只证明代码、证据 schema 与 solver-free consumer smoke 合同通过；不改变 numerical pilot
-仍需作者审核和单独授权的边界。
+仍需独立 dispatch 和数值结果验收的边界。
 
 ## 非目标与回退
 
