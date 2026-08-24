@@ -4,7 +4,8 @@
 外磁场下 PNJL 热力学主接口。
 
 核心公式对应：
-- Ω_f^0, Ω_f^T (Landau 求和)
+- 默认 MFIR：零场三动量截断真空项 + Hurwitz-zeta 磁场修正 + Landau 热项
+- 旧完整 Landau 真空项仅为未接入主入口的结构兼容/历史实现
 - E_{f,n} = sqrt(2n|q_f|eB + pz^2 + M_f^2)
 - ρ_f = ∂P/∂μ_f（提供数值导数与低温近似两种路径）
 - G(B) IMC 参数化

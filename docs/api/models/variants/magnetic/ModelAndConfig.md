@@ -43,6 +43,8 @@
 - `p_num`
 - `pz_max`
 - `cutoff_N`
+- `route`（默认 `:mfir`；可显式指定 `:landau_legacy` 做历史诊断）
+- `zeta_num`（MFIR Hurwitz-zeta 特殊函数的固定积分节点数）
 - `imc`
 
 默认构造器：
@@ -59,7 +61,9 @@
 - 内部最小值为 `MAGNETIC_EB_MIN_FM2 = 100 / hbarc^2`
 
 `PNJLMagneticModel` 与 `MagneticConfig` 对 `eB_fm2 < MAGNETIC_EB_MIN_FM2` 抛出
-`ArgumentError`；通过验证后始终使用 Landau magnetic route。`solve_magnetic_gap`
+`ArgumentError`；通过验证后默认使用“零场三动量截断 + MFIR/Hurwitz-zeta 磁场真空
+修正 + Landau 热项”路线。只有显式设置 `route=:landau_legacy` 才使用历史完整
+Landau 真空项与平滑截断；该路线不属于生产或 acceptance。`solve_magnetic_gap`
 要求有限且 `T_fm > 0`，当前只允许 `xi=0`。`MagneticGapResult.candidates` 保存去重后的
 多分支候选；未启用稳定性分类时标准 `solve_gap` 按已找到候选中的最低 `Omega`
 返回 `MeanFieldState`，但不提供局部稳定性证明。启用 `classify_stability=true` 只增加
