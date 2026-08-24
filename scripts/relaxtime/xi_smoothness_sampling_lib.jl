@@ -172,7 +172,7 @@ function sample_params(total::Int;
     near_count::Int=12,
     T_range::Tuple{Float64, Float64}=(50.0, 270.0),
     muq_range::Tuple{Float64, Float64}=(0.0, 360.0),
-    boundary_csv::String=joinpath("data", "reference", "pnjl", "boundary.csv"),
+    boundary_csv::String=joinpath("data", "reference", "pnjl", "legacy_phase_reference_v1", "boundary.csv"),
     crossover_csv::String=joinpath("data", "reference", "pnjl", "crossover.csv"),
     near_delta_T_half::Float64=NEAR_PHASE_DELTA_T_HALF,
     near_delta_muq_half::Float64=NEAR_PHASE_DELTA_MUQ_HALF,

@@ -2,7 +2,7 @@ using Test
 
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const _MODELS_PATH = normpath(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
-const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "cep.csv")
+const CEP_REFERENCE_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv")
 const CHI_B_FD_REFERENCE_BASELINE_PATH = joinpath(PROJECT_ROOT, "tests", "baselines", "pnjl", "baseline_pnjl_chi_b_taylordiff_fd_reference_v1.csv")
 
 if !isdefined(Main, :Models)

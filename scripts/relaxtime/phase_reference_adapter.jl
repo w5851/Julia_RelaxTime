@@ -403,11 +403,12 @@ function load_default_phase_reference_runtime(; project_root::AbstractString,
 )
     source in (:candidate, :legacy) || _error("phase-reference source must be candidate or legacy")
     reference_root = joinpath(project_root, "data", "reference", "pnjl")
+    legacy_root = joinpath(reference_root, "legacy_phase_reference_v1")
     legacy_paths = (
-        boundary_path=joinpath(reference_root, "boundary.csv"),
-        cep_path=joinpath(reference_root, "cep.csv"),
-        crossover_path=joinpath(reference_root, "crossover_dense.csv"),
-        spinodals_path=joinpath(reference_root, "spinodals.csv"),
+        boundary_path=joinpath(legacy_root, "boundary.csv"),
+        cep_path=joinpath(legacy_root, "cep.csv"),
+        crossover_path=joinpath(legacy_root, "crossover_dense.csv"),
+        spinodals_path=joinpath(legacy_root, "spinodals.csv"),
     )
     source === :legacy && return load_legacy_phase_reference(; legacy_paths...)
     candidate_root = joinpath(reference_root, "issue130_phase_reference_v1")

@@ -19,7 +19,9 @@ using Statistics
 
 const PROJECT_ROOT_V2 = normpath(joinpath(@__DIR__, "..", ".."))
 const HBARC_MEV_FM_V2 = 197.3269804
-const V2_CANONICAL_CEP_PATH = joinpath(PROJECT_ROOT_V2, "data", "reference", "pnjl", "cep.csv")
+const V2_CANONICAL_CEP_PATH = joinpath(
+    PROJECT_ROOT_V2, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv",
+)
 const V2_STATUS_VALUES = (:confirmed_first_order, :confirmed_monotone, :ambiguous_near_critical)
 
 # The v1 script supplies Models, Criticality, SolverWorkTelemetry, the stable

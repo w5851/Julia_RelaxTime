@@ -19,7 +19,9 @@ using Statistics
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", ".."))
 const HBARC_MEV_FM = 197.3269804
 const METHODS = (:c2_dense_baseline, :rho_support_cascade, :high_resolution_oracle)
-const CANONICAL_CEP_PATH = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "cep.csv")
+const CANONICAL_CEP_PATH = joinpath(
+    PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1", "cep.csv",
+)
 
 # JSON (unlike CSV) does not permit IEEE NaN/Inf literals.  A pilot job is
 # allowed to finish without finding a CEP bracket; those diagnostic fields are

@@ -1,0 +1,18 @@
+{
+  "schema_version": "pnjl_legacy_phase_reference_retirement_v1",
+  "status": "retired_canonical_snapshot",
+  "source_root": "data/reference/pnjl",
+  "snapshot_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "runtime_canonical_source": "data/reference/pnjl/issue130_phase_reference_v1/strict",
+  "fallback_and_rollback": "explicit_snapshot_only",
+  "canonical_root_status": "dense_legacy_paths_absent",
+  "solver_called": false,
+  "files": [
+    {"source_path": "data/reference/pnjl/boundary.csv", "path": "boundary.csv", "bytes": 3221, "sha256": "5480a3048177be5ff4a2e7314c56d228dacaa5899ff7fe07f3417e1139cf5890"},
+    {"source_path": "data/reference/pnjl/cep.csv", "path": "cep.csv", "bytes": 651, "sha256": "8bdda456f2495ff322f80a802ee1efab56567bbfce18f26617544d505be4d65c"},
+    {"source_path": "data/reference/pnjl/crossover_dense.csv", "path": "crossover_dense.csv", "bytes": 27507, "sha256": "0f811c3648a18a26d7a1a6383e08466638d7484a0c7b984c7ceb9c84661aa4df"},
+    {"source_path": "data/reference/pnjl/crossover_dense.meta.json", "path": "crossover_dense.meta.json", "bytes": 4305, "sha256": "2ede138c91cc6ea88757b686aef074a003cea3565010d5009f8ccc5cb4956d1e"},
+    {"source_path": "data/reference/pnjl/phase_reference_dense_manifest.json", "path": "phase_reference_dense_manifest.json", "bytes": 8059, "sha256": "07b58593efc8a6729c6db2247ad03d6b5564003fe06eb96eb38897501cd7af39"},
+    {"source_path": "data/reference/pnjl/spinodals.csv", "path": "spinodals.csv", "bytes": 4916, "sha256": "96accaa2a1d863406e8d9bb961c3c39532e0372d8e0550a463749f220b1de33f"}
+  ]
+}

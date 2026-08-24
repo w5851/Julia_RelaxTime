@@ -122,3 +122,18 @@ end
     @test PRA.source_summary(rollback).runtime_view == "legacy"
     @test PRA.boundary_data(rollback, 0.0).mu_values == [301.0]
 end
+
+@testset "repository default uses candidate plus retired legacy snapshot" begin
+    project_root = normpath(joinpath(@__DIR__, "..", "..", ".."))
+    runtime = PRA.load_default_phase_reference_runtime(project_root=project_root)
+    summary = PRA.source_summary(runtime)
+    @test PRA.source_kind(runtime) === :candidate
+    @test summary.runtime_view == "certified_candidate_with_legacy_fallback"
+    @test summary.fallback_enabled
+    @test sum(values(summary.fallback_row_counts)) > 0
+
+    rollback = PRA.load_default_phase_reference_runtime(project_root=project_root, source=:legacy)
+    @test PRA.source_kind(rollback) === :legacy
+    @test PRA.source_summary(rollback).runtime_view == "legacy"
+    @test !PRA.source_summary(rollback).fallback_enabled
+end

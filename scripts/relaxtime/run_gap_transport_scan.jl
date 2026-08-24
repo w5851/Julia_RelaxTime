@@ -45,13 +45,18 @@ const REQUIRED_PROCESSES = TransportWorkflow.RelaxationTime.REQUIRED_PROCESSES
 
 function preferred_phase_reference_path(dense_name::String, legacy_name::String)
     dense_path = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", dense_name)
-    return isfile(dense_path) ? dense_path : joinpath(PROJECT_ROOT, "data", "reference", "pnjl", legacy_name)
+    legacy_root = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
+    retired_dense_path = joinpath(legacy_root, dense_name)
+    legacy_path = joinpath(legacy_root, legacy_name)
+    isfile(dense_path) && return dense_path
+    return isfile(retired_dense_path) ? retired_dense_path : legacy_path
 end
 
 const DEFAULT_PHASE_BOUNDARY_PATH = preferred_phase_reference_path("boundary_dense.csv", "boundary.csv")
 const DEFAULT_PHASE_CEP_PATH = preferred_phase_reference_path("cep_dense.csv", "cep.csv")
 const DEFAULT_PHASE_CROSSOVER_PATH = preferred_phase_reference_path("crossover_dense.csv", "crossover.csv")
 const DEFAULT_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "issue130_phase_reference_v1")
+const LEGACY_PHASE_REFERENCE_ROOT = joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "legacy_phase_reference_v1")
 
 function _load_runtime_phase_reference(opts)
     mode = opts.phase_reference_mode
@@ -61,7 +66,7 @@ function _load_runtime_phase_reference(opts)
         boundary_path=DEFAULT_PHASE_BOUNDARY_PATH,
         cep_path=DEFAULT_PHASE_CEP_PATH,
         crossover_path=DEFAULT_PHASE_CROSSOVER_PATH,
-        spinodals_path=joinpath(PROJECT_ROOT, "data", "reference", "pnjl", "spinodals.csv"),
+        spinodals_path=joinpath(LEGACY_PHASE_REFERENCE_ROOT, "spinodals.csv"),
     )
     mode === :legacy && return PhaseReferenceAdapter.load_legacy_phase_reference(; legacy...)
     root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root

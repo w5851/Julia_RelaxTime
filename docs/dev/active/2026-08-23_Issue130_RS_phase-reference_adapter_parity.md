@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active。runtime-switch PR #260 与 solver-free parity PR #261 已合并；
+状态：accepted。runtime-switch PR #260 与 solver-free parity PR #261 已合并；
 paired numerical pilot workflow PR #262 已合并到 `main@27e9642d431ba7afd845f2b187f77c0fbbe3be4d`。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
 production，也不把 solver-free smoke 当作数值 production 通过。
@@ -11,7 +11,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - candidate source run：`32354095831`
 - aggregate replay：`32451053476`
 - candidate：`data/reference/pnjl/issue130_phase_reference_v1/`
-- legacy fallback：`data/reference/pnjl/{boundary.csv,cep.csv,crossover_dense.csv,spinodals.csv}`
+- legacy fallback：`data/reference/pnjl/legacy_phase_reference_v1/` versioned snapshot
 - runtime view：strict candidate 的 certified-only 行，缺失/不合格键逐键 legacy fallback
 - rollback：`--phase-reference-mode legacy`
 - 本机不调用 equilibrium solver；不启动新的 C0/C1/C2、M4 production 或 transport 全量扫描
@@ -39,10 +39,11 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   `tau_u_ubar_ratio_high` 标记；collector replay 将其分类为
   `pilot_pair_complete_with_common_quality_warnings_diagnostic_only`。该分类不放宽
   `scan_quality` 阈值，也不把质量警告升级为正式 RS parity。
-- [ ] 作者审核限定 numerical evidence 与共同质量警告；在审核前保持 diagnostic-only、
-  fallback、rollback 和旧 production。
-- [ ] phase-guided/Paper P1 等消费者完成不再直接依赖旧文件的引用审计后，才创建独立
-  `old-reference retirement` PR。
+- [x] 作者已审核限定 numerical evidence 与共同质量警告，并确认新 reference 效果符合预期；
+  限定证据仍保持 diagnostic-only，不改写为全域 numerical parity。
+- [x] phase-guided/Paper P1 等消费者的 adapter 路径已完成引用审计；PR #263 合并后，作者另行
+  授权 `old-reference retirement` 与 RS transport 重验。retirement 只退出 canonical 根路径，
+  保留 versioned fallback/rollback snapshot。
 
 ## 当前证据
 
@@ -67,8 +68,8 @@ source run `32684074876` 的 artifact 保留在 Actions；本地派生审计包�
 - 参考输入差异通过 `mode_a_fixed_muB_phase_scaled` 的连续路径传播：先从 reference
   取 `T_phase_base_MeV`，再使用 `T=alpha_T*T_phase_base_MeV` 求 equilibrium 和 transport；
   因此 reference 不仅承担离散标签，也影响连续温度锚点与其后的平衡态/输运量。
-- 该包支持“本限定 pilot 未见 candidate-specific 明显 transport regression”，不支持
-  全域 numerical parity、旧 reference retirement 或 production promotion。
+- 该包支持“本限定 pilot 未见 candidate-specific 明显 transport regression”；作者据此授权
+  retirement 和后续 production 重验，但证据本身仍不等价于全域 numerical parity。
 
 ## CI 留痕
 
@@ -82,7 +83,7 @@ legacy-switch、dependency audit 和 advisory governance。
 
 ## 非目标与回退
 
-- 不删除或重写 `boundary.csv`、`cep.csv`、`crossover_dense.csv`、`spinodals.csv`。
+- 不重写 legacy 数值；canonical 根路径退役时以 byte-preserving snapshot 保留。
 - 不把 `unresolved`、`ambiguous`、`interpolated_noncertified` 行升级为 candidate certified。
 - 不移除逐键 fallback，不移除显式 legacy rollback。
 - numerical pilot 或后续 consumer 审计失败时，维持旧 reference/旧 production，提交具体失败字段和
