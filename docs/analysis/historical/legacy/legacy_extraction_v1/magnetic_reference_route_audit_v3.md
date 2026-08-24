@@ -4,13 +4,15 @@
 
 `pnjl_mag_static_source_gate_passed_pending_numeric_target_gate`。本页已完成参考论文
 和 `pnjl_mag` 源码的静态 source-gate，并已固定仓库、commit、关键文件 hash 和
-合同差异；尚未提取可接纳的外部 numeric target。本轮没有运行任何 equilibrium
-solver。
+合同差异；当前仅提取并接纳一个 fixed-state `Omega` kernel-only oracle，尚未提取
+可接纳的 equilibrium numeric target。本轮没有运行任何 equilibrium solver。
 
 机器可读 gate 表：
 [`tables/pnjl_mag_source_gate_v1.csv`](tables/pnjl_mag_source_gate_v1.csv)。
 结论边界见
 [`tables/pnjl_mag_source_gate_claim_ledger_v1.csv`](tables/pnjl_mag_source_gate_claim_ledger_v1.csv)。
+外部仓库已有数据文件的范围和 hash 见
+[`tables/pnjl_mag_external_data_inventory_v1.csv`](tables/pnjl_mag_external_data_inventory_v1.csv)。
 
 ## 参考文献与可复核来源
 
@@ -85,6 +87,12 @@ replay 当成磁场物理正确性的外部证明。
 - **待完成**：`p_z`、Landau level、zeta 节点收敛，输出字段映射，以及多分支/局部
   根语义的对照。外部实现是一 seed continuation，不是 Julia 的多 seed candidate
   集合。
+- **已有数据但不接纳**：`orders_muB0.csv` 和 `reduced_magnetic_susceptibilities_muB0.csv`
+  的行数、范围、hash 和生成口径已登记；它们只有 `muB=0`，输出没有完整 solver
+  status/候选分支/独立收敛矩阵，因此目前只能作为诊断输入清单。
+- **已接纳的最小外部 oracle**：`tests/validation/data/targets/pnjl/reference/`
+  中的单点 `Omega` 只验证 MFIR kernel；测试显式记录外部 `hc=197.33` 的单位映射，
+  不调用 root solver，也不约束 equilibrium branch 或扫描。
 
 后续接入流程如下：
 

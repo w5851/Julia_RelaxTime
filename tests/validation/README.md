@@ -73,7 +73,11 @@ is recorded in
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/pnjl_mag_source_gate_v1.csv`.
 Until the remaining numerical
 convergence, ensemble adapter, branch policy, and output schema gates are closed,
-all existing rows remain evidence/diagnostic rather than targets. The point-list file is maintained with the historical
+all equilibrium rows remain evidence/diagnostic rather than targets. One explicitly
+labelled fixed-state kernel-only Omega target is admitted under
+`tests/validation/data/targets/pnjl/reference/`; it does not validate root solving
+or branch completeness. Its source hashes and observed comparison delta are recorded
+under `tests/validation/data/provenance/pnjl/evidence/`. The point-list file is maintained with the historical
 extraction package at
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.
 

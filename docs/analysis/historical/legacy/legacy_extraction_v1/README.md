@@ -70,6 +70,10 @@ The machine-readable static contract is
 [`tables/pnjl_mag_source_gate_v1.csv`](tables/pnjl_mag_source_gate_v1.csv).
 Its claim boundaries are in
 [`tables/pnjl_mag_source_gate_claim_ledger_v1.csv`](tables/pnjl_mag_source_gate_claim_ledger_v1.csv).
+The committed external data inventory (source hashes and scope only) is in
+[`tables/pnjl_mag_external_data_inventory_v1.csv`](tables/pnjl_mag_external_data_inventory_v1.csv);
+the data themselves remain in the fixed external clone and are not copied into
+the current validation target tree.
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
@@ -77,9 +81,10 @@ Neither record promotes the external source to acceptance: the magnetic
 numeric convergence/ensemble/output/branch gates and the Mott convention gate
 remain open. The v2 replay supplies only same-kernel diagnostic states; the paper-route
 audit now marks smooth-Landau as non-acceptance until the regularization is
-resolved. The next external-source target is `pnjl_mag`; its repository and commit are
-fixed, and the remaining work is a machine-readable output adapter plus numeric
-convergence gate. The original point list is recorded in
+resolved. The selected external source is `pnjl_mag`; its repository and commit are
+fixed, and one fixed-state `Omega` kernel-only oracle has been admitted. The remaining
+work is an equilibrium output adapter plus numeric convergence and branch-policy gates.
+The original point list is recorded in
 [`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
 ## Current-project relationship
