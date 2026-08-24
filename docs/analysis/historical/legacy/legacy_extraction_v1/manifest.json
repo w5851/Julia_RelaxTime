@@ -33,6 +33,10 @@
     "tables/pnjl_mag_source_gate_v1.csv",
     "tables/pnjl_mag_source_gate_claim_ledger_v1.csv",
     "tables/pnjl_mag_external_data_inventory_v1.csv",
+    "pnjl_mag_equilibrium_replay_v1/README.md",
+    "pnjl_mag_equilibrium_replay_v1/manifest.json",
+    "pnjl_mag_equilibrium_replay_v1/provenance.json",
+    "pnjl_mag_equilibrium_replay_v1/pnjl_mag_equilibrium_replay_v1.csv",
     "../../../../../tests/validation/data/targets/pnjl/reference/pnjl_magnetic_external_kernel_targets_v1.csv",
     "../../../../../tests/validation/data/provenance/pnjl/evidence/pnjl_magnetic_external_kernel_provenance_v1.csv",
     "../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv"
@@ -56,7 +60,8 @@
     "diagnostic_only_legacy_evidence": true,
     "magnetic_external_acceptance": "pending_pnjl_mag_numeric_target_gate",
     "magnetic_external_kernel_target": "accepted_kernel_only",
-    "magnetic_external_validation_plan": "pnjl_mag_static_source_gate_passed_pending_numeric_target_gate; legacy_fortran_diagnostic_only",
+    "magnetic_external_equilibrium_replay": "current_machine_replay_passed_diagnostic_only",
+    "magnetic_external_validation_plan": "pnjl_mag_local_equilibrium_replay_passed_pending_cross_solver_target_gate; legacy_fortran_diagnostic_only",
     "mott_integral_external_acceptance": "diagnostic_only_convention_not_promoted",
     "cleanup_status": "deferred_until_review"
   }

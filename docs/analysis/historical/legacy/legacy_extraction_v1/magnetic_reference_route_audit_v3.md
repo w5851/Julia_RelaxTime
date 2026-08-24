@@ -2,10 +2,11 @@
 
 ## 状态
 
-`pnjl_mag_static_source_gate_passed_pending_numeric_target_gate`。本页已完成参考论文
+`pnjl_mag_local_equilibrium_replay_passed_pending_cross_solver_target_gate`。本页已完成参考论文
 和 `pnjl_mag` 源码的静态 source-gate，并已固定仓库、commit、关键文件 hash 和
-合同差异；当前仅提取并接纳一个 fixed-state `Omega` kernel-only oracle，尚未提取
-可接纳的 equilibrium numeric target。本轮没有运行任何 equilibrium solver。
+合同差异；当前已在本机重放外部单 seed equilibrium continuation，并保留 9 个代表点，
+同时仅接纳一个 fixed-state `Omega` kernel-only oracle。外部 equilibrium 重放仍为
+`diagnostic_only`，尚未形成 Julia/外部跨求解器 acceptance target。
 
 机器可读 gate 表：
 [`tables/pnjl_mag_source_gate_v1.csv`](tables/pnjl_mag_source_gate_v1.csv)。
@@ -90,15 +91,21 @@ replay 当成磁场物理正确性的外部证明。
 - **已有数据但不接纳**：`orders_muB0.csv` 和 `reduced_magnetic_susceptibilities_muB0.csv`
   的行数、范围、hash 和生成口径已登记；它们只有 `muB=0`，输出没有完整 solver
   status/候选分支/独立收敛矩阵，因此目前只能作为诊断输入清单。
+- **本机 equilibrium 重放通过但不接纳**：外部 `.venv` 已通过锁定的 `uv.lock` 建立，
+  作者测试 `9/9` 通过；按 `T=300..50 MeV`、步长 `1 MeV` 的下降 continuation，在
+  `eB={0.2,0.4,0.8} GeV^2` 提取 `T={50,150,240} MeV` 共 9 点。五维状态与作者提交的
+  `orders_muB0.csv` 逐字段一致，最大 gap residual 为 `1.65e-13`。证据见
+  [`pnjl_mag_equilibrium_replay_v1/`](pnjl_mag_equilibrium_replay_v1/)。该路线仍只有一个
+  continuation 分支，不能证明 Julia 多 seed candidate 集合等价。
 - **已接纳的最小外部 oracle**：`tests/validation/data/targets/pnjl/reference/`
   中的单点 `Omega` 只验证 MFIR kernel；测试显式记录外部 `hc=197.33` 的单位映射，
   不调用 root solver，也不约束 equilibrium branch 或扫描。
 
 后续接入流程如下：
 
-1. 固定可重放的依赖、生成脚本、参数清单和机器可读输出 schema；
-2. 再抽取少量代表点，覆盖低温/高温、低/中/高 `eB`、Landau onset 与相结构变化，
-   同时保留所有候选分支而不是只保留最低 `Omega`；
+1. 已固定可重放的依赖、生成脚本、参数清单，并建立外部单分支诊断输出 schema；
+2. 下一步对代表点执行 Julia 多 seed candidate 重放，显式匹配或区分 continuation
+   分支，而不是只比较一个 residual-pass 根；
 3. 只有在 source consistency、branch clarity、有限性和收敛门槛通过后，才把轻量
    fixed-point CSV 放入 `tests/validation/data/targets/`；原始输出只留在外部 provenance
    或分析目录；
@@ -106,8 +113,8 @@ replay 当成磁场物理正确性的外部证明。
    validation family，不把不同
    正则化的数值混成一个 target。
 
-源码可用性已不再阻塞；当前阻塞点是 numeric convergence、output adapter 和 target
-admission。不重跑
+源码和外部 equilibrium 可重放性已不再阻塞；当前阻塞点是跨求解器 branch adapter、
+numeric convergence 和 target admission。不重跑
 C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay 直接复制成 target。
 
 ## 主项目待办边界
@@ -115,7 +122,7 @@ C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay �
 - **已完成的主项目路线决策**：正式 profile `a=0.0108805` 已接入
   `magnetic_default.toml`；MFIR/Hurwitz-zeta 为默认生产真空路线，完整
   smooth-Landau 只通过 `route=:landau_legacy` 保留为历史/诊断路线。
-- **必须后续处理**：在不改变生产路线的前提下，固定 `pnjl_mag` 运行依赖、参数、单位、
-  积分、分支与机器可读输出合同，再生成轻量外部 acceptance targets。
+- **必须后续处理**：在不改变生产路线的前提下，对已固定的外部代表点补充 Julia
+  多分支重放、积分收敛和分支映射，再决定是否生成轻量 equilibrium acceptance targets。
 - **不在本轮**：Maxwell 自能、磁化率、各向异性压力、FixedRho/phase magnetic
   workflow、全域磁场扫描和 C0/C1/C2 重跑。

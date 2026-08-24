@@ -74,6 +74,10 @@ The committed external data inventory (source hashes and scope only) is in
 [`tables/pnjl_mag_external_data_inventory_v1.csv`](tables/pnjl_mag_external_data_inventory_v1.csv);
 the data themselves remain in the fixed external clone and are not copied into
 the current validation target tree.
+The current-machine replay of the external one-seed equilibrium continuation is in
+[`pnjl_mag_equilibrium_replay_v1/`](pnjl_mag_equilibrium_replay_v1/). It retains only
+nine representative rows and records source/dependency hashes, residuals, wall time,
+and exact state agreement with the committed external CSV. It remains diagnostic-only.
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
@@ -83,7 +87,8 @@ remain open. The v2 replay supplies only same-kernel diagnostic states; the pape
 audit now marks smooth-Landau as non-acceptance until the regularization is
 resolved. The selected external source is `pnjl_mag`; its repository and commit are
 fixed, and one fixed-state `Omega` kernel-only oracle has been admitted. The remaining
-work is an equilibrium output adapter plus numeric convergence and branch-policy gates.
+work is matched Julia/external branch comparison plus numeric convergence and
+branch-policy gates; the local external-only equilibrium replay does not close them.
 The original point list is recorded in
 [`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
