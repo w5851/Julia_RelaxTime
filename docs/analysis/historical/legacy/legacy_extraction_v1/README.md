@@ -64,14 +64,17 @@ The short FixedMu replay and same-route Julia/Fortran comparison are recorded in
 [`tables/magnetic_external_fixedmu_replay_v2.csv`](tables/magnetic_external_fixedmu_replay_v2.csv).
 The aligned state deltas are in
 [`tables/magnetic_julia_fortran_same_route_v2.csv`](tables/magnetic_julia_fortran_same_route_v2.csv).
+The later paper-route audit and `pnjl_cep` test-set handoff are recorded in
+[`magnetic_reference_route_audit_v3.md`](magnetic_reference_route_audit_v3.md).
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
 Neither record promotes the external source to acceptance: the magnetic
 parameter/unit/ensemble/cutoff/branch gates and the Mott convention gate remain
-open. The v2 replay supplies candidate Fortran smooth-Landau states and
-diagnostic `pnjl_mag` MFIR roots, but the profile and regularization gates remain
-open. The original point list is recorded in
+open. The v2 replay supplies only same-kernel diagnostic states; the paper-route
+audit now marks smooth-Landau as non-acceptance until the regularization is
+resolved. The next external-source target is `pnjl_cep`, pending a source
+URL/commit and machine-readable output contract. The original point list is recorded in
 [`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
 ## Current-project relationship

@@ -25,6 +25,7 @@
     "tables/legacy_current_project_absorption_v1.csv",
     "tables/legacy_magnetic_external_crosscheck_v1.csv",
     "magnetic_external_crosscheck_v2.md",
+    "magnetic_reference_route_audit_v3.md",
     "tables/magnetic_external_fixedmu_replay_v2.csv",
     "tables/magnetic_julia_fortran_same_route_v2.csv",
     "magnetic_imc_parameter_provenance_v1.md",
@@ -48,8 +49,8 @@
     "production_code_import": false,
     "full_scan_import": false,
     "diagnostic_only_legacy_evidence": true,
-    "magnetic_external_acceptance": "blocked_profile_regularization_ensemble_cutoff_branch_gate",
-    "magnetic_external_validation_plan": "fortran_smooth_landau_candidate_plus_pnjl_mag_mfir_diagnostic_replay",
+    "magnetic_external_acceptance": "blocked_reference_route_source_branch_gate",
+    "magnetic_external_validation_plan": "pnjl_cep_pending_source_audit; legacy_fortran_and_pnjl_mag_diagnostic_only",
     "mott_integral_external_acceptance": "diagnostic_only_convention_not_promoted",
     "cleanup_status": "deferred_until_review"
   }

@@ -55,20 +55,21 @@ acceptance suite. The magnetic external-source ledger is kept under
 `docs/analysis/historical/legacy/legacy_extraction_v1/` until model, unit,
 cutoff, and branch gates are closed.
 
-The magnetic plan is intentionally dual-source: use the legacy Fortran route
-and `pnjl_mag` to establish source consistency at a small set of FixedMu points,
-then compare those points with the current Julia five-dimensional solver. The
-Fortran entropy/density postprocessing rows with the documented flavor-charge
-bug and NaN exports are excluded from acceptance; state, stationarity residual,
-and a convention-matched `Omega` remain the initial observables. The short v2
-replay is recorded in
+The magnetic external plan is now source-gated rather than dual-source. The
+legacy Fortran route and `pnjl_mag` replay remain diagnostic evidence only: the
+former follows the disputed smooth-Landau kernel and the latter follows an
+independent MFIR/Hurwitz-zeta kernel. The Fortran entropy/density postprocessing
+rows with the documented flavor-charge bug and NaN exports are excluded from
+acceptance. The short v2 replay is recorded in
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_external_fixedmu_replay_v2.csv`;
 the same-route Julia/Fortran state deltas are in
-`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`;
-the original point plan is recorded in `magnetic_external_validation_point_plan_v1.csv`. Until the IMC
-profile (`a=0.108805` versus `a=0.0108805`), units, ensemble, cutoffs, and branch
-policy are frozen, all rows remain evidence/diagnostic rather than targets. The
-point-list file is maintained with the historical extraction package at
+`docs/analysis/historical/legacy/legacy_extraction_v1/tables/magnetic_julia_fortran_same_route_v2.csv`.
+The paper-route audit and handoff to the pending `pnjl_cep` source are in
+`docs/analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md`.
+Until the external source, regularization, IMC profile (`a=0.0108805`), units,
+ensemble, and branch policy are frozen, all rows remain evidence/diagnostic
+rather than targets. The point-list file is maintained with the historical
+extraction package at
 `docs/analysis/historical/legacy/legacy_extraction_v1/tables/`.
 
 Practical rule:

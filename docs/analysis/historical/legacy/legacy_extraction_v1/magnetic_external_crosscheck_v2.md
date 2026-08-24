@@ -101,6 +101,20 @@ Fortran 行保持为空。
 
 本轮没有必要重跑 C0/C1/C2。
 
+## 2026-08-24 路线修订（不改写上面的历史结果）
+
+作者反馈指出当前使用的 smooth-Landau 截断存在问题；贺伟博硕士论文第 4 章
+（PDF 页 33--39，印刷页 23--29，SHA-256 见
+[`magnetic_reference_route_audit_v3.md`](magnetic_reference_route_audit_v3.md)）给出的
+参考路线是“零场真空三动量截断 + Hurwitz-zeta/MFIR 磁场真空修正 + Landau 热项”。
+这与本记录的完整 Landau 真空 smooth cutoff 不是同一正则化。
+
+因此，上述 Fortran/Julia 数值一致性只能保留为 **same-kernel diagnostic**，不能作为
+当前磁场物理实现或外部 acceptance 的证明；`pnjl_mag` 仍是独立 MFIR diagnostic，
+也不直接替代新的测试源。后续外部测试集改为优先接入 `pnjl_cep`，但在获得其仓库
+URL、固定 commit、公式/单位/分支说明和机器可读输出前，状态为
+`blocked_pending_pnjl_cep_source`。本修订不触发 solver、磁场扫描或 C0/C1/C2。
+
 ## Replay provenance
 
 - Julia project: `codex/legacy-extraction@b9a2441e`

@@ -1,5 +1,12 @@
 ## 【提取报告：外磁场下的PNJL模型相关公式】
 
+> **路线审计更新（2026-08-24）**：贺伟博硕士论文第 4 章（PDF 页 33--39）给出的
+> 磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”，不是当前代码的
+> “完整 Landau 真空项 + `smooth_cutoff(N=10)`”。作者已指出 smooth cutoff 存在问题，
+> 因此本页原先对 smooth-Landau 的公式覆盖不能作为物理正确性或外部 acceptance 证明。
+> 当前实现入口仍保留为诊断状态；后续测试集优先转向 `pnjl_cep`，见
+> [`magnetic_reference_route_audit_v3.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md)。
+
 ### 📍 源信息
 - **文献**：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》
 - **位置**：第五章“磁场对QCD一阶相变的影响”，第5.1节“外磁场下的PNJL模型”
@@ -13,7 +20,8 @@
 > `eB` 从 `MeV^2` 转成内部 `fm^-2`，而 `zeta=eB/Lambda_QCD^2` 使用同一
 > 内部单位，转换因子在比值中抵消。因此这是真实的模型 profile/版本冲突；在
 > 作者确认前保留当前默认值，不把两者当作同一参数化，也不生成外部 acceptance
-> baseline。可复核记录见 [`magnetic_imc_parameter_provenance_v1.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
+> baseline。正式 profile 决策为 `a=0.0108805`；当前 `0.108805` 是待修复的旧配置状态。
+> 可复核记录见 [`magnetic_imc_parameter_provenance_v1.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
 
 ---
 
@@ -165,8 +173,9 @@ $$
 | 巨热力学势分解 | 式(5-2) | `calculate_magnetic_omega_components` | 固定态内核已组装 | **已接入（诊断）** | 组装 `chi + poly + vac + therm`；尚无高节点 equilibrium 生产证据 |
 | Landau 能谱 | 式(5-6) | `MagneticIntegrals.energy_landau` | **已接入（内核）** | **已接入（内核）** | `sqrt(pz^2 + M^2 + 2n|q|eB)`；有能谱单测 |
 | Landau 简并度 | `alpha_n=2-delta_{n0}` | `MagneticIntegrals.alpha_n` | **已接入（内核）** | **已接入（内核）** | `n=0` 为 1，其余为 2；有单测 |
-| 真空 Landau 项 | 式(5-3)、(5-7) | `omega0_flavor_landau` | **已接入（内核）** | **已接入（内核）** | 使用有限 `n_max`、pz Gauss 节点和平滑截断；数值截断需独立收敛 |
-| 平滑截断 | 式(5-7) | `MagneticIntegrals.smooth_cutoff` | **已接入（内核）** | **已接入（内核）** | 默认 `cutoff_N=10`；论文公式不决定 pz 节点和截断上限 |
+| 真空 Landau 项 | 当前代码诊断路线；与贺伟博论文式(4-3)、(4-6)不一致 | `omega0_flavor_landau` | **已接入（诊断；路线待复核）** | **非 acceptance** | 有限 `n_max`、pz Gauss 节点和平滑截断只证明 kernel 可运行，不证明参考正则化正确 |
+| 平滑截断 | 当前代码 `smooth_cutoff`; 作者反馈指出存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（诊断；不作物理准入）** | **非 acceptance** | 默认 `cutoff_N=10`；不得继续把它作为外部测试 target |
+| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8) | 无当前主线实现 | **仅源公式/待实现** | **待 `pnjl_cep` 源码审计** | 需先冻结特殊函数、零场真空项、单位和分支合同，再决定是否实现 |
 | Polyakov 热项 | 式(5-4) 及 `Z_f^+ + Z_f^-` | `omegat_flavor_landau`、`_log_polyakov_pair` | **已接入（内核）** | **已接入（内核）** | 使用一般温度双对数；低温指数稳定缩放已有短测试 |
 | 动力学质量与手征项 | 式(2-55)、式(5-2)中的 `G(eB)` | `_calculate_mass_vec_with_GB`、`_chiral_with_GB` | 固定态内核已接入 | **已接入（诊断）** | 质量核支持泛型实数；完整 Omega 仍以 Float64 finite-difference solver 为主 |
 | 对数 Polyakov 势 | 式(2-50)--(2-51) | `PNJLCore.polyakov_potential` | 固定态内核已接入 | **已接入（诊断）** | 由 PNJL core 复用；未单独证明磁场全域参数适用性 |
@@ -187,10 +196,10 @@ $$
 
 从公式覆盖看，当前主线已经覆盖“固定外部磁场背景下的物质巨势、一般温度净密度和五维驻点接口”；从外部验证资格看，仍不能把它称为已完成的全域物理合同，原因是：
 
-1. 外部参数 profile 尚未在 `a=0.108805` 与 `a=0.0108805` 之间冻结；
+1. 正式 profile 已决定为 `a=0.0108805`，但当前 TOML/运行时接线尚未完成；
 2. solver 的多 seed 不是全分支证明；
 3. Hessian 分类只是可选诊断，且不应提升为默认生产筛选条件；
-4. Fortran 与 `pnjl_mag` 尚未在同一参数、单位、ensemble、截断和 branch 口径下完成代表点 replay；
+4. Fortran smooth-Landau 与 `pnjl_mag` MFIR 不是同一正则化；新的外部 target 应等待 `pnjl_cep` 源码/输出合同；
 5. Maxwell、磁化响应、方向性压力、`T=0` 近似和 RS 联合路线均不在当前合同内。
 
 因此“公式已实现”只能用于描述内核覆盖，不能替代“已完成生产验证”。Hessian 标签应作为分支审计和显式研究信息保留，不应在没有额外物理约定时升级为默认生产资格门槛。
