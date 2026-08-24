@@ -1,6 +1,6 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-23"
+updated_at = "2026-08-24"
 
 [[tracks]]
 id = "issue130-phase"
@@ -14,7 +14,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-rs-numerical-pilot"
-current_sha = "359d614289e42fe79d208b7ad2a2abe5f7f3dd96"
+current_sha = "3d762e11349599e8d62bbc55fe7d026af0188541"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -31,7 +31,7 @@ evidence = [
   "pr:261",
   "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96",
 ]
-updated_at = "2026-08-23"
+updated_at = "2026-08-24"
 
 [[tracks]]
 id = "rs-transport"
@@ -45,7 +45,7 @@ required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-rs-numerical-pilot"
-current_sha = "359d614289e42fe79d208b7ad2a2abe5f7f3dd96"
+current_sha = "3d762e11349599e8d62bbc55fe7d026af0188541"
 run_ids = ["32354095831", "32451053476"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -54,7 +54,7 @@ evidence = [
   "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96",
   "review:author_accepted_solver_free_parity",
 ]
-updated_at = "2026-08-23"
+updated_at = "2026-08-24"
 
 [[tracks]]
 id = "plot-sop"
