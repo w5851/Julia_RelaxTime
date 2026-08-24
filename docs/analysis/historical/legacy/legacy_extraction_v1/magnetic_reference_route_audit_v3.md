@@ -77,9 +77,10 @@ smooth-Landau 路径的直接数值 target；除非主项目实现并冻结同�
 
 ## 主项目待办边界
 
-- **必须后续处理**：把正式 profile `a=0.0108805` 接入唯一运行时配置，并修复
-  `magnetic_default.toml` 未实际接入的问题；这与正则化路线确认分开验收。
-- **路线决策后处理**：决定实现 MFIR/Hurwitz-zeta 路线，或明确保留 smooth-Landau
-  仅作历史/诊断路线；在决定前不做性能或精度优化。
+- **已完成的主项目路线决策**：正式 profile `a=0.0108805` 已接入
+  `magnetic_default.toml`；MFIR/Hurwitz-zeta 为默认生产真空路线，完整
+  smooth-Landau 只通过 `route=:landau_legacy` 保留为历史/诊断路线。
+- **必须后续处理**：获取 `pnjl_cep` 的仓库 URL/路径、固定 commit、运行依赖和机器可读
+  输出，完成 source-gate 后再生成轻量外部 acceptance targets。
 - **不在本轮**：Maxwell 自能、磁化率、各向异性压力、FixedRho/phase magnetic
   workflow、全域磁场扫描和 C0/C1/C2 重跑。

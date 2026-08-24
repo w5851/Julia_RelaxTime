@@ -1,10 +1,11 @@
 ## 【提取报告：外磁场下的PNJL模型相关公式】
 
 > **路线审计更新（2026-08-24）**：贺伟博硕士论文第 4 章（PDF 页 33--39）给出的
-> 磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”，不是当前代码的
-> “完整 Landau 真空项 + `smooth_cutoff(N=10)`”。作者已指出 smooth cutoff 存在问题，
-> 因此本页原先对 smooth-Landau 的公式覆盖不能作为物理正确性或外部 acceptance 证明。
-> 当前实现入口仍保留为诊断状态；后续测试集优先转向 `pnjl_cep`，见
+> 默认磁场真空项是“零场三动量截断 + Hurwitz-zeta/MFIR 磁场修正”。`pnjl_cep`
+> 作者补充说明其实现使用磁场无关正规化，并指出平滑截断路线存在问题；因此本项目
+> 将 MFIR 设为默认生产路线。旧的完整 Landau 真空项 + `smooth_cutoff(N=10)` 仅以
+> `route=:landau_legacy` 保留，不能作为物理 acceptance 参考。外部测试集待转向
+> `pnjl_cep`，见
 > [`magnetic_reference_route_audit_v3.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md)。
 
 ### 📍 源信息
@@ -12,15 +13,16 @@
 - **位置**：第五章“磁场对QCD一阶相变的影响”，第5.1节“外磁场下的PNJL模型”
 - **提取时间**：2026-2-20
 
-> **IMC 参数来源警告（2026-08-23）**：当前 Julia 默认使用
-> `a=0.108805`，来自本项目引用的高雪艳博士论文表 5-1；Ferreira 2014
+> **IMC 参数决策（2026-08-24）**：论文表格中的 `0.108805` 已确认是排版/记录错误；
+> 当前生产 profile 采用 `a=0.0108805`，并已写入
+> `config/models/pnjl/magnetic_default.toml` 的实际加载路径。Ferreira 2014
 >（DOI `10.1103/PhysRevD.89.116011`）、Ferreira 2018
 >（DOI `10.1103/PhysRevD.97.014014`）、旧 Fortran 与 `pnjl_mag` 均使用
 > `a=0.0108805`。源码审计没有发现可补回的隐藏十倍单位转换：Julia 只把
 > `eB` 从 `MeV^2` 转成内部 `fm^-2`，而 `zeta=eB/Lambda_QCD^2` 使用同一
-> 内部单位，转换因子在比值中抵消。因此这是真实的模型 profile/版本冲突；在
-> 作者确认前保留当前默认值，不把两者当作同一参数化，也不生成外部 acceptance
-> baseline。正式 profile 决策为 `a=0.0108805`；当前 `0.108805` 是待修复的旧配置状态。
+> 内部单位，转换因子在比值中抵消；因此不能用单位转换补回十倍差异。旧源码中的
+> `0.108805` 不再是生产默认值。`MagneticConfig` 会读取 `magnetic_default.toml`，
+> 同时保留显式 `imc=` 覆盖以支持复核。
 > 可复核记录见 [`magnetic_imc_parameter_provenance_v1.md`](../../../../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
 
 ---
@@ -57,24 +59,39 @@ $$
 
 ---
 
-### **公式3：真空项 $\Omega_{f}^{0}$**
-**【标签】** 式(5-3)、(5-7)
-**【类型】** 真空贡献的积分表达式
+### **公式3：MFIR 真空项 $\Omega_{f}^{\mathrm{vac}}$（默认生产路线）**
+**【标签】** 贺伟博硕士论文第 4 章式(4-3)--(4-8)；与 `pnjl_cep` 的磁场无关正规化约定一致
+**【类型】** 零场三动量截断 + 有限磁场 Hurwitz-zeta 修正
 **【内容】**
 $$
-\Omega_{f}^{0} = -N_{c}\frac{|q_{f}|eB}{2\pi}\sum_{n = 0}^{\infty}\alpha_{n}\int_{-\infty}^{\infty}\frac{dp_{z}}{2\pi} E_{f,n}
+\Omega_{f}^{\mathrm{vac}}(B)=
+\Omega_{f}^{\mathrm{vac}}(0;\Lambda,M_f)+\Omega_{f}^{\mathrm{mag}}(B,M_f)
+$$
+$$
+\Omega_{f}^{\mathrm{vac}}(0;\Lambda,M_f)
+=-2N_c\int_{|\mathbf p|<\Lambda}\frac{d^3p}{(2\pi)^3}\sqrt{\mathbf p^2+M_f^2}
+$$
+$$
+\Omega_{f}^{\mathrm{mag}}(B,M_f)
+=-\frac{N_c(|q_f|eB)^2}{2\pi^2}
+\left[\zeta'(-1,x)-\frac{x^2-x}{2}\ln x+\frac{x^2}{4}\right],
+\qquad x=\frac{M_f^2}{2|q_f|eB}.
 $$
 
-**平滑截断正则化形式**（式5-7）：
-$$
-\Omega_{f}^{0} = -N_{c}\frac{|q_{f}|eB}{2\pi}\sum_{n = 0}^{\infty}\alpha_{n}\int_{-\infty}^{\infty}\frac{dp_{z}}{2\pi} f_{\Lambda}^{2}(p_{f})E_{f,n}
-$$
-$$
-f_{\Lambda}(p) = \sqrt{\frac{\Lambda^{2N}}{\Lambda^{2N} + p^{2N}}}
-$$
-其中 $N=10$ 在数值计算中采用。
+实现入口：`PNJLCore.vacuum_integral_with_cutoff`、
+`MagneticIntegrals.omega_magnetic_mfir`。
 
-实现中将截断函数的横向动量写为 $p_{f,n}=\sqrt{p_z^2+2n|q_f|eB}$；论文式(5-7)只记作 $f_\Lambda(p_f)$，这里的展开是代码与 Landau 能谱的变量映射，不是额外的物理假设。
+`zeta'(-1,x)` 使用固定 Gauss-Legendre 节点的 Abel--Plana 表示，节点数由
+`MagneticConfig.zeta_num` 控制。该数值近似只承担特殊函数求值，不改变 MFIR 公式本身。
+
+**旧诊断路线**：`route=:landau_legacy` 才使用
+$$
+\Omega_{f,\mathrm{legacy}}^{0}=-N_c\frac{|q_f|eB}{2\pi}
+\sum_n\alpha_n\int\frac{dp_z}{2\pi}f_\Lambda^2(p_{f,n})E_{f,n},
+\qquad
+f_\Lambda(p)=\sqrt{\frac{\Lambda^{2N}}{\Lambda^{2N}+p^{2N}}},\ N=10.
+$$
+该路线保留历史 replay 用途，不具备生产或 acceptance 资格。
 
 ---
 
@@ -173,9 +190,9 @@ $$
 | 巨热力学势分解 | 式(5-2) | `calculate_magnetic_omega_components` | 固定态内核已组装 | **已接入（诊断）** | 组装 `chi + poly + vac + therm`；尚无高节点 equilibrium 生产证据 |
 | Landau 能谱 | 式(5-6) | `MagneticIntegrals.energy_landau` | **已接入（内核）** | **已接入（内核）** | `sqrt(pz^2 + M^2 + 2n|q|eB)`；有能谱单测 |
 | Landau 简并度 | `alpha_n=2-delta_{n0}` | `MagneticIntegrals.alpha_n` | **已接入（内核）** | **已接入（内核）** | `n=0` 为 1，其余为 2；有单测 |
-| 真空 Landau 项 | 当前代码诊断路线；与贺伟博论文式(4-3)、(4-6)不一致 | `omega0_flavor_landau` | **已接入（诊断；路线待复核）** | **非 acceptance** | 有限 `n_max`、pz Gauss 节点和平滑截断只证明 kernel 可运行，不证明参考正则化正确 |
-| 平滑截断 | 当前代码 `smooth_cutoff`; 作者反馈指出存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（诊断；不作物理准入）** | **非 acceptance** | 默认 `cutoff_N=10`；不得继续把它作为外部测试 target |
-| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8) | 无当前主线实现 | **仅源公式/待实现** | **待 `pnjl_cep` 源码审计** | 需先冻结特殊函数、零场真空项、单位和分支合同，再决定是否实现 |
+| 真空 Landau 项 | 历史诊断路线；与贺伟博论文 MFIR 式(4-3)--(4-8)不一致 | `omega0_flavor_landau` | **已接入（显式 legacy）** | **非 acceptance** | 仅在 `route=:landau_legacy` 使用；有限 `n_max`、pz Gauss 节点和平滑截断不代表生产正则化 |
+| 平滑截断 | 当前代码 `smooth_cutoff`; `pnjl_cep` 作者指出该路线存在问题 | `MagneticIntegrals.smooth_cutoff` | **已接入（legacy diagnostic）** | **非 acceptance** | 不作为默认路由，不生成新外部 target |
+| MFIR/Hurwitz-zeta 磁场真空修正 | 贺伟博论文式(4-6)--(4-8)；磁场无关正规化约定 | `omega_magnetic_mfir` + `PNJLCore.vacuum_integral_with_cutoff` | **已接入（默认生产内核）** | **外部 acceptance 待 `pnjl_cep`** | 需冻结 `zeta_num`、单位、参数 profile，并用 `pnjl_cep` 典型点验证 |
 | Polyakov 热项 | 式(5-4) 及 `Z_f^+ + Z_f^-` | `omegat_flavor_landau`、`_log_polyakov_pair` | **已接入（内核）** | **已接入（内核）** | 使用一般温度双对数；低温指数稳定缩放已有短测试 |
 | 动力学质量与手征项 | 式(2-55)、式(5-2)中的 `G(eB)` | `_calculate_mass_vec_with_GB`、`_chiral_with_GB` | 固定态内核已接入 | **已接入（诊断）** | 质量核支持泛型实数；完整 Omega 仍以 Float64 finite-difference solver 为主 |
 | 对数 Polyakov 势 | 式(2-50)--(2-51) | `PNJLCore.polyakov_potential` | 固定态内核已接入 | **已接入（诊断）** | 由 PNJL core 复用；未单独证明磁场全域参数适用性 |
@@ -196,10 +213,10 @@ $$
 
 从公式覆盖看，当前主线已经覆盖“固定外部磁场背景下的物质巨势、一般温度净密度和五维驻点接口”；从外部验证资格看，仍不能把它称为已完成的全域物理合同，原因是：
 
-1. 正式 profile 已决定为 `a=0.0108805`，但当前 TOML/运行时接线尚未完成；
+1. 正式 profile 已决定为 `a=0.0108805`，并已接入 `magnetic_default.toml`；
 2. solver 的多 seed 不是全分支证明；
 3. Hessian 分类只是可选诊断，且不应提升为默认生产筛选条件；
-4. Fortran smooth-Landau 与 `pnjl_mag` MFIR 不是同一正则化；新的外部 target 应等待 `pnjl_cep` 源码/输出合同；
+4. Fortran smooth-Landau 与 `pnjl_mag` MFIR 不是同一正则化；旧 Fortran 仅保留 legacy，新的外部 target 应来自 `pnjl_cep` 源码/输出合同；
 5. Maxwell、磁化响应、方向性压力、`T=0` 近似和 RS 联合路线均不在当前合同内。
 
 因此“公式已实现”只能用于描述内核覆盖，不能替代“已完成生产验证”。Hessian 标签应作为分支审计和显式研究信息保留，不应在没有额外物理约定时升级为默认生产资格门槛。
@@ -238,8 +255,8 @@ $$
 **表5-1：磁场依赖耦合常数G的相关参数**
 | 参数 | 数值 | 单位 | 说明 |
 |------|------|------|------|
-| a（当前 Julia profile） | 0.108805 | 无量纲 | 高雪艳博士论文表5-1；与 Ferreira/外部实现存在十倍冲突 |
-| a（Ferreira/外部 profile） | 0.0108805 | 无量纲 | Ferreira 2014 式(12)、Ferreira 2018 参数段；Fortran 与 `pnjl_mag` 同值 |
+| a（当前 Julia 生产 profile） | 0.0108805 | 无量纲 | 已纠正论文表格中的十倍排版/记录错误；写入 `magnetic_default.toml` |
+| a（历史错误值） | 0.108805 | 无量纲 | 仅保留在历史审计记录，不得作为生产默认值 |
 | b | -1.0133 × 10⁻⁴ | 无量纲 | 式(5-9)参数 |
 | c | 0.02228 | 无量纲 | 式(5-9)参数 |
 | d | 1.84558 × 10⁻⁴ | 无量纲 | 式(5-9)参数 |

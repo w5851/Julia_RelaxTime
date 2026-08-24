@@ -124,10 +124,10 @@
 - `[magnetic.imc].a`, `b`, `c`, `d`, `Lambda_QCD_MeV`  
   权威来源为 `docs/reference/formula/models/pnjl_magnetic/PNJL_magnetic_core.md` 中 IMC 经验公式
 
-> 实现核对（2026-08-23）：当前 `PNJLMagneticModel` 构造器仍直接调用
-> `MagneticThermodynamics.default_imc_params()`，尚未发现对本 TOML 的运行时读取。
-> 因此上述文件目前是声明性 profile 模板，不应被描述为已经生效的磁场运行时配置；
-> 需单独完成配置接线后再恢复“运行时权威”表述。
+> 实现核对（2026-08-24）：`PNJLMagneticModel` 通过
+> `MagneticThermodynamics.default_magnetic_config()` 读取该 TOML；`route`、
+> `zeta_num`、Landau 热项离散参数和 IMC 参数均进入 `MagneticConfig`。因此该文件
+> 现在是磁场默认 profile 的运行时权威来源；显式构造器关键字仍可用于复核和诊断覆盖。
 
 ### 3.6 `config/models/rpnjl/default.toml`
 

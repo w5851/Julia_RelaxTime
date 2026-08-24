@@ -1,5 +1,11 @@
 # Magnetic IMC 参数 provenance v1
 
+> **当前状态修订（2026-08-24）**：本 v1 文件保留的是配置接线修复前的历史快照。
+> 当前生产 profile 已采用 `a=0.0108805`，`MagneticThermodynamics` 已通过
+> `default_magnetic_config()` 读取 `config/models/pnjl/magnetic_default.toml`。
+> 下文关于“当前仍为 `0.108805`”和“尚未接线”的表述属于当时的审计状态，不再描述
+> 当前代码。
+
 ## 结论
 
 **正式 profile 决策（2026-08-24）**：本项目后续磁场生产目标采用 Ferreira/外部实现
