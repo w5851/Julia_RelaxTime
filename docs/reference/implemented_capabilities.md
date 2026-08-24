@@ -776,7 +776,7 @@ $$
 MFIR 路线已接入运行时配置；外部参考已固定为
 [`pnjl_mag`](https://github.com/ZhouRui-xzit/pnjl_mag) commit
 `e1fc81d3c3c9d220c49972e54307b66a604cb9db`。在其参数、单位、积分、分支和输出合同
-完成 source-gate，并提取轻量 fixed-point target 前，磁场外部数值验证仍保持
+完成静态 source-gate 但尚未提取轻量 fixed-point target 前，磁场外部数值验证仍保持
 `diagnostic_only`。当前已完成的短 FixedMu replay（Fortran smooth-Landau 候选状态与
 `pnjl_mag` MFIR 诊断根）见
 [`magnetic_external_crosscheck_v2.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_external_crosscheck_v2.md)。
@@ -821,7 +821,7 @@ $$
 - **公共 API**：`PNJLMagneticModel`、`solve_magnetic_gap`、`Models.run_magnetic_scan`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。磁场 API 只接受正标量 `eB`：外部生产单位为 `MeV^2`，要求 `eB >= MAGNETIC_EB_MIN_MEV2 = 100`；核心内部单位为 `fm^-2`，要求 `eB_fm2 >= MAGNETIC_EB_MIN_FM2 = 100/hbarc^2`。低于门槛、零值和负值统一抛出 `ArgumentError`，不会路由到普通 PNJL；模型 capability 恒定只承诺磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
 - **稳定 CLI**：`scripts/models/run_unified_scan.jl scan magnetic` 是 `(T,mu,eB)` 完整五维 FixedMu equilibrium 产线，写出 selected CSV 和 candidates CSV；`mu` 表示共同的 `mu_u=mu_d=mu_s`，外部单位为 MeV/MeV^2。
 - **固定态诊断 CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl` 仍使用固定 `x_state`，只负责内核、`n_max` 或稳定性诊断，不应解释为 equilibrium 扫描。
-- **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。旧 Fortran 交叉核对只保留为 legacy 路线诊断。`pnjl_mag` 的仓库和固定 commit 已获得，且其源码采用 MFIR；尚缺参数/单位/积分/分支合同审计和轻量 target 提取，因此外部 acceptance gate 尚未关闭。
+- **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。旧 Fortran 交叉核对只保留为 legacy 路线诊断。`pnjl_mag` 的仓库和固定 commit 已获得，且其源码采用 MFIR；静态参数/单位/积分/分支合同审计已记录在 [`pnjl_mag_source_gate_v1.csv`](../analysis/historical/legacy/legacy_extraction_v1/tables/pnjl_mag_source_gate_v1.csv)，但数值收敛、输出 adapter 和轻量 target 提取尚未完成，因此外部 acceptance gate 尚未关闭。
 - **当前实现边界**：受支持正 `eB` 的 `PNJLMagneticModel.solve_gap` 通过 `solve_magnetic_gap` 对磁场 `Omega` 的五维驻点做多 seed 求解，并以候选集合保留分支、残差、`n_max` 和可选 Hessian 稳定性标签；普通 `solve_gap` 在未启用稳定性分类时按已找到候选中的最低 `Omega` 选择一个 convenience state，但 branch-aware API 仍保留全部可行候选。`classify_stability=true` 只启用有限差分 Hessian 诊断/显式研究策略，不是 PNJL 系列模型的默认生产过滤条件；`saddle_or_maximum` 标签不能单独否定一个已收敛驻点。`T_fm` 必须为正，磁场模型只接受 `xi=0`。磁场 `calculate_magnetic_rho` 与 `calculate_magnetic_number_densities` 共用含 `Phi/PhiBar` 的净密度语义，后者的 `net` 和历史 `quark` 字段均表示 `q-qbar`，`antiquark` 明确为 `nothing`；该结果不是普通 PNJL 的独立夸克/反夸克输运输入，且模型 capability 会将通用 `number_densities` 标为不支持；需要磁场密度时应调用专用 API。共享 `solve_constraint`/ProblemSpec 约束链目前显式拒绝 `PNJLMagneticModel`，避免把普通 PNJL residual 误用于磁场；磁场完整平衡态入口是 `solve_magnetic_gap`。
 - **统一入口拒绝边界**：普通 `run_tmu_scan`、`run_trho_scan` 以及 phase/Maxwell/CEP pipeline 遇到 `model_kind=:PNJLMagnetic` 会显式报错；当前只承诺磁场 `FixedMu`，不把普通 PNJL 的 `FixedRho` 或 phase pipeline 伪装成磁场实现。
 - **数值边界**：默认 MFIR 不用 Landau 求和表示真空项；`n_max`、`p_z_max` 只控制热 Landau 项，`zeta_num` 控制 MFIR 特殊函数的数值积分。`route=:landau_legacy` 下的 `smooth_cutoff`、真空 `n_max` 和 pz Gauss 节点仅为历史诊断。论文的低温占据 `n_max` 估计不等同于真空项的求和上限；这些数值参数在提取和接纳 `pnjl_mag` acceptance target 前仍需收敛审计。

@@ -2,9 +2,15 @@
 
 ## 状态
 
-`pnjl_mag_source_available_pending_target_gate`。本页已完成参考论文的公式审计，并已
-固定 `pnjl_mag` 的仓库与 commit；尚未完成参数、单位、积分、分支和输出合同审计，
-也未提取外部 acceptance target。本轮没有运行任何 equilibrium solver。
+`pnjl_mag_static_source_gate_passed_pending_numeric_target_gate`。本页已完成参考论文
+和 `pnjl_mag` 源码的静态 source-gate，并已固定仓库、commit、关键文件 hash 和
+合同差异；尚未提取可接纳的外部 numeric target。本轮没有运行任何 equilibrium
+solver。
+
+机器可读 gate 表：
+[`tables/pnjl_mag_source_gate_v1.csv`](tables/pnjl_mag_source_gate_v1.csv)。
+结论边界见
+[`tables/pnjl_mag_source_gate_claim_ledger_v1.csv`](tables/pnjl_mag_source_gate_claim_ledger_v1.csv)。
 
 ## 参考文献与可复核来源
 
@@ -67,21 +73,33 @@ replay 当成磁场物理正确性的外部证明。
 - 已确认的高层结构：五维 FixedMu、JAX 自动微分、Optimistix 求根、
   MFIR/Hurwitz-zeta 真空项和 Landau 热项
 
+静态 source-gate 结论如下：
+
+- **已通过**：MFIR/Hurwitz-zeta 公式家族、五维变量顺序、声明的 PNJL/IMC 参数。
+- **需 adapter**：外部 `muB` 是 baryon chemical potential，源码内部除以 3；Julia
+  入口接受共同的 flavor `mu_vec`。
+- **条件通过**：两边都使用自然单位，但外部 `hc=197.33` 与 Julia
+  `hbarc=197.3269804` 不完全相同，接纳前必须固定换算常数。
+- **不一致**：外部允许 `eB=0` 并对负值取绝对值；Julia 生产契约只接受
+  `eB >= 100 MeV^2` 的正标量。
+- **待完成**：`p_z`、Landau level、zeta 节点收敛，输出字段映射，以及多分支/局部
+  根语义的对照。外部实现是一 seed continuation，不是 Julia 的多 seed candidate
+  集合。
+
 后续接入流程如下：
 
-1. solver-free 审计其磁场公式、真空正则化、`a` profile、单位、`n_max`/特殊函数
-   约定、五维变量顺序、分支选择和 residual/status 字段；
-2. 固定可重放的依赖、生成脚本、参数清单和机器可读输出 schema；
-3. 再抽取少量代表点，覆盖低温/高温、低/中/高 `eB`、Landau onset 与相结构变化，
+1. 固定可重放的依赖、生成脚本、参数清单和机器可读输出 schema；
+2. 再抽取少量代表点，覆盖低温/高温、低/中/高 `eB`、Landau onset 与相结构变化，
    同时保留所有候选分支而不是只保留最低 `Omega`；
-4. 只有在 source consistency、branch clarity、有限性和收敛门槛通过后，才把轻量
+3. 只有在 source consistency、branch clarity、有限性和收敛门槛通过后，才把轻量
    fixed-point CSV 放入 `tests/validation/data/targets/`；原始输出只留在外部 provenance
    或分析目录；
-5. 若 `pnjl_mag` 的具体公式或参数合同与当前 Julia MFIR 路线不一致，建立独立
+4. 若 `pnjl_mag` 的具体公式或参数合同与当前 Julia MFIR 路线不一致，建立独立
    validation family，不把不同
    正则化的数值混成一个 target。
 
-源码可用性已不再阻塞；当前阻塞点是 source contract 和 target admission。不重跑
+源码可用性已不再阻塞；当前阻塞点是 numeric convergence、output adapter 和 target
+admission。不重跑
 C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay 直接复制成 target。
 
 ## 主项目待办边界
@@ -89,7 +107,7 @@ C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay �
 - **已完成的主项目路线决策**：正式 profile `a=0.0108805` 已接入
   `magnetic_default.toml`；MFIR/Hurwitz-zeta 为默认生产真空路线，完整
   smooth-Landau 只通过 `route=:landau_legacy` 保留为历史/诊断路线。
-- **必须后续处理**：完成 `pnjl_mag` 的 source-gate，固定运行依赖、参数、单位、积分、
-  分支与机器可读输出合同，再生成轻量外部 acceptance targets。
+- **必须后续处理**：在不改变生产路线的前提下，固定 `pnjl_mag` 运行依赖、参数、单位、
+  积分、分支与机器可读输出合同，再生成轻量外部 acceptance targets。
 - **不在本轮**：Maxwell 自能、磁化率、各向异性压力、FixedRho/phase magnetic
   workflow、全域磁场扫描和 C0/C1/C2 重跑。
