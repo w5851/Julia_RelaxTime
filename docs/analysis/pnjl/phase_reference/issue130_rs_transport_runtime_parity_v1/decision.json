@@ -1,0 +1,21 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "fallback_enabled": true,
+  "legacy_rollback_verified": true,
+  "next_action": "perform a separate limited numerical RS pilot after author review of this solver-free parity package",
+  "replay_run_id": "32451053476",
+  "repo_head": "1ccf29310fb20c30bcd154f0b4966e25a7565225",
+  "runtime_view": "certified_candidate_with_legacy_fallback",
+  "schema_version": "pnjl_issue130_rs_transport_runtime_parity_v1",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "stop_conditions": [
+    "do not delete legacy reference files",
+    "do not remove per-key fallback or explicit rollback",
+    "do not claim RS numerical parity from this solver-free package",
+    "do not start full RS production before the limited pilot passes"
+  ],
+  "transport_coefficients_computed": false,
+  "verdict": "rs_adapter_parity_solver_free_pass"
+}
