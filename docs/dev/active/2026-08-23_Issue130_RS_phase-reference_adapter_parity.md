@@ -26,6 +26,11 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] 固化 portable evidence：输入哈希、raw dry-run provenance、source summary、parity table、
   claim ledger 和停止边界。
 - [x] 作者审核 solver-free parity evidence；作者已授权合并 PR #261。
+- [x] 已新增 versioned workflow
+  `.github/workflows/relaxtime-issue130-rs-numerical-pilot-v1.yml` 与 paired collector/test。
+  numerical scope 固定为 `xi=-0.5,0,0.5`、`muB=150,450,900 MeV`、`alpha_T=1.0,1.2`，
+  两套 reference 使用相同 transport 配置并在同一 job 内顺序运行；名义 18 个请求点因
+  现有 `direct_coexistence` 锚点的共存侧替换形成 19 个有效计划点，已在 manifest 中显式记录。
 - [ ] 经作者授权后触发限定 numerical RS pilot；至少比较 candidate runtime 与显式 legacy
   rollback 的 phase anchor、失败/非有限点、transport 输出字段和运行成本。pilot 失败时停止，
   保留 diagnostic-only、fallback、rollback 和旧 production。
