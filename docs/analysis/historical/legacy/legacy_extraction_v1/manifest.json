@@ -51,6 +51,8 @@
     "pnjl_mag_convergence_v1/production_parity_fixed_state_v1.csv",
     "pnjl_mag_convergence_v1/source_parity_solver_v1.csv",
     "pnjl_mag_convergence_v1/production_parity_solver_v1.csv",
+    "pnjl_mag_convergence_v1/source_parity_branch_repeatability_v1.csv",
+    "pnjl_mag_convergence_v1/production_parity_branch_repeatability_v1.csv",
     "../../../../../tests/validation/data/targets/pnjl/reference/pnjl_magnetic_external_kernel_targets_v1.csv",
     "../../../../../tests/validation/data/provenance/pnjl/evidence/pnjl_magnetic_external_kernel_provenance_v1.csv",
     "../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv"

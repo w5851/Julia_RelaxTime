@@ -1,8 +1,8 @@
 {
   "schema_version": "pnjl_mag_convergence_provenance_v1",
-  "generated_at_utc": "2026-08-25T06:10:37.2088344Z",
+  "generated_at_utc": "2026-08-25T06:20:05.5083452Z",
   "producer_script": "scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl",
-  "producer_script_sha256": "D06ECDABD8DF92737689B3CCE16FE8094065483307CEB9048E79CE9F20E2E3CC",
+  "producer_script_sha256": "5E75CFEFA5351CA2D5F47ADDEE2D10C9E62CB5F9ABF2D6969F9203525B218B8D",
   "julia_repo_input_head": "d843d371736413d074f865d0a86fba90a34fd0ae",
   "input_replay_table": "../pnjl_mag_equilibrium_replay_v1/pnjl_mag_equilibrium_replay_v1.csv",
   "external_source": {
@@ -11,10 +11,19 @@
     "role": "source-parity diagnostic only"
   },
   "execution": {
-    "command": "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver",
+    "commands": [
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode fixed",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode branch"
+    ],
     "solver_scope": "3 anchors x 2 profiles x 2 node controls, with 3 seeds and optional Newton fallback",
     "full_scan_triggered": false,
-    "c0_c1_c2_triggered": false
+    "c0_c1_c2_triggered": false,
+    "branch_repeat_run": {
+      "source_sha256": "534F24F115A9D7B96100397B6753178E8E20DC726CE2464B8EC76D020B54600D",
+      "production_sha256": "F65E3983A87660132DDDB6261F304441779FEB60CEBBB12EF84BA083ED8B3FC3",
+      "byte_identical_across_two_runs": true
+    }
   },
   "profile_boundary": {
     "source_parity": "External hc and full external parameter/unit contract for cross-solver comparability.",

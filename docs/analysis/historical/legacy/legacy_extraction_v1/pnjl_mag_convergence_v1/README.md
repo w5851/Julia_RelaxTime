@@ -27,6 +27,10 @@ fm 单位换算和生产边界一起变化；因此它不是把 source CSV 的�
 - solver 诊断使用 3 个 seed、trust-region primary、Newton fallback 和候选去重。
   source-parity 在高温高场点保留两个物理候选；production-parity 本轮三个锚点均只
   得到一个候选。该结果不证明全分支完备性。
+- 高温高场锚点枚举了 3 个 seed 的全部 6 种顺序。source-parity 每种顺序均得到相同
+  的两个候选，production-parity 每种顺序均得到相同的一个候选；两个输出在第二次
+  独立执行后 SHA-256 逐字节不变。该检查只证明已声明 seed 集合内的顺序不敏感和
+  确定性，不证明 seed 集合或物理解分支已经完备。
 
 ## 文件
 
@@ -35,12 +39,15 @@ fm 单位换算和生产边界一起变化；因此它不是把 source CSV 的�
   仅作 profile 差异诊断，`omega_comparable=false`；
 - `source_parity_solver_v1.csv`：source-parity 独立多 seed 重求解和候选输出；
 - `production_parity_solver_v1.csv`：production-parity 独立多 seed 重求解和候选输出；
+- `source_parity_branch_repeatability_v1.csv`：source-parity 高温高场 6 种 seed 顺序；
+- `production_parity_branch_repeatability_v1.csv`：production-parity 高温高场 6 种 seed 顺序；
 - `manifest.json`、`provenance.json`：schema、输入、脚本、hash 和结果边界。
 
 生成命令：
 
 ```powershell
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode both
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode branch
 ```
 
 本目录所有结果均为 `diagnostic_only`。在获得更完整的 n_max / pz / zeta 收敛矩阵、

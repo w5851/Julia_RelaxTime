@@ -85,9 +85,9 @@ function _parse_mode(args::Vector{String})
             i == length(args) && error("missing value for --mode")
             i += 1
             mode = Symbol(lowercase(args[i]))
-            mode in (:fixed, :solver, :both) || error("mode must be fixed, solver or both")
+            mode in (:fixed, :solver, :branch, :both) || error("mode must be fixed, solver, branch or both")
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|both]")
+            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|branch|both]")
             exit(0)
         else
             error("unknown option: $arg")
@@ -95,6 +95,74 @@ function _parse_mode(args::Vector{String})
         i += 1
     end
     return mode
+end
+
+function _seed_permutations(seeds)
+    return [
+        (seeds[i], seeds[j], seeds[k])
+        for i in eachindex(seeds), j in eachindex(seeds), k in eachindex(seeds)
+        if i != j && i != k && j != k
+    ]
+end
+
+function _run_branch_profile(row, control, profile::Symbol, output_path::String)
+    seeds = _solver_seeds(row.state)
+    permutations = _seed_permutations(seeds)
+    open(output_path, "w") do io
+        println(io, "profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,node,p_num,zeta_num,pz_max_fm_inv,n_max,permutation_index,seed_order,candidate_index,origin_seed_label,method,iterations,residual_norm,omega_fm4,phi_u,phi_d,phi_s,Phi,PhiBar,attempt_count,failed_attempts,candidate_count,status,error")
+        for (permutation_index, permutation) in enumerate(permutations)
+            model, T_fm, μ_fm = profile === :source ?
+                _source_model(row, control) : _production_model(row, control)
+            mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+            seed_order = join((seed.label for seed in permutation), '>')
+            result = nothing
+            error_text = ""
+            try
+                result = PNJL.solve_magnetic_gap(
+                    model,
+                    T_fm,
+                    mu_vec;
+                    p_num=control.p_num,
+                    pz_max=control.pz_max,
+                    n_max=control.n_max,
+                    initial_guess=permutation[1].state,
+                    seed_candidates=[permutation[2].state, permutation[3].state],
+                    include_default_seeds=false,
+                    method=:trust_region,
+                    fallback_method=:newton,
+                    iterations=120,
+                    residual_norm_max=1e-6,
+                    root_merge_tol=1e-5,
+                )
+            catch err
+                error_text = sprint(showerror, err)
+            end
+            eB_fm2 = model.magnetic.eB_fm2
+            if result === nothing
+                println(io, join(_csv.(Any[
+                    String(profile), row.T_MeV, row.muB_MeV, row.eB_GeV2, eB_fm2,
+                    control.name, control.p_num, control.zeta_num, control.pz_max,
+                    control.n_max, permutation_index, seed_order, "", "", "", "",
+                    "", "", "", "", "", "", "", 0, 0, 0, "solver_error",
+                    error_text,
+                ]), ','))
+                continue
+            end
+            for (candidate_index, candidate) in enumerate(result.candidates)
+                origin_seed_label = permutation[candidate.seed_index].label
+                println(io, join(_csv.(Any[
+                    String(profile), row.T_MeV, row.muB_MeV, row.eB_GeV2, eB_fm2,
+                    control.name, control.p_num, control.zeta_num, control.pz_max,
+                    control.n_max, permutation_index, seed_order, candidate_index,
+                    origin_seed_label, candidate.method, candidate.iterations,
+                    candidate.residual_norm, candidate.omega, candidate.x_state[1],
+                    candidate.x_state[2], candidate.x_state[3], candidate.x_state[4],
+                    candidate.x_state[5], result.attempt_count, result.failed_attempts,
+                    length(result.candidates), "ok", "",
+                ]), ','))
+            end
+        end
+    end
 end
 
 function _external_params()
@@ -292,6 +360,17 @@ function main(args=ARGS)
         println("source_parity_solver=$source_path")
         println("production_parity_solver=$production_path")
         println("solver_rows=$(length(rows) * length(solver_controls)) per profile before candidate expansion")
+    end
+    if mode in (:branch, :both)
+        row = only(row for row in rows if row.T_MeV == 240.0 && row.eB_GeV2 == 0.8)
+        control = controls[3]
+        source_path = joinpath(OUTPUT_DIR, "source_parity_branch_repeatability_v1.csv")
+        production_path = joinpath(OUTPUT_DIR, "production_parity_branch_repeatability_v1.csv")
+        _run_branch_profile(row, control, :source, source_path)
+        _run_branch_profile(row, control, :production, production_path)
+        println("source_parity_branch=$source_path")
+        println("production_parity_branch=$production_path")
+        println("branch_seed_permutations=6 per profile")
     end
 end
 

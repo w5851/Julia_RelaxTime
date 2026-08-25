@@ -7,13 +7,17 @@
     "source_parity_fixed_state": "source_parity_fixed_state_v1.csv",
     "production_parity_fixed_state": "production_parity_fixed_state_v1.csv",
     "source_parity_solver": "source_parity_solver_v1.csv",
-    "production_parity_solver": "production_parity_solver_v1.csv"
+    "production_parity_solver": "production_parity_solver_v1.csv",
+    "source_parity_branch_repeatability": "source_parity_branch_repeatability_v1.csv",
+    "production_parity_branch_repeatability": "production_parity_branch_repeatability_v1.csv"
   },
   "sha256": {
     "source_parity_fixed_state_v1.csv": "4997CEA880C2CD068E4ACBEF3AF4847E36C9339C3B57B49D387C8A6E64C17ACA",
     "production_parity_fixed_state_v1.csv": "E66A01A2C8AC979EE95B19F01992BE8BB484F235CE28642F83362F159F25B84A",
     "source_parity_solver_v1.csv": "83EC891AEB4B4188B531EC6CD884270B470D765C0CEC1AA7CB77F93722C8F940",
-    "production_parity_solver_v1.csv": "253584ADD14B68B18BA019AB42D495DAC1274009124FF9DAA5BB0DDA05E5F05B"
+    "production_parity_solver_v1.csv": "253584ADD14B68B18BA019AB42D495DAC1274009124FF9DAA5BB0DDA05E5F05B",
+    "source_parity_branch_repeatability_v1.csv": "534F24F115A9D7B96100397B6753178E8E20DC726CE2464B8EC76D020B54600D",
+    "production_parity_branch_repeatability_v1.csv": "F65E3983A87660132DDDB6261F304441779FEB60CEBBB12EF84BA083ED8B3FC3"
   },
   "source_contract": {
     "external_remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
@@ -56,7 +60,11 @@
     "production_solver_output_rows": 6,
     "source_high_field_candidate_count": 2,
     "production_all_rows_converged": true,
-    "production_is_independent_resolve": true
+    "production_is_independent_resolve": true,
+    "branch_seed_permutations_per_profile": 6,
+    "source_candidate_count_per_permutation": 2,
+    "production_candidate_count_per_permutation": 1,
+    "repeat_run_byte_identical": true
   },
   "boundary": "No branch-completeness claim, no formal validation admission, no full magnetic scan, no C0/C1/C2 rerun."
 }
