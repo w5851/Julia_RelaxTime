@@ -1,0 +1,62 @@
+{
+  "schema_version": "pnjl_mag_convergence_manifest_v1",
+  "acceptance_scope": "diagnostic_only",
+  "producer": "scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl",
+  "input_artifact": "../pnjl_mag_equilibrium_replay_v1/",
+  "tables": {
+    "source_parity_fixed_state": "source_parity_fixed_state_v1.csv",
+    "production_parity_fixed_state": "production_parity_fixed_state_v1.csv",
+    "source_parity_solver": "source_parity_solver_v1.csv",
+    "production_parity_solver": "production_parity_solver_v1.csv"
+  },
+  "sha256": {
+    "source_parity_fixed_state_v1.csv": "4997CEA880C2CD068E4ACBEF3AF4847E36C9339C3B57B49D387C8A6E64C17ACA",
+    "production_parity_fixed_state_v1.csv": "E66A01A2C8AC979EE95B19F01992BE8BB484F235CE28642F83362F159F25B84A",
+    "source_parity_solver_v1.csv": "83EC891AEB4B4188B531EC6CD884270B470D765C0CEC1AA7CB77F93722C8F940",
+    "production_parity_solver_v1.csv": "253584ADD14B68B18BA019AB42D495DAC1274009124FF9DAA5BB0DDA05E5F05B"
+  },
+  "source_contract": {
+    "external_remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
+    "external_commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+    "hbarc_MeV_fm": 197.33,
+    "imc_a": 0.0108805,
+    "route": "mfir_zero_field_cutoff_plus_hurwitz_zeta_magnetic_correction_plus_landau_thermal",
+    "mu_semantics": "muB/3",
+    "landau_n_range": "0..79_or_0..95",
+    "purpose": "external_cross_solver_diagnostic"
+  },
+  "production_contract": {
+    "hbarc_MeV_fm": 197.3269804,
+    "route": "current_julia_mfir_default",
+    "mu_semantics": "muB/3",
+    "purpose": "candidate_julia_validation_target_after_review"
+  },
+  "scope": {
+    "anchors": [
+      {"T_MeV": 50.0, "muB_MeV": 0.0, "eB_GeV2": 0.2},
+      {"T_MeV": 240.0, "muB_MeV": 0.0, "eB_GeV2": 0.2},
+      {"T_MeV": 240.0, "muB_MeV": 0.0, "eB_GeV2": 0.8}
+    ],
+    "fixed_nodes": [
+      "screening:p64/zeta64/pz25/nmax79",
+      "mid:p96/zeta128/pz32/nmax79",
+      "matched:p128/zeta256/pz40/nmax79",
+      "landau_probe:p128/zeta256/pz40/nmax95"
+    ],
+    "solver_nodes": ["matched", "landau_probe"],
+    "seed_count": 3,
+    "solver": "trust_region_primary_newton_fallback",
+    "solver_iterations": 120,
+    "residual_norm_max": 1.0e-6
+  },
+  "observations": {
+    "source_fixed_rows": 12,
+    "production_fixed_rows": 12,
+    "source_solver_output_rows": 7,
+    "production_solver_output_rows": 6,
+    "source_high_field_candidate_count": 2,
+    "production_all_rows_converged": true,
+    "production_is_independent_resolve": true
+  },
+  "boundary": "No branch-completeness claim, no formal validation admission, no full magnetic scan, no C0/C1/C2 rerun."
+}

@@ -84,6 +84,12 @@ nine points at screening nodes and three high-temperature points at matched node
 the matched run reproduces the external Omega branch and exposes an additional
 candidate at `T=240 MeV, eB=0.8 GeV^2`. It remains diagnostic-only and does not close
 the convergence or all-branch gates.
+The separate profile/convergence diagnostic is in
+[`pnjl_mag_convergence_v1/`](pnjl_mag_convergence_v1/). It keeps source-parity
+(`hc=197.33`) and production-parity (Julia `hbarc=197.3269804`) in separate CSVs,
+and includes both fixed-state node checks and independent multi-seed re-solves.
+It records convergence evidence without promoting either profile to an equilibrium
+acceptance target.
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).

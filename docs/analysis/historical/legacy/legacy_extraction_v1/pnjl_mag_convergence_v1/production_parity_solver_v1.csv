@@ -1,0 +1,7 @@
+profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,node,p_num,zeta_num,pz_max_fm_inv,n_max,candidate_index,seed_index,seed_label,converged,physical,method,iterations,residual_norm,omega_fm4,state_l2_delta_input,status,error,attempt_count,failed_attempts,candidate_count
+production,50.0,0.0,0.2,5.136378925382266,matched,128,256,40.0,79,1,2,external_chiral_shift,true,true,trust_region,4,5.185617503515407e-16,-21.505720811030695,0.0001627456778828567,ok,,4,2,1
+production,50.0,0.0,0.2,5.136378925382266,landau_probe,128,256,40.0,95,1,2,external_chiral_shift,true,true,trust_region,4,5.185617503515407e-16,-21.505720811030695,0.0001627456778828567,ok,,4,2,1
+production,240.0,0.0,0.2,5.136378925382266,matched,128,256,40.0,79,1,3,project_thermal,true,true,trust_region,15,1.595239050032197e-13,-26.614956535302802,5.5849083585474005e-5,ok,,3,0,1
+production,240.0,0.0,0.2,5.136378925382266,landau_probe,128,256,40.0,95,1,3,project_thermal,true,true,trust_region,15,1.448389682866254e-14,-26.615079098692284,4.5420259644595824e-5,ok,,3,0,1
+production,240.0,0.0,0.8,20.545515701529062,matched,128,256,40.0,79,1,2,external_chiral_shift,true,true,trust_region,17,1.9628182225765842e-13,-24.124440804872464,4.706088218546711e-5,ok,,4,2,1
+production,240.0,0.0,0.8,20.545515701529062,landau_probe,128,256,40.0,95,1,2,external_chiral_shift,true,true,trust_region,17,2.4644259208937625e-13,-24.124440805454803,4.706086561865467e-5,ok,,4,2,1

@@ -1,0 +1,34 @@
+{
+  "schema_version": "pnjl_mag_convergence_provenance_v1",
+  "generated_at_utc": "2026-08-25T06:10:37.2088344Z",
+  "producer_script": "scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl",
+  "producer_script_sha256": "D06ECDABD8DF92737689B3CCE16FE8094065483307CEB9048E79CE9F20E2E3CC",
+  "julia_repo_input_head": "d843d371736413d074f865d0a86fba90a34fd0ae",
+  "input_replay_table": "../pnjl_mag_equilibrium_replay_v1/pnjl_mag_equilibrium_replay_v1.csv",
+  "external_source": {
+    "remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
+    "commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+    "role": "source-parity diagnostic only"
+  },
+  "execution": {
+    "command": "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver",
+    "solver_scope": "3 anchors x 2 profiles x 2 node controls, with 3 seeds and optional Newton fallback",
+    "full_scan_triggered": false,
+    "c0_c1_c2_triggered": false
+  },
+  "profile_boundary": {
+    "source_parity": "External hc and full external parameter/unit contract for cross-solver comparability.",
+    "production_parity": "Julia default hc and runtime parameter/unit contract; external state is only an initial seed.",
+    "csv_mixing": "forbidden"
+  },
+  "result_boundary": {
+    "status": "diagnostic_only",
+    "external_acceptance": "not_admitted",
+    "production_validation_target": "not_admitted",
+    "requires_before_promotion": [
+      "explicit n_max/pz/zeta convergence matrix",
+      "branch coverage and seed-order repeatability",
+      "reviewed production parameter contract"
+    ]
+  }
+}
