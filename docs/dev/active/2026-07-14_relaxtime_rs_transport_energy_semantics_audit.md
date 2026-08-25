@@ -430,6 +430,18 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 通用 production workflow 在新 canonical reference 合并前继续保留现有 `12/6` 默认值，避免形成“新热力学默认 + 旧 reference”的过渡组合；phase-reference PR 同步把正式默认改为 `24/8`。
 - reference 合并后使用新 source commit、Action case name、正式 slug、CSV 和图像目录重跑；旧 production、旧图像及 registry 历史记录保持逐字节不变。新 case 先保持 `current_candidate`，由作者审核后决定是否晋升 `approved`。
 
+### 8.8 M4 分片重验执行锁（2026-08-25）
+
+- mode-A candidate-runtime production run `32709280462` 运行约 252.2 分钟后由 hosted runner 失去通信；setup 和依赖安装成功，数值 producer 未完成，后续 artifact upload 未执行。该 run 只记录为 `runner_communication_lost` / infrastructure failure，不给出 solver、finite/converged 或物理 verdict。
+- 本次重验固定使用 immutable calculation SHA `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`；`origin/main@c154c9d2aff0e8d28acc07f635793f7a086a97f8` 是本次执行分支的基线，实际 workflow head 以包含 calculation-SHA 输入校验的执行分支提交为准，并在每个 shard 审计中记录。历史 full source case `05be2c05186f8e12baf3097b68f8619e53d19711` 只作性能和 shard 拓扑参考，不冒充新 candidate 结果。
+- 不再运行额外 pilot，直接复用历史 `15+15` topology：mode-A 15 shards、mode-B 15 shards。`mode=both` 不用于重验，因为当前 workflow 在单 job 内顺序执行两个 mode；两种 mode 以独立 workflow dispatch 受控并行。
+- 每个 mode 的 3 个 `muB=0`/对应 alpha 或 T 组合使用完整 `xi=-0.50:0.01:0.50`；`muB=450,900` 的组合沿 ξ 正负侧拆分。新 manifest 不依赖历史的 `xi=0` 双侧重复后去重：negative shard 输入含 `xi=0.00` 以触发 mode-A route，positive shard 从 `xi=0.01` 开始。
+- mode-A direct-coexistence 语义不得取消：当一阶 anchor、`alpha_T=1.0` 且两侧 certification 通过时，严格共存的 `xi=0` 不作为唯一输运点，而由 certified `xi=-0.003/+0.003` 两侧点表示；普通 crossover 或未认证点按原有 `xi=0`/unresolved 语义处理。expected-key manifest 按实际 route 区分 101 点与两侧替换后的有效点数。
+- 固定 `p_num=24,t_num=8`、`tau=128/20/36/24/560`、`match_thermo`、`validated_anchored`、`compute_bulk=true` 和全部物理容差；数值 shard 使用 `render_plots=false`，图像在 solver-free aggregate 后单独生成。
+- 每个 shard 独立保存 result、channel diagnostics、solver telemetry、expected/actual key manifest、input/config hash、calculation/workflow SHA、wall time 和失败清单。runner 失联只允许 failed-only rerun；重复失联或单 shard 接近 330 分钟时停止后续波次，不降低节点、不放宽容差。
+- GitHub Student 认证可能提高 public-hosted runner 的并发额度，但不把额度当作无限容量：先以 6--10 个总并发组成调度波次，观察 queued/in-progress 与单 shard wall time，再扩展到其余已授权 shard；这只是调度控制，不是数值 pilot。
+- A/B aggregate 只有在全部 shard provenance、key 并集、finite/converged、重复键、失败点和成本审计通过后生成；结果继续保持 `diagnostic-only`，不得覆盖历史 `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1` 或直接晋升 production。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）

@@ -18,6 +18,11 @@ on:
         required: false
         default: "first_canonical_v1_diagnostic"
         type: string
+      calculation_sha:
+        description: "immutable calculation SHA for the numerical contract"
+        required: false
+        default: "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
+        type: string
       shard_label:
         description: "short artifact label for a sharded run"
         required: false
@@ -166,6 +171,7 @@ jobs:
           set -euo pipefail
 
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          calculation_sha="${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}"
           shard_label="${{ inputs.shard_label || 'full' }}"
           run_tier="${{ inputs.run_tier || 'dry-run' }}"
           policy="${{ inputs.propagator_xi_policy || 'match_thermo' }}"
@@ -183,6 +189,14 @@ jobs:
 
           if [[ ! "$case_name" =~ ^[A-Za-z0-9_.=-]+$ ]]; then
             echo "::error::case_name contains unsupported characters: $case_name"
+            exit 2
+          fi
+          if [[ ! "$calculation_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::calculation_sha must be a lowercase 40-hex SHA: $calculation_sha"
+            exit 2
+          fi
+          if [ "$calculation_sha" != "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48" ]; then
+            echo "::error::calculation_sha is not the frozen Issue130 RS contract SHA: $calculation_sha"
             exit 2
           fi
           if [[ ! "$shard_label" =~ ^[A-Za-z0-9_.=-]+$ ]]; then
@@ -301,6 +315,7 @@ jobs:
         run: |
           set -euo pipefail
           case_name="${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}"
+          calculation_sha="${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}"
           shard_label="${{ inputs.shard_label || 'full' }}"
           audit_root="data/outputs/artifacts/relaxtime_phase_guided_transport/${{ github.run_id }}"
           mkdir -p "$audit_root"
@@ -322,6 +337,7 @@ jobs:
             echo ""
             printf -- '- mode: `%s`\n' "${{ inputs.mode || 'both' }}"
             printf -- '- case_name: `%s`\n' "$case_name"
+            printf -- '- calculation_sha: `%s`\n' "$calculation_sha"
             printf -- '- shard_label: `%s`\n' "$shard_label"
             printf -- '- run_tier: `%s`\n' "${{ inputs.run_tier || 'dry-run' }}"
             printf -- '- propagator_xi_policy: `%s`\n' "${{ inputs.propagator_xi_policy || 'match_thermo' }}"
@@ -380,6 +396,7 @@ jobs:
             echo ""
             echo "- mode: \`${{ inputs.mode || 'both' }}\`"
             echo "- case_name: \`${{ inputs.case_name || 'first_canonical_v1_diagnostic' }}\`"
+            echo "- calculation_sha: \`${{ inputs.calculation_sha || '3c5f6b3c9bd535cff7657364dadb2efc31f2ea48' }}\`"
             echo "- shard_label: \`${{ inputs.shard_label || 'full' }}\`"
             echo "- run_tier: \`${{ inputs.run_tier || 'dry-run' }}\`"
             echo "- propagator_xi_policy: \`${{ inputs.propagator_xi_policy || 'match_thermo' }}\`"
