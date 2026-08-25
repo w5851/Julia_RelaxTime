@@ -89,7 +89,10 @@ The separate profile/convergence diagnostic is in
 (`hc=197.33`) and production-parity (Julia `hbarc=197.3269804`) in separate CSVs,
 and includes both fixed-state node checks and independent multi-seed re-solves.
 It records convergence evidence without promoting either profile to an equilibrium
-acceptance target.
+acceptance target. The extended matrix found a production blocker: current automatic
+`n_max` resolves to `3/4` at the tested high-temperature points and is materially
+under-resolved; all seeds at one physical point must share a reviewed,
+temperature-aware thermal cutoff before acceptance.
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).

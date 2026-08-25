@@ -1,9 +1,9 @@
 {
   "schema_version": "pnjl_mag_convergence_provenance_v1",
-  "generated_at_utc": "2026-08-25T06:20:05.5083452Z",
+  "generated_at_utc": "2026-08-25T06:56:55.8515295Z",
   "producer_script": "scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl",
-  "producer_script_sha256": "5E75CFEFA5351CA2D5F47ADDEE2D10C9E62CB5F9ABF2D6969F9203525B218B8D",
-  "julia_repo_input_head": "d843d371736413d074f865d0a86fba90a34fd0ae",
+  "producer_script_sha256": "BE2191F1506715D99301A69922D25C7A575E433153A9E85950CC233F51A7FC00",
+  "julia_repo_input_head": "1e1ff1fb620b16336dd9fce3bc82c9cee075eae1",
   "input_replay_table": "../pnjl_mag_equilibrium_replay_v1/pnjl_mag_equilibrium_replay_v1.csv",
   "external_source": {
     "remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
@@ -14,7 +14,11 @@
     "commands": [
       "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode fixed",
       "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver",
-      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode branch"
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode branch",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode cutoff",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode quadrature",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver_cutoff",
+      "julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode default"
     ],
     "solver_scope": "3 anchors x 2 profiles x 2 node controls, with 3 seeds and optional Newton fallback",
     "full_scan_triggered": false,
@@ -28,15 +32,25 @@
   "profile_boundary": {
     "source_parity": "External hc and full external parameter/unit contract for cross-solver comparability.",
     "production_parity": "Julia default hc and runtime parameter/unit contract; external state is only an initial seed.",
-    "csv_mixing": "forbidden"
+    "csv_mixing": "forbidden",
+    "hbarc_is_only_difference": false,
+    "additional_controlled_differences": [
+      "runtime parameter injection",
+      "MeV/fm and eB unit mapping",
+      "muB/3 adapter semantics",
+      "quadrature and Landau cutoff",
+      "solver seed and branch governance"
+    ]
   },
   "result_boundary": {
     "status": "diagnostic_only",
     "external_acceptance": "not_admitted",
-    "production_validation_target": "not_admitted",
+    "production_validation_target": "blocked",
+    "blocker": "Current auto n_max uses a non-temperature-aware cutoff and resolves it per seed; tested high-temperature points are materially under-resolved.",
     "requires_before_promotion": [
-      "explicit n_max/pz/zeta convergence matrix",
-      "branch coverage and seed-order repeatability",
+      "common temperature-aware thermal Landau cutoff for all seeds and attempts at one physical point",
+      "wider T/mu/eB convergence matrix after the cutoff fix",
+      "branch coverage under the converged numerical contract",
       "reviewed production parameter contract"
     ]
   }

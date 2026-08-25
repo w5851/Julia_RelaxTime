@@ -32,6 +32,38 @@ fm 单位换算和生产边界一起变化；因此它不是把 source CSV 的�
   独立执行后 SHA-256 逐字节不变。该检查只证明已声明 seed 集合内的顺序不敏感和
   确定性，不证明 seed 集合或物理解分支已经完备。
 
+## 截断与节点诊断
+
+在 `p_num=128, zeta_num=256, pz_max=40 fm^-1` 下，`n_max` 从 `31` 扫到 `511`：
+
+- `T=50 MeV, eB=0.2 GeV^2` 在全部档位上稳定；
+- `T=240 MeV, eB=0.8 GeV^2` 在 `n_max=63` 后已达到约 `1e-8 fm^-4` 的稳定性；
+- `T=240 MeV, eB=0.2 GeV^2` 到 `n_max=383` 后才稳定，`383 -> 511` 的 Omega
+  变化约 `4.8e-11 fm^-4`。外部 source state 在 `n_max=79` 恰好满足外部
+  source-parity，但在收敛截断上的 residual 约为 `1.68e-4`，所以外部
+  `n=0..79` 不能作为截断收敛证明。
+
+真正重求解也确认这一点。production-parity 的低场高温根从 `n_max=79` 到
+`n_max=383` 发生约 `1.53e-5` 的五维状态位移和 `-1.773e-4 fm^-4` 的 Omega 变化；
+低温点不变，高场点的 Omega 只变化约 `-6.36e-10 fm^-4`。
+
+解耦节点矩阵显示，在这三个锚点上 `p_num=128` 和 `pz_max=40 fm^-1` 已与更高探针
+对齐到约 `1e-9 fm^-4`；高场点需要至少单独审查 `zeta_num`，`64/128` 明显不足，
+`384` 与 `512` 的 Omega 差约 `1.6e-11 fm^-4`。
+
+## 生产 blocker
+
+当前 production 默认是 `p_num=96, zeta_num=64, pz_max=25 fm^-1, n_max=nothing`。
+auto `n_max` 在三个锚点分别解析为 `4,3,3`。在两个 `T=240 MeV` 点，外部状态上的
+fixed residual 分别约为 `1.284` 和 `0.150`；默认 solver 得到的状态与外部状态距离
+分别约为 `0.253` 和 `0.0133`。这不是可由 profile 小差异解释的误差。
+
+实现还会为每个 seed 独立解析 auto `n_max`，再把这些可能来自不同截断问题的候选
+按 Omega 排序。因此，当前 auto-`n_max` 生产路线不能作为正式 equilibrium validation
+target，也不能用本目录的 `n_max=383` 直接替换成全域常数。后续必须建立共同的、
+温度感知的 thermal Landau 尾项截断合同，并让同一点的全部 seed/attempt 使用同一
+截断后，才能重新评估 production acceptance。
+
 ## 文件
 
 - `source_parity_fixed_state_v1.csv`：source-parity 外部状态固定点评估；
@@ -41,6 +73,14 @@ fm 单位换算和生产边界一起变化；因此它不是把 source CSV 的�
 - `production_parity_solver_v1.csv`：production-parity 独立多 seed 重求解和候选输出；
 - `source_parity_branch_repeatability_v1.csv`：source-parity 高温高场 6 种 seed 顺序；
 - `production_parity_branch_repeatability_v1.csv`：production-parity 高温高场 6 种 seed 顺序；
+- `source_parity_nmax_fixed_state_v1.csv`、`production_parity_nmax_fixed_state_v1.csv`：
+  `n_max=31..511` 的固定态矩阵；
+- `source_parity_quadrature_fixed_state_v1.csv`、`production_parity_quadrature_fixed_state_v1.csv`：
+  `p_num`、`pz_max`、`zeta_num` 解耦矩阵；
+- `source_parity_solver_cutoff_v1.csv`、`production_parity_solver_cutoff_v1.csv`：
+  `n_max=79/383` 的独立重求解；
+- `production_default_nmax_fixed_state_v1.csv`、`production_default_nmax_solver_v1.csv`：
+  当前默认 auto-`n_max` 的实际解析层数和求解结果；
 - `manifest.json`、`provenance.json`：schema、输入、脚本、hash 和结果边界。
 
 生成命令：
@@ -48,7 +88,12 @@ fm 单位换算和生产边界一起变化；因此它不是把 source CSV 的�
 ```powershell
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode both
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode branch
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode cutoff
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode quadrature
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver_cutoff
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode default
 ```
 
-本目录所有结果均为 `diagnostic_only`。在获得更完整的 n_max / pz / zeta 收敛矩阵、
-分支覆盖证据和明确的生产 profile 审核前，不得将任何 CSV 作为正式 acceptance baseline。
+本目录所有结果均为 `diagnostic_only`。在修复 auto-`n_max` production blocker、补充
+更广的 `T/mu/eB` 收敛矩阵并复核分支覆盖前，不得将任何 equilibrium CSV 作为正式
+acceptance baseline。

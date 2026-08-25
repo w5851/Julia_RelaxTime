@@ -76,6 +76,44 @@ function _controls()
     ]
 end
 
+function _cutoff_controls()
+    return [
+        (name="nmax31", p_num=128, zeta_num=256, pz_max=40.0, n_max=31),
+        (name="nmax47", p_num=128, zeta_num=256, pz_max=40.0, n_max=47),
+        (name="nmax63", p_num=128, zeta_num=256, pz_max=40.0, n_max=63),
+        (name="nmax79", p_num=128, zeta_num=256, pz_max=40.0, n_max=79),
+        (name="nmax95", p_num=128, zeta_num=256, pz_max=40.0, n_max=95),
+        (name="nmax127", p_num=128, zeta_num=256, pz_max=40.0, n_max=127),
+        (name="nmax159", p_num=128, zeta_num=256, pz_max=40.0, n_max=159),
+        (name="nmax255", p_num=128, zeta_num=256, pz_max=40.0, n_max=255),
+        (name="nmax383", p_num=128, zeta_num=256, pz_max=40.0, n_max=383),
+        (name="nmax511", p_num=128, zeta_num=256, pz_max=40.0, n_max=511),
+    ]
+end
+
+function _quadrature_controls()
+    return [
+        (name="p64", p_num=64, zeta_num=256, pz_max=40.0, n_max=383),
+        (name="p96", p_num=96, zeta_num=256, pz_max=40.0, n_max=383),
+        (name="reference", p_num=128, zeta_num=256, pz_max=40.0, n_max=383),
+        (name="p160", p_num=160, zeta_num=256, pz_max=40.0, n_max=383),
+        (name="pz25", p_num=128, zeta_num=256, pz_max=25.0, n_max=383),
+        (name="pz32", p_num=128, zeta_num=256, pz_max=32.0, n_max=383),
+        (name="pz48", p_num=128, zeta_num=256, pz_max=48.0, n_max=383),
+        (name="zeta64", p_num=128, zeta_num=64, pz_max=40.0, n_max=383),
+        (name="zeta128", p_num=128, zeta_num=128, pz_max=40.0, n_max=383),
+        (name="zeta384", p_num=128, zeta_num=384, pz_max=40.0, n_max=383),
+        (name="zeta512", p_num=128, zeta_num=512, pz_max=40.0, n_max=383),
+    ]
+end
+
+function _solver_cutoff_controls()
+    return [
+        (name="nmax79", p_num=128, zeta_num=384, pz_max=40.0, n_max=79),
+        (name="nmax383", p_num=128, zeta_num=384, pz_max=40.0, n_max=383),
+    ]
+end
+
 function _parse_mode(args::Vector{String})
     mode = :fixed
     i = 1
@@ -85,9 +123,9 @@ function _parse_mode(args::Vector{String})
             i == length(args) && error("missing value for --mode")
             i += 1
             mode = Symbol(lowercase(args[i]))
-            mode in (:fixed, :solver, :branch, :both) || error("mode must be fixed, solver, branch or both")
+            mode in (:fixed, :solver, :branch, :cutoff, :quadrature, :solver_cutoff, :default, :both) || error("mode must be fixed, solver, branch, cutoff, quadrature, solver_cutoff, default or both")
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|branch|both]")
+            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|branch|cutoff|quadrature|solver_cutoff|default|both]")
             exit(0)
         else
             error("unknown option: $arg")
@@ -237,6 +275,7 @@ function _write_header(io)
 end
 
 function _csv(value)
+    value === nothing && return ""
     return value isa AbstractString ? replace(value, ',' => ';') : string(value)
 end
 
@@ -281,7 +320,7 @@ end
 
 function _run_solver_profile(rows, controls, profile::Symbol, output_path::String)
     open(output_path, "w") do io
-        println(io, "profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,node,p_num,zeta_num,pz_max_fm_inv,n_max,candidate_index,seed_index,seed_label,converged,physical,method,iterations,residual_norm,omega_fm4,state_l2_delta_input,status,error,attempt_count,failed_attempts,candidate_count")
+        println(io, "profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,node,p_num,zeta_num,pz_max_fm_inv,configured_n_max,resolved_n_max,candidate_index,seed_index,seed_label,converged,physical,method,iterations,residual_norm,omega_fm4,phi_u,phi_d,phi_s,Phi,PhiBar,state_l2_delta_input,status,error,attempt_count,failed_attempts,candidate_count")
         for row in rows
             for control in controls
                 model, T_fm, μ_fm = profile === :source ?
@@ -315,8 +354,8 @@ function _run_solver_profile(rows, controls, profile::Symbol, output_path::Strin
                     println(io, join(_csv.(Any[
                         String(profile), row.T_MeV, row.muB_MeV, row.eB_GeV2, eB_fm2,
                         control.name, control.p_num, control.zeta_num, control.pz_max,
-                        control.n_max, "", "", "", "", "", "", "", "", "", "",
-                        "solver_error", error_text, 0, 0, 0,
+                        control.n_max, "", "", "", "", "", "", "", "", "", "", "",
+                        "", "", "", "", "", "solver_error", error_text, 0, 0, 0,
                     ]), ','))
                     continue
                 end
@@ -325,14 +364,40 @@ function _run_solver_profile(rows, controls, profile::Symbol, output_path::Strin
                     println(io, join(_csv.(Any[
                         String(profile), row.T_MeV, row.muB_MeV, row.eB_GeV2, eB_fm2,
                         control.name, control.p_num, control.zeta_num, control.pz_max,
-                        control.n_max, candidate_index, candidate.seed_index, seed_label,
+                        control.n_max, candidate.n_max, candidate_index, candidate.seed_index, seed_label,
                         candidate.converged, candidate.physical, candidate.method,
                         candidate.iterations, candidate.residual_norm, candidate.omega,
+                        candidate.x_state[1], candidate.x_state[2], candidate.x_state[3],
+                        candidate.x_state[4], candidate.x_state[5],
                         norm(candidate.x_state - row.state), "ok", "",
                         result.attempt_count, result.failed_attempts, length(result.candidates),
                     ]), ','))
                 end
             end
+        end
+    end
+end
+
+function _run_production_default_probe(rows, output_path::String)
+    control = (name="production_default", p_num=96, zeta_num=64, pz_max=25.0, n_max=nothing)
+    open(output_path, "w") do io
+        println(io, "profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,p_num,zeta_num,pz_max_fm_inv,configured_n_max,resolved_n_max,fixed_residual_norm,fixed_omega_fm4,status")
+        for row in rows
+            model, T_fm, μ_fm = _production_model(row, control)
+            mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+            comp = PNJL.MagneticThermodynamics.calculate_magnetic_omega_components(
+                row.state, mu_vec, T_fm, model.magnetic,
+            )
+            residual = PNJL.magnetic_gap_residual(
+                model, row.state, T_fm, mu_vec;
+                p_num=control.p_num, pz_max=control.pz_max, n_max=comp.n_max,
+            )
+            println(io, join(_csv.(Any[
+                "production", row.T_MeV, row.muB_MeV, row.eB_GeV2,
+                model.magnetic.eB_fm2, control.p_num, control.zeta_num,
+                control.pz_max, control.n_max, comp.n_max, norm(residual),
+                comp.omega, "ok",
+            ]), ','))
         end
     end
 end
@@ -371,6 +436,46 @@ function main(args=ARGS)
         println("source_parity_branch=$source_path")
         println("production_parity_branch=$production_path")
         println("branch_seed_permutations=6 per profile")
+    end
+    if mode == :cutoff
+        cutoff_controls = _cutoff_controls()
+        source_path = joinpath(OUTPUT_DIR, "source_parity_nmax_fixed_state_v1.csv")
+        production_path = joinpath(OUTPUT_DIR, "production_parity_nmax_fixed_state_v1.csv")
+        _run_profile(rows, cutoff_controls, :source, source_path)
+        _run_profile(rows, cutoff_controls, :production, production_path)
+        println("source_parity_nmax=$source_path")
+        println("production_parity_nmax=$production_path")
+        println("nmax_fixed_rows=$(length(rows) * length(cutoff_controls)) per profile")
+    end
+    if mode == :quadrature
+        quadrature_controls = _quadrature_controls()
+        source_path = joinpath(OUTPUT_DIR, "source_parity_quadrature_fixed_state_v1.csv")
+        production_path = joinpath(OUTPUT_DIR, "production_parity_quadrature_fixed_state_v1.csv")
+        _run_profile(rows, quadrature_controls, :source, source_path)
+        _run_profile(rows, quadrature_controls, :production, production_path)
+        println("source_parity_quadrature=$source_path")
+        println("production_parity_quadrature=$production_path")
+        println("quadrature_fixed_rows=$(length(rows) * length(quadrature_controls)) per profile")
+    end
+    if mode == :solver_cutoff
+        solver_cutoff_controls = _solver_cutoff_controls()
+        source_path = joinpath(OUTPUT_DIR, "source_parity_solver_cutoff_v1.csv")
+        production_path = joinpath(OUTPUT_DIR, "production_parity_solver_cutoff_v1.csv")
+        _run_solver_profile(rows, solver_cutoff_controls, :source, source_path)
+        _run_solver_profile(rows, solver_cutoff_controls, :production, production_path)
+        println("source_parity_solver_cutoff=$source_path")
+        println("production_parity_solver_cutoff=$production_path")
+        println("solver_cutoff_rows=$(length(rows) * length(solver_cutoff_controls)) per profile before candidate expansion")
+    end
+    if mode == :default
+        fixed_path = joinpath(OUTPUT_DIR, "production_default_nmax_fixed_state_v1.csv")
+        solver_path = joinpath(OUTPUT_DIR, "production_default_nmax_solver_v1.csv")
+        control = (name="production_default", p_num=96, zeta_num=64, pz_max=25.0, n_max=nothing)
+        _run_production_default_probe(rows, fixed_path)
+        _run_solver_profile(rows, [control], :production, solver_path)
+        println("production_default_nmax_fixed=$fixed_path")
+        println("production_default_nmax_solver=$solver_path")
+        println("production_default_rows=$(length(rows))")
     end
 end
 

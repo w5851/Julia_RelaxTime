@@ -9,15 +9,31 @@
     "source_parity_solver": "source_parity_solver_v1.csv",
     "production_parity_solver": "production_parity_solver_v1.csv",
     "source_parity_branch_repeatability": "source_parity_branch_repeatability_v1.csv",
-    "production_parity_branch_repeatability": "production_parity_branch_repeatability_v1.csv"
+    "production_parity_branch_repeatability": "production_parity_branch_repeatability_v1.csv",
+    "source_parity_nmax_fixed_state": "source_parity_nmax_fixed_state_v1.csv",
+    "production_parity_nmax_fixed_state": "production_parity_nmax_fixed_state_v1.csv",
+    "source_parity_quadrature_fixed_state": "source_parity_quadrature_fixed_state_v1.csv",
+    "production_parity_quadrature_fixed_state": "production_parity_quadrature_fixed_state_v1.csv",
+    "source_parity_solver_cutoff": "source_parity_solver_cutoff_v1.csv",
+    "production_parity_solver_cutoff": "production_parity_solver_cutoff_v1.csv",
+    "production_default_nmax_fixed_state": "production_default_nmax_fixed_state_v1.csv",
+    "production_default_nmax_solver": "production_default_nmax_solver_v1.csv"
   },
   "sha256": {
     "source_parity_fixed_state_v1.csv": "4997CEA880C2CD068E4ACBEF3AF4847E36C9339C3B57B49D387C8A6E64C17ACA",
     "production_parity_fixed_state_v1.csv": "E66A01A2C8AC979EE95B19F01992BE8BB484F235CE28642F83362F159F25B84A",
-    "source_parity_solver_v1.csv": "83EC891AEB4B4188B531EC6CD884270B470D765C0CEC1AA7CB77F93722C8F940",
-    "production_parity_solver_v1.csv": "253584ADD14B68B18BA019AB42D495DAC1274009124FF9DAA5BB0DDA05E5F05B",
+    "source_parity_solver_v1.csv": "0EBC38BEC29BE35C262664A7D8D894B1E9F4ABD01C2EA9E229C94589FBBE5F18",
+    "production_parity_solver_v1.csv": "CECEA52570AE2BBFD6C0B5496F6A01B1C56E2331B40EF5AC4FDFD67979CF7FA7",
     "source_parity_branch_repeatability_v1.csv": "534F24F115A9D7B96100397B6753178E8E20DC726CE2464B8EC76D020B54600D",
-    "production_parity_branch_repeatability_v1.csv": "F65E3983A87660132DDDB6261F304441779FEB60CEBBB12EF84BA083ED8B3FC3"
+    "production_parity_branch_repeatability_v1.csv": "F65E3983A87660132DDDB6261F304441779FEB60CEBBB12EF84BA083ED8B3FC3",
+    "source_parity_nmax_fixed_state_v1.csv": "E33670338665655203A2E3B0FD25FAD6579C8333B4BEEC3BEEE5ECBA5E8005CA",
+    "production_parity_nmax_fixed_state_v1.csv": "718AF4B9AFAD96D1905ED0479CA530FD22D00C612D424F56489981C55800C058",
+    "source_parity_quadrature_fixed_state_v1.csv": "76B21B4060539FF6A1A8D9F9A555BF7D3F7B27E6292796CBD02FCAD725EFB782",
+    "production_parity_quadrature_fixed_state_v1.csv": "A6563D6704776647EC5F5C4C9AA48B8F2D8F0A98E339FB074AEAD5B85E0DC3FE",
+    "source_parity_solver_cutoff_v1.csv": "41B69747A2ED671E0FAA0BF216378E94777E8F91932076A26EF9834ABBD239F6",
+    "production_parity_solver_cutoff_v1.csv": "7E3EE4523EEEBFB1202A6EDB6D86ED719B6BBCDC9743C0C0DC997A609D393CEB",
+    "production_default_nmax_fixed_state_v1.csv": "3CA47C0E97D1401F655616C0FA6327B59FA6CD17382525036AD26B96307FFD92",
+    "production_default_nmax_solver_v1.csv": "3413D26A38593F028A4AB097079A39B99B86EA11E9B8E3D6755EC5A0E804AF50"
   },
   "source_contract": {
     "external_remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
@@ -33,7 +49,8 @@
     "hbarc_MeV_fm": 197.3269804,
     "route": "current_julia_mfir_default",
     "mu_semantics": "muB/3",
-    "purpose": "candidate_julia_validation_target_after_review"
+    "purpose": "candidate_julia_validation_target_after_auto_nmax_fix_and_review",
+    "current_default_status": "blocked_auto_nmax_not_thermal_converged"
   },
   "scope": {
     "anchors": [
@@ -48,6 +65,9 @@
       "landau_probe:p128/zeta256/pz40/nmax95"
     ],
     "solver_nodes": ["matched", "landau_probe"],
+    "nmax_nodes": [31, 47, 63, 79, 95, 127, 159, 255, 383, 511],
+    "quadrature_reference": "p128/zeta256/pz40/nmax383",
+    "quadrature_upper_probes": "p160/zeta512/pz48/nmax383",
     "seed_count": 3,
     "solver": "trust_region_primary_newton_fallback",
     "solver_iterations": 120,
@@ -64,7 +84,16 @@
     "branch_seed_permutations_per_profile": 6,
     "source_candidate_count_per_permutation": 2,
     "production_candidate_count_per_permutation": 1,
-    "repeat_run_byte_identical": true
+    "repeat_run_byte_identical": true,
+    "low_field_high_temperature_converged_nmax_probe": 383,
+    "low_field_high_temperature_omega_delta_n79_to_n383_fm4": -0.00017730114877423375,
+    "low_field_high_temperature_state_l2_delta_n79_to_n383": 1.5279434864190956e-5,
+    "production_default_resolved_nmax": {
+      "T50_eB0.2": 4,
+      "T240_eB0.2": 3,
+      "T240_eB0.8": 3
+    },
+    "production_blocker": "Auto n_max is not temperature-aware and is resolved independently per seed before candidate Omega ordering."
   },
-  "boundary": "No branch-completeness claim, no formal validation admission, no full magnetic scan, no C0/C1/C2 rerun."
+  "boundary": "Production auto-nmax blocker found; no branch-completeness claim, no formal validation admission, no full magnetic scan, no C0/C1/C2 rerun."
 }

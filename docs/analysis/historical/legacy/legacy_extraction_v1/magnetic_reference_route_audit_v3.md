@@ -89,8 +89,12 @@ replay 当成磁场物理正确性的外部证明。
   对照；匹配节点下 Omega 差最大约 `1.18e-12`。`T=240 MeV,eB=0.8 GeV^2`
   发现第二个物理候选，说明 branch-aware 输出确有必要。外部实现仍是一 seed
   continuation，不是 Julia 的多 seed candidate 集合。
-- **待完成**：独立 `p_z`、Landau level、zeta 节点收敛矩阵、正式输出字段映射和
-  branch-policy/target admission；筛查节点下的差异不能替代匹配节点收敛证据。
+- **已完成诊断矩阵、仍不得接纳**：`pnjl_mag_convergence_v1/` 已记录独立
+  `n_max=31..511`、`p_num/p_z/zeta` 解耦矩阵、`n_max=79/383` 重求解和高温高场
+  seed-order 重复性；source/production CSV 严格分离。矩阵显示低场高温需要约
+  `n_max=383` 才稳定，而当前 production auto-`n_max` 实际只解析为 `3/4`，且为
+  每个 seed 独立解析。因此必须先修复共同的、温度感知的 thermal cutoff 合同，再
+  讨论正式输出字段映射、branch policy 和 target admission。
 - **已有数据但不接纳**：`orders_muB0.csv` 和 `reduced_magnetic_susceptibilities_muB0.csv`
   的行数、范围、hash 和生成口径已登记；它们只有 `muB=0`，输出没有完整 solver
   status/候选分支/独立收敛矩阵，因此目前只能作为诊断输入清单。
@@ -122,7 +126,8 @@ replay 当成磁场物理正确性的外部证明。
    正则化的数值混成一个 target。
 
 源码和外部 equilibrium 可重放性、有限范围的跨求解器 adapter 已不再阻塞；当前阻塞点是
-numeric convergence、正式 output schema、branch policy 和 target admission。不重跑
+production auto-`n_max` 合同、扩展 numeric convergence、正式 output schema、branch policy
+和 target admission。不重跑
 C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay 直接复制成 target。
 
 ## 主项目待办边界
