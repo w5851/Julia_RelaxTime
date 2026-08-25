@@ -64,6 +64,13 @@ target，也不能用本目录的 `n_max=383` 直接替换成全域常数。后�
 温度感知的 thermal Landau 尾项截断合同，并让同一点的全部 seed/attempt 使用同一
 截断后，才能重新评估 production acceptance。
 
+作为候选合同的短诊断，使用同一点共享的
+`E_tail=max(|mu|+k*T,mass)` 推导 `n_max`，并以 `n_max=511` 做局部参考：低场高温
+`k=24` 给出 `n_max=249`、Omega 差约 `1.13e-8 fm^-4`，`k=30` 给出 `n_max=389`、
+差约 `3.84e-11 fm^-4`；高场点对应差异约 `9.7e-9` 和 `3.4e-11 fm^-4`。低温点
+`k=16` 后已稳定。这个结果支持温度感知、同点共享截断的设计方向，但不是全域
+接受标准；`k`、尾项误差、真实 root solver 和更多 `T/mu/eB` 点仍需单独审计。
+
 ## 文件
 
 - `source_parity_fixed_state_v1.csv`：source-parity 外部状态固定点评估；
@@ -81,6 +88,8 @@ target，也不能用本目录的 `n_max=383` 直接替换成全域常数。后�
   `n_max=79/383` 的独立重求解；
 - `production_default_nmax_fixed_state_v1.csv`、`production_default_nmax_solver_v1.csv`：
   当前默认 auto-`n_max` 的实际解析层数和求解结果；
+- `source_parity_thermal_cutoff_fixed_state_v1.csv`、`production_parity_thermal_cutoff_fixed_state_v1.csv`：
+  `k={12,16,20,24,30,36}` 的温度感知截断候选诊断；
 - `manifest.json`、`provenance.json`：schema、输入、脚本、hash 和结果边界。
 
 生成命令：
@@ -92,6 +101,7 @@ julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_conve
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode quadrature
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode solver_cutoff
 julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode default
+julia --startup-file=no --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl --mode thermal_cutoff
 ```
 
 本目录所有结果均为 `diagnostic_only`。在修复 auto-`n_max` production blocker、补充

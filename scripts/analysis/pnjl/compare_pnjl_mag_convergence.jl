@@ -114,6 +114,10 @@ function _solver_cutoff_controls()
     ]
 end
 
+function _thermal_cutoff_factors()
+    return (12.0, 16.0, 20.0, 24.0, 30.0, 36.0)
+end
+
 function _parse_mode(args::Vector{String})
     mode = :fixed
     i = 1
@@ -123,9 +127,9 @@ function _parse_mode(args::Vector{String})
             i == length(args) && error("missing value for --mode")
             i += 1
             mode = Symbol(lowercase(args[i]))
-            mode in (:fixed, :solver, :branch, :cutoff, :quadrature, :solver_cutoff, :default, :both) || error("mode must be fixed, solver, branch, cutoff, quadrature, solver_cutoff, default or both")
+            mode in (:fixed, :solver, :branch, :cutoff, :quadrature, :solver_cutoff, :default, :thermal_cutoff, :both) || error("mode must be fixed, solver, branch, cutoff, quadrature, solver_cutoff, default, thermal_cutoff or both")
         elseif arg in ("-h", "--help")
-            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|branch|cutoff|quadrature|solver_cutoff|default|both]")
+            println("Usage: julia --project=. scripts/analysis/pnjl/compare_pnjl_mag_convergence.jl [--mode fixed|solver|branch|cutoff|quadrature|solver_cutoff|default|thermal_cutoff|both]")
             exit(0)
         else
             error("unknown option: $arg")
@@ -402,6 +406,58 @@ function _run_production_default_probe(rows, output_path::String)
     end
 end
 
+function _thermal_nmax_candidate(model, row, T_fm, mu_fm, factor::Real)
+    μabs = abs(Float64(mu_fm))
+    conf = model.magnetic
+    comp = PNJL.MagneticThermodynamics.calculate_magnetic_omega_components(
+        row.state, SVector{3, Float64}(mu_fm, mu_fm, mu_fm), T_fm, conf;
+        p_num=128, pz_max=40.0, n_max=0,
+    )
+    charges = (2 / 3, 1 / 3, 1 / 3)
+    levels = Int[]
+    for (mass, q_abs) in zip(comp.masses, charges)
+        target = max(μabs + Float64(factor) * Float64(T_fm), Float64(mass))
+        n = ceil(Int, max(0.0, target^2 - Float64(mass)^2) / (2 * q_abs * conf.eB_fm2))
+        push!(levels, n)
+    end
+    return maximum(levels), comp.masses
+end
+
+function _run_thermal_cutoff_profile(rows, profile::Symbol, output_path::String)
+    factors = _thermal_cutoff_factors()
+    open(output_path, "w") do io
+        println(io, "profile,T_MeV,muB_MeV,eB_GeV2,eB_fm_minus2,factor_k,n_max_candidate,n_max_reference,mass_u,mass_d,mass_s,fixed_residual_norm,omega_fm4,omega_delta_vs_reference,status")
+        for row in rows
+            for factor in factors
+                control = (name="thermal", p_num=128, zeta_num=512, pz_max=40.0, n_max=nothing)
+                model, T_fm, μ_fm = profile === :source ?
+                    _source_model(row, control) : _production_model(row, control)
+                mu_vec = SVector{3, Float64}(μ_fm, μ_fm, μ_fm)
+                n_candidate, masses = _thermal_nmax_candidate(model, row, T_fm, μ_fm, factor)
+                n_reference = 511
+                omega = PNJL.MagneticThermodynamics.calculate_magnetic_omega_components(
+                    row.state, mu_vec, T_fm, model.magnetic;
+                    p_num=128, pz_max=40.0, n_max=n_candidate,
+                )
+                reference = PNJL.MagneticThermodynamics.calculate_magnetic_omega_components(
+                    row.state, mu_vec, T_fm, model.magnetic;
+                    p_num=128, pz_max=40.0, n_max=n_reference,
+                )
+                residual = PNJL.magnetic_gap_residual(
+                    model, row.state, T_fm, mu_vec;
+                    p_num=128, pz_max=40.0, n_max=n_candidate,
+                )
+                println(io, join(_csv.(Any[
+                    String(profile), row.T_MeV, row.muB_MeV, row.eB_GeV2,
+                    model.magnetic.eB_fm2, factor, n_candidate, n_reference,
+                    masses[1], masses[2], masses[3], norm(residual), omega.omega,
+                    omega.omega - reference.omega, "ok",
+                ]), ','))
+            end
+        end
+    end
+end
+
 function main(args=ARGS)
     mode = _parse_mode(args)
     rows = _read_rows(INPUT_CSV)
@@ -476,6 +532,15 @@ function main(args=ARGS)
         println("production_default_nmax_fixed=$fixed_path")
         println("production_default_nmax_solver=$solver_path")
         println("production_default_rows=$(length(rows))")
+    end
+    if mode == :thermal_cutoff
+        source_path = joinpath(OUTPUT_DIR, "source_parity_thermal_cutoff_fixed_state_v1.csv")
+        production_path = joinpath(OUTPUT_DIR, "production_parity_thermal_cutoff_fixed_state_v1.csv")
+        _run_thermal_cutoff_profile(rows, :source, source_path)
+        _run_thermal_cutoff_profile(rows, :production, production_path)
+        println("source_parity_thermal_cutoff=$source_path")
+        println("production_parity_thermal_cutoff=$production_path")
+        println("thermal_cutoff_rows=$(length(rows) * length(_thermal_cutoff_factors())) per profile")
     end
 end
 
