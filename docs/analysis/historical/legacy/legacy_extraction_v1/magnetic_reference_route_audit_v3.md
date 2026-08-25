@@ -2,11 +2,11 @@
 
 ## 状态
 
-`pnjl_mag_local_equilibrium_replay_passed_pending_cross_solver_target_gate`。本页已完成参考论文
+`pnjl_mag_cross_solver_diagnostic_passed_pending_convergence_target_gate`。本页已完成参考论文
 和 `pnjl_mag` 源码的静态 source-gate，并已固定仓库、commit、关键文件 hash 和
 合同差异；当前已在本机重放外部单 seed equilibrium continuation，并保留 9 个代表点，
 同时仅接纳一个 fixed-state `Omega` kernel-only oracle。外部 equilibrium 重放仍为
-`diagnostic_only`，尚未形成 Julia/外部跨求解器 acceptance target。
+`diagnostic_only`；已形成小规模 Julia/外部跨求解器对照，但尚未形成 acceptance target。
 
 机器可读 gate 表：
 [`tables/pnjl_mag_source_gate_v1.csv`](tables/pnjl_mag_source_gate_v1.csv)。
@@ -85,9 +85,12 @@ replay 当成磁场物理正确性的外部证明。
   `hbarc=197.3269804` 不完全相同，接纳前必须固定换算常数。
 - **不一致**：外部允许 `eB=0` 并对负值取绝对值；Julia 生产契约只接受
   `eB >= 100 MeV^2` 的正标量。
-- **待完成**：`p_z`、Landau level、zeta 节点收敛，输出字段映射，以及多分支/局部
-  根语义的对照。外部实现是一 seed continuation，不是 Julia 的多 seed candidate
-  集合。
+- **已完成诊断、未完成接纳**：9 点筛查和 3 个高温匹配节点已完成 Julia 多 seed
+  对照；匹配节点下 Omega 差最大约 `1.18e-12`。`T=240 MeV,eB=0.8 GeV^2`
+  发现第二个物理候选，说明 branch-aware 输出确有必要。外部实现仍是一 seed
+  continuation，不是 Julia 的多 seed candidate 集合。
+- **待完成**：独立 `p_z`、Landau level、zeta 节点收敛矩阵、正式输出字段映射和
+  branch-policy/target admission；筛查节点下的差异不能替代匹配节点收敛证据。
 - **已有数据但不接纳**：`orders_muB0.csv` 和 `reduced_magnetic_susceptibilities_muB0.csv`
   的行数、范围、hash 和生成口径已登记；它们只有 `muB=0`，输出没有完整 solver
   status/候选分支/独立收敛矩阵，因此目前只能作为诊断输入清单。
@@ -97,6 +100,11 @@ replay 当成磁场物理正确性的外部证明。
   `orders_muB0.csv` 逐字段一致，最大 gap residual 为 `1.65e-13`。证据见
   [`pnjl_mag_equilibrium_replay_v1/`](pnjl_mag_equilibrium_replay_v1/)。该路线仍只有一个
   continuation 分支，不能证明 Julia 多 seed candidate 集合等价。
+- **跨求解器诊断通过但不接纳**：[`pnjl_mag_cross_solver_replay_v1/`](pnjl_mag_cross_solver_replay_v1/)
+  在全部 9 点做筛查，并对 `T=240 MeV` 的 3 点使用匹配节点；匹配节点下外部状态
+  residual 最大约 `3.1e-12`、Omega 差最大约 `1.2e-12`。`eB=0.8 GeV^2` 的高温点
+  找到两个物理候选，外部 continuation 分支为较低 Omega 候选。该证据尚不包含
+  全分支完备性或独立收敛矩阵。
 - **已接纳的最小外部 oracle**：`tests/validation/data/targets/pnjl/reference/`
   中的单点 `Omega` 只验证 MFIR kernel；测试显式记录外部 `hc=197.33` 的单位映射，
   不调用 root solver，也不约束 equilibrium branch 或扫描。
@@ -104,17 +112,17 @@ replay 当成磁场物理正确性的外部证明。
 后续接入流程如下：
 
 1. 已固定可重放的依赖、生成脚本、参数清单，并建立外部单分支诊断输出 schema；
-2. 下一步对代表点执行 Julia 多 seed candidate 重放，显式匹配或区分 continuation
-   分支，而不是只比较一个 residual-pass 根；
-3. 只有在 source consistency、branch clarity、有限性和收敛门槛通过后，才把轻量
+2. 已对代表点执行 Julia 多 seed candidate 重放，显式记录 continuation 分支和额外
+   候选；
+3. 下一步完成 source consistency、branch clarity、有限性和收敛门槛后，才把轻量
    fixed-point CSV 放入 `tests/validation/data/targets/`；原始输出只留在外部 provenance
    或分析目录；
 4. 若 `pnjl_mag` 的具体公式或参数合同与当前 Julia MFIR 路线不一致，建立独立
    validation family，不把不同
    正则化的数值混成一个 target。
 
-源码和外部 equilibrium 可重放性已不再阻塞；当前阻塞点是跨求解器 branch adapter、
-numeric convergence 和 target admission。不重跑
+源码和外部 equilibrium 可重放性、有限范围的跨求解器 adapter 已不再阻塞；当前阻塞点是
+numeric convergence、正式 output schema、branch policy 和 target admission。不重跑
 C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay 直接复制成 target。
 
 ## 主项目待办边界
@@ -122,7 +130,7 @@ C0/C1/C2，不扩展 Fortran 的 `n_max` 收敛扫描，也不把历史 replay �
 - **已完成的主项目路线决策**：正式 profile `a=0.0108805` 已接入
   `magnetic_default.toml`；MFIR/Hurwitz-zeta 为默认生产真空路线，完整
   smooth-Landau 只通过 `route=:landau_legacy` 保留为历史/诊断路线。
-- **必须后续处理**：在不改变生产路线的前提下，对已固定的外部代表点补充 Julia
-  多分支重放、积分收敛和分支映射，再决定是否生成轻量 equilibrium acceptance targets。
+- **必须后续处理**：在不改变生产路线的前提下，补充多节点收敛矩阵、固定 branch
+  policy 和正式输出映射，再决定是否生成轻量 equilibrium acceptance targets。
 - **不在本轮**：Maxwell 自能、磁化率、各向异性压力、FixedRho/phase magnetic
   workflow、全域磁场扫描和 C0/C1/C2 重跑。

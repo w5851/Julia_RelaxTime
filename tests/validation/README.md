@@ -75,6 +75,11 @@ The external locked environment has also been replayed locally through the autho
 descending one-seed temperature continuation. Nine representative equilibrium rows,
 source hashes, residuals, and exact comparison with the committed external CSV are in
 `docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_equilibrium_replay_v1/`.
+The follow-up cross-solver diagnostic is in
+`docs/analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_cross_solver_replay_v1/`:
+all nine points were screened with Julia multi-seed solving, and three `T=240 MeV`
+points were replayed with matched quadrature nodes. The matched run remains diagnostic
+only; its branch and convergence gates are not acceptance targets.
 Until the remaining numerical
 convergence, ensemble adapter, branch policy, and output schema gates are closed,
 all equilibrium rows remain evidence/diagnostic rather than targets. One explicitly

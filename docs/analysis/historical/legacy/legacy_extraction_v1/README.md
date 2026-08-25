@@ -78,6 +78,12 @@ The current-machine replay of the external one-seed equilibrium continuation is 
 [`pnjl_mag_equilibrium_replay_v1/`](pnjl_mag_equilibrium_replay_v1/). It retains only
 nine representative rows and records source/dependency hashes, residuals, wall time,
 and exact state agreement with the committed external CSV. It remains diagnostic-only.
+The small Julia/external cross-solver diagnostic is in
+[`pnjl_mag_cross_solver_replay_v1/`](pnjl_mag_cross_solver_replay_v1/). It covers all
+nine points at screening nodes and three high-temperature points at matched nodes;
+the matched run reproduces the external Omega branch and exposes an additional
+candidate at `T=240 MeV, eB=0.8 GeV^2`. It remains diagnostic-only and does not close
+the convergence or all-branch gates.
 The current Mott integral audit statistics are recorded in the main validation
 provenance file
 [`tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv`](../../../../../tests/validation/data/provenance/relaxtime/evidence/relaxtime_mott_integral_external_crosscheck_v1.csv).
@@ -86,9 +92,9 @@ numeric convergence/ensemble/output/branch gates and the Mott convention gate
 remain open. The v2 replay supplies only same-kernel diagnostic states; the paper-route
 audit now marks smooth-Landau as non-acceptance until the regularization is
 resolved. The selected external source is `pnjl_mag`; its repository and commit are
-fixed, and one fixed-state `Omega` kernel-only oracle has been admitted. The remaining
-work is matched Julia/external branch comparison plus numeric convergence and
-branch-policy gates; the local external-only equilibrium replay does not close them.
+fixed, and one fixed-state `Omega` kernel-only oracle has been admitted. The matched
+Julia/external branch diagnostic is now recorded, but numeric convergence, formal
+output schema and branch-policy gates remain open; no equilibrium target is admitted.
 The original point list is recorded in
 [`magnetic_external_validation_point_plan_v1.csv`](tables/magnetic_external_validation_point_plan_v1.csv).
 
