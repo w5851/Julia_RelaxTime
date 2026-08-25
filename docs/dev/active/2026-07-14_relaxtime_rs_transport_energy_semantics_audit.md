@@ -442,6 +442,15 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - GitHub Student 认证可能提高 public-hosted runner 的并发额度，但不把额度当作无限容量：先以 6--10 个总并发组成调度波次，观察 queued/in-progress 与单 shard wall time，再扩展到其余已授权 shard；这只是调度控制，不是数值 pilot。
 - A/B aggregate 只有在全部 shard provenance、key 并集、finite/converged、重复键、失败点和成本审计通过后生成；结果继续保持 `diagnostic-only`，不得覆盖历史 `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1` 或直接晋升 production。
 
+### 8.9 M4 分片 dispatch 记录（2026-08-25）
+
+- PR #266 已在 focused CI 全绿后 squash merge，workflow head 为 `22874505877491754eed27519ad8a7b871c82571`；执行 ref 为 `codex/issue130-rs-sharded-run-v2`，base 为该 merge SHA。数值 case 固定为 `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`，calculation SHA 固定为 `3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`。
+- 30 个唯一 dispatch 已提交：
+  - mode-A：`32817419175` (`A_mu0_a10_full`)、`32817421815` (`A_mu0_a11_full`)、`32817424871` (`A_mu0_a12_full`)、`32817427980` (`A_mu450_a10_neg`)、`32817431677` (`A_mu450_a10_pos`)、`32817529717` (`A_mu450_a11_neg`)、`32817532839` (`A_mu450_a11_pos`)、`32817535505` (`A_mu450_a12_neg`)、`32817538589` (`A_mu450_a12_pos`)、`32817541560` (`A_mu900_a10_neg`)、`32817544844` (`A_mu900_a10_pos`)、`32817549646` (`A_mu900_a11_neg`)、`32817552946` (`A_mu900_a11_pos`)、`32817555686` (`A_mu900_a12_neg`)、`32817559249` (`A_mu900_a12_pos`)。
+  - mode-B：`32817434357` (`B_T120_mu0_full`)、`32817437525` (`B_T160_mu0_full`)、`32817439861` (`B_T200_mu0_full`)、`32817442542` (`B_T120_mu450_neg`)、`32817445213` (`B_T120_mu450_pos`)、`32817562105` (`B_T160_mu450_neg`)、`32817566643` (`B_T160_mu450_pos`)、`32817570850` (`B_T200_mu450_neg`)、`32817573728` (`B_T200_mu450_pos`)、`32817577977` (`B_T120_mu900_neg`)、`32817580774` (`B_T120_mu900_pos`)、`32817583483` (`B_T160_mu900_neg`)、`32817586501` (`B_T160_mu900_pos`)、`32817589187` (`B_T200_mu900_neg`)、`32817592217` (`B_T200_mu900_pos`)。
+- 由于批量 dispatch 输出截断，曾误提交一组相同 label 的重复 B runs；以下 10 个重复 run 已全部请求取消并记录为调度事故，不纳入 aggregate：`32817608059`、`32817612099`、`32817614679`、`32817617122`、`32817623140`、`32817626448`、`32817629180`、`32817632016`、`32817634309`、`32817636849`。它们没有新的输入合同，也不替代 30 个唯一 shard。
+- dispatch 时观察到约 29 个 job `in_progress`、其余少量 `queued`，说明学生认证/账户额度确实允许明显高于历史的并发；仍以 Actions 实际状态为准，不将并发额度写成数值性能结论。下一步只对唯一 shard 做 hard-gate、cost、failed-only 和 expected-key 审计。
+
 ## 9. 里程碑
 
 ### M0：公式来源与审计 gate（当前 Draft PR）

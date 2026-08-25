@@ -47,13 +47,13 @@ status = "active"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
-next_action = "run 32709280462 已记录为 runner_communication_lost；使用历史 15+15 shard 拓扑，固定 calculation SHA 与 direct-coexistence 两侧点合同，mode-A/mode-B 分开 dispatch 并受控并行。"
+next_action = "30 个唯一 RS numerical shards 已从 merge workflow head 22874505877491754eed27519ad8a7b871c82571 dispatch；等待逐 shard hard-gate、成本和 provenance 审计，重复 dispatch 已取消。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-rs-sharded-production"
-current_sha = "c154c9d2aff0e8d28acc07f635793f7a086a97f8"
-run_ids = ["32354095831", "32451053476", "32684074876", "32709280462"]
+current_sha = "17684580e67a95f7f5c5d56e6a9efbe4ad4307be"
+run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
   "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/",
@@ -70,6 +70,10 @@ evidence = [
   "pr:263",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
   "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8",
+  "sha:17684580e67a95f7f5c5d56e6a9efbe4ad4307be",
+  "sha:22874505877491754eed27519ad8a7b871c82571",
+  "note:rs_sharded_prod_v2_30_unique_dispatches_20260825",
+  "note:rs_sharded_prod_v2_duplicate_dispatches_cancelled_32817608059_32817612099_32817614679_32817617122_32817623140_32817626448_32817629180_32817632016_32817634309_32817636849",
   "note:32709280462_runner_communication_lost_no_numerical_verdict_no_artifact",
   "note:rs_sharded_rerun_authorized_historical_15plus15_topology_mode_ab_parallel_direct_coexistence_side_points_preserved",
 ]
@@ -196,10 +200,10 @@ status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
 reason = "RS production 依赖新的高精度 phase reference；旧 production 和 registry 历史保持不可变。"
-next_action = "将 32709280462 固化为 runner_communication_lost；不做 pilot，按历史 15+15 shard 矩阵分别 dispatch mode-A/mode-B，保留 mode-A direct-coexistence 的 xi=±0.003 两侧点并在 aggregate 前做 expected-key audit。"
+next_action = "30 个唯一 15+15 shards 已 dispatch；逐 shard 完成后先做 failed-only/provenance/key 合并审计，再生成 A/B aggregate diagnostic-only evidence。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel"]
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "sha:22874505877491754eed27519ad8a7b871c82571", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_dispatched_no_pilot_mode_ab_parallel", "note:duplicate_dispatches_cancelled"]
 
 [[items]]
 id = "issue130-targeted-closure-diagnostic"
