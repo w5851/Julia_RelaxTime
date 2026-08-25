@@ -47,12 +47,12 @@ status = "active"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
-next_action = "mode-A run 32709280462 运行中；验收 hard gates、完整性、telemetry、成本和 reference provenance，通过后才运行 mode-B。"
+next_action = "run 32709280462 已记录为 runner_communication_lost；使用历史 15+15 shard 拓扑，固定 calculation SHA 与 direct-coexistence 两侧点合同，mode-A/mode-B 分开 dispatch 并受控并行。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-rs-candidate-production"
-current_sha = "b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"
+current_branch = "codex/issue130-rs-sharded-production"
+current_sha = "c154c9d2aff0e8d28acc07f635793f7a086a97f8"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -69,6 +69,9 @@ evidence = [
 "run:32709280462",
   "pr:263",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
+  "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8",
+  "note:32709280462_runner_communication_lost_no_numerical_verdict_no_artifact",
+  "note:rs_sharded_rerun_authorized_historical_15plus15_topology_mode_ab_parallel_direct_coexistence_side_points_preserved",
 ]
 updated_at = "2026-08-24"
 
@@ -193,10 +196,10 @@ status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md"
 reason = "RS production 依赖新的高精度 phase reference；旧 production 和 registry 历史保持不可变。"
-next_action = "验收 mode-A run 32709280462；若 hard gates 通过，再以同一 merge SHA 和新 case 串行运行 mode-B，随后生成 candidate evidence package。"
+next_action = "将 32709280462 固化为 runner_communication_lost；不做 pilot，按历史 15+15 shard 矩阵分别 dispatch mode-A/mode-B，保留 mode-A direct-coexistence 的 xi=±0.003 两侧点并在 aggregate 前做 expected-key audit。"
 blocked_by = []
 backlog_file = ""
-evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"]
+evidence = ["file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md", "run:32709280462", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "sha:c154c9d2aff0e8d28acc07f635793f7a086a97f8", "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48", "note:runner_communication_lost_no_solver_verdict", "note:15plus15_shards_no_pilot_mode_ab_parallel"]
 
 [[items]]
 id = "issue130-targeted-closure-diagnostic"
