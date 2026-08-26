@@ -104,6 +104,24 @@ Models.pnjl_module()
             cutoff_N=10,
         )
         @test resolved_nmax >= 0
+
+        # The thermal-tail profile is a physical-point policy, not a per-seed
+        # policy. Distinct seeds must therefore resolve to the same Landau
+        # layer count before the solver enters NLsolve.
+        alternate_seed = SVector{5}(-1.1, -1.1, -1.7, 0.4, 0.4)
+        resolved_alt = Models._resolve_magnetic_attempt_nmax(
+            m,
+            alternate_seed,
+            0.7,
+            μ;
+            xi=0.0,
+            p_num=4,
+            t_num=4,
+            pz_max=5.0,
+            n_max=nothing,
+            cutoff_N=10,
+        )
+        @test resolved_alt == resolved_nmax
     end
 
     @testset "Hessian 只提供诊断，不拒绝驻点" begin

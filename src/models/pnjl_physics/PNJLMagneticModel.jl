@@ -46,6 +46,10 @@ function PNJLMagneticModel(
     cutoff_N::Union{Nothing, Int}=nothing,
     route::Union{Nothing, Symbol}=nothing,
     zeta_num::Union{Nothing, Int}=nothing,
+    n_max_policy::Union{Nothing, Symbol}=nothing,
+    thermal_tail_factor::Union{Nothing, Real}=nothing,
+    n_max_floor::Union{Nothing, Int}=nothing,
+    n_max_cap::Union{Nothing, Int}=nothing,
     imc=nothing,
     kwargs...,
 )
@@ -67,6 +71,10 @@ function PNJLMagneticModel(
         imc=imc_params,
         route=route === nothing ? config_defaults.route : route,
         zeta_num=zeta_num === nothing ? config_defaults.zeta_num : zeta_num,
+        n_max_policy=n_max_policy === nothing ? config_defaults.n_max_policy : n_max_policy,
+        thermal_tail_factor=thermal_tail_factor === nothing ? config_defaults.thermal_tail_factor : thermal_tail_factor,
+        n_max_floor=n_max_floor === nothing ? config_defaults.n_max_floor : n_max_floor,
+        n_max_cap=n_max_cap === nothing ? config_defaults.n_max_cap : n_max_cap,
         params=base.params,
     )
     return PNJLMagneticModel(base, conf)

@@ -5,14 +5,20 @@ route = "mfir"
 # eB (fm^-2), where electric charge e is included. Must be >= 100/hbarc^2.
 eB_fm2 = 0.10
 
-# Landau truncation; set to -1 to enable auto estimation.
+# Landau truncation. An explicit nonnegative value overrides the profile.
 n_max = -1
+# Shared cutoff policy used when n_max=-1. The thermal-tail policy is resolved
+# once per physical point and reused by every seed/attempt.
+n_max_policy = "thermal_tail"
+thermal_tail_factor = 30.0
+n_max_floor = 3
+n_max_cap = 10000
 
 # pz integration settings
-p_num = 96
-pz_max = 25.0
+p_num = 128
+pz_max = 40.0
 cutoff_N = 10
-zeta_num = 64
+zeta_num = 256
 
 [magnetic.imc]
 # G(B)=G0*(1+aζ^2+bζ^3)/(1+cζ^2+dζ^4), ζ=eB/Λ_QCD^2

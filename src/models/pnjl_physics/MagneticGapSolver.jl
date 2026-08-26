@@ -40,8 +40,8 @@ end
 
 The Landau cutoff is discrete, so callers must provide a fixed `n_max` for
 the differentiable kernel. `solve_magnetic_gap` resolves that cutoff once per
-seed before entering NLsolve and reuses it for both the primary and fallback
-attempts.
+physical point before entering the seed loop and reuses it for every primary
+and fallback attempt.
 """
 function gap_residual(model::PNJLMagneticModel, x, T_fm, mu_vec; kwargs...)
     return magnetic_gap_residual(model, x, T_fm, mu_vec; kwargs...)
@@ -133,7 +133,7 @@ function magnetic_gap_residual(
 )
     n_max_value = n_max === nothing ? model.magnetic.n_max : n_max
     n_max_value !== nothing || throw(ArgumentError(
-        "magnetic AD residual requires a fixed n_max; solve_magnetic_gap resolves it per seed",
+        "magnetic AD residual requires a fixed n_max; solve_magnetic_gap resolves it per physical point",
     ))
     n_max_value >= 0 || throw(ArgumentError("magnetic AD residual requires n_max >= 0, got $(n_max_value)"))
     μ = _magnetic_solver_validate(model, T_fm, mu_vec, xi)
@@ -178,19 +178,23 @@ function _resolve_magnetic_attempt_nmax(
     end
 
     thermo = _magnetic_thermodynamics_module()
-    components = thermo.calculate_magnetic_omega_components(
-        seed,
-        μ,
-        T_fm,
-        model.magnetic;
-        xi=xi,
-        p_num=p_num,
-        t_num=t_num,
-        pz_max=pz_max,
-        n_max=nothing,
-        cutoff_N=cutoff_N,
-    )
-    resolved = Int(components.n_max)
+    masses = nothing
+    if model.magnetic.n_max_policy === :vacuum_cutoff
+        components = thermo.calculate_magnetic_omega_components(
+            seed,
+            μ,
+            T_fm,
+            model.magnetic;
+            xi=xi,
+            p_num=p_num,
+            t_num=t_num,
+            pz_max=pz_max,
+            n_max=nothing,
+            cutoff_N=cutoff_N,
+        )
+        masses = components.masses
+    end
+    resolved = Int(thermo.resolve_magnetic_nmax(T_fm, μ, model.magnetic; masses=masses))
     resolved >= 0 || throw(ArgumentError("resolved magnetic n_max must be >= 0, got $(resolved)"))
     return resolved
 end
@@ -373,20 +377,20 @@ function solve_magnetic_gap(
         seed_candidates=seed_candidates,
         include_default_seeds=include_default_seeds,
     )
+    n_max_shared = _resolve_magnetic_attempt_nmax(model, seeds[1], T_fm, μ;
+        xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
     attempts = NamedTuple[]
     for seed in seeds
-        n_max_seed = _resolve_magnetic_attempt_nmax(model, seed, T_fm, μ;
-            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max, cutoff_N=cutoff_N)
         primary = _magnetic_attempt(model, seed, T_fm, μ, method_eff;
             xtol=xtol_eff, ftol=ftol_eff, iterations=iterations,
             residual_norm_max=residual_norm_max,
-            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_seed, cutoff_N=cutoff_N)
+            xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_shared, cutoff_N=cutoff_N)
         push!(attempts, primary)
         if !primary.converged && fallback_method !== nothing && fallback_method != method_eff
             fallback = _magnetic_attempt(model, seed, T_fm, μ, fallback_method;
                 xtol=xtol_eff, ftol=ftol_eff, iterations=iterations,
                 residual_norm_max=residual_norm_max,
-                xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_seed, cutoff_N=cutoff_N)
+                xi=xi, p_num=p_num_eff, t_num=t_num, pz_max=pz_max, n_max=n_max_shared, cutoff_N=cutoff_N)
             push!(attempts, fallback)
         end
     end

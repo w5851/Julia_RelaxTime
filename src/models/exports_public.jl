@@ -87,6 +87,7 @@ export DEFAULT_ZETA_COUNT, zeta_nodes, zeta_prime_minus_one, omega_magnetic_mfir
 export omega0_flavor_landau, omegat_flavor_landau, density_flavor_landau
 export MagneticIMCParams, default_imc_params, coupling_GB
 export MagneticConfig, default_magnetic_config
+export resolve_magnetic_nmax
 export calculate_magnetic_omega_components, calculate_magnetic_omega
 export calculate_magnetic_pressure, calculate_magnetic_rho
 export calculate_magnetic_number_densities
