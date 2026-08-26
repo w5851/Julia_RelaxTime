@@ -39,6 +39,8 @@ const SELECTED_HEADER = join((
     "mu_MeV",
     "eB_MeV2",
     "xi",
+    "cutoff_policy",
+    "configured_n_max",
     "selected_candidate_index",
     "branch_label",
     "method",
@@ -71,6 +73,8 @@ const CANDIDATE_HEADER = join((
     "mu_MeV",
     "eB_MeV2",
     "xi",
+    "cutoff_policy",
+    "configured_n_max",
     "candidate_index",
     "seed_index",
     "branch_label",
@@ -189,23 +193,29 @@ end
 @inline _field(value::AbstractString) = _quote(value)
 @inline _field(value::Symbol) = _quote(value)
 
+@inline _cutoff_policy(model::PNJLMagneticModel) = model.magnetic.n_max_policy
+@inline _configured_n_max(model::PNJLMagneticModel) =
+    model.magnetic.n_max === nothing ? "auto" : string(model.magnetic.n_max)
+
 function _candidate_mass_mev(model::PNJLMagneticModel, candidate::MagneticGapCandidate)
     masses = calculate_mass_vec(model, candidate.x_state[1:3])
     return masses .* ħc_MeV_fm
 end
 
-function _write_failed_selected!(io, T, mu, eB, xi, message)
+function _write_failed_selected!(io, T, mu, eB, xi, model, message)
     values = (
-        T, mu, eB, xi, 0, :none, :none, 0, 0,
+        T, mu, eB, xi, _cutoff_policy(model), _configured_n_max(model),
+        0, :none, :none, 0, 0,
         (fill(NaN, 17)...),
         0, false, message,
     )
     println(io, join((_field(value) for value in values), ','))
 end
 
-function _write_selected!(io, T, mu, eB, xi, result, candidate, thermo, masses, rho_vec, message)
+function _write_selected!(io, T, mu, eB, xi, result, candidate, model, thermo, masses, rho_vec, message)
     values = (
-        T, mu, eB, xi, result.selected_index, candidate.branch_label, candidate.method,
+        T, mu, eB, xi, _cutoff_policy(model), _configured_n_max(model),
+        result.selected_index, candidate.branch_label, candidate.method,
         result.attempt_count, result.failed_attempts, candidate.omega,
         -candidate.omega, thermo[2], thermo[3], thermo[4], rho_vec[1], rho_vec[2], rho_vec[3],
         candidate.x_state[1], candidate.x_state[2], candidate.x_state[3],
@@ -218,7 +228,8 @@ end
 function _write_candidate!(io, T, mu, eB, xi, index, candidate, model, message)
     masses = _candidate_mass_mev(model, candidate)
     values = (
-        T, mu, eB, xi, index, candidate.seed_index, candidate.branch_label,
+        T, mu, eB, xi, _cutoff_policy(model), _configured_n_max(model),
+        index, candidate.seed_index, candidate.branch_label,
         candidate.stability, candidate.method, candidate.iterations, candidate.omega,
         candidate.x_state[1], candidate.x_state[2], candidate.x_state[3],
         candidate.x_state[4], candidate.x_state[5], masses[1], masses[2], masses[3],
@@ -257,11 +268,16 @@ function run_magnetic_scan(
     resume::Bool=true,
     profile::String=get(ENV, "PNJL_PARAM_PROFILE", "default"),
     physics_profile::String=get(ENV, "PHYSICS_PARAM_PROFILE", "default"),
-    p_num::Int=96,
+    magnetic_profile::String=get(ENV, "PNJL_MAGNETIC_PROFILE", "magnetic_default"),
+    p_num::Int=128,
     t_num::Int=8,
-    pz_max::Real=0.0,
+    pz_max::Union{Nothing, Real}=nothing,
     n_max::Union{Nothing, Int}=nothing,
     cutoff_N::Int=10,
+    n_max_policy::Union{Nothing, Symbol}=nothing,
+    thermal_tail_factor::Union{Nothing, Real}=nothing,
+    n_max_floor::Union{Nothing, Int}=nothing,
+    n_max_cap::Union{Nothing, Int}=nothing,
     method::Symbol=:trust_region,
     fallback_method::Union{Nothing, Symbol}=:newton,
     xtol::Real=1e-9,
@@ -307,10 +323,15 @@ function run_magnetic_scan(
                             eB_fm2=eB_fm2,
                             profile=profile,
                             physics_profile=physics_profile,
+                            magnetic_profile=magnetic_profile,
                             p_num=p_num,
                             pz_max=pz_max,
                             n_max=n_max,
                             cutoff_N=cutoff_N,
+                            n_max_policy=n_max_policy,
+                            thermal_tail_factor=thermal_tail_factor,
+                            n_max_floor=n_max_floor,
+                            n_max_cap=n_max_cap,
                         )
 
                         for mu in mu_values
@@ -379,7 +400,7 @@ function run_magnetic_scan(
                                 masses = _candidate_mass_mev(model, candidate)
                                 _write_selected!(
                                     selected_io, T, mu, eB, xi, result, candidate,
-                                    thermo, masses, rho_vec, message,
+                                    model, thermo, masses, rho_vec, message,
                                 )
                                 for (index, candidate_row) in enumerate(result.candidates)
                                     _write_candidate!(
@@ -394,7 +415,7 @@ function run_magnetic_scan(
                             catch err
                                 err isa InterruptException && rethrow()
                                 message = sprint(showerror, err)
-                                _write_failed_selected!(selected_io, T, mu, eB, xi, message)
+                                _write_failed_selected!(selected_io, T, mu, eB, xi, model, message)
                                 flush(selected_io)
                                 stats[:failure] += 1
                             end

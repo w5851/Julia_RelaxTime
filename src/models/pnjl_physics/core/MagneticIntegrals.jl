@@ -1,7 +1,11 @@
 """
     MagneticIntegrals
 
-外磁场 PNJL 的 Landau 能级积分工具。
+外磁场 PNJL 的磁场积分工具。
+
+默认生产路线使用 MFIR：零场三动量截断真空项由 `PNJLCore` 组装，
+本模块提供有限磁场的 Hurwitz-zeta 修正；热介质项仍使用 Landau 能级求和。
+完整 Landau 真空项保留为显式 legacy/diagnostic 路线，不作为默认正则化。
 
 单位约定：
 - 动量/质量/温度/化学势：fm⁻¹
@@ -22,11 +26,12 @@ const _CONSTANTS_PATH = normpath(joinpath(@__DIR__, "..", "..", "..", "constants
 if !isdefined(Main, :Constants_PNJL)
     Base.include(Main, _CONSTANTS_PATH)
 end
-using Main.Constants_PNJL: Λ_inv_fm, ħc_MeV_fm
+using Main.Constants_PNJL: Λ_inv_fm, ħc_MeV_fm, N_color
 
 export QUARK_CHARGE_ABS
 export alpha_n, energy_landau, smooth_cutoff
 export pz_nodes, resolve_nmax_from_cutoff
+export DEFAULT_ZETA_COUNT, zeta_nodes, zeta_prime_minus_one, omega_magnetic_mfir
 export omega0_flavor_landau, omegat_flavor_landau
 export density_flavor_landau
 
@@ -34,6 +39,8 @@ const QUARK_CHARGE_ABS = SVector{3, Float64}(2 / 3, 1 / 3, 1 / 3)
 const MAGNETIC_EB_MIN_MEV2 = 100.0
 const MAGNETIC_EB_MIN_FM2 = MAGNETIC_EB_MIN_MEV2 / ħc_MeV_fm^2
 const _PZ_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
+const DEFAULT_ZETA_COUNT = 64
+const _ZETA_NODE_CACHE = Dict{Int, Tuple{Vector{Float64}, Vector{Float64}}}()
 const _LOG_EPS = 1e-16
 const _EXP_LIMIT = 745.0
 
@@ -70,6 +77,80 @@ function pz_nodes(p_num::Int)
         nodes, weights = gauleg(0.0, 1.0, p_num)
         (nodes, weights)
     end
+end
+
+function zeta_nodes(zeta_num::Int=DEFAULT_ZETA_COUNT)
+    zeta_num >= 8 || throw(ArgumentError("zeta_num must be >= 8, got $(zeta_num)"))
+    return get!(_ZETA_NODE_CACHE, zeta_num) do
+        gauleg(0.0, 1.0, zeta_num)
+    end
+end
+
+# Jet-compatible Abel-Plana representation of zeta'(-1, x). The fixed
+# quadrature nodes are numerical data; operations on x remain generic so
+# ForwardDiff can differentiate the MFIR correction with respect to the gap.
+@inline function _atan_series_small(x::Real; terms::Int=18)
+    x_squared = x * x
+    power = x
+    total = zero(x)
+    sign = one(x)
+    @inbounds for index in 0:(terms - 1)
+        total += sign * power / (2 * index + 1)
+        power *= x_squared
+        sign = -sign
+    end
+    return total
+end
+
+@inline function _atan_nonnegative(x::Real)
+    reduced = x
+    @inbounds for _ in 1:2
+        reduced /= one(reduced) + sqrt(one(reduced) + reduced * reduced)
+    end
+    return 4 * _atan_series_small(reduced)
+end
+
+function zeta_prime_minus_one(x::Real; zeta_num::Int=DEFAULT_ZETA_COUNT)
+    isfinite(x) && x > zero(x) || throw(ArgumentError(
+        "Hurwitz-zeta argument x must be finite and positive, got $(x)",
+    ))
+    nodes, weights = zeta_nodes(zeta_num)
+    scalar_term = x * (-x + 2 * (x - one(x)) * log(x)) / 4
+    integral = zero(x)
+    @inbounds for i in eachindex(nodes, weights)
+        u = nodes[i]
+        momentum = -log1p(-u)
+        jacobian = inv(one(u) - u)
+        integrand = (
+            2 * x * _atan_nonnegative(momentum / x) +
+            momentum * log(x * x + momentum * momentum)
+        ) / (2 * (exp(2 * π * momentum) - 1))
+        integral += weights[i] * integrand * jacobian
+    end
+    return scalar_term + 2 * integral
+end
+
+"""Finite MFIR magnetic-vacuum correction for one flavor.
+
+The zero-field cutoff vacuum term is deliberately not included here. The
+caller adds it once using the shared `PNJLCore.vacuum_integral_with_cutoff`,
+then adds this finite Hurwitz-zeta correction.
+"""
+function omega_magnetic_mfir(
+    mass::Real,
+    q_abs::Real,
+    eB::Real;
+    zeta_num::Int=DEFAULT_ZETA_COUNT,
+    N_c::Real=N_color,
+)
+    eB_value = validate_magnetic_eB(eB)
+    qB = q_abs * eB_value
+    mass_abs = abs(mass)
+    mass_safe = mass_abs + one(mass_abs) * 1e-12
+    x = mass_safe * mass_safe / (2 * qB)
+    bracket = zeta_prime_minus_one(x; zeta_num=zeta_num) -
+        (x * x - x) * log(x) / 2 + x * x / 4
+    return -N_c * qB * qB * bracket / (2 * π^2)
 end
 
 @inline function _safe_log(x)

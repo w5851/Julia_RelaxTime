@@ -9,6 +9,7 @@
 - `energy_landau`
 - `smooth_cutoff`
 - `resolve_nmax_from_cutoff`
+- `resolve_magnetic_nmax`
 - `omega0_flavor_landau`
 - `omegat_flavor_landau`
 - `density_flavor_landau`
@@ -34,9 +35,17 @@ $$E_{f,n} = \sqrt{2 n |q_f| eB + p_z^2 + M_f^2}$$
 
 平滑截断因子，用于 Landau 真空项积分中的 UV 抑制。若只想做常规业务调用，不建议直接把它当作入口。
 
-## `resolve_nmax_from_cutoff`
+## `resolve_magnetic_nmax` 与 `resolve_nmax_from_cutoff`
 
-根据质量、化学势、电荷与磁场强度估计 `n_max`。它的职责是给出收敛起点，而不是替代收敛验证；真正的主题级收敛检查仍应通过 `magnetic_nmax_convergence_report` 完成。
+`resolve_magnetic_nmax(T_fm, mu_vec, magnetic; masses=nothing)` 是生产 profile 的
+统一入口。显式 `MagneticConfig.n_max` 优先；默认 `:thermal_tail` 使用
+`E_tail=max(abs.(mu_vec)) + thermal_tail_factor*T_fm` 估计热尾，并在
+`n_max_floor`/`n_max_cap` 预算内返回一次共享层数。`solve_magnetic_gap` 对同一个
+`(T,mu,eB)` 点的全部 seed、primary 和 fallback attempt 复用该结果。
+
+`resolve_nmax_from_cutoff` 仍根据质量、化学势、电荷与磁场强度给出 legacy
+`:vacuum_cutoff` 策略的起点；它不是默认 MFIR 真空项的求和上限，也不替代收敛验证。
+真正的主题级收敛检查仍应通过 `magnetic_nmax_convergence_report` 完成。
 
 ## `omega0_flavor_landau` / `omegat_flavor_landau`
 

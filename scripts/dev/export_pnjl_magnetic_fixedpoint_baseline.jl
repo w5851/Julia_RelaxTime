@@ -11,6 +11,12 @@ include(joinpath(PROJECT_ROOT, "src", "constants", "Constants_PNJL.jl"))
 include(joinpath(PROJECT_ROOT, "src", "models", "Models.jl"))
 Models.pnjl_module()
 
+using .Models: calculate_magnetic_number_densities,
+               calculate_magnetic_omega_components,
+               calculate_magnetic_rho,
+               default_magnetic_config,
+               magnetic_nmax_convergence_report
+
 const PNJL = Models.pnjl_module()
 
 function parse_args(args::Vector{String})

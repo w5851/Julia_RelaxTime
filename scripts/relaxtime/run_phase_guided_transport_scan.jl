@@ -118,6 +118,9 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
     io = open(paths.result_csv, "a")
     failed_io = open(paths.failed_points, "a")
     channel_io = opts.channel_diagnostics ? open(paths.channel_diagnostics, "a") : nothing
+    # Bind the result before the try/finally block; the provenance summary is
+    # written after streams are closed and must remain a function-local value.
+    stats = nothing
     try
         if filesize(paths.result_csv) == 0
             Main.ScanCSV.write_metadata(io, Dict(

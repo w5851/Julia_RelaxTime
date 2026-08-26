@@ -27,6 +27,7 @@
 - `calculate_magnetic_pressure`
 - `calculate_magnetic_number_densities`
 - `magnetic_nmax_convergence_report`
+- `resolve_magnetic_nmax`
 - `Models.run_magnetic_scan`
 - `MAGNETIC_EB_MIN_MEV2` / `MAGNETIC_EB_MIN_FM2`
 
@@ -67,6 +68,9 @@ all_branches = result.candidates
 - `calculate_magnetic_number_densities` 返回 `net` 和历史兼容字段 `quark`（二者均为 `q-qbar`），并将 `antiquark` 明确设为 `nothing`；磁场路线没有独立的夸克/反夸克数密度输出，不应把该结果当作普通 PNJL 输运输入。
 - 磁场模型 capability 会将通用 `number_densities` 恒定标为不支持，因为该通用合同要求独立 `quark/antiquark`；磁场密度请使用上面的专用 API。
 - 共享 `solve_constraint`/ProblemSpec 约束入口暂不承载磁场专用 Omega，会显式拒绝 `PNJLMagneticModel`；FixedMu 磁场平衡态请使用上面的 `solve_magnetic_gap`。
+- 默认 profile 使用 MFIR、`p_num=128`、`pz_max=40 fm^-1` 和共享的
+  `thermal_tail` Landau 截断（`thermal_tail_factor=30`、`n_max_cap=10000`）。跨求解器
+  source-parity 诊断可选择 `magnetic_source_parity.toml`，其显式固定 `n_max=79`。
 
 参数与配置细节见 [ModelAndConfig.md](ModelAndConfig.md)。
 

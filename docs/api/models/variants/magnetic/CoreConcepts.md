@@ -37,12 +37,19 @@ magnetic 不是一个单纯流程主题，而是对现有 PNJL 模型族的一�
 普通 PNJL 与磁场 Landau 路径是两个明确的计算合同；本主题不声明在 `eB -> 0`
 时自动退化为普通 PNJL。
 
-## 4. `n_max` 收敛治理不是附属功能
+## 4. `n_max` 配置与收敛治理
 
 Landau 求和的核心风险不是语法使用，而是截断是否足够：
 
-- `resolve_nmax_from_cutoff` 给出自动估计
-- `magnetic_nmax_convergence_report` 比较 `n_base` 与 `n_base + delta_n` 的相对差
+- 默认 `n_max_policy=:thermal_tail` 由 `resolve_magnetic_nmax` 根据
+  `E_tail=max(abs.(mu_vec)) + thermal_tail_factor*T` 估计热项层数，并应用
+  `n_max_floor`/`n_max_cap`；显式 `n_max` 优先。
+- `solve_magnetic_gap` 在进入 seed loop 前为同一物理点解析一次 `n_max`，所有
+  primary/fallback attempt 使用同一个离散层数。
+- `n_max_policy=:vacuum_cutoff` 与 `resolve_nmax_from_cutoff` 仅作为显式 legacy
+  诊断策略保留。
+- `magnetic_nmax_convergence_report` 比较 `n_base` 与 `n_base + delta_n` 的相对差，
+  用于代表点审计而不是自动把局部结果升级为全域证明。
 
 这意味着 magnetic 主题必须把“如何检查收敛”放进主说明，而不是仅列函数签名。
 

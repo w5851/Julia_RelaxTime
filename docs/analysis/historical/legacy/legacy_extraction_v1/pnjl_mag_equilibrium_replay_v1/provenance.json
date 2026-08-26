@@ -1,0 +1,55 @@
+{
+  "schema_version": "pnjl_mag_equilibrium_replay_provenance_v1",
+  "generated_at_utc": "2026-08-24T08:10:44.910219+00:00",
+  "external_root": "D:\\Temp\\pnjl_mag_audit_20260823",
+  "external_remote": "https://github.com/ZhouRui-xzit/pnjl_mag.git",
+  "external_commit": "e1fc81d3c3c9d220c49972e54307b66a604cb9db",
+  "external_source_hashes": {
+    "src/constants.py": "6CE74C38D8DEA3B04BDDDA153252DB84D8F5F6801755CDE10A8A5D9012B06720",
+    "src/gap.py": "724CEFEC5C04C1A17AD13BCA5EA7B7AA3647E9FBF250B9C06B6F1BB207FB970E",
+    "src/pnjl_mag.py": "C2152237D120C499E910FD8413CC6F525D524F7212E382E2C599F702E9338E56",
+    "src/plot_orders.py": "6B77D06BC51E8DCE3F6A6267CDB45896F0CF424CEA26D85F1652A96FFFD4625F",
+    "data/orders_muB0.csv": "D36916FAF8BF7BCD4E262A76074B4010010F4716C5EB1A9732EDDB2A51A5F440",
+    "uv.lock": "E5EAB7C1C369CDDA049CB1B8640903CA67DA63B394963D7FB184BFE636BFFE39"
+  },
+  "python_executable": "D:\\Temp\\pnjl_mag_audit_20260823\\.venv\\Scripts\\python.exe",
+  "external_python_version": "Python 3.14.4",
+  "producer_script": "D:\\w\\legacy-extraction\\Julia_RelaxTime\\scripts\\analysis\\pnjl\\extract_pnjl_mag_equilibrium_replay.py",
+  "producer_script_sha256": "BF54CA1C62C07BFFB8B4668DEB01D3257F6F1DF37EAFEE7D6862538C9B35477B",
+  "route": "pnjl_mag.solve_x_scan descending temperature continuation",
+  "temperature_path_MeV": "300..50 step -1",
+  "selected_temperatures_MeV": [
+    50.0,
+    150.0,
+    240.0
+  ],
+  "fields_GeV2": [
+    0.2,
+    0.4,
+    0.8
+  ],
+  "muB_MeV": 0.0,
+  "p_num": 128,
+  "landau_levels": 80,
+  "zeta_num": 256,
+  "seed": [
+    -0.03,
+    -0.02,
+    -0.45,
+    0.85,
+    0.85
+  ],
+  "external_hc_MeV_fm": 197.33,
+  "point_count": 9,
+  "field_wall_seconds": {
+    "0.2": 31.601502000001346,
+    "0.4": 21.27210180000111,
+    "0.8": 23.021350800001528
+  },
+  "total_wall_seconds": 78.85734980000052,
+  "table_sha256": "A0398B928E6116632CF5248F0BB41F9024425CDC64ECBB97D448D1D7FE284A8B",
+  "external_data_replay": "replayed_current_machine_and_matched_committed_csv",
+  "julia_solver_called": false,
+  "acceptance_scope": "diagnostic_only",
+  "boundary": "One-seed continuation; no multi-seed branch ensemble, global minimum, or Julia parity acceptance."
+}

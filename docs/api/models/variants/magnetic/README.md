@@ -23,6 +23,7 @@
 - `energy_landau`
 - `smooth_cutoff`
 - `resolve_nmax_from_cutoff`
+- `resolve_magnetic_nmax`
 - `omega0_flavor_landau`
 - `omegat_flavor_landau`
 - `density_flavor_landau`

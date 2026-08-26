@@ -178,6 +178,12 @@ function _parse_magnetic_args(args::Vector{String})
             kwargs[:overwrite] = _parse_bool(value, key)
         elseif key == "resume"
             kwargs[:resume] = _parse_bool(value, key)
+        elseif key == "profile"
+            kwargs[:profile] = value
+        elseif key == "physics_profile"
+            kwargs[:physics_profile] = value
+        elseif key == "magnetic_profile"
+            kwargs[:magnetic_profile] = value
         elseif key == "p_num"
             kwargs[:p_num] = parse(Int, value)
         elseif key == "t_num"
@@ -186,6 +192,14 @@ function _parse_magnetic_args(args::Vector{String})
             kwargs[:pz_max] = parse(Float64, value)
         elseif key == "n_max"
             kwargs[:n_max] = parse(Int, value)
+        elseif key == "n_max_policy"
+            kwargs[:n_max_policy] = Symbol(lowercase(value))
+        elseif key == "thermal_tail_factor"
+            kwargs[:thermal_tail_factor] = parse(Float64, value)
+        elseif key == "n_max_floor"
+            kwargs[:n_max_floor] = parse(Int, value)
+        elseif key == "n_max_cap"
+            kwargs[:n_max_cap] = parse(Int, value)
         elseif key == "cutoff_N"
             kwargs[:cutoff_N] = parse(Int, value)
         elseif key == "method"

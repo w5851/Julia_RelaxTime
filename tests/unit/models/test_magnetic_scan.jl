@@ -51,6 +51,8 @@ const _MS = Models.MagneticScan
     @test occursin("_candidates.csv", _MS._derived_candidates_output(selected))
     @test occursin("selected_candidate_index", _MS.SELECTED_HEADER)
     @test occursin("candidate_index", _MS.CANDIDATE_HEADER)
+    @test occursin("cutoff_policy", _MS.SELECTED_HEADER)
+    @test occursin("configured_n_max", _MS.CANDIDATE_HEADER)
 
     @test_throws ArgumentError Models.run_tmu_scan(
         T_values=[150.0], mu_values=[0.0], xi_values=[0.0],
