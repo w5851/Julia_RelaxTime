@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；高精度相变 reference 与修复后的新 production 尚未执行
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit，正式 RS production 晋升尚未执行
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -441,6 +441,23 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 每个 shard 独立保存 result、channel diagnostics、solver telemetry、expected/actual key manifest、input/config hash、calculation/workflow SHA、wall time 和失败清单。runner 失联只允许 failed-only rerun；重复失联或单 shard 接近 330 分钟时停止后续波次，不降低节点、不放宽容差。
 - GitHub Student 认证可能提高 public-hosted runner 的并发额度，但不把额度当作无限容量：先以 6--10 个总并发组成调度波次，观察 queued/in-progress 与单 shard wall time，再扩展到其余已授权 shard；这只是调度控制，不是数值 pilot。
 - A/B aggregate 只有在全部 shard provenance、key 并集、finite/converged、重复键、失败点和成本审计通过后生成；结果继续保持 `diagnostic-only`，不得覆盖历史 `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1` 或直接晋升 production。
+
+### 8.10 M4 Post-Repair Provenance Audit（2026-08-26）
+
+- PR #269 `fix: repair RS provenance artifact hashes` 已合并到 `main@472e3eb0047b3a9380b27f1935880b0e473ca9b5`。
+  修复只作用于未来 run 的 effective-config 和 stream flush 顺序；本次 30 个历史 shard artifact
+  保持不可变。
+- 对 `rs_sharded_production_v2_20260826` 的 30 个唯一 shard 及
+  `aggregate_replay_20260826_v4` 做 solver-free 复核。post-repair 包为
+  `post_repair_audit_20260826_v1`，外部 audit manifest SHA 为
+  `587f79db64476f777b25ca5ee234a43b5a31e17bea375864d9e13f0226d1d6f0`。
+- 复核结果：30/30 scan 完整、finite/converged、无 failed point/重复键，hard gate 与 timing 全部通过；
+  aggregate manifest 自校验通过；60 个 mismatch 全部被分类为历史
+  `effective_config.json`/`failed_points.csv` sidecar 缺陷，没有意外缺失或 hash mismatch。
+- mode-A 910 行、mode-B 909 行；direct-coexistence `xi=±0.003` 合同通过。固定-T mode-B 的
+  `alpha_T=NaN` 按字段合同豁免，不视为非有限 transport 值。
+- audit verdict 为 `post_repair_audit_pass_diagnostic_only`。质量警告和 candidate/legacy 差异仍
+  进入作者审核；在审核前不创建正式 RS promotion/import、不覆盖旧 production、不删除 fallback。
 
 ## 9. 里程碑
 

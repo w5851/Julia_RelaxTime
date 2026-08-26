@@ -1,7 +1,8 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：accepted。runtime-switch PR #260 与 solver-free parity PR #261 已合并；
-paired numerical pilot workflow PR #262 已合并到 `main@27e9642d431ba7afd845f2b187f77c0fbbe3be4d`。
+状态：active（post-repair audit 已通过，full candidate/legacy review pending）。runtime-switch PR #260、
+solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
+均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
 production，也不把 solver-free smoke 当作数值 production 通过。
 
@@ -14,7 +15,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - legacy fallback：`data/reference/pnjl/legacy_phase_reference_v1/` versioned snapshot
 - runtime view：strict candidate 的 certified-only 行，缺失/不合格键逐键 legacy fallback
 - rollback：`--phase-reference-mode legacy`
-- 本机不调用 equilibrium solver；不启动新的 C0/C1/C2、M4 production 或 transport 全量扫描
+- 本机不调用 equilibrium solver；本轮 post-repair audit 不重跑 C0/C1/C2、M4 solver 或 transport
 
 ## 阶段与验收
 
@@ -44,6 +45,12 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] phase-guided/Paper P1 等消费者的 adapter 路径已完成引用审计；PR #263 合并后，作者另行
   授权 `old-reference retirement` 与 RS transport 重验。retirement 只退出 canonical 根路径，
   保留 versioned fallback/rollback snapshot。
+- [x] 复用历史 15+15 shard 拓扑完成 RS numerical v2：30 个唯一 run 成功，10 个重复 dispatch
+  已取消；calculation SHA、workflow head、direct-coexistence `xi=±0.003` 合同均固定。
+- [x] PR #269 合并后，用同一不可变 artifact 完成 post-repair solver-free provenance audit；
+  verdict 为 `post_repair_audit_pass_diagnostic_only`，没有意外 artifact/hash、finite/converged、
+  failed-point、重复键或 hard-gate 失败。
+- [ ] 作者审核 full candidate/legacy comparison；接受后再创建独立 versioned RS promotion/import PR。
 
 ## 当前证据
 
@@ -70,6 +77,27 @@ source run `32684074876` 的 artifact 保留在 Actions；本地派生审计包�
   因此 reference 不仅承担离散标签，也影响连续温度锚点与其后的平衡态/输运量。
 - 该包支持“本限定 pilot 未见 candidate-specific 明显 transport regression”；作者据此授权
   retirement 和后续 production 重验，但证据本身仍不等价于全域 numerical parity。
+
+## 15+15 Numerical v2 与 Post-Repair Audit
+
+source root：
+`D:\Desktop\Julia_RelaxTime_issue130_artifacts\rs_sharded_production_v2_20260826`。
+
+- aggregate：`aggregate_replay_20260826_v4`；post-repair audit：`post_repair_audit_20260826_v1`。
+- calculation SHA：`3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`；workflow head：
+  `22874505877491754eed27519ad8a7b871c82571`。
+- 30/30 unique shards 的 scan、finite/converged、failed points、重复键、hard gate 和 timing
+  全部通过；mode-A 910 行、mode-B 909 行。
+- 60 个 manifest mismatch 全部是历史 `effective_config.json`/`failed_points.csv` sidecar 写入顺序
+  缺陷；PR #269 修复未来 producer，旧 artifact 不改写。mode-B `alpha_T=NaN` 是固定-T 路由的
+  预期字段，不是非有限失败。
+- 质量警告保留为诊断：mode-A `tau_u_ubar_ratio_high` 230 条，mode-B 240 条；候选/legacy
+  phase-field mismatch 分别为 15 和 47 个共同键。它们进入作者审核，不自动判定为 solver regression。
+- 当前 verdict：`post_repair_audit_pass_diagnostic_only`。本包只证明执行与 provenance 可审计，
+  不晋升 RS production、不移除 fallback、不修改旧结果。
+
+下一步是生成 candidate/legacy 差异审核表并由作者确认；确认后另建 versioned RS promotion/import
+PR，再在合并 SHA 上做 solver-free consumer smoke。
 
 ## CI 留痕
 
