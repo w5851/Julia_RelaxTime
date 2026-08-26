@@ -1,0 +1,8 @@
+{
+  "audit_root": "post_repair_audit_20260826_v1",
+  "manifest_sha256": "587f79db64476f777b25ca5ee234a43b5a31e17bea375864d9e13f0226d1d6f0",
+  "schema_version": "issue130_rs_post_repair_audit_pointer_v1",
+  "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826",
+  "summary_sha256": "dc7d5605c5b40e0903659d0ef3c092ec098f41ac9ac98379b59333adf31d2e15",
+  "verdict": "post_repair_audit_pass_diagnostic_only"
+}
