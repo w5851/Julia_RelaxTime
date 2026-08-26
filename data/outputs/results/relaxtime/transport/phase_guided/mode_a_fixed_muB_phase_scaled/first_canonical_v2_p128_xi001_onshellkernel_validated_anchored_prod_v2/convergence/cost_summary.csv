@@ -1,0 +1,5 @@
+# diagnostic_only Issue130 RS aggregate replay v4; calculation_sha=3c5f6b3c9bd535cff7657364dadb2efc31f2ea48; workflow_head_sha=22874505877491754eed27519ad8a7b871c82571; source_runs=30 unique successful shards
+scope,shards,wall_duration_sum_min,max_run_duration_min,mean_run_duration_min,billable_sum_min,timing_failures
+mode_a_fixed_muB_phase_scaled,15,1802.75,213.267,120.183,0.0,0
+mode_b_fixed_T_sparse_muB,15,1659.4,194.133,110.627,0.0,0
+all_unique_shards,30,3462.15,213.267,115.405,0.0,0

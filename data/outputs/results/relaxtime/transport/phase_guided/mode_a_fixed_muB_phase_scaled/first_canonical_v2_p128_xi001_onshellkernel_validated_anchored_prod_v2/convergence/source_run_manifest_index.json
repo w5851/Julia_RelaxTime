@@ -1,0 +1,1628 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "mode": "mode_a_fixed_muB_phase_scaled",
+  "schema_version": "issue130_rs_source_run_manifest_index_v1",
+  "selected_runs": [
+    {
+      "config_hash": "d006ea80ef92d4e28f297c20a5d3fcbe8da05dc9cdd859a0aece0076f2098f17",
+      "diag_rows": 4242,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu0_a10_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817419175",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "0",
+          "--alphaT-list",
+          "1.0",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 101,
+            "sha256": "9cbecf1cab5872a7cf0d093fb93aabbb29f265a5785bbd6280a9a803443a00fd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 101,
+            "sha256": "fff762ef6cbc653bc7dd6fe1e845b45ada0a28811fab2e723f89ce4d5d13da12"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "34786f835e0b1cf972724aa5f483b62ac542e83df041d464523202c1232b13cc"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "97f73fd5c63fff62b327aa1879c7650bdefbfb10bc055cd9a3477e145a657ee8"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 4242,
+            "sha256": "932c4a6a9b639764fb1194f759f45bcd5177074ec08e17d98fe5954c025e4dd8"
+          }
+        ],
+        "config_hash": "d006ea80ef92d4e28f297c20a5d3fcbe8da05dc9cdd859a0aece0076f2098f17",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064003_f48b4d90",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 101,
+          "skipped_count": 0,
+          "success_count": 101
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:03Z"
+      },
+      "scan_rows": 101,
+      "sidecar_hashes": {
+        "README.md": "34786f835e0b1cf972724aa5f483b62ac542e83df041d464523202c1232b13cc",
+        "channel_diagnostics.csv": "932c4a6a9b639764fb1194f759f45bcd5177074ec08e17d98fe5954c025e4dd8",
+        "effective_config.json": "d006ea80ef92d4e28f297c20a5d3fcbe8da05dc9cdd859a0aece0076f2098f17",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "520db90fd16d03a83ab9fb2932a367d1e1df1ab0958453b2e9d3751550cd9fde",
+        "sampling_plan.csv": "fff762ef6cbc653bc7dd6fe1e845b45ada0a28811fab2e723f89ce4d5d13da12"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817419175\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817419175"
+    },
+    {
+      "config_hash": "6f68a8123bb8ec4db878123e3aeceead27b74a507e06bbbf4fc19eb0e2c7aa67",
+      "diag_rows": 4242,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu0_a11_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817421815",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "0",
+          "--alphaT-list",
+          "1.1",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 101,
+            "sha256": "a62c3a7d47c82860573aac2c5c7887be60adf56d013febc8c61c3d3acc80888b"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 101,
+            "sha256": "99e9c259c3ef6a2697b8e124ddaddc2d7e37dc561e2409281d4aece93ab487e6"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "ed2508e73c734635bdbceac8af7cd206d6057cdc25b9073468e0274de0f38b0c"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "e239b4eb793510648682568dc0fd49d7292f5dd51b4dedf777a1da6cd21355f2"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 4242,
+            "sha256": "543da5bda80d3bf4a5e9aa77d7d67822965a7445278cac567f37bef83547977f"
+          }
+        ],
+        "config_hash": "6f68a8123bb8ec4db878123e3aeceead27b74a507e06bbbf4fc19eb0e2c7aa67",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064010_454713cb",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 101,
+          "skipped_count": 0,
+          "success_count": 101
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:10Z"
+      },
+      "scan_rows": 101,
+      "sidecar_hashes": {
+        "README.md": "ed2508e73c734635bdbceac8af7cd206d6057cdc25b9073468e0274de0f38b0c",
+        "channel_diagnostics.csv": "543da5bda80d3bf4a5e9aa77d7d67822965a7445278cac567f37bef83547977f",
+        "effective_config.json": "6f68a8123bb8ec4db878123e3aeceead27b74a507e06bbbf4fc19eb0e2c7aa67",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "00304f93ba92194bb44474f532df979db4cf3e4c98edd4b8e1a5db3c83d1c918",
+        "sampling_plan.csv": "99e9c259c3ef6a2697b8e124ddaddc2d7e37dc561e2409281d4aece93ab487e6"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817421815\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817421815"
+    },
+    {
+      "config_hash": "413f9ecc2ab6de25cd019f201123bc4cb507fb184ff66b86dd0bb792cc14f8e5",
+      "diag_rows": 4242,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu0_a12_full / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817424871",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "0",
+          "--alphaT-list",
+          "1.2",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 101,
+            "sha256": "777acff249ea1c842599b286cf0a001bffa64084a2cfbe77562a1a39b9185777"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 101,
+            "sha256": "a62394693eb7ef9ae5179828f0e1a64405bfe3f31b00bc531cb25f362f2db328"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "f1357b84969126c239e33adeec6de484cef68f0ce32ef52e2e7382acee59a31b"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "fde87d4dfa825ee806aadad0248b675cd60dcf3bf555bd08ce77cad643d6539b"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 4242,
+            "sha256": "2ebd6da5a526655ca605bf25652ed535669809a5e9a56b15d45234c7b4c38a0b"
+          }
+        ],
+        "config_hash": "413f9ecc2ab6de25cd019f201123bc4cb507fb184ff66b86dd0bb792cc14f8e5",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064012_ad1f0f51",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 101,
+          "skipped_count": 0,
+          "success_count": 101
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:12Z"
+      },
+      "scan_rows": 101,
+      "sidecar_hashes": {
+        "README.md": "f1357b84969126c239e33adeec6de484cef68f0ce32ef52e2e7382acee59a31b",
+        "channel_diagnostics.csv": "2ebd6da5a526655ca605bf25652ed535669809a5e9a56b15d45234c7b4c38a0b",
+        "effective_config.json": "413f9ecc2ab6de25cd019f201123bc4cb507fb184ff66b86dd0bb792cc14f8e5",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "f249de1a21fdef92fb6cd766b02930a2c7f1ed31fe5042f3b74b1d97c4398a02",
+        "sampling_plan.csv": "a62394693eb7ef9ae5179828f0e1a64405bfe3f31b00bc531cb25f362f2db328"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817424871\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817424871"
+    },
+    {
+      "config_hash": "0e5012eaecfea9f01d8fa71b8c99d15df5f4da5c17fe9463527fec7714b2c748",
+      "diag_rows": 2142,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a10_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817427980",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.0",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 51,
+            "sha256": "8c6df95a5d8804a8f2def17de84e65181edd3fcfb91f04893ac7977e5bf0625d"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 51,
+            "sha256": "989fb7d6d9c44853aa04602e0b78672f7b5be66b011114ac37b0f0e935d9e4fb"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "8829a4a6f12b4be7dd51643eaa23e72fe4d2096e35c77cb855d01d64446dc04d"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "9fe54d650bbbdf2ab8971da57496a03bde055dda6ebb6b307f009e25dc250f4f"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2142,
+            "sha256": "81d88808fe35ce1bebcbac570574a61c647b905e1306de755fc72ef842cab81f"
+          }
+        ],
+        "config_hash": "0e5012eaecfea9f01d8fa71b8c99d15df5f4da5c17fe9463527fec7714b2c748",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T063847_351c7c54",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 51,
+          "skipped_count": 0,
+          "success_count": 51
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:38:47Z"
+      },
+      "scan_rows": 51,
+      "sidecar_hashes": {
+        "README.md": "8829a4a6f12b4be7dd51643eaa23e72fe4d2096e35c77cb855d01d64446dc04d",
+        "channel_diagnostics.csv": "81d88808fe35ce1bebcbac570574a61c647b905e1306de755fc72ef842cab81f",
+        "effective_config.json": "0e5012eaecfea9f01d8fa71b8c99d15df5f4da5c17fe9463527fec7714b2c748",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "78b334eb9e0a005dbf22738fec2e2a2d74839f86aafd9bc02d5ce9b63b5914f4",
+        "sampling_plan.csv": "989fb7d6d9c44853aa04602e0b78672f7b5be66b011114ac37b0f0e935d9e4fb"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817427980\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817427980"
+    },
+    {
+      "config_hash": "8c941ea725918786c732ae5bde0b496099e76a080e678527923d04f4b2807ea5",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a10_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817431677",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.0",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "39aef9707fb1f186f78365b5a15bb1bbc8ddfc4f65240c89d7a7619de1a68c36"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "1898df182d485c3e6dca375a749f6949b5f67a424bc9582e85c16cd74131512d"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "0da55938b395cf9d367a914ff945dea6fa176d5f3e5156ded872f230bc5b92e9"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "880e479cd944ce6bfe5911b8a7c9881c36469cd8b03f3ed980480bc9692135e7"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "90e718b046c90562d39f1f5d55c589ac7353b39dfa4fd5213cd0508b706d80eb"
+          }
+        ],
+        "config_hash": "8c941ea725918786c732ae5bde0b496099e76a080e678527923d04f4b2807ea5",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064007_55965be9",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:07Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "0da55938b395cf9d367a914ff945dea6fa176d5f3e5156ded872f230bc5b92e9",
+        "channel_diagnostics.csv": "90e718b046c90562d39f1f5d55c589ac7353b39dfa4fd5213cd0508b706d80eb",
+        "effective_config.json": "8c941ea725918786c732ae5bde0b496099e76a080e678527923d04f4b2807ea5",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "6cd638458f9ba3e2fcbe8e2e01bcc3f45d05f35eee42012c067a4f47550d511e",
+        "sampling_plan.csv": "1898df182d485c3e6dca375a749f6949b5f67a424bc9582e85c16cd74131512d"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817431677\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817431677"
+    },
+    {
+      "config_hash": "363bc2abe7e04e94f2fe6c20aab649bae4648633f9f5dd45d0172ab24c4ddda6",
+      "diag_rows": 2142,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a11_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817529717",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.1",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 51,
+            "sha256": "483e0ce984f6dab1e05971bab4f8229882d555b715244f1ab2f04f16905f8b3f"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 51,
+            "sha256": "f755676653f8c6fda4ffc507c93bb7405d169b6850618854fba7b22d18e7105e"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "402a414b2a00c9cdcd425c710b74367aeee590be3f82a93a2aafb243ecfb1b73"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "4182ace293f95d4b985e4b015f96d062b00236dcf2a9be1282490737477cd9d1"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2142,
+            "sha256": "ad2680dae3d7ad5187496e3755bfd5a146d602314666bd1b6de1f227eb8b02f9"
+          }
+        ],
+        "config_hash": "363bc2abe7e04e94f2fe6c20aab649bae4648633f9f5dd45d0172ab24c4ddda6",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064136_ab3cf21c",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 51,
+          "skipped_count": 0,
+          "success_count": 51
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:36Z"
+      },
+      "scan_rows": 51,
+      "sidecar_hashes": {
+        "README.md": "402a414b2a00c9cdcd425c710b74367aeee590be3f82a93a2aafb243ecfb1b73",
+        "channel_diagnostics.csv": "ad2680dae3d7ad5187496e3755bfd5a146d602314666bd1b6de1f227eb8b02f9",
+        "effective_config.json": "363bc2abe7e04e94f2fe6c20aab649bae4648633f9f5dd45d0172ab24c4ddda6",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "3936854a1bac695ca412c76e43b517af936df9a7eb4a1c0d3b0fa980100fb404",
+        "sampling_plan.csv": "f755676653f8c6fda4ffc507c93bb7405d169b6850618854fba7b22d18e7105e"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817529717\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817529717"
+    },
+    {
+      "config_hash": "d6f11c1eceafde7427c491a4d010705b87b6dbcd4d8251a9e5d1d145afc7c5eb",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a11_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817532839",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.1",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "c79d473682839e08bddc3eb05947b271d44bb7e9383ec400449213faef291afe"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "c2372adee6a4f44690122faf9c2b5536a5541058f53aecb058e4007d8ab9e9a3"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "ea5fedabfc6affc19fa819b627dbcb18c470cb754322a5a1bc004db36543a8d2"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "f20bee2e82049dccd2a4f870b8e70ee15313d1134de3aa8af62ee601730d91f8"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "91ecce7148d8e9f00ec126d848d3a5cdd72fbe1024fdb9afbf89967da46dd34f"
+          }
+        ],
+        "config_hash": "d6f11c1eceafde7427c491a4d010705b87b6dbcd4d8251a9e5d1d145afc7c5eb",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064151_81f517fc",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:51Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "ea5fedabfc6affc19fa819b627dbcb18c470cb754322a5a1bc004db36543a8d2",
+        "channel_diagnostics.csv": "91ecce7148d8e9f00ec126d848d3a5cdd72fbe1024fdb9afbf89967da46dd34f",
+        "effective_config.json": "d6f11c1eceafde7427c491a4d010705b87b6dbcd4d8251a9e5d1d145afc7c5eb",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "ad0b53bb9ad299e0bf619633f8ef0a9133f04a2d7f0d9db2b9f4f62755d9fa9e",
+        "sampling_plan.csv": "c2372adee6a4f44690122faf9c2b5536a5541058f53aecb058e4007d8ab9e9a3"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817532839\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817532839"
+    },
+    {
+      "config_hash": "56d54c5604c467dcdf1ec0dac0b6ce29c5274951ee793c81ef1ee86e05a856c5",
+      "diag_rows": 2142,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a12_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817535505",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.2",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 51,
+            "sha256": "7d80ec400304fd2ec8269a62b78d69e6edd2e8114b7c2a2ed074c10058f9e6fa"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 51,
+            "sha256": "e036841f51ffb6e1c49855a07e06ad81469f4e202ab95155de75fb83b401b749"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "5a4e069d5148bbeab62842df16459eb67f3cd3928efdf66752b0123f7c02c380"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "865b5de112dfee91e9efaf5fc6e3d5af9010eea0670242cc328772a4bea41543"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2142,
+            "sha256": "68b9e34b640577184d9b5361a2841ca781e3a31c49352492a67a029aeb6e1db9"
+          }
+        ],
+        "config_hash": "56d54c5604c467dcdf1ec0dac0b6ce29c5274951ee793c81ef1ee86e05a856c5",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064154_c8fef90d",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 51,
+          "skipped_count": 0,
+          "success_count": 51
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:54Z"
+      },
+      "scan_rows": 51,
+      "sidecar_hashes": {
+        "README.md": "5a4e069d5148bbeab62842df16459eb67f3cd3928efdf66752b0123f7c02c380",
+        "channel_diagnostics.csv": "68b9e34b640577184d9b5361a2841ca781e3a31c49352492a67a029aeb6e1db9",
+        "effective_config.json": "56d54c5604c467dcdf1ec0dac0b6ce29c5274951ee793c81ef1ee86e05a856c5",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "882ddde0d89339fd043efca14244d38e264260f5431bd58ac0a3162b9b5891e8",
+        "sampling_plan.csv": "e036841f51ffb6e1c49855a07e06ad81469f4e202ab95155de75fb83b401b749"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817535505\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817535505"
+    },
+    {
+      "config_hash": "b75dc9c9d2028004ef34ee0c8a948268fbf9aaf31c60fdde308f05564f413973",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu450_a12_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817538589",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "450",
+          "--alphaT-list",
+          "1.2",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "d1e1b16bd26528928a5a930eaa51bf383ea1104745bfe928e8b54fb8830c457b"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "02c01f73bd42d03d2f50886517337b6551736c3f163a5d1c9df76f8576542192"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "b3e2f1ae98f0e52f62ca43bb8433f1ddae9f68145f2dae230d08d3f357f360ee"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "1d29d128e52957c60f4314d3e9badd5b1289519ff00fb737b9bb001e256fc9dc"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "19ec1b47b62b4119a3fcfa2ee5496f3dcbb21eae5228675f2b0c2b7b79c4be64"
+          }
+        ],
+        "config_hash": "b75dc9c9d2028004ef34ee0c8a948268fbf9aaf31c60fdde308f05564f413973",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064155_c8c1b644",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:55Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "b3e2f1ae98f0e52f62ca43bb8433f1ddae9f68145f2dae230d08d3f357f360ee",
+        "channel_diagnostics.csv": "19ec1b47b62b4119a3fcfa2ee5496f3dcbb21eae5228675f2b0c2b7b79c4be64",
+        "effective_config.json": "b75dc9c9d2028004ef34ee0c8a948268fbf9aaf31c60fdde308f05564f413973",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "138870738ea61fd8cf1325d7d701cca92e07527866e9fd2104e09e91c051b1d0",
+        "sampling_plan.csv": "02c01f73bd42d03d2f50886517337b6551736c3f163a5d1c9df76f8576542192"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817538589\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817538589"
+    },
+    {
+      "config_hash": "5732afe014a93046a13e526970b04a0cd728b9b1c6f0d4d1c43236fa0676751d",
+      "diag_rows": 2184,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a10_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817541560",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.0",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 52,
+            "sha256": "a70265e5bc01c1d61302f7d9efa707f5a5640d3826e2204022e6c16f1c99405c"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 52,
+            "sha256": "1a62e051b06bccb3026300207ac6195c9ad95de8d9484ddbbba1ad89aa7ba006"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "76b3658db1be160712c774ee2f1796f09ff5fc40304563856e3c2883af716dc1"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "03ee38c146a3c0622fd262ba59146f88ba46e64e90008294c1b2c7a4f184c3f6"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2184,
+            "sha256": "4ae556e64d14a512c643d53d124e12c93a25499483f1e8e1aa7e29450c3222ee"
+          }
+        ],
+        "config_hash": "5732afe014a93046a13e526970b04a0cd728b9b1c6f0d4d1c43236fa0676751d",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064009_fe16548a",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 52,
+          "skipped_count": 0,
+          "success_count": 52
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:09Z"
+      },
+      "scan_rows": 52,
+      "sidecar_hashes": {
+        "README.md": "76b3658db1be160712c774ee2f1796f09ff5fc40304563856e3c2883af716dc1",
+        "channel_diagnostics.csv": "4ae556e64d14a512c643d53d124e12c93a25499483f1e8e1aa7e29450c3222ee",
+        "effective_config.json": "5732afe014a93046a13e526970b04a0cd728b9b1c6f0d4d1c43236fa0676751d",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "8eec14fffabf086571b1cfa3dc564a62b53708e179310568bf5b9723510d9ed5",
+        "sampling_plan.csv": "1a62e051b06bccb3026300207ac6195c9ad95de8d9484ddbbba1ad89aa7ba006"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817541560\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817541560"
+    },
+    {
+      "config_hash": "7fbb8e178e1194c20a53f965409bc7935a6f8e25be500579235ee628c3f58ab4",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a10_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817544844",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.0",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "06969be6a9e466539b47cb71c0314730d75cd68af995e4f8e6ce0d586709c9e9"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "d559427b35fca2e96d78a9ef739d0acb41ec21430a5969f3bd33bcb0a4b2edf3"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "dea0a1a6f9e5709d4194094c93d6f10cae46a01e20241e6a2a2dfa06f6ba991d"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "660c355d68113fc90e3a618e4c2ebb521001dbbd4f983e5e5256e4de4ef84ab8"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "5664585764cfe1c58c58a3bfaada67692657630bc5febfe1fe4919ea20065da9"
+          }
+        ],
+        "config_hash": "7fbb8e178e1194c20a53f965409bc7935a6f8e25be500579235ee628c3f58ab4",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064149_96386642",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:49Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "dea0a1a6f9e5709d4194094c93d6f10cae46a01e20241e6a2a2dfa06f6ba991d",
+        "channel_diagnostics.csv": "5664585764cfe1c58c58a3bfaada67692657630bc5febfe1fe4919ea20065da9",
+        "effective_config.json": "7fbb8e178e1194c20a53f965409bc7935a6f8e25be500579235ee628c3f58ab4",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "a22cbd6d92e3923ff2980cbc5fe6c1b44e154246ca50369f3157c5a2438c7b08",
+        "sampling_plan.csv": "d559427b35fca2e96d78a9ef739d0acb41ec21430a5969f3bd33bcb0a4b2edf3"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817544844\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817544844"
+    },
+    {
+      "config_hash": "d768460e41a6c584815a8ab4665254e93c0d9cf04b384b4d6c372eb07703ae18",
+      "diag_rows": 2142,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a11_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817549646",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.1",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 51,
+            "sha256": "c31db327130a4dddb78c38cfd503d1a13f06f9ccabb904317c85d476cd705336"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 51,
+            "sha256": "f0fb423ac7e199463266e4d97382fcbb790606fc107c5cc86259ad7158a8d708"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "31eb202e5ba993c652613e1e66c60820eb8538f3f92e24bebcfae64f9616b736"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "0a86e736977f395c7c7b08f27435fb7e1752fee4fa03e4ac38526a7f27d35aed"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2142,
+            "sha256": "5c1dc461d3cfe4cf0f7a0e2b3309872eb642b7d4dc99bbb747380edc346e78ed"
+          }
+        ],
+        "config_hash": "d768460e41a6c584815a8ab4665254e93c0d9cf04b384b4d6c372eb07703ae18",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064159_e185a613",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 51,
+          "skipped_count": 0,
+          "success_count": 51
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:59Z"
+      },
+      "scan_rows": 51,
+      "sidecar_hashes": {
+        "README.md": "31eb202e5ba993c652613e1e66c60820eb8538f3f92e24bebcfae64f9616b736",
+        "channel_diagnostics.csv": "5c1dc461d3cfe4cf0f7a0e2b3309872eb642b7d4dc99bbb747380edc346e78ed",
+        "effective_config.json": "d768460e41a6c584815a8ab4665254e93c0d9cf04b384b4d6c372eb07703ae18",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "966d4be2033bde6da36b24f69fa4ac5312b6b06916d3e775f030dbbf2972e1bf",
+        "sampling_plan.csv": "f0fb423ac7e199463266e4d97382fcbb790606fc107c5cc86259ad7158a8d708"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817549646\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817549646"
+    },
+    {
+      "config_hash": "5c975d53b3dbf043d02a47fa9594e5ba3bd546be0002471985b12c1ae640eddb",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a11_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817552946",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.1",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "f0c7053dadd6209cea397a8a46deec151c691a19028dad62f261555e90f227fd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "a7b7eca8a654d22f4e0bd081abd1cff81f7eaa85601b6205a7efbc6ae1e319dd"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "8ea508d249ea4aecc832fa1cc1e79009e5dc5ca718f74f95f15dd334333d67a9"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "d73dafef39b0ed29d6ed2052c85367433cc7e39506cc94235a21e6fdc3c16204"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "390934c8ae9d16216eb95a6777127cd92f0e91a35856846144a11c36c9eb2956"
+          }
+        ],
+        "config_hash": "5c975d53b3dbf043d02a47fa9594e5ba3bd546be0002471985b12c1ae640eddb",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064020_8b942f0d",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:40:20Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "8ea508d249ea4aecc832fa1cc1e79009e5dc5ca718f74f95f15dd334333d67a9",
+        "channel_diagnostics.csv": "390934c8ae9d16216eb95a6777127cd92f0e91a35856846144a11c36c9eb2956",
+        "effective_config.json": "5c975d53b3dbf043d02a47fa9594e5ba3bd546be0002471985b12c1ae640eddb",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "e62680d2475f6f5bc8f5e00650f563717f41c56a7941622f6f25b3a5dd5a17a8",
+        "sampling_plan.csv": "a7b7eca8a654d22f4e0bd081abd1cff81f7eaa85601b6205a7efbc6ae1e319dd"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817552946\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817552946"
+    },
+    {
+      "config_hash": "45f8c9cb04597cb41f26a1c4ac7ec757e8f0a740ff11158ac0f6e43780d66d90",
+      "diag_rows": 2142,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a12_neg / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817555686",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.2",
+          "--xi-list",
+          "-0.50,-0.49,-0.48,-0.47,-0.46,-0.45,-0.44,-0.43,-0.42,-0.41,-0.40,-0.39,-0.38,-0.37,-0.36,-0.35,-0.34,-0.33,-0.32,-0.31,-0.30,-0.29,-0.28,-0.27,-0.26,-0.25,-0.24,-0.23,-0.22,-0.21,-0.20,-0.19,-0.18,-0.17,-0.16,-0.15,-0.14,-0.13,-0.12,-0.11,-0.10,-0.09,-0.08,-0.07,-0.06,-0.05,-0.04,-0.03,-0.02,-0.01,0.00",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 51,
+            "sha256": "8087443e854dcd0e646e59fa61e499c7fba7d9761d889c9efc4ea53b0c1fd325"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 51,
+            "sha256": "6e2d4c34dbcc4241d6c87066a8ce95dceb38f1faf51dc200b3b959eed037a5a5"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "09d7ee691dea93f3a714d27265ecfbda17395f32435e8cfb6a80f5eb4a2acd5e"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "3060efa99110835b566384bdbf883a842b6c48d1e673aecbd1eadf4f21d7e3c4"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2142,
+            "sha256": "561566f3350d48555f92c0089e4e6f139d3aa5ce0b3c2d381f20aab6fda887fa"
+          }
+        ],
+        "config_hash": "45f8c9cb04597cb41f26a1c4ac7ec757e8f0a740ff11158ac0f6e43780d66d90",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064153_4234867a",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 51,
+          "skipped_count": 0,
+          "success_count": 51
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:41:53Z"
+      },
+      "scan_rows": 51,
+      "sidecar_hashes": {
+        "README.md": "09d7ee691dea93f3a714d27265ecfbda17395f32435e8cfb6a80f5eb4a2acd5e",
+        "channel_diagnostics.csv": "561566f3350d48555f92c0089e4e6f139d3aa5ce0b3c2d381f20aab6fda887fa",
+        "effective_config.json": "45f8c9cb04597cb41f26a1c4ac7ec757e8f0a740ff11158ac0f6e43780d66d90",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "f1ffddc106b4c3bf2799341011b0645cb304613bb9ff9ba3f81d5498b496666f",
+        "sampling_plan.csv": "6e2d4c34dbcc4241d6c87066a8ce95dceb38f1faf51dc200b3b959eed037a5a5"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817555686\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817555686"
+    },
+    {
+      "config_hash": "496fd12618f546964e1217179461176c53ccc30d4c5b94c0fbd59f7cb6fb1a4f",
+      "diag_rows": 2100,
+      "failed_rows": 0,
+      "known_stale_manifest_hash_files": "effective_config.json,failed_points.csv",
+      "label": "A_mu900_a12_pos / fixed-muB-phase-scaled",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "run_id": "32817559249",
+      "run_manifest": {
+        "argv": [
+          "--mode",
+          "fixed-muB-phase-scaled",
+          "--muB-list",
+          "900",
+          "--alphaT-list",
+          "1.2",
+          "--xi-list",
+          "0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15,0.16,0.17,0.18,0.19,0.20,0.21,0.22,0.23,0.24,0.25,0.26,0.27,0.28,0.29,0.30,0.31,0.32,0.33,0.34,0.35,0.36,0.37,0.38,0.39,0.40,0.41,0.42,0.43,0.44,0.45,0.46,0.47,0.48,0.49,0.50",
+          "--case-name",
+          "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+          "--propagator-xi-policy",
+          "match_thermo",
+          "--sigma-cache-policy",
+          "validated_anchored",
+          "--p-num",
+          "24",
+          "--t-num",
+          "8",
+          "--phase-anchor-policy",
+          "direct_coexistence",
+          "--channel-diagnostics",
+          "--tau-p-nodes",
+          "128",
+          "--tau-angle-nodes",
+          "20",
+          "--tau-phi-nodes",
+          "36",
+          "--tau-n-sigma",
+          "24",
+          "--sigma-grid-n",
+          "560",
+          "--overwrite"
+        ],
+        "artifacts": [
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/phase_guided_transport_scan.csv",
+            "rows": 50,
+            "sha256": "fba731be5082e23fe1cfcfaae23187fd235562bfd924b44193eacb55a484089a"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/sampling_plan.csv",
+            "rows": 50,
+            "sha256": "bd6f3d5ba6f745730bafe1c208f207c13b4842743250ad3c3877312b65716d71"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/README.md",
+            "rows": null,
+            "sha256": "68565e355ff3763ac4fa73acfb1c8481df894e1d6e52db62b13bd792872749b7"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/effective_config.json",
+            "rows": null,
+            "sha256": "cac51fe9ad554239096928c120a5a09f8d082647c8cae0e8a9bd2943aa830fdc"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/failed_points.csv",
+            "rows": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          {
+            "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/channel_diagnostics.csv",
+            "rows": 2100,
+            "sha256": "40d6157f1c6c4ed8c479076801dc60c1215f23230c4c5960cf261692563cecdc"
+          }
+        ],
+        "config_hash": "496fd12618f546964e1217179461176c53ccc30d4c5b94c0fbd59f7cb6fb1a4f",
+        "cwd": ".",
+        "git_branch": "codex/issue130-rs-sharded-run-v2",
+        "git_commit": "22874505877491754eed27519ad8a7b871c82571",
+        "git_dirty": true,
+        "julia_version": "1.12.5",
+        "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+        "project_path": ".",
+        "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+        "run_id": "20260825T064208_e0524947",
+        "schema_version": "v1",
+        "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+        "summary": {
+          "error_count": 0,
+          "points_total": 50,
+          "skipped_count": 0,
+          "success_count": 50
+        },
+        "threads": 1,
+        "timestamp_utc": "2026-08-25T06:42:08Z"
+      },
+      "scan_rows": 50,
+      "sidecar_hashes": {
+        "README.md": "68565e355ff3763ac4fa73acfb1c8481df894e1d6e52db62b13bd792872749b7",
+        "channel_diagnostics.csv": "40d6157f1c6c4ed8c479076801dc60c1215f23230c4c5960cf261692563cecdc",
+        "effective_config.json": "496fd12618f546964e1217179461176c53ccc30d4c5b94c0fbd59f7cb6fb1a4f",
+        "failed_points.csv": "25b7d84f4fcef45cc8666411fd14cb293005de9e69f95eec86586ac8aae96f2e",
+        "run_manifest.json": "e232ce81b5806451e735e773cdf915a0ca974adcba5bbb8793804074bb76f297",
+        "sampling_plan.csv": "bd6f3d5ba6f745730bafe1c208f207c13b4842743250ad3c3877312b65716d71"
+      },
+      "source_case_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\collector\\32817559249\\results\\relaxtime\\transport\\phase_guided\\mode_a_fixed_muB_phase_scaled\\first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "url": "https://github.com/w5851/Julia_RelaxTime/actions/runs/32817559249"
+    }
+  ],
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571"
+}

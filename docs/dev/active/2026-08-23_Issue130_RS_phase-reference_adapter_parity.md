@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit 已通过，full candidate/legacy review 已接受）。runtime-switch PR #260、
+状态：active（post-repair audit 与 versioned result import 已通过，full candidate/legacy review 已接受）。PR #272 已创建且 11/11 checks 通过，等待作者审核与合并授权。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
 均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
@@ -52,8 +52,26 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   failed-point、重复键或 hard-gate 失败。
 - [x] 作者审核 full candidate/legacy comparison 与同构审核图；作者确认结果符合预期。
   candidate 图已作为 `author_accepted_formal_layout` 导入正式 figure 路径；数值证据仍保持
-  `diagnostic-only`。下一步创建独立 versioned RS promotion/import PR，保留 legacy fallback
-  和显式 rollback。
+  `diagnostic-only`。本次 versioned RS promotion/import PR 已在隔离 worktree 中生成
+  `...prod_v2` result trees，保留 legacy fallback 和显式 rollback；PR #272 已提交，CI 11/11 通过，等待作者审核与合并授权。
+
+- [x] solver-free source preflight 与 versioned result import 已完成：aggregate v4、30 个选定
+  shard sidecar、candidate figure manifest 和旧 `prod_v1` tree hash 均通过校验；本次 import
+  未调用 solver、未切换 runtime、未覆盖旧结果。
+- [x] mode-A candidate result 已写入
+  `data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`：
+  910 scan 行、38220 diagnostic 行，manifest SHA256
+  `3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72`。
+- [x] mode-B candidate result 已写入
+  `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/`：
+  909 scan 行、38178 diagnostic 行，manifest SHA256
+  `093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921`。
+- [x] 两套 result manifest 均记录 `artifact_status=imported_candidate`、
+  `numerical_status=diagnostic_only`、`runtime_default_switch=false`、
+  `source_solver_called=true`、`aggregate_replay_solver_called=false`、
+  `import_solver_called=false`；质量警告和历史 sidecar hash 缺陷均保留。
+- [ ] PR #272 的作者审核、合并后的 solver-free consumer smoke 尚未完成；PR checks 已 11/11 通过。
+  在此之前不得把 `prod_v2` 设为默认 runtime、不得删除 `prod_v1`。
 
 ## 当前证据
 
@@ -104,8 +122,9 @@ source root：
 的 `figure_formalization`，目标为两棵 `...prod_v2` 图树。该导入只复制 PNG 并写入逐图 hash，
 `solver_called=false`、`production_write=false`；它不等价于数值 production promotion。
 
-下一步是另建 versioned RS promotion/import PR，再在合并 SHA 上执行 solver-free consumer
-smoke；旧 reference retirement 继续依赖该数值迁移完成。
+下一步是提交并审核独立的 versioned RS promotion/import PR，再在合并 SHA 上执行 solver-free
+consumer smoke；只有 smoke 和作者授权均通过，才另立 runtime-default switch / old-reference
+retirement 后续任务。
 
 ## CI 留痕
 
