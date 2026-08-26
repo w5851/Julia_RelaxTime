@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit 已通过，full candidate/legacy review pending）。runtime-switch PR #260、
+状态：active（post-repair audit 已通过，full candidate/legacy review 已接受）。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
 均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
@@ -50,7 +50,10 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] PR #269 合并后，用同一不可变 artifact 完成 post-repair solver-free provenance audit；
   verdict 为 `post_repair_audit_pass_diagnostic_only`，没有意外 artifact/hash、finite/converged、
   failed-point、重复键或 hard-gate 失败。
-- [ ] 作者审核 full candidate/legacy comparison；接受后再创建独立 versioned RS promotion/import PR。
+- [x] 作者审核 full candidate/legacy comparison 与同构审核图；作者确认结果符合预期。
+  candidate 图已作为 `author_accepted_formal_layout` 导入正式 figure 路径；数值证据仍保持
+  `diagnostic-only`。下一步创建独立 versioned RS promotion/import PR，保留 legacy fallback
+  和显式 rollback。
 
 ## 当前证据
 
@@ -96,8 +99,13 @@ source root：
 - 当前 verdict：`post_repair_audit_pass_diagnostic_only`。本包只证明执行与 provenance 可审计，
   不晋升 RS production、不移除 fallback、不修改旧结果。
 
-下一步是生成 candidate/legacy 差异审核表并由作者确认；确认后另建 versioned RS promotion/import
-PR，再在合并 SHA 上做 solver-free consumer smoke。
+作者已确认 candidate/legacy 差异及同构图像。新增正式 figure 导入证据位于
+`docs/analysis/relaxtime/issue130_rs_sharded_production_v2_post_repair_audit_v1/manifest.json`
+的 `figure_formalization`，目标为两棵 `...prod_v2` 图树。该导入只复制 PNG 并写入逐图 hash，
+`solver_called=false`、`production_write=false`；它不等价于数值 production promotion。
+
+下一步是另建 versioned RS promotion/import PR，再在合并 SHA 上执行 solver-free consumer
+smoke；旧 reference retirement 继续依赖该数值迁移完成。
 
 ## CI 留痕
 

@@ -38,6 +38,27 @@
     "solver_called": false,
     "production_write": false
   },
+  "figure_formalization": {
+    "schema_version": "issue130_rs_candidate_runtime_formalization_v1",
+    "status": "author_accepted_formal_layout",
+    "numerical_status": "diagnostic_only",
+    "source_manifest_sha256": "9a986e1887292309a46a963dfbc76f08cc7fb67d3fa5664f282ee7256853f01b",
+    "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\candidate_legacy_figures_v2",
+    "targets": {
+      "mode_a_fixed_muB_phase_scaled": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "figure_count": 36,
+        "plot_manifest_sha256": "eed426abfc592a7842d6124b1dbe86fb3394c6cd58a7e29b2be69335790180c7"
+      },
+      "mode_b_fixed_T_sparse_muB": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "figure_count": 36,
+        "plot_manifest_sha256": "fbb216a45db2fa8c3a819a1e97f129821752972e7bc70db2a75360e9e69d9b77"
+      }
+    },
+    "solver_called": false,
+    "production_write": false
+  },
   "non_goals": [
     "no solver rerun",
     "no old artifact rewrite",
