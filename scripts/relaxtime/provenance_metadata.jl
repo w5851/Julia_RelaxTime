@@ -174,6 +174,11 @@ function write_run_sidecars(outdir::String;
     manifest_toml = joinpath(project_root, "Manifest.toml")
 
     cwd_rel = relpath(pwd(), project_root)
+    # The effective config is itself an artifact in production workflows.  Write
+    # the final wrapped snapshot before hashing artifacts so a pre-existing
+    # options-only snapshot cannot leave a stale manifest hash behind.
+    _write_json(joinpath(outdir, "effective_config.json"), effective)
+
     manifest = Dict{String,Any}(
         "schema_version" => "v1",
         "run_id" => ctx.run_id,
@@ -194,7 +199,6 @@ function write_run_sidecars(outdir::String;
         "summary" => summary,
     )
 
-    _write_json(joinpath(outdir, "effective_config.json"), effective)
     _write_json(joinpath(outdir, "run_manifest.json"), manifest)
 end
 

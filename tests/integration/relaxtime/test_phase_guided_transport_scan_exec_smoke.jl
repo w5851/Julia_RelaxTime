@@ -1,4 +1,6 @@
 using Test
+using JSON3
+using SHA
 
 const REPO_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guided_transport_scan.jl")
@@ -23,9 +25,11 @@ end
 
     result_csv = joinpath(outdir, "phase_guided_transport_scan.csv")
     failed_csv = joinpath(outdir, "failed_points.csv")
+    manifest_path = joinpath(outdir, "run_manifest.json")
 
     @test isfile(result_csv)
     @test isfile(failed_csv)
+    @test isfile(manifest_path)
 
     result_lines = _non_comment_lines(result_csv)
     @test length(result_lines) == 2
@@ -35,4 +39,11 @@ end
     failed_lines = _non_comment_lines(failed_csv)
     @test length(failed_lines) == 1
     @test startswith(failed_lines[1], "T_MeV,muB_MeV,xi,")
+
+    manifest_obj = JSON3.read(read(manifest_path, String))
+    for entry in manifest_obj["artifacts"]
+        artifact_path = joinpath(outdir, basename(String(entry["path"])))
+        @test isfile(artifact_path)
+        @test String(entry["sha256"]) == bytes2hex(SHA.sha256(read(artifact_path)))
+    end
 end

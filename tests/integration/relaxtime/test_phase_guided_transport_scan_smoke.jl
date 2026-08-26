@@ -1,5 +1,6 @@
 using Test
 using JSON3
+using SHA
 
 const REPO_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guided_transport_scan.jl")
@@ -45,4 +46,9 @@ const SCRIPT_PATH = joinpath(REPO_ROOT, "scripts", "relaxtime", "run_phase_guide
 
     manifest_obj = JSON3.read(read(manifest, String))
     @test String(manifest_obj["script"]) == "scripts/relaxtime/run_phase_guided_transport_scan.jl"
+    for entry in manifest_obj["artifacts"]
+        artifact_path = joinpath(outdir, basename(String(entry["path"])))
+        @test isfile(artifact_path)
+        @test String(entry["sha256"]) == bytes2hex(SHA.sha256(read(artifact_path)))
+    end
 end

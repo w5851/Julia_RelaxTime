@@ -167,25 +167,29 @@ function run_phase_guided_scan(opts::PhaseGuidedCLI.PhaseGuidedScanOptions, ctx;
             existing,
         )
 
-        Main.ProvenanceMetadata.write_run_sidecars(
-            opts.outdir;
-            ctx=ctx,
-            effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference),
-            artifacts=opts.channel_diagnostics ?
-                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
-                [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
-            summary=Dict{String,Any}(
-                "points_total" => stats.total,
-                "success_count" => stats.success,
-                "error_count" => stats.error,
-                "skipped_count" => stats.skipped,
-            ),
-        )
     finally
         close(io)
         close(failed_io)
         channel_io !== nothing && close(channel_io)
     end
+
+    # Hashes must be taken only after all producer streams have been flushed and
+    # closed.  In particular, a header-only failed_points.csv is a valid zero-row
+    # artifact and must not be hashed as an empty file.
+    Main.ProvenanceMetadata.write_run_sidecars(
+        opts.outdir;
+        ctx=ctx,
+        effective_config=PhaseGuidedAssets.build_effective_config(opts, paths.result_csv, paths.plan_csv; figure_dir=replace(figure_dir, '\\' => '/'), phase_reference=phase_reference),
+        artifacts=opts.channel_diagnostics ?
+            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points, paths.channel_diagnostics] :
+            [paths.result_csv, paths.plan_csv, paths.readme, paths.effective_config, paths.failed_points],
+        summary=Dict{String,Any}(
+            "points_total" => stats.total,
+            "success_count" => stats.success,
+            "error_count" => stats.error,
+            "skipped_count" => stats.skipped,
+        ),
+    )
 
     println("Phase-guided transport scan finished. Output: $(paths.result_csv)")
     return plan
