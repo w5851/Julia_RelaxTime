@@ -3,3 +3,4 @@ all_unique_shards_complete,"30 个唯一 RS shard 的 scan 完整、finite/conve
 historical_manifest_defects_classified,"历史 manifest mismatch 仅限 effective_config.json 与 failed_points.csv，并作为不可变 provenance 缺陷保留。",supported,"外部 post_repair_audit_20260826_v1/artifact_hash_audit.csv; PR #269","不改写旧 manifest"
 candidate_legacy_difference_requires_review,"candidate/legacy phase 与 transport 差异仍是作者审核门禁。",author_check,"外部 post_repair_audit_20260826_v1/audit_summary.json; aggregate_summary.json","不自动判定为 solver regression 或接受 promotion"
 no_solver_rerun,"本次 post-repair audit 只读取既有 artifact 和 aggregate，不调用 equilibrium solver。",supported,"外部 post_repair_audit_20260826_v1/audit_summary.json; command_manifest.json","源 numerical run 本身的 solver 执行由 Actions provenance 另行记录"
+candidate_legacy_layout_equivalent,"candidate/legacy 四棵图像树均按历史 phase-guided 绘图入口生成，可逐张对照。",supported,"外部 candidate_legacy_figures_v2/manifest.json; 各树 plot_manifest.json","仅是视觉/绘图合同等价，不是数值收敛、phase promotion 或 RS production 结论"

@@ -23,6 +23,21 @@
   },
   "audit_script": "scripts/analysis/relaxtime/audit_issue130_rs_sharded_provenance.py",
   "audit_script_sha256_before_commit": "e4c8871ebd91580b6d36d724098efb69e9080f0299058d0a696a584c4a428956",
+  "figure_audit": {
+    "schema_version": "issue130_rs_candidate_legacy_figures_v1",
+    "output_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\candidate_legacy_figures_v2",
+    "manifest_sha256": "9a986e1887292309a46a963dfbc76f08cc7fb67d3fa5664f282ee7256853f01b",
+    "figure_counts": {
+      "mode_a_fixed_muB_phase_scaled/candidate_runtime": 36,
+      "mode_a_fixed_muB_phase_scaled/legacy_runtime": 36,
+      "mode_b_fixed_T_sparse_muB/candidate_runtime": 36,
+      "mode_b_fixed_T_sparse_muB/legacy_runtime": 36
+    },
+    "plot_script": "scripts/analysis/relaxtime/render_issue130_rs_candidate_legacy_figures.py",
+    "same_layout_as_legacy": true,
+    "solver_called": false,
+    "production_write": false
+  },
   "non_goals": [
     "no solver rerun",
     "no old artifact rewrite",

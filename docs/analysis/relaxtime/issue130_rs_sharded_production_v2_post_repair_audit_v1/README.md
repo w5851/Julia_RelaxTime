@@ -44,3 +44,19 @@ fallback，也不完成 RS candidate promotion。下一步是作者审核 candid
 另建 versioned RS promotion/import PR，保留逐键 legacy fallback 和显式 rollback。
 
 详细表格和不可变 hash 位于外部 audit 目录；本目录的 `manifest.json` 保存其指针与摘要哈希。
+
+## Candidate/legacy 图像审阅包
+
+为便于作者审核，另生成了一个只读的同构绘图包：
+
+- 外部目录：`D:\Desktop\Julia_RelaxTime_issue130_artifacts\rs_sharded_production_v2_20260826\candidate_legacy_figures_v2`
+- manifest SHA-256：`9a986e1887292309a46a963dfbc76f08cc7fb67d3fa5664f282ee7256853f01b`
+- 目录结构：`mode_a_fixed_muB_phase_scaled`、`mode_b_fixed_T_sparse_muB`，各自包含
+  `candidate_runtime` 与 `legacy_runtime`；其下保留对应的 `prod_v2`/`prod_v1` case 名、
+  `plot_panel=*` 分面和旧图同名 PNG 文件。
+- 四棵树各 36 张 PNG，共 144 张；横轴、分面、曲线分组、12 个输运量、PNG 与 600 dpi
+  均复用历史入口 `scripts/relaxtime/run_phase_guided_transport_plots.jl`。
+- 生成脚本：`scripts/analysis/relaxtime/render_issue130_rs_candidate_legacy_figures.py`。
+
+该包只证明“candidate 与 legacy 可以在旧图视觉合同下逐张对照”，不把图像差异解释成
+solver 收敛，也不改变正式 `data/outputs/figures`、reference 或 fallback。
