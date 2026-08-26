@@ -19,6 +19,7 @@
 - `config/models/njl/default.toml` + `config/models/njl/unittest.toml`
 - `config/models/pnjl/default.toml` + `config/models/pnjl/unittest.toml`
 - `config/models/pnjl/magnetic_default.toml`（外磁场 PNJL 配置模板）
+- `config/models/pnjl/magnetic_source_parity.toml`（与固定 `pnjl_mag` 节点口径对照的诊断模板）
 - `config/models/rpnjl/default.toml` + `config/models/rpnjl/unittest.toml`
 
 覆盖关系统一为：
@@ -30,6 +31,7 @@
 对应环境变量：
 
 - `NJL_PARAM_PROFILE` / `PNJL_PARAM_PROFILE` / `RPNJL_PARAM_PROFILE`
+- `PNJL_MAGNETIC_PROFILE`（磁场 profile；默认 `magnetic_default`）
 - `PHYSICS_PARAM_PROFILE`（物理常量层）
 
 推荐漂移检查命令：

@@ -41,8 +41,14 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 `
 - `xi_values`：目前只能为 `[0.0]`。
 - `model_kind`：只能是 `:PNJLMagnetic`。
 - `solver_mode`：只能是 `:fixed_mu`。
-- `p_num`、`t_num`、`pz_max`、`n_max`、`cutoff_N` 和 solver 控制项会原样传给
-  magnetic solver；默认值是保守生产配置，但不自动构成全域收敛证明。
+- `magnetic_profile` 选择磁场 TOML profile；默认是 `magnetic_default`，跨求解器
+  source-parity 诊断可使用 `magnetic_source_parity`。
+- `p_num`、`t_num`、`pz_max`、`n_max`、`n_max_policy`、`thermal_tail_factor`、
+  `n_max_floor`、`n_max_cap`、`cutoff_N` 和 solver 控制项会原样传给 magnetic
+  solver。默认 profile 的自动截断在每个物理点共享；显式 `n_max` 优先。
+- 默认 `p_num=128`、`pz_max=40 fm^-1`、`n_max_policy=thermal_tail`、
+  `thermal_tail_factor=30`、`n_max_cap=10000` 是当前生产预算，不自动构成全域
+  收敛证明；代表点仍应使用 `magnetic_nmax_convergence_report` 审计。
 
 每个点调用 `solve_magnetic_gap`。扫描沿每个 `(T,eB)` 的 `mu` 顺序传递上一点
 选中态作为 continuation seed，同时保留 magnetic solver 的默认多 seed 候选。
@@ -68,7 +74,9 @@ total, success, failure, skipped,
 output, selected_output, candidates_output
 ```
 
-`resume=true` 按 `(T,mu,eB,xi)` 四元键跳过已写入的 selected 行；候选 CSV 是同一次
+`resume=true` 按 `(T,mu,eB,xi)` 四元键跳过已写入的 selected 行；selected 和
+candidate CSV 都记录 `cutoff_policy` 与 `configured_n_max`，以便审计实际截断合同。
+候选 CSV 是同一次
 运行的伴随 artifact，不应单独解释为完整分支全集覆盖证明。
 
 ## 物理与流程边界

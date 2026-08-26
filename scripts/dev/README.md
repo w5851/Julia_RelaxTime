@@ -116,6 +116,7 @@ julia --project=. scripts/dev/generate_api_export_index.jl \
 	--include-symbol energy_landau \
 	--include-symbol smooth_cutoff \
 	--include-symbol resolve_nmax_from_cutoff \
+	--include-symbol resolve_magnetic_nmax \
 	--include-symbol omega0_flavor_landau \
 	--include-symbol omegat_flavor_landau \
 	--include-symbol density_flavor_landau \

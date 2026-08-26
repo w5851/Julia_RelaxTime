@@ -792,8 +792,13 @@ equilibrium target 尚未接纳前，磁场外部 equilibrium 数值验证仍保
 路线与当前 MFIR 生产合同不同。贺伟博硕士论文给出的
 参考路线是零场真空三动量截断 + Hurwitz-zeta/MFIR 磁场真空修正 + Landau 热项，
 见 [`magnetic_reference_route_audit_v3.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_reference_route_audit_v3.md)。
-运行时构造器已接入 `magnetic_default.toml`；后续外部测试集从已固定源码的
-`pnjl_mag` 提取，不再扩展 smooth-Landau replay。
+运行时构造器已接入 `magnetic_default.toml`；当前默认 profile 使用共享的、温度感知
+`thermal_tail` Landau 热项层数策略（`thermal_tail_factor=30`、`n_max_floor=3`、
+`n_max_cap=10000`），同一点的所有 seed/primary/fallback attempt 共用一次解析结果。
+跨求解器 source-parity 诊断可选择 `magnetic_source_parity.toml`，显式固定外部匹配的
+`n_max=79`、`p_num=128`、`pz_max=40 fm^-1` 和 `zeta_num=256`。这些 profile 仍不把
+`pnjl_mag` equilibrium 输出提升为正式 acceptance target，也不再扩展 smooth-Landau
+replay。
 
 磁场巨势还包含
 
@@ -826,13 +831,13 @@ $$
 
 来源核验范围：高雪艳博士论文《强相互作用物质相变与重子数涨落的研究》第 2.2 节印刷页 21--24、第五章第 5.1 节印刷页 65--68；MFIR 细节以贺伟博硕士论文第 4 章印刷页 33--39 为实现参考，并以 `pnjl_mag@e1fc81d3c3c9d220c49972e54307b66a604cb9db` 的磁场无关正规化实现作为外部核对路线。原文有符号/排版不一致（式(2-63)重复 `phi_u`，式(5-10)导数符号与式(2-65)冲突，式(5-11)使用带符号 `q_f B`），所以本页不把这些冲突字符升级为无条件代码合同。IMC 参数的正式决策为 `a=0.0108805`；Julia 的 `MeV^2 -> fm^-2` 转换在 `zeta=eB/Lambda_QCD^2` 中抵消，未发现隐藏十倍补偿。运行时配置已接入，详见 [`magnetic_imc_parameter_provenance_v1.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_imc_parameter_provenance_v1.md)。
 
-- **公共 API**：`PNJLMagneticModel`、`solve_magnetic_gap`、`Models.run_magnetic_scan`、`MagneticConfig`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。磁场 API 只接受正标量 `eB`：外部生产单位为 `MeV^2`，要求 `eB >= MAGNETIC_EB_MIN_MEV2 = 100`；核心内部单位为 `fm^-2`，要求 `eB_fm2 >= MAGNETIC_EB_MIN_FM2 = 100/hbarc^2`。低于门槛、零值和负值统一抛出 `ArgumentError`，不会路由到普通 PNJL；模型 capability 恒定只承诺磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
+- **公共 API**：`PNJLMagneticModel`、`solve_magnetic_gap`、`Models.run_magnetic_scan`、`MagneticConfig`、`resolve_magnetic_nmax`、magnetic Omega/pressure/density 与 `magnetic_nmax_convergence_report`。磁场 API 只接受正标量 `eB`：外部生产单位为 `MeV^2`，要求 `eB >= MAGNETIC_EB_MIN_MEV2 = 100`；核心内部单位为 `fm^-2`，要求 `eB_fm2 >= MAGNETIC_EB_MIN_FM2 = 100/hbarc^2`。低于门槛、零值和负值统一抛出 `ArgumentError`，不会路由到普通 PNJL；模型 capability 恒定只承诺磁场专用净密度能力，调用方应使用 `calculate_magnetic_number_densities` 的 `net` 字段。
 - **稳定 CLI**：`scripts/models/run_unified_scan.jl scan magnetic` 是 `(T,mu,eB)` 完整五维 FixedMu equilibrium 产线，写出 selected CSV 和 candidates CSV；`mu` 表示共同的 `mu_u=mu_d=mu_s`，外部单位为 MeV/MeV^2。
 - **固定态诊断 CLI**：`run_magnetic_point.jl`、`run_magnetic_eb_scan.jl`、`run_magnetic_stability_scan.jl` 仍使用固定 `x_state`，只负责内核、`n_max` 或稳定性诊断，不应解释为 equilibrium 扫描。
 - **证据**：magnetic unit、thermodynamics unit、fixed-point regression，以及低节点 `solve_magnetic_gap` stationarity/branch probe；固定点证据覆盖固定 `x_state` 的内核/回归，不等于默认高节点磁场 equilibrium 或全分支全集已验收。旧 Fortran 交叉核对只保留为 legacy 路线诊断。`pnjl_mag` 的仓库和固定 commit 已获得，且其源码采用 MFIR；静态合同审计记录在 [`pnjl_mag_source_gate_v1.csv`](../analysis/historical/legacy/legacy_extraction_v1/tables/pnjl_mag_source_gate_v1.csv)，本机外部 equilibrium 重放记录在 [`pnjl_mag_equilibrium_replay_v1/`](../analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_equilibrium_replay_v1/)；小规模 Julia/外部跨求解器诊断记录在 [`pnjl_mag_cross_solver_replay_v1/`](../analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_cross_solver_replay_v1/)。当前仅接纳固定态 `Omega` kernel-only oracle；积分收敛、分支完备性和 equilibrium target 尚未完成，因此外部 acceptance gate 尚未关闭。进一步的 profile/截断矩阵见 [`pnjl_mag_convergence_v1/`](../analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_convergence_v1/)，其中 `source-parity` 与 `production-parity` 严格分离；`hbarc` 不是唯一差异，参数注入、单位映射、`muB/3`、积分节点、Landau 截断和 seed/branch governance 也必须显式固定。
 - **当前实现边界**：受支持正 `eB` 的 `PNJLMagneticModel.solve_gap` 通过 `solve_magnetic_gap` 对磁场 `Omega` 的五维驻点做多 seed 求解，并以候选集合保留分支、残差、`n_max` 和可选 Hessian 稳定性标签；普通 `solve_gap` 在未启用稳定性分类时按已找到候选中的最低 `Omega` 选择一个 convenience state，但 branch-aware API 仍保留全部可行候选。`classify_stability=true` 只启用有限差分 Hessian 诊断/显式研究策略，不是 PNJL 系列模型的默认生产过滤条件；`saddle_or_maximum` 标签不能单独否定一个已收敛驻点。`T_fm` 必须为正，磁场模型只接受 `xi=0`。磁场 `calculate_magnetic_rho` 与 `calculate_magnetic_number_densities` 共用含 `Phi/PhiBar` 的净密度语义，后者的 `net` 和历史 `quark` 字段均表示 `q-qbar`，`antiquark` 明确为 `nothing`；该结果不是普通 PNJL 的独立夸克/反夸克输运输入，且模型 capability 会将通用 `number_densities` 标为不支持；需要磁场密度时应调用专用 API。共享 `solve_constraint`/ProblemSpec 约束链目前显式拒绝 `PNJLMagneticModel`，避免把普通 PNJL residual 误用于磁场；磁场完整平衡态入口是 `solve_magnetic_gap`。
 - **统一入口拒绝边界**：普通 `run_tmu_scan`、`run_trho_scan` 以及 phase/Maxwell/CEP pipeline 遇到 `model_kind=:PNJLMagnetic` 会显式报错；当前只承诺磁场 `FixedMu`，不把普通 PNJL 的 `FixedRho` 或 phase pipeline 伪装成磁场实现。
-- **数值边界**：默认 MFIR 不用 Landau 求和表示真空项；`n_max`、`p_z_max` 只控制热 Landau 项，`zeta_num` 控制 MFIR 特殊函数的数值积分。`route=:landau_legacy` 下的 `smooth_cutoff`、真空 `n_max` 和 pz Gauss 节点仅为历史诊断。论文的低温占据 `n_max` 估计不等同于真空项的求和上限。当前诊断发现 production 默认 `n_max=nothing` 在 `T=50,eB=0.2` 实际解析为 `4`，在 `T=240,eB=0.2/0.8` 实际解析为 `3/3`；低场高温在 `n_max=79→383` 时发生约 `1.53e-5` 状态位移和 `1.77e-4 fm^-4` Omega 变化。由于 auto-`n_max` 不含温度且为每个 seed 独立解析，当前自动截断是 production blocker；在建立共同的、温度感知的 thermal Landau 尾项截断并重新审计前，不接纳 equilibrium target，也不把 `n_max=383` 直接硬编码为全域合同。
+- **数值边界**：默认 MFIR 不用 Landau 求和表示真空项；`n_max`、`p_z_max` 只控制热 Landau 项，`zeta_num` 控制 MFIR 特殊函数的数值积分。`route=:landau_legacy` 下的 `smooth_cutoff`、真空 `n_max` 和 pz Gauss 节点仅为历史诊断。论文的低温占据 `n_max` 估计不等同于真空项的求和上限。历史诊断中的旧 auto-`n_max`（`T=50,eB=0.2` 约为 `4`，`T=240,eB=0.2/0.8` 约为 `3/3`）已被当前默认 profile 的共享 thermal-tail 策略替代；当前实现由 `resolve_magnetic_nmax` 按温度/化学势估计并执行 `floor/cap` 预算，显式 `n_max` 优先。固定点回归基线因此发生有意的截断语义迁移，不能与旧基线数值逐行混用；仍需代表点和外部 source-parity 诊断，不能将本地回归基线解释为全域收敛证明。
 - **外场能量边界**：当前 `omega/pressure` 是固定外部磁场背景下的物质巨势/压力，只组装式(5-2)中的夸克 Landau 项、手征项和 Polyakov 势；拉格朗日量中的外部 Maxwell 项不作为独立的 `B^2/2` 能量加入输出。因此这些量不能直接解释为包含电磁场自能的总 EOS，若未来需要该口径必须新增显式、版本化的 Maxwell 选项并重新验证压力、能量和相平衡。
 - **压力方向边界**：`calculate_magnetic_pressure=-Omega` 当前只定义固定外部 `B` 背景下的标量物质压力；代码没有磁化强度导数、横向/纵向压力拆分或磁场介质自洽 EOS。不能把该标量直接解释为包含磁化各向异性的完整压力张量。
 
