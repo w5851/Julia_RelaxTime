@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit 与 versioned result import 已通过，full candidate/legacy review 已接受）。runtime-switch PR #260、
+状态：active（post-repair audit 与 versioned result import 已通过，full candidate/legacy review 已接受）。PR #272 已创建且 11/11 checks 通过，等待作者审核与合并授权。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
 均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
@@ -53,7 +53,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] 作者审核 full candidate/legacy comparison 与同构审核图；作者确认结果符合预期。
   candidate 图已作为 `author_accepted_formal_layout` 导入正式 figure 路径；数值证据仍保持
   `diagnostic-only`。本次 versioned RS promotion/import PR 已在隔离 worktree 中生成
-  `...prod_v2` result trees，保留 legacy fallback 和显式 rollback；等待 CI 与作者审核。
+  `...prod_v2` result trees，保留 legacy fallback 和显式 rollback；PR #272 已提交，CI 11/11 通过，等待作者审核与合并授权。
 
 - [x] solver-free source preflight 与 versioned result import 已完成：aggregate v4、30 个选定
   shard sidecar、candidate figure manifest 和旧 `prod_v1` tree hash 均通过校验；本次 import
@@ -70,7 +70,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   `numerical_status=diagnostic_only`、`runtime_default_switch=false`、
   `source_solver_called=true`、`aggregate_replay_solver_called=false`、
   `import_solver_called=false`；质量警告和历史 sidecar hash 缺陷均保留。
-- [ ] focused CI、PR 合并后的 solver-free consumer smoke 和作者对 result import 的审核尚未完成；
+- [ ] PR #272 的作者审核、合并后的 solver-free consumer smoke 尚未完成；PR checks 已 11/11 通过。
   在此之前不得把 `prod_v2` 设为默认 runtime、不得删除 `prod_v1`。
 
 ## 当前证据
