@@ -776,15 +776,18 @@ $$
 MFIR 路线已接入运行时配置；外部参考已固定为
 [`pnjl_mag`](https://github.com/ZhouRui-xzit/pnjl_mag) commit
 `e1fc81d3c3c9d220c49972e54307b66a604cb9db`。在其参数、单位、积分、分支和输出合同
-完成静态 source-gate 后，当前仅接纳一个 fixed-state `Omega` kernel-only target；在
-equilibrium target 尚未接纳前，磁场外部 equilibrium 数值验证仍保持 `diagnostic_only`。
+完成静态 source-gate 后，当前接纳一个 fixed-state `Omega` kernel-only target，以及
+三个固定参数、匹配节点的 equilibrium anchor target；其余外部 equilibrium 数值仍保持
+`diagnostic_only`，不代表全分支完备性或全域收敛验收。
 外部项目的锁定环境已在本机建立，作者测试 `9/9` 通过；按作者的 `300→50 MeV`、
 步长 `1 MeV` 单 seed continuation 重放了 `eB={0.2,0.4,0.8} GeV^2`，提取的 9 个
 代表状态与作者 CSV 逐字段一致。该结果只证明外部路线可重现，不证明 Julia 多分支求解等价。
 随后已在隔离诊断中用同一参数映射做 9 点 Julia screening，并对 `T=240 MeV` 的 3 点
 做外部匹配节点复核；匹配节点下 Omega 差最大约 `1.2e-12`，高温高场点还发现第二个
 物理候选。该证据见 [`pnjl_mag_cross_solver_replay_v1/`](../analysis/historical/legacy/legacy_extraction_v1/pnjl_mag_cross_solver_replay_v1/)，
-仍是 diagnostic-only，不等于全分支或收敛 acceptance。
+仍是 diagnostic-only，不等于全分支或全域收敛 acceptance；其中三点 matched-node
+结果已由 `tests/validation/pnjl/reference/test_magnetic_pnjl_mag_equilibrium_anchors.jl`
+作为有限范围的 candidate-membership equilibrium anchor 固化。
 当前已完成的短 FixedMu replay（Fortran smooth-Landau 候选状态与
 `pnjl_mag` MFIR 诊断根）见
 [`magnetic_external_crosscheck_v2.md`](../analysis/historical/legacy/legacy_extraction_v1/magnetic_external_crosscheck_v2.md)。
@@ -797,8 +800,8 @@ equilibrium target 尚未接纳前，磁场外部 equilibrium 数值验证仍保
 `n_max_cap=10000`），同一点的所有 seed/primary/fallback attempt 共用一次解析结果。
 跨求解器 source-parity 诊断可选择 `magnetic_source_parity.toml`，显式固定外部匹配的
 `n_max=79`、`p_num=128`、`pz_max=40 fm^-1` 和 `zeta_num=256`。这些 profile 仍不把
-`pnjl_mag` equilibrium 输出提升为正式 acceptance target，也不再扩展 smooth-Landau
-replay。
+`pnjl_mag` equilibrium 输出仅在三点 matched-node anchor 合同下进入正式 acceptance，
+不扩展为全域或全分支 acceptance，也不再扩展 smooth-Landau replay。
 
 磁场巨势还包含
 
