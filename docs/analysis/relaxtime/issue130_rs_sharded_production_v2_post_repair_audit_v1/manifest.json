@@ -1,0 +1,68 @@
+{
+  "schema_version": "issue130_rs_sharded_production_v2_post_repair_audit_pointer_v1",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "repo_head_at_audit": "472e3eb0047b3a9380b27f1935880b0e473ca9b5",
+  "repair_pr": 269,
+  "repair_merge_sha": "472e3eb0047b3a9380b27f1935880b0e473ca9b5",
+  "verdict": "post_repair_audit_pass_diagnostic_only",
+  "solver_called": false,
+  "production_write": false,
+  "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826",
+  "aggregate_root": "aggregate_replay_20260826_v4",
+  "audit_root": "post_repair_audit_20260826_v1",
+  "external_hashes": {
+    "dispatch_manifest.json": "fbf6bceefd678dd8d1864f4bba173a79bd7c3569c2e0509c80ab0d52704177e3",
+    "aggregate_replay_20260826_v4/manifest.json": "42e88e028832311a95e45816eaf8ab1bb2dbbe8bb094ed6b59681c51d1cad754",
+    "aggregate_replay_20260826_v4/aggregate_summary.json": "4385f1c06b25dc8eb43f35327f9b029b856eb7e3158494267568749e110e7c71",
+    "post_repair_audit_20260826_v1/manifest.json": "587f79db64476f777b25ca5ee234a43b5a31e17bea375864d9e13f0226d1d6f0",
+    "post_repair_audit_20260826_v1/audit_summary.json": "dc7d5605c5b40e0903659d0ef3c092ec098f41ac9ac98379b59333adf31d2e15",
+    "post_repair_audit_20260826_v1/candidate_legacy_review_summary.json": "2f3fe8c5559b52d0430ba14f9391a53beb340d7dd4cb5ebfd76ce82ff147a9e7",
+    "post_repair_audit_20260826_v1/candidate_legacy_phase_mismatches.csv": "6a5a002ca8f0922171953a8e59e9215e0977a5882cfac9ddf6a0ba1bbb8662c8",
+    "post_repair_audit_20260826_v1/candidate_legacy_numeric_extrema.csv": "7566bf047d5262171950cfae485c2dd9bf6640a6c4f8d3e701773c3504498f09"
+  },
+  "audit_script": "scripts/analysis/relaxtime/audit_issue130_rs_sharded_provenance.py",
+  "audit_script_sha256_before_commit": "e4c8871ebd91580b6d36d724098efb69e9080f0299058d0a696a584c4a428956",
+  "figure_audit": {
+    "schema_version": "issue130_rs_candidate_legacy_figures_v1",
+    "output_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\candidate_legacy_figures_v2",
+    "manifest_sha256": "9a986e1887292309a46a963dfbc76f08cc7fb67d3fa5664f282ee7256853f01b",
+    "figure_counts": {
+      "mode_a_fixed_muB_phase_scaled/candidate_runtime": 36,
+      "mode_a_fixed_muB_phase_scaled/legacy_runtime": 36,
+      "mode_b_fixed_T_sparse_muB/candidate_runtime": 36,
+      "mode_b_fixed_T_sparse_muB/legacy_runtime": 36
+    },
+    "plot_script": "scripts/analysis/relaxtime/render_issue130_rs_candidate_legacy_figures.py",
+    "same_layout_as_legacy": true,
+    "solver_called": false,
+    "production_write": false
+  },
+  "figure_formalization": {
+    "schema_version": "issue130_rs_candidate_runtime_formalization_v1",
+    "status": "author_accepted_formal_layout",
+    "numerical_status": "diagnostic_only",
+    "source_manifest_sha256": "9a986e1887292309a46a963dfbc76f08cc7fb67d3fa5664f282ee7256853f01b",
+    "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826\\candidate_legacy_figures_v2",
+    "targets": {
+      "mode_a_fixed_muB_phase_scaled": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "figure_count": 36,
+        "plot_manifest_sha256": "eed426abfc592a7842d6124b1dbe86fb3394c6cd58a7e29b2be69335790180c7"
+      },
+      "mode_b_fixed_T_sparse_muB": {
+        "path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "figure_count": 36,
+        "plot_manifest_sha256": "fbb216a45db2fa8c3a819a1e97f129821752972e7bc70db2a75360e9e69d9b77"
+      }
+    },
+    "solver_called": false,
+    "production_write": false
+  },
+  "non_goals": [
+    "no solver rerun",
+    "no old artifact rewrite",
+    "no RS promotion",
+    "no legacy deletion"
+  ]
+}

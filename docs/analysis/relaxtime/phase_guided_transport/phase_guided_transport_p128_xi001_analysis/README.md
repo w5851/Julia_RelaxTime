@@ -39,6 +39,19 @@
 - 背景平滑但 tau 单点下探的窗口：直接近因是 channel diagnostics 中少数通道的 rate/contribution 局部尖峰。例如 `mode A, muB=450, alpha_T=1.0, xi=0.26` 由 `uubar_to_uubar` 与 `uubar_to_ddbar` 放大主导；`mode B, T=200, muB=450, xi=0.31` 由 `udbar_to_udbar/dubar_to_dubar` 放大主导。
 - 对这些 channel-rate 尖峰，是否能写成“传播子分母近零”取决于下方逐窗口 denominator-chain verdict；没有通过 rate 复现或局部收敛补证的窗口仍保留为机制候选。
 
+### Issue #130 candidate v2 的 muB=900 补充口径
+
+上述历史表中的 `mode_a_muB900p0_alpha1p0_xip0p00_1` 仍表示 `xi=0` 附近的离散
+上游分支跳变；这一历史结论不被撤销。对 Issue #130 candidate v2 的同构审核图，作者进一步
+把它与跳变前分支内部的连续斜率变化分开解释：在 `xi=-0.05 ... -0.003` 的同一分支内，
+增大 `xi` 的输运响应可局部类比为有效降温，而各向同性基线中降低 `T` 时 `tau` 的快速增加
+提供了熟悉的同构形状；`xi=0` 与 `xi=+0.003` 之间的分支切换则是独立的一阶效应。
+
+这只是 candidate v2、`muB=900 MeV`、`alpha_T=1.0` 切片的作者接受诊断解释，不把 `xi`
+严格等同于温度、不定义新的热力学坐标，也不覆盖本分析包对其他窗口的 denominator-chain
+和分支证据要求。详见
+`docs/analysis/relaxtime/issue130_rs_sharded_production_v2_post_repair_audit_v1/README.md`。
+
 
 ## 非一阶 channel-rate spike 的 denominator-chain 补证
 
