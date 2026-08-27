@@ -343,7 +343,7 @@ status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md"
 reason = "作者已接受两套 prod_v2 raw 及分析默认迁移；论文使用仍需独立的 publication-clean 派生层，不能修改 raw 或把 diagnostic-only 结果升级为 manuscript eligible。"
-next_action = "publication_clean_v1 已生成；4 个 T=200 局部平滑候选保留在派生层，T=120、μB=900 的历史一阶星标已抑制并由 strict CEP-slice 审计证明无真实 CEP 交点；作者确认后再另立 old-reference retirement audit/PR，未经单独授权不物理删除旧 prod_v1。"
+next_action = "publication_clean_v1 已生成；4 个 T=200 局部平滑候选保留在派生层，历史 T=120、μB=900、ξ=-0.09 星标仅保留审计，图上改用作者确认的 crossover→first_order 最小区间 [-0.14,-0.13] 中点 ξ=-0.135，mode-A direct-coexistence 图上改用 ±0.003 区间中点 ξ=0；作者确认后再另立 old-reference retirement audit/PR，未经单独授权不物理删除旧 prod_v1。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -352,9 +352,11 @@ evidence = [
   "file:tests/unit/python/test_phase_guided_publication_clean_v1.py",
   "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/",
   "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/cep_marker_audit.csv",
+  "file:docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/publication_marker_map.csv",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "sha:22874505877491754eed27519ad8a7b871c82571",
   "note:solver_free_derived_layer_raw_immutable_manuscript_ineligible",
+  "note:publication_markers_use_confirmed_interval_midpoints_not_historical_stars",
 ]
 
 [[items]]

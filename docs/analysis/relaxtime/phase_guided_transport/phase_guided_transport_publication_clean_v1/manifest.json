@@ -1,10 +1,11 @@
 {
   "schema": "phase_guided_transport_publication_clean_manifest_v1",
+  "marker_contract": "confirmed_interval_midpoint_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
-  "generated_at": "2026-08-27T12:04:40.112553+00:00",
-  "base_git_commit": "9de0fa89c3c1ed79eefa4f25b2dd0305ad7133ac",
+  "generated_at": "2026-08-27T12:28:41.697968+00:00",
+  "base_git_commit": "ca91543602714aa63a42973418637ed47da1636a",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py",
-  "generator_sha256": "47a2337d288e68604ef074e7bd0a02ec72167bf46a72e655aa4e313102e62ec1",
+  "generator_sha256": "6ad77b2933a76b089c9fec43c485ba5eb0d31908a033410b7c4881a824ffead8",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
   "status": "derived_author_review_required",
@@ -67,21 +68,23 @@
     "inherited_replacement_rows": 19,
     "review_adjustment_rows": 4,
     "marker_recipe_rows": 6,
-    "marker_render_rows": 6,
+    "marker_render_rows": 0,
     "marker_audit_rows": 9,
-    "marker_suppressed_rows": 3,
+    "marker_suppressed_rows": 9,
     "cep_slice_audit_rows": 1,
     "cep_marker_render_rows": 0,
+    "publication_marker_render_rows": 6,
+    "phase_switch_midpoint_rows": 6,
     "marker_semantics_audit_rows": 9,
     "publication_clean_point_rows": 5457,
     "curve_rows": 54,
     "figure_count": 18
   },
   "known_boundaries": [
-    "mode_a xi=0 first-order recipe reconciled to raw xi=-0.003/+0.003 side points",
+    "mode_a xi=0 first-order recipe retains raw xi=-0.003/+0.003 endpoints and renders their interval midpoint as a display-only marker",
     "mode_a muB=900 alpha_T=1.0 xi=-0.01 mixed bulk/equilibrium branch remains excluded",
     "T=200 mode-B xi=-0.10 (muB=900) and xi=0.36 (muB=0) have author-requested display-only smoothing candidates",
-    "T=120 mode-B muB=900 xi=-0.09 historical first-order marker is suppressed; strict CEP-slice audit finds no common CEP intersection",
+    "T=120 mode-B muB=900 xi=-0.09 historical first-order marker is suppressed; publication uses the author-confirmed phase-label-switch interval midpoint",
     "mode_a muB=450 alpha_T=1.0 xi=-0.20 retains the raw non-first-order slope change; prior mechanism evidence is simple_1m4KPi",
     "derived display values are not solver recomputations or numerical convergence evidence",
     "old prod_v1 and phase-reference legacy fallback are retained; retirement is a separate audit"
@@ -89,8 +92,8 @@
   "outputs": [
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/README.md",
-      "sha256": "9267b97ed87992d0ba54d8b4a41fe24d9665e84f3dbbc461eb8596cb5a875a23",
-      "bytes": 4884
+      "sha256": "0d5280bbb31468b9fb35d71060bfa09db50337bf44bfc1344ef77fec50a4a86b",
+      "bytes": 5671
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/cep_marker_audit.csv",
@@ -104,18 +107,18 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/claim_ledger.csv",
-      "sha256": "952fcb680f927e00dcd8fb994932e7622a2d9ce63f0934a155cc2fab362a87c5",
-      "bytes": 3458
+      "sha256": "33d1984f8959d274b9cdbed7cc587fe59587305e85cb991b829387cf15c5c847",
+      "bytes": 3661
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/curve_index.csv",
-      "sha256": "9699b3b34dc48a9ad98c015a3c505e0859ffa9ea9211c9d73fc4e94b0ba69ca4",
+      "sha256": "6c010e1d42f0c09618ac2f4073f7ee42fbe4fa7581bd9bb2a9ac91f9a96f3be2",
       "bytes": 3274
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/first_order_marker_map.csv",
-      "sha256": "fe5c0120d2426cd4ac2c29dc9e0ab5a2a5b5045af92ff0d5d015f04fb4b87cd6",
-      "bytes": 2733
+      "sha256": "6a86a902fd06903edd5bb5128892837bc64bdef7e557358f549bb5dfec60ecee",
+      "bytes": 2853
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/input_inventory.csv",
@@ -124,13 +127,18 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/marker_semantics_audit.csv",
-      "sha256": "5c7f187777081ecff9d2c18167f39b7b7322189068c35fc874c2a4330b1e37fd",
-      "bytes": 3494
+      "sha256": "15504b5a88ef5cf7bad5a52ffdd38fc3bcfeb95cf57649b13715ee432da04392",
+      "bytes": 4460
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/publication_clean_points.csv",
-      "sha256": "87e23e27f8fc51e21d8f5e7a2eb8d934dccbd0ef0ceb23d1202fd81621f0a52d",
-      "bytes": 1402193
+      "sha256": "38787ed96e6862c6dc3e1afb53e8825922304f167f7d2f72d7e190c1a86c1e44",
+      "bytes": 1402079
+    },
+    {
+      "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/publication_marker_map.csv",
+      "sha256": "f2e8dc64f916d601a68b94be76759318ace90fe7743319b81a76268bbecb5ec6",
+      "bytes": 3871
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/tables/replacement_map.csv",
@@ -144,8 +152,8 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/plot_manifest.json",
-      "sha256": "1775c83df598abc40e50dc2e0f918e0099028b9e8db36e9e67dcf8398a24cc22",
-      "bytes": 6382
+      "sha256": "478a79f5ac105d920de8434e20893e4ba9c5903b6d38e08ed068aa46bef3f355",
+      "bytes": 6595
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_a/plot_panel=muB0.0/eta_over_s_vs_xi.png",
@@ -179,33 +187,33 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_a/plot_panel=muB900.0/eta_over_s_vs_xi.png",
-      "sha256": "dcab19ee3aac4257dc0b43c79bd1549c81c74973c75bef67a9c303a03e63bbbe",
-      "bytes": 249694
+      "sha256": "b15aa8bc039f38f3c077bd2a2a422c8ca3e16ac6e1b2b151815aa2bcb936c64a",
+      "bytes": 257279
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_a/plot_panel=muB900.0/zeta_over_s_vs_xi.png",
-      "sha256": "eeac9e4cde2b5c37f58fedafb29a2d6ce5eea094bf4afc6571b273a4ac725648",
-      "bytes": 244594
+      "sha256": "cae21202e3abaaed0531c152c62a349f8469fb940f2774f385f28e4ce69509bf",
+      "bytes": 252105
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_a/plot_panel=muB900.0/sigma_over_T_vs_xi.png",
-      "sha256": "b98ef533d594337677de00de153dd4920737fe4271c5b7cb694801e74e760e49",
-      "bytes": 340505
+      "sha256": "6759d5fc4d9b2196ebce394338558a501525b9c005e29845d00d5a10f1695bfb",
+      "bytes": 348277
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_b/plot_panel=T120.0/eta_over_s_vs_xi.png",
-      "sha256": "21952ca8b71622ac9ae2393153be4990511e875088cd991c09343aec1c7200be",
-      "bytes": 185931
+      "sha256": "c84b61253d5183c972c5a8bed6de88f1230f60dc3b3e828a2df7f0612ccb3dce",
+      "bytes": 217621
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_b/plot_panel=T120.0/zeta_over_s_vs_xi.png",
-      "sha256": "c0019ec32f49e06e4888c5be75f26e1dfe98812a6eede577ee4715d2e390065d",
-      "bytes": 194488
+      "sha256": "f786a146a32d42cf2f34bfedf7b8957279cfb8ec556142ab3be9827a270151f7",
+      "bytes": 224335
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_b/plot_panel=T120.0/sigma_over_T_vs_xi.png",
-      "sha256": "593a62530dcc387f75bfe9537f89ee4186dfad4616a753330b5b1ed8d9672d88",
-      "bytes": 202166
+      "sha256": "4bcd955fea17ba844031e940bcfa785cf09cc0290d38d3372781961edd9dfee8",
+      "bytes": 232208
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/mode_b/plot_panel=T160.0/eta_over_s_vs_xi.png",

@@ -23,13 +23,14 @@
 
 - [x] 读取两棵 `prod_v2` raw tree，校验 scan/diagnostic 行数、重复键、非有限值、failed points、双 SHA 和 source/derived solver provenance。
 - [x] 19 个非一阶显示替换键按当前 raw 左右邻点重算；保留旧配方值用于迁移审计，不能直接复制旧 `prod_v1` 数值。
-- [x] 旧配方 `mode_a, μB=900, αT=1.0, ξ=0` 在当前 direct-coexistence grid 中缺失时，改为记录 `ξ=−0.003/+0.003` 两侧 raw marker；不生成唯一 `ξ=0` 输运值。
+- [x] 旧配方 `mode_a, μB=900, αT=1.0, ξ=0` 在当前 direct-coexistence grid 中缺失时，保留 `ξ=−0.003/+0.003` 两侧 raw 端点，并以其确认区间中点 `ξ=0` 作为 display-only 星标；不生成唯一 `ξ=0` raw 输运值。
 - [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`：长表、替换表、marker 对齐表、曲线索引、18 张图、manifest、plot manifest 和 claim ledger。
 - [x] 派生层所有行写入 `canonical_data_modified=false`；manifest 明确 `solver_called=false`、`manuscript_eligible=false`。
-- [ ] 作者审核 18 张同构图、19 个继承显示替换值、两侧一阶 marker 和已知 `xi=-0.01` bulk 分支排除项。
+- [ ] 作者审核 18 张同构图、19 个继承显示替换值、两个有限区间中点 marker、两侧端点 provenance 和已知 `xi=-0.01` bulk 分支排除项。
 - [ ] 作者审核本轮新增的 4 个 T=200 局部平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；候选只写入 clean layer。
-- [x] 修正 T=120、μB=900 的历史星标：`xi=-0.09` 不是 CEP，publication-clean 不再渲染；`tables/cep_marker_audit.csv` 证明固定切片没有真实 CEP 交点，因此不放置替代星标。
+- [x] 修正 T=120、μB=900 的历史星标：`xi=-0.09` 只保留在审计记录；依据当前 `phase_reference_kind: crossover → first_order` 的作者确认区间 `[-0.14,-0.13]`，publication-clean 改渲染中点 `xi=-0.135`。严格 CEP 表仍独立记录固定切片坐标审计。
 - [x] 回溯 mode-A `μB=450, αT=1.0, ξ=-0.20`：当前点为 crossover/no-transition，既有 mechanism window 支持 `simple_1m4KΠ` 小分母归因；不修改 raw。
+- [x] 统一论文 marker 语义：严格 CEP/相标签切换本质上保留有限宽度 bracket；`tables/publication_marker_map.csv` 记录两侧 raw 端点、phase label、质量标志及中点 display 值，图中只绘制中点，不把中点写入 raw/clean 长表。
 
 ## old-reference retirement 后续门禁
 

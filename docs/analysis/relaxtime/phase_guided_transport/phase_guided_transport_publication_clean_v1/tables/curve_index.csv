@@ -17,9 +17,9 @@ mode_a,muB450.0,alpha1.1,zeta_over_s,101,1,0,-0.5,0.5,False
 mode_a,muB450.0,alpha1.2,eta_over_s,101,0,0,-0.5,0.5,False
 mode_a,muB450.0,alpha1.2,sigma_over_T,101,0,0,-0.5,0.5,False
 mode_a,muB450.0,alpha1.2,zeta_over_s,101,0,0,-0.5,0.5,False
-mode_a,muB900.0,alpha1.0,eta_over_s,102,0,2,-0.5,0.5,False
-mode_a,muB900.0,alpha1.0,sigma_over_T,102,0,2,-0.5,0.5,False
-mode_a,muB900.0,alpha1.0,zeta_over_s,102,0,2,-0.5,0.5,False
+mode_a,muB900.0,alpha1.0,eta_over_s,102,0,0,-0.5,0.5,False
+mode_a,muB900.0,alpha1.0,sigma_over_T,102,0,0,-0.5,0.5,False
+mode_a,muB900.0,alpha1.0,zeta_over_s,102,0,0,-0.5,0.5,False
 mode_a,muB900.0,alpha1.1,eta_over_s,101,0,0,-0.5,0.5,False
 mode_a,muB900.0,alpha1.1,sigma_over_T,101,0,0,-0.5,0.5,False
 mode_a,muB900.0,alpha1.1,zeta_over_s,101,0,0,-0.5,0.5,False

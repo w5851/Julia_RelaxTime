@@ -170,12 +170,12 @@ PR 将两套 mode-A/mode-B `prod_v2` 登记为作者接受的 formal raw，并�
 
 - [x] 从最新 `origin/main@c5ae1057bede6d1df1861da5c1f7659d69bcb052` 建立隔离分支，固定消费两棵作者接受的 `prod_v2` raw tree；本地不调用 solver。
 - [x] 复用既有作者审核的 19 个非一阶显示异常键，但所有显示值都从当前 `prod_v2` 的左右真实邻点重新线性插值；旧 `prod_v1` 数值不直接复制。
-- [x] 对旧配方的 `mode_a, μB=900, αT=1.0, ξ=0` 缺键进行显式 reconciliation：当前 direct-coexistence 合同只保留 `ξ=−0.003/+0.003` 两侧 raw 点，不伪造唯一 `ξ=0` 输运值。
+- [x] 对旧配方的 `mode_a, μB=900, αT=1.0, ξ=0` 缺键进行显式 reconciliation：保留 `ξ=−0.003/+0.003` 两侧 raw 端点，publication-clean 只在图上显示确认区间中点 `ξ=0`，不伪造唯一 `ξ=0` raw 输运值。
 - [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`，包括输入哈希、替换表、marker 对齐表、长表、曲线索引、18 张同构显示图、plot manifest、manifest 与 claim ledger。
 - [x] 根据作者本轮图审计，新增 4 个独立的 T=200 局部显示平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 各覆盖 `η/s`、`ζ/s`；均由当前 `prod_v2` 左右 raw 邻点重算，写入 `tables/review_adjustment_map.csv`，不修改 raw。
-- [x] 复核并修正 T=120、μB=900 的三张图：历史配方中的 ξ=-0.09 星标不是 CEP，已在 publication-clean 中抑制；strict CEP-slice 审计写入 `tables/cep_marker_audit.csv`，由于固定切片没有共同 CEP 交点，不绘制替代星标。
+- [x] 复核并修正 T=120、μB=900 的三张图：历史配方中的 ξ=-0.09 星标只保留在审计；publication-clean 按作者确认的 `crossover → first_order` 最小切换区间 `[-0.14,-0.13]` 渲染中点 `ξ=-0.135`。strict CEP-slice 审计仍写入 `tables/cep_marker_audit.csv`，与论文显示 proxy 分开。
 - [x] 回溯 mode-A μB=450、αT=1.0、ξ=-0.20：该点为 crossover/no-transition；既有定点机制表支持 `simple_1m4KΠ` 小分母归因，未对 raw 或 phase 标签作改写。
-- [ ] 作者审核派生显示值、4 个新增局部平滑候选、两侧一阶标记和已知排除项；在审核前保持 `manuscript_eligible=false`。
+- [ ] 作者审核派生显示值、4 个新增局部平滑候选、两个有限区间中点 marker 及端点 provenance 和已知排除项；在审核前保持 `manuscript_eligible=false`。
 - [ ] 作者审核通过后，另立 old-reference retirement audit/PR；仅在所有 consumer 不再依赖旧路径且 fallback/rollback 已验证时，才讨论物理删除旧 `prod_v1`。
 
 ## CI 留痕

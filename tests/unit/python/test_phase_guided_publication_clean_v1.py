@@ -85,7 +85,7 @@ def test_replacement_requires_all_three_current_points() -> None:
         MODULE.build_replacement_map(loaded, recipe)
 
 
-def test_direct_coexistence_marker_reconciles_to_two_raw_side_points() -> None:
+def test_direct_coexistence_marker_keeps_side_points_as_suppressed_audit_rows() -> None:
     rows = [_row(xi="-0.003", value="2.0"), _row(xi="0.003", value="4.0")]
     loaded = _loaded(rows)
     recipe = [{
@@ -100,8 +100,99 @@ def test_direct_coexistence_marker_reconciles_to_two_raw_side_points() -> None:
     }]
     markers = MODULE.build_marker_map(loaded, recipe)
     assert [row["render_xi"] for row in markers] == ["-0.0030000000", "0.0030000000"]
-    assert all(row["marker_status"] == "reconciled_direct_coexistence_side_point" for row in markers)
-    assert all(row["render_marker"] for row in markers)
+    assert all(row["marker_status"] == "suppressed_historical_direct_coexistence_side_point" for row in markers)
+    assert all(not row["render_marker"] for row in markers)
+
+
+def test_publication_marker_uses_direct_coexistence_midpoint_without_raw_point() -> None:
+    rows = [
+        _row(xi="-0.003", value="2.0"),
+        _row(xi="0.003", value="4.0"),
+    ]
+    loaded = _loaded(rows)
+    spec = [{
+        "window_id": "midpoint",
+        "mode_key": "mode_a",
+        "plot_panel": "muB450.0",
+        "plot_series": "alpha1.0",
+        "left_xi": "-0.003",
+        "right_xi": "0.003",
+        "marker_basis": "direct_coexistence_interval",
+        "reason": "fixture",
+    }]
+    markers = MODULE.build_publication_marker_map(loaded, spec)
+    assert len(markers) == 3
+    assert {row["render_xi"] for row in markers} == {"0.0000000000"}
+    assert {row["marker_status"] for row in markers} == {"confirmed_interval_midpoint"}
+    assert all(row["display_value"] == 3.0 + offset for row, offset in zip(markers, (0.0, 1.0, 2.0)))
+    assert all(row["left_value"] < row["display_value"] < row["right_value"] for row in markers)
+    assert all(row["canonical_data_modified"] is False for row in markers)
+
+
+def test_publication_midpoint_is_not_added_to_clean_point_table() -> None:
+    rows = [_row(xi="-0.003", value="2.0"), _row(xi="0.003", value="4.0")]
+    loaded = _loaded(rows)
+    publication = MODULE.build_publication_marker_map(
+        loaded,
+        [{
+            "window_id": "midpoint",
+            "mode_key": "mode_a",
+            "plot_panel": "muB450.0",
+            "plot_series": "alpha1.0",
+            "left_xi": "-0.003",
+            "right_xi": "0.003",
+            "marker_basis": "direct_coexistence_interval",
+            "reason": "fixture",
+        }],
+    )
+    points = MODULE.build_clean_points(loaded, [], [])
+    assert {row["xi"] for row in points} == {"-0.0030000000", "0.0030000000"}
+    assert {row["render_xi"] for row in publication} == {"0.0000000000"}
+
+
+def test_publication_marker_uses_confirmed_phase_label_switch_midpoint() -> None:
+    left = _row(panel="T120.0", series="muB900.0", xi="-0.14", value="2.0")
+    right = _row(panel="T120.0", series="muB900.0", xi="-0.13", value="4.0")
+    left["T_MeV"] = right["T_MeV"] = "120.0"
+    left["muB_MeV"] = right["muB_MeV"] = "900.0"
+    left["phase_reference_kind"] = "crossover"
+    right["phase_reference_kind"] = "first_order"
+    loaded = _loaded([left, right], mode_key="mode_b")
+    spec = [{
+        "window_id": "switch",
+        "mode_key": "mode_b",
+        "plot_panel": "T120.0",
+        "plot_series": "muB900.0",
+        "left_xi": "-0.14",
+        "right_xi": "-0.13",
+        "marker_basis": "phase_label_switch",
+        "reason": "fixture",
+    }]
+    markers = MODULE.build_publication_marker_map(loaded, spec)
+    assert len(markers) == 3
+    assert {row["render_xi"] for row in markers} == {"-0.1350000000"}
+    assert all(row["left_phase_reference_kind"] == "crossover" for row in markers)
+    assert all(row["right_phase_reference_kind"] == "first_order" for row in markers)
+
+
+def test_publication_marker_rejects_phase_bracket_without_label_switch() -> None:
+    rows = [
+        _row(panel="T120.0", series="muB900.0", xi="-0.14", value="2.0"),
+        _row(panel="T120.0", series="muB900.0", xi="-0.13", value="4.0"),
+    ]
+    loaded = _loaded(rows, mode_key="mode_b")
+    spec = [{
+        "window_id": "switch",
+        "mode_key": "mode_b",
+        "plot_panel": "T120.0",
+        "plot_series": "muB900.0",
+        "left_xi": "-0.14",
+        "right_xi": "-0.13",
+        "marker_basis": "phase_label_switch",
+        "reason": "fixture",
+    }]
+    with pytest.raises(ValueError, match="no label switch"):
+        MODULE.build_publication_marker_map(loaded, spec)
 
 
 def test_missing_non_mode_a_marker_is_an_error() -> None:
@@ -207,9 +298,9 @@ def test_marker_semantics_audit_does_not_call_t120_marker_cep() -> None:
     assert cep_audit[0]["marker_action"] == "suppress_historical_non_CEP_marker"
     audit = MODULE.build_marker_semantics_audit(loaded, markers, cep_audit)
     assert audit[0]["intended_semantics"] == "historical_first_order_branch_marker"
-    assert audit[0]["cep_semantics"] == "not_a_CEP_marker"
+    assert audit[0]["cep_semantics"] == "confirmed_interval_midpoint_proxy"
     assert audit[0]["render_marker"] is False
-    assert "no strict CEP intersection" in audit[0]["audit_verdict"]
+    assert "phase-label-switch midpoint" in audit[0]["audit_verdict"]
 
 
 def test_suppressed_historical_marker_is_not_written_to_clean_points() -> None:
