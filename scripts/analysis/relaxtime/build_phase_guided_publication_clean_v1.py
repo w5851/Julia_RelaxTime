@@ -495,8 +495,8 @@ def build_marker_semantics_audit(
         if marker["mode_key"] == "mode_b" and marker["plot_panel"] == "T120.0":
             intended = "first_order_transition"
             cep_semantics = "not_a_CEP_marker"
-            verdict = "consistent_first_order_marker; no CEP claim"
-            evidence = "paper_first_order_markers.csv; current phase_reference_kind/phase_structure"
+            verdict = "first_order_branch_marker; no CEP claim; placement is not a CEP coordinate"
+            evidence = "paper_first_order_markers.csv; current phase_reference_kind/phase_structure; first_order_protection.csv"
         else:
             intended = "first_order_boundary_or_transition"
             cep_semantics = "not_a_CEP_marker"
@@ -736,7 +736,7 @@ def claim_ledger(
         {
             "claim_id": "PC-V1-007",
             "status": "supported_with_scope_limit",
-            "claim_zh": "T=120 MeV、μB=900 MeV 的星标经复核是 ξ=−0.09 的一阶转变点，不是 CEP；本 publication-clean 图层没有绘制 CEP 标记。",
+            "claim_zh": "T=120 MeV、μB=900 MeV 的星标经复核是 ξ=−0.09 的一阶分支/保护 marker，不是 CEP；本 publication-clean 图层没有绘制 CEP 标记，不能把该星标当作 CEP 坐标。",
             "evidence": "tables/marker_semantics_audit.csv; tables/first_order_marker_map.csv; data/reference/pnjl/issue130_phase_reference_v1/*",
             "scope_limit": "CEP 位置应从 phase-reference CEP boundary 图层读取，不能把输运一阶星标当作 CEP 坐标。",
         },

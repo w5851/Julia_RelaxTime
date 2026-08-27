@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_transport_publication_clean_plot_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
-  "generated_at": "2026-08-27T11:25:49.046800+00:00",
-  "base_git_commit": "f11fccd2bbbfd9275fce9e00ee4e5fdaca083fef",
+  "generated_at": "2026-08-27T11:35:46.589034+00:00",
+  "base_git_commit": "3608023d92142344fd2feed0e829d94a6dd17c88",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py",
-  "generator_sha256": "7d7f67472984498b21a1dd45d6ae41dc7065060bd4697349d48b7ec93faf25b8",
+  "generator_sha256": "258b074bc9b8ed5a4448d8e8c35543a9f96ff1dec84320fc7372bc1213b9333e",
   "observables": [
     "eta_over_s",
     "zeta_over_s",
