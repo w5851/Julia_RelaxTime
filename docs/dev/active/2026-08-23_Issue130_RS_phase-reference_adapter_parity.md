@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit 与 versioned result import 已通过，full candidate/legacy review 已接受）。PR #272 已创建且 11/11 checks 通过，等待作者审核与合并授权。runtime-switch PR #260、
+状态：active（post-repair audit、versioned result import 与合并后 solver-free consumer smoke v2 已通过，full candidate/legacy review 已接受）。PR #272 已 squash merge 到 `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`，合并后 smoke verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
 均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
@@ -53,7 +53,7 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] 作者审核 full candidate/legacy comparison 与同构审核图；作者确认结果符合预期。
   candidate 图已作为 `author_accepted_formal_layout` 导入正式 figure 路径；数值证据仍保持
   `diagnostic-only`。本次 versioned RS promotion/import PR 已在隔离 worktree 中生成
-  `...prod_v2` result trees，保留 legacy fallback 和显式 rollback；PR #272 已提交，CI 11/11 通过，等待作者审核与合并授权。
+  `...prod_v2` result trees，保留 legacy fallback 和显式 rollback；PR #272 已 squash merge，CI 11/11 通过。
 
 - [x] solver-free source preflight 与 versioned result import 已完成：aggregate v4、30 个选定
   shard sidecar、candidate figure manifest 和旧 `prod_v1` tree hash 均通过校验；本次 import
@@ -70,13 +70,32 @@ production，也不把 solver-free smoke 当作数值 production 通过。
   `numerical_status=diagnostic_only`、`runtime_default_switch=false`、
   `source_solver_called=true`、`aggregate_replay_solver_called=false`、
   `import_solver_called=false`；质量警告和历史 sidecar hash 缺陷均保留。
-- [ ] PR #272 的作者审核、合并后的 solver-free consumer smoke 尚未完成；PR checks 已 11/11 通过。
-  在此之前不得把 `prod_v2` 设为默认 runtime、不得删除 `prod_v1`。
+- [x] PR #272 已完成作者审核并 squash merge 到
+  `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`；其后的 solver-free consumer
+  smoke v2 已完成，verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。
+  `prod_v2` 仍是 `diagnostic_only`，不得据此切换默认 runtime 或删除 `prod_v1`。
+
+## 合并后 solver-free consumer smoke v2
+
+- [x] 在 PR #272 合并 SHA 上重放 candidate runtime、diagnostic candidate 和显式
+  legacy rollback 三条 source-resolution 路径；运行入口与一点评估 dry-run 均记录
+  `solver_called=false`，dry-run 使用 `reference_interpolation`，未触发 coexistence solver。
+- [x] 固化 v2 evidence：
+  `docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/`。
+  包含 raw/规范化 source smoke、runtime/legacy config 与 manifest、输入/结果 hash、
+  parity comparison、claim ledger、decision 和旧 `prod_v1` tree hash。
+- [x] 两套 imported `prod_v2` result tree 的 manifest、scan/diagnostic 行数、逐文件
+  hash、figure source hash、direct-coexistence side-point 合同均通过；mode-A 为
+  910 scan/38220 diagnostic，mode-B 为 909 scan/38178 diagnostic。
+- [x] verdict 保持 diagnostic-only：不声称 RS numerical parity，不写 production、
+  不切换 runtime 默认、不移除 legacy fallback 或显式 rollback。
 
 ## 当前证据
 
 见：
-`docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/`。
+`docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/`（历史 v1）与
+`docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/`（合并后
+solver-free smoke v2）。
 
 - runtime view：`certified_candidate_with_legacy_fallback`
 - candidate strict：boundary `7162`（certified `3091`）、crossover `1343`、CEP `93`（certified `90`）、
@@ -122,9 +141,9 @@ source root：
 的 `figure_formalization`，目标为两棵 `...prod_v2` 图树。该导入只复制 PNG 并写入逐图 hash，
 `solver_called=false`、`production_write=false`；它不等价于数值 production promotion。
 
-下一步是提交并审核独立的 versioned RS promotion/import PR，再在合并 SHA 上执行 solver-free
-consumer smoke；只有 smoke 和作者授权均通过，才另立 runtime-default switch / old-reference
-retirement 后续任务。
+下一步是由作者审核 v2 smoke evidence；若继续推进，另立并单独授权 RS numerical
+promotion/default switch 以及 old-reference retirement。当前仍保留逐键 legacy fallback、
+显式 rollback 和旧 `prod_v1` 结果。
 
 ## CI 留痕
 

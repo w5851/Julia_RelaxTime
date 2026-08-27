@@ -1,0 +1,74 @@
+{
+  "argv": [
+    "--mode",
+    "fixed-muB-phase-scaled",
+    "--case-name",
+    "issue130_rs_parity_v2",
+    "--xi-list",
+    "0.0",
+    "--muB-list",
+    "150.0",
+    "--alphaT-list",
+    "1.0",
+    "--propagator-xi-policy",
+    "isotropic",
+    "--sigma-cache-policy",
+    "validated_anchored",
+    "--tau-p-nodes",
+    "6",
+    "--tau-angle-nodes",
+    "2",
+    "--tau-phi-nodes",
+    "2",
+    "--tau-n-sigma",
+    "4",
+    "--sigma-grid-n",
+    "12",
+    "--no-compute-bulk",
+    "--dry-run",
+    "--overwrite",
+    "--phase-reference-layer",
+    "strict",
+    "--phase-anchor-policy",
+    "reference_interpolation",
+    "--phase-reference-mode",
+    "runtime",
+    "--outdir",
+    "docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/runtime"
+  ],
+  "artifacts": [
+    {
+      "path": "docs\\analysis\\pnjl\\phase_reference\\issue130_rs_transport_runtime_parity_v2\\runtime\\sampling_plan.csv",
+      "rows": 1,
+      "sha256": "08b698b0d97639d0e800732bf38a9e6dcb5ae60d17a4eea0bab7fc4e3167ef63"
+    },
+    {
+      "path": "docs\\analysis\\pnjl\\phase_reference\\issue130_rs_transport_runtime_parity_v2\\runtime\\README.md",
+      "rows": null,
+      "sha256": "a6312256b30c3134d555afb10066311636f45650b6360907afe12b69431d0a8a"
+    },
+    {
+      "path": "docs\\analysis\\pnjl\\phase_reference\\issue130_rs_transport_runtime_parity_v2\\runtime\\effective_config.json",
+      "rows": null,
+      "sha256": "2da7a794f12c73c1c9d1913af09a68c9ea22c64e1babfdd3fb8a3a5ee7557069"
+    }
+  ],
+  "config_hash": "2da7a794f12c73c1c9d1913af09a68c9ea22c64e1babfdd3fb8a3a5ee7557069",
+  "cwd": ".",
+  "git_branch": "codex/issue130-rs-consumer-smoke",
+  "git_commit": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "git_dirty": true,
+  "julia_version": "1.12.5",
+  "manifest_toml_hash": "d9ab46fb9539a5ed2b03d4c993115f5218b8ecb791c4ff5250a0da99e2654067",
+  "project_path": ".",
+  "project_toml_hash": "c66b29f4c64051b9304a71fa7cfa08aed2c759944b6d862bca1578bda30182bb",
+  "run_id": "20260827T072014_33c027cb",
+  "schema_version": "v1",
+  "script": "scripts/relaxtime/run_phase_guided_transport_scan.jl",
+  "summary": {
+    "dry_run": true,
+    "points_total": 1
+  },
+  "threads": 1,
+  "timestamp_utc": "2026-08-27T07:20:14Z"
+}
