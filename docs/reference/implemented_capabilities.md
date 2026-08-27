@@ -711,7 +711,8 @@ phase reference / direct coexistence anchor
 一阶共存处严格 `xi=0` 的单一输运值可能不唯一，当前 formal case 用经过热力学与更高节点认证的正/负近零 `xi` 分别表示两侧极限。phase reference 负责指导采样，不自动晋升新的相结构 reference。
 
 - **专题入口**：`scripts/relaxtime/run_phase_guided_transport_scan.jl`。
-- **当前 formal case**：`first_canonical_v1_p128_xi001_validated_anchored_prod_v1`；低 `xi` 分辨率收敛锚为 `...xi005...`。具体路径以 [`scripts/README.md`](../guides/scripts/README.md) 的当前登记为准。
+- **当前 formal raw case**：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`；低 `xi` 分辨率收敛锚仍为 `...xi005...`。具体路径以 [`scripts/README.md`](../guides/scripts/README.md) 的当前登记为准。旧高密度 `prod_v1` 仅作历史回退。
+- `prod_v2` raw 结果已通过作者审核并登记为 `approved`；分母/传播子近零点和非一阶相变突变点的文献显示清理必须另建派生层，不得回写 raw 结果。
 - **治理边界**：GitHub workflow 默认产出 diagnostic candidate；formal 资格来自命名 case 的 convergence/import gate，而不是 workflow 成功状态。
 
 ## 14. 路线 L：外磁场 PNJL

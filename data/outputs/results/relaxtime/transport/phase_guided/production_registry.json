@@ -1,6 +1,6 @@
 {
   "format": "phase_guided_transport_production_registry_v1",
-  "updated_at": "2026-07-15T19:57:00+08:00",
+  "updated_at": "2026-08-27T00:00:00+08:00",
   "schema": {
     "required_entry_fields": [
       "case_slug",
@@ -103,8 +103,8 @@
       "transport_kernel_energy_policy": "onshell_kinematic_energy",
       "distribution_energy_policy": "rs_deformed",
       "propagator_xi_policy": "match_thermo",
-      "status": "current_candidate",
-      "superseded_by": null,
+      "status": "superseded_for_manuscript",
+      "superseded_by": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
       "manuscript_eligible": false,
       "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
       "updated_at": "2026-07-15T19:57:00+08:00"
@@ -118,11 +118,49 @@
       "transport_kernel_energy_policy": "onshell_kinematic_energy",
       "distribution_energy_policy": "rs_deformed",
       "propagator_xi_policy": "match_thermo",
-      "status": "current_candidate",
-      "superseded_by": null,
+      "status": "superseded_for_manuscript",
+      "superseded_by": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
       "manuscript_eligible": false,
       "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
       "updated_at": "2026-07-15T19:57:00+08:00"
+    },
+    {
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "source_commit": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "transport_kernel_energy_policy": "onshell_kinematic_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "approved",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json",
+      "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+      "raw_result_status": "author_accepted_formal_raw",
+      "approval_scope": "raw numerical result and author-reviewed formal figure layout; publication-clean derivation remains separate",
+      "updated_at": "2026-08-27T00:00:00+08:00"
+    },
+    {
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "source_commit": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "transport_kernel_energy_policy": "onshell_kinematic_energy",
+      "distribution_energy_policy": "rs_deformed",
+      "propagator_xi_policy": "match_thermo",
+      "status": "approved",
+      "superseded_by": null,
+      "manuscript_eligible": false,
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/manifest.json",
+      "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+      "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+      "raw_result_status": "author_accepted_formal_raw",
+      "approval_scope": "raw numerical result and author-reviewed formal figure layout; publication-clean derivation remains separate",
+      "updated_at": "2026-08-27T00:00:00+08:00"
     }
   ]
 }

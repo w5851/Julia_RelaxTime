@@ -1,0 +1,103 @@
+{
+  "schema_version": "issue130_rs_transport_formal_raw_promotion_v1",
+  "package_status": "approved_formal_raw",
+  "scope": "author-approved RS prod_v2 raw promotion and analysis-default migration",
+  "created_at": "2026-08-27T00:00:00+08:00",
+  "repository_base_sha": "f110dd0a8ddf04ee6686ce69faf3faa4007d6fbf",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
+  "promotion_solver_called": false,
+  "source_solver_called": true,
+  "production_write": false,
+  "runtime_default_switch": false,
+  "analysis_default_switch": true,
+  "numerical_audit_status": "diagnostic_only",
+  "manuscript_eligible": false,
+  "author_review": {
+    "status": "accepted",
+    "scope": "full candidate/legacy review and same-layout mode-A/mode-B prod_v2 figures",
+    "accepted_on": "2026-08-27",
+    "raw_result_status": "author_accepted_formal_raw",
+    "publication_clean_status": "pending_separate_derived_layer"
+  },
+  "source_evidence": {
+    "aggregate_root": "aggregate_replay_20260826_v4",
+    "aggregate_manifest_sha256": "42e88e028832311a95e45816eaf8ab1bb2dbbe8bb094ed6b59681c51d1cad754",
+    "post_repair_audit_root": "post_repair_audit_20260826_v1",
+    "post_repair_audit_manifest_sha256": "587f79db64476f777b25ca5ee234a43b5a31e17bea375864d9e13f0226d1d6f0",
+    "post_repair_audit_verdict": "post_repair_audit_pass_diagnostic_only",
+    "consumer_smoke_evidence": "docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/",
+    "source_root": "D:\\Desktop\\Julia_RelaxTime_issue130_artifacts\\rs_sharded_production_v2_20260826"
+  },
+  "registry": {
+    "path": "data/outputs/results/relaxtime/transport/phase_guided/production_registry.json",
+    "sha256_at_promotion": "86a5ec17b03fc4721ebaace90cc5b55117acaf8c03e63ea1abfe1dfd9ce8bb7b",
+    "approved_entries": [
+      {
+        "mode": "mode_a_fixed_muB_phase_scaled",
+        "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "status": "approved",
+        "manuscript_eligible": false
+      },
+      {
+        "mode": "mode_b_fixed_T_sparse_muB",
+        "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+        "status": "approved",
+        "manuscript_eligible": false
+      }
+    ]
+  },
+  "entries": [
+    {
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/",
+      "result_manifest_sha256": "3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72",
+      "scan_sha256": "144f59dd6d74b1d13b24b793328e620e796fb645b7af9418174ba5a55e360587",
+      "diagnostics_sha256": "6eaf02101e330762569d028fe1398c94184e243ea6d7e39a8db69718a6e4e246",
+      "figure_manifest_sha256": "eed426abfc592a7842d6124b1dbe86fb3394c6cd58a7e29b2be69335790180c7",
+      "scan_rows": 910,
+      "diagnostic_rows": 38220,
+      "quality_ok_rows": 680,
+      "quality_warning_rows": 230,
+      "legacy_prod_v1_tree_hash": "f44b61fe07afd1eac4c40d6ba8c043007182aa653655ba511a41cc1d034af0dd"
+    },
+    {
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/",
+      "result_manifest_sha256": "093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921",
+      "scan_sha256": "3b73b937f1f09cf7112b3a42219088f98b852e5ef0354174b66f71823f7bb29c",
+      "diagnostics_sha256": "ada5d7c204a02e705cfbb5744bedbcc68158d54cce55faa0c8b92d0ba50d0d0f",
+      "figure_manifest_sha256": "fbb216a45db2fa8c3a819a1e97f129821752972e7bc70db2a75360e9e69d9b77",
+      "scan_rows": 909,
+      "diagnostic_rows": 38178,
+      "quality_ok_rows": 669,
+      "quality_warning_rows": 240,
+      "legacy_prod_v1_tree_hash": "d9779b96fb1f6147234390e9150e08dbfcf0299ea257a0f563bde0e2e61dd001"
+    }
+  ],
+  "analysis_default_migrations": [
+    {
+      "file": "scripts/analysis/relaxtime/build_phase_guided_transport_xi001_jump_analysis.py",
+      "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "output": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/"
+    },
+    {
+      "file": "scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl",
+      "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "output": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis_v2/"
+    }
+  ],
+  "preserved_boundaries": [
+    "raw prod_v2 result and figure trees are not rewritten",
+    "legacy fallback and --phase-reference-mode legacy rollback remain available",
+    "old prod_v1 result and historical comparison/mechanism audit remain unchanged",
+    "runtime production workflow still requires explicit case_name",
+    "publication-clean filtering is a separate derived layer",
+    "no claim of full-domain RS numerical parity or convergence promotion"
+  ],
+  "next_action": "build a versioned publication_clean derived layer when separately authorized; do not delete prod_v1 or legacy fallback in this package"
+}

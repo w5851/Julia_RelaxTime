@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 
 
 ROOT = Path(__file__).resolve().parents[3]
-CASE = "first_canonical_v1_p128_xi001_validated_anchored_prod_v1"
+CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2"
 CONVERGENCE_CASE = f"{CASE}_convergence"
 ANALYSIS_DIR = (
     ROOT
@@ -36,7 +36,7 @@ ANALYSIS_DIR = (
     / "analysis"
     / "relaxtime"
     / "phase_guided_transport"
-    / "phase_guided_transport_p128_xi001_analysis"
+    / "phase_guided_transport_p128_xi001_analysis_v2"
 )
 
 MODE_INPUTS = {
@@ -61,8 +61,8 @@ MODE_INPUTS = {
         / "phase_guided"
         / "mode_a_fixed_muB_phase_scaled"
         / CASE,
-        "main_rows": 909,
-        "channel_rows": 38178,
+        "main_rows": 910,
+        "channel_rows": 38220,
     },
     "mode_b": {
         "mode_value": "mode_b_fixed_T_sparse_muB",
@@ -1038,7 +1038,7 @@ def make_claim_ledger(
         {
             "claim_id": "CLAIM-DATA-XI001-001",
             "status": "supported",
-            "claim_zh": "xi001 正式产物在 mode A/B 各包含 909 个主结果点，xi 网格为 -0.50:0.01:0.50，failed points 为 0。",
+            "claim_zh": "当前 prod_v2 在 mode A 包含 910 个主结果点（direct-coexistence 的 xi=±0.003 两侧点替代严格共存点），mode B 包含 909 个主结果点；两条路线的 xi 主网格为 -0.50:0.01:0.50，failed points 为 0。",
             "evidence": "tables/input_inventory.csv",
             "fields_or_points": "scan_rows, xi_count, failed_rows",
         },

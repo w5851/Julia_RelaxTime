@@ -1,0 +1,8 @@
+claim_id,status,claim_zh,evidence,scope
+RS-RAW-001,supported,"作者接受 mode-A 与 mode-B 的 prod_v2 结果及同构审核图，可作为 approved formal raw 输入。","manifest.json;input_inventory.csv;production_registry.json","raw result and author-reviewed formal figure layout only"
+RS-RAW-002,supported,"mode-A 有 910 个 scan 行和 38220 个 diagnostic 行，mode-B 有 909 个 scan 行和 38178 个 diagnostic 行；两套结果的 scan 行均 finite/converged 且无重复键。","input_inventory.csv;each result manifest","source numerical artifact summary"
+RS-RAW-003,bounded,"两套结果的质量警告（mode-A 230、mode-B 240）及历史 sidecar hash 缺陷保留，不被 promotion 改写为数值收敛。","each result manifest;post-repair audit manifest","numerical audit boundary"
+RS-RAW-004,supported,"registry 两条 prod_v2 entry 的 status 为 approved，但 manuscript_eligible=false。","production_registry.json;manifest.json","raw registry eligibility"
+RS-RAW-005,supported,"分析入口默认使用 prod_v2，并写入版本化 phase_guided_transport_p128_xi001_analysis_v2，不覆盖旧 v1 分析包。","manifest.json;scripts/analysis/README.md;analysis scripts","analysis-only default migration"
+RS-RAW-006,bounded,"本次未调用 solver、未写 production CSV、未切换 runtime workflow 默认；legacy fallback、显式 rollback 和旧 prod_v1 保留。","manifest.json;active task doc","non-goals and rollback boundary"
+RS-RAW-007,pending,"publication-clean 清理与可选 old-reference retirement 不属于本 PR，需单独版本化派生层和作者授权。","README.md;manifest.json","future manuscript/retirement work"
