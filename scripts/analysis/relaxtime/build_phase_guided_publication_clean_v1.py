@@ -177,6 +177,15 @@ def validate_scan(
         curves[(row["plot_panel"], row["plot_series"])].append(row)
     for curve in curves.values():
         curve.sort(key=lambda row: parse_finite(row, "xi"))
+    diagnostic_rows = read_csv(paths["diagnostics"])
+    diagnostic_required = {"density", "rate", "contribution", "total", "tau_inv_species"}
+    if diagnostic_rows and not diagnostic_required.issubset(diagnostic_rows[0]):
+        raise ValueError(f"{mode_key}: diagnostic fields are incomplete")
+    for row in diagnostic_rows:
+        for field in diagnostic_required:
+            value = parse_finite(row, field)
+            if value < 0:
+                raise ValueError(f"{mode_key}: negative diagnostic {field}: {value}")
     failed_rows = read_csv(paths["failed"])
     if failed_rows:
         raise ValueError(f"{mode_key}: failed_points.csv contains {len(failed_rows)} rows")
@@ -203,6 +212,8 @@ def validate_scan(
     if scan_summary.get("rows") not in (None, len(rows)):
         raise ValueError(f"{mode_key}: source scan row count disagrees with manifest")
     diagnostic_summary = manifest.get("diagnostic_summary", {})
+    if diagnostic_summary.get("rows") not in (None, len(diagnostic_rows)):
+        raise ValueError(f"{mode_key}: diagnostic row count disagrees with manifest")
     if diagnostic_summary.get("nonfinite", 0) or diagnostic_summary.get("duplicate_keys", 0):
         raise ValueError(f"{mode_key}: source diagnostics are not clean")
     return rows, index, dict(curves), manifest

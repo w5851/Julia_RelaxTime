@@ -1,10 +1,10 @@
 {
   "schema": "phase_guided_transport_publication_clean_manifest_v1",
   "case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
-  "generated_at": "2026-08-27T10:43:32.656475+00:00",
-  "base_git_commit": "c5ae1057bede6d1df1861da5c1f7659d69bcb052",
+  "generated_at": "2026-08-27T10:52:37.900875+00:00",
+  "base_git_commit": "c0edbe08c75ce1ebae8e048ff0b1ccd2b0958ae2",
   "generator": "scripts/analysis/relaxtime/build_phase_guided_publication_clean_v1.py",
-  "generator_sha256": "88699fde8c30f37b5143a80dc6754c6d8363c4f21574a50ae5eaefd6f773cc74",
+  "generator_sha256": "b643986ecb5a6a6f230e8659812e253e20fc687f02c177a08204c86b49a543ee",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571",
   "status": "derived_author_review_required",
@@ -111,7 +111,7 @@
     },
     {
       "path": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/figures/plot_manifest.json",
-      "sha256": "0c7d1f36c99c6281712b163b8fd2571bbdf6e9fb3b068309bd4c0b7b48a1b164",
+      "sha256": "b5ce87516b3be9a5d2debd45775cb0d997f0f62fe8ddd1d9347ea1e082199e16",
       "bytes": 6065
     },
     {
