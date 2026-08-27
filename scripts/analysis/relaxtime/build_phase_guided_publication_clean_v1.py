@@ -56,6 +56,34 @@ MARKER_RECIPE = RECIPE_DIR / "paper_first_order_markers.csv"
 BULK_AUDIT = RECIPE_DIR / "bulk_derivative_branch_audit.csv"
 
 DISPLAY_FIELDS = ["eta_over_s", "zeta_over_s", "sigma_over_T"]
+# These are explicit author-requested display-layer repairs for the current
+# prod_v2 candidate.  They are deliberately kept outside the historical
+# pole-sensitive recipe so that an audit can distinguish inherited choices
+# from this review round.  The raw result tree is never changed.
+REVIEW_ADJUSTMENTS = (
+    {
+        "window_id": "author_review_mode_b_T200p0_muB900p0_xim0p10",
+        "mode_key": "mode_b",
+        "plot_panel": "T200.0",
+        "plot_series": "muB900.0",
+        "xi": "-0.10",
+        "left_xi": "-0.11",
+        "right_xi": "-0.09",
+        "observables": DISPLAY_FIELDS[:2],
+        "reason": "author-requested local spike smoothing; current raw point is a small downward residual against adjacent xi samples",
+    },
+    {
+        "window_id": "author_review_mode_b_T200p0_muB0p0_xip0p36",
+        "mode_key": "mode_b",
+        "plot_panel": "T200.0",
+        "plot_series": "muB0.0",
+        "xi": "0.36",
+        "left_xi": "0.35",
+        "right_xi": "0.37",
+        "observables": DISPLAY_FIELDS[:2],
+        "reason": "author-requested local spike smoothing; current raw point is a small downward residual against adjacent xi samples",
+    },
+)
 MODE_CONFIG = {
     "mode_a": {
         "mode": "mode_a_fixed_muB_phase_scaled",
@@ -319,8 +347,77 @@ def build_replacement_map(
                 "recipe_source_sha256": sha256_file(REPLACEMENT_RECIPE),
                 "canonical_data_modified": False,
                 "display_status": "interpolated_noncertified",
+                "adjustment_type": "inherited_recipe",
+                "adjustment_reason": "historical pole-sensitive display recipe; value recomputed from current prod_v2 neighbours",
             }
         )
+    return out
+
+
+def build_review_adjustment_map(
+    loaded: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build the explicit, author-requested local smoothing candidates.
+
+    Each target is checked against its named neighbours and the value is
+    recomputed from the current raw rows.  Keeping this separate from the
+    inherited recipe makes the provenance and later author acceptance
+    decision unambiguous.
+    """
+    out: list[dict[str, Any]] = []
+    for spec in REVIEW_ADJUSTMENTS:
+        mode_key = spec["mode_key"]
+        target = current_row(loaded, mode_key, spec["plot_panel"], spec["plot_series"], spec["xi"])
+        left = current_row(loaded, mode_key, spec["plot_panel"], spec["plot_series"], spec["left_xi"])
+        right = current_row(loaded, mode_key, spec["plot_panel"], spec["plot_series"], spec["right_xi"])
+        if target is None or left is None or right is None:
+            raise ValueError(
+                f"review adjustment key missing from current {mode_key}: "
+                f"{spec['plot_panel']} {spec['plot_series']} {spec['xi']}"
+            )
+        target_xi = parse_finite(target, "xi")
+        left_xi = parse_finite(left, "xi")
+        right_xi = parse_finite(right, "xi")
+        if not left_xi < target_xi < right_xi:
+            raise ValueError(f"invalid review adjustment bracket for {spec['window_id']}")
+        weight = (target_xi - left_xi) / (right_xi - left_xi)
+        for observable in spec["observables"]:
+            raw_value = parse_finite(target, observable)
+            left_value = parse_finite(left, observable)
+            right_value = parse_finite(right, observable)
+            derived_value = left_value + weight * (right_value - left_value)
+            neighbour_mean = (left_value + right_value) / 2.0
+            residual = raw_value - derived_value
+            residual_relative = residual / neighbour_mean if neighbour_mean else math.nan
+            if not all(math.isfinite(value) for value in (derived_value, residual, residual_relative)):
+                raise ValueError(f"non-finite review adjustment for {spec['window_id']} {observable}")
+            out.append(
+                {
+                    "window_id": spec["window_id"],
+                    "mode_key": mode_key,
+                    "plot_panel": spec["plot_panel"],
+                    "plot_series": spec["plot_series"],
+                    "observable": observable,
+                    "xi": canonical_xi(target["xi"]),
+                    "raw_production_value_current": raw_value,
+                    "recipe_raw_production_value": "",
+                    "recipe_display_value": "",
+                    "left_xi": canonical_xi(left["xi"]),
+                    "left_value_current": left_value,
+                    "right_xi": canonical_xi(right["xi"]),
+                    "right_value_current": right_value,
+                    "derived_display_value": derived_value,
+                    "local_residual": residual,
+                    "local_residual_relative": residual_relative,
+                    "replacement_method": "linear interpolation between current prod_v2 neighbours",
+                    "recipe_source": "author_review_request",
+                    "recipe_source_sha256": "",
+                    "canonical_data_modified": False,
+                    "display_status": "author_requested_interpolation",
+                    "adjustment_type": "author_requested_smoothing",
+                    "adjustment_reason": spec["reason"],
+                }
+            )
     return out
 
 
@@ -380,6 +477,53 @@ def build_marker_map(
     return out
 
 
+def build_marker_semantics_audit(
+    loaded: dict[str, dict[str, Any]], markers: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Record what each plotted star means; stars in this layer are not CEPs."""
+    out: list[dict[str, Any]] = []
+    for marker in markers:
+        row = current_row(
+            loaded,
+            marker["mode_key"],
+            marker["plot_panel"],
+            marker["plot_series"],
+            marker["render_xi"],
+        )
+        if row is None:
+            raise ValueError(f"marker audit row missing for {marker}")
+        if marker["mode_key"] == "mode_b" and marker["plot_panel"] == "T120.0":
+            intended = "first_order_transition"
+            cep_semantics = "not_a_CEP_marker"
+            verdict = "consistent_first_order_marker; no CEP claim"
+            evidence = "paper_first_order_markers.csv; current phase_reference_kind/phase_structure"
+        else:
+            intended = "first_order_boundary_or_transition"
+            cep_semantics = "not_a_CEP_marker"
+            verdict = "consistent_non_CEP_first_order_marker"
+            evidence = "paper_first_order_markers.csv; direct-coexistence marker contract"
+        out.append(
+            {
+                "window_id": marker["window_id"],
+                "mode_key": marker["mode_key"],
+                "plot_panel": marker["plot_panel"],
+                "plot_series": marker["plot_series"],
+                "observable": marker["observable"],
+                "render_xi": marker["render_xi"],
+                "marker_status": marker["marker_status"],
+                "intended_semantics": intended,
+                "cep_semantics": cep_semantics,
+                "phase_reference_kind": row["phase_reference_kind"],
+                "phase_structure": row["phase_structure"],
+                "quality_flag": row["quality_flag"],
+                "audit_verdict": verdict,
+                "evidence": evidence,
+                "canonical_data_modified": False,
+            }
+        )
+    return out
+
+
 def build_clean_points(
     loaded: dict[str, dict[str, Any]],
     replacements: list[dict[str, Any]],
@@ -406,8 +550,12 @@ def build_clean_points(
                 )
                 if replacement is not None:
                     clean_value = replacement["derived_display_value"]
-                    status = "interpolated_noncertified"
-                    source = "current prod_v2 left/right raw neighbours"
+                    status = replacement.get("display_status", "interpolated_noncertified")
+                    source = (
+                        "current prod_v2 neighbours (author-requested local smoothing)"
+                        if status == "author_requested_interpolation"
+                        else "current prod_v2 left/right raw neighbours"
+                    )
                 elif marker is not None:
                     clean_value = marker["raw_production_value_current"]
                     status = "first_order_raw_marker"
@@ -455,7 +603,11 @@ def build_curve_index(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "plot_series": key[2],
                 "observable": key[3],
                 "point_count": len(rows),
-                "replacement_count": sum(row["display_status"] == "interpolated_noncertified" for row in rows),
+                "replacement_count": sum(
+                    row["display_status"]
+                    in {"interpolated_noncertified", "author_requested_interpolation"}
+                    for row in rows
+                ),
                 "marker_count": sum(row["display_status"] == "first_order_raw_marker" for row in rows),
                 "xi_min": min(float(row["xi"]) for row in rows),
                 "xi_max": max(float(row["xi"]) for row in rows),
@@ -532,7 +684,11 @@ def render_figures(points: list[dict[str, Any]]) -> list[Path]:
     return paths
 
 
-def claim_ledger(replacements: list[dict[str, Any]], markers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def claim_ledger(
+    inherited_replacements: list[dict[str, Any]],
+    review_adjustments: list[dict[str, Any]],
+    markers: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     reconciled = sum(row["marker_status"] == "reconciled_direct_coexistence_side_point" for row in markers)
     return [
         {
@@ -545,7 +701,7 @@ def claim_ledger(replacements: list[dict[str, Any]], markers: list[dict[str, Any
         {
             "claim_id": "PC-V1-002",
             "status": "supported_with_scope_limit",
-            "claim_zh": f"{len(replacements)} 个作者审核过的非一阶显示异常点按当前 prod_v2 左右真实邻点重新线性插值；结果只写入派生 clean_value，不覆盖 raw_value。",
+            "claim_zh": f"{len(inherited_replacements)} 个既有作者审核过的非一阶显示异常点按当前 prod_v2 左右真实邻点重新线性插值；结果只写入派生 clean_value，不覆盖 raw_value。",
             "evidence": "tables/replacement_map.csv; tables/publication_clean_points.csv",
             "scope_limit": "插值值不是新的 solver 结果，也不是有限宽度/极点正则化；只允许用于明确标注的显示层。",
         },
@@ -570,10 +726,37 @@ def claim_ledger(replacements: list[dict[str, Any]], markers: list[dict[str, Any
             "evidence": "README.md; manifest.json",
             "scope_limit": "old-reference retirement 另立审计/PR，并在作者授权前不物理删除旧 prod_v1。",
         },
+        {
+            "claim_id": "PC-V1-006",
+            "status": "author_check",
+            "claim_zh": f"本轮作者审阅新增 {len(review_adjustments)} 个 T=200 MeV 局部显示平滑候选：mode B 的 (μB=900, ξ=−0.10) 与 (μB=0, ξ=0.36) 各覆盖 η/s、ζ/s；均由当前 raw 左右邻点线性重算。",
+            "evidence": "tables/review_adjustment_map.csv; tables/publication_clean_points.csv; figures/mode_b/plot_panel=T200.0",
+            "scope_limit": "这是待作者确认的显示层修正，不改变 raw result、phase 标签或收敛结论；候选数值不是新的 solver 结果。",
+        },
+        {
+            "claim_id": "PC-V1-007",
+            "status": "supported_with_scope_limit",
+            "claim_zh": "T=120 MeV、μB=900 MeV 的星标经复核是 ξ=−0.09 的一阶转变点，不是 CEP；本 publication-clean 图层没有绘制 CEP 标记。",
+            "evidence": "tables/marker_semantics_audit.csv; tables/first_order_marker_map.csv; data/reference/pnjl/issue130_phase_reference_v1/*",
+            "scope_limit": "CEP 位置应从 phase-reference CEP boundary 图层读取，不能把输运一阶星标当作 CEP 坐标。",
+        },
+        {
+            "claim_id": "PC-V1-008",
+            "status": "supported_with_scope_limit",
+            "claim_zh": "mode-A μB=450 MeV、αT=1.0、ξ=−0.20 的连续区快速斜率变化与既有 simple_1m4KΠ 小分母机制窗口一致；该点 phase_reference_kind=crossover，非一阶相变。",
+            "evidence": "docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_p128_xi001_analysis/tables/mechanism_window_summary.csv; tables/denominator_chain_summary.csv; tables/downstream_transport_response_summary.csv",
+            "scope_limit": "机制证据是定点分解/复现支持，不把它升级为新的 solver 收敛或论文定稿结论。",
+        },
     ]
 
 
-def render_readme(inventory: list[dict[str, Any]], replacements: list[dict[str, Any]], markers: list[dict[str, Any]], figure_paths: list[Path]) -> str:
+def render_readme(
+    inventory: list[dict[str, Any]],
+    inherited_replacements: list[dict[str, Any]],
+    review_adjustments: list[dict[str, Any]],
+    markers: list[dict[str, Any]],
+    figure_paths: list[Path],
+) -> str:
     inventory_lines = "\n".join(
         f"| {row['mode_key']} | {row['scan_rows']} | {row['diagnostic_rows']} | `{row['scan_sha256']}` | `{row['diagnostics_sha256']}` |"
         for row in inventory
@@ -584,7 +767,7 @@ def render_readme(inventory: list[dict[str, Any]], replacements: list[dict[str, 
 
 本包从作者接受的两套 `prod_v2` 原始 RS transport 结果生成论文显示候选层。它只做 solver-free 后处理：不修改 `data/outputs/results/**`、`production_registry.json` 或正式 figure，不调用 equilibrium/transport solver，也不把派生值写回 raw CSV。
 
-`publication_clean` 的含义是：沿用已审核的极点/小分母显示配方，但在当前 `prod_v2` 网格上重新取左右真实邻点计算显示插值；一阶相变点继续保留 raw 值。该层默认 `manuscript_eligible=false`，须经作者审核后才能用于论文。
+`publication_clean` 的含义是：沿用已审核的极点/小分母显示配方，并在当前 `prod_v2` 网格上重新取左右真实邻点计算显示插值；一阶相变点继续保留 raw 值。本轮另记录作者提出的局部平滑候选，但它们仍待本轮作者确认。该层默认 `manuscript_eligible=false`，须经作者审核后才能用于论文。
 
 ## 输入 provenance
 
@@ -601,16 +784,21 @@ def render_readme(inventory: list[dict[str, Any]], replacements: list[dict[str, 
 
 ## 派生规则
 
-1. 19 个非一阶显示替换点从当前 raw 的 `left_xi < target_xi < right_xi` 三点线性插值；`raw_value` 与左右端点同时保留。
+1. 继承配方中的 19 个非一阶显示替换点从当前 raw 的 `left_xi < target_xi < right_xi` 三点线性插值；`raw_value` 与左右端点同时保留。
 2. 旧配方中 `mode_a, μB=900, αT=1.0, ξ=0` 当前不存在：direct-coexistence 合同使用 `ξ=−0.003/+0.003`。本包只标记两侧真实 raw 点，不生成 `ξ=0` 的输运数值。
 3. 一阶点不做平滑；所有派生行带 `canonical_data_modified=false`。`quality_flag`/`quality_reason` 原样带入。
 4. 已知 `mode_a, μB=900, αT=1.0, ξ=−0.01` bulk 分支问题仍列为排除项；本包不会用插值掩盖它。
+5. 本轮作者审阅新增 4 个 T=200 MeV 局部平滑候选：`(mode B, μB=900, ξ=−0.10)` 与 `(mode B, μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；全部按当前 raw 左右邻点线性重算，单列于 `review_adjustment_map.csv`，不改变原始结果。
+6. T=120 MeV、μB=900 MeV 的星标语义经审计为一阶转变点（ξ=−0.09），不是 CEP；本图层没有 CEP 标记。CEP 应从 phase-reference 图层读取。
+7. mode-A μB=450 MeV、αT=1.0、ξ=−0.20 的非一阶斜率变化与既有 `simple_1m4KΠ` 小分母机制窗口一致；这属于机制归因证据，不是新的相变标签。
 
 ## 结果文件
 
 - `tables/input_inventory.csv`：输入路径、行数、哈希及 solver provenance。
-- `tables/replacement_map.csv`：19 个当前邻点插值映射。
+- `tables/replacement_map.csv`：19 个继承配方加 4 个本轮作者审阅候选的当前邻点插值映射。
+- `tables/review_adjustment_map.csv`：4 个本轮作者请求的 T=200 局部平滑候选及局部残差。
 - `tables/first_order_marker_map.csv`：旧标记与当前 raw/±0.003 合同的逐项对齐。
+- `tables/marker_semantics_audit.csv`：星标语义审计，明确 T=120 星标不是 CEP。
 - `tables/publication_clean_points.csv`：三种论文展示 observable 的长表，含 raw/clean/status。
 - `tables/curve_index.csv`：18 条 panel/series/observable 曲线的覆盖和替换计数。
 - `tables/claim_ledger.csv`：证据强度、范围限制和未声明事项。
@@ -630,8 +818,11 @@ python -m pytest tests/unit/python/test_phase_guided_publication_clean_v1.py
 def main() -> None:
     loaded, inventory = load_inputs()
     replacement_recipe, marker_recipe = load_recipe()
-    replacements = build_replacement_map(loaded, replacement_recipe)
+    inherited_replacements = build_replacement_map(loaded, replacement_recipe)
+    review_adjustments = build_review_adjustment_map(loaded)
+    replacements = [*inherited_replacements, *review_adjustments]
     markers = build_marker_map(loaded, marker_recipe)
+    marker_semantics = build_marker_semantics_audit(loaded, markers)
     points = build_clean_points(loaded, replacements, markers)
     curves = build_curve_index(points)
     figure_paths = render_figures(points)
@@ -647,15 +838,23 @@ def main() -> None:
         "window_id", "mode_key", "plot_panel", "plot_series", "observable", "xi",
         "raw_production_value_current", "recipe_raw_production_value", "recipe_display_value",
         "left_xi", "left_value_current", "right_xi", "right_value_current", "derived_display_value",
-        "replacement_method", "recipe_source", "recipe_source_sha256", "canonical_data_modified", "display_status",
+        "local_residual", "local_residual_relative", "replacement_method", "recipe_source", "recipe_source_sha256",
+        "canonical_data_modified", "display_status", "adjustment_type", "adjustment_reason",
     ]
     write_csv(TABLE_DIR / "replacement_map.csv", replacements, replacement_fields)
+    write_csv(TABLE_DIR / "review_adjustment_map.csv", review_adjustments, replacement_fields)
     marker_fields = [
         "window_id", "mode_key", "plot_panel", "plot_series", "recipe_xi", "render_xi", "observable",
         "raw_production_value_current", "recipe_raw_production_value", "marker", "marker_status",
         "marker_semantics", "coexistence_side", "canonical_data_modified",
     ]
     write_csv(TABLE_DIR / "first_order_marker_map.csv", markers, marker_fields)
+    marker_audit_fields = [
+        "window_id", "mode_key", "plot_panel", "plot_series", "observable", "render_xi",
+        "marker_status", "intended_semantics", "cep_semantics", "phase_reference_kind",
+        "phase_structure", "quality_flag", "audit_verdict", "evidence", "canonical_data_modified",
+    ]
+    write_csv(TABLE_DIR / "marker_semantics_audit.csv", marker_semantics, marker_audit_fields)
     point_fields = [
         "mode_key", "mode", "plot_panel", "plot_series", "plot_series_label", "T_MeV", "muB_MeV", "xi",
         "observable", "raw_value", "clean_value", "display_status", "value_source", "phase_structure",
@@ -669,7 +868,7 @@ def main() -> None:
     write_csv(TABLE_DIR / "curve_index.csv", curves, curve_fields)
     write_csv(
         TABLE_DIR / "claim_ledger.csv",
-        claim_ledger(replacements, markers),
+        claim_ledger(inherited_replacements, review_adjustments, markers),
         ["claim_id", "status", "claim_zh", "evidence", "scope_limit"],
     )
 
@@ -683,11 +882,13 @@ def main() -> None:
         "generator_sha256": sha256_file(generator_path),
         "observables": DISPLAY_FIELDS,
         "replacement_count": len(replacements),
+        "inherited_replacement_count": len(inherited_replacements),
+        "review_adjustment_count": len(review_adjustments),
         "marker_recipe_count": len(marker_recipe),
         "marker_render_count": len(markers),
         "manuscript_eligible": False,
         "canonical_data_modified": False,
-        "rendering_semantics": "current prod_v2 raw curves with audited adjacent-neighbour display replacements; first-order raw markers retained; no raw mutation",
+        "rendering_semantics": "current prod_v2 raw curves with inherited and author-requested adjacent-neighbour display replacements; first-order raw markers retained; no raw mutation",
         "figures": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
             for path in figure_paths
@@ -696,7 +897,10 @@ def main() -> None:
     write_json(FIGURE_DIR / "plot_manifest.json", plot_manifest)
 
     readme_path = OUT_DIR / "README.md"
-    readme_path.write_text(render_readme(inventory, replacements, markers, figure_paths), encoding="utf-8")
+    readme_path.write_text(
+        render_readme(inventory, inherited_replacements, review_adjustments, markers, figure_paths),
+        encoding="utf-8",
+    )
     output_paths = [
         readme_path,
         *sorted(TABLE_DIR.glob("*.csv")),
@@ -731,8 +935,11 @@ def main() -> None:
         },
         "derived_counts": {
             "replacement_rows": len(replacements),
+            "inherited_replacement_rows": len(inherited_replacements),
+            "review_adjustment_rows": len(review_adjustments),
             "marker_recipe_rows": len(marker_recipe),
             "marker_render_rows": len(markers),
+            "marker_semantics_audit_rows": len(marker_semantics),
             "publication_clean_point_rows": len(points),
             "curve_rows": len(curves),
             "figure_count": len(figure_paths),
@@ -740,6 +947,9 @@ def main() -> None:
         "known_boundaries": [
             "mode_a xi=0 first-order recipe reconciled to raw xi=-0.003/+0.003 side points",
             "mode_a muB=900 alpha_T=1.0 xi=-0.01 mixed bulk/equilibrium branch remains excluded",
+            "T=200 mode-B xi=-0.10 (muB=900) and xi=0.36 (muB=0) have author-requested display-only smoothing candidates",
+            "T=120 mode-B muB=900 xi=-0.09 star is a first-order marker, not a CEP marker",
+            "mode_a muB=450 alpha_T=1.0 xi=-0.20 retains the raw non-first-order slope change; prior mechanism evidence is simple_1m4KPi",
             "derived display values are not solver recomputations or numerical convergence evidence",
             "old prod_v1 and phase-reference legacy fallback are retained; retirement is a separate audit",
         ],

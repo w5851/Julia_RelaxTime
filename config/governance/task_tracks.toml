@@ -343,7 +343,7 @@ status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md"
 reason = "作者已接受两套 prod_v2 raw 及分析默认迁移；论文使用仍需独立的 publication-clean 派生层，不能修改 raw 或把 diagnostic-only 结果升级为 manuscript eligible。"
-next_action = "在隔离分支生成并审阅 publication_clean_v1；作者审核通过后另立 old-reference retirement audit/PR，未经单独授权不物理删除旧 prod_v1。"
+next_action = "publication_clean_v1 已生成；当前复核加入 4 个 T=200 局部平滑候选并审计 T=120 星标（明确为一阶 marker、非 CEP），作者确认后再另立 old-reference retirement audit/PR；未经单独授权不物理删除旧 prod_v1。"
 blocked_by = []
 backlog_file = ""
 evidence = [

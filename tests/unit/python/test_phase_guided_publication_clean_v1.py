@@ -149,15 +149,50 @@ def test_clean_points_separate_raw_interpolated_and_marker_status() -> None:
     assert all(row["canonical_data_modified"] is False for row in points)
 
 
+def test_review_adjustment_recomputes_explicit_local_targets() -> None:
+    rows = []
+    for xi, value in [('-0.11', '10.0'), ('-0.10', '8.0'), ('-0.09', '14.0')]:
+        rows.append(_row(panel="T200.0", series="muB900.0", xi=xi, value=value))
+    for xi, value in [('0.35', '20.0'), ('0.36', '17.0'), ('0.37', '26.0')]:
+        rows.append(_row(panel="T200.0", series="muB0.0", xi=xi, value=value))
+    loaded = _loaded(rows, mode_key="mode_b")
+    adjustments = MODULE.build_review_adjustment_map(loaded)
+    assert len(adjustments) == 4
+    assert {row["xi"] for row in adjustments} == {"-0.1000000000", "0.3600000000"}
+    assert {row["observable"] for row in adjustments} == {"eta_over_s", "zeta_over_s"}
+    assert all(row["display_status"] == "author_requested_interpolation" for row in adjustments)
+    assert all(row["adjustment_type"] == "author_requested_smoothing" for row in adjustments)
+    assert {round(row["local_residual"], 8) for row in adjustments} == {-4.0, -6.0}
+
+
+def test_marker_semantics_audit_does_not_call_t120_marker_cep() -> None:
+    row = _row(panel="T120.0", series="muB900.0", xi="-0.09", value="2.0")
+    loaded = _loaded([row], mode_key="mode_b")
+    markers = [{
+        "window_id": "t120",
+        "mode_key": "mode_b",
+        "plot_panel": "T120.0",
+        "plot_series": "muB900.0",
+        "render_xi": "-0.0900000000",
+        "observable": "eta_over_s",
+        "marker_status": "applied_current_raw_point",
+    }]
+    audit = MODULE.build_marker_semantics_audit(loaded, markers)
+    assert audit[0]["intended_semantics"] == "first_order_transition"
+    assert audit[0]["cep_semantics"] == "not_a_CEP_marker"
+    assert "no CEP claim" in audit[0]["audit_verdict"]
+
+
 def test_curve_index_counts_derived_rows() -> None:
     points = [
         {"mode_key": "mode_a", "plot_panel": "p", "plot_series": "s", "observable": "eta_over_s", "display_status": "raw", "xi": "0.0"},
         {"mode_key": "mode_a", "plot_panel": "p", "plot_series": "s", "observable": "eta_over_s", "display_status": "interpolated_noncertified", "xi": "0.1"},
+        {"mode_key": "mode_a", "plot_panel": "p", "plot_series": "s", "observable": "eta_over_s", "display_status": "author_requested_interpolation", "xi": "0.15"},
         {"mode_key": "mode_a", "plot_panel": "p", "plot_series": "s", "observable": "eta_over_s", "display_status": "first_order_raw_marker", "xi": "0.2"},
     ]
     rows = MODULE.build_curve_index(points)
     assert rows == [{
         "mode_key": "mode_a", "plot_panel": "p", "plot_series": "s", "observable": "eta_over_s",
-        "point_count": 3, "replacement_count": 1, "marker_count": 1, "xi_min": 0.0, "xi_max": 0.2,
+        "point_count": 4, "replacement_count": 2, "marker_count": 1, "xi_min": 0.0, "xi_max": 0.2,
         "canonical_data_modified": False,
     }]

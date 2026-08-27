@@ -172,7 +172,10 @@ PR 将两套 mode-A/mode-B `prod_v2` 登记为作者接受的 formal raw，并�
 - [x] 复用既有作者审核的 19 个非一阶显示异常键，但所有显示值都从当前 `prod_v2` 的左右真实邻点重新线性插值；旧 `prod_v1` 数值不直接复制。
 - [x] 对旧配方的 `mode_a, μB=900, αT=1.0, ξ=0` 缺键进行显式 reconciliation：当前 direct-coexistence 合同只保留 `ξ=−0.003/+0.003` 两侧 raw 点，不伪造唯一 `ξ=0` 输运值。
 - [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`，包括输入哈希、替换表、marker 对齐表、长表、曲线索引、18 张同构显示图、plot manifest、manifest 与 claim ledger。
-- [ ] 作者审核派生显示值、两侧一阶标记和已知排除项；在审核前保持 `manuscript_eligible=false`。
+- [x] 根据作者本轮图审计，新增 4 个独立的 T=200 局部显示平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 各覆盖 `η/s`、`ζ/s`；均由当前 `prod_v2` 左右 raw 邻点重算，写入 `tables/review_adjustment_map.csv`，不修改 raw。
+- [x] 复核 T=120、μB=900 的三张图：ξ=-0.09 星标来自一阶 marker 配方，当前 scan 亦为 `phase_reference_kind=first_order` / `phase_structure=first_order_possible`；它不是 CEP，审计写入 `tables/marker_semantics_audit.csv`，本图层不绘制 CEP 标记。
+- [x] 回溯 mode-A μB=450、αT=1.0、ξ=-0.20：该点为 crossover/no-transition；既有定点机制表支持 `simple_1m4KΠ` 小分母归因，未对 raw 或 phase 标签作改写。
+- [ ] 作者审核派生显示值、4 个新增局部平滑候选、两侧一阶标记和已知排除项；在审核前保持 `manuscript_eligible=false`。
 - [ ] 作者审核通过后，另立 old-reference retirement audit/PR；仅在所有 consumer 不再依赖旧路径且 fallback/rollback 已验证时，才讨论物理删除旧 `prod_v1`。
 
 ## CI 留痕

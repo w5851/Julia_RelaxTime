@@ -26,7 +26,10 @@
 - [x] 旧配方 `mode_a, μB=900, αT=1.0, ξ=0` 在当前 direct-coexistence grid 中缺失时，改为记录 `ξ=−0.003/+0.003` 两侧 raw marker；不生成唯一 `ξ=0` 输运值。
 - [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`：长表、替换表、marker 对齐表、曲线索引、18 张图、manifest、plot manifest 和 claim ledger。
 - [x] 派生层所有行写入 `canonical_data_modified=false`；manifest 明确 `solver_called=false`、`manuscript_eligible=false`。
-- [ ] 作者审核 18 张同构图、19 个显示替换值、两侧一阶 marker 和已知 `xi=-0.01` bulk 分支排除项。
+- [ ] 作者审核 18 张同构图、19 个继承显示替换值、两侧一阶 marker 和已知 `xi=-0.01` bulk 分支排除项。
+- [ ] 作者审核本轮新增的 4 个 T=200 局部平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；候选只写入 clean layer。
+- [x] 复核 T=120、μB=900 的星标：`xi=-0.09` 是一阶转变 marker，不是 CEP；证据写入 `tables/marker_semantics_audit.csv`。
+- [x] 回溯 mode-A `μB=450, αT=1.0, ξ=-0.20`：当前点为 crossover/no-transition，既有 mechanism window 支持 `simple_1m4KΠ` 小分母归因；不修改 raw。
 
 ## old-reference retirement 后续门禁
 
