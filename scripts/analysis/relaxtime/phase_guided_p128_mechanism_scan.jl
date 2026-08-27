@@ -7,14 +7,14 @@ using SHA
 const PROJECT_ROOT = normpath(joinpath(@__DIR__, "..", "..", ".."))
 include(joinpath(@__DIR__, "t190_sigma_chain_decomposition_lib.jl"))
 
-const CASE = "first_canonical_v1_p128_xi001_validated_anchored_prod_v1"
+const CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2"
 const DEFAULT_ANALYSIS_DIR = joinpath(
     PROJECT_ROOT,
     "docs",
     "analysis",
     "relaxtime",
     "phase_guided_transport",
-    "phase_guided_transport_p128_xi001_analysis",
+    "phase_guided_transport_p128_xi001_analysis_v2",
 )
 const DEFAULT_CANDIDATE_CSV = joinpath(DEFAULT_ANALYSIS_DIR, "tables", "mechanism_window_candidates.csv")
 const DEFAULT_OUT_DIR = joinpath(DEFAULT_ANALYSIS_DIR, "tables")
@@ -47,7 +47,7 @@ function usage()
       julia --project=. scripts/analysis/relaxtime/phase_guided_p128_mechanism_scan.jl [options]
 
     Options:
-      --case-name <name>           formal result case name (default first_canonical_v1_p128_xi001_validated_anchored_prod_v1)
+      --case-name <name>           formal result case name (default first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2)
       --candidate-csv <path>       mechanism_window_candidates.csv (default docs/analysis/.../tables)
       --out-dir <path>             output table directory (default docs/analysis/.../tables)
       --window-limit <int>         limit selected windows for smoke runs (0 means all selected windows)

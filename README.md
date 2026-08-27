@@ -159,9 +159,10 @@ julia --project=. scripts/dev/check_models_entry_contract.jl
   - 执行与复现 SOP：`docs/guides/sop/workflows/relaxtime_transport.md`
   - 用户说明：`docs/guides/scripts/README.md`
   - API 入口：`docs/api/relaxtime/transport/README.md`
-  - phase-guided 当前 formal case（mode a/b，高 `xi` 分辨率）：`first_canonical_v1_p128_xi001_validated_anchored_prod_v1`
+  - phase-guided 当前 formal raw case（mode a/b，高 `xi` 分辨率）：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`
   - phase-guided 低 `xi` 分辨率 anchor / p104-vs-p128 收敛依据：`first_canonical_v1_p128_xi005_validated_anchored_prod_v1`
-  - 两个 case 的完整结果、图层和 convergence evidence 路径以 `docs/guides/scripts/README.md` 的当前登记为准。
+  - 两个 case 的完整结果、图层和 convergence evidence 路径以 `docs/guides/scripts/README.md` 的当前登记为准；旧高密度 `prod_v1` 保留为历史回退。
+  - `prod_v2` 的 raw 数值结果已由作者接受并登记为 `approved`；文献图使用前仍需单独的 publication-clean 派生层，不修改 raw CSV。
 - 介子热力学 / 介子数密度
   - 介子热力学 SOP：`docs/guides/sop/workflows/meson_thermodynamics.md`
   - 介子数密度 SOP：`docs/guides/sop/workflows/meson_density.md`

@@ -1,8 +1,8 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit、versioned result import 与合并后 solver-free consumer smoke v2 已通过，full candidate/legacy review 已接受）。PR #272 已 squash merge 到 `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`，合并后 smoke verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。runtime-switch PR #260、
+状态：active（post-repair audit、versioned result import 与合并后 solver-free consumer smoke v2 已通过，full candidate/legacy review 已接受）。PR #272 已 squash merge 到 `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`，合并后 smoke verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。作者已接受两套 `prod_v2` raw 结果并授权将分析默认切换到 `prod_v2`；当前迁移由独立 promotion/default PR 承接。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
-均已合并；RS numerical v2 已完成但仍保持 diagnostic-only。
+均已合并；RS numerical v2 的数值审计状态仍保持 `diagnostic_only`，但 raw 结果登记可独立提升为作者接受的正式 raw 输入。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
 production，也不把 solver-free smoke 当作数值 production 通过。
 
@@ -73,7 +73,8 @@ production，也不把 solver-free smoke 当作数值 production 通过。
 - [x] PR #272 已完成作者审核并 squash merge 到
   `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`；其后的 solver-free consumer
   smoke v2 已完成，verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。
-  `prod_v2` 仍是 `diagnostic_only`，不得据此切换默认 runtime 或删除 `prod_v1`。
+  `prod_v2` 的数值审计状态仍是 `diagnostic_only`；本次独立 promotion PR 只登记作者
+  接受的 formal raw 并迁移分析默认，不改变 runtime 数值执行合同、不删除 `prod_v1`。
 
 ## 合并后 solver-free consumer smoke v2
 
@@ -104,6 +105,24 @@ solver-free smoke v2）。
 - `xi=0, muB=150 MeV, alpha_T=1` 的 phase-guided crossover anchor：
   candidate runtime `198.2066818967471 MeV`，legacy `198.12550509377107 MeV`，差异
   `0.08117680297604579 MeV`。这是 reference 输入差异，不是 RS transport 数值 parity 结论。
+
+## 作者接受后的 raw promotion 与分析默认迁移（2026-08-27）
+
+- 作者确认同构审核图符合预期；“两套 `prod_v2`”明确指 mode-A 与 mode-B 两棵
+  result tree，而不是 candidate/legacy 两套 phase reference。
+- 两棵 `prod_v2` raw 结果在外部 `production_registry.json` 登记为 `approved`，并保留
+  `manuscript_eligible=false`：这是 raw numerical result 的接受，不等价于 publication-clean
+  图层已经完成，也不抹去质量警告、历史 sidecar 缺陷或数值审计边界。
+- 本次 promotion/default migration 的不可变审计包为
+  `docs/analysis/relaxtime/issue130_rs_transport_formal_raw_promotion_v1/`，其中记录两套
+  result/figure manifest、registry hash、输入 provenance、claim ledger 和未完成边界。
+- 当前分析入口默认切换到
+  `first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2`；旧 `prod_v1`
+  目录及其旧新比较、历史 mechanism audit 保持不可变并继续作为 legacy evidence。
+- 该迁移不改变 `run_phase_guided_transport_scan.jl` 的数值执行合同，不触发新的 solver run；
+  production workflow 仍要求显式 `case_name`，避免分析默认切换意外触发长任务。
+- 文献使用的分母/传播子近零点与非一阶相变突变点清理，后续另建 versioned
+  `publication_clean` 派生层；不得从两棵 raw `prod_v2` CSV 中直接删除或覆盖点。
 
 ## Numerical pilot 结果审计
 
@@ -141,9 +160,11 @@ source root：
 的 `figure_formalization`，目标为两棵 `...prod_v2` 图树。该导入只复制 PNG 并写入逐图 hash，
 `solver_called=false`、`production_write=false`；它不等价于数值 production promotion。
 
-下一步是由作者审核 v2 smoke evidence；若继续推进，另立并单独授权 RS numerical
-promotion/default switch 以及 old-reference retirement。当前仍保留逐键 legacy fallback、
-显式 rollback 和旧 `prod_v1` 结果。
+作者已审核 v2 smoke evidence、full candidate/legacy 对照和同构图；当前 promotion/default
+PR 将两套 mode-A/mode-B `prod_v2` 登记为作者接受的 formal raw，并把分析入口默认迁移到
+`prod_v2`。数值状态仍保持 `diagnostic_only`，逐键 legacy fallback、显式 rollback 和旧
+`prod_v1` 结果继续保留。publication-clean 派生层以及可选的 old-reference retirement
+另立任务，不能由本 PR 推断完成。
 
 ## CI 留痕
 

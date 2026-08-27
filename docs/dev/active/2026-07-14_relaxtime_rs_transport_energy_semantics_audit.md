@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit，正式 RS production 晋升尚未执行
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，分析默认迁移正在由独立 promotion PR 完成，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -367,7 +367,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 定义并校验 registry schema，至少包含 `case_slug`、`mode`、`result_path`、`figure_path`、`source_commit`、`transport_kernel_energy_policy`、`distribution_energy_policy`、`propagator_xi_policy`、`status`、`superseded_by`、`manuscript_eligible`、`audit_manifest_path`、更新时间。
 - [x] 把上述旧 case 标记为 `superseded_for_manuscript`、`manuscript_eligible=false`，但不修改旧目录。
 - [x] 新 case 尚未生成时允许 `superseded_by=null` 或明确的 pending 状态。
-- [x] 后续新数据 PR 先登记 `current_candidate`；完成收敛、provenance、图像和新旧对比后才晋升为 `approved`、`manuscript_eligible=true`。
+- [x] 后续新数据 PR 先登记 `current_candidate`；完成收敛、provenance、图像和新旧对比后，可在作者明确接受 raw 范围时晋升 registry `approved`；这不自动设置 `manuscript_eligible=true`，文献清理需另建派生层。
 - [x] 回填旧 case 的 `superseded_by`，使 registry 成为论文输入资格的权威状态入口。
 
 ### 8.3 新 production 门槛
@@ -376,7 +376,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 使用新的、语义可辨识的 case slug，不覆盖任何现有正式目录。
 - [x] 先通过参数收敛 gate，再生产全量 CSV 和图像。
 - [x] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；若 production workflow 输出 $\kappa_{XY}$、$\lambda$ 或其派生量，也必须纳入差异表。同时证明弛豫时间未因 kernel energy 修复改变。
-- [ ] 通过独立数据/图像 PR 导入、审计和晋升。
+- [ ] 通过独立数据/图像 PR 导入、审计和晋升（本任务的 raw promotion/default migration PR 正在独立进行）。
 
 ### 8.4 M2 执行范围锁（2026-07-15）
 
@@ -399,7 +399,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - 两种 mode 各生成 `36` 张 PNG；`plot_manifest.json` 各含 `36` 个逐图 SHA256、source CSV SHA256 和 `dpi=600`。PNG `pHYs` 元数据为 `599.9988 dpi`，是 600 dpi 转换为整数 pixels-per-meter 后的量化结果；figure-side 均只保留 PNG 与 `plot_manifest.json`。
 - 抽查 mode A 的 `muB900/zeta_over_s` 和 mode B 的 `T200/zeta_over_s` 图，坐标、图例、曲线和文件渲染正常；图中局部尖锐结构保留为待论文解释时结合邻点与通道诊断审阅的数值特征，不在本次产物 PR 中做平滑或删点。
 - 旧高密度 case `first_canonical_v1_p128_xi001_validated_anchored_prod_v1` 的导入前后 tree SHA256 完全一致：mode A result `6941d4e8ee7ae16399679e863761906e74f39784f9e69fc764752da20d3166c9`，mode B result `d343dec6de88b8a8f107be893bc62c8c64337338494aca7aa64e1b1dfa5f2dc9`，mode A figure `f96c418fb316634fced730867ab09e7ea2a0cc0f5d8452a24dbcfd65ddc09c0d`，mode B figure `d5c0bd164a6ec814ecc06c9b7a04be3a6599ac166010bcd3482e32d47ba07d9d`。
-- registry 已登记新 slug 的两条 mode entry 为 `current_candidate`、`manuscript_eligible=false`；旧粗网格 v1 指向旧高密度 v1，旧高密度 v1 再指向本次 v2 candidate。只有作者 review 后才允许把 v2 晋升为 `approved`。
+- registry 已登记新 slug 的两条 mode entry 为作者接受的 `approved` raw、`manuscript_eligible=false`；旧粗网格 v1 指向旧高密度 v1，旧高密度 v1 再指向本次 v2 raw。publication-clean 派生层仍需独立构建，不能将 raw approval 解释为论文输入资格。
 - 最终验证通过：三个 Python 脚本 `py_compile`、importer `--validate-only`、`check_script_entrypoints.jl`、`check_relaxtime_script_governance.jl`、`check_docs_consistency.jl`、`check_data_output_path_guard.jl`。`active-docs-governance` 的既有无关失败不属于本任务 required gate，未混入本 PR。
 - 新产物文本在最终化阶段统一为 LF，并按 parameter-gate manifest、plot manifest、result manifest 的依赖顺序重算哈希；对 Git index 中 staged blob 的递归 SHA256 校验通过，避免 Windows CRLF 工作区哈希与仓库提交字节不一致。
 
@@ -456,8 +456,9 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
   `effective_config.json`/`failed_points.csv` sidecar 缺陷，没有意外缺失或 hash mismatch。
 - mode-A 910 行、mode-B 909 行；direct-coexistence `xi=±0.003` 合同通过。固定-T mode-B 的
   `alpha_T=NaN` 按字段合同豁免，不视为非有限 transport 值。
-- audit verdict 为 `post_repair_audit_pass_diagnostic_only`。质量警告和 candidate/legacy 差异仍
-  进入作者审核；在审核前不创建正式 RS promotion/import、不覆盖旧 production、不删除 fallback。
+- audit verdict 为 `post_repair_audit_pass_diagnostic_only`。质量警告和 candidate/legacy 差异已
+  进入作者审核；作者接受 raw 范围后由独立 promotion/default PR 登记 `approved`，但不覆盖旧
+  production、不删除 fallback，且不把 diagnostic-only audit 改写为全域 numerical parity。
 
 ## 9. 里程碑
 
@@ -486,7 +487,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
 - [x] 使用新 case slug 导入结果与图像，不覆盖旧产物。
 - [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
-- [ ] 新 case 经 review 后在 registry 晋升为 `approved`。
+- [x] 新 case 经作者 review 后在 registry 晋升为 `approved` raw；`manuscript_eligible=false`，publication-clean 仍未完成。
 
 ### M3：极点敏感派生显示与 bulk 分支一致性
 
@@ -497,7 +498,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；已合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`。
 - [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
 - [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
-- [ ] 从修复提交重跑受影响的正式 production 和论文图，再决定 registry 是否晋升 `approved`。
+- [x] 从修复提交重跑受影响的正式 production 和论文图，并完成作者审核；registry raw approval 由当前 promotion/default PR 记录，论文资格仍单独判断。
 
 ## 10. Definition of Done
 
@@ -524,4 +525,4 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 | 旧数据状态只能靠聊天记忆 | 论文输入选择未读取 registry | 在新数据前先完成外部 registry；旧目录保持不可变。 |
 | 标量结果被过度解释为张量响应 | 论文/API 使用 longitudinal/transverse 完整响应措辞 | 在稳定文档和论文 handoff 中明确本次只覆盖角积分后的标量有效量。 |
 
-回退边界：代码 PR 可整体回退到拆分前实现；旧 production 因始终不被覆盖，无需数据回滚。若新 case 未通过 gate，只保留为 `current_candidate` 或撤销导入，不得晋升为 `approved`。
+回退边界：代码 PR 可整体回退到拆分前实现；旧 production 因始终不被覆盖，无需数据回滚。若数值 gate 未形成全域 parity，仍可在作者明确 raw 范围后登记为 `approved` raw，但不得设置 `manuscript_eligible=true`；否则保留为 `current_candidate` 或撤销导入。legacy fallback 与显式 rollback 始终保留。
