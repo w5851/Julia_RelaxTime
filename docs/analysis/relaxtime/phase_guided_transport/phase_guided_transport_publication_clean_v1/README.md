@@ -19,6 +19,8 @@
 - source solver：已调用；本次派生：`solver_called=false`
 - 旧显示配方：`docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_v2_pole_sensitive_rendering/tables/paper_display_replacements.csv`（SHA 记录于 manifest）
 - 本包生成图：18 张 PNG，见 `figures/plot_manifest.json`
+- 历史 marker：9 条审计记录，其中 6 条实际渲染；T=120、μB=900 的 3 条历史星标被抑制。
+- CEP-slice 审计：1 个固定切片，可渲染的 strict CEP 星标记录为 0 条。
 
 ## 派生规则
 
@@ -27,7 +29,7 @@
 3. 一阶点不做平滑；所有派生行带 `canonical_data_modified=false`。`quality_flag`/`quality_reason` 原样带入。
 4. 已知 `mode_a, μB=900, αT=1.0, ξ=−0.01` bulk 分支问题仍列为排除项；本包不会用插值掩盖它。
 5. 本轮作者审阅新增 4 个 T=200 MeV 局部平滑候选：`(mode B, μB=900, ξ=−0.10)` 与 `(mode B, μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；全部按当前 raw 左右邻点线性重算，单列于 `review_adjustment_map.csv`，不改变原始结果。
-6. T=120 MeV、μB=900 MeV 的星标语义经审计为一阶转变点（ξ=−0.09），不是 CEP；本图层没有 CEP 标记。CEP 应从 phase-reference 图层读取。
+6. 历史配方中 T=120 MeV、μB=900 MeV、ξ=−0.09 的星标只作为审计输入，不进入 publication-clean 图；严格 CEP-slice 审计显示该固定切片没有真实 CEP 交点，因此不放置替代星标。真正的 CEP 标记只能来自 phase-reference 的同坐标交点。
 7. mode-A μB=450 MeV、αT=1.0、ξ=−0.20 的非一阶斜率变化与既有 `simple_1m4KΠ` 小分母机制窗口一致；这属于机制归因证据，不是新的相变标签。
 
 ## 结果文件
@@ -35,8 +37,10 @@
 - `tables/input_inventory.csv`：输入路径、行数、哈希及 solver provenance。
 - `tables/replacement_map.csv`：19 个继承配方加 4 个本轮作者审阅候选的当前邻点插值映射。
 - `tables/review_adjustment_map.csv`：4 个本轮作者请求的 T=200 局部平滑候选及局部残差。
-- `tables/first_order_marker_map.csv`：旧标记与当前 raw/±0.003 合同的逐项对齐。
-- `tables/marker_semantics_audit.csv`：星标语义审计，明确 T=120 星标不是 CEP。
+- `tables/first_order_marker_map.csv`：旧标记与当前 raw/±0.003 合同的逐项对齐，并记录是否渲染。
+- `tables/marker_semantics_audit.csv`：历史 marker 语义和 publication-clean 渲染决定。
+- `tables/cep_marker_audit.csv`：固定输运切片与 strict CEP 表的坐标配对；若无共同交点则不绘制 CEP 星标。
+- `tables/cep_marker_map.csv`：仅在存在 strict 固定切片交点时生成的 CEP 星标及其显示值；当前为空。
 - `tables/publication_clean_points.csv`：三种论文展示 observable 的长表，含 raw/clean/status。
 - `tables/curve_index.csv`：18 条 panel/series/observable 曲线的覆盖和替换计数。
 - `tables/claim_ledger.csv`：证据强度、范围限制和未声明事项。

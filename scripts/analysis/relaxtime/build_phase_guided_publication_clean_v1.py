@@ -54,6 +54,16 @@ RECIPE_DIR = (
 REPLACEMENT_RECIPE = RECIPE_DIR / "paper_display_replacements.csv"
 MARKER_RECIPE = RECIPE_DIR / "paper_first_order_markers.csv"
 BULK_AUDIT = RECIPE_DIR / "bulk_derivative_branch_audit.csv"
+CEP_BOUNDARY = (
+    ROOT
+    / "data"
+    / "reference"
+    / "pnjl"
+    / "issue130_phase_reference_v1"
+    / "strict"
+    / "tables"
+    / "cep_boundary_strict_reference_v1.csv"
+)
 
 DISPLAY_FIELDS = ["eta_over_s", "zeta_over_s", "sigma_over_T"]
 # These are explicit author-requested display-layer repairs for the current
@@ -297,6 +307,24 @@ def load_recipe() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     return replacements, markers
 
 
+def load_cep_boundary() -> list[dict[str, str]]:
+    rows = read_csv(CEP_BOUNDARY)
+    required = {
+        "xi",
+        "mu_CEP_proxy_MeV",
+        "T_low_MeV",
+        "T_high_MeV",
+        "T_midpoint_MeV",
+        "layer",
+        "status",
+    }
+    if not rows or not required.issubset(rows[0]):
+        raise ValueError("strict CEP boundary table is empty or missing required fields")
+    if any(row.get("layer") != "strict_reference_v1" for row in rows):
+        raise ValueError("CEP boundary input contains a non-strict layer")
+    return rows
+
+
 def current_row(
     loaded: dict[str, dict[str, Any]], mode_key: str, panel: str, series: str, xi: str | float
 ) -> dict[str, str] | None:
@@ -430,6 +458,7 @@ def build_marker_map(
         mode_key = recipe["mode_key"]
         target = current_row(loaded, mode_key, recipe["plot_panel"], recipe["plot_series"], recipe["xi"])
         if target is not None:
+            historical_non_cep = mode_key == "mode_b" and recipe["plot_panel"] == "T120.0"
             out.append(
                 {
                     "window_id": recipe["window_id"],
@@ -442,8 +471,17 @@ def build_marker_map(
                     "raw_production_value_current": parse_finite(target, recipe["observable"]),
                     "recipe_raw_production_value": recipe["raw_production_value"],
                     "marker": recipe["marker"],
-                    "marker_status": "applied_current_raw_point",
-                    "marker_semantics": "first-order/upstream branch transition point retained without smoothing",
+                    "marker_status": (
+                        "suppressed_historical_non_CEP"
+                        if historical_non_cep
+                        else "applied_current_raw_point"
+                    ),
+                    "marker_semantics": (
+                        "historical first-order branch marker retained for audit only; not a CEP"
+                        if historical_non_cep
+                        else "first-order/upstream branch transition point retained without smoothing"
+                    ),
+                    "render_marker": not historical_non_cep,
                     "canonical_data_modified": False,
                 }
             )
@@ -468,6 +506,7 @@ def build_marker_map(
                         "marker": recipe["marker"],
                         "marker_status": "reconciled_direct_coexistence_side_point",
                         "marker_semantics": "first-order boundary; current raw grid has no unique xi=0 transport value; retain xi=+/-0.003 side point",
+                        "render_marker": True,
                         "coexistence_side": side,
                         "canonical_data_modified": False,
                     }
@@ -477,11 +516,194 @@ def build_marker_map(
     return out
 
 
-def build_marker_semantics_audit(
-    loaded: dict[str, dict[str, Any]], markers: list[dict[str, Any]]
+def build_cep_slice_audit(
+    loaded: dict[str, dict[str, Any]],
+    markers: list[dict[str, Any]],
+    cep_rows: list[dict[str, str]],
 ) -> list[dict[str, Any]]:
-    """Record what each plotted star means; stars in this layer are not CEPs."""
+    """Prove whether a historical marker's fixed plot slice intersects CEP.
+
+    CEP input is parameterized by ``xi`` and ``mu_q``.  The transport plots
+    use fixed ``T``/``mu_B`` slices, so a marker is eligible only when one
+    strict CEP row contains the plotted temperature bracket and its converted
+    ``mu_B = 3 * mu_q`` agrees with the plotted series.  We intentionally do
+    not place a marker at the nearest point when the two coordinates match at
+    different xi values.
+    """
     out: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for marker in markers:
+        if not (
+            marker["mode_key"] == "mode_b"
+            and marker["plot_panel"] == "T120.0"
+        ):
+            continue
+        curve_key = (
+            marker["mode_key"],
+            marker["plot_panel"],
+            marker["plot_series"],
+        )
+        if curve_key in seen:
+            continue
+        seen.add(curve_key)
+        payload = loaded[marker["mode_key"]]
+        curve_rows = payload["curves"].get((marker["plot_panel"], marker["plot_series"]), [])
+        if not curve_rows:
+            raise ValueError(f"CEP audit curve missing for {curve_key}")
+        T_slice = parse_finite(curve_rows[0], "T_MeV")
+        muB_slice = parse_finite(curve_rows[0], "muB_MeV")
+        parsed = []
+        for row in cep_rows:
+            T_low = parse_finite(row, "T_low_MeV")
+            T_high = parse_finite(row, "T_high_MeV")
+            T_mid = parse_finite(row, "T_midpoint_MeV")
+            muB_cep = 3.0 * parse_finite(row, "mu_CEP_proxy_MeV")
+            parsed.append(
+                {
+                    "xi": canonical_xi(row["xi"]),
+                    "T_low": T_low,
+                    "T_high": T_high,
+                    "T_mid": T_mid,
+                    "muB": muB_cep,
+                    "T_delta": abs(T_mid - T_slice),
+                    "muB_delta": abs(muB_cep - muB_slice),
+                }
+            )
+        nearest_T = min(parsed, key=lambda row: (row["T_delta"], row["muB_delta"], row["xi"]))
+        nearest_muB = min(parsed, key=lambda row: (row["muB_delta"], row["T_delta"], row["xi"]))
+        strict = [
+            row
+            for row in parsed
+            if row["T_low"] <= T_slice <= row["T_high"]
+            and math.isclose(row["muB"], muB_slice, rel_tol=0.0, abs_tol=1.0e-8)
+        ]
+        out.append(
+            {
+                "mode_key": marker["mode_key"],
+                "plot_panel": marker["plot_panel"],
+                "plot_series": marker["plot_series"],
+                "T_slice_MeV": T_slice,
+                "muB_slice_MeV": muB_slice,
+                "cep_table_rows": len(parsed),
+                "strict_intersection_count": len(strict),
+                "strict_intersection": bool(strict),
+                "nearest_T_xi": nearest_T["xi"],
+                "nearest_T_midpoint_MeV": nearest_T["T_mid"],
+                "nearest_T_muB_MeV": nearest_T["muB"],
+                "nearest_T_delta_MeV": nearest_T["T_delta"],
+                "nearest_muB_xi": nearest_muB["xi"],
+                "nearest_muB_T_midpoint_MeV": nearest_muB["T_mid"],
+                "nearest_muB_MeV": nearest_muB["muB"],
+                "nearest_muB_delta_MeV": nearest_muB["muB_delta"],
+                "marker_action": (
+                    "render_strict_CEP_marker"
+                    if strict
+                    else "suppress_historical_non_CEP_marker"
+                ),
+                "reason": (
+                    "strict CEP intersection exists on this fixed slice"
+                    if strict
+                    else "T and muB closest matches occur at different xi; nearest point is not a CEP"
+                ),
+                "reference_path": relpath(CEP_BOUNDARY),
+                "reference_sha256": sha256_file(CEP_BOUNDARY),
+                "canonical_data_modified": False,
+            }
+        )
+    return out
+
+
+def interpolate_curve_value(
+    curve_rows: list[dict[str, str]], xi: float, field: str
+) -> float:
+    ordered = sorted(curve_rows, key=lambda row: float(row["xi"]))
+    if xi < float(ordered[0]["xi"]) or xi > float(ordered[-1]["xi"]):
+        raise ValueError(f"CEP xi={xi} lies outside transport curve support")
+    for row in ordered:
+        if math.isclose(float(row["xi"]), xi, rel_tol=0.0, abs_tol=1.0e-10):
+            return parse_finite(row, field)
+    for left, right in zip(ordered, ordered[1:]):
+        x_left = float(left["xi"])
+        x_right = float(right["xi"])
+        if x_left < xi < x_right:
+            y_left = parse_finite(left, field)
+            y_right = parse_finite(right, field)
+            weight = (xi - x_left) / (x_right - x_left)
+            return y_left + weight * (y_right - y_left)
+    raise ValueError(f"unable to interpolate CEP xi={xi}")
+
+
+def build_cep_marker_map(
+    loaded: dict[str, dict[str, Any]],
+    cep_slice_audit: list[dict[str, Any]],
+    cep_rows: list[dict[str, str]],
+) -> list[dict[str, Any]]:
+    """Build display-only stars for genuine fixed-slice CEP intersections."""
+    out: list[dict[str, Any]] = []
+    for audit in cep_slice_audit:
+        if not audit["strict_intersection"]:
+            continue
+        payload = loaded[audit["mode_key"]]
+        curve_rows = payload["curves"].get(
+            (audit["plot_panel"], audit["plot_series"]), []
+        )
+        if not curve_rows:
+            raise ValueError(f"CEP marker curve missing for {audit}")
+        T_slice = float(audit["T_slice_MeV"])
+        muB_slice = float(audit["muB_slice_MeV"])
+        matches = []
+        for row in cep_rows:
+            T_low = parse_finite(row, "T_low_MeV")
+            T_high = parse_finite(row, "T_high_MeV")
+            muB_cep = 3.0 * parse_finite(row, "mu_CEP_proxy_MeV")
+            if T_low <= T_slice <= T_high and math.isclose(
+                muB_cep, muB_slice, rel_tol=0.0, abs_tol=1.0e-8
+            ):
+                matches.append(row)
+        for row in matches:
+            xi = float(row["xi"])
+            for observable in DISPLAY_FIELDS:
+                out.append(
+                    {
+                        "window_id": (
+                            f"strict_cep_{audit['mode_key']}_{audit['plot_panel']}"
+                            f"_{audit['plot_series']}_{canonical_xi(xi)}"
+                        ),
+                        "mode_key": audit["mode_key"],
+                        "plot_panel": audit["plot_panel"],
+                        "plot_series": audit["plot_series"],
+                        "recipe_xi": canonical_xi(xi),
+                        "render_xi": canonical_xi(xi),
+                        "observable": observable,
+                        "raw_production_value_current": interpolate_curve_value(
+                            curve_rows, xi, observable
+                        ),
+                        "recipe_raw_production_value": "",
+                        "marker": "star",
+                        "marker_status": "strict_CEP_marker",
+                        "marker_semantics": (
+                            "strict CEP boundary intersection; y value linearly interpolated "
+                            "from current raw transport neighbours"
+                        ),
+                        "render_marker": True,
+                        "coexistence_side": "",
+                        "canonical_data_modified": False,
+                    }
+                )
+    return out
+
+
+def build_marker_semantics_audit(
+    loaded: dict[str, dict[str, Any]],
+    markers: list[dict[str, Any]],
+    cep_slice_audit: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Record whether each historical marker is eligible for publication."""
+    out: list[dict[str, Any]] = []
+    cep_by_curve = {
+        (row["mode_key"], row["plot_panel"], row["plot_series"]): row
+        for row in cep_slice_audit
+    }
     for marker in markers:
         row = current_row(
             loaded,
@@ -493,10 +715,20 @@ def build_marker_semantics_audit(
         if row is None:
             raise ValueError(f"marker audit row missing for {marker}")
         if marker["mode_key"] == "mode_b" and marker["plot_panel"] == "T120.0":
-            intended = "first_order_transition"
+            slice_audit = cep_by_curve[
+                (marker["mode_key"], marker["plot_panel"], marker["plot_series"])
+            ]
+            intended = "historical_first_order_branch_marker"
             cep_semantics = "not_a_CEP_marker"
-            verdict = "first_order_branch_marker; no CEP claim; placement is not a CEP coordinate"
-            evidence = "paper_first_order_markers.csv; current phase_reference_kind/phase_structure; first_order_protection.csv"
+            verdict = (
+                "suppressed_from_publication_clean; no strict CEP intersection on fixed slice"
+                if not slice_audit["strict_intersection"]
+                else "suppressed_historical_marker; strict CEP marker must be rendered separately"
+            )
+            evidence = (
+                "paper_first_order_markers.csv; current phase_reference_kind/phase_structure; "
+                "first_order_protection.csv; tables/cep_marker_audit.csv"
+            )
         else:
             intended = "first_order_boundary_or_transition"
             cep_semantics = "not_a_CEP_marker"
@@ -516,6 +748,7 @@ def build_marker_semantics_audit(
                 "phase_reference_kind": row["phase_reference_kind"],
                 "phase_structure": row["phase_structure"],
                 "quality_flag": row["quality_flag"],
+                "render_marker": marker.get("render_marker", True),
                 "audit_verdict": verdict,
                 "evidence": evidence,
                 "canonical_data_modified": False,
@@ -536,6 +769,7 @@ def build_clean_points(
     marker_index = {
         (row["mode_key"], row["plot_panel"], row["plot_series"], row["render_xi"], row["observable"]): row
         for row in markers
+        if row.get("render_marker", True)
     }
     out: list[dict[str, Any]] = []
     for mode_key, payload in loaded.items():
@@ -617,7 +851,9 @@ def build_curve_index(points: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-def render_figures(points: list[dict[str, Any]]) -> list[Path]:
+def render_figures(
+    points: list[dict[str, Any]], cep_markers: list[dict[str, Any]] | None = None
+) -> list[Path]:
     try:
         import matplotlib
 
@@ -631,6 +867,7 @@ def render_figures(points: list[dict[str, Any]]) -> list[Path]:
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in points:
         grouped[(row["mode_key"], row["plot_panel"], row["plot_series"])].append(row)
+    cep_markers = cep_markers or []
     paths: list[Path] = []
     for mode_key in MODE_CONFIG:
         panels = sorted({key[1] for key in grouped if key[0] == mode_key})
@@ -668,6 +905,35 @@ def render_figures(points: list[dict[str, Any]]) -> list[Path]:
                             edgecolor="black",
                             linewidth=0.55,
                             zorder=5,
+                        )
+                    cep_rows = [
+                        row
+                        for row in cep_markers
+                        if row["mode_key"] == mode_key
+                        and row["plot_panel"] == panel
+                        and row["plot_series"] == series
+                        and row["observable"] == observable
+                    ]
+                    if cep_rows:
+                        ax.scatter(
+                            [float(row["render_xi"]) for row in cep_rows],
+                            [float(row["raw_production_value_current"]) for row in cep_rows],
+                            marker="*",
+                            s=120,
+                            facecolor="#CCBB44",
+                            edgecolor="black",
+                            linewidth=0.65,
+                            zorder=6,
+                        )
+                        ax.scatter(
+                            [],
+                            [],
+                            marker="*",
+                            s=90,
+                            facecolor="#CCBB44",
+                            edgecolor="black",
+                            linewidth=0.65,
+                            label="CEP (strict intersection)",
                         )
                 if marker_present:
                     ax.scatter([], [], marker="*", s=75, facecolor="white", edgecolor="black", linewidth=0.55, label="first-order transition")
@@ -736,9 +1002,9 @@ def claim_ledger(
         {
             "claim_id": "PC-V1-007",
             "status": "supported_with_scope_limit",
-            "claim_zh": "T=120 MeV、μB=900 MeV 的星标经复核是 ξ=−0.09 的一阶分支/保护 marker，不是 CEP；本 publication-clean 图层没有绘制 CEP 标记，不能把该星标当作 CEP 坐标。",
-            "evidence": "tables/marker_semantics_audit.csv; tables/first_order_marker_map.csv; data/reference/pnjl/issue130_phase_reference_v1/*",
-            "scope_limit": "CEP 位置应从 phase-reference CEP boundary 图层读取，不能把输运一阶星标当作 CEP 坐标。",
+            "claim_zh": "历史配方中 T=120 MeV、μB=900 MeV、ξ=−0.09 的星标不是 CEP，已从 publication-clean 图层抑制；strict CEP-slice 审计未找到该固定切片的共同交点，因此不绘制替代星标。",
+            "evidence": "tables/marker_semantics_audit.csv; tables/first_order_marker_map.csv; tables/cep_marker_audit.csv; tables/cep_marker_map.csv; data/reference/pnjl/issue130_phase_reference_v1/*",
+            "scope_limit": "CEP 星标只能由 phase-reference CEP boundary 与当前图的固定 T/μB 坐标共同匹配后绘制，不能把输运一阶 marker 投影成 CEP。",
         },
         {
             "claim_id": "PC-V1-008",
@@ -755,6 +1021,9 @@ def render_readme(
     inherited_replacements: list[dict[str, Any]],
     review_adjustments: list[dict[str, Any]],
     markers: list[dict[str, Any]],
+    rendered_markers: list[dict[str, Any]],
+    cep_slice_audit: list[dict[str, Any]],
+    cep_markers: list[dict[str, Any]],
     figure_paths: list[Path],
 ) -> str:
     inventory_lines = "\n".join(
@@ -781,6 +1050,8 @@ def render_readme(
 - source solver：已调用；本次派生：`solver_called=false`
 - 旧显示配方：`{relpath(REPLACEMENT_RECIPE)}`（SHA 记录于 manifest）
 - 本包生成图：{len(figure_paths)} 张 PNG，见 `figures/plot_manifest.json`
+- 历史 marker：{len(markers)} 条审计记录，其中 {len(rendered_markers)} 条实际渲染；T=120、μB=900 的 3 条历史星标被抑制。
+- CEP-slice 审计：{len(cep_slice_audit)} 个固定切片，可渲染的 strict CEP 星标记录为 {len(cep_markers)} 条。
 
 ## 派生规则
 
@@ -789,7 +1060,7 @@ def render_readme(
 3. 一阶点不做平滑；所有派生行带 `canonical_data_modified=false`。`quality_flag`/`quality_reason` 原样带入。
 4. 已知 `mode_a, μB=900, αT=1.0, ξ=−0.01` bulk 分支问题仍列为排除项；本包不会用插值掩盖它。
 5. 本轮作者审阅新增 4 个 T=200 MeV 局部平滑候选：`(mode B, μB=900, ξ=−0.10)` 与 `(mode B, μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；全部按当前 raw 左右邻点线性重算，单列于 `review_adjustment_map.csv`，不改变原始结果。
-6. T=120 MeV、μB=900 MeV 的星标语义经审计为一阶转变点（ξ=−0.09），不是 CEP；本图层没有 CEP 标记。CEP 应从 phase-reference 图层读取。
+6. 历史配方中 T=120 MeV、μB=900 MeV、ξ=−0.09 的星标只作为审计输入，不进入 publication-clean 图；严格 CEP-slice 审计显示该固定切片没有真实 CEP 交点，因此不放置替代星标。真正的 CEP 标记只能来自 phase-reference 的同坐标交点。
 7. mode-A μB=450 MeV、αT=1.0、ξ=−0.20 的非一阶斜率变化与既有 `simple_1m4KΠ` 小分母机制窗口一致；这属于机制归因证据，不是新的相变标签。
 
 ## 结果文件
@@ -797,8 +1068,10 @@ def render_readme(
 - `tables/input_inventory.csv`：输入路径、行数、哈希及 solver provenance。
 - `tables/replacement_map.csv`：19 个继承配方加 4 个本轮作者审阅候选的当前邻点插值映射。
 - `tables/review_adjustment_map.csv`：4 个本轮作者请求的 T=200 局部平滑候选及局部残差。
-- `tables/first_order_marker_map.csv`：旧标记与当前 raw/±0.003 合同的逐项对齐。
-- `tables/marker_semantics_audit.csv`：星标语义审计，明确 T=120 星标不是 CEP。
+- `tables/first_order_marker_map.csv`：旧标记与当前 raw/±0.003 合同的逐项对齐，并记录是否渲染。
+- `tables/marker_semantics_audit.csv`：历史 marker 语义和 publication-clean 渲染决定。
+- `tables/cep_marker_audit.csv`：固定输运切片与 strict CEP 表的坐标配对；若无共同交点则不绘制 CEP 星标。
+- `tables/cep_marker_map.csv`：仅在存在 strict 固定切片交点时生成的 CEP 星标及其显示值；当前为空。
 - `tables/publication_clean_points.csv`：三种论文展示 observable 的长表，含 raw/clean/status。
 - `tables/curve_index.csv`：18 条 panel/series/observable 曲线的覆盖和替换计数。
 - `tables/claim_ledger.csv`：证据强度、范围限制和未声明事项。
@@ -818,14 +1091,18 @@ python -m pytest tests/unit/python/test_phase_guided_publication_clean_v1.py
 def main() -> None:
     loaded, inventory = load_inputs()
     replacement_recipe, marker_recipe = load_recipe()
+    cep_rows = load_cep_boundary()
     inherited_replacements = build_replacement_map(loaded, replacement_recipe)
     review_adjustments = build_review_adjustment_map(loaded)
     replacements = [*inherited_replacements, *review_adjustments]
     markers = build_marker_map(loaded, marker_recipe)
-    marker_semantics = build_marker_semantics_audit(loaded, markers)
-    points = build_clean_points(loaded, replacements, markers)
+    cep_slice_audit = build_cep_slice_audit(loaded, markers, cep_rows)
+    cep_markers = build_cep_marker_map(loaded, cep_slice_audit, cep_rows)
+    marker_semantics = build_marker_semantics_audit(loaded, markers, cep_slice_audit)
+    rendered_markers = [row for row in markers if row.get("render_marker", True)]
+    points = build_clean_points(loaded, replacements, rendered_markers)
     curves = build_curve_index(points)
-    figure_paths = render_figures(points)
+    figure_paths = render_figures(points, cep_markers)
 
     input_fields = [
         "mode_key", "mode", "scan_rows", "diagnostic_rows", "failed_rows", "xi_count",
@@ -846,15 +1123,24 @@ def main() -> None:
     marker_fields = [
         "window_id", "mode_key", "plot_panel", "plot_series", "recipe_xi", "render_xi", "observable",
         "raw_production_value_current", "recipe_raw_production_value", "marker", "marker_status",
-        "marker_semantics", "coexistence_side", "canonical_data_modified",
+        "marker_semantics", "render_marker", "coexistence_side", "canonical_data_modified",
     ]
     write_csv(TABLE_DIR / "first_order_marker_map.csv", markers, marker_fields)
     marker_audit_fields = [
         "window_id", "mode_key", "plot_panel", "plot_series", "observable", "render_xi",
         "marker_status", "intended_semantics", "cep_semantics", "phase_reference_kind",
-        "phase_structure", "quality_flag", "audit_verdict", "evidence", "canonical_data_modified",
+        "phase_structure", "quality_flag", "render_marker", "audit_verdict", "evidence", "canonical_data_modified",
     ]
     write_csv(TABLE_DIR / "marker_semantics_audit.csv", marker_semantics, marker_audit_fields)
+    cep_audit_fields = [
+        "mode_key", "plot_panel", "plot_series", "T_slice_MeV", "muB_slice_MeV",
+        "cep_table_rows", "strict_intersection_count", "strict_intersection",
+        "nearest_T_xi", "nearest_T_midpoint_MeV", "nearest_T_muB_MeV", "nearest_T_delta_MeV",
+        "nearest_muB_xi", "nearest_muB_T_midpoint_MeV", "nearest_muB_MeV", "nearest_muB_delta_MeV",
+        "marker_action", "reason", "reference_path", "reference_sha256", "canonical_data_modified",
+    ]
+    write_csv(TABLE_DIR / "cep_marker_audit.csv", cep_slice_audit, cep_audit_fields)
+    write_csv(TABLE_DIR / "cep_marker_map.csv", cep_markers, marker_fields)
     point_fields = [
         "mode_key", "mode", "plot_panel", "plot_series", "plot_series_label", "T_MeV", "muB_MeV", "xi",
         "observable", "raw_value", "clean_value", "display_status", "value_source", "phase_structure",
@@ -885,10 +1171,14 @@ def main() -> None:
         "inherited_replacement_count": len(inherited_replacements),
         "review_adjustment_count": len(review_adjustments),
         "marker_recipe_count": len(marker_recipe),
-        "marker_render_count": len(markers),
+        "marker_audit_count": len(markers),
+        "marker_render_count": len(rendered_markers) + len(cep_markers),
+        "first_order_marker_render_count": len(rendered_markers),
+        "historical_marker_suppressed_count": len(markers) - len(rendered_markers),
+        "cep_marker_render_count": len(cep_markers),
         "manuscript_eligible": False,
         "canonical_data_modified": False,
-        "rendering_semantics": "current prod_v2 raw curves with inherited and author-requested adjacent-neighbour display replacements; first-order raw markers retained; no raw mutation",
+        "rendering_semantics": "current prod_v2 raw curves with inherited and author-requested adjacent-neighbour display replacements; historical non-CEP markers suppressed; strict CEP markers rendered only for a common fixed-slice intersection; no raw mutation",
         "figures": [
             {"path": relpath(path), "sha256": sha256_file(path), "bytes": path.stat().st_size}
             for path in figure_paths
@@ -898,7 +1188,16 @@ def main() -> None:
 
     readme_path = OUT_DIR / "README.md"
     readme_path.write_text(
-        render_readme(inventory, inherited_replacements, review_adjustments, markers, figure_paths),
+        render_readme(
+            inventory,
+            inherited_replacements,
+            review_adjustments,
+            markers,
+            rendered_markers,
+            cep_slice_audit,
+            cep_markers,
+            figure_paths,
+        ),
         encoding="utf-8",
     )
     output_paths = [
@@ -932,13 +1231,20 @@ def main() -> None:
             "marker_path": relpath(MARKER_RECIPE),
             "marker_sha256": sha256_file(MARKER_RECIPE),
             "marker_rows": len(marker_recipe),
+            "cep_boundary_path": relpath(CEP_BOUNDARY),
+            "cep_boundary_sha256": sha256_file(CEP_BOUNDARY),
+            "cep_boundary_rows": len(cep_rows),
         },
         "derived_counts": {
             "replacement_rows": len(replacements),
             "inherited_replacement_rows": len(inherited_replacements),
             "review_adjustment_rows": len(review_adjustments),
             "marker_recipe_rows": len(marker_recipe),
-            "marker_render_rows": len(markers),
+            "marker_render_rows": len(rendered_markers),
+            "marker_audit_rows": len(markers),
+            "marker_suppressed_rows": len(markers) - len(rendered_markers),
+            "cep_slice_audit_rows": len(cep_slice_audit),
+            "cep_marker_render_rows": len(cep_markers),
             "marker_semantics_audit_rows": len(marker_semantics),
             "publication_clean_point_rows": len(points),
             "curve_rows": len(curves),
@@ -948,7 +1254,7 @@ def main() -> None:
             "mode_a xi=0 first-order recipe reconciled to raw xi=-0.003/+0.003 side points",
             "mode_a muB=900 alpha_T=1.0 xi=-0.01 mixed bulk/equilibrium branch remains excluded",
             "T=200 mode-B xi=-0.10 (muB=900) and xi=0.36 (muB=0) have author-requested display-only smoothing candidates",
-            "T=120 mode-B muB=900 xi=-0.09 star is a first-order marker, not a CEP marker",
+            "T=120 mode-B muB=900 xi=-0.09 historical first-order marker is suppressed; strict CEP-slice audit finds no common CEP intersection",
             "mode_a muB=450 alpha_T=1.0 xi=-0.20 retains the raw non-first-order slope change; prior mechanism evidence is simple_1m4KPi",
             "derived display values are not solver recomputations or numerical convergence evidence",
             "old prod_v1 and phase-reference legacy fallback are retained; retirement is a separate audit",

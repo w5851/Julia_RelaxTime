@@ -28,7 +28,7 @@
 - [x] 派生层所有行写入 `canonical_data_modified=false`；manifest 明确 `solver_called=false`、`manuscript_eligible=false`。
 - [ ] 作者审核 18 张同构图、19 个继承显示替换值、两侧一阶 marker 和已知 `xi=-0.01` bulk 分支排除项。
 - [ ] 作者审核本轮新增的 4 个 T=200 局部平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；候选只写入 clean layer。
-- [x] 复核 T=120、μB=900 的星标：`xi=-0.09` 是一阶转变 marker，不是 CEP；证据写入 `tables/marker_semantics_audit.csv`。
+- [x] 修正 T=120、μB=900 的历史星标：`xi=-0.09` 不是 CEP，publication-clean 不再渲染；`tables/cep_marker_audit.csv` 证明固定切片没有真实 CEP 交点，因此不放置替代星标。
 - [x] 回溯 mode-A `μB=450, αT=1.0, ξ=-0.20`：当前点为 crossover/no-transition，既有 mechanism window 支持 `simple_1m4KΠ` 小分母归因；不修改 raw。
 
 ## old-reference retirement 后续门禁

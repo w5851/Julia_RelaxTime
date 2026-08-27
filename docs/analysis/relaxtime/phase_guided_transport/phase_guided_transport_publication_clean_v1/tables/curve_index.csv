@@ -32,9 +32,9 @@ mode_b,T120.0,muB0.0,zeta_over_s,101,0,0,-0.5,0.5,False
 mode_b,T120.0,muB450.0,eta_over_s,101,0,0,-0.5,0.5,False
 mode_b,T120.0,muB450.0,sigma_over_T,101,0,0,-0.5,0.5,False
 mode_b,T120.0,muB450.0,zeta_over_s,101,0,0,-0.5,0.5,False
-mode_b,T120.0,muB900.0,eta_over_s,101,0,1,-0.5,0.5,False
-mode_b,T120.0,muB900.0,sigma_over_T,101,0,1,-0.5,0.5,False
-mode_b,T120.0,muB900.0,zeta_over_s,101,0,1,-0.5,0.5,False
+mode_b,T120.0,muB900.0,eta_over_s,101,0,0,-0.5,0.5,False
+mode_b,T120.0,muB900.0,sigma_over_T,101,0,0,-0.5,0.5,False
+mode_b,T120.0,muB900.0,zeta_over_s,101,0,0,-0.5,0.5,False
 mode_b,T160.0,muB0.0,eta_over_s,101,0,0,-0.5,0.5,False
 mode_b,T160.0,muB0.0,sigma_over_T,101,0,0,-0.5,0.5,False
 mode_b,T160.0,muB0.0,zeta_over_s,101,0,0,-0.5,0.5,False

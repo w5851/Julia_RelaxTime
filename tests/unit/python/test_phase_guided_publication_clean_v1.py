@@ -101,6 +101,7 @@ def test_direct_coexistence_marker_reconciles_to_two_raw_side_points() -> None:
     markers = MODULE.build_marker_map(loaded, recipe)
     assert [row["render_xi"] for row in markers] == ["-0.0030000000", "0.0030000000"]
     assert all(row["marker_status"] == "reconciled_direct_coexistence_side_point" for row in markers)
+    assert all(row["render_marker"] for row in markers)
 
 
 def test_missing_non_mode_a_marker_is_an_error() -> None:
@@ -167,6 +168,8 @@ def test_review_adjustment_recomputes_explicit_local_targets() -> None:
 
 def test_marker_semantics_audit_does_not_call_t120_marker_cep() -> None:
     row = _row(panel="T120.0", series="muB900.0", xi="-0.09", value="2.0")
+    row["T_MeV"] = "120.0"
+    row["muB_MeV"] = "900.0"
     loaded = _loaded([row], mode_key="mode_b")
     markers = [{
         "window_id": "t120",
@@ -176,11 +179,87 @@ def test_marker_semantics_audit_does_not_call_t120_marker_cep() -> None:
         "render_xi": "-0.0900000000",
         "observable": "eta_over_s",
         "marker_status": "applied_current_raw_point",
+        "render_marker": False,
     }]
-    audit = MODULE.build_marker_semantics_audit(loaded, markers)
-    assert audit[0]["intended_semantics"] == "first_order_transition"
+    cep_rows = [
+        {
+            "xi": "0.25",
+            "mu_CEP_proxy_MeV": "323.0",
+            "T_low_MeV": "119.9",
+            "T_high_MeV": "120.1",
+            "T_midpoint_MeV": "120.0",
+            "layer": "strict_reference_v1",
+            "status": "bracket_preserved",
+        },
+        {
+            "xi": "0.06",
+            "mu_CEP_proxy_MeV": "300.0",
+            "T_low_MeV": "128.6",
+            "T_high_MeV": "128.7",
+            "T_midpoint_MeV": "128.65",
+            "layer": "strict_reference_v1",
+            "status": "bracket_preserved",
+        },
+    ]
+    cep_audit = MODULE.build_cep_slice_audit(loaded, markers, cep_rows)
+    assert len(cep_audit) == 1
+    assert cep_audit[0]["strict_intersection"] is False
+    assert cep_audit[0]["marker_action"] == "suppress_historical_non_CEP_marker"
+    audit = MODULE.build_marker_semantics_audit(loaded, markers, cep_audit)
+    assert audit[0]["intended_semantics"] == "historical_first_order_branch_marker"
     assert audit[0]["cep_semantics"] == "not_a_CEP_marker"
-    assert "no CEP claim" in audit[0]["audit_verdict"]
+    assert audit[0]["render_marker"] is False
+    assert "no strict CEP intersection" in audit[0]["audit_verdict"]
+
+
+def test_suppressed_historical_marker_is_not_written_to_clean_points() -> None:
+    rows = [_row(panel="T120.0", series="muB900.0", xi="-0.09", value="2.0")]
+    loaded = _loaded(rows, mode_key="mode_b")
+    marker = [{
+        "window_id": "t120",
+        "mode_key": "mode_b",
+        "plot_panel": "T120.0",
+        "plot_series": "muB900.0",
+        "render_xi": "-0.0900000000",
+        "observable": "eta_over_s",
+        "raw_production_value_current": 2.0,
+        "marker_status": "suppressed_historical_non_CEP",
+        "render_marker": False,
+    }]
+    points = MODULE.build_clean_points(loaded, [], marker)
+    point = next(row for row in points if row["observable"] == "eta_over_s")
+    assert point["display_status"] == "raw"
+
+
+def test_strict_cep_intersection_generates_cep_marker_rows() -> None:
+    row = _row(panel="T120.0", series="muB900.0", xi="0.0", value="2.0")
+    row["T_MeV"] = "120.0"
+    row["muB_MeV"] = "900.0"
+    loaded = _loaded([row], mode_key="mode_b")
+    markers = [{
+        "window_id": "t120",
+        "mode_key": "mode_b",
+        "plot_panel": "T120.0",
+        "plot_series": "muB900.0",
+        "render_xi": "0.0000000000",
+        "observable": "eta_over_s",
+        "marker_status": "suppressed_historical_non_CEP",
+        "render_marker": False,
+    }]
+    cep_rows = [{
+        "xi": "0.0",
+        "mu_CEP_proxy_MeV": "300.0",
+        "T_low_MeV": "119.9",
+        "T_high_MeV": "120.1",
+        "T_midpoint_MeV": "120.0",
+        "layer": "strict_reference_v1",
+        "status": "bracket_preserved",
+    }]
+    audit = MODULE.build_cep_slice_audit(loaded, markers, cep_rows)
+    cep_markers = MODULE.build_cep_marker_map(loaded, audit, cep_rows)
+    assert len(cep_markers) == 3
+    assert {row["marker_status"] for row in cep_markers} == {"strict_CEP_marker"}
+    assert {row["render_xi"] for row in cep_markers} == {"0.0000000000"}
 
 
 def test_curve_index_counts_derived_rows() -> None:
