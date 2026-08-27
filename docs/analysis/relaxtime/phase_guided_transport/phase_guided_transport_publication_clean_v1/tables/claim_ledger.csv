@@ -1,0 +1,6 @@
+claim_id,status,claim_zh,evidence,scope_limit
+PC-V1-001,supported,publication_clean_v1 只消费作者接受的两棵 prod_v2 raw result tree；raw CSV、registry 和正式 figure 均未被修改，派生过程未调用 solver。,tables/input_inventory.csv; manifest.json; figures/plot_manifest.json,raw numerical audit 仍为 diagnostic-only，publication_clean_v1 不改变收敛或物理结论。
+PC-V1-002,supported_with_scope_limit,19 个作者审核过的非一阶显示异常点按当前 prod_v2 左右真实邻点重新线性插值；结果只写入派生 clean_value，不覆盖 raw_value。,tables/replacement_map.csv; tables/publication_clean_points.csv,插值值不是新的 solver 结果，也不是有限宽度/极点正则化；只允许用于明确标注的显示层。
+PC-V1-003,supported_with_scope_limit,一阶窗口保留当前 raw 值；旧配方的 3 个 mode-A ξ=0 标记在当前 direct-coexistence 合同下重解释为 ξ=−0.003/+0.003 两侧真实点（共 6 个 side markers），不伪造 ξ=0 输运值。,tables/first_order_marker_map.csv; tables/publication_clean_points.csv; data/outputs/results/relaxtime/transport/phase_guided/*/manifest.json,共存面没有唯一输运值；论文图若需要单一边界线，需另行定义图形语义并由作者审核。
+PC-V1-004,author_check,派生图仍不是 manuscript eligible；mode-A μB=900、αT=1.0、ξ=−0.01 的 bulk/equilibrium 分支不一致继续作为已知排除项。,tables/bulk_derivative_branch_audit.csv; figures/plot_manifest.json,在稳定分支与 bulk base_state 复用修复并重跑前，不得将该曲线声明为论文定稿输入。
+PC-V1-005,not_claimed,本层不声称 RS numerical parity、全域 solver 收敛或旧 reference 已删除。,README.md; manifest.json,old-reference retirement 另立审计/PR，并在作者授权前不物理删除旧 prod_v1。
