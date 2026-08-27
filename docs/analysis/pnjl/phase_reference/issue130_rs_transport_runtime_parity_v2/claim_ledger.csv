@@ -1,0 +1,6 @@
+claim_id,claim,status,evidence,boundary
+post_merge_source_resolution,"The real phase-guided consumer resolves candidate runtime, diagnostic candidate, and explicit legacy rollback on the #272 merge SHA.",supported,consumer_source_smoke.json; consumer_smoke.csv; runtime/run_manifest.json; legacy/run_manifest.json,solver-free source-resolution and one-point plan smoke
+fallback_and_rollback,"Certified-only candidate view, per-key legacy fallback, and explicit legacy rollback remain available.",supported,consumer_source_smoke.json; parity_comparison.csv,does not certify unresolved candidate rows
+versioned_result_import_integrity,"Both imported prod_v2 result trees and their author-accepted figure source hashes match their manifests, while prod_v1 tree hashes are unchanged.",supported,result_import_inventory.csv; result manifest hashes,"integrity/import evidence, not a new numerical run"
+candidate_legacy_difference,Candidate and legacy anchors remain contract-compatible but numerically distinct inputs.,supported,parity_comparison.csv,not RS numerical parity or convergence
+solver_free_boundary,"This v2 package invokes no equilibrium solver, transport coefficient evaluation, result rewrite, or runtime switch.",supported,consumer_source_smoke.json; dry-run manifests; result_import_inventory.csv,numerical RS promotion remains a separately authorized decision

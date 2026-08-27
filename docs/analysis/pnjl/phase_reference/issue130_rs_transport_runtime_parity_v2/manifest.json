@@ -1,0 +1,201 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "dry_runs": [
+    {
+      "config_sha256": "2da7a794f12c73c1c9d1913af09a68c9ea22c64e1babfdd3fb8a3a5ee7557069",
+      "mode": "runtime",
+      "points_total": 1,
+      "run_id": "20260827T072014_33c027cb",
+      "run_manifest_sha256": "4b9cbdee2c0772d8042b1d25922eb6dccacfa623a4e319ce047e90409135b03a",
+      "sampling_plan_sha256": "08b698b0d97639d0e800732bf38a9e6dcb5ae60d17a4eea0bab7fc4e3167ef63",
+      "source": "candidate"
+    },
+    {
+      "config_sha256": "4af8641cb6621d7d3bd9b7cf84ea834fa9b62736efb089365543853419df3f5d",
+      "mode": "legacy",
+      "points_total": 1,
+      "run_id": "20260827T072014_3e426b21",
+      "run_manifest_sha256": "d47d98637adf550f5a3da1df9cd99ccf75c45365c5320b3b05fb452c0cb438f3",
+      "sampling_plan_sha256": "fbe1e1507c3745fd8b88ca0572f425c5cefd7433345c719464cea1840778603e",
+      "source": "legacy"
+    }
+  ],
+  "files": {
+    "README.md": "2ab234017d0511836e0adb6df3e3652b87107394888d1eb6db720d9d0f7b8f1a",
+    "claim_ledger.csv": "ff420e4f5ec435a9943dc22763984683dd935238f3fe204044e7fb66548e5362",
+    "consumer_smoke.csv": "0b12c2ff82b7e8903381fd45f507f372646e0b851622a0e29e3affad6b0a9843",
+    "consumer_source_smoke.json": "9b26a3f55f235bb3d291f5fd91204a6a267c1fab7e9b70875e49bbb7044821df",
+    "consumer_source_smoke_runner_raw.json": "f059b011bfe10e62f315f994829ac4d703f2cf869d8f4801cafb1e35279864c4",
+    "decision.json": "de3fcc0c74f179237ff9257c669f36f7873f1e2c018f71695738e99f27883bc2",
+    "input_inventory.csv": "9acfe711d07c0e8a5100dc7402df08c81c660b471766888ab9bbf3530dfa2f28",
+    "legacy/README.md": "70916114fa0b81e80b9f74d0934403f769b740a394f8c1912504ad0b3f3ec4b0",
+    "legacy/effective_config.json": "4af8641cb6621d7d3bd9b7cf84ea834fa9b62736efb089365543853419df3f5d",
+    "legacy/run_manifest.json": "d47d98637adf550f5a3da1df9cd99ccf75c45365c5320b3b05fb452c0cb438f3",
+    "legacy/sampling_plan.csv": "fbe1e1507c3745fd8b88ca0572f425c5cefd7433345c719464cea1840778603e",
+    "parity_comparison.csv": "286fc5932b5bbff0eac334445bc5d8e26ba56f9e307d9414afcb5d0c73ccd053",
+    "portable_config_snapshot.json": "82465d3fc9546323b6759e5f31c6324e7c4832dd5a1b29c6e3e516c19e3524b1",
+    "result_import_inventory.csv": "a2cee5898e9a25b787b3d7ff287b82841fa2a360fcfb9cba32a62103a6c23755",
+    "runtime/README.md": "a6312256b30c3134d555afb10066311636f45650b6360907afe12b69431d0a8a",
+    "runtime/effective_config.json": "2da7a794f12c73c1c9d1913af09a68c9ea22c64e1babfdd3fb8a3a5ee7557069",
+    "runtime/run_manifest.json": "4b9cbdee2c0772d8042b1d25922eb6dccacfa623a4e319ce047e90409135b03a",
+    "runtime/sampling_plan.csv": "08b698b0d97639d0e800732bf38a9e6dcb5ae60d17a4eea0bab7fc4e3167ef63"
+  },
+  "generated_at_utc": "2026-08-27T07:36:02.242137+00:00",
+  "input_inventory": [
+    {
+      "bytes": 16420,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+      "sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519"
+    },
+    {
+      "bytes": 2130,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
+      "sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73"
+    },
+    {
+      "bytes": 11994,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/cep_boundary_strict_reference_v1.csv",
+      "sha256": "3cfc3c8d23876eb095610c845f879054026eed1db09952350999fce56668bbc7"
+    },
+    {
+      "bytes": 244934,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/crossover_surface_strict_reference_v1.csv",
+      "sha256": "4f6626ff0b736e11e6e48e2cd9f390d170f43a27fba54d45b502af84b1553d23"
+    },
+    {
+      "bytes": 2674236,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/maxwell_surface_strict_reference_v1.csv",
+      "sha256": "510818e8d1a93814e25143ce3b64a75605b34bdd8c609036b8d37e303826405c"
+    },
+    {
+      "bytes": 668050,
+      "path": "data/reference/pnjl/issue130_phase_reference_v1/strict/tables/spinodal_surface_strict_reference_v1.csv",
+      "sha256": "103026e01de6bb9e5d86150f7895e0bc3289758c97f0682c85df25a178073182"
+    },
+    {
+      "bytes": 3221,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/boundary.csv",
+      "sha256": "5480a3048177be5ff4a2e7314c56d228dacaa5899ff7fe07f3417e1139cf5890"
+    },
+    {
+      "bytes": 651,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/cep.csv",
+      "sha256": "8bdda456f2495ff322f80a802ee1efab56567bbfce18f26617544d505be4d65c"
+    },
+    {
+      "bytes": 27507,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.csv",
+      "sha256": "0f811c3648a18a26d7a1a6383e08466638d7484a0c7b984c7ceb9c84661aa4df"
+    },
+    {
+      "bytes": 4305,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/crossover_dense.meta.json",
+      "sha256": "2ede138c91cc6ea88757b686aef074a003cea3565010d5009f8ccc5cb4956d1e"
+    },
+    {
+      "bytes": 8059,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/phase_reference_dense_manifest.json",
+      "sha256": "07b58593efc8a6729c6db2247ad03d6b5564003fe06eb96eb38897501cd7af39"
+    },
+    {
+      "bytes": 510,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/README.md",
+      "sha256": "aedce8782b7eeebed889f6c0b170f1d1a0f85dc49cc2c867a971265f8d1f4b63"
+    },
+    {
+      "bytes": 1580,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json",
+      "sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d"
+    },
+    {
+      "bytes": 4916,
+      "path": "data/reference/pnjl/legacy_phase_reference_v1/spinodals.csv",
+      "sha256": "96accaa2a1d863406e8d9bb961c3c39532e0372d8e0550a463749f220b1de33f"
+    }
+  ],
+  "legacy_snapshot_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "merge_sha": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "production_write": false,
+  "replay_run_id": "32451053476",
+  "repo_head": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "result_import": [
+    {
+      "aggregate_replay_solver_called": false,
+      "diagnostic_rows": 38220,
+      "diagnostic_sha256": "6eaf02101e330762569d028fe1398c94184e243ea6d7e39a8db69718a6e4e246",
+      "figure_count": 36,
+      "figure_manifest_sha256": "eed426abfc592a7842d6124b1dbe86fb3394c6cd58a7e29b2be69335790180c7",
+      "import_solver_called": false,
+      "known_metadata_defects": {
+        "effective_config.json": 30,
+        "failed_points.csv": 30
+      },
+      "legacy_prod_v1_tree_hash": "f44b61fe07afd1eac4c40d6ba8c043007182aa653655ba511a41cc1d034af0dd",
+      "manifest_sha256": "3d0a91170a62f570e119d1189d8e79526c008a1a77a94464772d53c3ca9e5f72",
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "numerical_status": "diagnostic_only",
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "quality_reason_counts": {
+        "ok": 680,
+        "tau_u_ubar_ratio_high": 230
+      },
+      "runtime_default_switch": false,
+      "scan_rows": 910,
+      "scan_sha256": "144f59dd6d74b1d13b24b793328e620e796fb645b7af9418174ba5a55e360587",
+      "source_solver_called": true
+    },
+    {
+      "aggregate_replay_solver_called": false,
+      "diagnostic_rows": 38178,
+      "diagnostic_sha256": "ada5d7c204a02e705cfbb5744bedbcc68158d54cce55faa0c8b92d0ba50d0d0f",
+      "figure_count": 36,
+      "figure_manifest_sha256": "fbb216a45db2fa8c3a819a1e97f129821752972e7bc70db2a75360e9e69d9b77",
+      "import_solver_called": false,
+      "known_metadata_defects": {
+        "effective_config.json": 30,
+        "failed_points.csv": 30
+      },
+      "legacy_prod_v1_tree_hash": "d9779b96fb1f6147234390e9150e08dbfcf0299ea257a0f563bde0e2e61dd001",
+      "manifest_sha256": "093ff05502f63515ac70b1a3e992971ecbc649c343bc7e591fa4fb1b8fc54921",
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "numerical_status": "diagnostic_only",
+      "path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+      "quality_reason_counts": {
+        "ok": 669,
+        "tau_u_ubar_ratio_high": 240
+      },
+      "runtime_default_switch": false,
+      "scan_rows": 909,
+      "scan_sha256": "3b73b937f1f09cf7112b3a42219088f98b852e5ef0354174b66f71823f7bb29c",
+      "source_solver_called": true
+    }
+  ],
+  "result_import_verified": true,
+  "runtime_default_switch": false,
+  "schema_version": "pnjl_issue130_rs_transport_runtime_parity_v2",
+  "scripts": [
+    {
+      "path": "scripts/analysis/pnjl/build_issue130_rs_runtime_consumer_smoke_v2.py",
+      "sha256": "d8208b4f8be69fbd13d9cdd32a65e69d48ff7c8ca9263543ddb7396dea4e63a3"
+    },
+    {
+      "path": "scripts/analysis/pnjl/audit_issue130_rs_runtime_parity.jl",
+      "sha256": "76045b97c14837472dfccae40d0351299d1ab0ba84cbc5f03ad9ade6e73bd35a"
+    },
+    {
+      "path": "scripts/analysis/relaxtime/import_issue130_rs_candidate_results.py",
+      "sha256": "b707c48760ffd791271466c320ed6572c5f3923e918c0768b22fffd10d05b65a"
+    }
+  ],
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "source_smoke_normalization": {
+    "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1/{boundary.csv,cep.csv,crossover_dense.csv,spinodals.csv}",
+    "normalized_sha256": "9b26a3f55f235bb3d291f5fd91204a6a267c1fab7e9b70875e49bbb7044821df",
+    "raw_runner_sha256": "f059b011bfe10e62f315f994829ac4d703f2cf869d8f4801cafb1e35279864c4"
+  },
+  "transport_coefficients_computed": false,
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571"
+}

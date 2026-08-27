@@ -1,0 +1,172 @@
+{
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "consumer_points": [
+    {
+      "boundary_first_T_MeV": 41,
+      "boundary_first_muq_MeV": 357.9124998225613,
+      "boundary_muB_CEP_MeV": 873.5862261137158,
+      "boundary_rows": 49,
+      "boundary_xi_used": 0,
+      "crossover_T_MeV": 198.2066818967471,
+      "crossover_query_muq_MeV": 50,
+      "crossover_xi_used": 0,
+      "first_order_T_MeV": 131,
+      "first_order_xi_used": 0,
+      "mode": "runtime",
+      "mode_a_phase_T_MeV": 198.2066818967471,
+      "mode_a_phase_kind": "crossover",
+      "mode_a_query_muB_MeV": 150,
+      "solver_called": false,
+      "source_kind": "candidate"
+    },
+    {
+      "boundary_first_T_MeV": 5,
+      "boundary_first_muq_MeV": 361.0392798318283,
+      "boundary_muB_CEP_MeV": 873.5862261137158,
+      "boundary_rows": 75,
+      "boundary_xi_used": 0,
+      "crossover_T_MeV": 198.17900998431992,
+      "crossover_query_muq_MeV": 50,
+      "crossover_xi_used": 0,
+      "first_order_T_MeV": 131,
+      "first_order_xi_used": 0,
+      "mode": "diagnostic",
+      "mode_a_phase_T_MeV": 198.17900998431992,
+      "mode_a_phase_kind": "crossover",
+      "mode_a_query_muB_MeV": 150,
+      "solver_called": false,
+      "source_kind": "candidate"
+    },
+    {
+      "boundary_first_T_MeV": 50,
+      "boundary_first_muq_MeV": 356.4183284099421,
+      "boundary_muB_CEP_MeV": 877.1423865705507,
+      "boundary_rows": 5,
+      "boundary_xi_used": 0,
+      "crossover_T_MeV": 198.12550509377107,
+      "crossover_query_muq_MeV": 50,
+      "crossover_xi_used": 0,
+      "first_order_T_MeV": 130,
+      "first_order_xi_used": 0,
+      "mode": "legacy",
+      "mode_a_phase_T_MeV": 198.12550509377107,
+      "mode_a_phase_kind": "crossover",
+      "mode_a_query_muB_MeV": 150,
+      "solver_called": false,
+      "source_kind": "legacy"
+    }
+  ],
+  "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1/{boundary.csv,cep.csv,crossover_dense.csv,spinodals.csv}",
+  "legacy_root_normalized": true,
+  "legacy_root_source": "data/reference/pnjl/legacy_phase_reference_v1",
+  "non_goals": [
+    "no equilibrium solver invocation",
+    "no transport coefficient evaluation",
+    "no data/reference write",
+    "no legacy deletion or runtime fallback removal"
+  ],
+  "query": {
+    "alpha_T": 1,
+    "muB_MeV": 150,
+    "muq_MeV": 50,
+    "xi": 0
+  },
+  "repo_head": "3b19246fb911be4a2efa75fbe14fcb9a793ca256",
+  "schema_version": "pnjl_issue130_rs_runtime_consumer_smoke_v1",
+  "scope": "solver_free_reference_resolution",
+  "solver_called": false,
+  "sources": {
+    "diagnostic": {
+      "diagnostics": {
+        "candidate_layer_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+        "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+        "fallback_enabled": false,
+        "manifest_reference_status": "candidate",
+        "row_counts": {
+          "boundary": 7162,
+          "cep": 93,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "runtime_view": "diagnostic_all_rows",
+        "schema_version": "pnjl_issue130_phase_reference_adapter_v1",
+        "source_root": "D:\\Temp\\julia_relaxtime_issue130_shared\\data\\reference\\pnjl\\issue130_phase_reference_v1",
+        "uncertified_rows": 4074
+      },
+      "root": "data/reference/pnjl/issue130_phase_reference_v1",
+      "runtime_enabled": false,
+      "source_kind": "candidate",
+      "source_layer": "strict"
+    },
+    "legacy": {
+      "diagnostics": {
+        "candidate_layer_manifest_sha256": "",
+        "candidate_manifest_sha256": "",
+        "fallback_enabled": false,
+        "manifest_reference_status": "legacy",
+        "row_counts": {
+          "boundary": 48,
+          "cep": 11,
+          "crossover": 336,
+          "spinodals": 57
+        },
+        "runtime_view": "legacy",
+        "schema_version": "legacy",
+        "source_root": "",
+        "uncertified_rows": 0
+      },
+      "root": "",
+      "runtime_enabled": true,
+      "source_kind": "legacy",
+      "source_layer": "legacy"
+    },
+    "runtime": {
+      "diagnostics": {
+        "candidate_layer_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+        "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+        "candidate_row_counts": {
+          "boundary": 3091,
+          "cep": 90,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "certified_row_counts": {
+          "boundary": 3091,
+          "cep": 90,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "fallback_enabled": true,
+        "fallback_reason": "candidate_key_absent_or_uncertified",
+        "fallback_row_counts": {
+          "boundary": 35,
+          "cep": 1,
+          "crossover": 315,
+          "spinodals": 31
+        },
+        "legacy_manifest_reference_status": "legacy",
+        "legacy_row_counts": {
+          "boundary": 48,
+          "cep": 11,
+          "crossover": 336,
+          "spinodals": 57
+        },
+        "manifest_reference_status": "candidate",
+        "row_counts": {
+          "boundary": 7162,
+          "cep": 93,
+          "crossover": 1343,
+          "spinodals": 6886
+        },
+        "runtime_view": "certified_candidate_with_legacy_fallback",
+        "schema_version": "pnjl_issue130_phase_reference_adapter_v1",
+        "source_root": "D:\\Temp\\julia_relaxtime_issue130_shared\\data\\reference\\pnjl\\issue130_phase_reference_v1",
+        "uncertified_rows": 4074
+      },
+      "root": "data/reference/pnjl/issue130_phase_reference_v1",
+      "runtime_enabled": true,
+      "source_kind": "candidate",
+      "source_layer": "strict"
+    }
+  }
+}
