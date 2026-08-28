@@ -14,8 +14,7 @@
   "source_run_id": "32354095831",
   "stop_reasons": [
     "legacy_fallback_key_count_nonzero",
-    "default_runtime_fallback_preserved",
-    "validator_candidate_schema_migration_pending"
+    "default_runtime_fallback_preserved"
   ],
   "verdict": "candidate_only_contract_supported"
 }

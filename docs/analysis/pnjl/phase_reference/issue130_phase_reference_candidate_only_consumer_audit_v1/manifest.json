@@ -23,27 +23,27 @@
       "sha256": "771799649860dcaa892e2aae38e2c1930ee2c9dab297c1b853f258fae30fb7ce"
     },
     {
-      "bytes": 825,
+      "bytes": 808,
       "path": "consumer_matrix.csv",
-      "sha256": "3cc82a4d3e718e57b7354af6247103bd25e90eb38067b755b44c33154846f0d6"
-    },
-    {
-      "bytes": 763,
-      "path": "decision.json",
-      "sha256": "e803a79f9e9c4074ee0dbdfa344ff66d1d604e90756a90db12896444538df782"
+      "sha256": "5847acfe6ca840b28a41c9ae3719b672ec4e4baef522053f3abc8a82e9c0d82f"
     },
     {
       "bytes": 711,
+      "path": "decision.json",
+      "sha256": "f0bdba83059f4fef82a8aa0a9ec7f088c317d13ee4feb81878fda2eb718fddbe"
+    },
+    {
+      "bytes": 724,
       "path": "README.md",
-      "sha256": "9bc17f98de32a7ce9b0f8d95861993e66e4c1143401174c3fa4d7f0c083726a0"
+      "sha256": "8a4a18ec1a982e70683470c0787e60fbdfe3e6096d0f6a0628cb01706e3a085e"
     }
   ],
-  "generated_at_utc": "2026-08-28T12:11:16.899917+00:00",
+  "generated_at_utc": "2026-08-28T12:16:26.428670+00:00",
   "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
   "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1",
   "legacy_snapshot_status": "retired_canonical_snapshot",
   "reference_write": false,
-  "repo_head": "aa0644de44a3a09a2cfd5e8621186acf5fca18aa",
+  "repo_head": "8e6f8f5b990a668d3a5e4594c24781913c2753eb",
   "runtime_consumption": false,
   "schema_version": "pnjl_issue130_phase_reference_candidate_only_consumer_audit_v1",
   "solver_called": false,

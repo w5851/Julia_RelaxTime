@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -37,10 +38,14 @@ def _find_project_root() -> Path:
 
 
 PROJECT_ROOT = _find_project_root()
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 LEGACY_PHASE_REFERENCE_ROOT = PROJECT_ROOT / "data" / "reference" / "pnjl" / "legacy_phase_reference_v1"
 DEFAULT_BOUNDARY_PATH = LEGACY_PHASE_REFERENCE_ROOT / "boundary.csv"
 DEFAULT_SPINODAL_PATH = LEGACY_PHASE_REFERENCE_ROOT / "spinodals.csv"
 DEFAULT_CROSSOVER_PATH = PROJECT_ROOT / "data" / "reference" / "pnjl" / "crossover.csv"
+
+from scripts.pnjl.phase_reference_adapter import load_phase_reference
 
 
 @dataclass
@@ -465,6 +470,18 @@ def main() -> None:
     parser.add_argument("--boundary", type=Path, default=DEFAULT_BOUNDARY_PATH)
     parser.add_argument("--spinodal", type=Path, default=DEFAULT_SPINODAL_PATH)
     parser.add_argument("--crossover", type=Path, default=DEFAULT_CROSSOVER_PATH)
+    parser.add_argument(
+        "--phase-reference-root",
+        type=Path,
+        default=None,
+        help="显式 Issue #130 candidate root；指定后按 candidate schema 验证，不读取 legacy 默认文件",
+    )
+    parser.add_argument(
+        "--phase-reference-layer",
+        choices=["strict", "derived", "render"],
+        default="strict",
+        help="candidate layer for --phase-reference-root",
+    )
     parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
     
@@ -472,20 +489,27 @@ def main() -> None:
     print("PNJL Phase Data Validation")
     print("=" * 60)
     
-    # 统计信息
-    print_statistics(args.boundary, "boundary.csv")
-    print_statistics(args.spinodal, "spinodals.csv")
-    print_crossover_statistics(args.crossover, "crossover.csv")
-    
     # 验证
     print("\n" + "-" * 60)
     print("Validation Results")
     print("-" * 60)
-    
-    all_issues = []
-    all_issues.extend(validate_boundary_data(args.boundary))
-    all_issues.extend(validate_spinodal_data(args.spinodal))
-    all_issues.extend(validate_crossover_data(args.crossover))
+
+    if args.phase_reference_root is not None:
+        candidate_issues, statistics = validate_candidate_reference(
+            args.phase_reference_root,
+            args.phase_reference_layer,
+        )
+        print_candidate_statistics(statistics, args.phase_reference_layer)
+        all_issues = candidate_issues
+    else:
+        # 统计信息和历史 schema 验证保持向后兼容。
+        print_statistics(args.boundary, "boundary.csv")
+        print_statistics(args.spinodal, "spinodals.csv")
+        print_crossover_statistics(args.crossover, "crossover.csv")
+        all_issues = []
+        all_issues.extend(validate_boundary_data(args.boundary))
+        all_issues.extend(validate_spinodal_data(args.spinodal))
+        all_issues.extend(validate_crossover_data(args.crossover))
     
     if not all_issues:
         print("\n✓ All data passed validation!")
@@ -496,9 +520,9 @@ def main() -> None:
         print(f"\nFound {len(errors)} errors, {len(warnings)} warnings")
         
         for issue in all_issues:
-            symbol = "✗" if issue.severity == "error" else "⚠"
+            symbol = "ERROR" if issue.severity == "error" else "WARN"
             val_str = f" (value={issue.value:.4f})" if issue.value is not None else ""
-            print(f"  {symbol} [{issue.file}] ξ={issue.xi}, T={issue.T_MeV:.1f} MeV, "
+            print(f"  {symbol} [{issue.file}] xi={issue.xi}, T={issue.T_MeV:.1f} MeV, "
                   f"{issue.column}: {issue.message}{val_str}")
     
     print("\n" + "=" * 60)
@@ -533,8 +557,58 @@ def print_crossover_statistics(path: Path, name: str) -> None:
         T_deconf = [r.get("T_crossover_deconf_MeV", float('nan')) for r in data]
         T_deconf_valid = [t for t in T_deconf if not np.isnan(t)]
         if T_deconf_valid:
-            print(f"    T_deconf: [{min(T_deconf_valid):.2f}, {max(T_deconf_valid):.2f}] MeV "
-                  f"({len(T_deconf_valid)}/{len(data)} valid)")
+                print(f"    T_deconf: [{min(T_deconf_valid):.2f}, {max(T_deconf_valid):.2f}] MeV "
+                      f"({len(T_deconf_valid)}/{len(data)} valid)")
+
+
+def validate_candidate_reference(reference_root: Path, layer: str = "strict") -> Tuple[List[ValidationIssue], Dict[str, Dict[str, int]]]:
+    """Validate an explicit Issue #130 candidate layer without legacy conversion.
+
+    The candidate schema intentionally differs from the historical CSV files,
+    so this route validates the adapter-normalized tables and reports
+    unresolved rows as warnings rather than silently treating them as runtime
+    input.  Key uniqueness, numeric finiteness, and schema/units are enforced
+    by :func:`load_phase_reference` itself.
+    """
+
+    bundle = load_phase_reference(reference_root, layer=layer, allow_runtime=False)
+    issues: List[ValidationIssue] = []
+    statistics: Dict[str, Dict[str, int]] = {}
+    for table, rows in bundle.tables.items():
+        certified = sum(1 for row in rows if bool(row.get("certified", False)))
+        unresolved = len(rows) - certified
+        statistics[table] = {
+            "rows": len(rows),
+            "certified": certified,
+            "unresolved": unresolved,
+        }
+        if unresolved:
+            issues.append(
+                ValidationIssue(
+                    severity="warning",
+                    file=f"{table}.candidate",
+                    column="status",
+                    xi=0.0,
+                    T_MeV=0.0,
+                    message=(
+                        f"{unresolved} unresolved/non-certified rows retained for diagnostics; "
+                        "they are excluded from candidate-only runtime views"
+                    ),
+                )
+            )
+    return issues, statistics
+
+
+def print_candidate_statistics(statistics: Dict[str, Dict[str, int]], layer: str) -> None:
+    """Print compact statistics for an explicit candidate layer."""
+
+    print(f"\nIssue #130 candidate layer ({layer}):")
+    for table in sorted(statistics):
+        row = statistics[table]
+        print(
+            f"  {table}: {row['rows']} rows, {row['certified']} certified, "
+            f"{row['unresolved']} unresolved"
+        )
 
 
 if __name__ == "__main__":

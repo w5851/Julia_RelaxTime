@@ -4,4 +4,4 @@ julia_phase_reference_adapter,candidate_only,pass,False,False,explicit loader an
 phase_guided_transport,candidate_only,pass,False,False,CLI/parser route is opt-in; production default remains fallback
 pnjl_plot_phase_diagram,explicit_candidate_root,pass,False,False,"{""boundary"": 7162, ""cep"": 93, ""crossover"": 1343, ""spinodals"": 6886}"
 legacy_rollback,explicit_legacy,pass,False,False,snapshot and explicit legacy mode remain declared
-pnjl_validate_phase_data,candidate_only,migration_required,False,False,validator still accepts legacy-shaped paths only; candidate schema adapter remains to be migrated
+pnjl_validate_phase_data,candidate_only,pass,False,False,explicit candidate schema validation route; legacy CSV validation remains backwards compatible

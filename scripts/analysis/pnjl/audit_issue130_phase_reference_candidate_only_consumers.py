@@ -138,6 +138,7 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
     gap_cli = read_text(repo_root, "scripts/relaxtime/gap_transport_scan_cli.jl")
     phase_cli = read_text(repo_root, "scripts/relaxtime/phase_guided_transport_scan_cli.jl")
     phase_adapter = read_text(repo_root, "scripts/relaxtime/phase_reference_adapter.jl")
+    validator = read_text(repo_root, "scripts/pnjl/validate_phase_data.py")
     rollback_declared = (
         "mode === :legacy" in run_gap
         and "--phase-reference-mode" in gap_cli
@@ -195,14 +196,24 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
         {
             "consumer": "pnjl_validate_phase_data",
             "route": "candidate_only",
-            "status": "migration_required",
+            "status": "pass" if "def validate_candidate_reference" in validator else "migration_required",
             "solver_called": False,
             "fallback_enabled": False,
-            "detail": "validator still accepts legacy-shaped paths only; candidate schema adapter remains to be migrated",
+            "detail": "explicit candidate schema validation route; legacy CSV validation remains backwards compatible",
         },
     ]
 
     hard_failures = [row["consumer"] for row in consumer_rows if row["status"] == "fail"]
+    stop_reasons = [
+        "legacy_fallback_key_count_nonzero",
+        "default_runtime_fallback_preserved",
+    ]
+    if not any(
+        row["consumer"] == "pnjl_validate_phase_data" and row["status"] == "pass"
+        for row in consumer_rows
+    ):
+        stop_reasons.append("validator_candidate_schema_migration_pending")
+
     decision = {
         "schema_version": SCHEMA_VERSION,
         "verdict": "candidate_only_contract_supported" if not hard_failures else "candidate_only_contract_inconclusive",
@@ -218,11 +229,7 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
         "calculation_sha": CALCULATION_SHA,
         "source_run_id": stage_a.get("source_run_id", ""),
         "replay_run_id": stage_a.get("replay_run_id", ""),
-        "stop_reasons": [
-            "legacy_fallback_key_count_nonzero",
-            "default_runtime_fallback_preserved",
-            "validator_candidate_schema_migration_pending",
-        ],
+        "stop_reasons": stop_reasons,
     }
     candidate_contract_ok = candidate_only_fallback_disabled and all_candidate_rows_certified
     claims = [
@@ -269,8 +276,9 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
 - legacy fallback keys（Stage A）：`{decision['legacy_fallback_key_count']}`
 - physical deletion：`False`
 
-`consumer_matrix.csv` 区分 candidate-only、显式 legacy rollback 和仍需迁移的 validator。
-当前默认 `runtime` fallback 不变；只有后续请求键覆盖和消费者迁移完成后才可评估物理清理。
+`consumer_matrix.csv` 区分 candidate-only、显式 legacy rollback 和 validator 的
+candidate-schema 入口。当前默认 `runtime` fallback 不变；只有后续请求键覆盖和
+消费者迁移完成后才可评估物理清理。
 """
     (output_root / "README.md").write_text(readme, encoding="utf-8", newline="\n")
     audit = (

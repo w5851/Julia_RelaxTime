@@ -112,8 +112,8 @@ certified；阶段 B 必须先定义请求键/适配层合同并验证显式 leg
 阶段 B 当前 solver-free smoke 已固化到
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_candidate_only_consumer_audit_v1/`：
 Python/Julia adapter、phase-guided、显式 plot root 和 legacy rollback 均通过；
-`validate_phase_data.py` 仍只接受 legacy-shaped 输入，标记为
-`migration_required`，因此不把本阶段误记为完整迁移。
+`validate_phase_data.py` 已增加显式 candidate schema 验证入口（legacy CSV 路径仍向后兼容），
+但这些 smoke 仍不证明所有动态请求键都无需 fallback，因此不把本阶段误记为完整路径退役。
 
 ### 阶段 C：物理清理（再次单独授权）
 
