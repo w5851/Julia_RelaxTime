@@ -8,6 +8,7 @@ if !isdefined(Main, :Models)
 end
 
 const DEFAULT_CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1"
+const LEGACY_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
 const ANALYSIS_TABLE_DIR = joinpath(
     PROJECT_ROOT,
     "docs",
@@ -63,14 +64,28 @@ end
     max(abs(Float64(a)), abs(Float64(b)), eps(Float64))
 
 function production_scan_path(case_name::AbstractString)
+    case_root = case_name == DEFAULT_CASE ?
+        joinpath(
+            PROJECT_ROOT,
+            "data",
+            "outputs",
+            "results",
+            "relaxtime",
+            "transport",
+            "phase_guided",
+            LEGACY_SNAPSHOT_VERSION,
+        ) :
+        joinpath(
+            PROJECT_ROOT,
+            "data",
+            "outputs",
+            "results",
+            "relaxtime",
+            "transport",
+            "phase_guided",
+        )
     return joinpath(
-        PROJECT_ROOT,
-        "data",
-        "outputs",
-        "results",
-        "relaxtime",
-        "transport",
-        "phase_guided",
+        case_root,
         "mode_a_fixed_muB_phase_scaled",
         case_name,
         "phase_guided_transport_scan.csv",

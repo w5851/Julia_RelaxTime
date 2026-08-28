@@ -97,8 +97,8 @@
     {
       "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
       "mode": "mode_a_fixed_muB_phase_scaled",
-      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
       "source_commit": "05be2c05186f8e12baf3097b68f8619e53d19711",
       "transport_kernel_energy_policy": "onshell_kinematic_energy",
       "distribution_energy_policy": "rs_deformed",
@@ -106,14 +106,16 @@
       "status": "superseded_for_manuscript",
       "superseded_by": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
       "manuscript_eligible": false,
-      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
+      "path_status": "retired_to_versioned_legacy_snapshot",
+      "legacy_snapshot_version": "legacy_prod_v1_snapshot_v1",
       "updated_at": "2026-07-15T19:57:00+08:00"
     },
     {
       "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
       "mode": "mode_b_fixed_T_sparse_muB",
-      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
-      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "result_path": "data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "figure_path": "data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
       "source_commit": "05be2c05186f8e12baf3097b68f8619e53d19711",
       "transport_kernel_energy_policy": "onshell_kinematic_energy",
       "distribution_energy_policy": "rs_deformed",
@@ -121,7 +123,9 @@
       "status": "superseded_for_manuscript",
       "superseded_by": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
       "manuscript_eligible": false,
-      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
+      "audit_manifest_path": "data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/manifest.json",
+      "path_status": "retired_to_versioned_legacy_snapshot",
+      "legacy_snapshot_version": "legacy_prod_v1_snapshot_v1",
       "updated_at": "2026-07-15T19:57:00+08:00"
     },
     {
