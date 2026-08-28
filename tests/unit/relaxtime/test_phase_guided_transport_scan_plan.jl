@@ -165,6 +165,16 @@ end
     @test explicit.p_num == 24
     @test explicit.t_num == 8
     @test explicit.phase_anchor_policy === :reference_interpolation
+
+    candidate_only = Main.PhaseGuidedTransportScanCLI.parse_args([
+        "--mode", "fixed-muB-phase-scaled",
+        "--xi-list", "0.0",
+        "--muB-list", "900",
+        "--alphaT-list", "1.0",
+        "--phase-reference-mode", "candidate_only",
+        "--dry-run",
+    ])
+    @test candidate_only.phase_reference_mode === :candidate_only
 end
 
 @testset "coexistence certification always uses an independent higher node configuration" begin

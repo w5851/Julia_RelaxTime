@@ -102,7 +102,7 @@ function print_usage()
     println("  --tr-p-max <fm^-1>          输运积分 p 上限 (default 8.0)")
     println("  --phase-reference-root <dir>  Issue #130 candidate root（默认使用仓库内 candidate）")
     println("  --phase-reference-layer <strict|derived|render>  candidate layer (default strict)")
-    println("  --phase-reference-mode <runtime|diagnostic|legacy>  candidate gate or explicit legacy rollback (default runtime)")
+    println("  --phase-reference-mode <runtime|candidate_only|diagnostic|legacy>  candidate gate, candidate-only migration route, or explicit legacy rollback (default runtime)")
     println("  -h, --help                  显示帮助")
 end
 
@@ -256,7 +256,7 @@ function parse_args(args::Vector{String})
             opts[:phase_reference_layer] = layer
         elseif arg == "--phase-reference-mode"
             mode = Symbol(require_value())
-            mode in (:runtime, :diagnostic, :legacy) || error("unknown phase reference mode: $(mode)")
+            mode in (:runtime, :candidate_only, :diagnostic, :legacy) || error("unknown phase reference mode: $(mode) (expected: runtime|candidate_only|diagnostic|legacy)")
             opts[:phase_reference_mode] = mode
         elseif arg in ("-h", "--help")
             print_usage()

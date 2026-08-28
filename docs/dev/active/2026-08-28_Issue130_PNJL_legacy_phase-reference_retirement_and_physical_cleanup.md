@@ -96,10 +96,18 @@ certified；阶段 B 必须先定义请求键/适配层合同并验证显式 leg
 
 ### 阶段 B：fallback/path retirement（以阶段 A 证据为输入）
 
+- [x] 在 Julia/Python adapter 中增加显式 `candidate_only` 运行视图：仅暴露
+  certified candidate 行，诊断明确 `fallback_enabled=false`；现有 `runtime` fallback
+  和 `--phase-reference-mode legacy` rollback 保持不变。
 - [ ] 若仍有 active consumer 依赖 legacy，先迁移其请求键/适配层，保持显式
   rollback，不改数值输入；为迁移增加 Julia/Python/workflow focused tests。
 - [ ] 在独立 PR 中更新 registry、默认路径和文档；验证 candidate-only runtime 与
   显式 legacy rollback 均可用。此阶段仍不物理删除 snapshot。
+
+阶段 B 的第一步已在 candidate-only consumer contract 分支实现并加入 focused tests；
+它只提供可审计的迁移入口，不改变默认 `runtime` fallback。要完成路径退役，仍需对
+实际 transport/phase-guided/plot/validation 请求键逐项做 candidate-only smoke，并在
+确认没有 fallback 依赖后再更新默认路径。
 
 ### 阶段 C：物理清理（再次单独授权）
 

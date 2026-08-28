@@ -440,22 +440,66 @@ def to_legacy_views(
     }
 
 
+def build_candidate_only_view(candidate: PhaseReferenceBundle) -> PhaseReferenceRuntimeView:
+    """Build an explicit certified-candidate-only runtime view.
+
+    Unresolved/interpolated candidate rows are filtered exactly as they are for
+    the candidate side of the fallback view.  No legacy table is consulted and
+    the diagnostics make that fact machine-readable.  This opt-in view is used
+    by consumer migration tests; it does not change the existing fallback
+    default or promote unresolved rows to runtime input.
+    """
+
+    if candidate.layer == "render":
+        raise PhaseReferenceContractError(
+            "render layer is visualization-only and cannot be a candidate-only runtime view"
+        )
+
+    tables: dict[str, tuple[Mapping[str, Any], ...]] = {}
+    candidate_counts: dict[str, int] = {}
+    fallback_counts: dict[str, int] = {}
+    for table in _TABLES:
+        certified = tuple(
+            row for row in candidate.tables.get(table, ()) if row.get("certified", False)
+        )
+        tables[table] = certified
+        candidate_counts[table] = len(certified)
+        fallback_counts[table] = 0
+
+    return PhaseReferenceRuntimeView(
+        layer=candidate.layer,
+        source="candidate",
+        tables=tables,
+        diagnostics={
+            "runtime_view": "certified_candidate_only",
+            "candidate_manifest_sha256": candidate.diagnostics.get("manifest_sha256", ""),
+            "candidate_row_counts": candidate_counts,
+            "fallback_row_counts": fallback_counts,
+            "fallback_enabled": False,
+            "fallback_reason": "disabled_explicit_candidate_only",
+        },
+    )
+
+
 def build_runtime_view(
     candidate: PhaseReferenceBundle,
     *,
     legacy_tables: Mapping[str, Iterable[Mapping[str, Any]]] | None = None,
 ) -> PhaseReferenceRuntimeView:
-    """Build a solver-free certified-only view with per-key legacy fallback.
+    """Build a certified candidate view, optionally merged with legacy fallback.
 
-    This mirrors the Julia runtime switch without writing either source.  The
-    candidate remains the preferred source; unresolved/interpolated rows are
-    omitted and only keys absent from that certified view are filled from the
-    caller-provided legacy tables.
+    Passing ``legacy_tables=None`` is an explicit candidate-only operation.
+    Passing a mapping preserves the historical candidate-preferred, per-key
+    fallback contract (including an empty mapping, whose diagnostics still
+    state that fallback was enabled).  Neither route writes either source.
     """
 
-    legacy_tables = legacy_tables or {}
+    candidate_view = build_candidate_only_view(candidate)
+    if legacy_tables is None:
+        return candidate_view
+
     merged: dict[str, tuple[Mapping[str, Any], ...]] = {}
-    candidate_counts: dict[str, int] = {}
+    candidate_counts = dict(candidate_view.diagnostics["candidate_row_counts"])
     fallback_counts: dict[str, int] = {}
 
     def key(table: str, row: Mapping[str, Any]) -> tuple[Any, ...]:
@@ -463,8 +507,7 @@ def build_runtime_view(
         return tuple(row.get(field) for field in spec["keys"])
 
     for table in _TABLES:
-        certified = [row for row in candidate.tables.get(table, ()) if row.get("certified", False)]
-        rows = list(certified)
+        rows = list(candidate_view.tables.get(table, ()))
         seen = {key(table, row) for row in rows}
         n_fallback = 0
         for row in legacy_tables.get(table, ()):
@@ -477,7 +520,7 @@ def build_runtime_view(
             seen.add(row_key)
             n_fallback += 1
         merged[table] = tuple(rows)
-        candidate_counts[table] = len(certified)
+        candidate_counts[table] = len(rows) - n_fallback
         fallback_counts[table] = n_fallback
 
     return PhaseReferenceRuntimeView(
@@ -501,6 +544,7 @@ __all__ = [
     "PhaseReferenceContractError",
     "PhaseReferenceRuntimeView",
     "SCHEMA_VERSION",
+    "build_candidate_only_view",
     "build_runtime_view",
     "load_phase_reference",
     "sha256",

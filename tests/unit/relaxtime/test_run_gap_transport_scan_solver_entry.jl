@@ -213,6 +213,8 @@ end
     @test default_opts.phase_reference_mode === :runtime
     legacy_opts = Main.parse_args(["--phase-reference-mode", "legacy"])
     @test legacy_opts.phase_reference_mode === :legacy
+    candidate_only_opts = Main.parse_args(["--phase-reference-mode", "candidate_only"])
+    @test candidate_only_opts.phase_reference_mode === :candidate_only
     diagnostic_opts = Main.parse_args([
         "--phase-reference-root", "candidate", "--phase-reference-mode", "diagnostic",
     ])

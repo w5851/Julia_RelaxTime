@@ -137,3 +137,26 @@ end
     @test PRA.source_summary(rollback).runtime_view == "legacy"
     @test !PRA.source_summary(rollback).fallback_enabled
 end
+
+@testset "explicit candidate-only runtime route filters unresolved rows" begin
+    project_root = normpath(joinpath(@__DIR__, "..", "..", ".."))
+    candidate = PRA.load_default_phase_reference_runtime(
+        project_root=project_root,
+        source=:candidate_only,
+    )
+    summary = PRA.source_summary(candidate)
+    @test PRA.source_kind(candidate) === :candidate
+    @test summary.runtime_view == "certified_candidate_only"
+    @test !summary.fallback_enabled
+    @test all(row.certified for rows in values(candidate.tables) for row in rows)
+    @test sum(length(rows) for rows in values(candidate.tables)) == 11410
+    @test PRA.boundary_data(candidate, 0.0).xi == 0.0
+
+    # Explicit legacy rollback remains independent of candidate-only routing.
+    rollback = PRA.load_default_phase_reference_runtime(
+        project_root=project_root,
+        source=:legacy,
+    )
+    @test PRA.source_kind(rollback) === :legacy
+    @test PRA.source_summary(rollback).runtime_view == "legacy"
+end

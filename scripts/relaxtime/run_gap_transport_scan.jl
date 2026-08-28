@@ -70,6 +70,9 @@ function _load_runtime_phase_reference(opts)
     )
     mode === :legacy && return PhaseReferenceAdapter.load_legacy_phase_reference(; legacy...)
     root = opts.phase_reference_root === nothing ? DEFAULT_PHASE_REFERENCE_ROOT : opts.phase_reference_root
+    mode === :candidate_only && return PhaseReferenceAdapter.load_phase_reference_candidate_only(
+        root; layer=opts.phase_reference_layer
+    )
     mode === :diagnostic && return PhaseReferenceAdapter.load_phase_reference(root; layer=opts.phase_reference_layer)
     return PhaseReferenceAdapter.load_phase_reference_runtime_with_fallback(
         root; layer=opts.phase_reference_layer, legacy...
@@ -468,7 +471,7 @@ function main()
     phase_reference = _load_runtime_phase_reference(opts)
     run_scan(opts, ctx;
         phase_reference=phase_reference,
-        phase_reference_mode=opts.phase_reference_mode === :diagnostic ? :diagnostic : :runtime,
+        phase_reference_mode=opts.phase_reference_mode,
     )
 end
 

@@ -25,12 +25,12 @@ function load_phase_boundary_data(xi::Float64;
     phase_reference_mode::Symbol=:runtime,
 )
     if phase_reference !== nothing
-        phase_reference_mode in (:runtime, :diagnostic, :legacy) ||
-            throw(ArgumentError("phase_reference_mode must be :runtime, :diagnostic, or :legacy"))
+        phase_reference_mode in (:runtime, :candidate_only, :diagnostic, :legacy) ||
+            throw(ArgumentError("phase_reference_mode must be :runtime, :candidate_only, :diagnostic, or :legacy"))
         return Main.PhaseReferenceAdapter.boundary_data(
             phase_reference,
             xi;
-            require_certified=phase_reference_mode === :runtime,
+            require_certified=phase_reference_mode in (:runtime, :candidate_only),
         )
     end
     T_CEP = NaN
@@ -245,12 +245,12 @@ end
 
 function load_crossover_reference(xi::Float64; phase_reference=nothing, phase_reference_mode::Symbol=:runtime)
     if phase_reference !== nothing
-        phase_reference_mode in (:runtime, :diagnostic, :legacy) ||
-            throw(ArgumentError("phase_reference_mode must be :runtime, :diagnostic, or :legacy"))
+        phase_reference_mode in (:runtime, :candidate_only, :diagnostic, :legacy) ||
+            throw(ArgumentError("phase_reference_mode must be :runtime, :candidate_only, :diagnostic, or :legacy"))
         rows = Main.PhaseReferenceAdapter.crossover_rows(
             phase_reference,
             xi;
-            require_certified=phase_reference_mode === :runtime,
+            require_certified=phase_reference_mode in (:runtime, :candidate_only),
         )
         isempty(rows) && return nothing, nothing
         return [(mu_MeV=row.muq_MeV, T_crossover_MeV=row.T_MeV) for row in rows],

@@ -17,6 +17,7 @@ export PhaseReferenceAdapterError
 export PhaseReferenceSource
 export load_phase_reference
 export load_phase_reference_runtime
+export load_phase_reference_candidate_only
 export load_phase_reference_runtime_with_fallback
 export load_default_phase_reference_runtime
 export load_legacy_phase_reference
@@ -371,6 +372,33 @@ function load_phase_reference_runtime(root::AbstractString; layer::Symbol=:stric
     return load_phase_reference(root; layer=layer, allow_runtime=true)
 end
 
+"""Load only certified candidate rows without consulting the legacy snapshot.
+
+This is an explicit migration/diagnostic route.  It filters unresolved or
+interpolated candidate rows, enables the runtime query guard on the remaining
+rows, and records that fallback is disabled.  The existing ``:runtime``
+default remains candidate-preferred with per-key legacy fallback until a
+separate coverage audit authorizes changing that default.
+"""
+function load_phase_reference_candidate_only(root::AbstractString; layer::Symbol=:strict)
+    layer === :render && _error("render layer is visualization-only and cannot be a candidate-only runtime view")
+    source = load_phase_reference(root; layer=layer, allow_runtime=false)
+    certified = _certified_runtime_source(source)
+    diagnostics = merge(certified.diagnostics, (
+        runtime_view="certified_candidate_only",
+        fallback_enabled=false,
+        fallback_reason="disabled_explicit_candidate_only",
+    ))
+    return PhaseReferenceSource(
+        certified.kind,
+        certified.layer,
+        certified.root,
+        true,
+        certified.tables,
+        diagnostics,
+    )
+end
+
 function load_phase_reference_runtime_with_fallback(candidate_root::AbstractString;
     layer::Symbol=:strict,
     boundary_path::AbstractString,
@@ -401,7 +429,7 @@ function load_default_phase_reference_runtime(; project_root::AbstractString,
     layer::Symbol=:strict,
     source::Symbol=:candidate,
 )
-    source in (:candidate, :legacy) || _error("phase-reference source must be candidate or legacy")
+    source in (:candidate, :candidate_only, :legacy) || _error("phase-reference source must be candidate, candidate_only, or legacy")
     reference_root = joinpath(project_root, "data", "reference", "pnjl")
     legacy_root = joinpath(reference_root, "legacy_phase_reference_v1")
     legacy_paths = (
@@ -412,6 +440,7 @@ function load_default_phase_reference_runtime(; project_root::AbstractString,
     )
     source === :legacy && return load_legacy_phase_reference(; legacy_paths...)
     candidate_root = joinpath(reference_root, "issue130_phase_reference_v1")
+    source === :candidate_only && return load_phase_reference_candidate_only(candidate_root; layer=layer)
     return load_phase_reference_runtime_with_fallback(candidate_root; layer=layer, legacy_paths...)
 end
 

@@ -7,6 +7,7 @@ import pytest
 
 from scripts.pnjl.phase_reference_adapter import (
     PhaseReferenceContractError,
+    build_candidate_only_view,
     build_runtime_view,
     load_phase_reference,
     to_legacy_views,
@@ -164,3 +165,31 @@ def test_runtime_view_uses_certified_candidate_then_legacy_fallback(tmp_path: Pa
     assert runtime.diagnostics["runtime_view"] == "certified_candidate_with_legacy_fallback"
     assert runtime.diagnostics["fallback_row_counts"]["boundary"] == 1
     assert runtime.tables["boundary"][0]["source_layer"] == "legacy_fallback"
+
+
+def test_candidate_only_view_filters_unresolved_without_enabling_fallback(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_candidate(root)
+    boundary = root / "strict" / "tables" / TABLES["boundary"]
+    boundary.write_text(
+        boundary.read_text(encoding="utf-8").replace(
+            "native,true,true", "rho_geometry_not_converged,false,true"
+        ),
+        encoding="utf-8",
+    )
+    candidate = load_phase_reference(root, layer="strict")
+    runtime = build_candidate_only_view(candidate)
+    assert runtime.source == "candidate"
+    assert runtime.diagnostics["runtime_view"] == "certified_candidate_only"
+    assert runtime.diagnostics["fallback_enabled"] is False
+    assert all(value == 0 for value in runtime.diagnostics["fallback_row_counts"].values())
+    assert not runtime.tables["boundary"]
+
+
+def test_runtime_view_without_legacy_mapping_is_machine_readable_candidate_only(tmp_path: Path) -> None:
+    root = tmp_path / "candidate"
+    _write_candidate(root)
+    candidate = load_phase_reference(root, layer="strict")
+    runtime = build_runtime_view(candidate)
+    assert runtime.diagnostics["runtime_view"] == "certified_candidate_only"
+    assert runtime.diagnostics["fallback_enabled"] is False

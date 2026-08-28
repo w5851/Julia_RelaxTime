@@ -13,8 +13,8 @@ next_action = "phase-reference runtime promotion 与 canonical root retirement �
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-pnjl-legacy-reference-retirement"
-current_sha = "aa2086f428454bddcc087c4a1b2a9503d834c888"
+current_branch = "codex/issue130-pnjl-candidate-only-consumer-contract"
+current_sha = "b00d168edb56244a9f7958a1f6948fb745d2b2bd"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -462,7 +462,7 @@ status = "active"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
 reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 仍是 candidate strict 未认证/缺键行的逐键 fallback 和显式 rollback 输入，必须先完成 solver-free 覆盖与消费者审计，不能沿用 RS allowlist 直接删除。"
-  next_action = "legacy_audit_v1 已完成但 verdict=retirement_inconclusive（fallback=382、active contract blocker=24、unknown active=0）；保留 snapshot，先做 candidate-only 请求键/适配层迁移并验证显式 legacy rollback，复审通过前不创建或合并物理删除 PR。"
+next_action = "legacy_audit_v1 已完成但 verdict=retirement_inconclusive（fallback=382、active contract blocker=24、unknown active=0）；candidate_only 适配入口已在独立分支加入，下一步对实际 transport/phase-guided/plot/validation 请求键做 solver-free smoke，复审通过前不切换默认 runtime 或创建物理删除 PR。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -473,12 +473,13 @@ evidence = [
   "file:scripts/relaxtime/phase_reference_adapter.jl",
   "pr:264",
   "pr:278",
-    "sha:aa2086f428454bddcc087c4a1b2a9503d834c888",
-    "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
-    "note:solver_free_preflight_candidate_certified_and_legacy_fallback_key_counts_20260828",
-    "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v1/",
-    "note:legacy_audit_v1_retirement_inconclusive_fallback382_active_contract_blockers24_20260828",
-  ]
+  "sha:aa2086f428454bddcc087c4a1b2a9503d834c888",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "note:solver_free_preflight_candidate_certified_and_legacy_fallback_key_counts_20260828",
+  "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v1/",
+  "note:legacy_audit_v1_retirement_inconclusive_fallback382_active_contract_blockers24_20260828",
+  "note:stage_b_candidate_only_adapter_contract_and_explicit_legacy_rollback_solver_free_smoke_pending_20260828",
+]
 
 [[items]]
 id = "plot-sop-independent-land"

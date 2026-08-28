@@ -204,7 +204,7 @@ function main()
     phase_reference = Main._load_runtime_phase_reference(opts)
     run_phase_guided_scan(opts, ctx;
         phase_reference=phase_reference,
-        phase_reference_mode=opts.phase_reference_mode === :diagnostic ? :diagnostic : :runtime,
+        phase_reference_mode=opts.phase_reference_mode,
     )
 end
 
