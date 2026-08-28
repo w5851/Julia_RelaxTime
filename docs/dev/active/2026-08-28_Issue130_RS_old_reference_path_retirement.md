@@ -6,6 +6,7 @@
 ## 固定输入与目标
 
 - audit 基线：PR #276，`main@ad47ad1482574faa4764af3913b8cfa3b6bae53e`
+- implementation PR：#277，初始实现提交 `e5545bda`（当前 CI 待完成）
 - calculation SHA：`3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`
 - source result commit：`05be2c05186f8e12baf3097b68f8619e53d19711`
 - legacy case：`first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1`

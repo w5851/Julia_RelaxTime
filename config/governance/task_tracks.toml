@@ -406,7 +406,9 @@ evidence = [
   "file:data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
   "file:data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
   "pr:276",
+  "pr:277",
   "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
+  "sha:e5545bda9e5a438f34679ab7120581e7cd01718a",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "note:canonical_prod_v1_paths_retired_to_versioned_snapshot_no_physical_deletion",
 ]
