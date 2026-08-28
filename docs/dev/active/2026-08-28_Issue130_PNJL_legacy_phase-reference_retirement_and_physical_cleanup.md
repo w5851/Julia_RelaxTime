@@ -67,17 +67,34 @@ runtime view 仍可能从 legacy 提供缺键或未认证键。尤其 candidate 
 
 ### 阶段 A：solver-free retirement audit
 
-- [ ] 固定 candidate/legacy 文件树、manifest、calculation/postprocess SHA 和
+- [x] 固定 candidate/legacy 文件树、manifest、calculation/postprocess SHA 和
   tree hash；检查 NaN/Inf、重复键、schema/单位及 snapshot 字节完整性。
-- [ ] 以 adapter 的真实 key 语义（而非 CSV 行号）重建每表 certified、uncertified、
+- [x] 以 adapter 的真实 key 语义（而非 CSV 行号）重建每表 certified、uncertified、
   fallback、overlap 和 consumer-requested coverage 矩阵。
-- [ ] 静态扫描 Julia、Python、workflow、配置和文档，区分 runtime consumer、显式
+- [x] 静态扫描 Julia、Python、workflow、配置和文档，区分 runtime consumer、显式
   `legacy` rollback、历史复现和已失效路径；检查 fallback 是否仍可达。
-- [ ] 输出 versioned evidence package：`manifest.json`、`coverage.csv`、
+- [x] 输出 versioned evidence package：`manifest.json`、`coverage.csv`、
   `fallback_matrix.csv`、`consumer_matrix.csv`、`claim_ledger.json` 和停止原因；
   package 不复制原始全量曲线。
 
-### 阶段 B：fallback/path retirement（仅审计通过后）
+#### 阶段 A 实际结果（2026-08-28）
+
+审计包位于
+`docs/analysis/pnjl/phase_reference/issue130_phase_reference_legacy_audit_v1/`，
+固定 candidate calculation SHA 为
+`3c5f6b3c9bd535cff7657364dadb2efc31f2ea48`，source run 为 `32354095831`，
+replay run 为 `32451053476`。审计本身 `solver_called=false`、
+`reference_write=false`，candidate/legacy tree 与
+`RETIREMENT_MANIFEST.json` 的 bytes/SHA 均通过。
+
+当前 verdict 为 `retirement_inconclusive`：legacy fallback key 共 `382`（
+boundary `35`、crossover `315`、CEP `1`、spinodals `31`），candidate
+uncertified 行 `4074`；静态 tracked-source 扫描记录 `24` 个仍需迁移或保留
+rollback 的 active contract，未知 active 引用为 `0`。因此 snapshot 继续保留，
+不得创建物理删除 PR。candidate-only 迁移不能把这些 unresolved 行自动提升为
+certified；阶段 B 必须先定义请求键/适配层合同并验证显式 legacy rollback。
+
+### 阶段 B：fallback/path retirement（以阶段 A 证据为输入）
 
 - [ ] 若仍有 active consumer 依赖 legacy，先迁移其请求键/适配层，保持显式
   rollback，不改数值输入；为迁移增加 Julia/Python/workflow focused tests。
@@ -107,7 +124,8 @@ runtime view 仍可能从 legacy 提供缺键或未认证键。尤其 candidate 
 
 ## 6. 里程碑与停止条件
 
-1. `legacy_audit_v1`：只读覆盖/消费者审计完成并由作者审核；失败则保持现状。
+1. `legacy_audit_v1`：只读覆盖/消费者审计完成并由作者审核；当前结果已归档为
+   `retirement_inconclusive`，故保持现状并进入阶段 B 设计。
 2. `legacy_path_retirement_v1`：若需要，迁移 active consumer 并保留 rollback。
 3. `legacy_physical_deletion_v1`：仅在 fallback=0、consumer migration 完成、
    evidence/hash 完整且作者明确授权后执行。

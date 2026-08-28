@@ -1,0 +1,83 @@
+{
+  "active_consumer_blocker_count": 24,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_auto_selected": false,
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "candidate_reference_write": true,
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "candidate_runtime_consumption": false,
+  "candidate_strict_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+  "candidate_strict_reference_write": false,
+  "candidate_tree_sha256": "25239b872577977128669252878a92ce234de6e293a10413767da87f3e7c8b8e",
+  "decision": "decision.json",
+  "files": [
+    {
+      "bytes": 976,
+      "path": "AUDIT.md",
+      "sha256": "6ef0e94194439bf1444329c61ee572666bbf36054d8e3268debbc79255d8a843"
+    },
+    {
+      "bytes": 1255,
+      "path": "decision.json",
+      "sha256": "0f0e59c46b968ccb411dca5ab4bbb022339b5fedada14fb8ddfdc1834c698a48"
+    },
+    {
+      "bytes": 2021,
+      "path": "README.md",
+      "sha256": "ed6c78cb26c8c86a1b0176c800e1ef7b2b11bc8afca7dd2aaa508ae38059ada9"
+    },
+    {
+      "bytes": 1346,
+      "path": "tables/claim_ledger.csv",
+      "sha256": "775600e1fe5910cfdf0a5261764ff63f32d37238dd32c165534e44dec21f4c6c"
+    },
+    {
+      "bytes": 1799,
+      "path": "tables/claim_ledger.json",
+      "sha256": "66320290775ed9683fecbe884953f4943b21b46aef9f62ee84ee96ed065ba562"
+    },
+    {
+      "bytes": 17439,
+      "path": "tables/consumer_matrix.csv",
+      "sha256": "a4e7ced6883647951d3a928dca5702c024090341b2fc1e684ec5142cb269f796"
+    },
+    {
+      "bytes": 521,
+      "path": "tables/coverage_matrix.csv",
+      "sha256": "0591fa71f53250b01f78d662a6c9b14973dfca6eada44af67908ed2392e72f6f"
+    },
+    {
+      "bytes": 40867,
+      "path": "tables/fallback_matrix.csv",
+      "sha256": "8605b7059971be09a0a2ed365fbc9d6853e138c1ccf9420201984750f88e99b2"
+    },
+    {
+      "bytes": 1384,
+      "path": "tables/legacy_snapshot_inventory.csv",
+      "sha256": "b41c9a415115e2fd9bf3a48c535b924aa424fff61fe2434df1cc4aa8b348ad21"
+    },
+    {
+      "bytes": 43372,
+      "path": "tables/reference_occurrences.csv",
+      "sha256": "030980121076a734216b3b8676771e45332b465c081a071f93867fd6efec1c6a"
+    }
+  ],
+  "generated_at_utc": "2026-08-28T11:42:26.394070+00:00",
+  "input_manifests": {
+    "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+    "candidate_strict": "data/reference/pnjl/issue130_phase_reference_v1/strict/manifest.json",
+    "legacy_retirement": "data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json"
+  },
+  "legacy_fallback_key_count": 382,
+  "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "legacy_tree_sha256": "c128ef6358a5813533fc5a9726047585a750a4421f162293564bea8e363764e6",
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "repo_head": "ead55ece4a799948e54799288177f45908ff9d88",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_legacy_retirement_audit_v1",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "verdict": "retirement_inconclusive"
+}
