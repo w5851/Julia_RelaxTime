@@ -1,4 +1,0 @@
-# production_case: first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1
-# source_candidate_case: p128_xi001_onshellkernel_localdispatch_20260715
-# source_sharded_action_runs: see convergence/production_download_manifest.csv
-T_MeV,muB_MeV,xi,seed_source,phase_prev,phase_curr_hint,error_type,error_message,timestamp

@@ -44,15 +44,15 @@ updated_at = "2026-08-24"
 id = "rs-transport"
 title = "RS transport production"
 status = "active"
-current_task = "issue130-rs-old-reference-path-retirement"
+current_task = "issue130-rs-old-reference-physical-deletion"
 blocked_by = []
 unlocks = []
-next_action = "retirement audit 已由 PR #276 合并并经作者审核；当前在共享隔离 worktree 执行 RS old prod_v1 的 path-retirement implementation。只迁移到 byte-preserving versioned snapshot、更新 registry/consumer 指针并保留 fallback/rollback，不物理删除旧树。"
+next_action = "PR #277 已合并完成 canonical/path retirement；当前在隔离 worktree 准备物理删除 proposal，仅按 allowlist 删除 RS prod_v1 snapshot，保留 Git 恢复引用并等待作者单独合并授权。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-rs-old-reference-path-retirement"
-current_sha = "ad47ad1482574faa4764af3913b8cfa3b6bae53e"
+current_branch = "codex/issue130-rs-old-reference-physical-deletion"
+current_sha = "74b53b47ebcca2b292cee72f70a70a84b0d2eea5"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -65,7 +65,10 @@ evidence = [
   "review:author_accepted_solver_free_parity",
 "review:author_accepted_numerical_pilot_and_authorized_production",
 "pr:264",
-"sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7",
+  "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7",
+  "pr:277",
+  "sha:74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+  "note:physical_deletion_proposal_pending_author_merge_authorization",
 "run:32709280462",
   "pr:263",
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
@@ -393,24 +396,46 @@ evidence = [
 id = "issue130-rs-old-reference-path-retirement"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md"
-reason = "retirement audit 已确认无 active old consumer、fallback hash 与 current prod_v2 manifest 一致；旧 RS prod_v1 可退出 mode-specific canonical 根路径，但必须保留 byte-preserving versioned snapshot 和显式 rollback。"
-next_action = "完成旧 prod_v1 result/figure 的 snapshot 迁移、registry/历史可执行工具路径更新、hash/absence/fallback 单元测试和 focused CI；不物理删除 snapshot。"
+reason = "retirement audit 已确认无 active old consumer、fallback hash 与 current prod_v2 manifest 一致；PR #277 已将旧 RS prod_v1 退出 mode-specific canonical 根路径并完成 versioned snapshot 交接，后续物理删除由独立任务管理。"
+next_action = "PR #277 已通过全部 CI 并以 main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5 合并；path-retirement 完成，物理删除转交 item:issue130-rs-old-reference-physical-deletion。"
 blocked_by = []
 backlog_file = ""
 evidence = [
   "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md",
   "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md",
-  "file:data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
+  "file:docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/deletion_manifest.json",
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_path_retirement_v1/figure_snapshot/RETIREMENT_MANIFEST.json",
   "pr:276",
   "pr:277",
   "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
   "sha:e5545bda9e5a438f34679ab7120581e7cd01718a",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
-  "note:canonical_prod_v1_paths_retired_to_versioned_snapshot_no_physical_deletion",
+  "sha:74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+  "note:canonical_prod_v1_paths_retired_to_versioned_snapshot; physical_deletion_handoff",
+]
+
+[[items]]
+id = "issue130-rs-old-reference-physical-deletion"
+track_id = "rs-transport"
+classification = "required_follow_up"
+status = "active"
+parent = "track:rs-transport"
+task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md"
+reason = "path-retirement PR #277 已合并且 current prod_v2 已成为分析默认；作者授权创建独立物理删除 PR。删除范围仅为带 hash 的 RS prod_v1 versioned snapshot，不包含 current prod_v2、更早历史证据或 PNJL phase-reference legacy snapshot。"
+next_action = "在隔离分支应用精确 deletion allowlist，更新 registry/fallback 语义，运行 solver-free deletion validator 与 focused CI；PR 仅待作者审核，未经再次授权不合并。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md",
+  "file:docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/",
+  "file:data/outputs/results/relaxtime/transport/phase_guided/production_registry.json",
+  "pr:277",
+  "sha:74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "note:proposal_only_no_merge_authorization; git_history_recovery_boundary; no_solver",
 ]
 
 [[items]]

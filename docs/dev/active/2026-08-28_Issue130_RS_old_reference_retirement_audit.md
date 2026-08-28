@@ -1,8 +1,8 @@
 # Issue #130：RS old-reference retirement audit
 
 状态：accepted；审计 PR #276 已合并到 `main@ad47ad1482574faa4764af3913b8cfa3b6bae53e`，
-作者审核已通过，当前进入独立的 path-retirement implementation PR。仍不物理删除旧
-`prod_v1`，不调用 solver，不触发 numerical Actions。
+作者审核已通过，path-retirement implementation PR #277 已合并。物理删除不在该审计
+包内，现由独立的 deletion proposal 任务处理；审计包本身保持不可变。
 
 ## 范围锁定
 

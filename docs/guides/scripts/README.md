@@ -210,9 +210,9 @@ powershell -ExecutionPolicy Bypass -File scripts/dev/run_with_sysimage.ps1 scrip
       - mode b: `data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v1_p128_xi005_validated_anchored_prod_v1/`
       - shared convergence evidence: `data/outputs/results/relaxtime/transport/phase_guided/first_canonical_v1_p128_xi005_validated_anchored_prod_v1_convergence/`
   - 旧 `first_canonical_v1` 已从仓库数据树移除。它缺少 `validated_anchored` sigma-cache policy、显式高精度 tau/sigma 积分参数、channel diagnostics 和全网格 convergence gate；历史对照请通过 git history / PR #122 查看，局部 `xi` 结构的 production-grade 解读应优先使用当前 `prod_v2` raw case。旧高密度 `prod_v1` 不再占用 mode 的 canonical 根路径，而是保留在版本化 snapshot：
-    - result：`data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/<mode>/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/`
-    - figure：`data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/<mode>/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/`
-    - snapshot 只用于显式 legacy fallback/rollback 与历史复现，不作为当前分析默认；result 说明见 snapshot 根目录的 `README.md`/`RETIREMENT_MANIFEST.json`，figure 说明与 manifest 见 `docs/analysis/relaxtime/issue130_rs_old_reference_path_retirement_v1/figure_snapshot/`。
+    - result/figure snapshot 已在 path-retirement 后由独立 deletion proposal 处理，当前不提供 RS `prod_v1` fallback/rollback。
+    - 删除 allowlist、删除前 tree/manifest hash 与 Git 恢复引用见 `docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/`。
+    - path-retirement merge `74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 保留删除前 snapshot 的 Git 历史恢复边界；这不是外部数值备份。当前 approved `prod_v2` 仍位于各 mode canonical 目录；PNJL phase-reference 的 `legacy_phase_reference_v1` fallback 不受此 RS 删除影响。
 - [scripts/relaxtime/run_phase_guided_transport_plots.jl](../../../scripts/relaxtime/run_phase_guided_transport_plots.jl)
   - canonical case 的 post-processing / plot-review wrapper
   - 图层正式落盘到 `data/outputs/figures/relaxtime/transport/phase_guided/<mode>/<case_name>/`
