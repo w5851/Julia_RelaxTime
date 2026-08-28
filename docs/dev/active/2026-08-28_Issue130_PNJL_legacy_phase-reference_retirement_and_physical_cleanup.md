@@ -111,9 +111,13 @@ certified；阶段 B 必须先定义请求键/适配层合同并验证显式 leg
 
 阶段 B 当前 solver-free smoke 已固化到
 `docs/analysis/pnjl/phase_reference/issue130_phase_reference_candidate_only_consumer_audit_v1/`：
-Python/Julia adapter、phase-guided、显式 plot root 和 legacy rollback 均通过；
-`validate_phase_data.py` 已增加显式 candidate schema 验证入口（legacy CSV 路径仍向后兼容），
-但这些 smoke 仍不证明所有动态请求键都无需 fallback，因此不把本阶段误记为完整路径退役。
+Python/Julia adapter、phase-guided、显式 plot root、candidate schema validator 和
+legacy rollback 均通过；`validate_phase_data.py` 的 legacy CSV 路径仍向后兼容。
+进一步的 `dynamic_request_matrix.csv` 按两个实际消费者、四张 phase 表和 21 个
+canonical ξ 请求键检查了 exact certified candidate 覆盖。结果为
+`dynamic_request_key_coverage_complete=false`：CEP 的 `ξ=0.5` 在两个消费者中各有
+一个请求仍需 legacy fallback（共 2 个请求），故不把本阶段误记为完整路径退役；
+Stage A 的 382 个逐键 fallback 仍是物理删除的总阻塞。
 
 ### 阶段 C：物理清理（再次单独授权）
 

@@ -19,5 +19,12 @@
     "claim_id": "physical_deletion_ready",
     "evidence": "decision.json; Stage A fallback matrix",
     "status": "not_supported"
+  },
+  {
+    "boundary": "an exact xi gap still requires the explicit legacy fallback; nearest-xi behavior is not coverage evidence",
+    "claim": "All canonical transport and phase-guided request xi keys are covered by certified candidate rows.",
+    "claim_id": "dynamic_request_key_coverage",
+    "evidence": "dynamic_request_matrix.csv",
+    "status": "not_supported"
   }
 ]

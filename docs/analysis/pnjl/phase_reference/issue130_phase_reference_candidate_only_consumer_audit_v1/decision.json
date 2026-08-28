@@ -3,6 +3,7 @@
   "candidate_only_consumer_failures": [],
   "candidate_only_contract_supported": true,
   "candidate_uncertified_rows": 4074,
+  "dynamic_request_key_coverage_complete": false,
   "legacy_fallback_key_count": 382,
   "legacy_rollback_contract_supported": true,
   "physical_deletion_eligible": false,
@@ -14,7 +15,8 @@
   "source_run_id": "32354095831",
   "stop_reasons": [
     "legacy_fallback_key_count_nonzero",
-    "default_runtime_fallback_preserved"
+    "default_runtime_fallback_preserved",
+    "dynamic_request_key_coverage_incomplete"
   ],
   "verdict": "candidate_only_contract_supported"
 }

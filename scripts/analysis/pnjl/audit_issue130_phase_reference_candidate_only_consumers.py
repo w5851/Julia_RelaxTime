@@ -31,6 +31,7 @@ AUDIT_RELATIVE = Path(
 OUTPUT_RELATIVE = Path(
     "docs/analysis/pnjl/phase_reference/issue130_phase_reference_candidate_only_consumer_audit_v1"
 )
+CANONICAL_CONSUMER_XIS = tuple(round(-0.5 + 0.05 * index, 12) for index in range(21))
 
 
 def sha256(path: Path) -> str:
@@ -134,6 +135,35 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
         "crossover": len(plot_data[3]),
     }
 
+    # The transport/phase-guided consumers request a canonical xi list and
+    # then use the adapter's nearest-xi behavior.  For a retirement decision we
+    # must record whether the candidate has an exact certified xi first; a
+    # nearest neighbor is not evidence that a legacy fallback is unreachable.
+    dynamic_request_rows: list[dict[str, Any]] = []
+    dynamic_incomplete = False
+    for consumer in ("transport_phase_guided", "phase_guided_plan"):
+        for table in ("boundary", "crossover", "cep", "spinodals"):
+            table_rows = candidate_only.tables.get(table, ())
+            for xi in CANONICAL_CONSUMER_XIS:
+                exact = [
+                    row
+                    for row in table_rows
+                    if abs(float(row.get("xi", float("nan"))) - xi) <= 1e-10
+                ]
+                complete = bool(exact)
+                dynamic_incomplete = dynamic_incomplete or not complete
+                dynamic_request_rows.append(
+                    {
+                        "consumer": consumer,
+                        "table": table,
+                        "requested_xi": xi,
+                        "candidate_exact": complete,
+                        "candidate_certified_rows": len(exact),
+                        "fallback_needed": not complete,
+                        "status": "pass" if complete else "fallback_required",
+                    }
+                )
+
     run_gap = read_text(repo_root, "scripts/relaxtime/run_gap_transport_scan.jl")
     gap_cli = read_text(repo_root, "scripts/relaxtime/gap_transport_scan_cli.jl")
     phase_cli = read_text(repo_root, "scripts/relaxtime/phase_guided_transport_scan_cli.jl")
@@ -208,6 +238,8 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
         "legacy_fallback_key_count_nonzero",
         "default_runtime_fallback_preserved",
     ]
+    if dynamic_incomplete:
+        stop_reasons.append("dynamic_request_key_coverage_incomplete")
     if not any(
         row["consumer"] == "pnjl_validate_phase_data" and row["status"] == "pass"
         for row in consumer_rows
@@ -219,6 +251,7 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
         "verdict": "candidate_only_contract_supported" if not hard_failures else "candidate_only_contract_inconclusive",
         "candidate_only_contract_supported": not hard_failures,
         "legacy_rollback_contract_supported": rollback_declared,
+        "dynamic_request_key_coverage_complete": not dynamic_incomplete,
         "candidate_only_consumer_failures": hard_failures,
         "candidate_uncertified_rows": int(stage_a.get("candidate_uncertified_rows", 0)),
         "legacy_fallback_key_count": int(stage_a.get("legacy_fallback_key_count", 0)),
@@ -254,12 +287,32 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
             "evidence": "decision.json; Stage A fallback matrix",
             "boundary": "requires fallback=0 and a separate author-authorized allowlist PR",
         },
+        {
+            "claim_id": "dynamic_request_key_coverage",
+            "claim": "All canonical transport and phase-guided request xi keys are covered by certified candidate rows.",
+            "status": "supported" if not dynamic_incomplete else "not_supported",
+            "evidence": "dynamic_request_matrix.csv",
+            "boundary": "an exact xi gap still requires the explicit legacy fallback; nearest-xi behavior is not coverage evidence",
+        },
     ]
 
     write_csv(
         output_root / "consumer_matrix.csv",
         ["consumer", "route", "status", "solver_called", "fallback_enabled", "detail"],
         consumer_rows,
+    )
+    write_csv(
+        output_root / "dynamic_request_matrix.csv",
+        [
+            "consumer",
+            "table",
+            "requested_xi",
+            "candidate_exact",
+            "candidate_certified_rows",
+            "fallback_needed",
+            "status",
+        ],
+        dynamic_request_rows,
     )
     write_json(output_root / "decision.json", decision)
     write_json(output_root / "claim_ledger.json", claims)
@@ -274,11 +327,14 @@ def build_audit(repo_root: Path, output_root: Path) -> dict[str, Any]:
 - candidate-only rows：`{sum(len(rows) for rows in candidate_only.tables.values())}`（全部 certified）
 - candidate unresolved rows（Stage A）：`{decision['candidate_uncertified_rows']}`
 - legacy fallback keys（Stage A）：`{decision['legacy_fallback_key_count']}`
+- canonical request-key coverage：`{'complete' if decision['dynamic_request_key_coverage_complete'] else 'incomplete'}`
+- remaining fallback-required requests：`{sum(1 for row in dynamic_request_rows if row['fallback_needed'])}`
 - physical deletion：`False`
 
 `consumer_matrix.csv` 区分 candidate-only、显式 legacy rollback 和 validator 的
-candidate-schema 入口。当前默认 `runtime` fallback 不变；只有后续请求键覆盖和
-消费者迁移完成后才可评估物理清理。
+candidate-schema 入口；`dynamic_request_matrix.csv` 按 21 个 canonical xi、四张
+phase 表和两个实际消费者记录 exact certified coverage。当前默认 `runtime`
+fallback 不变；只有后续请求键覆盖和消费者迁移完成后才可评估物理清理。
 """
     (output_root / "README.md").write_text(readme, encoding="utf-8", newline="\n")
     audit = (

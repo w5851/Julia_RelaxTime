@@ -9,12 +9,12 @@ status = "active"
 current_task = "issue130-phase-reference-legacy-retirement"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "phase-reference runtime promotion 与 canonical root retirement 已完成；legacy_audit_v1 已判定 retirement_inconclusive，当前在 candidate-only 适配分支执行消费者 solver-free smoke；未证明 fallback=0 且迁移完成前不切换默认 runtime 或做物理删除。"
+next_action = "legacy_audit_v1 为 retirement_inconclusive；candidate-only adapter/transport/phase-guided/plot/validator solver-free smoke 已通过，但 dynamic_request_matrix 发现 CEP xi=0.5 在两个消费者各有一个 exact candidate 缺口，且 Stage A 仍有 382 个 legacy fallback key。保持默认 runtime fallback 与 rollback，先完成候选覆盖/适配决策；fallback=0、证据和作者再次授权前不切换默认 runtime 或做物理删除。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-pnjl-candidate-only-consumer-contract"
-current_sha = "b00d168edb56244a9f7958a1f6948fb745d2b2bd"
+current_sha = "64310b6db4df418478a8ab8bf3f4d41ec9333d8e"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -37,6 +37,9 @@ evidence = [
   "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba",
   "review:author_accepted_numerical_pilot_and_authorized_retirement",
   "promotion:runtime_default_strict_candidate_with_certified_only_fallback",
+  "file:docs/analysis/pnjl/phase_reference/issue130_phase_reference_candidate_only_consumer_audit_v1/",
+  "pr:280",
+  "pr:281",
 ]
 updated_at = "2026-08-24"
 

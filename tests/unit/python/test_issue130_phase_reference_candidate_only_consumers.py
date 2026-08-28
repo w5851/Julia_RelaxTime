@@ -20,4 +20,7 @@ def test_real_candidate_only_consumer_audit_is_solver_free(tmp_path: Path) -> No
     assert manifest["runtime_consumption"] is False
     decision = MODULE.read_json(tmp_path / "audit" / "decision.json")
     assert decision["legacy_rollback_contract_supported"] is True
+    assert decision["dynamic_request_key_coverage_complete"] is False
     assert decision["physical_deletion_eligible"] is False
+    matrix = (tmp_path / "audit" / "dynamic_request_matrix.csv").read_text(encoding="utf-8")
+    assert "cep,0.5,False,0,True,fallback_required" in matrix
