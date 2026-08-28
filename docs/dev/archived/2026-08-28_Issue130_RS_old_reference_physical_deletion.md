@@ -1,8 +1,21 @@
-# Issue #130：RS old `prod_v1` physical deletion proposal
+---
+title: Issue #130：RS old `prod_v1` physical deletion
+archived: true
+original: docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md
+archived_date: 2026-08-28
+---
 
-状态：active；draft PR #278 已创建，提案分支已应用精确 allowlist 删除，尚未合并。path-retirement
-PR #277 已以 `main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 合并；本任务只讨论
-其后的工作树物理删除，不回写或重跑数值。
+
+以下为原始内容（保留，以便审阅与历史参考）：
+
+---
+
+# Issue #130：RS old `prod_v1` physical deletion
+
+状态：accepted；PR #278 已获作者审核并以
+`main@aa2086f428454bddcc087c4a1b2a9503d834c888` 合并。path-retirement PR #277
+已以 `main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 合并；本任务记录其后的
+工作树物理删除，不回写或重跑数值。
 
 ## 范围
 
@@ -36,13 +49,15 @@ data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1
 - [x] deletion validator、current `prod_v2` integrity 和 focused CI 全绿；本地
   Issue #130 RS 相关测试 50 项通过，validator verdict 为
   `physical_deletion_proposal_valid`。
-- [ ] 作者审核确认 Git 历史恢复边界和“删除后无 RS fallback/rollback”语义；
-- [ ] 物理删除 PR 单独获得合并授权。
+- [x] 作者审核确认 Git 历史恢复边界和“删除后无 RS fallback/rollback”语义；
+- [x] 物理删除 PR 单独获得合并授权并完成合并。
 
-当前 draft PR：#278；创建提交为
-`f973d113600c80bdaa2c1367cf709fa5489df214`。CI 结果与作者审核完成前不合并。
+PR #278：创建提交为 `f973d113600c80bdaa2c1367cf709fa5489df214`，合并提交为
+`aa2086f428454bddcc087c4a1b2a9503d834c888`；远端和本地提案分支已清理。
 
 ## 停止条件
 
 allowlist 以外出现删除、current `prod_v2` 或 PNJL legacy 文件变化、恢复引用不可达、
-registry 仍把旧 snapshot 标成可用、或任何 numerical/solver 变化时，立即停止。
+registry 仍把旧 snapshot 标成可用、或任何 numerical/solver 变化时，立即停止。RS
+旧 snapshot 的物理删除已完成；PNJL phase-reference legacy snapshot 由独立任务继续
+审计，不能由本任务的 allowlist 推断为可删除。
