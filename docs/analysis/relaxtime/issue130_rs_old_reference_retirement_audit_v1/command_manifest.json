@@ -1,0 +1,8 @@
+{
+  "command": "python scripts/analysis/relaxtime/audit_issue130_rs_old_reference_retirement.py",
+  "output_root": "D:\\Temp\\julia_relaxtime_issue130_shared\\docs\\analysis\\relaxtime\\issue130_rs_old_reference_retirement_audit_v1",
+  "production_write": false,
+  "repo_head": "ac0674e249176a3453257105bab3b2382e409581",
+  "repo_root": "D:\\Temp\\julia_relaxtime_issue130_shared",
+  "solver_called": false
+}

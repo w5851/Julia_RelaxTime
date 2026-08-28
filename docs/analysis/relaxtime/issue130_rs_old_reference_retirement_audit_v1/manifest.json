@@ -1,0 +1,71 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "files": [
+    {
+      "bytes": 16914,
+      "path": "reference_inventory.csv",
+      "sha256": "4f783010d21d92b5a0cfafa017eec9599aa344a21366dedef45991e917723fcd"
+    },
+    {
+      "bytes": 5256,
+      "path": "registry_consistency.csv",
+      "sha256": "4135d262f5104ad4ee7a7581ec9001abad1ca35ca4f86e2c60db867ae7f4a13d"
+    },
+    {
+      "bytes": 188529,
+      "path": "consumer_reference_map.csv",
+      "sha256": "eb6dbb380226cc1783bd38464635bdb819bd792bc705eae35969f6ce61b1c00c"
+    },
+    {
+      "bytes": 1489,
+      "path": "fallback_smoke.csv",
+      "sha256": "4d1afbfc910b174a95d57a6842f8f9ca6f071935bed1aa7c6ed8d16454cfcaeb"
+    },
+    {
+      "bytes": 764,
+      "path": "consumer_smoke.csv",
+      "sha256": "82351cfcaacac0d8237b5d4016068690c7ad9fa93ea4b34a3dbf9bf35d0fb869"
+    },
+    {
+      "bytes": 8037,
+      "path": "retention_deletion_allowlist.csv",
+      "sha256": "731ad3c31c70c7e6cd62648c4f54576d6374a893b075099237e136520c1e58a8"
+    },
+    {
+      "bytes": 1316,
+      "path": "claim_ledger.csv",
+      "sha256": "5762015ea7519d22692ecab4d78969a173fd478c944e8e18a8d08e566a6272b5"
+    },
+    {
+      "bytes": 10768,
+      "path": "registry_snapshot.json",
+      "sha256": "8369adb983b1dcc9fb5dd45b64fb4fbe1952d1d0608c50c52c36dd3f039ce46d"
+    },
+    {
+      "bytes": 913,
+      "path": "rollback_plan.md",
+      "sha256": "3b303199d88b95d956e7ed0c0e78df3195822ed743e301bb39df63b2b386b69c"
+    },
+    {
+      "bytes": 1837,
+      "path": "audit_summary.json",
+      "sha256": "2c7e44cc12ef38e66bfc39aa1aa0fac76f9dcca3f5887278e0b11db31891c9cd"
+    },
+    {
+      "bytes": 409,
+      "path": "command_manifest.json",
+      "sha256": "590cced1da17fa914a8e6d56066adae810180bcf958df8bb8e13c26887fe2d27"
+    },
+    {
+      "bytes": 3616,
+      "path": "README.md",
+      "sha256": "4207b6900a21d323c7d96353a0710882dfa4f1350848f62547dda9d8a73673fb"
+    }
+  ],
+  "old_reference_deleted": false,
+  "production_write": false,
+  "schema_version": "issue130_rs_old_reference_retirement_audit_v1_manifest",
+  "solver_called": false,
+  "source_repo_head": "ac0674e249176a3453257105bab3b2382e409581",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571"
+}

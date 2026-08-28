@@ -1,0 +1,7 @@
+claim_id,claim,status,evidence,boundary
+prod_v2_default_contract,静态默认分析入口包含 current prod_v2，且没有把旧 prod_v1 作为默认 case。,supported,consumer_reference_map.csv; consumer_smoke.csv; production_registry.json,solver-free contract only
+legacy_fallback_integrity,两套 current prod_v2 manifest 记录的 legacy prod_v1 tree hash 与仓库实际 tree 一致。,supported,fallback_smoke.csv; reference_inventory.csv,does not certify numerical parity
+no_active_old_consumer,tracked active consumer contracts 没有直接引用旧 RS prod_v1 case。,supported,consumer_reference_map.csv,historical tooling/docs are retained and separately classified
+canonical_path_retirement_candidate,旧 RS prod_v1 可以进入 active/canonical path retirement 的 implementation review。,candidate,retention_deletion_allowlist.csv; fallback_smoke.csv; consumer_smoke.csv,requires a separate implementation PR and author review
+physical_deletion,旧 RS prod_v1 可以物理删除。,not_claimed,retention_deletion_allowlist.csv; rollback_plan.md,"legacy snapshot, historical evidence and diagnostic-only numerical status remain"
+solver_free_boundary,本审计没有调用 solver、写 production/reference 或改写 raw result。,supported,manifest.json; command_manifest.json,no numerical conclusion
