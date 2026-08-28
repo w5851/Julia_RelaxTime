@@ -1,7 +1,7 @@
 # Issue #130：RS old `prod_v1` path retirement implementation
 
-状态：active；作者已审核并接受 retirement audit，当前 PR 只执行 canonical/path
-退役，不物理删除数值文件，不调用 solver，不触发 numerical Actions。
+状态：accepted；PR #277 已通过 CI 并以 `main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5`
+合并。该 PR 只执行 canonical/path 退役；后续物理删除由独立任务和 PR 处理。
 
 ## 固定输入与目标
 
@@ -50,7 +50,11 @@ result snapshot 根目录的 `RETIREMENT_MANIFEST.json` 与 analysis 下的 figu
 - [x] 增加 snapshot tree/hash、registry pointer、fallback/rollback 和旧 canonical absence 单元测试。
 - [x] 运行 focused Python/Julia、consumer smoke、task-ledger、active-docs、docs consistency、
   data-output-path、script governance 与 `git diff --check`（本地 solver-free / governance checks）。
-- [ ] CI 全绿后等待作者审核；本 PR 合并后才将 audit item 记录为 path-retirement 完成。
+- [x] CI 全绿并经作者授权合并；PR #277 的 squash merge SHA 为
+  `74b53b47ebcca2b292cee72f70a70a84b0d2eea5`。
+- [x] path-retirement 分支及远端引用已清理；旧 snapshot 在本任务结束时仍由该 merge
+  commit 保留，物理删除转交
+  `2026-08-28_Issue130_RS_old_reference_physical_deletion.md`。
 
 ## 停止条件
 
