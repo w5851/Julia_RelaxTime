@@ -9,7 +9,7 @@ status = "active"
 current_task = "issue130-phase-reference-legacy-retirement"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "phase-reference runtime promotion 与 canonical root retirement 已完成；先完成 PNJL legacy fallback 覆盖/消费者 solver-free audit，未证明 fallback=0 前不做物理删除。"
+next_action = "phase-reference runtime promotion 与 canonical root retirement 已完成；legacy_audit_v1 已判定 retirement_inconclusive，当前在 candidate-only 适配分支执行消费者 solver-free smoke；未证明 fallback=0 且迁移完成前不切换默认 runtime 或做物理删除。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
