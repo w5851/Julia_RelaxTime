@@ -1,6 +1,8 @@
 # Issue #130：RS `publication_clean` 派生层与 old-reference retirement
 
-状态：active；publication-clean v1 已生成，等待作者审核；old-reference retirement 尚未开始。
+状态：accepted；publication-clean v1 已由作者审核并经 PR #275 合并到
+`main@ac0674e249176a3453257105bab3b2382e409581`；old-reference retirement 已转入独立的
+`2026-08-28_Issue130_RS_old_reference_retirement_audit.md` 审计任务。
 
 ## 范围
 
@@ -26,20 +28,21 @@
 - [x] 旧配方 `mode_a, μB=900, αT=1.0, ξ=0` 在当前 direct-coexistence grid 中缺失时，保留 `ξ=−0.003/+0.003` 两侧 raw 端点，并以其确认区间中点 `ξ=0` 作为 display-only 星标；不生成唯一 `ξ=0` raw 输运值。
 - [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`：长表、替换表、marker 对齐表、曲线索引、18 张图、manifest、plot manifest 和 claim ledger。
 - [x] 派生层所有行写入 `canonical_data_modified=false`；manifest 明确 `solver_called=false`、`manuscript_eligible=false`。
-- [ ] 作者审核 18 张同构图、19 个继承显示替换值、两个有限区间中点 marker、两侧端点 provenance 和已知 `xi=-0.01` bulk 分支排除项。
-- [ ] 作者审核本轮新增的 4 个 T=200 局部平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；候选只写入 clean layer。
+- [x] 作者审核 18 张同构图、19 个继承显示替换值、两个有限区间中点 marker、两侧端点 provenance 和已知 `xi=-0.01` bulk 分支排除项。
+- [x] 作者审核本轮新增的 4 个 T=200 局部平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 的 `η/s`、`ζ/s`；候选只写入 clean layer。
 - [x] 修正 T=120、μB=900 的历史星标：`xi=-0.09` 只保留在审计记录；依据当前 `phase_reference_kind: crossover → first_order` 的作者确认区间 `[-0.14,-0.13]`，publication-clean 改渲染中点 `xi=-0.135`。严格 CEP 表仍独立记录固定切片坐标审计。
 - [x] 回溯 mode-A `μB=450, αT=1.0, ξ=-0.20`：当前点为 crossover/no-transition，既有 mechanism window 支持 `simple_1m4KΠ` 小分母归因；不修改 raw。
 - [x] 统一论文 marker 语义：严格 CEP/相标签切换本质上保留有限宽度 bracket；`tables/publication_marker_map.csv` 记录两侧 raw 端点、phase label、质量标志及中点 display 值，图中只绘制中点，不把中点写入 raw/clean 长表。
 
 ## old-reference retirement 后续门禁
 
-作者完成 publication-clean 审核后，另立 retirement audit/PR，至少完成：
+作者完成 publication-clean 审核后，已另立 retirement audit/PR；具体 evidence 和后续放行门禁见
+`docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md`：
 
-- [ ] 枚举所有代码、配置、脚本、文档、workflow 和 figure manifest 对旧 `prod_v1` 路径的引用；区分 active consumer、历史证据和 rollback/fallback。
-- [ ] 在不调用 solver 的前提下验证默认 `prod_v2` 分析路径、显式 `--phase-reference-mode legacy` 回退和 versioned legacy snapshot 均可解析。
-- [ ] 固化旧 mode-A/mode-B `prod_v1` tree hash、引用清单、fallback smoke、删除/保留 allowlist 与回退步骤。
-- [ ] 未经作者单独授权不物理删除旧 `prod_v1`；若仍有 active consumer 或 manuscript/复现依赖，保持 versioned snapshot。
+- [x] 枚举所有代码、配置、脚本、文档、workflow 和 figure manifest 对旧 `prod_v1` 路径的引用；区分 active consumer、历史证据和 rollback/fallback。详见 `docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/consumer_reference_map.csv`。
+- [x] 在不调用 solver 的前提下验证默认 `prod_v2` 分析路径、显式 `--phase-reference-mode legacy` 回退和 versioned legacy snapshot 均可解析。详见 `consumer_smoke.csv` 与 `fallback_smoke.csv`。
+- [x] 固化旧 mode-A/mode-B `prod_v1` tree hash、引用清单、fallback smoke、删除/保留 allowlist 与回退步骤。详见 `reference_inventory.csv`、`retention_deletion_allowlist.csv` 和 `rollback_plan.md`。
+- [x] 未经作者单独授权不物理删除旧 `prod_v1`；当前保留 versioned snapshot，物理删除仍未授权。
 
 ## 证据与复现
 

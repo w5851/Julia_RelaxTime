@@ -44,15 +44,15 @@ updated_at = "2026-08-24"
 id = "rs-transport"
 title = "RS transport production"
 status = "active"
-current_task = "issue130-rs-publication-clean"
+current_task = "issue130-rs-old-reference-retirement-audit"
 blocked_by = []
 unlocks = []
-next_action = "两套 prod_v2 raw 已由 PR #274 登记为 approved，分析默认已迁移；当前在隔离分支生成 publication_clean_v1 并等待作者审核，之后另立 old-reference retirement audit/PR。数值审计仍为 diagnostic-only，保留 legacy fallback、显式 rollback 与旧 prod_v1。"
+next_action = "publication-clean v1 已经作者审核并经 PR #275 合并；当前在共享隔离 worktree 执行 RS old prod_v1 的 solver-free retirement audit。先固化引用、tree hash、fallback/rollback 和 retention allowlist，再决定是否建立 path-retirement implementation PR；不物理删除旧树。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-rs-publication-clean"
-current_sha = "c5ae1057bede6d1df1861da5c1f7659d69bcb052"
+current_branch = "codex/issue130-rs-old-reference-retirement-audit"
+current_sha = "ac0674e249176a3453257105bab3b2382e409581"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -89,8 +89,13 @@ evidence = [
   "note:versioned_result_import_pr272_checks_passed_author_review_accepted",
   "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/",
   "note:rs_consumer_smoke_v2_pass_diagnostic_only_solver_free_runtime_default_unchanged",
+  "pr:275",
+  "sha:ac0674e249176a3453257105bab3b2382e409581",
+  "review:author_accepted_publication_clean_v1",
+  "file:docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/",
+  "note:retirement_audit_pass_retain_legacy_solver_free",
 ]
-updated_at = "2026-08-27"
+updated_at = "2026-08-28"
 
 [[tracks]]
 id = "plot-sop"
@@ -330,7 +335,7 @@ status = "accepted"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-23_Issue130_RS_phase-reference_adapter_parity.md"
 reason = "runtime-switch 已合并；RS transport 必须在保留 strict candidate certified-only、逐键 legacy fallback 和显式 rollback 的前提下完成 consumer parity 与限定重验，不能把 solver-free smoke 误写成 production parity。"
-next_action = "PR #274 已合并：两套 mode-A/mode-B prod_v2 已登记为 approved formal raw，分析入口默认迁移到 prod_v2。当前由 item:issue130-rs-publication-clean 生成 publication_clean_v1 并等待作者审核；审核通过后再启动独立 old-reference retirement audit/PR。数值状态仍为 diagnostic-only，legacy fallback/rollback 与 prod_v1 保留。"
+next_action = "PR #274 与 PR #275 已合并：两套 mode-A/mode-B prod_v2 已登记为 approved formal raw，分析入口默认迁移，publication-clean v1 已由作者审核接受；old-reference retirement 由 item:issue130-rs-old-reference-retirement-audit 承接。数值状态仍为 diagnostic-only，legacy fallback/rollback 与 prod_v1 保留。"
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2_quality_audit/", "file:docs/analysis/relaxtime/issue130_rs_sharded_production_v2_post_repair_audit_v1/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:data/outputs/results/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2/", "file:scripts/analysis/relaxtime/import_issue130_rs_candidate_results.py", "file:tests/unit/python/test_issue130_rs_candidate_result_import.py", "run:32354095831", "run:32451053476", "run:32684074876", "run:32817419175", "run:32817421815", "run:32817424871", "run:32817427980", "run:32817431677", "run:32817434357", "run:32817437525", "run:32817439861", "run:32817442542", "run:32817445213", "run:32817529717", "run:32817532839", "run:32817535505", "run:32817538589", "run:32817541560", "run:32817544844", "run:32817549646", "run:32817552946", "run:32817555686", "run:32817559249", "run:32817562105", "run:32817566643", "run:32817570850", "run:32817573728", "run:32817577977", "run:32817580774", "run:32817583483", "run:32817586501", "run:32817589187", "run:32817592217", "pr:261", "pr:262", "pr:263", "pr:269", "pr:272", "sha:da35d4b9c88c924a90f1696454c50f65a5fa288d", "sha:1ccf29310fb20c30bcd154f0b4966e25a7565225", "sha:22874505877491754eed27519ad8a7b871c82571", "sha:472e3eb0047b3a9380b27f1935880b0e473ca9b5", "sha:31ab0490a68be02d2f8cde7739a79128b3d3fd23", "sha:1c15d6bbc8ec4f1a4857286d1ef1f4a50158b69f", "sha:eba889feea0d422f20cb33e92ad62d9c8cf377fa", "sha:359d614289e42fe79d208b7ad2a2abe5f7f3dd96", "sha:27e9642d431ba7afd845f2b187f77c0fbbe3be4d", "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba", "note:pr272_11_of_11_successful", "review:author_accepted_numerical_pilot", "review:author_accepted_full_rs_candidate_legacy_comparison_and_figures", "note:pilot_pair_complete_with_common_quality_warnings_diagnostic_only", "note:rs_sharded_production_v2_30_unique_successful_shards_10_duplicate_dispatches_cancelled", "note:post_repair_audit_pass_diagnostic_only", "note:formal_candidate_figures_imported_without_numerical_promotion", "note:historical_sidecar_hash_mismatch_60_preserved_immutable", "note:versioned_rs_result_import_mode_a_910_scan_38220_diag_manifest_3d0a9117", "note:versioned_rs_result_import_mode_b_909_scan_38178_diag_manifest_093ff055", "note:result_import_solver_free_runtime_default_unchanged_legacy_preserved", "note:result_import_author_review_accepted", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/", "sha:3b19246fb911be4a2efa75fbe14fcb9a793ca256", "note:rs_consumer_smoke_v2_pass_diagnostic_only_solver_free"]
@@ -339,11 +344,11 @@ evidence = ["file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runti
 id = "issue130-rs-publication-clean"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-27_Issue130_RS_publication_clean_and_old_reference_retirement.md"
 reason = "作者已接受两套 prod_v2 raw 及分析默认迁移；论文使用仍需独立的 publication-clean 派生层，不能修改 raw 或把 diagnostic-only 结果升级为 manuscript eligible。"
-next_action = "publication_clean_v1 已生成；4 个 T=200 局部平滑候选保留在派生层，历史 T=120、μB=900、ξ=-0.09 星标仅保留审计，图上改用作者确认的 crossover→first_order 最小区间 [-0.14,-0.13] 中点 ξ=-0.135，mode-A direct-coexistence 图上改用 ±0.003 区间中点 ξ=0；作者确认后再另立 old-reference retirement audit/PR，未经单独授权不物理删除旧 prod_v1。"
+next_action = "publication_clean_v1 已由作者审核并经 PR #275 合并；old-reference retirement audit 已转入 item:issue130-rs-old-reference-retirement-audit。未经单独授权不物理删除旧 prod_v1。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -357,6 +362,31 @@ evidence = [
   "sha:22874505877491754eed27519ad8a7b871c82571",
   "note:solver_free_derived_layer_raw_immutable_manuscript_ineligible",
   "note:publication_markers_use_confirmed_interval_midpoints_not_historical_stars",
+  "pr:275",
+  "sha:ac0674e249176a3453257105bab3b2382e409581",
+  "review:author_accepted_publication_clean_v1",
+]
+
+[[items]]
+id = "issue130-rs-old-reference-retirement-audit"
+track_id = "rs-transport"
+classification = "required_follow_up"
+status = "active"
+parent = "track:rs-transport"
+task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md"
+reason = "publication-clean v1 已通过作者审核；当前需在不调用 solver 的前提下盘点旧 RS prod_v1 的 active consumer、fallback/rollback、历史证据和不可变 tree hash，先决定 canonical path retirement，再单独讨论物理删除。"
+next_action = "完成 audit PR 的 focused CI 和作者审核；当前 verdict 为 retirement_audit_pass_retain_legacy，可进入 path-retirement implementation review，但不删除旧 prod_v1。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md",
+  "file:scripts/analysis/relaxtime/audit_issue130_rs_old_reference_retirement.py",
+  "file:tests/unit/python/test_issue130_rs_old_reference_retirement.py",
+  "file:docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/",
+  "sha:ac0674e249176a3453257105bab3b2382e409581",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "sha:22874505877491754eed27519ad8a7b871c82571",
+  "note:retirement_audit_pass_retain_legacy_solver_free",
 ]
 
 [[items]]

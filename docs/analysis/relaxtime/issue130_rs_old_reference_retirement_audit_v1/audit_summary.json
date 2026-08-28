@@ -1,0 +1,38 @@
+{
+  "active_legacy_integrity_blocker_count": 0,
+  "active_old_reference_occurrences": 0,
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "canonical_path_retirement_candidate": true,
+  "claims": {
+    "canonical_path_retirement_candidate": "candidate",
+    "legacy_fallback_integrity": "supported",
+    "no_active_old_consumer": "supported",
+    "physical_deletion": "not_claimed",
+    "prod_v2_default_contract": "supported",
+    "solver_free_boundary": "supported"
+  },
+  "consumer_smoke_pass": true,
+  "current_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+  "fallback_smoke_pass": true,
+  "generated_utc": "2026-08-28T03:39:27.441008+00:00",
+  "generator": "scripts/analysis/relaxtime/audit_issue130_rs_old_reference_retirement.py",
+  "generator_sha256": "b80451c3c288e8bbe4e1f537b52ce69886b1dbe1d6967eb050a043c8d24ce38c",
+  "historical_cases": [
+    "first_canonical_v1_p128_xi001_validated_anchored_prod_v1",
+    "first_canonical_v1_p128_xi005_validated_anchored_prod_v1"
+  ],
+  "historical_manifest_mismatch_count": 26,
+  "legacy_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+  "old_reference_deleted": false,
+  "physical_deletion_gate": "blocked_diagnostic_only_or_historical_dependency",
+  "production_write": false,
+  "reference_occurrence_count": 492,
+  "registry_sha256": "86a5ec17b03fc4721ebaace90cc5b55117acaf8c03e63ea1abfe1dfd9ce8bb7b",
+  "repo_head": "ac0674e249176a3453257105bab3b2382e409581",
+  "schema_version": "issue130_rs_old_reference_retirement_audit_v1",
+  "scope_boundary": "RS transport prod_v1 only; PNJL phase-reference legacy snapshot is out of scope",
+  "solver_called": false,
+  "tree_count": 18,
+  "verdict": "retirement_audit_pass_retain_legacy",
+  "workflow_head_sha": "22874505877491754eed27519ad8a7b871c82571"
+}

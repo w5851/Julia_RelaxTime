@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，PR #274 已完成 raw promotion 与分析默认迁移，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留；当前 publication-clean v1 等待作者审核，old-reference retirement 仍需独立审计
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，PR #274 已完成 raw promotion 与分析默认迁移，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留；publication-clean v1 已由作者审核接受并经 PR #275 合并到 `main@ac0674e249176a3453257105bab3b2382e409581`；old-reference retirement 进入独立 solver-free audit
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -487,7 +487,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
 - [x] 使用新 case slug 导入结果与图像，不覆盖旧产物。
 - [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
-- [x] 新 case 经作者 review 后在 registry 晋升为 `approved` raw；`manuscript_eligible=false`。`publication_clean_v1` 已生成，等待作者审核。
+- [x] 新 case 经作者 review 后在 registry 晋升为 `approved` raw；`manuscript_eligible=false`。`publication_clean_v1` 已生成并经作者审核接受。
 
 ### M3：极点敏感派生显示与 bulk 分支一致性
 
@@ -498,7 +498,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；已合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`。
 - [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
 - [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
-- [x] 从修复提交重跑受影响的正式 production 和论文图，并完成作者审核；registry raw approval 已由 PR #274 记录，论文资格仍单独判断，当前 `publication_clean_v1` 等待作者审核。
+- [x] 从修复提交重跑受影响的正式 production 和论文图，并完成作者审核；registry raw approval 已由 PR #274 记录，论文资格仍单独判断；publication-clean 已由 PR #275 合并，旧 reference retirement 由独立 audit 任务承接。
 
 ## 10. Definition of Done
 
