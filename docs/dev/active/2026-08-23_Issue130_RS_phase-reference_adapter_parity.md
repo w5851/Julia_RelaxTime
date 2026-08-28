@@ -1,6 +1,6 @@
 # Issue #130：RS transport phase-reference adapter parity 与限定重验
 
-状态：active（post-repair audit、versioned result import 与合并后 solver-free consumer smoke v2 已通过，full candidate/legacy review 已接受）。PR #272 已 squash merge 到 `main@3b19246fb911be4a2efa75fbe14fcb9a793ca256`，合并后 smoke verdict 为 `rs_consumer_smoke_pass_diagnostic_only`。作者已接受两套 `prod_v2` raw 结果并授权将分析默认切换到 `prod_v2`；当前迁移由独立 promotion/default PR 承接。runtime-switch PR #260、
+状态：active（post-repair audit、versioned result import、合并后 solver-free consumer smoke v2 与 raw promotion/default migration 已完成；publication-clean 派生层进入作者审核阶段）。PR #274 已 squash merge 到 `main@c5ae1057bede6d1df1861da5c1f7659d69bcb052`；两套 `prod_v2` raw 已登记为 `approved`，分析入口默认已迁移到 `prod_v2`，数值审计仍为 `diagnostic_only`。当前 publication-clean PR 使用新分支承接派生层；old-reference retirement 仍为后续独立审计。runtime-switch PR #260、
 solver-free parity PR #261、paired numerical pilot workflow PR #262 和 provenance repair PR #269
 均已合并；RS numerical v2 的数值审计状态仍保持 `diagnostic_only`，但 raw 结果登记可独立提升为作者接受的正式 raw 输入。
 本任务承接 RS transport 的 consumer parity；它不删除旧 reference，不覆盖旧 transport
@@ -165,6 +165,18 @@ PR 将两套 mode-A/mode-B `prod_v2` 登记为作者接受的 formal raw，并�
 `prod_v2`。数值状态仍保持 `diagnostic_only`，逐键 legacy fallback、显式 rollback 和旧
 `prod_v1` 结果继续保留。publication-clean 派生层以及可选的 old-reference retirement
 另立任务，不能由本 PR 推断完成。
+
+## `publication_clean_v1` 派生层（2026-08-27）
+
+- [x] 从最新 `origin/main@c5ae1057bede6d1df1861da5c1f7659d69bcb052` 建立隔离分支，固定消费两棵作者接受的 `prod_v2` raw tree；本地不调用 solver。
+- [x] 复用既有作者审核的 19 个非一阶显示异常键，但所有显示值都从当前 `prod_v2` 的左右真实邻点重新线性插值；旧 `prod_v1` 数值不直接复制。
+- [x] 对旧配方的 `mode_a, μB=900, αT=1.0, ξ=0` 缺键进行显式 reconciliation：保留 `ξ=−0.003/+0.003` 两侧 raw 端点，publication-clean 只在图上显示确认区间中点 `ξ=0`，不伪造唯一 `ξ=0` raw 输运值。
+- [x] 生成 `docs/analysis/relaxtime/phase_guided_transport/phase_guided_transport_publication_clean_v1/`，包括输入哈希、替换表、marker 对齐表、长表、曲线索引、18 张同构显示图、plot manifest、manifest 与 claim ledger。
+- [x] 根据作者本轮图审计，新增 4 个独立的 T=200 局部显示平滑候选：mode-B `(μB=900, ξ=-0.10)` 与 `(μB=0, ξ=0.36)` 各覆盖 `η/s`、`ζ/s`；均由当前 `prod_v2` 左右 raw 邻点重算，写入 `tables/review_adjustment_map.csv`，不修改 raw。
+- [x] 复核并修正 T=120、μB=900 的三张图：历史配方中的 ξ=-0.09 星标只保留在审计；publication-clean 按作者确认的 `crossover → first_order` 最小切换区间 `[-0.14,-0.13]` 渲染中点 `ξ=-0.135`。strict CEP-slice 审计仍写入 `tables/cep_marker_audit.csv`，与论文显示 proxy 分开。
+- [x] 回溯 mode-A μB=450、αT=1.0、ξ=-0.20：该点为 crossover/no-transition；既有定点机制表支持 `simple_1m4KΠ` 小分母归因，未对 raw 或 phase 标签作改写。
+- [ ] 作者审核派生显示值、4 个新增局部平滑候选、两个有限区间中点 marker 及端点 provenance 和已知排除项；在审核前保持 `manuscript_eligible=false`。
+- [ ] 作者审核通过后，另立 old-reference retirement audit/PR；仅在所有 consumer 不再依赖旧路径且 fallback/rollback 已验证时，才讨论物理删除旧 `prod_v1`。
 
 ## CI 留痕
 

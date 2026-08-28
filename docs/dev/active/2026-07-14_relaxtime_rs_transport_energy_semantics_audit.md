@@ -2,7 +2,7 @@
 
 创建日期：2026-07-14
 
-状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，分析默认迁移正在由独立 promotion PR 完成，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留
+状态：PR 1 已于 2026-07-15 合并到 `main@05be2c05186f8e12baf3097b68f8619e53d19711`；M1 完成；M2 candidate 产物已通过 [PR #132](https://github.com/w5851/Julia_RelaxTime/pull/132) 合并；M3 派生显示审计已通过 [PR #134](https://github.com/w5851/Julia_RelaxTime/pull/134) 合并，bulk equilibrium 复用、稳定分支与直接共存锚点已通过 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`；Issue #130 phase reference 已导入并切换 runtime，RS v2 numerical shards 已完成 diagnostic-only audit；作者已接受两套 `prod_v2` formal raw，PR #274 已完成 raw promotion 与分析默认迁移，`manuscript_eligible=false`，旧 `prod_v1` 与 legacy fallback 保留；当前 publication-clean v1 等待作者审核，old-reference retirement 仍需独立审计
 
 基线提交：`ea706548e9167db61e0cb7537bab2d2d4daf4cad`
 
@@ -376,7 +376,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 使用新的、语义可辨识的 case slug，不覆盖任何现有正式目录。
 - [x] 先通过参数收敛 gate，再生产全量 CSV 和图像。
 - [x] 比较修改前后 $\eta/s$、$\sigma/T$、$\zeta/s$；若 production workflow 输出 $\kappa_{XY}$、$\lambda$ 或其派生量，也必须纳入差异表。同时证明弛豫时间未因 kernel energy 修复改变。
-- [ ] 通过独立数据/图像 PR 导入、审计和晋升（本任务的 raw promotion/default migration PR 正在独立进行）。
+- [x] 通过独立数据/图像 PR 导入、审计和 raw 晋升（PR #274）；publication-clean 派生层不在 raw promotion 内，按独立任务推进。
 
 ### 8.4 M2 执行范围锁（2026-07-15）
 
@@ -487,7 +487,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 由代码合并提交运行收敛 gate 和正式 GitHub Actions。
 - [x] 使用新 case slug 导入结果与图像，不覆盖旧产物。
 - [x] 完成新旧差异、provenance、manifest 和论文输入资格审计。
-- [x] 新 case 经作者 review 后在 registry 晋升为 `approved` raw；`manuscript_eligible=false`，publication-clean 仍未完成。
+- [x] 新 case 经作者 review 后在 registry 晋升为 `approved` raw；`manuscript_eligible=false`。`publication_clean_v1` 已生成，等待作者审核。
 
 ### M3：极点敏感派生显示与 bulk 分支一致性
 
@@ -498,7 +498,7 @@ CI 进一步发现 `baseline_phase_guided_transport_mode_b_v1.csv` 仍保留旧�
 - [x] 通过独立代码 [PR #135](https://github.com/w5851/Julia_RelaxTime/pull/135) 在一阶区域按热力学势选择主稳定态，并让 bulk 导数复用主 equilibrium `base_state`；已合并到 `main@697be19a919c1c3e8203adecd813c1ccf2928319`。
 - [x] 引入点内 derivative context，共享零阶状态、Jacobian/线性分解，并将重复的压力/质量 Taylor series 收敛为 `T`、`mu`、`T+mu` 三方向。
 - [x] 建立 direct coexistence anchor、共存点 missing/undefined 输运语义和自适应双侧近零认证，并补充 unit/integration/regression 与性能证据；本项没有新的外部物理参考量，validation 责任由双节点收敛 gate 和固定点回归承担。
-- [x] 从修复提交重跑受影响的正式 production 和论文图，并完成作者审核；registry raw approval 由当前 promotion/default PR 记录，论文资格仍单独判断。
+- [x] 从修复提交重跑受影响的正式 production 和论文图，并完成作者审核；registry raw approval 已由 PR #274 记录，论文资格仍单独判断，当前 `publication_clean_v1` 等待作者审核。
 
 ## 10. Definition of Done
 
