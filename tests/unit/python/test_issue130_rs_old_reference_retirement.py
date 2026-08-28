@@ -127,16 +127,8 @@ def test_real_current_and_legacy_inventory_contracts_pass() -> None:
 
 
 def test_snapshot_manifests_preserve_tree_hashes_and_retire_canonical_paths() -> None:
-    for root, expected_schema in (
-        (
-            ROOT / MODULE.LEGACY_RESULT_ROOT,
-            "relaxtime_rs_legacy_prod_v1_retirement_v1",
-        ),
-        (
-            ROOT / MODULE.LEGACY_FIGURE_ROOT,
-            "relaxtime_rs_legacy_prod_v1_figure_retirement_v1",
-        ),
-    ):
+    result_root = ROOT / MODULE.LEGACY_RESULT_ROOT
+    for root, expected_schema in ((result_root, "relaxtime_rs_legacy_prod_v1_retirement_v1"),):
         manifest = MODULE.read_json(root / "RETIREMENT_MANIFEST.json")
         assert manifest["schema_version"] == expected_schema
         assert manifest["status"] == "retired_canonical_snapshot"
@@ -152,8 +144,33 @@ def test_snapshot_manifests_preserve_tree_hashes_and_retire_canonical_paths() ->
             files = [path for path in snapshot.rglob("*") if path.is_file()]
             assert len(files) == tree["file_count"]
             assert sum(path.stat().st_size for path in files) == tree["bytes"]
-            inner_manifest = snapshot / ("manifest.json" if expected_schema.endswith("retirement_v1") and "figure" not in expected_schema else "plot_manifest.json")
+            inner_manifest = snapshot / "manifest.json"
             assert MODULE.sha256(inner_manifest) == tree["manifest_sha256"]
+
+    figure_root = ROOT / MODULE.LEGACY_FIGURE_ROOT
+    figure_manifest_root = ROOT / "docs" / "analysis" / "relaxtime" / "issue130_rs_old_reference_path_retirement_v1" / "figure_snapshot"
+    figure_manifest = MODULE.read_json(figure_manifest_root / "RETIREMENT_MANIFEST.json")
+    assert figure_manifest["schema_version"] == "relaxtime_rs_legacy_prod_v1_figure_retirement_v1"
+    assert figure_manifest["status"] == "retired_canonical_snapshot"
+    assert figure_manifest["canonical_root_status"] == "legacy_prod_v1_paths_absent"
+    assert figure_manifest["solver_called"] is False
+    assert figure_manifest["production_write"] is False
+    for tree in figure_manifest["trees"]:
+        snapshot = ROOT / tree["snapshot_path"]
+        source = ROOT / tree["source_path"]
+        assert snapshot.is_dir()
+        assert not source.exists()
+        assert MODULE.tree_hash(snapshot) == tree["tree_sha256"]
+        files = [path for path in snapshot.rglob("*") if path.is_file()]
+        assert len(files) == tree["file_count"]
+        assert sum(path.stat().st_size for path in files) == tree["bytes"]
+        assert MODULE.sha256(snapshot / "plot_manifest.json") == tree["manifest_sha256"]
+    assert figure_root.is_dir()
+    assert not (figure_root / "README.md").exists()
+    assert not (figure_root / "RETIREMENT_MANIFEST.json").exists()
+    assert MODULE.read_json(result_root / "RETIREMENT_MANIFEST.json")["figure_snapshot_metadata_path"].endswith(
+        "issue130_rs_old_reference_path_retirement_v1/figure_snapshot/RETIREMENT_MANIFEST.json"
+    )
 
 
 def test_registry_points_legacy_entries_to_versioned_snapshot() -> None:

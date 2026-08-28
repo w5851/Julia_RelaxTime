@@ -3,6 +3,7 @@
   "status": "retired_canonical_snapshot",
   "canonical_root_status": "legacy_prod_v1_paths_absent",
   "snapshot_version": "legacy_prod_v1_snapshot_v1",
+  "figure_snapshot_metadata_path": "docs/analysis/relaxtime/issue130_rs_old_reference_path_retirement_v1/figure_snapshot/RETIREMENT_MANIFEST.json",
   "runtime_canonical_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
   "fallback_and_rollback": "explicit_snapshot_only",
   "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",

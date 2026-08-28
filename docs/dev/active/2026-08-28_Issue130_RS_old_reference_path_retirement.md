@@ -26,7 +26,9 @@ data/outputs/figures/relaxtime/transport/phase_guided/
 
 mode-specific canonical roots中不再出现旧 case。每棵 tree 的内部 manifest、CSV、PNG、
 convergence sidecar 均保持原始字节；路径无关 tree SHA、manifest SHA、文件数和字节数写入
-两个 snapshot 根目录的 `RETIREMENT_MANIFEST.json`。registry 的旧条目改为指向 snapshot，
+result snapshot 根目录的 `RETIREMENT_MANIFEST.json` 与 analysis 下的 figure snapshot manifest
+记录上述信息；figure 输出根目录只保留图像和 `plot_manifest.json`，以满足 data-output-path
+门禁。registry 的旧条目改为指向 snapshot，
 并明确 `path_status=retired_to_versioned_legacy_snapshot`。
 
 ## Consumer 与回退边界
@@ -41,7 +43,9 @@ convergence sidecar 均保持原始字节；路径无关 tree SHA、manifest SHA
 ## 实现清单
 
 - [x] 迁移 mode-A/mode-B 旧 result 与 figure tree，核对 canonical-root absence。
-- [x] 新增 result/figure snapshot README 与 retirement manifest。
+- [x] 新增 result snapshot README 与 retirement manifest；figure snapshot 的说明/manifest
+  放在 `docs/analysis/relaxtime/issue130_rs_old_reference_path_retirement_v1/figure_snapshot/`，
+  figure 输出目录仅保留允许的图像资产。
 - [x] 更新 production registry、历史可执行分析/导入/审计工具和当前脚本指南的 snapshot 路径。
 - [x] 增加 snapshot tree/hash、registry pointer、fallback/rollback 和旧 canonical absence 单元测试。
 - [x] 运行 focused Python/Julia、consumer smoke、task-ledger、active-docs、docs consistency、

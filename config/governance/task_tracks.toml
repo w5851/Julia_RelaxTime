@@ -404,7 +404,7 @@ evidence = [
   "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md",
   "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md",
   "file:data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
-  "file:data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
+  "file:docs/analysis/relaxtime/issue130_rs_old_reference_path_retirement_v1/figure_snapshot/RETIREMENT_MANIFEST.json",
   "pr:276",
   "pr:277",
   "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
