@@ -25,6 +25,8 @@ MANIFEST_NAME = "deletion_manifest.json"
 ALLOWLIST_NAME = "deletion_allowlist.csv"
 CALCULATION_SHA = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 RECOVERY_REF = "74b53b47ebcca2b292cee72f70a70a84b0d2eea5"
+PROPOSAL_PR = 278
+PROPOSAL_COMMIT = "f973d113600c80bdaa2c1367cf709fa5489df214"
 LEGACY_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
 LEGACY_CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1"
 CURRENT_CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2"
@@ -151,6 +153,10 @@ def _repo_path(repo_root: Path, relative: str) -> Path:
 def validate_allowlist(repo_root: Path, manifest: dict[str, Any], rows: list[dict[str, str]]) -> dict[str, Any]:
     if manifest.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("deletion manifest schema mismatch")
+    if manifest.get("proposal_pr") != PROPOSAL_PR:
+        raise ValueError("proposal PR provenance mismatch")
+    if manifest.get("proposal_commit") != PROPOSAL_COMMIT:
+        raise ValueError("proposal commit provenance mismatch")
     if manifest.get("path_retirement_merge_sha") != RECOVERY_REF:
         raise ValueError("unexpected recovery ref")
     if manifest.get("calculation_sha") != CALCULATION_SHA:

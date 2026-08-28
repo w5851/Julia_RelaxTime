@@ -1,6 +1,8 @@
 {
   "schema_version": "issue130_rs_old_reference_physical_deletion_v1",
   "proposal_status": "pending_author_review",
+  "proposal_pr": 278,
+  "proposal_commit": "f973d113600c80bdaa2c1367cf709fa5489df214",
   "physical_deletion_applied_in_branch": true,
   "merge_authorization_required": true,
   "author_authorized_pr_creation": true,

@@ -1,6 +1,6 @@
 # Issue #130：RS old `prod_v1` physical deletion proposal
 
-状态：active；PR 提案分支已应用精确 allowlist 删除，尚未合并。path-retirement
+状态：active；draft PR #278 已创建，提案分支已应用精确 allowlist 删除，尚未合并。path-retirement
 PR #277 已以 `main@74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 合并；本任务只讨论
 其后的工作树物理删除，不回写或重跑数值。
 
@@ -33,9 +33,14 @@ data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1
 - [x] PR #277 CI 全绿并已合并；path-retirement 远端/本地分支已清理；
 - [x] 仅删除 allowlist 中的 snapshot paths；
 - [x] deletion manifest 记录 scope、hash、字节数、Git 恢复引用和排除项；
-- [ ] deletion validator、current `prod_v2` integrity 和 focused CI 全绿；
+- [x] deletion validator、current `prod_v2` integrity 和 focused CI 全绿；本地
+  Issue #130 RS 相关测试 50 项通过，validator verdict 为
+  `physical_deletion_proposal_valid`。
 - [ ] 作者审核确认 Git 历史恢复边界和“删除后无 RS fallback/rollback”语义；
 - [ ] 物理删除 PR 单独获得合并授权。
+
+当前 draft PR：#278；创建提交为
+`f973d113600c80bdaa2c1367cf709fa5489df214`。CI 结果与作者审核完成前不合并。
 
 ## 停止条件
 

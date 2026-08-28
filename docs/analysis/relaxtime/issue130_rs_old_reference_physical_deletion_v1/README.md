@@ -1,6 +1,6 @@
 # Issue #130 RS old `prod_v1` physical-deletion proposal v1
 
-本包记录 RS phase-guided transport 旧 `prod_v1` snapshot 的物理删除提案。
+本包记录 RS phase-guided transport 旧 `prod_v1` snapshot 的物理删除提案（draft PR #278）。
 它只在物理删除分支中移除工作树副本；当前 PR 尚未合并，`main` 的工作树状态由
 path-retirement merge `74b53b47ebcca2b292cee72f70a70a84b0d2eea5` 保留。
 
@@ -33,7 +33,7 @@ Git 历史恢复引用。恢复步骤见 `restore_commands.md`；合并后若仓
 ## Status and gates
 
 - `proposal_status`: `pending_author_review`
-- 本分支已应用 `git rm`，但不代表 `main` 已删除；合并仍需单独授权。
+- 本分支已应用 `git rm`；draft PR #278 已创建，但不代表 `main` 已删除；合并仍需单独授权。
 - `fallback_available_after_merge=false`、`rollback_available_after_merge=false`：
   这是有意的破坏性边界，不能与旧 snapshot 删除混写成“仍可回退”。
 - `solver_called=false`、`production_write=false`：本 PR 只做路径/registry/文档/测试治理。

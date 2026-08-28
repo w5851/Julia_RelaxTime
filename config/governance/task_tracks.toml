@@ -47,12 +47,12 @@ status = "active"
 current_task = "issue130-rs-old-reference-physical-deletion"
 blocked_by = []
 unlocks = []
-next_action = "PR #277 已合并完成 canonical/path retirement；当前在隔离 worktree 准备物理删除 proposal，仅按 allowlist 删除 RS prod_v1 snapshot，保留 Git 恢复引用并等待作者单独合并授权。"
+next_action = "PR #277 已合并完成 canonical/path retirement；draft PR #278 已按 allowlist 提交 RS prod_v1 snapshot 物理删除 proposal，等待 CI 与作者单独合并授权。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
 current_branch = "codex/issue130-rs-old-reference-physical-deletion"
-current_sha = "74b53b47ebcca2b292cee72f70a70a84b0d2eea5"
+current_sha = "f973d113600c80bdaa2c1367cf709fa5489df214"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -425,7 +425,7 @@ status = "active"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md"
 reason = "path-retirement PR #277 已合并且 current prod_v2 已成为分析默认；作者授权创建独立物理删除 PR。删除范围仅为带 hash 的 RS prod_v1 versioned snapshot，不包含 current prod_v2、更早历史证据或 PNJL phase-reference legacy snapshot。"
-next_action = "在隔离分支应用精确 deletion allowlist，更新 registry/fallback 语义，运行 solver-free deletion validator 与 focused CI；PR 仅待作者审核，未经再次授权不合并。"
+next_action = "draft PR #278 已在隔离分支应用精确 deletion allowlist、更新 registry/fallback 语义并通过 solver-free validator 与 focused CI；等待作者审核，未经再次授权不合并。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -433,7 +433,9 @@ evidence = [
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/",
   "file:data/outputs/results/relaxtime/transport/phase_guided/production_registry.json",
   "pr:277",
+  "pr:278",
   "sha:74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
+  "sha:f973d113600c80bdaa2c1367cf709fa5489df214",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "note:proposal_only_no_merge_authorization; git_history_recovery_boundary; no_solver",
 ]
