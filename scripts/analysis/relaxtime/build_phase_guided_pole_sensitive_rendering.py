@@ -31,6 +31,7 @@ from matplotlib.lines import Line2D
 ROOT = Path(__file__).resolve().parents[3]
 V1_CASE = "first_canonical_v1_p128_xi001_validated_anchored_prod_v1"
 V2_CASE = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1"
+LEGACY_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
 RESULT_ROOT = (
     ROOT / "data" / "outputs" / "results" / "relaxtime" / "transport" / "phase_guided"
 )
@@ -181,8 +182,10 @@ def diag_key(row: dict[str, str]) -> tuple[str, ...]:
 
 
 def case_paths(mode: str, case: str) -> dict[str, Path]:
-    result_dir = RESULT_ROOT / mode / case
-    figure_dir = FIGURE_ROOT / mode / case
+    result_base = RESULT_ROOT / LEGACY_SNAPSHOT_VERSION if case == V2_CASE else RESULT_ROOT
+    figure_base = FIGURE_ROOT / LEGACY_SNAPSHOT_VERSION if case == V2_CASE else FIGURE_ROOT
+    result_dir = result_base / mode / case
+    figure_dir = figure_base / mode / case
     return {
         "result_dir": result_dir,
         "figure_dir": figure_dir,
@@ -893,7 +896,7 @@ def build_claim_ledger(
             "claim_id": "CLAIM-V2-POLE-006",
             "status": "implementation_issue_supported",
             "claim_zh": "mode A 的 muB=900、alpha_T=1.0、xi=-0.01 主扫描 continuation 保留了亚稳低质量夸克候选，而 bulk 独立求解选择了热力学势更低的稳定高质量强子候选；当前 zeta/s 因而混用了两个分支。",
-            "evidence": "tables/bulk_derivative_branch_audit.csv; data/outputs/results/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
+            "evidence": "tables/bulk_derivative_branch_audit.csv; data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1/phase_guided_transport_scan.csv",
             "scope_limit": "本分析 PR 只修正稳定性归因；在主平衡态治理和 bulk base_state 复用完成并重跑 production 前，不修正或平滑该 zeta/s 点。",
         },
         {

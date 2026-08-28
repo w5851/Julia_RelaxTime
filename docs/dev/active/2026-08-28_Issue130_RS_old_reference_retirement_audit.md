@@ -1,6 +1,7 @@
 # Issue #130：RS old-reference retirement audit
 
-状态：active；审计包已生成，等待 audit PR 的 focused CI 与作者审核。当前不删除旧
+状态：accepted；审计 PR #276 已合并到 `main@ad47ad1482574faa4764af3913b8cfa3b6bae53e`，
+作者审核已通过，当前进入独立的 path-retirement implementation PR。仍不物理删除旧
 `prod_v1`，不调用 solver，不触发 numerical Actions。
 
 ## 范围锁定
@@ -43,10 +44,11 @@
 
 ## 放行门禁
 
-- [ ] 作者审核 `reference_inventory.csv`、`registry_consistency.csv`、`consumer_reference_map.csv` 和
+- [x] 作者审核 `reference_inventory.csv`、`registry_consistency.csv`、`consumer_reference_map.csv` 和
   `retention_deletion_allowlist.csv`。
-- [ ] 另立 implementation PR，仅迁移旧 v2 `prod_v1` 的 canonical/path 指针、registry 和文档，
-  不改 raw bytes、不重算数值。
+- [x] 另立 implementation PR，仅迁移旧 v2 `prod_v1` 的 canonical/path 指针、registry 和文档，
+  不改 raw bytes、不重算数值；具体执行任务见
+  `2026-08-28_Issue130_RS_old_reference_path_retirement.md`。
 - [ ] implementation PR 通过 focused CI，并重新执行 default/legacy/rollback solver-free smoke。
 - [ ] implementation PR 合并后，旧 raw/figure 只保留 versioned snapshot；任务台账记录新的 mainline SHA。
 - [ ] 物理删除必须另立 PR，并在历史依赖、论文复现、rollback 和 snapshot hash 均确认后获得单独授权；
@@ -57,3 +59,11 @@
 任一 active old consumer、current/fallback tree hash 不匹配、versioned snapshot 无法解析、registry
 路径语义不一致或历史证据依赖未厘清时，停止 implementation PR；不重跑 solver，不放宽容差，不删除
 旧 `prod_v1`。
+
+## Audit merge record
+
+- audit PR：#276，merge SHA `ad47ad1482574faa4764af3913b8cfa3b6bae53e`
+- verdict：`retirement_audit_pass_retain_legacy`
+- solver/free boundary：`solver_called=false`、`production_write=false`、`old_reference_deleted=false`
+- handoff：path-retirement implementation 分支
+  `codex/issue130-rs-old-reference-path-retirement`

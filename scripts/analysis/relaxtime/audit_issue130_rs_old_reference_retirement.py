@@ -39,6 +39,9 @@ OLD_CASE_TOKENS = (
 MODES = ("mode_a_fixed_muB_phase_scaled", "mode_b_fixed_T_sparse_muB")
 RESULT_ROOT = Path("data/outputs/results/relaxtime/transport/phase_guided")
 FIGURE_ROOT = Path("data/outputs/figures/relaxtime/transport/phase_guided")
+LEGACY_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
+LEGACY_RESULT_ROOT = RESULT_ROOT / LEGACY_SNAPSHOT_VERSION
+LEGACY_FIGURE_ROOT = FIGURE_ROOT / LEGACY_SNAPSHOT_VERSION
 REGISTRY_PATH = RESULT_ROOT / "production_registry.json"
 AUDIT_PACKAGE_ROOT = Path("docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1")
 SCAN_NAME = "phase_guided_transport_scan.csv"
@@ -211,6 +214,20 @@ def relative(path: Path, repo_root: Path) -> str:
     return path.resolve().relative_to(repo_root.resolve()).as_posix()
 
 
+def result_case_root(repo_root: Path, mode: str, case_slug: str) -> Path:
+    """Resolve a result case without treating the retired path as canonical."""
+
+    base = LEGACY_RESULT_ROOT if case_slug == LEGACY_CASE else RESULT_ROOT
+    return repo_root / base / mode / case_slug
+
+
+def figure_case_root(repo_root: Path, mode: str, case_slug: str) -> Path:
+    """Resolve the figure tree paired with a result case."""
+
+    base = LEGACY_FIGURE_ROOT if case_slug == LEGACY_CASE else FIGURE_ROOT
+    return repo_root / base / mode / case_slug
+
+
 def classify_case(case_slug: str, layer: str) -> tuple[str, str, str]:
     if case_slug == CURRENT_CASE:
         return "current_prod_v2", "canonical_current", "retain_canonical"
@@ -349,14 +366,14 @@ def scan_tree(repo_root: Path, root: Path, layer: str, mode: str, registry: dict
     data_root = root
     data_manifest = manifest
     if layer == "figure":
-        data_root = repo_root / RESULT_ROOT / mode / case_slug
+        data_root = result_case_root(repo_root, mode, case_slug)
         data_manifest_path = data_root / "manifest.json"
         data_manifest = read_json(data_manifest_path) if data_manifest_path.is_file() else {}
     scan = csv_stats(data_root / SCAN_NAME, mode)
     diagnostic = csv_stats(data_root / DIAGNOSTIC_NAME, mode, diagnostic=True)
     expected_rows = expected_scan_rows(data_manifest)
     scan_ok = scan_contract_ok(scan, expected_rows)
-    figure_root = repo_root / FIGURE_ROOT / mode / case_slug
+    figure_root = figure_case_root(repo_root, mode, case_slug)
     figure_manifest_path = figure_root / "plot_manifest.json"
     figure_manifest = read_json(figure_manifest_path) if figure_manifest_path.is_file() else {}
     scan_path = data_root / SCAN_NAME
@@ -424,15 +441,16 @@ def collect_trees(repo_root: Path, registry: dict[tuple[str, str], dict[str, Any
     for root in sorted(result_root.iterdir() if result_root.is_dir() else []):
         if root.is_dir() and root.name.endswith("_prod_v1_convergence"):
             rows.append(scan_tree(repo_root, root, "result_convergence", "shared_convergence", registry))
-    for mode in MODES:
-        result_mode_root = repo_root / RESULT_ROOT / mode
-        figure_mode_root = repo_root / FIGURE_ROOT / mode
-        for root in sorted(result_mode_root.iterdir() if result_mode_root.is_dir() else []):
-            if root.is_dir() and ("_prod_v1" in root.name or "_prod_v2" in root.name):
-                rows.append(scan_tree(repo_root, root, "result", mode, registry))
-        for root in sorted(figure_mode_root.iterdir() if figure_mode_root.is_dir() else []):
-            if root.is_dir() and ("_prod_v1" in root.name or "_prod_v2" in root.name):
-                rows.append(scan_tree(repo_root, root, "figure", mode, registry))
+    for result_base, figure_base in ((RESULT_ROOT, FIGURE_ROOT), (LEGACY_RESULT_ROOT, LEGACY_FIGURE_ROOT)):
+        for mode in MODES:
+            result_mode_root = repo_root / result_base / mode
+            figure_mode_root = repo_root / figure_base / mode
+            for root in sorted(result_mode_root.iterdir() if result_mode_root.is_dir() else []):
+                if root.is_dir() and ("_prod_v1" in root.name or "_prod_v2" in root.name):
+                    rows.append(scan_tree(repo_root, root, "result", mode, registry))
+            for root in sorted(figure_mode_root.iterdir() if figure_mode_root.is_dir() else []):
+                if root.is_dir() and ("_prod_v1" in root.name or "_prod_v2" in root.name):
+                    rows.append(scan_tree(repo_root, root, "figure", mode, registry))
     return rows
 
 
@@ -585,7 +603,7 @@ def fallback_rows(repo_root: Path, tree_rows: list[dict[str, Any]]) -> list[dict
     for mode in MODES:
         current = by_key.get((CURRENT_CASE, mode, "result"), {})
         legacy = by_key.get((LEGACY_CASE, mode, "result"), {})
-        current_manifest = repo_root / RESULT_ROOT / mode / CURRENT_CASE / "manifest.json"
+        current_manifest = result_case_root(repo_root, mode, CURRENT_CASE) / "manifest.json"
         manifest = read_json(current_manifest) if current_manifest.is_file() else {}
         expected = str(manifest.get("legacy_prod_v1_tree_hash", ""))
         actual = str(legacy.get("tree_sha256", ""))
@@ -856,6 +874,9 @@ def main() -> int:
         "workflow_head_sha": WORKFLOW_HEAD_SHA,
         "current_case": CURRENT_CASE,
         "legacy_case": LEGACY_CASE,
+        "legacy_snapshot_version": LEGACY_SNAPSHOT_VERSION,
+        "legacy_snapshot_result_root": LEGACY_RESULT_ROOT.as_posix(),
+        "legacy_snapshot_figure_root": LEGACY_FIGURE_ROOT.as_posix(),
         "historical_cases": list(HISTORICAL_CASES),
         "verdict": verdict,
         "solver_called": False,

@@ -1,0 +1,35 @@
+{
+  "schema_version": "relaxtime_rs_legacy_prod_v1_figure_retirement_v1",
+  "status": "retired_canonical_snapshot",
+  "canonical_root_status": "legacy_prod_v1_paths_absent",
+  "snapshot_version": "legacy_prod_v1_snapshot_v1",
+  "runtime_canonical_case": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2",
+  "fallback_and_rollback": "explicit_snapshot_only",
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "source_commit": "05be2c05186f8e12baf3097b68f8619e53d19711",
+  "solver_called": false,
+  "production_write": false,
+  "physical_deletion_authorized": false,
+  "trees": [
+    {
+      "mode": "mode_a_fixed_muB_phase_scaled",
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "source_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "snapshot_path": "data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_a_fixed_muB_phase_scaled/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "file_count": 37,
+      "bytes": 7972810,
+      "tree_sha256": "869ed86367fe6ce6c7e5b35b80e6e07e04fa1bb3fe8990777da6f9d53c7bfa4c",
+      "manifest_sha256": "41a44b1d7645e3789cd88d8d9db69acaabfeefc3b0d1ad6a79628cf56b1d5c06"
+    },
+    {
+      "mode": "mode_b_fixed_T_sparse_muB",
+      "case_slug": "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "source_path": "data/outputs/figures/relaxtime/transport/phase_guided/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "snapshot_path": "data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/mode_b_fixed_T_sparse_muB/first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v1",
+      "file_count": 37,
+      "bytes": 6867696,
+      "tree_sha256": "1a49f1617cc7b00286687f72ed44a48d7c91959438d9446cad1faf3762aa0b5d",
+      "manifest_sha256": "8139c835802c0040db892e109d3c123b089907177d8b4e93b4e45edda219722b"
+    }
+  ]
+}

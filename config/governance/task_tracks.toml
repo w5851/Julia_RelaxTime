@@ -44,15 +44,15 @@ updated_at = "2026-08-24"
 id = "rs-transport"
 title = "RS transport production"
 status = "active"
-current_task = "issue130-rs-old-reference-retirement-audit"
+current_task = "issue130-rs-old-reference-path-retirement"
 blocked_by = []
 unlocks = []
-next_action = "publication-clean v1 已经作者审核并经 PR #275 合并；当前在共享隔离 worktree 执行 RS old prod_v1 的 solver-free retirement audit。先固化引用、tree hash、fallback/rollback 和 retention allowlist，再决定是否建立 path-retirement implementation PR；不物理删除旧树。"
+next_action = "retirement audit 已由 PR #276 合并并经作者审核；当前在共享隔离 worktree 执行 RS old prod_v1 的 path-retirement implementation。只迁移到 byte-preserving versioned snapshot、更新 registry/consumer 指针并保留 fallback/rollback，不物理删除旧树。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-rs-old-reference-retirement-audit"
-current_sha = "ac0674e249176a3453257105bab3b2382e409581"
+current_branch = "codex/issue130-rs-old-reference-path-retirement"
+current_sha = "ad47ad1482574faa4764af3913b8cfa3b6bae53e"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -90,7 +90,7 @@ evidence = [
   "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v2/",
   "note:rs_consumer_smoke_v2_pass_diagnostic_only_solver_free_runtime_default_unchanged",
   "pr:275",
-  "sha:ac0674e249176a3453257105bab3b2382e409581",
+  "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
   "review:author_accepted_publication_clean_v1",
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/",
   "note:retirement_audit_pass_retain_legacy_solver_free",
@@ -371,11 +371,11 @@ evidence = [
 id = "issue130-rs-old-reference-retirement-audit"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:rs-transport"
 task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md"
 reason = "publication-clean v1 已通过作者审核；当前需在不调用 solver 的前提下盘点旧 RS prod_v1 的 active consumer、fallback/rollback、历史证据和不可变 tree hash，先决定 canonical path retirement，再单独讨论物理删除。"
-next_action = "完成 audit PR 的 focused CI 和作者审核；当前 verdict 为 retirement_audit_pass_retain_legacy，可进入 path-retirement implementation review，但不删除旧 prod_v1。"
+next_action = "PR #276 已合并并经作者审核；path-retirement implementation 由 item:issue130-rs-old-reference-path-retirement 承接，旧 prod_v1 仍不物理删除。"
 blocked_by = []
 backlog_file = ""
 evidence = [
@@ -383,10 +383,32 @@ evidence = [
   "file:scripts/analysis/relaxtime/audit_issue130_rs_old_reference_retirement.py",
   "file:tests/unit/python/test_issue130_rs_old_reference_retirement.py",
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_retirement_audit_v1/",
-  "sha:ac0674e249176a3453257105bab3b2382e409581",
+  "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
   "sha:22874505877491754eed27519ad8a7b871c82571",
   "note:retirement_audit_pass_retain_legacy_solver_free",
+]
+
+[[items]]
+id = "issue130-rs-old-reference-path-retirement"
+track_id = "rs-transport"
+classification = "required_follow_up"
+status = "active"
+parent = "track:rs-transport"
+task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md"
+reason = "retirement audit 已确认无 active old consumer、fallback hash 与 current prod_v2 manifest 一致；旧 RS prod_v1 可退出 mode-specific canonical 根路径，但必须保留 byte-preserving versioned snapshot 和显式 rollback。"
+next_action = "完成旧 prod_v1 result/figure 的 snapshot 迁移、registry/历史可执行工具路径更新、hash/absence/fallback 单元测试和 focused CI；不物理删除 snapshot。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_path_retirement.md",
+  "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_retirement_audit.md",
+  "file:data/outputs/results/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
+  "file:data/outputs/figures/relaxtime/transport/phase_guided/legacy_prod_v1_snapshot_v1/RETIREMENT_MANIFEST.json",
+  "pr:276",
+  "sha:ad47ad1482574faa4764af3913b8cfa3b6bae53e",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "note:canonical_prod_v1_paths_retired_to_versioned_snapshot_no_physical_deletion",
 ]
 
 [[items]]

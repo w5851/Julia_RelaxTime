@@ -26,6 +26,7 @@ from typing import Any, Iterable
 CALCULATION_SHA = "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48"
 WORKFLOW_HEAD_SHA = "22874505877491754eed27519ad8a7b871c82571"
 CASE_NAME = "first_canonical_v2_p128_xi001_onshellkernel_validated_anchored_prod_v2"
+LEGACY_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
 AGGREGATE_NAME = "aggregate_replay_20260826_v4"
 AUDIT_NAME = "post_repair_audit_20260826_v1"
 AGGREGATE_MANIFEST_SHA256 = (
@@ -721,7 +722,12 @@ def import_case(repo_root: Path, source: dict[str, Any], mode: str, source_runs:
     figure_summary = validate_figure_reference(repo_root, mode, sha256_file(scan_path))
     official_root = (repo_root / "data" / "outputs" / "results" / "relaxtime" / "transport" / "phase_guided").resolve()
     target = official_root / mode / CASE_NAME
-    old_case = official_root / mode / CASE_NAME.replace("_prod_v2", "_prod_v1")
+    old_case = (
+        official_root
+        / LEGACY_SNAPSHOT_VERSION
+        / mode
+        / CASE_NAME.replace("_prod_v2", "_prod_v1")
+    )
     if target.exists():
         raise FileExistsError(f"refusing to overwrite existing result case: {target}")
     if not old_case.is_dir():

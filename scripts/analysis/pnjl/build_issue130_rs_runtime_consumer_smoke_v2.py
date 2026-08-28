@@ -31,6 +31,7 @@ REPLAY_RUN_ID = "32451053476"
 AGGREGATE_NAME = "aggregate_replay_20260826_v4"
 AUDIT_NAME = "post_repair_audit_20260826_v1"
 SCHEMA = "pnjl_issue130_rs_transport_runtime_parity_v2"
+LEGACY_RESULT_SNAPSHOT_VERSION = "legacy_prod_v1_snapshot_v1"
 
 CANDIDATE_RELATIVE = Path("data/reference/pnjl/issue130_phase_reference_v1")
 LEGACY_RELATIVE = Path("data/reference/pnjl/legacy_phase_reference_v1")
@@ -351,7 +352,12 @@ def _validate_result(repo_root: Path, mode: str) -> dict[str, Any]:
     failed_fields, failed_rows = read_csv(root / "failed_points.csv")
     if not failed_fields or failed_rows:
         raise ValueError(f"{mode} failed_points.csv is not empty")
-    old_root = root.parent / root.name.replace("_prod_v2", "_prod_v1")
+    old_root = (
+        root.parents[1]
+        / LEGACY_RESULT_SNAPSHOT_VERSION
+        / mode
+        / root.name.replace("_prod_v2", "_prod_v1")
+    )
     old_hash = _result_tree_hash(old_root)
     if manifest.get("legacy_prod_v1_tree_hash") != old_hash:
         raise ValueError(f"{mode} legacy prod_v1 tree changed or hash record is stale")
