@@ -1,0 +1,23 @@
+[
+  {
+    "boundary": "does not prove all dynamic consumer request keys are covered",
+    "claim": "Candidate-only view exposes only certified candidate rows and disables legacy fallback.",
+    "claim_id": "candidate_only_runtime_view",
+    "evidence": "consumer_matrix.csv; candidate manifest hashes",
+    "status": "supported"
+  },
+  {
+    "boundary": "rollback preservation is not evidence that legacy can be deleted",
+    "claim": "The explicit legacy rollback route and immutable snapshot remain declared.",
+    "claim_id": "explicit_legacy_rollback",
+    "evidence": "consumer_matrix.csv; legacy RETIREMENT_MANIFEST.json",
+    "status": "supported"
+  },
+  {
+    "boundary": "requires fallback=0 and a separate author-authorized allowlist PR",
+    "claim": "PNJL legacy snapshot is ready for physical deletion.",
+    "claim_id": "physical_deletion_ready",
+    "evidence": "decision.json; Stage A fallback matrix",
+    "status": "not_supported"
+  }
+]

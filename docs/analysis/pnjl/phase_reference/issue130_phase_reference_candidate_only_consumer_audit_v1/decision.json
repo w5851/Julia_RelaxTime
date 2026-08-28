@@ -1,0 +1,21 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_only_consumer_failures": [],
+  "candidate_only_contract_supported": true,
+  "candidate_uncertified_rows": 4074,
+  "legacy_fallback_key_count": 382,
+  "legacy_rollback_contract_supported": true,
+  "physical_deletion_eligible": false,
+  "reference_write": false,
+  "replay_run_id": "32451053476",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_candidate_only_consumer_audit_v1",
+  "solver_called": false,
+  "source_run_id": "32354095831",
+  "stop_reasons": [
+    "legacy_fallback_key_count_nonzero",
+    "default_runtime_fallback_preserved",
+    "validator_candidate_schema_migration_pending"
+  ],
+  "verdict": "candidate_only_contract_supported"
+}

@@ -116,6 +116,11 @@ KNOWN_CONSUMERS: dict[str, dict[str, Any]] = {
         "role": "current_retirement_audit",
         "retirement_blocker": False,
     },
+    "scripts/analysis/pnjl/audit_issue130_phase_reference_candidate_only_consumers.py": {
+        "kind": "migration_audit_tooling",
+        "role": "candidate_only_consumer_audit",
+        "retirement_blocker": False,
+    },
     "scripts/analysis/pnjl/build_issue130_rs_runtime_consumer_smoke_v2.py": {
         "kind": "diagnostic_tooling",
         "role": "historical_snapshot_input",

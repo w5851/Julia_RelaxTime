@@ -1,0 +1,51 @@
+{
+  "calculation_sha": "3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "candidate_manifest_sha256": "7d37aedd8ec7a1c4715f5f0b9462460ed5619d26586b27e5326e32a777b06519",
+  "candidate_reference_status": "candidate",
+  "candidate_root": "data/reference/pnjl/issue130_phase_reference_v1",
+  "candidate_strict_manifest_sha256": "b0a6f7ed1095810ed0a877d07fdc5bff2c93fd4a54c495a208b952f8198e4b73",
+  "candidate_strict_reference_write": false,
+  "decision": "decision.json",
+  "files": [
+    {
+      "bytes": 172,
+      "path": "AUDIT.md",
+      "sha256": "6c35371860a81393d9d99aad3478327a7182ff8527c399867bac902b819069f9"
+    },
+    {
+      "bytes": 702,
+      "path": "claim_ledger.csv",
+      "sha256": "a30fcf04ca28fd7c1a5471c5ffab9b15ae217ff0acf7d14bf8cf686e06de7dae"
+    },
+    {
+      "bytes": 955,
+      "path": "claim_ledger.json",
+      "sha256": "771799649860dcaa892e2aae38e2c1930ee2c9dab297c1b853f258fae30fb7ce"
+    },
+    {
+      "bytes": 825,
+      "path": "consumer_matrix.csv",
+      "sha256": "3cc82a4d3e718e57b7354af6247103bd25e90eb38067b755b44c33154846f0d6"
+    },
+    {
+      "bytes": 763,
+      "path": "decision.json",
+      "sha256": "e803a79f9e9c4074ee0dbdfa344ff66d1d604e90756a90db12896444538df782"
+    },
+    {
+      "bytes": 711,
+      "path": "README.md",
+      "sha256": "9bc17f98de32a7ce9b0f8d95861993e66e4c1143401174c3fa4d7f0c083726a0"
+    }
+  ],
+  "generated_at_utc": "2026-08-28T12:11:16.899917+00:00",
+  "legacy_retirement_manifest_sha256": "1bb479e1876ac94157d5f2d04e435ff60fcb7e4e2615f169c22680d7aec1ce1d",
+  "legacy_root": "data/reference/pnjl/legacy_phase_reference_v1",
+  "legacy_snapshot_status": "retired_canonical_snapshot",
+  "reference_write": false,
+  "repo_head": "aa0644de44a3a09a2cfd5e8621186acf5fca18aa",
+  "runtime_consumption": false,
+  "schema_version": "pnjl_issue130_phase_reference_candidate_only_consumer_audit_v1",
+  "solver_called": false,
+  "verdict": "candidate_only_contract_supported"
+}

@@ -1,0 +1,4 @@
+claim_id,claim,status,evidence,boundary
+candidate_only_runtime_view,Candidate-only view exposes only certified candidate rows and disables legacy fallback.,supported,consumer_matrix.csv; candidate manifest hashes,does not prove all dynamic consumer request keys are covered
+explicit_legacy_rollback,The explicit legacy rollback route and immutable snapshot remain declared.,supported,consumer_matrix.csv; legacy RETIREMENT_MANIFEST.json,rollback preservation is not evidence that legacy can be deleted
+physical_deletion_ready,PNJL legacy snapshot is ready for physical deletion.,not_supported,decision.json; Stage A fallback matrix,requires fallback=0 and a separate author-authorized allowlist PR
