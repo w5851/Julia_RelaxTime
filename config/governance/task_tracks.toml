@@ -1,20 +1,20 @@
 schema_version = 1
 primary_track = "issue130-phase"
-updated_at = "2026-08-27"
+updated_at = "2026-08-28"
 
 [[tracks]]
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
-status = "promoted"
-current_task = "issue130-phase-reference-runtime-switch"
+status = "active"
+current_task = "issue130-phase-reference-legacy-retirement"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "phase-reference runtime promotion 与 canonical retirement 已完成；当前唯一 active numerical gate 由 rs-transport track 承接。"
+next_action = "phase-reference runtime promotion 与 canonical root retirement 已完成；先完成 PNJL legacy fallback 覆盖/消费者 solver-free audit，未证明 fallback=0 前不做物理删除。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "main"
-current_sha = "b4b4d20720c081d39a8f9f8886b027ce22b0d8e7"
+current_branch = "codex/issue130-pnjl-legacy-reference-retirement"
+current_sha = "aa2086f428454bddcc087c4a1b2a9503d834c888"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -44,15 +44,15 @@ updated_at = "2026-08-24"
 id = "rs-transport"
 title = "RS transport production"
 status = "active"
-current_task = "issue130-rs-old-reference-physical-deletion"
+current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
-next_action = "PR #277 已合并完成 canonical/path retirement；draft PR #278 已按 allowlist 提交 RS prod_v1 snapshot 物理删除 proposal，等待 CI 与作者单独合并授权。"
+next_action = "RS prod_v2 consumer/默认迁移与旧 prod_v1 物理清理已完成并留存 evidence；数值状态仍为 diagnostic-only，后续 PNJL legacy phase-reference audit 独立推进，不在本项自动重跑 RS。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-rs-old-reference-physical-deletion"
-current_sha = "f973d113600c80bdaa2c1367cf709fa5489df214"
+current_branch = "main"
+current_sha = "aa2086f428454bddcc087c4a1b2a9503d834c888"
 run_ids = ["32354095831", "32451053476", "32684074876", "32709280462", "32817419175", "32817421815", "32817424871", "32817427980", "32817431677", "32817434357", "32817437525", "32817439861", "32817442542", "32817445213", "32817529717", "32817532839", "32817535505", "32817538589", "32817541560", "32817544844", "32817549646", "32817552946", "32817555686", "32817559249", "32817562105", "32817566643", "32817570850", "32817573728", "32817577977", "32817580774", "32817583483", "32817586501", "32817589187", "32817592217"]
 evidence = [
   "file:docs/dev/active/2026-07-14_relaxtime_rs_transport_energy_semantics_audit.md",
@@ -421,15 +421,15 @@ evidence = [
 id = "issue130-rs-old-reference-physical-deletion"
 track_id = "rs-transport"
 classification = "required_follow_up"
-status = "active"
+status = "accepted"
 parent = "track:rs-transport"
-task_file = "docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md"
-reason = "path-retirement PR #277 已合并且 current prod_v2 已成为分析默认；作者授权创建独立物理删除 PR。删除范围仅为带 hash 的 RS prod_v1 versioned snapshot，不包含 current prod_v2、更早历史证据或 PNJL phase-reference legacy snapshot。"
-next_action = "draft PR #278 已在隔离分支应用精确 deletion allowlist、更新 registry/fallback 语义并通过 solver-free validator 与 focused CI；等待作者审核，未经再次授权不合并。"
+task_file = "docs/dev/archived/2026-08-28_Issue130_RS_old_reference_physical_deletion.md"
+reason = "path-retirement PR #277 已合并且 current prod_v2 已成为分析默认；作者审核并授权后，PR #278 按精确 allowlist 完成 RS prod_v1 versioned snapshot 物理删除。PNJL phase-reference legacy snapshot 明确不在删除范围。"
+next_action = "PR #278 已以 main@aa2086f428454bddcc087c4a1b2a9503d834c888 合并；删除 validator、focused CI、恢复边界和 manifest evidence 已接受，RS 旧引用物理清理完成。"
 blocked_by = []
 backlog_file = ""
 evidence = [
-  "file:docs/dev/active/2026-08-28_Issue130_RS_old_reference_physical_deletion.md",
+  "file:docs/dev/archived/2026-08-28_Issue130_RS_old_reference_physical_deletion.md",
   "file:docs/analysis/relaxtime/issue130_rs_old_reference_physical_deletion_v1/",
   "file:data/outputs/results/relaxtime/transport/phase_guided/production_registry.json",
   "pr:277",
@@ -437,7 +437,8 @@ evidence = [
   "sha:74b53b47ebcca2b292cee72f70a70a84b0d2eea5",
   "sha:f973d113600c80bdaa2c1367cf709fa5489df214",
   "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
-  "note:proposal_only_no_merge_authorization; git_history_recovery_boundary; no_solver",
+  "sha:aa2086f428454bddcc087c4a1b2a9503d834c888",
+  "note:physical_deletion_merged_authorized; git_history_recovery_boundary; no_solver",
 ]
 
 [[items]]
@@ -452,6 +453,30 @@ next_action = "PR #264 已合并；保留 versioned snapshot 作为逐键 fallba
 blocked_by = []
 backlog_file = ""
 evidence = ["file:docs/dev/active/2026-08-24_Issue130_phase-reference-retirement.md", "file:docs/dev/active/2026-08-23_Issue130_phase-reference-adapter-contract.md", "file:docs/analysis/pnjl/phase_reference/issue130_rs_transport_runtime_parity_v1/", "run:32684074876", "pr:263", "sha:d4193bcf77bb23d740787a103782e3e6fc96dbba", "pr:264", "sha:b4b4d20720c081d39a8f9f8886b027ce22b0d8e7", "review:author_authorized_versioned_retirement", "note:canonical root retirement preserves byte-identical fallback and rollback snapshot"]
+
+[[items]]
+id = "issue130-phase-reference-legacy-retirement"
+track_id = "issue130-phase"
+classification = "required_follow_up"
+status = "active"
+parent = "track:issue130-phase"
+task_file = "docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md"
+reason = "RS prod_v1 物理删除已独立收口；PNJL legacy phase-reference 仍是 candidate strict 未认证/缺键行的逐键 fallback 和显式 rollback 输入，必须先完成 solver-free 覆盖与消费者审计，不能沿用 RS allowlist 直接删除。"
+next_action = "固定 candidate/legacy tree、manifest/hash、adapter key 覆盖和 active consumer 矩阵；生成 legacy_audit_v1。未证明 fallback=0、consumer migration 完成且恢复证据完整前，不创建或合并物理删除 PR。"
+blocked_by = []
+backlog_file = ""
+evidence = [
+  "file:docs/dev/active/2026-08-28_Issue130_PNJL_legacy_phase-reference_retirement_and_physical_cleanup.md",
+  "file:data/reference/pnjl/issue130_phase_reference_v1/manifest.json",
+  "file:data/reference/pnjl/legacy_phase_reference_v1/RETIREMENT_MANIFEST.json",
+  "file:scripts/pnjl/phase_reference_adapter.py",
+  "file:scripts/relaxtime/phase_reference_adapter.jl",
+  "pr:264",
+  "pr:278",
+  "sha:aa2086f428454bddcc087c4a1b2a9503d834c888",
+  "sha:3c5f6b3c9bd535cff7657364dadb2efc31f2ea48",
+  "note:solver_free_preflight_candidate_certified_and_legacy_fallback_key_counts_20260828",
+]
 
 [[items]]
 id = "plot-sop-independent-land"
