@@ -6,15 +6,15 @@ updated_at = "2026-08-29"
 id = "issue130-phase"
 title = "Issue #130 phase reference and CEP evidence"
 status = "active"
-current_task = "issue130-phase-reference-legacy-retirement"
+current_task = "issue130-phase-reference-three-layer-accepted-map"
 blocked_by = []
 unlocks = ["track:rs-transport"]
-next_action = "phase-reference runtime promotion 与 canonical root retirement 已完成；先完成 PNJL legacy fallback 覆盖/消费者 solver-free audit，未证明 fallback=0 前不做物理删除。"
+next_action = "审核 v2 strict/render/accepted 三层覆盖与状态；审核通过后再另立 accepted runtime promotion，随后重做 legacy fallback coverage audit。"
 required_author_review = true
 author_review_status = "accepted"
 promotion_required = true
-current_branch = "codex/issue130-pnjl-legacy-reference-retirement"
-current_sha = "aa2086f428454bddcc087c4a1b2a9503d834c888"
+current_branch = "codex/issue130-phase-reference-three-layer-v2"
+current_sha = "e1769e4abea196a4f75303b1dbdf4e1081efbbba"
 run_ids = ["31710995191", "31712021367", "31713290292", "31713534102", "31714535418", "32139943632", "32222254605", "32225731719", "32237794907", "32354095831", "32450188629", "32451053476", "32684074876", "32709280462"]
 evidence = [
   "file:docs/dev/active/2026-07-27_Issue130_CEP三态合同与pilot_v2.md",
@@ -43,7 +43,7 @@ updated_at = "2026-08-24"
 [[tracks]]
 id = "rs-transport"
 title = "RS transport production"
-status = "active"
+status = "review"
 current_task = "rs-production-after-phase-reference"
 blocked_by = []
 unlocks = []
@@ -482,7 +482,7 @@ evidence = [
 id = "issue130-phase-reference-three-layer-accepted-map"
 track_id = "issue130-phase"
 classification = "required_follow_up"
-status = "active"
+status = "review"
 parent = "track:issue130-phase"
 task_file = "docs/dev/active/2026-08-29_Issue130_phase-reference_three-layer_accepted-map.md"
 reason = "作者已确认以 strict、render、accepted 作为三层公共语义；derived 仅保留为内部构建证据。v2 的 render/spinodal 完整化、accepted 状态保留和 adapter smoke 已完成，当前等待作者审核后再决定下游默认与 legacy retirement。"
@@ -499,6 +499,7 @@ evidence = [
   "file:data/reference/pnjl/issue130_phase_reference_v2/claim_ledger.json",
   "file:tests/unit/python/test_issue130_phase_reference_v2.py",
   "file:tests/unit/relaxtime/test_phase_reference_adapter.jl",
+  "commit:e1769e4a",
   "note:author_authorized_three_layer_strict_render_accepted_plan",
 ]
 
